@@ -14,7 +14,9 @@ import {
   DatabaseOperationsStack,
   GuardDutyMalwareProtectionStack,
   MonitoringStack,
-  FrontendStack
+  FrontendStack,
+  GitHubOidcStack,
+  LambdaLayersStack
 } from '../lib/stacks';
 import {
   loadEnvironment,
@@ -100,7 +102,16 @@ async function main() {
     // Create stacks in dependency order
     console.log(`Creating MCR CDK stacks for stage: ${stage}`);
 
-    // 1. Foundation Stack (no dependencies)
+    // 1. GitHub OIDC Stack (one-time setup, only if flag is set)
+    if (process.env.CREATE_GITHUB_OIDC === 'true') {
+      const githubOidcStack = new GitHubOidcStack(app, `MCR-GitHubOIDC`, {
+        env,
+        description: 'GitHub OIDC provider for MCR CI/CD'
+      });
+      console.log('Created GitHub OIDC stack (one-time setup)');
+    }
+
+    // 2. Foundation Stack (no dependencies)
     const foundationStack = new FoundationStack(app, `MCR-Foundation-${stage}`, {
       env,
       stage,
@@ -108,7 +119,7 @@ async function main() {
       serviceName: 'foundation'
     });
 
-    // 2. Network Stack (depends on Foundation)
+    // 3. Network Stack (depends on Foundation)
     const networkStack = new NetworkStack(app, `MCR-Network-${stage}`, {
       env,
       stage,
@@ -117,7 +128,15 @@ async function main() {
     });
     networkStack.addDependency(foundationStack);
 
-    // 3. Data Stack (depends on Network)
+    // 4. Lambda Layers Stack (depends on Network for VPC)
+    const lambdaLayersStack = new LambdaLayersStack(app, `MCR-LambdaLayers-${stage}`, {
+      env,
+      stage,
+      description: 'Centralized Lambda layers for MCR'
+    });
+    lambdaLayersStack.addDependency(networkStack);
+
+    // 5. Data Stack (depends on Network)
     if (!networkStack.databaseSecurityGroup) {
       throw new Error('Database security group not found in NetworkStack');
     }
@@ -132,7 +151,7 @@ async function main() {
     });
     dataStack.addDependency(networkStack);
 
-    // 4. Auth Stack (depends on Foundation, but can run parallel to Data)
+    // 6. Auth Stack (depends on Foundation, but can run parallel to Data)
     const authStack = new AuthStack(app, `MCR-Auth-${stage}`, {
       env,
       stage,
@@ -144,7 +163,7 @@ async function main() {
     });
     authStack.addDependency(foundationStack);
 
-    // 5. API and Compute Stack (depends on Network, Data, and Auth)
+    // 7. API and Compute Stack (depends on Network, Data, Auth, and Lambda Layers)
     const apiComputeStack = new ApiComputeStack(app, `MCR-ApiCompute-${stage}`, {
       env,
       stage,
@@ -156,13 +175,16 @@ async function main() {
       uploadsBucketName: dataStack.uploadsBucket.bucketName,
       qaBucketName: dataStack.qaBucket.bucketName,
       userPool: authStack.userPool,
-      authenticatedRole: authStack.authenticatedRole
+      authenticatedRole: authStack.authenticatedRole,
+      prismaLayerArn: lambdaLayersStack.prismaLayerVersionArn,
+      postgresToolsLayerArn: lambdaLayersStack.postgresToolsLayerVersionArn
     });
     apiComputeStack.addDependency(networkStack);
     apiComputeStack.addDependency(dataStack);
     apiComputeStack.addDependency(authStack);
+    apiComputeStack.addDependency(lambdaLayersStack);
 
-    // 6. Database Operations Stack (depends on Network and Data)
+    // 8. Database Operations Stack (depends on Network, Data, and Lambda Layers)
     const databaseOperationsStack = new DatabaseOperationsStack(app, `MCR-DatabaseOps-${stage}`, {
       env,
       stage,
@@ -172,12 +194,29 @@ async function main() {
       lambdaSecurityGroup: networkStack.lambdaSecurityGroup,
       databaseCluster: dataStack.database.cluster,
       databaseSecret: dataStack.database.secret,
-      uploadsBucketName: dataStack.uploadsBucket.bucketName
+      uploadsBucketName: dataStack.uploadsBucket.bucketName,
+      prismaLayerArn: lambdaLayersStack.prismaLayerVersionArn,
+      postgresToolsLayerArn: lambdaLayersStack.postgresToolsLayerVersionArn
     });
     databaseOperationsStack.addDependency(networkStack);
     databaseOperationsStack.addDependency(dataStack);
+    databaseOperationsStack.addDependency(lambdaLayersStack);
 
-    // 7. Virus Scanning Stack - Using GuardDuty Malware Protection
+    // 9. Frontend Stack (depends on API Compute for backend URLs)
+    const frontendStack = new FrontendStack(app, `MCR-Frontend-${stage}`, {
+      env,
+      stage,
+      stageConfig,
+      serviceName: 'frontend',
+      enableAppWebIntegration: true,
+      enableHsts: true,
+      // Custom domains can be added here when certificates are available
+      // appDomainName: getDomainName(stage),
+      // appCertificateArn: getCertificateArn(stage)
+    });
+    frontendStack.addDependency(apiComputeStack);
+
+    // 10. Virus Scanning Stack - Using GuardDuty Malware Protection
     const virusScanningStack = new GuardDutyMalwareProtectionStack(app, `MCR-VirusScanning-${stage}`, {
       env,
       stage,
@@ -194,7 +233,7 @@ async function main() {
     virusScanningStack.addDependency(dataStack);
     virusScanningStack.addDependency(networkStack); // Add network dependency for VPC
 
-    // 8. Monitoring Stack (depends on Foundation, can run in parallel with others)
+    // 11. Monitoring Stack (depends on Foundation, can run in parallel with others)
     const monitoringStack = new MonitoringStack(app, `MCR-Monitoring-${stage}`, {
       env,
       stage,
@@ -202,21 +241,6 @@ async function main() {
       serviceName: 'monitoring'
     });
     monitoringStack.addDependency(foundationStack);
-
-    // 9. Frontend Stack (depends on API+Compute and Auth for configuration)
-    const frontendStack = new FrontendStack(app, `MCR-Frontend-${stage}`, {
-      env,
-      stage,
-      stageConfig,
-      serviceName: 'frontend',
-      appDomainName: process.env.APP_DOMAIN_NAME,
-      appCertificateArn: process.env.APP_CERTIFICATE_ARN,
-      storybookDomainName: process.env.STORYBOOK_DOMAIN_NAME,
-      storybookCertificateArn: process.env.STORYBOOK_CERTIFICATE_ARN,
-      enableHsts: true
-    });
-    frontendStack.addDependency(apiComputeStack);
-    frontendStack.addDependency(authStack);
 
     // Apply IAM aspects
     const iamPath = process.env.IAM_PATH || '/delegatedadmin/developer/';
@@ -247,19 +271,23 @@ async function main() {
 
     // Output stack information
     console.log('\nStack deployment order:');
-    console.log('1. Foundation Stack');
-    console.log('2. Network Stack');
-    console.log('3. Data Stack (parallel with Auth)');
-    console.log('4. Auth Stack (parallel with Data)');
-    console.log('5. API+Compute Stack (combined to avoid circular dependencies)');
-    console.log('6. Database Operations Stack (parallel with Virus Scanning)');
-    console.log('7. Virus Scanning Stack [GuardDuty] (parallel with Database Operations)');
-    console.log('8. Monitoring Stack (can run in parallel)');
-    console.log('9. Frontend Stack (depends on API+Compute and Auth)');
+    console.log('1. GitHub OIDC Stack (one-time, if CREATE_GITHUB_OIDC=true)');
+    console.log('2. Foundation Stack');
+    console.log('3. Network Stack');
+    console.log('4. Lambda Layers Stack');
+    console.log('5. Data Stack (parallel with Auth)');
+    console.log('6. Auth Stack (parallel with Data)');
+    console.log('7. API+Compute Stack (combined to avoid circular dependencies)');
+    console.log('8. Database Operations Stack');
+    console.log('9. Frontend Stack');
+    console.log('10. Virus Scanning Stack [GuardDuty]');
+    console.log('11. Monitoring Stack (can run in parallel)');
     console.log('\nTo deploy all stacks:');
     console.log(`cdk deploy --all --context stage=${stage}`);
     console.log('\nTo deploy a specific stack:');
     console.log(`cdk deploy MCR-<StackName>-${stage} --context stage=${stage}`);
+    console.log('\nTo create GitHub OIDC (one-time):');
+    console.log(`CREATE_GITHUB_OIDC=true cdk deploy MCR-GitHubOIDC`);
 
     // Helper functions
     function getCallbackUrls(stage: string): string[] {

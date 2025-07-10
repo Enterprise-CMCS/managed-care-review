@@ -19,6 +19,15 @@ export interface DatabaseOperationsStackProps extends BaseStackProps {
   databaseCluster: rds.IDatabaseCluster;
   databaseSecret: secretsmanager.ISecret;
   uploadsBucketName: string;
+  // From Lambda Layers Stack
+  /**
+   * ARN of the Prisma Lambda layer for database ORM functionality
+   */
+  prismaLayerArn?: string;
+  /**
+   * ARN of the PostgreSQL tools Lambda layer for database operations
+   */
+  postgresToolsLayerArn?: string;
 }
 
 /**
@@ -71,11 +80,10 @@ export class DatabaseOperationsStack extends BaseStack {
     // Create VPC endpoint for Secrets Manager
     this.createVpcEndpoint();
 
-    // Create PostgreSQL jumpbox VM (for dev/val/prod)
-    // TODO: Re-enable when public subnet configuration is available
-    // if (this.stage !== 'ephemeral') {
-    //   this.createPostgresVm();
-    // }
+    // Create PostgreSQL jumpbox VM (only for prod/val environments)
+    if (this.stage === 'prod' || this.stage === 'val') {
+      this.createPostgresVm();
+    }
 
     // Create cross-account roles for val/prod
     if (this.stage === 'val' || this.stage === 'prod') {
@@ -130,8 +138,8 @@ export class DatabaseOperationsStack extends BaseStack {
       });
     }
 
-    // VM scripts bucket (for dev/val/prod)
-    if (this.stage !== 'ephemeral') {
+    // VM scripts bucket (only for prod/val environments)
+    if (this.stage === 'prod' || this.stage === 'val') {
       this.vmScriptsBucket = new s3.Bucket(this, 'VmScriptsBucket', {
         bucketName: `${SERVICES.POSTGRES}-${this.stage}-postgres-infra-scripts`,
         encryption: s3.BucketEncryption.S3_MANAGED,

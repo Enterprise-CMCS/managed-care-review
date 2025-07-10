@@ -10,6 +10,8 @@ import * as s3 from 'aws-cdk-lib/aws-s3';
 import * as iam from 'aws-cdk-lib/aws-iam';
 import * as secretsmanager from 'aws-cdk-lib/aws-secretsmanager';
 import * as ssm from 'aws-cdk-lib/aws-ssm';
+import * as events from 'aws-cdk-lib/aws-events';
+import * as targets from 'aws-cdk-lib/aws-events-targets';
 import { Duration } from 'aws-cdk-lib';
 import { SERVICES, API_PATHS, LAMBDA_FUNCTIONS } from '@config/constants';
 import { needsPrismaLayer } from '@constructs/lambda/bundling-utils';
@@ -24,6 +26,15 @@ export interface ApiComputeStackProps extends BaseStackProps {
   // From Auth Stack
   userPool: cognito.IUserPool;
   authenticatedRole?: iam.IRole;
+  // From Lambda Layers Stack
+  /**
+   * ARN of the Prisma Lambda layer for database ORM functionality
+   */
+  prismaLayerArn?: string;
+  /**
+   * ARN of the PostgreSQL tools Lambda layer for database operations
+   */
+  postgresToolsLayerArn?: string;
 }
 
 /**
@@ -67,32 +78,32 @@ export class ApiComputeStack extends BaseStack {
    * Matches serverless.yml Lambda functions exactly
    */
   private readonly FUNCTION_CONFIGS: Record<string, FunctionConfig> = {
-    // Main GraphQL API handler (handles all GraphQL operations)
+    // Main GraphQL API handler (handles all GraphQL operations) - uses VPC in serverless
     GRAPHQL: { useVpc: true, needsDatabaseAccess: true, needsSesAccess: false, needsCognitoAccess: true },
     
-    // Auth functions
+    // Auth functions - oauth_token uses VPC in serverless
     OAUTH_TOKEN: { useVpc: true, needsDatabaseAccess: true, needsSesAccess: false, needsCognitoAccess: false },
     THIRD_PARTY_API_AUTHORIZER: { useVpc: false, needsDatabaseAccess: false, needsSesAccess: false, needsCognitoAccess: false },
     
-    // Health check
+    // Health check - no VPC in serverless
     INDEX_HEALTH_CHECKER: { useVpc: false, needsDatabaseAccess: false, needsSesAccess: false, needsCognitoAccess: false },
     
-    // Email functions
+    // Email functions - no VPC in serverless
     EMAIL_SUBMIT: { useVpc: false, needsDatabaseAccess: false, needsSesAccess: true, needsCognitoAccess: false },
     
-    // File operations
+    // File operations - no VPC in serverless
     ZIP_KEYS: { useVpc: false, needsDatabaseAccess: false, needsSesAccess: false, needsCognitoAccess: false },
     
-    // Database operations
+    // Database operations - migrate uses VPC in serverless
     MIGRATE: { useVpc: true, needsDatabaseAccess: true, needsSesAccess: false, needsCognitoAccess: false },
     
-    // S3 audit
+    // S3 audit - auditFiles uses VPC in serverless
     AUDIT_FILES: { useVpc: true, needsDatabaseAccess: true, needsSesAccess: false, needsCognitoAccess: false },
     
-    // Cleanup
+    // Cleanup - no VPC in serverless
     CLEANUP: { useVpc: false, needsDatabaseAccess: false, needsSesAccess: false, needsCognitoAccess: false },
     
-    // Observability
+    // Observability - no VPC in serverless
     OTEL: { useVpc: false, needsDatabaseAccess: false, needsSesAccess: false, needsCognitoAccess: false },
   };
 
@@ -145,6 +156,9 @@ export class ApiComputeStack extends BaseStack {
 
     // Grant necessary permissions
     this.grantPermissions();
+
+    // Create scheduled events
+    this.createScheduledEvents();
   }
 
   /**
@@ -333,6 +347,26 @@ export class ApiComputeStack extends BaseStack {
         timeout: Duration.seconds(60),
         memorySize: this.stage === 'prod' ? 4096 : 1024,
         ephemeralStorageSize: this.stage === 'prod' ? 2048 : 512
+      },
+      MIGRATE: {
+        timeout: Duration.seconds(60),
+        memorySize: 1024
+      },
+      GRAPHQL: {
+        timeout: Duration.seconds(30),
+        memorySize: 1024
+      },
+      CLEANUP: {
+        timeout: Duration.seconds(900), // 15 minutes
+        memorySize: 1024
+      },
+      AUDIT_FILES: {
+        timeout: Duration.seconds(60),
+        memorySize: 1024
+      },
+      OAUTH_TOKEN: {
+        timeout: Duration.seconds(29), // Default API Gateway timeout
+        memorySize: 1024
       }
     };
 
@@ -435,6 +469,21 @@ export class ApiComputeStack extends BaseStack {
   }
 
   /**
+   * Create scheduled events for Lambda functions
+   */
+  private createScheduledEvents(): void {
+    // Schedule cleanup Lambda - runs at 14:00 UTC Monday-Friday
+    const cleanupFunction = this.getFunction('CLEANUP');
+    const cleanupRule = new events.Rule(this, 'CleanupScheduleRule', {
+      ruleName: `${SERVICES.APP_API}-${this.stage}-cleanup-schedule`,
+      description: 'Scheduled cleanup of temporary resources',
+      schedule: events.Schedule.expression('cron(0 14 ? * MON-FRI *)')
+    });
+    
+    cleanupRule.addTarget(new targets.LambdaFunction(cleanupFunction as lambda.Function));
+  }
+
+  /**
    * Create all API endpoints
    */
   private createApiEndpoints(): void {
@@ -501,6 +550,17 @@ export class ApiComputeStack extends BaseStack {
     externalResource.addMethod('POST', new apigateway.LambdaIntegration(this.getFunction('GRAPHQL')), {
       authorizationType: apigateway.AuthorizationType.CUSTOM,
       authorizer: thirdPartyAuthorizer
+    });
+
+    // Email submission endpoint (authenticated)
+    const emailResource = this.api.root.addResource('email');
+    const submitResource = emailResource.addResource('submit');
+    ApiEndpointFactory.createAuthenticatedEndpoint(this, 'EmailSubmitEndpoint', {
+      resource: submitResource,
+      method: 'POST',
+      handler: this.getFunction('EMAIL_SUBMIT'),
+      userPool: this.userPool,
+      authorizer: this.authorizer
     });
   }
 

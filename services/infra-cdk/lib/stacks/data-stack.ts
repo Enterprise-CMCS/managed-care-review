@@ -179,21 +179,6 @@ export class DataStack extends BaseStack {
       ]
     }));
 
-    // Add bucket policy to deny access to unscanned files
-    // Commented out since virus scanning stack is disabled
-    this.uploadsBucket.addToResourcePolicy(new iam.PolicyStatement({
-      sid: 'DenyUnscannedFiles',
-      effect: iam.Effect.DENY,
-      principals: [new iam.AnyPrincipal()],
-      actions: ['s3:GetObject'],
-      resources: [`${this.uploadsBucket.bucketArn}/*`],
-      conditions: {
-        StringNotEquals: {
-          's3:ExistingObjectTag/virusScanStatus': ['CLEAN'],
-          's3:ExistingObjectTag/contentsPreviouslyScanned': ['TRUE']
-        }
-      }
-    }));
 
     // Create QA bucket
     const qaBucket = new SecureS3Bucket(this, 'QaBucket', {
@@ -238,20 +223,5 @@ export class DataStack extends BaseStack {
       ]
     }));
 
-    // Add bucket policy to deny access to unscanned files in QA bucket
-    // Commented out since virus scanning stack is disabled
-    this.qaBucket.addToResourcePolicy(new iam.PolicyStatement({
-      sid: 'DenyUnscannedFiles',
-      effect: iam.Effect.DENY,
-      principals: [new iam.AnyPrincipal()],
-      actions: ['s3:GetObject'],
-      resources: [`${this.qaBucket.bucketArn}/*`],
-      conditions: {
-        StringNotEquals: {
-          's3:ExistingObjectTag/virusScanStatus': ['CLEAN'],
-          's3:ExistingObjectTag/contentsPreviouslyScanned': ['TRUE']
-        }
-      }
-    }));
   }
 }

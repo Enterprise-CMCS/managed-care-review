@@ -8,3 +8,5 @@ export * from './database-operations-stack';
 export * from './monitoring-stack';
 export * from './guardduty-malware-protection-stack';
 export * from './frontend-stack';
+export * from './github-oidc-stack';
+export * from './lambda-layers-stack';

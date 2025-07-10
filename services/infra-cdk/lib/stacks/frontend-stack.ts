@@ -1,5 +1,5 @@
 import { BaseStack, BaseStackProps, ServiceRegistry } from '@constructs/base';
-import { StaticWebsite, GeoRestrictedWaf, BuildConfig } from '@constructs/frontend';
+import { StaticWebsite, GeoRestrictedWaf, BuildConfig, AppWebIntegration } from '@constructs/frontend';
 import { Construct } from 'constructs';
 import * as cloudfront from 'aws-cdk-lib/aws-cloudfront';
 import * as iam from 'aws-cdk-lib/aws-iam';
@@ -23,6 +23,12 @@ export interface FrontendStackProps extends BaseStackProps {
    * Enable HSTS security headers
    */
   enableHsts?: boolean;
+  
+  /**
+   * Enable app-web integration for side-by-side deployment
+   * When true, deploys pre-built artifacts from app-web directory
+   */
+  enableAppWebIntegration?: boolean;
 }
 
 /**
@@ -44,6 +50,7 @@ export class FrontendStack extends BaseStack {
   private readonly storybookDomainName?: string;
   private readonly storybookCertificateArn?: string;
   private readonly enableHsts?: boolean;
+  private readonly enableAppWebIntegration?: boolean;
   
   constructor(scope: Construct, id: string, props: FrontendStackProps) {
     super(scope, id, {
@@ -57,6 +64,7 @@ export class FrontendStack extends BaseStack {
     this.storybookDomainName = props.storybookDomainName;
     this.storybookCertificateArn = props.storybookCertificateArn;
     this.enableHsts = props.enableHsts;
+    this.enableAppWebIntegration = props.enableAppWebIntegration;
     
     // Define resources after all properties are initialized
     this.defineResources();
@@ -119,6 +127,23 @@ export class FrontendStack extends BaseStack {
     // Store metadata about required configuration
     // Actual configuration will be retrieved during build time
     this.buildConfig.storeConfigurationMetadata(this.mainAppUrl);
+    
+    // Add app-web integration if enabled
+    if (this.enableAppWebIntegration) {
+      // Get commit SHA from context (passed from CI/CD)
+      const commitSha = this.node.tryGetContext('commitSha');
+      
+      new AppWebIntegration(this, 'AppWebIntegration', {
+        mainAppBucket: this.mainApp.bucket,
+        storybookBucket: this.storybook.bucket,
+        mainAppDistribution: this.mainApp.distribution,
+        storybookDistribution: this.storybook.distribution,
+        stage: this.stage,
+        appWebPath: '../app-web',
+        commitSha: commitSha,
+        enableImmutableAssets: true
+      });
+    }
     
     // Store frontend URLs in ServiceRegistry for cross-stack references
     this.storeServiceRegistryValues();

@@ -466,7 +466,7 @@ importers:
         version: 6.21.0(eslint@8.57.0)(typescript@4.9.5)
       '@vitest/coverage-v8':
         specifier: ^3.1.1
-        version: 3.1.1(vitest@3.0.7(@types/node@22.13.11)(jiti@1.21.0)(jsdom@25.0.1)(sass@1.77.2)(terser@5.42.0)(tsx@4.19.3)(yaml@2.8.0))
+        version: 3.1.1(vitest@3.0.7(@types/node@20.19.0)(jiti@1.21.0)(jsdom@25.0.1)(sass@1.77.2)(terser@5.42.0)(tsx@4.19.3)(yaml@2.8.0))
       eslint:
         specifier: ^8.3.0
         version: 8.57.0
@@ -475,7 +475,7 @@ importers:
         version: 10.1.5(eslint@8.57.0)
       eslint-plugin-jest:
         specifier: ^27.0.1
-        version: 27.9.0(@typescript-eslint/eslint-plugin@8.29.1(@typescript-eslint/parser@6.21.0(eslint@8.57.0)(typescript@4.9.5))(eslint@8.57.0)(typescript@4.9.5))(eslint@8.57.0)(jest@29.7.0(@types/node@22.13.11)(babel-plugin-macros@3.1.0))(typescript@4.9.5)
+        version: 27.9.0(@typescript-eslint/eslint-plugin@8.29.1(@typescript-eslint/parser@6.21.0(eslint@8.57.0)(typescript@4.9.5))(eslint@8.57.0)(typescript@4.9.5))(eslint@8.57.0)(jest@29.7.0(@types/node@20.19.0)(babel-plugin-macros@3.1.0)(ts-node@10.9.2(@types/node@20.19.0)(typescript@4.9.5)))(typescript@4.9.5)
       eslint-plugin-prettier:
         specifier: ^5.0.1
         version: 5.0.1(@types/eslint@9.6.1)(eslint-config-prettier@10.1.5(eslint@8.57.0))(eslint@8.57.0)(prettier@3.5.3)
@@ -484,7 +484,7 @@ importers:
         version: 11.2.0
       jest:
         specifier: ^29.7.0
-        version: 29.7.0(@types/node@22.13.11)(babel-plugin-macros@3.1.0)
+        version: 29.7.0(@types/node@20.19.0)(babel-plugin-macros@3.1.0)(ts-node@10.9.2(@types/node@20.19.0)(typescript@4.9.5))
       lint-staged:
         specifier: ^15.2.7
         version: 15.2.7
@@ -517,7 +517,7 @@ importers:
         version: 4.9.5
       vitest:
         specifier: ^3.0.7
-        version: 3.0.7(@types/node@22.13.11)(jiti@1.21.0)(jsdom@25.0.1)(sass@1.77.2)(terser@5.42.0)(tsx@4.19.3)(yaml@2.8.0)
+        version: 3.0.7(@types/node@20.19.0)(jiti@1.21.0)(jsdom@25.0.1)(sass@1.77.2)(terser@5.42.0)(tsx@4.19.3)(yaml@2.8.0)
 
   services/app-graphql:
     dependencies:
@@ -826,7 +826,7 @@ importers:
         version: 10.1.5(eslint@8.57.0)
       eslint-plugin-jest:
         specifier: ^27.0.1
-        version: 27.9.0(@typescript-eslint/eslint-plugin@8.29.1(@typescript-eslint/parser@6.21.0(eslint@8.57.0)(typescript@4.9.5))(eslint@8.57.0)(typescript@4.9.5))(eslint@8.57.0)(jest@29.7.0(@types/node@20.14.12)(babel-plugin-macros@3.1.0))(typescript@4.9.5)
+        version: 27.9.0(@typescript-eslint/eslint-plugin@8.29.1(@typescript-eslint/parser@6.21.0(eslint@8.57.0)(typescript@4.9.5))(eslint@8.57.0)(typescript@4.9.5))(eslint@8.57.0)(jest@29.7.0(@types/node@20.14.12)(babel-plugin-macros@3.1.0)(ts-node@10.9.2(@types/node@20.14.12)(typescript@4.9.5)))(typescript@4.9.5)
       eslint-plugin-jsx-a11y:
         specifier: ^6.5.1
         version: 6.8.0(eslint@8.57.0)
@@ -1067,363 +1067,6 @@ importers:
         specifier: ~5.4.3
         version: 5.4.5
 
-  services/infra-cdk/cdk.out/asset.323feed039c2aa94950044b45fd88259c144c8f440e0e16ea65539f1383bee1a:
-    dependencies:
-      '@aws-sdk/client-cognito-identity-provider':
-        specifier: ^3.828.0
-        version: 3.828.0
-      '@aws-sdk/client-rds':
-        specifier: ^3.828.0
-        version: 3.828.0
-      '@aws-sdk/client-s3':
-        specifier: ^3.828.0
-        version: 3.828.0
-      '@aws-sdk/client-secrets-manager':
-        specifier: ^3.828.0
-        version: 3.828.0
-      '@aws-sdk/client-ses':
-        specifier: ^3.828.0
-        version: 3.828.0
-      '@aws-sdk/client-ssm':
-        specifier: ^3.828.0
-        version: 3.828.0
-
-  services/infra-cdk/cdk.out/asset.3a3d7837f57cef3b76f5ddf42dfb2ae38e9e502274cf5dc10a1d14ba4ca13ab4:
-    dependencies:
-      '@aws-sdk/client-cognito-identity-provider':
-        specifier: ^3.828.0
-        version: 3.828.0
-      '@aws-sdk/client-rds':
-        specifier: ^3.828.0
-        version: 3.828.0
-      '@aws-sdk/client-s3':
-        specifier: ^3.828.0
-        version: 3.828.0
-      '@aws-sdk/client-secrets-manager':
-        specifier: ^3.828.0
-        version: 3.828.0
-      '@aws-sdk/client-ses':
-        specifier: ^3.828.0
-        version: 3.828.0
-      '@aws-sdk/client-ssm':
-        specifier: ^3.828.0
-        version: 3.828.0
-
-  services/infra-cdk/cdk.out/asset.3b5eab1ee1042a75eef81827d82c1842ce6b4027feb225fbf92b8902e28d3d6e:
-    dependencies:
-      '@aws-sdk/client-cognito-identity-provider':
-        specifier: 3.828.0
-        version: 3.828.0
-      '@aws-sdk/client-rds':
-        specifier: 3.828.0
-        version: 3.828.0
-      '@aws-sdk/client-s3':
-        specifier: 3.828.0
-        version: 3.828.0
-      '@aws-sdk/client-secrets-manager':
-        specifier: 3.828.0
-        version: 3.828.0
-      '@aws-sdk/client-ses':
-        specifier: 3.828.0
-        version: 3.828.0
-      '@aws-sdk/client-ssm':
-        specifier: 3.828.0
-        version: 3.828.0
-
-  services/infra-cdk/cdk.out/asset.4c69989deb4d59d82aa7dc379d64d8a86ff73a70ec4338488075318e4bbf3338:
-    dependencies:
-      '@aws-sdk/client-cognito-identity-provider':
-        specifier: 3.828.0
-        version: 3.828.0
-      '@aws-sdk/client-rds':
-        specifier: 3.828.0
-        version: 3.828.0
-      '@aws-sdk/client-s3':
-        specifier: 3.828.0
-        version: 3.828.0
-      '@aws-sdk/client-secrets-manager':
-        specifier: 3.828.0
-        version: 3.828.0
-      '@aws-sdk/client-ses':
-        specifier: 3.828.0
-        version: 3.828.0
-      '@aws-sdk/client-ssm':
-        specifier: 3.828.0
-        version: 3.828.0
-
-  services/infra-cdk/cdk.out/asset.4f1fc97eeb63eacce133db006243c44a06dde2ab2c9b0b88184766dbd40aa2c9:
-    dependencies:
-      '@aws-sdk/client-cognito-identity-provider':
-        specifier: ^3.828.0
-        version: 3.828.0
-      '@aws-sdk/client-rds':
-        specifier: ^3.828.0
-        version: 3.828.0
-      '@aws-sdk/client-s3':
-        specifier: ^3.828.0
-        version: 3.828.0
-      '@aws-sdk/client-secrets-manager':
-        specifier: ^3.828.0
-        version: 3.828.0
-      '@aws-sdk/client-ses':
-        specifier: ^3.828.0
-        version: 3.828.0
-      '@aws-sdk/client-ssm':
-        specifier: ^3.828.0
-        version: 3.828.0
-
-  services/infra-cdk/cdk.out/asset.6620243e5ec3fb42525bef22f82aa4124a9fc22e713d606db87a8108142b1dd5:
-    dependencies:
-      '@aws-sdk/client-cognito-identity-provider':
-        specifier: ^3.828.0
-        version: 3.828.0
-      '@aws-sdk/client-rds':
-        specifier: ^3.828.0
-        version: 3.828.0
-      '@aws-sdk/client-s3':
-        specifier: ^3.828.0
-        version: 3.828.0
-      '@aws-sdk/client-secrets-manager':
-        specifier: ^3.828.0
-        version: 3.828.0
-      '@aws-sdk/client-ses':
-        specifier: ^3.828.0
-        version: 3.828.0
-      '@aws-sdk/client-ssm':
-        specifier: ^3.828.0
-        version: 3.828.0
-
-  services/infra-cdk/cdk.out/asset.6c53b00014b5a858dc4b37a95f255e143dd87eca363d3a7bede0950cebdf0132:
-    dependencies:
-      '@aws-sdk/client-cognito-identity-provider':
-        specifier: 3.828.0
-        version: 3.828.0
-      '@aws-sdk/client-rds':
-        specifier: 3.828.0
-        version: 3.828.0
-      '@aws-sdk/client-s3':
-        specifier: ^3.828.0
-        version: 3.828.0
-      '@aws-sdk/client-secrets-manager':
-        specifier: ^3.828.0
-        version: 3.828.0
-      '@aws-sdk/client-ses':
-        specifier: 3.828.0
-        version: 3.828.0
-      '@aws-sdk/client-ssm':
-        specifier: 3.828.0
-        version: 3.828.0
-
-  services/infra-cdk/cdk.out/asset.6e40f757ba5f0f448613067902403f1937b3db5df94886180f9874c1afcf9a29:
-    dependencies:
-      '@aws-sdk/client-cognito-identity-provider':
-        specifier: ^3.828.0
-        version: 3.828.0
-      '@aws-sdk/client-rds':
-        specifier: ^3.828.0
-        version: 3.828.0
-      '@aws-sdk/client-s3':
-        specifier: ^3.828.0
-        version: 3.828.0
-      '@aws-sdk/client-secrets-manager':
-        specifier: ^3.828.0
-        version: 3.828.0
-      '@aws-sdk/client-ses':
-        specifier: ^3.828.0
-        version: 3.828.0
-      '@aws-sdk/client-ssm':
-        specifier: ^3.828.0
-        version: 3.828.0
-
-  services/infra-cdk/cdk.out/asset.6ebc5bb99d04f5016f74960841ad9a121a96b90e42a260674c9e3be1e86a8cbc:
-    dependencies:
-      '@aws-sdk/client-cognito-identity-provider':
-        specifier: ^3.828.0
-        version: 3.828.0
-      '@aws-sdk/client-rds':
-        specifier: ^3.828.0
-        version: 3.828.0
-      '@aws-sdk/client-s3':
-        specifier: ^3.828.0
-        version: 3.828.0
-      '@aws-sdk/client-secrets-manager':
-        specifier: ^3.828.0
-        version: 3.828.0
-      '@aws-sdk/client-ses':
-        specifier: ^3.828.0
-        version: 3.828.0
-      '@aws-sdk/client-ssm':
-        specifier: ^3.828.0
-        version: 3.828.0
-
-  services/infra-cdk/cdk.out/asset.875e2e0da9806e3bafc8dcb8620245ef3a5d5643949871abcbbde036e155ae94:
-    dependencies:
-      '@aws-sdk/client-cognito-identity-provider':
-        specifier: ^3.828.0
-        version: 3.828.0
-      '@aws-sdk/client-rds':
-        specifier: ^3.828.0
-        version: 3.828.0
-      '@aws-sdk/client-s3':
-        specifier: ^3.828.0
-        version: 3.828.0
-      '@aws-sdk/client-secrets-manager':
-        specifier: ^3.828.0
-        version: 3.828.0
-      '@aws-sdk/client-ses':
-        specifier: ^3.828.0
-        version: 3.828.0
-      '@aws-sdk/client-ssm':
-        specifier: ^3.828.0
-        version: 3.828.0
-
-  services/infra-cdk/cdk.out/asset.9a41221def8b6ae191bbf80e58f2356580006f32d0adcf91106b3128c5d2d50b:
-    dependencies:
-      '@aws-sdk/client-cognito-identity-provider':
-        specifier: 3.828.0
-        version: 3.828.0
-      '@aws-sdk/client-rds':
-        specifier: 3.828.0
-        version: 3.828.0
-      '@aws-sdk/client-s3':
-        specifier: ^3.828.0
-        version: 3.828.0
-      '@aws-sdk/client-secrets-manager':
-        specifier: ^3.828.0
-        version: 3.828.0
-      '@aws-sdk/client-ses':
-        specifier: 3.828.0
-        version: 3.828.0
-      '@aws-sdk/client-ssm':
-        specifier: 3.828.0
-        version: 3.828.0
-
-  services/infra-cdk/cdk.out/asset.9a48bc6fa52d7e7a64007dd01fde415920d6f7904fa1061bd45f64fed78a7b92:
-    dependencies:
-      '@aws-sdk/client-cognito-identity-provider':
-        specifier: ^3.828.0
-        version: 3.828.0
-      '@aws-sdk/client-rds':
-        specifier: ^3.828.0
-        version: 3.828.0
-      '@aws-sdk/client-s3':
-        specifier: ^3.828.0
-        version: 3.828.0
-      '@aws-sdk/client-secrets-manager':
-        specifier: ^3.828.0
-        version: 3.828.0
-      '@aws-sdk/client-ses':
-        specifier: ^3.828.0
-        version: 3.828.0
-      '@aws-sdk/client-ssm':
-        specifier: ^3.828.0
-        version: 3.828.0
-
-  services/infra-cdk/cdk.out/asset.9d7ff984ff13e9125dbf5c067d403e37c94185def6d0c390c04e785e73aefaae:
-    dependencies:
-      '@aws-sdk/client-cognito-identity-provider':
-        specifier: 3.828.0
-        version: 3.828.0
-      '@aws-sdk/client-rds':
-        specifier: 3.828.0
-        version: 3.828.0
-      '@aws-sdk/client-s3':
-        specifier: ^3.828.0
-        version: 3.828.0
-      '@aws-sdk/client-secrets-manager':
-        specifier: ^3.828.0
-        version: 3.828.0
-      '@aws-sdk/client-ses':
-        specifier: 3.828.0
-        version: 3.828.0
-      '@aws-sdk/client-ssm':
-        specifier: 3.828.0
-        version: 3.828.0
-
-  services/infra-cdk/cdk.out/asset.a84e9e7a2830335d0a80460e3cbfd2abd636c532e27bb0a473088f5ce5f5ad1c:
-    dependencies:
-      '@aws-sdk/client-cognito-identity-provider':
-        specifier: ^3.828.0
-        version: 3.828.0
-      '@aws-sdk/client-rds':
-        specifier: ^3.828.0
-        version: 3.828.0
-      '@aws-sdk/client-s3':
-        specifier: ^3.828.0
-        version: 3.828.0
-      '@aws-sdk/client-secrets-manager':
-        specifier: ^3.828.0
-        version: 3.828.0
-      '@aws-sdk/client-ses':
-        specifier: ^3.828.0
-        version: 3.828.0
-      '@aws-sdk/client-ssm':
-        specifier: ^3.828.0
-        version: 3.828.0
-
-  services/infra-cdk/cdk.out/asset.a86ce14da5ed88530430c550c18e6700c8485d54e5f309cc8449a360366f83b0:
-    dependencies:
-      '@aws-sdk/client-cognito-identity-provider':
-        specifier: 3.828.0
-        version: 3.828.0
-      '@aws-sdk/client-rds':
-        specifier: 3.828.0
-        version: 3.828.0
-      '@aws-sdk/client-s3':
-        specifier: 3.828.0
-        version: 3.828.0
-      '@aws-sdk/client-secrets-manager':
-        specifier: 3.828.0
-        version: 3.828.0
-      '@aws-sdk/client-ses':
-        specifier: 3.828.0
-        version: 3.828.0
-      '@aws-sdk/client-ssm':
-        specifier: 3.828.0
-        version: 3.828.0
-
-  services/infra-cdk/cdk.out/asset.b09fe566e0f51e7a34125e09766efd9f3ac48936a839b6536a57f21d81a5ba85:
-    dependencies:
-      '@aws-sdk/client-cognito-identity-provider':
-        specifier: 3.828.0
-        version: 3.828.0
-      '@aws-sdk/client-rds':
-        specifier: 3.828.0
-        version: 3.828.0
-      '@aws-sdk/client-s3':
-        specifier: 3.828.0
-        version: 3.828.0
-      '@aws-sdk/client-secrets-manager':
-        specifier: 3.828.0
-        version: 3.828.0
-      '@aws-sdk/client-ses':
-        specifier: 3.828.0
-        version: 3.828.0
-      '@aws-sdk/client-ssm':
-        specifier: 3.828.0
-        version: 3.828.0
-
-  services/infra-cdk/cdk.out/asset.cc2ab3a8e96481c3858e96413ff7065d52ed34ea7ca27a2bb34874808b378d68:
-    dependencies:
-      '@aws-sdk/client-cognito-identity-provider':
-        specifier: ^3.828.0
-        version: 3.828.0
-      '@aws-sdk/client-rds':
-        specifier: ^3.828.0
-        version: 3.828.0
-      '@aws-sdk/client-s3':
-        specifier: ^3.828.0
-        version: 3.828.0
-      '@aws-sdk/client-secrets-manager':
-        specifier: ^3.828.0
-        version: 3.828.0
-      '@aws-sdk/client-ses':
-        specifier: ^3.828.0
-        version: 3.828.0
-      '@aws-sdk/client-ssm':
-        specifier: ^3.828.0
-        version: 3.828.0
-
   services/postgres:
     dependencies:
       '@aws-sdk/client-cloudformation':
@@ -1613,7 +1256,7 @@ importers:
         version: 2.0.2
       ts-jest:
         specifier: ^29.1.1
-        version: 29.1.4(@babel/core@7.24.7)(@jest/transform@29.7.0)(@jest/types@29.6.3)(babel-jest@29.7.0(@babel/core@7.24.7))(esbuild@0.25.5)(jest@29.7.0(@types/node@20.16.5)(babel-plugin-macros@3.1.0))(typescript@5.5.4)
+        version: 29.1.4(@babel/core@7.24.7)(@jest/transform@29.7.0)(@jest/types@29.6.3)(babel-jest@29.7.0(@babel/core@7.24.7))(esbuild@0.25.5)(jest@29.7.0(@types/node@20.16.5)(babel-plugin-macros@3.1.0)(ts-node@10.9.2(@types/node@20.16.5)(typescript@5.5.4)))(typescript@5.5.4)
       ts-loader:
         specifier: ^9.5.2
         version: 9.5.2(typescript@5.5.4)(webpack@5.93.0(esbuild@0.25.5))
@@ -19878,6 +19521,112 @@ snapshots:
       - supports-color
       - ts-node
 
+  '@jest/core@29.7.0(babel-plugin-macros@3.1.0)(ts-node@10.9.2(@types/node@20.14.12)(typescript@4.9.5))':
+    dependencies:
+      '@jest/console': 29.7.0
+      '@jest/reporters': 29.7.0
+      '@jest/test-result': 29.7.0
+      '@jest/transform': 29.7.0
+      '@jest/types': 29.6.3
+      '@types/node': 20.19.0
+      ansi-escapes: 4.3.2
+      chalk: 4.1.2
+      ci-info: 3.8.0
+      exit: 0.1.2
+      graceful-fs: 4.2.11
+      jest-changed-files: 29.7.0
+      jest-config: 29.7.0(@types/node@20.19.0)(babel-plugin-macros@3.1.0)(ts-node@10.9.2(@types/node@20.14.12)(typescript@4.9.5))
+      jest-haste-map: 29.7.0
+      jest-message-util: 29.7.0
+      jest-regex-util: 29.6.3
+      jest-resolve: 29.7.0
+      jest-resolve-dependencies: 29.7.0
+      jest-runner: 29.7.0
+      jest-runtime: 29.7.0
+      jest-snapshot: 29.7.0
+      jest-util: 29.7.0
+      jest-validate: 29.7.0
+      jest-watcher: 29.7.0
+      micromatch: 4.0.8
+      pretty-format: 29.7.0
+      slash: 3.0.0
+      strip-ansi: 6.0.1
+    transitivePeerDependencies:
+      - babel-plugin-macros
+      - supports-color
+      - ts-node
+    optional: true
+
+  '@jest/core@29.7.0(babel-plugin-macros@3.1.0)(ts-node@10.9.2(@types/node@20.16.5)(typescript@5.5.4))':
+    dependencies:
+      '@jest/console': 29.7.0
+      '@jest/reporters': 29.7.0
+      '@jest/test-result': 29.7.0
+      '@jest/transform': 29.7.0
+      '@jest/types': 29.6.3
+      '@types/node': 20.19.0
+      ansi-escapes: 4.3.2
+      chalk: 4.1.2
+      ci-info: 3.8.0
+      exit: 0.1.2
+      graceful-fs: 4.2.11
+      jest-changed-files: 29.7.0
+      jest-config: 29.7.0(@types/node@20.19.0)(babel-plugin-macros@3.1.0)(ts-node@10.9.2(@types/node@20.16.5)(typescript@5.5.4))
+      jest-haste-map: 29.7.0
+      jest-message-util: 29.7.0
+      jest-regex-util: 29.6.3
+      jest-resolve: 29.7.0
+      jest-resolve-dependencies: 29.7.0
+      jest-runner: 29.7.0
+      jest-runtime: 29.7.0
+      jest-snapshot: 29.7.0
+      jest-util: 29.7.0
+      jest-validate: 29.7.0
+      jest-watcher: 29.7.0
+      micromatch: 4.0.8
+      pretty-format: 29.7.0
+      slash: 3.0.0
+      strip-ansi: 6.0.1
+    transitivePeerDependencies:
+      - babel-plugin-macros
+      - supports-color
+      - ts-node
+
+  '@jest/core@29.7.0(babel-plugin-macros@3.1.0)(ts-node@10.9.2(@types/node@20.19.0)(typescript@4.9.5))':
+    dependencies:
+      '@jest/console': 29.7.0
+      '@jest/reporters': 29.7.0
+      '@jest/test-result': 29.7.0
+      '@jest/transform': 29.7.0
+      '@jest/types': 29.6.3
+      '@types/node': 20.19.0
+      ansi-escapes: 4.3.2
+      chalk: 4.1.2
+      ci-info: 3.8.0
+      exit: 0.1.2
+      graceful-fs: 4.2.11
+      jest-changed-files: 29.7.0
+      jest-config: 29.7.0(@types/node@20.19.0)(babel-plugin-macros@3.1.0)(ts-node@10.9.2(@types/node@20.19.0)(typescript@4.9.5))
+      jest-haste-map: 29.7.0
+      jest-message-util: 29.7.0
+      jest-regex-util: 29.6.3
+      jest-resolve: 29.7.0
+      jest-resolve-dependencies: 29.7.0
+      jest-runner: 29.7.0
+      jest-runtime: 29.7.0
+      jest-snapshot: 29.7.0
+      jest-util: 29.7.0
+      jest-validate: 29.7.0
+      jest-watcher: 29.7.0
+      micromatch: 4.0.8
+      pretty-format: 29.7.0
+      slash: 3.0.0
+      strip-ansi: 6.0.1
+    transitivePeerDependencies:
+      - babel-plugin-macros
+      - supports-color
+      - ts-node
+
   '@jest/create-cache-key-function@29.7.0':
     dependencies:
       '@jest/types': 29.6.3
@@ -22876,7 +22625,7 @@ snapshots:
     transitivePeerDependencies:
       - supports-color
 
-  '@vitest/coverage-v8@3.1.1(vitest@3.0.7(@types/node@22.13.11)(jiti@1.21.0)(jsdom@25.0.1)(sass@1.77.2)(terser@5.42.0)(tsx@4.19.3)(yaml@2.8.0))':
+  '@vitest/coverage-v8@3.1.1(vitest@3.0.7(@types/node@20.19.0)(jiti@1.21.0)(jsdom@25.0.1)(sass@1.77.2)(terser@5.42.0)(tsx@4.19.3)(yaml@2.8.0))':
     dependencies:
       '@ampproject/remapping': 2.3.0
       '@bcoe/v8-coverage': 1.0.2
@@ -22890,7 +22639,7 @@ snapshots:
       std-env: 3.9.0
       test-exclude: 7.0.1
       tinyrainbow: 2.0.0
-      vitest: 3.0.7(@types/node@22.13.11)(jiti@1.21.0)(jsdom@25.0.1)(sass@1.77.2)(terser@5.42.0)(tsx@4.19.3)(yaml@2.8.0)
+      vitest: 3.0.7(@types/node@20.19.0)(jiti@1.21.0)(jsdom@25.0.1)(sass@1.77.2)(terser@5.42.0)(tsx@4.19.3)(yaml@2.8.0)
     transitivePeerDependencies:
       - supports-color
 
@@ -22942,13 +22691,13 @@ snapshots:
     optionalDependencies:
       vite: 6.2.0(@types/node@20.16.5)(jiti@1.21.0)(sass@1.77.2)(terser@5.42.0)(tsx@4.19.3)(yaml@2.8.0)
 
-  '@vitest/mocker@3.0.7(vite@6.2.0(@types/node@22.13.11)(jiti@1.21.0)(sass@1.77.2)(terser@5.42.0)(tsx@4.19.3)(yaml@2.8.0))':
+  '@vitest/mocker@3.0.7(vite@6.2.0(@types/node@20.19.0)(jiti@1.21.0)(sass@1.77.2)(terser@5.42.0)(tsx@4.19.3)(yaml@2.8.0))':
     dependencies:
       '@vitest/spy': 3.0.7
       estree-walker: 3.0.3
       magic-string: 0.30.17
     optionalDependencies:
-      vite: 6.2.0(@types/node@22.13.11)(jiti@1.21.0)(sass@1.77.2)(terser@5.42.0)(tsx@4.19.3)(yaml@2.8.0)
+      vite: 6.2.0(@types/node@20.19.0)(jiti@1.21.0)(sass@1.77.2)(terser@5.42.0)(tsx@4.19.3)(yaml@2.8.0)
 
   '@vitest/pretty-format@2.0.5':
     dependencies:
@@ -24563,13 +24312,13 @@ snapshots:
       - supports-color
       - ts-node
 
-  create-jest@29.7.0(@types/node@20.14.12)(babel-plugin-macros@3.1.0):
+  create-jest@29.7.0(@types/node@20.14.12)(babel-plugin-macros@3.1.0)(ts-node@10.9.2(@types/node@20.14.12)(typescript@4.9.5)):
     dependencies:
       '@jest/types': 29.6.3
       chalk: 4.1.2
       exit: 0.1.2
       graceful-fs: 4.2.11
-      jest-config: 29.7.0(@types/node@20.14.12)(babel-plugin-macros@3.1.0)
+      jest-config: 29.7.0(@types/node@20.14.12)(babel-plugin-macros@3.1.0)(ts-node@10.9.2(@types/node@20.14.12)(typescript@4.9.5))
       jest-util: 29.7.0
       prompts: 2.4.2
     transitivePeerDependencies:
@@ -24579,13 +24328,13 @@ snapshots:
       - ts-node
     optional: true
 
-  create-jest@29.7.0(@types/node@20.16.5)(babel-plugin-macros@3.1.0):
+  create-jest@29.7.0(@types/node@20.16.5)(babel-plugin-macros@3.1.0)(ts-node@10.9.2(@types/node@20.16.5)(typescript@5.5.4)):
     dependencies:
       '@jest/types': 29.6.3
       chalk: 4.1.2
       exit: 0.1.2
       graceful-fs: 4.2.11
-      jest-config: 29.7.0(@types/node@20.16.5)(babel-plugin-macros@3.1.0)
+      jest-config: 29.7.0(@types/node@20.16.5)(babel-plugin-macros@3.1.0)(ts-node@10.9.2(@types/node@20.16.5)(typescript@5.5.4))
       jest-util: 29.7.0
       prompts: 2.4.2
     transitivePeerDependencies:
@@ -24594,13 +24343,13 @@ snapshots:
       - supports-color
       - ts-node
 
-  create-jest@29.7.0(@types/node@22.13.11)(babel-plugin-macros@3.1.0):
+  create-jest@29.7.0(@types/node@20.19.0)(babel-plugin-macros@3.1.0)(ts-node@10.9.2(@types/node@20.19.0)(typescript@4.9.5)):
     dependencies:
       '@jest/types': 29.6.3
       chalk: 4.1.2
       exit: 0.1.2
       graceful-fs: 4.2.11
-      jest-config: 29.7.0(@types/node@22.13.11)(babel-plugin-macros@3.1.0)
+      jest-config: 29.7.0(@types/node@20.19.0)(babel-plugin-macros@3.1.0)(ts-node@10.9.2(@types/node@20.19.0)(typescript@4.9.5))
       jest-util: 29.7.0
       prompts: 2.4.2
     transitivePeerDependencies:
@@ -25268,24 +25017,24 @@ snapshots:
     dependencies:
       eslint: 8.57.0
 
-  eslint-plugin-jest@27.9.0(@typescript-eslint/eslint-plugin@8.29.1(@typescript-eslint/parser@6.21.0(eslint@8.57.0)(typescript@4.9.5))(eslint@8.57.0)(typescript@4.9.5))(eslint@8.57.0)(jest@29.7.0(@types/node@20.14.12)(babel-plugin-macros@3.1.0))(typescript@4.9.5):
+  eslint-plugin-jest@27.9.0(@typescript-eslint/eslint-plugin@8.29.1(@typescript-eslint/parser@6.21.0(eslint@8.57.0)(typescript@4.9.5))(eslint@8.57.0)(typescript@4.9.5))(eslint@8.57.0)(jest@29.7.0(@types/node@20.14.12)(babel-plugin-macros@3.1.0)(ts-node@10.9.2(@types/node@20.14.12)(typescript@4.9.5)))(typescript@4.9.5):
     dependencies:
       '@typescript-eslint/utils': 5.57.0(eslint@8.57.0)(typescript@4.9.5)
       eslint: 8.57.0
     optionalDependencies:
       '@typescript-eslint/eslint-plugin': 8.29.1(@typescript-eslint/parser@6.21.0(eslint@8.57.0)(typescript@4.9.5))(eslint@8.57.0)(typescript@4.9.5)
-      jest: 29.7.0(@types/node@20.14.12)(babel-plugin-macros@3.1.0)
+      jest: 29.7.0(@types/node@20.14.12)(babel-plugin-macros@3.1.0)(ts-node@10.9.2(@types/node@20.14.12)(typescript@4.9.5))
     transitivePeerDependencies:
       - supports-color
       - typescript
 
-  eslint-plugin-jest@27.9.0(@typescript-eslint/eslint-plugin@8.29.1(@typescript-eslint/parser@6.21.0(eslint@8.57.0)(typescript@4.9.5))(eslint@8.57.0)(typescript@4.9.5))(eslint@8.57.0)(jest@29.7.0(@types/node@22.13.11)(babel-plugin-macros@3.1.0))(typescript@4.9.5):
+  eslint-plugin-jest@27.9.0(@typescript-eslint/eslint-plugin@8.29.1(@typescript-eslint/parser@6.21.0(eslint@8.57.0)(typescript@4.9.5))(eslint@8.57.0)(typescript@4.9.5))(eslint@8.57.0)(jest@29.7.0(@types/node@20.19.0)(babel-plugin-macros@3.1.0)(ts-node@10.9.2(@types/node@20.19.0)(typescript@4.9.5)))(typescript@4.9.5):
     dependencies:
       '@typescript-eslint/utils': 5.57.0(eslint@8.57.0)(typescript@4.9.5)
       eslint: 8.57.0
     optionalDependencies:
       '@typescript-eslint/eslint-plugin': 8.29.1(@typescript-eslint/parser@6.21.0(eslint@8.57.0)(typescript@4.9.5))(eslint@8.57.0)(typescript@4.9.5)
-      jest: 29.7.0(@types/node@22.13.11)(babel-plugin-macros@3.1.0)
+      jest: 29.7.0(@types/node@20.19.0)(babel-plugin-macros@3.1.0)(ts-node@10.9.2(@types/node@20.19.0)(typescript@4.9.5))
     transitivePeerDependencies:
       - supports-color
       - typescript
@@ -26781,16 +26530,16 @@ snapshots:
       - supports-color
       - ts-node
 
-  jest-cli@29.7.0(@types/node@20.14.12)(babel-plugin-macros@3.1.0):
+  jest-cli@29.7.0(@types/node@20.14.12)(babel-plugin-macros@3.1.0)(ts-node@10.9.2(@types/node@20.14.12)(typescript@4.9.5)):
     dependencies:
-      '@jest/core': 29.7.0(babel-plugin-macros@3.1.0)(ts-node@10.9.2(@types/node@20.11.24)(typescript@5.4.5))
+      '@jest/core': 29.7.0(babel-plugin-macros@3.1.0)(ts-node@10.9.2(@types/node@20.14.12)(typescript@4.9.5))
       '@jest/test-result': 29.7.0
       '@jest/types': 29.6.3
       chalk: 4.1.2
-      create-jest: 29.7.0(@types/node@20.14.12)(babel-plugin-macros@3.1.0)
+      create-jest: 29.7.0(@types/node@20.14.12)(babel-plugin-macros@3.1.0)(ts-node@10.9.2(@types/node@20.14.12)(typescript@4.9.5))
       exit: 0.1.2
       import-local: 3.1.0
-      jest-config: 29.7.0(@types/node@20.14.12)(babel-plugin-macros@3.1.0)
+      jest-config: 29.7.0(@types/node@20.14.12)(babel-plugin-macros@3.1.0)(ts-node@10.9.2(@types/node@20.14.12)(typescript@4.9.5))
       jest-util: 29.7.0
       jest-validate: 29.7.0
       yargs: 17.7.2
@@ -26801,16 +26550,16 @@ snapshots:
       - ts-node
     optional: true
 
-  jest-cli@29.7.0(@types/node@20.16.5)(babel-plugin-macros@3.1.0):
+  jest-cli@29.7.0(@types/node@20.16.5)(babel-plugin-macros@3.1.0)(ts-node@10.9.2(@types/node@20.16.5)(typescript@5.5.4)):
     dependencies:
-      '@jest/core': 29.7.0(babel-plugin-macros@3.1.0)(ts-node@10.9.2(@types/node@20.11.24)(typescript@5.4.5))
+      '@jest/core': 29.7.0(babel-plugin-macros@3.1.0)(ts-node@10.9.2(@types/node@20.16.5)(typescript@5.5.4))
       '@jest/test-result': 29.7.0
       '@jest/types': 29.6.3
       chalk: 4.1.2
-      create-jest: 29.7.0(@types/node@20.16.5)(babel-plugin-macros@3.1.0)
+      create-jest: 29.7.0(@types/node@20.16.5)(babel-plugin-macros@3.1.0)(ts-node@10.9.2(@types/node@20.16.5)(typescript@5.5.4))
       exit: 0.1.2
       import-local: 3.1.0
-      jest-config: 29.7.0(@types/node@20.16.5)(babel-plugin-macros@3.1.0)
+      jest-config: 29.7.0(@types/node@20.16.5)(babel-plugin-macros@3.1.0)(ts-node@10.9.2(@types/node@20.16.5)(typescript@5.5.4))
       jest-util: 29.7.0
       jest-validate: 29.7.0
       yargs: 17.7.2
@@ -26820,16 +26569,16 @@ snapshots:
       - supports-color
       - ts-node
 
-  jest-cli@29.7.0(@types/node@22.13.11)(babel-plugin-macros@3.1.0):
+  jest-cli@29.7.0(@types/node@20.19.0)(babel-plugin-macros@3.1.0)(ts-node@10.9.2(@types/node@20.19.0)(typescript@4.9.5)):
     dependencies:
-      '@jest/core': 29.7.0(babel-plugin-macros@3.1.0)(ts-node@10.9.2(@types/node@20.11.24)(typescript@5.4.5))
+      '@jest/core': 29.7.0(babel-plugin-macros@3.1.0)(ts-node@10.9.2(@types/node@20.19.0)(typescript@4.9.5))
       '@jest/test-result': 29.7.0
       '@jest/types': 29.6.3
       chalk: 4.1.2
-      create-jest: 29.7.0(@types/node@22.13.11)(babel-plugin-macros@3.1.0)
+      create-jest: 29.7.0(@types/node@20.19.0)(babel-plugin-macros@3.1.0)(ts-node@10.9.2(@types/node@20.19.0)(typescript@4.9.5))
       exit: 0.1.2
       import-local: 3.1.0
-      jest-config: 29.7.0(@types/node@22.13.11)(babel-plugin-macros@3.1.0)
+      jest-config: 29.7.0(@types/node@20.19.0)(babel-plugin-macros@3.1.0)(ts-node@10.9.2(@types/node@20.19.0)(typescript@4.9.5))
       jest-util: 29.7.0
       jest-validate: 29.7.0
       yargs: 17.7.2
@@ -26870,7 +26619,7 @@ snapshots:
       - babel-plugin-macros
       - supports-color
 
-  jest-config@29.7.0(@types/node@20.14.12)(babel-plugin-macros@3.1.0):
+  jest-config@29.7.0(@types/node@20.14.12)(babel-plugin-macros@3.1.0)(ts-node@10.9.2(@types/node@20.14.12)(typescript@4.9.5)):
     dependencies:
       '@babel/core': 7.24.7
       '@jest/test-sequencer': 29.7.0
@@ -26896,12 +26645,13 @@ snapshots:
       strip-json-comments: 3.1.1
     optionalDependencies:
       '@types/node': 20.14.12
+      ts-node: 10.9.2(@types/node@20.14.12)(typescript@4.9.5)
     transitivePeerDependencies:
       - babel-plugin-macros
       - supports-color
     optional: true
 
-  jest-config@29.7.0(@types/node@20.16.5)(babel-plugin-macros@3.1.0):
+  jest-config@29.7.0(@types/node@20.16.5)(babel-plugin-macros@3.1.0)(ts-node@10.9.2(@types/node@20.16.5)(typescript@5.5.4)):
     dependencies:
       '@babel/core': 7.24.7
       '@jest/test-sequencer': 29.7.0
@@ -26927,6 +26677,7 @@ snapshots:
       strip-json-comments: 3.1.1
     optionalDependencies:
       '@types/node': 20.16.5
+      ts-node: 10.9.2(@types/node@20.16.5)(typescript@5.5.4)
     transitivePeerDependencies:
       - babel-plugin-macros
       - supports-color
@@ -26962,7 +26713,7 @@ snapshots:
       - babel-plugin-macros
       - supports-color
 
-  jest-config@29.7.0(@types/node@22.13.11)(babel-plugin-macros@3.1.0):
+  jest-config@29.7.0(@types/node@20.19.0)(babel-plugin-macros@3.1.0)(ts-node@10.9.2(@types/node@20.14.12)(typescript@4.9.5)):
     dependencies:
       '@babel/core': 7.24.7
       '@jest/test-sequencer': 29.7.0
@@ -26987,7 +26738,71 @@ snapshots:
       slash: 3.0.0
       strip-json-comments: 3.1.1
     optionalDependencies:
-      '@types/node': 22.13.11
+      '@types/node': 20.19.0
+      ts-node: 10.9.2(@types/node@20.14.12)(typescript@4.9.5)
+    transitivePeerDependencies:
+      - babel-plugin-macros
+      - supports-color
+    optional: true
+
+  jest-config@29.7.0(@types/node@20.19.0)(babel-plugin-macros@3.1.0)(ts-node@10.9.2(@types/node@20.16.5)(typescript@5.5.4)):
+    dependencies:
+      '@babel/core': 7.24.7
+      '@jest/test-sequencer': 29.7.0
+      '@jest/types': 29.6.3
+      babel-jest: 29.7.0(@babel/core@7.24.7)
+      chalk: 4.1.2
+      ci-info: 3.8.0
+      deepmerge: 4.3.1
+      glob: 7.2.3
+      graceful-fs: 4.2.11
+      jest-circus: 29.7.0(babel-plugin-macros@3.1.0)
+      jest-environment-node: 29.7.0
+      jest-get-type: 29.6.3
+      jest-regex-util: 29.6.3
+      jest-resolve: 29.7.0
+      jest-runner: 29.7.0
+      jest-util: 29.7.0
+      jest-validate: 29.7.0
+      micromatch: 4.0.8
+      parse-json: 5.2.0
+      pretty-format: 29.7.0
+      slash: 3.0.0
+      strip-json-comments: 3.1.1
+    optionalDependencies:
+      '@types/node': 20.19.0
+      ts-node: 10.9.2(@types/node@20.16.5)(typescript@5.5.4)
+    transitivePeerDependencies:
+      - babel-plugin-macros
+      - supports-color
+
+  jest-config@29.7.0(@types/node@20.19.0)(babel-plugin-macros@3.1.0)(ts-node@10.9.2(@types/node@20.19.0)(typescript@4.9.5)):
+    dependencies:
+      '@babel/core': 7.24.7
+      '@jest/test-sequencer': 29.7.0
+      '@jest/types': 29.6.3
+      babel-jest: 29.7.0(@babel/core@7.24.7)
+      chalk: 4.1.2
+      ci-info: 3.8.0
+      deepmerge: 4.3.1
+      glob: 7.2.3
+      graceful-fs: 4.2.11
+      jest-circus: 29.7.0(babel-plugin-macros@3.1.0)
+      jest-environment-node: 29.7.0
+      jest-get-type: 29.6.3
+      jest-regex-util: 29.6.3
+      jest-resolve: 29.7.0
+      jest-runner: 29.7.0
+      jest-util: 29.7.0
+      jest-validate: 29.7.0
+      micromatch: 4.0.8
+      parse-json: 5.2.0
+      pretty-format: 29.7.0
+      slash: 3.0.0
+      strip-json-comments: 3.1.1
+    optionalDependencies:
+      '@types/node': 20.19.0
+      ts-node: 10.9.2(@types/node@20.19.0)(typescript@4.9.5)
     transitivePeerDependencies:
       - babel-plugin-macros
       - supports-color
@@ -27233,12 +27048,12 @@ snapshots:
       - supports-color
       - ts-node
 
-  jest@29.7.0(@types/node@20.14.12)(babel-plugin-macros@3.1.0):
+  jest@29.7.0(@types/node@20.14.12)(babel-plugin-macros@3.1.0)(ts-node@10.9.2(@types/node@20.14.12)(typescript@4.9.5)):
     dependencies:
-      '@jest/core': 29.7.0(babel-plugin-macros@3.1.0)(ts-node@10.9.2(@types/node@20.11.24)(typescript@5.4.5))
+      '@jest/core': 29.7.0(babel-plugin-macros@3.1.0)(ts-node@10.9.2(@types/node@20.14.12)(typescript@4.9.5))
       '@jest/types': 29.6.3
       import-local: 3.1.0
-      jest-cli: 29.7.0(@types/node@20.14.12)(babel-plugin-macros@3.1.0)
+      jest-cli: 29.7.0(@types/node@20.14.12)(babel-plugin-macros@3.1.0)(ts-node@10.9.2(@types/node@20.14.12)(typescript@4.9.5))
     transitivePeerDependencies:
       - '@types/node'
       - babel-plugin-macros
@@ -27246,24 +27061,24 @@ snapshots:
       - ts-node
     optional: true
 
-  jest@29.7.0(@types/node@20.16.5)(babel-plugin-macros@3.1.0):
+  jest@29.7.0(@types/node@20.16.5)(babel-plugin-macros@3.1.0)(ts-node@10.9.2(@types/node@20.16.5)(typescript@5.5.4)):
     dependencies:
-      '@jest/core': 29.7.0(babel-plugin-macros@3.1.0)(ts-node@10.9.2(@types/node@20.11.24)(typescript@5.4.5))
+      '@jest/core': 29.7.0(babel-plugin-macros@3.1.0)(ts-node@10.9.2(@types/node@20.16.5)(typescript@5.5.4))
       '@jest/types': 29.6.3
       import-local: 3.1.0
-      jest-cli: 29.7.0(@types/node@20.16.5)(babel-plugin-macros@3.1.0)
+      jest-cli: 29.7.0(@types/node@20.16.5)(babel-plugin-macros@3.1.0)(ts-node@10.9.2(@types/node@20.16.5)(typescript@5.5.4))
     transitivePeerDependencies:
       - '@types/node'
       - babel-plugin-macros
       - supports-color
       - ts-node
 
-  jest@29.7.0(@types/node@22.13.11)(babel-plugin-macros@3.1.0):
+  jest@29.7.0(@types/node@20.19.0)(babel-plugin-macros@3.1.0)(ts-node@10.9.2(@types/node@20.19.0)(typescript@4.9.5)):
     dependencies:
-      '@jest/core': 29.7.0(babel-plugin-macros@3.1.0)(ts-node@10.9.2(@types/node@20.11.24)(typescript@5.4.5))
+      '@jest/core': 29.7.0(babel-plugin-macros@3.1.0)(ts-node@10.9.2(@types/node@20.19.0)(typescript@4.9.5))
       '@jest/types': 29.6.3
       import-local: 3.1.0
-      jest-cli: 29.7.0(@types/node@22.13.11)(babel-plugin-macros@3.1.0)
+      jest-cli: 29.7.0(@types/node@20.19.0)(babel-plugin-macros@3.1.0)(ts-node@10.9.2(@types/node@20.19.0)(typescript@4.9.5))
     transitivePeerDependencies:
       - '@types/node'
       - babel-plugin-macros
@@ -30663,11 +30478,11 @@ snapshots:
       babel-jest: 29.7.0(@babel/core@7.24.7)
       esbuild: 0.25.5
 
-  ts-jest@29.1.4(@babel/core@7.24.7)(@jest/transform@29.7.0)(@jest/types@29.6.3)(babel-jest@29.7.0(@babel/core@7.24.7))(esbuild@0.25.5)(jest@29.7.0(@types/node@20.16.5)(babel-plugin-macros@3.1.0))(typescript@5.5.4):
+  ts-jest@29.1.4(@babel/core@7.24.7)(@jest/transform@29.7.0)(@jest/types@29.6.3)(babel-jest@29.7.0(@babel/core@7.24.7))(esbuild@0.25.5)(jest@29.7.0(@types/node@20.16.5)(babel-plugin-macros@3.1.0)(ts-node@10.9.2(@types/node@20.16.5)(typescript@5.5.4)))(typescript@5.5.4):
     dependencies:
       bs-logger: 0.2.6
       fast-json-stable-stringify: 2.1.0
-      jest: 29.7.0(@types/node@20.16.5)(babel-plugin-macros@3.1.0)
+      jest: 29.7.0(@types/node@20.16.5)(babel-plugin-macros@3.1.0)(ts-node@10.9.2(@types/node@20.16.5)(typescript@5.5.4))
       jest-util: 29.7.0
       json5: 2.2.3
       lodash.memoize: 4.1.2
@@ -30711,6 +30526,63 @@ snapshots:
       typescript: 5.4.5
       v8-compile-cache-lib: 3.0.1
       yn: 3.1.1
+
+  ts-node@10.9.2(@types/node@20.14.12)(typescript@4.9.5):
+    dependencies:
+      '@cspotcode/source-map-support': 0.8.1
+      '@tsconfig/node10': 1.0.11
+      '@tsconfig/node12': 1.0.11
+      '@tsconfig/node14': 1.0.3
+      '@tsconfig/node16': 1.0.4
+      '@types/node': 20.14.12
+      acorn: 8.15.0
+      acorn-walk: 8.3.4
+      arg: 4.1.3
+      create-require: 1.1.1
+      diff: 4.0.2
+      make-error: 1.3.6
+      typescript: 4.9.5
+      v8-compile-cache-lib: 3.0.1
+      yn: 3.1.1
+    optional: true
+
+  ts-node@10.9.2(@types/node@20.16.5)(typescript@5.5.4):
+    dependencies:
+      '@cspotcode/source-map-support': 0.8.1
+      '@tsconfig/node10': 1.0.11
+      '@tsconfig/node12': 1.0.11
+      '@tsconfig/node14': 1.0.3
+      '@tsconfig/node16': 1.0.4
+      '@types/node': 20.16.5
+      acorn: 8.15.0
+      acorn-walk: 8.3.4
+      arg: 4.1.3
+      create-require: 1.1.1
+      diff: 4.0.2
+      make-error: 1.3.6
+      typescript: 5.5.4
+      v8-compile-cache-lib: 3.0.1
+      yn: 3.1.1
+    optional: true
+
+  ts-node@10.9.2(@types/node@20.19.0)(typescript@4.9.5):
+    dependencies:
+      '@cspotcode/source-map-support': 0.8.1
+      '@tsconfig/node10': 1.0.11
+      '@tsconfig/node12': 1.0.11
+      '@tsconfig/node14': 1.0.3
+      '@tsconfig/node16': 1.0.4
+      '@types/node': 20.19.0
+      acorn: 8.15.0
+      acorn-walk: 8.3.4
+      arg: 4.1.3
+      create-require: 1.1.1
+      diff: 4.0.2
+      make-error: 1.3.6
+      typescript: 4.9.5
+      v8-compile-cache-lib: 3.0.1
+      yn: 3.1.1
+    optional: true
 
   tsconfck@3.0.3(typescript@4.9.5):
     optionalDependencies:
@@ -31065,13 +30937,13 @@ snapshots:
       - tsx
       - yaml
 
-  vite-node@3.0.7(@types/node@22.13.11)(jiti@1.21.0)(sass@1.77.2)(terser@5.42.0)(tsx@4.19.3)(yaml@2.8.0):
+  vite-node@3.0.7(@types/node@20.19.0)(jiti@1.21.0)(sass@1.77.2)(terser@5.42.0)(tsx@4.19.3)(yaml@2.8.0):
     dependencies:
       cac: 6.7.14
       debug: 4.4.1(supports-color@8.1.1)
       es-module-lexer: 1.6.0
       pathe: 2.0.3
-      vite: 6.3.5(@types/node@22.13.11)(jiti@1.21.0)(sass@1.77.2)(terser@5.42.0)(tsx@4.19.3)(yaml@2.8.0)
+      vite: 6.3.5(@types/node@20.19.0)(jiti@1.21.0)(sass@1.77.2)(terser@5.42.0)(tsx@4.19.3)(yaml@2.8.0)
     transitivePeerDependencies:
       - '@types/node'
       - jiti
@@ -31142,13 +31014,13 @@ snapshots:
       tsx: 4.19.3
       yaml: 2.8.0
 
-  vite@6.2.0(@types/node@22.13.11)(jiti@1.21.0)(sass@1.77.2)(terser@5.42.0)(tsx@4.19.3)(yaml@2.8.0):
+  vite@6.2.0(@types/node@20.19.0)(jiti@1.21.0)(sass@1.77.2)(terser@5.42.0)(tsx@4.19.3)(yaml@2.8.0):
     dependencies:
       esbuild: 0.25.4
       postcss: 8.5.3
       rollup: 4.31.0
     optionalDependencies:
-      '@types/node': 22.13.11
+      '@types/node': 20.19.0
       fsevents: 2.3.3
       jiti: 1.21.0
       sass: 1.77.2
@@ -31190,7 +31062,7 @@ snapshots:
       tsx: 4.19.3
       yaml: 2.8.0
 
-  vite@6.3.5(@types/node@22.13.11)(jiti@1.21.0)(sass@1.77.2)(terser@5.42.0)(tsx@4.19.3)(yaml@2.8.0):
+  vite@6.3.5(@types/node@20.19.0)(jiti@1.21.0)(sass@1.77.2)(terser@5.42.0)(tsx@4.19.3)(yaml@2.8.0):
     dependencies:
       esbuild: 0.25.4
       fdir: 6.4.4(picomatch@4.0.2)
@@ -31199,7 +31071,7 @@ snapshots:
       rollup: 4.40.2
       tinyglobby: 0.2.13
     optionalDependencies:
-      '@types/node': 22.13.11
+      '@types/node': 20.19.0
       fsevents: 2.3.3
       jiti: 1.21.0
       sass: 1.77.2
@@ -31286,10 +31158,10 @@ snapshots:
       - tsx
       - yaml
 
-  vitest@3.0.7(@types/node@22.13.11)(jiti@1.21.0)(jsdom@25.0.1)(sass@1.77.2)(terser@5.42.0)(tsx@4.19.3)(yaml@2.8.0):
+  vitest@3.0.7(@types/node@20.19.0)(jiti@1.21.0)(jsdom@25.0.1)(sass@1.77.2)(terser@5.42.0)(tsx@4.19.3)(yaml@2.8.0):
     dependencies:
       '@vitest/expect': 3.0.7
-      '@vitest/mocker': 3.0.7(vite@6.2.0(@types/node@22.13.11)(jiti@1.21.0)(sass@1.77.2)(terser@5.42.0)(tsx@4.19.3)(yaml@2.8.0))
+      '@vitest/mocker': 3.0.7(vite@6.2.0(@types/node@20.19.0)(jiti@1.21.0)(sass@1.77.2)(terser@5.42.0)(tsx@4.19.3)(yaml@2.8.0))
       '@vitest/pretty-format': 3.0.7
       '@vitest/runner': 3.0.7
       '@vitest/snapshot': 3.0.7
@@ -31305,11 +31177,11 @@ snapshots:
       tinyexec: 0.3.2
       tinypool: 1.0.2
       tinyrainbow: 2.0.0
-      vite: 6.2.0(@types/node@22.13.11)(jiti@1.21.0)(sass@1.77.2)(terser@5.42.0)(tsx@4.19.3)(yaml@2.8.0)
-      vite-node: 3.0.7(@types/node@22.13.11)(jiti@1.21.0)(sass@1.77.2)(terser@5.42.0)(tsx@4.19.3)(yaml@2.8.0)
+      vite: 6.2.0(@types/node@20.19.0)(jiti@1.21.0)(sass@1.77.2)(terser@5.42.0)(tsx@4.19.3)(yaml@2.8.0)
+      vite-node: 3.0.7(@types/node@20.19.0)(jiti@1.21.0)(sass@1.77.2)(terser@5.42.0)(tsx@4.19.3)(yaml@2.8.0)
       why-is-node-running: 2.3.0
     optionalDependencies:
-      '@types/node': 22.13.11
+      '@types/node': 20.19.0
       jsdom: 25.0.1
     transitivePeerDependencies:
       - jiti

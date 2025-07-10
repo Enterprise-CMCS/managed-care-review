@@ -20,14 +20,6 @@ interface GuardDutyScanResult {
   }>;
 }
 
-// ClamAV-compatible tag mapping
-const GUARDDUTY_TO_CLAMAV_STATUS_MAP: Record<string, string> = {
-  'NO_THREATS_FOUND': 'CLEAN',
-  'THREATS_FOUND': 'INFECTED',
-  'FAILED': 'ERROR',
-  'UNSUPPORTED': 'SKIPPED',
-  'ACCESS_DENIED': 'ERROR'
-};
 
 const s3Client = new S3Client({});
 const snsClient = new SNSClient({});
@@ -65,11 +57,6 @@ export async function handler(
       tag.Key !== 'contentsPreviouslyScanned'
     );
 
-    // Determine if we should add contentsPreviouslyScanned tag
-    const shouldAddContentsPreviouslyScanned = 
-      scanResult === 'NO_THREATS_FOUND' && 
-      !existingTags.some(tag => tag.Key === 'contentsPreviouslyScanned');
-
     // Create new tags with both GuardDuty and ClamAV-compatible formats
     const newTags: Tag[] = [
       ...filteredTags,
@@ -77,14 +64,20 @@ export async function handler(
       { Key: 'GuardDutyMalwareScanStatus', Value: scanResult },
       { Key: 'GuardDutyScanId', Value: detail.scanId },
       { Key: 'GuardDutyScanDate', Value: scanDate },
-      // ClamAV-compatible tags for backward compatibility
-      { Key: 'virusScanStatus', Value: GUARDDUTY_TO_CLAMAV_STATUS_MAP[scanResult] },
       { Key: 'virusScanTimestamp', Value: new Date(scanDate).getTime().toString() }
     ];
 
-    // Add contentsPreviouslyScanned if file is clean
-    if (shouldAddContentsPreviouslyScanned) {
+    // Add ClamAV-compatible tags based on scan result
+    if (scanResult === 'NO_THREATS_FOUND') {
+      // Clean file - matches ClamAV behavior
+      newTags.push({ Key: 'virusScanStatus', Value: 'CLEAN' });
       newTags.push({ Key: 'contentsPreviouslyScanned', Value: 'TRUE' });
+    } else if (scanResult === 'THREATS_FOUND') {
+      // Infected file
+      newTags.push({ Key: 'virusScanStatus', Value: 'INFECTED' });
+    } else {
+      // Failed, unsupported, or access denied - mark as not scanned
+      newTags.push({ Key: 'contentsPreviouslyScanned', Value: 'FALSE' });
     }
 
     // If threats were found, add threat details
