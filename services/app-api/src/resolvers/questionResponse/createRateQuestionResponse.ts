@@ -10,6 +10,7 @@ import {
 import { createForbiddenError, createUserInputError } from '../errorUtils'
 import type { Emailer } from '../../emailer'
 import type { StateCodeType } from '@mc-review/hpp'
+import { canWrite } from '../../authorization/oauthAuthorization'
 
 export function createRateQuestionResponseResolver(
     store: Store,
@@ -18,6 +19,20 @@ export function createRateQuestionResponseResolver(
     return async (_parent, { input }, context) => {
         const { user, ctx, tracer } = context
         const span = tracer?.startSpan('createRateQuestionResponse', {}, ctx)
+
+        // Check OAuth client read permissions
+        if (!canWrite(context)) {
+            const errMessage = `OAuth client does not have write permissions`
+            logError('createRateQuestionResponse', errMessage)
+            setErrorAttributesOnActiveSpan(errMessage, span)
+
+            throw new GraphQLError(errMessage, {
+                extensions: {
+                    code: 'FORBIDDEN',
+                    cause: 'INSUFFICIENT_OAUTH_GRANTS',
+                },
+            })
+        }
 
         if (!isStateUser(user)) {
             const msg = 'user not authorized to create a question response'

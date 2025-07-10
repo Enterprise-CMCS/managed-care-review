@@ -24,7 +24,8 @@ const useDocument = () => {
                             url: null,
                         }
 
-                    const documentLink = await getURL(key, bucket)
+                    const documentLink =
+                        doc.downloadURL || (await getURL(key, bucket))
                     return {
                         ...doc,
                         s3Key: key,

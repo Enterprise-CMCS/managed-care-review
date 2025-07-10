@@ -14,6 +14,7 @@ import { createForbiddenError, createUserInputError } from '../errorUtils'
 import { z } from 'zod'
 import type { UpdateDraftContractRatesArgsType } from '../../postgres/contractAndRates/updateDraftContractRates'
 import { generateRateCertificationName } from '../rate/generateRateCertificationName'
+import { canWrite } from '../../authorization/oauthAuthorization'
 
 // Zod schemas to parse the updatedRates param since the types are not fully defined in GQL
 // CREATE / UPDATE / LINK
@@ -53,6 +54,20 @@ function updateDraftContractRates(
         const { user, ctx, tracer } = context
         const span = tracer?.startSpan('updateDraftContractRates', {}, ctx)
         setResolverDetailsOnActiveSpan('updateDraftContractRates', user, span)
+
+        // Check OAuth client read permissions
+        if (!canWrite(context)) {
+            const errMessage = `OAuth client does not have write permissions`
+            logError('updateDraftContractRates', errMessage)
+            setErrorAttributesOnActiveSpan(errMessage, span)
+
+            throw new GraphQLError(errMessage, {
+                extensions: {
+                    code: 'FORBIDDEN',
+                    cause: 'INSUFFICIENT_OAUTH_GRANTS',
+                },
+            })
+        }
 
         const { contractID, updatedRates, lastSeenUpdatedAt } = input
         const parsedRatesResult = updatedRatesSchema.safeParse(updatedRates)

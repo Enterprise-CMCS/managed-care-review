@@ -11,6 +11,7 @@ import type { Store } from '../../postgres'
 import { GraphQLError } from 'graphql/index'
 import type { Emailer } from '../../emailer'
 import type { StateCodeType } from '@mc-review/hpp'
+import { canWrite } from '../../authorization/oauthAuthorization'
 
 export function createContractQuestionResponseResolver(
     store: Store,
@@ -23,6 +24,20 @@ export function createContractQuestionResponseResolver(
             {},
             ctx
         )
+
+        // Check OAuth client read permissions
+        if (!canWrite(context)) {
+            const errMessage = `OAuth client does not have write permissions`
+            logError('createContractQuestionResponse', errMessage)
+            setErrorAttributesOnActiveSpan(errMessage, span)
+
+            throw new GraphQLError(errMessage, {
+                extensions: {
+                    code: 'FORBIDDEN',
+                    cause: 'INSUFFICIENT_OAUTH_GRANTS',
+                },
+            })
+        }
 
         if (!isStateUser(user)) {
             const msg = 'user not authorized to create a question response'

@@ -6,7 +6,7 @@ import {
     getCoreRowModel,
     useReactTable,
 } from '@tanstack/react-table'
-import Select, { OnChangeValue } from 'react-select'
+import { OnChangeValue } from 'react-select'
 import {
     CmsUser,
     Division,
@@ -24,6 +24,7 @@ import { LinkWithLogging, Loading } from '../../../components'
 import { useStringConstants } from '../../../hooks/useStringConstants'
 import { wrapApolloResult } from '@mc-review/helpers'
 import { SettingsErrorAlert } from '../SettingsErrorAlert'
+import { AccessibleSelect } from '../../../components/Select'
 
 type DivisionSelectOptions = {
     label: string
@@ -75,7 +76,7 @@ function DivisionSelect({
     const defaultOption = findOptionByValue(currentAssignment)
 
     return (
-        <Select
+        <AccessibleSelect
             styles={{
                 control: (baseStyles) => {
                     if (updateErrored) {

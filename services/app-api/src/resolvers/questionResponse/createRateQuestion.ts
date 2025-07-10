@@ -11,6 +11,7 @@ import { NotFoundError, handleNotFoundError } from '../../postgres/postgresError
 import { GraphQLError } from 'graphql/index'
 import type { Emailer } from '../../emailer'
 import type { StateCodeType } from '../../testHelpers'
+import { canWrite } from '../../authorization/oauthAuthorization'
 
 export function createRateQuestionResolver(
     store: Store,
@@ -19,6 +20,20 @@ export function createRateQuestionResolver(
     return async (_parent, { input }, context) => {
         const { user, ctx, tracer } = context
         const span = tracer?.startSpan('createRateQuestion', {}, ctx)
+
+        // Check OAuth client read permissions
+        if (!canWrite(context)) {
+            const errMessage = `OAuth client does not have write permissions`
+            logError('createRateQuestion', errMessage)
+            setErrorAttributesOnActiveSpan(errMessage, span)
+
+            throw new GraphQLError(errMessage, {
+                extensions: {
+                    code: 'FORBIDDEN',
+                    cause: 'INSUFFICIENT_OAUTH_GRANTS',
+                },
+            })
+        }
 
         if (!hasCMSPermissions(user)) {
             const msg = 'user not authorized to create a question'

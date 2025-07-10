@@ -150,11 +150,11 @@ export const SingleRateFormFields = ({
                             >
                                 Document definitions and requirements
                             </LinkWithLogging>
-                            <span className="padding-top-2">
+                            <span className="mcr-note padding-top-2">
                                 {`Upload only one rate certification document. Additional rates can be added later.`}
                             </span>
 
-                            <span className="padding-top-1">
+                            <span className="usa-hint padding-top-1">
                                 This input only accepts one file in PDF, DOC, or
                                 DOCX format.
                             </span>
@@ -192,12 +192,12 @@ export const SingleRateFormFields = ({
                             >
                                 Document definitions and requirements
                             </LinkWithLogging>
-                            <span className="padding-top-1">
+                            <span className="mcr-note padding-top-1">
                                 {`Upload any supporting documents for Rate certification ${index + 1}`}
                             </span>
                             <span>Additional rates can be added later.</span>
 
-                            <span className="padding-top-1">
+                            <span className="usa-hint padding-top-1">
                                 This input only accepts PDF, CSV, DOC, DOCX,
                                 XLS, XLSX files.
                             </span>
@@ -225,7 +225,7 @@ export const SingleRateFormFields = ({
                     <span className={styles.requiredOptionalText}>
                         Required
                     </span>
-                    <span className={styles.requiredOptionalText}>
+                    <span className="mcr-note">
                         This information will be used to generate the rate name
                     </span>
                     <ContactSupportLink
@@ -604,7 +604,7 @@ export const SingleRateFormFields = ({
                     >
                         Required
                     </span>
-                    <span className={styles.requiredOptionalText}>
+                    <span className="mcr-note">
                         Communication preference between CMS Office of the
                         Actuary (OACT) and all state’s actuaries (i.e.
                         certifying actuaries and additional actuary contacts)

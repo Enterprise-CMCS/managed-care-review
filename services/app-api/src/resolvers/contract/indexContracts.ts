@@ -17,6 +17,10 @@ import {
 } from '../attributeHelper'
 import { GraphQLError } from 'graphql/index'
 import type { ContractOrErrorArrayType } from '../../postgres/contractAndRates/findAllContractsWithHistoryByState'
+import {
+    canRead,
+    getAuthContextInfo,
+} from '../../authorization/oauthAuthorization'
 
 const parseContracts = (
     contractsWithHistory: ContractOrErrorArrayType,
@@ -69,6 +73,20 @@ export function indexContractsResolver(
         const span = tracer?.startSpan('indexContracts', {}, ctx)
         setResolverDetailsOnActiveSpan('indexContracts', user, span)
 
+        // Check OAuth client read permissions
+        if (!canRead(context)) {
+            const errMessage = `OAuth client does not have read permissions`
+            logError('indexContracts', errMessage)
+            setErrorAttributesOnActiveSpan(errMessage, span)
+            throw new ForbiddenError(errMessage)
+        }
+
+        // Log OAuth client access for audit trail
+        if (context.oauthClient?.isOAuthClient) {
+            logSuccess('indexContracts')
+        }
+
+        // Authorization check (same for both OAuth clients and regular users)
         if (isStateUser(user)) {
             const contractsWithHistory =
                 await store.findAllContractsWithHistoryByState(user.stateCode)
@@ -129,7 +147,10 @@ export function indexContractsResolver(
 
             return formatContracts(parsedContracts)
         } else {
-            const errMsg = 'user not authorized to fetch state data'
+            const authInfo = getAuthContextInfo(context)
+            const errMsg = authInfo.isOAuthClient
+                ? `OAuth client not authorized to fetch contract data`
+                : 'user not authorized to fetch state data'
             logError('indexContracts', errMsg)
             setErrorAttributesOnActiveSpan(errMsg, span)
             throw createForbiddenError(errMsg)

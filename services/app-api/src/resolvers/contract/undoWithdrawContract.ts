@@ -12,6 +12,7 @@ import { GraphQLError } from 'graphql/index'
 import { hasCMSPermissions } from '../../domain-models'
 import type { StateCodeType } from '../../testHelpers'
 import type { Emailer } from '../../emailer'
+import { canWrite } from '../../authorization/oauthAuthorization'
 
 export function undoWithdrawContract(
     store: Store,
@@ -24,6 +25,20 @@ export function undoWithdrawContract(
 
         const { contractID, updatedReason } = input
         span?.setAttribute('mcreview.package_id', contractID)
+
+        // Check OAuth client read permissions
+        if (!canWrite(context)) {
+            const errMessage = `OAuth client does not have write permissions`
+            logError('undoWithdrawContract', errMessage)
+            setErrorAttributesOnActiveSpan(errMessage, span)
+
+            throw new GraphQLError(errMessage, {
+                extensions: {
+                    code: 'FORBIDDEN',
+                    cause: 'INSUFFICIENT_OAUTH_GRANTS',
+                },
+            })
+        }
 
         if (!hasCMSPermissions(user)) {
             const message =

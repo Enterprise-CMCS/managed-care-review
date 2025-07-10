@@ -12,6 +12,7 @@ import { createForbiddenError, createUserInputError } from '../errorUtils'
 import { NotFoundError } from '../../postgres/postgresErrors'
 import { GraphQLError } from 'graphql/index'
 import type { StateCodeType } from '../../testHelpers'
+import { canWrite } from '../../authorization/oauthAuthorization'
 
 export function undoWithdrawRate(
     store: Store,
@@ -24,6 +25,20 @@ export function undoWithdrawRate(
 
         const { rateID, updatedReason } = input
         span?.setAttribute('mcreview.package_id', rateID)
+
+        // Check OAuth client read permissions
+        if (!canWrite(context)) {
+            const errMessage = `OAuth client does not have write permissions`
+            logError('undoWithdrawRate', errMessage)
+            setErrorAttributesOnActiveSpan(errMessage, span)
+
+            throw new GraphQLError(errMessage, {
+                extensions: {
+                    code: 'FORBIDDEN',
+                    cause: 'INSUFFICIENT_OAUTH_GRANTS',
+                },
+            })
+        }
 
         if (!hasCMSPermissions(user)) {
             const message = 'user not authorized to undo withdraw rate'

@@ -432,19 +432,19 @@
                 {
                     "id": "bf209f98-036a-4eb1-8339-bf68f2948548",
                     "fullName": "HealthChoice Illinois",
-                    "name": "HealthChoice ",
+                    "name": "HCI",
                     "isRateProgram": false
                 },
                 {
                     "id": "47556fc7-642a-4d7e-992f-fc73ab15b6bf",
-                    "fullName": "DCFS Youth Specialty Plan",
+                    "fullName": "HealthChoice Illinois – YouthCare",
                     "name": "YouthCare",
                     "isRateProgram": false
                 },
                 {
-                    "id": "3cf7ad5b-cfcd-4579-930c-1c936792724c",
-                    "fullName": "Health Choice Special Needs Children and DCFS",
-                    "name": "HC SNC DCFS",
+                    "id": "a9056d71-0eec-470a-9241-6d386aeaffac",
+                    "fullName": "Medicare-Medicaid Alignment Initiative",
+                    "name": "MMAI",
                     "isRateProgram": false
                 }
             ],
@@ -469,6 +469,12 @@
                     "id": "9862db8f-18e7-4d7f-af27-7d6bc50f2f5d",
                     "fullName": "Healthy Indiana Plan 2.0",
                     "name": "HIP 2.0",
+                    "isRateProgram": false
+                },
+                {
+                    "id": "61186cf9-6022-48c2-a053-303c880d308a",
+                    "fullName": "PathWays to Aging",
+                    "name": "PathWays",
                     "isRateProgram": false
                 }
             ],

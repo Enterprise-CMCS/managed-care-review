@@ -63,6 +63,7 @@ import { rateStrippedResolver } from './rate/rateResolver'
 import { indexRatesStripped } from './rate/indexRatesStripped'
 import { withdrawContract } from './contract/withdrawContract'
 import { undoWithdrawContract } from './contract/undoWithdrawContract'
+import { documentZipPackageResolver } from './documents'
 import {
     createOauthClientResolver,
     fetchOauthClientsResolver,
@@ -192,11 +193,13 @@ export function configureResolvers(
         RateRevision: rateRevisionResolver(store),
         RateFormData: rateFormDataResolver(),
         ContractQuestion: questionResolver(store),
+        RateQuestion: questionResolver(store),
         Contract: contractResolver(store, applicationEndpoint),
         UnlockedContract: unlockedContractResolver(store, applicationEndpoint),
         ContractRevision: contractRevisionResolver(store),
         GenericDocument: genericDocumentResolver(s3Client),
         Document: questionResponseDocumentResolver(s3Client),
+        DocumentZipPackage: documentZipPackageResolver(s3Client),
     }
 
     return resolvers
