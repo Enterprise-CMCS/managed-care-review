@@ -71,6 +71,7 @@ export type FormikRateForm = {
     rateProgramIDs: RateRevision['formData']['rateProgramIDs']
     rateDocuments: FileItemT[]
     supportingDocuments: FileItemT[]
+    rateMedicaidPopulations: RateRevision['formData']['rateMedicaidPopulations']
     actuaryContacts: RateRevision['formData']['certifyingActuaryContacts']
     addtlActuaryContacts: RateRevision['formData']['addtlActuaryContacts']
     actuaryCommunicationPreference: RateRevision['formData']['actuaryCommunicationPreference']
@@ -578,6 +579,9 @@ const RateDetails = ({
                                                                         )}
                                                                         shouldValidate={
                                                                             shouldValidate
+                                                                        }
+                                                                        contract={
+                                                                            contract
                                                                         }
                                                                     />
                                                                 )}

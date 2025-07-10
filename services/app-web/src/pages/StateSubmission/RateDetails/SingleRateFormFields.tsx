@@ -5,11 +5,13 @@ import {
     Fieldset,
     FormGroup,
     Label,
+    Link,
 } from '@trussworks/react-uswds'
 import classnames from 'classnames'
 import {
     ButtonWithLogging,
     FieldRadio,
+    FieldCheckbox,
     FileUpload,
     LinkWithLogging,
     PoliteErrorMessage,
@@ -36,6 +38,7 @@ import { ActuaryContactFields } from '../Contacts'
 import { FormikRateForm, RateDetailFormConfig } from './V2/RateDetailsV2'
 import { useFocus } from '../../../hooks/useFocus'
 import { ContactSupportLink } from '../../../components/ErrorAlert/ContactSupportLink'
+import { Contract } from '../../../gen/gqlClient'
 const isRateTypeEmpty = (rateForm: FormikRateForm): boolean =>
     rateForm.rateType === undefined
 const isRateTypeAmendment = (rateForm: FormikRateForm): boolean =>
@@ -55,6 +58,7 @@ type SingleRateFormFieldsProps = {
     shouldValidate: boolean
     index: number // defaults to 0
     fieldNamePrefix: string // formik field name prefix - used for looking up values and errors in Formik FieldArray
+    contract?: Contract
     autofill?: (rateForm: FormikRateForm) => void // used for multi-rates, when called will FieldArray replace the existing form fields with new data
 }
 
@@ -103,6 +107,7 @@ export const SingleRateFormFields = ({
     shouldValidate,
     index = 0,
     fieldNamePrefix,
+    contract,
 }: SingleRateFormFieldsProps): React.ReactElement => {
     // page level setup
     const { handleUploadFile, handleScanFile } = useS3()
@@ -129,6 +134,8 @@ export const SingleRateFormFields = ({
         if (!shouldValidate) return undefined
         return getIn(errors, `${fieldNamePrefix}.${fieldName}`)
     }
+
+    const formHeading = 'Rate Details Form'
 
     return (
         <>
@@ -244,6 +251,61 @@ export const SingleRateFormFields = ({
                     label="What rates are included in this certification?"
                 />
             </FormGroup>
+
+            {contract?.draftRevision?.formData.dsnpContract !== null && (
+                <FormGroup
+                    error={Boolean(showFieldErrors('rateMedicaidPopulations'))}
+                >
+                    <Fieldset legend="Rate Medicaid populations">
+                        <span className={styles.requiredOptionalText}>
+                            Required
+                        </span>
+                        <Link
+                            variant="external"
+                            href={
+                                'https://www.medicaid.gov/medicaid/managed-care/managed-care-entities/index.html'
+                            }
+                            target="_blank"
+                        >
+                            Medicaid Managed Care Rate Development Guide
+                        </Link>
+                        <div className="usa-hint">
+                            <span>Check all that apply</span>
+                        </div>
+                        {Boolean(
+                            showFieldErrors('rateMedicaidPopulations')
+                        ) && (
+                            <PoliteErrorMessage formFieldLabel="Rate medicaid populations">
+                                {showFieldErrors('rateMedicaidPopulations')}
+                            </PoliteErrorMessage>
+                        )}
+                        <FieldCheckbox
+                            id="prepaidInpatientHealthPlan"
+                            name="rateMedicaidPopulations"
+                            label="Medicare-Medicaid dually eligible individuals enrolled through a Dual-Eligible Special Needs Plan (D-SNP)"
+                            value="PIHP"
+                            heading="Managed Care entities"
+                            parent_component_heading={formHeading}
+                        />
+                        <FieldCheckbox
+                            id="prepaidAmbulatoryHealthPlans"
+                            name="rateMedicaidPopulations"
+                            label="Medicaid-only"
+                            value="PAHP"
+                            heading="Managed Care entities"
+                            parent_component_heading={formHeading}
+                        />
+                        <FieldCheckbox
+                            id="primaryCareCaseManagementEntity"
+                            name="rateMedicaidPopulations"
+                            label="Medicare-Medicaid dually eligible individuals not enrolled through a D-SNP"
+                            value="PCCM"
+                            heading="Managed Care entities"
+                            parent_component_heading={formHeading}
+                        />
+                    </Fieldset>
+                </FormGroup>
+            )}
 
             <FormGroup error={Boolean(showFieldErrors('rateType'))}>
                 <Fieldset
