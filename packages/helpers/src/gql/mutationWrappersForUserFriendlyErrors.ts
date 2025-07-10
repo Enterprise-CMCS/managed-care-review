@@ -34,7 +34,8 @@ import {
 import { GraphQLError } from 'graphql'
 
 import { recordJSException } from '@mc-review/otel'
-import { handleGQLErrors as handleGQLErrorLogging, GraphQLErrorInput } from './apolloErrors'
+import { handleGQLErrors as handleGQLErrorLogging } from './apolloErrors'
+import { ApolloError } from '@apollo/client/errors'
 import { ERROR_MESSAGES } from '@mc-review/constants'
 
 /*
@@ -65,7 +66,7 @@ const divisionToIndexQuestionDivision = (
     `${division.toUpperCase()}Questions` as IndexQuestionDivisions
 
 export const handleGraphQLErrorsAndAddUserFacingMessages = (
-    error: GraphQLErrorInput,
+    error: ApolloError | Error,
     mutation: MutationType
 ) => {
     let message
@@ -85,14 +86,11 @@ export const handleGraphQLErrorsAndAddUserFacingMessages = (
         cause: {},
     }
 
-    // Extract GraphQL errors from different error formats
+    // Extract GraphQL errors from ApolloError
     let graphQLErrors: readonly GraphQLError[] = []
     
-    if (error instanceof GraphQLError) {
-        graphQLErrors = [error]
-    } else if (typeof error === 'object' && error !== null && 'graphQLErrors' in error) {
-        const apolloStyleError = error as { graphQLErrors?: readonly GraphQLError[] }
-        graphQLErrors = apolloStyleError.graphQLErrors || []
+    if (error instanceof ApolloError && error.graphQLErrors) {
+        graphQLErrors = error.graphQLErrors
     }
 
     if (graphQLErrors.length > 0) {
