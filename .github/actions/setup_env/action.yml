@@ -42,6 +42,11 @@ runs:
         node-version-file: '.nvmrc'
         cache: 'pnpm'
 
+    - name: Set serverless legacy deployment bucket
+      shell: bash
+      run: |
+        echo "ENABLE_LEGACY_DEPLOYMENT_BUCKET=true" >> $GITHUB_ENV
+
     - name: Install dependencies
       shell: bash
       run: PRISMA_CLI_BINARY_TARGETS=rhel-openssl-3.0.x pnpm install --frozen-lockfile
