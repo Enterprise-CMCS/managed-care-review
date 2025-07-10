@@ -121,7 +121,7 @@ export const ContractDetailsFormSchema = (
             }
         ),
         dsnpContract: Yup.string().when('federalAuthorities', {
-            is: (authorities: string[]) => authorities.some(type => ['VOLUNTARY', 'WAIVER_1115', 'WAIVER_1915B', 'STATE_PLAN'].includes(type)),
+            is: (authorities: string[]) => authorities.some(type => ['VOLUNTARY', 'WAIVER_1115', 'WAIVER_1915B', 'STATE_PLAN'].includes(type)) && activeFeatureFlags['dsnp'],
             then: schema => schema.required('You must select yes or no'),
             otherwise: schema => schema.notRequired()
         }),
