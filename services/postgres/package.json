@@ -14,7 +14,7 @@
         "eslint-plugin-prettier": "^5.0.1",
         "fs-extra": "^11.2.0",
         "serverless-esbuild": "^1.55.0",
-        "serverless": "4.2.3",
+        "serverless": "4.17.1",
         "serverless-iam-helper": "https://github.com/CMSgov/serverless-iam-helper",
         "serverless-s3-bucket-helper": "https://github.com/CMSgov/serverless-s3-bucket-helper",
         "serverless-stack-termination-protection": "^2.0.2",

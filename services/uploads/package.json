@@ -42,7 +42,7 @@
         "@types/mime-types": "^3.0.1",
         "@types/node": "^20.14.12",
         "lint-staged": "^15.2.7",
-        "serverless": "4.2.3",
+        "serverless": "4.17.1",
         "serverless-esbuild": "^1.52.1",
         "serverless-iam-helper": "https://github.com/CMSgov/serverless-iam-helper.git",
         "serverless-offline": "^14.4.0",
