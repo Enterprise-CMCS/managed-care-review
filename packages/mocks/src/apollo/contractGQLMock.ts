@@ -97,7 +97,6 @@ const fetchContractMockFail = ({
             query: FetchContractDocument,
             variables: { input: { contractID: id } },
         },
-        error: graphQLError,
         result: {
             data: null,
             errors: [graphQLError],
@@ -180,7 +179,6 @@ const createContractMockFail = ({
                 } 
             },
         },
-        error: graphQLError,
         result: {
             data: null,
             errors: [graphQLError],
@@ -215,7 +213,6 @@ const fetchContractWithQuestionsMockFail = ({
             query: FetchContractWithQuestionsDocument,
             variables: { input: { contractID: id } },
         },
-        error: graphQLError,
         result: {
             data: null,
             errors: [graphQLError],
@@ -365,7 +362,6 @@ const updateContractDraftRevisionMockFail = ({
             query: UpdateContractDraftRevisionDocument,
             variables: { input: contractInput },
         },
-        error: graphQLError,
         result: {
             data: null,
             errors: [graphQLError],
@@ -417,7 +413,6 @@ const submitContractMockError = ({
             query: SubmitContractDocument,
             variables: { input: { contractID: id } },
         },
-        error: graphQLError,
         result: {
             data: null,
             errors: [graphQLError],
