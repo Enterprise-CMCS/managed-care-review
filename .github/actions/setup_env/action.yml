@@ -1,5 +1,5 @@
 name: 'Setup MC-Review environment'
-description: 'Runs common tasks for setting up the build environment in GHA'
+description: 'Runs common tasks for setting up the build environment in GitHub Actions'
 
 runs:
   using: 'composite'
