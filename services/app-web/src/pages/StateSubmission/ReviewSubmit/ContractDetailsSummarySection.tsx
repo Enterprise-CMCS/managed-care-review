@@ -114,6 +114,10 @@ export const ContractDetailsSummarySection = ({
         featureFlags.CONTRACT_438_ATTESTATION.flag,
         featureFlags.CONTRACT_438_ATTESTATION.defaultValue
     )
+    const contractDsnp = ldClient?.variation(
+        featureFlags.DSNP.flag,
+        featureFlags.DSNP.defaultValue
+    )
 
     const attestationYesNo =
         contractFormData?.statutoryRegulatoryAttestation != null &&
@@ -304,7 +308,7 @@ export const ContractDetailsSummarySection = ({
                         }
                     />
                 </MultiColumnGrid>
-                {contractFormData?.dsnpContract !== null && (
+                {contractDsnp && contractFormData?.dsnpContract !== null && (
                     <MultiColumnGrid columns={1}>
                         <DataDetail
                             id="dsnp"
