@@ -26,6 +26,7 @@ import {
     ACCEPTED_RATE_CERTIFICATION_FILE_TYPES,
 } from '../../../components/FileUpload'
 import { useS3 } from '../../../contexts/S3Context'
+import { RateMedicaidPopulationsRecord } from '@mc-review/hpp'
 
 import {
     FieldArray,
@@ -256,10 +257,20 @@ export const SingleRateFormFields = ({
                 <FormGroup
                     error={Boolean(showFieldErrors('rateMedicaidPopulations'))}
                 >
-                    <Fieldset legend="Rate Medicaid populations">
+                    <Fieldset
+                        legend="Rate Medicaid populations"
+                        id={`${fieldNamePrefix}.rateMedicaidPopulations`}
+                    >
                         <span className={styles.requiredOptionalText}>
                             Required
                         </span>
+                        <div
+                            role="note"
+                            aria-labelledby={`${fieldNamePrefix}.rateMedicaidPopulations`}
+                            className="mcr-note margin-top-1"
+                        >
+                            See 42 CFR § 422.2
+                        </div>
                         <Link
                             variant="external"
                             href={
@@ -280,27 +291,31 @@ export const SingleRateFormFields = ({
                             </PoliteErrorMessage>
                         )}
                         <FieldCheckbox
-                            id="prepaidInpatientHealthPlan"
-                            name="rateMedicaidPopulations"
-                            label="Medicare-Medicaid dually eligible individuals enrolled through a Dual-Eligible Special Needs Plan (D-SNP)"
-                            value="PIHP"
-                            heading="Managed Care entities"
+                            id="withDSNP"
+                            name={`${fieldNamePrefix}.rateMedicaidPopulations`}
+                            label={
+                                RateMedicaidPopulationsRecord.MEDICARE_MEDICAID_WITH_DSNP
+                            }
+                            value="MEDICARE_MEDICAID_WITH_DSNP"
+                            heading="Rate Medicaid populations"
                             parent_component_heading={formHeading}
                         />
                         <FieldCheckbox
-                            id="prepaidAmbulatoryHealthPlans"
-                            name="rateMedicaidPopulations"
-                            label="Medicaid-only"
-                            value="PAHP"
-                            heading="Managed Care entities"
+                            id="medicaidOnly"
+                            name={`${fieldNamePrefix}.rateMedicaidPopulations`}
+                            label={RateMedicaidPopulationsRecord.MEDICAID_ONLY}
+                            value="MEDICAID_ONLY"
+                            heading="Rate Medicaid populations"
                             parent_component_heading={formHeading}
                         />
                         <FieldCheckbox
-                            id="primaryCareCaseManagementEntity"
-                            name="rateMedicaidPopulations"
-                            label="Medicare-Medicaid dually eligible individuals not enrolled through a D-SNP"
-                            value="PCCM"
-                            heading="Managed Care entities"
+                            id="withoutDSNP"
+                            name={`${fieldNamePrefix}.rateMedicaidPopulations`}
+                            label={
+                                RateMedicaidPopulationsRecord.MEDICARE_MEDICAID_WITHOUT_DSNP
+                            }
+                            value="MEDICARE_MEDICAID_WITHOUT_DSNP"
+                            heading="Rate Medicaid populations"
                             parent_component_heading={formHeading}
                         />
                     </Fieldset>
