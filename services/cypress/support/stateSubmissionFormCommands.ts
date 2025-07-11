@@ -130,7 +130,8 @@ Cypress.Commands.add('fillOutBaseContractDetails', () => {
         .blur()
     cy.findByLabelText('Managed Care Organization (MCO)').check({force: true})
     cy.findByLabelText('1932(a) State Plan Authority').check({force: true})
-    cy.findByText('Is this contract associated with a Dual-Eligible Special Needs Plan (D-SNP) that covers Medicaid benefits?')
+    cy.findAllByText('Is this contract associated with a Dual-Eligible Special Needs Plan (D-SNP) that covers Medicaid benefits?')
+    .first()
     .parent()
     .within(() => {
         cy.findByText('Yes').click()
