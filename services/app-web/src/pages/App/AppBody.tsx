@@ -9,6 +9,7 @@ import { useLDClient } from 'launchdarkly-react-client-sdk'
 import { featureFlags } from '@mc-review/common-code'
 import { Landing } from '../Landing/Landing'
 import { usePageTracing } from '../../hooks/usePageTracing'
+import { usePage } from '../../contexts/PageContext'
 
 export function AppBody({
     authMode,
@@ -22,6 +23,7 @@ export function AppBody({
     const isLowerEnvironment = environmentName !== 'prod'
     const { loginStatus } = useAuth()
     const ldClient = useLDClient()
+    const { activeMainContentId } = usePage()
 
     // Add logging and metrics
     usePageTracing('AppBody')
@@ -35,7 +37,12 @@ export function AppBody({
 
     return (
         <div id="App" className={styles.app}>
-            <LinkWithLogging className="usa-skipnav" href="#main-content">
+            <LinkWithLogging
+                className="usa-skipnav"
+                // If an alternate main content is set, we focus that. Usually to skip navigation in main element for
+                // accessibility requirements.
+                href={activeMainContentId ?? '#main-content'}
+            >
                 Skip to main content
             </LinkWithLogging>
             <GovBanner aria-label="Official government website" />
