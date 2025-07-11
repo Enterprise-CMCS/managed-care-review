@@ -27,7 +27,7 @@ export const ContractQuestionResponse = () => {
     const location = useLocation()
     const submitType = new URLSearchParams(location.search).get('submit')
     let division: Division | undefined = undefined
-    const { updateHeading } = usePage()
+    const { updateHeading, updateActiveMainContent } = usePage()
     const { loggedInUser } = useAuth()
     const hasCMSPermissions = hasCMSUserPermissions(loggedInUser)
 
@@ -43,10 +43,16 @@ export const ContractQuestionResponse = () => {
     const contract = data?.fetchContract.contract
     const contractRev = contract?.packageSubmissions?.[0]?.contractRevision
     const contractName = contractRev?.contractName ?? undefined
+    const activeMainContentId = 'contractQuestionResponseMainContent'
 
     useEffect(() => {
         updateHeading({ customHeading: contractName })
     }, [contractName, updateHeading])
+
+    // Set the active main content to focus when click the Skip to main content button.
+    useEffect(() => {
+        updateActiveMainContent(activeMainContentId)
+    }, [activeMainContentId, updateActiveMainContent])
 
     // Handle loading and error states for fetching data while using cached data
     if (!data && loading) {
@@ -65,7 +71,7 @@ export const ContractQuestionResponse = () => {
         division = getUserDivision(loggedInUser as CmsUser)
     }
     return (
-        <div className={styles.background}>
+        <div className={styles.background} id={activeMainContentId}>
             <GridContainer className={styles.container}>
                 {hasCMSPermissions && !division && <UserAccountWarningBanner />}
 

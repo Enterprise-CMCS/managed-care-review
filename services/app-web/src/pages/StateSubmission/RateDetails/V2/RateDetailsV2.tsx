@@ -98,7 +98,7 @@ const RateDetails = ({
     const displayAsStandaloneRate = type === 'SINGLE'
     const { loggedInUser } = useAuth()
     const ldClient = useLDClient()
-    const { updateHeading } = usePage()
+    const { updateHeading, updateActiveMainContent } = usePage()
 
     const useEditUnlockRate = ldClient?.variation(
         featureFlags.RATE_EDIT_UNLOCK.flag,
@@ -187,7 +187,15 @@ const RateDetails = ({
         ? fetchRateData?.fetchRate.rate.draftRevision?.formData
               .rateCertificationName
         : contract?.draftRevision?.contractName
+    const activeMainContentId = 'rateQuestionResponseMainContent'
+
     if (pageHeading) updateHeading({ customHeading: pageHeading })
+
+    // Set the active main content to focus when click the Skip to main content button.
+    useEffect(() => {
+        updateActiveMainContent(activeMainContentId)
+    }, [activeMainContentId, updateActiveMainContent])
+
     const [updateDraftContractRates] = useUpdateDraftContractRatesMutation()
     const [submitRate] = useSubmitRateMutation()
 

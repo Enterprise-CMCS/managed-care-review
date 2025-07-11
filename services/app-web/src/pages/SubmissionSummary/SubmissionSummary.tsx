@@ -55,7 +55,7 @@ export interface SubmissionSummaryFormValues {
 
 export const SubmissionSummary = (): React.ReactElement => {
     // Page level state
-    const { updateHeading } = usePage()
+    const { updateHeading, updateActiveMainContent } = usePage()
     const modalRef = useRef<ModalRef>(null)
     const [documentError, setDocumentError] = useState(false)
     const [showTempUndoWithdrawBanner, setShowTempUndoWithdrawBanner] =
@@ -106,6 +106,7 @@ export const SubmissionSummary = (): React.ReactElement => {
         contract && contract?.packageSubmissions.length > 0
             ? contract.packageSubmissions[0].contractRevision.contractName
             : ''
+    const activeMainContentId = 'submissionSummaryPageMainContent'
 
     useEffect(() => {
         if (searchParams.get('showTempUndoWithdrawBanner') === 'true') {
@@ -116,11 +117,18 @@ export const SubmissionSummary = (): React.ReactElement => {
             setSearchParams(searchParams, { replace: true })
         }
     }, [searchParams, setSearchParams])
+
+    // Setting app wide variables
     useEffect(() => {
         updateHeading({
             customHeading: name,
         })
     }, [name, updateHeading])
+
+    // Set the active main content to focus when click the Skip to main content button.
+    useEffect(() => {
+        updateActiveMainContent(activeMainContentId)
+    }, [activeMainContentId, updateActiveMainContent])
 
     // Handle loading and error states for fetching data while using cached data
     if (!data && loading) {
@@ -309,7 +317,7 @@ export const SubmissionSummary = (): React.ReactElement => {
     }
 
     return (
-        <div className={styles.background}>
+        <div className={styles.background} id={activeMainContentId}>
             <GridContainer
                 data-testid="submission-summary"
                 className={styles.container}
