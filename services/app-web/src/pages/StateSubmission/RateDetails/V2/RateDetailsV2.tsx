@@ -110,6 +110,7 @@ const RateDetails = ({
         featureFlags.HIDE_SUPPORTING_DOCS_PAGE.flag,
         featureFlags.HIDE_SUPPORTING_DOCS_PAGE.defaultValue
     )
+
     const [showAPIErrorBanner, setShowAPIErrorBanner] = useState<
         boolean | string
     >(false) // string is a custom error message, defaults to generic message when true
@@ -118,12 +119,6 @@ const RateDetails = ({
 
     // Form validation
     const [shouldValidate, setShouldValidate] = useState(showValidations)
-    const rateDetailsFormSchema = RateDetailsFormSchema(
-        {
-            'rate-edit-unlock': useEditUnlockRate,
-        },
-        !displayAsStandaloneRate
-    )
 
     const { setFocusErrorSummaryHeading, errorSummaryHeadingRef } =
         useErrorSummary()
@@ -191,7 +186,15 @@ const RateDetails = ({
     if (pageHeading) updateHeading({ customHeading: pageHeading })
     const [updateDraftContractRates] = useUpdateDraftContractRatesMutation()
     const [submitRate] = useSubmitRateMutation()
-
+    const isDSNPPopulated =
+        contract?.draftRevision?.formData?.dsnpContract != null
+    const rateDetailsFormSchema = RateDetailsFormSchema(
+        {
+            'rate-edit-unlock': useEditUnlockRate,
+        },
+        !displayAsStandaloneRate,
+        isDSNPPopulated
+    )
     // Set up initial rate form values for Formik
     const initialRates: Rate[] = React.useMemo(
         () =>

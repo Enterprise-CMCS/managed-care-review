@@ -259,6 +259,7 @@ export const SingleRateFormFields = ({
                 >
                     <Fieldset
                         legend="Rate Medicaid populations"
+                        aria-required
                         id={`${fieldNamePrefix}.rateMedicaidPopulations`}
                     >
                         <span className={styles.requiredOptionalText}>
