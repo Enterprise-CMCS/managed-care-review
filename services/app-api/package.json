@@ -26,14 +26,14 @@
     },
     "dependencies": {
         "@apollo/client": "3.8.8",
-        "@aws-sdk/client-cognito-identity-provider": "^3.840.0",
-        "@aws-sdk/client-rds": "^3.841.0",
-        "@aws-sdk/client-s3": "^3.842.0",
-        "@aws-sdk/client-secrets-manager": "^3.840.0",
-        "@aws-sdk/client-ses": "^3.840.0",
-        "@aws-sdk/client-ssm": "^3.840.0",
-        "@aws-sdk/lib-storage": "^3.842.0",
-        "@aws-sdk/s3-request-presigner": "^3.842.0",
+        "@aws-sdk/client-cognito-identity-provider": "^3.844.0",
+        "@aws-sdk/client-rds": "^3.844.0",
+        "@aws-sdk/client-s3": "^3.844.0",
+        "@aws-sdk/client-secrets-manager": "^3.844.0",
+        "@aws-sdk/client-ses": "^3.844.0",
+        "@aws-sdk/client-ssm": "^3.844.0",
+        "@aws-sdk/lib-storage": "^3.844.0",
+        "@aws-sdk/s3-request-presigner": "^3.844.0",
         "@launchdarkly/node-server-sdk": "9.9.1",
         "@mc-review/common-code": "workspace:*",
         "@mc-review/constants": "workspace:*",
@@ -96,6 +96,6 @@
         "serverless-s3-bucket-helper": "https://github.com/CMSgov/serverless-s3-bucket-helper",
         "serverless-stack-termination-protection": "^2.0.2",
         "typescript": "4.9.5",
-        "vitest": "^3.0.7"
+        "vitest": "^3.2.4"
     }
 }
