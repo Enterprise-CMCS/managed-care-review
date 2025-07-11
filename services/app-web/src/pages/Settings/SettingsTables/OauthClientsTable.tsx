@@ -1,4 +1,4 @@
-import React, { useMemo } from 'react'
+import React, { useEffect, useMemo } from 'react'
 import { OauthClient, useFetchOauthClientsQuery } from '../../../gen/gqlClient'
 import { Loading, NavLinkWithLogging } from '../../../components'
 import { SettingsErrorAlert } from '../SettingsErrorAlert'
@@ -12,6 +12,7 @@ import {
 import { Grid, Table } from '@trussworks/react-uswds'
 import { wrapApolloResult } from '@mc-review/helpers'
 import { RoutesRecord } from '@mc-review/constants'
+import { usePage } from '../../../contexts/PageContext'
 
 const OauthClientTable = ({
     authClients,
@@ -106,11 +107,19 @@ const OauthClientTable = ({
 }
 
 export const OauthClients = () => {
+    const { updateActiveMainContent } = usePage()
+
     const { result: fetchOauthClientsResult } = wrapApolloResult(
         useFetchOauthClientsQuery({
             fetchPolicy: 'cache-and-network',
         })
     )
+
+    const activeMainContentId = 'oauthClientsPageMainContent'
+    // Set the active main content to focus when click the Skip to main content button.
+    useEffect(() => {
+        updateActiveMainContent(activeMainContentId)
+    }, [activeMainContentId, updateActiveMainContent])
 
     if (fetchOauthClientsResult.status === 'LOADING') {
         return <Loading />
@@ -127,7 +136,7 @@ export const OauthClients = () => {
     )
 
     return (
-        <>
+        <div id={activeMainContentId}>
             <h2>Oauth clients</h2>
             <Grid row gap>
                 <Grid col="fill">
@@ -153,6 +162,6 @@ export const OauthClients = () => {
                     <p>No Oauth clients to display</p>
                 </div>
             )}
-        </>
+        </div>
     )
 }

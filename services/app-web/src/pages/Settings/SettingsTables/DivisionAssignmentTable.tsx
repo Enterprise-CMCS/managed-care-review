@@ -1,5 +1,5 @@
 import { GridContainer, Table } from '@trussworks/react-uswds'
-import React, { useCallback, useMemo, useState } from 'react'
+import React, { useCallback, useEffect, useMemo, useState } from 'react'
 import {
     createColumnHelper,
     flexRender,
@@ -26,6 +26,7 @@ import { useStringConstants } from '../../../hooks/useStringConstants'
 import { wrapApolloResult } from '@mc-review/helpers'
 import { SettingsErrorAlert } from '../SettingsErrorAlert'
 import { AccessibleSelect } from '../../../components/Select'
+import { usePage } from '../../../contexts/PageContext'
 
 type DivisionSelectOptions = {
     label: string
@@ -201,6 +202,7 @@ type SetDivisionCallbackType = (
 
 export const DivisionAssignmentTable = (): React.ReactElement => {
     const stringConstants = useStringConstants()
+    const { updateActiveMainContent } = usePage()
     const MAIL_TO_SUPPORT = stringConstants.MAIL_TO_SUPPORT
 
     const [updateDivisionAssignmentMutation] =
@@ -234,6 +236,12 @@ export const DivisionAssignmentTable = (): React.ReactElement => {
         })
     )
 
+    const activeMainContentId = 'divisionAssignmentPageMainContent'
+    // Set the active main content to focus when click the Skip to main content button.
+    useEffect(() => {
+        updateActiveMainContent(activeMainContentId)
+    }, [activeMainContentId, updateActiveMainContent])
+
     if (indexUsersResult.status === 'LOADING')
         return (
             <GridContainer>
@@ -253,7 +261,7 @@ export const DivisionAssignmentTable = (): React.ReactElement => {
         .map((edge) => edge.node as CmsUser)
 
     return (
-        <>
+        <div id={activeMainContentId}>
             <h2>Division assignments</h2>
             <p>
                 A list of CMS analysts and their division assignments. If this
@@ -279,7 +287,7 @@ export const DivisionAssignmentTable = (): React.ReactElement => {
                     <p>No CMS users to display</p>
                 </div>
             )}
-        </>
+        </div>
     )
 }
 

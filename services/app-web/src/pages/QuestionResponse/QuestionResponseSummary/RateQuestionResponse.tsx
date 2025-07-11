@@ -28,7 +28,7 @@ export const RateQuestionResponse = () => {
     const submitType = new URLSearchParams(location.search).get('submit')
     const { loggedInUser } = useAuth()
     const { pathname } = useLocation()
-    const { updateHeading } = usePage()
+    const { updateHeading, updateActiveMainContent } = usePage()
     const [rateName, setRateName] = useState<string | undefined>(undefined)
     const hasCMSPermissions = hasCMSUserPermissions(loggedInUser)
     let division: Division | undefined = undefined
@@ -47,9 +47,16 @@ export const RateQuestionResponse = () => {
         fetchPolicy: 'cache-and-network',
     })
 
+    const activeMainContentId = 'rateQuestionResponseMainContent'
+
     useEffect(() => {
         updateHeading({ customHeading: rateName })
     }, [rateName, updateHeading])
+
+    // Set the active main content to focus when click the Skip to main content button.
+    useEffect(() => {
+        updateActiveMainContent(activeMainContentId)
+    }, [activeMainContentId, updateActiveMainContent])
 
     const rate = data?.fetchRate.rate
     const rateRev = rate?.packageSubmissions?.[0]?.rateRevision
@@ -79,7 +86,7 @@ export const RateQuestionResponse = () => {
     }
 
     return (
-        <div className={styles.background}>
+        <div className={styles.background} id={activeMainContentId}>
             <GridContainer className={styles.container}>
                 {hasCMSPermissions && !division && <UserAccountWarningBanner />}
 
