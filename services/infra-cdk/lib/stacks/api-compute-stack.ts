@@ -487,12 +487,13 @@ export class ApiComputeStack extends BaseStack {
    * Create all API endpoints
    */
   private createApiEndpoints(): void {
-    // GraphQL endpoint
+    // GraphQL endpoint with AWS IAM authorization (matching serverless config)
     const graphqlResource = this.api.root.addResource(API_PATHS.GRAPHQL.replace('/', ''));
     ApiEndpointFactory.createGraphQLEndpoint(this, 'GraphQLEndpoint', {
       resource: graphqlResource,
       handler: this.getFunction('GRAPHQL'),
-      userPool: this.userPool
+      authType: 'IAM',
+      methods: ['GET', 'POST']  // Match serverless config exactly
     });
 
     // Health check endpoint (public)

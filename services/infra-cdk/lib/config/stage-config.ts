@@ -84,19 +84,19 @@ export class StageConfiguration {
     switch (stage) {
       case 'dev':
         return {
-          minCapacity: 0.5,
-          maxCapacity: 1,
-          backupRetentionDays: 7,
+          minCapacity: 1,
+          maxCapacity: 16,
+          backupRetentionDays: 1,
           deletionProtection: false,
           enableDataApi: true,
           secretRotationDays: undefined // No rotation in dev
         };
       case 'val':
         return {
-          minCapacity: 0.5,
-          maxCapacity: 2,
-          backupRetentionDays: 14,
-          deletionProtection: false,
+          minCapacity: 1,
+          maxCapacity: 16,
+          backupRetentionDays: 7,
+          deletionProtection: true,
           enableDataApi: true,
           secretRotationDays: 30
         };

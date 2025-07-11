@@ -164,6 +164,20 @@ export class ApiEndpointFactory {
   }
 
   /**
+   * Create an AWS IAM authenticated endpoint
+   */
+  static createIAMAuthEndpoint(
+    scope: Construct,
+    id: string,
+    props: Omit<ApiEndpointProps, 'authorizationType'>
+  ): ApiEndpoint {
+    return new ApiEndpoint(scope, id, {
+      ...props,
+      authorizationType: apigateway.AuthorizationType.IAM
+    });
+  }
+
+  /**
    * Create a GraphQL endpoint
    */
   static createGraphQLEndpoint(
@@ -172,37 +186,56 @@ export class ApiEndpointFactory {
     props: {
       resource: apigateway.Resource;
       handler: lambda.IFunction;
+      authType?: 'IAM' | 'COGNITO' | 'NONE';
       userPool?: cognito.IUserPool;
+      methods?: ('GET' | 'POST')[];
     }
-  ): ApiEndpoint {
-    const endpoint = props.userPool
-      ? ApiEndpointFactory.createAuthenticatedEndpoint(scope, id, {
-          resource: props.resource,
-          method: 'POST',
-          handler: props.handler,
-          userPool: props.userPool,
-          requestModels: {
-            'application/json': new apigateway.Model(scope, `${id}Model`, {
-              restApi: props.resource.api,
-              contentType: 'application/json',
-              schema: {
-                type: apigateway.JsonSchemaType.OBJECT,
-                properties: {
-                  query: { type: apigateway.JsonSchemaType.STRING },
-                  variables: { type: apigateway.JsonSchemaType.OBJECT },
-                  operationName: { type: apigateway.JsonSchemaType.STRING }
-                },
-                required: ['query']
-              }
-            })
-          }
-        })
-      : ApiEndpointFactory.createPublicEndpoint(scope, id, {
-          resource: props.resource,
-          method: 'POST',
-          handler: props.handler
-        });
-
-    return endpoint;
+  ): ApiEndpoint[] {
+    const methods = props.methods || ['POST'];
+    const authType = props.authType || 'NONE';
+    
+    const requestModel = new apigateway.Model(scope, `${id}Model`, {
+      restApi: props.resource.api,
+      contentType: 'application/json',
+      schema: {
+        type: apigateway.JsonSchemaType.OBJECT,
+        properties: {
+          query: { type: apigateway.JsonSchemaType.STRING },
+          variables: { type: apigateway.JsonSchemaType.OBJECT },
+          operationName: { type: apigateway.JsonSchemaType.STRING }
+        },
+        required: ['query']
+      }
+    });
+    
+    return methods.map(method => {
+      const endpointId = `${id}${method}`;
+      
+      switch (authType) {
+        case 'IAM':
+          return ApiEndpointFactory.createIAMAuthEndpoint(scope, endpointId, {
+            resource: props.resource,
+            method,
+            handler: props.handler,
+            requestModels: method === 'POST' ? { 'application/json': requestModel } : undefined
+          });
+        case 'COGNITO':
+          if (!props.userPool) throw new Error('userPool required for COGNITO auth');
+          return ApiEndpointFactory.createAuthenticatedEndpoint(scope, endpointId, {
+            resource: props.resource,
+            method,
+            handler: props.handler,
+            userPool: props.userPool,
+            requestModels: method === 'POST' ? { 'application/json': requestModel } : undefined
+          });
+        default:
+          return ApiEndpointFactory.createPublicEndpoint(scope, endpointId, {
+            resource: props.resource,
+            method,
+            handler: props.handler,
+            requestModels: method === 'POST' ? { 'application/json': requestModel } : undefined
+          });
+      }
+    });
   }
 }

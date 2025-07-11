@@ -65,7 +65,7 @@ export class AuroraServerlessV2 extends Construct {
       description: `Database credentials for ${props.databaseName} - ${props.stage}`,
       generateSecretString: {
         secretStringTemplate: JSON.stringify({
-          username: 'postgres'
+          username: 'mcreviewadmin'
         }),
         generateStringKey: 'password',
         excludeCharacters: ' %+~`#$&*()|[]{}:;<>?!\'/@"\\',
