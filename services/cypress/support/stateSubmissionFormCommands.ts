@@ -131,11 +131,11 @@ Cypress.Commands.add('fillOutBaseContractDetails', () => {
     cy.findByLabelText('Managed Care Organization (MCO)').check({force: true})
     cy.findByLabelText('1932(a) State Plan Authority').check({force: true})
     cy.findAllByText('Is this contract associated with a Dual-Eligible Special Needs Plan (D-SNP) that covers Medicaid benefits?')
-    .first()
-    .parent()
-    .within(() => {
-        cy.findByText('Yes').click()
-    })
+        .first()
+        .parent()
+        .within(() => {
+            cy.findByText('Yes').click()
+        })
     cy.findAllByTestId('file-input-input').should('have.length', 2)
     cy.findAllByTestId('file-input-input').each((fileInput) =>
         cy.wrap(fileInput).attachFile(
@@ -219,11 +219,12 @@ Cypress.Commands.add('fillOutAmendmentToBaseContractDetails', () => {
         .blur()
     cy.findByLabelText('Managed Care Organization (MCO)').check({force: true})
     cy.findByLabelText('1932(a) State Plan Authority').check({force: true})
-    cy.findByText('Is this contract associated with a Dual-Eligible Special Needs Plan (D-SNP) that covers Medicaid benefits?')
-    .parent()
-    .within(() => {
-        cy.findByText('Yes').click()
-    })
+    cy.findAllByText('Is this contract associated with a Dual-Eligible Special Needs Plan (D-SNP) that covers Medicaid benefits?')
+        .first()
+        .parent()
+        .within(() => {
+            cy.findByText('Yes').click()
+        })
     // fill out the yes/nos
     cy.findByText('In Lieu-of Services and Settings (ILOSs) in accordance with 42 CFR § 438.3(e)(2)')
     .parent()
