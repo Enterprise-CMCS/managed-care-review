@@ -2,4 +2,4 @@
 export * from './constants';
 export * from './environment';
 export * from './stage-config';
-export * from './lambda-handlers';
+export * from './auth-urls';

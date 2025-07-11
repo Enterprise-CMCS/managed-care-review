@@ -1,6 +1,6 @@
 import { Stack, StackProps, Tags, Aspects } from 'aws-cdk-lib';
 import { Construct } from 'constructs';
-import { AwsSolutionsChecks, NagSuppressions } from 'cdk-nag';
+import { AwsSolutionsChecks } from 'cdk-nag';
 import { 
   MANDATORY_TAGS, 
   PROJECT_NAME, 
@@ -47,8 +47,8 @@ export abstract class BaseStack extends Stack {
     // // Apply CDK Nag checks
     // this.applyCdkNag();
 
-    // Set termination protection for production
-    if (this.stage === 'prod') {
+    // Set termination protection for protected stages (matches serverless config)
+    if (['dev', 'val', 'prod', 'main'].includes(this.stage)) {
       this.terminationProtection = true;
     }
   }
@@ -121,16 +121,12 @@ export abstract class BaseStack extends Stack {
   /**
    * Check if the stack is in production
    */
-  protected get isProduction(): boolean {
-    return this.stage === 'prod';
-  }
+  protected get isProduction(): boolean { return this.stage === 'prod'; }
 
   /**
    * Check if the stack is in development
    */
-  protected get isDevelopment(): boolean {
-    return this.stage === 'dev';
-  }
+  protected get isDevelopment(): boolean { return this.stage === 'dev'; }
 
   /**
    * Abstract method that child stacks must implement to define their resources

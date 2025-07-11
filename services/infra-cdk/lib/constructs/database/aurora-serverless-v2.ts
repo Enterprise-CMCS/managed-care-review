@@ -6,9 +6,9 @@ import * as secretsmanager from 'aws-cdk-lib/aws-secretsmanager';
 import * as cloudwatch from 'aws-cdk-lib/aws-cloudwatch';
 import * as cloudwatch_actions from 'aws-cdk-lib/aws-cloudwatch-actions';
 import * as sns from 'aws-cdk-lib/aws-sns';
-import { Duration, RemovalPolicy } from 'aws-cdk-lib';
+import { Duration, RemovalPolicy, Stack } from 'aws-cdk-lib';
 import { DatabaseConfig } from '@config/stage-config';
-import { ResourceNames } from '@config/constants';
+import { ResourceNames, CDK_DEPLOYMENT_SUFFIX } from '@config/constants';
 import { ServiceRegistry } from '@constructs/base';
 // import { NagSuppressions } from 'cdk-nag';
 
@@ -60,8 +60,9 @@ export class AuroraServerlessV2 extends Construct {
     }
 
     // Create database credentials secret
+    // Match serverless format: aurora_postgres_${stage}
     this.secret = new secretsmanager.Secret(this, 'Secret', {
-      secretName: ResourceNames.secretName('database', props.stage),
+      secretName: `aurora_postgres_${props.stage}${CDK_DEPLOYMENT_SUFFIX}`,
       description: `Database credentials for ${props.databaseName} - ${props.stage}`,
       generateSecretString: {
         secretStringTemplate: JSON.stringify({
@@ -69,7 +70,7 @@ export class AuroraServerlessV2 extends Construct {
         }),
         generateStringKey: 'password',
         excludeCharacters: ' %+~`#$&*()|[]{}:;<>?!\'/@"\\',
-        passwordLength: 32
+        passwordLength: 30
       }
     });
 
@@ -93,8 +94,9 @@ export class AuroraServerlessV2 extends Construct {
         version: rds.AuroraPostgresEngineVersion.VER_14_9
       }),
       credentials: rds.Credentials.fromSecret(this.secret),
-      clusterIdentifier: ResourceNames.resourceName('database', 'cluster', props.stage),
-      defaultDatabaseName: props.databaseName,
+      clusterIdentifier: ResourceNames.resourceName('database', 'cluster', props.stage) + CDK_DEPLOYMENT_SUFFIX,
+      // Match serverless format: aurora_postgres_${stage}_${accountId}
+      defaultDatabaseName: `aurora_postgres_${props.stage}_${Stack.of(this).account}${CDK_DEPLOYMENT_SUFFIX}`,
       vpc: props.vpc,
       vpcSubnets: props.vpcSubnets,
       securityGroups: [props.securityGroup, ...(props.additionalSecurityGroups || [])],

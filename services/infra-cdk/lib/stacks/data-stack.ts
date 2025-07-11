@@ -13,6 +13,7 @@ export interface DataStackProps extends BaseStackProps {
   vpc: ec2.IVpc;
   databaseSecurityGroup: ec2.ISecurityGroup;
   lambdaSecurityGroup: ec2.ISecurityGroup;
+  vpnSecurityGroups?: ec2.ISecurityGroup[];
   alertTopic?: sns.ITopic;
 }
 
@@ -26,6 +27,7 @@ export class DataStack extends BaseStack {
   private readonly vpc: ec2.IVpc;
   private readonly databaseSecurityGroup: ec2.ISecurityGroup;
   private readonly lambdaSecurityGroup: ec2.ISecurityGroup;
+  private readonly vpnSecurityGroups?: ec2.ISecurityGroup[];
   private readonly alertTopic?: sns.ITopic;
 
   constructor(scope: Construct, id: string, props: DataStackProps) {
@@ -38,6 +40,7 @@ export class DataStack extends BaseStack {
     this.vpc = props.vpc;
     this.databaseSecurityGroup = props.databaseSecurityGroup;
     this.lambdaSecurityGroup = props.lambdaSecurityGroup;
+    this.vpnSecurityGroups = props.vpnSecurityGroups;
     this.alertTopic = props.alertTopic;
     
     // Define resources after all properties are initialized
@@ -81,28 +84,8 @@ export class DataStack extends BaseStack {
       deletionProtection: ['prod', 'val'].includes(this.stage)
     };
 
-    // Import existing security groups for VPN access
-    const additionalSecurityGroups: ec2.ISecurityGroup[] = [];
-    
-    try {
-      // Import VPN security group for developer access via Transit Gateway
-      const vpnSecurityGroup = ec2.SecurityGroup.fromLookupByName(
-        this, 'VpnSecurityGroup', 'cmscloud-vpn', this.vpc
-      );
-      additionalSecurityGroups.push(vpnSecurityGroup);
-    } catch (error) {
-      console.warn('Could not find cmscloud-vpn security group');
-    }
-
-    try {
-      // Import shared services security group
-      const sharedServicesSecurityGroup = ec2.SecurityGroup.fromLookupByName(
-        this, 'SharedServicesSecurityGroup', 'cmscloud-shared-services', this.vpc
-      );
-      additionalSecurityGroups.push(sharedServicesSecurityGroup);
-    } catch (error) {
-      console.warn('Could not find cmscloud-shared-services security group');
-    }
+    // Use provided VPN security groups instead of lookups
+    const additionalSecurityGroups = this.vpnSecurityGroups || [];
 
     this.database = new AuroraServerlessV2(this, 'Database', {
       databaseName: SERVICES.POSTGRES,

@@ -13,8 +13,9 @@ import * as ssm from 'aws-cdk-lib/aws-ssm';
 import * as events from 'aws-cdk-lib/aws-events';
 import * as targets from 'aws-cdk-lib/aws-events-targets';
 import { Duration } from 'aws-cdk-lib';
-import { SERVICES, API_PATHS, LAMBDA_FUNCTIONS } from '@config/constants';
+import { SERVICES, API_PATHS, LAMBDA_FUNCTIONS, LAMBDA_MEMORY, LAMBDA_TIMEOUTS, getOtelEnvironment, LAMBDA_COMMON_ENV, FILE_SIZE_LIMITS } from '@config/constants';
 import { needsPrismaLayer } from '@constructs/lambda/bundling-utils';
+import { LambdaEnvironmentFactory } from '@constructs/lambda/environment-factory';
 
 export interface ApiComputeStackProps extends BaseStackProps {
   // From Compute Stack
@@ -200,9 +201,7 @@ export class ApiComputeStack extends BaseStack {
   private createOtelLayer(): void {
     const otelConstruct = new OtelLayer(this, 'Otel', {
       stage: this.stage,
-      architecture: this.stageConfig.lambda.architecture === 'arm64' 
-        ? lambda.Architecture.ARM_64 
-        : lambda.Architecture.X86_64
+      architecture: lambda.Architecture.X86_64 // Match serverless configuration exactly
     });
 
     this.otelLayer = otelConstruct.layer;
@@ -257,45 +256,21 @@ export class ApiComputeStack extends BaseStack {
       '/configuration/ld_sdk_key_feds'
     );
 
-    return {
-      // Stage configuration
-      STAGE: this.stage,
-      stage: this.stage, // Some functions expect lowercase
-      REGION: this.region,
-      
-      // Database configuration
-      DATABASE_SECRET_ARN: this.databaseSecretArn,
-      SECRETS_MANAGER_SECRET: `aurora_postgres_${this.stage}`,
-      
-      // S3 bucket configuration
-      UPLOADS_BUCKET: this.uploadsBucketName,
-      QA_BUCKET: this.qaBucketName,
-      VITE_APP_S3_DOCUMENTS_BUCKET: this.uploadsBucketName,
-      VITE_APP_S3_QA_BUCKET: this.qaBucketName,
-      
-      // OTEL configuration
-      API_APP_OTEL_COLLECTOR_URL: apiOtelCollectorUrl,
-      AWS_LAMBDA_EXEC_WRAPPER: '/opt/otel-handler',
-      OPENTELEMETRY_COLLECTOR_CONFIG_FILE: '/var/task/collector.yml',
-      
-      // Application configuration from SSM
-      EMAILER_MODE: emailerMode,
-      PARAMETER_STORE_MODE: parameterStoreMode,
-      LD_SDK_KEY: ldSdkKey,
-      
-      // JWT configuration
-      JWT_SECRET: this.getJwtSecret(),
-      
-      // Application endpoint (default for local development)
-      APPLICATION_ENDPOINT: 'http://localhost:3000',
-      
-      // Auth mode configuration
-      VITE_APP_AUTH_MODE: process.env.VITE_APP_AUTH_MODE || 'AWS_IAM',
-      
-      // Prisma configuration
-      PRISMA_QUERY_ENGINE_LIBRARY: '/opt/nodejs/node_modules/.prisma/client/libquery_engine-linux-arm64-openssl-3.0.x.so.node',
-      NODE_OPTIONS: '--enable-source-maps'
-    };
+    // Use LambdaEnvironmentFactory to create consistent environment
+    return LambdaEnvironmentFactory.createApiLambdaEnvironment(
+      this.stage,
+      this.region,
+      {
+        databaseSecretArn: this.databaseSecretArn,
+        uploadsBucket: this.uploadsBucketName,
+        qaBucket: this.qaBucketName,
+        apiOtelCollectorUrl,
+        emailerMode,
+        parameterStoreMode,
+        ldSdkKey,
+        jwtSecret: this.getJwtSecret()
+      }
+    );
   }
 
   /**
@@ -330,7 +305,7 @@ export class ApiComputeStack extends BaseStack {
         HEALTH_CHECK_SERVICES: 'database,s3,cognito'
       },
       ZIP_KEYS: {
-        MAX_TOTAL_SIZE: (1024 * 1024 * 1024).toString(), // 1GB
+        MAX_TOTAL_SIZE: (FILE_SIZE_LIMITS.MAX_SCAN_SIZE_BYTES * 3.5).toString(), // ~1GB
         BATCH_SIZE: '50'
       }
     };
@@ -344,29 +319,25 @@ export class ApiComputeStack extends BaseStack {
   private getFunctionSpecificConfig(functionName: string): Partial<CreateFunctionProps> {
     const specificConfigs: Record<string, Partial<CreateFunctionProps>> = {
       ZIP_KEYS: {
-        timeout: Duration.seconds(60),
-        memorySize: this.stage === 'prod' ? 4096 : 1024,
+        timeout: LAMBDA_TIMEOUTS.STANDARD,
+        memorySize: this.stage === 'prod' ? LAMBDA_MEMORY.XLARGE : LAMBDA_MEMORY.MEDIUM,
         ephemeralStorageSize: this.stage === 'prod' ? 2048 : 512
       },
       MIGRATE: {
-        timeout: Duration.seconds(60),
-        memorySize: 1024
+        timeout: LAMBDA_TIMEOUTS.STANDARD,
+        memorySize: LAMBDA_MEMORY.MEDIUM
       },
       GRAPHQL: {
-        timeout: Duration.seconds(30),
-        memorySize: 1024
-      },
-      CLEANUP: {
-        timeout: Duration.seconds(900), // 15 minutes
-        memorySize: 1024
+        timeout: LAMBDA_TIMEOUTS.API_DEFAULT,
+        memorySize: LAMBDA_MEMORY.MEDIUM
       },
       AUDIT_FILES: {
-        timeout: Duration.seconds(60),
-        memorySize: 1024
+        timeout: LAMBDA_TIMEOUTS.STANDARD,
+        memorySize: LAMBDA_MEMORY.MEDIUM
       },
       OAUTH_TOKEN: {
-        timeout: Duration.seconds(29), // Default API Gateway timeout
-        memorySize: 1024
+        timeout: LAMBDA_TIMEOUTS.SHORT, // Default API Gateway timeout
+        memorySize: LAMBDA_MEMORY.MEDIUM
       }
     };
 
@@ -418,6 +389,74 @@ export class ApiComputeStack extends BaseStack {
       this.databaseSecretArn
     );
 
+    // Grant global permissions that apply to all functions (matching serverless config)
+    this.functions.forEach((func) => {
+      // RDS snapshot permissions - serverless grants these to all functions
+      func.function.addToRolePolicy(new iam.PolicyStatement({
+        effect: iam.Effect.ALLOW,
+        actions: [
+          'rds:CreateDBClusterSnapshot',
+          'rds:CreateDBSnapshot',
+          'rds:CopyDBClusterSnapshot',
+          'rds:CopyDBSnapshot',
+          'rds:DescribeDBClusterSnapshots',
+          'rds:DeleteDBClusterSnapshot'
+        ],
+        resources: ['*']
+      }));
+      
+      // SSM parameter permissions - serverless grants these to all functions
+      func.function.addToRolePolicy(new iam.PolicyStatement({
+        effect: iam.Effect.ALLOW,
+        actions: [
+          'ssm:GetParameter',
+          'ssm:GetParameters'
+        ],
+        resources: ['*']
+      }));
+      
+      // Lambda invoke permissions - serverless grants these to all functions
+      func.function.addToRolePolicy(new iam.PolicyStatement({
+        effect: iam.Effect.ALLOW,
+        actions: ['lambda:InvokeFunction'],
+        resources: ['*']
+      }));
+      
+      // Cognito permissions - serverless grants these to all functions
+      func.function.addToRolePolicy(new iam.PolicyStatement({
+        effect: iam.Effect.ALLOW,
+        actions: ['cognito-idp:ListUsers'],
+        resources: ['*']
+      }));
+      
+      // Secrets Manager permissions - serverless grants these to all functions
+      func.function.addToRolePolicy(new iam.PolicyStatement({
+        effect: iam.Effect.ALLOW,
+        actions: [
+          'secretsmanager:GetSecretValue',
+          'secretsmanager:DescribeSecret'
+        ],
+        resources: ['*']
+      }));
+      
+      // RDS database connect permissions - serverless grants these to all functions
+      func.function.addToRolePolicy(new iam.PolicyStatement({
+        effect: iam.Effect.ALLOW,
+        actions: ['rds-db:connect'],
+        resources: [this.databaseSecretArn.replace(':secret:', ':cluster:')]
+      }));
+      
+      // SES permissions - serverless grants these to all functions
+      func.function.addToRolePolicy(new iam.PolicyStatement({
+        effect: iam.Effect.ALLOW,
+        actions: [
+          'ses:SendEmail',
+          'ses:SendRawEmail'
+        ],
+        resources: ['*']
+      }));
+    });
+
     // Grant permissions based on function configuration
     this.functions.forEach((func, name) => {
       const config = this.FUNCTION_CONFIGS[name];
@@ -428,43 +467,20 @@ export class ApiComputeStack extends BaseStack {
       }
 
       // Grant S3 permissions to file operation functions
-      if (['ZIP_KEYS', 'AUDIT_FILES', 'CLEANUP'].includes(name)) {
-        uploadsBucket.grantReadWrite(func.function);
-        qaBucket.grantReadWrite(func.function);
-      }
-
-      // Grant database access only to functions that need it
-      if (config.needsDatabaseAccess) {
-        databaseSecret.grantRead(func.function);
-      }
-
-      // Grant SES permissions to email functions
-      if (config.needsSesAccess) {
+      // Match serverless config: s3:* on /allusers/* paths only
+      if (['ZIP_KEYS', 'AUDIT_FILES', 'CLEANUP', 'GRAPHQL'].includes(name)) {
         func.function.addToRolePolicy(new iam.PolicyStatement({
           effect: iam.Effect.ALLOW,
-          actions: [
-            'ses:SendEmail',
-            'ses:SendRawEmail',
-            'ses:SendTemplatedEmail'
-          ],
-          resources: ['*']
+          actions: ['s3:*'],
+          resources: [
+            `${uploadsBucket.bucketArn}/allusers/*`,
+            `${qaBucket.bucketArn}/allusers/*`
+          ]
         }));
       }
 
-      // Grant Cognito permissions to user management functions
-      if (config.needsCognitoAccess) {
-        func.function.addToRolePolicy(new iam.PolicyStatement({
-          effect: iam.Effect.ALLOW,
-          actions: [
-            'cognito-idp:ListUsers',
-            'cognito-idp:AdminGetUser',
-            'cognito-idp:AdminUpdateUserAttributes',
-            'cognito-idp:AdminAddUserToGroup',
-            'cognito-idp:AdminRemoveUserFromGroup'
-          ],
-          resources: [this.userPool.userPoolArn]
-        }));
-      }
+      // Note: Database secret read, SES, and Cognito permissions are already granted globally above
+      // to match serverless configuration where these are granted to all functions
     });
   }
 
@@ -553,16 +569,8 @@ export class ApiComputeStack extends BaseStack {
       authorizer: thirdPartyAuthorizer
     });
 
-    // Email submission endpoint (authenticated)
-    const emailResource = this.api.root.addResource('email');
-    const submitResource = emailResource.addResource('submit');
-    ApiEndpointFactory.createAuthenticatedEndpoint(this, 'EmailSubmitEndpoint', {
-      resource: submitResource,
-      method: 'POST',
-      handler: this.getFunction('EMAIL_SUBMIT'),
-      userPool: this.userPool,
-      authorizer: this.authorizer
-    });
+    // Note: email_submit function is not exposed via API Gateway in serverless config
+    // It's an internal-only Lambda function
   }
 
   /**

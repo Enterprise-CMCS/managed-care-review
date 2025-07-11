@@ -132,6 +132,15 @@ export const API_PATHS = {
   DOCS: '/docs'
 } as const;
 
+// CDK deployment suffix for resource naming (remove when ready to import)
+export const CDK_DEPLOYMENT_SUFFIX = '-cdk';
+
+// Infrastructure SSM parameter paths
+export const INFRASTRUCTURE_SSM_PARAMS = {
+  VPN_SECURITY_GROUP: '/configuration/vpn_security_group_id',
+  SHARED_SERVICES_SG: '/configuration/shared_services_security_group_id'
+} as const;
+
 // Error messages
 export const ERROR_MESSAGES = {
   MISSING_STAGE: 'Stage must be provided via --context stage=<stage>',
@@ -140,3 +149,9 @@ export const ERROR_MESSAGES = {
   RESOURCE_NOT_FOUND: 'Required resource not found',
   CIRCULAR_DEPENDENCY: 'Circular dependency detected'
 } as const;
+
+// Re-export configuration modules
+export * from './aws-resources';
+export * from './limits';
+export * from './network';
+export * from './service-defaults';

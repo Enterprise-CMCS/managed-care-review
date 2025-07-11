@@ -1,7 +1,8 @@
 import { BaseStack, BaseStackProps, ImportedVpc, ServiceRegistry } from '@constructs/base';
 import { Construct } from 'constructs';
 import * as ec2 from 'aws-cdk-lib/aws-ec2';
-import { STACK_NAMES, ResourceNames } from '@config/constants';
+import { STACK_NAMES, ResourceNames, INFRASTRUCTURE_SSM_PARAMS } from '@config/constants';
+import * as ssm from 'aws-cdk-lib/aws-ssm';
 
 export interface NetworkStackProps extends BaseStackProps {
   // No additional props needed since we're importing
@@ -16,6 +17,7 @@ export class NetworkStack extends BaseStack {
   public vpc: ec2.IVpc;
   public lambdaSecurityGroup: ec2.ISecurityGroup;
   public databaseSecurityGroup: ec2.ISecurityGroup;
+  public vpnSecurityGroups: ec2.ISecurityGroup[];
 
   constructor(scope: Construct, id: string, props: NetworkStackProps) {
     super(scope, id, {
@@ -41,6 +43,9 @@ export class NetworkStack extends BaseStack {
 
     // Create security groups instead of importing
     this.createSecurityGroups();
+
+    // Import VPN security groups from SSM parameters
+    this.importVpnSecurityGroups();
 
     // Store VPC and security group information in Parameter Store for cross-stack reference
     this.storeNetworkInfo();
@@ -128,10 +133,68 @@ export class NetworkStack extends BaseStack {
       'Allow database cluster internal communication'
     );
 
+    // Allow VPN access to database
+    if (this.vpnSecurityGroups && this.vpnSecurityGroups.length > 0) {
+      this.vpnSecurityGroups.forEach((vpnSg, index) => {
+        this.databaseSecurityGroup.addIngressRule(
+          vpnSg,
+          ec2.Port.tcp(5432),
+          `Allow VPN access to PostgreSQL database (${index + 1})`
+        );
+      });
+    }
+
     // Add stage-specific rules
     if (this.stage === 'dev') {
       // Dev might need additional access for debugging
       // But we'll keep it minimal for security
+    }
+  }
+
+  /**
+   * Import VPN security groups from SSM parameters
+   */
+  private importVpnSecurityGroups(): void {
+    this.vpnSecurityGroups = [];
+
+    try {
+      // Try to get VPN security group ID from SSM
+      const vpnSecurityGroupId = ssm.StringParameter.valueFromLookup(
+        this,
+        INFRASTRUCTURE_SSM_PARAMS.VPN_SECURITY_GROUP
+      );
+
+      // Only import if we got a valid value (not the dummy token)
+      if (vpnSecurityGroupId && !vpnSecurityGroupId.includes('dummy-value')) {
+        const vpnSg = ec2.SecurityGroup.fromSecurityGroupId(
+          this,
+          'VpnSecurityGroup',
+          vpnSecurityGroupId
+        );
+        this.vpnSecurityGroups.push(vpnSg);
+      }
+    } catch (error) {
+      console.log('VPN security group not found in SSM, skipping import');
+    }
+
+    try {
+      // Try to get shared services security group ID from SSM
+      const sharedServicesGroupId = ssm.StringParameter.valueFromLookup(
+        this,
+        INFRASTRUCTURE_SSM_PARAMS.SHARED_SERVICES_SG
+      );
+
+      // Only import if we got a valid value (not the dummy token)
+      if (sharedServicesGroupId && !sharedServicesGroupId.includes('dummy-value')) {
+        const sharedSg = ec2.SecurityGroup.fromSecurityGroupId(
+          this,
+          'SharedServicesSecurityGroup',
+          sharedServicesGroupId
+        );
+        this.vpnSecurityGroups.push(sharedSg);
+      }
+    } catch (error) {
+      console.log('Shared services security group not found in SSM, skipping import');
     }
   }
 }

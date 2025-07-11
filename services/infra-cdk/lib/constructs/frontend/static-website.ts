@@ -30,6 +30,7 @@ export interface StaticWebsiteProps {
   customDomain?: {
     domainName: string;
     certificateArn: string;
+    minimumProtocolVersion?: string;
   };
   
   /**
@@ -40,19 +41,9 @@ export interface StaticWebsiteProps {
   };
   
   /**
-   * Enable CloudFront logging
+   * Error response code (200 for SPA, 403 for static)
    */
-  enableLogging?: boolean;
-  
-  /**
-   * Custom error page path (defaults to /index.html)
-   */
-  errorPagePath?: string;
-  
-  /**
-   * Custom error response code (defaults to 200 for SPAs)
-   */
-  errorResponseCode?: number;
+  errorResponseCode: number;
 }
 
 /**
@@ -75,8 +66,7 @@ export class StaticWebsite extends Construct {
       blockPublicAccess: s3.BlockPublicAccess.BLOCK_ALL,
       websiteIndexDocument: 'index.html',
       websiteErrorDocument: 'index.html',
-      removalPolicy: props.stage === 'prod' ? RemovalPolicy.RETAIN : RemovalPolicy.DESTROY,
-      autoDeleteObjects: props.stage !== 'prod',
+      objectOwnership: s3.ObjectOwnership.OBJECT_WRITER,
       enforceSSL: true
     });
     
@@ -97,8 +87,7 @@ export class StaticWebsite extends Construct {
     const distributionProps: cloudfront.DistributionProps = {
       comment: `CloudFront Distro for the ${props.websiteName} static website hosted in S3`,
       defaultRootObject: 'index.html',
-      httpVersion: cloudfront.HttpVersion.HTTP2_AND_3,
-      priceClass: cloudfront.PriceClass.PRICE_CLASS_100,
+      httpVersion: cloudfront.HttpVersion.HTTP2,
       
       defaultBehavior: {
         origin: new cloudfrontOrigins.S3Origin(this.bucket, {
@@ -108,6 +97,7 @@ export class StaticWebsite extends Construct {
         viewerProtocolPolicy: cloudfront.ViewerProtocolPolicy.REDIRECT_TO_HTTPS,
         allowedMethods: cloudfront.AllowedMethods.ALLOW_GET_HEAD,
         cachedMethods: cloudfront.CachedMethods.CACHE_GET_HEAD,
+        cachePolicy: cloudfront.CachePolicy.CACHING_DISABLED,
         functionAssociations: props.cloudfrontFunctions?.viewerResponse ? [{
           function: props.cloudfrontFunctions.viewerResponse,
           eventType: cloudfront.FunctionEventType.VIEWER_RESPONSE
@@ -116,9 +106,8 @@ export class StaticWebsite extends Construct {
       
       errorResponses: [{
         httpStatus: 403,
-        responseHttpStatus: props.errorResponseCode ?? 200,
-        responsePagePath: props.errorPagePath ?? '/index.html',
-        ttl: Duration.seconds(0)
+        responseHttpStatus: props.errorResponseCode,
+        responsePagePath: '/index.html'
       }],
       
       webAclId: props.webAcl?.attrArn,
@@ -129,10 +118,10 @@ export class StaticWebsite extends Construct {
         acm.Certificate.fromCertificateArn(this, 'Certificate', props.customDomain.certificateArn) : 
         undefined,
         
-      // Logging configuration
-      enableLogging: props.enableLogging,
-      logBucket: props.enableLogging ? this.bucket : undefined,
-      logFilePrefix: props.enableLogging ? `${props.stage}-${props.websiteName}-cloudfront-logs/` : undefined
+      // Logging configuration (always enabled to match serverless)
+      enableLogging: true,
+      logBucket: this.bucket,
+      logFilePrefix: `${props.stage}-${props.websiteName}-cloudfront-logs/`
     };
     
     this.distribution = new cloudfront.Distribution(this, 'Distribution', distributionProps);

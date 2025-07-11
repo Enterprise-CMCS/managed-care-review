@@ -1,5 +1,6 @@
 import { Duration } from 'aws-cdk-lib';
 import { Environment } from './environment';
+import { DATABASE_DEFAULTS, CLOUDWATCH_DEFAULTS, LAMBDA_MEMORY, LAMBDA_TIMEOUTS, SECRETS_MANAGER_DEFAULTS, API_RATE_LIMITS } from './constants';
 
 export interface NetworkConfig {
   // All network configuration is read from SSM Parameter Store
@@ -86,7 +87,7 @@ export class StageConfiguration {
         return {
           minCapacity: 1,
           maxCapacity: 16,
-          backupRetentionDays: 1,
+          backupRetentionDays: DATABASE_DEFAULTS.BACKUP.RETENTION_DAYS.dev,
           deletionProtection: false,
           enableDataApi: true,
           secretRotationDays: undefined // No rotation in dev
@@ -95,19 +96,19 @@ export class StageConfiguration {
         return {
           minCapacity: 1,
           maxCapacity: 16,
-          backupRetentionDays: 7,
+          backupRetentionDays: DATABASE_DEFAULTS.BACKUP.RETENTION_DAYS.val,
           deletionProtection: true,
           enableDataApi: true,
-          secretRotationDays: 30
+          secretRotationDays: SECRETS_MANAGER_DEFAULTS.ROTATION_DAYS
         };
       case 'prod':
         return {
           minCapacity: 1,
           maxCapacity: 16,
-          backupRetentionDays: 30,
+          backupRetentionDays: DATABASE_DEFAULTS.BACKUP.RETENTION_DAYS.prod,
           deletionProtection: true,
           enableDataApi: false,
-          secretRotationDays: 30
+          secretRotationDays: SECRETS_MANAGER_DEFAULTS.ROTATION_DAYS
         };
       default:
         throw new Error(`Unknown stage: ${stage}`);
@@ -118,21 +119,21 @@ export class StageConfiguration {
     switch (stage) {
       case 'dev':
         return {
-          memorySize: 1024,
-          timeout: Duration.seconds(29),
+          memorySize: LAMBDA_MEMORY.MEDIUM,
+          timeout: LAMBDA_TIMEOUTS.SHORT,
           architecture: 'arm64'
         };
       case 'val':
         return {
-          memorySize: 1024,
-          timeout: Duration.seconds(29),
+          memorySize: LAMBDA_MEMORY.MEDIUM,
+          timeout: LAMBDA_TIMEOUTS.SHORT,
           reservedConcurrentExecutions: 10,
           architecture: 'arm64'
         };
       case 'prod':
         return {
-          memorySize: 2048,
-          timeout: Duration.seconds(29),
+          memorySize: LAMBDA_MEMORY.LARGE,
+          timeout: LAMBDA_TIMEOUTS.SHORT,
           reservedConcurrentExecutions: 100,
           provisionedConcurrentExecutions: 10,
           architecture: 'arm64'
@@ -146,21 +147,21 @@ export class StageConfiguration {
     switch (stage) {
       case 'dev':
         return {
-          logRetentionDays: 7,
+          logRetentionDays: CLOUDWATCH_DEFAULTS.LOG_RETENTION_BY_STAGE.dev,
           detailedMetrics: false,
           tracingEnabled: true,
           dashboardEnabled: false
         };
       case 'val':
         return {
-          logRetentionDays: 14,
+          logRetentionDays: CLOUDWATCH_DEFAULTS.LOG_RETENTION_BY_STAGE.val,
           detailedMetrics: true,
           tracingEnabled: true,
           dashboardEnabled: true
         };
       case 'prod':
         return {
-          logRetentionDays: 90,
+          logRetentionDays: CLOUDWATCH_DEFAULTS.LOG_RETENTION_BY_STAGE.prod,
           detailedMetrics: true,
           tracingEnabled: true,
           dashboardEnabled: true
@@ -177,24 +178,24 @@ export class StageConfiguration {
           wafEnabled: false,
           cognitoMfa: 'OFF',
           secretRotation: false,
-          apiThrottleRate: 100,
-          apiThrottleBurst: 200
+          apiThrottleRate: API_RATE_LIMITS.DEFAULT.RATE,
+          apiThrottleBurst: API_RATE_LIMITS.DEFAULT.BURST
         };
       case 'val':
         return {
           wafEnabled: true,
           cognitoMfa: 'OPTIONAL',
           secretRotation: true,
-          apiThrottleRate: 1000,
-          apiThrottleBurst: 2000
+          apiThrottleRate: API_RATE_LIMITS.AUTHENTICATED.RATE * 2,
+          apiThrottleBurst: API_RATE_LIMITS.AUTHENTICATED.BURST * 2
         };
       case 'prod':
         return {
           wafEnabled: true,
           cognitoMfa: 'REQUIRED',
           secretRotation: true,
-          apiThrottleRate: 10000,
-          apiThrottleBurst: 20000
+          apiThrottleRate: API_RATE_LIMITS.AUTHENTICATED.RATE * 20,
+          apiThrottleBurst: API_RATE_LIMITS.AUTHENTICATED.BURST * 20
         };
       default:
         throw new Error(`Unknown stage: ${stage}`);

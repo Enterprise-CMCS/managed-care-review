@@ -9,7 +9,7 @@ import * as s3 from 'aws-cdk-lib/aws-s3';
 import * as secretsmanager from 'aws-cdk-lib/aws-secretsmanager';
 import * as rds from 'aws-cdk-lib/aws-rds';
 import { Duration, RemovalPolicy, Tags } from 'aws-cdk-lib';
-import { SERVICES } from '@config/constants';
+import { SERVICES, LAMBDA_TIMEOUTS, LAMBDA_MEMORY, SSH_ACCESS_IPS, getAllSshAccessIps, getSshAccessIpv6, SECRETS_MANAGER_DEFAULTS, DATABASE_DEFAULTS, PERMISSION_BOUNDARIES, S3_DEFAULTS, AWS_ACCOUNTS, EXTERNAL_ENDPOINTS, CDK_DEPLOYMENT_SUFFIX } from '@config/constants';
 // import { NagSuppressions } from 'cdk-nag';
 import * as path from 'path';
 
@@ -80,8 +80,8 @@ export class DatabaseOperationsStack extends BaseStack {
     // Create VPC endpoint for Secrets Manager
     this.createVpcEndpoint();
 
-    // Create PostgreSQL jumpbox VM (only for prod/val environments)
-    if (this.stage === 'prod' || this.stage === 'val') {
+    // Create PostgreSQL jumpbox VM (for main/val/prod environments - matches serverless)
+    if (this.stage === 'main' || this.stage === 'val' || this.stage === 'prod') {
       this.createPostgresVm();
     }
 
@@ -124,13 +124,13 @@ export class DatabaseOperationsStack extends BaseStack {
     // Data export bucket (for val/prod only)
     if (this.stage === 'val' || this.stage === 'prod') {
       this.dataExportBucket = new s3.Bucket(this, 'DataExportBucket', {
-        bucketName: `${SERVICES.POSTGRES}-${this.stage}-data-export`,
+        bucketName: `${SERVICES.POSTGRES}-${this.stage}-data-export${CDK_DEPLOYMENT_SUFFIX}`,
         encryption: s3.BucketEncryption.S3_MANAGED,
         blockPublicAccess: s3.BlockPublicAccess.BLOCK_ALL,
         versioned: true,
         lifecycleRules: [{
           id: 'ExpireOldVersions',
-          noncurrentVersionExpiration: Duration.days(30),
+          noncurrentVersionExpiration: Duration.days(S3_DEFAULTS.LIFECYCLE.EXPIRE_NONCURRENT_VERSIONS_DAYS),
           enabled: true
         }],
         removalPolicy: this.stage === 'prod' ? RemovalPolicy.RETAIN : RemovalPolicy.DESTROY,
@@ -138,10 +138,10 @@ export class DatabaseOperationsStack extends BaseStack {
       });
     }
 
-    // VM scripts bucket (only for prod/val environments)
-    if (this.stage === 'prod' || this.stage === 'val') {
+    // VM scripts bucket (for main/val/prod environments - matches serverless)
+    if (this.stage === 'main' || this.stage === 'val' || this.stage === 'prod') {
       this.vmScriptsBucket = new s3.Bucket(this, 'VmScriptsBucket', {
-        bucketName: `${SERVICES.POSTGRES}-${this.stage}-postgres-infra-scripts`,
+        bucketName: `${SERVICES.POSTGRES}-${this.stage}-postgres-infra-scripts${CDK_DEPLOYMENT_SUFFIX}`,
         encryption: s3.BucketEncryption.S3_MANAGED,
         blockPublicAccess: s3.BlockPublicAccess.BLOCK_ALL,
         removalPolicy: RemovalPolicy.DESTROY,
@@ -169,7 +169,7 @@ export class DatabaseOperationsStack extends BaseStack {
           subnetType: ec2.SubnetType.PRIVATE_WITH_EGRESS
         },
         securityGroup: this.lambdaSecurityGroup,
-        automaticallyAfter: Duration.days(30),
+        automaticallyAfter: Duration.days(SECRETS_MANAGER_DEFAULTS.ROTATION_DAYS),
         rotateImmediatelyOnUpdate: true, // Enable immediate rotation on update/import for validation
       });
 
@@ -210,7 +210,7 @@ export class DatabaseOperationsStack extends BaseStack {
       stage: this.stage,
       lambdaConfig: {
         ...this.stageConfig.lambda,
-        timeout: Duration.seconds(60)
+        timeout: LAMBDA_TIMEOUTS.STANDARD
       },
       environment: {
         SECRETS_MANAGER_ENDPOINT: `https://secretsmanager.${this.region}.amazonaws.com`
@@ -233,15 +233,15 @@ export class DatabaseOperationsStack extends BaseStack {
       stage: this.stage,
       lambdaConfig: {
         ...this.stageConfig.lambda,
-        timeout: Duration.minutes(5),
-        memorySize: 4096
+        timeout: LAMBDA_TIMEOUTS.EXTENDED,
+        memorySize: LAMBDA_MEMORY.XLARGE
       },
       environment: {
         S3_BUCKET: this.dataExportBucket?.bucketName || `postgres-${this.stage}-dummy-export`,
         DB_SECRET_ARN: this.databaseSecret.secretArn,
         SECRETS_MANAGER_ENDPOINT: `https://secretsmanager.${this.region}.amazonaws.com`,
         ...(this.stage === 'prod' && {
-          VAL_ROLE_ARN: `arn:aws:iam::${this.getValAccountId()}:role/${SERVICES.POSTGRES}-cross-account-upload-val`
+          VAL_ROLE_ARN: `arn:aws:iam::${AWS_ACCOUNTS.VAL}:role/${SERVICES.POSTGRES}-cross-account-upload-val${CDK_DEPLOYMENT_SUFFIX}`
         })
       },
       vpc: this.vpc,
@@ -267,8 +267,8 @@ export class DatabaseOperationsStack extends BaseStack {
       stage: this.stage,
       lambdaConfig: {
         ...this.stageConfig.lambda,
-        timeout: Duration.minutes(10),
-        memorySize: 4096
+        timeout: LAMBDA_TIMEOUTS.LONG_RUNNING,
+        memorySize: LAMBDA_MEMORY.XLARGE
       },
       environment: {
         S3_BUCKET: this.dataExportBucket?.bucketName || `postgres-${this.stage}-dummy-import`,
@@ -296,7 +296,7 @@ export class DatabaseOperationsStack extends BaseStack {
         subnetType: ec2.SubnetType.PRIVATE_WITH_EGRESS
       },
       securityGroups: [this.lambdaSecurityGroup],
-      privateDnsEnabled: false
+      privateDnsEnabled: false // Keep as false per user request
     });
   }
 
@@ -309,14 +309,7 @@ export class DatabaseOperationsStack extends BaseStack {
     });
 
     // Add ingress rules for SSH access
-    const sshSources = [
-      '34.196.35.156/32',
-      '73.170.112.247/32',
-      '172.58.0.0/16',
-      '162.218.226.179/32',
-      '66.108.108.206/32',
-      '207.153.23.192/32'
-    ];
+    const sshSources = getAllSshAccessIps();
 
     sshSources.forEach(source => {
       vmSecurityGroup.addIngressRule(
@@ -326,22 +319,25 @@ export class DatabaseOperationsStack extends BaseStack {
       );
     });
 
-    // Add IPv6 rule
-    vmSecurityGroup.addIngressRule(
-      ec2.Peer.ipv6('2601:483:5300:22cf:e1a1:88e9:46b7:2c49/128'),
-      ec2.Port.tcp(22),
-      'SSH access IPv6'
-    );
+    // Add IPv6 rules
+    const sshIpv6Sources = getSshAccessIpv6();
+    sshIpv6Sources.forEach(source => {
+      vmSecurityGroup.addIngressRule(
+        ec2.Peer.ipv6(source),
+        ec2.Port.tcp(22),
+        'SSH access IPv6'
+      );
+    });
 
     // Create IAM role for VM
     const vmRole = new iam.Role(this, 'PostgresVmRole', {
-      roleName: `postgresvm-${this.stage}-ServiceRole`,
+      roleName: `postgresvm-${this.stage}-ServiceRole${CDK_DEPLOYMENT_SUFFIX}`,
       assumedBy: new iam.ServicePrincipal('ec2.amazonaws.com'),
       path: '/delegatedadmin/developer/',
       permissionsBoundary: iam.ManagedPolicy.fromManagedPolicyArn(
         this,
         'VmPermissionBoundary',
-        `arn:aws:iam::${this.account}:policy/cms-cloud-admin/ct-ado-poweruser-permissions-boundary-policy`
+        PERMISSION_BOUNDARIES.POWERUSER(this.account)
       )
     });
 
@@ -362,7 +358,7 @@ export class DatabaseOperationsStack extends BaseStack {
       }),
       securityGroup: vmSecurityGroup,
       role: vmRole,
-      instanceName: `postgresvm-${this.stage}`,
+      instanceName: `postgresvm-${this.stage}${CDK_DEPLOYMENT_SUFFIX}`,
       userData: this.getVmUserData()
     });
 
@@ -377,8 +373,8 @@ export class DatabaseOperationsStack extends BaseStack {
     if (this.stage === 'val') {
       // Create cross-account role for prod to upload to val
       const crossAccountRole = new iam.Role(this, 'CrossAccountUploadRole', {
-        roleName: `${SERVICES.POSTGRES}-cross-account-upload-val`,
-        assumedBy: new iam.ArnPrincipal(`arn:aws:iam::${this.getProdAccountId()}:root`)
+        roleName: `${SERVICES.POSTGRES}-cross-account-upload-val${CDK_DEPLOYMENT_SUFFIX}`,
+        assumedBy: new iam.ArnPrincipal(`arn:aws:iam::${AWS_ACCOUNTS.PROD}:root`)
       });
 
       // Grant permissions to upload to data export bucket
@@ -459,7 +455,7 @@ export class DatabaseOperationsStack extends BaseStack {
       permissionsBoundary: iam.ManagedPolicy.fromManagedPolicyArn(
         this,
         'ProdExportPermissionBoundary',
-        `arn:aws:iam::${this.account}:policy/cms-cloud-admin/ct-ado-poweruser-permissions-boundary-policy`
+        PERMISSION_BOUNDARIES.POWERUSER(this.account)
       ),
       managedPolicies: [
         iam.ManagedPolicy.fromAwsManagedPolicyName('service-role/AWSLambdaBasicExecutionRole'),
@@ -471,7 +467,7 @@ export class DatabaseOperationsStack extends BaseStack {
     prodExportRole.addToPolicy(new iam.PolicyStatement({
       effect: iam.Effect.ALLOW,
       actions: ['sts:AssumeRole'],
-      resources: [`arn:aws:iam::${this.getValAccountId()}:role/${SERVICES.POSTGRES}-cross-account-upload-val`]
+      resources: [`arn:aws:iam::${AWS_ACCOUNTS.VAL}:role/${SERVICES.POSTGRES}-cross-account-upload-val${CDK_DEPLOYMENT_SUFFIX}`]
     }));
 
     // Replace the function's role
@@ -526,8 +522,8 @@ export class DatabaseOperationsStack extends BaseStack {
       'chmod 600 /home/ubuntu/.ssh/authorized_keys',
       'chown ubuntu:ubuntu /home/ubuntu/.ssh/authorized_keys',
       '',
-      `sed -i "s,SLACK_WEBHOOK,${this.getSlackWebhook()},g" /usr/local/bin/vm-startup.sh`,
-      `sed -i "s,SLACK_WEBHOOK,${this.getSlackWebhook()},g" /usr/local/bin/vm-shutdown.sh`,
+      `sed -i "s,SLACK_WEBHOOK,${EXTERNAL_ENDPOINTS.SLACK_WEBHOOK},g" /usr/local/bin/vm-startup.sh`,
+      `sed -i "s,SLACK_WEBHOOK,${EXTERNAL_ENDPOINTS.SLACK_WEBHOOK},g" /usr/local/bin/vm-shutdown.sh`,
       `sed -i "s,STAGE,${this.stage},g" /usr/local/bin/vm-startup.sh`,
       `sed -i "s,STAGE,${this.stage},g" /usr/local/bin/vm-shutdown.sh`,
       'systemctl start notify-slack',
@@ -537,19 +533,5 @@ export class DatabaseOperationsStack extends BaseStack {
     return userData;
   }
 
-  private getValAccountId(): string {
-    // This should come from environment or config
-    return process.env.VAL_AWS_ACCOUNT_ID || '';
-  }
-
-  private getProdAccountId(): string {
-    // This should come from environment or config
-    return process.env.PROD_AWS_ACCOUNT_ID || '';
-  }
-
-  private getSlackWebhook(): string {
-    // This should come from environment or config
-    return process.env.SLACK_WEBHOOK || '';
-  }
 
 }

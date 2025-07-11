@@ -9,8 +9,93 @@ import { OtelLayer } from './otel-layer';
 import { StageConfig } from '@config/stage-config';
 import { LAMBDA_FUNCTIONS } from '@config/constants';
 import { ServiceRegistry } from '@constructs/base';
-import { getHandlerMapping, isFunctionMapped, UNMAPPED_FUNCTIONS } from '@config/lambda-handlers';
 import { needsPrismaLayer } from './bundling-utils';
+
+interface HandlerMapping {
+  entry: string;
+  handler: string;
+  functionName?: string; // For functions where CDK name differs from serverless
+}
+
+/**
+ * Handler mappings for functions that exist in serverless.yml
+ */
+const HANDLER_MAP: Record<string, HandlerMapping> = {
+  // Main GraphQL API
+  GRAPHQL: { 
+    entry: 'handlers/apollo_gql.ts', 
+    handler: 'gqlHandler',
+    functionName: 'graphql'
+  },
+  
+  // Email functions
+  EMAIL_SUBMIT: { 
+    entry: 'handlers/email_submit.ts', 
+    handler: 'main',
+    functionName: 'email_submit'
+  },
+  
+  // Auth functions
+  OAUTH_TOKEN: { 
+    entry: 'handlers/oauth_token.ts', 
+    handler: 'main',
+    functionName: 'oauth_token'
+  },
+  
+  // Health check
+  HEALTH: { 
+    entry: 'handlers/health_check.ts', 
+    handler: 'main',
+    functionName: 'health'
+  },
+  INDEX_HEALTH_CHECKER: {
+    entry: 'handlers/health_check.ts',
+    handler: 'main',
+    functionName: 'health'
+  },
+  
+  // Authorizer
+  THIRD_PARTY_API_AUTHORIZER: { 
+    entry: 'handlers/third_party_API_authorizer.ts', 
+    handler: 'main',
+    functionName: 'third_party_api_authorizer'
+  },
+  
+  // Observability
+  OTEL: { 
+    entry: 'handlers/otel_proxy.ts', 
+    handler: 'main',
+    functionName: 'otel'
+  },
+  
+  // Database operations
+  MIGRATE: { 
+    entry: 'handlers/postgres_migrate.ts', 
+    handler: 'main',
+    functionName: 'migrate'
+  },
+  
+  // File operations
+  ZIP_KEYS: { 
+    entry: 'handlers/bulk_download.ts', 
+    handler: 'main',
+    functionName: 'zip_keys'
+  },
+  
+  // Cleanup
+  CLEANUP: { 
+    entry: 'handlers/cleanup.ts', 
+    handler: 'main',
+    functionName: 'cleanup'
+  },
+  
+  // S3 audit
+  AUDIT_FILES: { 
+    entry: 'handlers/audit_s3.ts', 
+    handler: 'main',
+    functionName: 'auditFiles'
+  }
+};
 
 export interface LambdaFactoryProps {
   serviceName: string;
@@ -59,13 +144,14 @@ export class LambdaFactory extends Construct {
     }
 
     // Get handler mapping
-    const handlerMapping = getHandlerMapping(functionProps.functionName);
+    const handlerMapping = HANDLER_MAP[functionProps.functionName];
     
-    // Skip unmapped functions with warning
+    // Skip unmapped functions with error
     if (!handlerMapping && !functionProps.handler) {
-      console.warn(`⚠️  Skipping function: ${functionProps.functionName} - no handler mapping found`);
-      // Create and return a dummy function to avoid breaking references
-      return {} as BaseLambdaFunction;
+      throw new Error(
+        `Function ${functionProps.functionName} has no handler mapping. ` +
+        `Add mapping to HANDLER_MAP or provide explicit handler.`
+      );
     }
 
     // Construct handler string from mapping
@@ -178,14 +264,4 @@ export class LambdaFactory extends Construct {
     return vpcFunctions.includes(functionName);
   }
 
-  /**
-   * Create a Lambda function from an existing function definition (for migration)
-   */
-  public static fromExistingFunction(
-    scope: Construct,
-    id: string,
-    functionArn: string
-  ): lambda.IFunction {
-    return lambda.Function.fromFunctionArn(scope, id, functionArn);
-  }
 }

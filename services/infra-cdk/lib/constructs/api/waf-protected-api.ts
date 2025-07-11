@@ -6,7 +6,7 @@ import * as cloudwatch from 'aws-cdk-lib/aws-cloudwatch';
 import { WafwebaclToApiGateway } from '@aws-solutions-constructs/aws-wafwebacl-apigateway';
 import { Duration } from 'aws-cdk-lib';
 import { SecurityConfig } from '@config/stage-config';
-import { ResourceNames, API_PATHS } from '@config/constants';
+import { ResourceNames, API_PATHS, API_GATEWAY_DEFAULTS, API_RATE_LIMITS } from '@config/constants';
 import { ServiceRegistry } from '@constructs/base';
 // import { NagSuppressions } from 'cdk-nag';
 
@@ -73,7 +73,7 @@ export class WafProtectedApi extends Construct {
         maxAge: Duration.hours(1)
       },
       binaryMediaTypes: props.binaryMediaTypes,
-      minimumCompressionSize: props.minimumCompressionSize || 1024,
+      minimumCompressionSize: props.minimumCompressionSize || API_GATEWAY_DEFAULTS.MINIMUM_COMPRESSION_SIZE,
       endpointTypes: [apigateway.EndpointType.REGIONAL]
     });
 

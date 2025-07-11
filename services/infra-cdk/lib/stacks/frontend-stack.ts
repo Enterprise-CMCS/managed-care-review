@@ -95,8 +95,6 @@ export class FrontendStack extends BaseStack {
       cloudfrontFunctions: {
         viewerResponse: hstsFunction
       },
-      enableLogging: true,
-      errorPagePath: '/index.html',
       errorResponseCode: 200 // For SPA routing
     });
     
@@ -111,8 +109,6 @@ export class FrontendStack extends BaseStack {
         domainName: this.storybookDomainName,
         certificateArn: this.storybookCertificateArn
       } : undefined,
-      enableLogging: true,
-      errorPagePath: '/index.html',
       errorResponseCode: 403 // Storybook uses 403 for error pages
     });
     

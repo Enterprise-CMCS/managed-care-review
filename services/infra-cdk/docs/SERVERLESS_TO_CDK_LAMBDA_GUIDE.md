@@ -4,30 +4,35 @@
 1. [Provider Configuration](#provider-configuration)
 2. [IAM Configuration](#iam-configuration)
 3. [Environment Variables](#environment-variables)
-4. [Lambda Layers](#lambda-layers)
-5. [app-api Service Functions](#app-api-service-functions)
-6. [postgres Service Functions](#postgres-service-functions)
-7. [uploads Service Functions](#uploads-service-functions)
-8. [ui-auth Service (Cognito/Authentication)](#ui-auth-service-cognitoauthentication)
-9. [Database Resources (RDS Aurora)](#database-resources-rds-aurora)
-10. [Storage Resources (S3)](#storage-resources-s3)
-11. [Network Resources (VPC)](#network-resources-vpc)
-12. [Frontend Resources (CloudFront + S3)](#frontend-resources-cloudfront--s3)
-13. [infra-api Service (API Gateway & WAF)](#infra-api-service-api-gateway--waf)
-14. [github-oidc Service (GitHub Actions OIDC)](#github-oidc-service-github-actions-oidc)
-15. [app-web Service (Build & Deploy)](#app-web-service-build--deploy)
-16. [storybook Service (Component Documentation)](#storybook-service-component-documentation)
-17. [ui Service (Main Application Frontend)](#ui-service-main-application-frontend)
-18. [CDK App Architecture & Bootstrapping](#cdk-app-architecture--bootstrapping)
-19. [CDK Aspects & Cross-Cutting Concerns](#cdk-aspects--cross-cutting-concerns)
-20. [Advanced API Patterns](#advanced-api-patterns)
-21. [Lambda Factory & Patterns](#lambda-factory--patterns)
-22. [Cross-Stack References](#cross-stack-references)
-23. [Security Patterns](#security-patterns)
-24. [Build & Deployment Patterns](#build--deployment-patterns)
-25. [Database Operations](#database-operations)
-26. [Monitoring & Observability](#monitoring--observability)
-27. [Migration Best Practices](#migration-best-practices)
+4. [Configuration Management](#configuration-management)
+5. [Lambda Layers](#lambda-layers)
+6. [Lambda Environment Factory](#lambda-environment-factory)
+7. [app-api Service Functions](#app-api-service-functions)
+8. [postgres Service Functions](#postgres-service-functions)
+9. [uploads Service Functions](#uploads-service-functions)
+10. [ui-auth Service (Cognito/Authentication)](#ui-auth-service-cognitoauthentication)
+11. [Database Resources (RDS Aurora)](#database-resources-rds-aurora)
+12. [Storage Resources (S3)](#storage-resources-s3)
+13. [Network Resources (VPC)](#network-resources-vpc)
+14. [Frontend Resources (CloudFront + S3)](#frontend-resources-cloudfront--s3)
+15. [infra-api Service (API Gateway & WAF)](#infra-api-service-api-gateway--waf)
+16. [github-oidc Service (GitHub Actions OIDC)](#github-oidc-service-github-actions-oidc)
+17. [app-web Service (Build & Deploy)](#app-web-service-build--deploy)
+18. [storybook Service (Component Documentation)](#storybook-service-component-documentation)
+19. [ui Service (Main Application Frontend)](#ui-service-main-application-frontend)
+20. [CDK App Architecture & Bootstrapping](#cdk-app-architecture--bootstrapping)
+21. [CDK Aspects & Cross-Cutting Concerns](#cdk-aspects--cross-cutting-concerns)
+22. [Advanced API Patterns](#advanced-api-patterns)
+23. [Lambda Factory & Patterns](#lambda-factory--patterns)
+24. [Cross-Stack References](#cross-stack-references)
+25. [Security Patterns](#security-patterns)
+26. [Build & Deployment Patterns](#build--deployment-patterns)
+27. [Database Operations](#database-operations)
+28. [Monitoring & Observability](#monitoring--observability)
+29. [Migration Best Practices](#migration-best-practices)
+30. [Modular Constructs Pattern](#modular-constructs-pattern)
+31. [Best Practices & Clean Code](#best-practices--clean-code)
+32. [Lambda Package Building & Bundling](#lambda-package-building--bundling)
 
 ---
 
@@ -145,6 +150,232 @@ environment: {
 
 ---
 
+## Configuration Management
+
+### Overview
+CDK best practice is to centralize all configuration values instead of hardcoding them throughout the codebase. The infrastructure now uses a set of configuration modules:
+
+### Configuration Files Structure
+
+```typescript
+// lib/config/
+├── constants.ts         // Main constants file that re-exports all modules
+├── aws-resources.ts     // External AWS resource references
+├── limits.ts           // Resource limits and size constants
+├── network.ts          // Network configuration
+└── service-defaults.ts // AWS service default configurations
+```
+
+### 1. AWS Resources Configuration (aws-resources.ts)
+
+#### Serverless Hardcoded Values
+```yaml
+# Hardcoded in serverless.yml
+layers:
+  - arn:aws:lambda:us-east-1:901920570463:layer:aws-otel-nodejs-amd64-ver-1-18-1:4
+
+# Hardcoded account IDs
+VAL_ROLE_ARN: arn:aws:iam::${env:VAL_AWS_ACCOUNT_ID}:role/postgres-cross-account-upload-val
+```
+
+#### CDK Configuration Approach
+```typescript
+// aws-resources.ts
+export const OTEL_LAYERS = {
+  X86_64: 'arn:aws:lambda:us-east-1:901920570463:layer:aws-otel-nodejs-amd64-ver-1-18-1:4',
+  ARM64: 'arn:aws:lambda:us-east-1:901920570463:layer:aws-otel-nodejs-arm64-ver-1-30-2:1',
+} as const;
+
+export function getOtelLayerArn(architecture: 'x86_64' | 'arm64' = 'x86_64'): string {
+  return architecture === 'arm64' ? OTEL_LAYERS.ARM64 : OTEL_LAYERS.X86_64;
+}
+
+export const AWS_ACCOUNTS = {
+  VAL: process.env.VAL_AWS_ACCOUNT_ID || '',
+  PROD: process.env.PROD_AWS_ACCOUNT_ID || '',
+} as const;
+
+// Usage in stack
+layers: [
+  lambda.LayerVersion.fromLayerVersionArn(
+    this,
+    'OtelLayer',
+    getOtelLayerArn('x86_64')
+  )
+]
+```
+
+### 2. Resource Limits Configuration (limits.ts)
+
+#### Serverless Hardcoded Values
+```yaml
+# Hardcoded throughout serverless files
+memorySize: 1024
+timeout: 60
+MAX_FILE_SIZE: '314572800'  # 300MB
+```
+
+#### CDK Configuration Approach
+```typescript
+// limits.ts
+export const LAMBDA_MEMORY = {
+  MINIMUM: 128,
+  SMALL: 512,
+  MEDIUM: 1024,
+  LARGE: 2048,
+  XLARGE: 4096,
+  MAXIMUM: 10240,
+} as const;
+
+export const LAMBDA_TIMEOUTS = {
+  SHORT: Duration.seconds(29),     // Just under API Gateway limit
+  API_DEFAULT: Duration.seconds(30),
+  STANDARD: Duration.seconds(60),
+  EXTENDED: Duration.minutes(5),
+  LONG_RUNNING: Duration.minutes(10),
+  MAXIMUM: Duration.minutes(15),
+} as const;
+
+export const FILE_SIZE_LIMITS = {
+  MAX_SCAN_SIZE_BYTES: 314572800,  // 300MB
+  MAX_SCAN_SIZE_MB: 300,
+  MAX_API_PAYLOAD_BYTES: 10485760, // 10MB
+  MAX_API_PAYLOAD_MB: 10,
+} as const;
+
+// Usage in Lambda configuration
+lambdaConfig: {
+  memorySize: LAMBDA_MEMORY.MEDIUM,
+  timeout: LAMBDA_TIMEOUTS.STANDARD
+}
+```
+
+### 3. Network Configuration (network.ts)
+
+#### Serverless Hardcoded Values
+```yaml
+# SSH IPs hardcoded in EC2 configuration
+- '34.196.35.156/32'
+- '73.170.112.247/32'
+- '172.58.0.0/16'
+```
+
+#### CDK Configuration Approach
+```typescript
+// network.ts
+export const SSH_ACCESS_IPS = {
+  CMS_OFFICE_1: '34.196.35.156/32',
+  CMS_OFFICE_2: '73.170.112.247/32',
+  CMS_VPN: '172.58.0.0/16',
+  DEVELOPER_1: '162.218.226.179/32',
+  DEVELOPER_2: '66.108.108.206/32',
+  DEVELOPER_3: '207.153.23.192/32',
+  DEVELOPER_IPV6: '2601:483:5300:22cf:e1a1:88e9:46b7:2c49/128',
+} as const;
+
+export function getAllSshAccessIps(): string[] {
+  return Object.values(SSH_ACCESS_IPS).filter(ip => !ip.includes(':'));
+}
+
+// Usage in security group
+const sshSources = getAllSshAccessIps();
+sshSources.forEach(source => {
+  vmSecurityGroup.addIngressRule(
+    ec2.Peer.ipv4(source),
+    ec2.Port.tcp(22),
+    'SSH access'
+  );
+});
+```
+
+### 4. Service Defaults Configuration (service-defaults.ts)
+
+#### Serverless Various Defaults
+```yaml
+# S3 allowed extensions
+allowedFileExtensions:
+  - '*.csv'
+  - '*.doc'
+  - '*.docx'
+  # ... etc
+
+# GuardDuty settings
+FindingPublishingFrequency: 'FIFTEEN_MINUTES'
+
+# Secrets rotation
+automaticallyAfter: Duration.days(30)
+```
+
+#### CDK Configuration Approach
+```typescript
+// service-defaults.ts
+export const S3_DEFAULTS = {
+  ALLOWED_FILE_EXTENSIONS: [
+    '*.csv',
+    '*.doc',
+    '*.docx',
+    '*.pdf',
+    '*.txt',
+    '*.xls',
+    '*.xlsx',
+    '*.zip',
+    '*.xlsm',
+    '*.xltm',
+    '*.xlam',
+  ] as const,
+  
+  LIFECYCLE: {
+    EXPIRE_NONCURRENT_VERSIONS_DAYS: 30,
+    TRANSITION_TO_IA_DAYS: 90,
+    TRANSITION_TO_GLACIER_DAYS: 365,
+  },
+} as const;
+
+export const GUARDDUTY_DEFAULTS = {
+  FINDING_PUBLISHING_FREQUENCY: 'FIFTEEN_MINUTES' as const,
+  S3_PROTECTION_ENABLED: true,
+  MALWARE_PROTECTION_SCAN_TIMEOUT: Duration.minutes(5),
+} as const;
+
+export const SECRETS_MANAGER_DEFAULTS = {
+  ROTATION_DAYS: 30,
+  ROTATION_WINDOW: {
+    HOUR: 23, // 11 PM
+    DURATION: Duration.hours(2),
+  },
+  RECOVERY_WINDOW_DAYS: 7,
+} as const;
+```
+
+### Migration Guide for Configuration
+
+1. **Import the constants**:
+   ```typescript
+   import { LAMBDA_MEMORY, LAMBDA_TIMEOUTS, FILE_SIZE_LIMITS } from '@config/constants';
+   ```
+
+2. **Replace hardcoded values**:
+   ```typescript
+   // Before
+   memorySize: 1024,
+   timeout: Duration.seconds(60),
+   
+   // After
+   memorySize: LAMBDA_MEMORY.MEDIUM,
+   timeout: LAMBDA_TIMEOUTS.STANDARD,
+   ```
+
+3. **Use configuration functions**:
+   ```typescript
+   // Before
+   'arn:aws:lambda:us-east-1:901920570463:layer:aws-otel-nodejs-amd64-ver-1-18-1:4'
+   
+   // After
+   getOtelLayerArn('x86_64')
+   ```
+
+---
+
 ## Lambda Layers
 
 ### Serverless Layers
@@ -156,23 +387,228 @@ layers:
     path: lambda-layers-prisma-client-engine      # CDK: Code.fromAsset
 ```
 
-### CDK Layers Equivalent
+### CDK Layers Equivalent - Updated with Configuration
 ```typescript
-// In PrismaLayer construct
+// Import configuration
+import { getOtelLayerArn, SERVICES } from '@config/constants';
+
+// In PrismaLayer construct - Custom layer from local code
 this.layerVersion = new lambda.LayerVersion(this, 'PrismaLayer', {
   code: lambda.Code.fromAsset(path.join(__dirname, '../../../app-api/lambda-layers-prisma-client-engine')),
   compatibleRuntimes: [lambda.Runtime.NODEJS_20_X],
   description: 'Prisma client engine layer',
-  layerVersionName: `prisma-client-engine-${props.stage}`
+  layerVersionName: `${SERVICES.APP_API}-${props.stage}-prisma-engine`
 });
 
-// In OtelLayer construct
-this.layer = new lambda.LayerVersion(this, 'OtelLayer', {
-  code: lambda.Code.fromAsset('path/to/otel-layer'),
-  compatibleRuntimes: [lambda.Runtime.NODEJS_20_X],
-  compatibleArchitectures: [props.architecture],
-  description: 'OpenTelemetry instrumentation layer'
-});
+// In OtelLayer construct - External AWS-managed layer
+export class OtelLayer extends Construct {
+  public readonly layer: lambda.ILayerVersion;
+
+  constructor(scope: Construct, id: string, props: OtelLayerProps) {
+    super(scope, id);
+
+    // Use configuration to get the correct layer ARN
+    const architecture = props.architecture || Architecture.ARM_64;
+    const archType = architecture === Architecture.ARM_64 ? 'arm64' : 'x86_64';
+    
+    // Reference external layer using centralized configuration
+    this.layer = lambda.LayerVersion.fromLayerVersionArn(
+      this,
+      'AwsOtelLayer',
+      getOtelLayerArn(archType)
+    );
+    
+    // Store layer ARN in Parameter Store for cross-stack reference
+    ServiceRegistry.putLayerArn(this, props.stage, 'otel', this.layer.layerVersionArn);
+  }
+}
+```
+
+### Key Changes from Hardcoded Approach
+
+1. **External Layer ARNs**: No longer hardcoded in the stack files
+   ```typescript
+   // Before: Hardcoded ARN
+   'arn:aws:lambda:us-east-1:901920570463:layer:aws-otel-nodejs-amd64-ver-1-18-1:4'
+   
+   // After: Configuration function
+   getOtelLayerArn('x86_64')
+   ```
+
+2. **Service Names**: Use constants for consistency
+   ```typescript
+   // Before: Hardcoded service name
+   layerVersionName: `prisma-client-engine-${props.stage}`
+   
+   // After: Service constant
+   layerVersionName: `${SERVICES.APP_API}-${props.stage}-prisma-engine`
+   ```
+
+3. **Architecture Support**: Configuration handles architecture differences
+   ```typescript
+   // The getOtelLayerArn function returns the correct ARN based on architecture
+   export function getOtelLayerArn(architecture: 'x86_64' | 'arm64' = 'x86_64'): string {
+     return architecture === 'arm64' ? OTEL_LAYERS.ARM64 : OTEL_LAYERS.X86_64;
+   }
+   ```
+
+---
+
+## Lambda Environment Factory
+
+### Overview
+Instead of manually constructing environment variables for each Lambda function, CDK now provides a `LambdaEnvironmentFactory` that ensures consistency and reduces duplication.
+
+### Factory Pattern Structure
+
+```typescript
+// constructs/lambda/environment-factory.ts
+export class LambdaEnvironmentFactory {
+  // Base environment for all functions
+  static createBaseEnvironment(stage: string, region: string): BaseEnvironment
+  
+  // Specialized environments
+  static createOtelEnvironment(stage: string): OtelEnvironment
+  static createDatabaseEnvironment(secretArn: string, stage: string, region: string): DatabaseEnvironment
+  static createS3Environment(uploadsBucket: string, qaBucket: string): S3Environment
+  static createAuthEnvironment(options?: AuthOptions): AuthEnvironment
+  
+  // Complete environments for specific Lambda types
+  static createApiLambdaEnvironment(stage: string, region: string, config: ApiConfig): Record<string, string>
+  static createVirusScanEnvironment(stage: string, bucketNames: string[], options?: ScanOptions): Record<string, string>
+  static createDatabaseLambdaEnvironment(stage: string, region: string, secretArn: string, options?: DbOptions): Record<string, string>
+}
+```
+
+### Serverless Environment Variables (Before)
+```yaml
+# Repeated in every function
+environment:
+  stage: ${sls:stage}
+  STAGE: ${sls:stage}
+  REGION: ${self:provider.region}
+  NODE_OPTIONS: '--enable-source-maps'
+  AWS_NODEJS_CONNECTION_REUSE_ENABLED: '1'
+  LOG_LEVEL: 'INFO'
+  DATABASE_SECRET_ARN: ${cf:aurora-${sls:stage}.DatabaseSecretArn}
+  UPLOADS_BUCKET: ${cf:uploads-${sls:stage}.BucketName}
+  QA_BUCKET: ${cf:uploads-${sls:stage}.QABucketName}
+  AWS_LAMBDA_EXEC_WRAPPER: '/opt/otel-handler'
+  OPENTELEMETRY_COLLECTOR_CONFIG_FILE: '/var/task/collector.yml'
+  VITE_APP_OTEL_COLLECTOR_URL: ${env:VITE_APP_OTEL_COLLECTOR_URL}
+```
+
+### CDK Environment Factory (After)
+
+#### 1. For API Lambda Functions
+```typescript
+// Instead of manually creating environment object
+const environment = LambdaEnvironmentFactory.createApiLambdaEnvironment(
+  this.stage,
+  this.region,
+  {
+    databaseSecretArn: this.databaseSecretArn,
+    uploadsBucket: this.uploadsBucketName,
+    qaBucket: this.qaBucketName,
+    apiOtelCollectorUrl: ssmApiOtelUrl,
+    emailerMode: ssmEmailerMode,
+    parameterStoreMode: ssmParamStoreMode,
+    ldSdkKey: ssmLdSdkKey,
+    jwtSecret: this.getJwtSecret()
+  }
+);
+
+// Automatically includes:
+// - Base environment (stage, region, NODE_OPTIONS, etc.)
+// - Database configuration
+// - S3 bucket configuration
+// - OTEL configuration
+// - Auth configuration
+// - Feature flags
+```
+
+#### 2. For Virus Scanning Functions
+```typescript
+// GuardDuty scan processor
+environment: LambdaEnvironmentFactory.createVirusScanEnvironment(
+  this.stage,
+  [this.uploadsBucket.bucketName, this.qaBucket.bucketName],
+  {
+    maxFileSize: FILE_SIZE_LIMITS.MAX_SCAN_SIZE_BYTES,
+    enableClamAvCompatibility: true,
+    alertTopicArn: this.alertTopic.topicArn
+  }
+)
+
+// Automatically includes:
+// - Base environment
+// - OTEL configuration
+// - Virus scan specific settings
+// - Bucket configuration
+```
+
+#### 3. For Database-Only Functions
+```typescript
+// Database migration function
+environment: LambdaEnvironmentFactory.createDatabaseLambdaEnvironment(
+  this.stage,
+  this.region,
+  this.databaseSecretArn,
+  {
+    includeOtel: true,
+    additionalEnv: {
+      MIGRATION_PATH: './migrations'
+    }
+  }
+)
+```
+
+### Merging Multiple Environments
+```typescript
+// For complex functions needing multiple configurations
+environment: LambdaEnvironmentFactory.merge(
+  LambdaEnvironmentFactory.createBaseEnvironment(stage, region),
+  LambdaEnvironmentFactory.createDatabaseEnvironment(secretArn, stage, region),
+  LambdaEnvironmentFactory.createS3Environment(uploadsBucket, qaBucket),
+  {
+    CUSTOM_VAR: 'custom-value'
+  }
+)
+```
+
+### Benefits of Factory Pattern
+
+1. **Consistency**: All Lambda functions get the same base configuration
+2. **Type Safety**: TypeScript interfaces ensure correct environment variables
+3. **DRY Principle**: No more duplicating environment variables across functions
+4. **Maintainability**: Change environment variables in one place
+5. **Documentation**: Self-documenting what each Lambda type needs
+6. **Testing**: Easier to mock and test environment configurations
+
+### Migration Guide
+
+1. **Identify Lambda function type** (API, Database, S3, etc.)
+2. **Choose appropriate factory method**
+3. **Replace inline environment object** with factory call
+4. **Add any additional custom variables** as needed
+
+Example migration:
+```typescript
+// Before
+environment: {
+  stage: this.stage,
+  STAGE: this.stage,
+  REGION: this.region,
+  DATABASE_SECRET_ARN: this.databaseSecretArn,
+  // ... 20+ more lines
+}
+
+// After
+environment: LambdaEnvironmentFactory.createApiLambdaEnvironment(
+  this.stage,
+  this.region,
+  config
+)
 ```
 
 ---
@@ -5103,59 +5539,108 @@ export class BaseLambdaFunction extends Construct {
 }
 ```
 
-### LambdaFactory for Common Patterns
+### LambdaFactory for Common Patterns - Updated
+
+The Lambda factory now integrates with the environment factory and configuration management:
 
 ```typescript
 // lib/constructs/lambda/lambda-factory.ts
-export class LambdaFactory {
+import { LAMBDA_MEMORY, LAMBDA_TIMEOUTS } from '@config/constants';
+import { LambdaEnvironmentFactory } from './environment-factory';
+
+export class LambdaFactory extends Construct {
+  private readonly props: LambdaFactoryProps;
+  private readonly functions: Map<string, BaseLambdaFunction> = new Map();
+
+  constructor(scope: Construct, id: string, props: LambdaFactoryProps) {
+    super(scope, id);
+    this.props = props;
+  }
+
   /**
-   * Create a Node.js Lambda with TypeScript support
+   * Create a Lambda function with standard configuration
    */
-  static createNodeFunction(
-    scope: Construct,
-    id: string,
-    props: {
-      entry: string;
-      handler?: string;
-      environment?: { [key: string]: string };
-      layers?: lambda.ILayerVersion[];
-      vpc?: ec2.IVpc;
-      timeout?: Duration;
-      memorySize?: number;
-    }
-  ): NodejsFunction {
-    return new NodejsFunction(scope, id, {
-      entry: props.entry,
-      handler: props.handler || 'handler',
-      runtime: lambda.Runtime.NODEJS_20_X,
-      architecture: lambda.Architecture.ARM_64,
-      bundling: {
-        minify: true,
-        sourceMap: true,
-        sourcesContent: false,
-        target: 'node20',
-        externalModules: [
-          '@aws-sdk/*', // Available in Lambda runtime
-          '@prisma/client', // Provided by layer
-          'pg', // Provided by layer
-        ],
-        loader: {
-          '.sql': 'text', // Load SQL files as text
-        },
-        esbuildArgs: {
-          '--tree-shaking': 'true',
-        }
-      },
+  public createFunction(functionProps: CreateFunctionProps): BaseLambdaFunction {
+    const functionId = functionProps.functionName;
+    
+    // Get handler mapping
+    const handlerMapping = getHandlerMapping(functionProps.functionName);
+    const handler = `${handlerMapping.entry}.${handlerMapping.handler}`;
+
+    // Determine if this function needs VPC access
+    const needsVpc = functionProps.useVpc ?? this.requiresVpc(functionProps.functionName);
+
+    // Create lambda config with proper defaults from constants
+    const lambdaConfig = {
+      ...this.props.stageConfig.lambda,
+      timeout: functionProps.timeout || LAMBDA_TIMEOUTS.API_DEFAULT,
+      memorySize: functionProps.memorySize || LAMBDA_MEMORY.MEDIUM,
+      ...(functionProps.ephemeralStorageSize && { ephemeralStorageSize: functionProps.ephemeralStorageSize })
+    };
+
+    // Create the function using BaseLambdaFunction
+    const lambdaFunction = new BaseLambdaFunction(this, functionId, {
+      functionName: LAMBDA_FUNCTIONS[functionProps.functionName],
+      serviceName: this.props.serviceName,
+      handler,
+      stage: this.props.stage,
+      lambdaConfig,
       environment: {
-        NODE_OPTIONS: '--enable-source-maps',
-        AWS_NODEJS_CONNECTION_REUSE_ENABLED: '1',
-        ...props.environment
+        ...this.props.commonEnvironment, // From LambdaEnvironmentFactory
+        ...functionProps.environment      // Function-specific overrides
       },
-      timeout: props.timeout || Duration.seconds(30),
-      memorySize: props.memorySize || 1024,
-      layers: props.layers,
-      vpc: props.vpc,
-      tracing: lambda.Tracing.ACTIVE
+      vpc: needsVpc ? this.props.vpc : undefined,
+      vpcSubnets: needsVpc && this.props.vpc ? {
+        subnets: this.props.vpc.privateSubnets
+      } : undefined,
+      securityGroups: needsVpc ? this.props.securityGroups : undefined,
+      layers: [
+        this.props.otelLayer,
+        ...(needsPrismaLayer(functionProps.functionName) && this.props.prismaLayer ? [this.props.prismaLayer] : []),
+        ...(functionProps.additionalLayers || [])
+      ],
+      role: functionProps.role,
+      logRetentionDays: this.props.stageConfig.monitoring.logRetentionDays
+    });
+
+    // Store the function
+    this.functions.set(functionId, lambdaFunction);
+
+    // Store function ARN in Parameter Store
+    ServiceRegistry.putLambdaArn(
+      this,
+      this.props.stage,
+      LAMBDA_FUNCTIONS[functionProps.functionName],
+      lambdaFunction.functionArn
+    );
+
+    return lambdaFunction;
+  }
+
+  /**
+   * Create a VPC-enabled Lambda for database access
+   */
+  public createDatabaseFunction(
+    functionName: keyof typeof LAMBDA_FUNCTIONS,
+    additionalEnv?: Record<string, string>
+  ): BaseLambdaFunction {
+    // Use environment factory for database functions
+    const environment = LambdaEnvironmentFactory.createDatabaseLambdaEnvironment(
+      this.props.stage,
+      this.props.region,
+      this.props.databaseSecretArn,
+      {
+        includeOtel: true,
+        additionalEnv
+      }
+    );
+
+    return this.createFunction({
+      functionName,
+      useVpc: true,
+      environment,
+      timeout: LAMBDA_TIMEOUTS.STANDARD,
+      memorySize: LAMBDA_MEMORY.MEDIUM
     });
   }
 
@@ -7607,14 +8092,1435 @@ const migrationChecklist = {
 
 ---
 
+## Modular Constructs Pattern
+
+### Overview
+Large CDK stacks can become difficult to maintain. The modular constructs pattern breaks down complex stacks into smaller, focused, reusable components.
+
+### Case Study: GuardDuty Stack Refactoring
+
+#### Before: Monolithic Stack (731 lines)
+```typescript
+export class GuardDutyMalwareProtectionStack extends BaseStack {
+  // Everything in one file:
+  // - Detector creation
+  // - IAM roles
+  // - Protection plans
+  // - S3 policies
+  // - EventBridge rules
+  // - Lambda functions
+  // - SQS queues
+  // - SNS topics
+  // - CloudWatch metrics
+  // ... 700+ lines of intertwined logic
+}
+```
+
+#### After: Modular Constructs (6 focused files)
+
+```typescript
+// lib/constructs/guardduty/
+├── detector-manager.ts       // 87 lines - GuardDuty detector management
+├── malware-protection-plan.ts // 123 lines - Protection plan creation
+├── virus-scan-policies.ts    // 106 lines - S3 bucket policies
+├── scan-event-processor.ts   // 156 lines - Event processing
+├── rescan-capability.ts      // 194 lines - Rescan functionality
+└── index.ts                  // Exports all constructs
+```
+
+### 1. Detector Manager Construct
+```typescript
+// detector-manager.ts
+export class GuardDutyDetectorManager extends Construct {
+  public readonly detectorId: string;
+  
+  constructor(scope: Construct, id: string, props: { stage: string }) {
+    super(scope, id);
+    
+    // Single responsibility: Manage GuardDuty detector
+    const detectorHandler = this.createDetectorHandler();
+    this.detectorResource = new CustomResource(this, 'GuardDutyDetector', {
+      serviceToken: detectorHandler.functionArn,
+      properties: {
+        Enable: true,
+        FindingPublishingFrequency: GUARDDUTY_DEFAULTS.FINDING_PUBLISHING_FREQUENCY
+      }
+    });
+    
+    this.detectorId = this.detectorResource.getAttString('DetectorId');
+  }
+}
+```
+
+### 2. Malware Protection Plan Construct
+```typescript
+// malware-protection-plan.ts
+export class MalwareProtectionPlan extends Construct {
+  public readonly plan: guardduty.CfnMalwareProtectionPlan;
+  
+  constructor(scope: Construct, id: string, props: MalwareProtectionPlanProps) {
+    super(scope, id);
+    
+    // Single responsibility: Create protection plan for one bucket
+    this.plan = new guardduty.CfnMalwareProtectionPlan(this, 'Plan', {
+      role: props.malwareProtectionRole.roleArn,
+      protectedResource: {
+        s3Bucket: {
+          bucketName: props.bucket.bucketName,
+          objectPrefixes: props.objectPrefixes
+        }
+      },
+      actions: { tagging: { status: 'ENABLED' } }
+    });
+  }
+}
+```
+
+### 3. Refactored Stack Using Constructs
+```typescript
+// guardduty-malware-protection-stack-refactored.ts
+export class GuardDutyMalwareProtectionStackRefactored extends BaseStack {
+  protected defineResources(props: GuardDutyMalwareProtectionStackProps): void {
+    // 1. Detector management
+    this.detectorManager = new GuardDutyDetectorManager(this, 'DetectorManager', {
+      stage: this.stage
+    });
+
+    // 2. IAM role
+    this.malwareProtectionRole = new MalwareProtectionRole(this, 'MalwareRole', {
+      stage: this.stage,
+      buckets: [props.uploadsBucket, props.qaBucket]
+    });
+
+    // 3. Protection plans
+    this.uploadsPlan = new MalwareProtectionPlan(this, 'UploadsPlan', {
+      stage: this.stage,
+      bucket: props.uploadsBucket,
+      bucketType: 'uploads',
+      malwareProtectionRole: this.malwareProtectionRole.role
+    });
+
+    // 4. Bucket policies
+    new VirusScanPolicies(this, 'UploadsPolicies', {
+      bucket: props.uploadsBucket,
+      bucketName: 'uploads'
+    });
+
+    // 5. Event processing
+    this.scanEventProcessor = new ScanEventProcessor(this, 'EventProcessor', {
+      stage: this.stage,
+      stageConfig: this.stageConfig,
+      uploadsBucket: props.uploadsBucket,
+      qaBucket: props.qaBucket,
+      alertEmail: props.alertEmail
+    });
+
+    // 6. Optional rescan capability
+    if (props.enableRescanCapability) {
+      this.rescanCapability = new RescanCapability(this, 'RescanCapability', {
+        stage: this.stage,
+        stageConfig: this.stageConfig,
+        uploadsBucket: props.uploadsBucket,
+        qaBucket: props.qaBucket
+      });
+    }
+  }
+}
+```
+
+### Benefits of Modular Constructs
+
+1. **Single Responsibility**: Each construct has one clear purpose
+2. **Reusability**: Constructs can be used in multiple stacks
+3. **Testability**: Smaller units are easier to test
+4. **Maintainability**: Changes are localized
+5. **Readability**: Stack logic is clearer
+6. **Composition**: Build complex stacks from simple parts
+
+### Creating Your Own Modular Constructs
+
+#### Step 1: Identify Logical Boundaries
+```typescript
+// Look for:
+// - Resources that change together
+// - Repeated patterns
+// - Independent functionality
+// - Clear interfaces between components
+```
+
+#### Step 2: Define Construct Interface
+```typescript
+export interface MyConstructProps {
+  // Required props
+  stage: string;
+  bucket: s3.IBucket;
+  
+  // Optional props
+  enableFeatureX?: boolean;
+  customConfig?: CustomConfig;
+}
+```
+
+#### Step 3: Implement Single Responsibility
+```typescript
+export class MyConstruct extends Construct {
+  // Public properties for other constructs to reference
+  public readonly resource: SomeResource;
+  
+  constructor(scope: Construct, id: string, props: MyConstructProps) {
+    super(scope, id);
+    
+    // Create only resources related to this construct's purpose
+    this.resource = new SomeResource(this, 'Resource', {
+      // configuration
+    });
+    
+    // Handle internal wiring
+    this.wireUpEventHandlers();
+    this.grantPermissions();
+  }
+  
+  // Private methods for internal logic
+  private wireUpEventHandlers(): void {
+    // ...
+  }
+  
+  private grantPermissions(): void {
+    // ...
+  }
+}
+```
+
+#### Step 4: Export Through Index
+```typescript
+// constructs/my-feature/index.ts
+export * from './my-construct';
+export * from './my-other-construct';
+export * from './my-types';
+```
+
+### When to Create a New Construct
+
+Create a new construct when you have:
+- **Repeated Pattern**: Same resources created multiple times
+- **Logical Grouping**: Related resources that work together
+- **Complex Configuration**: Hide complexity behind simple interface
+- **Cross-Stack Sharing**: Resources used by multiple stacks
+- **Domain Concept**: Represents a business/technical concept
+
+### Anti-Patterns to Avoid
+
+1. **Too Granular**: Don't create a construct for a single resource
+2. **Too Broad**: Don't put unrelated resources together
+3. **Circular Dependencies**: Avoid constructs depending on each other
+4. **State Management**: Constructs should be stateless
+5. **Side Effects**: Avoid external calls in constructors
+
+---
+
+## Best Practices & Clean Code
+
+### 1. Configuration Management
+
+#### ❌ Bad: Hardcoded Values
+```typescript
+const lambda = new lambda.Function(this, 'MyFunction', {
+  memorySize: 1024,
+  timeout: Duration.seconds(300),
+  layers: [
+    lambda.LayerVersion.fromLayerVersionArn(
+      this,
+      'OtelLayer',
+      'arn:aws:lambda:us-east-1:901920570463:layer:aws-otel-nodejs-amd64-ver-1-18-1:4'
+    )
+  ]
+});
+```
+
+#### ✅ Good: Centralized Configuration
+```typescript
+import { LAMBDA_MEMORY, LAMBDA_TIMEOUTS, getOtelLayerArn } from '@config/constants';
+
+const lambda = new lambda.Function(this, 'MyFunction', {
+  memorySize: LAMBDA_MEMORY.MEDIUM,
+  timeout: LAMBDA_TIMEOUTS.EXTENDED,
+  layers: [
+    lambda.LayerVersion.fromLayerVersionArn(
+      this,
+      'OtelLayer',
+      getOtelLayerArn('x86_64')
+    )
+  ]
+});
+```
+
+### 2. Environment Variables
+
+#### ❌ Bad: Inline Environment
+```typescript
+environment: {
+  stage: this.stage,
+  STAGE: this.stage,
+  REGION: this.region,
+  NODE_OPTIONS: '--enable-source-maps',
+  AWS_NODEJS_CONNECTION_REUSE_ENABLED: '1',
+  DATABASE_SECRET_ARN: secretArn,
+  UPLOADS_BUCKET: bucketName,
+  // ... 20 more lines
+}
+```
+
+#### ✅ Good: Environment Factory
+```typescript
+environment: LambdaEnvironmentFactory.createApiLambdaEnvironment(
+  this.stage,
+  this.region,
+  {
+    databaseSecretArn: secretArn,
+    uploadsBucket: bucketName,
+    // Other required config
+  }
+)
+```
+
+### 3. Stack Organization
+
+#### ❌ Bad: Everything in One Stack
+```typescript
+export class MegaStack extends Stack {
+  constructor(scope: Construct, id: string) {
+    // VPC
+    // Databases
+    // S3 Buckets
+    // Lambda Functions
+    // API Gateway
+    // CloudFront
+    // Cognito
+    // ... 2000+ lines
+  }
+}
+```
+
+#### ✅ Good: Logical Stack Separation
+```typescript
+// Separate stacks for separate concerns
+export class NetworkStack extends BaseStack { }
+export class DataStack extends BaseStack { }
+export class ComputeStack extends BaseStack { }
+export class ApiStack extends BaseStack { }
+export class FrontendStack extends BaseStack { }
+
+// Orchestrate in app
+const network = new NetworkStack(app, 'Network', props);
+const data = new DataStack(app, 'Data', { vpc: network.vpc });
+const compute = new ComputeStack(app, 'Compute', { vpc: network.vpc, db: data.cluster });
+```
+
+### 4. Type Safety
+
+#### ❌ Bad: Any Types and Strings
+```typescript
+const createLambda = (name: any, config: any) => {
+  return new lambda.Function(this, name, {
+    runtime: 'nodejs20.x', // String
+    handler: config.handler,
+    memorySize: config.memory || 1024
+  });
+};
+```
+
+#### ✅ Good: Strong Types
+```typescript
+interface LambdaConfig {
+  handler: string;
+  memory?: keyof typeof LAMBDA_MEMORY;
+  timeout?: Duration;
+}
+
+const createLambda = (name: string, config: LambdaConfig): lambda.Function => {
+  return new lambda.Function(this, name, {
+    runtime: lambda.Runtime.NODEJS_20_X,
+    handler: config.handler,
+    memorySize: config.memory ? LAMBDA_MEMORY[config.memory] : LAMBDA_MEMORY.MEDIUM
+  });
+};
+```
+
+### 5. Resource Naming
+
+#### ❌ Bad: Inconsistent Naming
+```typescript
+new s3.Bucket(this, 'MyBucket', {
+  bucketName: 'uploads-bucket-' + stage
+});
+
+new lambda.Function(this, 'function1', {
+  functionName: `${stage}_graphql_handler`
+});
+```
+
+#### ✅ Good: Consistent Naming Convention
+```typescript
+import { ResourceNames } from '@config/constants';
+
+new s3.Bucket(this, 'UploadsBucket', {
+  bucketName: ResourceNames.s3BucketName('uploads', stage)
+});
+
+new lambda.Function(this, 'GraphQLHandler', {
+  functionName: ResourceNames.lambdaFunctionName('graphql', stage)
+});
+```
+
+### 6. Error Handling
+
+#### ❌ Bad: No Error Context
+```typescript
+const secret = secretsmanager.Secret.fromSecretArn(
+  this,
+  'Secret',
+  props.secretArn
+);
+```
+
+#### ✅ Good: Validation and Context
+```typescript
+if (!props.secretArn) {
+  throw new Error(`Database secret ARN is required for stage: ${this.stage}`);
+}
+
+const secret = secretsmanager.Secret.fromSecretCompleteArn(
+  this,
+  'DatabaseSecret',
+  props.secretArn
+);
+```
+
+### 7. Documentation
+
+#### ❌ Bad: No Comments
+```typescript
+export class MyConstruct extends Construct {
+  constructor(scope: Construct, id: string, props: any) {
+    super(scope, id);
+    // Complex logic with no explanation
+  }
+}
+```
+
+#### ✅ Good: Clear Documentation
+```typescript
+/**
+ * S3 bucket with virus scanning enforcement
+ * 
+ * This construct creates an S3 bucket with:
+ * - Automatic virus scanning via GuardDuty
+ * - File type restrictions
+ * - SSL enforcement
+ * - Versioning enabled
+ * 
+ * @example
+ * ```typescript
+ * new SecureUploadsBucket(this, 'Uploads', {
+ *   stage: 'prod',
+ *   allowedFileTypes: S3_DEFAULTS.ALLOWED_FILE_EXTENSIONS
+ * });
+ * ```
+ */
+export class SecureUploadsBucket extends Construct {
+  public readonly bucket: s3.Bucket;
+  
+  constructor(scope: Construct, id: string, props: SecureUploadsBucketProps) {
+    super(scope, id);
+    // Implementation
+  }
+}
+```
+
+### Clean Code Checklist
+
+- [ ] No magic numbers - use named constants
+- [ ] No hardcoded ARNs or IDs
+- [ ] Consistent resource naming
+- [ ] Type-safe interfaces
+- [ ] Single responsibility constructs
+- [ ] Proper error handling with context
+- [ ] Environment variables via factory
+- [ ] Configuration in central location
+- [ ] Meaningful variable/function names
+- [ ] Documentation for public APIs
+- [ ] No commented-out code
+- [ ] Logical file organization
+- [ ] Dependency injection over hardcoding
+- [ ] Immutable infrastructure patterns
+- [ ] Tagged resources for cost tracking
+
+---
+
 ## Conclusion
 
-This comprehensive guide covers the complete migration from Serverless Framework to AWS CDK for the Managed Care Review application. The CDK approach provides:
+This comprehensive guide covers the complete migration from Serverless Framework to AWS CDK for the Managed Care Review application. 
 
-- **Better Type Safety**: Full TypeScript support throughout
+### Key Improvements in the Updated CDK Approach
+
+The CDK infrastructure now includes several major improvements:
+
+1. **Centralized Configuration Management**
+   - All hardcoded values moved to configuration files
+   - Constants for memory, timeouts, file sizes, and network settings
+   - Configuration functions for dynamic values
+
+2. **Lambda Environment Factory**
+   - Consistent environment variable management
+   - Type-safe environment creation
+   - Specialized factories for different Lambda types
+
+3. **Modular Constructs Pattern**
+   - Large stacks broken into focused, reusable constructs
+   - Single responsibility principle applied
+   - Easier testing and maintenance
+
+4. **Clean Code Practices**
+   - No magic numbers
+   - Strong typing throughout
+   - Consistent naming conventions
+   - Comprehensive documentation
+
+### Benefits of the CDK Approach
+
+- **Better Type Safety**: Full TypeScript support with strong interfaces
 - **Improved Modularity**: Reusable constructs and patterns
 - **Enhanced Security**: Built-in best practices and compliance
 - **Simplified Operations**: Integrated monitoring and deployment
 - **Greater Flexibility**: Full control over AWS resources
+- **Maintainability**: Clean, organized code that's easy to update
 
-Remember to migrate incrementally, test thoroughly, and maintain backwards compatibility throughout the process.
+### Migration Path
+
+1. **Start with Configuration**: Set up centralized configuration files
+2. **Use Environment Factory**: Standardize Lambda environment variables
+3. **Apply Modular Patterns**: Break down large stacks incrementally
+4. **Follow Clean Code**: Apply best practices as you migrate
+
+Remember to migrate incrementally, test thoroughly, and maintain backwards compatibility throughout the process. The investment in clean, well-organized CDK code will pay dividends in long-term maintainability and operational excellence.
+
+---
+
+## Lambda Package Building & Bundling
+
+### Overview
+
+This section provides comprehensive details about how Lambda packages are built in the CDK infrastructure, migrating from serverless-esbuild to CDK's NodejsFunction construct with custom bundling configurations.
+
+### Comparison: Serverless vs CDK Lambda Bundling
+
+#### Serverless Approach
+```yaml
+# serverless.yml
+custom:
+  esbuild:
+    bundle: true
+    minify: false
+    sourcemap: true
+    exclude: 
+      - '@aws-sdk/*'
+      - 'aws-sdk'
+    target: 'node18'
+    define:
+      'require.resolve': undefined
+    platform: 'node'
+    format: 'cjs'
+    packager: 'pnpm'
+    buildConcurrency: 10
+    plugins: 'esbuild-plugins.js'
+
+functions:
+  graphql:
+    handler: src/handlers/apollo_gql.gqlHandler
+    package:
+      individually: true
+```
+
+#### CDK Approach
+```typescript
+// base-lambda-function.ts
+this.function = new NodejsFunction(this, 'Function', {
+  functionName: ResourceNames.resourceName(props.serviceName, props.functionName, props.stage),
+  runtime: lambda.Runtime.NODEJS_20_X,
+  architecture: props.lambdaConfig.architecture === 'arm64' 
+    ? lambda.Architecture.ARM_64 
+    : lambda.Architecture.X86_64,
+  handler: handlerFunction,
+  entry: path.join('..', props.serviceName, 'src', `${entryFile}.ts`),
+  bundling: getBundlingConfig(functionName, stage, architecture),
+  layers: props.layers,
+  // ... other configuration
+});
+```
+
+### Lambda Bundling Architecture
+
+#### 1. Build Process Flow
+
+```
+TypeScript Source Code
+        ↓
+NodejsFunction Construct
+        ↓
+getBundlingConfig()
+        ↓
+esbuild Configuration
+        ↓
+Command Hooks (before/after)
+        ↓
+Bundle Output
+        ↓
+Lambda Deployment Package
+```
+
+#### 2. Key Components
+
+**BaseLambdaFunction** (`lib/constructs/lambda/base-lambda-function.ts`)
+- Wraps AWS CDK's NodejsFunction
+- Standardizes Lambda configuration
+- Handles role creation and permissions
+- Sets up logging and monitoring
+
+**bundling-utils.ts** (`lib/constructs/lambda/bundling-utils.ts`)
+- Configures esbuild for Lambda bundling
+- Manages external modules
+- Handles special file copying
+- Provides architecture-specific settings
+
+**esbuild-config.ts** (`lib/constructs/lambda/esbuild-config.ts`)
+- Core esbuild configuration
+- GraphQL loader plugin
+- Command hooks for file operations
+- Environment-specific optimizations
+
+### Detailed Bundling Configuration
+
+#### 1. Base Bundling Options
+
+```typescript
+export function getBundlingConfig(
+  functionName: string,
+  stage: string,
+  architecture: Architecture = Architecture.X86_64
+): NodejsFunctionProps['bundling'] {
+  return {
+    // Optimization settings
+    minify: true,                          // Reduce bundle size
+    sourceMap: true,                       // Enable debugging
+    sourcesContent: false,                 // Exclude source content from maps
+    target: 'node20',                      // Target Node.js 20.x runtime
+    format: OutputFormat.CJS,              // CommonJS format for Lambda
+    
+    // Module resolution
+    mainFields: ['module', 'main'],        // Prefer ES modules, fallback to CommonJS
+    
+    // External modules (not bundled)
+    externalModules: [
+      '@aws-sdk/*',                        // Available in Lambda runtime
+      'aws-sdk',                           // Legacy SDK
+      '@opentelemetry/*',                  // Provided via layer
+      'prisma',                            // Provided via layer
+      '@prisma/client',                    // Provided via layer
+      'canvas',                            // Native module
+      'utf-8-validate',                    // Native module
+      'bufferutil',                        // Native module
+    ],
+    
+    // esbuild arguments
+    esbuildArgs: {
+      '--bundle': true,                    // Bundle all dependencies
+      '--platform': 'node',                // Target Node.js platform
+      '--keep-names': 'true',              // Preserve function names
+      '--tree-shaking': 'true',            // Remove unused code
+      '--drop:debugger': true,             // Remove debugger statements
+      ...(stage === 'prod' && { 
+        '--drop:console': true             // Remove console logs in production
+      })
+    },
+    
+    // Command hooks for special operations
+    commandHooks,
+    
+    // Node modules to include (despite being external)
+    nodeModules: [
+      '@aws-sdk/client-s3',
+      '@aws-sdk/client-ses',
+      '@aws-sdk/client-cognito-identity-provider',
+      '@aws-sdk/client-secrets-manager',
+      '@aws-sdk/client-ssm',
+      '@aws-sdk/client-rds',
+    ],
+    
+    // TypeScript configuration
+    tsconfig: path.join(projectRoot, 'services', 'infra-cdk', 'tsconfig.lambda.json'),
+    
+    // Force local bundling (no Docker)
+    forceDockerBundling: false,
+  };
+}
+```
+
+#### 2. Command Hooks
+
+Command hooks handle special file operations during the bundling process:
+
+```typescript
+const commandHooks = {
+  // Before npm install
+  beforeInstall: (inputDir: string, outputDir: string): string[] => [
+    // Copy pnpm workspace configuration
+    `cp ${projectRoot}/pnpm-workspace.yaml ${outputDir}/pnpm-workspace.yaml`,
+  ],
+  
+  // Before bundling
+  beforeBundling: (inputDir: string, outputDir: string): string[] => {
+    const commands: string[] = [];
+    
+    // GraphQL functions need schema file
+    if (functionName === 'GRAPHQL') {
+      const schemaPath = path.join(inputDir, '..', '..', '..', 'app-graphql', 'src', 'schema.graphql');
+      commands.push(
+        `if [ -f "${schemaPath}" ]; then`,
+        `  mkdir -p "${outputDir}/app-graphql/src"`,
+        `  cp "${schemaPath}" "${outputDir}/app-graphql/src/"`,
+        `fi`
+      );
+    }
+    
+    // Email functions need templates
+    if (['EMAIL_SUBMIT', 'SEND_TEMPLATE_EMAIL'].includes(functionName)) {
+      const templatesPath = path.join(inputDir, '..', 'emailer', 'etaTemplates');
+      commands.push(
+        `if [ -d "${templatesPath}" ]; then`,
+        `  mkdir -p "${outputDir}/etaTemplates"`,
+        `  cp -r "${templatesPath}"/* "${outputDir}/etaTemplates/"`,
+        `fi`
+      );
+    }
+    
+    // OTEL function needs collector config
+    if (functionName === 'OTEL') {
+      const collectorPath = path.join(inputDir, '..', '..', 'collector.yml');
+      commands.push(
+        `if [ -f "${collectorPath}" ]; then`,
+        `  cp "${collectorPath}" "${outputDir}/"`,
+        `fi`
+      );
+    }
+    
+    return commands.length > 0 ? [commands.join(' && ')] : [];
+  },
+  
+  // After bundling
+  afterBundling: (inputDir: string, outputDir: string): string[] => {
+    const commands: string[] = [];
+    
+    // Replace environment variables in collector.yml
+    if (functionName === 'OTEL') {
+      commands.push(
+        `if [ -f "${outputDir}/collector.yml" ] && [ -n "$NR_LICENSE_KEY" ]; then`,
+        `  sed -i.bak "s/\\$NR_LICENSE_KEY/$NR_LICENSE_KEY/g" "${outputDir}/collector.yml"`,
+        `  rm "${outputDir}/collector.yml.bak"`,
+        `fi`
+      );
+    }
+    
+    return commands.length > 0 ? [commands.join(' && ')] : [];
+  }
+};
+```
+
+### External Modules Strategy
+
+#### Why Externalize Certain Modules?
+
+1. **AWS SDK**: Already available in Lambda runtime
+   - Reduces bundle size significantly
+   - Uses AWS's optimized version
+   - Automatic security updates
+
+2. **Lambda Layers**: Large dependencies shared across functions
+   - Prisma client and binaries
+   - OpenTelemetry instrumentation
+   - Reduces cold start times
+
+3. **Native Modules**: Cannot be bundled
+   - Binary dependencies
+   - Platform-specific code
+   - Must be installed at runtime
+
+#### Layer Integration
+
+```typescript
+// Lambda function with layers
+this.function = new NodejsFunction(this, 'Function', {
+  layers: [
+    this.otelLayer,                                    // OpenTelemetry instrumentation
+    ...(needsPrismaLayer(functionName) ? [this.prismaLayer] : []), // Prisma if needed
+    ...(functionProps.additionalLayers || [])         // Function-specific layers
+  ],
+});
+
+// Determine if function needs Prisma
+export function needsPrismaLayer(functionName: string): boolean {
+  const prismaFunctions = [
+    'GRAPHQL', 'CURRENT_USER', 'GET_USERS', 'UPDATE_USER_ROLE',
+    'INDEX_RATES', 'DELETE_RATE', 'INDEX_STATE_SUBMISSION',
+    'CREATE_QUESTION_RESPONSE', 'SEND_REVIEW_ACTION_EMAILS',
+    'SEND_EMAILS_FOR_CMS_RATE_REVIEWS', 'OAUTH_TOKEN', 'MIGRATE',
+  ];
+  return prismaFunctions.includes(functionName);
+}
+```
+
+### Workspace Package Handling
+
+The CDK bundling process handles pnpm workspaces specially:
+
+1. **Workspace Configuration**: Copies `pnpm-workspace.yaml` to bundling directory
+2. **Local Packages**: Bundles `@mc-review/*` packages directly into Lambda
+3. **Package Resolution**: Uses workspace protocol for local dependencies
+
+```typescript
+// tsconfig.lambda.json
+{
+  "compilerOptions": {
+    "paths": {
+      "@mc-review/*": ["../../packages/*/build"]  // Resolve workspace packages
+    }
+  }
+}
+```
+
+### Special File Handling Examples
+
+#### 1. GraphQL Schema
+```typescript
+// GraphQL Lambda needs schema file at runtime
+if (functionName === 'GRAPHQL') {
+  // Copy schema.graphql to bundle
+  // From: services/app-graphql/src/schema.graphql
+  // To: bundle/app-graphql/src/schema.graphql
+}
+```
+
+#### 2. Email Templates
+```typescript
+// Email functions need ETA templates
+if (['EMAIL_SUBMIT', 'SEND_TEMPLATE_EMAIL'].includes(functionName)) {
+  // Copy all template files
+  // From: services/app-api/src/emailer/etaTemplates/
+  // To: bundle/etaTemplates/
+}
+```
+
+#### 3. Configuration Files
+```typescript
+// OTEL function needs collector configuration
+if (functionName === 'OTEL') {
+  // Copy and process collector.yml
+  // Replace $NR_LICENSE_KEY with actual value
+}
+```
+
+### Build Optimization Techniques
+
+#### 1. Tree Shaking
+- Removes unused code automatically
+- Analyzes import/export statements
+- Significantly reduces bundle size
+
+#### 2. Minification
+```typescript
+minify: true,  // Production optimization
+// Transforms:
+function calculateTotal(items) {
+  return items.reduce((sum, item) => sum + item.price, 0);
+}
+// To:
+function a(b){return b.reduce((c,d)=>c+d.price,0)}
+```
+
+#### 3. Source Maps
+```typescript
+sourceMap: true,        // Enable debugging
+sourcesContent: false,  // Don't include source in maps
+// Generates .js.map files for stack trace mapping
+```
+
+#### 4. Console Statement Removal
+```typescript
+// Production only
+'--drop:console': true
+// Removes all console.log, console.error, etc.
+```
+
+### Architecture-Specific Configuration
+
+```typescript
+// Support for different architectures
+architecture: props.lambdaConfig.architecture === 'arm64' 
+  ? lambda.Architecture.ARM_64    // Graviton2 processors
+  : lambda.Architecture.X86_64    // Traditional x86
+
+// Benefits of ARM64:
+// - ~20% better price/performance
+// - Lower latency
+// - Reduced costs
+```
+
+### Debugging Bundled Lambdas
+
+#### 1. Source Maps
+- Automatically generated for all functions
+- Maps minified code back to TypeScript
+- Enable readable stack traces
+
+#### 2. Local Testing
+```typescript
+// Test bundled output locally
+npm run build
+node dist/handlers/apollo_gql.js
+
+// With source maps
+node --enable-source-maps dist/handlers/apollo_gql.js
+```
+
+#### 3. Bundle Analysis
+```typescript
+// esbuild generates metafile for analysis
+esbuildArgs: {
+  '--metafile': true,  // Analyze bundle contents
+}
+```
+
+### Migration from Serverless
+
+#### Key Differences
+
+1. **Handler Format**
+   - Serverless: `src/handlers/apollo_gql.gqlHandler`
+   - CDK: Entry file + handler function separately
+
+2. **Layer Management**
+   - Serverless: Global provider.layers
+   - CDK: Per-function layers array
+
+3. **Build Process**
+   - Serverless: Runs during deployment
+   - CDK: Runs during synthesis
+
+4. **Environment Variables**
+   - Serverless: Interpolated at deploy time
+   - CDK: Set during synthesis
+
+#### Migration Checklist
+
+- [ ] Update handler references to CDK format
+- [ ] Move custom esbuild plugins to CDK configuration
+- [ ] Update file copying logic to command hooks
+- [ ] Configure external modules correctly
+- [ ] Set up Lambda layers for shared dependencies
+- [ ] Update environment variable references
+- [ ] Test bundled output locally
+- [ ] Verify special files are included
+
+### Best Practices
+
+1. **Keep Bundles Small**
+   - Externalize AWS SDK
+   - Use layers for large dependencies
+   - Enable tree shaking
+
+2. **Optimize Cold Starts**
+   - Minimize bundle size
+   - Use ARM64 architecture
+   - Consider provisioned concurrency
+
+3. **Maintain Debuggability**
+   - Always generate source maps
+   - Keep function names (`--keep-names`)
+   - Use structured logging
+
+4. **Handle Native Modules**
+   - Don't bundle binary dependencies
+   - Use Lambda layers when possible
+   - Test on target architecture
+
+5. **Version Control**
+   - Lock dependency versions
+   - Use exact versions in layers
+   - Test updates thoroughly
+
+### Troubleshooting Common Issues
+
+#### 1. Module Not Found
+```
+Error: Cannot find module '@mc-review/common-js'
+Solution: Ensure workspace packages are built before CDK synthesis
+```
+
+#### 2. Native Module Errors
+```
+Error: The module 'canvas.node' was compiled against a different Node.js version
+Solution: Add to externalModules and install via layer
+```
+
+#### 3. Large Bundle Size
+```
+Warning: Bundle size exceeds 50MB
+Solution: Check for accidentally bundled node_modules, use external modules
+```
+
+#### 4. Missing Files at Runtime
+```
+Error: ENOENT: no such file or directory 'schema.graphql'
+Solution: Add file copying to command hooks
+```
+
+## 33. Frontend Asset Building & Deployment
+
+This section explains how frontend assets are built and deployed in the CDK infrastructure, including the build process, CDK constructs used, and deployment strategies.
+
+### Overview
+
+The CDK frontend deployment uses a multi-stage process:
+1. **Build Phase**: React application is built using npm scripts
+2. **Bundle Phase**: Assets are prepared for deployment 
+3. **Deploy Phase**: Assets are uploaded to S3 and served via CloudFront
+
+### Build Process
+
+#### 1. Build Configuration
+
+**Serverless**:
+```yaml
+# app-web/serverless.yml
+custom:
+  scripts:
+    hooks:
+      'package:createDeploymentArtifacts': |
+        set -e
+        npm run build
+        rm -rf build/static/js/*.js.map
+```
+
+**CDK**:
+```typescript
+// In frontend-stack.ts
+private deployFrontendAssets(): void {
+  // Build command executed during CDK synthesis
+  const buildCommand = [
+    'cd ../../app-web',
+    'npm ci',
+    'npm run build',
+    'rm -rf build/static/js/*.js.map'
+  ].join(' && ');
+
+  // Assets are built and deployed using BucketDeployment
+  new s3deploy.BucketDeployment(this, 'WebsiteDeployment', {
+    sources: [
+      s3deploy.Source.asset('../../app-web/build', {
+        bundling: {
+          image: cdk.DockerImage.fromRegistry('node:20'),
+          command: ['bash', '-c', buildCommand],
+          environment: {
+            REACT_APP_API_URL: this.apiUrl,
+            REACT_APP_AUTH_URL: this.authUrl,
+            // ... other env vars
+          }
+        }
+      })
+    ],
+    destinationBucket: this.websiteBucket,
+    distributionPaths: ['/*'], // Invalidate CloudFront cache
+    prune: true, // Remove old files
+    retainOnDelete: false
+  });
+}
+```
+
+#### 2. Environment Variables
+
+The build process injects environment-specific variables:
+
+```typescript
+// Environment variables passed to React build
+const buildEnvironment = {
+  // API endpoints
+  REACT_APP_API_URL: `https://${this.api.restApiId}.execute-api.${this.region}.amazonaws.com/${this.stage}`,
+  REACT_APP_AUTH_URL: `https://${this.authApi.restApiId}.execute-api.${this.region}.amazonaws.com/${this.stage}`,
+  
+  // Feature flags
+  REACT_APP_OTEL_COLLECTOR_URL: this.otelCollectorUrl,
+  REACT_APP_APPLICATION_ENDPOINT: this.cloudFrontUrl,
+  
+  // Build metadata
+  VITE_REACT_APP_VERSION: this.gitCommitHash || 'unknown',
+  VITE_LD_CLIENT_ID: this.launchDarklyClientId || ''
+};
+```
+
+### CDK Constructs
+
+#### 1. Static Website Construct
+
+The `StaticWebsite` construct handles S3 bucket creation and CloudFront configuration:
+
+```typescript
+export class StaticWebsite extends Construct {
+  public readonly bucket: s3.IBucket;
+  public readonly distribution: cloudfront.Distribution;
+  public readonly url: string;
+
+  constructor(scope: Construct, id: string, props: StaticWebsiteProps) {
+    super(scope, id);
+
+    // Create S3 bucket for static assets
+    this.bucket = new s3.Bucket(this, 'WebsiteBucket', {
+      bucketName: `${props.bucketName}-${props.stage}-${Stack.of(this).account}`,
+      encryption: s3.BucketEncryption.S3_MANAGED,
+      blockPublicAccess: s3.BlockPublicAccess.BLOCK_ALL,
+      removalPolicy: props.stage === 'prod' 
+        ? RemovalPolicy.RETAIN 
+        : RemovalPolicy.DESTROY,
+      autoDeleteObjects: props.stage !== 'prod',
+      versioned: true,
+      lifecycleRules: [{
+        id: 'ExpireOldVersions',
+        noncurrentVersionExpiration: Duration.days(30),
+        abortIncompleteMultipartUploadAfter: Duration.days(7)
+      }]
+    });
+
+    // Create CloudFront Origin Access Control
+    const oac = new cloudfront.CfnOriginAccessControl(this, 'OAC', {
+      originAccessControlConfig: {
+        name: `${props.bucketName}-${props.stage}-oac`,
+        originAccessControlOriginType: 's3',
+        signingBehavior: 'always',
+        signingProtocol: 'sigv4'
+      }
+    });
+
+    // CloudFront distribution configuration
+    this.distribution = new cloudfront.Distribution(this, 'Distribution', {
+      comment: `${props.description} - ${props.stage}`,
+      defaultRootObject: 'index.html',
+      defaultBehavior: {
+        origin: new origins.S3Origin(this.bucket),
+        viewerProtocolPolicy: cloudfront.ViewerProtocolPolicy.REDIRECT_TO_HTTPS,
+        allowedMethods: cloudfront.AllowedMethods.ALLOW_GET_HEAD,
+        cachePolicy: cloudfront.CachePolicy.CACHING_DISABLED,
+        originRequestPolicy: cloudfront.OriginRequestPolicy.CORS_S3_ORIGIN,
+        responseHeadersPolicy: this.createResponseHeadersPolicy()
+      },
+      errorResponses: [
+        {
+          httpStatus: 404,
+          responseHttpStatus: 200,
+          responsePagePath: '/index.html',
+          ttl: Duration.seconds(0)
+        },
+        {
+          httpStatus: 403,
+          responseHttpStatus: 200,
+          responsePagePath: '/index.html',
+          ttl: Duration.seconds(0)
+        }
+      ],
+      priceClass: cloudfront.PriceClass.PRICE_CLASS_100,
+      httpVersion: cloudfront.HttpVersion.HTTP2_AND_3,
+      minimumProtocolVersion: cloudfront.SecurityPolicyProtocol.TLS_V1_2_2021,
+      enableLogging: true,
+      logBucket: props.logBucket,
+      logFilePrefix: `cloudfront/${props.bucketName}/`
+    });
+
+    // Grant CloudFront access to S3
+    this.bucket.addToResourcePolicy(new iam.PolicyStatement({
+      sid: 'AllowCloudFrontServicePrincipalReadOnly',
+      effect: iam.Effect.ALLOW,
+      principals: [new iam.ServicePrincipal('cloudfront.amazonaws.com')],
+      actions: ['s3:GetObject'],
+      resources: [`${this.bucket.bucketArn}/*`],
+      conditions: {
+        StringEquals: {
+          'AWS:SourceArn': `arn:aws:cloudfront::${Stack.of(this).account}:distribution/${this.distribution.distributionId}`
+        }
+      }
+    }));
+  }
+}
+```
+
+#### 2. App Web Integration
+
+The `AppWebIntegration` construct handles the specific app-web deployment:
+
+```typescript
+export class AppWebIntegration extends Construct {
+  constructor(scope: Construct, id: string, props: AppWebIntegrationProps) {
+    super(scope, id);
+
+    // Deploy React build artifacts
+    new s3deploy.BucketDeployment(this, 'AppWebDeployment', {
+      sources: [
+        s3deploy.Source.asset(path.join(__dirname, '../../../app-web/build'), {
+          bundling: {
+            image: cdk.DockerImage.fromRegistry('public.ecr.aws/docker/library/node:20-alpine'),
+            command: [
+              'sh', '-c', 
+              [
+                'cd /asset-input',
+                'npm ci --prefer-offline --no-audit',
+                'npm run build',
+                'cp -r build/* /asset-output/',
+                // Remove source maps in production
+                props.stage === 'prod' && 'rm -rf /asset-output/static/js/*.js.map'
+              ].filter(Boolean).join(' && ')
+            ],
+            environment: props.environment,
+            user: 'root',
+            local: {
+              // Local bundling for faster development
+              tryBundle(outputDir: string): boolean {
+                if (process.env.CDK_DOCKER_BUILD === 'false') {
+                  execSync(`cd ${path.join(__dirname, '../../../app-web')} && npm ci && npm run build`);
+                  execSync(`cp -r ${path.join(__dirname, '../../../app-web/build/*')} ${outputDir}/`);
+                  if (props.stage === 'prod') {
+                    execSync(`rm -rf ${outputDir}/static/js/*.js.map`);
+                  }
+                  return true;
+                }
+                return false;
+              }
+            }
+          }
+        })
+      ],
+      destinationBucket: props.websiteBucket,
+      distribution: props.distribution,
+      distributionPaths: ['/*'],
+      prune: true,
+      retainOnDelete: false,
+      memoryLimit: 2048
+    });
+  }
+}
+```
+
+### Deployment Strategies
+
+#### 1. Caching Strategy
+
+```typescript
+// Cache configuration for different asset types
+const staticAssetsBehavior: cloudfront.BehaviorOptions = {
+  origin: new origins.S3Origin(this.bucket),
+  viewerProtocolPolicy: cloudfront.ViewerProtocolPolicy.REDIRECT_TO_HTTPS,
+  cachePolicy: new cloudfront.CachePolicy(this, 'StaticAssetsCachePolicy', {
+    defaultTtl: Duration.days(30),
+    maxTtl: Duration.days(365),
+    queryStringBehavior: cloudfront.CacheQueryStringBehavior.all(),
+  }),
+  compress: true
+};
+
+// Add behaviors for static assets
+this.distribution.addBehavior('/static/*', staticAssetsBehavior);
+this.distribution.addBehavior('/*.js', staticAssetsBehavior);
+this.distribution.addBehavior('/*.css', staticAssetsBehavior);
+```
+
+#### 2. Security Headers
+
+```typescript
+private createResponseHeadersPolicy(): cloudfront.ResponseHeadersPolicy {
+  return new cloudfront.ResponseHeadersPolicy(this, 'SecurityHeadersPolicy', {
+    securityHeadersBehavior: {
+      contentTypeOptions: { override: true },
+      frameOptions: { 
+        frameOption: cloudfront.HeadersFrameOption.DENY, 
+        override: true 
+      },
+      referrerPolicy: {
+        referrerPolicy: cloudfront.HeadersReferrerPolicy.SAME_ORIGIN,
+        override: true
+      },
+      strictTransportSecurity: {
+        accessControlMaxAge: Duration.days(365),
+        includeSubdomains: true,
+        override: true
+      },
+      xssProtection: {
+        mode: cloudfront.HeadersXssProtection.BLOCK,
+        protection: true,
+        override: true
+      }
+    },
+    customHeadersBehavior: {
+      customHeaders: [
+        {
+          header: 'Cache-Control',
+          value: 'no-cache, no-store, must-revalidate',
+          override: false
+        },
+        {
+          header: 'Pragma',
+          value: 'no-cache',
+          override: false
+        },
+        {
+          header: 'X-Content-Type-Options',
+          value: 'nosniff',
+          override: true
+        }
+      ]
+    }
+  });
+}
+```
+
+### Build Optimization
+
+#### 1. Docker Layer Caching
+
+```typescript
+// Optimize Docker builds with layer caching
+bundling: {
+  image: cdk.DockerImage.fromRegistry('node:20-alpine'),
+  command: ['sh', '-c', buildCommand],
+  volumes: [
+    // Cache npm packages between builds
+    {
+      containerPath: '/root/.npm',
+      hostPath: path.join(os.homedir(), '.npm-cache'),
+    }
+  ],
+  buildArgs: {
+    // Enable BuildKit for better caching
+    DOCKER_BUILDKIT: '1'
+  }
+}
+```
+
+#### 2. Conditional Builds
+
+```typescript
+// Skip build in certain environments
+const shouldBuild = process.env.SKIP_FRONTEND_BUILD !== 'true';
+
+if (shouldBuild) {
+  new s3deploy.BucketDeployment(this, 'Deployment', {
+    // ... deployment config
+  });
+} else {
+  console.log('Skipping frontend build (SKIP_FRONTEND_BUILD=true)');
+}
+```
+
+### Environment-Specific Configurations
+
+#### Development
+```typescript
+if (props.stage === 'dev') {
+  // Enable source maps
+  buildEnvironment.GENERATE_SOURCEMAP = 'true';
+  
+  // Disable caching for easier debugging
+  distribution.defaultBehavior.cachePolicy = cloudfront.CachePolicy.CACHING_DISABLED;
+}
+```
+
+#### Production
+```typescript
+if (props.stage === 'prod') {
+  // Remove source maps
+  bundling.command.push('&& rm -rf /asset-output/static/js/*.js.map');
+  
+  // Enable CloudFront compression
+  distribution.defaultBehavior.compress = true;
+  
+  // Add Web Application Firewall
+  const webAcl = new wafv2.CfnWebACL(this, 'WebAcl', {
+    // ... WAF configuration
+  });
+}
+```
+
+### Monitoring & Alerts
+
+```typescript
+// CloudFront distribution alarms
+new cloudwatch.Alarm(this, 'HighErrorRate', {
+  metric: new cloudwatch.Metric({
+    namespace: 'AWS/CloudFront',
+    metricName: '4xxErrorRate',
+    dimensionsMap: {
+      DistributionId: this.distribution.distributionId
+    },
+    statistic: 'Average',
+    period: Duration.minutes(5)
+  }),
+  threshold: 5,
+  evaluationPeriods: 2,
+  alarmDescription: 'High 4xx error rate on CloudFront distribution'
+});
+
+// S3 bucket metrics
+new cloudwatch.Alarm(this, 'HighBucketSize', {
+  metric: new cloudwatch.Metric({
+    namespace: 'AWS/S3',
+    metricName: 'BucketSizeBytes',
+    dimensionsMap: {
+      BucketName: this.bucket.bucketName,
+      StorageType: 'StandardStorage'
+    },
+    statistic: 'Average',
+    period: Duration.days(1)
+  }),
+  threshold: 1_073_741_824, // 1GB
+  evaluationPeriods: 1,
+  alarmDescription: 'S3 bucket size exceeds 1GB'
+});
+```
+
+### Best Practices
+
+1. **Build Optimization**
+   - Use Docker layer caching
+   - Implement local bundling when possible
+   - Remove source maps in production
+   - Minimize bundle sizes
+
+2. **Security**
+   - Block public access to S3 buckets
+   - Use Origin Access Control (OAC)
+   - Implement security headers
+   - Enable AWS WAF for production
+
+3. **Performance**
+   - Use CloudFront edge locations
+   - Implement proper cache headers
+   - Enable Gzip compression
+   - Use HTTP/2 and HTTP/3
+
+4. **Deployment**
+   - Invalidate CloudFront cache on deployment
+   - Use versioned S3 objects
+   - Implement rollback strategies
+   - Monitor deployment metrics
+
+5. **Cost Optimization**
+   - Use appropriate CloudFront price class
+   - Implement S3 lifecycle policies
+   - Monitor and alert on usage
+   - Clean up old deployments
+
+This comprehensive bundling system ensures efficient, optimized Lambda deployments while maintaining developer productivity and debuggability.

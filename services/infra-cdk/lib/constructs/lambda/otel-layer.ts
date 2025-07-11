@@ -2,6 +2,7 @@ import { Construct } from 'constructs';
 import * as lambda from 'aws-cdk-lib/aws-lambda';
 import { Architecture } from 'aws-cdk-lib/aws-lambda';
 import { ServiceRegistry } from '@constructs/base';
+import { getOtelLayerArn } from '@config/constants';
 
 export interface OtelLayerProps {
   stage: string;
@@ -39,13 +40,8 @@ export class OtelLayer extends Construct {
   private getAwsOtelLayerArn(stage: string, architecture: Architecture): string {
     // AWS-managed OpenTelemetry layer ARNs
     // These are the official AWS layers that include the OTEL collector
-    const region = 'us-east-1'; // Based on your serverless config
-    
-    if (architecture === Architecture.ARM_64) {
-      return `arn:aws:lambda:${region}:901920570463:layer:aws-otel-nodejs-arm64-ver-1-30-2:1`;
-    } else {
-      return `arn:aws:lambda:${region}:901920570463:layer:aws-otel-nodejs-amd64-ver-1-30-2:1`;
-    }
+    const archType = architecture === Architecture.ARM_64 ? 'arm64' : 'x86_64';
+    return getOtelLayerArn(archType);
   }
 
   /**
