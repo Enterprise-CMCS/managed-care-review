@@ -5,11 +5,13 @@ import {
     Fieldset,
     FormGroup,
     Label,
+    Link,
 } from '@trussworks/react-uswds'
 import classnames from 'classnames'
 import {
     ButtonWithLogging,
     FieldRadio,
+    FieldCheckbox,
     FileUpload,
     LinkWithLogging,
     PoliteErrorMessage,
@@ -24,6 +26,7 @@ import {
     ACCEPTED_RATE_CERTIFICATION_FILE_TYPES,
 } from '../../../components/FileUpload'
 import { useS3 } from '../../../contexts/S3Context'
+import { RateMedicaidPopulationsRecord } from '@mc-review/hpp'
 
 import {
     FieldArray,
@@ -36,6 +39,7 @@ import { ActuaryContactFields } from '../Contacts'
 import { FormikRateForm, RateDetailFormConfig } from './V2/RateDetailsV2'
 import { useFocus } from '../../../hooks/useFocus'
 import { ContactSupportLink } from '../../../components/ErrorAlert/ContactSupportLink'
+import { Contract } from '../../../gen/gqlClient'
 const isRateTypeEmpty = (rateForm: FormikRateForm): boolean =>
     rateForm.rateType === undefined
 const isRateTypeAmendment = (rateForm: FormikRateForm): boolean =>
@@ -55,6 +59,7 @@ type SingleRateFormFieldsProps = {
     shouldValidate: boolean
     index: number // defaults to 0
     fieldNamePrefix: string // formik field name prefix - used for looking up values and errors in Formik FieldArray
+    contract?: Contract
     autofill?: (rateForm: FormikRateForm) => void // used for multi-rates, when called will FieldArray replace the existing form fields with new data
 }
 
@@ -103,6 +108,7 @@ export const SingleRateFormFields = ({
     shouldValidate,
     index = 0,
     fieldNamePrefix,
+    contract,
 }: SingleRateFormFieldsProps): React.ReactElement => {
     // page level setup
     const { handleUploadFile, handleScanFile } = useS3()
@@ -129,6 +135,8 @@ export const SingleRateFormFields = ({
         if (!shouldValidate) return undefined
         return getIn(errors, `${fieldNamePrefix}.${fieldName}`)
     }
+
+    const formHeading = 'Rate Details Form'
 
     return (
         <>
@@ -244,6 +252,76 @@ export const SingleRateFormFields = ({
                     label="What rates are included in this certification?"
                 />
             </FormGroup>
+
+            {contract?.draftRevision?.formData.dsnpContract !== null && (
+                <FormGroup
+                    error={Boolean(showFieldErrors('rateMedicaidPopulations'))}
+                >
+                    <Fieldset
+                        legend="Rate Medicaid populations"
+                        aria-required
+                        id={`${fieldNamePrefix}.rateMedicaidPopulations`}
+                    >
+                        <span className={styles.requiredOptionalText}>
+                            Required
+                        </span>
+                        <div
+                            role="note"
+                            aria-labelledby={`${fieldNamePrefix}.rateMedicaidPopulations`}
+                            className="mcr-note margin-top-1"
+                        >
+                            See 42 CFR § 422.2
+                        </div>
+                        <Link
+                            variant="external"
+                            href={
+                                'https://www.medicaid.gov/medicaid/managed-care/managed-care-entities/index.html'
+                            }
+                            target="_blank"
+                        >
+                            Medicaid Managed Care Rate Development Guide
+                        </Link>
+                        <div className="usa-hint">
+                            <span>Check all that apply</span>
+                        </div>
+                        {Boolean(
+                            showFieldErrors('rateMedicaidPopulations')
+                        ) && (
+                            <PoliteErrorMessage formFieldLabel="Rate medicaid populations">
+                                {showFieldErrors('rateMedicaidPopulations')}
+                            </PoliteErrorMessage>
+                        )}
+                        <FieldCheckbox
+                            id="withDSNP"
+                            name={`${fieldNamePrefix}.rateMedicaidPopulations`}
+                            label={
+                                RateMedicaidPopulationsRecord.MEDICARE_MEDICAID_WITH_DSNP
+                            }
+                            value="MEDICARE_MEDICAID_WITH_DSNP"
+                            heading="Rate Medicaid populations"
+                            parent_component_heading={formHeading}
+                        />
+                        <FieldCheckbox
+                            id="medicaidOnly"
+                            name={`${fieldNamePrefix}.rateMedicaidPopulations`}
+                            label={RateMedicaidPopulationsRecord.MEDICAID_ONLY}
+                            value="MEDICAID_ONLY"
+                            heading="Rate Medicaid populations"
+                            parent_component_heading={formHeading}
+                        />
+                        <FieldCheckbox
+                            id="withoutDSNP"
+                            name={`${fieldNamePrefix}.rateMedicaidPopulations`}
+                            label={
+                                RateMedicaidPopulationsRecord.MEDICARE_MEDICAID_WITHOUT_DSNP
+                            }
+                            value="MEDICARE_MEDICAID_WITHOUT_DSNP"
+                            heading="Rate Medicaid populations"
+                            parent_component_heading={formHeading}
+                        />
+                    </Fieldset>
+                </FormGroup>
+            )}
 
             <FormGroup error={Boolean(showFieldErrors('rateType'))}>
                 <Fieldset
