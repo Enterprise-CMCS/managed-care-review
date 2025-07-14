@@ -99,7 +99,6 @@ const approveContractMockFailure = ({
                 },
             },
         },
-        error: graphQLError,
         result: {
             data: null,
             errors: [graphQLError],

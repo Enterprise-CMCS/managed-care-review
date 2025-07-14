@@ -512,7 +512,6 @@ const submitHealthPlanPackageMockError = ({
             query: SubmitHealthPlanPackageDocument,
             variables: { input: { pkgID: id } },
         },
-        error: graphQLError,
         result: {
             data: null,
             errors: [graphQLError],
@@ -599,7 +598,6 @@ const unlockHealthPlanPackageMockError = ({
             query: UnlockHealthPlanPackageDocument,
             variables: { input: { pkgID: id, unlockedReason: reason } },
         },
-        error: graphQLError,
         result: {
             data: null,
             errors: [graphQLError],
@@ -636,7 +634,6 @@ const unlockContractMockError = ({
             query: UnlockContractDocument,
             variables: { input: { contractID: id, unlockedReason: reason } },
         },
-        error: graphQLError,
         result: {
             data: null,
             errors: [graphQLError],

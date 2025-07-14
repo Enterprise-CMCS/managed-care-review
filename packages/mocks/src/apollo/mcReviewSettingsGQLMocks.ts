@@ -136,9 +136,9 @@ const fetchMcReviewSettingsFailMock = (): MockedResponse<GraphQLError> => {
             query: FetchMcReviewSettingsDocument,
             variables: {},
         },
-        error: graphQLError,
         result: {
             data: null,
+            errors: [graphQLError],
         },
     }
 }

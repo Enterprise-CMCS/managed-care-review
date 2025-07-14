@@ -222,9 +222,9 @@ const indexUsersQueryFailMock = (): MockedResponse<GraphQLError> => {
         request: {
             query: IndexUsersDocument,
         },
-        error: graphQLError,
         result: {
             data: null,
+            errors: [graphQLError],
         },
     }
 }
@@ -299,9 +299,9 @@ function updateStateAssignmentsMutationMockFailure(
                 },
             },
         },
-        error: graphQLError,
         result: {
             data: null,
+            errors: [graphQLError],
         },
     }
 }
