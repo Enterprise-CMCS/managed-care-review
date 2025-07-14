@@ -366,7 +366,7 @@ describe('ContractDetails', () => {
 
             expect(dsnpQuestion).toBeInTheDocument()
             within(dsnpQuestion).getByRole('link', {
-                name: 'D-SNP guidance',
+                name: 'D-SNP guidance (opens in new window)',
             })
         })
     })
