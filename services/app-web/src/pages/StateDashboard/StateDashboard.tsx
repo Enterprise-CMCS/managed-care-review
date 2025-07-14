@@ -5,7 +5,7 @@ import { useAuth } from '../../contexts/AuthContext'
 import { useIndexContractsForDashboardQuery } from '../../gen/gqlClient'
 import styles from './StateDashboard.module.scss'
 import { SubmissionSuccessMessage } from './SubmissionSuccessMessage'
-import { handleGraphQLError, isLikelyUserAuthError } from '@mc-review/helpers'
+import { handleApolloError, isLikelyUserAuthError } from '@mc-review/helpers'
 import {
     ErrorAlertSignIn,
     ContractTable,
@@ -33,7 +33,7 @@ export const StateDashboard = (): React.ReactElement => {
     if (!data && loading) {
         return <Loading />
     } else if (!data && error) {
-        handleGraphQLError(error, true)
+        handleApolloError(error, true)
         return (
             <div id={DASHBOARD_ATTRIBUTE} className={styles.wrapper}>
                 <GridContainer className={styles.container}>

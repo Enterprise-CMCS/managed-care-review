@@ -6,8 +6,9 @@ import {
     CreateApiKeyPayload,
     useCreateApiKeyMutation,
 } from '../../gen/gqlClient'
-import { handleGraphQLError } from '@mc-review/helpers'
+import { handleApolloError } from '@mc-review/helpers'
 import { recordJSException } from '@mc-review/otel'
+import { ApolloError } from '@apollo/client'
 import { GenericErrorPage } from '../Errors/GenericErrorPage'
 import styles from './APIAccess.module.scss'
 import { ButtonWithLogging, LinkWithLogging } from '../../components'
@@ -33,8 +34,8 @@ function APIAccess(): React.ReactElement {
             setAPIKey(result.data?.createAPIKey)
         } catch (err) {
             console.error('unexpected error generating a new API Key', err)
-            if (err instanceof Error) {
-                handleGraphQLError(err, true)
+            if (err instanceof ApolloError) {
+                handleApolloError(err, true)
             }
             recordJSException(err)
             setDisplayErrorPage(true)

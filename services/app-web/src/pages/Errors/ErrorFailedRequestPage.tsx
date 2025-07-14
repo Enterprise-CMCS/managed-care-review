@@ -3,12 +3,13 @@ import styles from './Errors.module.scss'
 
 import { PageHeading } from '../../components/PageHeading'
 import { GridContainer } from '@trussworks/react-uswds'
-import { handleGraphQLError, isLikelyUserAuthError } from '@mc-review/helpers'
+import { ApolloError } from '@apollo/client'
+import { handleApolloError, isLikelyUserAuthError } from '@mc-review/helpers'
 import { ErrorAlertFailedRequest, ErrorAlertSignIn } from '../../components'
 import { useAuth } from '../../contexts/AuthContext'
 
 /*
-    For use with an unknown error coming back from API requests
+    For use with an unknown ApolloError coming back from API requests
     - full takeover of the main app content below the header
     - specific ErrorAlert displayed at top of page
     - handles OTEL logging
@@ -18,18 +19,18 @@ export const ErrorFailedRequestPage = ({
     error,
     testID,
 }: {
-    error: Error
+    error: ApolloError
     testID: string
 }): React.ReactElement => {
     const { loginStatus } = useAuth()
     const isAuthenticated = loginStatus === 'LOGGED_IN'
-    handleGraphQLError(error as any, isAuthenticated)
+    handleApolloError(error, isAuthenticated)
 
     return (
         <section data-testid={testID} className={styles.errorsContainer}>
             <GridContainer>
                 <PageHeading> Error </PageHeading>
-                {isLikelyUserAuthError(error as any, isAuthenticated) ? (
+                {isLikelyUserAuthError(error, isAuthenticated) ? (
                     <ErrorAlertSignIn />
                 ) : (
                     <ErrorAlertFailedRequest />
