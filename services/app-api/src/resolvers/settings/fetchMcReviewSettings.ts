@@ -7,7 +7,7 @@ import {
 } from '../attributeHelper'
 import { logError, logSuccess } from '../../logger'
 import { hasAdminPermissions, hasCMSPermissions } from '../../domain-models'
-import { ForbiddenError } from 'apollo-server-lambda'
+import { createForbiddenError } from '../errorUtils'
 import { GraphQLError } from 'graphql'
 import type { Emailer } from '../../emailer'
 
@@ -26,9 +26,7 @@ export function fetchMcReviewSettings(
             const msg = 'user not authorized to fetch mc review settings'
             logError('fetchMcReviewSettings', msg)
             setErrorAttributesOnActiveSpan(msg, span)
-            throw new ForbiddenError(msg, {
-                cause: 'NOT_AUTHORIZED',
-            })
+            throw createForbiddenError(msg)
         }
 
         // First get emailer config

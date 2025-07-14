@@ -1,4 +1,4 @@
-import { ForbiddenError, UserInputError } from 'apollo-server-lambda'
+import { createForbiddenError, createUserInputError } from '../errorUtils'
 import { isStateUser } from '../../domain-models'
 import type { MutationResolvers } from '../../gen/gqlServer'
 import { logError, logSuccess } from '../../logger'
@@ -80,7 +80,7 @@ export function updateContractDraftRevision(
                 : 'User not authorized to fetch data from a different state'
             logError('updateContractDraftRevision', msg)
             setErrorAttributesOnActiveSpan(msg, span)
-            throw new ForbiddenError(msg)
+            throw createForbiddenError(msg)
         }
 
         if (
@@ -91,9 +91,7 @@ export function updateContractDraftRevision(
             const errMessage = `Contract is not in editable state. Contract: ${contractID} Status: ${contractWithHistory.status}`
             logError('updateContractDraftRevision', errMessage)
             setErrorAttributesOnActiveSpan(errMessage, span)
-            throw new UserInputError(errMessage, {
-                argumentName: 'contractID',
-            })
+            throw createUserInputError(errMessage, 'contractID')
         }
 
         // If updatedAt does not match concurrent editing occurred.
@@ -104,7 +102,7 @@ export function updateContractDraftRevision(
             const errMessage = `Concurrent update error: The data you are trying to modify has changed since you last retrieved it. Please refresh the page to continue.`
             logError('updateContractDraftRevision', errMessage)
             setErrorAttributesOnActiveSpan(errMessage, span)
-            throw new UserInputError(errMessage)
+            throw createUserInputError(errMessage)
         }
 
         // Using zod to validate and transform graphQL types into domain types.
@@ -119,7 +117,7 @@ export function updateContractDraftRevision(
             const errMessage = parsedFormData.message
             logError('updateContractDraftRevision', errMessage)
             setErrorAttributesOnActiveSpan(errMessage, span)
-            throw new UserInputError(errMessage)
+            throw createUserInputError(errMessage)
         }
 
         const editableFormData = parsedFormData

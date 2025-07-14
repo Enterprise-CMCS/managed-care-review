@@ -1,4 +1,4 @@
-import { ForbiddenError, UserInputError } from 'apollo-server-lambda'
+import { createForbiddenError, createUserInputError } from '../errorUtils'
 import type { MutationResolvers } from '../../gen/gqlServer'
 import { logError, logSuccess } from '../../logger'
 import { NotFoundError, type Store } from '../../postgres'
@@ -41,7 +41,7 @@ export function approveContract(
             const message = 'user not authorized to approve a contract'
             logError('approveContract', message)
             setErrorAttributesOnActiveSpan(message, span)
-            throw new ForbiddenError(message)
+            throw createForbiddenError(message)
         }
 
         const contractWithHistory =
@@ -75,10 +75,7 @@ export function approveContract(
             const errMessage = `Attempted to approve contract with wrong status: ${contractWithHistory.consolidatedStatus}`
             logError('approveContract', errMessage)
             setErrorAttributesOnActiveSpan(errMessage, span)
-            throw new UserInputError(errMessage, {
-                argumentName: 'contractID',
-                cause: 'INVALID_PACKAGE_STATUS',
-            })
+            throw createUserInputError(errMessage, 'contractID')
         }
         const today = new Date()
         const dateApprovalReleasedToStateAsDate = new Date(
@@ -89,9 +86,7 @@ export function approveContract(
             const errMessage = `Attempted to approve contract with invalid approval release date: ${dateApprovalReleasedToState}`
             logError('approveContract', errMessage)
             setErrorAttributesOnActiveSpan(errMessage, span)
-            throw new UserInputError(errMessage, {
-                cause: 'INVALID_APPROVAL_RELEASE_DATE',
-            })
+            throw createUserInputError(errMessage)
         }
         const approveContractResult = await store.approveContract({
             contractID: contractID,

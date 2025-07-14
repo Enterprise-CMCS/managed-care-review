@@ -8,7 +8,7 @@ import {
     type CHIPFederalAuthority,
     federalAuthorityKeysForCHIP,
 } from '@mc-review/hpp'
-import { ForbiddenError, UserInputError } from 'apollo-server-lambda'
+import { createForbiddenError, createUserInputError } from '../errorUtils'
 import { GraphQLError } from 'graphql'
 import {
     setResolverDetailsOnActiveSpan,
@@ -48,7 +48,7 @@ const validateStatusAndUpdateInfo = (
         const errMessage = 'Resubmission requires a reason'
         logError('submitContract', errMessage)
         setErrorAttributesOnActiveSpan(errMessage, span)
-        throw new UserInputError(errMessage)
+        throw createUserInputError(errMessage)
     } else if (status === 'RESUBMITTED' || status === 'SUBMITTED') {
         const errMessage = `Attempted to submit an already submitted package.`
         logError('submitContract', errMessage)
@@ -107,7 +107,9 @@ export function submitContract(
                 'user not authorized to fetch state data',
                 span
             )
-            throw new ForbiddenError('user not authorized to fetch state data')
+            throw createForbiddenError(
+                'user not authorized to fetch state data'
+            )
         }
         const stateFromCurrentUser: State['code'] = user.stateCode
 
@@ -149,7 +151,7 @@ export function submitContract(
                 'user not authorized to fetch data from a different state',
                 span
             )
-            throw new ForbiddenError(
+            throw createForbiddenError(
                 'user not authorized to fetch data from a different state'
             )
         }
@@ -211,9 +213,7 @@ export function submitContract(
             const errMessage = parsedContract.message
             logError('submitContract', errMessage)
             setErrorAttributesOnActiveSpan(errMessage, span)
-            throw new UserInputError(errMessage, {
-                message: parsedContract.message,
-            })
+            throw createUserInputError(errMessage)
         }
         // add all rates (including any linked rates) back in
         parsedContract.draftRates = contractWithHistory.draftRates
@@ -282,10 +282,7 @@ export function submitContract(
                 const errMessage = `Attempted to submit a contract and rates contract without rates: ${parsedContract.id}`
                 logError('submitContract', errMessage)
                 setErrorAttributesOnActiveSpan(errMessage, span)
-                throw new UserInputError(errMessage, {
-                    argumentName: 'contractID',
-                    cause: 'BAD_USER_INPUT',
-                })
+                throw createUserInputError(errMessage, 'contractID', contractID)
             }
 
             //Ensure included rates are in a valid state
@@ -298,10 +295,11 @@ export function submitContract(
                         const errMessage = `Attempted to submit a contract with a withdrawn rate. Rate id: ${draftRate.id}`
                         logError('submitContract', errMessage)
                         setErrorAttributesOnActiveSpan(errMessage, span)
-                        throw new UserInputError(errMessage, {
-                            argumentName: 'rateID',
-                            cause: 'INVALID_PACKAGE_STATUS',
-                        })
+                        throw createUserInputError(
+                            errMessage,
+                            'rateID',
+                            draftRate.id
+                        )
                     }
                 }
             }

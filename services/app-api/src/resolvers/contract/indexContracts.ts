@@ -1,5 +1,5 @@
 import type { Span } from '@opentelemetry/api'
-import { ForbiddenError } from 'apollo-server-lambda'
+import { createForbiddenError } from '../errorUtils'
 import {
     isStateUser,
     hasAdminPermissions,
@@ -153,7 +153,7 @@ export function indexContractsResolver(
                 : 'user not authorized to fetch state data'
             logError('indexContracts', errMsg)
             setErrorAttributesOnActiveSpan(errMsg, span)
-            throw new ForbiddenError(errMsg)
+            throw createForbiddenError(errMsg)
         }
     }
 }

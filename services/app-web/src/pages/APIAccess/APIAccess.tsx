@@ -1,4 +1,3 @@
-import { ApolloError } from '@apollo/client'
 import { Grid, GridContainer, Link } from '@trussworks/react-uswds'
 import path from 'path-browserify'
 import { useState } from 'react'
@@ -9,6 +8,7 @@ import {
 } from '../../gen/gqlClient'
 import { handleApolloError } from '@mc-review/helpers'
 import { recordJSException } from '@mc-review/otel'
+import { ApolloError } from '@apollo/client'
 import { GenericErrorPage } from '../Errors/GenericErrorPage'
 import styles from './APIAccess.module.scss'
 import { ButtonWithLogging, LinkWithLogging } from '../../components'

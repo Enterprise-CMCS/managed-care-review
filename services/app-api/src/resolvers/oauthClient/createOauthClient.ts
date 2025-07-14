@@ -1,6 +1,6 @@
 import type { MutationResolvers } from '../../gen/gqlServer'
 import type { Store } from '../../postgres'
-import { ForbiddenError, UserInputError } from 'apollo-server-core'
+import { createForbiddenError, createUserInputError } from '../errorUtils'
 import { GraphQLError } from 'graphql'
 import { logError, logSuccess } from '../../logger'
 import {
@@ -36,7 +36,7 @@ export function createOauthClientResolver(
             const msg = 'Only ADMIN users can create OAuth clients'
             logError('createOauthClient', msg)
             setErrorAttributesOnActiveSpan(msg, span)
-            throw new ForbiddenError(msg)
+            throw createForbiddenError(msg)
         }
 
         // Validate that the provided userID exists and is a valid CMS user
@@ -56,9 +56,9 @@ export function createOauthClientResolver(
             const msg = `User with ID ${input.userID} does not exist`
             logError('createOauthClient', msg)
             setErrorAttributesOnActiveSpan(msg, span)
-            throw new UserInputError(
+            throw createUserInputError(
                 `User with ID ${input.userID} does not exist`,
-                { argumentName: 'userID' }
+                'userID'
             )
         }
 
@@ -70,7 +70,7 @@ export function createOauthClientResolver(
             const msg = `OAuth clients can only be associated with CMS users`
             logError('createOauthClient', msg)
             setErrorAttributesOnActiveSpan(msg, span)
-            throw new UserInputError(msg, { argumentName: 'userID' })
+            throw createUserInputError(msg, 'userID')
         }
 
         const oauthClient = await store.createOAuthClient({

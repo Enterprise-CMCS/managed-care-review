@@ -8,8 +8,8 @@ import {
 } from '../attributeHelper'
 import { hasCMSPermissions } from '../../domain-models'
 import { logError, logSuccess } from '../../logger'
-import { ForbiddenError, UserInputError } from 'apollo-server-lambda'
-import { NotFoundError } from '../../postgres'
+import { createForbiddenError, createUserInputError } from '../errorUtils'
+import { NotFoundError } from '../../postgres/postgresErrors'
 import { GraphQLError } from 'graphql/index'
 import type { StateCodeType } from '../../testHelpers'
 import { canWrite } from '../../authorization/oauthAuthorization'
@@ -44,7 +44,7 @@ export function undoWithdrawRate(
             const message = 'user not authorized to undo withdraw rate'
             logError('undoWithdrawRate', message)
             setErrorAttributesOnActiveSpan(message, span)
-            throw new ForbiddenError(message)
+            throw createForbiddenError(message)
         }
 
         const rateWithHistory = await store.findRateWithHistory(rateID)
@@ -75,10 +75,7 @@ export function undoWithdrawRate(
             const errMessage = `Attempted to undo rate withdrawal with wrong status. Rate: ${rateWithHistory.consolidatedStatus}`
             logError('undoWithdrawRate', errMessage)
             setErrorAttributesOnActiveSpan(errMessage, span)
-            throw new UserInputError(errMessage, {
-                argumentName: 'rateID',
-                cause: 'INVALID_PACKAGE_STATUS',
-            })
+            throw createUserInputError(errMessage, 'rateID')
         }
 
         // There must be one contract rate was withdrawn from and all must be in a submitted state.
@@ -121,10 +118,7 @@ export function undoWithdrawRate(
             const errMessage = `Attempted to undo rate withdrawal with parent contract in an invalid state: ${parentContract.consolidatedStatus}`
             logError('undoWithdrawRate', errMessage)
             setErrorAttributesOnActiveSpan(errMessage, span)
-            throw new UserInputError(errMessage, {
-                argumentName: 'rateID',
-                cause: 'INVALID_PACKAGE_STATUS',
-            })
+            throw createUserInputError(errMessage, 'rateID')
         }
 
         // Other linked contracts can be in 'SUBMITTED', 'RESUBMITTED', 'WITHDRAWN' statuses
@@ -139,10 +133,7 @@ export function undoWithdrawRate(
             const errMessage = `Attempted to undo rate withdrawal with contract(s) that are in an invalid state. Invalid contract IDs: ${invalidLinkedContractStatus.map((contract) => contract.id)}`
             logError('undoWithdrawRate', errMessage)
             setErrorAttributesOnActiveSpan(errMessage, span)
-            throw new UserInputError(errMessage, {
-                argumentName: 'rateID',
-                cause: 'INVALID_PACKAGE_STATUS',
-            })
+            throw createUserInputError(errMessage, 'rateID')
         }
 
         const undoWithdrawRate = await store.undoWithdrawRate({
