@@ -1336,6 +1336,7 @@ export const ContractDetails = ({
                                                                 }
                                                                 target="_blank"
                                                                 data-testid="dsnpGuidanceLink"
+                                                                aria-label="D-SNP guidance (opens in new window)"
                                                             >
                                                                 D-SNP guidance
                                                             </LinkWithLogging>
