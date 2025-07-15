@@ -80,7 +80,6 @@ function updateDraftContractRates(
         }
 
         const parsedUpdates = parsedRatesResult.data
-
         // fetch contract with rates
         const contract = await store.findContractWithHistory(contractID)
         if (contract instanceof Error) {

@@ -70,6 +70,7 @@ import {
     deleteOauthClientResolver,
     updateOauthClientResolver,
 } from './oauthClient'
+import type { DocumentZipService } from '../zip/generateZip'
 
 export function configureResolvers(
     store: Store,
@@ -77,7 +78,8 @@ export function configureResolvers(
     launchDarkly: LDService,
     jwt: JWTLib,
     s3Client: S3ClientT,
-    applicationEndpoint: string
+    applicationEndpoint: string,
+    documentZip: DocumentZipService
 ): Resolvers {
     const resolvers: Resolvers = {
         Date: GraphQLDate,
@@ -106,7 +108,12 @@ export function configureResolvers(
                 store,
                 launchDarkly
             ),
-            submitContract: submitContract(store, emailer, launchDarkly),
+            submitContract: submitContract(
+                store,
+                emailer,
+                launchDarkly,
+                documentZip
+            ),
             unlockHealthPlanPackage: unlockHealthPlanPackageResolver(
                 store,
                 emailer
@@ -140,7 +147,7 @@ export function configureResolvers(
             ),
             createAPIKey: createAPIKeyResolver(jwt),
             unlockRate: unlockRate(store),
-            submitRate: submitRate(store, launchDarkly),
+            submitRate: submitRate(store, launchDarkly, documentZip),
             updateEmailSettings: updateEmailSettings(store),
             createOauthClient: createOauthClientResolver(store),
             deleteOauthClient: deleteOauthClientResolver(store),
