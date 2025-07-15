@@ -13,6 +13,7 @@ import {
   LambdaLayersStack
 } from './stacks';
 import { StageConfig } from './config/stage-config';
+import { CDK_DEPLOYMENT_SUFFIX } from './config/constants';
 
 export interface StackOrchestratorProps {
   app: cdk.App;
@@ -30,7 +31,7 @@ export interface StackReferences {
   apiCompute: ApiComputeStack;
   databaseOps: DatabaseOperationsStack;
   frontend: FrontendStack;
-  virusScanning: GuardDutyMalwareProtectionStack;
+  virusScanning?: GuardDutyMalwareProtectionStack;
   monitoring: MonitoringStack;
   githubOidc?: GitHubOidcStack;
 }
@@ -61,17 +62,18 @@ export class StackOrchestrator {
     const data = this.createData(network);
     const auth = this.createAuth(foundation);
 
-    // 6. API Compute Stack (depends on Network, Data, Auth, Lambda Layers)
-    const apiCompute = this.createApiCompute(network, data, auth, lambdaLayers);
-
-    // 7. Database Operations Stack
+    // 6. Database Operations Stack (needs to be created before ApiCompute for layer exports)
     const databaseOps = this.createDatabaseOps(network, data, lambdaLayers);
+
+    // 7. API Compute Stack (depends on Network, Data, Auth, Lambda Layers, and DatabaseOps)
+    const apiCompute = this.createApiCompute(network, data, auth, lambdaLayers);
+    apiCompute.addDependency(databaseOps); // Ensure DatabaseOps exports are available
 
     // 8. Frontend Stack
     const frontend = this.createFrontend(apiCompute);
 
     // 9. Virus Scanning Stack
-    const virusScanning = this.createVirusScanning(data, network);
+    // const virusScanning = this.createVirusScanning(data, network);
 
     // 10. Monitoring Stack
     const monitoring = this.createMonitoring(foundation);
@@ -85,7 +87,7 @@ export class StackOrchestrator {
       apiCompute,
       databaseOps,
       frontend,
-      virusScanning,
+      // virusScanning,
       monitoring,
       githubOidc
     };
@@ -102,7 +104,7 @@ export class StackOrchestrator {
   }
 
   private createFoundation(): FoundationStack {
-    return new FoundationStack(this.props.app, `MCR-Foundation-${this.props.stage}`, {
+    return new FoundationStack(this.props.app, `MCR-Foundation-${this.props.stage}${CDK_DEPLOYMENT_SUFFIX}`, {
       env: this.props.env,
       stage: this.props.stage,
       stageConfig: this.props.stageConfig,
@@ -111,7 +113,7 @@ export class StackOrchestrator {
   }
 
   private createNetwork(foundation: FoundationStack): NetworkStack {
-    const stack = new NetworkStack(this.props.app, `MCR-Network-${this.props.stage}`, {
+    const stack = new NetworkStack(this.props.app, `MCR-Network-${this.props.stage}${CDK_DEPLOYMENT_SUFFIX}`, {
       env: this.props.env,
       stage: this.props.stage,
       stageConfig: this.props.stageConfig,
@@ -122,7 +124,7 @@ export class StackOrchestrator {
   }
 
   private createLambdaLayers(network: NetworkStack): LambdaLayersStack {
-    const stack = new LambdaLayersStack(this.props.app, `MCR-LambdaLayers-${this.props.stage}`, {
+    const stack = new LambdaLayersStack(this.props.app, `MCR-LambdaLayers-${this.props.stage}${CDK_DEPLOYMENT_SUFFIX}`, {
       env: this.props.env,
       stage: this.props.stage,
       description: 'Centralized Lambda layers for MCR'
@@ -135,7 +137,7 @@ export class StackOrchestrator {
     if (!network.databaseSecurityGroup) {
       throw new Error('Database security group not found in NetworkStack');
     }
-    const stack = new DataStack(this.props.app, `MCR-Data-${this.props.stage}`, {
+    const stack = new DataStack(this.props.app, `MCR-Data-${this.props.stage}${CDK_DEPLOYMENT_SUFFIX}`, {
       env: this.props.env,
       stage: this.props.stage,
       stageConfig: this.props.stageConfig,
@@ -150,7 +152,7 @@ export class StackOrchestrator {
   }
 
   private createAuth(foundation: FoundationStack): AuthStack {
-    const stack = new AuthStack(this.props.app, `MCR-Auth-${this.props.stage}`, {
+    const stack = new AuthStack(this.props.app, `MCR-Auth-${this.props.stage}${CDK_DEPLOYMENT_SUFFIX}`, {
       env: this.props.env,
       stage: this.props.stage,
       stageConfig: this.props.stageConfig,
@@ -169,7 +171,7 @@ export class StackOrchestrator {
     auth: AuthStack,
     lambdaLayers: LambdaLayersStack
   ): ApiComputeStack {
-    const stack = new ApiComputeStack(this.props.app, `MCR-ApiCompute-${this.props.stage}`, {
+    const stack = new ApiComputeStack(this.props.app, `MCR-ApiCompute-${this.props.stage}${CDK_DEPLOYMENT_SUFFIX}`, {
       env: this.props.env,
       stage: this.props.stage,
       stageConfig: this.props.stageConfig,
@@ -196,7 +198,7 @@ export class StackOrchestrator {
     data: DataStack,
     lambdaLayers: LambdaLayersStack
   ): DatabaseOperationsStack {
-    const stack = new DatabaseOperationsStack(this.props.app, `MCR-DatabaseOps-${this.props.stage}`, {
+    const stack = new DatabaseOperationsStack(this.props.app, `MCR-DatabaseOps-${this.props.stage}${CDK_DEPLOYMENT_SUFFIX}`, {
       env: this.props.env,
       stage: this.props.stage,
       stageConfig: this.props.stageConfig,
@@ -216,7 +218,7 @@ export class StackOrchestrator {
   }
 
   private createFrontend(apiCompute: ApiComputeStack): FrontendStack {
-    const stack = new FrontendStack(this.props.app, `MCR-Frontend-${this.props.stage}`, {
+    const stack = new FrontendStack(this.props.app, `MCR-Frontend-${this.props.stage}${CDK_DEPLOYMENT_SUFFIX}`, {
       env: this.props.env,
       stage: this.props.stage,
       stageConfig: this.props.stageConfig,
@@ -229,7 +231,7 @@ export class StackOrchestrator {
   }
 
   private createVirusScanning(data: DataStack, network: NetworkStack): GuardDutyMalwareProtectionStack {
-    const stack = new GuardDutyMalwareProtectionStack(this.props.app, `MCR-VirusScanning-${this.props.stage}`, {
+    const stack = new GuardDutyMalwareProtectionStack(this.props.app, `MCR-VirusScanning-${this.props.stage}${CDK_DEPLOYMENT_SUFFIX}`, {
       env: this.props.env,
       stage: this.props.stage,
       stageConfig: this.props.stageConfig,
@@ -248,7 +250,7 @@ export class StackOrchestrator {
   }
 
   private createMonitoring(foundation: FoundationStack): MonitoringStack {
-    const stack = new MonitoringStack(this.props.app, `MCR-Monitoring-${this.props.stage}`, {
+    const stack = new MonitoringStack(this.props.app, `MCR-Monitoring-${this.props.stage}${CDK_DEPLOYMENT_SUFFIX}`, {
       env: this.props.env,
       stage: this.props.stage,
       stageConfig: this.props.stageConfig,

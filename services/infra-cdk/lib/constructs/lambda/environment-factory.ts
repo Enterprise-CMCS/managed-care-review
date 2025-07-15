@@ -242,6 +242,7 @@ export class LambdaEnvironmentFactory {
       parameterStoreMode: string;
       ldSdkKey: string;
       jwtSecret?: string;
+      applicationEndpoint?: string;
       additionalEnv?: Record<string, string>;
     }
   ): Record<string, string> {
@@ -260,7 +261,8 @@ export class LambdaEnvironmentFactory {
       ...featureEnv,
       ...otelEnv,
       API_APP_OTEL_COLLECTOR_URL: config.apiOtelCollectorUrl,
-      APPLICATION_ENDPOINT: 'http://localhost:3000',
+      APPLICATION_ENDPOINT: config.applicationEndpoint || 
+        `https://${stage === 'prod' ? 'app' : stage}.mcr.cms.gov`,
       // Prisma configuration
       PRISMA_QUERY_ENGINE_LIBRARY: '/opt/nodejs/node_modules/.prisma/client/libquery_engine-linux-arm64-openssl-3.0.x.so.node',
       ...(config.additionalEnv || {})

@@ -8,7 +8,7 @@ import * as iam from 'aws-cdk-lib/aws-iam';
 import * as s3 from 'aws-cdk-lib/aws-s3';
 import * as secretsmanager from 'aws-cdk-lib/aws-secretsmanager';
 import * as rds from 'aws-cdk-lib/aws-rds';
-import { Duration, RemovalPolicy, Tags } from 'aws-cdk-lib';
+import { Duration, RemovalPolicy, Tags, CfnOutput } from 'aws-cdk-lib';
 import { SERVICES, LAMBDA_TIMEOUTS, LAMBDA_MEMORY, SSH_ACCESS_IPS, getAllSshAccessIps, getSshAccessIpv6, SECRETS_MANAGER_DEFAULTS, DATABASE_DEFAULTS, PERMISSION_BOUNDARIES, S3_DEFAULTS, AWS_ACCOUNTS, EXTERNAL_ENDPOINTS, CDK_DEPLOYMENT_SUFFIX } from '@config/constants';
 // import { NagSuppressions } from 'cdk-nag';
 import * as path from 'path';
@@ -89,6 +89,9 @@ export class DatabaseOperationsStack extends BaseStack {
     if (this.stage === 'val' || this.stage === 'prod') {
       this.createCrossAccountRoles();
     }
+    
+    // Create outputs
+    this.createOutputs();
   }
 
   private createLambdaLayers(): void {
@@ -531,6 +534,32 @@ export class DatabaseOperationsStack extends BaseStack {
     );
     
     return userData;
+  }
+
+  /**
+   * Create stack outputs
+   */
+  private createOutputs(): void {
+    // Export migration layer ARN for use by ApiComputeStack
+    new CfnOutput(this, 'PrismaMigrationLayerArn', {
+      value: this.prismaMigrationLayer.layerVersionArn,
+      exportName: `${this.stackName}-PrismaMigrationLayerArn`,
+      description: 'ARN of the Prisma migration layer for database migrations'
+    });
+    
+    // Export engine layer ARN for reference
+    new CfnOutput(this, 'PrismaEngineLayerArn', {
+      value: this.prismaEngineLayer.layerVersionArn,
+      exportName: `${this.stackName}-PrismaEngineLayerArn`,
+      description: 'ARN of the Prisma engine layer'
+    });
+    
+    // Export pg tools layer ARN for reference
+    new CfnOutput(this, 'PgToolsLayerArn', {
+      value: this.pgToolsLayer.layerVersionArn,
+      exportName: `${this.stackName}-PgToolsLayerArn`,
+      description: 'ARN of the PostgreSQL tools layer'
+    });
   }
 
 

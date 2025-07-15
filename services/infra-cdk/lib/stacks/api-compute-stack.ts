@@ -12,8 +12,8 @@ import * as secretsmanager from 'aws-cdk-lib/aws-secretsmanager';
 import * as ssm from 'aws-cdk-lib/aws-ssm';
 import * as events from 'aws-cdk-lib/aws-events';
 import * as targets from 'aws-cdk-lib/aws-events-targets';
-import { Duration } from 'aws-cdk-lib';
-import { SERVICES, API_PATHS, LAMBDA_FUNCTIONS, LAMBDA_MEMORY, LAMBDA_TIMEOUTS, getOtelEnvironment, LAMBDA_COMMON_ENV, FILE_SIZE_LIMITS } from '@config/constants';
+import { Duration, Fn } from 'aws-cdk-lib';
+import { SERVICES, API_PATHS, LAMBDA_FUNCTIONS, LAMBDA_MEMORY, LAMBDA_TIMEOUTS, getOtelEnvironment, LAMBDA_COMMON_ENV, FILE_SIZE_LIMITS, CDK_DEPLOYMENT_SUFFIX } from '@config/constants';
 import { needsPrismaLayer } from '@constructs/lambda/bundling-utils';
 import { LambdaEnvironmentFactory } from '@constructs/lambda/environment-factory';
 
@@ -36,6 +36,11 @@ export interface ApiComputeStackProps extends BaseStackProps {
    * ARN of the PostgreSQL tools Lambda layer for database operations
    */
   postgresToolsLayerArn?: string;
+  // From Frontend Stack
+  /**
+   * Application endpoint URL for email links and redirects
+   */
+  applicationEndpoint?: string;
 }
 
 /**
@@ -72,6 +77,8 @@ export class ApiComputeStack extends BaseStack {
   private readonly qaBucketName: string;
   private readonly userPool: cognito.IUserPool;
   private readonly authenticatedRole?: iam.IRole;
+  private readonly applicationEndpoint?: string;
+  private prismaMigrationLayer?: lambda.ILayerVersion;
 
   /**
    * Function configurations defining VPC usage and permission requirements
@@ -122,6 +129,7 @@ export class ApiComputeStack extends BaseStack {
     this.qaBucketName = props.qaBucketName;
     this.userPool = props.userPool;
     this.authenticatedRole = props.authenticatedRole;
+    this.applicationEndpoint = props.applicationEndpoint;
     
     // Initialize functions map
     this.functions = new Map<string, BaseLambdaFunction>();
@@ -268,7 +276,9 @@ export class ApiComputeStack extends BaseStack {
         emailerMode,
         parameterStoreMode,
         ldSdkKey,
-        jwtSecret: this.getJwtSecret()
+        jwtSecret: this.getJwtSecret(),
+        applicationEndpoint: this.applicationEndpoint || 
+          `https://${this.stage === 'prod' ? 'app' : this.stage}.mcr.cms.gov`
       }
     );
   }
@@ -285,6 +295,21 @@ export class ApiComputeStack extends BaseStack {
     // For deployed environments, the Lambda functions will read this at runtime
     // from Secrets Manager. We just need to pass the reference.
     return '';
+  }
+
+  /**
+   * Get Prisma migration layer for the MIGRATE function
+   * Lazily creates and caches the layer to avoid duplication
+   */
+  private getMigrationLayer(): lambda.ILayerVersion | undefined {
+    if (!this.prismaMigrationLayer) {
+      this.prismaMigrationLayer = lambda.LayerVersion.fromLayerVersionArn(
+        this,
+        'ImportedPrismaMigrationLayer',
+        Fn.importValue(`MCR-DatabaseOps-${this.stage}${CDK_DEPLOYMENT_SUFFIX}-PrismaMigrationLayerArn`)
+      );
+    }
+    return this.prismaMigrationLayer;
   }
 
   /**
@@ -325,7 +350,8 @@ export class ApiComputeStack extends BaseStack {
       },
       MIGRATE: {
         timeout: LAMBDA_TIMEOUTS.STANDARD,
-        memorySize: LAMBDA_MEMORY.MEDIUM
+        memorySize: LAMBDA_MEMORY.MEDIUM,
+        additionalLayers: [this.getMigrationLayer()].filter(Boolean) as lambda.ILayerVersion[]
       },
       GRAPHQL: {
         timeout: LAMBDA_TIMEOUTS.API_DEFAULT,
@@ -455,33 +481,20 @@ export class ApiComputeStack extends BaseStack {
         ],
         resources: ['*']
       }));
-    });
-
-    // Grant permissions based on function configuration
-    this.functions.forEach((func, name) => {
-      const config = this.FUNCTION_CONFIGS[name];
       
-      if (!config) {
-        console.warn(`No configuration found for function ${name} - skipping permissions`);
-        return;
-      }
-
-      // Grant S3 permissions to file operation functions
-      // Match serverless config: s3:* on /allusers/* paths only
-      if (['ZIP_KEYS', 'AUDIT_FILES', 'CLEANUP', 'GRAPHQL'].includes(name)) {
-        func.function.addToRolePolicy(new iam.PolicyStatement({
-          effect: iam.Effect.ALLOW,
-          actions: ['s3:*'],
-          resources: [
-            `${uploadsBucket.bucketArn}/allusers/*`,
-            `${qaBucket.bucketArn}/allusers/*`
-          ]
-        }));
-      }
-
-      // Note: Database secret read, SES, and Cognito permissions are already granted globally above
-      // to match serverless configuration where these are granted to all functions
+      // S3 permissions - serverless grants these to all functions
+      func.function.addToRolePolicy(new iam.PolicyStatement({
+        effect: iam.Effect.ALLOW,
+        actions: ['s3:*'],
+        resources: [
+          `${uploadsBucket.bucketArn}/allusers/*`,
+          `${qaBucket.bucketArn}/allusers/*`
+        ]
+      }));
     });
+
+    // Note: All permissions are granted globally above to match serverless configuration
+    // where IAM permissions are defined at the provider level for all functions
   }
 
   /**

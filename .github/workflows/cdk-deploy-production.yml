@@ -118,7 +118,7 @@ jobs:
       if: github.ref == 'refs/heads/main'
       working-directory: services/infra-cdk
       run: |
-        npx cdk deploy github-oidc-stack \
+        npx cdk deploy MCR-GitHubOIDC-cdk \
           --require-approval never \
           --ci
 
@@ -127,18 +127,18 @@ jobs:
       id: deploy-layers
       working-directory: services/infra-cdk
       run: |
-        npx cdk deploy lambda-layers-stack-${{ env.STAGE }} \
+        npx cdk deploy MCR-LambdaLayers-${{ env.STAGE }}-cdk \
           --require-approval never \
           --ci \
           -c stage=${{ env.STAGE }}
         
         # Get layer ARNs from stack outputs
         PRISMA_LAYER_ARN=$(aws cloudformation describe-stacks \
-          --stack-name lambda-layers-stack-${{ env.STAGE }} \
+          --stack-name MCR-LambdaLayers-${{ env.STAGE }}-cdk \
           --query 'Stacks[0].Outputs[?OutputKey==`PrismaLayerArn`].OutputValue' \
           --output text)
         POSTGRES_TOOLS_LAYER_ARN=$(aws cloudformation describe-stacks \
-          --stack-name lambda-layers-stack-${{ env.STAGE }} \
+          --stack-name MCR-LambdaLayers-${{ env.STAGE }}-cdk \
           --query 'Stacks[0].Outputs[?OutputKey==`PostgresToolsLayerArn`].OutputValue' \
           --output text)
         
@@ -149,8 +149,15 @@ jobs:
     - name: Deploy CDK Infrastructure
       working-directory: services/infra-cdk
       run: |
-        # Deploy all stacks with layer ARNs
-        npx cdk deploy --all \
+        # Deploy all stacks (except GuardDuty) with layer ARNs
+        npx cdk deploy \
+          MCR-Foundation-${{ env.STAGE }}-cdk \
+          MCR-Network-${{ env.STAGE }}-cdk \
+          MCR-Data-${{ env.STAGE }}-cdk \
+          MCR-Auth-${{ env.STAGE }}-cdk \
+          MCR-ApiCompute-${{ env.STAGE }}-cdk \
+          MCR-DatabaseOps-${{ env.STAGE }}-cdk \
+          MCR-Monitoring-${{ env.STAGE }}-cdk \
           --require-approval never \
           --ci \
           -c stage=${{ env.STAGE }} \
@@ -179,31 +186,31 @@ jobs:
         }
         
         # Export all required values
-        echo "api-url=$(get_output "infra-api-$STAGE" "ApiGatewayRestApiUrl")" >> $GITHUB_OUTPUT
-        echo "cognito-region=$(get_output "ui-auth-$STAGE" "Region")" >> $GITHUB_OUTPUT
-        echo "cognito-user-pool-id=$(get_output "ui-auth-$STAGE" "UserPoolId")" >> $GITHUB_OUTPUT
-        echo "cognito-client-id=$(get_output "ui-auth-$STAGE" "UserPoolClientId")" >> $GITHUB_OUTPUT
-        echo "cognito-client-domain=$(get_output "ui-auth-$STAGE" "UserPoolClientDomain")" >> $GITHUB_OUTPUT
-        echo "cognito-identity-pool-id=$(get_output "ui-auth-$STAGE" "IdentityPoolId")" >> $GITHUB_OUTPUT
-        echo "s3-documents-bucket=$(get_output "uploads-$STAGE" "DocumentUploadsBucketName")" >> $GITHUB_OUTPUT
-        echo "s3-qa-bucket=$(get_output "uploads-$STAGE" "QAUploadsBucketName")" >> $GITHUB_OUTPUT
-        echo "application-endpoint=$(get_output "ui-$STAGE" "CloudFrontEndpointUrl")" >> $GITHUB_OUTPUT
-        echo "storybook-endpoint=$(get_output "storybook-$STAGE" "CloudFrontEndpointUrl")" >> $GITHUB_OUTPUT
+        echo "api-url=$(get_output "MCR-ApiCompute-$STAGE-cdk" "ApiGatewayUrl")" >> $GITHUB_OUTPUT
+        echo "cognito-region=$(get_output "MCR-Auth-$STAGE-cdk" "Region")" >> $GITHUB_OUTPUT
+        echo "cognito-user-pool-id=$(get_output "MCR-Auth-$STAGE-cdk" "UserPoolId")" >> $GITHUB_OUTPUT
+        echo "cognito-client-id=$(get_output "MCR-Auth-$STAGE-cdk" "UserPoolClientId")" >> $GITHUB_OUTPUT
+        echo "cognito-client-domain=$(get_output "MCR-Auth-$STAGE-cdk" "UserPoolClientDomain")" >> $GITHUB_OUTPUT
+        echo "cognito-identity-pool-id=$(get_output "MCR-Auth-$STAGE-cdk" "IdentityPoolId")" >> $GITHUB_OUTPUT
+        echo "s3-documents-bucket=$(get_output "MCR-Data-$STAGE-cdk" "UploadsBucketName")" >> $GITHUB_OUTPUT
+        echo "s3-qa-bucket=$(get_output "MCR-Data-$STAGE-cdk" "QaBucketName")" >> $GITHUB_OUTPUT
+        echo "application-endpoint=$(get_output "MCR-Frontend-$STAGE-cdk" "ApplicationUrl")" >> $GITHUB_OUTPUT
+        echo "storybook-endpoint=$(get_output "MCR-Frontend-$STAGE-cdk" "StorybookUrl")" >> $GITHUB_OUTPUT
         
         # Export as environment variables for build
-        echo "VITE_APP_API_URL=$(get_output "infra-api-$STAGE" "ApiGatewayRestApiUrl")" >> $GITHUB_ENV
+        echo "VITE_APP_API_URL=$(get_output "MCR-ApiCompute-$STAGE-cdk" "ApiGatewayUrl")" >> $GITHUB_ENV
         echo "VITE_APP_AUTH_MODE=AWS_COGNITO" >> $GITHUB_ENV
-        echo "VITE_APP_COGNITO_REGION=$(get_output "ui-auth-$STAGE" "Region")" >> $GITHUB_ENV
-        echo "VITE_APP_COGNITO_ID_POOL_ID=$(get_output "ui-auth-$STAGE" "IdentityPoolId")" >> $GITHUB_ENV
-        echo "VITE_APP_COGNITO_USER_POOL_ID=$(get_output "ui-auth-$STAGE" "UserPoolId")" >> $GITHUB_ENV
-        echo "VITE_APP_COGNITO_USER_POOL_CLIENT_ID=$(get_output "ui-auth-$STAGE" "UserPoolClientId")" >> $GITHUB_ENV
-        echo "VITE_APP_COGNITO_USER_POOL_CLIENT_DOMAIN=$(get_output "ui-auth-$STAGE" "UserPoolClientDomain")" >> $GITHUB_ENV
+        echo "VITE_APP_COGNITO_REGION=$(get_output "MCR-Auth-$STAGE-cdk" "Region")" >> $GITHUB_ENV
+        echo "VITE_APP_COGNITO_ID_POOL_ID=$(get_output "MCR-Auth-$STAGE-cdk" "IdentityPoolId")" >> $GITHUB_ENV
+        echo "VITE_APP_COGNITO_USER_POOL_ID=$(get_output "MCR-Auth-$STAGE-cdk" "UserPoolId")" >> $GITHUB_ENV
+        echo "VITE_APP_COGNITO_USER_POOL_CLIENT_ID=$(get_output "MCR-Auth-$STAGE-cdk" "UserPoolClientId")" >> $GITHUB_ENV
+        echo "VITE_APP_COGNITO_USER_POOL_CLIENT_DOMAIN=$(get_output "MCR-Auth-$STAGE-cdk" "UserPoolClientDomain")" >> $GITHUB_ENV
         echo "VITE_APP_S3_REGION=$AWS_REGION" >> $GITHUB_ENV
-        echo "VITE_APP_S3_DOCUMENTS_BUCKET=$(get_output "uploads-$STAGE" "DocumentUploadsBucketName")" >> $GITHUB_ENV
-        echo "VITE_APP_S3_QA_BUCKET=$(get_output "uploads-$STAGE" "QAUploadsBucketName")" >> $GITHUB_ENV
+        echo "VITE_APP_S3_DOCUMENTS_BUCKET=$(get_output "MCR-Data-$STAGE-cdk" "UploadsBucketName")" >> $GITHUB_ENV
+        echo "VITE_APP_S3_QA_BUCKET=$(get_output "MCR-Data-$STAGE-cdk" "QaBucketName")" >> $GITHUB_ENV
         echo "VITE_APP_STAGE_NAME=$STAGE" >> $GITHUB_ENV
-        echo "VITE_APP_APPLICATION_ENDPOINT=$(get_output "ui-$STAGE" "CloudFrontEndpointUrl")" >> $GITHUB_ENV
-        echo "VITE_APP_OTEL_COLLECTOR_URL=$(get_output "infra-api-$STAGE" "ApiGatewayRestApiUrl")/otel" >> $GITHUB_ENV
+        echo "VITE_APP_APPLICATION_ENDPOINT=$(get_output "MCR-Frontend-$STAGE-cdk" "ApplicationUrl")" >> $GITHUB_ENV
+        echo "VITE_APP_OTEL_COLLECTOR_URL=$(get_output "MCR-ApiCompute-$STAGE-cdk" "ApiGatewayUrl")/otel" >> $GITHUB_ENV
         
         # Add additional environment variables
         echo "VITE_APP_LD_CLIENT_ID=${{ secrets.VITE_APP_LD_CLIENT_ID || 'placeholder' }}" >> $GITHUB_ENV
@@ -230,7 +237,7 @@ jobs:
     - name: Deploy Frontend
       working-directory: services/infra-cdk
       run: |
-        npx cdk deploy frontend-stack-${{ env.STAGE }} \
+        npx cdk deploy MCR-Frontend-${{ env.STAGE }}-cdk \
           --require-approval never \
           --ci \
           -c stage=${{ env.STAGE }} \

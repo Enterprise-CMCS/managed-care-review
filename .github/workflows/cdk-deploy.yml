@@ -142,7 +142,7 @@ jobs:
               comment.body.includes(`CDK Diff for stage: ${{ matrix.stage }}`)
             );
             
-            const commentBody = `### 🔍 CDK Diff Results - ${{ matrix.stage }}\n\n${diffOutput}\n\n<details>\n<summary>Stack deployment order</summary>\n\n1. Foundation Stack\n2. Network Stack\n3. Data Stack & Auth Stack (parallel)\n4. Compute Stack\n5. API Stack\n6. Database Operations Stack & Virus Scanning Stack (parallel)\n7. Monitoring Stack\n\n</details>`;
+            const commentBody = `### 🔍 CDK Diff Results - ${{ matrix.stage }}\n\n${diffOutput}\n\n<details>\n<summary>Stack deployment order</summary>\n\n1. Foundation Stack\n2. Network Stack\n3. Lambda Layers Stack\n4. Data Stack & Auth Stack (parallel)\n5. ApiCompute Stack\n6. Database Operations Stack\n7. Frontend Stack\n8. Monitoring Stack\n\n</details>`;
             
             if (botComment) {
               await github.rest.issues.updateComment({
@@ -250,7 +250,7 @@ jobs:
           CDK_DEFAULT_ACCOUNT: ${{ secrets.AWS_ACCOUNT_ID }}
         run: |
           echo "🚀 Deploying Foundation Stack for ${{ matrix.stage }}..."
-          cdk deploy MCR-Foundation-${{ matrix.stage }} \
+          cdk deploy MCR-Foundation-${{ matrix.stage }}-cdk \
             --context stage=${{ matrix.stage }} \
             --require-approval never \
             --ci
@@ -261,7 +261,7 @@ jobs:
           CDK_DEFAULT_ACCOUNT: ${{ secrets.AWS_ACCOUNT_ID }}
         run: |
           echo "🚀 Deploying Network Stack for ${{ matrix.stage }}..."
-          cdk deploy MCR-Network-${{ matrix.stage }} \
+          cdk deploy MCR-Network-${{ matrix.stage }}-cdk \
             --context stage=${{ matrix.stage }} \
             --require-approval never \
             --ci
@@ -272,45 +272,56 @@ jobs:
           CDK_DEFAULT_ACCOUNT: ${{ secrets.AWS_ACCOUNT_ID }}
         run: |
           echo "🚀 Deploying Data and Auth Stacks in parallel for ${{ matrix.stage }}..."
-          cdk deploy MCR-Data-${{ matrix.stage }} MCR-Auth-${{ matrix.stage }} \
+          cdk deploy MCR-Data-${{ matrix.stage }}-cdk MCR-Auth-${{ matrix.stage }}-cdk \
             --context stage=${{ matrix.stage }} \
             --require-approval never \
             --ci \
             --concurrency 2
 
-      - name: Deploy Compute Stack
+      - name: Deploy Lambda Layers Stack
         working-directory: services/infra-cdk
         env:
           CDK_DEFAULT_ACCOUNT: ${{ secrets.AWS_ACCOUNT_ID }}
         run: |
-          echo "🚀 Deploying Compute Stack for ${{ matrix.stage }}..."
-          cdk deploy MCR-Compute-${{ matrix.stage }} \
+          echo "🚀 Deploying Lambda Layers Stack for ${{ matrix.stage }}..."
+          cdk deploy MCR-LambdaLayers-${{ matrix.stage }}-cdk \
             --context stage=${{ matrix.stage }} \
             --require-approval never \
             --ci
 
-      - name: Deploy API Stack
+      - name: Deploy ApiCompute Stack
         working-directory: services/infra-cdk
         env:
           CDK_DEFAULT_ACCOUNT: ${{ secrets.AWS_ACCOUNT_ID }}
         run: |
-          echo "🚀 Deploying API Stack for ${{ matrix.stage }}..."
-          cdk deploy MCR-Api-${{ matrix.stage }} \
+          echo "🚀 Deploying ApiCompute Stack for ${{ matrix.stage }}..."
+          cdk deploy MCR-ApiCompute-${{ matrix.stage }}-cdk \
             --context stage=${{ matrix.stage }} \
             --require-approval never \
             --ci
 
-      - name: Deploy Database Operations and Virus Scanning Stacks (Parallel)
+
+      - name: Deploy Database Operations Stack
         working-directory: services/infra-cdk
         env:
           CDK_DEFAULT_ACCOUNT: ${{ secrets.AWS_ACCOUNT_ID }}
         run: |
-          echo "🚀 Deploying Database Operations and Virus Scanning Stacks in parallel for ${{ matrix.stage }}..."
-          cdk deploy MCR-DatabaseOps-${{ matrix.stage }} MCR-VirusScanning-${{ matrix.stage }} \
+          echo "🚀 Deploying Database Operations Stack for ${{ matrix.stage }}..."
+          cdk deploy MCR-DatabaseOps-${{ matrix.stage }}-cdk \
             --context stage=${{ matrix.stage }} \
             --require-approval never \
-            --ci \
-            --concurrency 2
+            --ci
+
+      - name: Deploy Frontend Stack
+        working-directory: services/infra-cdk
+        env:
+          CDK_DEFAULT_ACCOUNT: ${{ secrets.AWS_ACCOUNT_ID }}
+        run: |
+          echo "🚀 Deploying Frontend Stack for ${{ matrix.stage }}..."
+          cdk deploy MCR-Frontend-${{ matrix.stage }}-cdk \
+            --context stage=${{ matrix.stage }} \
+            --require-approval never \
+            --ci
 
       - name: Deploy Monitoring Stack
         working-directory: services/infra-cdk
@@ -318,7 +329,7 @@ jobs:
           CDK_DEFAULT_ACCOUNT: ${{ secrets.AWS_ACCOUNT_ID }}
         run: |
           echo "🚀 Deploying Monitoring Stack for ${{ matrix.stage }}..."
-          cdk deploy MCR-Monitoring-${{ matrix.stage }} \
+          cdk deploy MCR-Monitoring-${{ matrix.stage }}-cdk \
             --context stage=${{ matrix.stage }} \
             --require-approval never \
             --ci

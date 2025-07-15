@@ -222,9 +222,9 @@ function handler(event) {
       description: 'CloudFront distribution ID for main application'
     });
     
-    new CfnOutput(this, 'MainAppUrl', {
+    new CfnOutput(this, 'ApplicationUrl', {
       value: this.mainAppUrl,
-      exportName: this.exportName('MainAppUrl'),
+      exportName: this.exportName('ApplicationUrl'),
       description: 'CloudFront URL for main application'
     });
     

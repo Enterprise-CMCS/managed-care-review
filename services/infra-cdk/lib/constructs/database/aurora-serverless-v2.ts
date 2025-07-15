@@ -95,8 +95,8 @@ export class AuroraServerlessV2 extends Construct {
       }),
       credentials: rds.Credentials.fromSecret(this.secret),
       clusterIdentifier: ResourceNames.resourceName('database', 'cluster', props.stage) + CDK_DEPLOYMENT_SUFFIX,
-      // Match serverless format: aurora_postgres_${stage}_${accountId}
-      defaultDatabaseName: `aurora_postgres_${props.stage}_${Stack.of(this).account}${CDK_DEPLOYMENT_SUFFIX}`,
+      // RDS database names must be alphanumeric only (no underscores)
+      defaultDatabaseName: `aurorapostgres${props.stage}${Stack.of(this).account}cdk`,
       vpc: props.vpc,
       vpcSubnets: props.vpcSubnets,
       securityGroups: [props.securityGroup, ...(props.additionalSecurityGroups || [])],

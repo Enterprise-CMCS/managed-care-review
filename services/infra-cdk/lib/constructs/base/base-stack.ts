@@ -25,7 +25,7 @@ export abstract class BaseStack extends Stack {
   protected readonly serviceName: string;
 
   constructor(scope: Construct, id: string, props: BaseStackProps) {
-    const stackName = ResourceNames.stackName(props.serviceName, props.stage);
+    const stackName = ResourceNames.stackName(props.serviceName, props.stage) + '-cdk';
     
     super(scope, id, {
       ...props,

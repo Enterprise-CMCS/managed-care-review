@@ -56,7 +56,7 @@ cdk deploy "*" --context stage=dev
 #### 5. **ApiCompute Stack** - API Gateway, Lambda functions
 - **Lambda Functions**: GraphQL, OAuth, health, email, migrations, cleanup
 - **API Gateway**: REST API with WAF, Cognito auth, request validation
-- **Lambda Layers**: Prisma (DB), OTEL (observability), PowerTools
+- **Lambda Layers**: Prisma (DB), OTEL (observability)
 - **EventBridge**: Scheduled tasks and event-driven workflows
 - **Auto-bundling**: TypeScript → JavaScript with esbuild
 

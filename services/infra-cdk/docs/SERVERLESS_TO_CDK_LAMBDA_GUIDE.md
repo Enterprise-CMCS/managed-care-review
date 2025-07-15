@@ -9523,4 +9523,232 @@ new cloudwatch.Alarm(this, 'HighBucketSize', {
    - Monitor and alert on usage
    - Clean up old deployments
 
+## 34. SSM Parameters Required for CDK Deployment
+
+This section documents all AWS Systems Manager (SSM) Parameter Store parameters that must be configured before deploying the CDK infrastructure. These parameters allow the CDK to integrate with existing infrastructure and configure Lambda environments.
+
+### Overview
+
+The CDK infrastructure reads configuration from SSM Parameter Store to:
+- Import existing VPC and network resources
+- Configure Lambda function environment variables
+- Integrate with external services (OTEL, LaunchDarkly, etc.)
+- Import security groups for VPN access
+
+### Required Parameters
+
+#### 1. VPC and Network Parameters (REQUIRED)
+
+These parameters are used by the `ImportedVpc` construct to import your existing VPC:
+
+```bash
+# VPC Configuration
+aws ssm put-parameter \
+    --name "/configuration/default/vpc/id" \
+    --value "vpc-xxxxxxxxx" \
+    --type "String" \
+    --description "VPC ID for MCR infrastructure"
+
+aws ssm put-parameter \
+    --name "/configuration/default/vpc/cidr" \
+    --value "10.0.0.0/16" \
+    --type "String" \
+    --description "VPC CIDR block"
+
+# Private Subnets (minimum 2 required, 3 recommended)
+aws ssm put-parameter \
+    --name "/configuration/default/vpc/subnets/private/a/id" \
+    --value "subnet-xxxxxxxxx" \
+    --type "String" \
+    --description "Private subnet in AZ-a"
+
+aws ssm put-parameter \
+    --name "/configuration/default/vpc/subnets/private/b/id" \
+    --value "subnet-yyyyyyyyy" \
+    --type "String" \
+    --description "Private subnet in AZ-b"
+
+aws ssm put-parameter \
+    --name "/configuration/default/vpc/subnets/private/c/id" \
+    --value "subnet-zzzzzzzzz" \
+    --type "String" \
+    --description "Private subnet in AZ-c"
+```
+
+#### 2. Lambda Environment Configuration (REQUIRED)
+
+These parameters configure Lambda function environments:
+
+```bash
+# OpenTelemetry Configuration
+aws ssm put-parameter \
+    --name "/configuration/api_app_otel_collector_url" \
+    --value "https://otel-collector.example.com" \
+    --type "String" \
+    --description "OpenTelemetry collector endpoint URL"
+
+# Email Service Configuration
+aws ssm put-parameter \
+    --name "/configuration/emailer_mode" \
+    --value "ses" \
+    --type "String" \
+    --description "Email service mode: ses | mock"
+
+# Parameter Store Mode
+aws ssm put-parameter \
+    --name "/configuration/parameterStoreMode" \
+    --value "standard" \
+    --type "String" \
+    --description "Parameter store access mode"
+
+# LaunchDarkly SDK Key (store as SecureString)
+aws ssm put-parameter \
+    --name "/configuration/ld_sdk_key_feds" \
+    --value "sdk-xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx" \
+    --type "SecureString" \
+    --key-id "alias/aws/ssm" \
+    --description "LaunchDarkly SDK key for feature flags"
+```
+
+#### 3. VPN Security Groups (OPTIONAL)
+
+For database access via VPN (replaces bastion EC2):
+
+```bash
+# VPN Security Group
+aws ssm put-parameter \
+    --name "/configuration/vpn_security_group_id" \
+    --value "sg-xxxxxxxxx" \
+    --type "String" \
+    --description "VPN security group ID for database access"
+
+# Shared Services Security Group (if applicable)
+aws ssm put-parameter \
+    --name "/configuration/shared_services_security_group_id" \
+    --value "sg-yyyyyyyyy" \
+    --type "String" \
+    --description "Shared services security group ID"
+```
+
+#### 4. Frontend Build Parameters (OPTIONAL)
+
+These parameters are used during frontend build process:
+
+```bash
+# LaunchDarkly Client ID
+aws ssm put-parameter \
+    --name "/configuration/react_app_ld_client_id_feds" \
+    --value "client-xxxxxxxx" \
+    --type "String" \
+    --description "LaunchDarkly client ID for React app"
+
+# New Relic Configuration (if using New Relic)
+aws ssm put-parameter \
+    --name "/configuration/react_app_nr_account_id" \
+    --value "1234567" \
+    --type "String" \
+    --description "New Relic account ID"
+
+aws ssm put-parameter \
+    --name "/configuration/react_app_nr_agent_id" \
+    --value "agent-id" \
+    --type "String" \
+    --description "New Relic agent ID"
+
+aws ssm put-parameter \
+    --name "/configuration/react_app_nr_license_key" \
+    --value "license-key" \
+    --type "SecureString" \
+    --description "New Relic license key"
+
+aws ssm put-parameter \
+    --name "/configuration/react_app_nr_trust_key" \
+    --value "trust-key" \
+    --type "SecureString" \
+    --description "New Relic trust key"
+```
+
+### Parameters Created by CDK
+
+The CDK will automatically create these parameters during deployment:
+
+```
+/mcr/{stage}/service-registry/*     # Service discovery
+/mcr/{stage}/foundation/*           # Foundation stack outputs
+/mcr/{stage}/network/*              # Network stack outputs
+/mcr/{stage}/database/*             # Database endpoints
+/mcr/{stage}/auth/*                 # Cognito configuration
+/mcr/{stage}/lambda/*               # Lambda layer ARNs
+/mcr/{stage}/s3/*                   # S3 bucket names
+/mcr/{stage}/frontend/build/*       # Frontend build metadata
+```
+
+### Migration Checklist
+
+Before deploying CDK infrastructure:
+
+- [ ] Identify existing VPC ID and CIDR block
+- [ ] Get subnet IDs for at least 2 availability zones
+- [ ] Obtain OpenTelemetry collector URL
+- [ ] Get LaunchDarkly SDK keys (backend and frontend)
+- [ ] Determine email service mode (ses or mock)
+- [ ] Identify VPN security group IDs (if using VPN access)
+- [ ] Create all required SSM parameters using AWS CLI
+- [ ] Verify parameters are in correct region
+- [ ] Test parameter access with appropriate IAM permissions
+
+### Verification
+
+Verify all parameters are set correctly:
+
+```bash
+# List all configuration parameters
+aws ssm describe-parameters \
+    --parameter-filters "Key=Path,Values=/configuration" \
+    --query "Parameters[*].[Name,Type,Description]" \
+    --output table
+
+# Get specific parameter value
+aws ssm get-parameter \
+    --name "/configuration/default/vpc/id" \
+    --query "Parameter.Value" \
+    --output text
+```
+
+### Troubleshooting
+
+#### Missing Parameter Errors
+
+If CDK synthesis fails with "Parameter not found":
+1. Verify parameter exists in correct region
+2. Check parameter name matches exactly (case-sensitive)
+3. Ensure IAM role has `ssm:GetParameter` permission
+4. For SecureString parameters, also need `kms:Decrypt`
+
+#### VPC Import Failures
+
+If VPC import fails:
+1. Verify VPC ID is correct
+2. Ensure at least 2 subnets in different AZs
+3. Check subnet types match (private with egress)
+4. Verify CIDR block matches actual VPC
+
+#### Security Group Import Issues
+
+If security group imports fail:
+1. Security groups must exist in same region
+2. Check security group IDs are correct
+3. Verify CDK deployment account has access
+4. Groups must be in the imported VPC
+
+### Best Practices
+
+1. **Use SecureString** for sensitive values (API keys, passwords)
+2. **Document** parameter purpose in descriptions
+3. **Version** parameter changes with timestamps
+4. **Automate** parameter creation with scripts
+5. **Validate** parameters before CDK deployment
+6. **Use consistent** naming conventions
+7. **Implement** least-privilege IAM policies
+
 This comprehensive bundling system ensures efficient, optimized Lambda deployments while maintaining developer productivity and debuggability.
