@@ -275,7 +275,7 @@ export const SingleRateFormFields = ({
                         <Link
                             variant="external"
                             href={
-                                'https://www.medicaid.gov/medicaid/managed-care/managed-care-entities/index.html'
+                                'https://www.medicaid.gov/medicaid/managed-care/guidance/rate-review-and-rate-guides'
                             }
                             target="_blank"
                         >
@@ -313,6 +313,16 @@ export const SingleRateFormFields = ({
                             id="withoutDSNP"
                             name={`${fieldNamePrefix}.rateMedicaidPopulations`}
                             label={
+                                <span>
+                                    Medicare-Medicaid dually eligible
+                                    individuals{' '}
+                                    <span style={{ fontWeight: 'bold' }}>
+                                        not
+                                    </span>{' '}
+                                    enrolled through a D-SNP
+                                </span>
+                            }
+                            tealiumLabel={
                                 RateMedicaidPopulationsRecord.MEDICARE_MEDICAID_WITHOUT_DSNP
                             }
                             value="MEDICARE_MEDICAID_WITHOUT_DSNP"

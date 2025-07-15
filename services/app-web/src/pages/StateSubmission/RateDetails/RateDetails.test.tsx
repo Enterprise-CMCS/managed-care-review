@@ -450,7 +450,7 @@ describe('RateDetails', () => {
                 ).toBeInTheDocument()
                 expect(submitButton).toHaveAttribute('aria-disabled', 'true')
                 expect(
-                    screen.getByText('There are 9 errors on this page')
+                    screen.getByText('There are 10 errors on this page')
                 ).toBeInTheDocument()
             })
         })
