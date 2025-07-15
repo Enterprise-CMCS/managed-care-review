@@ -3,7 +3,7 @@ describe('rate details', () => {
         cy.stubFeatureFlags()
         cy.interceptGraphQL()
     })
-    it.skip('can navigate back and save as draft from rate details page', () => {
+    it('can navigate back and save as draft from rate details page', () => {
         cy.logInAsStateUser()
         cy.startNewContractAndRatesSubmission()
 
