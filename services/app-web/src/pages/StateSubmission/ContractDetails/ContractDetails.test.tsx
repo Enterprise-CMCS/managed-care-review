@@ -353,7 +353,7 @@ describe('ContractDetails', () => {
             })
 
             expect(fedAuthQuestion).toBeInTheDocument()
-            //This will trigger d-snp question
+            //This will trigger the d-snp field to render
             within(fedAuthQuestion)
                 .getByRole('checkbox', {
                     name: '1915(b) Waiver Authority',
@@ -366,7 +366,7 @@ describe('ContractDetails', () => {
 
             expect(dsnpQuestion).toBeInTheDocument()
             within(dsnpQuestion).getByRole('link', {
-                name: 'D-SNP guidance',
+                name: 'D-SNP guidance (opens in new window)',
             })
         })
     })
