@@ -453,6 +453,8 @@ Cypress.Commands.add('fillOutAmendmentToPriorRateCertification', (id = 0) => {
         force: true,
     })
     cy.findByText('PMAP').click()
+    cy.findByText('Medicaid-only').click()
+    
     cy.findByLabelText('Date certified for rate amendment').clear().type('03/01/2024')
 
     //Fill out certifying actuary
