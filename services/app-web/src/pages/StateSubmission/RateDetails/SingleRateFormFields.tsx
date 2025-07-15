@@ -292,7 +292,7 @@ export const SingleRateFormFields = ({
                             </PoliteErrorMessage>
                         )}
                         <FieldCheckbox
-                            id="withDSNP"
+                            id={`${fieldNamePrefix}.withDSNP`}
                             name={`${fieldNamePrefix}.rateMedicaidPopulations`}
                             label={
                                 RateMedicaidPopulationsRecord.MEDICARE_MEDICAID_WITH_DSNP
@@ -302,7 +302,7 @@ export const SingleRateFormFields = ({
                             parent_component_heading={formHeading}
                         />
                         <FieldCheckbox
-                            id="medicaidOnly"
+                            id={`${fieldNamePrefix}.medicaidOnly`}
                             name={`${fieldNamePrefix}.rateMedicaidPopulations`}
                             label={RateMedicaidPopulationsRecord.MEDICAID_ONLY}
                             value="MEDICAID_ONLY"
@@ -310,7 +310,7 @@ export const SingleRateFormFields = ({
                             parent_component_heading={formHeading}
                         />
                         <FieldCheckbox
-                            id="withoutDSNP"
+                            id={`${fieldNamePrefix}.withoutDSNP`}
                             name={`${fieldNamePrefix}.rateMedicaidPopulations`}
                             label={
                                 <span>

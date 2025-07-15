@@ -372,7 +372,7 @@ Cypress.Commands.add('fillOutNewRateCertification', () => {
                 force: true,
             })
             cy.findByText('PMAP').click()
-            cy.findByLabelText('Medicaid-only').check({force: true})
+            cy.findAllByLabelText('Medicaid-only').eq(0).check({force: true})
 
             //Fill out certifying actuary
             cy.findAllByLabelText('Name').eq(0).click().type('Actuary Contact Person')
@@ -448,12 +448,12 @@ Cypress.Commands.add('fillOutAmendmentToPriorRateCertification', (id = 0) => {
     cy.get(`[id="rateForms.${id}.rateDateEnd"]`).clear().type('03/01/2025')
     cy.get(`[id="rateForms.${id}.effectiveDateStart"]`).clear().type('03/01/2024')
     cy.get(`[id="rateForms.${id}.effectiveDateEnd"]`).clear().type('03/01/2025')
+    cy.get(`[id="rateForms.${id}.medicaidOnly"]`).check({ force:true })
 
     cy.findByRole('combobox', { name: 'programs (required)' }).click({
         force: true,
     })
     cy.findByText('PMAP').click()
-    cy.findByText('Medicaid-only').click()
     
     cy.findByLabelText('Date certified for rate amendment').clear().type('03/01/2024')
 
