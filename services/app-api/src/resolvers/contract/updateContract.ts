@@ -1,8 +1,5 @@
 import { createForbiddenError, createUserInputError } from '../errorUtils'
-import {
-    convertContractWithRatesToUnlockedHPP,
-    hasCMSPermissions,
-} from '../../domain-models'
+import { hasCMSPermissions } from '../../domain-models'
 import type { MutationResolvers } from '../../gen/gqlServer'
 import { logError } from '../../logger'
 import type { Store } from '../../postgres'

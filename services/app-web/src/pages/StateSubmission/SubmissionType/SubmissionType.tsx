@@ -246,6 +246,8 @@ export const SubmissionType = ({
                     federalAuthorities:
                         draftSubmission.draftRevision.formData
                             .federalAuthorities,
+                    dsnpContract:
+                        draftSubmission.draftRevision.formData.dsnpContract,
                     contractDocuments:
                         draftSubmission.draftRevision.formData
                             .contractDocuments,

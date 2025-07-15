@@ -1,5 +1,6 @@
 import type { BucketShortName } from './s3Amplify'
 import type { S3Error } from './s3Error'
+import type { GenerateDocumentZipFunctionType } from '../zip/generateZip'
 
 export type S3ClientT = {
     uploadFile: (
@@ -19,4 +20,5 @@ export type S3ClientT = {
         filename: string,
         bucket: BucketShortName
     ) => Promise<string | Error>
+    generateDocumentZip: GenerateDocumentZipFunctionType
 }

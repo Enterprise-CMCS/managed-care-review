@@ -7,14 +7,14 @@ import {
 import { isStateUser } from '../../domain-models'
 import { logError } from '../../logger'
 import { createForbiddenError, createUserInputError } from '../errorUtils'
-import { NotFoundError, handleNotFoundError } from '../../postgres/postgresErrors'
+import { NotFoundError } from '../../postgres/postgresErrors'
 import { GraphQLError } from 'graphql/index'
 import type { LDService } from '../../launchDarkly/launchDarkly'
 import { generateRateCertificationName } from './generateRateCertificationName'
 import { findStatePrograms } from '@mc-review/hpp'
 import { nullsToUndefined } from '../../domain-models/nullstoUndefined'
-import { generateRateDocumentsZip } from '../contract/submitContract'
 import { canWrite } from '../../authorization/oauthAuthorization'
+import type { DocumentZipService } from '../../zip/generateZip'
 
 /*
     Submit rate will change a draft revision to submitted and generate a rate name if one is missing
@@ -22,7 +22,8 @@ import { canWrite } from '../../authorization/oauthAuthorization'
 */
 export function submitRate(
     store: Store,
-    launchDarkly: LDService
+    launchDarkly: LDService,
+    documentZip: DocumentZipService
 ): MutationResolvers['submitRate'] {
     return async (_parent, { input }, context) => {
         const { user, ctx, tracer } = context
@@ -214,10 +215,8 @@ export function submitRate(
         // generate zips
         const rateRevision = submittedRate.revisions[0]
         if (rateRevision) {
-            const zipResult = await generateRateDocumentsZip(
-                store,
-                rateRevision
-            )
+            const zipResult =
+                await documentZip.generateRateDocumentsZip(rateRevision)
             if (zipResult instanceof Error) {
                 // Log the error but don't fail the submission
                 logError(

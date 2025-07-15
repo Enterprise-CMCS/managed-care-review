@@ -114,6 +114,12 @@ const rateTypeSchema = z.union([
     z.literal('AMENDMENT')
 ])
 
+const rateMedicaidPopulationsSchema = z.union([
+    z.literal('MEDICARE_MEDICAID_WITH_DSNP'),
+    z.literal('MEDICAID_ONLY'),
+    z.literal('MEDICARE_MEDICAID_WITHOUT_DSNP')
+])
+
 const rateCapitationTypeSchema = z.union([
     z.literal('RATE_CELL'),
     z.literal('RATE_RANGE'),
@@ -204,4 +210,5 @@ export {
     capitationRatesAmendedReasonSchema,
     populationCoveredSchema,
     submissionTypeSchema,
+    rateMedicaidPopulationsSchema,
 }

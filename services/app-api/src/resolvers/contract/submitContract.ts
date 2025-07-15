@@ -33,8 +33,8 @@ import {
     generateApplicableProvisionsList,
 } from '../../domain-models/contractAndRates'
 import type { GeneralizedModifiedProvisions } from '@mc-review/hpp'
-import { generateDocumentZip } from '../../zip'
 import { canWrite } from '../../authorization/oauthAuthorization'
+import type { DocumentZipService } from '../../zip/generateZip'
 
 const validateStatusAndUpdateInfo = (
     status: PackageStatusType,
@@ -63,7 +63,8 @@ const validateStatusAndUpdateInfo = (
 export function submitContract(
     store: Store,
     emailer: Emailer,
-    launchDarkly: LDService
+    launchDarkly: LDService,
+    documentZip: DocumentZipService
 ): MutationResolvers['submitContract'] {
     return async (_parent, { input }, context) => {
         const featureFlags = await launchDarkly.allFlags({
@@ -369,8 +370,7 @@ export function submitContract(
         }
 
         // Generate zips!
-        const contractZipRes = await createContractZips(
-            store,
+        const contractZipRes = await documentZip.createContractZips(
             submitContractResult,
             span
         )
@@ -380,8 +380,7 @@ export function submitContract(
             setErrorAttributesOnActiveSpan(errMessage, span)
         }
 
-        const rateZipRes = await createRateZips(
-            store,
+        const rateZipRes = await documentZip.createRateZips(
             submitContractResult,
             span
         )
