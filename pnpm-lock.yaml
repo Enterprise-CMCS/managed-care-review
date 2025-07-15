@@ -122,7 +122,7 @@ importers:
   packages/dates:
     dependencies:
       dayjs:
-        specifier: ^1.10.5
+        specifier: ^1.11.13
         version: 1.11.13
       typescript:
         specifier: 4.9.5
@@ -178,8 +178,8 @@ importers:
         specifier: 3.8.8
         version: 3.8.8(graphql-ws@5.14.3(graphql@16.9.0))(graphql@16.9.0)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(subscriptions-transport-ws@0.11.0(graphql@16.9.0))
       dayjs:
-        specifier: ^1.10.5
-        version: 1.11.12
+        specifier: ^1.11.13
+        version: 1.11.13
       typescript:
         specifier: ^4.9.5
         version: 4.9.5
@@ -218,7 +218,7 @@ importers:
         specifier: workspace:*
         version: link:../hpp
       dayjs:
-        specifier: ^1.10.5
+        specifier: ^1.11.13
         version: 1.11.13
       graphql:
         specifier: ^16.9.0
@@ -653,8 +653,8 @@ importers:
         specifier: ^1.10.0
         version: 1.10.0
       dayjs:
-        specifier: ^1.11.12
-        version: 1.11.12
+        specifier: ^1.11.13
+        version: 1.11.13
       formik:
         specifier: ^2.4.6
         version: 2.4.6(react@18.3.1)
@@ -7877,9 +7877,6 @@ packages:
 
   dataloader@2.2.3:
     resolution: {integrity: sha512-y2krtASINtPFS1rSDjacrFgn1dcUuoREVabwlOGOe4SdxenREqwjwjElAdwvbGM7kgZz9a3KVicWR7vcz8rnzA==}
-
-  dayjs@1.11.12:
-    resolution: {integrity: sha512-Rt2g+nTbLlDWZTwwrIXjy9MeiZmSDI375FvZs72ngxx8PDC6YXOeR3q5LAuPzjZQxhiWdRKac7RKV+YyQYfYIg==}
 
   dayjs@1.11.13:
     resolution: {integrity: sha512-oaMBel6gjolK862uaPQOVTA7q3TZhuSvuMQAAglQDOWYO9A91IrAOUJEyKVlqJlHE0vq5p5UXxzdPfMH/x6xNg==}
@@ -24521,7 +24518,7 @@ snapshots:
       cli-table3: 0.6.5
       commander: 6.2.1
       common-tags: 1.8.2
-      dayjs: 1.11.12
+      dayjs: 1.11.13
       debug: 4.3.4(supports-color@8.1.1)
       enquirer: 2.4.1
       eventemitter2: 6.4.7
@@ -24626,8 +24623,6 @@ snapshots:
       is-data-view: 1.0.1
 
   dataloader@2.2.3: {}
-
-  dayjs@1.11.12: {}
 
   dayjs@1.11.13: {}
 
