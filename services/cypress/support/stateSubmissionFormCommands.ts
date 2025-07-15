@@ -372,6 +372,7 @@ Cypress.Commands.add('fillOutNewRateCertification', () => {
                 force: true,
             })
             cy.findByText('PMAP').click()
+            cy.findByLabelText('Medicaid-only').check({force: true})
 
             //Fill out certifying actuary
             cy.findAllByLabelText('Name').eq(0).click().type('Actuary Contact Person')
