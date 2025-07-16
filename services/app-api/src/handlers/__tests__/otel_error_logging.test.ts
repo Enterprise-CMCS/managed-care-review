@@ -35,13 +35,13 @@ describe('OTEL Error Logging', () => {
                 .spyOn(console, 'error')
                 .mockImplementation(() => {})
 
-            const result = await server.executeOperation({
+            const result = (await server.executeOperation({
                 query: gql`
                     query {
                         triggerError
                     }
                 `,
-            })
+            })) as { errors?: any; data?: any }
 
             // Verify GraphQL error is returned
             expect(result.errors).toBeDefined()
@@ -137,13 +137,13 @@ describe('OTEL Error Logging', () => {
                 resolvers,
             })
 
-            const result = await server.executeOperation({
+            const result = (await server.executeOperation({
                 query: gql`
                     query {
                         triggerCustomError
                     }
                 `,
-            })
+            })) as { errors?: any; data?: any }
 
             // Verify custom error structure is preserved
             expect(result.errors).toBeDefined()

@@ -13,14 +13,14 @@ const updateTestEmailSettings = async (
     server: ApolloServer,
     emailConfiguration: EmailConfiguration
 ): Promise<UpdateEmailSettingsPayload> => {
-    const updateEmailConfig = await server.executeOperation({
+    const updateEmailConfig = (await server.executeOperation({
         query: UpdateEmailSettingsDocument,
         variables: {
             input: {
                 emailConfiguration,
             },
         },
-    })
+    })) as { body: { data?: any; errors?: any } }
 
     if (updateEmailConfig.body.errors) {
         console.info('errors', updateEmailConfig.body.errors)
@@ -42,9 +42,9 @@ const updateTestEmailSettings = async (
 const fetchTestMcReviewSettings = async (
     server: ApolloServer
 ): Promise<FetchMcReviewSettingsPayload> => {
-    const fetchMcReviewSettings = await server.executeOperation({
+    const fetchMcReviewSettings = (await server.executeOperation({
         query: FetchMcReviewSettingsDocument,
-    })
+    })) as { body: { data?: any; errors?: any } }
 
     if (fetchMcReviewSettings.body.errors) {
         console.info('errors', fetchMcReviewSettings.body.errors)

@@ -25,7 +25,7 @@ describe('Apollo Server v3 Status Code Behavior', () => {
             })
 
             // Test invalid variable type (number instead of string)
-            const result = await server.executeOperation({
+            const result = (await server.executeOperation({
                 query: gql`
                     query HelloQuery($name: String!) {
                         hello(name: $name)
@@ -34,7 +34,7 @@ describe('Apollo Server v3 Status Code Behavior', () => {
                 variables: {
                     name: 123, // Invalid: number instead of string
                 },
-            })
+            })) as { errors?: any; data?: any }
 
             // Apollo Server v3 behavior: returns BAD_USER_INPUT for variable validation errors
             expect(result.errors).toBeDefined()
@@ -64,14 +64,14 @@ describe('Apollo Server v3 Status Code Behavior', () => {
             })
 
             // Test missing required variable
-            const result = await server.executeOperation({
+            const result = (await server.executeOperation({
                 query: gql`
                     query HelloQuery($name: String!) {
                         hello(name: $name)
                     }
                 `,
                 variables: {}, // Missing required variable
-            })
+            })) as { errors?: any; data?: any }
 
             expect(result.errors).toBeDefined()
             expect(result.errors?.[0]?.message).toContain(
@@ -98,7 +98,7 @@ describe('Apollo Server v3 Status Code Behavior', () => {
                 resolvers,
             })
 
-            const result = await server.executeOperation({
+            const result = (await server.executeOperation({
                 query: gql`
                     query Test($input: String!) {
                         test(input: $input)
@@ -107,7 +107,7 @@ describe('Apollo Server v3 Status Code Behavior', () => {
                 variables: {
                     input: 456, // Invalid type
                 },
-            })
+            })) as { errors?: any; data?: any }
 
             // Apollo Server v3 vs v4 Behavior
             // Apollo Server v3 (current): Returns BAD_USER_INPUT with 400 status
@@ -142,7 +142,7 @@ describe('Apollo Server v3 Status Code Behavior', () => {
                 resolvers,
             })
 
-            const result = await server.executeOperation({
+            const result = (await server.executeOperation({
                 query: gql`
                     query ValidateAge($age: Int!) {
                         validateAge(age: $age)
@@ -151,7 +151,7 @@ describe('Apollo Server v3 Status Code Behavior', () => {
                 variables: {
                     age: -5,
                 },
-            })
+            })) as { errors?: any; data?: any }
 
             expect(result.errors).toBeDefined()
             expect(result.errors?.[0]?.message).toBe('Age must be positive')

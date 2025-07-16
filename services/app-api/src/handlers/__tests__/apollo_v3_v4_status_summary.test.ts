@@ -24,7 +24,7 @@ describe('Apollo Server v3 vs v4 Status Code Summary', () => {
             })
 
             // Test invalid variable type
-            const result = await server.executeOperation({
+            const result = (await server.executeOperation({
                 query: gql`
                     query HelloQuery($name: String!) {
                         hello(name: $name)
@@ -33,7 +33,7 @@ describe('Apollo Server v3 vs v4 Status Code Summary', () => {
                 variables: {
                     name: 123, // Invalid: number instead of string
                 },
-            })
+            })) as { errors?: any; data?: any }
 
             // Apollo Server v3 Variable Validation
             // Error Code: BAD_USER_INPUT
@@ -104,13 +104,13 @@ describe('Apollo Server v3 vs v4 Status Code Summary', () => {
                 resolvers,
             })
 
-            const result = await server.executeOperation({
+            const result = (await server.executeOperation({
                 query: gql`
                     query {
                         testError
                     }
                 `,
-            })
+            })) as { errors?: any; data?: any }
 
             // Custom Error Handling Test
             // Error Code: BAD_USER_INPUT

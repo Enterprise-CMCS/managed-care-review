@@ -37,10 +37,10 @@ const fetchTestRateById = async (
     rateID: string
 ): Promise<Rate> => {
     const input = { rateID }
-    const result = await server.executeOperation({
+    const result = (await server.executeOperation({
         query: FetchRateDocument,
         variables: { input },
-    })
+    })) as { body: { data?: any; errors?: any } }
 
     if (result.body.errors) {
         throw new Error(
@@ -60,10 +60,10 @@ const fetchTestRateWithQuestionsById = async (
     rateID: string
 ): Promise<Rate> => {
     const input = { rateID }
-    const result = await server.executeOperation({
+    const result = (await server.executeOperation({
         query: FetchRateWithQuestionsDocument,
         variables: { input },
-    })
+    })) as { body: { data?: any; errors?: any } }
 
     if (result.body.errors) {
         throw new Error(
@@ -97,7 +97,7 @@ const submitTestRate = async (
     rateID: string,
     submittedReason: string
 ): Promise<Rate> => {
-    const updateResult = await server.executeOperation({
+    const updateResult = (await server.executeOperation({
         query: SubmitRateDocument,
         variables: {
             input: {
@@ -105,7 +105,7 @@ const submitTestRate = async (
                 submittedReason,
             },
         },
-    })
+    })) as { body: { data?: any; errors?: any } }
 
     if (updateResult.body.errors) {
         console.info('errors', updateResult.body.errors)
@@ -129,7 +129,7 @@ const unlockTestRate = async (
     rateID: string,
     unlockedReason: string
 ) => {
-    const updateResult = await server.executeOperation({
+    const updateResult = (await server.executeOperation({
         query: UnlockRateDocument,
         variables: {
             input: {
@@ -137,7 +137,7 @@ const unlockTestRate = async (
                 unlockedReason,
             },
         },
-    })
+    })) as { body: { data?: any; errors?: any } }
 
     if (updateResult.body.errors) {
         console.info('errors', updateResult.body.errors)
@@ -160,12 +160,12 @@ async function updateTestDraftRatesOnContract(
     server: ApolloServer,
     input: UpdateDraftContractRatesInput
 ): Promise<Contract> {
-    const updateResult = await server.executeOperation({
+    const updateResult = (await server.executeOperation({
         query: UpdateDraftContractRatesDocument,
         variables: {
             input,
         },
-    })
+    })) as { body: { data?: any; errors?: any } }
 
     if (updateResult.body.errors || !updateResult.body.data) {
         throw new Error(
@@ -389,7 +389,7 @@ const createTestDraftRateOnContract = async (
         rateData = mockRateFormDataInput()
     }
 
-    const updateResult = await server.executeOperation({
+    const updateResult = (await server.executeOperation({
         query: UpdateDraftContractRatesDocument,
         variables: {
             input: {
@@ -403,7 +403,7 @@ const createTestDraftRateOnContract = async (
                 ],
             },
         },
-    })
+    })) as { body: { data?: any; errors?: any } }
 
     if (updateResult.body.errors || !updateResult.body.data) {
         console.info('errors', updateResult.body.errors)
@@ -426,7 +426,7 @@ const updateTestDraftRateOnContract = async (
         rateData = mockRateFormDataInput()
     }
 
-    const updateResult = await server.executeOperation({
+    const updateResult = (await server.executeOperation({
         query: UpdateDraftContractRatesDocument,
         variables: {
             input: {
@@ -441,7 +441,7 @@ const updateTestDraftRateOnContract = async (
                 ],
             },
         },
-    })
+    })) as { body: { data?: any; errors?: any } }
 
     if (updateResult.body.errors || !updateResult.body.data) {
         console.info('errors', updateResult.body.errors)
@@ -473,7 +473,7 @@ const withdrawTestRate = async (
     rateID: string,
     updatedReason: string
 ): Promise<RateType> => {
-    const withdrawResult = await server.executeOperation({
+    const withdrawResult = (await server.executeOperation({
         query: WithdrawRateDocument,
         variables: {
             input: {
@@ -481,7 +481,7 @@ const withdrawTestRate = async (
                 updatedReason,
             },
         },
-    })
+    })) as { body: { data?: any; errors?: any } }
 
     if (withdrawResult.body.errors) {
         console.info('errors', withdrawResult.body.errors)
@@ -505,7 +505,7 @@ const undoWithdrawTestRate = async (
     rateID: string,
     updatedReason: string
 ): Promise<RateType> => {
-    const undoWithdrawRate = await server.executeOperation({
+    const undoWithdrawRate = (await server.executeOperation({
         query: UndoWithdrawnRateDocument,
         variables: {
             input: {
@@ -513,7 +513,7 @@ const undoWithdrawTestRate = async (
                 updatedReason,
             },
         },
-    })
+    })) as { body: { data?: any; errors?: any } }
 
     if (undoWithdrawRate.body.errors) {
         console.info('errors', undoWithdrawRate.body.errors)
@@ -537,7 +537,7 @@ const fetchTestIndexRatesStripped = async (
     stateCode?: string,
     rateIDs?: string[]
 ): Promise<IndexRatesStrippedPayload> => {
-    const indexRatesStrippedResult = await server.executeOperation({
+    const indexRatesStrippedResult = (await server.executeOperation({
         query: IndexRatesStrippedDocument,
         variables: {
             input: {
@@ -545,7 +545,7 @@ const fetchTestIndexRatesStripped = async (
                 rateIDs,
             },
         },
-    })
+    })) as { body: { data?: any; errors?: any } }
 
     if (indexRatesStrippedResult.body.errors) {
         console.info('errors', indexRatesStrippedResult.body.errors)

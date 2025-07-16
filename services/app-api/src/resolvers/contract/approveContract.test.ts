@@ -57,7 +57,7 @@ describe('approveContract', () => {
 
         const draftContract = await createTestContract(stateServer)
 
-        const approveContractResult = await cmsServer.executeOperation({
+        const approveContractResult = (await cmsServer.executeOperation({
             query: ApproveContractDocument,
             variables: {
                 input: {
@@ -65,7 +65,7 @@ describe('approveContract', () => {
                     dateApprovalReleasedToState: '2024-12-12',
                 },
             },
-        })
+        })) as { errors?: any; data?: any }
 
         expect(approveContractResult.errors).toBeDefined()
         if (approveContractResult.errors === undefined) {
@@ -100,7 +100,7 @@ describe('approveContract', () => {
             'unlock to resubmit'
         )
 
-        const approveContractResult = await cmsServer.executeOperation({
+        const approveContractResult = (await cmsServer.executeOperation({
             query: ApproveContractDocument,
             variables: {
                 input: {
@@ -108,7 +108,7 @@ describe('approveContract', () => {
                     dateApprovalReleasedToState: '2024-12-12',
                 },
             },
-        })
+        })) as { errors?: any; data?: any }
 
         expect(approveContractResult.errors).toBeDefined()
         if (approveContractResult.errors === undefined) {
@@ -137,7 +137,7 @@ describe('approveContract', () => {
 
         const contract = await createAndSubmitTestContractWithRate(stateServer)
 
-        await cmsServer.executeOperation({
+        await (cmsServer.executeOperation({
             query: ApproveContractDocument,
             variables: {
                 input: {
@@ -145,9 +145,9 @@ describe('approveContract', () => {
                     dateApprovalReleasedToState: '2024-11-11',
                 },
             },
-        })
+        }) as Promise<{ errors?: any; data?: any }>)
 
-        const secondApprovalResult = await cmsServer.executeOperation({
+        const secondApprovalResult = (await cmsServer.executeOperation({
             query: ApproveContractDocument,
             variables: {
                 input: {
@@ -155,7 +155,7 @@ describe('approveContract', () => {
                     dateApprovalReleasedToState: '2024-12-12',
                 },
             },
-        })
+        })) as { errors?: any; data?: any }
 
         expect(secondApprovalResult.errors).toBeDefined()
         if (secondApprovalResult.errors === undefined) {
@@ -183,7 +183,7 @@ describe('approveContract', () => {
         })
 
         const contract = await createAndSubmitTestContractWithRate(stateServer)
-        const approveContractResult = await cmsServer.executeOperation({
+        const approveContractResult = (await cmsServer.executeOperation({
             query: ApproveContractDocument,
             variables: {
                 input: {
@@ -191,7 +191,7 @@ describe('approveContract', () => {
                     dateApprovalReleasedToState: '3009-11-11',
                 },
             },
-        })
+        })) as { errors?: any; data?: any }
         expect(approveContractResult.errors).toBeDefined()
         if (approveContractResult.errors === undefined) {
             throw new Error('type narrow')
@@ -212,7 +212,7 @@ describe('approveContract', () => {
 
         const contract = await createAndSubmitTestContractWithRate(stateServer)
 
-        const approveContractResult = await stateServer.executeOperation({
+        const approveContractResult = (await stateServer.executeOperation({
             query: ApproveContractDocument,
             variables: {
                 input: {
@@ -220,7 +220,7 @@ describe('approveContract', () => {
                     dateApprovalReleasedToState: '2024-12-12',
                 },
             },
-        })
+        })) as { errors?: any; data?: any }
 
         expect(approveContractResult.errors).toBeDefined()
         if (approveContractResult.errors === undefined) {

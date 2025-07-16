@@ -64,25 +64,25 @@ describe('submitRate', () => {
 
         const rate = await createSubmitAndUnlockTestRate(stateServer, cmsServer)
 
-        const fetchDraftRate = await stateServer.executeOperation({
+        const fetchDraftRate = (await stateServer.executeOperation({
             query: FetchRateDocument,
             variables: {
                 input: { rateID: rate.id },
             },
-        })
+        })) as { errors?: any; data?: any }
 
         const draftFormData =
             fetchDraftRate.data?.fetchRate.rate.draftRevision.formData
 
         // submitRate with no form data updates
-        const result = await stateServer.executeOperation({
+        const result = (await stateServer.executeOperation({
             query: SubmitRateDocument,
             variables: {
                 input: {
                     rateID: rate.id,
                 },
             },
-        })
+        })) as { errors?: any; data?: any }
 
         expect(result.errors).toBeUndefined()
         const submittedRate = result.data?.submitRate.rate
@@ -159,12 +159,12 @@ describe('submitRate', () => {
 
         const rate = await createSubmitAndUnlockTestRate(stateServer, cmsServer)
 
-        const fetchDraftRate = await stateServer.executeOperation({
+        const fetchDraftRate = (await stateServer.executeOperation({
             query: FetchRateDocument,
             variables: {
                 input: { rateID: rate.id },
             },
-        })
+        })) as { errors?: any; data?: any }
 
         const draftFormData = rate.draftRevision?.formData
 

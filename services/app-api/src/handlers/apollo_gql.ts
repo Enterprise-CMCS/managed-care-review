@@ -375,7 +375,6 @@ async function initializeGQLHandler(): Promise<Handler> {
     const server = new ApolloServer({
         typeDefs,
         resolvers,
-        context: contextForRequest,
         plugins,
         introspection: introspectionAllowed,
     })
@@ -386,8 +385,7 @@ async function initializeGQLHandler(): Promise<Handler> {
         handlers.createAPIGatewayProxyEventV2RequestHandler(),
         {
             context: async ({ event, context }) => {
-                // Context logic will be moved here
-                return { event, context }
+                return await contextForRequest({ event, context })
             },
         }
     )

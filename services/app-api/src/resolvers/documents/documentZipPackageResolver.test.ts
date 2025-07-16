@@ -41,12 +41,12 @@ describe('DocumentZipPackage resolver', () => {
         const submittedContract =
             await createAndSubmitTestContractWithRate(stateServer)
 
-        const result = await stateServer.executeOperation({
+        const result = (await stateServer.executeOperation({
             query: FetchContractDocument,
             variables: {
                 input: { contractID: submittedContract.id },
             },
-        })
+        })) as { errors?: any; data?: any }
 
         expect(result.errors).toBeUndefined()
         const contractRevision =
@@ -80,12 +80,12 @@ describe('DocumentZipPackage resolver', () => {
         const submittedContract =
             await createAndSubmitTestContractWithRate(stateServer)
 
-        const result = await stateServer.executeOperation({
+        const result = (await stateServer.executeOperation({
             query: FetchContractDocument,
             variables: {
                 input: { contractID: submittedContract.id },
             },
-        })
+        })) as { errors?: any; data?: any }
 
         expect(result.errors).toBeUndefined()
         const rateRevisions =
@@ -127,12 +127,12 @@ describe('DocumentZipPackage resolver', () => {
             updatedContract.id
         )
 
-        const result = await stateServer.executeOperation({
+        const result = (await stateServer.executeOperation({
             query: FetchContractDocument,
             variables: {
                 input: { contractID: submittedContract.id },
             },
-        })
+        })) as { errors?: any; data?: any }
 
         expect(result.errors).toBeUndefined()
 
