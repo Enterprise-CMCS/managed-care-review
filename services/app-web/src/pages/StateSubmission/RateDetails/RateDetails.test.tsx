@@ -1927,4 +1927,84 @@ describe('RateDetails', () => {
             ).toBeInTheDocument()
         })
     })
+
+    describe('handles medicaid populations for D-SNP associated rates', () => {
+        it('renders rate Medicaid populations question', async () => {
+            const contract = mockContractPackageDraft()
+            contract.draftRevision!.formData.dsnpContract = true
+            renderWithProviders(
+                <Routes>
+                    <Route
+                        path={RoutesRecord.SUBMISSIONS_RATE_DETAILS}
+                        element={<RateDetails type="MULTI" />}
+                    />
+                </Routes>,
+                {
+                    apolloProvider: {
+                        mocks: [
+                            fetchCurrentUserMock({ statusCode: 200 }),
+                            fetchContractMockSuccess({
+                                contract: {
+                                    ...contract,
+                                    id: 'test-abc-123',
+                                },
+                            }),
+                        ],
+                    },
+                    routerProvider: {
+                        route: `/submissions/test-abc-123/edit/rate-details`,
+                    },
+                    featureFlags: {
+                        'rate-edit-unlock': false,
+                        dsnp: true,
+                    },
+                }
+            )
+
+            await screen.findByText('Rate Details')
+            // rate Medicaid populations question to be present
+            expect(
+                screen.getByText('Rate Medicaid populations')
+            ).toBeInTheDocument()
+        })
+
+        it('does not render rate Medicaid populations question without dsnp', async () => {
+            const contract = mockContractPackageDraft()
+            contract.draftRevision!.formData.dsnpContract = null
+            renderWithProviders(
+                <Routes>
+                    <Route
+                        path={RoutesRecord.SUBMISSIONS_RATE_DETAILS}
+                        element={<RateDetails type="MULTI" />}
+                    />
+                </Routes>,
+                {
+                    apolloProvider: {
+                        mocks: [
+                            fetchCurrentUserMock({ statusCode: 200 }),
+                            fetchContractMockSuccess({
+                                contract: {
+                                    ...contract,
+                                    id: 'test-abc-123',
+                                },
+                            }),
+                        ],
+                    },
+                    routerProvider: {
+                        route: `/submissions/test-abc-123/edit/rate-details`,
+                    },
+                    featureFlags: {
+                        'rate-edit-unlock': false,
+                        dsnp: true,
+                    },
+                }
+            )
+
+            await screen.findByText('Rate Details')
+            // rate Medicaid populations question to not be present
+            expect(
+                screen.queryByText('Rate Medicaid populations')
+            ).not.toBeInTheDocument()
+        })
+    })
 })
