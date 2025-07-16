@@ -194,14 +194,15 @@ const RateDetails = ({
 
     const [updateDraftContractRates] = useUpdateDraftContractRatesMutation()
     const [submitRate] = useSubmitRateMutation()
-    const isDSNPPopulated =
-        contract?.draftRevision?.formData?.dsnpContract != null
+    const isDSNP =
+        contract?.draftRevision?.formData?.dsnpContract === true
     const rateDetailsFormSchema = RateDetailsFormSchema(
         {
             'rate-edit-unlock': useEditUnlockRate,
+            'dsnp': true
         },
         !displayAsStandaloneRate,
-        isDSNPPopulated
+        isDSNP
     )
     // Set up initial rate form values for Formik
     const initialRates: Rate[] = React.useMemo(

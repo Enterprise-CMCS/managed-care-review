@@ -40,6 +40,9 @@ import { FormikRateForm, RateDetailFormConfig } from './V2/RateDetailsV2'
 import { useFocus } from '../../../hooks/useFocus'
 import { ContactSupportLink } from '../../../components/ErrorAlert/ContactSupportLink'
 import { Contract } from '../../../gen/gqlClient'
+import { featureFlags } from '@mc-review/common-code'
+import { useLDClient } from 'launchdarkly-react-client-sdk'
+
 const isRateTypeEmpty = (rateForm: FormikRateForm): boolean =>
     rateForm.rateType === undefined
 const isRateTypeAmendment = (rateForm: FormikRateForm): boolean =>
@@ -114,10 +117,16 @@ export const SingleRateFormFields = ({
     const { handleUploadFile, handleScanFile } = useS3()
     const { errors, setFieldValue } = useFormikContext<RateDetailFormConfig>()
     const [focusNewActuaryContact, setFocusNewActuaryContact] = useState(false)
+    const ldClient = useLDClient()
 
     const newActuaryContactNameRef = useRef<HTMLInputElement | null>(null)
     const [newActuaryContactButtonRef, setNewActuaryContactButtonFocus] =
         useFocus()
+
+    const dsnpEnabled = ldClient?.variation(
+        featureFlags.DSNP.flag,
+        featureFlags.DSNP.defaultValue
+    )
 
     useEffect(() => {
         if (focusNewActuaryContact) {
@@ -137,7 +146,7 @@ export const SingleRateFormFields = ({
     }
 
     const formHeading = 'Rate Details Form'
-
+    const isDSNP = contract?.draftRevision?.formData.dsnpContract === true
     return (
         <>
             <FormGroup error={Boolean(showFieldErrors('rateDocuments'))}>
@@ -253,7 +262,7 @@ export const SingleRateFormFields = ({
                 />
             </FormGroup>
 
-            {contract?.draftRevision?.formData.dsnpContract && (
+            {dsnpEnabled && isDSNP && (
                 <FormGroup
                     error={Boolean(showFieldErrors('rateMedicaidPopulations'))}
                 >

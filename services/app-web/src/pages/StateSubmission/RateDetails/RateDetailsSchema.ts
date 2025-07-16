@@ -9,7 +9,7 @@ import {
 
 Yup.addMethod(Yup.date, 'validateDateFormat', validateDateFormat)
 
-const SingleRateCertSchema = (_activeFeatureFlags: FeatureFlagSettings, isDSNPPopulated?: boolean) =>
+const SingleRateCertSchema = (_activeFeatureFlags: FeatureFlagSettings, isDSNP?: boolean) =>
     Yup.object().shape({
         rateDocuments: validateFileItemsListSingleUpload({ required: true }),
         supportingDocuments: validateFileItemsList({ required: false }),
@@ -31,7 +31,7 @@ const SingleRateCertSchema = (_activeFeatureFlags: FeatureFlagSettings, isDSNPPo
         rateType: Yup.string().defined(
             'You must choose a rate certification type'
         ),
-        rateMedicaidPopulations: isDSNPPopulated ? 
+        rateMedicaidPopulations: isDSNP && _activeFeatureFlags['dsnp']? 
         Yup.array().test(
             'medicaidPopulationSelection',
             'You must select at least one Medicaid population',
@@ -174,7 +174,7 @@ const SingleRateCertSchema = (_activeFeatureFlags: FeatureFlagSettings, isDSNPPo
 const RateDetailsFormSchema = (
     activeFeatureFlags?: FeatureFlagSettings,
     isMultiRate?: boolean,
-    isDSNPPopulated?: boolean,
+    isDSNP?: boolean,
 ) => {
     return isMultiRate
         ? Yup.object().shape({
@@ -201,7 +201,7 @@ const RateDetailsFormSchema = (
                       .when('.ratePreviouslySubmitted', {
                           // continue with normal rate form validations when its a new rate
                           is: 'NO',
-                          then: SingleRateCertSchema(activeFeatureFlags || {}, isDSNPPopulated),
+                          then: SingleRateCertSchema(activeFeatureFlags || {}, isDSNP),
                       })
               ),
           })
@@ -210,7 +210,7 @@ const RateDetailsFormSchema = (
           // eventually this could be just a single rate cert schema, but for now since the UI is shared, it still uses an array like RateDetails
           Yup.object().shape({
               rateForms: Yup.array().of(
-                  SingleRateCertSchema(activeFeatureFlags || {}, isDSNPPopulated)
+                  SingleRateCertSchema(activeFeatureFlags || {}, isDSNP)
               ),
           })
 }
