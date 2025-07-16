@@ -450,7 +450,7 @@ describe('RateDetails', () => {
                 ).toBeInTheDocument()
                 expect(submitButton).toHaveAttribute('aria-disabled', 'true')
                 expect(
-                    screen.getByText('There are 9 errors on this page')
+                    screen.getByText('There are 10 errors on this page')
                 ).toBeInTheDocument()
             })
         })
@@ -1722,7 +1722,9 @@ describe('RateDetails', () => {
         })
 
         it('when rate previously submitted question is answered with NO', async () => {
-            const contractID = 'test-abc-123'
+            const contract = mockContractPackageDraft()
+            contract.id = 'test-abc-123'
+            contract.draftRevision!.formData.dsnpContract = true
             const { user } = renderWithProviders(
                 <Routes>
                     <Route
@@ -1736,18 +1738,18 @@ describe('RateDetails', () => {
                             fetchCurrentUserMock({ statusCode: 200 }),
                             fetchContractMockSuccess({
                                 contract: {
-                                    ...mockContractPackageDraft(),
-                                    id: contractID,
+                                    ...contract,
                                     draftRates: [], //clear out rates
                                 },
                             }),
                         ],
                     },
                     routerProvider: {
-                        route: `/submissions/${contractID}/edit/rate-details`,
+                        route: `/submissions/${contract.id}/edit/rate-details`,
                     },
                     featureFlags: {
                         'rate-edit-unlock': false,
+                        dsnp: true,
                     },
                 }
             )
@@ -1778,6 +1780,11 @@ describe('RateDetails', () => {
             ).toHaveLength(2)
             expect(
                 screen.getAllByText('You must choose a rate certification type')
+            ).toHaveLength(2)
+            expect(
+                screen.getAllByText(
+                    'You must select at least one Medicaid population'
+                )
             ).toHaveLength(2)
             expect(
                 screen.getAllByText(
@@ -1925,6 +1932,86 @@ describe('RateDetails', () => {
                     name: /WITHDRAWN-RATE-2-NAME/,
                 })
             ).toBeInTheDocument()
+        })
+    })
+
+    describe('handles medicaid populations for D-SNP associated rates', () => {
+        it('renders rate Medicaid populations question', async () => {
+            const contract = mockContractPackageDraft()
+            contract.draftRevision!.formData.dsnpContract = true
+            renderWithProviders(
+                <Routes>
+                    <Route
+                        path={RoutesRecord.SUBMISSIONS_RATE_DETAILS}
+                        element={<RateDetails type="MULTI" />}
+                    />
+                </Routes>,
+                {
+                    apolloProvider: {
+                        mocks: [
+                            fetchCurrentUserMock({ statusCode: 200 }),
+                            fetchContractMockSuccess({
+                                contract: {
+                                    ...contract,
+                                    id: 'test-abc-123',
+                                },
+                            }),
+                        ],
+                    },
+                    routerProvider: {
+                        route: `/submissions/test-abc-123/edit/rate-details`,
+                    },
+                    featureFlags: {
+                        'rate-edit-unlock': false,
+                        dsnp: true,
+                    },
+                }
+            )
+
+            await screen.findByText('Rate Details')
+            // rate Medicaid populations question to be present
+            expect(
+                screen.getByText('Rate Medicaid populations')
+            ).toBeInTheDocument()
+        })
+
+        it('does not render rate Medicaid populations question without dsnp', async () => {
+            const contract = mockContractPackageDraft()
+            contract.draftRevision!.formData.dsnpContract = false
+            renderWithProviders(
+                <Routes>
+                    <Route
+                        path={RoutesRecord.SUBMISSIONS_RATE_DETAILS}
+                        element={<RateDetails type="MULTI" />}
+                    />
+                </Routes>,
+                {
+                    apolloProvider: {
+                        mocks: [
+                            fetchCurrentUserMock({ statusCode: 200 }),
+                            fetchContractMockSuccess({
+                                contract: {
+                                    ...contract,
+                                    id: 'test-abc-123',
+                                },
+                            }),
+                        ],
+                    },
+                    routerProvider: {
+                        route: `/submissions/test-abc-123/edit/rate-details`,
+                    },
+                    featureFlags: {
+                        'rate-edit-unlock': false,
+                        dsnp: true,
+                    },
+                }
+            )
+
+            await screen.findByText('Rate Details')
+            // rate Medicaid populations question to not be present
+            expect(
+                screen.queryByText('Rate Medicaid populations')
+            ).not.toBeInTheDocument()
         })
     })
 })

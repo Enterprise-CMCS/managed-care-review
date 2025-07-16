@@ -1318,6 +1318,7 @@ export const ContractDetails = ({
                                                     >
                                                         <Fieldset
                                                             aria-required
+                                                            id="dsnpContract"
                                                             legend="Is this contract associated with a Dual-Eligible Special Needs Plan (D-SNP) that covers Medicaid benefits?"
                                                         >
                                                             <span
@@ -1327,17 +1328,14 @@ export const ContractDetails = ({
                                                             >
                                                                 Required
                                                             </span>
-                                                            <span
-                                                                className={
-                                                                    styles.requiredOptionalText
-                                                                }
-                                                                style={{
-                                                                    color: '#1B1B1B',
-                                                                }}
+                                                            <div
+                                                                role="note"
+                                                                aria-labelledby="dsnpContract"
+                                                                className="mcr-note margin-top-1"
                                                             >
                                                                 See 42 CFR §
                                                                 422.2
-                                                            </span>
+                                                            </div>
                                                             <LinkWithLogging
                                                                 variant="external"
                                                                 href={

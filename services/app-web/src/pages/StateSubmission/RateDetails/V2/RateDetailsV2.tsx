@@ -71,6 +71,7 @@ export type FormikRateForm = {
     rateProgramIDs: RateRevision['formData']['rateProgramIDs']
     rateDocuments: FileItemT[]
     supportingDocuments: FileItemT[]
+    rateMedicaidPopulations?: RateRevision['formData']['rateMedicaidPopulations']
     actuaryContacts: RateRevision['formData']['certifyingActuaryContacts']
     addtlActuaryContacts: RateRevision['formData']['addtlActuaryContacts']
     actuaryCommunicationPreference: RateRevision['formData']['actuaryCommunicationPreference']
@@ -109,6 +110,7 @@ const RateDetails = ({
         featureFlags.HIDE_SUPPORTING_DOCS_PAGE.flag,
         featureFlags.HIDE_SUPPORTING_DOCS_PAGE.defaultValue
     )
+
     const [showAPIErrorBanner, setShowAPIErrorBanner] = useState<
         boolean | string
     >(false) // string is a custom error message, defaults to generic message when true
@@ -117,12 +119,6 @@ const RateDetails = ({
 
     // Form validation
     const [shouldValidate, setShouldValidate] = useState(showValidations)
-    const rateDetailsFormSchema = RateDetailsFormSchema(
-        {
-            'rate-edit-unlock': useEditUnlockRate,
-        },
-        !displayAsStandaloneRate
-    )
 
     const { setFocusErrorSummaryHeading, errorSummaryHeadingRef } =
         useErrorSummary()
@@ -198,7 +194,16 @@ const RateDetails = ({
 
     const [updateDraftContractRates] = useUpdateDraftContractRatesMutation()
     const [submitRate] = useSubmitRateMutation()
-
+    const isDSNP =
+        contract?.draftRevision?.formData?.dsnpContract === true
+    const rateDetailsFormSchema = RateDetailsFormSchema(
+        {
+            'rate-edit-unlock': useEditUnlockRate,
+            'dsnp': true
+        },
+        !displayAsStandaloneRate,
+        isDSNP
+    )
     // Set up initial rate form values for Formik
     const initialRates: Rate[] = React.useMemo(
         () =>
@@ -269,13 +274,16 @@ const RateDetails = ({
         }
 
         if (displayAsStandaloneRate && options.type === 'CONTINUE') {
+            const dsnpPopulated =
+                contract?.draftRevision?.formData?.dsnpContract != null
             try {
                 await submitRate({
                     variables: {
                         input: {
                             rateID: id ?? 'no-id',
                             formData: convertRateFormToGQLRateFormData(
-                                rateForms[0]
+                                rateForms[0],
+                                dsnpPopulated
                             ), // only grab the first rate in the array for standalone rate submission
                         },
                     },
@@ -302,6 +310,8 @@ const RateDetails = ({
             (options.type === 'CONTINUE' || options.type === 'SAVE_AS_DRAFT')
         ) {
             try {
+                const dsnpPopulated =
+                    contract?.draftRevision?.formData?.dsnpContract != null
                 const formattedRateForms = rateForms.filter((rate) => {
                     if (rate.ratePreviouslySubmitted === 'YES') {
                         return rate.id
@@ -309,7 +319,10 @@ const RateDetails = ({
                         return rate
                     }
                 })
-                const updatedRates = generateUpdatedRates(formattedRateForms)
+                const updatedRates = generateUpdatedRates(
+                    formattedRateForms,
+                    dsnpPopulated
+                )
                 await updateDraftContractRates({
                     variables: {
                         input: {
@@ -586,6 +599,9 @@ const RateDetails = ({
                                                                         )}
                                                                         shouldValidate={
                                                                             shouldValidate
+                                                                        }
+                                                                        contract={
+                                                                            contract
                                                                         }
                                                                     />
                                                                 )}
