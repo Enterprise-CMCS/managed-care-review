@@ -5,7 +5,7 @@ import {
     Label,
 } from '@trussworks/react-uswds'
 import { Formik, FormikErrors, FormikHelpers } from 'formik'
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import { useNavigate, useLocation, generatePath } from 'react-router-dom'
 import {
     DynamicStepIndicator,
@@ -36,19 +36,19 @@ import {
 import {
     booleanAsYesNoFormValue,
     yesNoFormValueAsBoolean,
-} from '../../../components/Form/FieldYesNo/FieldYesNo'
+} from '../../../components/Form/FieldYesNo'
 import { SubmissionTypeFormSchema } from './SubmissionTypeSchema'
 import {
     RoutesRecord,
     RouteT,
-    STATE_SUBMISSION_FORM_ROUTES,
     STATE_SUBMISSION_FORM_ROUTES_WITHOUT_SUPPORTING_DOCS,
+    STATE_SUBMISSION_FORM_ROUTES,
 } from '@mc-review/constants'
-import { FormContainer } from '../../../components/FormContainer/FormContainer'
+import { FormContainer } from '../../../components'
 import { useCurrentRoute } from '../../../hooks'
 import { ErrorOrLoadingPage } from '../ErrorOrLoadingPage'
 import { useAuth } from '../../../contexts/AuthContext'
-import { useRouteParams } from '../../../hooks/useRouteParams'
+import { useRouteParams } from '../../../hooks'
 import { PageBannerAlerts } from '../PageBannerAlerts'
 import { useErrorSummary } from '../../../hooks/useErrorSummary'
 import { useContractForm } from '../../../hooks/useContractForm'
@@ -56,6 +56,7 @@ import { useLDClient } from 'launchdarkly-react-client-sdk'
 import { featureFlags } from '@mc-review/common-code'
 import { ContactSupportLink } from '../../../components/ErrorAlert/ContactSupportLink'
 import { useFocusOnRender } from '../../../hooks/useFocusOnRender'
+import { usePage } from '../../../contexts/PageContext'
 
 export interface SubmissionTypeFormValues {
     populationCovered?: PopulationCoveredType
@@ -80,6 +81,7 @@ export const SubmissionType = ({
     const [showAPIErrorBanner, setShowAPIErrorBanner] = useState<
         boolean | string
     >(false) // string is a custom error message, defaults to generic message when true
+    const { updateActiveMainContent } = usePage()
 
     const { setFocusErrorSummaryHeading, errorSummaryHeadingRef } =
         useErrorSummary()
@@ -122,6 +124,12 @@ export const SubmissionType = ({
         contractType:
             draftSubmission?.draftRevision?.formData.contractType ?? '',
     }
+    const activeMainContentId = 'submissionTypePageMainContent'
+
+    // Set the active main content to focus when click the Skip to main content button.
+    useEffect(() => {
+        updateActiveMainContent(activeMainContentId)
+    }, [activeMainContentId, updateActiveMainContent])
 
     if (interimState) {
         return <ErrorOrLoadingPage state={interimState || 'GENERIC_ERROR'} />
@@ -401,7 +409,7 @@ export const SubmissionType = ({
     }
 
     return (
-        <>
+        <div id={activeMainContentId}>
             <FormNotificationContainer>
                 <DynamicStepIndicator
                     formPages={
@@ -414,7 +422,9 @@ export const SubmissionType = ({
                               ? STATE_SUBMISSION_FORM_ROUTES_WITHOUT_SUPPORTING_DOCS
                               : STATE_SUBMISSION_FORM_ROUTES
                     }
-                    currentFormPage={currentRoute}
+                    currentFormPage={
+                        draftSubmission ? currentRoute : 'SUBMISSIONS_TYPE'
+                    }
                 />
                 <PageBannerAlerts
                     loggedInUser={loggedInUser}
@@ -872,6 +882,6 @@ export const SubmissionType = ({
                     }}
                 </Formik>
             </FormContainer>
-        </>
+        </div>
     )
 }

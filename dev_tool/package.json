@@ -24,7 +24,7 @@
         "@aws-sdk/client-ec2": "^3.844.0",
         "@aws-sdk/client-secrets-manager": "^3.844.0",
         "axios": "^1.10.0",
-        "node-ssh": "^13.1.0",
+        "node-ssh": "^13.2.1",
         "prompts": "^2.4.2",
         "yargs": "^17.2.1"
     },

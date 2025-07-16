@@ -289,7 +289,7 @@ describe('fetchRate', () => {
         await updateTestDraftRateOnContract(
             server,
             submittedInitial.id,
-            unlocked.draftRates[0].draftRevision?.updatedAt,
+            unlocked.draftRevision?.updatedAt,
             rateID,
             updatedRateInfo
         )
