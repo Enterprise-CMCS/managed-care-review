@@ -20,6 +20,9 @@ export type FieldCheckboxProps = {
     heading: string
     parent_component_type?: string | 'form'
     parent_component_heading: string
+    // label can be either a string or element
+    // tealiumLabel is the string version of lable for tealium
+    // used when lable is not a string
     tealiumLabel?: string
 } & JSX.IntrinsicElements['input']
 
