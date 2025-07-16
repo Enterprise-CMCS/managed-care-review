@@ -1722,7 +1722,9 @@ describe('RateDetails', () => {
         })
 
         it('when rate previously submitted question is answered with NO', async () => {
-            const contractID = 'test-abc-123'
+            const contract = mockContractPackageDraft()
+            contract.id = 'test-abc-123'
+            contract.draftRevision!.formData.dsnpContract = true
             const { user } = renderWithProviders(
                 <Routes>
                     <Route
@@ -1736,18 +1738,18 @@ describe('RateDetails', () => {
                             fetchCurrentUserMock({ statusCode: 200 }),
                             fetchContractMockSuccess({
                                 contract: {
-                                    ...mockContractPackageDraft(),
-                                    id: contractID,
+                                    ...contract,
                                     draftRates: [], //clear out rates
                                 },
                             }),
                         ],
                     },
                     routerProvider: {
-                        route: `/submissions/${contractID}/edit/rate-details`,
+                        route: `/submissions/${contract.id}/edit/rate-details`,
                     },
                     featureFlags: {
                         'rate-edit-unlock': false,
+                        dsnp: true,
                     },
                 }
             )
@@ -1778,6 +1780,11 @@ describe('RateDetails', () => {
             ).toHaveLength(2)
             expect(
                 screen.getAllByText('You must choose a rate certification type')
+            ).toHaveLength(2)
+            expect(
+                screen.getAllByText(
+                    'You must select at least one Medicaid population'
+                )
             ).toHaveLength(2)
             expect(
                 screen.getAllByText(
