@@ -20,6 +20,8 @@ const updateTestEmailSettings = async (
                 emailConfiguration,
             },
         },
+    }, {
+        contextValue: { user: { role: 'ADMIN' } },
     })) as { body: { data?: any; errors?: any } }
 
     if (updateEmailConfig.body.errors) {
@@ -44,6 +46,8 @@ const fetchTestMcReviewSettings = async (
 ): Promise<FetchMcReviewSettingsPayload> => {
     const fetchMcReviewSettings = (await server.executeOperation({
         query: FetchMcReviewSettingsDocument,
+    }, {
+        contextValue: { user: { role: 'ADMIN' } },
     })) as { body: { data?: any; errors?: any } }
 
     if (fetchMcReviewSettings.body.errors) {

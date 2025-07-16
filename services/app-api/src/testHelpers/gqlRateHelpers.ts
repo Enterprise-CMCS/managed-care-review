@@ -40,6 +40,8 @@ const fetchTestRateById = async (
     const result = (await server.executeOperation({
         query: FetchRateDocument,
         variables: { input },
+    }, {
+        contextValue: { user: { role: 'STATE_USER' } },
     })) as { body: { data?: any; errors?: any } }
 
     if (result.body.errors) {
@@ -63,6 +65,8 @@ const fetchTestRateWithQuestionsById = async (
     const result = (await server.executeOperation({
         query: FetchRateWithQuestionsDocument,
         variables: { input },
+    }, {
+        contextValue: { user: { role: 'STATE_USER' } },
     })) as { body: { data?: any; errors?: any } }
 
     if (result.body.errors) {
@@ -105,6 +109,8 @@ const submitTestRate = async (
                 submittedReason,
             },
         },
+    }, {
+        contextValue: { user: { role: 'STATE_USER' } },
     })) as { body: { data?: any; errors?: any } }
 
     if (updateResult.body.errors) {
@@ -137,6 +143,8 @@ const unlockTestRate = async (
                 unlockedReason,
             },
         },
+    }, {
+        contextValue: { user: { role: 'CMS_USER' } },
     })) as { body: { data?: any; errors?: any } }
 
     if (updateResult.body.errors) {
@@ -165,6 +173,8 @@ async function updateTestDraftRatesOnContract(
         variables: {
             input,
         },
+    }, {
+        contextValue: { user: { role: 'STATE_USER' } },
     })) as { body: { data?: any; errors?: any } }
 
     if (updateResult.body.errors || !updateResult.body.data) {
@@ -403,6 +413,8 @@ const createTestDraftRateOnContract = async (
                 ],
             },
         },
+    }, {
+        contextValue: { user: { role: 'STATE_USER' } },
     })) as { body: { data?: any; errors?: any } }
 
     if (updateResult.body.errors || !updateResult.body.data) {
@@ -441,6 +453,8 @@ const updateTestDraftRateOnContract = async (
                 ],
             },
         },
+    }, {
+        contextValue: { user: { role: 'STATE_USER' } },
     })) as { body: { data?: any; errors?: any } }
 
     if (updateResult.body.errors || !updateResult.body.data) {
@@ -481,6 +495,8 @@ const withdrawTestRate = async (
                 updatedReason,
             },
         },
+    }, {
+        contextValue: { user: { role: 'CMS_USER' } },
     })) as { body: { data?: any; errors?: any } }
 
     if (withdrawResult.body.errors) {
@@ -513,6 +529,8 @@ const undoWithdrawTestRate = async (
                 updatedReason,
             },
         },
+    }, {
+        contextValue: { user: { role: 'CMS_USER' } },
     })) as { body: { data?: any; errors?: any } }
 
     if (undoWithdrawRate.body.errors) {
@@ -545,6 +563,8 @@ const fetchTestIndexRatesStripped = async (
                 rateIDs,
             },
         },
+    }, {
+        contextValue: { user: { role: 'STATE_USER' } },
     })) as { body: { data?: any; errors?: any } }
 
     if (indexRatesStrippedResult.body.errors) {

@@ -163,7 +163,6 @@ const constructTestPostgresServer = async (opts?: {
     return new ApolloServer({
         typeDefs,
         resolvers: postgresResolvers,
-        context,
     })
 }
 
@@ -260,6 +259,8 @@ const createTestHealthPlanPackage = async (
     const result = await server.executeOperation({
         query: CreateHealthPlanPackageDocument,
         variables: { input },
+    }, {
+        contextValue: defaultContext(),
     })
     if (result.body.errors) {
         throw new Error(
@@ -287,6 +288,8 @@ const updateTestHealthPlanFormData = async (
                 healthPlanFormData: updatedB64,
             },
         },
+    }, {
+        contextValue: defaultContext(),
     })
     if (updateResult.body.errors) {
         console.info('errors', JSON.stringify(updateResult.body.errors))
@@ -319,6 +322,8 @@ const updateTestHealthPlanPackage = async (
                 healthPlanFormData: domainToBase64(draft),
             },
         },
+    }, {
+        contextValue: defaultContext(),
     })
     if (updateResult.body.errors) {
         console.info('errors', JSON.stringify(updateResult.body.errors))
@@ -419,6 +424,8 @@ const submitTestHealthPlanPackage = async (
                 pkgID,
             },
         },
+    }, {
+        contextValue: defaultContext(),
     })
 
     if (updateResult.body.errors) {
@@ -451,6 +458,8 @@ const resubmitTestHealthPlanPackage = async (
                 submittedReason,
             },
         },
+    }, {
+        contextValue: defaultContext(),
     })
 
     if (updateResult.body.errors) {
@@ -483,6 +492,8 @@ const unlockTestHealthPlanPackage = async (
                 unlockedReason,
             },
         },
+    }, {
+        contextValue: defaultContext(),
     })
 
     if (updateResult.body.errors) {
@@ -510,6 +521,8 @@ const fetchTestHealthPlanPackageById = async (
     const result = await server.executeOperation({
         query: FetchHealthPlanPackageDocument,
         variables: { input },
+    }, {
+        contextValue: defaultContext(),
     })
 
     if (result.body.errors)
@@ -545,6 +558,8 @@ const createTestQuestion = async (
                 ...question,
             },
         },
+    }, {
+        contextValue: defaultContext(),
     })
 
     if (createdQuestion.body.errors)
@@ -580,6 +595,8 @@ const createTestRateQuestion = async (
                 ...question,
             },
         },
+    }, {
+        contextValue: defaultContext(),
     })
 }
 
@@ -605,6 +622,8 @@ const createTestRateQuestionResponse = async (
                 questionID,
             },
         },
+    }, {
+        contextValue: defaultContext(),
     })
 }
 
@@ -629,6 +648,8 @@ const createTestQuestionResponse = async (
                 questionID,
             },
         },
+    }, {
+        contextValue: defaultContext(),
     })
 
     if (createdResponse.body.errors)
@@ -656,6 +677,8 @@ const updateTestStateAssignments = async (
                 assignedUsers: assignedUserIDs,
             },
         },
+    }, {
+        contextValue: defaultContext(),
     })
 
     if (updatedAssignments.body.errors)
