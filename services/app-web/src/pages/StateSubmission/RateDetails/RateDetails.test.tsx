@@ -1977,7 +1977,7 @@ describe('RateDetails', () => {
 
         it('does not render rate Medicaid populations question without dsnp', async () => {
             const contract = mockContractPackageDraft()
-            contract.draftRevision!.formData.dsnpContract = null
+            contract.draftRevision!.formData.dsnpContract = false
             renderWithProviders(
                 <Routes>
                     <Route

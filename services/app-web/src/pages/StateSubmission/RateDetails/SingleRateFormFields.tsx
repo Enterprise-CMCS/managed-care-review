@@ -253,7 +253,7 @@ export const SingleRateFormFields = ({
                 />
             </FormGroup>
 
-            {contract?.draftRevision?.formData.dsnpContract !== null && (
+            {contract?.draftRevision?.formData.dsnpContract && (
                 <FormGroup
                     error={Boolean(showFieldErrors('rateMedicaidPopulations'))}
                 >
