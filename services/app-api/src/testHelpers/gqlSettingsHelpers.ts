@@ -1,4 +1,4 @@
-import type { ApolloServer } from 'apollo-server-lambda'
+import type { ApolloServer } from '@apollo/server'
 import type {
     EmailConfiguration,
     FetchMcReviewSettingsPayload,
@@ -22,21 +22,21 @@ const updateTestEmailSettings = async (
         },
     })
 
-    if (updateEmailConfig.errors) {
-        console.info('errors', updateEmailConfig.errors)
+    if (updateEmailConfig.body.errors) {
+        console.info('errors', updateEmailConfig.body.errors)
         throw new Error(
-            `updateTestEmailSettings mutation failed with errors ${updateEmailConfig.errors}`
+            `updateTestEmailSettings mutation failed with errors ${updateEmailConfig.body.errors}`
         )
     }
 
     if (
-        updateEmailConfig.data === undefined ||
-        updateEmailConfig.data === null
+        updateEmailConfig.body.data === undefined ||
+        updateEmailConfig.body.data === null
     ) {
         throw new Error('updateTestEmailSettings returned nothing')
     }
 
-    return updateEmailConfig.data.updateEmailSettings
+    return updateEmailConfig.body.data.updateEmailSettings
 }
 
 const fetchTestMcReviewSettings = async (
@@ -46,21 +46,21 @@ const fetchTestMcReviewSettings = async (
         query: FetchMcReviewSettingsDocument,
     })
 
-    if (fetchMcReviewSettings.errors) {
-        console.info('errors', fetchMcReviewSettings.errors)
+    if (fetchMcReviewSettings.body.errors) {
+        console.info('errors', fetchMcReviewSettings.body.errors)
         throw new Error(
-            `fetchTestMcReviewSettings query failed with errors ${fetchMcReviewSettings.errors}`
+            `fetchTestMcReviewSettings query failed with errors ${fetchMcReviewSettings.body.errors}`
         )
     }
 
     if (
-        fetchMcReviewSettings.data === undefined ||
-        fetchMcReviewSettings.data === null
+        fetchMcReviewSettings.body.data === undefined ||
+        fetchMcReviewSettings.body.data === null
     ) {
         throw new Error('fetchTestMcReviewSettings returned nothing')
     }
 
-    return fetchMcReviewSettings.data.fetchMcReviewSettings
+    return fetchMcReviewSettings.body.data.fetchMcReviewSettings
 }
 
 export { updateTestEmailSettings, fetchTestMcReviewSettings }

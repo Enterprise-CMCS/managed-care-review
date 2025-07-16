@@ -21,7 +21,7 @@ import {
 } from './gqlHelpers'
 
 import { type ContractType } from '../domain-models'
-import type { ApolloServer } from 'apollo-server-lambda'
+import type { ApolloServer } from '@apollo/server'
 import type {
     Contract,
     ContractDraftRevisionFormDataInput,
@@ -66,17 +66,17 @@ async function submitTestContract(
         },
     })
 
-    if (result.errors) {
+    if (result.body.errors) {
         throw new Error(
-            `submitTestContract query failed with errors ${result.errors}`
+            `submitTestContract query failed with errors ${result.body.errors}`
         )
     }
 
-    if (!result.data) {
+    if (!result.body.data) {
         throw new Error('submitTestContract returned nothing')
     }
 
-    return result.data.submitContract.contract
+    return result.body.data.submitContract.contract
 }
 
 async function resubmitTestContract(
@@ -94,17 +94,17 @@ async function resubmitTestContract(
         },
     })
 
-    if (updateResult.errors) {
+    if (updateResult.body.errors) {
         throw new Error(
-            `resubmitTestContract query failed with errors ${updateResult.errors}`
+            `resubmitTestContract query failed with errors ${updateResult.body.errors}`
         )
     }
 
-    if (!updateResult.data) {
+    if (!updateResult.body.data) {
         throw new Error('resubmitTestContract returned nothing')
     }
 
-    return updateResult.data.submitContract.contract
+    return updateResult.body.data.submitContract.contract
 }
 
 async function unlockTestContract(
@@ -122,17 +122,17 @@ async function unlockTestContract(
         },
     })
 
-    if (result.errors) {
+    if (result.body.errors) {
         throw new Error(
-            `unlockTestContract query failed with errors ${result.errors}`
+            `unlockTestContract query failed with errors ${result.body.errors}`
         )
     }
 
-    if (!result.data) {
+    if (!result.body.data) {
         throw new Error('unlockTestContract returned nothing')
     }
 
-    return result.data.unlockContract.contract
+    return result.body.data.unlockContract.contract
 }
 
 async function createSubmitAndUnlockTestContract(
@@ -172,17 +172,17 @@ async function fetchTestContract(
         variables: { input },
     })
 
-    if (result.errors) {
+    if (result.body.errors) {
         throw new Error(
-            `fetchTestContract query failed with errors ${result.errors}`
+            `fetchTestContract query failed with errors ${result.body.errors}`
         )
     }
 
-    if (!result.data) {
+    if (!result.body.data) {
         throw new Error('fetchTestContract returned nothing')
     }
 
-    return result.data.fetchContract.contract
+    return result.body.data.fetchContract.contract
 }
 
 async function approveTestContract(
@@ -200,17 +200,17 @@ async function approveTestContract(
         variables: { input },
     })
 
-    if (result.errors) {
+    if (result.body.errors) {
         throw new Error(
-            `approveTestContract mutation failed with errors ${result.errors}`
+            `approveTestContract mutation failed with errors ${result.body.errors}`
         )
     }
 
-    if (!result.data) {
+    if (!result.body.data) {
         throw new Error('approveTestContract returned nothing')
     }
 
-    return result.data.approveContract.contract
+    return result.body.data.approveContract.contract
 }
 
 const fetchTestContractWithQuestions = async (
@@ -226,17 +226,17 @@ const fetchTestContractWithQuestions = async (
         },
     })
 
-    if (result.errors) {
+    if (result.body.errors) {
         throw new Error(
-            `fetchTestContractWithQuestions query failed with errors ${result.errors}`
+            `fetchTestContractWithQuestions query failed with errors ${result.body.errors}`
         )
     }
 
-    if (!result.data) {
+    if (!result.body.data) {
         throw new Error('fetchTestContractWithQuestions returned nothing')
     }
 
-    return result.data.fetchContract.contract
+    return result.body.data.fetchContract.contract
 }
 
 const createTestContract = async (
@@ -263,17 +263,17 @@ const createTestContract = async (
         variables: { input },
     })
 
-    if (result.errors) {
+    if (result.body.errors) {
         throw new Error(
-            `createTestContract mutation failed with errors ${result.errors}`
+            `createTestContract mutation failed with errors ${result.body.errors}`
         )
     }
 
-    if (!result.data) {
+    if (!result.body.data) {
         throw new Error('createTestContract returned nothing')
     }
 
-    return result.data.createContract.contract
+    return result.body.data.createContract.contract
 }
 
 async function createAndUpdateTestContractWithRate(
@@ -450,18 +450,18 @@ const updateTestContractDraftRevision = async (
         },
     })
 
-    if (updateResult.errors) {
-        console.info('errors', JSON.stringify(updateResult.errors))
+    if (updateResult.body.errors) {
+        console.info('errors', JSON.stringify(updateResult.body.errors))
         throw new Error(
-            `updateTestContractDraftRevision mutation failed with errors ${updateResult.errors}`
+            `updateTestContractDraftRevision mutation failed with errors ${updateResult.body.errors}`
         )
     }
 
-    if (!updateResult.data) {
+    if (!updateResult.body.data) {
         throw new Error('updateTestContractDraftRevision returned nothing')
     }
 
-    return updateResult.data.updateContractDraftRevision.contract
+    return updateResult.body.data.updateContractDraftRevision.contract
 }
 
 const withdrawTestContract = async (
@@ -479,15 +479,18 @@ const withdrawTestContract = async (
         },
     })
 
-    if (withdrawResult.errors) {
-        console.info('errors', withdrawResult.errors)
+    if (withdrawResult.body.errors) {
+        console.info('errors', withdrawResult.body.errors)
     }
 
-    if (withdrawResult.data === undefined || withdrawResult.data === null) {
+    if (
+        withdrawResult.body.data === undefined ||
+        withdrawResult.body.data === null
+    ) {
         throw new Error('withdraw contract returned nothing')
     }
 
-    return withdrawResult.data.withdrawContract.contract
+    return withdrawResult.body.data.withdrawContract.contract
 }
 
 const undoWithdrawTestContract = async (
@@ -505,18 +508,18 @@ const undoWithdrawTestContract = async (
         },
     })
 
-    if (undoWithdrawResult.errors) {
-        console.info('errors', undoWithdrawResult.errors)
+    if (undoWithdrawResult.body.errors) {
+        console.info('errors', undoWithdrawResult.body.errors)
     }
 
     if (
-        undoWithdrawResult.data === undefined ||
-        undoWithdrawResult.data === null
+        undoWithdrawResult.body.data === undefined ||
+        undoWithdrawResult.body.data === null
     ) {
         throw new Error('undo withdraw contract returned nothing')
     }
 
-    return undoWithdrawResult.data.undoWithdrawContract.contract
+    return undoWithdrawResult.body.data.undoWithdrawContract.contract
 }
 
 const errorUndoWithdrawTestContract = async (
@@ -534,13 +537,13 @@ const errorUndoWithdrawTestContract = async (
         },
     })
 
-    if (!undoWithdrawResult.errors) {
+    if (!undoWithdrawResult.body.errors) {
         throw new Error(
             'errorUndoWithdrawTestContract: expected errors to return'
         )
     }
 
-    return undoWithdrawResult.errors
+    return undoWithdrawResult.body.errors
 }
 
 const contractHistoryToDescriptions = (contract: Contract): string[] => {

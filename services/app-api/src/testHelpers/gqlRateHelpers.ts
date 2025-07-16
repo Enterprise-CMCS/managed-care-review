@@ -24,7 +24,7 @@ import type {
     UpdateDraftContractRatesInput,
     Rate,
 } from '../gen/gqlServer'
-import type { ApolloServer } from 'apollo-server-lambda'
+import type { ApolloServer } from '@apollo/server'
 import type {
     RateFormEditableType,
     RateType,
@@ -42,17 +42,17 @@ const fetchTestRateById = async (
         variables: { input },
     })
 
-    if (result.errors) {
+    if (result.body.errors) {
         throw new Error(
-            `fetchTestRateById query failed with errors ${result.errors}`
+            `fetchTestRateById query failed with errors ${result.body.errors}`
         )
     }
 
-    if (!result.data) {
+    if (!result.body.data) {
         throw new Error('fetchTestRateById returned nothing')
     }
 
-    return result.data.fetchRate.rate
+    return result.body.data.fetchRate.rate
 }
 
 const fetchTestRateWithQuestionsById = async (
@@ -65,17 +65,17 @@ const fetchTestRateWithQuestionsById = async (
         variables: { input },
     })
 
-    if (result.errors) {
+    if (result.body.errors) {
         throw new Error(
-            `fetchTestRateWithQuestionsById query failed with errors ${result.errors}`
+            `fetchTestRateWithQuestionsById query failed with errors ${result.body.errors}`
         )
     }
 
-    if (!result.data) {
+    if (!result.body.data) {
         throw new Error('fetchTestRateWithQuestionsById returned nothing')
     }
 
-    return result.data.fetchRate.rate
+    return result.body.data.fetchRate.rate
 }
 
 // rates must be initially submitted with a contract before they can be unlocked and submitted on their own.
@@ -107,18 +107,21 @@ const submitTestRate = async (
         },
     })
 
-    if (updateResult.errors) {
-        console.info('errors', updateResult.errors)
+    if (updateResult.body.errors) {
+        console.info('errors', updateResult.body.errors)
         throw new Error(
-            `submitTestRate mutation failed with errors ${updateResult.errors}`
+            `submitTestRate mutation failed with errors ${updateResult.body.errors}`
         )
     }
 
-    if (updateResult.data === undefined || updateResult.data === null) {
+    if (
+        updateResult.body.data === undefined ||
+        updateResult.body.data === null
+    ) {
         throw new Error('submitTestRate returned nothing')
     }
 
-    return updateResult.data.submitRate.rate
+    return updateResult.body.data.submitRate.rate
 }
 
 const unlockTestRate = async (
@@ -136,18 +139,21 @@ const unlockTestRate = async (
         },
     })
 
-    if (updateResult.errors) {
-        console.info('errors', updateResult.errors)
+    if (updateResult.body.errors) {
+        console.info('errors', updateResult.body.errors)
         throw new Error(
-            `unlockRate mutation failed with errors ${updateResult.errors}`
+            `unlockRate mutation failed with errors ${updateResult.body.errors}`
         )
     }
 
-    if (updateResult.data === undefined || updateResult.data === null) {
+    if (
+        updateResult.body.data === undefined ||
+        updateResult.body.data === null
+    ) {
         throw new Error('unlockTestRate returned nothing')
     }
 
-    return updateResult.data.unlockRate.rate
+    return updateResult.body.data.unlockRate.rate
 }
 
 async function updateTestDraftRatesOnContract(
@@ -161,13 +167,13 @@ async function updateTestDraftRatesOnContract(
         },
     })
 
-    if (updateResult.errors || !updateResult.data) {
+    if (updateResult.body.errors || !updateResult.body.data) {
         throw new Error(
-            `updateDraftContractRates mutation failed with errors ${updateResult.errors}`
+            `updateDraftContractRates mutation failed with errors ${updateResult.body.errors}`
         )
     }
 
-    return updateResult.data.updateDraftContractRates.contract
+    return updateResult.body.data.updateDraftContractRates.contract
 }
 
 async function addNewRateToTestContract(
@@ -399,14 +405,14 @@ const createTestDraftRateOnContract = async (
         },
     })
 
-    if (updateResult.errors || !updateResult.data) {
-        console.info('errors', updateResult.errors)
+    if (updateResult.body.errors || !updateResult.body.data) {
+        console.info('errors', updateResult.body.errors)
         throw new Error(
-            `updateDraftContractRates mutation failed with errors ${updateResult.errors}`
+            `updateDraftContractRates mutation failed with errors ${updateResult.body.errors}`
         )
     }
 
-    return updateResult.data.updateDraftContractRates.contract
+    return updateResult.body.data.updateDraftContractRates.contract
 }
 
 const updateTestDraftRateOnContract = async (
@@ -437,14 +443,14 @@ const updateTestDraftRateOnContract = async (
         },
     })
 
-    if (updateResult.errors || !updateResult.data) {
-        console.info('errors', updateResult.errors)
+    if (updateResult.body.errors || !updateResult.body.data) {
+        console.info('errors', updateResult.body.errors)
         throw new Error(
-            `updateDraftContractRates mutation failed with errors ${updateResult.errors}`
+            `updateDraftContractRates mutation failed with errors ${updateResult.body.errors}`
         )
     }
 
-    return updateResult.data.updateDraftContractRates.contract
+    return updateResult.body.data.updateDraftContractRates.contract
 }
 
 const updateTestRate = async (
@@ -477,18 +483,21 @@ const withdrawTestRate = async (
         },
     })
 
-    if (withdrawResult.errors) {
-        console.info('errors', withdrawResult.errors)
+    if (withdrawResult.body.errors) {
+        console.info('errors', withdrawResult.body.errors)
         throw new Error(
-            `withdrawRate mutation failed with errors ${withdrawResult.errors}`
+            `withdrawRate mutation failed with errors ${withdrawResult.body.errors}`
         )
     }
 
-    if (withdrawResult.data === undefined || withdrawResult.data === null) {
+    if (
+        withdrawResult.body.data === undefined ||
+        withdrawResult.body.data === null
+    ) {
         throw new Error('withdrawRate returned nothing')
     }
 
-    return withdrawResult.data.withdrawRate.rate
+    return withdrawResult.body.data.withdrawRate.rate
 }
 
 const undoWithdrawTestRate = async (
@@ -506,18 +515,21 @@ const undoWithdrawTestRate = async (
         },
     })
 
-    if (undoWithdrawRate.errors) {
-        console.info('errors', undoWithdrawRate.errors)
+    if (undoWithdrawRate.body.errors) {
+        console.info('errors', undoWithdrawRate.body.errors)
         throw new Error(
-            `undoWithdrawRate mutation failed with errors ${undoWithdrawRate.errors}`
+            `undoWithdrawRate mutation failed with errors ${undoWithdrawRate.body.errors}`
         )
     }
 
-    if (undoWithdrawRate.data === undefined || undoWithdrawRate.data === null) {
+    if (
+        undoWithdrawRate.body.data === undefined ||
+        undoWithdrawRate.body.data === null
+    ) {
         throw new Error('undoWithdrawRate returned nothing')
     }
 
-    return undoWithdrawRate.data.undoWithdrawRate.rate
+    return undoWithdrawRate.body.data.undoWithdrawRate.rate
 }
 
 const fetchTestIndexRatesStripped = async (
@@ -535,21 +547,22 @@ const fetchTestIndexRatesStripped = async (
         },
     })
 
-    if (indexRatesStrippedResult.errors) {
-        console.info('errors', indexRatesStrippedResult.errors)
+    if (indexRatesStrippedResult.body.errors) {
+        console.info('errors', indexRatesStrippedResult.body.errors)
         throw new Error(
-            `fetchTestIndexRatesStripped query failed with errors ${indexRatesStrippedResult.errors}`
+            `fetchTestIndexRatesStripped query failed with errors ${indexRatesStrippedResult.body.errors}`
         )
     }
 
     if (
-        indexRatesStrippedResult.data === undefined ||
-        indexRatesStrippedResult.data === null
+        indexRatesStrippedResult.body.data === undefined ||
+        indexRatesStrippedResult.body.data === null
     ) {
         throw new Error('fetchTestIndexRatesStripped returned nothing')
     }
 
-    const indexRatesStripped = indexRatesStrippedResult.data.indexRatesStripped
+    const indexRatesStripped =
+        indexRatesStrippedResult.body.data.indexRatesStripped
 
     if (!indexRatesStripped || indexRatesStripped.length === 0) {
         throw new Error('fetchTestIndexRatesStripped returned with no rates')

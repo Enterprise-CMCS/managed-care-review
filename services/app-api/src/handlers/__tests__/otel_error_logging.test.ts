@@ -1,4 +1,4 @@
-import { ApolloServer } from 'apollo-server-lambda'
+import { ApolloServer } from '@apollo/server'
 import { gql } from '@apollo/client'
 import { createTracer } from '../../otel/otel_handler'
 import { recordException } from '../../../../uploads/src/lib/otel'

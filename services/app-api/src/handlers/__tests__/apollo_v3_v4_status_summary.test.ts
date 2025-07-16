@@ -1,4 +1,4 @@
-import { ApolloServer } from 'apollo-server-lambda'
+import { ApolloServer } from '@apollo/server'
 import { gql } from '@apollo/client'
 import { GraphQLError } from 'graphql'
 
@@ -49,7 +49,7 @@ describe('Apollo Server v3 vs v4 Status Code Summary', () => {
             // Apollo Server v4 Upgrade Implications
             //
             // Current State (Apollo Server v3):
-            //   • apollo-server-lambda: ^3.5.0
+            //   • @apollo/server: ^4.11.0
             //   • Variable validation errors return 400 HTTP status
             //   • Error responses have extensions.code: "BAD_USER_INPUT"
             //   • Custom GraphQLError handling works correctly

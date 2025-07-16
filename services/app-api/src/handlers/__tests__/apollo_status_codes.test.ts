@@ -1,4 +1,4 @@
-import { ApolloServer } from 'apollo-server-lambda'
+import { ApolloServer } from '@apollo/server'
 import { gql } from '@apollo/client'
 import { GraphQLError } from 'graphql'
 
@@ -172,7 +172,7 @@ describe('Apollo Server v3 Status Code Behavior', () => {
             // - Requires explicit error formatting for proper status codes
             //
             // Current project status:
-            // - Using Apollo Server v3 (apollo-server-lambda ^3.5.0)
+            // - Using Apollo Server v4 (@apollo/server ^4.11.0)
             // - Variable validation should return 400 status codes
             // - Custom error handling uses GraphQLError with extensions.code
 
