@@ -22,23 +22,23 @@ const updateTestEmailSettings = async (
         },
     }, {
         contextValue: { user: { role: 'ADMIN' } },
-    })) as { body: { singleResult: { data?: any; errors?: any } } }
+    })) as { body: { data?: any; errors?: any } }
 
-    if (updateEmailConfig.body.singleResult.errors) {
-        console.info('errors', updateEmailConfig.body.singleResult.errors)
+    if (updateEmailConfig.body.errors) {
+        console.info('errors', updateEmailConfig.body.errors)
         throw new Error(
-            `updateTestEmailSettings mutation failed with errors ${updateEmailConfig.body.singleResult.errors}`
+            `updateTestEmailSettings mutation failed with errors ${updateEmailConfig.body.errors}`
         )
     }
 
     if (
-        updateEmailConfig.body.singleResult.data === undefined ||
-        updateEmailConfig.body.singleResult.data === null
+        updateEmailConfig.body.data === undefined ||
+        updateEmailConfig.body.data === null
     ) {
         throw new Error('updateTestEmailSettings returned nothing')
     }
 
-    return updateEmailConfig.body.singleResult.data.updateEmailSettings
+    return updateEmailConfig.body.data.updateEmailSettings
 }
 
 const fetchTestMcReviewSettings = async (
@@ -48,23 +48,23 @@ const fetchTestMcReviewSettings = async (
         query: FetchMcReviewSettingsDocument,
     }, {
         contextValue: { user: { role: 'ADMIN' } },
-    })) as { body: { singleResult: { data?: any; errors?: any } } }
+    })) as { body: { data?: any; errors?: any } }
 
-    if (fetchMcReviewSettings.body.singleResult.errors) {
-        console.info('errors', fetchMcReviewSettings.body.singleResult.errors)
+    if (fetchMcReviewSettings.body.errors) {
+        console.info('errors', fetchMcReviewSettings.body.errors)
         throw new Error(
-            `fetchTestMcReviewSettings query failed with errors ${fetchMcReviewSettings.body.singleResult.errors}`
+            `fetchTestMcReviewSettings query failed with errors ${fetchMcReviewSettings.body.errors}`
         )
     }
 
     if (
-        fetchMcReviewSettings.body.singleResult.data === undefined ||
-        fetchMcReviewSettings.body.singleResult.data === null
+        fetchMcReviewSettings.body.data === undefined ||
+        fetchMcReviewSettings.body.data === null
     ) {
         throw new Error('fetchTestMcReviewSettings returned nothing')
     }
 
-    return fetchMcReviewSettings.body.singleResult.data.fetchMcReviewSettings
+    return fetchMcReviewSettings.body.data.fetchMcReviewSettings
 }
 
 export { updateTestEmailSettings, fetchTestMcReviewSettings }
