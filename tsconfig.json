@@ -1,8 +1,8 @@
 {
     "compilerOptions": {
-        "module": "esnext",
+        "module": "node16",
         "forceConsistentCasingInFileNames": true,
-        "moduleResolution": "node",
+        "moduleResolution": "bundler",
         "noFallthroughCasesInSwitch": true,
         "strict": true,
         "useUnknownInCatchVariables": false

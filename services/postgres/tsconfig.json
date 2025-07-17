@@ -4,8 +4,7 @@
         "module": "ESNext",
         "lib": ["ESNext"],
         "target": "ESNext",
-        "moduleResolution": "node",
-
+        "moduleResolution": "bundler",
         "baseUrl": "/",
         "experimentalDecorators": true,
         "emitDecoratorMetadata": true,
@@ -13,7 +12,9 @@
         "sourceMap": true,
         "skipLibCheck": true,
         "esModuleInterop": true,
+        "allowSyntheticDefaultImports": true,
         "resolveJsonModule": true
     },
-    "include": ["scripts/**/*", "src/**/*"]
+    "include": ["scripts/**/*", "src/**/*"],
+    "exclude": ["eslint.config.ts"]
 }

@@ -4,7 +4,7 @@
         "module": "commonjs",
         "lib": ["es2021", "dom.iterable"],
         "target": "es2021",
-        "moduleResolution": "node",
+        "moduleResolution": "bundler",
 
         "baseUrl": "/",
         "experimentalDecorators": true,
