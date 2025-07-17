@@ -1,7 +1,7 @@
 # Managed Care Review - API Changelog
 ## This document highlights API changes that have been introduced since May 2025
 
-### July 9, 2025
+### July 16, 2025
 #### Added
 - `rateMedicaidPopulations` optional array field, possible values: `["MEDICARE_MEDICAID_WITH_DSNP", "MEDICAID_ONLY", "MEDICARE_MEDICAID_WITHOUT_DSNP"]`, added to `formData` on `RateRevision`. This change affects all queries and mutations that include `RateFormData`
 
