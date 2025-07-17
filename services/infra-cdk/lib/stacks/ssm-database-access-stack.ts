@@ -312,7 +312,7 @@ export class SSMDatabaseAccessStack extends BaseStack {
    */
   private createSessionLogging(): void {
     new logs.LogGroup(this, 'SSMSessionLogGroup', {
-      logGroupName: `/aws/ssm/mcr-${this.stage}-sessions`,
+      logGroupName: `/aws/ssm/cdk-mcr-${this.stage}-sessions`,
       retention: logs.RetentionDays.ONE_MONTH,
       removalPolicy: RemovalPolicy.DESTROY
     });

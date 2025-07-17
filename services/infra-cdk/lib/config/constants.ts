@@ -64,8 +64,8 @@ export const LAMBDA_FUNCTIONS = {
 
 // S3 bucket names (from existing uploads service)
 export const S3_BUCKETS = {
-  UPLOADS: 'uploads',
-  QA: 'qa-uploads'
+  UPLOADS: 'uploads-cdk',
+  QA: 'qa-uploads-cdk'
 } as const;
 
 // Parameter Store paths
@@ -138,7 +138,8 @@ export const CDK_DEPLOYMENT_SUFFIX = '-cdk';
 // Infrastructure SSM parameter paths
 export const INFRASTRUCTURE_SSM_PARAMS = {
   VPN_SECURITY_GROUP: '/configuration/vpn_security_group_id',
-  SHARED_SERVICES_SG: '/configuration/shared_services_security_group_id'
+  SHARED_SERVICES_SG: '/configuration/shared_services_security_group_id',
+  EMAIL_SOURCE_ADDRESS: '/configuration/email/sourceAddress'
 } as const;
 
 // Error messages

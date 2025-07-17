@@ -59,12 +59,49 @@ The migration was completed with the following approach:
 5. **Environment Management**: Centralized environment variable management
 6. **Security First**: Implemented WAF protection and permission boundaries
 
+## Production Hardening
+
+During the migration, several critical security and production issues were identified and fixed:
+
+### 1. JWT Secret Security
+- **Issue**: JWT secret ARN was passed as environment variable, risking ARN leakage in CloudWatch logs
+- **Fix**: Pass `ISecret` object and use `secret.grantRead()` pattern, only exposing non-sensitive secret name
+- **Implementation**: `api-compute-stack.ts` lines 459, 286; `environment-factory.ts` line 267
+
+### 2. Binary Content Handling
+- **Issue**: File uploads/downloads would be corrupted without proper binary handling
+- **Fix**: Added `ContentHandling.CONVERT_TO_BINARY` for multipart/form-data endpoints
+- **Implementation**: Created `createAuthenticatedBinaryEndpoint` factory method in `api-endpoint.ts`
+
+### 3. Layer Version Management
+- **Issue**: Cross-stack layer references via CloudFormation exports can cause deployment failures
+- **Fix**: Use SSM Parameter Store for layer ARN storage and retrieval
+- **Implementation**: `database-operations-stack.ts` stores ARNs; `api-compute-stack.ts` retrieves via SSM
+
+### 4. Auth Stack Validation
+- **Issue**: Empty callback URLs would silently break authentication flow
+- **Fix**: Added validation to throw errors for missing critical configuration
+- **Implementation**: `auth-stack.ts` `validateConfiguration()` method ensures required URLs and email sender
+
+### 5. IAM Permission Scoping
+- **Issue**: Mixed IAM condition contexts (Identity Pool vs User Pool) in same statement
+- **Fix**: Separated conditions and properly attached policies to authenticated role
+- **Implementation**: `auth-stack.ts` uses Identity Pool-specific conditions and attaches policies
+
+### 6. Stack Naming Consistency
+- **Issue**: Inconsistent stack naming caused deployment failures
+- **Fix**: Applied `CDK_DEPLOYMENT_SUFFIX` to all stack names uniformly
+- **Implementation**: `stack-orchestrator.ts` ensures all stacks use consistent naming
+
 ## Lessons Learned
 
 1. **Cross-Stack Dependencies**: Careful planning required to avoid circular dependencies
 2. **Naming Consistency**: Stack naming must be consistent across all environments
-3. **Layer Management**: Shared layers need proper cross-stack exports
+3. **Layer Management**: Shared layers need proper cross-stack exports via SSM Parameters
 4. **Testing Strategy**: CDK snapshot tests are valuable for preventing regressions
+5. **Security First**: Always use CDK grant patterns for secrets instead of passing ARNs
+6. **Binary Content**: API Gateway requires explicit content handling for file uploads
+7. **Validation**: Fail fast with clear errors for missing critical configuration
 
 ## References
 

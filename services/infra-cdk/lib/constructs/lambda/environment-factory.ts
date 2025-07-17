@@ -241,7 +241,7 @@ export class LambdaEnvironmentFactory {
       emailerMode: string;
       parameterStoreMode: string;
       ldSdkKey: string;
-      jwtSecret?: string;
+      jwtSecretName: string;
       applicationEndpoint?: string;
       additionalEnv?: Record<string, string>;
     }
@@ -249,7 +249,7 @@ export class LambdaEnvironmentFactory {
     const baseEnv = this.createBaseEnvironment(stage, region);
     const dbEnv = this.createDatabaseEnvironment(config.databaseSecretArn, stage, region);
     const s3Env = this.createS3Environment(config.uploadsBucket, config.qaBucket);
-    const authEnv = this.createAuthEnvironment({ jwtSecret: config.jwtSecret });
+    const authEnv = this.createAuthEnvironment();
     const featureEnv = this.createFeatureFlagEnvironment(config.ldSdkKey, config.parameterStoreMode);
     const otelEnv = this.createOtelEnvironment(stage);
 
@@ -263,6 +263,8 @@ export class LambdaEnvironmentFactory {
       API_APP_OTEL_COLLECTOR_URL: config.apiOtelCollectorUrl,
       APPLICATION_ENDPOINT: config.applicationEndpoint || 
         `https://${stage === 'prod' ? 'app' : stage}.mcr.cms.gov`,
+      // JWT Secret name for runtime retrieval (non-sensitive)
+      JWT_SECRET_NAME: config.jwtSecretName,
       // Prisma configuration
       PRISMA_QUERY_ENGINE_LIBRARY: '/opt/nodejs/node_modules/.prisma/client/libquery_engine-linux-arm64-openssl-3.0.x.so.node',
       ...(config.additionalEnv || {})

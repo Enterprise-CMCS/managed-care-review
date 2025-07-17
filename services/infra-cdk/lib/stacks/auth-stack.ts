@@ -4,7 +4,7 @@ import { Construct } from 'constructs';
 import * as cognito from 'aws-cdk-lib/aws-cognito';
 import * as iam from 'aws-cdk-lib/aws-iam';
 import * as ssm from 'aws-cdk-lib/aws-ssm';
-import { SERVICES } from '@config/constants';
+import { SERVICES, CDK_DEPLOYMENT_SUFFIX } from '@config/constants';
 
 export interface AuthStackProps extends BaseStackProps {
   allowedCallbackUrls: string[];
@@ -39,8 +39,31 @@ export class AuthStack extends BaseStack {
     this.samlMetadataUrl = props.samlMetadataUrl;
     this.emailSender = props.emailSender;
     
+    // Validate critical configuration
+    this.validateConfiguration();
+    
     // Define resources after all properties are initialized
     this.defineResources();
+  }
+
+  /**
+   * Validate critical configuration to prevent silent failures
+   */
+  private validateConfiguration(): void {
+    // Validate callback URLs - critical for authentication flow
+    if (this.allowedCallbackUrls.length === 0) {
+      throw new Error('allowedCallbackUrls must not be empty - authentication will fail without valid callback URLs');
+    }
+    
+    // Validate logout URLs
+    if (this.allowedLogoutUrls.length === 0) {
+      throw new Error('allowedLogoutUrls must not be empty - logout flow will fail without valid logout URLs');
+    }
+    
+    // Validate email sender in production
+    if (this.stage === 'prod' && !this.emailSender) {
+      throw new Error('emailSender must be provided in production to ensure proper email delivery');
+    }
   }
 
   /**
@@ -68,7 +91,7 @@ export class AuthStack extends BaseStack {
       securityConfig: this.stageConfig.security,
       samlMetadataUrl: this.samlMetadataUrl || this.getSamlMetadataUrl(),
       customDomain: this.getCustomDomain(),
-      emailSender: this.emailSender,
+      emailSender: this.emailSender || this.getDefaultEmailSender(),
       allowedCallbackUrls: this.allowedCallbackUrls,
       allowedLogoutUrls: this.allowedLogoutUrls,
       identityPoolName: SERVICES.UI_AUTH,
@@ -101,7 +124,15 @@ export class AuthStack extends BaseStack {
    * Get custom domain for Cognito hosted UI
    */
   private getCustomDomain(): string {
-    return `mcr-${this.stage}`;
+    return `mcr-${this.stage}${CDK_DEPLOYMENT_SUFFIX}`;
+  }
+
+  /**
+   * Get default email sender with domain-verified address
+   */
+  private getDefaultEmailSender(): string {
+    // Use domain-verified address instead of Cognito's default no-reply@verificationemail.com
+    return `noreply-${this.stage}@mcr.cms.gov`;
   }
 
   /**
@@ -110,8 +141,8 @@ export class AuthStack extends BaseStack {
   private getS3BucketsForIdentityPool(): string[] {
     // These will be the actual bucket names created in data stack
     return [
-      `mcr-${this.stage}-uploads-bucket`,
-      `mcr-${this.stage}-qa-bucket`
+      `mcr-${this.stage}-uploads-cdk-bucket`,
+      `mcr-${this.stage}-qa-cdk-bucket`
     ];
   }
 
@@ -172,74 +203,97 @@ export class AuthStack extends BaseStack {
    * Attach IAM policies for different user groups
    */
   private attachGroupPolicies(): void {
-    if (!this.authenticatedRole) return;
+    if (!this.authenticatedRole || !this.identityPool) return;
 
-    // Create policies for different groups
-    const adminPolicy = new iam.PolicyStatement({
-      effect: iam.Effect.ALLOW,
-      actions: ['*'],
-      resources: ['*'],
-      conditions: {
-        StringEquals: {
-          'cognito-identity.amazonaws.com:aud': this.identityPool?.ref,
-          'cognito:groups': 'ADMIN'
-        }
-      }
+    // Create a single policy with statements for each group
+    // Using ForAnyValue:StringLike to check groups claim passed from User Pool to Identity Pool
+    const groupBasedPolicy = new iam.Policy(this, 'GroupBasedAccessPolicy', {
+      statements: [
+        // Admin group - full access
+        new iam.PolicyStatement({
+          sid: 'AdminGroupFullAccess',
+          effect: iam.Effect.ALLOW,
+          actions: ['*'],
+          resources: ['*'],
+          conditions: {
+            StringEquals: {
+              'cognito-identity.amazonaws.com:aud': this.identityPool.ref
+            },
+            'ForAnyValue:StringLike': {
+              'cognito-identity.amazonaws.com:amr': '*:ADMIN'
+            }
+          }
+        }),
+        
+        // State user group - can upload and manage submissions
+        new iam.PolicyStatement({
+          sid: 'StateUserGroupAccess',
+          effect: iam.Effect.ALLOW,
+          actions: [
+            's3:PutObject',
+            's3:GetObject',
+            's3:DeleteObject',
+            'dynamodb:PutItem',
+            'dynamodb:GetItem',
+            'dynamodb:Query'
+          ],
+          resources: ['*'],
+          conditions: {
+            StringEquals: {
+              'cognito-identity.amazonaws.com:aud': this.identityPool.ref
+            },
+            'ForAnyValue:StringLike': {
+              'cognito-identity.amazonaws.com:amr': '*:STATE_USER'
+            }
+          }
+        }),
+        
+        // CMS user group - can review and update submissions
+        new iam.PolicyStatement({
+          sid: 'CmsUserGroupAccess',
+          effect: iam.Effect.ALLOW,
+          actions: [
+            's3:GetObject',
+            'dynamodb:GetItem',
+            'dynamodb:Query',
+            'dynamodb:UpdateItem'
+          ],
+          resources: ['*'],
+          conditions: {
+            StringEquals: {
+              'cognito-identity.amazonaws.com:aud': this.identityPool.ref
+            },
+            'ForAnyValue:StringLike': {
+              'cognito-identity.amazonaws.com:amr': '*:CMS_USER'
+            }
+          }
+        }),
+        
+        // Read-only group - view only access
+        new iam.PolicyStatement({
+          sid: 'ReadOnlyGroupAccess',
+          effect: iam.Effect.ALLOW,
+          actions: [
+            's3:GetObject',
+            'dynamodb:GetItem',
+            'dynamodb:Query'
+          ],
+          resources: ['*'],
+          conditions: {
+            StringEquals: {
+              'cognito-identity.amazonaws.com:aud': this.identityPool.ref
+            },
+            'ForAnyValue:StringLike': {
+              'cognito-identity.amazonaws.com:amr': '*:READ_ONLY'
+            }
+          }
+        })
+      ]
     });
 
-    const stateUserPolicy = new iam.PolicyStatement({
-      effect: iam.Effect.ALLOW,
-      actions: [
-        's3:PutObject',
-        's3:GetObject',
-        's3:DeleteObject',
-        'dynamodb:PutItem',
-        'dynamodb:GetItem',
-        'dynamodb:Query'
-      ],
-      resources: ['*'],
-      conditions: {
-        StringEquals: {
-          'cognito-identity.amazonaws.com:aud': this.identityPool?.ref,
-          'cognito:groups': 'STATE_USER'
-        }
-      }
-    });
+    // Actually attach the policy to the authenticated role
+    this.authenticatedRole.attachInlinePolicy(groupBasedPolicy);
 
-    const cmsUserPolicy = new iam.PolicyStatement({
-      effect: iam.Effect.ALLOW,
-      actions: [
-        's3:GetObject',
-        'dynamodb:GetItem',
-        'dynamodb:Query',
-        'dynamodb:UpdateItem'
-      ],
-      resources: ['*'],
-      conditions: {
-        StringEquals: {
-          'cognito-identity.amazonaws.com:aud': this.identityPool?.ref,
-          'cognito:groups': 'CMS_USER'
-        }
-      }
-    });
-
-    const readOnlyPolicy = new iam.PolicyStatement({
-      effect: iam.Effect.ALLOW,
-      actions: [
-        's3:GetObject',
-        'dynamodb:GetItem',
-        'dynamodb:Query'
-      ],
-      resources: ['*'],
-      conditions: {
-        StringEquals: {
-          'cognito-identity.amazonaws.com:aud': this.identityPool?.ref,
-          'cognito:groups': 'READ_ONLY'
-        }
-      }
-    });
-
-    // Note: In a real implementation, these would be more granular
-    // and resources would be specific rather than wildcards
+    // Note: In production, resources should be specific rather than wildcards
   }
 }

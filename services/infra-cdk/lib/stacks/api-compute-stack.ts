@@ -13,7 +13,7 @@ import * as ssm from 'aws-cdk-lib/aws-ssm';
 import * as events from 'aws-cdk-lib/aws-events';
 import * as targets from 'aws-cdk-lib/aws-events-targets';
 import { Duration, Fn } from 'aws-cdk-lib';
-import { SERVICES, API_PATHS, LAMBDA_FUNCTIONS, LAMBDA_MEMORY, LAMBDA_TIMEOUTS, getOtelEnvironment, LAMBDA_COMMON_ENV, FILE_SIZE_LIMITS, CDK_DEPLOYMENT_SUFFIX } from '@config/constants';
+import { SERVICES, API_PATHS, LAMBDA_FUNCTIONS, LAMBDA_MEMORY, LAMBDA_TIMEOUTS, getOtelEnvironment, LAMBDA_COMMON_ENV, FILE_SIZE_LIMITS, CDK_DEPLOYMENT_SUFFIX, PROJECT_PREFIX } from '@config/constants';
 import { needsPrismaLayer } from '@constructs/lambda/bundling-utils';
 import { LambdaEnvironmentFactory } from '@constructs/lambda/environment-factory';
 
@@ -27,6 +27,11 @@ export interface ApiComputeStackProps extends BaseStackProps {
   // From Auth Stack
   userPool: cognito.IUserPool;
   authenticatedRole?: iam.IRole;
+  // From Foundation Stack
+  /**
+   * JWT secret for API authentication
+   */
+  jwtSecret: secretsmanager.ISecret;
   // From Lambda Layers Stack
   /**
    * ARN of the Prisma Lambda layer for database ORM functionality
@@ -78,6 +83,7 @@ export class ApiComputeStack extends BaseStack {
   private readonly userPool: cognito.IUserPool;
   private readonly authenticatedRole?: iam.IRole;
   private readonly applicationEndpoint?: string;
+  private readonly jwtSecret: secretsmanager.ISecret;
   private prismaMigrationLayer?: lambda.ILayerVersion;
 
   /**
@@ -130,6 +136,7 @@ export class ApiComputeStack extends BaseStack {
     this.userPool = props.userPool;
     this.authenticatedRole = props.authenticatedRole;
     this.applicationEndpoint = props.applicationEndpoint;
+    this.jwtSecret = props.jwtSecret;
     
     // Initialize functions map
     this.functions = new Map<string, BaseLambdaFunction>();
@@ -186,11 +193,10 @@ export class ApiComputeStack extends BaseStack {
     this.api = wafApi.api;
     this.apiUrl = wafApi.url;
 
-    // Store API ID in ServiceRegistry for cross-stack reference first
-    // This prevents circular dependencies when creating authorizer
-    ServiceRegistry.putApiId(this, this.stage, this.api.restApiId);
+    // Note: API ID is already stored in ServiceRegistry by WafProtectedApi construct
+    // This prevents circular dependencies when other stacks need the API reference
 
-    // Create Cognito authorizer after storing API info
+    // Create Cognito authorizer
     this.authorizer = new apigateway.CognitoUserPoolsAuthorizer(this, 'Authorizer', {
       cognitoUserPools: [this.userPool],
       authorizerName: `${SERVICES.INFRA_API}-${this.stage}-authorizer`
@@ -276,26 +282,13 @@ export class ApiComputeStack extends BaseStack {
         emailerMode,
         parameterStoreMode,
         ldSdkKey,
-        jwtSecret: this.getJwtSecret(),
+        jwtSecretName: this.jwtSecret.secretName,
         applicationEndpoint: this.applicationEndpoint || 
           `https://${this.stage === 'prod' ? 'app' : this.stage}.mcr.cms.gov`
       }
     );
   }
 
-  /**
-   * Get JWT secret based on stage
-   */
-  private getJwtSecret(): string {
-    // For local development, use environment variable
-    if (process.env.JWT_SECRET) {
-      return process.env.JWT_SECRET;
-    }
-    
-    // For deployed environments, the Lambda functions will read this at runtime
-    // from Secrets Manager. We just need to pass the reference.
-    return '';
-  }
 
   /**
    * Get Prisma migration layer for the MIGRATE function
@@ -303,10 +296,16 @@ export class ApiComputeStack extends BaseStack {
    */
   private getMigrationLayer(): lambda.ILayerVersion | undefined {
     if (!this.prismaMigrationLayer) {
+      // Read layer ARN from SSM Parameter Store
+      const layerArn = ssm.StringParameter.valueForStringParameter(
+        this,
+        `/${PROJECT_PREFIX}/${this.stage}/layers/prisma-migration-arn`
+      );
+      
       this.prismaMigrationLayer = lambda.LayerVersion.fromLayerVersionArn(
         this,
         'ImportedPrismaMigrationLayer',
-        Fn.importValue(`MCR-DatabaseOps-${this.stage}${CDK_DEPLOYMENT_SUFFIX}-PrismaMigrationLayerArn`)
+        layerArn
       );
     }
     return this.prismaMigrationLayer;
@@ -455,7 +454,10 @@ export class ApiComputeStack extends BaseStack {
         resources: ['*']
       }));
       
-      // Secrets Manager permissions - serverless grants these to all functions
+      // Grant read access to JWT secret using AWS CDK grant pattern
+      this.jwtSecret.grantRead(func.function);
+      
+      // Additional Secrets Manager permissions for other secrets (matching serverless)
       func.function.addToRolePolicy(new iam.PolicyStatement({
         effect: iam.Effect.ALLOW,
         actions: [
@@ -550,9 +552,9 @@ export class ApiComputeStack extends BaseStack {
       handler: this.getFunction('OTEL')
     });
 
-    // Zip endpoint for bulk downloads
+    // Zip endpoint for bulk downloads (binary content)
     const zipResource = this.api.root.addResource('zip');
-    ApiEndpointFactory.createAuthenticatedEndpoint(this, 'ZipKeysEndpoint', {
+    ApiEndpointFactory.createAuthenticatedBinaryEndpoint(this, 'ZipKeysEndpoint', {
       resource: zipResource,
       method: 'POST',
       handler: this.getFunction('ZIP_KEYS'),

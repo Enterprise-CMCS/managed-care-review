@@ -33,7 +33,7 @@ export class WafProtectedApi extends Construct {
 
     // Create log group for API Gateway
     this.logGroup = new logs.LogGroup(this, 'ApiLogGroup', {
-      logGroupName: `/aws/apigateway/${ResourceNames.resourceName(props.apiName, 'api', props.stage)}`,
+      logGroupName: `/aws/apigateway/cdk-${ResourceNames.resourceName(props.apiName, 'api', props.stage)}`,
       retention: logs.RetentionDays.ONE_MONTH
     });
 

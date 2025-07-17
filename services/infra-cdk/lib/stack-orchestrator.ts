@@ -1,4 +1,5 @@
 import * as cdk from 'aws-cdk-lib';
+import * as ssm from 'aws-cdk-lib/aws-ssm';
 import {
   FoundationStack,
   NetworkStack,
@@ -13,7 +14,7 @@ import {
   LambdaLayersStack
 } from './stacks';
 import { StageConfig } from './config/stage-config';
-import { CDK_DEPLOYMENT_SUFFIX } from './config/constants';
+import { CDK_DEPLOYMENT_SUFFIX, INFRASTRUCTURE_SSM_PARAMS } from './config/constants';
 
 export interface StackOrchestratorProps {
   app: cdk.App;
@@ -65,8 +66,8 @@ export class StackOrchestrator {
     // 6. Database Operations Stack (needs to be created before ApiCompute for layer exports)
     const databaseOps = this.createDatabaseOps(network, data, lambdaLayers);
 
-    // 7. API Compute Stack (depends on Network, Data, Auth, Lambda Layers, and DatabaseOps)
-    const apiCompute = this.createApiCompute(network, data, auth, lambdaLayers);
+    // 7. API Compute Stack (depends on Foundation, Network, Data, Auth, Lambda Layers, and DatabaseOps)
+    const apiCompute = this.createApiCompute(foundation, network, data, auth, lambdaLayers);
     apiCompute.addDependency(databaseOps); // Ensure DatabaseOps exports are available
 
     // 8. Frontend Stack
@@ -152,6 +153,22 @@ export class StackOrchestrator {
   }
 
   private createAuth(foundation: FoundationStack): AuthStack {
+    // Fetch email sender from SSM Parameter Store (matching serverless implementation)
+    let emailSender: string | undefined;
+    try {
+      const ssmEmailValue = ssm.StringParameter.valueFromLookup(
+        foundation,
+        INFRASTRUCTURE_SSM_PARAMS.EMAIL_SOURCE_ADDRESS
+      );
+      
+      // Only use the value if it's not a dummy token and not empty
+      if (ssmEmailValue && !ssmEmailValue.includes('dummy-value') && ssmEmailValue.trim() !== '') {
+        emailSender = ssmEmailValue;
+      }
+    } catch (error) {
+      console.log('Email source address not found in SSM, will use default');
+    }
+
     const stack = new AuthStack(this.props.app, `MCR-Auth-${this.props.stage}${CDK_DEPLOYMENT_SUFFIX}`, {
       env: this.props.env,
       stage: this.props.stage,
@@ -159,13 +176,15 @@ export class StackOrchestrator {
       serviceName: 'auth',
       allowedCallbackUrls: this.getCallbackUrls(),
       allowedLogoutUrls: this.getLogoutUrls(),
-      samlMetadataUrl: process.env.SAML_METADATA_URL
+      samlMetadataUrl: process.env.SAML_METADATA_URL,
+      emailSender: emailSender
     });
     stack.addDependency(foundation);
     return stack;
   }
 
   private createApiCompute(
+    foundation: FoundationStack,
     network: NetworkStack,
     data: DataStack,
     auth: AuthStack,
@@ -183,9 +202,11 @@ export class StackOrchestrator {
       qaBucketName: data.qaBucket.bucketName,
       userPool: auth.userPool,
       authenticatedRole: auth.authenticatedRole,
+      jwtSecret: foundation.jwtSecret,
       prismaLayerArn: lambdaLayers.prismaLayerVersionArn,
       postgresToolsLayerArn: lambdaLayers.postgresToolsLayerVersionArn
     });
+    stack.addDependency(foundation);
     stack.addDependency(network);
     stack.addDependency(data);
     stack.addDependency(auth);

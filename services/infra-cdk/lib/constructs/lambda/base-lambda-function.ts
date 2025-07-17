@@ -46,7 +46,7 @@ export class BaseLambdaFunction extends Construct {
 
     // Create log group with retention
     this.logGroup = new logs.LogGroup(this, 'LogGroup', {
-      logGroupName: `/aws/lambda/${ResourceNames.resourceName(props.serviceName, props.functionName, props.stage)}`,
+      logGroupName: `/aws/lambda/cdk-${ResourceNames.resourceName(props.serviceName, props.functionName, props.stage)}`,
       retention: props.logRetentionDays || 7
     });
 

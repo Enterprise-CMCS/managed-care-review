@@ -1602,4 +1602,147 @@ new cloudwatch.Alarm(this, 'HighErrorRate', {
 });
 ```
 
-This documentation provides a complete understanding of how the CDK architecture is wired together, from the abstract BaseStack through the factory patterns to concrete implementations, with clear migration paths from serverless configurations for all major AWS services used in the application.
+---
+
+## Production Security Considerations
+
+### 1. Secret Management
+
+**JWT Secret Handling**
+```typescript
+// ❌ Anti-pattern: Exposing secret ARN in environment
+environment: {
+  JWT_SECRET_ARN: jwtSecret.secretArn  // ARN visible in logs!
+}
+
+// ✅ Best practice: Grant access pattern
+// In stack:
+jwtSecret.grantRead(lambdaFunction);
+
+// In environment:
+environment: {
+  JWT_SECRET_NAME: jwtSecret.secretName  // Non-sensitive identifier
+}
+```
+
+### 2. Binary Content Handling
+
+**API Gateway File Upload/Download**
+```typescript
+// Create specialized binary endpoints
+ApiEndpointFactory.createAuthenticatedBinaryEndpoint(this, 'FileEndpoint', {
+  resource: filesResource,
+  method: 'POST',
+  handler: fileHandler,
+  userPool: this.userPool,
+  authorizer: this.authorizer,
+  // Critical for binary content
+  contentHandling: apigateway.ContentHandling.CONVERT_TO_BINARY
+});
+```
+
+### 3. Cross-Stack Dependencies
+
+**Layer Version Management**
+```typescript
+// Store in SSM Parameter Store (not CloudFormation exports)
+new ssm.StringParameter(this, 'LayerArnParam', {
+  parameterName: `/${PROJECT_PREFIX}/${stage}/layers/my-layer-arn`,
+  stringValue: layer.layerVersionArn
+});
+
+// Retrieve in consuming stack
+const layerArn = ssm.StringParameter.valueForStringParameter(
+  this,
+  `/${PROJECT_PREFIX}/${stage}/layers/my-layer-arn`
+);
+```
+
+### 4. Configuration Validation
+
+**Fail Fast Pattern**
+```typescript
+export class AuthStack extends BaseStack {
+  constructor(scope: Construct, id: string, props: AuthStackProps) {
+    super(scope, id, props);
+    
+    // Validate critical configuration early
+    this.validateConfiguration();
+  }
+  
+  private validateConfiguration(): void {
+    if (this.allowedCallbackUrls.length === 0) {
+      throw new Error(
+        'allowedCallbackUrls must not be empty - authentication will fail'
+      );
+    }
+    
+    if (this.stage === 'prod' && !this.emailSender) {
+      throw new Error(
+        'emailSender required in production for proper email delivery'
+      );
+    }
+  }
+}
+```
+
+### 5. IAM Permission Boundaries
+
+**Proper Identity Pool Conditions**
+```typescript
+// Correct Identity Pool IAM conditions
+new iam.PolicyStatement({
+  effect: iam.Effect.ALLOW,
+  actions: ['s3:GetObject'],
+  resources: ['*'],
+  conditions: {
+    StringEquals: {
+      'cognito-identity.amazonaws.com:aud': identityPool.ref
+    },
+    'ForAnyValue:StringLike': {
+      'cognito-identity.amazonaws.com:amr': '*:ADMIN'
+    }
+  }
+});
+```
+
+### 6. Stack Naming Consistency
+
+**Deployment Suffix Pattern**
+```typescript
+// Ensure all stacks use consistent naming
+import { CDK_DEPLOYMENT_SUFFIX } from '@config/constants';
+
+new ApiComputeStack(app, `MCR-ApiCompute-${stage}${CDK_DEPLOYMENT_SUFFIX}`, {
+  // ... props
+});
+```
+
+### 7. Environment Variable Security
+
+**LambdaEnvironmentFactory Pattern**
+```typescript
+export class LambdaEnvironmentFactory {
+  static createApiLambdaEnvironment(config: {
+    jwtSecretName: string,  // Name only, not ARN
+    databaseSecretArn: string,  // OK - needed for connection
+    applicationEndpoint?: string
+  }): Record<string, string> {
+    return {
+      // Non-sensitive values
+      APPLICATION_ENDPOINT: config.applicationEndpoint,
+      JWT_SECRET_NAME: config.jwtSecretName,
+      
+      // Sensitive values accessed via SDK
+      DATABASE_SECRET_ARN: config.databaseSecretArn,
+      
+      // SSM parameters resolved at deploy time
+      API_OTEL_COLLECTOR_URL: ssm.StringParameter.valueForStringParameter(
+        this, '/configuration/api_app_otel_collector_url'
+      )
+    };
+  }
+}
+```
+
+This documentation provides a complete understanding of how the CDK architecture is wired together, from the abstract BaseStack through the factory patterns to concrete implementations, with clear migration paths from serverless configurations for all major AWS services used in the application, along with critical production security considerations.

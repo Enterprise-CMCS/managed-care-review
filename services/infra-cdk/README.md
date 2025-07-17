@@ -2,6 +2,17 @@
 
 Production-ready AWS CDK infrastructure for Managed Care Review.
 
+## Production Security Hardening
+
+This CDK implementation includes critical security hardening measures:
+
+1. **JWT Secret Protection**: Uses AWS CDK grant patterns to avoid exposing secret ARNs in environment variables
+2. **Binary Content Handling**: Properly configured API Gateway endpoints for file uploads/downloads
+3. **Layer Version Management**: Uses SSM Parameters instead of CloudFormation exports to avoid deployment failures
+4. **Configuration Validation**: Fail-fast validation for critical Auth stack configuration
+5. **IAM Permission Scoping**: Correct Identity Pool conditions and properly attached policies
+6. **Stack Naming Consistency**: Uniform CDK deployment suffix across all stacks
+
 ## Quick Start
 
 ```bash

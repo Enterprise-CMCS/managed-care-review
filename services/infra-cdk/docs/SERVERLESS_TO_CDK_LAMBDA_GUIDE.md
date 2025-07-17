@@ -6084,6 +6084,216 @@ const userPoolId = Fn.importValue(`MCR-${stage}-UserPoolId`);
 
 ---
 
+## Production Hardening
+
+### 1. JWT Secret Security Pattern
+
+**Issue**: Passing JWT secret ARN as environment variable risks exposing it in CloudWatch logs.
+
+**Solution**: Use AWS CDK grant patterns to provide access without exposing the ARN.
+
+```typescript
+// ❌ Anti-pattern: Exposing secret ARN
+environment: {
+  JWT_SECRET_ARN: jwtSecret.secretArn  // ARN visible in logs!
+}
+
+// ✅ Correct pattern: Grant access and use secret name
+// In stack:
+this.jwtSecret.grantRead(lambdaFunction);
+
+// In environment:
+environment: {
+  JWT_SECRET_NAME: jwtSecret.secretName  // Only non-sensitive name
+}
+
+// In Lambda code:
+const secretsManager = new AWS.SecretsManager();
+const secret = await secretsManager.getSecretValue({
+  SecretId: process.env.JWT_SECRET_NAME
+}).promise();
+```
+
+### 2. Binary Content Handling for API Gateway
+
+**Issue**: File uploads/downloads get corrupted without proper binary content handling.
+
+**Solution**: Create specialized endpoints with content handling.
+
+```typescript
+// lib/constructs/api/api-endpoint.ts
+export class ApiEndpointFactory {
+  /**
+   * Create endpoint that handles binary content (file uploads/downloads)
+   */
+  static createAuthenticatedBinaryEndpoint(
+    scope: Construct,
+    id: string,
+    props: ApiEndpointProps & { userPool: cognito.IUserPool }
+  ): ApiEndpoint {
+    const endpoint = new ApiEndpoint(scope, id, {
+      ...props,
+      authType: 'COGNITO_USER_POOLS',
+      authorizer: props.authorizer
+    });
+
+    // Configure binary content handling
+    const integration = new apigateway.LambdaIntegration(props.handler, {
+      proxy: true,
+      contentHandling: apigateway.ContentHandling.CONVERT_TO_BINARY
+    });
+
+    endpoint.resource.addMethod(props.method, integration, {
+      authorizationType: apigateway.AuthorizationType.COGNITO_USER_POOLS,
+      authorizer: props.authorizer
+    });
+
+    return endpoint;
+  }
+}
+
+// Usage for file download endpoint:
+ApiEndpointFactory.createAuthenticatedBinaryEndpoint(this, 'ZipKeysEndpoint', {
+  resource: zipResource,
+  method: 'POST',
+  handler: this.getFunction('ZIP_KEYS'),
+  userPool: this.userPool,
+  authorizer: this.authorizer
+});
+```
+
+### 3. Cross-Stack Layer Management
+
+**Issue**: CloudFormation exports can cause deployment failures when updating layers.
+
+**Solution**: Use SSM Parameter Store for layer ARN storage.
+
+```typescript
+// In layer stack - store ARN:
+new ssm.StringParameter(this, 'PrismaMigrationLayerArnParam', {
+  parameterName: `/${PROJECT_PREFIX}/${this.stage}/layers/prisma-migration-arn`,
+  stringValue: this.prismaMigrationLayer.layerVersionArn,
+  description: 'ARN of the Prisma migration layer'
+});
+
+// In consuming stack - retrieve ARN:
+private getMigrationLayer(): lambda.ILayerVersion | undefined {
+  if (!this.prismaMigrationLayer) {
+    const layerArn = ssm.StringParameter.valueForStringParameter(
+      this,
+      `/${PROJECT_PREFIX}/${this.stage}/layers/prisma-migration-arn`
+    );
+    
+    this.prismaMigrationLayer = lambda.LayerVersion.fromLayerVersionArn(
+      this,
+      'ImportedPrismaMigrationLayer',
+      layerArn
+    );
+  }
+  return this.prismaMigrationLayer;
+}
+```
+
+### 4. Auth Stack Validation
+
+**Issue**: Missing configuration can cause silent authentication failures.
+
+**Solution**: Validate critical configuration during stack creation.
+
+```typescript
+// lib/stacks/auth-stack.ts
+private validateConfiguration(): void {
+  // Prevent silent auth failures
+  if (this.allowedCallbackUrls.length === 0) {
+    throw new Error(
+      'allowedCallbackUrls must not be empty - authentication will fail without valid callback URLs'
+    );
+  }
+  
+  // Ensure proper email delivery in production
+  if (this.stage === 'prod' && !this.emailSender) {
+    throw new Error(
+      'emailSender must be provided in production to ensure proper email delivery'
+    );
+  }
+}
+
+// Provide domain-verified default
+private getDefaultEmailSender(): string {
+  // Avoid Cognito's default no-reply@verificationemail.com
+  return `noreply-${this.stage}@mcr.cms.gov`;
+}
+```
+
+### 5. IAM Permission Scoping
+
+**Issue**: Mixed IAM condition contexts and unattached policies.
+
+**Solution**: Use correct Identity Pool conditions and attach policies.
+
+```typescript
+// ❌ Anti-pattern: Mixing contexts
+conditions: {
+  StringEquals: {
+    'cognito-identity.amazonaws.com:aud': identityPoolId,
+    'cognito:groups': 'ADMIN'  // Wrong context!
+  }
+}
+
+// ✅ Correct pattern: Identity Pool conditions
+const groupBasedPolicy = new iam.Policy(this, 'GroupBasedAccessPolicy', {
+  statements: [
+    new iam.PolicyStatement({
+      effect: iam.Effect.ALLOW,
+      actions: ['s3:GetObject'],
+      resources: ['*'],
+      conditions: {
+        StringEquals: {
+          'cognito-identity.amazonaws.com:aud': this.identityPool.ref
+        },
+        'ForAnyValue:StringLike': {
+          'cognito-identity.amazonaws.com:amr': '*:ADMIN'
+        }
+      }
+    })
+  ]
+});
+
+// MUST attach the policy!
+this.authenticatedRole.attachInlinePolicy(groupBasedPolicy);
+```
+
+### 6. Environment Variable Security
+
+**Issue**: Sensitive values in environment variables can leak.
+
+**Solution**: Use proper patterns for each type of configuration.
+
+```typescript
+// lib/constructs/lambda/environment-factory.ts
+export class LambdaEnvironmentFactory {
+  static createApiLambdaEnvironment(config: {
+    // ... other params
+    jwtSecretName: string,  // Name only, not ARN
+    applicationEndpoint?: string
+  }): Record<string, string> {
+    return {
+      // Non-sensitive configuration
+      APPLICATION_ENDPOINT: config.applicationEndpoint || 
+        `https://${stage === 'prod' ? 'app' : stage}.mcr.cms.gov`,
+      
+      // Secret reference (not value)
+      JWT_SECRET_NAME: config.jwtSecretName,
+      
+      // SSM parameters resolved at deploy time
+      API_OTEL_COLLECTOR_URL: ssm.StringParameter.valueForStringParameter(
+        this, '/configuration/api_app_otel_collector_url'
+      )
+    };
+  }
+}
+```
+
 ## Security Patterns
 
 ### WAF Integration with API Gateway

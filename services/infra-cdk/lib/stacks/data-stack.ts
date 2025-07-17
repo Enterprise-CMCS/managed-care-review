@@ -107,7 +107,7 @@ export class DataStack extends BaseStack {
   private createS3Buckets(): void {
     // Create S3 access logging bucket (CDK Nag AwsSolutions-S1)
     const loggingBucket = new s3.Bucket(this, 'S3LoggingBucket', {
-      bucketName: `${S3_BUCKETS.UPLOADS}-${this.stage}-logs-${this.account}`,
+      bucketName: `${S3_BUCKETS.UPLOADS}-${this.stage}-logs-${this.account}-cdk`,
       encryption: s3.BucketEncryption.S3_MANAGED,
       blockPublicAccess: s3.BlockPublicAccess.BLOCK_ALL,
       enforceSSL: true,

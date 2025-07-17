@@ -18,6 +18,7 @@ export interface ApiEndpointProps {
   requestTemplates?: { [contentType: string]: string };
   integrationResponses?: apigateway.IntegrationResponse[];
   methodResponses?: apigateway.MethodResponse[];
+  contentHandling?: apigateway.ContentHandling;
 }
 
 /**
@@ -37,6 +38,7 @@ export class ApiEndpoint extends Construct {
     // Create Lambda integration
     this.integration = new apigateway.LambdaIntegration(props.handler, {
       proxy: true,
+      contentHandling: props.contentHandling,
       integrationResponses: props.integrationResponses || [
         {
           statusCode: '200',
@@ -174,6 +176,50 @@ export class ApiEndpointFactory {
     return new ApiEndpoint(scope, id, {
       ...props,
       authorizationType: apigateway.AuthorizationType.IAM
+    });
+  }
+
+  /**
+   * Create a binary content endpoint (for file uploads/downloads)
+   * Use this when the Lambda returns binary content like ZIP, PDF, images, etc.
+   * This prevents base64 encoding overhead and potential corruption
+   */
+  static createBinaryEndpoint(
+    scope: Construct,
+    id: string,
+    props: ApiEndpointProps
+  ): ApiEndpoint {
+    return new ApiEndpoint(scope, id, {
+      ...props,
+      contentHandling: apigateway.ContentHandling.CONVERT_TO_BINARY
+    });
+  }
+
+  /**
+   * Create an authenticated binary endpoint (Cognito + binary content)
+   * Use this for protected endpoints that handle binary data (e.g., authenticated file downloads)
+   * Combines Cognito authentication with binary content handling
+   */
+  static createAuthenticatedBinaryEndpoint(
+    scope: Construct,
+    id: string,
+    props: ApiEndpointProps & { userPool: cognito.IUserPool }
+  ): ApiEndpoint {
+    // Create Cognito authorizer if not provided
+    const authorizer = props.authorizer || new apigateway.CognitoUserPoolsAuthorizer(
+      scope,
+      `${id}Authorizer`,
+      {
+        cognitoUserPools: [props.userPool],
+        authorizerName: `${id}-authorizer`
+      }
+    );
+
+    return new ApiEndpoint(scope, id, {
+      ...props,
+      authorizationType: apigateway.AuthorizationType.COGNITO,
+      authorizer,
+      contentHandling: apigateway.ContentHandling.CONVERT_TO_BINARY
     });
   }
 
