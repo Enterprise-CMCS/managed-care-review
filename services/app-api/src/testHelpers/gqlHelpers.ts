@@ -56,7 +56,6 @@ import type { S3ClientT } from '../s3'
 import { convertRateInfoToRateFormDataInput } from '../domain-models/contractAndRates/convertHPPtoContractWithRates'
 import { createAndUpdateTestContractWithoutRates } from './gqlContractHelpers'
 import { addNewRateToTestContract } from './gqlRateHelpers'
-import type { GraphQLResponse } from 'apollo-server-types'
 import { configureEmailer } from '../handlers/configuration'
 import type { DocumentZipService } from '../zip/generateZip'
 import {
@@ -578,7 +577,7 @@ const createTestRateQuestion = async (
     server: ApolloServer,
     rateID: string,
     questionData?: Omit<CreateRateQuestionInputType, 'rateID'>
-): Promise<GraphQLResponse> => {
+) => {
     const question = questionData || {
         documents: [
             {
@@ -604,7 +603,7 @@ const createTestRateQuestionResponse = async (
     server: ApolloServer,
     questionID: string,
     responseData?: Omit<InsertQuestionResponseArgs, 'questionID'>
-): Promise<GraphQLResponse> => {
+) => {
     const response = responseData || {
         documents: [
             {

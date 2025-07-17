@@ -1,18 +1,25 @@
-import type { GraphQLResponse } from 'apollo-server-types'
 import type { GraphQLFormattedError } from 'graphql'
+
+// Apollo Server v4 response type
+type GraphQLResponse = {
+    body: {
+        data?: any
+        errors?: GraphQLFormattedError[]
+    }
+}
 
 // assertAnError returns an the only error in a graphQL errors response
 function assertAnError(res: GraphQLResponse): GraphQLFormattedError {
-    if (!res.errors || res.errors.length === 0) {
+    if (!res.body.errors || res.body.errors.length === 0) {
         throw new Error('response did not return errors')
     }
 
-    if (res.errors.length > 1) {
-        console.error('Got Multiple Errors: ', res.errors)
+    if (res.body.errors.length > 1) {
+        console.error('Got Multiple Errors: ', res.body.errors)
         throw new Error('response returned multiple errors')
     }
 
-    return res.errors[0]
+    return res.body.errors[0]
 }
 
 // assertAnErrorExtensions returns the error code from the only error's extensions
