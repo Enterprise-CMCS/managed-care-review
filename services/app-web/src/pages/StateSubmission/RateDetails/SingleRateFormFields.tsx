@@ -267,7 +267,7 @@ export const SingleRateFormFields = ({
                     error={Boolean(showFieldErrors('rateMedicaidPopulations'))}
                 >
                     <Fieldset
-                        legend="Rate Medicaid populations"
+                        legend="Which Medicaid populations are included in this rate certification?"
                         aria-required
                         id={`${fieldNamePrefix}.rateMedicaidPopulations`}
                     >
@@ -281,22 +281,21 @@ export const SingleRateFormFields = ({
                         >
                             See 42 CFR § 422.2
                         </div>
-                        <Link
+                        <LinkWithLogging
+                            aria-label="Medicaid Managed Care Rate Development Guide (opens in new window)"
+                            href={'https://www.medicaid.gov/medicaid/managed-care/guidance/rate-review-and-rate-guides'}
                             variant="external"
-                            href={
-                                'https://www.medicaid.gov/medicaid/managed-care/guidance/rate-review-and-rate-guides'
-                            }
                             target="_blank"
                         >
                             Medicaid Managed Care Rate Development Guide
-                        </Link>
+                        </LinkWithLogging>
                         <div className="usa-hint">
                             <span>Check all that apply</span>
                         </div>
                         {Boolean(
                             showFieldErrors('rateMedicaidPopulations')
                         ) && (
-                            <PoliteErrorMessage formFieldLabel="Rate medicaid populations">
+                            <PoliteErrorMessage formFieldLabel="Which Medicaid populations are included in this rate certification">
                                 {showFieldErrors('rateMedicaidPopulations')}
                             </PoliteErrorMessage>
                         )}
@@ -307,7 +306,7 @@ export const SingleRateFormFields = ({
                                 RateMedicaidPopulationsRecord.MEDICARE_MEDICAID_WITH_DSNP
                             }
                             value="MEDICARE_MEDICAID_WITH_DSNP"
-                            heading="Rate Medicaid populations"
+                            heading="Which Medicaid populations are included in this rate certification"
                             parent_component_heading={formHeading}
                         />
                         <FieldCheckbox
@@ -315,7 +314,7 @@ export const SingleRateFormFields = ({
                             name={`${fieldNamePrefix}.rateMedicaidPopulations`}
                             label={RateMedicaidPopulationsRecord.MEDICAID_ONLY}
                             value="MEDICAID_ONLY"
-                            heading="Rate Medicaid populations"
+                            heading="Which Medicaid populations are included in this rate certification"
                             parent_component_heading={formHeading}
                         />
                         <FieldCheckbox
@@ -325,7 +324,7 @@ export const SingleRateFormFields = ({
                                 <span>
                                     Medicare-Medicaid dually eligible
                                     individuals{' '}
-                                    <span style={{ fontWeight: 'bold' }}>
+                                    <span style={{ fontWeight: 600 }}>
                                         not
                                     </span>{' '}
                                     enrolled through a D-SNP
@@ -335,7 +334,7 @@ export const SingleRateFormFields = ({
                                 RateMedicaidPopulationsRecord.MEDICARE_MEDICAID_WITHOUT_DSNP
                             }
                             value="MEDICARE_MEDICAID_WITHOUT_DSNP"
-                            heading="Rate Medicaid populations"
+                            heading="Which Medicaid populations are included in this rate certification"
                             parent_component_heading={formHeading}
                         />
                     </Fieldset>
