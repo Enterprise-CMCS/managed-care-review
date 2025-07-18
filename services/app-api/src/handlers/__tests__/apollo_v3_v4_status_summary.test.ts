@@ -33,6 +33,8 @@ describe('Apollo Server v3 vs v4 Status Code Summary', () => {
                 variables: {
                     name: 123, // Invalid: number instead of string
                 },
+            }, {
+                contextValue: {}, // Apollo v4 requires context
             })) as { errors?: any; data?: any }
 
             // Apollo Server v3 Variable Validation
@@ -110,6 +112,8 @@ describe('Apollo Server v3 vs v4 Status Code Summary', () => {
                         testError
                     }
                 `,
+            }, {
+                contextValue: {}, // Apollo v4 requires context
             })) as { errors?: any; data?: any }
 
             // Custom Error Handling Test

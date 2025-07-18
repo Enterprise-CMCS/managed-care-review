@@ -41,6 +41,8 @@ describe('OTEL Error Logging', () => {
                         triggerError
                     }
                 `,
+            }, {
+                contextValue: {}, // Apollo v4 requires context
             })) as { errors?: any; data?: any }
 
             // Verify GraphQL error is returned
@@ -143,6 +145,8 @@ describe('OTEL Error Logging', () => {
                         triggerCustomError
                     }
                 `,
+            }, {
+                contextValue: {}, // Apollo v4 requires context
             })) as { errors?: any; data?: any }
 
             // Verify custom error structure is preserved

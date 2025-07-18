@@ -34,6 +34,8 @@ describe('Apollo Server v3 Status Code Behavior', () => {
                 variables: {
                     name: 123, // Invalid: number instead of string
                 },
+            }, {
+                contextValue: {}, // Apollo v4 requires context
             })) as { errors?: any; data?: any }
 
             // Apollo Server v3 behavior: returns BAD_USER_INPUT for variable validation errors
@@ -71,6 +73,8 @@ describe('Apollo Server v3 Status Code Behavior', () => {
                     }
                 `,
                 variables: {}, // Missing required variable
+            }, {
+                contextValue: {}, // Apollo v4 requires context
             })) as { errors?: any; data?: any }
 
             expect(result.errors).toBeDefined()
@@ -107,6 +111,8 @@ describe('Apollo Server v3 Status Code Behavior', () => {
                 variables: {
                     input: 456, // Invalid type
                 },
+            }, {
+                contextValue: {}, // Apollo v4 requires context
             })) as { errors?: any; data?: any }
 
             // Apollo Server v3 vs v4 Behavior
@@ -151,6 +157,8 @@ describe('Apollo Server v3 Status Code Behavior', () => {
                 variables: {
                     age: -5,
                 },
+            }, {
+                contextValue: {}, // Apollo v4 requires context
             })) as { errors?: any; data?: any }
 
             expect(result.errors).toBeDefined()
