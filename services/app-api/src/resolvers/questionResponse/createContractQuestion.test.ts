@@ -3,6 +3,7 @@ import {
     constructTestPostgresServer,
     createTestQuestion,
     updateTestStateAssignments,
+    defaultContext,
 } from '../../testHelpers/gqlHelpers'
 import {
     assertAnError,
@@ -42,11 +43,7 @@ describe('createQuestion', () => {
 
     it('returns question data after creation', async () => {
         const stateServer = await constructTestPostgresServer()
-        const cmsServer = await constructTestPostgresServer({
-            context: {
-                user: cmsUser,
-            },
-        })
+        const cmsServer = await constructTestPostgresServer()
 
         const contract = await createAndSubmitTestContractWithRate(stateServer)
 
@@ -69,11 +66,7 @@ describe('createQuestion', () => {
     })
     it('allows question creation on UNLOCKED and RESUBMITTED package', async () => {
         const stateServer = await constructTestPostgresServer()
-        const cmsServer = await constructTestPostgresServer({
-            context: {
-                user: cmsUser,
-            },
-        })
+        const cmsServer = await constructTestPostgresServer()
         const contract = await createAndSubmitTestContractWithRate(stateServer)
 
         await unlockTestContract(cmsServer, contract.id, 'test unlock')
@@ -148,11 +141,7 @@ describe('createQuestion', () => {
     })
     it('returns an error if package status is DRAFT', async () => {
         const stateServer = await constructTestPostgresServer()
-        const cmsServer = await constructTestPostgresServer({
-            context: {
-                user: cmsUser,
-            },
-        })
+        const cmsServer = await constructTestPostgresServer()
 
         const draftContract = await createTestContract(stateServer)
 
@@ -169,6 +158,10 @@ describe('createQuestion', () => {
                     ],
                 },
             },
+        }, {
+            contextValue: {
+                user: cmsUser,
+            },
         })
 
         expect(createdQuestion.errors).toBeDefined()
@@ -179,11 +172,7 @@ describe('createQuestion', () => {
     })
     it('returns an error if contract has been approved', async () => {
         const stateServer = await constructTestPostgresServer()
-        const cmsServer = await constructTestPostgresServer({
-            context: {
-                user: cmsUser,
-            },
-        })
+        const cmsServer = await constructTestPostgresServer()
 
         const contract = await createAndSubmitTestContractWithRate(stateServer)
         // approve contract
@@ -203,6 +192,10 @@ describe('createQuestion', () => {
                         },
                     ],
                 },
+            },
+        }, {
+            contextValue: {
+                user: cmsUser,
             },
         })
 
@@ -229,6 +222,8 @@ describe('createQuestion', () => {
                     ],
                 },
             },
+        }, {
+            contextValue: defaultContext(),
         })
 
         expect(createdQuestion.errors).toBeDefined()
@@ -239,11 +234,7 @@ describe('createQuestion', () => {
     })
     it('returns error on invalid package id', async () => {
         const stateServer = await constructTestPostgresServer()
-        const cmsServer = await constructTestPostgresServer({
-            context: {
-                user: cmsUser,
-            },
-        })
+        const cmsServer = await constructTestPostgresServer()
 
         await createAndSubmitTestContractWithRate(stateServer)
 
@@ -259,6 +250,10 @@ describe('createQuestion', () => {
                         },
                     ],
                 },
+            },
+        }, {
+            contextValue: {
+                user: cmsUser,
             },
         })
 
@@ -274,11 +269,7 @@ describe('createQuestion', () => {
         })
         await createDBUsersWithFullData([cmsUserWithNoDivision])
         const stateServer = await constructTestPostgresServer()
-        const cmsServer = await constructTestPostgresServer({
-            context: {
-                user: cmsUserWithNoDivision,
-            },
-        })
+        const cmsServer = await constructTestPostgresServer()
 
         await createAndSubmitTestContractWithRate(stateServer)
 
@@ -294,6 +285,10 @@ describe('createQuestion', () => {
                         },
                     ],
                 },
+            },
+        }, {
+            contextValue: {
+                user: cmsUserWithNoDivision,
             },
         })
 
@@ -309,11 +304,7 @@ describe('createQuestion', () => {
         })
         await createDBUsersWithFullData([cmsUserWithNoDivision])
         const stateServer = await constructTestPostgresServer()
-        const cmsServer = await constructTestPostgresServer({
-            context: {
-                user: cmsUserWithNoDivision,
-            },
-        })
+        const cmsServer = await constructTestPostgresServer()
 
         await createAndSubmitTestContractWithRate(stateServer)
 
@@ -330,6 +321,10 @@ describe('createQuestion', () => {
                     ],
                 },
             },
+        }, {
+            contextValue: {
+                user: cmsUserWithNoDivision,
+            },
         })
 
         expect(createdQuestion.errors).toBeDefined()
@@ -344,9 +339,6 @@ describe('createQuestion', () => {
         //mock invoke email submit lambda
         const stateServer = await constructTestPostgresServer()
         const cmsServer = await constructTestPostgresServer({
-            context: {
-                user: cmsUser,
-            },
             emailer: mockEmailer,
         })
 
@@ -392,9 +384,6 @@ describe('createQuestion', () => {
         //mock invoke email submit lambda
         const stateServer = await constructTestPostgresServer()
         const cmsServer = await constructTestPostgresServer({
-            context: {
-                user: cmsUser,
-            },
             emailer: mockEmailer,
         })
 
@@ -442,16 +431,10 @@ describe('createQuestion', () => {
         //mock invoke email submit lambda
         const stateServer = await constructTestPostgresServer()
         const cmsServer = await constructTestPostgresServer({
-            context: {
-                user: cmsUser,
-            },
             emailer: mockEmailer,
         })
         const cmsDMCPUser = testCMSUser({ divisionAssignment: 'DMCP' })
         const cmsDMCPServer = await constructTestPostgresServer({
-            context: {
-                user: cmsDMCPUser,
-            },
             emailer: mockEmailer,
         })
         const stateSubmission =
@@ -493,9 +476,6 @@ describe('createQuestion', () => {
     it('does not send any emails if submission fails', async () => {
         const mockEmailer = testEmailer()
         const cmsServer = await constructTestPostgresServer({
-            context: {
-                user: cmsUser,
-            },
             emailer: mockEmailer,
         })
 
@@ -511,6 +491,10 @@ describe('createQuestion', () => {
                         },
                     ],
                 },
+            },
+        }, {
+            contextValue: {
+                user: cmsUser,
             },
         })
 
