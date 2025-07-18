@@ -7,7 +7,8 @@ import {
     createFilter,
 } from 'react-select'
 import styles from '../../../components/Select/Select.module.scss'
-import { IndexRatesInput, useIndexRatesQuery } from '../../../gen/gqlClient'
+import { IndexRatesInput, useIndexRatesStrippedQuery, FetchRateDocument } from '../../../gen/gqlClient'
+import { useLazyQuery } from '@apollo/client'
 import { programNames } from '@mc-review/hpp'
 import { formatCalendarDate } from '@mc-review/dates'
 import {
@@ -51,53 +52,56 @@ export const LinkRateSelect = ({
     ...selectProps
 }: LinkRateSelectPropType & Props<LinkRateOptionType, false>) => {
     const input: IndexRatesInput = { stateCode }
-    const { data, loading, error } = useIndexRatesQuery({
+    const { data, loading, error } = useIndexRatesStrippedQuery({
         variables: { input },
     })
+    
+    // Lazy query for fetching individual rate details when selected
+    const [fetchRate, { loading: fetchRateLoading }] = useLazyQuery(FetchRateDocument)
     const { getKey } = useS3()
     const { logDropdownSelectionEvent } = useTealium()
     const [_field, _meta, helpers] = useField({ name }) // useField only relevant for non-autofill implementations
 
-    const rates = data?.indexRates.edges.map((e) => e.node) || []
+    const rates = data?.indexRatesStripped.edges.map((e) => e.node) || []
     // Sort rates by latest submission in desc order and remove withdrawn
     // Do not display withdrawn rates as an option of a linked rate to select
     const updatedRates = rates
         .sort(
             (a, b) =>
-                new Date(b.revisions[0].submitInfo?.updatedAt).getTime() -
-                new Date(a.revisions[0].submitInfo?.updatedAt).getTime()
+                new Date(b.latestSubmittedRevision?.submitInfo?.updatedAt || b.draftRevision?.submitInfo?.updatedAt || 0).getTime() -
+                new Date(a.latestSubmittedRevision?.submitInfo?.updatedAt || a.draftRevision?.submitInfo?.updatedAt || 0).getTime()
         )
         .filter((rate) => rate.consolidatedStatus !== 'WITHDRAWN')
 
     const rateNames: LinkRateOptionType[] = updatedRates.map((rate) => {
-        const revision = rate.revisions[0]
+        const revision = rate.latestSubmittedRevision || rate.draftRevision
         const rateProgramIDs =
-            revision.formData.rateProgramIDs.length > 0
+            revision?.formData.rateProgramIDs.length > 0
                 ? revision.formData.rateProgramIDs
-                : revision.formData.deprecatedRateProgramIDs
+                : revision?.formData.deprecatedRateProgramIDs || []
 
         return {
             value: rate.id,
             label:
-                revision.formData.rateCertificationName ??
+                revision?.formData.rateCertificationName ??
                 'Unknown rate certification',
             rateCertificationName:
-                revision.formData.rateCertificationName ??
+                revision?.formData.rateCertificationName ??
                 'Unknown rate certification',
             rateProgramIDs: programNames(
                 rate.state.programs,
                 rateProgramIDs
             ).join(', '),
             rateDateStart: formatCalendarDate(
-                revision.formData.rateDateStart,
+                revision?.formData.rateDateStart,
                 'UTC'
             ),
             rateDateEnd: formatCalendarDate(
-                revision.formData.rateDateEnd,
+                revision?.formData.rateDateEnd,
                 'UTC'
             ),
             rateDateCertified: formatCalendarDate(
-                revision.formData.rateDateCertified,
+                revision?.formData.rateDateCertified,
                 'UTC'
             ),
         }
@@ -117,7 +121,7 @@ export const LinkRateSelect = ({
     )
 
     const noOptionsMessage = () => {
-        if (loading) {
+        if (loading || fetchRateLoading) {
             return 'Loading rate certifications...'
         }
         if (error) {
@@ -139,15 +143,26 @@ export const LinkRateSelect = ({
 
             if (autofill) {
                 const linkedRateID = newValue.value
-                const linkedRate = rates.find(
-                    (rate) => rate.id === linkedRateID
-                )
-                const linkedRateForm: FormikRateForm =
-                    convertIndexRatesGQLRateToRateForm(getKey, linkedRate)
-                // put already selected fields back in place
-                linkedRateForm.ratePreviouslySubmitted = 'YES'
-
-                autofill(linkedRateForm)
+                
+                // Fetch the full rate data using the fetchRate query
+                try {
+                    const { data: fetchRateData } = await fetchRate({
+                        variables: { input: { rateID: linkedRateID } },
+                    })
+                    
+                    if (fetchRateData?.fetchRate?.rate) {
+                        const linkedRateForm: FormikRateForm =
+                            convertIndexRatesGQLRateToRateForm(getKey, fetchRateData.fetchRate.rate)
+                        // put already selected fields back in place
+                        linkedRateForm.ratePreviouslySubmitted = 'YES'
+                        
+                        autofill(linkedRateForm)
+                    } else {
+                        console.error('Failed to fetch rate data for ID:', linkedRateID)
+                    }
+                } catch (error) {
+                    console.error('Error fetching rate data:', error)
+                }
             } else {
                 // this path is used for replace/withdraw redundant rates
                 // we are not autofilling form data, we are just returning the IDs of the rate selected
@@ -218,7 +233,7 @@ export const LinkRateSelect = ({
             classNamePrefix="select"
             id={`${name}-parentDiv`}
             placeholder={
-                loading ? 'Loading rate certifications...' : 'Select...'
+                loading || fetchRateLoading ? 'Loading rate certifications...' : 'Select...'
             }
             loadingMessage={() => 'Loading rate certifications...'}
             name={name}
