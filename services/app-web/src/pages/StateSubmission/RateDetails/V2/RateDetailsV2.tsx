@@ -97,6 +97,7 @@ const RateDetails = ({
     const navigate = useNavigate()
     const { getKey } = useS3()
     const displayAsStandaloneRate = type === 'SINGLE'
+    const [selectedRateID, setSelectedRateID] = useState<string | null>(null);
     const { loggedInUser } = useAuth()
     const ldClient = useLDClient()
     const { updateHeading, updateActiveMainContent } = usePage()
@@ -153,7 +154,8 @@ const RateDetails = ({
                 rateID: id ?? 'unknown-rate',
             },
         },
-        skip: !displayAsStandaloneRate,
+        skip: !displayAsStandaloneRate || !selectedRateID,
+        // skip: !displayAsStandaloneRate || !!linkedRateID,
     })
 
     useEffect(() => {
@@ -163,7 +165,7 @@ const RateDetails = ({
             newRateNameRef.current = null
         }
     }, [focusNewRate])
-
+    
     // Set up data for form. Either based on contract API (for multi rate) or rates API (for edit and submit of standalone rate)
     const contract = fetchContractData?.fetchContract.contract
     const contractDraftRevision = contract?.draftRevision
@@ -191,7 +193,11 @@ const RateDetails = ({
     useEffect(() => {
         updateActiveMainContent(activeMainContentId)
     }, [activeMainContentId, updateActiveMainContent])
-
+    useEffect(() => {
+        if (fetchRateData?.fetchRate?.rate) {
+            console.log('Fetched rate from API:', fetchRateData.fetchRate.rate)
+        }
+    }, [fetchRateData])
     const [updateDraftContractRates] = useUpdateDraftContractRatesMutation()
     const [submitRate] = useSubmitRateMutation()
     const isDSNP =
@@ -558,8 +564,16 @@ const RateDetails = ({
                                                                             index
                                                                         }
                                                                         autofill={(
-                                                                            rateForm: FormikRateForm
+                                                                            rateForm: FormikRateForm,
+                                                                            linkedRateID?: string
                                                                         ) => {
+                                                                            if (typeof linkedRateID === 'string') {
+                                                                                setSelectedRateID(linkedRateID)
+                                                                                console.log(linkedRateID, 'linkedrateid')
+                                                                                console.log(fetchRateData?.fetchRate.rate)
+                                                                                console.log(fetchRateLoading, 'fetch loading')
+                                                                            }
+                                                                            // return ()=> {console.log('')}
                                                                             return replace(
                                                                                 index,
                                                                                 rateForm

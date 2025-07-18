@@ -7,7 +7,7 @@ import {
     createFilter,
 } from 'react-select'
 import styles from '../../../components/Select/Select.module.scss'
-import { IndexRatesInput, useIndexRatesQuery } from '../../../gen/gqlClient'
+import { IndexRatesInput, useIndexRatesQuery, useIndexRatesStrippedQuery } from '../../../gen/gqlClient'
 import { programNames } from '@mc-review/hpp'
 import { formatCalendarDate } from '@mc-review/dates'
 import {
@@ -36,7 +36,7 @@ export type LinkRateSelectPropType = {
     name: string
     initialValue: string | undefined
     alreadySelected?: string[] // used for multi-rate, array of rate IDs helps ensure we can't select rates already selected elsewhere on page
-    autofill?: (rateForm: FormikRateForm) => void // used for multi-rates, when called will FieldArray replace the existing form fields with new data
+    autofill?: (rateForm: FormikRateForm, linkedRateID?: string) => void // used for multi-rates, when called will FieldArray replace the existing form fields with new data
     label?: string
     stateCode?: string //used to limit rates by state
 }
@@ -54,23 +54,27 @@ export const LinkRateSelect = ({
     const { data, loading, error } = useIndexRatesQuery({
         variables: { input },
     })
+    const { data: rData, loading: rLoading, error: rError } = useIndexRatesStrippedQuery({
+        variables: { input },
+    })
     const { getKey } = useS3()
     const { logDropdownSelectionEvent } = useTealium()
     const [_field, _meta, helpers] = useField({ name }) // useField only relevant for non-autofill implementations
 
-    const rates = data?.indexRates.edges.map((e) => e.node) || []
+    const rates = rData?.indexRatesStripped.edges.map((e) => e.node) || []
+    // const rates = data?.indexRates.edges.map((e) => e.node) || []
     // Sort rates by latest submission in desc order and remove withdrawn
     // Do not display withdrawn rates as an option of a linked rate to select
     const updatedRates = rates
         .sort(
             (a, b) =>
-                new Date(b.revisions[0].submitInfo?.updatedAt).getTime() -
-                new Date(a.revisions[0].submitInfo?.updatedAt).getTime()
+                new Date(b.latestSubmittedRevision.submitInfo?.updatedAt).getTime() -
+                new Date(a.latestSubmittedRevision.submitInfo?.updatedAt).getTime()
         )
         .filter((rate) => rate.consolidatedStatus !== 'WITHDRAWN')
 
     const rateNames: LinkRateOptionType[] = updatedRates.map((rate) => {
-        const revision = rate.revisions[0]
+        const revision = rate.latestSubmittedRevision
         const rateProgramIDs =
             revision.formData.rateProgramIDs.length > 0
                 ? revision.formData.rateProgramIDs
@@ -142,12 +146,12 @@ export const LinkRateSelect = ({
                 const linkedRate = rates.find(
                     (rate) => rate.id === linkedRateID
                 )
-                const linkedRateForm: FormikRateForm =
-                    convertIndexRatesGQLRateToRateForm(getKey, linkedRate)
-                // put already selected fields back in place
-                linkedRateForm.ratePreviouslySubmitted = 'YES'
+                // const linkedRateForm: FormikRateForm =
+                //     convertIndexRatesGQLRateToRateForm(getKey, linkedRate)
+                // // put already selected fields back in place
+                // linkedRateForm.ratePreviouslySubmitted = 'YES'
 
-                autofill(linkedRateForm)
+                // autofill(linkedRateForm, linkedRateID)
             } else {
                 // this path is used for replace/withdraw redundant rates
                 // we are not autofilling form data, we are just returning the IDs of the rate selected
