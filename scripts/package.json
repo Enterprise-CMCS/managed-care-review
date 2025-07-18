@@ -3,6 +3,7 @@
     "version": "1.0.0",
     "description": "local scripts",
     "main": "index.js",
+    "type": "module",
     "license": "MIT",
     "private": true,
     "scripts": {
@@ -31,7 +32,7 @@
         "@octokit/openapi-types": "^25.1.0",
         "csv-parser": "^3.2.0",
         "lint-staged": "^15.2.7",
-        "typescript": "^4.5.4",
+        "typescript": "5.1.6",
         "uuid": "^9.0.0"
     }
 }

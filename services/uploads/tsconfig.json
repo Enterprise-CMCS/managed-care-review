@@ -4,7 +4,7 @@
         "target": "ESNext",
         "module": "ESNext",
         "lib": ["ES2021", "DOM"],
-        "moduleResolution": "node",
+        "moduleResolution": "bundler",
 
         "baseUrl": "/",
         "experimentalDecorators": true,
@@ -13,7 +13,8 @@
         "sourceMap": true,
         "skipLibCheck": true,
         "esModuleInterop": true,
+        "allowSyntheticDefaultImports": true,
         "resolveJsonModule": true
     },
-    "include": ["src"]
+    "include": ["src", "eslint.config.ts"]
 }
