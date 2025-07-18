@@ -3,6 +3,7 @@
     "version": "1.0.0",
     "description": "local scripts",
     "main": "index.js",
+    "type": "module",
     "license": "MIT",
     "private": true,
     "scripts": {
