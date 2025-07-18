@@ -36,7 +36,7 @@ describe('OTEL Error Logging', () => {
                 .spyOn(console, 'error')
                 .mockImplementation(() => {})
 
-            const result = (await server.executeOperation({
+            const response = await server.executeOperation({
                 query: gql`
                     query {
                         triggerError
@@ -44,7 +44,10 @@ describe('OTEL Error Logging', () => {
                 `,
             }, {
                 contextValue: {}, // Apollo v4 requires context
-            })) as { errors?: any; data?: any }
+            })
+            
+            // Apollo Server v4 returns response with body property
+            const result = response.body.kind === 'single' ? response.body.singleResult : response
 
             // Verify GraphQL error is returned
             expect(result.errors).toBeDefined()
@@ -141,7 +144,7 @@ describe('OTEL Error Logging', () => {
             })
             await server.start()
 
-            const result = (await server.executeOperation({
+            const response = await server.executeOperation({
                 query: gql`
                     query {
                         triggerCustomError
@@ -149,7 +152,10 @@ describe('OTEL Error Logging', () => {
                 `,
             }, {
                 contextValue: {}, // Apollo v4 requires context
-            })) as { errors?: any; data?: any }
+            })
+            
+            // Apollo Server v4 returns response with body property
+            const result = response.body.kind === 'single' ? response.body.singleResult : response
 
             // Verify custom error structure is preserved
             expect(result.errors).toBeDefined()
