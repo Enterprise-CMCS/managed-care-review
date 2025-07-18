@@ -108,6 +108,10 @@ describe('approveContract', () => {
                     dateApprovalReleasedToState: '2024-12-12',
                 },
             },
+        }, {
+            contextValue: {
+                user: testCMSUser(),
+            },
         })) as { errors?: any; data?: any }
 
         expect(approveContractResult.errors).toBeDefined()
@@ -145,6 +149,10 @@ describe('approveContract', () => {
                     dateApprovalReleasedToState: '2024-11-11',
                 },
             },
+        }, {
+            contextValue: {
+                user: testCMSUser(),
+            },
         }) as Promise<{ errors?: any; data?: any }>)
 
         const secondApprovalResult = (await cmsServer.executeOperation({
@@ -154,6 +162,10 @@ describe('approveContract', () => {
                     contractID: contract.id,
                     dateApprovalReleasedToState: '2024-12-12',
                 },
+            },
+        }, {
+            contextValue: {
+                user: testCMSUser(),
             },
         })) as { errors?: any; data?: any }
 
@@ -191,6 +203,10 @@ describe('approveContract', () => {
                     dateApprovalReleasedToState: '3009-11-11',
                 },
             },
+        }, {
+            contextValue: {
+                user: testCMSUser(),
+            },
         })) as { errors?: any; data?: any }
         expect(approveContractResult.errors).toBeDefined()
         if (approveContractResult.errors === undefined) {
@@ -219,6 +235,10 @@ describe('approveContract', () => {
                     contractID: contract.id,
                     dateApprovalReleasedToState: '2024-12-12',
                 },
+            },
+        }, {
+            contextValue: {
+                user: testStateUser(),
             },
         })) as { errors?: any; data?: any }
 

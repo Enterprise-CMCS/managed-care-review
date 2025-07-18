@@ -21,6 +21,10 @@ describe('createContract', () => {
         const res = (await server.executeOperation({
             query: CreateContractDocument,
             variables: { input },
+        }, {
+            contextValue: {
+                user: testStateUser(),
+            },
         })) as { errors?: any; data?: any }
 
         expect(res.errors).toBeUndefined()
@@ -58,6 +62,10 @@ describe('createContract', () => {
         const res = (await server.executeOperation({
             query: CreateContractDocument,
             variables: { input },
+        }, {
+            contextValue: {
+                user: testStateUser(),
+            },
         })) as { errors?: any; data?: any }
 
         expect(res.errors).toBeDefined()
@@ -84,6 +92,10 @@ describe('createContract', () => {
         const res = (await server.executeOperation({
             query: CreateContractDocument,
             variables: { input },
+        }, {
+            contextValue: {
+                user: testStateUser(),
+            },
         })) as { errors?: any; data?: any }
 
         expect(res.errors).toBeDefined()
