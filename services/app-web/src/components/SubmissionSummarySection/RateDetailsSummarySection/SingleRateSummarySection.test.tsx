@@ -32,6 +32,7 @@ describe('SingleRateSummarySection', () => {
                         }),
                     ],
                 },
+                featureFlags: { dsnp: true },
             }
         )
         // Wait for all the documents to be in the table
@@ -55,6 +56,11 @@ describe('SingleRateSummarySection', () => {
         expect(
             screen.getByRole('definition', {
                 name: 'Programs this rate certification covers',
+            })
+        ).toBeInTheDocument()
+        expect(
+            screen.getByRole('definition', {
+                name: 'Medicaid populations included in this rate certification',
             })
         ).toBeInTheDocument()
         expect(
