@@ -728,5 +728,4 @@ export {
     createTestRateQuestion,
     createTestRateQuestionResponse,
     constructTestEmailer,
-    resetDefaultTestUser,
 }
