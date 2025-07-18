@@ -117,9 +117,6 @@ describe.each(authorizedUserTests)(
 
             const server = await constructTestPostgresServer({
                 store: postgresStore,
-                context: {
-                    user: mockUser,
-                },
             })
 
             const updateRes = await server.executeOperation({
@@ -129,6 +126,10 @@ describe.each(authorizedUserTests)(
                         stateCode: 'CA',
                         assignedUsers: [newUser.id],
                     },
+                },
+            }, {
+                contextValue: {
+                    user: mockUser,
                 },
             })
 
@@ -156,6 +157,10 @@ describe.each(authorizedUserTests)(
                         assignedUsers: [secondUser.id, thirdUser.id],
                     },
                 },
+            }, {
+                contextValue: {
+                    user: mockUser,
+                },
             })
 
             expect(updateRes2.data).toBeDefined()
@@ -177,6 +182,10 @@ describe.each(authorizedUserTests)(
                         assignedUsers: [secondUser.id],
                     },
                 },
+            }, {
+                contextValue: {
+                    user: mockUser,
+                },
             })
 
             expect(updateRes3.data).toBeDefined()
@@ -185,6 +194,10 @@ describe.each(authorizedUserTests)(
             const allUsersQuery = await server.executeOperation({
                 query: IndexUsersDocument,
                 variables: {},
+            }, {
+                contextValue: {
+                    user: mockUser,
+                },
             })
 
             expect(allUsersQuery.data).toBeDefined()
@@ -270,9 +283,6 @@ describe.each(authorizedUserTests)(
 
             const server = await constructTestPostgresServer({
                 store: postgresStore,
-                context: {
-                    user: mockUser,
-                },
             })
 
             const updateResEmpty = await server.executeOperation({
@@ -282,6 +292,10 @@ describe.each(authorizedUserTests)(
                         stateCode: 'CA',
                         assignedUsers: [],
                     },
+                },
+            }, {
+                contextValue: {
+                    user: mockUser,
                 },
             })
 
@@ -301,6 +315,10 @@ describe.each(authorizedUserTests)(
                         assignedUsers: undefined,
                     },
                 },
+            }, {
+                contextValue: {
+                    user: mockUser,
+                },
             })
 
             expect(assertAnError(updateResUndefined).message).toContain(
@@ -315,6 +333,10 @@ describe.each(authorizedUserTests)(
                         stateCode: 'CA',
                         assignedUsers: null,
                     },
+                },
+            }, {
+                contextValue: {
+                    user: mockUser,
                 },
             })
 
@@ -335,9 +357,6 @@ describe.each(authorizedUserTests)(
 
             const server = await constructTestPostgresServer({
                 store: postgresStore,
-                context: {
-                    user: mockUser,
-                },
             })
 
             const updateRes = await server.executeOperation({
@@ -347,6 +366,10 @@ describe.each(authorizedUserTests)(
                         stateCode: 'XX',
                         assignedUsers: [newUser.id],
                     },
+                },
+            }, {
+                contextValue: {
+                    user: mockUser,
                 },
             })
 
@@ -361,9 +384,6 @@ describe.each(authorizedUserTests)(
             const postgresStore = NewPostgresStore(prismaClient)
             const server = await constructTestPostgresServer({
                 store: postgresStore,
-                context: {
-                    user: mockUser,
-                },
             })
 
             const newStateUser =
@@ -381,6 +401,10 @@ describe.each(authorizedUserTests)(
                         assignedUsers: [newStateUser.id],
                     },
                 },
+            }, {
+                contextValue: {
+                    user: mockUser,
+                },
             })
 
             expect(updateRes.errors).toBeDefined()
@@ -395,9 +419,6 @@ describe.each(authorizedUserTests)(
             const postgresStore = NewPostgresStore(prismaClient)
             const server = await constructTestPostgresServer({
                 store: postgresStore,
-                context: {
-                    user: mockUser,
-                },
             })
 
             const updateRes = await server.executeOperation({
@@ -407,6 +428,10 @@ describe.each(authorizedUserTests)(
                         stateCode: 'CA',
                         assignedUsers: ['not-existing-user-id'],
                     },
+                },
+            }, {
+                contextValue: {
+                    user: mockUser,
                 },
             })
 
@@ -421,9 +446,6 @@ describe.each(authorizedUserTests)(
             const postgresStore = NewPostgresStore(prismaClient)
             const server = await constructTestPostgresServer({
                 store: postgresStore,
-                context: {
-                    user: mockUser,
-                },
             })
 
             const newCMSUser = await postgresStore.insertUser(mockTestCMSUser())
@@ -439,6 +461,10 @@ describe.each(authorizedUserTests)(
                         stateCode: 'CA',
                         assignedUsers: [newCMSUser.id, newCMSUser.id],
                     },
+                },
+            }, {
+                contextValue: {
+                    user: mockUser,
                 },
             })
 
@@ -460,9 +486,6 @@ describe.each(unauthorizedUserTests)(
             const postgresStore = NewPostgresStore(prismaClient)
             const server = await constructTestPostgresServer({
                 store: postgresStore,
-                context: {
-                    user: mockUser,
-                },
             })
 
             const updateRes = await server.executeOperation({
@@ -472,6 +495,10 @@ describe.each(unauthorizedUserTests)(
                         stateCode: 'CA',
                         assignedUsers: ['not-existing-user-id'],
                     },
+                },
+            }, {
+                contextValue: {
+                    user: mockUser,
                 },
             })
 
