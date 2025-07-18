@@ -29,6 +29,7 @@ describe('OTEL Error Logging', () => {
                 typeDefs,
                 resolvers,
             })
+            await server.start()
 
             // Mock console.error to capture logged errors
             const consoleErrorSpy = vi
@@ -138,6 +139,7 @@ describe('OTEL Error Logging', () => {
                 typeDefs,
                 resolvers,
             })
+            await server.start()
 
             const result = (await server.executeOperation({
                 query: gql`

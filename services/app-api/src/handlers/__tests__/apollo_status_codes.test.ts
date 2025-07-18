@@ -23,6 +23,7 @@ describe('Apollo Server v3 Status Code Behavior', () => {
                 typeDefs,
                 resolvers,
             })
+            await server.start()
 
             // Test invalid variable type (number instead of string)
             const result = (await server.executeOperation({
@@ -64,6 +65,7 @@ describe('Apollo Server v3 Status Code Behavior', () => {
                 typeDefs,
                 resolvers,
             })
+            await server.start()
 
             // Test missing required variable
             const result = (await server.executeOperation({
@@ -101,6 +103,7 @@ describe('Apollo Server v3 Status Code Behavior', () => {
                 typeDefs,
                 resolvers,
             })
+            await server.start()
 
             const result = (await server.executeOperation({
                 query: gql`
@@ -147,6 +150,7 @@ describe('Apollo Server v3 Status Code Behavior', () => {
                 typeDefs,
                 resolvers,
             })
+            await server.start()
 
             const result = (await server.executeOperation({
                 query: gql`

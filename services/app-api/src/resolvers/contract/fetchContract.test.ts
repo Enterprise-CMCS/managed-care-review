@@ -64,6 +64,10 @@ describe('fetchContract', () => {
                     contractID: stateSubmission.id,
                 },
             },
+        }, {
+            contextValue: {
+                user: testStateUser(),
+            },
         })) as { errors?: any; data?: any }
 
         expect(fetchDraftContractResult.errors).toBeUndefined()
@@ -325,6 +329,10 @@ describe('fetchContract', () => {
                     contractID: stateSubmission.id,
                 },
             },
+        }, {
+            contextValue: {
+                user: stateUserVA,
+            },
         })) as { errors?: any; data?: any }
 
         expect(fetchResult.errors).toBeDefined()
@@ -365,6 +373,15 @@ describe('fetchContract', () => {
             variables: {
                 input: {
                     contractID: stateSubmission.id,
+                },
+            },
+        }, {
+            contextValue: {
+                user: testStateUser(),
+                oauthClient: {
+                    clientId: 'test-oauth-client',
+                    grants: ['client_credentials'],
+                    isOAuthClient: true,
                 },
             },
         })) as { errors?: any; data?: any }
@@ -408,6 +425,18 @@ describe('fetchContract', () => {
                     contractID: stateSubmission.id,
                 },
             },
+        }, {
+            contextValue: {
+                user: testStateUser({
+                    stateCode: 'VA',
+                    email: 'oauth@va.gov',
+                }),
+                oauthClient: {
+                    clientId: 'test-oauth-client-va',
+                    grants: ['client_credentials'],
+                    isOAuthClient: true,
+                },
+            },
         })) as { errors?: any; data?: any }
 
         expect(fetchResult.errors).toBeDefined()
@@ -448,6 +477,15 @@ describe('fetchContract', () => {
             variables: {
                 input: {
                     contractID: stateSubmission.id,
+                },
+            },
+        }, {
+            contextValue: {
+                user: testStateUser(),
+                oauthClient: {
+                    clientId: 'test-oauth-client',
+                    grants: ['some_other_grant'],
+                    isOAuthClient: true,
                 },
             },
         })) as { errors?: any; data?: any }

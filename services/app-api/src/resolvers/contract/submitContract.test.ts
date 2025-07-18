@@ -1078,6 +1078,10 @@ describe('submitContract', () => {
         const res = (await cmsServer.executeOperation({
             query: SubmitContractDocument,
             variables: { input },
+        }, {
+            contextValue: {
+                user: testCMSUser(),
+            },
         })) as { errors?: any; data?: any }
 
         expect(res.errors).toBeDefined()
@@ -1121,6 +1125,10 @@ describe('submitContract', () => {
                     contractID: contract.id,
                 },
             },
+        }, {
+            contextValue: {
+                user: testStateUser(),
+            },
         })) as { errors?: any; data?: any }
 
         expect(res.errors).toBeDefined()
@@ -1138,6 +1146,10 @@ describe('submitContract', () => {
                 input: {
                     contractID: draft.id,
                 },
+            },
+        }, {
+            contextValue: {
+                user: testStateUser(),
             },
         })) as { errors?: any; data?: any }
 
@@ -1363,6 +1375,10 @@ describe('submitContract', () => {
                         contractID: draftID,
                     },
                 },
+            }, {
+                contextValue: {
+                    user: testStateUser(),
+                },
             }) as Promise<{ errors?: any; data?: any }>)
 
             expect(mockEmailer.sendEmail).toHaveBeenCalledWith(
@@ -1428,6 +1444,10 @@ describe('submitContract', () => {
                         contractID: draftID,
                     },
                 },
+            }, {
+                contextValue: {
+                    user: testStateUser(),
+                },
             })) as { errors?: any; data?: any }
 
             expect(submitResult.errors).toBeUndefined()
@@ -1477,6 +1497,10 @@ describe('submitContract', () => {
                         contractID: stateSubmission.id,
                         submittedReason: 'Test resubmitted reason',
                     },
+                },
+            }, {
+                contextValue: {
+                    user: testStateUser(),
                 },
             })) as { errors?: any; data?: any }
 
@@ -1579,6 +1603,10 @@ describe('submitContract', () => {
                     input: {
                         contractID: draftID,
                     },
+                },
+            }, {
+                contextValue: {
+                    user: testStateUser(),
                 },
             })) as { errors?: any; data?: any }
 
@@ -1695,6 +1723,10 @@ describe('submitContract', () => {
                         contractID: initialContract.id,
                     },
                 },
+            }, {
+                contextValue: {
+                    user: testStateUser(),
+                },
             })) as { errors?: any; data?: any }
 
             expect(submitResult.errors).toBeDefined()
@@ -1722,6 +1754,10 @@ describe('submitContract', () => {
                     input: {
                         contractID: initialContract.id,
                     },
+                },
+            }, {
+                contextValue: {
+                    user: testStateUser(),
                 },
             })) as { errors?: any; data?: any }
 
@@ -1754,6 +1790,10 @@ describe('submitContract', () => {
                     input: {
                         contractID: initialContract.id,
                     },
+                },
+            }, {
+                contextValue: {
+                    user: testStateUser(),
                 },
             })) as { errors?: any; data?: any }
 

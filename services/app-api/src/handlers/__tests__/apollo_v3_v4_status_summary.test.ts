@@ -22,6 +22,7 @@ describe('Apollo Server v3 vs v4 Status Code Summary', () => {
                 typeDefs,
                 resolvers,
             })
+            await server.start()
 
             // Test invalid variable type
             const result = (await server.executeOperation({
@@ -105,6 +106,7 @@ describe('Apollo Server v3 vs v4 Status Code Summary', () => {
                 typeDefs,
                 resolvers,
             })
+            await server.start()
 
             const result = (await server.executeOperation({
                 query: gql`
