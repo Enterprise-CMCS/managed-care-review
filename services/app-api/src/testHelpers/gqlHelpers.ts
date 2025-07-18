@@ -23,6 +23,7 @@ import type {
     ProgramType,
     CreateRateQuestionInputType,
     EmailSettingsType,
+    UserType,
 } from '../domain-models'
 import type { EmailConfiguration, Emailer } from '../emailer'
 import type {
@@ -83,10 +84,25 @@ function defaultFloridaRateProgram(): ProgramType {
     return rateProgram
 }
 
+// Store the default user instance to ensure consistency across operations
+let defaultTestUser: UserType | null = null
+
+const getOrCreateDefaultUser = (): UserType => {
+    if (!defaultTestUser) {
+        defaultTestUser = testStateUser()
+    }
+    return defaultTestUser
+}
+
 const defaultContext = (): Context => {
     return {
-        user: testStateUser(),
+        user: getOrCreateDefaultUser(),
     }
+}
+
+// Reset function for tests to ensure clean state
+export const resetDefaultTestUser = (): void => {
+    defaultTestUser = null
 }
 
 const constructTestPostgresServer = async (opts?: {
@@ -100,7 +116,7 @@ const constructTestPostgresServer = async (opts?: {
     documentZip?: DocumentZipService
 }): Promise<ApolloServer> => {
     // set defaults
-    const context = opts?.context || defaultContext()
+    const userForInsertion = opts?.context?.user || getOrCreateDefaultUser()
     const ldService = opts?.ldService || testLDService()
     const prismaClient = await sharedTestPrismaClient()
     const postgresStore = {
@@ -119,7 +135,7 @@ const constructTestPostgresServer = async (opts?: {
         opts?.documentZip ??
         documentZipService(postgresStore, localGenerateDocumentZip)
 
-    await insertUserToLocalAurora(postgresStore, context.user)
+    await insertUserToLocalAurora(postgresStore, userForInsertion)
     const s3TestClient = testS3Client()
     const s3 = opts?.s3Client || s3TestClient
 
@@ -712,4 +728,5 @@ export {
     createTestRateQuestion,
     createTestRateQuestionResponse,
     constructTestEmailer,
+    resetDefaultTestUser,
 }
