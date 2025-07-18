@@ -1,6 +1,9 @@
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
 import React, { useState } from 'react'
-import { DataDetail } from '../../../components/DataDetail'
+import {
+    DataDetail,
+    DataDetailCheckboxList,
+} from '../../../components/DataDetail'
 import { SectionHeader } from '../../../components/SectionHeader'
 import { useS3 } from '../../../contexts/S3Context'
 import { formatCalendarDate } from '@mc-review/dates'
@@ -36,10 +39,15 @@ import {
     getVisibleLatestRateRevisions,
 } from '@mc-review/helpers'
 import { useAuth } from '../../../contexts/AuthContext'
-import { ActuaryCommunicationRecord } from '@mc-review/hpp'
+import {
+    ActuaryCommunicationRecord,
+    RateMedicaidPopulationsRecord,
+} from '@mc-review/hpp'
 import { useParams } from 'react-router-dom'
 import { hasCMSUserPermissions } from '@mc-review/helpers'
 import { InfoTag } from '../../../components/InfoTag/InfoTag'
+import { featureFlags } from '@mc-review/common-code'
+import { useLDClient } from 'launchdarkly-react-client-sdk'
 
 export type RateDetailsSummarySectionProps = {
     contract: Contract | UnlockedContract
@@ -92,6 +100,7 @@ export const RateDetailsSummarySection = ({
 }: RateDetailsSummarySectionProps): React.ReactElement => {
     const { loggedInUser } = useAuth()
     const { revisionVersion } = useParams()
+    const ldClient = useLDClient()
     const isSubmitted =
         contract.status === 'SUBMITTED' || contract.status === 'RESUBMITTED'
     const isCMSUser = hasCMSUserPermissions(loggedInUser)
@@ -100,7 +109,10 @@ export const RateDetailsSummarySection = ({
     const isEditing = !isSubmittedOrCMSUser && editNavigateTo !== undefined
     const isPreviousSubmission = usePreviousSubmission()
     const isInitialSubmission = contract.packageSubmissions.length === 1
-
+    const isDsnpEnabled = ldClient?.variation(
+        featureFlags.DSNP.flag,
+        featureFlags.DSNP.defaultValue
+    )
     const rateRevs = rateRevisions
         ? rateRevisions
         : getVisibleLatestRateRevisions(contract, isEditing)
@@ -318,7 +330,9 @@ export const RateDetailsSummarySection = ({
                       const hasNoRatePrograms =
                           rateFormData.rateProgramIDs.length === 0
                       const isLinkedRate = rateRev.isLinked
-
+                      const medicaidPopulations =
+                          (rateFormData.rateMedicaidPopulations ??
+                              []) as string[]
                       /**
                     Rate programs switched in summer 2024. We still show deprecated program field values when
                     - there's no new field values present and CMS user is viewing
@@ -375,6 +389,31 @@ export const RateDetailsSummarySection = ({
                                               )}
                                           />
                                       )}
+                                      {isDsnpEnabled &&
+                                          medicaidPopulations.length !== 0 && (
+                                              <DataDetail
+                                                  id="medicaidPop"
+                                                  label="Medicaid populations included in this rate certification"
+                                                  explainMissingData={
+                                                      isLinkedRate
+                                                          ? false
+                                                          : explainMissingData
+                                                  }
+                                                  children={
+                                                      <DataDetailCheckboxList
+                                                          list={
+                                                              medicaidPopulations
+                                                          }
+                                                          dict={
+                                                              RateMedicaidPopulationsRecord
+                                                          }
+                                                          displayEmptyList={
+                                                              !explainMissingData
+                                                          }
+                                                      />
+                                                  }
+                                              />
+                                          )}
                                       <DataDetail
                                           id="rateType"
                                           label="Rate certification type"
@@ -387,6 +426,8 @@ export const RateDetailsSummarySection = ({
                                               rateRev
                                           )}
                                       />
+                                  </MultiColumnGrid>
+                                  <MultiColumnGrid columns={2}>
                                       <DataDetail
                                           id="ratingPeriod"
                                           label={
@@ -492,6 +533,8 @@ export const RateDetailsSummarySection = ({
                                               />
                                           )
                                       )}
+                                  </MultiColumnGrid>
+                                  <MultiColumnGrid columns={1}>
                                       <DataDetail
                                           id="communicationPreference"
                                           label="Actuaries’ communication preference"
