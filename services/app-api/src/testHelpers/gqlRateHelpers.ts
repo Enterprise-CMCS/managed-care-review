@@ -10,7 +10,7 @@ import {
     IndexRatesStrippedDocument,
 } from '../gen/gqlClient'
 import { must } from './assertionHelpers'
-import { defaultFloridaProgram, defaultFloridaRateProgram } from './gqlHelpers'
+import { defaultFloridaProgram, defaultFloridaRateProgram, defaultContext } from './gqlHelpers'
 import { mockRateFormDataInput } from './rateDataMocks'
 import { sharedTestPrismaClient } from './storeHelpers'
 import { updateDraftRate } from '../postgres/contractAndRates/updateDraftRate'
@@ -24,7 +24,7 @@ import type {
     UpdateDraftContractRatesInput,
     Rate,
 } from '../gen/gqlServer'
-import type { ApolloServer } from 'apollo-server-lambda'
+import type { ApolloServer } from '@apollo/server'
 import type {
     RateFormEditableType,
     RateType,
@@ -37,10 +37,12 @@ const fetchTestRateById = async (
     rateID: string
 ): Promise<Rate> => {
     const input = { rateID }
-    const result = await server.executeOperation({
+    const result = (await server.executeOperation({
         query: FetchRateDocument,
         variables: { input },
-    })
+    }, {
+        contextValue: defaultContext(),
+    })) as { data?: any; errors?: any }
 
     if (result.errors) {
         throw new Error(
@@ -60,10 +62,12 @@ const fetchTestRateWithQuestionsById = async (
     rateID: string
 ): Promise<Rate> => {
     const input = { rateID }
-    const result = await server.executeOperation({
+    const result = (await server.executeOperation({
         query: FetchRateWithQuestionsDocument,
         variables: { input },
-    })
+    }, {
+        contextValue: defaultContext(),
+    })) as { data?: any; errors?: any }
 
     if (result.errors) {
         throw new Error(
@@ -97,7 +101,7 @@ const submitTestRate = async (
     rateID: string,
     submittedReason: string
 ): Promise<Rate> => {
-    const updateResult = await server.executeOperation({
+    const updateResult = (await server.executeOperation({
         query: SubmitRateDocument,
         variables: {
             input: {
@@ -105,7 +109,9 @@ const submitTestRate = async (
                 submittedReason,
             },
         },
-    })
+    }, {
+        contextValue: defaultContext(),
+    })) as { data?: any; errors?: any }
 
     if (updateResult.errors) {
         console.info('errors', updateResult.errors)
@@ -114,7 +120,10 @@ const submitTestRate = async (
         )
     }
 
-    if (updateResult.data === undefined || updateResult.data === null) {
+    if (
+        updateResult.data === undefined ||
+        updateResult.data === null
+    ) {
         throw new Error('submitTestRate returned nothing')
     }
 
@@ -126,7 +135,7 @@ const unlockTestRate = async (
     rateID: string,
     unlockedReason: string
 ) => {
-    const updateResult = await server.executeOperation({
+    const updateResult = (await server.executeOperation({
         query: UnlockRateDocument,
         variables: {
             input: {
@@ -134,7 +143,9 @@ const unlockTestRate = async (
                 unlockedReason,
             },
         },
-    })
+    }, {
+        contextValue: defaultContext(),
+    })) as { data?: any; errors?: any }
 
     if (updateResult.errors) {
         console.info('errors', updateResult.errors)
@@ -143,7 +154,10 @@ const unlockTestRate = async (
         )
     }
 
-    if (updateResult.data === undefined || updateResult.data === null) {
+    if (
+        updateResult.data === undefined ||
+        updateResult.data === null
+    ) {
         throw new Error('unlockTestRate returned nothing')
     }
 
@@ -154,12 +168,14 @@ async function updateTestDraftRatesOnContract(
     server: ApolloServer,
     input: UpdateDraftContractRatesInput
 ): Promise<Contract> {
-    const updateResult = await server.executeOperation({
+    const updateResult = (await server.executeOperation({
         query: UpdateDraftContractRatesDocument,
         variables: {
             input,
         },
-    })
+    }, {
+        contextValue: defaultContext(),
+    })) as { data?: any; errors?: any }
 
     if (updateResult.errors || !updateResult.data) {
         throw new Error(
@@ -383,7 +399,7 @@ const createTestDraftRateOnContract = async (
         rateData = mockRateFormDataInput()
     }
 
-    const updateResult = await server.executeOperation({
+    const updateResult = (await server.executeOperation({
         query: UpdateDraftContractRatesDocument,
         variables: {
             input: {
@@ -397,7 +413,9 @@ const createTestDraftRateOnContract = async (
                 ],
             },
         },
-    })
+    }, {
+        contextValue: defaultContext(),
+    })) as { data?: any; errors?: any }
 
     if (updateResult.errors || !updateResult.data) {
         console.info('errors', updateResult.errors)
@@ -420,7 +438,7 @@ const updateTestDraftRateOnContract = async (
         rateData = mockRateFormDataInput()
     }
 
-    const updateResult = await server.executeOperation({
+    const updateResult = (await server.executeOperation({
         query: UpdateDraftContractRatesDocument,
         variables: {
             input: {
@@ -435,7 +453,9 @@ const updateTestDraftRateOnContract = async (
                 ],
             },
         },
-    })
+    }, {
+        contextValue: defaultContext(),
+    })) as { data?: any; errors?: any }
 
     if (updateResult.errors || !updateResult.data) {
         console.info('errors', updateResult.errors)
@@ -467,7 +487,7 @@ const withdrawTestRate = async (
     rateID: string,
     updatedReason: string
 ): Promise<RateType> => {
-    const withdrawResult = await server.executeOperation({
+    const withdrawResult = (await server.executeOperation({
         query: WithdrawRateDocument,
         variables: {
             input: {
@@ -475,7 +495,9 @@ const withdrawTestRate = async (
                 updatedReason,
             },
         },
-    })
+    }, {
+        contextValue: defaultContext(),
+    })) as { data?: any; errors?: any }
 
     if (withdrawResult.errors) {
         console.info('errors', withdrawResult.errors)
@@ -484,7 +506,10 @@ const withdrawTestRate = async (
         )
     }
 
-    if (withdrawResult.data === undefined || withdrawResult.data === null) {
+    if (
+        withdrawResult.data === undefined ||
+        withdrawResult.data === null
+    ) {
         throw new Error('withdrawRate returned nothing')
     }
 
@@ -496,7 +521,7 @@ const undoWithdrawTestRate = async (
     rateID: string,
     updatedReason: string
 ): Promise<RateType> => {
-    const undoWithdrawRate = await server.executeOperation({
+    const undoWithdrawRate = (await server.executeOperation({
         query: UndoWithdrawnRateDocument,
         variables: {
             input: {
@@ -504,7 +529,9 @@ const undoWithdrawTestRate = async (
                 updatedReason,
             },
         },
-    })
+    }, {
+        contextValue: defaultContext(),
+    })) as { data?: any; errors?: any }
 
     if (undoWithdrawRate.errors) {
         console.info('errors', undoWithdrawRate.errors)
@@ -513,7 +540,10 @@ const undoWithdrawTestRate = async (
         )
     }
 
-    if (undoWithdrawRate.data === undefined || undoWithdrawRate.data === null) {
+    if (
+        undoWithdrawRate.data === undefined ||
+        undoWithdrawRate.data === null
+    ) {
         throw new Error('undoWithdrawRate returned nothing')
     }
 
@@ -525,7 +555,7 @@ const fetchTestIndexRatesStripped = async (
     stateCode?: string,
     rateIDs?: string[]
 ): Promise<IndexRatesStrippedPayload> => {
-    const indexRatesStrippedResult = await server.executeOperation({
+    const indexRatesStrippedResult = (await server.executeOperation({
         query: IndexRatesStrippedDocument,
         variables: {
             input: {
@@ -533,7 +563,9 @@ const fetchTestIndexRatesStripped = async (
                 rateIDs,
             },
         },
-    })
+    }, {
+        contextValue: defaultContext(),
+    })) as { data?: any; errors?: any }
 
     if (indexRatesStrippedResult.errors) {
         console.info('errors', indexRatesStrippedResult.errors)
@@ -549,7 +581,8 @@ const fetchTestIndexRatesStripped = async (
         throw new Error('fetchTestIndexRatesStripped returned nothing')
     }
 
-    const indexRatesStripped = indexRatesStrippedResult.data.indexRatesStripped
+    const indexRatesStripped =
+        indexRatesStrippedResult.data.indexRatesStripped
 
     if (!indexRatesStripped || indexRatesStripped.length === 0) {
         throw new Error('fetchTestIndexRatesStripped returned with no rates')

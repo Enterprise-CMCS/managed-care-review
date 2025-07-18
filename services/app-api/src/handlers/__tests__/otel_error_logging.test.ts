@@ -1,4 +1,4 @@
-import { ApolloServer } from 'apollo-server-lambda'
+import { ApolloServer } from '@apollo/server'
 import { gql } from '@apollo/client'
 import { createTracer } from '../../otel/otel_handler'
 import { recordException } from '../../../../uploads/src/lib/otel'
@@ -29,19 +29,25 @@ describe('OTEL Error Logging', () => {
                 typeDefs,
                 resolvers,
             })
+            await server.start()
 
             // Mock console.error to capture logged errors
             const consoleErrorSpy = vi
                 .spyOn(console, 'error')
                 .mockImplementation(() => {})
 
-            const result = await server.executeOperation({
+            const response = await server.executeOperation({
                 query: gql`
                     query {
                         triggerError
                     }
                 `,
+            }, {
+                contextValue: {}, // Apollo v4 requires context
             })
+            
+            // Apollo Server v4 returns response with body property
+            const result = response.body.kind === 'single' ? response.body.singleResult : response
 
             // Verify GraphQL error is returned
             expect(result.errors).toBeDefined()
@@ -136,14 +142,20 @@ describe('OTEL Error Logging', () => {
                 typeDefs,
                 resolvers,
             })
+            await server.start()
 
-            const result = await server.executeOperation({
+            const response = await server.executeOperation({
                 query: gql`
                     query {
                         triggerCustomError
                     }
                 `,
+            }, {
+                contextValue: {}, // Apollo v4 requires context
             })
+            
+            // Apollo Server v4 returns response with body property
+            const result = response.body.kind === 'single' ? response.body.singleResult : response
 
             // Verify custom error structure is preserved
             expect(result.errors).toBeDefined()

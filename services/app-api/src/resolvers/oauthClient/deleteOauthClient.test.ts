@@ -31,7 +31,7 @@ describe('deleteOauthClient', () => {
             context: { user: adminUser },
         })
         // Create a client first
-        const createRes = await server.executeOperation({
+        const createRes = (await server.executeOperation({
             query: CreateOauthClientDocument,
             variables: {
                 input: {
@@ -40,14 +40,14 @@ describe('deleteOauthClient', () => {
                     userID: cmsUser.id,
                 },
             },
-        })
+        })) as { errors?: any; data?: any }
         expect(createRes.errors).toBeUndefined()
         const clientId = createRes.data?.createOauthClient.oauthClient.clientId
         // Delete it
-        const deleteRes = await server.executeOperation({
+        const deleteRes = (await server.executeOperation({
             query: DeleteOauthClientDocument,
             variables: { input: { clientId } },
-        })
+        })) as { errors?: any; data?: any }
         expect(deleteRes.errors).toBeUndefined()
         expect(deleteRes.data?.deleteOauthClient.oauthClient.clientId).toBe(
             clientId
@@ -62,10 +62,10 @@ describe('deleteOauthClient', () => {
         const server = await constructTestPostgresServer({
             context: { user: testStateUser() },
         })
-        const res = await server.executeOperation({
+        const res = (await server.executeOperation({
             query: DeleteOauthClientDocument,
             variables: { input: { clientId: 'fake' } },
-        })
+        })) as { errors?: any; data?: any }
         expect(res.errors?.[0].message).toBe(
             'user not authorized to delete OAuth clients'
         )
@@ -75,10 +75,10 @@ describe('deleteOauthClient', () => {
         const server = await constructTestPostgresServer({
             context: { user: testAdminUser() },
         })
-        const res = await server.executeOperation({
+        const res = (await server.executeOperation({
             query: DeleteOauthClientDocument,
             variables: { input: { clientId: 'nonexistent' } },
-        })
+        })) as { errors?: any; data?: any }
         expect(res.errors?.[0].message).toBe('Failed to delete OAuth client')
         expect(res.errors?.[0].extensions?.code).toBe('INTERNAL_SERVER_ERROR')
         expect(res.errors?.[0].extensions?.cause).toBe('DB_ERROR')
@@ -92,10 +92,10 @@ describe('deleteOauthClient', () => {
                 deleteOAuthClient: async () => new Error('DB fail'),
             },
         })
-        const res = await server.executeOperation({
+        const res = (await server.executeOperation({
             query: DeleteOauthClientDocument,
             variables: { input: { clientId: 'fail' } },
-        })
+        })) as { errors?: any; data?: any }
         expect(res.errors?.[0].message).toMatch(/fail/i)
     })
 })

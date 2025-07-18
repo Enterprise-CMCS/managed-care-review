@@ -1,10 +1,10 @@
-import { ApolloServer } from 'apollo-server-lambda'
+import { ApolloServer } from '@apollo/server'
 import { gql } from '@apollo/client'
 import { GraphQLError } from 'graphql'
 
-describe('Apollo Server v3 vs v4 Status Code Summary', () => {
-    describe('Current Apollo Server v3 behavior verification', () => {
-        it('confirms v3 returns BAD_USER_INPUT for variable validation errors', async () => {
+describe('Apollo Server v4 Status Code Summary', () => {
+    describe('Current Apollo Server v4 behavior verification', () => {
+        it('confirms v4 returns BAD_USER_INPUT for variable validation errors', async () => {
             const typeDefs = gql`
                 type Query {
                     hello(name: String!): String
@@ -22,9 +22,10 @@ describe('Apollo Server v3 vs v4 Status Code Summary', () => {
                 typeDefs,
                 resolvers,
             })
+            await server.start()
 
             // Test invalid variable type
-            const result = await server.executeOperation({
+            const response = await server.executeOperation({
                 query: gql`
                     query HelloQuery($name: String!) {
                         hello(name: $name)
@@ -33,11 +34,16 @@ describe('Apollo Server v3 vs v4 Status Code Summary', () => {
                 variables: {
                     name: 123, // Invalid: number instead of string
                 },
+            }, {
+                contextValue: {}, // Apollo v4 requires context
             })
+            
+            // Apollo Server v4 returns response with body property
+            const result = response.body.kind === 'single' ? response.body.singleResult : response
 
-            // Apollo Server v3 Variable Validation
+            // Apollo Server v4 Variable Validation
             // Error Code: BAD_USER_INPUT
-            // Status: ✅ Apollo Server v3 correctly returns BAD_USER_INPUT for variable validation
+            // Status: ✅ Apollo Server v4 correctly returns BAD_USER_INPUT for variable validation
 
             expect(result.errors?.[0]?.extensions?.code).toBe('BAD_USER_INPUT')
             expect(result.errors?.[0]?.message).toContain(
@@ -48,16 +54,16 @@ describe('Apollo Server v3 vs v4 Status Code Summary', () => {
         it('documents the upgrade implications', () => {
             // Apollo Server v4 Upgrade Implications
             //
-            // Current State (Apollo Server v3):
-            //   • apollo-server-lambda: ^3.5.0
-            //   • Variable validation errors return 400 HTTP status
+            // Current State (Apollo Server v4):
+            //   • @apollo/server: ^4.11.0
+            //   • Variable validation errors return 200 HTTP status
             //   • Error responses have extensions.code: "BAD_USER_INPUT"
             //   • Custom GraphQLError handling works correctly
             //
-            // After v4 Upgrade:
-            //   • Variable validation errors will return 200 HTTP status
-            //   • Error responses still have extensions.code: "BAD_USER_INPUT"
-            //   • Client-side error handling may need adjustment
+            // Key v4 Behavior:
+            //   • All GraphQL errors return 200 OK HTTP status
+            //   • Errors are included in the response body
+            //   • Client applications must check for errors in response
             //
             // Recommended v4 Workaround:
             //   • Use formatError to customize error responses
@@ -103,14 +109,20 @@ describe('Apollo Server v3 vs v4 Status Code Summary', () => {
                 typeDefs,
                 resolvers,
             })
+            await server.start()
 
-            const result = await server.executeOperation({
+            const response = await server.executeOperation({
                 query: gql`
                     query {
                         testError
                     }
                 `,
+            }, {
+                contextValue: {}, // Apollo v4 requires context
             })
+            
+            // Apollo Server v4 returns response with body property
+            const result = response.body.kind === 'single' ? response.body.singleResult : response
 
             // Custom Error Handling Test
             // Error Code: BAD_USER_INPUT

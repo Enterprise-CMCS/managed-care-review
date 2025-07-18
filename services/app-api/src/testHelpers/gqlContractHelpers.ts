@@ -18,10 +18,11 @@ import {
     createTestHealthPlanPackage,
     defaultFloridaProgram,
     updateTestHealthPlanFormData,
+    defaultContext,
 } from './gqlHelpers'
 
 import { type ContractType } from '../domain-models'
-import type { ApolloServer } from 'apollo-server-lambda'
+import type { ApolloServer } from '@apollo/server'
 import type {
     Contract,
     ContractDraftRevisionFormDataInput,
@@ -64,6 +65,8 @@ async function submitTestContract(
                 submittedReason: submittedReason,
             },
         },
+    }, {
+        contextValue: defaultContext(),
     })
 
     if (result.errors) {
@@ -92,6 +95,8 @@ async function resubmitTestContract(
                 submittedReason,
             },
         },
+    }, {
+        contextValue: defaultContext(),
     })
 
     if (updateResult.errors) {
@@ -120,6 +125,8 @@ async function unlockTestContract(
                 unlockedReason: unlockedReason,
             },
         },
+    }, {
+        contextValue: defaultContext(),
     })
 
     if (result.errors) {
@@ -170,6 +177,8 @@ async function fetchTestContract(
     const result = await server.executeOperation({
         query: FetchContractDocument,
         variables: { input },
+    }, {
+        contextValue: defaultContext(),
     })
 
     if (result.errors) {
@@ -198,6 +207,8 @@ async function approveTestContract(
     const result = await server.executeOperation({
         query: ApproveContractDocument,
         variables: { input },
+    }, {
+        contextValue: defaultContext(),
     })
 
     if (result.errors) {
@@ -224,6 +235,8 @@ const fetchTestContractWithQuestions = async (
                 contractID: contractID,
             },
         },
+    }, {
+        contextValue: defaultContext(),
     })
 
     if (result.errors) {
@@ -261,6 +274,8 @@ const createTestContract = async (
     const result = await server.executeOperation({
         query: CreateContractDocument,
         variables: { input },
+    }, {
+        contextValue: defaultContext(),
     })
 
     if (result.errors) {
@@ -370,6 +385,8 @@ const linkRateToDraftContract = async (
                 ],
             },
         },
+    }, {
+        contextValue: defaultContext(),
     })
     return updatedContract
 }
@@ -386,6 +403,8 @@ const clearRatesOnDraftContract = async (
                 updatedRates: [],
             },
         },
+    }, {
+        contextValue: defaultContext(),
     })
     return updatedContract
 }
@@ -410,6 +429,8 @@ const updateRateOnDraftContract = async (
                 ],
             },
         },
+    }, {
+        contextValue: defaultContext(),
     })
     must(updatedContract)
     const contractData = updatedContract.data?.updateDraftContractRates.contract
@@ -448,6 +469,8 @@ const updateTestContractDraftRevision = async (
                 formData: updatedFormData,
             },
         },
+    }, {
+        contextValue: defaultContext(),
     })
 
     if (updateResult.errors) {
@@ -477,13 +500,18 @@ const withdrawTestContract = async (
                 updatedReason,
             },
         },
+    }, {
+        contextValue: defaultContext(),
     })
 
     if (withdrawResult.errors) {
         console.info('errors', withdrawResult.errors)
     }
 
-    if (withdrawResult.data === undefined || withdrawResult.data === null) {
+    if (
+        withdrawResult.data === undefined ||
+        withdrawResult.data === null
+    ) {
         throw new Error('withdraw contract returned nothing')
     }
 
@@ -503,6 +531,8 @@ const undoWithdrawTestContract = async (
                 updatedReason,
             },
         },
+    }, {
+        contextValue: defaultContext(),
     })
 
     if (undoWithdrawResult.errors) {
@@ -532,6 +562,8 @@ const errorUndoWithdrawTestContract = async (
                 updatedReason,
             },
         },
+    }, {
+        contextValue: defaultContext(),
     })
 
     if (!undoWithdrawResult.errors) {

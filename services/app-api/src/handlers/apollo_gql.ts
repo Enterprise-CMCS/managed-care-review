@@ -1,6 +1,10 @@
 import type { Context as OTELContext, Span, Tracer } from '@opentelemetry/api'
 import { propagation, ROOT_CONTEXT } from '@opentelemetry/api'
-import { ApolloServer } from 'apollo-server-lambda'
+import { ApolloServer } from '@apollo/server'
+import {
+    startServerAndCreateLambdaHandler,
+    handlers,
+} from '@as-integrations/aws-lambda'
 import { initTracer, recordException } from '../../../uploads/src/lib/otel'
 import type {
     APIGatewayProxyEvent,
@@ -30,10 +34,8 @@ import { ldService, offlineLDService } from '../launchDarkly/launchDarkly'
 import type { LDClient } from '@launchdarkly/node-server-sdk'
 import * as ld from '@launchdarkly/node-server-sdk'
 import { newJWTLib } from '../jwt'
-import {
-    ApolloServerPluginLandingPageDisabled,
-    ApolloServerPluginLandingPageLocalDefault,
-} from 'apollo-server-core'
+import { ApolloServerPluginLandingPageDisabled } from '@apollo/server/plugin/disabled'
+import { ApolloServerPluginLandingPageLocalDefault } from '@apollo/server/plugin/landingPage/default'
 import { newDeployedS3Client, newLocalS3Client } from '../s3'
 import type { S3ClientT, S3BucketConfigType } from '../s3'
 import {
@@ -373,22 +375,20 @@ async function initializeGQLHandler(): Promise<Handler> {
     const server = new ApolloServer({
         typeDefs,
         resolvers,
-        context: contextForRequest,
         plugins,
         introspection: introspectionAllowed,
     })
 
-    const handler = server.createHandler({
-        expressGetMiddlewareOptions: {
-            cors: {
-                origin: true,
-                credentials: true,
+    await server.start()
+    const handler = startServerAndCreateLambdaHandler(
+        server,
+        handlers.createAPIGatewayProxyEventV2RequestHandler(),
+        {
+            context: async ({ event, context }) => {
+                return await contextForRequest({ event, context })
             },
-            bodyParserConfig: {
-                limit: '10mb',
-            },
-        },
-    })
+        }
+    )
 
     // Locally, we wrap our handler in a middleware that returns 403 for unauthenticated requests
     const isLocal = authMode === 'LOCAL'

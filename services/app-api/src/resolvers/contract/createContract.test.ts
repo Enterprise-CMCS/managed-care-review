@@ -18,10 +18,14 @@ describe('createContract', () => {
             submissionDescription: 'A real submission',
             contractType: 'BASE',
         }
-        const res = await server.executeOperation({
+        const res = (await server.executeOperation({
             query: CreateContractDocument,
             variables: { input },
-        })
+        }, {
+            contextValue: {
+                user: testStateUser(),
+            },
+        })) as { errors?: any; data?: any }
 
         expect(res.errors).toBeUndefined()
 
@@ -55,10 +59,14 @@ describe('createContract', () => {
             submissionDescription: 'A real submission',
             contractType: 'BASE',
         }
-        const res = await server.executeOperation({
+        const res = (await server.executeOperation({
             query: CreateContractDocument,
             variables: { input },
-        })
+        }, {
+            contextValue: {
+                user: testStateUser(),
+            },
+        })) as { errors?: any; data?: any }
 
         expect(res.errors).toBeDefined()
         expect(res.errors && res.errors[0].message).toBe(
@@ -81,10 +89,14 @@ describe('createContract', () => {
             submissionDescription: 'A real submission',
             contractType: 'BASE',
         }
-        const res = await server.executeOperation({
+        const res = (await server.executeOperation({
             query: CreateContractDocument,
             variables: { input },
-        })
+        }, {
+            contextValue: {
+                user: testStateUser(),
+            },
+        })) as { errors?: any; data?: any }
 
         expect(res.errors).toBeDefined()
         expect(res.errors && res.errors[0].message).toBe(

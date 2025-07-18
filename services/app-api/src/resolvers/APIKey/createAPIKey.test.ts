@@ -18,9 +18,9 @@ describe('createAPIKey', () => {
             context: { user },
         })
 
-        const result = await server.executeOperation({
+        const result = (await server.executeOperation({
             query: CreateApiKeyDocument,
-        })
+        })) as { errors?: any; data?: any }
 
         const keyResult = result.data?.createAPIKey
 
