@@ -1,10 +1,8 @@
 import tseslint from 'typescript-eslint'
-import js from '@eslint/js'
 import typescript from '@typescript-eslint/eslint-plugin'
 import typescriptParser from '@typescript-eslint/parser'
 
 export default tseslint.config([
-    js.configs.recommended,
     {
         files: ['**/*.ts'],
         ignores: [

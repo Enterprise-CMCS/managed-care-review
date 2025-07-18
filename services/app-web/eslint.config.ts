@@ -1,5 +1,4 @@
 import tseslint from 'typescript-eslint'
-import js from '@eslint/js'
 import typescript from '@typescript-eslint/eslint-plugin'
 import typescriptParser from '@typescript-eslint/parser'
 import jest from 'eslint-plugin-jest'
@@ -7,7 +6,6 @@ import jsxA11y from 'eslint-plugin-jsx-a11y'
 import reactHooks from 'eslint-plugin-react-hooks'
 
 export default tseslint.config([
-    js.configs.recommended,
     {
         files: ['**/*.{ts,tsx}'],
         ignores: [

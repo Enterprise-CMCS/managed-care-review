@@ -464,9 +464,6 @@ importers:
         specifier: ^3.24.2
         version: 3.24.2
     devDependencies:
-      '@eslint/js':
-        specifier: ^9.31.0
-        version: 9.31.0
       '@graphql-tools/jest-transform':
         specifier: ^2.0.0
         version: 2.0.0(graphql@16.9.0)

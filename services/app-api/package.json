@@ -70,7 +70,6 @@
         "zod": "^3.24.2"
     },
     "devDependencies": {
-        "@eslint/js": "^9.31.0",
         "@graphql-tools/jest-transform": "^2.0.0",
         "@luckycatfactory/esbuild-graphql-loader": "^3.8.1",
         "@types/archiver": "^6.0.3",

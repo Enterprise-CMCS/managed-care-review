@@ -15,6 +15,5 @@
         "allowSyntheticDefaultImports": true,
         "resolveJsonModule": true
     },
-    "include": ["scripts/**/*", "src/**/*"],
-    "exclude": ["eslint.config.ts"]
+    "include": ["scripts/**/*", "src/**/*", "eslint.config.ts"]
 }
