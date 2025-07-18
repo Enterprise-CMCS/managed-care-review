@@ -1,4 +1,4 @@
-import { ApolloServer } from 'apollo-server-lambda'
+import { ApolloServer } from '@apollo/server'
 import {
     CreateHealthPlanPackageDocument,
     SubmitHealthPlanPackageDocument,
@@ -23,6 +23,7 @@ import type {
     ProgramType,
     CreateRateQuestionInputType,
     EmailSettingsType,
+    UserType,
 } from '../domain-models'
 import type { EmailConfiguration, Emailer } from '../emailer'
 import type {
@@ -56,7 +57,6 @@ import type { S3ClientT } from '../s3'
 import { convertRateInfoToRateFormDataInput } from '../domain-models/contractAndRates/convertHPPtoContractWithRates'
 import { createAndUpdateTestContractWithoutRates } from './gqlContractHelpers'
 import { addNewRateToTestContract } from './gqlRateHelpers'
-import type { GraphQLResponse } from 'apollo-server-types'
 import { configureEmailer } from '../handlers/configuration'
 import type { DocumentZipService } from '../zip/generateZip'
 import {
@@ -84,10 +84,25 @@ function defaultFloridaRateProgram(): ProgramType {
     return rateProgram
 }
 
+// Store the default user instance to ensure consistency across operations
+let defaultTestUser: UserType | null = null
+
+const getOrCreateDefaultUser = (): UserType => {
+    if (!defaultTestUser) {
+        defaultTestUser = testStateUser()
+    }
+    return defaultTestUser
+}
+
 const defaultContext = (): Context => {
     return {
-        user: testStateUser(),
+        user: getOrCreateDefaultUser(),
     }
+}
+
+// Reset function for tests to ensure clean state
+export const resetDefaultTestUser = (): void => {
+    defaultTestUser = null
 }
 
 const constructTestPostgresServer = async (opts?: {
@@ -101,7 +116,7 @@ const constructTestPostgresServer = async (opts?: {
     documentZip?: DocumentZipService
 }): Promise<ApolloServer> => {
     // set defaults
-    const context = opts?.context || defaultContext()
+    const userForInsertion = opts?.context?.user || getOrCreateDefaultUser()
     const ldService = opts?.ldService || testLDService()
     const prismaClient = await sharedTestPrismaClient()
     const postgresStore = {
@@ -120,7 +135,7 @@ const constructTestPostgresServer = async (opts?: {
         opts?.documentZip ??
         documentZipService(postgresStore, localGenerateDocumentZip)
 
-    await insertUserToLocalAurora(postgresStore, context.user)
+    await insertUserToLocalAurora(postgresStore, userForInsertion)
     const s3TestClient = testS3Client()
     const s3 = opts?.s3Client || s3TestClient
 
@@ -163,7 +178,6 @@ const constructTestPostgresServer = async (opts?: {
     return new ApolloServer({
         typeDefs,
         resolvers: postgresResolvers,
-        context,
     })
 }
 
@@ -260,6 +274,8 @@ const createTestHealthPlanPackage = async (
     const result = await server.executeOperation({
         query: CreateHealthPlanPackageDocument,
         variables: { input },
+    }, {
+        contextValue: defaultContext(),
     })
     if (result.errors) {
         throw new Error(
@@ -287,6 +303,8 @@ const updateTestHealthPlanFormData = async (
                 healthPlanFormData: updatedB64,
             },
         },
+    }, {
+        contextValue: defaultContext(),
     })
     if (updateResult.errors) {
         console.info('errors', JSON.stringify(updateResult.errors))
@@ -319,6 +337,8 @@ const updateTestHealthPlanPackage = async (
                 healthPlanFormData: domainToBase64(draft),
             },
         },
+    }, {
+        contextValue: defaultContext(),
     })
     if (updateResult.errors) {
         console.info('errors', JSON.stringify(updateResult.errors))
@@ -412,14 +432,16 @@ const submitTestHealthPlanPackage = async (
     server: ApolloServer,
     pkgID: string
 ) => {
-    const updateResult = await server.executeOperation({
+    const updateResult = (await server.executeOperation({
         query: SubmitHealthPlanPackageDocument,
         variables: {
             input: {
                 pkgID,
             },
         },
-    })
+    }, {
+        contextValue: defaultContext(),
+    })) as { data?: any; errors?: any }
 
     if (updateResult.errors) {
         console.info('errors', updateResult.errors)
@@ -428,7 +450,10 @@ const submitTestHealthPlanPackage = async (
         )
     }
 
-    if (updateResult.data === undefined || updateResult.data === null) {
+    if (
+        updateResult.data === undefined ||
+        updateResult.data === null
+    ) {
         throw new Error('submitTestHealthPlanPackage returned nothing')
     }
 
@@ -440,7 +465,7 @@ const resubmitTestHealthPlanPackage = async (
     pkgID: string,
     submittedReason: string
 ) => {
-    const updateResult = await server.executeOperation({
+    const updateResult = (await server.executeOperation({
         query: SubmitHealthPlanPackageDocument,
         variables: {
             input: {
@@ -448,7 +473,9 @@ const resubmitTestHealthPlanPackage = async (
                 submittedReason,
             },
         },
-    })
+    }, {
+        contextValue: defaultContext(),
+    })) as { data?: any; errors?: any }
 
     if (updateResult.errors) {
         console.info('errors', updateResult.errors)
@@ -457,7 +484,10 @@ const resubmitTestHealthPlanPackage = async (
         )
     }
 
-    if (updateResult.data === undefined || updateResult.data === null) {
+    if (
+        updateResult.data === undefined ||
+        updateResult.data === null
+    ) {
         throw new Error('resubmitTestHealthPlanPackage returned nothing')
     }
 
@@ -469,7 +499,7 @@ const unlockTestHealthPlanPackage = async (
     pkgID: string,
     unlockedReason: string
 ): Promise<HealthPlanPackage> => {
-    const updateResult = await server.executeOperation({
+    const updateResult = (await server.executeOperation({
         query: UnlockHealthPlanPackageDocument,
         variables: {
             input: {
@@ -477,7 +507,9 @@ const unlockTestHealthPlanPackage = async (
                 unlockedReason,
             },
         },
-    })
+    }, {
+        contextValue: defaultContext(),
+    })) as { data?: any; errors?: any }
 
     if (updateResult.errors) {
         console.info('errors', updateResult.errors)
@@ -486,7 +518,10 @@ const unlockTestHealthPlanPackage = async (
         )
     }
 
-    if (updateResult.data === undefined || updateResult.data === null) {
+    if (
+        updateResult.data === undefined ||
+        updateResult.data === null
+    ) {
         throw new Error('unlockTestHealthPlanPackage returned nothing')
     }
 
@@ -498,10 +533,12 @@ const fetchTestHealthPlanPackageById = async (
     pkgID: string
 ): Promise<HealthPlanPackage> => {
     const input = { pkgID }
-    const result = await server.executeOperation({
+    const result = (await server.executeOperation({
         query: FetchHealthPlanPackageDocument,
         variables: { input },
-    })
+    }, {
+        contextValue: defaultContext(),
+    })) as { data?: any; errors?: any }
 
     if (result.errors)
         throw new Error(
@@ -528,7 +565,7 @@ const createTestQuestion = async (
             },
         ],
     }
-    const createdQuestion = await server.executeOperation({
+    const createdQuestion = (await server.executeOperation({
         query: CreateContractQuestionDocument,
         variables: {
             input: {
@@ -536,7 +573,9 @@ const createTestQuestion = async (
                 ...question,
             },
         },
-    })
+    }, {
+        contextValue: defaultContext(),
+    })) as { data?: any; errors?: any }
 
     if (createdQuestion.errors)
         throw new Error(
@@ -554,7 +593,7 @@ const createTestRateQuestion = async (
     server: ApolloServer,
     rateID: string,
     questionData?: Omit<CreateRateQuestionInputType, 'rateID'>
-): Promise<GraphQLResponse> => {
+) => {
     const question = questionData || {
         documents: [
             {
@@ -563,7 +602,7 @@ const createTestRateQuestion = async (
             },
         ],
     }
-    return await server.executeOperation({
+    return (await server.executeOperation({
         query: CreateRateQuestionDocument,
         variables: {
             input: {
@@ -571,14 +610,16 @@ const createTestRateQuestion = async (
                 ...question,
             },
         },
-    })
+    }, {
+        contextValue: defaultContext(),
+    })) as { data?: any; errors?: any }
 }
 
 const createTestRateQuestionResponse = async (
     server: ApolloServer,
     questionID: string,
     responseData?: Omit<InsertQuestionResponseArgs, 'questionID'>
-): Promise<GraphQLResponse> => {
+) => {
     const response = responseData || {
         documents: [
             {
@@ -588,7 +629,7 @@ const createTestRateQuestionResponse = async (
         ],
     }
 
-    return await server.executeOperation({
+    return (await server.executeOperation({
         query: CreateRateQuestionResponseDocument,
         variables: {
             input: {
@@ -596,7 +637,9 @@ const createTestRateQuestionResponse = async (
                 questionID,
             },
         },
-    })
+    }, {
+        contextValue: defaultContext(),
+    })) as { data?: any; errors?: any }
 }
 
 const createTestQuestionResponse = async (
@@ -612,7 +655,7 @@ const createTestQuestionResponse = async (
             },
         ],
     }
-    const createdResponse = await server.executeOperation({
+    const createdResponse = (await server.executeOperation({
         query: CreateContractQuestionResponseDocument,
         variables: {
             input: {
@@ -620,7 +663,9 @@ const createTestQuestionResponse = async (
                 questionID,
             },
         },
-    })
+    }, {
+        contextValue: defaultContext(),
+    })) as { data?: any; errors?: any }
 
     if (createdResponse.errors)
         throw new Error(
@@ -639,7 +684,7 @@ const updateTestStateAssignments = async (
     stateCode: string,
     assignedUserIDs: string[]
 ): Promise<UpdateStateAssignmentsByStatePayload> => {
-    const updatedAssignments = await server.executeOperation({
+    const updatedAssignments = (await server.executeOperation({
         query: UpdateStateAssignmentsByStateDocument,
         variables: {
             input: {
@@ -647,7 +692,9 @@ const updateTestStateAssignments = async (
                 assignedUsers: assignedUserIDs,
             },
         },
-    })
+    }, {
+        contextValue: defaultContext(),
+    })) as { data?: any; errors?: any }
 
     if (updatedAssignments.errors)
         throw new Error(

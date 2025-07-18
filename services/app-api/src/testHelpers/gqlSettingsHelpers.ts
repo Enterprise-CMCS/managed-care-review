@@ -1,4 +1,4 @@
-import type { ApolloServer } from 'apollo-server-lambda'
+import type { ApolloServer } from '@apollo/server'
 import type {
     EmailConfiguration,
     FetchMcReviewSettingsPayload,
@@ -8,19 +8,22 @@ import {
     UpdateEmailSettingsDocument,
     FetchMcReviewSettingsDocument,
 } from '../gen/gqlClient'
+import { defaultContext } from './gqlHelpers'
 
 const updateTestEmailSettings = async (
     server: ApolloServer,
     emailConfiguration: EmailConfiguration
 ): Promise<UpdateEmailSettingsPayload> => {
-    const updateEmailConfig = await server.executeOperation({
+    const updateEmailConfig = (await server.executeOperation({
         query: UpdateEmailSettingsDocument,
         variables: {
             input: {
                 emailConfiguration,
             },
         },
-    })
+    }, {
+        contextValue: defaultContext(),
+    })) as { data?: any; errors?: any }
 
     if (updateEmailConfig.errors) {
         console.info('errors', updateEmailConfig.errors)
@@ -42,9 +45,11 @@ const updateTestEmailSettings = async (
 const fetchTestMcReviewSettings = async (
     server: ApolloServer
 ): Promise<FetchMcReviewSettingsPayload> => {
-    const fetchMcReviewSettings = await server.executeOperation({
+    const fetchMcReviewSettings = (await server.executeOperation({
         query: FetchMcReviewSettingsDocument,
-    })
+    }, {
+        contextValue: defaultContext(),
+    })) as { data?: any; errors?: any }
 
     if (fetchMcReviewSettings.errors) {
         console.info('errors', fetchMcReviewSettings.errors)

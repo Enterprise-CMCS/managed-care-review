@@ -1075,10 +1075,14 @@ describe('submitContract', () => {
             submittedReason: 'Test cms user calling state user func',
         }
 
-        const res = await cmsServer.executeOperation({
+        const res = (await cmsServer.executeOperation({
             query: SubmitContractDocument,
             variables: { input },
-        })
+        }, {
+            contextValue: {
+                user: testCMSUser(),
+            },
+        })) as { errors?: any; data?: any }
 
         expect(res.errors).toBeDefined()
         expect(res.errors && res.errors[0].message).toBe(
@@ -1114,14 +1118,18 @@ describe('submitContract', () => {
             }
         )
 
-        const res = await stateServer.executeOperation({
+        const res = (await stateServer.executeOperation({
             query: SubmitContractDocument,
             variables: {
                 input: {
                     contractID: contract.id,
                 },
             },
-        })
+        }, {
+            contextValue: {
+                user: testStateUser(),
+            },
+        })) as { errors?: any; data?: any }
 
         expect(res.errors).toBeDefined()
     })
@@ -1132,14 +1140,18 @@ describe('submitContract', () => {
         })
 
         const draft = await createAndUpdateTestContractWithoutRates(stateServer)
-        const res = await stateServer.executeOperation({
+        const res = (await stateServer.executeOperation({
             query: SubmitContractDocument,
             variables: {
                 input: {
                     contractID: draft.id,
                 },
             },
-        })
+        }, {
+            contextValue: {
+                user: testStateUser(),
+            },
+        })) as { errors?: any; data?: any }
 
         expect(res.errors).toBeDefined()
         expect(res.errors).toEqual([
@@ -1356,14 +1368,18 @@ describe('submitContract', () => {
             )
             const draftID = draft.id
 
-            await server.executeOperation({
+            await (server.executeOperation({
                 query: SubmitContractDocument,
                 variables: {
                     input: {
                         contractID: draftID,
                     },
                 },
-            })
+            }, {
+                contextValue: {
+                    user: testStateUser(),
+                },
+            }) as Promise<{ errors?: any; data?: any }>)
 
             expect(mockEmailer.sendEmail).toHaveBeenCalledWith(
                 expect.objectContaining({
@@ -1421,14 +1437,18 @@ describe('submitContract', () => {
             const draft = await createAndUpdateTestContractWithRate(server)
             const draftID = draft.id
 
-            const submitResult = await server.executeOperation({
+            const submitResult = (await server.executeOperation({
                 query: SubmitContractDocument,
                 variables: {
                     input: {
                         contractID: draftID,
                     },
                 },
-            })
+            }, {
+                contextValue: {
+                    user: testStateUser(),
+                },
+            })) as { errors?: any; data?: any }
 
             expect(submitResult.errors).toBeUndefined()
 
@@ -1470,7 +1490,7 @@ describe('submitContract', () => {
                 'Test unlock reason.'
             )
 
-            const submitResult = await stateServer.executeOperation({
+            const submitResult = (await stateServer.executeOperation({
                 query: SubmitContractDocument,
                 variables: {
                     input: {
@@ -1478,7 +1498,11 @@ describe('submitContract', () => {
                         submittedReason: 'Test resubmitted reason',
                     },
                 },
-            })
+            }, {
+                contextValue: {
+                    user: testStateUser(),
+                },
+            })) as { errors?: any; data?: any }
 
             const currentRevision =
                 submitResult?.data?.submitContract?.contract
@@ -1573,14 +1597,18 @@ describe('submitContract', () => {
             // Invalid contract ID
             const draftID = '123'
 
-            const submitResult = await server.executeOperation({
+            const submitResult = (await server.executeOperation({
                 query: SubmitContractDocument,
                 variables: {
                     input: {
                         contractID: draftID,
                     },
                 },
-            })
+            }, {
+                contextValue: {
+                    user: testStateUser(),
+                },
+            })) as { errors?: any; data?: any }
 
             expect(submitResult.errors).toBeDefined()
             expect(mockEmailer.sendEmail).not.toHaveBeenCalled()
@@ -1688,14 +1716,18 @@ describe('submitContract', () => {
             await new Promise((resolve) => setTimeout(resolve, 2000))
 
             // submit
-            const submitResult = await server.executeOperation({
+            const submitResult = (await server.executeOperation({
                 query: SubmitContractDocument,
                 variables: {
                     input: {
                         contractID: initialContract.id,
                     },
                 },
-            })
+            }, {
+                contextValue: {
+                    user: testStateUser(),
+                },
+            })) as { errors?: any; data?: any }
 
             expect(submitResult.errors).toBeDefined()
             expect(submitResult.errors?.[0].message).toContain('required')
@@ -1716,14 +1748,18 @@ describe('submitContract', () => {
             await new Promise((resolve) => setTimeout(resolve, 2000))
 
             // submit
-            const submitResult = await server.executeOperation({
+            const submitResult = (await server.executeOperation({
                 query: SubmitContractDocument,
                 variables: {
                     input: {
                         contractID: initialContract.id,
                     },
                 },
-            })
+            }, {
+                contextValue: {
+                    user: testStateUser(),
+                },
+            })) as { errors?: any; data?: any }
 
             expect(submitResult.errors).toBeDefined()
             expect(submitResult.errors?.[0].message).toContain('Required')
@@ -1748,14 +1784,18 @@ describe('submitContract', () => {
             await new Promise((resolve) => setTimeout(resolve, 2000))
 
             // submit
-            const submitResult = await server.executeOperation({
+            const submitResult = (await server.executeOperation({
                 query: SubmitContractDocument,
                 variables: {
                     input: {
                         contractID: initialContract.id,
                     },
                 },
-            })
+            }, {
+                contextValue: {
+                    user: testStateUser(),
+                },
+            })) as { errors?: any; data?: any }
 
             expect(submitResult.errors).toBeUndefined()
         }, 20000)
