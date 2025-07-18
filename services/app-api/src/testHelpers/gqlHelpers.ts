@@ -162,7 +162,6 @@ const constructTestPostgresServer = async (opts?: {
     return new ApolloServer({
         typeDefs,
         resolvers: postgresResolvers,
-        context,
     })
 }
 
@@ -259,18 +258,20 @@ const createTestHealthPlanPackage = async (
     const result = await server.executeOperation({
         query: CreateHealthPlanPackageDocument,
         variables: { input },
+    }, {
+        contextValue: defaultContext(),
     })
-    if (result.body.errors) {
+    if (result.errors) {
         throw new Error(
-            `createTestHealthPlanPackage mutation failed with errors ${result.body.errors}`
+            `createTestHealthPlanPackage mutation failed with errors ${result.errors}`
         )
     }
 
-    if (!result.body.data) {
+    if (!result.data) {
         throw new Error('CreateHealthPlanPackage returned nothing')
     }
 
-    return result.body.data.createHealthPlanPackage.pkg
+    return result.data.createHealthPlanPackage.pkg
 }
 
 const updateTestHealthPlanFormData = async (
@@ -286,18 +287,20 @@ const updateTestHealthPlanFormData = async (
                 healthPlanFormData: updatedB64,
             },
         },
+    }, {
+        contextValue: defaultContext(),
     })
-    if (updateResult.body.errors) {
-        console.info('errors', JSON.stringify(updateResult.body.errors))
+    if (updateResult.errors) {
+        console.info('errors', JSON.stringify(updateResult.errors))
         throw new Error(
-            `updateTestHealthPlanFormData mutation failed with errors ${updateResult.body.errors}`
+            `updateTestHealthPlanFormData mutation failed with errors ${updateResult.errors}`
         )
     }
 
-    if (!updateResult.body.data) {
+    if (!updateResult.data) {
         throw new Error('updateTestHealthPlanFormData returned nothing')
     }
-    return updateResult.body.data.updateHealthPlanFormData.pkg
+    return updateResult.data.updateHealthPlanFormData.pkg
 }
 
 const updateTestHealthPlanPackage = async (
@@ -318,18 +321,20 @@ const updateTestHealthPlanPackage = async (
                 healthPlanFormData: domainToBase64(draft),
             },
         },
+    }, {
+        contextValue: defaultContext(),
     })
-    if (updateResult.body.errors) {
-        console.info('errors', JSON.stringify(updateResult.body.errors))
+    if (updateResult.errors) {
+        console.info('errors', JSON.stringify(updateResult.errors))
         throw new Error(
-            `updateTestHealthPlanFormData mutation failed with errors ${updateResult.body.errors}`
+            `updateTestHealthPlanFormData mutation failed with errors ${updateResult.errors}`
         )
     }
 
-    if (!updateResult.body.data) {
+    if (!updateResult.data) {
         throw new Error('updateTestHealthPlanFormData returned nothing')
     }
-    return updateResult.body.data.updateHealthPlanFormData.pkg
+    return updateResult.data.updateHealthPlanFormData.pkg
 }
 
 const createAndUpdateTestHealthPlanPackage = async (
@@ -411,30 +416,32 @@ const submitTestHealthPlanPackage = async (
     server: ApolloServer,
     pkgID: string
 ) => {
-    const updateResult = await server.executeOperation({
+    const updateResult = (await server.executeOperation({
         query: SubmitHealthPlanPackageDocument,
         variables: {
             input: {
                 pkgID,
             },
         },
-    })
+    }, {
+        contextValue: defaultContext(),
+    })) as { data?: any; errors?: any }
 
-    if (updateResult.body.errors) {
-        console.info('errors', updateResult.body.errors)
+    if (updateResult.errors) {
+        console.info('errors', updateResult.errors)
         throw new Error(
-            `submitTestHealthPlanPackage mutation failed with errors ${updateResult.body.errors}`
+            `submitTestHealthPlanPackage mutation failed with errors ${updateResult.errors}`
         )
     }
 
     if (
-        updateResult.body.data === undefined ||
-        updateResult.body.data === null
+        updateResult.data === undefined ||
+        updateResult.data === null
     ) {
         throw new Error('submitTestHealthPlanPackage returned nothing')
     }
 
-    return updateResult.body.data.submitHealthPlanPackage.pkg
+    return updateResult.data.submitHealthPlanPackage.pkg
 }
 
 const resubmitTestHealthPlanPackage = async (
@@ -442,7 +449,7 @@ const resubmitTestHealthPlanPackage = async (
     pkgID: string,
     submittedReason: string
 ) => {
-    const updateResult = await server.executeOperation({
+    const updateResult = (await server.executeOperation({
         query: SubmitHealthPlanPackageDocument,
         variables: {
             input: {
@@ -450,23 +457,25 @@ const resubmitTestHealthPlanPackage = async (
                 submittedReason,
             },
         },
-    })
+    }, {
+        contextValue: defaultContext(),
+    })) as { data?: any; errors?: any }
 
-    if (updateResult.body.errors) {
-        console.info('errors', updateResult.body.errors)
+    if (updateResult.errors) {
+        console.info('errors', updateResult.errors)
         throw new Error(
-            `resubmitTestHealthPlanPackage mutation failed with errors ${updateResult.body.errors}`
+            `resubmitTestHealthPlanPackage mutation failed with errors ${updateResult.errors}`
         )
     }
 
     if (
-        updateResult.body.data === undefined ||
-        updateResult.body.data === null
+        updateResult.data === undefined ||
+        updateResult.data === null
     ) {
         throw new Error('resubmitTestHealthPlanPackage returned nothing')
     }
 
-    return updateResult.body.data.submitHealthPlanPackage.pkg
+    return updateResult.data.submitHealthPlanPackage.pkg
 }
 
 const unlockTestHealthPlanPackage = async (
@@ -474,7 +483,7 @@ const unlockTestHealthPlanPackage = async (
     pkgID: string,
     unlockedReason: string
 ): Promise<HealthPlanPackage> => {
-    const updateResult = await server.executeOperation({
+    const updateResult = (await server.executeOperation({
         query: UnlockHealthPlanPackageDocument,
         variables: {
             input: {
@@ -482,23 +491,25 @@ const unlockTestHealthPlanPackage = async (
                 unlockedReason,
             },
         },
-    })
+    }, {
+        contextValue: defaultContext(),
+    })) as { data?: any; errors?: any }
 
-    if (updateResult.body.errors) {
-        console.info('errors', updateResult.body.errors)
+    if (updateResult.errors) {
+        console.info('errors', updateResult.errors)
         throw new Error(
-            `unlockTestHealthPlanPackage mutation failed with errors ${updateResult.body.errors}`
+            `unlockTestHealthPlanPackage mutation failed with errors ${updateResult.errors}`
         )
     }
 
     if (
-        updateResult.body.data === undefined ||
-        updateResult.body.data === null
+        updateResult.data === undefined ||
+        updateResult.data === null
     ) {
         throw new Error('unlockTestHealthPlanPackage returned nothing')
     }
 
-    return updateResult.body.data.unlockHealthPlanPackage.pkg
+    return updateResult.data.unlockHealthPlanPackage.pkg
 }
 
 const fetchTestHealthPlanPackageById = async (
@@ -506,21 +517,23 @@ const fetchTestHealthPlanPackageById = async (
     pkgID: string
 ): Promise<HealthPlanPackage> => {
     const input = { pkgID }
-    const result = await server.executeOperation({
+    const result = (await server.executeOperation({
         query: FetchHealthPlanPackageDocument,
         variables: { input },
-    })
+    }, {
+        contextValue: defaultContext(),
+    })) as { data?: any; errors?: any }
 
-    if (result.body.errors)
+    if (result.errors)
         throw new Error(
-            `fetchTestHealthPlanPackageById query failed with errors ${result.body.errors}`
+            `fetchTestHealthPlanPackageById query failed with errors ${result.errors}`
         )
 
-    if (!result.body.data) {
+    if (!result.data) {
         throw new Error('fetchTestHealthPlanPackageById returned nothing')
     }
 
-    return result.body.data.fetchHealthPlanPackage.pkg
+    return result.data.fetchHealthPlanPackage.pkg
 }
 
 const createTestQuestion = async (
@@ -536,7 +549,7 @@ const createTestQuestion = async (
             },
         ],
     }
-    const createdQuestion = await server.executeOperation({
+    const createdQuestion = (await server.executeOperation({
         query: CreateContractQuestionDocument,
         variables: {
             input: {
@@ -544,18 +557,20 @@ const createTestQuestion = async (
                 ...question,
             },
         },
-    })
+    }, {
+        contextValue: defaultContext(),
+    })) as { data?: any; errors?: any }
 
-    if (createdQuestion.body.errors)
+    if (createdQuestion.errors)
         throw new Error(
-            `createTestQuestion mutation failed with errors ${createdQuestion.body.errors}`
+            `createTestQuestion mutation failed with errors ${createdQuestion.errors}`
         )
 
-    if (!createdQuestion.body.data) {
+    if (!createdQuestion.data) {
         throw new Error('createTestQuestion returned nothing')
     }
 
-    return createdQuestion.body.data.createContractQuestion
+    return createdQuestion.data.createContractQuestion
 }
 
 const createTestRateQuestion = async (
@@ -571,7 +586,7 @@ const createTestRateQuestion = async (
             },
         ],
     }
-    return await server.executeOperation({
+    return (await server.executeOperation({
         query: CreateRateQuestionDocument,
         variables: {
             input: {
@@ -579,7 +594,9 @@ const createTestRateQuestion = async (
                 ...question,
             },
         },
-    })
+    }, {
+        contextValue: defaultContext(),
+    })) as { data?: any; errors?: any }
 }
 
 const createTestRateQuestionResponse = async (
@@ -596,7 +613,7 @@ const createTestRateQuestionResponse = async (
         ],
     }
 
-    return await server.executeOperation({
+    return (await server.executeOperation({
         query: CreateRateQuestionResponseDocument,
         variables: {
             input: {
@@ -604,7 +621,9 @@ const createTestRateQuestionResponse = async (
                 questionID,
             },
         },
-    })
+    }, {
+        contextValue: defaultContext(),
+    })) as { data?: any; errors?: any }
 }
 
 const createTestQuestionResponse = async (
@@ -620,7 +639,7 @@ const createTestQuestionResponse = async (
             },
         ],
     }
-    const createdResponse = await server.executeOperation({
+    const createdResponse = (await server.executeOperation({
         query: CreateContractQuestionResponseDocument,
         variables: {
             input: {
@@ -628,18 +647,20 @@ const createTestQuestionResponse = async (
                 questionID,
             },
         },
-    })
+    }, {
+        contextValue: defaultContext(),
+    })) as { data?: any; errors?: any }
 
-    if (createdResponse.body.errors)
+    if (createdResponse.errors)
         throw new Error(
-            `createTestQuestionResponse mutation failed with errors ${createdResponse.body.errors}`
+            `createTestQuestionResponse mutation failed with errors ${createdResponse.errors}`
         )
 
-    if (!createdResponse.body.data) {
+    if (!createdResponse.data) {
         throw new Error('createTestQuestionResponse returned nothing')
     }
 
-    return createdResponse.body.data.createContractQuestionResponse
+    return createdResponse.data.createContractQuestionResponse
 }
 
 const updateTestStateAssignments = async (
@@ -647,7 +668,7 @@ const updateTestStateAssignments = async (
     stateCode: string,
     assignedUserIDs: string[]
 ): Promise<UpdateStateAssignmentsByStatePayload> => {
-    const updatedAssignments = await server.executeOperation({
+    const updatedAssignments = (await server.executeOperation({
         query: UpdateStateAssignmentsByStateDocument,
         variables: {
             input: {
@@ -655,18 +676,20 @@ const updateTestStateAssignments = async (
                 assignedUsers: assignedUserIDs,
             },
         },
-    })
+    }, {
+        contextValue: defaultContext(),
+    })) as { data?: any; errors?: any }
 
-    if (updatedAssignments.body.errors)
+    if (updatedAssignments.errors)
         throw new Error(
-            `updateStateAssignmentsByState mutation failed with errors ${updatedAssignments.body.errors}`
+            `updateStateAssignmentsByState mutation failed with errors ${updatedAssignments.errors}`
         )
 
-    if (!updatedAssignments.body.data) {
+    if (!updatedAssignments.data) {
         throw new Error('updateStateAssignmentsByState returned nothing')
     }
 
-    return updatedAssignments.body.data.updateStateAssignmentsByState
+    return updatedAssignments.data.updateStateAssignmentsByState
 }
 
 export {

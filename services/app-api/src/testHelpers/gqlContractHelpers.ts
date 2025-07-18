@@ -18,6 +18,7 @@ import {
     createTestHealthPlanPackage,
     defaultFloridaProgram,
     updateTestHealthPlanFormData,
+    defaultContext,
 } from './gqlHelpers'
 
 import { type ContractType } from '../domain-models'
@@ -64,19 +65,21 @@ async function submitTestContract(
                 submittedReason: submittedReason,
             },
         },
+    }, {
+        contextValue: defaultContext(),
     })
 
-    if (result.body.errors) {
+    if (result.errors) {
         throw new Error(
-            `submitTestContract query failed with errors ${result.body.errors}`
+            `submitTestContract query failed with errors ${result.errors}`
         )
     }
 
-    if (!result.body.data) {
+    if (!result.data) {
         throw new Error('submitTestContract returned nothing')
     }
 
-    return result.body.data.submitContract.contract
+    return result.data.submitContract.contract
 }
 
 async function resubmitTestContract(
@@ -92,19 +95,21 @@ async function resubmitTestContract(
                 submittedReason,
             },
         },
+    }, {
+        contextValue: defaultContext(),
     })
 
-    if (updateResult.body.errors) {
+    if (updateResult.errors) {
         throw new Error(
-            `resubmitTestContract query failed with errors ${updateResult.body.errors}`
+            `resubmitTestContract query failed with errors ${updateResult.errors}`
         )
     }
 
-    if (!updateResult.body.data) {
+    if (!updateResult.data) {
         throw new Error('resubmitTestContract returned nothing')
     }
 
-    return updateResult.body.data.submitContract.contract
+    return updateResult.data.submitContract.contract
 }
 
 async function unlockTestContract(
@@ -120,19 +125,21 @@ async function unlockTestContract(
                 unlockedReason: unlockedReason,
             },
         },
+    }, {
+        contextValue: defaultContext(),
     })
 
-    if (result.body.errors) {
+    if (result.errors) {
         throw new Error(
-            `unlockTestContract query failed with errors ${result.body.errors}`
+            `unlockTestContract query failed with errors ${result.errors}`
         )
     }
 
-    if (!result.body.data) {
+    if (!result.data) {
         throw new Error('unlockTestContract returned nothing')
     }
 
-    return result.body.data.unlockContract.contract
+    return result.data.unlockContract.contract
 }
 
 async function createSubmitAndUnlockTestContract(
@@ -170,19 +177,21 @@ async function fetchTestContract(
     const result = await server.executeOperation({
         query: FetchContractDocument,
         variables: { input },
+    }, {
+        contextValue: defaultContext(),
     })
 
-    if (result.body.errors) {
+    if (result.errors) {
         throw new Error(
-            `fetchTestContract query failed with errors ${result.body.errors}`
+            `fetchTestContract query failed with errors ${result.errors}`
         )
     }
 
-    if (!result.body.data) {
+    if (!result.data) {
         throw new Error('fetchTestContract returned nothing')
     }
 
-    return result.body.data.fetchContract.contract
+    return result.data.fetchContract.contract
 }
 
 async function approveTestContract(
@@ -198,19 +207,21 @@ async function approveTestContract(
     const result = await server.executeOperation({
         query: ApproveContractDocument,
         variables: { input },
+    }, {
+        contextValue: defaultContext(),
     })
 
-    if (result.body.errors) {
+    if (result.errors) {
         throw new Error(
-            `approveTestContract mutation failed with errors ${result.body.errors}`
+            `approveTestContract mutation failed with errors ${result.errors}`
         )
     }
 
-    if (!result.body.data) {
+    if (!result.data) {
         throw new Error('approveTestContract returned nothing')
     }
 
-    return result.body.data.approveContract.contract
+    return result.data.approveContract.contract
 }
 
 const fetchTestContractWithQuestions = async (
@@ -224,19 +235,21 @@ const fetchTestContractWithQuestions = async (
                 contractID: contractID,
             },
         },
+    }, {
+        contextValue: defaultContext(),
     })
 
-    if (result.body.errors) {
+    if (result.errors) {
         throw new Error(
-            `fetchTestContractWithQuestions query failed with errors ${result.body.errors}`
+            `fetchTestContractWithQuestions query failed with errors ${result.errors}`
         )
     }
 
-    if (!result.body.data) {
+    if (!result.data) {
         throw new Error('fetchTestContractWithQuestions returned nothing')
     }
 
-    return result.body.data.fetchContract.contract
+    return result.data.fetchContract.contract
 }
 
 const createTestContract = async (
@@ -261,19 +274,21 @@ const createTestContract = async (
     const result = await server.executeOperation({
         query: CreateContractDocument,
         variables: { input },
+    }, {
+        contextValue: defaultContext(),
     })
 
-    if (result.body.errors) {
+    if (result.errors) {
         throw new Error(
-            `createTestContract mutation failed with errors ${result.body.errors}`
+            `createTestContract mutation failed with errors ${result.errors}`
         )
     }
 
-    if (!result.body.data) {
+    if (!result.data) {
         throw new Error('createTestContract returned nothing')
     }
 
-    return result.body.data.createContract.contract
+    return result.data.createContract.contract
 }
 
 async function createAndUpdateTestContractWithRate(
@@ -370,6 +385,8 @@ const linkRateToDraftContract = async (
                 ],
             },
         },
+    }, {
+        contextValue: defaultContext(),
     })
     return updatedContract
 }
@@ -386,6 +403,8 @@ const clearRatesOnDraftContract = async (
                 updatedRates: [],
             },
         },
+    }, {
+        contextValue: defaultContext(),
     })
     return updatedContract
 }
@@ -410,6 +429,8 @@ const updateRateOnDraftContract = async (
                 ],
             },
         },
+    }, {
+        contextValue: defaultContext(),
     })
     must(updatedContract)
     const contractData = updatedContract.data?.updateDraftContractRates.contract
@@ -448,20 +469,22 @@ const updateTestContractDraftRevision = async (
                 formData: updatedFormData,
             },
         },
+    }, {
+        contextValue: defaultContext(),
     })
 
-    if (updateResult.body.errors) {
-        console.info('errors', JSON.stringify(updateResult.body.errors))
+    if (updateResult.errors) {
+        console.info('errors', JSON.stringify(updateResult.errors))
         throw new Error(
-            `updateTestContractDraftRevision mutation failed with errors ${updateResult.body.errors}`
+            `updateTestContractDraftRevision mutation failed with errors ${updateResult.errors}`
         )
     }
 
-    if (!updateResult.body.data) {
+    if (!updateResult.data) {
         throw new Error('updateTestContractDraftRevision returned nothing')
     }
 
-    return updateResult.body.data.updateContractDraftRevision.contract
+    return updateResult.data.updateContractDraftRevision.contract
 }
 
 const withdrawTestContract = async (
@@ -477,20 +500,22 @@ const withdrawTestContract = async (
                 updatedReason,
             },
         },
+    }, {
+        contextValue: defaultContext(),
     })
 
-    if (withdrawResult.body.errors) {
-        console.info('errors', withdrawResult.body.errors)
+    if (withdrawResult.errors) {
+        console.info('errors', withdrawResult.errors)
     }
 
     if (
-        withdrawResult.body.data === undefined ||
-        withdrawResult.body.data === null
+        withdrawResult.data === undefined ||
+        withdrawResult.data === null
     ) {
         throw new Error('withdraw contract returned nothing')
     }
 
-    return withdrawResult.body.data.withdrawContract.contract
+    return withdrawResult.data.withdrawContract.contract
 }
 
 const undoWithdrawTestContract = async (
@@ -506,20 +531,22 @@ const undoWithdrawTestContract = async (
                 updatedReason,
             },
         },
+    }, {
+        contextValue: defaultContext(),
     })
 
-    if (undoWithdrawResult.body.errors) {
-        console.info('errors', undoWithdrawResult.body.errors)
+    if (undoWithdrawResult.errors) {
+        console.info('errors', undoWithdrawResult.errors)
     }
 
     if (
-        undoWithdrawResult.body.data === undefined ||
-        undoWithdrawResult.body.data === null
+        undoWithdrawResult.data === undefined ||
+        undoWithdrawResult.data === null
     ) {
         throw new Error('undo withdraw contract returned nothing')
     }
 
-    return undoWithdrawResult.body.data.undoWithdrawContract.contract
+    return undoWithdrawResult.data.undoWithdrawContract.contract
 }
 
 const errorUndoWithdrawTestContract = async (
@@ -535,15 +562,17 @@ const errorUndoWithdrawTestContract = async (
                 updatedReason,
             },
         },
+    }, {
+        contextValue: defaultContext(),
     })
 
-    if (!undoWithdrawResult.body.errors) {
+    if (!undoWithdrawResult.errors) {
         throw new Error(
             'errorUndoWithdrawTestContract: expected errors to return'
         )
     }
 
-    return undoWithdrawResult.body.errors
+    return undoWithdrawResult.errors
 }
 
 const contractHistoryToDescriptions = (contract: Contract): string[] => {

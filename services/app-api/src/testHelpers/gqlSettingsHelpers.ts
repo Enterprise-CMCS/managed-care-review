@@ -8,6 +8,7 @@ import {
     UpdateEmailSettingsDocument,
     FetchMcReviewSettingsDocument,
 } from '../gen/gqlClient'
+import { defaultContext } from './gqlHelpers'
 
 const updateTestEmailSettings = async (
     server: ApolloServer,
@@ -20,23 +21,25 @@ const updateTestEmailSettings = async (
                 emailConfiguration,
             },
         },
-    })) as { body: { data?: any; errors?: any } }
+    }, {
+        contextValue: defaultContext(),
+    })) as { data?: any; errors?: any }
 
-    if (updateEmailConfig.body.errors) {
-        console.info('errors', updateEmailConfig.body.errors)
+    if (updateEmailConfig.errors) {
+        console.info('errors', updateEmailConfig.errors)
         throw new Error(
-            `updateTestEmailSettings mutation failed with errors ${updateEmailConfig.body.errors}`
+            `updateTestEmailSettings mutation failed with errors ${updateEmailConfig.errors}`
         )
     }
 
     if (
-        updateEmailConfig.body.data === undefined ||
-        updateEmailConfig.body.data === null
+        updateEmailConfig.data === undefined ||
+        updateEmailConfig.data === null
     ) {
         throw new Error('updateTestEmailSettings returned nothing')
     }
 
-    return updateEmailConfig.body.data.updateEmailSettings
+    return updateEmailConfig.data.updateEmailSettings
 }
 
 const fetchTestMcReviewSettings = async (
@@ -44,23 +47,25 @@ const fetchTestMcReviewSettings = async (
 ): Promise<FetchMcReviewSettingsPayload> => {
     const fetchMcReviewSettings = (await server.executeOperation({
         query: FetchMcReviewSettingsDocument,
-    })) as { body: { data?: any; errors?: any } }
+    }, {
+        contextValue: defaultContext(),
+    })) as { data?: any; errors?: any }
 
-    if (fetchMcReviewSettings.body.errors) {
-        console.info('errors', fetchMcReviewSettings.body.errors)
+    if (fetchMcReviewSettings.errors) {
+        console.info('errors', fetchMcReviewSettings.errors)
         throw new Error(
-            `fetchTestMcReviewSettings query failed with errors ${fetchMcReviewSettings.body.errors}`
+            `fetchTestMcReviewSettings query failed with errors ${fetchMcReviewSettings.errors}`
         )
     }
 
     if (
-        fetchMcReviewSettings.body.data === undefined ||
-        fetchMcReviewSettings.body.data === null
+        fetchMcReviewSettings.data === undefined ||
+        fetchMcReviewSettings.data === null
     ) {
         throw new Error('fetchTestMcReviewSettings returned nothing')
     }
 
-    return fetchMcReviewSettings.body.data.fetchMcReviewSettings
+    return fetchMcReviewSettings.data.fetchMcReviewSettings
 }
 
 export { updateTestEmailSettings, fetchTestMcReviewSettings }
