@@ -6,7 +6,7 @@ import * as ec2 from 'aws-cdk-lib/aws-ec2';
 import * as s3 from 'aws-cdk-lib/aws-s3';
 import * as iam from 'aws-cdk-lib/aws-iam';
 import * as sns from 'aws-cdk-lib/aws-sns';
-import { Duration, RemovalPolicy } from 'aws-cdk-lib';
+import { Duration, RemovalPolicy, CfnOutput } from 'aws-cdk-lib';
 import { S3_BUCKETS, SERVICES } from '@config/constants';
 
 export interface DataStackProps extends BaseStackProps {
@@ -56,6 +56,9 @@ export class DataStack extends BaseStack {
 
     // Create S3 buckets
     this.createS3Buckets();
+
+    // Create outputs
+    this.createOutputs();
   }
 
 
@@ -206,5 +209,20 @@ export class DataStack extends BaseStack {
       ]
     }));
 
+  }
+
+  /**
+   * Create stack outputs
+   */
+  private createOutputs(): void {
+    new CfnOutput(this, 'DocumentUploadsBucketName', {
+      value: this.uploadsBucket.bucketName,
+      description: 'Document uploads S3 bucket name'
+    });
+
+    new CfnOutput(this, 'QAUploadsBucketName', {
+      value: this.qaBucket.bucketName,
+      description: 'QA uploads S3 bucket name'
+    });
   }
 }

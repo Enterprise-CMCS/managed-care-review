@@ -1,10 +1,7 @@
 import { Construct } from 'constructs';
 import * as apigateway from 'aws-cdk-lib/aws-apigateway';
 import * as waf from 'aws-cdk-lib/aws-wafv2';
-import * as logs from 'aws-cdk-lib/aws-logs';
-import * as cloudwatch from 'aws-cdk-lib/aws-cloudwatch';
 import { WafwebaclToApiGateway } from '@aws-solutions-constructs/aws-wafwebacl-apigateway';
-import { Duration } from 'aws-cdk-lib';
 import { SecurityConfig } from '@config/stage-config';
 import { ResourceNames, API_PATHS, API_GATEWAY_DEFAULTS, API_RATE_LIMITS } from '@config/constants';
 import { ServiceRegistry } from '@constructs/base';
@@ -15,8 +12,6 @@ export interface WafProtectedApiProps {
   stage: string;
   securityConfig: SecurityConfig;
   description?: string;
-  minimumCompressionSize?: number;
-  binaryMediaTypes?: string[];
 }
 
 /**
@@ -25,56 +20,15 @@ export interface WafProtectedApiProps {
 export class WafProtectedApi extends Construct {
   public readonly api: apigateway.RestApi;
   public readonly webAcl: waf.CfnWebACL;
-  public readonly logGroup: logs.LogGroup;
   public readonly deployment: apigateway.Deployment;
 
   constructor(scope: Construct, id: string, props: WafProtectedApiProps) {
     super(scope, id);
 
-    // Create log group for API Gateway
-    this.logGroup = new logs.LogGroup(this, 'ApiLogGroup', {
-      logGroupName: `/aws/apigateway/cdk-${ResourceNames.resourceName(props.apiName, 'api', props.stage)}`,
-      retention: logs.RetentionDays.ONE_MONTH
-    });
-
-    // Create the API Gateway REST API first
+    // Create the API Gateway REST API first - match Serverless configuration
     this.api = new apigateway.RestApi(this, 'Api', {
       restApiName: ResourceNames.resourceName(props.apiName, 'api', props.stage),
-      description: props.description || `${props.apiName} API for ${props.stage}`,
-      deployOptions: {
-        stageName: props.stage,
-        tracingEnabled: true,
-        dataTraceEnabled: props.stage !== 'prod',
-        loggingLevel: props.stage === 'prod' 
-          ? apigateway.MethodLoggingLevel.ERROR 
-          : apigateway.MethodLoggingLevel.INFO,
-        metricsEnabled: true,
-        methodOptions: {
-          '/*/*': {  // Apply throttling to all resources and methods
-            throttlingRateLimit: props.securityConfig.apiThrottleRate,
-            throttlingBurstLimit: props.securityConfig.apiThrottleBurst
-          }
-        },
-        accessLogDestination: new apigateway.LogGroupLogDestination(this.logGroup),
-        accessLogFormat: apigateway.AccessLogFormat.jsonWithStandardFields()
-      },
-      defaultCorsPreflightOptions: {
-        allowOrigins: apigateway.Cors.ALL_ORIGINS,
-        allowMethods: apigateway.Cors.ALL_METHODS,
-        allowHeaders: [
-          'Content-Type',
-          'X-Amz-Date',
-          'Authorization',
-          'X-Api-Key',
-          'X-Amz-Security-Token',
-          'X-Amz-User-Agent'
-        ],
-        allowCredentials: true,
-        maxAge: Duration.hours(1)
-      },
-      binaryMediaTypes: props.binaryMediaTypes,
-      minimumCompressionSize: props.minimumCompressionSize || API_GATEWAY_DEFAULTS.MINIMUM_COMPRESSION_SIZE,
-      endpointTypes: [apigateway.EndpointType.REGIONAL]
+      description: props.description || `${props.apiName} API for ${props.stage}`
     });
 
     // Attach WAF to the existing API Gateway if WAF is enabled

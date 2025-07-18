@@ -12,7 +12,7 @@ import * as secretsmanager from 'aws-cdk-lib/aws-secretsmanager';
 import * as ssm from 'aws-cdk-lib/aws-ssm';
 import * as events from 'aws-cdk-lib/aws-events';
 import * as targets from 'aws-cdk-lib/aws-events-targets';
-import { Duration, Fn } from 'aws-cdk-lib';
+import { Duration, Fn, CfnOutput } from 'aws-cdk-lib';
 import { SERVICES, API_PATHS, LAMBDA_FUNCTIONS, LAMBDA_MEMORY, LAMBDA_TIMEOUTS, getOtelEnvironment, LAMBDA_COMMON_ENV, FILE_SIZE_LIMITS, CDK_DEPLOYMENT_SUFFIX, PROJECT_PREFIX } from '@config/constants';
 import { needsPrismaLayer } from '@constructs/lambda/bundling-utils';
 import { LambdaEnvironmentFactory } from '@constructs/lambda/environment-factory';
@@ -186,8 +186,7 @@ export class ApiComputeStack extends BaseStack {
       apiName: SERVICES.INFRA_API,
       stage: this.stage,
       securityConfig: this.stageConfig.security,
-      description: 'Managed Care Review API Gateway',
-      binaryMediaTypes: ['multipart/form-data', 'application/pdf']
+      description: 'Managed Care Review API Gateway'
     });
 
     this.api = wafApi.api;
@@ -207,6 +206,12 @@ export class ApiComputeStack extends BaseStack {
 
     // Grant API Gateway permissions to authenticated role from auth stack
     this.grantApiPermissionsToAuthenticatedRole();
+
+    // Create outputs
+    new CfnOutput(this, 'ApiUrl', {
+      value: this.apiUrl,
+      description: 'API Gateway URL'
+    });
   }
 
   /**
@@ -617,4 +622,5 @@ export class ApiComputeStack extends BaseStack {
       }));
     }
   }
+
 }

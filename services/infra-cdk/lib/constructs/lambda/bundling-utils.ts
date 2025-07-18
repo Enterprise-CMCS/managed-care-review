@@ -33,16 +33,18 @@ export function getBundlingConfig(
     target: 'node20',
     format: OutputFormat.CJS,
     mainFields: ['module', 'main'],
-    // External modules - workspace packages will be bundled, not externalized
+    // External modules - match serverless.yml exactly
     externalModules: [
+      // Lambda runtime provides AWS SDK v3
       '@aws-sdk/*',
       'aws-sdk',
+      
+      // OTEL layer
       '@opentelemetry/*',
+      
+      // Prisma layer (matches esbuild.config.js exclude)
       'prisma',
       '@prisma/client',
-      'canvas',
-      'utf-8-validate',
-      'bufferutil',
     ],
     esbuildArgs: {
       '--bundle': true,
@@ -53,15 +55,8 @@ export function getBundlingConfig(
       ...(stage === 'prod' && { '--drop:console': true })
     },
     commandHooks,
-    // Include only AWS SDK modules (workspace packages will be bundled)
-    nodeModules: [
-      '@aws-sdk/client-s3',
-      '@aws-sdk/client-ses',
-      '@aws-sdk/client-cognito-identity-provider',
-      '@aws-sdk/client-secrets-manager',
-      '@aws-sdk/client-ssm',
-      '@aws-sdk/client-rds',
-    ],
+    // Don't include any node_modules - let CDK handle dependencies via externalModules
+    // AWS SDK v3 is provided by Lambda runtime, no need to bundle it
     // Environment variables for bundling
     environment: {
       NODE_ENV: stage === 'prod' ? 'production' : 'development',

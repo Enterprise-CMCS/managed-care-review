@@ -4,6 +4,7 @@ import { Construct } from 'constructs';
 import * as cognito from 'aws-cdk-lib/aws-cognito';
 import * as iam from 'aws-cdk-lib/aws-iam';
 import * as ssm from 'aws-cdk-lib/aws-ssm';
+import { CfnOutput } from 'aws-cdk-lib';
 import { SERVICES, CDK_DEPLOYMENT_SUFFIX } from '@config/constants';
 
 export interface AuthStackProps extends BaseStackProps {
@@ -104,6 +105,9 @@ export class AuthStack extends BaseStack {
     this.userPoolClient = this.cognitoAuth.userPoolClient;
     this.identityPool = this.cognitoAuth.identityPool;
     this.authenticatedRole = this.cognitoAuth.authenticatedRole;
+
+    // Create outputs
+    this.createOutputs();
   }
 
   /**
@@ -295,5 +299,36 @@ export class AuthStack extends BaseStack {
     this.authenticatedRole.attachInlinePolicy(groupBasedPolicy);
 
     // Note: In production, resources should be specific rather than wildcards
+  }
+
+  /**
+   * Create stack outputs
+   */
+  private createOutputs(): void {
+    new CfnOutput(this, 'UserPoolId', {
+      value: this.userPool.userPoolId,
+      description: 'Cognito User Pool ID'
+    });
+
+    new CfnOutput(this, 'UserPoolClientId', {
+      value: this.userPoolClient.userPoolClientId,
+      description: 'Cognito User Pool Client ID'
+    });
+
+    if (this.identityPool) {
+      new CfnOutput(this, 'IdentityPoolId', {
+        value: this.identityPool.ref,
+        description: 'Cognito Identity Pool ID'
+      });
+    }
+
+    // Add UserPoolClientDomain output if custom domain is configured
+    const domain = this.userPool.node.findChild('Domain') as cognito.UserPoolDomain | undefined;
+    if (domain) {
+      new CfnOutput(this, 'UserPoolClientDomain', {
+        value: domain.domainName,
+        description: 'Cognito User Pool Domain'
+      });
+    }
   }
 }

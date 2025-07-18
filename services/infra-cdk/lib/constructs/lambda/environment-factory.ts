@@ -15,6 +15,7 @@ export interface BaseEnvironment {
   STAGE: string;
   REGION: string;
   NODE_OPTIONS: string;
+  NODE_PATH: string;
   AWS_NODEJS_CONNECTION_REUSE_ENABLED: string;
   LOG_LEVEL: string;
 }
@@ -88,6 +89,8 @@ export class LambdaEnvironmentFactory {
       stage,
       STAGE: stage,
       REGION: region,
+      // Include NODE_PATH for Lambda layer module resolution
+      NODE_PATH: '/opt/nodejs/node_modules:/var/runtime/node_modules:/var/task/node_modules',
       ...LAMBDA_COMMON_ENV
     };
   }

@@ -61,7 +61,7 @@ export class StaticWebsite extends Construct {
     
     // Create S3 bucket for static hosting
     this.bucket = new s3.Bucket(this, 'Bucket', {
-      bucketName: ResourceNames.resourceName(props.websiteName, 'static', props.stage),
+      bucketName: `${ResourceNames.resourceName(props.websiteName, 'static', props.stage)}-cdk`,
       encryption: s3.BucketEncryption.S3_MANAGED,
       blockPublicAccess: s3.BlockPublicAccess.BLOCK_ALL,
       websiteIndexDocument: 'index.html',
@@ -121,7 +121,7 @@ export class StaticWebsite extends Construct {
       // Logging configuration (always enabled to match serverless)
       enableLogging: true,
       logBucket: this.bucket,
-      logFilePrefix: `${props.stage}-${props.websiteName}-cloudfront-logs/`
+      logFilePrefix: `${props.stage}-${props.websiteName}-cdk-cloudfront-logs/`
     };
     
     this.distribution = new cloudfront.Distribution(this, 'Distribution', distributionProps);

@@ -197,6 +197,7 @@ export class LambdaFactory extends Construct {
       } : undefined,
       securityGroups: needsVpc ? this.props.securityGroups : undefined,
       layers: [
+        // Order matters: OTEL first, then Prisma, then additional
         this.props.otelLayer,
         ...(needsPrismaLayer(functionProps.functionName) && this.props.prismaLayer ? [this.props.prismaLayer] : []),
         ...(functionProps.additionalLayers || [])
