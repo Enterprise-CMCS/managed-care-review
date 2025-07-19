@@ -7,7 +7,7 @@ import {
     createFilter,
 } from 'react-select'
 import styles from '../../../components/Select/Select.module.scss'
-import { IndexRatesInput, useIndexRatesQuery, useIndexRatesStrippedQuery } from '../../../gen/gqlClient'
+import { FetchRateDocument, IndexRatesInput, useFetchRateQuery, useIndexRatesQuery, useIndexRatesStrippedQuery } from '../../../gen/gqlClient'
 import { programNames } from '@mc-review/hpp'
 import { formatCalendarDate } from '@mc-review/dates'
 import {
@@ -19,6 +19,7 @@ import { useTealium } from '../../../hooks'
 import { useField } from 'formik'
 import { convertIndexRatesGQLRateToRateForm } from '../../StateSubmission/RateDetails/rateDetailsHelpers'
 import { AccessibleSelect } from '../../../components/Select'
+import { useState } from 'react'
 
 export interface LinkRateOptionType {
     readonly value: string
@@ -51,18 +52,23 @@ export const LinkRateSelect = ({
     ...selectProps
 }: LinkRateSelectPropType & Props<LinkRateOptionType, false>) => {
     const input: IndexRatesInput = { stateCode }
-    const { data, loading, error } = useIndexRatesQuery({
+    const [selectedRateId, setSelectedRateId] = useState<string | null>(null);
+
+    
+    const { data, loading, error } = useIndexRatesStrippedQuery({
         variables: { input },
     })
-    const { data: rData, loading: rLoading, error: rError } = useIndexRatesStrippedQuery({
-        variables: { input },
-    })
+    const { data: selectedRateData, loading: sloading, error: serror } = useFetchRateQuery({
+        variables: { input: {
+            rateID: selectedRateId ?? ''
+        } },
+        skip: !selectedRateId, // Skip the query if no ID is selected
+      });
     const { getKey } = useS3()
     const { logDropdownSelectionEvent } = useTealium()
     const [_field, _meta, helpers] = useField({ name }) // useField only relevant for non-autofill implementations
 
-    const rates = rData?.indexRatesStripped.edges.map((e) => e.node) || []
-    // const rates = data?.indexRates.edges.map((e) => e.node) || []
+    const rates = data?.indexRatesStripped.edges.map((e) => e.node) || []
     // Sort rates by latest submission in desc order and remove withdrawn
     // Do not display withdrawn rates as an option of a linked rate to select
     const updatedRates = rates
@@ -143,15 +149,15 @@ export const LinkRateSelect = ({
 
             if (autofill) {
                 const linkedRateID = newValue.value
-                const linkedRate = rates.find(
-                    (rate) => rate.id === linkedRateID
-                )
-                // const linkedRateForm: FormikRateForm =
-                //     convertIndexRatesGQLRateToRateForm(getKey, linkedRate)
-                // // put already selected fields back in place
-                // linkedRateForm.ratePreviouslySubmitted = 'YES'
+                
+                setSelectedRateId(linkedRateID);
+                const linkedRate = selectedRateData?.fetchRate.rate
+                const linkedRateForm: FormikRateForm =
+                    convertIndexRatesGQLRateToRateForm(getKey, linkedRate)
+                // put already selected fields back in place
+                linkedRateForm.ratePreviouslySubmitted = 'YES'
 
-                // autofill(linkedRateForm, linkedRateID)
+                autofill(linkedRateForm, linkedRateID)
             } else {
                 // this path is used for replace/withdraw redundant rates
                 // we are not autofilling form data, we are just returning the IDs of the rate selected
