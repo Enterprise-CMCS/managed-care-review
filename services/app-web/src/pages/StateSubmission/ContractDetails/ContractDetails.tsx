@@ -555,7 +555,7 @@ export const ContractDetails = ({
         const updatedSubmission = await updateDraft(updatedContract)
         if (updatedSubmission instanceof Error) {
             setSubmitting(false)
-            console.info('Error updating draft submission: ', updatedSubmission)
+            console.info('Error updatestting draft submission: ', updatedSubmission)
         } else if (options.type === 'SAVE_AS_DRAFT' && updatedSubmission) {
             setDraftSaved(true)
             setSubmitting(false)
