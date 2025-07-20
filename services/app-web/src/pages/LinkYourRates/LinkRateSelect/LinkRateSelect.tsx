@@ -7,7 +7,7 @@ import {
     createFilter,
 } from 'react-select'
 import styles from '../../../components/Select/Select.module.scss'
-import { FetchRateDocument, IndexRatesInput, useFetchRateQuery, useIndexRatesQuery, useIndexRatesStrippedQuery } from '../../../gen/gqlClient'
+import { IndexRatesInput, useFetchRateQuery, useIndexRatesStrippedQuery } from '../../../gen/gqlClient'
 import { programNames } from '@mc-review/hpp'
 import { formatCalendarDate } from '@mc-review/dates'
 import {

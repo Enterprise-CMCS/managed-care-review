@@ -193,11 +193,7 @@ const RateDetails = ({
     useEffect(() => {
         updateActiveMainContent(activeMainContentId)
     }, [activeMainContentId, updateActiveMainContent])
-    useEffect(() => {
-        if (fetchRateData?.fetchRate?.rate) {
-            console.log('Fetched rate from API:', fetchRateData.fetchRate.rate)
-        }
-    }, [fetchRateData])
+  
     const [updateDraftContractRates] = useUpdateDraftContractRatesMutation()
     const [submitRate] = useSubmitRateMutation()
     const isDSNP =
@@ -247,7 +243,7 @@ const RateDetails = ({
         )
     }
     // Redirect if in standalone rate workflow and rate not editable
-    if (displayAsStandaloneRate && initialRates[0].status !== 'UNLOCKED') {
+    if (displayAsStandaloneRate && initialRates[0]?.status !== 'UNLOCKED') {
         navigate(`/rates/${id}`)
     }
 
