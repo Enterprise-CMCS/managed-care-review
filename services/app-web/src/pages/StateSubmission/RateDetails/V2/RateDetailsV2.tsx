@@ -154,8 +154,7 @@ const RateDetails = ({
                 rateID: id ?? 'unknown-rate',
             },
         },
-        skip: !displayAsStandaloneRate || !selectedRateID,
-        // skip: !displayAsStandaloneRate || !!linkedRateID,
+        skip: !displayAsStandaloneRate,
     })
 
     useEffect(() => {
