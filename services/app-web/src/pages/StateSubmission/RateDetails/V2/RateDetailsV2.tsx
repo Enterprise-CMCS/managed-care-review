@@ -56,6 +56,7 @@ import { LinkedRateSummary } from '../LinkedRateSummary'
 import { usePage } from '../../../../contexts/PageContext'
 import { InfoTag } from '../../../../components/InfoTag/InfoTag'
 import { useFocusOnRender } from '../../../../hooks/useFocusOnRender'
+import { ApolloError } from '@apollo/client'
 
 export type FormikRateForm = {
     id?: string // no id if its a new rate
@@ -126,6 +127,9 @@ const RateDetails = ({
 
     // Multi-rates state management
     const [focusNewRate, setFocusNewRate] = useState(false)
+    const [rateSummaryLoading, setRateSummaryLoading] =  useState<boolean | undefined>(undefined);
+    const [rateSummaryError, setRateSummaryError] = useState<ApolloError | undefined>(undefined);
+
     const newRateNameRef = React.useRef<HTMLElement | null>(null)
     const [newRateButtonRef, setNewRateButtonFocus] = useFocus() // This ref.current is always the same element
     const { id } = useRouteParams()
@@ -560,15 +564,11 @@ const RateDetails = ({
                                                                         }
                                                                         autofill={(
                                                                             rateForm: FormikRateForm,
-                                                                            linkedRateID?: string
+                                                                            autoFillLoading?: boolean | undefined,
+                                                                            autoFillError?: ApolloError | undefined
                                                                         ) => {
-                                                                            if (typeof linkedRateID === 'string') {
-                                                                                setSelectedRateID(linkedRateID)
-                                                                                console.log(linkedRateID, 'linkedrateid')
-                                                                                console.log(fetchRateData?.fetchRate.rate)
-                                                                                console.log(fetchRateLoading, 'fetch loading')
-                                                                            }
-                                                                            // return ()=> {console.log('')}
+                                                                            setRateSummaryLoading(autoFillLoading)
+                                                                            setRateSummaryError(autoFillError)
                                                                             return replace(
                                                                                 index,
                                                                                 rateForm
@@ -590,6 +590,8 @@ const RateDetails = ({
                                                                             rateForm={
                                                                                 rateForm
                                                                             }
+                                                                            loading={rateSummaryLoading}
+                                                                            apiError={rateSummaryError}
                                                                         />
                                                                     )}
 

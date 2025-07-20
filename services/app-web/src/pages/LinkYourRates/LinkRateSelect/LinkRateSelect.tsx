@@ -19,7 +19,8 @@ import { useTealium } from '../../../hooks'
 import { useField } from 'formik'
 import { convertIndexRatesGQLRateToRateForm } from '../../StateSubmission/RateDetails/rateDetailsHelpers'
 import { AccessibleSelect } from '../../../components/Select'
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
+import { ApolloError } from '@apollo/client'
 
 export interface LinkRateOptionType {
     readonly value: string
@@ -37,7 +38,7 @@ export type LinkRateSelectPropType = {
     name: string
     initialValue: string | undefined
     alreadySelected?: string[] // used for multi-rate, array of rate IDs helps ensure we can't select rates already selected elsewhere on page
-    autofill?: (rateForm: FormikRateForm, linkedRateID?: string) => void // used for multi-rates, when called will FieldArray replace the existing form fields with new data
+    autofill?: (rateForm: FormikRateForm, autofillLoading?: boolean, autofillError?: ApolloError | undefined) => void // used for multi-rates, when called will FieldArray replace the existing form fields with new data
     label?: string
     stateCode?: string //used to limit rates by state
 }
@@ -58,16 +59,30 @@ export const LinkRateSelect = ({
     const { data, loading, error } = useIndexRatesStrippedQuery({
         variables: { input },
     })
-    const { data: selectedRateData, loading: sloading, error: serror } = useFetchRateQuery({
+    const { data: selectedRateData, loading: fetchRateLoading, error: fetchRateError } = useFetchRateQuery({
         variables: { input: {
             rateID: selectedRateId ?? ''
         } },
-        skip: !selectedRateId, // Skip the query if no ID is selected
+        skip: !selectedRateId,
       });
     const { getKey } = useS3()
     const { logDropdownSelectionEvent } = useTealium()
     const [_field, _meta, helpers] = useField({ name }) // useField only relevant for non-autofill implementations
 
+    useEffect(() => {
+        if (selectedRateData?.fetchRate?.rate) {
+          const linkedRate = selectedRateData.fetchRate.rate;
+          // Do any additional logic here
+          if (autofill){
+                const linkedRateForm: FormikRateForm =
+                    convertIndexRatesGQLRateToRateForm(getKey, linkedRate)
+                // put already selected fields back in place
+                linkedRateForm.ratePreviouslySubmitted = 'YES'
+
+                autofill(linkedRateForm, fetchRateLoading, fetchRateError)
+          }
+        }
+      }, [selectedRateData]);
     const rates = data?.indexRatesStripped.edges.map((e) => e.node) || []
     // Sort rates by latest submission in desc order and remove withdrawn
     // Do not display withdrawn rates as an option of a linked rate to select
@@ -149,15 +164,8 @@ export const LinkRateSelect = ({
 
             if (autofill) {
                 const linkedRateID = newValue.value
-                
                 setSelectedRateId(linkedRateID);
-                const linkedRate = selectedRateData?.fetchRate.rate
-                const linkedRateForm: FormikRateForm =
-                    convertIndexRatesGQLRateToRateForm(getKey, linkedRate)
-                // put already selected fields back in place
-                linkedRateForm.ratePreviouslySubmitted = 'YES'
-
-                autofill(linkedRateForm, linkedRateID)
+                
             } else {
                 // this path is used for replace/withdraw redundant rates
                 // we are not autofilling form data, we are just returning the IDs of the rate selected
@@ -173,6 +181,7 @@ export const LinkRateSelect = ({
                 // put already selected fields back in place
                 emptyRateForm.ratePreviouslySubmitted = 'YES'
                 autofill(emptyRateForm)
+
             } else {
                 // this path is used for replace/withdraw redundant rates
                 // we are not autofilling form data, we are just returning the IDs of the rate selected

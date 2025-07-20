@@ -12,12 +12,13 @@ import {
     convertGQLRateToRateForm,
 } from '../StateSubmission/RateDetails'
 import { useS3 } from '../../contexts/S3Context'
+import { ApolloError } from '@apollo/client'
 
 export type LinkYourRatesProps = {
     fieldNamePrefix: string
     index: number
     shouldValidate: boolean
-    autofill: (rateForm: FormikRateForm, linkedRateID?: string) => void // used for multi-rates, when called will FieldArray replace the existing form fields with new data
+    autofill: (rateForm: FormikRateForm, autofillLoading?: boolean, autofillError?: ApolloError) => void // used for multi-rates, when called will FieldArray replace the existing form fields with new data
     disableRadioBtns: boolean
 }
 
