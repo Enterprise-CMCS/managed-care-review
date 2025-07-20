@@ -53,7 +53,7 @@ export const LinkRateSelect = ({
     ...selectProps
 }: LinkRateSelectPropType & Props<LinkRateOptionType, false>) => {
     const input: IndexRatesInput = { stateCode }
-    const [selectedRateId, setSelectedRateId] = useState<string | null>(null);
+    const [selectedRateId, setSelectedRateID] = useState<string | null>(null);
 
     
     const { data, loading, error } = useIndexRatesStrippedQuery({
@@ -72,17 +72,15 @@ export const LinkRateSelect = ({
     useEffect(() => {
         if (selectedRateData?.fetchRate?.rate) {
           const linkedRate = selectedRateData.fetchRate.rate;
-          // Do any additional logic here
           if (autofill){
                 const linkedRateForm: FormikRateForm =
                     convertIndexRatesGQLRateToRateForm(getKey, linkedRate)
-                // put already selected fields back in place
                 linkedRateForm.ratePreviouslySubmitted = 'YES'
-
                 autofill(linkedRateForm, fetchRateLoading, fetchRateError)
           }
         }
       }, [selectedRateData]);
+    
     const rates = data?.indexRatesStripped.edges.map((e) => e.node) || []
     // Sort rates by latest submission in desc order and remove withdrawn
     // Do not display withdrawn rates as an option of a linked rate to select
@@ -164,8 +162,9 @@ export const LinkRateSelect = ({
 
             if (autofill) {
                 const linkedRateID = newValue.value
-                setSelectedRateId(linkedRateID);
-                
+                // This will trigger the fetchRate call 
+                // for the newly selected linkedRate
+                setSelectedRateID(linkedRateID);
             } else {
                 // this path is used for replace/withdraw redundant rates
                 // we are not autofilling form data, we are just returning the IDs of the rate selected
