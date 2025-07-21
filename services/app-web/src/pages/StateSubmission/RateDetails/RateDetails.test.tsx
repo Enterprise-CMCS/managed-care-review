@@ -35,7 +35,7 @@ import { Rate } from '../../../gen/gqlClient'
 
 describe('RateDetails', () => {
     // BRING THESE TESTS BACK WHEN WE RE-p IMPLEMENT SINGLE RATE EDIT
-    /* eslint-disable jest/no-disabled-tests, jest/expect-expect */
+
     describe.skip('handles edit  of a single rate', () => {
         it('renders without errors', async () => {
             const rateID = 'test-abc-123'
@@ -110,7 +110,6 @@ describe('RateDetails', () => {
                 )
                 .closest('fieldset')
             await userEvent.click(
-                // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
                 within(hasSharedRateFieldset!).getByLabelText(/No/i)
             )
 
@@ -1397,7 +1396,7 @@ describe('RateDetails', () => {
             const option = screen
                 .getByRole('listbox')
                 .querySelector('#react-select-2-option-0')
-            // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+
             await user.click(option!)
 
             await waitFor(() => {
@@ -1485,19 +1484,19 @@ describe('RateDetails', () => {
             const option = screen
                 .getByRole('listbox')
                 .querySelector('#react-select-2-option-0')
-            // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+
             await user.click(option!)
 
             const clearSelectionButton = screen
                 .getByRole('combobox')
                 .querySelector('.select__clear-indicator')
-            // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+
             await user.click(clearSelectionButton!)
 
             const open = screen
                 .getByRole('combobox')
                 .querySelector('.select__dropdown-indicator')
-            // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+
             await user.click(open!)
             expect(screen.getByRole('listbox')).toBeInTheDocument()
 

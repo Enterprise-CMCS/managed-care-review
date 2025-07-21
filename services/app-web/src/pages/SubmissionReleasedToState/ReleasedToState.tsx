@@ -42,7 +42,7 @@ const ReleaseToStateSchema = Yup.object().shape({
     dateApprovalReleasedToState: Yup.date()
         .required('You must select a date')
         .max(today.toString(), 'You must enter a valid date')
-        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+
         // @ts-ignore-next-line
         .validateDateFormat('YYYY-MM-DD', true)
         .typeError('Date must be in MM/DD/YYYY format'),
