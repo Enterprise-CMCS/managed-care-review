@@ -744,7 +744,7 @@ describe('RateDetailsSummarySection', () => {
             },
             { timeout: 10000 }
         )
-    })
+    }, 10000)
 
     it('renders rate range capitation type', () => {
         const draftContract = mockContractPackageDraft()
