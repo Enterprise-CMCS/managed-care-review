@@ -435,7 +435,7 @@ describe('ContractDetails', () => {
                 modifiedProvisionMedicaidAmendmentKeys.length + 1 //+1 to account for the unrelated dsnp question
             )
         })
-        // eslint-disable-next-line jest/no-disabled-tests
+
         it.skip('shows correct validations for medicaid contract amendment', async () => {
             const draftContract = mockContractPackageUnlockedWithUnlockedType()
             draftContract.draftRevision.formData.populationCovered = 'MEDICAID'
@@ -515,7 +515,7 @@ describe('ContractDetails', () => {
                 )
             })
         })
-        // eslint-disable-next-line jest/no-disabled-tests
+
         it.skip('can set provisions for medicaid base contract', async () => {
             const draftContract = mockContractPackageUnlockedWithUnlockedType()
             draftContract.draftRevision.formData.populationCovered = 'MEDICAID'
@@ -569,7 +569,7 @@ describe('ContractDetails', () => {
                 modifiedProvisionMedicaidBaseKeys.length
             )
         })
-        // eslint-disable-next-line jest/no-disabled-tests
+
         it.skip('shows correct validations for medicaid base contract', async () => {
             const draftContract = mockContractPackageUnlockedWithUnlockedType()
             draftContract.draftRevision.formData.populationCovered = 'MEDICAID'
@@ -746,7 +746,7 @@ describe('ContractDetails', () => {
                 provisionCHIPKeys.length + 1 //+1 to account for the unrelated dsnp question
             )
         })
-        // eslint-disable-next-line jest/no-disabled-tests
+
         it.skip('shows correct validations for CHIP only amendment', async () => {
             const draftContract = mockContractPackageUnlockedWithUnlockedType()
             draftContract.draftRevision.formData.populationCovered = 'CHIP'
