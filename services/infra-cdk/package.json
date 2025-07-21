@@ -10,7 +10,6 @@
     "test:watch": "jest --watch",
     "test:coverage": "jest --coverage",
     "cdk": "cdk",
-    "presynth": "pnpm run -C ../.. build:packages",
     "synth": "cdk synth",
     "diff": "cdk diff",
     "deploy": "cdk deploy",
