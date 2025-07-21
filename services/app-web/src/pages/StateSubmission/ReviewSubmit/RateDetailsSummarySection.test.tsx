@@ -359,6 +359,17 @@ describe('RateDetailsSummarySection', () => {
             })
         ).toBeInTheDocument()
         expect(
+            screen.getByTestId(
+                'Medicare-Medicaid dually eligible individuals enrolled through a Dual-Eligible Special Needs Plan (D-SNP)'
+            )
+        ).toBeInTheDocument()
+        expect(screen.getByTestId('Medicaid-only')).toBeInTheDocument()
+        expect(
+            screen.getByTestId(
+                'Medicare-Medicaid dually eligible individuals not enrolled through a D-SNP'
+            )
+        ).toBeInTheDocument()
+        expect(
             screen.getByRole('definition', { name: 'Rate certification type' })
         ).toBeInTheDocument()
         expect(
@@ -709,37 +720,6 @@ describe('RateDetailsSummarySection', () => {
             )
         ).toBeInTheDocument()
     })
-
-    it('renders selected medicaid populations', async () => {
-        renderWithProviders(
-            <RateDetailsSummarySection
-                contract={draftContract}
-                submissionName="MN-PMAP-0001"
-                statePrograms={statePrograms}
-            />,
-            {
-                apolloProvider: apolloProviderCMSUser,
-                featureFlags: { dsnp: true },
-            }
-        )
-
-        await waitFor(
-            () => {
-                expect(
-                    screen.getByTestId(
-                        'Medicare-Medicaid dually eligible individuals enrolled through a Dual-Eligible Special Needs Plan (D-SNP)'
-                    )
-                ).toBeInTheDocument()
-                expect(screen.getByTestId('Medicaid-only')).toBeInTheDocument()
-                expect(
-                    screen.getByTestId(
-                        'Medicare-Medicaid dually eligible individuals not enrolled through a D-SNP'
-                    )
-                ).toBeInTheDocument()
-            },
-            { timeout: 10000 }
-        )
-    }, 10000)
 
     it('renders rate range capitation type', () => {
         const draftContract = mockContractPackageDraft()
