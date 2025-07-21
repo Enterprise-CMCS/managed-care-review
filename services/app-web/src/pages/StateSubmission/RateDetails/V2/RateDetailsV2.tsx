@@ -98,7 +98,6 @@ const RateDetails = ({
     const navigate = useNavigate()
     const { getKey } = useS3()
     const displayAsStandaloneRate = type === 'SINGLE'
-    const [selectedRateID, setSelectedRateID] = useState<string | null>(null);
     const { loggedInUser } = useAuth()
     const ldClient = useLDClient()
     const { updateHeading, updateActiveMainContent } = usePage()
@@ -246,7 +245,7 @@ const RateDetails = ({
         )
     }
     // Redirect if in standalone rate workflow and rate not editable
-    if (displayAsStandaloneRate && initialRates[0]?.status !== 'UNLOCKED') {
+    if (displayAsStandaloneRate && initialRates[0].status !== 'UNLOCKED') {
         navigate(`/rates/${id}`)
     }
 
@@ -567,8 +566,9 @@ const RateDetails = ({
                                                                             autoFillLoading?: boolean | undefined,
                                                                             autoFillError?: ApolloError | undefined
                                                                         ) => {
-                                                                            setRateSummaryLoading(autoFillLoading)
-                                                                            setRateSummaryError(autoFillError)
+                                                                            if (autoFillLoading) setRateSummaryLoading(autoFillLoading)
+                                                                            if (autoFillError) setRateSummaryError(autoFillError)
+
                                                                             return replace(
                                                                                 index,
                                                                                 rateForm
