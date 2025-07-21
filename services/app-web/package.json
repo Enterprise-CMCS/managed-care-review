@@ -162,6 +162,7 @@
         "@vitest/ui": "^2.1.9",
         "classnames": "^2.2.6",
         "cypress": "^13.13.2",
+        "eslint": "^9.31.0",
         "eslint-config-prettier": "^10.1.5",
         "eslint-plugin-jest": "^29.0.1",
         "eslint-plugin-jsx-a11y": "^6.5.1",
@@ -183,6 +184,7 @@
         "stylelint": "^16.12.0",
         "stylelint-config-recommended-scss": "^14.1.0",
         "typescript": "5.1.6",
+        "typescript-eslint": "^8.37.0",
         "vite-plugin-graphql-loader": "^4.0.4",
         "vite-plugin-svgr": "^4.3.0",
         "vitest": "^3.2.4"
