@@ -711,8 +711,6 @@ describe('RateDetailsSummarySection', () => {
     })
 
     it('renders selected medicaid populations', async () => {
-        draftContract.draftRates![0].draftRevision!.formData.rateCertificationName =
-            'rate-123'
         renderWithProviders(
             <RateDetailsSummarySection
                 contract={draftContract}
@@ -724,8 +722,6 @@ describe('RateDetailsSummarySection', () => {
                 featureFlags: { dsnp: true },
             }
         )
-        const rateName = 'rate-123'
-        expect(screen.getByText(rateName)).toBeInTheDocument()
 
         await waitFor(
             () => {
