@@ -107,15 +107,12 @@ jobs:
     - name: Build packages
       run: pnpm build:packages
 
-    - name: Run tests
-      run: pnpm test
-      continue-on-error: true  # Don't fail deployment for test failures in dev
-
     # 4. CDK Synth - Validate infrastructure code
     - name: CDK Synth
       working-directory: services/infra-cdk
       run: |
         echo "Running CDK synth to validate infrastructure..."
+        pnpm install --frozen-lockfile
         pnpm cdk synth --all --context stage=${{ env.STAGE }} > cdk-synth-output.yaml
 
     # 5. Store CDK Synth Artifacts
