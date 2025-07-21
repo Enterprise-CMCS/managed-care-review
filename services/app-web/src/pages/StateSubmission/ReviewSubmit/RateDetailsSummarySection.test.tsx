@@ -728,20 +728,23 @@ describe('RateDetailsSummarySection', () => {
         const rateName = 'rate-123'
         expect(screen.getByText(rateName)).toBeInTheDocument()
 
-        await waitFor(() => {
-            expect(
-                screen.getByTestId(
-                    'Medicare-Medicaid dually eligible individuals enrolled through a Dual-Eligible Special Needs Plan (D-SNP)'
-                )
-            ).toBeInTheDocument()
-            expect(screen.getByTestId('Medicaid-only')).toBeInTheDocument()
-            expect(
-                screen.getByTestId(
-                    'Medicare-Medicaid dually eligible individuals not enrolled through a D-SNP'
-                )
-            ).toBeInTheDocument()
-        })
-    }, 10000)
+        await waitFor(
+            () => {
+                expect(
+                    screen.getByTestId(
+                        'Medicare-Medicaid dually eligible individuals enrolled through a Dual-Eligible Special Needs Plan (D-SNP)'
+                    )
+                ).toBeInTheDocument()
+                expect(screen.getByTestId('Medicaid-only')).toBeInTheDocument()
+                expect(
+                    screen.getByTestId(
+                        'Medicare-Medicaid dually eligible individuals not enrolled through a D-SNP'
+                    )
+                ).toBeInTheDocument()
+            },
+            { timeout: 10000 }
+        )
+    })
 
     it('renders rate range capitation type', () => {
         const draftContract = mockContractPackageDraft()
