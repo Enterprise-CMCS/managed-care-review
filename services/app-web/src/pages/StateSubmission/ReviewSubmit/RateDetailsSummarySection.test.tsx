@@ -711,6 +711,8 @@ describe('RateDetailsSummarySection', () => {
     })
 
     it('renders selected medicaid populations', async () => {
+        draftContract.draftRates![0].draftRevision!.formData.rateCertificationName =
+            'rate-123'
         renderWithProviders(
             <RateDetailsSummarySection
                 contract={draftContract}
@@ -723,8 +725,9 @@ describe('RateDetailsSummarySection', () => {
                 featureFlags: { dsnp: true },
             }
         )
-
+        const rateName = 'rate-123'
         await waitFor(() => {
+            expect(screen.getByText(rateName)).toBeInTheDocument()
             expect(
                 screen.getByText(
                     'Medicare-Medicaid dually eligible individuals enrolled through a Dual-Eligible Special Needs Plan (D-SNP)'
