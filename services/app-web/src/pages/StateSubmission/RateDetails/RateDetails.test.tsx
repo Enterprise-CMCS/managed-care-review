@@ -17,9 +17,10 @@ import {
     rateRevisionDataMock,
     draftRateDataMock,
     fetchDraftRateMockSuccess,
-    indexRatesMockSuccess,
     mockWithdrawnRates,
     mockContractPackageUnlockedWithUnlockedType,
+    indexRatesStrippedMockSuccess,
+    strippedRateDataMock,
 } from '@mc-review/mocks'
 import { Route, Routes, Location } from 'react-router-dom'
 import { RoutesRecord } from '@mc-review/constants'
@@ -31,7 +32,7 @@ import {
     clickRemoveIndexRate,
     fillOutIndexRate,
 } from '../../../testHelpers/jestRateHelpers'
-import { Rate } from '../../../gen/gqlClient'
+import { Rate, RateStripped } from '../../../gen/gqlClient'
 
 describe('RateDetails', () => {
     // BRING THESE TESTS BACK WHEN WE RE-p IMPLEMENT SINGLE RATE EDIT
@@ -748,7 +749,7 @@ describe('RateDetails', () => {
                                     id: 'test-abc-123',
                                 },
                             }),
-                            indexRatesMockSuccess(),
+                            indexRatesStrippedMockSuccess(),
                             updateDraftContractRatesMockSuccess({
                                 contract: {
                                     id: 'test-abc-123',
@@ -977,12 +978,12 @@ describe('RateDetails', () => {
                 {
                     apolloProvider: {
                         mocks: [
-                            indexRatesMockSuccess(),
+                            indexRatesStrippedMockSuccess(),
                             fetchCurrentUserMock({ statusCode: 200 }),
                             fetchContractMockSuccess({
                                 contract: testContract,
                             }),
-                            indexRatesMockSuccess(),
+                            indexRatesStrippedMockSuccess(),
                         ],
                     },
                     routerProvider: {
@@ -1031,14 +1032,14 @@ describe('RateDetails', () => {
         })
 
         it('lists dropdown options in desc order by latest submission date', async () => {
-            const rates: Rate[] = [
+            const rates: RateStripped[] = [
                 {
-                    ...rateDataMock(),
+                    ...strippedRateDataMock(),
                     id: 'test-id-123',
                     stateNumber: 1,
-                    revisions: [
+                    latestSubmittedRevision: 
                         {
-                            ...rateRevisionDataMock(),
+                            ...strippedRateDataMock().latestSubmittedRevision,
                             submitInfo: {
                                 __typename: 'UpdateInformation',
                                 updatedAt: new Date('2022-04-10'),
@@ -1051,19 +1052,18 @@ describe('RateDetails', () => {
                                 updatedReason: 'Resubmit',
                             },
                             formData: {
-                                ...rateRevisionDataMock().formData,
+                                ...strippedRateDataMock().latestSubmittedRevision.formData,
                                 rateCertificationName: 'Third-Position-Rate',
                             },
                         },
-                    ],
                 },
                 {
-                    ...rateDataMock(),
+                    ...strippedRateDataMock(),
                     id: 'test-id-124',
                     stateNumber: 2,
-                    revisions: [
+                    latestSubmittedRevision:
                         {
-                            ...rateRevisionDataMock(),
+                            ...strippedRateDataMock().latestSubmittedRevision,
                             submitInfo: {
                                 __typename: 'UpdateInformation',
                                 updatedAt: new Date('2024-04-10'),
@@ -1076,19 +1076,18 @@ describe('RateDetails', () => {
                                 updatedReason: 'Resubmit',
                             },
                             formData: {
-                                ...rateRevisionDataMock().formData,
+                                ...strippedRateDataMock().latestSubmittedRevision.formData,
                                 rateCertificationName: 'First-Position-Rate',
                             },
                         },
-                    ],
                 },
                 {
-                    ...rateDataMock(),
+                    ...strippedRateDataMock(),
                     id: 'test-id-125',
                     stateNumber: 3,
-                    revisions: [
+                    latestSubmittedRevision:
                         {
-                            ...rateRevisionDataMock(),
+                            ...strippedRateDataMock().latestSubmittedRevision,
                             submitInfo: {
                                 __typename: 'UpdateInformation',
                                 updatedAt: new Date('2024-04-08'),
@@ -1101,11 +1100,10 @@ describe('RateDetails', () => {
                                 updatedReason: 'Resubmit',
                             },
                             formData: {
-                                ...rateRevisionDataMock().formData,
+                                ...strippedRateDataMock().latestSubmittedRevision.formData,
                                 rateCertificationName: 'Second-Position-Rate',
                             },
                         },
-                    ],
                 },
             ]
 
@@ -1119,7 +1117,7 @@ describe('RateDetails', () => {
                 {
                     apolloProvider: {
                         mocks: [
-                            indexRatesMockSuccess(undefined, rates),
+                            indexRatesStrippedMockSuccess(undefined, rates),
                             fetchCurrentUserMock({ statusCode: 200 }),
                             fetchContractMockSuccess({
                                 contract: mockContractWithLinkedRateDraft(),
@@ -1176,16 +1174,16 @@ describe('RateDetails', () => {
         })
 
         it('omits withdrawn rates from the dropdown options', async () => {
-            const rates: Rate[] = [
+            const rates: RateStripped[] = [
                 {
-                    ...rateDataMock(),
+                    ...strippedRateDataMock(),
                     id: 'test-id-123',
                     stateNumber: 1,
                     consolidatedStatus: 'WITHDRAWN',
                     reviewStatus: 'WITHDRAWN',
-                    revisions: [
+                    latestSubmittedRevision:
                         {
-                            ...rateRevisionDataMock(),
+                            ...strippedRateDataMock().latestSubmittedRevision,
                             submitInfo: {
                                 __typename: 'UpdateInformation',
                                 updatedAt: new Date('2022-04-10'),
@@ -1198,19 +1196,19 @@ describe('RateDetails', () => {
                                 updatedReason: 'Resubmit',
                             },
                             formData: {
-                                ...rateRevisionDataMock().formData,
+                                ...strippedRateDataMock().latestSubmittedRevision.formData,
                                 rateCertificationName: 'Third-Position-Rate',
                             },
                         },
-                    ],
+                    
                 },
                 {
-                    ...rateDataMock(),
+                    ...strippedRateDataMock(),
                     id: 'test-id-124',
                     stateNumber: 2,
-                    revisions: [
+                    latestSubmittedRevision:
                         {
-                            ...rateRevisionDataMock(),
+                            ...strippedRateDataMock().latestSubmittedRevision,
                             submitInfo: {
                                 __typename: 'UpdateInformation',
                                 updatedAt: new Date('2024-04-10'),
@@ -1223,19 +1221,18 @@ describe('RateDetails', () => {
                                 updatedReason: 'Resubmit',
                             },
                             formData: {
-                                ...rateRevisionDataMock().formData,
+                                ...strippedRateDataMock().latestSubmittedRevision.formData,
                                 rateCertificationName: 'First-Position-Rate',
                             },
                         },
-                    ],
                 },
                 {
-                    ...rateDataMock(),
+                    ...strippedRateDataMock(),
                     id: 'test-id-125',
                     stateNumber: 3,
-                    revisions: [
+                    latestSubmittedRevision:
                         {
-                            ...rateRevisionDataMock(),
+                            ...strippedRateDataMock().latestSubmittedRevision,
                             submitInfo: {
                                 __typename: 'UpdateInformation',
                                 updatedAt: new Date('2024-04-08'),
@@ -1248,11 +1245,10 @@ describe('RateDetails', () => {
                                 updatedReason: 'Resubmit',
                             },
                             formData: {
-                                ...rateRevisionDataMock().formData,
+                                ...strippedRateDataMock().latestSubmittedRevision.formData,
                                 rateCertificationName: 'Second-Position-Rate',
                             },
                         },
-                    ],
                 },
             ]
 
@@ -1266,7 +1262,7 @@ describe('RateDetails', () => {
                 {
                     apolloProvider: {
                         mocks: [
-                            indexRatesMockSuccess(undefined, rates),
+                            indexRatesStrippedMockSuccess(undefined, rates),
                             fetchCurrentUserMock({ statusCode: 200 }),
                             fetchContractMockSuccess({
                                 contract: mockContractWithLinkedRateDraft(),
@@ -1330,7 +1326,7 @@ describe('RateDetails', () => {
                 {
                     apolloProvider: {
                         mocks: [
-                            indexRatesMockSuccess(),
+                            indexRatesStrippedMockSuccess(),
                             fetchCurrentUserMock({ statusCode: 200 }),
                             fetchDraftRateMockSuccess({ id: rateID }),
                             fetchContractMockSuccess({
@@ -1418,7 +1414,7 @@ describe('RateDetails', () => {
                 {
                     apolloProvider: {
                         mocks: [
-                            indexRatesMockSuccess(),
+                            indexRatesStrippedMockSuccess(),
                             fetchCurrentUserMock({ statusCode: 200 }),
                             fetchDraftRateMockSuccess({ id: rateID }),
                             fetchContractMockSuccess({
