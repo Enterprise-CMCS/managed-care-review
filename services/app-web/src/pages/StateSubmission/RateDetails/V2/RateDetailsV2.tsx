@@ -56,6 +56,7 @@ import { LinkedRateSummary } from '../LinkedRateSummary'
 import { usePage } from '../../../../contexts/PageContext'
 import { InfoTag } from '../../../../components/InfoTag/InfoTag'
 import { useFocusOnRender } from '../../../../hooks/useFocusOnRender'
+import { ApolloError } from '@apollo/client'
 
 export type FormikRateForm = {
     id?: string // no id if its a new rate
@@ -125,6 +126,9 @@ const RateDetails = ({
 
     // Multi-rates state management
     const [focusNewRate, setFocusNewRate] = useState(false)
+    const [rateSummaryLoading, setRateSummaryLoading] =  useState<boolean | undefined>(undefined);
+    const [rateSummaryError, setRateSummaryError] = useState<ApolloError | undefined>(undefined);
+
     const newRateNameRef = React.useRef<HTMLElement | null>(null)
     const [newRateButtonRef, setNewRateButtonFocus] = useFocus() // This ref.current is always the same element
     const { id } = useRouteParams()
@@ -163,7 +167,7 @@ const RateDetails = ({
             newRateNameRef.current = null
         }
     }, [focusNewRate])
-
+    
     // Set up data for form. Either based on contract API (for multi rate) or rates API (for edit and submit of standalone rate)
     const contract = fetchContractData?.fetchContract.contract
     const contractDraftRevision = contract?.draftRevision
@@ -191,7 +195,7 @@ const RateDetails = ({
     useEffect(() => {
         updateActiveMainContent(activeMainContentId)
     }, [activeMainContentId, updateActiveMainContent])
-
+  
     const [updateDraftContractRates] = useUpdateDraftContractRatesMutation()
     const [submitRate] = useSubmitRateMutation()
     const isDSNP =
@@ -558,8 +562,13 @@ const RateDetails = ({
                                                                             index
                                                                         }
                                                                         autofill={(
-                                                                            rateForm: FormikRateForm
+                                                                            rateForm: FormikRateForm,
+                                                                            autoFillLoading?: boolean | undefined,
+                                                                            autoFillError?: ApolloError | undefined
                                                                         ) => {
+                                                                            if (autoFillLoading) setRateSummaryLoading(autoFillLoading)
+                                                                            if (autoFillError) setRateSummaryError(autoFillError)
+
                                                                             return replace(
                                                                                 index,
                                                                                 rateForm
@@ -581,6 +590,8 @@ const RateDetails = ({
                                                                             rateForm={
                                                                                 rateForm
                                                                             }
+                                                                            loading={rateSummaryLoading}
+                                                                            apiError={rateSummaryError}
                                                                         />
                                                                     )}
 
