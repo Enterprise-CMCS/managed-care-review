@@ -16,7 +16,7 @@
         "start": "pnpm serverless offline start --stage local --region us-east-1 --httpPort 3030 --host 127.0.0.1"
     },
     "lint-staged": {
-        "*.{js,ts}": [
+        "**/*.{js,ts}": [
             "eslint --max-warnings=0 --ignore-pattern 'esbuild.config.js'",
             "prettier --write"
         ],

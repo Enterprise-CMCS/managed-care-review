@@ -19,7 +19,7 @@
         "cy:run": "NODE_V8_COVERAGE=./coverage-cypress cypress run"
     },
     "lint-staged": {
-        "*.{js,jsx, ts,tsx}": [
+        "**/*.{js,jsx,ts,tsx}": [
             "eslint --fix --max-warnings=0",
             "prettier --write"
         ],
