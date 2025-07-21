@@ -48,11 +48,11 @@ fi
 
 # Build TypeScript
 echo -e "${YELLOW}Building TypeScript...${NC}"
-npm run build
+pnpm run build
 
 # Run tests
 echo -e "${YELLOW}Running tests...${NC}"
-npm test
+pnpm test
 
 # Synthesize CloudFormation
 echo -e "${YELLOW}Synthesizing CloudFormation templates...${NC}"
