@@ -2010,7 +2010,7 @@ describe('RateDetails', () => {
             await screen.findByText('Rate Details')
             // rate Medicaid populations question to not be present
             expect(
-                screen.queryByText('Which Medicaid populations are included in this rate certifications')
+                screen.queryByText('Which Medicaid populations are included in this rate certification')
             ).not.toBeInTheDocument()
         })
     })
