@@ -1967,7 +1967,7 @@ describe('RateDetails', () => {
             await screen.findByText('Rate Details')
             // rate Medicaid populations question to be present
             expect(
-                screen.getByText('Rate Medicaid populations')
+                screen.getByText('Which Medicaid populations are included in this rate certification?')
             ).toBeInTheDocument()
         })
 
@@ -2006,7 +2006,7 @@ describe('RateDetails', () => {
             await screen.findByText('Rate Details')
             // rate Medicaid populations question to not be present
             expect(
-                screen.queryByText('Rate Medicaid populations')
+                screen.queryByText('Which Medicaid populations are included in this rate certification')
             ).not.toBeInTheDocument()
         })
     })
