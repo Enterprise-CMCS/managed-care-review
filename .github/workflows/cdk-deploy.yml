@@ -75,6 +75,11 @@ jobs:
         node-version: ${{ env.NODE_VERSION }}
         cache: 'pnpm'
 
+    - name: Configure pnpm and git for HTTPS
+      run: |
+        pnpm config set git-prefer-https true
+        git config --global url."https://github.com/".insteadOf "git@github.com:"
+
     # 2. Cache dependencies
     - name: Get pnpm store directory
       id: pnpm-cache
@@ -95,6 +100,9 @@ jobs:
     # 3. Install and build
     - name: Install dependencies
       run: pnpm install --frozen-lockfile
+
+    - name: Generate code (GraphQL, Prisma, Proto)
+      run: pnpm -r generate
 
     - name: Build packages
       run: pnpm build:packages

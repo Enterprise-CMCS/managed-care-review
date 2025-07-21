@@ -77,6 +77,11 @@ jobs:
           version: 8
           run_install: false
 
+      - name: Configure pnpm and git for HTTPS
+        run: |
+          pnpm config set git-prefer-https true
+          git config --global url."https://github.com/".insteadOf "git@github.com:"
+
       - name: Get pnpm store directory
         shell: bash
         run: |
@@ -86,7 +91,7 @@ jobs:
         uses: actions/cache@v3
         with:
           path: ${{ env.STORE_PATH }}
-          key: ${{ runner.os }}-pnpm-store-${{ hashFiles('**/pnpm-lock.yaml') }}
+          key: ${{ runner.os }}-pnpm-store-${{ hashFiles('services/infra-cdk/pnpm-lock.yaml') }}
           restore-keys: |
             ${{ runner.os }}-pnpm-store-
 
