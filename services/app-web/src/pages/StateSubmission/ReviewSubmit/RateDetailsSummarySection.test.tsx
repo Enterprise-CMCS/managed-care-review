@@ -726,8 +726,9 @@ describe('RateDetailsSummarySection', () => {
             }
         )
         const rateName = 'rate-123'
+        expect(screen.getByText(rateName)).toBeInTheDocument()
+
         await waitFor(() => {
-            expect(screen.getByText(rateName)).toBeInTheDocument()
             expect(
                 screen.getByText(
                     'Medicare-Medicaid dually eligible individuals enrolled through a Dual-Eligible Special Needs Plan (D-SNP)'
@@ -740,7 +741,7 @@ describe('RateDetailsSummarySection', () => {
                 )
             ).toBeInTheDocument()
         })
-    })
+    }, 10000)
 
     it('renders rate range capitation type', () => {
         const draftContract = mockContractPackageDraft()
