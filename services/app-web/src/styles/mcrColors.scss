@@ -34,7 +34,8 @@ $mcr-gray-lightest: #f0f0f0; /// USWDS 'gray-5'
 
 // mcr-foundation is used for text and containers
 $mcr-foundation-ink: #1b1b1b; // USWDS 'gray-90'
-$mcr-foundation-hint: #71767a; // USWDS 'text-base'
+$mcr-foundation-hint: #3d4551; // NON-USWDS color to achieve 7:1 contracts for accessibility
+$mcr-foundation-note: #1b1b1b; // NON-USWDS color to achieve 7:1 contracts for accessibility
 $mcr-foundation-link: $mcr-primary-base;
 $mcr-foundation-focus: #3e94cf; // CMS 'color-focus'
 $mcr-foundation-white: #fff;

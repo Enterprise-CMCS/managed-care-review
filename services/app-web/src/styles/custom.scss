@@ -58,8 +58,8 @@ $mcr-single-page-width: 40rem; // based on figma - however, 40rem is also media 
             min-width: 20rem;
             max-width: 40rem;
             margin: 0 auto;
+        }
     }
-}
 }
 
 // Adds blue-cyan  gradient to top border of a container, used on document tables
@@ -134,4 +134,9 @@ $mcr-single-page-width: 40rem; // based on figma - however, 40rem is also media 
     width: 1px;
     height: 1px;
     overflow: hidden;
+}
+
+// CSS class for form input note fields
+.mcr-note {
+    color: $mcr-foundation-note;
 }

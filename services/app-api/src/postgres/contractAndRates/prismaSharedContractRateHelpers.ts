@@ -479,6 +479,7 @@ function rateFormDataToDomainModel(
         rateProgramIDs: rateRevision.rateProgramIDs,
         deprecatedRateProgramIDs: rateRevision.deprecatedRateProgramIDs,
         rateCertificationName: rateRevision.rateCertificationName ?? undefined,
+        rateMedicaidPopulations: rateRevision.rateMedicaidPopulations ?? [],
         certifyingActuaryContacts: rateRevision.certifyingActuaryContacts
             ? rateRevision.certifyingActuaryContacts.map((actuary) => ({
                   name: actuary.name ?? undefined,
@@ -624,6 +625,10 @@ function contractFormDataToDomainModel(
         riskBasedContract:
             contractRevision.riskBasedContract !== null
                 ? contractRevision.riskBasedContract
+                : undefined,
+        dsnpContract:
+            contractRevision.dsnpContract !== null
+                ? contractRevision.dsnpContract
                 : undefined,
         stateContacts: contractRevision.stateContacts
             ? contractRevision.stateContacts.map((contact) => ({

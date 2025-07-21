@@ -1,3 +1,5 @@
+#import "../fragments/oauthUserFragment.graphql"
+
 query fetchOauthClients($input: FetchOauthClientsInput) {
     fetchOauthClients(input: $input) {
         oauthClients {
@@ -6,7 +8,9 @@ query fetchOauthClients($input: FetchOauthClientsInput) {
             clientSecret
             grants
             description
-            contactEmail
+            user {
+                ...oauthUserFragment
+            }
             createdAt
             updatedAt
         }

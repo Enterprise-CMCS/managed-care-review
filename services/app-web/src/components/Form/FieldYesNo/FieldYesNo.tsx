@@ -17,9 +17,12 @@ import classNames from 'classnames'
  * ReactUSWDS components directly.
  */
 
+type LegendStyle = 'default' | 'large' | 'srOnly' | undefined
+
 export type FieldYesNoProps = {
     name: string
     label: string
+    legendStyle?: LegendStyle
     hint?: React.ReactNode
     showError?: boolean
     id: string
@@ -29,6 +32,7 @@ export type FieldYesNoProps = {
 export const FieldYesNo = ({
     name,
     label,
+    legendStyle,
     hint,
     showError = false,
     variant = 'TOPLEVEL',
@@ -55,6 +59,7 @@ export const FieldYesNo = ({
             legend={label}
             className={classes}
             data-testid="yes-no-radio-fieldset"
+            legendStyle={legendStyle}
         >
             {inputProps['aria-required'] !== undefined && (
                 <span className={styles.requiredOptionalText}>
@@ -70,7 +75,7 @@ export const FieldYesNo = ({
                 <div
                     role="note"
                     aria-labelledby={id}
-                    className="usa-hint margin-top-1"
+                    className="mcr-note margin-top-1"
                 >
                     {hint}
                 </div>

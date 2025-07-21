@@ -38,6 +38,7 @@ fragment rateQuestionEdgeFragment on RateQuestionEdge {
             }
         }
         division
+        round
         documents {
             s3URL
             name

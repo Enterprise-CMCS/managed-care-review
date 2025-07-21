@@ -1,3 +1,5 @@
+#import "../fragments/oauthUserFragment.graphql"
+
 mutation UpdateOauthClient($input: UpdateOauthClientInput!) {
     updateOauthClient(input: $input) {
         oauthClient {
@@ -5,7 +7,9 @@ mutation UpdateOauthClient($input: UpdateOauthClientInput!) {
             clientId
             clientSecret
             description
-            contactEmail
+            user {
+                ...oauthUserFragment
+            }
             grants
             createdAt
             updatedAt

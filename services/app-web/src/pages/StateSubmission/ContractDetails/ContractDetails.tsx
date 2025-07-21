@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { useState, useEffect } from 'react'
 import dayjs from 'dayjs'
 import {
     Form as UswdsForm,
@@ -25,13 +25,13 @@ import {
     LinkWithLogging,
     ReactRouterLinkWithLogging,
     FormNotificationContainer,
+    FormContainer,
 } from '../../../components'
 import { formatForForm, isDateRangeEmpty } from '../../../formHelpers'
 import { formatUserInputDate } from '@mc-review/dates'
 import { useS3 } from '../../../contexts/S3Context'
 
 import { ContractDetailsFormSchema } from './ContractDetailsSchema'
-import { ManagedCareEntityRecord, FederalAuthorityRecord } from '@mc-review/hpp'
 import { PageActions } from '../PageActions'
 import {
     activeFormPages,
@@ -47,35 +47,35 @@ import { ACCEPTED_SUBMISSION_FILE_TYPES } from '../../../components/FileUpload'
 import {
     federalAuthorityKeysForCHIP,
     federalAuthorityKeys,
+    ManagedCareEntityRecord,
+    FederalAuthorityRecord,
+    type ManagedCareEntity,
+    type ContractExecutionStatus,
+    type FederalAuthority,
 } from '@mc-review/hpp'
 import {
     generateProvisionLabel,
     generateApplicableProvisionsList,
 } from '@mc-review/common-code'
-import type {
-    ManagedCareEntity,
-    ContractExecutionStatus,
-    FederalAuthority,
-} from '@mc-review/hpp'
 import {
     isBaseContract,
     isCHIPOnly,
     isContractAmendment,
     isContractWithProvisions,
+    featureFlags,
 } from '@mc-review/common-code'
-import { RoutesRecord } from '@mc-review/constants'
-import { useLDClient } from 'launchdarkly-react-client-sdk'
-import { featureFlags } from '@mc-review/common-code'
 import {
-    booleanAsYesNoFormValue,
-    yesNoFormValueAsBoolean,
-} from '../../../components/Form/FieldYesNo/FieldYesNo'
-import {
+    RoutesRecord,
+    RouteT,
     StatutoryRegulatoryAttestation,
     StatutoryRegulatoryAttestationDescription,
     StatutoryRegulatoryAttestationQuestion,
 } from '@mc-review/constants'
-import { FormContainer } from '../../../components/FormContainer/FormContainer'
+import { useLDClient } from 'launchdarkly-react-client-sdk'
+import {
+    booleanAsYesNoFormValue,
+    yesNoFormValueAsBoolean,
+} from '../../../components/Form/FieldYesNo'
 import { useCurrentRoute, useRouteParams } from '../../../hooks'
 import { useAuth } from '../../../contexts/AuthContext'
 import { ErrorOrLoadingPage } from '../ErrorOrLoadingPage'
@@ -86,6 +86,8 @@ import {
     UpdateContractDraftRevisionInput,
     ContractDraftRevisionFormDataInput,
 } from '../../../gen/gqlClient'
+import { useFocusOnRender } from '../../../hooks/useFocusOnRender'
+import { usePage } from '../../../contexts/PageContext'
 
 function formattedDatePlusOneDay(initialValue: string): string {
     const dayjsValue = dayjs(initialValue)
@@ -125,6 +127,7 @@ export type ContractDetailsFormValues = {
     contractDateEnd: string
     managedCareEntities: ManagedCareEntity[]
     federalAuthorities: FederalAuthority[]
+    dsnpContract: string | undefined
     inLieuServicesAndSettings: string | undefined
     modifiedBenefitsProvided: string | undefined
     modifiedGeoAreaServed: string | undefined
@@ -151,7 +154,9 @@ export type FormError =
 export const ContractDetails = ({
     showValidations = false,
 }: ContractFormPageProps): React.ReactElement => {
-    const [shouldValidate, setShouldValidate] = React.useState(showValidations)
+    const [shouldValidate, setShouldValidate] = useState(showValidations)
+    const [draftSaved, setDraftSaved] = useState(false)
+    useFocusOnRender(draftSaved, '[data-testid="saveAsDraftSuccessBanner"]')
     const navigate = useNavigate()
     const ldClient = useLDClient()
     const { setFocusErrorSummaryHeading, errorSummaryHeadingRef } =
@@ -161,8 +166,16 @@ export const ContractDetails = ({
     const { loggedInUser } = useAuth()
     const { currentRoute } = useCurrentRoute()
     const { id } = useRouteParams()
+    const { updateActiveMainContent } = usePage()
     const { draftSubmission, interimState, updateDraft, showPageErrorMessage } =
         useContractForm(id)
+
+    const activeMainContentId = 'contractDetailsPageMainContent'
+
+    // Set the active main content to focus when click the Skip to main content button.
+    useEffect(() => {
+        updateActiveMainContent(activeMainContentId)
+    }, [activeMainContentId, updateActiveMainContent])
 
     const contract438Attestation = ldClient?.variation(
         featureFlags.CONTRACT_438_ATTESTATION.flag,
@@ -172,6 +185,11 @@ export const ContractDetails = ({
     const hideSupportingDocs = ldClient?.variation(
         featureFlags.HIDE_SUPPORTING_DOCS_PAGE.flag,
         featureFlags.HIDE_SUPPORTING_DOCS_PAGE.defaultValue
+    )
+
+    const enableDSNPs = ldClient?.variation(
+        featureFlags.DSNP.flag,
+        featureFlags.DSNP.defaultValue
     )
 
     // Contract documents state management
@@ -190,7 +208,7 @@ export const ContractDetails = ({
                 docType === 'supporting' &&
                 !draftSubmission.draftRevision.formData.supportingDocuments)
         )
-            undefined
+            return undefined
         const docs =
             docType === 'contract'
                 ? draftSubmission.draftRevision.formData.contractDocuments
@@ -254,6 +272,10 @@ export const ContractDetails = ({
                 .managedCareEntities as ManagedCareEntity[]) ?? [],
         federalAuthorities:
             draftSubmission.draftRevision.formData.federalAuthorities ?? [],
+        dsnpContract:
+            booleanAsYesNoFormValue(
+                draftSubmission.draftRevision.formData.dsnpContract
+            ) ?? '',
         inLieuServicesAndSettings:
             booleanAsYesNoFormValue(
                 draftSubmission.draftRevision.formData.inLieuServicesAndSettings
@@ -391,9 +413,18 @@ export const ContractDetails = ({
         values: ContractDetailsFormValues,
         setSubmitting: (isSubmitting: boolean) => void, // formik setSubmitting
         options: {
-            redirectPath: string
+            type: 'SAVE_AS_DRAFT' | 'BACK' | 'CONTINUE'
+            redirectPath?: RouteT
         }
     ) => {
+        if (options.type === 'SAVE_AS_DRAFT' && draftSaved) {
+            setDraftSaved(false)
+        }
+
+        const dsnpTrigger = values.federalAuthorities.some((type) =>
+            dsnpTriggers.includes(type)
+        )
+
         const updatedDraftSubmissionFormData: ContractDraftRevisionFormDataInput =
             {
                 contractExecutionStatus: values.contractExecutionStatus,
@@ -415,6 +446,11 @@ export const ContractDetails = ({
                     formatDocumentsForGQL(values.supportingDocuments) || [],
                 managedCareEntities: values.managedCareEntities,
                 federalAuthorities: values.federalAuthorities,
+                // Clear dsnpContract if all dsnp trigger federalAuthorities are removed after a value was previously selected for dsnpContract
+                dsnpContract:
+                    values.dsnpContract && dsnpTrigger
+                        ? yesNoFormValueAsBoolean(values.dsnpContract)
+                        : undefined,
                 submissionType:
                     draftSubmission.draftRevision.formData.submissionType,
                 statutoryRegulatoryAttestation: formatYesNoForProto(
@@ -520,15 +556,32 @@ export const ContractDetails = ({
         if (updatedSubmission instanceof Error) {
             setSubmitting(false)
             console.info('Error updating draft submission: ', updatedSubmission)
-        } else if (updatedSubmission) {
-            navigate(options.redirectPath)
+        } else if (options.type === 'SAVE_AS_DRAFT' && updatedSubmission) {
+            setDraftSaved(true)
+            setSubmitting(false)
+        } else {
+            //Can assume back or continue was clicked at this point
+            if (options.redirectPath) {
+                navigate(
+                    generatePath(RoutesRecord[options.redirectPath], {
+                        id: id,
+                    })
+                )
+            }
         }
     }
 
     const formHeading = 'Contract Details Form'
 
+    const dsnpTriggers = [
+        'STATE_PLAN',
+        'WAIVER_1915B',
+        'WAIVER_1115',
+        'VOLUNTARY',
+    ]
+
     return (
-        <>
+        <div id={activeMainContentId}>
             <FormNotificationContainer>
                 <DynamicStepIndicator
                     formPages={activeFormPages(
@@ -541,6 +594,7 @@ export const ContractDetails = ({
                     loggedInUser={loggedInUser}
                     unlockedInfo={draftSubmission.draftRevision.unlockInfo}
                     showPageErrorMessage={showPageErrorMessage ?? false}
+                    draftSaved={draftSaved}
                 />
             </FormNotificationContainer>
             <FormContainer id="ContactDetails">
@@ -548,11 +602,12 @@ export const ContractDetails = ({
                     initialValues={contractDetailsInitialValues}
                     onSubmit={(values, { setSubmitting }) => {
                         return handleFormSubmit(values, setSubmitting, {
+                            type: 'CONTINUE',
                             redirectPath:
                                 draftSubmission.draftRevision.formData
                                     .submissionType === 'CONTRACT_ONLY'
-                                    ? `../contacts`
-                                    : `../rate-details`,
+                                    ? 'SUBMISSIONS_CONTACTS'
+                                    : 'SUBMISSIONS_RATE_DETAILS',
                         })
                     }}
                     validationSchema={() =>
@@ -630,7 +685,7 @@ export const ContractDetails = ({
                                                         Document definitions and
                                                         requirements
                                                     </LinkWithLogging>
-                                                    <span className="padding-top-05">
+                                                    <span className="mcr-note padding-top-05">
                                                         Supporting documents can
                                                         be added later. If you
                                                         have additional contract
@@ -638,7 +693,7 @@ export const ContractDetails = ({
                                                         them in a separate
                                                         submission.
                                                     </span>
-                                                    <span className="padding-top-1">
+                                                    <span className="usa-hint padding-top-1">
                                                         This input only accepts
                                                         PDF, CSV, DOC, DOCX,
                                                         XLS, XLSX files.
@@ -707,13 +762,13 @@ export const ContractDetails = ({
                                                             Document definitions
                                                             and requirements
                                                         </LinkWithLogging>
-                                                        <span className="padding-top-05">
+                                                        <span className="mcr-note padding-top-05">
                                                             Upload any
                                                             supporting documents
                                                             related to the
                                                             contract.
                                                         </span>
-                                                        <span className="padding-top-1">
+                                                        <span className="usa-hint padding-top-1">
                                                             This input only
                                                             accepts PDF, CSV,
                                                             DOC, DOCX, XLS, XLSX
@@ -1246,6 +1301,67 @@ export const ContractDetails = ({
                                                     )}
                                                 </Fieldset>
                                             </FormGroup>
+                                            {enableDSNPs &&
+                                                values.federalAuthorities.some(
+                                                    (type) =>
+                                                        dsnpTriggers.includes(
+                                                            type
+                                                        )
+                                                ) && (
+                                                    <FormGroup
+                                                        error={Boolean(
+                                                            showFieldErrors(
+                                                                'dsnpContract',
+                                                                errors
+                                                            )
+                                                        )}
+                                                    >
+                                                        <Fieldset
+                                                            aria-required
+                                                            id="dsnpContract"
+                                                            legend="Is this contract associated with a Dual-Eligible Special Needs Plan (D-SNP) that covers Medicaid benefits?"
+                                                        >
+                                                            <span
+                                                                className={
+                                                                    styles.requiredOptionalText
+                                                                }
+                                                            >
+                                                                Required
+                                                            </span>
+                                                            <div
+                                                                role="note"
+                                                                aria-labelledby="dsnpContract"
+                                                                className="mcr-note margin-top-1"
+                                                            >
+                                                                See 42 CFR §
+                                                                422.2
+                                                            </div>
+                                                            <LinkWithLogging
+                                                                variant="external"
+                                                                href={
+                                                                    '/help#dual-eligible-special-needs-plans'
+                                                                }
+                                                                target="_blank"
+                                                                data-testid="dsnpGuidanceLink"
+                                                                aria-label="D-SNP guidance (opens in new window)"
+                                                            >
+                                                                D-SNP guidance
+                                                            </LinkWithLogging>
+                                                            <FieldYesNo
+                                                                id="dsnpContract"
+                                                                name="dsnpContract"
+                                                                label="Is this contract associated with a Dual-Eligible Special Needs Plan (D-SNP) that covers Medicaid benefits?"
+                                                                showError={Boolean(
+                                                                    showFieldErrors(
+                                                                        'dsnpContract',
+                                                                        errors
+                                                                    )
+                                                                )}
+                                                                legendStyle="srOnly"
+                                                            />
+                                                        </Fieldset>
+                                                    </FormGroup>
+                                                )}
                                             {isContractWithProvisions(
                                                 draftSubmission
                                             ) && (
@@ -1308,8 +1424,7 @@ export const ContractDetails = ({
                                             values,
                                             setSubmitting,
                                             {
-                                                redirectPath:
-                                                    RoutesRecord.DASHBOARD_SUBMISSIONS,
+                                                type: 'SAVE_AS_DRAFT',
                                             }
                                         )
                                     }}
@@ -1325,7 +1440,9 @@ export const ContractDetails = ({
                                                 values,
                                                 setSubmitting,
                                                 {
-                                                    redirectPath: '../type',
+                                                    type: 'BACK',
+                                                    redirectPath:
+                                                        'SUBMISSIONS_TYPE',
                                                 }
                                             )
                                         }
@@ -1339,14 +1456,17 @@ export const ContractDetails = ({
                                         RoutesRecord.SUBMISSIONS_TYPE,
                                         { id }
                                     )}
-                                    saveAsDraftOnClickUrl={
-                                        RoutesRecord.DASHBOARD_SUBMISSIONS
-                                    }
                                     continueOnClickUrl={
                                         draftSubmission.draftRevision.formData
                                             .submissionType === 'CONTRACT_ONLY'
-                                            ? '/edit/contacts'
-                                            : '/edit/rate-details'
+                                            ? generatePath(
+                                                  RoutesRecord.SUBMISSIONS_RATE_DETAILS,
+                                                  { id }
+                                              )
+                                            : generatePath(
+                                                  RoutesRecord.SUBMISSIONS_CONTACTS,
+                                                  { id }
+                                              )
                                     }
                                 />
                             </UswdsForm>
@@ -1354,6 +1474,6 @@ export const ContractDetails = ({
                     )}
                 </Formik>
             </FormContainer>
-        </>
+        </div>
     )
 }

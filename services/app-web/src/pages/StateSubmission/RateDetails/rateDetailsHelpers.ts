@@ -20,7 +20,8 @@ import { type FormikRateForm } from './V2/RateDetailsV2'
 // generateUpdatedRates takes the Formik RateForm list used for multi-rates and prepares for contract with rates update mutation
 // ensure we link, create, and update the proper rates
 const generateUpdatedRates = (
-    newRateForms: FormikRateForm[]
+    newRateForms: FormikRateForm[],
+    dsnpPopulated?: Boolean | null
 ): UpdateContractRateInput[] => {
     const updatedRates: UpdateContractRateInput[] = newRateForms.map((form) => {
         const { id, ...rateFormData } = form
@@ -28,7 +29,7 @@ const generateUpdatedRates = (
         return {
             formData: isLinkedRate
                 ? undefined
-                : convertRateFormToGQLRateFormData(rateFormData),
+                : convertRateFormToGQLRateFormData(rateFormData, dsnpPopulated),
             rateID: id,
             type: isLinkedRate ? 'LINK' : !id ? 'CREATE' : 'UPDATE',
         }
@@ -39,7 +40,8 @@ const generateUpdatedRates = (
 
 // convert from FormikRateForm to GQL RateFormData used in API
 const convertRateFormToGQLRateFormData = (
-    rateForm: FormikRateForm
+    rateForm: FormikRateForm,
+    dsnpPopulated?: Boolean | null
 ): RateFormDataInput => {
     return {
         // intentionally do not map backend calculated fields on submit such status and rateCertificationName
@@ -59,6 +61,7 @@ const convertRateFormToGQLRateFormData = (
             rateForm.effectiveDateEnd
         ),
         rateProgramIDs: rateForm.rateProgramIDs,
+        rateMedicaidPopulations: dsnpPopulated ? rateForm.rateMedicaidPopulations : [],
         deprecatedRateProgramIDs: [],
         certifyingActuaryContacts: rateForm.actuaryContacts,
         addtlActuaryContacts: rateForm.addtlActuaryContacts,
@@ -74,6 +77,7 @@ const isRatePartiallyFilled = (rate: RateFormData): boolean => {
     return Boolean(rate.rateDocuments.length ||
         rate.supportingDocuments.length ||
         rate.rateProgramIDs.length ||
+        rate.rateMedicaidPopulations ||
         rate.rateType ||
         rate.rateCapitationType ||
         hasActuaryContacts(rate.certifyingActuaryContacts) ||
@@ -120,6 +124,7 @@ const convertIndexRatesGQLRateToRateForm = (getKey: S3ClientT['getKey'], rate?: 
         ),
         effectiveDateEnd: formatForForm(rateForm?.amendmentEffectiveDateEnd),
         rateProgramIDs: rateForm?.rateProgramIDs ?? [],
+        rateMedicaidPopulations: rateForm?.rateMedicaidPopulations ?? [],
         rateDocuments: formatDocumentsForForm({
             documents: rateForm?.rateDocuments,
             getKey: getKey,
@@ -151,7 +156,6 @@ const convertGQLRateToRateForm = (getKey: S3ClientT['getKey'], rate?: Rate, pare
     const handleAsLinkedRate = rate && rate.parentContractID !== parentContractID // TODO: Make this a more sophisticated check for child-rates
     const rateRev = handleAsLinkedRate ? rate?.revisions[0] : rate?.draftRevision
     const rateForm = rateRev?.formData
-
     // isFilledIn is used for determining if the rateForm should be saved in the case of the yes/no question for was
     // this rate included in another submission fillable Fields includes only fields that aren't auto populated on
     // initial yes/no selection, like id and rateName
@@ -171,6 +175,7 @@ const convertGQLRateToRateForm = (getKey: S3ClientT['getKey'], rate?: Rate, pare
         ),
         effectiveDateEnd: formatForForm(rateForm?.amendmentEffectiveDateEnd),
         rateProgramIDs: rateForm?.rateProgramIDs ?? [],
+        rateMedicaidPopulations: rateForm?.rateMedicaidPopulations,
         rateDocuments: formatDocumentsForForm({
             documents: rateForm?.rateDocuments,
             getKey: getKey,

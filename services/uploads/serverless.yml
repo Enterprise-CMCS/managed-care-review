@@ -51,6 +51,7 @@ provider:
             - lambda:InvokeFunction
           Resource:
             - !Sub arn:aws:lambda:${self:provider.region}:${AWS::AccountId}:function:${self:service}-${sls:stage}-avAuditFiles
+            - !Sub arn:aws:lambda:${self:provider.region}:${AWS::AccountId}:function:${self:service}-${sls:stage}-rescanWorker
 
 custom:
   region: us-east-1
@@ -143,6 +144,9 @@ functions:
     layers:
       - !Ref ClamAvLambdaLayer
       - arn:aws:lambda:us-east-1:901920570463:layer:aws-otel-nodejs-amd64-ver-1-18-1:4
+    vpc:
+      securityGroupIds: ${self:custom.sgId}
+      subnetIds: ${self:custom.privateSubnets}
     environment:
       stage: ${sls:stage}
       AUDIT_BUCKET_NAME: !Ref DocumentUploadsBucket
@@ -151,6 +155,7 @@ functions:
       AWS_LAMBDA_EXEC_WRAPPER: /opt/otel-handler
       OPENTELEMETRY_COLLECTOR_CONFIG_FILE: /var/task/collector.yml
       VITE_APP_OTEL_COLLECTOR_URL: ${self:custom.reactAppOtelCollectorUrl}
+      RESCAN_WORKER_LAMBDA_NAME: ${self:service}-${sls:stage}-rescanWorker
 
 resources:
   Conditions:

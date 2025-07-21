@@ -36,6 +36,11 @@ import {
 } from 'apollo-server-core'
 import { newDeployedS3Client, newLocalS3Client } from '../s3'
 import type { S3ClientT, S3BucketConfigType } from '../s3'
+import {
+    documentZipService,
+    generateDocumentZip,
+    localGenerateDocumentZip,
+} from '../zip/generateZip'
 
 let ldClient: LDClient
 let s3Client: S3ClientT
@@ -46,6 +51,11 @@ export interface Context {
     span?: Span
     tracer?: Tracer
     ctx?: OTELContext
+    oauthClient?: {
+        clientId: string
+        grants: string[]
+        isOAuthClient: boolean
+    }
 }
 
 // This function pulls auth info out of the cognitoAuthenticationProvider in the lambda event
@@ -89,15 +99,23 @@ function contextForRequestForFetcher(userFetcher: userFromAuthProvider): ({
                 }
 
                 const store = NewPostgresStore(pgResult)
-                const userId = event.requestContext.authorizer?.principalId
+                const principalId = event.requestContext.authorizer?.principalId
+                const authorizerContext = event.requestContext.authorizer
+
+                // Extract OAuth context if present
+                const isOAuthClient =
+                    authorizerContext?.isOAuthClient === 'true'
+                const oauthClientId = authorizerContext?.clientId
+                const oauthGrants = authorizerContext?.grants?.split(',') || []
 
                 let userResult
                 if (authProvider && !fromThirdPartyAuthorizer) {
                     userResult = await userFetcher(authProvider, store)
-                } else if (fromThirdPartyAuthorizer && userId) {
+                } else if (fromThirdPartyAuthorizer && principalId) {
+                    // principalId is now always the user ID for both OAuth and regular tokens
                     userResult = await userFromThirdPartyAuthorizer(
                         store,
-                        userId
+                        principalId
                     )
                 }
 
@@ -105,11 +123,22 @@ function contextForRequestForFetcher(userFetcher: userFromAuthProvider): ({
                     throw new Error(`Log: userResult must be supplied`)
                 }
                 if (!userResult.isErr()) {
-                    return {
+                    const context: Context = {
                         user: userResult.value,
                         tracer: tracer,
                         ctx: ctx,
                     }
+
+                    // Add OAuth client info if present
+                    if (isOAuthClient && oauthClientId) {
+                        context.oauthClient = {
+                            clientId: oauthClientId,
+                            grants: oauthGrants,
+                            isOAuthClient: true,
+                        }
+                    }
+
+                    return context
                 } else {
                     throw new Error(
                         `Log: failed to fetch user: ${userResult.error}`
@@ -305,6 +334,11 @@ async function initializeGQLHandler(): Promise<Handler> {
         s3Client = newDeployedS3Client(S3_BUCKETS_CONFIG, region)
     }
 
+    // Service for zipping documents
+    const generateDocZip =
+        authMode === 'LOCAL' ? localGenerateDocumentZip : generateDocumentZip
+    const documentZip = documentZipService(store, generateDocZip)
+
     // Print out all the variables we've been configured with. Leave sensitive ones out, please.
     console.info('Running With Config: ', {
         authMode,
@@ -324,7 +358,8 @@ async function initializeGQLHandler(): Promise<Handler> {
         launchDarkly,
         jwtLib,
         s3Client,
-        applicationEndpoint
+        applicationEndpoint,
+        documentZip
     )
 
     const userFetcher =

@@ -24,10 +24,8 @@ describe('rate details', () => {
             cy.navigateFormByDirectLink(
                 `/submissions/${draftSubmissionId}/edit/rate-details`
             )
-
-            // Navigate to dashboard page by clicking save as draft
             cy.navigateContractRatesForm('SAVE_DRAFT')
-            cy.findByRole('heading', { level: 1, name: /Submissions dashboard/ })
+            cy.get('[data-testid="saveAsDraftSuccessBanner"]').should('exist')
         })
     })
 

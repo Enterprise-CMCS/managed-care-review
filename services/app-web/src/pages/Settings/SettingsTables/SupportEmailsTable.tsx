@@ -1,13 +1,22 @@
+import { useEffect } from 'react'
 import { useOutletContext } from 'react-router-dom'
 import { MCReviewSettingsContextType } from '../Settings'
 import { Table } from '@trussworks/react-uswds'
 import React from 'react'
 import { Loading } from '../../../components'
 import { SettingsErrorAlert } from '../SettingsErrorAlert'
+import { usePage } from '../../../contexts/PageContext'
 
 const SupportEmailsTable = () => {
+    const { updateActiveMainContent } = usePage()
     const { emailConfig: config } =
         useOutletContext<MCReviewSettingsContextType>()
+
+    const activeMainContentId = 'supportEmailsPageMainContent'
+    // Set the active main content to focus when click the Skip to main content button.
+    useEffect(() => {
+        updateActiveMainContent(activeMainContentId)
+    }, [activeMainContentId, updateActiveMainContent])
 
     if (config.loading) return <Loading />
 
@@ -15,7 +24,7 @@ const SupportEmailsTable = () => {
         return <SettingsErrorAlert error={config.error} />
 
     return (
-        <>
+        <div id={activeMainContentId}>
             <h2>Support emails</h2>
             <p>
                 States that need support should contact one of these email
@@ -50,7 +59,7 @@ const SupportEmailsTable = () => {
                     </tr>
                 </tbody>
             </Table>
-        </>
+        </div>
     )
 }
 

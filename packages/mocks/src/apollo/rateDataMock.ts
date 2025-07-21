@@ -621,6 +621,7 @@ function mockRateSubmittedWithQuestions(
                                 },
                             ],
                             division: 'DMCO',
+                            round: 2,
                             responses: [
                                 {
                                     __typename: 'QuestionResponse',
@@ -654,6 +655,7 @@ function mockRateSubmittedWithQuestions(
                                     downloadURL: expect.any(String),
                                 },
                             ],
+                            round: 1,
                             division: 'DMCO',
                             responses: [],
                         },
@@ -682,6 +684,7 @@ function mockRateSubmittedWithQuestions(
                                 },
                             ],
                             division: 'DMCP',
+                            round: 1,
                             responses: [
                                 {
                                     __typename: 'QuestionResponse' as const,
@@ -724,6 +727,7 @@ function mockRateSubmittedWithQuestions(
                                 },
                             ],
                             division: 'OACT',
+                            round: 2,
                             responses: [
                                 {
                                     __typename: 'QuestionResponse' as const,
@@ -760,6 +764,8 @@ function mockRateSubmittedWithQuestions(
                                 },
                             ],
                             division: 'OACT',
+
+                            round: 1,
                             responses: [
                                 {
                                     __typename: 'QuestionResponse' as const,

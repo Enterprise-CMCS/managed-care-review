@@ -10,6 +10,7 @@ describe('CMS user can view rate reviews', () => {
         cy.interceptFeatureFlags({
             'undo-withdraw-rate': true
         })
+
         cy.apiAssignDivisionToCMSUser(cmsUser(), 'DMCO').then(() => {
             // Create a new contract and rates submission with two attached rates
             cy.apiCreateAndSubmitContractWithRates(stateUser()).then(

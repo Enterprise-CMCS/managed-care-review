@@ -5,8 +5,8 @@ import {
     Label,
 } from '@trussworks/react-uswds'
 import { Formik, FormikErrors, FormikHelpers } from 'formik'
-import React, { useState } from 'react'
-import { useNavigate, useLocation } from 'react-router-dom'
+import React, { useState, useEffect } from 'react'
+import { useNavigate, useLocation, generatePath } from 'react-router-dom'
 import {
     DynamicStepIndicator,
     ErrorSummary,
@@ -36,24 +36,27 @@ import {
 import {
     booleanAsYesNoFormValue,
     yesNoFormValueAsBoolean,
-} from '../../../components/Form/FieldYesNo/FieldYesNo'
+} from '../../../components/Form/FieldYesNo'
 import { SubmissionTypeFormSchema } from './SubmissionTypeSchema'
 import {
     RoutesRecord,
-    STATE_SUBMISSION_FORM_ROUTES,
+    RouteT,
     STATE_SUBMISSION_FORM_ROUTES_WITHOUT_SUPPORTING_DOCS,
+    STATE_SUBMISSION_FORM_ROUTES,
 } from '@mc-review/constants'
-import { FormContainer } from '../../../components/FormContainer/FormContainer'
+import { FormContainer } from '../../../components'
 import { useCurrentRoute } from '../../../hooks'
 import { ErrorOrLoadingPage } from '../ErrorOrLoadingPage'
 import { useAuth } from '../../../contexts/AuthContext'
-import { useRouteParams } from '../../../hooks/useRouteParams'
+import { useRouteParams } from '../../../hooks'
 import { PageBannerAlerts } from '../PageBannerAlerts'
 import { useErrorSummary } from '../../../hooks/useErrorSummary'
 import { useContractForm } from '../../../hooks/useContractForm'
 import { useLDClient } from 'launchdarkly-react-client-sdk'
 import { featureFlags } from '@mc-review/common-code'
 import { ContactSupportLink } from '../../../components/ErrorAlert/ContactSupportLink'
+import { useFocusOnRender } from '../../../hooks/useFocusOnRender'
+import { usePage } from '../../../contexts/PageContext'
 
 export interface SubmissionTypeFormValues {
     populationCovered?: PopulationCoveredType
@@ -73,9 +76,12 @@ export const SubmissionType = ({
     const { loggedInUser } = useAuth()
     const { currentRoute } = useCurrentRoute()
     const [shouldValidate, setShouldValidate] = useState(showValidations)
+    const [draftSaved, setDraftSaved] = useState(false)
+    useFocusOnRender(draftSaved, '[data-testid="saveAsDraftSuccessBanner"]')
     const [showAPIErrorBanner, setShowAPIErrorBanner] = useState<
         boolean | string
     >(false) // string is a custom error message, defaults to generic message when true
+    const { updateActiveMainContent } = usePage()
 
     const { setFocusErrorSummaryHeading, errorSummaryHeadingRef } =
         useErrorSummary()
@@ -118,6 +124,12 @@ export const SubmissionType = ({
         contractType:
             draftSubmission?.draftRevision?.formData.contractType ?? '',
     }
+    const activeMainContentId = 'submissionTypePageMainContent'
+
+    // Set the active main content to focus when click the Skip to main content button.
+    useEffect(() => {
+        updateActiveMainContent(activeMainContentId)
+    }, [activeMainContentId, updateActiveMainContent])
 
     if (interimState) {
         return <ErrorOrLoadingPage state={interimState || 'GENERIC_ERROR'} />
@@ -126,8 +138,14 @@ export const SubmissionType = ({
     const handleFormSubmit = async (
         values: SubmissionTypeFormValues,
         setSubmitting: (isSubmitting: boolean) => void, // formik setSubmitting
-        redirectPath?: string
+        options: {
+            type: 'SAVE_AS_DRAFT' | 'CANCEL' | 'CONTINUE'
+            redirectPath?: RouteT
+        }
     ) => {
+        if (options.type === 'SAVE_AS_DRAFT' && draftSaved) {
+            setDraftSaved(false)
+        }
         if (isNewSubmission) {
             if (!values.populationCovered) {
                 console.info(
@@ -180,7 +198,6 @@ export const SubmissionType = ({
             }
 
             const draftSubmission = await createDraft(input)
-
             if (draftSubmission instanceof Error) {
                 setShowAPIErrorBanner(true)
                 setSubmitting(false) // unblock submit button to allow resubmit
@@ -190,8 +207,15 @@ export const SubmissionType = ({
                 )
                 return
             }
-            navigate(`/submissions/${draftSubmission.id}/edit/contract-details`)
+            if (options.redirectPath) {
+                navigate(
+                    generatePath(RoutesRecord[options.redirectPath], {
+                        id: draftSubmission.id,
+                    })
+                )
+            }
         } else {
+            setSubmitting(true)
             if (draftSubmission === undefined || !updateDraft) {
                 console.info(draftSubmission, updateDraft)
                 console.info(
@@ -230,6 +254,8 @@ export const SubmissionType = ({
                     federalAuthorities:
                         draftSubmission.draftRevision.formData
                             .federalAuthorities,
+                    dsnpContract:
+                        draftSubmission.draftRevision.formData.dsnpContract,
                     contractDocuments:
                         draftSubmission.draftRevision.formData
                             .contractDocuments,
@@ -322,8 +348,18 @@ export const SubmissionType = ({
             const updatedDraft = await updateDraft(updatedContractInput)
             if (updatedDraft instanceof Error) {
                 setSubmitting(false)
+            } else if (options.type === 'SAVE_AS_DRAFT' && updatedDraft) {
+                setDraftSaved(true)
+                setSubmitting(false)
             } else {
-                navigate(redirectPath || `../contract-details`)
+                //Can assume it was a 'CONTINUE' type at this point
+                if (options.redirectPath) {
+                    navigate(
+                        generatePath(RoutesRecord[options.redirectPath], {
+                            id: id,
+                        })
+                    )
+                }
             }
         }
     }
@@ -373,7 +409,7 @@ export const SubmissionType = ({
     }
 
     return (
-        <>
+        <div id={activeMainContentId}>
             <FormNotificationContainer>
                 <DynamicStepIndicator
                     formPages={
@@ -386,19 +422,25 @@ export const SubmissionType = ({
                               ? STATE_SUBMISSION_FORM_ROUTES_WITHOUT_SUPPORTING_DOCS
                               : STATE_SUBMISSION_FORM_ROUTES
                     }
-                    currentFormPage={currentRoute}
+                    currentFormPage={
+                        draftSubmission ? currentRoute : 'SUBMISSIONS_TYPE'
+                    }
                 />
                 <PageBannerAlerts
                     loggedInUser={loggedInUser}
                     unlockedInfo={draftSubmission?.draftRevision.unlockInfo}
-                    showPageErrorMessage={showPageErrorMessage ?? false}
+                    showPageErrorMessage={showPageErrorMessage}
+                    draftSaved={draftSaved}
                 />
             </FormNotificationContainer>
             <FormContainer id="SubmissionType">
                 <Formik
                     initialValues={submissionTypeInitialValues}
                     onSubmit={(values, { setSubmitting }) => {
-                        return handleFormSubmit(values, setSubmitting)
+                        return handleFormSubmit(values, setSubmitting, {
+                            type: 'CONTINUE',
+                            redirectPath: 'SUBMISSIONS_CONTRACT_DETAILS',
+                        })
                     }}
                     validationSchema={SubmissionTypeFormSchema()}
                 >
@@ -551,7 +593,7 @@ export const SubmissionType = ({
                                                     <div
                                                         role="note"
                                                         aria-labelledby="populationCovered"
-                                                        className="usa-hint padding-top-2"
+                                                        className="mcr-note padding-top-2"
                                                     >
                                                         If you need to change
                                                         your response, contact
@@ -679,7 +721,7 @@ export const SubmissionType = ({
                                                     <div
                                                         role="note"
                                                         aria-labelledby="submissionType"
-                                                        className="usa-hint padding-top-2"
+                                                        className="mcr-note padding-top-2"
                                                     >
                                                         If you need to change
                                                         your response, contact
@@ -691,7 +733,7 @@ export const SubmissionType = ({
                                                     <div
                                                         role="note"
                                                         aria-labelledby="submissionType"
-                                                        className="usa-hint padding-top-2"
+                                                        className="mcr-note padding-top-2"
                                                     >
                                                         States are not required
                                                         to submit rates with
@@ -777,17 +819,18 @@ export const SubmissionType = ({
                                             )}
                                             hint={
                                                 <>
-                                                    <p
+                                                    <span
                                                         id="submissionDescriptionHelp"
-                                                        role="note"
+                                                        className="margin-bottom-2"
                                                     >
                                                         Provide a 1-2 paragraph
                                                         summary of your
                                                         submission that
                                                         highlights any important
                                                         changes CMS reviewers
-                                                        will need to be aware of
-                                                    </p>
+                                                        will need to be aware
+                                                        of.
+                                                    </span>
                                                     <ReactRouterLinkWithLogging
                                                         variant="external"
                                                         to={{
@@ -822,14 +865,13 @@ export const SubmissionType = ({
                                             await handleFormSubmit(
                                                 values,
                                                 setSubmitting,
-                                                RoutesRecord.DASHBOARD_SUBMISSIONS
+                                                {
+                                                    type: 'SAVE_AS_DRAFT',
+                                                }
                                             )
                                         }}
                                         actionInProgress={isSubmitting}
                                         backOnClickUrl={
-                                            RoutesRecord.DASHBOARD_SUBMISSIONS
-                                        }
-                                        saveAsDraftOnClickUrl={
                                             RoutesRecord.DASHBOARD_SUBMISSIONS
                                         }
                                         continueOnClickUrl="/edit/contract-details"
@@ -840,6 +882,6 @@ export const SubmissionType = ({
                     }}
                 </Formik>
             </FormContainer>
-        </>
+        </div>
     )
 }

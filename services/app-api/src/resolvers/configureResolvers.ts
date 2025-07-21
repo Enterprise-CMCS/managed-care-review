@@ -63,12 +63,14 @@ import { rateStrippedResolver } from './rate/rateResolver'
 import { indexRatesStripped } from './rate/indexRatesStripped'
 import { withdrawContract } from './contract/withdrawContract'
 import { undoWithdrawContract } from './contract/undoWithdrawContract'
+import { documentZipPackageResolver } from './documents'
 import {
     createOauthClientResolver,
     fetchOauthClientsResolver,
     deleteOauthClientResolver,
     updateOauthClientResolver,
 } from './oauthClient'
+import type { DocumentZipService } from '../zip/generateZip'
 
 export function configureResolvers(
     store: Store,
@@ -76,7 +78,8 @@ export function configureResolvers(
     launchDarkly: LDService,
     jwt: JWTLib,
     s3Client: S3ClientT,
-    applicationEndpoint: string
+    applicationEndpoint: string,
+    documentZip: DocumentZipService
 ): Resolvers {
     const resolvers: Resolvers = {
         Date: GraphQLDate,
@@ -105,7 +108,12 @@ export function configureResolvers(
                 store,
                 launchDarkly
             ),
-            submitContract: submitContract(store, emailer, launchDarkly),
+            submitContract: submitContract(
+                store,
+                emailer,
+                launchDarkly,
+                documentZip
+            ),
             unlockHealthPlanPackage: unlockHealthPlanPackageResolver(
                 store,
                 emailer
@@ -139,7 +147,7 @@ export function configureResolvers(
             ),
             createAPIKey: createAPIKeyResolver(jwt),
             unlockRate: unlockRate(store),
-            submitRate: submitRate(store, launchDarkly),
+            submitRate: submitRate(store, launchDarkly, documentZip),
             updateEmailSettings: updateEmailSettings(store),
             createOauthClient: createOauthClientResolver(store),
             deleteOauthClient: deleteOauthClientResolver(store),
@@ -192,11 +200,13 @@ export function configureResolvers(
         RateRevision: rateRevisionResolver(store),
         RateFormData: rateFormDataResolver(),
         ContractQuestion: questionResolver(store),
+        RateQuestion: questionResolver(store),
         Contract: contractResolver(store, applicationEndpoint),
         UnlockedContract: unlockedContractResolver(store, applicationEndpoint),
         ContractRevision: contractRevisionResolver(store),
         GenericDocument: genericDocumentResolver(s3Client),
         Document: questionResponseDocumentResolver(s3Client),
+        DocumentZipPackage: documentZipPackageResolver(s3Client),
     }
 
     return resolvers

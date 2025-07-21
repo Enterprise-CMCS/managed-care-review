@@ -2,12 +2,13 @@ import React, { useState, useEffect } from 'react'
 import { Grid, GridContainer, Icon, SideNav } from '@trussworks/react-uswds'
 import styles from './Settings.module.scss'
 import { NavLinkWithLogging } from '../../components'
-import { Outlet, useLocation } from 'react-router-dom'
+import { Outlet, useLocation, matchPath } from 'react-router-dom'
 import { recordJSException } from '@mc-review/otel'
 import {
     EmailConfiguration,
     StateAssignment,
     useFetchMcReviewSettingsQuery,
+    OauthClient,
 } from '../../gen/gqlClient'
 import { StateAnalystsInDashboardType } from './SettingsTables'
 import { RoutesRecord } from '@mc-review/constants'
@@ -15,6 +16,8 @@ import { ApolloError } from '@apollo/client'
 import { AssignedStaffUpdateBanner } from '../../components/Banner/AssignedStaffUpdateBanner/AssignedStaffUpdateBanner'
 import { useCurrentRoute } from '../../hooks'
 import { SETTINGS_HIDE_SIDEBAR_ROUTES } from '@mc-review/constants'
+import { useAuth } from '../../contexts/AuthContext'
+import { NewOauthClientBanner } from '../../components/Banner'
 
 export const TestMonitoring = (): null => {
     const location = useLocation()
@@ -36,6 +39,7 @@ export type LastUpdatedAnalystsType = {
     removed: string[] // full name string - passed from formik label in EditStateAssign
     added: string[] // full name string - passed from formik label in EditStateAssign
 }
+
 export type MCReviewSettingsContextType = {
     emailConfig: {
         data?: EmailConfiguration
@@ -49,6 +53,12 @@ export type MCReviewSettingsContextType = {
         lastUpdated: LastUpdatedAnalystsType | null
         setLastUpdated: React.Dispatch<
             React.SetStateAction<LastUpdatedAnalystsType | null>
+        >
+    }
+    oauthClients: {
+        newOauthClient?: OauthClient | null
+        setNewOauthClient: React.Dispatch<
+            React.SetStateAction<OauthClient | null | undefined>
         >
     }
 }
@@ -73,17 +83,23 @@ const mapStateAnalystFromDB = (
 }
 
 export const Settings = (): React.ReactElement => {
+    const { loggedInUser } = useAuth()
+    const isAdminUser = loggedInUser?.role === 'ADMIN_USER'
     const { currentRoute } = useCurrentRoute()
-    const { pathname } = useLocation()
+    const { pathname, search } = useLocation()
     const [lastUpdatedAnalysts, setLastUpdatedAnalysts] =
         useState<LastUpdatedAnalystsType | null>(null)
+    const [newOauthClient, setNewOauthClient] = useState<
+        OauthClient | null | undefined
+    >(null)
 
     // determine if we should display a recent submit success banner
-    const submitType = new URLSearchParams(location.search).get('submit')
+    const submitType = new URLSearchParams(search).get('submit')
     const showAnalystsUpdatedBanner = submitType == 'state-assignments'
+    const showCreatedOauthBanner = submitType == 'create-oauth-client'
 
     const isSelectedLink = (route: string): string => {
-        return route.includes(pathname) ? 'usa-current' : ''
+        return matchPath(route, pathname) ? 'usa-current' : ''
     }
 
     const {
@@ -129,6 +145,12 @@ export const Settings = (): React.ReactElement => {
             lastUpdated: lastUpdatedAnalysts,
             setLastUpdated: (analysts) => {
                 setLastUpdatedAnalysts(analysts)
+            },
+        },
+        oauthClients: {
+            newOauthClient: newOauthClient,
+            setNewOauthClient: (oauthClient) => {
+                setNewOauthClient(oauthClient)
             },
         },
     }
@@ -189,6 +211,16 @@ export const Settings = (): React.ReactElement => {
                             >
                                 Support emails
                             </NavLinkWithLogging>,
+                            isAdminUser && (
+                                <NavLinkWithLogging
+                                    to={RoutesRecord.OAUTH_CLIENTS}
+                                    className={isSelectedLink(
+                                        RoutesRecord.OAUTH_CLIENTS
+                                    )}
+                                >
+                                    Oauth clients
+                                </NavLinkWithLogging>
+                            ),
                         ]}
                     />
                 </div>
@@ -199,6 +231,9 @@ export const Settings = (): React.ReactElement => {
                             added={lastUpdatedAnalysts.added}
                             removed={lastUpdatedAnalysts.removed}
                         />
+                    )}
+                    {newOauthClient && showCreatedOauthBanner && (
+                        <NewOauthClientBanner {...newOauthClient} />
                     )}
                     <Outlet context={context} />
                 </Grid>

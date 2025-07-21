@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import { Form as UswdsForm } from '@trussworks/react-uswds'
 import { generatePath, useNavigate } from 'react-router-dom'
 import { v4 as uuidv4 } from 'uuid'
@@ -15,10 +15,9 @@ import {
 } from '../../../components/FileUpload'
 import { PageActions } from '../PageActions'
 import classNames from 'classnames'
-import { ErrorSummary } from '../../../components/Form'
+import { ErrorSummary, FormContainer } from '../../../components'
 import { activeFormPages } from '../StateSubmissionForm'
 import { RoutesRecord } from '@mc-review/constants'
-import { FormContainer } from '../../../components/FormContainer/FormContainer'
 import { useAuth } from '../../../contexts/AuthContext'
 import {
     useCurrentRoute,
@@ -33,12 +32,18 @@ import {
 } from '../../../components'
 import { PageBannerAlerts } from '../PageBannerAlerts'
 import { useErrorSummary } from '../../../hooks/useErrorSummary'
+import { useFocusOnRender } from '../../../hooks/useFocusOnRender'
+import { recordJSException } from '@mc-review/otel'
+import { usePage } from '../../../contexts/PageContext'
 
 export const Documents = (): React.ReactElement => {
     const [shouldValidate, setShouldValidate] = useState(false)
     const navigate = useNavigate()
+    const [draftSaved, setDraftSaved] = useState(false)
+    useFocusOnRender(draftSaved, '[data-testid="saveAsDraftSuccessBanner"]')
     const { setFocusErrorSummaryHeading, errorSummaryHeadingRef } =
         useErrorSummary()
+    const { updateActiveMainContent } = usePage()
 
     // set up API handling and HPP data
     const { loggedInUser } = useAuth()
@@ -51,6 +56,13 @@ export const Documents = (): React.ReactElement => {
         showPageErrorMessage,
         unlockInfo,
     } = useHealthPlanPackageForm(id)
+
+    const activeMainContentId = 'supportingDocsPageMainContent'
+
+    // Set the active main content to focus when click the Skip to main content button.
+    useEffect(() => {
+        updateActiveMainContent(activeMainContentId)
+    }, [activeMainContentId, updateActiveMainContent])
 
     // Documents state management
     const { uploadFile, scanFile, getKey, getS3URL } = useS3()
@@ -168,11 +180,13 @@ export const Documents = (): React.ReactElement => {
             redirectPath,
         }: {
             shouldValidateDocuments: boolean
-            redirectPath: string
+            redirectPath: string | null
         }) =>
         async (e: React.FormEvent | React.MouseEvent) => {
             e.preventDefault()
-
+            if (draftSaved) {
+                setDraftSaved(false)
+            }
             // Currently documents validation happens (outside of the yup schema, which only handles the formik form data)
             // if there are any errors present in the documents list and we are in a validation state (relevant for Save as Draft) force user to clear validations to continue
             if (shouldValidateDocuments) {
@@ -227,16 +241,22 @@ export const Documents = (): React.ReactElement => {
                         updatedSubmission
                     )
                     onUpdateDraftSubmissionError()
-                } else if (updatedSubmission) {
+                } else if (updatedSubmission && redirectPath) {
                     navigate(redirectPath)
+                } else {
+                    setDraftSaved(true)
+                    setIsSubmitting(false)
                 }
             } catch (error) {
+                recordJSException(
+                    `Supporting Documents: Apollo error reported. Error message: ${error}`
+                )
                 onUpdateDraftSubmissionError()
             }
         }
 
     return (
-        <>
+        <div id={activeMainContentId}>
             <FormNotificationContainer>
                 <DynamicStepIndicator
                     formPages={activeFormPages(draftSubmission)}
@@ -246,6 +266,7 @@ export const Documents = (): React.ReactElement => {
                     loggedInUser={loggedInUser}
                     unlockedInfo={unlockInfo}
                     showPageErrorMessage={showPageErrorMessage ?? false}
+                    draftSaved={draftSaved}
                 />
             </FormNotificationContainer>
             <FormContainer id="Documents">
@@ -312,8 +333,7 @@ export const Documents = (): React.ReactElement => {
                         saveAsDraftOnClick={async (e) => {
                             await handleFormSubmit({
                                 shouldValidateDocuments: true,
-                                redirectPath:
-                                    RoutesRecord.DASHBOARD_SUBMISSIONS,
+                                redirectPath: '',
                             })(e)
                         }}
                         backOnClick={async (e) => {
@@ -330,13 +350,10 @@ export const Documents = (): React.ReactElement => {
                             RoutesRecord.SUBMISSIONS_CONTACTS,
                             { id }
                         )}
-                        saveAsDraftOnClickUrl={
-                            RoutesRecord.DASHBOARD_SUBMISSIONS
-                        }
                         continueOnClickUrl="/edit/review-and-submit"
                     />
                 </UswdsForm>
             </FormContainer>
-        </>
+        </div>
     )
 }

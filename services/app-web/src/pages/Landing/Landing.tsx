@@ -101,6 +101,11 @@ export const Landing = (): React.ReactElement => {
                                 </li>
                                 <li>Rate certifications and rate amendments</li>
                                 <li>
+                                    Contracts related to Dual Eligible Special
+                                    Needs Plans (D-SNPs) with Medicaid-covered
+                                    benefits
+                                </li>
+                                <li>
                                     <LinkWithLogging
                                         aria-label="Document definitions and requirements"
                                         href={'/help#key-documents'}
@@ -116,16 +121,19 @@ export const Landing = (): React.ReactElement => {
                                 <li>State directed preprints</li>
                                 <li>Rate-only submissions</li>
                                 <li>
+                                    Contracts without Medicaid-covered benefits
+                                </li>
+                                <li>
+                                    Some submissions related to programs for
+                                    dual-eligible beneficiaries, such as
+                                    Programs of All-Inclusive Care for the
+                                    Elderly (PACE), and dual demonstration
+                                    contracts
+                                </li>
+                                <li>
                                     Non-health plan submissions such as External
                                     Quality Review Organization (EQRO) or
                                     enrollment broker
-                                </li>
-                                <li>
-                                    Submissions related to programs for
-                                    dual-eligible beneficiaries, such as Dual
-                                    Eligible Special Needs Plans (D-SNP),
-                                    Programs of All-Inclusive Care for the
-                                    Elderly (PACE), dual demonstration contracts
                                 </li>
                             </ul>
                         </Grid>

@@ -16,13 +16,16 @@ export function fetchOauthClientsResolver(
         const { user, ctx, tracer } = context
         const span = tracer?.startSpan('fetchOauthClients', {}, ctx)
         setResolverDetailsOnActiveSpan('fetchOauthClients', user, span)
+
         if (!user || user.role !== 'ADMIN_USER') {
             const msg = 'User not authorized to fetch OAuth clients'
             logError('fetchOauthClients', msg)
             setErrorAttributesOnActiveSpan(msg, span)
             throw new ForbiddenError(msg)
         }
+
         let oauthClients = []
+
         // If input is omitted or empty, fetch all
         if (!input || !input.clientIds || input.clientIds.length === 0) {
             const all = await store.listOAuthClients()

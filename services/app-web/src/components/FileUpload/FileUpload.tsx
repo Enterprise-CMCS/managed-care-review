@@ -226,6 +226,7 @@ export const FileUpload = ({
                             })
                             return
                         } catch (e) {
+                            console.info('SCANNING_ERROR: ', e.message)
                             setFileItems((prevItems) => {
                                 const newItems = [...prevItems]
                                 return newItems.map((item) => {
@@ -378,7 +379,7 @@ export const FileUpload = ({
                     id={`${id}-hint`}
                     role="note"
                     aria-labelledby={id}
-                    className={styles.fileInputHint}
+                    className={styles.fileInputNote}
                 >
                     {hint}
                 </span>
@@ -388,7 +389,9 @@ export const FileUpload = ({
                 id={id}
                 name={`${name}${inputRequired ? ' (required)' : ''}`}
                 className={styles.fileInput}
-                aria-describedby={error ? `${id}-error ${id}-hint` : `${id}-hint`}
+                aria-describedby={
+                    error ? `${id}-error ${id}-hint` : `${id}-hint`
+                }
                 multiple={allowMultipleUploads}
                 onChange={handleOnChange}
                 onDrop={handleOnDrop}
@@ -401,9 +404,9 @@ export const FileUpload = ({
                 // eslint-disable-next-line @typescript-eslint/no-empty-function
                 onPointerLeaveCapture={() => {}}
             />
-            <h5 tabIndex={-1} ref={summaryRef} className={styles.fileSummary}>
+            <p tabIndex={-1} ref={summaryRef} className={styles.fileSummary}>
                 {`${summary} ${summaryDetailText}`}
-            </h5>
+            </p>
             <FileItemsList
                 retryItem={retryFile}
                 deleteItem={deleteItem}

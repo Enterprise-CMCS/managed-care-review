@@ -1,8 +1,5 @@
 import { ForbiddenError, UserInputError } from 'apollo-server-lambda'
-import {
-    convertContractWithRatesToUnlockedHPP,
-    hasCMSPermissions,
-} from '../../domain-models'
+import { hasCMSPermissions } from '../../domain-models'
 import type { MutationResolvers } from '../../gen/gqlServer'
 import { logError } from '../../logger'
 import type { Store } from '../../postgres'
@@ -12,6 +9,7 @@ import {
 } from '../attributeHelper'
 import { GraphQLError } from 'graphql'
 import { NotFoundError } from '../../postgres'
+import { canWrite } from '../../authorization/oauthAuthorization'
 
 export function updateContract(
     store: Store
@@ -20,6 +18,20 @@ export function updateContract(
         const { user, ctx, tracer } = context
         const span = tracer?.startSpan('updateContract', {}, ctx)
         setResolverDetailsOnActiveSpan('updateContract', user, span)
+
+        // Check OAuth client read permissions
+        if (!canWrite(context)) {
+            const errMessage = `OAuth client does not have write permissions`
+            logError('updateContract', errMessage)
+            setErrorAttributesOnActiveSpan(errMessage, span)
+
+            throw new GraphQLError(errMessage, {
+                extensions: {
+                    code: 'FORBIDDEN',
+                    cause: 'INSUFFICIENT_OAUTH_GRANTS',
+                },
+            })
+        }
 
         // This resolver is only callable by CMS users
         if (!hasCMSPermissions(user)) {
@@ -92,22 +104,8 @@ export function updateContract(
             })
         }
 
-        const convertedPkg =
-            convertContractWithRatesToUnlockedHPP(updatedContract)
-
-        if (convertedPkg instanceof Error) {
-            const errMessage = `Issue converting contract. Message: ${convertedPkg.message}`
-            logError('updateContract', errMessage)
-            setErrorAttributesOnActiveSpan(errMessage, span)
-            throw new GraphQLError(errMessage, {
-                extensions: {
-                    code: 'INTERNAL_SERVER_ERROR',
-                    cause: 'PROTO_DECODE_ERROR',
-                },
-            })
-        }
         return {
-            pkg: convertedPkg,
+            contract: updatedContract,
         }
     }
 }

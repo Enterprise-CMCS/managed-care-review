@@ -25,7 +25,15 @@ function preparePrismaLayer() {
     echo "Prepare Prisma Client Migration lambda layer"
     rsync -av node_modules/@prisma/client/ lambda-layers-prisma-client-migration/nodejs/node_modules/@prisma/client
     rsync -av node_modules/prisma/ lambda-layers-prisma-client-migration/nodejs/node_modules/prisma
-    rsync -av ./../../node_modules/.pnpm/@prisma+client@5.17.0_prisma@5.17.0/node_modules/.prisma/ lambda-layers-prisma-client-migration/nodejs/node_modules/.prisma 
+    # Find the current prisma client version path dynamically
+    PRISMA_CLIENT_PATH=$(find ./../../node_modules/.pnpm -name "@prisma+client@*" -type d | head -1)
+    if [ -n "$PRISMA_CLIENT_PATH" ]; then
+        echo "Found Prisma client path: $PRISMA_CLIENT_PATH"
+        rsync -av "$PRISMA_CLIENT_PATH/node_modules/.prisma/" lambda-layers-prisma-client-migration/nodejs/node_modules/.prisma
+    else
+        echo "ERROR: Could not find Prisma client path in .pnpm"
+        exit 1
+    fi
     cp ./../../node_modules/.pnpm/node_modules/@prisma/engines/libquery_engine-rhel-openssl-3.0.x.so.node lambda-layers-prisma-client-migration/nodejs/node_modules/@prisma/engines/
     cp ./../../node_modules/.pnpm/node_modules/@prisma/engines/schema-engine-rhel-openssl-3.0.x lambda-layers-prisma-client-migration/nodejs/node_modules/@prisma/engines/
     cp ./../../node_modules/.pnpm/node_modules/@prisma/engines/package.json lambda-layers-prisma-client-migration/nodejs/node_modules/@prisma/engines/package.json
@@ -38,7 +46,14 @@ function preparePrismaLayer() {
     echo "Prepare Prisma Client Engine lambda layer"
     rsync -av node_modules/@prisma/client/ lambda-layers-prisma-client-engine/nodejs/node_modules/@prisma/client
     rsync -av node_modules/prisma/ lambda-layers-prisma-client-engine/nodejs/node_modules/prisma
-    rsync -av ./../../node_modules/.pnpm/@prisma+client@5.17.0_prisma@5.17.0/node_modules/.prisma/ lambda-layers-prisma-client-engine/nodejs/node_modules/.prisma 
+    # Use the same dynamically found path for the engine layer
+    if [ -n "$PRISMA_CLIENT_PATH" ]; then
+        echo "Using Prisma client path: $PRISMA_CLIENT_PATH"
+        rsync -av "$PRISMA_CLIENT_PATH/node_modules/.prisma/" lambda-layers-prisma-client-engine/nodejs/node_modules/.prisma
+    else
+        echo "ERROR: Could not find Prisma client path in .pnpm"
+        exit 1
+    fi
     rsync -av ./../../node_modules/.pnpm/node_modules/@prisma/engines/dist/ lambda-layers-prisma-client-migration/nodejs/node_modules/@prisma/engines/dist
     rsync -av ./../../node_modules/.pnpm/node_modules/@prisma/debug/ lambda-layers-prisma-client-migration/nodejs/node_modules/@prisma/debug
     rsync -av ./../../node_modules/.pnpm/node_modules/@prisma/engines-version/ lambda-layers-prisma-client-migration/nodejs/node_modules/@prisma/engines-version

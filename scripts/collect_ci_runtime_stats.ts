@@ -1,4 +1,5 @@
 import { Octokit } from 'octokit'
+import type { components } from '@octokit/openapi-types'
 import fs from 'fs'
 import path from 'path'
 import os from 'os'
@@ -64,7 +65,7 @@ async function fetchDeployRuns(): Promise<WorkflowRun[]> {
 
     console.info('Workflows fetched')
 
-    const deploy = workflows.find((w) => {
+    const deploy = workflows.find((w: components['schemas']['workflow']) => {
         return w.name === 'Deploy'
     })
 

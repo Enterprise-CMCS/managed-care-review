@@ -117,7 +117,7 @@ describe('ContractDetailsSummarySection', () => {
             />,
             {
                 apolloProvider: defaultApolloMocks,
-                featureFlags: { '438-attestation': true },
+                featureFlags: { '438-attestation': true, dsnp: true },
             }
         )
 
@@ -153,6 +153,11 @@ describe('ContractDetailsSummarySection', () => {
         expect(
             screen.getByRole('definition', {
                 name: 'This contract action does NOT include new or modified provisions related to the following',
+            })
+        ).toBeInTheDocument()
+        expect(
+            screen.getByRole('definition', {
+                name: 'Is this contract associated with a Dual-Eligible Special Needs Plan (D-SNP) that covers Medicaid benefits?',
             })
         ).toBeInTheDocument()
     })

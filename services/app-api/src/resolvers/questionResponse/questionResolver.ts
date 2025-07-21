@@ -1,22 +1,31 @@
 import type { Resolvers } from '../../gen/gqlServer'
-
-import type { ContractQuestionType } from '../../domain-models'
+import type {
+    ContractQuestionType,
+    RateQuestionType,
+} from '../../domain-models'
 import type { Store } from '../../postgres'
 import { GraphQLError } from 'graphql'
 
 export function questionResolver(store: Store): Resolvers['QuestionResolver'] {
     return {
-        round: async (parent: ContractQuestionType) => {
-            const questions = await store.findAllQuestionsByContract(
-                parent.contractID
-            )
+        round: async (parent: ContractQuestionType | RateQuestionType) => {
+            const isContractQuestion = 'contractID' in parent
+            const type = isContractQuestion ? 'contract' : 'rate'
+            const id = isContractQuestion ? parent.contractID : parent.rateID
+            const storeMethod = isContractQuestion
+                ? store.findAllQuestionsByContract
+                : store.findAllQuestionsByRate
+
+            const questions:
+                | (ContractQuestionType | RateQuestionType)[]
+                | Error = await storeMethod(id)
+
             if (!questions) {
-                throw new Error(
-                    `Questions not found for contract: ${parent.contractID}`
-                )
+                throw new Error(`Questions not found for ${type}: ${id}`)
             }
+
             if (questions instanceof Error) {
-                const errMessage = `Issue return questions for contract message: ${questions.message}`
+                const errMessage = `Issue return questions for ${type} message: ${questions.message}`
 
                 throw new GraphQLError(errMessage, {
                     extensions: {

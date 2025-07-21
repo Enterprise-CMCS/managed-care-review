@@ -11,6 +11,7 @@ import { hasAdminPermissions, hasCMSPermissions } from '../../domain-models'
 import { isValidStateCode } from '@mc-review/hpp'
 import { NotFoundError } from '../../postgres'
 import { GraphQLError } from 'graphql/index'
+import { canWrite } from '../../authorization/oauthAuthorization'
 
 // Update cms users assigned to a specific state
 export function updateStateAssignmentsByState(
@@ -24,6 +25,20 @@ export function updateStateAssignmentsByState(
             currentUser,
             span
         )
+
+        // Check OAuth client read permissions
+        if (!canWrite(context)) {
+            const errMessage = `OAuth client does not have write permissions`
+            logError('updateStateAssignmentsByState', errMessage)
+            setErrorAttributesOnActiveSpan(errMessage, span)
+
+            throw new GraphQLError(errMessage, {
+                extensions: {
+                    code: 'FORBIDDEN',
+                    cause: 'INSUFFICIENT_OAUTH_GRANTS',
+                },
+            })
+        }
 
         // Only Admin and all CMS users can call this resolver
         if (

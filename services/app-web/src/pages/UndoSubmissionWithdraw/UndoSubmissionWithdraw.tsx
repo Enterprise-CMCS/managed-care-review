@@ -12,20 +12,14 @@ import {
 import {
     ActionButton,
     Breadcrumbs,
+    FieldTextarea,
     GenericApiErrorBanner,
-    PoliteErrorMessage,
 } from '../../components'
 import { RoutesRecord } from '@mc-review/constants'
 import { ErrorOrLoadingPage } from '../StateSubmission'
 import { handleAndReturnErrorState } from '../StateSubmission/ErrorOrLoadingPage'
 import { GenericErrorPage } from '../Errors/GenericErrorPage'
-import {
-    ButtonGroup,
-    Form,
-    FormGroup,
-    Label,
-    Textarea,
-} from '@trussworks/react-uswds'
+import { ButtonGroup, Form } from '@trussworks/react-uswds'
 import { PageActionsContainer } from '../StateSubmission/PageActions'
 import { recordJSException } from '@mc-review/otel'
 import { generatePath } from 'react-router-dom'
@@ -49,7 +43,7 @@ export const UndoSubmissionWithdraw = (): React.ReactElement => {
     const { logFormSubmitEvent } = useTealium()
     const navigate = useNavigate()
     const [shouldValidate, setShouldValidate] = useState(false)
-    const showFieldErrors = (error?: FormError): boolean | undefined =>
+    const showFieldErrors = (error?: FormError): boolean =>
         shouldValidate && Boolean(error)
     const [
         undoWithdrawSubmission,
@@ -150,47 +144,18 @@ export const UndoSubmissionWithdraw = (): React.ReactElement => {
                         {undoWithdrawError && <GenericApiErrorBanner />}
                         <fieldset className="usa-fieldset">
                             <h2>Undo submission withdraw</h2>
-                            <FormGroup
-                                error={showFieldErrors(
+                            <FieldTextarea
+                                label="Reason for undoing the submission withdraw."
+                                id="undoSubmissionWithdrawReason"
+                                data-testid="undoSubmissionWithdrawReason"
+                                name="undoSubmissionWithdrawReason"
+                                aria-required
+                                hint="This will move the submission back to the submitted status."
+                                showError={showFieldErrors(
                                     errors.undoSubmissionWithdrawReason
                                 )}
-                                className="margin-top-0"
-                            >
-                                <Label
-                                    htmlFor="undoSubmissionWithdrawReason"
-                                    className="margin-bottom-0 text-bold"
-                                >
-                                    Reason for undoing the submission withdraw.
-                                </Label>
-                                <p className="margin-bottom-0 margin-top-05 usa-hint">
-                                    Required
-                                </p>
-                                <p className="margin-bottom-0 margin-top-05 usa-hint">
-                                    This will move the submission back to the
-                                    submitted status.
-                                </p>
-                                {showFieldErrors(
-                                    errors.undoSubmissionWithdrawReason
-                                ) && (
-                                    <PoliteErrorMessage formFieldLabel="Reason for undoing withdraw">
-                                        {errors.undoSubmissionWithdrawReason}
-                                    </PoliteErrorMessage>
-                                )}
-                                <Textarea
-                                    name="undoSubmissionWithdrawReason"
-                                    id="undoSubmissionWithdrawReason"
-                                    data-testid="undoSubmissionWithdrawReason"
-                                    aria-labelledby="undoSubmissionWithdrawReason"
-                                    aria-required
-                                    defaultValue={
-                                        values.undoSubmissionWithdrawReason
-                                    }
-                                    onChange={handleChange}
-                                    error={showFieldErrors(
-                                        errors.undoSubmissionWithdrawReason
-                                    )}
-                                />
-                            </FormGroup>
+                                onChange={handleChange}
+                            />
                         </fieldset>
                         <PageActionsContainer>
                             <ButtonGroup type="default">

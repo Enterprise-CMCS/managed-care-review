@@ -68,6 +68,14 @@ async function checkMimeTypes(
 
     for (const [scanFileName, key] of Object.entries(filemap)) {
         try {
+            // Skip MIME type validation for .zip files
+            if (key.toLowerCase().endsWith('.zip')) {
+                console.info(
+                    `Skipping MIME type validation for zip file: ${key}`
+                )
+                continue
+            }
+
             const scanFilePath = path.join(scanDir, scanFileName)
             const originalFilename = await s3Client.getOriginalFilename(
                 key,

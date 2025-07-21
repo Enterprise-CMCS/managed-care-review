@@ -18,6 +18,8 @@ const ROUTES = [
     'DIVISION_ASSIGNMENTS',
     'AUTOMATED_EMAILS',
     'SUPPORT_EMAILS',
+    'OAUTH_CLIENTS',
+    'CREATE_OAUTH_CLIENT',
     'RATES_SUMMARY',
     'RATES_UPLOAD_QUESTION',
     'RATES_SUMMARY_QUESTIONS_AND_ANSWERS',
@@ -73,6 +75,8 @@ const RoutesRecord: Record<RouteT, string> = {
     DIVISION_ASSIGNMENTS: '/mc-review-settings/division-assignments',
     AUTOMATED_EMAILS: '/mc-review-settings/automated-emails',
     SUPPORT_EMAILS: '/mc-review-settings/support-emails',
+    OAUTH_CLIENTS: '/mc-review-settings/oauth-clients',
+    CREATE_OAUTH_CLIENT: '/mc-review-settings/oauth-clients/create-oauth-client',
     RATES_SUMMARY: '/rates/:id',
     RATES_SUMMARY_QUESTIONS_AND_ANSWERS: '/rates/:id/question-and-answers',
     RATE_EDIT: '/rates/:id/edit',
@@ -168,6 +172,7 @@ const CMS_WORKFLOW_FORM_ROUTES: RouteTWithUnknown[]  = [
 
 const SETTINGS_HIDE_SIDEBAR_ROUTES: RouteTWithUnknown[] = [
     'EDIT_STATE_ASSIGNMENTS',
+    'CREATE_OAUTH_CLIENT'
 ]
 
 /*
@@ -188,6 +193,8 @@ const PageTitlesRecord: Record<RouteT | 'UNKNOWN_ROUTE', string> = {
     DIVISION_ASSIGNMENTS: 'Division assignments',
     AUTOMATED_EMAILS: 'Automated emails',
     SUPPORT_EMAILS: 'Support emails',
+    OAUTH_CLIENTS: 'Oauth clients',
+    CREATE_OAUTH_CLIENT: 'Create OAuth client',
     DASHBOARD: 'Dashboard',
     DASHBOARD_RATES: 'Rate review dashboard',
     DASHBOARD_SUBMISSIONS: 'Dashboard',

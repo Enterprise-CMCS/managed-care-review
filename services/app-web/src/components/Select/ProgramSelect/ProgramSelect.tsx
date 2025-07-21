@@ -1,13 +1,9 @@
 import React from 'react'
 import styles from '../Select.module.scss'
-import Select, {
-    ActionMeta,
-    AriaOnFocus,
-    OnChangeValue,
-    Props,
-} from 'react-select'
+import { ActionMeta, AriaOnFocus, OnChangeValue, Props } from 'react-select'
 import { useField } from 'formik'
 import { useStatePrograms, useTealium } from '../../../hooks'
+import { AccessibleSelect } from '../AccessibleSelect/AccessibleSelect'
 
 export type ProgramSelectPropType = {
     name: string
@@ -87,7 +83,7 @@ export const ProgramSelect = ({
     }
 
     return (
-        <Select
+        <AccessibleSelect
             defaultValue={programIDs.map((programID) => {
                 const program = statePrograms.find((p) => p.id === programID)
                 if (!program) {

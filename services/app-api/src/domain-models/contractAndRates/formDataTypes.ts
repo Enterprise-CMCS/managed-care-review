@@ -9,6 +9,7 @@ import {
     rateCapitationTypeSchema,
     rateTypeSchema,
     submissionTypeSchema,
+    rateMedicaidPopulationsSchema,
 } from '@mc-review/hpp'
 import { statusSchema } from './statusType'
 import type { RawCreateParams, ZodTypeAny } from 'zod/lib/types'
@@ -67,6 +68,7 @@ const genericContractFormDataSchema = z.object({
 
     populationCovered: populationCoveredSchema,
     riskBasedContract: z.boolean(),
+    dsnpContract: z.boolean().optional(),
     stateContacts: z.array(stateContactSchema),
     supportingDocuments: z.array(documentSchema),
     contractExecutionStatus: contractExecutionStatusSchema,
@@ -111,6 +113,9 @@ const contractFormDataSchema = genericContractFormDataSchema.extend({
     ),
     riskBasedContract: preprocessNulls(
         genericContractFormDataSchema.shape.riskBasedContract.optional()
+    ),
+    dsnpContract: preprocessNulls(
+        genericContractFormDataSchema.shape.dsnpContract.optional()
     ),
     contractExecutionStatus: preprocessNulls(
         genericContractFormDataSchema.shape.contractExecutionStatus.optional()
@@ -204,6 +209,7 @@ const genericRateFormDataSchema = z.object({
     rateDateStart: z.date(),
     rateDateEnd: z.date(),
     rateDateCertified: z.date(),
+    rateMedicaidPopulations: z.array(rateMedicaidPopulationsSchema),
     amendmentEffectiveDateStart: preprocessNulls(z.date().optional()),
     amendmentEffectiveDateEnd: preprocessNulls(z.date().optional()),
     deprecatedRateProgramIDs: z.array(z.string()),
@@ -244,6 +250,9 @@ const rateFormDataSchema = genericRateFormDataSchema.extend({
     ),
     rateProgramIDs: preprocessNulls(
         genericRateFormDataSchema.shape.rateProgramIDs.optional()
+    ),
+    rateMedicaidPopulations: preprocessNulls(
+        genericRateFormDataSchema.shape.rateMedicaidPopulations.optional()
     ),
     rateCertificationName: preprocessNulls(
         genericRateFormDataSchema.shape.rateCertificationName.optional()

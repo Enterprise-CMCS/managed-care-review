@@ -2,6 +2,8 @@ import type {
     Division,
     RateRevisionTable,
     ContractRevisionTable,
+    DocumentZipPackage,
+    DocumentZipType,
 } from '@prisma/client'
 import type { StateCodeType } from '@mc-review/hpp'
 import type {
@@ -75,7 +77,10 @@ import type { UpdateDraftContractRatesArgsType } from './contractAndRates/update
 import { updateStateAssignedUsers } from './state/updateStateAssignedUsers'
 import { findStateAssignedUsers } from './state/findStateAssignedUsers'
 
-import { findAllDocuments } from './documents'
+import {
+    type CreateDocumentZipPackageArgsType,
+    findAllDocuments,
+} from './documents'
 import type { WithdrawRateArgsType } from './contractAndRates/withdrawRate'
 import { withdrawRate } from './contractAndRates/withdrawRate'
 import { findEmailSettings } from './settings/findEmailSettings'
@@ -109,7 +114,14 @@ import {
     getOAuthClientByClientId as _getOAuthClientByClientId,
     deleteOAuthClient as _deleteOAuthClient,
     updateOAuthClient as _updateOAuthClient,
+    getOAuthClientsByUserId as _getOAuthClientsByUserId,
 } from './oauth/oauthClientStore'
+
+import {
+    createDocumentZipPackage,
+    findDocumentZipPackagesByContractRevision,
+    findDocumentZipPackagesByRateRevision,
+} from './documents'
 
 type Store = {
     /** Settings functions **/
@@ -237,9 +249,21 @@ type Store = {
         rateID: string
     ) => Promise<RateQuestionType[] | Error>
 
-    /** Other **/
+    /** Documents **/
     findAllDocuments: () => Promise<AuditDocument[] | Error>
+    createDocumentZipPackage: (
+        args: CreateDocumentZipPackageArgsType
+    ) => Promise<DocumentZipPackage | Error>
+    findDocumentZipPackagesByContractRevision: (
+        contractRevisionID: string,
+        documentType?: DocumentZipType
+    ) => Promise<DocumentZipPackage[] | Error>
+    findDocumentZipPackagesByRateRevision: (
+        rateRevisionID: string,
+        documentType?: DocumentZipType
+    ) => Promise<DocumentZipPackage[] | Error>
 
+    /** OAuth **/
     createOAuthClient: (
         data: Parameters<typeof _createOAuthClient>[1]
     ) => ReturnType<typeof _createOAuthClient>
@@ -255,6 +279,9 @@ type Store = {
         clientId: string,
         data: Parameters<typeof _updateOAuthClient>[2]
     ) => ReturnType<typeof _updateOAuthClient>
+    getOAuthClientsByUserId: (
+        userID: string
+    ) => ReturnType<typeof _getOAuthClientsByUserId>
 }
 
 function NewPostgresStore(client: ExtendedPrismaClient): Store {
@@ -349,8 +376,25 @@ function NewPostgresStore(client: ExtendedPrismaClient): Store {
         findAllQuestionsByRate: (rateID) =>
             findAllQuestionsByRate(client, rateID),
 
-        /** Other **/
+        /** Documents **/
         findAllDocuments: () => findAllDocuments(client),
+        createDocumentZipPackage: (args) =>
+            createDocumentZipPackage(client, args),
+        findDocumentZipPackagesByContractRevision: (
+            contractRevisionID,
+            documentType
+        ) =>
+            findDocumentZipPackagesByContractRevision(
+                client,
+                contractRevisionID,
+                documentType
+            ),
+        findDocumentZipPackagesByRateRevision: (rateRevisionID, documentType) =>
+            findDocumentZipPackagesByRateRevision(
+                client,
+                rateRevisionID,
+                documentType
+            ),
 
         /** Oauth **/
         createOAuthClient: (data) => _createOAuthClient(client, data),
@@ -361,6 +405,8 @@ function NewPostgresStore(client: ExtendedPrismaClient): Store {
         deleteOAuthClient: (clientId) => _deleteOAuthClient(client, clientId),
         updateOAuthClient: (clientId, data) =>
             _updateOAuthClient(client, clientId, data),
+        getOAuthClientsByUserId: (userID) =>
+            _getOAuthClientsByUserId(client, userID),
     }
 }
 

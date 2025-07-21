@@ -8,14 +8,38 @@ import {
 import type { FormikRateForm } from './'
 import { useStatePrograms } from '../../../hooks'
 import { formatDocumentsForGQL } from '../../../formHelpers/formatters'
+import {
+    ErrorOrLoadingPage,
+    handleAndReturnErrorState,
+} from '../ErrorOrLoadingPage'
+import { ApolloError } from '@apollo/client'
 
 export const LinkedRateSummary = ({
     rateForm,
+    loading,
+    apiError,
 }: {
-    rateForm: FormikRateForm
+    rateForm: FormikRateForm,
+    loading: boolean | undefined,
+    apiError: ApolloError | undefined
 }): React.ReactElement | null => {
     const statePrograms = useStatePrograms()
+ // Display any full page interim state resulting from the initial fetch API requests
+ if (loading) {
+    return (
+        <SectionCard id={`linked-rate-${rateForm.id}`} key={rateForm.id}>
+            <ErrorOrLoadingPage state="LOADING" />
+        </SectionCard>
+    )
+}
 
+if (apiError) {
+    return (
+        <ErrorOrLoadingPage
+            state={handleAndReturnErrorState(apiError)}
+        />
+    )
+}
     return (
         <SectionCard id={`linked-rate-${rateForm.id}`} key={rateForm.id}>
             <h3 aria-label={`Rate ID: ${rateForm.rateCertificationName}`}>

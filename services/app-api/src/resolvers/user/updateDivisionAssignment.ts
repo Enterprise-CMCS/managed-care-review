@@ -9,6 +9,7 @@ import {
     setErrorAttributesOnActiveSpan,
     setResolverDetailsOnActiveSpan,
 } from '../attributeHelper'
+import { canWrite } from '../../authorization/oauthAuthorization'
 
 export function updateDivisionAssignment(
     store: Store
@@ -21,6 +22,20 @@ export function updateDivisionAssignment(
             currentUser,
             span
         )
+
+        // Check OAuth client read permissions
+        if (!canWrite(context)) {
+            const errMessage = `OAuth client does not have write permissions`
+            logError('updateDivisionAssignment', errMessage)
+            setErrorAttributesOnActiveSpan(errMessage, span)
+
+            throw new GraphQLError(errMessage, {
+                extensions: {
+                    code: 'FORBIDDEN',
+                    cause: 'INSUFFICIENT_OAUTH_GRANTS',
+                },
+            })
+        }
 
         // This resolver is only callable by admin users
         if (!hasAdminPermissions(currentUser)) {

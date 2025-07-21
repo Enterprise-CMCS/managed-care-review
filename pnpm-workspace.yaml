@@ -1,5 +1,6 @@
 packages:
     - 'services/**'
+    - '!services/infra-cdk'
     - 'packages/**'
     - 'dev_tool'
     - 'scripts'

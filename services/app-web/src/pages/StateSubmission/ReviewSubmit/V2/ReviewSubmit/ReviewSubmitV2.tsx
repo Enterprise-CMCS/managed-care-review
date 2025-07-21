@@ -8,7 +8,6 @@ import { ActionButton } from '../../../../../components/ActionButton'
 import { useRouteParams, useStatePrograms } from '../../../../../hooks'
 import { useLDClient } from 'launchdarkly-react-client-sdk'
 
-import { RoutesRecord } from '@mc-review/constants'
 import { UnlockSubmitModal } from '../../../../../components/Modal/UnlockSubmitModal'
 import { getVisibleLatestContractFormData } from '@mc-review/helpers'
 import { useAuth } from '../../../../../contexts/AuthContext'
@@ -33,7 +32,7 @@ export const ReviewSubmit = (): React.ReactElement => {
     const modalRef = useRef<ModalRef>(null)
     const statePrograms = useStatePrograms()
     const { loggedInUser } = useAuth()
-    const { updateHeading } = usePage()
+    const { updateHeading, updateActiveMainContent } = usePage()
     const { id } = useRouteParams()
     const [isSubmitting, setIsSubmitting] = useState<boolean>(false)
     const ldClient = useLDClient()
@@ -53,12 +52,18 @@ export const ReviewSubmit = (): React.ReactElement => {
     })
 
     const contract = data?.fetchContract.contract
+    const activeMainContentId = 'reviewSubmitMainContent'
 
     useEffect(() => {
         updateHeading({
             customHeading: contract?.draftRevision?.contractName,
         })
     }, [contract, updateHeading])
+
+    // Set the active main content to focus when click the Skip to main content button.
+    useEffect(() => {
+        updateActiveMainContent(activeMainContentId)
+    }, [activeMainContentId, updateActiveMainContent])
 
     if (loading) {
         return (
@@ -101,7 +106,7 @@ export const ReviewSubmit = (): React.ReactElement => {
             programs
         ) || ''
     return (
-        <>
+        <div id={activeMainContentId}>
             <FormNotificationContainer>
                 <DynamicStepIndicator
                     formPages={activeFormPages(
@@ -150,22 +155,7 @@ export const ReviewSubmit = (): React.ReactElement => {
                     explainMissingData
                 />
 
-                <PageActionsContainer
-                    left={
-                        <ActionButton
-                            type="button"
-                            variant="linkStyle"
-                            link_url={RoutesRecord.DASHBOARD_SUBMISSIONS}
-                            parent_component_type="page body"
-                            onClick={() =>
-                                navigate(RoutesRecord.DASHBOARD_SUBMISSIONS)
-                            }
-                            disabled={isSubmitting}
-                        >
-                            Save as draft
-                        </ActionButton>
-                    }
-                >
+                <PageActionsContainer>
                     <ActionButton
                         type="button"
                         variant="outline"
@@ -203,6 +193,6 @@ export const ReviewSubmit = (): React.ReactElement => {
                     setIsSubmitting={setIsSubmitting}
                 />
             </GridContainer>
-        </>
+        </div>
     )
 }

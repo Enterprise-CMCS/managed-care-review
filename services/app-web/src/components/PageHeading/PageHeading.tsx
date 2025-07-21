@@ -1,4 +1,4 @@
-import React, { useEffect, useRef } from 'react'
+import React from 'react'
 import classnames from 'classnames'
 
 import './PageHeading.module.scss'
@@ -19,19 +19,13 @@ export const PageHeading = ({
     headingLevel,
     ...props
 }: PageHeadingProps): React.ReactElement => {
-    const headingRef = useRef<HTMLHeadingElement>(null)
     const Component = headingLevel || 'h1'
     const classes = classnames('heading', className)
-
-    useEffect(() => {
-        headingRef.current?.focus()
-    }, [children])
 
     return (
         <Component
             className={classes}
             tabIndex={-1}
-            ref={headingRef}
             aria-live="polite"
             {...props}
         >

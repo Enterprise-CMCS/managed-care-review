@@ -1,6 +1,6 @@
 import React from 'react'
 import styles from '../../Select/Select.module.scss'
-import Select, {
+import {
     AriaOnFocus,
     Props,
     components,
@@ -10,6 +10,7 @@ import Select, {
     OnChangeValue,
 } from 'react-select'
 import { useTealium } from '../../../hooks'
+import { AccessibleSelect } from '../../Select'
 
 export type FilterSelectPropType = {
     name: string
@@ -87,7 +88,7 @@ export const FilterSelect = ({
             {label && (
                 <label htmlFor={`${name}-filter-select-input`}>{label}</label>
             )}
-            <Select
+            <AccessibleSelect
                 options={filterOptions}
                 className={styles.multiSelect}
                 classNamePrefix="select"

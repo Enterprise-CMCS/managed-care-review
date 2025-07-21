@@ -39,7 +39,7 @@ module.exports = defineConfig({
             newConfig.env.AUTH_MODE = process.env.VITE_APP_AUTH_MODE
             newConfig.env.TEST_USERS_PASS = process.env.TEST_USERS_PASS
 
-            // Configure env for Amplify authorization
+            // Configure env for cognito authorization
             newConfig.env.API_URL = process.env.VITE_APP_API_URL
             newConfig.env.COGNITO_USER_POOL_ID =
                 process.env.COGNITO_USER_POOL_ID
@@ -48,6 +48,9 @@ module.exports = defineConfig({
                 process.env.COGNITO_IDENTITY_POOL_ID
             newConfig.env.COGNITO_USER_POOL_WEB_CLIENT_ID =
                 process.env.COGNITO_USER_POOL_WEB_CLIENT_ID
+            newConfig.env.AWS_ACCESS_KEY_ID = process.env.AWS_ACCESS_KEY_ID
+            newConfig.env.AWS_SECRET_ACCESS_KEY = process.env.AWS_SECRET_ACCESS_KEY
+            newConfig.env.AWS_SESSION_TOKEN = process.env.AWS_SESSION_TOKEN
 
             // Reads graphql schema and converts it to gql for apollo client.
             on('task', {

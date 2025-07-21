@@ -24,6 +24,15 @@ outputs:
   oidc-role-arn:
     description: 'ARN of the OIDC role to assume'
     value: ${{ steps.format-oidc-role-arn.outputs.arn }}
+  aws-access-key-id:
+    description: 'AWS Access Key ID'
+    value: ${{ steps.configure-aws-credentials.outputs.aws-access-key-id }}
+  aws-secret-access-key:
+    description: 'AWS Secret Access Key'
+    value: ${{ steps.configure-aws-credentials.outputs.aws-secret-access-key }}
+  aws-session-token:
+    description: 'AWS Session Token'
+    value: ${{ steps.configure-aws-credentials.outputs.aws-session-token }}
 
 runs:
   using: 'composite'
@@ -44,8 +53,10 @@ runs:
         echo "arn=$ARN" >> $GITHUB_OUTPUT
 
     - name: Configure AWS credentials
+      id: configure-aws-credentials
       if: ${{ inputs.dry-run != 'true' }}
-      uses: aws-actions/configure-aws-credentials@v2
+      uses: aws-actions/configure-aws-credentials@v4
       with:
         aws-region: ${{ inputs.region }}
         role-to-assume: ${{ steps.format-oidc-role-arn.outputs.arn }}
+        output-credentials: true

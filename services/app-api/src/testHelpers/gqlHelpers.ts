@@ -58,6 +58,11 @@ import { createAndUpdateTestContractWithoutRates } from './gqlContractHelpers'
 import { addNewRateToTestContract } from './gqlRateHelpers'
 import type { GraphQLResponse } from 'apollo-server-types'
 import { configureEmailer } from '../handlers/configuration'
+import type { DocumentZipService } from '../zip/generateZip'
+import {
+    documentZipService,
+    localGenerateDocumentZip,
+} from '../zip/generateZip'
 
 // Since our programs are checked into source code, we have a program we
 // use as our default
@@ -93,6 +98,7 @@ const constructTestPostgresServer = async (opts?: {
     ldService?: LDService
     jwt?: JWTLib
     s3Client?: S3ClientT
+    documentZip?: DocumentZipService
 }): Promise<ApolloServer> => {
     // set defaults
     const context = opts?.context || defaultContext()
@@ -109,6 +115,10 @@ const constructTestPostgresServer = async (opts?: {
             signingKey: Buffer.from('123af', 'hex'),
             expirationDurationS: 1000,
         })
+
+    const localDocumentZip =
+        opts?.documentZip ??
+        documentZipService(postgresStore, localGenerateDocumentZip)
 
     await insertUserToLocalAurora(postgresStore, context.user)
     const s3TestClient = testS3Client()
@@ -136,7 +146,6 @@ const constructTestPostgresServer = async (opts?: {
             ldService,
         }))
 
-
     if (emailer instanceof Error) {
         throw new Error(`Failed to configure emailer: ${emailer.message}`)
     }
@@ -147,7 +156,8 @@ const constructTestPostgresServer = async (opts?: {
         ldService,
         jwt,
         s3,
-        'https://localhost:3000'
+        'https://localhost:3000',
+        localDocumentZip
     )
 
     return new ApolloServer({
@@ -172,7 +182,10 @@ const constructTestEmailer = async (opts: {
         const prismaClient = await sharedTestPrismaClient()
         store = NewPostgresStore(prismaClient)
     }
-    const removeParameterStore = await ldService.getFeatureFlag({  key: 'foo', flag: 'remove-parameter-store'})
+    const removeParameterStore = await ldService.getFeatureFlag({
+        key: 'foo',
+        flag: 'remove-parameter-store',
+    })
 
     const emailSettings = await store.findEmailSettings()
     if (emailSettings instanceof Error) {
@@ -181,18 +194,34 @@ const constructTestEmailer = async (opts: {
 
     // go into test emailer with both paramet
     const testEmailSettings: EmailSettingsType = {
-        emailSource: removeParameterStore? emailSettings.emailSource : emailConfig.emailSource,
-        devReviewTeamEmails: removeParameterStore? emailSettings.devReviewTeamEmails : emailConfig.devReviewTeamEmails,
-        oactEmails: removeParameterStore? emailSettings.oactEmails : emailConfig.oactEmails,
-        dmcpReviewEmails:
-        removeParameterStore? emailSettings.dmcpReviewEmails : emailConfig.dmcpReviewEmails,
-        dmcpSubmissionEmails:
-        removeParameterStore? emailSettings.dmcpSubmissionEmails : emailConfig.dmcpSubmissionEmails,
-        dmcoEmails:     removeParameterStore? emailSettings.dmcoEmails : emailConfig.dmcoEmails,
+        emailSource: removeParameterStore
+            ? emailSettings.emailSource
+            : emailConfig.emailSource,
+        devReviewTeamEmails: removeParameterStore
+            ? emailSettings.devReviewTeamEmails
+            : emailConfig.devReviewTeamEmails,
+        oactEmails: removeParameterStore
+            ? emailSettings.oactEmails
+            : emailConfig.oactEmails,
+        dmcpReviewEmails: removeParameterStore
+            ? emailSettings.dmcpReviewEmails
+            : emailConfig.dmcpReviewEmails,
+        dmcpSubmissionEmails: removeParameterStore
+            ? emailSettings.dmcpSubmissionEmails
+            : emailConfig.dmcpSubmissionEmails,
+        dmcoEmails: removeParameterStore
+            ? emailSettings.dmcoEmails
+            : emailConfig.dmcoEmails,
         // These three settings are string[] in db but string in EmailConfiguration, follow up ticket will convert EmailConfiguration to string[]
-        cmsReviewHelpEmailAddress:     removeParameterStore? emailSettings.cmsReviewHelpEmailAddress : [emailConfig.cmsReviewHelpEmailAddress],
-        cmsRateHelpEmailAddress:     removeParameterStore? emailSettings.cmsRateHelpEmailAddress : [emailConfig.cmsRateHelpEmailAddress],
-        helpDeskEmail: removeParameterStore? emailSettings.helpDeskEmail : [emailConfig.helpDeskEmail],
+        cmsReviewHelpEmailAddress: removeParameterStore
+            ? emailSettings.cmsReviewHelpEmailAddress
+            : [emailConfig.cmsReviewHelpEmailAddress],
+        cmsRateHelpEmailAddress: removeParameterStore
+            ? emailSettings.cmsRateHelpEmailAddress
+            : [emailConfig.cmsRateHelpEmailAddress],
+        helpDeskEmail: removeParameterStore
+            ? emailSettings.helpDeskEmail
+            : [emailConfig.helpDeskEmail],
     }
 
     store.findEmailSettings = async () => {

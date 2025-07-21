@@ -1,5 +1,5 @@
 import styles from '../Select.module.scss'
-import Select, {
+import {
     ActionMeta,
     AriaOnFocus,
     OnChangeValue,
@@ -8,6 +8,7 @@ import Select, {
 import type {} from 'react-select/base'
 import { useField } from 'formik'
 import { useTealium } from '../../../hooks'
+import { AccessibleSelect } from '../AccessibleSelect/AccessibleSelect'
 
 type FieldSelectOptionType = {
     readonly label: string
@@ -18,7 +19,7 @@ type FieldSelectOptionType = {
 
 type FieldSelectType = {
     name: string
-    initialValues: FieldSelectOptionType[]
+    initialValues: FieldSelectOptionType[] | FieldSelectOptionType
     dropdownOptions: FieldSelectOptionType[]
     label: string
     optionDescriptionSingular?: string
@@ -33,7 +34,6 @@ type FieldSelectType = {
  */
 const FieldSelect = ({
     name,
-    isMulti = true,
     isSearchable = true,
     initialValues,
     dropdownOptions,
@@ -94,7 +94,7 @@ const FieldSelect = ({
     }
 
     return (
-        <Select
+        <AccessibleSelect
             defaultValue={initialValues}
             placeholder={
                 isLoading
@@ -109,7 +109,6 @@ const FieldSelect = ({
             name={name}
             options={error || isLoading ? undefined : dropdownOptions}
             isSearchable
-            isMulti
             maxMenuHeight={200} // using this to limit size of the display to ~ 5 options with no font zooming
             aria-label={`${optionDescriptionSingular} (required)`}
             ariaLiveMessages={{

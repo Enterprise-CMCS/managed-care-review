@@ -3,11 +3,12 @@ describe('state user in state submission form', () => {
         cy.stubFeatureFlags()
         cy.interceptGraphQL()
     })
-    it('can navigate forward, back,  and save as draft on each form page', () => {
+    it('can navigate forward, back, and save as draft on each form page', () => {
         // goal of this test is to check every single form page and navigation (going backwards, forwards or save as draft with new info)
         cy.interceptFeatureFlags({
             '438-attestation': true,
-            'hide-supporting-docs-page': true
+            'hide-supporting-docs-page': true,
+            'dsnp': true
         })
         cy.logInAsStateUser()
 
@@ -37,9 +38,9 @@ describe('state user in state submission form', () => {
             cy.findByTestId('step-indicator').findAllByRole('listitem').should('have.length', 4)
             cy.findByText('Rate details').should('not.exist')
 
-            // Navigate back to previous page
+            //Navigate back to previous page
             cy.findByRole('button', { name: /Cancel/, timeout: 5_000}).click()
-            cy.findByRole('heading', { level: 1, name: /Submissions dashboard/ })
+            cy.findByRole('heading', { level: 1, name: /Submissions/ })
 
             // Link to type page
             cy.navigateFormByDirectLink(
@@ -61,7 +62,7 @@ describe('state user in state submission form', () => {
 
             // Save as draft
             cy.navigateContractForm('SAVE_DRAFT')
-            cy.findByRole('heading', { level: 1, name: /Submissions dashboard/ })
+            cy.get('[data-testid="saveAsDraftSuccessBanner"]').should('exist')
 
             // Link to type page and continue forward
             cy.navigateFormByDirectLink(
@@ -83,7 +84,7 @@ describe('state user in state submission form', () => {
             cy.findByRole('heading', { level: 2, name: /Contract details/ })
             cy.fillOutAmendmentToBaseContractDetails()
             cy.navigateContractForm('SAVE_DRAFT')
-            cy.findByRole('heading', { level: 1, name: /Submissions dashboard/ })
+            cy.get('[data-testid="saveAsDraftSuccessBanner"]').should('exist')
 
             // Link to contract details page and continue
                cy.navigateFormByDirectLink(
@@ -103,7 +104,7 @@ describe('state user in state submission form', () => {
             cy.findByRole('heading', { level: 2, name: /Rate details/ })
             cy.fillOutNewRateCertification()
             cy.navigateContractRatesForm('SAVE_DRAFT')
-            cy.findByRole('heading', { level: 1, name: /Submissions dashboard/ })
+            cy.get('[data-testid="saveAsDraftSuccessBanner"]').should('exist')
 
             // Link to rate details page, change to rate amendment, continue
             cy.navigateFormByDirectLink(
@@ -124,7 +125,7 @@ describe('state user in state submission form', () => {
             cy.findByRole('heading', { level: 2, name: /Contacts/ })
             cy.fillOutStateContact()
             cy.navigateContractForm('SAVE_DRAFT')
-            cy.findByRole('heading', { level: 1, name: /Submissions dashboard/ })
+            cy.get('[data-testid="saveAsDraftSuccessBanner"]').should('exist')
 
             // Link to contacts page and continue
             cy.navigateFormByDirectLink(

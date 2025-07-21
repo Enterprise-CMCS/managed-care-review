@@ -44,6 +44,7 @@ import {
     AutomatedEmailsTable,
     SupportEmailsTable,
     DivisionAssignmentTable,
+    OauthClients,
 } from '../Settings/SettingsTables'
 import { EditStateAssign } from '../Settings/EditStateAssign/EditStateAssign'
 import {
@@ -58,6 +59,8 @@ import { RateWithdraw } from '../RateWithdraw/RateWithdraw'
 import { UndoRateWithdraw } from '../UndoRateWithdraw/UndoRateWithdraw'
 import { SubmissionWithdraw } from '../SubmissionWithdraw/SubmissionWithdraw'
 import { UndoSubmissionWithdraw } from '../UndoSubmissionWithdraw/UndoSubmissionWithdraw'
+import { CreateOauthClient } from '../Settings/Oauth/CreateOauthClient'
+import { User } from '../../gen/gqlClient'
 
 function componentForAuthMode(
     authMode: AuthModeType
@@ -186,10 +189,12 @@ const StateUserRoutes = ({
 
 const CMSUserRoutes = ({
     stageName,
+    loggedInUser,
 }: {
     authMode: AuthModeType
     setAlert?: React.Dispatch<React.ReactElement>
     stageName?: string
+    loggedInUser: User
 }): React.ReactElement => {
     // feature flag
     const ldClient = useLDClient()
@@ -205,6 +210,8 @@ const CMSUserRoutes = ({
         featureFlags.UNDO_WITHDRAW_SUBMISSION.flag,
         featureFlags.UNDO_WITHDRAW_SUBMISSION.defaultValue
     )
+
+    const isAdminUser = loggedInUser.__typename === 'AdminUser'
 
     return (
         <AuthenticatedRouteWrapper>
@@ -339,10 +346,23 @@ const CMSUserRoutes = ({
                         path={RoutesRecord.SUPPORT_EMAILS}
                         element={<SupportEmailsTable />}
                     />
-                    <Route
-                        path={RoutesRecord.EDIT_STATE_ASSIGNMENTS}
-                        element={<EditStateAssign />}
-                    />
+                    {isAdminUser && (
+                        //For Admin user only routes.
+                        <>
+                            <Route
+                                path={RoutesRecord.OAUTH_CLIENTS}
+                                element={<OauthClients />}
+                            />
+                            <Route
+                                path={RoutesRecord.EDIT_STATE_ASSIGNMENTS}
+                                element={<EditStateAssign />}
+                            />
+                            <Route
+                                path={RoutesRecord.CREATE_OAUTH_CLIENT}
+                                element={<CreateOauthClient />}
+                            />
+                        </>
+                    )}
                 </Route>
                 <Route
                     path={RoutesRecord.SETTINGS}
@@ -470,6 +490,7 @@ export const AppRoutes = ({
                 authMode={authMode}
                 setAlert={setAlert}
                 stageName={stageName}
+                loggedInUser={loggedInUser}
             />
         )
     }

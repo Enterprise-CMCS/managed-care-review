@@ -31,6 +31,7 @@ async function insertDraftRate(
         rateProgramIDs,
         deprecatedRateProgramIDs,
         rateCertificationName,
+        rateMedicaidPopulations,
         certifyingActuaryContacts,
         addtlActuaryContacts,
         actuaryCommunicationPreference,
@@ -100,6 +101,7 @@ async function insertDraftRate(
                             rateProgramIDs,
                             deprecatedRateProgramIDs,
                             rateCertificationName,
+                            rateMedicaidPopulations,
                             certifyingActuaryContacts: {
                                 create:
                                     certifyingActuaryContacts &&

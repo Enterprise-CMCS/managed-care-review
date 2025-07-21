@@ -33,6 +33,7 @@ fragment contractRevisionFragment on ContractRevision {
         submissionType
 
         riskBasedContract
+        dsnpContract
         submissionDescription
 
         stateContacts {
@@ -75,5 +76,14 @@ fragment contractRevisionFragment on ContractRevision {
         modifiedNonRiskPaymentArrangements
         statutoryRegulatoryAttestation
         statutoryRegulatoryAttestationDescription
+    }
+
+    documentZipPackages {
+        id
+        s3URL
+        sha256
+        documentType
+        createdAt
+        downloadUrl
     }
 }

@@ -1,8 +1,9 @@
 import React from 'react'
 import styles from '../Select.module.scss'
-import Select, { AriaOnFocus, Props } from 'react-select'
+import { AriaOnFocus, Props } from 'react-select'
 import { Program } from '../../../gen/gqlClient'
 import { useField } from 'formik'
+import { AccessibleSelect } from '../AccessibleSelect/AccessibleSelect'
 
 export type PackageSelectPropType = {
     name: string
@@ -79,7 +80,7 @@ export const PackageSelect = ({
     }
 
     return (
-        <Select
+        <AccessibleSelect
             value={defaultValues}
             placeholder={isLoading ? 'Loading submissions...' : 'Select...'}
             noOptionsMessage={() => noOptionsMessage()}

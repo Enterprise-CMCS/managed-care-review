@@ -6,70 +6,28 @@ import {
     InMemoryCache,
     NormalizedCacheObject,
 } from '@apollo/client'
-import { Amplify, Auth as AmplifyAuth, API } from 'aws-amplify'
 import {
     RateFormDataInput,
     ContractFormData,
     CreateContractInput,
 } from '../gen/gqlClient'
-
-type StateUserType = {
-    id: string
-    email: string
-    givenName: string
-    familyName: string
-    role: 'STATE_USER'
-    stateCode: string
-}
-
-type CMSUserType = {
-    id: string
-    email: string
-    givenName: string
-    familyName: string
-    role: 'CMS_USER'
-    stateAssignments: []
-}
-
-type AdminUserType = {
-    id: string
-    email: string
-    givenName: string
-    familyName: string
-    role: 'ADMIN_USER'
-}
-
-type DivisionType = 'DMCO' | 'DMCP' | 'OACT'
-
-type UserType = StateUserType | AdminUserType | CMSUserType
+import {
+    CognitoIdentityProviderClient,
+    AdminInitiateAuthCommand,
+    AuthFlowType,
+} from '@aws-sdk/client-cognito-identity-provider'
+import {
+    CognitoIdentityClient,
+    GetIdCommand,
+    GetCredentialsForIdentityCommand,
+} from '@aws-sdk/client-cognito-identity'
+import { SignatureV4 } from '@aws-sdk/signature-v4'
+import { HttpRequest } from '@aws-sdk/protocol-http'
+import { Sha256 } from '@aws-crypto/sha256-js'
+import { findStatePrograms } from '@mc-review/hpp';
 
 // programs for state used in tests
-const minnesotaStatePrograms = [
-    {
-        id: 'abbdf9b0-c49e-4c4c-bb6f-040cb7b51cce',
-        fullName: 'Special Needs Basic Care',
-        name: 'SNBC',
-        isRateProgram: false,
-    },
-    {
-        id: 'd95394e5-44d1-45df-8151-1cc1ee66f100',
-        fullName: 'Prepaid Medical Assistance Program',
-        name: 'PMAP',
-        isRateProgram: false,
-    },
-    {
-        id: 'ea16a6c0-5fc6-4df8-adac-c627e76660ab',
-        fullName: 'Minnesota Senior Care Plus ',
-        name: 'MSC+',
-        isRateProgram: false,
-    },
-    {
-        id: '3fd36500-bf2c-47bc-80e8-e7aa417184c5',
-        fullName: 'Minnesota Senior Health Options',
-        name: 'MSHO',
-        isRateProgram: false,
-    },
-]
+const minnesotaStatePrograms = findStatePrograms('MN')
 
 const s3DlUrl =
     'https://fake-bucket.s3.amazonaws.com/file.pdf?AWSAccessKeyId=AKIAIOSFODNN7EXAMPLE&Expires=1719564800&Signature=abc123def456ghijk' //pragma: allowlist secret
@@ -181,6 +139,32 @@ const newSubmissionInput = (
     )
 }
 
+export type StateUserType = {
+    id: string
+    email: string
+    givenName: string
+    familyName: string
+    role: 'STATE_USER'
+    stateCode: string
+}
+
+export type CMSUserType = {
+    id: string
+    email: string
+    givenName: string
+    familyName: string
+    role: 'CMS_USER'
+    stateAssignments: []
+}
+
+export type AdminUserType = {
+    id: string
+    email: string
+    givenName: string
+    familyName: string
+    role: 'ADMIN_USER'
+}
+
 const stateUser = (): StateUserType => ({
     id: 'user1',
     email: 'aang@example.com',
@@ -207,24 +191,166 @@ const adminUser = (): AdminUserType => ({
     role: 'ADMIN_USER',
 })
 
-// Configure Amplify using envs set in cypress.config.ts
-Amplify.configure({
-    Auth: {
-        mandatorySignIn: true,
-        region: Cypress.env('COGNITO_REGION'),
-        userPoolId: Cypress.env('COGNITO_USER_POOL_ID'),
-        identityPoolId: Cypress.env('COGNITO_IDENTITY_POOL_ID'),
-        userPoolWebClientId: Cypress.env('COGNITO_USER_POOL_WEB_CLIENT_ID'),
-    },
-    API: {
-        endpoints: [
-            {
-                name: 'api',
-                endpoint: Cypress.env('API_URL'),
+class AuthAPIManager {
+    private tokens: {
+        accessToken: string
+        idToken: string
+        refreshToken: string
+    } | null = null
+
+    private cognitoIdentityProvider: CognitoIdentityProviderClient
+    private cognitoIdentity: CognitoIdentityClient
+
+    constructor() {
+        this.cognitoIdentityProvider = new CognitoIdentityProviderClient({
+            region: Cypress.env('COGNITO_REGION'),
+            credentials: {
+                accessKeyId: Cypress.env('AWS_ACCESS_KEY_ID'),
+                secretAccessKey: Cypress.env('AWS_SECRET_ACCESS_KEY'),
+                sessionToken: Cypress.env('AWS_SESSION_TOKEN')
+            }
+        })
+
+        this.cognitoIdentity = new CognitoIdentityClient({
+            region: Cypress.env('COGNITO_REGION'),
+        })
+    }
+
+    async signIn(email: string, password: string) {
+        const command = new AdminInitiateAuthCommand({
+            AuthFlow: AuthFlowType.ADMIN_NO_SRP_AUTH,
+            UserPoolId: Cypress.env('COGNITO_USER_POOL_ID'),
+            ClientId: Cypress.env('COGNITO_USER_POOL_WEB_CLIENT_ID'),
+            AuthParameters: {
+                USERNAME: email,
+                PASSWORD: password,
             },
-        ],
-    },
-})
+        })
+
+        const response = await this.cognitoIdentityProvider.send(command)
+
+        if (!response.AuthenticationResult) {
+            throw new Error('Auth: Authentication failed')
+        }
+
+        this.tokens = {
+            accessToken: response.AuthenticationResult.AccessToken!,
+            idToken: response.AuthenticationResult.IdToken!,
+            refreshToken: response.AuthenticationResult.RefreshToken!,
+        }
+
+        return this.tokens
+    }
+
+    async signOut() {
+        // Clear tokens and sessions
+        this.tokens = null
+        return Promise.resolve()
+    }
+
+    async post(path: string, options: any): Promise<AxiosResponse> {
+        const apiUrl = Cypress.env('API_URL')
+
+        // Parse API URL to get domain and full path
+        const parsedApiUrl = new URL(apiUrl)
+        const apiDomain = `${parsedApiUrl.protocol}//${parsedApiUrl.host}`
+        const fullPath = `${parsedApiUrl.pathname.replace(/\/$/, '')}${path}`
+
+        // Create request body and headers
+        const body = JSON.stringify(options.body)
+
+        const request = new HttpRequest({
+            method: 'POST',
+            hostname: parsedApiUrl.hostname,
+            path: fullPath,
+            headers: {
+                'Content-Type': 'application/json',
+                'Host': parsedApiUrl.hostname,
+                ...options.headers,
+            },
+            body,
+        })
+
+        let response
+
+        // If token is provided we sign the request headers
+        if (this.tokens) {
+            // Get AWS credentials from stored tokens
+            const getIdCommand = new GetIdCommand({
+                IdentityPoolId: Cypress.env('COGNITO_IDENTITY_POOL_ID'),
+                Logins: {
+                    [`cognito-idp.${Cypress.env('COGNITO_REGION')}.amazonaws.com/${Cypress.env('COGNITO_USER_POOL_ID')}`]: this.tokens.idToken,
+                },
+            })
+
+            const { IdentityId } = await this.cognitoIdentity.send(getIdCommand)
+
+            const getCredsCommand = new GetCredentialsForIdentityCommand({
+                IdentityId,
+                Logins: {
+                    [`cognito-idp.${Cypress.env('COGNITO_REGION')}.amazonaws.com/${Cypress.env('COGNITO_USER_POOL_ID')}`]: this.tokens.idToken,
+                },
+            })
+
+            const { Credentials } = await this.cognitoIdentity.send(getCredsCommand)
+
+            const signer = new SignatureV4({
+                service: 'execute-api',
+                region: Cypress.env('COGNITO_REGION') ?? 'us-east-1',
+                credentials: {
+                    accessKeyId: Credentials!.AccessKeyId!,
+                    secretAccessKey: Credentials!.SecretKey!,
+                    sessionToken: Credentials!.SessionToken!,
+                },
+                sha256: Sha256,
+            })
+
+            const signedRequest = await signer.sign(request)
+
+            response = await fetch(`${apiDomain}${fullPath}`, {
+                method: 'POST',
+                headers: signedRequest.headers,
+                body,
+            })
+        } else {
+            // fetch with unsigned request headers
+            response = await fetch(`${apiDomain}${fullPath}`, request)
+        }
+
+        // Parse response safely
+        let responseData
+        const contentType = response.headers.get('content-type')
+
+        if (contentType?.includes('application/json')) {
+            const responseText = await response.text()
+            try {
+                responseData = JSON.parse(responseText)
+            } catch (jsonError) {
+                console.error('JSON parse error:', jsonError, 'Response:', responseText)
+                responseData = responseText
+            }
+        } else {
+            responseData = await response.text()
+        }
+
+        // Convert to AxiosResponse format
+        const headers: { [key: string]: string } = {}
+        response.headers.forEach((value, key) => {
+            headers[key] = value
+        })
+
+        return {
+            data: responseData,
+            status: response.status,
+            statusText: response.statusText,
+            headers,
+            config: {},
+            request: { url: `${apiDomain}${fullPath}` },
+        } as AxiosResponse
+    }
+}
+
+const AuthAPI = new AuthAPIManager()
 
 function fetchResponseFromAxios(axiosResponse: AxiosResponse): Response {
     const fakeFetchResponse: Response = {
@@ -284,7 +410,7 @@ function fetchResponseFromAxios(axiosResponse: AxiosResponse): Response {
 
 // fakeAmplify Fetch looks like the API for fetch, but is secretly making an amplify request
 // Apollo Link uses the ~fetch api for it's client-side middleware.
-// Amplify.API uses axios undeneath and does its own transformation of the body, so we wrap that up here.
+// Amplify.API uses axios underneath and does its own transformation of the body, so we wrap that up here.
 async function fakeAmplifyFetch(
     uri: string,
     options: RequestInit
@@ -317,7 +443,7 @@ async function fakeAmplifyFetch(
     }
 
     return new Promise<Response>((resolve, reject) => {
-        API.post('api', uri, apiOptions)
+        AuthAPI.post(uri, apiOptions)
             .then((apiResponse: AxiosResponse) => {
                 // The Apollo Link wants a fetch.Response shaped response,
                 // not the axios shaped response that Amplify.API returns
@@ -342,7 +468,7 @@ async function fakeAmplifyFetch(
 // Provides Amplify auth and apollo client to callback function.
 const apolloClientWrapper = async <T>(
     schema: DocumentNode,
-    authUser: UserType,
+    authUser: StateUserType | CMSUserType | AdminUserType,
     callback: (apolloClient: ApolloClient<NormalizedCacheObject>) => Promise<T>
 ): Promise<T> => {
     const isLocalAuth = Cypress.env('AUTH_MODE') === 'LOCAL'
@@ -351,7 +477,7 @@ const apolloClientWrapper = async <T>(
         uri: '/graphql',
         headers: isLocalAuth
             ? {
-                  'cognito-authentication-provider': JSON.stringify(authUser),
+                  'Cognito-Authentication-Provider': JSON.stringify(authUser),
               }
             : undefined,
         fetch: fakeAmplifyFetch,
@@ -362,11 +488,7 @@ const apolloClientWrapper = async <T>(
 
     const apolloClient: ApolloClient<NormalizedCacheObject> = new ApolloClient({
         link: new HttpLink(httpLinkConfig),
-        cache: new InMemoryCache({
-            possibleTypes: {
-                Submission: ['DraftSubmission', 'StateSubmission'],
-            },
-        }),
+        cache: new InMemoryCache(),
         typeDefs: schema,
         defaultOptions: {
             watchQuery: {
@@ -376,13 +498,13 @@ const apolloClientWrapper = async <T>(
     })
 
     if (!isLocalAuth) {
-        await AmplifyAuth.signIn(authUser.email, Cypress.env('TEST_USERS_PASS'))
+        await AuthAPI.signIn(authUser.email, Cypress.env('TEST_USERS_PASS'))
     }
 
     const result = await callback(apolloClient)
 
     if (!isLocalAuth) {
-        await AmplifyAuth.signOut()
+        await AuthAPI.signOut()
     }
 
     return result
@@ -396,12 +518,5 @@ export {
     stateUser,
     rateFormData,
     contractFormData,
-    minnesotaStatePrograms,
-}
-export type {
-    StateUserType,
-    CMSUserType,
-    AdminUserType,
-    UserType,
-    DivisionType,
+    minnesotaStatePrograms
 }

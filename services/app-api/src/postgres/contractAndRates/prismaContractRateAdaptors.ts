@@ -42,6 +42,7 @@ function prismaRateCreateFormDataFromDomain(
         rateProgramIDs: rateFormData.rateProgramIDs,
         deprecatedRateProgramIDs: [],
         rateCertificationName: rateFormData.rateCertificationName,
+        rateMedicaidPopulations: rateFormData.rateMedicaidPopulations,
         rateDocuments: {
             create:
                 rateFormData.rateDocuments &&
@@ -93,6 +94,7 @@ function prismaUpdateRateFormDataFromDomain(
             rateFormData.amendmentEffectiveDateEnd
         ),
         rateProgramIDs: emptify(rateFormData.rateProgramIDs),
+        rateMedicaidPopulations: emptify(rateFormData.rateMedicaidPopulations),
         deprecatedRateProgramIDs: [],
         rateCertificationName: nullify(rateFormData.rateCertificationName),
         rateDocuments: {
@@ -144,6 +146,7 @@ function prismaCreateContractFormDataFromDomain(
         programIDs,
         populationCovered,
         riskBasedContract,
+        dsnpContract,
         stateContacts,
         supportingDocuments,
         contractType,
@@ -176,6 +179,7 @@ function prismaCreateContractFormDataFromDomain(
         populationCovered: populationCovered,
         programIDs: programIDs,
         riskBasedContract: riskBasedContract,
+        dsnpContract: dsnpContract,
         submissionType: submissionType,
         submissionDescription: submissionDescription,
         contractType: contractType,
@@ -220,6 +224,7 @@ function prismaUpdateContractFormDataFromDomain(
         populationCovered: nullify(contractFormData.populationCovered),
         programIDs: emptify(contractFormData.programIDs),
         riskBasedContract: nullify(contractFormData.riskBasedContract),
+        dsnpContract: nullify(contractFormData.dsnpContract),
         submissionType: contractFormData.submissionType,
         submissionDescription: contractFormData.submissionDescription,
         contractType: contractFormData.contractType,

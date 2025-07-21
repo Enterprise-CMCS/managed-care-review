@@ -10,16 +10,14 @@ import {
     SubmitContractDocument,
     CreateContractDocument,
     UpdateContractDraftRevisionDocument,
-    UpdateContractDraftRevisionInput,
+    UpdateContractDraftRevisionInput, CmsUsersUnion, Division,
 } from '../gen/gqlClient'
 import {
     apolloClientWrapper,
-    DivisionType,
     adminUser,
     newSubmissionInput,
     rateFormData,
     contractFormData,
-    CMSUserType, 
     minnesotaStatePrograms,
 } from '../utils/apollo-test-utils'
 import { ApolloClient, DocumentNode, NormalizedCacheObject } from '@apollo/client'
@@ -144,8 +142,8 @@ const createAndSubmitContractWithRates = async (
 
 const assignCmsDivision = async (
     apolloClient: ApolloClient<NormalizedCacheObject>,
-    cmsUser: CMSUserType,
-    division: DivisionType
+    cmsUser: CmsUsersUnion,
+    division: Division
 ): Promise<void> => {
     // get all users query
     const result = await apolloClient.query({
@@ -225,11 +223,10 @@ Cypress.Commands.add(
 Cypress.Commands.add(
     'apiAssignDivisionToCMSUser',
     (cmsUser, division): Cypress.Chainable<void> =>
-        cy.task<DocumentNode>('readGraphQLSchema').then((schema) =>
-            cy.wrap(apolloClientWrapper(schema, cmsUser, seedUserIntoDB)).then(() =>
-                cy.wrap(apolloClientWrapper(schema, adminUser(), (apolloClient) =>
-                        assignCmsDivision(apolloClient, cmsUser, division)
-                    )
+        cy.task<DocumentNode>('readGraphQLSchema').then( { timeout: 30000 },(schema) =>
+            cy.wrap(apolloClientWrapper(schema, cmsUser, seedUserIntoDB), { timeout: 30000 } ).then(() =>
+                apolloClientWrapper(schema, adminUser(), (apolloClient) =>
+                    assignCmsDivision(apolloClient, cmsUser, division)
                 )
             )
         )

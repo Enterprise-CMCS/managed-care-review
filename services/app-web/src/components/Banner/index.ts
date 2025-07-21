@@ -10,3 +10,4 @@ export { DocumentWarningBanner } from './DocumentWarningBanner/DocumentWarningBa
 export { RateWithdrawBanner } from './RateWithdrawBanner/RateWithdrawBanner'
 export { SubmissionApprovedBanner } from './SubmissionApprovedBanner/SubmissionApprovedBanner'
 export { IncompleteSubmissionBanner } from './IncompleteSubmissionBanner/IncompleteSubmissionBanner'
+export { NewOauthClientBanner } from './NewOauthClientBanner/NewOauthClientBanner'

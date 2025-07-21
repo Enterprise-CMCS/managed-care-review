@@ -27,6 +27,8 @@ import {
     generateApplicableProvisionsList,
 } from '../../domain-models/contractAndRates'
 import type { GeneralizedModifiedProvisions } from '@mc-review/hpp'
+import { canWrite } from '../../authorization/oauthAuthorization'
+import type { DocumentZipService } from '../../zip/generateZip'
 
 const validateStatusAndUpdateInfo = (
     status: PackageStatusType,
@@ -55,7 +57,8 @@ const validateStatusAndUpdateInfo = (
 export function submitContract(
     store: Store,
     emailer: Emailer,
-    launchDarkly: LDService
+    launchDarkly: LDService,
+    documentZip: DocumentZipService
 ): MutationResolvers['submitContract'] {
     return async (_parent, { input }, context) => {
         const featureFlags = await launchDarkly.allFlags({
@@ -65,6 +68,20 @@ export function submitContract(
         const { user, ctx, tracer } = context
         const span = tracer?.startSpan('submitContract', {}, ctx)
         setResolverDetailsOnActiveSpan('submitContract', user, span)
+
+        // Check OAuth client read permissions
+        if (!canWrite(context)) {
+            const errMessage = `OAuth client does not have write permissions`
+            logError('submitContract', errMessage)
+            setErrorAttributesOnActiveSpan(errMessage, span)
+
+            throw new GraphQLError(errMessage, {
+                extensions: {
+                    code: 'FORBIDDEN',
+                    cause: 'INSUFFICIENT_OAUTH_GRANTS',
+                },
+            })
+        }
 
         const { submittedReason, contractID } = input
         span?.setAttribute('mcreview.contract_id', contractID)
@@ -345,6 +362,34 @@ export function submitContract(
                     code: 'INTERNAL_SERVER_ERROR',
                     cause: 'DB_ERROR',
                 },
+            })
+        }
+
+        // Generate zips!
+        const contractZipRes = await documentZip.createContractZips(
+            submitContractResult,
+            span
+        )
+        if (contractZipRes instanceof Error) {
+            const errMessage = `Failed to zip files for contract revision with ID: ${contractRevisionID}: ${contractZipRes.message}`
+            logError('submitContract', errMessage)
+            setErrorAttributesOnActiveSpan(errMessage, span)
+        }
+
+        const rateZipRes = await documentZip.createRateZips(
+            submitContractResult,
+            span
+        )
+        if (rateZipRes instanceof Array) {
+            const errorMessage = `Failed to zip files for ${rateZipRes.length} rate revision(s) on contract ${contractRevisionID}`
+            logError('submitContract', errorMessage)
+            setErrorAttributesOnActiveSpan(errorMessage, span)
+
+            rateZipRes.forEach((error, index) => {
+                logError(
+                    'submitContract',
+                    `Rate zip error ${index + 1}: ${error.message}`
+                )
             })
         }
 

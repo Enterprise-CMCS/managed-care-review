@@ -198,6 +198,7 @@ describe('updateDraftContractRates', () => {
             rateDateStart: '2024-01-01',
             rateDateEnd: '2025-01-01',
             rateProgramIDs: ['foo'],
+            rateMedicaidPopulations: ['MEDICAID_ONLY'],
             deprecatedRateProgramIDs: [],
 
             rateDocuments: [

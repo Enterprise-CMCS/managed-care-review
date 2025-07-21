@@ -1,7 +1,7 @@
 import { Context } from 'aws-lambda'
 import { NewS3UploadsClient, S3UploadsClient } from '../deps/s3'
 import { virusScanStatus } from '../lib/tags'
-import { _Object } from '@aws-sdk/client-s3'
+import { _Object, ListObjectsV2Command, S3Client } from '@aws-sdk/client-s3'
 import { InvokeCommand, LambdaClient } from '@aws-sdk/client-lambda'
 import { fromUtf8, toUtf8 } from '@aws-sdk/util-utf8-node'
 
@@ -68,34 +68,47 @@ function NewLambdaInfectedFilesLister(lambdaName: string): listInfectedFilesFn {
     }
 }
 
-// Chunk the objects by file size. Process files in small batches for parallel processing
-function chunkS3Objects(objects: _Object[]): _Object[][] {
-    const maxChunkSize = 100_000_000 // 100 MB in bytes
+// process objects in batches
+async function listAndProcessBucketObjects(
+    client: S3Client,
+    bucketName: string,
+    processor: (objects: _Object[]) => Promise<void | Error>,
+    batchSize: number = 100
+): Promise<void | Error> {
+    let continuationToken: string | undefined
+    let totalProcessed = 0
 
-    const chunks: _Object[][] = []
-    let currentChunk: _Object[] = []
-    let currentChunkSize = 0
+    try {
+        do {
+            const listCmd = new ListObjectsV2Command({
+                Bucket: bucketName,
+                ContinuationToken: continuationToken,
+                MaxKeys: Math.min(batchSize, 1000), // S3 max is 1000
+            })
 
-    for (const obj of objects) {
-        const size = obj.Size || maxChunkSize
-        if (
-            size + currentChunkSize > maxChunkSize ||
-            currentChunk.length === 5 // Process 5 files per chunk
-        ) {
-            chunks.push(currentChunk)
-            currentChunk = []
-            currentChunkSize = 0
-        }
+            const listFilesResult = await client.send(listCmd)
 
-        currentChunk.push(obj)
-        currentChunkSize += size
+            if (
+                listFilesResult.Contents &&
+                listFilesResult.Contents.length > 0
+            ) {
+                const result = await processor(listFilesResult.Contents)
+                if (result instanceof Error) {
+                    return result
+                }
+                totalProcessed += listFilesResult.Contents.length
+            }
+
+            continuationToken = listFilesResult.NextContinuationToken
+            console.info(`Processed batch. Total processed: ${totalProcessed}`)
+        } while (continuationToken)
+
+        console.info(`Successfully processed all ${totalProcessed} objects`)
+        return undefined
+    } catch (err) {
+        console.error(`Error in streaming processing:`, err)
+        return err instanceof Error ? err : new Error('Unknown error')
     }
-
-    if (currentChunk.length > 0) {
-        chunks.push(currentChunk)
-    }
-
-    return chunks
 }
 
 // Re-scan files that have problematic scan statuses (ERROR or no scan tag)
@@ -104,107 +117,113 @@ export async function rescanFailedFiles(
     fileScanner: listInfectedFilesFn,
     bucketName: string
 ): Promise<string[] | Error> {
-    console.info('Starting rescan of failed files...')
-
-    // List all objects in bucket
-    const objects = await s3Client.listBucketObjects(bucketName)
-    if (objects instanceof Error) {
-        console.error('Failed to list files', objects)
-        return objects
-    }
-
-    console.info(`Found ${objects.length} total objects in bucket`)
-
-    // For now, skip oversized file handling - focus on core rescan functionality
-    const validSizeObjects = objects.filter(
-        (o) => o.Size && o.Size <= 314572800
-    )
-
-    console.info(`${validSizeObjects.length} files are valid size for scanning`)
-
-    // Find files that need to be rescanned
-    const filesToRescan: _Object[] = []
-
-    for (const obj of validSizeObjects) {
-        if (!obj.Key) continue
-
-        const tags = await s3Client.getObjectTags(obj.Key, bucketName)
-        if (tags instanceof Error) {
-            console.error(`Failed to get tags for ${obj.Key}:`, tags)
-            continue
-        }
-
-        const scanStatus = virusScanStatus(tags)
-
-        // Rescan files that have ERROR status or no scan status at all
-        if (scanStatus === 'ERROR' || scanStatus === undefined) {
-            console.info(
-                `File needs rescanning - Status: ${scanStatus || 'NONE'}, Key: ${obj.Key}`
-            )
-            filesToRescan.push(obj)
-        } else if (scanStatus instanceof Error) {
-            console.info(
-                `File has invalid scan status, needs rescanning - Key: ${obj.Key}`
-            )
-            filesToRescan.push(obj)
-        }
-    }
-
-    console.info(
-        `Found ${filesToRescan.length} files that need to be rescanned`
-    )
-
-    if (filesToRescan.length === 0) {
-        console.info('No files need rescanning!')
-        return []
-    }
-
-    // Chunk the files to rescan
-    const chunks = chunkS3Objects(filesToRescan)
-    console.info(
-        'Created chunks of sizes:',
-        chunks.map((c) => c.length)
-    )
+    console.info('Starting streaming rescan of failed files...')
 
     let allInfectedFiles: string[] = []
+    const filesToRescan: _Object[] = []
+    const BATCH_SIZE = 50 // Process 50 files at a time
 
-    // Process chunks in parallel by invoking worker lambdas
-    const scanPromises: Promise<ScanFilesOutput | Error>[] = []
-    for (const chunk of chunks) {
-        const keys = chunk
+    // Process objects in streaming fashion
+    const objectProcessor = async (
+        objects: _Object[]
+    ): Promise<void | Error> => {
+        // Filter for files that need rescanning
+        const validSizeObjects = objects.filter(
+            (o) => o.Size && o.Size <= 314572800
+        )
+
+        // Check each object's scan status
+        for (const obj of validSizeObjects) {
+            if (!obj.Key) continue
+
+            const tags = await s3Client.getObjectTags(obj.Key, bucketName)
+            if (tags instanceof Error) {
+                console.error(`Failed to get tags for ${obj.Key}:`, tags)
+                continue
+            }
+
+            const scanStatus = virusScanStatus(tags)
+
+            // Add to rescan list if needed
+            if (
+                scanStatus === 'ERROR' ||
+                scanStatus === undefined ||
+                scanStatus instanceof Error
+            ) {
+                console.info(
+                    `File needs rescanning - Status: ${scanStatus || 'NONE'}, Key: ${obj.Key}`
+                )
+                filesToRescan.push(obj)
+
+                // Process batch when we reach batch size
+                if (filesToRescan.length >= BATCH_SIZE) {
+                    const batchResult = await processBatch(
+                        filesToRescan.splice(0, BATCH_SIZE)
+                    )
+                    if (batchResult instanceof Error) {
+                        return batchResult
+                    }
+                    allInfectedFiles = allInfectedFiles.concat(batchResult)
+                }
+            }
+        }
+        return undefined
+    }
+
+    // Helper function to process a batch of files
+    const processBatch = async (
+        batch: _Object[]
+    ): Promise<string[] | Error> => {
+        const keys = batch
             .map((obj) => obj.Key)
             .filter((key): key is string => key !== undefined)
 
-        console.info(
-            `Queuing chunk with ${keys.length} files for parallel processing`
-        )
+        console.info(`Processing batch of ${keys.length} files`)
 
-        scanPromises.push(
-            fileScanner({
-                bucket: bucketName,
-                keys,
-            })
-        )
-    }
+        const result = await fileScanner({
+            bucket: bucketName,
+            keys,
+        })
 
-    console.info(
-        `Starting parallel processing of ${scanPromises.length} chunks`
-    )
-    const chunkResults = await Promise.all(scanPromises)
-
-    // Compile results
-    for (const chunkRes of chunkResults) {
-        if (chunkRes instanceof Error) {
-            console.error('Failed to scan chunk of files', chunkRes)
-            return chunkRes
+        if (result instanceof Error) {
+            console.error('Failed to scan batch of files', result)
+            return result
         }
 
-        console.info('Infected files in chunk:', chunkRes.infectedKeys)
-        allInfectedFiles = allInfectedFiles.concat(chunkRes.infectedKeys)
+        console.info('Infected files in batch:', result.infectedKeys)
+        return result.infectedKeys
+    }
+
+    const extendedS3Client = {
+        ...s3Client,
+        listAndProcessBucketObjects: (
+            processor: (objects: _Object[]) => Promise<void | Error>
+        ) =>
+            listAndProcessBucketObjects(
+                new S3Client({}),
+                bucketName,
+                processor
+            ),
+    }
+
+    // Process all objects in streaming fashion
+    const streamResult =
+        await extendedS3Client.listAndProcessBucketObjects(objectProcessor)
+    if (streamResult instanceof Error) {
+        return streamResult
+    }
+
+    // Process any remaining files in the last batch
+    if (filesToRescan.length > 0) {
+        const finalBatchResult = await processBatch(filesToRescan)
+        if (finalBatchResult instanceof Error) {
+            return finalBatchResult
+        }
+        allInfectedFiles = allInfectedFiles.concat(finalBatchResult)
     }
 
     console.info(
-        `Rescan complete! Processed ${filesToRescan.length} files in parallel, found ${allInfectedFiles.length} infected files`
+        `Streaming rescan complete! Found ${allInfectedFiles.length} infected files`
     )
 
     return allInfectedFiles
