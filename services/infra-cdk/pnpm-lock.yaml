@@ -8,15 +8,6 @@ importers:
 
   .:
     dependencies:
-      '@aws-lambda-powertools/logger':
-        specifier: ^2.2.0
-        version: 2.24.0
-      '@aws-lambda-powertools/metrics':
-        specifier: ^2.2.0
-        version: 2.24.0
-      '@aws-lambda-powertools/tracer':
-        specifier: ^2.2.0
-        version: 2.24.0
       '@aws-sdk/client-secrets-manager':
         specifier: ^3.828.0
         version: 3.848.0
@@ -121,36 +112,6 @@ packages:
 
   '@aws-crypto/util@5.2.0':
     resolution: {integrity: sha512-4RkU9EsI6ZpBve5fseQlGNUWKMa1RLPQ1dnjnQoe07ldfIzcsGb5hC5W0Dm7u423KWzawlrpbjXBrXCEv9zazQ==}
-
-  '@aws-lambda-powertools/commons@2.24.0':
-    resolution: {integrity: sha512-rVVkI3B6IOmiVeFWU2Jv19TvJbn9vFnDfTFpv7MVjMseulpSQlpMqRxxVGPRl75F38fIjNrapRJLZufTsv+iug==}
-
-  '@aws-lambda-powertools/logger@2.24.0':
-    resolution: {integrity: sha512-NlcWjEiNIrJ16XltIclKwt8UApZE6/84jZGpnZK9J6MLOctQCP3QRcYPKYggNu0SFb2K4zjv0GzA9GeUSkJ1/w==}
-    peerDependencies:
-      '@aws-lambda-powertools/jmespath': 2.24.0
-      '@middy/core': 4.x || 5.x || 6.x
-    peerDependenciesMeta:
-      '@aws-lambda-powertools/jmespath':
-        optional: true
-      '@middy/core':
-        optional: true
-
-  '@aws-lambda-powertools/metrics@2.24.0':
-    resolution: {integrity: sha512-uI9ASU+ikaHblRYzsKyYBDaTGq7YeFKMW0Nwbwn9qSl5USdDTXAWKXwMCpJFwcJQCmDEa2eQzLcz3rUd8yLT7w==}
-    peerDependencies:
-      '@middy/core': 4.x || 5.x || 6.x
-    peerDependenciesMeta:
-      '@middy/core':
-        optional: true
-
-  '@aws-lambda-powertools/tracer@2.24.0':
-    resolution: {integrity: sha512-xbhqnuWKtB327J93JlfsuS2flurWdAdemR2gBxOUruIkNvoUoW50MAP4r6quLeAHG7Si0rwlKHaCXVyd4WNzyw==}
-    peerDependencies:
-      '@middy/core': 4.x || 5.x || 6.x
-    peerDependenciesMeta:
-      '@middy/core':
-        optional: true
 
   '@aws-sdk/client-secrets-manager@3.848.0':
     resolution: {integrity: sha512-T1SRQrBvUD8KGArFpWeVuXD1Qh2zqMErayRvJiTvVMy8ru1jXDr58MVdoIDnRVLQFeE4k9f0jtPbUXJsRIoGIQ==}
@@ -858,10 +819,6 @@ packages:
     resolution: {integrity: sha512-6yZf53i/qB8gRHH/l2ZwUG5xgkPgQF15/KxH0DdXMDHjesA9MeZje/853ifkSY0x4m5S+dfDZ+c4x439PF0M2w==}
     engines: {node: '>=18.0.0'}
 
-  '@smithy/service-error-classification@2.1.5':
-    resolution: {integrity: sha512-uBDTIBBEdAQryvHdc5W8sS5YX7RQzF683XrHePVdFmAgKiMofU15FLSM0/HU03hKTnazdNRFa0YHS7+ArwoUSQ==}
-    engines: {node: '>=14.0.0'}
-
   '@smithy/service-error-classification@4.0.6':
     resolution: {integrity: sha512-RRoTDL//7xi4tn5FrN2NzH17jbgmnKidUqd4KvquT0954/i6CXXkh1884jBiunq24g9cGtPBEXlU40W6EpNOOg==}
     engines: {node: '>=18.0.0'}
@@ -877,10 +834,6 @@ packages:
   '@smithy/smithy-client@4.4.8':
     resolution: {integrity: sha512-pcW691/lx7V54gE+dDGC26nxz8nrvnvRSCJaIYD6XLPpOInEZeKdV/SpSux+wqeQ4Ine7LJQu8uxMvobTIBK0w==}
     engines: {node: '>=18.0.0'}
-
-  '@smithy/types@2.12.0':
-    resolution: {integrity: sha512-QwYgloJ0sVNBeBuBs65cIkTbfzV/Q6ZNPCJ99EICFEdJYG50nGIY/uYXp+TbsdJReIuPr0a0kXmCvren3MbRRw==}
-    engines: {node: '>=14.0.0'}
 
   '@smithy/types@4.3.1':
     resolution: {integrity: sha512-UqKOQBL2x6+HWl3P+3QqFD4ncKq0I8Nuz9QItGv5WuKuMHuuwlhvqcZCoXGfc+P1QmfJE7VieykoYYmrOoFJxA==}
@@ -977,9 +930,6 @@ packages:
 
   '@types/babel__traverse@7.20.7':
     resolution: {integrity: sha512-dkO5fhS7+/oos4ciWxyEyjWe48zmG6wbCheo/G2ZnHx4fs3EU6YC6UM8rk56gAjNJ9P3MTH2jo5jb92/K6wbng==}
-
-  '@types/cls-hooked@4.3.9':
-    resolution: {integrity: sha512-CMtHMz6Q/dkfcHarq9nioXH8BDPP+v5xvd+N90lBQ2bdmu06UvnLDqxTKoOJzz4SzIwb/x9i4UXGAAcnUDuIvg==}
 
   '@types/graceful-fs@4.1.9':
     resolution: {integrity: sha512-olP3sd1qOEe5dXTSaFvQG+02VdRXcdytWLAZsAq1PecU8uqQAhkrnbli7DagjtXKW/Bl7YJbUsa8MPcuc8LHEQ==}
@@ -1128,15 +1078,8 @@ packages:
     resolution: {integrity: sha512-HGyxoOTYUyCM6stUe6EJgnd4EoewAI7zMdfqO+kGjnlZmBDz/cR5pf8r/cR4Wq60sL/p0IkcjUEEPwS3GFrIyw==}
     engines: {node: '>=8'}
 
-  async-hook-jl@1.7.6:
-    resolution: {integrity: sha512-gFaHkFfSxTjvoxDMYqDuGHlcRyUuamF8s+ZTtJdDzqjws4mCt7v0vuV79/E2Wr2/riMQgtG4/yUtXWs1gZ7JMg==}
-    engines: {node: ^4.7 || >=6.9 || >=7.3}
-
   async@3.2.6:
     resolution: {integrity: sha512-htCUDlxyyCLMgaM3xXg0C0LW2xqfuQ6p05pCEIsXuyQ+a1koYKTuBMzRNwmybfLgvJDMd0r1LTn4+E0Ti6C2AA==}
-
-  atomic-batcher@1.0.2:
-    resolution: {integrity: sha512-EFGCRj4kLX1dHv1cDzTk+xbjBFj1GnJDpui52YmEcxxHHEWjYyT6l51U7n6WQ28osZH4S9gSybxe56Vm7vB61Q==}
 
   aws-cdk-lib@2.147.0:
     resolution: {integrity: sha512-0dzUEeWxpuLeeQvqwR4Vz2ja/V0nzzgndgPdp56nc9CsghbrFtMATtno3ec5INHiJz/Mj6/NXQ5t9vrffd6Mgw==}
@@ -1160,10 +1103,6 @@ packages:
     resolution: {integrity: sha512-xkz07DNnpBwVeSaiV62SapLzifprC78PG/KxRZiJXg6CQEddcu9/Icvws6i8YRjDtEkvH6WmOwIFGrdkbOt7Lw==}
     engines: {node: '>= 14.15.0'}
     hasBin: true
-
-  aws-xray-sdk-core@3.10.3:
-    resolution: {integrity: sha512-bltsLAr4juMJJ2tT5/L/CtwUGIvHihtPe6SO/z3jjOD73PHhOYxcuwCMFFyTbTy5S4WThJO32oZk7r+pg3ZoCQ==}
-    engines: {node: '>= 14.x'}
 
   babel-jest@29.7.0:
     resolution: {integrity: sha512-BrvGY3xZSwEcCzKvKsCi2GgHqDqsYkOP4/by5xCgIwGXQxIEh+8ew3gmrE1y7XRR6LHZIj6yLYnUi/mm2KXKBg==}
@@ -1261,10 +1200,6 @@ packages:
     resolution: {integrity: sha512-BSeNnyus75C4//NQ9gQt1/csTXyo/8Sb+afLAkzAptFuMsod9HFokGNudZpi/oQV73hnVK+sR+5PVRMd+Dr7YQ==}
     engines: {node: '>=12'}
 
-  cls-hooked@4.2.2:
-    resolution: {integrity: sha512-J4Xj5f5wq/4jAvcdgoGsL3G103BtWpZrMo8NEinRltN+xpTZdI+M38pyQqhuFU/P792xkMFvnKSf+Lm81U1bxw==}
-    engines: {node: ^4.7 || >=6.9 || >=7.3 || >=8.2.1}
-
   co@4.6.0:
     resolution: {integrity: sha512-QVb0dM5HvG+uaxitm8wONl7jltx8dqhfU33DcqtOZcLSVIKSDDLDi7+0LbAKiyI8hD9u42m2YxXSkMGWThaecQ==}
     engines: {iojs: '>= 1.0.0', node: '>= 0.12.0'}
@@ -1355,9 +1290,6 @@ packages:
 
   electron-to-chromium@1.5.187:
     resolution: {integrity: sha512-cl5Jc9I0KGUoOoSbxvTywTa40uspGJt/BDBoDLoxJRSBpWh4FFXBsjNRHfQrONsV/OoEjDfHUmZQa2d6Ze4YgA==}
-
-  emitter-listener@1.1.2:
-    resolution: {integrity: sha512-Bt1sBAGFHY9DKY+4/2cV6izcKJUf5T7/gkdmkxzX/qv9CcGH8xSwVRW5mtX03SWJtRTWSOpzCuWN9rBFYZepZQ==}
 
   emittery@0.13.1:
     resolution: {integrity: sha512-DeWwawk6r5yR9jFgnDKYt4sLS0LmHJJi3ZOnb5/JdbYwj3nW+FxQnHIjhBKz8YLC7oRNPVM9NQ47I3CVx34eqQ==}
@@ -2058,10 +1990,6 @@ packages:
   run-parallel@1.2.0:
     resolution: {integrity: sha512-5l4VyZR86LZ/lDxZTR6jqL8AFE2S0IFLMP26AbjsLVADxHdhB/c0GUsH+y39UfCi3dzz8OlQuPmnaJOMoDHQBA==}
 
-  semver@5.7.2:
-    resolution: {integrity: sha512-cBznnQ9KjJqU67B52RMC65CMarK2600WFnbkcaiwWq3xy/5haFJlshgnpjovMVJ+Hff49d8GEn0b87C5pDQ10g==}
-    hasBin: true
-
   semver@6.3.1:
     resolution: {integrity: sha512-BR7VvDCVHO+q2xBEWskxS6DJE1qRnb7DxzUrogb71CWoSficBxYsiAGd+Kl0mmq/MprG9yArRkyrQxTO6XjMzA==}
     hasBin: true
@@ -2078,9 +2006,6 @@ packages:
   shebang-regex@3.0.0:
     resolution: {integrity: sha512-7++dFhtcx3353uBaq8DDR4NuxBetBzC7ZQOhmTQInHEd6bSrXdiEyzCvG07Z44UYdLShWUyXt5M/yhz8ekcb1A==}
     engines: {node: '>=8'}
-
-  shimmer@1.2.1:
-    resolution: {integrity: sha512-sQTKC1Re/rM6XyFM6fIAGHRPVGvyXfgzIDvzoq608vM+jeyVD0Tu1E6Np0Kc2zAIFWIj963V2800iF/9LPieQw==}
 
   signal-exit@3.0.7:
     resolution: {integrity: sha512-wnD2ZE+l+SPC/uoS0vXeE9L1+0wuaMqKlfz9AMUo38JsyLSBWSFcHR1Rri62LZc12vLr1gb3jl7iwQhgwpAbGQ==}
@@ -2104,9 +2029,6 @@ packages:
 
   sprintf-js@1.0.3:
     resolution: {integrity: sha512-D9cPgkvLlV3t3IzL0D0YLvGA9Ahk4PcvVwUbN0dSGr1aP0Nrt4AEnTUbuGvquEC0mA64Gqt1fzirlRs5ibXx8g==}
-
-  stack-chain@1.3.7:
-    resolution: {integrity: sha512-D8cWtWVdIe/jBA7v5p5Hwl5yOSOrmZPWDPe2KxQ5UAGD+nxbxU0lKXA4h85Ta6+qgdKVL3vUxsbIZjc1kBG7ug==}
 
   stack-utils@2.0.6:
     resolution: {integrity: sha512-XlkWvfIm6RmsWtNJx+uqtKLS8eqFbxUg0ZzLXqY0caEy9l7hruX8IpiDnjsLavoBgqCCR71TqWO8MaXYheJ3RQ==}
@@ -2359,22 +2281,6 @@ snapshots:
       '@aws-sdk/types': 3.840.0
       '@smithy/util-utf8': 2.3.0
       tslib: 2.8.1
-
-  '@aws-lambda-powertools/commons@2.24.0': {}
-
-  '@aws-lambda-powertools/logger@2.24.0':
-    dependencies:
-      '@aws-lambda-powertools/commons': 2.24.0
-      lodash.merge: 4.6.2
-
-  '@aws-lambda-powertools/metrics@2.24.0':
-    dependencies:
-      '@aws-lambda-powertools/commons': 2.24.0
-
-  '@aws-lambda-powertools/tracer@2.24.0':
-    dependencies:
-      '@aws-lambda-powertools/commons': 2.24.0
-      aws-xray-sdk-core: 3.10.3
 
   '@aws-sdk/client-secrets-manager@3.848.0':
     dependencies:
@@ -3407,10 +3313,6 @@ snapshots:
       '@smithy/types': 4.3.1
       tslib: 2.8.1
 
-  '@smithy/service-error-classification@2.1.5':
-    dependencies:
-      '@smithy/types': 2.12.0
-
   '@smithy/service-error-classification@4.0.6':
     dependencies:
       '@smithy/types': 4.3.1
@@ -3439,10 +3341,6 @@ snapshots:
       '@smithy/protocol-http': 5.1.2
       '@smithy/types': 4.3.1
       '@smithy/util-stream': 4.2.3
-      tslib: 2.8.1
-
-  '@smithy/types@2.12.0':
-    dependencies:
       tslib: 2.8.1
 
   '@smithy/types@4.3.1':
@@ -3575,10 +3473,6 @@ snapshots:
   '@types/babel__traverse@7.20.7':
     dependencies:
       '@babel/types': 7.28.1
-
-  '@types/cls-hooked@4.3.9':
-    dependencies:
-      '@types/node': 20.11.24
 
   '@types/graceful-fs@4.1.9':
     dependencies:
@@ -3749,13 +3643,7 @@ snapshots:
 
   array-union@2.1.0: {}
 
-  async-hook-jl@1.7.6:
-    dependencies:
-      stack-chain: 1.3.7
-
   async@3.2.6: {}
-
-  atomic-batcher@1.0.2: {}
 
   aws-cdk-lib@2.147.0(constructs@10.4.2):
     dependencies:
@@ -3767,15 +3655,6 @@ snapshots:
   aws-cdk@2.147.0:
     optionalDependencies:
       fsevents: 2.3.2
-
-  aws-xray-sdk-core@3.10.3:
-    dependencies:
-      '@aws-sdk/types': 3.840.0
-      '@smithy/service-error-classification': 2.1.5
-      '@types/cls-hooked': 4.3.9
-      atomic-batcher: 1.0.2
-      cls-hooked: 4.2.2
-      semver: 7.7.2
 
   babel-jest@29.7.0(@babel/core@7.28.0):
     dependencies:
@@ -3896,12 +3775,6 @@ snapshots:
       strip-ansi: 6.0.1
       wrap-ansi: 7.0.0
 
-  cls-hooked@4.2.2:
-    dependencies:
-      async-hook-jl: 1.7.6
-      emitter-listener: 1.1.2
-      semver: 5.7.2
-
   co@4.6.0: {}
 
   collect-v8-coverage@1.0.2: {}
@@ -3972,10 +3845,6 @@ snapshots:
       jake: 10.9.2
 
   electron-to-chromium@1.5.187: {}
-
-  emitter-listener@1.1.2:
-    dependencies:
-      shimmer: 1.2.1
 
   emittery@0.13.1: {}
 
@@ -4869,8 +4738,6 @@ snapshots:
     dependencies:
       queue-microtask: 1.2.3
 
-  semver@5.7.2: {}
-
   semver@6.3.1: {}
 
   semver@7.7.2: {}
@@ -4880,8 +4747,6 @@ snapshots:
       shebang-regex: 3.0.0
 
   shebang-regex@3.0.0: {}
-
-  shimmer@1.2.1: {}
 
   signal-exit@3.0.7: {}
 
@@ -4902,8 +4767,6 @@ snapshots:
   source-map@0.6.1: {}
 
   sprintf-js@1.0.3: {}
-
-  stack-chain@1.3.7: {}
 
   stack-utils@2.0.6:
     dependencies:
