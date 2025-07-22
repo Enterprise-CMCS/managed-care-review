@@ -13,7 +13,7 @@
         "test": "services/cypress"
     },
     "scripts": {
-        "build:packages": "pnpm --filter \"./packages/**\" --recursive build",
+        "build:packages": "pnpm --filter \"./packages/**\" run build",
         "packages:watch": "find ./packages -type f ! -path '*/node_modules/*' ! -path '*/build/*' | entr pnpm build:packages",
         "preinstall": "npx only-allow pnpm",
         "clean": "rm -rf node_modules && pnpm store prune",
@@ -28,7 +28,8 @@
         "precombine:reports": "pnpm run copy:reports && mkdir -p .nyc_output",
         "combine:reports": "npx nyc merge reports && mv coverage.json .nyc_output/out.json",
         "prereport:combined": "pnpm run combine:reports",
-        "report:combined": "mkdir -p coverage-all && npx nyc report --reporter lcov --reporter text --reporter json-summary --report-dir coverage-all"
+        "report:combined": "mkdir -p coverage-all && npx nyc report --reporter lcov --reporter text --reporter json-summary --report-dir coverage-all",
+        "cdk:synth:dev": "pnpm run build:packages && pnpm --filter infra-cdk cdk synth -c stage=dev"
     },
     "repository": {
         "type": "git",

@@ -1,0 +1,234 @@
+name: CDK Manual Deploy
+
+on:
+  workflow_dispatch:
+    inputs:
+      stage:
+        description: 'Stage to deploy'
+        required: true
+        type: choice
+        options:
+          - dev
+          - val
+          - prod
+      stack:
+        description: 'Stack to deploy (leave empty for all)'
+        required: false
+        type: choice
+        options:
+          - ''
+          - Foundation
+          - Network
+          - Data
+          - Auth
+          - Compute
+          - Api
+          - DatabaseOps
+          - VirusScanning
+          - Monitoring
+      action:
+        description: 'Action to perform'
+        required: true
+        type: choice
+        options:
+          - deploy
+          - destroy
+          - diff
+      skip_approval:
+        description: 'Skip manual approval for deployment'
+        required: false
+        type: boolean
+        default: false
+
+env:
+  AWS_REGION: us-east-1
+  NODE_VERSION: '20.x'
+  CDK_DEFAULT_REGION: us-east-1
+
+permissions:
+  id-token: write
+  contents: read
+
+jobs:
+  manual-deploy:
+    name: Manual CDK Operation
+    runs-on: ubuntu-latest
+    environment: ${{ inputs.stage }}
+    
+    steps:
+      - name: Validate prod deployment
+        if: inputs.stage == 'prod' && inputs.action == 'deploy'
+        run: |
+          echo "⚠️  Production deployment requested"
+          echo "Please ensure all approvals are in place"
+
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v2
+        with:
+          version: 8
+          run_install: false
+
+      - name: Configure pnpm and git for HTTPS
+        run: |
+          pnpm config set git-prefer-https true
+          git config --global url."https://github.com/".insteadOf "git@github.com:"
+
+      - name: Get pnpm store directory
+        shell: bash
+        run: |
+          echo "STORE_PATH=$(pnpm store path --silent)" >> $GITHUB_ENV
+
+      - name: Setup pnpm cache
+        uses: actions/cache@v3
+        with:
+          path: ${{ env.STORE_PATH }}
+          key: ${{ runner.os }}-pnpm-store-${{ hashFiles('services/infra-cdk/pnpm-lock.yaml') }}
+          restore-keys: |
+            ${{ runner.os }}-pnpm-store-
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ secrets.AWS_DEPLOY_ROLE_ARN }}
+          role-session-name: GitHubActions-CDK-Manual
+          aws-region: ${{ env.AWS_REGION }}
+
+      - name: Install dependencies
+        working-directory: services/infra-cdk
+        run: |
+          pnpm install --frozen-lockfile
+          pnpm run build
+
+      - name: Install AWS CDK
+        run: pnpm add -g aws-cdk@latest
+
+      - name: Load environment variables
+        working-directory: services/infra-cdk
+        run: |
+          # Load stage-specific environment variables
+          if [ -f ".env.${{ inputs.stage }}" ]; then
+            echo "Loading .env.${{ inputs.stage }}"
+            export $(cat .env.${{ inputs.stage }} | grep -v '^#' | xargs)
+          fi
+          
+          # Set environment variables from GitHub secrets
+          echo "VPC_ID=${{ secrets[format('VPC_ID_{0}', inputs.stage)] }}" >> $GITHUB_ENV
+          echo "SUBNET_PRIVATE_A_ID=${{ secrets[format('SUBNET_PRIVATE_A_ID_{0}', inputs.stage)] }}" >> $GITHUB_ENV
+          echo "SUBNET_PRIVATE_B_ID=${{ secrets[format('SUBNET_PRIVATE_B_ID_{0}', inputs.stage)] }}" >> $GITHUB_ENV
+          echo "SUBNET_PRIVATE_C_ID=${{ secrets[format('SUBNET_PRIVATE_C_ID_{0}', inputs.stage)] }}" >> $GITHUB_ENV
+          echo "SUBNET_PUBLIC_A_ID=${{ secrets[format('SUBNET_PUBLIC_A_ID_{0}', inputs.stage)] }}" >> $GITHUB_ENV
+          echo "SG_ID=${{ secrets[format('SG_ID_{0}', inputs.stage)] }}" >> $GITHUB_ENV
+          echo "IAM_PERMISSIONS_BOUNDARY=${{ secrets.IAM_PERMISSIONS_BOUNDARY }}" >> $GITHUB_ENV
+          echo "IAM_PATH=${{ secrets.IAM_PATH }}" >> $GITHUB_ENV
+          echo "SAML_METADATA_URL=${{ secrets.SAML_METADATA_URL }}" >> $GITHUB_ENV
+          echo "VIRUS_SCAN_ALERT_EMAIL=${{ secrets.VIRUS_SCAN_ALERT_EMAIL }}" >> $GITHUB_ENV
+          echo "SLACK_WEBHOOK=${{ secrets.SLACK_WEBHOOK }}" >> $GITHUB_ENV
+
+      - name: CDK Bootstrap
+        if: inputs.action == 'deploy'
+        working-directory: services/infra-cdk
+        run: |
+          cdk bootstrap --context stage=${{ inputs.stage }}
+
+      - name: Determine stack name
+        id: stack_name
+        run: |
+          if [ -z "${{ inputs.stack }}" ]; then
+            echo "stack_pattern=--all" >> $GITHUB_OUTPUT
+            echo "stack_display=All Stacks" >> $GITHUB_OUTPUT
+          else
+            echo "stack_pattern=MCR-${{ inputs.stack }}-${{ inputs.stage }}" >> $GITHUB_OUTPUT
+            echo "stack_display=${{ inputs.stack }} Stack" >> $GITHUB_OUTPUT
+          fi
+
+      - name: CDK Diff
+        if: inputs.action == 'diff'
+        working-directory: services/infra-cdk
+        run: |
+          echo "🔍 Running CDK diff for ${{ steps.stack_name.outputs.stack_display }} in ${{ inputs.stage }}..."
+          cdk diff ${{ steps.stack_name.outputs.stack_pattern }} \
+            --context stage=${{ inputs.stage }}
+
+      - name: CDK Deploy
+        if: inputs.action == 'deploy'
+        working-directory: services/infra-cdk
+        run: |
+          echo "🚀 Deploying ${{ steps.stack_name.outputs.stack_display }} in ${{ inputs.stage }}..."
+          
+          APPROVAL_FLAG=""
+          if [ "${{ inputs.skip_approval }}" == "true" ]; then
+            APPROVAL_FLAG="--require-approval never"
+          fi
+          
+          if [ -z "${{ inputs.stack }}" ]; then
+            # Deploy all stacks in correct order
+            echo "📦 Deploying all stacks in dependency order..."
+            cdk deploy --all \
+              --context stage=${{ inputs.stage }} \
+              $APPROVAL_FLAG \
+              --ci
+          else
+            # Deploy specific stack
+            cdk deploy ${{ steps.stack_name.outputs.stack_pattern }} \
+              --context stage=${{ inputs.stage }} \
+              $APPROVAL_FLAG \
+              --ci
+          fi
+
+      - name: CDK Destroy
+        if: inputs.action == 'destroy'
+        working-directory: services/infra-cdk
+        run: |
+          echo "🗑️  Destroying ${{ steps.stack_name.outputs.stack_display }} in ${{ inputs.stage }}..."
+          echo "⚠️  WARNING: This action cannot be undone!"
+          
+          if [ -z "${{ inputs.stack }}" ]; then
+            # Destroy all stacks in reverse order
+            echo "📦 Destroying all stacks in reverse dependency order..."
+            cdk destroy --all \
+              --context stage=${{ inputs.stage }} \
+              --force
+          else
+            # Destroy specific stack
+            cdk destroy ${{ steps.stack_name.outputs.stack_pattern }} \
+              --context stage=${{ inputs.stage }} \
+              --force
+          fi
+
+      - name: Summary
+        run: |
+          echo "## 📋 Operation Summary" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "- **Action**: ${{ inputs.action }}" >> $GITHUB_STEP_SUMMARY
+          echo "- **Stage**: ${{ inputs.stage }}" >> $GITHUB_STEP_SUMMARY
+          echo "- **Stack**: ${{ steps.stack_name.outputs.stack_display }}" >> $GITHUB_STEP_SUMMARY
+          echo "- **Time**: $(date)" >> $GITHUB_STEP_SUMMARY
+          echo "- **Triggered by**: @${{ github.actor }}" >> $GITHUB_STEP_SUMMARY
+
+      - name: Notify Slack
+        if: always()
+        uses: slackapi/slack-github-action@v1.24.0
+        with:
+          payload: |
+            {
+              "text": "${{ job.status == 'success' && '✅' || '❌' }} Manual CDK ${{ inputs.action }} ${{ job.status }}",
+              "blocks": [
+                {
+                  "type": "section",
+                  "text": {
+                    "type": "mrkdwn",
+                    "text": "*${{ job.status == 'success' && '✅' || '❌' }} Manual CDK Operation*\n*Action:* `${{ inputs.action }}`\n*Stage:* `${{ inputs.stage }}`\n*Stack:* `${{ steps.stack_name.outputs.stack_display }}`\n*Status:* `${{ job.status }}`\n*Triggered by:* @${{ github.actor }}"
+                  }
+                }
+              ]
+            }
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK }}

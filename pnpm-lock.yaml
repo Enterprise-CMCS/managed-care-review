@@ -201,6 +201,12 @@ importers:
       '@apollo/client':
         specifier: 3.8.8
         version: 3.8.8(graphql-ws@5.14.3(graphql@16.9.0))(graphql@16.9.0)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(subscriptions-transport-ws@0.11.0(graphql@16.9.0))
+      '@mc-review/constants':
+        specifier: workspace:*
+        version: link:../constants
+      '@mc-review/dates':
+        specifier: workspace:*
+        version: link:../dates
       dayjs:
         specifier: ^1.10.5
         version: 1.11.12
@@ -211,12 +217,6 @@ importers:
         specifier: ^3.24.2
         version: 3.24.2
     devDependencies:
-      '@mc-review/constants':
-        specifier: workspace:*
-        version: link:../constants
-      '@mc-review/dates':
-        specifier: workspace:*
-        version: link:../dates
       '@types/jest':
         specifier: ^29.5.6
         version: 29.5.14
