@@ -24,11 +24,11 @@ export interface DatabaseOperationsStackProps extends BaseStackProps {
   /**
    * ARN of the Prisma Lambda layer for database ORM functionality
    */
-  prismaLayerArn?: string;
+  prismaLayerArn: string;
   /**
    * ARN of the PostgreSQL tools Lambda layer for database operations
    */
-  postgresToolsLayerArn?: string;
+  postgresToolsLayerArn: string;
 }
 
 /**
@@ -46,6 +46,8 @@ export class DatabaseOperationsStack extends BaseStack {
   private readonly databaseCluster: rds.IDatabaseCluster;
   private readonly databaseSecret: secretsmanager.ISecret;
   private readonly uploadsBucketName: string;
+  private readonly prismaLayerArn: string;
+  private readonly postgresToolsLayerArn: string;
 
   constructor(scope: Construct, id: string, props: DatabaseOperationsStackProps) {
     super(scope, id, {
@@ -59,6 +61,8 @@ export class DatabaseOperationsStack extends BaseStack {
     this.databaseCluster = props.databaseCluster;
     this.databaseSecret = props.databaseSecret;
     this.uploadsBucketName = props.uploadsBucketName;
+    this.prismaLayerArn = props.prismaLayerArn;
+    this.postgresToolsLayerArn = props.postgresToolsLayerArn;
     
     // Define resources after all properties are initialized
     this.defineResources();
@@ -96,32 +100,28 @@ export class DatabaseOperationsStack extends BaseStack {
   }
 
   private createLambdaLayers(): void {
-    // PgTools layer - PostgreSQL client libraries
-    this.pgToolsLayer = new lambda.LayerVersion(this, 'PgToolsLayer', {
-      code: lambda.Code.fromAsset('lambda-layers-postgres-tools'),
-      compatibleRuntimes: [lambda.Runtime.NODEJS_20_X],
-      compatibleArchitectures: [lambda.Architecture.X86_64, lambda.Architecture.ARM_64],
-      description: 'PostgreSQL client tools and libraries',
-      layerVersionName: `${SERVICES.POSTGRES}-${this.stage}-pgtools`
-    });
+    // Import layers from LambdaLayersStack instead of creating new ones
+    this.pgToolsLayer = lambda.LayerVersion.fromLayerVersionArn(
+      this,
+      'ImportedPgToolsLayer',
+      this.postgresToolsLayerArn
+    );
 
-    // Prisma Client Engine layer
-    this.prismaEngineLayer = new lambda.LayerVersion(this, 'PrismaEngineLayer', {
-      code: lambda.Code.fromAsset('lambda-layers-prisma-client-engine'),
-      compatibleRuntimes: [lambda.Runtime.NODEJS_20_X],
-      compatibleArchitectures: [lambda.Architecture.X86_64, lambda.Architecture.ARM_64],
-      description: 'Prisma client engine binaries',
-      layerVersionName: `${SERVICES.POSTGRES}-${this.stage}-prisma-engine`
-    });
-
-    // Prisma Migration layer
-    this.prismaMigrationLayer = new lambda.LayerVersion(this, 'PrismaMigrationLayer', {
-      code: lambda.Code.fromAsset('lambda-layers-prisma-client-migration'),
-      compatibleRuntimes: [lambda.Runtime.NODEJS_20_X],
-      compatibleArchitectures: [lambda.Architecture.X86_64, lambda.Architecture.ARM_64],
-      description: 'Prisma migration tools',
-      layerVersionName: `${SERVICES.POSTGRES}-${this.stage}-prisma-migration`
-    });
+    // Import Prisma layer from LambdaLayersStack
+    // Note: We're using the same Prisma layer for both engine and migration
+    // since the centralized PrismaLayer includes all necessary components
+    this.prismaEngineLayer = lambda.LayerVersion.fromLayerVersionArn(
+      this,
+      'ImportedPrismaEngineLayer',
+      this.prismaLayerArn
+    );
+    
+    // Use the same Prisma layer for migration (it includes migration tools)
+    this.prismaMigrationLayer = lambda.LayerVersion.fromLayerVersionArn(
+      this,
+      'ImportedPrismaMigrationLayer',
+      this.prismaLayerArn
+    );
   }
 
   private createS3Buckets(): void {
@@ -541,33 +541,8 @@ export class DatabaseOperationsStack extends BaseStack {
    * Create stack outputs
    */
   private createOutputs(): void {
-    // Store migration layer ARN in SSM for use by ApiComputeStack
-    new ssm.StringParameter(this, 'PrismaMigrationLayerArnParam', {
-      parameterName: `/${PROJECT_PREFIX}/${this.stage}/layers/prisma-migration-arn`,
-      stringValue: this.prismaMigrationLayer.layerVersionArn,
-      description: 'ARN of the Prisma migration layer for database migrations'
-    });
-    
-    // Store engine layer ARN in SSM for reference
-    new ssm.StringParameter(this, 'PrismaEngineLayerArnParam', {
-      parameterName: `/${PROJECT_PREFIX}/${this.stage}/layers/prisma-engine-arn`,
-      stringValue: this.prismaEngineLayer.layerVersionArn,
-      description: 'ARN of the Prisma engine layer'
-    });
-    
-    // Store pg tools layer ARN in SSM for reference
-    new ssm.StringParameter(this, 'PgToolsLayerArnParam', {
-      parameterName: `/${PROJECT_PREFIX}/${this.stage}/layers/pg-tools-arn`,
-      stringValue: this.pgToolsLayer.layerVersionArn,
-      description: 'ARN of the PostgreSQL tools layer'
-    });
-    
-    // Keep CloudFormation exports for backward compatibility during migration
-    new CfnOutput(this, 'PrismaMigrationLayerArn', {
-      value: this.prismaMigrationLayer.layerVersionArn,
-      exportName: `${this.stackName}-PrismaMigrationLayerArn`,
-      description: 'ARN of the Prisma migration layer for database migrations'
-    });
+    // Layer outputs are now handled by LambdaLayersStack
+    // This stack imports the layers instead of creating them
   }
 
 

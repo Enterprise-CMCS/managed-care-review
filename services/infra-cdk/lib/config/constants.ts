@@ -91,7 +91,7 @@ export const MANDATORY_TAGS = {
 // Default values
 export const DEFAULTS = {
   LAMBDA_RUNTIME: 'NODEJS_20_X',
-  LAMBDA_ARCHITECTURE: 'ARM_64',
+  LAMBDA_ARCHITECTURE: 'X86_64', // Match serverless - uses x86_64
   LOG_LEVEL: 'INFO',
   METRICS_NAMESPACE: 'MCR',
   CDK_QUALIFIER: 'mcr'

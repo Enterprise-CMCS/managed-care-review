@@ -84,6 +84,7 @@ export class ApiComputeStack extends BaseStack {
   private readonly authenticatedRole?: iam.IRole;
   private readonly applicationEndpoint?: string;
   private readonly jwtSecret: secretsmanager.ISecret;
+  private readonly prismaLayerArn?: string;
   private prismaMigrationLayer?: lambda.ILayerVersion;
 
   /**
@@ -137,6 +138,7 @@ export class ApiComputeStack extends BaseStack {
     this.authenticatedRole = props.authenticatedRole;
     this.applicationEndpoint = props.applicationEndpoint;
     this.jwtSecret = props.jwtSecret;
+    this.prismaLayerArn = props.prismaLayerArn;
     
     // Initialize functions map
     this.functions = new Map<string, BaseLambdaFunction>();
@@ -227,11 +229,20 @@ export class ApiComputeStack extends BaseStack {
   }
 
   /**
-   * Create Prisma layer for Lambda functions
+   * Import Prisma layer from LambdaLayersStack
    */
   private createPrismaLayer(): void {
-    const prismaConstruct = new PrismaLayer(this, 'Prisma');
-    this.prismaLayer = prismaConstruct.layerVersion;
+    if (this.prismaLayerArn) {
+      this.prismaLayer = lambda.LayerVersion.fromLayerVersionArn(
+        this,
+        'ImportedPrismaLayer',
+        this.prismaLayerArn
+      );
+    } else {
+      // Fallback: create local layer if ARN not provided (for backwards compatibility)
+      const prismaConstruct = new PrismaLayer(this, 'Prisma');
+      this.prismaLayer = prismaConstruct.layerVersion;
+    }
   }
 
   /**

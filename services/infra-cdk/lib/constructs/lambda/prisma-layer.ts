@@ -84,23 +84,24 @@ export class PrismaLayer extends Construct {
                 const schemaPath = path.join(__dirname, 'layers', 'prisma', 'schema.prisma');
                 if (fs.existsSync(schemaPath)) {
                   fs.copySync(schemaPath, path.join(tempDir, 'schema.prisma'));
-                  execSync(`${pm} exec prisma generate`, {
+                  execSync(`PRISMA_CLI_BINARY_TARGETS=rhel-openssl-3.0.x ${pm} exec prisma generate`, {
                     cwd: tempDir,
-                    stdio: 'inherit'
+                    stdio: 'inherit',
+                    env: { ...process.env, PRISMA_CLI_BINARY_TARGETS: 'rhel-openssl-3.0.x' }
                   });
                 }
                 
-                /* 5️⃣ Prune non-arm64 engines */
+                /* 5️⃣ Prune non-rhel engines for Lambda x86_64 */
                 // With pnpm, the actual packages are in .pnpm directory
                 const pnpmDir = path.join(tempDir, 'node_modules', '.pnpm');
                 if (fs.existsSync(pnpmDir)) {
                   // Find and prune engines in pnpm structure
                   execSync(
-                    `find ${pnpmDir} -path "*/@prisma/engines/*" -type f ! -name "*linux-arm64*" -delete 2>/dev/null || true`,
+                    `find ${pnpmDir} -path "*/@prisma/engines/*" -type f ! -name "*rhel-openssl-3.0.x*" -delete 2>/dev/null || true`,
                     { stdio: 'ignore' }
                   );
                   execSync(
-                    `find ${pnpmDir} -path "*/.prisma/client/*" -type f ! -name "*linux-arm64*" -delete 2>/dev/null || true`,
+                    `find ${pnpmDir} -path "*/.prisma/client/*" -type f ! -name "*rhel-openssl-3.0.x*" -delete 2>/dev/null || true`,
                     { stdio: 'ignore' }
                   );
                 }
@@ -109,7 +110,7 @@ export class PrismaLayer extends Construct {
                 const enginesDir = path.join(tempDir, 'node_modules', '@prisma', 'engines');
                 if (fs.existsSync(enginesDir)) {
                   execSync(
-                    `find ${enginesDir} -type f ! -name "*linux-arm64*" -delete 2>/dev/null || true`,
+                    `find ${enginesDir} -type f ! -name "*rhel-openssl-3.0.x*" -delete 2>/dev/null || true`,
                     { stdio: 'ignore' }
                   );
                 }
@@ -117,7 +118,7 @@ export class PrismaLayer extends Construct {
                 const prismaClientDir = path.join(tempDir, 'node_modules', '.prisma', 'client');
                 if (fs.existsSync(prismaClientDir)) {
                   execSync(
-                    `find ${prismaClientDir} -type f ! -name "*linux-arm64*" -delete 2>/dev/null || true`,
+                    `find ${prismaClientDir} -type f ! -name "*rhel-openssl-3.0.x*" -delete 2>/dev/null || true`,
                     { stdio: 'ignore' }
                   );
                 }
@@ -158,7 +159,7 @@ export class PrismaLayer extends Construct {
   public getEnvironment(): Record<string, string> {
     return {
       // Tell Prisma where to find the query engine
-      PRISMA_QUERY_ENGINE_LIBRARY: '/opt/nodejs/node_modules/.prisma/client/libquery_engine-linux-arm64-openssl-3.0.x.so.node',
+      PRISMA_QUERY_ENGINE_LIBRARY: '/opt/nodejs/node_modules/.prisma/client/libquery_engine-rhel-openssl-3.0.x.so.node', // Match serverless - x86_64
       // Enable source maps for better debugging
       NODE_OPTIONS: '--enable-source-maps',
     };

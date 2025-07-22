@@ -4,6 +4,7 @@ import * as lambda from 'aws-cdk-lib/aws-lambda';
 import * as path from 'path';
 import { createHash } from 'crypto';
 import * as fs from 'fs';
+import { PrismaLayer } from '../constructs/lambda/prisma-layer';
 
 export interface LambdaLayersStackProps extends StackProps {
   stage: string;
@@ -48,7 +49,7 @@ export class LambdaLayersStack extends Stack {
       value: JSON.stringify({
         prismaVersion: '5.17.0',
         runtime: 'nodejs20.x',
-        architecture: 'arm64',
+        architecture: 'x86_64',
         timestamp: new Date().toISOString()
       }),
       description: 'Layer build metadata'
@@ -56,62 +57,17 @@ export class LambdaLayersStack extends Stack {
   }
 
   /**
-   * Create Prisma layer with optimized bundling
+   * Create Prisma layer using the PrismaLayer construct with local bundling
    */
   private createPrismaLayer(stage: string): lambda.LayerVersion {
-    const layerHash = this.calculateLayerHash('prisma');
-    
-    return new lambda.LayerVersion(this, 'PrismaLayer', {
-      layerVersionName: `mcr-prisma-${stage}-${layerHash}`,
-      description: `Prisma client layer v5.17.0 - Built ${new Date().toISOString()}`,
-      compatibleRuntimes: [lambda.Runtime.NODEJS_20_X],
-      compatibleArchitectures: [lambda.Architecture.ARM_64],
-      removalPolicy: RemovalPolicy.RETAIN,
-      code: lambda.Code.fromAsset(path.join(__dirname, '../constructs/lambda/layers/prisma'), {
-        bundling: {
-          image: lambda.Runtime.NODEJS_20_X.bundlingImage,
-          command: [
-            'bash', '-c', [
-              // Install exact versions
-              'npm install --no-save @prisma/client@5.17.0 prisma@5.17.0',
-              
-              // Set binary targets for ARM64
-              'export PRISMA_CLI_BINARY_TARGETS=linux-arm64-openssl-3.0.x',
-              
-              // Generate Prisma client
-              'npx prisma generate',
-              
-              // Remove all non-ARM64 binaries to minimize size
-              'find node_modules/.prisma/client -type f ! -name "*linux-arm64*" -delete',
-              'find node_modules/@prisma/engines -type f ! -name "*linux-arm64*" -delete',
-              
-              // Remove unnecessary files
-              'find node_modules -name "*.ts" -delete',
-              'find node_modules -name "*.map" -delete',
-              'find node_modules -name "*.md" -delete',
-              'find node_modules -name "test" -type d -exec rm -rf {} + 2>/dev/null || true',
-              'find node_modules -name "tests" -type d -exec rm -rf {} + 2>/dev/null || true',
-              'find node_modules -name "docs" -type d -exec rm -rf {} + 2>/dev/null || true',
-              'find node_modules -name ".github" -type d -exec rm -rf {} + 2>/dev/null || true',
-              
-              // Copy to layer structure
-              'mkdir -p /asset-output/nodejs',
-              'cp -r node_modules /asset-output/nodejs/',
-              
-              // Create layer metadata
-              'echo \'{"version":"5.17.0","runtime":"nodejs20.x","arch":"arm64"}\' > /asset-output/nodejs/layer-metadata.json',
-              
-              // Calculate final size
-              'echo "Layer size: $(du -sh /asset-output | cut -f1)"'
-            ].join(' && ')
-          ],
-          environment: {
-            NPM_CONFIG_CACHE: '/tmp/npm-cache',
-            PRISMA_CLI_BINARY_TARGETS: 'linux-arm64-openssl-3.0.x'
-          },
-        },
-      }),
+    // Use the PrismaLayer construct which has local bundling implemented
+    const prismaLayer = new PrismaLayer(this, 'PrismaLayer', {
+      layerName: `mcr-prisma-${stage}`,
+      description: `Prisma client layer - Built ${new Date().toISOString()}`,
+      compatibleRuntimes: [lambda.Runtime.NODEJS_20_X]
     });
+    
+    return prismaLayer.layerVersion;
   }
 
   /**
@@ -130,44 +86,70 @@ export class LambdaLayersStack extends Stack {
         layerVersionName: `mcr-postgres-tools-${stage}-${layerHash}`,
         description: `PostgreSQL tools layer - Built ${new Date().toISOString()}`,
         compatibleRuntimes: [lambda.Runtime.NODEJS_20_X],
-        compatibleArchitectures: [lambda.Architecture.ARM_64],
+        compatibleArchitectures: [lambda.Architecture.X86_64], // Match serverless - x86_64 only
         removalPolicy: RemovalPolicy.RETAIN,
         code: lambda.Code.fromAsset(layerPath),
       });
     }
     
-    // Fallback: Create minimal postgres tools layer
+    // Fallback: Create minimal postgres tools layer with local bundling
     return new lambda.LayerVersion(this, 'PostgresToolsLayer', {
       layerVersionName: `mcr-postgres-tools-${stage}-${layerHash}`,
       description: `PostgreSQL tools layer - Built ${new Date().toISOString()}`,
       compatibleRuntimes: [lambda.Runtime.NODEJS_20_X],
-      compatibleArchitectures: [lambda.Architecture.ARM_64],
+      compatibleArchitectures: [lambda.Architecture.X86_64], // Match serverless - x86_64 only
       removalPolicy: RemovalPolicy.RETAIN,
       code: lambda.Code.fromAsset(path.join(__dirname, '../constructs/lambda/layers'), {
         bundling: {
           image: lambda.Runtime.NODEJS_20_X.bundlingImage,
+          local: {
+            tryBundle(outputDir: string): boolean {
+              const { execSync } = require('child_process');
+              const fs = require('fs-extra');
+              const path = require('path');
+              
+              try {
+                // Create layer structure
+                fs.ensureDirSync(path.join(outputDir, 'nodejs/node_modules'));
+                
+                // Create package.json
+                const packageJson = {
+                  name: 'postgres-tools-layer',
+                  version: '1.0.0',
+                  description: 'PostgreSQL client tools for Lambda',
+                  dependencies: {
+                    'pg': '^8.11.3',
+                    'pg-format': '^1.0.4'
+                  }
+                };
+                
+                fs.writeJsonSync(path.join(outputDir, 'nodejs/package.json'), packageJson);
+                
+                // Install dependencies
+                execSync('npm install --production', {
+                  cwd: path.join(outputDir, 'nodejs'),
+                  stdio: 'inherit'
+                });
+                
+                // Create metadata
+                fs.writeJsonSync(path.join(outputDir, 'layer-metadata.json'), {
+                  postgres_version: 'node-pg-8.11.3',
+                  tools: ['pg client library']
+                });
+                
+                console.log('PostgreSQL tools layer built successfully with local bundling');
+                return true;
+              } catch (error) {
+                console.error('Failed to build PostgreSQL tools layer locally:', error);
+                return false;
+              }
+            }
+          },
+          // Docker command as fallback only
           command: [
             'bash', '-c', [
-              // Install postgres client libraries
-              'yum install -y postgresql15 postgresql15-libs',
-              
-              // Create layer structure
-              'mkdir -p /asset-output/bin',
-              'cp /usr/bin/pg_dump /asset-output/bin/',
-              'cp /usr/bin/pg_restore /asset-output/bin/',
-              'cp /usr/bin/psql /asset-output/bin/',
-              
-              // Copy required libraries
-              'mkdir -p /asset-output/lib',
-              'cp -P /usr/lib64/libpq* /asset-output/lib/',
-              'cp -P /usr/lib64/libssl* /asset-output/lib/',
-              'cp -P /usr/lib64/libcrypto* /asset-output/lib/',
-              
-              // Make binaries executable
-              'chmod +x /asset-output/bin/*',
-              
-              // Create metadata
-              'echo \'{"postgres_version":"15","tools":["pg_dump","pg_restore","psql"]}\' > /asset-output/layer-metadata.json'
+              'echo "Docker bundling should not be used - local bundling failed"',
+              'exit 1'
             ].join(' && ')
           ],
         },
@@ -188,7 +170,7 @@ export class LambdaLayersStack extends Stack {
    */
   public static getPrismaLayerEnvironment(): Record<string, string> {
     return {
-      PRISMA_QUERY_ENGINE_LIBRARY: '/opt/nodejs/node_modules/.prisma/client/libquery_engine-linux-arm64-openssl-3.0.x.so.node',
+      PRISMA_QUERY_ENGINE_LIBRARY: '/opt/nodejs/node_modules/.prisma/client/libquery_engine-rhel-openssl-3.0.x.so.node',
       NODE_OPTIONS: '--enable-source-maps',
     };
   }

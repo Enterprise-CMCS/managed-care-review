@@ -61,6 +61,9 @@ export function getBundlingCommandHooks(functionName: string) {
     beforeBundling(inputDir: string, outputDir: string): string[] {
       const commands: string[] = [];
       
+      // The preflight script ensures packages are built before CDK operations
+      // No need to duplicate that logic here
+      
       // For GRAPHQL function, copy the schema file
       if (functionName === 'GRAPHQL') {
         // The schema is in app-graphql service

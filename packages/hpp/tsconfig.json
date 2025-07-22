@@ -5,7 +5,7 @@
         "lib": ["ES2021", "DOM"],
         "target": "ES2021",
         "moduleResolution": "node",
-        "baseUrl": "/",
+        "baseUrl": "./",
         "experimentalDecorators": true,
         "emitDecoratorMetadata": true,
         "preserveConstEnums": true,
@@ -19,6 +19,5 @@
         "declaration": true,
         "outDir": "./build"
     },
-    "include": ["src/**/*", "src/data/statePrograms.json"],
-    "exclude": ["src/gen/**/*"]
+    "include": ["src/**/*", "src/data/statePrograms.json"]
 }

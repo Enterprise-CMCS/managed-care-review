@@ -121,14 +121,14 @@ export class StageConfiguration {
         return {
           memorySize: LAMBDA_MEMORY.MEDIUM,
           timeout: LAMBDA_TIMEOUTS.SHORT,
-          architecture: 'arm64'
+          architecture: 'x86_64' // Match serverless
         };
       case 'val':
         return {
           memorySize: LAMBDA_MEMORY.MEDIUM,
           timeout: LAMBDA_TIMEOUTS.SHORT,
           reservedConcurrentExecutions: 10,
-          architecture: 'arm64'
+          architecture: 'x86_64' // Match serverless
         };
       case 'prod':
         return {
@@ -136,7 +136,7 @@ export class StageConfiguration {
           timeout: LAMBDA_TIMEOUTS.SHORT,
           reservedConcurrentExecutions: 100,
           provisionedConcurrentExecutions: 10,
-          architecture: 'arm64'
+          architecture: 'x86_64' // Match serverless
         };
       default:
         throw new Error(`Unknown stage: ${stage}`);

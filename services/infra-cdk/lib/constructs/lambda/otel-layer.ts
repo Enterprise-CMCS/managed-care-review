@@ -18,7 +18,7 @@ export class OtelLayer extends Construct {
   constructor(scope: Construct, id: string, props: OtelLayerProps) {
     super(scope, id);
 
-    const architecture = props.architecture || Architecture.ARM_64;
+    const architecture = props.architecture || Architecture.X86_64; // Match serverless - x86_64 only
 
     // Use the AWS-managed OpenTelemetry layer
     // This layer includes the OTEL collector and instrumentation libraries

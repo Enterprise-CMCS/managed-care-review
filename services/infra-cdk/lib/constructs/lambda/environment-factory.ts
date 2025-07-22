@@ -268,8 +268,8 @@ export class LambdaEnvironmentFactory {
         `https://${stage === 'prod' ? 'app' : stage}.mcr.cms.gov`,
       // JWT Secret name for runtime retrieval (non-sensitive)
       JWT_SECRET_NAME: config.jwtSecretName,
-      // Prisma configuration
-      PRISMA_QUERY_ENGINE_LIBRARY: '/opt/nodejs/node_modules/.prisma/client/libquery_engine-linux-arm64-openssl-3.0.x.so.node',
+      // Prisma configuration - matches serverless configuration for RHEL
+      PRISMA_QUERY_ENGINE_LIBRARY: '/opt/nodejs/node_modules/.prisma/client/libquery_engine-rhel-openssl-3.0.x.so.node',
       ...(config.additionalEnv || {})
     };
   }
