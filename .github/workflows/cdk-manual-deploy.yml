@@ -43,7 +43,6 @@ on:
 env:
   AWS_REGION: us-east-1
   NODE_VERSION: '20.x'
-  CDK_DEFAULT_ACCOUNT: ${{ secrets.AWS_ACCOUNT_ID }}
   CDK_DEFAULT_REGION: us-east-1
 
 permissions:

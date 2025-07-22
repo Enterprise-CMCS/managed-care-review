@@ -46,6 +46,7 @@ jobs:
   deploy:
     name: ${{ github.event_name == 'pull_request' && 'CDK Diff' || 'Deploy CDK Infrastructure' }}
     runs-on: ubuntu-latest
+    environment: ${{ env.STAGE }}
     outputs:
       api-url: ${{ steps.export-config.outputs.api-url }}
       cognito-region: ${{ steps.export-config.outputs.cognito-region }}
@@ -113,11 +114,33 @@ jobs:
       run: pnpm install --frozen-lockfile
 
     # 4. Configure AWS credentials via OIDC
+    - name: Validate AWS Account Secrets
+      run: |
+        if [[ -z "${{ secrets.DEV_AWS_ACCOUNT_ID }}" ]]; then
+          echo "ERROR: DEV_AWS_ACCOUNT_ID secret is not configured"
+          echo "Please add the following secrets to the repository:"
+          echo "  - DEV_AWS_ACCOUNT_ID"
+          echo "  - VAL_AWS_ACCOUNT_ID"
+          echo "  - PROD_AWS_ACCOUNT_ID"
+          exit 1
+        fi
+
+    - name: Set AWS Account ID
+      id: set-account-id
+      run: |
+        if [[ "${{ env.STAGE }}" == "prod" ]]; then
+          echo "account-id=${{ secrets.PROD_AWS_ACCOUNT_ID }}" >> $GITHUB_OUTPUT
+        elif [[ "${{ env.STAGE }}" == "val" ]]; then
+          echo "account-id=${{ secrets.VAL_AWS_ACCOUNT_ID }}" >> $GITHUB_OUTPUT
+        else
+          echo "account-id=${{ secrets.DEV_AWS_ACCOUNT_ID }}" >> $GITHUB_OUTPUT
+        fi
+
     - name: Configure AWS credentials
       uses: ./.github/actions/get_aws_credentials
       with:
         region: ${{ env.AWS_REGION }}
-        account-id: ${{ secrets.AWS_ACCOUNT_ID }}
+        account-id: ${{ steps.set-account-id.outputs.account-id }}
         stage-name: ${{ env.STAGE }}
 
     # 5. CDK Synth - Validate infrastructure code
@@ -235,7 +258,7 @@ jobs:
       if: github.event_name != 'pull_request'
       working-directory: services/infra-cdk
       run: |
-        pnpm cdk bootstrap aws://${{ secrets.AWS_ACCOUNT_ID }}/${{ env.AWS_REGION }} \
+        pnpm cdk bootstrap aws://${{ steps.set-account-id.outputs.account-id }}/${{ env.AWS_REGION }} \
           --cloudformation-execution-policies arn:aws:iam::aws:policy/AdministratorAccess \
           -c stage=${{ env.STAGE }} || true
 
