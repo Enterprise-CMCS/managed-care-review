@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import { Form as UswdsForm } from '@trussworks/react-uswds'
 import { generatePath, useNavigate } from 'react-router-dom'
 import { v4 as uuidv4 } from 'uuid'
@@ -15,10 +15,9 @@ import {
 } from '../../../components/FileUpload'
 import { PageActions } from '../PageActions'
 import classNames from 'classnames'
-import { ErrorSummary } from '../../../components/Form'
+import { ErrorSummary, FormContainer } from '../../../components'
 import { activeFormPages } from '../StateSubmissionForm'
 import { RoutesRecord } from '@mc-review/constants'
-import { FormContainer } from '../../../components/FormContainer/FormContainer'
 import { useAuth } from '../../../contexts/AuthContext'
 import {
     useCurrentRoute,
@@ -35,6 +34,7 @@ import { PageBannerAlerts } from '../PageBannerAlerts'
 import { useErrorSummary } from '../../../hooks/useErrorSummary'
 import { useFocusOnRender } from '../../../hooks/useFocusOnRender'
 import { recordJSException } from '@mc-review/otel'
+import { usePage } from '../../../contexts/PageContext'
 
 export const Documents = (): React.ReactElement => {
     const [shouldValidate, setShouldValidate] = useState(false)
@@ -43,6 +43,7 @@ export const Documents = (): React.ReactElement => {
     useFocusOnRender(draftSaved, '[data-testid="saveAsDraftSuccessBanner"]')
     const { setFocusErrorSummaryHeading, errorSummaryHeadingRef } =
         useErrorSummary()
+    const { updateActiveMainContent } = usePage()
 
     // set up API handling and HPP data
     const { loggedInUser } = useAuth()
@@ -55,6 +56,13 @@ export const Documents = (): React.ReactElement => {
         showPageErrorMessage,
         unlockInfo,
     } = useHealthPlanPackageForm(id)
+
+    const activeMainContentId = 'supportingDocsPageMainContent'
+
+    // Set the active main content to focus when click the Skip to main content button.
+    useEffect(() => {
+        updateActiveMainContent(activeMainContentId)
+    }, [activeMainContentId, updateActiveMainContent])
 
     // Documents state management
     const { uploadFile, scanFile, getKey, getS3URL } = useS3()
@@ -248,7 +256,7 @@ export const Documents = (): React.ReactElement => {
         }
 
     return (
-        <>
+        <div id={activeMainContentId}>
             <FormNotificationContainer>
                 <DynamicStepIndicator
                     formPages={activeFormPages(draftSubmission)}
@@ -346,6 +354,6 @@ export const Documents = (): React.ReactElement => {
                     />
                 </UswdsForm>
             </FormContainer>
-        </>
+        </div>
     )
 }

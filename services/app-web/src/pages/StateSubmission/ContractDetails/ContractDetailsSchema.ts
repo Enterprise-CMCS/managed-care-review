@@ -75,7 +75,7 @@ export const ContractDetailsFormSchema = (
             'You must select a contract status'
         ),
         contractDateStart: Yup.date()
-            // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+             
             // @ts-ignore-next-line
             .validateDateFormat('YYYY-MM-DD', true)
             .typeError('The start date must be in MM/DD/YYYY format')
@@ -83,7 +83,7 @@ export const ContractDetailsFormSchema = (
         contractDocuments: validateFileItemsList({ required: true }),
         supportingDocuments: validateFileItemsList({ required: false }),
         contractDateEnd: Yup.date()
-            // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+             
             // @ts-ignore-next-line
             .validateDateFormat('YYYY-MM-DD', true)
             .typeError('The end date must be in MM/DD/YYYY format')

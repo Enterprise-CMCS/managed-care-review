@@ -4,7 +4,7 @@
         "module": "commonjs",
         "lib": ["es2021"],
         "target": "es2021",
-        "moduleResolution": "node",
+        "moduleResolution": "bundler",
 
         "baseUrl": "/",
         "outDir": "./build",

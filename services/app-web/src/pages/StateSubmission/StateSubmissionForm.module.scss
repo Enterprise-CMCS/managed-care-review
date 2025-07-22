@@ -59,6 +59,12 @@
     margin-top: 0;
 }
 
+[class^='usa-checkbox__label'] {
+    &::before {
+        top: 4px;
+    }
+}
+
 .buttonGroup {
     justify-content: flex-end;
     margin-right: 0;

@@ -478,41 +478,41 @@ describe('StateSubmissionForm', () => {
 
         it('shows a generic error when updating submission fails', async () => {
             const mockSubmission = mockContractPackageDraft()
-            ;(mockSubmission.draftRevision!.formData.submissionDescription =
-                'A real submission but updated something'),
-                renderWithProviders(
-                    <Routes>
-                        <Route element={<SubmissionSideNav />}>
-                            <Route
-                                path={RoutesRecord.SUBMISSIONS_EDIT_TOP_LEVEL}
-                                element={<StateSubmissionForm />}
-                            />
-                        </Route>
-                    </Routes>,
-                    {
-                        apolloProvider: {
-                            mocks: [
-                                fetchCurrentUserMock({ statusCode: 200 }),
-                                fetchContractMockSuccess({
-                                    contract: {
-                                        ...mockSubmission,
-                                        id: '15',
-                                    },
-                                }),
-                                fetchContractWithQuestionsMockSuccess({
-                                    contract: {
-                                        ...mockSubmission,
-                                        id: '15',
-                                    },
-                                }),
-                                updateContractDraftRevisionMockFail({
-                                    contract: { id: '15' },
-                                }),
-                            ],
-                        },
-                        routerProvider: { route: '/submissions/15/edit/type' },
-                    }
-                )
+            mockSubmission.draftRevision!.formData.submissionDescription =
+                'A real submission but updated something'
+            renderWithProviders(
+                <Routes>
+                    <Route element={<SubmissionSideNav />}>
+                        <Route
+                            path={RoutesRecord.SUBMISSIONS_EDIT_TOP_LEVEL}
+                            element={<StateSubmissionForm />}
+                        />
+                    </Route>
+                </Routes>,
+                {
+                    apolloProvider: {
+                        mocks: [
+                            fetchCurrentUserMock({ statusCode: 200 }),
+                            fetchContractMockSuccess({
+                                contract: {
+                                    ...mockSubmission,
+                                    id: '15',
+                                },
+                            }),
+                            fetchContractWithQuestionsMockSuccess({
+                                contract: {
+                                    ...mockSubmission,
+                                    id: '15',
+                                },
+                            }),
+                            updateContractDraftRevisionMockFail({
+                                contract: { id: '15' },
+                            }),
+                        ],
+                    },
+                    routerProvider: { route: '/submissions/15/edit/type' },
+                }
+            )
 
             await waitFor(() =>
                 expect(

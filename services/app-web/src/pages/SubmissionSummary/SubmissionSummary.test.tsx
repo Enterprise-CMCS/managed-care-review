@@ -489,7 +489,7 @@ describe('SubmissionSummary', () => {
                         mockContractPackageUnlockedWithUnlockedType({
                             id: 'test-abc-123',
                         })
-                    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+
                     contract.draftRevision!.formData.submissionDescription =
                         'NEW_DESCRIPTION'
                     contract.packageSubmissions[0].contractRevision.formData.submissionDescription =

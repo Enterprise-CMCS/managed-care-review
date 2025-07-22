@@ -13,7 +13,7 @@ describe('Error boundary tests', () => {
         // Store original console.error
         originalError = console.error
         // Replace console.error with filtered version
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+
         console.error = (...args: any[]) => {
             // Suppress React ErrorBoundary warnings and our test error
             if (

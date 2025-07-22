@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import dayjs from 'dayjs'
 import {
     Form as UswdsForm,
@@ -25,13 +25,13 @@ import {
     LinkWithLogging,
     ReactRouterLinkWithLogging,
     FormNotificationContainer,
+    FormContainer,
 } from '../../../components'
 import { formatForForm, isDateRangeEmpty } from '../../../formHelpers'
 import { formatUserInputDate } from '@mc-review/dates'
 import { useS3 } from '../../../contexts/S3Context'
 
 import { ContractDetailsFormSchema } from './ContractDetailsSchema'
-import { ManagedCareEntityRecord, FederalAuthorityRecord } from '@mc-review/hpp'
 import { PageActions } from '../PageActions'
 import {
     activeFormPages,
@@ -47,35 +47,35 @@ import { ACCEPTED_SUBMISSION_FILE_TYPES } from '../../../components/FileUpload'
 import {
     federalAuthorityKeysForCHIP,
     federalAuthorityKeys,
+    ManagedCareEntityRecord,
+    FederalAuthorityRecord,
+    type ManagedCareEntity,
+    type ContractExecutionStatus,
+    type FederalAuthority,
 } from '@mc-review/hpp'
 import {
     generateProvisionLabel,
     generateApplicableProvisionsList,
 } from '@mc-review/common-code'
-import type {
-    ManagedCareEntity,
-    ContractExecutionStatus,
-    FederalAuthority,
-} from '@mc-review/hpp'
 import {
     isBaseContract,
     isCHIPOnly,
     isContractAmendment,
     isContractWithProvisions,
+    featureFlags,
 } from '@mc-review/common-code'
-import { RoutesRecord, RouteT } from '@mc-review/constants'
-import { useLDClient } from 'launchdarkly-react-client-sdk'
-import { featureFlags } from '@mc-review/common-code'
 import {
-    booleanAsYesNoFormValue,
-    yesNoFormValueAsBoolean,
-} from '../../../components/Form/FieldYesNo/FieldYesNo'
-import {
+    RoutesRecord,
+    RouteT,
     StatutoryRegulatoryAttestation,
     StatutoryRegulatoryAttestationDescription,
     StatutoryRegulatoryAttestationQuestion,
 } from '@mc-review/constants'
-import { FormContainer } from '../../../components/FormContainer/FormContainer'
+import { useLDClient } from 'launchdarkly-react-client-sdk'
+import {
+    booleanAsYesNoFormValue,
+    yesNoFormValueAsBoolean,
+} from '../../../components/Form/FieldYesNo'
 import { useCurrentRoute, useRouteParams } from '../../../hooks'
 import { useAuth } from '../../../contexts/AuthContext'
 import { ErrorOrLoadingPage } from '../ErrorOrLoadingPage'
@@ -87,6 +87,7 @@ import {
     ContractDraftRevisionFormDataInput,
 } from '../../../gen/gqlClient'
 import { useFocusOnRender } from '../../../hooks/useFocusOnRender'
+import { usePage } from '../../../contexts/PageContext'
 
 function formattedDatePlusOneDay(initialValue: string): string {
     const dayjsValue = dayjs(initialValue)
@@ -165,8 +166,16 @@ export const ContractDetails = ({
     const { loggedInUser } = useAuth()
     const { currentRoute } = useCurrentRoute()
     const { id } = useRouteParams()
+    const { updateActiveMainContent } = usePage()
     const { draftSubmission, interimState, updateDraft, showPageErrorMessage } =
         useContractForm(id)
+
+    const activeMainContentId = 'contractDetailsPageMainContent'
+
+    // Set the active main content to focus when click the Skip to main content button.
+    useEffect(() => {
+        updateActiveMainContent(activeMainContentId)
+    }, [activeMainContentId, updateActiveMainContent])
 
     const contract438Attestation = ldClient?.variation(
         featureFlags.CONTRACT_438_ATTESTATION.flag,
@@ -572,7 +581,7 @@ export const ContractDetails = ({
     ]
 
     return (
-        <>
+        <div id={activeMainContentId}>
             <FormNotificationContainer>
                 <DynamicStepIndicator
                     formPages={activeFormPages(
@@ -1309,6 +1318,7 @@ export const ContractDetails = ({
                                                     >
                                                         <Fieldset
                                                             aria-required
+                                                            id="dsnpContract"
                                                             legend="Is this contract associated with a Dual-Eligible Special Needs Plan (D-SNP) that covers Medicaid benefits?"
                                                         >
                                                             <span
@@ -1318,17 +1328,14 @@ export const ContractDetails = ({
                                                             >
                                                                 Required
                                                             </span>
-                                                            <span
-                                                                className={
-                                                                    styles.requiredOptionalText
-                                                                }
-                                                                style={{
-                                                                    color: '#1B1B1B',
-                                                                }}
+                                                            <div
+                                                                role="note"
+                                                                aria-labelledby="dsnpContract"
+                                                                className="mcr-note margin-top-1"
                                                             >
                                                                 See 42 CFR §
                                                                 422.2
-                                                            </span>
+                                                            </div>
                                                             <LinkWithLogging
                                                                 variant="external"
                                                                 href={
@@ -1336,6 +1343,7 @@ export const ContractDetails = ({
                                                                 }
                                                                 target="_blank"
                                                                 data-testid="dsnpGuidanceLink"
+                                                                aria-label="D-SNP guidance (opens in new window)"
                                                             >
                                                                 D-SNP guidance
                                                             </LinkWithLogging>
@@ -1466,6 +1474,6 @@ export const ContractDetails = ({
                     )}
                 </Formik>
             </FormContainer>
-        </>
+        </div>
     )
 }

@@ -9,7 +9,7 @@ import {
 
 Yup.addMethod(Yup.date, 'validateDateFormat', validateDateFormat)
 
-const SingleRateCertSchema = (_activeFeatureFlags: FeatureFlagSettings) =>
+const SingleRateCertSchema = (_activeFeatureFlags: FeatureFlagSettings, isDSNP?: boolean) =>
     Yup.object().shape({
         rateDocuments: validateFileItemsListSingleUpload({ required: true }),
         supportingDocuments: validateFileItemsList({ required: false }),
@@ -31,14 +31,22 @@ const SingleRateCertSchema = (_activeFeatureFlags: FeatureFlagSettings) =>
         rateType: Yup.string().defined(
             'You must choose a rate certification type'
         ),
+        rateMedicaidPopulations: isDSNP && _activeFeatureFlags['dsnp']? 
+        Yup.array().test(
+            'medicaidPopulationSelection',
+            'You must select at least one Medicaid population',
+            (value) => {
+                return Boolean(value && value.length > 0)
+            }
+        ) : Yup.array(),
         rateCapitationType: Yup.string().defined(
             "You must select whether you're certifying rates or rate ranges"
         ),
-        rateDateStart: Yup.date().when('rateType', (contractType) => {
-            if (contractType) {
+        rateDateStart: Yup.date().when('rateType', (rateType) => {
+            if (rateType) {
                 return (
                     Yup.date()
-                        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+                         
                         // @ts-ignore-next-line
                         .validateDateFormat('YYYY-MM-DD', true)
                         .defined('You must enter a start date')
@@ -52,7 +60,7 @@ const SingleRateCertSchema = (_activeFeatureFlags: FeatureFlagSettings) =>
             if (rateType) {
                 return (
                     Yup.date()
-                        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+                         
                         // @ts-ignore-next-line
                         .validateDateFormat('YYYY-MM-DD', true)
                         .defined('You must enter an end date')
@@ -77,7 +85,7 @@ const SingleRateCertSchema = (_activeFeatureFlags: FeatureFlagSettings) =>
             if (rateType) {
                 return (
                     Yup.date()
-                        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+                         
                         // @ts-ignore-next-line
                         .validateDateFormat('YYYY-MM-DD', true)
                         .defined(
@@ -94,7 +102,7 @@ const SingleRateCertSchema = (_activeFeatureFlags: FeatureFlagSettings) =>
             is: 'AMENDMENT',
             then: Yup.date()
                 .nullable()
-                // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+                 
                 // @ts-ignore-next-line
                 .validateDateFormat('YYYY-MM-DD', true)
                 .defined('You must enter a start date')
@@ -104,7 +112,7 @@ const SingleRateCertSchema = (_activeFeatureFlags: FeatureFlagSettings) =>
             is: 'AMENDMENT',
             then: Yup.date()
                 .nullable()
-                // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+                 
                 // @ts-ignore-next-line
                 .validateDateFormat('YYYY-MM-DD', true)
                 .defined('You must enter an end date')
@@ -165,7 +173,8 @@ const SingleRateCertSchema = (_activeFeatureFlags: FeatureFlagSettings) =>
 
 const RateDetailsFormSchema = (
     activeFeatureFlags?: FeatureFlagSettings,
-    isMultiRate?: boolean
+    isMultiRate?: boolean,
+    isDSNP?: boolean,
 ) => {
     return isMultiRate
         ? Yup.object().shape({
@@ -192,7 +201,7 @@ const RateDetailsFormSchema = (
                       .when('.ratePreviouslySubmitted', {
                           // continue with normal rate form validations when its a new rate
                           is: 'NO',
-                          then: SingleRateCertSchema(activeFeatureFlags || {}),
+                          then: SingleRateCertSchema(activeFeatureFlags || {}, isDSNP),
                       })
               ),
           })
@@ -201,7 +210,7 @@ const RateDetailsFormSchema = (
           // eventually this could be just a single rate cert schema, but for now since the UI is shared, it still uses an array like RateDetails
           Yup.object().shape({
               rateForms: Yup.array().of(
-                  SingleRateCertSchema(activeFeatureFlags || {})
+                  SingleRateCertSchema(activeFeatureFlags || {}, isDSNP)
               ),
           })
 }
