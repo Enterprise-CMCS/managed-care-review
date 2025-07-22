@@ -16,9 +16,8 @@ import {
     StateContact,
     UpdateContractDraftRevisionInput,
 } from '../../../gen/gqlClient'
-import { ErrorSummary, FieldTextInput } from '../../../components/Form'
 
-import { useFocus } from '../../../hooks/useFocus'
+import { useFocus } from '../../../hooks'
 import { PageActions } from '../PageActions'
 import {
     activeFormPages,
@@ -30,8 +29,10 @@ import {
     DynamicStepIndicator,
     FormNotificationContainer,
     SectionCard,
+    FormContainer,
+    ErrorSummary,
+    FieldTextInput,
 } from '../../../components'
-import { FormContainer } from '../../../components/FormContainer/FormContainer'
 import { useCurrentRoute, useRouteParams, useTealium } from '../../../hooks'
 import { useContractForm } from '../../../hooks/useContractForm'
 import { useAuth } from '../../../contexts/AuthContext'
@@ -40,6 +41,7 @@ import { PageBannerAlerts } from '../PageBannerAlerts'
 import { useErrorSummary } from '../../../hooks/useErrorSummary'
 import { featureFlags } from '@mc-review/common-code'
 import { useFocusOnRender } from '../../../hooks/useFocusOnRender'
+import { usePage } from '../../../contexts/PageContext'
 
 export interface ContactsFormValues {
     stateContacts: StateContact[]
@@ -85,6 +87,7 @@ const Contacts = ({
     const { loggedInUser } = useAuth()
     const { currentRoute } = useCurrentRoute()
     const { id } = useRouteParams()
+    const { updateActiveMainContent } = usePage()
     const { draftSubmission, interimState, updateDraft, showPageErrorMessage } =
         useContractForm(id)
     const newStateContactNameRef = React.useRef<HTMLInputElement | null>(null) // This ref.current is reset to the newest contact name field each time new contact is added
@@ -117,6 +120,13 @@ const Contacts = ({
             newActuaryContactNameRef.current = null
         }
     }, [focusNewContact, focusNewActuaryContact])
+
+    const activeMainContentId = 'submissionTypePageMainContent'
+
+    // Set the active main content to focus when click the Skip to main content button.
+    useEffect(() => {
+        updateActiveMainContent(activeMainContentId)
+    }, [activeMainContentId, updateActiveMainContent])
 
     // TODO: refactor this into reusable component that is more understandable
     const showFieldErrors = (error?: FormError): boolean | undefined =>

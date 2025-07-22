@@ -15,16 +15,21 @@ import { useTealium } from '../../../hooks'
 
 export type FieldCheckboxProps = {
     name: string
-    label: string
+    label: string | React.ReactNode
     id: string
     heading: string
     parent_component_type?: string | 'form'
     parent_component_heading: string
+    // label can be either a string or element
+    // tealiumLabel is the string version of lable for tealium
+    // used when lable is not a string
+    tealiumLabel?: string
 } & JSX.IntrinsicElements['input']
 
 export const FieldCheckbox = ({
     name,
     label,
+    tealiumLabel,
     id,
     heading,
     parent_component_type = 'form',
@@ -38,11 +43,12 @@ export const FieldCheckbox = ({
 
     const handleClickWithLogging = (e: React.MouseEvent<HTMLInputElement>) => {
         const target = e.target as HTMLInputElement
+        const stringLable = typeof label === 'string' ? label : tealiumLabel
         logCheckboxEvent({
             event_name: target.checked
                 ? 'checkbox_selected'
                 : 'checkbox_unselected',
-            text: label,
+            text: stringLable || '',
             heading,
             parent_component_type,
             parent_component_heading,

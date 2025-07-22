@@ -76,7 +76,7 @@ const SubmissionsDashboard = (): React.ReactElement => {
 
             if (sub.status === 'UNLOCKED') {
                 // Errors - data handling
-                // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+
                 const previousRevision = sub.draftRevision!
                 const previousFormData = previousRevision.formData
 

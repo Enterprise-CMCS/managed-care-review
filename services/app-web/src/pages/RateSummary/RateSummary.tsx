@@ -37,7 +37,7 @@ import { ChildrenType } from '../../components/MultiColumnGrid/MultiColumnGrid'
 export const RateSummary = (): React.ReactElement => {
     // Page level state
     const { loggedInUser } = useAuth()
-    const { updateHeading } = usePage()
+    const { updateHeading, updateActiveMainContent } = usePage()
     const navigate = useNavigate()
     const [rateName, setRateName] = useState<string | undefined>(undefined)
     const [searchParams, setSearchParams] = useSearchParams()
@@ -95,6 +95,12 @@ export const RateSummary = (): React.ReactElement => {
         },
         fetchPolicy: 'cache-and-network',
     })
+
+    const activeMainContentId = 'rateSummaryPageMainContent'
+    // Set the active main content to focus when click the Skip to main content button.
+    useEffect(() => {
+        updateActiveMainContent(activeMainContentId)
+    }, [activeMainContentId, updateActiveMainContent])
 
     // Handle loading and error states for fetching data while using cached data
     if (!data && loading) {
@@ -301,7 +307,7 @@ export const RateSummary = (): React.ReactElement => {
     }
 
     return (
-        <div className={styles.background}>
+        <div className={styles.background} id={activeMainContentId}>
             <GridContainer
                 data-testid="rate-summary"
                 className={styles.container}

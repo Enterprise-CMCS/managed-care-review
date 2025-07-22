@@ -110,10 +110,8 @@ describe('YearPicker', () => {
 
         years.forEach((year, index) => {
             if (index < 5 || index > 9) {
-                // eslint-disable-next-line jest/no-conditional-expect
                 expect(getByText(year)).toBeDisabled()
             } else {
-                // eslint-disable-next-line jest/no-conditional-expect
                 expect(getByText(year)).not.toBeDisabled()
             }
         })

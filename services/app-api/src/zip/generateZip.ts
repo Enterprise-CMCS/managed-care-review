@@ -110,6 +110,7 @@ export const generateDocumentZip: GenerateDocumentZipFunctionType = async (
         timeoutPerMB: 1000,
         ...options, // Override with any provided values
     }
+
     // Create a temporary directory for our downloads
     let tempDir: string
     try {
