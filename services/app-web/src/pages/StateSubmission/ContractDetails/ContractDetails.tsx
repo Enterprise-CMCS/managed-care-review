@@ -1342,13 +1342,14 @@ export const ContractDetails = ({
                                                             <FieldYesNo
                                                                 id="dsnpContract"
                                                                 name="dsnpContract"
-                                                                label=""
+                                                                label="Is this contract associated with a Dual-Eligible Special Needs Plan (D-SNP) that covers Medicaid benefits?"
                                                                 showError={Boolean(
                                                                     showFieldErrors(
                                                                         'dsnpContract',
                                                                         errors
                                                                     )
                                                                 )}
+                                                                legendStyle="srOnly"
                                                             />
                                                         </Fieldset>
                                                     </FormGroup>
