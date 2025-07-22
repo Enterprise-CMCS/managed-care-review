@@ -1,10 +1,12 @@
-import { constructTestPostgresServer } from '../../testHelpers/gqlHelpers'
+import { constructTestPostgresServer, executeGraphQLOperation } from '../../testHelpers/gqlHelpers'
 import { ApproveContractDocument } from '../../gen/gqlClient'
-import { testCMSUser } from '../../testHelpers/userHelpers'
+import { testCMSUser, testStateUser } from '../../testHelpers/userHelpers'
 import {
     approveTestContract,
+    approveTestContractAsUser,
     createTestContract,
     unlockTestContract,
+    unlockTestContractAsUser,
     createAndSubmitTestContractWithRate,
 } from '../../testHelpers/gqlContractHelpers'
 import { testS3Client } from '../../testHelpers'
@@ -13,10 +15,11 @@ describe('approveContract', () => {
     const mockS3 = testS3Client()
 
     it('approves the contract', async () => {
+        const cmsUser = testCMSUser()
         const cmsServer = await constructTestPostgresServer({
             s3Client: mockS3,
             context: {
-                user: testCMSUser(),
+                user: cmsUser,
             },
         })
 
@@ -26,9 +29,10 @@ describe('approveContract', () => {
 
         const contract = await createAndSubmitTestContractWithRate(stateServer)
 
-        const approvedContract = await approveTestContract(
+        const approvedContract = await approveTestContractAsUser(
             cmsServer,
-            contract.id
+            contract.id,
+            cmsUser
         )
         expect(approvedContract.reviewStatusActions).toHaveLength(1)
         expect(approvedContract.reviewStatusActions![0]?.contractID).toBe(
@@ -48,16 +52,9 @@ describe('approveContract', () => {
             s3Client: mockS3,
         })
 
-        const cmsServer = await constructTestPostgresServer({
-            s3Client: mockS3,
-            context: {
-                user: testCMSUser(),
-            },
-        })
-
         const draftContract = await createTestContract(stateServer)
 
-        const approveContractResult = (await cmsServer.executeOperation({
+        const approveContractResult = await executeGraphQLOperation(stateServer, {
             query: ApproveContractDocument,
             variables: {
                 input: {
@@ -65,7 +62,8 @@ describe('approveContract', () => {
                     dateApprovalReleasedToState: '2024-12-12',
                 },
             },
-        })) as { errors?: any; data?: any }
+            contextValue: { user: testCMSUser() },
+        })
 
         expect(approveContractResult.errors).toBeDefined()
         if (approveContractResult.errors === undefined) {
@@ -85,22 +83,24 @@ describe('approveContract', () => {
             s3Client: mockS3,
         })
 
+        const cmsUser = testCMSUser()
         const cmsServer = await constructTestPostgresServer({
             s3Client: mockS3,
             context: {
-                user: testCMSUser(),
+                user: cmsUser,
             },
         })
 
         const contract = await createAndSubmitTestContractWithRate(stateServer)
 
-        const unlockedContract = await unlockTestContract(
+        const unlockedContract = await unlockTestContractAsUser(
             cmsServer,
             contract.id,
-            'unlock to resubmit'
+            'unlock to resubmit',
+            cmsUser
         )
 
-        const approveContractResult = (await cmsServer.executeOperation({
+        const approveContractResult = await executeGraphQLOperation(cmsServer, {
             query: ApproveContractDocument,
             variables: {
                 input: {
@@ -108,11 +108,8 @@ describe('approveContract', () => {
                     dateApprovalReleasedToState: '2024-12-12',
                 },
             },
-        }, {
-            contextValue: {
-                user: testCMSUser(),
-            },
-        })) as { errors?: any; data?: any }
+            contextValue: { user: testCMSUser() },
+        })
 
         expect(approveContractResult.errors).toBeDefined()
         if (approveContractResult.errors === undefined) {
@@ -141,7 +138,7 @@ describe('approveContract', () => {
 
         const contract = await createAndSubmitTestContractWithRate(stateServer)
 
-        await (cmsServer.executeOperation({
+        await executeGraphQLOperation(cmsServer, {
             query: ApproveContractDocument,
             variables: {
                 input: {
@@ -149,13 +146,10 @@ describe('approveContract', () => {
                     dateApprovalReleasedToState: '2024-11-11',
                 },
             },
-        }, {
-            contextValue: {
-                user: testCMSUser(),
-            },
-        }) as Promise<{ errors?: any; data?: any }>)
+            contextValue: { user: testCMSUser() },
+        })
 
-        const secondApprovalResult = (await cmsServer.executeOperation({
+        const secondApprovalResult = await executeGraphQLOperation(cmsServer, {
             query: ApproveContractDocument,
             variables: {
                 input: {
@@ -163,11 +157,8 @@ describe('approveContract', () => {
                     dateApprovalReleasedToState: '2024-12-12',
                 },
             },
-        }, {
-            contextValue: {
-                user: testCMSUser(),
-            },
-        })) as { errors?: any; data?: any }
+            contextValue: { user: testCMSUser() },
+        })
 
         expect(secondApprovalResult.errors).toBeDefined()
         if (secondApprovalResult.errors === undefined) {
@@ -195,7 +186,7 @@ describe('approveContract', () => {
         })
 
         const contract = await createAndSubmitTestContractWithRate(stateServer)
-        const approveContractResult = (await cmsServer.executeOperation({
+        const approveContractResult = await executeGraphQLOperation(cmsServer, {
             query: ApproveContractDocument,
             variables: {
                 input: {
@@ -203,11 +194,8 @@ describe('approveContract', () => {
                     dateApprovalReleasedToState: '3009-11-11',
                 },
             },
-        }, {
-            contextValue: {
-                user: testCMSUser(),
-            },
-        })) as { errors?: any; data?: any }
+            contextValue: { user: testCMSUser() },
+        })
         expect(approveContractResult.errors).toBeDefined()
         if (approveContractResult.errors === undefined) {
             throw new Error('type narrow')
@@ -228,7 +216,7 @@ describe('approveContract', () => {
 
         const contract = await createAndSubmitTestContractWithRate(stateServer)
 
-        const approveContractResult = (await stateServer.executeOperation({
+        const approveContractResult = await executeGraphQLOperation(stateServer, {
             query: ApproveContractDocument,
             variables: {
                 input: {
@@ -236,11 +224,8 @@ describe('approveContract', () => {
                     dateApprovalReleasedToState: '2024-12-12',
                 },
             },
-        }, {
-            contextValue: {
-                user: testStateUser(),
-            },
-        })) as { errors?: any; data?: any }
+            contextValue: { user: testStateUser() },
+        })
 
         expect(approveContractResult.errors).toBeDefined()
         if (approveContractResult.errors === undefined) {
