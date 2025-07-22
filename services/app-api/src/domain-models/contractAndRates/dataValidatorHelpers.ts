@@ -67,19 +67,23 @@ const validatePopulationCovered = (
 const validateDSNPContract = (
     formData: ContractDraftRevisionFormDataInput,
     featureFlags?: FeatureFlagSettings
-) =>
-    z.boolean().superRefine((_, ctx) => {
-        const dsnpFederalAuthorities = []
-        if (
-            formData.submissionType === 'CONTRACT_AND_RATES'
-        ) {
-            ctx.addIssue({
-                code: z.ZodIssueCode.custom,
-                message:
-                    'populationCoveredSchema of CHIP cannot be submissionType of CONTRACT_AND_RATES',
-            })
-        }
-    })
+) => {
+    if (featureFlags?.['dsnp']) {
+        z.boolean().superRefine((_, ctx) => {
+            const dsnpFederalAuthorities = []
+            if (
+                formData.submissionType === 'CONTRACT_AND_RATES'
+            ) {
+                ctx.addIssue({
+                    code: z.ZodIssueCode.custom,
+                    message:
+                        'populationCoveredSchema of CHIP cannot be submissionType of CONTRACT_AND_RATES',
+                })
+            }
+        })
+    }
+}
+
 const validateContractDraftRevisionInput = (
     formData: ContractDraftRevisionFormDataInput,
     stateCode: string,
