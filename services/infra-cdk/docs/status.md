@@ -18,12 +18,12 @@ This document tracks the progress of the Managed Care Review (MCR) serverless to
 ### Phase 2: Production-Ready CI/CD Implementation ✅
 
 #### 2.1 GitHub OIDC Authentication
-- [x] Created `GitHubOidcStack` for one-time OIDC provider setup
-- [x] Configured trust policy for specific repository and branches
-- [x] Added PowerUserAccess with additional IAM permissions for CDK
-- [x] Set up role ARN output for GitHub Actions
+- [x] ~~Created `GitHubOidcStack` for one-time OIDC provider setup~~
+- [x] Using existing serverless OIDC setup at `services/github-oidc/serverless.yml`
+- [x] CDK deployments use serverless OIDC role via `get_aws_credentials` GitHub Action
+- [x] Avoids duplicate OIDC providers (only one allowed per AWS account)
 
-**File**: `lib/stacks/github-oidc-stack.ts`
+**Note**: The CDK GitHubOidcStack is disabled in favor of the existing serverless implementation
 
 #### 2.2 Lambda Layers Management
 - [x] Created `LambdaLayersStack` for centralized layer management
@@ -109,15 +109,15 @@ This document tracks the progress of the Managed Care Review (MCR) serverless to
 
 ### One-Time Setup
 
-1. **Deploy GitHub OIDC Stack**:
-   ```bash
-   cd services/infra-cdk
-   CREATE_GITHUB_OIDC=true npx cdk deploy MCR-GitHubOIDC
-   ```
+1. **GitHub OIDC Setup**:
+   - The OIDC provider is already set up via the serverless stack at `services/github-oidc`
+   - No additional CDK OIDC deployment is required
 
 2. **Add GitHub Repository Secrets**:
-   - `AWS_ACCOUNT_ID`: Your AWS account ID
-   - `DEPLOY_ROLE_ARN`: ARN from OIDC stack output
+   - `DEV_AWS_ACCOUNT_ID`: Dev AWS account ID
+   - `VAL_AWS_ACCOUNT_ID`: Val AWS account ID  
+   - `PROD_AWS_ACCOUNT_ID`: Prod AWS account ID
+   - The OIDC role ARN is automatically constructed by the `get_aws_credentials` action
 
 ### Regular Deployment
 

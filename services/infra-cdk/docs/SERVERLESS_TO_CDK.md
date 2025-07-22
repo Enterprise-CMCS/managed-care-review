@@ -3658,6 +3658,8 @@ export class WafProtectedApi extends Construct {
 
 ### Complete Line-by-Line GitHub OIDC Infrastructure Mapping
 
+**NOTE: The CDK deployment reuses the existing serverless OIDC setup to avoid duplicate OIDC providers (only one allowed per AWS account). The CDK GitHubOidcStack is disabled.**
+
 The github-oidc service configures OpenID Connect (OIDC) authentication for GitHub Actions, allowing secure AWS deployments without storing credentials.
 
 ### OIDC Provider Configuration - Complete Mapping
@@ -3960,29 +3962,31 @@ jobs:
 
 ### Key Migration Notes for github-oidc
 
+**IMPORTANT**: The CDK currently reuses the existing serverless OIDC infrastructure instead of creating its own. The GitHubOidcStack is kept for reference but is disabled to avoid conflicts.
+
 1. **OIDC Provider Creation**:
-   - Serverless: Conditional based on stage
-   - CDK: TypeScript array check in code
+   - Serverless: Conditional based on stage (currently active)
+   - CDK: Would use TypeScript array check in code (disabled)
 
 2. **Stage-based Configuration**:
-   - Serverless: Uses `params` section with stage keys
-   - CDK: Method to map stage to configuration
+   - Serverless: Uses `params` section with stage keys (currently active)
+   - CDK: Would use method to map stage to configuration (disabled)
 
 3. **Trust Policy**:
-   - Serverless: Complex condition with If statement
-   - CDK: Cleaner with OpenIdConnectPrincipal or FederatedPrincipal
+   - Serverless: Complex condition with If statement (currently active)
+   - CDK: Would be cleaner with OpenIdConnectPrincipal or FederatedPrincipal (disabled)
 
 4. **Inline Policies**:
-   - Serverless: Separate RolePolicy resource with condition
-   - CDK: `inlinePolicies` property on Role
+   - Serverless: Separate RolePolicy resource with condition (currently active)
+   - CDK: Would use `inlinePolicies` property on Role (disabled)
 
 5. **Thumbprints**:
-   - Serverless: Array in params
-   - CDK: Direct array in OpenIdConnectProvider
+   - Serverless: Array in params (currently active)
+   - CDK: Would use direct array in OpenIdConnectProvider (disabled)
 
 6. **GitHub Integration**:
    - Both approaches result in the same trust relationship
-   - CDK provides type safety for principal configuration
+   - CDK uses the serverless OIDC role via the `get_aws_credentials` GitHub Action
 
 ---
 

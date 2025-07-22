@@ -95,12 +95,15 @@ export class StackOrchestrator {
   }
 
   private createGitHubOidc(): GitHubOidcStack | undefined {
-    if (process.env.CREATE_GITHUB_OIDC === 'true') {
-      return new GitHubOidcStack(this.props.app, `MCR-GitHubOIDC`, {
-        env: this.props.env,
-        description: 'GitHub OIDC provider for MCR CI/CD'
-      });
-    }
+    // DISABLED: Using existing serverless OIDC setup instead of CDK's GitHubOidcStack
+    // to avoid duplicate OIDC providers (only one allowed per AWS account)
+    // The serverless OIDC role is used via the get_aws_credentials GitHub Action
+    // if (process.env.CREATE_GITHUB_OIDC === 'true') {
+    //   return new GitHubOidcStack(this.props.app, `MCR-GitHubOIDC`, {
+    //     env: this.props.env,
+    //     description: 'GitHub OIDC provider for MCR CI/CD'
+    //   });
+    // }
     return undefined;
   }
 

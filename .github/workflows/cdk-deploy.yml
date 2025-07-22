@@ -141,7 +141,7 @@ jobs:
       with:
         region: ${{ env.AWS_REGION }}
         account-id: ${{ steps.set-account-id.outputs.account-id }}
-        stage-name: ${{ env.STAGE }}
+        stage-name: ${{ env.STAGE == 'dev' && 'main' || env.STAGE }}
 
     # 5. CDK Synth - Validate infrastructure code
     - name: CDK Synth
@@ -263,13 +263,15 @@ jobs:
           -c stage=${{ env.STAGE }} || true
 
     # 12. Deploy OIDC stack (one-time)
-    - name: Deploy GitHub OIDC Stack
-      if: github.ref == 'refs/heads/main' && github.event_name != 'pull_request'
-      working-directory: services/infra-cdk
-      run: |
-        pnpm cdk deploy MCR-GitHubOIDC-cdk \
-          --require-approval never \
-          --ci
+    # COMMENTED OUT: Using existing serverless OIDC setup instead of CDK's GitHubOidcStack
+    # to avoid duplicate OIDC providers (only one allowed per AWS account)
+    # - name: Deploy GitHub OIDC Stack
+    #   if: github.ref == 'refs/heads/main' && github.event_name != 'pull_request'
+    #   working-directory: services/infra-cdk
+    #   run: |
+    #     pnpm cdk deploy MCR-GitHubOIDC-cdk \
+    #       --require-approval never \
+    #       --ci
 
     # 13. Deploy Lambda layers
     - name: Deploy Lambda Layers

@@ -5,6 +5,11 @@ import * as iam from 'aws-cdk-lib/aws-iam';
 /**
  * Stack for setting up GitHub Actions OIDC authentication
  * This is a one-time setup per AWS account
+ * 
+ * NOTE: This stack is currently DISABLED in favor of using the existing
+ * serverless OIDC setup at services/github-oidc/serverless.yml
+ * to avoid creating duplicate OIDC providers (only one allowed per AWS account).
+ * The CDK deployments use the serverless OIDC role via the get_aws_credentials GitHub Action.
  */
 export class GitHubOidcStack extends Stack {
   public readonly deployRole: iam.Role;
