@@ -74,6 +74,7 @@ jobs:
       with:
         node-version: ${{ env.NODE_VERSION }}
         cache: 'pnpm'
+        cache-dependency-path: services/infra-cdk/pnpm-lock.yaml
 
     - name: Configure pnpm and git for HTTPS
       run: |
@@ -93,13 +94,13 @@ jobs:
         path: |
           ${{ steps.pnpm-cache.outputs.STORE_PATH }}
           ~/.cache/prisma
-        key: ${{ runner.os }}-pnpm-${{ hashFiles('**/pnpm-lock.yaml') }}
+        key: ${{ runner.os }}-pnpm-cdk-${{ hashFiles('services/infra-cdk/pnpm-lock.yaml') }}
         restore-keys: |
-          ${{ runner.os }}-pnpm-
+          ${{ runner.os }}-pnpm-cdk-
 
     # 3. Install and build
-    - name: Install dependencies
-      run: pnpm install --frozen-lockfile
+    - name: Install dependencies for code generation
+      run: pnpm install --frozen-lockfile --filter "./packages/**" --filter "./services/app-graphql" --filter "./services/app-proto" --filter "./services/app-api"
 
     - name: Generate code (GraphQL, Prisma, Proto)
       run: pnpm -r generate
@@ -107,29 +108,32 @@ jobs:
     - name: Build packages
       run: pnpm build:packages
 
-    # 4. CDK Synth - Validate infrastructure code
-    - name: CDK Synth
+    - name: Install CDK dependencies
       working-directory: services/infra-cdk
-      run: |
-        echo "Running CDK synth to validate infrastructure..."
-        pnpm install --frozen-lockfile
-        pnpm cdk synth --all --context stage=${{ env.STAGE }} > cdk-synth-output.yaml
+      run: pnpm install --frozen-lockfile
 
-    # 5. Store CDK Synth Artifacts
-    - name: Store CDK Synth Artifacts
-      uses: actions/upload-artifact@v4
-      with:
-        name: cdk-synth-output-${{ env.STAGE }}
-        path: services/infra-cdk/cdk-synth-output.yaml
-        retention-days: 5
-
-    # 6. Configure AWS credentials via OIDC
+    # 4. Configure AWS credentials via OIDC
     - name: Configure AWS credentials
       uses: ./.github/actions/get_aws_credentials
       with:
         region: ${{ env.AWS_REGION }}
         account-id: ${{ secrets.AWS_ACCOUNT_ID }}
         stage-name: ${{ env.STAGE }}
+
+    # 5. CDK Synth - Validate infrastructure code
+    - name: CDK Synth
+      working-directory: services/infra-cdk
+      run: |
+        echo "Running CDK synth to validate infrastructure..."
+        pnpm cdk synth --all --context stage=${{ env.STAGE }} > cdk-synth-output.yaml
+
+    # 6. Store CDK Synth Artifacts
+    - name: Store CDK Synth Artifacts
+      uses: actions/upload-artifact@v4
+      with:
+        name: cdk-synth-output-${{ env.STAGE }}
+        path: services/infra-cdk/cdk-synth-output.yaml
+        retention-days: 5
 
     # 7. CDK Diff - Check infrastructure changes
     - name: CDK Diff
