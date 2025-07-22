@@ -5,6 +5,7 @@ import {
     unlockTestHealthPlanPackage,
     updateTestHealthPlanFormData,
     updateTestStateAssignments,
+    executeGraphQLOperation,
 } from '../../testHelpers/gqlHelpers'
 import { SubmitContractDocument } from '../../gen/gqlClient'
 import { testS3Client } from '../../testHelpers'
@@ -1058,16 +1059,18 @@ describe('submitContract', () => {
 
     it('returns an error if a CMS user attempts to call submitContract', async () => {
         const stateServer = await constructTestPostgresServer()
+        const cmsUser = testCMSUser()
         const cmsServer = await constructTestPostgresServer({
             context: {
-                user: testCMSUser(),
+                user: cmsUser,
             },
             s3Client: mockS3,
         })
 
         const contract = await createSubmitAndUnlockTestContract(
             stateServer,
-            cmsServer
+            cmsServer,
+            cmsUser
         )
 
         const input = {
@@ -1075,10 +1078,16 @@ describe('submitContract', () => {
             submittedReason: 'Test cms user calling state user func',
         }
 
-        const res = await cmsServer.executeOperation({
+        const response = await cmsServer.executeOperation({
             query: SubmitContractDocument,
             variables: { input },
+        }, {
+            contextValue: {
+                user: cmsUser,
+            },
         })
+        
+        const res = response.body.kind === 'single' ? response.body.singleResult : response
 
         expect(res.errors).toBeDefined()
         expect(res.errors && res.errors[0].message).toBe(
@@ -1114,14 +1123,20 @@ describe('submitContract', () => {
             }
         )
 
-        const res = await stateServer.executeOperation({
+        const response = await stateServer.executeOperation({
             query: SubmitContractDocument,
             variables: {
                 input: {
                     contractID: contract.id,
                 },
             },
+        }, {
+            contextValue: {
+                user: testStateUser(),
+            },
         })
+        
+        const res = response.body.kind === 'single' ? response.body.singleResult : response
 
         expect(res.errors).toBeDefined()
     })
@@ -1132,14 +1147,20 @@ describe('submitContract', () => {
         })
 
         const draft = await createAndUpdateTestContractWithoutRates(stateServer)
-        const res = await stateServer.executeOperation({
+        const response = await stateServer.executeOperation({
             query: SubmitContractDocument,
             variables: {
                 input: {
                     contractID: draft.id,
                 },
             },
+        }, {
+            contextValue: {
+                user: testStateUser(),
+            },
         })
+        
+        const res = response.body.kind === 'single' ? response.body.singleResult : response
 
         expect(res.errors).toBeDefined()
         expect(res.errors).toEqual([
@@ -1175,11 +1196,6 @@ describe('submitContract', () => {
             const server = await constructTestPostgresServer({
                 emailer: mockEmailer,
             })
-            const cmsServer = await constructTestPostgresServer({
-                context: {
-                    user: testCMSUser(),
-                },
-            })
 
             const assignedUsers = [
                 testCMSUser({
@@ -1195,7 +1211,7 @@ describe('submitContract', () => {
             const assignedUserIDs = assignedUsers.map((u) => u.id)
             const stateAnalystsEmails = assignedUsers.map((u) => u.email)
             await createDBUsersWithFullData(assignedUsers)
-            await updateTestStateAssignments(cmsServer, 'FL', assignedUserIDs)
+            await updateTestStateAssignments(server, 'FL', assignedUserIDs)
 
             const submitResult =
                 await createAndSubmitTestContractWithRate(server)
@@ -1356,14 +1372,18 @@ describe('submitContract', () => {
             )
             const draftID = draft.id
 
-            await server.executeOperation({
+            await (server.executeOperation({
                 query: SubmitContractDocument,
                 variables: {
                     input: {
                         contractID: draftID,
                     },
                 },
-            })
+            }, {
+                contextValue: {
+                    user: testStateUser(),
+                },
+            }) as Promise<{ errors?: any; data?: any }>)
 
             expect(mockEmailer.sendEmail).toHaveBeenCalledWith(
                 expect.objectContaining({
@@ -1421,13 +1441,14 @@ describe('submitContract', () => {
             const draft = await createAndUpdateTestContractWithRate(server)
             const draftID = draft.id
 
-            const submitResult = await server.executeOperation({
+            const submitResult = await executeGraphQLOperation(server, {
                 query: SubmitContractDocument,
                 variables: {
                     input: {
                         contractID: draftID,
                     },
                 },
+                contextValue: { user: testStateUser() },
             })
 
             expect(submitResult.errors).toBeUndefined()
@@ -1470,7 +1491,7 @@ describe('submitContract', () => {
                 'Test unlock reason.'
             )
 
-            const submitResult = await stateServer.executeOperation({
+            const submitResponse = await stateServer.executeOperation({
                 query: SubmitContractDocument,
                 variables: {
                     input: {
@@ -1478,7 +1499,13 @@ describe('submitContract', () => {
                         submittedReason: 'Test resubmitted reason',
                     },
                 },
+            }, {
+                contextValue: {
+                    user: testStateUser(),
+                },
             })
+            
+            const submitResult = submitResponse.body.kind === 'single' ? submitResponse.body.singleResult : submitResponse
 
             const currentRevision =
                 submitResult?.data?.submitContract?.contract
@@ -1573,13 +1600,14 @@ describe('submitContract', () => {
             // Invalid contract ID
             const draftID = '123'
 
-            const submitResult = await server.executeOperation({
+            const submitResult = await executeGraphQLOperation(server, {
                 query: SubmitContractDocument,
                 variables: {
                     input: {
                         contractID: draftID,
                     },
                 },
+                contextValue: { user: testStateUser() },
             })
 
             expect(submitResult.errors).toBeDefined()
@@ -1688,13 +1716,14 @@ describe('submitContract', () => {
             await new Promise((resolve) => setTimeout(resolve, 2000))
 
             // submit
-            const submitResult = await server.executeOperation({
+            const submitResult = await executeGraphQLOperation(server, {
                 query: SubmitContractDocument,
                 variables: {
                     input: {
                         contractID: initialContract.id,
                     },
                 },
+                contextValue: { user: testStateUser() },
             })
 
             expect(submitResult.errors).toBeDefined()
@@ -1716,13 +1745,14 @@ describe('submitContract', () => {
             await new Promise((resolve) => setTimeout(resolve, 2000))
 
             // submit
-            const submitResult = await server.executeOperation({
+            const submitResult = await executeGraphQLOperation(server, {
                 query: SubmitContractDocument,
                 variables: {
                     input: {
                         contractID: initialContract.id,
                     },
                 },
+                contextValue: { user: testStateUser() },
             })
 
             expect(submitResult.errors).toBeDefined()
@@ -1748,13 +1778,14 @@ describe('submitContract', () => {
             await new Promise((resolve) => setTimeout(resolve, 2000))
 
             // submit
-            const submitResult = await server.executeOperation({
+            const submitResult = await executeGraphQLOperation(server, {
                 query: SubmitContractDocument,
                 variables: {
                     input: {
                         contractID: initialContract.id,
                     },
                 },
+                contextValue: { user: testStateUser() },
             })
 
             expect(submitResult.errors).toBeUndefined()

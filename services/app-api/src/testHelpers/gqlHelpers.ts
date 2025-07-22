@@ -1,4 +1,4 @@
-import { ApolloServer } from 'apollo-server-lambda'
+import { ApolloServer } from '@apollo/server'
 import {
     CreateHealthPlanPackageDocument,
     SubmitHealthPlanPackageDocument,
@@ -23,6 +23,7 @@ import type {
     ProgramType,
     CreateRateQuestionInputType,
     EmailSettingsType,
+    UserType,
 } from '../domain-models'
 import type { EmailConfiguration, Emailer } from '../emailer'
 import type {
@@ -56,7 +57,6 @@ import type { S3ClientT } from '../s3'
 import { convertRateInfoToRateFormDataInput } from '../domain-models/contractAndRates/convertHPPtoContractWithRates'
 import { createAndUpdateTestContractWithoutRates } from './gqlContractHelpers'
 import { addNewRateToTestContract } from './gqlRateHelpers'
-import type { GraphQLResponse } from 'apollo-server-types'
 import { configureEmailer } from '../handlers/configuration'
 import type { DocumentZipService } from '../zip/generateZip'
 import {
@@ -84,10 +84,25 @@ function defaultFloridaRateProgram(): ProgramType {
     return rateProgram
 }
 
+// Store the default user instance to ensure consistency across operations
+let defaultTestUser: UserType | null = null
+
+const getOrCreateDefaultUser = (): UserType => {
+    if (!defaultTestUser) {
+        defaultTestUser = testStateUser()
+    }
+    return defaultTestUser
+}
+
 const defaultContext = (): Context => {
     return {
-        user: testStateUser(),
+        user: getOrCreateDefaultUser(),
     }
+}
+
+// Reset function for tests to ensure clean state
+export const resetDefaultTestUser = (): void => {
+    defaultTestUser = null
 }
 
 const constructTestPostgresServer = async (opts?: {
@@ -101,7 +116,7 @@ const constructTestPostgresServer = async (opts?: {
     documentZip?: DocumentZipService
 }): Promise<ApolloServer> => {
     // set defaults
-    const context = opts?.context || defaultContext()
+    const userForInsertion = opts?.context?.user || getOrCreateDefaultUser()
     const ldService = opts?.ldService || testLDService()
     const prismaClient = await sharedTestPrismaClient()
     const postgresStore = {
@@ -120,7 +135,7 @@ const constructTestPostgresServer = async (opts?: {
         opts?.documentZip ??
         documentZipService(postgresStore, localGenerateDocumentZip)
 
-    await insertUserToLocalAurora(postgresStore, context.user)
+    await insertUserToLocalAurora(postgresStore, userForInsertion)
     const s3TestClient = testS3Client()
     const s3 = opts?.s3Client || s3TestClient
 
@@ -160,11 +175,15 @@ const constructTestPostgresServer = async (opts?: {
         localDocumentZip
     )
 
-    return new ApolloServer({
+    const server = new ApolloServer({
         typeDefs,
         resolvers: postgresResolvers,
-        context,
     })
+    
+    // Apollo v4 requires starting the server before executing operations
+    await server.start()
+    
+    return server
 }
 
 const constructTestEmailer = async (opts: {
@@ -257,13 +276,24 @@ const createTestHealthPlanPackage = async (
         submissionDescription: 'A created submission',
         contractType: 'BASE',
     }
-    const result = await server.executeOperation({
+    const response = await server.executeOperation({
         query: CreateHealthPlanPackageDocument,
         variables: { input },
+    }, {
+        contextValue: defaultContext(),
     })
+    
+    // Handle Apollo v4 response structure
+    let result: any
+    if ('body' in response && response.body) {
+        result = response.body.kind === 'single' ? response.body.singleResult : response.body
+    } else {
+        result = response
+    }
+    
     if (result.errors) {
         throw new Error(
-            `createTestHealthPlanPackage mutation failed with errors ${result.errors}`
+            `createTestHealthPlanPackage mutation failed with errors ${JSON.stringify(result.errors)}`
         )
     }
 
@@ -279,7 +309,7 @@ const updateTestHealthPlanFormData = async (
     updatedFormData: HealthPlanFormDataType
 ): Promise<HealthPlanPackage> => {
     const updatedB64 = domainToBase64(updatedFormData)
-    const updateResult = await server.executeOperation({
+    const response = await server.executeOperation({
         query: UpdateHealthPlanFormDataDocument,
         variables: {
             input: {
@@ -287,11 +317,22 @@ const updateTestHealthPlanFormData = async (
                 healthPlanFormData: updatedB64,
             },
         },
+    }, {
+        contextValue: defaultContext(),
     })
+    
+    // Handle Apollo v4 response structure
+    let updateResult: any
+    if ('body' in response && response.body) {
+        updateResult = response.body.kind === 'single' ? response.body.singleResult : response.body
+    } else {
+        updateResult = response
+    }
+    
     if (updateResult.errors) {
         console.info('errors', JSON.stringify(updateResult.errors))
         throw new Error(
-            `updateTestHealthPlanFormData mutation failed with errors ${updateResult.errors}`
+            `updateTestHealthPlanFormData mutation failed with errors ${JSON.stringify(updateResult.errors)}`
         )
     }
 
@@ -311,7 +352,7 @@ const updateTestHealthPlanPackage = async (
 
     Object.assign(draft, partialUpdates)
 
-    const updateResult = await server.executeOperation({
+    const response = await server.executeOperation({
         query: UpdateHealthPlanFormDataDocument,
         variables: {
             input: {
@@ -319,11 +360,22 @@ const updateTestHealthPlanPackage = async (
                 healthPlanFormData: domainToBase64(draft),
             },
         },
+    }, {
+        contextValue: defaultContext(),
     })
+    
+    // Handle Apollo v4 response structure
+    let updateResult: any
+    if ('body' in response && response.body) {
+        updateResult = response.body.kind === 'single' ? response.body.singleResult : response.body
+    } else {
+        updateResult = response
+    }
+    
     if (updateResult.errors) {
         console.info('errors', JSON.stringify(updateResult.errors))
         throw new Error(
-            `updateTestHealthPlanFormData mutation failed with errors ${updateResult.errors}`
+            `updateTestHealthPlanFormData mutation failed with errors ${JSON.stringify(updateResult.errors)}`
         )
     }
 
@@ -412,23 +464,36 @@ const submitTestHealthPlanPackage = async (
     server: ApolloServer,
     pkgID: string
 ) => {
-    const updateResult = await server.executeOperation({
+    const response = await server.executeOperation({
         query: SubmitHealthPlanPackageDocument,
         variables: {
             input: {
                 pkgID,
             },
         },
+    }, {
+        contextValue: defaultContext(),
     })
+    
+    // Handle Apollo v4 response structure
+    let updateResult: any
+    if ('body' in response && response.body) {
+        updateResult = response.body.kind === 'single' ? response.body.singleResult : response.body
+    } else {
+        updateResult = response
+    }
 
     if (updateResult.errors) {
         console.info('errors', updateResult.errors)
         throw new Error(
-            `submitTestHealthPlanPackage mutation failed with errors ${updateResult.errors}`
+            `submitTestHealthPlanPackage mutation failed with errors ${JSON.stringify(updateResult.errors)}`
         )
     }
 
-    if (updateResult.data === undefined || updateResult.data === null) {
+    if (
+        updateResult.data === undefined ||
+        updateResult.data === null
+    ) {
         throw new Error('submitTestHealthPlanPackage returned nothing')
     }
 
@@ -440,7 +505,7 @@ const resubmitTestHealthPlanPackage = async (
     pkgID: string,
     submittedReason: string
 ) => {
-    const updateResult = await server.executeOperation({
+    const response = await server.executeOperation({
         query: SubmitHealthPlanPackageDocument,
         variables: {
             input: {
@@ -448,16 +513,29 @@ const resubmitTestHealthPlanPackage = async (
                 submittedReason,
             },
         },
+    }, {
+        contextValue: defaultContext(),
     })
+    
+    // Handle Apollo v4 response structure
+    let updateResult: any
+    if ('body' in response && response.body) {
+        updateResult = response.body.kind === 'single' ? response.body.singleResult : response.body
+    } else {
+        updateResult = response
+    }
 
     if (updateResult.errors) {
         console.info('errors', updateResult.errors)
         throw new Error(
-            `resubmitTestHealthPlanPackage mutation failed with errors ${updateResult.errors}`
+            `resubmitTestHealthPlanPackage mutation failed with errors ${JSON.stringify(updateResult.errors)}`
         )
     }
 
-    if (updateResult.data === undefined || updateResult.data === null) {
+    if (
+        updateResult.data === undefined ||
+        updateResult.data === null
+    ) {
         throw new Error('resubmitTestHealthPlanPackage returned nothing')
     }
 
@@ -469,7 +547,7 @@ const unlockTestHealthPlanPackage = async (
     pkgID: string,
     unlockedReason: string
 ): Promise<HealthPlanPackage> => {
-    const updateResult = await server.executeOperation({
+    const response = await server.executeOperation({
         query: UnlockHealthPlanPackageDocument,
         variables: {
             input: {
@@ -477,16 +555,72 @@ const unlockTestHealthPlanPackage = async (
                 unlockedReason,
             },
         },
+    }, {
+        contextValue: defaultContext(),
     })
+    
+    // Handle Apollo v4 response structure
+    let updateResult: any
+    if ('body' in response && response.body) {
+        updateResult = response.body.kind === 'single' ? response.body.singleResult : response.body
+    } else {
+        updateResult = response
+    }
 
     if (updateResult.errors) {
         console.info('errors', updateResult.errors)
         throw new Error(
-            `unlockTestHealthPlanPackage mutation failed with errors ${updateResult.errors}`
+            `unlockTestHealthPlanPackage mutation failed with errors ${JSON.stringify(updateResult.errors)}`
         )
     }
 
-    if (updateResult.data === undefined || updateResult.data === null) {
+    if (
+        updateResult.data === undefined ||
+        updateResult.data === null
+    ) {
+        throw new Error('unlockTestHealthPlanPackage returned nothing')
+    }
+
+    return updateResult.data.unlockHealthPlanPackage.pkg
+}
+
+const unlockTestHealthPlanPackageAsUser = async (
+    server: ApolloServer,
+    pkgID: string,
+    unlockedReason: string,
+    user: UserType
+): Promise<HealthPlanPackage> => {
+    const response = await server.executeOperation({
+        query: UnlockHealthPlanPackageDocument,
+        variables: {
+            input: {
+                pkgID: pkgID,
+                unlockedReason,
+            },
+        },
+    }, {
+        contextValue: { user },
+    })
+    
+    // Handle Apollo v4 response structure
+    let updateResult: any
+    if ('body' in response && response.body) {
+        updateResult = response.body.kind === 'single' ? response.body.singleResult : response.body
+    } else {
+        updateResult = response
+    }
+
+    if (updateResult.errors) {
+        console.info('errors', updateResult.errors)
+        throw new Error(
+            `unlockTestHealthPlanPackage mutation failed with errors ${JSON.stringify(updateResult.errors)}`
+        )
+    }
+
+    if (
+        updateResult.data === undefined ||
+        updateResult.data === null
+    ) {
         throw new Error('unlockTestHealthPlanPackage returned nothing')
     }
 
@@ -498,14 +632,24 @@ const fetchTestHealthPlanPackageById = async (
     pkgID: string
 ): Promise<HealthPlanPackage> => {
     const input = { pkgID }
-    const result = await server.executeOperation({
+    const response = await server.executeOperation({
         query: FetchHealthPlanPackageDocument,
         variables: { input },
+    }, {
+        contextValue: defaultContext(),
     })
+    
+    // Handle Apollo v4 response structure
+    let result: any
+    if ('body' in response && response.body) {
+        result = response.body.kind === 'single' ? response.body.singleResult : response.body
+    } else {
+        result = response
+    }
 
     if (result.errors)
         throw new Error(
-            `fetchTestHealthPlanPackageById query failed with errors ${result.errors}`
+            `fetchTestHealthPlanPackageById query failed with errors ${JSON.stringify(result.errors)}`
         )
 
     if (!result.data) {
@@ -528,7 +672,7 @@ const createTestQuestion = async (
             },
         ],
     }
-    const createdQuestion = await server.executeOperation({
+    const response = await server.executeOperation({
         query: CreateContractQuestionDocument,
         variables: {
             input: {
@@ -536,11 +680,67 @@ const createTestQuestion = async (
                 ...question,
             },
         },
+    }, {
+        contextValue: defaultContext(),
     })
+    
+    // Handle Apollo v4 response structure
+    let createdQuestion: any
+    if ('body' in response && response.body) {
+        createdQuestion = response.body.kind === 'single' ? response.body.singleResult : response.body
+    } else {
+        createdQuestion = response
+    }
 
     if (createdQuestion.errors)
         throw new Error(
-            `createTestQuestion mutation failed with errors ${createdQuestion.errors}`
+            `createTestQuestion mutation failed with errors ${JSON.stringify(createdQuestion.errors)}`
+        )
+
+    if (!createdQuestion.data) {
+        throw new Error('createTestQuestion returned nothing')
+    }
+
+    return createdQuestion.data.createContractQuestion
+}
+
+const createTestQuestionAsUser = async (
+    server: ApolloServer,
+    contractID: string,
+    user: UserType,
+    questionData?: Omit<CreateContractQuestionInput, 'contractID'>
+): Promise<CreateContractQuestionPayload> => {
+    const question = questionData || {
+        documents: [
+            {
+                name: 'Test Question',
+                s3URL: 's3://bucketname/key/test1',
+            },
+        ],
+    }
+    const response = await server.executeOperation({
+        query: CreateContractQuestionDocument,
+        variables: {
+            input: {
+                contractID,
+                ...question,
+            },
+        },
+    }, {
+        contextValue: { user },
+    })
+    
+    // Handle Apollo v4 response structure
+    let createdQuestion: any
+    if ('body' in response && response.body) {
+        createdQuestion = response.body.kind === 'single' ? response.body.singleResult : response.body
+    } else {
+        createdQuestion = response
+    }
+
+    if (createdQuestion.errors)
+        throw new Error(
+            `createTestQuestion mutation failed with errors ${JSON.stringify(createdQuestion.errors)}`
         )
 
     if (!createdQuestion.data) {
@@ -554,7 +754,7 @@ const createTestRateQuestion = async (
     server: ApolloServer,
     rateID: string,
     questionData?: Omit<CreateRateQuestionInputType, 'rateID'>
-): Promise<GraphQLResponse> => {
+) => {
     const question = questionData || {
         documents: [
             {
@@ -563,7 +763,7 @@ const createTestRateQuestion = async (
             },
         ],
     }
-    return await server.executeOperation({
+    const response = await server.executeOperation({
         query: CreateRateQuestionDocument,
         variables: {
             input: {
@@ -571,14 +771,23 @@ const createTestRateQuestion = async (
                 ...question,
             },
         },
+    }, {
+        contextValue: defaultContext(),
     })
+    
+    // Handle Apollo v4 response structure
+    if ('body' in response && response.body) {
+        return response.body.kind === 'single' ? response.body.singleResult : response.body
+    } else {
+        return response
+    }
 }
 
 const createTestRateQuestionResponse = async (
     server: ApolloServer,
     questionID: string,
     responseData?: Omit<InsertQuestionResponseArgs, 'questionID'>
-): Promise<GraphQLResponse> => {
+) => {
     const response = responseData || {
         documents: [
             {
@@ -588,7 +797,7 @@ const createTestRateQuestionResponse = async (
         ],
     }
 
-    return await server.executeOperation({
+    const result = await server.executeOperation({
         query: CreateRateQuestionResponseDocument,
         variables: {
             input: {
@@ -596,7 +805,16 @@ const createTestRateQuestionResponse = async (
                 questionID,
             },
         },
+    }, {
+        contextValue: defaultContext(),
     })
+    
+    // Handle Apollo v4 response structure
+    if ('body' in result && result.body) {
+        return result.body.kind === 'single' ? result.body.singleResult : result.body
+    } else {
+        return result
+    }
 }
 
 const createTestQuestionResponse = async (
@@ -612,7 +830,7 @@ const createTestQuestionResponse = async (
             },
         ],
     }
-    const createdResponse = await server.executeOperation({
+    const result = await server.executeOperation({
         query: CreateContractQuestionResponseDocument,
         variables: {
             input: {
@@ -620,11 +838,21 @@ const createTestQuestionResponse = async (
                 questionID,
             },
         },
+    }, {
+        contextValue: defaultContext(),
     })
+    
+    // Handle Apollo v4 response structure
+    let createdResponse: any
+    if ('body' in result && result.body) {
+        createdResponse = result.body.kind === 'single' ? result.body.singleResult : result.body
+    } else {
+        createdResponse = result
+    }
 
     if (createdResponse.errors)
         throw new Error(
-            `createTestQuestionResponse mutation failed with errors ${createdResponse.errors}`
+            `createTestQuestionResponse mutation failed with errors ${JSON.stringify(createdResponse.errors)}`
         )
 
     if (!createdResponse.data) {
@@ -639,7 +867,7 @@ const updateTestStateAssignments = async (
     stateCode: string,
     assignedUserIDs: string[]
 ): Promise<UpdateStateAssignmentsByStatePayload> => {
-    const updatedAssignments = await server.executeOperation({
+    const response = await server.executeOperation({
         query: UpdateStateAssignmentsByStateDocument,
         variables: {
             input: {
@@ -647,11 +875,21 @@ const updateTestStateAssignments = async (
                 assignedUsers: assignedUserIDs,
             },
         },
+    }, {
+        contextValue: defaultContext(),
     })
+    
+    // Handle Apollo v4 response structure
+    let updatedAssignments: any
+    if ('body' in response && response.body) {
+        updatedAssignments = response.body.kind === 'single' ? response.body.singleResult : response.body
+    } else {
+        updatedAssignments = response
+    }
 
     if (updatedAssignments.errors)
         throw new Error(
-            `updateStateAssignmentsByState mutation failed with errors ${updatedAssignments.errors}`
+            `updateStateAssignmentsByState mutation failed with errors ${JSON.stringify(updatedAssignments.errors)}`
         )
 
     if (!updatedAssignments.data) {
@@ -660,6 +898,9 @@ const updateTestStateAssignments = async (
 
     return updatedAssignments.data.updateStateAssignmentsByState
 }
+
+// Re-export Apollo v4 response helpers
+export { extractGraphQLResponse, executeGraphQLOperation } from './apolloV4ResponseHelper'
 
 export {
     constructTestPostgresServer,
@@ -670,11 +911,13 @@ export {
     fetchTestHealthPlanPackageById,
     submitTestHealthPlanPackage,
     unlockTestHealthPlanPackage,
+    unlockTestHealthPlanPackageAsUser,
     resubmitTestHealthPlanPackage,
     defaultContext,
     defaultFloridaProgram,
     defaultFloridaRateProgram,
     createTestQuestion,
+    createTestQuestionAsUser,
     createTestQuestionResponse,
     updateTestHealthPlanPackage,
     updateTestStateAssignments,

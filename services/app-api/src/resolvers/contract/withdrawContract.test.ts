@@ -201,6 +201,10 @@ describe('withdrawContract', () => {
                         ],
                     },
                 },
+            }, {
+                contextValue: {
+                    user: testStateUser(),
+                },
             })
         )
 
@@ -250,6 +254,10 @@ describe('withdrawContract', () => {
                         ],
                     },
                 },
+            }, {
+                contextValue: {
+                    user: testStateUser(),
+                },
             })
         )
 
@@ -279,6 +287,10 @@ describe('withdrawContract', () => {
                             },
                         ],
                     },
+                },
+            }, {
+                contextValue: {
+                    user: testStateUser(),
                 },
             })
         )
@@ -389,6 +401,10 @@ describe('withdrawContract', () => {
                         ],
                     },
                 },
+            }, {
+                contextValue: {
+                    user: testStateUser(),
+                },
             })
         )
 
@@ -441,6 +457,10 @@ describe('withdrawContract', () => {
                             },
                         ],
                     },
+                },
+            }, {
+                contextValue: {
+                    user: testStateUser(),
                 },
             })
         )
@@ -541,6 +561,10 @@ describe('withdrawContract', () => {
                         ],
                     },
                 },
+            }, {
+                contextValue: {
+                    user: testStateUser(),
+                },
             })
         )
 
@@ -580,6 +604,10 @@ describe('withdrawContract', () => {
                         ],
                     },
                 },
+            }, {
+                contextValue: {
+                    user: testStateUser(),
+                },
             })
         )
 
@@ -609,6 +637,10 @@ describe('withdrawContract', () => {
                             },
                         ],
                     },
+                },
+            }, {
+                contextValue: {
+                    user: testStateUser(),
                 },
             })
         )
@@ -640,6 +672,10 @@ describe('withdrawContract', () => {
                             },
                         ],
                     },
+                },
+            }, {
+                contextValue: {
+                    user: testStateUser(),
                 },
             })
         )
@@ -705,6 +741,10 @@ describe('withdrawContract', () => {
                         ],
                     },
                 },
+            }, {
+                contextValue: {
+                    user: testStateUser(),
+                },
             })
         )
 
@@ -744,6 +784,10 @@ describe('withdrawContract', () => {
                         ],
                     },
                 },
+            }, {
+                contextValue: {
+                    user: testStateUser(),
+                },
             })
         )
 
@@ -778,6 +822,10 @@ describe('withdrawContract', () => {
                             },
                         ],
                     },
+                },
+            }, {
+                contextValue: {
+                    user: testStateUser(),
                 },
             })
         )
@@ -854,6 +902,10 @@ describe('withdrawContract', () => {
                             },
                         ],
                     },
+                },
+            }, {
+                contextValue: {
+                    user: testStateUser(),
                 },
             })
         )
@@ -941,6 +993,10 @@ describe('withdrawContract', () => {
                         ],
                     },
                 },
+            }, {
+                contextValue: {
+                    user: testStateUser(),
+                },
             })
         )
 
@@ -964,6 +1020,10 @@ describe('withdrawContract', () => {
                     contractID: draftContractB.id,
                     submittedReason: 'Trying to submit with a withdrawn rate',
                 },
+            },
+        }, {
+            contextValue: {
+                user: testStateUser(),
             },
         })
 

@@ -57,14 +57,26 @@ describe('fetchContract', () => {
         const stateSubmission =
             await createAndUpdateTestHealthPlanPackage(stateServer)
 
-        const fetchDraftContractResult = await stateServer.executeOperation({
+        const response = await stateServer.executeOperation({
             query: FetchContractDocument,
             variables: {
                 input: {
                     contractID: stateSubmission.id,
                 },
             },
+        }, {
+            contextValue: {
+                user: testStateUser(),
+            },
         })
+        
+        // Handle Apollo v4 response structure
+        let fetchDraftContractResult: any
+        if ('body' in response && response.body) {
+            fetchDraftContractResult = response.body.kind === 'single' ? response.body.singleResult : response.body
+        } else {
+            fetchDraftContractResult = response
+        }
 
         expect(fetchDraftContractResult.errors).toBeUndefined()
 
@@ -309,23 +321,36 @@ describe('fetchContract', () => {
         const stateSubmission =
             await createAndUpdateTestHealthPlanPackage(stateServerFL)
 
+        const stateUserVA = testStateUser({
+            stateCode: 'VA',
+            email: 'aang@mn.gov',
+        })
         const stateServerVA = await constructTestPostgresServer({
             context: {
-                user: testStateUser({
-                    stateCode: 'VA',
-                    email: 'aang@mn.gov',
-                }),
+                user: stateUserVA,
             },
         })
 
-        const fetchResult = await stateServerVA.executeOperation({
+        const response = await stateServerVA.executeOperation({
             query: FetchContractDocument,
             variables: {
                 input: {
                     contractID: stateSubmission.id,
                 },
             },
+        }, {
+            contextValue: {
+                user: stateUserVA,
+            },
         })
+        
+        // Handle Apollo v4 response structure
+        let fetchResult: any
+        if ('body' in response && response.body) {
+            fetchResult = response.body.kind === 'single' ? response.body.singleResult : response.body
+        } else {
+            fetchResult = response
+        }
 
         expect(fetchResult.errors).toBeDefined()
         if (fetchResult.errors === undefined) {
@@ -360,14 +385,31 @@ describe('fetchContract', () => {
             s3Client: mockS3,
         })
 
-        const fetchResult = await oauthServer.executeOperation({
+        const response = await oauthServer.executeOperation({
             query: FetchContractDocument,
             variables: {
                 input: {
                     contractID: stateSubmission.id,
                 },
             },
+        }, {
+            contextValue: {
+                user: testStateUser(),
+                oauthClient: {
+                    clientId: 'test-oauth-client',
+                    grants: ['client_credentials'],
+                    isOAuthClient: true,
+                },
+            },
         })
+        
+        // Handle Apollo v4 response structure
+        let fetchResult: any
+        if ('body' in response && response.body) {
+            fetchResult = response.body.kind === 'single' ? response.body.singleResult : response.body
+        } else {
+            fetchResult = response
+        }
 
         expect(fetchResult.errors).toBeUndefined()
         expect(fetchResult.data?.fetchContract.contract).toBeDefined()
@@ -401,14 +443,34 @@ describe('fetchContract', () => {
             s3Client: mockS3,
         })
 
-        const fetchResult = await oauthServerVA.executeOperation({
+        const response = await oauthServerVA.executeOperation({
             query: FetchContractDocument,
             variables: {
                 input: {
                     contractID: stateSubmission.id,
                 },
             },
+        }, {
+            contextValue: {
+                user: testStateUser({
+                    stateCode: 'VA',
+                    email: 'oauth@va.gov',
+                }),
+                oauthClient: {
+                    clientId: 'test-oauth-client-va',
+                    grants: ['client_credentials'],
+                    isOAuthClient: true,
+                },
+            },
         })
+        
+        // Handle Apollo v4 response structure
+        let fetchResult: any
+        if ('body' in response && response.body) {
+            fetchResult = response.body.kind === 'single' ? response.body.singleResult : response.body
+        } else {
+            fetchResult = response
+        }
 
         expect(fetchResult.errors).toBeDefined()
         if (fetchResult.errors === undefined) {
@@ -443,14 +505,31 @@ describe('fetchContract', () => {
             s3Client: mockS3,
         })
 
-        const fetchResult = await oauthServer.executeOperation({
+        const response = await oauthServer.executeOperation({
             query: FetchContractDocument,
             variables: {
                 input: {
                     contractID: stateSubmission.id,
                 },
             },
+        }, {
+            contextValue: {
+                user: testStateUser(),
+                oauthClient: {
+                    clientId: 'test-oauth-client',
+                    grants: ['some_other_grant'],
+                    isOAuthClient: true,
+                },
+            },
         })
+        
+        // Handle Apollo v4 response structure
+        let fetchResult: any
+        if ('body' in response && response.body) {
+            fetchResult = response.body.kind === 'single' ? response.body.singleResult : response.body
+        } else {
+            fetchResult = response
+        }
 
         expect(fetchResult.errors).toBeDefined()
         if (fetchResult.errors === undefined) {
