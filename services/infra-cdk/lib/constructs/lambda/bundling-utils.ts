@@ -45,6 +45,10 @@ export function getBundlingConfig(
       // Prisma layer (matches esbuild.config.js exclude)
       'prisma',
       '@prisma/client',
+      
+      // PostgreSQL client (provided by postgres-tools layer)
+      'pg',
+      'pg-native',
     ],
     esbuildArgs: {
       '--bundle': true,
