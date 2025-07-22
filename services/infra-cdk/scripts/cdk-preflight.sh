@@ -47,11 +47,11 @@ echo -e "${GREEN}✓ All critical packages are built${NC}"
 # Check 3: Verify Prisma client is generated
 echo -e "${YELLOW}Checking Prisma client...${NC}"
 if [ ! -d "$REPO_ROOT/services/app-api/node_modules/.prisma/client" ] && [ ! -d "$REPO_ROOT/node_modules/.prisma/client" ]; then
-    echo -e "${RED}ERROR: Prisma client not generated.${NC}"
-    echo -e "${YELLOW}Run 'pnpm -r generate' from the repository root first.${NC}"
-    exit 1
+    echo -e "${YELLOW}WARNING: Prisma client not generated.${NC}"
+    echo -e "${YELLOW}Run 'pnpm -r generate' from the repository root for functions that need Prisma.${NC}"
+else
+    echo -e "${GREEN}✓ Prisma client is generated${NC}"
 fi
-echo -e "${GREEN}✓ Prisma client is generated${NC}"
 
 # Check 4: Verify CDK dependencies are installed
 echo -e "${YELLOW}Checking CDK dependencies...${NC}"
