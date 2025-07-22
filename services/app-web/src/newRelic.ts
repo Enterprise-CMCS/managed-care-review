@@ -1,4 +1,4 @@
-/* eslint-disable no-useless-escape */
+ 
 type NewRelicScriptInput = {
     accountID: string,
     trustKey: string,

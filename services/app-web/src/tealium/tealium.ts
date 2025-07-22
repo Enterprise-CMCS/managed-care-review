@@ -58,7 +58,7 @@ const tealiumClient = (
             heading?: string | React.ReactElement
         ) => {
             const currentRoute = getRouteName(pathname)
-            // eslint-disable-next-line @typescript-eslint/no-empty-function
+             
             const utag = window.utag || { link: () => {}, view: () => {} }
             const tagData: TealiumInteractionEventDataObject =
                 removeNullAndUndefined({

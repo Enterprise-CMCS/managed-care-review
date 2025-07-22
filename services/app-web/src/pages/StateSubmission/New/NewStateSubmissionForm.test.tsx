@@ -60,7 +60,6 @@ describe('NewStateSubmissionForm', () => {
         expect(riskBasedContractFieldSet).toBeDefined()
 
         await userEvent.click(
-            // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
             within(riskBasedContractFieldSet!).getByLabelText('No')
         )
 

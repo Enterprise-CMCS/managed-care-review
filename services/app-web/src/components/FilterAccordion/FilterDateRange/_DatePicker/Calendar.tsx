@@ -358,7 +358,7 @@ export const Calendar = ({
     return (
         // Ignoring error: "Static HTML elements with event handlers require a role."
         // Ignoring because this element does not have a role in the USWDS implementation (https://github.com/uswds/uswds/blob/develop/src/js/components/date-picker.js#L1042)
-        // eslint-disable-next-line jsx-a11y/no-static-element-interactions
+
         <div
             tabIndex={-1}
             className="usa-date-picker__calendar__date-picker"

@@ -6,7 +6,6 @@ const mockSetValue = vi.fn()
 
 vi.mock('formik', () => {
     return {
-        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
         // @ts-ignore-next-line
         ...vi.importActual('formik'),
         useField: () => [

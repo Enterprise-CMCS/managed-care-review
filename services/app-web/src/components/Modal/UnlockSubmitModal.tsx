@@ -283,7 +283,6 @@ export const UnlockSubmitModal = ({
             modalAlert={modalAlert}
         >
             {includesFormInput ? (
-                // eslint-disable-next-line jsx-a11y/no-noninteractive-tabindex
                 <form tabIndex={0}>
                     {modalValues.modalDescription && (
                         <p>{modalValues.modalDescription}</p>

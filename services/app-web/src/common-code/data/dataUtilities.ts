@@ -31,15 +31,15 @@ type UnknownObjectWithNestedData<T> = T extends null
 function replaceNullsWithUndefineds<T extends object>(
     obj: T
 ):  UnknownObjectWithNestedData<T> {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+     
     const newObj: any = obj instanceof Array ? [] : {}
     Object.keys(obj).forEach((k) => {
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+         
         const v: any = (obj as any)[k]
         newObj[k as keyof T] =
             v === null
                 ? undefined
-                : // eslint-disable-next-line no-proto
+                :  
                   v &&
                     typeof v === 'object' && !(v instanceof Date)
                   ? replaceNullsWithUndefineds(v)

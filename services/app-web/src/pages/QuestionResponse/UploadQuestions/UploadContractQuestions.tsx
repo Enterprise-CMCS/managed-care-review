@@ -21,7 +21,7 @@ import { Error404 } from '../../Errors/Error404Page'
 
 export const UploadContractQuestions = () => {
     // router context
-    // eslint-disable-next-line @typescript-eslint/no-use-before-define
+
     const { updateHeading } = usePage()
     const { id, division } = useParams<{ division: string; id: string }>()
     const navigate = useNavigate()

@@ -91,7 +91,7 @@ describe('StateDashboard', () => {
 
         // set draft current revision to a far future updatedAt. Set unlocked to nearer future. This allows us to test sorting.
         const draft = mockContractPackageDraft()
-        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+
         draft.draftRevision!.updatedAt = new Date('2100-01-01')
         const submitted = mockContractPackageSubmitted()
         submitted.packageSubmissions[0].contractRevision.updatedAt = new Date(
@@ -264,7 +264,7 @@ describe('StateDashboard', () => {
 
         // set draft current revision to a far future updatedAt. Set unlocked to nearer future. This allows us to test sorting.
         const draft = mockContractPackageDraft()
-        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+
         draft.draftRevision!.updatedAt = new Date('2100-01-01')
         const submitted = mockContractPackageSubmitted()
         submitted.packageSubmissions[0].contractRevision.updatedAt = new Date(
