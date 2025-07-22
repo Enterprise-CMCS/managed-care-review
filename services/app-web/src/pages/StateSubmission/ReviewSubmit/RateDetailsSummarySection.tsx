@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-non-null-assertion */
 import React, { useState } from 'react'
 import {
     DataDetail,
@@ -223,7 +222,6 @@ export const RateDetailsSummarySection = ({
         if (!isRateRev) {
             // TODO: make this support an unlocked child rate.
             if (rate.status === 'DRAFT') {
-                // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
                 return rate.draftRevision!.formData
             } else {
                 return rate.revisions[0]?.formData
