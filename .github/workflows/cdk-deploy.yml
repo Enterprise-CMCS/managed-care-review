@@ -46,7 +46,7 @@ jobs:
   deploy:
     name: ${{ github.event_name == 'pull_request' && 'CDK Diff' || 'Deploy CDK Infrastructure' }}
     runs-on: ubuntu-latest
-    environment: ${{ env.STAGE }}
+    environment: ${{ github.event.inputs.stage || (github.ref_name == 'main' && 'prod' || 'dev') }}
     outputs:
       api-url: ${{ steps.export-config.outputs.api-url }}
       cognito-region: ${{ steps.export-config.outputs.cognito-region }}
