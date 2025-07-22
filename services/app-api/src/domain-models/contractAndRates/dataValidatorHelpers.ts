@@ -1,3 +1,4 @@
+import { dsnpTriggers } from '@mc-review/common-code'
 import type { FeatureFlagSettings } from '@mc-review/common-code'
 import type { ContractDraftRevisionFormDataInput } from '../../gen/gqlServer'
 import { contractFormDataSchema, preprocessNulls } from './formDataTypes'
@@ -64,26 +65,6 @@ const validatePopulationCovered = (
         }
     })
 
-const validateDSNPContract = (
-    formData: ContractDraftRevisionFormDataInput,
-    featureFlags?: FeatureFlagSettings
-) => {
-    if (featureFlags?.['dsnp']) {
-        z.boolean().superRefine((_, ctx) => {
-            const dsnpFederalAuthorities = []
-            if (
-                formData.submissionType === 'CONTRACT_AND_RATES'
-            ) {
-                ctx.addIssue({
-                    code: z.ZodIssueCode.custom,
-                    message:
-                        'populationCoveredSchema of CHIP cannot be submissionType of CONTRACT_AND_RATES',
-                })
-            }
-        })
-    }
-}
-
 const validateContractDraftRevisionInput = (
     formData: ContractDraftRevisionFormDataInput,
     stateCode: string,
@@ -113,33 +94,46 @@ const validateContractDraftRevisionInput = (
 }
 
 const refineForFeatureFlags = (featureFlags?: FeatureFlagSettings) => {
-    if (featureFlags?.['438-attestation']) {
+    if (featureFlags) {
         return submittableContractSchema.superRefine((contract, ctx) => {
-            // since we have different validations based on a feature flag, we add them as a refinement here.
-            // once 438 attestation ships this refinement should be moved to the submittableContractSchema
-            // and statutoryRegulatoryAttestation should be made non-optional.
-
             const formData = contract.draftRevision.formData
-            if (formData.statutoryRegulatoryAttestation === undefined) {
-                ctx.addIssue({
-                    code: z.ZodIssueCode.custom,
-                    message:
-                        'statutoryRegulatoryAttestationDescription is required when  438-attestation feature flag is on',
-                })
-            }
+            if (featureFlags['438-attestation']) {
+                // since we have different validations based on a feature flag, we add them as a refinement here.
+                // once 438 attestation ships this refinement should be moved to the submittableContractSchema
+                // and statutoryRegulatoryAttestation should be made non-optional.
 
-            if (
-                (formData.statutoryRegulatoryAttestation === false &&
-                    !formData.statutoryRegulatoryAttestationDescription) ||
-                (formData.statutoryRegulatoryAttestationDescription &&
-                    formData.statutoryRegulatoryAttestationDescription
-                        .length === 0)
-            ) {
-                ctx.addIssue({
-                    code: z.ZodIssueCode.custom,
-                    message:
-                        'statutoryRegulatoryAttestationDescription is Required if statutoryRegulatoryAttestation is false',
-                })
+                if (formData.statutoryRegulatoryAttestation === undefined) {
+                    ctx.addIssue({
+                        code: z.ZodIssueCode.custom,
+                        message:
+                            'statutoryRegulatoryAttestationDescription is required when  438-attestation feature flag is on',
+                    })
+                }
+
+                if (
+                    (formData.statutoryRegulatoryAttestation === false &&
+                        !formData.statutoryRegulatoryAttestationDescription) ||
+                    (formData.statutoryRegulatoryAttestationDescription &&
+                        formData.statutoryRegulatoryAttestationDescription
+                            .length === 0)
+                ) {
+                    ctx.addIssue({
+                        code: z.ZodIssueCode.custom,
+                        message:
+                            'statutoryRegulatoryAttestationDescription is Required if statutoryRegulatoryAttestation is false',
+                    })
+                }
+            }
+            if (featureFlags['dsnp']) {
+                const dsnpIsReuired = formData.federalAuthorities.some(
+                    (authority) => dsnpTriggers.includes(authority)
+                )
+                if (dsnpIsReuired) {
+                    ctx.addIssue({
+                        code: z.ZodIssueCode.custom,
+                        message: `dsnpContract is required when any of the following Federal Authorities are present: ${dsnpTriggers.toString()}`,
+                    })
+                }
             }
         })
     } else {
