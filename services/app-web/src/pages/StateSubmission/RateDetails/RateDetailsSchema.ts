@@ -46,7 +46,7 @@ const SingleRateCertSchema = (_activeFeatureFlags: FeatureFlagSettings, isDSNP?:
             if (rateType) {
                 return (
                     Yup.date()
-                        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+                         
                         // @ts-ignore-next-line
                         .validateDateFormat('YYYY-MM-DD', true)
                         .defined('You must enter a start date')
@@ -60,7 +60,7 @@ const SingleRateCertSchema = (_activeFeatureFlags: FeatureFlagSettings, isDSNP?:
             if (rateType) {
                 return (
                     Yup.date()
-                        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+                         
                         // @ts-ignore-next-line
                         .validateDateFormat('YYYY-MM-DD', true)
                         .defined('You must enter an end date')
@@ -85,7 +85,7 @@ const SingleRateCertSchema = (_activeFeatureFlags: FeatureFlagSettings, isDSNP?:
             if (rateType) {
                 return (
                     Yup.date()
-                        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+                         
                         // @ts-ignore-next-line
                         .validateDateFormat('YYYY-MM-DD', true)
                         .defined(
@@ -102,7 +102,7 @@ const SingleRateCertSchema = (_activeFeatureFlags: FeatureFlagSettings, isDSNP?:
             is: 'AMENDMENT',
             then: Yup.date()
                 .nullable()
-                // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+                 
                 // @ts-ignore-next-line
                 .validateDateFormat('YYYY-MM-DD', true)
                 .defined('You must enter a start date')
@@ -112,7 +112,7 @@ const SingleRateCertSchema = (_activeFeatureFlags: FeatureFlagSettings, isDSNP?:
             is: 'AMENDMENT',
             then: Yup.date()
                 .nullable()
-                // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+                 
                 // @ts-ignore-next-line
                 .validateDateFormat('YYYY-MM-DD', true)
                 .defined('You must enter an end date')
