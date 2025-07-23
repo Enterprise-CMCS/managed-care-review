@@ -1,6 +1,9 @@
 import { dsnpTriggers } from '@mc-review/common-code'
 import type { FeatureFlagSettings } from '@mc-review/common-code'
-import type { ContractDraftRevisionFormDataInput } from '../../gen/gqlServer'
+import type {
+    ContractDraftRevisionFormDataInput,
+    Rate,
+} from '../../gen/gqlServer'
 import { contractFormDataSchema, preprocessNulls } from './formDataTypes'
 import { contractTypeSchema, populationCoveredSchema } from '@mc-review/hpp'
 import { z } from 'zod'
@@ -125,15 +128,34 @@ const refineForFeatureFlags = (featureFlags?: FeatureFlagSettings) => {
                 }
             }
             if (featureFlags['dsnp']) {
+                // when the dnsp flag is on, the dsnpContract field becomes
+                // required IF the submission's federal authorities include
+                // ANY of the following: 'STATE_PLAN','WAIVER_1915B', 'WAIVER_1115', 'VOLUNTARY'
                 const dsnpIsReuired = formData.federalAuthorities.some(
                     (authority) => dsnpTriggers.includes(authority)
                 )
-                if (dsnpIsReuired) {
+                if (dsnpIsReuired && formData.dsnpContract === null) {
                     ctx.addIssue({
                         code: z.ZodIssueCode.custom,
                         message: `dsnpContract is required when any of the following Federal Authorities are present: ${dsnpTriggers.toString()}`,
                     })
                 }
+                // if the contract is associated with a DSNP then
+                // associated rate Medicaid populations must be selected
+                contract.draftRates.forEach((rate: Rate) => {
+                    const rateFormData = rate.draftRevision?.formData
+                    const noRateMedicaidPopulations =
+                        !rateFormData?.rateMedicaidPopulations ||
+                        rateFormData?.rateMedicaidPopulations?.length === 0
+                    const isDSNPContract = formData.dsnpContract
+
+                    if (isDSNPContract && noRateMedicaidPopulations) {
+                        ctx.addIssue({
+                            code: z.ZodIssueCode.custom,
+                            message: `rateMedicaidPopulations is required for when dsnpContract is true`,
+                        })
+                    }
+                })
             }
         })
     } else {

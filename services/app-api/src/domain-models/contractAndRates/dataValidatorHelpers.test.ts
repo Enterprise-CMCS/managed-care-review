@@ -306,7 +306,7 @@ describe('parseContract', () => {
                             rateType: 'AMENDMENT',
                             rateCapitationType: 'RATE_CELL',
                             rateCertificationName: 'fake-name',
-                            rateMedicaidPopulations: [],
+                            rateMedicaidPopulations: ['MEDICAID_ONLY'],
                             rateDocuments: [
                                 {
                                     s3URL: 's3://bucketname/key/contractsupporting1',
@@ -355,6 +355,7 @@ describe('parseContract', () => {
             postgresStore,
             {
                 '438-attestation': true,
+                dsnp: true,
             }
         )
 
@@ -511,6 +512,7 @@ describe('parseContract', () => {
             postgresStore,
             {
                 '438-attestation': true,
+                dsnp: true,
             }
         )
         if (!(parsedContract instanceof Error)) {
@@ -518,7 +520,7 @@ describe('parseContract', () => {
                 'Unexpected error: Was expecting validateContractDraftRevisionInput to return and error'
             )
         }
-        expect(parsedContract.errors).toHaveLength(5)
+        expect(parsedContract.errors).toHaveLength(6)
         const errMessages = parsedContract.errors.map((err) => err.message)
         expect(errMessages[0]).toContain(
             'Array must contain at least 1 element(s)'
@@ -533,7 +535,187 @@ describe('parseContract', () => {
             'statutoryRegulatoryAttestationDescription is required when  438-attestation feature flag is on'
         )
         expect(errMessages[4]).toContain(
+            'rateMedicaidPopulations is required for when dsnpContract is true'
+        )
+        expect(errMessages[5]).toContain(
             'Program(s) in [fake-id,fakerateprogramid] are not valid FL programs'
         )
+    })
+    it('return error if dnspContract is required but not populated', async () => {
+        const prismaClient = await sharedTestPrismaClient()
+        const postgresStore = NewPostgresStore(prismaClient)
+        const stateCode = 'FL'
+        const contract: ContractType = {
+            status: 'DRAFT',
+            createdAt: new Date(),
+            updatedAt: new Date(),
+            id: '28b00852-00e3-467c-9311-519e60d43283',
+            stateCode: 'FL',
+            stateNumber: 5,
+            reviewStatus: 'UNDER_REVIEW',
+            consolidatedStatus: 'DRAFT',
+            mccrsID: undefined,
+            revisions: [],
+            draftRevision: {
+                id: 'e5bccaa3-d91c-499a-9f2f-c6ce8dbf8a5f',
+                submitInfo: undefined,
+                unlockInfo: undefined,
+                contract: {
+                    id: '88a54ccd-a36d-494d-a386-8ecf8b7438e6',
+                    stateCode: 'MN',
+                    stateNumber: 4,
+                },
+                createdAt: new Date(11 / 27 / 2023),
+                updatedAt: new Date(11 / 27 / 2023),
+                formData: {
+                    programIDs: [defaultFloridaProgram().id],
+                    populationCovered: 'MEDICAID',
+                    submissionType: 'CONTRACT_AND_RATES',
+                    riskBasedContract: true,
+                    dsnpContract: null,
+                    submissionDescription: 'A real submission',
+                    supportingDocuments: [
+                        {
+                            s3URL: 's3://bucketname/key/contractsupporting1',
+                            sha256: 'fakesha',
+                            name: 'contractSupporting1',
+                            dateAdded: new Date('01/15/2024'),
+                            downloadURL: s3DlUrl,
+                        },
+                        {
+                            s3URL: 's3://bucketname/key/contractSupporting2',
+                            sha256: 'fakesha',
+                            name: 'contractSupporting2',
+                            dateAdded: new Date('01/13/2024'),
+                            downloadURL: s3DlUrl,
+                        },
+                    ],
+                    stateContacts: [
+                        {
+                            name: 'Someone',
+                            email: 'someone@example.com',
+                            titleRole: 'sometitle',
+                        },
+                    ],
+                    contractType: 'AMENDMENT',
+                    contractExecutionStatus: 'EXECUTED',
+                    contractDocuments: [
+                        {
+                            s3URL: 's3://bucketname/key/contractsupporting1',
+                            sha256: 'fakesha',
+                            name: 'contractSupporting1',
+                            dateAdded: new Date('01/15/2024'),
+                            downloadURL: s3DlUrl,
+                        },
+                    ],
+                    contractDateStart: new Date(),
+                    contractDateEnd: new Date(),
+                    managedCareEntities: ['MCO'],
+                    federalAuthorities: ['STATE_PLAN'],
+                    inLieuServicesAndSettings: true,
+                    modifiedBenefitsProvided: true,
+                    modifiedGeoAreaServed: false,
+                    modifiedMedicaidBeneficiaries: true,
+                    modifiedRiskSharingStrategy: true,
+                    modifiedIncentiveArrangements: false,
+                    modifiedWitholdAgreements: false,
+                    modifiedStateDirectedPayments: true,
+                    modifiedPassThroughPayments: true,
+                    modifiedPaymentsForMentalDiseaseInstitutions: false,
+                    modifiedMedicalLossRatioStandards: true,
+                    modifiedOtherFinancialPaymentIncentive: false,
+                    modifiedEnrollmentProcess: true,
+                    modifiedGrevienceAndAppeal: false,
+                    modifiedNetworkAdequacyStandards: true,
+                    modifiedLengthOfContract: false,
+                    modifiedNonRiskPaymentArrangements: true,
+                    statutoryRegulatoryAttestation: true,
+                    statutoryRegulatoryAttestationDescription:
+                        'valid description',
+                },
+            },
+            draftRates: [
+                {
+                    id: '6ab1b4c0-f9d2-4567-958a-3123e98328eb',
+                    createdAt: new Date(),
+                    updatedAt: new Date(),
+                    status: 'DRAFT',
+                    reviewStatus: 'UNDER_REVIEW',
+                    consolidatedStatus: 'DRAFT',
+                    stateCode: 'FL',
+                    stateNumber: 5,
+                    parentContractID: 'cb9a1ecb-cdb6-4ef2-956d-3fba8776cd8b',
+                    packageSubmissions: [],
+                    draftRevision: {
+                        id: '6c7862a2-f3a1-4171-9fdd-6a8c9c2dd24b',
+                        rateID: '6ab1b4c0-f9d2-4567-958a-3123e98328eb',
+                        createdAt: new Date(),
+                        updatedAt: new Date(),
+                        submitInfo: undefined,
+                        unlockInfo: undefined,
+                        formData: {
+                            rateType: 'AMENDMENT',
+                            rateCapitationType: 'RATE_CELL',
+                            rateCertificationName: 'fake-name',
+                            rateMedicaidPopulations: [],
+                            rateDocuments: [
+                                {
+                                    s3URL: 's3://bucketname/key/contractsupporting1',
+                                    sha256: 'fakesha',
+                                    name: 'contractSupporting1',
+                                    dateAdded: new Date('01/15/2024'),
+                                    downloadURL: s3DlUrl,
+                                },
+                            ],
+                            supportingDocuments: [],
+                            rateDateStart: new Date('2020-02-02'),
+                            rateDateEnd: new Date('2021-02-02'),
+                            rateDateCertified: new Date(),
+                            amendmentEffectiveDateStart: new Date('1/1/2023'),
+                            amendmentEffectiveDateEnd: new Date('1/1/2024'),
+                            rateProgramIDs: [defaultFloridaRateProgram().id],
+                            deprecatedRateProgramIDs: [],
+                            certifyingActuaryContacts: [
+                                {
+                                    actuarialFirm: 'DELOITTE',
+                                    name: 'Actuary Contact 1',
+                                    titleRole: 'Test Actuary Contact 1',
+                                    email: 'actuarycontact1@test.com',
+                                },
+                            ],
+                            addtlActuaryContacts: [
+                                {
+                                    actuarialFirm: 'DELOITTE',
+                                    name: 'Actuary Contact 1',
+                                    titleRole: 'Test Actuary Contact 1',
+                                    email: 'additionalactuarycontact1@test.com',
+                                },
+                            ],
+                            actuaryCommunicationPreference: 'OACT_TO_ACTUARY',
+                            packagesWithSharedRateCerts: [],
+                        },
+                    },
+                    revisions: [],
+                },
+            ],
+            packageSubmissions: [],
+        }
+        const parsedContract = parseContract(
+            contract,
+            stateCode,
+            postgresStore,
+            {
+                '438-attestation': true,
+                dsnp: true,
+            }
+        )
+        if (!(parsedContract instanceof Error)) {
+            throw new Error(
+                'Unexpected error: Was expecting validateContractDraftRevisionInput to return and error'
+            )
+        }
+        expect(parsedContract.errors).toHaveLength(1)
+        const errMessages = parsedContract.errors.map((err) => err.message)
+        expect(errMessages[0]).toContain('Expected boolean, received null')
     })
 })
