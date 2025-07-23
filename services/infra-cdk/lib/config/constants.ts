@@ -51,6 +51,7 @@ export const LAMBDA_FUNCTIONS = {
   
   // Database operations
   MIGRATE: 'migrate',
+  MIGRATE_DOCUMENT_ZIPS: 'migrateDocumentZips',
   
   // S3 operations
   AUDIT_FILES: 'auditFiles',

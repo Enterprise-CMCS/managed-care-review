@@ -1,6 +1,6 @@
 import { BaseStack, BaseStackProps, ServiceRegistry } from '@constructs/base';
 import { WafProtectedApi, ApiEndpointFactory } from '@constructs/api';
-import { OtelLayer, LambdaFactory, PrismaLayer, type BaseLambdaFunction, type CreateFunctionProps } from '@constructs/lambda';
+import { OtelLayer, LambdaFactory, type BaseLambdaFunction, type CreateFunctionProps } from '@constructs/lambda';
 import { Construct } from 'constructs';
 import * as apigateway from 'aws-cdk-lib/aws-apigateway';
 import * as cognito from 'aws-cdk-lib/aws-cognito';
@@ -32,15 +32,6 @@ export interface ApiComputeStackProps extends BaseStackProps {
    * JWT secret for API authentication
    */
   jwtSecret: secretsmanager.ISecret;
-  // From Lambda Layers Stack
-  /**
-   * ARN of the Prisma Lambda layer for database ORM functionality
-   */
-  prismaLayerArn?: string;
-  /**
-   * ARN of the PostgreSQL tools Lambda layer for database operations
-   */
-  postgresToolsLayerArn?: string;
   // From Frontend Stack
   /**
    * Application endpoint URL for email links and redirects
@@ -65,7 +56,8 @@ interface FunctionConfig {
 export class ApiComputeStack extends BaseStack {
   // Compute resources
   public otelLayer: lambda.ILayerVersion;
-  public prismaLayer: lambda.ILayerVersion;
+  public prismaEngineLayer?: lambda.ILayerVersion;
+  public prismaMigrationLayer?: lambda.ILayerVersion;
   public lambdaFactory: LambdaFactory;
   public functions: Map<string, BaseLambdaFunction>;
   
@@ -84,8 +76,6 @@ export class ApiComputeStack extends BaseStack {
   private readonly authenticatedRole?: iam.IRole;
   private readonly applicationEndpoint?: string;
   private readonly jwtSecret: secretsmanager.ISecret;
-  private readonly prismaLayerArn?: string;
-  private prismaMigrationLayer?: lambda.ILayerVersion;
 
   /**
    * Function configurations defining VPC usage and permission requirements
@@ -120,6 +110,9 @@ export class ApiComputeStack extends BaseStack {
     
     // Observability - no VPC in serverless
     OTEL: { useVpc: false, needsDatabaseAccess: false, needsSesAccess: false, needsCognitoAccess: false },
+    
+    // Document migration - uses VPC in serverless (same as MIGRATE)
+    MIGRATE_DOCUMENT_ZIPS: { useVpc: true, needsDatabaseAccess: true, needsSesAccess: false, needsCognitoAccess: false },
   };
 
   constructor(scope: Construct, id: string, props: ApiComputeStackProps) {
@@ -138,7 +131,6 @@ export class ApiComputeStack extends BaseStack {
     this.authenticatedRole = props.authenticatedRole;
     this.applicationEndpoint = props.applicationEndpoint;
     this.jwtSecret = props.jwtSecret;
-    this.prismaLayerArn = props.prismaLayerArn;
     
     // Initialize functions map
     this.functions = new Map<string, BaseLambdaFunction>();
@@ -164,7 +156,7 @@ export class ApiComputeStack extends BaseStack {
   private createComputeResources(): void {
     // Create layers
     this.createOtelLayer();
-    this.createPrismaLayer();
+    this.createPrismaLayers();
 
     // Create Lambda factory
     this.createLambdaFactory();
@@ -229,20 +221,24 @@ export class ApiComputeStack extends BaseStack {
   }
 
   /**
-   * Import Prisma layer from LambdaLayersStack
+   * Import Prisma layers from SSM Parameter Store
    */
-  private createPrismaLayer(): void {
-    if (this.prismaLayerArn) {
-      this.prismaLayer = lambda.LayerVersion.fromLayerVersionArn(
-        this,
-        'ImportedPrismaLayer',
-        this.prismaLayerArn
-      );
-    } else {
-      // Fallback: create local layer if ARN not provided (for backwards compatibility)
-      const prismaConstruct = new PrismaLayer(this, 'Prisma');
-      this.prismaLayer = prismaConstruct.layerVersion;
-    }
+  private createPrismaLayers(): void {
+    // Import Prisma Engine layer from SSM
+    const prismaEngineLayerArn = ServiceRegistry.getLayerArn(this, this.stage, 'prisma-engine');
+    this.prismaEngineLayer = lambda.LayerVersion.fromLayerVersionArn(
+      this,
+      'ImportedPrismaEngineLayer',
+      prismaEngineLayerArn
+    );
+    
+    // Import Prisma Migration layer from SSM
+    const prismaMigrationLayerArn = ServiceRegistry.getLayerArn(this, this.stage, 'prisma-migration');
+    this.prismaMigrationLayer = lambda.LayerVersion.fromLayerVersionArn(
+      this,
+      'ImportedPrismaMigrationLayer',
+      prismaMigrationLayerArn
+    );
   }
 
   /**
@@ -256,7 +252,8 @@ export class ApiComputeStack extends BaseStack {
       vpc: this.vpc,
       securityGroups: [this.lambdaSecurityGroup],
       otelLayer: this.otelLayer,
-      prismaLayer: this.prismaLayer,
+      prismaEngineLayer: this.prismaEngineLayer,
+      prismaMigrationLayer: this.prismaMigrationLayer,
       commonEnvironment: this.getCommonEnvironment()
     });
   }
@@ -306,26 +303,6 @@ export class ApiComputeStack extends BaseStack {
   }
 
 
-  /**
-   * Get Prisma migration layer for the MIGRATE function
-   * Lazily creates and caches the layer to avoid duplication
-   */
-  private getMigrationLayer(): lambda.ILayerVersion | undefined {
-    if (!this.prismaMigrationLayer) {
-      // Read layer ARN from SSM Parameter Store
-      const layerArn = ssm.StringParameter.valueForStringParameter(
-        this,
-        `/${PROJECT_PREFIX}/${this.stage}/layers/prisma-migration-arn`
-      );
-      
-      this.prismaMigrationLayer = lambda.LayerVersion.fromLayerVersionArn(
-        this,
-        'ImportedPrismaMigrationLayer',
-        layerArn
-      );
-    }
-    return this.prismaMigrationLayer;
-  }
 
   /**
    * Get function-specific environment variables
@@ -365,8 +342,7 @@ export class ApiComputeStack extends BaseStack {
       },
       MIGRATE: {
         timeout: LAMBDA_TIMEOUTS.STANDARD,
-        memorySize: LAMBDA_MEMORY.MEDIUM,
-        additionalLayers: [this.getMigrationLayer()].filter(Boolean) as lambda.ILayerVersion[]
+        memorySize: LAMBDA_MEMORY.MEDIUM
       },
       GRAPHQL: {
         timeout: LAMBDA_TIMEOUTS.API_DEFAULT,

@@ -1,7 +1,7 @@
 #!/bin/bash
 set -e
 
-echo "Building Prisma Client Engine Lambda layer..."
+echo "Building Prisma Client Migration Lambda layer..."
 
 # Get the directory where this script is located
 SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
@@ -14,7 +14,7 @@ rm -f nodejs.tar.gz
 
 # Create layer structure
 mkdir -p nodejs/node_modules/.prisma
-mkdir -p nodejs/node_modules/@prisma/engines
+mkdir -p nodejs/node_modules/@prisma
 mkdir -p nodejs/node_modules/prisma
 mkdir -p nodejs/prisma
 
@@ -42,25 +42,35 @@ else
     exit 1
 fi
 
-# Copy additional Prisma dependencies (lighter subset than migration layer)
-rsync -avL "$PROJECT_ROOT/node_modules/.pnpm/node_modules/@prisma/engines/dist/" nodejs/node_modules/@prisma/engines/dist/ || true
-rsync -avL "$PROJECT_ROOT/node_modules/.pnpm/node_modules/@prisma/debug/" nodejs/node_modules/@prisma/debug/ || true
-rsync -avL "$PROJECT_ROOT/node_modules/.pnpm/node_modules/@prisma/engines-version/" nodejs/node_modules/@prisma/engines-version/ || true
-rsync -avL "$PROJECT_ROOT/node_modules/.pnpm/node_modules/@prisma/fetch-engine/" nodejs/node_modules/@prisma/fetch-engine/ || true
-rsync -avL "$PROJECT_ROOT/node_modules/.pnpm/node_modules/@prisma/get-platform/" nodejs/node_modules/@prisma/get-platform/ || true
+# Copy ALL Prisma dependencies for migrations (including heavy engines)
+echo "Copying full Prisma ecosystem for migrations..."
+rsync -avL "$PROJECT_ROOT/node_modules/.pnpm/node_modules/@prisma/" nodejs/node_modules/@prisma/ || true
+
+# Copy specific pg module for node-pg-migrate
+echo "Copying pg module..."
+# First try to find pg in .pnpm store
+PG_PATH=$(find "$PROJECT_ROOT/node_modules/.pnpm" -name "pg@*" -type d | grep -v "node_modules/pg" | head -1)
+if [ -n "$PG_PATH" ]; then
+    echo "Found pg module at: $PG_PATH"
+    mkdir -p nodejs/node_modules/pg
+    rsync -av "$PG_PATH/node_modules/pg/" nodejs/node_modules/pg/
+else
+    # Fallback to app-api node_modules
+    if [ -d "$APP_API_DIR/node_modules/pg" ]; then
+        rsync -av "$APP_API_DIR/node_modules/pg/" nodejs/node_modules/pg/
+    else
+        echo "WARNING: Could not find pg module"
+    fi
+fi
 
 # Copy schema files
 echo "Copying schema files..."
 rsync -av "$APP_API_DIR/prisma/" nodejs/prisma/
 
-# Remove Prisma CLI to save space
-rm -rf nodejs/node_modules/@prisma/cli
-
 # Remove non-RHEL binaries to save space
 echo "Removing non-RHEL binaries..."
 find nodejs/node_modules/.prisma/client -type f ! -name "*rhel-openssl-3.0.x*" -name "*.node" -delete 2>/dev/null || true
 find nodejs/node_modules/prisma -type f ! -name "*rhel-openssl-3.0.x*" -name "*.node" -delete 2>/dev/null || true
-rm -rf nodejs/node_modules/prisma/engines
 
 # Remove debian binaries
 rm -f nodejs/node_modules/.prisma/client/libquery_engine-debian-openssl-*.so.node
@@ -73,4 +83,4 @@ tar -zcf nodejs.tar.gz nodejs/
 
 # Show final size
 echo "Layer size: $(du -sh nodejs.tar.gz | cut -f1)"
-echo "Prisma Client Engine layer built successfully!"
+echo "Prisma Client Migration layer built successfully!"

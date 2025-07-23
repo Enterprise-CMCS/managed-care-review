@@ -290,19 +290,6 @@ jobs:
           --require-approval never \
           --ci \
           -c stage=${{ env.STAGE }}
-        
-        # Get layer ARNs from stack outputs
-        PRISMA_LAYER_ARN=$(aws cloudformation describe-stacks \
-          --stack-name MCR-LambdaLayers-${{ env.STAGE }}-cdk \
-          --query 'Stacks[0].Outputs[?OutputKey==`PrismaLayerArn`].OutputValue' \
-          --output text)
-        POSTGRES_TOOLS_LAYER_ARN=$(aws cloudformation describe-stacks \
-          --stack-name MCR-LambdaLayers-${{ env.STAGE }}-cdk \
-          --query 'Stacks[0].Outputs[?OutputKey==`PostgresToolsLayerArn`].OutputValue' \
-          --output text)
-        
-        echo "prisma-layer-arn=$PRISMA_LAYER_ARN" >> $GITHUB_OUTPUT
-        echo "postgres-tools-layer-arn=$POSTGRES_TOOLS_LAYER_ARN" >> $GITHUB_OUTPUT
 
     # 14. Deploy infrastructure stacks (Phase 1 - excluding Frontend)
     - name: Deploy Infrastructure Stacks
@@ -320,9 +307,7 @@ jobs:
           MCR-Monitoring-${{ env.STAGE }}-cdk \
           --require-approval never \
           --ci \
-          -c stage=${{ env.STAGE }} \
-          -c prismaLayerArn=${{ steps.deploy-layers.outputs.prisma-layer-arn }} \
-          -c postgresToolsLayerArn=${{ steps.deploy-layers.outputs.postgres-tools-layer-arn }}
+          -c stage=${{ env.STAGE }}
 
     # 15. Export infrastructure outputs for frontend build
     - name: Export Infrastructure Outputs

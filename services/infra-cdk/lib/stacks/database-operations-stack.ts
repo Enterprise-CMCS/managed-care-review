@@ -1,4 +1,4 @@
-import { BaseStack, BaseStackProps } from '@constructs/base';
+import { BaseStack, BaseStackProps, ServiceRegistry } from '@constructs/base';
 import { BaseLambdaFunction } from '@constructs/lambda';
 import { S3ScriptUploader } from '@constructs/s3-script-uploader';
 import { Construct } from 'constructs';
@@ -20,19 +20,6 @@ export interface DatabaseOperationsStackProps extends BaseStackProps {
   databaseCluster: rds.IDatabaseCluster;
   databaseSecret: secretsmanager.ISecret;
   uploadsBucketName: string;
-  // From Lambda Layers Stack
-  /**
-   * ARN of the Prisma Engine Lambda layer for database ORM functionality
-   */
-  prismaEngineLayerArn: string;
-  /**
-   * ARN of the Prisma Migration Lambda layer for database migrations
-   */
-  prismaMigrationLayerArn: string;
-  /**
-   * ARN of the PostgreSQL tools Lambda layer for database operations
-   */
-  postgresToolsLayerArn: string;
 }
 
 /**
@@ -50,9 +37,6 @@ export class DatabaseOperationsStack extends BaseStack {
   private readonly databaseCluster: rds.IDatabaseCluster;
   private readonly databaseSecret: secretsmanager.ISecret;
   private readonly uploadsBucketName: string;
-  private readonly prismaEngineLayerArn: string;
-  private readonly prismaMigrationLayerArn: string;
-  private readonly postgresToolsLayerArn: string;
 
   constructor(scope: Construct, id: string, props: DatabaseOperationsStackProps) {
     super(scope, id, {
@@ -66,9 +50,6 @@ export class DatabaseOperationsStack extends BaseStack {
     this.databaseCluster = props.databaseCluster;
     this.databaseSecret = props.databaseSecret;
     this.uploadsBucketName = props.uploadsBucketName;
-    this.prismaEngineLayerArn = props.prismaEngineLayerArn;
-    this.prismaMigrationLayerArn = props.prismaMigrationLayerArn;
-    this.postgresToolsLayerArn = props.postgresToolsLayerArn;
     
     // Define resources after all properties are initialized
     this.defineResources();
@@ -106,25 +87,28 @@ export class DatabaseOperationsStack extends BaseStack {
   }
 
   private createLambdaLayers(): void {
-    // Import layers from LambdaLayersStack
+    // Import layers from SSM Parameter Store
+    const postgresToolsLayerArn = ServiceRegistry.getLayerArn(this, this.stage, 'postgres-tools');
     this.pgToolsLayer = lambda.LayerVersion.fromLayerVersionArn(
       this,
       'ImportedPgToolsLayer',
-      this.postgresToolsLayerArn
+      postgresToolsLayerArn
     );
 
-    // Import Prisma Engine layer
+    // Import Prisma Engine layer from SSM
+    const prismaEngineLayerArn = ServiceRegistry.getLayerArn(this, this.stage, 'prisma-engine');
     this.prismaEngineLayer = lambda.LayerVersion.fromLayerVersionArn(
       this,
       'ImportedPrismaEngineLayer',
-      this.prismaEngineLayerArn
+      prismaEngineLayerArn
     );
     
-    // Import Prisma Migration layer (separate from engine layer)
+    // Import Prisma Migration layer from SSM
+    const prismaMigrationLayerArn = ServiceRegistry.getLayerArn(this, this.stage, 'prisma-migration');
     this.prismaMigrationLayer = lambda.LayerVersion.fromLayerVersionArn(
       this,
       'ImportedPrismaMigrationLayer',
-      this.prismaMigrationLayerArn
+      prismaMigrationLayerArn
     );
   }
 

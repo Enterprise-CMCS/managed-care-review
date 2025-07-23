@@ -4,6 +4,7 @@ import * as lambda from 'aws-cdk-lib/aws-lambda';
 import * as path from 'path';
 import { createHash } from 'crypto';
 import * as fs from 'fs';
+import { ServiceRegistry } from '../constructs/base/service-registry';
 
 export interface LambdaLayersStackProps extends StackProps {
   stage: string;
@@ -36,24 +37,34 @@ export class LambdaLayersStack extends Stack {
     this.postgresToolsLayerVersion = this.createPostgresToolsLayer(props.stage);
     this.postgresToolsLayerVersionArn = this.postgresToolsLayerVersion.layerVersionArn;
 
-    // Export ARNs for cross-stack reference
-    new CfnOutput(this, 'PrismaEngineLayerArn', {
-      value: this.prismaEngineLayerVersionArn,
-      exportName: `${props.stage}-PrismaEngineLayerArn`,
-      description: 'ARN of the Prisma engine layer'
-    });
-    
-    new CfnOutput(this, 'PrismaMigrationLayerArn', {
-      value: this.prismaMigrationLayerVersionArn,
-      exportName: `${props.stage}-PrismaMigrationLayerArn`,
-      description: 'ARN of the Prisma migration layer'
-    });
+    // Store layer ARNs in SSM Parameter Store for cross-stack reference
+    // This avoids CloudFormation export locks and enables flexible access
+    ServiceRegistry.putLayerArn(this, props.stage, 'prisma-engine', this.prismaEngineLayerVersionArn);
+    ServiceRegistry.putLayerArn(this, props.stage, 'prisma-migration', this.prismaMigrationLayerVersionArn);
+    ServiceRegistry.putLayerArn(this, props.stage, 'postgres-tools', this.postgresToolsLayerVersionArn);
 
-    new CfnOutput(this, 'PostgresToolsLayerArn', {
-      value: this.postgresToolsLayerVersionArn,
-      exportName: `${props.stage}-PostgresToolsLayerArn`,
-      description: 'ARN of the PostgreSQL tools layer'
-    });
+    // Export ARNs for cross-stack reference
+    // NOTE: Commented out to avoid CloudFormation export lock issues
+    // When using StackOrchestrator with direct prop passing, these exports are redundant
+    // The GitHub Actions workflow uses CDK context parameters instead of exports
+    
+    // new CfnOutput(this, 'PrismaEngineLayerArn', {
+    //   value: this.prismaEngineLayerVersionArn,
+    //   exportName: `${props.stage}-PrismaEngineLayerArn`,
+    //   description: 'ARN of the Prisma engine layer'
+    // });
+    
+    // new CfnOutput(this, 'PrismaMigrationLayerArn', {
+    //   value: this.prismaMigrationLayerVersionArn,
+    //   exportName: `${props.stage}-PrismaMigrationLayerArn`,
+    //   description: 'ARN of the Prisma migration layer'
+    // });
+
+    // new CfnOutput(this, 'PostgresToolsLayerArn', {
+    //   value: this.postgresToolsLayerVersionArn,
+    //   exportName: `${props.stage}-PostgresToolsLayerArn`,
+    //   description: 'ARN of the PostgreSQL tools layer'
+    // });
 
     // Output layer metadata
     new CfnOutput(this, 'LayerMetadata', {
@@ -71,7 +82,7 @@ export class LambdaLayersStack extends Stack {
    * Create Prisma Engine layer with Lambda binaries
    */
   private createPrismaEngineLayer(stage: string): lambda.LayerVersion {
-    const layerHash = this.calculateLayerHash('prisma-engine');
+    const layerHash = this.calculateLayerHash('prisma-engine', stage);
     
     return new lambda.LayerVersion(this, 'PrismaEngineLayer', {
       layerVersionName: `mcr-prisma-engine-${stage}-${layerHash}`,
@@ -87,7 +98,7 @@ export class LambdaLayersStack extends Stack {
    * Create Prisma Migration layer with migration tools
    */
   private createPrismaMigrationLayer(stage: string): lambda.LayerVersion {
-    const layerHash = this.calculateLayerHash('prisma-migration');
+    const layerHash = this.calculateLayerHash('prisma-migration', stage);
     
     return new lambda.LayerVersion(this, 'PrismaMigrationLayer', {
       layerVersionName: `mcr-prisma-migration-${stage}-${layerHash}`,
@@ -103,7 +114,7 @@ export class LambdaLayersStack extends Stack {
    * Create PostgreSQL tools layer
    */
   private createPostgresToolsLayer(stage: string): lambda.LayerVersion {
-    const layerHash = this.calculateLayerHash('postgres-tools');
+    const layerHash = this.calculateLayerHash('postgres-tools', stage);
     
     // Check if the postgres tools build script exists
     const buildScriptPath = path.join(__dirname, '../../lambda-layers-postgres-tools/build.sh');
@@ -187,11 +198,66 @@ export class LambdaLayersStack extends Stack {
   }
 
   /**
-   * Calculate a hash for layer versioning based on dependencies
+   * Calculate a hash for layer versioning based on content
+   * Hash changes only when functional layer content changes, not file timestamps
    */
-  private calculateLayerHash(layerType: string): string {
-    const content = `${layerType}-${new Date().toISOString().split('T')[0]}`;
-    return createHash('md5').update(content).digest('hex').substring(0, 8);
+  private calculateLayerHash(layerType: string, stage: string): string {
+    const hashInputs: string[] = [
+      layerType,
+      '5.17.0',      // Prisma version
+      'nodejs20.x',   // Runtime
+      'x86_64'       // Architecture
+    ];
+    
+    // Include build script CONTENT (not modification time)
+    const buildScriptPath = path.join(__dirname, `../../${this.getLayerBuildPath(layerType)}/build.sh`);
+    try {
+      if (fs.existsSync(buildScriptPath)) {
+        const scriptContent = fs.readFileSync(buildScriptPath, 'utf8');
+        hashInputs.push(scriptContent);
+        
+        // Debug logging in dev mode
+        if (stage === 'dev') {
+          console.log(`Layer ${layerType}: Including build script content (${scriptContent.length} chars)`);
+        }
+      }
+    } catch (error) {
+      console.warn(`Layer hash: Could not read build script ${buildScriptPath}, skipping content hash`);
+    }
+    
+    // For Prisma layers: include schema content (affects generated client)
+    if (layerType.includes('prisma')) {
+      const schemaPath = path.join(__dirname, '../../../app-api/prisma/schema.prisma');
+      try {
+        if (fs.existsSync(schemaPath)) {
+          const schemaContent = fs.readFileSync(schemaPath, 'utf8');
+          hashInputs.push(schemaContent);
+          
+          // Debug logging in dev mode  
+          if (stage === 'dev') {
+            console.log(`Layer ${layerType}: Including Prisma schema content (${schemaContent.length} chars)`);
+          }
+        }
+      } catch (error) {
+        console.warn(`Layer hash: Could not read Prisma schema ${schemaPath}, skipping schema hash`);
+      }
+    }
+    
+    // Create deterministic, content-only hash
+    const combined = hashInputs.join('|');
+    return createHash('md5').update(combined).digest('hex').substring(0, 8);
+  }
+  
+  /**
+   * Get the build path for a layer type
+   */
+  private getLayerBuildPath(layerType: string): string {
+    const pathMap: Record<string, string> = {
+      'prisma-engine': 'lambda-layers-prisma-client-engine',
+      'prisma-migration': 'lambda-layers-prisma-client-migration',
+      'postgres-tools': 'lambda-layers-postgres-tools'
+    };
+    return pathMap[layerType] || layerType;
   }
 
   /**

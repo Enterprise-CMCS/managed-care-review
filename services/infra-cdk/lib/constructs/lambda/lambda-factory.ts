@@ -9,7 +9,7 @@ import { OtelLayer } from './otel-layer';
 import { StageConfig } from '@config/stage-config';
 import { LAMBDA_FUNCTIONS } from '@config/constants';
 import { ServiceRegistry } from '@constructs/base';
-import { needsPrismaLayer } from './bundling-utils';
+import { getPrismaLayerType, PrismaLayerType } from './bundling-utils';
 
 interface HandlerMapping {
   entry: string;
@@ -74,6 +74,11 @@ const HANDLER_MAP: Record<string, HandlerMapping> = {
     handler: 'main',
     functionName: 'migrate'
   },
+  MIGRATE_DOCUMENT_ZIPS: {
+    entry: 'handlers/migrate_document_zips.ts',
+    handler: 'main',
+    functionName: 'migrate_document_zips'
+  },
   
   // File operations
   ZIP_KEYS: { 
@@ -104,7 +109,8 @@ export interface LambdaFactoryProps {
   vpc?: ec2.IVpc;
   securityGroups?: ec2.ISecurityGroup[];
   otelLayer: lambda.ILayerVersion;
-  prismaLayer?: lambda.ILayerVersion;
+  prismaEngineLayer?: lambda.ILayerVersion;
+  prismaMigrationLayer?: lambda.ILayerVersion;
   commonEnvironment?: Record<string, string>;
 }
 
@@ -126,14 +132,31 @@ export interface CreateFunctionProps {
 export class LambdaFactory extends Construct {
   private readonly props: LambdaFactoryProps;
   private readonly functions: Map<string, BaseLambdaFunction> = new Map();
+  
+  /**
+   * Functions that should NOT have any layers applied (matching serverless.yml)
+   * These functions have no layers defined in serverless config
+   */
+  private readonly FUNCTIONS_WITHOUT_LAYERS: Array<keyof typeof LAMBDA_FUNCTIONS> = [
+    'EMAIL_SUBMIT',
+    'THIRD_PARTY_API_AUTHORIZER'
+  ];
 
   constructor(scope: Construct, id: string, props: LambdaFactoryProps) {
     super(scope, id);
     this.props = props;
+    
+    // Validate layer configuration on construction
+    this.validateLayerConfiguration();
   }
 
   /**
    * Create a Lambda function with standard configuration
+   * 
+   * Layer application logic:
+   * - All functions get OTEL layer (required for observability)
+   * - Functions get Prisma Engine OR Migration layer based on getPrismaLayerType(), never both
+   * - Additional layers can be added via additionalLayers parameter
    */
   public createFunction(functionProps: CreateFunctionProps): BaseLambdaFunction {
     const functionId = functionProps.functionName;
@@ -196,12 +219,7 @@ export class LambdaFactory extends Construct {
         subnets: (this.props.vpc as any).privateSubnets || []
       } : undefined,
       securityGroups: needsVpc ? this.props.securityGroups : undefined,
-      layers: [
-        // Order matters: OTEL first, then Prisma, then additional
-        this.props.otelLayer,
-        ...(needsPrismaLayer(functionProps.functionName) && this.props.prismaLayer ? [this.props.prismaLayer] : []),
-        ...(functionProps.additionalLayers || [])
-      ],
+      layers: this.getLayersForFunction(functionProps),
       role: functionProps.role,
       logRetentionDays: this.props.stageConfig.monitoring.logRetentionDays
     });
@@ -244,6 +262,41 @@ export class LambdaFactory extends Construct {
   }
 
   /**
+   * Get the appropriate layers for a function based on its requirements
+   * Functions in FUNCTIONS_WITHOUT_LAYERS get no layers at all (matching serverless.yml)
+   */
+  private getLayersForFunction(functionProps: CreateFunctionProps): lambda.ILayerVersion[] {
+    // Check if this function should have no layers
+    if (this.FUNCTIONS_WITHOUT_LAYERS.includes(functionProps.functionName)) {
+      return [];
+    }
+    
+    // Otherwise, apply standard layer configuration
+    return [
+      // Order matters: OTEL first, then Prisma, then additional
+      this.props.otelLayer,
+      ...this.getPrismaLayers(functionProps.functionName),
+      ...(functionProps.additionalLayers || [])
+    ];
+  }
+
+  /**
+   * Get the appropriate Prisma layers for a function
+   */
+  private getPrismaLayers(functionName: string): lambda.ILayerVersion[] {
+    const layerType = getPrismaLayerType(functionName);
+    
+    switch (layerType) {
+      case PrismaLayerType.ENGINE:
+        return this.props.prismaEngineLayer ? [this.props.prismaEngineLayer] : [];
+      case PrismaLayerType.MIGRATION:
+        return this.props.prismaMigrationLayer ? [this.props.prismaMigrationLayer] : [];
+      case PrismaLayerType.NONE:
+        return [];
+    }
+  }
+
+  /**
    * Get all functions created by this factory
    */
   public getAllFunctions(): Map<string, BaseLambdaFunction> {
@@ -263,6 +316,52 @@ export class LambdaFactory extends Construct {
     ];
 
     return vpcFunctions.includes(functionName);
+  }
+
+  /**
+   * Validate layer configuration to ensure required layers are present
+   * and there are no conflicting configurations
+   */
+  private validateLayerConfiguration(): void {
+    // OTEL layer is required for all functions
+    if (!this.props.otelLayer) {
+      throw new Error(
+        'OTEL layer is required but not provided. ' +
+        'All Lambda functions must have the OTEL layer for observability. ' +
+        'Please ensure the otelLayer is properly configured in the LambdaFactory props.'
+      );
+    }
+
+    // Warn if no Prisma layers are configured
+    if (!this.props.prismaEngineLayer && !this.props.prismaMigrationLayer) {
+      console.warn(
+        '[LambdaFactory] Warning: No Prisma layers configured. ' +
+        'Functions requiring database access may fail. ' +
+        'Consider adding prismaEngineLayer and/or prismaMigrationLayer to the factory configuration.'
+      );
+    }
+
+    // Validate that Prisma layers are different if both are provided
+    if (this.props.prismaEngineLayer && this.props.prismaMigrationLayer) {
+      // Check if they're the same layer (comparing ARNs)
+      const engineArn = (this.props.prismaEngineLayer as any).layerVersionArn || '';
+      const migrationArn = (this.props.prismaMigrationLayer as any).layerVersionArn || '';
+      
+      if (engineArn && migrationArn && engineArn === migrationArn) {
+        throw new Error(
+          'Conflicting layer configuration: prismaEngineLayer and prismaMigrationLayer ' +
+          'must be different layers. Engine layer is for runtime queries, ' +
+          'Migration layer is for schema migrations. ' +
+          `Both are currently pointing to: ${engineArn}`
+        );
+      }
+    }
+
+    // Log successful validation
+    console.log('[LambdaFactory] Layer configuration validated successfully:');
+    console.log('  - OTEL layer: ✓');
+    console.log(`  - Prisma Engine layer: ${this.props.prismaEngineLayer ? '✓' : '✗ (optional)'}`);
+    console.log(`  - Prisma Migration layer: ${this.props.prismaMigrationLayer ? '✓' : '✗ (optional)'}`);
   }
 
 }

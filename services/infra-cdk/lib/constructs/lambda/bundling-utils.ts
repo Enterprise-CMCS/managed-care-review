@@ -81,25 +81,48 @@ export function getBundlingConfig(
 }
 
 /**
- * Check if a function needs Prisma layer
+ * Enum for Prisma layer types
  */
-export function needsPrismaLayer(functionName: string): boolean {
-  const prismaFunctions = [
-    'GRAPHQL',
-    'CURRENT_USER',
-    'GET_USERS',
-    'UPDATE_USER_ROLE',
-    'INDEX_RATES',
-    'DELETE_RATE',
-    'INDEX_STATE_SUBMISSION',
-    'CREATE_QUESTION_RESPONSE',
-    'SEND_REVIEW_ACTION_EMAILS',
-    'SEND_EMAILS_FOR_CMS_RATE_REVIEWS',
+export enum PrismaLayerType {
+  ENGINE = 'engine',
+  MIGRATION = 'migration',
+  NONE = 'none'
+}
+
+/**
+ * Get which Prisma layer a function needs based on Serverless configuration
+ * This exactly matches the layer usage in serverless.yml
+ */
+export function getPrismaLayerType(functionName: string): PrismaLayerType {
+  // Functions that use PrismaClientEngine layer (from serverless.yml)
+  const engineFunctions = [
     'OAUTH_TOKEN',
+    'GRAPHQL',
+    'AUDIT_FILES',
+    'MIGRATE_DOCUMENT_ZIPS',
+  ];
+  
+  // Functions that use PrismaClientMigration layer (from serverless.yml)
+  const migrationFunctions = [
     'MIGRATE',
   ];
   
-  return prismaFunctions.includes(functionName);
+  if (engineFunctions.includes(functionName)) {
+    return PrismaLayerType.ENGINE;
+  }
+  
+  if (migrationFunctions.includes(functionName)) {
+    return PrismaLayerType.MIGRATION;
+  }
+  
+  return PrismaLayerType.NONE;
+}
+
+/**
+ * Check if a function needs any Prisma layer (backwards compatibility)
+ */
+export function needsPrismaLayer(functionName: string): boolean {
+  return getPrismaLayerType(functionName) !== PrismaLayerType.NONE;
 }
 
 /**
