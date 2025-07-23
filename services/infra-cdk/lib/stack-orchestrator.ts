@@ -206,7 +206,7 @@ export class StackOrchestrator {
       userPool: auth.userPool,
       authenticatedRole: auth.authenticatedRole,
       jwtSecret: foundation.jwtSecret,
-      prismaLayerArn: lambdaLayers.prismaLayerVersionArn,
+      prismaLayerArn: lambdaLayers.prismaEngineLayerVersionArn,
       postgresToolsLayerArn: lambdaLayers.postgresToolsLayerVersionArn
     });
     stack.addDependency(foundation);
@@ -232,7 +232,8 @@ export class StackOrchestrator {
       databaseCluster: data.database.cluster,
       databaseSecret: data.database.secret,
       uploadsBucketName: data.uploadsBucket.bucketName,
-      prismaLayerArn: lambdaLayers.prismaLayerVersionArn,
+      prismaEngineLayerArn: lambdaLayers.prismaEngineLayerVersionArn,
+      prismaMigrationLayerArn: lambdaLayers.prismaMigrationLayerVersionArn,
       postgresToolsLayerArn: lambdaLayers.postgresToolsLayerVersionArn
     });
     stack.addDependency(network);

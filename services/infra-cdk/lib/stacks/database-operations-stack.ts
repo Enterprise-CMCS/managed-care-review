@@ -22,9 +22,13 @@ export interface DatabaseOperationsStackProps extends BaseStackProps {
   uploadsBucketName: string;
   // From Lambda Layers Stack
   /**
-   * ARN of the Prisma Lambda layer for database ORM functionality
+   * ARN of the Prisma Engine Lambda layer for database ORM functionality
    */
-  prismaLayerArn: string;
+  prismaEngineLayerArn: string;
+  /**
+   * ARN of the Prisma Migration Lambda layer for database migrations
+   */
+  prismaMigrationLayerArn: string;
   /**
    * ARN of the PostgreSQL tools Lambda layer for database operations
    */
@@ -46,7 +50,8 @@ export class DatabaseOperationsStack extends BaseStack {
   private readonly databaseCluster: rds.IDatabaseCluster;
   private readonly databaseSecret: secretsmanager.ISecret;
   private readonly uploadsBucketName: string;
-  private readonly prismaLayerArn: string;
+  private readonly prismaEngineLayerArn: string;
+  private readonly prismaMigrationLayerArn: string;
   private readonly postgresToolsLayerArn: string;
 
   constructor(scope: Construct, id: string, props: DatabaseOperationsStackProps) {
@@ -61,7 +66,8 @@ export class DatabaseOperationsStack extends BaseStack {
     this.databaseCluster = props.databaseCluster;
     this.databaseSecret = props.databaseSecret;
     this.uploadsBucketName = props.uploadsBucketName;
-    this.prismaLayerArn = props.prismaLayerArn;
+    this.prismaEngineLayerArn = props.prismaEngineLayerArn;
+    this.prismaMigrationLayerArn = props.prismaMigrationLayerArn;
     this.postgresToolsLayerArn = props.postgresToolsLayerArn;
     
     // Define resources after all properties are initialized
@@ -100,27 +106,25 @@ export class DatabaseOperationsStack extends BaseStack {
   }
 
   private createLambdaLayers(): void {
-    // Import layers from LambdaLayersStack instead of creating new ones
+    // Import layers from LambdaLayersStack
     this.pgToolsLayer = lambda.LayerVersion.fromLayerVersionArn(
       this,
       'ImportedPgToolsLayer',
       this.postgresToolsLayerArn
     );
 
-    // Import Prisma layer from LambdaLayersStack
-    // Note: We're using the same Prisma layer for both engine and migration
-    // since the centralized PrismaLayer includes all necessary components
+    // Import Prisma Engine layer
     this.prismaEngineLayer = lambda.LayerVersion.fromLayerVersionArn(
       this,
       'ImportedPrismaEngineLayer',
-      this.prismaLayerArn
+      this.prismaEngineLayerArn
     );
     
-    // Use the same Prisma layer for migration (it includes migration tools)
+    // Import Prisma Migration layer (separate from engine layer)
     this.prismaMigrationLayer = lambda.LayerVersion.fromLayerVersionArn(
       this,
       'ImportedPrismaMigrationLayer',
-      this.prismaLayerArn
+      this.prismaMigrationLayerArn
     );
   }
 

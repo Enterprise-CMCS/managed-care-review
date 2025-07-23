@@ -4,7 +4,6 @@ import * as lambda from 'aws-cdk-lib/aws-lambda';
 import * as path from 'path';
 import { createHash } from 'crypto';
 import * as fs from 'fs';
-import { PrismaLayer } from '../constructs/lambda/prisma-layer';
 
 export interface LambdaLayersStackProps extends StackProps {
   stage: string;
@@ -15,27 +14,39 @@ export interface LambdaLayersStackProps extends StackProps {
  * This centralizes layer management and allows for clean cross-stack references
  */
 export class LambdaLayersStack extends Stack {
-  public readonly prismaLayerVersionArn: string;
-  public readonly prismaLayerVersion: lambda.LayerVersion;
+  public readonly prismaEngineLayerVersionArn: string;
+  public readonly prismaEngineLayerVersion: lambda.LayerVersion;
+  public readonly prismaMigrationLayerVersionArn: string;
+  public readonly prismaMigrationLayerVersion: lambda.LayerVersion;
   public readonly postgresToolsLayerVersionArn: string;
   public readonly postgresToolsLayerVersion: lambda.LayerVersion;
 
   constructor(scope: Construct, id: string, props: LambdaLayersStackProps) {
     super(scope, id, props);
 
-    // Create Prisma layer with automatic versioning
-    this.prismaLayerVersion = this.createPrismaLayer(props.stage);
-    this.prismaLayerVersionArn = this.prismaLayerVersion.layerVersionArn;
+    // Create Prisma Engine layer with automatic versioning
+    this.prismaEngineLayerVersion = this.createPrismaEngineLayer(props.stage);
+    this.prismaEngineLayerVersionArn = this.prismaEngineLayerVersion.layerVersionArn;
+    
+    // Create Prisma Migration layer with automatic versioning
+    this.prismaMigrationLayerVersion = this.createPrismaMigrationLayer(props.stage);
+    this.prismaMigrationLayerVersionArn = this.prismaMigrationLayerVersion.layerVersionArn;
 
     // Create PostgreSQL tools layer
     this.postgresToolsLayerVersion = this.createPostgresToolsLayer(props.stage);
     this.postgresToolsLayerVersionArn = this.postgresToolsLayerVersion.layerVersionArn;
 
     // Export ARNs for cross-stack reference
-    new CfnOutput(this, 'PrismaLayerArn', {
-      value: this.prismaLayerVersionArn,
-      exportName: `${props.stage}-PrismaLayerArn`,
-      description: 'ARN of the Prisma client layer'
+    new CfnOutput(this, 'PrismaEngineLayerArn', {
+      value: this.prismaEngineLayerVersionArn,
+      exportName: `${props.stage}-PrismaEngineLayerArn`,
+      description: 'ARN of the Prisma engine layer'
+    });
+    
+    new CfnOutput(this, 'PrismaMigrationLayerArn', {
+      value: this.prismaMigrationLayerVersionArn,
+      exportName: `${props.stage}-PrismaMigrationLayerArn`,
+      description: 'ARN of the Prisma migration layer'
     });
 
     new CfnOutput(this, 'PostgresToolsLayerArn', {
@@ -57,17 +68,35 @@ export class LambdaLayersStack extends Stack {
   }
 
   /**
-   * Create Prisma layer using the PrismaLayer construct with local bundling
+   * Create Prisma Engine layer with Lambda binaries
    */
-  private createPrismaLayer(stage: string): lambda.LayerVersion {
-    // Use the PrismaLayer construct which has local bundling implemented
-    const prismaLayer = new PrismaLayer(this, 'PrismaLayer', {
-      layerName: `mcr-prisma-${stage}`,
-      description: `Prisma client layer - Built ${new Date().toISOString()}`,
-      compatibleRuntimes: [lambda.Runtime.NODEJS_20_X]
-    });
+  private createPrismaEngineLayer(stage: string): lambda.LayerVersion {
+    const layerHash = this.calculateLayerHash('prisma-engine');
     
-    return prismaLayer.layerVersion;
+    return new lambda.LayerVersion(this, 'PrismaEngineLayer', {
+      layerVersionName: `mcr-prisma-engine-${stage}-${layerHash}`,
+      description: `Prisma engine layer - Built ${new Date().toISOString()}`,
+      compatibleRuntimes: [lambda.Runtime.NODEJS_20_X],
+      compatibleArchitectures: [lambda.Architecture.X86_64], // Match serverless - x86_64 only
+      removalPolicy: RemovalPolicy.RETAIN,
+      code: lambda.Code.fromAsset(path.join(__dirname, '../../lambda-layers-prisma-client-engine')),
+    });
+  }
+  
+  /**
+   * Create Prisma Migration layer with migration tools
+   */
+  private createPrismaMigrationLayer(stage: string): lambda.LayerVersion {
+    const layerHash = this.calculateLayerHash('prisma-migration');
+    
+    return new lambda.LayerVersion(this, 'PrismaMigrationLayer', {
+      layerVersionName: `mcr-prisma-migration-${stage}-${layerHash}`,
+      description: `Prisma migration layer - Built ${new Date().toISOString()}`,
+      compatibleRuntimes: [lambda.Runtime.NODEJS_20_X],
+      compatibleArchitectures: [lambda.Architecture.X86_64], // Match serverless - x86_64 only
+      removalPolicy: RemovalPolicy.RETAIN,
+      code: lambda.Code.fromAsset(path.join(__dirname, '../../lambda-layers-prisma-client-migration')),
+    });
   }
 
   /**
@@ -166,9 +195,9 @@ export class LambdaLayersStack extends Stack {
   }
 
   /**
-   * Get environment variables for functions using Prisma layer
+   * Get environment variables for functions using Prisma engine layer
    */
-  public static getPrismaLayerEnvironment(): Record<string, string> {
+  public static getPrismaEngineLayerEnvironment(): Record<string, string> {
     return {
       PRISMA_QUERY_ENGINE_LIBRARY: '/opt/nodejs/node_modules/.prisma/client/libquery_engine-rhel-openssl-3.0.x.so.node',
       NODE_OPTIONS: '--enable-source-maps',
