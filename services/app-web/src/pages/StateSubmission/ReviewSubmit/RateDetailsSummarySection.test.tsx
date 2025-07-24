@@ -354,37 +354,41 @@ describe('RateDetailsSummarySection', () => {
         const rateName =
             'MCR-MN-0005-SNBC-RATE-20221014-20221014-CERTIFICATION-20221014'
 
-        expect(screen.getByText(rateName)).toBeInTheDocument()
-        expect(
-            screen.getByRole('definition', {
-                name: 'Rates this rate certification covers',
-            })
-        ).toBeInTheDocument()
-        expect(
-            screen.getByRole('definition', {
-                name: 'Medicaid populations included in this rate certification',
-            })
-        ).toBeInTheDocument()
-        expect(
-            screen.getByTestId(
-                'Medicare-Medicaid dually eligible individuals enrolled through a Dual-Eligible Special Needs Plan (D-SNP)'
-            )
-        ).toBeInTheDocument()
-        expect(screen.getByTestId('Medicaid-only')).toBeInTheDocument()
-        expect(
-            screen.getByTestId(
-                'Medicare-Medicaid dually eligible individuals not enrolled through a D-SNP'
-            )
-        ).toBeInTheDocument()
-        expect(
-            screen.getByRole('definition', { name: 'Rate certification type' })
-        ).toBeInTheDocument()
-        expect(
-            screen.getByRole('definition', { name: 'Rating period' })
-        ).toBeInTheDocument()
-        expect(
-            screen.getByRole('definition', { name: 'Date certified' })
-        ).toBeInTheDocument()
+        await waitFor(() => {
+            expect(screen.getByText(rateName)).toBeInTheDocument()
+            expect(
+                screen.getByRole('definition', {
+                    name: 'Rates this rate certification covers',
+                })
+            ).toBeInTheDocument()
+            expect(
+                screen.getByRole('definition', {
+                    name: 'Medicaid populations included in this rate certification',
+                })
+            ).toBeInTheDocument()
+            expect(
+                screen.getByTestId(
+                    'Medicare-Medicaid dually eligible individuals enrolled through a Dual-Eligible Special Needs Plan (D-SNP)'
+                )
+            ).toBeInTheDocument()
+            expect(screen.getByTestId('Medicaid-only')).toBeInTheDocument()
+            expect(
+                screen.getByTestId(
+                    'Medicare-Medicaid dually eligible individuals not enrolled through a D-SNP'
+                )
+            ).toBeInTheDocument()
+            expect(
+                screen.getByRole('definition', {
+                    name: 'Rate certification type',
+                })
+            ).toBeInTheDocument()
+            expect(
+                screen.getByRole('definition', { name: 'Rating period' })
+            ).toBeInTheDocument()
+            expect(
+                screen.getByRole('definition', { name: 'Date certified' })
+            ).toBeInTheDocument()
+        })
     })
 
     it('can render the deprecated rate programs when present and no new rate programs added to CMS user viewing an existing rate certification submission', async () => {
