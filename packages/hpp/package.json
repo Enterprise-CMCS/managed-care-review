@@ -8,6 +8,7 @@
         "copy-gen-code": "mkdir -p build/gen && cp -r src/gen/* build/gen/ && find build/gen -name '*.ts' -delete"
     },
     "dependencies": {
+        "@mc-review/dates": "workspace:*",
         "@apollo/client": "3.8.8",
         "dayjs": "^1.11.13",
         "typescript": "5.1.6",
