@@ -8,11 +8,19 @@
  */
 
 /**
- * OpenTelemetry Lambda Layer ARNs
- * Version: 1.18.1 for x86_64, 1.30.2 for ARM64
+ * OpenTelemetry Lambda Layer ARNs (PINNED VERSIONS)
  * 
- * These layers provide OpenTelemetry instrumentation for Lambda functions
+ * ⚠️  IMPORTANT: These versions are PINNED to prevent unexpected changes during deployment.
+ *    OTEL layer upgrades can affect cold start times and telemetry behavior.
+ *    Always test upgrades in dev/val before production deployment.
+ * 
+ * Current Versions:
+ * - x86_64: 1.18.1:4 (aws-otel-nodejs-amd64-ver-1-18-1:4)
+ * - arm64: 1.30.2:1 (aws-otel-nodejs-arm64-ver-1-30-2:1)
+ * 
  * Source: AWS Distro for OpenTelemetry
+ * Upgrade Guide: docs/OTEL_LAYER_MANAGEMENT.md
+ * Last Updated: 2024-07-24
  */
 export const OTEL_LAYERS = {
   X86_64: 'arn:aws:lambda:us-east-1:901920570463:layer:aws-otel-nodejs-amd64-ver-1-18-1:4',

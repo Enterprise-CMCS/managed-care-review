@@ -144,12 +144,43 @@ jobs:
         account-id: ${{ steps.set-account-id.outputs.account-id }}
         stage-name: ${{ env.STAGE == 'dev' && 'main' || env.STAGE }}
 
-    # 5. Prepare Prisma Lambda Layers
-    - name: Prepare Prisma Lambda Layers
+    # 5. Build Optimized Lambda Layers
+    - name: Build Optimized Lambda Layers
       working-directory: services/infra-cdk
       run: |
-        echo "Building Prisma Lambda layers..."
-        pnpm prepare:prisma
+        echo "Building optimized Lambda layers with size limits..."
+        # Build all layers with aggressive size optimization
+        ./scripts/build-layer.sh all
+        
+        # Verify all layers are under size limits
+        echo "Layer sizes:"
+        du -sh lambda-layers-*/nodejs.tar.gz 2>/dev/null || true
+        
+        # Create artifacts directory
+        mkdir -p layer-artifacts
+        
+        # Copy compressed layers to artifacts directory
+        cp lambda-layers-prisma-client-engine/nodejs.tar.gz layer-artifacts/prisma-engine-layer.tar.gz
+        cp lambda-layers-prisma-client-migration/nodejs.tar.gz layer-artifacts/prisma-migration-layer.tar.gz
+        cp lambda-layers-postgres-tools/nodejs.tar.gz layer-artifacts/postgres-tools-layer.tar.gz
+        
+        echo "✅ All layers built and ready for deployment"
+
+    # 5a. Test Layer Sizes (Regression Prevention)
+    - name: Test Layer Sizes
+      working-directory: services/infra-cdk
+      run: |
+        echo "Testing layer sizes to prevent deployment failures..."
+        pnpm run test:size
+
+    # 5b. Upload Layer Artifacts
+    - name: Upload Lambda Layer Artifacts
+      uses: actions/upload-artifact@v4
+      with:
+        name: lambda-layers-${{ env.STAGE }}
+        path: services/infra-cdk/layer-artifacts/
+        retention-days: 7
+        compression-level: 0  # Already compressed tar.gz files
 
     # 6. CDK Synth - Validate infrastructure code
     - name: CDK Synth
@@ -279,6 +310,35 @@ jobs:
     #     pnpm cdk deploy MCR-GitHubOIDC-cdk \
     #       --require-approval never \
     #       --ci
+
+    # 12a. Download Layer Artifacts for Deployment
+    - name: Download Lambda Layer Artifacts
+      uses: actions/download-artifact@v4
+      with:
+        name: lambda-layers-${{ env.STAGE }}
+        path: services/infra-cdk/layer-artifacts/
+
+    # 12b. Prepare Layer Assets for CDK
+    - name: Prepare Layer Assets for CDK
+      working-directory: services/infra-cdk
+      run: |
+        echo "Preparing layer assets for CDK deployment..."
+        
+        # Extract layers to expected directories
+        mkdir -p lambda-layers-prisma-client-engine/nodejs
+        mkdir -p lambda-layers-prisma-client-migration/nodejs
+        mkdir -p lambda-layers-postgres-tools/nodejs
+        
+        # Extract artifacts to correct locations
+        tar -xzf layer-artifacts/prisma-engine-layer.tar.gz -C lambda-layers-prisma-client-engine/
+        tar -xzf layer-artifacts/prisma-migration-layer.tar.gz -C lambda-layers-prisma-client-migration/
+        tar -xzf layer-artifacts/postgres-tools-layer.tar.gz -C lambda-layers-postgres-tools/
+        
+        # Verify extractions
+        echo "Layer asset sizes:"
+        du -sh lambda-layers-*/nodejs 2>/dev/null || true
+        
+        echo "✅ Layer assets prepared for CDK deployment"
 
     # 13. Deploy All Infrastructure (excluding Frontend)
     - name: Deploy All Infrastructure Stacks

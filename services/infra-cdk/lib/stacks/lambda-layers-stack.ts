@@ -79,120 +79,61 @@ export class LambdaLayersStack extends Stack {
   }
 
   /**
-   * Create Prisma Engine layer with Lambda binaries
+   * Create Prisma Engine layer with Lambda binaries from pre-built artifacts
    */
   private createPrismaEngineLayer(stage: string): lambda.LayerVersion {
     const layerHash = this.calculateLayerHash('prisma-engine', stage);
     
     return new lambda.LayerVersion(this, 'PrismaEngineLayer', {
       layerVersionName: `mcr-prisma-engine-${stage}-${layerHash}`,
-      description: `Prisma engine layer - Built ${new Date().toISOString()}`,
+      description: `Prisma engine layer (optimized <50MB) - Built ${new Date().toISOString()}`,
       compatibleRuntimes: [lambda.Runtime.NODEJS_20_X],
       compatibleArchitectures: [lambda.Architecture.X86_64], // Match serverless - x86_64 only
       removalPolicy: RemovalPolicy.RETAIN,
-      code: lambda.Code.fromAsset(path.join(__dirname, '../../lambda-layers-prisma-client-engine')),
+      // Use pre-built, size-optimized layer assets
+      code: lambda.Code.fromAsset(path.join(__dirname, '../../lambda-layers-prisma-client-engine'), {
+        // No bundling - use pre-built artifacts from CI
+        // This prevents inline building which was causing 250MB+ layer sizes
+      }),
     });
   }
   
   /**
-   * Create Prisma Migration layer with migration tools
+   * Create Prisma Migration layer with migration tools from pre-built artifacts
    */
   private createPrismaMigrationLayer(stage: string): lambda.LayerVersion {
     const layerHash = this.calculateLayerHash('prisma-migration', stage);
     
     return new lambda.LayerVersion(this, 'PrismaMigrationLayer', {
       layerVersionName: `mcr-prisma-migration-${stage}-${layerHash}`,
-      description: `Prisma migration layer - Built ${new Date().toISOString()}`,
+      description: `Prisma migration layer (optimized <50MB) - Built ${new Date().toISOString()}`,
       compatibleRuntimes: [lambda.Runtime.NODEJS_20_X],
       compatibleArchitectures: [lambda.Architecture.X86_64], // Match serverless - x86_64 only
       removalPolicy: RemovalPolicy.RETAIN,
-      code: lambda.Code.fromAsset(path.join(__dirname, '../../lambda-layers-prisma-client-migration')),
+      // Use pre-built, size-optimized layer assets
+      code: lambda.Code.fromAsset(path.join(__dirname, '../../lambda-layers-prisma-client-migration'), {
+        // No bundling - use pre-built artifacts from CI
+        // This prevents inline building which was causing 250MB+ layer sizes
+      }),
     });
   }
 
   /**
-   * Create PostgreSQL tools layer
+   * Create PostgreSQL tools layer from pre-built artifacts
    */
   private createPostgresToolsLayer(stage: string): lambda.LayerVersion {
     const layerHash = this.calculateLayerHash('postgres-tools', stage);
     
-    // Check if the postgres tools build script exists
-    const buildScriptPath = path.join(__dirname, '../../lambda-layers-postgres-tools/build.sh');
-    const layerPath = path.join(__dirname, '../../lambda-layers-postgres-tools');
-    
-    // If build script exists, use it; otherwise create a basic layer
-    if (fs.existsSync(buildScriptPath)) {
-      return new lambda.LayerVersion(this, 'PostgresToolsLayer', {
-        layerVersionName: `mcr-postgres-tools-${stage}-${layerHash}`,
-        description: `PostgreSQL tools layer - Built ${new Date().toISOString()}`,
-        compatibleRuntimes: [lambda.Runtime.NODEJS_20_X],
-        compatibleArchitectures: [lambda.Architecture.X86_64], // Match serverless - x86_64 only
-        removalPolicy: RemovalPolicy.RETAIN,
-        code: lambda.Code.fromAsset(layerPath),
-      });
-    }
-    
-    // Fallback: Create minimal postgres tools layer with local bundling
     return new lambda.LayerVersion(this, 'PostgresToolsLayer', {
       layerVersionName: `mcr-postgres-tools-${stage}-${layerHash}`,
-      description: `PostgreSQL tools layer - Built ${new Date().toISOString()}`,
+      description: `PostgreSQL tools layer (optimized <50MB) - Built ${new Date().toISOString()}`,
       compatibleRuntimes: [lambda.Runtime.NODEJS_20_X],
       compatibleArchitectures: [lambda.Architecture.X86_64], // Match serverless - x86_64 only
       removalPolicy: RemovalPolicy.RETAIN,
-      code: lambda.Code.fromAsset(path.join(__dirname, '../constructs/lambda/layers'), {
-        bundling: {
-          image: lambda.Runtime.NODEJS_20_X.bundlingImage,
-          local: {
-            tryBundle(outputDir: string): boolean {
-              const { execSync } = require('child_process');
-              const fs = require('fs-extra');
-              const path = require('path');
-              
-              try {
-                // Create layer structure
-                fs.ensureDirSync(path.join(outputDir, 'nodejs/node_modules'));
-                
-                // Create package.json
-                const packageJson = {
-                  name: 'postgres-tools-layer',
-                  version: '1.0.0',
-                  description: 'PostgreSQL client tools for Lambda',
-                  dependencies: {
-                    'pg': '^8.11.3',
-                    'pg-format': '^1.0.4'
-                  }
-                };
-                
-                fs.writeJsonSync(path.join(outputDir, 'nodejs/package.json'), packageJson);
-                
-                // Install dependencies
-                execSync('npm install --production', {
-                  cwd: path.join(outputDir, 'nodejs'),
-                  stdio: 'inherit'
-                });
-                
-                // Create metadata
-                fs.writeJsonSync(path.join(outputDir, 'layer-metadata.json'), {
-                  postgres_version: 'node-pg-8.11.3',
-                  tools: ['pg client library']
-                });
-                
-                console.log('PostgreSQL tools layer built successfully with local bundling');
-                return true;
-              } catch (error) {
-                console.error('Failed to build PostgreSQL tools layer locally:', error);
-                return false;
-              }
-            }
-          },
-          // Docker command as fallback only
-          command: [
-            'bash', '-c', [
-              'echo "Docker bundling should not be used - local bundling failed"',
-              'exit 1'
-            ].join(' && ')
-          ],
-        },
+      // Use pre-built, size-optimized layer assets
+      code: lambda.Code.fromAsset(path.join(__dirname, '../../lambda-layers-postgres-tools'), {
+        // No bundling - use pre-built artifacts from CI
+        // This prevents inline building which was causing 250MB+ layer sizes
       }),
     });
   }
