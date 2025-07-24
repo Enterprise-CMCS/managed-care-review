@@ -21,7 +21,6 @@ jobs:
       deploy-id: ${{ steps.ghdeployment.outputs.deployment_id }}
       stage-name: ${{ steps.stage-name.outputs.stage-name-for-branch}}
       app-version: ${{ steps.branch-name.outputs.app-version}}
-      changed-services: ${{ steps.changed-services-action.outputs.changed-services }}
     steps:
       - name: Check out repository
         uses: actions/checkout@v4
@@ -61,13 +60,14 @@ jobs:
         shell: bash
         run: pnpm -r build:ci-scripts
 
-      - name: run get_changed_services
-        id: changed-services-action
-        uses: ./scripts/get-changed-services/
-        with:
-          branchName: ${{ steps.branch-name.outputs.branch-name}}
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      # TODO: Remove changed services logic - not needed for CDK deployments
+      # - name: run get_changed_services
+      #   id: changed-services-action
+      #   uses: ./scripts/get-changed-services/
+      #   with:
+      #     branchName: ${{ steps.branch-name.outputs.branch-name}}
+      #   env:
+      #     GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - uses: chrnorm/deployment-action@v2
         name: Create GitHub deployment
@@ -128,6 +128,7 @@ jobs:
           account-id: ${{ secrets.DEV_AWS_ACCOUNT_ID }}
           # use the manually bootstrapped OIDC role to solve the chicken-and-egg problem of deploying the OIDC service via OIDC
           stage-name: ${{ steps.set-oidc-stage-name.outputs.stage-name }}
+          changed-services: "github-oidc"  # Force it to use the main role for bootstrapping
 
       - name: deploy github-oidc with CDK
         id: deploy-github-oidc-cdk
@@ -344,7 +345,6 @@ jobs:
           region: ${{ vars.AWS_DEFAULT_REGION }}
           account-id: ${{ secrets.DEV_AWS_ACCOUNT_ID }}
           stage-name: ${{ needs.begin-deployment.outputs.stage-name }}
-          changed-services: ${{ needs.begin-deployment.outputs.changed-services }}
 
       - name: Deploy CDK foundation stacks
         working-directory: services/infra-cdk
@@ -380,7 +380,6 @@ jobs:
           region: ${{ vars.AWS_DEFAULT_REGION }}
           account-id: ${{ secrets.DEV_AWS_ACCOUNT_ID }}
           stage-name: ${{ needs.begin-deployment.outputs.stage-name }}
-          changed-services: ${{ needs.begin-deployment.outputs.changed-services }}
 
       - name: Download Prisma layers
         uses: actions/download-artifact@v4
@@ -437,7 +436,6 @@ jobs:
           region: ${{ vars.AWS_DEFAULT_REGION }}
           account-id: ${{ secrets.DEV_AWS_ACCOUNT_ID }}
           stage-name: ${{ needs.begin-deployment.outputs.stage-name }}
-          changed-services: ${{ needs.begin-deployment.outputs.changed-services }}
 
       - name: Deploy CDK compute stacks
         working-directory: services/infra-cdk
