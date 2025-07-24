@@ -1,16 +1,15 @@
 import { Construct } from 'constructs';
 import * as lambda from 'aws-cdk-lib/aws-lambda';
-import { Architecture } from 'aws-cdk-lib/aws-lambda';
 import { ServiceRegistry } from '@constructs/base';
-import { getOtelLayerArn } from '@config/constants';
+import { OTEL_LAYER_ARN } from '@config/constants';
 
 export interface OtelLayerProps {
   stage: string;
-  architecture?: Architecture;
 }
 
 /**
  * Lambda Layer containing AWS OpenTelemetry collector and libraries
+ * Uses x86_64 architecture only (matches serverless configuration)
  */
 export class OtelLayer extends Construct {
   public readonly layer: lambda.ILayerVersion;
@@ -18,30 +17,16 @@ export class OtelLayer extends Construct {
   constructor(scope: Construct, id: string, props: OtelLayerProps) {
     super(scope, id);
 
-    const architecture = props.architecture || Architecture.X86_64; // Match serverless - x86_64 only
-
-    // Use the AWS-managed OpenTelemetry layer
+    // Use the AWS-managed OpenTelemetry layer (x86_64 only)
     // This layer includes the OTEL collector and instrumentation libraries
-    const layerArn = this.getAwsOtelLayerArn(props.stage, architecture);
-
     this.layer = lambda.LayerVersion.fromLayerVersionArn(
       this,
       'AwsOtelLayer',
-      layerArn
+      OTEL_LAYER_ARN
     );
 
     // Store layer ARN in Parameter Store for other stacks to use
-    ServiceRegistry.putLayerArn(this, props.stage, 'otel', layerArn);
-  }
-
-  /**
-   * Get the AWS-managed OpenTelemetry layer ARN for the specified architecture
-   */
-  private getAwsOtelLayerArn(stage: string, architecture: Architecture): string {
-    // AWS-managed OpenTelemetry layer ARNs
-    // These are the official AWS layers that include the OTEL collector
-    const archType = architecture === Architecture.ARM_64 ? 'arm64' : 'x86_64';
-    return getOtelLayerArn(archType);
+    ServiceRegistry.putLayerArn(this, props.stage, 'otel', OTEL_LAYER_ARN);
   }
 
   /**

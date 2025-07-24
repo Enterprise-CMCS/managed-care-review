@@ -14,7 +14,7 @@ import * as lambda from 'aws-cdk-lib/aws-lambda';
 import * as s3 from 'aws-cdk-lib/aws-s3';
 import * as iam from 'aws-cdk-lib/aws-iam';
 import { Duration } from 'aws-cdk-lib';
-import { LAMBDA_MEMORY, LAMBDA_TIMEOUTS, FILE_SIZE_LIMITS, PROJECT_PREFIX, SERVICES, getOtelLayerArn } from '@config/constants';
+import { LAMBDA_MEMORY, LAMBDA_TIMEOUTS, FILE_SIZE_LIMITS, PROJECT_PREFIX, SERVICES, OTEL_LAYER_ARN } from '@config/constants';
 import { LambdaEnvironmentFactory } from '@constructs/lambda/environment-factory';
 import { StageConfig } from '@config/stage-config';
 
@@ -79,7 +79,7 @@ export class ScanEventProcessor extends Construct {
         lambda.LayerVersion.fromLayerVersionArn(
           this,
           'OtelLayerScanProcessor',
-          getOtelLayerArn('x86_64')
+          OTEL_LAYER_ARN
         )
       ]
     });

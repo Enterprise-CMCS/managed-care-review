@@ -102,7 +102,7 @@ jobs:
 
     # 3. Install and build
     - name: Install dependencies for code generation
-      run: pnpm install --frozen-lockfile --filter "./packages/**" --filter "./services/app-graphql" --filter "./services/app-proto" --filter "./services/app-api"
+      run: pnpm install --no-frozen-lockfile --filter "./packages/**" --filter "./services/app-graphql" --filter "./services/app-proto" --filter "./services/app-api"
 
     - name: Generate code (GraphQL, Prisma, Proto)
       run: pnpm -r generate

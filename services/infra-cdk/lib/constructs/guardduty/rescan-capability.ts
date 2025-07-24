@@ -14,7 +14,7 @@ import * as s3 from 'aws-cdk-lib/aws-s3';
 import * as iam from 'aws-cdk-lib/aws-iam';
 import * as ec2 from 'aws-cdk-lib/aws-ec2';
 import { Duration, CfnOutput } from 'aws-cdk-lib';
-import { LAMBDA_MEMORY, LAMBDA_TIMEOUTS, FILE_SIZE_LIMITS, PROJECT_PREFIX, SERVICES, getOtelLayerArn, QUEUE_LIMITS } from '@config/constants';
+import { LAMBDA_MEMORY, LAMBDA_TIMEOUTS, FILE_SIZE_LIMITS, PROJECT_PREFIX, SERVICES, OTEL_LAYER_ARN, QUEUE_LIMITS } from '@config/constants';
 import { LambdaEnvironmentFactory } from '@constructs/lambda/environment-factory';
 import { StageConfig } from '@config/stage-config';
 
@@ -98,7 +98,7 @@ export class RescanCapability extends Construct {
         lambda.LayerVersion.fromLayerVersionArn(
           this,
           'OtelLayerRescanHandler',
-          getOtelLayerArn('x86_64')
+          OTEL_LAYER_ARN
         )
       ]
     });
@@ -129,7 +129,7 @@ export class RescanCapability extends Construct {
         lambda.LayerVersion.fromLayerVersionArn(
           this,
           'OtelLayerRescanWorker',
-          getOtelLayerArn('x86_64')
+          OTEL_LAYER_ARN
         )
       ]
     });

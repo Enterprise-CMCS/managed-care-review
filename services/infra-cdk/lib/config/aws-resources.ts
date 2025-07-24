@@ -8,30 +8,28 @@
  */
 
 /**
- * OpenTelemetry Lambda Layer ARNs (PINNED VERSIONS)
+ * OpenTelemetry Lambda Layer ARN (PINNED VERSION)
  * 
- * ⚠️  IMPORTANT: These versions are PINNED to prevent unexpected changes during deployment.
+ * ⚠️  IMPORTANT: This version is PINNED to prevent unexpected changes during deployment.
  *    OTEL layer upgrades can affect cold start times and telemetry behavior.
  *    Always test upgrades in dev/val before production deployment.
  * 
- * Current Versions:
- * - x86_64: 1.18.1:4 (aws-otel-nodejs-amd64-ver-1-18-1:4)
- * - arm64: 1.30.2:1 (aws-otel-nodejs-arm64-ver-1-30-2:1)
+ * Architecture: x86_64 only (matches existing serverless configuration)
+ * Current Version: 1.18.1:4 (aws-otel-nodejs-amd64-ver-1-18-1:4)
  * 
  * Source: AWS Distro for OpenTelemetry
  * Upgrade Guide: docs/OTEL_LAYER_MANAGEMENT.md
  * Last Updated: 2024-07-24
  */
-export const OTEL_LAYERS = {
-  X86_64: 'arn:aws:lambda:us-east-1:901920570463:layer:aws-otel-nodejs-amd64-ver-1-18-1:4',
-  ARM64: 'arn:aws:lambda:us-east-1:901920570463:layer:aws-otel-nodejs-arm64-ver-1-30-2:1',
-} as const;
+export const OTEL_LAYER_ARN = 'arn:aws:lambda:us-east-1:901920570463:layer:aws-otel-nodejs-amd64-ver-1-18-1:4';
 
 /**
- * Get the appropriate OTEL layer ARN based on architecture
+ * Get the OTEL layer ARN (x86_64 architecture only)
+ * 
+ * @deprecated Use OTEL_LAYER_ARN constant directly
  */
-export function getOtelLayerArn(architecture: 'x86_64' | 'arm64' = 'x86_64'): string {
-  return architecture === 'arm64' ? OTEL_LAYERS.ARM64 : OTEL_LAYERS.X86_64;
+export function getOtelLayerArn(): string {
+  return OTEL_LAYER_ARN;
 }
 
 /**
