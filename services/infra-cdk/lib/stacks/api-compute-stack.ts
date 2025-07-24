@@ -213,8 +213,8 @@ export class ApiComputeStack extends BaseStack {
    */
   private createOtelLayer(): void {
     const otelConstruct = new OtelLayer(this, 'Otel', {
-      stage: this.stage,
-      architecture: lambda.Architecture.X86_64 // Match serverless configuration exactly
+      stage: this.stage
+      // OTEL layer now hardcoded to x86_64 (matches serverless configuration)
     });
 
     this.otelLayer = otelConstruct.layer;
