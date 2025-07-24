@@ -32,7 +32,7 @@ import {
     clickRemoveIndexRate,
     fillOutIndexRate,
 } from '../../../testHelpers/jestRateHelpers'
-import { Rate, RateStripped } from '../../../gen/gqlClient'
+import { RateStripped } from '../../../gen/gqlClient'
 
 describe('RateDetails', () => {
     // BRING THESE TESTS BACK WHEN WE RE-p IMPLEMENT SINGLE RATE EDIT
@@ -1036,73 +1036,73 @@ describe('RateDetails', () => {
                     ...strippedRateDataMock(),
                     id: 'test-id-123',
                     stateNumber: 1,
-                    latestSubmittedRevision: 
-                        {
-                            ...strippedRateDataMock().latestSubmittedRevision,
-                            submitInfo: {
-                                __typename: 'UpdateInformation',
-                                updatedAt: new Date('2022-04-10'),
-                                updatedBy: {
-                                    email: 'aang@example.com',
-                                    role: 'ADMIN_USER',
-                                    familyName: 'Hotman',
-                                    givenName: 'Iroh',
-                                },
-                                updatedReason: 'Resubmit',
+                    latestSubmittedRevision: {
+                        ...strippedRateDataMock().latestSubmittedRevision,
+                        submitInfo: {
+                            __typename: 'UpdateInformation',
+                            updatedAt: new Date('2022-04-10'),
+                            updatedBy: {
+                                email: 'aang@example.com',
+                                role: 'ADMIN_USER',
+                                familyName: 'Hotman',
+                                givenName: 'Iroh',
                             },
-                            formData: {
-                                ...strippedRateDataMock().latestSubmittedRevision.formData,
-                                rateCertificationName: 'Third-Position-Rate',
-                            },
+                            updatedReason: 'Resubmit',
                         },
+                        formData: {
+                            ...strippedRateDataMock().latestSubmittedRevision
+                                .formData,
+                            rateCertificationName: 'Third-Position-Rate',
+                        },
+                    },
                 },
                 {
                     ...strippedRateDataMock(),
                     id: 'test-id-124',
                     stateNumber: 2,
-                    latestSubmittedRevision:
-                        {
-                            ...strippedRateDataMock().latestSubmittedRevision,
-                            submitInfo: {
-                                __typename: 'UpdateInformation',
-                                updatedAt: new Date('2024-04-10'),
-                                updatedBy: {
-                                    email: 'aang@example.com',
-                                    role: 'STATE_USER',
-                                    familyName: 'Airman',
-                                    givenName: 'Aang',
-                                },
-                                updatedReason: 'Resubmit',
+                    latestSubmittedRevision: {
+                        ...strippedRateDataMock().latestSubmittedRevision,
+                        submitInfo: {
+                            __typename: 'UpdateInformation',
+                            updatedAt: new Date('2024-04-10'),
+                            updatedBy: {
+                                email: 'aang@example.com',
+                                role: 'STATE_USER',
+                                familyName: 'Airman',
+                                givenName: 'Aang',
                             },
-                            formData: {
-                                ...strippedRateDataMock().latestSubmittedRevision.formData,
-                                rateCertificationName: 'First-Position-Rate',
-                            },
+                            updatedReason: 'Resubmit',
                         },
+                        formData: {
+                            ...strippedRateDataMock().latestSubmittedRevision
+                                .formData,
+                            rateCertificationName: 'First-Position-Rate',
+                        },
+                    },
                 },
                 {
                     ...strippedRateDataMock(),
                     id: 'test-id-125',
                     stateNumber: 3,
-                    latestSubmittedRevision:
-                        {
-                            ...strippedRateDataMock().latestSubmittedRevision,
-                            submitInfo: {
-                                __typename: 'UpdateInformation',
-                                updatedAt: new Date('2024-04-08'),
-                                updatedBy: {
-                                    email: 'aang@example.com',
-                                    role: 'STATE_USER',
-                                    familyName: 'Airman',
-                                    givenName: 'Aang',
-                                },
-                                updatedReason: 'Resubmit',
+                    latestSubmittedRevision: {
+                        ...strippedRateDataMock().latestSubmittedRevision,
+                        submitInfo: {
+                            __typename: 'UpdateInformation',
+                            updatedAt: new Date('2024-04-08'),
+                            updatedBy: {
+                                email: 'aang@example.com',
+                                role: 'STATE_USER',
+                                familyName: 'Airman',
+                                givenName: 'Aang',
                             },
-                            formData: {
-                                ...strippedRateDataMock().latestSubmittedRevision.formData,
-                                rateCertificationName: 'Second-Position-Rate',
-                            },
+                            updatedReason: 'Resubmit',
                         },
+                        formData: {
+                            ...strippedRateDataMock().latestSubmittedRevision
+                                .formData,
+                            rateCertificationName: 'Second-Position-Rate',
+                        },
+                    },
                 },
             ]
 
@@ -1166,7 +1166,7 @@ describe('RateDetails', () => {
             // Assert options are present
             const dropdownOptions = screen.getAllByRole('option')
             expect(dropdownOptions).toHaveLength(3)
-
+            // test commit
             expect(dropdownOptions[0]).toHaveTextContent('First-Position-Rate')
             expect(dropdownOptions[1]).toHaveTextContent('Second-Position-Rate')
             expect(dropdownOptions[2]).toHaveTextContent('Third-Position-Rate')
@@ -1180,74 +1180,73 @@ describe('RateDetails', () => {
                     stateNumber: 1,
                     consolidatedStatus: 'WITHDRAWN',
                     reviewStatus: 'WITHDRAWN',
-                    latestSubmittedRevision:
-                        {
-                            ...strippedRateDataMock().latestSubmittedRevision,
-                            submitInfo: {
-                                __typename: 'UpdateInformation',
-                                updatedAt: new Date('2022-04-10'),
-                                updatedBy: {
-                                    email: 'aang@example.com',
-                                    role: 'ADMIN_USER',
-                                    familyName: 'Hotman',
-                                    givenName: 'Iroh',
-                                },
-                                updatedReason: 'Resubmit',
+                    latestSubmittedRevision: {
+                        ...strippedRateDataMock().latestSubmittedRevision,
+                        submitInfo: {
+                            __typename: 'UpdateInformation',
+                            updatedAt: new Date('2022-04-10'),
+                            updatedBy: {
+                                email: 'aang@example.com',
+                                role: 'ADMIN_USER',
+                                familyName: 'Hotman',
+                                givenName: 'Iroh',
                             },
-                            formData: {
-                                ...strippedRateDataMock().latestSubmittedRevision.formData,
-                                rateCertificationName: 'Third-Position-Rate',
-                            },
+                            updatedReason: 'Resubmit',
                         },
-                    
+                        formData: {
+                            ...strippedRateDataMock().latestSubmittedRevision
+                                .formData,
+                            rateCertificationName: 'Third-Position-Rate',
+                        },
+                    },
                 },
                 {
                     ...strippedRateDataMock(),
                     id: 'test-id-124',
                     stateNumber: 2,
-                    latestSubmittedRevision:
-                        {
-                            ...strippedRateDataMock().latestSubmittedRevision,
-                            submitInfo: {
-                                __typename: 'UpdateInformation',
-                                updatedAt: new Date('2024-04-10'),
-                                updatedBy: {
-                                    email: 'aang@example.com',
-                                    role: 'STATE_USER',
-                                    familyName: 'Airman',
-                                    givenName: 'Aang',
-                                },
-                                updatedReason: 'Resubmit',
+                    latestSubmittedRevision: {
+                        ...strippedRateDataMock().latestSubmittedRevision,
+                        submitInfo: {
+                            __typename: 'UpdateInformation',
+                            updatedAt: new Date('2024-04-10'),
+                            updatedBy: {
+                                email: 'aang@example.com',
+                                role: 'STATE_USER',
+                                familyName: 'Airman',
+                                givenName: 'Aang',
                             },
-                            formData: {
-                                ...strippedRateDataMock().latestSubmittedRevision.formData,
-                                rateCertificationName: 'First-Position-Rate',
-                            },
+                            updatedReason: 'Resubmit',
                         },
+                        formData: {
+                            ...strippedRateDataMock().latestSubmittedRevision
+                                .formData,
+                            rateCertificationName: 'First-Position-Rate',
+                        },
+                    },
                 },
                 {
                     ...strippedRateDataMock(),
                     id: 'test-id-125',
                     stateNumber: 3,
-                    latestSubmittedRevision:
-                        {
-                            ...strippedRateDataMock().latestSubmittedRevision,
-                            submitInfo: {
-                                __typename: 'UpdateInformation',
-                                updatedAt: new Date('2024-04-08'),
-                                updatedBy: {
-                                    email: 'aang@example.com',
-                                    role: 'STATE_USER',
-                                    familyName: 'Airman',
-                                    givenName: 'Aang',
-                                },
-                                updatedReason: 'Resubmit',
+                    latestSubmittedRevision: {
+                        ...strippedRateDataMock().latestSubmittedRevision,
+                        submitInfo: {
+                            __typename: 'UpdateInformation',
+                            updatedAt: new Date('2024-04-08'),
+                            updatedBy: {
+                                email: 'aang@example.com',
+                                role: 'STATE_USER',
+                                familyName: 'Airman',
+                                givenName: 'Aang',
                             },
-                            formData: {
-                                ...strippedRateDataMock().latestSubmittedRevision.formData,
-                                rateCertificationName: 'Second-Position-Rate',
-                            },
+                            updatedReason: 'Resubmit',
                         },
+                        formData: {
+                            ...strippedRateDataMock().latestSubmittedRevision
+                                .formData,
+                            rateCertificationName: 'Second-Position-Rate',
+                        },
+                    },
                 },
             ]
 
@@ -1966,7 +1965,9 @@ describe('RateDetails', () => {
             await screen.findByText('Rate Details')
             // rate Medicaid populations question to be present
             expect(
-                screen.getByText('Which Medicaid populations are included in this rate certification?')
+                screen.getByText(
+                    'Which Medicaid populations are included in this rate certification?'
+                )
             ).toBeInTheDocument()
         })
 
@@ -2005,7 +2006,9 @@ describe('RateDetails', () => {
             await screen.findByText('Rate Details')
             // rate Medicaid populations question to not be present
             expect(
-                screen.queryByText('Which Medicaid populations are included in this rate certification')
+                screen.queryByText(
+                    'Which Medicaid populations are included in this rate certification'
+                )
             ).not.toBeInTheDocument()
         })
     })
