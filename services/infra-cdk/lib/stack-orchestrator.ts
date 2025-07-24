@@ -104,16 +104,17 @@ export class StackOrchestrator {
     }
 
     private createGitHubOidc(): GitHubOidcStack | undefined {
-        // DISABLED: Using existing serverless OIDC setup instead of CDK's GitHubOidcStack
-        // to avoid duplicate OIDC providers (only one allowed per AWS account)
-        // The serverless OIDC role is used via the get_aws_credentials GitHub Action
-        // if (process.env.CREATE_GITHUB_OIDC === 'true') {
-        //   return new GitHubOidcStack(this.props.app, `MCR-GitHubOIDC`, {
-        //     env: this.props.env,
-        //     description: 'GitHub OIDC provider for MCR CI/CD'
-        //   });
-        // }
-        return undefined
+        // Create GitHub OIDC stack for stage-specific role
+        // This replaces the serverless github-oidc service
+        return new GitHubOidcStack(
+            this.props.app,
+            `MCR-GitHubOIDC-${this.props.stage}`,
+            {
+                env: this.props.env,
+                stage: this.props.stage,
+                description: `GitHub OIDC provider and role for stage ${this.props.stage}`,
+            }
+        )
     }
 
     private createFoundation(): FoundationStack {
