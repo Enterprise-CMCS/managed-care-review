@@ -88,8 +88,14 @@ export function getBundlingCommandHooks(functionName: string) {
         );
       }
       
-      // For OTEL function, copy collector.yml
-      if (functionName === 'OTEL') {
+      // Copy collector.yml for ALL functions that will have OTEL layer
+      // This matches serverless behavior where collector.yml is bundled with all OTEL-enabled functions
+      const functionsWithOtel = [
+        'GRAPHQL', 'OAUTH_TOKEN', 'MIGRATE', 'MIGRATE_DOCUMENT_ZIPS', 'AUDIT_FILES',
+        'INDEX_HEALTH_CHECKER', 'ZIP_KEYS', 'CLEANUP', 'OTEL'
+      ];
+      
+      if (functionsWithOtel.includes(functionName)) {
         const collectorPath = path.join(inputDir, '..', '..', 'collector.yml');
         commands.push(
           `if [ -f "${collectorPath}" ]; then`,
@@ -104,8 +110,14 @@ export function getBundlingCommandHooks(functionName: string) {
     afterBundling(inputDir: string, outputDir: string): string[] {
       const commands: string[] = [];
       
-      // For OTEL function, replace license key in collector.yml
-      if (functionName === 'OTEL') {
+      // Replace license key in collector.yml for ALL functions that have OTEL layer
+      // This matches serverless behavior where NR_LICENSE_KEY is substituted during build
+      const functionsWithOtel = [
+        'GRAPHQL', 'OAUTH_TOKEN', 'MIGRATE', 'MIGRATE_DOCUMENT_ZIPS', 'AUDIT_FILES',
+        'INDEX_HEALTH_CHECKER', 'ZIP_KEYS', 'CLEANUP', 'OTEL'
+      ];
+      
+      if (functionsWithOtel.includes(functionName)) {
         commands.push(
           `if [ -f "${outputDir}/collector.yml" ] && [ -n "$NR_LICENSE_KEY" ]; then`,
           `  sed -i.bak "s/\\$NR_LICENSE_KEY/$NR_LICENSE_KEY/g" "${outputDir}/collector.yml"`,
