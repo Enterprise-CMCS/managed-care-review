@@ -5,8 +5,8 @@ set -e
 # Ensures layers stay under 50MB to prevent deployment failures
 
 SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
-PROJECT_ROOT="$SCRIPT_DIR/../.."
-INFRA_CDK_DIR="$PROJECT_ROOT/services/infra-cdk"
+INFRA_CDK_DIR="$SCRIPT_DIR/.."
+PROJECT_ROOT="$SCRIPT_DIR/../../.."
 APP_API_DIR="$PROJECT_ROOT/services/app-api"
 
 # Layer type to build (engine, migration, postgres-tools)
