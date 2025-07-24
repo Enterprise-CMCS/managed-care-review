@@ -280,29 +280,13 @@ jobs:
     #       --require-approval never \
     #       --ci
 
-    # 13. Deploy Lambda layers
-    - name: Deploy Lambda Layers
-      id: deploy-layers
+    # 13. Deploy All Infrastructure (excluding Frontend)
+    - name: Deploy All Infrastructure Stacks
       working-directory: services/infra-cdk
       run: |
-        pnpm cdk deploy MCR-LambdaLayers-${{ env.STAGE }}-cdk \
-          --require-approval never \
-          --ci \
-          -c stage=${{ env.STAGE }}
-
-    # 14. Deploy infrastructure stacks (Phase 1 - excluding Frontend)
-    - name: Deploy Infrastructure Stacks
-      working-directory: services/infra-cdk
-      run: |
-        # Deploy infrastructure stacks in dependency order (excluding Frontend)
-        pnpm cdk deploy \
-          MCR-Foundation-${{ env.STAGE }}-cdk \
-          MCR-Network-${{ env.STAGE }}-cdk \
-          MCR-Data-${{ env.STAGE }}-cdk \
-          MCR-Auth-${{ env.STAGE }}-cdk \
-          MCR-DatabaseOps-${{ env.STAGE }}-cdk \
-          MCR-ApiCompute-${{ env.STAGE }}-cdk \
-          MCR-Monitoring-${{ env.STAGE }}-cdk \
+        # Deploy all infrastructure stacks at once, excluding frontend
+        pnpm cdk deploy --all \
+          --exclude "MCR-Frontend-${{ env.STAGE }}-cdk" \
           --require-approval never \
           --ci \
           -c stage=${{ env.STAGE }}
@@ -409,11 +393,11 @@ jobs:
         echo "Building Storybook..."
         pnpm storybook:build
 
-    # 18. Deploy Frontend Stack (Phase 2)
+    # 18. Deploy Frontend Stack (Final Phase)
     - name: Deploy Frontend Stack
       working-directory: services/infra-cdk
       run: |
-        echo "Deploying Frontend stack with built assets..."
+        echo "Deploying Frontend stack with real infrastructure configuration..."
         pnpm cdk deploy MCR-Frontend-${{ env.STAGE }}-cdk \
           --require-approval never \
           --ci \
