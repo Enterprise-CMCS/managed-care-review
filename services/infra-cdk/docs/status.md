@@ -1,11 +1,13 @@
 # MCR CDK Infrastructure Status
 
 ## Overview
+
 This document tracks the progress of the Managed Care Review (MCR) serverless to CDK migration, focusing on achieving 100% configuration parity while implementing AWS best practices.
 
 ## Migration Status
 
 ### Phase 1: Foundation Setup ✅
+
 - [x] Remove ClamAV references from CDK Data Stack
 - [x] Delete virus-scan-bucket.ts construct and remove export
 - [x] Fix GuardDuty bucket policy conditions (AND logic instead of OR)
@@ -18,6 +20,7 @@ This document tracks the progress of the Managed Care Review (MCR) serverless to
 ### Phase 2: Production-Ready CI/CD Implementation ✅
 
 #### 2.1 GitHub OIDC Authentication
+
 - [x] ~~Created `GitHubOidcStack` for one-time OIDC provider setup~~
 - [x] Using existing serverless OIDC setup at `services/github-oidc/serverless.yml`
 - [x] CDK deployments use serverless OIDC role via `get_aws_credentials` GitHub Action
@@ -26,6 +29,7 @@ This document tracks the progress of the Managed Care Review (MCR) serverless to
 **Note**: The CDK GitHubOidcStack is disabled in favor of the existing serverless implementation
 
 #### 2.2 Lambda Layers Management
+
 - [x] Created `LambdaLayersStack` for centralized layer management
 - [x] Implemented Prisma layer with automatic versioning
 - [x] Added PostgreSQL tools layer
@@ -35,6 +39,7 @@ This document tracks the progress of the Managed Care Review (MCR) serverless to
 **File**: `lib/stacks/lambda-layers-stack.ts`
 
 #### 2.3 GitHub Actions Workflow
+
 - [x] Created production-ready CDK deployment workflow
 - [x] Added concurrency control to prevent parallel deployments
 - [x] Implemented proper deployment order (layers → infra → frontend)
@@ -45,16 +50,19 @@ This document tracks the progress of the Managed Care Review (MCR) serverless to
 **File**: `.github/workflows/cdk-deploy-production.yml`
 
 #### 2.4 Frontend Artifact Versioning
+
 - [x] Enhanced `AppWebIntegration` with commit SHA-based versioning
 - [x] Implemented immutable asset caching with proper cache headers
 - [x] Added automatic CloudFront invalidation via `distributionPaths`
 - [x] Configured to keep old versions for rollback capability
 
-**Files**: 
+**Files**:
+
 - `lib/constructs/frontend/app-web-integration.ts`
 - `lib/stacks/frontend-stack.ts` (updated to pass commit SHA)
 
 #### 2.5 Postgres Scripts Custom Resource
+
 - [x] Created CDK-native replacement for serverless hooks
 - [x] Implemented checksum verification with MD5
 - [x] Added exponential backoff retry logic
@@ -64,6 +72,7 @@ This document tracks the progress of the Managed Care Review (MCR) serverless to
 **File**: `lib/constructs/database/postgres-scripts-upload.ts`
 
 #### 2.6 CDK App Integration
+
 - [x] Updated CDK app entry point to include new stacks
 - [x] Added proper stack dependencies
 - [x] Integrated layer ARN passing between stacks
@@ -72,34 +81,40 @@ This document tracks the progress of the Managed Care Review (MCR) serverless to
 **File**: `bin/mcr-app.ts`
 
 #### 2.7 Helper Scripts
+
 - [x] Created `export-build-config.sh` to export CloudFormation outputs
 - [x] Created `validate-build-config.sh` to validate configuration
 - [x] Made scripts executable with proper error handling
 
 **Files**:
+
 - `scripts/export-build-config.sh`
 - `scripts/validate-build-config.sh`
 
 ## Key Improvements
 
 ### Security
+
 - ✅ OIDC authentication eliminates static AWS credentials
 - ✅ IAM roles scoped to specific repository and branches
 - ✅ Checksum verification for all uploaded artifacts
 
 ### Reliability
+
 - ✅ Concurrency guards prevent deployment conflicts
 - ✅ Exponential backoff for resilient uploads
 - ✅ Hash-based change detection prevents unnecessary updates
 - ✅ Comprehensive error handling in custom resources
 
 ### Performance
+
 - ✅ pnpm store caching reduces install time by 50-80%
 - ✅ Lean Prisma layer (<50MB) with only ARM64 binaries
 - ✅ Immutable asset caching with 365-day cache headers
 - ✅ Parallel stack deployments where possible
 
 ### Maintainability
+
 - ✅ Clear separation between infrastructure and application code
 - ✅ Versioned deployments enable easy rollback
 - ✅ Side-by-side operation with existing serverless
@@ -110,18 +125,20 @@ This document tracks the progress of the Managed Care Review (MCR) serverless to
 ### One-Time Setup
 
 1. **GitHub OIDC Setup**:
-   - The OIDC provider is already set up via the serverless stack at `services/github-oidc`
-   - No additional CDK OIDC deployment is required
+
+    - The OIDC provider is already set up via the serverless stack at `services/github-oidc`
+    - No additional CDK OIDC deployment is required
 
 2. **Add GitHub Repository Secrets**:
-   - `DEV_AWS_ACCOUNT_ID`: Dev AWS account ID
-   - `VAL_AWS_ACCOUNT_ID`: Val AWS account ID  
-   - `PROD_AWS_ACCOUNT_ID`: Prod AWS account ID
-   - The OIDC role ARN is automatically constructed by the `get_aws_credentials` action
+    - `DEV_AWS_ACCOUNT_ID`: Dev AWS account ID
+    - `VAL_AWS_ACCOUNT_ID`: Val AWS account ID
+    - `PROD_AWS_ACCOUNT_ID`: Prod AWS account ID
+    - The OIDC role ARN is automatically constructed by the `get_aws_credentials` action
 
 ### Regular Deployment
 
 The GitHub Actions workflow will automatically:
+
 1. Deploy Lambda layers
 2. Deploy infrastructure stacks
 3. Export build configuration
@@ -141,93 +158,104 @@ npx cdk deploy MCR-Frontend-dev -c stage=dev -c commitSha=$(git rev-parse HEAD)
 ## Migration Path
 
 1. **Dev Environment** (Current)
-   - Test CDK deployment in feature branch
-   - Validate configuration parity
-   - Run side-by-side with serverless
+
+    - Test CDK deployment in feature branch
+    - Validate configuration parity
+    - Run side-by-side with serverless
 
 2. **Val Environment** (Next)
-   - Deploy CDK stacks to val
-   - Test all functionality
-   - Monitor for issues
+
+    - Deploy CDK stacks to val
+    - Test all functionality
+    - Monitor for issues
 
 3. **Production** (Final)
-   - Deploy during maintenance window
-   - Keep serverless as fallback
-   - Remove serverless after validation period
+    - Deploy during maintenance window
+    - Keep serverless as fallback
+    - Remove serverless after validation period
 
 ## Phase 3: Complete Migration Checklist
 
 ### Migration Progress Summary
+
 - **Total Items**: 45
 - **Completed**: 25 (Phase 1 & 2)
 - **Remaining**: 20
 - **Completion**: 56%
 
 ### 3.1 API Gateway & Custom Domains 🟡
+
 - [ ] **P0** Custom domain names for API Gateway
-  - Current: Serverless domain manager plugin
-  - Target: `DomainName` and `BasePathMapping` constructs
-  - Note: Required for production URLs
+    - Current: Serverless domain manager plugin
+    - Target: `DomainName` and `BasePathMapping` constructs
+    - Note: Required for production URLs
 - [ ] **P1** API Gateway request/response transformations
 - [ ] **P1** API rate limiting and throttling
 - [ ] **P2** API Gateway resource policies
 - [ ] **P2** Usage plans and API keys
 
 ### 3.2 Authentication & Authorization 🟡
+
 - [ ] **P0** SAML metadata configuration for all environments
-  - Current: Environment-specific URLs in serverless
-  - Target: Stage-aware SAML configuration in CDK
+    - Current: Environment-specific URLs in serverless
+    - Target: Stage-aware SAML configuration in CDK
 - [ ] **P1** OAuth callback URLs for all stages
 - [ ] **P2** MFA enforcement policies
 - [ ] **P2** Password complexity requirements
 - [ ] **P3** Session timeout configuration
 
 ### 3.3 Event-Driven Architecture 🔴
+
 - [ ] **P0** EventBridge rules for scheduled tasks
-  - Current: Serverless schedule events
-  - Target: `events.Rule` with cron expressions
+    - Current: Serverless schedule events
+    - Target: `events.Rule` with cron expressions
 - [ ] **P1** S3 bucket event notifications → Lambda
-  - Required for: Upload processing triggers
+    - Required for: Upload processing triggers
 - [ ] **P1** SQS queues for async processing
 - [ ] **P2** SNS topics for notifications
 - [ ] **P2** Dead letter queue configurations
 
 ### 3.4 Database & Secrets Management 🟢
+
 - [ ] **P0** Secrets rotation with AWS Solutions Construct
-  - Current: Custom rotation Lambda
-  - Target: AWS Solutions patterns
-  - Note: User mentioned this is using AWS SA construct
+    - Current: Custom rotation Lambda
+    - Target: AWS Solutions patterns
+    - Note: User mentioned this is using AWS SA construct
 - [ ] **P1** Cross-account secret sharing for prod
 - [ ] **P2** KMS key policies and rotation
 
 ### 3.5 Monitoring & Alerting 🔴
+
 - [ ] **P0** CloudWatch Log Groups retention policies
-  - Current: Serverless default (never expire)
-  - Target: Stage-specific retention
+    - Current: Serverless default (never expire)
+    - Target: Stage-specific retention
 - [ ] **P1** CloudWatch alarms for:
-  - Lambda errors
-  - API Gateway 4xx/5xx rates
-  - Database connection failures
+    - Lambda errors
+    - API Gateway 4xx/5xx rates
+    - Database connection failures
 - [ ] **P1** SNS alert topics and email subscriptions
 - [ ] **P2** X-Ray tracing configuration
 - [ ] **P3** Custom CloudWatch dashboards
 
 ### 3.6 Security & Compliance 🟡
+
 - [ ] **P0** WAF rules beyond geo-blocking
-  - SQL injection protection
-  - XSS protection
-  - Rate limiting
+    - SQL injection protection
+    - XSS protection
+    - Rate limiting
 - [ ] **P1** VPC endpoints for AWS services
 - [ ] **P2** Security group rules audit
 - [ ] **P3** AWS Config rules for compliance
 
 ### 3.7 Cost Optimization 🔵
+
 - [ ] **P2** Lambda reserved concurrency settings
 - [ ] **P2** S3 lifecycle policies for old uploads
 - [ ] **P3** CloudFront caching behaviors optimization
 - [ ] **P3** RDS reserved instances
 
 ### 3.8 Operational Tools 🔵
+
 - [ ] **P1** Database backup automation beyond default
 - [ ] **P2** Log aggregation configuration
 - [ ] **P3** Automated security scanning integration
@@ -235,25 +263,30 @@ npx cdk deploy MCR-Frontend-dev -c stage=dev -c commitSha=$(git rev-parse HEAD)
 ### 3.9 Service-Specific Gaps
 
 #### **UI-Auth Service**
+
 - SAML integration (P0)
 - OAuth providers configuration (P1)
 
 #### **Uploads Service**
+
 - S3 event notifications (P1)
 - CORS configuration (P1)
 - Multipart upload settings (P2)
 
 #### **App-API Service**
+
 - GraphQL schema deployment automation (P2)
 - DataLoader configuration (P3)
 
 #### **Postgres Service**
+
 - Additional backup strategies (P2)
 - Read replica configuration (P3)
 
 ### Priority Legend
+
 - **P0** 🔴 Critical - Blocks production
-- **P1** 🟡 High - Core functionality 
+- **P1** 🟡 High - Core functionality
 - **P2** 🔵 Medium - Important features
 - **P3** ⚪ Low - Nice to have
 

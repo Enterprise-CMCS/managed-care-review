@@ -7,12 +7,13 @@ For local development, you need to set the following environment variables:
 ### Required Variables
 
 1. **AWS Account ID** - Set one of these:
-   - `CDK_DEFAULT_ACCOUNT` - Preferred method, matches GitHub Actions
-   - `DEV_ACCOUNT_ID` - Stage-specific account ID
-   - `AWS_ACCOUNT_ID` - Generic fallback
+
+    - `CDK_DEFAULT_ACCOUNT` - Preferred method, matches GitHub Actions
+    - `DEV_ACCOUNT_ID` - Stage-specific account ID
+    - `AWS_ACCOUNT_ID` - Generic fallback
 
 2. **AWS Region**:
-   - `AWS_REGION` - Required (e.g., `us-east-1`)
+    - `AWS_REGION` - Required (e.g., `us-east-1`)
 
 ### Example .env.local file
 
@@ -66,6 +67,7 @@ In GitHub Actions, the `CDK_DEFAULT_ACCOUNT` is automatically set from the `secr
 ## VPC Configuration
 
 The VPC configuration is read from SSM Parameter Store:
+
 - `/configuration/default/vpc/id` - VPC ID
 - `/configuration/default/vpc/private-subnet-ids` - Comma-separated list of private subnet IDs
 - `/configuration/default/vpc/availability-zones` - Comma-separated list of availability zones
@@ -84,6 +86,7 @@ aws ssm put-parameter --name "/configuration/default/vpc/availability-zones" --v
 ## Security Groups
 
 Security groups are created by the CDK NetworkStack and are not imported. This ensures:
+
 - Consistent security group configuration
 - Proper ingress/egress rules
 - Clean infrastructure as code

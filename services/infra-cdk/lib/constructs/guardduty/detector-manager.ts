@@ -1,55 +1,64 @@
 /**
  * GuardDuty Detector Manager
- * 
+ *
  * Manages the creation and configuration of GuardDuty detector
  * using a custom resource to handle existing detectors gracefully
  */
 
-import { Construct } from 'constructs';
-import * as lambda from 'aws-cdk-lib/aws-lambda';
-import * as iam from 'aws-cdk-lib/aws-iam';
-import { Duration, CustomResource, CfnOutput } from 'aws-cdk-lib';
-import { GUARDDUTY_DEFAULTS } from '@config/constants';
+import { Construct } from 'constructs'
+import * as lambda from 'aws-cdk-lib/aws-lambda'
+import * as iam from 'aws-cdk-lib/aws-iam'
+import { Duration, CustomResource, CfnOutput } from 'aws-cdk-lib'
+import { GUARDDUTY_DEFAULTS } from '@config/constants'
 
 export interface GuardDutyDetectorManagerProps {
-  stage: string;
+    stage: string
 }
 
 export class GuardDutyDetectorManager extends Construct {
-  public readonly detectorId: string;
-  public readonly detectorResource: CustomResource;
+    public readonly detectorId: string
+    public readonly detectorResource: CustomResource
 
-  constructor(scope: Construct, id: string, props: GuardDutyDetectorManagerProps) {
-    super(scope, id);
+    constructor(
+        scope: Construct,
+        id: string,
+        props: GuardDutyDetectorManagerProps
+    ) {
+        super(scope, id)
 
-    // Create Lambda handler for detector management
-    const detectorHandler = this.createDetectorHandler();
+        // Create Lambda handler for detector management
+        const detectorHandler = this.createDetectorHandler()
 
-    // Create custom resource to handle detector creation
-    this.detectorResource = new CustomResource(this, 'GuardDutyDetectorResource', {
-      serviceToken: detectorHandler.functionArn,
-      resourceType: 'Custom::GuardDutyDetector',
-      properties: {
-        Enable: true,
-        FindingPublishingFrequency: GUARDDUTY_DEFAULTS.FINDING_PUBLISHING_FREQUENCY
-      }
-    });
+        // Create custom resource to handle detector creation
+        this.detectorResource = new CustomResource(
+            this,
+            'GuardDutyDetectorResource',
+            {
+                serviceToken: detectorHandler.functionArn,
+                resourceType: 'Custom::GuardDutyDetector',
+                properties: {
+                    Enable: true,
+                    FindingPublishingFrequency:
+                        GUARDDUTY_DEFAULTS.FINDING_PUBLISHING_FREQUENCY,
+                },
+            }
+        )
 
-    this.detectorId = this.detectorResource.getAttString('DetectorId');
+        this.detectorId = this.detectorResource.getAttString('DetectorId')
 
-    // Output the detector ID
-    new CfnOutput(this, 'GuardDutyDetectorId', {
-      value: this.detectorId,
-      description: 'GuardDuty Detector ID',
-      exportName: `GuardDuty-${props.stage}-DetectorId`
-    });
-  }
+        // Output the detector ID
+        new CfnOutput(this, 'GuardDutyDetectorId', {
+            value: this.detectorId,
+            description: 'GuardDuty Detector ID',
+            exportName: `GuardDuty-${props.stage}-DetectorId`,
+        })
+    }
 
-  private createDetectorHandler(): lambda.Function {
-    return new lambda.Function(this, 'DetectorHandler', {
-      runtime: lambda.Runtime.NODEJS_20_X,
-      handler: 'index.handler',
-      code: lambda.Code.fromInline(`
+    private createDetectorHandler(): lambda.Function {
+        return new lambda.Function(this, 'DetectorHandler', {
+            runtime: lambda.Runtime.NODEJS_20_X,
+            handler: 'index.handler',
+            code: lambda.Code.fromInline(`
         const { GuardDuty } = require('@aws-sdk/client-guardduty');
         const response = require('cfn-response');
         
@@ -91,17 +100,17 @@ export class GuardDutyDetectorManager extends Construct {
           }
         };
       `),
-      timeout: Duration.seconds(60),
-      initialPolicy: [
-        new iam.PolicyStatement({
-          effect: iam.Effect.ALLOW,
-          actions: [
-            'guardduty:ListDetectors',
-            'guardduty:CreateDetector'
-          ],
-          resources: ['*']
+            timeout: Duration.seconds(60),
+            initialPolicy: [
+                new iam.PolicyStatement({
+                    effect: iam.Effect.ALLOW,
+                    actions: [
+                        'guardduty:ListDetectors',
+                        'guardduty:CreateDetector',
+                    ],
+                    resources: ['*'],
+                }),
+            ],
         })
-      ]
-    });
-  }
+    }
 }

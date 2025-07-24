@@ -1,6 +1,6 @@
 /**
  * AWS Resource ARNs and External Resource References
- * 
+ *
  * This file contains all external AWS resource references including:
  * - Lambda Layer ARNs
  * - External service ARNs
@@ -10,20 +10,22 @@
 /**
  * OpenTelemetry Lambda Layer ARNs
  * Version: 1.18.1 for x86_64, 1.30.2 for ARM64
- * 
+ *
  * These layers provide OpenTelemetry instrumentation for Lambda functions
  * Source: AWS Distro for OpenTelemetry
  */
 export const OTEL_LAYERS = {
-  X86_64: 'arn:aws:lambda:us-east-1:901920570463:layer:aws-otel-nodejs-amd64-ver-1-18-1:4',
-  ARM64: 'arn:aws:lambda:us-east-1:901920570463:layer:aws-otel-nodejs-arm64-ver-1-30-2:1',
-} as const;
+    X86_64: 'arn:aws:lambda:us-east-1:901920570463:layer:aws-otel-nodejs-amd64-ver-1-18-1:4',
+    ARM64: 'arn:aws:lambda:us-east-1:901920570463:layer:aws-otel-nodejs-arm64-ver-1-30-2:1',
+} as const
 
 /**
  * Get the appropriate OTEL layer ARN based on architecture
  */
-export function getOtelLayerArn(architecture: 'x86_64' | 'arm64' = 'x86_64'): string {
-  return architecture === 'arm64' ? OTEL_LAYERS.ARM64 : OTEL_LAYERS.X86_64;
+export function getOtelLayerArn(
+    architecture: 'x86_64' | 'arm64' = 'x86_64'
+): string {
+    return architecture === 'arm64' ? OTEL_LAYERS.ARM64 : OTEL_LAYERS.X86_64
 }
 
 /**
@@ -31,25 +33,25 @@ export function getOtelLayerArn(architecture: 'x86_64' | 'arm64' = 'x86_64'): st
  * These should be loaded from environment variables in production
  */
 export const AWS_ACCOUNTS = {
-  VAL: process.env.VAL_AWS_ACCOUNT_ID || '',
-  PROD: process.env.PROD_AWS_ACCOUNT_ID || '',
-} as const;
+    VAL: process.env.VAL_AWS_ACCOUNT_ID || '',
+    PROD: process.env.PROD_AWS_ACCOUNT_ID || '',
+} as const
 
 /**
  * IAM Permission Boundaries
  * Required for CMS Cloud environments
  */
 export const PERMISSION_BOUNDARIES = {
-  POWERUSER: (accountId: string) => 
-    `arn:aws:iam::${accountId}:policy/cms-cloud-admin/ct-ado-poweruser-permissions-boundary-policy`,
-  DEVELOPER: (accountId: string) =>
-    `arn:aws:iam::${accountId}:policy/cms-cloud-admin/developer-boundary-policy`,
-} as const;
+    POWERUSER: (accountId: string) =>
+        `arn:aws:iam::${accountId}:policy/cms-cloud-admin/ct-ado-poweruser-permissions-boundary-policy`,
+    DEVELOPER: (accountId: string) =>
+        `arn:aws:iam::${accountId}:policy/cms-cloud-admin/developer-boundary-policy`,
+} as const
 
 /**
  * External Integration Endpoints
  */
 export const EXTERNAL_ENDPOINTS = {
-  SLACK_WEBHOOK: process.env.SLACK_WEBHOOK || '',
-  OTEL_COLLECTOR_URL: process.env.VITE_APP_OTEL_COLLECTOR_URL || '',
-} as const;
+    SLACK_WEBHOOK: process.env.SLACK_WEBHOOK || '',
+    OTEL_COLLECTOR_URL: process.env.VITE_APP_OTEL_COLLECTOR_URL || '',
+} as const
