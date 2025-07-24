@@ -9,7 +9,7 @@ import {
     mockValidHelpDeskUser,
     mockValidStateUser,
 } from '@mc-review/mocks'
-import { screen, within } from '@testing-library/react'
+import { screen, waitFor, within } from '@testing-library/react'
 import { rateWithHistoryMock } from '@mc-review/mocks'
 import type { Contract } from '../../../gen/gqlClient'
 
@@ -58,11 +58,13 @@ describe('SingleRateSummarySection', () => {
                 name: 'Programs this rate certification covers',
             })
         ).toBeInTheDocument()
-        expect(
-            screen.getByRole('definition', {
-                name: 'Medicaid populations included in this rate certification',
-            })
-        ).toBeInTheDocument()
+        await waitFor(() => {
+            expect(
+                screen.getByRole('definition', {
+                    name: 'Medicaid populations included in this rate certification',
+                })
+            ).toBeInTheDocument()
+        })
         expect(
             screen.getByRole('definition', { name: 'Rate certification type' })
         ).toBeInTheDocument()
