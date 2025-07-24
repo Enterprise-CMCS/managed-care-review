@@ -457,13 +457,12 @@ jobs:
     - name: Deploy Frontend Stack
       working-directory: services/infra-cdk
       run: |
-        echo "Deploying Frontend stack with real infrastructure configuration..."
+        echo "Deploying Frontend stack with CDK native asset management..."
         pnpm cdk deploy MCR-Frontend-${{ env.STAGE }}-cdk \
           --require-approval never \
           --ci \
           -c stage=${{ env.STAGE }} \
-          -c enableAppWebIntegration=true \
-          -c commitSha=${{ github.sha }}
+          -c enableAppWebIntegration=true
 
     # 19. Export all deployment outputs
     - name: Export All Deployment Outputs

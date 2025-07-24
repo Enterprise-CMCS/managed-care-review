@@ -126,9 +126,7 @@ export class FrontendStack extends BaseStack {
     
     // Add app-web integration if enabled
     if (this.enableAppWebIntegration) {
-      // Get commit SHA from context (passed from CI/CD)
-      const commitSha = this.node.tryGetContext('commitSha');
-      
+      // CDK native asset management handles versioning automatically
       new AppWebIntegration(this, 'AppWebIntegration', {
         mainAppBucket: this.mainApp.bucket,
         storybookBucket: this.storybook.bucket,
@@ -136,7 +134,6 @@ export class FrontendStack extends BaseStack {
         storybookDistribution: this.storybook.distribution,
         stage: this.stage,
         appWebPath: '../app-web',
-        commitSha: commitSha,
         enableImmutableAssets: true
       });
     }
