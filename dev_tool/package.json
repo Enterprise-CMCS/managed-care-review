@@ -23,7 +23,7 @@
         "@aws-sdk/client-cloudfront": "^3.848.0",
         "@aws-sdk/client-ec2": "^3.848.0",
         "@aws-sdk/client-secrets-manager": "^3.848.0",
-        "axios": "^1.10.0",
+        "axios": "^1.11.0",
         "node-ssh": "^13.2.1",
         "prompts": "^2.4.2",
         "yargs": "^17.2.1"
