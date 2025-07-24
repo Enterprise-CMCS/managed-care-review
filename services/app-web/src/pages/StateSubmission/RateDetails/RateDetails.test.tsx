@@ -32,7 +32,7 @@ import {
     clickRemoveIndexRate,
     fillOutIndexRate,
 } from '../../../testHelpers/jestRateHelpers'
-import { RateStripped } from '../../../gen/gqlClient'
+import { Rate, RateStripped } from '../../../gen/gqlClient'
 
 describe('RateDetails', () => {
     // BRING THESE TESTS BACK WHEN WE RE-p IMPLEMENT SINGLE RATE EDIT
@@ -1031,121 +1031,80 @@ describe('RateDetails', () => {
         })
 
         it('lists dropdown options in desc order by latest submission date', async () => {
-            const testContract = {
-                ...mockContractWithLinkedRateDraft({
-                    draftRates: [
-                        draftRateDataMock(
-                            { id: 'test-abc-124' },
-                            {
-                                formData: {
-                                    ...rateRevisionDataMock().formData,
-                                    rateDocuments: [
-                                        {
-                                            s3URL: 's3://bucketname/one-one/one-one.png',
-                                            name: 'one one',
-                                            sha256: 'fakeSha1',
-                                        },
-                                        {
-                                            s3URL: 's3://bucketname/one-two/one-two.png',
-                                            name: 'one two',
-                                            sha256: 'fakeSha2',
-                                        },
-                                        {
-                                            s3URL: 's3://bucketname/one-three/one-three.png',
-                                            name: 'one three',
-                                            sha256: 'fakeSha3',
-                                        },
-                                    ],
+            const rates: RateStripped[] = [
+                {
+                    ...strippedRateDataMock(),
+                    id: 'test-id-123',
+                    stateNumber: 1,
+                    latestSubmittedRevision: 
+                        {
+                            ...strippedRateDataMock().latestSubmittedRevision,
+                            submitInfo: {
+                                __typename: 'UpdateInformation',
+                                updatedAt: new Date('2022-04-10'),
+                                updatedBy: {
+                                    email: 'aang@example.com',
+                                    role: 'ADMIN_USER',
+                                    familyName: 'Hotman',
+                                    givenName: 'Iroh',
                                 },
-                            }
-                        ),
-                    ],
-                }),
-            }
-            const r1 = strippedRateDataMock()
-            r1.latestSubmittedRevision.formData.rateCertificationName =
-                'First-Position-Rate'
-            const r2 = strippedRateDataMock()
-            r2.latestSubmittedRevision.formData.rateCertificationName =
-                'Second-Position-Rate'
-            const r3 = strippedRateDataMock()
-            r3.latestSubmittedRevision.formData.rateCertificationName =
-                'Third-Position-Rate'
-            const rates: RateStripped[] = [r1, r2, r3]
-            // const rates: RateStripped[] = [
-            //     {
-            //         ...strippedRateDataMock(),
-            //         id: 'test-id-123',
-            //         stateNumber: 1,
-            //         latestSubmittedRevision: {
-            //             ...strippedRateDataMock().latestSubmittedRevision,
-            //             submitInfo: {
-            //                 __typename: 'UpdateInformation',
-            //                 updatedAt: new Date('2022-04-10'),
-            //                 updatedBy: {
-            //                     email: 'aang@example.com',
-            //                     role: 'ADMIN_USER',
-            //                     familyName: 'Hotman',
-            //                     givenName: 'Iroh',
-            //                 },
-            //                 updatedReason: 'Resubmit',
-            //             },
-            //             formData: {
-            //                 ...strippedRateDataMock().latestSubmittedRevision
-            //                     .formData,
-            //                 rateCertificationName: 'Third-Position-Rate',
-            //             },
-            //         },
-            //     },
-            //     {
-            //         ...strippedRateDataMock(),
-            //         id: 'test-id-124',
-            //         stateNumber: 2,
-            //         latestSubmittedRevision: {
-            //             ...strippedRateDataMock().latestSubmittedRevision,
-            //             submitInfo: {
-            //                 __typename: 'UpdateInformation',
-            //                 updatedAt: new Date('2024-04-10'),
-            //                 updatedBy: {
-            //                     email: 'aang@example.com',
-            //                     role: 'STATE_USER',
-            //                     familyName: 'Airman',
-            //                     givenName: 'Aang',
-            //                 },
-            //                 updatedReason: 'Resubmit',
-            //             },
-            //             formData: {
-            //                 ...strippedRateDataMock().latestSubmittedRevision
-            //                     .formData,
-            //                 rateCertificationName: 'First-Position-Rate',
-            //             },
-            //         },
-            //     },
-            //     {
-            //         ...strippedRateDataMock(),
-            //         id: 'test-id-125',
-            //         stateNumber: 3,
-            //         latestSubmittedRevision: {
-            //             ...strippedRateDataMock().latestSubmittedRevision,
-            //             submitInfo: {
-            //                 __typename: 'UpdateInformation',
-            //                 updatedAt: new Date('2024-04-08'),
-            //                 updatedBy: {
-            //                     email: 'aang@example.com',
-            //                     role: 'STATE_USER',
-            //                     familyName: 'Airman',
-            //                     givenName: 'Aang',
-            //                 },
-            //                 updatedReason: 'Resubmit',
-            //             },
-            //             formData: {
-            //                 ...strippedRateDataMock().latestSubmittedRevision
-            //                     .formData,
-            //                 rateCertificationName: 'Second-Position-Rate',
-            //             },
-            //         },
-            //     },
-            // ]
+                                updatedReason: 'Resubmit',
+                            },
+                            formData: {
+                                ...strippedRateDataMock().latestSubmittedRevision.formData,
+                                rateCertificationName: 'Third-Position-Rate',
+                            },
+                        },
+                },
+                {
+                    ...strippedRateDataMock(),
+                    id: 'test-id-124',
+                    stateNumber: 2,
+                    latestSubmittedRevision:
+                        {
+                            ...strippedRateDataMock().latestSubmittedRevision,
+                            submitInfo: {
+                                __typename: 'UpdateInformation',
+                                updatedAt: new Date('2024-04-10'),
+                                updatedBy: {
+                                    email: 'aang@example.com',
+                                    role: 'STATE_USER',
+                                    familyName: 'Airman',
+                                    givenName: 'Aang',
+                                },
+                                updatedReason: 'Resubmit',
+                            },
+                            formData: {
+                                ...strippedRateDataMock().latestSubmittedRevision.formData,
+                                rateCertificationName: 'First-Position-Rate',
+                            },
+                        },
+                },
+                {
+                    ...strippedRateDataMock(),
+                    id: 'test-id-125',
+                    stateNumber: 3,
+                    latestSubmittedRevision:
+                        {
+                            ...strippedRateDataMock().latestSubmittedRevision,
+                            submitInfo: {
+                                __typename: 'UpdateInformation',
+                                updatedAt: new Date('2024-04-08'),
+                                updatedBy: {
+                                    email: 'aang@example.com',
+                                    role: 'STATE_USER',
+                                    familyName: 'Airman',
+                                    givenName: 'Aang',
+                                },
+                                updatedReason: 'Resubmit',
+                            },
+                            formData: {
+                                ...strippedRateDataMock().latestSubmittedRevision.formData,
+                                rateCertificationName: 'Second-Position-Rate',
+                            },
+                        },
+                },
+            ]
 
             const { user } = renderWithProviders(
                 <Routes>
@@ -1160,9 +1119,8 @@ describe('RateDetails', () => {
                             indexRatesStrippedMockSuccess(undefined, rates),
                             fetchCurrentUserMock({ statusCode: 200 }),
                             fetchContractMockSuccess({
-                                contract: testContract,
+                                contract: mockContractWithLinkedRateDraft(),
                             }),
-                            indexRatesStrippedMockSuccess(undefined, rates),
                         ],
                     },
                     routerProvider: {
@@ -1222,73 +1180,74 @@ describe('RateDetails', () => {
                     stateNumber: 1,
                     consolidatedStatus: 'WITHDRAWN',
                     reviewStatus: 'WITHDRAWN',
-                    latestSubmittedRevision: {
-                        ...strippedRateDataMock().latestSubmittedRevision,
-                        submitInfo: {
-                            __typename: 'UpdateInformation',
-                            updatedAt: new Date('2022-04-10'),
-                            updatedBy: {
-                                email: 'aang@example.com',
-                                role: 'ADMIN_USER',
-                                familyName: 'Hotman',
-                                givenName: 'Iroh',
+                    latestSubmittedRevision:
+                        {
+                            ...strippedRateDataMock().latestSubmittedRevision,
+                            submitInfo: {
+                                __typename: 'UpdateInformation',
+                                updatedAt: new Date('2022-04-10'),
+                                updatedBy: {
+                                    email: 'aang@example.com',
+                                    role: 'ADMIN_USER',
+                                    familyName: 'Hotman',
+                                    givenName: 'Iroh',
+                                },
+                                updatedReason: 'Resubmit',
                             },
-                            updatedReason: 'Resubmit',
+                            formData: {
+                                ...strippedRateDataMock().latestSubmittedRevision.formData,
+                                rateCertificationName: 'Third-Position-Rate',
+                            },
                         },
-                        formData: {
-                            ...strippedRateDataMock().latestSubmittedRevision
-                                .formData,
-                            rateCertificationName: 'Third-Position-Rate',
-                        },
-                    },
+                    
                 },
                 {
                     ...strippedRateDataMock(),
                     id: 'test-id-124',
                     stateNumber: 2,
-                    latestSubmittedRevision: {
-                        ...strippedRateDataMock().latestSubmittedRevision,
-                        submitInfo: {
-                            __typename: 'UpdateInformation',
-                            updatedAt: new Date('2024-04-10'),
-                            updatedBy: {
-                                email: 'aang@example.com',
-                                role: 'STATE_USER',
-                                familyName: 'Airman',
-                                givenName: 'Aang',
+                    latestSubmittedRevision:
+                        {
+                            ...strippedRateDataMock().latestSubmittedRevision,
+                            submitInfo: {
+                                __typename: 'UpdateInformation',
+                                updatedAt: new Date('2024-04-10'),
+                                updatedBy: {
+                                    email: 'aang@example.com',
+                                    role: 'STATE_USER',
+                                    familyName: 'Airman',
+                                    givenName: 'Aang',
+                                },
+                                updatedReason: 'Resubmit',
                             },
-                            updatedReason: 'Resubmit',
+                            formData: {
+                                ...strippedRateDataMock().latestSubmittedRevision.formData,
+                                rateCertificationName: 'First-Position-Rate',
+                            },
                         },
-                        formData: {
-                            ...strippedRateDataMock().latestSubmittedRevision
-                                .formData,
-                            rateCertificationName: 'First-Position-Rate',
-                        },
-                    },
                 },
                 {
                     ...strippedRateDataMock(),
                     id: 'test-id-125',
                     stateNumber: 3,
-                    latestSubmittedRevision: {
-                        ...strippedRateDataMock().latestSubmittedRevision,
-                        submitInfo: {
-                            __typename: 'UpdateInformation',
-                            updatedAt: new Date('2024-04-08'),
-                            updatedBy: {
-                                email: 'aang@example.com',
-                                role: 'STATE_USER',
-                                familyName: 'Airman',
-                                givenName: 'Aang',
+                    latestSubmittedRevision:
+                        {
+                            ...strippedRateDataMock().latestSubmittedRevision,
+                            submitInfo: {
+                                __typename: 'UpdateInformation',
+                                updatedAt: new Date('2024-04-08'),
+                                updatedBy: {
+                                    email: 'aang@example.com',
+                                    role: 'STATE_USER',
+                                    familyName: 'Airman',
+                                    givenName: 'Aang',
+                                },
+                                updatedReason: 'Resubmit',
                             },
-                            updatedReason: 'Resubmit',
+                            formData: {
+                                ...strippedRateDataMock().latestSubmittedRevision.formData,
+                                rateCertificationName: 'Second-Position-Rate',
+                            },
                         },
-                        formData: {
-                            ...strippedRateDataMock().latestSubmittedRevision
-                                .formData,
-                            rateCertificationName: 'Second-Position-Rate',
-                        },
-                    },
                 },
             ]
 
@@ -2007,9 +1966,7 @@ describe('RateDetails', () => {
             await screen.findByText('Rate Details')
             // rate Medicaid populations question to be present
             expect(
-                screen.getByText(
-                    'Which Medicaid populations are included in this rate certification?'
-                )
+                screen.getByText('Which Medicaid populations are included in this rate certification?')
             ).toBeInTheDocument()
         })
 
@@ -2048,9 +2005,7 @@ describe('RateDetails', () => {
             await screen.findByText('Rate Details')
             // rate Medicaid populations question to not be present
             expect(
-                screen.queryByText(
-                    'Which Medicaid populations are included in this rate certification'
-                )
+                screen.queryByText('Which Medicaid populations are included in this rate certification')
             ).not.toBeInTheDocument()
         })
     })
