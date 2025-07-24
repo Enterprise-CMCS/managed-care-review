@@ -1,9 +1,6 @@
 import { dsnpTriggers } from '@mc-review/common-code'
 import type { FeatureFlagSettings } from '@mc-review/common-code'
-import type {
-    ContractDraftRevisionFormDataInput,
-    Rate,
-} from '../../gen/gqlServer'
+import type { ContractDraftRevisionFormDataInput } from '../../gen/gqlServer'
 import { contractFormDataSchema, preprocessNulls } from './formDataTypes'
 import { contractTypeSchema, populationCoveredSchema } from '@mc-review/hpp'
 import { z } from 'zod'
@@ -99,42 +96,17 @@ const validateContractDraftRevisionInput = (
 const refineForFeatureFlags = (featureFlags?: FeatureFlagSettings) => {
     if (featureFlags) {
         return submittableContractSchema.superRefine((contract, ctx) => {
-            const formData = contract.draftRevision.formData
-            if (featureFlags['438-attestation']) {
-                // since we have different validations based on a feature flag, we add them as a refinement here.
-                // once 438 attestation ships this refinement should be moved to the submittableContractSchema
-                // and statutoryRegulatoryAttestation should be made non-optional.
+            const contractFormData = contract.draftRevision.formData
 
-                if (formData.statutoryRegulatoryAttestation === undefined) {
-                    ctx.addIssue({
-                        code: z.ZodIssueCode.custom,
-                        message:
-                            'statutoryRegulatoryAttestationDescription is required when  438-attestation feature flag is on',
-                    })
-                }
-
-                if (
-                    (formData.statutoryRegulatoryAttestation === false &&
-                        !formData.statutoryRegulatoryAttestationDescription) ||
-                    (formData.statutoryRegulatoryAttestationDescription &&
-                        formData.statutoryRegulatoryAttestationDescription
-                            .length === 0)
-                ) {
-                    ctx.addIssue({
-                        code: z.ZodIssueCode.custom,
-                        message:
-                            'statutoryRegulatoryAttestationDescription is Required if statutoryRegulatoryAttestation is false',
-                    })
-                }
-            }
             if (featureFlags['dsnp']) {
                 // when the dnsp flag is on, the dsnpContract field becomes
                 // required IF the submission's federal authorities include
                 // ANY of the following: 'STATE_PLAN','WAIVER_1915B', 'WAIVER_1115', 'VOLUNTARY'
-                const dsnpIsReuired = formData.federalAuthorities.some(
+                const dsnpIsRequired = contractFormData.federalAuthorities.some(
                     (authority) => dsnpTriggers.includes(authority)
                 )
-                if (dsnpIsReuired && formData.dsnpContract === null) {
+
+                if (dsnpIsRequired && contractFormData.dsnpContract === null) {
                     ctx.addIssue({
                         code: z.ZodIssueCode.custom,
                         message: `dsnpContract is required when any of the following Federal Authorities are present: ${dsnpTriggers.toString()}`,
@@ -142,12 +114,12 @@ const refineForFeatureFlags = (featureFlags?: FeatureFlagSettings) => {
                 }
                 // if the contract is associated with a DSNP then
                 // associated rate Medicaid populations must be selected
-                contract.draftRates.forEach((rate: Rate) => {
+                contract.draftRates.forEach((rate) => {
                     const rateFormData = rate.draftRevision?.formData
                     const noRateMedicaidPopulations =
                         !rateFormData?.rateMedicaidPopulations ||
                         rateFormData?.rateMedicaidPopulations?.length === 0
-                    const isDSNPContract = formData.dsnpContract
+                    const isDSNPContract = contractFormData.dsnpContract
 
                     if (isDSNPContract && noRateMedicaidPopulations) {
                         ctx.addIssue({
