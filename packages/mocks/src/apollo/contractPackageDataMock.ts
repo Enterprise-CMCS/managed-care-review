@@ -474,11 +474,6 @@ function mockContractPackageDraft(partial?: Partial<Contract>): Contract {
                     formData: {
                         __typename: 'RateFormData',
                         rateType: 'AMENDMENT',
-                        rateMedicaidPopulations: [
-                            "MEDICARE_MEDICAID_WITH_DSNP",
-                            "MEDICAID_ONLY",
-                            "MEDICARE_MEDICAID_WITHOUT_DSNP"
-                        ],
                         rateCapitationType: 'RATE_CELL',
                         rateDocuments: [
                             {
@@ -1308,11 +1303,6 @@ function mockContractPackageSubmitted(partial?: Partial<Contract>): Contract {
                             rateCertificationName: 'rate cert',
                             rateType: 'AMENDMENT',
                             rateCapitationType: 'RATE_CELL',
-                            rateMedicaidPopulations: [
-                                "MEDICARE_MEDICAID_WITH_DSNP",
-                                "MEDICAID_ONLY",
-                                "MEDICARE_MEDICAID_WITHOUT_DSNP"
-                            ],
                             rateDocuments: [
                                 {
                                     __typename: 'GenericDocument',
