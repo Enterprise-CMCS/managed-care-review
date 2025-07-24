@@ -14,6 +14,7 @@ jobs:
   begin-deployment:
     name: Begin CDK Deployment
     runs-on: ubuntu-24.04
+    environment: dev
     permissions:
       deployments: write
     outputs:
