@@ -100,16 +100,7 @@ jobs:
         restore-keys: |
           ${{ runner.os }}-pnpm-cdk-
 
-    # 3. Install and build
-    - name: Install dependencies for code generation
-      run: pnpm install --no-frozen-lockfile --filter "./packages/**" --filter "./services/app-graphql" --filter "./services/app-proto" --filter "./services/app-api"
-
-    - name: Generate code (GraphQL, Prisma, Proto)
-      run: pnpm -r generate
-
-    - name: Build packages
-      run: pnpm build:packages
-
+    # 3. Install CDK dependencies (self-sufficient)
     - name: Install CDK dependencies
       working-directory: services/infra-cdk
       run: pnpm install --frozen-lockfile
