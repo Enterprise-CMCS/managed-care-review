@@ -97,6 +97,12 @@ jobs:
             fi
           )" >> $GITHUB_OUTPUT
 
+      - name: Debug - Show what role we're trying to assume
+        run: |
+          echo "Bootstrap stage name: ${{ steps.set-oidc-stage-name.outputs.stage-name }}"
+          echo "Target stage name: ${{ steps.stage-name.outputs.stage-name-for-branch}}"
+          echo "Expected role ARN: arn:aws:iam::${{ secrets.DEV_AWS_ACCOUNT_ID }}:role/delegatedadmin/developer/github-oidc-${{ steps.set-oidc-stage-name.outputs.stage-name }}-ServiceRole"
+          
       - name: Get AWS credentials
         uses: ./.github/actions/get_aws_credentials
         with:
