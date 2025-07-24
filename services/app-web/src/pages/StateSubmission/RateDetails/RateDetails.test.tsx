@@ -1744,7 +1744,6 @@ describe('RateDetails', () => {
                     },
                     featureFlags: {
                         'rate-edit-unlock': false,
-                        dsnp: true,
                     },
                 }
             )

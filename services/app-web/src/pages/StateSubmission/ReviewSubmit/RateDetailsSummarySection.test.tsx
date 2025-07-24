@@ -346,7 +346,7 @@ describe('RateDetailsSummarySection', () => {
                 />,
                 {
                     apolloProvider: apolloProviderCMSUser,
-                    featureFlags: { 'dsnp': true },
+                    featureFlags: { dsnp: true },
                 }
             )
         })
