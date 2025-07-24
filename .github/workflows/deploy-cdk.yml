@@ -14,7 +14,7 @@ jobs:
   begin-deployment:
     name: Begin CDK Deployment
     runs-on: ubuntu-24.04
-    environment: dev
+    # environment: dev  # Temporarily removing to test if this fixes OIDC auth
     permissions:
       deployments: write
     outputs:
