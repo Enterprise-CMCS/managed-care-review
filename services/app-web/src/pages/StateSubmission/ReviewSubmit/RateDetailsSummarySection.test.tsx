@@ -330,6 +330,13 @@ describe('RateDetailsSummarySection', () => {
             'NEW'
         contract.packageSubmissions[0].rateRevisions[0].formData.amendmentEffectiveDateStart =
             null
+        contract.packageSubmissions[0].rateRevisions[0].formData.rateMedicaidPopulations =
+            [
+                'MEDICAID_ONLY',
+                'MEDICARE_MEDICAID_WITHOUT_DSNP',
+                'MEDICARE_MEDICAID_WITH_DSNP',
+            ]
+
         await waitFor(() => {
             renderWithProviders(
                 <RateDetailsSummarySection
