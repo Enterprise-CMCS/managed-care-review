@@ -137,7 +137,10 @@ const refineForFeatureFlags = (featureFlags?: FeatureFlagSettings) => {
                     (authority) => dsnpTriggers.includes(authority)
                 )
 
-                if (dsnpIsRequired && contractFormData.dsnpContract === null) {
+                const dsnpNotAnswered =
+                    contractFormData.dsnpContract === null ||
+                    contractFormData.dsnpContract === undefined
+                if (dsnpIsRequired && dsnpNotAnswered) {
                     ctx.addIssue({
                         code: z.ZodIssueCode.custom,
                         message: `dsnpContract is required when any of the following Federal Authorities are present: ${dsnpTriggers.toString()}`,
