@@ -31,6 +31,7 @@ env:
   AWS_REGION: us-east-1
   NODE_VERSION: 20
   STAGE: ${{ github.event.inputs.stage || (github.ref_name == 'main' && 'prod' || 'dev') }}
+  NR_LICENSE_KEY: ${{ secrets.NR_LICENSE_KEY }}
 
 # Prevent parallel deployments
 concurrency:
@@ -261,13 +262,12 @@ jobs:
         echo "See the CDK Diff artifact for detailed changes." >> $GITHUB_STEP_SUMMARY
 
     # 11. CDK Bootstrap (if needed)
-    - name: CDK Bootstrap
-      if: github.event_name != 'pull_request'
-      working-directory: services/infra-cdk
-      run: |
-        pnpm cdk bootstrap aws://${{ steps.set-account-id.outputs.account-id }}/${{ env.AWS_REGION }} \
-          --cloudformation-execution-policies arn:aws:iam::aws:policy/AdministratorAccess \
-          -c stage=${{ env.STAGE }} || true
+    # - name: CDK Bootstrap
+    #   working-directory: services/infra-cdk
+    #   run: |
+    #     pnpm cdk bootstrap aws://${{ steps.set-account-id.outputs.account-id }}/${{ env.AWS_REGION }} \
+    #       --cloudformation-execution-policies arn:aws:iam::aws:policy/AdministratorAccess \
+    #       -c stage=${{ env.STAGE }} || true
 
     # 12. Deploy OIDC stack (one-time)
     # COMMENTED OUT: Using existing serverless OIDC setup instead of CDK's GitHubOidcStack
@@ -283,7 +283,6 @@ jobs:
     # 13. Deploy Lambda layers
     - name: Deploy Lambda Layers
       id: deploy-layers
-      if: github.event_name != 'pull_request'
       working-directory: services/infra-cdk
       run: |
         pnpm cdk deploy MCR-LambdaLayers-${{ env.STAGE }}-cdk \
@@ -293,7 +292,6 @@ jobs:
 
     # 14. Deploy infrastructure stacks (Phase 1 - excluding Frontend)
     - name: Deploy Infrastructure Stacks
-      if: github.event_name != 'pull_request'
       working-directory: services/infra-cdk
       run: |
         # Deploy infrastructure stacks in dependency order (excluding Frontend)
@@ -312,7 +310,6 @@ jobs:
     # 15. Export infrastructure outputs for frontend build
     - name: Export Infrastructure Outputs
       id: infra-outputs
-      if: github.event_name != 'pull_request'
       run: |
         # Create script to export infrastructure outputs
         cat > export-infra-outputs.sh << 'EOF'
@@ -358,7 +355,6 @@ jobs:
     # 16. Fetch optional SSM parameters for frontend build
     - name: Fetch SSM Parameters
       id: ssm-params
-      if: github.event_name != 'pull_request'
       run: |
         # Fetch optional parameters from SSM (matching serverless)
         echo "Fetching optional SSM parameters..."
@@ -385,7 +381,6 @@ jobs:
 
     # 17. Build frontend assets with real infrastructure configuration
     - name: Build Frontend with Infrastructure Configuration
-      if: github.event_name != 'pull_request'
       working-directory: services/app-web
       env:
         # Match serverless environment variables exactly
@@ -416,7 +411,6 @@ jobs:
 
     # 18. Deploy Frontend Stack (Phase 2)
     - name: Deploy Frontend Stack
-      if: github.event_name != 'pull_request'
       working-directory: services/infra-cdk
       run: |
         echo "Deploying Frontend stack with built assets..."
@@ -430,7 +424,6 @@ jobs:
     # 19. Export all deployment outputs
     - name: Export All Deployment Outputs
       id: export-config
-      if: github.event_name != 'pull_request'
       run: |
         # Create script to export all CloudFormation outputs
         cat > export-outputs.sh << 'EOF'
@@ -467,7 +460,7 @@ jobs:
 
     # 20. Output deployment information
     - name: Output Deployment Summary
-      if: success() && github.event_name != 'pull_request'
+      if: success()
       run: |
         echo "## 🚀 Deployment Successful!" >> $GITHUB_STEP_SUMMARY
         echo "" >> $GITHUB_STEP_SUMMARY

@@ -28,6 +28,7 @@ export interface BaseLambdaFunctionProps {
   logRetentionDays?: number;
   depsLockFilePath?: string;
   layers?: lambda.ILayerVersion[];
+  hasOtelLayer?: boolean; // Whether this function has the OTEL layer for telemetry
 }
 
 /**
@@ -75,10 +76,12 @@ export class BaseLambdaFunction extends Construct {
       depsLockFilePath: props.depsLockFilePath,
       environment: {
         NODE_OPTIONS: '--enable-source-maps',
-        // OTEL configuration
-        AWS_LAMBDA_EXEC_WRAPPER: '/opt/otel-handler',
-        OTEL_PROPAGATORS: 'tracecontext,baggage,xray',
-        OTEL_PYTHON_DISABLED_INSTRUMENTATIONS: 'urllib3',
+        // OTEL configuration - only if function has OTEL layer
+        ...(props.hasOtelLayer && {
+          AWS_LAMBDA_EXEC_WRAPPER: '/opt/otel-handler',
+          OTEL_PROPAGATORS: 'tracecontext,baggage,xray',
+          OTEL_PYTHON_DISABLED_INSTRUMENTATIONS: 'urllib3',
+        }),
         // Service configuration
         SERVICE_NAME: props.serviceName,
         METRICS_NAMESPACE: DEFAULTS.METRICS_NAMESPACE,

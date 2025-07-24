@@ -135,11 +135,10 @@ export class LambdaFactory extends Construct {
   
   /**
    * Functions that should NOT have any layers applied (matching serverless.yml)
-   * These functions have no layers defined in serverless config
+   * Updated based on serverless.yml analysis: ALL functions have OTEL layers
    */
   private readonly FUNCTIONS_WITHOUT_LAYERS: Array<keyof typeof LAMBDA_FUNCTIONS> = [
-    'EMAIL_SUBMIT',
-    'THIRD_PARTY_API_AUTHORIZER'
+    // All functions in serverless.yml have OTEL layers - no exclusions needed
   ];
 
   constructor(scope: Construct, id: string, props: LambdaFactoryProps) {
@@ -221,7 +220,8 @@ export class LambdaFactory extends Construct {
       securityGroups: needsVpc ? this.props.securityGroups : undefined,
       layers: this.getLayersForFunction(functionProps),
       role: functionProps.role,
-      logRetentionDays: this.props.stageConfig.monitoring.logRetentionDays
+      logRetentionDays: this.props.stageConfig.monitoring.logRetentionDays,
+      hasOtelLayer: true // All functions have OTEL layers per serverless.yml analysis
     });
 
     // Store the function

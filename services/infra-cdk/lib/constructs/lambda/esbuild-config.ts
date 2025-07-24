@@ -90,17 +90,18 @@ export function getBundlingCommandHooks(functionName: string) {
       
       // Copy collector.yml for ALL functions that will have OTEL layer
       // This matches serverless behavior where collector.yml is bundled with all OTEL-enabled functions
+      // NOTE: All 11 serverless functions have OTEL layers - complete list from serverless.yml analysis
       const functionsWithOtel = [
-        'GRAPHQL', 'OAUTH_TOKEN', 'MIGRATE', 'MIGRATE_DOCUMENT_ZIPS', 'AUDIT_FILES',
-        'INDEX_HEALTH_CHECKER', 'ZIP_KEYS', 'CLEANUP', 'OTEL'
+        'email_submit', 'oauth_token', 'health', 'third_party_api_authorizer', 'otel', 
+        'graphql', 'migrate', 'migrate_document_zips', 'zip_keys', 'cleanup', 'auditFiles'
       ];
       
       if (functionsWithOtel.includes(functionName)) {
+        // Use app-api collector.yml (more reliable path resolution)
+        // inputDir is typically /tmp/bundling/app-api/src/handlers/, so go up to app-api level
         const collectorPath = path.join(inputDir, '..', '..', 'collector.yml');
         commands.push(
-          `if [ -f "${collectorPath}" ]; then`,
-          `  cp "${collectorPath}" "${outputDir}/"`,
-          `fi`
+          `if [ -f "${collectorPath}" ]; then cp "${collectorPath}" "${outputDir}/"; fi`
         );
       }
       
@@ -112,17 +113,15 @@ export function getBundlingCommandHooks(functionName: string) {
       
       // Replace license key in collector.yml for ALL functions that have OTEL layer
       // This matches serverless behavior where NR_LICENSE_KEY is substituted during build
+      // NOTE: All 11 serverless functions have OTEL layers - complete list from serverless.yml analysis
       const functionsWithOtel = [
-        'GRAPHQL', 'OAUTH_TOKEN', 'MIGRATE', 'MIGRATE_DOCUMENT_ZIPS', 'AUDIT_FILES',
-        'INDEX_HEALTH_CHECKER', 'ZIP_KEYS', 'CLEANUP', 'OTEL'
+        'email_submit', 'oauth_token', 'health', 'third_party_api_authorizer', 'otel', 
+        'graphql', 'migrate', 'migrate_document_zips', 'zip_keys', 'cleanup', 'auditFiles'
       ];
       
       if (functionsWithOtel.includes(functionName)) {
         commands.push(
-          `if [ -f "${outputDir}/collector.yml" ] && [ -n "$NR_LICENSE_KEY" ]; then`,
-          `  sed -i.bak "s/\\$NR_LICENSE_KEY/$NR_LICENSE_KEY/g" "${outputDir}/collector.yml"`,
-          `  rm "${outputDir}/collector.yml.bak"`,
-          `fi`
+          `if [ -f "${outputDir}/collector.yml" ] && [ -n "$NR_LICENSE_KEY" ]; then sed -i.bak "s/\\$NR_LICENSE_KEY/$NR_LICENSE_KEY/g" "${outputDir}/collector.yml" && rm "${outputDir}/collector.yml.bak"; fi`
         );
       }
       
