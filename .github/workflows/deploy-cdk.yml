@@ -3,9 +3,9 @@ name: Deploy CDK (Experimental)
 on:
   push:
     branches:
-      - 'mt-sls-to-cdk'  # Your current CDK branch
-      - 'cdk-**'         # Any future CDK experiment branches
-  workflow_dispatch:     # Manual trigger button in GitHub UI
+      - 'mt-sls-to-cdk'
+      - 'cdk-**'
+  workflow_dispatch:
 
 permissions:
   id-token: write
@@ -79,21 +79,38 @@ jobs:
           description: CDK stack ${{ steps.stage-name.outputs.stage-name-for-branch}}
           initial-status: in_progress
 
-      # Deploy GitHub OIDC service to create stage-specific role
-      - name: Get AWS credentials (bootstrap)
+      # Deploy GitHub OIDC service
+      - name: Set the correct stage name for the bootstrapped OIDC role based on the environment
+        id: set-oidc-stage-name
+        shell: bash
+        # the dev environment uses 'main' as the stage name; otherwise the stage name is same as the environment name
+        # if the environment isn't one of [dev, val, prod], fail the job
+        run: |
+          echo "stage-name=$(
+            if [[ "dev" == "val" || "dev" == "prod" ]]; then
+              echo "dev";
+            elif [[ "dev" == "dev" ]]; then
+              echo "main";
+            else
+              echo "Invalid environment: dev" >&2;
+              kill -HUP $$
+            fi
+          )" >> $GITHUB_OUTPUT
+
+      - name: Get AWS credentials
         uses: ./.github/actions/get_aws_credentials
         with:
           region: ${{ vars.AWS_DEFAULT_REGION }}
           account-id: ${{ secrets.DEV_AWS_ACCOUNT_ID }}
-          stage-name: main  # Use main to bootstrap
-          changed-services: "github-oidc"  # Force it to use main role
+          # use the manually bootstrapped OIDC role to solve the chicken-and-egg problem of deploying the OIDC service via OIDC
+          stage-name: ${{ steps.set-oidc-stage-name.outputs.stage-name }}
 
-      - name: Deploy GitHub OIDC role for stage using CDK
+      - name: deploy github-oidc with CDK
+        id: deploy-github-oidc-cdk
         working-directory: services/infra-cdk
         env:
           STAGE_NAME: ${{ steps.stage-name.outputs.stage-name-for-branch}}
         run: |
-          # Deploy just the GitHub OIDC stack for this stage
           npx cdk deploy MCR-GitHubOIDC-${STAGE_NAME} --require-approval never
 
   web-unit-tests:
@@ -267,7 +284,6 @@ jobs:
           name: lambda-layers-clamav
           path: ./services/uploads/src/avLayer/build/lambda_layer.zip
 
-
   deploy-cdk-foundation:
     needs: [begin-deployment, build-clamav-layer]
     name: deploy - CDK foundation stacks
@@ -308,7 +324,7 @@ jobs:
           IAM_PERMISSIONS_BOUNDARY=${{ secrets.DEV_IAM_PERMISSIONS_BOUNDARY }}
           IAM_PATH=${{ secrets.IAM_PATH }}
           EOF
-          
+
           ./scripts/deploy-foundation.sh $STAGE_NAME
 
   deploy-cdk-layers:
