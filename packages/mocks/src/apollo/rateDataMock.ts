@@ -38,11 +38,11 @@ const rateRevisionDataMock = (data?: Partial<RateRevision>): RateRevision => {
         formData: {
             rateType: 'AMENDMENT',
             rateCapitationType: 'RATE_CELL',
-            // rateMedicaidPopulations: [
-            //     "MEDICARE_MEDICAID_WITH_DSNP",
-            //     "MEDICAID_ONLY",
-            //     "MEDICARE_MEDICAID_WITHOUT_DSNP"
-            // ],
+            rateMedicaidPopulations: [
+                "MEDICARE_MEDICAID_WITH_DSNP",
+                "MEDICAID_ONLY",
+                "MEDICARE_MEDICAID_WITHOUT_DSNP"
+            ],
             rateDocuments: [
                 {
                     id: 'rate-document.pdf',
