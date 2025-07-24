@@ -474,8 +474,8 @@ importers:
         specifier: ^6.0.3
         version: 6.0.3
       '@types/aws-lambda':
-        specifier: ^8.10.145
-        version: 8.10.145
+        specifier: ^8.10.152
+        version: 8.10.152
       '@types/eslint':
         specifier: ^9.6.1
         version: 9.6.1
@@ -1206,8 +1206,8 @@ importers:
         version: 2.1.35
     devDependencies:
       '@types/aws-lambda':
-        specifier: ^8.10.145
-        version: 8.10.145
+        specifier: ^8.10.152
+        version: 8.10.152
       '@types/eslint':
         specifier: ^9.6.1
         version: 9.6.1
@@ -6397,11 +6397,8 @@ packages:
   '@types/aria-query@5.0.1':
     resolution: {integrity: sha512-XTIieEY+gvJ39ChLcB4If5zHtPxt3Syj5rgZR+e1ctpmK8NjPf0zFqsz4JpLJT0xla9GFDKjy8Cpu331nrmE1Q==}
 
-  '@types/aws-lambda@8.10.145':
-    resolution: {integrity: sha512-dtByW6WiFk5W5Jfgz1VM+YPA21xMXTuSFoLYIDY0L44jDLLflVPtZkYuu3/YxpGcvjzKFBZLU+GyKjR0HOYtyw==}
-
-  '@types/aws-lambda@8.10.150':
-    resolution: {integrity: sha512-AX+AbjH/rH5ezX1fbK8onC/a+HyQHo7QGmvoxAE42n22OsciAxvZoZNEr22tbXs8WfP1nIsBjKDpgPm3HjOZbA==}
+  '@types/aws-lambda@8.10.152':
+    resolution: {integrity: sha512-soT/c2gYBnT5ygwiHPmd9a1bftj462NWVk2tKCc1PYHSIacB2UwbTS2zYG4jzag1mRDuzg/OjtxQjQ2NKRB6Rw==}
 
   '@types/babel__core@7.20.5':
     resolution: {integrity: sha512-qoQprZvz5wQFJwMDqeseRXWv3rqMvhgpbXFfVyWhbx9X47POIA6i/+dXefEmZKoAgOaTdaIgNSMqMIU61yRyzA==}
@@ -20973,7 +20970,7 @@ snapshots:
       '@octokit/core': 7.0.2
       '@octokit/oauth-authorization-url': 8.0.0
       '@octokit/oauth-methods': 6.0.0
-      '@types/aws-lambda': 8.10.150
+      '@types/aws-lambda': 8.10.152
       universal-user-agent: 7.0.3
 
   '@octokit/oauth-authorization-url@8.0.0': {}
@@ -22898,9 +22895,7 @@ snapshots:
 
   '@types/aria-query@5.0.1': {}
 
-  '@types/aws-lambda@8.10.145': {}
-
-  '@types/aws-lambda@8.10.150': {}
+  '@types/aws-lambda@8.10.152': {}
 
   '@types/babel__core@7.20.5':
     dependencies:
@@ -23945,7 +23940,7 @@ snapshots:
 
   apollo-server-lambda@3.13.0(encoding@0.1.13)(graphql@16.9.0):
     dependencies:
-      '@types/aws-lambda': 8.10.145
+      '@types/aws-lambda': 8.10.152
       '@vendia/serverless-express': 4.10.1
       apollo-server-core: 3.13.0(encoding@0.1.13)(graphql@16.9.0)
       apollo-server-express: 3.13.0(encoding@0.1.13)(express@4.19.2)(graphql@16.9.0)
