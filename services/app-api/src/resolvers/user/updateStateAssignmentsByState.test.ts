@@ -22,6 +22,14 @@ import {
     assertAnErrorExtensions,
 } from '../../testHelpers'
 
+// Helper to extract GraphQL response from Apollo v4 response structure
+function extractTestResponse(response: any): any {
+    if ('body' in response && response.body) {
+        return response.body.kind === 'single' ? response.body.singleResult : response.body
+    }
+    return response
+}
+
 const authorizedUserTests = [
     {
         userType: 'ADMIN user',
@@ -133,15 +141,16 @@ describe.each(authorizedUserTests)(
                 },
             })
 
-            expect(updateRes.data).toBeDefined()
-            expect(updateRes.errors).toBeUndefined()
+            const result = extractTestResponse(updateRes)
+            expect(result.data).toBeDefined()
+            expect(result.errors).toBeUndefined()
 
-            if (!updateRes.data) {
+            if (!result.data) {
                 throw new Error('no data')
             }
 
             const users =
-                updateRes.data.updateStateAssignmentsByState.assignedUsers
+                result.data.updateStateAssignmentsByState.assignedUsers
             expect(users).toHaveLength(1)
             const user = users[0]
             expect(user.id).toBe(newUser.id)
@@ -407,7 +416,8 @@ describe.each(authorizedUserTests)(
                 },
             })
 
-            expect(updateRes.errors).toBeDefined()
+            const result = extractTestResponse(updateRes)
+            expect(result.errors).toBeDefined()
 
             expect(assertAnError(updateRes).message).toContain(
                 'Attempted to assign non-cms-users to a state'
@@ -468,7 +478,8 @@ describe.each(authorizedUserTests)(
                 },
             })
 
-            expect(updateRes.errors).toBeDefined()
+            const result = extractTestResponse(updateRes)
+            expect(result.errors).toBeDefined()
 
             expect(assertAnError(updateRes).message).toContain(
                 'Some assigned user IDs do not exist or are duplicative'

@@ -37,6 +37,14 @@ import type { CreateHealthPlanPackageInput } from '../gen/gqlServer'
 import { mockGqlContractDraftRevisionFormDataInput } from './gqlContractInputMocks'
 import type { GraphQLFormattedError } from 'graphql/index'
 
+// Helper to extract GraphQL response from Apollo v4 response structure
+function extractTestResponse(response: any): any {
+    if ('body' in response && response.body) {
+        return response.body.kind === 'single' ? response.body.singleResult : response.body
+    }
+    return response
+}
+
 const createAndSubmitTestContract = async (
     server: ApolloServer,
     stateCode?: StateCodeType,
@@ -69,13 +77,7 @@ async function submitTestContract(
         contextValue: defaultContext(),
     })
     
-    // Handle Apollo v4 response structure
-    let result: any
-    if ('body' in response && response.body) {
-        result = response.body.kind === 'single' ? response.body.singleResult : response.body
-    } else {
-        result = response
-    }
+    const result = extractTestResponse(response)
 
     if (result.errors) {
         throw new Error(
@@ -107,13 +109,7 @@ async function resubmitTestContract(
         contextValue: defaultContext(),
     })
     
-    // Handle Apollo v4 response structure
-    let updateResult: any
-    if ('body' in response && response.body) {
-        updateResult = response.body.kind === 'single' ? response.body.singleResult : response.body
-    } else {
-        updateResult = response
-    }
+    const updateResult = extractTestResponse(response)
 
     if (updateResult.errors) {
         throw new Error(
@@ -145,13 +141,7 @@ async function unlockTestContract(
         contextValue: defaultContext(),
     })
     
-    // Handle Apollo v4 response structure
-    let result: any
-    if ('body' in response && response.body) {
-        result = response.body.kind === 'single' ? response.body.singleResult : response.body
-    } else {
-        result = response
-    }
+    const result = extractTestResponse(response)
 
     if (result.errors) {
         throw new Error(
@@ -184,13 +174,7 @@ async function unlockTestContractAsUser(
         contextValue: { user },
     })
     
-    // Handle Apollo v4 response structure
-    let result: any
-    if ('body' in response && response.body) {
-        result = response.body.kind === 'single' ? response.body.singleResult : response.body
-    } else {
-        result = response
-    }
+    const result = extractTestResponse(response)
 
     if (result.errors) {
         throw new Error(
@@ -243,13 +227,7 @@ async function fetchTestContract(
         contextValue: defaultContext(),
     })
     
-    // Handle Apollo v4 response structure
-    let result: any
-    if ('body' in response && response.body) {
-        result = response.body.kind === 'single' ? response.body.singleResult : response.body
-    } else {
-        result = response
-    }
+    const result = extractTestResponse(response)
 
     if (result.errors) {
         throw new Error(
@@ -281,13 +259,7 @@ async function approveTestContract(
         contextValue: defaultContext(),
     })
     
-    // Handle Apollo v4 response structure
-    let result: any
-    if ('body' in response && response.body) {
-        result = response.body.kind === 'single' ? response.body.singleResult : response.body
-    } else {
-        result = response
-    }
+    const result = extractTestResponse(response)
 
     if (result.errors) {
         throw new Error(
@@ -320,13 +292,7 @@ async function approveTestContractAsUser(
         contextValue: { user },
     })
     
-    // Handle Apollo v4 response structure
-    let result: any
-    if ('body' in response && response.body) {
-        result = response.body.kind === 'single' ? response.body.singleResult : response.body
-    } else {
-        result = response
-    }
+    const result = extractTestResponse(response)
 
     if (result.errors) {
         throw new Error(
@@ -356,13 +322,7 @@ const fetchTestContractWithQuestions = async (
         contextValue: defaultContext(),
     })
     
-    // Handle Apollo v4 response structure
-    let result: any
-    if ('body' in response && response.body) {
-        result = response.body.kind === 'single' ? response.body.singleResult : response.body
-    } else {
-        result = response
-    }
+    const result = extractTestResponse(response)
 
     if (result.errors) {
         throw new Error(
@@ -403,13 +363,7 @@ const createTestContract = async (
         contextValue: defaultContext(),
     })
     
-    // Handle Apollo v4 response structure
-    let result: any
-    if ('body' in response && response.body) {
-        result = response.body.kind === 'single' ? response.body.singleResult : response.body
-    } else {
-        result = response
-    }
+    const result = extractTestResponse(response)
 
     if (result.errors) {
         throw new Error(
@@ -522,13 +476,7 @@ const linkRateToDraftContract = async (
         contextValue: defaultContext(),
     })
     
-    // Handle Apollo v4 response structure
-    let updatedContract: any
-    if ('body' in response && response.body) {
-        updatedContract = response.body.kind === 'single' ? response.body.singleResult : response.body
-    } else {
-        updatedContract = response
-    }
+    const updatedContract = extractTestResponse(response)
     return updatedContract
 }
 
@@ -548,13 +496,7 @@ const clearRatesOnDraftContract = async (
         contextValue: defaultContext(),
     })
     
-    // Handle Apollo v4 response structure
-    let updatedContract: any
-    if ('body' in response && response.body) {
-        updatedContract = response.body.kind === 'single' ? response.body.singleResult : response.body
-    } else {
-        updatedContract = response
-    }
+    const updatedContract = extractTestResponse(response)
     return updatedContract
 }
 
@@ -582,13 +524,7 @@ const updateRateOnDraftContract = async (
         contextValue: defaultContext(),
     })
     
-    // Handle Apollo v4 response structure
-    let updatedContract: any
-    if ('body' in response && response.body) {
-        updatedContract = response.body.kind === 'single' ? response.body.singleResult : response.body
-    } else {
-        updatedContract = response
-    }
+    const updatedContract = extractTestResponse(response)
     must(updatedContract)
     const contractData = updatedContract.data?.updateDraftContractRates.contract
     if (!contractData)
@@ -630,13 +566,7 @@ const updateTestContractDraftRevision = async (
         contextValue: defaultContext(),
     })
     
-    // Handle Apollo v4 response structure
-    let updateResult: any
-    if ('body' in response && response.body) {
-        updateResult = response.body.kind === 'single' ? response.body.singleResult : response.body
-    } else {
-        updateResult = response
-    }
+    const updateResult = extractTestResponse(response)
 
     if (updateResult.errors) {
         console.info('errors', JSON.stringify(updateResult.errors))
@@ -669,13 +599,7 @@ const withdrawTestContract = async (
         contextValue: defaultContext(),
     })
     
-    // Handle Apollo v4 response structure
-    let withdrawResult: any
-    if ('body' in response && response.body) {
-        withdrawResult = response.body.kind === 'single' ? response.body.singleResult : response.body
-    } else {
-        withdrawResult = response
-    }
+    const withdrawResult = extractTestResponse(response)
 
     if (withdrawResult.errors) {
         console.info('errors', withdrawResult.errors)
@@ -708,13 +632,7 @@ const undoWithdrawTestContract = async (
         contextValue: defaultContext(),
     })
     
-    // Handle Apollo v4 response structure
-    let undoWithdrawResult: any
-    if ('body' in response && response.body) {
-        undoWithdrawResult = response.body.kind === 'single' ? response.body.singleResult : response.body
-    } else {
-        undoWithdrawResult = response
-    }
+    const undoWithdrawResult = extractTestResponse(response)
 
     if (undoWithdrawResult.errors) {
         console.info('errors', undoWithdrawResult.errors)
@@ -747,13 +665,7 @@ const errorUndoWithdrawTestContract = async (
         contextValue: defaultContext(),
     })
     
-    // Handle Apollo v4 response structure
-    let undoWithdrawResult: any
-    if ('body' in response && response.body) {
-        undoWithdrawResult = response.body.kind === 'single' ? response.body.singleResult : response.body
-    } else {
-        undoWithdrawResult = response
-    }
+    const undoWithdrawResult = extractTestResponse(response)
 
     if (!undoWithdrawResult.errors) {
         throw new Error(

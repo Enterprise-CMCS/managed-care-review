@@ -19,6 +19,14 @@ import {
     assertAnErrorExtensions,
 } from '../../testHelpers'
 
+// Helper to extract GraphQL response from Apollo v4 response structure
+function extractTestResponse(response: any): any {
+    if ('body' in response && response.body) {
+        return response.body.kind === 'single' ? response.body.singleResult : response.body
+    }
+    return response
+}
+
 const authorizedUserTests = [
     {
         userType: 'ADMIN user',
@@ -123,14 +131,15 @@ describe.each(authorizedUserTests)(
                 },
             })
 
-            expect(updateRes.data).toBeDefined()
-            expect(updateRes.errors).toBeUndefined()
+            const result = extractTestResponse(updateRes)
+            expect(result.data).toBeDefined()
+            expect(result.errors).toBeUndefined()
 
-            if (!updateRes.data) {
+            if (!result.data) {
                 throw new Error('no data')
             }
 
-            const user = updateRes.data.updateStateAssignment.user
+            const user = result.data.updateStateAssignment.user
             expect(user.email).toBe(newUser.email)
             expect(user.stateAssignments).toHaveLength(1)
             expect(user.stateAssignments[0].code).toBe('CA')
@@ -147,14 +156,15 @@ describe.each(authorizedUserTests)(
                 },
             })
 
-            expect(updateRes2.data).toBeDefined()
-            expect(updateRes2.errors).toBeUndefined()
+            const result2 = extractTestResponse(updateRes2)
+            expect(result2.data).toBeDefined()
+            expect(result2.errors).toBeUndefined()
 
-            if (!updateRes2.data) {
+            if (!result2.data) {
                 throw new Error('no data')
             }
 
-            const user2 = updateRes2.data.updateStateAssignment.user
+            const user2 = result2.data.updateStateAssignment.user
             expect(user2.email).toBe(newUser.email)
             expect(user2.stateAssignments).toHaveLength(2)
             expect(user2.stateAssignments.map((s: State) => s.code)).toEqual(

@@ -33,6 +33,14 @@ import type { UserType } from '../domain-models'
 import { createAndSubmitTestContractWithRate } from './gqlContractHelpers'
 import { clearDocMetadata } from './documentHelpers'
 
+// Helper to extract GraphQL response from Apollo v4 response structure
+function extractTestResponse(response: any): any {
+    if ('body' in response && response.body) {
+        return response.body.kind === 'single' ? response.body.singleResult : response.body
+    }
+    return response
+}
+
 const fetchTestRateById = async (
     server: ApolloServer,
     rateID: string
@@ -45,13 +53,7 @@ const fetchTestRateById = async (
         contextValue: defaultContext(),
     })
     
-    // Handle Apollo v4 response structure
-    let result: any
-    if ('body' in response && response.body) {
-        result = response.body.kind === 'single' ? response.body.singleResult : response.body
-    } else {
-        result = response
-    }
+    const result = extractTestResponse(response)
 
     if (result.errors) {
         throw new Error(
@@ -78,13 +80,7 @@ const fetchTestRateWithQuestionsById = async (
         contextValue: defaultContext(),
     })
     
-    // Handle Apollo v4 response structure
-    let result: any
-    if ('body' in response && response.body) {
-        result = response.body.kind === 'single' ? response.body.singleResult : response.body
-    } else {
-        result = response
-    }
+    const result = extractTestResponse(response)
 
     if (result.errors) {
         throw new Error(
@@ -133,13 +129,7 @@ const submitTestRate = async (
         contextValue: defaultContext(),
     })
     
-    // Handle Apollo v4 response structure
-    let updateResult: any
-    if ('body' in response && response.body) {
-        updateResult = response.body.kind === 'single' ? response.body.singleResult : response.body
-    } else {
-        updateResult = response
-    }
+    const updateResult = extractTestResponse(response)
 
     if (updateResult.errors) {
         console.info('errors', updateResult.errors)
@@ -175,13 +165,7 @@ const unlockTestRate = async (
         contextValue: defaultContext(),
     })
     
-    // Handle Apollo v4 response structure
-    let updateResult: any
-    if ('body' in response && response.body) {
-        updateResult = response.body.kind === 'single' ? response.body.singleResult : response.body
-    } else {
-        updateResult = response
-    }
+    const updateResult = extractTestResponse(response)
 
     if (updateResult.errors) {
         console.info('errors', updateResult.errors)
@@ -218,13 +202,7 @@ const unlockTestRateAsUser = async (
         contextValue: { user },
     })
     
-    // Handle Apollo v4 response structure
-    let updateResult: any
-    if ('body' in response && response.body) {
-        updateResult = response.body.kind === 'single' ? response.body.singleResult : response.body
-    } else {
-        updateResult = response
-    }
+    const updateResult = extractTestResponse(response)
 
     if (updateResult.errors) {
         console.info('errors', updateResult.errors)
@@ -256,13 +234,7 @@ async function updateTestDraftRatesOnContract(
         contextValue: defaultContext(),
     })
     
-    // Handle Apollo v4 response structure
-    let updateResult: any
-    if ('body' in response && response.body) {
-        updateResult = response.body.kind === 'single' ? response.body.singleResult : response.body
-    } else {
-        updateResult = response
-    }
+    const updateResult = extractTestResponse(response)
 
     if (updateResult.errors || !updateResult.data) {
         throw new Error(
@@ -504,13 +476,7 @@ const createTestDraftRateOnContract = async (
         contextValue: defaultContext(),
     })
     
-    // Handle Apollo v4 response structure
-    let updateResult: any
-    if ('body' in response && response.body) {
-        updateResult = response.body.kind === 'single' ? response.body.singleResult : response.body
-    } else {
-        updateResult = response
-    }
+    const updateResult = extractTestResponse(response)
 
     if (updateResult.errors || !updateResult.data) {
         console.info('errors', updateResult.errors)
@@ -552,13 +518,7 @@ const updateTestDraftRateOnContract = async (
         contextValue: defaultContext(),
     })
     
-    // Handle Apollo v4 response structure
-    let updateResult: any
-    if ('body' in response && response.body) {
-        updateResult = response.body.kind === 'single' ? response.body.singleResult : response.body
-    } else {
-        updateResult = response
-    }
+    const updateResult = extractTestResponse(response)
 
     if (updateResult.errors || !updateResult.data) {
         console.info('errors', updateResult.errors)
@@ -602,13 +562,7 @@ const withdrawTestRate = async (
         contextValue: defaultContext(),
     })
     
-    // Handle Apollo v4 response structure
-    let withdrawResult: any
-    if ('body' in response && response.body) {
-        withdrawResult = response.body.kind === 'single' ? response.body.singleResult : response.body
-    } else {
-        withdrawResult = response
-    }
+    const withdrawResult = extractTestResponse(response)
 
     if (withdrawResult.errors) {
         console.info('errors', withdrawResult.errors)
@@ -644,13 +598,7 @@ const undoWithdrawTestRate = async (
         contextValue: defaultContext(),
     })
     
-    // Handle Apollo v4 response structure
-    let undoWithdrawRate: any
-    if ('body' in response && response.body) {
-        undoWithdrawRate = response.body.kind === 'single' ? response.body.singleResult : response.body
-    } else {
-        undoWithdrawRate = response
-    }
+    const undoWithdrawRate = extractTestResponse(response)
 
     if (undoWithdrawRate.errors) {
         console.info('errors', undoWithdrawRate.errors)
@@ -686,13 +634,7 @@ const fetchTestIndexRatesStripped = async (
         contextValue: defaultContext(),
     })
     
-    // Handle Apollo v4 response structure
-    let indexRatesStrippedResult: any
-    if ('body' in response && response.body) {
-        indexRatesStrippedResult = response.body.kind === 'single' ? response.body.singleResult : response.body
-    } else {
-        indexRatesStrippedResult = response
-    }
+    const indexRatesStrippedResult = extractTestResponse(response)
 
     if (indexRatesStrippedResult.errors) {
         console.info('errors', indexRatesStrippedResult.errors)

@@ -6,23 +6,46 @@ type GraphQLResponse = {
     errors?: GraphQLFormattedError[]
 }
 
+// Helper to extract GraphQL response from Apollo v4 response structure
+function extractGraphQLResponse(response: any): GraphQLResponse {
+    // Handle Apollo v4 response structure
+    if ('body' in response && response.body) {
+        const result = response.body.kind === 'single' 
+            ? response.body.singleResult 
+            : response.body
+        return {
+            data: result.data,
+            errors: result.errors
+        }
+    }
+    
+    // Already in correct format or v3 response
+    return {
+        data: response.data,
+        errors: response.errors
+    }
+}
+
 // assertAnError returns an the only error in a graphQL errors response
-function assertAnError(res: GraphQLResponse): GraphQLFormattedError {
-    if (!res.errors || res.errors.length === 0) {
+function assertAnError(res: any): GraphQLFormattedError {
+    // Extract the actual GraphQL response from v4 structure if needed
+    const graphqlResponse = extractGraphQLResponse(res)
+    
+    if (!graphqlResponse.errors || graphqlResponse.errors.length === 0) {
         throw new Error('response did not return errors')
     }
 
-    if (res.errors.length > 1) {
-        console.error('Got Multiple Errors: ', res.errors)
+    if (graphqlResponse.errors.length > 1) {
+        console.error('Got Multiple Errors: ', graphqlResponse.errors)
         throw new Error('response returned multiple errors')
     }
 
-    return res.errors[0]
+    return graphqlResponse.errors[0]
 }
 
 // assertAnErrorExtensions returns the error code from the only error's extensions
 function assertAnErrorExtensions(
-    res: GraphQLResponse
+    res: any
 ): Record<string, unknown> {
     const err = assertAnError(res)
 
@@ -35,7 +58,7 @@ function assertAnErrorExtensions(
 }
 
 // assertAnErrorCode returns the error code from the only error's extensions
-function assertAnErrorCode(res: GraphQLResponse): string {
+function assertAnErrorCode(res: any): string {
     const extensions = assertAnErrorExtensions(res)
 
     if (!extensions.code || !(typeof extensions.code === 'string')) {

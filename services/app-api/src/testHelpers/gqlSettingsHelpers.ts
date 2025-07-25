@@ -10,6 +10,14 @@ import {
 } from '../gen/gqlClient'
 import { defaultContext } from './gqlHelpers'
 
+// Helper to extract GraphQL response from Apollo v4 response structure
+function extractTestResponse(response: any): any {
+    if ('body' in response && response.body) {
+        return response.body.kind === 'single' ? response.body.singleResult : response.body
+    }
+    return response
+}
+
 const updateTestEmailSettings = async (
     server: ApolloServer,
     emailConfiguration: EmailConfiguration
@@ -25,13 +33,7 @@ const updateTestEmailSettings = async (
         contextValue: defaultContext(),
     })
     
-    // Handle Apollo v4 response structure
-    let updateEmailConfig: any
-    if ('body' in response && response.body) {
-        updateEmailConfig = response.body.kind === 'single' ? response.body.singleResult : response.body
-    } else {
-        updateEmailConfig = response
-    }
+    const updateEmailConfig = extractTestResponse(response)
 
     if (updateEmailConfig.errors) {
         console.info('errors', updateEmailConfig.errors)
@@ -59,13 +61,7 @@ const fetchTestMcReviewSettings = async (
         contextValue: defaultContext(),
     })
     
-    // Handle Apollo v4 response structure
-    let fetchMcReviewSettings: any
-    if ('body' in response && response.body) {
-        fetchMcReviewSettings = response.body.kind === 'single' ? response.body.singleResult : response.body
-    } else {
-        fetchMcReviewSettings = response
-    }
+    const fetchMcReviewSettings = extractTestResponse(response)
 
     if (fetchMcReviewSettings.errors) {
         console.info('errors', fetchMcReviewSettings.errors)

@@ -64,6 +64,14 @@ import {
     localGenerateDocumentZip,
 } from '../zip/generateZip'
 
+// Helper to extract GraphQL response from Apollo v4 response structure
+function extractTestResponse(response: any): any {
+    if ('body' in response && response.body) {
+        return response.body.kind === 'single' ? response.body.singleResult : response.body
+    }
+    return response
+}
+
 // Since our programs are checked into source code, we have a program we
 // use as our default
 function defaultFloridaProgram(): ProgramType {
@@ -283,13 +291,7 @@ const createTestHealthPlanPackage = async (
         contextValue: defaultContext(),
     })
     
-    // Handle Apollo v4 response structure
-    let result: any
-    if ('body' in response && response.body) {
-        result = response.body.kind === 'single' ? response.body.singleResult : response.body
-    } else {
-        result = response
-    }
+    const result = extractTestResponse(response)
     
     if (result.errors) {
         throw new Error(
@@ -321,13 +323,7 @@ const updateTestHealthPlanFormData = async (
         contextValue: defaultContext(),
     })
     
-    // Handle Apollo v4 response structure
-    let updateResult: any
-    if ('body' in response && response.body) {
-        updateResult = response.body.kind === 'single' ? response.body.singleResult : response.body
-    } else {
-        updateResult = response
-    }
+    const updateResult = extractTestResponse(response)
     
     if (updateResult.errors) {
         console.info('errors', JSON.stringify(updateResult.errors))
@@ -364,13 +360,7 @@ const updateTestHealthPlanPackage = async (
         contextValue: defaultContext(),
     })
     
-    // Handle Apollo v4 response structure
-    let updateResult: any
-    if ('body' in response && response.body) {
-        updateResult = response.body.kind === 'single' ? response.body.singleResult : response.body
-    } else {
-        updateResult = response
-    }
+    const updateResult = extractTestResponse(response)
     
     if (updateResult.errors) {
         console.info('errors', JSON.stringify(updateResult.errors))
@@ -475,13 +465,7 @@ const submitTestHealthPlanPackage = async (
         contextValue: defaultContext(),
     })
     
-    // Handle Apollo v4 response structure
-    let updateResult: any
-    if ('body' in response && response.body) {
-        updateResult = response.body.kind === 'single' ? response.body.singleResult : response.body
-    } else {
-        updateResult = response
-    }
+    const updateResult = extractTestResponse(response)
 
     if (updateResult.errors) {
         console.info('errors', updateResult.errors)
@@ -517,13 +501,7 @@ const resubmitTestHealthPlanPackage = async (
         contextValue: defaultContext(),
     })
     
-    // Handle Apollo v4 response structure
-    let updateResult: any
-    if ('body' in response && response.body) {
-        updateResult = response.body.kind === 'single' ? response.body.singleResult : response.body
-    } else {
-        updateResult = response
-    }
+    const updateResult = extractTestResponse(response)
 
     if (updateResult.errors) {
         console.info('errors', updateResult.errors)
@@ -559,13 +537,7 @@ const unlockTestHealthPlanPackage = async (
         contextValue: defaultContext(),
     })
     
-    // Handle Apollo v4 response structure
-    let updateResult: any
-    if ('body' in response && response.body) {
-        updateResult = response.body.kind === 'single' ? response.body.singleResult : response.body
-    } else {
-        updateResult = response
-    }
+    const updateResult = extractTestResponse(response)
 
     if (updateResult.errors) {
         console.info('errors', updateResult.errors)
@@ -602,13 +574,7 @@ const unlockTestHealthPlanPackageAsUser = async (
         contextValue: { user },
     })
     
-    // Handle Apollo v4 response structure
-    let updateResult: any
-    if ('body' in response && response.body) {
-        updateResult = response.body.kind === 'single' ? response.body.singleResult : response.body
-    } else {
-        updateResult = response
-    }
+    const updateResult = extractTestResponse(response)
 
     if (updateResult.errors) {
         console.info('errors', updateResult.errors)
@@ -639,13 +605,7 @@ const fetchTestHealthPlanPackageById = async (
         contextValue: defaultContext(),
     })
     
-    // Handle Apollo v4 response structure
-    let result: any
-    if ('body' in response && response.body) {
-        result = response.body.kind === 'single' ? response.body.singleResult : response.body
-    } else {
-        result = response
-    }
+    const result = extractTestResponse(response)
 
     if (result.errors)
         throw new Error(
@@ -684,13 +644,7 @@ const createTestQuestion = async (
         contextValue: defaultContext(),
     })
     
-    // Handle Apollo v4 response structure
-    let createdQuestion: any
-    if ('body' in response && response.body) {
-        createdQuestion = response.body.kind === 'single' ? response.body.singleResult : response.body
-    } else {
-        createdQuestion = response
-    }
+    const createdQuestion = extractTestResponse(response)
 
     if (createdQuestion.errors)
         throw new Error(
@@ -730,13 +684,7 @@ const createTestQuestionAsUser = async (
         contextValue: { user },
     })
     
-    // Handle Apollo v4 response structure
-    let createdQuestion: any
-    if ('body' in response && response.body) {
-        createdQuestion = response.body.kind === 'single' ? response.body.singleResult : response.body
-    } else {
-        createdQuestion = response
-    }
+    const createdQuestion = extractTestResponse(response)
 
     if (createdQuestion.errors)
         throw new Error(
@@ -775,12 +723,7 @@ const createTestRateQuestion = async (
         contextValue: defaultContext(),
     })
     
-    // Handle Apollo v4 response structure
-    if ('body' in response && response.body) {
-        return response.body.kind === 'single' ? response.body.singleResult : response.body
-    } else {
-        return response
-    }
+    return extractTestResponse(response)
 }
 
 const createTestRateQuestionResponse = async (
@@ -809,12 +752,7 @@ const createTestRateQuestionResponse = async (
         contextValue: defaultContext(),
     })
     
-    // Handle Apollo v4 response structure
-    if ('body' in result && result.body) {
-        return result.body.kind === 'single' ? result.body.singleResult : result.body
-    } else {
-        return result
-    }
+    return extractTestResponse(result)
 }
 
 const createTestQuestionResponse = async (
@@ -842,13 +780,7 @@ const createTestQuestionResponse = async (
         contextValue: defaultContext(),
     })
     
-    // Handle Apollo v4 response structure
-    let createdResponse: any
-    if ('body' in result && result.body) {
-        createdResponse = result.body.kind === 'single' ? result.body.singleResult : result.body
-    } else {
-        createdResponse = result
-    }
+    const createdResponse = extractTestResponse(result)
 
     if (createdResponse.errors)
         throw new Error(
@@ -879,13 +811,7 @@ const updateTestStateAssignments = async (
         contextValue: defaultContext(),
     })
     
-    // Handle Apollo v4 response structure
-    let updatedAssignments: any
-    if ('body' in response && response.body) {
-        updatedAssignments = response.body.kind === 'single' ? response.body.singleResult : response.body
-    } else {
-        updatedAssignments = response
-    }
+    const updatedAssignments = extractTestResponse(response)
 
     if (updatedAssignments.errors)
         throw new Error(
