@@ -10,12 +10,14 @@ on:
 permissions:
   id-token: write
   contents: read
+  deployments: write
 
 jobs:
   begin-deployment:
     name: Begin CDK Deployment
     runs-on: ubuntu-24.04
-    environment: dev
+    environment: 
+      name: dev
     permissions:
       deployments: write
     outputs:
@@ -80,62 +82,41 @@ jobs:
           description: CDK stack ${{ steps.stage-name.outputs.stage-name-for-branch}}
           initial-status: in_progress
 
-      # Deploy GitHub OIDC service
-      - name: Set the correct stage name for the bootstrapped OIDC role based on the environment
-        id: set-oidc-stage-name
+
+  deploy-github-oidc:
+    needs: [begin-deployment]
+    name: deploy - GitHub OIDC service
+    runs-on: ubuntu-24.04
+    environment: 
+      name: dev
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Setup env
+        uses: ./.github/actions/setup_env
+
+      - name: Generate Code
+        run: pnpm -r generate
+
+      - name: Build packages
         shell: bash
-        # the dev environment uses 'main' as the stage name; otherwise the stage name is same as the environment name
-        # if the environment isn't one of [dev, val, prod], fail the job
-        run: |
-          echo "stage-name=$(
-            if [[ "dev" == "val" || "dev" == "prod" ]]; then
-              echo "dev";
-            elif [[ "dev" == "dev" ]]; then
-              echo "main";
-            else
-              echo "Invalid environment: dev" >&2;
-              kill -HUP $$
-            fi
-          )" >> $GITHUB_OUTPUT
+        run: pnpm build:packages
 
-      - name: Debug - Show what role we're trying to assume and OIDC context
-        run: |
-          echo "Bootstrap stage name: ${{ steps.set-oidc-stage-name.outputs.stage-name }}"
-          echo "Target stage name: ${{ steps.stage-name.outputs.stage-name-for-branch}}"
-          echo "Expected role ARN: arn:aws:iam::${{ secrets.DEV_AWS_ACCOUNT_ID }}:role/delegatedadmin/developer/github-oidc-${{ steps.set-oidc-stage-name.outputs.stage-name }}-ServiceRole"
-          echo "GitHub ref: ${{ github.ref }}"
-          echo "GitHub environment: ${{ github.environment }}"
-          echo "Expected subject claim: repo:Enterprise-CMCS/managed-care-review:environment:dev"
-
-      - name: Debug - Show GitHub context that forms OIDC claims
-        run: |
-          echo "=== GITHUB CONTEXT ==="
-          echo "github.repository: ${{ github.repository }}"
-          echo "github.ref: ${{ github.ref }}"
-          echo "github.sha: ${{ github.sha }}"
-          echo "github.workflow: ${{ github.workflow }}"
-          echo "github.actor: ${{ github.actor }}"
-          echo "github.event_name: ${{ github.event_name }}"
-          echo "github.environment: '${{ github.environment }}'"
-          echo "runner.environment: '${{ runner.environment }}'"
-          echo "Expected subject: repo:${{ github.repository }}:environment:dev"
-          echo "Likely actual subject: repo:${{ github.repository }}:ref:${{ github.ref }}"
-          echo "======================"
-
-      - name: Get AWS credentials
+      - name: Get AWS credentials (bootstrap with main OIDC role)
         uses: ./.github/actions/get_aws_credentials
         with:
           region: ${{ vars.AWS_DEFAULT_REGION }}
           account-id: ${{ secrets.DEV_AWS_ACCOUNT_ID }}
-          # use the manually bootstrapped OIDC role to solve the chicken-and-egg problem of deploying the OIDC service via OIDC
-          stage-name: ${{ steps.set-oidc-stage-name.outputs.stage-name }}
-          changed-services: "github-oidc"  # Force it to use the main role for bootstrapping
+          # Use main OIDC role for bootstrapping since branch-specific role doesn't exist yet
+          stage-name: main
+          changed-services: "github-oidc"
 
       - name: deploy github-oidc with CDK
         id: deploy-github-oidc-cdk
         working-directory: services/infra-cdk
         env:
-          STAGE_NAME: ${{ steps.stage-name.outputs.stage-name-for-branch}}
+          STAGE_NAME: ${{ needs.begin-deployment.outputs.stage-name }}
         run: |
           echo "Starting CDK OIDC deployment for stage: ${STAGE_NAME}"
           echo "Stack name will be: MCR-GitHubOIDC-${STAGE_NAME}"
@@ -322,7 +303,7 @@ jobs:
           path: ./services/uploads/src/avLayer/build/lambda_layer.zip
 
   deploy-cdk-foundation:
-    needs: [begin-deployment, build-clamav-layer]
+    needs: [begin-deployment, deploy-github-oidc, build-clamav-layer]
     name: deploy - CDK foundation stacks
     runs-on: ubuntu-24.04
     environment: dev
