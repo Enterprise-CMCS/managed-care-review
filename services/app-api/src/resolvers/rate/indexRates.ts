@@ -59,7 +59,7 @@ export function indexRatesResolver(store: Store): QueryResolvers['indexRates'] {
             const errMessage = `OAuth client does not have read permissions`
             logError('indexRates', errMessage)
             setErrorAttributesOnActiveSpan(errMessage, span)
-            throw new ForbiddenError(errMessage)
+            throw createForbiddenError(errMessage)
         }
 
         // Log OAuth client access for audit trail
