@@ -30,6 +30,8 @@ export const graphqlLoaderPlugin: Plugin = {
 function getExternalModules(functionName?: string): string[] {
   const baseExternal = ['prisma', '@prisma/client']; // Always external (layers provide these)
   
+  if (!functionName) return baseExternal;
+  
   // Only GraphQL function externalizes heavy GraphQL/Apollo deps
   if (functionName === 'GRAPHQL' || functionName === 'graphql') {
     return [
@@ -42,7 +44,18 @@ function getExternalModules(functionName?: string): string[] {
     ];
   }
   
-  // All other functions (Database, etc.) bundle AWS SDK normally
+  // Database functions externalize AWS SDK (provided by Lambda runtime)
+  if (functionName.includes('Db') || functionName.includes('Database') || 
+      functionName.includes('Manager') || functionName.includes('Export') || 
+      functionName.includes('Import')) {
+    return [
+      ...baseExternal,
+      '@aws-sdk/*',
+      'aws-sdk'
+    ];
+  }
+  
+  // All other functions bundle dependencies normally
   return baseExternal;
 }
 
