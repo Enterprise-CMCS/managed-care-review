@@ -61,6 +61,7 @@ const contractFormData = (
     contractDateEnd: '2024-05-31',
     managedCareEntities: ['MCO'],
     federalAuthorities: ['STATE_PLAN'],
+    dsnpContract: false,
     inLieuServicesAndSettings: true,
     modifiedBenefitsProvided: true,
     modifiedGeoAreaServed: true,
