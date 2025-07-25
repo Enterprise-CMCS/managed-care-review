@@ -90,19 +90,23 @@ export function getBundlingCommandHooks(functionName: string) {
       
       // Copy collector.yml for ALL functions that will have OTEL layer
       // This matches serverless behavior where collector.yml is bundled with all OTEL-enabled functions
-      // NOTE: All 11 serverless functions have OTEL layers - complete list from serverless.yml analysis
+      // Use CDK function names (not serverless names) to match LAMBDA_FUNCTIONS constant
       const functionsWithOtel = [
-        'email_submit', 'oauth_token', 'health', 'third_party_api_authorizer', 'otel', 
-        'graphql', 'migrate', 'migrate_document_zips', 'zip_keys', 'cleanup', 'auditFiles'
+        'emailSubmit', 'oauthToken', 'health', 'thirdPartyApiAuthorizer', 'otel', 
+        'graphql', 'migrate', 'migrateDocumentZips', 'zipKeys', 'cleanup', 'auditFiles'
       ];
       
       if (functionsWithOtel.includes(functionName)) {
-        // Use app-api collector.yml (more reliable path resolution)
-        // inputDir is typically /tmp/bundling/app-api/src/handlers/, so go up to app-api level
-        const collectorPath = path.join(inputDir, '..', '..', 'collector.yml');
-        commands.push(
-          `if [ -f "${collectorPath}" ]; then cp "${collectorPath}" "${outputDir}/"; fi`
-        );
+        // Use app-api collector.yml as single source of truth (like serverless)
+        const projectRoot = path.resolve(__dirname, '..', '..', '..', '..');
+        const collectorPath = path.join(projectRoot, 'services', 'app-api', 'collector.yml');
+        
+        try {
+          const collectorContent = fs.readFileSync(collectorPath, 'utf8');
+          fs.writeFileSync(path.join(outputDir, 'collector.yml'), collectorContent);
+        } catch {
+          // Silent failure like serverless
+        }
       }
       
       return commands.length > 0 ? [commands.join(' && ')] : [];
@@ -113,16 +117,22 @@ export function getBundlingCommandHooks(functionName: string) {
       
       // Replace license key in collector.yml for ALL functions that have OTEL layer
       // This matches serverless behavior where NR_LICENSE_KEY is substituted during build
-      // NOTE: All 11 serverless functions have OTEL layers - complete list from serverless.yml analysis
+      // Use CDK function names (not serverless names) to match LAMBDA_FUNCTIONS constant
       const functionsWithOtel = [
-        'email_submit', 'oauth_token', 'health', 'third_party_api_authorizer', 'otel', 
-        'graphql', 'migrate', 'migrate_document_zips', 'zip_keys', 'cleanup', 'auditFiles'
+        'emailSubmit', 'oauthToken', 'health', 'thirdPartyApiAuthorizer', 'otel', 
+        'graphql', 'migrate', 'migrateDocumentZips', 'zipKeys', 'cleanup', 'auditFiles'
       ];
       
       if (functionsWithOtel.includes(functionName)) {
-        commands.push(
-          `if [ -f "${outputDir}/collector.yml" ] && [ -n "$NR_LICENSE_KEY" ]; then sed -i.bak "s/\\$NR_LICENSE_KEY/$NR_LICENSE_KEY/g" "${outputDir}/collector.yml" && rm "${outputDir}/collector.yml.bak"; fi`
-        );
+        // Replace license key in collector.yml (like serverless)
+        try {
+          const collectorFilePath = path.join(outputDir, 'collector.yml');
+          let contents = fs.readFileSync(collectorFilePath, 'utf8');
+          contents = contents.replace('$NR_LICENSE_KEY', process.env.NR_LICENSE_KEY || '');
+          fs.writeFileSync(collectorFilePath, contents);
+        } catch {
+          // Silent failure like serverless
+        }
       }
       
       return commands.length > 0 ? [commands.join(' && ')] : [];

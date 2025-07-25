@@ -185,6 +185,8 @@ jobs:
     # 6. CDK Synth - Validate infrastructure code
     - name: CDK Synth
       working-directory: services/infra-cdk
+      env:
+        NR_LICENSE_KEY: ${{ secrets.NR_LICENSE_KEY }}
       run: |
         echo "Running CDK synth to validate infrastructure..."
         pnpm cdk synth --all --context stage=${{ env.STAGE }} > cdk-synth-output.yaml
@@ -201,6 +203,8 @@ jobs:
     - name: CDK Diff
       id: cdk-diff
       working-directory: services/infra-cdk
+      env:
+        NR_LICENSE_KEY: ${{ secrets.NR_LICENSE_KEY }}
       run: |
         echo "Running CDK diff to check for infrastructure changes..."
         
@@ -343,6 +347,8 @@ jobs:
     # 13. Deploy All Infrastructure Stacks (explicit order, excluding Frontend)
     - name: Deploy Infrastructure Stacks
       working-directory: services/infra-cdk
+      env:
+        NR_LICENSE_KEY: ${{ secrets.NR_LICENSE_KEY }}
       run: |
         # Deploy infrastructure stacks in dependency order (excluding frontend)
         # This ensures proper deployment separation and avoids --exclude issues

@@ -37,3 +37,4 @@ lerna-debug.log*
 # Testing
 *.test.js
 *.spec.js
+test-lambdas.sh
