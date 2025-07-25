@@ -67,7 +67,7 @@ importers:
         specifier: ^8.57.0
         version: 8.57.1
       fs-extra:
-        specifier: ^11.3.0
+        specifier: ^11.2.0
         version: 11.3.0
       jest:
         specifier: ^29.7.0

@@ -1,19 +1,55 @@
 import { BuildOptions, Plugin } from 'esbuild';
 import * as path from 'path';
 import * as fs from 'fs';
+const {
+    generateGraphQLString,
+    generateContentsFromGraphqlString,
+} = require('@luckycatfactory/esbuild-graphql-loader');
+const fse = require('fs-extra');
 
 /**
- * GraphQL loader plugin for esbuild (sync version for CDK)
+ * GraphQL loader plugin for esbuild - matches serverless exactly
+ * Uses same @luckycatfactory/esbuild-graphql-loader as serverless
  */
 export const graphqlLoaderPlugin: Plugin = {
-  name: 'graphql-sync',
+  name: 'graphql-loader',
   setup(build) {
-    build.onLoad({ filter: /\.(gql|graphql)$/ }, (args) => {
-      const text = fs.readFileSync(args.path, 'utf8');
-      return {
-        contents: `export default \`${text}\`;`,
-        loader: 'js',
-      };
+    build.onLoad({ filter: /\.graphql$|\.gql$/ }, (args) =>
+      generateGraphQLString(args.path).then(
+        (graphqlString: string) => ({
+          contents: generateContentsFromGraphqlString(graphqlString),
+        })
+      )
+    );
+  },
+};
+
+/**
+ * Copy eta templates plugin - matches serverless exactly
+ * Copies etaTemplates to src/handlers/etaTemplates/ structure
+ */
+export const copyEtaTemplatesPlugin: Plugin = {
+  name: 'copy-eta-templates',
+  setup(build) {
+    build.onStart(async () => {
+      try {
+        await fse.ensureDir('.esbuild/.build/src/handlers/etaTemplates/');
+      } catch (err) {
+        console.error('Error making directory: ', err);
+      }
+    });
+
+    build.onEnd(async () => {
+      try {
+        await fse.copy(
+          './src/emailer/etaTemplates',
+          '.esbuild/.build/src/handlers/etaTemplates/',
+          { overwrite: true }
+        );
+        console.log('Eta templates copied successfully');
+      } catch (err) {
+        console.error('Error copying eta templates:', err);
+      }
     });
   },
 };
@@ -31,21 +67,17 @@ export function getEsbuildConfig(stage: string): BuildOptions {
     sourcemap: true,
     sourcesContent: false,
     external: [
-      '@aws-sdk/*',
-      'aws-sdk',
-      '@opentelemetry/*',
+      // Match serverless esbuild.config.js exclude exactly
       'prisma',
       '@prisma/client',
-      // Native modules
-      'canvas',
-      'utf-8-validate',
-      'bufferutil',
+      // AWS SDK and OTEL are provided by runtime/layers but don't need explicit exclusion
+      // Let Lambda runtime and layers handle them naturally
     ],
     mainFields: ['module', 'main'],
     metafile: true,
     minify: stage === 'prod',
     keepNames: true,
-    plugins: [graphqlLoaderPlugin],
+    plugins: [graphqlLoaderPlugin, copyEtaTemplatesPlugin],
     loader: {
       '.node': 'file',
     },
@@ -76,14 +108,15 @@ export function getBundlingCommandHooks(functionName: string) {
         );
       }
       
-      // For email functions, copy eta templates
+      // For email functions, copy eta templates - match serverless directory structure exactly
       if (['EMAIL_SUBMIT', 'SEND_TEMPLATE_EMAIL', 'SEND_REVIEW_ACTION_EMAILS', 'SEND_EMAILS_FOR_CMS_RATE_REVIEWS'].includes(functionName)) {
         // Path from handler directory to emailer templates
         const templatesPath = path.join(inputDir, '..', 'emailer', 'etaTemplates');
         commands.push(
           `if [ -d "${templatesPath}" ]; then`,
-          `  mkdir -p "${outputDir}/etaTemplates"`,
-          `  cp -r "${templatesPath}"/* "${outputDir}/etaTemplates/"`,
+          // Match serverless structure: .esbuild/.build/src/handlers/etaTemplates/
+          `  mkdir -p "${outputDir}/src/handlers/etaTemplates"`,
+          `  cp -r "${templatesPath}"/* "${outputDir}/src/handlers/etaTemplates/"`,
           `fi`
         );
       }
