@@ -29,6 +29,7 @@ export interface OtelEnvironment {
   VITE_APP_OTEL_COLLECTOR_URL: string;
   OTEL_SERVICE_NAME: string;
   OTEL_PROPAGATORS: string;
+  NR_LICENSE_KEY: string;
 }
 
 /**
@@ -105,7 +106,8 @@ export class LambdaEnvironmentFactory {
       OPENTELEMETRY_COLLECTOR_CONFIG_FILE: otelVars.OPENTELEMETRY_COLLECTOR_CONFIG_FILE || '/var/task/collector.yml',
       VITE_APP_OTEL_COLLECTOR_URL: otelVars.VITE_APP_OTEL_COLLECTOR_URL || '',
       OTEL_SERVICE_NAME: otelVars.OTEL_SERVICE_NAME || `mcr-${stage}`,
-      OTEL_PROPAGATORS: otelVars.OTEL_PROPAGATORS || 'tracecontext,baggage,xray'
+      OTEL_PROPAGATORS: otelVars.OTEL_PROPAGATORS || 'tracecontext,baggage,xray',
+      NR_LICENSE_KEY: process.env.NR_LICENSE_KEY || ''
     };
   }
 
