@@ -86,11 +86,7 @@ export function getBundlingCommandHooks(functionName: string) {
         // Path from handler directory to emailer templates  
         const templatesPath = path.join(inputDir, '..', 'emailer', 'etaTemplates');
         commands.push(
-          `if [ -d "${templatesPath}" ]; then`,
-          // Match serverless structure: .esbuild/.build/src/handlers/etaTemplates/
-          `  mkdir -p "${outputDir}/src/handlers/etaTemplates"`,
-          `  cp -r "${templatesPath}"/* "${outputDir}/src/handlers/etaTemplates/"`,
-          `fi`
+          `if [ -d "${templatesPath}" ]; then mkdir -p "${outputDir}/src/handlers/etaTemplates" && cp -r "${templatesPath}"/* "${outputDir}/src/handlers/etaTemplates/"; fi`
         );
       }
       
