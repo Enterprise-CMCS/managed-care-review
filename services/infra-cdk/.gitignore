@@ -38,3 +38,6 @@ lerna-debug.log*
 *.test.js
 *.spec.js
 test-lambdas.sh
+
+# Validation scripts (temporary)
+scripts/validate-cdk-bundle-convergence.sh

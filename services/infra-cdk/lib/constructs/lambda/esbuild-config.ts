@@ -5,7 +5,6 @@ const {
     generateGraphQLString,
     generateContentsFromGraphqlString,
 } = require('@luckycatfactory/esbuild-graphql-loader');
-const fse = require('fs-extra');
 
 /**
  * GraphQL loader plugin for esbuild - matches serverless exactly
@@ -24,35 +23,6 @@ export const graphqlLoaderPlugin: Plugin = {
   },
 };
 
-/**
- * Copy eta templates plugin - matches serverless exactly
- * Copies etaTemplates to src/handlers/etaTemplates/ structure
- */
-export const copyEtaTemplatesPlugin: Plugin = {
-  name: 'copy-eta-templates',
-  setup(build) {
-    build.onStart(async () => {
-      try {
-        await fse.ensureDir('.esbuild/.build/src/handlers/etaTemplates/');
-      } catch (err) {
-        console.error('Error making directory: ', err);
-      }
-    });
-
-    build.onEnd(async () => {
-      try {
-        await fse.copy(
-          './src/emailer/etaTemplates',
-          '.esbuild/.build/src/handlers/etaTemplates/',
-          { overwrite: true }
-        );
-        console.log('Eta templates copied successfully');
-      } catch (err) {
-        console.error('Error copying eta templates:', err);
-      }
-    });
-  },
-};
 
 /**
  * Get ESBuild configuration for Lambda bundling
@@ -67,17 +37,20 @@ export function getEsbuildConfig(stage: string): BuildOptions {
     sourcemap: true,
     sourcesContent: false,
     external: [
-      // Match serverless esbuild.config.js exclude exactly
+      // Match bundling-utils.ts external modules exactly
       'prisma',
       '@prisma/client',
-      // AWS SDK and OTEL are provided by runtime/layers but don't need explicit exclusion
-      // Let Lambda runtime and layers handle them naturally
+      'apollo-server-core',
+      'apollo-server-lambda', 
+      'apollo-server-types',
+      '@launchdarkly/node-server-sdk',
+      'graphql-tag',
     ],
     mainFields: ['module', 'main'],
     metafile: true,
     minify: stage === 'prod',
     keepNames: true,
-    plugins: [graphqlLoaderPlugin, copyEtaTemplatesPlugin],
+    plugins: [graphqlLoaderPlugin],
     loader: {
       '.node': 'file',
     },
@@ -109,8 +82,8 @@ export function getBundlingCommandHooks(functionName: string) {
       }
       
       // For email functions, copy eta templates - match serverless directory structure exactly
-      if (['EMAIL_SUBMIT', 'SEND_TEMPLATE_EMAIL', 'SEND_REVIEW_ACTION_EMAILS', 'SEND_EMAILS_FOR_CMS_RATE_REVIEWS'].includes(functionName)) {
-        // Path from handler directory to emailer templates
+      if (['emailSubmit'].includes(functionName)) {
+        // Path from handler directory to emailer templates  
         const templatesPath = path.join(inputDir, '..', 'emailer', 'etaTemplates');
         commands.push(
           `if [ -d "${templatesPath}" ]; then`,

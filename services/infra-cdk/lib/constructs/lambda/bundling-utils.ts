@@ -33,16 +33,22 @@ export function getBundlingConfig(
     target: 'node20',
     format: OutputFormat.CJS,
     mainFields: ['module', 'main'],
-    // External modules - match serverless esbuild.config.js exactly
-    // Serverless only excludes what's provided by layers
+    // External modules - scientific analysis shows these are the heaviest dependencies  
     externalModules: [
       // Prisma is provided by layers (matches esbuild.config.js exclude exactly)
       'prisma',
       '@prisma/client',
       
-      // AWS SDK is provided by Lambda runtime (no need to exclude - runtime handles it)
-      // OTEL is provided by layers (no need to exclude - layers handle it)
-      // Everything else gets bundled just like serverless
+      // Heavy Apollo Server dependencies (identified from bundle analysis)
+      'apollo-server-core',
+      'apollo-server-lambda', 
+      'apollo-server-types',
+      
+      // Heavy LaunchDarkly SDK (identified from bundle analysis)
+      '@launchdarkly/node-server-sdk',
+      
+      // GraphQL utilities (identified from bundle analysis)
+      'graphql-tag',
     ],
     esbuildArgs: {
       '--bundle': true,
