@@ -129,6 +129,10 @@ describe.each(authorizedUserTests)(
                         stateAssignments: ['CA'],
                     },
                 },
+            }, {
+                contextValue: {
+                    user: mockUser,
+                },
             })
 
             const result = extractTestResponse(updateRes)
@@ -153,6 +157,10 @@ describe.each(authorizedUserTests)(
                         cmsUserID: newUser.id,
                         stateAssignments: ['VA', 'MA'],
                     },
+                },
+            }, {
+                contextValue: {
+                    user: mockUser,
                 },
             })
 
@@ -197,6 +205,10 @@ describe.each(authorizedUserTests)(
                         stateAssignments: [],
                     },
                 },
+            }, {
+                contextValue: {
+                    user: mockUser,
+                },
             })
 
             expect(assertAnError(updateResEmpty).message).toContain(
@@ -215,6 +227,10 @@ describe.each(authorizedUserTests)(
                         stateAssignments: undefined,
                     },
                 },
+            }, {
+                contextValue: {
+                    user: mockUser,
+                },
             })
 
             expect(assertAnError(updateResUndefined).message).toContain(
@@ -232,6 +248,10 @@ describe.each(authorizedUserTests)(
                         cmsUserID: newUser.id,
                         stateAssignments: null,
                     },
+                },
+            }, {
+                contextValue: {
+                    user: mockUser,
                 },
             })
 
@@ -267,6 +287,10 @@ describe.each(authorizedUserTests)(
                         cmsUserID: newUser.id,
                         stateAssignments: ['CA', 'XX', 'BS'],
                     },
+                },
+            }, {
+                contextValue: {
+                    user: mockUser,
                 },
             })
 
@@ -304,6 +328,10 @@ describe.each(authorizedUserTests)(
                         stateAssignments: ['CA'],
                     },
                 },
+            }, {
+                contextValue: {
+                    user: mockUser,
+                },
             })
 
             expect(assertAnError(updateRes).message).toContain(
@@ -328,6 +356,10 @@ describe.each(authorizedUserTests)(
                         cmsUserID: 'not-an-existing-user',
                         stateAssignments: ['CA'],
                     },
+                },
+            }, {
+                contextValue: {
+                    user: mockUser,
                 },
             })
 
@@ -362,6 +394,10 @@ describe.each(unauthorizedUserTests)(
                         cmsUserID: cmsUserID,
                         stateAssignments: ['CA'],
                     },
+                },
+            }, {
+                contextValue: {
+                    user: mockUser,
                 },
             })
 
