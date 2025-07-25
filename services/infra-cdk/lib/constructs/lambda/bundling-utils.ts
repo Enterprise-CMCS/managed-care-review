@@ -4,6 +4,28 @@ import { getEsbuildConfig, getBundlingCommandHooks, graphqlLoaderPlugin } from '
 import * as path from 'path';
 
 /**
+ * Get function-specific external modules
+ */
+function getExternalModules(functionName: string): string[] {
+  const baseExternal = ['prisma', '@prisma/client']; // Always external (layers provide these)
+  
+  // Only GraphQL function externalizes heavy GraphQL/Apollo deps
+  if (functionName === 'GRAPHQL' || functionName === 'graphql') {
+    return [
+      ...baseExternal,
+      'apollo-server-core',
+      'apollo-server-lambda', 
+      'apollo-server-types',
+      '@launchdarkly/node-server-sdk', 
+      'graphql-tag'
+    ];
+  }
+  
+  // All other functions (Database, etc.) bundle AWS SDK normally
+  return baseExternal;
+}
+
+/**
  * Get bundling configuration for a Lambda function
  */
 export function getBundlingConfig(
@@ -11,7 +33,7 @@ export function getBundlingConfig(
   stage: string,
   architecture: Architecture = Architecture.X86_64
 ): NodejsFunctionProps['bundling'] {
-  const esbuildConfig = getEsbuildConfig(stage);
+  const esbuildConfig = getEsbuildConfig(stage, functionName);
   const projectRoot = path.join(__dirname, '..', '..', '..', '..', '..');
   
   // Merge command hooks from esbuild-config with additional workspace handling
@@ -33,23 +55,8 @@ export function getBundlingConfig(
     target: 'node20',
     format: OutputFormat.CJS,
     mainFields: ['module', 'main'],
-    // External modules - scientific analysis shows these are the heaviest dependencies  
-    externalModules: [
-      // Prisma is provided by layers (matches esbuild.config.js exclude exactly)
-      'prisma',
-      '@prisma/client',
-      
-      // Heavy Apollo Server dependencies (identified from bundle analysis)
-      'apollo-server-core',
-      'apollo-server-lambda', 
-      'apollo-server-types',
-      
-      // Heavy LaunchDarkly SDK (identified from bundle analysis)
-      '@launchdarkly/node-server-sdk',
-      
-      // GraphQL utilities (identified from bundle analysis)
-      'graphql-tag',
-    ],
+    // Function-specific external modules
+    externalModules: getExternalModules(functionName),
     esbuildArgs: {
       '--bundle': true,
       '--platform': 'node',

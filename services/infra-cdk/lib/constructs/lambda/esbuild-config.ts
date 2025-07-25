@@ -25,10 +25,32 @@ export const graphqlLoaderPlugin: Plugin = {
 
 
 /**
+ * Get function-specific external modules
+ */
+function getExternalModules(functionName?: string): string[] {
+  const baseExternal = ['prisma', '@prisma/client']; // Always external (layers provide these)
+  
+  // Only GraphQL function externalizes heavy GraphQL/Apollo deps
+  if (functionName === 'GRAPHQL' || functionName === 'graphql') {
+    return [
+      ...baseExternal,
+      'apollo-server-core',
+      'apollo-server-lambda', 
+      'apollo-server-types',
+      '@launchdarkly/node-server-sdk',
+      'graphql-tag'
+    ];
+  }
+  
+  // All other functions (Database, etc.) bundle AWS SDK normally
+  return baseExternal;
+}
+
+/**
  * Get ESBuild configuration for Lambda bundling
  * Matches the serverless-esbuild configuration
  */
-export function getEsbuildConfig(stage: string): BuildOptions {
+export function getEsbuildConfig(stage: string, functionName?: string): BuildOptions {
   return {
     bundle: true,
     platform: 'node',
@@ -36,16 +58,7 @@ export function getEsbuildConfig(stage: string): BuildOptions {
     format: 'cjs', // Use CommonJS to match serverless
     sourcemap: true,
     sourcesContent: false,
-    external: [
-      // Match bundling-utils.ts external modules exactly
-      'prisma',
-      '@prisma/client',
-      'apollo-server-core',
-      'apollo-server-lambda', 
-      'apollo-server-types',
-      '@launchdarkly/node-server-sdk',
-      'graphql-tag',
-    ],
+    external: getExternalModules(functionName),
     mainFields: ['module', 'main'],
     metafile: true,
     minify: stage === 'prod',
