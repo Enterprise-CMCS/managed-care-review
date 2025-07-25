@@ -246,7 +246,8 @@ export class StackOrchestrator {
       enableAppWebIntegration: true,
       enableHsts: true
     });
-    stack.addDependency(apiCompute);
+    // Frontend stack is deployment-independent - gets API URLs at CI build time, not CDK deployment time
+    // Removing dependency allows proper --exclude behavior and phase separation
     return stack;
   }
 
