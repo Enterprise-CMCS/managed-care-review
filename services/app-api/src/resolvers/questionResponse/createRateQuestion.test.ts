@@ -384,7 +384,7 @@ describe('createRateQuestion', () => {
             emailer: mockEmailer,
         })
 
-        const submitResult = await cmsServer.executeOperation({
+        const submitResult = (await cmsServer.executeOperation({
             query: CreateRateQuestionDocument,
             variables: {
                 input: {
@@ -397,7 +397,7 @@ describe('createRateQuestion', () => {
                     ],
                 },
             },
-        })
+        })) as { errors?: any; data?: any }
 
         expect(submitResult.errors).toBeDefined()
         expect(mockEmailer.sendEmail).not.toHaveBeenCalled()

@@ -18,10 +18,11 @@ import {
     createTestHealthPlanPackage,
     defaultFloridaProgram,
     updateTestHealthPlanFormData,
+    defaultContext,
 } from './gqlHelpers'
 
-import { type ContractType } from '../domain-models'
-import type { ApolloServer } from 'apollo-server-lambda'
+import { type ContractType, type UserType } from '../domain-models'
+import type { ApolloServer } from '@apollo/server'
 import type {
     Contract,
     ContractDraftRevisionFormDataInput,
@@ -35,6 +36,14 @@ import type { ContractFormDataType } from '../domain-models'
 import type { CreateHealthPlanPackageInput } from '../gen/gqlServer'
 import { mockGqlContractDraftRevisionFormDataInput } from './gqlContractInputMocks'
 import type { GraphQLFormattedError } from 'graphql/index'
+
+// Helper to extract GraphQL response from Apollo v4 response structure
+function extractTestResponse(response: any): any {
+    if ('body' in response && response.body) {
+        return response.body.kind === 'single' ? response.body.singleResult : response.body
+    }
+    return response
+}
 
 const createAndSubmitTestContract = async (
     server: ApolloServer,
@@ -56,7 +65,7 @@ async function submitTestContract(
     contractID: string,
     submittedReason?: string
 ): Promise<Contract> {
-    const result = await server.executeOperation({
+    const response = await server.executeOperation({
         query: SubmitContractDocument,
         variables: {
             input: {
@@ -64,11 +73,15 @@ async function submitTestContract(
                 submittedReason: submittedReason,
             },
         },
+    }, {
+        contextValue: defaultContext(),
     })
+    
+    const result = extractTestResponse(response)
 
     if (result.errors) {
         throw new Error(
-            `submitTestContract query failed with errors ${result.errors}`
+            `submitTestContract query failed with errors ${JSON.stringify(result.errors)}`
         )
     }
 
@@ -84,7 +97,7 @@ async function resubmitTestContract(
     contractID: string,
     submittedReason?: string
 ): Promise<Contract> {
-    const updateResult = await server.executeOperation({
+    const response = await server.executeOperation({
         query: SubmitContractDocument,
         variables: {
             input: {
@@ -92,11 +105,15 @@ async function resubmitTestContract(
                 submittedReason,
             },
         },
+    }, {
+        contextValue: defaultContext(),
     })
+    
+    const updateResult = extractTestResponse(response)
 
     if (updateResult.errors) {
         throw new Error(
-            `resubmitTestContract query failed with errors ${updateResult.errors}`
+            `resubmitTestContract query failed with errors ${JSON.stringify(updateResult.errors)}`
         )
     }
 
@@ -112,7 +129,7 @@ async function unlockTestContract(
     contractID: string,
     unlockedReason?: string
 ): Promise<UnlockedContract> {
-    const result = await server.executeOperation({
+    const response = await server.executeOperation({
         query: UnlockContractDocument,
         variables: {
             input: {
@@ -120,11 +137,48 @@ async function unlockTestContract(
                 unlockedReason: unlockedReason,
             },
         },
+    }, {
+        contextValue: defaultContext(),
     })
+    
+    const result = extractTestResponse(response)
 
     if (result.errors) {
         throw new Error(
-            `unlockTestContract query failed with errors ${result.errors}`
+            `unlockTestContract query failed with errors ${JSON.stringify(result.errors)}`
+        )
+    }
+
+    if (!result.data) {
+        throw new Error('unlockTestContract returned nothing')
+    }
+
+    return result.data.unlockContract.contract
+}
+
+async function unlockTestContractAsUser(
+    server: ApolloServer,
+    contractID: string,
+    unlockedReason: string | undefined,
+    user: UserType
+): Promise<UnlockedContract> {
+    const response = await server.executeOperation({
+        query: UnlockContractDocument,
+        variables: {
+            input: {
+                contractID: contractID,
+                unlockedReason: unlockedReason,
+            },
+        },
+    }, {
+        contextValue: { user },
+    })
+    
+    const result = extractTestResponse(response)
+
+    if (result.errors) {
+        throw new Error(
+            `unlockTestContract query failed with errors ${JSON.stringify(result.errors)}`
         )
     }
 
@@ -137,16 +191,15 @@ async function unlockTestContract(
 
 async function createSubmitAndUnlockTestContract(
     stateServer: ApolloServer,
-    cmsServer: ApolloServer
+    cmsServer: ApolloServer,
+    cmsUser?: UserType
 ): Promise<UnlockedContract> {
     const contract = await createAndSubmitTestContractWithRate(stateServer)
     const contractID = contract.id
 
-    const unlockedContract = await unlockTestContract(
-        cmsServer,
-        contractID,
-        'test unlock'
-    )
+    const unlockedContract = cmsUser
+        ? await unlockTestContractAsUser(cmsServer, contractID, 'test unlock', cmsUser)
+        : await unlockTestContract(cmsServer, contractID, 'test unlock')
 
     return unlockedContract
 }
@@ -167,14 +220,18 @@ async function fetchTestContract(
     contractID: string
 ): Promise<Contract> {
     const input = { contractID }
-    const result = await server.executeOperation({
+    const response = await server.executeOperation({
         query: FetchContractDocument,
         variables: { input },
+    }, {
+        contextValue: defaultContext(),
     })
+    
+    const result = extractTestResponse(response)
 
     if (result.errors) {
         throw new Error(
-            `fetchTestContract query failed with errors ${result.errors}`
+            `fetchTestContract query failed with errors ${JSON.stringify(result.errors)}`
         )
     }
 
@@ -195,14 +252,51 @@ async function approveTestContract(
         dateApprovalReleasedToState:
             dateApprovalReleasedToState || '2024-11-11',
     }
-    const result = await server.executeOperation({
+    const response = await server.executeOperation({
         query: ApproveContractDocument,
         variables: { input },
+    }, {
+        contextValue: defaultContext(),
     })
+    
+    const result = extractTestResponse(response)
 
     if (result.errors) {
         throw new Error(
-            `approveTestContract mutation failed with errors ${result.errors}`
+            `approveTestContract mutation failed with errors ${JSON.stringify(result.errors)}`
+        )
+    }
+
+    if (!result.data) {
+        throw new Error('approveTestContract returned nothing')
+    }
+
+    return result.data.approveContract.contract
+}
+
+async function approveTestContractAsUser(
+    server: ApolloServer,
+    contractID: string,
+    user: UserType,
+    dateApprovalReleasedToState?: string
+): Promise<Contract> {
+    const input = {
+        contractID,
+        dateApprovalReleasedToState:
+            dateApprovalReleasedToState || '2024-11-11',
+    }
+    const response = await server.executeOperation({
+        query: ApproveContractDocument,
+        variables: { input },
+    }, {
+        contextValue: { user },
+    })
+    
+    const result = extractTestResponse(response)
+
+    if (result.errors) {
+        throw new Error(
+            `approveTestContract mutation failed with errors ${JSON.stringify(result.errors)}`
         )
     }
 
@@ -217,18 +311,22 @@ const fetchTestContractWithQuestions = async (
     server: ApolloServer,
     contractID: string
 ): Promise<Contract> => {
-    const result = await server.executeOperation({
+    const response = await server.executeOperation({
         query: FetchContractWithQuestionsDocument,
         variables: {
             input: {
                 contractID: contractID,
             },
         },
+    }, {
+        contextValue: defaultContext(),
     })
+    
+    const result = extractTestResponse(response)
 
     if (result.errors) {
         throw new Error(
-            `fetchTestContractWithQuestions query failed with errors ${result.errors}`
+            `fetchTestContractWithQuestions query failed with errors ${JSON.stringify(result.errors)}`
         )
     }
 
@@ -258,14 +356,18 @@ const createTestContract = async (
         contractType: 'BASE',
         ...formData,
     }
-    const result = await server.executeOperation({
+    const response = await server.executeOperation({
         query: CreateContractDocument,
         variables: { input },
+    }, {
+        contextValue: defaultContext(),
     })
+    
+    const result = extractTestResponse(response)
 
     if (result.errors) {
         throw new Error(
-            `createTestContract mutation failed with errors ${result.errors}`
+            `createTestContract mutation failed with errors ${JSON.stringify(result.errors)}`
         )
     }
 
@@ -357,7 +459,7 @@ const linkRateToDraftContract = async (
     contractID: string,
     linkedRateID: string
 ) => {
-    const updatedContract = await server.executeOperation({
+    const response = await server.executeOperation({
         query: UpdateDraftContractRatesDocument,
         variables: {
             input: {
@@ -370,7 +472,11 @@ const linkRateToDraftContract = async (
                 ],
             },
         },
+    }, {
+        contextValue: defaultContext(),
     })
+    
+    const updatedContract = extractTestResponse(response)
     return updatedContract
 }
 
@@ -378,7 +484,7 @@ const clearRatesOnDraftContract = async (
     server: ApolloServer,
     contractID: string
 ) => {
-    const updatedContract = await server.executeOperation({
+    const response = await server.executeOperation({
         query: UpdateDraftContractRatesDocument,
         variables: {
             input: {
@@ -386,7 +492,11 @@ const clearRatesOnDraftContract = async (
                 updatedRates: [],
             },
         },
+    }, {
+        contextValue: defaultContext(),
     })
+    
+    const updatedContract = extractTestResponse(response)
     return updatedContract
 }
 
@@ -396,7 +506,7 @@ const updateRateOnDraftContract = async (
     rateID: string,
     rateData: Partial<RateFormData>
 ): Promise<ContractType> => {
-    const updatedContract = await server.executeOperation({
+    const response = await server.executeOperation({
         query: UpdateDraftContractRatesDocument,
         variables: {
             input: {
@@ -410,7 +520,11 @@ const updateRateOnDraftContract = async (
                 ],
             },
         },
+    }, {
+        contextValue: defaultContext(),
     })
+    
+    const updatedContract = extractTestResponse(response)
     must(updatedContract)
     const contractData = updatedContract.data?.updateDraftContractRates.contract
     if (!contractData)
@@ -438,7 +552,7 @@ const updateTestContractDraftRevision = async (
             draftContract.stateCode as StateCodeType
         )
 
-    const updateResult = await server.executeOperation({
+    const response = await server.executeOperation({
         query: UpdateContractDraftRevisionDocument,
         variables: {
             input: {
@@ -448,12 +562,16 @@ const updateTestContractDraftRevision = async (
                 formData: updatedFormData,
             },
         },
+    }, {
+        contextValue: defaultContext(),
     })
+    
+    const updateResult = extractTestResponse(response)
 
     if (updateResult.errors) {
         console.info('errors', JSON.stringify(updateResult.errors))
         throw new Error(
-            `updateTestContractDraftRevision mutation failed with errors ${updateResult.errors}`
+            `updateTestContractDraftRevision mutation failed with errors ${JSON.stringify(updateResult.errors)}`
         )
     }
 
@@ -469,7 +587,7 @@ const withdrawTestContract = async (
     contractID: string,
     updatedReason: string
 ): Promise<Contract> => {
-    const withdrawResult = await server.executeOperation({
+    const response = await server.executeOperation({
         query: WithdrawContractDocument,
         variables: {
             input: {
@@ -477,13 +595,20 @@ const withdrawTestContract = async (
                 updatedReason,
             },
         },
+    }, {
+        contextValue: defaultContext(),
     })
+    
+    const withdrawResult = extractTestResponse(response)
 
     if (withdrawResult.errors) {
         console.info('errors', withdrawResult.errors)
     }
 
-    if (withdrawResult.data === undefined || withdrawResult.data === null) {
+    if (
+        withdrawResult.data === undefined ||
+        withdrawResult.data === null
+    ) {
         throw new Error('withdraw contract returned nothing')
     }
 
@@ -495,7 +620,7 @@ const undoWithdrawTestContract = async (
     contractID: string,
     updatedReason: string
 ): Promise<Contract> => {
-    const undoWithdrawResult = await server.executeOperation({
+    const response = await server.executeOperation({
         query: UndoWithdrawContractDocument,
         variables: {
             input: {
@@ -503,7 +628,11 @@ const undoWithdrawTestContract = async (
                 updatedReason,
             },
         },
+    }, {
+        contextValue: defaultContext(),
     })
+    
+    const undoWithdrawResult = extractTestResponse(response)
 
     if (undoWithdrawResult.errors) {
         console.info('errors', undoWithdrawResult.errors)
@@ -524,7 +653,7 @@ const errorUndoWithdrawTestContract = async (
     contractID: string,
     updatedReason: string
 ): Promise<ReadonlyArray<GraphQLFormattedError>> => {
-    const undoWithdrawResult = await server.executeOperation({
+    const response = await server.executeOperation({
         query: UndoWithdrawContractDocument,
         variables: {
             input: {
@@ -532,7 +661,11 @@ const errorUndoWithdrawTestContract = async (
                 updatedReason,
             },
         },
+    }, {
+        contextValue: defaultContext(),
     })
+    
+    const undoWithdrawResult = extractTestResponse(response)
 
     if (!undoWithdrawResult.errors) {
         throw new Error(
@@ -568,8 +701,10 @@ const contractHistoryToDescriptions = (contract: Contract): string[] => {
 export {
     submitTestContract,
     unlockTestContract,
+    unlockTestContractAsUser,
     createAndSubmitTestContract,
     approveTestContract,
+    approveTestContractAsUser,
     fetchTestContract,
     fetchTestContractWithQuestions,
     createAndUpdateTestContractWithoutRates,

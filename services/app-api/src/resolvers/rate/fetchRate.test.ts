@@ -9,6 +9,7 @@ import {
     createTestRateQuestion,
     defaultFloridaRateProgram,
     unlockTestHealthPlanPackage,
+    unlockTestHealthPlanPackageAsUser,
     updateTestHealthPlanFormData,
 } from '../../testHelpers/gqlHelpers'
 import {
@@ -33,6 +34,7 @@ import {
     fetchTestContract,
     submitTestContract,
     unlockTestContract,
+    unlockTestContractAsUser,
 } from '../../testHelpers/gqlContractHelpers'
 import { latestFormData } from '../../testHelpers/healthPlanPackageHelpers'
 import { testS3Client } from '../../../../app-api/src/testHelpers/s3Helpers'
@@ -61,7 +63,8 @@ describe('fetchRate', () => {
 
         const submittedRate = await createSubmitAndUnlockTestRate(
             stateServer,
-            cmsServer
+            cmsServer,
+            testCMSUser()
         )
 
         // editrate with new data and resubmit
@@ -148,7 +151,8 @@ describe('fetchRate', () => {
         // First, create new rate and unlock to edit it
         const submittedInitial = await createSubmitAndUnlockTestRate(
             server,
-            cmsServer
+            cmsServer,
+            testCMSUser()
         )
 
         // add new rate
@@ -250,10 +254,11 @@ describe('fetchRate', () => {
         )
 
         // unlock and set non-deprecated IDs
-        const unlocked = await unlockTestContract(
+        const unlocked = await unlockTestContractAsUser(
             cmsServer,
             submittedInitial.id,
-            'unlock to fix deprecated IDs'
+            'unlock to fix deprecated IDs',
+            testCMSUser()
         )
 
         const realRateProgramIDs = [defaultFloridaRateProgram().id]
@@ -508,10 +513,11 @@ describe('fetchRate', () => {
         ).toBe('2024-01-01')
 
         // 2. Unlock and add more documents
-        const unlockedA0Pkg = await unlockTestHealthPlanPackage(
+        const unlockedA0Pkg = await unlockTestHealthPlanPackageAsUser(
             cmsServer,
             AID,
-            'Unlock A.0'
+            'Unlock A.0',
+            testCMSUser()
         )
         const a0FormData = latestFormData(unlockedA0Pkg)
         a0FormData.submissionDescription = 'DESC A1'

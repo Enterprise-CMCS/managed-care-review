@@ -79,7 +79,7 @@ describe('createContractQuestionResponse', () => {
         const stateServer = await constructTestPostgresServer()
         const fakeID = 'abc-123'
 
-        const createResponseResult = await stateServer.executeOperation({
+        const createResponseResult = (await stateServer.executeOperation({
             query: CreateContractQuestionResponseDocument,
             variables: {
                 input: {
@@ -92,7 +92,7 @@ describe('createContractQuestionResponse', () => {
                     ],
                 },
             },
-        })
+        })) as { errors?: any; data?: any }
 
         expect(createResponseResult).toBeDefined()
         expect(assertAnErrorCode(createResponseResult)).toBe('BAD_USER_INPUT')
@@ -112,7 +112,7 @@ describe('createContractQuestionResponse', () => {
         const createdQuestion = await createTestQuestion(cmsServer, contract.id)
         await approveTestContract(cmsServer, contract.id)
 
-        const createResponseResult = await stateServer.executeOperation({
+        const createResponseResult = (await stateServer.executeOperation({
             query: CreateContractQuestionResponseDocument,
             variables: {
                 input: {
@@ -125,7 +125,7 @@ describe('createContractQuestionResponse', () => {
                     ],
                 },
             },
-        })
+        })) as { errors?: any; data?: any }
 
         expect(createResponseResult).toBeDefined()
         expect(assertAnErrorCode(createResponseResult)).toBe('BAD_USER_INPUT')
@@ -144,7 +144,7 @@ describe('createContractQuestionResponse', () => {
         const contract = await createAndSubmitTestContractWithRate(stateServer)
         const createdQuestion = await createTestQuestion(cmsServer, contract.id)
 
-        const createResponseResult = await cmsServer.executeOperation({
+        const createResponseResult = (await cmsServer.executeOperation({
             query: CreateContractQuestionResponseDocument,
             variables: {
                 input: {
@@ -157,7 +157,7 @@ describe('createContractQuestionResponse', () => {
                     ],
                 },
             },
-        })
+        })) as { errors?: any; data?: any }
 
         expect(createResponseResult.errors).toBeDefined()
         expect(assertAnErrorCode(createResponseResult)).toBe('FORBIDDEN')
