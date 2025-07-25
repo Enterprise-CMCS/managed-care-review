@@ -112,6 +112,10 @@ jobs:
           stage-name: main
           changed-services: "github-oidc"
 
+      - name: Run CDK preflight checks
+        working-directory: services/infra-cdk
+        run: ./scripts/cdk-preflight.sh
+
       - name: deploy github-oidc with CDK
         id: deploy-github-oidc-cdk
         working-directory: services/infra-cdk
@@ -123,11 +127,11 @@ jobs:
           
           # List current stacks to see what exists
           echo "=== Current CDK stacks ==="
-          npx cdk list || echo "No CDK stacks found"
+          pnpm cdk list || echo "No CDK stacks found"
           
           # Deploy the OIDC stack
           echo "=== Deploying OIDC stack ==="
-          npx cdk deploy MCR-GitHubOIDC-${STAGE_NAME} --require-approval never
+          pnpm cdk deploy MCR-GitHubOIDC-${STAGE_NAME} --require-approval never
           
           echo "=== CDK deployment completed ==="
 
