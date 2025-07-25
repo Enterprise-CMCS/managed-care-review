@@ -125,6 +125,9 @@ describe.each(authorizedUserTests)(
 
             const server = await constructTestPostgresServer({
                 store: postgresStore,
+                context: {
+                    user: mockUser,
+                },
             })
 
             const updateRes = await server.executeOperation({
@@ -292,6 +295,9 @@ describe.each(authorizedUserTests)(
 
             const server = await constructTestPostgresServer({
                 store: postgresStore,
+                context: {
+                    user: mockUser,
+                },
             })
 
             const updateResEmpty = await server.executeOperation({
@@ -366,6 +372,9 @@ describe.each(authorizedUserTests)(
 
             const server = await constructTestPostgresServer({
                 store: postgresStore,
+                context: {
+                    user: mockUser,
+                },
             })
 
             const updateRes = await server.executeOperation({
@@ -393,6 +402,9 @@ describe.each(authorizedUserTests)(
             const postgresStore = NewPostgresStore(prismaClient)
             const server = await constructTestPostgresServer({
                 store: postgresStore,
+                context: {
+                    user: mockUser,
+                },
             })
 
             const newStateUser =
@@ -429,6 +441,9 @@ describe.each(authorizedUserTests)(
             const postgresStore = NewPostgresStore(prismaClient)
             const server = await constructTestPostgresServer({
                 store: postgresStore,
+                context: {
+                    user: mockUser,
+                },
             })
 
             const updateRes = await server.executeOperation({
@@ -456,6 +471,9 @@ describe.each(authorizedUserTests)(
             const postgresStore = NewPostgresStore(prismaClient)
             const server = await constructTestPostgresServer({
                 store: postgresStore,
+                context: {
+                    user: mockUser,
+                },
             })
 
             const newCMSUser = await postgresStore.insertUser(mockTestCMSUser())
@@ -497,6 +515,9 @@ describe.each(unauthorizedUserTests)(
             const postgresStore = NewPostgresStore(prismaClient)
             const server = await constructTestPostgresServer({
                 store: postgresStore,
+                context: {
+                    user: mockUser,
+                },
             })
 
             const updateRes = await server.executeOperation({
