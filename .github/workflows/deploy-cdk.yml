@@ -116,6 +116,10 @@ jobs:
         working-directory: services/infra-cdk
         run: ./scripts/cdk-preflight.sh
 
+      - name: Build TypeScript for CDK
+        working-directory: services/infra-cdk
+        run: pnpm run build
+
       - name: deploy github-oidc with CDK
         id: deploy-github-oidc-cdk
         working-directory: services/infra-cdk
@@ -127,11 +131,11 @@ jobs:
           
           # List current stacks to see what exists
           echo "=== Current CDK stacks ==="
-          pnpm cdk list || echo "No CDK stacks found"
+          npx cdk list --context stage=${STAGE_NAME} || echo "No CDK stacks found"
           
           # Deploy the OIDC stack
           echo "=== Deploying OIDC stack ==="
-          pnpm cdk deploy MCR-GitHubOIDC-${STAGE_NAME} --require-approval never
+          npx cdk deploy MCR-GitHubOIDC-${STAGE_NAME} --context stage=${STAGE_NAME} --require-approval never
           
           echo "=== CDK deployment completed ==="
 
