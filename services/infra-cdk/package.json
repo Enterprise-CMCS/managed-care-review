@@ -1,5 +1,5 @@
 {
-  "name": "@mcr/infra-cdk",
+  "name": "mcr-infra-cdk",
   "version": "1.0.0",
   "description": "AWS CDK Infrastructure for Managed Care Review",
   "private": true,
@@ -50,6 +50,7 @@
   },
   "dependencies": {
     "@aws-sdk/client-secrets-manager": "^3.828.0",
+    "@aws-solutions-constructs/aws-apigateway-lambda": "2.57.0",
     "@aws-solutions-constructs/aws-cloudfront-s3": "^2.57.0",
     "@aws-solutions-constructs/aws-cognito-apigateway-lambda": "^2.57.0",
     "@aws-solutions-constructs/aws-lambda-secretsmanager": "^2.57.0",

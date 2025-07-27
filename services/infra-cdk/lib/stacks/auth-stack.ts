@@ -15,14 +15,13 @@ export interface AuthStackProps extends BaseStackProps {
 }
 
 /**
- * Auth stack that creates Cognito User Pool and Identity Pool
+ * Auth stack that creates Cognito User Pool only
+ * Identity Pool is created separately in AuthExtensionsStack to avoid circular dependencies
  */
 export class AuthStack extends BaseStack {
   public cognitoAuth: CognitoAuth;
   public userPool: cognito.IUserPool;
   public userPoolClient: cognito.IUserPoolClient;
-  public identityPool?: cognito.CfnIdentityPool;
-  public authenticatedRole?: iam.IRole;
   private readonly allowedCallbackUrls: string[];
   private readonly allowedLogoutUrls: string[];
   private readonly samlMetadataUrl?: string;
@@ -82,10 +81,9 @@ export class AuthStack extends BaseStack {
   }
 
   /**
-   * Create Cognito authentication infrastructure
+   * Create Cognito User Pool infrastructure only
    */
   private createCognitoAuth(): void {
-
     this.cognitoAuth = new CognitoAuth(this, 'CognitoAuth', {
       userPoolName: SERVICES.UI_AUTH,
       stage: this.stage,
@@ -94,17 +92,33 @@ export class AuthStack extends BaseStack {
       customDomain: this.getCustomDomain(),
       emailSender: this.emailSender || this.getDefaultEmailSender(),
       allowedCallbackUrls: this.allowedCallbackUrls,
-      allowedLogoutUrls: this.allowedLogoutUrls,
-      identityPoolName: SERVICES.UI_AUTH,
-      s3Buckets: this.getS3BucketsForIdentityPool()
-      // Note: API Gateway ID will be added by api-compute-stack after it's created
+      allowedLogoutUrls: this.allowedLogoutUrls
+      // Note: identityPoolName and s3Buckets removed to prevent Identity Pool creation
+      // Identity Pool will be created separately in AuthExtensionsStack
     });
 
-    // Set public properties
+    // Set public properties (User Pool only)
     this.userPool = this.cognitoAuth.userPool;
     this.userPoolClient = this.cognitoAuth.userPoolClient;
-    this.identityPool = this.cognitoAuth.identityPool;
-    this.authenticatedRole = this.cognitoAuth.authenticatedRole;
+
+    // Store User Pool ARN in SSM for other stacks to reference
+    new ssm.StringParameter(this, 'UserPoolArnParameter', {
+      parameterName: `/cognito/${this.stage}/user-pool-arn`,
+      stringValue: this.userPool.userPoolArn,
+      description: 'Cognito User Pool ARN for cross-stack reference'
+    });
+
+    new ssm.StringParameter(this, 'UserPoolIdParameter', {
+      parameterName: `/cognito/${this.stage}/user-pool-id`,
+      stringValue: this.userPool.userPoolId,
+      description: 'Cognito User Pool ID for cross-stack reference'
+    });
+
+    new ssm.StringParameter(this, 'UserPoolClientIdParameter', {
+      parameterName: `/cognito/${this.stage}/user-pool-client-id`,
+      stringValue: this.userPoolClient.userPoolClientId,
+      description: 'Cognito User Pool Client ID for cross-stack reference'
+    });
 
     // Create outputs
     this.createOutputs();
@@ -139,16 +153,6 @@ export class AuthStack extends BaseStack {
     return `noreply-${this.stage}@mcr.cms.gov`;
   }
 
-  /**
-   * Get S3 buckets that authenticated users can access
-   */
-  private getS3BucketsForIdentityPool(): string[] {
-    // These will be the actual bucket names created in data stack
-    return [
-      `mcr-${this.stage}-uploads-cdk-bucket`,
-      `mcr-${this.stage}-qa-cdk-bucket`
-    ];
-  }
 
   /**
    * Add Lambda triggers to User Pool
@@ -169,137 +173,38 @@ export class AuthStack extends BaseStack {
    */
   private configureUserPoolExtensions(): void {
     // Create user groups
-    const adminGroup = new cognito.CfnUserPoolGroup(this, 'AdminGroup', {
+    new cognito.CfnUserPoolGroup(this, 'AdminGroup', {
       userPoolId: this.userPool.userPoolId,
       groupName: 'ADMIN',
       description: 'Administrator users with full access',
       precedence: 1
     });
 
-    const stateUserGroup = new cognito.CfnUserPoolGroup(this, 'StateUserGroup', {
+    new cognito.CfnUserPoolGroup(this, 'StateUserGroup', {
       userPoolId: this.userPool.userPoolId,
       groupName: 'STATE_USER',
       description: 'State users who can submit rates',
       precedence: 10
     });
 
-    const cmsUserGroup = new cognito.CfnUserPoolGroup(this, 'CmsUserGroup', {
+    new cognito.CfnUserPoolGroup(this, 'CmsUserGroup', {
       userPoolId: this.userPool.userPoolId,
       groupName: 'CMS_USER',
       description: 'CMS users who can review rates',
       precedence: 10
     });
 
-    const readOnlyGroup = new cognito.CfnUserPoolGroup(this, 'ReadOnlyGroup', {
+    new cognito.CfnUserPoolGroup(this, 'ReadOnlyGroup', {
       userPoolId: this.userPool.userPoolId,
       groupName: 'READ_ONLY',
       description: 'Read-only users',
       precedence: 20
     });
 
-    // If we have an authenticated role, attach policies for groups
-    if (this.authenticatedRole) {
-      this.attachGroupPolicies();
-    }
+    // Note: Group-based IAM policies will be configured in AuthExtensionsStack
+    // when the Identity Pool and authenticated role are created
   }
 
-  /**
-   * Attach IAM policies for different user groups
-   */
-  private attachGroupPolicies(): void {
-    if (!this.authenticatedRole || !this.identityPool) return;
-
-    // Create a single policy with statements for each group
-    // Using ForAnyValue:StringLike to check groups claim passed from User Pool to Identity Pool
-    const groupBasedPolicy = new iam.Policy(this, 'GroupBasedAccessPolicy', {
-      statements: [
-        // Admin group - full access
-        new iam.PolicyStatement({
-          sid: 'AdminGroupFullAccess',
-          effect: iam.Effect.ALLOW,
-          actions: ['*'],
-          resources: ['*'],
-          conditions: {
-            StringEquals: {
-              'cognito-identity.amazonaws.com:aud': this.identityPool.ref
-            },
-            'ForAnyValue:StringLike': {
-              'cognito-identity.amazonaws.com:amr': '*:ADMIN'
-            }
-          }
-        }),
-        
-        // State user group - can upload and manage submissions
-        new iam.PolicyStatement({
-          sid: 'StateUserGroupAccess',
-          effect: iam.Effect.ALLOW,
-          actions: [
-            's3:PutObject',
-            's3:GetObject',
-            's3:DeleteObject',
-            'dynamodb:PutItem',
-            'dynamodb:GetItem',
-            'dynamodb:Query'
-          ],
-          resources: ['*'],
-          conditions: {
-            StringEquals: {
-              'cognito-identity.amazonaws.com:aud': this.identityPool.ref
-            },
-            'ForAnyValue:StringLike': {
-              'cognito-identity.amazonaws.com:amr': '*:STATE_USER'
-            }
-          }
-        }),
-        
-        // CMS user group - can review and update submissions
-        new iam.PolicyStatement({
-          sid: 'CmsUserGroupAccess',
-          effect: iam.Effect.ALLOW,
-          actions: [
-            's3:GetObject',
-            'dynamodb:GetItem',
-            'dynamodb:Query',
-            'dynamodb:UpdateItem'
-          ],
-          resources: ['*'],
-          conditions: {
-            StringEquals: {
-              'cognito-identity.amazonaws.com:aud': this.identityPool.ref
-            },
-            'ForAnyValue:StringLike': {
-              'cognito-identity.amazonaws.com:amr': '*:CMS_USER'
-            }
-          }
-        }),
-        
-        // Read-only group - view only access
-        new iam.PolicyStatement({
-          sid: 'ReadOnlyGroupAccess',
-          effect: iam.Effect.ALLOW,
-          actions: [
-            's3:GetObject',
-            'dynamodb:GetItem',
-            'dynamodb:Query'
-          ],
-          resources: ['*'],
-          conditions: {
-            StringEquals: {
-              'cognito-identity.amazonaws.com:aud': this.identityPool.ref
-            },
-            'ForAnyValue:StringLike': {
-              'cognito-identity.amazonaws.com:amr': '*:READ_ONLY'
-            }
-          }
-        })
-      ]
-    });
-
-    // Actually attach the policy to the authenticated role
-    this.authenticatedRole.attachInlinePolicy(groupBasedPolicy);
-
-    // Note: In production, resources should be specific rather than wildcards
-  }
 
   /**
    * Create stack outputs
@@ -310,17 +215,15 @@ export class AuthStack extends BaseStack {
       description: 'Cognito User Pool ID'
     });
 
+    new CfnOutput(this, 'UserPoolArn', {
+      value: this.userPool.userPoolArn,
+      description: 'Cognito User Pool ARN'
+    });
+
     new CfnOutput(this, 'UserPoolClientId', {
       value: this.userPoolClient.userPoolClientId,
       description: 'Cognito User Pool Client ID'
     });
-
-    if (this.identityPool) {
-      new CfnOutput(this, 'IdentityPoolId', {
-        value: this.identityPool.ref,
-        description: 'Cognito Identity Pool ID'
-      });
-    }
 
     // Add UserPoolClientDomain output if custom domain is configured
     const domain = this.userPool.node.findChild('Domain') as cognito.UserPoolDomain | undefined;
@@ -330,5 +233,7 @@ export class AuthStack extends BaseStack {
         description: 'Cognito User Pool Domain'
       });
     }
+
+    // Note: Identity Pool outputs will be created in AuthExtensionsStack
   }
 }
