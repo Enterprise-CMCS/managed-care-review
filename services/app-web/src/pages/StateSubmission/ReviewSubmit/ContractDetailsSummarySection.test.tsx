@@ -203,6 +203,66 @@ describe('ContractDetailsSummarySection', () => {
         expect(await screen.findByText('No compliance')).toBeInTheDocument()
     })
 
+    it('displays correct contract is associated with DSNP field', async () => {
+        const contract = mockContractPackageDraft()
+        if (contract.draftRevision) {
+            contract.draftRevision.formData = {
+                ...contract.draftRevision.formData,
+                dsnpContract: false,
+            }
+
+            renderWithProviders(
+                <ContractDetailsSummarySection
+                    contract={contract}
+                    isStateUser
+                    editNavigateTo="contract-details"
+                    submissionName="MN-PMAP-0001"
+                />,
+                {
+                    apolloProvider: defaultApolloMocks,
+                    featureFlags: { dsnp: true },
+                }
+            )
+        }
+
+        expect(
+            await screen.findByText(
+                'Is this contract associated with a Dual-Eligible Special Needs Plan (D-SNP) that covers Medicaid benefits?'
+            )
+        ).toBeInTheDocument()
+    })
+
+    it('displays missing info error when contract is associated with DSNP field is null', async () => {
+        const contract = mockContractPackageDraft()
+        if (contract.draftRevision) {
+            contract.draftRevision.formData = {
+                ...contract.draftRevision.formData,
+                federalAuthorities: ['STATE_PLAN'], // DSNP triggering fed authority
+                dsnpContract: null,
+            }
+
+            renderWithProviders(
+                <ContractDetailsSummarySection
+                    contract={contract}
+                    isStateUser
+                    editNavigateTo="contract-details"
+                    submissionName="MN-PMAP-0001"
+                    explainMissingData
+                />,
+                {
+                    apolloProvider: defaultApolloMocks,
+                    featureFlags: { dsnp: true },
+                }
+            )
+        }
+        const dsnpField = await screen.getByLabelText(
+            'Is this contract associated with a Dual-Eligible Special Needs Plan (D-SNP) that covers Medicaid benefits?'
+        )
+        expect(
+            within(dsnpField).queryByText(/You must provide this information/)
+        ).toBeInTheDocument()
+    })
+
     it('displays correct effective dates text for base contract', async () => {
         const contract = mockContractPackageDraft()
         if (contract.draftRevision) {
