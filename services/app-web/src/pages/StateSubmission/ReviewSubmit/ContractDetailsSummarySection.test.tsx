@@ -255,6 +255,8 @@ describe('ContractDetailsSummarySection', () => {
                 }
             )
         }
+        await screen.findAllByText('Contract details')
+
         expect(
             await screen.findByText(
                 'Is this contract associated with a Dual-Eligible Special Needs Plan (D-SNP) that covers Medicaid benefits?'
