@@ -346,7 +346,7 @@ jobs:
         echo "✅ Layer assets prepared for CDK deployment"
 
     # 13. Deploy New Elegant Micro-Stack Infrastructure (Optimized for Parallel Deployment)
-    - name: Deploy Elegant Micro-Stack Infrastructure
+    - name: Deploy MCR-Stack Infrastructure
       working-directory: services/infra-cdk
       env:
         NR_LICENSE_KEY: ${{ secrets.NR_LICENSE_KEY }}

@@ -22,13 +22,13 @@ export const SERVICES = {
 
 // Lambda handlers (only used by multiple stacks)
 export const LAMBDA_HANDLERS = {
-  GRAPHQL: 'handlers/apollo_gql.gqlHandler',
-  HEALTH_CHECK: 'handlers/health_check.main',
-  OAUTH_TOKEN: 'handlers/oauth_token.main',
-  OTEL_PROXY: 'handlers/otel_proxy.main',
-  ZIP_KEYS: 'handlers/bulk_download.main',
-  AUDIT_FILES: 'handlers/audit_s3.main',
-  CLEANUP: 'handlers/cleanup.main'
+  GRAPHQL: 'src/handlers/apollo_gql.gqlHandler',
+  HEALTH_CHECK: 'src/handlers/health_check.main',
+  OAUTH_TOKEN: 'src/handlers/oauth_token.main',
+  OTEL_PROXY: 'src/handlers/otel_proxy.main',
+  ZIP_KEYS: 'src/handlers/bulk_download.main',
+  AUDIT_FILES: 'src/handlers/audit_s3.main',
+  CLEANUP: 'src/handlers/cleanup.main'
 } as const;
 
 // External AWS resources (pinned versions for stability)

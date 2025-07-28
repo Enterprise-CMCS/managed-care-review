@@ -23,80 +23,80 @@ interface HandlerMapping {
 const HANDLER_MAP: Record<string, HandlerMapping> = {
   // Main GraphQL API
   GRAPHQL: { 
-    entry: 'handlers/apollo_gql', 
+    entry: 'src/handlers/apollo_gql', 
     handler: 'gqlHandler',
     functionName: 'graphql'
   },
   
   // Email functions
   EMAIL_SUBMIT: { 
-    entry: 'handlers/email_submit', 
+    entry: 'src/handlers/email_submit', 
     handler: 'main',
     functionName: 'email_submit'
   },
   
   // Auth functions
   OAUTH_TOKEN: { 
-    entry: 'handlers/oauth_token', 
+    entry: 'src/handlers/oauth_token', 
     handler: 'main',
     functionName: 'oauth_token'
   },
   
   // Health check
   HEALTH: { 
-    entry: 'handlers/health_check', 
+    entry: 'src/handlers/health_check', 
     handler: 'main',
     functionName: 'health'
   },
   INDEX_HEALTH_CHECKER: {
-    entry: 'handlers/health_check',
+    entry: 'src/handlers/health_check',
     handler: 'main',
     functionName: 'health'
   },
   
   // Authorizer
   THIRD_PARTY_API_AUTHORIZER: { 
-    entry: 'handlers/third_party_API_authorizer', 
+    entry: 'src/handlers/third_party_API_authorizer', 
     handler: 'main',
     functionName: 'third_party_api_authorizer'
   },
   
   // Observability
   OTEL: { 
-    entry: 'handlers/otel_proxy', 
+    entry: 'src/handlers/otel_proxy', 
     handler: 'main',
     functionName: 'otel'
   },
   
   // Database operations
   MIGRATE: { 
-    entry: 'handlers/postgres_migrate', 
+    entry: 'src/handlers/postgres_migrate', 
     handler: 'main',
     functionName: 'migrate'
   },
   MIGRATE_DOCUMENT_ZIPS: {
-    entry: 'handlers/migrate_document_zips',
+    entry: 'src/handlers/migrate_document_zips',
     handler: 'main',
     functionName: 'migrate_document_zips'
   },
   
   // File operations
   ZIP_KEYS: { 
-    entry: 'handlers/bulk_download', 
+    entry: 'src/handlers/bulk_download', 
     handler: 'main',
     functionName: 'zip_keys'
   },
   
   // Cleanup
   CLEANUP: { 
-    entry: 'handlers/cleanup', 
+    entry: 'src/handlers/cleanup', 
     handler: 'main',
     functionName: 'cleanup'
   },
   
   // S3 audit
   AUDIT_FILES: { 
-    entry: 'handlers/audit_s3', 
+    entry: 'src/handlers/audit_s3', 
     handler: 'main',
     functionName: 'auditFiles'
   }
