@@ -5,11 +5,13 @@ import {
     Fieldset,
     FormGroup,
     Label,
+    Link,
 } from '@trussworks/react-uswds'
 import classnames from 'classnames'
 import {
     ButtonWithLogging,
     FieldRadio,
+    FieldCheckbox,
     FileUpload,
     LinkWithLogging,
     PoliteErrorMessage,
@@ -24,6 +26,7 @@ import {
     ACCEPTED_RATE_CERTIFICATION_FILE_TYPES,
 } from '../../../components/FileUpload'
 import { useS3 } from '../../../contexts/S3Context'
+import { RateMedicaidPopulationsRecord } from '@mc-review/hpp'
 
 import {
     FieldArray,
@@ -36,6 +39,10 @@ import { ActuaryContactFields } from '../Contacts'
 import { FormikRateForm, RateDetailFormConfig } from './V2/RateDetailsV2'
 import { useFocus } from '../../../hooks/useFocus'
 import { ContactSupportLink } from '../../../components/ErrorAlert/ContactSupportLink'
+import { Contract } from '../../../gen/gqlClient'
+import { featureFlags } from '@mc-review/common-code'
+import { useLDClient } from 'launchdarkly-react-client-sdk'
+
 const isRateTypeEmpty = (rateForm: FormikRateForm): boolean =>
     rateForm.rateType === undefined
 const isRateTypeAmendment = (rateForm: FormikRateForm): boolean =>
@@ -55,6 +62,7 @@ type SingleRateFormFieldsProps = {
     shouldValidate: boolean
     index: number // defaults to 0
     fieldNamePrefix: string // formik field name prefix - used for looking up values and errors in Formik FieldArray
+    contract?: Contract
     autofill?: (rateForm: FormikRateForm) => void // used for multi-rates, when called will FieldArray replace the existing form fields with new data
 }
 
@@ -103,15 +111,22 @@ export const SingleRateFormFields = ({
     shouldValidate,
     index = 0,
     fieldNamePrefix,
+    contract,
 }: SingleRateFormFieldsProps): React.ReactElement => {
     // page level setup
     const { handleUploadFile, handleScanFile } = useS3()
     const { errors, setFieldValue } = useFormikContext<RateDetailFormConfig>()
     const [focusNewActuaryContact, setFocusNewActuaryContact] = useState(false)
+    const ldClient = useLDClient()
 
     const newActuaryContactNameRef = useRef<HTMLInputElement | null>(null)
     const [newActuaryContactButtonRef, setNewActuaryContactButtonFocus] =
         useFocus()
+
+    const dsnpEnabled = ldClient?.variation(
+        featureFlags.DSNP.flag,
+        featureFlags.DSNP.defaultValue
+    )
 
     useEffect(() => {
         if (focusNewActuaryContact) {
@@ -130,6 +145,8 @@ export const SingleRateFormFields = ({
         return getIn(errors, `${fieldNamePrefix}.${fieldName}`)
     }
 
+    const formHeading = 'Rate Details Form'
+    const isDSNP = contract?.draftRevision?.formData.dsnpContract === true
     return (
         <>
             <FormGroup error={Boolean(showFieldErrors('rateDocuments'))}>
@@ -244,6 +261,85 @@ export const SingleRateFormFields = ({
                     label="What rates are included in this certification?"
                 />
             </FormGroup>
+
+            {dsnpEnabled && isDSNP && (
+                <FormGroup
+                    error={Boolean(showFieldErrors('rateMedicaidPopulations'))}
+                >
+                    <Fieldset
+                        legend="Which Medicaid populations are included in this rate certification?"
+                        aria-required
+                        id={`${fieldNamePrefix}.rateMedicaidPopulations`}
+                    >
+                        <span className={styles.requiredOptionalText}>
+                            Required
+                        </span>
+                        <div
+                            role="note"
+                            aria-labelledby={`${fieldNamePrefix}.rateMedicaidPopulations`}
+                            className="mcr-note margin-top-1"
+                        >
+                            See 42 CFR § 422.2
+                        </div>
+                        <LinkWithLogging
+                            aria-label="Medicaid Managed Care Rate Development Guide (opens in new window)"
+                            href={'https://www.medicaid.gov/medicaid/managed-care/guidance/rate-review-and-rate-guides'}
+                            variant="external"
+                            target="_blank"
+                        >
+                            Medicaid Managed Care Rate Development Guide
+                        </LinkWithLogging>
+                        <div className="usa-hint">
+                            <span>Check all that apply</span>
+                        </div>
+                        {Boolean(
+                            showFieldErrors('rateMedicaidPopulations')
+                        ) && (
+                            <PoliteErrorMessage formFieldLabel="Which Medicaid populations are included in this rate certification">
+                                {showFieldErrors('rateMedicaidPopulations')}
+                            </PoliteErrorMessage>
+                        )}
+                        <FieldCheckbox
+                            id={`${fieldNamePrefix}.withDSNP`}
+                            name={`${fieldNamePrefix}.rateMedicaidPopulations`}
+                            label={
+                                RateMedicaidPopulationsRecord.MEDICARE_MEDICAID_WITH_DSNP
+                            }
+                            value="MEDICARE_MEDICAID_WITH_DSNP"
+                            heading="Which Medicaid populations are included in this rate certification"
+                            parent_component_heading={formHeading}
+                        />
+                        <FieldCheckbox
+                            id={`${fieldNamePrefix}.medicaidOnly`}
+                            name={`${fieldNamePrefix}.rateMedicaidPopulations`}
+                            label={RateMedicaidPopulationsRecord.MEDICAID_ONLY}
+                            value="MEDICAID_ONLY"
+                            heading="Which Medicaid populations are included in this rate certification"
+                            parent_component_heading={formHeading}
+                        />
+                        <FieldCheckbox
+                            id={`${fieldNamePrefix}.withoutDSNP`}
+                            name={`${fieldNamePrefix}.rateMedicaidPopulations`}
+                            label={
+                                <span>
+                                    Medicare-Medicaid dually eligible
+                                    individuals{' '}
+                                    <span style={{ fontWeight: 600 }}>
+                                        not
+                                    </span>{' '}
+                                    enrolled through a D-SNP
+                                </span>
+                            }
+                            tealiumLabel={
+                                RateMedicaidPopulationsRecord.MEDICARE_MEDICAID_WITHOUT_DSNP
+                            }
+                            value="MEDICARE_MEDICAID_WITHOUT_DSNP"
+                            heading="Which Medicaid populations are included in this rate certification"
+                            parent_component_heading={formHeading}
+                        />
+                    </Fieldset>
+                </FormGroup>
+            )}
 
             <FormGroup error={Boolean(showFieldErrors('rateType'))}>
                 <Fieldset
