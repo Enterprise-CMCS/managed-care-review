@@ -154,7 +154,7 @@ export class FrontendStack extends BaseStack {
    */
   private createHstsFunction(): cloudfront.Function {
     return new cloudfront.Function(this, 'HstsFunction', {
-      functionName: `hsts-${this.stage}`,
+      functionName: `hsts-${this.stage}-cdk`,
       comment: 'This function adds headers to implement HSTS',
       code: cloudfront.FunctionCode.fromInline(`
 function handler(event) {

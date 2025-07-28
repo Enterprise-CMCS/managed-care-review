@@ -150,20 +150,21 @@ export class LambdaLayersStack extends Stack {
       'x86_64'       // Architecture
     ];
     
-    // Include build script CONTENT (not modification time)
-    const buildScriptPath = path.join(__dirname, `../../${this.getLayerBuildPath(layerType)}/build.sh`);
+    // Include main build script CONTENT (not modification time)
+    // All layers now use the centralized build-layer.sh script
+    const mainBuildScriptPath = path.join(__dirname, '../../scripts/build-layer.sh');
     try {
-      if (fs.existsSync(buildScriptPath)) {
-        const scriptContent = fs.readFileSync(buildScriptPath, 'utf8');
+      if (fs.existsSync(mainBuildScriptPath)) {
+        const scriptContent = fs.readFileSync(mainBuildScriptPath, 'utf8');
         hashInputs.push(scriptContent);
         
         // Debug logging in dev mode
         if (stage === 'dev') {
-          console.log(`Layer ${layerType}: Including build script content (${scriptContent.length} chars)`);
+          console.log(`Layer ${layerType}: Including main build script content (${scriptContent.length} chars)`);
         }
       }
     } catch (error) {
-      console.warn(`Layer hash: Could not read build script ${buildScriptPath}, skipping content hash`);
+      console.warn(`Layer hash: Could not read main build script ${mainBuildScriptPath}, skipping content hash`);
     }
     
     // For Prisma layers: include Prisma version for hash stability (workspace-independent)

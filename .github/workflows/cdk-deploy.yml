@@ -434,8 +434,6 @@ jobs:
         
         # NEW: Get API URLs from micro-stacks
         GRAPHQL_API_URL=$(get_output "MCR-GraphQLApi-$STAGE-cdk" "GraphQLApiUrl")
-        HEALTH_API_URL=$(get_output "MCR-PublicApi-$STAGE-cdk" "HealthApiUrl")
-        OAUTH_API_URL=$(get_output "MCR-PublicApi-$STAGE-cdk" "OAuthApiUrl")
         OTEL_API_URL=$(get_output "MCR-PublicApi-$STAGE-cdk" "OtelApiUrl")
         
         # NEW: Get auth from AuthExtensions stack (breaks circular dependency!)
@@ -455,8 +453,6 @@ jobs:
         # Output for GitHub Actions - NEW micro-stack architecture
         echo "api-url=$GRAPHQL_API_URL" >> $GITHUB_OUTPUT              # Main API (GraphQL)
         echo "graphql-api-url=$GRAPHQL_API_URL" >> $GITHUB_OUTPUT       # GraphQL endpoint
-        echo "health-api-url=$HEALTH_API_URL" >> $GITHUB_OUTPUT         # Health check endpoint
-        echo "oauth-api-url=$OAUTH_API_URL" >> $GITHUB_OUTPUT           # OAuth endpoint
         echo "otel-api-url=$OTEL_API_URL" >> $GITHUB_OUTPUT             # OTEL collector endpoint
         echo "user-pool-id=$USER_POOL_ID" >> $GITHUB_OUTPUT
         echo "user-pool-client-id=$USER_POOL_CLIENT_ID" >> $GITHUB_OUTPUT
@@ -468,8 +464,6 @@ jobs:
         echo "✅ Micro-stack outputs exported successfully!"
         echo "📊 API endpoints available:"
         echo "  - GraphQL: $GRAPHQL_API_URL"
-        echo "  - Health: $HEALTH_API_URL" 
-        echo "  - OAuth: $OAUTH_API_URL"
         echo "  - OTEL: $OTEL_API_URL"
         EOF
         
@@ -521,9 +515,6 @@ jobs:
         VITE_APP_S3_QA_BUCKET: ${{ steps.infra-outputs.outputs.qa-bucket }}
         VITE_APP_STAGE_NAME: ${{ env.STAGE }}
         VITE_APP_OTEL_COLLECTOR_URL: ${{ steps.infra-outputs.outputs.otel-api-url }}      # NEW: Dedicated OTEL micro-stack
-        # NEW: Additional micro-stack endpoints for specialized use cases
-        VITE_APP_HEALTH_API_URL: ${{ steps.infra-outputs.outputs.health-api-url }}        # Health check endpoint
-        VITE_APP_OAUTH_API_URL: ${{ steps.infra-outputs.outputs.oauth-api-url }}          # OAuth endpoint
         # Optional environment variables from SSM (will be fetched in build step)
         VITE_APP_LD_CLIENT_ID: ${{ env.VITE_APP_LD_CLIENT_ID || '' }}
         VITE_APP_NR_ACCOUNT_ID: ${{ env.VITE_APP_NR_ACCOUNT_ID || '' }}
@@ -534,8 +525,6 @@ jobs:
         echo "🏗️ Building frontend with elegant micro-stack architecture..."
         echo "📊 API endpoints configured:"
         echo "  - GraphQL API: ${{ steps.infra-outputs.outputs.graphql-api-url }}"
-        echo "  - Health API: ${{ steps.infra-outputs.outputs.health-api-url }}"
-        echo "  - OAuth API: ${{ steps.infra-outputs.outputs.oauth-api-url }}"
         echo "  - OTEL API: ${{ steps.infra-outputs.outputs.otel-api-url }}"
         
         pnpm build

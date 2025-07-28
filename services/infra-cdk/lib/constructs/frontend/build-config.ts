@@ -130,7 +130,7 @@ export class BuildConfig extends Construct {
     Object.entries(config).forEach(([key, value]) => {
       if (value !== undefined) {
         new ssm.StringParameter(this, `${key}Parameter`, {
-          parameterName: `/mcr/${this.stage}/frontend/build/${key}`,
+          parameterName: `/mcr-cdk/${this.stage}/frontend/build/${key}`,
           stringValue: value,
           description: `Frontend build configuration: ${key}`
         });
@@ -145,7 +145,7 @@ export class BuildConfig extends Construct {
   public storeConfigurationMetadata(applicationEndpoint: string): void {
     // Store the application endpoint directly
     new ssm.StringParameter(this, 'AppEndpointParameter', {
-      parameterName: `/mcr/${this.stage}/frontend/build/metadata/app-endpoint`,
+      parameterName: `/mcr-cdk/${this.stage}/frontend/build/metadata/app-endpoint`,
       stringValue: applicationEndpoint,
       description: 'Frontend application endpoint'
     });
@@ -153,18 +153,18 @@ export class BuildConfig extends Construct {
     // Store references to where configuration values can be found
     // These will be resolved during the build process, not during CDK synthesis
     const configSources = {
-      API_URL: `/mcr/${this.stage}/service-registry/api/url`,
-      USER_POOL_ID: `/mcr/${this.stage}/service-registry/auth/user-pool-id`,
-      USER_POOL_CLIENT_ID: `/mcr/${this.stage}/service-registry/auth/user-pool-client-id`,
-      IDENTITY_POOL_ID: `/mcr/${this.stage}/service-registry/auth/identity-pool-id`,
-      UPLOADS_BUCKET: `/mcr/${this.stage}/service-registry/s3/uploads-bucket-name`,
-      QA_BUCKET: `/mcr/${this.stage}/service-registry/s3/qa-bucket-name`
+      API_URL: `/mcr-cdk/${this.stage}/service-registry/api/url`,
+      USER_POOL_ID: `/mcr-cdk/${this.stage}/service-registry/auth/user-pool-id`,
+      USER_POOL_CLIENT_ID: `/mcr-cdk/${this.stage}/service-registry/auth/user-pool-client-id`,
+      IDENTITY_POOL_ID: `/mcr-cdk/${this.stage}/service-registry/auth/identity-pool-id`,
+      UPLOADS_BUCKET: `/mcr-cdk/${this.stage}/service-registry/s3/uploads-bucket-name`,
+      QA_BUCKET: `/mcr-cdk/${this.stage}/service-registry/s3/qa-bucket-name`
     };
     
     // Store the configuration source paths
     Object.entries(configSources).forEach(([key, paramPath]) => {
       new ssm.StringParameter(this, `${key}SourceParameter`, {
-        parameterName: `/mcr/${this.stage}/frontend/build/metadata/source/${key}`,
+        parameterName: `/mcr-cdk/${this.stage}/frontend/build/metadata/source/${key}`,
         stringValue: paramPath,
         description: `SSM parameter path for ${key}`
       });
@@ -172,13 +172,13 @@ export class BuildConfig extends Construct {
     
     // Store static configuration values
     new ssm.StringParameter(this, 'StageParameter', {
-      parameterName: `/mcr/${this.stage}/frontend/build/metadata/stage`,
+      parameterName: `/mcr-cdk/${this.stage}/frontend/build/metadata/stage`,
       stringValue: this.stage,
       description: 'Deployment stage'
     });
     
     new ssm.StringParameter(this, 'AuthModeParameter', {
-      parameterName: `/mcr/${this.stage}/frontend/build/metadata/auth-mode`,
+      parameterName: `/mcr-cdk/${this.stage}/frontend/build/metadata/auth-mode`,
       stringValue: process.env.VITE_APP_AUTH_MODE || 'COGNITO',
       description: 'Authentication mode'
     });
