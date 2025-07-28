@@ -37,13 +37,8 @@ import type { CreateHealthPlanPackageInput } from '../gen/gqlServer'
 import { mockGqlContractDraftRevisionFormDataInput } from './gqlContractInputMocks'
 import type { GraphQLFormattedError } from 'graphql/index'
 
-// Helper to extract GraphQL response from Apollo v4 response structure
-function extractTestResponse(response: any): any {
-    if ('body' in response && response.body) {
-        return response.body.kind === 'single' ? response.body.singleResult : response.body
-    }
-    return response
-}
+import { extractGraphQLResponse } from './apolloV4ResponseHelper'
+import type { Context } from '../handlers/apollo_gql'
 
 const createAndSubmitTestContract = async (
     server: ApolloServer,
@@ -63,7 +58,8 @@ const createAndSubmitTestContract = async (
 async function submitTestContract(
     server: ApolloServer,
     contractID: string,
-    submittedReason?: string
+    submittedReason?: string,
+    context?: Context
 ): Promise<Contract> {
     const response = await server.executeOperation({
         query: SubmitContractDocument,
@@ -74,10 +70,10 @@ async function submitTestContract(
             },
         },
     }, {
-        contextValue: defaultContext(),
+        contextValue: context || defaultContext(),
     })
     
-    const result = extractTestResponse(response)
+    const result = extractGraphQLResponse(response)
 
     if (result.errors) {
         throw new Error(
@@ -95,7 +91,8 @@ async function submitTestContract(
 async function resubmitTestContract(
     server: ApolloServer,
     contractID: string,
-    submittedReason?: string
+    submittedReason?: string,
+    context?: Context
 ): Promise<Contract> {
     const response = await server.executeOperation({
         query: SubmitContractDocument,
@@ -106,10 +103,10 @@ async function resubmitTestContract(
             },
         },
     }, {
-        contextValue: defaultContext(),
+        contextValue: context || defaultContext(),
     })
     
-    const updateResult = extractTestResponse(response)
+    const updateResult = extractGraphQLResponse(response)
 
     if (updateResult.errors) {
         throw new Error(
@@ -141,7 +138,7 @@ async function unlockTestContract(
         contextValue: defaultContext(),
     })
     
-    const result = extractTestResponse(response)
+    const result = extractGraphQLResponse(response)
 
     if (result.errors) {
         throw new Error(
@@ -174,7 +171,7 @@ async function unlockTestContractAsUser(
         contextValue: { user },
     })
     
-    const result = extractTestResponse(response)
+    const result = extractGraphQLResponse(response)
 
     if (result.errors) {
         throw new Error(
@@ -227,7 +224,7 @@ async function fetchTestContract(
         contextValue: defaultContext(),
     })
     
-    const result = extractTestResponse(response)
+    const result = extractGraphQLResponse(response)
 
     if (result.errors) {
         throw new Error(
@@ -259,7 +256,7 @@ async function approveTestContract(
         contextValue: defaultContext(),
     })
     
-    const result = extractTestResponse(response)
+    const result = extractGraphQLResponse(response)
 
     if (result.errors) {
         throw new Error(
@@ -292,7 +289,7 @@ async function approveTestContractAsUser(
         contextValue: { user },
     })
     
-    const result = extractTestResponse(response)
+    const result = extractGraphQLResponse(response)
 
     if (result.errors) {
         throw new Error(
@@ -322,7 +319,7 @@ const fetchTestContractWithQuestions = async (
         contextValue: defaultContext(),
     })
     
-    const result = extractTestResponse(response)
+    const result = extractGraphQLResponse(response)
 
     if (result.errors) {
         throw new Error(
@@ -363,7 +360,7 @@ const createTestContract = async (
         contextValue: defaultContext(),
     })
     
-    const result = extractTestResponse(response)
+    const result = extractGraphQLResponse(response)
 
     if (result.errors) {
         throw new Error(
@@ -476,7 +473,7 @@ const linkRateToDraftContract = async (
         contextValue: defaultContext(),
     })
     
-    const updatedContract = extractTestResponse(response)
+    const updatedContract = extractGraphQLResponse(response)
     return updatedContract
 }
 
@@ -496,7 +493,7 @@ const clearRatesOnDraftContract = async (
         contextValue: defaultContext(),
     })
     
-    const updatedContract = extractTestResponse(response)
+    const updatedContract = extractGraphQLResponse(response)
     return updatedContract
 }
 
@@ -524,7 +521,7 @@ const updateRateOnDraftContract = async (
         contextValue: defaultContext(),
     })
     
-    const updatedContract = extractTestResponse(response)
+    const updatedContract = extractGraphQLResponse(response)
     must(updatedContract)
     const contractData = updatedContract.data?.updateDraftContractRates.contract
     if (!contractData)
@@ -566,7 +563,7 @@ const updateTestContractDraftRevision = async (
         contextValue: defaultContext(),
     })
     
-    const updateResult = extractTestResponse(response)
+    const updateResult = extractGraphQLResponse(response)
 
     if (updateResult.errors) {
         console.info('errors', JSON.stringify(updateResult.errors))
@@ -599,7 +596,7 @@ const withdrawTestContract = async (
         contextValue: defaultContext(),
     })
     
-    const withdrawResult = extractTestResponse(response)
+    const withdrawResult = extractGraphQLResponse(response)
 
     if (withdrawResult.errors) {
         console.info('errors', withdrawResult.errors)
@@ -632,7 +629,7 @@ const undoWithdrawTestContract = async (
         contextValue: defaultContext(),
     })
     
-    const undoWithdrawResult = extractTestResponse(response)
+    const undoWithdrawResult = extractGraphQLResponse(response)
 
     if (undoWithdrawResult.errors) {
         console.info('errors', undoWithdrawResult.errors)
@@ -665,7 +662,7 @@ const errorUndoWithdrawTestContract = async (
         contextValue: defaultContext(),
     })
     
-    const undoWithdrawResult = extractTestResponse(response)
+    const undoWithdrawResult = extractGraphQLResponse(response)
 
     if (!undoWithdrawResult.errors) {
         throw new Error(

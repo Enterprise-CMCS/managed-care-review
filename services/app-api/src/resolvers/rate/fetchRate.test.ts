@@ -64,7 +64,7 @@ describe('fetchRate', () => {
         const submittedRate = await createSubmitAndUnlockTestRate(
             stateServer,
             cmsServer,
-            testCMSUser()
+            cmsUser
         )
 
         // editrate with new data and resubmit
@@ -152,7 +152,7 @@ describe('fetchRate', () => {
         const submittedInitial = await createSubmitAndUnlockTestRate(
             server,
             cmsServer,
-            testCMSUser()
+            cmsUser
         )
 
         // add new rate
@@ -354,7 +354,8 @@ describe('fetchRate', () => {
 
         const submittedRate = await createSubmitAndUnlockTestRate(
             server,
-            cmsServer
+            cmsServer,
+            cmsUser
         )
 
         const input = {
@@ -399,7 +400,8 @@ describe('fetchRate', () => {
 
         const submittedRate = await createSubmitAndUnlockTestRate(
             server,
-            cmsServer
+            cmsServer,
+            cmsUser
         )
         expect(submittedRate).toBeDefined()
 

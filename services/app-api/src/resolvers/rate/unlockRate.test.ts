@@ -25,9 +25,10 @@ describe(`unlockRate`, () => {
                     ldService,
                     s3Client: mockS3,
                 })
+                const cmsUser = mockUser()
                 const cmsServer = await constructTestPostgresServer({
                     context: {
-                        user: mockUser(),
+                        user: cmsUser,
                     },
                     ldService,
                     s3Client: mockS3,
@@ -36,7 +37,8 @@ describe(`unlockRate`, () => {
                 // Create and unlock a rate
                 const updatedRate = await createSubmitAndUnlockTestRate(
                     stateServer,
-                    cmsServer
+                    cmsServer,
+                    cmsUser
                 )
 
                 expect(updatedRate.status).toBe('UNLOCKED')
@@ -59,9 +61,10 @@ describe(`unlockRate`, () => {
                     ldService,
                     s3Client: mockS3,
                 })
+                const cmsUser = mockUser()
                 const cmsServer = await constructTestPostgresServer({
                     context: {
-                        user: mockUser(),
+                        user: cmsUser,
                     },
                     ldService,
                     s3Client: mockS3,
@@ -70,7 +73,8 @@ describe(`unlockRate`, () => {
                 // Create a rate
                 const rate = await createSubmitAndUnlockTestRate(
                     stateServer,
-                    cmsServer
+                    cmsServer,
+                    cmsUser
                 )
 
                 // Try to unlock the rate again
@@ -125,9 +129,10 @@ describe(`unlockRate`, () => {
             ldService,
             s3Client: mockS3,
         })
+        const cmsUser = testCMSUser()
         const cmsServer = await constructTestPostgresServer({
             context: {
-                user: testCMSUser(),
+                user: cmsUser,
             },
             ldService,
             s3Client: mockS3,

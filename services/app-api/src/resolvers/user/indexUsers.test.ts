@@ -115,7 +115,7 @@ describe('indexUsers', () => {
         )
     })
 
-    it('returns an error if called by a CMS user', async () => {
+    it('allows CMS users to index users', async () => {
         const cmsUser = testCMSUser()
         const server = await constructTestPostgresServer({
             context: {
@@ -131,8 +131,9 @@ describe('indexUsers', () => {
             },
         })
 
-        expect(assertAnError(updateRes).message).toBe(
-            'user not authorized to fetch users'
-        )
+        const result = extractGraphQLResponse(updateRes)
+        expect(result.data).toBeDefined()
+        expect(result.errors).toBeUndefined()
+        expect(result.data?.indexUsers).toBeDefined()
     })
 })

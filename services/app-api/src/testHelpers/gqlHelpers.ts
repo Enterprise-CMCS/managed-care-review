@@ -92,8 +92,9 @@ function defaultFloridaRateProgram(): ProgramType {
     return rateProgram
 }
 
-// Store the default user instance to ensure consistency across operations
+// Store the default user and context instance to ensure consistency across operations
 let defaultTestUser: UserType | null = null
+let defaultTestContext: Context | null = null
 
 const getOrCreateDefaultUser = (): UserType => {
     if (!defaultTestUser) {
@@ -103,14 +104,18 @@ const getOrCreateDefaultUser = (): UserType => {
 }
 
 const defaultContext = (): Context => {
-    return {
-        user: getOrCreateDefaultUser(),
+    if (!defaultTestContext) {
+        defaultTestContext = {
+            user: getOrCreateDefaultUser(),
+        }
     }
+    return defaultTestContext
 }
 
 // Reset function for tests to ensure clean state
 export const resetDefaultTestUser = (): void => {
     defaultTestUser = null
+    defaultTestContext = null
 }
 
 const constructTestPostgresServer = async (opts?: {

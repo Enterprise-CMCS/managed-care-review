@@ -33,13 +33,8 @@ import type { UserType } from '../domain-models'
 import { createAndSubmitTestContractWithRate } from './gqlContractHelpers'
 import { clearDocMetadata } from './documentHelpers'
 
-// Helper to extract GraphQL response from Apollo v4 response structure
-function extractTestResponse(response: any): any {
-    if ('body' in response && response.body) {
-        return response.body.kind === 'single' ? response.body.singleResult : response.body
-    }
-    return response
-}
+import { extractGraphQLResponse } from './apolloV4ResponseHelper'
+import type { Context } from '../handlers/apollo_gql'
 
 const fetchTestRateById = async (
     server: ApolloServer,
@@ -53,7 +48,7 @@ const fetchTestRateById = async (
         contextValue: defaultContext(),
     })
     
-    const result = extractTestResponse(response)
+    const result = extractGraphQLResponse(response)
 
     if (result.errors) {
         throw new Error(
@@ -80,7 +75,7 @@ const fetchTestRateWithQuestionsById = async (
         contextValue: defaultContext(),
     })
     
-    const result = extractTestResponse(response)
+    const result = extractGraphQLResponse(response)
 
     if (result.errors) {
         throw new Error(
@@ -129,7 +124,7 @@ const submitTestRate = async (
         contextValue: defaultContext(),
     })
     
-    const updateResult = extractTestResponse(response)
+    const updateResult = extractGraphQLResponse(response)
 
     if (updateResult.errors) {
         console.info('errors', updateResult.errors)
@@ -165,7 +160,7 @@ const unlockTestRate = async (
         contextValue: defaultContext(),
     })
     
-    const updateResult = extractTestResponse(response)
+    const updateResult = extractGraphQLResponse(response)
 
     if (updateResult.errors) {
         console.info('errors', updateResult.errors)
@@ -202,7 +197,7 @@ const unlockTestRateAsUser = async (
         contextValue: { user },
     })
     
-    const updateResult = extractTestResponse(response)
+    const updateResult = extractGraphQLResponse(response)
 
     if (updateResult.errors) {
         console.info('errors', updateResult.errors)
@@ -234,7 +229,7 @@ async function updateTestDraftRatesOnContract(
         contextValue: defaultContext(),
     })
     
-    const updateResult = extractTestResponse(response)
+    const updateResult = extractGraphQLResponse(response)
 
     if (updateResult.errors || !updateResult.data) {
         throw new Error(
@@ -476,7 +471,7 @@ const createTestDraftRateOnContract = async (
         contextValue: defaultContext(),
     })
     
-    const updateResult = extractTestResponse(response)
+    const updateResult = extractGraphQLResponse(response)
 
     if (updateResult.errors || !updateResult.data) {
         console.info('errors', updateResult.errors)
@@ -518,7 +513,7 @@ const updateTestDraftRateOnContract = async (
         contextValue: defaultContext(),
     })
     
-    const updateResult = extractTestResponse(response)
+    const updateResult = extractGraphQLResponse(response)
 
     if (updateResult.errors || !updateResult.data) {
         console.info('errors', updateResult.errors)
@@ -548,7 +543,8 @@ const updateTestRate = async (
 const withdrawTestRate = async (
     server: ApolloServer,
     rateID: string,
-    updatedReason: string
+    updatedReason: string,
+    context?: Context
 ): Promise<RateType> => {
     const response = await server.executeOperation({
         query: WithdrawRateDocument,
@@ -559,10 +555,10 @@ const withdrawTestRate = async (
             },
         },
     }, {
-        contextValue: defaultContext(),
+        contextValue: context || defaultContext(),
     })
     
-    const withdrawResult = extractTestResponse(response)
+    const withdrawResult = extractGraphQLResponse(response)
 
     if (withdrawResult.errors) {
         console.info('errors', withdrawResult.errors)
@@ -598,7 +594,7 @@ const undoWithdrawTestRate = async (
         contextValue: defaultContext(),
     })
     
-    const undoWithdrawRate = extractTestResponse(response)
+    const undoWithdrawRate = extractGraphQLResponse(response)
 
     if (undoWithdrawRate.errors) {
         console.info('errors', undoWithdrawRate.errors)
@@ -634,7 +630,7 @@ const fetchTestIndexRatesStripped = async (
         contextValue: defaultContext(),
     })
     
-    const indexRatesStrippedResult = extractTestResponse(response)
+    const indexRatesStrippedResult = extractGraphQLResponse(response)
 
     if (indexRatesStrippedResult.errors) {
         console.info('errors', indexRatesStrippedResult.errors)

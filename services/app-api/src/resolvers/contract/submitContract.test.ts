@@ -213,10 +213,11 @@ describe('submitContract', () => {
         await addLinkedRateToTestContract(stateServer, draftB0, OneID)
 
         // 3. Unlock A0, edit and resubmit
-        await unlockTestHealthPlanPackage(
+        await unlockTestHealthPlanPackageAsUser(
             cmsServer,
             AID,
-            'edit the linked rate, please'
+            'edit the linked rate, please',
+            cmsUser
         )
 
         const resubmittedA = await submitTestContract(
@@ -353,9 +354,10 @@ describe('submitContract', () => {
             s3Client: mockS3,
         })
 
+        const cmsUser = testCMSUser()
         const cmsServer = await constructTestPostgresServer({
             context: {
-                user: testCMSUser(),
+                user: cmsUser,
             },
             s3Client: mockS3,
         })
@@ -1245,9 +1247,10 @@ describe('submitContract', () => {
             const server = await constructTestPostgresServer({
                 emailer: mockEmailer,
             })
+            const cmsUser = testCMSUser()
             const cmsServer = await constructTestPostgresServer({
                 context: {
-                    user: testCMSUser(),
+                    user: cmsUser,
                 },
                 emailer: mockEmailer,
             })
@@ -1274,7 +1277,7 @@ describe('submitContract', () => {
                 { submissionType: 'CONTRACT_ONLY' }
             )
             await submitTestContract(server, draft1.id)
-            await unlockTestContract(cmsServer, draft1.id, 'unlock to resubmit')
+            await unlockTestContractAsUser(cmsServer, draft1.id, 'unlock to resubmit', cmsUser)
             const submit1 = await submitTestContract(
                 server,
                 draft1.id,
@@ -1313,10 +1316,11 @@ describe('submitContract', () => {
                 store: postgresStore,
                 emailer: mockEmailer,
             })
+            const cmsUser = testCMSUser()
             const cmsServer = await constructTestPostgresServer({
                 store: postgresStore,
                 context: {
-                    user: testCMSUser(),
+                    user: cmsUser,
                 },
             })
 
@@ -1378,10 +1382,6 @@ describe('submitContract', () => {
                     input: {
                         contractID: draftID,
                     },
-                },
-            }, {
-                contextValue: {
-                    user: testStateUser(),
                 },
             }) as Promise<{ errors?: any; data?: any }>)
 
@@ -1448,7 +1448,6 @@ describe('submitContract', () => {
                         contractID: draftID,
                     },
                 },
-                contextValue: { user: testStateUser() },
             })
 
             expect(submitResult.errors).toBeUndefined()
@@ -1479,16 +1478,18 @@ describe('submitContract', () => {
 
             const stateSubmission =
                 await createAndSubmitTestContractWithRate(stateServer)
+            const cmsUser = testCMSUser()
             const cmsServer = await constructTestPostgresServer({
                 context: {
-                    user: testCMSUser(),
+                    user: cmsUser,
                 },
             })
 
-            await unlockTestContract(
+            await unlockTestContractAsUser(
                 cmsServer,
                 stateSubmission.id,
-                'Test unlock reason.'
+                'Test unlock reason.',
+                cmsUser
             )
 
             const submitResponse = await stateServer.executeOperation({
@@ -1555,16 +1556,18 @@ describe('submitContract', () => {
                 { submissionType: 'CONTRACT_ONLY' }
             )
 
+            const cmsUser = testCMSUser()
             const cmsServer = await constructTestPostgresServer({
                 context: {
-                    user: testCMSUser(),
+                    user: cmsUser,
                 },
             })
 
-            await unlockTestContract(
+            await unlockTestContractAsUser(
                 cmsServer,
                 stateSubmission.id,
-                'Test unlock reason.'
+                'Test unlock reason.',
+                cmsUser
             )
 
             const submitResult = await resubmitTestContract(
@@ -1607,7 +1610,6 @@ describe('submitContract', () => {
                         contractID: draftID,
                     },
                 },
-                contextValue: { user: testStateUser() },
             })
 
             expect(submitResult.errors).toBeDefined()
@@ -1723,7 +1725,6 @@ describe('submitContract', () => {
                         contractID: initialContract.id,
                     },
                 },
-                contextValue: { user: testStateUser() },
             })
 
             expect(submitResult.errors).toBeDefined()
@@ -1752,7 +1753,6 @@ describe('submitContract', () => {
                         contractID: initialContract.id,
                     },
                 },
-                contextValue: { user: testStateUser() },
             })
 
             expect(submitResult.errors).toBeDefined()
@@ -1785,7 +1785,6 @@ describe('submitContract', () => {
                         contractID: initialContract.id,
                     },
                 },
-                contextValue: { user: testStateUser() },
             })
 
             expect(submitResult.errors).toBeUndefined()

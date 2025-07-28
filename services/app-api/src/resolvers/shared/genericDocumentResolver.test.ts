@@ -28,7 +28,8 @@ describe(`genericDocumentResolver`, () => {
         // Create a rate
         const submittedRate = await createSubmitAndUnlockTestRate(
             server,
-            cmsServer
+            cmsServer,
+            cmsUser
         )
         expect(submittedRate).toBeDefined()
 
