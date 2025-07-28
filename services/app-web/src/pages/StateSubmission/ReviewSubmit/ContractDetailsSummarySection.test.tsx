@@ -232,6 +232,10 @@ describe('ContractDetailsSummarySection', () => {
                 'Is this contract associated with a Dual-Eligible Special Needs Plan (D-SNP) that covers Medicaid benefits?'
             )
         ).toBeInTheDocument()
+        const dsnpField = await screen.getByTestId('dsnp')
+        expect(
+            within(dsnpField).queryByText(/You must provide this information/)
+        ).toBeInTheDocument()
         // const dsnpField = await screen.getByTestId('dsnp')
         // expect(
         //     within(dsnpField).queryByText(/You must provide this information/)
