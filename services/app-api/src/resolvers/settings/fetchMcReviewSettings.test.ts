@@ -103,6 +103,8 @@ describe('fetchMcReviewSettings', () => {
 
         const mcReviewSettings = await server.executeOperation({
             query: FetchMcReviewSettingsDocument,
+        }, {
+            contextValue: { user: testAdminUser() },
         })
 
         if (!mcReviewSettings.data?.fetchMcReviewSettings?.stateAssignments) {
@@ -177,6 +179,8 @@ describe('fetchMcReviewSettings', () => {
         // make a mock request
         const res = await server.executeOperation({
             query: FetchMcReviewSettingsDocument,
+        }, {
+            contextValue: { user: testUserAdmin },
         })
 
         const result = extractGraphQLResponse(res)
@@ -200,6 +204,8 @@ describe('fetchMcReviewSettings', () => {
 
         const mcReviewSettings = await server.executeOperation({
             query: FetchMcReviewSettingsDocument,
+        }, {
+            contextValue: { user: testStateUser() },
         })
 
         const result = extractGraphQLResponse(mcReviewSettings)
@@ -228,6 +234,8 @@ describe('fetchMcReviewSettings', () => {
 
         const response = await server.executeOperation({
             query: FetchMcReviewSettingsDocument,
+        }, {
+            contextValue: { user: testAdminUser() },
         })
         
         const mcReviewSettings = extractGraphQLResponse(response)

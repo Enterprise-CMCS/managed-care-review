@@ -48,6 +48,7 @@ const testRateFormInputData = (): RateFormDataInput => ({
     amendmentEffectiveDateEnd: '2025-02-01',
     rateProgramIDs: [defaultFloridaProgram().id],
     deprecatedRateProgramIDs: [],
+    rateMedicaidPopulations: ['MEDICARE_MEDICAID_WITHOUT_DSNP'],
     rateDocuments: [
         {
             s3URL: 's3://bucketname/key/test1',
@@ -502,7 +503,7 @@ describe('withdrawRate', () => {
         )
 
         const rateID = contract.packageSubmissions[0].rateRevisions[0].rateID
-        await withdrawTestRate(cmsServer, rateID, 'Withdraw invalid rate')
+        await withdrawTestRate(cmsServer, rateID, 'Withdraw invalid rate', { user: cmsUser })
 
         must(
             await cmsServer.executeOperation({

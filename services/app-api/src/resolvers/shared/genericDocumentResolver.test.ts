@@ -43,6 +43,8 @@ describe(`genericDocumentResolver`, () => {
             variables: {
                 input,
             },
+        }, {
+            contextValue: { user: cmsUser },
         })
         
         const result = extractGraphQLResponse(response)
