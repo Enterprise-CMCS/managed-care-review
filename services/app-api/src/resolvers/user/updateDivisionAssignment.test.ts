@@ -53,7 +53,7 @@ describe('updateDivisionAssignment', () => {
                     },
                 }, {
                     contextValue: {
-                        user: mockUser,
+                        user: adminUser,
                     },
                 })
 
@@ -84,7 +84,7 @@ describe('updateDivisionAssignment', () => {
                     },
                 }, {
                     contextValue: {
-                        user: mockUser,
+                        user: adminUser,
                     },
                 })
 
@@ -148,7 +148,7 @@ describe('updateDivisionAssignment', () => {
                     },
                 }, {
                     contextValue: {
-                        user: mockUser,
+                        user: mockUser(),
                     },
                 })
 
@@ -197,7 +197,7 @@ describe('updateDivisionAssignment', () => {
             },
         }, {
             contextValue: {
-                user: mockUser,
+                user: adminUser,
             },
         })
 

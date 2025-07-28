@@ -9,6 +9,7 @@ import {
     FetchMcReviewSettingsDocument,
 } from '../gen/gqlClient'
 import { defaultContext } from './gqlHelpers'
+import type { Context } from '../handlers/apollo_gql'
 
 // Helper to extract GraphQL response from Apollo v4 response structure
 function extractTestResponse(response: any): any {
@@ -20,7 +21,8 @@ function extractTestResponse(response: any): any {
 
 const updateTestEmailSettings = async (
     server: ApolloServer,
-    emailConfiguration: EmailConfiguration
+    emailConfiguration: EmailConfiguration,
+    context?: Context
 ): Promise<UpdateEmailSettingsPayload> => {
     const response = await server.executeOperation({
         query: UpdateEmailSettingsDocument,
@@ -30,7 +32,7 @@ const updateTestEmailSettings = async (
             },
         },
     }, {
-        contextValue: defaultContext(),
+        contextValue: context || defaultContext(),
     })
     
     const updateEmailConfig = extractTestResponse(response)
@@ -53,12 +55,13 @@ const updateTestEmailSettings = async (
 }
 
 const fetchTestMcReviewSettings = async (
-    server: ApolloServer
+    server: ApolloServer,
+    context?: Context
 ): Promise<FetchMcReviewSettingsPayload> => {
     const response = await server.executeOperation({
         query: FetchMcReviewSettingsDocument,
     }, {
-        contextValue: defaultContext(),
+        contextValue: context || defaultContext(),
     })
     
     const fetchMcReviewSettings = extractTestResponse(response)

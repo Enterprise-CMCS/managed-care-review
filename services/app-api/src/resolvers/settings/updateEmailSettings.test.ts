@@ -2,7 +2,7 @@ import {
     type EmailConfiguration,
     UpdateEmailSettingsDocument,
 } from '../../gen/gqlClient'
-import { constructTestPostgresServer } from '../../testHelpers/gqlHelpers'
+import { constructTestPostgresServer, extractGraphQLResponse } from '../../testHelpers/gqlHelpers'
 import {
     fetchTestMcReviewSettings,
     updateTestEmailSettings,
@@ -35,13 +35,13 @@ describe('updateEmailSettings', () => {
     })
 
     it('updates email settings', async () => {
+        const adminUser = testAdminUser()
+        const adminContext = { user: adminUser }
         const adminServer = await constructTestPostgresServer({
-            context: {
-                user: testAdminUser(),
-            },
+            context: adminContext,
         })
 
-        const mcReviewSettings = await fetchTestMcReviewSettings(adminServer)
+        const mcReviewSettings = await fetchTestMcReviewSettings(adminServer, adminContext)
         const defaultEmailConfig = mcReviewSettings.emailConfiguration
 
         if (!defaultEmailConfig) {
@@ -51,7 +51,8 @@ describe('updateEmailSettings', () => {
         const emailConfigUpdate = mockEmailConfigUpdate()
         const updatedEmailSettings = await updateTestEmailSettings(
             adminServer,
-            emailConfigUpdate
+            emailConfigUpdate,
+            adminContext
         )
 
         // expect our changes to match the updated email settings
@@ -62,7 +63,8 @@ describe('updateEmailSettings', () => {
         // reset email settings so other tests do no fail
         const restoredEmailSettings = await updateTestEmailSettings(
             adminServer,
-            defaultEmailConfig
+            defaultEmailConfig,
+            adminContext
         )
         expect(restoredEmailSettings.emailConfiguration).toEqual(
             defaultEmailConfig
@@ -89,10 +91,15 @@ describe('updateEmailSettings', () => {
                     emailConfiguration: emailConfigUpdate,
                 },
             },
+        }, {
+            contextValue: {
+                user: testAdminUser(),
+            },
         })
 
-        expect(updateEmailConfig.errors).toBeDefined()
-        expect(updateEmailConfig.errors?.[0].message).toContain(
+        const result = extractGraphQLResponse(updateEmailConfig)
+        expect(result.errors).toBeDefined()
+        expect(result.errors?.[0].message).toContain(
             'Invalid email settings'
         )
     })
@@ -111,10 +118,15 @@ describe('updateEmailSettings', () => {
                     emailConfiguration: emailConfigUpdate,
                 },
             },
+        }, {
+            contextValue: {
+                user: testCMSUser(),
+            },
         })
 
-        expect(updateEmailConfig.errors).toBeDefined()
-        expect(updateEmailConfig.errors?.[0].message).toBe(
+        const result = extractGraphQLResponse(updateEmailConfig)
+        expect(result.errors).toBeDefined()
+        expect(result.errors?.[0].message).toBe(
             'user not authorized to update email settings'
         )
     })
