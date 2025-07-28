@@ -9,7 +9,7 @@ import {
     ContractExecutionStatus,
     PopulationCoveredType,
 } from './healthPlanFormDataType'
-import { HealthPlanPackageStatus } from './gen/gqlClient'
+import { HealthPlanPackageStatus, RateMedicaidPopulations } from './gen/gqlClient'
 
 const SubmissionTypeRecord: Record<SubmissionType, string> = {
     CONTRACT_ONLY: 'Contract action only',
@@ -30,6 +30,12 @@ const ContractTypeRecord: Record<ContractType, string> = {
 const RateTypeRecord: Record<RateType, string> = {
     NEW: 'Certification',
     AMENDMENT: 'Amendment',
+}
+
+const RateMedicaidPopulationsRecord: Record<RateMedicaidPopulations, string> = {
+    MEDICARE_MEDICAID_WITH_DSNP: 'Medicare-Medicaid dually eligible individuals enrolled through a Dual-Eligible Special Needs Plan (D-SNP)',
+    MEDICAID_ONLY: 'Medicaid-only',
+    MEDICARE_MEDICAID_WITHOUT_DSNP: `Medicare-Medicaid dually eligible individuals not enrolled through a D-SNP`
 }
 const ContractExecutionStatusRecord: Record<ContractExecutionStatus, string> = {
     EXECUTED: 'Fully executed',
@@ -84,4 +90,5 @@ export {
     ContractExecutionStatusRecord,
     SubmissionStatusRecord,
     PopulationCoveredRecord,
+    RateMedicaidPopulationsRecord
 }

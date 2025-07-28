@@ -175,15 +175,16 @@ describe.each(authorizedUserTests)(
                 },
             })
 
-            expect(updateRes2.data).toBeDefined()
-            expect(updateRes2.errors).toBeUndefined()
+            const result2 = extractTestResponse(updateRes2)
+            expect(result2.data).toBeDefined()
+            expect(result2.errors).toBeUndefined()
 
-            if (!updateRes2.data) {
+            if (!result2.data) {
                 throw new Error('no data')
             }
 
             const users2 =
-                updateRes2.data.updateStateAssignmentsByState.assignedUsers
+                result2.data.updateStateAssignmentsByState.assignedUsers
             expect(users2).toHaveLength(2)
 
             const updateRes3 = await server.executeOperation({
@@ -200,8 +201,9 @@ describe.each(authorizedUserTests)(
                 },
             })
 
-            expect(updateRes3.data).toBeDefined()
-            expect(updateRes3.errors).toBeUndefined()
+            const result3 = extractTestResponse(updateRes3)
+            expect(result3.data).toBeDefined()
+            expect(result3.errors).toBeUndefined()
 
             const allUsersQuery = await server.executeOperation({
                 query: IndexUsersDocument,
@@ -212,15 +214,16 @@ describe.each(authorizedUserTests)(
                 },
             })
 
-            expect(allUsersQuery.data).toBeDefined()
-            expect(allUsersQuery.errors).toBeUndefined()
+            const allUsersResult = extractTestResponse(allUsersQuery)
+            expect(allUsersResult.data).toBeDefined()
+            expect(allUsersResult.errors).toBeUndefined()
 
-            if (!allUsersQuery.data) {
+            if (!allUsersResult.data) {
                 throw new Error('no data')
             }
 
             const theseUserIDs = [newUser.id, secondUser.id, thirdUser.id]
-            const theseUsers = allUsersQuery.data.indexUsers.edges
+            const theseUsers = allUsersResult.data.indexUsers.edges
                 .map((e: UserEdge) => e.node)
                 .filter((n: User) => theseUserIDs.includes(n.id))
 

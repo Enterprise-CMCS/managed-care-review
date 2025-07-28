@@ -56,6 +56,7 @@ import { LinkedRateSummary } from '../LinkedRateSummary'
 import { usePage } from '../../../../contexts/PageContext'
 import { InfoTag } from '../../../../components/InfoTag/InfoTag'
 import { useFocusOnRender } from '../../../../hooks/useFocusOnRender'
+import { ApolloError } from '@apollo/client'
 
 export type FormikRateForm = {
     id?: string // no id if its a new rate
@@ -71,6 +72,7 @@ export type FormikRateForm = {
     rateProgramIDs: RateRevision['formData']['rateProgramIDs']
     rateDocuments: FileItemT[]
     supportingDocuments: FileItemT[]
+    rateMedicaidPopulations?: RateRevision['formData']['rateMedicaidPopulations']
     actuaryContacts: RateRevision['formData']['certifyingActuaryContacts']
     addtlActuaryContacts: RateRevision['formData']['addtlActuaryContacts']
     actuaryCommunicationPreference: RateRevision['formData']['actuaryCommunicationPreference']
@@ -98,7 +100,7 @@ const RateDetails = ({
     const displayAsStandaloneRate = type === 'SINGLE'
     const { loggedInUser } = useAuth()
     const ldClient = useLDClient()
-    const { updateHeading } = usePage()
+    const { updateHeading, updateActiveMainContent } = usePage()
 
     const useEditUnlockRate = ldClient?.variation(
         featureFlags.RATE_EDIT_UNLOCK.flag,
@@ -109,6 +111,7 @@ const RateDetails = ({
         featureFlags.HIDE_SUPPORTING_DOCS_PAGE.flag,
         featureFlags.HIDE_SUPPORTING_DOCS_PAGE.defaultValue
     )
+
     const [showAPIErrorBanner, setShowAPIErrorBanner] = useState<
         boolean | string
     >(false) // string is a custom error message, defaults to generic message when true
@@ -117,18 +120,15 @@ const RateDetails = ({
 
     // Form validation
     const [shouldValidate, setShouldValidate] = useState(showValidations)
-    const rateDetailsFormSchema = RateDetailsFormSchema(
-        {
-            'rate-edit-unlock': useEditUnlockRate,
-        },
-        !displayAsStandaloneRate
-    )
 
     const { setFocusErrorSummaryHeading, errorSummaryHeadingRef } =
         useErrorSummary()
 
     // Multi-rates state management
     const [focusNewRate, setFocusNewRate] = useState(false)
+    const [rateSummaryLoading, setRateSummaryLoading] =  useState<boolean | undefined>(undefined);
+    const [rateSummaryError, setRateSummaryError] = useState<ApolloError | undefined>(undefined);
+
     const newRateNameRef = React.useRef<HTMLElement | null>(null)
     const [newRateButtonRef, setNewRateButtonFocus] = useFocus() // This ref.current is always the same element
     const { id } = useRouteParams()
@@ -167,7 +167,7 @@ const RateDetails = ({
             newRateNameRef.current = null
         }
     }, [focusNewRate])
-
+    
     // Set up data for form. Either based on contract API (for multi rate) or rates API (for edit and submit of standalone rate)
     const contract = fetchContractData?.fetchContract.contract
     const contractDraftRevision = contract?.draftRevision
@@ -187,10 +187,27 @@ const RateDetails = ({
         ? fetchRateData?.fetchRate.rate.draftRevision?.formData
               .rateCertificationName
         : contract?.draftRevision?.contractName
+    const activeMainContentId = 'rateQuestionResponseMainContent'
+
     if (pageHeading) updateHeading({ customHeading: pageHeading })
+
+    // Set the active main content to focus when click the Skip to main content button.
+    useEffect(() => {
+        updateActiveMainContent(activeMainContentId)
+    }, [activeMainContentId, updateActiveMainContent])
+  
     const [updateDraftContractRates] = useUpdateDraftContractRatesMutation()
     const [submitRate] = useSubmitRateMutation()
-
+    const isDSNP =
+        contract?.draftRevision?.formData?.dsnpContract === true
+    const rateDetailsFormSchema = RateDetailsFormSchema(
+        {
+            'rate-edit-unlock': useEditUnlockRate,
+            'dsnp': true
+        },
+        !displayAsStandaloneRate,
+        isDSNP
+    )
     // Set up initial rate form values for Formik
     const initialRates: Rate[] = React.useMemo(
         () =>
@@ -261,13 +278,16 @@ const RateDetails = ({
         }
 
         if (displayAsStandaloneRate && options.type === 'CONTINUE') {
+            const dsnpPopulated =
+                contract?.draftRevision?.formData?.dsnpContract != null
             try {
                 await submitRate({
                     variables: {
                         input: {
                             rateID: id ?? 'no-id',
                             formData: convertRateFormToGQLRateFormData(
-                                rateForms[0]
+                                rateForms[0],
+                                dsnpPopulated
                             ), // only grab the first rate in the array for standalone rate submission
                         },
                     },
@@ -294,6 +314,8 @@ const RateDetails = ({
             (options.type === 'CONTINUE' || options.type === 'SAVE_AS_DRAFT')
         ) {
             try {
+                const dsnpPopulated =
+                    contract?.draftRevision?.formData?.dsnpContract != null
                 const formattedRateForms = rateForms.filter((rate) => {
                     if (rate.ratePreviouslySubmitted === 'YES') {
                         return rate.id
@@ -301,7 +323,10 @@ const RateDetails = ({
                         return rate
                     }
                 })
-                const updatedRates = generateUpdatedRates(formattedRateForms)
+                const updatedRates = generateUpdatedRates(
+                    formattedRateForms,
+                    dsnpPopulated
+                )
                 await updateDraftContractRates({
                     variables: {
                         input: {
@@ -537,8 +562,13 @@ const RateDetails = ({
                                                                             index
                                                                         }
                                                                         autofill={(
-                                                                            rateForm: FormikRateForm
+                                                                            rateForm: FormikRateForm,
+                                                                            autoFillLoading?: boolean | undefined,
+                                                                            autoFillError?: ApolloError | undefined
                                                                         ) => {
+                                                                            if (autoFillLoading) setRateSummaryLoading(autoFillLoading)
+                                                                            if (autoFillError) setRateSummaryError(autoFillError)
+
                                                                             return replace(
                                                                                 index,
                                                                                 rateForm
@@ -560,6 +590,8 @@ const RateDetails = ({
                                                                             rateForm={
                                                                                 rateForm
                                                                             }
+                                                                            loading={rateSummaryLoading}
+                                                                            apiError={rateSummaryError}
                                                                         />
                                                                     )}
 
@@ -578,6 +610,9 @@ const RateDetails = ({
                                                                         )}
                                                                         shouldValidate={
                                                                             shouldValidate
+                                                                        }
+                                                                        contract={
+                                                                            contract
                                                                         }
                                                                     />
                                                                 )}

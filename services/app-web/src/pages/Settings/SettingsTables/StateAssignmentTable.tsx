@@ -10,7 +10,7 @@ import {
     getSortedRowModel,
     useReactTable,
 } from '@tanstack/react-table'
-import { useMemo, useRef, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import {
     FilterAccordion,
     FilterOptionType,
@@ -29,6 +29,7 @@ import { type MCReviewSettingsContextType } from '../Settings'
 import { EditLink, formatUserNamesFromUsers } from '../'
 import { SettingsErrorAlert } from '../SettingsErrorAlert'
 import { getTealiumFiltersChanged } from '../../../tealium/tealiumHelpers'
+import { usePage } from '../../../contexts/PageContext'
 
 type AnalystDisplayType = {
     email: string
@@ -100,8 +101,15 @@ const StateAssignmentTable = () => {
         filtersForAnalytics: '',
     })
     const { logFilterEvent } = useTealium()
+    const { updateActiveMainContent } = usePage()
     const { stateAnalysts: analysts } =
         useOutletContext<MCReviewSettingsContextType>()
+
+    const activeMainContentId = 'stateAssignmentPageMainContent'
+    // Set the active main content to focus when click the Skip to main content button.
+    useEffect(() => {
+        updateActiveMainContent(activeMainContentId)
+    }, [activeMainContentId, updateActiveMainContent])
 
     const tableColumns = useMemo(
         () => [
@@ -258,7 +266,7 @@ const StateAssignmentTable = () => {
         return <SettingsErrorAlert error={analysts.error} />
 
     return (
-        <>
+        <div id={activeMainContentId}>
             <h2>State assignments</h2>
             <p>
                 Below is a list of the DMCO staff assigned to states. To edit
@@ -342,7 +350,7 @@ const StateAssignmentTable = () => {
                     ))}
                 </tbody>
             </Table>
-        </>
+        </div>
     )
 }
 export {

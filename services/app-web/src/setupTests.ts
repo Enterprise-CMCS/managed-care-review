@@ -8,7 +8,7 @@ import { cleanup } from '@testing-library/react'
 // learn more: https://github.com/testing-library/jest-dom
 import '@testing-library/jest-dom'
 
-// eslint-disable-next-line @typescript-eslint/no-empty-function
+ 
 Element.prototype.scrollIntoView = () => {}
 
 // to make calculating the sha work in jest

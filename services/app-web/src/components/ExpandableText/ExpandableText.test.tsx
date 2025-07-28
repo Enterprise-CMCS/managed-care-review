@@ -21,7 +21,7 @@ describe('ExpandableText', () => {
             },
             // we need a setter here because it gets called when you
             // pass a ref to <component ref={ref} />
-            // eslint-disable-next-line @typescript-eslint/no-empty-function
+
             set current(_value) {},
         }
         vi.spyOn(React, 'useRef').mockReturnValue(mockRef)

@@ -67,10 +67,8 @@ describe('MonthPicker', () => {
 
         MONTH_LABELS.forEach((month, index) => {
             if (index < 3 || index > 7) {
-                // eslint-disable-next-line jest/no-conditional-expect
                 expect(getByText(month)).toBeDisabled()
             } else {
-                // eslint-disable-next-line jest/no-conditional-expect
                 expect(getByText(month)).not.toBeDisabled()
             }
         })
