@@ -111,7 +111,7 @@ jobs:
 
     - name: Install CDK dependencies
       working-directory: services/infra-cdk
-      run: pnpm install
+      run: npm install
 
     # 4. Configure AWS credentials via OIDC
     - name: Validate AWS Account Secrets
@@ -170,7 +170,7 @@ jobs:
       working-directory: services/infra-cdk
       run: |
         echo "Testing layer sizes to prevent deployment failures..."
-        pnpm run test:size
+        npm run test:size
 
     # 5b. Upload Layer Artifacts
     - name: Upload Lambda Layer Artifacts
@@ -188,7 +188,7 @@ jobs:
         NR_LICENSE_KEY: ${{ secrets.NR_LICENSE_KEY }}
       run: |
         echo "Running CDK synth to validate infrastructure..."
-        pnpm run cdk synth --all --context stage=${{ env.STAGE }} > cdk-synth-output.yaml
+        npm run cdk synth --all --context stage=${{ env.STAGE }} > cdk-synth-output.yaml
 
     # 7. Store CDK Synth Artifacts
     - name: Store CDK Synth Artifacts
@@ -212,7 +212,7 @@ jobs:
         DIFF_OUTPUT="tmp/cdk-diff-output.txt"
         
         # Run diff for all stacks, capture output
-        pnpm run cdk diff --all --context stage=${{ env.STAGE }} | tee "$DIFF_OUTPUT" || true
+        npm run cdk diff --all --context stage=${{ env.STAGE }} | tee "$DIFF_OUTPUT" || true
         
         # Check if there are any differences
         if grep -q "Stack MCR-.* contains changes" "$DIFF_OUTPUT"; then
@@ -353,7 +353,7 @@ jobs:
         
         # Step 1: Deploy foundation stacks (sequential dependencies)
         echo "📋 Step 1: Deploying foundation infrastructure..."
-        pnpm run cdk deploy \
+        npm run cdk deploy \
           MCR-Foundation-${{ env.STAGE }}-cdk \
           MCR-Network-${{ env.STAGE }}-cdk \
           MCR-LambdaLayers-${{ env.STAGE }}-cdk \
@@ -366,14 +366,14 @@ jobs:
         
         # Step 2: Deploy SharedInfra (depends on LambdaLayers)
         echo "🏗️ Step 2: Deploying shared infrastructure..."
-        pnpm run cdk deploy MCR-SharedInfra-${{ env.STAGE }}-cdk \
+        npm run cdk deploy MCR-SharedInfra-${{ env.STAGE }}-cdk \
           --require-approval never \
           --ci \
           -c stage=${{ env.STAGE }}
         
         # Step 3: Deploy API micro-stacks in PARALLEL (major speed improvement!)
         echo "⚡ Step 3: Deploying API micro-stacks in parallel..."
-        pnpm run cdk deploy \
+        npm run cdk deploy \
           MCR-GraphQLApi-${{ env.STAGE }}-cdk \
           MCR-PublicApi-${{ env.STAGE }}-cdk \
           MCR-FileOps-${{ env.STAGE }}-cdk \
@@ -384,14 +384,14 @@ jobs:
         
         # Step 4: Deploy AuthExtensions (after APIs exist - breaks circular dependency)
         echo "🔐 Step 4: Deploying auth extensions..."
-        pnpm run cdk deploy MCR-AuthExtensions-${{ env.STAGE }}-cdk \
+        npm run cdk deploy MCR-AuthExtensions-${{ env.STAGE }}-cdk \
           --require-approval never \
           --ci \
           -c stage=${{ env.STAGE }}
         
         # Step 5: Deploy Monitoring
         echo "📊 Step 5: Deploying monitoring..."
-        pnpm run cdk deploy MCR-Monitoring-${{ env.STAGE }}-cdk \
+        npm run cdk deploy MCR-Monitoring-${{ env.STAGE }}-cdk \
           --require-approval never \
           --ci \
           -c stage=${{ env.STAGE }}
@@ -537,7 +537,7 @@ jobs:
       working-directory: services/infra-cdk
       run: |
         echo "Deploying Frontend stack independently with CDK native asset management..."
-        pnpm run cdk deploy MCR-Frontend-${{ env.STAGE }}-cdk \
+        npm run cdk deploy MCR-Frontend-${{ env.STAGE }}-cdk \
           --require-approval never \
           --ci \
           -c stage=${{ env.STAGE }} \
