@@ -5,7 +5,6 @@ import * as path from 'path';
 import { createHash } from 'crypto';
 import * as fs from 'fs';
 import { ServiceRegistry } from '../constructs/base/service-registry';
-import { CDKPaths } from '../config/paths';
 
 export interface LambdaLayersStackProps extends StackProps {
   stage: string;

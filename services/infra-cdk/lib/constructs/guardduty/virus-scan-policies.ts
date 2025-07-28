@@ -7,7 +7,23 @@
 import { Construct } from 'constructs';
 import * as s3 from 'aws-cdk-lib/aws-s3';
 import * as iam from 'aws-cdk-lib/aws-iam';
-import { S3_DEFAULTS } from '@config/constants';
+// S3 defaults (moved from shared config)
+const S3_DEFAULTS = {
+  ALLOWED_FILE_EXTENSIONS: [
+    '*.csv', '*.doc', '*.docx', '*.pdf', '*.txt',
+    '*.xls', '*.xlsx', '*.zip', '*.xlsm', '*.xltm', '*.xlam'
+  ],
+  LIFECYCLE: {
+    EXPIRE_NONCURRENT_VERSIONS_DAYS: 30,
+    TRANSITION_TO_IA_DAYS: 90,
+    TRANSITION_TO_GLACIER_DAYS: 365,
+  },
+  CORS: {
+    MAX_AGE_SECONDS: 3600,
+    ALLOWED_METHODS: ['GET', 'PUT', 'POST', 'DELETE', 'HEAD'],
+    ALLOWED_HEADERS: ['*'],
+  },
+} as const;
 
 export interface VirusScanPoliciesProps {
   bucket: s3.IBucket;

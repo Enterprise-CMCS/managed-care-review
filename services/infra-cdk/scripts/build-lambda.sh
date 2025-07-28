@@ -37,8 +37,26 @@ echo "📦 Creating ultra-clean Lambda package (no workspace dependencies)..."
 cd "$TEMP_BUILD_DIR"
 
 # Copy ONLY essential runtime files (no package.json = no workspace conflicts)
-cp -r "$APP_API_DIR/src" ./
-cp -r "$APP_API_DIR/prisma" ./
+# Create structure that matches CDK handler expectations
+cp -r "$APP_API_DIR/src/handlers" ./ || true
+cp -r "$APP_API_DIR/src/postgres" ./ || true
+cp -r "$APP_API_DIR/src/domain-models" ./ || true
+cp -r "$APP_API_DIR/src/authn" ./ || true
+cp -r "$APP_API_DIR/src/authorization" ./ || true
+cp -r "$APP_API_DIR/src/resolvers" ./ || true
+cp -r "$APP_API_DIR/src/s3" ./ || true
+cp -r "$APP_API_DIR/src/zip" ./ || true
+cp -r "$APP_API_DIR/src/emailer" ./ || true
+cp -r "$APP_API_DIR/src/gen" ./ || true
+cp -r "$APP_API_DIR/src/jwt" ./ || true
+cp -r "$APP_API_DIR/src/launchDarkly" ./ || true
+cp -r "$APP_API_DIR/src/logger" ./ || true
+cp -r "$APP_API_DIR/src/oauth" ./ || true
+cp -r "$APP_API_DIR/src/otel" ./ || true
+cp -r "$APP_API_DIR/src/parameterStore" ./ || true
+cp -r "$APP_API_DIR/src/secrets" ./ || true
+cp -r "$APP_API_DIR/src/dataMigrations" ./ || true
+cp -r "$APP_API_DIR/prisma" ./ || true
 
 # Copy compiled output if it exists
 if [ -d "$APP_API_DIR/dist" ]; then

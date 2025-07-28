@@ -21,16 +21,8 @@ function getExternalModules(functionName: string): string[] {
     ];
   }
   
-  // Database functions externalize AWS SDK (provided by Lambda runtime)
-  if (functionName.includes('Db') || functionName.includes('Database') || 
-      functionName.includes('Manager') || functionName.includes('Export') || 
-      functionName.includes('Import')) {
-    return [
-      ...baseExternal,
-      '@aws-sdk/*',
-      'aws-sdk'
-    ];
-  }
+  // Note: AWS SDK v3 (@aws-sdk/*) is NOT provided by Lambda runtime and must be bundled
+  // Only AWS SDK v2 (aws-sdk) is provided by Lambda runtime, but we use v3
   
   // All other functions bundle dependencies normally
   return baseExternal;

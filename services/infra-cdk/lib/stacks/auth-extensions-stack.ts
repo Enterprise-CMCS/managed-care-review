@@ -4,7 +4,7 @@ import * as cognito from 'aws-cdk-lib/aws-cognito';
 import * as iam from 'aws-cdk-lib/aws-iam';
 import * as ssm from 'aws-cdk-lib/aws-ssm';
 import { CfnOutput } from 'aws-cdk-lib';
-import { ResourceNames, SERVICES } from '@config/constants';
+import { ResourceNames, SERVICES } from '@config/index';
 
 export interface AuthExtensionsStackProps extends BaseStackProps {
   s3BucketNames: string[];
@@ -37,11 +37,11 @@ export class AuthExtensionsStack extends BaseStack {
     // Import User Pool from SSM parameters (created by AuthStack)
     const userPoolId = ssm.StringParameter.valueForStringParameter(
       this, 
-      `/cognito/${this.stage}/user-pool-id`
+      `/mcr-cdk-cognito/${this.stage}/user-pool-id`
     );
     const userPoolClientId = ssm.StringParameter.valueForStringParameter(
       this, 
-      `/cognito/${this.stage}/user-pool-client-id`
+      `/mcr-cdk-cognito/${this.stage}/user-pool-client-id`
     );
 
     // Create Identity Pool - now that APIs exist, no circular dependency
@@ -119,11 +119,11 @@ export class AuthExtensionsStack extends BaseStack {
     // Configure group-based access policies
     this.configureGroupBasedPolicies();
 
-    // Store Identity Pool ID in SSM for other stacks
+    // Store Identity Pool ID in SSM for other stacks (CDK-specific paths)
     new ssm.StringParameter(this, 'IdentityPoolIdParameter', {
-      parameterName: `/cognito/${this.stage}/identity-pool-id`,
+      parameterName: `/mcr-cdk-cognito/${this.stage}/identity-pool-id`,
       stringValue: this.identityPool.ref,
-      description: 'Cognito Identity Pool ID for cross-stack reference'
+      description: 'CDK-managed Cognito Identity Pool ID for cross-stack reference'
     });
 
     // Create outputs

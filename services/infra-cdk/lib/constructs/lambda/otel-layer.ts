@@ -1,7 +1,7 @@
 import { Construct } from 'constructs';
 import * as lambda from 'aws-cdk-lib/aws-lambda';
 import { ServiceRegistry } from '@constructs/base';
-import { OTEL_LAYER_ARN } from '@config/constants';
+import { OTEL_LAYER_ARN } from '@config/index';
 
 export interface OtelLayerProps {
   stage: string;

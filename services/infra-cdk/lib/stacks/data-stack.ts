@@ -7,7 +7,7 @@ import * as s3 from 'aws-cdk-lib/aws-s3';
 import * as iam from 'aws-cdk-lib/aws-iam';
 import * as sns from 'aws-cdk-lib/aws-sns';
 import { Duration, RemovalPolicy, CfnOutput } from 'aws-cdk-lib';
-import { S3_BUCKETS, SERVICES } from '@config/constants';
+import { getEnvironment, S3_BUCKETS, SERVICES } from '@config/index';
 
 export interface DataStackProps extends BaseStackProps {
   vpc: ec2.IVpc;
@@ -75,16 +75,14 @@ export class DataStack extends BaseStack {
       throw new Error('Database security group not initialized in DataStack');
     }
 
-    // Configure database based on stage settings
+    // Get ultra-lean config for this environment
+    const config = getEnvironment(this.stage);
+    
+    // Use database configuration directly from ultra-lean config
     const databaseConfig = {
-      ...this.stageConfig.database,
-      // Use default PostgreSQL port (5432) to match Serverless implementation
-      // Set backup retention based on stage
-      backupRetentionPeriod: this.stage === 'prod' ? 30 : 
-                             this.stage === 'val' ? 7 : 
-                             this.stage === 'main' ? 7 : 1,
-      // Set deletion protection for production environments
-      deletionProtection: ['prod', 'val'].includes(this.stage)
+      ...config.database,
+      // Use default PostgreSQL port (5432) to match Serverless implementation  
+      backupRetentionPeriod: config.database.backupRetentionDays
     };
 
     // Use provided VPN security groups instead of lookups
@@ -108,9 +106,11 @@ export class DataStack extends BaseStack {
    * Create S3 buckets with proper security configurations
    */
   private createS3Buckets(): void {
+    const config = getEnvironment(this.stage);
+    
     // Create S3 access logging bucket (CDK Nag AwsSolutions-S1)
     const loggingBucket = new s3.Bucket(this, 'S3LoggingBucket', {
-      bucketName: `${S3_BUCKETS.UPLOADS}-${this.stage}-logs-${this.account}-cdk`,
+      bucketName: `mcr-cdk-${S3_BUCKETS.UPLOADS}-${this.stage}-logs-${this.account}`,
       encryption: s3.BucketEncryption.S3_MANAGED,
       blockPublicAccess: s3.BlockPublicAccess.BLOCK_ALL,
       enforceSSL: true,
@@ -119,7 +119,7 @@ export class DataStack extends BaseStack {
         expiration: Duration.days(90),
         enabled: true
       }],
-      removalPolicy: this.stage === 'prod' ? RemovalPolicy.RETAIN : RemovalPolicy.DESTROY
+      removalPolicy: config.database.deletionProtection ? RemovalPolicy.RETAIN : RemovalPolicy.DESTROY
     });
 
     // Create uploads bucket with enhanced security

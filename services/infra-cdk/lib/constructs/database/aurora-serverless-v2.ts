@@ -7,8 +7,8 @@ import * as cloudwatch from 'aws-cdk-lib/aws-cloudwatch';
 import * as cloudwatch_actions from 'aws-cdk-lib/aws-cloudwatch-actions';
 import * as sns from 'aws-cdk-lib/aws-sns';
 import { Duration, RemovalPolicy, Stack } from 'aws-cdk-lib';
-import { DatabaseConfig } from '@config/stage-config';
-import { ResourceNames, CDK_DEPLOYMENT_SUFFIX } from '@config/constants';
+import { DatabaseConfig } from '@config/index';
+import { ResourceNames, CDK_DEPLOYMENT_SUFFIX } from '@config/index';
 import { ServiceRegistry } from '@constructs/base';
 // import { NagSuppressions } from 'cdk-nag';
 
@@ -60,9 +60,9 @@ export class AuroraServerlessV2 extends Construct {
     }
 
     // Create database credentials secret
-    // Match serverless format: aurora_postgres_${stage}
+    // Use CDK-specific naming to avoid conflicts with serverless
     this.secret = new secretsmanager.Secret(this, 'Secret', {
-      secretName: `aurora_postgres_${props.stage}${CDK_DEPLOYMENT_SUFFIX}`,
+      secretName: `mcr-cdk-aurora-postgres-${props.stage}`,
       description: `Database credentials for ${props.databaseName} - ${props.stage}`,
       generateSecretString: {
         secretStringTemplate: JSON.stringify({

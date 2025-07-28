@@ -1,7 +1,8 @@
 import { BaseStack, BaseStackProps, ImportedVpc, ServiceRegistry } from '@constructs/base';
 import { Construct } from 'constructs';
 import * as ec2 from 'aws-cdk-lib/aws-ec2';
-import { STACK_NAMES, ResourceNames, INFRASTRUCTURE_SSM_PARAMS } from '@config/constants';
+import { ResourceNames } from '@config/index';
+import { VPN_SSM_PARAMS } from '@config/index';
 import * as ssm from 'aws-cdk-lib/aws-ssm';
 
 export interface NetworkStackProps extends BaseStackProps {
@@ -144,11 +145,8 @@ export class NetworkStack extends BaseStack {
       });
     }
 
-    // Add stage-specific rules
-    if (this.stage === 'dev') {
-      // Dev might need additional access for debugging
-      // But we'll keep it minimal for security
-    }
+    // Stage-specific rules would be defined in the environment config if needed
+    // No additional rules currently required
   }
 
   /**
@@ -161,7 +159,7 @@ export class NetworkStack extends BaseStack {
       // Try to get VPN security group ID from SSM
       const vpnSecurityGroupId = ssm.StringParameter.valueFromLookup(
         this,
-        INFRASTRUCTURE_SSM_PARAMS.VPN_SECURITY_GROUP
+        VPN_SSM_PARAMS.VPN_SECURITY_GROUP
       );
 
       // Only import if we got a valid value (not the dummy token)
@@ -181,7 +179,7 @@ export class NetworkStack extends BaseStack {
       // Try to get shared services security group ID from SSM
       const sharedServicesGroupId = ssm.StringParameter.valueFromLookup(
         this,
-        INFRASTRUCTURE_SSM_PARAMS.SHARED_SERVICES_SG
+        VPN_SSM_PARAMS.SHARED_SERVICES_SG
       );
 
       // Only import if we got a valid value (not the dummy token)

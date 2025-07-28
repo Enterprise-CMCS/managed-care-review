@@ -6,7 +6,7 @@ import * as iam from 'aws-cdk-lib/aws-iam';
 import * as wafv2 from 'aws-cdk-lib/aws-wafv2';
 import * as acm from 'aws-cdk-lib/aws-certificatemanager';
 import { Duration, RemovalPolicy, Stack, CfnOutput } from 'aws-cdk-lib';
-import { ResourceNames } from '@config/constants';
+import { ResourceNames } from '@config/index';
 
 export interface StaticWebsiteProps {
   /**

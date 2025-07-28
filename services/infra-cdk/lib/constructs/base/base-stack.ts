@@ -1,12 +1,16 @@
 import { Stack, StackProps, Tags, Aspects } from 'aws-cdk-lib';
 import { Construct } from 'constructs';
 import { AwsSolutionsChecks } from 'cdk-nag';
-import { 
-  MANDATORY_TAGS, 
-  PROJECT_NAME, 
-  ResourceNames 
-} from '@config/constants';
-import { StageConfig } from '@config/stage-config';
+import { PROJECT_NAME, ResourceNames, StageConfig } from '@config/index';
+
+// Base stack specific constants (moved from shared config)
+const MANDATORY_TAGS = {
+  PROJECT: 'Project',
+  ENVIRONMENT: 'Environment',
+  MANAGED_BY: 'ManagedBy',
+  SERVICE: 'Service',
+  COST_CENTER: 'CostCenter'
+} as const;
 
 export interface BaseStackProps extends StackProps {
   stage: string;

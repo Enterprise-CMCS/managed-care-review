@@ -3,7 +3,7 @@ import * as s3 from 'aws-cdk-lib/aws-s3';
 import * as iam from 'aws-cdk-lib/aws-iam';
 import * as kms from 'aws-cdk-lib/aws-kms';
 import { Duration, RemovalPolicy } from 'aws-cdk-lib';
-import { ResourceNames } from '@config/constants';
+import { ResourceNames } from '@config/index';
 // import { NagSuppressions } from 'cdk-nag';
 
 export interface SecureS3BucketProps {

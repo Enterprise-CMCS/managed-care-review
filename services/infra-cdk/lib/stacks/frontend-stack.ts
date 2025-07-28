@@ -4,7 +4,7 @@ import { Construct } from 'constructs';
 import * as cloudfront from 'aws-cdk-lib/aws-cloudfront';
 import * as iam from 'aws-cdk-lib/aws-iam';
 import { CfnOutput, Stack } from 'aws-cdk-lib';
-import { SERVICES } from '@config/constants';
+import { SERVICES } from '@config/index';
 
 export interface FrontendStackProps extends BaseStackProps {
   /**

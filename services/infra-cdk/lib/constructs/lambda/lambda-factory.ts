@@ -6,8 +6,8 @@ import * as path from 'path';
 import { Duration } from 'aws-cdk-lib';
 import { BaseLambdaFunction, BaseLambdaFunctionProps } from './base-lambda-function';
 import { OtelLayer } from './otel-layer';
-import { StageConfig } from '@config/stage-config';
-import { LAMBDA_FUNCTIONS } from '@config/constants';
+import { StageConfig } from '@config/index';
+import { LAMBDA_FUNCTIONS } from '@config/index';
 import { ServiceRegistry } from '@constructs/base';
 import { getPrismaLayerType, PrismaLayerType } from './bundling-utils';
 

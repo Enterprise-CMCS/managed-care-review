@@ -5,7 +5,7 @@ import * as cognito from 'aws-cdk-lib/aws-cognito';
 import * as iam from 'aws-cdk-lib/aws-iam';
 import * as ssm from 'aws-cdk-lib/aws-ssm';
 import { CfnOutput } from 'aws-cdk-lib';
-import { SERVICES, CDK_DEPLOYMENT_SUFFIX } from '@config/constants';
+import { getEnvironment, SERVICES, CDK_DEPLOYMENT_SUFFIX } from '@config/index';
 
 export interface AuthStackProps extends BaseStackProps {
   allowedCallbackUrls: string[];
@@ -60,9 +60,10 @@ export class AuthStack extends BaseStack {
       throw new Error('allowedLogoutUrls must not be empty - logout flow will fail without valid logout URLs');
     }
     
-    // Validate email sender in production
-    if (this.stage === 'prod' && !this.emailSender) {
-      throw new Error('emailSender must be provided in production to ensure proper email delivery');
+    // Validate email sender when required by config
+    const config = getEnvironment(this.stage);
+    if (config.features.requireEmailSender && !this.emailSender) {
+      throw new Error('emailSender must be provided for this environment to ensure proper email delivery');
     }
   }
 
@@ -84,10 +85,12 @@ export class AuthStack extends BaseStack {
    * Create Cognito User Pool infrastructure only
    */
   private createCognitoAuth(): void {
+    const config = getEnvironment(this.stage);
+    
     this.cognitoAuth = new CognitoAuth(this, 'CognitoAuth', {
       userPoolName: SERVICES.UI_AUTH,
       stage: this.stage,
-      securityConfig: this.stageConfig.security,
+      securityConfig: config.security,
       samlMetadataUrl: this.samlMetadataUrl || this.getSamlMetadataUrl(),
       customDomain: this.getCustomDomain(),
       emailSender: this.emailSender || this.getDefaultEmailSender(),
@@ -101,23 +104,23 @@ export class AuthStack extends BaseStack {
     this.userPool = this.cognitoAuth.userPool;
     this.userPoolClient = this.cognitoAuth.userPoolClient;
 
-    // Store User Pool ARN in SSM for other stacks to reference
+    // Store User Pool ARN in SSM for other stacks to reference (CDK-specific paths)
     new ssm.StringParameter(this, 'UserPoolArnParameter', {
-      parameterName: `/cognito/${this.stage}/user-pool-arn`,
+      parameterName: `/mcr-cdk-cognito/${this.stage}/user-pool-arn`,
       stringValue: this.userPool.userPoolArn,
-      description: 'Cognito User Pool ARN for cross-stack reference'
+      description: 'CDK-managed Cognito User Pool ARN for cross-stack reference'
     });
 
     new ssm.StringParameter(this, 'UserPoolIdParameter', {
-      parameterName: `/cognito/${this.stage}/user-pool-id`,
+      parameterName: `/mcr-cdk-cognito/${this.stage}/user-pool-id`,
       stringValue: this.userPool.userPoolId,
-      description: 'Cognito User Pool ID for cross-stack reference'
+      description: 'CDK-managed Cognito User Pool ID for cross-stack reference'
     });
 
     new ssm.StringParameter(this, 'UserPoolClientIdParameter', {
-      parameterName: `/cognito/${this.stage}/user-pool-client-id`,
+      parameterName: `/mcr-cdk-cognito/${this.stage}/user-pool-client-id`,
       stringValue: this.userPoolClient.userPoolClientId,
-      description: 'Cognito User Pool Client ID for cross-stack reference'
+      description: 'CDK-managed Cognito User Pool Client ID for cross-stack reference'
     });
 
     // Create outputs
@@ -128,9 +131,11 @@ export class AuthStack extends BaseStack {
    * Get SAML metadata URL based on stage
    */
   private getSamlMetadataUrl(): string | undefined {
+    const config = getEnvironment(this.stage);
+    
     // Only use SAML for production environments
     // Development environments can test without external SAML dependencies
-    if (this.stage === 'prod') {
+    if (config.features.requireEmailSender) { // Using this as proxy for production-level requirements
       return `{{/configuration/okta_metadata_url}}`;
     }
     

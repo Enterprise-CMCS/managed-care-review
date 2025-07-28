@@ -1,6 +1,6 @@
 import { Construct } from 'constructs';
 import * as ssm from 'aws-cdk-lib/aws-ssm';
-import { PARAMETER_STORE_PATHS, ResourceNames } from '@config/constants';
+import { ResourceNames } from '@config/index';
 
 /**
  * Service Registry for managing cross-stack references via SSM Parameter Store.
@@ -8,7 +8,7 @@ import { PARAMETER_STORE_PATHS, ResourceNames } from '@config/constants';
  */
 export class ServiceRegistry {
   /**
-   * Store a value in Parameter Store
+   * Store a value in Parameter Store (conflict-free)
    */
   static putValue(
     scope: Construct,
@@ -17,10 +17,10 @@ export class ServiceRegistry {
     value: string,
     stage: string,
     description?: string
-  ): ssm.StringParameter {
+  ): void {
     const parameterName = ResourceNames.ssmParameterName(category, key, stage);
     
-    return new ssm.StringParameter(scope, `${category}${key}Parameter`, {
+    new ssm.StringParameter(scope, `${category}${key}Parameter`, {
       parameterName,
       stringValue: value,
       description: description || `${category} ${key} for ${stage}`,

@@ -2,7 +2,7 @@ import { BaseStack, BaseStackProps } from '@constructs/base';
 import { Construct } from 'constructs';
 import * as ssm from 'aws-cdk-lib/aws-ssm';
 import * as secretsmanager from 'aws-cdk-lib/aws-secretsmanager';
-import { STACK_NAMES, PROJECT_PREFIX } from '@config/constants';
+import { PROJECT_PREFIX } from '@config/index';
 
 /**
  * Foundation stack that sets up base infrastructure components
@@ -38,7 +38,7 @@ export class FoundationStack extends BaseStack {
   }
 
   /**
-   * Create SSM parameter path hierarchy
+   * Create SSM parameter path hierarchy (CDK-specific paths)
    */
   private createParameterPaths(): void {
     // Create root parameter to establish hierarchy
@@ -70,7 +70,7 @@ export class FoundationStack extends BaseStack {
   }
 
   /**
-   * Store stage configuration in Parameter Store
+   * Store stage configuration in Parameter Store (CDK-specific paths)
    */
   private storeStageConfiguration(): void {
     // Store stage config as JSON for other stacks to reference
@@ -102,12 +102,12 @@ export class FoundationStack extends BaseStack {
   }
 
   /**
-   * Create JWT secret for API authentication
+   * Create JWT secret for API authentication (CDK-specific naming)
    */
   private createJwtSecret(): void {
     this.jwtSecret = new secretsmanager.Secret(this, 'JWTSecret', {
-      secretName: `api_jwt_secret_${this.stage}`,
-      description: 'Dynamically generated secret for JWT signing/validation',
+      secretName: `mcr-cdk-api-jwt-secret-${this.stage}`,
+      description: 'CDK-managed JWT secret for API authentication',
       generateSecretString: {
         secretStringTemplate: '{}',
         generateStringKey: 'jwtsigningkey',
@@ -119,11 +119,11 @@ export class FoundationStack extends BaseStack {
       }
     });
 
-    // Store secret ARN in SSM for easy reference
+    // Store secret ARN in SSM for easy reference (CDK-specific paths)
     new ssm.StringParameter(this, 'JwtSecretArnParameter', {
       parameterName: `/${PROJECT_PREFIX}/${this.stage}/foundation/jwt-secret-arn`,
       stringValue: this.jwtSecret.secretArn,
-      description: 'ARN of JWT secret for API authentication'
+      description: 'ARN of CDK-managed JWT secret for API authentication'
     });
   }
 }

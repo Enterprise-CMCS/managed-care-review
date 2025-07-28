@@ -5,7 +5,8 @@
  * Reduces duplication and ensures consistency across all Lambda functions
  */
 
-import { EXTERNAL_ENDPOINTS, LAMBDA_COMMON_ENV, getOtelEnvironment } from '@config/constants';
+import { LAMBDA_COMMON_ENV } from '@config/index';
+import { EXTERNAL_ENDPOINTS, getOtelEnvironment } from '@config/index';
 
 /**
  * Base environment variables common to all Lambda functions

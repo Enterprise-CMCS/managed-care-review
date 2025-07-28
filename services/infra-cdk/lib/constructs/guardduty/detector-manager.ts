@@ -9,7 +9,13 @@ import { Construct } from 'constructs';
 import * as lambda from 'aws-cdk-lib/aws-lambda';
 import * as iam from 'aws-cdk-lib/aws-iam';
 import { Duration, CustomResource, CfnOutput } from 'aws-cdk-lib';
-import { GUARDDUTY_DEFAULTS } from '@config/constants';
+
+// GuardDuty-specific constants (moved from shared config)
+const GUARDDUTY_DEFAULTS = {
+  FINDING_PUBLISHING_FREQUENCY: 'FIFTEEN_MINUTES' as const,
+  S3_PROTECTION_ENABLED: true,
+  MALWARE_PROTECTION_SCAN_TIMEOUT: Duration.minutes(5),
+} as const;
 
 export interface GuardDutyDetectorManagerProps {
   stage: string;

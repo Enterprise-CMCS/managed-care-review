@@ -2,9 +2,53 @@ import { Construct } from 'constructs';
 import * as apigateway from 'aws-cdk-lib/aws-apigateway';
 import * as waf from 'aws-cdk-lib/aws-wafv2';
 import { WafwebaclToApiGateway } from '@aws-solutions-constructs/aws-wafwebacl-apigateway';
-import { SecurityConfig } from '@config/stage-config';
-import { ResourceNames, API_PATHS, API_GATEWAY_DEFAULTS, API_RATE_LIMITS } from '@config/constants';
+import { SecurityConfig, ResourceNames } from '@config/index';
 import { ServiceRegistry } from '@constructs/base';
+
+// API-specific constants (moved from shared config)
+const API_PATHS = {
+  GRAPHQL: '/graphql',
+  LOCAL: '/local',
+  HEALTH: '/health',
+  DOCS: '/docs'
+} as const;
+
+const API_GATEWAY_DEFAULTS = {
+  MINIMUM_COMPRESSION_SIZE: 1024,
+  BINARY_MEDIA_TYPES: [
+    'application/pdf',
+    'application/zip',
+    'application/octet-stream',
+    'image/*',
+  ],
+  METHOD_SETTINGS: {
+    LOGGING_LEVEL: {
+      dev: 'INFO',
+      val: 'ERROR',
+      prod: 'ERROR',
+    },
+    DATA_TRACE_ENABLED: {
+      dev: true,
+      val: false,
+      prod: false,
+    },
+  },
+} as const;
+
+const API_RATE_LIMITS = {
+  DEFAULT: {
+    RATE: 100,
+    BURST: 200,
+  },
+  AUTHENTICATED: {
+    RATE: 500,
+    BURST: 1000,
+  },
+  PUBLIC: {
+    RATE: 50,
+    BURST: 100,
+  },
+} as const;
 // import { NagSuppressions } from 'cdk-nag';
 
 export interface WafProtectedApiProps {

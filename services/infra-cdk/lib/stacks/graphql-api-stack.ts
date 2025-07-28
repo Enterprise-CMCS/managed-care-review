@@ -6,8 +6,26 @@ import * as ec2 from 'aws-cdk-lib/aws-ec2';
 import * as ssm from 'aws-cdk-lib/aws-ssm';
 import { CognitoToApiGatewayToLambda } from '@aws-solutions-constructs/aws-cognito-apigateway-lambda';
 import { Duration, CfnOutput } from 'aws-cdk-lib';
-import { PrismaLayerType } from '@constructs/lambda/bundling-utils';
-import { CDKPaths } from '../config/paths';
+import { 
+  getEnvironment, 
+  LAMBDA_HANDLERS, 
+  SSM_PATHS,
+  ResourceNames,
+  getDatabaseUrl
+} from '../config';
+import { CDKPaths, getLambdaEnvironment } from '@config/index';
+
+// Lambda configuration (moved from shared config)
+const LAMBDA_DEFAULTS = {
+  RUNTIME: 'NODEJS_20_X',
+  ARCHITECTURE: 'x86_64',
+  TIMEOUT_API: Duration.seconds(29),
+  TIMEOUT_STANDARD: Duration.seconds(60),
+  MEMORY_SMALL: 256,
+  MEMORY_MEDIUM: 512,
+  MEMORY_LARGE: 1024,
+  MEMORY_XLARGE: 2048
+} as const;
 
 export interface GraphQLApiStackProps extends BaseStackProps {
   vpc: ec2.IVpc;
@@ -54,44 +72,36 @@ export class GraphQLApiStack extends BaseStack {
   }
 
   protected defineResources(): void {
-    // TODO: Import User Pool from SSM parameters (created by AuthStack)
-    // For now, let the Solutions Construct create its own User Pool
-    // const userPoolId = ssm.StringParameter.valueForStringParameter(
-    //   this, 
-    //   `/cognito/${this.stage}/user-pool-id`
-    // );
-    // const userPool = cognito.UserPool.fromUserPoolId(this, 'ImportedUserPool', userPoolId);
+    const config = getEnvironment(this.stage);
 
-    // Import shared infrastructure layers from SSM
+    // Import shared infrastructure layers from SSM using lean config paths
     const otelLayerArn = ssm.StringParameter.valueForStringParameter(
       this, 
-      `/lambda/${this.stage}/otel-layer-arn`
+      ResourceNames.ssmPath(SSM_PATHS.OTEL_LAYER, this.stage)
     );
     const otelLayer = lambda.LayerVersion.fromLayerVersionArn(this, 'OtelLayer', otelLayerArn);
 
     const prismaEngineLayerArn = ssm.StringParameter.valueForStringParameter(
       this, 
-      `/lambda/${this.stage}/prisma-engine-layer-arn`
+      ResourceNames.ssmPath(SSM_PATHS.PRISMA_ENGINE_LAYER, this.stage)
     );
     const prismaEngineLayer = lambda.LayerVersion.fromLayerVersionArn(this, 'PrismaEngineLayer', prismaEngineLayerArn);
 
-    // Create GraphQL API using Solutions Construct - ultra-clean with pre-built Lambda package
+    // Create GraphQL API using Solutions Construct with lean config
     const graphqlApi = new CognitoToApiGatewayToLambda(this, 'GraphQLApi', {
       lambdaFunctionProps: {
         runtime: lambda.Runtime.NODEJS_20_X,
         code: lambda.Code.fromAsset(CDKPaths.getLambdaPackagePath()),
-        handler: 'handlers/apollo_gql.gqlHandler',
-        timeout: Duration.seconds(30),
-        memorySize: 1024,
+        handler: LAMBDA_HANDLERS.GRAPHQL,
+        timeout: config.lambda.timeout,
+        memorySize: config.lambda.memorySize,
         layers: [otelLayer, prismaEngineLayer],
         vpc: this.vpc,
         securityGroups: [this.lambdaSecurityGroup],
         environment: this.getEnvironmentVariables()
       },
-      // Note: For now, let the construct create its own User Pool
-      // Will integrate with existing User Pool in next iteration
       apiGatewayProps: {
-        restApiName: `mcr-${this.stage}-graphql-api`,
+        restApiName: ResourceNames.apiName('graphql-api', this.stage),
         description: `GraphQL API for Managed Care Review - ${this.stage}`,
         defaultCorsPreflightOptions: {
           allowOrigins: ['*'],
@@ -117,32 +127,17 @@ export class GraphQLApiStack extends BaseStack {
   }
 
   /**
-   * Get environment variables for GraphQL Lambda function
-   * Replaces complex EnvironmentFactory pattern
+   * Get environment variables using ultra-lean config helpers
    */
   private getEnvironmentVariables(): Record<string, string> {
-    // Construct PostgreSQL connection URL from individual secret components
-    const databaseUrl = `postgresql://{{resolve:secretsmanager:${this.databaseSecretArn}:SecretString:username}}:{{resolve:secretsmanager:${this.databaseSecretArn}:SecretString:password}}@${this.databaseClusterEndpoint}:5432/${this.databaseName}`;
-    
-    return {
-      NODE_ENV: this.stage === 'prod' ? 'production' : 'development',
-      STAGE: this.stage,
-      DATABASE_URL: databaseUrl,
+    return getLambdaEnvironment(this.stage, {
+      DATABASE_URL: getDatabaseUrl(this.databaseSecretArn, this.databaseClusterEndpoint, this.databaseName),
       UPLOADS_BUCKET_NAME: this.uploadsBucketName,
       QA_BUCKET_NAME: this.qaBucketName,
       APPLICATION_ENDPOINT: this.applicationEndpoint || `https://mcr-${this.stage}.cms.gov`,
-      OTEL_EXPORTER_OTLP_ENDPOINT: ssm.StringParameter.valueForStringParameter(
-        this, 
-        '/configuration/api_app_otel_collector_url'
-      ),
-      EMAILER_MODE: ssm.StringParameter.valueForStringParameter(
-        this, 
-        '/configuration/emailer_mode'
-      ),
-      LD_SDK_KEY: ssm.StringParameter.valueForStringParameter(
-        this, 
-        '/configuration/ld_sdk_key_feds'
-      )
-    };
+      OTEL_EXPORTER_OTLP_ENDPOINT: ssm.StringParameter.valueForStringParameter(this, SSM_PATHS.OTEL_COLLECTOR_URL),
+      EMAILER_MODE: ssm.StringParameter.valueForStringParameter(this, SSM_PATHS.EMAILER_MODE),
+      LD_SDK_KEY: ssm.StringParameter.valueForStringParameter(this, SSM_PATHS.LD_SDK_KEY)
+    });
   }
 }

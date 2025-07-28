@@ -3,8 +3,8 @@ import * as cognito from 'aws-cdk-lib/aws-cognito';
 import * as iam from 'aws-cdk-lib/aws-iam';
 import * as ssm from 'aws-cdk-lib/aws-ssm';
 import { Duration, RemovalPolicy, Stack } from 'aws-cdk-lib';
-import { SecurityConfig } from '@config/stage-config';
-import { ResourceNames } from '@config/constants';
+import { SecurityConfig } from '@config/index';
+import { ResourceNames } from '@config/index';
 import { ServiceRegistry } from '@constructs/base';
 // import { NagSuppressions } from 'cdk-nag';
 

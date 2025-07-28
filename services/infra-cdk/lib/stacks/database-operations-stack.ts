@@ -10,7 +10,63 @@ import * as secretsmanager from 'aws-cdk-lib/aws-secretsmanager';
 import * as rds from 'aws-cdk-lib/aws-rds';
 import * as ssm from 'aws-cdk-lib/aws-ssm';
 import { Duration, RemovalPolicy, Tags, CfnOutput } from 'aws-cdk-lib';
-import { SERVICES, LAMBDA_TIMEOUTS, LAMBDA_MEMORY, SSH_ACCESS_IPS, getAllSshAccessIps, getSshAccessIpv6, SECRETS_MANAGER_DEFAULTS, DATABASE_DEFAULTS, PERMISSION_BOUNDARIES, S3_DEFAULTS, AWS_ACCOUNTS, EXTERNAL_ENDPOINTS, CDK_DEPLOYMENT_SUFFIX, PROJECT_PREFIX } from '@config/constants';
+import { getEnvironment, SERVICES, ResourceNames, CDK_DEPLOYMENT_SUFFIX, PROJECT_PREFIX, PERMISSION_BOUNDARIES } from '@config/index';
+import { AWS_ACCOUNTS, EXTERNAL_ENDPOINTS } from '@config/index';
+
+// Lambda configuration (moved from shared config)
+const LAMBDA_DEFAULTS = {
+  RUNTIME: 'NODEJS_20_X',
+  ARCHITECTURE: 'x86_64',
+  TIMEOUT_API: Duration.seconds(29),
+  TIMEOUT_STANDARD: Duration.seconds(60),
+  TIMEOUT_EXTENDED: Duration.minutes(5),
+  TIMEOUT_LONG_RUNNING: Duration.minutes(10),
+  MEMORY_SMALL: 256,
+  MEMORY_MEDIUM: 512,
+  MEMORY_LARGE: 1024,
+  MEMORY_XLARGE: 2048
+} as const;
+
+// S3 configuration (moved from shared config)
+const S3_DEFAULTS = {
+  ALLOWED_FILE_EXTENSIONS: [
+    '*.csv', '*.doc', '*.docx', '*.pdf', '*.txt',
+    '*.xls', '*.xlsx', '*.zip', '*.xlsm', '*.xltm', '*.xlam'
+  ],
+  LIFECYCLE: {
+    EXPIRE_NONCURRENT_VERSIONS_DAYS: 30,
+    TRANSITION_TO_IA_DAYS: 90,
+    TRANSITION_TO_GLACIER_DAYS: 365,
+  },
+  CORS: {
+    MAX_AGE_SECONDS: 3600,
+    ALLOWED_METHODS: ['GET', 'PUT', 'POST', 'DELETE', 'HEAD'],
+    ALLOWED_HEADERS: ['*'],
+  },
+} as const;
+
+// Secrets Manager configuration (moved from shared config)
+const SECRETS_MANAGER_DEFAULTS = {
+  ROTATION_DAYS: 30,
+  ROTATION_WINDOW: {
+    HOUR: 23,
+    DURATION: { hours: 2 },
+  },
+  RECOVERY_WINDOW_DAYS: 7,
+} as const;
+
+// SSH access utilities (moved from shared config)
+function getSshAccessIpv4(): string[] {
+  return process.env.SSH_ACCESS_IPV4?.split(',').map(ip => ip.trim()) || [];
+}
+
+function getSshAccessIpv6(): string[] {
+  return process.env.SSH_ACCESS_IPV6?.split(',').map(ip => ip.trim()) || [];
+}
+
+function getAllSshAccessIps(): string[] {
+  return [...getSshAccessIpv4(), ...getSshAccessIpv6()];
+}
 // import { NagSuppressions } from 'cdk-nag';
 import * as path from 'path';
 
@@ -56,6 +112,7 @@ export class DatabaseOperationsStack extends BaseStack {
   }
 
   protected defineResources(): void {
+    const config = getEnvironment(this.stage);
 
     // Create Lambda layers
     this.createLambdaLayers();
@@ -72,13 +129,13 @@ export class DatabaseOperationsStack extends BaseStack {
     // Create VPC endpoint for Secrets Manager
     this.createVpcEndpoint();
 
-    // Create PostgreSQL jumpbox VM (for main/val/prod environments - matches serverless)
-    if (this.stage === 'main' || this.stage === 'val' || this.stage === 'prod') {
+    // Create PostgreSQL jumpbox VM based on config
+    if (config.features.enablePostgresVm) {
       this.createPostgresVm();
     }
 
-    // Create cross-account roles for val/prod
-    if (this.stage === 'val' || this.stage === 'prod') {
+    // Create cross-account roles based on config
+    if (config.features.enableCrossAccountRoles) {
       this.createCrossAccountRoles();
     }
     
@@ -113,8 +170,10 @@ export class DatabaseOperationsStack extends BaseStack {
   }
 
   private createS3Buckets(): void {
-    // Data export bucket (for val/prod only)
-    if (this.stage === 'val' || this.stage === 'prod') {
+    const config = getEnvironment(this.stage);
+    
+    // Data export bucket based on config
+    if (config.features.enableDataExportBucket) {
       this.dataExportBucket = new s3.Bucket(this, 'DataExportBucket', {
         bucketName: `${SERVICES.POSTGRES}-${this.stage}-data-export${CDK_DEPLOYMENT_SUFFIX}`,
         encryption: s3.BucketEncryption.S3_MANAGED,
@@ -125,13 +184,13 @@ export class DatabaseOperationsStack extends BaseStack {
           noncurrentVersionExpiration: Duration.days(S3_DEFAULTS.LIFECYCLE.EXPIRE_NONCURRENT_VERSIONS_DAYS),
           enabled: true
         }],
-        removalPolicy: this.stage === 'prod' ? RemovalPolicy.RETAIN : RemovalPolicy.DESTROY,
+        removalPolicy: config.database.deletionProtection ? RemovalPolicy.RETAIN : RemovalPolicy.DESTROY,
         enforceSSL: true
       });
     }
 
-    // VM scripts bucket (for main/val/prod environments - matches serverless)
-    if (this.stage === 'main' || this.stage === 'val' || this.stage === 'prod') {
+    // VM scripts bucket based on config
+    if (config.features.enablePostgresVm) {
       this.vmScriptsBucket = new s3.Bucket(this, 'VmScriptsBucket', {
         bucketName: `${SERVICES.POSTGRES}-${this.stage}-postgres-infra-scripts${CDK_DEPLOYMENT_SUFFIX}`,
         encryption: s3.BucketEncryption.S3_MANAGED,
@@ -150,8 +209,10 @@ export class DatabaseOperationsStack extends BaseStack {
   }
 
   private createSecretRotation(): void {
-    // Use native CDK secret rotation for PostgreSQL
-    if (this.stage !== 'ephemeral' && this.stage !== 'dev') {
+    const config = getEnvironment(this.stage);
+    
+    // Use native CDK secret rotation based on config
+    if (config.security.secretRotation) {
       const secretRotation = new secretsmanager.SecretRotation(this, 'SecretRotation', {
         application: secretsmanager.SecretRotationApplication.POSTGRES_ROTATION_SINGLE_USER,
         secret: this.databaseSecret,
@@ -194,6 +255,8 @@ export class DatabaseOperationsStack extends BaseStack {
   }
 
   private createDatabaseFunctions(): void {
+    const config = getEnvironment(this.stage);
+    
     // Database Manager function
     const dbManagerFunction = new BaseLambdaFunction(this, 'DbManagerFunction', {
       functionName: 'dbManager',
@@ -201,8 +264,8 @@ export class DatabaseOperationsStack extends BaseStack {
       handler: 'logicalDatabaseManager.handler',
       stage: this.stage,
       lambdaConfig: {
-        ...this.stageConfig.lambda,
-        timeout: LAMBDA_TIMEOUTS.STANDARD
+        ...config.lambda,
+        timeout: LAMBDA_DEFAULTS.TIMEOUT_STANDARD
       },
       environment: {
         SECRETS_MANAGER_ENDPOINT: `https://secretsmanager.${this.region}.amazonaws.com`
@@ -224,15 +287,15 @@ export class DatabaseOperationsStack extends BaseStack {
       handler: 'db_export.handler',
       stage: this.stage,
       lambdaConfig: {
-        ...this.stageConfig.lambda,
-        timeout: LAMBDA_TIMEOUTS.EXTENDED,
-        memorySize: LAMBDA_MEMORY.XLARGE
+        ...config.lambda,
+        timeout: LAMBDA_DEFAULTS.TIMEOUT_EXTENDED,
+        memorySize: LAMBDA_DEFAULTS.MEMORY_XLARGE
       },
       environment: {
         S3_BUCKET: this.dataExportBucket?.bucketName || `postgres-${this.stage}-dummy-export`,
         DB_SECRET_ARN: this.databaseSecret.secretArn,
         SECRETS_MANAGER_ENDPOINT: `https://secretsmanager.${this.region}.amazonaws.com`,
-        ...(this.stage === 'prod' && {
+        ...(config.features.enableCrossAccountRoles && config.environment === 'prod' && {
           VAL_ROLE_ARN: `arn:aws:iam::${AWS_ACCOUNTS.VAL}:role/${SERVICES.POSTGRES}-cross-account-upload-val${CDK_DEPLOYMENT_SUFFIX}`
         })
       },
@@ -245,7 +308,7 @@ export class DatabaseOperationsStack extends BaseStack {
     });
 
     // Create separate role for prod export with cross-account permissions
-    if (this.stage === 'prod') {
+    if (config.features.enableCrossAccountRoles && config.environment === 'prod') {
       this.createProdExportRole(dbExportFunction);
     } else {
       this.grantExportPermissions(dbExportFunction);
@@ -258,9 +321,9 @@ export class DatabaseOperationsStack extends BaseStack {
       handler: 'db_import.handler',
       stage: this.stage,
       lambdaConfig: {
-        ...this.stageConfig.lambda,
-        timeout: LAMBDA_TIMEOUTS.LONG_RUNNING,
-        memorySize: LAMBDA_MEMORY.XLARGE
+        ...config.lambda,
+        timeout: LAMBDA_DEFAULTS.TIMEOUT_LONG_RUNNING,
+        memorySize: LAMBDA_DEFAULTS.MEMORY_XLARGE
       },
       environment: {
         S3_BUCKET: this.dataExportBucket?.bucketName || `postgres-${this.stage}-dummy-import`,
@@ -303,7 +366,7 @@ export class DatabaseOperationsStack extends BaseStack {
     // Add ingress rules for SSH access
     const sshSources = getAllSshAccessIps();
 
-    sshSources.forEach(source => {
+    sshSources.forEach((source: string) => {
       vmSecurityGroup.addIngressRule(
         ec2.Peer.ipv4(source),
         ec2.Port.tcp(22),
@@ -313,7 +376,7 @@ export class DatabaseOperationsStack extends BaseStack {
 
     // Add IPv6 rules
     const sshIpv6Sources = getSshAccessIpv6();
-    sshIpv6Sources.forEach(source => {
+    sshIpv6Sources.forEach((source: string) => {
       vmSecurityGroup.addIngressRule(
         ec2.Peer.ipv6(source),
         ec2.Port.tcp(22),
@@ -362,7 +425,9 @@ export class DatabaseOperationsStack extends BaseStack {
   }
 
   private createCrossAccountRoles(): void {
-    if (this.stage === 'val') {
+    const config = getEnvironment(this.stage);
+    
+    if (config.environment === 'val') {
       // Create cross-account role for prod to upload to val
       const crossAccountRole = new iam.Role(this, 'CrossAccountUploadRole', {
         roleName: `${SERVICES.POSTGRES}-cross-account-upload-val${CDK_DEPLOYMENT_SUFFIX}`,

@@ -14,9 +14,18 @@ import * as lambda from 'aws-cdk-lib/aws-lambda';
 import * as s3 from 'aws-cdk-lib/aws-s3';
 import * as iam from 'aws-cdk-lib/aws-iam';
 import { Duration } from 'aws-cdk-lib';
-import { LAMBDA_MEMORY, LAMBDA_TIMEOUTS, FILE_SIZE_LIMITS, PROJECT_PREFIX, SERVICES, OTEL_LAYER_ARN } from '@config/constants';
+import { PROJECT_PREFIX, SERVICES, OTEL_LAYER_ARN } from '@config/index';
+import { LAMBDA_MEMORY, LAMBDA_TIMEOUTS } from '@config/index';
+
+// File size limits (moved from shared config)
+const FILE_SIZE_LIMITS = {
+  SCAN_TIMEOUT_MB: 512,
+  MAX_UPLOAD_SIZE_MB: 100,
+  QUARANTINE_THRESHOLD_MB: 1024,
+  MAX_SCAN_SIZE_BYTES: 512 * 1024 * 1024, // 512MB in bytes
+} as const;
 import { LambdaEnvironmentFactory } from '@constructs/lambda/environment-factory';
-import { StageConfig } from '@config/stage-config';
+import { StageConfig } from '@config/index';
 
 export interface ScanEventProcessorProps {
   stage: string;

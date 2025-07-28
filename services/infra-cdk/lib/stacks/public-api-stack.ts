@@ -5,7 +5,26 @@ import * as ec2 from 'aws-cdk-lib/aws-ec2';
 import * as ssm from 'aws-cdk-lib/aws-ssm';
 import { ApiGatewayToLambda } from '@aws-solutions-constructs/aws-apigateway-lambda';
 import { Duration, CfnOutput } from 'aws-cdk-lib';
-import { CDKPaths } from '../config/paths';
+import { 
+  getEnvironment, 
+  LAMBDA_HANDLERS, 
+  SSM_PATHS,
+  ResourceNames,
+  getDatabaseUrl
+} from '../config';
+import { CDKPaths, getLambdaEnvironment } from '@config/index';
+
+// Lambda configuration (moved from shared config)
+const LAMBDA_DEFAULTS = {
+  RUNTIME: 'NODEJS_20_X',
+  ARCHITECTURE: 'x86_64',
+  TIMEOUT_API: Duration.seconds(29),
+  TIMEOUT_STANDARD: Duration.seconds(60),
+  MEMORY_SMALL: 256,
+  MEMORY_MEDIUM: 512,
+  MEMORY_LARGE: 1024,
+  MEMORY_XLARGE: 2048
+} as const;
 
 export interface PublicApiStackProps extends BaseStackProps {
   vpc: ec2.IVpc;
@@ -49,70 +68,72 @@ export class PublicApiStack extends BaseStack {
   }
 
   protected defineResources(): void {
-    // Import shared infrastructure layers from SSM
+    const config = getEnvironment(this.stage);
+
+    // Import shared infrastructure layers from SSM using lean config paths
     const otelLayerArn = ssm.StringParameter.valueForStringParameter(
       this, 
-      `/lambda/${this.stage}/otel-layer-arn`
+      ResourceNames.ssmPath(SSM_PATHS.OTEL_LAYER, this.stage)
     );
     const otelLayer = lambda.LayerVersion.fromLayerVersionArn(this, 'OtelLayer', otelLayerArn);
 
     const prismaEngineLayerArn = ssm.StringParameter.valueForStringParameter(
       this, 
-      `/lambda/${this.stage}/prisma-engine-layer-arn`
+      ResourceNames.ssmPath(SSM_PATHS.PRISMA_ENGINE_LAYER, this.stage)
     );
     const prismaEngineLayer = lambda.LayerVersion.fromLayerVersionArn(this, 'PrismaEngineLayer', prismaEngineLayerArn);
 
-    // Health Check API - ultra-clean with pre-built Lambda package
+    // Health Check API with lean config
     const healthApi = new ApiGatewayToLambda(this, 'HealthApi', {
       lambdaFunctionProps: {
         runtime: lambda.Runtime.NODEJS_20_X,
         code: lambda.Code.fromAsset(CDKPaths.getLambdaPackagePath()),
-        handler: 'handlers/health_check.main',
-        timeout: Duration.seconds(10),
-        memorySize: 256,
+        handler: LAMBDA_HANDLERS.HEALTH_CHECK,
+        timeout: LAMBDA_DEFAULTS.TIMEOUT_API,
+        memorySize: LAMBDA_DEFAULTS.MEMORY_SMALL,
         layers: [otelLayer],
         environment: this.getBaseEnvironmentVariables()
       },
       apiGatewayProps: {
-        restApiName: `mcr-${this.stage}-health-api`,
+        restApiName: ResourceNames.apiName('health-api', this.stage),
         description: `Health Check API for Managed Care Review - ${this.stage}`
       }
     });
     this.healthApiUrl = healthApi.apiGateway.url;
 
-    // OAuth Token API - ultra-clean with pre-built Lambda package
+    // OAuth Token API with lean config
     const oauthApi = new ApiGatewayToLambda(this, 'OAuthApi', {
       lambdaFunctionProps: {
         runtime: lambda.Runtime.NODEJS_20_X,
         code: lambda.Code.fromAsset(CDKPaths.getLambdaPackagePath()),
-        handler: 'handlers/oauth_token.main',
-        timeout: Duration.seconds(30),
-        memorySize: 512,
+        handler: LAMBDA_HANDLERS.OAUTH_TOKEN,
+        timeout: config.lambda.timeout,
+        memorySize: LAMBDA_DEFAULTS.MEMORY_MEDIUM,
         layers: [otelLayer, prismaEngineLayer],
         vpc: this.vpc,
         securityGroups: [this.lambdaSecurityGroup],
         environment: this.getDatabaseEnvironmentVariables()
       },
       apiGatewayProps: {
-        restApiName: `mcr-${this.stage}-oauth-api`,
+        restApiName: ResourceNames.apiName('oauth-api', this.stage),
         description: `OAuth Token API for Managed Care Review - ${this.stage}`
       }
     });
     this.oauthApiUrl = oauthApi.apiGateway.url;
 
-    // OTEL Proxy API - ultra-clean with pre-built Lambda package
+    // OTEL Proxy API with lean config
     const otelApi = new ApiGatewayToLambda(this, 'OtelApi', {
       lambdaFunctionProps: {
         runtime: lambda.Runtime.NODEJS_20_X,
         code: lambda.Code.fromAsset(CDKPaths.getLambdaPackagePath()),
-        handler: 'handlers/otel_proxy.main',
-        timeout: Duration.seconds(15),
-        memorySize: 256,
+        handler: LAMBDA_HANDLERS.OTEL_PROXY,
+        timeout: LAMBDA_DEFAULTS.TIMEOUT_STANDARD,
+        memorySize: LAMBDA_DEFAULTS.MEMORY_SMALL,
         layers: [otelLayer],
         environment: this.getBaseEnvironmentVariables()
       },
       apiGatewayProps: {
-        restApiName: `mcr-${this.stage}-otel-api`,
+        restApiName: ResourceNames.apiName('otel-api', this.stage),
         description: `OTEL Proxy API for Managed Care Review - ${this.stage}`
       }
     });
@@ -123,35 +144,25 @@ export class PublicApiStack extends BaseStack {
   }
 
   /**
-   * Get base environment variables for all functions
+   * Get base environment variables using lean config helpers
    */
   private getBaseEnvironmentVariables(): Record<string, string> {
-    return {
-      NODE_ENV: this.stage === 'prod' ? 'production' : 'development',
-      STAGE: this.stage,
+    return getLambdaEnvironment(this.stage, {
       APPLICATION_ENDPOINT: this.applicationEndpoint || `https://mcr-${this.stage}.cms.gov`,
-      OTEL_EXPORTER_OTLP_ENDPOINT: ssm.StringParameter.valueForStringParameter(
-        this, 
-        '/configuration/api_app_otel_collector_url'
-      )
-    };
+      OTEL_EXPORTER_OTLP_ENDPOINT: ssm.StringParameter.valueForStringParameter(this, SSM_PATHS.OTEL_COLLECTOR_URL)
+    });
   }
 
   /**
    * Get environment variables for functions that need database access
    */
   private getDatabaseEnvironmentVariables(): Record<string, string> {
-    // Construct PostgreSQL connection URL from individual secret components
-    const databaseUrl = `postgresql://{{resolve:secretsmanager:${this.databaseSecretArn}:SecretString:username}}:{{resolve:secretsmanager:${this.databaseSecretArn}:SecretString:password}}@${this.databaseClusterEndpoint}:5432/${this.databaseName}`;
-    
-    return {
-      ...this.getBaseEnvironmentVariables(),
-      DATABASE_URL: databaseUrl,
-      LD_SDK_KEY: ssm.StringParameter.valueForStringParameter(
-        this, 
-        '/configuration/ld_sdk_key_feds'
-      )
-    };
+    return getLambdaEnvironment(this.stage, {
+      APPLICATION_ENDPOINT: this.applicationEndpoint || `https://mcr-${this.stage}.cms.gov`,
+      DATABASE_URL: getDatabaseUrl(this.databaseSecretArn, this.databaseClusterEndpoint, this.databaseName),
+      OTEL_EXPORTER_OTLP_ENDPOINT: ssm.StringParameter.valueForStringParameter(this, SSM_PATHS.OTEL_COLLECTOR_URL),
+      LD_SDK_KEY: ssm.StringParameter.valueForStringParameter(this, SSM_PATHS.LD_SDK_KEY)
+    });
   }
 
   /**

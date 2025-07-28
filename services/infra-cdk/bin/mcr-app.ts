@@ -7,10 +7,8 @@ import { IamPathAspect } from '../lib/aspects/iam-path-aspects';
 import { IamPermissionsBoundaryAspect } from '../lib/aspects/iam-permissions-boundary-aspects';
 import { StackOrchestrator } from '../lib/stack-orchestrator';
 import {
-  loadEnvironment,
-  validateEnvironment,
-  StageConfiguration,
-  ERROR_MESSAGES
+  getEnvironment,
+  getCdkEnvironment
 } from '../lib/config';
 import { SecretsManagerClient, GetSecretValueCommand } from '@aws-sdk/client-secrets-manager';
 
@@ -39,9 +37,6 @@ async function main() {
                   process.env.CDK_STAGE || 
                   'dev';
     
-    // Load environment variables
-    loadEnvironment(stage);
-    
     // Get CDK synthesizer config (required)
     const synthConfig = await getSynthesizerConfig();
     
@@ -54,34 +49,31 @@ async function main() {
     app.node.setContext('stage', stage);
     
     if (!stage) {
-      throw new Error(ERROR_MESSAGES.MISSING_STAGE);
+      throw new Error('Stage must be provided via --context stage=<stage>');
     }
 
-    // Validate stage
-    if (!['dev', 'val', 'prod'].includes(stage)) {
-      throw new Error(ERROR_MESSAGES.INVALID_STAGE);
+    // Validate stage with lean config
+    if (!['dev', 'val', 'prod'].includes(stage) && !stage.startsWith('ephemeral-')) {
+      throw new Error('Invalid stage. Must be one of: dev, val, prod, or ephemeral-*');
     }
 
-    // Validate environment
-    validateEnvironment(stage);
+    // Validate required environment variables
+    if (!process.env.AWS_REGION) {
+      throw new Error('AWS_REGION environment variable is required');
+    }
 
-    // Get stage configuration
-    const stageConfig = StageConfiguration.get(stage);
+    // Get ultra-lean environment configuration
+    const config = getEnvironment(stage);
+    const env = getCdkEnvironment(stage);
 
-    // Environment for all stacks
-    const env: cdk.Environment = {
-      account: stageConfig.account,
-      region: stageConfig.region
-    };
-
-    // Create stacks using StackOrchestrator
+    // Create stacks using StackOrchestrator with lean config
     console.log(`Creating MCR CDK stacks for stage: ${stage}`);
     
     const orchestrator = new StackOrchestrator({
       app,
       stage,
       env,
-      stageConfig
+      config
     });
     
     const stacks = orchestrator.createAllStacks();

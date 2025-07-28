@@ -5,14 +5,13 @@ import {
   NetworkStack,
   DataStack,
   AuthStack,
-  // OLD MONOLITHIC STACK REMOVED: ApiComputeStack eliminated (612 lines → 175 lines via micro-stacks)
   DatabaseOperationsStack,
   GuardDutyMalwareProtectionStack,
   MonitoringStack,
   FrontendStack,
   GitHubOidcStack,
   LambdaLayersStack,
-  // Elegant micro-stack architecture (85% code reduction)
+  // Ultra-lean micro-stack architecture
   SharedInfraStack,
   GraphQLApiStack,
   PublicApiStack,
@@ -20,14 +19,22 @@ import {
   ScheduledTasksStack,
   AuthExtensionsStack
 } from './stacks';
-import { StageConfig } from './config/stage-config';
-import { CDK_DEPLOYMENT_SUFFIX, INFRASTRUCTURE_SSM_PARAMS } from './config/constants';
+import { 
+  getEnvironment, 
+  getCdkEnvironment, 
+  ResourceNames, 
+  CDK_DEPLOYMENT_SUFFIX, 
+  SSM_PATHS,
+  getCallbackUrls,
+  getLogoutUrls,
+  type EnvironmentConfig 
+} from './config';
 
 export interface StackOrchestratorProps {
   app: cdk.App;
   stage: string;
   env: cdk.Environment;
-  stageConfig: StageConfig;
+  config: EnvironmentConfig;
 }
 
 export interface StackReferences {
@@ -140,19 +147,19 @@ export class StackOrchestrator {
   }
 
   private createFoundation(): FoundationStack {
-    return new FoundationStack(this.props.app, `MCR-Foundation-${this.props.stage}${CDK_DEPLOYMENT_SUFFIX}`, {
+    return new FoundationStack(this.props.app, ResourceNames.stackName('Foundation', this.props.stage), {
       env: this.props.env,
       stage: this.props.stage,
-      stageConfig: this.props.stageConfig,
+      stageConfig: this.props.config,
       serviceName: 'foundation'
     });
   }
 
   private createNetwork(foundation: FoundationStack): NetworkStack {
-    const stack = new NetworkStack(this.props.app, `MCR-Network-${this.props.stage}${CDK_DEPLOYMENT_SUFFIX}`, {
+    const stack = new NetworkStack(this.props.app, ResourceNames.stackName('Network', this.props.stage), {
       env: this.props.env,
       stage: this.props.stage,
-      stageConfig: this.props.stageConfig,
+      stageConfig: this.props.config,
       serviceName: 'network'
     });
     stack.addDependency(foundation);
@@ -160,7 +167,7 @@ export class StackOrchestrator {
   }
 
   private createLambdaLayers(network: NetworkStack): LambdaLayersStack {
-    const stack = new LambdaLayersStack(this.props.app, `MCR-LambdaLayers-${this.props.stage}${CDK_DEPLOYMENT_SUFFIX}`, {
+    const stack = new LambdaLayersStack(this.props.app, ResourceNames.stackName('LambdaLayers', this.props.stage), {
       env: this.props.env,
       stage: this.props.stage,
       description: 'Centralized Lambda layers for MCR'
@@ -173,10 +180,10 @@ export class StackOrchestrator {
     if (!network.databaseSecurityGroup) {
       throw new Error('Database security group not found in NetworkStack');
     }
-    const stack = new DataStack(this.props.app, `MCR-Data-${this.props.stage}${CDK_DEPLOYMENT_SUFFIX}`, {
+    const stack = new DataStack(this.props.app, ResourceNames.stackName('Data', this.props.stage), {
       env: this.props.env,
       stage: this.props.stage,
-      stageConfig: this.props.stageConfig,
+      stageConfig: this.props.config,
       serviceName: 'data',
       vpc: network.vpc,
       databaseSecurityGroup: network.databaseSecurityGroup,
@@ -188,12 +195,12 @@ export class StackOrchestrator {
   }
 
   private createAuth(foundation: FoundationStack): AuthStack {
-    // Fetch email sender from SSM Parameter Store (matching serverless implementation)
+    // Fetch email sender from SSM Parameter Store using lean config paths
     let emailSender: string | undefined;
     try {
       const ssmEmailValue = ssm.StringParameter.valueFromLookup(
         foundation,
-        INFRASTRUCTURE_SSM_PARAMS.EMAIL_SOURCE_ADDRESS
+        SSM_PATHS.EMAIL_SOURCE_ADDRESS
       );
       
       // Only use the value if it's not a dummy token and not empty
@@ -204,10 +211,10 @@ export class StackOrchestrator {
       console.log('Email source address not found in SSM, will use default');
     }
 
-    const stack = new AuthStack(this.props.app, `MCR-Auth-${this.props.stage}${CDK_DEPLOYMENT_SUFFIX}`, {
+    const stack = new AuthStack(this.props.app, ResourceNames.stackName('Auth', this.props.stage), {
       env: this.props.env,
       stage: this.props.stage,
-      stageConfig: this.props.stageConfig,
+      stageConfig: this.props.config,
       serviceName: 'auth',
       allowedCallbackUrls: this.getCallbackUrls(),
       allowedLogoutUrls: this.getLogoutUrls(),
@@ -233,10 +240,10 @@ export class StackOrchestrator {
     data: DataStack,
     lambdaLayers: LambdaLayersStack
   ): DatabaseOperationsStack {
-    const stack = new DatabaseOperationsStack(this.props.app, `MCR-DatabaseOps-${this.props.stage}${CDK_DEPLOYMENT_SUFFIX}`, {
+    const stack = new DatabaseOperationsStack(this.props.app, ResourceNames.stackName('DatabaseOps', this.props.stage), {
       env: this.props.env,
       stage: this.props.stage,
-      stageConfig: this.props.stageConfig,
+      stageConfig: this.props.config,
       serviceName: 'database-ops',
       vpc: network.vpc,
       lambdaSecurityGroup: network.lambdaSecurityGroup,
@@ -251,10 +258,10 @@ export class StackOrchestrator {
   }
 
   private createFrontend(): FrontendStack {
-    const stack = new FrontendStack(this.props.app, `MCR-Frontend-${this.props.stage}${CDK_DEPLOYMENT_SUFFIX}`, {
+    const stack = new FrontendStack(this.props.app, ResourceNames.stackName('Frontend', this.props.stage), {
       env: this.props.env,
       stage: this.props.stage,
-      stageConfig: this.props.stageConfig,
+      stageConfig: this.props.config,
       serviceName: 'frontend',
       enableAppWebIntegration: true,
       enableHsts: true
@@ -265,10 +272,10 @@ export class StackOrchestrator {
   }
 
   private createVirusScanning(data: DataStack, network: NetworkStack): GuardDutyMalwareProtectionStack {
-    const stack = new GuardDutyMalwareProtectionStack(this.props.app, `MCR-VirusScanning-${this.props.stage}${CDK_DEPLOYMENT_SUFFIX}`, {
+    const stack = new GuardDutyMalwareProtectionStack(this.props.app, ResourceNames.stackName('VirusScanning', this.props.stage), {
       env: this.props.env,
       stage: this.props.stage,
-      stageConfig: this.props.stageConfig,
+      stageConfig: this.props.config,
       serviceName: 'virus-scanning',
       uploadsBucket: data.uploadsBucket,
       qaBucket: data.qaBucket,
@@ -284,10 +291,10 @@ export class StackOrchestrator {
   }
 
   private createMonitoring(foundation: FoundationStack): MonitoringStack {
-    const stack = new MonitoringStack(this.props.app, `MCR-Monitoring-${this.props.stage}${CDK_DEPLOYMENT_SUFFIX}`, {
+    const stack = new MonitoringStack(this.props.app, ResourceNames.stackName('Monitoring', this.props.stage), {
       env: this.props.env,
       stage: this.props.stage,
-      stageConfig: this.props.stageConfig,
+      stageConfig: this.props.config,
       serviceName: 'monitoring'
     });
     stack.addDependency(foundation);
@@ -295,12 +302,10 @@ export class StackOrchestrator {
   }
 
   private getCallbackUrls(): string[] {
-    const { getCallbackUrls } = require('./config/auth-urls');
     return getCallbackUrls(this.props.stage);
   }
 
   private getLogoutUrls(): string[] {
-    const { getLogoutUrls } = require('./config/auth-urls');
     return getLogoutUrls(this.props.stage);
   }
 
@@ -309,13 +314,13 @@ export class StackOrchestrator {
   // ========================================
 
   /**
-   * Create Shared Infrastructure Stack - OTEL + Prisma layers + SSM parameters
+   * Create Shared Infrastructure Stack with lean config
    */
   private createSharedInfra(lambdaLayers: LambdaLayersStack): SharedInfraStack {
-    const stack = new SharedInfraStack(this.props.app, `MCR-SharedInfra-${this.props.stage}${CDK_DEPLOYMENT_SUFFIX}`, {
+    const stack = new SharedInfraStack(this.props.app, ResourceNames.stackName('SharedInfra', this.props.stage), {
       env: this.props.env,
       stage: this.props.stage,
-      stageConfig: this.props.stageConfig,
+      stageConfig: this.props.config,
       serviceName: 'shared-infra'
     });
     stack.addDependency(lambdaLayers);
@@ -323,7 +328,7 @@ export class StackOrchestrator {
   }
 
   /**
-   * Create GraphQL API Stack using CognitoToApiGatewayToLambda construct
+   * Create GraphQL API Stack with lean config
    */
   private createGraphQLApi(
     foundation: FoundationStack,
@@ -331,16 +336,16 @@ export class StackOrchestrator {
     data: DataStack,
     sharedInfra: SharedInfraStack
   ): GraphQLApiStack {
-    const stack = new GraphQLApiStack(this.props.app, `MCR-GraphQLApi-${this.props.stage}${CDK_DEPLOYMENT_SUFFIX}`, {
+    const stack = new GraphQLApiStack(this.props.app, ResourceNames.stackName('GraphQLApi', this.props.stage), {
       env: this.props.env,
       stage: this.props.stage,
-      stageConfig: this.props.stageConfig,
+      stageConfig: this.props.config,
       serviceName: 'graphql-api',
       vpc: network.vpc,
       lambdaSecurityGroup: network.lambdaSecurityGroup,
       databaseSecretArn: data.database.secret.secretArn,
       databaseClusterEndpoint: data.database.clusterEndpoint.hostname,
-      databaseName: `aurorapostgres${this.props.stage}${this.props.env.account}cdk`,
+      databaseName: ResourceNames.databaseName(this.props.stage, this.props.env.account || ''),
       uploadsBucketName: data.uploadsBucket.bucketName,
       qaBucketName: data.qaBucket.bucketName,
       applicationEndpoint: process.env.APPLICATION_ENDPOINT
@@ -353,7 +358,7 @@ export class StackOrchestrator {
   }
 
   /**
-   * Create Public API Stack - Health/OAuth/OTEL endpoints using ApiGatewayToLambda constructs
+   * Create Public API Stack with lean config
    */
   private createPublicApi(
     foundation: FoundationStack,
@@ -361,16 +366,16 @@ export class StackOrchestrator {
     data: DataStack,
     sharedInfra: SharedInfraStack
   ): PublicApiStack {
-    const stack = new PublicApiStack(this.props.app, `MCR-PublicApi-${this.props.stage}${CDK_DEPLOYMENT_SUFFIX}`, {
+    const stack = new PublicApiStack(this.props.app, ResourceNames.stackName('PublicApi', this.props.stage), {
       env: this.props.env,
       stage: this.props.stage,
-      stageConfig: this.props.stageConfig,
+      stageConfig: this.props.config,
       serviceName: 'public-api',
       vpc: network.vpc,
       lambdaSecurityGroup: network.lambdaSecurityGroup,
       databaseSecretArn: data.database.secret.secretArn,
       databaseClusterEndpoint: data.database.clusterEndpoint.hostname,
-      databaseName: `aurorapostgres${this.props.stage}${this.props.env.account}cdk`,
+      databaseName: ResourceNames.databaseName(this.props.stage, this.props.env.account || ''),
       applicationEndpoint: process.env.APPLICATION_ENDPOINT
     });
     stack.addDependency(foundation);
@@ -381,13 +386,13 @@ export class StackOrchestrator {
   }
 
   /**
-   * Create File Operations Stack - S3 + Lambda integrations
+   * Create File Operations Stack with lean config
    */
   private createFileOps(data: DataStack, sharedInfra: SharedInfraStack): FileOpsStack {
-    const stack = new FileOpsStack(this.props.app, `MCR-FileOps-${this.props.stage}${CDK_DEPLOYMENT_SUFFIX}`, {
+    const stack = new FileOpsStack(this.props.app, ResourceNames.stackName('FileOps', this.props.stage), {
       env: this.props.env,
       stage: this.props.stage,
-      stageConfig: this.props.stageConfig,
+      stageConfig: this.props.config,
       serviceName: 'file-ops',
       uploadsBucketName: data.uploadsBucket.bucketName,
       qaBucketName: data.qaBucket.bucketName,
@@ -399,13 +404,13 @@ export class StackOrchestrator {
   }
 
   /**
-   * Create Scheduled Tasks Stack - EventBridge + Lambda for cleanup
+   * Create Scheduled Tasks Stack with lean config
    */
   private createScheduledTasks(data: DataStack, sharedInfra: SharedInfraStack): ScheduledTasksStack {
-    const stack = new ScheduledTasksStack(this.props.app, `MCR-ScheduledTasks-${this.props.stage}${CDK_DEPLOYMENT_SUFFIX}`, {
+    const stack = new ScheduledTasksStack(this.props.app, ResourceNames.stackName('ScheduledTasks', this.props.stage), {
       env: this.props.env,
       stage: this.props.stage,
-      stageConfig: this.props.stageConfig,
+      stageConfig: this.props.config,
       serviceName: 'scheduled-tasks',
       uploadsBucketName: data.uploadsBucket.bucketName,
       qaBucketName: data.qaBucket.bucketName,
@@ -417,17 +422,17 @@ export class StackOrchestrator {
   }
 
   /**
-   * Create Auth Extensions Stack - Identity Pool + group-based IAM (after APIs exist)
+   * Create Auth Extensions Stack with lean config
    */
   private createAuthExtensions(
     data: DataStack,
     graphqlApi: GraphQLApiStack,
     publicApi: PublicApiStack
   ): AuthExtensionsStack {
-    const stack = new AuthExtensionsStack(this.props.app, `MCR-AuthExtensions-${this.props.stage}${CDK_DEPLOYMENT_SUFFIX}`, {
+    const stack = new AuthExtensionsStack(this.props.app, ResourceNames.stackName('AuthExtensions', this.props.stage), {
       env: this.props.env,
       stage: this.props.stage,
-      stageConfig: this.props.stageConfig,
+      stageConfig: this.props.config,
       serviceName: 'auth-extensions',
       s3BucketNames: [
         data.uploadsBucket.bucketName,

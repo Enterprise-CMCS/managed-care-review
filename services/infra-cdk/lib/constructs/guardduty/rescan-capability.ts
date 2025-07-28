@@ -14,9 +14,28 @@ import * as s3 from 'aws-cdk-lib/aws-s3';
 import * as iam from 'aws-cdk-lib/aws-iam';
 import * as ec2 from 'aws-cdk-lib/aws-ec2';
 import { Duration, CfnOutput } from 'aws-cdk-lib';
-import { LAMBDA_MEMORY, LAMBDA_TIMEOUTS, FILE_SIZE_LIMITS, PROJECT_PREFIX, SERVICES, OTEL_LAYER_ARN, QUEUE_LIMITS } from '@config/constants';
+import { PROJECT_PREFIX, SERVICES } from '@config/index';
+import { LAMBDA_MEMORY, LAMBDA_TIMEOUTS } from '@config/index';
 import { LambdaEnvironmentFactory } from '@constructs/lambda/environment-factory';
-import { StageConfig } from '@config/stage-config';
+import { StageConfig } from '@config/index';
+
+// GuardDuty rescan-specific constants (moved from shared config)
+const FILE_SIZE_LIMITS = {
+  MAX_SCAN_SIZE_BYTES: 314572800,
+  MAX_SCAN_SIZE_MB: 300,
+  MAX_API_PAYLOAD_BYTES: 10485760,
+  MAX_API_PAYLOAD_MB: 10,
+  MAX_LAMBDA_PAYLOAD_BYTES: 6291456,
+  MAX_LAMBDA_PAYLOAD_MB: 6,
+} as const;
+
+const QUEUE_LIMITS = {
+  DEFAULT_VISIBILITY_TIMEOUT: Duration.minutes(5),
+  MAX_RETENTION: Duration.days(14),
+  DEFAULT_RETENTION: Duration.days(7),
+} as const;
+
+const OTEL_LAYER_ARN = 'arn:aws:lambda:us-east-1:901920570463:layer:aws-otel-nodejs-amd64-ver-1-18-1:4';
 
 export interface RescanCapabilityProps {
   stage: string;

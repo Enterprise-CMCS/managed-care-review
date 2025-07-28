@@ -4,6 +4,7 @@ import { Construct } from 'constructs';
 import * as lambda from 'aws-cdk-lib/aws-lambda';
 import * as ssm from 'aws-cdk-lib/aws-ssm';
 import { CfnOutput } from 'aws-cdk-lib';
+import { SSM_PATHS, ResourceNames } from '../config';
 
 /**
  * Shared infrastructure stack - provides common components for other stacks
@@ -53,26 +54,25 @@ export class SharedInfraStack extends BaseStack {
   }
 
   /**
-   * Store common environment variables in SSM Parameter Store
-   * Eliminates the need for EnvironmentFactory pattern
+   * Store common environment variables in SSM Parameter Store using lean config paths (conflict-free)
    */
   private storeCommonEnvironment(): void {
     // Store OTEL layer ARN for other stacks to reference
     new ssm.StringParameter(this, 'OtelLayerArnParameter', {
-      parameterName: `/lambda/${this.stage}/otel-layer-arn`,
+      parameterName: ResourceNames.ssmPath(SSM_PATHS.OTEL_LAYER, this.stage),
       stringValue: this.otelLayer.layerVersionArn,
       description: 'OTEL Layer ARN for Lambda functions'
     });
 
     // Store Prisma layer ARNs for other stacks to reference
     new ssm.StringParameter(this, 'PrismaEngineLayerArnParameter', {
-      parameterName: `/lambda/${this.stage}/prisma-engine-layer-arn`,
+      parameterName: ResourceNames.ssmPath(SSM_PATHS.PRISMA_ENGINE_LAYER, this.stage),
       stringValue: this.prismaEngineLayer.layerVersionArn,
       description: 'Prisma Engine Layer ARN for Lambda functions'
     });
 
     new ssm.StringParameter(this, 'PrismaMigrationLayerArnParameter', {
-      parameterName: `/lambda/${this.stage}/prisma-migration-layer-arn`,
+      parameterName: ResourceNames.ssmPath(SSM_PATHS.PRISMA_MIGRATION_LAYER, this.stage),
       stringValue: this.prismaMigrationLayer.layerVersionArn,
       description: 'Prisma Migration Layer ARN for Lambda functions'
     });
