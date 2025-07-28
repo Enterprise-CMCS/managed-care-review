@@ -21,6 +21,15 @@ function getExternalModules(functionName: string): string[] {
     ];
   }
   
+  // Database functions that use postgres tools layer
+  if (functionName === 'dbManager' || functionName === 'dbExport' || functionName === 'dbImport') {
+    return [
+      ...baseExternal,
+      'pg', // Provided by postgres tools layer
+      'pg-format' // Provided by postgres tools layer
+    ];
+  }
+  
   // Note: AWS SDK v3 (@aws-sdk/*) is NOT provided by Lambda runtime and must be bundled
   // Only AWS SDK v2 (aws-sdk) is provided by Lambda runtime, but we use v3
   
