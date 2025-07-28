@@ -113,7 +113,7 @@ jobs:
       working-directory: services/infra-cdk
       run: |
         # Use npm with explicit isolation from parent directories
-        npm install --prefix . --no-package-lock
+        npm install --prefix . --no-package-lock --legacy-peer-deps
 
     # 4. Configure AWS credentials via OIDC
     - name: Validate AWS Account Secrets
