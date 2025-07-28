@@ -330,6 +330,13 @@ describe('RateDetailsSummarySection', () => {
             'NEW'
         contract.packageSubmissions[0].rateRevisions[0].formData.amendmentEffectiveDateStart =
             null
+        contract.packageSubmissions[0].rateRevisions[0].formData.rateMedicaidPopulations =
+            [
+                'MEDICAID_ONLY',
+                'MEDICARE_MEDICAID_WITHOUT_DSNP',
+                'MEDICARE_MEDICAID_WITH_DSNP',
+            ]
+
         await waitFor(() => {
             renderWithProviders(
                 <RateDetailsSummarySection
@@ -339,6 +346,7 @@ describe('RateDetailsSummarySection', () => {
                 />,
                 {
                     apolloProvider: apolloProviderCMSUser,
+                    featureFlags: { dsnp: true },
                 }
             )
         })
@@ -348,12 +356,28 @@ describe('RateDetailsSummarySection', () => {
 
         expect(screen.getByText(rateName)).toBeInTheDocument()
         expect(
-            screen.getByRole('definition', { name: 'Rate certification type' })
-        ).toBeInTheDocument()
-        expect(
             screen.getByRole('definition', {
                 name: 'Rates this rate certification covers',
             })
+        ).toBeInTheDocument()
+        expect(
+            screen.getByRole('definition', {
+                name: 'Medicaid populations included in this rate certification',
+            })
+        ).toBeInTheDocument()
+        expect(
+            screen.getByTestId(
+                'Medicare-Medicaid dually eligible individuals enrolled through a Dual-Eligible Special Needs Plan (D-SNP)'
+            )
+        ).toBeInTheDocument()
+        expect(screen.getByTestId('Medicaid-only')).toBeInTheDocument()
+        expect(
+            screen.getByTestId(
+                'Medicare-Medicaid dually eligible individuals not enrolled through a D-SNP'
+            )
+        ).toBeInTheDocument()
+        expect(
+            screen.getByRole('definition', { name: 'Rate certification type' })
         ).toBeInTheDocument()
         expect(
             screen.getByRole('definition', { name: 'Rating period' })
