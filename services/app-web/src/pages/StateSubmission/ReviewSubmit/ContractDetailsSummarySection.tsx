@@ -139,7 +139,7 @@ export const ContractDetailsSummarySection = ({
         contractFormData?.dsnpContract === null ||
         contractFormData?.dsnpContract === undefined
     const dsnpIsRequired =
-        contractFormData?.federalAuthorities.some((authority) =>
+        contractFormData?.federalAuthorities?.some((authority) =>
             dsnpTriggers.includes(authority)
         ) &&
         dsnpNotProvided &&
