@@ -1,4 +1,4 @@
-import { constructTestPostgresServer } from '../../testHelpers/gqlHelpers'
+import { constructTestPostgresServer, extractGraphQLResponse } from '../../testHelpers/gqlHelpers'
 import { UpdateDivisionAssignmentDocument } from '../../gen/gqlClient'
 import type { InsertUserArgsType } from '../../postgres'
 import { NewPostgresStore } from '../../postgres'
@@ -50,17 +50,22 @@ describe('updateDivisionAssignment', () => {
                             divisionAssignment: firstDivisionAssignment,
                         },
                     },
+                }, {
+                    contextValue: {
+                        user: mockUser,
+                    },
                 })
 
-                expect(firstUpdateRes.data).toBeDefined()
-                expect(firstUpdateRes.errors).toBeUndefined()
+                const firstResult = extractGraphQLResponse(firstUpdateRes)
+                expect(firstResult.data).toBeDefined()
+                expect(firstResult.errors).toBeUndefined()
 
-                if (!firstUpdateRes.data) {
+                if (!firstResult.data) {
                     throw new Error('no data')
                 }
 
                 const firstUpdateToUser =
-                    firstUpdateRes.data.updateDivisionAssignment.user
+                    firstResult.data.updateDivisionAssignment.user
                 expect(firstUpdateToUser.email).toBe(newUser.email)
                 // division assignment should now be set
                 expect(firstUpdateToUser.divisionAssignment).toBe(
@@ -76,17 +81,22 @@ describe('updateDivisionAssignment', () => {
                             divisionAssignment: secondDivisionAssignment,
                         },
                     },
+                }, {
+                    contextValue: {
+                        user: mockUser,
+                    },
                 })
 
-                expect(secondUpdateRes.data).toBeDefined()
-                expect(secondUpdateRes.errors).toBeUndefined()
+                const secondResult = extractGraphQLResponse(secondUpdateRes)
+                expect(secondResult.data).toBeDefined()
+                expect(secondResult.errors).toBeUndefined()
 
-                if (!secondUpdateRes.data) {
+                if (!secondResult.data) {
                     throw new Error('no data')
                 }
 
                 const secondUpdateToUser =
-                    secondUpdateRes.data.updateDivisionAssignment.user
+                    secondResult.data.updateDivisionAssignment.user
                 expect(secondUpdateToUser.email).toBe(newUser.email)
                 expect(secondUpdateToUser.divisionAssignment).toBe(
                     secondDivisionAssignment
@@ -135,6 +145,10 @@ describe('updateDivisionAssignment', () => {
                             divisionAssignment: 'OACT',
                         },
                     },
+                }, {
+                    contextValue: {
+                        user: mockUser,
+                    },
                 })
 
                 expect(assertAnError(updateRes).message).toContain(
@@ -179,6 +193,10 @@ describe('updateDivisionAssignment', () => {
                     divisionAssignment: 'OACT',
                 },
             },
+        }, {
+            contextValue: {
+                user: mockUser,
+            },
         })
 
         expect(assertAnError(updateRes).message).toContain(
@@ -208,6 +226,10 @@ describe('updateDivisionAssignment', () => {
                     divisionAssignment: 'OACT',
                 },
             },
+        }, {
+            contextValue: {
+                user: mockUser,
+            },
         })
 
         expect(assertAnError(updateRes).message).toContain(
@@ -233,6 +255,10 @@ describe('updateDivisionAssignment', () => {
                     cmsUserID: cmsUserID,
                     divisionAssignment: 'OACT',
                 },
+            },
+        }, {
+            contextValue: {
+                user: mockUser,
             },
         })
 

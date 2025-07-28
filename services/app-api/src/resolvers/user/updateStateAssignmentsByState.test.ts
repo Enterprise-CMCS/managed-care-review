@@ -14,21 +14,13 @@ import {
     UpdateStateAssignmentsByStateDocument,
     IndexUsersDocument,
 } from '../../gen/gqlClient'
-import { constructTestPostgresServer } from '../../testHelpers/gqlHelpers'
+import { constructTestPostgresServer, extractGraphQLResponse } from '../../testHelpers/gqlHelpers'
 import type { User, UserEdge } from '../../gen/gqlServer'
 import {
     assertAnError,
     assertAnErrorCode,
     assertAnErrorExtensions,
 } from '../../testHelpers'
-
-// Helper to extract GraphQL response from Apollo v4 response structure
-function extractTestResponse(response: any): any {
-    if ('body' in response && response.body) {
-        return response.body.kind === 'single' ? response.body.singleResult : response.body
-    }
-    return response
-}
 
 const authorizedUserTests = [
     {
@@ -144,7 +136,7 @@ describe.each(authorizedUserTests)(
                 },
             })
 
-            const result = extractTestResponse(updateRes)
+            const result = extractGraphQLResponse(updateRes)
             expect(result.data).toBeDefined()
             expect(result.errors).toBeUndefined()
 
@@ -175,7 +167,7 @@ describe.each(authorizedUserTests)(
                 },
             })
 
-            const result2 = extractTestResponse(updateRes2)
+            const result2 = extractGraphQLResponse(updateRes2)
             expect(result2.data).toBeDefined()
             expect(result2.errors).toBeUndefined()
 
@@ -201,7 +193,7 @@ describe.each(authorizedUserTests)(
                 },
             })
 
-            const result3 = extractTestResponse(updateRes3)
+            const result3 = extractGraphQLResponse(updateRes3)
             expect(result3.data).toBeDefined()
             expect(result3.errors).toBeUndefined()
 
@@ -214,7 +206,7 @@ describe.each(authorizedUserTests)(
                 },
             })
 
-            const allUsersResult = extractTestResponse(allUsersQuery)
+            const allUsersResult = extractGraphQLResponse(allUsersQuery)
             expect(allUsersResult.data).toBeDefined()
             expect(allUsersResult.errors).toBeUndefined()
 
@@ -431,7 +423,7 @@ describe.each(authorizedUserTests)(
                 },
             })
 
-            const result = extractTestResponse(updateRes)
+            const result = extractGraphQLResponse(updateRes)
             expect(result.errors).toBeDefined()
 
             expect(assertAnError(updateRes).message).toContain(
@@ -499,7 +491,7 @@ describe.each(authorizedUserTests)(
                 },
             })
 
-            const result = extractTestResponse(updateRes)
+            const result = extractGraphQLResponse(updateRes)
             expect(result.errors).toBeDefined()
 
             expect(assertAnError(updateRes).message).toContain(
