@@ -76,7 +76,6 @@ jobs:
       with:
         node-version: ${{ env.NODE_VERSION }}
         cache: 'pnpm'
-        cache-dependency-path: services/infra-cdk/pnpm-lock.yaml
 
     - name: Configure pnpm and git for HTTPS
       run: |
@@ -112,7 +111,7 @@ jobs:
 
     - name: Install CDK dependencies
       working-directory: services/infra-cdk
-      run: pnpm install --frozen-lockfile
+      run: pnpm install
 
     # 4. Configure AWS credentials via OIDC
     - name: Validate AWS Account Secrets
