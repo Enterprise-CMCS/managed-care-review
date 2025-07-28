@@ -14,6 +14,7 @@ import {
     fetchTestContractWithQuestions,
     submitTestContract,
     unlockTestContract,
+    unlockTestContractAsUser,
     withdrawTestContract,
 } from '../../testHelpers/gqlContractHelpers'
 import {
@@ -83,7 +84,7 @@ describe('withdrawRate', () => {
             },
         })
 
-        const contract = await createAndSubmitTestContractWithRate(stateServer)
+        const contract = await createAndSubmitTestContractWithRate(stateServer, undefined, { user: stateUser })
         const rate = contract.packageSubmissions[0].rateRevisions[0]
         const rateID = rate.rateID
         const rateName = rate.formData.rateCertificationName
@@ -92,7 +93,8 @@ describe('withdrawRate', () => {
         const withdrawnRate = await withdrawTestRate(
             cmsServer,
             rateID,
-            updatedReason
+            updatedReason,
+            { user: cmsUser }
         )
 
         // expect rate to contain contract in withdrawn join table
@@ -220,7 +222,7 @@ describe('withdrawRate', () => {
             },
         })
 
-        const contract = await createAndSubmitTestContractWithRate(stateServer)
+        const contract = await createAndSubmitTestContractWithRate(stateServer, undefined, { user: stateUser })
         const rate = contract.packageSubmissions[0].rateRevisions[0]
         const rateID = rate.rateID
         const rateName = rate.formData.rateCertificationName
@@ -245,7 +247,8 @@ describe('withdrawRate', () => {
         const withdrawnRate = await withdrawTestRate(
             cmsServer,
             rateID,
-            updatedReason
+            updatedReason,
+            { user: cmsUser }
         )
 
         // expect rate to contain contract in withdrawn join table
@@ -398,7 +401,9 @@ describe('withdrawRate', () => {
 
         const submittedContract = await submitTestContract(
             stateServer,
-            contract.id
+            contract.id,
+            undefined,
+            { user: stateUser }
         )
 
         // expect two submitted rates
@@ -491,7 +496,9 @@ describe('withdrawRate', () => {
         )
         const contract = await submitTestContract(
             stateServer,
-            draftWithExtraRate.id
+            draftWithExtraRate.id,
+            undefined,
+            { user: stateUser }
         )
 
         const rateID = contract.packageSubmissions[0].rateRevisions[0].rateID
@@ -577,7 +584,7 @@ describe('withdrawRate', () => {
             },
         })
 
-        const contractA = await createAndSubmitTestContractWithRate(stateServer)
+        const contractA = await createAndSubmitTestContractWithRate(stateServer, undefined, { user: stateUser })
         const rateID = contractA.packageSubmissions[0].rateRevisions[0].rateID
 
         const contractB =
@@ -608,7 +615,9 @@ describe('withdrawRate', () => {
 
         const submittedContractB = await submitTestContract(
             stateServer,
-            contractB.id
+            contractB.id,
+            undefined,
+            { user: stateUser }
         )
 
         // expect contract B to be submitted before we withdraw rate
@@ -700,7 +709,7 @@ describe('withdrawRate', () => {
             },
         })
 
-        const contractA = await createAndSubmitTestContractWithRate(stateServer)
+        const contractA = await createAndSubmitTestContractWithRate(stateServer, undefined, { user: stateUser })
         const rateID = contractA.packageSubmissions[0].rateRevisions[0].rateID
 
         const contractB =
@@ -727,7 +736,9 @@ describe('withdrawRate', () => {
 
         const submittedContractB = await submitTestContract(
             stateServer,
-            contractB.id
+            contractB.id,
+            undefined,
+            { user: stateUser }
         )
 
         // expect contract B to be submitted before we withdraw rate
@@ -831,7 +842,7 @@ describe('withdrawRate', () => {
         })
 
         // contractA is parent contract and submitted
-        const contractA = await createAndSubmitTestContractWithRate(stateServer)
+        const contractA = await createAndSubmitTestContractWithRate(stateServer, undefined, { user: stateUser })
         const rateID = contractA.packageSubmissions[0].rateRevisions[0].rateID
 
         // contract B is linked and in draft
@@ -843,7 +854,7 @@ describe('withdrawRate', () => {
             await createAndUpdateTestContractWithoutRates(stateServer)
 
         // contract D is submitted, unlocked, then linked
-        const contractD = await createAndSubmitTestContractWithRate(stateServer)
+        const contractD = await createAndSubmitTestContractWithRate(stateServer, undefined, { user: stateUser })
 
         // link rate to contract B
         must(
@@ -889,7 +900,9 @@ describe('withdrawRate', () => {
 
         const submittedContractC = await submitTestContract(
             stateServer,
-            contractC.id
+            contractC.id,
+            undefined,
+            { user: stateUser }
         )
         const newContractCRate =
             submittedContractC.packageSubmissions[0].rateRevisions.find(
@@ -1121,7 +1134,7 @@ describe('withdrawRate', () => {
             emailer: mockEmailer,
         })
 
-        const contractA = await createAndSubmitTestContractWithRate(stateServer)
+        const contractA = await createAndSubmitTestContractWithRate(stateServer, undefined, { user: stateUser })
         const rateID = contractA.packageSubmissions[0].rateRevisions[0].rateID
         const rateName =
             contractA.packageSubmissions[0].rateRevisions[0].formData
@@ -1157,7 +1170,9 @@ describe('withdrawRate', () => {
         )
         const submittedContractB = await submitTestContract(
             stateServer,
-            contractB.id
+            contractB.id,
+            undefined,
+            { user: stateUser }
         )
         await unlockTestContract(
             cmsServer,
@@ -1260,8 +1275,8 @@ describe('withdrawRate invalid status handling', () => {
             'Attempted to withdraw rate with wrong status. Rate: DRAFT, Parent contract: DRAFT'
         )
 
-        await submitTestContract(stateServer, contractID)
-        await unlockTestContract(cmsServer, draftContract.id, 'Unlock contract')
+        await submitTestContract(stateServer, contractID, undefined, { user: stateUser })
+        await unlockTestContractAsUser(cmsServer, draftContract.id, 'Unlock contract', cmsUser)
 
         const failedWithdrawUnlockedRate = await cmsServer.executeOperation({
             query: WithdrawRateDocument,
@@ -1279,7 +1294,7 @@ describe('withdrawRate invalid status handling', () => {
             'Attempted to withdraw rate with wrong status. Rate: UNLOCKED, Parent contract: UNLOCKED'
         )
 
-        await submitTestContract(stateServer, contractID, 'Resubmit')
+        await submitTestContract(stateServer, contractID, 'Resubmit', { user: stateUser })
 
         const withdrawnRateResult = await cmsServer.executeOperation({
             query: WithdrawRateDocument,
@@ -1362,7 +1377,7 @@ describe('withdrawRate invalid status handling', () => {
             },
         })
 
-        const contract = await createAndSubmitTestContractWithRate(stateServer)
+        const contract = await createAndSubmitTestContractWithRate(stateServer, undefined, { user: stateUser })
         const rateID = contract.packageSubmissions[0].rateRevisions[0].rateID
         const failedWithdrawWithdrawnRate = await cmsServer.executeOperation({
             query: WithdrawRateDocument,
@@ -1397,7 +1412,7 @@ describe('withdrawRate invalid status handling', () => {
             })
 
             const contract =
-                await createAndSubmitTestContractWithRate(stateServer)
+                await createAndSubmitTestContractWithRate(stateServer, undefined, { user: stateUser })
             const rateID =
                 contract.packageSubmissions[0].rateRevisions[0].rateID
 

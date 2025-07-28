@@ -13,6 +13,7 @@ import {
 } from '../../gen/gqlClient'
 import { assertAnError, must } from '../../testHelpers'
 import { testLDService } from '../../testHelpers/launchDarklyHelpers'
+import { extractGraphQLResponse } from '../../testHelpers/gqlHelpers'
 
 describe('fetchMcReviewSettings', () => {
     it('returns states with assignments', async () => {
@@ -178,10 +179,12 @@ describe('fetchMcReviewSettings', () => {
             query: FetchMcReviewSettingsDocument,
         })
 
-        // confirm that we get what we got
-        expect(res.errors).toBeUndefined()
+        const result = extractGraphQLResponse(res)
 
-        expect(res.data?.fetchMcReviewSettings.emailConfiguration).toBeDefined()
+        // confirm that we get what we got
+        expect(result.errors).toBeUndefined()
+
+        expect(result.data?.fetchMcReviewSettings.emailConfiguration).toBeDefined()
     })
 
     it('errors when called by state user', async () => {
@@ -199,7 +202,9 @@ describe('fetchMcReviewSettings', () => {
             query: FetchMcReviewSettingsDocument,
         })
 
-        expect(assertAnError(mcReviewSettings).message).toContain(
+        const result = extractGraphQLResponse(mcReviewSettings)
+
+        expect(assertAnError(result).message).toContain(
             'user not authorized to fetch mc review settings'
         )
     })
@@ -221,11 +226,14 @@ describe('fetchMcReviewSettings', () => {
 
         const emailSettings = must(await postgresStore.findEmailSettings())
 
-        const mcReviewSettings = must(await server.executeOperation({
+        const response = await server.executeOperation({
             query: FetchMcReviewSettingsDocument,
-        }))
+        })
+        
+        const mcReviewSettings = extractGraphQLResponse(response)
+        must(mcReviewSettings.data)
 
-        const emailConfig = mcReviewSettings.data?.fetchMcReviewSettings.emailConfiguration
+        const emailConfig = mcReviewSettings.data.fetchMcReviewSettings.emailConfiguration
 
         // Expect the default email settings from database
         expect(emailConfig.emailSource).toEqual(emailSettings.emailSource)

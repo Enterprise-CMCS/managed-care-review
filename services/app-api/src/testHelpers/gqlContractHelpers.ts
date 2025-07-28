@@ -203,13 +203,14 @@ async function createSubmitAndUnlockTestContract(
 
 async function createAndSubmitTestContractWithRate(
     server: ApolloServer,
-    contractOverrides?: Partial<HealthPlanFormDataType>
+    contractOverrides?: Partial<HealthPlanFormDataType>,
+    context?: Context
 ): Promise<Contract> {
     const draft = await createAndUpdateTestContractWithRate(
         server,
         contractOverrides
     )
-    return await submitTestContract(server, draft.id)
+    return await submitTestContract(server, draft.id, undefined, context)
 }
 
 async function fetchTestContract(
@@ -582,7 +583,8 @@ const updateTestContractDraftRevision = async (
 const withdrawTestContract = async (
     server: ApolloServer,
     contractID: string,
-    updatedReason: string
+    updatedReason: string,
+    context?: Context
 ): Promise<Contract> => {
     const response = await server.executeOperation({
         query: WithdrawContractDocument,
@@ -593,7 +595,7 @@ const withdrawTestContract = async (
             },
         },
     }, {
-        contextValue: defaultContext(),
+        contextValue: context || defaultContext(),
     })
     
     const withdrawResult = extractGraphQLResponse(response)

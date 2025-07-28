@@ -580,7 +580,8 @@ const withdrawTestRate = async (
 const undoWithdrawTestRate = async (
     server: ApolloServer,
     rateID: string,
-    updatedReason: string
+    updatedReason: string,
+    context?: Context
 ): Promise<RateType> => {
     const response = await server.executeOperation({
         query: UndoWithdrawnRateDocument,
@@ -591,7 +592,7 @@ const undoWithdrawTestRate = async (
             },
         },
     }, {
-        contextValue: defaultContext(),
+        contextValue: context || defaultContext(),
     })
     
     const undoWithdrawRate = extractGraphQLResponse(response)
