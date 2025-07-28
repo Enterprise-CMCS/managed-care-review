@@ -274,7 +274,8 @@ export class DatabaseOperationsStack extends BaseStack {
       vpcSubnets: {
         subnetType: ec2.SubnetType.PRIVATE_WITH_EGRESS
       },
-      securityGroups: [this.lambdaSecurityGroup]
+      securityGroups: [this.lambdaSecurityGroup],
+      depsLockFilePath: path.join(__dirname, '..', '..', '..', '..', 'pnpm-lock.yaml')
     });
 
     // Grant permissions for database manager
@@ -304,7 +305,8 @@ export class DatabaseOperationsStack extends BaseStack {
         subnetType: ec2.SubnetType.PRIVATE_WITH_EGRESS
       },
       securityGroups: [this.lambdaSecurityGroup],
-      layers: [this.pgToolsLayer]
+      layers: [this.pgToolsLayer],
+      depsLockFilePath: path.join(__dirname, '..', '..', '..', '..', 'pnpm-lock.yaml')
     });
 
     // Create separate role for prod export with cross-account permissions
@@ -336,7 +338,8 @@ export class DatabaseOperationsStack extends BaseStack {
         subnetType: ec2.SubnetType.PRIVATE_WITH_EGRESS
       },
       securityGroups: [this.lambdaSecurityGroup],
-      layers: [this.pgToolsLayer, this.prismaEngineLayer, this.prismaMigrationLayer]
+      layers: [this.pgToolsLayer, this.prismaEngineLayer, this.prismaMigrationLayer],
+      depsLockFilePath: path.join(__dirname, '..', '..', '..', '..', 'pnpm-lock.yaml')
     });
 
     this.grantImportPermissions(dbImportFunction);
