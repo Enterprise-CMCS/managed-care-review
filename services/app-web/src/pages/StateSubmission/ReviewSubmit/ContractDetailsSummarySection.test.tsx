@@ -212,12 +212,13 @@ describe('ContractDetailsSummarySection', () => {
                 dsnpContract: null,
             }
 
-            await renderWithProviders(
+            renderWithProviders(
                 <ContractDetailsSummarySection
                     contract={contract}
                     isStateUser
                     editNavigateTo="contract-details"
                     submissionName="MN-PMAP-0001"
+                    explainMissingData
                 />,
                 {
                     apolloProvider: defaultApolloMocks,
