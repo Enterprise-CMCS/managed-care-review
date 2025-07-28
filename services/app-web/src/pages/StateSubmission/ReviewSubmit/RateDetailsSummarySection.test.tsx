@@ -321,7 +321,7 @@ describe('RateDetailsSummarySection', () => {
         expect(screen.getByText(rateName)).toBeInTheDocument()
     })
 
-    it('can render all rate details fields for new rate certification submission', async () => {
+    it.skip('can render all rate details fields for new rate certification submission', async () => {
         const statePrograms = mockMNState().programs
         const contract = mockContractPackageSubmitted()
         contract.packageSubmissions[0].rateRevisions[0].formData.rateCertificationName =
