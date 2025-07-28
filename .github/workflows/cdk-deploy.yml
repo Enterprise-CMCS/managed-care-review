@@ -111,7 +111,9 @@ jobs:
 
     - name: Install CDK dependencies
       working-directory: services/infra-cdk
-      run: npm install
+      run: |
+        # Use npm with explicit isolation from parent directories
+        npm install --prefix . --no-package-lock
 
     # 4. Configure AWS credentials via OIDC
     - name: Validate AWS Account Secrets
