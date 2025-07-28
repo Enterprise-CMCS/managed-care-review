@@ -212,7 +212,7 @@ describe('ContractDetailsSummarySection', () => {
                 dsnpContract: null,
             }
 
-            renderWithProviders(
+            await renderWithProviders(
                 <ContractDetailsSummarySection
                     contract={contract}
                     isStateUser
