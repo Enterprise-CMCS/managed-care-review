@@ -10,6 +10,7 @@ import { AuditAction } from '@prisma/client'
 import {
     iterableCmsUsersMockData,
     testAdminUser,
+    testStateUser,
 } from '../../testHelpers/userHelpers'
 
 describe('updateDivisionAssignment', () => {
@@ -162,10 +163,11 @@ describe('updateDivisionAssignment', () => {
     it('errors if the target is not a CMS user', async () => {
         const prismaClient = await sharedTestPrismaClient()
         const postgresStore = NewPostgresStore(prismaClient)
+        const adminUser = testAdminUser()
         const server = await constructTestPostgresServer({
             store: postgresStore,
             context: {
-                user: testAdminUser(),
+                user: adminUser,
             },
         })
 
@@ -208,10 +210,11 @@ describe('updateDivisionAssignment', () => {
     it('errors if the userID doesnt exist', async () => {
         const prismaClient = await sharedTestPrismaClient()
         const postgresStore = NewPostgresStore(prismaClient)
+        const adminUser = testAdminUser()
         const server = await constructTestPostgresServer({
             store: postgresStore,
             context: {
-                user: testAdminUser(),
+                user: adminUser,
             },
         })
 
@@ -228,7 +231,7 @@ describe('updateDivisionAssignment', () => {
             },
         }, {
             contextValue: {
-                user: mockUser,
+                user: adminUser,
             },
         })
 
@@ -241,8 +244,12 @@ describe('updateDivisionAssignment', () => {
     it('errors if called by a state user', async () => {
         const prismaClient = await sharedTestPrismaClient()
         const postgresStore = NewPostgresStore(prismaClient)
+        const stateUser = testStateUser()
         const server = await constructTestPostgresServer({
             store: postgresStore,
+            context: {
+                user: stateUser,
+            },
         })
 
         // setup a user in the db for us to modify
@@ -258,7 +265,7 @@ describe('updateDivisionAssignment', () => {
             },
         }, {
             contextValue: {
-                user: mockUser,
+                user: stateUser,
             },
         })
 

@@ -104,11 +104,9 @@ describe('indexUsers', () => {
 
         const updateRes = await server.executeOperation({
             query: IndexUsersDocument,
-            variables: {
-                input: {
-                    cmsUserID: uuidv4(),
-                    stateAssignments: ['CA'],
-                },
+        }, {
+            contextValue: {
+                user: testStateUser(),
             },
         })
 
@@ -127,12 +125,6 @@ describe('indexUsers', () => {
 
         const updateRes = await server.executeOperation({
             query: IndexUsersDocument,
-            variables: {
-                input: {
-                    cmsUserID: uuidv4(),
-                    stateAssignments: ['CA'],
-                },
-            },
         }, {
             contextValue: {
                 user: cmsUser,
