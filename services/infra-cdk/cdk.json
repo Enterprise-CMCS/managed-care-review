@@ -1,5 +1,5 @@
 {
-  "app": "npx ts-node -r tsconfig-paths/register --prefer-ts-exts bin/mcr-app.ts",
+  "app": "ts-node -r tsconfig-paths/register --prefer-ts-exts bin/mcr-app.ts",
   "watch": {
     "include": [
       "**"
