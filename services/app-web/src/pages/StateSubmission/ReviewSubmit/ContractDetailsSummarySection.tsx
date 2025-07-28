@@ -141,9 +141,7 @@ export const ContractDetailsSummarySection = ({
     const dsnpIsRequired =
         contractFormData?.federalAuthorities?.some((authority) =>
             dsnpTriggers?.includes(authority)
-        ) &&
-        dsnpNotProvided &&
-        contractDsnp
+        ) && dsnpNotProvided
     const dsnpUserValue =
         contractFormData?.dsnpContract === null
             ? undefined
@@ -321,7 +319,7 @@ export const ContractDetailsSummarySection = ({
                         }
                     />
                 </MultiColumnGrid>
-                {true && (
+                {contractDsnp && (
                     <MultiColumnGrid columns={1}>
                         <DataDetail
                             id="dsnp"
