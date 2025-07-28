@@ -236,10 +236,6 @@ describe('ContractDetailsSummarySection', () => {
         expect(
             within(dsnpField).queryByText(/You must provide this information/)
         ).toBeInTheDocument()
-        // const dsnpField = await screen.getByTestId('dsnp')
-        // expect(
-        //     within(dsnpField).queryByText(/You must provide this information/)
-        // ).toBeInTheDocument()
     })
 
     it('displays correct contract is associated with DSNP field', async () => {
@@ -269,16 +265,6 @@ describe('ContractDetailsSummarySection', () => {
                 'Is this contract associated with a Dual-Eligible Special Needs Plan (D-SNP) that covers Medicaid benefits?'
             )
         ).toBeInTheDocument()
-        const dsnpField = await screen.getByTestId('dsnp')
-        expect(
-            within(dsnpField).queryByText(/You must provide this information/)
-        ).toBeInTheDocument()
-
-        // expect(
-        //     await screen.findByText(
-        //         'Is this contract associated with a Dual-Eligible Special Needs Plan (D-SNP) that covers Medicaid benefits?'
-        //     )
-        // ).toBeInTheDocument()
     })
 
     it('displays correct effective dates text for base contract', async () => {
