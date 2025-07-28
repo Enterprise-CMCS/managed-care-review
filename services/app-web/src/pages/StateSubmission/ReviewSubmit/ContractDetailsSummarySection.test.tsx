@@ -203,35 +203,6 @@ describe('ContractDetailsSummarySection', () => {
         expect(await screen.findByText('No compliance')).toBeInTheDocument()
     })
 
-    it('displays correct contract is associated with DSNP field', async () => {
-        const contract = mockContractPackageDraft()
-        if (contract.draftRevision) {
-            contract.draftRevision.formData = {
-                ...contract.draftRevision.formData,
-                dsnpContract: false,
-            }
-
-            renderWithProviders(
-                <ContractDetailsSummarySection
-                    contract={contract}
-                    isStateUser
-                    editNavigateTo="contract-details"
-                    submissionName="MN-PMAP-0001"
-                />,
-                {
-                    apolloProvider: defaultApolloMocks,
-                    featureFlags: { dsnp: true },
-                }
-            )
-        }
-
-        expect(
-            await screen.findByText(
-                'Is this contract associated with a Dual-Eligible Special Needs Plan (D-SNP) that covers Medicaid benefits?'
-            )
-        ).toBeInTheDocument()
-    })
-
     it('displays missing info error when contract is associated with DSNP field is null', async () => {
         const contract = mockContractPackageDraft()
         if (contract.draftRevision) {
@@ -265,6 +236,35 @@ describe('ContractDetailsSummarySection', () => {
         const dsnpField = await screen.getByTestId('dsnp')
         expect(
             within(dsnpField).queryByText(/You must provide this information/)
+        ).toBeInTheDocument()
+    })
+
+    it('displays correct contract is associated with DSNP field', async () => {
+        const contract = mockContractPackageDraft()
+        if (contract.draftRevision) {
+            contract.draftRevision.formData = {
+                ...contract.draftRevision.formData,
+                dsnpContract: false,
+            }
+
+            renderWithProviders(
+                <ContractDetailsSummarySection
+                    contract={contract}
+                    isStateUser
+                    editNavigateTo="contract-details"
+                    submissionName="MN-PMAP-0001"
+                />,
+                {
+                    apolloProvider: defaultApolloMocks,
+                    featureFlags: { dsnp: true },
+                }
+            )
+        }
+
+        expect(
+            await screen.findByText(
+                'Is this contract associated with a Dual-Eligible Special Needs Plan (D-SNP) that covers Medicaid benefits?'
+            )
         ).toBeInTheDocument()
     })
 
