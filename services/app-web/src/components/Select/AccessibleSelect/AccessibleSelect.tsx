@@ -27,6 +27,18 @@ export const AccessibleSelect = <
                     color: '#3D4551', // 7:1 contrast rule. Not aware of background color
                     ...passedStyles?.placeholder,
                 }),
+                dropdownIndicator: (baseStyles) => ({
+                    ...baseStyles,
+                    color: '#565C65', // 3:1 UI contrast rule
+                }),
+                clearIndicator: (baseStyles) => ({
+                    ...baseStyles,
+                    color: '#565C65', // 3:1 UI contrast rule
+                }),
+                control: (baseStyles) => ({
+                    ...baseStyles,
+                    borderColor: '#565C65', // 3:1 UI contrast rule
+                }),
             }}
         />
     )
