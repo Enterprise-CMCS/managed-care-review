@@ -25,9 +25,9 @@
     "deploy:val": "./scripts/dev-toolkit.sh preflight && ./scripts/dev-toolkit.sh deploy val",
     "deploy:prod": "./scripts/dev-toolkit.sh preflight && ./scripts/dev-toolkit.sh deploy prod",
     "preflight": "./scripts/dev-toolkit.sh preflight",
-    "synth:dev": "pnpm run preflight && cdk synth --context stage=dev",
-    "synth:val": "pnpm run preflight && cdk synth --context stage=val",
-    "synth:prod": "pnpm run preflight && cdk synth --context stage=prod",
+    "synth:dev": "npm run preflight && cdk synth --context stage=dev",
+    "synth:val": "npm run preflight && cdk synth --context stage=val",
+    "synth:prod": "npm run preflight && cdk synth --context stage=prod",
     "diff:dev": "cdk diff --context stage=dev",
     "diff:val": "cdk diff --context stage=val",
     "diff:prod": "cdk diff --context stage=prod"
@@ -60,6 +60,8 @@
     "cdk-nag": "^2.28.0",
     "constructs": "^10.0.0",
     "dotenv": "^16.4.5",
+    "graphql": "^16.0.0",
+    "graphql-tag": "^2.11.0",
     "source-map-support": "^0.5.21"
   },
   "main": "jest.config.js",
