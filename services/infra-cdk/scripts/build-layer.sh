@@ -85,6 +85,7 @@ build_prisma_engine_layer() {
     local output_dir="$INFRA_CDK_DIR/lambda-layers-prisma-client-engine"
     
     echo "🏗️  Building Prisma Engine layer..."
+    mkdir -p "$output_dir"
     cd "$output_dir"
     
     # Clean existing build
@@ -143,6 +144,7 @@ build_prisma_migration_layer() {
     local output_dir="$INFRA_CDK_DIR/lambda-layers-prisma-client-migration"
     
     echo "🏗️  Building Prisma Migration layer..."
+    mkdir -p "$output_dir"
     cd "$output_dir"
     
     # Clean existing build
@@ -194,6 +196,7 @@ build_postgres_tools_layer() {
     local output_dir="$INFRA_CDK_DIR/lambda-layers-postgres-tools"
     
     echo "🏗️  Building PostgreSQL Tools layer..."
+    mkdir -p "$output_dir"
     cd "$output_dir"
     
     # Clean existing build
