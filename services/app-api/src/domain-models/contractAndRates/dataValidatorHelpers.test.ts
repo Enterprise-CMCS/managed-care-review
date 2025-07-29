@@ -535,7 +535,7 @@ describe('parseContract', () => {
             'statutoryRegulatoryAttestationDescription is required when 438-attestation feature flag is on'
         )
         expect(errMessages[4]).toContain(
-            'rateMedicaidPopulations is required for when dsnpContract is true'
+            'rateMedicaidPopulations is required when dsnpContract is true'
         )
         expect(errMessages[5]).toContain(
             'Program(s) in [fake-id,fakerateprogramid] are not valid FL programs'
@@ -572,7 +572,7 @@ describe('parseContract', () => {
                     populationCovered: 'MEDICAID',
                     submissionType: 'CONTRACT_AND_RATES',
                     riskBasedContract: true,
-                    dsnpContract: null,
+                    dsnpContract: undefined,
                     submissionDescription: 'A real submission',
                     supportingDocuments: [
                         {
@@ -716,6 +716,8 @@ describe('parseContract', () => {
         }
         expect(parsedContract.errors).toHaveLength(1)
         const errMessages = parsedContract.errors.map((err) => err.message)
-        expect(errMessages[0]).toContain('Expected boolean, received null')
+        expect(errMessages[0]).toContain(
+            'dsnpContract is required when any of the following Federal Authorities are present: STATE_PLAN,WAIVER_1915B,WAIVER_1115,VOLUNTARY'
+        )
     })
 })
