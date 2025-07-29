@@ -97,7 +97,7 @@ const refineForFeatureFlags = (featureFlags?: FeatureFlagSettings) => {
     if (featureFlags) {
         return submittableContractSchema.superRefine((contract, ctx) => {
             const contractFormData = contract.draftRevision.formData
-            if (featureFlags?.['438-attestation']) {
+            if (featureFlags['438-attestation']) {
                 // since we have different validations based on a feature flag, we add them as a refinement here.
                 // once 438 attestation ships this refinement should be moved to the submittableContractSchema
                 // and statutoryRegulatoryAttestation should be made non-optional.
@@ -109,7 +109,7 @@ const refineForFeatureFlags = (featureFlags?: FeatureFlagSettings) => {
                     ctx.addIssue({
                         code: z.ZodIssueCode.custom,
                         message:
-                            'statutoryRegulatoryAttestationDescription is required when  438-attestation feature flag is on',
+                            'statutoryRegulatoryAttestationDescription is required when 438-attestation feature flag is on',
                     })
                 }
 
@@ -158,7 +158,7 @@ const refineForFeatureFlags = (featureFlags?: FeatureFlagSettings) => {
                     if (isDSNPContract && noRateMedicaidPopulations) {
                         ctx.addIssue({
                             code: z.ZodIssueCode.custom,
-                            message: `rateMedicaidPopulations is required for when dsnpContract is true`,
+                            message: `rateMedicaidPopulations is required when dsnpContract is true`,
                         })
                     }
                 })
