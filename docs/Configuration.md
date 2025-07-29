@@ -2,7 +2,14 @@
 
 managed-care-review is [configured using env vars](https://12factor.net/config).
 
-Different env vars can be set in different environments [local dev, review apps, dev, staging, prod] to configure things differently. Environment variables are individually mapped in the `deploy` and `promote` Github workflows for use in deployments. If a new environment variable is added, it should be mapped there as well.
+Different env vars can be set in different environments [local dev, review apps, dev, staging, prod] to configure things differently. With our migration to AWS CDK, environment variables are now managed through:
+
+1. **CDK Context**: Stage-specific configuration passed via `--context stage=<env>`
+2. **SSM Parameter Store**: Configuration values stored in AWS Systems Manager
+3. **Secrets Manager**: Sensitive values like database credentials
+4. **Environment Factory**: Centralized TypeScript classes that manage environment variables for Lambda functions
+
+For CDK deployments, new environment variables should be added to the appropriate environment factory in `/services/infra-cdk/lib/constructs/lambda/environment-factory.ts`.
 
 For local dev, we use `.envrc` and `.envrc.local` to set the appropriate environment variables. `.envrc` is loaded first, then `.envrc.local`, so if you need to set anything differently for your local environment you can set it in there. For more details, see the [`direnv` docs](https://direnv.net).
 
@@ -44,13 +51,13 @@ Read by `app-api`
 
 These four env vars configure cognito auth from the browser. They are ignored if `VITE_APP_AUTH_MODE` is set to `LOCAL` and thus are only set in deployed environments.
 
-### `VITE_APP_APPLICATION_ENDPOINT`
+### `VITE_APP_APPLICATION_ENDPOINT` / `APPLICATION_ENDPOINT`
 
 Read by app-web and app-api
 
 valid values: A URL where a running app-web can be reached
 
-It's used as the redirects for login by app-web when it configures login via IDM.
+It's used as the redirects for login by app-web when it configures login via IDM. In CDK deployments, this is automatically imported from the Frontend stack's CloudFront distribution URL.
 
 ### `APP_VERSION`
 
@@ -76,10 +83,11 @@ This is used for rudimentary feature flags, allow us to switch things off and on
 
 Read by `app-api` to securely pull secrets out of AWS Secrets Manager. Only set in AWS deployed environments, not used locally. This is the name of the secret to pull out of SM, which is scoped by review-app.
 
-### `DATABASE_URL`
+### `DATABASE_URL` / `DATABASE_SECRET_ARN`
 
-Read by `app-api` in configuring our connection to postgres. Required.
-Must be set to a valid `postgres://` url or the sentinel value of `AWS_SM` in which case the correct values will be pulled out of AWS Secrets Manager (which requires SECRETS_MANAGER_SECRET) be set.
+In CDK deployments, database connections are managed via `DATABASE_SECRET_ARN` which points to an AWS Secrets Manager secret containing the database credentials. The Lambda functions automatically retrieve and use these credentials.
+
+For local development, `DATABASE_URL` is still used and must be set to a valid `postgres://` URL.
 
 ### `VITE_APP_S3_*`
 
@@ -196,6 +204,28 @@ These are the same in all environments.
 -   VITE_APP_NR_TRUST_KEY
 
 These env vars configure new relic for browser monitoring. They are interpolated into browser monitoring inline script. If we move towards integration via New Relic APM instead, these variables can be deleted.
+
+## CDK Configuration Management
+
+With our migration to CDK, configuration is managed through several mechanisms:
+
+### CDK Context Variables
+- `stage`: The deployment stage (dev, val, prod)
+- Set via command line: `cdk deploy --context stage=dev`
+- Accessed in CDK code: `this.node.tryGetContext('stage')`
+
+### Stage Configuration
+Centralized in `/services/infra-cdk/lib/config/stage-config.ts`:
+- Lambda settings (memory, timeout, architecture)
+- VPC configuration
+- Security settings
+- Monitoring configuration
+
+### Environment Variables for Lambda Functions
+Managed by the Environment Factory pattern:
+- Base environment (stage, region, common settings)
+- Function-specific environment variables
+- Cross-stack references via CloudFormation outputs
 
 ## Email configuration
 
