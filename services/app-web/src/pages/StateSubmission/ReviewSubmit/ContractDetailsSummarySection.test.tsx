@@ -239,7 +239,7 @@ describe('ContractDetailsSummarySection', () => {
         ).toBeInTheDocument()
     })
 
-    it('displays correct contract is associated with DSNP field', async () => {
+    it('displays correctly if the contract is associated with a DSNP', async () => {
         const contract = mockContractPackageDraft()
         if (contract.draftRevision) {
             contract.draftRevision.formData = {
