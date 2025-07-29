@@ -266,6 +266,9 @@ const RateDetails = ({
         }
     ) => {
         setShowAPIErrorBanner(false)
+        const dsnpPopulated =
+            contract?.draftRevision?.formData?.dsnpContract != null &&
+            contract?.draftRevision?.formData?.dsnpContract != undefined
         if (options.type === 'SAVE_AS_DRAFT' && draftSaved) {
             setDraftSaved(false)
         }
@@ -286,8 +289,6 @@ const RateDetails = ({
         }
 
         if (displayAsStandaloneRate && options.type === 'CONTINUE') {
-            const dsnpPopulated =
-                contract?.draftRevision?.formData?.dsnpContract != null
             try {
                 await submitRate({
                     variables: {
@@ -322,8 +323,6 @@ const RateDetails = ({
             (options.type === 'CONTINUE' || options.type === 'SAVE_AS_DRAFT')
         ) {
             try {
-                const dsnpPopulated =
-                    contract?.draftRevision?.formData?.dsnpContract != null
                 const formattedRateForms = rateForms.filter((rate) => {
                     if (rate.ratePreviouslySubmitted === 'YES') {
                         return rate.id
