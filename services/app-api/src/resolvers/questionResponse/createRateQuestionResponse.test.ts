@@ -1,6 +1,7 @@
 import {
     createDBUsersWithFullData,
     testCMSUser,
+    testAdminUser,
 } from '../../testHelpers/userHelpers'
 import {
     constructTestPostgresServer,
@@ -172,6 +173,12 @@ describe('createRateQuestionResponse', () => {
             },
             emailer: mockEmailer,
         })
+        const adminServer = await constructTestPostgresServer({
+            context: {
+                user: testAdminUser(),
+            },
+            emailer: mockEmailer,
+        })
 
         // add some users to the db, assign them to the state
         const assignedUsers = [
@@ -190,7 +197,7 @@ describe('createRateQuestionResponse', () => {
         const assignedUserIDs = assignedUsers.map((u) => u.id)
         const assignedUserEmails = assignedUsers.map((u) => u.email)
 
-        await updateTestStateAssignments(cmsServer, 'FL', assignedUserIDs)
+        await updateTestStateAssignments(adminServer, 'FL', assignedUserIDs)
 
         const submittedContractAndRate =
             await createAndSubmitTestContractWithRate(stateServer)

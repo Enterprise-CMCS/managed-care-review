@@ -262,7 +262,7 @@ describe('fetchRate', () => {
             cmsServer,
             submittedInitial.id,
             'unlock to fix deprecated IDs',
-            testCMSUser()
+            cmsUser
         )
 
         const realRateProgramIDs = [defaultFloridaRateProgram().id]
@@ -442,13 +442,14 @@ describe('fetchRate', () => {
 
     it('returns the correct dateAdded for documents', async () => {
         const prismaClient = await sharedTestPrismaClient()
+        const cmsUser = testCMSUser()
         const stateServer = await constructTestPostgresServer({
             s3Client: mockS3,
         })
         const cmsServer = await constructTestPostgresServer({
             ldService,
             context: {
-                user: testCMSUser(),
+                user: cmsUser,
             },
             s3Client: mockS3,
         })
@@ -529,7 +530,7 @@ describe('fetchRate', () => {
             cmsServer,
             AID,
             'Unlock A.0',
-            testCMSUser()
+            cmsUser
         )
         const a0FormData = latestFormData(unlockedA0Pkg)
         a0FormData.submissionDescription = 'DESC A1'
@@ -683,16 +684,16 @@ describe('fetchRate', () => {
         const rateQuestions = result.data?.fetchRate.rate.questions
 
         // Expect each question in the correct division by the correct user
-        expect(rateQuestions.DMCOQuestions.edges).toHaveLength(1)
-        expect(rateQuestions.DMCOQuestions.edges[0].node.addedBy).toEqual(
+        expect(rateQuestions?.DMCOQuestions.edges).toHaveLength(1)
+        expect(rateQuestions?.DMCOQuestions.edges[0].node.addedBy).toEqual(
             expect.objectContaining(dmcoCmsUser)
         )
-        expect(rateQuestions.DMCPQuestions.edges).toHaveLength(1)
-        expect(rateQuestions.DMCPQuestions.edges[0].node.addedBy).toEqual(
+        expect(rateQuestions?.DMCPQuestions.edges).toHaveLength(1)
+        expect(rateQuestions?.DMCPQuestions.edges[0].node.addedBy).toEqual(
             expect.objectContaining(dmcpCmsUser)
         )
-        expect(rateQuestions.OACTQuestions.edges).toHaveLength(1)
-        expect(rateQuestions.OACTQuestions.edges[0].node.addedBy).toEqual(
+        expect(rateQuestions?.OACTQuestions.edges).toHaveLength(1)
+        expect(rateQuestions?.OACTQuestions.edges[0].node.addedBy).toEqual(
             expect.objectContaining(oactApproverUser)
         )
 
