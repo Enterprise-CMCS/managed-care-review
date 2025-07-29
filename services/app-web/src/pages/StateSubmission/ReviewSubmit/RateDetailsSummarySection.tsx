@@ -112,8 +112,7 @@ export const RateDetailsSummarySection = ({
         featureFlags.DSNP.flag,
         featureFlags.DSNP.defaultValue
     )
-    const contractIsDsnp =
-        contract.draftRevision?.formData.dsnpContract === true
+
     const rateRevs = rateRevisions
         ? rateRevisions
         : getVisibleLatestRateRevisions(contract, isEditing)
@@ -333,6 +332,11 @@ export const RateDetailsSummarySection = ({
                       const medicaidPopulations =
                           (rateFormData.rateMedicaidPopulations ??
                               []) as string[]
+                      const contractIsDsnp =
+                          contract.packageSubmissions[0]?.contractRevision
+                              ?.formData?.dsnpContract === true ||
+                          contract.draftRevision?.formData?.dsnpContract ===
+                              true
                       /**
                     Rate programs switched in summer 2024. We still show deprecated program field values when
                     - there's no new field values present and CMS user is viewing

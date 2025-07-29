@@ -321,9 +321,11 @@ describe('RateDetailsSummarySection', () => {
         expect(screen.getByText(rateName)).toBeInTheDocument()
     })
 
-    it.skip('can render all rate details fields for new rate certification submission', async () => {
+    it('can render all rate details fields for new rate certification submission', async () => {
         const statePrograms = mockMNState().programs
         const contract = mockContractPackageSubmitted()
+        contract.packageSubmissions[0].contractRevision.formData.dsnpContract =
+            true
         contract.packageSubmissions[0].rateRevisions[0].formData.rateCertificationName =
             'MCR-MN-0005-SNBC-RATE-20221014-20221014-CERTIFICATION-20221014'
         contract.packageSubmissions[0].rateRevisions[0].formData.rateType =
@@ -1104,6 +1106,36 @@ describe('RateDetailsSummarySection', () => {
                 screen.queryByText(/Programs this rate certification covers/)
             ).not.toBeInTheDocument()
         })
+    })
+
+    it('displays missing info text for state users on unlocked submissions when Rate Medicaid populations not populated on historic submission with dsnp contract', async () => {
+        const draftContract = mockContractPackageDraft()
+        draftContract.draftRevision!.formData.dsnpContract = true
+        draftContract.draftRates![0].draftRevision!.formData.rateMedicaidPopulations =
+            []
+
+        renderWithProviders(
+            <RateDetailsSummarySection
+                contract={draftContract}
+                editNavigateTo="rate-details"
+                submissionName="MN-PMAP-0001"
+                statePrograms={statePrograms}
+                explainMissingData
+            />,
+            {
+                apolloProvider: apolloProviderStateUser,
+                featureFlags: { dsnp: true },
+            }
+        )
+        expect(
+            await screen.findByText(
+                'Medicaid populations included in this rate certification'
+            )
+        ).toBeInTheDocument()
+        const medicaidPop = await screen.getByTestId('medicaidPop')
+        expect(
+            within(medicaidPop).queryByText(/You must provide this information/)
+        ).toBeInTheDocument()
     })
 
     it('renders inline error when bulk URL is unavailable', async () => {
