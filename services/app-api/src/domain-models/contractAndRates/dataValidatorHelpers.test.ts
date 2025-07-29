@@ -532,7 +532,7 @@ describe('parseContract', () => {
             'cannot submit rates with CHIP only populationCovered'
         )
         expect(errMessages[3]).toContain(
-            'statutoryRegulatoryAttestationDescription is required when  438-attestation feature flag is on'
+            'statutoryRegulatoryAttestationDescription is required when 438-attestation feature flag is on'
         )
         expect(errMessages[4]).toContain(
             'rateMedicaidPopulations is required for when dsnpContract is true'
