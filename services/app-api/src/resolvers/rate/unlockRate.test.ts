@@ -3,6 +3,7 @@ import { UnlockRateDocument } from '../../gen/gqlClient'
 import {
     iterableCmsUsersMockData,
     testCMSUser,
+    testStateUser,
 } from '../../testHelpers/userHelpers'
 import { expectToBeDefined } from '../../testHelpers/assertionHelpers'
 import { testLDService } from '../../testHelpers/launchDarklyHelpers'
@@ -22,7 +23,11 @@ describe(`unlockRate`, () => {
         '$userRole tests',
         ({ mockUser }) => {
             it('changes rate status to UNLOCKED and creates a new draft revision with unlock info', async () => {
+                const stateUser = testStateUser()
                 const stateServer = await constructTestPostgresServer({
+                    context: {
+                        user: stateUser,
+                    },
                     ldService,
                     s3Client: mockS3,
                 })
@@ -39,7 +44,8 @@ describe(`unlockRate`, () => {
                 const updatedRate = await createSubmitAndUnlockTestRate(
                     stateServer,
                     cmsServer,
-                    cmsUser
+                    cmsUser,
+                    stateUser
                 )
 
                 expect(updatedRate.status).toBe('UNLOCKED')
@@ -58,7 +64,11 @@ describe(`unlockRate`, () => {
             })
 
             it('returns status error if rate is actively being edited in draft', async () => {
+                const stateUser = testStateUser()
                 const stateServer = await constructTestPostgresServer({
+                    context: {
+                        user: stateUser,
+                    },
                     ldService,
                     s3Client: mockS3,
                 })
@@ -75,7 +85,8 @@ describe(`unlockRate`, () => {
                 const rate = await createSubmitAndUnlockTestRate(
                     stateServer,
                     cmsServer,
-                    cmsUser
+                    cmsUser,
+                    stateUser
                 )
 
                 // Try to unlock the rate again
@@ -100,7 +111,11 @@ describe(`unlockRate`, () => {
             })
 
             it('returns unauthorized error for state user', async () => {
+                const stateUser = testStateUser()
                 const stateServer = await constructTestPostgresServer({
+                    context: {
+                        user: stateUser,
+                    },
                     ldService,
                     s3Client: mockS3,
                 })
@@ -119,6 +134,8 @@ describe(`unlockRate`, () => {
                             unlockedReason: 'Super duper good reason.',
                         },
                     },
+                }, {
+                    contextValue: { user: stateUser },
                 })
 
                 const unlockResult = extractGraphQLResponse(response)
@@ -132,7 +149,11 @@ describe(`unlockRate`, () => {
     )
 
     it('does not allow rates with wrong status to be unlocked', async () => {
+        const stateUser = testStateUser()
         const stateServer = await constructTestPostgresServer({
+            context: {
+                user: stateUser,
+            },
             ldService,
             s3Client: mockS3,
         })
@@ -146,13 +167,13 @@ describe(`unlockRate`, () => {
         })
 
         // Create and unlock a rate
-        const contract = await createAndSubmitTestContractWithRate(stateServer)
+        const contract = await createAndSubmitTestContractWithRate(stateServer, undefined, { user: stateUser })
 
         const rateID = contract.packageSubmissions[0].rateRevisions[0].rateID
 
-        await withdrawTestRate(cmsServer, rateID, 'withdrawRate')
+        await withdrawTestRate(cmsServer, rateID, 'withdrawRate', { user: cmsUser })
 
-        const unlockResult = await cmsServer.executeOperation({
+        const response = await cmsServer.executeOperation({
             query: UnlockRateDocument,
             variables: {
                 input: {
@@ -160,7 +181,11 @@ describe(`unlockRate`, () => {
                     unlockedReason: 'Super duper good reason.',
                 },
             },
+        }, {
+            contextValue: { user: cmsUser },
         })
+
+        const unlockResult = extractGraphQLResponse(response)
 
         // expect error to be defined
         expectToBeDefined(unlockResult.errors)
