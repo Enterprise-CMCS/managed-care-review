@@ -14,6 +14,7 @@ import { DownloadButton } from '../../../components/DownloadButton'
 import { usePreviousSubmission } from '../../../hooks/usePreviousSubmission'
 import styles from '../../SubmissionSummary/SubmissionSummary.module.scss'
 import { useAuth } from '../../../contexts/AuthContext'
+import { dsnpTriggers } from '@mc-review/common-code'
 
 import {
     sortModifiedProvisions,
@@ -118,12 +119,7 @@ export const ContractDetailsSummarySection = ({
         featureFlags.DSNP.flag,
         featureFlags.DSNP.defaultValue
     )
-    const dsnpTriggers = [
-        'STATE_PLAN',
-        'WAIVER_1915B',
-        'WAIVER_1115',
-        'VOLUNTARY',
-    ]
+
     const attestationYesNo =
         contractFormData?.statutoryRegulatoryAttestation != null &&
         booleanAsYesNoFormValue(contractFormData.statutoryRegulatoryAttestation)
