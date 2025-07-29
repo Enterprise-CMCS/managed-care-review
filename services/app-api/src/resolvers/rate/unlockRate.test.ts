@@ -121,7 +121,7 @@ describe(`unlockRate`, () => {
                 })
 
                 const contract =
-                    await createAndSubmitTestContractWithRate(stateServer)
+                    await createAndSubmitTestContractWithRate(stateServer, undefined, { user: stateUser })
                 // Create a rate
                 const rate = contract.packageSubmissions[0].rateRevisions[0]
 

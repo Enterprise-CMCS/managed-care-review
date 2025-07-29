@@ -290,10 +290,11 @@ describe('submitRate', () => {
             ldService,
             s3Client: mockS3,
         })
+        const cmsUser = testCMSUser()
         const cmsServer = await constructTestPostgresServer({
             ldService,
             context: {
-                user: testCMSUser(),
+                user: cmsUser,
             },
             s3Client: mockS3,
         })
@@ -362,10 +363,11 @@ describe('submitRate', () => {
         )
 
         // 5. unlock and resubmit A
-        await unlockTestHealthPlanPackage(
+        await unlockTestHealthPlanPackageAsUser(
             cmsServer,
             contractA0.id,
-            'does this mess history'
+            'does this mess history',
+            cmsUser
         )
 
         const unlockedRateOne = await fetchTestRateById(stateServer, OneID)

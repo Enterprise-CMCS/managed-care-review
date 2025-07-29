@@ -20,10 +20,11 @@ describe('fetchMcReviewSettings', () => {
         const prismaClient = await sharedTestPrismaClient()
         const postgresStore = NewPostgresStore(prismaClient)
 
+        const adminUser = testAdminUser()
         const server = await constructTestPostgresServer({
             store: postgresStore,
             context: {
-                user: testAdminUser(),
+                user: adminUser,
             },
         })
 
@@ -47,7 +48,7 @@ describe('fetchMcReviewSettings', () => {
         )
 
         // Assign states to each CMS user
-        const assignedOhioCMSUserResult = await server.executeOperation({
+        const assignedOhioCMSUserResponse = await server.executeOperation({
             query: UpdateStateAssignmentDocument,
             variables: {
                 input: {
@@ -55,7 +56,10 @@ describe('fetchMcReviewSettings', () => {
                     stateAssignments: ['OH'],
                 },
             },
+        }, {
+            contextValue: { user: adminUser },
         })
+        const assignedOhioCMSUserResult = extractGraphQLResponse(assignedOhioCMSUserResponse)
 
         if (!assignedOhioCMSUserResult.data?.updateStateAssignment) {
             throw new Error(
@@ -65,7 +69,7 @@ describe('fetchMcReviewSettings', () => {
         const assignedOhioCMSUser =
             assignedOhioCMSUserResult.data.updateStateAssignment.user
 
-        const assignedTexasCMSUserResult = await server.executeOperation({
+        const assignedTexasCMSUserResponse = await server.executeOperation({
             query: UpdateStateAssignmentDocument,
             variables: {
                 input: {
@@ -73,7 +77,10 @@ describe('fetchMcReviewSettings', () => {
                     stateAssignments: ['TX'],
                 },
             },
+        }, {
+            contextValue: { user: adminUser },
         })
+        const assignedTexasCMSUserResult = extractGraphQLResponse(assignedTexasCMSUserResponse)
 
         if (!assignedTexasCMSUserResult.data?.updateStateAssignment) {
             throw new Error(
@@ -106,7 +113,7 @@ describe('fetchMcReviewSettings', () => {
         const settingsResponse = await server.executeOperation({
             query: FetchMcReviewSettingsDocument,
         }, {
-            contextValue: { user: testAdminUser() },
+            contextValue: { user: adminUser },
         })
 
         const mcReviewSettings = extractGraphQLResponse(settingsResponse)
@@ -239,7 +246,7 @@ describe('fetchMcReviewSettings', () => {
         const response = await server.executeOperation({
             query: FetchMcReviewSettingsDocument,
         }, {
-            contextValue: { user: testAdminUser() },
+            contextValue: { user: adminUser },
         })
         
         const mcReviewSettings = extractGraphQLResponse(response)

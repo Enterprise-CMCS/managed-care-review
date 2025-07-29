@@ -59,7 +59,9 @@ describe('Rate Submission Zip Generation - Rate-Specific Scenarios', () => {
             // Create, submit, and unlock a rate
             const unlockedRate = await createSubmitAndUnlockTestRate(
                 stateServer,
-                cmsServer
+                cmsServer,
+                cmsUser,
+                stateUser
             )
 
             // Clear mocks since the contract+rate submission above would have triggered zip generation
@@ -124,7 +126,9 @@ describe('Rate Submission Zip Generation - Rate-Specific Scenarios', () => {
 
             const unlockedRate = await createSubmitAndUnlockTestRate(
                 stateServer,
-                cmsServer
+                cmsServer,
+                cmsUser,
+                stateUser
             )
 
             // Clear mocks from the initial contract submission
@@ -180,7 +184,9 @@ describe('Rate Submission Zip Generation - Rate-Specific Scenarios', () => {
 
             const unlockedRate = await createSubmitAndUnlockTestRate(
                 stateServer,
-                cmsServer
+                cmsServer,
+                cmsUser,
+                stateUser
             )
 
             // Clear mocks from initial submission
