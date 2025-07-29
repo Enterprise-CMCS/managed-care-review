@@ -1,10 +1,12 @@
 import { BaseStack, BaseStackProps } from '@constructs/base';
 import { Construct } from 'constructs';
 import * as lambda from 'aws-cdk-lib/aws-lambda';
+import { NodejsFunction, OutputFormat } from 'aws-cdk-lib/aws-lambda-nodejs';
 import * as ec2 from 'aws-cdk-lib/aws-ec2';
 import * as ssm from 'aws-cdk-lib/aws-ssm';
 import { ApiGatewayToLambda } from '@aws-solutions-constructs/aws-apigateway-lambda';
 import { Duration, CfnOutput } from 'aws-cdk-lib';
+import * as path from 'path';
 import { 
   getEnvironment, 
   LAMBDA_HANDLERS, 
@@ -12,7 +14,7 @@ import {
   ResourceNames,
   getDatabaseUrl
 } from '../config';
-import { CDKPaths, getLambdaEnvironment } from '@config/index';
+import { getLambdaEnvironment } from '@config/index';
 
 // Lambda configuration (moved from shared config)
 const LAMBDA_DEFAULTS = {
@@ -83,17 +85,32 @@ export class PublicApiStack extends BaseStack {
     );
     const prismaEngineLayer = lambda.LayerVersion.fromLayerVersionArn(this, 'PrismaEngineLayer', prismaEngineLayerArn);
 
-    // Health Check API with lean config
+    // Health Check Lambda using CDK NodejsFunction
+    const healthFunction = new NodejsFunction(this, 'HealthFunction', {
+      functionName: ResourceNames.resourceName(this.serviceName, 'health', this.stage),
+      entry: path.join(__dirname, '..', '..', '..', 'app-api', 'src', 'handlers', 'health_check.ts'),
+      handler: 'main',
+      runtime: lambda.Runtime.NODEJS_20_X,
+      architecture: lambda.Architecture.X86_64,
+      timeout: LAMBDA_DEFAULTS.TIMEOUT_API,
+      memorySize: LAMBDA_DEFAULTS.MEMORY_SMALL,
+      layers: [otelLayer],
+      environment: this.getBaseEnvironmentVariables(),
+      bundling: {
+        format: OutputFormat.CJS,
+        target: 'node20',
+        sourceMap: true,
+        minify: this.isProduction,
+        externalModules: ['@prisma/client', 'prisma'],
+        esbuildArgs: {
+          '--packages': 'bundle'
+        },
+      }
+    });
+
+    // Health Check API with CDK NodejsFunction
     const healthApi = new ApiGatewayToLambda(this, 'HealthApi', {
-      lambdaFunctionProps: {
-        runtime: lambda.Runtime.NODEJS_20_X,
-        code: lambda.Code.fromAsset(CDKPaths.getLambdaPackagePath()),
-        handler: LAMBDA_HANDLERS.HEALTH_CHECK,
-        timeout: LAMBDA_DEFAULTS.TIMEOUT_API,
-        memorySize: LAMBDA_DEFAULTS.MEMORY_SMALL,
-        layers: [otelLayer],
-        environment: this.getBaseEnvironmentVariables()
-      },
+      existingLambdaObj: healthFunction,
       apiGatewayProps: {
         restApiName: ResourceNames.apiName('health-api', this.stage),
         description: `Health Check API for Managed Care Review - ${this.stage}`
@@ -101,19 +118,34 @@ export class PublicApiStack extends BaseStack {
     });
     this.healthApiUrl = healthApi.apiGateway.url;
 
-    // OAuth Token API with lean config
+    // OAuth Token Lambda using CDK NodejsFunction
+    const oauthFunction = new NodejsFunction(this, 'OAuthFunction', {
+      functionName: ResourceNames.resourceName(this.serviceName, 'oauth', this.stage),
+      entry: path.join(__dirname, '..', '..', '..', 'app-api', 'src', 'handlers', 'oauth_token.ts'),
+      handler: 'main',
+      runtime: lambda.Runtime.NODEJS_20_X,
+      architecture: lambda.Architecture.X86_64,
+      timeout: config.lambda.timeout,
+      memorySize: LAMBDA_DEFAULTS.MEMORY_MEDIUM,
+      layers: [otelLayer, prismaEngineLayer],
+      vpc: this.vpc,
+      securityGroups: [this.lambdaSecurityGroup],
+      environment: this.getDatabaseEnvironmentVariables(),
+      bundling: {
+        format: OutputFormat.CJS,
+        target: 'node20',
+        sourceMap: true,
+        minify: this.isProduction,
+        externalModules: ['@prisma/client', 'prisma'],
+        esbuildArgs: {
+          '--packages': 'bundle'
+        },
+      }
+    });
+
+    // OAuth Token API with CDK NodejsFunction
     const oauthApi = new ApiGatewayToLambda(this, 'OAuthApi', {
-      lambdaFunctionProps: {
-        runtime: lambda.Runtime.NODEJS_20_X,
-        code: lambda.Code.fromAsset(CDKPaths.getLambdaPackagePath()),
-        handler: LAMBDA_HANDLERS.OAUTH_TOKEN,
-        timeout: config.lambda.timeout,
-        memorySize: LAMBDA_DEFAULTS.MEMORY_MEDIUM,
-        layers: [otelLayer, prismaEngineLayer],
-        vpc: this.vpc,
-        securityGroups: [this.lambdaSecurityGroup],
-        environment: this.getDatabaseEnvironmentVariables()
-      },
+      existingLambdaObj: oauthFunction,
       apiGatewayProps: {
         restApiName: ResourceNames.apiName('oauth-api', this.stage),
         description: `OAuth Token API for Managed Care Review - ${this.stage}`
@@ -121,17 +153,32 @@ export class PublicApiStack extends BaseStack {
     });
     this.oauthApiUrl = oauthApi.apiGateway.url;
 
-    // OTEL Proxy API with lean config
+    // OTEL Proxy Lambda using CDK NodejsFunction
+    const otelFunction = new NodejsFunction(this, 'OtelFunction', {
+      functionName: ResourceNames.resourceName(this.serviceName, 'otel', this.stage),
+      entry: path.join(__dirname, '..', '..', '..', 'app-api', 'src', 'handlers', 'otel_proxy.ts'),
+      handler: 'main',
+      runtime: lambda.Runtime.NODEJS_20_X,
+      architecture: lambda.Architecture.X86_64,
+      timeout: LAMBDA_DEFAULTS.TIMEOUT_STANDARD,
+      memorySize: LAMBDA_DEFAULTS.MEMORY_SMALL,
+      layers: [otelLayer],
+      environment: this.getBaseEnvironmentVariables(),
+      bundling: {
+        format: OutputFormat.CJS,
+        target: 'node20',
+        sourceMap: true,
+        minify: this.isProduction,
+        externalModules: ['@prisma/client', 'prisma'],
+        esbuildArgs: {
+          '--packages': 'bundle'
+        },
+      }
+    });
+
+    // OTEL Proxy API with CDK NodejsFunction
     const otelApi = new ApiGatewayToLambda(this, 'OtelApi', {
-      lambdaFunctionProps: {
-        runtime: lambda.Runtime.NODEJS_20_X,
-        code: lambda.Code.fromAsset(CDKPaths.getLambdaPackagePath()),
-        handler: LAMBDA_HANDLERS.OTEL_PROXY,
-        timeout: LAMBDA_DEFAULTS.TIMEOUT_STANDARD,
-        memorySize: LAMBDA_DEFAULTS.MEMORY_SMALL,
-        layers: [otelLayer],
-        environment: this.getBaseEnvironmentVariables()
-      },
+      existingLambdaObj: otelFunction,
       apiGatewayProps: {
         restApiName: ResourceNames.apiName('otel-api', this.stage),
         description: `OTEL Proxy API for Managed Care Review - ${this.stage}`

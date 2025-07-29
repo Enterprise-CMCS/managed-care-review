@@ -2,18 +2,20 @@ import { BaseStack, BaseStackProps } from '@constructs/base';
 import { Construct } from 'constructs';
 import * as cognito from 'aws-cdk-lib/aws-cognito';
 import * as lambda from 'aws-cdk-lib/aws-lambda';
+import { NodejsFunction, OutputFormat } from 'aws-cdk-lib/aws-lambda-nodejs';
 import * as ec2 from 'aws-cdk-lib/aws-ec2';
 import * as ssm from 'aws-cdk-lib/aws-ssm';
 import { CognitoToApiGatewayToLambda } from '@aws-solutions-constructs/aws-cognito-apigateway-lambda';
 import { Duration, CfnOutput } from 'aws-cdk-lib';
+import * as path from 'path';
 import { 
   getEnvironment, 
-  LAMBDA_HANDLERS, 
   SSM_PATHS,
   ResourceNames,
   getDatabaseUrl
 } from '../config';
-import { CDKPaths, getLambdaEnvironment } from '@config/index';
+import { getLambdaEnvironment } from '@config/index';
+import { getBundlingConfig } from '@constructs/lambda/bundling-utils';
 
 // Lambda configuration (moved from shared config)
 const LAMBDA_DEFAULTS = {
@@ -87,19 +89,30 @@ export class GraphQLApiStack extends BaseStack {
     );
     const prismaEngineLayer = lambda.LayerVersion.fromLayerVersionArn(this, 'PrismaEngineLayer', prismaEngineLayerArn);
 
-    // Create GraphQL API using Solutions Construct with lean config
+    // Create GraphQL Lambda using CDK NodejsFunction
+    const graphqlFunction = new NodejsFunction(this, 'GraphQLFunction', {
+      functionName: ResourceNames.resourceName(this.serviceName, 'graphql', this.stage),
+      entry: path.join(__dirname, '..', '..', '..', 'app-api', 'src', 'handlers', 'apollo_gql.ts'),
+      handler: 'gqlHandler',
+      runtime: lambda.Runtime.NODEJS_20_X,
+      architecture: lambda.Architecture.X86_64, // Keep current until migration validated
+      timeout: config.lambda.timeout,
+      memorySize: config.lambda.memorySize,
+      // OTEL layer is required for app initialization
+      layers: [
+        otelLayer, // Re-enabled - required for app startup
+        prismaEngineLayer
+      ],
+      vpc: this.vpc,
+      securityGroups: [this.lambdaSecurityGroup],
+      environment: this.getEnvironmentVariables(),
+      // Use tested bundling configuration that includes collector.yml handling
+      bundling: getBundlingConfig('graphql', this.stage)
+    });
+
+    // Create GraphQL API using Solutions Construct with pre-built Lambda
     const graphqlApi = new CognitoToApiGatewayToLambda(this, 'GraphQLApi', {
-      lambdaFunctionProps: {
-        runtime: lambda.Runtime.NODEJS_20_X,
-        code: lambda.Code.fromAsset(CDKPaths.getLambdaPackagePath()),
-        handler: LAMBDA_HANDLERS.GRAPHQL,
-        timeout: config.lambda.timeout,
-        memorySize: config.lambda.memorySize,
-        layers: [otelLayer, prismaEngineLayer],
-        vpc: this.vpc,
-        securityGroups: [this.lambdaSecurityGroup],
-        environment: this.getEnvironmentVariables()
-      },
+      existingLambdaObj: graphqlFunction,
       apiGatewayProps: {
         restApiName: ResourceNames.apiName('graphql-api', this.stage),
         description: `GraphQL API for Managed Care Review - ${this.stage}`,
@@ -124,6 +137,11 @@ export class GraphQLApiStack extends BaseStack {
       value: graphqlApi.apiGateway.restApiId,
       description: 'GraphQL API Gateway ID'
     });
+
+    new CfnOutput(this, 'GraphQLFunctionName', {
+      value: graphqlFunction.functionName,
+      description: 'GraphQL Lambda Function Name'
+    });
   }
 
   /**
@@ -134,10 +152,23 @@ export class GraphQLApiStack extends BaseStack {
       DATABASE_URL: getDatabaseUrl(this.databaseSecretArn, this.databaseClusterEndpoint, this.databaseName),
       UPLOADS_BUCKET_NAME: this.uploadsBucketName,
       QA_BUCKET_NAME: this.qaBucketName,
+      // Add S3 bucket names with the expected variable names for app-api
+      VITE_APP_S3_DOCUMENTS_BUCKET: this.uploadsBucketName,
+      VITE_APP_S3_QA_BUCKET: this.qaBucketName,
       APPLICATION_ENDPOINT: this.applicationEndpoint || `https://mcr-${this.stage}.cms.gov`,
-      OTEL_EXPORTER_OTLP_ENDPOINT: ssm.StringParameter.valueForStringParameter(this, SSM_PATHS.OTEL_COLLECTOR_URL),
+      // OTEL configuration - required for app initialization
+      API_APP_OTEL_COLLECTOR_URL: ssm.StringParameter.valueForStringParameter(this, SSM_PATHS.OTEL_COLLECTOR_URL),
+      AWS_LAMBDA_EXEC_WRAPPER: '/opt/otel-handler',
+      OPENTELEMETRY_COLLECTOR_CONFIG_FILE: '/var/task/collector.yml',
+      JWT_SECRET: `{{resolve:secretsmanager:${ssm.StringParameter.valueForStringParameter(this, `/mcr-cdk/${this.stage}/foundation/jwt-secret-arn`)}:SecretString:jwtsigningkey}}`,
       EMAILER_MODE: ssm.StringParameter.valueForStringParameter(this, SSM_PATHS.EMAILER_MODE),
-      LD_SDK_KEY: ssm.StringParameter.valueForStringParameter(this, SSM_PATHS.LD_SDK_KEY)
+      LD_SDK_KEY: ssm.StringParameter.valueForStringParameter(this, SSM_PATHS.LD_SDK_KEY),
+      VITE_APP_AUTH_MODE: this.stage === 'dev' ? 'LOCAL' : 'AWS_COGNITO',
+      PARAMETER_STORE_MODE: 'AWS',
+      REGION: this.region,
+      stage: this.stage,
+      // Critical missing env vars from serverless
+      SECRETS_MANAGER_SECRET: `aurora_postgres_${this.stage}`
     });
   }
 }

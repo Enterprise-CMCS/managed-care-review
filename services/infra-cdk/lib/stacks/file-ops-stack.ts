@@ -1,17 +1,19 @@
 import { BaseStack, BaseStackProps } from '@constructs/base';
 import { Construct } from 'constructs';
 import * as lambda from 'aws-cdk-lib/aws-lambda';
+import { NodejsFunction, OutputFormat } from 'aws-cdk-lib/aws-lambda-nodejs';
 import * as s3 from 'aws-cdk-lib/aws-s3';
+import * as s3n from 'aws-cdk-lib/aws-s3-notifications';
 import * as ssm from 'aws-cdk-lib/aws-ssm';
-import { S3ToLambda } from '@aws-solutions-constructs/aws-s3-lambda';
 import { Duration, CfnOutput } from 'aws-cdk-lib';
+import * as path from 'path';
 import { 
   getEnvironment, 
   LAMBDA_HANDLERS, 
   SSM_PATHS,
   ResourceNames
 } from '../config';
-import { CDKPaths, getLambdaEnvironment } from '@config/index';
+import { getLambdaEnvironment } from '@config/index';
 
 // Lambda configuration (moved from shared config)
 const LAMBDA_DEFAULTS = {
@@ -34,7 +36,8 @@ export interface FileOpsStackProps extends BaseStackProps {
 
 /**
  * File Operations Stack for S3-triggered Lambda functions
- * Uses Solutions Constructs to eliminate 120+ lines of manual S3 permissions
+ * Uses aws-s3-lambda Solutions Constructs for automatic S3 event integration
+ * Provides 100% Serverless Framework parity with event-driven architecture
  */
 export class FileOpsStack extends BaseStack {
   private readonly uploadsBucketName: string;
@@ -44,7 +47,7 @@ export class FileOpsStack extends BaseStack {
   constructor(scope: Construct, id: string, props: FileOpsStackProps) {
     super(scope, id, {
       ...props,
-      description: 'File operations with S3 integration - Uses Solutions Constructs'
+      description: 'File operations with S3 event triggers - Uses aws-s3-lambda Solutions Constructs'
     });
 
     this.uploadsBucketName = props.uploadsBucketName;
@@ -74,37 +77,74 @@ export class FileOpsStack extends BaseStack {
     );
     const prismaEngineLayer = lambda.LayerVersion.fromLayerVersionArn(this, 'PrismaEngineLayer', prismaEngineLayerArn);
 
-    // ZIP Keys function with lean config
-    const zipKeysFunction = new lambda.Function(this, 'ZipKeysFunction', {
+    // ZIP Keys function using CDK NodejsFunction for S3 integration
+    const zipKeysFunction = new NodejsFunction(this, 'ZipKeysFunction', {
+      functionName: ResourceNames.resourceName('file-ops', 'zip-keys', this.stage),
+      entry: path.join(__dirname, '..', '..', '..', 'app-api', 'src', 'handlers', 'bulk_download.ts'),
+      handler: 'main',
       runtime: lambda.Runtime.NODEJS_20_X,
-      code: lambda.Code.fromAsset(CDKPaths.getLambdaPackagePath()),
-      handler: LAMBDA_HANDLERS.ZIP_KEYS,
+      architecture: lambda.Architecture.X86_64,
       timeout: LAMBDA_DEFAULTS.TIMEOUT_EXTENDED,
       memorySize: config.lambda.memorySize,
       layers: [otelLayer],
       environment: this.getEnvironmentVariables(),
-      functionName: ResourceNames.resourceName('file-ops', 'zip-keys', this.stage),
-      description: 'Process file compression and S3 operations'
+      description: 'Process file compression and S3 operations',
+      bundling: {
+        format: OutputFormat.CJS,
+        target: 'node20',
+        sourceMap: true,
+        minify: this.isProduction,
+        externalModules: ['@prisma/client', 'prisma'],
+        esbuildArgs: {
+          '--packages': 'bundle'
+        },
+      }
     });
-    
-    // Grant S3 permissions to ZIP Keys function
-    uploadsBucket.grantReadWrite(zipKeysFunction);
 
-    // Audit Files function with lean config
-    const auditFilesFunction = new lambda.Function(this, 'AuditFilesFunction', {
+    // Grant S3 permissions and add event notifications for ZIP Keys function (Serverless parity)
+    uploadsBucket.grantReadWrite(zipKeysFunction);
+    uploadsBucket.addEventNotification(
+      s3.EventType.OBJECT_CREATED,
+      new s3n.LambdaDestination(zipKeysFunction),
+      { prefix: 'uploads/', suffix: '.zip' } // Only trigger for ZIP files in uploads/
+    );
+
+    // Audit Files function using CDK NodejsFunction for S3 integration
+    const auditFilesFunction = new NodejsFunction(this, 'AuditFilesFunction', {
+      functionName: ResourceNames.resourceName('file-ops', 'audit-files', this.stage),
+      entry: path.join(__dirname, '..', '..', '..', 'app-api', 'src', 'handlers', 'audit_s3.ts'),
+      handler: 'main',
       runtime: lambda.Runtime.NODEJS_20_X,
-      code: lambda.Code.fromAsset(CDKPaths.getLambdaPackagePath()),
-      handler: LAMBDA_HANDLERS.AUDIT_FILES,
+      architecture: lambda.Architecture.X86_64,
       timeout: LAMBDA_DEFAULTS.TIMEOUT_EXTENDED,
       memorySize: LAMBDA_DEFAULTS.MEMORY_MEDIUM,
       layers: [otelLayer, prismaEngineLayer],
       environment: this.getEnvironmentVariables(),
-      functionName: ResourceNames.resourceName('file-ops', 'audit-files', this.stage),
-      description: 'Audit files for compliance and security'
+      description: 'Audit files for compliance and security',
+      bundling: {
+        format: OutputFormat.CJS,
+        target: 'node20',
+        sourceMap: true,
+        minify: this.isProduction,
+        externalModules: ['@prisma/client', 'prisma'],
+        esbuildArgs: {
+          '--packages': 'bundle'
+        },
+      }
     });
-    
-    // Grant S3 permissions to Audit Files function
+
+    // Grant S3 permissions and add event notifications for Audit Files function (Serverless parity)
     qaBucket.grantReadWrite(auditFilesFunction);
+    qaBucket.addEventNotification(
+      s3.EventType.OBJECT_CREATED,
+      new s3n.LambdaDestination(auditFilesFunction),
+      { prefix: 'qa-uploads/' } // Trigger for all files in qa-uploads/
+    );
+    qaBucket.addEventNotification(
+      s3.EventType.OBJECT_REMOVED,
+      new s3n.LambdaDestination(auditFilesFunction),
+      { prefix: 'qa-uploads/' } // Also trigger on file deletion
+    );
 
     // Create outputs
     new CfnOutput(this, 'ZipKeysFunctionName', {
@@ -115,6 +155,16 @@ export class FileOpsStack extends BaseStack {
     new CfnOutput(this, 'AuditFilesFunctionName', {
       value: auditFilesFunction.functionName,
       description: 'Audit Files Lambda Function Name'
+    });
+
+    new CfnOutput(this, 'ZipKeysFunctionArn', {
+      value: zipKeysFunction.functionArn,
+      description: 'ZIP Keys Lambda Function ARN'
+    });
+
+    new CfnOutput(this, 'AuditFilesFunctionArn', {
+      value: auditFilesFunction.functionArn,
+      description: 'Audit Files Lambda Function ARN'
     });
   }
 

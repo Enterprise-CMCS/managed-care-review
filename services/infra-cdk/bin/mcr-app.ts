@@ -13,21 +13,36 @@ import {
 import { SecretsManagerClient, GetSecretValueCommand } from '@aws-sdk/client-secrets-manager';
 
 
-// Load CDK synthesizer config from Secrets Manager (required)
+// Load CDK synthesizer config from Secrets Manager (required for deployment)
 async function getSynthesizerConfig(): Promise<any> {
-  const client = new SecretsManagerClient({ 
-    region: process.env.AWS_REGION || process.env.CDK_DEFAULT_REGION || 'us-east-1' 
-  });
-  
-  const response = await client.send(new GetSecretValueCommand({
-    SecretId: 'cdkSynthesizerConfig'
-  }));
-  
-  if (!response.SecretString) {
-    throw new Error('cdkSynthesizerConfig secret not found in Secrets Manager');
+  try {
+    const client = new SecretsManagerClient({ 
+      region: process.env.AWS_REGION || process.env.CDK_DEFAULT_REGION || 'us-east-1' 
+    });
+    
+    const response = await client.send(new GetSecretValueCommand({
+      SecretId: 'cdkSynthesizerConfig'
+    }));
+    
+    if (!response.SecretString) {
+      throw new Error('cdkSynthesizerConfig secret not found in Secrets Manager');
+    }
+    
+    return JSON.parse(response.SecretString);
+  } catch (error) {
+    const errorMessage = error instanceof Error ? error.message : String(error);
+    console.warn('Warning: Unable to load CDK synthesizer config from Secrets Manager:', errorMessage);
+    console.warn('Using default synthesizer for synthesis/testing. Deployment may require proper AWS credentials.');
+    
+    // Return minimal default config that allows synthesis to work
+    return {
+      qualifier: 'hnb659fds',
+      bootstrapStackVersionSsmParameter: '/cdk-bootstrap/hnb659fds/version',
+      bucketName: 'cdk-hnb659fds-assets-${AWS::AccountId}-${AWS::Region}',
+      fileAssetsBucketName: 'cdk-hnb659fds-assets-${AWS::AccountId}-${AWS::Region}',
+      repositoryName: 'cdk-hnb659fds-container-assets-${AWS::AccountId}-${AWS::Region}'
+    };
   }
-  
-  return JSON.parse(response.SecretString);
 }
 
 // Main async function to initialize app with custom synthesizer
@@ -37,7 +52,8 @@ async function main() {
                   process.env.CDK_STAGE || 
                   'dev';
     
-    // Get CDK synthesizer config (required)
+    // Get CDK synthesizer config (required for deployment, optional for synthesis)
+    console.log('Loading CDK synthesizer configuration...');
     const synthConfig = await getSynthesizerConfig();
     
     // Create CDK app with custom synthesizer
@@ -76,7 +92,9 @@ async function main() {
       config
     });
     
+    console.log('Orchestrating stack creation...');
     const stacks = orchestrator.createAllStacks();
+    console.log('Stack creation completed successfully');
 
     // Apply IAM aspects
     const iamPath = process.env.IAM_PATH || '/delegatedadmin/developer/';
@@ -107,11 +125,17 @@ async function main() {
 
 
     // Synthesize the app
+    console.log('Starting CDK synthesis...');
     app.synth();
+    console.log('CDK synthesis completed successfully');
 }
 
 // Run the main function
 main().catch(error => {
   console.error('CDK app initialization failed:', error);
+  console.error('\n🔍 Troubleshooting:');
+  console.error('- For synthesis issues: Check AWS credentials and region configuration');
+  console.error('- For deployment issues: Ensure CDK bootstrap and proper AWS permissions');
+  console.error('- For synthesis-only testing: AWS credentials may not be required');
   process.exit(1);
 });

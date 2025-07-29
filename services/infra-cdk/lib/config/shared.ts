@@ -44,6 +44,7 @@ export const SSM_PATHS = {
   OTEL_COLLECTOR_URL: '/configuration/api_app_otel_collector_url',
   EMAILER_MODE: '/configuration/emailer_mode',
   LD_SDK_KEY: '/configuration/ld_sdk_key_feds',
+  JWT_SECRET: '/configuration/jwt_signing_key',
   EMAIL_SOURCE_ADDRESS: '/configuration/email/sourceAddress'
 } as const;
 

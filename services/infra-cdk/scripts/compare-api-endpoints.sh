@@ -171,15 +171,48 @@ else
 fi
 
 echo ""
-echo "${BLUE}Phase 6: AWS CLI Deployment Verification${NC}"
+echo "${BLUE}Phase 6: CDK Stack Analysis${NC}"
+echo "---------------------------"
+
+# Check CDK stacks for API configurations
+echo "Analyzing CDK stacks for API Gateway configurations..."
+
+# Map CDK stack names to their API types
+declare -A cdk_stacks=(
+    ["GraphQLApiStack"]="GraphQL API"
+    ["PublicApiStack"]="Public REST APIs (OTEL, Health)"
+    ["AuthStack"]="Auth endpoints (OAuth)"
+)
+
+for stack_file in lib/stacks/*-stack.ts; do
+    if [ -f "$stack_file" ]; then
+        stack_name=$(basename "$stack_file" .ts | sed 's/-stack//' | sed 's/\b\(.\)/\u\1/g')Stack
+        if [[ ${cdk_stacks[$stack_name]+isset} ]]; then
+            echo ""
+            echo "${GREEN}$stack_name: ${cdk_stacks[$stack_name]}${NC}"
+            
+            # Count API methods in stack
+            method_count=$(grep -E "addMethod|\.ANY|\.GET|\.POST|\.PUT|\.DELETE" "$stack_file" | wc -l)
+            echo "  API methods defined: $method_count"
+        fi
+    fi
+done
+
+echo ""
+echo "${BLUE}Phase 7: AWS CLI Deployment Verification${NC}"
 echo "--------------------------------------"
 
-echo "To verify deployed endpoints, run these commands:"
+STAGE=${STAGE:-dev}
+echo "Checking deployed CDK resources for stage: $STAGE"
 echo ""
-echo "${YELLOW}# Get API Gateway ID${NC}"
-echo "aws apigateway get-rest-apis --query 'items[?contains(name,\`api\`)].{Name:name,Id:id}' --output table"
+
+# Get CDK API Gateways
+echo "${YELLOW}CDK API Gateways:${NC}"
+aws apigateway get-rest-apis --query "items[?contains(name, 'MCR-') && contains(name, '-${STAGE}-cdk')].{Name:name,Id:id}" --output table 2>/dev/null || echo "AWS CLI command failed - check credentials"
+
 echo ""
-echo "${YELLOW}# Get deployed resources/endpoints${NC}"
+echo "${YELLOW}To get detailed endpoint information:${NC}"
+echo "# Get API Gateway ID from above table, then:"
 echo "aws apigateway get-resources --rest-api-id \$API_ID --output table"
 echo ""
 echo "${YELLOW}# Count deployed endpoints${NC}"
