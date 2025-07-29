@@ -10,6 +10,7 @@ import { createSubmitAndUnlockTestRate } from '../../testHelpers/gqlRateHelpers'
 import { createAndSubmitTestContractWithRate } from '../../testHelpers/gqlContractHelpers'
 import { testS3Client } from '../../../../app-api/src/testHelpers/s3Helpers'
 import { withdrawTestRate } from '../../testHelpers/gqlRateHelpers'
+import { extractGraphQLResponse } from '../../testHelpers/apolloV4ResponseHelper'
 
 describe(`unlockRate`, () => {
     const ldService = testLDService({
@@ -78,7 +79,7 @@ describe(`unlockRate`, () => {
                 )
 
                 // Try to unlock the rate again
-                const unlockResult2 = await cmsServer.executeOperation({
+                const response2 = await cmsServer.executeOperation({
                     query: UnlockRateDocument,
                     variables: {
                         input: {
@@ -86,7 +87,11 @@ describe(`unlockRate`, () => {
                             unlockedReason: 'Super duper good reason.',
                         },
                     },
+                }, {
+                    contextValue: { user: mockUser() },
                 })
+
+                const unlockResult2 = extractGraphQLResponse(response2)
 
                 expectToBeDefined(unlockResult2.errors)
                 expect(unlockResult2.errors[0].message).toBe(
@@ -106,7 +111,7 @@ describe(`unlockRate`, () => {
                 const rate = contract.packageSubmissions[0].rateRevisions[0]
 
                 // Unlock the rate
-                const unlockResult = await stateServer.executeOperation({
+                const response = await stateServer.executeOperation({
                     query: UnlockRateDocument,
                     variables: {
                         input: {
@@ -115,6 +120,8 @@ describe(`unlockRate`, () => {
                         },
                     },
                 })
+
+                const unlockResult = extractGraphQLResponse(response)
 
                 expectToBeDefined(unlockResult.errors)
                 expect(unlockResult.errors[0].message).toBe(

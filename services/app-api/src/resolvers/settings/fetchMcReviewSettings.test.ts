@@ -13,7 +13,7 @@ import {
 } from '../../gen/gqlClient'
 import { assertAnError, must } from '../../testHelpers'
 import { testLDService } from '../../testHelpers/launchDarklyHelpers'
-import { extractGraphQLResponse } from '../../testHelpers/gqlHelpers'
+import { extractGraphQLResponse } from '../../testHelpers/apolloV4ResponseHelper'
 
 describe('fetchMcReviewSettings', () => {
     it('returns states with assignments', async () => {
@@ -83,7 +83,7 @@ describe('fetchMcReviewSettings', () => {
         const assignedTexasCMSUser =
             assignedTexasCMSUserResult.data.updateStateAssignment.user
 
-        const assignedFloridaCMSUserResult = await server.executeOperation({
+        const floridaResponse = await server.executeOperation({
             query: UpdateStateAssignmentDocument,
             variables: {
                 input: {
@@ -93,6 +93,8 @@ describe('fetchMcReviewSettings', () => {
             },
         })
 
+        const assignedFloridaCMSUserResult = extractGraphQLResponse(floridaResponse)
+
         if (!assignedFloridaCMSUserResult.data?.updateStateAssignment) {
             throw new Error(
                 'Unexpected Error: updateStateAssignment resulted no data'
@@ -101,11 +103,13 @@ describe('fetchMcReviewSettings', () => {
         const assignedFloridaCMSUser =
             assignedFloridaCMSUserResult.data.updateStateAssignment.user
 
-        const mcReviewSettings = await server.executeOperation({
+        const settingsResponse = await server.executeOperation({
             query: FetchMcReviewSettingsDocument,
         }, {
             contextValue: { user: testAdminUser() },
         })
+
+        const mcReviewSettings = extractGraphQLResponse(settingsResponse)
 
         if (!mcReviewSettings.data?.fetchMcReviewSettings?.stateAssignments) {
             throw new Error(
