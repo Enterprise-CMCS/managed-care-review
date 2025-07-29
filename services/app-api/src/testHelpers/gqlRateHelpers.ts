@@ -110,7 +110,8 @@ async function createSubmitAndUnlockTestRate(
 const submitTestRate = async (
     server: ApolloServer,
     rateID: string,
-    submittedReason: string
+    submittedReason: string,
+    context?: Context
 ): Promise<Rate> => {
     const response = await server.executeOperation({
         query: SubmitRateDocument,
@@ -121,7 +122,7 @@ const submitTestRate = async (
             },
         },
     }, {
-        contextValue: defaultContext(),
+        contextValue: context || defaultContext(),
     })
     
     const updateResult = extractGraphQLResponse(response)

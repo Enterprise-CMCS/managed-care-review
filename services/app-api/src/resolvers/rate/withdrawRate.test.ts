@@ -7,6 +7,7 @@ import {
     constructTestPostgresServer,
     defaultFloridaProgram,
 } from '../../testHelpers/gqlHelpers'
+import { extractGraphQLResponse } from '../../testHelpers/apolloV4ResponseHelper'
 import {
     createAndSubmitTestContractWithRate,
     createAndUpdateTestContractWithoutRates,
@@ -1260,7 +1261,7 @@ describe('withdrawRate invalid status handling', () => {
         const rateID = draftContract.draftRates?.[0].id as string
         const contractID = draftContract.id
 
-        const failedWithdrawDraftRate = await cmsServer.executeOperation({
+        const response = await cmsServer.executeOperation({
             query: WithdrawRateDocument,
             variables: {
                 input: {
@@ -1268,7 +1269,11 @@ describe('withdrawRate invalid status handling', () => {
                     updatedReason: 'Withdraw draft rate',
                 },
             },
+        }, {
+            contextValue: { user: cmsUser },
         })
+
+        const failedWithdrawDraftRate = extractGraphQLResponse(response)
 
         // expect error for attempting to withdraw a draft rate
         expect(failedWithdrawDraftRate.errors?.[0]).toBeDefined()
@@ -1380,7 +1385,7 @@ describe('withdrawRate invalid status handling', () => {
 
         const contract = await createAndSubmitTestContractWithRate(stateServer, undefined, { user: stateUser })
         const rateID = contract.packageSubmissions[0].rateRevisions[0].rateID
-        const failedWithdrawWithdrawnRate = await cmsServer.executeOperation({
+        const response = await cmsServer.executeOperation({
             query: WithdrawRateDocument,
             variables: {
                 input: {
@@ -1388,7 +1393,11 @@ describe('withdrawRate invalid status handling', () => {
                     updatedReason: 'This rate does not exist',
                 },
             },
+        }, {
+            contextValue: { user: cmsUser },
         })
+
+        const failedWithdrawWithdrawnRate = extractGraphQLResponse(response)
 
         // expect error for attempting to withdraw rate in postgres
         expect(failedWithdrawWithdrawnRate.errors?.[0]).toBeDefined()
@@ -1417,7 +1426,7 @@ describe('withdrawRate invalid status handling', () => {
             const rateID =
                 contract.packageSubmissions[0].rateRevisions[0].rateID
 
-            const failedWithdrawDraftRate = await server.executeOperation({
+            const response = await server.executeOperation({
                 query: WithdrawRateDocument,
                 variables: {
                     input: {
@@ -1425,7 +1434,11 @@ describe('withdrawRate invalid status handling', () => {
                         updatedReason: 'Withdraw draft rate',
                     },
                 },
+            }, {
+                contextValue: { user: mockUser() },
             })
+
+            const failedWithdrawDraftRate = extractGraphQLResponse(response)
 
             // expect error when withdrawing rate as an unauthorized user.
             expect(failedWithdrawDraftRate.errors?.[0]).toBeDefined()
