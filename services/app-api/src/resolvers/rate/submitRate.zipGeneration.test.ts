@@ -75,7 +75,8 @@ describe('Rate Submission Zip Generation - Rate-Specific Scenarios', () => {
             const resubmittedRate = await submitTestRate(
                 stateServer,
                 unlockedRate.id,
-                'Standalone rate resubmission'
+                'Standalone rate resubmission',
+                { user: stateUser }
             )
 
             // Verify zip generation was called for the standalone rate submission
@@ -138,7 +139,8 @@ describe('Rate Submission Zip Generation - Rate-Specific Scenarios', () => {
             await submitTestRate(
                 stateServer,
                 unlockedRate.id,
-                'Test resubmission'
+                'Test resubmission',
+                { user: stateUser }
             )
 
             // Verify both rateDocuments and supportingDocuments are included
@@ -192,7 +194,7 @@ describe('Rate Submission Zip Generation - Rate-Specific Scenarios', () => {
             // Clear mocks from initial submission
             vi.clearAllMocks()
 
-            await submitTestRate(stateServer, unlockedRate.id, 'Test path')
+            await submitTestRate(stateServer, unlockedRate.id, 'Test path', { user: stateUser })
 
             const zipCall = mockGenerateDocumentZip.mock.calls[0]
             const destinationPath = zipCall[1]

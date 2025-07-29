@@ -4,6 +4,7 @@ import {
     constructTestPostgresServer,
     createAndUpdateTestHealthPlanPackage,
     unlockTestHealthPlanPackage,
+    unlockTestHealthPlanPackageAsUser,
 } from '../../testHelpers/gqlHelpers'
 import { extractGraphQLResponse } from '../../testHelpers/apolloV4ResponseHelper'
 import { latestFormData } from '../../testHelpers/healthPlanPackageHelpers'

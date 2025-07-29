@@ -16,25 +16,28 @@ import { findRateRelatedContracts } from './findRateRelatedContracts'
 it('returns related contracts with correct status', async () => {
     const client = await sharedTestPrismaClient()
 
+    const stateUser = testStateUser()
+    const cmsUser = testCMSUser()
+
     const stateServer = await constructTestPostgresServer({
         context: {
-            user: testStateUser(),
+            user: stateUser,
         },
     })
 
     const cmsServer = await constructTestPostgresServer({
         context: {
-            user: testCMSUser(),
+            user: cmsUser,
         },
     })
 
     const submittedContractA =
-        await createAndSubmitTestContractWithRate(stateServer)
+        await createAndSubmitTestContractWithRate(stateServer, undefined, { user: stateUser })
     const rateAID =
         submittedContractA.packageSubmissions[0].rateRevisions[0].rateID
 
-    await unlockTestContract(cmsServer, submittedContractA.id, 'unlock 1')
-    await submitTestContract(stateServer, submittedContractA.id, 'submit 2')
+    await unlockTestContract(cmsServer, submittedContractA.id, 'unlock 1', { user: cmsUser })
+    await submitTestContract(stateServer, submittedContractA.id, 'submit 2', { user: stateUser })
 
     const contractB = await createAndUpdateTestContractWithoutRates(stateServer)
 
@@ -58,10 +61,12 @@ it('returns related contracts with correct status', async () => {
                     ],
                 },
             },
+        }, {
+            contextValue: { user: stateUser },
         })
     )
 
-    await submitTestContract(stateServer, contractB.id)
+    await submitTestContract(stateServer, contractB.id, undefined, { user: stateUser })
 
     let rateARelatedStrippedContracts = must(
         await findRateRelatedContracts(client, rateAID)
@@ -84,7 +89,8 @@ it('returns related contracts with correct status', async () => {
     await unlockTestContract(
         cmsServer,
         submittedContractA.id,
-        'unlocked parent contract'
+        'unlocked parent contract',
+        { user: cmsUser }
     )
 
     const contractC = await createAndUpdateTestContractWithoutRates(stateServer)
@@ -108,15 +114,18 @@ it('returns related contracts with correct status', async () => {
                     ],
                 },
             },
+        }, {
+            contextValue: { user: stateUser },
         })
     )
 
-    await submitTestContract(stateServer, contractC.id)
+    await submitTestContract(stateServer, contractC.id, undefined, { user: stateUser })
 
     const unlockedContractB = await unlockTestContract(
         cmsServer,
         contractB.id,
-        'unlock to remove rate A'
+        'unlock to remove rate A',
+        { user: cmsUser }
     )
     const rateBID = unlockedContractB.packageSubmissions[0].rateRevisions.find(
         (rate) => rate.rateID !== rateAID
@@ -144,6 +153,8 @@ it('returns related contracts with correct status', async () => {
                     ],
                 },
             },
+        }, {
+            contextValue: { user: stateUser },
         })
     )
 
@@ -173,11 +184,12 @@ it('returns related contracts with correct status', async () => {
     await submitTestContract(
         stateServer,
         contractB.id,
-        'resubmit contractB without rateA'
+        'resubmit contractB without rateA',
+        { user: stateUser }
     )
 
     // approve contractC
-    await approveTestContract(cmsServer, contractC.id)
+    await approveTestContract(cmsServer, contractC.id, { user: cmsUser })
 
     rateARelatedStrippedContracts = must(
         await findRateRelatedContracts(client, rateAID)

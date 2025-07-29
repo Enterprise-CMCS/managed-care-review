@@ -10,6 +10,7 @@ import {
 } from '../../testHelpers/gqlHelpers'
 import type { RateEdge, Rate } from '../../gen/gqlServer'
 import { testCMSUser, testStateUser } from '../../testHelpers/userHelpers'
+import { extractGraphQLResponse } from '../../testHelpers/apolloV4ResponseHelper'
 import {
     createAndSubmitTestContractWithRate,
     submitTestContract,
@@ -45,21 +46,24 @@ describe('indexRatesStripped', () => {
             contract2.packageSubmissions[0].rateRevisions[0].rateID
 
         // index rates
-        const result = await cmsServer.executeOperation({
+        const response = await cmsServer.executeOperation({
             query: IndexRatesStrippedWithRelatedContractsDocument,
             variables: {
                 input: {
                     rateIDs: [submit1ID, submit2ID],
                 },
             },
+        }, {
+            contextValue: { user: testCMSUser() },
         })
+        const result = extractGraphQLResponse(response)
 
         expect(result.data).toBeDefined()
         const ratesIndex = result.data?.indexRatesStripped
         const testRateIDs = [submit1ID, submit2ID]
 
         expect(result.errors).toBeUndefined()
-        const matchedTestRates: RateStripped[] = ratesIndex.edges
+        const matchedTestRates: RateStripped[] = ratesIndex!.edges
             .map((edge: RateStrippedEdge) => edge.node)
             .filter((test: Rate) => {
                 return testRateIDs.includes(test.id)
@@ -95,9 +99,12 @@ describe('indexRatesStripped', () => {
         const draft1 = contract1.draftRates[0]
         const draft2 = contract2.draftRates[0]
 
-        const result = await cmsServer.executeOperation({
+        const response = await cmsServer.executeOperation({
             query: IndexRatesStrippedDocument,
+        }, {
+            contextValue: { user: testCMSUser() },
         })
+        const result = extractGraphQLResponse(response)
 
         expect(result.errors).toBeUndefined()
 
@@ -105,7 +112,7 @@ describe('indexRatesStripped', () => {
 
         // pull out test related rates and order them
         const testRateIDs = [draft1.id, draft2.id]
-        const testRates: RateStripped[] = ratesIndex.edges
+        const testRates: RateStripped[] = ratesIndex!.edges
             .map((edge: RateStrippedEdge) => edge.node)
             .filter((test: Rate) => {
                 return testRateIDs.includes(test.id)
@@ -152,15 +159,18 @@ describe('indexRatesStripped', () => {
         const otherState1 = contract3.packageSubmissions[0].rateRevisions[0]
 
         // index rates
-        const result = await cmsServer.executeOperation({
+        const response = await cmsServer.executeOperation({
             query: IndexRatesStrippedDocument,
+        }, {
+            contextValue: { user: testCMSUser() },
         })
+        const result = extractGraphQLResponse(response)
 
         expect(result.errors).toBeUndefined()
 
         const ratesIndex = result.data?.indexRatesStripped
         // Pull out only the rates results relevant to the test by using id of recently created test packages.
-        const allRates: RateStripped[] = ratesIndex.edges.map(
+        const allRates: RateStripped[] = ratesIndex!.edges.map(
             (edge: RateEdge) => edge.node
         )
         const defaultStateRates: RateStripped[] = []
