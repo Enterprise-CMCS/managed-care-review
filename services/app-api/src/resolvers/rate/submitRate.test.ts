@@ -65,27 +65,33 @@ describe('submitRate', () => {
             s3Client: mockS3,
         })
 
-        const rate = await createSubmitAndUnlockTestRate(stateServer, cmsServer)
+        const rate = await createSubmitAndUnlockTestRate(stateServer, cmsServer, cmsUser, stateUser)
 
-        const fetchDraftRate = (await stateServer.executeOperation({
+        const fetchDraftRateResponse = await stateServer.executeOperation({
             query: FetchRateDocument,
             variables: {
                 input: { rateID: rate.id },
             },
-        })) as { errors?: any; data?: any }
+        }, {
+            contextValue: { user: stateUser },
+        })
+        const fetchDraftRate = extractGraphQLResponse(fetchDraftRateResponse)
 
         const draftFormData =
             fetchDraftRate.data?.fetchRate.rate.draftRevision.formData
 
         // submitRate with no form data updates
-        const result = (await stateServer.executeOperation({
+        const response = await stateServer.executeOperation({
             query: SubmitRateDocument,
             variables: {
                 input: {
                     rateID: rate.id,
                 },
             },
-        })) as { errors?: any; data?: any }
+        }, {
+            contextValue: { user: stateUser },
+        })
+        const result = extractGraphQLResponse(response)
 
         expect(result.errors).toBeUndefined()
         const submittedRate = result.data?.submitRate.rate
@@ -161,14 +167,17 @@ describe('submitRate', () => {
             s3Client: mockS3,
         })
 
-        const rate = await createSubmitAndUnlockTestRate(stateServer, cmsServer)
+        const rate = await createSubmitAndUnlockTestRate(stateServer, cmsServer, cmsUser, stateUser)
 
-        const fetchDraftRate = (await stateServer.executeOperation({
+        const fetchDraftRateResponse = await stateServer.executeOperation({
             query: FetchRateDocument,
             variables: {
                 input: { rateID: rate.id },
             },
-        })) as { errors?: any; data?: any }
+        }, {
+            contextValue: { user: stateUser },
+        })
+        const fetchDraftRate = extractGraphQLResponse(fetchDraftRateResponse)
 
         const draftFormData = rate.draftRevision?.formData
 
@@ -184,7 +193,8 @@ describe('submitRate', () => {
         const submittedRate = await submitTestRate(
             stateServer,
             rate.id,
-            'Submit with edited rate description'
+            'Submit with edited rate description',
+            { user: stateUser }
         )
 
         const submittedRateFormData = submittedRate.revisions[0].formData
@@ -221,15 +231,19 @@ describe('submitRate', () => {
         const draftRate = await createSubmitAndUnlockTestRate(
             stateServer,
             cmsServer,
-            cmsUser
+            cmsUser,
+            stateUser
         )
 
-        const fetchDraftRate = await stateServer.executeOperation({
+        const fetchDraftRateResponse = await stateServer.executeOperation({
             query: FetchRateDocument,
             variables: {
                 input: { rateID: draftRate.id },
             },
+        }, {
+            contextValue: { user: stateUser },
         })
+        const fetchDraftRate = extractGraphQLResponse(fetchDraftRateResponse)
 
         const draftFormData =
             fetchDraftRate.data?.fetchRate.rate.draftRevision.formData
@@ -238,7 +252,7 @@ describe('submitRate', () => {
         expect(fetchDraftRate.errors).toBeUndefined()
         expect(draftFormData).toBeDefined()
 
-        const result = await stateServer.executeOperation({
+        const response = await stateServer.executeOperation({
             query: SubmitRateDocument,
             variables: {
                 input: {
@@ -246,7 +260,10 @@ describe('submitRate', () => {
                     submittedReason: 'submit rate',
                 },
             },
+        }, {
+            contextValue: { user: stateUser },
         })
+        const result = extractGraphQLResponse(response)
         const submittedRate = result.data?.submitRate.rate
         const submittedRateFormData = submittedRate.revisions[0].formData
 
@@ -265,7 +282,11 @@ describe('submitRate', () => {
     })
 
     it('returns the latest linked contracts', async () => {
+        const stateUser = testStateUser()
         const stateServer = await constructTestPostgresServer({
+            context: {
+                user: stateUser,
+            },
             ldService,
             s3Client: mockS3,
         })
@@ -317,7 +338,7 @@ describe('submitRate', () => {
         )
         await addLinkedRateToTestContract(stateServer, draftC020, TwoID)
 
-        const contractC0 = await submitTestContract(stateServer, draftC0.id)
+        const contractC0 = await submitTestContract(stateServer, draftC0.id, undefined, { user: stateUser })
 
         // 4. make sure both rates return contract C in their list of revisions
         const rateOne = await fetchTestRateById(stateServer, OneID)
@@ -360,7 +381,8 @@ describe('submitRate', () => {
         await submitTestContract(
             stateServer,
             contractA0.id,
-            'but what about this'
+            'but what about this',
+            { user: stateUser }
         )
 
         // everything should have the latest
@@ -416,6 +438,8 @@ describe('submitRate', () => {
                     pkgID: draftContractWithRate.id,
                 },
             },
+        }, {
+            contextValue: { user: stateUser },
         })
 
         // fetch newly created rate
@@ -434,7 +458,7 @@ describe('submitRate', () => {
         expect(draftRate.status).toBe('SUBMITTED')
 
         // unlocked the rate
-        const unlockedRateResult = await cmsServer.executeOperation({
+        const unlockedRateResponse = await cmsServer.executeOperation({
             query: UnlockRateDocument,
             variables: {
                 input: {
@@ -442,7 +466,10 @@ describe('submitRate', () => {
                     unlockedReason: 'unlock rate',
                 },
             },
+        }, {
+            contextValue: { user: cmsUser },
         })
+        const unlockedRateResult = extractGraphQLResponse(unlockedRateResponse)
         const unlockedRate = unlockedRateResult.data?.unlockRate.rate
 
         // expect no errors from unlocking
@@ -451,7 +478,7 @@ describe('submitRate', () => {
         expect(unlockedRate.status).toBe('UNLOCKED')
 
         // resubmit rate
-        const result = await stateServer.executeOperation({
+        const response = await stateServer.executeOperation({
             query: SubmitRateDocument,
             variables: {
                 input: {
@@ -462,7 +489,10 @@ describe('submitRate', () => {
                     ),
                 },
             },
+        }, {
+            contextValue: { user: stateUser },
         })
+        const result = extractGraphQLResponse(response)
         const submittedRate = result.data?.submitRate.rate
 
         // expect no errors from submit rate
@@ -495,7 +525,7 @@ describe('submitRate', () => {
 
         await withdrawTestRate(cmsServer, rate.rateID, 'withdraw rate', { user: cmsUser })
 
-        const submitResult = await await stateServer.executeOperation({
+        const submitResponse = await stateServer.executeOperation({
             query: SubmitRateDocument,
             variables: {
                 input: {
@@ -503,7 +533,10 @@ describe('submitRate', () => {
                     submittedReason: 'Submit a already submitted rate',
                 },
             },
+        }, {
+            contextValue: { user: stateUser },
         })
+        const submitResult = extractGraphQLResponse(submitResponse)
 
         expect(submitResult.errors).toBeDefined()
 
@@ -536,15 +569,19 @@ describe('submitRate', () => {
         const draftRate = await createSubmitAndUnlockTestRate(
             stateServer,
             cmsServer,
-            cmsUser
+            cmsUser,
+            stateUser
         )
 
-        const fetchDraftRate = await stateServer.executeOperation({
+        const fetchDraftRateResponse = await stateServer.executeOperation({
             query: FetchRateDocument,
             variables: {
                 input: { rateID: draftRate.id },
             },
+        }, {
+            contextValue: { user: stateUser },
         })
+        const fetchDraftRate = extractGraphQLResponse(fetchDraftRateResponse)
 
         const draftFormData =
             fetchDraftRate.data?.fetchRate.rate.draftRevision.formData
@@ -558,7 +595,7 @@ describe('submitRate', () => {
             rateDateStart: new Date(Date.UTC(2025, 1, 1)),
         })
 
-        const result = await stateServer.executeOperation({
+        const response = await stateServer.executeOperation({
             query: SubmitRateDocument,
             variables: {
                 input: {
@@ -566,7 +603,10 @@ describe('submitRate', () => {
                     submittedReason: 'submit rate',
                 },
             },
+        }, {
+            contextValue: { user: stateUser },
         })
+        const result = extractGraphQLResponse(response)
 
         expect(result.errors).toBeDefined()
         expect(result.errors?.[0].message).toBe(
@@ -584,7 +624,7 @@ describe('submitRate', () => {
                 familyName: 'Avatar',
                 email: 'aang@example.com',
                 role: 'STATE_USER',
-                stateCode: 'NM',
+                stateCode: 'FL',
             },
         })
 
@@ -595,7 +635,17 @@ describe('submitRate', () => {
             },
         })
 
-        const cmsUser = testCMSUser()
+        const cmsUserData = testCMSUser()
+        const cmsUser = await client.user.create({
+            data: {
+                id: cmsUserData.id,
+                givenName: cmsUserData.givenName,
+                familyName: cmsUserData.familyName,
+                email: cmsUserData.email,
+                role: cmsUserData.role,
+                divisionAssignment: cmsUserData.divisionAssignment,
+            },
+        })
         const cmsServer = await constructTestPostgresServer({
             s3Client: mockS3,
             context: {

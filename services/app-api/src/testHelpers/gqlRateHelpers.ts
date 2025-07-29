@@ -94,9 +94,14 @@ const fetchTestRateWithQuestionsById = async (
 async function createSubmitAndUnlockTestRate(
     stateServer: ApolloServer,
     cmsServer: ApolloServer,
-    cmsUser?: UserType
+    cmsUser?: UserType,
+    stateUser?: UserType
 ): Promise<Rate> {
-    const contract = await createAndSubmitTestContractWithRate(stateServer)
+    const contract = await createAndSubmitTestContractWithRate(
+        stateServer, 
+        undefined, 
+        stateUser ? { user: stateUser } : undefined
+    )
     const rateRevision = contract.packageSubmissions[0].rateRevisions[0]
     const rateID = rateRevision.rateID
 
