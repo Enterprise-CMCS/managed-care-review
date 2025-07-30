@@ -526,7 +526,6 @@ export const SubmissionType = ({
                                                             setFieldValue
                                                         )
                                                     }
-                                                    aria-required
                                                     list_position={1}
                                                     list_options={3}
                                                     parent_component_heading="Which populations does this contract action cover?"
@@ -592,7 +591,6 @@ export const SubmissionType = ({
                                                 {hasPreviouslySubmittedRates && (
                                                     <div
                                                         role="note"
-                                                        aria-labelledby="populationCovered"
                                                         className="mcr-note padding-top-2"
                                                     >
                                                         If you need to change
@@ -720,7 +718,6 @@ export const SubmissionType = ({
                                                 {hasPreviouslySubmittedRates && (
                                                     <div
                                                         role="note"
-                                                        aria-labelledby="submissionType"
                                                         className="mcr-note padding-top-2"
                                                     >
                                                         If you need to change
