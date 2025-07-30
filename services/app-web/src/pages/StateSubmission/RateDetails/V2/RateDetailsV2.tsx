@@ -112,6 +112,11 @@ const RateDetails = ({
         featureFlags.HIDE_SUPPORTING_DOCS_PAGE.defaultValue
     )
 
+    const dsnpEnabled = ldClient?.variation(
+        featureFlags.DSNP.flag,
+        featureFlags.DSNP.defaultValue
+    )
+
     const [showAPIErrorBanner, setShowAPIErrorBanner] = useState<
         boolean | string
     >(false) // string is a custom error message, defaults to generic message when true
@@ -126,8 +131,12 @@ const RateDetails = ({
 
     // Multi-rates state management
     const [focusNewRate, setFocusNewRate] = useState(false)
-    const [rateSummaryLoading, setRateSummaryLoading] =  useState<boolean | undefined>(undefined);
-    const [rateSummaryError, setRateSummaryError] = useState<ApolloError | undefined>(undefined);
+    const [rateSummaryLoading, setRateSummaryLoading] = useState<
+        boolean | undefined
+    >(undefined)
+    const [rateSummaryError, setRateSummaryError] = useState<
+        ApolloError | undefined
+    >(undefined)
 
     const newRateNameRef = React.useRef<HTMLElement | null>(null)
     const [newRateButtonRef, setNewRateButtonFocus] = useFocus() // This ref.current is always the same element
@@ -167,7 +176,7 @@ const RateDetails = ({
             newRateNameRef.current = null
         }
     }, [focusNewRate])
-    
+
     // Set up data for form. Either based on contract API (for multi rate) or rates API (for edit and submit of standalone rate)
     const contract = fetchContractData?.fetchContract.contract
     const contractDraftRevision = contract?.draftRevision
@@ -195,15 +204,14 @@ const RateDetails = ({
     useEffect(() => {
         updateActiveMainContent(activeMainContentId)
     }, [activeMainContentId, updateActiveMainContent])
-  
+
     const [updateDraftContractRates] = useUpdateDraftContractRatesMutation()
     const [submitRate] = useSubmitRateMutation()
-    const isDSNP =
-        contract?.draftRevision?.formData?.dsnpContract === true
+    const isDSNP = contract?.draftRevision?.formData?.dsnpContract === true
     const rateDetailsFormSchema = RateDetailsFormSchema(
         {
             'rate-edit-unlock': useEditUnlockRate,
-            'dsnp': true
+            dsnp: dsnpEnabled,
         },
         !displayAsStandaloneRate,
         isDSNP
@@ -258,6 +266,9 @@ const RateDetails = ({
         }
     ) => {
         setShowAPIErrorBanner(false)
+        const dsnpPopulated =
+            contract?.draftRevision?.formData?.dsnpContract != null &&
+            contract?.draftRevision?.formData?.dsnpContract != undefined
         if (options.type === 'SAVE_AS_DRAFT' && draftSaved) {
             setDraftSaved(false)
         }
@@ -278,8 +289,6 @@ const RateDetails = ({
         }
 
         if (displayAsStandaloneRate && options.type === 'CONTINUE') {
-            const dsnpPopulated =
-                contract?.draftRevision?.formData?.dsnpContract != null
             try {
                 await submitRate({
                     variables: {
@@ -314,8 +323,6 @@ const RateDetails = ({
             (options.type === 'CONTINUE' || options.type === 'SAVE_AS_DRAFT')
         ) {
             try {
-                const dsnpPopulated =
-                    contract?.draftRevision?.formData?.dsnpContract != null
                 const formattedRateForms = rateForms.filter((rate) => {
                     if (rate.ratePreviouslySubmitted === 'YES') {
                         return rate.id
@@ -563,11 +570,25 @@ const RateDetails = ({
                                                                         }
                                                                         autofill={(
                                                                             rateForm: FormikRateForm,
-                                                                            autoFillLoading?: boolean | undefined,
-                                                                            autoFillError?: ApolloError | undefined
+                                                                            autoFillLoading?:
+                                                                                | boolean
+                                                                                | undefined,
+                                                                            autoFillError?:
+                                                                                | ApolloError
+                                                                                | undefined
                                                                         ) => {
-                                                                            if (autoFillLoading) setRateSummaryLoading(autoFillLoading)
-                                                                            if (autoFillError) setRateSummaryError(autoFillError)
+                                                                            if (
+                                                                                autoFillLoading
+                                                                            )
+                                                                                setRateSummaryLoading(
+                                                                                    autoFillLoading
+                                                                                )
+                                                                            if (
+                                                                                autoFillError
+                                                                            )
+                                                                                setRateSummaryError(
+                                                                                    autoFillError
+                                                                                )
 
                                                                             return replace(
                                                                                 index,
@@ -590,8 +611,12 @@ const RateDetails = ({
                                                                             rateForm={
                                                                                 rateForm
                                                                             }
-                                                                            loading={rateSummaryLoading}
-                                                                            apiError={rateSummaryError}
+                                                                            loading={
+                                                                                rateSummaryLoading
+                                                                            }
+                                                                            apiError={
+                                                                                rateSummaryError
+                                                                            }
                                                                         />
                                                                     )}
 
