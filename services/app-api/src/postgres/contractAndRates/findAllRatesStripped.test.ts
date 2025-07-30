@@ -21,27 +21,30 @@ import { expect } from 'vitest'
 it('returns all rates with stripped down data', async () => {
     const client = await sharedTestPrismaClient()
 
+    const stateUser = testStateUser()
+    const cmsUser = testCMSUser()
+
     const stateServer = await constructTestPostgresServer({
         context: {
-            user: testStateUser(),
+            user: stateUser,
         },
     })
 
     const cmsServer = await constructTestPostgresServer({
         context: {
-            user: testCMSUser(),
+            user: cmsUser,
         },
     })
 
     const submittedContractA =
-        await createAndSubmitTestContractWithRate(stateServer)
+        await createAndSubmitTestContractWithRate(stateServer, undefined, { user: stateUser })
     const rateAID =
         submittedContractA.packageSubmissions[0].rateRevisions[0].rateID
 
-    await unlockTestContract(cmsServer, submittedContractA.id, 'unlock 1')
-    await submitTestContract(stateServer, submittedContractA.id, 'submit 2')
+    await unlockTestContract(cmsServer, submittedContractA.id, 'unlock 1', { user: cmsUser })
+    await submitTestContract(stateServer, submittedContractA.id, 'submit 2', { user: stateUser })
 
-    await unlockTestContract(cmsServer, submittedContractA.id, 'unlock 2')
+    await unlockTestContract(cmsServer, submittedContractA.id, 'unlock 2', { user: cmsUser })
 
     const contractB = await createAndUpdateTestContractWithoutRates(stateServer)
     // link rate contract B
@@ -64,12 +67,16 @@ it('returns all rates with stripped down data', async () => {
                     ],
                 },
             },
+        }, {
+            contextValue: { user: stateUser },
         })
     )
 
     const submittedContractB = await submitTestContract(
         stateServer,
-        contractB.id
+        contractB.id,
+        undefined,
+        { user: stateUser }
     )
     const rateBID = submittedContractB.packageSubmissions[0].rateRevisions.find(
         (rate) => rate.rateID !== rateAID
@@ -79,7 +86,7 @@ it('returns all rates with stripped down data', async () => {
         throw new Error('Unexpected error: rateBID should exist, but does not.')
     }
 
-    await withdrawTestRate(cmsServer, rateBID, 'Withdraw invalid rate')
+    await withdrawTestRate(cmsServer, rateBID, 'Withdraw invalid rate', { user: cmsUser })
 
     const strippedRatesOrErrors = must(await findAllRatesStripped(client))
     const strippedRates: StrippedRateType[] = []
@@ -123,7 +130,7 @@ it('returns all rates with stripped down data', async () => {
     expect(rateBFromArray?.reviewStatusActions?.[0].actionType).toBe('WITHDRAW')
 
     // Undo the rate withdraw
-    await undoWithdrawTestRate(cmsServer, rateBID, 'Undo withdraw rateB')
+    await undoWithdrawTestRate(cmsServer, rateBID, 'Undo withdraw rateB', { user: cmsUser })
 
     const strippedRatesOrErrorsAgain = must(await findAllRatesStripped(client))
     const strippedRatesAgain: StrippedRateType[] = []

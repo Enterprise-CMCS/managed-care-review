@@ -10,6 +10,7 @@ import { testLDService } from '../../testHelpers/launchDarklyHelpers'
 import { testStateUser } from '../../testHelpers/userHelpers'
 import { generateDocumentZip } from '../../zip'
 import { vi } from 'vitest'
+import { extractGraphQLResponse } from '../../testHelpers/apolloV4ResponseHelper'
 
 // Mock the zip generation function
 vi.mock('../../zip')
@@ -39,14 +40,17 @@ describe('DocumentZipPackage resolver', () => {
 
         // This creates a CONTRACT_AND_RATES submission with both contract and rate documents
         const submittedContract =
-            await createAndSubmitTestContractWithRate(stateServer)
+            await createAndSubmitTestContractWithRate(stateServer, undefined, { user: stateUser })
 
-        const result = (await stateServer.executeOperation({
+        const response = await stateServer.executeOperation({
             query: FetchContractDocument,
             variables: {
                 input: { contractID: submittedContract.id },
             },
-        })) as { errors?: any; data?: any }
+        }, {
+            contextValue: { user: stateUser },
+        })
+        const result = extractGraphQLResponse(response)
 
         expect(result.errors).toBeUndefined()
         const contractRevision =
@@ -78,14 +82,17 @@ describe('DocumentZipPackage resolver', () => {
 
         // This creates CONTRACT_AND_RATES with rates
         const submittedContract =
-            await createAndSubmitTestContractWithRate(stateServer)
+            await createAndSubmitTestContractWithRate(stateServer, undefined, { user: stateUser })
 
-        const result = (await stateServer.executeOperation({
+        const response = await stateServer.executeOperation({
             query: FetchContractDocument,
             variables: {
                 input: { contractID: submittedContract.id },
             },
-        })) as { errors?: any; data?: any }
+        }, {
+            contextValue: { user: stateUser },
+        })
+        const result = extractGraphQLResponse(response)
 
         expect(result.errors).toBeUndefined()
         const rateRevisions =
@@ -124,15 +131,20 @@ describe('DocumentZipPackage resolver', () => {
 
         const submittedContract = await submitTestContract(
             stateServer,
-            updatedContract.id
+            updatedContract.id,
+            undefined,
+            { user: stateUser }
         )
 
-        const result = (await stateServer.executeOperation({
+        const response = await stateServer.executeOperation({
             query: FetchContractDocument,
             variables: {
                 input: { contractID: submittedContract.id },
             },
-        })) as { errors?: any; data?: any }
+        }, {
+            contextValue: { user: stateUser },
+        })
+        const result = extractGraphQLResponse(response)
 
         expect(result.errors).toBeUndefined()
 
