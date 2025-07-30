@@ -121,8 +121,8 @@ importers:
         specifier: ^1.5.10
         version: 1.5.10
       zod:
-        specifier: ^3.24.2
-        version: 3.24.2
+        specifier: ^4.0.14
+        version: 4.0.14
     devDependencies:
       '@types/jest':
         specifier: ^29.5.6
@@ -208,8 +208,8 @@ importers:
         specifier: 5.8.3
         version: 5.8.3
       zod:
-        specifier: ^3.24.2
-        version: 3.24.2
+        specifier: ^4.0.14
+        version: 4.0.14
     devDependencies:
       '@mc-review/constants':
         specifier: workspace:*
@@ -461,8 +461,8 @@ importers:
         specifier: ^9.0.0
         version: 9.0.1
       zod:
-        specifier: ^3.24.2
-        version: 3.24.2
+        specifier: ^4.0.14
+        version: 4.0.14
     devDependencies:
       '@graphql-tools/jest-transform':
         specifier: ^2.0.0
@@ -13975,8 +13975,8 @@ packages:
     resolution: {integrity: sha512-zK7YHHz4ZXpW89AHXUPbQVGKI7uvkd3hzusTdotCg1UxyaVtg0zFJSTfW/Dq5f7OBBVnq6cZIaC8Ti4hb6dtCA==}
     engines: {node: '>= 14'}
 
-  zod@3.24.2:
-    resolution: {integrity: sha512-lY7CDW43ECgW9u1TcT3IoXHflywfVqDYze4waEz812jR/bZ8FHDsl7pFQoSZTz5N+2NqRXs8GBwnAwo3ZNxqhQ==}
+  zod@4.0.14:
+    resolution: {integrity: sha512-nGFJTnJN6cM2v9kXL+SOBq3AtjQby3Mv5ySGFof5UGRHrRioSJ5iG680cYNjE/yWk671nROcpPj4hAS8nyLhSw==}
 
   zone.js@0.14.7:
     resolution: {integrity: sha512-0w6DGkX2BPuiK/NLf+4A8FLE43QwBfuqz2dVgi/40Rj1WmqUskCqj329O/pwrqFJLG5X8wkeG2RhIAro441xtg==}
@@ -32676,6 +32676,6 @@ snapshots:
       compress-commons: 6.0.2
       readable-stream: 4.5.2
 
-  zod@3.24.2: {}
+  zod@4.0.14: {}
 
   zone.js@0.14.7: {}
