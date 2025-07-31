@@ -11,8 +11,8 @@
         "@mc-review/dates": "workspace:*",
         "@apollo/client": "3.8.8",
         "dayjs": "^1.11.13",
-        "typescript": "5.1.6",
-        "zod": "^3.24.2"
+        "typescript": "5.8.3",
+        "zod": "^4.0.14"
     },
     "devDependencies": {
         "@types/jest": "^29.5.6",
