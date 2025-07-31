@@ -3,6 +3,7 @@
     "version": "1.0.0",
     "description": "AWS CDK Infrastructure for Managed Care Review",
     "private": true,
+    "type": "module",
     "scripts": {
         "precommit": "lint-staged",
         "build": "echo 'Build is handled by CDK synth'",
