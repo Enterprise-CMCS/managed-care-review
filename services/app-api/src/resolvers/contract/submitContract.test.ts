@@ -1704,8 +1704,12 @@ describe('submitContract', () => {
         })
 
         it('errors when contract 4348 attestation question is undefined', async () => {
+            const stateUser = testStateUser()
             const server = await constructTestPostgresServer({
                 ldService: ldService,
+                context: {
+                    user: stateUser,
+                },
             })
 
             // setup
@@ -1725,6 +1729,7 @@ describe('submitContract', () => {
                         contractID: initialContract.id,
                     },
                 },
+                contextValue: { user: stateUser },
             })
 
             expect(submitResult.errors).toBeDefined()
@@ -1732,8 +1737,12 @@ describe('submitContract', () => {
         }, 20000)
 
         it('errors when contract 4348 attestation question is false without a description', async () => {
+            const stateUser = testStateUser()
             const server = await constructTestPostgresServer({
                 ldService: ldService,
+                context: {
+                    user: stateUser,
+                },
             })
 
             // setup
@@ -1753,6 +1762,7 @@ describe('submitContract', () => {
                         contractID: initialContract.id,
                     },
                 },
+                contextValue: { user: stateUser },
             })
 
             expect(submitResult.errors).toBeDefined()
@@ -1760,8 +1770,12 @@ describe('submitContract', () => {
         }, 20000)
 
         it('successfully submits when contract 4348 attestation question is valid', async () => {
+            const stateUser = testStateUser()
             const server = await constructTestPostgresServer({
                 ldService: ldService,
+                context: {
+                    user: stateUser,
+                },
             })
 
             // setup
@@ -1785,6 +1799,7 @@ describe('submitContract', () => {
                         contractID: initialContract.id,
                     },
                 },
+                contextValue: { user: stateUser },
             })
 
             expect(submitResult.errors).toBeUndefined()

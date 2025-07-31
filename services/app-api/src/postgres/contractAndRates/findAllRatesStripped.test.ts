@@ -5,7 +5,7 @@ import {
     createAndSubmitTestContractWithRate,
     createAndUpdateTestContractWithoutRates,
     submitTestContract,
-    unlockTestContract,
+    unlockTestContractAsUser,
 } from '../../testHelpers/gqlContractHelpers'
 import { findAllRatesStripped } from './findAllRatesStripped'
 import { must } from '../../testHelpers'
@@ -41,10 +41,10 @@ it('returns all rates with stripped down data', async () => {
     const rateAID =
         submittedContractA.packageSubmissions[0].rateRevisions[0].rateID
 
-    await unlockTestContract(cmsServer, submittedContractA.id, 'unlock 1', { user: cmsUser })
+    await unlockTestContractAsUser(cmsServer, submittedContractA.id, 'unlock 1', cmsUser)
     await submitTestContract(stateServer, submittedContractA.id, 'submit 2', { user: stateUser })
 
-    await unlockTestContract(cmsServer, submittedContractA.id, 'unlock 2', { user: cmsUser })
+    await unlockTestContractAsUser(cmsServer, submittedContractA.id, 'unlock 2', cmsUser)
 
     const contractB = await createAndUpdateTestContractWithoutRates(stateServer)
     // link rate contract B
