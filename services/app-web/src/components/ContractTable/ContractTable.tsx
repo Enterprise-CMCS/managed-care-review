@@ -33,6 +33,7 @@ import useDeepCompareEffect from 'use-deep-compare-effect'
 import { getTealiumFiltersChanged } from '../../tealium/tealiumHelpers'
 import { titleCaseString } from '@mc-review/common-code'
 import { formatCalendarDate } from '@mc-review/dates'
+import { RowCellElement } from '..'
 
 export type ContractInDashboardType = {
     id: string
@@ -587,7 +588,11 @@ export const ContractTable = ({
                             {reactTable.getHeaderGroups().map((headerGroup) => (
                                 <tr key={headerGroup.id}>
                                     {headerGroup.headers.map((header) => (
-                                        <th scope="col" key={header.id}>
+                                        <th
+                                            scope="col"
+                                            key={header.id}
+                                            id={header.id}
+                                        >
                                             {header.isPlaceholder
                                                 ? null
                                                 : flexRender(
@@ -607,18 +612,19 @@ export const ContractTable = ({
                                     data-testid={`row-${row.original.id}`}
                                 >
                                     {row.getVisibleCells().map((cell) => (
-                                        <td
+                                        <RowCellElement
                                             key={cell.id}
-                                            data-testid={
-                                                cell.column.columnDef.meta
-                                                    ?.dataTestID
+                                            element={
+                                                cell.column.id === 'ID'
+                                                    ? 'th'
+                                                    : 'td'
                                             }
                                         >
                                             {flexRender(
                                                 cell.column.columnDef.cell,
                                                 cell.getContext()
                                             )}
-                                        </td>
+                                        </RowCellElement>
                                     ))}
                                 </tr>
                             ))}
