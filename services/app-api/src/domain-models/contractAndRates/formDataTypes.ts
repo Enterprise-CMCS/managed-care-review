@@ -12,7 +12,6 @@ import {
     rateMedicaidPopulationsSchema,
 } from '@mc-review/hpp'
 import { statusSchema } from './statusType'
-import type { RawCreateParams, ZodTypeAny } from 'zod/lib/types'
 
 const documentSchema = z.object({
     id: z.string().optional(),
@@ -51,11 +50,8 @@ const actuaryContactSchema = z.object({
     actuarialFirmOther: z.string().optional(),
 })
 
-function preprocessNulls<T extends ZodTypeAny>(
-    schema: T,
-    params?: RawCreateParams
-) {
-    return z.preprocess((val) => val ?? undefined, schema, params)
+function preprocessNulls<T extends z.ZodType>(schema: T) {
+    return z.preprocess((val) => val ?? undefined, schema)
 }
 
 // genericContractFormDataSchema has all the types for all fields in ContractFormData
