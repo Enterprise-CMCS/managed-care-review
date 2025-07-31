@@ -614,6 +614,10 @@ export const ContractTable = ({
                                     {row.getVisibleCells().map((cell) => (
                                         <RowCellElement
                                             key={cell.id}
+                                            data-testid={
+                                                cell.column.columnDef.meta
+                                                    ?.dataTestID
+                                            }
                                             element={
                                                 cell.column.id === 'ID'
                                                     ? 'th'
