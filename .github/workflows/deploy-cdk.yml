@@ -116,11 +116,11 @@ jobs:
 
           # List current stacks to see what exists
           echo "=== Current CDK stacks ==="
-          npx cdk list --context stage=${STAGE_NAME} || echo "No CDK stacks found"
+          pnpm cdk list --context stage=${STAGE_NAME} || echo "No CDK stacks found"
 
           # Deploy the OIDC stack
           echo "=== Deploying OIDC stack ==="
-          npx cdk deploy MCR-GitHubOIDC-${STAGE_NAME} --context stage=${STAGE_NAME} --require-approval never
+          pnpm cdk deploy MCR-GitHubOIDC-${STAGE_NAME} --context stage=${STAGE_NAME} --require-approval never
 
           echo "=== CDK deployment completed ==="
 
