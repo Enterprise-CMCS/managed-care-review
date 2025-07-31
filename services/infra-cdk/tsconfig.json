@@ -1,43 +1,45 @@
 {
-  "compilerOptions": {
-    "target": "ES2020",
-    "module": "commonjs",
-    "lib": ["es2020", "dom"],
-    "types": ["node"],
-    "declaration": true,
-    "strict": true,
-    "noImplicitAny": true,
-    "strictNullChecks": true,
-    "noImplicitThis": true,
-    "esModuleInterop": true,
-    "skipLibCheck": true,
-    "forceConsistentCasingInFileNames": true,
-    "resolveJsonModule": true,
-    "allowJs": false,
-    "noEmit": true,
-    "inlineSourceMap": true,
-    "inlineSources": true,
-    "experimentalDecorators": true,
-    "strictPropertyInitialization": false,
-    "moduleResolution": "node",
-    "typeRoots": ["./node_modules/@types"],
-    "baseUrl": ".",
-    "paths": {
-      "@config/*": ["lib/config/*"],
-      "@constructs/*": ["lib/constructs/*"],
-      "@stacks/*": ["lib/stacks/*"],
-      "@patterns/*": ["lib/patterns/*"]
-    }
-  },
-  "exclude": [
-    "node_modules",
-    "cdk.out",
-    "coverage",
-    "**/*.test.ts",
-    "**/*.spec.ts"
-  ],
-  "include": [
-    "bin/**/*",
-    "lib/**/*"
-  ]
+    "extends": "../../tsconfig.json",
+    "compilerOptions": {
+        "target": "ESNext",
+        "module": "ESNext",
+        "lib": ["ES2021", "DOM"],
+        "types": ["node", "jest"],
+        "moduleResolution": "bundler",
+        "baseUrl": ".",
+        "experimentalDecorators": true,
+        "emitDecoratorMetadata": true,
+        "preserveConstEnums": true,
+        "skipLibCheck": true,
+        "esModuleInterop": true,
+        "allowSyntheticDefaultImports": true,
+        "resolveJsonModule": true,
+        "declaration": true,
+        "strict": true,
+        "noImplicitAny": true,
+        "strictNullChecks": true,
+        "noImplicitThis": true,
+        "forceConsistentCasingInFileNames": true,
+        "allowJs": false,
+        "noEmit": true,
+        "inlineSourceMap": true,
+        "inlineSources": true,
+        "strictPropertyInitialization": false,
+        "typeRoots": ["./node_modules/@types"],
+        "paths": {
+            "@config/*": ["lib/config/*"],
+            "@constructs/*": ["lib/constructs/*"],
+            "@stacks/*": ["lib/stacks/*"],
+            "@patterns/*": ["lib/patterns/*"]
+        }
+    },
+    "exclude": ["node_modules", "cdk.out", "coverage"],
+    "include": [
+        "bin/**/*",
+        "lib/**/*",
+        "test/**/*",
+        "*.ts",
+        "**/*.ts",
+        "eslint.config.ts"
+    ]
 }

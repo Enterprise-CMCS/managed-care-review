@@ -9,6 +9,14 @@ import duration from 'dayjs/plugin/duration'
 import customParseFormat from 'dayjs/plugin/customParseFormat'
 import isSameOrAfter from 'dayjs/plugin/isSameOrAfter'
 
+import 'dayjs/plugin/advancedFormat'
+import 'dayjs/plugin/isLeapYear'
+import 'dayjs/plugin/timezone'
+import 'dayjs/plugin/utc'
+import 'dayjs/plugin/duration'
+import 'dayjs/plugin/customParseFormat'
+import 'dayjs/plugin/isSameOrAfter'
+
 dayjs.extend(utc)
 dayjs.extend(advancedFormat)
 dayjs.extend(timezone)

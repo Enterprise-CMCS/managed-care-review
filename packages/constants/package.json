@@ -9,6 +9,6 @@
     "license": "ISC",
     "dependencies": {
         "@apollo/client": "3.8.8",
-        "typescript": "5.1.6"
+        "typescript": "5.8.3"
     }
 }

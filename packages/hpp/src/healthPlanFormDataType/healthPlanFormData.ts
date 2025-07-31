@@ -10,7 +10,7 @@ import {
     GeneralizedModifiedProvisions,
 } from './ModifiedProvisions'
 import { generateApplicableProvisionsList } from '../healthPlanSubmissionHelpers/provisions'
-import { dayjs } from '@mc-review/dates'
+import { formatRateNameDate } from '@mc-review/dates'
 import type { LockedHealthPlanFormDataType } from './LockedHealthPlanFormDataType'
 import type { HealthPlanFormDataType } from './HealthPlanFormDataType'
 import type { ProgramArgType } from '.'
@@ -325,12 +325,6 @@ const removeInvalidProvisionsAndAuthorities = (
     return pkg
 }
 
-function formatRateNameDate(date: Date | undefined): string {
-    if (!date) {
-        return ''
-    }
-    return dayjs(date).tz('UTC').format('YYYYMMDD')
-}
 export {
     isContractWithProvisions,
     hasValidModifiedProvisions,

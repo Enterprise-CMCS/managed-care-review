@@ -520,13 +520,13 @@ describe('parseContract', () => {
                 'Unexpected error: Was expecting validateContractDraftRevisionInput to return and error'
             )
         }
-        expect(parsedContract.errors).toHaveLength(6)
-        const errMessages = parsedContract.errors.map((err) => err.message)
+        expect(parsedContract.issues).toHaveLength(6)
+        const errMessages = parsedContract.issues.map((err) => err.message)
         expect(errMessages[0]).toContain(
-            'Array must contain at least 1 element(s)'
+            'Too small: expected array to have >=1 items'
         )
         expect(errMessages[1]).toContain(
-            'Array must contain at least 1 element(s)'
+            'Too small: expected array to have >=1 items'
         )
         expect(errMessages[2]).toContain(
             'cannot submit rates with CHIP only populationCovered'
@@ -714,8 +714,8 @@ describe('parseContract', () => {
                 'Unexpected error: Was expecting validateContractDraftRevisionInput to return and error'
             )
         }
-        expect(parsedContract.errors).toHaveLength(1)
-        const errMessages = parsedContract.errors.map((err) => err.message)
+        expect(parsedContract.issues).toHaveLength(1)
+        const errMessages = parsedContract.issues.map((err) => err.message)
         expect(errMessages[0]).toContain(
             'dsnpContract is required when any of the following Federal Authorities are present: STATE_PLAN,WAIVER_1915B,WAIVER_1115,VOLUNTARY'
         )

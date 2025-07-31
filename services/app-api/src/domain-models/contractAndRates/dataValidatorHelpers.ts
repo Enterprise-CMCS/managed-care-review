@@ -42,7 +42,7 @@ const validateProgramIDs = (stateCode: string, store: Store) => {
         const allPrograms = store.findPrograms(stateCode, programs)
         if (allPrograms instanceof Error) {
             ctx.addIssue({
-                code: z.ZodIssueCode.custom,
+                code: 'custom',
                 message: allPrograms.message,
             })
         }
@@ -58,7 +58,7 @@ const validatePopulationCovered = (
             formData.submissionType === 'CONTRACT_AND_RATES'
         ) {
             ctx.addIssue({
-                code: z.ZodIssueCode.custom,
+                code: 'custom',
                 message:
                     'populationCoveredSchema of CHIP cannot be submissionType of CONTRACT_AND_RATES',
             })
@@ -107,7 +107,7 @@ const refineForFeatureFlags = (featureFlags?: FeatureFlagSettings) => {
                     undefined
                 ) {
                     ctx.addIssue({
-                        code: z.ZodIssueCode.custom,
+                        code: 'custom',
                         message:
                             'statutoryRegulatoryAttestationDescription is required when 438-attestation feature flag is on',
                     })
@@ -123,7 +123,7 @@ const refineForFeatureFlags = (featureFlags?: FeatureFlagSettings) => {
                             .length === 0)
                 ) {
                     ctx.addIssue({
-                        code: z.ZodIssueCode.custom,
+                        code: 'custom',
                         message:
                             'statutoryRegulatoryAttestationDescription is Required if statutoryRegulatoryAttestation is false',
                     })
@@ -142,7 +142,7 @@ const refineForFeatureFlags = (featureFlags?: FeatureFlagSettings) => {
                     contractFormData.dsnpContract === undefined
                 if (dsnpIsRequired && dsnpNotAnswered) {
                     ctx.addIssue({
-                        code: z.ZodIssueCode.custom,
+                        code: 'custom',
                         message: `dsnpContract is required when any of the following Federal Authorities are present: ${dsnpTriggers.toString()}`,
                     })
                 }
@@ -157,7 +157,7 @@ const refineForFeatureFlags = (featureFlags?: FeatureFlagSettings) => {
 
                     if (isDSNPContract && noRateMedicaidPopulations) {
                         ctx.addIssue({
-                            code: z.ZodIssueCode.custom,
+                            code: 'custom',
                             message: `rateMedicaidPopulations is required when dsnpContract is true`,
                         })
                     }
@@ -196,7 +196,7 @@ const parseContract = (
             const findResult = store.findPrograms(stateCode, [...allProgramIDs])
             if (findResult instanceof Error) {
                 ctx.addIssue({
-                    code: z.ZodIssueCode.custom,
+                    code: 'custom',
                     message: findResult.message,
                 })
             }
