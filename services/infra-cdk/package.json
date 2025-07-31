@@ -6,7 +6,7 @@
     "type": "module",
     "scripts": {
         "precommit": "lint-staged",
-        "build": "echo 'Build is handled by CDK synth'",
+        "build": "tsc",
         "watch": "tsc -w",
         "test": "jest",
         "test:watch": "jest --watch",

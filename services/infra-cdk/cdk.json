@@ -1,5 +1,5 @@
 {
-    "app": "pnpm exec ts-node --esm -r tsconfig-paths/register bin/mcr-app.ts",
+    "app": "node build/bin/mcr-app.js",
     "watch": {
         "include": ["**"],
         "exclude": [

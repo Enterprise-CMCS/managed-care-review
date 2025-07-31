@@ -21,7 +21,8 @@
         "noImplicitThis": true,
         "forceConsistentCasingInFileNames": true,
         "allowJs": false,
-        "noEmit": true,
+        "noEmit": false,
+        "outDir": "build",
         "inlineSourceMap": true,
         "inlineSources": true,
         "strictPropertyInitialization": false,
@@ -36,7 +37,14 @@
     "ts-node": {
         "esm": true
     },
-    "exclude": ["node_modules", "cdk.out", "coverage"],
+    "exclude": [
+        "node_modules",
+        "cdk.out",
+        "coverage",
+        "build",
+        "src/lambdas/**/*",
+        "eslint.config.ts"
+    ],
     "include": [
         "bin/**/*",
         "lib/**/*",
