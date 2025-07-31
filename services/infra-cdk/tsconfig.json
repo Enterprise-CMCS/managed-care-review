@@ -33,6 +33,9 @@
             "@patterns/*": ["lib/patterns/*"]
         }
     },
+    "ts-node": {
+        "esm": true
+    },
     "exclude": ["node_modules", "cdk.out", "coverage"],
     "include": [
         "bin/**/*",
