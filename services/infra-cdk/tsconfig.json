@@ -37,7 +37,8 @@
         "node_modules",
         "cdk.out",
         "coverage",
-        "src/lambda-wrappers/**/*.ts"
+        "src/lambda-wrappers/**/*.ts",
+        "src/lambdas/**/*.ts"
     ],
     "include": [
         "bin/**/*",

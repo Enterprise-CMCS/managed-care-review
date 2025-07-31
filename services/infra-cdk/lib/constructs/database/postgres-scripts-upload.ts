@@ -1,33 +1,33 @@
-import { Construct } from 'constructs'
-import type * as s3 from 'aws-cdk-lib/aws-s3'
-import * as lambda from 'aws-cdk-lib/aws-lambda'
-import * as iam from 'aws-cdk-lib/aws-iam'
-import * as cr from 'aws-cdk-lib/custom-resources'
-import { Duration, Size, CustomResource } from 'aws-cdk-lib'
-import * as path from 'path'
-import * as fs from 'fs'
-import { createHash } from 'crypto'
+import { Construct } from 'constructs';
+import type * as s3 from 'aws-cdk-lib/aws-s3';
+import * as lambda from 'aws-cdk-lib/aws-lambda';
+import * as iam from 'aws-cdk-lib/aws-iam';
+import * as cr from 'aws-cdk-lib/custom-resources';
+import { Duration, Size, CustomResource } from 'aws-cdk-lib';
+import * as path from 'path';
+import * as fs from 'fs';
+import { createHash } from 'crypto';
 
 export interface PostgresScriptsUploadProps {
-    /**
-     * The S3 bucket to upload scripts to
-     */
-    bucket: s3.IBucket
-
-    /**
-     * Stage name
-     */
-    stage: string
-
-    /**
-     * Path to the scripts directory
-     */
-    scriptsPath?: string
-
-    /**
-     * Script files to upload
-     */
-    scriptFiles?: string[]
+  /**
+   * The S3 bucket to upload scripts to
+   */
+  bucket: s3.IBucket;
+  
+  /**
+   * Stage name
+   */
+  stage: string;
+  
+  /**
+   * Path to the scripts directory
+   */
+  scriptsPath?: string;
+  
+  /**
+   * Script files to upload
+   */
+  scriptFiles?: string[];
 }
 
 /**
@@ -35,128 +35,110 @@ export interface PostgresScriptsUploadProps {
  * Replaces the serverless hook with CDK-native solution
  */
 export class PostgresScriptsUpload extends Construct {
-    public readonly uploadFunction: lambda.Function
-    public readonly customResource: CustomResource
-
-    constructor(
-        scope: Construct,
-        id: string,
-        props: PostgresScriptsUploadProps
-    ) {
-        super(scope, id)
-
-        const scriptsPath =
-            props.scriptsPath || path.join(__dirname, '../../../vm-scripts')
-        const scriptFiles = props.scriptFiles || [
-            'vm-startup.sh',
-            'vm-shutdown.sh',
-            'slack-notify.service',
-            'authorized_keys',
-        ]
-
-        // Calculate hash of all scripts for change detection
-        const scriptsHash = this.calculateScriptsHash(scriptsPath, scriptFiles)
-
-        // Create the upload Lambda function with robust error handling
-        this.uploadFunction = new lambda.Function(
-            this,
-            'ScriptsUploadFunction',
-            {
-                runtime: lambda.Runtime.NODEJS_20_X,
-                handler: 'index.handler',
-                description: `Upload Postgres VM scripts to S3 with checksum verification - ${props.stage}`,
-                timeout: Duration.minutes(5),
-                memorySize: 512,
-                ephemeralStorageSize: Size.gibibytes(2),
-                environment: {
-                    SCRIPTS_BUCKET: props.bucket.bucketName,
-                    STAGE: props.stage,
-                },
-                code: lambda.Code.fromInline(this.getUploadLambdaCode()),
-            }
-        )
-
-        // Grant permissions to the Lambda
-        props.bucket.grantReadWrite(this.uploadFunction)
-
-        // Create the custom resource provider
-        const provider = new cr.Provider(this, 'ScriptsUploadProvider', {
-            onEventHandler: this.uploadFunction,
-            logRetention: 7,
-        })
-
-        // Create the custom resource
-        this.customResource = new CustomResource(
-            this,
-            'ScriptsUploadResource',
-            {
-                serviceToken: provider.serviceToken,
-                resourceType: 'Custom::PostgresScriptsUpload',
-                properties: {
-                    BucketName: props.bucket.bucketName,
-                    SourceHash: scriptsHash,
-                    ScriptsPath: 'files/',
-                    Scripts: scriptFiles.map((file) => ({
-                        key: `files/${file}`,
-                        path: path.join(scriptsPath, file),
-                        exists: fs.existsSync(path.join(scriptsPath, file)),
-                    })),
-                    Timestamp: new Date().toISOString(),
-                },
-            }
-        )
-
-        // Read and embed script contents for the Lambda
-        const scriptContents: Record<string, string> = {}
-        scriptFiles.forEach((file) => {
-            const filePath = path.join(scriptsPath, file)
-            if (fs.existsSync(filePath)) {
-                scriptContents[file] = fs.readFileSync(filePath, 'utf-8')
-            }
-        })
-
-        // Add inline policy to embed script contents
-        this.uploadFunction.addToRolePolicy(
-            new iam.PolicyStatement({
-                effect: iam.Effect.ALLOW,
-                actions: ['s3:PutObjectTagging', 's3:GetObjectTagging'],
-                resources: [`${props.bucket.bucketArn}/*`],
-            })
-        )
-
-        // Store script contents as environment variable (base64 encoded to handle special chars)
-        this.uploadFunction.addEnvironment(
-            'SCRIPT_CONTENTS',
-            Buffer.from(JSON.stringify(scriptContents)).toString('base64')
-        )
-    }
-
-    /**
-     * Calculate hash of all scripts for change detection
-     */
-    private calculateScriptsHash(
-        scriptsPath: string,
-        scriptFiles: string[]
-    ): string {
-        const hash = createHash('sha256')
-
-        scriptFiles.forEach((file) => {
-            const filePath = path.join(scriptsPath, file)
-            if (fs.existsSync(filePath)) {
-                const content = fs.readFileSync(filePath)
-                hash.update(file)
-                hash.update(content)
-            }
-        })
-
-        return hash.digest('hex').substring(0, 16)
-    }
-
-    /**
-     * Lambda function code for uploading scripts with checksum verification
-     */
-    private getUploadLambdaCode(): string {
-        return `
+  public readonly uploadFunction: lambda.Function;
+  public readonly customResource: CustomResource;
+  
+  constructor(scope: Construct, id: string, props: PostgresScriptsUploadProps) {
+    super(scope, id);
+    
+    const scriptsPath = props.scriptsPath || path.join(__dirname, '../../../vm-scripts');
+    const scriptFiles = props.scriptFiles || [
+      'vm-startup.sh',
+      'vm-shutdown.sh',
+      'slack-notify.service',
+      'authorized_keys'
+    ];
+    
+    // Calculate hash of all scripts for change detection
+    const scriptsHash = this.calculateScriptsHash(scriptsPath, scriptFiles);
+    
+    // Create the upload Lambda function with robust error handling
+    this.uploadFunction = new lambda.Function(this, 'ScriptsUploadFunction', {
+      runtime: lambda.Runtime.NODEJS_20_X,
+      handler: 'index.handler',
+      description: `Upload Postgres VM scripts to S3 with checksum verification - ${props.stage}`,
+      timeout: Duration.minutes(5),
+      memorySize: 512,
+      ephemeralStorageSize: Size.gibibytes(2),
+      environment: {
+        SCRIPTS_BUCKET: props.bucket.bucketName,
+        STAGE: props.stage
+      },
+      code: lambda.Code.fromInline(this.getUploadLambdaCode()),
+    });
+    
+    // Grant permissions to the Lambda
+    props.bucket.grantReadWrite(this.uploadFunction);
+    
+    // Create the custom resource provider
+    const provider = new cr.Provider(this, 'ScriptsUploadProvider', {
+      onEventHandler: this.uploadFunction,
+      logRetention: 7,
+    });
+    
+    // Create the custom resource
+    this.customResource = new CustomResource(this, 'ScriptsUploadResource', {
+      serviceToken: provider.serviceToken,
+      resourceType: 'Custom::PostgresScriptsUpload',
+      properties: {
+        BucketName: props.bucket.bucketName,
+        SourceHash: scriptsHash,
+        ScriptsPath: 'files/',
+        Scripts: scriptFiles.map(file => ({
+          key: `files/${file}`,
+          path: path.join(scriptsPath, file),
+          exists: fs.existsSync(path.join(scriptsPath, file))
+        })),
+        Timestamp: new Date().toISOString()
+      }
+    });
+    
+    // Read and embed script contents for the Lambda
+    const scriptContents: Record<string, string> = {};
+    scriptFiles.forEach(file => {
+      const filePath = path.join(scriptsPath, file);
+      if (fs.existsSync(filePath)) {
+        scriptContents[file] = fs.readFileSync(filePath, 'utf-8');
+      }
+    });
+    
+    // Add inline policy to embed script contents
+    this.uploadFunction.addToRolePolicy(new iam.PolicyStatement({
+      effect: iam.Effect.ALLOW,
+      actions: ['s3:PutObjectTagging', 's3:GetObjectTagging'],
+      resources: [`${props.bucket.bucketArn}/*`]
+    }));
+    
+    // Store script contents as environment variable (base64 encoded to handle special chars)
+    this.uploadFunction.addEnvironment(
+      'SCRIPT_CONTENTS', 
+      Buffer.from(JSON.stringify(scriptContents)).toString('base64')
+    );
+  }
+  
+  /**
+   * Calculate hash of all scripts for change detection
+   */
+  private calculateScriptsHash(scriptsPath: string, scriptFiles: string[]): string {
+    const hash = createHash('sha256');
+    
+    scriptFiles.forEach(file => {
+      const filePath = path.join(scriptsPath, file);
+      if (fs.existsSync(filePath)) {
+        const content = fs.readFileSync(filePath);
+        hash.update(file);
+        hash.update(content);
+      }
+    });
+    
+    return hash.digest('hex').substring(0, 16);
+  }
+  
+  /**
+   * Lambda function code for uploading scripts with checksum verification
+   */
+  private getUploadLambdaCode(): string {
+    return `
 const AWS = require('aws-sdk');
 const s3 = new AWS.S3();
 const crypto = require('crypto');
@@ -203,7 +185,7 @@ async function uploadWithRetry(bucket, key, body, maxRetries = 3) {
       // Calculate MD5 checksum
       const md5Hash = crypto.createHash('md5').update(body).digest('base64');
       
-      console.info(\`Attempt \${attempt}: Uploading \${key} with checksum \${md5Hash}\`);
+      console.log(\`Attempt \${attempt}: Uploading \${key} with checksum \${md5Hash}\`);
       
       // Upload with Content-MD5 for integrity check
       const uploadParams = {
@@ -229,7 +211,7 @@ async function uploadWithRetry(bucket, key, body, maxRetries = 3) {
       const calculatedMd5 = crypto.createHash('md5').update(body).digest('hex');
       
       if (uploadedEtag === calculatedMd5) {
-        console.info(\`Successfully uploaded and verified \${key}\`);
+        console.log(\`Successfully uploaded and verified \${key}\`);
         return { success: true, checksum: uploadedEtag };
       } else {
         throw new Error(\`Checksum mismatch: expected \${calculatedMd5}, got \${uploadedEtag}\`);
@@ -244,7 +226,7 @@ async function uploadWithRetry(bucket, key, body, maxRetries = 3) {
       
       // Exponential backoff: 1s, 2s, 4s
       const delay = Math.pow(2, attempt - 1) * 1000;
-      console.info(\`Retrying in \${delay}ms...\`);
+      console.log(\`Retrying in \${delay}ms...\`);
       await new Promise(resolve => setTimeout(resolve, delay));
     }
   }
@@ -264,7 +246,7 @@ async function isDeploymentNeeded(bucket, sourceHash) {
     
   } catch (error) {
     if (error.code === 'NoSuchKey') {
-      console.info('No previous deployment found, proceeding with upload');
+      console.log('No previous deployment found, proceeding with upload');
       return true;
     }
     throw error;
@@ -273,7 +255,7 @@ async function isDeploymentNeeded(bucket, sourceHash) {
 
 // Main handler
 exports.handler = async (event, context) => {
-  console.info('Event:', JSON.stringify(event, null, 2));
+  console.log('Event:', JSON.stringify(event, null, 2));
   
   try {
     const { RequestType, ResourceProperties } = event;
@@ -281,7 +263,7 @@ exports.handler = async (event, context) => {
     
     // Handle delete requests
     if (RequestType === 'Delete') {
-      console.info('Delete requested, keeping scripts in S3');
+      console.log('Delete requested, keeping scripts in S3');
       await sendResponse(event, context, 'SUCCESS', { 
         message: 'Scripts retained in S3' 
       });
@@ -292,7 +274,7 @@ exports.handler = async (event, context) => {
     const needsDeployment = await isDeploymentNeeded(BucketName, SourceHash);
     
     if (!needsDeployment && RequestType === 'Update') {
-      console.info('No changes detected, skipping upload');
+      console.log('No changes detected, skipping upload');
       await sendResponse(event, context, 'SUCCESS', { 
         message: 'No changes detected',
         skipped: true,
@@ -343,7 +325,7 @@ exports.handler = async (event, context) => {
       ContentType: 'application/json'
     }).promise();
     
-    console.info('All scripts uploaded successfully');
+    console.log('All scripts uploaded successfully');
     await sendResponse(event, context, 'SUCCESS', {
       message: 'Scripts uploaded with verification',
       uploadedCount: successfulUploads.length,
@@ -357,6 +339,6 @@ exports.handler = async (event, context) => {
     });
   }
 };
-`
-    }
+`;
+  }
 }

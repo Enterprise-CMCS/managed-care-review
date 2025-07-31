@@ -37,3 +37,11 @@ lerna-debug.log*
 # Testing
 *.test.js
 *.spec.js
+test-lambdas.sh
+
+# Validation scripts (temporary)
+scripts/validate-cdk-bundle-convergence.sh
+
+# Lambda layer build artifacts
+lambda-layers-*/
+layer-artifacts/

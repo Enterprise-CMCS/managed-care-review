@@ -807,7 +807,7 @@ describe('Admin only settings page tests', () => {
         }
 
         await waitFor(() => {
-            expect(parent).toHaveStyle('border-color: hsl(0, 0%, 70%);')
+            expect(parent).toHaveStyle('border-color: #565C65;')
         })
     })
 })

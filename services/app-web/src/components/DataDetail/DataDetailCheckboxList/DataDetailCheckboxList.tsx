@@ -29,7 +29,9 @@ export const DataDetailCheckboxList = ({
     return (
         <ul>
             {listToDisplay.map((item) => (
-                <li key={item}>{item}</li>
+                <li key={item} data-testid={item}>
+                    {item}
+                </li>
             ))}
         </ul>
     )
