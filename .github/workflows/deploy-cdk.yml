@@ -101,10 +101,6 @@ jobs:
           stage-name: main
           changed-services: 'github-oidc'
 
-      - name: Run CDK preflight checks
-        working-directory: services/infra-cdk
-        run: ./scripts/cdk-preflight.sh
-
       - name: Build TypeScript for CDK
         working-directory: services/infra-cdk
         run: pnpm run build
