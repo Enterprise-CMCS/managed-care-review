@@ -56,7 +56,7 @@ describe('approveContract', () => {
             },
         })
 
-        const draftContract = await createTestContract(stateServer, undefined, { user: stateUser })
+        const draftContract = await createTestContract(stateServer, undefined, undefined, { user: stateUser })
 
         const cmsUser = testCMSUser()
         const approveContractResult = await executeGraphQLOperation(stateServer, {

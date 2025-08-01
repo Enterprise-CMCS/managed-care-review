@@ -6,6 +6,7 @@ import {
 } from '../../testHelpers/userHelpers'
 import { CreateOauthClientDocument } from '../../gen/gqlClient'
 import { sharedTestPrismaClient } from '../../testHelpers/storeHelpers'
+import { extractGraphQLResponse } from '../../testHelpers/apolloV4ResponseHelper'
 
 describe('createOauthClient', () => {
     it('creates a new OAuth client as ADMIN', async () => {
@@ -32,10 +33,13 @@ describe('createOauthClient', () => {
             description: 'Test client',
             userID: cmsUser.id,
         }
-        const res = (await server.executeOperation({
+        const response = await server.executeOperation({
             query: CreateOauthClientDocument,
             variables: { input },
-        })) as { errors?: any; data?: any }
+        }, {
+            contextValue: { user: adminUser },
+        })
+        const res = extractGraphQLResponse(response)
         expect(res.errors).toBeUndefined()
         const oauthClient = res.data?.createOauthClient.oauthClient
         expect(oauthClient).toBeDefined()
@@ -70,10 +74,13 @@ describe('createOauthClient', () => {
             description: 'No grants',
             userID: cmsUser.id,
         }
-        const res = (await server.executeOperation({
+        const response = await server.executeOperation({
             query: CreateOauthClientDocument,
             variables: { input },
-        })) as { errors?: any; data?: any }
+        }, {
+            contextValue: { user: adminUser },
+        })
+        const res = extractGraphQLResponse(response)
         expect(res.errors).toBeUndefined()
         const oauthClient = res.data?.createOauthClient.oauthClient
         expect(oauthClient.grants).toEqual(['client_credentials'])
@@ -89,10 +96,13 @@ describe('createOauthClient', () => {
             userID: stateUser.id,
             description: 'Should fail',
         }
-        const res = (await server.executeOperation({
+        const response = await server.executeOperation({
             query: CreateOauthClientDocument,
             variables: { input },
-        })) as { errors?: any; data?: any }
+        }, {
+            contextValue: { user: stateUser },
+})
+        const res = extractGraphQLResponse(response)
         expect(res.errors?.[0].message).toMatch(/only admin users/i)
     })
 
@@ -113,10 +123,13 @@ describe('createOauthClient', () => {
             userID: cmsUser.id,
             description: 'DB fail',
         }
-        const res = (await server.executeOperation({
+        const response = await server.executeOperation({
             query: CreateOauthClientDocument,
             variables: { input },
-        })) as { errors?: any; data?: any }
+        }, {
+            contextValue: { user: adminUser },
+})
+        const res = extractGraphQLResponse(response)
         expect(res.errors?.[0].message).toMatch(/db fail/i)
     })
 
@@ -133,10 +146,13 @@ describe('createOauthClient', () => {
             userID: 'invalid-user-id',
             description: 'Should fail',
         }
-        const res = (await server.executeOperation({
+        const response = await server.executeOperation({
             query: CreateOauthClientDocument,
             variables: { input },
-        })) as { errors?: any; data?: any }
+        }, {
+            contextValue: { user: adminUser },
+})
+        const res = extractGraphQLResponse(response)
         expect(res.errors?.[0].message).toMatch(
             /User with ID invalid-user-id does not exist/
         )
@@ -156,10 +172,13 @@ describe('createOauthClient', () => {
             userID: 'invalid-user-id',
             description: 'Should fail',
         }
-        const res = (await server.executeOperation({
+        const response = await server.executeOperation({
             query: CreateOauthClientDocument,
             variables: { input },
-        })) as { errors?: any; data?: any }
+        }, {
+            contextValue: { user: adminUser },
+})
+        const res = extractGraphQLResponse(response)
         expect(res.errors?.[0].message).toMatch(/Generic postgres error/)
     })
 
@@ -182,7 +201,7 @@ describe('createOauthClient', () => {
         const server = await constructTestPostgresServer({
             context: { user: adminUser },
         })
-        const res = await server.executeOperation({
+        const response = await server.executeOperation({
             query: CreateOauthClientDocument,
             variables: {
                 input: {
@@ -191,7 +210,10 @@ describe('createOauthClient', () => {
                     userID: cmsUser.id,
                 },
             },
-        })
+        }, {
+            contextValue: { user: adminUser },
+})
+        const res = extractGraphQLResponse(response)
         expect(res.errors).toBeUndefined()
         expect(res.data?.createOauthClient.oauthClient).toBeDefined()
     })
@@ -221,10 +243,13 @@ describe('createOauthClient', () => {
             grants: ['client_credentials'],
             userID: stateUser.id,
         }
-        const res = (await server.executeOperation({
+        const response = await server.executeOperation({
             query: CreateOauthClientDocument,
             variables: { input },
-        })) as { errors?: any; data?: any }
+        }, {
+            contextValue: { user: adminUser },
+})
+        const res = extractGraphQLResponse(response)
         expect(res.errors?.[0].message).toMatch(
             /OAuth clients can only be associated with CMS users/
         )
