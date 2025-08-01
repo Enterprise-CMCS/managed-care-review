@@ -27,6 +27,7 @@ import {
     resubmitTestContract,
     submitTestContract,
     unlockTestContract,
+    unlockTestContractAsUser,
     updateTestContractDraftRevision,
 } from '../../testHelpers/gqlContractHelpers'
 import {
@@ -1197,8 +1198,12 @@ describe('submitContract', () => {
         it('send CMS email to CMS if submission is valid', async () => {
             const config = testEmailConfig()
             const mockEmailer = testEmailer(config)
+            const adminUser = testCMSUser()
             const server = await constructTestPostgresServer({
                 emailer: mockEmailer,
+                context: {
+                    user: adminUser,
+                },
             })
 
             const assignedUsers = [
@@ -1215,7 +1220,7 @@ describe('submitContract', () => {
             const assignedUserIDs = assignedUsers.map((u) => u.id)
             const stateAnalystsEmails = assignedUsers.map((u) => u.email)
             await createDBUsersWithFullData(assignedUsers)
-            await updateTestStateAssignments(server, 'FL', assignedUserIDs)
+            await updateTestStateAssignments(server, 'FL', assignedUserIDs, { user: adminUser })
 
             const submitResult =
                 await createAndSubmitTestContractWithRate(server)
@@ -1271,7 +1276,7 @@ describe('submitContract', () => {
             const assignedUserIDs = assignedUsers.map((u) => u.id)
             const stateAnalystsEmails = assignedUsers.map((u) => u.email)
             await createDBUsersWithFullData(assignedUsers)
-            await updateTestStateAssignments(cmsServer, 'FL', assignedUserIDs)
+            await updateTestStateAssignments(cmsServer, 'FL', assignedUserIDs, { user: cmsUser })
 
             const draft1 = await createAndUpdateTestContractWithoutRates(
                 server,
@@ -1342,7 +1347,7 @@ describe('submitContract', () => {
             const assignedUserIDs = assignedUsers.map((u) => u.id)
             const assignedUserEmails = assignedUsers.map((u) => u.email)
 
-            await updateTestStateAssignments(cmsServer, 'FL', assignedUserIDs)
+            await updateTestStateAssignments(cmsServer, 'FL', assignedUserIDs, { user: cmsUser })
             const submit1 = await createAndSubmitTestContractWithRate(server)
             const contractName =
                 submit1.packageSubmissions[0].contractRevision.contractName
@@ -1367,9 +1372,13 @@ describe('submitContract', () => {
         it('does send email when request for state analysts emails fails', async () => {
             const config = testEmailConfig()
             const mockEmailer = testEmailer(config)
+            const stateUser = testStateUser()
             //mock invoke email submit lambda
             const server = await constructTestPostgresServer({
                 emailer: mockEmailer,
+                context: {
+                    user: stateUser,
+                },
             })
             const draft = await createAndUpdateTestContractWithoutRates(
                 server,
@@ -1385,6 +1394,8 @@ describe('submitContract', () => {
                         contractID: draftID,
                     },
                 },
+            }, {
+                contextValue: { user: stateUser },
             }) as Promise<{ errors?: any; data?: any }>)
 
             expect(mockEmailer.sendEmail).toHaveBeenCalledWith(

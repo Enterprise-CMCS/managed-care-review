@@ -802,7 +802,8 @@ const createTestQuestionResponse = async (
 const updateTestStateAssignments = async (
     server: ApolloServer,
     stateCode: string,
-    assignedUserIDs: string[]
+    assignedUserIDs: string[],
+    context?: Context
 ): Promise<UpdateStateAssignmentsByStatePayload> => {
     const response = await server.executeOperation({
         query: UpdateStateAssignmentsByStateDocument,
@@ -813,7 +814,7 @@ const updateTestStateAssignments = async (
             },
         },
     }, {
-        contextValue: defaultContext(),
+        contextValue: context || defaultContext(),
     })
     
     const updatedAssignments = extractTestResponse(response)

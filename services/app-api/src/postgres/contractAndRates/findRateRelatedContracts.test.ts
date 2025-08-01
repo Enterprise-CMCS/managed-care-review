@@ -3,6 +3,7 @@ import { constructTestPostgresServer } from '../../testHelpers/gqlHelpers'
 import { testCMSUser, testStateUser } from '../../testHelpers/userHelpers'
 import {
     approveTestContract,
+    approveTestContractAsUser,
     createAndSubmitTestContractWithRate,
     createAndUpdateTestContractWithoutRates,
     submitTestContract,
@@ -189,7 +190,7 @@ it('returns related contracts with correct status', async () => {
     )
 
     // approve contractC
-    await approveTestContract(cmsServer, contractC.id, { user: cmsUser })
+    await approveTestContractAsUser(cmsServer, contractC.id, cmsUser)
 
     rateARelatedStrippedContracts = must(
         await findRateRelatedContracts(client, rateAID)

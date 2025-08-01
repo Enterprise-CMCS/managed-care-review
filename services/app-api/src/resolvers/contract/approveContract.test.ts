@@ -125,8 +125,12 @@ describe('approveContract', () => {
     })
 
     it('errors if contract review status is APPROVED', async () => {
+        const stateUser = testStateUser()
         const stateServer = await constructTestPostgresServer({
             s3Client: mockS3,
+            context: {
+                user: stateUser,
+            },
         })
 
         const cmsServer = await constructTestPostgresServer({
@@ -136,7 +140,7 @@ describe('approveContract', () => {
             },
         })
 
-        const contract = await createAndSubmitTestContractWithRate(stateServer)
+        const contract = await createAndSubmitTestContractWithRate(stateServer, undefined, { user: stateUser })
 
         await executeGraphQLOperation(cmsServer, {
             query: ApproveContractDocument,
