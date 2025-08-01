@@ -1,6 +1,6 @@
 import { UpdateContractDocument } from '../../gen/gqlClient'
 import { constructTestPostgresServer } from '../../testHelpers/gqlHelpers'
-import { iterableCmsUsersMockData } from '../../testHelpers/userHelpers'
+import { iterableCmsUsersMockData, testStateUser } from '../../testHelpers/userHelpers'
 import {
     createAndSubmitTestContractWithRate,
     createTestContract,
@@ -32,6 +32,8 @@ describe('updateContract', () => {
                             mccrsID: '1234',
                         },
                     },
+                }, {
+                    contextValue: { user: cmsUser },
                 })
 
                 expect(updateResult.errors).toBeUndefined()
@@ -47,6 +49,8 @@ describe('updateContract', () => {
                                 id: contract.id,
                             },
                         },
+                    }, {
+                        contextValue: { user: cmsUser },
                     })
 
                 expect(updateResult.errors).toBeUndefined()
@@ -76,6 +80,8 @@ describe('updateContract', () => {
                             mccrsID: '1234',
                         },
                     },
+                }, {
+                    contextValue: { user: cmsUser },
                 })
                 expect(updateResult.errors).toBeDefined()
                 if (updateResult.errors === undefined) {
@@ -105,6 +111,8 @@ describe('updateContract', () => {
                             mccrsID: '1234',
                         },
                     },
+                }, {
+                    contextValue: { user: testStateUser() },
                 })
                 expect(updateResult.errors).toBeDefined()
                 if (updateResult.errors === undefined) {

@@ -214,13 +214,15 @@ describe('contractResolver', () => {
             draft.id
         )
 
+        const vaUser = testStateUser({
+            stateCode: 'VA',
+            email: 'aang@mn.gov',
+        })
         const stateServerVA = await constructTestPostgresServer({
             context: {
-                user: testStateUser({
-                    stateCode: 'VA',
-                    email: 'aang@mn.gov',
-                }),
+                user: vaUser,
             },
+            s3Client: mockS3,
         })
 
         const fetchResult = await stateServerVA.executeOperation({
@@ -230,6 +232,8 @@ describe('contractResolver', () => {
                     contractID: stateSubmission.id,
                 },
             },
+        }, {
+            contextValue: { user: vaUser },
         })
 
         expect(fetchResult.errors).toBeDefined()

@@ -92,9 +92,10 @@ describe('fetchContract', () => {
         const stateServer = await constructTestPostgresServer({
             s3Client: mockS3,
         })
+        const cmsUser = testCMSUser()
         const cmsServer = await constructTestPostgresServer({
             context: {
-                user: testCMSUser(),
+                user: cmsUser,
             },
             s3Client: mockS3,
         })
@@ -110,16 +111,16 @@ describe('fetchContract', () => {
 
         const intiallySubmitted = await submitTestContract(stateServer, AID)
 
-        await unlockTestHealthPlanPackage(cmsServer, AID, 'Unlock A.0')
+        await unlockTestHealthPlanPackage(cmsServer, AID, 'Unlock A.0', { user: cmsUser })
         await submitTestContract(stateServer, AID, 'Submit A.1')
 
-        await unlockTestHealthPlanPackage(cmsServer, AID, 'Unlock A.1')
+        await unlockTestHealthPlanPackage(cmsServer, AID, 'Unlock A.1', { user: cmsUser })
         await submitTestContract(stateServer, AID, 'Submit A.2')
 
-        await unlockTestHealthPlanPackage(cmsServer, AID, 'Unlock A.2')
+        await unlockTestHealthPlanPackage(cmsServer, AID, 'Unlock A.2', { user: cmsUser })
         await submitTestContract(stateServer, AID, 'Submit A.3')
 
-        await unlockTestHealthPlanPackage(cmsServer, AID, 'Unlock A.3')
+        await unlockTestHealthPlanPackage(cmsServer, AID, 'Unlock A.3', { user: cmsUser })
         await submitTestContract(stateServer, AID, 'Submit A.4')
 
         const submittedMultiply = await fetchTestContract(stateServer, AID)
@@ -131,7 +132,7 @@ describe('fetchContract', () => {
             intiallySubmitted.initiallySubmittedAt
         )
 
-        await unlockTestHealthPlanPackage(cmsServer, AID, 'Unlock A.4')
+        await unlockTestHealthPlanPackage(cmsServer, AID, 'Unlock A.4', { user: cmsUser })
 
         const finallyUnlocked = await fetchTestContract(stateServer, AID)
         expect(finallyUnlocked.packageSubmissions).toHaveLength(5)

@@ -528,7 +528,8 @@ const resubmitTestHealthPlanPackage = async (
 const unlockTestHealthPlanPackage = async (
     server: ApolloServer,
     pkgID: string,
-    unlockedReason: string
+    unlockedReason: string,
+    context?: Context
 ): Promise<HealthPlanPackage> => {
     const response = await server.executeOperation({
         query: UnlockHealthPlanPackageDocument,
@@ -539,7 +540,7 @@ const unlockTestHealthPlanPackage = async (
             },
         },
     }, {
-        contextValue: defaultContext(),
+        contextValue: context || defaultContext(),
     })
     
     const updateResult = extractTestResponse(response)
@@ -627,7 +628,8 @@ const fetchTestHealthPlanPackageById = async (
 const createTestQuestion = async (
     server: ApolloServer,
     contractID: string,
-    questionData?: Omit<CreateContractQuestionInput, 'contractID'>
+    questionData?: Omit<CreateContractQuestionInput, 'contractID'>,
+    context?: Context
 ): Promise<CreateContractQuestionPayload> => {
     const question = questionData || {
         documents: [
@@ -646,7 +648,7 @@ const createTestQuestion = async (
             },
         },
     }, {
-        contextValue: defaultContext(),
+        contextValue: context || defaultContext(),
     })
     
     const createdQuestion = extractTestResponse(response)
