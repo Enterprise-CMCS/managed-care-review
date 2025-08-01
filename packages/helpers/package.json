@@ -11,7 +11,7 @@
         "@mc-review/hpp": "workspace:*",
         "@mc-review/mocks": "workspace:*",
         "@mc-review/otel": "workspace:*",
-        "typescript": "5.8.3",
+        "typescript": "5.9.2",
         "url-parse": "^1.5.10"
     },
     "devDependencies": {

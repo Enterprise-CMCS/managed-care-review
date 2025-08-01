@@ -22,7 +22,7 @@
         "serverless-iam-helper": "https://github.com/CMSgov/serverless-iam-helper",
         "serverless-s3-bucket-helper": "https://github.com/CMSgov/serverless-s3-bucket-helper",
         "serverless-stack-termination-protection": "^2.0.2",
-        "typescript": "5.8.3"
+        "typescript": "5.9.2"
     },
     "dependencies": {
         "@aws-sdk/client-cloudformation": "^3.857.0",
