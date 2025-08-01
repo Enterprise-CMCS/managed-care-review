@@ -209,7 +209,8 @@ async function createAndSubmitTestContractWithRate(
 ): Promise<Contract> {
     const draft = await createAndUpdateTestContractWithRate(
         server,
-        contractOverrides
+        contractOverrides,
+        context
     )
     return await submitTestContract(server, draft.id, undefined, context)
 }
@@ -244,7 +245,8 @@ async function fetchTestContract(
 async function approveTestContract(
     server: ApolloServer,
     contractID: string,
-    dateApprovalReleasedToState?: string
+    dateApprovalReleasedToState?: string,
+    context?: Context
 ): Promise<Contract> {
     const input = {
         contractID,
@@ -255,7 +257,7 @@ async function approveTestContract(
         query: ApproveContractDocument,
         variables: { input },
     }, {
-        contextValue: defaultContext(),
+        contextValue: context || defaultContext(),
     })
     
     const result = extractGraphQLResponse(response)
@@ -340,7 +342,8 @@ const fetchTestContractWithQuestions = async (
 const createTestContract = async (
     server: ApolloServer,
     stateCode?: StateCodeType,
-    formData?: Partial<ContractFormDataType>
+    formData?: Partial<ContractFormDataType>,
+    context?: Context
 ): Promise<Contract> => {
     const programs = stateCode
         ? [must(findStatePrograms(stateCode))[0]]
@@ -360,7 +363,7 @@ const createTestContract = async (
         query: CreateContractDocument,
         variables: { input },
     }, {
-        contextValue: defaultContext(),
+        contextValue: context || defaultContext(),
     })
     
     const result = extractGraphQLResponse(response)
@@ -380,21 +383,24 @@ const createTestContract = async (
 
 async function createAndUpdateTestContractWithRate(
     server: ApolloServer,
-    contractOverrides?: Partial<HealthPlanFormDataType>
+    contractOverrides?: Partial<HealthPlanFormDataType>,
+    context?: Context
 ): Promise<Contract> {
     const draft = await createAndUpdateTestContractWithoutRates(
         server,
         (contractOverrides?.stateCode as StateCodeType) ?? 'FL',
-        contractOverrides
+        contractOverrides,
+        context
     )
 
-    return await addNewRateToTestContract(server, draft)
+    return await addNewRateToTestContract(server, draft, undefined, context)
 }
 
 const createAndUpdateTestContractWithoutRates = async (
     server: ApolloServer,
     stateCode?: StateCodeType,
-    contractFormDataOverrides?: Partial<HealthPlanFormDataType>
+    contractFormDataOverrides?: Partial<HealthPlanFormDataType>,
+    context?: Context
 ): Promise<Contract> => {
     const pkg = await createTestHealthPlanPackage(server, stateCode)
     const draft = latestFormData(pkg)
