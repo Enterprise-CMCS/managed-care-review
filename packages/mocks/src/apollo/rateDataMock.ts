@@ -38,7 +38,6 @@ const rateRevisionDataMock = (data?: Partial<RateRevision>): RateRevision => {
         formData: {
             rateType: 'AMENDMENT',
             rateCapitationType: 'RATE_CELL',
-            rateMedicaidPopulations: ['MEDICAID_ONLY'],
             rateDocuments: [
                 {
                     id: 'rate-document.pdf',
@@ -401,6 +400,7 @@ function mockRateSubmittedWithQuestions(
                 __typename: 'RateFormData',
                 rateCertificationName: 'rate cert',
                 rateType: 'AMENDMENT',
+                rateMedicaidPopulations: ['MEDICAID_ONLY'],
                 rateCapitationType: 'RATE_CELL',
                 rateDocuments: [
                     {
