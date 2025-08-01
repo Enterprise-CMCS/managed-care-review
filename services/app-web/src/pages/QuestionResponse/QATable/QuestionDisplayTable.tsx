@@ -35,7 +35,7 @@ export const QuestionDisplayTable = ({
             <tbody>
                 {displayDocuments.map((doc, index) => (
                     <tr key={doc.name + index}>
-                        <td>
+                        <th scope="row">
                             {doc.downloadURL ? (
                                 <LinkWithLogging
                                     className={styles.inlineLink}
@@ -48,7 +48,7 @@ export const QuestionDisplayTable = ({
                             ) : (
                                 doc.name
                             )}
-                        </td>
+                        </th>
                         <td>
                             {formatCalendarDate(
                                 doc.createdAt,
