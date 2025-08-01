@@ -15,6 +15,7 @@ import {
     testCMSUser,
     testStateUser,
 } from '../../testHelpers/userHelpers'
+import { extractGraphQLResponse } from '../../testHelpers/apolloV4ResponseHelper'
 
 describe('contractResolver', () => {
     const dmcoCMSUser = testCMSUser({
@@ -61,7 +62,7 @@ describe('contractResolver', () => {
             s3Client: mockS3,
         })
 
-        const draft = await createAndUpdateTestContractWithRate(stateServer)
+        const draft = await createAndUpdateTestContractWithRate(stateServer, undefined, { user: stateUser })
         const stateSubmission = await submitTestContract(stateServer, draft.id, undefined, { user: stateUser })
 
         const createdDMCOQuestion = await createTestQuestion(
@@ -135,7 +136,7 @@ describe('contractResolver', () => {
         const indexQuestionsResult = contractWithQuestions.questions
 
         draft.questions = indexQuestionsResult
-        const fetchContractResult = await stateServer.executeOperation({
+        const response = await stateServer.executeOperation({
             query: FetchContractWithQuestionsDocument,
             variables: {
                 input: {
@@ -145,6 +146,8 @@ describe('contractResolver', () => {
         }, {
             contextValue: { user: stateUser },
         })
+        
+        const fetchContractResult = extractGraphQLResponse(response)
 
         expect(fetchContractResult.errors).toBeUndefined()
 
