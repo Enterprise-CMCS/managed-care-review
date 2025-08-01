@@ -79,13 +79,15 @@ describe('undoWithdrawContract', () => {
             undefined,
             {
                 submissionType: 'CONTRACT_ONLY',
-            }
+            },
+            { user: stateUser }
         )
 
         const withdrawnContract = await withdrawTestContract(
             cmsServer,
             contract.id,
-            'withdraw submission'
+            'withdraw submission',
+            { user: cmsUser }
         )
 
         expect(withdrawnContract.consolidatedStatus).toBe('WITHDRAWN')
@@ -93,7 +95,8 @@ describe('undoWithdrawContract', () => {
         const undoWithdrawnContract = await undoWithdrawTestContract(
             cmsServer,
             contract.id,
-            'Undo submission withdraw done in error.'
+            'Undo submission withdraw done in error.',
+            { user: cmsUser }
         )
 
         const contractHistory = contractHistoryToDescriptions(
@@ -113,7 +116,8 @@ describe('undoWithdrawContract', () => {
             await withdrawTestContract(
                 cmsServer,
                 undoWithdrawnContract.id,
-                'withdraw again'
+                'withdraw again',
+                { user: cmsUser }
             )
         )
 
@@ -122,7 +126,8 @@ describe('undoWithdrawContract', () => {
             await undoWithdrawTestContract(
                 cmsServer,
                 undoWithdrawnContract.id,
-                'undo withdraw again'
+                'undo withdraw again',
+                { user: cmsUser }
             )
         )
 
@@ -131,7 +136,8 @@ describe('undoWithdrawContract', () => {
             await unlockTestContract(
                 cmsServer,
                 undoWithdrawnContract.id,
-                'unlock after undo withdraw'
+                'unlock after undo withdraw',
+                { user: cmsUser }
             )
         )
 
@@ -140,12 +146,13 @@ describe('undoWithdrawContract', () => {
             await submitTestContract(
                 stateServer,
                 undoWithdrawnContract.id,
-                'resubmit'
+                'resubmit',
+                { user: stateUser }
             )
         )
 
         // expect approval without errors
-        must(await approveTestContract(cmsServer, undoWithdrawnContract.id))
+        must(await approveTestContract(cmsServer, undoWithdrawnContract.id, undefined, { user: cmsUser }))
     })
     it('can undo a contract and rate submission withdrawal', async () => {
         const stateServer = await constructTestPostgresServer({
@@ -161,11 +168,11 @@ describe('undoWithdrawContract', () => {
         })
 
         const draftContract =
-            await createAndUpdateTestContractWithRate(stateServer)
+            await createAndUpdateTestContractWithRate(stateServer, undefined, { user: stateUser })
 
-        await addNewRateToTestContract(stateServer, draftContract)
+        await addNewRateToTestContract(stateServer, draftContract, undefined, { user: stateUser })
 
-        const contract = await submitTestContract(stateServer, draftContract.id)
+        const contract = await submitTestContract(stateServer, draftContract.id, undefined, { user: stateUser })
 
         const rateAID = contract.packageSubmissions[0].rateRevisions[0].rateID
         const rateBID = contract.packageSubmissions[0].rateRevisions[1].rateID
@@ -179,7 +186,8 @@ describe('undoWithdrawContract', () => {
         const withdrawnContract = await withdrawTestContract(
             cmsServer,
             contract.id,
-            'withdraw submission'
+            'withdraw submission',
+            { user: cmsUser }
         )
 
         const withdrawnARate = await fetchTestRateById(cmsServer, rateAID)
@@ -193,7 +201,8 @@ describe('undoWithdrawContract', () => {
         const undoWithdrawnContract = await undoWithdrawTestContract(
             cmsServer,
             contract.id,
-            'undo submission withdraw'
+            'undo submission withdraw',
+            { user: cmsUser }
         )
 
         const undoWithdrawnARate = await fetchTestRateById(cmsServer, rateAID)
@@ -208,7 +217,8 @@ describe('undoWithdrawContract', () => {
             await withdrawTestContract(
                 cmsServer,
                 undoWithdrawnContract.id,
-                'withdraw again'
+                'withdraw again',
+                { user: cmsUser }
             )
         )
 
@@ -217,7 +227,8 @@ describe('undoWithdrawContract', () => {
             await undoWithdrawTestContract(
                 cmsServer,
                 undoWithdrawnContract.id,
-                'undo withdraw again'
+                'undo withdraw again',
+                { user: cmsUser }
             )
         )
 
@@ -226,7 +237,8 @@ describe('undoWithdrawContract', () => {
             await unlockTestContract(
                 cmsServer,
                 undoWithdrawnContract.id,
-                'unlock after undo withdraw'
+                'unlock after undo withdraw',
+                { user: cmsUser }
             )
         )
 
@@ -235,12 +247,13 @@ describe('undoWithdrawContract', () => {
             await submitTestContract(
                 stateServer,
                 undoWithdrawnContract.id,
-                'resubmit'
+                'resubmit',
+                { user: stateUser }
             )
         )
 
         // expect approval without errors
-        must(await approveTestContract(cmsServer, undoWithdrawnContract.id))
+        must(await approveTestContract(cmsServer, undoWithdrawnContract.id, undefined, { user: cmsUser }))
     })
     it('can undo a submission withdrawal that had linked child rates', async () => {
         const stateServer = await constructTestPostgresServer({
@@ -288,6 +301,8 @@ describe('undoWithdrawContract', () => {
                         ],
                     },
                 },
+            }, {
+                contextValue: { user: stateUser },
             })
         )
 
@@ -338,6 +353,8 @@ describe('undoWithdrawContract', () => {
                         ],
                     },
                 },
+            }, {
+                contextValue: { user: stateUser },
             })
         )
 
@@ -370,6 +387,8 @@ describe('undoWithdrawContract', () => {
                         ],
                     },
                 },
+            }, {
+                contextValue: { user: stateUser },
             })
         )
 
@@ -543,6 +562,8 @@ describe('undoWithdrawContract', () => {
                         ],
                     },
                 },
+            }, {
+                contextValue: { user: stateUser },
             })
         )
 

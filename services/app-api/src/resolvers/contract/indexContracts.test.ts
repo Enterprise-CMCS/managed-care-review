@@ -34,9 +34,12 @@ describe(`indexContracts`, () => {
             const submittedContract =
                 await createAndSubmitTestContractWithRate(stateServer)
             // then see if we can get that same contract back from the index
-            const result = await stateServer.executeOperation({
+            const response = await stateServer.executeOperation({
                 query: IndexContractsForDashboardDocument,
+            }, {
+                contextValue: { user: testStateUser() },
             })
+            const result = extractGraphQLResponse(response)
 
             expect(result.errors).toBeUndefined()
 
@@ -102,9 +105,12 @@ describe(`indexContracts`, () => {
             )
 
             // index contracts api request
-            const result = await stateServer.executeOperation({
+            const response = await stateServer.executeOperation({
                 query: IndexContractsForDashboardDocument,
+            }, {
+                contextValue: { user: testStateUser() },
             })
+            const result = extractGraphQLResponse(response)
             const submissionsIndex = result.data?.indexContracts
 
             // pull out test related contracts and order them
@@ -154,10 +160,13 @@ describe(`indexContracts`, () => {
                 },
             })
 
-            const result = await otherUserServer.executeOperation({
+            const response = await otherUserServer.executeOperation({
                 query: IndexContractsForDashboardDocument,
                 variables: { input },
+            }, {
+                contextValue: { user: testStateUser() },
             })
+            const result = extractGraphQLResponse(response)
 
             expect(result.errors).toBeUndefined()
             const contracts = result.data?.indexContracts.edges.map(

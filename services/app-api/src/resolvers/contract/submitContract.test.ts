@@ -216,11 +216,11 @@ describe('submitContract', () => {
         await addLinkedRateToTestContract(stateServer, draftB0, OneID)
 
         // 3. Unlock A0, edit and resubmit
-        await unlockTestHealthPlanPackageAsUser(
+        await unlockTestContract(
             cmsServer,
             AID,
             'edit the linked rate, please',
-            cmsUser
+            { user: cmsUser }
         )
 
         const resubmittedA = await submitTestContract(
