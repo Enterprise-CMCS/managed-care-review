@@ -115,9 +115,10 @@ describe('submitContract', () => {
             s3Client: mockS3,
         })
 
+        const cmsUser = testCMSUser()
         const cmsServer = await constructTestPostgresServer({
             context: {
-                user: testCMSUser(),
+                user: cmsUser,
             },
             s3Client: mockS3,
         })
@@ -142,7 +143,8 @@ describe('submitContract', () => {
         await unlockTestContract(
             cmsServer,
             contractID,
-            'Change to contract only'
+            'Change to contract only',
+            { user: cmsUser }
         )
 
         await updateTestContractDraftRevision(stateServer, contractID)
@@ -1430,12 +1432,13 @@ describe('submitContract', () => {
 
         it('send state email to submitter if submission is valid', async () => {
             const mockEmailer = testEmailer()
+            const stateUser = testStateUser({
+                email: 'notspiderman@example.com',
+            })
             const server = await constructTestPostgresServer({
                 emailer: mockEmailer,
                 context: {
-                    user: testStateUser({
-                        email: 'notspiderman@example.com',
-                    }),
+                    user: stateUser,
                 },
             })
             const draft = await createAndUpdateTestContractWithRate(server)
@@ -1448,6 +1451,7 @@ describe('submitContract', () => {
                         contractID: draftID,
                     },
                 },
+                contextValue: { user: stateUser },
             })
 
             expect(submitResult.errors).toBeUndefined()
@@ -1597,8 +1601,12 @@ describe('submitContract', () => {
 
         it('does not send any emails if submission fails', async () => {
             const mockEmailer = testEmailer()
+            const stateUser = testStateUser()
             const server = await constructTestPostgresServer({
                 emailer: mockEmailer,
+                context: {
+                    user: stateUser,
+                },
             })
             // Invalid contract ID
             const draftID = '123'
@@ -1610,6 +1618,7 @@ describe('submitContract', () => {
                         contractID: draftID,
                     },
                 },
+                contextValue: { user: stateUser },
             })
 
             expect(submitResult.errors).toBeDefined()

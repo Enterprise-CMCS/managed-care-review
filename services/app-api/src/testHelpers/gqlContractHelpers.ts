@@ -124,7 +124,8 @@ async function resubmitTestContract(
 async function unlockTestContract(
     server: ApolloServer,
     contractID: string,
-    unlockedReason?: string
+    unlockedReason?: string,
+    context?: Context
 ): Promise<UnlockedContract> {
     const response = await server.executeOperation({
         query: UnlockContractDocument,
@@ -135,7 +136,7 @@ async function unlockTestContract(
             },
         },
     }, {
-        contextValue: defaultContext(),
+        contextValue: context || defaultContext(),
     })
     
     const result = extractGraphQLResponse(response)

@@ -1284,7 +1284,7 @@ describe('withdrawRate invalid status handling', () => {
         await submitTestContract(stateServer, contractID, undefined, { user: stateUser })
         await unlockTestContractAsUser(cmsServer, draftContract.id, 'Unlock contract', cmsUser)
 
-        const response = await cmsServer.executeOperation({
+        const withdrawUnlockedResponse = await cmsServer.executeOperation({
             query: WithdrawRateDocument,
             variables: {
                 input: {
@@ -1296,7 +1296,7 @@ describe('withdrawRate invalid status handling', () => {
             contextValue: { user: cmsUser },
         })
 
-        const failedWithdrawUnlockedRate = extractGraphQLResponse(response)
+        const failedWithdrawUnlockedRate = extractGraphQLResponse(withdrawUnlockedResponse)
 
         // expect error for attempting to withdraw an unlocked rate
         expect(failedWithdrawUnlockedRate.errors?.[0]).toBeDefined()
