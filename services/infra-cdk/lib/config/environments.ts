@@ -1,6 +1,5 @@
 /**
- * Ultra-Lean Environment Configuration
- * Supports dev, val, prod, and ephemeral environments with zero bloat
+ * Supports dev, val, prod, and review environments
  */
 
 import { Duration } from 'aws-cdk-lib'
@@ -185,26 +184,13 @@ const getAccountId = (envVar: string, stage: string): string => {
 
 /**
  * Detect if stage is a review environment
- * Review environments are branch-based deployments for testing
  */
 export function isReviewEnvironment(stage: string): boolean {
     return !['dev', 'val', 'prod'].includes(stage)
 }
 
 /**
- * Extract identifier from review stage name
- * e.g., "featurebranch" -> "featurebranch"
- */
-export function getReviewIdentifier(stage: string): string {
-    if (!isReviewEnvironment(stage)) {
-        throw new Error(`Stage ${stage} is not a review environment`)
-    }
-    return stage
-}
-
-/**
  * Validate stage name follows AWS resource naming rules
- * Based on stage_name_for_branch.sh validation
  */
 function validateStageName(stage: string): void {
     // Rule 1: Only lowercase alphanumeric characters (allowing hyphens for existing compatibility)
