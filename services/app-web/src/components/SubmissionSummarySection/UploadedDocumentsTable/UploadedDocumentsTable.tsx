@@ -14,6 +14,7 @@ import { useLDClient } from 'launchdarkly-react-client-sdk'
 import { featureFlags } from '@mc-review/common-code'
 import { formatCalendarDate } from '@mc-review/dates'
 import { usePreviousSubmission } from '../../../hooks'
+
 // This is used to convert from deprecated FE domain types from protos to GQL GenericDocuments by added in a dateAdded
 export const convertFromSubmissionDocumentsToGenericDocuments = (
     deprecatedDocs: SubmissionDocument[],
@@ -193,7 +194,7 @@ export const UploadedDocumentsTable = ({
                     {refreshedDocs.map((doc) => (
                         <tr key={doc.name}>
                             {doc.url && doc.s3Key ? (
-                                <td>
+                                <th scope="row">
                                     <DocumentTag
                                         isNew={shouldHaveNewTag(doc)}
                                         isShared={showLegacySharedRatesAcross}
@@ -206,15 +207,15 @@ export const UploadedDocumentsTable = ({
                                     >
                                         {doc.name}
                                     </LinkWithLogging>
-                                </td>
+                                </th>
                             ) : (
-                                <td>
+                                <th scope="row">
                                     <DocumentTag
                                         isNew={shouldHaveNewTag(doc)}
                                         isShared={showLegacySharedRatesAcross}
                                     />
                                     {doc.name}
-                                </td>
+                                </th>
                             )}
                             <td>
                                 {canDisplayDateAddedForDocument(doc) ? (
