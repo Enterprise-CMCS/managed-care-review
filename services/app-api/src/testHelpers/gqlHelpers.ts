@@ -765,7 +765,8 @@ const createTestRateQuestionResponse = async (
 const createTestQuestionResponse = async (
     server: ApolloServer,
     questionID: string,
-    responseData?: Omit<InsertQuestionResponseArgs, 'questionID'>
+    responseData?: Omit<InsertQuestionResponseArgs, 'questionID'>,
+    context?: Context
 ): Promise<CreateContractQuestionResponsePayload> => {
     const response = responseData || {
         documents: [
@@ -784,7 +785,7 @@ const createTestQuestionResponse = async (
             },
         },
     }, {
-        contextValue: defaultContext(),
+        contextValue: context || defaultContext(),
     })
     
     const createdResponse = extractTestResponse(result)

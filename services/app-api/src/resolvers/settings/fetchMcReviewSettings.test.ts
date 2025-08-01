@@ -98,6 +98,8 @@ describe('fetchMcReviewSettings', () => {
                     stateAssignments: ['FL'],
                 },
             },
+        }, {
+            contextValue: { user: adminUser },
         })
 
         const assignedFloridaCMSUserResult = extractGraphQLResponse(floridaResponse)

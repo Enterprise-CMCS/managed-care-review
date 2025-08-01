@@ -34,8 +34,12 @@ describe('contractResolver', () => {
     })
 
     it('returns questions associated with a contract', async () => {
+        const stateUser = testStateUser()
         const stateServer = await constructTestPostgresServer({
             s3Client: mockS3,
+            context: {
+                user: stateUser,
+            },
         })
 
         const dmcoCMSServer = await constructTestPostgresServer({
@@ -58,7 +62,7 @@ describe('contractResolver', () => {
         })
 
         const draft = await createAndUpdateTestContractWithRate(stateServer)
-        const stateSubmission = await submitTestContract(stateServer, draft.id)
+        const stateSubmission = await submitTestContract(stateServer, draft.id, undefined, { user: stateUser })
 
         const createdDMCOQuestion = await createTestQuestion(
             dmcoCMSServer,
@@ -70,12 +74,15 @@ describe('contractResolver', () => {
                         s3URL: 's3://bucketname/key/test11',
                     },
                 ],
-            }
+            },
+            { user: dmcoCMSUser }
         )
 
         const responseToDMCO = await createTestQuestionResponse(
             stateServer,
-            createdDMCOQuestion.question.id
+            createdDMCOQuestion.question.id,
+            undefined,
+            { user: stateUser }
         )
 
         const createdDMCPQuestion = await createTestQuestion(
@@ -88,12 +95,15 @@ describe('contractResolver', () => {
                         s3URL: 's3://bucketname/key/test12',
                     },
                 ],
-            }
+            },
+            { user: dmcpCMSUser }
         )
 
         const responseToDMCP = await createTestQuestionResponse(
             stateServer,
-            createdDMCPQuestion.question.id
+            createdDMCPQuestion.question.id,
+            undefined,
+            { user: stateUser }
         )
 
         const createdOACTQuestion = await createTestQuestion(
@@ -106,17 +116,21 @@ describe('contractResolver', () => {
                         s3URL: 's3://bucketname/key/test13',
                     },
                 ],
-            }
+            },
+            { user: oactCMSUser }
         )
 
         const responseToOACT = await createTestQuestionResponse(
             stateServer,
-            createdOACTQuestion.question.id
+            createdOACTQuestion.question.id,
+            undefined,
+            { user: stateUser }
         )
 
         const contractWithQuestions = await fetchTestContractWithQuestions(
             stateServer,
-            stateSubmission.id
+            stateSubmission.id,
+            { user: stateUser }
         )
         const indexQuestionsResult = contractWithQuestions.questions
 
@@ -128,6 +142,8 @@ describe('contractResolver', () => {
                     contractID: stateSubmission.id,
                 },
             },
+        }, {
+            contextValue: { user: stateUser },
         })
 
         expect(fetchContractResult.errors).toBeUndefined()

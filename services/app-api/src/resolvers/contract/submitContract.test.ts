@@ -1588,7 +1588,8 @@ describe('submitContract', () => {
             const submitResult = await resubmitTestContract(
                 stateServerTwo,
                 stateSubmission.id,
-                'Test resubmission reason'
+                'Test resubmission reason',
+                { user: testStateUser({ email: 'notspiderman@example.com' }) }
             )
 
             const currentRevision =

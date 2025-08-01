@@ -308,7 +308,8 @@ async function approveTestContractAsUser(
 
 const fetchTestContractWithQuestions = async (
     server: ApolloServer,
-    contractID: string
+    contractID: string,
+    context?: Context
 ): Promise<Contract> => {
     const response = await server.executeOperation({
         query: FetchContractWithQuestionsDocument,
@@ -318,7 +319,7 @@ const fetchTestContractWithQuestions = async (
             },
         },
     }, {
-        contextValue: defaultContext(),
+        contextValue: context || defaultContext(),
     })
     
     const result = extractGraphQLResponse(response)
