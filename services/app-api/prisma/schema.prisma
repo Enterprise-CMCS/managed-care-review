@@ -193,18 +193,18 @@ model RateRevisionTable {
   rateMedicaidPopulations         RateMedicaidPopulations[]
   rateDocuments                   RateDocument[]
   supportingDocuments             RateSupportingDocument[]
-  rateDateStart                   DateTime?                @db.Date
-  rateDateEnd                     DateTime?                @db.Date
-  rateDateCertified               DateTime?                @db.Date
-  amendmentEffectiveDateStart     DateTime?                @db.Date
-  amendmentEffectiveDateEnd       DateTime?                @db.Date
+  rateDateStart                   DateTime?                 @db.Date
+  rateDateEnd                     DateTime?                 @db.Date
+  rateDateCertified               DateTime?                 @db.Date
+  amendmentEffectiveDateStart     DateTime?                 @db.Date
+  amendmentEffectiveDateEnd       DateTime?                 @db.Date
   deprecatedRateProgramIDs        String[]
   rateProgramIDs                  String[]
   rateCertificationName           String?
-  certifyingActuaryContacts       ActuaryContact[]         @relation(name: "CertifyingActuaryOnRateRevision")
-  addtlActuaryContacts            ActuaryContact[]         @relation(name: "AddtlActuaryOnRateRevision")
+  certifyingActuaryContacts       ActuaryContact[]          @relation(name: "CertifyingActuaryOnRateRevision")
+  addtlActuaryContacts            ActuaryContact[]          @relation(name: "AddtlActuaryOnRateRevision")
   actuaryCommunicationPreference  ActuaryCommunication?
-  contractsWithSharedRateRevision ContractTable[]          @relation(name: "SharedRateRevisions")
+  contractsWithSharedRateRevision ContractTable[]           @relation(name: "SharedRateRevisions")
 
   documentZipPackage DocumentZipPackage[]
 }
@@ -291,6 +291,7 @@ model ContractDocument {
   name               String
   s3URL              String
   sha256             String
+  dateAdded          DateTime?
   contractRevisionID String
   contractRevision   ContractRevisionTable @relation(fields: [contractRevisionID], references: [id])
 }
@@ -303,6 +304,7 @@ model ContractSupportingDocument {
   name               String
   s3URL              String
   sha256             String
+  dateAdded          DateTime?
   contractRevisionID String
   contractRevision   ContractRevisionTable @relation(fields: [contractRevisionID], references: [id])
 }
@@ -315,6 +317,7 @@ model RateDocument {
   name           String
   s3URL          String
   sha256         String
+  dateAdded      DateTime?
   rateRevisionID String
   rateRevision   RateRevisionTable @relation(fields: [rateRevisionID], references: [id], onDelete: Cascade)
 }
@@ -327,6 +330,7 @@ model RateSupportingDocument {
   name           String
   s3URL          String
   sha256         String
+  dateAdded      DateTime?
   rateRevisionID String
   rateRevision   RateRevisionTable @relation(fields: [rateRevisionID], references: [id], onDelete: Cascade)
 }
