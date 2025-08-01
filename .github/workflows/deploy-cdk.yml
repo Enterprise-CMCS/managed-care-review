@@ -101,10 +101,6 @@ jobs:
           stage-name: main
           changed-services: 'github-oidc'
 
-      - name: Build TypeScript for CDK
-        working-directory: services/infra-cdk
-        run: pnpm run build
-
       - name: deploy github-oidc with CDK
         id: deploy-github-oidc-cdk
         working-directory: services/infra-cdk
@@ -118,7 +114,7 @@ jobs:
           echo "=== Current CDK stacks ==="
           pnpm cdk list --context stage=${STAGE_NAME} || echo "No CDK stacks found"
 
-          # Deploy the OIDC stack
+          # Deploy the OIDC stack (CDK will compile TypeScript automatically)
           echo "=== Deploying OIDC stack ==="
           pnpm cdk deploy MCR-GitHubOIDC-${STAGE_NAME} --context stage=${STAGE_NAME} --require-approval never
 

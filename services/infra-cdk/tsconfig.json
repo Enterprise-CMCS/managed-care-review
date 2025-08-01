@@ -1,56 +1,19 @@
 {
     "extends": "../../tsconfig.json",
     "compilerOptions": {
-        "target": "ESNext",
+        "target": "ES2022",
         "module": "ESNext",
-        "lib": ["ES2021", "DOM"],
+        "lib": ["ES2022", "DOM"],
         "types": ["node", "jest"],
         "moduleResolution": "bundler",
-        "baseUrl": ".",
+        "baseUrl": "/",
         "experimentalDecorators": true,
         "emitDecoratorMetadata": true,
         "preserveConstEnums": true,
         "skipLibCheck": true,
         "esModuleInterop": true,
         "allowSyntheticDefaultImports": true,
-        "resolveJsonModule": true,
-        "declaration": true,
-        "strict": true,
-        "noImplicitAny": true,
-        "strictNullChecks": true,
-        "noImplicitThis": true,
-        "forceConsistentCasingInFileNames": true,
-        "allowJs": false,
-        "noEmit": false,
-        "outDir": "build",
-        "inlineSourceMap": true,
-        "inlineSources": true,
-        "strictPropertyInitialization": false,
-        "typeRoots": ["./node_modules/@types"],
-        "paths": {
-            "@config/*": ["lib/config/*"],
-            "@constructs/*": ["lib/constructs/*"],
-            "@stacks/*": ["lib/stacks/*"],
-            "@patterns/*": ["lib/patterns/*"]
-        }
+        "resolveJsonModule": true
     },
-    "ts-node": {
-        "esm": true
-    },
-    "exclude": [
-        "node_modules",
-        "cdk.out",
-        "coverage",
-        "build",
-        "src/lambdas/**/*",
-        "eslint.config.ts"
-    ],
-    "include": [
-        "bin/**/*",
-        "lib/**/*",
-        "test/**/*",
-        "*.ts",
-        "**/*.ts",
-        "eslint.config.ts"
-    ]
+    "include": ["src", "lib", "eslint.config.ts", "jest.config.js"]
 }

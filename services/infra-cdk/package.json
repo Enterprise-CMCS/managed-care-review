@@ -6,7 +6,6 @@
     "type": "module",
     "scripts": {
         "precommit": "lint-staged",
-        "build": "tsc",
         "watch": "tsc -w",
         "test": "jest",
         "test:watch": "jest --watch",
