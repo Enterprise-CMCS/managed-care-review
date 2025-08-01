@@ -20,6 +20,7 @@ import {
     mockGqlContractDraftRevisionFormDataInput,
     testS3Client,
 } from '../../testHelpers'
+import { extractGraphQLResponse } from '../../testHelpers/apolloV4ResponseHelper'
 
 describe('fetchContract', () => {
     const mockS3 = testS3Client()

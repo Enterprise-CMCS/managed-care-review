@@ -18,6 +18,7 @@ import {
     testCMSUser,
     testStateUser,
 } from '../../testHelpers/userHelpers'
+import { extractGraphQLResponse } from '../../testHelpers/apolloV4ResponseHelper'
 import {
     createAndSubmitTestContractWithRate,
     createAndUpdateTestContractWithoutRates,

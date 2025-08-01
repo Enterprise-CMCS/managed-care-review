@@ -24,16 +24,21 @@ import {
     createAndUpdateTestContractWithRate,
 } from '../../testHelpers/gqlContractHelpers'
 import { must } from '../../testHelpers'
+import { extractGraphQLResponse } from '../../testHelpers/apolloV4ResponseHelper'
 
 describe('updateDraftContractRates', () => {
     const mockS3 = testS3Client()
 
     it('returns 404 for an unknown Contract', async () => {
+        const stateUser = testStateUser()
         const stateServer = await constructTestPostgresServer({
             s3Client: mockS3,
+            context: {
+                user: stateUser,
+            },
         })
 
-        const result = await stateServer.executeOperation({
+        const response = await stateServer.executeOperation({
             query: UpdateDraftContractRatesDocument,
             variables: {
                 input: {
@@ -42,7 +47,11 @@ describe('updateDraftContractRates', () => {
                     updatedRates: [],
                 },
             },
+        }, {
+            contextValue: { user: stateUser },
         })
+        
+        const result = extractGraphQLResponse(response)
 
         expect(result.errors).toBeDefined()
         if (!result.errors) {

@@ -26,6 +26,7 @@ import {
     UpdateDraftContractRatesDocument,
 } from '../../gen/gqlClient'
 import { testEmailConfig, testEmailer } from '../../testHelpers/emailerHelpers'
+import { extractGraphQLResponse } from '../../testHelpers/apolloV4ResponseHelper'
 
 const testRateFormInputData = (): RateFormDataInput => ({
     rateType: 'AMENDMENT',

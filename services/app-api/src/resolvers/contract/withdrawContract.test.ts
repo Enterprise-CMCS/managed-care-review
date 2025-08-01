@@ -23,6 +23,7 @@ import {
     fetchTestIndexRatesStripped,
 } from '../../testHelpers/gqlRateHelpers'
 import { testEmailConfig, testEmailer } from '../../testHelpers/emailerHelpers'
+import { extractGraphQLResponse } from '../../testHelpers/apolloV4ResponseHelper'
 
 const testRateFormInputData = (): RateFormDataInput => ({
     rateType: 'AMENDMENT',
@@ -1036,7 +1037,7 @@ describe('withdrawContract', () => {
         expect(rateA.consolidatedStatus).toBe('WITHDRAWN')
 
         // try to resubmit unlocked contract linked to rate without previously having submitted with it.
-        const resubmitContractB = await stateServer.executeOperation({
+        const response = await stateServer.executeOperation({
             query: SubmitContractDocument,
             variables: {
                 input: {
@@ -1049,6 +1050,8 @@ describe('withdrawContract', () => {
                 user: testStateUser(),
             },
         })
+        
+        const resubmitContractB = extractGraphQLResponse(response)
 
         // expect errors when trying to resubmit with a withdrawn rate
         expect(resubmitContractB.errors).toBeDefined()
