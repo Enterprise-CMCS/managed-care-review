@@ -1,5 +1,5 @@
-import { AppConfigLoader } from '../lib/config/app-config'
-import { SynthesizerConfigLoader } from '../lib/config/synthesizer-config'
+import { AppConfigLoader } from '../lib/config/app'
+import { SynthesizerConfigLoader } from '../lib/config/synthesizer'
 import { CdkAppFactory } from '../lib/app-factory'
 
 async function main(): Promise<void> {
