@@ -6,7 +6,7 @@
 import { Duration } from 'aws-cdk-lib'
 import * as logs from 'aws-cdk-lib/aws-logs'
 
-export type Environment = 'dev' | 'val' | 'prod' | 'ephemeral'
+export type Environment = 'dev' | 'val' | 'prod' | 'review'
 
 export interface DatabaseConfig {
     minCapacity: number
@@ -142,7 +142,7 @@ const STAGE_OVERRIDES = {
             requireEmailSender: true,
         },
     },
-    ephemeral: {
+    review: {
         database: { backupRetentionDays: 1, deletionProtection: false },
         lambda: { memorySize: 512 },
         security: {
@@ -184,22 +184,22 @@ const getAccountId = (envVar: string, stage: string): string => {
 }
 
 /**
- * Detect if stage is ephemeral environment
- * Review environments (branch-based) are also considered ephemeral
+ * Detect if stage is a review environment
+ * Review environments are branch-based deployments for testing
  */
-export function isEphemeralEnvironment(stage: string): boolean {
+export function isReviewEnvironment(stage: string): boolean {
     return !['dev', 'val', 'prod'].includes(stage)
 }
 
 /**
- * Extract PR number from ephemeral stage name
- * e.g., "ephemeral-pr-123" -> "123"
+ * Extract identifier from review stage name
+ * e.g., "featurebranch" -> "featurebranch"
  */
-export function getEphemeralIdentifier(stage: string): string {
-    if (!isEphemeralEnvironment(stage)) {
-        throw new Error(`Stage ${stage} is not an ephemeral environment`)
+export function getReviewIdentifier(stage: string): string {
+    if (!isReviewEnvironment(stage)) {
+        throw new Error(`Stage ${stage} is not a review environment`)
     }
-    return stage.replace('ephemeral-', '')
+    return stage
 }
 
 /**
@@ -262,8 +262,8 @@ export function getEnvironment(stage: string): EnvironmentConfig {
     // Validate stage name follows AWS naming rules
     validateStageName(stage)
 
-    // Determine actual stage for ephemeral environments (includes branch-based review envs)
-    const configStage = isEphemeralEnvironment(stage) ? 'ephemeral' : stage
+    // Determine actual stage for review environments (branch-based deployments)
+    const configStage = isReviewEnvironment(stage) ? 'review' : stage
     const overrides =
         STAGE_OVERRIDES[configStage as keyof typeof STAGE_OVERRIDES]
 
@@ -274,7 +274,7 @@ export function getEnvironment(stage: string): EnvironmentConfig {
     }
 
     const accountEnvVar =
-        configStage === 'ephemeral'
+        configStage === 'review'
             ? 'DEV_ACCOUNT_ID'
             : `${configStage.toUpperCase()}_ACCOUNT_ID`
 
