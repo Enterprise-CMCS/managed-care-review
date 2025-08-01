@@ -14,6 +14,7 @@ import type { ContractDraftRevisionFormDataInput } from '../../gen/gqlServer'
 import { testLDService } from '../../testHelpers/launchDarklyHelpers'
 import { submitTestContract } from '../../testHelpers/gqlContractHelpers'
 import { mockGqlContractDraftRevisionFormDataInput } from '../../testHelpers'
+import { extractGraphQLResponse } from '../../testHelpers/apolloV4ResponseHelper'
 
 describe(`Tests UpdateHealthPlanFormData`, () => {
     const cmsUser = testCMSUser()

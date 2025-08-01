@@ -10,7 +10,7 @@ import {
     IndexRatesStrippedDocument,
 } from '../gen/gqlClient'
 import { must } from './assertionHelpers'
-import { defaultFloridaProgram, defaultFloridaRateProgram } from './gqlHelpers'
+import { defaultFloridaProgram, defaultFloridaRateProgram, defaultContext } from './gqlHelpers'
 import { mockRateFormDataInput } from './rateDataMocks'
 import { sharedTestPrismaClient } from './storeHelpers'
 import { updateDraftRate } from '../postgres/contractAndRates/updateDraftRate'
@@ -24,27 +24,35 @@ import type {
     UpdateDraftContractRatesInput,
     Rate,
 } from '../gen/gqlServer'
-import type { ApolloServer } from 'apollo-server-lambda'
+import type { ApolloServer } from '@apollo/server'
 import type {
     RateFormEditableType,
     RateType,
 } from '../domain-models/contractAndRates'
+import type { UserType } from '../domain-models'
 import { createAndSubmitTestContractWithRate } from './gqlContractHelpers'
 import { clearDocMetadata } from './documentHelpers'
+
+import { extractGraphQLResponse } from './apolloV4ResponseHelper'
+import type { Context } from '../handlers/apollo_gql'
 
 const fetchTestRateById = async (
     server: ApolloServer,
     rateID: string
 ): Promise<Rate> => {
     const input = { rateID }
-    const result = await server.executeOperation({
+    const response = await server.executeOperation({
         query: FetchRateDocument,
         variables: { input },
+    }, {
+        contextValue: defaultContext(),
     })
+    
+    const result = extractGraphQLResponse(response)
 
     if (result.errors) {
         throw new Error(
-            `fetchTestRateById query failed with errors ${result.errors}`
+            `fetchTestRateById query failed with errors ${JSON.stringify(result.errors)}`
         )
     }
 
@@ -60,14 +68,18 @@ const fetchTestRateWithQuestionsById = async (
     rateID: string
 ): Promise<Rate> => {
     const input = { rateID }
-    const result = await server.executeOperation({
+    const response = await server.executeOperation({
         query: FetchRateWithQuestionsDocument,
         variables: { input },
+    }, {
+        contextValue: defaultContext(),
     })
+    
+    const result = extractGraphQLResponse(response)
 
     if (result.errors) {
         throw new Error(
-            `fetchTestRateWithQuestionsById query failed with errors ${result.errors}`
+            `fetchTestRateWithQuestionsById query failed with errors ${JSON.stringify(result.errors)}`
         )
     }
 
@@ -81,13 +93,21 @@ const fetchTestRateWithQuestionsById = async (
 // rates must be initially submitted with a contract before they can be unlocked and submitted on their own.
 async function createSubmitAndUnlockTestRate(
     stateServer: ApolloServer,
-    cmsServer: ApolloServer
+    cmsServer: ApolloServer,
+    cmsUser?: UserType,
+    stateUser?: UserType
 ): Promise<Rate> {
-    const contract = await createAndSubmitTestContractWithRate(stateServer)
+    const contract = await createAndSubmitTestContractWithRate(
+        stateServer, 
+        undefined, 
+        stateUser ? { user: stateUser } : undefined
+    )
     const rateRevision = contract.packageSubmissions[0].rateRevisions[0]
     const rateID = rateRevision.rateID
 
-    const unlockedRate = await unlockTestRate(cmsServer, rateID, 'test unlock')
+    const unlockedRate = cmsUser 
+        ? await unlockTestRateAsUser(cmsServer, rateID, 'test unlock', cmsUser)
+        : await unlockTestRate(cmsServer, rateID, 'test unlock')
 
     return unlockedRate
 }
@@ -95,9 +115,10 @@ async function createSubmitAndUnlockTestRate(
 const submitTestRate = async (
     server: ApolloServer,
     rateID: string,
-    submittedReason: string
+    submittedReason: string,
+    context?: Context
 ): Promise<Rate> => {
-    const updateResult = await server.executeOperation({
+    const response = await server.executeOperation({
         query: SubmitRateDocument,
         variables: {
             input: {
@@ -105,16 +126,23 @@ const submitTestRate = async (
                 submittedReason,
             },
         },
+    }, {
+        contextValue: context || defaultContext(),
     })
+    
+    const updateResult = extractGraphQLResponse(response)
 
     if (updateResult.errors) {
         console.info('errors', updateResult.errors)
         throw new Error(
-            `submitTestRate mutation failed with errors ${updateResult.errors}`
+            `submitTestRate mutation failed with errors ${JSON.stringify(updateResult.errors)}`
         )
     }
 
-    if (updateResult.data === undefined || updateResult.data === null) {
+    if (
+        updateResult.data === undefined ||
+        updateResult.data === null
+    ) {
         throw new Error('submitTestRate returned nothing')
     }
 
@@ -126,7 +154,7 @@ const unlockTestRate = async (
     rateID: string,
     unlockedReason: string
 ) => {
-    const updateResult = await server.executeOperation({
+    const response = await server.executeOperation({
         query: UnlockRateDocument,
         variables: {
             input: {
@@ -134,16 +162,60 @@ const unlockTestRate = async (
                 unlockedReason,
             },
         },
+    }, {
+        contextValue: defaultContext(),
     })
+    
+    const updateResult = extractGraphQLResponse(response)
 
     if (updateResult.errors) {
         console.info('errors', updateResult.errors)
         throw new Error(
-            `unlockRate mutation failed with errors ${updateResult.errors}`
+            `unlockRate mutation failed with errors ${JSON.stringify(updateResult.errors)}`
         )
     }
 
-    if (updateResult.data === undefined || updateResult.data === null) {
+    if (
+        updateResult.data === undefined ||
+        updateResult.data === null
+    ) {
+        throw new Error('unlockTestRate returned nothing')
+    }
+
+    return updateResult.data.unlockRate.rate
+}
+
+const unlockTestRateAsUser = async (
+    server: ApolloServer,
+    rateID: string,
+    unlockedReason: string,
+    user: UserType
+) => {
+    const response = await server.executeOperation({
+        query: UnlockRateDocument,
+        variables: {
+            input: {
+                rateID,
+                unlockedReason,
+            },
+        },
+    }, {
+        contextValue: { user },
+    })
+    
+    const updateResult = extractGraphQLResponse(response)
+
+    if (updateResult.errors) {
+        console.info('errors', updateResult.errors)
+        throw new Error(
+            `unlockRate mutation failed with errors ${JSON.stringify(updateResult.errors)}`
+        )
+    }
+
+    if (
+        updateResult.data === undefined ||
+        updateResult.data === null
+    ) {
         throw new Error('unlockTestRate returned nothing')
     }
 
@@ -154,16 +226,20 @@ async function updateTestDraftRatesOnContract(
     server: ApolloServer,
     input: UpdateDraftContractRatesInput
 ): Promise<Contract> {
-    const updateResult = await server.executeOperation({
+    const response = await server.executeOperation({
         query: UpdateDraftContractRatesDocument,
         variables: {
             input,
         },
+    }, {
+        contextValue: defaultContext(),
     })
+    
+    const updateResult = extractGraphQLResponse(response)
 
     if (updateResult.errors || !updateResult.data) {
         throw new Error(
-            `updateDraftContractRates mutation failed with errors ${updateResult.errors}`
+            `updateDraftContractRates mutation failed with errors ${JSON.stringify(updateResult.errors)}`
         )
     }
 
@@ -383,7 +459,7 @@ const createTestDraftRateOnContract = async (
         rateData = mockRateFormDataInput()
     }
 
-    const updateResult = await server.executeOperation({
+    const response = await server.executeOperation({
         query: UpdateDraftContractRatesDocument,
         variables: {
             input: {
@@ -397,12 +473,16 @@ const createTestDraftRateOnContract = async (
                 ],
             },
         },
+    }, {
+        contextValue: defaultContext(),
     })
+    
+    const updateResult = extractGraphQLResponse(response)
 
     if (updateResult.errors || !updateResult.data) {
         console.info('errors', updateResult.errors)
         throw new Error(
-            `updateDraftContractRates mutation failed with errors ${updateResult.errors}`
+            `updateDraftContractRates mutation failed with errors ${JSON.stringify(updateResult.errors)}`
         )
     }
 
@@ -420,7 +500,7 @@ const updateTestDraftRateOnContract = async (
         rateData = mockRateFormDataInput()
     }
 
-    const updateResult = await server.executeOperation({
+    const response = await server.executeOperation({
         query: UpdateDraftContractRatesDocument,
         variables: {
             input: {
@@ -435,12 +515,16 @@ const updateTestDraftRateOnContract = async (
                 ],
             },
         },
+    }, {
+        contextValue: defaultContext(),
     })
+    
+    const updateResult = extractGraphQLResponse(response)
 
     if (updateResult.errors || !updateResult.data) {
         console.info('errors', updateResult.errors)
         throw new Error(
-            `updateDraftContractRates mutation failed with errors ${updateResult.errors}`
+            `updateDraftContractRates mutation failed with errors ${JSON.stringify(updateResult.errors)}`
         )
     }
 
@@ -465,9 +549,10 @@ const updateTestRate = async (
 const withdrawTestRate = async (
     server: ApolloServer,
     rateID: string,
-    updatedReason: string
+    updatedReason: string,
+    context?: Context
 ): Promise<RateType> => {
-    const withdrawResult = await server.executeOperation({
+    const response = await server.executeOperation({
         query: WithdrawRateDocument,
         variables: {
             input: {
@@ -475,16 +560,23 @@ const withdrawTestRate = async (
                 updatedReason,
             },
         },
+    }, {
+        contextValue: context || defaultContext(),
     })
+    
+    const withdrawResult = extractGraphQLResponse(response)
 
     if (withdrawResult.errors) {
         console.info('errors', withdrawResult.errors)
         throw new Error(
-            `withdrawRate mutation failed with errors ${withdrawResult.errors}`
+            `withdrawRate mutation failed with errors ${JSON.stringify(withdrawResult.errors)}`
         )
     }
 
-    if (withdrawResult.data === undefined || withdrawResult.data === null) {
+    if (
+        withdrawResult.data === undefined ||
+        withdrawResult.data === null
+    ) {
         throw new Error('withdrawRate returned nothing')
     }
 
@@ -494,9 +586,10 @@ const withdrawTestRate = async (
 const undoWithdrawTestRate = async (
     server: ApolloServer,
     rateID: string,
-    updatedReason: string
+    updatedReason: string,
+    context?: Context
 ): Promise<RateType> => {
-    const undoWithdrawRate = await server.executeOperation({
+    const response = await server.executeOperation({
         query: UndoWithdrawnRateDocument,
         variables: {
             input: {
@@ -504,16 +597,23 @@ const undoWithdrawTestRate = async (
                 updatedReason,
             },
         },
+    }, {
+        contextValue: context || defaultContext(),
     })
+    
+    const undoWithdrawRate = extractGraphQLResponse(response)
 
     if (undoWithdrawRate.errors) {
         console.info('errors', undoWithdrawRate.errors)
         throw new Error(
-            `undoWithdrawRate mutation failed with errors ${undoWithdrawRate.errors}`
+            `undoWithdrawRate mutation failed with errors ${JSON.stringify(undoWithdrawRate.errors)}`
         )
     }
 
-    if (undoWithdrawRate.data === undefined || undoWithdrawRate.data === null) {
+    if (
+        undoWithdrawRate.data === undefined ||
+        undoWithdrawRate.data === null
+    ) {
         throw new Error('undoWithdrawRate returned nothing')
     }
 
@@ -525,7 +625,7 @@ const fetchTestIndexRatesStripped = async (
     stateCode?: string,
     rateIDs?: string[]
 ): Promise<IndexRatesStrippedPayload> => {
-    const indexRatesStrippedResult = await server.executeOperation({
+    const response = await server.executeOperation({
         query: IndexRatesStrippedDocument,
         variables: {
             input: {
@@ -533,12 +633,16 @@ const fetchTestIndexRatesStripped = async (
                 rateIDs,
             },
         },
+    }, {
+        contextValue: defaultContext(),
     })
+    
+    const indexRatesStrippedResult = extractGraphQLResponse(response)
 
     if (indexRatesStrippedResult.errors) {
         console.info('errors', indexRatesStrippedResult.errors)
         throw new Error(
-            `fetchTestIndexRatesStripped query failed with errors ${indexRatesStrippedResult.errors}`
+            `fetchTestIndexRatesStripped query failed with errors ${JSON.stringify(indexRatesStrippedResult.errors)}`
         )
     }
 
@@ -549,7 +653,8 @@ const fetchTestIndexRatesStripped = async (
         throw new Error('fetchTestIndexRatesStripped returned nothing')
     }
 
-    const indexRatesStripped = indexRatesStrippedResult.data.indexRatesStripped
+    const indexRatesStripped =
+        indexRatesStrippedResult.data.indexRatesStripped
 
     if (!indexRatesStripped || indexRatesStripped.length === 0) {
         throw new Error('fetchTestIndexRatesStripped returned with no rates')
@@ -602,6 +707,7 @@ export {
     fetchTestRateById,
     submitTestRate,
     unlockTestRate,
+    unlockTestRateAsUser,
     updateTestRate,
     formatRateDataForSending,
     fetchTestRateWithQuestionsById,

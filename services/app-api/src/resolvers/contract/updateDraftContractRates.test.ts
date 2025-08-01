@@ -24,16 +24,21 @@ import {
     createAndUpdateTestContractWithRate,
 } from '../../testHelpers/gqlContractHelpers'
 import { must } from '../../testHelpers'
+import { extractGraphQLResponse } from '../../testHelpers/apolloV4ResponseHelper'
 
 describe('updateDraftContractRates', () => {
     const mockS3 = testS3Client()
 
     it('returns 404 for an unknown Contract', async () => {
+        const stateUser = testStateUser()
         const stateServer = await constructTestPostgresServer({
             s3Client: mockS3,
+            context: {
+                user: stateUser,
+            },
         })
 
-        const result = await stateServer.executeOperation({
+        const response = await stateServer.executeOperation({
             query: UpdateDraftContractRatesDocument,
             variables: {
                 input: {
@@ -42,7 +47,11 @@ describe('updateDraftContractRates', () => {
                     updatedRates: [],
                 },
             },
+        }, {
+            contextValue: { user: stateUser },
         })
+        
+        const result = extractGraphQLResponse(response)
 
         expect(result.errors).toBeDefined()
         if (!result.errors) {
@@ -896,17 +905,22 @@ describe('updateDraftContractRates', () => {
     })
 
     it('doesnt allow linking a WITHDRAWN rate', async () => {
+        const stateUser = testStateUser()
         const stateServer = await constructTestPostgresServer({
             s3Client: mockS3,
+            context: {
+                user: stateUser,
+            },
         })
+        const cmsUser = testCMSUser()
         const cmsServer = await constructTestPostgresServer({
             context: {
-                user: testCMSUser(),
+                user: cmsUser,
             },
         })
 
         const otherPackage =
-            await createAndSubmitTestContractWithRate(stateServer)
+            await createAndSubmitTestContractWithRate(stateServer, undefined, { user: stateUser })
 
         const withdrawnRate =
             otherPackage.packageSubmissions[0].rateRevisions[0]
@@ -915,7 +929,8 @@ describe('updateDraftContractRates', () => {
             await withdrawTestRate(
                 cmsServer,
                 withdrawnRate.rateID,
-                'Withdraw rate'
+                'Withdraw rate',
+                { user: cmsUser }
             )
         )
 
@@ -950,23 +965,29 @@ describe('updateDraftContractRates', () => {
     })
 
     it('doesnt allow updating a non-child rate', async () => {
+        const stateUser = testStateUser()
         const stateServer = await constructTestPostgresServer({
             s3Client: mockS3,
+            context: {
+                user: stateUser,
+            },
         })
+        const cmsUser = testCMSUser()
         const cmsServer = await constructTestPostgresServer({
             context: {
-                user: testCMSUser(),
+                user: cmsUser,
             },
             s3Client: mockS3,
         })
 
         const otherPackage =
-            await createAndSubmitTestHealthPlanPackage(stateServer)
+            await createAndSubmitTestHealthPlanPackage(stateServer, { user: stateUser })
 
         await unlockTestHealthPlanPackage(
             cmsServer,
             otherPackage.id,
-            'unlock to not update'
+            'unlock to not update',
+            { user: cmsUser }
         )
 
         const otherFD = latestFormData(otherPackage)

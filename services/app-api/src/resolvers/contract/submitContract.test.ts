@@ -5,6 +5,7 @@ import {
     unlockTestHealthPlanPackage,
     updateTestHealthPlanFormData,
     updateTestStateAssignments,
+    executeGraphQLOperation,
 } from '../../testHelpers/gqlHelpers'
 import { SubmitContractDocument } from '../../gen/gqlClient'
 import { testS3Client } from '../../testHelpers'
@@ -26,6 +27,7 @@ import {
     resubmitTestContract,
     submitTestContract,
     unlockTestContract,
+    unlockTestContractAsUser,
     updateTestContractDraftRevision,
 } from '../../testHelpers/gqlContractHelpers'
 import {
@@ -114,9 +116,10 @@ describe('submitContract', () => {
             s3Client: mockS3,
         })
 
+        const cmsUser = testCMSUser()
         const cmsServer = await constructTestPostgresServer({
             context: {
-                user: testCMSUser(),
+                user: cmsUser,
             },
             s3Client: mockS3,
         })
@@ -141,7 +144,8 @@ describe('submitContract', () => {
         await unlockTestContract(
             cmsServer,
             contractID,
-            'Change to contract only'
+            'Change to contract only',
+            { user: cmsUser }
         )
 
         await updateTestContractDraftRevision(stateServer, contractID)
@@ -212,10 +216,11 @@ describe('submitContract', () => {
         await addLinkedRateToTestContract(stateServer, draftB0, OneID)
 
         // 3. Unlock A0, edit and resubmit
-        await unlockTestHealthPlanPackage(
+        await unlockTestContract(
             cmsServer,
             AID,
-            'edit the linked rate, please'
+            'edit the linked rate, please',
+            { user: cmsUser }
         )
 
         const resubmittedA = await submitTestContract(
@@ -352,9 +357,10 @@ describe('submitContract', () => {
             s3Client: mockS3,
         })
 
+        const cmsUser = testCMSUser()
         const cmsServer = await constructTestPostgresServer({
             context: {
-                user: testCMSUser(),
+                user: cmsUser,
             },
             s3Client: mockS3,
         })
@@ -1058,16 +1064,18 @@ describe('submitContract', () => {
 
     it('returns an error if a CMS user attempts to call submitContract', async () => {
         const stateServer = await constructTestPostgresServer()
+        const cmsUser = testCMSUser()
         const cmsServer = await constructTestPostgresServer({
             context: {
-                user: testCMSUser(),
+                user: cmsUser,
             },
             s3Client: mockS3,
         })
 
         const contract = await createSubmitAndUnlockTestContract(
             stateServer,
-            cmsServer
+            cmsServer,
+            cmsUser
         )
 
         const input = {
@@ -1075,10 +1083,16 @@ describe('submitContract', () => {
             submittedReason: 'Test cms user calling state user func',
         }
 
-        const res = await cmsServer.executeOperation({
+        const response = await cmsServer.executeOperation({
             query: SubmitContractDocument,
             variables: { input },
+        }, {
+            contextValue: {
+                user: cmsUser,
+            },
         })
+        
+        const res = response.body.kind === 'single' ? response.body.singleResult : response
 
         expect(res.errors).toBeDefined()
         expect(res.errors && res.errors[0].message).toBe(
@@ -1114,14 +1128,20 @@ describe('submitContract', () => {
             }
         )
 
-        const res = await stateServer.executeOperation({
+        const response = await stateServer.executeOperation({
             query: SubmitContractDocument,
             variables: {
                 input: {
                     contractID: contract.id,
                 },
             },
+        }, {
+            contextValue: {
+                user: testStateUser(),
+            },
         })
+        
+        const res = response.body.kind === 'single' ? response.body.singleResult : response
 
         expect(res.errors).toBeDefined()
     })
@@ -1132,14 +1152,20 @@ describe('submitContract', () => {
         })
 
         const draft = await createAndUpdateTestContractWithoutRates(stateServer)
-        const res = await stateServer.executeOperation({
+        const response = await stateServer.executeOperation({
             query: SubmitContractDocument,
             variables: {
                 input: {
                     contractID: draft.id,
                 },
             },
+        }, {
+            contextValue: {
+                user: testStateUser(),
+            },
         })
+        
+        const res = response.body.kind === 'single' ? response.body.singleResult : response
 
         expect(res.errors).toBeDefined()
         expect(res.errors).toEqual([
@@ -1172,12 +1198,11 @@ describe('submitContract', () => {
         it('send CMS email to CMS if submission is valid', async () => {
             const config = testEmailConfig()
             const mockEmailer = testEmailer(config)
+            const adminUser = testCMSUser()
             const server = await constructTestPostgresServer({
                 emailer: mockEmailer,
-            })
-            const cmsServer = await constructTestPostgresServer({
                 context: {
-                    user: testCMSUser(),
+                    user: adminUser,
                 },
             })
 
@@ -1195,7 +1220,7 @@ describe('submitContract', () => {
             const assignedUserIDs = assignedUsers.map((u) => u.id)
             const stateAnalystsEmails = assignedUsers.map((u) => u.email)
             await createDBUsersWithFullData(assignedUsers)
-            await updateTestStateAssignments(cmsServer, 'FL', assignedUserIDs)
+            await updateTestStateAssignments(server, 'FL', assignedUserIDs, { user: adminUser })
 
             const submitResult =
                 await createAndSubmitTestContractWithRate(server)
@@ -1229,9 +1254,10 @@ describe('submitContract', () => {
             const server = await constructTestPostgresServer({
                 emailer: mockEmailer,
             })
+            const cmsUser = testCMSUser()
             const cmsServer = await constructTestPostgresServer({
                 context: {
-                    user: testCMSUser(),
+                    user: cmsUser,
                 },
                 emailer: mockEmailer,
             })
@@ -1250,7 +1276,7 @@ describe('submitContract', () => {
             const assignedUserIDs = assignedUsers.map((u) => u.id)
             const stateAnalystsEmails = assignedUsers.map((u) => u.email)
             await createDBUsersWithFullData(assignedUsers)
-            await updateTestStateAssignments(cmsServer, 'FL', assignedUserIDs)
+            await updateTestStateAssignments(cmsServer, 'FL', assignedUserIDs, { user: cmsUser })
 
             const draft1 = await createAndUpdateTestContractWithoutRates(
                 server,
@@ -1258,7 +1284,7 @@ describe('submitContract', () => {
                 { submissionType: 'CONTRACT_ONLY' }
             )
             await submitTestContract(server, draft1.id)
-            await unlockTestContract(cmsServer, draft1.id, 'unlock to resubmit')
+            await unlockTestContractAsUser(cmsServer, draft1.id, 'unlock to resubmit', cmsUser)
             const submit1 = await submitTestContract(
                 server,
                 draft1.id,
@@ -1297,10 +1323,11 @@ describe('submitContract', () => {
                 store: postgresStore,
                 emailer: mockEmailer,
             })
+            const cmsUser = testCMSUser()
             const cmsServer = await constructTestPostgresServer({
                 store: postgresStore,
                 context: {
-                    user: testCMSUser(),
+                    user: cmsUser,
                 },
             })
 
@@ -1320,7 +1347,7 @@ describe('submitContract', () => {
             const assignedUserIDs = assignedUsers.map((u) => u.id)
             const assignedUserEmails = assignedUsers.map((u) => u.email)
 
-            await updateTestStateAssignments(cmsServer, 'FL', assignedUserIDs)
+            await updateTestStateAssignments(cmsServer, 'FL', assignedUserIDs, { user: cmsUser })
             const submit1 = await createAndSubmitTestContractWithRate(server)
             const contractName =
                 submit1.packageSubmissions[0].contractRevision.contractName
@@ -1345,9 +1372,13 @@ describe('submitContract', () => {
         it('does send email when request for state analysts emails fails', async () => {
             const config = testEmailConfig()
             const mockEmailer = testEmailer(config)
+            const stateUser = testStateUser()
             //mock invoke email submit lambda
             const server = await constructTestPostgresServer({
                 emailer: mockEmailer,
+                context: {
+                    user: stateUser,
+                },
             })
             const draft = await createAndUpdateTestContractWithoutRates(
                 server,
@@ -1356,14 +1387,16 @@ describe('submitContract', () => {
             )
             const draftID = draft.id
 
-            await server.executeOperation({
+            await (server.executeOperation({
                 query: SubmitContractDocument,
                 variables: {
                     input: {
                         contractID: draftID,
                     },
                 },
-            })
+            }, {
+                contextValue: { user: stateUser },
+            }) as Promise<{ errors?: any; data?: any }>)
 
             expect(mockEmailer.sendEmail).toHaveBeenCalledWith(
                 expect.objectContaining({
@@ -1410,24 +1443,26 @@ describe('submitContract', () => {
 
         it('send state email to submitter if submission is valid', async () => {
             const mockEmailer = testEmailer()
+            const stateUser = testStateUser({
+                email: 'notspiderman@example.com',
+            })
             const server = await constructTestPostgresServer({
                 emailer: mockEmailer,
                 context: {
-                    user: testStateUser({
-                        email: 'notspiderman@example.com',
-                    }),
+                    user: stateUser,
                 },
             })
             const draft = await createAndUpdateTestContractWithRate(server)
             const draftID = draft.id
 
-            const submitResult = await server.executeOperation({
+            const submitResult = await executeGraphQLOperation(server, {
                 query: SubmitContractDocument,
                 variables: {
                     input: {
                         contractID: draftID,
                     },
                 },
+                contextValue: { user: stateUser },
             })
 
             expect(submitResult.errors).toBeUndefined()
@@ -1458,19 +1493,21 @@ describe('submitContract', () => {
 
             const stateSubmission =
                 await createAndSubmitTestContractWithRate(stateServer)
+            const cmsUser = testCMSUser()
             const cmsServer = await constructTestPostgresServer({
                 context: {
-                    user: testCMSUser(),
+                    user: cmsUser,
                 },
             })
 
-            await unlockTestContract(
+            await unlockTestContractAsUser(
                 cmsServer,
                 stateSubmission.id,
-                'Test unlock reason.'
+                'Test unlock reason.',
+                cmsUser
             )
 
-            const submitResult = await stateServer.executeOperation({
+            const submitResponse = await stateServer.executeOperation({
                 query: SubmitContractDocument,
                 variables: {
                     input: {
@@ -1478,7 +1515,13 @@ describe('submitContract', () => {
                         submittedReason: 'Test resubmitted reason',
                     },
                 },
+            }, {
+                contextValue: {
+                    user: testStateUser(),
+                },
             })
+            
+            const submitResult = submitResponse.body.kind === 'single' ? submitResponse.body.singleResult : submitResponse
 
             const currentRevision =
                 submitResult?.data?.submitContract?.contract
@@ -1528,22 +1571,25 @@ describe('submitContract', () => {
                 { submissionType: 'CONTRACT_ONLY' }
             )
 
+            const cmsUser = testCMSUser()
             const cmsServer = await constructTestPostgresServer({
                 context: {
-                    user: testCMSUser(),
+                    user: cmsUser,
                 },
             })
 
-            await unlockTestContract(
+            await unlockTestContractAsUser(
                 cmsServer,
                 stateSubmission.id,
-                'Test unlock reason.'
+                'Test unlock reason.',
+                cmsUser
             )
 
             const submitResult = await resubmitTestContract(
                 stateServerTwo,
                 stateSubmission.id,
-                'Test resubmission reason'
+                'Test resubmission reason',
+                { user: testStateUser({ email: 'notspiderman@example.com' }) }
             )
 
             const currentRevision =
@@ -1567,19 +1613,24 @@ describe('submitContract', () => {
 
         it('does not send any emails if submission fails', async () => {
             const mockEmailer = testEmailer()
+            const stateUser = testStateUser()
             const server = await constructTestPostgresServer({
                 emailer: mockEmailer,
+                context: {
+                    user: stateUser,
+                },
             })
             // Invalid contract ID
             const draftID = '123'
 
-            const submitResult = await server.executeOperation({
+            const submitResult = await executeGraphQLOperation(server, {
                 query: SubmitContractDocument,
                 variables: {
                     input: {
                         contractID: draftID,
                     },
                 },
+                contextValue: { user: stateUser },
             })
 
             expect(submitResult.errors).toBeDefined()
@@ -1674,8 +1725,12 @@ describe('submitContract', () => {
         })
 
         it('errors when contract 4348 attestation question is undefined', async () => {
+            const stateUser = testStateUser()
             const server = await constructTestPostgresServer({
                 ldService: ldService,
+                context: {
+                    user: stateUser,
+                },
             })
 
             // setup
@@ -1688,13 +1743,14 @@ describe('submitContract', () => {
             await new Promise((resolve) => setTimeout(resolve, 2000))
 
             // submit
-            const submitResult = await server.executeOperation({
+            const submitResult = await executeGraphQLOperation(server, {
                 query: SubmitContractDocument,
                 variables: {
                     input: {
                         contractID: initialContract.id,
                     },
                 },
+                contextValue: { user: stateUser },
             })
 
             expect(submitResult.errors).toBeDefined()
@@ -1702,8 +1758,12 @@ describe('submitContract', () => {
         }, 20000)
 
         it('errors when contract 4348 attestation question is false without a description', async () => {
+            const stateUser = testStateUser()
             const server = await constructTestPostgresServer({
                 ldService: ldService,
+                context: {
+                    user: stateUser,
+                },
             })
 
             // setup
@@ -1716,13 +1776,14 @@ describe('submitContract', () => {
             await new Promise((resolve) => setTimeout(resolve, 2000))
 
             // submit
-            const submitResult = await server.executeOperation({
+            const submitResult = await executeGraphQLOperation(server, {
                 query: SubmitContractDocument,
                 variables: {
                     input: {
                         contractID: initialContract.id,
                     },
                 },
+                contextValue: { user: stateUser },
             })
 
             expect(submitResult.errors).toBeDefined()
@@ -1730,8 +1791,12 @@ describe('submitContract', () => {
         }, 20000)
 
         it('successfully submits when contract 4348 attestation question is valid', async () => {
+            const stateUser = testStateUser()
             const server = await constructTestPostgresServer({
                 ldService: ldService,
+                context: {
+                    user: stateUser,
+                },
             })
 
             // setup
@@ -1748,13 +1813,14 @@ describe('submitContract', () => {
             await new Promise((resolve) => setTimeout(resolve, 2000))
 
             // submit
-            const submitResult = await server.executeOperation({
+            const submitResult = await executeGraphQLOperation(server, {
                 query: SubmitContractDocument,
                 variables: {
                     input: {
                         contractID: initialContract.id,
                     },
                 },
+                contextValue: { user: stateUser },
             })
 
             expect(submitResult.errors).toBeUndefined()

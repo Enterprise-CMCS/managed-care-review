@@ -18,6 +18,7 @@ import {
     testCMSUser,
     testStateUser,
 } from '../../testHelpers/userHelpers'
+import { extractGraphQLResponse } from '../../testHelpers/apolloV4ResponseHelper'
 import {
     createAndSubmitTestContractWithRate,
     createAndUpdateTestContractWithoutRates,
@@ -612,9 +613,10 @@ describe('unlockContract', () => {
         const stateServer = await constructTestPostgresServer({
             store: postgresStore,
         })
+        const cmsUser = testCMSUser()
         const cmsServer = await constructTestPostgresServer({
             context: {
-                user: testCMSUser(),
+                user: cmsUser,
             },
             emailer: mockEmailer,
             store: postgresStore,
@@ -637,7 +639,7 @@ describe('unlockContract', () => {
         const assignedUserIDs = assignedUsers.map((u) => u.id)
         const assignedUserEmails = assignedUsers.map((u) => u.email)
 
-        await updateTestStateAssignments(cmsServer, 'FL', assignedUserIDs)
+        await updateTestStateAssignments(cmsServer, 'FL', assignedUserIDs, { user: cmsUser })
 
         // First, create a new submitted submission
         const stateSubmission = await createAndSubmitTestContractWithRate(
@@ -650,7 +652,8 @@ describe('unlockContract', () => {
         const unlockResult = await unlockTestContract(
             cmsServer,
             stateSubmission.id,
-            'Super duper good reason.'
+            'Super duper good reason.',
+            { user: cmsUser }
         )
 
         const currentRevision = unlockResult.draftRevision
@@ -710,9 +713,10 @@ describe('unlockContract', () => {
                 }),
             },
         })
+        const cmsUser = testCMSUser()
         const cmsServer = await constructTestPostgresServer({
             context: {
-                user: testCMSUser(),
+                user: cmsUser,
             },
             emailer: mockEmailer,
         })
@@ -728,7 +732,8 @@ describe('unlockContract', () => {
         const unlockResult = await unlockTestContract(
             cmsServer,
             stateSubmission.id,
-            'Super duper good reason.'
+            'Super duper good reason.',
+            { user: cmsUser }
         )
 
         await submitTestContract(
@@ -740,7 +745,8 @@ describe('unlockContract', () => {
         await unlockTestContract(
             cmsServer,
             stateSubmission.id,
-            'For a second time.'
+            'For a second time.',
+            { user: cmsUser }
         )
 
         const currentRevision = unlockResult.draftRevision

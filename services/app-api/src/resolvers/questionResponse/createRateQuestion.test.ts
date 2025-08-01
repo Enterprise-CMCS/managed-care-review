@@ -42,7 +42,7 @@ describe('createRateQuestion', () => {
         )
         const rateQuestion = rateQuestionRes?.data?.createRateQuestion
 
-        expect(rateQuestion.question).toEqual(
+        expect(rateQuestion?.question).toEqual(
             expect.objectContaining({
                 id: expect.any(String),
                 rateID: rateID,
@@ -72,14 +72,15 @@ describe('createRateQuestion', () => {
         await unlockTestContract(
             cmsServer,
             submittedContractAndRate.id,
-            'Test unlock reason'
+            'Test unlock reason',
+            { user: cmsUser }
         )
         const rateQuestionRes = must(
             await createTestRateQuestion(cmsServer, rateID)
         )
         const rateQuestion = rateQuestionRes?.data?.createRateQuestion
 
-        expect(rateQuestion.question).toEqual(
+        expect(rateQuestion?.question).toEqual(
             expect.objectContaining({
                 id: expect.any(String),
                 rateID: rateID,
@@ -160,7 +161,8 @@ describe('createRateQuestion', () => {
         const withdrawnRate = await withdrawTestRate(
             cmsServer,
             rateToWithdraw.rateID,
-            'Withdraw rate'
+            'Withdraw rate',
+            { user: cmsUser }
         )
         const rateQuestionForWithdrawnRate = await createTestRateQuestion(
             cmsServer,
@@ -384,7 +386,7 @@ describe('createRateQuestion', () => {
             emailer: mockEmailer,
         })
 
-        const submitResult = await cmsServer.executeOperation({
+        const submitResult = (await cmsServer.executeOperation({
             query: CreateRateQuestionDocument,
             variables: {
                 input: {
@@ -397,7 +399,7 @@ describe('createRateQuestion', () => {
                     ],
                 },
             },
-        })
+        })) as { errors?: any; data?: any }
 
         expect(submitResult.errors).toBeDefined()
         expect(mockEmailer.sendEmail).not.toHaveBeenCalled()
