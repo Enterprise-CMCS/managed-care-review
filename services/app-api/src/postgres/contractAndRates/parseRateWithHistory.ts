@@ -181,10 +181,12 @@ function rateWithoutDraftContractsToDomainModel(
     setDateAddedForRateRevisions(submittedRevisions)
 
     // Add contract date added
+    const packageRateRevisions: RateRevisionType[] = []
     //NOTE: This will not display the actual date added for linked contracts because we do not query all the linked contract revisions
     const packageContractRevisions: { [id: string]: ContractRevisionType[] } =
         {}
     for (const pkg of packageSubmissions) {
+        packageRateRevisions.push(pkg.rateRevision)
         for (const cRev of pkg.contractRevisions) {
             if (!packageContractRevisions[cRev.contract.id]) {
                 packageContractRevisions[cRev.contract.id] = []
@@ -192,6 +194,15 @@ function rateWithoutDraftContractsToDomainModel(
             packageContractRevisions[cRev.contract.id].push(cRev)
         }
     }
+
+    // Set the document date added for packageSubmissions, the data here is isolated from submittedRevisions so we need
+    // to set it again. The frontend uses rate.revisions for rate data
+    /**
+     * Set dateAdded for packageSubmissions.
+     * Frontend currently uses rate.revisions but will migrate to packageSubmissions.
+     * This temporary fix will be removed once dateAdded is set at submission time.
+     */
+    setDateAddedForRateRevisions(packageRateRevisions)
 
     for (const cRevs of Object.values(packageContractRevisions)) {
         setDateAddedForContractRevisions(cRevs)
