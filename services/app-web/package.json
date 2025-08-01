@@ -108,7 +108,7 @@
         "graphql": "^16.9.0",
         "jotai": "^2.9.3",
         "jotai-location": "^0.5.1",
-        "jsdom": "^25.0.1",
+        "jsdom": "^26.1.0",
         "launchdarkly-react-client-sdk": "^3.6.0",
         "path-browserify": "^1.0.1",
         "protobufjs": "^7.3.0",
