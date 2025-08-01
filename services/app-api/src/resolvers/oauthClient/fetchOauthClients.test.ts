@@ -9,6 +9,7 @@ import {
     FetchOauthClientsDocument,
 } from '../../gen/gqlClient'
 import { sharedTestPrismaClient } from '../../testHelpers/storeHelpers'
+import { extractGraphQLResponse } from '../../testHelpers/apolloV4ResponseHelper'
 
 describe('fetchOauthClients', () => {
     it('fetches all OAuth clients as ADMIN', async () => {

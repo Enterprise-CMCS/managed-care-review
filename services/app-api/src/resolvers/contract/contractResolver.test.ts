@@ -244,7 +244,7 @@ describe('contractResolver', () => {
             s3Client: mockS3,
         })
 
-        const fetchResult = await stateServerVA.executeOperation({
+        const response = await stateServerVA.executeOperation({
             query: FetchContractWithQuestionsDocument,
             variables: {
                 input: {
@@ -254,6 +254,8 @@ describe('contractResolver', () => {
         }, {
             contextValue: { user: vaUser },
         })
+        
+        const fetchResult = extractGraphQLResponse(response)
 
         expect(fetchResult.errors).toBeDefined()
         if (fetchResult.errors === undefined) {

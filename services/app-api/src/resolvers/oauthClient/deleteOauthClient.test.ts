@@ -9,6 +9,7 @@ import {
     DeleteOauthClientDocument,
 } from '../../gen/gqlClient'
 import { sharedTestPrismaClient } from '../../testHelpers/storeHelpers'
+import { extractGraphQLResponse } from '../../testHelpers/apolloV4ResponseHelper'
 
 describe('deleteOauthClient', () => {
     it('deletes an OAuth client as ADMIN', async () => {
@@ -31,7 +32,7 @@ describe('deleteOauthClient', () => {
             context: { user: adminUser },
         })
         // Create a client first
-        const createRes = (await server.executeOperation({
+        const createResponse = await server.executeOperation({
             query: CreateOauthClientDocument,
             variables: {
                 input: {
@@ -40,14 +41,20 @@ describe('deleteOauthClient', () => {
                     userID: cmsUser.id,
                 },
             },
-        })) as { errors?: any; data?: any }
+        }, {
+            contextValue: { user: adminUser },
+        })
+        const createRes = extractGraphQLResponse(createResponse)
         expect(createRes.errors).toBeUndefined()
         const clientId = createRes.data?.createOauthClient.oauthClient.clientId
         // Delete it
-        const deleteRes = (await server.executeOperation({
+        const deleteResponse = await server.executeOperation({
             query: DeleteOauthClientDocument,
             variables: { input: { clientId } },
-        })) as { errors?: any; data?: any }
+        }, {
+            contextValue: { user: adminUser },
+        })
+        const deleteRes = extractGraphQLResponse(deleteResponse)
         expect(deleteRes.errors).toBeUndefined()
         expect(deleteRes.data?.deleteOauthClient.oauthClient.clientId).toBe(
             clientId
@@ -59,43 +66,55 @@ describe('deleteOauthClient', () => {
     })
 
     it('errors if not ADMIN', async () => {
+        const stateUser = testStateUser()
         const server = await constructTestPostgresServer({
-            context: { user: testStateUser() },
+            context: { user: stateUser },
         })
-        const res = (await server.executeOperation({
+        const response = await server.executeOperation({
             query: DeleteOauthClientDocument,
             variables: { input: { clientId: 'fake' } },
-        })) as { errors?: any; data?: any }
+        }, {
+            contextValue: { user: stateUser },
+        })
+        const res = extractGraphQLResponse(response)
         expect(res.errors?.[0].message).toBe(
             'user not authorized to delete OAuth clients'
         )
     })
 
     it('errors if client not found', async () => {
+        const adminUser = testAdminUser()
         const server = await constructTestPostgresServer({
-            context: { user: testAdminUser() },
+            context: { user: adminUser },
         })
-        const res = (await server.executeOperation({
+        const response = await server.executeOperation({
             query: DeleteOauthClientDocument,
             variables: { input: { clientId: 'nonexistent' } },
-        })) as { errors?: any; data?: any }
+        }, {
+            contextValue: { user: adminUser },
+        })
+        const res = extractGraphQLResponse(response)
         expect(res.errors?.[0].message).toBe('Failed to delete OAuth client')
         expect(res.errors?.[0].extensions?.code).toBe('INTERNAL_SERVER_ERROR')
         expect(res.errors?.[0].extensions?.cause).toBe('DB_ERROR')
     })
 
     it('errors on DB failure', async () => {
+        const adminUser = testAdminUser()
         const server = await constructTestPostgresServer({
-            context: { user: testAdminUser() },
+            context: { user: adminUser },
             store: {
                 ...{},
                 deleteOAuthClient: async () => new Error('DB fail'),
             },
         })
-        const res = (await server.executeOperation({
+        const response = await server.executeOperation({
             query: DeleteOauthClientDocument,
             variables: { input: { clientId: 'fail' } },
-        })) as { errors?: any; data?: any }
+        }, {
+            contextValue: { user: adminUser },
+        })
+        const res = extractGraphQLResponse(response)
         expect(res.errors?.[0].message).toMatch(/fail/i)
     })
 })

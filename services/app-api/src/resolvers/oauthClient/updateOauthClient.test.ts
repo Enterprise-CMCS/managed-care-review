@@ -9,6 +9,7 @@ import {
     CreateOauthClientDocument,
     UpdateOauthClientDocument,
 } from '../../gen/gqlClient'
+import { extractGraphQLResponse } from '../../testHelpers/apolloV4ResponseHelper'
 
 describe('updateOauthClient', () => {
     it('updates an OAuth client as ADMIN', async () => {
