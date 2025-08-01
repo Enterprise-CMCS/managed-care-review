@@ -111,8 +111,8 @@ jobs:
           echo "Stack name will be: MCR-GitHubOIDC-${STAGE_NAME}"
 
           # List current stacks to see what exists
-          echo "=== Current CDK stacks ==="
-          pnpm cdk list --context stage=${STAGE_NAME} || echo "No CDK stacks found"
+          #echo "=== Current CDK stacks ==="
+          #pnpm cdk list --context stage=${STAGE_NAME} || echo "No CDK stacks found"
 
           # Deploy the OIDC stack (CDK will compile TypeScript automatically)
           echo "=== Deploying OIDC stack ==="

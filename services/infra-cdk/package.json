@@ -3,10 +3,8 @@
     "version": "1.0.0",
     "description": "AWS CDK Infrastructure for Managed Care Review",
     "private": true,
-    "type": "module",
     "scripts": {
         "precommit": "lint-staged",
-        "watch": "tsc -w",
         "test": "jest",
         "test:watch": "jest --watch",
         "test:coverage": "jest --coverage",
