@@ -231,10 +231,11 @@ describe('fetchMcReviewSettings', () => {
     it('uses email settings from database with remove-parameter-store flag on', async () => {
         const prismaClient = await sharedTestPrismaClient()
         const postgresStore = NewPostgresStore(prismaClient)
+        const adminUser = testAdminUser()
 
         const server = await constructTestPostgresServer({
             context: {
-                user: testAdminUser(),
+                user: adminUser,
             },
             ldService: testLDService(
                 {

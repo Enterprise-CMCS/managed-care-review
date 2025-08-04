@@ -717,7 +717,7 @@ describe('withdrawRate', () => {
         const contractB =
             await createAndUpdateTestContractWithoutRates(stateServer)
 
-        // link rate to contract B
+        // link rate to contract B and add another rate to meet requirements
         must(
             await stateServer.executeOperation({
                 query: UpdateDraftContractRatesDocument,
@@ -730,9 +730,15 @@ describe('withdrawRate', () => {
                                 type: 'LINK',
                                 rateID: rateID,
                             },
+                            {
+                                type: 'CREATE',
+                                formData: testRateFormInputData(),
+                            },
                         ],
                     },
                 },
+            }, {
+                contextValue: { user: stateUser },
             })
         )
 
@@ -858,7 +864,7 @@ describe('withdrawRate', () => {
         // contract D is submitted, unlocked, then linked
         const contractD = await createAndSubmitTestContractWithRate(stateServer, undefined, { user: stateUser })
 
-        // link rate to contract B
+        // link rate to contract B and add another rate to meet requirements
         must(
             await stateServer.executeOperation({
                 query: UpdateDraftContractRatesDocument,
@@ -871,9 +877,15 @@ describe('withdrawRate', () => {
                                 type: 'LINK',
                                 rateID: rateID,
                             },
+                            {
+                                type: 'CREATE',
+                                formData: testRateFormInputData(),
+                            },
                         ],
                     },
                 },
+            }, {
+                contextValue: { user: stateUser },
             })
         )
 
@@ -1165,9 +1177,15 @@ describe('withdrawRate', () => {
                                 type: 'LINK',
                                 rateID: rateID,
                             },
+                            {
+                                type: 'CREATE',
+                                formData: testRateFormInputData(),
+                            },
                         ],
                     },
                 },
+            }, {
+                contextValue: { user: stateUser },
             })
         )
         const submittedContractB = await submitTestContract(
@@ -1330,7 +1348,7 @@ describe('withdrawRate invalid status handling', () => {
             })
         )
 
-        const failedWithdrawWithdrawnRate = await cmsServer.executeOperation({
+        const failedWithdrawWithdrawnRateResponse = await cmsServer.executeOperation({
             query: WithdrawRateDocument,
             variables: {
                 input: {
@@ -1338,7 +1356,11 @@ describe('withdrawRate invalid status handling', () => {
                     updatedReason: 'Withdraw already withdrawn rate',
                 },
             },
+        }, {
+            contextValue: { user: cmsUser },
         })
+        
+        const failedWithdrawWithdrawnRate = extractGraphQLResponse(failedWithdrawWithdrawnRateResponse)
 
         // expect error for attempting to withdraw a withdrawn rate
         expect(failedWithdrawWithdrawnRate.errors?.[0]).toBeDefined()

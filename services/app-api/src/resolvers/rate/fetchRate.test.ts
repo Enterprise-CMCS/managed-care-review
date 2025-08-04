@@ -7,6 +7,7 @@ import { testLDService } from '../../testHelpers/launchDarklyHelpers'
 import {
     constructTestPostgresServer,
     createTestRateQuestion,
+    defaultContext,
     defaultFloridaRateProgram,
     unlockTestHealthPlanPackage,
     unlockTestHealthPlanPackageAsUser,
@@ -679,6 +680,8 @@ describe('fetchRate', () => {
                     rateID,
                 },
             },
+        }, {
+            contextValue: defaultContext(),
         })
         const result = extractGraphQLResponse(response)
         const rateQuestions = result.data?.fetchRate.rate.questions
