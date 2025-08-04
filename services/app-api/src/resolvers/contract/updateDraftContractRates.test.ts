@@ -8,6 +8,8 @@ import {
     createAndUpdateTestHealthPlanPackage,
     createTestHealthPlanPackage,
     unlockTestHealthPlanPackage,
+    defaultContext,
+    extractGraphQLResponse,
 } from '../../testHelpers/gqlHelpers'
 import {
     createTestDraftRateOnContract,
@@ -330,7 +332,7 @@ describe('updateDraftContractRates', () => {
         const draft = await createTestHealthPlanPackage(stateServer)
         const draftFD = latestFormData(draft)
 
-        const result = await stateServer.executeOperation({
+        const response = await stateServer.executeOperation({
             query: UpdateDraftContractRatesDocument,
             variables: {
                 input: {
@@ -391,7 +393,11 @@ describe('updateDraftContractRates', () => {
                     ],
                 },
             },
+        }, {
+            contextValue: defaultContext(),
         })
+        
+        const result = extractGraphQLResponse(response)
 
         expect(result.errors).toBeUndefined()
         if (!result.data) {
@@ -413,7 +419,7 @@ describe('updateDraftContractRates', () => {
         const draftFD = latestFormData(draft)
         const rate = draftFD.rateInfos[0]
 
-        const result = await stateServer.executeOperation({
+        const response = await stateServer.executeOperation({
             query: UpdateDraftContractRatesDocument,
             variables: {
                 input: {
@@ -475,7 +481,11 @@ describe('updateDraftContractRates', () => {
                     ],
                 },
             },
+        }, {
+            contextValue: defaultContext(),
         })
+        
+        const result = extractGraphQLResponse(response)
         expect(result.errors).toBeUndefined()
 
         if (!result.data) {
@@ -500,7 +510,7 @@ describe('updateDraftContractRates', () => {
         const draft = await createAndUpdateTestHealthPlanPackage(stateServer)
         const draftFD = latestFormData(draft)
 
-        const result = await stateServer.executeOperation({
+        const response = await stateServer.executeOperation({
             query: UpdateDraftContractRatesDocument,
             variables: {
                 input: {
@@ -562,7 +572,11 @@ describe('updateDraftContractRates', () => {
                     ],
                 },
             },
+        }, {
+            contextValue: defaultContext(),
         })
+        
+        const result = extractGraphQLResponse(response)
         expect(result.errors).toBeDefined()
         expect(result.errors?.[0].extensions?.code).toBe('BAD_USER_INPUT')
         expect(result.errors?.[0].message).toBe(
@@ -581,7 +595,7 @@ describe('updateDraftContractRates', () => {
         const draft2FD = latestFormData(draft2)
         const rate = draft2FD.rateInfos[0]
 
-        const result = await stateServer.executeOperation({
+        const response = await stateServer.executeOperation({
             query: UpdateDraftContractRatesDocument,
             variables: {
                 input: {
@@ -643,7 +657,11 @@ describe('updateDraftContractRates', () => {
                     ],
                 },
             },
+        }, {
+            contextValue: defaultContext(),
         })
+        
+        const result = extractGraphQLResponse(response)
         expect(result.errors).toBeDefined()
         expect(result.errors?.[0].extensions?.code).toBe('BAD_USER_INPUT')
         expect(result.errors?.[0].message).toContain(
@@ -727,7 +745,7 @@ describe('updateDraftContractRates', () => {
         const contractDraft = await createTestHealthPlanPackage(stateServer)
         const draftFD = latestFormData(contractDraft)
 
-        const result = await stateServer.executeOperation({
+        const response = await stateServer.executeOperation({
             query: UpdateDraftContractRatesDocument,
             variables: {
                 input: {
@@ -741,7 +759,11 @@ describe('updateDraftContractRates', () => {
                     ],
                 },
             },
+        }, {
+            contextValue: defaultContext(),
         })
+
+        const result = extractGraphQLResponse(response)
 
         expect(result.errors).toBeUndefined()
         if (!result.data) {
