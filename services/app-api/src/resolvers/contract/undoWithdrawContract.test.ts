@@ -1,4 +1,4 @@
-import { testCMSUser, testStateUser } from '../../testHelpers/userHelpers'
+import { testCMSUser, testStateUser, createDBUsersWithFullData } from '../../testHelpers/userHelpers'
 import {
     constructTestPostgresServer,
     defaultFloridaProgram,
@@ -61,6 +61,11 @@ const testRateFormInputData = (): RateFormDataInput => ({
 describe('undoWithdrawContract', () => {
     const stateUser = testStateUser()
     const cmsUser = testCMSUser()
+    
+    beforeAll(async () => {
+        await createDBUsersWithFullData([stateUser, cmsUser])
+    })
+    
     it('can undo a contract-only submission withdrawal', async () => {
         const stateServer = await constructTestPostgresServer({
             context: {

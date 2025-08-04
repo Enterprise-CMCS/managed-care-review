@@ -49,20 +49,20 @@ describe('createContractQuestionResponse', () => {
 
         const contract = await createAndSubmitTestContractWithRate(stateServer)
 
-        const createdQuestion = await createTestQuestion(cmsServer, contract.id)
+        const createdQuestion = await createTestQuestion(cmsServer, contract.id, undefined, { user: cmsUser })
 
         const createResponseResult = await createTestQuestionResponse(
             stateServer,
-            createdQuestion.question.id
+            createdQuestion.id
         )
 
         expect(createResponseResult.question).toEqual(
             expect.objectContaining({
-                ...createdQuestion.question,
+                ...createdQuestion,
                 responses: expect.arrayContaining([
                     expect.objectContaining({
                         id: expect.any(String),
-                        questionID: createdQuestion.question.id,
+                        questionID: createdQuestion.id,
                         documents: [
                             {
                                 name: 'Test Question Response',
@@ -115,7 +115,7 @@ describe('createContractQuestionResponse', () => {
             },
         })
         const contract = await createAndSubmitTestContractWithRate(stateServer)
-        const createdQuestion = await createTestQuestion(cmsServer, contract.id)
+        const createdQuestion = await createTestQuestion(cmsServer, contract.id, undefined, { user: cmsUser })
         await approveTestContract(cmsServer, contract.id)
 
         const createResponseResult = await stateServer.executeOperation({
@@ -151,7 +151,7 @@ describe('createContractQuestionResponse', () => {
             },
         })
         const contract = await createAndSubmitTestContractWithRate(stateServer)
-        const createdQuestion = await createTestQuestion(cmsServer, contract.id)
+        const createdQuestion = await createTestQuestion(cmsServer, contract.id, undefined, { user: cmsUser })
 
         const createResponseResult = await cmsServer.executeOperation({
             query: CreateContractQuestionResponseDocument,
@@ -209,11 +209,11 @@ describe('createContractQuestionResponse', () => {
             }
         )
 
-        const createdQuestion = await createTestQuestion(cmsServer, contract.id)
+        const createdQuestion = await createTestQuestion(cmsServer, contract.id, undefined, { user: cmsUser })
 
         await createTestQuestionResponse(
             stateServer,
-            createdQuestion?.question.id
+            createdQuestion?.id
         )
 
         const contractName =
@@ -263,11 +263,11 @@ describe('createContractQuestionResponse', () => {
 
         const contract = await createAndSubmitTestContractWithRate(stateServer)
 
-        const createdQuestion = await createTestQuestion(cmsServer, contract.id)
+        const createdQuestion = await createTestQuestion(cmsServer, contract.id, undefined, { user: cmsUser })
 
         await createTestQuestionResponse(
             stateServer,
-            createdQuestion?.question.id
+            createdQuestion?.id
         )
 
         const statePrograms = findStatePrograms(contract.stateCode)

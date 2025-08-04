@@ -99,12 +99,14 @@ describe('createRateQuestionResponse', () => {
 
         const question = await createTestRateQuestion(
             cmsServer,
-            rateID
+            rateID,
+            undefined,
+            { user: cmsUser }
         )
 
         const questionResponseResult = await createTestRateQuestionResponse(
             cmsServer,
-            question.question.id
+            question.id
         )
 
         expect(questionResponseResult.errors).toBeDefined()
@@ -167,6 +169,7 @@ describe('createRateQuestionResponse', () => {
         const oactCMS = testCMSUser({
             divisionAssignment: 'OACT' as const,
         })
+        const adminUser = testAdminUser()
         const stateServer = await constructTestPostgresServer({
             emailer: mockEmailer,
         })
@@ -178,7 +181,7 @@ describe('createRateQuestionResponse', () => {
         })
         const adminServer = await constructTestPostgresServer({
             context: {
-                user: testAdminUser(),
+                user: adminUser,
             },
             emailer: mockEmailer,
         })
@@ -195,12 +198,12 @@ describe('createRateQuestionResponse', () => {
             }),
         ]
 
-        await createDBUsersWithFullData(assignedUsers)
+        await createDBUsersWithFullData([...assignedUsers, oactCMS, adminUser])
 
         const assignedUserIDs = assignedUsers.map((u) => u.id)
         const assignedUserEmails = assignedUsers.map((u) => u.email)
 
-        await updateTestStateAssignments(adminServer, 'FL', assignedUserIDs, { user: testAdminUser() })
+        await updateTestStateAssignments(adminServer, 'FL', assignedUserIDs, { user: adminUser })
 
         const submittedContractAndRate =
             await createAndSubmitTestContractWithRate(stateServer)
