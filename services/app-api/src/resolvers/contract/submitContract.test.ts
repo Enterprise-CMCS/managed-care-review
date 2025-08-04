@@ -1,4 +1,3 @@
-/* eslint-disable  @typescript-eslint/no-non-null-assertion */
 import {
     constructTestPostgresServer,
     defaultFloridaProgram,
@@ -82,7 +81,6 @@ describe('submitContract', () => {
         expect(sub.submittedRevisions).toHaveLength(2)
 
         // check form data is unchanged
-        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
         const draftFormData = updatedDraft.draftRevision!.formData
         const submittedFormData = sub.contractRevision.formData
 
@@ -457,7 +455,8 @@ describe('submitContract', () => {
         const unlockedA0Pkg = await unlockTestHealthPlanPackage(
             cmsServer,
             AID,
-            'Unlock A.0'
+            'Unlock A.0',
+            { user: cmsUser }
         )
         const a0FormData = latestFormData(unlockedA0Pkg)
         a0FormData.submissionDescription = 'DESC A1'
@@ -555,7 +554,8 @@ describe('submitContract', () => {
         const unlockedB0Pkg = await unlockTestHealthPlanPackage(
             cmsServer,
             BID,
-            'Unlock B.0'
+            'Unlock B.0',
+            { user: cmsUser }
         )
         const b0FormData = latestFormData(unlockedB0Pkg)
 
@@ -605,7 +605,8 @@ describe('submitContract', () => {
         const unlockedC0Pkg = await unlockTestHealthPlanPackage(
             cmsServer,
             CID,
-            'Unlock C.0'
+            'Unlock C.0',
+            { user: cmsUser }
         )
         const c0FormData = latestFormData(unlockedC0Pkg)
         c0FormData.submissionDescription = 'DESC C1'
@@ -831,6 +832,7 @@ describe('submitContract', () => {
     it('returns the correct dateAdded for documents', async () => {
         const ldService = testLDService({})
         const prismaClient = await sharedTestPrismaClient()
+        const cmsUser = testCMSUser()
         const stateServer = await constructTestPostgresServer({
             ldService,
             s3Client: mockS3,
@@ -838,7 +840,7 @@ describe('submitContract', () => {
         const cmsServer = await constructTestPostgresServer({
             ldService,
             context: {
-                user: testCMSUser(),
+                user: cmsUser,
             },
             s3Client: mockS3,
         })
@@ -933,7 +935,8 @@ describe('submitContract', () => {
         const unlockedA0Pkg = await unlockTestHealthPlanPackage(
             cmsServer,
             AID,
-            'Unlock A.0'
+            'Unlock A.0',
+            { user: cmsUser }
         )
         const a0FormData = latestFormData(unlockedA0Pkg)
         a0FormData.submissionDescription = 'DESC A1'
@@ -1086,16 +1089,22 @@ describe('submitContract', () => {
             submittedReason: 'Test cms user calling state user func',
         }
 
-        const response = await cmsServer.executeOperation({
-            query: SubmitContractDocument,
-            variables: { input },
-        }, {
-            contextValue: {
-                user: cmsUser,
+        const response = await cmsServer.executeOperation(
+            {
+                query: SubmitContractDocument,
+                variables: { input },
             },
-        })
-        
-        const res = response.body.kind === 'single' ? response.body.singleResult : response
+            {
+                contextValue: {
+                    user: cmsUser,
+                },
+            }
+        )
+
+        const res =
+            response.body.kind === 'single'
+                ? response.body.singleResult
+                : response
 
         expect(res.errors).toBeDefined()
         expect(res.errors && res.errors[0].message).toBe(
@@ -1131,20 +1140,26 @@ describe('submitContract', () => {
             }
         )
 
-        const response = await stateServer.executeOperation({
-            query: SubmitContractDocument,
-            variables: {
-                input: {
-                    contractID: contract.id,
+        const response = await stateServer.executeOperation(
+            {
+                query: SubmitContractDocument,
+                variables: {
+                    input: {
+                        contractID: contract.id,
+                    },
                 },
             },
-        }, {
-            contextValue: {
-                user: testStateUser(),
-            },
-        })
-        
-        const res = response.body.kind === 'single' ? response.body.singleResult : response
+            {
+                contextValue: {
+                    user: testStateUser(),
+                },
+            }
+        )
+
+        const res =
+            response.body.kind === 'single'
+                ? response.body.singleResult
+                : response
 
         expect(res.errors).toBeDefined()
     })
@@ -1155,20 +1170,26 @@ describe('submitContract', () => {
         })
 
         const draft = await createAndUpdateTestContractWithoutRates(stateServer)
-        const response = await stateServer.executeOperation({
-            query: SubmitContractDocument,
-            variables: {
-                input: {
-                    contractID: draft.id,
+        const response = await stateServer.executeOperation(
+            {
+                query: SubmitContractDocument,
+                variables: {
+                    input: {
+                        contractID: draft.id,
+                    },
                 },
             },
-        }, {
-            contextValue: {
-                user: testStateUser(),
-            },
-        })
-        
-        const res = response.body.kind === 'single' ? response.body.singleResult : response
+            {
+                contextValue: {
+                    user: testStateUser(),
+                },
+            }
+        )
+
+        const res =
+            response.body.kind === 'single'
+                ? response.body.singleResult
+                : response
 
         expect(res.errors).toBeDefined()
         expect(res.errors).toEqual([
@@ -1223,7 +1244,9 @@ describe('submitContract', () => {
             const assignedUserIDs = assignedUsers.map((u) => u.id)
             const stateAnalystsEmails = assignedUsers.map((u) => u.email)
             await createDBUsersWithFullData(assignedUsers)
-            await updateTestStateAssignments(server, 'FL', assignedUserIDs, { user: adminUser })
+            await updateTestStateAssignments(server, 'FL', assignedUserIDs, {
+                user: adminUser,
+            })
 
             const submitResult =
                 await createAndSubmitTestContractWithRate(server)
@@ -1249,7 +1272,6 @@ describe('submitContract', () => {
             )
         })
 
-        // eslint-disable-next-line jest/no-focused-tests
         it('send CMS email on contract only re-submission', async () => {
             const config = testEmailConfig()
             const mockEmailer = testEmailer(config)
@@ -1279,7 +1301,9 @@ describe('submitContract', () => {
             const assignedUserIDs = assignedUsers.map((u) => u.id)
             const stateAnalystsEmails = assignedUsers.map((u) => u.email)
             await createDBUsersWithFullData(assignedUsers)
-            await updateTestStateAssignments(cmsServer, 'FL', assignedUserIDs, { user: cmsUser })
+            await updateTestStateAssignments(cmsServer, 'FL', assignedUserIDs, {
+                user: cmsUser,
+            })
 
             const draft1 = await createAndUpdateTestContractWithoutRates(
                 server,
@@ -1287,7 +1311,12 @@ describe('submitContract', () => {
                 { submissionType: 'CONTRACT_ONLY' }
             )
             await submitTestContract(server, draft1.id)
-            await unlockTestContractAsUser(cmsServer, draft1.id, 'unlock to resubmit', cmsUser)
+            await unlockTestContractAsUser(
+                cmsServer,
+                draft1.id,
+                'unlock to resubmit',
+                cmsUser
+            )
             const submit1 = await submitTestContract(
                 server,
                 draft1.id,
@@ -1350,7 +1379,9 @@ describe('submitContract', () => {
             const assignedUserIDs = assignedUsers.map((u) => u.id)
             const assignedUserEmails = assignedUsers.map((u) => u.email)
 
-            await updateTestStateAssignments(cmsServer, 'FL', assignedUserIDs, { user: cmsUser })
+            await updateTestStateAssignments(cmsServer, 'FL', assignedUserIDs, {
+                user: cmsUser,
+            })
             const submit1 = await createAndSubmitTestContractWithRate(server)
             const contractName =
                 submit1.packageSubmissions[0].contractRevision.contractName
@@ -1390,16 +1421,19 @@ describe('submitContract', () => {
             )
             const draftID = draft.id
 
-            await (server.executeOperation({
-                query: SubmitContractDocument,
-                variables: {
-                    input: {
-                        contractID: draftID,
+            await (server.executeOperation(
+                {
+                    query: SubmitContractDocument,
+                    variables: {
+                        input: {
+                            contractID: draftID,
+                        },
                     },
                 },
-            }, {
-                contextValue: { user: stateUser },
-            }) as Promise<{ errors?: any; data?: any }>)
+                {
+                    contextValue: { user: stateUser },
+                }
+            ) as Promise<{ errors?: any; data?: any }>)
 
             expect(mockEmailer.sendEmail).toHaveBeenCalledWith(
                 expect.objectContaining({
@@ -1411,7 +1445,6 @@ describe('submitContract', () => {
         })
 
         // TODO: reimplement this test without using jest
-        // eslint-disable-next-line jest/no-commented-out-tests
         // it('does log error when request for state specific analysts emails failed', async () => {
         //     const consoleErrorSpy = jest.spyOn(console, 'error')
         //     const error = {
@@ -1490,13 +1523,18 @@ describe('submitContract', () => {
             const config = testEmailConfig()
             const mockEmailer = testEmailer(config)
             //mock invoke email submit lambda
+            const stateUser = testStateUser()
+            const cmsUser = testCMSUser()
+            await createDBUsersWithFullData([stateUser, cmsUser])
             const stateServer = await constructTestPostgresServer({
                 emailer: mockEmailer,
+                context: {
+                    user: stateUser,
+                },
             })
 
             const stateSubmission =
                 await createAndSubmitTestContractWithRate(stateServer)
-            const cmsUser = testCMSUser()
             const cmsServer = await constructTestPostgresServer({
                 context: {
                     user: cmsUser,
@@ -1510,21 +1548,27 @@ describe('submitContract', () => {
                 cmsUser
             )
 
-            const submitResponse = await stateServer.executeOperation({
-                query: SubmitContractDocument,
-                variables: {
-                    input: {
-                        contractID: stateSubmission.id,
-                        submittedReason: 'Test resubmitted reason',
+            const submitResponse = await stateServer.executeOperation(
+                {
+                    query: SubmitContractDocument,
+                    variables: {
+                        input: {
+                            contractID: stateSubmission.id,
+                            submittedReason: 'Test resubmitted reason',
+                        },
                     },
                 },
-            }, {
-                contextValue: {
-                    user: testStateUser(),
-                },
-            })
-            
-            const submitResult = submitResponse.body.kind === 'single' ? submitResponse.body.singleResult : submitResponse
+                {
+                    contextValue: {
+                        user: stateUser,
+                    },
+                }
+            )
+
+            const submitResult =
+                submitResponse.body.kind === 'single'
+                    ? submitResponse.body.singleResult
+                    : submitResponse
 
             const currentRevision =
                 submitResult?.data?.submitContract?.contract
@@ -1551,20 +1595,24 @@ describe('submitContract', () => {
             const config = testEmailConfig()
             const mockEmailer = testEmailer(config)
             //mock invoke email submit lambda
+            const stateUser1 = testStateUser({
+                email: 'alsonotspiderman@example.com',
+            })
+            const stateUser2 = testStateUser({
+                email: 'notspiderman@example.com',
+            })
+            const cmsUser = testCMSUser()
+            await createDBUsersWithFullData([stateUser1, stateUser2, cmsUser])
             const stateServer = await constructTestPostgresServer({
                 context: {
-                    user: testStateUser({
-                        email: 'alsonotspiderman@example.com',
-                    }),
+                    user: stateUser1,
                 },
             })
 
             const stateServerTwo = await constructTestPostgresServer({
                 emailer: mockEmailer,
                 context: {
-                    user: testStateUser({
-                        email: 'notspiderman@example.com',
-                    }),
+                    user: stateUser2,
                 },
             })
 
@@ -1574,7 +1622,6 @@ describe('submitContract', () => {
                 { submissionType: 'CONTRACT_ONLY' }
             )
 
-            const cmsUser = testCMSUser()
             const cmsServer = await constructTestPostgresServer({
                 context: {
                     user: cmsUser,
@@ -1592,7 +1639,7 @@ describe('submitContract', () => {
                 stateServerTwo,
                 stateSubmission.id,
                 'Test resubmission reason',
-                { user: testStateUser({ email: 'notspiderman@example.com' }) }
+                { user: stateUser2 }
             )
 
             const currentRevision =
@@ -1600,8 +1647,9 @@ describe('submitContract', () => {
 
             const name = currentRevision.contractName
 
-            // email subject line is correct for CMS email and contains correct email body text
-            expect(mockEmailer.sendEmail).toHaveBeenCalledWith(
+            // email subject line is correct for STATE email and contains correct email body text
+            expect(mockEmailer.sendEmail).toHaveBeenNthCalledWith(
+                2, // The second email is the state email
                 expect.objectContaining({
                     subject: expect.stringContaining(`${name} was resubmitted`),
                     sourceEmail: config.emailSource,
@@ -1647,10 +1695,12 @@ describe('submitContract', () => {
             const ldService = testLDService({
                 'remove-parameter-store': true,
             })
+            const stateUser = testStateUser()
+            await createDBUsersWithFullData([stateUser])
 
             const stateServer = await constructTestPostgresServer({
                 context: {
-                    user: testStateUser(),
+                    user: stateUser,
                 },
                 ldService,
                 emailer: mockEmailer,
@@ -1670,20 +1720,19 @@ describe('submitContract', () => {
                     subject: expect.stringContaining(
                         `New Managed Care Submission: ${name}`
                     ),
-                    sourceEmail: 'mc-review@cms.hhs.gov',
-                    toAddresses: expect.arrayContaining(
-                        Array.from([
-                            'mc-review-qa+DevTeam@truss.works',
-                            'mc-review-qa+DMCPsubmissiondev1@truss.works',
-                            'mc-review-qa+DMCPsubmissiondev2@truss.works',
-                        ])
-                    ),
+                    sourceEmail: expect.stringContaining('local@example.com'),
+                    toAddresses: expect.arrayContaining([
+                        expect.stringContaining('Dev.reviewer.1@example.com'),
+                        expect.stringContaining('Dev.reviewer.2@example.com'),
+                        expect.stringContaining(
+                            'dmcp-submission-reviewer.1@example.com'
+                        ),
+                    ]),
                 })
             )
         })
 
         // TODO: reimplement this test without using jest
-        // eslint-disable-next-line jest/no-commented-out-tests
         // it('errors when SES email has failed.', async () => {
         //     const mockEmailer = testEmailer()
 
