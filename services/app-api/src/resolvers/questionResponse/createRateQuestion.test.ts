@@ -38,7 +38,9 @@ describe('createRateQuestion', () => {
             submittedContractAndRate.packageSubmissions[0].rateRevisions[0]
                 .rateID
         const rateQuestion = must(
-            await createTestRateQuestion(cmsServer, rateID)
+            await createTestRateQuestion(cmsServer, rateID, undefined, {
+                user: cmsUser,
+            })
         )
 
         expect(rateQuestion?.question).toEqual(
@@ -75,7 +77,9 @@ describe('createRateQuestion', () => {
             { user: cmsUser }
         )
         const rateQuestion = must(
-            await createTestRateQuestion(cmsServer, rateID)
+            await createTestRateQuestion(cmsServer, rateID, undefined, {
+                user: cmsUser,
+            })
         )
 
         expect(rateQuestion?.question).toEqual(
@@ -99,14 +103,19 @@ describe('createRateQuestion', () => {
             'Test resubmit reason'
         )
         const rateQuestion2 = must(
-            await createTestRateQuestion(cmsServer, rateID, {
-                documents: [
-                    {
-                        name: 'Test Question 2',
-                        s3URL: 's3://bucketname/key/test1',
-                    },
-                ],
-            })
+            await createTestRateQuestion(
+                cmsServer,
+                rateID,
+                {
+                    documents: [
+                        {
+                            name: 'Test Question 2',
+                            s3URL: 's3://bucketname/key/test1',
+                        },
+                    ],
+                },
+                { user: cmsUser }
+            )
         )
 
         expect(rateQuestion2.question).toEqual(
@@ -147,7 +156,12 @@ describe('createRateQuestion', () => {
             )
         }
 
-        const rateQuestionRes = await createTestRateQuestion(cmsServer, rateID)
+        const rateQuestionRes = await createTestRateQuestion(
+            cmsServer,
+            rateID,
+            undefined,
+            { user: cmsUser }
+        )
 
         expect(rateQuestionRes.errors).toBeDefined()
         expect(assertAnErrorCode(rateQuestionRes)).toBe('BAD_USER_INPUT')
@@ -163,7 +177,9 @@ describe('createRateQuestion', () => {
         )
         const rateQuestionForWithdrawnRate = await createTestRateQuestion(
             cmsServer,
-            withdrawnRate.id
+            withdrawnRate.id,
+            undefined,
+            { user: cmsUser }
         )
 
         expect(rateQuestionForWithdrawnRate.errors).toBeDefined()
@@ -198,7 +214,9 @@ describe('createRateQuestion', () => {
         const invalidRateID = 'invalidID'
         const rateQuestionRes = await createTestRateQuestion(
             cmsServer,
-            invalidRateID
+            invalidRateID,
+            undefined,
+            { user: cmsUser }
         )
 
         expect(rateQuestionRes.errors).toBeDefined()
@@ -225,7 +243,12 @@ describe('createRateQuestion', () => {
             submittedContractAndRate.packageSubmissions[0].rateRevisions[0]
                 .rateID
 
-        const rateQuestionRes = await createTestRateQuestion(cmsServer, rateID)
+        const rateQuestionRes = await createTestRateQuestion(
+            cmsServer,
+            rateID,
+            undefined,
+            { user: cmsUserWithNoDivision }
+        )
 
         expect(rateQuestionRes.errors).toBeDefined()
         expect(assertAnErrorCode(rateQuestionRes)).toBe('FORBIDDEN')
@@ -251,7 +274,11 @@ describe('createRateQuestion', () => {
             submittedContractAndRate.packageSubmissions[0].rateRevisions[0]
         const rateID = rateRevision.rateID
 
-        must(await createTestRateQuestion(cmsServer, rateID))
+        must(
+            await createTestRateQuestion(cmsServer, rateID, undefined, {
+                user: cmsUser,
+            })
+        )
 
         expect(mockEmailer.sendEmail).toHaveBeenNthCalledWith(
             1,
@@ -298,7 +325,9 @@ describe('createRateQuestion', () => {
         const assignedUserIDs = assignedUsers.map((u) => u.id)
         const assignedUserEmails = assignedUsers.map((u) => u.email)
 
-        await updateTestStateAssignments(cmsServer, 'FL', assignedUserIDs)
+        await updateTestStateAssignments(cmsServer, 'FL', assignedUserIDs, {
+            user: cmsUser,
+        })
 
         const submittedContractAndRate =
             await createAndSubmitTestContractWithRate(stateServer)
@@ -306,7 +335,11 @@ describe('createRateQuestion', () => {
             submittedContractAndRate.packageSubmissions[0].rateRevisions[0]
         const rateID = rateRevision.rateID
 
-        must(await createTestRateQuestion(cmsServer, rateID))
+        must(
+            await createTestRateQuestion(cmsServer, rateID, undefined, {
+                user: cmsUser,
+            })
+        )
 
         const cmsEmails = [...config.devReviewTeamEmails, ...assignedUserEmails]
 
@@ -340,11 +373,13 @@ describe('createRateQuestion', () => {
             emailer: mockEmailer,
         })
 
+        const oactUser = testCMSUser({
+            divisionAssignment: 'OACT',
+        })
+        await createDBUsersWithFullData([oactUser])
         const oactServer = await constructTestPostgresServer({
             context: {
-                user: testCMSUser({
-                    divisionAssignment: 'OACT',
-                }),
+                user: oactUser,
             },
             emailer: mockEmailer,
         })
@@ -356,11 +391,23 @@ describe('createRateQuestion', () => {
         const rateID = rateRevision.rateID
 
         // round 1 dmco question
-        must(await createTestRateQuestion(cmsServer, rateID))
+        must(
+            await createTestRateQuestion(cmsServer, rateID, undefined, {
+                user: cmsUser,
+            })
+        )
         // round 1 oact question
-        must(await createTestRateQuestion(oactServer, rateID))
+        must(
+            await createTestRateQuestion(oactServer, rateID, undefined, {
+                user: oactUser,
+            })
+        )
         // round 2 dmco
-        must(await createTestRateQuestion(cmsServer, rateID))
+        must(
+            await createTestRateQuestion(cmsServer, rateID, undefined, {
+                user: cmsUser,
+            })
+        )
 
         expect(mockEmailer.sendEmail).toHaveBeenNthCalledWith(
             6,
@@ -383,20 +430,38 @@ describe('createRateQuestion', () => {
             emailer: mockEmailer,
         })
 
-        const submitResult = (await cmsServer.executeOperation({
-            query: CreateRateQuestionDocument,
-            variables: {
-                input: {
-                    rateID: '1234',
-                    documents: [
-                        {
-                            name: 'Test Question',
-                            s3URL: 's3://bucketname/key/test1',
-                        },
-                    ],
+        const response = await cmsServer.executeOperation(
+            {
+                query: CreateRateQuestionDocument,
+                variables: {
+                    input: {
+                        rateID: '1234',
+                        documents: [
+                            {
+                                name: 'Test Question',
+                                s3URL: 's3://bucketname/key/test1',
+                            },
+                        ],
+                    },
                 },
             },
-        })) as { errors?: any; data?: any }
+            {
+                contextValue: {
+                    user: cmsUser,
+                },
+            }
+        )
+
+        // Handle Apollo v4 response structure
+        let submitResult: any
+        if ('body' in response && response.body) {
+            submitResult =
+                response.body.kind === 'single'
+                    ? response.body.singleResult
+                    : response.body
+        } else {
+            submitResult = response
+        }
 
         expect(submitResult.errors).toBeDefined()
         expect(mockEmailer.sendEmail).not.toHaveBeenCalled()

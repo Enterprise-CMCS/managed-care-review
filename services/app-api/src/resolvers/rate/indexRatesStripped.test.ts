@@ -4,16 +4,16 @@ import {
     IndexRatesStrippedDocument,
     IndexRatesStrippedWithRelatedContractsDocument,
 } from '../../gen/gqlClient'
-import {
-    constructTestPostgresServer,
-    createAndUpdateTestHealthPlanPackage,
-} from '../../testHelpers/gqlHelpers'
+import { constructTestPostgresServer } from '../../testHelpers/gqlHelpers'
 import type { RateEdge, Rate } from '../../gen/gqlServer'
-import { testCMSUser, testStateUser, createDBUsersWithFullData } from '../../testHelpers/userHelpers'
+import {
+    testCMSUser,
+    testStateUser,
+    createDBUsersWithFullData,
+} from '../../testHelpers/userHelpers'
 import { extractGraphQLResponse } from '../../testHelpers/apolloV4ResponseHelper'
 import {
     createAndSubmitTestContractWithRate,
-    submitTestContract,
     createAndUpdateTestContractWithRate,
 } from '../../testHelpers/gqlContractHelpers'
 import { testS3Client } from '../../../../app-api/src/testHelpers/s3Helpers'
@@ -23,7 +23,7 @@ describe('indexRatesStripped', () => {
         'rate-edit-unlock': true,
     })
     const mockS3 = testS3Client()
-    
+
     // Create common test users
     const cmsUser = testCMSUser()
     const flStateUser = testStateUser()
@@ -31,7 +31,7 @@ describe('indexRatesStripped', () => {
         stateCode: 'VA',
         email: 'aang@va.gov',
     })
-    
+
     beforeAll(async () => {
         // Create users in database
         await createDBUsersWithFullData([cmsUser, flStateUser, vaStateUser])
@@ -54,8 +54,16 @@ describe('indexRatesStripped', () => {
             s3Client: mockS3,
         })
 
-        const contract1 = await createAndSubmitTestContractWithRate(stateServer, undefined, { user: stateUser })
-        const contract2 = await createAndSubmitTestContractWithRate(stateServer, undefined, { user: stateUser })
+        const contract1 = await createAndSubmitTestContractWithRate(
+            stateServer,
+            undefined,
+            { user: stateUser }
+        )
+        const contract2 = await createAndSubmitTestContractWithRate(
+            stateServer,
+            undefined,
+            { user: stateUser }
+        )
 
         const submit1ID =
             contract1.packageSubmissions[0].rateRevisions[0].rateID
@@ -63,16 +71,19 @@ describe('indexRatesStripped', () => {
             contract2.packageSubmissions[0].rateRevisions[0].rateID
 
         // index rates
-        const response = await cmsServer.executeOperation({
-            query: IndexRatesStrippedWithRelatedContractsDocument,
-            variables: {
-                input: {
-                    rateIDs: [submit1ID, submit2ID],
+        const response = await cmsServer.executeOperation(
+            {
+                query: IndexRatesStrippedWithRelatedContractsDocument,
+                variables: {
+                    input: {
+                        rateIDs: [submit1ID, submit2ID],
+                    },
                 },
             },
-        }, {
-            contextValue: { user: testCMSUser() },
-        })
+            {
+                contextValue: { user: testCMSUser() },
+            }
+        )
         const result = extractGraphQLResponse(response)
 
         expect(result.data).toBeDefined()
@@ -116,11 +127,14 @@ describe('indexRatesStripped', () => {
         const draft1 = contract1.draftRates[0]
         const draft2 = contract2.draftRates[0]
 
-        const response = await cmsServer.executeOperation({
-            query: IndexRatesStrippedDocument,
-        }, {
-            contextValue: { user: testCMSUser() },
-        })
+        const response = await cmsServer.executeOperation(
+            {
+                query: IndexRatesStrippedDocument,
+            },
+            {
+                contextValue: { user: testCMSUser() },
+            }
+        )
         const result = extractGraphQLResponse(response)
 
         expect(result.errors).toBeUndefined()
@@ -139,54 +153,53 @@ describe('indexRatesStripped', () => {
     })
 
     it('return a list of submitted rates from multiple states', async () => {
-        const stateUser = testStateUser()
-        const otherStateUser = testStateUser({
-            stateCode: 'VA',
-            email: 'aang@mn.gov',
-        })
+        // Use the users already created in beforeAll
         const stateServer = await constructTestPostgresServer({
             context: {
-                user: stateUser,
+                user: flStateUser,
             },
             ldService,
             s3Client: mockS3,
         })
         const cmsServer = await constructTestPostgresServer({
             context: {
-                user: testCMSUser(),
+                user: cmsUser,
             },
             ldService,
             s3Client: mockS3,
         })
         const otherStateServer = await constructTestPostgresServer({
             context: {
-                user: otherStateUser,
+                user: vaStateUser,
             },
             ldService,
             s3Client: mockS3,
         })
 
         // submit packages from two different states
-        const contract1 = await createAndSubmitTestContractWithRate(stateServer, undefined, { user: stateUser })
-        const contract2 = await createAndSubmitTestContractWithRate(stateServer, undefined, { user: stateUser })
+        const contract1 = await createAndSubmitTestContractWithRate(stateServer)
+        const contract2 = await createAndSubmitTestContractWithRate(stateServer)
 
-        const pkg3 = await createAndUpdateTestHealthPlanPackage(
+        const contract3 = await createAndSubmitTestContractWithRate(
             otherStateServer,
-            {},
-            'VA'
+            {
+                stateCode: 'VA',
+            }
         )
-        const contract3 = await submitTestContract(otherStateServer, pkg3.id, undefined, { user: otherStateUser })
 
         const defaultState1 = contract1.packageSubmissions[0].rateRevisions[0]
         const defaultState2 = contract2.packageSubmissions[0].rateRevisions[0]
         const otherState1 = contract3.packageSubmissions[0].rateRevisions[0]
 
         // index rates
-        const response = await cmsServer.executeOperation({
-            query: IndexRatesStrippedDocument,
-        }, {
-            contextValue: { user: testCMSUser() },
-        })
+        const response = await cmsServer.executeOperation(
+            {
+                query: IndexRatesStrippedDocument,
+            },
+            {
+                contextValue: { user: testCMSUser() },
+            }
+        )
         const result = extractGraphQLResponse(response)
 
         expect(result.errors).toBeUndefined()
@@ -230,17 +243,20 @@ describe('indexRatesStripped', () => {
         })
 
         // submit packages from two different states
-        await createAndSubmitTestContractWithRate(flStateServer, undefined, { user: flStateUser })
+        await createAndSubmitTestContractWithRate(flStateServer)
         await createAndSubmitTestContractWithRate(vaStateServer, {
             stateCode: 'VA',
-        }, { user: vaStateUser })
+        })
 
         // index rates
-        const floridaRatesResponse = await flStateServer.executeOperation({
-            query: IndexRatesStrippedDocument,
-        }, {
-            contextValue: { user: flStateUser },
-        })
+        const floridaRatesResponse = await flStateServer.executeOperation(
+            {
+                query: IndexRatesStrippedDocument,
+            },
+            {
+                contextValue: { user: flStateUser },
+            }
+        )
         const floridaRatesResult = extractGraphQLResponse(floridaRatesResponse)
 
         expect(floridaRatesResult.errors).toBeUndefined()
@@ -254,12 +270,17 @@ describe('indexRatesStripped', () => {
         expect(floridaRateStateCodes.every((code) => code === 'FL')).toBe(true)
 
         // index rates
-        const virginiaRatesResponse = await vaStateServer.executeOperation({
-            query: IndexRatesStrippedDocument,
-        }, {
-            contextValue: { user: vaStateUser },
-        })
-        const virginiaRatesResult = extractGraphQLResponse(virginiaRatesResponse)
+        const virginiaRatesResponse = await vaStateServer.executeOperation(
+            {
+                query: IndexRatesStrippedDocument,
+            },
+            {
+                contextValue: { user: vaStateUser },
+            }
+        )
+        const virginiaRatesResult = extractGraphQLResponse(
+            virginiaRatesResponse
+        )
 
         expect(virginiaRatesResult.errors).toBeUndefined()
 

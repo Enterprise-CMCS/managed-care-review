@@ -34,11 +34,14 @@ describe(`indexContracts`, () => {
             const submittedContract =
                 await createAndSubmitTestContractWithRate(stateServer)
             // then see if we can get that same contract back from the index
-            const response = await stateServer.executeOperation({
-                query: IndexContractsForDashboardDocument,
-            }, {
-                contextValue: { user: testStateUser() },
-            })
+            const response = await stateServer.executeOperation(
+                {
+                    query: IndexContractsForDashboardDocument,
+                },
+                {
+                    contextValue: { user: testStateUser() },
+                }
+            )
             const result = extractGraphQLResponse(response)
 
             expect(result.errors).toBeUndefined()
@@ -89,12 +92,14 @@ describe(`indexContracts`, () => {
             await unlockTestContract(
                 cmsServer,
                 unlockedContract.id,
-                'Test reason'
+                'Test reason',
+                { user: cmsUser }
             )
             await unlockTestContract(
                 cmsServer,
                 relockedContract.id,
-                'Test reason'
+                'Test reason',
+                { user: cmsUser }
             )
 
             // resubmit one
@@ -105,11 +110,14 @@ describe(`indexContracts`, () => {
             )
 
             // index contracts api request
-            const response = await stateServer.executeOperation({
-                query: IndexContractsForDashboardDocument,
-            }, {
-                contextValue: { user: testStateUser() },
-            })
+            const response = await stateServer.executeOperation(
+                {
+                    query: IndexContractsForDashboardDocument,
+                },
+                {
+                    contextValue: { user: testStateUser() },
+                }
+            )
             const result = extractGraphQLResponse(response)
             const submissionsIndex = result.data?.indexContracts
 
@@ -160,12 +168,15 @@ describe(`indexContracts`, () => {
                 },
             })
 
-            const response = await otherUserServer.executeOperation({
-                query: IndexContractsForDashboardDocument,
-                variables: { input },
-            }, {
-                contextValue: { user: testStateUser() },
-            })
+            const response = await otherUserServer.executeOperation(
+                {
+                    query: IndexContractsForDashboardDocument,
+                    variables: { input },
+                },
+                {
+                    contextValue: { user: testStateUser() },
+                }
+            )
             const result = extractGraphQLResponse(response)
 
             expect(result.errors).toBeUndefined()
@@ -198,11 +209,14 @@ describe(`indexContracts`, () => {
                 },
             })
 
-            const response = await otherUserServer.executeOperation({
-                query: IndexContractsForDashboardDocument,
-            }, {
-                contextValue: { user: otherUser },
-            })
+            const response = await otherUserServer.executeOperation(
+                {
+                    query: IndexContractsForDashboardDocument,
+                },
+                {
+                    contextValue: { user: otherUser },
+                }
+            )
             const result = extractGraphQLResponse(response)
 
             expect(result.errors).toBeUndefined()
@@ -233,11 +247,14 @@ describe(`indexContracts`, () => {
                     await createAndUpdateTestContractWithoutRates(stateServer)
 
                 // index contracts api request
-                const response = await cmsServer.executeOperation({
-                    query: IndexContractsForDashboardDocument,
-                }, {
-                    contextValue: { user: mockUser() },
-                })
+                const response = await cmsServer.executeOperation(
+                    {
+                        query: IndexContractsForDashboardDocument,
+                    },
+                    {
+                        contextValue: { user: mockUser() },
+                    }
+                )
                 const result = extractGraphQLResponse(response)
                 const submissionsIndex = result.data?.indexContracts
 
@@ -269,11 +286,23 @@ describe(`indexContracts`, () => {
 
                 // First, create new contracts
                 const submittedContract =
-                    await createAndSubmitTestContractWithRate(server, undefined, { user: stateUser })
+                    await createAndSubmitTestContractWithRate(
+                        server,
+                        undefined,
+                        { user: stateUser }
+                    )
                 const unlockedContract =
-                    await createAndSubmitTestContractWithRate(server, undefined, { user: stateUser })
+                    await createAndSubmitTestContractWithRate(
+                        server,
+                        undefined,
+                        { user: stateUser }
+                    )
                 const relockedContract =
-                    await createAndSubmitTestContractWithRate(server, undefined, { user: stateUser })
+                    await createAndSubmitTestContractWithRate(
+                        server,
+                        undefined,
+                        { user: stateUser }
+                    )
 
                 // unlock two
                 await unlockTestContract(
@@ -298,11 +327,14 @@ describe(`indexContracts`, () => {
                 )
 
                 // index contracts api request
-                const result = await cmsServer.executeOperation({
-                    query: IndexContractsForDashboardDocument,
-                }, {
-                    contextValue: { user: cmsUser },
-                })
+                const result = await cmsServer.executeOperation(
+                    {
+                        query: IndexContractsForDashboardDocument,
+                    },
+                    {
+                        contextValue: { user: cmsUser },
+                    }
+                )
                 const resultData = extractGraphQLResponse(result)
                 const submissionsIndex = resultData.data?.indexContracts
 
@@ -356,29 +388,34 @@ describe(`indexContracts`, () => {
                     },
                 })
                 // submit contracts from two different states
-                const defaultState1 =
-                    await createAndSubmitTestContractWithRate(stateServer, undefined, { user: stateUser })
-                const defaultState2 =
-                    await createAndSubmitTestContractWithRate(stateServer, undefined, { user: stateUser })
-
-                const draft = await createAndUpdateTestContractWithoutRates(
-                    otherStateServer,
-                    'VA' as const,
-                    { submissionType: 'CONTRACT_ONLY' }
+                const defaultState1 = await createAndSubmitTestContractWithRate(
+                    stateServer,
+                    undefined,
+                    { user: stateUser }
+                )
+                const defaultState2 = await createAndSubmitTestContractWithRate(
+                    stateServer,
+                    undefined,
+                    { user: stateUser }
                 )
 
-                const otherState1 = await submitTestContract(
+                const otherState1 = await createAndSubmitTestContractWithRate(
                     otherStateServer,
-                    draft.id,
-                    undefined,
+                    {
+                        stateCode: 'VA',
+                        submissionType: 'CONTRACT_ONLY',
+                    },
                     { user: otherStateUser }
                 )
 
-                const response = await cmsServer.executeOperation({
-                    query: IndexContractsForDashboardDocument,
-                }, {
-                    contextValue: { user: cmsUser },
-                })
+                const response = await cmsServer.executeOperation(
+                    {
+                        query: IndexContractsForDashboardDocument,
+                    },
+                    {
+                        contextValue: { user: cmsUser },
+                    }
+                )
                 const result = extractGraphQLResponse(response)
 
                 expect(result.errors).toBeUndefined()

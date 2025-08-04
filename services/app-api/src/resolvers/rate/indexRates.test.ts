@@ -1,9 +1,6 @@
 import { testLDService } from '../../testHelpers/launchDarklyHelpers'
 import { IndexRatesDocument } from '../../gen/gqlClient'
-import {
-    constructTestPostgresServer,
-    createAndUpdateTestHealthPlanPackage,
-} from '../../testHelpers/gqlHelpers'
+import { constructTestPostgresServer } from '../../testHelpers/gqlHelpers'
 import type { RateEdge, Rate } from '../../gen/gqlServer'
 import {
     iterableCmsUsersMockData,
@@ -12,7 +9,6 @@ import {
 import { extractGraphQLResponse } from '../../testHelpers/apolloV4ResponseHelper'
 import {
     createAndSubmitTestContractWithRate,
-    submitTestContract,
     createAndUpdateTestContractWithRate,
 } from '../../testHelpers/gqlContractHelpers'
 import { testS3Client } from '../../../../app-api/src/testHelpers/s3Helpers'
@@ -52,11 +48,14 @@ describe('indexRates', () => {
                     contract2.packageSubmissions[0].rateRevisions[0].rateID
 
                 // index rates
-                const response = await cmsServer.executeOperation({
-                    query: IndexRatesDocument,
-                }, {
-                    contextValue: { user: cmsUser },
-                })
+                const response = await cmsServer.executeOperation(
+                    {
+                        query: IndexRatesDocument,
+                    },
+                    {
+                        contextValue: { user: cmsUser },
+                    }
+                )
                 const result = extractGraphQLResponse(response)
 
                 expect(result.data).toBeDefined()
@@ -100,11 +99,14 @@ describe('indexRates', () => {
                 const draft2 = contract2.draftRates[0]
 
                 // index rates
-                const response = await cmsServer.executeOperation({
-                    query: IndexRatesDocument,
-                }, {
-                    contextValue: { user: cmsUser },
-                })
+                const response = await cmsServer.executeOperation(
+                    {
+                        query: IndexRatesDocument,
+                    },
+                    {
+                        contextValue: { user: cmsUser },
+                    }
+                )
                 const result = extractGraphQLResponse(response)
 
                 const ratesIndex = result.data?.indexRates
@@ -150,14 +152,11 @@ describe('indexRates', () => {
                 const contract2 =
                     await createAndSubmitTestContractWithRate(stateServer)
 
-                const pkg3 = await createAndUpdateTestHealthPlanPackage(
+                const contract3 = await createAndSubmitTestContractWithRate(
                     otherStateServer,
-                    {},
-                    'VA'
-                )
-                const contract3 = await submitTestContract(
-                    otherStateServer,
-                    pkg3.id
+                    {
+                        stateCode: 'VA',
+                    }
                 )
 
                 const defaultState1 =
@@ -168,11 +167,14 @@ describe('indexRates', () => {
                     contract3.packageSubmissions[0].rateRevisions[0]
 
                 // index rates
-                const response = await cmsServer.executeOperation({
-                    query: IndexRatesDocument,
-                }, {
-                    contextValue: { user: cmsUser },
-                })
+                const response = await cmsServer.executeOperation(
+                    {
+                        query: IndexRatesDocument,
+                    },
+                    {
+                        contextValue: { user: cmsUser },
+                    }
+                )
                 const result = extractGraphQLResponse(response)
 
                 const ratesIndex = result.data?.indexRates

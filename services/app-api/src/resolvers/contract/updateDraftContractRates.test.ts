@@ -40,19 +40,22 @@ describe('updateDraftContractRates', () => {
             },
         })
 
-        const response = await stateServer.executeOperation({
-            query: UpdateDraftContractRatesDocument,
-            variables: {
-                input: {
-                    contractID: 'foobar',
-                    lastSeenUpdatedAt: new Date(),
-                    updatedRates: [],
+        const response = await stateServer.executeOperation(
+            {
+                query: UpdateDraftContractRatesDocument,
+                variables: {
+                    input: {
+                        contractID: 'foobar',
+                        lastSeenUpdatedAt: new Date(),
+                        updatedRates: [],
+                    },
                 },
             },
-        }, {
-            contextValue: { user: stateUser },
-        })
-        
+            {
+                contextValue: { user: stateUser },
+            }
+        )
+
         const result = extractGraphQLResponse(response)
 
         expect(result.errors).toBeDefined()
@@ -82,18 +85,21 @@ describe('updateDraftContractRates', () => {
             },
         })
 
-        const response = await otherStateServer.executeOperation({
-            query: UpdateDraftContractRatesDocument,
-            variables: {
-                input: {
-                    contractID: draft.id,
-                    lastSeenUpdatedAt: draftFD.updatedAt,
-                    updatedRates: [],
+        const response = await otherStateServer.executeOperation(
+            {
+                query: UpdateDraftContractRatesDocument,
+                variables: {
+                    input: {
+                        contractID: draft.id,
+                        lastSeenUpdatedAt: draftFD.updatedAt,
+                        updatedRates: [],
+                    },
                 },
             },
-        }, {
-            contextValue: { user: testStateUser({ stateCode: 'MA' }) },
-        })
+            {
+                contextValue: { user: testStateUser({ stateCode: 'MA' }) },
+            }
+        )
         const result = extractGraphQLResponse(response)
 
         expect(result.errors).toBeDefined()
@@ -122,18 +128,21 @@ describe('updateDraftContractRates', () => {
             s3Client: mockS3,
         })
 
-        const response = await otherStateServer.executeOperation({
-            query: UpdateDraftContractRatesDocument,
-            variables: {
-                input: {
-                    contractID: draft.id,
-                    lastSeenUpdatedAt: draftFD.updatedAt,
-                    updatedRates: [],
+        const response = await otherStateServer.executeOperation(
+            {
+                query: UpdateDraftContractRatesDocument,
+                variables: {
+                    input: {
+                        contractID: draft.id,
+                        lastSeenUpdatedAt: draftFD.updatedAt,
+                        updatedRates: [],
+                    },
                 },
             },
-        }, {
-            contextValue: { user: testCMSUser() },
-        })
+            {
+                contextValue: { user: testCMSUser() },
+            }
+        )
         const result = extractGraphQLResponse(response)
 
         expect(result.errors).toBeDefined()
@@ -155,18 +164,21 @@ describe('updateDraftContractRates', () => {
         const draft = await createAndSubmitTestHealthPlanPackage(stateServer)
         const draftFD = latestFormData(draft)
 
-        const response = await stateServer.executeOperation({
-            query: UpdateDraftContractRatesDocument,
-            variables: {
-                input: {
-                    contractID: draft.id,
-                    lastSeenUpdatedAt: draftFD.updatedAt,
-                    updatedRates: [],
+        const response = await stateServer.executeOperation(
+            {
+                query: UpdateDraftContractRatesDocument,
+                variables: {
+                    input: {
+                        contractID: draft.id,
+                        lastSeenUpdatedAt: draftFD.updatedAt,
+                        updatedRates: [],
+                    },
                 },
             },
-        }, {
-            contextValue: { user: testStateUser() },
-        })
+            {
+                contextValue: { user: testStateUser() },
+            }
+        )
         const result = extractGraphQLResponse(response)
 
         expect(result.errors).toBeDefined()
@@ -187,18 +199,21 @@ describe('updateDraftContractRates', () => {
 
         const draft = await createTestHealthPlanPackage(stateServer)
 
-        const response = await stateServer.executeOperation({
-            query: UpdateDraftContractRatesDocument,
-            variables: {
-                input: {
-                    contractID: draft.id,
-                    lastSeenUpdatedAt: new Date(1999, 11, 23),
-                    updatedRates: [],
+        const response = await stateServer.executeOperation(
+            {
+                query: UpdateDraftContractRatesDocument,
+                variables: {
+                    input: {
+                        contractID: draft.id,
+                        lastSeenUpdatedAt: new Date(1999, 11, 23),
+                        updatedRates: [],
+                    },
                 },
             },
-        }, {
-            contextValue: { user: testStateUser() },
-        })
+            {
+                contextValue: { user: testStateUser() },
+            }
+        )
         const result = extractGraphQLResponse(response)
 
         expect(result.errors).toBeDefined()
@@ -251,54 +266,61 @@ describe('updateDraftContractRates', () => {
         const draft = await createAndSubmitTestHealthPlanPackage(stateServer)
         const draftFD = latestFormData(draft)
 
-        const result = await stateServer.executeOperation({
-            query: UpdateDraftContractRatesDocument,
-            variables: {
-                input: {
-                    contractID: draft.id,
-                    lastSeenUpdatedAt: draftFD.updatedAt,
-                    updatedRates: [
-                        {
-                            // invalid
-                            type: 'CREATE',
-                            rateID: 'foobar',
-                            formData: testRateFormData,
-                        },
-                        {
-                            // valid
-                            type: 'CREATE',
-                            formData: testRateFormData,
-                        },
-                        {
-                            // valid
-                            type: 'UPDATE',
-                            rateID: 'foobar',
-                            formData: testRateFormData,
-                        },
-                        {
-                            // invalid
-                            type: 'UPDATE',
-                            formData: testRateFormData,
-                        },
-                        {
-                            // invalid
-                            type: 'UPDATE',
-                        },
-                        {
-                            // invalid
-                            type: 'LINK',
-                            rateID: 'foobar',
-                            formData: testRateFormData,
-                        },
-                        {
-                            // valid
-                            type: 'LINK',
-                            rateID: 'foobar',
-                        },
-                    ],
+        const response = await stateServer.executeOperation(
+            {
+                query: UpdateDraftContractRatesDocument,
+                variables: {
+                    input: {
+                        contractID: draft.id,
+                        lastSeenUpdatedAt: draftFD.updatedAt,
+                        updatedRates: [
+                            {
+                                // invalid
+                                type: 'CREATE',
+                                rateID: 'foobar',
+                                formData: testRateFormData,
+                            },
+                            {
+                                // valid
+                                type: 'CREATE',
+                                formData: testRateFormData,
+                            },
+                            {
+                                // valid
+                                type: 'UPDATE',
+                                rateID: 'foobar',
+                                formData: testRateFormData,
+                            },
+                            {
+                                // invalid
+                                type: 'UPDATE',
+                                formData: testRateFormData,
+                            },
+                            {
+                                // invalid
+                                type: 'UPDATE',
+                            },
+                            {
+                                // invalid
+                                type: 'LINK',
+                                rateID: 'foobar',
+                                formData: testRateFormData,
+                            },
+                            {
+                                // valid
+                                type: 'LINK',
+                                rateID: 'foobar',
+                            },
+                        ],
+                    },
                 },
             },
-        })
+            {
+                contextValue: defaultContext(),
+            }
+        )
+
+        const result = extractGraphQLResponse(response)
 
         expect(result.errors).toBeDefined()
         if (!result.errors) {
@@ -332,71 +354,74 @@ describe('updateDraftContractRates', () => {
         const draft = await createTestHealthPlanPackage(stateServer)
         const draftFD = latestFormData(draft)
 
-        const response = await stateServer.executeOperation({
-            query: UpdateDraftContractRatesDocument,
-            variables: {
-                input: {
-                    contractID: draft.id,
-                    lastSeenUpdatedAt: draftFD.updatedAt,
-                    updatedRates: [
-                        {
-                            type: 'CREATE',
-                            formData: {
-                                rateType: 'AMENDMENT',
-                                rateCapitationType: 'RATE_CELL',
-                                rateDateStart: '2024-01-01',
-                                rateDateEnd: '2025-01-01',
-                                amendmentEffectiveDateStart: '2024-02-01',
-                                amendmentEffectiveDateEnd: '2025-02-01',
-                                rateProgramIDs: ['foo'],
-                                deprecatedRateProgramIDs: [],
-                                rateDocuments: [
-                                    {
-                                        s3URL: 's3://bucketname/key/test1',
-                                        name: 'ratedoc1.doc',
-                                        sha256: 'foobar',
-                                    },
-                                ],
-                                supportingDocuments: [
-                                    {
-                                        s3URL: 's3://bucketname/key/test11',
-                                        name: 'ratesupdoc1.doc',
-                                        sha256: 'foobar1',
-                                    },
-                                    {
-                                        s3URL: 's3://bucketname/key/test12',
-                                        name: 'ratesupdoc2.doc',
-                                        sha256: 'foobar2',
-                                    },
-                                ],
-                                certifyingActuaryContacts: [
-                                    {
-                                        name: 'Foo Person',
-                                        titleRole: 'Bar Job',
-                                        email: 'foo@example.com',
-                                        actuarialFirm: 'GUIDEHOUSE',
-                                    },
-                                ],
-                                addtlActuaryContacts: [
-                                    {
-                                        name: 'Bar Person',
-                                        titleRole: 'Baz Job',
-                                        email: 'bar@example.com',
-                                        actuarialFirm: 'OTHER',
-                                        actuarialFirmOther: 'Some Firm',
-                                    },
-                                ],
-                                actuaryCommunicationPreference:
-                                    'OACT_TO_ACTUARY',
+        const response = await stateServer.executeOperation(
+            {
+                query: UpdateDraftContractRatesDocument,
+                variables: {
+                    input: {
+                        contractID: draft.id,
+                        lastSeenUpdatedAt: draftFD.updatedAt,
+                        updatedRates: [
+                            {
+                                type: 'CREATE',
+                                formData: {
+                                    rateType: 'AMENDMENT',
+                                    rateCapitationType: 'RATE_CELL',
+                                    rateDateStart: '2024-01-01',
+                                    rateDateEnd: '2025-01-01',
+                                    amendmentEffectiveDateStart: '2024-02-01',
+                                    amendmentEffectiveDateEnd: '2025-02-01',
+                                    rateProgramIDs: ['foo'],
+                                    deprecatedRateProgramIDs: [],
+                                    rateDocuments: [
+                                        {
+                                            s3URL: 's3://bucketname/key/test1',
+                                            name: 'ratedoc1.doc',
+                                            sha256: 'foobar',
+                                        },
+                                    ],
+                                    supportingDocuments: [
+                                        {
+                                            s3URL: 's3://bucketname/key/test11',
+                                            name: 'ratesupdoc1.doc',
+                                            sha256: 'foobar1',
+                                        },
+                                        {
+                                            s3URL: 's3://bucketname/key/test12',
+                                            name: 'ratesupdoc2.doc',
+                                            sha256: 'foobar2',
+                                        },
+                                    ],
+                                    certifyingActuaryContacts: [
+                                        {
+                                            name: 'Foo Person',
+                                            titleRole: 'Bar Job',
+                                            email: 'foo@example.com',
+                                            actuarialFirm: 'GUIDEHOUSE',
+                                        },
+                                    ],
+                                    addtlActuaryContacts: [
+                                        {
+                                            name: 'Bar Person',
+                                            titleRole: 'Baz Job',
+                                            email: 'bar@example.com',
+                                            actuarialFirm: 'OTHER',
+                                            actuarialFirmOther: 'Some Firm',
+                                        },
+                                    ],
+                                    actuaryCommunicationPreference:
+                                        'OACT_TO_ACTUARY',
+                                },
                             },
-                        },
-                    ],
+                        ],
+                    },
                 },
             },
-        }, {
-            contextValue: defaultContext(),
-        })
-        
+            {
+                contextValue: defaultContext(),
+            }
+        )
+
         const result = extractGraphQLResponse(response)
 
         expect(result.errors).toBeUndefined()
@@ -419,72 +444,75 @@ describe('updateDraftContractRates', () => {
         const draftFD = latestFormData(draft)
         const rate = draftFD.rateInfos[0]
 
-        const response = await stateServer.executeOperation({
-            query: UpdateDraftContractRatesDocument,
-            variables: {
-                input: {
-                    contractID: draft.id,
-                    lastSeenUpdatedAt: draftFD.updatedAt,
-                    updatedRates: [
-                        {
-                            type: 'UPDATE',
-                            rateID: rate.id,
-                            formData: {
-                                rateType: 'AMENDMENT',
-                                rateCapitationType: 'RATE_CELL',
-                                rateDateStart: '2024-01-01',
-                                rateDateEnd: '2025-01-01',
-                                amendmentEffectiveDateStart: '2024-02-01',
-                                amendmentEffectiveDateEnd: '2025-02-01',
-                                rateProgramIDs: ['foo'],
-                                deprecatedRateProgramIDs: [],
-                                rateDocuments: [
-                                    {
-                                        s3URL: 's3://bucketname/key/test1',
-                                        name: 'updatedratedoc1.doc',
-                                        sha256: 'foobar',
-                                    },
-                                ],
-                                supportingDocuments: [
-                                    {
-                                        s3URL: 's3://bucketname/key/test11',
-                                        name: 'ratesupdoc1.doc',
-                                        sha256: 'foobar1',
-                                    },
-                                    {
-                                        s3URL: 's3://bucketname/key/test12',
-                                        name: 'ratesupdoc2.doc',
-                                        sha256: 'foobar2',
-                                    },
-                                ],
-                                certifyingActuaryContacts: [
-                                    {
-                                        name: 'Foo Person',
-                                        titleRole: 'Bar Job',
-                                        email: 'foo@example.com',
-                                        actuarialFirm: 'GUIDEHOUSE',
-                                    },
-                                ],
-                                addtlActuaryContacts: [
-                                    {
-                                        name: 'Bar Person',
-                                        titleRole: 'Baz Job',
-                                        email: 'bar@example.com',
-                                        actuarialFirm: 'OTHER',
-                                        actuarialFirmOther: 'Some Firm',
-                                    },
-                                ],
-                                actuaryCommunicationPreference:
-                                    'OACT_TO_ACTUARY',
+        const response = await stateServer.executeOperation(
+            {
+                query: UpdateDraftContractRatesDocument,
+                variables: {
+                    input: {
+                        contractID: draft.id,
+                        lastSeenUpdatedAt: draftFD.updatedAt,
+                        updatedRates: [
+                            {
+                                type: 'UPDATE',
+                                rateID: rate.id,
+                                formData: {
+                                    rateType: 'AMENDMENT',
+                                    rateCapitationType: 'RATE_CELL',
+                                    rateDateStart: '2024-01-01',
+                                    rateDateEnd: '2025-01-01',
+                                    amendmentEffectiveDateStart: '2024-02-01',
+                                    amendmentEffectiveDateEnd: '2025-02-01',
+                                    rateProgramIDs: ['foo'],
+                                    deprecatedRateProgramIDs: [],
+                                    rateDocuments: [
+                                        {
+                                            s3URL: 's3://bucketname/key/test1',
+                                            name: 'updatedratedoc1.doc',
+                                            sha256: 'foobar',
+                                        },
+                                    ],
+                                    supportingDocuments: [
+                                        {
+                                            s3URL: 's3://bucketname/key/test11',
+                                            name: 'ratesupdoc1.doc',
+                                            sha256: 'foobar1',
+                                        },
+                                        {
+                                            s3URL: 's3://bucketname/key/test12',
+                                            name: 'ratesupdoc2.doc',
+                                            sha256: 'foobar2',
+                                        },
+                                    ],
+                                    certifyingActuaryContacts: [
+                                        {
+                                            name: 'Foo Person',
+                                            titleRole: 'Bar Job',
+                                            email: 'foo@example.com',
+                                            actuarialFirm: 'GUIDEHOUSE',
+                                        },
+                                    ],
+                                    addtlActuaryContacts: [
+                                        {
+                                            name: 'Bar Person',
+                                            titleRole: 'Baz Job',
+                                            email: 'bar@example.com',
+                                            actuarialFirm: 'OTHER',
+                                            actuarialFirmOther: 'Some Firm',
+                                        },
+                                    ],
+                                    actuaryCommunicationPreference:
+                                        'OACT_TO_ACTUARY',
+                                },
                             },
-                        },
-                    ],
+                        ],
+                    },
                 },
             },
-        }, {
-            contextValue: defaultContext(),
-        })
-        
+            {
+                contextValue: defaultContext(),
+            }
+        )
+
         const result = extractGraphQLResponse(response)
         expect(result.errors).toBeUndefined()
 
@@ -510,72 +538,75 @@ describe('updateDraftContractRates', () => {
         const draft = await createAndUpdateTestHealthPlanPackage(stateServer)
         const draftFD = latestFormData(draft)
 
-        const response = await stateServer.executeOperation({
-            query: UpdateDraftContractRatesDocument,
-            variables: {
-                input: {
-                    contractID: draft.id,
-                    lastSeenUpdatedAt: draftFD.updatedAt,
-                    updatedRates: [
-                        {
-                            type: 'UPDATE',
-                            rateID: 'foo-bar',
-                            formData: {
-                                rateType: 'AMENDMENT',
-                                rateCapitationType: 'RATE_CELL',
-                                rateDateStart: '2024-01-01',
-                                rateDateEnd: '2025-01-01',
-                                amendmentEffectiveDateStart: '2024-02-01',
-                                amendmentEffectiveDateEnd: '2025-02-01',
-                                rateProgramIDs: ['foo'],
-                                deprecatedRateProgramIDs: [],
-                                rateDocuments: [
-                                    {
-                                        s3URL: 's3://bucketname/key/test1',
-                                        name: 'updatedratedoc1.doc',
-                                        sha256: 'foobar',
-                                    },
-                                ],
-                                supportingDocuments: [
-                                    {
-                                        s3URL: 's3://bucketname/key/test11',
-                                        name: 'ratesupdoc1.doc',
-                                        sha256: 'foobar1',
-                                    },
-                                    {
-                                        s3URL: 's3://bucketname/key/test12',
-                                        name: 'ratesupdoc2.doc',
-                                        sha256: 'foobar2',
-                                    },
-                                ],
-                                certifyingActuaryContacts: [
-                                    {
-                                        name: 'Foo Person',
-                                        titleRole: 'Bar Job',
-                                        email: 'foo@example.com',
-                                        actuarialFirm: 'GUIDEHOUSE',
-                                    },
-                                ],
-                                addtlActuaryContacts: [
-                                    {
-                                        name: 'Bar Person',
-                                        titleRole: 'Baz Job',
-                                        email: 'bar@example.com',
-                                        actuarialFirm: 'OTHER',
-                                        actuarialFirmOther: 'Some Firm',
-                                    },
-                                ],
-                                actuaryCommunicationPreference:
-                                    'OACT_TO_ACTUARY',
+        const response = await stateServer.executeOperation(
+            {
+                query: UpdateDraftContractRatesDocument,
+                variables: {
+                    input: {
+                        contractID: draft.id,
+                        lastSeenUpdatedAt: draftFD.updatedAt,
+                        updatedRates: [
+                            {
+                                type: 'UPDATE',
+                                rateID: 'foo-bar',
+                                formData: {
+                                    rateType: 'AMENDMENT',
+                                    rateCapitationType: 'RATE_CELL',
+                                    rateDateStart: '2024-01-01',
+                                    rateDateEnd: '2025-01-01',
+                                    amendmentEffectiveDateStart: '2024-02-01',
+                                    amendmentEffectiveDateEnd: '2025-02-01',
+                                    rateProgramIDs: ['foo'],
+                                    deprecatedRateProgramIDs: [],
+                                    rateDocuments: [
+                                        {
+                                            s3URL: 's3://bucketname/key/test1',
+                                            name: 'updatedratedoc1.doc',
+                                            sha256: 'foobar',
+                                        },
+                                    ],
+                                    supportingDocuments: [
+                                        {
+                                            s3URL: 's3://bucketname/key/test11',
+                                            name: 'ratesupdoc1.doc',
+                                            sha256: 'foobar1',
+                                        },
+                                        {
+                                            s3URL: 's3://bucketname/key/test12',
+                                            name: 'ratesupdoc2.doc',
+                                            sha256: 'foobar2',
+                                        },
+                                    ],
+                                    certifyingActuaryContacts: [
+                                        {
+                                            name: 'Foo Person',
+                                            titleRole: 'Bar Job',
+                                            email: 'foo@example.com',
+                                            actuarialFirm: 'GUIDEHOUSE',
+                                        },
+                                    ],
+                                    addtlActuaryContacts: [
+                                        {
+                                            name: 'Bar Person',
+                                            titleRole: 'Baz Job',
+                                            email: 'bar@example.com',
+                                            actuarialFirm: 'OTHER',
+                                            actuarialFirmOther: 'Some Firm',
+                                        },
+                                    ],
+                                    actuaryCommunicationPreference:
+                                        'OACT_TO_ACTUARY',
+                                },
                             },
-                        },
-                    ],
+                        ],
+                    },
                 },
             },
-        }, {
-            contextValue: defaultContext(),
-        })
-        
+            {
+                contextValue: defaultContext(),
+            }
+        )
+
         const result = extractGraphQLResponse(response)
         expect(result.errors).toBeDefined()
         expect(result.errors?.[0].extensions?.code).toBe('BAD_USER_INPUT')
@@ -595,72 +626,75 @@ describe('updateDraftContractRates', () => {
         const draft2FD = latestFormData(draft2)
         const rate = draft2FD.rateInfos[0]
 
-        const response = await stateServer.executeOperation({
-            query: UpdateDraftContractRatesDocument,
-            variables: {
-                input: {
-                    contractID: draft.id,
-                    lastSeenUpdatedAt: draftFD.updatedAt,
-                    updatedRates: [
-                        {
-                            type: 'UPDATE',
-                            rateID: rate.id,
-                            formData: {
-                                rateType: 'AMENDMENT',
-                                rateCapitationType: 'RATE_CELL',
-                                rateDateStart: '2024-01-01',
-                                rateDateEnd: '2025-01-01',
-                                amendmentEffectiveDateStart: '2024-02-01',
-                                amendmentEffectiveDateEnd: '2025-02-01',
-                                rateProgramIDs: ['foo'],
-                                deprecatedRateProgramIDs: [],
-                                rateDocuments: [
-                                    {
-                                        s3URL: 's3://bucketname/key/test1',
-                                        name: 'updatedratedoc1.doc',
-                                        sha256: 'foobar',
-                                    },
-                                ],
-                                supportingDocuments: [
-                                    {
-                                        s3URL: 's3://bucketname/key/test11',
-                                        name: 'ratesupdoc1.doc',
-                                        sha256: 'foobar1',
-                                    },
-                                    {
-                                        s3URL: 's3://bucketname/key/test12',
-                                        name: 'ratesupdoc2.doc',
-                                        sha256: 'foobar2',
-                                    },
-                                ],
-                                certifyingActuaryContacts: [
-                                    {
-                                        name: 'Foo Person',
-                                        titleRole: 'Bar Job',
-                                        email: 'foo@example.com',
-                                        actuarialFirm: 'GUIDEHOUSE',
-                                    },
-                                ],
-                                addtlActuaryContacts: [
-                                    {
-                                        name: 'Bar Person',
-                                        titleRole: 'Baz Job',
-                                        email: 'bar@example.com',
-                                        actuarialFirm: 'OTHER',
-                                        actuarialFirmOther: 'Some Firm',
-                                    },
-                                ],
-                                actuaryCommunicationPreference:
-                                    'OACT_TO_ACTUARY',
+        const response = await stateServer.executeOperation(
+            {
+                query: UpdateDraftContractRatesDocument,
+                variables: {
+                    input: {
+                        contractID: draft.id,
+                        lastSeenUpdatedAt: draftFD.updatedAt,
+                        updatedRates: [
+                            {
+                                type: 'UPDATE',
+                                rateID: rate.id,
+                                formData: {
+                                    rateType: 'AMENDMENT',
+                                    rateCapitationType: 'RATE_CELL',
+                                    rateDateStart: '2024-01-01',
+                                    rateDateEnd: '2025-01-01',
+                                    amendmentEffectiveDateStart: '2024-02-01',
+                                    amendmentEffectiveDateEnd: '2025-02-01',
+                                    rateProgramIDs: ['foo'],
+                                    deprecatedRateProgramIDs: [],
+                                    rateDocuments: [
+                                        {
+                                            s3URL: 's3://bucketname/key/test1',
+                                            name: 'updatedratedoc1.doc',
+                                            sha256: 'foobar',
+                                        },
+                                    ],
+                                    supportingDocuments: [
+                                        {
+                                            s3URL: 's3://bucketname/key/test11',
+                                            name: 'ratesupdoc1.doc',
+                                            sha256: 'foobar1',
+                                        },
+                                        {
+                                            s3URL: 's3://bucketname/key/test12',
+                                            name: 'ratesupdoc2.doc',
+                                            sha256: 'foobar2',
+                                        },
+                                    ],
+                                    certifyingActuaryContacts: [
+                                        {
+                                            name: 'Foo Person',
+                                            titleRole: 'Bar Job',
+                                            email: 'foo@example.com',
+                                            actuarialFirm: 'GUIDEHOUSE',
+                                        },
+                                    ],
+                                    addtlActuaryContacts: [
+                                        {
+                                            name: 'Bar Person',
+                                            titleRole: 'Baz Job',
+                                            email: 'bar@example.com',
+                                            actuarialFirm: 'OTHER',
+                                            actuarialFirmOther: 'Some Firm',
+                                        },
+                                    ],
+                                    actuaryCommunicationPreference:
+                                        'OACT_TO_ACTUARY',
+                                },
                             },
-                        },
-                    ],
+                        ],
+                    },
                 },
             },
-        }, {
-            contextValue: defaultContext(),
-        })
-        
+            {
+                contextValue: defaultContext(),
+            }
+        )
+
         const result = extractGraphQLResponse(response)
         expect(result.errors).toBeDefined()
         expect(result.errors?.[0].extensions?.code).toBe('BAD_USER_INPUT')
@@ -745,23 +779,26 @@ describe('updateDraftContractRates', () => {
         const contractDraft = await createTestHealthPlanPackage(stateServer)
         const draftFD = latestFormData(contractDraft)
 
-        const response = await stateServer.executeOperation({
-            query: UpdateDraftContractRatesDocument,
-            variables: {
-                input: {
-                    contractID: contractDraft.id,
-                    lastSeenUpdatedAt: draftFD.updatedAt,
-                    updatedRates: [
-                        {
-                            type: 'LINK',
-                            rateID: foreignRateID,
-                        },
-                    ],
+        const response = await stateServer.executeOperation(
+            {
+                query: UpdateDraftContractRatesDocument,
+                variables: {
+                    input: {
+                        contractID: contractDraft.id,
+                        lastSeenUpdatedAt: draftFD.updatedAt,
+                        updatedRates: [
+                            {
+                                type: 'LINK',
+                                rateID: foreignRateID,
+                            },
+                        ],
+                    },
                 },
             },
-        }, {
-            contextValue: defaultContext(),
-        })
+            {
+                contextValue: defaultContext(),
+            }
+        )
 
         const result = extractGraphQLResponse(response)
 
@@ -796,21 +833,28 @@ describe('updateDraftContractRates', () => {
         const contractDraft = await createTestHealthPlanPackage(stateServer)
         const draftFD = latestFormData(contractDraft)
 
-        const result = await stateServer.executeOperation({
-            query: UpdateDraftContractRatesDocument,
-            variables: {
-                input: {
-                    contractID: contractDraft.id,
-                    lastSeenUpdatedAt: draftFD.updatedAt,
-                    updatedRates: [
-                        {
-                            type: 'LINK',
-                            rateID: foreignRateID,
-                        },
-                    ],
+        const response = await stateServer.executeOperation(
+            {
+                query: UpdateDraftContractRatesDocument,
+                variables: {
+                    input: {
+                        contractID: contractDraft.id,
+                        lastSeenUpdatedAt: draftFD.updatedAt,
+                        updatedRates: [
+                            {
+                                type: 'LINK',
+                                rateID: foreignRateID,
+                            },
+                        ],
+                    },
                 },
             },
-        })
+            {
+                contextValue: defaultContext(),
+            }
+        )
+
+        const result = extractGraphQLResponse(response)
 
         expect(result.errors).toBeUndefined()
         if (!result.data) {
@@ -827,69 +871,76 @@ describe('updateDraftContractRates', () => {
 
         const rateID = draftRates[0].id
 
-        const updateResult = await stateServer.executeOperation({
-            query: UpdateDraftContractRatesDocument,
-            variables: {
-                input: {
-                    contractID: contractDraft.id,
-                    lastSeenUpdatedAt: draftRevision.updatedAt,
-                    updatedRates: [
-                        {
-                            type: 'UPDATE',
-                            rateID: rateID,
-                            formData: {
-                                rateType: 'AMENDMENT',
-                                rateCapitationType: 'RATE_CELL',
-                                rateDateStart: '2024-01-01',
-                                rateDateEnd: '2025-01-01',
-                                amendmentEffectiveDateStart: '2024-02-01',
-                                amendmentEffectiveDateEnd: '2025-02-01',
-                                rateProgramIDs: ['foo'],
-                                deprecatedRateProgramIDs: [],
-                                rateDocuments: [
-                                    {
-                                        s3URL: 's3://bucketname/key/test1',
-                                        name: 'updatedratedoc1.doc',
-                                        sha256: 'foobar',
-                                    },
-                                ],
-                                supportingDocuments: [
-                                    {
-                                        s3URL: 's3://bucketname/key/test11',
-                                        name: 'ratesupdoc1.doc',
-                                        sha256: 'foobar1',
-                                    },
-                                    {
-                                        s3URL: 's3://bucketname/key/test12',
-                                        name: 'ratesupdoc2.doc',
-                                        sha256: 'foobar2',
-                                    },
-                                ],
-                                certifyingActuaryContacts: [
-                                    {
-                                        name: 'Foo Person',
-                                        titleRole: 'Bar Job',
-                                        email: 'foo@example.com',
-                                        actuarialFirm: 'GUIDEHOUSE',
-                                    },
-                                ],
-                                addtlActuaryContacts: [
-                                    {
-                                        name: 'Bar Person',
-                                        titleRole: 'Baz Job',
-                                        email: 'bar@example.com',
-                                        actuarialFirm: 'OTHER',
-                                        actuarialFirmOther: 'Some Firm',
-                                    },
-                                ],
-                                actuaryCommunicationPreference:
-                                    'OACT_TO_ACTUARY',
+        const updateResponse = await stateServer.executeOperation(
+            {
+                query: UpdateDraftContractRatesDocument,
+                variables: {
+                    input: {
+                        contractID: contractDraft.id,
+                        lastSeenUpdatedAt: draftRevision.updatedAt,
+                        updatedRates: [
+                            {
+                                type: 'UPDATE',
+                                rateID: rateID,
+                                formData: {
+                                    rateType: 'AMENDMENT',
+                                    rateCapitationType: 'RATE_CELL',
+                                    rateDateStart: '2024-01-01',
+                                    rateDateEnd: '2025-01-01',
+                                    amendmentEffectiveDateStart: '2024-02-01',
+                                    amendmentEffectiveDateEnd: '2025-02-01',
+                                    rateProgramIDs: ['foo'],
+                                    deprecatedRateProgramIDs: [],
+                                    rateDocuments: [
+                                        {
+                                            s3URL: 's3://bucketname/key/test1',
+                                            name: 'updatedratedoc1.doc',
+                                            sha256: 'foobar',
+                                        },
+                                    ],
+                                    supportingDocuments: [
+                                        {
+                                            s3URL: 's3://bucketname/key/test11',
+                                            name: 'ratesupdoc1.doc',
+                                            sha256: 'foobar1',
+                                        },
+                                        {
+                                            s3URL: 's3://bucketname/key/test12',
+                                            name: 'ratesupdoc2.doc',
+                                            sha256: 'foobar2',
+                                        },
+                                    ],
+                                    certifyingActuaryContacts: [
+                                        {
+                                            name: 'Foo Person',
+                                            titleRole: 'Bar Job',
+                                            email: 'foo@example.com',
+                                            actuarialFirm: 'GUIDEHOUSE',
+                                        },
+                                    ],
+                                    addtlActuaryContacts: [
+                                        {
+                                            name: 'Bar Person',
+                                            titleRole: 'Baz Job',
+                                            email: 'bar@example.com',
+                                            actuarialFirm: 'OTHER',
+                                            actuarialFirmOther: 'Some Firm',
+                                        },
+                                    ],
+                                    actuaryCommunicationPreference:
+                                        'OACT_TO_ACTUARY',
+                                },
                             },
-                        },
-                    ],
+                        ],
+                    },
                 },
             },
-        })
+            {
+                contextValue: defaultContext(),
+            }
+        )
+
+        const updateResult = extractGraphQLResponse(updateResponse)
 
         expect(updateResult.errors).toBeDefined()
         if (!updateResult.errors) {
@@ -911,21 +962,29 @@ describe('updateDraftContractRates', () => {
         const contractDraft =
             await createAndUpdateTestContractWithRate(stateServer)
 
-        const result = await stateServer.executeOperation({
-            query: UpdateDraftContractRatesDocument,
-            variables: {
-                input: {
-                    contractID: contractDraft.id,
-                    lastSeenUpdatedAt: contractDraft.draftRevision?.updatedAt,
-                    updatedRates: [
-                        {
-                            type: 'LINK',
-                            rateID: withdrawnRate?.id,
-                        },
-                    ],
+        const response = await stateServer.executeOperation(
+            {
+                query: UpdateDraftContractRatesDocument,
+                variables: {
+                    input: {
+                        contractID: contractDraft.id,
+                        lastSeenUpdatedAt:
+                            contractDraft.draftRevision?.updatedAt,
+                        updatedRates: [
+                            {
+                                type: 'LINK',
+                                rateID: withdrawnRate?.id,
+                            },
+                        ],
+                    },
                 },
             },
-        })
+            {
+                contextValue: defaultContext(),
+            }
+        )
+
+        const result = extractGraphQLResponse(response)
 
         expect(result.errors).toBeDefined()
         if (!result.errors) {
@@ -953,8 +1012,11 @@ describe('updateDraftContractRates', () => {
             },
         })
 
-        const otherPackage =
-            await createAndSubmitTestContractWithRate(stateServer, undefined, { user: stateUser })
+        const otherPackage = await createAndSubmitTestContractWithRate(
+            stateServer,
+            undefined,
+            { user: stateUser }
+        )
 
         const withdrawnRate =
             otherPackage.packageSubmissions[0].rateRevisions[0]
@@ -971,21 +1033,29 @@ describe('updateDraftContractRates', () => {
         const contractDraft =
             await createAndUpdateTestContractWithoutRates(stateServer)
 
-        const result = await stateServer.executeOperation({
-            query: UpdateDraftContractRatesDocument,
-            variables: {
-                input: {
-                    contractID: contractDraft.id,
-                    lastSeenUpdatedAt: contractDraft.draftRevision?.updatedAt,
-                    updatedRates: [
-                        {
-                            type: 'LINK',
-                            rateID: withdrawnRate.rateID,
-                        },
-                    ],
+        const response = await stateServer.executeOperation(
+            {
+                query: UpdateDraftContractRatesDocument,
+                variables: {
+                    input: {
+                        contractID: contractDraft.id,
+                        lastSeenUpdatedAt:
+                            contractDraft.draftRevision?.updatedAt,
+                        updatedRates: [
+                            {
+                                type: 'LINK',
+                                rateID: withdrawnRate.rateID,
+                            },
+                        ],
+                    },
                 },
             },
-        })
+            {
+                contextValue: defaultContext(),
+            }
+        )
+
+        const result = extractGraphQLResponse(response)
 
         expect(result.errors).toBeDefined()
         if (!result.errors) {
@@ -1014,8 +1084,10 @@ describe('updateDraftContractRates', () => {
             s3Client: mockS3,
         })
 
-        const otherPackage =
-            await createAndSubmitTestHealthPlanPackage(stateServer, { user: stateUser })
+        const otherPackage = await createAndSubmitTestHealthPlanPackage(
+            stateServer,
+            { user: stateUser }
+        )
 
         await unlockTestHealthPlanPackage(
             cmsServer,
@@ -1030,93 +1102,103 @@ describe('updateDraftContractRates', () => {
         const contractDraft = await createTestHealthPlanPackage(stateServer)
         const draftFD = latestFormData(contractDraft)
 
-        const linkResult = await stateServer.executeOperation({
-            query: UpdateDraftContractRatesDocument,
-            variables: {
-                input: {
-                    contractID: contractDraft.id,
-                    lastSeenUpdatedAt: draftFD.updatedAt,
-                    updatedRates: [
-                        {
-                            type: 'LINK',
-                            rateID: foreignRateID,
-                        },
-                    ],
+        const linkResponse = await stateServer.executeOperation(
+            {
+                query: UpdateDraftContractRatesDocument,
+                variables: {
+                    input: {
+                        contractID: contractDraft.id,
+                        lastSeenUpdatedAt: draftFD.updatedAt,
+                        updatedRates: [
+                            {
+                                type: 'LINK',
+                                rateID: foreignRateID,
+                            },
+                        ],
+                    },
                 },
             },
-        })
+            {
+                contextValue: defaultContext(),
+            }
+        )
+
+        const linkResult = extractGraphQLResponse(linkResponse)
 
         expect(linkResult.errors).toBeUndefined()
 
         const draftRevision =
             linkResult?.data?.updateDraftContractRates.contract.draftRevision
 
-        const result = await stateServer.executeOperation({
-            query: UpdateDraftContractRatesDocument,
-            variables: {
-                input: {
-                    contractID: contractDraft.id,
-                    lastSeenUpdatedAt: draftRevision.updatedAt,
-                    updatedRates: [
-                        {
-                            type: 'UPDATE',
-                            rateID: foreignRateID,
-                            formData: {
-                                rateType: 'AMENDMENT',
-                                rateCapitationType: 'RATE_CELL',
-                                rateDateStart: '2024-01-01',
-                                rateDateEnd: '2025-01-01',
-                                amendmentEffectiveDateStart: '2024-02-01',
-                                amendmentEffectiveDateEnd: '2025-02-01',
-                                rateProgramIDs: ['foo'],
-                                deprecatedRateProgramIDs: [],
-                                rateDocuments: [
-                                    {
-                                        s3URL: 's3://bucketname/key/test1',
-                                        name: 'updatedratedoc1.doc',
-                                        sha256: 'foobar',
-                                    },
-                                ],
-                                supportingDocuments: [
-                                    {
-                                        s3URL: 's3://bucketname/key/test11',
-                                        name: 'ratesupdoc1.doc',
-                                        sha256: 'foobar1',
-                                    },
-                                    {
-                                        s3URL: 's3://bucketname/key/test12',
-                                        name: 'ratesupdoc2.doc',
-                                        sha256: 'foobar2',
-                                    },
-                                ],
-                                certifyingActuaryContacts: [
-                                    {
-                                        name: 'Foo Person',
-                                        titleRole: 'Bar Job',
-                                        email: 'foo@example.com',
-                                        actuarialFirm: 'GUIDEHOUSE',
-                                    },
-                                ],
-                                addtlActuaryContacts: [
-                                    {
-                                        name: 'Bar Person',
-                                        titleRole: 'Baz Job',
-                                        email: 'bar@example.com',
-                                        actuarialFirm: 'OTHER',
-                                        actuarialFirmOther: 'Some Firm',
-                                    },
-                                ],
-                                actuaryCommunicationPreference:
-                                    'OACT_TO_ACTUARY',
+        const response = await stateServer.executeOperation(
+            {
+                query: UpdateDraftContractRatesDocument,
+                variables: {
+                    input: {
+                        contractID: contractDraft.id,
+                        lastSeenUpdatedAt: draftRevision.updatedAt,
+                        updatedRates: [
+                            {
+                                type: 'UPDATE',
+                                rateID: foreignRateID,
+                                formData: {
+                                    rateType: 'AMENDMENT',
+                                    rateCapitationType: 'RATE_CELL',
+                                    rateDateStart: '2024-01-01',
+                                    rateDateEnd: '2025-01-01',
+                                    amendmentEffectiveDateStart: '2024-02-01',
+                                    amendmentEffectiveDateEnd: '2025-02-01',
+                                    rateProgramIDs: ['foo'],
+                                    deprecatedRateProgramIDs: [],
+                                    rateDocuments: [
+                                        {
+                                            s3URL: 's3://bucketname/key/test1',
+                                            name: 'updatedratedoc1.doc',
+                                            sha256: 'foobar',
+                                        },
+                                    ],
+                                    supportingDocuments: [
+                                        {
+                                            s3URL: 's3://bucketname/key/test11',
+                                            name: 'ratesupdoc1.doc',
+                                            sha256: 'foobar1',
+                                        },
+                                        {
+                                            s3URL: 's3://bucketname/key/test12',
+                                            name: 'ratesupdoc2.doc',
+                                            sha256: 'foobar2',
+                                        },
+                                    ],
+                                    certifyingActuaryContacts: [
+                                        {
+                                            name: 'Foo Person',
+                                            titleRole: 'Bar Job',
+                                            email: 'foo@example.com',
+                                            actuarialFirm: 'GUIDEHOUSE',
+                                        },
+                                    ],
+                                    addtlActuaryContacts: [
+                                        {
+                                            name: 'Bar Person',
+                                            titleRole: 'Baz Job',
+                                            email: 'bar@example.com',
+                                            actuarialFirm: 'OTHER',
+                                            actuarialFirmOther: 'Some Firm',
+                                        },
+                                    ],
+                                    actuaryCommunicationPreference:
+                                        'OACT_TO_ACTUARY',
+                                },
                             },
-                        },
-                    ],
+                        ],
+                    },
                 },
             },
-        }, {
-            contextValue: defaultContext(),
-        })
-        const resultData = extractGraphQLResponse(result)
+            {
+                contextValue: defaultContext(),
+            }
+        )
+        const resultData = extractGraphQLResponse(response)
 
         expect(resultData.errors).toBeDefined()
         if (!resultData.errors) {
@@ -1144,23 +1226,26 @@ describe('updateDraftContractRates', () => {
         const contractDraft = await createTestHealthPlanPackage(stateServer)
         const draftFD = latestFormData(contractDraft)
 
-        const linkResult = await stateServer.executeOperation({
-            query: UpdateDraftContractRatesDocument,
-            variables: {
-                input: {
-                    contractID: contractDraft.id,
-                    lastSeenUpdatedAt: draftFD.updatedAt,
-                    updatedRates: [
-                        {
-                            type: 'LINK',
-                            rateID: foreignRateID,
-                        },
-                    ],
+        const linkResult = await stateServer.executeOperation(
+            {
+                query: UpdateDraftContractRatesDocument,
+                variables: {
+                    input: {
+                        contractID: contractDraft.id,
+                        lastSeenUpdatedAt: draftFD.updatedAt,
+                        updatedRates: [
+                            {
+                                type: 'LINK',
+                                rateID: foreignRateID,
+                            },
+                        ],
+                    },
                 },
             },
-        }, {
-            contextValue: defaultContext(),
-        })
+            {
+                contextValue: defaultContext(),
+            }
+        )
 
         const result = extractGraphQLResponse(linkResult)
         expect(result.errors).toBeUndefined()
@@ -1176,18 +1261,21 @@ describe('updateDraftContractRates', () => {
 
         expect(draftRates).toHaveLength(1)
 
-        const unlinkResult = await stateServer.executeOperation({
-            query: UpdateDraftContractRatesDocument,
-            variables: {
-                input: {
-                    contractID: contractDraft.id,
-                    lastSeenUpdatedAt: draftRevision.updatedAt,
-                    updatedRates: [],
+        const unlinkResult = await stateServer.executeOperation(
+            {
+                query: UpdateDraftContractRatesDocument,
+                variables: {
+                    input: {
+                        contractID: contractDraft.id,
+                        lastSeenUpdatedAt: draftRevision.updatedAt,
+                        updatedRates: [],
+                    },
                 },
             },
-        }, {
-            contextValue: defaultContext(),
-        })
+            {
+                contextValue: defaultContext(),
+            }
+        )
 
         const unlinkResponse = extractGraphQLResponse(unlinkResult)
         expect(unlinkResponse.errors).toBeUndefined()
@@ -1217,19 +1305,22 @@ describe('updateDraftContractRates', () => {
         const existingRateResult = await fetchTestRateById(stateServer, rate.id)
         expect(existingRateResult.id).toBeDefined()
 
-        const result = await stateServer.executeOperation({
-            query: UpdateDraftContractRatesDocument,
-            variables: {
-                input: {
-                    contractID: draft.id,
-                    lastSeenUpdatedAt: draftFD.updatedAt,
-                    updatedRates: [],
+        const result = await stateServer.executeOperation(
+            {
+                query: UpdateDraftContractRatesDocument,
+                variables: {
+                    input: {
+                        contractID: draft.id,
+                        lastSeenUpdatedAt: draftFD.updatedAt,
+                        updatedRates: [],
+                    },
                 },
             },
-        }, {
-            contextValue: defaultContext(),
-        })
-        
+            {
+                contextValue: defaultContext(),
+            }
+        )
+
         const response = extractGraphQLResponse(result)
         expect(response.errors).toBeUndefined()
 
@@ -1242,21 +1333,24 @@ describe('updateDraftContractRates', () => {
 
         expect(draftRates).toHaveLength(0)
 
-        const nonexistantRateResult = await stateServer.executeOperation({
-            query: FetchRateDocument,
-            variables: { input: { rateID: rate.id } },
-        }, {
-            contextValue: defaultContext(),
-        })
+        const nonexistantRateResult = await stateServer.executeOperation(
+            {
+                query: FetchRateDocument,
+                variables: { input: { rateID: rate.id } },
+            },
+            {
+                contextValue: defaultContext(),
+            }
+        )
 
-        const nonexistantResponse = extractGraphQLResponse(nonexistantRateResult)
+        const nonexistantResponse = extractGraphQLResponse(
+            nonexistantRateResult
+        )
         expect(nonexistantResponse.errors).toBeDefined()
         if (!nonexistantResponse.errors) {
             throw new Error('define errors')
         }
-        expect(nonexistantResponse.errors[0].extensions?.code).toBe(
-            'NOT_FOUND'
-        )
+        expect(nonexistantResponse.errors[0].extensions?.code).toBe('NOT_FOUND')
     })
 
     it.todo('allows updating a child unlocked rate')
