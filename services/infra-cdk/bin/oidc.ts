@@ -16,7 +16,12 @@ import * as cdk from 'aws-cdk-lib'
 import { GitHubOidcStack } from '../lib/stacks'
 import { getCdkEnvironment } from '../lib/config'
 
-const app = new cdk.App()
+const app = new cdk.App({
+    defaultStackSynthesizer: new cdk.CliCredentialsStackSynthesizer({
+        qualifier: 'mcreview',
+    }),
+})
+
 const stage = app.node.tryGetContext('stage') || process.env.STAGE_NAME
 
 if (!stage) {
