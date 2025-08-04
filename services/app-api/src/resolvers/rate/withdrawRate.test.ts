@@ -612,6 +612,8 @@ describe('withdrawRate', () => {
                         ],
                     },
                 },
+            }, {
+                contextValue: { user: stateUser },
             })
         )
 
@@ -909,6 +911,8 @@ describe('withdrawRate', () => {
                         ],
                     },
                 },
+            }, {
+                contextValue: { user: stateUser },
             })
         )
 
@@ -929,7 +933,8 @@ describe('withdrawRate', () => {
         const unlockContractC = await unlockTestContract(
             cmsServer,
             contractC.id,
-            'unlock to make updates'
+            'unlock to make updates',
+            { user: cmsUser }
         )
 
         // update contract C child rate to assert it wasn't modified
@@ -961,6 +966,8 @@ describe('withdrawRate', () => {
                         ],
                     },
                 },
+            }, {
+                contextValue: { user: stateUser },
             })
         )
 
@@ -968,7 +975,8 @@ describe('withdrawRate', () => {
         await unlockTestContract(
             cmsServer,
             contractD.id,
-            'unlock to make updates'
+            'unlock to make updates',
+            { user: cmsUser }
         )
         must(
             await stateServer.executeOperation({
@@ -1197,7 +1205,8 @@ describe('withdrawRate', () => {
         await unlockTestContract(
             cmsServer,
             contractB.id,
-            'unlock to make updates'
+            'unlock to make updates',
+            { user: cmsUser }
         )
 
         const contractBName = packageName(

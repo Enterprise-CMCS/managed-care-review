@@ -1155,18 +1155,21 @@ describe('updateDraftContractRates', () => {
                     ],
                 },
             },
+        }, {
+            contextValue: defaultContext(),
         })
 
-        expect(linkResult.errors).toBeUndefined()
-        if (!linkResult.data) {
+        const result = extractGraphQLResponse(linkResult)
+        expect(result.errors).toBeUndefined()
+        if (!result.data) {
             throw new Error('no linkResult')
         }
 
         const draftRates =
-            linkResult.data.updateDraftContractRates.contract.draftRates
+            result.data.updateDraftContractRates.contract.draftRates
 
         const draftRevision =
-            linkResult.data.updateDraftContractRates.contract.draftRevision
+            result.data.updateDraftContractRates.contract.draftRevision
 
         expect(draftRates).toHaveLength(1)
 
@@ -1179,15 +1182,18 @@ describe('updateDraftContractRates', () => {
                     updatedRates: [],
                 },
             },
+        }, {
+            contextValue: defaultContext(),
         })
 
-        expect(unlinkResult.errors).toBeUndefined()
-        if (!unlinkResult.data) {
+        const unlinkResponse = extractGraphQLResponse(unlinkResult)
+        expect(unlinkResponse.errors).toBeUndefined()
+        if (!unlinkResponse.data) {
             throw new Error('no unlinkResult')
         }
 
         const emptyDraftRates =
-            unlinkResult.data.updateDraftContractRates.contract.draftRates
+            unlinkResponse.data.updateDraftContractRates.contract.draftRates
 
         expect(emptyDraftRates).toHaveLength(0)
     })
@@ -1217,28 +1223,35 @@ describe('updateDraftContractRates', () => {
                     updatedRates: [],
                 },
             },
+        }, {
+            contextValue: defaultContext(),
         })
-        expect(result.errors).toBeUndefined()
+        
+        const response = extractGraphQLResponse(result)
+        expect(response.errors).toBeUndefined()
 
-        if (!result.data) {
+        if (!response.data) {
             throw new Error('no data returned')
         }
 
         const draftRates =
-            result.data.updateDraftContractRates.contract.draftRates
+            response.data.updateDraftContractRates.contract.draftRates
 
         expect(draftRates).toHaveLength(0)
 
         const nonexistantRateResult = await stateServer.executeOperation({
             query: FetchRateDocument,
             variables: { input: { rateID: rate.id } },
+        }, {
+            contextValue: defaultContext(),
         })
 
-        expect(nonexistantRateResult.errors).toBeDefined()
-        if (!nonexistantRateResult.errors) {
+        const nonexistantResponse = extractGraphQLResponse(nonexistantRateResult)
+        expect(nonexistantResponse.errors).toBeDefined()
+        if (!nonexistantResponse.errors) {
             throw new Error('define errors')
         }
-        expect(nonexistantRateResult.errors[0].extensions?.code).toBe(
+        expect(nonexistantResponse.errors[0].extensions?.code).toBe(
             'NOT_FOUND'
         )
     })

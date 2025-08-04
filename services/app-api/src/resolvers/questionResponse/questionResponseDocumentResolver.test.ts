@@ -2,6 +2,7 @@ import {
     constructTestPostgresServer,
     createTestQuestion,
     createTestQuestionResponse,
+    defaultContext,
 } from '../../testHelpers/gqlHelpers'
 import {
     testCMSUser,
@@ -60,11 +61,14 @@ describe(`questionResponseDocumentResolver`, () => {
                         s3URL: 's3://bucketname/key/test11',
                     },
                 ],
-            }
+            },
+            { user: dmcoCMSUser }
         )
         const responseToDMCO = await createTestQuestionResponse(
             stateServer,
-            createdDMCOQuestion.question.id
+            createdDMCOQuestion.question.id,
+            undefined,
+            defaultContext()
         )
         const createdDMCPQuestion = await createTestQuestion(
             dmcpCMSServer,
@@ -76,11 +80,14 @@ describe(`questionResponseDocumentResolver`, () => {
                         s3URL: 's3://bucketname/key/test12',
                     },
                 ],
-            }
+            },
+            { user: dmcpCMSUser }
         )
         const responseToDMCP = await createTestQuestionResponse(
             stateServer,
-            createdDMCPQuestion.question.id
+            createdDMCPQuestion.question.id,
+            undefined,
+            defaultContext()
         )
         const createdOACTQuestion = await createTestQuestion(
             oactCMServer,
@@ -92,11 +99,14 @@ describe(`questionResponseDocumentResolver`, () => {
                         s3URL: 's3://bucketname/key/test13',
                     },
                 ],
-            }
+            },
+            { user: oactCMSUser }
         )
         const responseToOACT = await createTestQuestionResponse(
             stateServer,
-            createdOACTQuestion.question.id
+            createdOACTQuestion.question.id,
+            undefined,
+            defaultContext()
         )
         const contractWithQuestions = await fetchTestContractWithQuestions(
             stateServer,

@@ -669,9 +669,9 @@ describe('fetchRate', () => {
         const rateID =
             submittedRate.packageSubmissions[0].rateRevisions[0].rateID
 
-        await createTestRateQuestion(dmcoServer, rateID)
-        await createTestRateQuestion(dmcpServer, rateID)
-        await createTestRateQuestion(oactServer, rateID)
+        await createTestRateQuestion(dmcoServer, rateID, undefined, { user: dmcoCmsUser })
+        await createTestRateQuestion(dmcpServer, rateID, undefined, { user: dmcpCmsUser })
+        await createTestRateQuestion(oactServer, rateID, undefined, { user: oactApproverUser })
 
         const response = await server.executeOperation({
             query: FetchRateWithQuestionsDocument,
@@ -701,7 +701,7 @@ describe('fetchRate', () => {
         )
 
         // Test newly created dmco question and its order
-        await createTestRateQuestion(dmco2Server, rateID)
+        await createTestRateQuestion(dmco2Server, rateID, undefined, { user: dmco2CmsUser })
         const response2 = await server.executeOperation({
             query: FetchRateWithQuestionsDocument,
             variables: {
@@ -709,6 +709,8 @@ describe('fetchRate', () => {
                     rateID,
                 },
             },
+        }, {
+            contextValue: defaultContext(),
         })
         const result2 = extractGraphQLResponse(response2)
         const rateQuestions2 = result2.data?.fetchRate.rate.questions
