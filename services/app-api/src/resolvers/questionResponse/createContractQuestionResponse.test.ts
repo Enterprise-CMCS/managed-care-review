@@ -51,20 +51,25 @@ describe('createContractQuestionResponse', () => {
 
         const contract = await createAndSubmitTestContractWithRate(stateServer)
 
-        const createdQuestion = await createTestQuestion(cmsServer, contract.id, undefined, { user: cmsUser })
+        const createdQuestion = await createTestQuestion(
+            cmsServer,
+            contract.id,
+            undefined,
+            { user: cmsUser }
+        )
 
         const createResponseResult = await createTestQuestionResponse(
             stateServer,
-            createdQuestion.id
+            createdQuestion.question.id
         )
 
         expect(createResponseResult.question).toEqual(
             expect.objectContaining({
-                ...createdQuestion,
+                ...createdQuestion.question,
                 responses: expect.arrayContaining([
                     expect.objectContaining({
                         id: expect.any(String),
-                        questionID: createdQuestion.id,
+                        questionID: createdQuestion.question.id,
                         documents: [
                             {
                                 name: 'Test Question Response',
@@ -84,22 +89,25 @@ describe('createContractQuestionResponse', () => {
         const stateServer = await constructTestPostgresServer()
         const fakeID = 'abc-123'
 
-        const createResponseResult = await stateServer.executeOperation({
-            query: CreateContractQuestionResponseDocument,
-            variables: {
-                input: {
-                    questionID: fakeID,
-                    documents: [
-                        {
-                            name: 'Test Question',
-                            s3URL: 's3://bucketname/key/test1',
-                        },
-                    ],
+        const createResponseResult = await stateServer.executeOperation(
+            {
+                query: CreateContractQuestionResponseDocument,
+                variables: {
+                    input: {
+                        questionID: fakeID,
+                        documents: [
+                            {
+                                name: 'Test Question',
+                                s3URL: 's3://bucketname/key/test1',
+                            },
+                        ],
+                    },
                 },
             },
-        }, {
-            contextValue: defaultContext(),
-        })
+            {
+                contextValue: defaultContext(),
+            }
+        )
         const result = extractGraphQLResponse(createResponseResult)
 
         expect(result).toBeDefined()
@@ -111,31 +119,48 @@ describe('createContractQuestionResponse', () => {
 
     it('returns an error when attempting to create response for a contract that has been approved', async () => {
         const stateServer = await constructTestPostgresServer()
+        const cmsApprover = testCMSApproverUser()
+        await createDBUsersWithFullData([cmsApprover])
+        const cmsApproverServer = await constructTestPostgresServer({
+            context: {
+                user: cmsApprover,
+            },
+        })
         const cmsServer = await constructTestPostgresServer({
             context: {
                 user: cmsUser,
             },
         })
         const contract = await createAndSubmitTestContractWithRate(stateServer)
-        const createdQuestion = await createTestQuestion(cmsServer, contract.id, undefined, { user: cmsUser })
-        await approveTestContract(cmsServer, contract.id)
+        const createdQuestion = await createTestQuestion(
+            cmsServer,
+            contract.id,
+            undefined,
+            { user: cmsUser }
+        )
+        await approveTestContract(cmsApproverServer, contract.id, undefined, {
+            user: cmsApprover,
+        })
 
-        const createResponseResult = await stateServer.executeOperation({
-            query: CreateContractQuestionResponseDocument,
-            variables: {
-                input: {
-                    questionID: createdQuestion.question.id,
-                    documents: [
-                        {
-                            name: 'Test Question',
-                            s3URL: 's3://bucketname/key/test1',
-                        },
-                    ],
+        const createResponseResult = await stateServer.executeOperation(
+            {
+                query: CreateContractQuestionResponseDocument,
+                variables: {
+                    input: {
+                        questionID: createdQuestion.question.id,
+                        documents: [
+                            {
+                                name: 'Test Question',
+                                s3URL: 's3://bucketname/key/test1',
+                            },
+                        ],
+                    },
                 },
             },
-        }, {
-            contextValue: defaultContext(),
-        })
+            {
+                contextValue: defaultContext(),
+            }
+        )
         const result = extractGraphQLResponse(createResponseResult)
 
         expect(result).toBeDefined()
@@ -153,26 +178,34 @@ describe('createContractQuestionResponse', () => {
             },
         })
         const contract = await createAndSubmitTestContractWithRate(stateServer)
-        const createdQuestion = await createTestQuestion(cmsServer, contract.id, undefined, { user: cmsUser })
+        const createdQuestion = await createTestQuestion(
+            cmsServer,
+            contract.id,
+            undefined,
+            { user: cmsUser }
+        )
 
-        const createResponseResult = await cmsServer.executeOperation({
-            query: CreateContractQuestionResponseDocument,
-            variables: {
-                input: {
-                    questionID: createdQuestion.question.id,
-                    documents: [
-                        {
-                            name: 'Test Question',
-                            s3URL: 's3://bucketname/key/test1',
-                        },
-                    ],
+        const createResponseResult = await cmsServer.executeOperation(
+            {
+                query: CreateContractQuestionResponseDocument,
+                variables: {
+                    input: {
+                        questionID: createdQuestion.question.id,
+                        documents: [
+                            {
+                                name: 'Test Question',
+                                s3URL: 's3://bucketname/key/test1',
+                            },
+                        ],
+                    },
                 },
             },
-        }, {
-            contextValue: {
-                user: cmsUser,
-            },
-        })
+            {
+                contextValue: {
+                    user: cmsUser,
+                },
+            }
+        )
         const result = extractGraphQLResponse(createResponseResult)
 
         expect(result.errors).toBeDefined()
@@ -202,7 +235,9 @@ describe('createContractQuestionResponse', () => {
         const assignedUserIDs = assignedUsers.map((u) => u.id)
         const assignedUserEmails = assignedUsers.map((u) => u.email)
 
-        await updateTestStateAssignments(cmsServer, 'FL', assignedUserIDs, { user: adminUser })
+        await updateTestStateAssignments(cmsServer, 'FL', assignedUserIDs, {
+            user: adminUser,
+        })
 
         const contract = await createAndSubmitTestContractWithRate(
             stateServer,
@@ -212,11 +247,16 @@ describe('createContractQuestionResponse', () => {
             }
         )
 
-        const createdQuestion = await createTestQuestion(cmsServer, contract.id, undefined, { user: cmsUser })
+        const createdQuestion = await createTestQuestion(
+            cmsServer,
+            contract.id,
+            undefined,
+            { user: cmsUser }
+        )
 
         await createTestQuestionResponse(
             stateServer,
-            createdQuestion?.id
+            createdQuestion.question.id
         )
 
         const contractName =
@@ -266,11 +306,16 @@ describe('createContractQuestionResponse', () => {
 
         const contract = await createAndSubmitTestContractWithRate(stateServer)
 
-        const createdQuestion = await createTestQuestion(cmsServer, contract.id, undefined, { user: cmsUser })
+        const createdQuestion = await createTestQuestion(
+            cmsServer,
+            contract.id,
+            undefined,
+            { user: cmsUser }
+        )
 
         await createTestQuestionResponse(
             stateServer,
-            createdQuestion?.id
+            createdQuestion.question.id
         )
 
         const statePrograms = findStatePrograms(contract.stateCode)

@@ -1,4 +1,8 @@
-import { testCMSUser, testStateUser, createDBUsersWithFullData } from '../../testHelpers/userHelpers'
+import {
+    testCMSUser,
+    testStateUser,
+    createDBUsersWithFullData,
+} from '../../testHelpers/userHelpers'
 import {
     constructTestPostgresServer,
     defaultFloridaProgram,
@@ -26,7 +30,6 @@ import {
     UpdateDraftContractRatesDocument,
 } from '../../gen/gqlClient'
 import { testEmailConfig, testEmailer } from '../../testHelpers/emailerHelpers'
-import { extractGraphQLResponse } from '../../testHelpers/apolloV4ResponseHelper'
 
 const testRateFormInputData = (): RateFormDataInput => ({
     rateType: 'AMENDMENT',
@@ -61,11 +64,11 @@ const testRateFormInputData = (): RateFormDataInput => ({
 describe('undoWithdrawContract', () => {
     const stateUser = testStateUser()
     const cmsUser = testCMSUser()
-    
+
     beforeAll(async () => {
         await createDBUsersWithFullData([stateUser, cmsUser])
     })
-    
+
     it('can undo a contract-only submission withdrawal', async () => {
         const stateServer = await constructTestPostgresServer({
             context: {
@@ -84,8 +87,7 @@ describe('undoWithdrawContract', () => {
             undefined,
             {
                 submissionType: 'CONTRACT_ONLY',
-            },
-            { user: stateUser }
+            }
         )
 
         const withdrawnContract = await withdrawTestContract(
@@ -151,13 +153,18 @@ describe('undoWithdrawContract', () => {
             await submitTestContract(
                 stateServer,
                 undoWithdrawnContract.id,
-                'resubmit',
-                { user: stateUser }
+                'resubmit'
             )
         )
 
         // expect approval without errors
-        must(await approveTestContract(cmsServer, undoWithdrawnContract.id, undefined, { user: cmsUser }))
+        must(
+            await approveTestContract(
+                cmsServer,
+                undoWithdrawnContract.id,
+                undefined
+            )
+        )
     })
     it('can undo a contract and rate submission withdrawal', async () => {
         const stateServer = await constructTestPostgresServer({
@@ -172,12 +179,18 @@ describe('undoWithdrawContract', () => {
             },
         })
 
-        const draftContract =
-            await createAndUpdateTestContractWithRate(stateServer, undefined, { user: stateUser })
+        const draftContract = await createAndUpdateTestContractWithRate(
+            stateServer,
+            undefined
+        )
 
-        await addNewRateToTestContract(stateServer, draftContract, undefined, { user: stateUser })
+        await addNewRateToTestContract(stateServer, draftContract, undefined)
 
-        const contract = await submitTestContract(stateServer, draftContract.id, undefined, { user: stateUser })
+        const contract = await submitTestContract(
+            stateServer,
+            draftContract.id,
+            undefined
+        )
 
         const rateAID = contract.packageSubmissions[0].rateRevisions[0].rateID
         const rateBID = contract.packageSubmissions[0].rateRevisions[1].rateID
@@ -252,13 +265,18 @@ describe('undoWithdrawContract', () => {
             await submitTestContract(
                 stateServer,
                 undoWithdrawnContract.id,
-                'resubmit',
-                { user: stateUser }
+                'resubmit'
             )
         )
 
         // expect approval without errors
-        must(await approveTestContract(cmsServer, undoWithdrawnContract.id, undefined, { user: cmsUser }))
+        must(
+            await approveTestContract(
+                cmsServer,
+                undoWithdrawnContract.id,
+                undefined
+            )
+        )
     })
     it('can undo a submission withdrawal that had linked child rates', async () => {
         const stateServer = await constructTestPostgresServer({
@@ -283,32 +301,35 @@ describe('undoWithdrawContract', () => {
         }
 
         must(
-            await stateServer.executeOperation({
-                query: UpdateDraftContractRatesDocument,
-                variables: {
-                    input: {
-                        contractID: draftContract.id,
-                        lastSeenUpdatedAt:
-                            draftContract.draftRevision.updatedAt,
-                        updatedRates: [
-                            {
-                                type: 'CREATE',
-                                formData: testRateFormInputData(),
-                            },
-                            {
-                                type: 'CREATE',
-                                formData: testRateFormInputData(),
-                            },
-                            {
-                                type: 'CREATE',
-                                formData: testRateFormInputData(),
-                            },
-                        ],
+            await stateServer.executeOperation(
+                {
+                    query: UpdateDraftContractRatesDocument,
+                    variables: {
+                        input: {
+                            contractID: draftContract.id,
+                            lastSeenUpdatedAt:
+                                draftContract.draftRevision.updatedAt,
+                            updatedRates: [
+                                {
+                                    type: 'CREATE',
+                                    formData: testRateFormInputData(),
+                                },
+                                {
+                                    type: 'CREATE',
+                                    formData: testRateFormInputData(),
+                                },
+                                {
+                                    type: 'CREATE',
+                                    formData: testRateFormInputData(),
+                                },
+                            ],
+                        },
                     },
                 },
-            }, {
-                contextValue: { user: stateUser },
-            })
+                {
+                    contextValue: { user: stateUser },
+                }
+            )
         )
 
         const contractA = await submitTestContract(
@@ -343,24 +364,27 @@ describe('undoWithdrawContract', () => {
 
         // Link rate B to contract B
         must(
-            await stateServer.executeOperation({
-                query: UpdateDraftContractRatesDocument,
-                variables: {
-                    input: {
-                        contractID: draftContractB.id,
-                        lastSeenUpdatedAt:
-                            draftContractB.draftRevision.updatedAt,
-                        updatedRates: [
-                            {
-                                type: 'LINK',
-                                rateID: rateBID,
-                            },
-                        ],
+            await stateServer.executeOperation(
+                {
+                    query: UpdateDraftContractRatesDocument,
+                    variables: {
+                        input: {
+                            contractID: draftContractB.id,
+                            lastSeenUpdatedAt:
+                                draftContractB.draftRevision.updatedAt,
+                            updatedRates: [
+                                {
+                                    type: 'LINK',
+                                    rateID: rateBID,
+                                },
+                            ],
+                        },
                     },
                 },
-            }, {
-                contextValue: { user: stateUser },
-            })
+                {
+                    contextValue: { user: stateUser },
+                }
+            )
         )
 
         // Submit contract B with linked rate B, now rate B will not be withdrawn
@@ -377,24 +401,27 @@ describe('undoWithdrawContract', () => {
 
         // Link rate C to contract C
         must(
-            await stateServer.executeOperation({
-                query: UpdateDraftContractRatesDocument,
-                variables: {
-                    input: {
-                        contractID: draftContractC.id,
-                        lastSeenUpdatedAt:
-                            draftContractC.draftRevision.updatedAt,
-                        updatedRates: [
-                            {
-                                type: 'LINK',
-                                rateID: rateCID,
-                            },
-                        ],
+            await stateServer.executeOperation(
+                {
+                    query: UpdateDraftContractRatesDocument,
+                    variables: {
+                        input: {
+                            contractID: draftContractC.id,
+                            lastSeenUpdatedAt:
+                                draftContractC.draftRevision.updatedAt,
+                            updatedRates: [
+                                {
+                                    type: 'LINK',
+                                    rateID: rateCID,
+                                },
+                            ],
+                        },
                     },
                 },
-            }, {
-                contextValue: { user: stateUser },
-            })
+                {
+                    contextValue: { user: stateUser },
+                }
+            )
         )
 
         // // contract C is approved, which should not allow rate C to be withdrawn
@@ -552,24 +579,27 @@ describe('undoWithdrawContract', () => {
         }
 
         must(
-            await stateServer.executeOperation({
-                query: UpdateDraftContractRatesDocument,
-                variables: {
-                    input: {
-                        contractID: draftContractA.id,
-                        lastSeenUpdatedAt:
-                            draftContractA.draftRevision.updatedAt,
-                        updatedRates: [
-                            {
-                                type: 'LINK',
-                                rateID: rateBID,
-                            },
-                        ],
+            await stateServer.executeOperation(
+                {
+                    query: UpdateDraftContractRatesDocument,
+                    variables: {
+                        input: {
+                            contractID: draftContractA.id,
+                            lastSeenUpdatedAt:
+                                draftContractA.draftRevision.updatedAt,
+                            updatedRates: [
+                                {
+                                    type: 'LINK',
+                                    rateID: rateBID,
+                                },
+                            ],
+                        },
                     },
                 },
-            }, {
-                contextValue: { user: stateUser },
-            })
+                {
+                    contextValue: { user: stateUser },
+                }
+            )
         )
 
         const contractA = await submitTestContract(

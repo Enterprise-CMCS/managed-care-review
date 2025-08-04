@@ -4,7 +4,10 @@ import {
     mockStoreThatErrors,
     sharedTestPrismaClient,
 } from '../../testHelpers/storeHelpers'
-import { constructTestPostgresServer } from '../../testHelpers/gqlHelpers'
+import {
+    constructTestPostgresServer,
+    defaultContext,
+} from '../../testHelpers/gqlHelpers'
 import { testCMSUser, testStateUser } from '../../testHelpers/userHelpers'
 import {
     createTestContract,
@@ -161,18 +164,21 @@ describe(`Tests UpdateHealthPlanFormData`, () => {
             },
         })
 
-        const updateResult = await cmsUserServer.executeOperation({
-            query: UpdateContractDraftRevisionDocument,
-            variables: {
-                input: {
-                    contractID: draftContract.id,
-                    lastSeenUpdatedAt: draftRevision.updatedAt,
-                    formData: validEmptyFormData,
+        const updateResult = await cmsUserServer.executeOperation(
+            {
+                query: UpdateContractDraftRevisionDocument,
+                variables: {
+                    input: {
+                        contractID: draftContract.id,
+                        lastSeenUpdatedAt: draftRevision.updatedAt,
+                        formData: validEmptyFormData,
+                    },
                 },
             },
-        }, {
-            contextValue: { user: cmsUser },
-        })
+            {
+                contextValue: { user: cmsUser },
+            }
+        )
         const updateResultData = extractGraphQLResponse(updateResult)
 
         expect(updateResultData.errors).toBeDefined()
@@ -204,18 +210,21 @@ describe(`Tests UpdateHealthPlanFormData`, () => {
             },
         })
 
-        const updateResult = await otherUserServer.executeOperation({
-            query: UpdateContractDraftRevisionDocument,
-            variables: {
-                input: {
-                    contractID: draftContract.id,
-                    lastSeenUpdatedAt: draftRevision.updatedAt,
-                    formData: validEmptyFormData,
+        const updateResult = await otherUserServer.executeOperation(
+            {
+                query: UpdateContractDraftRevisionDocument,
+                variables: {
+                    input: {
+                        contractID: draftContract.id,
+                        lastSeenUpdatedAt: draftRevision.updatedAt,
+                        formData: validEmptyFormData,
+                    },
                 },
             },
-        }, {
-            contextValue: { user: testStateUser({ stateCode: 'VA' }) },
-        })
+            {
+                contextValue: { user: testStateUser({ stateCode: 'VA' }) },
+            }
+        )
         const updateResultData = extractGraphQLResponse(updateResult)
 
         expect(updateResultData.errors).toBeDefined()
@@ -255,18 +264,21 @@ describe(`Tests UpdateHealthPlanFormData`, () => {
             federalAuthorities: [],
         }
 
-        const updateResult = await server.executeOperation({
-            query: UpdateContractDraftRevisionDocument,
-            variables: {
-                input: {
-                    contractID: draftContract.id,
-                    lastSeenUpdatedAt: draftRevision.updatedAt,
-                    formData,
+        const updateResult = await server.executeOperation(
+            {
+                query: UpdateContractDraftRevisionDocument,
+                variables: {
+                    input: {
+                        contractID: draftContract.id,
+                        lastSeenUpdatedAt: draftRevision.updatedAt,
+                        formData,
+                    },
                 },
             },
-        }, {
-            contextValue: { user: testStateUser() },
-        })
+            {
+                contextValue: { user: testStateUser() },
+            }
+        )
         const updateResultData = extractGraphQLResponse(updateResult)
 
         expect(updateResultData.errors).toBeDefined()
@@ -274,7 +286,9 @@ describe(`Tests UpdateHealthPlanFormData`, () => {
             throw new Error('type narrow')
         }
 
-        expect(updateResultData.errors[0].extensions?.code).toBe('BAD_USER_INPUT')
+        expect(updateResultData.errors[0].extensions?.code).toBe(
+            'BAD_USER_INPUT'
+        )
         expect(updateResultData.errors[0].message).toContain(
             `populationCoveredSchema of CHIP cannot be submissionType of CONTRACT_AND_RATES`
         )
@@ -291,18 +305,21 @@ describe(`Tests UpdateHealthPlanFormData`, () => {
         await submitTestContract(server, contractID)
 
         // Now test updating a submitted submission
-        const updateResult = await server.executeOperation({
-            query: UpdateContractDraftRevisionDocument,
-            variables: {
-                input: {
-                    contractID,
-                    lastSeenUpdatedAt: updatedDraftContract.updatedAt,
-                    formData: validEmptyFormData,
+        const updateResult = await server.executeOperation(
+            {
+                query: UpdateContractDraftRevisionDocument,
+                variables: {
+                    input: {
+                        contractID,
+                        lastSeenUpdatedAt: updatedDraftContract.updatedAt,
+                        formData: validEmptyFormData,
+                    },
                 },
             },
-        }, {
-            contextValue: { user: testStateUser() },
-        })
+            {
+                contextValue: { user: testStateUser() },
+            }
+        )
         const updateResultData = extractGraphQLResponse(updateResult)
 
         expect(updateResultData.errors).toBeDefined()
@@ -310,7 +327,9 @@ describe(`Tests UpdateHealthPlanFormData`, () => {
             throw new Error('type narrow')
         }
 
-        expect(updateResultData.errors[0].extensions?.code).toBe('BAD_USER_INPUT')
+        expect(updateResultData.errors[0].extensions?.code).toBe(
+            'BAD_USER_INPUT'
+        )
         expect(updateResultData.errors[0].message).toContain(
             `Contract is not in editable state. Contract: ${contractID} Status: SUBMITTED`
         )
@@ -329,28 +348,37 @@ describe(`Tests UpdateHealthPlanFormData`, () => {
         }
 
         // Update the draft to have complete data for submission.
-        const updateResult = await server.executeOperation({
-            query: UpdateContractDraftRevisionDocument,
-            variables: {
-                input: {
-                    contractID: contractID,
-                    lastSeenUpdatedAt: new Date(1999, 11, 12),
-                    formData: validEmptyFormData,
+        const updateResult = await server.executeOperation(
+            {
+                query: UpdateContractDraftRevisionDocument,
+                variables: {
+                    input: {
+                        contractID: contractID,
+                        lastSeenUpdatedAt: new Date(1999, 11, 12),
+                        formData: validEmptyFormData,
+                    },
                 },
             },
-        })
+            {
+                contextValue: defaultContext(),
+            }
+        )
 
-        expect(updateResult.errors).toBeDefined()
-        if (updateResult.errors === undefined) {
+        const updateResultData = extractGraphQLResponse(updateResult)
+
+        expect(updateResultData.errors).toBeDefined()
+        if (updateResultData.errors === undefined) {
             throw new Error('type narrow')
         }
 
-        expect(updateResult.errors[0].extensions?.code).toBe('BAD_USER_INPUT')
+        expect(updateResultData.errors[0].extensions?.code).toBe(
+            'BAD_USER_INPUT'
+        )
 
         const expectedErrorMsg =
             'Concurrent update error: The data you are trying to modify has changed since you last retrieved it. Please refresh the page to continue.'
 
-        expect(updateResult.errors[0].message).toBe(expectedErrorMsg)
+        expect(updateResultData.errors[0].message).toBe(expectedErrorMsg)
     })
 
     it('errors if the update call to the db fails', async () => {
@@ -375,27 +403,36 @@ describe(`Tests UpdateHealthPlanFormData`, () => {
         }
 
         // Update the draft to have complete data for submission.
-        const updateResult = await server.executeOperation({
-            query: UpdateContractDraftRevisionDocument,
-            variables: {
-                input: {
-                    contractID: contractID,
-                    lastSeenUpdatedAt: draftRevision.updatedAt,
-                    formData: validEmptyFormData,
+        const updateResult = await server.executeOperation(
+            {
+                query: UpdateContractDraftRevisionDocument,
+                variables: {
+                    input: {
+                        contractID: contractID,
+                        lastSeenUpdatedAt: draftRevision.updatedAt,
+                        formData: validEmptyFormData,
+                    },
                 },
             },
-        })
+            {
+                contextValue: defaultContext(),
+            }
+        )
 
-        expect(updateResult.errors).toBeDefined()
-        if (updateResult.errors === undefined) {
+        const updateResultData = extractGraphQLResponse(updateResult)
+
+        expect(updateResultData.errors).toBeDefined()
+        if (updateResultData.errors === undefined) {
             throw new Error('type narrow')
         }
 
-        expect(updateResult.errors[0].extensions?.code).toBe(
+        expect(updateResultData.errors[0].extensions?.code).toBe(
             'INTERNAL_SERVER_ERROR'
         )
-        expect(updateResult.errors[0].message).toContain('UNEXPECTED_EXCEPTION')
-        expect(updateResult.errors[0].message).toContain(
+        expect(updateResultData.errors[0].message).toContain(
+            'UNEXPECTED_EXCEPTION'
+        )
+        expect(updateResultData.errors[0].message).toContain(
             'Error updating form data'
         )
     })

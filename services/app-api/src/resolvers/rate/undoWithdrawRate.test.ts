@@ -10,12 +10,10 @@ import {
     createAndUpdateTestContractWithRate,
     fetchTestContract,
     submitTestContract,
-    unlockTestContract,
     unlockTestContractAsUser,
     contractHistoryToDescriptions,
     withdrawTestContract,
     approveTestContract,
-    approveTestContractAsUser,
 } from '../../testHelpers/gqlContractHelpers'
 import {
     withdrawTestRate,
@@ -89,8 +87,7 @@ describe('undoWithdrawRate', () => {
         const contractA = await submitTestContract(
             stateServer,
             draftAWithExtraRate.id,
-            undefined,
-            { user: stateUser }
+            undefined
         )
 
         const rateID = contractA.packageSubmissions[0].rateRevisions[0].rateID
@@ -102,30 +99,34 @@ describe('undoWithdrawRate', () => {
 
         // link rate contract B
         must(
-            await stateServer.executeOperation({
-                query: UpdateDraftContractRatesDocument,
-                variables: {
-                    input: {
-                        contractID: contractB.id,
-                        lastSeenUpdatedAt: contractB.draftRevision?.updatedAt,
-                        updatedRates: [
-                            {
-                                type: 'LINK',
-                                rateID: rateID,
-                            },
-                            {
-                                type: 'CREATE',
-                                formData: testRateFormInputData(),
-                            },
-                        ],
+            await stateServer.executeOperation(
+                {
+                    query: UpdateDraftContractRatesDocument,
+                    variables: {
+                        input: {
+                            contractID: contractB.id,
+                            lastSeenUpdatedAt:
+                                contractB.draftRevision?.updatedAt,
+                            updatedRates: [
+                                {
+                                    type: 'LINK',
+                                    rateID: rateID,
+                                },
+                                {
+                                    type: 'CREATE',
+                                    formData: testRateFormInputData(),
+                                },
+                            ],
+                        },
                     },
                 },
-            }, {
-                contextValue: { user: stateUser },
-            })
+                {
+                    contextValue: { user: stateUser },
+                }
+            )
         )
 
-        await submitTestContract(stateServer, contractB.id, undefined, { user: stateUser })
+        await submitTestContract(stateServer, contractB.id, undefined)
 
         await unlockTestContractAsUser(
             cmsServer,
@@ -134,7 +135,7 @@ describe('undoWithdrawRate', () => {
             cmsUser
         )
 
-        await withdrawTestRate(cmsServer, rateID, 'Withdraw invalid rate', { user: cmsUser })
+        await withdrawTestRate(cmsServer, rateID, 'Withdraw invalid rate')
 
         await unlockTestContractAsUser(
             cmsServer,
@@ -146,22 +147,19 @@ describe('undoWithdrawRate', () => {
         await submitTestContract(
             stateServer,
             contractB.id,
-            'resubmit after withdrawing rate',
-            { user: stateUser }
+            'resubmit after withdrawing rate'
         )
 
         await submitTestContract(
             stateServer,
             contractA.id,
-            'Submit before undo withdraw',
-            { user: stateUser }
+            'Submit before undo withdraw'
         )
 
         const unwithdrawnRate = await undoWithdrawTestRate(
             cmsServer,
             rateID,
-            'Undo withdraw rate',
-            { user: cmsUser }
+            'Undo withdraw rate'
         )
 
         const submittedContractA = await fetchTestContract(
@@ -276,8 +274,7 @@ describe('undoWithdrawRate', () => {
         const contractA = await submitTestContract(
             stateServer,
             draftAWithExtraRate.id,
-            undefined,
-            { user: stateUser }
+            undefined
         )
 
         const rateID = contractA.packageSubmissions[0].rateRevisions[0].rateID
@@ -289,32 +286,36 @@ describe('undoWithdrawRate', () => {
 
         // link rate contract B
         must(
-            await stateServer.executeOperation({
-                query: UpdateDraftContractRatesDocument,
-                variables: {
-                    input: {
-                        contractID: contractB.id,
-                        lastSeenUpdatedAt: contractB.draftRevision?.updatedAt,
-                        updatedRates: [
-                            {
-                                type: 'LINK',
-                                rateID: rateID,
-                            },
-                            {
-                                type: 'CREATE',
-                                formData: testRateFormInputData(),
-                            },
-                        ],
+            await stateServer.executeOperation(
+                {
+                    query: UpdateDraftContractRatesDocument,
+                    variables: {
+                        input: {
+                            contractID: contractB.id,
+                            lastSeenUpdatedAt:
+                                contractB.draftRevision?.updatedAt,
+                            updatedRates: [
+                                {
+                                    type: 'LINK',
+                                    rateID: rateID,
+                                },
+                                {
+                                    type: 'CREATE',
+                                    formData: testRateFormInputData(),
+                                },
+                            ],
+                        },
                     },
                 },
-            }, {
-                contextValue: { user: stateUser },
-            })
+                {
+                    contextValue: { user: stateUser },
+                }
+            )
         )
 
-        await submitTestContract(stateServer, contractB.id, undefined, { user: stateUser })
+        await submitTestContract(stateServer, contractB.id, undefined)
 
-        await withdrawTestRate(cmsServer, rateID, 'Withdraw invalid rate', { user: cmsUser })
+        await withdrawTestRate(cmsServer, rateID, 'Withdraw invalid rate')
 
         await unlockTestContractAsUser(
             cmsServer,
@@ -326,22 +327,19 @@ describe('undoWithdrawRate', () => {
         await submitTestContract(
             stateServer,
             contractA.id,
-            'Submit before undo withdraw',
-            { user: stateUser }
+            'Submit before undo withdraw'
         )
 
         await withdrawTestContract(
             cmsServer,
             contractB.id,
-            'withdraw contractB',
-            { user: cmsUser }
+            'withdraw contractB'
         )
 
         const unwithdrawnRate = await undoWithdrawTestRate(
             cmsServer,
             rateID,
-            'Undo withdraw rate',
-            { user: cmsUser }
+            'Undo withdraw rate'
         )
 
         const submittedContractA = await fetchTestContract(
@@ -459,8 +457,7 @@ describe('undoWithdrawRate', () => {
         const contractA = await submitTestContract(
             stateServer,
             draftAWithExtraRate.id,
-            undefined,
-            { user: stateUser }
+            undefined
         )
 
         const rateID = contractA.packageSubmissions[0].rateRevisions[0].rateID
@@ -470,30 +467,34 @@ describe('undoWithdrawRate', () => {
 
         // link rate contract B
         must(
-            await stateServer.executeOperation({
-                query: UpdateDraftContractRatesDocument,
-                variables: {
-                    input: {
-                        contractID: contractB.id,
-                        lastSeenUpdatedAt: contractB.draftRevision?.updatedAt,
-                        updatedRates: [
-                            {
-                                type: 'LINK',
-                                rateID: rateID,
-                            },
-                            {
-                                type: 'CREATE',
-                                formData: testRateFormInputData(),
-                            },
-                        ],
+            await stateServer.executeOperation(
+                {
+                    query: UpdateDraftContractRatesDocument,
+                    variables: {
+                        input: {
+                            contractID: contractB.id,
+                            lastSeenUpdatedAt:
+                                contractB.draftRevision?.updatedAt,
+                            updatedRates: [
+                                {
+                                    type: 'LINK',
+                                    rateID: rateID,
+                                },
+                                {
+                                    type: 'CREATE',
+                                    formData: testRateFormInputData(),
+                                },
+                            ],
+                        },
                     },
                 },
-            }, {
-                contextValue: { user: stateUser },
-            })
+                {
+                    contextValue: { user: stateUser },
+                }
+            )
         )
 
-        await submitTestContract(stateServer, contractB.id, undefined, { user: stateUser })
+        await submitTestContract(stateServer, contractB.id, undefined)
 
         await unlockTestContractAsUser(
             cmsServer,
@@ -505,8 +506,7 @@ describe('undoWithdrawRate', () => {
         const withdrawnRate = await withdrawTestRate(
             cmsServer,
             rateID,
-            'Withdraw invalid rate',
-            { user: cmsUser }
+            'Withdraw invalid rate'
         )
 
         expect(withdrawnRate.consolidatedStatus).toBe('WITHDRAWN')
@@ -556,15 +556,13 @@ describe('undoWithdrawRate', () => {
         const submittedContractB = await submitTestContract(
             stateServer,
             contractB.id,
-            'resubmit after withdrawing rate',
-            { user: stateUser }
+            'resubmit after withdrawing rate'
         )
 
         const submittedContractA = await submitTestContract(
             stateServer,
             contractA.id,
-            'Submit before undo withdraw',
-            { user: stateUser }
+            'Submit before undo withdraw'
         )
 
         const contractAName =
@@ -582,8 +580,7 @@ describe('undoWithdrawRate', () => {
         const unwithdrawnRate = await undoWithdrawTestRate(
             cmsServer,
             rateID,
-            'Undo withdraw rate',
-            { user: cmsUser }
+            'Undo withdraw rate'
         )
 
         const unwithdrawnRateName =
@@ -665,7 +662,10 @@ describe('undo withdraw rate error handling', async () => {
             },
         })
 
-        const contractA = await createAndSubmitTestContractWithRate(stateServer, undefined, { user: stateUser })
+        const contractA = await createAndSubmitTestContractWithRate(
+            stateServer,
+            undefined
+        )
         const rateID = contractA.packageSubmissions[0].rateRevisions[0].rateID
 
         const contractB =
@@ -673,46 +673,53 @@ describe('undo withdraw rate error handling', async () => {
 
         // link rate contract B
         must(
-            await stateServer.executeOperation({
-                query: UpdateDraftContractRatesDocument,
-                variables: {
-                    input: {
-                        contractID: contractB.id,
-                        lastSeenUpdatedAt: contractB.draftRevision?.updatedAt,
-                        updatedRates: [
-                            {
-                                type: 'LINK',
-                                rateID: rateID,
-                            },
-                            {
-                                type: 'CREATE',
-                                formData: testRateFormInputData(),
-                            },
-                        ],
+            await stateServer.executeOperation(
+                {
+                    query: UpdateDraftContractRatesDocument,
+                    variables: {
+                        input: {
+                            contractID: contractB.id,
+                            lastSeenUpdatedAt:
+                                contractB.draftRevision?.updatedAt,
+                            updatedRates: [
+                                {
+                                    type: 'LINK',
+                                    rateID: rateID,
+                                },
+                                {
+                                    type: 'CREATE',
+                                    formData: testRateFormInputData(),
+                                },
+                            ],
+                        },
                     },
                 },
-            }, {
-                contextValue: { user: stateUser },
-            })
+                {
+                    contextValue: { user: stateUser },
+                }
+            )
         )
 
-        await submitTestContract(stateServer, contractB.id, undefined, { user: stateUser })
+        await submitTestContract(stateServer, contractB.id, undefined)
 
-        await withdrawTestRate(cmsServer, rateID, 'Withdraw invalid rate', { user: cmsUser })
+        await withdrawTestRate(cmsServer, rateID, 'Withdraw invalid rate')
 
-        await approveTestContract(cmsServer, contractB.id, undefined, { user: cmsUser })
+        await approveTestContract(cmsServer, contractB.id, undefined)
 
-        const response = await cmsServer.executeOperation({
-            query: UndoWithdrawnRateDocument,
-            variables: {
-                input: {
-                    rateID,
-                    updatedReason: 'I expect an undo withdraw error',
+        const response = await cmsServer.executeOperation(
+            {
+                query: UndoWithdrawnRateDocument,
+                variables: {
+                    input: {
+                        rateID,
+                        updatedReason: 'I expect an undo withdraw error',
+                    },
                 },
             },
-        }, {
-            contextValue: { user: cmsUser },
-        })
+            {
+                contextValue: { user: cmsUser },
+            }
+        )
 
         const unwithdrawnRate = extractGraphQLResponse(response)
 
@@ -737,7 +744,10 @@ describe('undo withdraw rate error handling', async () => {
             },
         })
 
-        const contractA = await createAndSubmitTestContractWithRate(stateServer, undefined, { user: stateUser })
+        const contractA = await createAndSubmitTestContractWithRate(
+            stateServer,
+            undefined
+        )
         const rateID = contractA.packageSubmissions[0].rateRevisions[0].rateID
 
         const contractB =
@@ -745,51 +755,57 @@ describe('undo withdraw rate error handling', async () => {
 
         // link rate contract B
         must(
-            await stateServer.executeOperation({
-                query: UpdateDraftContractRatesDocument,
-                variables: {
-                    input: {
-                        contractID: contractB.id,
-                        lastSeenUpdatedAt: contractB.draftRevision?.updatedAt,
-                        updatedRates: [
-                            {
-                                type: 'LINK',
-                                rateID: rateID,
-                            },
-                            {
-                                type: 'CREATE',
-                                formData: testRateFormInputData(),
-                            },
-                        ],
+            await stateServer.executeOperation(
+                {
+                    query: UpdateDraftContractRatesDocument,
+                    variables: {
+                        input: {
+                            contractID: contractB.id,
+                            lastSeenUpdatedAt:
+                                contractB.draftRevision?.updatedAt,
+                            updatedRates: [
+                                {
+                                    type: 'LINK',
+                                    rateID: rateID,
+                                },
+                                {
+                                    type: 'CREATE',
+                                    formData: testRateFormInputData(),
+                                },
+                            ],
+                        },
                     },
                 },
-            }, {
-                contextValue: { user: stateUser },
-            })
+                {
+                    contextValue: { user: stateUser },
+                }
+            )
         )
 
-        await submitTestContract(stateServer, contractB.id, undefined, { user: stateUser })
+        await submitTestContract(stateServer, contractB.id, undefined)
 
-        await withdrawTestRate(cmsServer, rateID, 'Withdraw invalid rate', { user: cmsUser })
+        await withdrawTestRate(cmsServer, rateID, 'Withdraw invalid rate')
 
         await withdrawTestContract(
             cmsServer,
             contractA.id,
-            'Withdraw ContractA',
-            { user: cmsUser }
+            'Withdraw ContractA'
         )
 
-        const response = await cmsServer.executeOperation({
-            query: UndoWithdrawnRateDocument,
-            variables: {
-                input: {
-                    rateID,
-                    updatedReason: 'I expect an undo withdraw error',
+        const response = await cmsServer.executeOperation(
+            {
+                query: UndoWithdrawnRateDocument,
+                variables: {
+                    input: {
+                        rateID,
+                        updatedReason: 'I expect an undo withdraw error',
+                    },
                 },
             },
-        }, {
-            contextValue: { user: cmsUser },
-        })
+            {
+                contextValue: { user: cmsUser },
+            }
+        )
 
         const unwithdrawnRate = extractGraphQLResponse(response)
 
@@ -814,22 +830,28 @@ describe('undo withdraw rate error handling', async () => {
             },
         })
 
-        const contractA = await createAndSubmitTestContractWithRate(stateServer, undefined, { user: stateUser })
+        const contractA = await createAndSubmitTestContractWithRate(
+            stateServer,
+            undefined
+        )
         const rateID = contractA.packageSubmissions[0].rateRevisions[0].rateID
 
-        await withdrawTestRate(cmsServer, rateID, 'Withdraw invalid rate', { user: cmsUser })
+        await withdrawTestRate(cmsServer, rateID, 'Withdraw invalid rate')
 
-        const response = await stateServer.executeOperation({
-            query: UndoWithdrawnRateDocument,
-            variables: {
-                input: {
-                    rateID,
-                    updatedReason: 'I expect an undo withdraw error',
+        const response = await stateServer.executeOperation(
+            {
+                query: UndoWithdrawnRateDocument,
+                variables: {
+                    input: {
+                        rateID,
+                        updatedReason: 'I expect an undo withdraw error',
+                    },
                 },
             },
-        }, {
-            contextValue: { user: stateUser },
-        })
+            {
+                contextValue: { user: stateUser },
+            }
+        )
 
         const unwithdrawnRate = extractGraphQLResponse(response)
 
@@ -857,22 +879,28 @@ describe('undo withdraw rate error handling', async () => {
             },
         })
 
-        const contractA = await createAndSubmitTestContractWithRate(stateServer, undefined, { user: stateUser })
+        const contractA = await createAndSubmitTestContractWithRate(
+            stateServer,
+            undefined
+        )
         const rateID = contractA.packageSubmissions[0].rateRevisions[0].rateID
 
-        await withdrawTestRate(cmsServer, rateID, 'Withdraw invalid rate', { user: cmsUser })
+        await withdrawTestRate(cmsServer, rateID, 'Withdraw invalid rate')
 
-        const response = await cmsServer.executeOperation({
-            query: UndoWithdrawnRateDocument,
-            variables: {
-                input: {
-                    rateID,
-                    updatedReason: 'I expect an undo withdraw error',
+        const response = await cmsServer.executeOperation(
+            {
+                query: UndoWithdrawnRateDocument,
+                variables: {
+                    input: {
+                        rateID,
+                        updatedReason: 'I expect an undo withdraw error',
+                    },
                 },
             },
-        }, {
-            contextValue: { user: cmsUser },
-        })
+            {
+                contextValue: { user: cmsUser },
+            }
+        )
 
         const unwithdrawnRate = extractGraphQLResponse(response)
 
@@ -900,24 +928,30 @@ describe('undo withdraw rate error handling', async () => {
             },
         })
 
-        const contractA = await createAndSubmitTestContractWithRate(stateServer, undefined, { user: stateUser })
+        const contractA = await createAndSubmitTestContractWithRate(
+            stateServer,
+            undefined
+        )
         const rateID = contractA.packageSubmissions[0].rateRevisions[0].rateID
 
         if (!rateID) {
             throw new Error('Unexpected error: rate not found')
         }
 
-        const response = await cmsServer.executeOperation({
-            query: UndoWithdrawnRateDocument,
-            variables: {
-                input: {
-                    rateID,
-                    updatedReason: 'I expect an undo withdraw error',
+        const response = await cmsServer.executeOperation(
+            {
+                query: UndoWithdrawnRateDocument,
+                variables: {
+                    input: {
+                        rateID,
+                        updatedReason: 'I expect an undo withdraw error',
+                    },
                 },
             },
-        }, {
-            contextValue: { user: cmsUser },
-        })
+            {
+                contextValue: { user: cmsUser },
+            }
+        )
 
         const unwithdrawnRate = extractGraphQLResponse(response)
 

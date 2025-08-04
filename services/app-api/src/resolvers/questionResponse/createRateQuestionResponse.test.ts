@@ -42,7 +42,7 @@ describe('createRateQuestionResponse', () => {
 
         const questionResponse = await createTestRateQuestionResponse(
             stateServer,
-            question.id,
+            question.question.id,
             undefined,
             { user: testStateUser() }
         )
@@ -106,7 +106,7 @@ describe('createRateQuestionResponse', () => {
 
         const questionResponseResult = await createTestRateQuestionResponse(
             cmsServer,
-            question.id
+            question.question.id
         )
 
         expect(questionResponseResult.errors).toBeDefined()
@@ -144,10 +144,10 @@ describe('createRateQuestionResponse', () => {
             { user: cmsUser }
         )
 
-        await createTestRateQuestionResponse(stateServer, question.id, undefined, { user: testStateUser() })
+        await createTestRateQuestionResponse(stateServer, question.question.id)
 
         expect(mockEmailer.sendEmail).toHaveBeenNthCalledWith(
-            6, // New response state email notification is the sixth email, CMS email is sent first
+            5, // New response state email notification is the fifth email
             expect.objectContaining({
                 subject: expect.stringContaining(
                     `[LOCAL] Response submitted to CMS for ${rateName}`
@@ -203,7 +203,9 @@ describe('createRateQuestionResponse', () => {
         const assignedUserIDs = assignedUsers.map((u) => u.id)
         const assignedUserEmails = assignedUsers.map((u) => u.email)
 
-        await updateTestStateAssignments(adminServer, 'FL', assignedUserIDs, { user: adminUser })
+        await updateTestStateAssignments(adminServer, 'FL', assignedUserIDs, {
+            user: adminUser,
+        })
 
         const submittedContractAndRate =
             await createAndSubmitTestContractWithRate(stateServer)
@@ -212,10 +214,15 @@ describe('createRateQuestionResponse', () => {
         const rateID = rateRevision.rateID
 
         const rateQuestion = must(
-            await createTestRateQuestion(cmsServer, rateID, undefined, { user: cmsUser })
+            await createTestRateQuestion(cmsServer, rateID, undefined, {
+                user: cmsUser,
+            })
         )
 
-        await createTestRateQuestionResponse(stateServer, rateQuestion.id, undefined, { user: testStateUser() })
+        await createTestRateQuestionResponse(
+            stateServer,
+            rateQuestion.question.id
+        )
 
         const rateName = rateRevision.formData.rateCertificationName
 
@@ -226,7 +233,7 @@ describe('createRateQuestionResponse', () => {
         ]
 
         expect(mockEmailer.sendEmail).toHaveBeenNthCalledWith(
-            5, // New response CMS email notification is the fifth email
+            4, // New response CMS email notification is the fourth email
             expect.objectContaining({
                 subject: expect.stringContaining(
                     `[LOCAL] New Responses for ${rateName}`
