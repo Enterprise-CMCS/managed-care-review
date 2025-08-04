@@ -9,7 +9,7 @@ import {
     createAndUpdateTestHealthPlanPackage,
 } from '../../testHelpers/gqlHelpers'
 import type { RateEdge, Rate } from '../../gen/gqlServer'
-import { testCMSUser, testStateUser } from '../../testHelpers/userHelpers'
+import { testCMSUser, testStateUser, createDBUsersWithFullData } from '../../testHelpers/userHelpers'
 import { extractGraphQLResponse } from '../../testHelpers/apolloV4ResponseHelper'
 import {
     createAndSubmitTestContractWithRate,
@@ -23,6 +23,19 @@ describe('indexRatesStripped', () => {
         'rate-edit-unlock': true,
     })
     const mockS3 = testS3Client()
+    
+    // Create common test users
+    const cmsUser = testCMSUser()
+    const flStateUser = testStateUser()
+    const vaStateUser = testStateUser({
+        stateCode: 'VA',
+        email: 'aang@va.gov',
+    })
+    
+    beforeAll(async () => {
+        // Create users in database
+        await createDBUsersWithFullData([cmsUser, flStateUser, vaStateUser])
+    })
 
     it('returns stripped rates with related contracts for cms user with no errors', async () => {
         const stateUser = testStateUser()
@@ -201,14 +214,6 @@ describe('indexRatesStripped', () => {
     })
 
     it('only returns state users rates', async () => {
-        const flStateUser = testStateUser({
-            stateCode: 'FL',
-            email: 'aang-fl@example.com',
-        })
-        const vaStateUser = testStateUser({
-            stateCode: 'VA',
-            email: 'aang-va@example.com',
-        })
         const flStateServer = await constructTestPostgresServer({
             context: {
                 user: flStateUser,

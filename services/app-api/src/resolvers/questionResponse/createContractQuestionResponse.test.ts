@@ -16,6 +16,7 @@ import {
     createDBUsersWithFullData,
     testCMSUser,
     testCMSApproverUser,
+    testAdminUser,
 } from '../../testHelpers/userHelpers'
 import { testEmailConfig, testEmailer } from '../../testHelpers/emailerHelpers'
 import { findStatePrograms } from '../../postgres'
@@ -23,6 +24,7 @@ import { createAndSubmitTestContractWithRate } from '../../testHelpers/gqlContra
 
 describe('createContractQuestionResponse', () => {
     const cmsUser = testCMSUser()
+    const adminUser = testAdminUser()
     // add some users to the db, assign them to the state in each test
     const assignedUsers = [
         testCMSUser({
@@ -36,7 +38,7 @@ describe('createContractQuestionResponse', () => {
     ]
     beforeAll(async () => {
         //Inserting a new CMS user, with division assigned, in postgres in order to create the question to user relationship.
-        await createDBUsersWithFullData([...assignedUsers, cmsUser])
+        await createDBUsersWithFullData([...assignedUsers, cmsUser, adminUser])
     })
 
     it('returns question response data', async () => {
@@ -186,6 +188,7 @@ describe('createContractQuestionResponse', () => {
         const oactCMS = testCMSUser({
             divisionAssignment: 'OACT' as const,
         })
+        await createDBUsersWithFullData([oactCMS])
         const stateServer = await constructTestPostgresServer({
             emailer: mockEmailer,
         })
@@ -199,7 +202,7 @@ describe('createContractQuestionResponse', () => {
         const assignedUserIDs = assignedUsers.map((u) => u.id)
         const assignedUserEmails = assignedUsers.map((u) => u.email)
 
-        await updateTestStateAssignments(cmsServer, 'FL', assignedUserIDs)
+        await updateTestStateAssignments(cmsServer, 'FL', assignedUserIDs, { user: adminUser })
 
         const contract = await createAndSubmitTestContractWithRate(
             stateServer,

@@ -2,6 +2,7 @@ import {
     iterableNonCMSUsersMockData,
     testCMSUser,
     testStateUser,
+    createDBUsersWithFullData,
 } from '../../testHelpers/userHelpers'
 import {
     constructTestPostgresServer,
@@ -71,9 +72,14 @@ const testRateFormInputData = (): RateFormDataInput => ({
 })
 
 describe('withdrawRate', () => {
+    const stateUser = testStateUser()
+    const cmsUser = testCMSUser()
+    
+    beforeAll(async () => {
+        await createDBUsersWithFullData([stateUser, cmsUser])
+    })
+    
     it('can withdraw a rate without errors', async () => {
-        const stateUser = testStateUser()
-        const cmsUser = testCMSUser()
         const stateServer = await constructTestPostgresServer({
             context: {
                 user: stateUser,
@@ -630,7 +636,8 @@ describe('withdrawRate', () => {
         const withdrawnRate = await withdrawTestRate(
             cmsServer,
             rateID,
-            'Withdraw invalid rate'
+            'Withdraw invalid rate',
+            { user: cmsUser }
         )
 
         // expect rate to contain both contracts in withdrawn join table
@@ -768,7 +775,8 @@ describe('withdrawRate', () => {
         const withdrawnRate = await withdrawTestRate(
             cmsServer,
             rateID,
-            'Withdraw invalid rate'
+            'Withdraw invalid rate',
+            { user: cmsUser }
         )
 
         // expect rate to contain both contracts in withdrawn join table
@@ -837,8 +845,6 @@ describe('withdrawRate', () => {
     })
 
     it('removes rate from DRAFT and UNLOCKED contracts linked to rate', async () => {
-        const stateUser = testStateUser()
-        const cmsUser = testCMSUser()
         const stateServer = await constructTestPostgresServer({
             context: {
                 user: stateUser,
@@ -999,7 +1005,8 @@ describe('withdrawRate', () => {
         const withdrawnRate = await withdrawTestRate(
             cmsServer,
             rateID,
-            'Withdraw invalid rate'
+            'Withdraw invalid rate',
+            { user: cmsUser }
         )
 
         // expect withdrawn rate to contain contractA and contractC in withdrawn join table
@@ -1141,8 +1148,6 @@ describe('withdrawRate', () => {
     it('sends emails to state and CMS when a rate is withdrawn', async () => {
         const emailConfig = testEmailConfig()
         const mockEmailer = testEmailer(emailConfig)
-        const stateUser = testStateUser()
-        const cmsUser = testCMSUser()
         const stateServer = await constructTestPostgresServer({
             context: {
                 user: stateUser,
@@ -1222,7 +1227,7 @@ describe('withdrawRate', () => {
                 (contact) => contact.email
             )
 
-        await withdrawTestRate(cmsServer, rateID, 'Withdraw invalid rate')
+        await withdrawTestRate(cmsServer, rateID, 'Withdraw invalid rate', { user: cmsUser })
 
         // expect CMS email to contain correct subject
         expect(mockEmailer.sendEmail).toHaveBeenNthCalledWith(

@@ -369,7 +369,7 @@ const createAndUpdateTestContractWithoutRates = async (
     contractFormDataOverrides?: Partial<HealthPlanFormDataType>,
     context?: Context
 ): Promise<Contract> => {
-    const pkg = await createTestHealthPlanPackage(server, stateCode)
+    const pkg = await createTestHealthPlanPackage(server, stateCode, context)
     const draft = latestFormData(pkg)
 
     draft.submissionType = 'CONTRACT_AND_RATES' as const

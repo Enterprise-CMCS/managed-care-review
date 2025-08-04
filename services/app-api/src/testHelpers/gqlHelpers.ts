@@ -275,7 +275,8 @@ const constructTestEmailer = async (opts: {
 
 const createTestHealthPlanPackage = async (
     server: ApolloServer,
-    stateCode?: StateCodeType
+    stateCode?: StateCodeType,
+    context?: Context
 ): Promise<HealthPlanPackage> => {
     const programs = stateCode
         ? [must(findStatePrograms(stateCode))[0]]
@@ -294,7 +295,7 @@ const createTestHealthPlanPackage = async (
         query: CreateHealthPlanPackageDocument,
         variables: { input },
     }, {
-        contextValue: defaultContext(),
+        contextValue: context || defaultContext(),
     })
     
     const result = extractTestResponse(response)
