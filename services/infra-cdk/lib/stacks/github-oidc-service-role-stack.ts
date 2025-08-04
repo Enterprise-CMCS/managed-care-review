@@ -34,9 +34,9 @@ export class GitHubOidcServiceRoleStack extends Stack {
             ? `repo:Enterprise-CMCS/managed-care-review:environment:${stage}`
             : 'repo:Enterprise-CMCS/managed-care-review:environment:dev'
 
-        // Create the stage-specific service role (matches Serverless naming)
+        // Create the stage-specific service role (CDK version to avoid Serverless conflict)
         this.serviceRole = new iam.Role(this, 'GitHubActionsServiceRole', {
-            roleName: `github-oidc-${stage}-ServiceRole`,
+            roleName: `github-oidc-cdk-${stage}-ServiceRole`,
             assumedBy: new iam.WebIdentityPrincipal(existingOidcProviderArn, {
                 StringEquals: {
                     'token.actions.githubusercontent.com:sub': subjectClaim,

@@ -315,6 +315,7 @@ jobs:
           region: ${{ vars.AWS_DEFAULT_REGION }}
           account-id: ${{ secrets.DEV_AWS_ACCOUNT_ID }}
           stage-name: ${{ needs.begin-deployment.outputs.stage-name }}
+          use-cdk-role: 'true'
 
       - name: Deploy CDK foundation stacks
         working-directory: services/infra-cdk
@@ -350,6 +351,7 @@ jobs:
           region: ${{ vars.AWS_DEFAULT_REGION }}
           account-id: ${{ secrets.DEV_AWS_ACCOUNT_ID }}
           stage-name: ${{ needs.begin-deployment.outputs.stage-name }}
+          use-cdk-role: 'true'
 
       - name: Download Prisma layers
         uses: actions/download-artifact@v4
@@ -406,6 +408,7 @@ jobs:
           region: ${{ vars.AWS_DEFAULT_REGION }}
           account-id: ${{ secrets.DEV_AWS_ACCOUNT_ID }}
           stage-name: ${{ needs.begin-deployment.outputs.stage-name }}
+          use-cdk-role: 'true'
 
       - name: Deploy CDK compute stacks
         working-directory: services/infra-cdk

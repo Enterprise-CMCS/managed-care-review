@@ -16,6 +16,9 @@ inputs:
   changed-services:
     description: 'List of changed services'
     required: false
+  use-cdk-role:
+    description: 'Use CDK role naming (github-oidc-cdk-${stage}-ServiceRole)'
+    default: 'false'
   dry-run:
     description: 'For testing purposes, output the OIDC role ARN without actually assuming the role'
     default: 'false'
@@ -49,7 +52,11 @@ runs:
       shell: bash
       id: format-oidc-role-arn
       run: |
-        ARN="arn:aws:iam::${{ inputs.account-id }}:role/delegatedadmin/developer/github-oidc-${{ steps.set-oidc-stage-name.outputs.stage-name }}-ServiceRole"
+        if [[ "${{ inputs.use-cdk-role }}" == "true" ]]; then
+          ARN="arn:aws:iam::${{ inputs.account-id }}:role/delegatedadmin/developer/github-oidc-cdk-${{ steps.set-oidc-stage-name.outputs.stage-name }}-ServiceRole"
+        else
+          ARN="arn:aws:iam::${{ inputs.account-id }}:role/delegatedadmin/developer/github-oidc-${{ steps.set-oidc-stage-name.outputs.stage-name }}-ServiceRole"
+        fi
         echo "arn=$ARN" >> $GITHUB_OUTPUT
 
     - name: Configure AWS credentials
