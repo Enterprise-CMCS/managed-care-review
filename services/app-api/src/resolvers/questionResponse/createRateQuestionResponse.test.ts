@@ -42,7 +42,7 @@ describe('createRateQuestionResponse', () => {
 
         const questionResponse = await createTestRateQuestionResponse(
             stateServer,
-            question.question.id,
+            question.id,
             undefined,
             { user: testStateUser() }
         )
@@ -97,15 +97,14 @@ describe('createRateQuestionResponse', () => {
         const rateID =
             contractWithRate.packageSubmissions[0].rateRevisions[0].rateID
 
-        const rateQuestionResult = await createTestRateQuestion(
+        const question = await createTestRateQuestion(
             cmsServer,
             rateID
         )
-        const question = rateQuestionResult.data?.createRateQuestion.question
 
         const questionResponseResult = await createTestRateQuestionResponse(
             cmsServer,
-            question.id
+            question.question.id
         )
 
         expect(questionResponseResult.errors).toBeDefined()
@@ -143,7 +142,7 @@ describe('createRateQuestionResponse', () => {
             { user: cmsUser }
         )
 
-        await createTestRateQuestionResponse(stateServer, question.question.id, undefined, { user: testStateUser() })
+        await createTestRateQuestionResponse(stateServer, question.id, undefined, { user: testStateUser() })
 
         expect(mockEmailer.sendEmail).toHaveBeenNthCalledWith(
             6, // New response state email notification is the sixth email, CMS email is sent first
@@ -212,9 +211,8 @@ describe('createRateQuestionResponse', () => {
         const rateQuestion = must(
             await createTestRateQuestion(cmsServer, rateID, undefined, { user: cmsUser })
         )
-        const question = rateQuestion.question
 
-        await createTestRateQuestionResponse(stateServer, question.id, undefined, { user: testStateUser() })
+        await createTestRateQuestionResponse(stateServer, rateQuestion.id, undefined, { user: testStateUser() })
 
         const rateName = rateRevision.formData.rateCertificationName
 

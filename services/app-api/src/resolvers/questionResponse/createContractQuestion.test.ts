@@ -4,6 +4,7 @@ import {
     createTestQuestion,
     updateTestStateAssignments,
     defaultContext,
+    extractGraphQLResponse,
 } from '../../testHelpers/gqlHelpers'
 import {
     assertAnError,
@@ -43,7 +44,11 @@ describe('createQuestion', () => {
 
     it('returns question data after creation', async () => {
         const stateServer = await constructTestPostgresServer()
-        const cmsServer = await constructTestPostgresServer()
+        const cmsServer = await constructTestPostgresServer({
+            context: {
+                user: cmsUser,
+            },
+        })
 
         const contract = await createAndSubmitTestContractWithRate(stateServer)
 
@@ -66,10 +71,14 @@ describe('createQuestion', () => {
     })
     it('allows question creation on UNLOCKED and RESUBMITTED package', async () => {
         const stateServer = await constructTestPostgresServer()
-        const cmsServer = await constructTestPostgresServer()
+        const cmsServer = await constructTestPostgresServer({
+            context: {
+                user: cmsUser,
+            },
+        })
         const contract = await createAndSubmitTestContractWithRate(stateServer)
 
-        await unlockTestContract(cmsServer, contract.id, 'test unlock')
+        await unlockTestContract(cmsServer, contract.id, 'test unlock', { user: cmsUser })
         await createTestQuestion(cmsServer, contract.id)
         await submitTestContract(stateServer, contract.id, 'resubmit reason')
         await createTestQuestion(cmsServer, contract.id, {
@@ -141,7 +150,11 @@ describe('createQuestion', () => {
     })
     it('returns an error if package status is DRAFT', async () => {
         const stateServer = await constructTestPostgresServer()
-        const cmsServer = await constructTestPostgresServer()
+        const cmsServer = await constructTestPostgresServer({
+            context: {
+                user: cmsUser,
+            },
+        })
 
         const draftContract = await createTestContract(stateServer)
 
@@ -164,13 +177,7 @@ describe('createQuestion', () => {
             },
         })
         
-        // Handle Apollo v4 response structure
-        let createdQuestion: any
-        if ('body' in response && response.body) {
-            createdQuestion = response.body.kind === 'single' ? response.body.singleResult : response.body
-        } else {
-            createdQuestion = response
-        }
+        const createdQuestion = extractGraphQLResponse(response)
 
         expect(createdQuestion.errors).toBeDefined()
         expect(assertAnErrorCode(createdQuestion)).toBe('BAD_USER_INPUT')
@@ -180,12 +187,22 @@ describe('createQuestion', () => {
     })
     it('returns an error if contract has been approved', async () => {
         const stateServer = await constructTestPostgresServer()
-        const cmsServer = await constructTestPostgresServer()
+        const cmsApprover = testCMSApproverUser()
+        const cmsApproverServer = await constructTestPostgresServer({
+            context: {
+                user: cmsApprover,
+            },
+        })
+        const cmsServer = await constructTestPostgresServer({
+            context: {
+                user: cmsUser,
+            },
+        })
 
         const contract = await createAndSubmitTestContractWithRate(stateServer)
         // approve contract
         const approvedContract = await approveTestContract(
-            cmsServer,
+            cmsApproverServer,
             contract.id
         )
         const response = await cmsServer.executeOperation({
@@ -207,13 +224,7 @@ describe('createQuestion', () => {
             },
         })
         
-        // Handle Apollo v4 response structure
-        let createdQuestion: any
-        if ('body' in response && response.body) {
-            createdQuestion = response.body.kind === 'single' ? response.body.singleResult : response.body
-        } else {
-            createdQuestion = response
-        }
+        const createdQuestion = extractGraphQLResponse(response)
 
         expect(createdQuestion.errors).toBeDefined()
         expect(assertAnErrorCode(createdQuestion)).toBe('BAD_USER_INPUT')
@@ -242,13 +253,7 @@ describe('createQuestion', () => {
             contextValue: defaultContext(),
         })
         
-        // Handle Apollo v4 response structure
-        let createdQuestion: any
-        if ('body' in response && response.body) {
-            createdQuestion = response.body.kind === 'single' ? response.body.singleResult : response.body
-        } else {
-            createdQuestion = response
-        }
+        const createdQuestion = extractGraphQLResponse(response)
 
         expect(createdQuestion.errors).toBeDefined()
         expect(assertAnErrorCode(createdQuestion)).toBe('FORBIDDEN')
@@ -258,7 +263,11 @@ describe('createQuestion', () => {
     })
     it('returns error on invalid package id', async () => {
         const stateServer = await constructTestPostgresServer()
-        const cmsServer = await constructTestPostgresServer()
+        const cmsServer = await constructTestPostgresServer({
+            context: {
+                user: cmsUser,
+            },
+        })
 
         await createAndSubmitTestContractWithRate(stateServer)
 
@@ -281,13 +290,7 @@ describe('createQuestion', () => {
             },
         })
         
-        // Handle Apollo v4 response structure
-        let createdQuestion: any
-        if ('body' in response && response.body) {
-            createdQuestion = response.body.kind === 'single' ? response.body.singleResult : response.body
-        } else {
-            createdQuestion = response
-        }
+        const createdQuestion = extractGraphQLResponse(response)
 
         expect(createdQuestion.errors).toBeDefined()
         expect(assertAnErrorCode(createdQuestion)).toBe('NOT_FOUND')
@@ -301,7 +304,11 @@ describe('createQuestion', () => {
         })
         await createDBUsersWithFullData([cmsUserWithNoDivision])
         const stateServer = await constructTestPostgresServer()
-        const cmsServer = await constructTestPostgresServer()
+        const cmsServer = await constructTestPostgresServer({
+            context: {
+                user: cmsUser,
+            },
+        })
 
         await createAndSubmitTestContractWithRate(stateServer)
 
@@ -324,13 +331,7 @@ describe('createQuestion', () => {
             },
         })
         
-        // Handle Apollo v4 response structure
-        let createdQuestion: any
-        if ('body' in response && response.body) {
-            createdQuestion = response.body.kind === 'single' ? response.body.singleResult : response.body
-        } else {
-            createdQuestion = response
-        }
+        const createdQuestion = extractGraphQLResponse(response)
 
         expect(createdQuestion.errors).toBeDefined()
         expect(assertAnErrorCode(createdQuestion)).toBe('FORBIDDEN')
@@ -344,7 +345,11 @@ describe('createQuestion', () => {
         })
         await createDBUsersWithFullData([cmsUserWithNoDivision])
         const stateServer = await constructTestPostgresServer()
-        const cmsServer = await constructTestPostgresServer()
+        const cmsServer = await constructTestPostgresServer({
+            context: {
+                user: cmsUser,
+            },
+        })
 
         await createAndSubmitTestContractWithRate(stateServer)
 
@@ -367,13 +372,7 @@ describe('createQuestion', () => {
             },
         })
         
-        // Handle Apollo v4 response structure
-        let createdQuestion: any
-        if ('body' in response && response.body) {
-            createdQuestion = response.body.kind === 'single' ? response.body.singleResult : response.body
-        } else {
-            createdQuestion = response
-        }
+        const createdQuestion = extractGraphQLResponse(response)
 
         expect(createdQuestion.errors).toBeDefined()
         expect(assertAnErrorCode(createdQuestion)).toBe('FORBIDDEN')
@@ -387,6 +386,9 @@ describe('createQuestion', () => {
         //mock invoke email submit lambda
         const stateServer = await constructTestPostgresServer()
         const cmsServer = await constructTestPostgresServer({
+            context: {
+                user: cmsUser,
+            },
             emailer: mockEmailer,
         })
 
@@ -432,6 +434,9 @@ describe('createQuestion', () => {
         //mock invoke email submit lambda
         const stateServer = await constructTestPostgresServer()
         const cmsServer = await constructTestPostgresServer({
+            context: {
+                user: cmsUser,
+            },
             emailer: mockEmailer,
         })
 
@@ -483,6 +488,9 @@ describe('createQuestion', () => {
         })
         const cmsDMCPUser = testCMSUser({ divisionAssignment: 'DMCP' })
         const cmsDMCPServer = await constructTestPostgresServer({
+            context: {
+                user: cmsDMCPUser,
+            },
             emailer: mockEmailer,
         })
         const stateSubmission =

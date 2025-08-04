@@ -4,6 +4,8 @@ import {
     createTestQuestion,
     createTestQuestionResponse,
     updateTestStateAssignments,
+    defaultContext,
+    extractGraphQLResponse,
 } from '../../testHelpers/gqlHelpers'
 import {
     approveTestContract,
@@ -13,6 +15,7 @@ import {
 import {
     createDBUsersWithFullData,
     testCMSUser,
+    testCMSApproverUser,
 } from '../../testHelpers/userHelpers'
 import { testEmailConfig, testEmailer } from '../../testHelpers/emailerHelpers'
 import { findStatePrograms } from '../../postgres'
@@ -79,7 +82,7 @@ describe('createContractQuestionResponse', () => {
         const stateServer = await constructTestPostgresServer()
         const fakeID = 'abc-123'
 
-        const createResponseResult = (await stateServer.executeOperation({
+        const createResponseResult = await stateServer.executeOperation({
             query: CreateContractQuestionResponseDocument,
             variables: {
                 input: {
@@ -92,11 +95,14 @@ describe('createContractQuestionResponse', () => {
                     ],
                 },
             },
-        })) as { errors?: any; data?: any }
+        }, {
+            contextValue: defaultContext(),
+        })
+        const result = extractGraphQLResponse(createResponseResult)
 
-        expect(createResponseResult).toBeDefined()
-        expect(assertAnErrorCode(createResponseResult)).toBe('BAD_USER_INPUT')
-        expect(assertAnError(createResponseResult).message).toBe(
+        expect(result).toBeDefined()
+        expect(assertAnErrorCode(result)).toBe('BAD_USER_INPUT')
+        expect(assertAnError(result).message).toBe(
             `Contract question with ID: ${fakeID} not found to attach response to`
         )
     })
@@ -112,7 +118,7 @@ describe('createContractQuestionResponse', () => {
         const createdQuestion = await createTestQuestion(cmsServer, contract.id)
         await approveTestContract(cmsServer, contract.id)
 
-        const createResponseResult = (await stateServer.executeOperation({
+        const createResponseResult = await stateServer.executeOperation({
             query: CreateContractQuestionResponseDocument,
             variables: {
                 input: {
@@ -125,11 +131,14 @@ describe('createContractQuestionResponse', () => {
                     ],
                 },
             },
-        })) as { errors?: any; data?: any }
+        }, {
+            contextValue: defaultContext(),
+        })
+        const result = extractGraphQLResponse(createResponseResult)
 
-        expect(createResponseResult).toBeDefined()
-        expect(assertAnErrorCode(createResponseResult)).toBe('BAD_USER_INPUT')
-        expect(assertAnError(createResponseResult).message).toBe(
+        expect(result).toBeDefined()
+        expect(assertAnErrorCode(result)).toBe('BAD_USER_INPUT')
+        expect(assertAnError(result).message).toBe(
             `Issue creating response for contract. Message: Cannot create response for contract in APPROVED status`
         )
     })
@@ -144,7 +153,7 @@ describe('createContractQuestionResponse', () => {
         const contract = await createAndSubmitTestContractWithRate(stateServer)
         const createdQuestion = await createTestQuestion(cmsServer, contract.id)
 
-        const createResponseResult = (await cmsServer.executeOperation({
+        const createResponseResult = await cmsServer.executeOperation({
             query: CreateContractQuestionResponseDocument,
             variables: {
                 input: {
@@ -157,11 +166,16 @@ describe('createContractQuestionResponse', () => {
                     ],
                 },
             },
-        })) as { errors?: any; data?: any }
+        }, {
+            contextValue: {
+                user: cmsUser,
+            },
+        })
+        const result = extractGraphQLResponse(createResponseResult)
 
-        expect(createResponseResult.errors).toBeDefined()
-        expect(assertAnErrorCode(createResponseResult)).toBe('FORBIDDEN')
-        expect(assertAnError(createResponseResult).message).toBe(
+        expect(result.errors).toBeDefined()
+        expect(assertAnErrorCode(result)).toBe('FORBIDDEN')
+        expect(assertAnError(result).message).toBe(
             'user not authorized to create a question response'
         )
     })

@@ -37,10 +37,9 @@ describe('createRateQuestion', () => {
         const rateID =
             submittedContractAndRate.packageSubmissions[0].rateRevisions[0]
                 .rateID
-        const rateQuestionRes = must(
+        const rateQuestion = must(
             await createTestRateQuestion(cmsServer, rateID)
         )
-        const rateQuestion = rateQuestionRes?.data?.createRateQuestion
 
         expect(rateQuestion?.question).toEqual(
             expect.objectContaining({
@@ -75,10 +74,9 @@ describe('createRateQuestion', () => {
             'Test unlock reason',
             { user: cmsUser }
         )
-        const rateQuestionRes = must(
+        const rateQuestion = must(
             await createTestRateQuestion(cmsServer, rateID)
         )
-        const rateQuestion = rateQuestionRes?.data?.createRateQuestion
 
         expect(rateQuestion?.question).toEqual(
             expect.objectContaining({
@@ -100,7 +98,7 @@ describe('createRateQuestion', () => {
             submittedContractAndRate.id,
             'Test resubmit reason'
         )
-        const rateQuestionRes2 = must(
+        const rateQuestion2 = must(
             await createTestRateQuestion(cmsServer, rateID, {
                 documents: [
                     {
@@ -110,7 +108,6 @@ describe('createRateQuestion', () => {
                 ],
             })
         )
-        const rateQuestion2 = rateQuestionRes2?.data?.createRateQuestion
 
         expect(rateQuestion2.question).toEqual(
             expect.objectContaining({
