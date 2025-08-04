@@ -525,8 +525,8 @@ importers:
         specifier: ^3.5.3
         version: 3.5.3
       serverless:
-        specifier: 4.2.3
-        version: 4.2.3
+        specifier: 4.16.1
+        version: 4.16.1
       serverless-associate-waf:
         specifier: ^1.2.1
         version: 1.2.1
@@ -535,13 +535,13 @@ importers:
         version: 1.52.1(esbuild@0.25.8)
       serverless-iam-helper:
         specifier: https://github.com/CMSgov/serverless-iam-helper
-        version: git+https://git@github.com:CMSgov/serverless-iam-helper.git#2cfc4c2153666025e6f7593c92df7efd2f2b9790(serverless@4.2.3)
+        version: git+https://git@github.com:CMSgov/serverless-iam-helper.git#2cfc4c2153666025e6f7593c92df7efd2f2b9790(serverless@4.16.1)
       serverless-offline:
         specifier: ^14.4.0
-        version: 14.4.0(serverless@4.2.3)
+        version: 14.4.0(serverless@4.16.1)
       serverless-s3-bucket-helper:
         specifier: https://github.com/CMSgov/serverless-s3-bucket-helper
-        version: git+https://git@github.com:CMSgov/serverless-s3-bucket-helper.git#e150b50b5663df8816cb425e39a9c934aa202d13(serverless@4.2.3)
+        version: git+https://git@github.com:CMSgov/serverless-s3-bucket-helper.git#e150b50b5663df8816cb425e39a9c934aa202d13(serverless@4.16.1)
       serverless-stack-termination-protection:
         specifier: ^2.0.2
         version: 2.0.2
@@ -900,8 +900,8 @@ importers:
         specifier: ^18.2.0
         version: 18.3.1(react@18.3.1)
       serverless:
-        specifier: 4.2.3
-        version: 4.2.3
+        specifier: 4.16.1
+        version: 4.16.1
       serverless-cf-invalidate-proxy:
         specifier: ^1.0.1
         version: 1.0.1
@@ -910,7 +910,7 @@ importers:
         version: 1.0.2
       serverless-s3-sync:
         specifier: ^3.3.0
-        version: 3.3.0(serverless@4.2.3)
+        version: 3.3.0(serverless@4.16.1)
       serverless-stack-termination-protection:
         specifier: ^2.0.2
         version: 2.0.2
@@ -1018,8 +1018,8 @@ importers:
   services/github-oidc:
     devDependencies:
       serverless:
-        specifier: 4.2.3
-        version: 4.2.3
+        specifier: 4.16.1
+        version: 4.16.1
       serverless-stack-termination-protection:
         specifier: ^2.0.2
         version: 2.0.2
@@ -1028,16 +1028,16 @@ importers:
     devDependencies:
       '@enterprise-cmcs/serverless-waf-plugin':
         specifier: ^1.4.0
-        version: 1.4.0(serverless@4.2.3)(typescript@5.9.2)
+        version: 1.4.0(serverless@4.16.1)(typescript@5.9.2)
       serverless:
-        specifier: 4.2.3
-        version: 4.2.3
+        specifier: 4.16.1
+        version: 4.16.1
       serverless-iam-helper:
         specifier: https://github.com/CMSgov/serverless-iam-helper
-        version: git+https://git@github.com:CMSgov/serverless-iam-helper.git#2cfc4c2153666025e6f7593c92df7efd2f2b9790(serverless@4.2.3)
+        version: git+https://git@github.com:CMSgov/serverless-iam-helper.git#2cfc4c2153666025e6f7593c92df7efd2f2b9790(serverless@4.16.1)
       serverless-s3-bucket-helper:
         specifier: https://github.com/CMSgov/serverless-s3-bucket-helper
-        version: git+https://git@github.com:CMSgov/serverless-s3-bucket-helper.git#e150b50b5663df8816cb425e39a9c934aa202d13(serverless@4.2.3)
+        version: git+https://git@github.com:CMSgov/serverless-s3-bucket-helper.git#e150b50b5663df8816cb425e39a9c934aa202d13(serverless@4.16.1)
       serverless-stack-termination-protection:
         specifier: ^2.0.2
         version: 2.0.2
@@ -1094,17 +1094,17 @@ importers:
         specifier: ^2.0.0
         version: 2.4.2
       serverless:
-        specifier: 4.2.3
-        version: 4.2.3
+        specifier: 4.16.1
+        version: 4.16.1
       serverless-esbuild:
         specifier: ^1.55.0
         version: 1.55.0(esbuild@0.25.8)
       serverless-iam-helper:
         specifier: https://github.com/CMSgov/serverless-iam-helper
-        version: git+https://git@github.com:CMSgov/serverless-iam-helper.git#2cfc4c2153666025e6f7593c92df7efd2f2b9790(serverless@4.2.3)
+        version: git+https://git@github.com:CMSgov/serverless-iam-helper.git#2cfc4c2153666025e6f7593c92df7efd2f2b9790(serverless@4.16.1)
       serverless-s3-bucket-helper:
         specifier: https://github.com/CMSgov/serverless-s3-bucket-helper
-        version: git+https://git@github.com:CMSgov/serverless-s3-bucket-helper.git#e150b50b5663df8816cb425e39a9c934aa202d13(serverless@4.2.3)
+        version: git+https://git@github.com:CMSgov/serverless-s3-bucket-helper.git#e150b50b5663df8816cb425e39a9c934aa202d13(serverless@4.16.1)
       serverless-stack-termination-protection:
         specifier: ^2.0.2
         version: 2.0.2
@@ -1115,11 +1115,11 @@ importers:
   services/storybook:
     devDependencies:
       serverless:
-        specifier: 4.2.3
-        version: 4.2.3
+        specifier: 4.16.1
+        version: 4.16.1
       serverless-s3-bucket-helper:
         specifier: https://github.com/CMSgov/serverless-s3-bucket-helper
-        version: git+https://git@github.com:CMSgov/serverless-s3-bucket-helper.git#e150b50b5663df8816cb425e39a9c934aa202d13(serverless@4.2.3)
+        version: git+https://git@github.com:CMSgov/serverless-s3-bucket-helper.git#e150b50b5663df8816cb425e39a9c934aa202d13(serverless@4.16.1)
       serverless-stack-termination-protection:
         specifier: ^2.0.2
         version: 2.0.2
@@ -1127,11 +1127,11 @@ importers:
   services/ui:
     devDependencies:
       serverless:
-        specifier: 4.2.3
-        version: 4.2.3
+        specifier: 4.16.1
+        version: 4.16.1
       serverless-s3-bucket-helper:
         specifier: https://github.com/CMSgov/serverless-s3-bucket-helper
-        version: git+https://git@github.com:CMSgov/serverless-s3-bucket-helper.git#e150b50b5663df8816cb425e39a9c934aa202d13(serverless@4.2.3)
+        version: git+https://git@github.com:CMSgov/serverless-s3-bucket-helper.git#e150b50b5663df8816cb425e39a9c934aa202d13(serverless@4.16.1)
       serverless-stack-termination-protection:
         specifier: ^2.0.2
         version: 2.0.2
@@ -1142,14 +1142,14 @@ importers:
         specifier: ^3.5.3
         version: 3.5.3
       serverless:
-        specifier: 4.2.3
-        version: 4.2.3
+        specifier: 4.16.1
+        version: 4.16.1
       serverless-iam-helper:
         specifier: https://github.com/CMSgov/serverless-iam-helper
-        version: git+https://git@github.com:CMSgov/serverless-iam-helper.git#2cfc4c2153666025e6f7593c92df7efd2f2b9790(serverless@4.2.3)
+        version: git+https://git@github.com:CMSgov/serverless-iam-helper.git#2cfc4c2153666025e6f7593c92df7efd2f2b9790(serverless@4.16.1)
       serverless-s3-bucket-helper:
         specifier: https://github.com/CMSgov/serverless-s3-bucket-helper
-        version: git+https://git@github.com:CMSgov/serverless-s3-bucket-helper.git#e150b50b5663df8816cb425e39a9c934aa202d13(serverless@4.2.3)
+        version: git+https://git@github.com:CMSgov/serverless-s3-bucket-helper.git#e150b50b5663df8816cb425e39a9c934aa202d13(serverless@4.16.1)
       serverless-stack-termination-protection:
         specifier: ^2.0.2
         version: 2.0.2
@@ -1245,23 +1245,23 @@ importers:
         specifier: ^15.2.7
         version: 15.2.7
       serverless:
-        specifier: 4.2.3
-        version: 4.2.3
+        specifier: 4.16.1
+        version: 4.16.1
       serverless-esbuild:
         specifier: ^1.52.1
         version: 1.52.1(esbuild@0.25.8)
       serverless-iam-helper:
         specifier: https://github.com/CMSgov/serverless-iam-helper.git
-        version: git+https://git@github.com:CMSgov/serverless-iam-helper.git#2cfc4c2153666025e6f7593c92df7efd2f2b9790(serverless@4.2.3)
+        version: git+https://git@github.com:CMSgov/serverless-iam-helper.git#2cfc4c2153666025e6f7593c92df7efd2f2b9790(serverless@4.16.1)
       serverless-offline:
         specifier: ^14.4.0
-        version: 14.4.0(serverless@4.2.3)
+        version: 14.4.0(serverless@4.16.1)
       serverless-s3-bucket-helper:
         specifier: https://github.com/CMSgov/serverless-s3-bucket-helper
-        version: git+https://git@github.com:CMSgov/serverless-s3-bucket-helper.git#e150b50b5663df8816cb425e39a9c934aa202d13(serverless@4.2.3)
+        version: git+https://git@github.com:CMSgov/serverless-s3-bucket-helper.git#e150b50b5663df8816cb425e39a9c934aa202d13(serverless@4.16.1)
       serverless-s3-local:
         specifier: ^0.8.4
-        version: 0.8.4(serverless@4.2.3)
+        version: 0.8.4(serverless@4.16.1)
       serverless-stack-termination-protection:
         specifier: ^2.0.2
         version: 2.0.2
@@ -12207,8 +12207,8 @@ packages:
   sax@1.2.1:
     resolution: {integrity: sha512-8I2a3LovHTOpm7NV5yOyO8IHqgVsfK4+UuySrXU8YXkSRX7k6hCV9b3HrkKCr3nMpgj+0bmocaJJWpvp1oc7ZA==}
 
-  sax@1.2.4:
-    resolution: {integrity: sha512-NqVDv9TpANUjFm0N8uM5GxL36UgKi9/atZw+x7YFnQ8ckwFGKrl4xX4yWtrey3UJm5nP1kUbnYgLopqWNSRhWw==}
+  sax@1.4.1:
+    resolution: {integrity: sha512-+aWOz7yVScEGoKNd4PA10LZ8sk0A/z5+nXQG5giUO5rprX9jgYsTdov9qCchZiPIZezbZH+jRut8nPodFAX4Jg==}
 
   saxes@6.0.0:
     resolution: {integrity: sha512-xAg7SOnEhrm5zI3puOOKyy1OMcMlIJZYNJY7xLBwSze0UjhPLnWfj2GF2EpT0jmzaJKIWKHLsaSSajf35bcYnA==}
@@ -12377,8 +12377,8 @@ packages:
   serverless-stack-termination-protection@2.0.2:
     resolution: {integrity: sha512-pPUVJmH5if8A12KVSTMqNjo7u8rfW0/vJO+UFp19lvkY0t8jfoO3R3DySwTDVcB+jzaCrU/NyEHPtbiDLVjSSw==}
 
-  serverless@4.2.3:
-    resolution: {integrity: sha512-Rt4Y9LqVEV7OGPKGfB//sCQXjG6irAqa545OuXef7SPWD+bm/diCh93sCqCkON7IdYpzWkmIBeQVdF3Q58bU6Q==}
+  serverless@4.16.1:
+    resolution: {integrity: sha512-Weq/0izBSVajYJ8cTQyMoHAdWZxdJQIVqYnTi+DOBDZZkFqLE3dxSYwjd2y/aVGEskAmS17rZyKE6bji2vc48g==}
     engines: {node: '>=18.0.0'}
     hasBin: true
 
@@ -19128,9 +19128,9 @@ snapshots:
 
   '@emotion/weak-memoize@0.4.0': {}
 
-  '@enterprise-cmcs/serverless-waf-plugin@1.4.0(serverless@4.2.3)(typescript@5.9.2)':
+  '@enterprise-cmcs/serverless-waf-plugin@1.4.0(serverless@4.16.1)(typescript@5.9.2)':
     dependencies:
-      serverless: 4.2.3
+      serverless: 4.16.1
       typescript: 5.9.2
 
   '@envelop/core@5.3.0':
@@ -30307,7 +30307,7 @@ snapshots:
 
   sax@1.2.1: {}
 
-  sax@1.2.4: {}
+  sax@1.4.1: {}
 
   saxes@6.0.0:
     dependencies:
@@ -30492,12 +30492,12 @@ snapshots:
       - bufferutil
       - utf-8-validate
 
-  serverless-iam-helper@git+https://git@github.com:CMSgov/serverless-iam-helper.git#2cfc4c2153666025e6f7593c92df7efd2f2b9790(serverless@4.2.3):
+  serverless-iam-helper@git+https://git@github.com:CMSgov/serverless-iam-helper.git#2cfc4c2153666025e6f7593c92df7efd2f2b9790(serverless@4.16.1):
     dependencies:
       lodash: 4.17.21
-      serverless: 4.2.3
+      serverless: 4.16.1
 
-  serverless-offline@13.9.0(serverless@4.2.3):
+  serverless-offline@13.9.0(serverless@4.16.1):
     dependencies:
       '@aws-sdk/client-lambda': 3.859.0
       '@hapi/boom': 10.0.1
@@ -30519,7 +30519,7 @@ snapshots:
       luxon: 3.5.0
       node-schedule: 2.1.1
       p-memoize: 7.1.1
-      serverless: 4.2.3
+      serverless: 4.16.1
       velocityjs: 2.0.6
       ws: 8.18.3
     transitivePeerDependencies:
@@ -30528,7 +30528,7 @@ snapshots:
       - supports-color
       - utf-8-validate
 
-  serverless-offline@14.4.0(serverless@4.2.3):
+  serverless-offline@14.4.0(serverless@4.16.1):
     dependencies:
       '@aws-sdk/client-lambda': 3.750.0
       '@hapi/boom': 10.0.1
@@ -30552,7 +30552,7 @@ snapshots:
       node-fetch: 3.3.2
       node-schedule: 2.1.1
       p-memoize: 7.1.1
-      serverless: 4.2.3
+      serverless: 4.16.1
       tree-kill: 1.2.2
       tsx: 4.19.3
       velocityjs: 2.0.6
@@ -30565,18 +30565,18 @@ snapshots:
 
   serverless-plugin-scripts@1.0.2: {}
 
-  serverless-s3-bucket-helper@git+https://git@github.com:CMSgov/serverless-s3-bucket-helper.git#e150b50b5663df8816cb425e39a9c934aa202d13(serverless@4.2.3):
+  serverless-s3-bucket-helper@git+https://git@github.com:CMSgov/serverless-s3-bucket-helper.git#e150b50b5663df8816cb425e39a9c934aa202d13(serverless@4.16.1):
     dependencies:
-      serverless: 4.2.3
+      serverless: 4.16.1
 
-  serverless-s3-local@0.8.4(serverless@4.2.3):
+  serverless-s3-local@0.8.4(serverless@4.16.1):
     dependencies:
       '@aws-sdk/client-s3': 3.859.0
       fs-extra: 11.3.0
       rxjs: 6.6.7
       rxjs-compat: 6.6.7
       s3rver: 3.7.1
-      serverless-offline: 13.9.0(serverless@4.2.3)
+      serverless-offline: 13.9.0(serverless@4.16.1)
       shelljs: 0.8.5
     transitivePeerDependencies:
       - aws-crt
@@ -30585,17 +30585,17 @@ snapshots:
       - supports-color
       - utf-8-validate
 
-  serverless-s3-sync@3.3.0(serverless@4.2.3):
+  serverless-s3-sync@3.3.0(serverless@4.16.1):
     dependencies:
       '@auth0/s3': 1.0.0
       bluebird: 3.7.2
       mime: 2.6.0
       minimatch: 3.1.2
-      serverless: 4.2.3
+      serverless: 4.16.1
 
   serverless-stack-termination-protection@2.0.2: {}
 
-  serverless@4.2.3:
+  serverless@4.16.1:
     dependencies:
       axios: 1.11.0
       axios-proxy-builder: 0.1.2
@@ -32456,12 +32456,12 @@ snapshots:
 
   xml2js@0.5.0:
     dependencies:
-      sax: 1.2.4
+      sax: 1.4.1
       xmlbuilder: 11.0.1
 
   xml2js@0.6.2:
     dependencies:
-      sax: 1.2.4
+      sax: 1.4.1
       xmlbuilder: 11.0.1
 
   xmlbuilder@11.0.1: {}
