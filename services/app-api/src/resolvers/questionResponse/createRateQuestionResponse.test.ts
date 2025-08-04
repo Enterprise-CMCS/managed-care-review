@@ -32,18 +32,20 @@ describe('createRateQuestionResponse', () => {
         const rateID =
             contractWithRate.packageSubmissions[0].rateRevisions[0].rateID
 
-        const rateQuestionResult = await createTestRateQuestion(
+        const question = await createTestRateQuestion(
             cmsServer,
-            rateID
+            rateID,
+            undefined,
+            { user: cmsUser }
         )
-        const question = rateQuestionResult.data?.createRateQuestion.question
 
-        const questionResponseResult = await createTestRateQuestionResponse(
+        const questionResponse = await createTestRateQuestionResponse(
             stateServer,
-            question.id
+            question.question.id,
+            undefined,
+            { user: testStateUser() }
         )
-        const questionWithResponse =
-            questionResponseResult.data?.createRateQuestionResponse.question
+        const questionWithResponse = questionResponse.question
 
         expect(questionWithResponse).toEqual(
             expect.objectContaining({
@@ -133,13 +135,14 @@ describe('createRateQuestionResponse', () => {
             contractWithRate.packageSubmissions[0].rateRevisions[0].formData
                 .rateCertificationName
 
-        const rateQuestionResult = await createTestRateQuestion(
+        const question = await createTestRateQuestion(
             cmsServer,
-            rateID
+            rateID,
+            undefined,
+            { user: cmsUser }
         )
-        const question = rateQuestionResult.data?.createRateQuestion.question
 
-        await createTestRateQuestionResponse(stateServer, question.id)
+        await createTestRateQuestionResponse(stateServer, question.question.id, undefined, { user: testStateUser() })
 
         expect(mockEmailer.sendEmail).toHaveBeenNthCalledWith(
             6, // New response state email notification is the sixth email, CMS email is sent first
@@ -197,7 +200,7 @@ describe('createRateQuestionResponse', () => {
         const assignedUserIDs = assignedUsers.map((u) => u.id)
         const assignedUserEmails = assignedUsers.map((u) => u.email)
 
-        await updateTestStateAssignments(adminServer, 'FL', assignedUserIDs)
+        await updateTestStateAssignments(adminServer, 'FL', assignedUserIDs, { user: testAdminUser() })
 
         const submittedContractAndRate =
             await createAndSubmitTestContractWithRate(stateServer)
@@ -205,12 +208,12 @@ describe('createRateQuestionResponse', () => {
             submittedContractAndRate.packageSubmissions[0].rateRevisions[0]
         const rateID = rateRevision.rateID
 
-        const rateQuestionResult = must(
-            await createTestRateQuestion(cmsServer, rateID)
+        const rateQuestion = must(
+            await createTestRateQuestion(cmsServer, rateID, undefined, { user: cmsUser })
         )
-        const question = rateQuestionResult.data?.createRateQuestion.question
+        const question = rateQuestion.question
 
-        await createTestRateQuestionResponse(stateServer, question.id)
+        await createTestRateQuestionResponse(stateServer, question.id, undefined, { user: testStateUser() })
 
         const rateName = rateRevision.formData.rateCertificationName
 

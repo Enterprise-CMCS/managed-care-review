@@ -708,7 +708,8 @@ const createTestQuestionAsUser = async (
 const createTestRateQuestion = async (
     server: ApolloServer,
     rateID: string,
-    questionData?: Omit<CreateRateQuestionInputType, 'rateID'>
+    questionData?: Omit<CreateRateQuestionInputType, 'rateID'>,
+    context?: Context
 ) => {
     const question = questionData || {
         documents: [
@@ -727,16 +728,28 @@ const createTestRateQuestion = async (
             },
         },
     }, {
-        contextValue: defaultContext(),
+        contextValue: context || defaultContext(),
     })
     
-    return extractTestResponse(response)
-}
+    const result = extractTestResponse(response)
+    
+    if (result.errors) {
+        throw new Error(
+            `createTestRateQuestion mutation failed with errors ${JSON.stringify(result.errors)}`
+        )
+    }
+    
+    if (!result.data) {
+        throw new Error('createTestRateQuestion returned nothing')
+    }
+    
+    return result.data.createRateQuestion
 
 const createTestRateQuestionResponse = async (
     server: ApolloServer,
     questionID: string,
-    responseData?: Omit<InsertQuestionResponseArgs, 'questionID'>
+    responseData?: Omit<InsertQuestionResponseArgs, 'questionID'>,
+    context?: Context
 ) => {
     const response = responseData || {
         documents: [
@@ -756,11 +769,22 @@ const createTestRateQuestionResponse = async (
             },
         },
     }, {
-        contextValue: defaultContext(),
+        contextValue: context || defaultContext(),
     })
     
-    return extractTestResponse(result)
-}
+    const extracted = extractTestResponse(result)
+    
+    if (extracted.errors) {
+        throw new Error(
+            `createTestRateQuestionResponse mutation failed with errors ${JSON.stringify(extracted.errors)}`
+        )
+    }
+    
+    if (!extracted.data) {
+        throw new Error('createTestRateQuestionResponse returned nothing')
+    }
+    
+    return extracted.data.createRateQuestionResponse
 
 const createTestQuestionResponse = async (
     server: ApolloServer,

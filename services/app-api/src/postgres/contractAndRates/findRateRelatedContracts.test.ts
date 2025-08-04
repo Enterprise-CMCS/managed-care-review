@@ -190,7 +190,7 @@ it('returns related contracts with correct status', async () => {
     )
 
     // approve contractC
-    await approveTestContractAsUser(cmsServer, contractC.id, cmsUser)
+    await approveTestContract(cmsServer, contractC.id, undefined, { user: cmsUser })
 
     rateARelatedStrippedContracts = must(
         await findRateRelatedContracts(client, rateAID)

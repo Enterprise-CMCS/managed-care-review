@@ -3,7 +3,6 @@ import { ApproveContractDocument } from '../../gen/gqlClient'
 import { testCMSUser, testStateUser } from '../../testHelpers/userHelpers'
 import {
     approveTestContract,
-    approveTestContractAsUser,
     createTestContract,
     unlockTestContract,
     unlockTestContractAsUser,
@@ -29,10 +28,11 @@ describe('approveContract', () => {
 
         const contract = await createAndSubmitTestContractWithRate(stateServer)
 
-        const approvedContract = await approveTestContractAsUser(
+        const approvedContract = await approveTestContract(
             cmsServer,
             contract.id,
-            cmsUser
+            undefined,
+            { user: cmsUser }
         )
         expect(approvedContract.reviewStatusActions).toHaveLength(1)
         expect(approvedContract.reviewStatusActions![0]?.contractID).toBe(

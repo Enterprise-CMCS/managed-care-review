@@ -700,7 +700,7 @@ describe('undo withdraw rate error handling', async () => {
 
         await withdrawTestRate(cmsServer, rateID, 'Withdraw invalid rate', { user: cmsUser })
 
-        await approveTestContractAsUser(cmsServer, contractB.id, cmsUser)
+        await approveTestContract(cmsServer, contractB.id, undefined, { user: cmsUser })
 
         const response = await cmsServer.executeOperation({
             query: UndoWithdrawnRateDocument,

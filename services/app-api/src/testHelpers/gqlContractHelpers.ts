@@ -275,39 +275,6 @@ async function approveTestContract(
     return result.data.approveContract.contract
 }
 
-async function approveTestContractAsUser(
-    server: ApolloServer,
-    contractID: string,
-    user: UserType,
-    dateApprovalReleasedToState?: string
-): Promise<Contract> {
-    const input = {
-        contractID,
-        dateApprovalReleasedToState:
-            dateApprovalReleasedToState || '2024-11-11',
-    }
-    const response = await server.executeOperation({
-        query: ApproveContractDocument,
-        variables: { input },
-    }, {
-        contextValue: { user },
-    })
-    
-    const result = extractGraphQLResponse(response)
-
-    if (result.errors) {
-        throw new Error(
-            `approveTestContract mutation failed with errors ${JSON.stringify(result.errors)}`
-        )
-    }
-
-    if (!result.data) {
-        throw new Error('approveTestContract returned nothing')
-    }
-
-    return result.data.approveContract.contract
-}
-
 const fetchTestContractWithQuestions = async (
     server: ApolloServer,
     contractID: string,
@@ -711,7 +678,6 @@ export {
     unlockTestContractAsUser,
     createAndSubmitTestContract,
     approveTestContract,
-    approveTestContractAsUser,
     fetchTestContract,
     fetchTestContractWithQuestions,
     createAndUpdateTestContractWithoutRates,

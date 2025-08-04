@@ -80,7 +80,7 @@ describe('updateDraftContractRates', () => {
             },
         })
 
-        const result = await otherStateServer.executeOperation({
+        const response = await otherStateServer.executeOperation({
             query: UpdateDraftContractRatesDocument,
             variables: {
                 input: {
@@ -89,7 +89,10 @@ describe('updateDraftContractRates', () => {
                     updatedRates: [],
                 },
             },
+        }, {
+            contextValue: { user: testStateUser({ stateCode: 'MA' }) },
         })
+        const result = extractGraphQLResponse(response)
 
         expect(result.errors).toBeDefined()
         if (!result.errors) {
@@ -117,7 +120,7 @@ describe('updateDraftContractRates', () => {
             s3Client: mockS3,
         })
 
-        const result = await otherStateServer.executeOperation({
+        const response = await otherStateServer.executeOperation({
             query: UpdateDraftContractRatesDocument,
             variables: {
                 input: {
@@ -126,7 +129,10 @@ describe('updateDraftContractRates', () => {
                     updatedRates: [],
                 },
             },
+        }, {
+            contextValue: { user: testCMSUser() },
         })
+        const result = extractGraphQLResponse(response)
 
         expect(result.errors).toBeDefined()
         if (!result.errors) {
@@ -147,7 +153,7 @@ describe('updateDraftContractRates', () => {
         const draft = await createAndSubmitTestHealthPlanPackage(stateServer)
         const draftFD = latestFormData(draft)
 
-        const result = await stateServer.executeOperation({
+        const response = await stateServer.executeOperation({
             query: UpdateDraftContractRatesDocument,
             variables: {
                 input: {
@@ -156,7 +162,10 @@ describe('updateDraftContractRates', () => {
                     updatedRates: [],
                 },
             },
+        }, {
+            contextValue: { user: testStateUser() },
         })
+        const result = extractGraphQLResponse(response)
 
         expect(result.errors).toBeDefined()
         if (!result.errors) {
@@ -176,7 +185,7 @@ describe('updateDraftContractRates', () => {
 
         const draft = await createTestHealthPlanPackage(stateServer)
 
-        const result = await stateServer.executeOperation({
+        const response = await stateServer.executeOperation({
             query: UpdateDraftContractRatesDocument,
             variables: {
                 input: {
@@ -185,7 +194,10 @@ describe('updateDraftContractRates', () => {
                     updatedRates: [],
                 },
             },
+        }, {
+            contextValue: { user: testStateUser() },
         })
+        const result = extractGraphQLResponse(response)
 
         expect(result.errors).toBeDefined()
         if (!result.errors) {
