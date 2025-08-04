@@ -80,6 +80,7 @@
     "license": "ISC",
     "lint-staged": {
         "**/*.{js,ts}": [
+            "tsc --noEmit",
             "eslint --max-warnings=0",
             "prettier --write"
         ],
