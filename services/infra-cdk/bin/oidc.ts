@@ -25,7 +25,7 @@ if (!stage) {
     )
 }
 
-const env = getCdkEnvironment()
+const env = getCdkEnvironment(stage)
 
 // Create ONLY the GitHub OIDC stack - no dependencies on lambda layers or other infrastructure
 new GitHubOidcStack(app, `MCR-GitHubOIDC-${stage}`, {
