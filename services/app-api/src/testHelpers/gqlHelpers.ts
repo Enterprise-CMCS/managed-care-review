@@ -1,4 +1,5 @@
 import { ApolloServer } from '@apollo/server'
+import { extractGraphQLResponse } from './apolloV4ResponseHelper'
 import {
     CreateHealthPlanPackageDocument,
     SubmitHealthPlanPackageDocument,
@@ -744,6 +745,7 @@ const createTestRateQuestion = async (
     }
     
     return result.data.createRateQuestion
+}
 
 const createTestRateQuestionResponse = async (
     server: ApolloServer,
@@ -785,6 +787,7 @@ const createTestRateQuestionResponse = async (
     }
     
     return extracted.data.createRateQuestionResponse
+}
 
 const createTestQuestionResponse = async (
     server: ApolloServer,
@@ -858,9 +861,6 @@ const updateTestStateAssignments = async (
     return updatedAssignments.data.updateStateAssignmentsByState
 }
 
-// Re-export Apollo v4 response helpers
-export { extractGraphQLResponse, executeGraphQLOperation } from './apolloV4ResponseHelper'
-
 export {
     constructTestPostgresServer,
     createTestHealthPlanPackage,
@@ -883,4 +883,5 @@ export {
     createTestRateQuestion,
     createTestRateQuestionResponse,
     constructTestEmailer,
+    extractGraphQLResponse,
 }
