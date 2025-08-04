@@ -300,8 +300,11 @@ describe(`indexContracts`, () => {
                 // index contracts api request
                 const result = await cmsServer.executeOperation({
                     query: IndexContractsForDashboardDocument,
+                }, {
+                    contextValue: { user: cmsUser },
                 })
-                const submissionsIndex = result.data?.indexContracts
+                const resultData = extractGraphQLResponse(result)
+                const submissionsIndex = resultData.data?.indexContracts
 
                 // pull out test related contracts and order them
                 const testSubmissionIDs = [

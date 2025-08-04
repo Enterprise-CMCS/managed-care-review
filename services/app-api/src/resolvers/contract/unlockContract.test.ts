@@ -267,9 +267,10 @@ describe('unlockContract', () => {
             s3Client: mockS3,
         })
 
+        const cmsUser = testCMSUser()
         const cmsServer = await constructTestPostgresServer({
             context: {
-                user: testCMSUser(),
+                user: cmsUser,
             },
             ldService,
             s3Client: mockS3,
@@ -309,7 +310,8 @@ describe('unlockContract', () => {
         await unlockTestHealthPlanPackage(
             cmsServer,
             contractB0.id,
-            'test unlock'
+            'test unlock',
+            { user: cmsUser }
         )
 
         const unlockedB = await fetchTestContract(stateServer, contractB0.id)
@@ -354,9 +356,10 @@ describe('unlockContract', () => {
             s3Client: mockS3,
         })
 
+        const cmsUser = testCMSUser()
         const cmsServer = await constructTestPostgresServer({
             context: {
-                user: testCMSUser(),
+                user: cmsUser,
             },
             ldService,
             s3Client: mockS3,
@@ -404,12 +407,13 @@ describe('unlockContract', () => {
         ).toEqual(['2021-01-01', '2023-03-03'])
 
         // unlock A
-        await unlockTestHealthPlanPackage(cmsServer, contractA0.id, 'unlock a')
+        await unlockTestHealthPlanPackage(cmsServer, contractA0.id, 'unlock a', { user: cmsUser })
         // unlock B, rate 3 should unlock, rate 1 should not.
         await unlockTestHealthPlanPackage(
             cmsServer,
             contractB0.id,
-            'test unlock'
+            'test unlock',
+            { user: cmsUser }
         )
         const unlockedB = await fetchTestContract(stateServer, contractB0.id)
         if (!unlockedB.draftRates) {

@@ -170,15 +170,18 @@ describe(`Tests UpdateHealthPlanFormData`, () => {
                     formData: validEmptyFormData,
                 },
             },
+        }, {
+            contextValue: { user: cmsUser },
         })
+        const updateResultData = extractGraphQLResponse(updateResult)
 
-        expect(updateResult.errors).toBeDefined()
-        if (updateResult.errors === undefined) {
+        expect(updateResultData.errors).toBeDefined()
+        if (updateResultData.errors === undefined) {
             throw new Error('type narrow')
         }
 
-        expect(updateResult.errors[0].extensions?.code).toBe('FORBIDDEN')
-        expect(updateResult.errors[0].message).toBe(
+        expect(updateResultData.errors[0].extensions?.code).toBe('FORBIDDEN')
+        expect(updateResultData.errors[0].message).toBe(
             'User not authorized to modify state data'
         )
     })
@@ -210,15 +213,18 @@ describe(`Tests UpdateHealthPlanFormData`, () => {
                     formData: validEmptyFormData,
                 },
             },
+        }, {
+            contextValue: { user: testStateUser({ stateCode: 'VA' }) },
         })
+        const updateResultData = extractGraphQLResponse(updateResult)
 
-        expect(updateResult.errors).toBeDefined()
-        if (updateResult.errors === undefined) {
+        expect(updateResultData.errors).toBeDefined()
+        if (updateResultData.errors === undefined) {
             throw new Error('type narrow')
         }
 
-        expect(updateResult.errors[0].extensions?.code).toBe('FORBIDDEN')
-        expect(updateResult.errors[0].message).toBe(
+        expect(updateResultData.errors[0].extensions?.code).toBe('FORBIDDEN')
+        expect(updateResultData.errors[0].message).toBe(
             'User not authorized to fetch data from a different state'
         )
     })
@@ -258,15 +264,18 @@ describe(`Tests UpdateHealthPlanFormData`, () => {
                     formData,
                 },
             },
+        }, {
+            contextValue: { user: testStateUser() },
         })
+        const updateResultData = extractGraphQLResponse(updateResult)
 
-        expect(updateResult.errors).toBeDefined()
-        if (updateResult.errors === undefined) {
+        expect(updateResultData.errors).toBeDefined()
+        if (updateResultData.errors === undefined) {
             throw new Error('type narrow')
         }
 
-        expect(updateResult.errors[0].extensions?.code).toBe('BAD_USER_INPUT')
-        expect(updateResult.errors[0].message).toContain(
+        expect(updateResultData.errors[0].extensions?.code).toBe('BAD_USER_INPUT')
+        expect(updateResultData.errors[0].message).toContain(
             `populationCoveredSchema of CHIP cannot be submissionType of CONTRACT_AND_RATES`
         )
     })
@@ -291,15 +300,18 @@ describe(`Tests UpdateHealthPlanFormData`, () => {
                     formData: validEmptyFormData,
                 },
             },
+        }, {
+            contextValue: { user: testStateUser() },
         })
+        const updateResultData = extractGraphQLResponse(updateResult)
 
-        expect(updateResult.errors).toBeDefined()
-        if (updateResult.errors === undefined) {
+        expect(updateResultData.errors).toBeDefined()
+        if (updateResultData.errors === undefined) {
             throw new Error('type narrow')
         }
 
-        expect(updateResult.errors[0].extensions?.code).toBe('BAD_USER_INPUT')
-        expect(updateResult.errors[0].message).toContain(
+        expect(updateResultData.errors[0].extensions?.code).toBe('BAD_USER_INPUT')
+        expect(updateResultData.errors[0].message).toContain(
             `Contract is not in editable state. Contract: ${contractID} Status: SUBMITTED`
         )
     })

@@ -192,9 +192,10 @@ describe('submitContract', () => {
         const stateServer = await constructTestPostgresServer({
             s3Client: mockS3,
         })
+        const cmsUser = testCMSUser()
         const cmsServer = await constructTestPostgresServer({
             context: {
-                user: testCMSUser(),
+                user: cmsUser,
             },
             s3Client: mockS3,
         })
@@ -239,10 +240,11 @@ describe('submitContract', () => {
             ldService,
             s3Client: mockS3,
         })
+        const cmsUser = testCMSUser()
         const cmsServer = await constructTestPostgresServer({
             ldService,
             context: {
-                user: testCMSUser(),
+                user: cmsUser,
             },
             s3Client: mockS3,
         })
@@ -318,7 +320,8 @@ describe('submitContract', () => {
         await unlockTestHealthPlanPackage(
             cmsServer,
             AID,
-            'unlock to weave the web'
+            'unlock to weave the web',
+            { user: cmsUser }
         )
         const unlockedA0 = await fetchTestContract(stateServer, AID)
         const unlockedA0Three = await addLinkedRateToTestContract(

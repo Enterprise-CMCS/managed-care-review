@@ -1113,17 +1113,20 @@ describe('updateDraftContractRates', () => {
                     ],
                 },
             },
+        }, {
+            contextValue: defaultContext(),
         })
+        const resultData = extractGraphQLResponse(result)
 
-        expect(result.errors).toBeDefined()
-        if (!result.errors) {
+        expect(resultData.errors).toBeDefined()
+        if (!resultData.errors) {
             throw new Error('no result')
         }
 
-        expect(result.errors[0].message).toContain(
+        expect(resultData.errors[0].message).toContain(
             'Attempted to update a rate that is not a child of this contract'
         )
-        expect(result.errors[0].extensions?.code).toBe('BAD_USER_INPUT')
+        expect(resultData.errors[0].extensions?.code).toBe('BAD_USER_INPUT')
         // TODO: This test must be updated to account for CHILDREN
     })
 
