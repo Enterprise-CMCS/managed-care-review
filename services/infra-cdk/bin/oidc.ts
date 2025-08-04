@@ -13,7 +13,7 @@
 
 import 'source-map-support/register'
 import * as cdk from 'aws-cdk-lib'
-import { GitHubOidcStack } from '../lib/stacks'
+import { GitHubOidcServiceRoleStack } from '../lib/stacks'
 import { getCdkEnvironment } from '../lib/config'
 
 const app = new cdk.App({
@@ -32,10 +32,11 @@ if (!stage) {
 
 const env = getCdkEnvironment(stage)
 
-// Create ONLY the GitHub OIDC stack - no dependencies on lambda layers or other infrastructure
-new GitHubOidcStack(app, `MCR-GitHubOIDC-${stage}`, {
+// Create only the GitHub OIDC service role
+new GitHubOidcServiceRoleStack(app, `MCR-GitHubOIDC-${stage}`, {
     env,
-    description: `GitHub OIDC provider for MCR CI/CD (${stage})`,
+    stage,
+    description: `GitHub OIDC service role for (${stage})`,
 })
 
 console.info(`OIDC-only CDK app initialized for stage: ${stage}`)
