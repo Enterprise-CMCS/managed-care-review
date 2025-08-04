@@ -2,6 +2,7 @@ import {
     createDBUsersWithFullData,
     testCMSUser,
     testAdminUser,
+    testStateUser,
 } from '../../testHelpers/userHelpers'
 import {
     constructTestPostgresServer,

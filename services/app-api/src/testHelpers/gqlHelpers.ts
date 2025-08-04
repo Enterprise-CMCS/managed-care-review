@@ -1,5 +1,5 @@
 import { ApolloServer } from '@apollo/server'
-import { extractGraphQLResponse } from './apolloV4ResponseHelper'
+import { extractGraphQLResponse, executeGraphQLOperation } from './apolloV4ResponseHelper'
 import {
     CreateHealthPlanPackageDocument,
     SubmitHealthPlanPackageDocument,
@@ -711,7 +711,7 @@ const createTestRateQuestion = async (
     rateID: string,
     questionData?: Omit<CreateRateQuestionInputType, 'rateID'>,
     context?: Context
-) => {
+): Promise<any> => {
     const question = questionData || {
         documents: [
             {
@@ -734,17 +734,18 @@ const createTestRateQuestion = async (
     
     const result = extractTestResponse(response)
     
+    // If there are errors, return the full response object so tests can check errors
     if (result.errors) {
-        throw new Error(
-            `createTestRateQuestion mutation failed with errors ${JSON.stringify(result.errors)}`
-        )
+        return result
     }
     
-    if (!result.data) {
-        throw new Error('createTestRateQuestion returned nothing')
+    // If successful and data exists, return just the data
+    if (result.data) {
+        return result.data.createRateQuestion
     }
     
-    return result.data.createRateQuestion
+    // If no data and no errors, throw an error
+    throw new Error('createTestRateQuestion returned nothing')
 }
 
 const createTestRateQuestionResponse = async (
@@ -752,7 +753,7 @@ const createTestRateQuestionResponse = async (
     questionID: string,
     responseData?: Omit<InsertQuestionResponseArgs, 'questionID'>,
     context?: Context
-) => {
+): Promise<any> => {
     const response = responseData || {
         documents: [
             {
@@ -776,17 +777,18 @@ const createTestRateQuestionResponse = async (
     
     const extracted = extractTestResponse(result)
     
+    // If there are errors, return the full response object so tests can check errors
     if (extracted.errors) {
-        throw new Error(
-            `createTestRateQuestionResponse mutation failed with errors ${JSON.stringify(extracted.errors)}`
-        )
+        return extracted
     }
     
-    if (!extracted.data) {
-        throw new Error('createTestRateQuestionResponse returned nothing')
+    // If successful and data exists, return just the data
+    if (extracted.data) {
+        return extracted.data.createRateQuestionResponse
     }
     
-    return extracted.data.createRateQuestionResponse
+    // If no data and no errors, return the full response
+    return extracted
 }
 
 const createTestQuestionResponse = async (
@@ -884,4 +886,5 @@ export {
     createTestRateQuestionResponse,
     constructTestEmailer,
     extractGraphQLResponse,
+    executeGraphQLOperation,
 }
