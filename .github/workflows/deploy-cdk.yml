@@ -328,7 +328,7 @@ jobs:
           SUBNET_PRIVATE_C_ID: ${{ secrets.DEV_SUBNET_PRIVATE_C_ID }}
         run: |
           echo "=== Deploying Network stack ==="
-          npx cdk deploy MCR-Network-${STAGE_NAME} \
+          npx cdk deploy MCR-Network-${STAGE_NAME}-cdk \
             --app 'pnpm tsx bin/network.ts' \
             --context stage=${STAGE_NAME} \
             --require-approval never
