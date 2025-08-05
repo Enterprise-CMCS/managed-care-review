@@ -317,21 +317,21 @@ jobs:
           stage-name: ${{ needs.begin-deployment.outputs.stage-name }}
           use-cdk-role: 'true'
 
-      - name: Deploy CDK foundation stacks
+      - name: Deploy CDK Network stack
         working-directory: services/infra-cdk
         env:
           STAGE_NAME: ${{ needs.begin-deployment.outputs.stage-name }}
+          VPC_ID: ${{ secrets.DEV_VPC_ID }}
+          SG_ID: ${{ secrets.DEV_SG_ID }}
+          SUBNET_PRIVATE_A_ID: ${{ secrets.DEV_SUBNET_PRIVATE_A_ID }}
+          SUBNET_PRIVATE_B_ID: ${{ secrets.DEV_SUBNET_PRIVATE_B_ID }}
+          SUBNET_PRIVATE_C_ID: ${{ secrets.DEV_SUBNET_PRIVATE_C_ID }}
         run: |
-          # Create basic .env file for CDK
-          cat > .env.dev << EOF
-          # Basic CDK environment configuration  
-          AWS_REGION=${{ vars.AWS_DEFAULT_REGION }}
-          NR_LICENSE_KEY=${{ secrets.NR_LICENSE_KEY }}
-          IAM_PERMISSIONS_BOUNDARY=${{ secrets.DEV_IAM_PERMISSIONS_BOUNDARY }}
-          IAM_PATH=${{ secrets.IAM_PATH }}
-          EOF
-
-          ./scripts/deploy-foundation.sh $STAGE_NAME
+          echo "=== Deploying Network stack ==="
+          npx cdk deploy MCR-Network-${STAGE_NAME} \
+            --app 'pnpm tsx bin/mcr-app.ts' \
+            --context stage=${STAGE_NAME} \
+            --require-approval never
 
   deploy-cdk-layers:
     needs: [begin-deployment, deploy-cdk-foundation, build-lambda-layers]
