@@ -1,5 +1,8 @@
 import { ApolloServer } from '@apollo/server'
-import { extractGraphQLResponse, executeGraphQLOperation } from './apolloV4ResponseHelper'
+import {
+    extractGraphQLResponse,
+    executeGraphQLOperation,
+} from './apolloV4ResponseHelper'
 import {
     CreateHealthPlanPackageDocument,
     SubmitHealthPlanPackageDocument,
@@ -68,7 +71,9 @@ import {
 // Helper to extract GraphQL response from Apollo v4 response structure
 function extractTestResponse(response: any): any {
     if ('body' in response && response.body) {
-        return response.body.kind === 'single' ? response.body.singleResult : response.body
+        return response.body.kind === 'single'
+            ? response.body.singleResult
+            : response.body
     }
     return response
 }
@@ -193,10 +198,10 @@ const constructTestPostgresServer = async (opts?: {
         typeDefs,
         resolvers: postgresResolvers,
     })
-    
+
     // Apollo v4 requires starting the server before executing operations
     await server.start()
-    
+
     return server
 }
 
@@ -291,15 +296,18 @@ const createTestHealthPlanPackage = async (
         submissionDescription: 'A created submission',
         contractType: 'BASE',
     }
-    const response = await server.executeOperation({
-        query: CreateHealthPlanPackageDocument,
-        variables: { input },
-    }, {
-        contextValue: context || defaultContext(),
-    })
-    
+    const response = await server.executeOperation(
+        {
+            query: CreateHealthPlanPackageDocument,
+            variables: { input },
+        },
+        {
+            contextValue: context || defaultContext(),
+        }
+    )
+
     const result = extractTestResponse(response)
-    
+
     if (result.errors) {
         throw new Error(
             `createTestHealthPlanPackage mutation failed with errors ${JSON.stringify(result.errors)}`
@@ -315,23 +323,27 @@ const createTestHealthPlanPackage = async (
 
 const updateTestHealthPlanFormData = async (
     server: ApolloServer,
-    updatedFormData: HealthPlanFormDataType
+    updatedFormData: HealthPlanFormDataType,
+    context?: Context
 ): Promise<HealthPlanPackage> => {
     const updatedB64 = domainToBase64(updatedFormData)
-    const response = await server.executeOperation({
-        query: UpdateHealthPlanFormDataDocument,
-        variables: {
-            input: {
-                pkgID: updatedFormData.id,
-                healthPlanFormData: updatedB64,
+    const response = await server.executeOperation(
+        {
+            query: UpdateHealthPlanFormDataDocument,
+            variables: {
+                input: {
+                    pkgID: updatedFormData.id,
+                    healthPlanFormData: updatedB64,
+                },
             },
         },
-    }, {
-        contextValue: defaultContext(),
-    })
-    
+        {
+            contextValue: context || defaultContext(),
+        }
+    )
+
     const updateResult = extractTestResponse(response)
-    
+
     if (updateResult.errors) {
         console.info('errors', JSON.stringify(updateResult.errors))
         throw new Error(
@@ -355,20 +367,23 @@ const updateTestHealthPlanPackage = async (
 
     Object.assign(draft, partialUpdates)
 
-    const response = await server.executeOperation({
-        query: UpdateHealthPlanFormDataDocument,
-        variables: {
-            input: {
-                pkgID: pkgID,
-                healthPlanFormData: domainToBase64(draft),
+    const response = await server.executeOperation(
+        {
+            query: UpdateHealthPlanFormDataDocument,
+            variables: {
+                input: {
+                    pkgID: pkgID,
+                    healthPlanFormData: domainToBase64(draft),
+                },
             },
         },
-    }, {
-        contextValue: defaultContext(),
-    })
-    
+        {
+            contextValue: defaultContext(),
+        }
+    )
+
     const updateResult = extractTestResponse(response)
-    
+
     if (updateResult.errors) {
         console.info('errors', JSON.stringify(updateResult.errors))
         throw new Error(
@@ -461,17 +476,20 @@ const submitTestHealthPlanPackage = async (
     server: ApolloServer,
     pkgID: string
 ) => {
-    const response = await server.executeOperation({
-        query: SubmitHealthPlanPackageDocument,
-        variables: {
-            input: {
-                pkgID,
+    const response = await server.executeOperation(
+        {
+            query: SubmitHealthPlanPackageDocument,
+            variables: {
+                input: {
+                    pkgID,
+                },
             },
         },
-    }, {
-        contextValue: defaultContext(),
-    })
-    
+        {
+            contextValue: defaultContext(),
+        }
+    )
+
     const updateResult = extractTestResponse(response)
 
     if (updateResult.errors) {
@@ -481,10 +499,7 @@ const submitTestHealthPlanPackage = async (
         )
     }
 
-    if (
-        updateResult.data === undefined ||
-        updateResult.data === null
-    ) {
+    if (updateResult.data === undefined || updateResult.data === null) {
         throw new Error('submitTestHealthPlanPackage returned nothing')
     }
 
@@ -496,18 +511,21 @@ const resubmitTestHealthPlanPackage = async (
     pkgID: string,
     submittedReason: string
 ) => {
-    const response = await server.executeOperation({
-        query: SubmitHealthPlanPackageDocument,
-        variables: {
-            input: {
-                pkgID,
-                submittedReason,
+    const response = await server.executeOperation(
+        {
+            query: SubmitHealthPlanPackageDocument,
+            variables: {
+                input: {
+                    pkgID,
+                    submittedReason,
+                },
             },
         },
-    }, {
-        contextValue: defaultContext(),
-    })
-    
+        {
+            contextValue: defaultContext(),
+        }
+    )
+
     const updateResult = extractTestResponse(response)
 
     if (updateResult.errors) {
@@ -517,10 +535,7 @@ const resubmitTestHealthPlanPackage = async (
         )
     }
 
-    if (
-        updateResult.data === undefined ||
-        updateResult.data === null
-    ) {
+    if (updateResult.data === undefined || updateResult.data === null) {
         throw new Error('resubmitTestHealthPlanPackage returned nothing')
     }
 
@@ -533,18 +548,21 @@ const unlockTestHealthPlanPackage = async (
     unlockedReason: string,
     context?: Context
 ): Promise<HealthPlanPackage> => {
-    const response = await server.executeOperation({
-        query: UnlockHealthPlanPackageDocument,
-        variables: {
-            input: {
-                pkgID: pkgID,
-                unlockedReason,
+    const response = await server.executeOperation(
+        {
+            query: UnlockHealthPlanPackageDocument,
+            variables: {
+                input: {
+                    pkgID: pkgID,
+                    unlockedReason,
+                },
             },
         },
-    }, {
-        contextValue: context || defaultContext(),
-    })
-    
+        {
+            contextValue: context || defaultContext(),
+        }
+    )
+
     const updateResult = extractTestResponse(response)
 
     if (updateResult.errors) {
@@ -554,10 +572,7 @@ const unlockTestHealthPlanPackage = async (
         )
     }
 
-    if (
-        updateResult.data === undefined ||
-        updateResult.data === null
-    ) {
+    if (updateResult.data === undefined || updateResult.data === null) {
         throw new Error('unlockTestHealthPlanPackage returned nothing')
     }
 
@@ -570,18 +585,21 @@ const unlockTestHealthPlanPackageAsUser = async (
     unlockedReason: string,
     user: UserType
 ): Promise<HealthPlanPackage> => {
-    const response = await server.executeOperation({
-        query: UnlockHealthPlanPackageDocument,
-        variables: {
-            input: {
-                pkgID: pkgID,
-                unlockedReason,
+    const response = await server.executeOperation(
+        {
+            query: UnlockHealthPlanPackageDocument,
+            variables: {
+                input: {
+                    pkgID: pkgID,
+                    unlockedReason,
+                },
             },
         },
-    }, {
-        contextValue: { user },
-    })
-    
+        {
+            contextValue: { user },
+        }
+    )
+
     const updateResult = extractTestResponse(response)
 
     if (updateResult.errors) {
@@ -591,10 +609,7 @@ const unlockTestHealthPlanPackageAsUser = async (
         )
     }
 
-    if (
-        updateResult.data === undefined ||
-        updateResult.data === null
-    ) {
+    if (updateResult.data === undefined || updateResult.data === null) {
         throw new Error('unlockTestHealthPlanPackage returned nothing')
     }
 
@@ -606,13 +621,16 @@ const fetchTestHealthPlanPackageById = async (
     pkgID: string
 ): Promise<HealthPlanPackage> => {
     const input = { pkgID }
-    const response = await server.executeOperation({
-        query: FetchHealthPlanPackageDocument,
-        variables: { input },
-    }, {
-        contextValue: defaultContext(),
-    })
-    
+    const response = await server.executeOperation(
+        {
+            query: FetchHealthPlanPackageDocument,
+            variables: { input },
+        },
+        {
+            contextValue: defaultContext(),
+        }
+    )
+
     const result = extractTestResponse(response)
 
     if (result.errors)
@@ -641,18 +659,21 @@ const createTestQuestion = async (
             },
         ],
     }
-    const response = await server.executeOperation({
-        query: CreateContractQuestionDocument,
-        variables: {
-            input: {
-                contractID,
-                ...question,
+    const response = await server.executeOperation(
+        {
+            query: CreateContractQuestionDocument,
+            variables: {
+                input: {
+                    contractID,
+                    ...question,
+                },
             },
         },
-    }, {
-        contextValue: context || defaultContext(),
-    })
-    
+        {
+            contextValue: context || defaultContext(),
+        }
+    )
+
     const createdQuestion = extractTestResponse(response)
 
     if (createdQuestion.errors)
@@ -681,18 +702,21 @@ const createTestQuestionAsUser = async (
             },
         ],
     }
-    const response = await server.executeOperation({
-        query: CreateContractQuestionDocument,
-        variables: {
-            input: {
-                contractID,
-                ...question,
+    const response = await server.executeOperation(
+        {
+            query: CreateContractQuestionDocument,
+            variables: {
+                input: {
+                    contractID,
+                    ...question,
+                },
             },
         },
-    }, {
-        contextValue: { user },
-    })
-    
+        {
+            contextValue: { user },
+        }
+    )
+
     const createdQuestion = extractTestResponse(response)
 
     if (createdQuestion.errors)
@@ -721,30 +745,33 @@ const createTestRateQuestion = async (
             },
         ],
     }
-    const response = await server.executeOperation({
-        query: CreateRateQuestionDocument,
-        variables: {
-            input: {
-                rateID,
-                ...question,
+    const response = await server.executeOperation(
+        {
+            query: CreateRateQuestionDocument,
+            variables: {
+                input: {
+                    rateID,
+                    ...question,
+                },
             },
         },
-    }, {
-        contextValue: context || defaultContext(),
-    })
-    
+        {
+            contextValue: context || defaultContext(),
+        }
+    )
+
     const result = extractTestResponse(response)
-    
+
     // If there are errors, return the full response object so tests can check errors
     if (result.errors) {
         return result
     }
-    
+
     // If successful and data exists, return just the data
     if (result.data) {
         return result.data.createRateQuestion
     }
-    
+
     // If no data and no errors, throw an error
     throw new Error('createTestRateQuestion returned nothing')
 }
@@ -764,30 +791,33 @@ const createTestRateQuestionResponse = async (
         ],
     }
 
-    const result = await server.executeOperation({
-        query: CreateRateQuestionResponseDocument,
-        variables: {
-            input: {
-                ...response,
-                questionID,
+    const result = await server.executeOperation(
+        {
+            query: CreateRateQuestionResponseDocument,
+            variables: {
+                input: {
+                    ...response,
+                    questionID,
+                },
             },
         },
-    }, {
-        contextValue: context || defaultContext(),
-    })
-    
+        {
+            contextValue: context || defaultContext(),
+        }
+    )
+
     const extracted = extractTestResponse(result)
-    
+
     // If there are errors, return the full response object so tests can check errors
     if (extracted.errors) {
         return extracted
     }
-    
+
     // If successful and data exists, return just the data
     if (extracted.data) {
         return extracted.data.createRateQuestionResponse
     }
-    
+
     // If no data and no errors, return the full response
     return extracted
 }
@@ -806,18 +836,21 @@ const createTestQuestionResponse = async (
             },
         ],
     }
-    const result = await server.executeOperation({
-        query: CreateContractQuestionResponseDocument,
-        variables: {
-            input: {
-                ...response,
-                questionID,
+    const result = await server.executeOperation(
+        {
+            query: CreateContractQuestionResponseDocument,
+            variables: {
+                input: {
+                    ...response,
+                    questionID,
+                },
             },
         },
-    }, {
-        contextValue: context || defaultContext(),
-    })
-    
+        {
+            contextValue: context || defaultContext(),
+        }
+    )
+
     const createdResponse = extractTestResponse(result)
 
     if (createdResponse.errors)
@@ -838,18 +871,21 @@ const updateTestStateAssignments = async (
     assignedUserIDs: string[],
     context?: Context
 ): Promise<UpdateStateAssignmentsByStatePayload> => {
-    const response = await server.executeOperation({
-        query: UpdateStateAssignmentsByStateDocument,
-        variables: {
-            input: {
-                stateCode,
-                assignedUsers: assignedUserIDs,
+    const response = await server.executeOperation(
+        {
+            query: UpdateStateAssignmentsByStateDocument,
+            variables: {
+                input: {
+                    stateCode,
+                    assignedUsers: assignedUserIDs,
+                },
             },
         },
-    }, {
-        contextValue: context || defaultContext(),
-    })
-    
+        {
+            contextValue: context || defaultContext(),
+        }
+    )
+
     const updatedAssignments = extractTestResponse(response)
 
     if (updatedAssignments.errors)
