@@ -251,7 +251,7 @@ describe('createContractQuestionResponse', () => {
             cmsServer,
             contract.id,
             undefined,
-            { user: cmsUser }
+            { user: oactCMS }
         )
 
         await createTestQuestionResponse(
@@ -310,7 +310,7 @@ describe('createContractQuestionResponse', () => {
             cmsServer,
             contract.id,
             undefined,
-            { user: cmsUser }
+            { user: oactCMS }
         )
 
         await createTestQuestionResponse(

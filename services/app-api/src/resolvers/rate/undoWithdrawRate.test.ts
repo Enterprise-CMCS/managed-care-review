@@ -557,7 +557,8 @@ describe('undoWithdrawRate', () => {
 
         const validateContractA = await fetchTestContract(
             cmsServer,
-            contractA.id
+            contractA.id,
+            { user: cmsUser }
         )
         expect(validateContractA.withdrawnRates).toEqual(
             expect.arrayContaining([
@@ -569,7 +570,8 @@ describe('undoWithdrawRate', () => {
 
         const validateContractB = await fetchTestContract(
             cmsServer,
-            contractB.id
+            contractB.id,
+            { user: cmsUser }
         )
         expect(validateContractB.withdrawnRates).toEqual(
             expect.arrayContaining([
@@ -616,36 +618,9 @@ describe('undoWithdrawRate', () => {
             unwithdrawnRate.packageSubmissions[0].rateRevision.formData
                 .rateCertificationName!
 
-        //Check state email for proper info
+        //Check CMS email for proper info (comes before state email)
         expect(mockEmailer.sendEmail).toHaveBeenNthCalledWith(
-            7,
-            expect.objectContaining({
-                subject: expect.stringContaining(
-                    `${unwithdrawnRateName} status update`
-                ),
-                sourceEmail: emailConfig.emailSource,
-                toAddresses: expect.arrayContaining(stateReceiverEmails),
-                bodyHTML: expect.stringContaining(unwithdrawnRateName),
-            })
-        )
-
-        //Check that all submissions related to the rate were included in the state email
-        expect(mockEmailer.sendEmail).toHaveBeenNthCalledWith(
-            7,
-            expect.objectContaining({
-                bodyHTML: expect.stringContaining(contractAName),
-            })
-        )
-        expect(mockEmailer.sendEmail).toHaveBeenNthCalledWith(
-            7,
-            expect.objectContaining({
-                bodyHTML: expect.stringContaining(contractBName),
-            })
-        )
-
-        //Check CMS email for proper info
-        expect(mockEmailer.sendEmail).toHaveBeenNthCalledWith(
-            8,
+            7, // CMS email
             expect.objectContaining({
                 subject: expect.stringContaining(
                     `${unwithdrawnRateName} status update`
@@ -660,6 +635,33 @@ describe('undoWithdrawRate', () => {
         )
 
         //Check that all submissions related to the rate were included in the CMS email
+        expect(mockEmailer.sendEmail).toHaveBeenNthCalledWith(
+            7,
+            expect.objectContaining({
+                bodyHTML: expect.stringContaining(contractAName),
+            })
+        )
+        expect(mockEmailer.sendEmail).toHaveBeenNthCalledWith(
+            7,
+            expect.objectContaining({
+                bodyHTML: expect.stringContaining(contractBName),
+            })
+        )
+
+        //Check state email for proper info
+        expect(mockEmailer.sendEmail).toHaveBeenNthCalledWith(
+            8, // State email comes after CMS email
+            expect.objectContaining({
+                subject: expect.stringContaining(
+                    `${unwithdrawnRateName} status update`
+                ),
+                sourceEmail: emailConfig.emailSource,
+                toAddresses: expect.arrayContaining(stateReceiverEmails),
+                bodyHTML: expect.stringContaining(unwithdrawnRateName),
+            })
+        )
+
+        //Check that all submissions related to the rate were included in the state email
         expect(mockEmailer.sendEmail).toHaveBeenNthCalledWith(
             8,
             expect.objectContaining({
