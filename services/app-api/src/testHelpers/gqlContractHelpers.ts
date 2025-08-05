@@ -637,7 +637,8 @@ const withdrawTestContract = async (
 const undoWithdrawTestContract = async (
     server: ApolloServer,
     contractID: string,
-    updatedReason: string
+    updatedReason: string,
+    context?: Context
 ): Promise<Contract> => {
     const response = await server.executeOperation(
         {
@@ -650,7 +651,7 @@ const undoWithdrawTestContract = async (
             },
         },
         {
-            contextValue: defaultContext(),
+            contextValue: context || defaultContext(),
         }
     )
 

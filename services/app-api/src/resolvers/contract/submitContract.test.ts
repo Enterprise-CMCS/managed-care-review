@@ -1692,10 +1692,14 @@ describe('submitContract', () => {
         it('uses email settings from database with remove-parameter-store flag on', async () => {
             const prismaClient = await sharedTestPrismaClient()
             const store = NewPostgresStore(prismaClient)
-            const mockEmailer = await testEmailerFromDatabase(store)
             const ldService = testLDService({
                 'remove-parameter-store': true,
             })
+            const mockEmailer = await testEmailerFromDatabase(
+                store,
+                undefined,
+                ldService
+            )
             const stateUser = testStateUser()
             await createDBUsersWithFullData([stateUser])
 
@@ -1721,12 +1725,18 @@ describe('submitContract', () => {
                     subject: expect.stringContaining(
                         `New Managed Care Submission: ${name}`
                     ),
-                    sourceEmail: expect.stringContaining('local@example.com'),
+                    sourceEmail: expect.stringContaining(
+                        'mc-review@cms.hhs.gov'
+                    ),
                     toAddresses: expect.arrayContaining([
-                        expect.stringContaining('Dev.reviewer.1@example.com'),
-                        expect.stringContaining('Dev.reviewer.2@example.com'),
                         expect.stringContaining(
-                            'dmcp-submission-reviewer.1@example.com'
+                            'mc-review-qa+DevTeam@truss.works'
+                        ),
+                        expect.stringContaining(
+                            'mc-review-qa+DMCPsubmissiondev1@truss.works'
+                        ),
+                        expect.stringContaining(
+                            'mc-review-qa+DMCPsubmissiondev2@truss.works'
                         ),
                     ]),
                 })

@@ -164,7 +164,8 @@ describe('undoWithdrawContract', () => {
             await approveTestContract(
                 cmsServer,
                 undoWithdrawnContract.id,
-                undefined
+                undefined,
+                { user: cmsUser }
             )
         )
     })
@@ -281,7 +282,8 @@ describe('undoWithdrawContract', () => {
             await approveTestContract(
                 cmsServer,
                 undoWithdrawnContract.id,
-                undefined
+                undefined,
+                { user: cmsUser }
             )
         )
     })
@@ -451,12 +453,15 @@ describe('undoWithdrawContract', () => {
         await submitTestContract(stateServer, draftContractC.id, undefined, {
             user: stateUser,
         })
-        await approveTestContract(cmsServer, draftContractC.id)
+        await approveTestContract(cmsServer, draftContractC.id, undefined, {
+            user: cmsUser,
+        })
 
         const withdrawnContractA = await withdrawTestContract(
             cmsServer,
             contractA.id,
-            'withdraw submission'
+            'withdraw submission',
+            { user: cmsUser }
         )
 
         let ratesStripped = await fetchTestIndexRatesStripped(
@@ -510,7 +515,8 @@ describe('undoWithdrawContract', () => {
         const undoWithdrawnContractA = await undoWithdrawTestContract(
             cmsServer,
             contractA.id,
-            'undo submission withdraw'
+            'undo submission withdraw',
+            { user: cmsUser }
         )
 
         ratesStripped = await fetchTestIndexRatesStripped(
@@ -649,7 +655,8 @@ describe('undoWithdrawContract', () => {
         const withdrawnContractA = await withdrawTestContract(
             cmsServer,
             contractA.id,
-            'withdraw submission'
+            'withdraw submission',
+            { user: cmsUser }
         )
 
         let rateB = await fetchTestRateById(cmsServer, rateBID)
@@ -671,7 +678,8 @@ describe('undoWithdrawContract', () => {
         const undoWithdrawnContractA = await undoWithdrawTestContract(
             cmsServer,
             contractA.id,
-            'undo submission withdraw'
+            'undo submission withdraw',
+            { user: cmsUser }
         )
 
         rateB = await fetchTestRateById(cmsServer, rateBID)
@@ -717,13 +725,15 @@ describe('undoWithdrawContract', () => {
         await withdrawTestContract(
             cmsServer,
             contract.id,
-            'withdraw submission'
+            'withdraw submission',
+            { user: cmsUser }
         )
 
         const unWithdrawnContract = await undoWithdrawTestContract(
             cmsServer,
             contract.id,
-            'Undo submission withdraw'
+            'Undo submission withdraw',
+            { user: cmsUser }
         )
 
         const contractName =
@@ -821,7 +831,9 @@ describe('undoWithdrawContract error handling', () => {
             { user: stateUser }
         )
 
-        await approveTestContract(cmsServer, approvedContract.id)
+        await approveTestContract(cmsServer, approvedContract.id, undefined, {
+            user: cmsUser,
+        })
 
         const unlockedContract = await createAndSubmitTestContract(
             stateServer,
