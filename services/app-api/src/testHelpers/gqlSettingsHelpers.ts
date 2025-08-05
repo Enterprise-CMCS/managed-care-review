@@ -1,4 +1,4 @@
-import type { ApolloServer } from 'apollo-server-lambda'
+import type { ApolloServer } from '@apollo/server'
 import type {
     EmailConfiguration,
     FetchMcReviewSettingsPayload,
@@ -8,24 +8,33 @@ import {
     UpdateEmailSettingsDocument,
     FetchMcReviewSettingsDocument,
 } from '../gen/gqlClient'
+import { defaultContext } from './gqlHelpers'
+import type { Context } from '../handlers/apollo_gql'
+
+import { extractGraphQLResponse } from './apolloV4ResponseHelper'
 
 const updateTestEmailSettings = async (
     server: ApolloServer,
-    emailConfiguration: EmailConfiguration
+    emailConfiguration: EmailConfiguration,
+    context?: Context
 ): Promise<UpdateEmailSettingsPayload> => {
-    const updateEmailConfig = await server.executeOperation({
+    const response = await server.executeOperation({
         query: UpdateEmailSettingsDocument,
         variables: {
             input: {
                 emailConfiguration,
             },
         },
+    }, {
+        contextValue: context || defaultContext(),
     })
+    
+    const updateEmailConfig = extractGraphQLResponse(response)
 
     if (updateEmailConfig.errors) {
         console.info('errors', updateEmailConfig.errors)
         throw new Error(
-            `updateTestEmailSettings mutation failed with errors ${updateEmailConfig.errors}`
+            `updateTestEmailSettings mutation failed with errors ${JSON.stringify(updateEmailConfig.errors)}`
         )
     }
 
@@ -40,16 +49,21 @@ const updateTestEmailSettings = async (
 }
 
 const fetchTestMcReviewSettings = async (
-    server: ApolloServer
+    server: ApolloServer,
+    context?: Context
 ): Promise<FetchMcReviewSettingsPayload> => {
-    const fetchMcReviewSettings = await server.executeOperation({
+    const response = await server.executeOperation({
         query: FetchMcReviewSettingsDocument,
+    }, {
+        contextValue: context || defaultContext(),
     })
+    
+    const fetchMcReviewSettings = extractGraphQLResponse(response)
 
     if (fetchMcReviewSettings.errors) {
         console.info('errors', fetchMcReviewSettings.errors)
         throw new Error(
-            `fetchTestMcReviewSettings query failed with errors ${fetchMcReviewSettings.errors}`
+            `fetchTestMcReviewSettings query failed with errors ${JSON.stringify(fetchMcReviewSettings.errors)}`
         )
     }
 

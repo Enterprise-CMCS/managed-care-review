@@ -15,6 +15,7 @@ import {
     testCMSUser,
     testStateUser,
 } from '../../testHelpers/userHelpers'
+import { extractGraphQLResponse } from '../../testHelpers/apolloV4ResponseHelper'
 
 describe('contractResolver', () => {
     const dmcoCMSUser = testCMSUser({
@@ -34,8 +35,12 @@ describe('contractResolver', () => {
     })
 
     it('returns questions associated with a contract', async () => {
+        const stateUser = testStateUser()
         const stateServer = await constructTestPostgresServer({
             s3Client: mockS3,
+            context: {
+                user: stateUser,
+            },
         })
 
         const dmcoCMSServer = await constructTestPostgresServer({
@@ -57,8 +62,8 @@ describe('contractResolver', () => {
             s3Client: mockS3,
         })
 
-        const draft = await createAndUpdateTestContractWithRate(stateServer)
-        const stateSubmission = await submitTestContract(stateServer, draft.id)
+        const draft = await createAndUpdateTestContractWithRate(stateServer, undefined, { user: stateUser })
+        const stateSubmission = await submitTestContract(stateServer, draft.id, undefined, { user: stateUser })
 
         const createdDMCOQuestion = await createTestQuestion(
             dmcoCMSServer,
@@ -70,12 +75,15 @@ describe('contractResolver', () => {
                         s3URL: 's3://bucketname/key/test11',
                     },
                 ],
-            }
+            },
+            { user: dmcoCMSUser }
         )
 
         const responseToDMCO = await createTestQuestionResponse(
             stateServer,
-            createdDMCOQuestion.question.id
+            createdDMCOQuestion.question.id,
+            undefined,
+            { user: stateUser }
         )
 
         const createdDMCPQuestion = await createTestQuestion(
@@ -88,12 +96,15 @@ describe('contractResolver', () => {
                         s3URL: 's3://bucketname/key/test12',
                     },
                 ],
-            }
+            },
+            { user: dmcpCMSUser }
         )
 
         const responseToDMCP = await createTestQuestionResponse(
             stateServer,
-            createdDMCPQuestion.question.id
+            createdDMCPQuestion.question.id,
+            undefined,
+            { user: stateUser }
         )
 
         const createdOACTQuestion = await createTestQuestion(
@@ -106,29 +117,37 @@ describe('contractResolver', () => {
                         s3URL: 's3://bucketname/key/test13',
                     },
                 ],
-            }
+            },
+            { user: oactCMSUser }
         )
 
         const responseToOACT = await createTestQuestionResponse(
             stateServer,
-            createdOACTQuestion.question.id
+            createdOACTQuestion.question.id,
+            undefined,
+            { user: stateUser }
         )
 
         const contractWithQuestions = await fetchTestContractWithQuestions(
             stateServer,
-            stateSubmission.id
+            stateSubmission.id,
+            { user: stateUser }
         )
         const indexQuestionsResult = contractWithQuestions.questions
 
         draft.questions = indexQuestionsResult
-        const fetchContractResult = await stateServer.executeOperation({
+        const response = await stateServer.executeOperation({
             query: FetchContractWithQuestionsDocument,
             variables: {
                 input: {
                     contractID: stateSubmission.id,
                 },
             },
+        }, {
+            contextValue: { user: stateUser },
         })
+        
+        const fetchContractResult = extractGraphQLResponse(response)
 
         expect(fetchContractResult.errors).toBeUndefined()
 
@@ -214,23 +233,29 @@ describe('contractResolver', () => {
             draft.id
         )
 
+        const vaUser = testStateUser({
+            stateCode: 'VA',
+            email: 'aang@mn.gov',
+        })
         const stateServerVA = await constructTestPostgresServer({
             context: {
-                user: testStateUser({
-                    stateCode: 'VA',
-                    email: 'aang@mn.gov',
-                }),
+                user: vaUser,
             },
+            s3Client: mockS3,
         })
 
-        const fetchResult = await stateServerVA.executeOperation({
+        const response = await stateServerVA.executeOperation({
             query: FetchContractWithQuestionsDocument,
             variables: {
                 input: {
                     contractID: stateSubmission.id,
                 },
             },
+        }, {
+            contextValue: { user: vaUser },
         })
+        
+        const fetchResult = extractGraphQLResponse(response)
 
         expect(fetchResult.errors).toBeDefined()
         if (fetchResult.errors === undefined) {

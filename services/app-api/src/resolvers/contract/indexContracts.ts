@@ -78,7 +78,7 @@ export function indexContractsResolver(
             const errMessage = `OAuth client does not have read permissions`
             logError('indexContracts', errMessage)
             setErrorAttributesOnActiveSpan(errMessage, span)
-            throw new ForbiddenError(errMessage)
+            throw createForbiddenError(errMessage)
         }
 
         // Log OAuth client access for audit trail

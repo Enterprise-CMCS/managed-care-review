@@ -43,7 +43,8 @@ describe(`questionResolver`, () => {
                         s3URL: 's3://bucketname/key/test12',
                     },
                 ],
-            }
+            },
+            { user: dmcpCMSUser }
         )
 
         const createdDMCPQuestion2 = await createTestQuestion(
@@ -56,7 +57,8 @@ describe(`questionResolver`, () => {
                         s3URL: 's3://bucketname/key/test12',
                     },
                 ],
-            }
+            },
+            { user: dmcpCMSUser }
         )
 
         const contractWithQuestions = await fetchTestContractWithQuestions(

@@ -7,10 +7,12 @@ import { testLDService } from '../../testHelpers/launchDarklyHelpers'
 import {
     constructTestPostgresServer,
     createTestRateQuestion,
+    defaultContext,
     defaultFloridaRateProgram,
-    unlockTestHealthPlanPackage,
+    unlockTestHealthPlanPackageAsUser,
     updateTestHealthPlanFormData,
 } from '../../testHelpers/gqlHelpers'
+import { extractGraphQLResponse } from '../../testHelpers/apolloV4ResponseHelper'
 import {
     createDBUsersWithFullData,
     testCMSApproverUser,
@@ -32,7 +34,7 @@ import {
     createAndUpdateTestContractWithoutRates,
     fetchTestContract,
     submitTestContract,
-    unlockTestContract,
+    unlockTestContractAsUser,
 } from '../../testHelpers/gqlContractHelpers'
 import { latestFormData } from '../../testHelpers/healthPlanPackageHelpers'
 import { testS3Client } from '../../../../app-api/src/testHelpers/s3Helpers'
@@ -61,7 +63,8 @@ describe('fetchRate', () => {
 
         const submittedRate = await createSubmitAndUnlockTestRate(
             stateServer,
-            cmsServer
+            cmsServer,
+            cmsUser
         )
 
         // editrate with new data and resubmit
@@ -148,7 +151,8 @@ describe('fetchRate', () => {
         // First, create new rate and unlock to edit it
         const submittedInitial = await createSubmitAndUnlockTestRate(
             server,
-            cmsServer
+            cmsServer,
+            cmsUser
         )
 
         // add new rate
@@ -170,34 +174,40 @@ describe('fetchRate', () => {
         // fetch and check rate 1 which was resubmitted with no changes
         expect(firstRateID).toBe(resubmittedRate.id) // first rate ID should be unchanged
 
-        const result1 = await cmsServer.executeOperation({
-            query: FetchRateDocument,
-            variables: {
-                input: { rateID: firstRateID },
+        const result1 = await cmsServer.executeOperation(
+            {
+                query: FetchRateDocument,
+                variables: {
+                    input: { rateID: firstRateID },
+                },
             },
-        })
+            {
+                contextValue: { user: cmsUser },
+            }
+        )
+        const result1Data = extractGraphQLResponse(result1)
 
-        const resubmittedRate1 = result1.data?.fetchRate.rate
-        expect(resubmittedRate1.revisions).toHaveLength(2)
+        const resubmittedRate1 = result1Data.data?.fetchRate.rate
+        expect(resubmittedRate1?.revisions).toHaveLength(2)
         // dates for first rate should be unchanged
-        expect(resubmittedRate1.revisions[0].formData.rateDateStart).toBe(
+        expect(resubmittedRate1?.revisions[0].formData.rateDateStart).toBe(
             '2034-02-01'
         )
-        expect(resubmittedRate1.revisions[0].formData.rateDateEnd).toBe(
+        expect(resubmittedRate1?.revisions[0].formData.rateDateEnd).toBe(
             '2035-02-01'
         )
-        expect(resubmittedRate1.revisions[0].submitInfo.updatedReason).toBe(
+        expect(resubmittedRate1?.revisions[0].submitInfo?.updatedReason).toBe(
             'Resubmit with an additional rate'
         )
 
         // check that initial rate is correct
-        expect(resubmittedRate1.revisions[1].formData.rateDateStart).toBe(
+        expect(resubmittedRate1?.revisions[1].formData.rateDateStart).toBe(
             '2024-01-01'
         )
-        expect(resubmittedRate1.revisions[1].formData.rateDateEnd).toBe(
+        expect(resubmittedRate1?.revisions[1].formData.rateDateEnd).toBe(
             '2025-01-01'
         )
-        expect(resubmittedRate1.revisions[1].submitInfo.updatedReason).toBe(
+        expect(resubmittedRate1?.revisions[1].submitInfo?.updatedReason).toBe(
             'Initial submission'
         )
     })
@@ -250,10 +260,11 @@ describe('fetchRate', () => {
         )
 
         // unlock and set non-deprecated IDs
-        const unlocked = await unlockTestContract(
+        const unlocked = await unlockTestContractAsUser(
             cmsServer,
             submittedInitial.id,
-            'unlock to fix deprecated IDs'
+            'unlock to fix deprecated IDs',
+            cmsUser
         )
 
         const realRateProgramIDs = [defaultFloridaRateProgram().id]
@@ -349,7 +360,8 @@ describe('fetchRate', () => {
 
         const submittedRate = await createSubmitAndUnlockTestRate(
             server,
-            cmsServer
+            cmsServer,
+            cmsUser
         )
 
         const input = {
@@ -357,15 +369,21 @@ describe('fetchRate', () => {
         }
 
         // fetch rate
-        const result = await cmsServer.executeOperation({
-            query: FetchRateDocument,
-            variables: {
-                input,
+        const result = await cmsServer.executeOperation(
+            {
+                query: FetchRateDocument,
+                variables: {
+                    input,
+                },
             },
-        })
+            {
+                contextValue: { user: cmsUser },
+            }
+        )
+        const resultData = extractGraphQLResponse(result)
 
-        const unlockedRate = result.data?.fetchRate.rate
-        expect(result.errors).toBeUndefined()
+        const unlockedRate = resultData.data?.fetchRate.rate
+        expect(resultData.errors).toBeUndefined()
         expect(unlockedRate).toBeDefined()
 
         expect(unlockedRate.draftRevision).toBeDefined()
@@ -394,7 +412,8 @@ describe('fetchRate', () => {
 
         const submittedRate = await createSubmitAndUnlockTestRate(
             server,
-            cmsServer
+            cmsServer,
+            cmsUser
         )
         expect(submittedRate).toBeDefined()
 
@@ -403,35 +422,42 @@ describe('fetchRate', () => {
         }
 
         // fetch rate
-        const result = await cmsServer.executeOperation({
-            query: FetchRateDocument,
-            variables: {
-                input,
+        const result = await cmsServer.executeOperation(
+            {
+                query: FetchRateDocument,
+                variables: {
+                    input,
+                },
             },
-        })
+            {
+                contextValue: { user: cmsUser },
+            }
+        )
+        const resultData = extractGraphQLResponse(result)
 
-        const unlockedRate = result.data?.fetchRate.rate
-        expect(result.errors).toBeUndefined()
+        const unlockedRate = resultData.data?.fetchRate.rate
+        expect(resultData.errors).toBeUndefined()
         expect(unlockedRate).toBeDefined()
 
         expect(
-            unlockedRate.draftRevision.formData.rateDocuments[0].downloadURL
+            unlockedRate?.draftRevision?.formData.rateDocuments[0].downloadURL
         ).toBeDefined()
         expect(
-            unlockedRate.draftRevision.formData.supportingDocuments[0]
+            unlockedRate?.draftRevision?.formData.supportingDocuments[0]
                 .downloadURL
         ).toBeDefined()
     })
 
     it('returns the correct dateAdded for documents', async () => {
         const prismaClient = await sharedTestPrismaClient()
+        const cmsUser = testCMSUser()
         const stateServer = await constructTestPostgresServer({
             s3Client: mockS3,
         })
         const cmsServer = await constructTestPostgresServer({
             ldService,
             context: {
-                user: testCMSUser(),
+                user: cmsUser,
             },
             s3Client: mockS3,
         })
@@ -508,10 +534,11 @@ describe('fetchRate', () => {
         ).toBe('2024-01-01')
 
         // 2. Unlock and add more documents
-        const unlockedA0Pkg = await unlockTestHealthPlanPackage(
+        const unlockedA0Pkg = await unlockTestHealthPlanPackageAsUser(
             cmsServer,
             AID,
-            'Unlock A.0'
+            'Unlock A.0',
+            cmsUser
         )
         const a0FormData = latestFormData(unlockedA0Pkg)
         a0FormData.submissionDescription = 'DESC A1'
@@ -649,54 +676,74 @@ describe('fetchRate', () => {
         const rateID =
             submittedRate.packageSubmissions[0].rateRevisions[0].rateID
 
-        await createTestRateQuestion(dmcoServer, rateID)
-        await createTestRateQuestion(dmcpServer, rateID)
-        await createTestRateQuestion(oactServer, rateID)
+        await createTestRateQuestion(dmcoServer, rateID, undefined, {
+            user: dmcoCmsUser,
+        })
+        await createTestRateQuestion(dmcpServer, rateID, undefined, {
+            user: dmcpCmsUser,
+        })
+        await createTestRateQuestion(oactServer, rateID, undefined, {
+            user: oactApproverUser,
+        })
 
-        const result = await server.executeOperation({
-            query: FetchRateWithQuestionsDocument,
-            variables: {
-                input: {
-                    rateID,
+        const response = await server.executeOperation(
+            {
+                query: FetchRateWithQuestionsDocument,
+                variables: {
+                    input: {
+                        rateID,
+                    },
                 },
             },
-        })
+            {
+                contextValue: defaultContext(),
+            }
+        )
+        const result = extractGraphQLResponse(response)
         const rateQuestions = result.data?.fetchRate.rate.questions
 
         // Expect each question in the correct division by the correct user
-        expect(rateQuestions.DMCOQuestions.edges).toHaveLength(1)
-        expect(rateQuestions.DMCOQuestions.edges[0].node.addedBy).toEqual(
+        expect(rateQuestions?.DMCOQuestions.edges).toHaveLength(1)
+        expect(rateQuestions?.DMCOQuestions.edges[0].node.addedBy).toEqual(
             expect.objectContaining(dmcoCmsUser)
         )
-        expect(rateQuestions.DMCPQuestions.edges).toHaveLength(1)
-        expect(rateQuestions.DMCPQuestions.edges[0].node.addedBy).toEqual(
+        expect(rateQuestions?.DMCPQuestions.edges).toHaveLength(1)
+        expect(rateQuestions?.DMCPQuestions.edges[0].node.addedBy).toEqual(
             expect.objectContaining(dmcpCmsUser)
         )
-        expect(rateQuestions.OACTQuestions.edges).toHaveLength(1)
-        expect(rateQuestions.OACTQuestions.edges[0].node.addedBy).toEqual(
+        expect(rateQuestions?.OACTQuestions.edges).toHaveLength(1)
+        expect(rateQuestions?.OACTQuestions.edges[0].node.addedBy).toEqual(
             expect.objectContaining(oactApproverUser)
         )
 
         // Test newly created dmco question and its order
-        await createTestRateQuestion(dmco2Server, rateID)
-        const result2 = await server.executeOperation({
-            query: FetchRateWithQuestionsDocument,
-            variables: {
-                input: {
-                    rateID,
+        await createTestRateQuestion(dmco2Server, rateID, undefined, {
+            user: dmco2CmsUser,
+        })
+        const response2 = await server.executeOperation(
+            {
+                query: FetchRateWithQuestionsDocument,
+                variables: {
+                    input: {
+                        rateID,
+                    },
                 },
             },
-        })
+            {
+                contextValue: defaultContext(),
+            }
+        )
+        const result2 = extractGraphQLResponse(response2)
         const rateQuestions2 = result2.data?.fetchRate.rate.questions
 
         // Expect 2 DMCO questions and the latest created question at index 0 by dmco2CmsUser
-        expect(rateQuestions2.DMCOQuestions.edges).toHaveLength(2)
-        expect(rateQuestions2.DMCOQuestions.edges[0].node.addedBy).toEqual(
+        expect(rateQuestions2?.DMCOQuestions.edges).toHaveLength(2)
+        expect(rateQuestions2?.DMCOQuestions.edges[0].node.addedBy).toEqual(
             expect.objectContaining(dmco2CmsUser)
         )
         // Expect earlier DMCO question to be at index 1
-        expect(rateQuestions2.DMCOQuestions.edges).toHaveLength(2)
-        expect(rateQuestions2.DMCOQuestions.edges[1].node.addedBy).toEqual(
+        expect(rateQuestions2?.DMCOQuestions.edges).toHaveLength(2)
+        expect(rateQuestions2?.DMCOQuestions.edges[1].node.addedBy).toEqual(
             expect.objectContaining(dmcoCmsUser)
         )
     })
@@ -730,14 +777,27 @@ describe('fetchRate', () => {
             s3Client: mockS3,
         })
 
-        const fetchResult = await oauthServer.executeOperation({
-            query: FetchRateDocument,
-            variables: {
-                input: {
-                    rateID,
+        const fetchResponse = await oauthServer.executeOperation(
+            {
+                query: FetchRateDocument,
+                variables: {
+                    input: {
+                        rateID,
+                    },
                 },
             },
-        })
+            {
+                contextValue: {
+                    user: testCMSUser(),
+                    oauthClient: {
+                        clientId: 'test-oauth-client',
+                        grants: ['client_credentials'],
+                        isOAuthClient: true,
+                    },
+                },
+            }
+        )
+        const fetchResult = extractGraphQLResponse(fetchResponse)
 
         expect(fetchResult.errors).toBeUndefined()
         expect(fetchResult.data?.fetchRate.rate).toBeDefined()
@@ -773,14 +833,27 @@ describe('fetchRate', () => {
             s3Client: mockS3,
         })
 
-        const fetchResult = await oauthServer.executeOperation({
-            query: FetchRateDocument,
-            variables: {
-                input: {
-                    rateID,
+        const fetchResponse = await oauthServer.executeOperation(
+            {
+                query: FetchRateDocument,
+                variables: {
+                    input: {
+                        rateID,
+                    },
                 },
             },
-        })
+            {
+                contextValue: {
+                    user: testCMSUser(),
+                    oauthClient: {
+                        clientId: 'test-oauth-client',
+                        grants: ['some_other_grant'],
+                        isOAuthClient: true,
+                    },
+                },
+            }
+        )
+        const fetchResult = extractGraphQLResponse(fetchResponse)
 
         expect(fetchResult.errors).toBeDefined()
         expect(fetchResult.errors?.[0].extensions?.code).toBe('FORBIDDEN')

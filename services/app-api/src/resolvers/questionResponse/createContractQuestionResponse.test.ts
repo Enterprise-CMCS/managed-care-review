@@ -4,6 +4,8 @@ import {
     createTestQuestion,
     createTestQuestionResponse,
     updateTestStateAssignments,
+    defaultContext,
+    extractGraphQLResponse,
 } from '../../testHelpers/gqlHelpers'
 import {
     approveTestContract,
@@ -13,6 +15,8 @@ import {
 import {
     createDBUsersWithFullData,
     testCMSUser,
+    testCMSApproverUser,
+    testAdminUser,
 } from '../../testHelpers/userHelpers'
 import { testEmailConfig, testEmailer } from '../../testHelpers/emailerHelpers'
 import { findStatePrograms } from '../../postgres'
@@ -20,6 +24,7 @@ import { createAndSubmitTestContractWithRate } from '../../testHelpers/gqlContra
 
 describe('createContractQuestionResponse', () => {
     const cmsUser = testCMSUser()
+    const adminUser = testAdminUser()
     // add some users to the db, assign them to the state in each test
     const assignedUsers = [
         testCMSUser({
@@ -33,7 +38,7 @@ describe('createContractQuestionResponse', () => {
     ]
     beforeAll(async () => {
         //Inserting a new CMS user, with division assigned, in postgres in order to create the question to user relationship.
-        await createDBUsersWithFullData([...assignedUsers, cmsUser])
+        await createDBUsersWithFullData([...assignedUsers, cmsUser, adminUser])
     })
 
     it('returns question response data', async () => {
@@ -46,7 +51,12 @@ describe('createContractQuestionResponse', () => {
 
         const contract = await createAndSubmitTestContractWithRate(stateServer)
 
-        const createdQuestion = await createTestQuestion(cmsServer, contract.id)
+        const createdQuestion = await createTestQuestion(
+            cmsServer,
+            contract.id,
+            undefined,
+            { user: cmsUser }
+        )
 
         const createResponseResult = await createTestQuestionResponse(
             stateServer,
@@ -79,57 +89,83 @@ describe('createContractQuestionResponse', () => {
         const stateServer = await constructTestPostgresServer()
         const fakeID = 'abc-123'
 
-        const createResponseResult = await stateServer.executeOperation({
-            query: CreateContractQuestionResponseDocument,
-            variables: {
-                input: {
-                    questionID: fakeID,
-                    documents: [
-                        {
-                            name: 'Test Question',
-                            s3URL: 's3://bucketname/key/test1',
-                        },
-                    ],
+        const createResponseResult = await stateServer.executeOperation(
+            {
+                query: CreateContractQuestionResponseDocument,
+                variables: {
+                    input: {
+                        questionID: fakeID,
+                        documents: [
+                            {
+                                name: 'Test Question',
+                                s3URL: 's3://bucketname/key/test1',
+                            },
+                        ],
+                    },
                 },
             },
-        })
+            {
+                contextValue: defaultContext(),
+            }
+        )
+        const result = extractGraphQLResponse(createResponseResult)
 
-        expect(createResponseResult).toBeDefined()
-        expect(assertAnErrorCode(createResponseResult)).toBe('BAD_USER_INPUT')
-        expect(assertAnError(createResponseResult).message).toBe(
+        expect(result).toBeDefined()
+        expect(assertAnErrorCode(result)).toBe('BAD_USER_INPUT')
+        expect(assertAnError(result).message).toBe(
             `Contract question with ID: ${fakeID} not found to attach response to`
         )
     })
 
     it('returns an error when attempting to create response for a contract that has been approved', async () => {
         const stateServer = await constructTestPostgresServer()
+        const cmsApprover = testCMSApproverUser()
+        await createDBUsersWithFullData([cmsApprover])
+        const cmsApproverServer = await constructTestPostgresServer({
+            context: {
+                user: cmsApprover,
+            },
+        })
         const cmsServer = await constructTestPostgresServer({
             context: {
                 user: cmsUser,
             },
         })
         const contract = await createAndSubmitTestContractWithRate(stateServer)
-        const createdQuestion = await createTestQuestion(cmsServer, contract.id)
-        await approveTestContract(cmsServer, contract.id)
-
-        const createResponseResult = await stateServer.executeOperation({
-            query: CreateContractQuestionResponseDocument,
-            variables: {
-                input: {
-                    questionID: createdQuestion.question.id,
-                    documents: [
-                        {
-                            name: 'Test Question',
-                            s3URL: 's3://bucketname/key/test1',
-                        },
-                    ],
-                },
-            },
+        const createdQuestion = await createTestQuestion(
+            cmsServer,
+            contract.id,
+            undefined,
+            { user: cmsUser }
+        )
+        await approveTestContract(cmsApproverServer, contract.id, undefined, {
+            user: cmsApprover,
         })
 
-        expect(createResponseResult).toBeDefined()
-        expect(assertAnErrorCode(createResponseResult)).toBe('BAD_USER_INPUT')
-        expect(assertAnError(createResponseResult).message).toBe(
+        const createResponseResult = await stateServer.executeOperation(
+            {
+                query: CreateContractQuestionResponseDocument,
+                variables: {
+                    input: {
+                        questionID: createdQuestion.question.id,
+                        documents: [
+                            {
+                                name: 'Test Question',
+                                s3URL: 's3://bucketname/key/test1',
+                            },
+                        ],
+                    },
+                },
+            },
+            {
+                contextValue: defaultContext(),
+            }
+        )
+        const result = extractGraphQLResponse(createResponseResult)
+
+        expect(result).toBeDefined()
+        expect(assertAnErrorCode(result)).toBe('BAD_USER_INPUT')
+        expect(assertAnError(result).message).toBe(
             `Issue creating response for contract. Message: Cannot create response for contract in APPROVED status`
         )
     })
@@ -142,26 +178,39 @@ describe('createContractQuestionResponse', () => {
             },
         })
         const contract = await createAndSubmitTestContractWithRate(stateServer)
-        const createdQuestion = await createTestQuestion(cmsServer, contract.id)
+        const createdQuestion = await createTestQuestion(
+            cmsServer,
+            contract.id,
+            undefined,
+            { user: cmsUser }
+        )
 
-        const createResponseResult = await cmsServer.executeOperation({
-            query: CreateContractQuestionResponseDocument,
-            variables: {
-                input: {
-                    questionID: createdQuestion.question.id,
-                    documents: [
-                        {
-                            name: 'Test Question',
-                            s3URL: 's3://bucketname/key/test1',
-                        },
-                    ],
+        const createResponseResult = await cmsServer.executeOperation(
+            {
+                query: CreateContractQuestionResponseDocument,
+                variables: {
+                    input: {
+                        questionID: createdQuestion.question.id,
+                        documents: [
+                            {
+                                name: 'Test Question',
+                                s3URL: 's3://bucketname/key/test1',
+                            },
+                        ],
+                    },
                 },
             },
-        })
+            {
+                contextValue: {
+                    user: cmsUser,
+                },
+            }
+        )
+        const result = extractGraphQLResponse(createResponseResult)
 
-        expect(createResponseResult.errors).toBeDefined()
-        expect(assertAnErrorCode(createResponseResult)).toBe('FORBIDDEN')
-        expect(assertAnError(createResponseResult).message).toBe(
+        expect(result.errors).toBeDefined()
+        expect(assertAnErrorCode(result)).toBe('FORBIDDEN')
+        expect(assertAnError(result).message).toBe(
             'user not authorized to create a question response'
         )
     })
@@ -172,6 +221,7 @@ describe('createContractQuestionResponse', () => {
         const oactCMS = testCMSUser({
             divisionAssignment: 'OACT' as const,
         })
+        await createDBUsersWithFullData([oactCMS])
         const stateServer = await constructTestPostgresServer({
             emailer: mockEmailer,
         })
@@ -185,7 +235,9 @@ describe('createContractQuestionResponse', () => {
         const assignedUserIDs = assignedUsers.map((u) => u.id)
         const assignedUserEmails = assignedUsers.map((u) => u.email)
 
-        await updateTestStateAssignments(cmsServer, 'FL', assignedUserIDs)
+        await updateTestStateAssignments(cmsServer, 'FL', assignedUserIDs, {
+            user: adminUser,
+        })
 
         const contract = await createAndSubmitTestContractWithRate(
             stateServer,
@@ -195,11 +247,16 @@ describe('createContractQuestionResponse', () => {
             }
         )
 
-        const createdQuestion = await createTestQuestion(cmsServer, contract.id)
+        const createdQuestion = await createTestQuestion(
+            cmsServer,
+            contract.id,
+            undefined,
+            { user: oactCMS }
+        )
 
         await createTestQuestionResponse(
             stateServer,
-            createdQuestion?.question.id
+            createdQuestion.question.id
         )
 
         const contractName =
@@ -222,7 +279,7 @@ describe('createContractQuestionResponse', () => {
                     Array.from(cmsRecipientEmails)
                 ),
                 bodyText: expect.stringContaining(
-                    `The state submitted responses to OACT's questions about ${contractName}`
+                    `The state submitted responses to ${oactCMS.divisionAssignment}'s questions about ${contractName}`
                 ),
                 bodyHTML: expect.stringContaining(
                     `<a href="http://localhost/submissions/${contract.id}/question-and-answers">View submission Q&A</a>`
@@ -249,11 +306,16 @@ describe('createContractQuestionResponse', () => {
 
         const contract = await createAndSubmitTestContractWithRate(stateServer)
 
-        const createdQuestion = await createTestQuestion(cmsServer, contract.id)
+        const createdQuestion = await createTestQuestion(
+            cmsServer,
+            contract.id,
+            undefined,
+            { user: oactCMS }
+        )
 
         await createTestQuestionResponse(
             stateServer,
-            createdQuestion?.question.id
+            createdQuestion.question.id
         )
 
         const statePrograms = findStatePrograms(contract.stateCode)
@@ -273,7 +335,7 @@ describe('createContractQuestionResponse', () => {
         ]
 
         expect(mockEmailer.sendEmail).toHaveBeenNthCalledWith(
-            6, // New response state email notification is the fifth email
+            6, // New response state email notification is the sixth email
             expect.objectContaining({
                 subject: expect.stringContaining(
                     `[LOCAL] Response submitted to CMS for ${pkgName}`

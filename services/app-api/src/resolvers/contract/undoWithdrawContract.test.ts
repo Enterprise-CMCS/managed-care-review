@@ -1,4 +1,8 @@
-import { testCMSUser, testStateUser } from '../../testHelpers/userHelpers'
+import {
+    testCMSUser,
+    testStateUser,
+    createDBUsersWithFullData,
+} from '../../testHelpers/userHelpers'
 import {
     constructTestPostgresServer,
     defaultFloridaProgram,
@@ -60,6 +64,11 @@ const testRateFormInputData = (): RateFormDataInput => ({
 describe('undoWithdrawContract', () => {
     const stateUser = testStateUser()
     const cmsUser = testCMSUser()
+
+    beforeAll(async () => {
+        await createDBUsersWithFullData([stateUser, cmsUser])
+    })
+
     it('can undo a contract-only submission withdrawal', async () => {
         const stateServer = await constructTestPostgresServer({
             context: {
@@ -78,13 +87,15 @@ describe('undoWithdrawContract', () => {
             undefined,
             {
                 submissionType: 'CONTRACT_ONLY',
-            }
+            },
+            { user: stateUser }
         )
 
         const withdrawnContract = await withdrawTestContract(
             cmsServer,
             contract.id,
-            'withdraw submission'
+            'withdraw submission',
+            { user: cmsUser }
         )
 
         expect(withdrawnContract.consolidatedStatus).toBe('WITHDRAWN')
@@ -92,7 +103,8 @@ describe('undoWithdrawContract', () => {
         const undoWithdrawnContract = await undoWithdrawTestContract(
             cmsServer,
             contract.id,
-            'Undo submission withdraw done in error.'
+            'Undo submission withdraw done in error.',
+            { user: cmsUser }
         )
 
         const contractHistory = contractHistoryToDescriptions(
@@ -112,7 +124,8 @@ describe('undoWithdrawContract', () => {
             await withdrawTestContract(
                 cmsServer,
                 undoWithdrawnContract.id,
-                'withdraw again'
+                'withdraw again',
+                { user: cmsUser }
             )
         )
 
@@ -121,7 +134,8 @@ describe('undoWithdrawContract', () => {
             await undoWithdrawTestContract(
                 cmsServer,
                 undoWithdrawnContract.id,
-                'undo withdraw again'
+                'undo withdraw again',
+                { user: cmsUser }
             )
         )
 
@@ -130,7 +144,8 @@ describe('undoWithdrawContract', () => {
             await unlockTestContract(
                 cmsServer,
                 undoWithdrawnContract.id,
-                'unlock after undo withdraw'
+                'unlock after undo withdraw',
+                { user: cmsUser }
             )
         )
 
@@ -139,12 +154,20 @@ describe('undoWithdrawContract', () => {
             await submitTestContract(
                 stateServer,
                 undoWithdrawnContract.id,
-                'resubmit'
+                'resubmit',
+                { user: stateUser }
             )
         )
 
         // expect approval without errors
-        must(await approveTestContract(cmsServer, undoWithdrawnContract.id))
+        must(
+            await approveTestContract(
+                cmsServer,
+                undoWithdrawnContract.id,
+                undefined,
+                { user: cmsUser }
+            )
+        )
     })
     it('can undo a contract and rate submission withdrawal', async () => {
         const stateServer = await constructTestPostgresServer({
@@ -159,12 +182,22 @@ describe('undoWithdrawContract', () => {
             },
         })
 
-        const draftContract =
-            await createAndUpdateTestContractWithRate(stateServer)
+        const draftContract = await createAndUpdateTestContractWithRate(
+            stateServer,
+            undefined,
+            { user: stateUser }
+        )
 
-        await addNewRateToTestContract(stateServer, draftContract)
+        await addNewRateToTestContract(stateServer, draftContract, undefined, {
+            user: stateUser,
+        })
 
-        const contract = await submitTestContract(stateServer, draftContract.id)
+        const contract = await submitTestContract(
+            stateServer,
+            draftContract.id,
+            undefined,
+            { user: stateUser }
+        )
 
         const rateAID = contract.packageSubmissions[0].rateRevisions[0].rateID
         const rateBID = contract.packageSubmissions[0].rateRevisions[1].rateID
@@ -178,7 +211,8 @@ describe('undoWithdrawContract', () => {
         const withdrawnContract = await withdrawTestContract(
             cmsServer,
             contract.id,
-            'withdraw submission'
+            'withdraw submission',
+            { user: cmsUser }
         )
 
         const withdrawnARate = await fetchTestRateById(cmsServer, rateAID)
@@ -192,7 +226,8 @@ describe('undoWithdrawContract', () => {
         const undoWithdrawnContract = await undoWithdrawTestContract(
             cmsServer,
             contract.id,
-            'undo submission withdraw'
+            'undo submission withdraw',
+            { user: cmsUser }
         )
 
         const undoWithdrawnARate = await fetchTestRateById(cmsServer, rateAID)
@@ -207,7 +242,8 @@ describe('undoWithdrawContract', () => {
             await withdrawTestContract(
                 cmsServer,
                 undoWithdrawnContract.id,
-                'withdraw again'
+                'withdraw again',
+                { user: cmsUser }
             )
         )
 
@@ -216,7 +252,8 @@ describe('undoWithdrawContract', () => {
             await undoWithdrawTestContract(
                 cmsServer,
                 undoWithdrawnContract.id,
-                'undo withdraw again'
+                'undo withdraw again',
+                { user: cmsUser }
             )
         )
 
@@ -225,7 +262,8 @@ describe('undoWithdrawContract', () => {
             await unlockTestContract(
                 cmsServer,
                 undoWithdrawnContract.id,
-                'unlock after undo withdraw'
+                'unlock after undo withdraw',
+                { user: cmsUser }
             )
         )
 
@@ -234,12 +272,20 @@ describe('undoWithdrawContract', () => {
             await submitTestContract(
                 stateServer,
                 undoWithdrawnContract.id,
-                'resubmit'
+                'resubmit',
+                { user: stateUser }
             )
         )
 
         // expect approval without errors
-        must(await approveTestContract(cmsServer, undoWithdrawnContract.id))
+        must(
+            await approveTestContract(
+                cmsServer,
+                undoWithdrawnContract.id,
+                undefined,
+                { user: cmsUser }
+            )
+        )
     })
     it('can undo a submission withdrawal that had linked child rates', async () => {
         const stateServer = await constructTestPostgresServer({
@@ -254,8 +300,12 @@ describe('undoWithdrawContract', () => {
             },
         })
 
-        const draftContract =
-            await createAndUpdateTestContractWithoutRates(stateServer)
+        const draftContract = await createAndUpdateTestContractWithoutRates(
+            stateServer,
+            undefined,
+            undefined,
+            { user: stateUser }
+        )
 
         if (!draftContract.draftRevision) {
             throw new Error(
@@ -264,35 +314,42 @@ describe('undoWithdrawContract', () => {
         }
 
         must(
-            await stateServer.executeOperation({
-                query: UpdateDraftContractRatesDocument,
-                variables: {
-                    input: {
-                        contractID: draftContract.id,
-                        lastSeenUpdatedAt:
-                            draftContract.draftRevision.updatedAt,
-                        updatedRates: [
-                            {
-                                type: 'CREATE',
-                                formData: testRateFormInputData(),
-                            },
-                            {
-                                type: 'CREATE',
-                                formData: testRateFormInputData(),
-                            },
-                            {
-                                type: 'CREATE',
-                                formData: testRateFormInputData(),
-                            },
-                        ],
+            await stateServer.executeOperation(
+                {
+                    query: UpdateDraftContractRatesDocument,
+                    variables: {
+                        input: {
+                            contractID: draftContract.id,
+                            lastSeenUpdatedAt:
+                                draftContract.draftRevision.updatedAt,
+                            updatedRates: [
+                                {
+                                    type: 'CREATE',
+                                    formData: testRateFormInputData(),
+                                },
+                                {
+                                    type: 'CREATE',
+                                    formData: testRateFormInputData(),
+                                },
+                                {
+                                    type: 'CREATE',
+                                    formData: testRateFormInputData(),
+                                },
+                            ],
+                        },
                     },
                 },
-            })
+                {
+                    contextValue: { user: stateUser },
+                }
+            )
         )
 
         const contractA = await submitTestContract(
             stateServer,
-            draftContract.id
+            draftContract.id,
+            undefined,
+            { user: stateUser }
         )
 
         const rateAID = contractA.packageSubmissions[0].rateRevisions[0].rateID
@@ -311,8 +368,12 @@ describe('undoWithdrawContract', () => {
             throw new Error('Unexpected error, expecting rate to exist')
         }
 
-        const draftContractB =
-            await createAndUpdateTestContractWithoutRates(stateServer)
+        const draftContractB = await createAndUpdateTestContractWithoutRates(
+            stateServer,
+            undefined,
+            undefined,
+            { user: stateUser }
+        )
 
         if (!draftContractB.draftRevision) {
             throw new Error(
@@ -322,29 +383,40 @@ describe('undoWithdrawContract', () => {
 
         // Link rate B to contract B
         must(
-            await stateServer.executeOperation({
-                query: UpdateDraftContractRatesDocument,
-                variables: {
-                    input: {
-                        contractID: draftContractB.id,
-                        lastSeenUpdatedAt:
-                            draftContractB.draftRevision.updatedAt,
-                        updatedRates: [
-                            {
-                                type: 'LINK',
-                                rateID: rateBID,
-                            },
-                        ],
+            await stateServer.executeOperation(
+                {
+                    query: UpdateDraftContractRatesDocument,
+                    variables: {
+                        input: {
+                            contractID: draftContractB.id,
+                            lastSeenUpdatedAt:
+                                draftContractB.draftRevision.updatedAt,
+                            updatedRates: [
+                                {
+                                    type: 'LINK',
+                                    rateID: rateBID,
+                                },
+                            ],
+                        },
                     },
                 },
-            })
+                {
+                    contextValue: { user: stateUser },
+                }
+            )
         )
 
         // Submit contract B with linked rate B, now rate B will not be withdrawn
-        await submitTestContract(stateServer, draftContractB.id)
+        await submitTestContract(stateServer, draftContractB.id, undefined, {
+            user: stateUser,
+        })
 
-        const draftContractC =
-            await createAndUpdateTestContractWithoutRates(stateServer)
+        const draftContractC = await createAndUpdateTestContractWithoutRates(
+            stateServer,
+            undefined,
+            undefined,
+            { user: stateUser }
+        )
 
         if (!draftContractC.draftRevision) {
             throw new Error(
@@ -354,32 +426,42 @@ describe('undoWithdrawContract', () => {
 
         // Link rate C to contract C
         must(
-            await stateServer.executeOperation({
-                query: UpdateDraftContractRatesDocument,
-                variables: {
-                    input: {
-                        contractID: draftContractC.id,
-                        lastSeenUpdatedAt:
-                            draftContractC.draftRevision.updatedAt,
-                        updatedRates: [
-                            {
-                                type: 'LINK',
-                                rateID: rateCID,
-                            },
-                        ],
+            await stateServer.executeOperation(
+                {
+                    query: UpdateDraftContractRatesDocument,
+                    variables: {
+                        input: {
+                            contractID: draftContractC.id,
+                            lastSeenUpdatedAt:
+                                draftContractC.draftRevision.updatedAt,
+                            updatedRates: [
+                                {
+                                    type: 'LINK',
+                                    rateID: rateCID,
+                                },
+                            ],
+                        },
                     },
                 },
-            })
+                {
+                    contextValue: { user: stateUser },
+                }
+            )
         )
 
         // // contract C is approved, which should not allow rate C to be withdrawn
-        await submitTestContract(stateServer, draftContractC.id)
-        await approveTestContract(cmsServer, draftContractC.id)
+        await submitTestContract(stateServer, draftContractC.id, undefined, {
+            user: stateUser,
+        })
+        await approveTestContract(cmsServer, draftContractC.id, undefined, {
+            user: cmsUser,
+        })
 
         const withdrawnContractA = await withdrawTestContract(
             cmsServer,
             contractA.id,
-            'withdraw submission'
+            'withdraw submission',
+            { user: cmsUser }
         )
 
         let ratesStripped = await fetchTestIndexRatesStripped(
@@ -433,7 +515,8 @@ describe('undoWithdrawContract', () => {
         const undoWithdrawnContractA = await undoWithdrawTestContract(
             cmsServer,
             contractA.id,
-            'undo submission withdraw'
+            'undo submission withdraw',
+            { user: cmsUser }
         )
 
         ratesStripped = await fetchTestIndexRatesStripped(
@@ -496,8 +579,12 @@ describe('undoWithdrawContract', () => {
             },
         })
 
-        const draftContractB =
-            await createAndUpdateTestContractWithoutRates(stateServer)
+        const draftContractB = await createAndUpdateTestContractWithoutRates(
+            stateServer,
+            undefined,
+            undefined,
+            { user: stateUser }
+        )
 
         if (!draftContractB.draftRevision) {
             throw new Error(
@@ -505,11 +592,15 @@ describe('undoWithdrawContract', () => {
             )
         }
 
-        await addNewRateToTestContract(stateServer, draftContractB)
+        await addNewRateToTestContract(stateServer, draftContractB, undefined, {
+            user: stateUser,
+        })
 
         const contractB = await submitTestContract(
             stateServer,
-            draftContractB.id
+            draftContractB.id,
+            undefined,
+            { user: stateUser }
         )
         const rateBID = contractB.packageSubmissions[0].rateRevisions[0].rateID
 
@@ -517,8 +608,12 @@ describe('undoWithdrawContract', () => {
             throw new Error('Unexpected error, expecting rate B to exist')
         }
 
-        const draftContractA =
-            await createAndUpdateTestContractWithoutRates(stateServer)
+        const draftContractA = await createAndUpdateTestContractWithoutRates(
+            stateServer,
+            undefined,
+            undefined,
+            { user: stateUser }
+        )
 
         if (!draftContractA.draftRevision) {
             throw new Error(
@@ -527,33 +622,41 @@ describe('undoWithdrawContract', () => {
         }
 
         must(
-            await stateServer.executeOperation({
-                query: UpdateDraftContractRatesDocument,
-                variables: {
-                    input: {
-                        contractID: draftContractA.id,
-                        lastSeenUpdatedAt:
-                            draftContractA.draftRevision.updatedAt,
-                        updatedRates: [
-                            {
-                                type: 'LINK',
-                                rateID: rateBID,
-                            },
-                        ],
+            await stateServer.executeOperation(
+                {
+                    query: UpdateDraftContractRatesDocument,
+                    variables: {
+                        input: {
+                            contractID: draftContractA.id,
+                            lastSeenUpdatedAt:
+                                draftContractA.draftRevision.updatedAt,
+                            updatedRates: [
+                                {
+                                    type: 'LINK',
+                                    rateID: rateBID,
+                                },
+                            ],
+                        },
                     },
                 },
-            })
+                {
+                    contextValue: { user: stateUser },
+                }
+            )
         )
 
         const contractA = await submitTestContract(
             stateServer,
-            draftContractA.id
+            draftContractA.id,
+            undefined,
+            { user: stateUser }
         )
 
         const withdrawnContractA = await withdrawTestContract(
             cmsServer,
             contractA.id,
-            'withdraw submission'
+            'withdraw submission',
+            { user: cmsUser }
         )
 
         let rateB = await fetchTestRateById(cmsServer, rateBID)
@@ -575,7 +678,8 @@ describe('undoWithdrawContract', () => {
         const undoWithdrawnContractA = await undoWithdrawTestContract(
             cmsServer,
             contractA.id,
-            'undo submission withdraw'
+            'undo submission withdraw',
+            { user: cmsUser }
         )
 
         rateB = await fetchTestRateById(cmsServer, rateBID)
@@ -614,19 +718,22 @@ describe('undoWithdrawContract', () => {
 
         const contract = await createAndSubmitTestContractWithRate(
             stateServer,
-            undefined
+            undefined,
+            { user: stateUser }
         )
 
         await withdrawTestContract(
             cmsServer,
             contract.id,
-            'withdraw submission'
+            'withdraw submission',
+            { user: cmsUser }
         )
 
         const unWithdrawnContract = await undoWithdrawTestContract(
             cmsServer,
             contract.id,
-            'Undo submission withdraw'
+            'Undo submission withdraw',
+            { user: cmsUser }
         )
 
         const contractName =
@@ -711,7 +818,8 @@ describe('undoWithdrawContract error handling', () => {
             undefined,
             {
                 submissionType: 'CONTRACT_ONLY',
-            }
+            },
+            { user: stateUser }
         )
 
         const approvedContract = await createAndSubmitTestContract(
@@ -719,30 +827,36 @@ describe('undoWithdrawContract error handling', () => {
             undefined,
             {
                 submissionType: 'CONTRACT_ONLY',
-            }
+            },
+            { user: stateUser }
         )
 
-        await approveTestContract(cmsServer, approvedContract.id)
+        await approveTestContract(cmsServer, approvedContract.id, undefined, {
+            user: cmsUser,
+        })
 
         const unlockedContract = await createAndSubmitTestContract(
             stateServer,
             undefined,
             {
                 submissionType: 'CONTRACT_ONLY',
-            }
+            },
+            { user: stateUser }
         )
 
         await unlockTestContract(
             cmsServer,
             unlockedContract.id,
-            'unlock contract'
+            'unlock contract',
+            { user: cmsUser }
         )
 
         const submittedContractWithdrawErrors =
             await errorUndoWithdrawTestContract(
                 cmsServer,
                 submittedContract.id,
-                'withdraw submission'
+                'withdraw submission',
+                { user: cmsUser }
             )
 
         expect(submittedContractWithdrawErrors[0].message).toBe(
@@ -753,7 +867,8 @@ describe('undoWithdrawContract error handling', () => {
             await errorUndoWithdrawTestContract(
                 cmsServer,
                 approvedContract.id,
-                'withdraw submission'
+                'withdraw submission',
+                { user: cmsUser }
             )
 
         expect(approvedContractWithdrawErrors[0].message).toBe(
@@ -764,7 +879,8 @@ describe('undoWithdrawContract error handling', () => {
             await errorUndoWithdrawTestContract(
                 cmsServer,
                 unlockedContract.id,
-                'withdraw submission'
+                'withdraw submission',
+                { user: cmsUser }
             )
 
         expect(unlockedContractWithdrawErrors[0].message).toBe(

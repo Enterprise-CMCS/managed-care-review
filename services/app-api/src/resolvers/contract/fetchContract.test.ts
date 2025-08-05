@@ -4,7 +4,11 @@ import {
     unlockTestHealthPlanPackage,
 } from '../../testHelpers/gqlHelpers'
 import { FetchContractDocument } from '../../gen/gqlClient'
-import { testCMSUser, testStateUser } from '../../testHelpers/userHelpers'
+import {
+    testCMSUser,
+    testCMSApproverUser,
+    testStateUser,
+} from '../../testHelpers/userHelpers'
 import {
     approveTestContract,
     createAndUpdateTestContractWithoutRates,
@@ -41,7 +45,6 @@ describe('fetchContract', () => {
         expect(draftRate[0].status).toBe('DRAFT')
         expect(draftRate[0].stateCode).toBe('FL')
         expect(
-            // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
             draftRate[0].draftRevision?.formData.rateDocuments![0].downloadURL
         ).toBeDefined()
 
@@ -57,14 +60,32 @@ describe('fetchContract', () => {
         const stateSubmission =
             await createAndUpdateTestHealthPlanPackage(stateServer)
 
-        const fetchDraftContractResult = await stateServer.executeOperation({
-            query: FetchContractDocument,
-            variables: {
-                input: {
-                    contractID: stateSubmission.id,
+        const response = await stateServer.executeOperation(
+            {
+                query: FetchContractDocument,
+                variables: {
+                    input: {
+                        contractID: stateSubmission.id,
+                    },
                 },
             },
-        })
+            {
+                contextValue: {
+                    user: testStateUser(),
+                },
+            }
+        )
+
+        // Handle Apollo v4 response structure
+        let fetchDraftContractResult: any
+        if ('body' in response && response.body) {
+            fetchDraftContractResult =
+                response.body.kind === 'single'
+                    ? response.body.singleResult
+                    : response.body
+        } else {
+            fetchDraftContractResult = response
+        }
 
         expect(fetchDraftContractResult.errors).toBeUndefined()
 
@@ -80,9 +101,10 @@ describe('fetchContract', () => {
         const stateServer = await constructTestPostgresServer({
             s3Client: mockS3,
         })
+        const cmsUser = testCMSUser()
         const cmsServer = await constructTestPostgresServer({
             context: {
-                user: testCMSUser(),
+                user: cmsUser,
             },
             s3Client: mockS3,
         })
@@ -98,16 +120,24 @@ describe('fetchContract', () => {
 
         const intiallySubmitted = await submitTestContract(stateServer, AID)
 
-        await unlockTestHealthPlanPackage(cmsServer, AID, 'Unlock A.0')
+        await unlockTestHealthPlanPackage(cmsServer, AID, 'Unlock A.0', {
+            user: cmsUser,
+        })
         await submitTestContract(stateServer, AID, 'Submit A.1')
 
-        await unlockTestHealthPlanPackage(cmsServer, AID, 'Unlock A.1')
+        await unlockTestHealthPlanPackage(cmsServer, AID, 'Unlock A.1', {
+            user: cmsUser,
+        })
         await submitTestContract(stateServer, AID, 'Submit A.2')
 
-        await unlockTestHealthPlanPackage(cmsServer, AID, 'Unlock A.2')
+        await unlockTestHealthPlanPackage(cmsServer, AID, 'Unlock A.2', {
+            user: cmsUser,
+        })
         await submitTestContract(stateServer, AID, 'Submit A.3')
 
-        await unlockTestHealthPlanPackage(cmsServer, AID, 'Unlock A.3')
+        await unlockTestHealthPlanPackage(cmsServer, AID, 'Unlock A.3', {
+            user: cmsUser,
+        })
         await submitTestContract(stateServer, AID, 'Submit A.4')
 
         const submittedMultiply = await fetchTestContract(stateServer, AID)
@@ -119,7 +149,9 @@ describe('fetchContract', () => {
             intiallySubmitted.initiallySubmittedAt
         )
 
-        await unlockTestHealthPlanPackage(cmsServer, AID, 'Unlock A.4')
+        await unlockTestHealthPlanPackage(cmsServer, AID, 'Unlock A.4', {
+            user: cmsUser,
+        })
 
         const finallyUnlocked = await fetchTestContract(stateServer, AID)
         expect(finallyUnlocked.packageSubmissions).toHaveLength(5)
@@ -134,9 +166,17 @@ describe('fetchContract', () => {
         const stateServer = await constructTestPostgresServer({
             s3Client: mockS3,
         })
+        const cmsUser = testCMSUser()
+        const cmsApproverUser = testCMSApproverUser()
         const cmsServer = await constructTestPostgresServer({
             context: {
-                user: testCMSUser(),
+                user: cmsUser,
+            },
+            s3Client: mockS3,
+        })
+        const cmsApproverServer = await constructTestPostgresServer({
+            context: {
+                user: cmsApproverUser,
             },
             s3Client: mockS3,
         })
@@ -165,7 +205,12 @@ describe('fetchContract', () => {
             initialCreatedDate.getTime()
         )
 
-        const unlocked = await unlockTestContract(cmsServer, AID, 'Unlock A.3')
+        const unlocked = await unlockTestContract(
+            cmsServer,
+            AID,
+            'Unlock A.3',
+            { user: cmsUser }
+        )
         const unlockedDate = unlocked.lastUpdatedForDisplay
         expect(unlockedDate.getTime()).not.toEqual(
             intiallySubmittedDate.getTime()
@@ -185,7 +230,12 @@ describe('fetchContract', () => {
             unlockUpdateDate.getTime()
         )
 
-        const approved = await approveTestContract(cmsServer, AID)
+        const approved = await approveTestContract(
+            cmsApproverServer,
+            AID,
+            undefined,
+            { user: cmsApproverUser }
+        )
         const approvedDate = approved.lastUpdatedForDisplay
         expect(approvedDate.getTime()).not.toEqual(secondSubmitDate.getTime())
     })
@@ -194,9 +244,10 @@ describe('fetchContract', () => {
         const stateServer = await constructTestPostgresServer({
             s3Client: mockS3,
         })
+        const cmsUser = testCMSUser()
         const cmsServer = await constructTestPostgresServer({
             context: {
-                user: testCMSUser(),
+                user: cmsUser,
             },
             s3Client: mockS3,
         })
@@ -219,7 +270,12 @@ describe('fetchContract', () => {
         const intiallySubmitted = await submitTestContract(stateServer, AID)
         expect(intiallySubmitted.dateContractDocsExecuted).toBeNull()
 
-        const unlocked = await unlockTestContract(cmsServer, AID, 'Unlock A.3')
+        const unlocked = await unlockTestContract(
+            cmsServer,
+            AID,
+            'Unlock A.3',
+            { user: cmsUser }
+        )
         expect(unlocked.dateContractDocsExecuted).toBeNull()
 
         const draft2FD = mockGqlContractDraftRevisionFormDataInput()
@@ -242,7 +298,8 @@ describe('fetchContract', () => {
         const secondUnlock = await unlockTestContract(
             cmsServer,
             AID,
-            'Unlock A.4'
+            'Unlock A.4',
+            { user: cmsUser }
         )
         expect(secondUnlock.dateContractDocsExecuted).not.toBeNull()
 
@@ -309,23 +366,42 @@ describe('fetchContract', () => {
         const stateSubmission =
             await createAndUpdateTestHealthPlanPackage(stateServerFL)
 
+        const stateUserVA = testStateUser({
+            stateCode: 'VA',
+            email: 'aang@mn.gov',
+        })
         const stateServerVA = await constructTestPostgresServer({
             context: {
-                user: testStateUser({
-                    stateCode: 'VA',
-                    email: 'aang@mn.gov',
-                }),
+                user: stateUserVA,
             },
         })
 
-        const fetchResult = await stateServerVA.executeOperation({
-            query: FetchContractDocument,
-            variables: {
-                input: {
-                    contractID: stateSubmission.id,
+        const response = await stateServerVA.executeOperation(
+            {
+                query: FetchContractDocument,
+                variables: {
+                    input: {
+                        contractID: stateSubmission.id,
+                    },
                 },
             },
-        })
+            {
+                contextValue: {
+                    user: stateUserVA,
+                },
+            }
+        )
+
+        // Handle Apollo v4 response structure
+        let fetchResult: any
+        if ('body' in response && response.body) {
+            fetchResult =
+                response.body.kind === 'single'
+                    ? response.body.singleResult
+                    : response.body
+        } else {
+            fetchResult = response
+        }
 
         expect(fetchResult.errors).toBeDefined()
         if (fetchResult.errors === undefined) {
@@ -360,14 +436,37 @@ describe('fetchContract', () => {
             s3Client: mockS3,
         })
 
-        const fetchResult = await oauthServer.executeOperation({
-            query: FetchContractDocument,
-            variables: {
-                input: {
-                    contractID: stateSubmission.id,
+        const response = await oauthServer.executeOperation(
+            {
+                query: FetchContractDocument,
+                variables: {
+                    input: {
+                        contractID: stateSubmission.id,
+                    },
                 },
             },
-        })
+            {
+                contextValue: {
+                    user: testStateUser(),
+                    oauthClient: {
+                        clientId: 'test-oauth-client',
+                        grants: ['client_credentials'],
+                        isOAuthClient: true,
+                    },
+                },
+            }
+        )
+
+        // Handle Apollo v4 response structure
+        let fetchResult: any
+        if ('body' in response && response.body) {
+            fetchResult =
+                response.body.kind === 'single'
+                    ? response.body.singleResult
+                    : response.body
+        } else {
+            fetchResult = response
+        }
 
         expect(fetchResult.errors).toBeUndefined()
         expect(fetchResult.data?.fetchContract.contract).toBeDefined()
@@ -401,14 +500,40 @@ describe('fetchContract', () => {
             s3Client: mockS3,
         })
 
-        const fetchResult = await oauthServerVA.executeOperation({
-            query: FetchContractDocument,
-            variables: {
-                input: {
-                    contractID: stateSubmission.id,
+        const response = await oauthServerVA.executeOperation(
+            {
+                query: FetchContractDocument,
+                variables: {
+                    input: {
+                        contractID: stateSubmission.id,
+                    },
                 },
             },
-        })
+            {
+                contextValue: {
+                    user: testStateUser({
+                        stateCode: 'VA',
+                        email: 'oauth@va.gov',
+                    }),
+                    oauthClient: {
+                        clientId: 'test-oauth-client-va',
+                        grants: ['client_credentials'],
+                        isOAuthClient: true,
+                    },
+                },
+            }
+        )
+
+        // Handle Apollo v4 response structure
+        let fetchResult: any
+        if ('body' in response && response.body) {
+            fetchResult =
+                response.body.kind === 'single'
+                    ? response.body.singleResult
+                    : response.body
+        } else {
+            fetchResult = response
+        }
 
         expect(fetchResult.errors).toBeDefined()
         if (fetchResult.errors === undefined) {
@@ -443,14 +568,37 @@ describe('fetchContract', () => {
             s3Client: mockS3,
         })
 
-        const fetchResult = await oauthServer.executeOperation({
-            query: FetchContractDocument,
-            variables: {
-                input: {
-                    contractID: stateSubmission.id,
+        const response = await oauthServer.executeOperation(
+            {
+                query: FetchContractDocument,
+                variables: {
+                    input: {
+                        contractID: stateSubmission.id,
+                    },
                 },
             },
-        })
+            {
+                contextValue: {
+                    user: testStateUser(),
+                    oauthClient: {
+                        clientId: 'test-oauth-client',
+                        grants: ['some_other_grant'],
+                        isOAuthClient: true,
+                    },
+                },
+            }
+        )
+
+        // Handle Apollo v4 response structure
+        let fetchResult: any
+        if ('body' in response && response.body) {
+            fetchResult =
+                response.body.kind === 'single'
+                    ? response.body.singleResult
+                    : response.body
+        } else {
+            fetchResult = response
+        }
 
         expect(fetchResult.errors).toBeDefined()
         if (fetchResult.errors === undefined) {

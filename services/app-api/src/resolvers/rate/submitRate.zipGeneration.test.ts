@@ -59,7 +59,9 @@ describe('Rate Submission Zip Generation - Rate-Specific Scenarios', () => {
             // Create, submit, and unlock a rate
             const unlockedRate = await createSubmitAndUnlockTestRate(
                 stateServer,
-                cmsServer
+                cmsServer,
+                cmsUser,
+                stateUser
             )
 
             // Clear mocks since the contract+rate submission above would have triggered zip generation
@@ -73,7 +75,8 @@ describe('Rate Submission Zip Generation - Rate-Specific Scenarios', () => {
             const resubmittedRate = await submitTestRate(
                 stateServer,
                 unlockedRate.id,
-                'Standalone rate resubmission'
+                'Standalone rate resubmission',
+                { user: stateUser }
             )
 
             // Verify zip generation was called for the standalone rate submission
@@ -124,7 +127,9 @@ describe('Rate Submission Zip Generation - Rate-Specific Scenarios', () => {
 
             const unlockedRate = await createSubmitAndUnlockTestRate(
                 stateServer,
-                cmsServer
+                cmsServer,
+                cmsUser,
+                stateUser
             )
 
             // Clear mocks from the initial contract submission
@@ -134,7 +139,8 @@ describe('Rate Submission Zip Generation - Rate-Specific Scenarios', () => {
             await submitTestRate(
                 stateServer,
                 unlockedRate.id,
-                'Test resubmission'
+                'Test resubmission',
+                { user: stateUser }
             )
 
             // Verify both rateDocuments and supportingDocuments are included
@@ -180,13 +186,15 @@ describe('Rate Submission Zip Generation - Rate-Specific Scenarios', () => {
 
             const unlockedRate = await createSubmitAndUnlockTestRate(
                 stateServer,
-                cmsServer
+                cmsServer,
+                cmsUser,
+                stateUser
             )
 
             // Clear mocks from initial submission
             vi.clearAllMocks()
 
-            await submitTestRate(stateServer, unlockedRate.id, 'Test path')
+            await submitTestRate(stateServer, unlockedRate.id, 'Test path', { user: stateUser })
 
             const zipCall = mockGenerateDocumentZip.mock.calls[0]
             const destinationPath = zipCall[1]

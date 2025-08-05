@@ -13,16 +13,18 @@ import {
 } from '../../gen/gqlClient'
 import { assertAnError, must } from '../../testHelpers'
 import { testLDService } from '../../testHelpers/launchDarklyHelpers'
+import { extractGraphQLResponse } from '../../testHelpers/apolloV4ResponseHelper'
 
 describe('fetchMcReviewSettings', () => {
     it('returns states with assignments', async () => {
         const prismaClient = await sharedTestPrismaClient()
         const postgresStore = NewPostgresStore(prismaClient)
 
+        const adminUser = testAdminUser()
         const server = await constructTestPostgresServer({
             store: postgresStore,
             context: {
-                user: testAdminUser(),
+                user: adminUser,
             },
         })
 
@@ -46,7 +48,7 @@ describe('fetchMcReviewSettings', () => {
         )
 
         // Assign states to each CMS user
-        const assignedOhioCMSUserResult = await server.executeOperation({
+        const assignedOhioCMSUserResponse = await server.executeOperation({
             query: UpdateStateAssignmentDocument,
             variables: {
                 input: {
@@ -54,7 +56,10 @@ describe('fetchMcReviewSettings', () => {
                     stateAssignments: ['OH'],
                 },
             },
+        }, {
+            contextValue: { user: adminUser },
         })
+        const assignedOhioCMSUserResult = extractGraphQLResponse(assignedOhioCMSUserResponse)
 
         if (!assignedOhioCMSUserResult.data?.updateStateAssignment) {
             throw new Error(
@@ -64,7 +69,7 @@ describe('fetchMcReviewSettings', () => {
         const assignedOhioCMSUser =
             assignedOhioCMSUserResult.data.updateStateAssignment.user
 
-        const assignedTexasCMSUserResult = await server.executeOperation({
+        const assignedTexasCMSUserResponse = await server.executeOperation({
             query: UpdateStateAssignmentDocument,
             variables: {
                 input: {
@@ -72,7 +77,10 @@ describe('fetchMcReviewSettings', () => {
                     stateAssignments: ['TX'],
                 },
             },
+        }, {
+            contextValue: { user: adminUser },
         })
+        const assignedTexasCMSUserResult = extractGraphQLResponse(assignedTexasCMSUserResponse)
 
         if (!assignedTexasCMSUserResult.data?.updateStateAssignment) {
             throw new Error(
@@ -82,7 +90,7 @@ describe('fetchMcReviewSettings', () => {
         const assignedTexasCMSUser =
             assignedTexasCMSUserResult.data.updateStateAssignment.user
 
-        const assignedFloridaCMSUserResult = await server.executeOperation({
+        const floridaResponse = await server.executeOperation({
             query: UpdateStateAssignmentDocument,
             variables: {
                 input: {
@@ -90,7 +98,11 @@ describe('fetchMcReviewSettings', () => {
                     stateAssignments: ['FL'],
                 },
             },
+        }, {
+            contextValue: { user: adminUser },
         })
+
+        const assignedFloridaCMSUserResult = extractGraphQLResponse(floridaResponse)
 
         if (!assignedFloridaCMSUserResult.data?.updateStateAssignment) {
             throw new Error(
@@ -100,9 +112,13 @@ describe('fetchMcReviewSettings', () => {
         const assignedFloridaCMSUser =
             assignedFloridaCMSUserResult.data.updateStateAssignment.user
 
-        const mcReviewSettings = await server.executeOperation({
+        const settingsResponse = await server.executeOperation({
             query: FetchMcReviewSettingsDocument,
+        }, {
+            contextValue: { user: adminUser },
         })
+
+        const mcReviewSettings = extractGraphQLResponse(settingsResponse)
 
         if (!mcReviewSettings.data?.fetchMcReviewSettings?.stateAssignments) {
             throw new Error(
@@ -176,12 +192,16 @@ describe('fetchMcReviewSettings', () => {
         // make a mock request
         const res = await server.executeOperation({
             query: FetchMcReviewSettingsDocument,
+        }, {
+            contextValue: { user: testUserAdmin },
         })
 
-        // confirm that we get what we got
-        expect(res.errors).toBeUndefined()
+        const result = extractGraphQLResponse(res)
 
-        expect(res.data?.fetchMcReviewSettings.emailConfiguration).toBeDefined()
+        // confirm that we get what we got
+        expect(result.errors).toBeUndefined()
+
+        expect(result.data?.fetchMcReviewSettings.emailConfiguration).toBeDefined()
     })
 
     it('errors when called by state user', async () => {
@@ -197,9 +217,13 @@ describe('fetchMcReviewSettings', () => {
 
         const mcReviewSettings = await server.executeOperation({
             query: FetchMcReviewSettingsDocument,
+        }, {
+            contextValue: { user: testStateUser() },
         })
 
-        expect(assertAnError(mcReviewSettings).message).toContain(
+        const result = extractGraphQLResponse(mcReviewSettings)
+
+        expect(assertAnError(result).message).toContain(
             'user not authorized to fetch mc review settings'
         )
     })
@@ -207,10 +231,11 @@ describe('fetchMcReviewSettings', () => {
     it('uses email settings from database with remove-parameter-store flag on', async () => {
         const prismaClient = await sharedTestPrismaClient()
         const postgresStore = NewPostgresStore(prismaClient)
+        const adminUser = testAdminUser()
 
         const server = await constructTestPostgresServer({
             context: {
-                user: testAdminUser(),
+                user: adminUser,
             },
             ldService: testLDService(
                 {
@@ -221,11 +246,16 @@ describe('fetchMcReviewSettings', () => {
 
         const emailSettings = must(await postgresStore.findEmailSettings())
 
-        const mcReviewSettings = must(await server.executeOperation({
+        const response = await server.executeOperation({
             query: FetchMcReviewSettingsDocument,
-        }))
+        }, {
+            contextValue: { user: adminUser },
+        })
+        
+        const mcReviewSettings = extractGraphQLResponse(response)
+        must(mcReviewSettings.data)
 
-        const emailConfig = mcReviewSettings.data?.fetchMcReviewSettings.emailConfiguration
+        const emailConfig = mcReviewSettings.data.fetchMcReviewSettings.emailConfiguration
 
         // Expect the default email settings from database
         expect(emailConfig.emailSource).toEqual(emailSettings.emailSource)

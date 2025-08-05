@@ -10,6 +10,7 @@ import {
     testCMSUser,
     testStateUser,
 } from '../../testHelpers/userHelpers'
+import { extractGraphQLResponse } from '../../testHelpers/apolloV4ResponseHelper'
 import {
     createAndSubmitTestContractWithRate,
     createAndUpdateTestContractWithoutRates,
@@ -33,9 +34,15 @@ describe(`indexContracts`, () => {
             const submittedContract =
                 await createAndSubmitTestContractWithRate(stateServer)
             // then see if we can get that same contract back from the index
-            const result = await stateServer.executeOperation({
-                query: IndexContractsForDashboardDocument,
-            })
+            const response = await stateServer.executeOperation(
+                {
+                    query: IndexContractsForDashboardDocument,
+                },
+                {
+                    contextValue: { user: testStateUser() },
+                }
+            )
+            const result = extractGraphQLResponse(response)
 
             expect(result.errors).toBeUndefined()
 
@@ -85,12 +92,14 @@ describe(`indexContracts`, () => {
             await unlockTestContract(
                 cmsServer,
                 unlockedContract.id,
-                'Test reason'
+                'Test reason',
+                { user: cmsUser }
             )
             await unlockTestContract(
                 cmsServer,
                 relockedContract.id,
-                'Test reason'
+                'Test reason',
+                { user: cmsUser }
             )
 
             // resubmit one
@@ -101,9 +110,15 @@ describe(`indexContracts`, () => {
             )
 
             // index contracts api request
-            const result = await stateServer.executeOperation({
-                query: IndexContractsForDashboardDocument,
-            })
+            const response = await stateServer.executeOperation(
+                {
+                    query: IndexContractsForDashboardDocument,
+                },
+                {
+                    contextValue: { user: testStateUser() },
+                }
+            )
+            const result = extractGraphQLResponse(response)
             const submissionsIndex = result.data?.indexContracts
 
             // pull out test related contracts and order them
@@ -153,10 +168,16 @@ describe(`indexContracts`, () => {
                 },
             })
 
-            const result = await otherUserServer.executeOperation({
-                query: IndexContractsForDashboardDocument,
-                variables: { input },
-            })
+            const response = await otherUserServer.executeOperation(
+                {
+                    query: IndexContractsForDashboardDocument,
+                    variables: { input },
+                },
+                {
+                    contextValue: { user: testStateUser() },
+                }
+            )
+            const result = extractGraphQLResponse(response)
 
             expect(result.errors).toBeUndefined()
             const contracts = result.data?.indexContracts.edges.map(
@@ -179,22 +200,29 @@ describe(`indexContracts`, () => {
             await createTestHealthPlanPackage(server)
             await createAndSubmitTestHealthPlanPackage(server)
 
+            const otherUser = testStateUser({
+                stateCode: 'VA',
+            })
             const otherUserServer = await constructTestPostgresServer({
                 context: {
-                    user: testStateUser({
-                        stateCode: 'VA',
-                    }),
+                    user: otherUser,
                 },
             })
 
-            const result = await otherUserServer.executeOperation({
-                query: IndexContractsForDashboardDocument,
-            })
+            const response = await otherUserServer.executeOperation(
+                {
+                    query: IndexContractsForDashboardDocument,
+                },
+                {
+                    contextValue: { user: otherUser },
+                }
+            )
+            const result = extractGraphQLResponse(response)
 
             expect(result.errors).toBeUndefined()
 
             const indexContracts = result.data?.indexContracts
-            const otherStateContracts = indexContracts.edges.filter(
+            const otherStateContracts = indexContracts!.edges.filter(
                 (contract: ContractEdge) => contract.node.stateCode !== 'VA'
             )
 
@@ -219,14 +247,20 @@ describe(`indexContracts`, () => {
                     await createAndUpdateTestContractWithoutRates(stateServer)
 
                 // index contracts api request
-                const result = await cmsServer.executeOperation({
-                    query: IndexContractsForDashboardDocument,
-                })
+                const response = await cmsServer.executeOperation(
+                    {
+                        query: IndexContractsForDashboardDocument,
+                    },
+                    {
+                        contextValue: { user: mockUser() },
+                    }
+                )
+                const result = extractGraphQLResponse(response)
                 const submissionsIndex = result.data?.indexContracts
 
                 // pull out test related contracts and order them
                 const testSubmissionIDs = [draft1.id, draft2.id]
-                const testContracts: Contract[] = submissionsIndex.edges
+                const testContracts: Contract[] = submissionsIndex!.edges
                     .map((edge: ContractEdge) => edge.node)
                     .filter((test: Contract) =>
                         testSubmissionIDs.includes(test.id)
@@ -236,46 +270,73 @@ describe(`indexContracts`, () => {
             })
 
             it('synthesizes the right statuses as a contract is submitted/unlocked/etc', async () => {
-                const server = await constructTestPostgresServer()
+                const stateUser = testStateUser()
+                const cmsUser = mockUser()
+                const server = await constructTestPostgresServer({
+                    context: {
+                        user: stateUser,
+                    },
+                })
 
                 const cmsServer = await constructTestPostgresServer({
                     context: {
-                        user: mockUser(),
+                        user: cmsUser,
                     },
                 })
 
                 // First, create new contracts
                 const submittedContract =
-                    await createAndSubmitTestContractWithRate(server)
+                    await createAndSubmitTestContractWithRate(
+                        server,
+                        undefined,
+                        { user: stateUser }
+                    )
                 const unlockedContract =
-                    await createAndSubmitTestContractWithRate(server)
+                    await createAndSubmitTestContractWithRate(
+                        server,
+                        undefined,
+                        { user: stateUser }
+                    )
                 const relockedContract =
-                    await createAndSubmitTestContractWithRate(server)
+                    await createAndSubmitTestContractWithRate(
+                        server,
+                        undefined,
+                        { user: stateUser }
+                    )
 
                 // unlock two
                 await unlockTestContract(
                     cmsServer,
                     unlockedContract.id,
-                    'Test reason'
+                    'Test reason',
+                    { user: cmsUser }
                 )
                 await unlockTestContract(
                     cmsServer,
                     relockedContract.id,
-                    'Test reason'
+                    'Test reason',
+                    { user: cmsUser }
                 )
 
                 // resubmit one
                 await submitTestContract(
                     server,
                     relockedContract.id,
-                    'Test first resubmission'
+                    'Test first resubmission',
+                    { user: stateUser }
                 )
 
                 // index contracts api request
-                const result = await cmsServer.executeOperation({
-                    query: IndexContractsForDashboardDocument,
-                })
-                const submissionsIndex = result.data?.indexContracts
+                const result = await cmsServer.executeOperation(
+                    {
+                        query: IndexContractsForDashboardDocument,
+                    },
+                    {
+                        contextValue: { user: cmsUser },
+                    }
+                )
+                const resultData = extractGraphQLResponse(result)
+                const submissionsIndex = resultData.data?.indexContracts
 
                 // pull out test related contracts and order them
                 const testSubmissionIDs = [
@@ -305,40 +366,57 @@ describe(`indexContracts`, () => {
             })
 
             it('return a list of submitted contracts from multiple states', async () => {
-                const stateServer = await constructTestPostgresServer()
+                const stateUser = testStateUser()
+                const otherStateUser = testStateUser({
+                    stateCode: 'VA',
+                    email: 'aang@mn.gov',
+                })
+                const cmsUser = mockUser()
+                const stateServer = await constructTestPostgresServer({
+                    context: {
+                        user: stateUser,
+                    },
+                })
                 const cmsServer = await constructTestPostgresServer({
                     context: {
-                        user: mockUser(),
+                        user: cmsUser,
                     },
                 })
                 const otherStateServer = await constructTestPostgresServer({
                     context: {
-                        user: testStateUser({
-                            stateCode: 'VA',
-                            email: 'aang@mn.gov',
-                        }),
+                        user: otherStateUser,
                     },
                 })
                 // submit contracts from two different states
-                const defaultState1 =
-                    await createAndSubmitTestContractWithRate(stateServer)
-                const defaultState2 =
-                    await createAndSubmitTestContractWithRate(stateServer)
-
-                const draft = await createAndUpdateTestContractWithoutRates(
-                    otherStateServer,
-                    'VA' as const,
-                    { submissionType: 'CONTRACT_ONLY' }
+                const defaultState1 = await createAndSubmitTestContractWithRate(
+                    stateServer,
+                    undefined,
+                    { user: stateUser }
+                )
+                const defaultState2 = await createAndSubmitTestContractWithRate(
+                    stateServer,
+                    undefined,
+                    { user: stateUser }
                 )
 
-                const otherState1 = await submitTestContract(
+                const otherState1 = await createAndSubmitTestContractWithRate(
                     otherStateServer,
-                    draft.id
+                    {
+                        stateCode: 'VA',
+                        submissionType: 'CONTRACT_ONLY',
+                    },
+                    { user: otherStateUser }
                 )
 
-                const result = await cmsServer.executeOperation({
-                    query: IndexContractsForDashboardDocument,
-                })
+                const response = await cmsServer.executeOperation(
+                    {
+                        query: IndexContractsForDashboardDocument,
+                    },
+                    {
+                        contextValue: { user: cmsUser },
+                    }
+                )
+                const result = extractGraphQLResponse(response)
 
                 expect(result.errors).toBeUndefined()
 

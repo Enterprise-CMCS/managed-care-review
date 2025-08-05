@@ -1,4 +1,8 @@
-import { ApolloServer } from 'apollo-server-lambda'
+import { ApolloServer } from '@apollo/server'
+import {
+    extractGraphQLResponse,
+    executeGraphQLOperation,
+} from './apolloV4ResponseHelper'
 import {
     CreateHealthPlanPackageDocument,
     SubmitHealthPlanPackageDocument,
@@ -23,6 +27,7 @@ import type {
     ProgramType,
     CreateRateQuestionInputType,
     EmailSettingsType,
+    UserType,
 } from '../domain-models'
 import type { EmailConfiguration, Emailer } from '../emailer'
 import type {
@@ -56,13 +61,22 @@ import type { S3ClientT } from '../s3'
 import { convertRateInfoToRateFormDataInput } from '../domain-models/contractAndRates/convertHPPtoContractWithRates'
 import { createAndUpdateTestContractWithoutRates } from './gqlContractHelpers'
 import { addNewRateToTestContract } from './gqlRateHelpers'
-import type { GraphQLResponse } from 'apollo-server-types'
 import { configureEmailer } from '../handlers/configuration'
 import type { DocumentZipService } from '../zip/generateZip'
 import {
     documentZipService,
     localGenerateDocumentZip,
 } from '../zip/generateZip'
+
+// Helper to extract GraphQL response from Apollo v4 response structure
+function extractTestResponse(response: any): any {
+    if ('body' in response && response.body) {
+        return response.body.kind === 'single'
+            ? response.body.singleResult
+            : response.body
+    }
+    return response
+}
 
 // Since our programs are checked into source code, we have a program we
 // use as our default
@@ -84,10 +98,30 @@ function defaultFloridaRateProgram(): ProgramType {
     return rateProgram
 }
 
-const defaultContext = (): Context => {
-    return {
-        user: testStateUser(),
+// Store the default user and context instance to ensure consistency across operations
+let defaultTestUser: UserType | null = null
+let defaultTestContext: Context | null = null
+
+const getOrCreateDefaultUser = (): UserType => {
+    if (!defaultTestUser) {
+        defaultTestUser = testStateUser()
     }
+    return defaultTestUser
+}
+
+const defaultContext = (): Context => {
+    if (!defaultTestContext) {
+        defaultTestContext = {
+            user: getOrCreateDefaultUser(),
+        }
+    }
+    return defaultTestContext
+}
+
+// Reset function for tests to ensure clean state
+export const resetDefaultTestUser = (): void => {
+    defaultTestUser = null
+    defaultTestContext = null
 }
 
 const constructTestPostgresServer = async (opts?: {
@@ -101,7 +135,7 @@ const constructTestPostgresServer = async (opts?: {
     documentZip?: DocumentZipService
 }): Promise<ApolloServer> => {
     // set defaults
-    const context = opts?.context || defaultContext()
+    const userForInsertion = opts?.context?.user || getOrCreateDefaultUser()
     const ldService = opts?.ldService || testLDService()
     const prismaClient = await sharedTestPrismaClient()
     const postgresStore = {
@@ -120,7 +154,7 @@ const constructTestPostgresServer = async (opts?: {
         opts?.documentZip ??
         documentZipService(postgresStore, localGenerateDocumentZip)
 
-    await insertUserToLocalAurora(postgresStore, context.user)
+    await insertUserToLocalAurora(postgresStore, userForInsertion)
     const s3TestClient = testS3Client()
     const s3 = opts?.s3Client || s3TestClient
 
@@ -160,11 +194,15 @@ const constructTestPostgresServer = async (opts?: {
         localDocumentZip
     )
 
-    return new ApolloServer({
+    const server = new ApolloServer({
         typeDefs,
         resolvers: postgresResolvers,
-        context,
     })
+
+    // Apollo v4 requires starting the server before executing operations
+    await server.start()
+
+    return server
 }
 
 const constructTestEmailer = async (opts: {
@@ -242,7 +280,8 @@ const constructTestEmailer = async (opts: {
 
 const createTestHealthPlanPackage = async (
     server: ApolloServer,
-    stateCode?: StateCodeType
+    stateCode?: StateCodeType,
+    context?: Context
 ): Promise<HealthPlanPackage> => {
     const programs = stateCode
         ? [must(findStatePrograms(stateCode))[0]]
@@ -257,13 +296,21 @@ const createTestHealthPlanPackage = async (
         submissionDescription: 'A created submission',
         contractType: 'BASE',
     }
-    const result = await server.executeOperation({
-        query: CreateHealthPlanPackageDocument,
-        variables: { input },
-    })
+    const response = await server.executeOperation(
+        {
+            query: CreateHealthPlanPackageDocument,
+            variables: { input },
+        },
+        {
+            contextValue: context || defaultContext(),
+        }
+    )
+
+    const result = extractTestResponse(response)
+
     if (result.errors) {
         throw new Error(
-            `createTestHealthPlanPackage mutation failed with errors ${result.errors}`
+            `createTestHealthPlanPackage mutation failed with errors ${JSON.stringify(result.errors)}`
         )
     }
 
@@ -276,22 +323,31 @@ const createTestHealthPlanPackage = async (
 
 const updateTestHealthPlanFormData = async (
     server: ApolloServer,
-    updatedFormData: HealthPlanFormDataType
+    updatedFormData: HealthPlanFormDataType,
+    context?: Context
 ): Promise<HealthPlanPackage> => {
     const updatedB64 = domainToBase64(updatedFormData)
-    const updateResult = await server.executeOperation({
-        query: UpdateHealthPlanFormDataDocument,
-        variables: {
-            input: {
-                pkgID: updatedFormData.id,
-                healthPlanFormData: updatedB64,
+    const response = await server.executeOperation(
+        {
+            query: UpdateHealthPlanFormDataDocument,
+            variables: {
+                input: {
+                    pkgID: updatedFormData.id,
+                    healthPlanFormData: updatedB64,
+                },
             },
         },
-    })
+        {
+            contextValue: context || defaultContext(),
+        }
+    )
+
+    const updateResult = extractTestResponse(response)
+
     if (updateResult.errors) {
         console.info('errors', JSON.stringify(updateResult.errors))
         throw new Error(
-            `updateTestHealthPlanFormData mutation failed with errors ${updateResult.errors}`
+            `updateTestHealthPlanFormData mutation failed with errors ${JSON.stringify(updateResult.errors)}`
         )
     }
 
@@ -311,19 +367,27 @@ const updateTestHealthPlanPackage = async (
 
     Object.assign(draft, partialUpdates)
 
-    const updateResult = await server.executeOperation({
-        query: UpdateHealthPlanFormDataDocument,
-        variables: {
-            input: {
-                pkgID: pkgID,
-                healthPlanFormData: domainToBase64(draft),
+    const response = await server.executeOperation(
+        {
+            query: UpdateHealthPlanFormDataDocument,
+            variables: {
+                input: {
+                    pkgID: pkgID,
+                    healthPlanFormData: domainToBase64(draft),
+                },
             },
         },
-    })
+        {
+            contextValue: defaultContext(),
+        }
+    )
+
+    const updateResult = extractTestResponse(response)
+
     if (updateResult.errors) {
         console.info('errors', JSON.stringify(updateResult.errors))
         throw new Error(
-            `updateTestHealthPlanFormData mutation failed with errors ${updateResult.errors}`
+            `updateTestHealthPlanFormData mutation failed with errors ${JSON.stringify(updateResult.errors)}`
         )
     }
 
@@ -412,19 +476,26 @@ const submitTestHealthPlanPackage = async (
     server: ApolloServer,
     pkgID: string
 ) => {
-    const updateResult = await server.executeOperation({
-        query: SubmitHealthPlanPackageDocument,
-        variables: {
-            input: {
-                pkgID,
+    const response = await server.executeOperation(
+        {
+            query: SubmitHealthPlanPackageDocument,
+            variables: {
+                input: {
+                    pkgID,
+                },
             },
         },
-    })
+        {
+            contextValue: defaultContext(),
+        }
+    )
+
+    const updateResult = extractTestResponse(response)
 
     if (updateResult.errors) {
         console.info('errors', updateResult.errors)
         throw new Error(
-            `submitTestHealthPlanPackage mutation failed with errors ${updateResult.errors}`
+            `submitTestHealthPlanPackage mutation failed with errors ${JSON.stringify(updateResult.errors)}`
         )
     }
 
@@ -440,20 +511,27 @@ const resubmitTestHealthPlanPackage = async (
     pkgID: string,
     submittedReason: string
 ) => {
-    const updateResult = await server.executeOperation({
-        query: SubmitHealthPlanPackageDocument,
-        variables: {
-            input: {
-                pkgID,
-                submittedReason,
+    const response = await server.executeOperation(
+        {
+            query: SubmitHealthPlanPackageDocument,
+            variables: {
+                input: {
+                    pkgID,
+                    submittedReason,
+                },
             },
         },
-    })
+        {
+            contextValue: defaultContext(),
+        }
+    )
+
+    const updateResult = extractTestResponse(response)
 
     if (updateResult.errors) {
         console.info('errors', updateResult.errors)
         throw new Error(
-            `resubmitTestHealthPlanPackage mutation failed with errors ${updateResult.errors}`
+            `resubmitTestHealthPlanPackage mutation failed with errors ${JSON.stringify(updateResult.errors)}`
         )
     }
 
@@ -467,22 +545,67 @@ const resubmitTestHealthPlanPackage = async (
 const unlockTestHealthPlanPackage = async (
     server: ApolloServer,
     pkgID: string,
-    unlockedReason: string
+    unlockedReason: string,
+    context?: Context
 ): Promise<HealthPlanPackage> => {
-    const updateResult = await server.executeOperation({
-        query: UnlockHealthPlanPackageDocument,
-        variables: {
-            input: {
-                pkgID: pkgID,
-                unlockedReason,
+    const response = await server.executeOperation(
+        {
+            query: UnlockHealthPlanPackageDocument,
+            variables: {
+                input: {
+                    pkgID: pkgID,
+                    unlockedReason,
+                },
             },
         },
-    })
+        {
+            contextValue: context || defaultContext(),
+        }
+    )
+
+    const updateResult = extractTestResponse(response)
 
     if (updateResult.errors) {
         console.info('errors', updateResult.errors)
         throw new Error(
-            `unlockTestHealthPlanPackage mutation failed with errors ${updateResult.errors}`
+            `unlockTestHealthPlanPackage mutation failed with errors ${JSON.stringify(updateResult.errors)}`
+        )
+    }
+
+    if (updateResult.data === undefined || updateResult.data === null) {
+        throw new Error('unlockTestHealthPlanPackage returned nothing')
+    }
+
+    return updateResult.data.unlockHealthPlanPackage.pkg
+}
+
+const unlockTestHealthPlanPackageAsUser = async (
+    server: ApolloServer,
+    pkgID: string,
+    unlockedReason: string,
+    user: UserType
+): Promise<HealthPlanPackage> => {
+    const response = await server.executeOperation(
+        {
+            query: UnlockHealthPlanPackageDocument,
+            variables: {
+                input: {
+                    pkgID: pkgID,
+                    unlockedReason,
+                },
+            },
+        },
+        {
+            contextValue: { user },
+        }
+    )
+
+    const updateResult = extractTestResponse(response)
+
+    if (updateResult.errors) {
+        console.info('errors', updateResult.errors)
+        throw new Error(
+            `unlockTestHealthPlanPackage mutation failed with errors ${JSON.stringify(updateResult.errors)}`
         )
     }
 
@@ -498,14 +621,21 @@ const fetchTestHealthPlanPackageById = async (
     pkgID: string
 ): Promise<HealthPlanPackage> => {
     const input = { pkgID }
-    const result = await server.executeOperation({
-        query: FetchHealthPlanPackageDocument,
-        variables: { input },
-    })
+    const response = await server.executeOperation(
+        {
+            query: FetchHealthPlanPackageDocument,
+            variables: { input },
+        },
+        {
+            contextValue: defaultContext(),
+        }
+    )
+
+    const result = extractTestResponse(response)
 
     if (result.errors)
         throw new Error(
-            `fetchTestHealthPlanPackageById query failed with errors ${result.errors}`
+            `fetchTestHealthPlanPackageById query failed with errors ${JSON.stringify(result.errors)}`
         )
 
     if (!result.data) {
@@ -518,6 +648,50 @@ const fetchTestHealthPlanPackageById = async (
 const createTestQuestion = async (
     server: ApolloServer,
     contractID: string,
+    questionData?: Omit<CreateContractQuestionInput, 'contractID'>,
+    context?: Context
+): Promise<CreateContractQuestionPayload> => {
+    const question = questionData || {
+        documents: [
+            {
+                name: 'Test Question',
+                s3URL: 's3://bucketname/key/test1',
+            },
+        ],
+    }
+    const response = await server.executeOperation(
+        {
+            query: CreateContractQuestionDocument,
+            variables: {
+                input: {
+                    contractID,
+                    ...question,
+                },
+            },
+        },
+        {
+            contextValue: context || defaultContext(),
+        }
+    )
+
+    const createdQuestion = extractTestResponse(response)
+
+    if (createdQuestion.errors)
+        throw new Error(
+            `createTestQuestion mutation failed with errors ${JSON.stringify(createdQuestion.errors)}`
+        )
+
+    if (!createdQuestion.data) {
+        throw new Error('createTestQuestion returned nothing')
+    }
+
+    return createdQuestion.data.createContractQuestion
+}
+
+const createTestQuestionAsUser = async (
+    server: ApolloServer,
+    contractID: string,
+    user: UserType,
     questionData?: Omit<CreateContractQuestionInput, 'contractID'>
 ): Promise<CreateContractQuestionPayload> => {
     const question = questionData || {
@@ -528,19 +702,26 @@ const createTestQuestion = async (
             },
         ],
     }
-    const createdQuestion = await server.executeOperation({
-        query: CreateContractQuestionDocument,
-        variables: {
-            input: {
-                contractID,
-                ...question,
+    const response = await server.executeOperation(
+        {
+            query: CreateContractQuestionDocument,
+            variables: {
+                input: {
+                    contractID,
+                    ...question,
+                },
             },
         },
-    })
+        {
+            contextValue: { user },
+        }
+    )
+
+    const createdQuestion = extractTestResponse(response)
 
     if (createdQuestion.errors)
         throw new Error(
-            `createTestQuestion mutation failed with errors ${createdQuestion.errors}`
+            `createTestQuestion mutation failed with errors ${JSON.stringify(createdQuestion.errors)}`
         )
 
     if (!createdQuestion.data) {
@@ -553,8 +734,9 @@ const createTestQuestion = async (
 const createTestRateQuestion = async (
     server: ApolloServer,
     rateID: string,
-    questionData?: Omit<CreateRateQuestionInputType, 'rateID'>
-): Promise<GraphQLResponse> => {
+    questionData?: Omit<CreateRateQuestionInputType, 'rateID'>,
+    context?: Context
+): Promise<any> => {
     const question = questionData || {
         documents: [
             {
@@ -563,22 +745,43 @@ const createTestRateQuestion = async (
             },
         ],
     }
-    return await server.executeOperation({
-        query: CreateRateQuestionDocument,
-        variables: {
-            input: {
-                rateID,
-                ...question,
+    const response = await server.executeOperation(
+        {
+            query: CreateRateQuestionDocument,
+            variables: {
+                input: {
+                    rateID,
+                    ...question,
+                },
             },
         },
-    })
+        {
+            contextValue: context || defaultContext(),
+        }
+    )
+
+    const result = extractTestResponse(response)
+
+    // If there are errors, return the full response object so tests can check errors
+    if (result.errors) {
+        return result
+    }
+
+    // If successful and data exists, return just the data
+    if (result.data) {
+        return result.data.createRateQuestion
+    }
+
+    // If no data and no errors, throw an error
+    throw new Error('createTestRateQuestion returned nothing')
 }
 
 const createTestRateQuestionResponse = async (
     server: ApolloServer,
     questionID: string,
-    responseData?: Omit<InsertQuestionResponseArgs, 'questionID'>
-): Promise<GraphQLResponse> => {
+    responseData?: Omit<InsertQuestionResponseArgs, 'questionID'>,
+    context?: Context
+): Promise<any> => {
     const response = responseData || {
         documents: [
             {
@@ -588,21 +791,42 @@ const createTestRateQuestionResponse = async (
         ],
     }
 
-    return await server.executeOperation({
-        query: CreateRateQuestionResponseDocument,
-        variables: {
-            input: {
-                ...response,
-                questionID,
+    const result = await server.executeOperation(
+        {
+            query: CreateRateQuestionResponseDocument,
+            variables: {
+                input: {
+                    ...response,
+                    questionID,
+                },
             },
         },
-    })
+        {
+            contextValue: context || defaultContext(),
+        }
+    )
+
+    const extracted = extractTestResponse(result)
+
+    // If there are errors, return the full response object so tests can check errors
+    if (extracted.errors) {
+        return extracted
+    }
+
+    // If successful and data exists, return just the data
+    if (extracted.data) {
+        return extracted.data.createRateQuestionResponse
+    }
+
+    // If no data and no errors, return the full response
+    return extracted
 }
 
 const createTestQuestionResponse = async (
     server: ApolloServer,
     questionID: string,
-    responseData?: Omit<InsertQuestionResponseArgs, 'questionID'>
+    responseData?: Omit<InsertQuestionResponseArgs, 'questionID'>,
+    context?: Context
 ): Promise<CreateContractQuestionResponsePayload> => {
     const response = responseData || {
         documents: [
@@ -612,19 +836,26 @@ const createTestQuestionResponse = async (
             },
         ],
     }
-    const createdResponse = await server.executeOperation({
-        query: CreateContractQuestionResponseDocument,
-        variables: {
-            input: {
-                ...response,
-                questionID,
+    const result = await server.executeOperation(
+        {
+            query: CreateContractQuestionResponseDocument,
+            variables: {
+                input: {
+                    ...response,
+                    questionID,
+                },
             },
         },
-    })
+        {
+            contextValue: context || defaultContext(),
+        }
+    )
+
+    const createdResponse = extractTestResponse(result)
 
     if (createdResponse.errors)
         throw new Error(
-            `createTestQuestionResponse mutation failed with errors ${createdResponse.errors}`
+            `createTestQuestionResponse mutation failed with errors ${JSON.stringify(createdResponse.errors)}`
         )
 
     if (!createdResponse.data) {
@@ -637,21 +868,29 @@ const createTestQuestionResponse = async (
 const updateTestStateAssignments = async (
     server: ApolloServer,
     stateCode: string,
-    assignedUserIDs: string[]
+    assignedUserIDs: string[],
+    context?: Context
 ): Promise<UpdateStateAssignmentsByStatePayload> => {
-    const updatedAssignments = await server.executeOperation({
-        query: UpdateStateAssignmentsByStateDocument,
-        variables: {
-            input: {
-                stateCode,
-                assignedUsers: assignedUserIDs,
+    const response = await server.executeOperation(
+        {
+            query: UpdateStateAssignmentsByStateDocument,
+            variables: {
+                input: {
+                    stateCode,
+                    assignedUsers: assignedUserIDs,
+                },
             },
         },
-    })
+        {
+            contextValue: context || defaultContext(),
+        }
+    )
+
+    const updatedAssignments = extractTestResponse(response)
 
     if (updatedAssignments.errors)
         throw new Error(
-            `updateStateAssignmentsByState mutation failed with errors ${updatedAssignments.errors}`
+            `updateStateAssignmentsByState mutation failed with errors ${JSON.stringify(updatedAssignments.errors)}`
         )
 
     if (!updatedAssignments.data) {
@@ -670,15 +909,19 @@ export {
     fetchTestHealthPlanPackageById,
     submitTestHealthPlanPackage,
     unlockTestHealthPlanPackage,
+    unlockTestHealthPlanPackageAsUser,
     resubmitTestHealthPlanPackage,
     defaultContext,
     defaultFloridaProgram,
     defaultFloridaRateProgram,
     createTestQuestion,
+    createTestQuestionAsUser,
     createTestQuestionResponse,
     updateTestHealthPlanPackage,
     updateTestStateAssignments,
     createTestRateQuestion,
     createTestRateQuestionResponse,
     constructTestEmailer,
+    extractGraphQLResponse,
+    executeGraphQLOperation,
 }
