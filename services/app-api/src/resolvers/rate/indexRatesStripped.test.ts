@@ -184,7 +184,8 @@ describe('indexRatesStripped', () => {
             otherStateServer,
             {
                 stateCode: 'VA',
-            }
+            },
+            { user: vaStateUser }
         )
 
         const defaultState1 = contract1.packageSubmissions[0].rateRevisions[0]
@@ -244,9 +245,13 @@ describe('indexRatesStripped', () => {
 
         // submit packages from two different states
         await createAndSubmitTestContractWithRate(flStateServer)
-        await createAndSubmitTestContractWithRate(vaStateServer, {
-            stateCode: 'VA',
-        })
+        await createAndSubmitTestContractWithRate(
+            vaStateServer,
+            {
+                stateCode: 'VA',
+            },
+            { user: vaStateUser }
+        )
 
         // index rates
         const floridaRatesResponse = await flStateServer.executeOperation(

@@ -5,6 +5,7 @@ import type { RateEdge, Rate } from '../../gen/gqlServer'
 import {
     iterableCmsUsersMockData,
     testStateUser,
+    createDBUsersWithFullData,
 } from '../../testHelpers/userHelpers'
 import { extractGraphQLResponse } from '../../testHelpers/apolloV4ResponseHelper'
 import {
@@ -21,6 +22,21 @@ describe('indexRates', () => {
                 'rate-edit-unlock': true,
             })
             const mockS3 = testS3Client()
+
+            beforeAll(async () => {
+                // Pre-create users to avoid duplicate creation during server setup
+                const stateUser = testStateUser()
+                const vaStateUser = testStateUser({
+                    stateCode: 'VA',
+                    email: 'aang@mn.gov',
+                })
+                const cmsUser = mockUser()
+                await createDBUsersWithFullData([
+                    stateUser,
+                    vaStateUser,
+                    cmsUser,
+                ])
+            })
 
             it('returns rate reviews list for cms user with no errors', async () => {
                 const cmsUser = mockUser()
@@ -156,6 +172,12 @@ describe('indexRates', () => {
                     otherStateServer,
                     {
                         stateCode: 'VA',
+                    },
+                    {
+                        user: testStateUser({
+                            stateCode: 'VA',
+                            email: 'aang@mn.gov',
+                        }),
                     }
                 )
 
