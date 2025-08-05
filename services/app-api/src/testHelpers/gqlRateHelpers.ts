@@ -39,7 +39,6 @@ import { createAndSubmitTestContractWithRate } from './gqlContractHelpers'
 import { clearDocMetadata } from './documentHelpers'
 
 import { extractGraphQLResponse } from './apolloV4ResponseHelper'
-import type { Context } from '../handlers/apollo_gql'
 
 const fetchTestRateById = async (
     server: ApolloServer,
