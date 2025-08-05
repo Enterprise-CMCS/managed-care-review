@@ -2,7 +2,6 @@ import {
     createDBUsersWithFullData,
     testCMSUser,
     testAdminUser,
-    testStateUser,
 } from '../../testHelpers/userHelpers'
 import {
     constructTestPostgresServer,
@@ -42,10 +41,12 @@ describe('createRateQuestionResponse', () => {
 
         const questionResponse = await createTestRateQuestionResponse(
             stateServer,
-            question.question.id,
-            undefined,
-            { user: testStateUser() }
+            question.question.id
         )
+
+        expect(questionResponse).toBeDefined()
+        expect(questionResponse.question).toBeDefined()
+
         const questionWithResponse = questionResponse.question
 
         expect(questionWithResponse).toEqual(
@@ -106,7 +107,9 @@ describe('createRateQuestionResponse', () => {
 
         const questionResponseResult = await createTestRateQuestionResponse(
             cmsServer,
-            question.question.id
+            question.question.id,
+            undefined,
+            { user: cmsUser }
         )
 
         expect(questionResponseResult.errors).toBeDefined()
@@ -147,14 +150,18 @@ describe('createRateQuestionResponse', () => {
         await createTestRateQuestionResponse(stateServer, question.question.id)
 
         expect(mockEmailer.sendEmail).toHaveBeenNthCalledWith(
-            5, // New response state email notification is the fifth email
+            6, // New response state email notification is the sixth email
             expect.objectContaining({
                 subject: expect.stringContaining(
                     `[LOCAL] Response submitted to CMS for ${rateName}`
                 ),
                 sourceEmail: emailConfig.emailSource,
+                toAddresses: expect.arrayContaining([
+                    'james@example.com',
+                    'email@example.com',
+                ]),
                 bodyText: expect.stringContaining(
-                    'Response to DMCO rate questions was successfully submitted.'
+                    'Response to DMCO rate questions was successfully submitted'
                 ),
                 bodyHTML: expect.stringContaining(
                     `<a href="http://localhost/submissions/${contractWithRate.id}/rates/${rateID}/question-and-answers">View response</a>`
@@ -215,7 +222,7 @@ describe('createRateQuestionResponse', () => {
 
         const rateQuestion = must(
             await createTestRateQuestion(cmsServer, rateID, undefined, {
-                user: cmsUser,
+                user: oactCMS,
             })
         )
 
@@ -229,11 +236,10 @@ describe('createRateQuestionResponse', () => {
         const cmsRecipientEmails = [
             ...assignedUserEmails,
             ...emailConfig.devReviewTeamEmails,
-            ...emailConfig.oactEmails,
         ]
 
         expect(mockEmailer.sendEmail).toHaveBeenNthCalledWith(
-            4, // New response CMS email notification is the fourth email
+            5, // New response CMS email notification is the fifth email
             expect.objectContaining({
                 subject: expect.stringContaining(
                     `[LOCAL] New Responses for ${rateName}`
@@ -243,7 +249,7 @@ describe('createRateQuestionResponse', () => {
                     Array.from(cmsRecipientEmails)
                 ),
                 bodyText: expect.stringContaining(
-                    `The state submitted responses to OACT's questions about ${rateName}`
+                    `The state submitted responses to ${oactCMS.divisionAssignment}'s questions about ${rateName}`
                 ),
                 bodyHTML: expect.stringContaining(
                     `<a href="http://localhost/rates/${rateID}/question-and-answers">View rate Q&A</a>`

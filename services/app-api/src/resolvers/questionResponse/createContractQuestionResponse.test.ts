@@ -279,7 +279,7 @@ describe('createContractQuestionResponse', () => {
                     Array.from(cmsRecipientEmails)
                 ),
                 bodyText: expect.stringContaining(
-                    `The state submitted responses to OACT's questions about ${contractName}`
+                    `The state submitted responses to ${oactCMS.divisionAssignment}'s questions about ${contractName}`
                 ),
                 bodyHTML: expect.stringContaining(
                     `<a href="http://localhost/submissions/${contract.id}/question-and-answers">View submission Q&A</a>`
@@ -335,7 +335,7 @@ describe('createContractQuestionResponse', () => {
         ]
 
         expect(mockEmailer.sendEmail).toHaveBeenNthCalledWith(
-            6, // New response state email notification is the fifth email
+            6, // New response state email notification is the sixth email
             expect.objectContaining({
                 subject: expect.stringContaining(
                     `[LOCAL] Response submitted to CMS for ${pkgName}`
