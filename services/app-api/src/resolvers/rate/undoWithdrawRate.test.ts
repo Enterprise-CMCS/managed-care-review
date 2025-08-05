@@ -588,6 +588,13 @@ describe('undoWithdrawRate', () => {
             cmsUser
         )
 
+        const submittedContractB = await submitTestContract(
+            stateServer,
+            contractB.id,
+            'resubmit after withdrawing rate',
+            { user: stateUser }
+        )
+
         const submittedContractA = await submitTestContract(
             stateServer,
             contractA.id,
@@ -599,7 +606,7 @@ describe('undoWithdrawRate', () => {
             submittedContractA.packageSubmissions[0].contractRevision
                 .contractName
         const contractBName =
-            validateContractB.packageSubmissions[0].contractRevision
+            submittedContractB.packageSubmissions[0].contractRevision
                 .contractName
 
         const stateReceiverEmails =
@@ -618,18 +625,15 @@ describe('undoWithdrawRate', () => {
             unwithdrawnRate.packageSubmissions[0].rateRevision.formData
                 .rateCertificationName!
 
-        //Check CMS email for proper info (comes before state email)
+        //Check state email for proper info
         expect(mockEmailer.sendEmail).toHaveBeenNthCalledWith(
-            7, // CMS email
+            7,
             expect.objectContaining({
                 subject: expect.stringContaining(
                     `${unwithdrawnRateName} status update`
                 ),
                 sourceEmail: emailConfig.emailSource,
-                toAddresses: expect.arrayContaining([
-                    ...testEmailConfig().dmcpSubmissionEmails,
-                    ...testEmailConfig().oactEmails,
-                ]),
+                toAddresses: expect.arrayContaining(stateReceiverEmails),
                 bodyHTML: expect.stringContaining(unwithdrawnRateName),
             })
         )
@@ -648,15 +652,18 @@ describe('undoWithdrawRate', () => {
             })
         )
 
-        //Check state email for proper info
+        //Check CMS email for proper info
         expect(mockEmailer.sendEmail).toHaveBeenNthCalledWith(
-            8, // State email comes after CMS email
+            8,
             expect.objectContaining({
                 subject: expect.stringContaining(
                     `${unwithdrawnRateName} status update`
                 ),
                 sourceEmail: emailConfig.emailSource,
-                toAddresses: expect.arrayContaining(stateReceiverEmails),
+                toAddresses: expect.arrayContaining([
+                    ...testEmailConfig().dmcpSubmissionEmails,
+                    ...testEmailConfig().oactEmails,
+                ]),
                 bodyHTML: expect.stringContaining(unwithdrawnRateName),
             })
         )
