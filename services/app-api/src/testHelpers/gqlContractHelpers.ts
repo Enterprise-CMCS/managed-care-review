@@ -674,7 +674,8 @@ const undoWithdrawTestContract = async (
 const errorUndoWithdrawTestContract = async (
     server: ApolloServer,
     contractID: string,
-    updatedReason: string
+    updatedReason: string,
+    context?: Context
 ): Promise<ReadonlyArray<GraphQLFormattedError>> => {
     const response = await server.executeOperation(
         {
@@ -687,7 +688,7 @@ const errorUndoWithdrawTestContract = async (
             },
         },
         {
-            contextValue: defaultContext(),
+            contextValue: context || defaultContext(),
         }
     )
 

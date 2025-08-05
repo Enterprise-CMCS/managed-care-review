@@ -855,7 +855,8 @@ describe('undoWithdrawContract error handling', () => {
             await errorUndoWithdrawTestContract(
                 cmsServer,
                 submittedContract.id,
-                'withdraw submission'
+                'withdraw submission',
+                { user: cmsUser }
             )
 
         expect(submittedContractWithdrawErrors[0].message).toBe(
@@ -866,7 +867,8 @@ describe('undoWithdrawContract error handling', () => {
             await errorUndoWithdrawTestContract(
                 cmsServer,
                 approvedContract.id,
-                'withdraw submission'
+                'withdraw submission',
+                { user: cmsUser }
             )
 
         expect(approvedContractWithdrawErrors[0].message).toBe(
@@ -877,7 +879,8 @@ describe('undoWithdrawContract error handling', () => {
             await errorUndoWithdrawTestContract(
                 cmsServer,
                 unlockedContract.id,
-                'withdraw submission'
+                'withdraw submission',
+                { user: cmsUser }
             )
 
         expect(unlockedContractWithdrawErrors[0].message).toBe(

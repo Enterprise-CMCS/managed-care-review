@@ -628,7 +628,7 @@ describe('undoWithdrawRate', () => {
 
         //Check CMS email for proper info (comes before state email)
         expect(mockEmailer.sendEmail).toHaveBeenNthCalledWith(
-            7, // CMS email
+            8, // CMS email - shifted due to extra contract B submission
             expect.objectContaining({
                 subject: expect.stringContaining(
                     `${unwithdrawnRateName} status update`
@@ -644,13 +644,13 @@ describe('undoWithdrawRate', () => {
 
         //Check that all submissions related to the rate were included in the CMS email
         expect(mockEmailer.sendEmail).toHaveBeenNthCalledWith(
-            7,
+            8,
             expect.objectContaining({
                 bodyHTML: expect.stringContaining(contractAName),
             })
         )
         expect(mockEmailer.sendEmail).toHaveBeenNthCalledWith(
-            7,
+            8,
             expect.objectContaining({
                 bodyHTML: expect.stringContaining(contractBName),
             })
@@ -658,7 +658,7 @@ describe('undoWithdrawRate', () => {
 
         //Check state email for proper info
         expect(mockEmailer.sendEmail).toHaveBeenNthCalledWith(
-            8, // State email comes after CMS email
+            9, // State email comes after CMS email - shifted due to extra contract B submission
             expect.objectContaining({
                 subject: expect.stringContaining(
                     `${unwithdrawnRateName} status update`
@@ -671,13 +671,13 @@ describe('undoWithdrawRate', () => {
 
         //Check that all submissions related to the rate were included in the state email
         expect(mockEmailer.sendEmail).toHaveBeenNthCalledWith(
-            8,
+            9,
             expect.objectContaining({
                 bodyHTML: expect.stringContaining(contractAName),
             })
         )
         expect(mockEmailer.sendEmail).toHaveBeenNthCalledWith(
-            8,
+            9,
             expect.objectContaining({
                 bodyHTML: expect.stringContaining(contractBName),
             })
