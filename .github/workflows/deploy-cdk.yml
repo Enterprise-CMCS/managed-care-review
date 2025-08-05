@@ -329,7 +329,7 @@ jobs:
         run: |
           echo "=== Deploying Network stack ==="
           npx cdk deploy MCR-Network-${STAGE_NAME} \
-            --app 'pnpm tsx bin/mcr-app.ts' \
+            --app 'pnpm tsx bin/network.ts' \
             --context stage=${STAGE_NAME} \
             --require-approval never
 
