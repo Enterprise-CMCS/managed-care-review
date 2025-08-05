@@ -9,7 +9,6 @@ import {
     createTestRateQuestion,
     defaultContext,
     defaultFloridaRateProgram,
-    unlockTestHealthPlanPackage,
     unlockTestHealthPlanPackageAsUser,
     updateTestHealthPlanFormData,
 } from '../../testHelpers/gqlHelpers'
@@ -35,7 +34,6 @@ import {
     createAndUpdateTestContractWithoutRates,
     fetchTestContract,
     submitTestContract,
-    unlockTestContract,
     unlockTestContractAsUser,
 } from '../../testHelpers/gqlContractHelpers'
 import { latestFormData } from '../../testHelpers/healthPlanPackageHelpers'
@@ -176,14 +174,17 @@ describe('fetchRate', () => {
         // fetch and check rate 1 which was resubmitted with no changes
         expect(firstRateID).toBe(resubmittedRate.id) // first rate ID should be unchanged
 
-        const result1 = await cmsServer.executeOperation({
-            query: FetchRateDocument,
-            variables: {
-                input: { rateID: firstRateID },
+        const result1 = await cmsServer.executeOperation(
+            {
+                query: FetchRateDocument,
+                variables: {
+                    input: { rateID: firstRateID },
+                },
             },
-        }, {
-            contextValue: { user: cmsUser },
-        })
+            {
+                contextValue: { user: cmsUser },
+            }
+        )
         const result1Data = extractGraphQLResponse(result1)
 
         const resubmittedRate1 = result1Data.data?.fetchRate.rate
@@ -368,14 +369,17 @@ describe('fetchRate', () => {
         }
 
         // fetch rate
-        const result = await cmsServer.executeOperation({
-            query: FetchRateDocument,
-            variables: {
-                input,
+        const result = await cmsServer.executeOperation(
+            {
+                query: FetchRateDocument,
+                variables: {
+                    input,
+                },
             },
-        }, {
-            contextValue: { user: cmsUser },
-        })
+            {
+                contextValue: { user: cmsUser },
+            }
+        )
         const resultData = extractGraphQLResponse(result)
 
         const unlockedRate = resultData.data?.fetchRate.rate
@@ -418,14 +422,17 @@ describe('fetchRate', () => {
         }
 
         // fetch rate
-        const result = await cmsServer.executeOperation({
-            query: FetchRateDocument,
-            variables: {
-                input,
+        const result = await cmsServer.executeOperation(
+            {
+                query: FetchRateDocument,
+                variables: {
+                    input,
+                },
             },
-        }, {
-            contextValue: { user: cmsUser },
-        })
+            {
+                contextValue: { user: cmsUser },
+            }
+        )
         const resultData = extractGraphQLResponse(result)
 
         const unlockedRate = resultData.data?.fetchRate.rate
@@ -669,20 +676,29 @@ describe('fetchRate', () => {
         const rateID =
             submittedRate.packageSubmissions[0].rateRevisions[0].rateID
 
-        await createTestRateQuestion(dmcoServer, rateID, undefined, { user: dmcoCmsUser })
-        await createTestRateQuestion(dmcpServer, rateID, undefined, { user: dmcpCmsUser })
-        await createTestRateQuestion(oactServer, rateID, undefined, { user: oactApproverUser })
+        await createTestRateQuestion(dmcoServer, rateID, undefined, {
+            user: dmcoCmsUser,
+        })
+        await createTestRateQuestion(dmcpServer, rateID, undefined, {
+            user: dmcpCmsUser,
+        })
+        await createTestRateQuestion(oactServer, rateID, undefined, {
+            user: oactApproverUser,
+        })
 
-        const response = await server.executeOperation({
-            query: FetchRateWithQuestionsDocument,
-            variables: {
-                input: {
-                    rateID,
+        const response = await server.executeOperation(
+            {
+                query: FetchRateWithQuestionsDocument,
+                variables: {
+                    input: {
+                        rateID,
+                    },
                 },
             },
-        }, {
-            contextValue: defaultContext(),
-        })
+            {
+                contextValue: defaultContext(),
+            }
+        )
         const result = extractGraphQLResponse(response)
         const rateQuestions = result.data?.fetchRate.rate.questions
 
@@ -701,17 +717,22 @@ describe('fetchRate', () => {
         )
 
         // Test newly created dmco question and its order
-        await createTestRateQuestion(dmco2Server, rateID, undefined, { user: dmco2CmsUser })
-        const response2 = await server.executeOperation({
-            query: FetchRateWithQuestionsDocument,
-            variables: {
-                input: {
-                    rateID,
+        await createTestRateQuestion(dmco2Server, rateID, undefined, {
+            user: dmco2CmsUser,
+        })
+        const response2 = await server.executeOperation(
+            {
+                query: FetchRateWithQuestionsDocument,
+                variables: {
+                    input: {
+                        rateID,
+                    },
                 },
             },
-        }, {
-            contextValue: defaultContext(),
-        })
+            {
+                contextValue: defaultContext(),
+            }
+        )
         const result2 = extractGraphQLResponse(response2)
         const rateQuestions2 = result2.data?.fetchRate.rate.questions
 
@@ -756,14 +777,26 @@ describe('fetchRate', () => {
             s3Client: mockS3,
         })
 
-        const fetchResponse = await oauthServer.executeOperation({
-            query: FetchRateDocument,
-            variables: {
-                input: {
-                    rateID,
+        const fetchResponse = await oauthServer.executeOperation(
+            {
+                query: FetchRateDocument,
+                variables: {
+                    input: {
+                        rateID,
+                    },
                 },
             },
-        })
+            {
+                contextValue: {
+                    user: testCMSUser(),
+                    oauthClient: {
+                        clientId: 'test-oauth-client',
+                        grants: ['client_credentials'],
+                        isOAuthClient: true,
+                    },
+                },
+            }
+        )
         const fetchResult = extractGraphQLResponse(fetchResponse)
 
         expect(fetchResult.errors).toBeUndefined()
@@ -800,14 +833,26 @@ describe('fetchRate', () => {
             s3Client: mockS3,
         })
 
-        const fetchResponse = await oauthServer.executeOperation({
-            query: FetchRateDocument,
-            variables: {
-                input: {
-                    rateID,
+        const fetchResponse = await oauthServer.executeOperation(
+            {
+                query: FetchRateDocument,
+                variables: {
+                    input: {
+                        rateID,
+                    },
                 },
             },
-        })
+            {
+                contextValue: {
+                    user: testCMSUser(),
+                    oauthClient: {
+                        clientId: 'test-oauth-client',
+                        grants: ['some_other_grant'],
+                        isOAuthClient: true,
+                    },
+                },
+            }
+        )
         const fetchResult = extractGraphQLResponse(fetchResponse)
 
         expect(fetchResult.errors).toBeDefined()

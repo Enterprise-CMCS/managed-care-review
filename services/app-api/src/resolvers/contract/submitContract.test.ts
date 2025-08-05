@@ -1619,7 +1619,8 @@ describe('submitContract', () => {
             const stateSubmission = await createAndSubmitTestContract(
                 stateServer,
                 undefined,
-                { submissionType: 'CONTRACT_ONLY' }
+                { submissionType: 'CONTRACT_ONLY' },
+                { user: stateUser1 }
             )
 
             const cmsServer = await constructTestPostgresServer({

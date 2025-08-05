@@ -43,15 +43,17 @@ import type { Context } from '../handlers/apollo_gql'
 const createAndSubmitTestContract = async (
     server: ApolloServer,
     stateCode?: StateCodeType,
-    formData?: Partial<ContractFormDataType>
+    formData?: Partial<ContractFormDataType>,
+    context?: Context
 ): Promise<Contract> => {
     const contract = await createAndUpdateTestContractWithoutRates(
         server,
         stateCode,
-        formData
+        formData,
+        context
     )
     return await must(
-        submitTestContract(server, contract.id, 'Time to submit!')
+        submitTestContract(server, contract.id, 'Time to submit!', context)
     )
 }
 
