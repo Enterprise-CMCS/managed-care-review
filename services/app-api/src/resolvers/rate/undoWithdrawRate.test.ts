@@ -595,19 +595,11 @@ describe('undoWithdrawRate', () => {
             { user: stateUser }
         )
 
-        // Contract B also needs to be resubmitted after rate withdrawal
-        const resubmittedContractB = await submitTestContract(
-            stateServer,
-            contractB.id,
-            'Resubmit contract B after rate withdrawal',
-            { user: stateUser }
-        )
-
         const contractAName =
             submittedContractA.packageSubmissions[0].contractRevision
                 .contractName
         const contractBName =
-            resubmittedContractB.packageSubmissions[0].contractRevision
+            validateContractB.packageSubmissions[0].contractRevision
                 .contractName
 
         const stateReceiverEmails =
@@ -628,7 +620,7 @@ describe('undoWithdrawRate', () => {
 
         //Check CMS email for proper info (comes before state email)
         expect(mockEmailer.sendEmail).toHaveBeenNthCalledWith(
-            8, // CMS email - shifted due to extra contract B submission
+            7, // CMS email
             expect.objectContaining({
                 subject: expect.stringContaining(
                     `${unwithdrawnRateName} status update`
@@ -644,13 +636,13 @@ describe('undoWithdrawRate', () => {
 
         //Check that all submissions related to the rate were included in the CMS email
         expect(mockEmailer.sendEmail).toHaveBeenNthCalledWith(
-            8,
+            7,
             expect.objectContaining({
                 bodyHTML: expect.stringContaining(contractAName),
             })
         )
         expect(mockEmailer.sendEmail).toHaveBeenNthCalledWith(
-            8,
+            7,
             expect.objectContaining({
                 bodyHTML: expect.stringContaining(contractBName),
             })
@@ -658,7 +650,7 @@ describe('undoWithdrawRate', () => {
 
         //Check state email for proper info
         expect(mockEmailer.sendEmail).toHaveBeenNthCalledWith(
-            9, // State email comes after CMS email - shifted due to extra contract B submission
+            8, // State email comes after CMS email
             expect.objectContaining({
                 subject: expect.stringContaining(
                     `${unwithdrawnRateName} status update`
@@ -671,13 +663,13 @@ describe('undoWithdrawRate', () => {
 
         //Check that all submissions related to the rate were included in the state email
         expect(mockEmailer.sendEmail).toHaveBeenNthCalledWith(
-            9,
+            8,
             expect.objectContaining({
                 bodyHTML: expect.stringContaining(contractAName),
             })
         )
         expect(mockEmailer.sendEmail).toHaveBeenNthCalledWith(
-            9,
+            8,
             expect.objectContaining({
                 bodyHTML: expect.stringContaining(contractBName),
             })
