@@ -1,7 +1,6 @@
 // Export all stacks
 export * from './foundation-stack'
 export * from './network-stack'
-export * from './network'
 export * from './data-stack'
 export * from './auth-stack'
 export * from './database-operations-stack'
@@ -19,3 +18,8 @@ export * from './public-api-stack'
 export * from './file-ops-stack'
 export * from './scheduled-tasks-stack'
 export * from './auth-extensions-stack'
+
+// Testing review environments
+export * from './network'
+export * from './postgres'
+export * from './uploads'
