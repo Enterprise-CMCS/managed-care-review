@@ -847,7 +847,8 @@ describe('undoWithdrawContract error handling', () => {
         await unlockTestContract(
             cmsServer,
             unlockedContract.id,
-            'unlock contract'
+            'unlock contract',
+            { user: cmsUser }
         )
 
         const submittedContractWithdrawErrors =

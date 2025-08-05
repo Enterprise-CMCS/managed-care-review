@@ -521,7 +521,7 @@ describe('undoWithdrawRate', () => {
             )
         )
 
-        const submittedContractB = await submitTestContract(
+        await submitTestContract(
             stateServer,
             contractB.id,
             'Submit contract B',
@@ -595,11 +595,19 @@ describe('undoWithdrawRate', () => {
             { user: stateUser }
         )
 
+        // Contract B also needs to be resubmitted after rate withdrawal
+        const resubmittedContractB = await submitTestContract(
+            stateServer,
+            contractB.id,
+            'Resubmit contract B after rate withdrawal',
+            { user: stateUser }
+        )
+
         const contractAName =
             submittedContractA.packageSubmissions[0].contractRevision
                 .contractName
         const contractBName =
-            submittedContractB.packageSubmissions[0].contractRevision
+            resubmittedContractB.packageSubmissions[0].contractRevision
                 .contractName
 
         const stateReceiverEmails =

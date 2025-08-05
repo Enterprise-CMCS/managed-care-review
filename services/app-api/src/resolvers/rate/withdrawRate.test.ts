@@ -547,26 +547,38 @@ describe('withdrawRate', () => {
             )
         )
 
-        const resubmitContractResult = must(
-            await stateServer.executeOperation(
-                {
-                    query: SubmitContractDocument,
-                    variables: {
-                        input: {
-                            contractID: contract.id,
-                            submittedReason: 'Resubmit contract',
-                        },
+        const resubmitContractResponse = await stateServer.executeOperation(
+            {
+                query: SubmitContractDocument,
+                variables: {
+                    input: {
+                        contractID: contract.id,
+                        submittedReason: 'Resubmit contract',
                     },
                 },
-                {
-                    contextValue: { user: stateUser },
-                }
-            )
+            },
+            {
+                contextValue: { user: stateUser },
+            }
         )
+
+        const resubmitContractResult = extractGraphQLResponse(
+            resubmitContractResponse
+        )
+
+        if (resubmitContractResult.errors) {
+            throw new Error(
+                `resubmitContract mutation failed with errors ${JSON.stringify(resubmitContractResult.errors)}`
+            )
+        }
+
+        if (!resubmitContractResult.data) {
+            throw new Error('resubmitContract returned nothing')
+        }
 
         // expect withdrawn rate to still be in the withdrawn rate join table
         const resubmittedContract =
-            resubmitContractResult.data?.submitContract.contract
+            resubmitContractResult.data.submitContract.contract
         expect(resubmittedContract.withdrawnRates).toEqual(
             expect.arrayContaining([
                 expect.objectContaining({
