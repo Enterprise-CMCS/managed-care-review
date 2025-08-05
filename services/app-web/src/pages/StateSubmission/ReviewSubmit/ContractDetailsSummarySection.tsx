@@ -200,6 +200,7 @@ export const ContractDetailsSummarySection = ({
             <SectionHeader
                 header="Contract details"
                 editNavigateTo={editNavigateTo}
+                hideBorderTop
             >
                 {isSubmittedOrCMSUser &&
                     !isPreviousSubmission &&
@@ -364,6 +365,9 @@ export const ContractDetailsSummarySection = ({
                     </MultiColumnGrid>
                 )}
             </dl>
+            <SectionHeader header="Contract documents" hideBorderBottom as="h3">
+                <span>download contract documents</span>
+            </SectionHeader>
             {contractFormData?.contractDocuments && (
                 <UploadedDocumentsTable
                     documents={contractFormData.contractDocuments}

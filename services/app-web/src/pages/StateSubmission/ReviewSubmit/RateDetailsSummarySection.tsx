@@ -317,6 +317,8 @@ export const RateDetailsSummarySection = ({
             <SectionHeader
                 header="Rate details"
                 editNavigateTo={editNavigateTo}
+                hideBorderTop
+                hideBorderBottom
             >
                 {showDownloadAllButton && renderDownloadButton(zippedFilesURL)}
             </SectionHeader>
@@ -551,6 +553,13 @@ export const RateDetailsSummarySection = ({
                                       />
                                   </MultiColumnGrid>
                               </dl>
+                              <SectionHeader
+                                  header="Rate documents"
+                                  hideBorderBottom
+                                  as="h3"
+                              >
+                                  <span>download contract documents</span>
+                              </SectionHeader>
                               {rateFormData.rateDocuments && (
                                   <UploadedDocumentsTable
                                       documents={rateFormData.rateDocuments}

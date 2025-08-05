@@ -116,7 +116,7 @@ export const UploadedDocumentsTable = ({
     const hasMultipleDocs = !multipleDocumentsAllowed && documents.length > 1
     const tableCaptionJSX = (
         <>
-            <span>{caption}</span>
+            <h4>{caption}</h4>
             {shouldShowEditButton && (
                 <NavLinkWithLogging
                     variant="unstyled"
