@@ -33,7 +33,7 @@ import {
 import { InlineDocumentWarning } from '../../../components/DocumentWarning'
 import { useLDClient } from 'launchdarkly-react-client-sdk'
 import { featureFlags } from '@mc-review/common-code'
-import { Grid } from '@trussworks/react-uswds'
+import { Grid, Icon } from '@trussworks/react-uswds'
 import {
     booleanAsYesNoFormValue,
     booleanAsYesNoUserValue,
@@ -80,7 +80,8 @@ function renderZipLink(
             href={zippedFilesURL}
             target="_blank"
         >
-            <p>
+            <p style={{ fontSize: '17px', width: '313px', color: '#005EA2' }}>
+                <Icon.FileDownload style={{ verticalAlign: 'middle' }} />
                 Download contract documents{' '}
                 {contractDocumentCount && `(${contractDocumentCount} files)`}
             </p>

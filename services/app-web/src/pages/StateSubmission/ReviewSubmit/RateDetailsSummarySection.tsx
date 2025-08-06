@@ -45,6 +45,7 @@ import { featureFlags } from '@mc-review/common-code'
 import { useLDClient } from 'launchdarkly-react-client-sdk'
 import { getRateZipDownloadUrl } from '../../../helpers/zipHelpers'
 import { LinkWithLogging } from '../../../components'
+import { Icon } from '@trussworks/react-uswds'
 
 export type RateDetailsSummarySectionProps = {
     contract: Contract | UnlockedContract
@@ -85,7 +86,8 @@ export function renderZipLink(
             href={zippedFilesURL}
             target="_blank"
         >
-            <p>
+            <p style={{ fontSize: '16px', width: '266px', color: '#005EA2' }}>
+                <Icon.FileDownload style={{ verticalAlign: 'middle' }} />
                 Download rate documents{' '}
                 {rateDocumentCount && `(${rateDocumentCount} files)`}
             </p>
