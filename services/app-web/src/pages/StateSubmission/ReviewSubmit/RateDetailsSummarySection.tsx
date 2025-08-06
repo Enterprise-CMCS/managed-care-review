@@ -89,7 +89,8 @@ export function renderZipLink(
             <p style={{ fontSize: '16px', width: '266px', color: '#005EA2' }}>
                 <Icon.FileDownload style={{ verticalAlign: 'middle' }} />
                 Download rate documents{' '}
-                {rateDocumentCount && `(${rateDocumentCount} files)`}
+                {rateDocumentCount &&
+                    `(${rateDocumentCount} file${rateDocumentCount > 1 ? 's' : ''})`}
             </p>
         </LinkWithLogging>
     )

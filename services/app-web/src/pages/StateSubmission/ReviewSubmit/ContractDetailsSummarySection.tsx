@@ -83,7 +83,8 @@ function renderZipLink(
             <p style={{ fontSize: '17px', width: '313px', color: '#005EA2' }}>
                 <Icon.FileDownload style={{ verticalAlign: 'middle' }} />
                 Download contract documents{' '}
-                {contractDocumentCount && `(${contractDocumentCount} files)`}
+                {contractDocumentCount &&
+                    `(${contractDocumentCount} file${contractDocumentCount > 1 ? 's' : ''})`}
             </p>
         </LinkWithLogging>
     )
