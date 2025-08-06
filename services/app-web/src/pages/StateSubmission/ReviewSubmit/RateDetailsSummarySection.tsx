@@ -1,13 +1,11 @@
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import {
     DataDetail,
     DataDetailCheckboxList,
 } from '../../../components/DataDetail'
 import { SectionHeader } from '../../../components/SectionHeader'
-import { useS3 } from '../../../contexts/S3Context'
 import { formatCalendarDate } from '@mc-review/dates'
 import { MultiColumnGrid } from '../../../components/MultiColumnGrid'
-import { DownloadButton } from '../../../components/DownloadButton'
 import { UploadedDocumentsTable } from '../../../components/SubmissionSummarySection'
 import { usePreviousSubmission } from '../../../hooks/usePreviousSubmission'
 import styles from '../../../components/SubmissionSummarySection/SubmissionSummarySection.module.scss'
@@ -15,8 +13,6 @@ import { GenericErrorPage } from '../../Errors/GenericErrorPage'
 
 import { DataDetailMissingField } from '../../../components/DataDetail/DataDetailMissingField'
 import { DataDetailContactField } from '../../../components/DataDetail/DataDetailContactField/DataDetailContactField'
-import { recordJSException } from '@mc-review/otel'
-import useDeepCompareEffect from 'use-deep-compare-effect'
 import { InlineDocumentWarning } from '../../../components/DocumentWarning'
 import { SectionCard } from '../../../components/SectionCard'
 import {
@@ -47,6 +43,8 @@ import { hasCMSUserPermissions } from '@mc-review/helpers'
 import { InfoTag } from '../../../components/InfoTag/InfoTag'
 import { featureFlags } from '@mc-review/common-code'
 import { useLDClient } from 'launchdarkly-react-client-sdk'
+import { getRateZipDownloadUrl } from '../../../helpers/zipHelpers'
+import { LinkWithLogging } from '../../../components'
 
 export type RateDetailsSummarySectionProps = {
     contract: Contract | UnlockedContract
@@ -72,8 +70,9 @@ type PackageNamesLookupType = {
     }
 }
 
-export function renderDownloadButton(
-    zippedFilesURL: string | undefined | Error
+export function renderZipLink(
+    zippedFilesURL: string | undefined | Error,
+    rateDocumentCount: number | undefined
 ) {
     if (zippedFilesURL instanceof Error || !zippedFilesURL) {
         return (
@@ -81,10 +80,16 @@ export function renderDownloadButton(
         )
     }
     return (
-        <DownloadButton
-            text="Download all rate documents"
-            zippedFilesURL={zippedFilesURL}
-        />
+        <LinkWithLogging
+            variant="unstyled"
+            href={zippedFilesURL}
+            target="_blank"
+        >
+            <p>
+                Download rate documents{' '}
+                {rateDocumentCount && `(${rateDocumentCount} files)`}
+            </p>
+        </LinkWithLogging>
     )
 }
 
@@ -134,8 +139,6 @@ export const RateDetailsSummarySection = ({
         ? getPackageSubmissionAtIndex(contract, lastSubmittedIndex)?.submitInfo
               .updatedAt
         : (getLastContractSubmission(contract)?.submitInfo.updatedAt ?? null)
-
-    const { getKey, getBulkDlURL } = useS3()
     const [zippedFilesURL, setZippedFilesURL] = useState<
         string | undefined | Error
     >(undefined)
@@ -238,66 +241,19 @@ export const RateDetailsSummarySection = ({
         return true
     }
 
-    useDeepCompareEffect(() => {
-        // skip getting urls of this if this is a previous submission or draft
-        if (!isSubmittedOrCMSUser || isPreviousSubmission) return
-
-        // get all the keys for the documents we want to zip
-        async function fetchZipUrl() {
-            const submittedRates =
-                getLastContractSubmission(contract)?.rateRevisions ?? []
-
-            // skip if no rates
-            if (submittedRates.length > 0) {
-                const keysFromDocs = submittedRates
-                    .flatMap((rateInfo) =>
-                        rateInfo.formData.rateDocuments.concat(
-                            rateInfo.formData.supportingDocuments
-                        )
-                    )
-                    .map((doc) => {
-                        const key = getKey(doc.s3URL)
-                        if (!key) return ''
-                        return key
-                    })
-                    .filter((key) => key !== '')
-
-                // call the lambda to zip the files and get the url
-                const zippedURL = await getBulkDlURL(
-                    keysFromDocs,
-                    submissionName + '-rate-details.zip',
-                    'HEALTH_PLAN_DOCS'
-                )
-                if (zippedURL instanceof Error) {
-                    const msg = `ERROR: getBulkDlURL failed to generate supporting document URL. ID: ${contract.id} Message: ${zippedURL}`
-                    console.info(msg)
-
-                    if (onDocumentError) {
-                        onDocumentError(true)
-                    }
-
-                    recordJSException(msg)
-                }
-
-                setZippedFilesURL(zippedURL)
-            }
+    useEffect(() => {
+        const currentRateRev = rateRevs && rateRevs[0]
+        if (
+            isSubmittedOrCMSUser &&
+            !isPreviousSubmission &&
+            currentRateRev?.documentZipPackages
+        ) {
+            const zipURL = getRateZipDownloadUrl(
+                currentRateRev.documentZipPackages
+            )
+            setZippedFilesURL(zipURL)
         }
-
-        void fetchZipUrl()
-    }, [
-        getKey,
-        getBulkDlURL,
-        contract,
-        submissionName,
-        isSubmittedOrCMSUser,
-        isPreviousSubmission,
-    ])
-
-    const showDownloadAllButton =
-        isSubmittedOrCMSUser &&
-        !isPreviousSubmission &&
-        rateRevs &&
-        rateRevs.length > 0
+    }, [isSubmittedOrCMSUser, isPreviousSubmission, rateRevs])
 
     const noRatesMessage = () => {
         if (isStateUser) {
@@ -320,9 +276,7 @@ export const RateDetailsSummarySection = ({
                 editNavigateTo={editNavigateTo}
                 hideBorderTop
                 hideBorderBottom
-            >
-                {showDownloadAllButton && renderDownloadButton(zippedFilesURL)}
-            </SectionHeader>
+            />
             {rateRevs && rateRevs.length > 0
                 ? rateRevs.map((rateRev) => {
                       const rateFormData = getRateFormData(rateRev)
@@ -334,6 +288,11 @@ export const RateDetailsSummarySection = ({
                       const medicaidPopulations =
                           (rateFormData.rateMedicaidPopulations ??
                               []) as string[]
+                      const rateDocumentCount =
+                          rateFormData.supportingDocuments &&
+                          rateFormData.rateDocuments &&
+                          rateFormData.supportingDocuments.length +
+                              rateFormData.rateDocuments.length
                       /**
                     Rate programs switched in summer 2024. We still show deprecated program field values when
                     - there's no new field values present and CMS user is viewing
@@ -559,7 +518,14 @@ export const RateDetailsSummarySection = ({
                                   hideBorderBottom
                                   as="h3"
                               >
-                                  <span>download contract documents</span>
+                                  {isSubmittedOrCMSUser &&
+                                      !isPreviousSubmission &&
+                                      rateRevs &&
+                                      rateRevs.length > 0 &&
+                                      renderZipLink(
+                                          zippedFilesURL,
+                                          rateDocumentCount
+                                      )}
                               </SectionHeader>
                               {rateFormData.rateDocuments && (
                                   <UploadedDocumentsTable

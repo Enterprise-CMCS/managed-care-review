@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { useEffect, useState } from 'react'
 import { DataDetail } from '../../../components/DataDetail'
 import { SectionHeader } from '../../../components/SectionHeader'
 import { UploadedDocumentsTable } from '../../../components/SubmissionSummarySection'
@@ -10,7 +10,6 @@ import {
 import { getContractZipDownloadUrl } from '../../../helpers/zipHelpers'
 import { formatCalendarDate } from '@mc-review/dates'
 import { MultiColumnGrid } from '../../../components/MultiColumnGrid'
-import { DownloadButton } from '../../../components/DownloadButton'
 import { usePreviousSubmission } from '../../../hooks/usePreviousSubmission'
 import styles from '../../SubmissionSummary/SubmissionSummary.module.scss'
 import { useAuth } from '../../../contexts/AuthContext'
@@ -52,6 +51,7 @@ import {
     getVisibleLatestContractFormData,
 } from '@mc-review/helpers'
 import { hasCMSUserPermissions } from '@mc-review/helpers'
+import { LinkWithLogging } from '../../../components'
 
 export type ContractDetailsSummarySectionProps = {
     contract: Contract
@@ -64,17 +64,26 @@ export type ContractDetailsSummarySectionProps = {
     explainMissingData?: boolean
 }
 
-function renderDownloadButton(zippedFilesURL: string | undefined | Error) {
-    if (zippedFilesURL instanceof Error) {
+function renderZipLink(
+    zippedFilesURL: string | undefined | Error,
+    contractDocumentCount: number | undefined
+) {
+    if (zippedFilesURL instanceof Error || zippedFilesURL === undefined) {
         return (
             <InlineDocumentWarning message="Contract document download is unavailable" />
         )
     }
     return (
-        <DownloadButton
-            text="Download all contract documents"
-            zippedFilesURL={zippedFilesURL}
-        />
+        <LinkWithLogging
+            variant="unstyled"
+            href={zippedFilesURL}
+            target="_blank"
+        >
+            <p>
+                Download contract documents{' '}
+                {contractDocumentCount && `(${contractDocumentCount} files)`}
+            </p>
+        </LinkWithLogging>
     )
 }
 
@@ -86,6 +95,9 @@ export const ContractDetailsSummarySection = ({
     onDocumentError,
     explainMissingData,
 }: ContractDetailsSummarySectionProps): React.ReactElement => {
+    const [zippedFilesURL, setZippedFilesURL] = useState<
+        string | undefined | Error
+    >(undefined)
     // Checks if submission is a previous submission
     const isPreviousSubmission = usePreviousSubmission()
     const ldClient = useLDClient()
@@ -117,6 +129,12 @@ export const ContractDetailsSummarySection = ({
         booleanAsYesNoFormValue(contractFormData.statutoryRegulatoryAttestation)
 
     const contractSupportingDocuments = contractFormData?.supportingDocuments
+    const contractDocs = contractFormData?.contractDocuments
+    const contractDocumentCount =
+        contractSupportingDocuments &&
+        contractDocs &&
+        contractFormData.supportingDocuments.length +
+            contractFormData.contractDocuments.length
     const applicableFederalAuthorities = isCHIPOnly(contract)
         ? contractFormData?.federalAuthorities.filter((authority) =>
               federalAuthorityKeysForCHIP.includes(
@@ -130,16 +148,29 @@ export const ContractDetailsSummarySection = ({
 
     // Get the zip download URL from the pre-generated zip packages
     // Only for submitted contracts, not drafts or previous submissions
-    const currentRevision =
-        contractRev ||
-        contract.draftRevision ||
-        contract.packageSubmissions[0]?.contractRevision
-    const zippedFilesURL =
-        isSubmittedOrCMSUser && !isPreviousSubmission && currentRevision
-            ? getContractZipDownloadUrl(
-                  currentRevision.documentZipPackages || undefined
-              )
-            : undefined
+    useEffect(() => {
+        const currentRevision =
+            contractRev ||
+            contract.draftRevision ||
+            contract.packageSubmissions[0]?.contractRevision
+
+        if (
+            isSubmittedOrCMSUser &&
+            !isPreviousSubmission &&
+            currentRevision?.documentZipPackages
+        ) {
+            const zipURL = getContractZipDownloadUrl(
+                currentRevision.documentZipPackages
+            )
+            setZippedFilesURL(zipURL)
+        }
+    }, [
+        isSubmittedOrCMSUser,
+        isPreviousSubmission,
+        contract.draftRevision,
+        contract.packageSubmissions,
+        contractRev,
+    ])
 
     // Calculate last submitted data for document upload tables
     const lastSubmittedIndex = getIndexFromRevisionVersion(
@@ -159,11 +190,7 @@ export const ContractDetailsSummarySection = ({
                 header="Contract details"
                 editNavigateTo={editNavigateTo}
                 hideBorderTop
-            >
-                {isSubmittedOrCMSUser &&
-                    !isPreviousSubmission &&
-                    renderDownloadButton(zippedFilesURL)}
-            </SectionHeader>
+            />
             <dl>
                 {contract438Attestation && (
                     <Grid row gap className={styles.singleColumnGrid}>
@@ -324,9 +351,11 @@ export const ContractDetailsSummarySection = ({
                 )}
             </dl>
             <SectionHeader header="Contract documents" hideBorderBottom as="h3">
-                <span>download contract documents</span>
+                {isSubmittedOrCMSUser &&
+                    !isPreviousSubmission &&
+                    renderZipLink(zippedFilesURL, contractDocumentCount)}
             </SectionHeader>
-            {contractFormData?.contractDocuments && (
+            {contractDocs && (
                 <UploadedDocumentsTable
                     documents={contractFormData.contractDocuments}
                     previousSubmissionDate={
