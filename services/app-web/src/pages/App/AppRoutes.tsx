@@ -346,16 +346,16 @@ const CMSUserRoutes = ({
                         path={RoutesRecord.SUPPORT_EMAILS}
                         element={<SupportEmailsTable />}
                     />
+                    <Route
+                        path={RoutesRecord.EDIT_STATE_ASSIGNMENTS}
+                        element={<EditStateAssign />}
+                    />
                     {isAdminUser && (
                         //For Admin user only routes.
                         <>
                             <Route
                                 path={RoutesRecord.OAUTH_CLIENTS}
                                 element={<OauthClients />}
-                            />
-                            <Route
-                                path={RoutesRecord.EDIT_STATE_ASSIGNMENTS}
-                                element={<EditStateAssign />}
                             />
                             <Route
                                 path={RoutesRecord.CREATE_OAUTH_CLIENT}

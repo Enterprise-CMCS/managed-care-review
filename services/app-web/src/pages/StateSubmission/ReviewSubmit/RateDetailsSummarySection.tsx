@@ -117,6 +117,7 @@ export const RateDetailsSummarySection = ({
         featureFlags.DSNP.flag,
         featureFlags.DSNP.defaultValue
     )
+
     const rateRevs = rateRevisions
         ? rateRevisions
         : getVisibleLatestRateRevisions(contract, isEditing)
@@ -288,6 +289,11 @@ export const RateDetailsSummarySection = ({
                       const medicaidPopulations =
                           (rateFormData.rateMedicaidPopulations ??
                               []) as string[]
+                      const contractIsDsnp =
+                          contract.packageSubmissions[0]?.contractRevision
+                              ?.formData?.dsnpContract === true ||
+                          contract.draftRevision?.formData?.dsnpContract ===
+                              true
                       const rateDocumentCount =
                           rateFormData.supportingDocuments &&
                           rateFormData.rateDocuments &&
@@ -349,31 +355,31 @@ export const RateDetailsSummarySection = ({
                                               )}
                                           />
                                       )}
-                                      {isDsnpEnabled &&
-                                          medicaidPopulations.length !== 0 && (
-                                              <DataDetail
-                                                  id="medicaidPop"
-                                                  label="Medicaid populations included in this rate certification"
-                                                  explainMissingData={
-                                                      isLinkedRate
-                                                          ? false
-                                                          : explainMissingData
-                                                  }
-                                                  children={
-                                                      <DataDetailCheckboxList
-                                                          list={
-                                                              medicaidPopulations
-                                                          }
-                                                          dict={
-                                                              RateMedicaidPopulationsRecord
-                                                          }
-                                                          displayEmptyList={
-                                                              !explainMissingData
-                                                          }
-                                                      />
-                                                  }
-                                              />
-                                          )}
+                                      {isDsnpEnabled && contractIsDsnp && (
+                                          <DataDetail
+                                              id="medicaidPop"
+                                              label="Medicaid populations included in this rate certification"
+                                              explainMissingData={
+                                                  isLinkedRate
+                                                      ? false
+                                                      : explainMissingData &&
+                                                        rateRev.formData
+                                                            .rateMedicaidPopulations
+                                                            ?.length === 0
+                                              }
+                                              children={
+                                                  <DataDetailCheckboxList
+                                                      list={medicaidPopulations}
+                                                      dict={
+                                                          RateMedicaidPopulationsRecord
+                                                      }
+                                                      displayEmptyList={
+                                                          !explainMissingData
+                                                      }
+                                                  />
+                                              }
+                                          />
+                                      )}
                                       <DataDetail
                                           id="rateType"
                                           label="Rate certification type"

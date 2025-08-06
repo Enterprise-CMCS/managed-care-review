@@ -58,7 +58,8 @@ const getTealiumPageName = ({
             } else {
                 return formatPageName({ heading, title: 'CMS Dashboard' })
             }
-        case 'DASHBOARD_SUBMISSIONS' || 'DASHBOARD_RATES':
+        case 'DASHBOARD_SUBMISSIONS':
+        case 'DASHBOARD_RATES':
             if (user && hasCMSUserPermissions(user)) {
                 return formatPageName({ title: 'CMS Dashboard' })
             } else if (user && user.__typename === 'StateUser') {
