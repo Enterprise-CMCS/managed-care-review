@@ -42,7 +42,7 @@ export class Uploads extends BaseStack {
     } {
         // Create uploads bucket that matches serverless naming: uploads-${stage}-uploads-${account}
         const uploadsBucket = new SecureS3Bucket(this, 'UploadsBucket', {
-            bucketName: `uploads-${this.stage}-uploads`,
+            bucketName: 'uploads-documents',
             stage: this.stage,
             cors: [
                 {
@@ -64,7 +64,7 @@ export class Uploads extends BaseStack {
 
         // Create Q&A bucket that matches serverless naming: uploads-${stage}-qa-${account}
         const qaBucket = new SecureS3Bucket(this, 'QaBucket', {
-            bucketName: `uploads-${this.stage}-qa`,
+            bucketName: 'uploads-qa',
             stage: this.stage,
             cors: [
                 {
