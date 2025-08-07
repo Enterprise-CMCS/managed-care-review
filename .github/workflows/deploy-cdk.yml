@@ -355,7 +355,7 @@ jobs:
           SUBNET_PRIVATE_C_ID: ${{ secrets.DEV_SUBNET_PRIVATE_C_ID }}
         run: |
           echo "=== Deploying Postgres stack ==="
-          npx cdk deploy MCR-Postgres-${STAGE_NAME} \
+          npx cdk deploy MCR-Postgres-${STAGE_NAME}-cdk \
             --app 'pnpm tsx bin/postgres.ts' \
             --context stage=${STAGE_NAME} \
             --require-approval never
