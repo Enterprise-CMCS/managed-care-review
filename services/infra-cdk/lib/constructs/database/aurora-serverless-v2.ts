@@ -16,8 +16,8 @@ import { Alarm, Metric, TreatMissingData } from 'aws-cdk-lib/aws-cloudwatch'
 import { SnsAction } from 'aws-cdk-lib/aws-cloudwatch-actions'
 import type { ITopic } from 'aws-cdk-lib/aws-sns'
 import { Duration, RemovalPolicy, Stack } from 'aws-cdk-lib'
-import type {
-    DatabaseConfig,
+import {
+    type DatabaseConfig,
     ResourceNames,
     CDK_DEPLOYMENT_SUFFIX,
 } from '../../config/index'
