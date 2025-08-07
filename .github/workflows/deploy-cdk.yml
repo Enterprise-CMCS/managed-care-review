@@ -171,7 +171,7 @@ jobs:
     runs-on: ubuntu-24.04
     services:
       postgres:
-        image: postgres:13.3
+        image: postgres:16.6
         env:
           VITE_APP_AUTH_MODE: AWS_COGNITO
           POSTGRES_PASSWORD: shhhsecret #pragma: allowlist secret
@@ -355,7 +355,7 @@ jobs:
           SUBNET_PRIVATE_C_ID: ${{ secrets.DEV_SUBNET_PRIVATE_C_ID }}
         run: |
           echo "=== Deploying Postgres stack ==="
-          npx cdk deploy MCR-Postgres-${STAGE_NAME}-cdk \
+          npx cdk deploy MCR-Postgres-${STAGE_NAME} \
             --app 'pnpm tsx bin/postgres.ts' \
             --context stage=${STAGE_NAME} \
             --require-approval never
