@@ -328,7 +328,7 @@ jobs:
           SUBNET_PRIVATE_C_ID: ${{ secrets.DEV_SUBNET_PRIVATE_C_ID }}
         run: |
           echo "=== Deploying Network stack ==="
-          npx cdk deploy MCR-Network-${STAGE_NAME} \
+          npx cdk deploy MCR-Network-${STAGE_NAME}-cdk \
             --app 'pnpm tsx bin/network.ts' \
             --context stage=${STAGE_NAME} \
             --require-approval never
@@ -339,8 +339,24 @@ jobs:
           STAGE_NAME: ${{ needs.begin-deployment.outputs.stage-name }}
         run: |
           echo "=== Deploying Uploads stack ==="
-          npx cdk deploy MCR-Uploads-${STAGE_NAME} \
+          npx cdk deploy MCR-Uploads-${STAGE_NAME}-cdk \
             --app 'pnpm tsx bin/uploads.ts' \
+            --context stage=${STAGE_NAME} \
+            --require-approval never
+
+      - name: Deploy CDK Postgres stack
+        working-directory: services/infra-cdk
+        env:
+          STAGE_NAME: ${{ needs.begin-deployment.outputs.stage-name }}
+          VPC_ID: ${{ secrets.DEV_VPC_ID }}
+          SG_ID: ${{ secrets.DEV_SG_ID }}
+          SUBNET_PRIVATE_A_ID: ${{ secrets.DEV_SUBNET_PRIVATE_A_ID }}
+          SUBNET_PRIVATE_B_ID: ${{ secrets.DEV_SUBNET_PRIVATE_B_ID }}
+          SUBNET_PRIVATE_C_ID: ${{ secrets.DEV_SUBNET_PRIVATE_C_ID }}
+        run: |
+          echo "=== Deploying Postgres stack ==="
+          npx cdk deploy MCR-Postgres-${STAGE_NAME}-cdk \
+            --app 'pnpm tsx bin/postgres.ts' \
             --context stage=${STAGE_NAME} \
             --require-approval never
 
