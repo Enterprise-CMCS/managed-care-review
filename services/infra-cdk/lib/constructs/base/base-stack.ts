@@ -1,6 +1,10 @@
 import { Stack, type StackProps, Tags } from 'aws-cdk-lib'
 import type { Construct } from 'constructs'
-import { PROJECT_NAME, ResourceNames, type StageConfig } from '@config/index'
+import {
+    PROJECT_NAME,
+    ResourceNames,
+    type StageConfig,
+} from '../../config/index'
 
 // Base stack specific constants (moved from shared config)
 const MANDATORY_TAGS = {
