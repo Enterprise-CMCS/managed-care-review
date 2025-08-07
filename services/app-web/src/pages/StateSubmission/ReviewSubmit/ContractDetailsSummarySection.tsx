@@ -80,7 +80,10 @@ function renderZipLink(
             href={zippedFilesURL}
             target="_blank"
         >
-            <p style={{ fontSize: '17px', width: '313px', color: '#005EA2' }}>
+            <p
+                style={{ fontSize: '17px', width: '313px', color: '#005EA2' }}
+                data-testid="zipDownloadLink"
+            >
                 <Icon.FileDownload style={{ verticalAlign: 'middle' }} />
                 Download contract documents{' '}
                 {contractDocumentCount &&

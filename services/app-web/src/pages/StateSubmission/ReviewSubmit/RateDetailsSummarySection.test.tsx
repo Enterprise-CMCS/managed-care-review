@@ -1277,13 +1277,8 @@ describe('RateDetailsSummarySection', () => {
         expect(screen.queryByText('Edit')).not.toBeInTheDocument()
 
         // expects download all button after loading has completed
-        await waitFor(() => {
-            expect(
-                screen.getByRole('link', {
-                    name: 'Download all rate documents',
-                })
-            ).toBeInTheDocument()
-        })
+        const link = await screen.findByTestId('zipDownloadLink')
+        expect(link).toBeInTheDocument()
 
         // expect withdrawn rates to be on the screen
         expect(

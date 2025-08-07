@@ -86,7 +86,10 @@ export function renderZipLink(
             href={zippedFilesURL}
             target="_blank"
         >
-            <p style={{ fontSize: '16px', width: '266px', color: '#005EA2' }}>
+            <p
+                style={{ fontSize: '16px', width: '266px', color: '#005EA2' }}
+                data-testid="zipDownloadLink"
+            >
                 <Icon.FileDownload style={{ verticalAlign: 'middle' }} />
                 Download rate documents{' '}
                 {rateDocumentCount &&
