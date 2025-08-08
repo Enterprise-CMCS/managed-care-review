@@ -1,5 +1,6 @@
 import { BaseStack, type BaseStackProps } from '../constructs/base/base-stack'
 import { type Construct } from 'constructs'
+import { join } from 'path'
 import {
     Bucket,
     BucketEncryption,
@@ -17,7 +18,7 @@ import {
     AllowedMethods,
     FunctionEventType,
 } from 'aws-cdk-lib/aws-cloudfront'
-import { S3Origin } from 'aws-cdk-lib/aws-cloudfront-origins'
+import { S3BucketOrigin } from 'aws-cdk-lib/aws-cloudfront-origins'
 import { CfnWebACL } from 'aws-cdk-lib/aws-wafv2'
 import { PolicyStatement, Effect } from 'aws-cdk-lib/aws-iam'
 import { CfnOutput } from 'aws-cdk-lib'
@@ -103,13 +104,12 @@ export class FrontendStack extends BaseStack {
             {
                 functionName: `hsts-${this.stage}`,
                 comment: 'This function adds headers to implement HSTS',
-                code: FunctionCode.fromInline(`
-function handler(event) {
-  var response = event.response;
-  var headers = response.headers;
-  headers['strict-transport-security'] = { value: 'max-age=63072000; includeSubdomains; preload'};
-  return response;
-}`),
+                code: FunctionCode.fromFile({
+                    filePath: join(
+                        __dirname,
+                        '../cloudfront-functions/hsts.js'
+                    ),
+                }),
                 runtime: FunctionRuntime.JS_1_0,
                 autoPublish: true,
             }
@@ -122,7 +122,7 @@ function handler(event) {
             httpVersion: HttpVersion.HTTP2,
 
             defaultBehavior: {
-                origin: new S3Origin(this.bucket, {
+                origin: S3BucketOrigin.withOriginAccessIdentity(this.bucket, {
                     originAccessIdentity: oai,
                 }),
                 compress: true,
