@@ -1,30 +1,79 @@
 #!/usr/bin/env node
 import * as cdk from 'aws-cdk-lib'
+import { AppConfigLoader } from '../lib/config/app'
+import { SynthesizerConfigLoader } from '../lib/config/synthesizer'
+import { Aspects } from 'aws-cdk-lib'
+import { IamPathAspect } from '../lib/aspects/iam-path-aspects'
+import { IamPermissionsBoundaryAspect } from '../lib/aspects/iam-permissions-boundary-aspects'
 import { getEnvironment, getCdkEnvironment, ResourceNames } from '../lib/config'
 import { FrontendStack } from '../lib/stacks/frontend'
 
-const app = new cdk.App()
+async function main(): Promise<void> {
+    try {
+        // Load configuration (matches postgres.ts pattern)
+        const appConfig = AppConfigLoader.load()
+        const synthesizerLoader = new SynthesizerConfigLoader(
+            appConfig.awsRegion
+        )
+        const synthConfig = await synthesizerLoader.load()
 
-// Get stage from context or environment
-const stage = app.node.tryGetContext('stage') || process.env.STAGE_NAME
-const env = getCdkEnvironment(stage)
-const config = getEnvironment(stage)
+        // Create CDK app
+        const app = new cdk.App({
+            defaultStackSynthesizer: new cdk.DefaultStackSynthesizer(
+                synthConfig
+            ),
+        })
 
-// Create simple frontend stack
-new FrontendStack(app, ResourceNames.stackName('Frontend', stage), {
-    env,
-    stage,
-    stageConfig: config,
-    serviceName: 'frontend',
-})
+        // Set stage context
+        app.node.setContext('stage', appConfig.stage)
 
-// Add resource tags (matches network.ts pattern)
-cdk.Tags.of(app).add('Project', 'mc-review')
-cdk.Tags.of(app).add('Environment', stage)
-cdk.Tags.of(app).add('ManagedBy', 'CDK')
-cdk.Tags.of(app).add(
-    'Repository',
-    'https://github.com/Enterprise-CMCS/managed-care-review'
-)
+        // Get environment config
+        const config = getEnvironment(appConfig.stage)
+        const env = getCdkEnvironment(appConfig.stage)
 
-app.synth()
+        // Create Frontend stack
+        new FrontendStack(
+            app,
+            ResourceNames.stackName('Frontend', appConfig.stage),
+            {
+                env,
+                stage: appConfig.stage,
+                stageConfig: config,
+                serviceName: 'frontend',
+            }
+        )
+
+        // Apply IAM aspects
+        Aspects.of(app).add(new IamPathAspect(appConfig.iamPath))
+        if (appConfig.permissionsBoundaryArn) {
+            Aspects.of(app).add(
+                new IamPermissionsBoundaryAspect(
+                    appConfig.permissionsBoundaryArn
+                )
+            )
+        }
+
+        // Add resource tags (matches network.ts pattern)
+        cdk.Tags.of(app).add('Project', 'mc-review')
+        cdk.Tags.of(app).add('Environment', appConfig.stage)
+        cdk.Tags.of(app).add('ManagedBy', 'CDK')
+        cdk.Tags.of(app).add(
+            'Repository',
+            'https://github.com/Enterprise-CMCS/managed-care-review'
+        )
+
+        app.synth()
+
+        console.info(
+            `CDK synthesis completed for Frontend stack: ${appConfig.stage}`
+        )
+    } catch (error) {
+        console.error('Frontend stack initialization failed:', error)
+        console.error('\nTroubleshooting:')
+        console.error('- Check AWS credentials and region configuration')
+        console.error('- Ensure CDK bootstrap and proper AWS permissions')
+        process.exit(1)
+    }
+}
+
+void main()
