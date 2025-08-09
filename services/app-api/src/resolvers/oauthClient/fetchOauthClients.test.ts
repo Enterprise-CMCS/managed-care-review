@@ -93,17 +93,7 @@ describe('fetchOauthClients', () => {
             context: { user: adminUser },
         })
 
-        // Clean up any existing OAuth clients to ensure test isolation
         const client = await sharedTestPrismaClient()
-        await client.oAuthClient.deleteMany()
-
-        // Fetch all should return empty array after cleanup
-        const emptyRes = await server.executeOperation({
-            query: FetchOauthClientsDocument,
-            variables: { input: {} },
-        })
-        expect(emptyRes.errors).toBeUndefined()
-        expect(emptyRes.data?.fetchOauthClients.oauthClients).toHaveLength(0)
 
         // Create a CMS user with state assignments
         const cmsUser = testCMSUser()
@@ -123,6 +113,16 @@ describe('fetchOauthClients', () => {
                 },
             },
         })
+
+        // Clean up any existing OAuth clients to ensure test isolation
+        await client.oAuthClient.deleteMany()
+        // Fetch all should return empty array after cleanup
+        const emptyRes = await server.executeOperation({
+            query: FetchOauthClientsDocument,
+            variables: { input: {} },
+        })
+        expect(emptyRes.errors).toBeUndefined()
+        expect(emptyRes.data?.fetchOauthClients.oauthClients).toHaveLength(0)
 
         // Create an OAuth client
         const createRes = await server.executeOperation({
