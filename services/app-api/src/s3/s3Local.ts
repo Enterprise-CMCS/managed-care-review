@@ -94,6 +94,18 @@ export function newLocalS3Client(
             const signedUrl = await getSignedUrl(s3Client, command)
             return signedUrl
         },
+        getZipURL: async (
+            s3key: string,
+            bucket: BucketShortName
+        ): Promise<string> => {
+            const command = new GetObjectCommand({
+                Bucket: bucketConfig[bucket],
+                Key: s3key,
+            })
+            // Create the presigned URL.
+            const signedUrl = await getSignedUrl(s3Client, command)
+            return signedUrl
+        },
         getBulkDlURL: async (
             keys: string[],
             filename: string,

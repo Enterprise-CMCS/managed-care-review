@@ -88,6 +88,8 @@
     display: block;
     font-weight: bold;
     margin: 0;
+    border-bottom: 1px solid custom.$mcr-gray-lighter;
+    padding-bottom: uswds.units(1);
 }
 
 .replaceRateWrapper {

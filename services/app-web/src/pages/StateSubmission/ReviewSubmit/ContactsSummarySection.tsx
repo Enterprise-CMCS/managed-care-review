@@ -36,6 +36,7 @@ export const ContactsSummarySection = ({
             <SectionHeader
                 header="State contacts"
                 editNavigateTo={editNavigateTo}
+                hideBorderTop
             />
 
             <GridContainer className="padding-left-0">

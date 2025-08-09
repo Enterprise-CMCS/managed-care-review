@@ -9,7 +9,9 @@ export type SectionHeaderProps = {
     subHeaderComponent?: React.ReactNode // Controls appearance of additional component below main heading
     sectionId?: string
     headerId?: string
-    hideBorder?: boolean
+    hideBorderBottom?: boolean
+    hideBorderTop?: boolean
+    as?: keyof JSX.IntrinsicElements
 }
 
 export const SectionHeader = ({
@@ -19,11 +21,14 @@ export const SectionHeader = ({
     children,
     sectionId,
     headerId,
-    hideBorder,
+    hideBorderBottom,
+    hideBorderTop,
+    as,
 }: SectionHeaderProps & JSX.IntrinsicElements['div']): React.ReactElement => {
     const classes = classNames({
         [styles.summarySectionHeader]: true,
-        [styles.summarySectionHeaderBorder]: !hideBorder,
+        [styles.summarySectionHeaderBorderBottom]: !hideBorderBottom,
+        [styles.summarySectionHeaderBorderTop]: !hideBorderTop,
         [styles.hasSubheader]: subHeaderComponent,
     })
 
@@ -31,10 +36,12 @@ export const SectionHeader = ({
         [styles.primaryDiv]: !!(editNavigateTo || children),
     })
 
+    const Tag = as ?? 'h2'
+
     return (
         <div className={classes} id={sectionId}>
             <div className={primaryDivClasses}>
-                <h2 id={headerId}>{header}</h2>
+                <Tag id={headerId}>{header}</Tag>
                 {subHeaderComponent}
             </div>
             <div>

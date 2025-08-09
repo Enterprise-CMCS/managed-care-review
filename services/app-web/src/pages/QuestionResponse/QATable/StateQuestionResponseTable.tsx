@@ -63,7 +63,7 @@ export const StateQuestionResponseTable = ({
     return (
         <>
             <div className={styles.tableHeader}>
-                <SectionHeader header={header} hideBorder />
+                <SectionHeader header={header} hideBorderBottom />
             </div>
             <section
                 className={styles.questionSection}

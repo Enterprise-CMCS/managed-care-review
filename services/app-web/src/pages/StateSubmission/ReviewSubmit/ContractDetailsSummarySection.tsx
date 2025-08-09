@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React from 'react'
 import { DataDetail } from '../../../components/DataDetail'
 import { SectionHeader } from '../../../components/SectionHeader'
 import { UploadedDocumentsTable } from '../../../components/SubmissionSummarySection'
@@ -7,10 +7,9 @@ import {
     FederalAuthorityRecord,
     ManagedCareEntityRecord,
 } from '@mc-review/hpp'
-import { useS3 } from '../../../contexts/S3Context'
+import { getContractZipDownloadUrl } from '../../../helpers/zipHelpers'
 import { formatCalendarDate } from '@mc-review/dates'
 import { MultiColumnGrid } from '../../../components/MultiColumnGrid'
-import { DownloadButton } from '../../../components/DownloadButton'
 import { usePreviousSubmission } from '../../../hooks/usePreviousSubmission'
 import styles from '../../SubmissionSummary/SubmissionSummary.module.scss'
 import { useAuth } from '../../../contexts/AuthContext'
@@ -31,12 +30,10 @@ import {
     federalAuthorityKeysForCHIP,
     CHIPFederalAuthority,
 } from '@mc-review/hpp'
-import { recordJSException } from '@mc-review/otel'
-import useDeepCompareEffect from 'use-deep-compare-effect'
 import { InlineDocumentWarning } from '../../../components/DocumentWarning'
 import { useLDClient } from 'launchdarkly-react-client-sdk'
 import { featureFlags } from '@mc-review/common-code'
-import { Grid } from '@trussworks/react-uswds'
+import { Grid, Icon } from '@trussworks/react-uswds'
 import {
     booleanAsYesNoFormValue,
     booleanAsYesNoUserValue,
@@ -55,6 +52,7 @@ import {
     getVisibleLatestContractFormData,
 } from '@mc-review/helpers'
 import { hasCMSUserPermissions } from '@mc-review/helpers'
+import { LinkWithLogging } from '../../../components'
 
 export type ContractDetailsSummarySectionProps = {
     contract: Contract
@@ -67,17 +65,35 @@ export type ContractDetailsSummarySectionProps = {
     explainMissingData?: boolean
 }
 
-function renderDownloadButton(zippedFilesURL: string | undefined | Error) {
-    if (zippedFilesURL instanceof Error) {
+function renderZipLink(
+    zippedFilesURL: string | undefined | Error,
+    contractDocumentCount: number | undefined,
+    onDocumentError?: (error: true) => void
+) {
+    if (zippedFilesURL instanceof Error || !zippedFilesURL) {
+        if (onDocumentError) {
+            onDocumentError(true)
+        }
         return (
             <InlineDocumentWarning message="Contract document download is unavailable" />
         )
     }
     return (
-        <DownloadButton
-            text="Download all contract documents"
-            zippedFilesURL={zippedFilesURL}
-        />
+        <LinkWithLogging
+            variant="unstyled"
+            href={zippedFilesURL}
+            target="_blank"
+        >
+            <p
+                style={{ fontSize: '17px', width: '313px', color: '#005EA2' }}
+                data-testid="zipDownloadLink"
+            >
+                <Icon.FileDownload style={{ verticalAlign: 'middle' }} />
+                Download contract documents{' '}
+                {contractDocumentCount &&
+                    `(${contractDocumentCount} file${contractDocumentCount > 1 ? 's' : ''})`}
+            </p>
+        </LinkWithLogging>
     )
 }
 
@@ -91,11 +107,6 @@ export const ContractDetailsSummarySection = ({
 }: ContractDetailsSummarySectionProps): React.ReactElement => {
     // Checks if submission is a previous submission
     const isPreviousSubmission = usePreviousSubmission()
-    // Get the zip file for the contract
-    const { getKey, getBulkDlURL } = useS3()
-    const [zippedFilesURL, setZippedFilesURL] = useState<
-        string | undefined | Error
-    >(undefined)
     const ldClient = useLDClient()
     const { loggedInUser } = useAuth()
     const { revisionVersion } = useParams()
@@ -125,6 +136,12 @@ export const ContractDetailsSummarySection = ({
         booleanAsYesNoFormValue(contractFormData.statutoryRegulatoryAttestation)
 
     const contractSupportingDocuments = contractFormData?.supportingDocuments
+    const contractDocs = contractFormData?.contractDocuments
+    const contractDocumentCount =
+        contractSupportingDocuments &&
+        contractDocs &&
+        contractFormData.supportingDocuments.length +
+            contractFormData.contractDocuments.length
     const applicableFederalAuthorities = isCHIPOnly(contract)
         ? contractFormData?.federalAuthorities.filter((authority) =>
               federalAuthorityKeysForCHIP.includes(
@@ -146,54 +163,19 @@ export const ContractDetailsSummarySection = ({
         contractFormData?.dsnpContract === null
             ? undefined
             : contractFormData?.dsnpContract
-    useDeepCompareEffect(() => {
-        // skip getting urls of this if this is a previous contract or draft
-        if (!isSubmittedOrCMSUser || isPreviousSubmission) return
+    // Get the zip download URL from the pre-generated zip packages
+    // Only for submitted contracts, not drafts or previous submissions
+    const currentRevision =
+        contractRev ||
+        contract.draftRevision ||
+        contract.packageSubmissions[0]?.contractRevision
+    const zippedFilesURL =
+        isSubmittedOrCMSUser &&
+        !isPreviousSubmission &&
+        currentRevision?.documentZipPackages
+            ? getContractZipDownloadUrl(currentRevision.documentZipPackages)
+            : undefined
 
-        // get all the keys for the documents we want to zip
-        async function fetchZipUrl() {
-            const keysFromDocs =
-                contractSupportingDocuments &&
-                contractFormData?.contractDocuments
-                    .concat(contractSupportingDocuments)
-                    .map((doc) => {
-                        const key = getKey(doc.s3URL)
-                        if (!key) return ''
-                        return key
-                    })
-                    .filter((key) => key !== '')
-
-            // call the lambda to zip the files and get the url
-            const zippedURL =
-                keysFromDocs &&
-                (await getBulkDlURL(
-                    keysFromDocs,
-                    submissionName + '-contract-details.zip',
-                    'HEALTH_PLAN_DOCS'
-                ))
-            if (zippedURL instanceof Error) {
-                const msg = `ERROR: getBulkDlURL failed to generate contract document URL. ID: ${contract.id} Message: ${zippedURL}`
-                console.info(msg)
-
-                if (onDocumentError) {
-                    onDocumentError(true)
-                }
-
-                recordJSException(msg)
-            }
-
-            setZippedFilesURL(zippedURL)
-        }
-
-        void fetchZipUrl()
-    }, [
-        getKey,
-        getBulkDlURL,
-        contract,
-        contractSupportingDocuments,
-        submissionName,
-        isPreviousSubmission,
-    ])
     // Calculate last submitted data for document upload tables
     const lastSubmittedIndex = getIndexFromRevisionVersion(
         contract,
@@ -211,11 +193,8 @@ export const ContractDetailsSummarySection = ({
             <SectionHeader
                 header="Contract details"
                 editNavigateTo={editNavigateTo}
-            >
-                {isSubmittedOrCMSUser &&
-                    !isPreviousSubmission &&
-                    renderDownloadButton(zippedFilesURL)}
-            </SectionHeader>
+                hideBorderTop
+            />
             <dl>
                 {contract438Attestation && (
                     <Grid row gap className={styles.singleColumnGrid}>
@@ -375,7 +354,16 @@ export const ContractDetailsSummarySection = ({
                     </MultiColumnGrid>
                 )}
             </dl>
-            {contractFormData?.contractDocuments && (
+            <SectionHeader header="Contract documents" hideBorderBottom as="h3">
+                {isSubmittedOrCMSUser &&
+                    !isPreviousSubmission &&
+                    renderZipLink(
+                        zippedFilesURL,
+                        contractDocumentCount,
+                        onDocumentError
+                    )}
+            </SectionHeader>
+            {contractDocs && (
                 <UploadedDocumentsTable
                     documents={contractFormData.contractDocuments}
                     previousSubmissionDate={

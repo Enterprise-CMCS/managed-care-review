@@ -43,7 +43,7 @@ describe('SectionHeader', () => {
     })
     it('respects the hideBorder prop', () => {
         renderWithProviders(
-            <SectionHeader header="This is a section" hideBorder />
+            <SectionHeader header="This is a section" hideBorderBottom />
         )
         expect(
             screen
