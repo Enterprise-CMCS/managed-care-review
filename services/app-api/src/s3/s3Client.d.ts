@@ -21,5 +21,5 @@ export type S3ClientT = {
         filename: string,
         bucket: BucketShortName
     ) => Promise<string | Error>
-    generateDocumentZip: GenerateDocumentZipFunctionType
+    generateDocumentZip?: GenerateDocumentZipFunctionType
 }

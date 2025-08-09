@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react'
+import React from 'react'
 import { DataDetail } from '../../../components/DataDetail'
 import { SectionHeader } from '../../../components/SectionHeader'
 import { UploadedDocumentsTable } from '../../../components/SubmissionSummarySection'
@@ -67,9 +67,13 @@ export type ContractDetailsSummarySectionProps = {
 
 function renderZipLink(
     zippedFilesURL: string | undefined | Error,
-    contractDocumentCount: number | undefined
+    contractDocumentCount: number | undefined,
+    onDocumentError?: (error: true) => void
 ) {
-    if (zippedFilesURL instanceof Error || zippedFilesURL === undefined) {
+    if (zippedFilesURL instanceof Error || !zippedFilesURL) {
+        if (onDocumentError) {
+            onDocumentError(true)
+        }
         return (
             <InlineDocumentWarning message="Contract document download is unavailable" />
         )
@@ -101,9 +105,6 @@ export const ContractDetailsSummarySection = ({
     onDocumentError,
     explainMissingData,
 }: ContractDetailsSummarySectionProps): React.ReactElement => {
-    const [zippedFilesURL, setZippedFilesURL] = useState<
-        string | undefined | Error
-    >(undefined)
     // Checks if submission is a previous submission
     const isPreviousSubmission = usePreviousSubmission()
     const ldClient = useLDClient()
@@ -164,29 +165,16 @@ export const ContractDetailsSummarySection = ({
             : contractFormData?.dsnpContract
     // Get the zip download URL from the pre-generated zip packages
     // Only for submitted contracts, not drafts or previous submissions
-    useEffect(() => {
-        const currentRevision =
-            contractRev ||
-            contract.draftRevision ||
-            contract.packageSubmissions[0]?.contractRevision
-
-        if (
-            isSubmittedOrCMSUser &&
-            !isPreviousSubmission &&
-            currentRevision?.documentZipPackages
-        ) {
-            const zipURL = getContractZipDownloadUrl(
-                currentRevision.documentZipPackages
-            )
-            setZippedFilesURL(zipURL)
-        }
-    }, [
-        isSubmittedOrCMSUser,
-        isPreviousSubmission,
-        contract.draftRevision,
-        contract.packageSubmissions,
-        contractRev,
-    ])
+    const currentRevision =
+        contractRev ||
+        contract.draftRevision ||
+        contract.packageSubmissions[0]?.contractRevision
+    const zippedFilesURL =
+        isSubmittedOrCMSUser &&
+        !isPreviousSubmission &&
+        currentRevision?.documentZipPackages
+            ? getContractZipDownloadUrl(currentRevision.documentZipPackages)
+            : undefined
 
     // Calculate last submitted data for document upload tables
     const lastSubmittedIndex = getIndexFromRevisionVersion(
@@ -369,7 +357,11 @@ export const ContractDetailsSummarySection = ({
             <SectionHeader header="Contract documents" hideBorderBottom as="h3">
                 {isSubmittedOrCMSUser &&
                     !isPreviousSubmission &&
-                    renderZipLink(zippedFilesURL, contractDocumentCount)}
+                    renderZipLink(
+                        zippedFilesURL,
+                        contractDocumentCount,
+                        onDocumentError
+                    )}
             </SectionHeader>
             {contractDocs && (
                 <UploadedDocumentsTable

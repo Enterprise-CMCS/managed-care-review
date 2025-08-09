@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react'
+import React from 'react'
 import {
     DataDetail,
     DataDetailCheckboxList,
@@ -73,9 +73,13 @@ type PackageNamesLookupType = {
 
 export function renderZipLink(
     zippedFilesURL: string | undefined | Error,
-    rateDocumentCount: number | undefined
+    rateDocumentCount: number | undefined,
+    onDocumentError?: (error: true) => void
 ) {
     if (zippedFilesURL instanceof Error || !zippedFilesURL) {
+        if (onDocumentError) {
+            onDocumentError(true)
+        }
         return (
             <InlineDocumentWarning message="Rate document download is unavailable" />
         )
@@ -146,9 +150,6 @@ export const RateDetailsSummarySection = ({
         ? getPackageSubmissionAtIndex(contract, lastSubmittedIndex)?.submitInfo
               .updatedAt
         : (getLastContractSubmission(contract)?.submitInfo.updatedAt ?? null)
-    const [zippedFilesURL, setZippedFilesURL] = useState<
-        string | undefined | Error
-    >(undefined)
     const [packageNamesLookup] = React.useState<PackageNamesLookupType | null>(
         null
     )
@@ -248,19 +249,13 @@ export const RateDetailsSummarySection = ({
         return true
     }
 
-    useEffect(() => {
-        const currentRateRev = rateRevs && rateRevs[0]
-        if (
-            isSubmittedOrCMSUser &&
-            !isPreviousSubmission &&
-            currentRateRev?.documentZipPackages
-        ) {
-            const zipURL = getRateZipDownloadUrl(
-                currentRateRev.documentZipPackages
-            )
-            setZippedFilesURL(zipURL)
-        }
-    }, [isSubmittedOrCMSUser, isPreviousSubmission, rateRevs])
+    const currentRateRev = rateRevs && rateRevs[0]
+    const zippedFilesURL =
+        isSubmittedOrCMSUser &&
+        !isPreviousSubmission &&
+        currentRateRev?.documentZipPackages
+            ? getRateZipDownloadUrl(currentRateRev.documentZipPackages)
+            : undefined
 
     const noRatesMessage = () => {
         if (isStateUser) {
@@ -536,7 +531,8 @@ export const RateDetailsSummarySection = ({
                                       rateRevs.length > 0 &&
                                       renderZipLink(
                                           zippedFilesURL,
-                                          rateDocumentCount
+                                          rateDocumentCount,
+                                          onDocumentError
                                       )}
                               </SectionHeader>
                               {rateFormData.rateDocuments && (
