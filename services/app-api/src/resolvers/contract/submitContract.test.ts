@@ -1,4 +1,3 @@
-/* eslint-disable  @typescript-eslint/no-non-null-assertion */
 import {
     constructTestPostgresServer,
     defaultFloridaProgram,
@@ -7,7 +6,10 @@ import {
     updateTestStateAssignments,
 } from '../../testHelpers/gqlHelpers'
 import { SubmitContractDocument } from '../../gen/gqlClient'
-import { testS3Client } from '../../testHelpers'
+import {
+    clearMetadataFromContractFormData,
+    testS3Client,
+} from '../../testHelpers'
 
 import {
     createDBUsersWithFullData,
@@ -80,7 +82,7 @@ describe('submitContract', () => {
         expect(sub.submittedRevisions).toHaveLength(2)
 
         // check form data is unchanged
-        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+
         const draftFormData = updatedDraft.draftRevision!.formData
         const submittedFormData = sub.contractRevision.formData
 
@@ -863,7 +865,7 @@ describe('submitContract', () => {
         const rate10 = subA0.rateRevisions[0]
         const OneID = rate10.rateID
 
-        // CHANGE SUBMISSION DATE
+        // Change submission date and document dateAdded
         await prismaClient.contractRevisionTable.update({
             where: {
                 id: subA0.contractRevision.id,
@@ -874,11 +876,72 @@ describe('submitContract', () => {
                         updatedAt: new Date('2024-01-01'),
                     },
                 },
+                contractDocuments: {
+                    updateMany:
+                        subA0.contractRevision.formData.contractDocuments.map(
+                            (doc) => ({
+                                where: {
+                                    id: doc.id!,
+                                },
+                                data: {
+                                    dateAdded: new Date('2024-01-01'),
+                                },
+                            })
+                        ),
+                },
+                supportingDocuments: {
+                    updateMany:
+                        subA0.contractRevision.formData.supportingDocuments.map(
+                            (doc) => ({
+                                where: {
+                                    id: doc.id!,
+                                },
+                                data: {
+                                    dateAdded: new Date('2024-01-01'),
+                                },
+                            })
+                        ),
+                },
+            },
+        })
+
+        // Change rate submission date and document dateAdded
+        await prismaClient.rateRevisionTable.update({
+            where: {
+                id: rate10.id,
+            },
+            data: {
+                submitInfo: {
+                    update: {
+                        updatedAt: new Date('2024-01-01'),
+                    },
+                },
+                rateDocuments: {
+                    updateMany: rate10.formData.rateDocuments.map((doc) => ({
+                        where: {
+                            id: doc.id!,
+                        },
+                        data: {
+                            dateAdded: new Date('2024-01-01'),
+                        },
+                    })),
+                },
+                supportingDocuments: {
+                    updateMany: rate10.formData.supportingDocuments.map(
+                        (doc) => ({
+                            where: {
+                                id: doc.id!,
+                            },
+                            data: {
+                                dateAdded: new Date('2024-01-01'),
+                            },
+                        })
+                    ),
+                },
             },
         })
 
         const fixSubmitA0 = await fetchTestContract(stateServer, AID)
-
         const contractRev = fixSubmitA0.packageSubmissions[0].contractRevision
 
         expect(contractRev.formData.contractDocuments).toHaveLength(1)
@@ -921,17 +984,23 @@ describe('submitContract', () => {
         ).toBe('2024-01-01')
 
         // 2. Unlock and add more documents
-        const unlockedA0Pkg = await unlockTestHealthPlanPackage(
+        const unlockedA0Pkg = await unlockTestContract(
             cmsServer,
             AID,
             'Unlock A.0'
         )
-        const a0FormData = latestFormData(unlockedA0Pkg)
+
+        const a0FormData = unlockedA0Pkg.draftRevision.formData
         a0FormData.submissionDescription = 'DESC A1'
         a0FormData.contractDocuments.push(dummyDoc('c2'))
-        a0FormData.documents.push(dummyDoc('s2'))
+        a0FormData.supportingDocuments.push(dummyDoc('s2'))
 
-        await updateTestHealthPlanFormData(stateServer, a0FormData)
+        await updateTestContractDraftRevision(
+            stateServer,
+            AID,
+            unlockedA0Pkg.draftRevision.updatedAt,
+            clearMetadataFromContractFormData(a0FormData)
+        )
 
         const unlockedA0Contract = await fetchTestContract(stateServer, AID)
 
@@ -953,8 +1022,36 @@ describe('submitContract', () => {
             'Submit A.1'
         )
         const a1sub = submittedA1.packageSubmissions[0]
+        const rateUpdated = a1sub.rateRevisions[0]
 
-        // CHANGE SUBMISSION DATE
+        const dummyDocC2 =
+            a1sub.contractRevision.formData.contractDocuments.find(
+                (doc) => doc.name === 'docc2.pdf'
+            )
+        const dummyDocS2 =
+            a1sub.contractRevision.formData.supportingDocuments.find(
+                (doc) => doc.name === 'docs2.pdf'
+            )
+        const dummyRateDocR2 = rateUpdated.formData.rateDocuments.find(
+            (doc) => doc.name === 'docr2.pdf'
+        )
+        const dummyRateDocS2 = rateUpdated.formData.supportingDocuments.find(
+            (doc) => doc.name === 'docx2.pdf'
+        )
+
+        if (!dummyDocC2 || !dummyDocS2) {
+            throw new Error(
+                'Unexpected error: Additional docs where not found in submission'
+            )
+        }
+
+        if (!dummyRateDocR2 || !dummyRateDocS2) {
+            throw new Error(
+                'Unexpected error: Additional docs where not found in submission'
+            )
+        }
+
+        // Change submission date and document dateAdded for new docs only.
         await prismaClient.contractRevisionTable.update({
             where: {
                 id: a1sub.contractRevision.id,
@@ -963,6 +1060,60 @@ describe('submitContract', () => {
                 submitInfo: {
                     update: {
                         updatedAt: new Date('2024-02-02'),
+                    },
+                },
+                contractDocuments: {
+                    update: {
+                        where: {
+                            id: dummyDocC2.id!,
+                        },
+                        data: {
+                            dateAdded: new Date('2024-02-02'),
+                        },
+                    },
+                },
+                supportingDocuments: {
+                    update: {
+                        where: {
+                            id: dummyDocS2.id!,
+                        },
+                        data: {
+                            dateAdded: new Date('2024-02-02'),
+                        },
+                    },
+                },
+            },
+        })
+
+        // Change rate submission date and document added for new docs only
+        await prismaClient.rateRevisionTable.update({
+            where: {
+                id: rateUpdated.id,
+            },
+            data: {
+                submitInfo: {
+                    update: {
+                        updatedAt: new Date('2024-02-02'),
+                    },
+                },
+                rateDocuments: {
+                    update: {
+                        where: {
+                            id: dummyRateDocR2.id!,
+                        },
+                        data: {
+                            dateAdded: new Date('2024-02-02'),
+                        },
+                    },
+                },
+                supportingDocuments: {
+                    update: {
+                        where: {
+                            id: dummyRateDocS2.id!,
+                        },
+                        data: {
+                            dateAdded: new Date('2024-02-02'),
+                        },
                     },
                 },
             },
@@ -1221,7 +1372,6 @@ describe('submitContract', () => {
             )
         })
 
-        // eslint-disable-next-line jest/no-focused-tests
         it('send CMS email on contract only re-submission', async () => {
             const config = testEmailConfig()
             const mockEmailer = testEmailer(config)
@@ -1375,7 +1525,7 @@ describe('submitContract', () => {
         })
 
         // TODO: reimplement this test without using jest
-        // eslint-disable-next-line jest/no-commented-out-tests
+
         // it('does log error when request for state specific analysts emails failed', async () => {
         //     const consoleErrorSpy = jest.spyOn(console, 'error')
         //     const error = {
@@ -1629,7 +1779,7 @@ describe('submitContract', () => {
         })
 
         // TODO: reimplement this test without using jest
-        // eslint-disable-next-line jest/no-commented-out-tests
+
         // it('errors when SES email has failed.', async () => {
         //     const mockEmailer = testEmailer()
 
