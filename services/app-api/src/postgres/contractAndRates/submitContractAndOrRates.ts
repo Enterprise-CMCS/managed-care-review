@@ -1,5 +1,27 @@
 import type { PrismaTransactionType } from '../prismaTypes'
-import type { ContractRevisionTable, RateRevisionTable } from '@prisma/client'
+import type {
+    Prisma,
+    ContractRevisionTable,
+    RateRevisionTable,
+} from '@prisma/client'
+
+const includeContractRevWithOnlyDocs = {
+    submitInfo: true,
+    contractDocuments: {
+        orderBy: {
+            position: 'asc',
+        },
+    },
+    supportingDocuments: {
+        orderBy: {
+            position: 'asc',
+        },
+    },
+} satisfies Prisma.ContractRevisionTableInclude
+
+type ContractRevWithOnlyDocs = Prisma.ContractRevisionTableGetPayload<{
+    include: typeof includeContractRevWithOnlyDocs
+}>
 
 async function submitContractAndOrRates(
     tx: PrismaTransactionType,
@@ -19,36 +41,94 @@ async function submitContractAndOrRates(
         },
     })
 
-    let submittedContractRev: ContractRevisionTable | undefined = undefined
+    let submittedContractRev: ContractRevWithOnlyDocs | undefined = undefined
     if (contractID) {
-        const submittedRev = await tx.contractRevisionTable.findFirst({
+        const allRevisions = await tx.contractRevisionTable.findMany({
             where: {
                 contractID: contractID,
-                submitInfo: {
-                    is: null,
-                },
+            },
+            include: includeContractRevWithOnlyDocs,
+            orderBy: {
+                createdAt: 'desc',
             },
         })
 
-        if (!submittedRev) {
+        // Latest revision for use in submitting contract
+        const latestRevision = allRevisions[0]
+
+        //  If submit info already exists, then the latest revision is in a submitted state
+        if (latestRevision.submitInfo) {
             return new Error(
                 'attempted to submit contract with no draft revision: ' +
                     contractID
             )
         }
 
-        submittedContractRev = submittedRev
+        // Set this for use outside this if
+        submittedContractRev = latestRevision
 
-        // Update the contract to include the submitInfo ID
+        // Remove the latest draft submission and set prev revisions in ascending
+        // order. We need to find the first time docs are submitted.
+        const previousRevisions = allRevisions.slice(1).reverse()
+
+        // Collect first date added for our documents from previous submissions
+        const prevDocs: { [key: string]: Date | undefined } = {}
+        for (const rev of previousRevisions) {
+            const allRevDocs = [
+                ...rev.contractDocuments,
+                ...rev.supportingDocuments,
+            ]
+            allRevDocs.forEach((doc) => {
+                if (!prevDocs[doc.sha256]) {
+                    if (!doc.dateAdded && !rev.submitInfo?.updatedAt) {
+                        return new Error(
+                            'error attempting to set contracts document date added. A previous submission document has no date added or submitted date.'
+                        )
+                    }
+                    prevDocs[doc.sha256] =
+                        doc.dateAdded ?? rev.submitInfo?.updatedAt
+                }
+            })
+        }
+
+        // Update the contract to include the submitInfo ID and set date added.
+        // doc dateAdded defaults to the first submission of this document, then fallback to current date time.
         await tx.contractRevisionTable.update({
             where: {
                 id: submittedContractRev.id,
             },
             data: {
                 submitInfoID: submitInfo.id,
+                contractDocuments: {
+                    updateMany: submittedContractRev.contractDocuments.map(
+                        (doc) => ({
+                            where: {
+                                id: doc.id,
+                            },
+                            data: {
+                                dateAdded:
+                                    prevDocs[doc.sha256] ?? currentDateTime,
+                            },
+                        })
+                    ),
+                },
+                supportingDocuments: {
+                    updateMany: submittedContractRev.supportingDocuments.map(
+                        (doc) => ({
+                            where: {
+                                id: doc.id,
+                            },
+                            data: {
+                                dateAdded:
+                                    prevDocs[doc.sha256] ?? currentDateTime,
+                            },
+                        })
+                    ),
+                },
             },
         })
     }
+
     // next update the submitted rate revs
     const submittedRateRevs = await tx.rateRevisionTable.findMany({
         where: {
@@ -59,6 +139,18 @@ async function submitContractAndOrRates(
                 is: null,
             },
         },
+        include: {
+            rateDocuments: {
+                orderBy: {
+                    position: 'asc',
+                },
+            },
+            supportingDocuments: {
+                orderBy: {
+                    position: 'asc',
+                },
+            },
+        },
     })
 
     if (submittedRateRevs.length !== rateIDs.length) {
@@ -67,17 +159,88 @@ async function submitContractAndOrRates(
         )
     }
 
-    // we only want to update the rateRevision's submit info if it has not already been submitted
-    await tx.rateRevisionTable.updateMany({
+    const previousSubmissions = await tx.rateRevisionTable.findMany({
         where: {
-            id: {
-                in: submittedRateRevs.map((rev) => rev.id),
+            rateID: {
+                in: rateIDs,
+            },
+            submitInfoID: {
+                not: null,
             },
         },
-        data: {
-            submitInfoID: submitInfo.id,
+        include: {
+            submitInfo: true,
+            rateDocuments: {
+                orderBy: {
+                    position: 'asc',
+                },
+            },
+            supportingDocuments: {
+                orderBy: {
+                    position: 'asc',
+                },
+            },
+        },
+        orderBy: {
+            createdAt: 'asc', // Need in asc order so dateAdded is set to when this doc was first submitted.
         },
     })
+
+    // hashmap of unique docs by sha256 and dateAdded.
+    // key of property is formatted as rateID-sha256. This narrows documents to the rate it was uploaded on.
+    const prevRateDocs: { [key: string]: Date | undefined } = {}
+    for (const rev of previousSubmissions) {
+        const allRevDocs = [...rev.rateDocuments, ...rev.supportingDocuments]
+        allRevDocs.forEach((doc) => {
+            const hashKey = `${rev.rateID}-${doc.sha256}`
+            if (!prevRateDocs[hashKey]) {
+                if (!doc.dateAdded && !rev.submitInfo?.updatedAt) {
+                    return new Error(
+                        `error attempting to set rate documents date added. A previous submission document has no date added or submitted date. Rate: ${rev.rateID} Revision: ${rev.id}`
+                    )
+                }
+                prevRateDocs[hashKey] =
+                    doc.dateAdded ?? rev.submitInfo?.updatedAt
+            }
+        })
+    }
+
+    // Loop through each rate rev and add submit info and document date added.
+    // Fallback on submission date if this doc was not previously submitted.
+    for (const rev of submittedRateRevs) {
+        await tx.rateRevisionTable.update({
+            where: {
+                id: rev.id,
+            },
+            data: {
+                submitInfoID: submitInfo.id,
+                rateDocuments: {
+                    updateMany: rev.rateDocuments.map((doc) => ({
+                        where: {
+                            id: doc.id,
+                        },
+                        data: {
+                            dateAdded:
+                                prevRateDocs[`${rev.rateID}-${doc.sha256}`] ??
+                                currentDateTime,
+                        },
+                    })),
+                },
+                supportingDocuments: {
+                    updateMany: rev.supportingDocuments.map((doc) => ({
+                        where: {
+                            id: doc.id,
+                        },
+                        data: {
+                            dateAdded:
+                                prevRateDocs[`${rev.rateID}-${doc.sha256}`] ??
+                                currentDateTime,
+                        },
+                    })),
+                },
+            },
+        })
+    }
 
     const submissionRelatedContractRevs: ContractRevisionTable[] = []
     const submissionRelatedRateRevs: RateRevisionTable[] = []

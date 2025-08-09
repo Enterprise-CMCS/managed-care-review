@@ -195,8 +195,6 @@ function rateWithoutDraftContractsToDomainModel(
         }
     }
 
-    // Set the document date added for packageSubmissions, the data here is isolated from submittedRevisions so we need
-    // to set it again. The frontend uses rate.revisions for rate data
     /**
      * Set dateAdded for packageSubmissions.
      * Frontend currently uses rate.revisions but will migrate to packageSubmissions.
