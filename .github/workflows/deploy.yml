@@ -538,12 +538,12 @@ jobs:
           stage-name: ${{ needs.begin-deployment.outputs.stage-name }}
           changed-services: ${{ needs.begin-deployment.outputs.changed-services }}
 
-      - uses: actions/download-artifact@v4
+      - uses: actions/download-artifact@v5
         with:
           name: app-web-gen
           path: ./services/app-web/src/gen
 
-      - uses: actions/download-artifact@v4
+      - uses: actions/download-artifact@v5
         with:
           name: cypress-gen
           path: ./services/cypress/gen
@@ -654,7 +654,7 @@ jobs:
           echo $(pwd)
           ls
 
-      - uses: actions/download-artifact@v4
+      - uses: actions/download-artifact@v5
 
       - name: Create combined test coverage report
         run: |
