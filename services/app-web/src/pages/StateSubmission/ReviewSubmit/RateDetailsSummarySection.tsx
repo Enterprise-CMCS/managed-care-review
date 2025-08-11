@@ -249,14 +249,6 @@ export const RateDetailsSummarySection = ({
         return true
     }
 
-    const currentRateRev = rateRevs && rateRevs[0]
-    const zippedFilesURL =
-        isSubmittedOrCMSUser &&
-        !isPreviousSubmission &&
-        currentRateRev?.documentZipPackages
-            ? getRateZipDownloadUrl(currentRateRev.documentZipPackages)
-            : undefined
-
     const noRatesMessage = () => {
         if (isStateUser) {
             return isSubmitted
@@ -300,6 +292,14 @@ export const RateDetailsSummarySection = ({
                           rateFormData.rateDocuments &&
                           rateFormData.supportingDocuments.length +
                               rateFormData.rateDocuments.length
+                      const zippedFilesURL =
+                          isSubmittedOrCMSUser &&
+                          !isPreviousSubmission &&
+                          rateRev?.documentZipPackages
+                              ? getRateZipDownloadUrl(
+                                    rateRev.documentZipPackages
+                                )
+                              : undefined
                       /**
                     Rate programs switched in summer 2024. We still show deprecated program field values when
                     - there's no new field values present and CMS user is viewing
