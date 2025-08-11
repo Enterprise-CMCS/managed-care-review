@@ -78,7 +78,7 @@ describe('State user can view submissions', () => {
             cy.findByText('Rate details').should('exist')
             cy.findByText('New rate certification').should('exist')
             cy.findByText('02/29/2024 to 02/28/2025').should('exist')
-            cy.findByText('/Download contract documents/i', {
+            cy.findByText(/Download contract documents/i, {
                 timeout: 20000,
             }).should('exist')
             cy.findByRole('table', {
