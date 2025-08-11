@@ -382,6 +382,28 @@ jobs:
             --context stage=${STAGE_NAME} \
             --require-approval never
 
+      - name: Deploy CDK Storybook stack
+        working-directory: services/infra-cdk
+        env:
+          STAGE_NAME: ${{ needs.begin-deployment.outputs.stage-name }}
+        run: |
+          echo "=== Deploying Storybook stack ==="
+          npx cdk deploy MCR-Storybook-${STAGE_NAME}-cdk \
+            --app 'pnpm tsx bin/storybook.ts' \
+            --context stage=${STAGE_NAME} \
+            --require-approval never
+
+      - name: Deploy CDK Cognito stack
+        working-directory: services/infra-cdk
+        env:
+          STAGE_NAME: ${{ needs.begin-deployment.outputs.stage-name }}
+        run: |
+          echo "=== Deploying Cognito stack ==="
+          npx cdk deploy MCR-Cognito-${STAGE_NAME}-cdk \
+            --app 'pnpm tsx bin/cognito.ts' \
+            --context stage=${STAGE_NAME} \
+            --require-approval never
+
   deploy-cdk-layers:
     needs: [begin-deployment, deploy-cdk-foundation, build-lambda-layers]
     name: deploy - CDK Lambda layers
