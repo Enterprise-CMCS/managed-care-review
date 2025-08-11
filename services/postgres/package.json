@@ -9,7 +9,7 @@
     "devDependencies": {
         "@aws-sdk/types": "^3.862.0",
         "@types/eslint": "^9.6.1",
-        "@types/pg": "^8.15.4",
+        "@types/pg": "^8.15.5",
         "@typescript-eslint/eslint-plugin": "^8.29.1",
         "@typescript-eslint/parser": "^8.29.1",
         "eslint": "^9.31.0",
