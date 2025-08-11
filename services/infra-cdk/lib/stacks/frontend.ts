@@ -1,6 +1,5 @@
 import { BaseStack, type BaseStackProps } from '../constructs/base/base-stack'
 import { type Construct } from 'constructs'
-import { join } from 'path'
 import {
     Bucket,
     BucketEncryption,
@@ -102,16 +101,16 @@ export class FrontendStack extends BaseStack {
             this,
             'HstsCloudfrontFunction',
             {
-                functionName: `hsts-${this.stage}`,
+                functionName: `hsts-${this.stage}-cdk`,
                 comment: 'This function adds headers to implement HSTS',
-                code: FunctionCode.fromFile({
-                    filePath: join(
-                        __dirname,
-                        '../cloudfront-functions/hsts.js'
-                    ),
-                }),
+                code: FunctionCode.fromInline(`
+function handler(event) {
+    var response = event.response;
+    var headers = response.headers;
+    headers['strict-transport-security'] = { value: 'max-age=63072000; includeSubdomains; preload'};
+    return response;
+}`),
                 runtime: FunctionRuntime.JS_1_0,
-                autoPublish: true,
             }
         )
 
