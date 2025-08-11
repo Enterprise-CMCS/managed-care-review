@@ -371,6 +371,17 @@ jobs:
             --context stage=${STAGE_NAME} \
             --require-approval never
 
+      - name: Deploy CDK InfraApi stack
+        working-directory: services/infra-cdk
+        env:
+          STAGE_NAME: ${{ needs.begin-deployment.outputs.stage-name }}
+        run: |
+          echo "=== Deploying InfraApi stack ==="
+          npx cdk deploy MCR-InfraApi-${STAGE_NAME}-cdk \
+            --app 'pnpm tsx bin/infra-api.ts' \
+            --context stage=${STAGE_NAME} \
+            --require-approval never
+
   deploy-cdk-layers:
     needs: [begin-deployment, deploy-cdk-foundation, build-lambda-layers]
     name: deploy - CDK Lambda layers
