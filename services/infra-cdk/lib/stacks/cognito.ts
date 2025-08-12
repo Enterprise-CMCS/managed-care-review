@@ -107,8 +107,8 @@ export class CognitoStack extends BaseStack {
                         'http://schemas.xmlsoap.org/ws/2005/05/identity/claims/emailaddress'
                     ),
                     custom: {
-                        state_code: ProviderAttribute.other('state'),
-                        role: ProviderAttribute.other('cmsRoles'),
+                        'custom:state_code': ProviderAttribute.other('state'),
+                        'custom:role': ProviderAttribute.other('cmsRoles'),
                     },
                     givenName: ProviderAttribute.other('firstName'),
                     familyName: ProviderAttribute.other('lastName'),
