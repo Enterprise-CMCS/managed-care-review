@@ -1,41 +1,70 @@
 #!/usr/bin/env node
 import 'source-map-support/register'
-import { App, Tags } from 'aws-cdk-lib'
+import * as cdk from 'aws-cdk-lib'
+import { AppConfigLoader } from '../lib/config/app'
+import { SynthesizerConfigLoader } from '../lib/config/synthesizer'
+import { Aspects } from 'aws-cdk-lib'
+import { IamPathAspect } from '../lib/aspects/iam-path-aspects'
+import { IamPermissionsBoundaryAspect } from '../lib/aspects/iam-permissions-boundary-aspects'
+import { getEnvironment, getCdkEnvironment, ResourceNames } from '../lib/config'
 import { AppApiStack } from '../lib/stacks/app-api'
-import { ResourceNames } from '../lib/config'
 
 async function main(): Promise<void> {
-    // Load app configuration
-    const appConfig = await import('../lib/config/app')
-    const config = await import('../lib/config')
+    try {
+        const appConfig = AppConfigLoader.load()
+        const synthesizerLoader = new SynthesizerConfigLoader(
+            appConfig.awsRegion
+        )
+        const synthConfig = await synthesizerLoader.load()
 
-    const app = new App()
+        const app = new cdk.App({
+            defaultStackSynthesizer: new cdk.DefaultStackSynthesizer(
+                synthConfig
+            ),
+        })
 
-    // Add global tags
-    Tags.of(app).add('Project', 'ManagedCareReview')
-    Tags.of(app).add('Environment', appConfig.default.stage)
-    Tags.of(app).add('ManagedBy', 'CDK')
+        app.node.setContext('stage', appConfig.stage)
 
-    // Standard environment configuration for all stacks
-    const env = {
-        account: process.env.CDK_DEFAULT_ACCOUNT,
-        region: process.env.CDK_DEFAULT_REGION || 'us-east-1',
-    }
+        const config = getEnvironment(appConfig.stage)
+        const env = getCdkEnvironment(appConfig.stage)
 
-    // Create App API stack
-    new AppApiStack(
-        app,
-        ResourceNames.stackName('AppApi', appConfig.default.stage),
-        {
-            env,
-            stage: appConfig.default.stage,
-            stageConfig: config.default,
-            serviceName: 'app-api',
+        new AppApiStack(
+            app,
+            ResourceNames.stackName('AppApi', appConfig.stage),
+            {
+                env,
+                stage: appConfig.stage,
+                stageConfig: config,
+                serviceName: 'app-api',
+            }
+        )
+
+        Aspects.of(app).add(new IamPathAspect(appConfig.iamPath))
+        if (appConfig.permissionsBoundaryArn) {
+            Aspects.of(app).add(
+                new IamPermissionsBoundaryAspect(
+                    appConfig.permissionsBoundaryArn
+                )
+            )
         }
-    )
+
+        cdk.Tags.of(app).add('Project', 'mc-review')
+        cdk.Tags.of(app).add('Environment', appConfig.stage)
+        cdk.Tags.of(app).add('ManagedBy', 'CDK')
+        cdk.Tags.of(app).add(
+            'Repository',
+            'https://github.com/Enterprise-CMCS/managed-care-review'
+        )
+
+        app.synth()
+
+        console.info(
+            `CDK synthesis completed for AppApi stack: ${appConfig.stage}`
+        )
+    } catch (error) {
+        console.error('App API stack initialization failed:', error)
+        process.exit(1)
+    }
 }
 
-main().catch((error: Error) => {
-    console.error('App API stack initialization failed:', error)
-    process.exit(1)
-})
+void main()
