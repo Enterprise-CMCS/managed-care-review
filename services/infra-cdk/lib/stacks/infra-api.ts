@@ -51,7 +51,7 @@ export class InfraApiStack extends BaseStack {
         this.webAcl = new CfnWebACL(this, 'WafPluginAcl', {
             scope: 'REGIONAL',
             defaultAction: { allow: {} },
-            name: `${this.stage}-infra-api-webacl`,
+            name: `${this.stage}-infra-api-cdk-webacl`,
             rules: [
                 {
                     name: `${this.stage}-AWS-AWSManagedRulesCommonRuleSet`,
