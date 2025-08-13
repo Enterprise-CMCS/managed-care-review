@@ -24,7 +24,7 @@ import { Vpc, SecurityGroup } from 'aws-cdk-lib/aws-ec2'
 import { StringParameter } from 'aws-cdk-lib/aws-ssm'
 import { CfnOutput, Duration, Fn, Size } from 'aws-cdk-lib'
 import { ResourceNames } from '../config'
-import { getBundlingConfig } from '../constructs/lambda/bundling-utils'
+import { getAppApiLambdaConfig } from '../constructs/lambda/app-api-lambda-config'
 import { LayerVersion, Runtime, Architecture } from 'aws-cdk-lib/aws-lambda'
 import { CfnWebACLAssociation } from 'aws-cdk-lib/aws-wafv2'
 import * as path from 'path'
@@ -306,10 +306,7 @@ export class AppApiStack extends BaseStack {
                 'handlers',
                 `${handlerFile}.ts`
             ),
-            bundling: getBundlingConfig(
-                functionName.toUpperCase().replace('-', '_'),
-                this.stage
-            ),
+            bundling: getAppApiLambdaConfig(functionName, this.stage),
             ...options,
         })
     }
