@@ -210,10 +210,9 @@ describe('RateDetailsSummarySection', () => {
                 name: 'Rate details',
             })
         ).toBeInTheDocument()
-        // Is this the best way to check that the link is not present?
+
         expect(screen.queryByText('Edit')).not.toBeInTheDocument()
 
-        // expects download all button after loading has completed
         const link = await screen.findByTestId('zipDownloadLink')
         expect(link).toBeInTheDocument()
     })

@@ -24,6 +24,14 @@ const rateRevisionDataMock = (data?: Partial<RateRevision>): RateRevision => {
         createdAt: '2023-10-16T19:01:21.389Z',
         updatedAt: '2023-10-16T19:02:26.767Z',
         unlockInfo: null,
+        documentZipPackages: [{
+            id: "zip-package-321",
+            s3URL: "s3://bucket-name/zips/rates/key/rate-documents.zip",
+            sha256: "sha123",
+            documentType: "RATE_DOCUMENTS",
+            createdAt: new Date('01/15/2024'),
+            downloadUrl: s3DlUrl
+        }],
         submitInfo: {
             __typename: 'UpdateInformation',
             updatedAt: '2023-10-16T19:02:26.766Z',
