@@ -1054,8 +1054,8 @@ importers:
         specifier: ^3.862.0
         version: 3.862.0
       '@prisma/client':
-        specifier: ^5.21.1
-        version: 5.22.0(prisma@6.14.0(magicast@0.3.5)(typescript@5.9.2))
+        specifier: ^6.14.0
+        version: 6.14.0(prisma@6.14.0(magicast@0.3.5)(typescript@5.9.2))(typescript@5.9.2)
       pg:
         specifier: ^8.16.3
         version: 8.16.3
@@ -5461,15 +5461,6 @@ packages:
 
   '@polka/url@1.0.0-next.25':
     resolution: {integrity: sha512-j7P6Rgr3mmtdkeDGTe0E/aYyWEWVtc5yFXtHCRHs28/jptDEWfaVOc5T7cblqy1XKPPfCxJc/8DwQ5YgLOZOVQ==}
-
-  '@prisma/client@5.22.0':
-    resolution: {integrity: sha512-M0SVXfyHnQREBKxCgyo7sffrKttwE6R8PMq330MIUF0pTwjUhLbW84pFDlf06B27XyCR++VtjugEnIHdr07SVA==}
-    engines: {node: '>=16.13'}
-    peerDependencies:
-      prisma: '*'
-    peerDependenciesMeta:
-      prisma:
-        optional: true
 
   '@prisma/client@6.14.0':
     resolution: {integrity: sha512-8E/Nk3eL5g7RQIg/LUj1ICyDmhD053STjxrPxUtCRybs2s/2sOEcx9NpITuAOPn07HEpWBfhAVe1T/HYWXUPOw==}
@@ -21685,10 +21676,6 @@ snapshots:
   '@pkgr/core@0.2.9': {}
 
   '@polka/url@1.0.0-next.25': {}
-
-  '@prisma/client@5.22.0(prisma@6.14.0(magicast@0.3.5)(typescript@5.9.2))':
-    optionalDependencies:
-      prisma: 6.14.0(magicast@0.3.5)(typescript@5.9.2)
 
   '@prisma/client@6.14.0(prisma@6.14.0(magicast@0.3.5)(typescript@5.9.2))(typescript@5.9.2)':
     optionalDependencies:
