@@ -63,7 +63,7 @@ function ldClientMock(featureFlags: FeatureFlagSettings): LDClient {
 }
 
 /* Render */
-// eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types
+
 const renderWithProviders = (
     ui: React.ReactNode, // actual test UI - the JSX to render
     options?: {

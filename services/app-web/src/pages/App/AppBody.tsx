@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { useEffect } from 'react'
 import { GovBanner } from '@trussworks/react-uswds'
 import styles from './AppBody.module.scss'
 import { AppRoutes } from './AppRoutes'
@@ -9,6 +9,8 @@ import { useLDClient } from 'launchdarkly-react-client-sdk'
 import { featureFlags } from '@mc-review/common-code'
 import { Landing } from '../Landing/Landing'
 import { usePageTracing } from '../../hooks/usePageTracing'
+import { usePage } from '../../contexts/PageContext'
+import { useLocation } from 'react-router-dom'
 
 export function AppBody({
     authMode,
@@ -22,6 +24,8 @@ export function AppBody({
     const isLowerEnvironment = environmentName !== 'prod'
     const { loginStatus } = useAuth()
     const ldClient = useLDClient()
+    const { activeMainContentId } = usePage()
+    const { pathname } = useLocation()
 
     // Add logging and metrics
     usePageTracing('AppBody')
@@ -33,9 +37,27 @@ export function AppBody({
 
     const siteUnderMaintenance = siteUnderMaintenanceBannerFlag !== 'OFF'
 
+    // We want the skip to main content link to be the first item in tab order on each page. Since this Link is persistent
+    // at all times, when you navigate pages, the link is never re-rendered and tab order does not reset to the top of the
+    // page. We have to manually focus the skip link to put it at first tab order.
+    useEffect(() => {
+        // Focus the skip link after route changes.
+        const skipLink = document.querySelector(
+            '.usa-skipnav'
+        ) as HTMLAnchorElement
+        if (skipLink) {
+            skipLink.focus()
+        }
+    }, [pathname])
+
     return (
         <div id="App" className={styles.app}>
-            <LinkWithLogging className="usa-skipnav" href="#main-content">
+            <LinkWithLogging
+                className="usa-skipnav"
+                // If an alternate main content is set, we focus that. Usually to skip navigation in main element for
+                // accessibility requirements.
+                href={activeMainContentId ?? '#main-content'}
+            >
                 Skip to main content
             </LinkWithLogging>
             <GovBanner aria-label="Official government website" />

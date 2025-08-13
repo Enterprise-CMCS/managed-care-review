@@ -1,21 +1,29 @@
 import { useOutletContext } from 'react-router-dom'
 import { MCReviewSettingsContextType } from '../Settings'
 import { Table } from '@trussworks/react-uswds'
-import React from 'react'
+import React, { useEffect } from 'react'
 import { Loading } from '../../../components'
 import { SettingsErrorAlert } from '../SettingsErrorAlert'
 import { formatEmails } from '../SettingsCells/SettingsCells'
+import { usePage } from '../../../contexts/PageContext'
 
 const AutomatedEmailsTable = () => {
+    const { updateActiveMainContent } = usePage()
     const { emailConfig: config } =
         useOutletContext<MCReviewSettingsContextType>()
+
+    const activeMainContentId = 'automatedEmailsPageMainContent'
+    // Set the active main content to focus when click the Skip to main content button.
+    useEffect(() => {
+        updateActiveMainContent(activeMainContentId)
+    }, [activeMainContentId, updateActiveMainContent])
 
     if (config.loading) return <Loading />
 
     if (config.error) return <SettingsErrorAlert error={config.error} />
 
     return (
-        <>
+        <div id={activeMainContentId}>
             <h2>Automated emails</h2>
             <p>
                 Shared inboxes receive emails for different submissions, as
@@ -71,7 +79,7 @@ const AutomatedEmailsTable = () => {
                     </tr>
                 </tbody>
             </Table>
-        </>
+        </div>
     )
 }
 
