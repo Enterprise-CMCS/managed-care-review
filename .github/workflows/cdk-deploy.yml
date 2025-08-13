@@ -1,0 +1,767 @@
+name: CDK Deploy
+
+on:
+  push:
+    branches: 
+      - main
+    paths:
+      - 'services/infra-cdk/**'
+      - 'services/app-web/**'
+      - '.github/workflows/cdk-deploy.yml'
+  pull_request:
+    branches:
+      - main
+    paths:
+      - 'services/infra-cdk/**'
+      - 'services/app-web/**'
+      - '.github/workflows/cdk-deploy.yml'
+  workflow_dispatch:
+    inputs:
+      stage:
+        description: 'Stage to deploy'
+        required: true
+        type: choice
+        options:
+          - dev
+          - val
+          - prod
+        default: dev
+
+env:
+  AWS_REGION: us-east-1
+  NODE_VERSION: 20
+  STAGE: ${{ github.event.inputs.stage || (github.ref_name == 'main' && 'prod' || 'dev') }}
+  NR_LICENSE_KEY: ${{ secrets.NR_LICENSE_KEY }}
+
+# Prevent parallel deployments
+concurrency:
+  group: cdk-deploy-${{ github.ref }}-${{ github.event.inputs.stage || 'auto' }}
+  cancel-in-progress: true
+
+permissions:
+  id-token: write
+  contents: read
+  pull-requests: write
+
+jobs:
+  deploy:
+    name: ${{ github.event_name == 'pull_request' && 'CDK Diff' || 'Deploy CDK Infrastructure' }}
+    runs-on: ubuntu-latest
+    environment: ${{ github.event.inputs.stage || (github.ref_name == 'main' && 'prod' || 'dev') }}
+    outputs:
+      api-url: ${{ steps.export-config.outputs.api-url }}
+      cognito-region: ${{ steps.export-config.outputs.cognito-region }}
+      cognito-user-pool-id: ${{ steps.export-config.outputs.cognito-user-pool-id }}
+      cognito-identity-pool-id: ${{ steps.export-config.outputs.cognito-identity-pool-id }}
+      cognito-client-id: ${{ steps.export-config.outputs.cognito-client-id }}
+      s3-documents-bucket: ${{ steps.export-config.outputs.s3-documents-bucket }}
+      s3-qa-bucket: ${{ steps.export-config.outputs.s3-qa-bucket }}
+      application-endpoint: ${{ steps.export-config.outputs.application-endpoint }}
+      storybook-endpoint: ${{ steps.export-config.outputs.storybook-endpoint }}
+    
+    steps:
+    # 1. Setup environment
+    - name: Checkout repository
+      uses: actions/checkout@v4
+      with:
+        fetch-depth: 0  # Need full history for accurate change detection
+
+    - name: Setup pnpm
+      uses: pnpm/action-setup@v4
+      with:
+        version: 9
+        run_install: false
+
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: ${{ env.NODE_VERSION }}
+        cache: 'pnpm'
+
+    - name: Configure pnpm and git for HTTPS
+      run: |
+        pnpm config set git-prefer-https true
+        git config --global url."https://github.com/".insteadOf "git@github.com:"
+
+    # 2. Cache dependencies
+    - name: Get pnpm store directory
+      id: pnpm-cache
+      shell: bash
+      run: |
+        echo "STORE_PATH=$(pnpm store path)" >> $GITHUB_OUTPUT
+
+    - name: Cache pnpm store
+      uses: actions/cache@v4
+      with:
+        path: |
+          ${{ steps.pnpm-cache.outputs.STORE_PATH }}
+          ~/.cache/prisma
+        key: ${{ runner.os }}-pnpm-cdk-${{ hashFiles('services/infra-cdk/pnpm-lock.yaml') }}
+        restore-keys: |
+          ${{ runner.os }}-pnpm-cdk-
+
+    # 3. Install and build dependencies needed for layer optimization
+    - name: Install dependencies for code generation
+      run: pnpm install --frozen-lockfile --filter "./packages/**" --filter "./services/app-graphql" --filter "./services/app-proto" --filter "./services/app-api" --filter "./services/app-web"
+
+    - name: Generate code (GraphQL, Prisma, Proto)
+      run: pnpm -r generate
+
+    - name: Build packages
+      run: pnpm build:packages
+
+    - name: Install CDK dependencies
+      working-directory: services/infra-cdk
+      run: |
+        # Install dependencies using pnpm (now part of workspace)
+        pnpm install --frozen-lockfile
+
+    # 4. Configure AWS credentials via OIDC
+    - name: Validate AWS Account Secrets
+      run: |
+        if [[ -z "${{ secrets.DEV_AWS_ACCOUNT_ID }}" ]]; then
+          echo "ERROR: DEV_AWS_ACCOUNT_ID secret is not configured"
+          echo "Please add the following secrets to the repository:"
+          echo "  - DEV_AWS_ACCOUNT_ID"
+          echo "  - VAL_AWS_ACCOUNT_ID"
+          echo "  - PROD_AWS_ACCOUNT_ID"
+          exit 1
+        fi
+
+    - name: Set AWS Account ID
+      id: set-account-id
+      run: |
+        if [[ "${{ env.STAGE }}" == "prod" ]]; then
+          echo "account-id=${{ secrets.PROD_AWS_ACCOUNT_ID }}" >> $GITHUB_OUTPUT
+        elif [[ "${{ env.STAGE }}" == "val" ]]; then
+          echo "account-id=${{ secrets.VAL_AWS_ACCOUNT_ID }}" >> $GITHUB_OUTPUT
+        else
+          echo "account-id=${{ secrets.DEV_AWS_ACCOUNT_ID }}" >> $GITHUB_OUTPUT
+        fi
+
+    - name: Configure AWS credentials
+      uses: ./.github/actions/get_aws_credentials
+      with:
+        region: ${{ env.AWS_REGION }}
+        account-id: ${{ steps.set-account-id.outputs.account-id }}
+        stage-name: ${{ env.STAGE == 'dev' && 'main' || env.STAGE }}
+
+    # Note: CDK bundles Prisma directly into Lambda functions
+    # No layer building required - see lambda-bundling.ts for bundling configuration
+
+    # 6. CDK Synth - Validate infrastructure code
+    - name: CDK Synth
+      working-directory: services/infra-cdk
+      env:
+        NR_LICENSE_KEY: ${{ secrets.NR_LICENSE_KEY }}
+      run: |
+        echo "Running CDK synth to validate infrastructure..."
+        pnpm run cdk synth --all --context stage=${{ env.STAGE }} > cdk-synth-output.yaml
+
+    # 7. Store CDK Synth Artifacts
+    - name: Store CDK Synth Artifacts
+      uses: actions/upload-artifact@v4
+      with:
+        name: cdk-synth-output-${{ env.STAGE }}
+        path: services/infra-cdk/cdk-synth-output.yaml
+        retention-days: 5
+
+    # 8. CDK Diff - Check infrastructure changes
+    - name: CDK Diff
+      id: cdk-diff
+      working-directory: services/infra-cdk
+      env:
+        NR_LICENSE_KEY: ${{ secrets.NR_LICENSE_KEY }}
+      run: |
+        echo "Running CDK diff to check for infrastructure changes..."
+        
+        # Create directory for outputs
+        mkdir -p tmp
+        DIFF_OUTPUT="tmp/cdk-diff-output.txt"
+        
+        # Run diff for all stacks, capture output
+        pnpm run cdk diff --all --context stage=${{ env.STAGE }} | tee "$DIFF_OUTPUT" || true
+        
+        # Check if there are any differences
+        if grep -q "Stack MCR-.* contains changes" "$DIFF_OUTPUT"; then
+          echo "has_diff=true" >> $GITHUB_OUTPUT
+        else
+          echo "has_diff=false" >> $GITHUB_OUTPUT
+        fi
+        
+        # Create markdown summary
+        cat > diff-summary.md << EOL
+        ## 🔍 CDK Infrastructure Changes
+        
+        ### Stage: ${{ env.STAGE }}
+        
+        <details>
+        <summary>Click to expand diff details</summary>
+        
+        \`\`\`diff
+        $(cat "$DIFF_OUTPUT")
+        \`\`\`
+        
+        </details>
+        EOL
+
+    # 8. Store CDK Diff Artifacts
+    - name: Store CDK Diff Artifacts
+      uses: actions/upload-artifact@v4
+      with:
+        name: cdk-diff-output-${{ env.STAGE }}
+        path: |
+          services/infra-cdk/tmp/cdk-diff-output.txt
+          services/infra-cdk/diff-summary.md
+        retention-days: 5
+
+    # 9. Comment PR with CDK Diff
+    - name: Comment PR with CDK Diff
+      if: github.event_name == 'pull_request' && steps.cdk-diff.outputs.has_diff == 'true'
+      uses: actions/github-script@v7
+      with:
+        github-token: ${{ secrets.GITHUB_TOKEN }}
+        script: |
+          const fs = require('fs');
+          const diffContent = fs.readFileSync('services/infra-cdk/diff-summary.md', 'utf8');
+          
+          // Find existing CDK diff comment
+          const comments = await github.rest.issues.listComments({
+            issue_number: context.issue.number,
+            owner: context.repo.owner,
+            repo: context.repo.repo
+          });
+          
+          const cdkDiffComment = comments.data.find(comment => 
+            comment.body.includes('🔍 CDK Infrastructure Changes')
+          );
+          
+          if (cdkDiffComment) {
+            // Update existing comment
+            await github.rest.issues.updateComment({
+              comment_id: cdkDiffComment.id,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: diffContent
+            });
+          } else {
+            // Create new comment
+            await github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: diffContent
+            });
+          }
+
+    # 10. Add CDK Diff to Job Summary
+    - name: Add CDK Diff to Job Summary
+      if: steps.cdk-diff.outputs.has_diff == 'true'
+      run: |
+        echo "## 🔍 CDK Infrastructure Changes Detected" >> $GITHUB_STEP_SUMMARY
+        echo "" >> $GITHUB_STEP_SUMMARY
+        echo "Infrastructure changes will be applied during deployment." >> $GITHUB_STEP_SUMMARY
+        echo "See the CDK Diff artifact for detailed changes." >> $GITHUB_STEP_SUMMARY
+
+    # 11. CDK Bootstrap (if needed)
+    # - name: CDK Bootstrap
+    #   working-directory: services/infra-cdk
+    #   run: |
+    #     pnpm cdk bootstrap aws://${{ steps.set-account-id.outputs.account-id }}/${{ env.AWS_REGION }} \
+    #       --cloudformation-execution-policies arn:aws:iam::aws:policy/AdministratorAccess \
+    #       -c stage=${{ env.STAGE }} || true
+
+    # 12. Deploy OIDC stack (one-time)
+    # COMMENTED OUT: Using existing serverless OIDC setup instead of CDK's GitHubOidcStack
+    # to avoid duplicate OIDC providers (only one allowed per AWS account)
+    # - name: Deploy GitHub OIDC Stack
+    #   if: github.ref == 'refs/heads/main' && github.event_name != 'pull_request'
+    #   working-directory: services/infra-cdk
+    #   run: |
+    #     pnpm cdk deploy MCR-GitHubOIDC-cdk \
+    #       --require-approval never \
+    #       --ci
+
+    # Note: CDK bundles dependencies directly into Lambda functions
+    # No layer preparation required - dependencies are bundled at deployment time
+
+    # 13. Deploy New Elegant Micro-Stack Infrastructure (Optimized for Parallel Deployment)
+    - name: Deploy MCR-Stack Infrastructure
+      working-directory: services/infra-cdk
+      env:
+        NR_LICENSE_KEY: ${{ secrets.NR_LICENSE_KEY }}
+      run: |
+        echo "Deploying all CDK stacks with automatic dependency resolution..."
+        
+        # Deploy ALL stacks in one command (CDK handles dependencies automatically)
+        pnpm run cdk deploy --all \
+          --require-approval never \
+          --ci \
+          -c stage=${{ env.STAGE }}
+        
+        echo "All backend stacks deployed successfully"
+
+# OLD MONOLITHIC STACK REMOVED: ApiComputeStack replaced by elegant micro-stack architecture
+    # The 612-line monolithic ApiComute stack has been successfully replaced by:
+    # - GraphQLApiStack (35 lines) - CognitoToApiGatewayToLambda construct
+    # - PublicApiStack (40 lines) - 3x ApiGatewayToLambda constructs  
+    # - FileOpsStack (30 lines) - S3 + Lambda integrations
+    # - ScheduledTasksStack (20 lines) - EventBridge + Lambda cleanup
+    # - AuthExtensionsStack (25 lines) - Identity Pool after APIs exist
+    # - SharedInfraStack (25 lines) - OTEL + Prisma layers
+    # Total: ~175 lines (85% code reduction) with zero circular dependencies
+
+    # 15. Export NEW Micro-Stack Infrastructure Outputs for Frontend Build
+    - name: Export New Micro-Stack Outputs
+      id: infra-outputs
+      run: |
+        # Create script to export NEW micro-stack infrastructure outputs
+        cat > export-micro-stack-outputs.sh << 'EOF'
+        #!/bin/bash
+        set -e
+        
+        STAGE=$1
+        
+        # Function to get stack output
+        get_output() {
+          local stack=$1
+          local output_key=$2
+          aws cloudformation describe-stacks \
+            --stack-name "$stack" \
+            --query "Stacks[0].Outputs[?OutputKey=='$output_key'].OutputValue" \
+            --output text 2>/dev/null || echo ""
+        }
+        
+        echo "🔍 Gathering outputs from elegant micro-stack architecture..."
+        
+        # NEW: Get API URLs from micro-stacks
+        GRAPHQL_API_URL=$(get_output "MCR-GraphQLApi-$STAGE-cdk" "GraphQLApiUrl")
+        OTEL_API_URL=$(get_output "MCR-PublicApi-$STAGE-cdk" "OtelApiUrl")
+        
+        # NEW: Get auth from AuthExtensions stack (breaks circular dependency!)
+        IDENTITY_POOL_ID=$(get_output "MCR-AuthExtensions-$STAGE-cdk" "IdentityPoolId")
+        
+        # Get User Pool info from Auth stack (no changes needed)
+        USER_POOL_ID=$(get_output "MCR-Auth-$STAGE-cdk" "UserPoolId")
+        USER_POOL_CLIENT_ID=$(get_output "MCR-Auth-$STAGE-cdk" "UserPoolClientId")
+        
+        # Get S3 buckets from Data stack (no changes needed)
+        DOCUMENTS_BUCKET=$(get_output "MCR-Data-$STAGE-cdk" "DocumentUploadsBucketName")
+        QA_BUCKET=$(get_output "MCR-Data-$STAGE-cdk" "QAUploadsBucketName")
+        
+        # Construct user pool domain (matching serverless pattern)
+        USER_POOL_DOMAIN="${STAGE}-login-${USER_POOL_CLIENT_ID}.auth.${AWS_REGION}.amazoncognito.com"
+        
+        # Output for GitHub Actions - NEW micro-stack architecture
+        echo "api-url=$GRAPHQL_API_URL" >> $GITHUB_OUTPUT              # Main API (GraphQL)
+        echo "graphql-api-url=$GRAPHQL_API_URL" >> $GITHUB_OUTPUT       # GraphQL endpoint
+        echo "otel-api-url=$OTEL_API_URL" >> $GITHUB_OUTPUT             # OTEL collector endpoint
+        echo "user-pool-id=$USER_POOL_ID" >> $GITHUB_OUTPUT
+        echo "user-pool-client-id=$USER_POOL_CLIENT_ID" >> $GITHUB_OUTPUT
+        echo "user-pool-domain=$USER_POOL_DOMAIN" >> $GITHUB_OUTPUT
+        echo "identity-pool-id=$IDENTITY_POOL_ID" >> $GITHUB_OUTPUT     # From AuthExtensions stack
+        echo "documents-bucket=$DOCUMENTS_BUCKET" >> $GITHUB_OUTPUT
+        echo "qa-bucket=$QA_BUCKET" >> $GITHUB_OUTPUT
+        
+        echo "✅ Micro-stack outputs exported successfully!"
+        echo "📊 API endpoints available:"
+        echo "  - GraphQL: $GRAPHQL_API_URL"
+        echo "  - OTEL: $OTEL_API_URL"
+        EOF
+        
+        chmod +x export-micro-stack-outputs.sh
+        ./export-micro-stack-outputs.sh ${{ env.STAGE }}
+
+    # 16. Fetch optional SSM parameters for frontend build
+    - name: Fetch SSM Parameters
+      id: ssm-params
+      run: |
+        # Fetch optional parameters from SSM (matching serverless)
+        echo "Fetching optional SSM parameters..."
+        
+        # Helper function to get SSM parameter
+        get_ssm_param() {
+          local param_name=$1
+          aws ssm get-parameter --name "$param_name" --query 'Parameter.Value' --output text 2>/dev/null || echo ""
+        }
+        
+        # Fetch parameters
+        LD_CLIENT_ID=$(get_ssm_param "/configuration/react_app_ld_client_id_feds")
+        NR_ACCOUNT_ID=$(get_ssm_param "/configuration/react_app_nr_account_id")
+        NR_AGENT_ID=$(get_ssm_param "/configuration/react_app_nr_agent_id")
+        NR_LICENSE_KEY=$(get_ssm_param "/configuration/react_app_nr_license_key")
+        NR_TRUST_KEY=$(get_ssm_param "/configuration/react_app_nr_trust_key")
+        
+        # Export as environment variables for next step
+        echo "VITE_APP_LD_CLIENT_ID=$LD_CLIENT_ID" >> $GITHUB_ENV
+        echo "VITE_APP_NR_ACCOUNT_ID=$NR_ACCOUNT_ID" >> $GITHUB_ENV
+        echo "VITE_APP_NR_AGENT_ID=$NR_AGENT_ID" >> $GITHUB_ENV
+        echo "VITE_APP_NR_LICENSE_KEY=$NR_LICENSE_KEY" >> $GITHUB_ENV
+        echo "VITE_APP_NR_TRUST_KEY=$NR_TRUST_KEY" >> $GITHUB_ENV
+
+    # 17. Build Frontend with NEW Micro-Stack Architecture Configuration
+    - name: Build Frontend with New Micro-Stack Configuration
+      working-directory: services/app-web
+      env:
+        # Match serverless environment variables exactly - UPDATED for micro-stacks
+        VITE_APP_AUTH_MODE: AWS_COGNITO
+        VITE_APP_API_URL: ${{ steps.infra-outputs.outputs.graphql-api-url }}           # NEW: GraphQL micro-stack
+        VITE_APP_APPLICATION_ENDPOINT: https://${{ env.STAGE == 'prod' && 'app' || env.STAGE }}.mcr.cms.gov
+        VITE_APP_COGNITO_REGION: ${{ env.AWS_REGION }}
+        VITE_APP_COGNITO_ID_POOL_ID: ${{ steps.infra-outputs.outputs.identity-pool-id }}  # NEW: From AuthExtensions
+        VITE_APP_COGNITO_USER_POOL_ID: ${{ steps.infra-outputs.outputs.user-pool-id }}
+        VITE_APP_COGNITO_USER_POOL_CLIENT_ID: ${{ steps.infra-outputs.outputs.user-pool-client-id }}
+        VITE_APP_COGNITO_USER_POOL_CLIENT_DOMAIN: ${{ steps.infra-outputs.outputs.user-pool-domain }}
+        VITE_APP_S3_REGION: ${{ env.AWS_REGION }}
+        VITE_APP_S3_DOCUMENTS_BUCKET: ${{ steps.infra-outputs.outputs.documents-bucket }}
+        VITE_APP_S3_QA_BUCKET: ${{ steps.infra-outputs.outputs.qa-bucket }}
+        VITE_APP_STAGE_NAME: ${{ env.STAGE }}
+        VITE_APP_OTEL_COLLECTOR_URL: ${{ steps.infra-outputs.outputs.otel-api-url }}      # NEW: Dedicated OTEL micro-stack
+        # Optional environment variables from SSM (will be fetched in build step)
+        VITE_APP_LD_CLIENT_ID: ${{ env.VITE_APP_LD_CLIENT_ID || '' }}
+        VITE_APP_NR_ACCOUNT_ID: ${{ env.VITE_APP_NR_ACCOUNT_ID || '' }}
+        VITE_APP_NR_AGENT_ID: ${{ env.VITE_APP_NR_AGENT_ID || '' }}
+        VITE_APP_NR_LICENSE_KEY: ${{ env.VITE_APP_NR_LICENSE_KEY || '' }}
+        VITE_APP_NR_TRUST_KEY: ${{ env.VITE_APP_NR_TRUST_KEY || '' }}
+      run: |
+        echo "🏗️ Building frontend with elegant micro-stack architecture..."
+        echo "📊 API endpoints configured:"
+        echo "  - GraphQL API: ${{ steps.infra-outputs.outputs.graphql-api-url }}"
+        echo "  - OTEL API: ${{ steps.infra-outputs.outputs.otel-api-url }}"
+        
+        pnpm build
+        echo "📚 Building Storybook..."
+        pnpm storybook:build
+        
+        echo "✅ Frontend built successfully with micro-stack configuration!"
+
+    # 18. Deploy Frontend Stack (Final Phase - Independent Deployment)
+    - name: Deploy Frontend Stack Only
+      working-directory: services/infra-cdk
+      run: |
+        echo "Deploying Frontend stack independently with CDK native asset management..."
+        pnpm run cdk deploy MCR-Frontend-${{ env.STAGE }}-cdk \
+          --require-approval never \
+          --ci \
+          -c stage=${{ env.STAGE }} \
+          -c enableAppWebIntegration=true
+
+    # 19. Export Final Deployment Outputs (Legacy Compatible + New Micro-Stack Architecture)
+    - name: Export Final Deployment Outputs
+      id: export-config
+      run: |
+        # Create script to export all CloudFormation outputs from elegant micro-stack architecture
+        cat > export-final-outputs.sh << 'EOF'
+        #!/bin/bash
+        set -e
+        
+        STAGE=$1
+        
+        # Function to get stack output
+        get_output() {
+          local stack=$1
+          local output_key=$2
+          aws cloudformation describe-stacks \
+            --stack-name "$stack" \
+            --query "Stacks[0].Outputs[?OutputKey=='$output_key'].OutputValue" \
+            --output text 2>/dev/null || echo ""
+        }
+        
+        echo "🔄 Exporting final outputs from elegant micro-stack architecture..."
+        
+        # NEW: Primary API URL from GraphQL micro-stack (replaces monolithic ApiCompute)
+        GRAPHQL_API_URL=$(get_output "MCR-GraphQLApi-$STAGE-cdk" "GraphQLApiUrl")
+        
+        # Auth outputs - NEW: Identity Pool from AuthExtensions (breaks circular dependency)
+        IDENTITY_POOL_ID=$(get_output "MCR-AuthExtensions-$STAGE-cdk" "IdentityPoolId")
+        USER_POOL_ID=$(get_output "MCR-Auth-$STAGE-cdk" "UserPoolId")
+        USER_POOL_CLIENT_ID=$(get_output "MCR-Auth-$STAGE-cdk" "UserPoolClientId")
+        USER_POOL_DOMAIN="${STAGE}-login-${USER_POOL_CLIENT_ID}.auth.${AWS_REGION}.amazoncognito.com"
+        
+        # Data outputs (unchanged)
+        DOCUMENTS_BUCKET=$(get_output "MCR-Data-$STAGE-cdk" "DocumentUploadsBucketName")
+        QA_BUCKET=$(get_output "MCR-Data-$STAGE-cdk" "QAUploadsBucketName")
+        
+        # Frontend outputs (unchanged)
+        APPLICATION_URL=$(get_output "MCR-Frontend-$STAGE-cdk" "ApplicationUrl")
+        STORYBOOK_URL=$(get_output "MCR-Frontend-$STAGE-cdk" "StorybookUrl")
+        
+        # Export for downstream GitHub Actions jobs - UPDATED for micro-stack architecture
+        echo "api-url=$GRAPHQL_API_URL" >> $GITHUB_OUTPUT                          # NEW: GraphQL micro-stack
+        echo "cognito-region=$AWS_REGION" >> $GITHUB_OUTPUT
+        echo "cognito-user-pool-id=$USER_POOL_ID" >> $GITHUB_OUTPUT
+        echo "cognito-client-id=$USER_POOL_CLIENT_ID" >> $GITHUB_OUTPUT
+        echo "cognito-client-domain=$USER_POOL_DOMAIN" >> $GITHUB_OUTPUT
+        echo "cognito-identity-pool-id=$IDENTITY_POOL_ID" >> $GITHUB_OUTPUT        # NEW: From AuthExtensions stack
+        echo "s3-documents-bucket=$DOCUMENTS_BUCKET" >> $GITHUB_OUTPUT
+        echo "s3-qa-bucket=$QA_BUCKET" >> $GITHUB_OUTPUT
+        echo "application-endpoint=$APPLICATION_URL" >> $GITHUB_OUTPUT
+        echo "storybook-endpoint=$STORYBOOK_URL" >> $GITHUB_OUTPUT
+        
+        echo "✅ Elegant micro-stack outputs exported successfully!"
+        echo "📊 Final API endpoints:"
+        echo "  - Primary GraphQL: $GRAPHQL_API_URL"
+        echo "  - Application: $APPLICATION_URL"
+        echo "  - Storybook: $STORYBOOK_URL"
+        EOF
+        
+        chmod +x export-final-outputs.sh
+        ./export-final-outputs.sh ${{ env.STAGE }}
+
+    # 20. Output deployment information
+    - name: Output Deployment Summary
+      if: success()
+      run: |
+        echo "## 🚀 Deployment Successful!" >> $GITHUB_STEP_SUMMARY
+        echo "" >> $GITHUB_STEP_SUMMARY
+        echo "### Environment: ${{ env.STAGE }}" >> $GITHUB_STEP_SUMMARY
+        echo "" >> $GITHUB_STEP_SUMMARY
+        echo "| Service | URL |" >> $GITHUB_STEP_SUMMARY
+        echo "|---------|-----|" >> $GITHUB_STEP_SUMMARY
+        echo "| Application | https://${{ steps.export-config.outputs.application-endpoint }} |" >> $GITHUB_STEP_SUMMARY
+        echo "| Storybook | https://${{ steps.export-config.outputs.storybook-endpoint }} |" >> $GITHUB_STEP_SUMMARY
+        echo "| API | ${{ steps.export-config.outputs.api-url }} |" >> $GITHUB_STEP_SUMMARY
+        echo "" >> $GITHUB_STEP_SUMMARY
+        echo "### Build Information" >> $GITHUB_STEP_SUMMARY
+        echo "- Commit: ${{ github.sha }}" >> $GITHUB_STEP_SUMMARY
+        echo "- Branch: ${{ github.ref_name }}" >> $GITHUB_STEP_SUMMARY
+        echo "- Workflow Run: ${{ github.run_id }}" >> $GITHUB_STEP_SUMMARY
+
+    # 21. Output PR summary for diff-only runs
+    - name: Output PR Summary
+      if: github.event_name == 'pull_request'
+      run: |
+        echo "## 📋 Pull Request Infrastructure Review" >> $GITHUB_STEP_SUMMARY
+        echo "" >> $GITHUB_STEP_SUMMARY
+        echo "### Environment: ${{ env.STAGE }}" >> $GITHUB_STEP_SUMMARY
+        echo "" >> $GITHUB_STEP_SUMMARY
+        if [[ "${{ steps.cdk-diff.outputs.has_diff }}" == "true" ]]; then
+          echo "✅ **CDK diff completed successfully**" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "Infrastructure changes have been detected and posted as a comment on this PR." >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "These changes will be applied when this PR is merged to main." >> $GITHUB_STEP_SUMMARY
+        else
+          echo "✅ **No infrastructure changes detected**" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "This PR does not include any CDK infrastructure changes." >> $GITHUB_STEP_SUMMARY
+        fi
+        echo "" >> $GITHUB_STEP_SUMMARY
+        echo "**Note:** Deployment steps are skipped for pull requests. Full deployment will occur after merge to main." >> $GITHUB_STEP_SUMMARY
+
+  # Run Cypress tests against CDK deployment with CDK-specific configurations
+  # IMPORTANT: This job uses CDK-specific environment variable passing strategy
+  # Variables are passed with both standard names AND CYPRESS_ prefix to ensure
+  # they reach the test process regardless of subprocess environment inheritance
+  cypress-tests:
+    name: Cypress E2E Tests - CDK
+    needs: deploy
+    if: success() && github.event_name == 'push' && contains(fromJSON('["main", "val", "prod"]'), github.ref_name)
+    runs-on: ubuntu-latest
+    container:
+      image: cypress/browsers:node-20.14.0-chrome-126.0.6478.114-1-ff-127.0.1-edge-126.0.2592.61-1
+      options: --user 1001
+    permissions:
+      id-token: write
+      contents: read
+    strategy:
+      fail-fast: false
+      matrix:
+        containers: [1, 2, 3, 4]  # Run tests in parallel
+    
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+
+    - name: Setup pnpm
+      uses: pnpm/action-setup@v4
+      with:
+        version: 9
+        run_install: false
+
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: ${{ env.NODE_VERSION }}
+        cache: 'pnpm'
+
+    - name: Install dependencies
+      run: |
+        pnpm install --frozen-lockfile
+        pnpm -r generate
+        pnpm build:packages
+
+    - name: Set AWS Account ID for Cypress
+      id: set-account-id-cypress
+      run: |
+        if [[ "${{ env.STAGE }}" == "prod" ]]; then
+          echo "account-id=${{ secrets.PROD_AWS_ACCOUNT_ID }}" >> $GITHUB_OUTPUT
+        elif [[ "${{ env.STAGE }}" == "val" ]]; then
+          echo "account-id=${{ secrets.VAL_AWS_ACCOUNT_ID }}" >> $GITHUB_OUTPUT
+        else
+          echo "account-id=${{ secrets.DEV_AWS_ACCOUNT_ID }}" >> $GITHUB_OUTPUT
+        fi
+
+    - name: Configure AWS credentials for test user creation
+      id: creds
+      uses: ./.github/actions/get_aws_credentials
+      with:
+        region: ${{ env.AWS_REGION }}
+        account-id: ${{ steps.set-account-id-cypress.outputs.account-id }}
+        stage-name: ${{ env.STAGE }}
+
+    - name: Create/Update Cypress Test Users in CDK Cognito
+      run: |
+        # Use the existing script that creates test users
+        cd scripts
+        pnpm tsc
+        # The stage name for CDK is just the stage (dev/val/prod)
+        node ./add_cypress_test_users.js ${{ env.STAGE }} ${{ secrets.TEST_USERS_PASS }}
+
+    - name: Wait for services to be ready
+      run: |
+        echo "Waiting for services to stabilize after deployment..."
+        sleep 30
+        
+        # Health check the API
+        max_attempts=10
+        attempt=1
+        while [ $attempt -le $max_attempts ]; do
+          if curl -f "${{ needs.deploy.outputs.api-url }}health" > /dev/null 2>&1; then
+            echo "✅ API is healthy"
+            break
+          fi
+          echo "Waiting for API... (attempt $attempt/$max_attempts)"
+          sleep 10
+          attempt=$((attempt + 1))
+        done
+
+    - name: Run Cypress Tests
+      id: cypress
+      uses: cypress-io/github-action@v6
+      with:
+        # Use existing Cypress config but override with CDK endpoints
+        config-file: services/cypress/cypress.config.ts
+        # Add Basic Auth credentials for non-prod CDK environments
+        config: baseUrl=https://onemacuser:onemacpass@${{ needs.deploy.outputs.application-endpoint }}
+        record: true
+        parallel: true
+        browser: chrome
+        group: 'CDK-Chrome-${{ env.STAGE }}'
+        ci-build-id: cdk-${{ github.run_id }}-${{ github.run_attempt }}
+      env:
+        # CRITICAL: Pass variables as both process.env AND Cypress.env for CDK
+        # This ensures Cypress receives them regardless of subprocess inheritance
+        VITE_APP_AUTH_MODE: AWS_COGNITO
+        CYPRESS_AUTH_MODE: AWS_COGNITO
+        CYPRESS_RECORD_KEY: ${{ secrets.CYPRESS_RECORD_KEY }}
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        TEST_USERS_PASS: ${{ secrets.TEST_USERS_PASS }}
+        CYPRESS_TEST_USERS_PASS: ${{ secrets.TEST_USERS_PASS }}
+        
+        # CDK-specific endpoint mappings
+        VITE_APP_API_URL: ${{ needs.deploy.outputs.api-url }}
+        CYPRESS_API_URL: ${{ needs.deploy.outputs.api-url }}
+        COGNITO_USER_POOL_ID: ${{ needs.deploy.outputs.cognito-user-pool-id }}
+        CYPRESS_COGNITO_USER_POOL_ID: ${{ needs.deploy.outputs.cognito-user-pool-id }}
+        COGNITO_REGION: ${{ env.AWS_REGION }}
+        CYPRESS_COGNITO_REGION: ${{ env.AWS_REGION }}
+        COGNITO_IDENTITY_POOL_ID: ${{ needs.deploy.outputs.cognito-identity-pool-id }}
+        CYPRESS_COGNITO_IDENTITY_POOL_ID: ${{ needs.deploy.outputs.cognito-identity-pool-id }}
+        COGNITO_USER_POOL_WEB_CLIENT_ID: ${{ needs.deploy.outputs.cognito-client-id }}
+        CYPRESS_COGNITO_USER_POOL_WEB_CLIENT_ID: ${{ needs.deploy.outputs.cognito-client-id }}
+        
+        # AWS credentials for S3 operations in tests
+        AWS_ACCESS_KEY_ID: ${{ steps.creds.outputs.aws-access-key-id }}
+        AWS_SECRET_ACCESS_KEY: ${{ steps.creds.outputs.aws-secret-access-key }}
+        AWS_SESSION_TOKEN: ${{ steps.creds.outputs.aws-session-token }}
+        CYPRESS_AWS_ACCESS_KEY_ID: ${{ steps.creds.outputs.aws-access-key-id }}
+        CYPRESS_AWS_SECRET_ACCESS_KEY: ${{ steps.creds.outputs.aws-secret-access-key }}
+        CYPRESS_AWS_SESSION_TOKEN: ${{ steps.creds.outputs.aws-session-token }}
+        
+        # Cypress folder overrides (running from root)
+        CYPRESS_SUPPORT_FILE: services/cypress/support/index.ts
+        CYPRESS_FIXTURES_FOLDER: services/cypress/fixtures
+        CYPRESS_SPEC_PATTERN: services/cypress/integration/**/*.spec.ts
+        CYPRESS_SCREEN_SHOTS_FOLDER: services/cypress/screenshots
+        CYPRESS_VIDEOS_FOLDER: services/cypress/videos
+        
+        # Enable coverage
+        CYPRESS_COVERAGE: true
+        NODE_V8_COVERAGE: ./coverage-cypress
+
+    - name: Upload Cypress Screenshots on Failure
+      if: failure() && steps.cypress.outcome == 'failure'
+      uses: actions/upload-artifact@v4
+      with:
+        name: cypress-screenshots-cdk-${{ matrix.containers }}
+        path: services/cypress/screenshots
+
+    - name: Upload Cypress Videos
+      if: always() && steps.cypress.outcome != 'skipped'
+      uses: actions/upload-artifact@v4
+      with:
+        name: cypress-videos-cdk-${{ matrix.containers }}
+        path: services/cypress/videos
+
+    - name: Upload Cypress Coverage
+      if: always()
+      uses: actions/upload-artifact@v4
+      with:
+        name: cypress-coverage-cdk-${{ matrix.containers }}
+        path: ./coverage-cypress/*.json
+
+  # Run Lambda validation script against CDK deployment
+  validate-lambdas:
+    name: Validate CDK Lambdas
+    needs: deploy
+    if: success() && github.event_name == 'push'
+    runs-on: ubuntu-latest
+    permissions:
+      id-token: write
+      contents: read
+    
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+
+    - name: Set AWS Account ID for Lambda Validation
+      id: set-account-id-validate
+      run: |
+        if [[ "${{ env.STAGE }}" == "prod" ]]; then
+          echo "account-id=${{ secrets.PROD_AWS_ACCOUNT_ID }}" >> $GITHUB_OUTPUT
+        elif [[ "${{ env.STAGE }}" == "val" ]]; then
+          echo "account-id=${{ secrets.VAL_AWS_ACCOUNT_ID }}" >> $GITHUB_OUTPUT
+        else
+          echo "account-id=${{ secrets.DEV_AWS_ACCOUNT_ID }}" >> $GITHUB_OUTPUT
+        fi
+
+    - name: Configure AWS credentials
+      uses: ./.github/actions/get_aws_credentials
+      with:
+        region: ${{ env.AWS_REGION }}
+        account-id: ${{ steps.set-account-id-validate.outputs.account-id }}
+        stage-name: ${{ env.STAGE }}
+
+    - name: Run Lambda Validation Script
+      working-directory: services/infra-cdk
+      run: |
+        echo "🔍 Validating all CDK-deployed Lambda functions..."
+        
+        # Set environment for the validation script
+        export STAGE=${{ env.STAGE }}
+        export REGION=${{ env.AWS_REGION }}
+        
+        # Run the comprehensive validation
+        chmod +x validate-all-lambdas.sh
+        ./validate-all-lambdas.sh -v
+        
+        echo "✅ Lambda validation complete"
+
+    - name: Upload Validation Report
+      if: always()
+      uses: actions/upload-artifact@v4
+      with:
+        name: lambda-validation-report-${{ env.STAGE }}
+        path: services/infra-cdk/validation-logs/
+        retention-days: 7

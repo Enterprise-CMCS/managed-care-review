@@ -15,28 +15,55 @@ import {
 } from '@aws-sdk/client-cloudformation'
 
 async function getUserPoolID(stageName: string): Promise<string> {
-    const uiAuthStackName = `ui-auth-${stageName}`
-
     const cfClient = new CloudFormationClient({ region: 'us-east-1' })
-    const input: DescribeStacksCommandInput = {
-        StackName: uiAuthStackName,
+    
+    // Try CDK stack first
+    const cdkStackName = `MCR-Auth-${stageName}-cdk`
+    try {
+        const cdkInput: DescribeStacksCommandInput = {
+            StackName: cdkStackName,
+        }
+        const cdkCommand = new DescribeStacksCommand(cdkInput)
+        const cdkResponse = await cfClient.send(cdkCommand)
+        
+        if (cdkResponse.Stacks && cdkResponse.Stacks[0].Outputs) {
+            const userPoolID = cdkResponse.Stacks[0].Outputs.filter(
+                (o) => o.OutputKey === 'UserPoolId'
+            )[0].OutputValue
+            
+            if (userPoolID) {
+                console.log(`Using CDK stack: ${cdkStackName}`)
+                return userPoolID
+            }
+        }
+    } catch (e) {
+        // CDK stack doesn't exist, try serverless
     }
-    const command = new DescribeStacksCommand(input)
-    const response = await cfClient.send(command)
-
-    if (response.Stacks === undefined) {
-        throw new Error(`Could not find stack of name ${uiAuthStackName}`)
+    
+    // Fallback to serverless stack
+    const serverlessStackName = `ui-auth-${stageName}`
+    try {
+        const serverlessInput: DescribeStacksCommandInput = {
+            StackName: serverlessStackName,
+        }
+        const serverlessCommand = new DescribeStacksCommand(serverlessInput)
+        const serverlessResponse = await cfClient.send(serverlessCommand)
+        
+        if (serverlessResponse.Stacks && serverlessResponse.Stacks[0].Outputs) {
+            const userPoolID = serverlessResponse.Stacks[0].Outputs?.filter(
+                (o) => o.OutputKey === 'UserPoolId'
+            )[0].OutputValue
+            
+            if (userPoolID) {
+                console.log(`Using serverless stack: ${serverlessStackName}`)
+                return userPoolID
+            }
+        }
+    } catch (e) {
+        throw new Error(`Could not find either CDK stack ${cdkStackName} or serverless stack ${serverlessStackName}`)
     }
-
-    const userPoolID = response.Stacks[0].Outputs?.filter(
-        (o) => o.OutputKey === 'UserPoolId'
-    )[0].OutputValue
-
-    if (userPoolID === undefined) {
-        throw new Error(`No UserPoolID defined in ${uiAuthStackName}`)
-    }
-
-    return userPoolID
+    
+    throw new Error(`No UserPoolID found in either CDK or serverless stacks`)
 }
 
 type UserRole = 'CMS_USER' | 'STATE_USER' | 'UNKNOWN_USER' | 'ADMIN_USER' | 'HELPDESK_USER' | 'BUSINESSOWNER_USER' | 'CMS_APPROVER_USER'
