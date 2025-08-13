@@ -146,22 +146,58 @@ export class AuthExtensionsStack extends Stack {
   private grantS3Permissions(): void {
     if (this.s3BucketNames.length === 0) return;
 
-    const s3Resources: string[] = [];
+    const s3ObjectResources: string[] = [];
+    const s3BucketResources: string[] = [];
+    
+    this.s3BucketNames.forEach(bucketName => {
+      // Add bucket-level resources
+      s3BucketResources.push(`arn:aws:s3:::${bucketName}`);
+      // Add object-level resources for all paths
+      s3ObjectResources.push(`arn:aws:s3:::${bucketName}/*`);
+    });
+
+    // Grant read permissions for viewing object details in console
+    this.authenticatedRole.addToPolicy(new iam.PolicyStatement({
+      effect: iam.Effect.ALLOW,
+      actions: [
+        's3:GetObject',
+        's3:GetObjectVersion',
+        's3:GetObjectTagging',
+        's3:GetObjectVersionTagging',
+        's3:GetObjectAttributes',
+        's3:GetObjectMetadata'
+      ],
+      resources: s3ObjectResources
+    }));
+
+    // Grant bucket-level permissions
+    this.authenticatedRole.addToPolicy(new iam.PolicyStatement({
+      effect: iam.Effect.ALLOW,
+      actions: [
+        's3:ListBucket',
+        's3:GetBucketLocation',
+        's3:GetBucketVersioning',
+        's3:ListBucketVersions'
+      ],
+      resources: s3BucketResources
+    }));
+
+    // Grant write permissions for specific paths
+    const s3WriteResources: string[] = [];
     this.s3BucketNames.forEach(bucketName => {
       // Add shared access paths
-      s3Resources.push(`arn:aws:s3:::${bucketName}/allusers/*`);
+      s3WriteResources.push(`arn:aws:s3:::${bucketName}/allusers/*`);
       // Add user-specific access paths
-      s3Resources.push(`arn:aws:s3:::${bucketName}/private/\${cognito-identity.amazonaws.com:sub}/*`);
+      s3WriteResources.push(`arn:aws:s3:::${bucketName}/private/\${cognito-identity.amazonaws.com:sub}/*`);
     });
 
     this.authenticatedRole.addToPolicy(new iam.PolicyStatement({
       effect: iam.Effect.ALLOW,
       actions: [
-        's3:GetObject',
         's3:PutObject',
         's3:DeleteObject'
       ],
-      resources: s3Resources
+      resources: s3WriteResources
     }));
   }
 

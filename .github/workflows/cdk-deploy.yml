@@ -556,7 +556,7 @@ jobs:
   cypress-tests:
     name: Cypress E2E Tests - CDK
     needs: deploy
-    if: success() && github.event_name == 'push' && contains(fromJSON('["main", "val", "prod"]'), github.ref_name)
+    if: success() && github.event_name == 'push'
     runs-on: ubuntu-latest
     container:
       image: cypress/browsers:node-20.14.0-chrome-126.0.6478.114-1-ff-127.0.1-edge-126.0.2592.61-1
@@ -765,3 +765,46 @@ jobs:
         name: lambda-validation-report-${{ env.STAGE }}
         path: services/infra-cdk/validation-logs/
         retention-days: 7
+
+  # Test GuardDuty malware protection
+  test-guardduty:
+    name: Test GuardDuty Malware Protection
+    needs: deploy
+    if: success() && github.event_name == 'push'
+    runs-on: ubuntu-latest
+    permissions:
+      id-token: write
+      contents: read
+    
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+
+    - name: Set AWS Account ID for GuardDuty Test
+      id: set-account-id-guardduty
+      run: |
+        if [[ "${{ env.STAGE }}" == "prod" ]]; then
+          echo "account-id=${{ secrets.PROD_AWS_ACCOUNT_ID }}" >> $GITHUB_OUTPUT
+        elif [[ "${{ env.STAGE }}" == "val" ]]; then
+          echo "account-id=${{ secrets.VAL_AWS_ACCOUNT_ID }}" >> $GITHUB_OUTPUT
+        else
+          echo "account-id=${{ secrets.DEV_AWS_ACCOUNT_ID }}" >> $GITHUB_OUTPUT
+        fi
+
+    - name: Configure AWS credentials
+      uses: ./.github/actions/get_aws_credentials
+      with:
+        region: ${{ env.AWS_REGION }}
+        account-id: ${{ steps.set-account-id-guardduty.outputs.account-id }}
+        stage-name: ${{ env.STAGE }}
+
+    - name: Run GuardDuty Test Script
+      working-directory: services/infra-cdk
+      run: |
+        echo "🛡️ Testing GuardDuty Malware Protection..."
+        
+        # Make script executable and run in CI mode
+        chmod +x test-guardduty-ci.sh
+        ./test-guardduty-ci.sh ${{ env.STAGE }}
+        
+        echo "✅ GuardDuty test complete"
