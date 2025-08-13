@@ -1,7 +1,4 @@
-import type {
-    ContractType,
-    ContractFormDataType,
-} from '../../domain-models/contractAndRates'
+import type { ContractType, ContractFormDataType } from '../../domain-models'
 import type { ExtendedPrismaClient } from '../prismaClient'
 import { parseContractWithHistory } from './parseContractWithHistory'
 import { includeFullContract } from './prismaFullContractRateHelpers'
