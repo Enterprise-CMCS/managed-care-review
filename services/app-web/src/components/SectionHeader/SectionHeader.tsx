@@ -12,6 +12,7 @@ export type SectionHeaderProps = {
     hideBorderBottom?: boolean
     hideBorderTop?: boolean
     as?: keyof JSX.IntrinsicElements
+    fontSize?: string
 }
 
 export const SectionHeader = ({
@@ -24,6 +25,7 @@ export const SectionHeader = ({
     hideBorderBottom,
     hideBorderTop,
     as,
+    fontSize,
 }: SectionHeaderProps & JSX.IntrinsicElements['div']): React.ReactElement => {
     const classes = classNames({
         [styles.summarySectionHeader]: true,
@@ -36,12 +38,22 @@ export const SectionHeader = ({
         [styles.primaryDiv]: !!(editNavigateTo || children),
     })
 
+    //This lets you customize the header level
     const Tag = as ?? 'h2'
 
     return (
         <div className={classes} id={sectionId}>
             <div className={primaryDivClasses}>
-                <Tag id={headerId}>{header}</Tag>
+                <Tag
+                    id={headerId}
+                    style={{
+                        fontSize,
+                        fontWeight: '400',
+                        marginBottom: '25px',
+                    }}
+                >
+                    {header}
+                </Tag>
                 {subHeaderComponent}
             </div>
             <div>

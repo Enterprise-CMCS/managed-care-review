@@ -270,6 +270,7 @@ export const RateDetailsSummarySection = ({
                 editNavigateTo={editNavigateTo}
                 hideBorderTop
                 hideBorderBottom
+                fontSize="38px"
             />
             {rateRevs && rateRevs.length > 0
                 ? rateRevs.map((rateRev) => {
@@ -523,7 +524,8 @@ export const RateDetailsSummarySection = ({
                               <SectionHeader
                                   header="Rate documents"
                                   hideBorderBottom
-                                  as="h3"
+                                  as="h4"
+                                  fontSize="24px"
                               >
                                   {isSubmittedOrCMSUser &&
                                       !isPreviousSubmission &&

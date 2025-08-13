@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React from 'react'
 import styles from '../SubmissionSummarySection.module.scss'
 import { MultiColumnGrid } from '../../MultiColumnGrid'
 import {
@@ -16,11 +16,8 @@ import {
 } from '../../../gen/gqlClient'
 import { UploadedDocumentsTable } from '../UploadedDocumentsTable'
 import { SectionHeader } from '../../SectionHeader'
-import { renderDownloadButton } from './RateDetailsSummarySection'
+import { renderZipLink } from '../../../pages/StateSubmission/ReviewSubmit/RateDetailsSummarySection'
 import { DocumentWarningBanner } from '../../Banner'
-import { useS3 } from '../../../contexts/S3Context'
-import useDeepCompareEffect from 'use-deep-compare-effect'
-import { recordJSException } from '@mc-review/otel'
 import { Grid } from '@trussworks/react-uswds'
 import { UploadedDocumentsTableProps } from '../UploadedDocumentsTable/UploadedDocumentsTable'
 import { useAuth } from '../../../contexts/AuthContext'
@@ -33,6 +30,7 @@ import { NavLinkWithLogging } from '../../TealiumLogging'
 import { hasCMSUserPermissions } from '@mc-review/helpers'
 import { featureFlags } from '@mc-review/common-code'
 import { useLDClient } from 'launchdarkly-react-client-sdk'
+import { getRateZipDownloadUrl } from '../../../helpers/zipHelpers'
 
 const rateCapitationType = (formData: RateFormData) =>
     formData.rateCapitationType
@@ -152,14 +150,6 @@ export const SingleRateSummarySection = ({
         ? withdrawnFromContractRevs
         : latestSubmission.contractRevisions
 
-    // TODO BULK DOWNLOAD
-    // needs to be wrap in a standalone hook
-    const { getKey, getBulkDlURL } = useS3()
-    const [documentError, setDocumentError] = useState(false)
-    const [zippedFilesURL, setZippedFilesURL] = useState<
-        string | undefined | Error
-    >(undefined)
-
     const appendDraftToSharedPackages: UploadedDocumentsTableProps['packagesWithSharedRateCerts'] =
         rateRevision?.formData.packagesWithSharedRateCerts.map((pkg) => ({
             packageId: pkg.packageId,
@@ -182,41 +172,14 @@ export const SingleRateSummarySection = ({
     const validateActuary = (actuary: ActuaryContact): boolean => {
         return !(!actuary?.name || !actuary?.email)
     }
-
-    useDeepCompareEffect(() => {
-        // get all the keys for the documents we want to zip
-        async function fetchZipUrl() {
-            const allRateDocuments =
-                formData.rateDocuments.concat(formData.supportingDocuments) ||
-                []
-
-            const keysFromDocs = allRateDocuments
-                .map((doc) => {
-                    const key = getKey(doc.s3URL)
-                    if (!key) return ''
-                    return key
-                })
-                .filter((key) => key !== '')
-
-            // call the lambda to zip the files and get the url
-            const zippedURL = await getBulkDlURL(
-                keysFromDocs,
-                formData.rateCertificationName + '-rate-details.zip',
-                'HEALTH_PLAN_DOCS'
-            )
-            if (zippedURL instanceof Error) {
-                const msg = `ERROR: getBulkDlURL failed to generate URL for a rate. ID: ${rate?.id} Message: ${zippedURL}`
-
-                setDocumentError(true)
-                recordJSException(msg)
-            }
-
-            setZippedFilesURL(zippedURL)
-        }
-
-        void fetchZipUrl()
-    }, [getKey, getBulkDlURL, formData])
-    // END bulk download logic
+    const rateDocumentCount =
+        formData.supportingDocuments &&
+        formData.rateDocuments &&
+        formData.supportingDocuments.length + formData.rateDocuments.length
+    const zippedFilesURL =
+        isSubmittedOrCMSUser && rateRevision.documentZipPackages
+            ? getRateZipDownloadUrl(rateRevision.documentZipPackages)
+            : undefined
 
     return (
         <React.Fragment key={rate.id}>
@@ -229,8 +192,9 @@ export const SingleRateSummarySection = ({
                         rate.revisions[0].formData.rateCertificationName ||
                         'Unknown rate name'
                     }
+                    hideBorderTop
                 />
-                {documentError && (
+                {!zippedFilesURL && (
                     <DocumentWarningBanner className={styles.banner} />
                 )}
                 <dl>
@@ -394,8 +358,8 @@ export const SingleRateSummarySection = ({
                 </dl>
             </SectionCard>
             <SectionCard className={styles.summarySection}>
-                <SectionHeader header="Rate documents">
-                    {renderDownloadButton(zippedFilesURL)}
+                <SectionHeader header="Rate documents" hideBorderTop>
+                    {renderZipLink(zippedFilesURL, rateDocumentCount)}
                 </SectionHeader>
                 <UploadedDocumentsTable
                     documents={formData.rateDocuments}

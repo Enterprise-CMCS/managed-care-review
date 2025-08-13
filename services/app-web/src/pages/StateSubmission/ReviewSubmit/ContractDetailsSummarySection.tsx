@@ -189,11 +189,13 @@ export const ContractDetailsSummarySection = ({
         <SectionCard
             id="contractDetailsSection"
             className={styles.summarySection}
+            style={{ paddingTop: 0 }}
         >
             <SectionHeader
                 header="Contract details"
                 editNavigateTo={editNavigateTo}
                 hideBorderTop
+                fontSize="38px"
             />
             <dl>
                 {contract438Attestation && (
@@ -354,7 +356,12 @@ export const ContractDetailsSummarySection = ({
                     </MultiColumnGrid>
                 )}
             </dl>
-            <SectionHeader header="Contract documents" hideBorderBottom as="h3">
+            <SectionHeader
+                header="Contract documents"
+                hideBorderBottom
+                as="h4"
+                fontSize="24px"
+            >
                 {isSubmittedOrCMSUser &&
                     !isPreviousSubmission &&
                     renderZipLink(

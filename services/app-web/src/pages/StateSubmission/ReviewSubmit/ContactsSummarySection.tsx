@@ -32,7 +32,11 @@ export const ContactsSummarySection = ({
         isStateUser
     )
     return (
-        <SectionCard id="stateContacts" className={styles.summarySection}>
+        <SectionCard
+            id="stateContacts"
+            className={styles.summarySection}
+            style={{ paddingTop: 10 }}
+        >
             <SectionHeader
                 header="State contacts"
                 editNavigateTo={editNavigateTo}

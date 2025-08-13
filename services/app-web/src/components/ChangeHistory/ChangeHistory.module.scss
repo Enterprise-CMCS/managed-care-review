@@ -6,10 +6,6 @@
     line-height: uswds.units(3);
     @include uswds.u-radius('md');
 
-    h2 {
-        margin: 0;
-        @include uswds.u-text('normal');
-    }
     &:first-of-type {
         h2 {
             @include uswds.u-text('bold');

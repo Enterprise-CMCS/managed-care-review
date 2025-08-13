@@ -70,6 +70,7 @@ export const SubmissionTypeSummarySection = ({
                 editNavigateTo={editNavigateTo}
                 headerId={'submissionName'}
                 hideBorderTop
+                fontSize="38px"
             >
                 {headerChildComponent && headerChildComponent}
             </SectionHeader>

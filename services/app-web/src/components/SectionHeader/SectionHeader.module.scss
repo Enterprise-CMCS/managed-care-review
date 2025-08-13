@@ -9,14 +9,13 @@
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding-top: uswds.units(2);
-    min-height: 3rem;
 
     &.hasSubheader {
         align-items: start;
         a {
             display: block;
             margin-top: 17.5px;
+            margin-bottom: 17.5px;
         }
     }
 }
