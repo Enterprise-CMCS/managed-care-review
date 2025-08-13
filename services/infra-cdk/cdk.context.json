@@ -1,0 +1,4 @@
+{
+  "ssm:account=121499393294:parameterName=/configuration/vpn_security_group_id:region=us-east-1": "sg-073793162dc0fddae",
+  "ssm:account=121499393294:parameterName=/configuration/shared_services_security_group_id:region=us-east-1": "sg-058dba1008ed23935"
+}

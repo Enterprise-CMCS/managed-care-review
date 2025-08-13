@@ -294,4 +294,5 @@ function parseContentDisposition(cd: string): string {
     }
 }
 
-module.exports = { main }
+export const handler = main
+module.exports = { main, handler }

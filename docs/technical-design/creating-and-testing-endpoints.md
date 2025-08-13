@@ -264,39 +264,89 @@ Again, this isn't needed for every piece of data returned by GraphQL. It is usef
 
 ## Lambda
 
-We use AWS Lambda to build RESTful endpoints in our application. When we create a lambda handler, serverless will add a new Lambda function for us in AWS. If we configure it correctly, that function will have access to things like our postgres database, which itself is hosted on AWS.
+We use AWS Lambda to build RESTful endpoints in our application. With our migration to AWS CDK, Lambda functions are now defined using TypeScript constructs instead of YAML configuration.
 
-### Serverless configuration
+### CDK Lambda Configuration
 
-Here is an example of serverless configuration for a Lambda that handles an api request, found in `/services/app-api/serverless.yml`.
+Here is an example of CDK configuration for a Lambda that handles an API request, found in `/services/infra-cdk/lib/stacks/api-compute-stack.ts`:
 
-```yaml
-reports:
-    handler: src/handlers/reports.main
-    events:
-        - http:
-              path: reports
-              method: get
-              cors: true
-              authorizer: aws_iam
-    layers:
-        - !Ref PrismaClientEngineLambdaLayer
-        - arn:aws:lambda:us-east-1:901920570463:layer:aws-otel-nodejs-amd64-ver-1-2-0:1
-    vpc:
-        securityGroupIds:
-            - ${self:custom.sgId}
-        subnetIds: ${self:custom.privateSubnets}
+```typescript
+// Define the Lambda function
+this.lambdaFactory.createFunction({
+  functionName: 'GRAPHQL',
+  useVpc: true,
+  environment: {
+    GRAPHQL_SCHEMA_PATH: './schema.graphql'
+  },
+  timeout: Duration.seconds(30),
+  memorySize: 1024
+});
+
+// Configure API Gateway endpoint
+const graphqlResource = this.api.root.addResource('graphql');
+ApiEndpointFactory.createGraphQLEndpoint(this, 'GraphQLEndpoint', {
+  resource: graphqlResource,
+  handler: this.getFunction('GRAPHQL'),
+  authType: 'IAM',
+  methods: ['GET', 'POST']
+});
 ```
 
-The code that runs when this handler is called is in `/app-api/src/handlers/reports.ts`.
+For Lambda functions that don't need API Gateway exposure (like scheduled tasks), the configuration is simpler:
 
-The handler points to `/app-api/src/handlers/reports.main`. We're telling the handler where to look for the file that contains the code that will run in the lambda (`src/handlers`) and also the name of the function (`main`). In `reports.ts` the exported handler is called `main`. The location and exported method of `reports.ts` have to match what's specified on the `handler:` line in our YAML file.
+```typescript
+// Create a scheduled Lambda function
+this.lambdaFactory.createFunction({
+  functionName: 'CLEANUP',
+  useVpc: false
+});
 
-We also provide a `path`. This handler will run when someone navigates to the site's base name, slash reports. For prod, it would be `https://mc-review.onemac.cms.gov/reports`.
+// Add EventBridge schedule
+const cleanupRule = new events.Rule(this, 'CleanupScheduleRule', {
+  schedule: events.Schedule.expression('cron(0 14 ? * MON-FRI *)')
+});
+cleanupRule.addTarget(new targets.LambdaFunction(cleanupFunction));
+```
 
-The `authorizer` line tells AWS that this method can only be invoked by a user who is logged in and has permissions set in AWS IAM. This will typically flow from someone being a state or CMS user, with permission to interact with the main site.
+The handler code remains in `/app-api/src/handlers/`, but with CDK, the handler mapping is defined in `/services/infra-cdk/lib/constructs/lambda/lambda-factory.ts`:
 
-`layers` tie this handler to services that it needs. A lambda layer is basically a collection of code that stays in AWS and doesn't need to be uploaded or updated with each deployment. It's an efficient way to make dependencies available without having to upload and build them each time. In the case of our example, we need database access, so we include our Prisma layer, and we're also tying in to `otel`, our open telemetry service, for observability.
+```typescript
+const HANDLER_MAP: Record<string, HandlerMapping> = {
+  GRAPHQL: { 
+    entry: 'handlers/apollo_gql.ts', 
+    handler: 'gqlHandler',
+    functionName: 'graphql'
+  },
+  EMAIL_SUBMIT: { 
+    entry: 'handlers/email_submit.ts', 
+    handler: 'main',
+    functionName: 'email_submit'
+  },
+  // ... other handler mappings
+};
+```
+
+With CDK, API paths are configured using the API Gateway constructs:
+
+```typescript
+// Create /health_check endpoint
+const healthResource = this.api.root.addResource('health_check');
+ApiEndpointFactory.createPublicEndpoint(this, 'HealthEndpoint', {
+  resource: healthResource,
+  method: 'GET',
+  handler: this.getFunction('INDEX_HEALTH_CHECKER')
+});
+```
+
+Authorization is configured per endpoint using CDK authorizers:
+- **IAM Authorization**: For internal APIs requiring AWS IAM credentials
+- **Cognito Authorization**: For user-authenticated endpoints
+- **Custom Authorizers**: For third-party API access
+
+Layers are managed centrally and applied automatically:
+- **OTEL Layer**: Applied to all functions for observability
+- **Prisma Layer**: Applied to functions needing database access (determined by `needsPrismaLayer()` utility)
+- **Migration Layer**: Applied only to the MIGRATE function
 
 In order to communicate with those layers, we have to specify which `vpc`, or virtual private cloud, this handler will run within. AWS services are basically islands, and vpcs are a way to enable secure communication between some of the islands under our control. By saying that our handler belongs to a particular vpc, we are telling AWS which services it can communicate with.
 

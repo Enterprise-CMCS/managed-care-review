@@ -1,0 +1,12 @@
+[Unit]
+Description=Notify Slack on system events
+After=network.target
+
+[Service]
+Type=oneshot
+RemainAfterExit=yes
+ExecStart=/usr/local/bin/vm-startup.sh
+ExecStop=/usr/local/bin/vm-shutdown.sh
+
+[Install]
+WantedBy=multi-user.target
