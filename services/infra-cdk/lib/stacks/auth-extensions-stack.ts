@@ -309,16 +309,8 @@ export class AuthExtensionsStack extends Stack {
    * Create redirect Lambda function for auth flows
    */
   private createRedirectFunction(userPoolId: string, userPoolClientId: string): void {
-    // Import OTEL layer for observability
-    const otelLayerArn = ssm.StringParameter.valueForStringParameter(
-      this, 
-      ResourceNames.ssmPath(SSM_PATHS.OTEL_LAYER, this.stage)
-    );
-    const otelLayer = lambda.LayerVersion.fromLayerVersionArn(
-      this, 
-      'RedirectOtelLayer', 
-      otelLayerArn
-    );
+    // OTEL layer is now added by Lambda Monitoring Aspect to avoid duplicates
+    // The aspect handles both OTEL and Datadog Extension layers consistently
     
     // Create redirect Lambda function matching serverless ui-auth
     const redirectFunction = new lambda.Function(this, 'RedirectFunction', {
@@ -327,7 +319,7 @@ export class AuthExtensionsStack extends Stack {
       handler: 'index.handler',
       timeout: Duration.seconds(60),
       memorySize: 1024,
-      layers: [otelLayer], // Add OTEL layer for instrumentation
+      // Layers added by Lambda Monitoring Aspect
       environment: {
         COGNITO_USER_POOL_ID: userPoolId,
         COGNITO_CLIENT_ID: userPoolClientId,

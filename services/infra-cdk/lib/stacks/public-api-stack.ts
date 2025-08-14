@@ -69,9 +69,8 @@ export class PublicApiStack extends Stack {
   private defineResources(): void {
     const config = getConfig(this.stage);
 
-    // Import shared infrastructure layers from SSM using ServiceRegistry
-    const otelLayerArn = ServiceRegistry.getLayerArn(this, this.stage, 'otel');
-    const otelLayer = lambda.LayerVersion.fromLayerVersionArn(this, 'OtelLayer', otelLayerArn);
+    // OTEL layer is now added by Lambda Monitoring Aspect to avoid duplicates
+    // The aspect handles both OTEL and Datadog Extension layers consistently
 
     // Health Check Lambda using CDK NodejsFunction (no Prisma needed)
     const healthFunction = new NodejsFunction(this, 'HealthFunction', {
@@ -82,7 +81,7 @@ export class PublicApiStack extends Stack {
       architecture: lambda.Architecture.X86_64,
       timeout: Duration.seconds(LAMBDA_DEFAULTS.TIMEOUT_API),
       memorySize: LAMBDA_DEFAULTS.MEMORY_SMALL,
-      layers: [otelLayer],
+      // Layers added by Lambda Monitoring Aspect,
       environment: this.getBaseEnvironmentVariables(),
       bundling: getBundlingConfig('health_check', this.stage) // Use proper bundling config
     });
@@ -99,7 +98,7 @@ export class PublicApiStack extends Stack {
       architecture: lambda.Architecture.X86_64,
       timeout: Duration.seconds(LAMBDA_DEFAULTS.TIMEOUT_STANDARD),
       memorySize: LAMBDA_DEFAULTS.MEMORY_MEDIUM,
-      layers: [otelLayer], // Prisma bundled directly into function
+      // Layers added by Lambda Monitoring Aspect, // Prisma bundled directly into function
       vpc: this.vpc,
       securityGroups: [this.lambdaSecurityGroup],
       environment: {
@@ -122,7 +121,7 @@ export class PublicApiStack extends Stack {
       architecture: lambda.Architecture.X86_64,
       timeout: Duration.seconds(LAMBDA_DEFAULTS.TIMEOUT_STANDARD),
       memorySize: LAMBDA_DEFAULTS.MEMORY_SMALL,
-      layers: [otelLayer],
+      // Layers added by Lambda Monitoring Aspect,
       environment: this.getBaseEnvironmentVariables(),
       bundling: getBundlingConfig('otel_proxy', this.stage) // Use proper bundling config
     });

@@ -15,6 +15,7 @@ export interface LambdaLayersStackProps extends StackProps {
  */
 export class LambdaLayersStack extends Stack {
   public readonly otelLayer: lambda.ILayerVersion;
+  public readonly datadogExtension: lambda.ILayerVersion;
 
   constructor(scope: Construct, id: string, props: LambdaLayersStackProps) {
     super(scope, id, props);
@@ -33,6 +34,21 @@ export class LambdaLayersStack extends Stack {
       parameterName: `/mcr-cdk-${stage}/layers/otel/arn`,
       stringValue: this.otelLayer.layerVersionArn,
       description: 'OTEL Layer ARN'
+    });
+
+    // Datadog Extension Layer (commercial AWS region)
+    // Note: If using GovCloud, use arn:aws-us-gov:lambda:us-gov-east-1:002406178527:layer:Datadog-Extension:65
+    this.datadogExtension = lambda.LayerVersion.fromLayerVersionArn(
+      this,
+      'DatadogExtension',
+      'arn:aws:lambda:us-east-1:464622532012:layer:Datadog-Extension:65'
+    );
+
+    // Store Datadog Extension ARN in SSM for cross-stack reference
+    new ssm.StringParameter(this, 'DatadogExtensionArnParameter', {
+      parameterName: `/mcr-cdk-${stage}/layers/datadog-extension/arn`,
+      stringValue: this.datadogExtension.layerVersionArn,
+      description: 'Datadog Extension Layer ARN'
     });
   }
 }

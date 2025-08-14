@@ -84,13 +84,7 @@ export class ScanEventProcessor extends Construct {
       vpc: props.vpc,
       vpcSubnets: props.vpcSubnets,
       securityGroups: props.securityGroups,
-      layers: [
-        lambda.LayerVersion.fromLayerVersionArn(
-          this,
-          'OtelLayerScanProcessor',
-          'arn:aws:lambda:us-east-1:901920570463:layer:aws-otel-nodejs-amd64-ver-1-18-1:4'
-        )
-      ],
+      // Layers added by Lambda Monitoring Aspect
       bundling: defaultBundling(props.stage)
     });
 

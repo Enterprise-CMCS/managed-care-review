@@ -81,12 +81,8 @@ export class ScheduledTasksStack extends Stack {
   private defineResources(): void {
     const config = getEnvironment(this.stage);
 
-    // Import shared infrastructure layers from SSM using lean config paths
-    const otelLayerArn = ssm.StringParameter.valueForStringParameter(
-      this, 
-      ResourceNames.ssmPath(SSM_PATHS.OTEL_LAYER, this.stage)
-    );
-    const otelLayer = lambda.LayerVersion.fromLayerVersionArn(this, 'OtelLayer', otelLayerArn);
+    // OTEL layer is now added by Lambda Monitoring Aspect to avoid duplicates
+    // The aspect handles both OTEL and Datadog Extension layers consistently
 
     // Create Lambda function with exact same configuration as before
     const cleanupFunction = new NodejsFunction(this, 'CleanupFunction', {
@@ -97,7 +93,7 @@ export class ScheduledTasksStack extends Stack {
       architecture: lambda.Architecture.X86_64,
       timeout: LAMBDA_DEFAULTS.TIMEOUT_LONG_RUNNING,
       memorySize: LAMBDA_DEFAULTS.MEMORY_MEDIUM,
-      layers: [otelLayer],
+      // Layers added by Lambda Monitoring Aspect,
       environment: this.getEnvironmentVariables(),
       description: 'Cleanup old files and temporary data - Solutions Constructs with all best practices',
       bundling: getBundlingConfig('cleanup', this.stage) // Cleanup doesn't need Prisma
@@ -169,7 +165,7 @@ export class ScheduledTasksStack extends Stack {
       architecture: lambda.Architecture.X86_64,
       timeout: LAMBDA_DEFAULTS.TIMEOUT_STANDARD,
       memorySize: LAMBDA_DEFAULTS.MEMORY_MEDIUM,
-      layers: [otelLayer],
+      // Layers added by Lambda Monitoring Aspect,
       environment: this.getEnvironmentVariables(),
       description: 'Email submission handler - serverless parity',
       bundling: getBundlingConfig('email_submit', this.stage) // Email doesn't need Prisma

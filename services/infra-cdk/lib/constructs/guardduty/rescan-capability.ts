@@ -35,7 +35,7 @@ const QUEUE_LIMITS = {
   DEFAULT_RETENTION: Duration.days(7),
 } as const;
 
-const OTEL_LAYER_ARN = 'arn:aws:lambda:us-east-1:901920570463:layer:aws-otel-nodejs-amd64-ver-1-18-1:4';
+// OTEL layer is now added by Lambda Monitoring Aspect to avoid duplicates
 
 export interface RescanCapabilityProps {
   stage: string;
@@ -109,13 +109,7 @@ export class RescanCapability extends Construct {
       vpc: props.vpc,
       vpcSubnets: props.vpcSubnets,
       securityGroups: props.securityGroups,
-      layers: [
-        lambda.LayerVersion.fromLayerVersionArn(
-          this,
-          'OtelLayerRescanHandler',
-          OTEL_LAYER_ARN
-        )
-      ],
+      // Layers added by Lambda Monitoring Aspect
       bundling: defaultBundling(props.stage)
     });
   }
@@ -141,13 +135,7 @@ export class RescanCapability extends Construct {
       vpc: props.vpc,
       vpcSubnets: props.vpcSubnets,
       securityGroups: props.securityGroups,
-      layers: [
-        lambda.LayerVersion.fromLayerVersionArn(
-          this,
-          'OtelLayerRescanWorker',
-          OTEL_LAYER_ARN
-        )
-      ],
+      // Layers added by Lambda Monitoring Aspect
       bundling: defaultBundling(props.stage)
     });
   }

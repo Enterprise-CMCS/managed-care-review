@@ -149,11 +149,7 @@ export class GraphQLApiStack extends Stack {
       timeout: Duration.seconds(30), // Matches serverless GraphQL timeout exactly
       memorySize: this.getMemorySize(), // 4096 for prod, 1024 for default
       
-      // Only OTEL layer - Prisma bundled directly
-      layers: [
-        lambda.LayerVersion.fromLayerVersionArn(this, 'OtelLayer', 
-          ssm.StringParameter.valueForStringParameter(this, ResourceNames.ssmPath(SSM_PATHS.OTEL_LAYER, this.stage)))
-      ],
+      // Layers added by Lambda Monitoring Aspect (Prisma bundled directly)
       
       // VPC configuration (matches serverless exactly)
       vpc: this.vpc,
@@ -180,11 +176,7 @@ export class GraphQLApiStack extends Stack {
       timeout: Duration.seconds(30), // Sufficient for authorization logic
       memorySize: 256, // Lightweight authorizer
       
-      // Only OTEL layer needed
-      layers: [
-        lambda.LayerVersion.fromLayerVersionArn(this, 'AuthOtelLayer', 
-          ssm.StringParameter.valueForStringParameter(this, ResourceNames.ssmPath(SSM_PATHS.OTEL_LAYER, this.stage)))
-      ],
+      // Layers added by Lambda Monitoring Aspect
       
       // Minimal environment for authorizer
       environment: {

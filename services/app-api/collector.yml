@@ -5,45 +5,15 @@ receivers:
       http:
 
 exporters:
-  # New Relic exporter (currently active)
+  # New Relic exporter
   otlp:
     endpoint: https://gov-otlp.nr-data.net:4317
     headers:
       api-key: $NR_LICENSE_KEY
-  
-  # Datadog exporter (commented out until API key is available)
-  # Uncomment the following section when ready to migrate to Datadog
-  # datadog:
-  #   api:
-  #     site: datadoghq.com  # Use ddog-gov.com for GovCloud
-  #     key: $DD_API_KEY     # Will be replaced by lambda-bundling.ts from SSM
-  #   traces:
-  #     trace_buffer: 500
-  #   metrics:
-  #     delta_ttl: 3600
-  #     resource_attributes_as_tags: true
-  #   logs:
-  #     enabled: true
-
-# Optional: Add batch processor for better performance
-# processors:
-#   batch:
-#     timeout: 10s
-#     send_batch_size: 1024
 
 service:
   pipelines:
     traces:
       receivers: [otlp]
-      exporters: [otlp]  # Add 'datadog' here when ready
-      # processors: [batch]  # Uncomment when using batch processor
-    
-    # Additional pipelines for Datadog (commented out)
-    # metrics:
-    #   receivers: [otlp]
-    #   exporters: [datadog]
-    #   processors: [batch]
-    # logs:
-    #   receivers: [otlp]
-    #   exporters: [datadog]
-    #   processors: [batch]
+      exporters: [otlp]  # Export to New Relic
+      # Note: Datadog Extension handles telemetry collection automatically when enabled

@@ -80,12 +80,8 @@ export class FileOpsStack extends Stack {
     const uploadsBucket = s3.Bucket.fromBucketName(this, 'UploadsBucket', this.uploadsBucketName);
     const qaBucket = s3.Bucket.fromBucketName(this, 'QaBucket', this.qaBucketName);
 
-    // Import shared infrastructure layers from SSM
-    const otelLayerArn = ssm.StringParameter.valueForStringParameter(
-      this, 
-      ResourceNames.ssmPath(SSM_PATHS.OTEL_LAYER, this.stage)
-    );
-    const otelLayer = lambda.LayerVersion.fromLayerVersionArn(this, 'OtelLayer', otelLayerArn);
+    // OTEL layer is now added by Lambda Monitoring Aspect to avoid duplicates
+    // The aspect handles both OTEL and Datadog Extension layers consistently
 
     // ZIP Keys function using CDK NodejsFunction for S3 integration
     const zipKeysFunction = new NodejsFunction(this, 'ZipKeysFunction', {
@@ -96,7 +92,7 @@ export class FileOpsStack extends Stack {
       architecture: lambda.Architecture.X86_64,
       timeout: LAMBDA_DEFAULTS.TIMEOUT_EXTENDED,
       memorySize: config.lambda.memorySize,
-      layers: [otelLayer], // Zip operations don't need Prisma
+      // Layers added by Lambda Monitoring Aspect (Zip operations don't need Prisma)
       environment: this.getEnvironmentVariables(),
       description: 'Process file compression and S3 operations - v2',
       bundling: getBundlingConfig('zip_keys', this.stage) // Correct function name
@@ -116,7 +112,7 @@ export class FileOpsStack extends Stack {
       architecture: lambda.Architecture.X86_64,
       timeout: LAMBDA_DEFAULTS.TIMEOUT_EXTENDED,
       memorySize: LAMBDA_DEFAULTS.MEMORY_MEDIUM,
-      layers: [otelLayer], // Prisma bundled directly into function
+      // Layers added by Lambda Monitoring Aspect (Prisma bundled directly into function)
       environment: {
         ...this.getEnvironmentVariables(),
         DATABASE_ENGINE: 'postgres',

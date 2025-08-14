@@ -5,6 +5,7 @@ import { Aspects } from 'aws-cdk-lib';
 // import { AwsSolutionsChecks } from 'cdk-nag';
 import { IamPathAspect } from '../lib/aspects/iam-path-aspects';
 import { IamPermissionsBoundaryAspect } from '../lib/aspects/iam-permissions-boundary-aspects';
+import { LambdaMonitoringAspect } from '../lib/aspects/lambda-monitoring-aspect';
 import { StackOrchestrator } from '../lib/stack-orchestrator';
 import {
   getConfig,
@@ -107,6 +108,20 @@ async function main() {
     if (permBoundary) {
       Aspects.of(app).add(new IamPermissionsBoundaryAspect(permBoundary));
       console.log(`Applying IAM permissions boundary: ${permBoundary}`);
+    }
+
+    // Apply Lambda Monitoring Aspect for Datadog integration
+    const enableDatadog = app.node.tryGetContext('enableDatadog') === true || 
+                          app.node.tryGetContext('enableDatadog') === 'true';
+    if (enableDatadog) {
+      // Secrets Manager ARNs have a random suffix, use wildcard for resource permissions
+      // The actual secret name is /mcr-cdk/dev/datadog-api-key with the key 'api_key'
+      const accountId = env.account || process.env.CDK_DEFAULT_ACCOUNT || process.env.AWS_ACCOUNT_ID;
+      const region = env.region || process.env.CDK_DEFAULT_REGION || process.env.AWS_REGION || 'us-east-1';
+      const datadogApiKeyArn = `arn:aws:secretsmanager:${region}:${accountId}:secret:/mcr-cdk/${stage}/datadog-api-key-*`;
+      Aspects.of(app).add(new LambdaMonitoringAspect(stage, datadogApiKeyArn, true));
+      console.log(`Applying Lambda Monitoring Aspect with Datadog enabled for stage: ${stage}`);
+      console.log(`Using Datadog API key ARN: ${datadogApiKeyArn}`);
     }
 
     // Apply CDK Nag to all stacks

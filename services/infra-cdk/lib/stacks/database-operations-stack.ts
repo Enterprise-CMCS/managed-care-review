@@ -11,7 +11,6 @@ import * as s3 from 'aws-cdk-lib/aws-s3';
 import * as secretsmanager from 'aws-cdk-lib/aws-secretsmanager';
 import * as rds from 'aws-cdk-lib/aws-rds';
 import * as ssm from 'aws-cdk-lib/aws-ssm';
-import { LambdaToSecretsmanager } from '@aws-solutions-constructs/aws-lambda-secretsmanager';
 import { Duration, RemovalPolicy, Tags, CfnOutput } from 'aws-cdk-lib';
 import { getBundlingConfig } from '../lambda-bundling';
 import { getEnvironment, SERVICES, ResourceNames, CDK_DEPLOYMENT_SUFFIX, PROJECT_PREFIX, PERMISSION_BOUNDARIES, SSM_PATHS, AWS_ACCOUNTS, EXTERNAL_ENDPOINTS } from '../config';
@@ -243,12 +242,8 @@ export class DatabaseOperationsStack extends Stack {
   private createDatabaseFunctions(): void {
     const config = getEnvironment(this.stage);
     
-    // Import OTEL layer from SSM for 100% serverless parity
-    const otelLayerArn = ssm.StringParameter.valueForStringParameter(
-      this, 
-      ResourceNames.ssmPath(SSM_PATHS.OTEL_LAYER, this.stage)
-    );
-    const otelLayer = lambda.LayerVersion.fromLayerVersionArn(this, 'OtelLayer', otelLayerArn);
+    // OTEL layer is now added by Lambda Monitoring Aspect to avoid duplicates
+    // The aspect handles both OTEL and Datadog Extension layers consistently
     
     // 🚀 Database Manager function - HYBRID APPROACH: Original function + Solutions Construct benefits
     // Using NodejsFunction for better bundling and TypeScript support
@@ -271,18 +266,11 @@ export class DatabaseOperationsStack extends Stack {
         subnetType: ec2.SubnetType.PRIVATE_WITH_EGRESS
       },
       securityGroups: [this.lambdaSecurityGroup],
-      layers: [otelLayer], // Prisma bundled directly into function
+      // Layers added by Lambda Monitoring Aspect
       bundling: getBundlingConfig('db_manager', this.stage) // Bundles Prisma directly
     });
 
-    // 🎯 ADD Solutions Construct benefits on top of existing function!
-    // Cast NodejsFunction to lambda.Function for type compatibility
-    const dbManagerIntegration = new LambdaToSecretsmanager(this, 'DbManagerIntegration', {
-      existingLambdaObj: dbManagerFunction as lambda.Function,
-      // Solutions Construct adds: DLQ, CloudWatch logs, monitoring, error handling
-    });
-
-    // Grant access to our existing database secret (maintain original functionality)
+    // Grant access to our existing database secret
     this.databaseSecret.grantRead(dbManagerFunction);
     
     // Grant additional secret management permissions (maintain original functionality)
@@ -325,7 +313,7 @@ export class DatabaseOperationsStack extends Stack {
         subnetType: ec2.SubnetType.PRIVATE_WITH_EGRESS
       },
       securityGroups: [this.lambdaSecurityGroup],
-      layers: [otelLayer], // Prisma bundled directly into function
+      // Layers added by Lambda Monitoring Aspect
       bundling: getBundlingConfig('db_export', this.stage) // Bundles Prisma directly
     });
 
@@ -361,7 +349,7 @@ export class DatabaseOperationsStack extends Stack {
         subnetType: ec2.SubnetType.PRIVATE_WITH_EGRESS
       },
       securityGroups: [this.lambdaSecurityGroup],
-      layers: [otelLayer], // Prisma bundled directly into function
+      // Layers added by Lambda Monitoring Aspect
       bundling: getBundlingConfig('db_import', this.stage) // Bundles Prisma directly
     });
 
@@ -390,7 +378,7 @@ export class DatabaseOperationsStack extends Stack {
         subnetType: ec2.SubnetType.PRIVATE_WITH_EGRESS
       },
       securityGroups: [this.lambdaSecurityGroup],
-      layers: [otelLayer], // Prisma bundled directly into function
+      // Layers added by Lambda Monitoring Aspect
       bundling: getBundlingConfig('postgres_migrate', this.stage) // Excludes Prisma from bundle
     });
 
@@ -418,7 +406,7 @@ export class DatabaseOperationsStack extends Stack {
         subnetType: ec2.SubnetType.PRIVATE_WITH_EGRESS
       },
       securityGroups: [this.lambdaSecurityGroup],
-      layers: [otelLayer], // Prisma bundled directly into function
+      // Layers added by Lambda Monitoring Aspect
       bundling: getBundlingConfig('migrate_document_zips', this.stage) // Excludes Prisma from bundle
     });
 
