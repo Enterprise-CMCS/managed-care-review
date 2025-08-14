@@ -41,7 +41,7 @@
         "@types/eslint": "^9.6.1",
         "@types/jest": "^29.5.14",
         "@types/mime-types": "^3.0.1",
-        "@types/node": "^20.14.12",
+        "@types/node": "^24.2.1",
         "@typescript-eslint/eslint-plugin": "^8.29.1",
         "@typescript-eslint/parser": "^8.29.1",
         "eslint": "^9.31.0",
