@@ -113,6 +113,14 @@ function preparePrismaLayer() {
 
     echo "Remove development files and documentation..."
 
+    # Remove TypeScript definitions (not needed at runtime)
+    find lambda-layers-prisma-client-migration/nodejs -name "*.d.ts" -delete
+    find lambda-layers-prisma-client-engine/nodejs -name "*.d.ts" -delete
+
+    # Remove source maps
+    find lambda-layers-prisma-client-migration/nodejs -name "*.map" -delete
+    find lambda-layers-prisma-client-engine/nodejs -name "*.map" -delete
+
     # Remove common dev/doc files
     find lambda-layers-prisma-client-migration/nodejs -name "*.md" -delete
     find lambda-layers-prisma-client-migration/nodejs -name "*.txt" -delete
@@ -146,5 +154,11 @@ function preparePrismaLayer() {
     rm -rf nodejs
     ls -lh nodejs.tar.gz
     popd || exit
+
+    echo "=== TOTAL COMPRESSED SIZES ==="
+    ls -lh lambda-layers-prisma-client-*/nodejs.tar.gz
+    echo "Combined uncompressed size would be approximately:"
+    total_size=$(du -sb lambda-layers-prisma-client-*/nodejs.tar.gz | awk '{sum += $1} END {print sum}')
+    echo "Scale=2; $total_size / 1024 / 1024" | bc -l | xargs printf "%.2f MB\n"
 }
 preparePrismaLayer
