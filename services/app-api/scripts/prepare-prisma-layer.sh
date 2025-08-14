@@ -111,6 +111,34 @@ function preparePrismaLayer() {
     rm -rf lambda-layers-prisma-client-engine/nodejs/node_modules/@prisma/engines/introspection-engine*
     rm -rf lambda-layers-prisma-client-engine/nodejs/node_modules/@prisma/engines/prisma-fmt*
 
+    echo "Remove unused database WASM files and Prisma Studio assets (keep only PostgreSQL)..."
+    
+    # Remove WASM files for unused databases in runtime directory (saves ~59MB)
+    find lambda-layers-prisma-client-migration/nodejs -name "*cockroach*wasm*" -delete 2>/dev/null || true
+    find lambda-layers-prisma-client-migration/nodejs -name "*mysql*wasm*" -delete 2>/dev/null || true
+    find lambda-layers-prisma-client-migration/nodejs -name "*sqlite*wasm*" -delete 2>/dev/null || true
+    find lambda-layers-prisma-client-migration/nodejs -name "*sqlserver*wasm*" -delete 2>/dev/null || true
+    
+    find lambda-layers-prisma-client-engine/nodejs -name "*cockroach*wasm*" -delete 2>/dev/null || true
+    find lambda-layers-prisma-client-engine/nodejs -name "*mysql*wasm*" -delete 2>/dev/null || true
+    find lambda-layers-prisma-client-engine/nodejs -name "*sqlite*wasm*" -delete 2>/dev/null || true
+    find lambda-layers-prisma-client-engine/nodejs -name "*sqlserver*wasm*" -delete 2>/dev/null || true
+    
+    # Remove additional WASM files for unused databases in build directory
+    find lambda-layers-prisma-client-migration/nodejs/node_modules/prisma/build -name "*cockroach*wasm*" -delete 2>/dev/null || true
+    find lambda-layers-prisma-client-migration/nodejs/node_modules/prisma/build -name "*mysql*wasm*" -delete 2>/dev/null || true
+    find lambda-layers-prisma-client-migration/nodejs/node_modules/prisma/build -name "*sqlite*wasm*" -delete 2>/dev/null || true
+    find lambda-layers-prisma-client-migration/nodejs/node_modules/prisma/build -name "*sqlserver*wasm*" -delete 2>/dev/null || true
+    
+    find lambda-layers-prisma-client-engine/nodejs/node_modules/prisma/build -name "*cockroach*wasm*" -delete 2>/dev/null || true
+    find lambda-layers-prisma-client-engine/nodejs/node_modules/prisma/build -name "*mysql*wasm*" -delete 2>/dev/null || true
+    find lambda-layers-prisma-client-engine/nodejs/node_modules/prisma/build -name "*sqlite*wasm*" -delete 2>/dev/null || true
+    find lambda-layers-prisma-client-engine/nodejs/node_modules/prisma/build -name "*sqlserver*wasm*" -delete 2>/dev/null || true
+    
+    # Remove Prisma Studio web UI assets
+    rm -rf lambda-layers-prisma-client-migration/nodejs/node_modules/prisma/build/public/ 2>/dev/null || true
+    rm -rf lambda-layers-prisma-client-engine/nodejs/node_modules/prisma/build/public/ 2>/dev/null || true
+
     echo "Remove development files and documentation..."
 
     # Remove TypeScript definitions (not needed at runtime)
