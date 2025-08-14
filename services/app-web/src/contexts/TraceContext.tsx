@@ -22,8 +22,12 @@ import {
     SemanticResourceAttributes,
     SemanticAttributes,
 } from '@opentelemetry/semantic-conventions'
-import React from 'react'
-import { useTracing, TraceContext } from '@mc-review/otel'
+import React, { useMemo } from 'react'
+import {
+    useTracing,
+    TraceContext,
+    setGlobalTracingContext,
+} from '@mc-review/otel'
 
 let tracerInstance: Tracer | undefined
 
@@ -199,5 +203,47 @@ export function useErrorBoundaryTracing() {
             })
         },
         [recordError]
+    )
+}
+
+const mockSpan = {
+    setAttribute: () => mockSpan,
+    setStatus: () => mockSpan,
+    recordException: () => mockSpan,
+    end: () => {},
+    spanContext: () => ({ traceId: 'mock', spanId: 'mock', traceFlags: 0 }),
+    setAttributes: () => mockSpan,
+    addEvent: () => mockSpan,
+    addLink: () => mockSpan,
+    addLinks: () => mockSpan,
+    updateName: () => mockSpan,
+    isRecording: () => true,
+}
+
+// Minimal mock TraceProvider
+export function MockTraceProvider({ children }: { children: React.ReactNode }) {
+    const mockValue = useMemo(
+        () => ({
+            tracer: {
+                startSpan: () => mockSpan,
+                startActiveSpan: () => mockSpan,
+            },
+            startSpan: () => mockSpan,
+            withSpan: async (name: string, operation: Function) =>
+                operation(mockSpan),
+            recordError: () => {},
+        }),
+        []
+    )
+
+    // Initialize the global tracing context once when the provider mounts
+    React.useEffect(() => {
+        setGlobalTracingContext(mockValue)
+    }, [mockValue]) // Empty dependency array since mockValue is stable
+
+    return (
+        <TraceContext.Provider value={mockValue}>
+            {children}
+        </TraceContext.Provider>
     )
 }
