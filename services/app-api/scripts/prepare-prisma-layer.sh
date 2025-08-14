@@ -86,10 +86,8 @@ function preparePrismaLayer() {
     rm -rf lambda-layers-prisma-client-migration/nodejs/node_modules/@prisma/migration-engine-debian-openssl-1.1.x
     rm -rf lambda-layers-prisma-client-migration/nodejs/node_modules/@prisma/prisma-fmt-debian-openssl-1.1.x
     rm -rf lambda-layers-prisma-client-migration/nodejs/node_modules/prisma/libquery_engine-rhel-openssl-1.0.x.so.node
-    rm -rf lambda-layers-prisma-client-migration/nodejs/node_modules/@prisma/debug
     rm -rf lambda-layers-prisma-client-migration/nodejs/node_modules/@prisma/engines-version
     rm -rf lambda-layers-prisma-client-migration/nodejs/node_modules/@prisma/fetch-engine
-    rm -rf lambda-layers-prisma-client-migration/nodejs/node_modules/@prisma/get-platform
     rm -rf lambda-layers-prisma-client-migration/nodejs/node_modules/@prisma/engines/migration-engine*
     rm -rf lambda-layers-prisma-client-migration/nodejs/node_modules/@prisma/engines/introspection-engine*
     rm -rf lambda-layers-prisma-client-migration/nodejs/node_modules/@prisma/engines/prisma-fmt*
