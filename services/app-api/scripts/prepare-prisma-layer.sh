@@ -54,11 +54,11 @@ function preparePrismaLayer() {
         echo "ERROR: Could not find Prisma client path in .pnpm"
         exit 1
     fi
-    rsync -av ./../../node_modules/.pnpm/node_modules/@prisma/engines/dist/ lambda-layers-prisma-client-migration/nodejs/node_modules/@prisma/engines/dist
-    rsync -av ./../../node_modules/.pnpm/node_modules/@prisma/debug/ lambda-layers-prisma-client-migration/nodejs/node_modules/@prisma/debug
-    rsync -av ./../../node_modules/.pnpm/node_modules/@prisma/engines-version/ lambda-layers-prisma-client-migration/nodejs/node_modules/@prisma/engines-version
-    rsync -av ./../../node_modules/.pnpm/node_modules/@prisma/fetch-engine/ lambda-layers-prisma-client-migration/nodejs/node_modules/@prisma/fetch-engine
-    rsync -av ./../../node_modules/.pnpm/node_modules/@prisma/get-platform/ lambda-layers-prisma-client-migration/nodejs/node_modules/@prisma/get-platform
+    rsync -av ./../../node_modules/.pnpm/node_modules/@prisma/engines/dist/ lambda-layers-prisma-client-engine/nodejs/node_modules/@prisma/engines/dist
+    rsync -av ./../../node_modules/.pnpm/node_modules/@prisma/debug/ lambda-layers-prisma-client-engine/nodejs/node_modules/@prisma/debug
+    rsync -av ./../../node_modules/.pnpm/node_modules/@prisma/engines-version/ lambda-layers-prisma-client-engine/nodejs/node_modules/@prisma/engines-version
+    rsync -av ./../../node_modules/.pnpm/node_modules/@prisma/fetch-engine/ lambda-layers-prisma-client-engine/nodejs/node_modules/@prisma/fetch-engine
+    rsync -av ./../../node_modules/.pnpm/node_modules/@prisma/get-platform/ lambda-layers-prisma-client-engine/nodejs/node_modules/@prisma/get-platform
 
     echo "Copy schema migration files to layer..."
     rsync -av prisma/ lambda-layers-prisma-client-migration/nodejs/prisma
@@ -86,8 +86,6 @@ function preparePrismaLayer() {
     rm -rf lambda-layers-prisma-client-migration/nodejs/node_modules/@prisma/migration-engine-debian-openssl-1.1.x
     rm -rf lambda-layers-prisma-client-migration/nodejs/node_modules/@prisma/prisma-fmt-debian-openssl-1.1.x
     rm -rf lambda-layers-prisma-client-migration/nodejs/node_modules/prisma/libquery_engine-rhel-openssl-1.0.x.so.node
-    rm -rf lambda-layers-prisma-client-migration/nodejs/node_modules/@prisma/engines-version
-    rm -rf lambda-layers-prisma-client-migration/nodejs/node_modules/@prisma/fetch-engine
     rm -rf lambda-layers-prisma-client-migration/nodejs/node_modules/@prisma/engines/migration-engine*
     rm -rf lambda-layers-prisma-client-migration/nodejs/node_modules/@prisma/engines/introspection-engine*
     rm -rf lambda-layers-prisma-client-migration/nodejs/node_modules/@prisma/engines/prisma-fmt*
