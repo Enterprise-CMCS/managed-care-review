@@ -90,6 +90,9 @@ function preparePrismaLayer() {
     rm -rf lambda-layers-prisma-client-migration/nodejs/node_modules/@prisma/engines-version
     rm -rf lambda-layers-prisma-client-migration/nodejs/node_modules/@prisma/fetch-engine
     rm -rf lambda-layers-prisma-client-migration/nodejs/node_modules/@prisma/get-platform
+    rm -rf lambda-layers-prisma-client-migration/nodejs/node_modules/@prisma/engines/migration-engine*
+    rm -rf lambda-layers-prisma-client-migration/nodejs/node_modules/@prisma/engines/introspection-engine*
+    rm -rf lambda-layers-prisma-client-migration/nodejs/node_modules/@prisma/engines/prisma-fmt*
 
     rm -rf lambda-layers-prisma-client-engine/nodejs/node_modules/.prisma/client/libquery_engine-debian-openssl-1.1.x.so.node
     rm -rf lambda-layers-prisma-client-engine/nodejs/node_modules/.prisma/client/libquery_engine-debian-openssl-3.0.x.so.node
@@ -104,6 +107,9 @@ function preparePrismaLayer() {
     rm -rf lambda-layers-prisma-client-engine/nodejs/node_modules/@prisma/engines-version
     rm -rf lambda-layers-prisma-client-engine/nodejs/node_modules/@prisma/fetch-engine
     rm -rf lambda-layers-prisma-client-engine/nodejs/node_modules/@prisma/get-platform
+    rm -rf lambda-layers-prisma-client-engine/nodejs/node_modules/@prisma/engines/migration-engine*
+    rm -rf lambda-layers-prisma-client-engine/nodejs/node_modules/@prisma/engines/introspection-engine*
+    rm -rf lambda-layers-prisma-client-engine/nodejs/node_modules/@prisma/engines/prisma-fmt*
 
     echo "Remove development files and documentation..."
 
@@ -121,6 +127,13 @@ function preparePrismaLayer() {
     find lambda-layers-prisma-client-engine/nodejs -name "LICENSE*" -delete
     find lambda-layers-prisma-client-engine/nodejs -name ".npmignore" -delete
     find lambda-layers-prisma-client-engine/nodejs -name "package-lock.json" -delete
+
+    find lambda-layers-prisma-client-migration/nodejs -name "*windows*" -delete 2>/dev/null || true
+    find lambda-layers-prisma-client-migration/nodejs -name "*darwin*" -delete 2>/dev/null || true
+    find lambda-layers-prisma-client-migration/nodejs -name "*.exe" -delete 2>/dev/null || true
+    find lambda-layers-prisma-client-engine/nodejs -name "*windows*" -delete 2>/dev/null || true
+    find lambda-layers-prisma-client-engine/nodejs -name "*darwin*" -delete 2>/dev/null || true
+    find lambda-layers-prisma-client-engine/nodejs -name "*.exe" -delete 2>/dev/null || true
 
     echo "Compressing and cleaning migration engine..."
     pushd lambda-layers-prisma-client-migration && tar -zcf /tmp/nodejs.tar.gz . && mv /tmp/nodejs.tar.gz ./nodejs.tar.gz
