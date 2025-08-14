@@ -1,21 +1,27 @@
 import { UpdateContractDocument } from '../../gen/gqlClient'
 import { constructTestPostgresServer } from '../../testHelpers/gqlHelpers'
-import { iterableCmsUsersMockData } from '../../testHelpers/userHelpers'
+import { iterableCmsUsersMockData, testStateUser } from '../../testHelpers/userHelpers'
 import {
     createAndSubmitTestContractWithRate,
     createTestContract,
 } from '../../testHelpers/gqlContractHelpers'
+import { extractGraphQLResponse } from '../../testHelpers/apolloV4ResponseHelper'
 describe('updateContract', () => {
     describe.each(iterableCmsUsersMockData)(
         '$userRole tests',
         ({ mockUser }) => {
             const cmsUser = mockUser()
             it('updates the contract', async () => {
-                const stateServer = await constructTestPostgresServer()
+                const stateUser = testStateUser()
+                const stateServer = await constructTestPostgresServer({
+                    context: {
+                        user: stateUser,
+                    },
+                })
 
                 // First, create a new submitted contract
                 const contract =
-                    await createAndSubmitTestContractWithRate(stateServer)
+                    await createAndSubmitTestContractWithRate(stateServer, undefined, { user: stateUser })
 
                 const cmsServer = await constructTestPostgresServer({
                     context: {
@@ -24,7 +30,7 @@ describe('updateContract', () => {
                 })
 
                 // Update
-                const updateResult = await cmsServer.executeOperation({
+                const response = await cmsServer.executeOperation({
                     query: UpdateContractDocument,
                     variables: {
                         input: {
@@ -32,14 +38,18 @@ describe('updateContract', () => {
                             mccrsID: '1234',
                         },
                     },
+                }, {
+                    contextValue: { user: cmsUser },
                 })
+                
+                const updateResult = extractGraphQLResponse(response)
 
                 expect(updateResult.errors).toBeUndefined()
                 const updatedSub = updateResult?.data?.updateContract.contract
                 expect(updatedSub.mccrsID).toBe('1234')
 
                 // Remove MCCRSID number
-                const updateResultWithNoMCCRSID =
+                const responseWithNoMCCRSID =
                     await cmsServer.executeOperation({
                         query: UpdateContractDocument,
                         variables: {
@@ -47,9 +57,13 @@ describe('updateContract', () => {
                                 id: contract.id,
                             },
                         },
+                    }, {
+                        contextValue: { user: cmsUser },
                     })
+                    
+                const updateResultWithNoMCCRSID = extractGraphQLResponse(responseWithNoMCCRSID)
 
-                expect(updateResult.errors).toBeUndefined()
+                expect(updateResultWithNoMCCRSID.errors).toBeUndefined()
                 const updatedSubWithNoMCCRSID =
                     updateResultWithNoMCCRSID?.data?.updateContract.contract
 
@@ -57,10 +71,15 @@ describe('updateContract', () => {
             })
 
             it('errors if the contract is not submitted', async () => {
-                const stateServer = await constructTestPostgresServer()
+                const stateUser = testStateUser()
+                const stateServer = await constructTestPostgresServer({
+                    context: {
+                        user: stateUser,
+                    },
+                })
 
                 // First, create a draft submission
-                const draftContract = await createTestContract(stateServer)
+                const draftContract = await createTestContract(stateServer, undefined, undefined, { user: stateUser })
                 const cmsServer = await constructTestPostgresServer({
                     context: {
                         user: cmsUser,
@@ -68,7 +87,7 @@ describe('updateContract', () => {
                 })
 
                 // Attempt update
-                const updateResult = await cmsServer.executeOperation({
+                const response = await cmsServer.executeOperation({
                     query: UpdateContractDocument,
                     variables: {
                         input: {
@@ -76,7 +95,11 @@ describe('updateContract', () => {
                             mccrsID: '1234',
                         },
                     },
+                }, {
+                    contextValue: { user: cmsUser },
                 })
+                
+                const updateResult = extractGraphQLResponse(response)
                 expect(updateResult.errors).toBeDefined()
                 if (updateResult.errors === undefined) {
                     throw new Error('type narrow')
@@ -91,13 +114,18 @@ describe('updateContract', () => {
             })
 
             it('errors if a State user calls it', async () => {
-                const stateServer = await constructTestPostgresServer()
+                const stateUser = testStateUser()
+                const stateServer = await constructTestPostgresServer({
+                    context: {
+                        user: stateUser,
+                    },
+                })
 
                 // First, create a new submitted contract
                 const contract =
-                    await createAndSubmitTestContractWithRate(stateServer)
+                    await createAndSubmitTestContractWithRate(stateServer, undefined, { user: stateUser })
                 // Update
-                const updateResult = await stateServer.executeOperation({
+                const response = await stateServer.executeOperation({
                     query: UpdateContractDocument,
                     variables: {
                         input: {
@@ -105,7 +133,11 @@ describe('updateContract', () => {
                             mccrsID: '1234',
                         },
                     },
+                }, {
+                    contextValue: { user: stateUser },
                 })
+                
+                const updateResult = extractGraphQLResponse(response)
                 expect(updateResult.errors).toBeDefined()
                 if (updateResult.errors === undefined) {
                     throw new Error('type narrow')

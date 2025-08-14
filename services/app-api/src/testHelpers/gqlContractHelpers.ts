@@ -18,10 +18,11 @@ import {
     createTestHealthPlanPackage,
     defaultFloridaProgram,
     updateTestHealthPlanFormData,
+    defaultContext,
 } from './gqlHelpers'
 
-import { type ContractType } from '../domain-models'
-import type { ApolloServer } from 'apollo-server-lambda'
+import { type ContractType, type UserType } from '../domain-models'
+import type { ApolloServer } from '@apollo/server'
 import type {
     Contract,
     ContractDraftRevisionFormDataInput,
@@ -36,39 +37,52 @@ import type { CreateHealthPlanPackageInput } from '../gen/gqlServer'
 import { mockGqlContractDraftRevisionFormDataInput } from './gqlContractInputMocks'
 import type { GraphQLFormattedError } from 'graphql/index'
 
+import { extractGraphQLResponse } from './apolloV4ResponseHelper'
+import type { Context } from '../handlers/apollo_gql'
+
 const createAndSubmitTestContract = async (
     server: ApolloServer,
     stateCode?: StateCodeType,
-    formData?: Partial<ContractFormDataType>
+    formData?: Partial<ContractFormDataType>,
+    context?: Context
 ): Promise<Contract> => {
     const contract = await createAndUpdateTestContractWithoutRates(
         server,
         stateCode,
-        formData
+        formData,
+        context
     )
     return await must(
-        submitTestContract(server, contract.id, 'Time to submit!')
+        submitTestContract(server, contract.id, 'Time to submit!', context)
     )
 }
 
 async function submitTestContract(
     server: ApolloServer,
     contractID: string,
-    submittedReason?: string
+    submittedReason?: string,
+    context?: Context
 ): Promise<Contract> {
-    const result = await server.executeOperation({
-        query: SubmitContractDocument,
-        variables: {
-            input: {
-                contractID: contractID,
-                submittedReason: submittedReason,
+    const response = await server.executeOperation(
+        {
+            query: SubmitContractDocument,
+            variables: {
+                input: {
+                    contractID: contractID,
+                    submittedReason: submittedReason,
+                },
             },
         },
-    })
+        {
+            contextValue: context || defaultContext(),
+        }
+    )
+
+    const result = extractGraphQLResponse(response)
 
     if (result.errors) {
         throw new Error(
-            `submitTestContract query failed with errors ${result.errors}`
+            `submitTestContract query failed with errors ${JSON.stringify(result.errors)}`
         )
     }
 
@@ -82,21 +96,29 @@ async function submitTestContract(
 async function resubmitTestContract(
     server: ApolloServer,
     contractID: string,
-    submittedReason?: string
+    submittedReason?: string,
+    context?: Context
 ): Promise<Contract> {
-    const updateResult = await server.executeOperation({
-        query: SubmitContractDocument,
-        variables: {
-            input: {
-                contractID,
-                submittedReason,
+    const response = await server.executeOperation(
+        {
+            query: SubmitContractDocument,
+            variables: {
+                input: {
+                    contractID,
+                    submittedReason,
+                },
             },
         },
-    })
+        {
+            contextValue: context || defaultContext(),
+        }
+    )
+
+    const updateResult = extractGraphQLResponse(response)
 
     if (updateResult.errors) {
         throw new Error(
-            `resubmitTestContract query failed with errors ${updateResult.errors}`
+            `resubmitTestContract query failed with errors ${JSON.stringify(updateResult.errors)}`
         )
     }
 
@@ -110,21 +132,65 @@ async function resubmitTestContract(
 async function unlockTestContract(
     server: ApolloServer,
     contractID: string,
-    unlockedReason?: string
+    unlockedReason?: string,
+    context?: Context
 ): Promise<UnlockedContract> {
-    const result = await server.executeOperation({
-        query: UnlockContractDocument,
-        variables: {
-            input: {
-                contractID: contractID,
-                unlockedReason: unlockedReason,
+    const response = await server.executeOperation(
+        {
+            query: UnlockContractDocument,
+            variables: {
+                input: {
+                    contractID: contractID,
+                    unlockedReason: unlockedReason,
+                },
             },
         },
-    })
+        {
+            contextValue: context || defaultContext(),
+        }
+    )
+
+    const result = extractGraphQLResponse(response)
 
     if (result.errors) {
         throw new Error(
-            `unlockTestContract query failed with errors ${result.errors}`
+            `unlockTestContract query failed with errors ${JSON.stringify(result.errors)}`
+        )
+    }
+
+    if (!result.data) {
+        throw new Error('unlockTestContract returned nothing')
+    }
+
+    return result.data.unlockContract.contract
+}
+
+async function unlockTestContractAsUser(
+    server: ApolloServer,
+    contractID: string,
+    unlockedReason: string | undefined,
+    user: UserType
+): Promise<UnlockedContract> {
+    const response = await server.executeOperation(
+        {
+            query: UnlockContractDocument,
+            variables: {
+                input: {
+                    contractID: contractID,
+                    unlockedReason: unlockedReason,
+                },
+            },
+        },
+        {
+            contextValue: { user },
+        }
+    )
+
+    const result = extractGraphQLResponse(response)
+
+    if (result.errors) {
+        throw new Error(
+            `unlockTestContract query failed with errors ${JSON.stringify(result.errors)}`
         )
     }
 
@@ -137,44 +203,58 @@ async function unlockTestContract(
 
 async function createSubmitAndUnlockTestContract(
     stateServer: ApolloServer,
-    cmsServer: ApolloServer
+    cmsServer: ApolloServer,
+    cmsUser?: UserType
 ): Promise<UnlockedContract> {
     const contract = await createAndSubmitTestContractWithRate(stateServer)
     const contractID = contract.id
 
-    const unlockedContract = await unlockTestContract(
-        cmsServer,
-        contractID,
-        'test unlock'
-    )
+    const unlockedContract = cmsUser
+        ? await unlockTestContractAsUser(
+              cmsServer,
+              contractID,
+              'test unlock',
+              cmsUser
+          )
+        : await unlockTestContract(cmsServer, contractID, 'test unlock')
 
     return unlockedContract
 }
 
 async function createAndSubmitTestContractWithRate(
     server: ApolloServer,
-    contractOverrides?: Partial<HealthPlanFormDataType>
+    contractOverrides?: Partial<HealthPlanFormDataType>,
+    context?: Context
 ): Promise<Contract> {
     const draft = await createAndUpdateTestContractWithRate(
         server,
-        contractOverrides
+        contractOverrides,
+        context
     )
-    return await submitTestContract(server, draft.id)
+    return await submitTestContract(server, draft.id, undefined, context)
 }
 
 async function fetchTestContract(
     server: ApolloServer,
-    contractID: string
+    contractID: string,
+    context?: Context
 ): Promise<Contract> {
     const input = { contractID }
-    const result = await server.executeOperation({
-        query: FetchContractDocument,
-        variables: { input },
-    })
+    const response = await server.executeOperation(
+        {
+            query: FetchContractDocument,
+            variables: { input },
+        },
+        {
+            contextValue: context || defaultContext(),
+        }
+    )
+
+    const result = extractGraphQLResponse(response)
 
     if (result.errors) {
         throw new Error(
-            `fetchTestContract query failed with errors ${result.errors}`
+            `fetchTestContract query failed with errors ${JSON.stringify(result.errors)}`
         )
     }
 
@@ -188,21 +268,29 @@ async function fetchTestContract(
 async function approveTestContract(
     server: ApolloServer,
     contractID: string,
-    dateApprovalReleasedToState?: string
+    dateApprovalReleasedToState?: string,
+    context?: Context
 ): Promise<Contract> {
     const input = {
         contractID,
         dateApprovalReleasedToState:
             dateApprovalReleasedToState || '2024-11-11',
     }
-    const result = await server.executeOperation({
-        query: ApproveContractDocument,
-        variables: { input },
-    })
+    const response = await server.executeOperation(
+        {
+            query: ApproveContractDocument,
+            variables: { input },
+        },
+        {
+            contextValue: context || defaultContext(),
+        }
+    )
+
+    const result = extractGraphQLResponse(response)
 
     if (result.errors) {
         throw new Error(
-            `approveTestContract mutation failed with errors ${result.errors}`
+            `approveTestContract mutation failed with errors ${JSON.stringify(result.errors)}`
         )
     }
 
@@ -215,20 +303,28 @@ async function approveTestContract(
 
 const fetchTestContractWithQuestions = async (
     server: ApolloServer,
-    contractID: string
+    contractID: string,
+    context?: Context
 ): Promise<Contract> => {
-    const result = await server.executeOperation({
-        query: FetchContractWithQuestionsDocument,
-        variables: {
-            input: {
-                contractID: contractID,
+    const response = await server.executeOperation(
+        {
+            query: FetchContractWithQuestionsDocument,
+            variables: {
+                input: {
+                    contractID: contractID,
+                },
             },
         },
-    })
+        {
+            contextValue: context || defaultContext(),
+        }
+    )
+
+    const result = extractGraphQLResponse(response)
 
     if (result.errors) {
         throw new Error(
-            `fetchTestContractWithQuestions query failed with errors ${result.errors}`
+            `fetchTestContractWithQuestions query failed with errors ${JSON.stringify(result.errors)}`
         )
     }
 
@@ -242,7 +338,8 @@ const fetchTestContractWithQuestions = async (
 const createTestContract = async (
     server: ApolloServer,
     stateCode?: StateCodeType,
-    formData?: Partial<ContractFormDataType>
+    formData?: Partial<ContractFormDataType>,
+    context?: Context
 ): Promise<Contract> => {
     const programs = stateCode
         ? [must(findStatePrograms(stateCode))[0]]
@@ -258,14 +355,21 @@ const createTestContract = async (
         contractType: 'BASE',
         ...formData,
     }
-    const result = await server.executeOperation({
-        query: CreateContractDocument,
-        variables: { input },
-    })
+    const response = await server.executeOperation(
+        {
+            query: CreateContractDocument,
+            variables: { input },
+        },
+        {
+            contextValue: context || defaultContext(),
+        }
+    )
+
+    const result = extractGraphQLResponse(response)
 
     if (result.errors) {
         throw new Error(
-            `createTestContract mutation failed with errors ${result.errors}`
+            `createTestContract mutation failed with errors ${JSON.stringify(result.errors)}`
         )
     }
 
@@ -278,23 +382,26 @@ const createTestContract = async (
 
 async function createAndUpdateTestContractWithRate(
     server: ApolloServer,
-    contractOverrides?: Partial<HealthPlanFormDataType>
+    contractOverrides?: Partial<HealthPlanFormDataType>,
+    context?: Context
 ): Promise<Contract> {
     const draft = await createAndUpdateTestContractWithoutRates(
         server,
         (contractOverrides?.stateCode as StateCodeType) ?? 'FL',
-        contractOverrides
+        contractOverrides,
+        context
     )
 
-    return await addNewRateToTestContract(server, draft)
+    return await addNewRateToTestContract(server, draft, undefined, context)
 }
 
 const createAndUpdateTestContractWithoutRates = async (
     server: ApolloServer,
     stateCode?: StateCodeType,
-    contractFormDataOverrides?: Partial<HealthPlanFormDataType>
+    contractFormDataOverrides?: Partial<HealthPlanFormDataType>,
+    context?: Context
 ): Promise<Contract> => {
-    const pkg = await createTestHealthPlanPackage(server, stateCode)
+    const pkg = await createTestHealthPlanPackage(server, stateCode, context)
     const draft = latestFormData(pkg)
 
     draft.submissionType = 'CONTRACT_AND_RATES' as const
@@ -347,8 +454,8 @@ const createAndUpdateTestContractWithoutRates = async (
 
     Object.assign(draft, contractFormDataOverrides)
 
-    await updateTestHealthPlanFormData(server, draft)
-    const updatedContract = await fetchTestContract(server, draft.id)
+    await updateTestHealthPlanFormData(server, draft, context)
+    const updatedContract = await fetchTestContract(server, draft.id, context)
     return updatedContract
 }
 
@@ -357,20 +464,27 @@ const linkRateToDraftContract = async (
     contractID: string,
     linkedRateID: string
 ) => {
-    const updatedContract = await server.executeOperation({
-        query: UpdateDraftContractRatesDocument,
-        variables: {
-            input: {
-                contractID: contractID,
-                updatedRates: [
-                    {
-                        type: 'LINK',
-                        rateID: linkedRateID,
-                    },
-                ],
+    const response = await server.executeOperation(
+        {
+            query: UpdateDraftContractRatesDocument,
+            variables: {
+                input: {
+                    contractID: contractID,
+                    updatedRates: [
+                        {
+                            type: 'LINK',
+                            rateID: linkedRateID,
+                        },
+                    ],
+                },
             },
         },
-    })
+        {
+            contextValue: defaultContext(),
+        }
+    )
+
+    const updatedContract = extractGraphQLResponse(response)
     return updatedContract
 }
 
@@ -378,15 +492,22 @@ const clearRatesOnDraftContract = async (
     server: ApolloServer,
     contractID: string
 ) => {
-    const updatedContract = await server.executeOperation({
-        query: UpdateDraftContractRatesDocument,
-        variables: {
-            input: {
-                contractID: contractID,
-                updatedRates: [],
+    const response = await server.executeOperation(
+        {
+            query: UpdateDraftContractRatesDocument,
+            variables: {
+                input: {
+                    contractID: contractID,
+                    updatedRates: [],
+                },
             },
         },
-    })
+        {
+            contextValue: defaultContext(),
+        }
+    )
+
+    const updatedContract = extractGraphQLResponse(response)
     return updatedContract
 }
 
@@ -396,21 +517,28 @@ const updateRateOnDraftContract = async (
     rateID: string,
     rateData: Partial<RateFormData>
 ): Promise<ContractType> => {
-    const updatedContract = await server.executeOperation({
-        query: UpdateDraftContractRatesDocument,
-        variables: {
-            input: {
-                contractID: contractID,
-                updatedRates: [
-                    {
-                        type: 'UPDATE',
-                        formData: rateData,
-                        rateID: rateID,
-                    },
-                ],
+    const response = await server.executeOperation(
+        {
+            query: UpdateDraftContractRatesDocument,
+            variables: {
+                input: {
+                    contractID: contractID,
+                    updatedRates: [
+                        {
+                            type: 'UPDATE',
+                            formData: rateData,
+                            rateID: rateID,
+                        },
+                    ],
+                },
             },
         },
-    })
+        {
+            contextValue: defaultContext(),
+        }
+    )
+
+    const updatedContract = extractGraphQLResponse(response)
     must(updatedContract)
     const contractData = updatedContract.data?.updateDraftContractRates.contract
     if (!contractData)
@@ -438,22 +566,30 @@ const updateTestContractDraftRevision = async (
             draftContract.stateCode as StateCodeType
         )
 
-    const updateResult = await server.executeOperation({
-        query: UpdateContractDraftRevisionDocument,
-        variables: {
-            input: {
-                contractID: contractID,
-                lastSeenUpdatedAt:
-                    lastSeenUpdatedAt || draftContract.draftRevision.updatedAt,
-                formData: updatedFormData,
+    const response = await server.executeOperation(
+        {
+            query: UpdateContractDraftRevisionDocument,
+            variables: {
+                input: {
+                    contractID: contractID,
+                    lastSeenUpdatedAt:
+                        lastSeenUpdatedAt ||
+                        draftContract.draftRevision.updatedAt,
+                    formData: updatedFormData,
+                },
             },
         },
-    })
+        {
+            contextValue: defaultContext(),
+        }
+    )
+
+    const updateResult = extractGraphQLResponse(response)
 
     if (updateResult.errors) {
         console.info('errors', JSON.stringify(updateResult.errors))
         throw new Error(
-            `updateTestContractDraftRevision mutation failed with errors ${updateResult.errors}`
+            `updateTestContractDraftRevision mutation failed with errors ${JSON.stringify(updateResult.errors)}`
         )
     }
 
@@ -467,17 +603,25 @@ const updateTestContractDraftRevision = async (
 const withdrawTestContract = async (
     server: ApolloServer,
     contractID: string,
-    updatedReason: string
+    updatedReason: string,
+    context?: Context
 ): Promise<Contract> => {
-    const withdrawResult = await server.executeOperation({
-        query: WithdrawContractDocument,
-        variables: {
-            input: {
-                contractID,
-                updatedReason,
+    const response = await server.executeOperation(
+        {
+            query: WithdrawContractDocument,
+            variables: {
+                input: {
+                    contractID,
+                    updatedReason,
+                },
             },
         },
-    })
+        {
+            contextValue: context || defaultContext(),
+        }
+    )
+
+    const withdrawResult = extractGraphQLResponse(response)
 
     if (withdrawResult.errors) {
         console.info('errors', withdrawResult.errors)
@@ -493,17 +637,25 @@ const withdrawTestContract = async (
 const undoWithdrawTestContract = async (
     server: ApolloServer,
     contractID: string,
-    updatedReason: string
+    updatedReason: string,
+    context?: Context
 ): Promise<Contract> => {
-    const undoWithdrawResult = await server.executeOperation({
-        query: UndoWithdrawContractDocument,
-        variables: {
-            input: {
-                contractID,
-                updatedReason,
+    const response = await server.executeOperation(
+        {
+            query: UndoWithdrawContractDocument,
+            variables: {
+                input: {
+                    contractID,
+                    updatedReason,
+                },
             },
         },
-    })
+        {
+            contextValue: context || defaultContext(),
+        }
+    )
+
+    const undoWithdrawResult = extractGraphQLResponse(response)
 
     if (undoWithdrawResult.errors) {
         console.info('errors', undoWithdrawResult.errors)
@@ -522,17 +674,25 @@ const undoWithdrawTestContract = async (
 const errorUndoWithdrawTestContract = async (
     server: ApolloServer,
     contractID: string,
-    updatedReason: string
+    updatedReason: string,
+    context?: Context
 ): Promise<ReadonlyArray<GraphQLFormattedError>> => {
-    const undoWithdrawResult = await server.executeOperation({
-        query: UndoWithdrawContractDocument,
-        variables: {
-            input: {
-                contractID,
-                updatedReason,
+    const response = await server.executeOperation(
+        {
+            query: UndoWithdrawContractDocument,
+            variables: {
+                input: {
+                    contractID,
+                    updatedReason,
+                },
             },
         },
-    })
+        {
+            contextValue: context || defaultContext(),
+        }
+    )
+
+    const undoWithdrawResult = extractGraphQLResponse(response)
 
     if (!undoWithdrawResult.errors) {
         throw new Error(
@@ -568,6 +728,7 @@ const contractHistoryToDescriptions = (contract: Contract): string[] => {
 export {
     submitTestContract,
     unlockTestContract,
+    unlockTestContractAsUser,
     createAndSubmitTestContract,
     approveTestContract,
     fetchTestContract,

@@ -1,5 +1,5 @@
 import type { Context } from '../../handlers/apollo_gql'
-import { constructTestPostgresServer } from '../../testHelpers/gqlHelpers'
+import { constructTestPostgresServer, extractGraphQLResponse } from '../../testHelpers/gqlHelpers'
 import { FetchCurrentUserDocument } from '../../gen/gqlClient'
 import { typedStatePrograms } from '@mc-review/hpp'
 import { testStateUser } from '../../testHelpers/userHelpers'
@@ -11,17 +11,22 @@ describe('currentUser', () => {
         // make a mock request
         const res = await server.executeOperation({
             query: FetchCurrentUserDocument,
+        }, {
+            contextValue: {
+                user: testStateUser(),
+            },
         })
 
         // confirm that we get what we got
-        expect(res.errors).toBeUndefined()
+        const result = extractGraphQLResponse(res)
+        expect(result.errors).toBeUndefined()
 
-        expect(res.data?.fetchCurrentUser.email).toBe('james@example.com')
-        expect(res.data?.fetchCurrentUser.state.code).toBe('FL')
+        expect(result.data?.fetchCurrentUser.email).toBe('james@example.com')
+        expect(result.data?.fetchCurrentUser.state.code).toBe('FL')
         const FLPrograms =
             typedStatePrograms.states.find((st) => st.code === 'FL')
                 ?.programs ?? []
-        expect(res.data?.fetchCurrentUser.state.programs).toHaveLength(
+        expect(result.data?.fetchCurrentUser.state.programs).toHaveLength(
             FLPrograms.length
         )
     })
@@ -43,14 +48,17 @@ describe('currentUser', () => {
         // make a mock request
         const res = await server.executeOperation({
             query: FetchCurrentUserDocument,
+        }, {
+            contextValue: customContext,
         })
 
         // confirm that we get what we got
-        expect(res.errors).toBeUndefined()
+        const result = extractGraphQLResponse(res)
+        expect(result.errors).toBeUndefined()
 
-        expect(res.data?.fetchCurrentUser.email).toBe('james@example.com')
-        expect(res.data?.fetchCurrentUser.state.code).toBe('MI')
-        expect(res.data?.fetchCurrentUser.state.name).toBe('Michigan')
-        expect(res.data?.fetchCurrentUser.state.programs).toHaveLength(6)
+        expect(result.data?.fetchCurrentUser.email).toBe('james@example.com')
+        expect(result.data?.fetchCurrentUser.state.code).toBe('MI')
+        expect(result.data?.fetchCurrentUser.state.name).toBe('Michigan')
+        expect(result.data?.fetchCurrentUser.state.programs).toHaveLength(6)
     })
 })

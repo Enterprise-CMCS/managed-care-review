@@ -14,7 +14,7 @@ import {
     UpdateStateAssignmentsByStateDocument,
     IndexUsersDocument,
 } from '../../gen/gqlClient'
-import { constructTestPostgresServer } from '../../testHelpers/gqlHelpers'
+import { constructTestPostgresServer, extractGraphQLResponse } from '../../testHelpers/gqlHelpers'
 import type { User, UserEdge } from '../../gen/gqlServer'
 import {
     assertAnError,
@@ -130,17 +130,22 @@ describe.each(authorizedUserTests)(
                         assignedUsers: [newUser.id],
                     },
                 },
+            }, {
+                contextValue: {
+                    user: mockUser,
+                },
             })
 
-            expect(updateRes.data).toBeDefined()
-            expect(updateRes.errors).toBeUndefined()
+            const result = extractGraphQLResponse(updateRes)
+            expect(result.data).toBeDefined()
+            expect(result.errors).toBeUndefined()
 
-            if (!updateRes.data) {
+            if (!result.data) {
                 throw new Error('no data')
             }
 
             const users =
-                updateRes.data.updateStateAssignmentsByState.assignedUsers
+                result.data.updateStateAssignmentsByState.assignedUsers
             expect(users).toHaveLength(1)
             const user = users[0]
             expect(user.id).toBe(newUser.id)
@@ -156,17 +161,22 @@ describe.each(authorizedUserTests)(
                         assignedUsers: [secondUser.id, thirdUser.id],
                     },
                 },
+            }, {
+                contextValue: {
+                    user: mockUser,
+                },
             })
 
-            expect(updateRes2.data).toBeDefined()
-            expect(updateRes2.errors).toBeUndefined()
+            const result2 = extractGraphQLResponse(updateRes2)
+            expect(result2.data).toBeDefined()
+            expect(result2.errors).toBeUndefined()
 
-            if (!updateRes2.data) {
+            if (!result2.data) {
                 throw new Error('no data')
             }
 
             const users2 =
-                updateRes2.data.updateStateAssignmentsByState.assignedUsers
+                result2.data.updateStateAssignmentsByState.assignedUsers
             expect(users2).toHaveLength(2)
 
             const updateRes3 = await server.executeOperation({
@@ -177,25 +187,35 @@ describe.each(authorizedUserTests)(
                         assignedUsers: [secondUser.id],
                     },
                 },
+            }, {
+                contextValue: {
+                    user: mockUser,
+                },
             })
 
-            expect(updateRes3.data).toBeDefined()
-            expect(updateRes3.errors).toBeUndefined()
+            const result3 = extractGraphQLResponse(updateRes3)
+            expect(result3.data).toBeDefined()
+            expect(result3.errors).toBeUndefined()
 
             const allUsersQuery = await server.executeOperation({
                 query: IndexUsersDocument,
                 variables: {},
+            }, {
+                contextValue: {
+                    user: mockUser,
+                },
             })
 
-            expect(allUsersQuery.data).toBeDefined()
-            expect(allUsersQuery.errors).toBeUndefined()
+            const allUsersResult = extractGraphQLResponse(allUsersQuery)
+            expect(allUsersResult.data).toBeDefined()
+            expect(allUsersResult.errors).toBeUndefined()
 
-            if (!allUsersQuery.data) {
+            if (!allUsersResult.data) {
                 throw new Error('no data')
             }
 
             const theseUserIDs = [newUser.id, secondUser.id, thirdUser.id]
-            const theseUsers = allUsersQuery.data.indexUsers.edges
+            const theseUsers = allUsersResult.data.indexUsers.edges
                 .map((e: UserEdge) => e.node)
                 .filter((n: User) => theseUserIDs.includes(n.id))
 
@@ -283,6 +303,10 @@ describe.each(authorizedUserTests)(
                         assignedUsers: [],
                     },
                 },
+            }, {
+                contextValue: {
+                    user: mockUser,
+                },
             })
 
             expect(assertAnError(updateResEmpty).message).toContain(
@@ -301,6 +325,10 @@ describe.each(authorizedUserTests)(
                         assignedUsers: undefined,
                     },
                 },
+            }, {
+                contextValue: {
+                    user: mockUser,
+                },
             })
 
             expect(assertAnError(updateResUndefined).message).toContain(
@@ -315,6 +343,10 @@ describe.each(authorizedUserTests)(
                         stateCode: 'CA',
                         assignedUsers: null,
                     },
+                },
+            }, {
+                contextValue: {
+                    user: mockUser,
                 },
             })
 
@@ -347,6 +379,10 @@ describe.each(authorizedUserTests)(
                         stateCode: 'XX',
                         assignedUsers: [newUser.id],
                     },
+                },
+            }, {
+                contextValue: {
+                    user: mockUser,
                 },
             })
 
@@ -381,9 +417,14 @@ describe.each(authorizedUserTests)(
                         assignedUsers: [newStateUser.id],
                     },
                 },
+            }, {
+                contextValue: {
+                    user: mockUser,
+                },
             })
 
-            expect(updateRes.errors).toBeDefined()
+            const result = extractGraphQLResponse(updateRes)
+            expect(result.errors).toBeDefined()
 
             expect(assertAnError(updateRes).message).toContain(
                 'Attempted to assign non-cms-users to a state'
@@ -407,6 +448,10 @@ describe.each(authorizedUserTests)(
                         stateCode: 'CA',
                         assignedUsers: ['not-existing-user-id'],
                     },
+                },
+            }, {
+                contextValue: {
+                    user: mockUser,
                 },
             })
 
@@ -440,9 +485,14 @@ describe.each(authorizedUserTests)(
                         assignedUsers: [newCMSUser.id, newCMSUser.id],
                     },
                 },
+            }, {
+                contextValue: {
+                    user: mockUser,
+                },
             })
 
-            expect(updateRes.errors).toBeDefined()
+            const result = extractGraphQLResponse(updateRes)
+            expect(result.errors).toBeDefined()
 
             expect(assertAnError(updateRes).message).toContain(
                 'Some assigned user IDs do not exist or are duplicative'
@@ -472,6 +522,10 @@ describe.each(unauthorizedUserTests)(
                         stateCode: 'CA',
                         assignedUsers: ['not-existing-user-id'],
                     },
+                },
+            }, {
+                contextValue: {
+                    user: mockUser,
                 },
             })
 

@@ -4,7 +4,9 @@ import {
     constructTestPostgresServer,
     createAndUpdateTestHealthPlanPackage,
     unlockTestHealthPlanPackage,
+    unlockTestHealthPlanPackageAsUser,
 } from '../../testHelpers/gqlHelpers'
+import { extractGraphQLResponse } from '../../testHelpers/apolloV4ResponseHelper'
 import { latestFormData } from '../../testHelpers/healthPlanPackageHelpers'
 import { testStateUser, testCMSUser } from '../../testHelpers/userHelpers'
 import {
@@ -25,6 +27,7 @@ import {
     fetchTestRateById,
     formatRateDataForSending,
     unlockTestRate,
+    unlockTestRateAsUser,
     withdrawTestRate,
 } from '../../testHelpers/gqlRateHelpers'
 import {
@@ -54,35 +57,42 @@ describe('submitRate', () => {
             s3Client: mockS3,
         })
 
+        const cmsUser = testCMSUser()
         const cmsServer = await constructTestPostgresServer({
             context: {
-                user: testCMSUser(),
+                user: cmsUser,
             },
             ldService,
             s3Client: mockS3,
         })
 
-        const rate = await createSubmitAndUnlockTestRate(stateServer, cmsServer)
+        const rate = await createSubmitAndUnlockTestRate(stateServer, cmsServer, cmsUser, stateUser)
 
-        const fetchDraftRate = await stateServer.executeOperation({
+        const fetchDraftRateResponse = await stateServer.executeOperation({
             query: FetchRateDocument,
             variables: {
                 input: { rateID: rate.id },
             },
+        }, {
+            contextValue: { user: stateUser },
         })
+        const fetchDraftRate = extractGraphQLResponse(fetchDraftRateResponse)
 
         const draftFormData =
             fetchDraftRate.data?.fetchRate.rate.draftRevision.formData
 
         // submitRate with no form data updates
-        const result = await stateServer.executeOperation({
+        const response = await stateServer.executeOperation({
             query: SubmitRateDocument,
             variables: {
                 input: {
                     rateID: rate.id,
                 },
             },
+        }, {
+            contextValue: { user: stateUser },
         })
+        const result = extractGraphQLResponse(response)
 
         expect(result.errors).toBeUndefined()
         const submittedRate = result.data?.submitRate.rate
@@ -149,22 +159,26 @@ describe('submitRate', () => {
             s3Client: mockS3,
         })
 
+        const cmsUser = testCMSUser()
         const cmsServer = await constructTestPostgresServer({
             context: {
-                user: testCMSUser(),
+                user: cmsUser,
             },
             ldService,
             s3Client: mockS3,
         })
 
-        const rate = await createSubmitAndUnlockTestRate(stateServer, cmsServer)
+        const rate = await createSubmitAndUnlockTestRate(stateServer, cmsServer, cmsUser, stateUser)
 
-        const fetchDraftRate = await stateServer.executeOperation({
+        const fetchDraftRateResponse = await stateServer.executeOperation({
             query: FetchRateDocument,
             variables: {
                 input: { rateID: rate.id },
             },
+        }, {
+            contextValue: { user: stateUser },
         })
+        const fetchDraftRate = extractGraphQLResponse(fetchDraftRateResponse)
 
         const draftFormData = rate.draftRevision?.formData
 
@@ -180,7 +194,8 @@ describe('submitRate', () => {
         const submittedRate = await submitTestRate(
             stateServer,
             rate.id,
-            'Submit with edited rate description'
+            'Submit with edited rate description',
+            { user: stateUser }
         )
 
         const submittedRateFormData = submittedRate.revisions[0].formData
@@ -205,9 +220,10 @@ describe('submitRate', () => {
             s3Client: mockS3,
         })
 
+        const cmsUser = testCMSUser()
         const cmsServer = await constructTestPostgresServer({
             context: {
-                user: testCMSUser(),
+                user: cmsUser,
             },
             ldService,
             s3Client: mockS3,
@@ -215,15 +231,20 @@ describe('submitRate', () => {
 
         const draftRate = await createSubmitAndUnlockTestRate(
             stateServer,
-            cmsServer
+            cmsServer,
+            cmsUser,
+            stateUser
         )
 
-        const fetchDraftRate = await stateServer.executeOperation({
+        const fetchDraftRateResponse = await stateServer.executeOperation({
             query: FetchRateDocument,
             variables: {
                 input: { rateID: draftRate.id },
             },
+        }, {
+            contextValue: { user: stateUser },
         })
+        const fetchDraftRate = extractGraphQLResponse(fetchDraftRateResponse)
 
         const draftFormData =
             fetchDraftRate.data?.fetchRate.rate.draftRevision.formData
@@ -232,7 +253,7 @@ describe('submitRate', () => {
         expect(fetchDraftRate.errors).toBeUndefined()
         expect(draftFormData).toBeDefined()
 
-        const result = await stateServer.executeOperation({
+        const response = await stateServer.executeOperation({
             query: SubmitRateDocument,
             variables: {
                 input: {
@@ -240,7 +261,10 @@ describe('submitRate', () => {
                     submittedReason: 'submit rate',
                 },
             },
+        }, {
+            contextValue: { user: stateUser },
         })
+        const result = extractGraphQLResponse(response)
         const submittedRate = result.data?.submitRate.rate
         const submittedRateFormData = submittedRate.revisions[0].formData
 
@@ -259,14 +283,19 @@ describe('submitRate', () => {
     })
 
     it('returns the latest linked contracts', async () => {
+        const stateUser = testStateUser()
         const stateServer = await constructTestPostgresServer({
+            context: {
+                user: stateUser,
+            },
             ldService,
             s3Client: mockS3,
         })
+        const cmsUser = testCMSUser()
         const cmsServer = await constructTestPostgresServer({
             ldService,
             context: {
-                user: testCMSUser(),
+                user: cmsUser,
             },
             s3Client: mockS3,
         })
@@ -279,7 +308,7 @@ describe('submitRate', () => {
             rateDateStart: '2001-01-01',
         })
 
-        const contractA0 = await submitTestContract(stateServer, AID)
+        const contractA0 = await submitTestContract(stateServer, AID, undefined, { user: stateUser })
         const subA0 = contractA0.packageSubmissions[0]
         const rate10 = subA0.rateRevisions[0]
         const OneID = rate10.rateID
@@ -293,7 +322,7 @@ describe('submitRate', () => {
             rateDateStart: '2003-01-01',
         })
 
-        const contractB0 = await submitTestContract(stateServer, draftB0.id)
+        const contractB0 = await submitTestContract(stateServer, draftB0.id, undefined, { user: stateUser })
         const subB0 = contractB0.packageSubmissions[0]
         const rate30 = subB0.rateRevisions[0]
         const TwoID = rate30.rateID
@@ -311,7 +340,7 @@ describe('submitRate', () => {
         )
         await addLinkedRateToTestContract(stateServer, draftC020, TwoID)
 
-        const contractC0 = await submitTestContract(stateServer, draftC0.id)
+        const contractC0 = await submitTestContract(stateServer, draftC0.id, undefined, { user: stateUser })
 
         // 4. make sure both rates return contract C in their list of revisions
         const rateOne = await fetchTestRateById(stateServer, OneID)
@@ -335,10 +364,11 @@ describe('submitRate', () => {
         )
 
         // 5. unlock and resubmit A
-        await unlockTestHealthPlanPackage(
+        await unlockTestHealthPlanPackageAsUser(
             cmsServer,
             contractA0.id,
-            'does this mess history'
+            'does this mess history',
+            cmsUser
         )
 
         const unlockedRateOne = await fetchTestRateById(stateServer, OneID)
@@ -354,7 +384,8 @@ describe('submitRate', () => {
         await submitTestContract(
             stateServer,
             contractA0.id,
-            'but what about this'
+            'but what about this',
+            { user: stateUser }
         )
 
         // everything should have the latest
@@ -410,22 +441,27 @@ describe('submitRate', () => {
                     pkgID: draftContractWithRate.id,
                 },
             },
+        }, {
+            contextValue: { user: stateUser },
         })
 
         // fetch newly created rate
-        const fetchDraftRate = await stateServer.executeOperation({
+        const fetchDraftRateResponse = await stateServer.executeOperation({
             query: FetchRateDocument,
             variables: {
                 input: { rateID },
             },
+        }, {
+            contextValue: { user: stateUser },
         })
+        const fetchDraftRate = extractGraphQLResponse(fetchDraftRateResponse)
         const draftRate = fetchDraftRate.data?.fetchRate.rate
 
         // expect rate to have been submitted with contract
         expect(draftRate.status).toBe('SUBMITTED')
 
         // unlocked the rate
-        const unlockedRateResult = await cmsServer.executeOperation({
+        const unlockedRateResponse = await cmsServer.executeOperation({
             query: UnlockRateDocument,
             variables: {
                 input: {
@@ -433,7 +469,10 @@ describe('submitRate', () => {
                     unlockedReason: 'unlock rate',
                 },
             },
+        }, {
+            contextValue: { user: cmsUser },
         })
+        const unlockedRateResult = extractGraphQLResponse(unlockedRateResponse)
         const unlockedRate = unlockedRateResult.data?.unlockRate.rate
 
         // expect no errors from unlocking
@@ -442,7 +481,7 @@ describe('submitRate', () => {
         expect(unlockedRate.status).toBe('UNLOCKED')
 
         // resubmit rate
-        const result = await stateServer.executeOperation({
+        const response = await stateServer.executeOperation({
             query: SubmitRateDocument,
             variables: {
                 input: {
@@ -453,7 +492,10 @@ describe('submitRate', () => {
                     ),
                 },
             },
+        }, {
+            contextValue: { user: stateUser },
         })
+        const result = extractGraphQLResponse(response)
         const submittedRate = result.data?.submitRate.rate
 
         // expect no errors from submit rate
@@ -472,20 +514,21 @@ describe('submitRate', () => {
             s3Client: mockS3,
         })
 
+        const cmsUser = testCMSUser()
         const cmsServer = await constructTestPostgresServer({
             context: {
-                user: testCMSUser(),
+                user: cmsUser,
             },
             ldService,
             s3Client: mockS3,
         })
 
-        const contract = await createAndSubmitTestContractWithRate(stateServer)
+        const contract = await createAndSubmitTestContractWithRate(stateServer, undefined, { user: stateUser })
         const rate = contract.packageSubmissions[0].rateRevisions[0]
 
-        await withdrawTestRate(cmsServer, rate.rateID, 'withdraw rate')
+        await withdrawTestRate(cmsServer, rate.rateID, 'withdraw rate', { user: cmsUser })
 
-        const submitResult = await await stateServer.executeOperation({
+        const submitResponse = await stateServer.executeOperation({
             query: SubmitRateDocument,
             variables: {
                 input: {
@@ -493,7 +536,10 @@ describe('submitRate', () => {
                     submittedReason: 'Submit a already submitted rate',
                 },
             },
+        }, {
+            contextValue: { user: stateUser },
         })
+        const submitResult = extractGraphQLResponse(submitResponse)
 
         expect(submitResult.errors).toBeDefined()
 
@@ -514,9 +560,10 @@ describe('submitRate', () => {
             s3Client: mockS3,
         })
 
+        const cmsUser = testCMSUser()
         const cmsServer = await constructTestPostgresServer({
             context: {
-                user: testCMSUser(),
+                user: cmsUser,
             },
             ldService,
             s3Client: mockS3,
@@ -524,15 +571,20 @@ describe('submitRate', () => {
 
         const draftRate = await createSubmitAndUnlockTestRate(
             stateServer,
-            cmsServer
+            cmsServer,
+            cmsUser,
+            stateUser
         )
 
-        const fetchDraftRate = await stateServer.executeOperation({
+        const fetchDraftRateResponse = await stateServer.executeOperation({
             query: FetchRateDocument,
             variables: {
                 input: { rateID: draftRate.id },
             },
+        }, {
+            contextValue: { user: stateUser },
         })
+        const fetchDraftRate = extractGraphQLResponse(fetchDraftRateResponse)
 
         const draftFormData =
             fetchDraftRate.data?.fetchRate.rate.draftRevision.formData
@@ -546,7 +598,7 @@ describe('submitRate', () => {
             rateDateStart: new Date(Date.UTC(2025, 1, 1)),
         })
 
-        const result = await stateServer.executeOperation({
+        const response = await stateServer.executeOperation({
             query: SubmitRateDocument,
             variables: {
                 input: {
@@ -554,7 +606,10 @@ describe('submitRate', () => {
                     submittedReason: 'submit rate',
                 },
             },
+        }, {
+            contextValue: { user: stateUser },
         })
+        const result = extractGraphQLResponse(response)
 
         expect(result.errors).toBeDefined()
         expect(result.errors?.[0].message).toBe(
@@ -572,18 +627,32 @@ describe('submitRate', () => {
                 familyName: 'Avatar',
                 email: 'aang@example.com',
                 role: 'STATE_USER',
-                stateCode: 'NM',
+                stateCode: 'FL',
             },
         })
 
         const stateServer = await constructTestPostgresServer({
             s3Client: mockS3,
+            context: {
+                user: stateUser,
+            },
         })
 
+        const cmsUserData = testCMSUser()
+        const cmsUser = await client.user.create({
+            data: {
+                id: cmsUserData.id,
+                givenName: cmsUserData.givenName,
+                familyName: cmsUserData.familyName,
+                email: cmsUserData.email,
+                role: cmsUserData.role,
+                divisionAssignment: cmsUserData.divisionAssignment,
+            },
+        })
         const cmsServer = await constructTestPostgresServer({
             s3Client: mockS3,
             context: {
-                user: testCMSUser(),
+                user: cmsUser,
             },
         })
 
@@ -595,7 +664,7 @@ describe('submitRate', () => {
 
         await addNewRateToTestContract(stateServer, draftA010)
 
-        const contractA0 = await submitTestContract(stateServer, AID)
+        const contractA0 = await submitTestContract(stateServer, AID, undefined, { user: stateUser })
         const subA0 = contractA0.packageSubmissions[0]
         const rate10 = subA0.rateRevisions[0]
         const OneID = rate10.rateID
@@ -610,11 +679,11 @@ describe('submitRate', () => {
         )
         await addNewRateToTestContract(stateServer, draftB010)
 
-        const contractB0 = await submitTestContract(stateServer, draftB0.id)
+        const contractB0 = await submitTestContract(stateServer, draftB0.id, undefined, { user: stateUser })
         const subB0 = contractB0.packageSubmissions[0]
         expect(subB0.rateRevisions[0].rateID).toBe(OneID)
 
-        await unlockTestRate(cmsServer, OneID, 'unlock rate')
+        await unlockTestRateAsUser(cmsServer, OneID, 'unlock rate', cmsUser)
 
         await updateTestRate(OneID, {
             rateCertificationName: 'after update',
