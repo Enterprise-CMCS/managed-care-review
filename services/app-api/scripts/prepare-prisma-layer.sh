@@ -42,6 +42,7 @@ function preparePrismaLayer() {
     rsync -av ./../../node_modules/.pnpm/node_modules/@prisma/engines-version/ lambda-layers-prisma-client-migration/nodejs/node_modules/@prisma/engines-version
     rsync -av ./../../node_modules/.pnpm/node_modules/@prisma/fetch-engine/ lambda-layers-prisma-client-migration/nodejs/node_modules/@prisma/fetch-engine
     rsync -av ./../../node_modules/.pnpm/node_modules/@prisma/get-platform/ lambda-layers-prisma-client-migration/nodejs/node_modules/@prisma/get-platform
+    rsync -av ./../../node_modules/.pnpm/node_modules/@prisma/config/ lambda-layers-prisma-client-migration/nodejs/node_modules/@prisma/config
 
     echo "Prepare Prisma Client Engine lambda layer"
     rsync -av node_modules/@prisma/client/ lambda-layers-prisma-client-engine/nodejs/node_modules/@prisma/client
@@ -59,6 +60,7 @@ function preparePrismaLayer() {
     rsync -av ./../../node_modules/.pnpm/node_modules/@prisma/engines-version/ lambda-layers-prisma-client-engine/nodejs/node_modules/@prisma/engines-version
     rsync -av ./../../node_modules/.pnpm/node_modules/@prisma/fetch-engine/ lambda-layers-prisma-client-engine/nodejs/node_modules/@prisma/fetch-engine
     rsync -av ./../../node_modules/.pnpm/node_modules/@prisma/get-platform/ lambda-layers-prisma-client-engine/nodejs/node_modules/@prisma/get-platform
+    rsync -av ./../../node_modules/.pnpm/node_modules/@prisma/config/ lambda-layers-prisma-client-engine/nodejs/node_modules/@prisma/config
 
     echo "Copy schema migration files to layer..."
     rsync -av prisma/ lambda-layers-prisma-client-migration/nodejs/prisma
