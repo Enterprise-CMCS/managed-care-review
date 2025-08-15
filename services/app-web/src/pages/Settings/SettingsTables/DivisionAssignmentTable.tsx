@@ -15,8 +15,7 @@ import {
 } from '../../../gen/gqlClient'
 
 import styles from '../Settings.module.scss'
-import { handleApolloError } from '@mc-review/helpers'
-import { updateDivisionAssignment } from '@mc-review/helpers'
+import { handleApolloError, updateDivisionAssignment } from '@mc-review/helpers'
 import { ApolloError } from '@apollo/client'
 import { useTealium } from '../../../hooks'
 import { useAuth } from '../../../contexts/AuthContext'

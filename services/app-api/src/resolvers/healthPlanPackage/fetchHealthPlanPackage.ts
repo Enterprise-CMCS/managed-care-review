@@ -1,4 +1,4 @@
-import { ForbiddenError } from 'apollo-server-lambda'
+import { createForbiddenError } from '../errorUtils'
 import {
     isStateUser,
     packageStatus,
@@ -80,7 +80,7 @@ export function fetchHealthPlanPackageResolver(
                     'user not authorized to fetch data from a different state',
                     span
                 )
-                throw new ForbiddenError(
+                throw createForbiddenError(
                     'user not authorized to fetch data from a different state'
                 )
             }
@@ -94,12 +94,14 @@ export function fetchHealthPlanPackageResolver(
                     'user not authorized to fetch a draft',
                     span
                 )
-                throw new ForbiddenError('user not authorized to fetch a draft')
+                throw createForbiddenError(
+                    'user not authorized to fetch a draft'
+                )
             }
         } else {
             logError('fetchHealthPlanPackage', 'unknown user type')
             setErrorAttributesOnActiveSpan('unknown user type', span)
-            throw new ForbiddenError(`unknown user type`)
+            throw createForbiddenError(`unknown user type`)
         }
 
         logSuccess('fetchHealthPlanPackage')

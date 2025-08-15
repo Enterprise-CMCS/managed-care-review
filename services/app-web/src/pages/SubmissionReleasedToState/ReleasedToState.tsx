@@ -126,7 +126,7 @@ const ReleasedToState = () => {
             navigate(`/submissions/${id}`)
         } catch (err) {
             recordJSException(
-                `ReleasedToState: Apollo error reported. Error message: Failed to create form data ${err}`
+                `ReleasedToState: GraphQL error reported. Error message: Failed to create form data ${err}`
             )
         }
     }

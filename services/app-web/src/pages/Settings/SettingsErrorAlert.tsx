@@ -1,4 +1,3 @@
-import { ApolloError } from '@apollo/client'
 import { GridContainer } from '@trussworks/react-uswds'
 import {
     ErrorAlertFailedRequest,
@@ -7,6 +6,7 @@ import {
 } from '../../components'
 import { handleApolloError } from '@mc-review/helpers'
 import { recordJSException } from '@mc-review/otel'
+import { ApolloError } from '@apollo/client'
 import styles from './Settings.module.scss'
 
 export const SettingsErrorAlert = ({
@@ -14,7 +14,7 @@ export const SettingsErrorAlert = ({
     isAuthenticated = true, // By default, assume user is valid because Settings are within wrapped auth routes. We only want to check for authentication when the prop passed in.
     isAdmin = true, // By default, assume user is admin because this error mainly used in settings subcomponents. We only want to check for authentication when the prop passed in.
 }: {
-    error?: ApolloError | Error
+    error?: Error
     isAuthenticated?: boolean
     isAdmin?: boolean
 }): React.ReactElement | null => {
