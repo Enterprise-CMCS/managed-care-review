@@ -115,13 +115,11 @@ rm lambda-layers-prisma-migration/nodejs/package.json
 rm lambda-layers-prisma-migration/nodejs/package-lock.json 2>/dev/null || true
 rm lambda-layers-prisma-migration/nodejs/pnpm-lock.yaml 2>/dev/null || true
 
-echo "Checking final size..."
-du -sh lambda-layers-prisma-migration/
+echo "Compressing migration layer..."
+pushd lambda-layers-prisma-migration && tar -zcf /tmp/nodejs.tar.gz . && mv /tmp/nodejs.tar.gz ./nodejs.tar.gz
+rm -rf nodejs
+ls -lh nodejs.tar.gz
+popd
 
-echo "Contents of migration layer:"
-ls -la lambda-layers-prisma-migration/nodejs/
-
-echo "Prisma CLI size after stripping:"
-du -sh lambda-layers-prisma-migration/nodejs/node_modules/prisma/
-
-echo "Migration layer built successfully!"
+echo "Migration layer compressed successfully!"
+ls -lh lambda-layers-prisma-migration/nodejs.tar.gz

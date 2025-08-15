@@ -85,13 +85,11 @@ rm lambda-layers-prisma-client-engine/nodejs/package.json
 rm lambda-layers-prisma-client-engine/nodejs/package-lock.json 2>/dev/null || true
 rm lambda-layers-prisma-client-engine/nodejs/pnpm-lock.yaml 2>/dev/null || true
 
-echo "Checking final size..."
-du -sh lambda-layers-prisma-client-engine/
+echo "Compressing engine layer..."
+pushd lambda-layers-prisma-client-engine && tar -zcf /tmp/nodejs.tar.gz . && mv /tmp/nodejs.tar.gz ./nodejs.tar.gz
+rm -rf nodejs
+ls -lh nodejs.tar.gz
+popd
 
-echo "Contents of engine layer:"
-ls -la lambda-layers-prisma-client-engine/nodejs/
-
-echo "Prisma Client size after stripping:"
-du -sh lambda-layers-prisma-client-engine/nodejs/node_modules/@prisma/client/
-
-echo "Engine layer built successfully!"
+echo "Engine layer compressed successfully!"
+ls -lh lambda-layers-prisma-client-engine/nodejs.tar.gz
