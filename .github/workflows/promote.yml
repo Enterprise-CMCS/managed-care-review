@@ -125,14 +125,18 @@ jobs:
         working-directory: services/app-api
         run: PRISMA_CLI_BINARY_TARGETS=rhel-openssl-3.0.x pnpm prisma generate
 
-      - name: Prepare "@prisma/client" lambda layer
+      - name: Prepare migration lambda layer
         working-directory: services/app-api
-        run: ./scripts/prepare-prisma-layer.sh
+        run: ./scripts/build-migration-layer.sh
+
+      - name: Prepare engine lambda layer
+        working-directory: services/app-api
+        run: ./scripts/build-engine-layer.sh
 
       - uses: actions/upload-artifact@v4
         with:
-          name: lambda-layers-prisma-client-migration
-          path: ./services/app-api/lambda-layers-prisma-client-migration
+          name: lambda-layers-prisma-migration
+          path: ./services/app-api/lambda-layers-prisma-migration
 
       - uses: actions/upload-artifact@v4
         with:
