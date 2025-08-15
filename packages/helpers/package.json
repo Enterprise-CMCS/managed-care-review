@@ -11,6 +11,7 @@
         "@mc-review/hpp": "workspace:*",
         "@mc-review/mocks": "workspace:*",
         "@mc-review/otel": "workspace:*",
+        "graphql": "^16.8.1",
         "typescript": "5.9.2",
         "url-parse": "^1.5.10"
     },
