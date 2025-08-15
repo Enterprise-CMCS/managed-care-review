@@ -13,7 +13,6 @@ import { GenericErrorPage } from '../../Errors/GenericErrorPage'
 
 import { DataDetailMissingField } from '../../../components/DataDetail/DataDetailMissingField'
 import { DataDetailContactField } from '../../../components/DataDetail/DataDetailContactField/DataDetailContactField'
-import { InlineDocumentWarning } from '../../../components/DocumentWarning'
 import { SectionCard } from '../../../components/SectionCard'
 import {
     Rate,
@@ -43,9 +42,7 @@ import { hasCMSUserPermissions } from '@mc-review/helpers'
 import { InfoTag } from '../../../components/InfoTag/InfoTag'
 import { featureFlags } from '@mc-review/common-code'
 import { useLDClient } from 'launchdarkly-react-client-sdk'
-import { getRateZipDownloadUrl } from '../../../helpers/zipHelpers'
-import { LinkWithLogging } from '../../../components'
-import { Icon } from '@trussworks/react-uswds'
+import { ZipDownloadLink } from '../../../components/ZipDownloadLink/ZipDownloadLink'
 
 export type RateDetailsSummarySectionProps = {
     contract: Contract | UnlockedContract
@@ -69,38 +66,6 @@ type PackageNamesLookupType = {
         packageName: PackageNameType
         status: HealthPlanPackageStatus
     }
-}
-
-export function renderZipLink(
-    zippedFilesURL: string | undefined | Error,
-    rateDocumentCount: number | undefined,
-    onDocumentError?: (error: true) => void
-) {
-    if (zippedFilesURL instanceof Error || !zippedFilesURL) {
-        if (onDocumentError) {
-            onDocumentError(true)
-        }
-        return (
-            <InlineDocumentWarning message="Rate document download is unavailable" />
-        )
-    }
-    return (
-        <LinkWithLogging
-            variant="unstyled"
-            href={zippedFilesURL}
-            target="_blank"
-        >
-            <p
-                style={{ fontSize: '16px', width: '266px', color: '#005EA2' }}
-                data-testid="zipDownloadLink"
-            >
-                <Icon.FileDownload style={{ verticalAlign: 'middle' }} />
-                Download rate documents{' '}
-                {rateDocumentCount &&
-                    `(${rateDocumentCount} file${rateDocumentCount > 1 ? 's' : ''})`}
-            </p>
-        </LinkWithLogging>
-    )
 }
 
 export const RateDetailsSummarySection = ({
@@ -293,14 +258,9 @@ export const RateDetailsSummarySection = ({
                           rateFormData.rateDocuments &&
                           rateFormData.supportingDocuments.length +
                               rateFormData.rateDocuments.length
-                      const zippedFilesURL =
-                          isSubmittedOrCMSUser &&
-                          !isPreviousSubmission &&
-                          rateRev?.documentZipPackages
-                              ? getRateZipDownloadUrl(
-                                    rateRev.documentZipPackages
-                                )
-                              : undefined
+                      const documentZipPackage = rateRev?.documentZipPackages
+                          ? rateRev.documentZipPackages
+                          : undefined
                       /**
                     Rate programs switched in summer 2024. We still show deprecated program field values when
                     - there's no new field values present and CMS user is viewing
@@ -528,13 +488,15 @@ export const RateDetailsSummarySection = ({
                                   fontSize="24px"
                               >
                                   {isSubmittedOrCMSUser &&
-                                      !isPreviousSubmission &&
-                                      rateRevs &&
-                                      rateRevs.length > 0 &&
-                                      renderZipLink(
-                                          zippedFilesURL,
-                                          rateDocumentCount,
-                                          onDocumentError
+                                      !isPreviousSubmission && (
+                                          <ZipDownloadLink
+                                              type={'RATE'}
+                                              documentZipPackages={
+                                                  documentZipPackage
+                                              }
+                                              documentCount={rateDocumentCount}
+                                              onDocumentError={onDocumentError}
+                                          />
                                       )}
                               </SectionHeader>
                               {rateFormData.rateDocuments && (

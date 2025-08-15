@@ -1,0 +1,19 @@
+@use '../../styles/custom.scss' as custom;
+
+.contract {
+    font-size: 17px;
+    width: 313px;
+    color: custom.$mcr-primary-base;
+}
+
+.rate {
+    font-size: 17px;
+    width: 279px;
+    color: custom.$mcr-primary-base;
+}
+
+.singleRate {
+    font-size: 17px;
+    width: 280px;
+    color: custom.$mcr-primary-base;
+}

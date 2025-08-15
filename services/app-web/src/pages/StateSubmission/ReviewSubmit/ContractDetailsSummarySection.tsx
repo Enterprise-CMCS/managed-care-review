@@ -7,7 +7,6 @@ import {
     FederalAuthorityRecord,
     ManagedCareEntityRecord,
 } from '@mc-review/hpp'
-import { getContractZipDownloadUrl } from '../../../helpers/zipHelpers'
 import { formatCalendarDate } from '@mc-review/dates'
 import { MultiColumnGrid } from '../../../components/MultiColumnGrid'
 import { usePreviousSubmission } from '../../../hooks/usePreviousSubmission'
@@ -30,10 +29,9 @@ import {
     federalAuthorityKeysForCHIP,
     CHIPFederalAuthority,
 } from '@mc-review/hpp'
-import { InlineDocumentWarning } from '../../../components/DocumentWarning'
 import { useLDClient } from 'launchdarkly-react-client-sdk'
 import { featureFlags } from '@mc-review/common-code'
-import { Grid, Icon } from '@trussworks/react-uswds'
+import { Grid } from '@trussworks/react-uswds'
 import {
     booleanAsYesNoFormValue,
     booleanAsYesNoUserValue,
@@ -52,7 +50,7 @@ import {
     getVisibleLatestContractFormData,
 } from '@mc-review/helpers'
 import { hasCMSUserPermissions } from '@mc-review/helpers'
-import { LinkWithLogging } from '../../../components'
+import { ZipDownloadLink } from '../../../components/ZipDownloadLink/ZipDownloadLink'
 
 export type ContractDetailsSummarySectionProps = {
     contract: Contract
@@ -63,38 +61,6 @@ export type ContractDetailsSummarySectionProps = {
     submissionName: string
     onDocumentError?: (error: true) => void
     explainMissingData?: boolean
-}
-
-function renderZipLink(
-    zippedFilesURL: string | undefined | Error,
-    contractDocumentCount: number | undefined,
-    onDocumentError?: (error: true) => void
-) {
-    if (zippedFilesURL instanceof Error || !zippedFilesURL) {
-        if (onDocumentError) {
-            onDocumentError(true)
-        }
-        return (
-            <InlineDocumentWarning message="Contract document download is unavailable" />
-        )
-    }
-    return (
-        <LinkWithLogging
-            variant="unstyled"
-            href={zippedFilesURL}
-            target="_blank"
-        >
-            <p
-                style={{ fontSize: '17px', width: '313px', color: '#005EA2' }}
-                data-testid="zipDownloadLink"
-            >
-                <Icon.FileDownload style={{ verticalAlign: 'middle' }} />
-                Download contract documents{' '}
-                {contractDocumentCount &&
-                    `(${contractDocumentCount} file${contractDocumentCount > 1 ? 's' : ''})`}
-            </p>
-        </LinkWithLogging>
-    )
 }
 
 export const ContractDetailsSummarySection = ({
@@ -169,13 +135,9 @@ export const ContractDetailsSummarySection = ({
         contractRev ||
         contract.draftRevision ||
         contract.packageSubmissions[0]?.contractRevision
-    const zippedFilesURL =
-        isSubmittedOrCMSUser &&
-        !isPreviousSubmission &&
-        currentRevision?.documentZipPackages
-            ? getContractZipDownloadUrl(currentRevision.documentZipPackages)
-            : undefined
-
+    const documentZipPackage = currentRevision?.documentZipPackages
+        ? currentRevision.documentZipPackages
+        : undefined
     // Calculate last submitted data for document upload tables
     const lastSubmittedIndex = getIndexFromRevisionVersion(
         contract,
@@ -362,13 +324,14 @@ export const ContractDetailsSummarySection = ({
                 as="h4"
                 fontSize="24px"
             >
-                {isSubmittedOrCMSUser &&
-                    !isPreviousSubmission &&
-                    renderZipLink(
-                        zippedFilesURL,
-                        contractDocumentCount,
-                        onDocumentError
-                    )}
+                {isSubmittedOrCMSUser && !isPreviousSubmission && (
+                    <ZipDownloadLink
+                        type={'CONTRACT'}
+                        documentZipPackages={documentZipPackage}
+                        documentCount={contractDocumentCount}
+                        onDocumentError={onDocumentError}
+                    />
+                )}
             </SectionHeader>
             {contractDocs && (
                 <UploadedDocumentsTable

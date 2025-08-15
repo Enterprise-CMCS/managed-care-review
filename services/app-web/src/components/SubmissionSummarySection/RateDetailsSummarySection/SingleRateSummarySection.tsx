@@ -16,7 +16,6 @@ import {
 } from '../../../gen/gqlClient'
 import { UploadedDocumentsTable } from '../UploadedDocumentsTable'
 import { SectionHeader } from '../../SectionHeader'
-import { renderZipLink } from '../../../pages/StateSubmission/ReviewSubmit/RateDetailsSummarySection'
 import { DocumentWarningBanner } from '../../Banner'
 import { Grid } from '@trussworks/react-uswds'
 import { UploadedDocumentsTableProps } from '../UploadedDocumentsTable/UploadedDocumentsTable'
@@ -30,7 +29,7 @@ import { NavLinkWithLogging } from '../../TealiumLogging'
 import { hasCMSUserPermissions } from '@mc-review/helpers'
 import { featureFlags } from '@mc-review/common-code'
 import { useLDClient } from 'launchdarkly-react-client-sdk'
-import { getRateZipDownloadUrl } from '../../../helpers/zipHelpers'
+import { ZipDownloadLink } from '../../ZipDownloadLink/ZipDownloadLink'
 
 const rateCapitationType = (formData: RateFormData) =>
     formData.rateCapitationType
@@ -176,10 +175,9 @@ export const SingleRateSummarySection = ({
         formData.supportingDocuments &&
         formData.rateDocuments &&
         formData.supportingDocuments.length + formData.rateDocuments.length
-    const zippedFilesURL =
-        isSubmittedOrCMSUser && rateRevision.documentZipPackages
-            ? getRateZipDownloadUrl(rateRevision.documentZipPackages)
-            : undefined
+    const documentZipPackage = rateRevision.documentZipPackages
+        ? rateRevision.documentZipPackages
+        : undefined
 
     return (
         <React.Fragment key={rate.id}>
@@ -194,7 +192,7 @@ export const SingleRateSummarySection = ({
                     }
                     hideBorderTop
                 />
-                {!zippedFilesURL && (
+                {!documentZipPackage && (
                     <DocumentWarningBanner className={styles.banner} />
                 )}
                 <dl>
@@ -359,7 +357,11 @@ export const SingleRateSummarySection = ({
             </SectionCard>
             <SectionCard className={styles.summarySection}>
                 <SectionHeader header="Rate documents" hideBorderTop>
-                    {renderZipLink(zippedFilesURL, rateDocumentCount)}
+                    <ZipDownloadLink
+                        type={'SINGLE-RATE'}
+                        documentZipPackages={documentZipPackage}
+                        documentCount={rateDocumentCount}
+                    />
                 </SectionHeader>
                 <UploadedDocumentsTable
                     documents={formData.rateDocuments}
