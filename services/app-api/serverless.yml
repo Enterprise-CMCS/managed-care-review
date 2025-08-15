@@ -148,8 +148,8 @@ provider:
     VITE_APP_S3_QA_BUCKET: ${self:custom.reactAppS3QABucket}
     VITE_APP_S3_DOCUMENTS_BUCKET: ${self:custom.reactAppS3DocumentUploadsBucket}
 layers:
-  prismaClientMigration:
-    path: lambda-layers-prisma-client-migration
+  prismaMigration:
+    path: lambda-layers-prisma-migration
   prismaClientEngine:
     path: lambda-layers-prisma-client-engine
 
@@ -235,7 +235,7 @@ functions:
         - ${self:custom.sgId}
       subnetIds: ${self:custom.privateSubnets}
     layers:
-      - !Ref PrismaClientMigrationLambdaLayer
+      - !Ref PrismaMigrationLambdaLayer
       - arn:aws:lambda:us-east-1:901920570463:layer:aws-otel-nodejs-amd64-ver-1-18-1:4
 
   migrate_document_zips:
