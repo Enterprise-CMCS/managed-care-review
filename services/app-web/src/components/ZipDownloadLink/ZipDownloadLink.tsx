@@ -55,7 +55,7 @@ export const ZipDownloadLink = ({
             target="_blank"
         >
             <p className={className(type)} data-testid="zipDownloadLink">
-                <Icon.FileDownload style={{ verticalAlign: 'sub' }} />
+                <Icon.FileDownload className={styles.downloadIcon} />
                 Download {`${contractOrRate}`} documents{' '}
                 {documentCount &&
                     `(${documentCount} file${documentCount > 1 ? 's' : ''})`}
