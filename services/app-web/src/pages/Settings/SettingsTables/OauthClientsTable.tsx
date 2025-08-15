@@ -108,6 +108,7 @@ const OauthClientTable = ({
 
 export const OauthClients = () => {
     const { updateActiveMainContent } = usePage()
+
     const { result: fetchOauthClientsResult } = wrapApolloResult(
         useFetchOauthClientsQuery({
             fetchPolicy: 'cache-and-network',
@@ -119,6 +120,7 @@ export const OauthClients = () => {
     useEffect(() => {
         updateActiveMainContent(activeMainContentId)
     }, [activeMainContentId, updateActiveMainContent])
+
     if (fetchOauthClientsResult.status === 'LOADING') {
         return <Loading />
     } else if (fetchOauthClientsResult.status === 'ERROR') {

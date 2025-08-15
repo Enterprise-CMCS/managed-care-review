@@ -33,6 +33,24 @@
     opacity: 0;
 }
 
+// USWDS Radio overrides
+// Adjust color contrast and font weight of disabled radio options to adhere to 7:1 contrast ratio
+.usa-radio__input:disabled + [class*='__label'] {
+    color: #1b1b1b;
+    font-weight: lighter;
+}
+
+.usa-radio__input:disabled + [class*='__label']::before {
+    box-shadow: 0 0 0 2px #7a7a7a;
+}
+
+.usa-radio__input:checked:disabled + [class*='__label']::before {
+    background-color: #7a7a7a;
+    box-shadow:
+        0 0 0 2px #7a7a7a,
+        inset 0 0 0 2px white;
+}
+
 // BUTTONS
 // todo - bring these styles into ActionButton, use ActionButton everywhere and delete this override
 // Removes html link styles from uswds button-styled links, used anywhere we have a link (Add New Submission) that looks a button

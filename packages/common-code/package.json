@@ -11,13 +11,13 @@
         "@mc-review/constants": "workspace:*",
         "@mc-review/helpers": "workspace:*",
         "@mc-review/hpp": "workspace:*",
-        "typescript": "5.1.6",
+        "typescript": "5.9.2",
         "url-parse": "^1.5.10",
-        "zod": "^3.24.2"
+        "zod": "^4.0.14"
     },
     "devDependencies": {
         "@types/jest": "^29.5.6",
-        "@types/node": "^20.14.12",
+        "@types/node": "^24.2.1",
         "@types/url-parse": "^1.4.3"
     }
 }

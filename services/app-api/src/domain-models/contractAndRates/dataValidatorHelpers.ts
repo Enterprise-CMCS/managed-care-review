@@ -1,3 +1,4 @@
+import { dsnpTriggers } from '@mc-review/common-code'
 import type { FeatureFlagSettings } from '@mc-review/common-code'
 import type { ContractDraftRevisionFormDataInput } from '../../gen/gqlServer'
 import { contractFormDataSchema, preprocessNulls } from './formDataTypes'
@@ -41,7 +42,7 @@ const validateProgramIDs = (stateCode: string, store: Store) => {
         const allPrograms = store.findPrograms(stateCode, programs)
         if (allPrograms instanceof Error) {
             ctx.addIssue({
-                code: z.ZodIssueCode.custom,
+                code: 'custom',
                 message: allPrograms.message,
             })
         }
@@ -57,7 +58,7 @@ const validatePopulationCovered = (
             formData.submissionType === 'CONTRACT_AND_RATES'
         ) {
             ctx.addIssue({
-                code: z.ZodIssueCode.custom,
+                code: 'custom',
                 message:
                     'populationCoveredSchema of CHIP cannot be submissionType of CONTRACT_AND_RATES',
             })
@@ -93,32 +94,73 @@ const validateContractDraftRevisionInput = (
 }
 
 const refineForFeatureFlags = (featureFlags?: FeatureFlagSettings) => {
-    if (featureFlags?.['438-attestation']) {
+    if (featureFlags) {
         return submittableContractSchema.superRefine((contract, ctx) => {
-            // since we have different validations based on a feature flag, we add them as a refinement here.
-            // once 438 attestation ships this refinement should be moved to the submittableContractSchema
-            // and statutoryRegulatoryAttestation should be made non-optional.
+            const contractFormData = contract.draftRevision.formData
+            if (featureFlags['438-attestation']) {
+                // since we have different validations based on a feature flag, we add them as a refinement here.
+                // once 438 attestation ships this refinement should be moved to the submittableContractSchema
+                // and statutoryRegulatoryAttestation should be made non-optional.
 
-            const formData = contract.draftRevision.formData
-            if (formData.statutoryRegulatoryAttestation === undefined) {
-                ctx.addIssue({
-                    code: z.ZodIssueCode.custom,
-                    message:
-                        'statutoryRegulatoryAttestationDescription is required when  438-attestation feature flag is on',
-                })
+                if (
+                    contractFormData.statutoryRegulatoryAttestation ===
+                    undefined
+                ) {
+                    ctx.addIssue({
+                        code: 'custom',
+                        message:
+                            'statutoryRegulatoryAttestationDescription is required when 438-attestation feature flag is on',
+                    })
+                }
+
+                if (
+                    (contractFormData.statutoryRegulatoryAttestation ===
+                        false &&
+                        !contractFormData.statutoryRegulatoryAttestationDescription) ||
+                    (contractFormData.statutoryRegulatoryAttestationDescription &&
+                        contractFormData
+                            .statutoryRegulatoryAttestationDescription
+                            .length === 0)
+                ) {
+                    ctx.addIssue({
+                        code: 'custom',
+                        message:
+                            'statutoryRegulatoryAttestationDescription is Required if statutoryRegulatoryAttestation is false',
+                    })
+                }
             }
+            if (featureFlags['dsnp']) {
+                // when the dnsp flag is on, the dsnpContract field becomes
+                // required IF the submission's federal authorities include
+                // ANY of the following: 'STATE_PLAN','WAIVER_1915B', 'WAIVER_1115', 'VOLUNTARY'
+                const dsnpIsRequired = contractFormData.federalAuthorities.some(
+                    (authority) => dsnpTriggers.includes(authority)
+                )
 
-            if (
-                (formData.statutoryRegulatoryAttestation === false &&
-                    !formData.statutoryRegulatoryAttestationDescription) ||
-                (formData.statutoryRegulatoryAttestationDescription &&
-                    formData.statutoryRegulatoryAttestationDescription
-                        .length === 0)
-            ) {
-                ctx.addIssue({
-                    code: z.ZodIssueCode.custom,
-                    message:
-                        'statutoryRegulatoryAttestationDescription is Required if statutoryRegulatoryAttestation is false',
+                const dsnpNotAnswered =
+                    contractFormData.dsnpContract === null ||
+                    contractFormData.dsnpContract === undefined
+                if (dsnpIsRequired && dsnpNotAnswered) {
+                    ctx.addIssue({
+                        code: 'custom',
+                        message: `dsnpContract is required when any of the following Federal Authorities are present: ${dsnpTriggers.toString()}`,
+                    })
+                }
+                // if the contract is associated with a DSNP then
+                // associated rate Medicaid populations must be selected
+                contract.draftRates.forEach((rate) => {
+                    const rateFormData = rate.draftRevision?.formData
+                    const noRateMedicaidPopulations =
+                        !rateFormData?.rateMedicaidPopulations ||
+                        rateFormData?.rateMedicaidPopulations?.length === 0
+                    const isDSNPContract = contractFormData.dsnpContract
+
+                    if (isDSNPContract && noRateMedicaidPopulations) {
+                        ctx.addIssue({
+                            code: 'custom',
+                            message: `rateMedicaidPopulations is required when dsnpContract is true`,
+                        })
+                    }
                 })
             }
         })
@@ -154,7 +196,7 @@ const parseContract = (
             const findResult = store.findPrograms(stateCode, [...allProgramIDs])
             if (findResult instanceof Error) {
                 ctx.addIssue({
-                    code: z.ZodIssueCode.custom,
+                    code: 'custom',
                     message: findResult.message,
                 })
             }

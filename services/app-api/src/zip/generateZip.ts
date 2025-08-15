@@ -26,6 +26,7 @@ const s3Client = new S3Client({
 
 // Maximum total size for document zip packages (1.5GB)
 const MAX_ZIP_SIZE_BYTES = 1536 * 1024 * 1024
+
 /**
  * Extracts bucket name from S3 URL
  */

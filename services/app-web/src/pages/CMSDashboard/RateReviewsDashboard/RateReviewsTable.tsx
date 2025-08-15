@@ -39,6 +39,7 @@ import { getTealiumFiltersChanged } from '../../../tealium/tealiumHelpers'
 import { formatCalendarDate } from '@mc-review/dates'
 import { InfoTag, TagProps } from '../../../components/InfoTag/InfoTag'
 import { ConsolidatedRateStatusRecord } from '@mc-review/constants'
+import { RowCellElement } from '../../../components'
 
 type RatingPeriodFilterType = [string, string] | []
 
@@ -672,7 +673,11 @@ export const RateReviewsTable = ({
                             {reactTable.getHeaderGroups().map((headerGroup) => (
                                 <tr key={headerGroup.id}>
                                     {headerGroup.headers.map((header) => (
-                                        <th scope="col" key={header.id}>
+                                        <th
+                                            scope="col"
+                                            key={header.id}
+                                            id={header.id}
+                                        >
                                             {header.isPlaceholder
                                                 ? null
                                                 : flexRender(
@@ -692,18 +697,19 @@ export const RateReviewsTable = ({
                                     data-testid={`row-${row.original.id}`}
                                 >
                                     {row.getVisibleCells().map((cell) => (
-                                        <td
+                                        <RowCellElement
                                             key={cell.id}
-                                            data-testid={
-                                                cell.column.columnDef.meta
-                                                    ?.dataTestID
+                                            element={
+                                                cell.column.id === 'Rate review'
+                                                    ? 'th'
+                                                    : 'td'
                                             }
                                         >
                                             {flexRender(
                                                 cell.column.columnDef.cell,
                                                 cell.getContext()
                                             )}
-                                        </td>
+                                        </RowCellElement>
                                     ))}
                                 </tr>
                             ))}

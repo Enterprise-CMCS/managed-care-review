@@ -1,7 +1,11 @@
 import React, { useState } from 'react'
 import styles from '../SubmissionSummarySection.module.scss'
 import { MultiColumnGrid } from '../../MultiColumnGrid'
-import { DataDetail, DataDetailContactField } from '../../DataDetail'
+import {
+    DataDetail,
+    DataDetailCheckboxList,
+    DataDetailContactField,
+} from '../../DataDetail'
 import { formatCalendarDate } from '@mc-review/dates'
 import {
     ActuaryContact,
@@ -21,9 +25,14 @@ import { Grid } from '@trussworks/react-uswds'
 import { UploadedDocumentsTableProps } from '../UploadedDocumentsTable/UploadedDocumentsTable'
 import { useAuth } from '../../../contexts/AuthContext'
 import { SectionCard } from '../../SectionCard'
-import { ActuaryCommunicationRecord } from '@mc-review/hpp'
+import {
+    ActuaryCommunicationRecord,
+    RateMedicaidPopulationsRecord,
+} from '@mc-review/hpp'
 import { NavLinkWithLogging } from '../../TealiumLogging'
 import { hasCMSUserPermissions } from '@mc-review/helpers'
+import { featureFlags } from '@mc-review/common-code'
+import { useLDClient } from 'launchdarkly-react-client-sdk'
 
 const rateCapitationType = (formData: RateFormData) =>
     formData.rateCapitationType
@@ -97,6 +106,7 @@ export const SingleRateSummarySection = ({
     statePrograms: Program[]
 }): React.ReactElement | null => {
     const { loggedInUser } = useAuth()
+    const ldClient = useLDClient()
     const latestSubmission = rate.packageSubmissions?.[0]
     if (!latestSubmission) {
         // This is unusual and ugly, we try not to throw ever, but we can't early return here.
@@ -109,6 +119,8 @@ export const SingleRateSummarySection = ({
     const rateRevision = latestSubmission.rateRevision
     const formData: RateFormData = rateRevision.formData
     const lastSubmittedDate = latestSubmission.submitInfo.updatedAt
+    const medicaidPopulations = (formData.rateMedicaidPopulations ??
+        []) as string[]
 
     const isRateAmendment = formData.rateType === 'AMENDMENT'
     const explainMissingData =
@@ -121,6 +133,10 @@ export const SingleRateSummarySection = ({
         rate.status === 'RESUBMITTED' ||
         isCMSUser
     const isWithdrawn = rate.consolidatedStatus === 'WITHDRAWN'
+    const isDsnpEnabled = ldClient?.variation(
+        featureFlags.DSNP.flag,
+        featureFlags.DSNP.defaultValue
+    )
 
     const withdrawnFromContractRevs =
         rate.withdrawnFromContracts?.reduce((acc, contract) => {
@@ -242,12 +258,28 @@ export const SingleRateSummarySection = ({
                                 false
                             )}
                         />
+                        {isDsnpEnabled && medicaidPopulations.length !== 0 && (
+                            <DataDetail
+                                id="medicaidPop"
+                                label="Medicaid populations included in this rate certification"
+                                explainMissingData={explainMissingData}
+                                children={
+                                    <DataDetailCheckboxList
+                                        list={medicaidPopulations}
+                                        dict={RateMedicaidPopulationsRecord}
+                                        displayEmptyList={!explainMissingData}
+                                    />
+                                }
+                            />
+                        )}
                         <DataDetail
                             id="rateType"
                             label="Rate certification type"
                             explainMissingData={explainMissingData}
                             children={rateCertificationType(formData)}
                         />
+                    </MultiColumnGrid>
+                    <MultiColumnGrid columns={2}>
                         <DataDetail
                             id="ratingPeriod"
                             label={

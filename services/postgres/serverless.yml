@@ -77,6 +77,14 @@ provider:
             - 's3:ListObjectsV2'
           Resource:
             - !Sub 'arn:aws:s3:::${self:custom.documentUploadsBucketName}/*'
+        - Effect: 'Allow'
+          Action:
+            - 's3:GetObject'
+            - 's3:PutObject'
+            - 's3:ListObjects'
+            - 's3:ListObjectsV2'
+          Resource:
+            - !Sub 'arn:aws:s3:::${self:custom.qaUploadsBucketName}/*'
         - Effect: Allow
           Action:
             - 's3:ListBucket'
@@ -107,6 +115,7 @@ custom:
   dbSecretsArn: ${env:CF_CONFIG_IGNORED_LOCALLY, env:DB_SM_ARN}
   slackWebhookUrl: ${env:SLACK_WEBHOOK}
   documentUploadsBucketName: ${env:CF_CONFIG_IGNORED_LOCALLY, cf:uploads-${sls:stage}.DocumentUploadsBucketName}
+  qaUploadsBucketName: ${env:CF_CONFIG_IGNORED_LOCALLY, cf:uploads-${sls:stage}.QAUploadsBucketName}
   serverlessTerminationProtection:
     stages:
       - dev
@@ -192,6 +201,7 @@ functions:
     environment:
       S3_BUCKET: ${self:custom.importBucket.${opt:stage}, self:custom.importBucket.other}
       DOCS_S3_BUCKET: ${self:custom.documentUploadsBucketName}
+      QA_S3_BUCKET: ${self:custom.qaUploadsBucketName}
       DB_SECRET_ARN: !Ref PostgresSecret
       SECRETS_MANAGER_ENDPOINT: !Sub 'https://secretsmanager.${AWS::Region}.amazonaws.com'
     layers:
