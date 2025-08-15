@@ -2,6 +2,8 @@ import styles from './SectionHeader.module.scss'
 import classNames from 'classnames'
 import { NavLinkWithLogging } from '../TealiumLogging/Link'
 
+type HeadingTag = 'h1' | 'h2' | 'h3' | 'h4' | 'h5' | 'h6'
+
 export type SectionHeaderProps = {
     header: string
     children?: React.ReactNode
@@ -11,7 +13,7 @@ export type SectionHeaderProps = {
     headerId?: string
     hideBorderBottom?: boolean
     hideBorderTop?: boolean
-    as?: keyof JSX.IntrinsicElements
+    as?: HeadingTag
     fontSize?: string
 }
 
@@ -49,7 +51,6 @@ export const SectionHeader = ({
                     style={{
                         fontSize,
                         fontWeight: '400',
-                        marginBottom: '25px',
                     }}
                 >
                     {header}
