@@ -52,7 +52,7 @@ function mockContractQuestions(
                             {
                                 s3URL: 's3://bucketname/key/dmco-question-1-document-1',
                                 name: 'dmco-question-1-document-1',
-                                downloadURL: expect.any(String),
+                                downloadURL: s3DlUrl,
                             },
                         ],
                         division: 'DMCO',
@@ -67,7 +67,7 @@ function mockContractQuestions(
                                     {
                                         s3URL: 's3://bucketname/key/response-to-dmco-1-document-1',
                                         name: 'response-to-dmco-1-document-1',
-                                        downloadURL: expect.any(String),
+                                        downloadURL:s3DlUrl,
                                     },
                                 ],
                             },
@@ -87,12 +87,12 @@ function mockContractQuestions(
                             {
                                 s3URL: 's3://bucketname/key/dmco-question-2-document-1',
                                 name: 'dmco-question-2-document-1',
-                                downloadURL: expect.any(String),
+                                downloadURL: s3DlUrl,
                             },
                             {
                                 s3URL: 's3://bucketname/key/question-2-document-2',
                                 name: 'dmco-question-2-document-2',
-                                downloadURL: expect.any(String),
+                                downloadURL: s3DlUrl,
                             },
                         ],
                         division: 'DMCO',
@@ -119,7 +119,7 @@ function mockContractQuestions(
                             {
                                 s3URL: 's3://bucketname/key/dmcp-question-1-document-1',
                                 name: 'dmcp-question-1-document-1',
-                                downloadURL: expect.any(String),
+                                downloadURL: s3DlUrl,
                             },
                         ],
                         division: 'DMCP',
@@ -134,7 +134,7 @@ function mockContractQuestions(
                                     {
                                         s3URL: 's3://bucketname/key/response-to-dmcp-1-document-1',
                                         name: 'response-to-dmcp-1-document-1',
-                                        downloadURL: expect.any(String),
+                                        downloadURL: s3DlUrl,
                                     },
                                 ],
                             },
@@ -161,7 +161,7 @@ function mockContractQuestions(
                             {
                                 s3URL: 's3://bucketname/key/oact-question-1-document-1',
                                 name: 'oact-question-1-document-1',
-                                downloadURL: expect.any(String),
+                                downloadURL: s3DlUrl,
                             },
                         ],
                         division: 'OACT',
@@ -176,7 +176,7 @@ function mockContractQuestions(
                                     {
                                         s3URL: 's3://bucketname/key/response-to-oact-1-document-1',
                                         name: 'response-to-oact-1-document-1',
-                                        downloadURL: expect.any(String),
+                                        downloadURL: s3DlUrl,
                                     },
                                 ],
                             },
@@ -198,7 +198,7 @@ function mockContractQuestions(
                             {
                                 s3URL: 's3://bucketname/key/oact-question-1-document-1',
                                 name: 'oact-question-2-document-1',
-                                downloadURL: expect.any(String),
+                                downloadURL: s3DlUrl,
                             },
                         ],
                         division: 'OACT',
@@ -213,7 +213,7 @@ function mockContractQuestions(
                                     {
                                         s3URL: 's3://bucketname/key/response-to-oact-1-document-1',
                                         name: 'response-to-oact-2-document-1',
-                                        downloadURL: expect.any(String),
+                                        downloadURL: s3DlUrl,
                                     },
                                 ],
                             },

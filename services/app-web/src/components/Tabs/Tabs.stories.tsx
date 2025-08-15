@@ -1,6 +1,7 @@
 import React from 'react'
 import { Tabs } from './Tabs'
 import { TabPanel } from './TabPanel'
+import ProvidersDecorator from '../../../.storybook/providersDecorator'
 
 export default {
     title: 'Components/Tabs',
@@ -13,6 +14,7 @@ export default {
         componentSubtitle:
             "Tabs are a secondary navigation pattern, allowing a user to view only the content they're interested in. Adapted from CMS Design System and CMSgov/easi-app",
     },
+    decorators: [ProvidersDecorator],
 }
 
 export const Default = (): React.ReactElement => {

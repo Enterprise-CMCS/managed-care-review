@@ -26,6 +26,7 @@
         "src/**/*",
         "vite.config.ts",
         "vite-env.d.ts",
-        "eslint.config.ts"
+        "eslint.config.ts",
+        ".storybook/**/*"
     ]
 }
