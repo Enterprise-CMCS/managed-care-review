@@ -9,14 +9,14 @@
         "@apollo/client": "3.8.8",
         "@mc-review/dates": "workspace:*",
         "@mc-review/hpp": "workspace:*",
-        "dayjs": "^1.10.5",
+        "dayjs": "^1.11.13",
         "graphql": "^16.9.0",
-        "typescript": "5.1.6",
+        "typescript": "5.9.2",
         "uuid": "^9.0.0"
     },
     "devDependencies": {
         "@types/jest": "^29.5.6",
-        "@types/node": "^20.14.12",
+        "@types/node": "^24.2.1",
         "@types/uuid": "^9.0.0"
     }
 }

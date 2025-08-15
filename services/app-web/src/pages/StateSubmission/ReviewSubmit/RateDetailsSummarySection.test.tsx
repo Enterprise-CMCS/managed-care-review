@@ -324,43 +324,71 @@ describe('RateDetailsSummarySection', () => {
     it('can render all rate details fields for new rate certification submission', async () => {
         const statePrograms = mockMNState().programs
         const contract = mockContractPackageSubmitted()
+        contract.packageSubmissions[0].contractRevision.formData.dsnpContract =
+            true
         contract.packageSubmissions[0].rateRevisions[0].formData.rateCertificationName =
             'MCR-MN-0005-SNBC-RATE-20221014-20221014-CERTIFICATION-20221014'
         contract.packageSubmissions[0].rateRevisions[0].formData.rateType =
             'NEW'
         contract.packageSubmissions[0].rateRevisions[0].formData.amendmentEffectiveDateStart =
             null
-        await waitFor(() => {
-            renderWithProviders(
-                <RateDetailsSummarySection
-                    contract={contract}
-                    submissionName="MN-MSHO-0003"
-                    statePrograms={statePrograms}
-                />,
-                {
-                    apolloProvider: apolloProviderCMSUser,
-                }
-            )
-        })
+        contract.packageSubmissions[0].rateRevisions[0].formData.rateMedicaidPopulations =
+            [
+                'MEDICAID_ONLY',
+                'MEDICARE_MEDICAID_WITHOUT_DSNP',
+                'MEDICARE_MEDICAID_WITH_DSNP',
+            ]
+
+        renderWithProviders(
+            <RateDetailsSummarySection
+                contract={contract}
+                submissionName="MN-MSHO-0003"
+                statePrograms={statePrograms}
+            />,
+            {
+                apolloProvider: apolloProviderCMSUser,
+                featureFlags: { dsnp: true },
+            }
+        )
 
         const rateName =
             'MCR-MN-0005-SNBC-RATE-20221014-20221014-CERTIFICATION-20221014'
 
-        expect(screen.getByText(rateName)).toBeInTheDocument()
-        expect(
-            screen.getByRole('definition', { name: 'Rate certification type' })
-        ).toBeInTheDocument()
-        expect(
-            screen.getByRole('definition', {
-                name: 'Rates this rate certification covers',
-            })
-        ).toBeInTheDocument()
-        expect(
-            screen.getByRole('definition', { name: 'Rating period' })
-        ).toBeInTheDocument()
-        expect(
-            screen.getByRole('definition', { name: 'Date certified' })
-        ).toBeInTheDocument()
+        await waitFor(() => {
+            expect(screen.getByText(rateName)).toBeInTheDocument()
+            expect(
+                screen.getByRole('definition', {
+                    name: 'Rates this rate certification covers',
+                })
+            ).toBeInTheDocument()
+            expect(
+                screen.getByRole('definition', {
+                    name: 'Medicaid populations included in this rate certification',
+                })
+            ).toBeInTheDocument()
+            expect(
+                screen.getByTestId(
+                    'Medicare-Medicaid dually eligible individuals enrolled through a Dual-Eligible Special Needs Plan (D-SNP)'
+                )
+            ).toBeInTheDocument()
+            expect(screen.getByTestId('Medicaid-only')).toBeInTheDocument()
+            expect(
+                screen.getByTestId(
+                    'Medicare-Medicaid dually eligible individuals not enrolled through a D-SNP'
+                )
+            ).toBeInTheDocument()
+            expect(
+                screen.getByRole('definition', {
+                    name: 'Rate certification type',
+                })
+            ).toBeInTheDocument()
+            expect(
+                screen.getByRole('definition', { name: 'Rating period' })
+            ).toBeInTheDocument()
+            expect(
+                screen.getByRole('definition', { name: 'Date certified' })
+            ).toBeInTheDocument()
+        })
     })
 
     it('can render the deprecated rate programs when present and no new rate programs added to CMS user viewing an existing rate certification submission', async () => {
@@ -1080,6 +1108,36 @@ describe('RateDetailsSummarySection', () => {
                 screen.queryByText(/Programs this rate certification covers/)
             ).not.toBeInTheDocument()
         })
+    })
+
+    it('displays missing info text for state users on unlocked submissions when Rate Medicaid populations not populated on historic submission with dsnp contract', async () => {
+        const draftContract = mockContractPackageDraft()
+        draftContract.draftRevision!.formData.dsnpContract = true
+        draftContract.draftRates![0].draftRevision!.formData.rateMedicaidPopulations =
+            []
+
+        renderWithProviders(
+            <RateDetailsSummarySection
+                contract={draftContract}
+                editNavigateTo="rate-details"
+                submissionName="MN-PMAP-0001"
+                statePrograms={statePrograms}
+                explainMissingData
+            />,
+            {
+                apolloProvider: apolloProviderStateUser,
+                featureFlags: { dsnp: true },
+            }
+        )
+        expect(
+            await screen.findByText(
+                'Medicaid populations included in this rate certification'
+            )
+        ).toBeInTheDocument()
+        const medicaidPop = await screen.getByTestId('medicaidPop')
+        expect(
+            within(medicaidPop).queryByText(/You must provide this information/)
+        ).toBeInTheDocument()
     })
 
     it('renders inline error when bulk URL is unavailable', async () => {

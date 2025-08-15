@@ -167,7 +167,7 @@ export function undoWithdrawRate(
         setSuccessAttributesOnActiveSpan(span)
 
         //Send emails upon success
-        const statePrograms = await store.findStatePrograms(
+        const statePrograms = store.findStatePrograms(
             undoWithdrawRate.stateCode
         )
 

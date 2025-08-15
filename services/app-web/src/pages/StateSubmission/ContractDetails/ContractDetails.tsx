@@ -63,6 +63,7 @@ import {
     isContractAmendment,
     isContractWithProvisions,
     featureFlags,
+    dsnpTriggers,
 } from '@mc-review/common-code'
 import {
     RoutesRecord,
@@ -572,13 +573,6 @@ export const ContractDetails = ({
     }
 
     const formHeading = 'Contract Details Form'
-
-    const dsnpTriggers = [
-        'STATE_PLAN',
-        'WAIVER_1915B',
-        'WAIVER_1115',
-        'VOLUNTARY',
-    ]
 
     return (
         <div id={activeMainContentId}>

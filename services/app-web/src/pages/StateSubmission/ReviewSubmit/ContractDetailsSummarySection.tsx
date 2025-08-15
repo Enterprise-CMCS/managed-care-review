@@ -14,6 +14,7 @@ import { DownloadButton } from '../../../components/DownloadButton'
 import { usePreviousSubmission } from '../../../hooks/usePreviousSubmission'
 import styles from '../../SubmissionSummary/SubmissionSummary.module.scss'
 import { useAuth } from '../../../contexts/AuthContext'
+import { dsnpTriggers } from '@mc-review/common-code'
 
 import {
     sortModifiedProvisions,
@@ -134,7 +135,17 @@ export const ContractDetailsSummarySection = ({
     const [modifiedProvisions, unmodifiedProvisions] =
         sortModifiedProvisions(contract)
     const provisionsAreInvalid = isMissingProvisions(contract) && isEditing
-
+    const dsnpNotProvided =
+        contractFormData?.dsnpContract === null ||
+        contractFormData?.dsnpContract === undefined
+    const dsnpIsRequired =
+        contractFormData?.federalAuthorities?.some((authority) =>
+            dsnpTriggers?.includes(authority)
+        ) && dsnpNotProvided
+    const dsnpUserValue =
+        contractFormData?.dsnpContract === null
+            ? undefined
+            : contractFormData?.dsnpContract
     useDeepCompareEffect(() => {
         // skip getting urls of this if this is a previous contract or draft
         if (!isSubmittedOrCMSUser || isPreviousSubmission) return
@@ -308,15 +319,15 @@ export const ContractDetailsSummarySection = ({
                         }
                     />
                 </MultiColumnGrid>
-                {contractDsnp && contractFormData?.dsnpContract !== null && (
+                {contractDsnp && (
                     <MultiColumnGrid columns={1}>
                         <DataDetail
                             id="dsnp"
                             label="Is this contract associated with a Dual-Eligible Special Needs Plan (D-SNP) that covers Medicaid benefits?"
-                            explainMissingData={explainMissingData}
-                            children={booleanAsYesNoUserValue(
-                                contractFormData?.dsnpContract
-                            )}
+                            explainMissingData={
+                                dsnpIsRequired && explainMissingData
+                            }
+                            children={booleanAsYesNoUserValue(dsnpUserValue)}
                         />
                     </MultiColumnGrid>
                 )}

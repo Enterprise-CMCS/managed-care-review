@@ -17,6 +17,12 @@ describe('SingleRateSummarySection', () => {
     it('can render rate details without errors', async () => {
         const rateData = rateWithHistoryMock()
         rateData.revisions[0].formData.deprecatedRateProgramIDs = ['123']
+        rateData.revisions[0].formData.rateMedicaidPopulations = [
+            'MEDICAID_ONLY',
+            'MEDICARE_MEDICAID_WITHOUT_DSNP',
+            'MEDICARE_MEDICAID_WITH_DSNP',
+        ]
+
         renderWithProviders(
             <SingleRateSummarySection
                 rate={rateData}
@@ -32,6 +38,7 @@ describe('SingleRateSummarySection', () => {
                         }),
                     ],
                 },
+                featureFlags: { dsnp: true },
             }
         )
         // Wait for all the documents to be in the table
@@ -55,6 +62,11 @@ describe('SingleRateSummarySection', () => {
         expect(
             screen.getByRole('definition', {
                 name: 'Programs this rate certification covers',
+            })
+        ).toBeInTheDocument()
+        expect(
+            screen.getByRole('definition', {
+                name: 'Medicaid populations included in this rate certification',
             })
         ).toBeInTheDocument()
         expect(
