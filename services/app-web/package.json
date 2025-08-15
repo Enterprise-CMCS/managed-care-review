@@ -164,7 +164,7 @@
         "classnames": "^2.2.6",
         "cypress": "^13.13.2",
         "eslint": "^9.31.0",
-        "eslint-config-prettier": "^10.1.5",
+        "eslint-config-prettier": "^10.1.8",
         "eslint-plugin-import": "^2.32.0",
         "eslint-plugin-jest": "^29.0.1",
         "eslint-plugin-jsx-a11y": "^6.10.2",

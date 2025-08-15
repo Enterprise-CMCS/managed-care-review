@@ -21,7 +21,7 @@
     },
     "dependencies": {
         "@aws-sdk/client-cloudfront": "^3.864.0",
-        "@aws-sdk/client-ec2": "^3.866.0",
+        "@aws-sdk/client-ec2": "^3.868.0",
         "@aws-sdk/client-secrets-manager": "^3.864.0",
         "axios": "^1.11.0",
         "node-ssh": "^13.2.1",
@@ -37,7 +37,7 @@
         "@typescript-eslint/eslint-plugin": "^8.29.1",
         "@typescript-eslint/parser": "^8.29.1",
         "eslint": "^9.31.0",
-        "eslint-config-prettier": "^10.1.5",
+        "eslint-config-prettier": "^10.1.8",
         "eslint-plugin-prettier": "^5.5.4",
         "jiti": "^2.0.0",
         "lint-staged": "^15.2.7",
