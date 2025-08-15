@@ -16,6 +16,7 @@ module.exports = defineConfig({
         viewportHeight: 1080,
         viewportWidth: 1440,
         experimentalRunAllSpecs: true,
+        modifyObstructiveCode: false,
         setupNodeEvents(on, config) {
             on(
                 'file:preprocessor',
