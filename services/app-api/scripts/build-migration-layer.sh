@@ -106,10 +106,7 @@ if [ -d "../app-proto/gen" ]; then
     rsync -av ../app-proto/gen/ lambda-layers-prisma-migration/nodejs/gen/
 fi
 
-# Add dependencies that might be needed
-cd lambda-layers-prisma-migration/nodejs
-pnpm add uuid@^9.0.0 --prod
-cd ../..
+# No additional dependencies needed for migrations
 
 echo "Final cleanup..."
 
