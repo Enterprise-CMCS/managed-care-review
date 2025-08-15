@@ -37,13 +37,14 @@ export const ZipDownloadLink = ({
                 return styles.singleRate
         }
     }
-
     if (!zippedFilesURL) {
         if (onDocumentError) {
             onDocumentError(true)
         }
         return (
-            <InlineDocumentWarning message="Contract document download is unavailable" />
+            <InlineDocumentWarning
+                message={`${type === 'CONTRACT' ? 'Contract' : 'Rate'} document download is unavailable`}
+            />
         )
     }
 

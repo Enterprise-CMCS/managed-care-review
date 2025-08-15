@@ -1134,6 +1134,7 @@ describe('RateDetailsSummarySection', () => {
     })
 
     it('renders inline error when bulk URL is unavailable', async () => {
+        const mockOnDocumentError = vi.fn()
         submittedContract.packageSubmissions[0].rateRevisions[0].documentZipPackages =
             null
         renderWithProviders(
@@ -1141,6 +1142,7 @@ describe('RateDetailsSummarySection', () => {
                 contract={submittedContract}
                 submissionName="MN-MSHO-0003"
                 statePrograms={statePrograms}
+                onDocumentError={mockOnDocumentError}
             />,
             {
                 apolloProvider: apolloProviderCMSUser,
@@ -1151,6 +1153,7 @@ describe('RateDetailsSummarySection', () => {
             expect(
                 screen.getByText('Rate document download is unavailable')
             ).toBeInTheDocument()
+            expect(mockOnDocumentError).toHaveBeenCalledWith(true)
         })
     })
 
