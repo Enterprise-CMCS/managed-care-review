@@ -30,6 +30,11 @@
     margin-top: uswds.units(2);
 }
 
+.headerTag {
+    margin-top: 0;
+    font-weight: 400;
+}
+
 @media print {
     .summarySectionHeader a {
         display: none;

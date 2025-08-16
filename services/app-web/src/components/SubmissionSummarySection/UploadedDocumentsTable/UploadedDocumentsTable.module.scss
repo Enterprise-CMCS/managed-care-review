@@ -32,7 +32,9 @@
 .captionContainer {
     display: flex;
     justify-content: space-between;
-    height: 35px;
+    align-items: center;
+    height: 3rem;
+    margin: 0;
 }
 
 .inlineLink {
@@ -51,7 +53,6 @@
 
 caption {
     text-align: left;
-    margin-bottom: uswds.units(3);
     font-weight: 700;
 }
 

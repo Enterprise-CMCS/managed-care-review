@@ -9,7 +9,7 @@ import {
 import { DocumentZipPackage } from '../../gen/gqlClient'
 import styles from './ZipDownloadLink.module.scss'
 
-type ZipDownloadLinkProps = {
+export type ZipDownloadLinkProps = {
     type: 'CONTRACT' | 'RATE' | 'SINGLE-RATE'
     documentZipPackages: DocumentZipPackage[] | undefined
     documentCount: number | undefined

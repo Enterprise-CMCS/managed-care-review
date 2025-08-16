@@ -50,7 +50,7 @@ import {
     getVisibleLatestContractFormData,
 } from '@mc-review/helpers'
 import { hasCMSUserPermissions } from '@mc-review/helpers'
-import { ZipDownloadLink } from '../../../components/ZipDownloadLink/ZipDownloadLink'
+import { DocumentHeader } from '../../../components/DocumentHeader/DocumentHeader'
 
 export type ContractDetailsSummarySectionProps = {
     contract: Contract
@@ -151,7 +151,6 @@ export const ContractDetailsSummarySection = ({
         <SectionCard
             id="contractDetailsSection"
             className={styles.summarySection}
-            style={{ paddingTop: 0 }}
         >
             <SectionHeader
                 header="Contract details"
@@ -318,21 +317,13 @@ export const ContractDetailsSummarySection = ({
                     </MultiColumnGrid>
                 )}
             </dl>
-            <SectionHeader
-                header="Contract documents"
-                hideBorderBottom
-                as="h4"
-                fontSize="24px"
-            >
-                {isSubmittedOrCMSUser && !isPreviousSubmission && (
-                    <ZipDownloadLink
-                        type={'CONTRACT'}
-                        documentZipPackages={documentZipPackage}
-                        documentCount={contractDocumentCount}
-                        onDocumentError={onDocumentError}
-                    />
-                )}
-            </SectionHeader>
+            <DocumentHeader
+                type={'CONTRACT'}
+                documentZipPackages={documentZipPackage}
+                documentCount={contractDocumentCount}
+                onDocumentError={onDocumentError}
+                renderZipLink={isSubmittedOrCMSUser && !isPreviousSubmission}
+            />
             {contractDocs && (
                 <UploadedDocumentsTable
                     documents={contractFormData.contractDocuments}

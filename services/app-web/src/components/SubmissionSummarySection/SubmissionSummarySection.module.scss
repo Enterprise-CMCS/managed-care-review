@@ -84,12 +84,19 @@
     }
 }
 
+.rateNameContainer {
+    white-space: normal;
+    overflow-wrap: anywhere;
+    word-break: break-all;
+}
+
 .rateName {
     display: block;
-    font-weight: bold;
+    font-weight: 400;
+    font-size: 28px;
     margin: 0;
     border-bottom: 1px solid custom.$mcr-gray-lighter;
-    padding-bottom: uswds.units(1);
+    padding-bottom: uswds.units(2);
 }
 
 .replaceRateWrapper {

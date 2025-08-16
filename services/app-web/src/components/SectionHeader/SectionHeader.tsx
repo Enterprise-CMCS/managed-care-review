@@ -48,9 +48,9 @@ export const SectionHeader = ({
             <div className={primaryDivClasses}>
                 <Tag
                     id={headerId}
+                    className={styles.headerTag}
                     style={{
                         fontSize,
-                        fontWeight: '400',
                     }}
                 >
                     {header}

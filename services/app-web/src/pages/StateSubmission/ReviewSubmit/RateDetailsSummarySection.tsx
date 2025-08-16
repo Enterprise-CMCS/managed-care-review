@@ -42,7 +42,7 @@ import { hasCMSUserPermissions } from '@mc-review/helpers'
 import { InfoTag } from '../../../components/InfoTag/InfoTag'
 import { featureFlags } from '@mc-review/common-code'
 import { useLDClient } from 'launchdarkly-react-client-sdk'
-import { ZipDownloadLink } from '../../../components/ZipDownloadLink/ZipDownloadLink'
+import { DocumentHeader } from '../../../components/DocumentHeader/DocumentHeader'
 
 export type RateDetailsSummarySectionProps = {
     contract: Contract | UnlockedContract
@@ -280,7 +280,7 @@ export const RateDetailsSummarySection = ({
                               id={`rate-details-${rateRev.id}`}
                               key={rateRev.id}
                           >
-                              <div>
+                              <div className={styles.rateNameContainer}>
                                   <h3
                                       aria-label={`Rate ID: ${rateFormData.rateCertificationName}`}
                                       className={styles.rateName}
@@ -481,24 +481,16 @@ export const RateDetailsSummarySection = ({
                                       />
                                   </MultiColumnGrid>
                               </dl>
-                              <SectionHeader
-                                  header="Rate documents"
-                                  hideBorderBottom
-                                  as="h4"
-                                  fontSize="24px"
-                              >
-                                  {isSubmittedOrCMSUser &&
-                                      !isPreviousSubmission && (
-                                          <ZipDownloadLink
-                                              type={'RATE'}
-                                              documentZipPackages={
-                                                  documentZipPackage
-                                              }
-                                              documentCount={rateDocumentCount}
-                                              onDocumentError={onDocumentError}
-                                          />
-                                      )}
-                              </SectionHeader>
+                              <DocumentHeader
+                                  type={'RATE'}
+                                  documentZipPackages={documentZipPackage}
+                                  documentCount={rateDocumentCount}
+                                  onDocumentError={onDocumentError}
+                                  renderZipLink={
+                                      isSubmittedOrCMSUser &&
+                                      !isPreviousSubmission
+                                  }
+                              />
                               {rateFormData.rateDocuments && (
                                   <UploadedDocumentsTable
                                       documents={rateFormData.rateDocuments}
