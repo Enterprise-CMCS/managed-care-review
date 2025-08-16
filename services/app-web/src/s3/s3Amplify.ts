@@ -144,6 +144,32 @@ function newAmplifyS3Client(bucketConfig: S3BucketConfigType): S3ClientT {
                 throw error
             }
         },
+        getZipURL: async (
+            s3key: string,
+            bucket: BucketShortName
+        ): Promise<string> => {
+            try {
+                const result = await Storage.get(s3key, {
+                    bucket: bucketConfig[bucket],
+                    expires: 3600,
+                })
+
+                //Maybe overkill?
+                if (typeof result !== 'string') {
+                    const error = new Error(
+                        `Unexpected result type from Storage.get for key: ${s3key}`
+                    )
+                    recordJSException(error)
+                    throw error
+                }
+
+                return result
+            } catch (err) {
+                const error = new Error(`Could not retrieve zip URL: ${err}`)
+                recordJSException(error)
+                throw error
+            }
+        },
         getBulkDlURL: async (
             keys: string[],
             filename: string,

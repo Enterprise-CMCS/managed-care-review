@@ -604,8 +604,10 @@ export function documentZipService(
         },
         generateContractDocumentsZip: async (contractRevision, span) => {
             const contractRevisionID = contractRevision.id
-            const contractDocuments =
-                contractRevision.formData.contractDocuments
+            const contractDocuments = [
+                ...(contractRevision.formData.contractDocuments || []),
+                ...(contractRevision.formData.supportingDocuments || []),
+            ]
 
             if (!contractDocuments || contractDocuments.length === 0) {
                 // No documents to zip

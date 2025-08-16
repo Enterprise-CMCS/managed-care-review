@@ -9,21 +9,30 @@
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding-bottom: uswds.units(2);
-    min-height: 3rem;
 
     &.hasSubheader {
         align-items: start;
         a {
             display: block;
             margin-top: 17.5px;
+            margin-bottom: 17.5px;
         }
     }
 }
 
-.summarySectionHeaderBorder {
+.summarySectionHeaderBorderBottom {
     border-bottom: 1px solid custom.$mcr-gray-lighter;
     margin-bottom: uswds.units(2);
+}
+
+.summarySectionHeaderBorderTop {
+    border-top: 1px solid custom.$mcr-gray-lighter;
+    margin-top: uswds.units(2);
+}
+
+.headerTag {
+    margin-top: 0;
+    font-weight: 400;
 }
 
 @media print {

@@ -15,7 +15,6 @@ import {
 import { renderWithProviders } from '../../../testHelpers/jestHelpers'
 import { RateDetailsSummarySection } from './RateDetailsSummarySection'
 import { Rate } from '../../../gen/gqlClient'
-import { testS3Client } from '../../../testHelpers/s3Helpers'
 import { ActuaryCommunicationRecord } from '@mc-review/hpp'
 import * as usePreviousSubmission from '../../../hooks/usePreviousSubmission'
 
@@ -211,17 +210,11 @@ describe('RateDetailsSummarySection', () => {
                 name: 'Rate details',
             })
         ).toBeInTheDocument()
-        // Is this the best way to check that the link is not present?
+
         expect(screen.queryByText('Edit')).not.toBeInTheDocument()
 
-        // expects download all button after loading has completed
-        await waitFor(() => {
-            expect(
-                screen.getByRole('link', {
-                    name: 'Download all rate documents',
-                })
-            ).toBeInTheDocument()
-        })
+        const link = await screen.findByTestId('zipDownloadLink')
+        expect(link).toBeInTheDocument()
     })
 
     it('can render all rate details fields for amendment to prior rate certification submission', () => {
@@ -1141,23 +1134,17 @@ describe('RateDetailsSummarySection', () => {
     })
 
     it('renders inline error when bulk URL is unavailable', async () => {
-        const s3Provider = {
-            ...testS3Client(),
-            getBulkDlURL: async (
-                _keys: string[],
-                _fileName: string
-            ): Promise<string | Error> => {
-                return new Error('Error: getBulkDlURL encountered an error')
-            },
-        }
+        const mockOnDocumentError = vi.fn()
+        submittedContract.packageSubmissions[0].rateRevisions[0].documentZipPackages =
+            null
         renderWithProviders(
             <RateDetailsSummarySection
                 contract={submittedContract}
                 submissionName="MN-MSHO-0003"
                 statePrograms={statePrograms}
+                onDocumentError={mockOnDocumentError}
             />,
             {
-                s3Provider,
                 apolloProvider: apolloProviderCMSUser,
             }
         )
@@ -1166,6 +1153,7 @@ describe('RateDetailsSummarySection', () => {
             expect(
                 screen.getByText('Rate document download is unavailable')
             ).toBeInTheDocument()
+            expect(mockOnDocumentError).toHaveBeenCalledWith(true)
         })
     })
 
@@ -1277,13 +1265,8 @@ describe('RateDetailsSummarySection', () => {
         expect(screen.queryByText('Edit')).not.toBeInTheDocument()
 
         // expects download all button after loading has completed
-        await waitFor(() => {
-            expect(
-                screen.getByRole('link', {
-                    name: 'Download all rate documents',
-                })
-            ).toBeInTheDocument()
-        })
+        const link = await screen.findByTestId('zipDownloadLink')
+        expect(link).toBeInTheDocument()
 
         // expect withdrawn rates to be on the screen
         expect(

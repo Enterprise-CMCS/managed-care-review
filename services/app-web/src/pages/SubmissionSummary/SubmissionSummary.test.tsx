@@ -16,7 +16,6 @@ import {
 import { renderWithProviders } from '../../testHelpers'
 import { SubmissionSummary } from './SubmissionSummary'
 import { SubmissionSideNav } from '../SubmissionSideNav'
-import { testS3Client } from '../../testHelpers'
 import { mockContractPackageUnlockedWithUnlockedType } from '@mc-review/mocks'
 import { ReviewSubmit } from '../StateSubmission/ReviewSubmit'
 import { generatePath, Location } from 'react-router-dom'
@@ -285,20 +284,11 @@ describe('SubmissionSummary', () => {
             })
 
             it('renders document download warning banner', async () => {
-                const s3Provider = {
-                    ...testS3Client(),
-                    getBulkDlURL: async (
-                        _keys: string[],
-                        _fileName: string
-                    ): Promise<string | Error> => {
-                        return new Error(
-                            'Error: getBulkDlURL encountered an error'
-                        )
-                    },
-                }
                 const contract = mockContractPackageSubmitted({
                     id: 'test-abc-123',
                 })
+                contract.packageSubmissions[0].contractRevision.documentZipPackages =
+                    undefined
                 renderWithProviders(
                     <Routes>
                         <Route element={<SubmissionSideNav />}>
@@ -327,7 +317,6 @@ describe('SubmissionSummary', () => {
                             route: '/submissions/test-abc-123',
                         },
                         featureFlags: {},
-                        s3Provider,
                     }
                 )
 

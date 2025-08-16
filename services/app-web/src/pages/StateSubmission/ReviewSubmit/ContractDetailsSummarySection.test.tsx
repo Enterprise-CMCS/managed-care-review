@@ -6,7 +6,6 @@ import {
     mockContractPackageDraft,
     mockContractPackageSubmitted,
 } from '@mc-review/mocks'
-import { testS3Client } from '../../../testHelpers/s3Helpers'
 import {
     StatutoryRegulatoryAttestation,
     StatutoryRegulatoryAttestationQuestion,
@@ -91,18 +90,10 @@ describe('ContractDetailsSummarySection', () => {
         ).toBeInTheDocument()
         expect(screen.queryByText('Edit')).not.toBeInTheDocument()
 
-        //expects loading button on component load
-        expect(screen.getByText('Loading')).toBeInTheDocument()
-
-        // expects download all button after loading has completed
-        await waitFor(() => {
-            expect(
-                screen.getByRole('link', {
-                    name: 'Download all contract documents',
-                })
-            ).toBeInTheDocument()
-            expect(screen.queryByText(/NEW/)).toBeNull()
-        })
+        //Expect zip package links to load
+        const link = await screen.findByTestId('zipDownloadLink')
+        expect(link).toBeInTheDocument()
+        expect(screen.queryByText(/NEW/)).toBeNull()
     })
 
     it('can render all contract details fields', async () => {
@@ -534,27 +525,18 @@ describe('ContractDetailsSummarySection', () => {
     })
 
     it('renders inline error when bulk URL is unavailable', async () => {
-        const s3Provider = {
-            ...testS3Client(),
-            getBulkDlURL: async (
-                _keys: string[],
-                _fileName: string
-            ): Promise<string | Error> => {
-                return new Error('Error: getBulkDlURL encountered an error')
-            },
-        }
+        const contract = mockContractPackageSubmitted()
+        //Removing pre-existing zip package
+        contract.packageSubmissions[0].contractRevision.documentZipPackages =
+            undefined
         renderWithProviders(
             <ContractDetailsSummarySection
-                contract={{
-                    ...mockContractPackageSubmitted(),
-                    status: 'SUBMITTED',
-                }}
+                contract={contract}
                 isStateUser
                 submissionName="MN-PMAP-0001"
             />,
             {
                 apolloProvider: defaultApolloMocks,
-                s3Provider,
             }
         )
 
