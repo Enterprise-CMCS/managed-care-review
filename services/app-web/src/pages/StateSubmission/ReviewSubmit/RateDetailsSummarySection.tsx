@@ -490,7 +490,7 @@ export const RateDetailsSummarySection = ({
                                       !!(
                                           isSubmittedOrCMSUser &&
                                           !isPreviousSubmission &&
-                                          editNavigateTo
+                                          !editNavigateTo
                                       )
                                   }
                               />

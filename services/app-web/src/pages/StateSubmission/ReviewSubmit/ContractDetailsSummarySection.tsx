@@ -326,7 +326,7 @@ export const ContractDetailsSummarySection = ({
                     !!(
                         isSubmittedOrCMSUser &&
                         !isPreviousSubmission &&
-                        editNavigateTo
+                        !editNavigateTo
                     )
                 }
             />
