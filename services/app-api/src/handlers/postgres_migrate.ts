@@ -54,20 +54,28 @@ const main: Handler = async (): Promise<APIGatewayProxyResultV2> => {
     // run the schema migration. this will add any new tables or fields from schema.prisma to postgres
     try {
         // Aurora can have long cold starts, so we extend connection timeout on migrates
-        const schemaPath =
-            process.env.SCHEMA_PATH ?? '/opt/nodejs/prisma/schema.prisma'
+        const schemaPath = process.env.SCHEMA_PATH ?? './prisma/schema.prisma'
+        
+        // For Lambda runtime, we need to set the Prisma binary path
+        // In our ESBuild bundle, we need to use the node_modules path
+        const prismaBinaryPath = './node_modules/prisma/build/index.js'
+        
         const prismaResult = spawnSync(
             `${process.execPath}`,
             [
-                '/opt/nodejs/node_modules/prisma/build/index.js',
+                prismaBinaryPath,
                 'migrate',
                 'deploy',
                 `--schema=${schemaPath}`,
             ],
             {
                 env: {
+                    ...process.env,
                     DATABASE_URL:
                         dbConnectionURL + `&connect_timeout=${connectTimeout}`,
+                    // Set Prisma engine paths for bundled deployment
+                    PRISMA_QUERY_ENGINE_LIBRARY: './prisma-engines/libquery_engine-rhel-openssl-3.0.x.so.node',
+                    PRISMA_QUERY_ENGINE_BINARY: './prisma-engines/libquery_engine-rhel-openssl-3.0.x.so.node',
                 },
             }
         )
@@ -130,7 +138,7 @@ const main: Handler = async (): Promise<APIGatewayProxyResultV2> => {
 
     const migrationResult = await migrate(
         dataMigrator,
-        '/opt/nodejs/dataMigrations/migrations/'
+        './dataMigrations/migrations/'
     )
     if (migrationResult instanceof Error) {
         const errMsg = `Could not migrate the database protobufs: ${migrationResult}`
