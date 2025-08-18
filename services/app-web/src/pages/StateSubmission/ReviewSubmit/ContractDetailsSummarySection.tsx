@@ -322,7 +322,13 @@ export const ContractDetailsSummarySection = ({
                 documentZipPackages={documentZipPackage}
                 documentCount={contractDocumentCount}
                 onDocumentError={onDocumentError}
-                renderZipLink={isSubmittedOrCMSUser && !isPreviousSubmission}
+                renderZipLink={
+                    !!(
+                        isSubmittedOrCMSUser &&
+                        !isPreviousSubmission &&
+                        editNavigateTo
+                    )
+                }
             />
             {contractDocs && (
                 <UploadedDocumentsTable

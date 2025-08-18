@@ -1,8 +1,14 @@
+@use '../../styles/custom.scss' as custom;
+
 .documentHeaderContainer {
     display: flex;
     align-items: center;
     justify-content: space-between;
     height: 2.5rem;
+    border-top: 1px solid custom.$mcr-gray-lighter;
+    margin-top: 0;
+    padding-top: 40px;
+    padding-bottom: 20px;
 }
 
 .header {

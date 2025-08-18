@@ -64,9 +64,14 @@
         margin-bottom: 0 !important;
     }
 }
+
 .summarySection dd[aria-labelledby='submittedWithContract'] ul {
     list-style-type: none;
     padding: 0;
+}
+
+.submissionTypeSection {
+    padding-bottom: 0 !important;
 }
 
 .contactInfo p {
@@ -97,6 +102,7 @@
     margin: 0;
     border-bottom: 1px solid custom.$mcr-gray-lighter;
     padding-bottom: uswds.units(2);
+    line-height: 2rem;
 }
 
 .replaceRateWrapper {

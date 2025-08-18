@@ -487,8 +487,11 @@ export const RateDetailsSummarySection = ({
                                   documentCount={rateDocumentCount}
                                   onDocumentError={onDocumentError}
                                   renderZipLink={
-                                      isSubmittedOrCMSUser &&
-                                      !isPreviousSubmission
+                                      !!(
+                                          isSubmittedOrCMSUser &&
+                                          !isPreviousSubmission &&
+                                          editNavigateTo
+                                      )
                                   }
                               />
                               {rateFormData.rateDocuments && (

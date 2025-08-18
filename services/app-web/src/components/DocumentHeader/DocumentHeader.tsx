@@ -17,7 +17,7 @@ export const DocumentHeader = ({
             <h4 className={styles.header}>
                 {zipLinkProps.type === 'RATE' ? 'Rate' : 'Contract'} documents
             </h4>
-            <ZipDownloadLink {...zipLinkProps} />
+            {renderZipLink && <ZipDownloadLink {...zipLinkProps} />}
         </div>
     )
 }

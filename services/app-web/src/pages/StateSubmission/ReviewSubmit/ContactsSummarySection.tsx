@@ -32,11 +32,15 @@ export const ContactsSummarySection = ({
         isStateUser
     )
     return (
-        <SectionCard id="stateContacts" className={styles.summarySection}>
+        <SectionCard
+            id="stateContacts"
+            className={styles.stateContactsReviewSection}
+        >
             <SectionHeader
                 header="State contacts"
                 editNavigateTo={editNavigateTo}
                 hideBorderTop
+                fontSize="38px"
             />
 
             <GridContainer className="padding-left-0">

@@ -62,7 +62,7 @@ export const SubmissionTypeSummarySection = ({
     return (
         <SectionCard
             id="submissionTypeSection"
-            className={styles.summarySection}
+            className={styles.submissionTypeSection}
         >
             <SectionHeader
                 header={submissionName}
