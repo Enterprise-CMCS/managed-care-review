@@ -45,20 +45,19 @@ du -sh "$PRISMA_DIR"
 # Remove the entire prisma-client runtime (16MB) - not needed for migrations
 rm -rf "$PRISMA_DIR"/prisma-client
 
-# Remove all non-PostgreSQL engine files from build directory
+# Remove ALL query engines - we only need schema engine for migrations
+find "$PRISMA_DIR" -name "*query_engine*" -delete 2>/dev/null || true
+find "$PRISMA_DIR" -name "libquery_engine*" -delete 2>/dev/null || true
+
+# Remove all non-PostgreSQL schema engine files 
 find "$PRISMA_DIR" -name "*cockroachdb*" -delete 2>/dev/null || true
 find "$PRISMA_DIR" -name "*sqlserver*" -delete 2>/dev/null || true
 find "$PRISMA_DIR" -name "*sqlite*" -delete 2>/dev/null || true
 find "$PRISMA_DIR" -name "*mysql*" -delete 2>/dev/null || true
 find "$PRISMA_DIR" -name "*mongodb*" -delete 2>/dev/null || true
 
-# Remove specific WASM files for other databases  
-rm -f "$PRISMA_DIR"/build/query_engine_bg.cockroachdb.wasm 2>/dev/null || true
-rm -f "$PRISMA_DIR"/build/query_compiler_bg.cockroachdb.wasm 2>/dev/null || true
-rm -f "$PRISMA_DIR"/build/query_engine_bg.sqlserver.wasm 2>/dev/null || true
-rm -f "$PRISMA_DIR"/build/query_compiler_bg.sqlserver.wasm 2>/dev/null || true
-rm -f "$PRISMA_DIR"/build/query_engine_bg.sqlite.wasm 2>/dev/null || true
-rm -f "$PRISMA_DIR"/build/query_compiler_bg.sqlite.wasm 2>/dev/null || true
+# Keep only PostgreSQL schema engine WASM files
+find "$PRISMA_DIR" -name "*.wasm" ! -name "*schema_engine*postgresql*" -delete 2>/dev/null || true
 
 # Remove non-Linux platform binaries
 find "$PRISMA_DIR" -name "*darwin*" -delete 2>/dev/null || true
@@ -82,8 +81,9 @@ if [ -d "$PRISMA_DIR"/build ]; then
 fi
 
 # Remove any remaining large files that aren't needed for migrations
-find "$PRISMA_DIR" -size +1M -name "*.wasm" ! -name "*postgresql*" -delete 2>/dev/null || true
-find "$PRISMA_DIR" -size +1M -name "*.node" ! -name "*postgresql*" -delete 2>/dev/null || true
+# Keep only schema engine files for PostgreSQL
+find "$PRISMA_DIR" -size +1M -name "*.wasm" ! -name "*schema_engine*postgresql*" -delete 2>/dev/null || true
+find "$PRISMA_DIR" -size +1M -name "*.node" ! -name "*schema_engine*postgresql*" -delete 2>/dev/null || true
 
 # Remove documentation and other non-essential files  
 rm -rf "$PRISMA_DIR"/README.md 2>/dev/null || true
@@ -93,9 +93,11 @@ rm -rf "$PRISMA_DIR"/docs 2>/dev/null || true
 echo "After aggressive stripping:"
 du -sh "$PRISMA_DIR"
 
-# Show what PostgreSQL files we kept
-echo "PostgreSQL files remaining:"
-find "$PRISMA_DIR" -name "*postgresql*" 2>/dev/null || echo "None found"
+# Show what schema engine files we kept
+echo "Schema engine files remaining:"
+find "$PRISMA_DIR" -name "*schema_engine*" 2>/dev/null || echo "None found"
+echo "All remaining large files:"
+find "$PRISMA_DIR" -size +1M 2>/dev/null || echo "None found"
 
 echo "Copying schema and migration files..."
 
