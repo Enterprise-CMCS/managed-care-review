@@ -197,15 +197,12 @@ functions:
     layers:
       - !Ref PgToolsLambdaLayer
       - !Ref PrismaClientEngineLambdaLayer
-      - !Ref PrismaMigrationLambdaLayer
 
 layers:
   PgTools:
     path: lambda-layers-postgres-tools
   prismaClientEngine:
     path: lambda-layers-prisma-client-engine
-  prismaMigration:
-    path: lambda-layers-prisma-migration
 
 resources:
   Conditions:
