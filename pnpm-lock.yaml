@@ -639,10 +639,10 @@ importers:
         version: 1.9.0
       '@opentelemetry/auto-instrumentations-web':
         specifier: ^0.39.0
-        version: 0.39.0(@opentelemetry/api@1.9.0)(zone.js@0.14.7)
+        version: 0.39.0(@opentelemetry/api@1.9.0)(zone.js@0.15.1)
       '@opentelemetry/context-zone':
-        specifier: ^1.27.0
-        version: 1.27.0(@opentelemetry/api@1.9.0)
+        specifier: ^2.0.1
+        version: 2.0.1(@opentelemetry/api@1.9.0)
       '@opentelemetry/exporter-trace-otlp-http':
         specifier: ^0.45.1
         version: 0.45.1(@opentelemetry/api@1.9.0)
@@ -5024,16 +5024,16 @@ packages:
     peerDependencies:
       '@opentelemetry/api': '>=1.0.0 <1.10.0'
 
-  '@opentelemetry/context-zone-peer-dep@1.27.0':
-    resolution: {integrity: sha512-gVeOOpqnLgP51F0EJGHeoAJmAHxXXroT1Tk2WVnMf/22jTiAunYzFFsMaqmcH8mNqjTYBLJb28Rz0tInO7uClg==}
-    engines: {node: '>=14'}
+  '@opentelemetry/context-zone-peer-dep@2.0.1':
+    resolution: {integrity: sha512-jgN4jGULoJo46HiJx60E8XR8tJEpuY9stQ7KJ936AfEB1vf6YCbgR/a5bC95frLAnbSbYbaP5ti2jCFxormK4A==}
+    engines: {node: ^18.19.0 || >=20.6.0}
     peerDependencies:
       '@opentelemetry/api': '>=1.0.0 <1.10.0'
-      zone.js: ^0.10.2 || ^0.11.0 || ^0.12.0 || ^0.13.0 || ^0.14.0
+      zone.js: ^0.10.2 || ^0.11.0 || ^0.12.0 || ^0.13.0 || ^0.14.0 || ^0.15.0
 
-  '@opentelemetry/context-zone@1.27.0':
-    resolution: {integrity: sha512-8lg/QKHNS8zGH5YPpenqXoA7L4pFPvGgxKFBAKoPvLx378posut7yXDl4XA10+yw2QRwIwMDBJ/8d6cOQ9G00Q==}
-    engines: {node: '>=14'}
+  '@opentelemetry/context-zone@2.0.1':
+    resolution: {integrity: sha512-xJmgpCBNZR0fS5ExbRl8Qn+Xg6k8BuRUR4BAjYeGzCuZ9DCYarZ05kEJCdG9hqrt0GcBtCfSTnr2ceeCWhoy5A==}
+    engines: {node: ^18.19.0 || >=20.6.0}
 
   '@opentelemetry/core@1.18.1':
     resolution: {integrity: sha512-kvnUqezHMhsQvdsnhnqTNfAJs3ox/isB0SVrM1dhVFw7SsB7TstuVa6fgWnN2GdPyilIFLUvvbTZoVRmx6eiRg==}
@@ -14042,8 +14042,8 @@ packages:
   zod@4.0.14:
     resolution: {integrity: sha512-nGFJTnJN6cM2v9kXL+SOBq3AtjQby3Mv5ySGFof5UGRHrRioSJ5iG680cYNjE/yWk671nROcpPj4hAS8nyLhSw==}
 
-  zone.js@0.14.7:
-    resolution: {integrity: sha512-0w6DGkX2BPuiK/NLf+4A8FLE43QwBfuqz2dVgi/40Rj1WmqUskCqj329O/pwrqFJLG5X8wkeG2RhIAro441xtg==}
+  zone.js@0.15.1:
+    resolution: {integrity: sha512-XE96n56IQpJM7NAoXswY3XRLcWFW83xe0BiAOeMD7K5k5xecOeul3Qcpx6GqEeeHNkW5DWL5zOyTbEfB4eti8w==}
 
 snapshots:
 
@@ -21112,15 +21112,15 @@ snapshots:
 
   '@opentelemetry/api@1.9.0': {}
 
-  '@opentelemetry/auto-instrumentations-web@0.39.0(@opentelemetry/api@1.9.0)(zone.js@0.14.7)':
+  '@opentelemetry/auto-instrumentations-web@0.39.0(@opentelemetry/api@1.9.0)(zone.js@0.15.1)':
     dependencies:
       '@opentelemetry/api': 1.9.0
       '@opentelemetry/instrumentation': 0.51.1(@opentelemetry/api@1.9.0)
       '@opentelemetry/instrumentation-document-load': 0.38.0(@opentelemetry/api@1.9.0)
       '@opentelemetry/instrumentation-fetch': 0.51.1(@opentelemetry/api@1.9.0)
-      '@opentelemetry/instrumentation-user-interaction': 0.38.0(@opentelemetry/api@1.9.0)(zone.js@0.14.7)
+      '@opentelemetry/instrumentation-user-interaction': 0.38.0(@opentelemetry/api@1.9.0)(zone.js@0.15.1)
       '@opentelemetry/instrumentation-xml-http-request': 0.51.1(@opentelemetry/api@1.9.0)
-      zone.js: 0.14.7
+      zone.js: 0.15.1
     transitivePeerDependencies:
       - supports-color
 
@@ -21132,15 +21132,15 @@ snapshots:
     dependencies:
       '@opentelemetry/api': 1.9.0
 
-  '@opentelemetry/context-zone-peer-dep@1.27.0(@opentelemetry/api@1.9.0)(zone.js@0.14.7)':
+  '@opentelemetry/context-zone-peer-dep@2.0.1(@opentelemetry/api@1.9.0)(zone.js@0.15.1)':
     dependencies:
       '@opentelemetry/api': 1.9.0
-      zone.js: 0.14.7
+      zone.js: 0.15.1
 
-  '@opentelemetry/context-zone@1.27.0(@opentelemetry/api@1.9.0)':
+  '@opentelemetry/context-zone@2.0.1(@opentelemetry/api@1.9.0)':
     dependencies:
-      '@opentelemetry/context-zone-peer-dep': 1.27.0(@opentelemetry/api@1.9.0)(zone.js@0.14.7)
-      zone.js: 0.14.7
+      '@opentelemetry/context-zone-peer-dep': 2.0.1(@opentelemetry/api@1.9.0)(zone.js@0.15.1)
+      zone.js: 0.15.1
     transitivePeerDependencies:
       - '@opentelemetry/api'
 
@@ -21319,13 +21319,13 @@ snapshots:
     transitivePeerDependencies:
       - supports-color
 
-  '@opentelemetry/instrumentation-user-interaction@0.38.0(@opentelemetry/api@1.9.0)(zone.js@0.14.7)':
+  '@opentelemetry/instrumentation-user-interaction@0.38.0(@opentelemetry/api@1.9.0)(zone.js@0.15.1)':
     dependencies:
       '@opentelemetry/api': 1.9.0
       '@opentelemetry/core': 1.30.1(@opentelemetry/api@1.9.0)
       '@opentelemetry/instrumentation': 0.51.1(@opentelemetry/api@1.9.0)
       '@opentelemetry/sdk-trace-web': 1.27.0(@opentelemetry/api@1.9.0)
-      zone.js: 0.14.7
+      zone.js: 0.15.1
     transitivePeerDependencies:
       - supports-color
 
@@ -32194,4 +32194,4 @@ snapshots:
 
   zod@4.0.14: {}
 
-  zone.js@0.14.7: {}
+  zone.js@0.15.1: {}
