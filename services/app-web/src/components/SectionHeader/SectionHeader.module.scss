@@ -9,13 +9,14 @@
     display: flex;
     justify-content: space-between;
     align-items: center;
+    padding-bottom: uswds.units(2);
+    min-height: 3rem;
 
     &.hasSubheader {
         align-items: start;
         a {
             display: block;
             margin-top: 17.5px;
-            margin-bottom: 17.5px;
         }
     }
 }
@@ -32,6 +33,7 @@
 
 .headerTag {
     margin-top: 0;
+    margin-bottom: 0;
     font-weight: 400;
 }
 

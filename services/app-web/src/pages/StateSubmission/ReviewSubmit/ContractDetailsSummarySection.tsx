@@ -150,7 +150,7 @@ export const ContractDetailsSummarySection = ({
     return (
         <SectionCard
             id="contractDetailsSection"
-            className={styles.summarySection}
+            className={styles.contractDetailsSection}
         >
             <SectionHeader
                 header="Contract details"
