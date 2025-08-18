@@ -245,6 +245,15 @@ jobs:
           name: lambda-layers-prisma-client-engine
           path: ./services/app-api/lambda-layers-prisma-client-engine
 
+      - name: Prepare migration lambda layer
+        working-directory: services/app-api
+        run: ./scripts/build-migration-layer.sh
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: lambda-layers-prisma-migration
+          path: ./services/app-api/lambda-layers-prisma-migration
+
       - name: Prepare postgres tools lambda layer
         working-directory: services/postgres
         run: ./build-postgres-lambda-layer.sh

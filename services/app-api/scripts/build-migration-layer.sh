@@ -78,8 +78,17 @@ find "$PRISMA_DIR" -name ".DS_Store" -delete 2>/dev/null || true
 # Keep only essential CLI files - remove everything in build except what we need for migrations
 if [ -d "$PRISMA_DIR"/build ]; then
     # Keep only PostgreSQL-specific files and core CLI
-    find "$PRISMA_DIR"/build -type f ! -name "*postgresql*" ! -name "index.js" ! -name "cli*" -delete 2>/dev/null || true
+    find "$PRISMA_DIR"/build -type f ! -name "*postgresql*" ! -name "index.js" ! -name "cli*" ! -name "child.js" -delete 2>/dev/null || true
 fi
+
+# Remove any remaining large files that aren't needed for migrations
+find "$PRISMA_DIR" -size +1M -name "*.wasm" ! -name "*postgresql*" -delete 2>/dev/null || true
+find "$PRISMA_DIR" -size +1M -name "*.node" ! -name "*postgresql*" -delete 2>/dev/null || true
+
+# Remove documentation and other non-essential files  
+rm -rf "$PRISMA_DIR"/README.md 2>/dev/null || true
+rm -rf "$PRISMA_DIR"/LICENSE 2>/dev/null || true
+rm -rf "$PRISMA_DIR"/docs 2>/dev/null || true
 
 echo "After aggressive stripping:"
 du -sh "$PRISMA_DIR"
