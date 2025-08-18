@@ -124,16 +124,6 @@ jobs:
 
       - uses: actions/download-artifact@v5
         with:
-          name: lambda-layers-prisma-migration
-          path: ./services/app-api/lambda-layers-prisma-migration
-
-      - name: Unzip prisma migration layer
-        run: |
-          tar -C ./services/app-api/lambda-layers-prisma-migration -xf ./services/app-api/lambda-layers-prisma-migration/nodejs.tar.gz
-          rm -rf ./services/app-api/lambda-layers-prisma-migration/nodejs.tar.gz
-
-      - uses: actions/download-artifact@v5
-        with:
           name: lambda-layers-prisma-client-engine
           path: ./services/app-api/lambda-layers-prisma-client-engine
 
