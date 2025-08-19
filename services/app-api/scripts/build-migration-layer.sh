@@ -1,7 +1,6 @@
 #!/bin/bash
 
 # Prisma Migration Layer for PostgreSQL only
-# This script creates a layer with just what's needed for migrations
 
 set -e
 
@@ -18,13 +17,14 @@ mkdir -p lambda-layers-prisma-migration/nodejs/dataMigrations
 
 echo "Installing Prisma CLI in temporary location..."
 
-# Create a package.json for just what we need
+# Create a package.json 
 cat > lambda-layers-prisma-migration/nodejs/package.json << 'EOF'
 {
   "name": "prisma-migration-layer",
   "version": "1.0.0",
   "dependencies": {
-    "prisma": "^6.14.0"
+    "prisma": "^6.14.0",
+    "@prisma/client": "^6.14.0"
   }
 }
 EOF
@@ -37,18 +37,18 @@ cd ../..
 echo "Removing unnecessary transitive dependencies..."
 
 # Remove Effect package 
-echo "Removing Effect package..."
-rm -rf lambda-layers-prisma-migration/nodejs/node_modules/.pnpm/effect@*
-find lambda-layers-prisma-migration/nodejs/node_modules -name "effect" -type l -delete 2>/dev/null || true
+#echo "Removing Effect package..."
+#rm -rf lambda-layers-prisma-migration/nodejs/node_modules/.pnpm/effect@*
+#find lambda-layers-prisma-migration/nodejs/node_modules -name "effect" -type l -delete 2>/dev/null || true
+#rm -rf lambda-layers-prisma-migration/nodejs/node_modules/effect 2>/dev/null || true
+## Remove fast-check package 
+#echo "Removing fast-check package..."
+#rm -rf lambda-layers-prisma-migration/nodejs/node_modules/.pnpm/fast-check@*
+#find lambda-layers-prisma-migration/nodejs/node_modules -name "fast-check" -type l -delete 2>/dev/null || true
 
-# Remove fast-check package 
-echo "Removing fast-check package..."
-rm -rf lambda-layers-prisma-migration/nodejs/node_modules/.pnpm/fast-check@*
-find lambda-layers-prisma-migration/nodejs/node_modules -name "fast-check" -type l -delete 2>/dev/null || true
-
-# Remove other development/testing dependencies not needed for migrations
-rm -rf lambda-layers-prisma-migration/nodejs/node_modules/.pnpm/*test* 2>/dev/null || true
-rm -rf lambda-layers-prisma-migration/nodejs/node_modules/.pnpm/*benchmark* 2>/dev/null || true
+## Remove other development/testing dependencies not needed for migrations
+#rm -rf lambda-layers-prisma-migration/nodejs/node_modules/.pnpm/*test* 2>/dev/null || true
+#rm -rf lambda-layers-prisma-migration/nodejs/node_modules/.pnpm/*benchmark* 2>/dev/null || true
 
 echo "Stripping down to PostgreSQL migration essentials only..."
 
@@ -57,9 +57,6 @@ PRISMA_DIR="lambda-layers-prisma-migration/nodejs/node_modules/prisma"
 
 echo "Original Prisma CLI size:"
 du -sh "$PRISMA_DIR"
-
-# Remove the entire prisma-client runtime (16MB) - not needed for migrations
-rm -rf "$PRISMA_DIR"/prisma-client
 
 # Remove ALL query engines - we only need schema engine for migrations
 find "$PRISMA_DIR" -name "*query_engine*" -delete 2>/dev/null || true
