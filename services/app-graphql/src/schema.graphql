@@ -93,6 +93,19 @@ type Query {
     """
     fetchContract(input: FetchContractInput!): FetchContractPayload!
 
+"""
+    fetchDocument returns a single document
+    given a documentID
+    an explicit expirationDate can be supplied
+    otherwise it defaults to expiring in 3600 seconds (1 hour)
+
+    It can be called by CMS or State users
+
+    Errors:
+    - BadInputError: An expiredIn value that exceeds the limit of 604,800 seconds (1 week)
+    - NotFoundError: document for documentID not found in database
+    """
+    fetchDocument(input: FetchDocumentInput!): FetchDocumentPayload!
     """
     fetchMcReviewSettings returns settings for the MC review app
 
@@ -2337,6 +2350,20 @@ type FetchContractPayload {
 
 input FetchContractInput {
     contractID: ID!
+}
+
+type FetchDocumentPayload {
+    document: GenericDocument!
+}
+
+input FetchDocumentInput {
+    documentID: ID!
+    """
+    ExpiresIn represents times in seconds until expiration.
+    Valid range from 1 second to 604,800 seconds (1 week).
+    Defaults to 3600 seconds (1 hour)
+    """
+    expiresIn: Int
 }
 
 type UnlockRatePayload {

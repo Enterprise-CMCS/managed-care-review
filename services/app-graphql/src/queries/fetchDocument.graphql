@@ -1,0 +1,7 @@
+query fetchDocument($input: FetchDocumentInput!) {
+    fetchDocument(input: $input) {
+        document {
+            ...genericDocumentFragment
+        }
+    }
+}
