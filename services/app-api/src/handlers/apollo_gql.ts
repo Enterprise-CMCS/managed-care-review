@@ -21,7 +21,7 @@ import {
     userFromLocalAuthProvider,
     userFromThirdPartyAuthorizer,
 } from '../authn'
-import { NewPostgresStore } from '../postgres/postgresStore'
+import { NewPostgresStore } from '../postgres'
 import { configureResolvers } from '../resolvers'
 import { configurePostgres, configureEmailer } from './configuration'
 import { createTracer } from '../otel/otel_handler'
@@ -42,7 +42,7 @@ import {
     documentZipService,
     generateDocumentZip,
     localGenerateDocumentZip,
-} from '../zip/generateZip'
+} from '../zip'
 
 let ldClient: LDClient
 let s3Client: S3ClientT
@@ -66,7 +66,7 @@ function contextForRequestForFetcher(userFetcher: userFromAuthProvider): ({
     event,
 }: {
     event: APIGatewayProxyEvent
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+
     context: any
 }) => Promise<Context> {
     return async ({ event, context }) => {
@@ -379,10 +379,9 @@ async function initializeGQLHandler(): Promise<Handler> {
         introspection: introspectionAllowed,
     })
 
-    await server.start()
     const handler = startServerAndCreateLambdaHandler(
         server,
-        handlers.createAPIGatewayProxyEventV2RequestHandler(),
+        handlers.createAPIGatewayProxyEventRequestHandler(),
         {
             context: async ({ event, context }) => {
                 return await contextForRequest({ event, context })
