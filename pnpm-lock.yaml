@@ -982,8 +982,8 @@ importers:
         version: 16.9.0
     devDependencies:
       '@bahmutov/cypress-esbuild-preprocessor':
-        specifier: ^2.2.4
-        version: 2.2.4(esbuild@0.25.8)
+        specifier: ^2.2.5
+        version: 2.2.5(esbuild@0.25.8)
       '@cypress-audit/pa11y':
         specifier: ^1.3.0
         version: 1.4.2(encoding@0.1.13)
@@ -3238,8 +3238,8 @@ packages:
     resolution: {integrity: sha512-ruv7Ae4J5dUYULmeXw1gmb7rYRz57OWCPM57pHojnLq/3Z1CK2lNSLTCVjxVk1F/TZHwOZZrOWi0ur95BbLxNQ==}
     engines: {node: '>=6.9.0'}
 
-  '@bahmutov/cypress-esbuild-preprocessor@2.2.4':
-    resolution: {integrity: sha512-t5xOKK+a6PlsxgRBtZDzayUcPJGDLKJt1pwKK/Y8szuDPPF+DbEsrqL8fbKgE1+koPvOVaYMX4ggwQwqfk99hA==}
+  '@bahmutov/cypress-esbuild-preprocessor@2.2.5':
+    resolution: {integrity: sha512-T8jugcaKdK3G470eWTo9fxeLXupnlTHLdWrjcfWuFM9spkHrASkiG20IpmAKiSPUjeXU0+A1EDssD48XMMxaKg==}
     peerDependencies:
       esbuild: '>=0.17.0'
 
@@ -7624,6 +7624,11 @@ packages:
     engines: {node: ^6 || ^7 || ^8 || ^9 || ^10 || ^11 || ^12 || >=13.7}
     hasBin: true
 
+  browserslist@4.25.3:
+    resolution: {integrity: sha512-cDGv1kkDI4/0e5yON9yM5G/0A5u8sf5TnmdX5C9qHzI9PPu++sQ9zjm1k9NiOrf3riY4OkK0zSGqfvJyJsgCBQ==}
+    engines: {node: ^6 || ^7 || ^8 || ^9 || ^10 || ^11 || ^12 || >=13.7}
+    hasBin: true
+
   bs-logger@0.2.6:
     resolution: {integrity: sha512-pd8DCoxmbgc7hyPKOvxtqNcjYoOsABPQdcCUjGp3d42VR2CX1ORhk2A87oqqu5R1kk+76nsxZupkmyd+MVtCog==}
     engines: {node: '>= 6'}
@@ -8527,6 +8532,9 @@ packages:
 
   electron-to-chromium@1.5.201:
     resolution: {integrity: sha512-ZG65vsrLClodGqywuigc+7m0gr4ISoTQttfVh7nfpLv0M7SIwF4WbFNEOywcqTiujs12AUeeXbFyQieDICAIxg==}
+
+  electron-to-chromium@1.5.205:
+    resolution: {integrity: sha512-gBtbT7IgOHu7CwdtIiXwbNRD1l6oG6GAyanmwMCLVqaoGy92Jfe1dSHLiSj8xUEZNxOTIVlXuaAalMMD+S4y0w==}
 
   element-closest@2.0.2:
     resolution: {integrity: sha512-QCqAWP3kwj8Gz9UXncVXQGdrhnWxD8SQBSeZp5pOsyCcQ6RpL738L1/tfuwBiMi6F1fYkxqPnBrFBR4L+f49Cg==}
@@ -18977,9 +18985,9 @@ snapshots:
       '@babel/helper-string-parser': 7.27.1
       '@babel/helper-validator-identifier': 7.27.1
 
-  '@bahmutov/cypress-esbuild-preprocessor@2.2.4(esbuild@0.25.8)':
+  '@bahmutov/cypress-esbuild-preprocessor@2.2.5(esbuild@0.25.8)':
     dependencies:
-      debug: 4.4.0
+      debug: 4.4.1(supports-color@8.1.1)
       esbuild: 0.25.8
     transitivePeerDependencies:
       - supports-color
@@ -24591,6 +24599,13 @@ snapshots:
       node-releases: 2.0.19
       update-browserslist-db: 1.1.3(browserslist@4.25.2)
 
+  browserslist@4.25.3:
+    dependencies:
+      caniuse-lite: 1.0.30001735
+      electron-to-chromium: 1.5.205
+      node-releases: 2.0.19
+      update-browserslist-db: 1.1.3(browserslist@4.25.3)
+
   bs-logger@0.2.6:
     dependencies:
       fast-json-stable-stringify: 2.1.0
@@ -25051,7 +25066,7 @@ snapshots:
 
   core-js-compat@3.45.0:
     dependencies:
-      browserslist: 4.25.2
+      browserslist: 4.25.3
 
   core-js@3.41.0: {}
 
@@ -25530,6 +25545,8 @@ snapshots:
   electron-to-chromium@1.5.119: {}
 
   electron-to-chromium@1.5.201: {}
+
+  electron-to-chromium@1.5.205: {}
 
   element-closest@2.0.2: {}
 
@@ -31550,6 +31567,12 @@ snapshots:
       escalade: 3.2.0
       picocolors: 1.1.1
 
+  update-browserslist-db@1.1.3(browserslist@4.25.3):
+    dependencies:
+      browserslist: 4.25.3
+      escalade: 3.2.0
+      picocolors: 1.1.1
+
   upper-case-first@2.0.2:
     dependencies:
       tslib: 2.8.1
@@ -31825,7 +31848,7 @@ snapshots:
       '@webassemblyjs/wasm-parser': 1.14.1
       acorn: 8.15.0
       acorn-import-attributes: 1.9.5(acorn@8.15.0)
-      browserslist: 4.25.2
+      browserslist: 4.25.3
       chrome-trace-event: 1.0.4
       enhanced-resolve: 5.18.3
       es-module-lexer: 1.7.0
