@@ -34,6 +34,22 @@ cd lambda-layers-prisma-migration/nodejs
 pnpm install --prod --no-optional --ignore-workspace
 cd ../..
 
+echo "Removing unnecessary transitive dependencies..."
+
+# Remove Effect package 
+echo "Removing Effect package..."
+rm -rf lambda-layers-prisma-migration/nodejs/node_modules/.pnpm/effect@*
+find lambda-layers-prisma-migration/nodejs/node_modules -name "effect" -type l -delete 2>/dev/null || true
+
+# Remove fast-check package 
+echo "Removing fast-check package..."
+rm -rf lambda-layers-prisma-migration/nodejs/node_modules/.pnpm/fast-check@*
+find lambda-layers-prisma-migration/nodejs/node_modules -name "fast-check" -type l -delete 2>/dev/null || true
+
+# Remove other development/testing dependencies not needed for migrations
+rm -rf lambda-layers-prisma-migration/nodejs/node_modules/.pnpm/*test* 2>/dev/null || true
+rm -rf lambda-layers-prisma-migration/nodejs/node_modules/.pnpm/*benchmark* 2>/dev/null || true
+
 echo "Stripping down to PostgreSQL migration essentials only..."
 
 # Keep only the essential Prisma CLI structure
