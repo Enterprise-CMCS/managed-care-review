@@ -81,16 +81,16 @@ export function fetchDocumentResolver(
                 cause: 'BAD_USER_INPUT',
             })
         }
-        const qaDocs = [
-            'contractQuestionDoc',
-            'contractQuestionResponseDoc',
-            'rateQuestionDoc',
-            'rateQuestionResponseDoc',
-        ]
-        const bucketName = qaDocs.includes(fetchedDocument.type)
-            ? 'QUESTION_ANSWER_DOCS'
-            : 'HEALTH_PLAN_DOCS'
-        const url = await s3Client.getURL(key, bucketName, expiresIn)
+        // const qaDocs = [
+        //     'contractQuestionDoc',
+        //     'contractQuestionResponseDoc',
+        //     'rateQuestionDoc',
+        //     'rateQuestionResponseDoc',
+        // ]
+        // const bucketName = qaDocs.includes(fetchedDocument.type)
+        //     ? 'QUESTION_ANSWER_DOCS'
+        //     : 'HEALTH_PLAN_DOCS'
+        const url = await s3Client.getURL(key, 'HEALTH_PLAN_DOCS', expiresIn)
         if (!url) {
             throw new Error('error getting download url from S3')
         }
