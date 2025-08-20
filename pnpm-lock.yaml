@@ -39,8 +39,8 @@ importers:
         specifier: ^3.864.0
         version: 3.864.0
       '@aws-sdk/client-ec2':
-        specifier: ^3.868.0
-        version: 3.868.0
+        specifier: ^3.871.0
+        version: 3.871.0
       '@aws-sdk/client-secrets-manager':
         specifier: ^3.864.0
         version: 3.864.0
@@ -1564,8 +1564,8 @@ packages:
     resolution: {integrity: sha512-Y2ixlSTjjAp2HJhkUArtYqC/X+zG5Qqu3Bl+Ez22u4u4YnG8HsNFD6FE1axuWSdSa5AFtWTEt+Cz2Ghj/tDySA==}
     engines: {node: '>=10.0.0'}
 
-  '@aws-sdk/client-ec2@3.868.0':
-    resolution: {integrity: sha512-IceL6+7+ynlWjIVk4e1I7h/GviHPW5CeBxp7TtJNqcp+yTLK0DprLa6ZdY2PuraGst/QaD3FuB0KyA8YnUBVuw==}
+  '@aws-sdk/client-ec2@3.871.0':
+    resolution: {integrity: sha512-u33X9Pt3xAN4788712kFM62/UX5bLcigkz9kpRF3juOCp+zKSsTRlT4qssFZ/kurKppPIj940Cd//cNRJ0qqtA==}
     engines: {node: '>=18.0.0'}
 
   '@aws-sdk/client-firehose@3.6.1':
@@ -8533,8 +8533,8 @@ packages:
   electron-to-chromium@1.5.201:
     resolution: {integrity: sha512-ZG65vsrLClodGqywuigc+7m0gr4ISoTQttfVh7nfpLv0M7SIwF4WbFNEOywcqTiujs12AUeeXbFyQieDICAIxg==}
 
-  electron-to-chromium@1.5.205:
-    resolution: {integrity: sha512-gBtbT7IgOHu7CwdtIiXwbNRD1l6oG6GAyanmwMCLVqaoGy92Jfe1dSHLiSj8xUEZNxOTIVlXuaAalMMD+S4y0w==}
+  electron-to-chromium@1.5.207:
+    resolution: {integrity: sha512-mryFrrL/GXDTmAtIVMVf+eIXM09BBPlO5IQ7lUyKmK8d+A4VpRGG+M3ofoVef6qyF8s60rJei8ymlJxjUA8Faw==}
 
   element-closest@2.0.2:
     resolution: {integrity: sha512-QCqAWP3kwj8Gz9UXncVXQGdrhnWxD8SQBSeZp5pOsyCcQ6RpL738L1/tfuwBiMi6F1fYkxqPnBrFBR4L+f49Cg==}
@@ -14895,7 +14895,7 @@ snapshots:
     transitivePeerDependencies:
       - react-native
 
-  '@aws-sdk/client-ec2@3.868.0':
+  '@aws-sdk/client-ec2@3.871.0':
     dependencies:
       '@aws-crypto/sha256-browser': 5.2.0
       '@aws-crypto/sha256-js': 5.2.0
@@ -24602,7 +24602,7 @@ snapshots:
   browserslist@4.25.3:
     dependencies:
       caniuse-lite: 1.0.30001735
-      electron-to-chromium: 1.5.205
+      electron-to-chromium: 1.5.207
       node-releases: 2.0.19
       update-browserslist-db: 1.1.3(browserslist@4.25.3)
 
@@ -25546,7 +25546,7 @@ snapshots:
 
   electron-to-chromium@1.5.201: {}
 
-  electron-to-chromium@1.5.205: {}
+  electron-to-chromium@1.5.207: {}
 
   element-closest@2.0.2: {}
 
