@@ -558,6 +558,7 @@ jobs:
     needs: deploy
     if: success()
     runs-on: ubuntu-latest
+    environment: ${{ github.event.inputs.stage || (github.ref_name == 'main' && 'prod' || 'dev') }}
     container:
       image: cypress/browsers:node-20.14.0-chrome-126.0.6478.114-1-ff-127.0.1-edge-126.0.2592.61-1
       options: --user 1001
@@ -585,6 +586,11 @@ jobs:
         node-version: ${{ env.NODE_VERSION }}
         cache: 'pnpm'
 
+    - name: Configure pnpm and git for HTTPS
+      run: |
+        pnpm config set git-prefer-https true
+        git config --global url."https://github.com/".insteadOf "git@github.com:"
+
     - name: Install dependencies
       run: |
         pnpm install --frozen-lockfile
@@ -608,7 +614,7 @@ jobs:
       with:
         region: ${{ env.AWS_REGION }}
         account-id: ${{ steps.set-account-id-cypress.outputs.account-id }}
-        stage-name: ${{ env.STAGE }}
+        stage-name: ${{ env.STAGE == 'dev' && 'main' || env.STAGE }}
 
     - name: Create/Update Cypress Test Users in CDK Cognito
       run: |
@@ -717,6 +723,7 @@ jobs:
     needs: deploy
     if: success()
     runs-on: ubuntu-latest
+    environment: ${{ github.event.inputs.stage || (github.ref_name == 'main' && 'prod' || 'dev') }}
     permissions:
       id-token: write
       contents: read
@@ -741,7 +748,7 @@ jobs:
       with:
         region: ${{ env.AWS_REGION }}
         account-id: ${{ steps.set-account-id-validate.outputs.account-id }}
-        stage-name: ${{ env.STAGE }}
+        stage-name: ${{ env.STAGE == 'dev' && 'main' || env.STAGE }}
 
     - name: Run Lambda Validation Script
       working-directory: services/infra-cdk
@@ -772,6 +779,7 @@ jobs:
     needs: deploy
     if: success()
     runs-on: ubuntu-latest
+    environment: ${{ github.event.inputs.stage || (github.ref_name == 'main' && 'prod' || 'dev') }}
     permissions:
       id-token: write
       contents: read
@@ -796,7 +804,7 @@ jobs:
       with:
         region: ${{ env.AWS_REGION }}
         account-id: ${{ steps.set-account-id-guardduty.outputs.account-id }}
-        stage-name: ${{ env.STAGE }}
+        stage-name: ${{ env.STAGE == 'dev' && 'main' || env.STAGE }}
 
     - name: Run GuardDuty Test Script
       working-directory: services/infra-cdk
