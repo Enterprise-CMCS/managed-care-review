@@ -641,6 +641,7 @@ jobs:
           sleep 10
           attempt=$((attempt + 1))
         done
+        
 
     - name: Run Cypress Tests
       id: cypress
@@ -648,8 +649,8 @@ jobs:
       with:
         # Use existing Cypress config but override with CDK endpoints
         config-file: services/cypress/cypress.config.ts
-        # Add Basic Auth credentials for non-prod CDK environments
-        config: baseUrl=https://onemacuser:onemacpass@${{ needs.deploy.outputs.application-endpoint }}
+        # Use plain URL without Basic Auth to match serverless
+        config: baseUrl=https://${{ needs.deploy.outputs.application-endpoint }}
         record: true
         parallel: true
         browser: chrome
@@ -816,3 +817,4 @@ jobs:
         ./test-guardduty-ci.sh ${{ env.STAGE }}
         
         echo "✅ GuardDuty test complete"
+
