@@ -401,6 +401,24 @@ const gqlHandler: Handler = async (event, context, completion) => {
     const initializedHandler = await handlerPromise
 
     const response = await initializedHandler(event, context, completion)
+
+    if (response && typeof response === 'object' && 'headers' in response) {
+        const apiGatewayEvent = event as APIGatewayProxyEvent
+        const origin =
+            apiGatewayEvent.headers?.origin ||
+            apiGatewayEvent.headers?.Origin ||
+            '*'
+
+        response.headers = {
+            ...response.headers,
+            'Access-Control-Allow-Origin': origin,
+            'Access-Control-Allow-Headers':
+                'Content-Type,Authorization,X-Amz-Date,X-Api-Key,X-Amz-Security-Token',
+            'Access-Control-Allow-Methods': 'GET,POST,OPTIONS',
+            'Access-Control-Allow-Credentials': 'true',
+        }
+    }
+
     const payloadSize = Buffer.from(event.body).length
     const serviceName = 'gql-handler'
     const otelCollectorUrl = process.env.API_APP_OTEL_COLLECTOR_URL
