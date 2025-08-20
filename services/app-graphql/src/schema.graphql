@@ -104,6 +104,7 @@ type Query {
     Errors:
     - BadInputError: An expiredIn value that exceeds the limit of 604,800 seconds (1 week)
     - NotFoundError: document for documentID not found in database
+    - ForbiddenError: OAuth client must have read permissions granted
     """
     fetchDocument(input: FetchDocumentInput!): FetchDocumentPayload!
     """

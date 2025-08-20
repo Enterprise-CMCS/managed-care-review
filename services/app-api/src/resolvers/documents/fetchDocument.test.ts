@@ -2,6 +2,7 @@ import { constructTestPostgresServer } from '../../testHelpers/gqlHelpers'
 import { FetchDocumentDocument } from '../../gen/gqlClient'
 import { createAndUpdateTestContractWithoutRates } from '../../testHelpers/gqlContractHelpers'
 import { testS3Client } from '../../testHelpers'
+import { testStateUser } from '../../testHelpers/userHelpers'
 
 describe('fetchDocument', () => {
     const mockS3 = testS3Client()
@@ -11,11 +12,9 @@ describe('fetchDocument', () => {
             s3Client: mockS3,
         })
 
-        // Create a contract
         const stateSubmission =
             await createAndUpdateTestContractWithoutRates(stateServer)
         const doc = stateSubmission.draftRevision?.formData.contractDocuments[0]
-        // Create OAuth client context
 
         const fetchResult = await stateServer.executeOperation({
             query: FetchDocumentDocument,
@@ -83,7 +82,82 @@ describe('fetchDocument', () => {
 
         expect(fetchResult.errors[0].extensions?.code).toBe('BAD_USER_INPUT')
         expect(fetchResult.errors[0].message).toBe(
-            'expiresIn field cannot exceed 604,800 seconds (1 week). currently set to 900000000'
+            'expiresIn field must be in range: 1 - 604,800 seconds (1 week). currently set to 900000000'
+        )
+    })
+
+    it('Bad input error with expiresIn field does not meet threshold', async () => {
+        const stateServer = await constructTestPostgresServer({
+            s3Client: mockS3,
+        })
+
+        // Create a contract
+        const stateSubmission =
+            await createAndUpdateTestContractWithoutRates(stateServer)
+        const doc = stateSubmission.draftRevision?.formData.contractDocuments[0]
+
+        const fetchResult = await stateServer.executeOperation({
+            query: FetchDocumentDocument,
+            variables: {
+                input: {
+                    documentID: doc!.id,
+                    expiresIn: 0,
+                },
+            },
+        })
+
+        expect(fetchResult.errors).toBeDefined()
+        if (fetchResult.errors === undefined) {
+            throw new Error('type narrow')
+        }
+
+        expect(fetchResult.errors[0].extensions?.code).toBe('BAD_USER_INPUT')
+        expect(fetchResult.errors[0].message).toBe(
+            'expiresIn field must be in range: 1 - 604,800 seconds (1 week). currently set to 0'
+        )
+    })
+
+    it('denies OAuth client without read permissions', async () => {
+        const stateServer = await constructTestPostgresServer({
+            s3Client: mockS3,
+        })
+
+        // Create a contract
+        const stateSubmission =
+            await createAndUpdateTestContractWithoutRates(stateServer)
+
+        // Create OAuth client context without client_credentials grant
+        const oauthServer = await constructTestPostgresServer({
+            context: {
+                user: testStateUser(),
+                oauthClient: {
+                    clientId: 'test-oauth-client',
+                    grants: ['some_other_grant'],
+                    isOAuthClient: true,
+                },
+            },
+            s3Client: mockS3,
+        })
+
+        const doc = stateSubmission.draftRevision?.formData.contractDocuments[0]
+
+        const fetchResult = await oauthServer.executeOperation({
+            query: FetchDocumentDocument,
+            variables: {
+                input: {
+                    documentID: doc!.id,
+                },
+            },
+        })
+
+        expect(fetchResult.errors).toBeDefined()
+        if (fetchResult.errors === undefined) {
+            throw new Error('type narrow')
+        }
+
+        expect(fetchResult.errors[0].extensions?.code).toBe('FORBIDDEN')
+        expect(fetchResult.errors[0].message).toBe(
+            'OAuth client does not have read permissions'
         )
     })
 })

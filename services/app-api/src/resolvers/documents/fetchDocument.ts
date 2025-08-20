@@ -70,8 +70,12 @@ export function fetchDocumentResolver(
         if (key instanceof Error) {
             throw new Error('S3 needs to be provided a valid key')
         }
-        if (input.expiresIn && input.expiresIn > 604800) {
-            const errMessage = `expiresIn field cannot exceed 604,800 seconds (1 week). currently set to ${input.expiresIn}`
+        const expiresIn =
+            input.expiresIn === undefined || input.expiresIn === null
+                ? 3600
+                : input.expiresIn
+        if (expiresIn > 604800 || expiresIn <= 0) {
+            const errMessage = `expiresIn field must be in range: 1 - 604,800 seconds (1 week). currently set to ${input.expiresIn}`
             throw new UserInputError(errMessage, {
                 argumentName: 'expiresIn',
                 cause: 'BAD_USER_INPUT',
@@ -86,7 +90,7 @@ export function fetchDocumentResolver(
         const bucketName = qaDocs.includes(fetchedDocument.type)
             ? 'QUESTION_ANSWER_DOCS'
             : 'HEALTH_PLAN_DOCS'
-        const url = await s3Client.getURL(key, bucketName)
+        const url = await s3Client.getURL(key, bucketName, expiresIn)
         if (!url) {
             throw new Error('error getting download url from S3')
         }
