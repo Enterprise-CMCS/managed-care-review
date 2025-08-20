@@ -556,7 +556,7 @@ jobs:
   cypress-tests:
     name: Cypress E2E Tests - CDK
     needs: deploy
-    if: success() && github.event_name == 'push'
+    if: success()
     runs-on: ubuntu-latest
     container:
       image: cypress/browsers:node-20.14.0-chrome-126.0.6478.114-1-ff-127.0.1-edge-126.0.2592.61-1
@@ -715,7 +715,7 @@ jobs:
   validate-lambdas:
     name: Validate CDK Lambdas
     needs: deploy
-    if: success() && github.event_name == 'push'
+    if: success()
     runs-on: ubuntu-latest
     permissions:
       id-token: write
@@ -770,7 +770,7 @@ jobs:
   test-guardduty:
     name: Test GuardDuty Malware Protection
     needs: deploy
-    if: success() && github.event_name == 'push'
+    if: success()
     runs-on: ubuntu-latest
     permissions:
       id-token: write

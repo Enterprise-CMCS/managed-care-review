@@ -99,7 +99,7 @@ export class LambdaMonitoringAspect implements IAspect {
     fn.addToRolePolicy(new iam.PolicyStatement({
       effect: iam.Effect.ALLOW,
       actions: ['secretsmanager:GetSecretValue'],
-      resources: [`arn:aws:secretsmanager:*:*:secret:/mcr-cdk/${this.stage}/datadog-api-key-*`]
+      resources: [`arn:aws:secretsmanager:*:*:secret:*mcr-cdk/${this.stage}/datadog-api-key*`]
     }));
     
     // Extract clean service name from function name
