@@ -5,7 +5,10 @@ import {
     fetchCurrentUserMock,
     mockContractPackageDraft,
     mockContractPackageSubmitted,
+    mockContractPackageUnlockedWithUnlockedType,
     mockValidCMSUser,
+    mockValidStateUser,
+    s3DlUrl,
 } from '@mc-review/mocks'
 import {
     StatutoryRegulatoryAttestation,
@@ -92,42 +95,6 @@ describe('ContractDetailsSummarySection', () => {
         const link = await screen.findByTestId('zipDownloadLink')
         expect(link).toBeInTheDocument()
         expect(screen.queryByText(/NEW/)).toBeNull()
-    })
-
-    it('renders zip package link for an unlocked submission', async () => {
-        renderWithProviders(
-            <ContractDetailsSummarySection
-                contract={{
-                    ...mockContractPackageSubmitted(),
-                    status: 'UNLOCKED',
-                    consolidatedStatus: 'UNLOCKED',
-                }}
-                isStateUser={false}
-                submissionName="MN-PMAP-0001"
-            />,
-            {
-                apolloProvider: {
-                    mocks: [
-                        fetchCurrentUserMock({
-                            statusCode: 200,
-                            user: mockValidCMSUser(),
-                        }),
-                    ],
-                },
-            }
-        )
-
-        expect(
-            screen.getByRole('heading', {
-                level: 2,
-                name: 'Contract details',
-            })
-        ).toBeInTheDocument()
-        expect(screen.queryByText('Edit')).not.toBeInTheDocument()
-
-        //Expect zip package links to load
-        const link = await screen.findByTestId('zipDownloadLink')
-        expect(link).toBeInTheDocument()
     })
 
     it('can render all contract details fields', async () => {
@@ -1059,6 +1026,137 @@ describe('ContractDetailsSummarySection', () => {
                     /You must provide this information/
                 )
             ).toBeNull()
+        })
+    })
+
+    describe('Document zip package download link', () => {
+        it('renders zip package link for a SUBMITTED submission as a State user', async () => {
+            renderWithProviders(
+                <ContractDetailsSummarySection
+                    contract={{
+                        ...mockContractPackageSubmitted(),
+                        status: 'SUBMITTED',
+                    }}
+                    isStateUser={false}
+                    submissionName="MN-PMAP-0001"
+                />,
+                {
+                    apolloProvider: {
+                        mocks: [
+                            fetchCurrentUserMock({
+                                statusCode: 200,
+                                user: mockValidStateUser(),
+                            }),
+                        ],
+                    },
+                }
+            )
+
+            await waitFor(() => {
+                expect(
+                    screen.getByRole('heading', {
+                        level: 2,
+                        name: 'Contract details',
+                    })
+                ).toBeInTheDocument()
+                expect(screen.queryByText('Edit')).not.toBeInTheDocument()
+            })
+
+            //Expect zip package links to load
+            const link = await screen.findByTestId('zipDownloadLink')
+            expect(link).toBeInTheDocument()
+            expect(
+                screen.getByText('Download contract documents (3 files)')
+            ).toBeInTheDocument()
+        })
+
+        it('renders zip package link for a SUBMITTED submission as a CMS user', async () => {
+            renderWithProviders(
+                <ContractDetailsSummarySection
+                    contract={{
+                        ...mockContractPackageSubmitted(),
+                        status: 'SUBMITTED',
+                    }}
+                    isStateUser={false}
+                    submissionName="MN-PMAP-0001"
+                />,
+                {
+                    apolloProvider: {
+                        mocks: [
+                            fetchCurrentUserMock({
+                                statusCode: 200,
+                                user: mockValidCMSUser(),
+                            }),
+                        ],
+                    },
+                }
+            )
+
+            await waitFor(() => {
+                expect(
+                    screen.getByRole('heading', {
+                        level: 2,
+                        name: 'Contract details',
+                    })
+                ).toBeInTheDocument()
+                expect(screen.queryByText('Edit')).not.toBeInTheDocument()
+            })
+
+            //Expect zip package links to load
+            const link = await screen.findByTestId('zipDownloadLink')
+            expect(link).toBeInTheDocument()
+            expect(
+                screen.getByText('Download contract documents (3 files)')
+            ).toBeInTheDocument()
+        })
+
+        it('renders zip package link for an UNLOCKED submission as a CMS user', async () => {
+            const contract = mockContractPackageUnlockedWithUnlockedType()
+            contract.packageSubmissions[0].contractRevision.documentZipPackages =
+                [
+                    {
+                        id: 'zip-package-123',
+                        s3URL: 's3://bucket-name/zips/contracts/key/contract-documents.zip',
+                        sha256: 'sha123',
+                        documentType: 'CONTRACT_DOCUMENTS',
+                        createdAt: new Date('01/15/2024'),
+                        downloadUrl: s3DlUrl,
+                    },
+                ]
+            renderWithProviders(
+                <ContractDetailsSummarySection
+                    contract={contract}
+                    isStateUser={false}
+                    submissionName="MN-PMAP-0001"
+                />,
+                {
+                    apolloProvider: {
+                        mocks: [
+                            fetchCurrentUserMock({
+                                statusCode: 200,
+                                user: mockValidCMSUser(),
+                            }),
+                        ],
+                    },
+                }
+            )
+
+            await waitFor(() => {
+                expect(
+                    screen.getByRole('heading', {
+                        level: 2,
+                        name: 'Contract details',
+                    })
+                ).toBeInTheDocument()
+                expect(screen.queryByText('Edit')).not.toBeInTheDocument()
+            })
+
+            //Expect zip package links to load
+            const link = await screen.findByTestId('zipDownloadLink')
+            expect(link).toBeInTheDocument()
+            expect(
+                screen.getByText('Download contract documents (1 file)')
+            ).toBeInTheDocument()
         })
     })
 })

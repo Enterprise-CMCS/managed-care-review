@@ -41,7 +41,11 @@ import {
     StatutoryRegulatoryAttestationQuestion,
 } from '@mc-review/constants'
 import { SectionCard } from '../../../components/SectionCard'
-import { Contract, ContractRevision } from '../../../gen/gqlClient'
+import {
+    Contract,
+    ContractRevision,
+    UnlockedContract,
+} from '../../../gen/gqlClient'
 import { useParams } from 'react-router-dom'
 import {
     getIndexFromRevisionVersion,
@@ -53,7 +57,7 @@ import { hasCMSUserPermissions } from '@mc-review/helpers'
 import { DocumentHeader } from '../../../components/DocumentHeader/DocumentHeader'
 
 export type ContractDetailsSummarySectionProps = {
-    contract: Contract
+    contract: Contract | UnlockedContract
     contractRev?: ContractRevision
     editNavigateTo?: string
     isCMSUser?: boolean
@@ -61,6 +65,25 @@ export type ContractDetailsSummarySectionProps = {
     submissionName: string
     onDocumentError?: (error: true) => void
     explainMissingData?: boolean
+}
+
+// Get the zip download URL from the pre-generated zip packages
+const getCurrentRevForZipLink = (
+    contract: Contract | UnlockedContract,
+    isCMSUser: boolean,
+    contractRev: ContractRevision | undefined
+): ContractRevision | undefined => {
+    const status = contract.status
+    switch (true) {
+        case !!contractRev:
+            return contractRev
+        case isCMSUser && status === 'UNLOCKED':
+            return contract.packageSubmissions[0]?.contractRevision
+        case !!contract.draftRevision:
+            return contract.draftRevision
+        default:
+            return contract.packageSubmissions[0]?.contractRevision
+    }
 }
 
 export const ContractDetailsSummarySection = ({
@@ -129,25 +152,11 @@ export const ContractDetailsSummarySection = ({
         contractFormData?.dsnpContract === null
             ? undefined
             : contractFormData?.dsnpContract
-    // Get the zip download URL from the pre-generated zip packages
-    const getCurrentRev = (
-        contract: Contract,
-        isCMSUser: boolean,
-        contractRev: ContractRevision | undefined
-    ): ContractRevision | undefined => {
-        const status = contract.status
-        switch (true) {
-            case !!contractRev:
-                return contractRev
-            case isCMSUser && status === 'UNLOCKED':
-                return contract.packageSubmissions[0]?.contractRevision
-            case !!contract.draftRevision:
-                return contract.draftRevision
-            default:
-                return contract.packageSubmissions[0]?.contractRevision
-        }
-    }
-    const currentRevision = getCurrentRev(contract, isCMSUser, contractRev)
+    const currentRevision = getCurrentRevForZipLink(
+        contract,
+        isCMSUser,
+        contractRev
+    )
     const documentZipPackage = currentRevision?.documentZipPackages
         ? currentRevision.documentZipPackages
         : undefined
