@@ -18,6 +18,7 @@ import { PrismaClient } from '@prisma/client'
 interface RequiredEnvVars {
     S3_BUCKET: string
     DOCS_S3_BUCKET: string
+    QA_S3_BUCKET: string
     DB_SECRET_ARN: string
 }
 
@@ -27,6 +28,7 @@ interface RequiredEnvVars {
 function getValidatedEnvironment(): RequiredEnvVars {
     const s3Bucket = process.env.S3_BUCKET
     const docsS3Bucket = process.env.DOCS_S3_BUCKET
+    const qaS3Bucket = process.env.QA_S3_BUCKET
     const dbSecretArn = process.env.DB_SECRET_ARN
 
     if (!s3Bucket) {
@@ -35,6 +37,9 @@ function getValidatedEnvironment(): RequiredEnvVars {
     if (!docsS3Bucket) {
         throw new Error('Missing required environment variable: DOCS_S3_BUCKET')
     }
+    if (!qaS3Bucket) {
+        throw new Error('Missing required environment variable: QA_S3_BUCKET')
+    }
     if (!dbSecretArn) {
         throw new Error('Missing required environment variable: DB_SECRET_ARN')
     }
@@ -42,6 +47,7 @@ function getValidatedEnvironment(): RequiredEnvVars {
     return {
         S3_BUCKET: s3Bucket,
         DOCS_S3_BUCKET: docsS3Bucket,
+        QA_S3_BUCKET: qaS3Bucket,
         DB_SECRET_ARN: dbSecretArn,
     }
 }
@@ -52,6 +58,7 @@ const ENV = getValidatedEnvironment()
 const REGION = process.env.AWS_REGION || 'us-east-1'
 const S3_BUCKET = ENV.S3_BUCKET
 const DOCS_S3_BUCKET = ENV.DOCS_S3_BUCKET
+const QA_S3_BUCKET = ENV.QA_S3_BUCKET
 const DB_SECRET_ARN = ENV.DB_SECRET_ARN
 const TMP_DIR = '/tmp'
 const S3_PREFIX = 'db_dump'
@@ -334,7 +341,8 @@ async function processDocuments<
     documents: T[],
     updateFunction: (doc: T, newSha256: string) => Promise<void>,
     startTime: number,
-    hassha256: boolean = true
+    hassha256: boolean = true,
+    isQADocument: boolean = false
 ): Promise<{ processed: number; shouldStop: boolean }> {
     let processed = 0
 
@@ -353,7 +361,8 @@ async function processDocuments<
             const { newSha256, replaced } = await replaceDocument(
                 doc.id,
                 doc.s3URL,
-                doc.name
+                doc.name,
+                isQADocument
             )
 
             if (replaced && hassha256) {
@@ -549,11 +558,19 @@ async function processAllDocumentsResumable(
         }
 
         // Process all remaining documents for this type
+        const qaDocumentTypes = [
+            'contractQuestionDocuments',
+            'contractQuestionResponseDocuments',
+            'rateQuestionDocuments',
+            'rateQuestionResponseDocuments',
+        ]
+        const isQADocument = qaDocumentTypes.includes(docType.name)
         const { processed, shouldStop } = await processDocuments(
             documents,
             docType.update,
             startTime,
-            docType.hassha256
+            docType.hassha256,
+            isQADocument
         )
 
         state[stateKey].processed += processed
@@ -1029,7 +1046,8 @@ function getMockFilePath(documentId: string, fileType: string): string {
 async function replaceDocument(
     documentId: string,
     s3Url: string,
-    originalFilename: string
+    originalFilename: string,
+    isQADocument: boolean = false
 ): Promise<{ newSha256: string; replaced: boolean }> {
     if (DRY_RUN) {
         console.info(`DRY RUN: Would replace document ${documentId}`)
@@ -1067,7 +1085,7 @@ async function replaceDocument(
             return { newSha256: '', replaced: false }
         }
 
-        bucket = DOCS_S3_BUCKET ?? ''
+        bucket = isQADocument ? QA_S3_BUCKET : DOCS_S3_BUCKET
         const finalKey = `allusers/${uuidPart}`
 
         console.info(`Target S3 location: s3://${bucket}/${finalKey}`)

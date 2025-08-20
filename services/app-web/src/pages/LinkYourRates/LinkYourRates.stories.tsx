@@ -1,9 +1,11 @@
 import { Formik } from 'formik'
 import { LinkYourRates } from './LinkYourRates'
+import ProvidersDecorator from '../../../.storybook/providersDecorator'
 
 export default {
     title: 'Components/LinkYourRates',
     component: LinkYourRates,
+    decorators: [ProvidersDecorator],
 }
 
 export const LinkRates = (): React.ReactElement => {
