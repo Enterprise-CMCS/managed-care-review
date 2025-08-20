@@ -1,6 +1,8 @@
 import { IAspect, Tags } from "aws-cdk-lib";
 import { IConstruct } from "constructs";
 import * as lambda from "aws-cdk-lib/aws-lambda";
+import * as iam from "aws-cdk-lib/aws-iam";
+import * as ssm from "aws-cdk-lib/aws-ssm";
 import { ServiceRegistry } from "../constructs/base/service-registry";
 
 /**
@@ -16,7 +18,7 @@ import { ServiceRegistry } from "../constructs/base/service-registry";
 export class LambdaMonitoringAspect implements IAspect {
   constructor(
     private stage: string,
-    private datadogApiKeyArn: string,
+    private datadogSecretSsmParam: string,  // Now it's the SSM parameter name
     private enableDatadog: boolean = false
   ) {}
 
@@ -93,6 +95,13 @@ export class LambdaMonitoringAspect implements IAspect {
     );
     fn.addLayers(ddExtension);
     
+    // Grant permission to read Datadog API key from Secrets Manager
+    fn.addToRolePolicy(new iam.PolicyStatement({
+      effect: iam.Effect.ALLOW,
+      actions: ['secretsmanager:GetSecretValue'],
+      resources: [`arn:aws:secretsmanager:*:*:secret:/mcr-cdk/${this.stage}/datadog-api-key-*`]
+    }));
+    
     // Extract clean service name from function name
     // e.g., "mcr-cdk-graphql-api-dev-cdk" -> "graphql-api"
     const service = fn.node.id
@@ -100,8 +109,14 @@ export class LambdaMonitoringAspect implements IAspect {
       .replace(/-dev-cdk$|-val-cdk$|-prod-cdk$/, '')
       .replace(/-\w+-cdk$/, '') || 'mcr';
     
+    // Resolve SSM parameter within the function's stack scope
+    const datadogSecretArn = ssm.StringParameter.valueForStringParameter(
+      fn, 
+      this.datadogSecretSsmParam
+    );
+    
     // Add Datadog environment variables (these become DD tags automatically)
-    fn.addEnvironment('DD_API_KEY_SECRET_ARN', this.datadogApiKeyArn);
+    fn.addEnvironment('DD_API_KEY_SECRET_ARN', datadogSecretArn);
     fn.addEnvironment('DD_SITE', 'ddog-gov.com');  // GovCloud endpoint
     
     // Required Datadog tags for Unified Service Tagging
@@ -118,12 +133,15 @@ export class LambdaMonitoringAspect implements IAspect {
     fn.addEnvironment('DD_TRACE_ENABLED', 'true');
     fn.addEnvironment('DD_LOGS_INJECTION', 'true');
     
+    // Explicitly disable log collection - logs go to Splunk only
+    fn.addEnvironment('DD_SERVERLESS_LOGS_ENABLED', 'false');
+    
     // Note: The Datadog Extension handles fetching the API key from Secrets Manager
     // using DD_API_KEY_SECRET_ARN - no additional IAM permissions needed
     
     // Apply AWS resource tags (these flow to Datadog automatically)
     Tags.of(fn).add('dd_service', service);
     Tags.of(fn).add('dd_env', this.stage);
-    Tags.of(fn).add('dd_team', 'managed-care-review');
+    Tags.of(fn).add('team', 'MC-Review');
   }
 }
