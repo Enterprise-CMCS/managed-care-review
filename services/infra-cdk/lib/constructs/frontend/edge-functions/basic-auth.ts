@@ -18,6 +18,11 @@ export interface BasicAuthEdgeFunctionProps {
    * Basic auth password (from environment variable) 
    */
   password?: string;
+  
+  /**
+   * Pass-through mode - disables authentication to match serverless
+   */
+  passThrough?: boolean;
 }
 
 /**
@@ -36,12 +41,20 @@ export class BasicAuthEdgeFunction extends Construct {
     
     // Create Lambda@Edge function
     this.function = new cloudfront.experimental.EdgeFunction(this, 'Function', {
-      functionName: `mcr-cdk-${props.stage}-basicauth`,
+      // Let CDK auto-generate unique function name to avoid conflicts
       runtime: lambda.Runtime.NODEJS_20_X,
       handler: 'index.handler',
       timeout: Duration.seconds(5), // Lambda@Edge limit
       memorySize: 128, // Lambda@Edge limit
-      code: lambda.Code.fromInline(`
+      code: lambda.Code.fromInline(props.passThrough ? `
+'use strict';
+
+exports.handler = (event, context, callback) => {
+  // Pass-through mode - no authentication (matches serverless)
+  const request = event.Records[0].cf.request;
+  callback(null, request);
+};
+` : `
 'use strict';
 
 exports.handler = (event, context, callback) => {
@@ -75,7 +88,9 @@ exports.handler = (event, context, callback) => {
   callback(null, request);
 };
 `),
-      description: `Basic authentication for ${props.stage} environment`
+      description: props.passThrough 
+        ? `Pass-through function for ${props.stage} environment (no authentication)` 
+        : `Basic authentication for ${props.stage} environment`
     });
   }
 }

@@ -2,7 +2,7 @@ import { ServiceRegistry } from '@constructs/base';
 import { Stack, StackProps } from 'aws-cdk-lib';
 import { stackName } from '../config';
 import { StaticWebsite, GeoRestrictedWaf, AppWebIntegration } from '@constructs/frontend';
-// import { BasicAuthEdgeFunction } from '@constructs/frontend/edge-functions/basic-auth'; // Removed to match serverless (no Basic Auth)
+import { BasicAuthEdgeFunction } from '@constructs/frontend/edge-functions/basic-auth';
 import { SecurityHeadersPolicy } from '@constructs/frontend/security-headers-policy';
 import { Construct } from 'constructs';
 import * as cloudfront from 'aws-cdk-lib/aws-cloudfront';
@@ -81,13 +81,14 @@ export class FrontendStack extends Stack {
     
     // Create Basic Auth Lambda@Edge for non-prod environments
     let basicAuthFunction: cloudfront.experimental.EdgeFunction | undefined;
-    // REMOVING BASIC AUTH TO MATCH SERVERLESS - Serverless doesn't have Basic Auth
-    // if (this.stage !== 'prod') {
-    //   const basicAuth = new BasicAuthEdgeFunction(this, 'BasicAuth', {
-    //     stage: this.stage
-    //   });
-    //   basicAuthFunction = basicAuth.function;
-    // }
+    // Pass-through mode to match serverless (no authentication)
+    if (this.stage !== 'prod') {
+      const basicAuth = new BasicAuthEdgeFunction(this, 'BasicAuth', {
+        stage: this.stage,
+        passThrough: true  // Pass-through mode - no authentication enforcement
+      });
+      basicAuthFunction = basicAuth.function;
+    }
     
     // Create main application website
     this.mainApp = new StaticWebsite(this, 'MainApp', {
