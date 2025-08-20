@@ -130,11 +130,24 @@ export const ContractDetailsSummarySection = ({
             ? undefined
             : contractFormData?.dsnpContract
     // Get the zip download URL from the pre-generated zip packages
-    // Only for submitted contracts, not drafts or previous submissions
-    const currentRevision =
-        contractRev ||
-        contract.draftRevision ||
-        contract.packageSubmissions[0]?.contractRevision
+    const getCurrentRev = (
+        contract: Contract,
+        isCMSUser: boolean,
+        contractRev: ContractRevision | undefined
+    ): ContractRevision | undefined => {
+        const status = contract.status
+        switch (true) {
+            case !!contractRev:
+                return contractRev
+            case isCMSUser && status === 'UNLOCKED':
+                return contract.packageSubmissions[0]?.contractRevision
+            case !!contract.draftRevision:
+                return contract.draftRevision
+            default:
+                return contract.packageSubmissions[0]?.contractRevision
+        }
+    }
+    const currentRevision = getCurrentRev(contract, isCMSUser, contractRev)
     const documentZipPackage = currentRevision?.documentZipPackages
         ? currentRevision.documentZipPackages
         : undefined
@@ -147,6 +160,7 @@ export const ContractDetailsSummarySection = ({
         ? getPackageSubmissionAtIndex(contract, lastSubmittedIndex)?.submitInfo
               .updatedAt
         : (getLastContractSubmission(contract)?.submitInfo.updatedAt ?? null)
+
     return (
         <SectionCard
             id="contractDetailsSection"

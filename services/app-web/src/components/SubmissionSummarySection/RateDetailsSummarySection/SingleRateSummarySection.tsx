@@ -29,7 +29,7 @@ import { NavLinkWithLogging } from '../../TealiumLogging'
 import { hasCMSUserPermissions } from '@mc-review/helpers'
 import { featureFlags } from '@mc-review/common-code'
 import { useLDClient } from 'launchdarkly-react-client-sdk'
-import { ZipDownloadLink } from '../../ZipDownloadLink/ZipDownloadLink'
+import { DocumentHeader } from '../../DocumentHeader/DocumentHeader'
 
 const rateCapitationType = (formData: RateFormData) =>
     formData.rateCapitationType
@@ -356,13 +356,13 @@ export const SingleRateSummarySection = ({
                 </dl>
             </SectionCard>
             <SectionCard className={styles.summarySection}>
-                <SectionHeader header="Rate documents" hideBorderTop>
-                    <ZipDownloadLink
-                        type={'SINGLE-RATE'}
-                        documentZipPackages={documentZipPackage}
-                        documentCount={rateDocumentCount}
-                    />
-                </SectionHeader>
+                <DocumentHeader
+                    type={'RATE'}
+                    documentZipPackages={documentZipPackage}
+                    documentCount={rateDocumentCount}
+                    renderZipLink={isSubmittedOrCMSUser}
+                    removeTopBorder
+                />
                 <UploadedDocumentsTable
                     documents={formData.rateDocuments}
                     packagesWithSharedRateCerts={appendDraftToSharedPackages}

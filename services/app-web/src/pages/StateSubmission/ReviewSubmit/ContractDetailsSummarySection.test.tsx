@@ -5,6 +5,7 @@ import {
     fetchCurrentUserMock,
     mockContractPackageDraft,
     mockContractPackageSubmitted,
+    mockValidCMSUser,
 } from '@mc-review/mocks'
 import {
     StatutoryRegulatoryAttestation,
@@ -60,11 +61,8 @@ describe('ContractDetailsSummarySection', () => {
                 name: /Edit Contract supporting documents/,
             })
         ).toHaveAttribute('href', '/documents')
-        expect(
-            screen.queryByRole('link', {
-                name: 'Download all contract documents',
-            })
-        ).toBeNull()
+        const link = await screen.queryByTestId('zipDownloadLink')
+        expect(link).toBeNull()
     })
 
     it('can render state submission on summary page without errors (submission summary behavior)', async () => {
@@ -94,6 +92,42 @@ describe('ContractDetailsSummarySection', () => {
         const link = await screen.findByTestId('zipDownloadLink')
         expect(link).toBeInTheDocument()
         expect(screen.queryByText(/NEW/)).toBeNull()
+    })
+
+    it('renders zip package link for an unlocked submission', async () => {
+        renderWithProviders(
+            <ContractDetailsSummarySection
+                contract={{
+                    ...mockContractPackageSubmitted(),
+                    status: 'UNLOCKED',
+                    consolidatedStatus: 'UNLOCKED',
+                }}
+                isStateUser={false}
+                submissionName="MN-PMAP-0001"
+            />,
+            {
+                apolloProvider: {
+                    mocks: [
+                        fetchCurrentUserMock({
+                            statusCode: 200,
+                            user: mockValidCMSUser(),
+                        }),
+                    ],
+                },
+            }
+        )
+
+        expect(
+            screen.getByRole('heading', {
+                level: 2,
+                name: 'Contract details',
+            })
+        ).toBeInTheDocument()
+        expect(screen.queryByText('Edit')).not.toBeInTheDocument()
+
+        //Expect zip package links to load
+        const link = await screen.findByTestId('zipDownloadLink')
+        expect(link).toBeInTheDocument()
     })
 
     it('can render all contract details fields', async () => {
