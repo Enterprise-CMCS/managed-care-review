@@ -94,7 +94,7 @@ export function fetchDocumentResolver(
         // const bucketName = qaDocs.includes(fetchedDocument.type)
         //     ? 'QUESTION_ANSWER_DOCS'
         //     : 'HEALTH_PLAN_DOCS'
-        const url = await s3Client.getURL(key, 'HEALTH_PLAN_DOCS', expiresIn)
+        const url = await s3Client.getURL(fetchedDocument.s3URL, 'HEALTH_PLAN_DOCS', expiresIn)
         if (!url) {
             throw new Error('error getting download url from S3')
         }
