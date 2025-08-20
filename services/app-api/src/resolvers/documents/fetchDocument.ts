@@ -6,12 +6,12 @@ import {
     setResolverDetailsOnActiveSpan,
     setSuccessAttributesOnActiveSpan,
 } from '../attributeHelper'
-import type { Document } from '../../domain-models'
 import { canRead } from '../../authorization/oauthAuthorization'
 import { logError, logSuccess } from '../../logger'
 import type { S3ClientT } from '../../s3'
 import { parseKey, parseBucketName } from '../../s3'
 import { UserInputError } from 'apollo-server-core'
+import type { SharedDocument } from '../../domain-models/DocumentType'
 
 export function fetchDocumentResolver(
     store: Store,
@@ -94,11 +94,11 @@ export function fetchDocumentResolver(
         // const bucketName = qaDocs.includes(fetchedDocument.type)
         //     ? 'QUESTION_ANSWER_DOCS'
         //     : 'HEALTH_PLAN_DOCS'
-        const url = await s3Client.getURL(fetchedDocument.s3URL, 'HEALTH_PLAN_DOCS', expiresIn)
+        const url = await s3Client.getURL(key, 'HEALTH_PLAN_DOCS', expiresIn)
         if (!url) {
             throw new Error('error getting download url from S3')
         }
-        const doc: Document = {
+        const doc: SharedDocument = {
             id: fetchedDocument.id,
             name: fetchedDocument.name,
             s3URL: fetchedDocument.s3URL,

@@ -4,7 +4,6 @@ import { questionResponseType } from './QuestionResponseType'
 import { divisionType } from './DivisionType'
 
 const document = z.object({
-    id: z.string().optional(),
     name: z.string(),
     s3URL: z.string(),
     downloadURL: z.string().optional(),

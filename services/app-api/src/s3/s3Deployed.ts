@@ -92,7 +92,7 @@ export function newDeployedS3Client(
             const signedUrl = await getSignedUrl(s3Client, command, {
                 expiresIn: expiresIn || 3600,
             })
-            return s3key
+            return signedUrl
         },
         getBulkDlURL: async (
             keys: string[],

@@ -1,5 +1,12 @@
 import { z } from 'zod'
 
+const sharedDocumentSchema = z.object({
+    id: z.string(),
+    name: z.string(),
+    s3URL: z.string(),
+    downloadURL: z.string(),
+})
+
 const baseDocumentSchema = z.object({
     id: z.string(),
     createdAt: z.date(),
@@ -70,5 +77,6 @@ const auditDocumentSchema = z.union([
 ])
 
 export type AuditDocument = z.infer<typeof auditDocumentSchema>
+export type SharedDocument = z.infer<typeof sharedDocumentSchema>
 
-export { auditDocumentSchema }
+export { auditDocumentSchema, sharedDocumentSchema }
