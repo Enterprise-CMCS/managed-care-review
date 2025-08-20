@@ -80,6 +80,7 @@ import { findStateAssignedUsers } from './state/findStateAssignedUsers'
 import {
     type CreateDocumentZipPackageArgsType,
     findAllDocuments,
+    findDocumentById,
 } from './documents'
 import type { WithdrawRateArgsType } from './contractAndRates/withdrawRate'
 import { withdrawRate } from './contractAndRates/withdrawRate'
@@ -251,6 +252,7 @@ type Store = {
 
     /** Documents **/
     findAllDocuments: () => Promise<AuditDocument[] | Error>
+    findDocumentById: (docID: string) => Promise<AuditDocument | Error>
     createDocumentZipPackage: (
         args: CreateDocumentZipPackageArgsType
     ) => Promise<DocumentZipPackage | Error>
@@ -378,6 +380,7 @@ function NewPostgresStore(client: ExtendedPrismaClient): Store {
 
         /** Documents **/
         findAllDocuments: () => findAllDocuments(client),
+        findDocumentById: (docID) => findDocumentById(client, docID),
         createDocumentZipPackage: (args) =>
             createDocumentZipPackage(client, args),
         findDocumentZipPackagesByContractRevision: (

@@ -1,7 +1,10 @@
 query fetchDocument($input: FetchDocumentInput!) {
     fetchDocument(input: $input) {
         document {
-            ...genericDocumentFragment
+            id
+            name
+            s3URL
+            downloadURL
         }
     }
 }
