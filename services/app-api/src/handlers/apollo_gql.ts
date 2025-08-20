@@ -60,6 +60,31 @@ export interface Context {
     }
 }
 
+export const getCorsHeaders = (
+    requestOrigin: string | undefined,
+    stageName: string = process.env.stage || 'local'
+) => {
+    const allowedOrigins = [
+        stageName === 'local'
+            ? 'http://localhost:3000'
+            : `https://${stageName !== 'prod' ? stageName + '.' : ''}mc-review.cms.gov`,
+        ...(process.env.INTERNAL_ALLOWED_ORIGINS?.split(',').filter(Boolean) ||
+            []),
+    ]
+
+    const origin = allowedOrigins.includes(requestOrigin || '')
+        ? requestOrigin
+        : allowedOrigins[1]
+
+    return {
+        'Access-Control-Allow-Origin': origin,
+        'Access-Control-Allow-Headers':
+            'Content-Type,Authorization,X-Amz-Date,X-Api-Key,X-Amz-Security-Token',
+        'Access-Control-Allow-Methods': 'GET,POST,OPTIONS',
+        'Access-Control-Allow-Credentials': 'true',
+    }
+}
+
 // This function pulls auth info out of the cognitoAuthenticationProvider in the lambda event
 // and turns that into our GQL resolver context object
 function contextForRequestForFetcher(userFetcher: userFromAuthProvider): ({
@@ -404,18 +429,9 @@ const gqlHandler: Handler = async (event, context, completion) => {
 
     if (response && typeof response === 'object' && 'headers' in response) {
         const apiGatewayEvent = event as APIGatewayProxyEvent
-        const origin =
-            apiGatewayEvent.headers?.origin ||
-            apiGatewayEvent.headers?.Origin ||
-            '*'
-
         response.headers = {
             ...response.headers,
-            'Access-Control-Allow-Origin': origin,
-            'Access-Control-Allow-Headers':
-                'Content-Type,Authorization,X-Amz-Date,X-Api-Key,X-Amz-Security-Token',
-            'Access-Control-Allow-Methods': 'GET,POST,OPTIONS',
-            'Access-Control-Allow-Credentials': 'true',
+            ...getCorsHeaders(apiGatewayEvent.headers?.origin),
         }
     }
 
