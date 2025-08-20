@@ -10,7 +10,7 @@ import type { Document } from '../../domain-models'
 import { canRead } from '../../authorization/oauthAuthorization'
 import { logError, logSuccess } from '../../logger'
 import type { S3ClientT } from '../../s3'
-import { extractS3Key } from '../../zip/generateZip'
+import { parseKey } from '../../s3'
 import { UserInputError } from 'apollo-server-core'
 
 export function fetchDocumentResolver(
@@ -65,7 +65,7 @@ export function fetchDocumentResolver(
             logSuccess('fetchDocument')
         }
         const s3URL = fetchedDocument.s3URL ?? ''
-        const key = extractS3Key(s3URL)
+        const key = parseKey(s3URL)
 
         if (key instanceof Error) {
             throw new Error('S3 needs to be provided a valid key')
