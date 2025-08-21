@@ -70,12 +70,6 @@ export const getCorsHeaders = (
             []),
     ]
 
-    console.info('Application Endpoint')
-    console.info(process.env.APPLICATION_ENDPOINT)
-
-    console.info('Allowed Origins')
-    console.info(allowedOrigins)
-
     const origin = allowedOrigins.includes(requestOrigin || '')
         ? requestOrigin
         : allowedOrigins[1]
