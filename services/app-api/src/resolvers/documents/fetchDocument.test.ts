@@ -21,6 +21,7 @@ describe('fetchDocument', () => {
             variables: {
                 input: {
                     documentID: doc!.id,
+                    documentType: 'CONTRACT_DOC',
                 },
             },
         })
@@ -40,6 +41,7 @@ describe('fetchDocument', () => {
             variables: {
                 input: {
                     documentID: 'bad_id',
+                    documentType: 'CONTRACT_DOC',
                 },
             },
         })
@@ -70,6 +72,7 @@ describe('fetchDocument', () => {
             variables: {
                 input: {
                     documentID: doc!.id,
+                    documentType: 'CONTRACT_DOC',
                     expiresIn: 900000000,
                 },
             },
@@ -101,6 +104,7 @@ describe('fetchDocument', () => {
             variables: {
                 input: {
                     documentID: doc!.id,
+                    documentType: 'CONTRACT_DOC',
                     expiresIn: 0,
                 },
             },
@@ -146,6 +150,7 @@ describe('fetchDocument', () => {
             variables: {
                 input: {
                     documentID: doc!.id,
+                    documentType: 'CONTRACT_DOC',
                 },
             },
         })

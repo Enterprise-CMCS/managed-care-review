@@ -20,7 +20,8 @@ it('returns document', async () => {
         await findDocumentById(
             client,
             contract.packageSubmissions[0].contractRevision.formData
-                .contractDocuments[0].id!
+                .contractDocuments[0].id!,
+            'CONTRACT_DOC'
         )
     )
 

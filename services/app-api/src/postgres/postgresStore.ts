@@ -102,7 +102,7 @@ import type {
 } from './contractAndRates/withdrawContract'
 import { withdrawContract } from './contractAndRates/withdrawContract'
 import { findRateRelatedContracts } from './contractAndRates/findRateRelatedContracts'
-import type { RelatedContractStripped } from '../gen/gqlClient'
+import type { RelatedContractStripped, SharedDocument } from '../gen/gqlClient'
 import {
     undoWithdrawContract,
     type UndoWithdrawContractArgsType,
@@ -123,6 +123,7 @@ import {
     findDocumentZipPackagesByContractRevision,
     findDocumentZipPackagesByRateRevision,
 } from './documents'
+import type { DocumentTypes } from '../domain-models/DocumentType'
 
 type Store = {
     /** Settings functions **/
@@ -252,7 +253,10 @@ type Store = {
 
     /** Documents **/
     findAllDocuments: () => Promise<AuditDocument[] | Error>
-    findDocumentById: (docID: string) => Promise<AuditDocument | Error>
+    findDocumentById: (
+        docID: string,
+        docType: DocumentTypes
+    ) => Promise<SharedDocument | Error>
     createDocumentZipPackage: (
         args: CreateDocumentZipPackageArgsType
     ) => Promise<DocumentZipPackage | Error>
@@ -380,7 +384,8 @@ function NewPostgresStore(client: ExtendedPrismaClient): Store {
 
         /** Documents **/
         findAllDocuments: () => findAllDocuments(client),
-        findDocumentById: (docID) => findDocumentById(client, docID),
+        findDocumentById: (docID, docType) =>
+            findDocumentById(client, docID, docType),
         createDocumentZipPackage: (args) =>
             createDocumentZipPackage(client, args),
         findDocumentZipPackagesByContractRevision: (

@@ -37,7 +37,10 @@ export function fetchDocumentResolver(
             })
         }
 
-        const fetchedDocument = await store.findDocumentById(input.documentID)
+        const fetchedDocument = await store.findDocumentById(
+            input.documentID,
+            input.documentType
+        )
 
         if (fetchedDocument instanceof Error) {
             const errMessage = `Issue finding document message: ${fetchedDocument.message}`
@@ -69,9 +72,9 @@ export function fetchDocumentResolver(
         const bucket = parseBucketName(s3URL)
 
         if (key instanceof Error || bucket instanceof Error) {
-            const err = new Error(
-                'S3 needs to be provided a valid key and bucket'
-            )
+            const errMsg = `S3 needs to be provided a valid key and bucket. Invalid for docID: ${input.documentID}`
+            console.error(errMsg)
+            const err = new Error(errMsg)
             throw err
         }
         const expiresIn =
@@ -86,12 +89,12 @@ export function fetchDocumentResolver(
             })
         }
         const qaDocs = [
-            'contractQuestionDoc',
-            'contractQuestionResponseDoc',
-            'rateQuestionDoc',
-            'rateQuestionResponseDoc',
+            'CONTRACT_QUESTION_DOC',
+            'CONTRACT_QUESTION_RESPONSE_DOC',
+            'RATE_QUESTION_DOC',
+            'RATE_QUESTION_RESPONSE_DOC',
         ]
-        const bucketName = qaDocs.includes(fetchedDocument.type)
+        const bucketName = qaDocs.includes(input.documentType)
             ? 'QUESTION_ANSWER_DOCS'
             : 'HEALTH_PLAN_DOCS'
         const url = await s3Client.getURL(key, bucketName, expiresIn)
@@ -102,6 +105,7 @@ export function fetchDocumentResolver(
             id: fetchedDocument.id,
             name: fetchedDocument.name,
             s3URL: fetchedDocument.s3URL,
+            sha256: fetchedDocument.sha256 ?? undefined,
             downloadURL: url,
         }
 

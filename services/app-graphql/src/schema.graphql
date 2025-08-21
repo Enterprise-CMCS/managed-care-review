@@ -1317,7 +1317,8 @@ type SharedDocument {
     id: String!
     name: String!
     s3URL: String!
-    downloadURL: String!
+    sha256: String
+    downloadURL: String
 }
 
 """
@@ -2371,6 +2372,10 @@ type FetchDocumentPayload {
 input FetchDocumentInput {
     documentID: ID!
     """
+    documentType indicates which of the document tables to query
+    """
+    documentType: DocumentType!
+    """
     ExpiresIn represents times in seconds until expiration.
     Valid range from 1 second to 604,800 seconds (1 week).
     Defaults to 3600 seconds (1 hour)
@@ -2669,6 +2674,18 @@ enum DocumentZipType {
     CONTRACT_DOCUMENTS
     RATE_DOCUMENTS
 }
+
+enum DocumentType {
+    CONTRACT_DOC
+    CONTRACT_SUPPORTING_DOC
+    RATE_DOC
+    RATE_SUPPORTING_DOC
+    CONTRACT_QUESTION_DOC
+    CONTRACT_QUESTION_RESPONSE_DOC
+    RATE_QUESTION_DOC
+    RATE_QUESTION_RESPONSE_DOC
+}
+
 type OauthClient {
     id: ID!
     clientId: String!
