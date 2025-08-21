@@ -65,12 +65,13 @@ export const getCorsHeaders = (
     stageName: string = process.env.stage || 'local'
 ) => {
     const allowedOrigins = [
-        stageName === 'local'
-            ? 'http://localhost:3000'
-            : `https://${stageName !== 'prod' ? stageName + '.' : ''}mc-review.cms.gov`,
+        process.env.APOLLO_ENDPOINT,
         ...(process.env.INTERNAL_ALLOWED_ORIGINS?.split(',').filter(Boolean) ||
             []),
     ]
+
+    console.info('Application Endpoint')
+    console.info(process.env.APPLICATION_ENDPOINT)
 
     console.info('Allowed Origins')
     console.info(allowedOrigins)
