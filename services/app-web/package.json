@@ -184,7 +184,7 @@
         "serverless-stack-termination-protection": "^2.0.2",
         "storybook": "^9.1.2",
         "stylelint": "^16.12.0",
-        "stylelint-config-recommended-scss": "^14.1.0",
+        "stylelint-config-recommended-scss": "^16.0.0",
         "typescript": "5.9.2",
         "typescript-eslint": "^8.37.0",
         "vite-plugin-graphql-loader": "^4.0.4",
