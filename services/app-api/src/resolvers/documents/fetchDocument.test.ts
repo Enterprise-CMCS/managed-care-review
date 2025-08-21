@@ -53,7 +53,7 @@ describe('fetchDocument', () => {
 
         expect(fetchResult.errors[0].extensions?.code).toBe('NOT_FOUND')
         expect(fetchResult.errors[0].message).toBe(
-            'Issue finding document message: PRISMA ERROR: Cannot find document with id: bad_id'
+            'Issue finding document message: PRISMA ERROR: Cannot find contract document with id: bad_id'
         )
     })
 

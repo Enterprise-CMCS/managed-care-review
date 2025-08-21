@@ -2376,7 +2376,7 @@ input FetchDocumentInput {
     """
     documentType: DocumentType!
     """
-    ExpiresIn represents times in seconds until expiration.
+    ExpiresIn represents times in seconds until the downloadURL's expiration.
     Valid range from 1 second to 604,800 seconds (1 week).
     Defaults to 3600 seconds (1 hour)
     """
