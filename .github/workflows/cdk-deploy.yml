@@ -650,7 +650,7 @@ jobs:
         # Use existing Cypress config but override with CDK endpoints
         config-file: services/cypress/cypress.config.ts
         # Use plain URL without Basic Auth to match serverless
-        config: baseUrl=https://${{ needs.deploy.outputs.application-endpoint }}
+        config: baseUrl=${{ needs.deploy.outputs.application-endpoint }}
         record: true
         parallel: true
         browser: chrome
