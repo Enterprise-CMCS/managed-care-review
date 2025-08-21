@@ -55,7 +55,7 @@ jobs:
     runs-on: ubuntu-24.04
     steps:
       - name: Check out repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
 
       - name: Setup env
         uses: ./.github/actions/setup_env
@@ -90,7 +90,7 @@ jobs:
     runs-on: ubuntu-24.04
     steps:
       - name: Check out repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
 
       - name: Setup env
         uses: ./.github/actions/setup_env
@@ -122,7 +122,7 @@ jobs:
           name: cypress-gen deploy ${{ inputs.stage_name }}
           path: ./services/cypress/gen
 
-      - uses: actions/download-artifact@v4
+      - uses: actions/download-artifact@v5
         with:
           name: lambda-layers-prisma-client-migration
           path: ./services/app-api/lambda-layers-prisma-client-migration
@@ -132,7 +132,7 @@ jobs:
           tar -C ./services/app-api/lambda-layers-prisma-client-migration -xf ./services/app-api/lambda-layers-prisma-client-migration/nodejs.tar.gz
           rm -rf ./services/app-api/lambda-layers-prisma-client-migration/nodejs.tar.gz
 
-      - uses: actions/download-artifact@v4
+      - uses: actions/download-artifact@v5
         with:
           name: lambda-layers-prisma-client-engine
           path: ./services/app-api/lambda-layers-prisma-client-engine

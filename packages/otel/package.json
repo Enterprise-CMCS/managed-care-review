@@ -13,8 +13,8 @@
         "react": "^18.2.0"
     },
     "devDependencies": {
-        "@types/node": "^20.14.12",
+        "@types/node": "^24.2.1",
         "@types/react": "^18.0.14",
-        "typescript": "5.8.3"
+        "typescript": "5.9.2"
     }
 }

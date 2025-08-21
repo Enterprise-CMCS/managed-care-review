@@ -467,8 +467,18 @@ function rateFormDataToDomainModel(
         rateID: rateRevision.rateID,
         rateType: rateRevision.rateType ?? undefined,
         rateCapitationType: rateRevision.rateCapitationType ?? undefined,
-        rateDocuments: rateRevision.rateDocuments ?? [],
-        supportingDocuments: rateRevision.supportingDocuments ?? [],
+        rateDocuments: rateRevision.rateDocuments
+            ? rateRevision.rateDocuments.map((doc) => ({
+                  ...doc,
+                  dateAdded: doc.dateAdded ?? undefined,
+              }))
+            : [],
+        supportingDocuments: rateRevision.supportingDocuments
+            ? rateRevision.supportingDocuments.map((doc) => ({
+                  ...doc,
+                  dateAdded: doc.dateAdded ?? undefined,
+              }))
+            : [],
         rateDateStart: rateRevision.rateDateStart ?? undefined,
         rateDateEnd: rateRevision.rateDateEnd ?? undefined,
         rateDateCertified: rateRevision.rateDateCertified ?? undefined,
@@ -532,16 +542,19 @@ function setDateAddedForContractRevisions(
         if (!sinceDate) break
         for (const doc of contractRev.formData.contractDocuments) {
             if (!firstSeenDate[doc.sha256]) {
-                firstSeenDate[doc.sha256] = sinceDate
+                // still set the hashmap of docs with db date added.
+                firstSeenDate[doc.sha256] = doc.dateAdded ?? sinceDate
             }
-            doc.dateAdded = firstSeenDate[doc.sha256]
+            // use db date added, fallback to hashmap
+            doc.dateAdded = doc.dateAdded ?? firstSeenDate[doc.sha256]
         }
         for (const doc of contractRev.formData.supportingDocuments) {
             if (!firstSeenDate[doc.sha256]) {
-                firstSeenDate[doc.sha256] = sinceDate
+                // still set the hashmap of docs with db date added.
+                firstSeenDate[doc.sha256] = doc.dateAdded ?? sinceDate
             }
-
-            doc.dateAdded = firstSeenDate[doc.sha256]
+            // use db date added, fallback to hashmap
+            doc.dateAdded = doc.dateAdded ?? firstSeenDate[doc.sha256]
         }
     }
 }
@@ -558,17 +571,21 @@ function setDateAddedForRateRevisions(rateRevs: RateRevisionType[]) {
         if (rateRev.formData.rateDocuments) {
             for (const doc of rateRev.formData.rateDocuments) {
                 if (!firstSeenDate[doc.sha256]) {
-                    firstSeenDate[doc.sha256] = sinceDate
+                    // still set the hashmap of docs with db date added.
+                    firstSeenDate[doc.sha256] = doc.dateAdded ?? sinceDate
                 }
-                doc.dateAdded = firstSeenDate[doc.sha256]
+                // use db date added, fallback to hashmap
+                doc.dateAdded = doc.dateAdded ?? firstSeenDate[doc.sha256]
             }
         }
         if (rateRev.formData.supportingDocuments) {
             for (const doc of rateRev.formData.supportingDocuments) {
                 if (!firstSeenDate[doc.sha256]) {
-                    firstSeenDate[doc.sha256] = sinceDate
+                    // still set the hashmap of docs with db date added.
+                    firstSeenDate[doc.sha256] = doc.dateAdded ?? sinceDate
                 }
-                doc.dateAdded = firstSeenDate[doc.sha256]
+                // use db date added, fallback to hashmap
+                doc.dateAdded = doc.dateAdded ?? firstSeenDate[doc.sha256]
             }
         }
     }
@@ -637,10 +654,20 @@ function contractFormDataToDomainModel(
                   email: contact.email ?? undefined,
               }))
             : [],
-        supportingDocuments: contractRevision.supportingDocuments ?? [],
+        supportingDocuments: contractRevision.supportingDocuments
+            ? contractRevision.supportingDocuments.map((doc) => ({
+                  ...doc,
+                  dateAdded: doc.dateAdded ?? undefined,
+              }))
+            : [],
         contractExecutionStatus:
             contractRevision.contractExecutionStatus ?? undefined,
-        contractDocuments: contractRevision.contractDocuments ?? [],
+        contractDocuments: contractRevision.contractDocuments
+            ? contractRevision.contractDocuments.map((doc) => ({
+                  ...doc,
+                  dateAdded: doc.dateAdded ?? undefined,
+              }))
+            : [],
         contractDateStart: contractRevision.contractDateStart ?? undefined,
         contractDateEnd: contractRevision.contractDateEnd ?? undefined,
         managedCareEntities: contractRevision.managedCareEntities ?? undefined,
