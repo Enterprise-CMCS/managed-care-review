@@ -72,6 +72,9 @@ export const getCorsHeaders = (
             []),
     ]
 
+    console.info('Allowed Origins')
+    console.info(allowedOrigins)
+
     const origin = allowedOrigins.includes(requestOrigin || '')
         ? requestOrigin
         : allowedOrigins[1]
@@ -429,6 +432,8 @@ const gqlHandler: Handler = async (event, context, completion) => {
 
     if (response && typeof response === 'object' && 'headers' in response) {
         const apiGatewayEvent = event as APIGatewayProxyEvent
+        console.info('Origin')
+        console.info(apiGatewayEvent.headers?.origin)
         response.headers = {
             ...response.headers,
             ...getCorsHeaders(apiGatewayEvent.headers?.origin),
