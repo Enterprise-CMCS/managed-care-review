@@ -65,7 +65,7 @@ export const getCorsHeaders = (
     stageName: string = process.env.stage || 'local'
 ) => {
     const allowedOrigins = [
-        process.env.APOLLO_ENDPOINT,
+        process.env.APPLICATION_ENDPOINT,
         ...(process.env.INTERNAL_ALLOWED_ORIGINS?.split(',').filter(Boolean) ||
             []),
     ]
