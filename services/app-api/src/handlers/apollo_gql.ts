@@ -43,6 +43,8 @@ import {
     generateDocumentZip,
     localGenerateDocumentZip,
 } from '../zip'
+import { logError } from '../logger'
+import { configureCorsHeaders } from '../cors/configureCorsHelpers'
 
 let ldClient: LDClient
 let s3Client: S3ClientT
@@ -60,27 +62,24 @@ export interface Context {
     }
 }
 
-export const getCorsHeaders = (
-    requestOrigin: string | undefined,
-    stageName: string = process.env.stage || 'local'
+// Helper function to check if origin matches allowed patterns
+export const isOriginAllowed = (
+    requestOrigin: string,
+    allowedOrigins: string[]
 ) => {
-    const allowedOrigins = [
-        process.env.APPLICATION_ENDPOINT,
-        ...(process.env.INTERNAL_ALLOWED_ORIGINS?.split(',').filter(Boolean) ||
-            []),
-    ]
+    if (allowedOrigins.length === 0) return false
 
-    const origin = allowedOrigins.includes(requestOrigin || '')
-        ? requestOrigin
-        : allowedOrigins[1]
-
-    return {
-        'Access-Control-Allow-Origin': origin,
-        'Access-Control-Allow-Headers':
-            'Content-Type,Authorization,X-Amz-Date,X-Api-Key,X-Amz-Security-Token',
-        'Access-Control-Allow-Methods': 'GET,POST,OPTIONS',
-        'Access-Control-Allow-Credentials': 'true',
-    }
+    return allowedOrigins.some((allowed) => {
+        // If it starts with '*.', treat as domain wildcard
+        if (allowed.startsWith('*.')) {
+            const domain = allowed.substring(2) // Remove the '*.'
+            return (
+                requestOrigin.endsWith('.' + domain) || requestOrigin === domain
+            )
+        }
+        // Otherwise, exact match
+        return requestOrigin === allowed
+    })
 }
 
 // This function pulls auth info out of the cognitoAuthenticationProvider in the lambda event
@@ -423,27 +422,26 @@ const gqlHandler: Handler = async (event, context, completion) => {
     // Once initialized, future awaits will return immediately
     const initializedHandler = await handlerPromise
 
-    const response = await initializedHandler(event, context, completion)
-
-    if (response && typeof response === 'object' && 'headers' in response) {
-        const apiGatewayEvent = event as APIGatewayProxyEvent
-        console.info('Origin')
-        console.info(apiGatewayEvent.headers?.origin)
-        response.headers = {
-            ...response.headers,
-            ...getCorsHeaders(apiGatewayEvent.headers?.origin),
-        }
-    }
-
-    const payloadSize = Buffer.from(event.body).length
-    const serviceName = 'gql-handler'
     const otelCollectorUrl = process.env.API_APP_OTEL_COLLECTOR_URL
     if (otelCollectorUrl === undefined || otelCollectorUrl === '') {
         throw new Error(
             'Configuration Error: API_APP_OTEL_COLLECTOR_URL is required to run app-api'
         )
     }
+    const serviceName = 'gql-handler'
     initTracer(serviceName, otelCollectorUrl)
+
+    const response = await initializedHandler(event, context, completion)
+
+    // Configure cors headers
+    const corsError = configureCorsHeaders(response, event)
+
+    if (corsError) {
+        logError('configureCorsHeaders', corsError.message)
+        recordException(corsError.message, serviceName, 'requestPayload')
+    }
+
+    const payloadSize = Buffer.from(event.body).length
     if (payloadSize > 5.5 * 1024 * 1024) {
         const errMsg = `Large request payload detected: ${payloadSize} bytes`
         console.warn(errMsg)
