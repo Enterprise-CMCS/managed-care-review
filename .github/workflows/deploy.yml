@@ -341,6 +341,7 @@ jobs:
       subnet_private_b_id: ${{ secrets.DEV_SUBNET_PRIVATE_B_ID }}
       subnet_private_c_id: ${{ secrets.DEV_SUBNET_PRIVATE_C_ID }}
       subnet_public_a_id: ${{ secrets.DEV_SUBNET_PUBLIC_A_ID }}
+      internal_allowed_origins: ${{ secrets.DEV_INTERNAL_ALLOWED_ORIGINS }}
 
   finishing-prep:
     name: Finishing Prep
