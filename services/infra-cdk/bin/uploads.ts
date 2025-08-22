@@ -31,7 +31,7 @@ async function main(): Promise<void> {
         const env = getCdkEnvironment(appConfig.stage)
 
         // Create Uploads stack (independent - no dependencies)
-        new Uploads(app, ResourceNames.stackName('Uploads', appConfig.stage), {
+        new Uploads(app, ResourceNames.stackName('uploads', appConfig.stage), {
             env,
             stage: appConfig.stage,
             stageConfig: config,
