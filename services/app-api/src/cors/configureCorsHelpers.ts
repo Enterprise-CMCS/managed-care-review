@@ -26,7 +26,7 @@ export const configureCorsHeaders = (
     event: APIGatewayProxyEvent
 ): void | Error => {
     if (response && typeof response === 'object' && 'headers' in response) {
-        const requestOrigin = event.headers?.Origin
+        const requestOrigin = event.headers?.origin || event.headers?.Origin
 
         if (!requestOrigin) {
             return new Error(
