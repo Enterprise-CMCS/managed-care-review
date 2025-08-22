@@ -1318,6 +1318,7 @@ type SharedDocument {
     name: String!
     s3URL: String!
     sha256: String
+    type: String
     downloadURL: String
 }
 
@@ -2374,7 +2375,7 @@ input FetchDocumentInput {
     """
     documentType indicates which of the document tables to query
     """
-    documentType: DocumentType!
+    documentType: DocumentType
     """
     ExpiresIn represents times in seconds until the downloadURL's expiration.
     Valid range from 1 second to 604,800 seconds (1 week).

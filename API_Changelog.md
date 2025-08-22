@@ -6,7 +6,7 @@
 - New endpoint `fetchDocument` added to the API
     - Parameters
         - `documentID`: the `id` of the document to be retrieved
-        - `documentType`: the type of document to be retrieved. Can be one of:  CONTRACT_DOC, CONTRACT_SUPPORTING_DOC, RATE_DOC, RATE_SUPPORTING_DOC, CONTRACT_QUESTION_DOC, CONTRACT_QUESTION_RESPONSE_DOC, RATE_QUESTION_DOC, RATE_QUESTION_RESPONSE_DOC
+        - `documentType`: optional field that represents the type of document to be retrieved. Can be one of:  CONTRACT_DOC, CONTRACT_SUPPORTING_DOC, RATE_DOC, RATE_SUPPORTING_DOC, CONTRACT_QUESTION_DOC, CONTRACT_QUESTION_RESPONSE_DOC, RATE_QUESTION_DOC, RATE_QUESTION_RESPONSE_DOC. Using this parameter gives a performance boost
         - `expiresIn`: represents times in seconds until the downloadURL's expiration. Valid range from 1 second to 604,800 seconds (1 week). Defaults to 3600 seconds (1 hour)
     - Returns a SharedDocument type
         - id: String

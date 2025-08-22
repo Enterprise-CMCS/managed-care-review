@@ -5,32 +5,63 @@ import { createAndSubmitTestContractWithRate } from '../../testHelpers/gqlContra
 import { must } from '../../testHelpers'
 import { findDocumentById } from '.'
 
-it('returns document', async () => {
-    const client = await sharedTestPrismaClient()
+describe('findDocumentById', () => {
+    it('returns document with documentType specified', async () => {
+        const client = await sharedTestPrismaClient()
 
-    const stateServer = await constructTestPostgresServer({
-        context: {
-            user: testStateUser(),
-        },
+        const stateServer = await constructTestPostgresServer({
+            context: {
+                user: testStateUser(),
+            },
+        })
+
+        const contract = await createAndSubmitTestContractWithRate(stateServer)
+
+        const fetchedDoc = must(
+            await findDocumentById(
+                client,
+                contract.packageSubmissions[0].contractRevision.formData
+                    .contractDocuments[0].id!,
+                'CONTRACT_DOC'
+            )
+        )
+
+        expect(fetchedDoc.id).toEqual(
+            contract.packageSubmissions[0].contractRevision.formData
+                .contractDocuments[0].id
+        )
+        expect(fetchedDoc.name).toEqual(
+            contract.packageSubmissions[0].contractRevision.formData
+                .contractDocuments[0].name
+        )
     })
 
-    const contract = await createAndSubmitTestContractWithRate(stateServer)
+    it('returns document without documentType specified', async () => {
+        const client = await sharedTestPrismaClient()
 
-    const fetchedDoc = must(
-        await findDocumentById(
-            client,
-            contract.packageSubmissions[0].contractRevision.formData
-                .contractDocuments[0].id!,
-            'CONTRACT_DOC'
+        const stateServer = await constructTestPostgresServer({
+            context: {
+                user: testStateUser(),
+            },
+        })
+
+        const contract = await createAndSubmitTestContractWithRate(stateServer)
+
+        const fetchedDoc = must(
+            await findDocumentById(
+                client,
+                contract.packageSubmissions[0].contractRevision.formData
+                    .contractDocuments[0].id!
+            )
         )
-    )
 
-    expect(fetchedDoc.id).toEqual(
-        contract.packageSubmissions[0].contractRevision.formData
-            .contractDocuments[0].id
-    )
-    expect(fetchedDoc.name).toEqual(
-        contract.packageSubmissions[0].contractRevision.formData
-            .contractDocuments[0].name
-    )
+        expect(fetchedDoc.id).toEqual(
+            contract.packageSubmissions[0].contractRevision.formData
+                .contractDocuments[0].id
+        )
+        expect(fetchedDoc.name).toEqual(
+            contract.packageSubmissions[0].contractRevision.formData
+                .contractDocuments[0].name
+        )
+    })
 })

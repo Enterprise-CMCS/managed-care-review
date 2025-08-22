@@ -39,7 +39,7 @@ export function fetchDocumentResolver(
 
         const fetchedDocument = await store.findDocumentById(
             input.documentID,
-            input.documentType
+            input.documentType ?? undefined
         )
 
         if (fetchedDocument instanceof Error) {
@@ -94,7 +94,9 @@ export function fetchDocumentResolver(
             'RATE_QUESTION_DOC',
             'RATE_QUESTION_RESPONSE_DOC',
         ]
-        const bucketName = qaDocs.includes(input.documentType)
+        const bucketName = qaDocs.includes(
+            input.documentType || fetchedDocument.type || ''
+        )
             ? 'QUESTION_ANSWER_DOCS'
             : 'HEALTH_PLAN_DOCS'
         const url = await s3Client.getURL(key, bucketName, expiresIn)

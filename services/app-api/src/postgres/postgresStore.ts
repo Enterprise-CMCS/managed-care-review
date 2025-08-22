@@ -255,7 +255,7 @@ type Store = {
     findAllDocuments: () => Promise<AuditDocument[] | Error>
     findDocumentById: (
         docID: string,
-        docType: DocumentTypes
+        docType?: DocumentTypes
     ) => Promise<SharedDocument | Error>
     createDocumentZipPackage: (
         args: CreateDocumentZipPackageArgsType
