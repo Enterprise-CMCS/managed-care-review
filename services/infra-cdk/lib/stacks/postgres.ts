@@ -174,10 +174,10 @@ export class Postgres extends BaseStack {
         })
 
         if (this.cluster) {
-            new CfnOutput(this, 'PostgresClusterArn', {
+            new CfnOutput(this, 'PostgresAuroraV2Arn', {
                 value: this.cluster.clusterArn,
                 description: 'CDK PostgreSQL Aurora cluster ARN',
-                exportName: `MCR-Postgres-${this.stage}-ClusterArn-cdk`,
+                exportName: `MCR-Postgres-${this.stage}-cdk-PostgresAuroraV2Arn`,
             })
 
             new CfnOutput(this, 'PostgresClusterEndpoint', {
