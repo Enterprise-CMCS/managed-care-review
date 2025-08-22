@@ -234,6 +234,7 @@ export class AppApiStack extends BaseStack {
 
         // S3 permissions
         const uploadsStackName = ResourceNames.stackName('Uploads', this.stage)
+        console.info(`stack name: ${uploadsStackName}`)
         const documentUploadsBucketArn = Fn.importValue(
             `${uploadsStackName}-DocumentUploadsBucketArn`
         )

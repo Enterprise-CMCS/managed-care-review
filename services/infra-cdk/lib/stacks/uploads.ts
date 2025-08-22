@@ -134,25 +134,25 @@ export class Uploads extends BaseStack {
         new CfnOutput(this, 'DocumentUploadsBucketName', {
             value: uploadsBucket.bucketName,
             description: 'Document uploads S3 bucket name',
-            exportName: `MCR-Uploads-${this.stage}-cdk-DocumentUploadsBucketName`,
+            exportName: this.exportName('DocumentUploadsBucketName'),
         })
 
         new CfnOutput(this, 'DocumentUploadsBucketArn', {
             value: uploadsBucket.bucketArn,
             description: 'Document uploads S3 bucket ARN',
-            exportName: `MCR-Uploads-${this.stage}-cdk-DocumentUploadsBucketArn`,
+            exportName: this.exportName('DocumentUploadsBucketArn'),
         })
 
         new CfnOutput(this, 'QAUploadsBucketName', {
             value: qaBucket.bucketName,
             description: 'QA uploads S3 bucket name',
-            exportName: `MCR-Uploads-${this.stage}-cdk-QAUploadsBucketName`,
+            exportName: this.exportName('QAUploadsBucketName'),
         })
 
         new CfnOutput(this, 'QAUploadsBucketArn', {
             value: qaBucket.bucketArn,
             description: 'QA uploads S3 bucket ARN',
-            exportName: `MCR-Uploads-${this.stage}-cdk-QAUploadsBucketArn`,
+            exportName: this.exportName('QAUploadsBucketArn'),
         })
     }
 }
