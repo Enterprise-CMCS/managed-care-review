@@ -233,7 +233,7 @@ export class AppApiStack extends BaseStack {
         )
 
         // S3 permissions
-        const uploadsStackName = ResourceNames.stackName('Uploads', this.stage)
+        const uploadsStackName = ResourceNames.stackName('uploads', this.stage)
         console.info(`stack name: ${uploadsStackName}`)
         const documentUploadsBucketArn = Fn.importValue(
             `${uploadsStackName}-DocumentUploadsBucketArn`
@@ -292,7 +292,7 @@ export class AppApiStack extends BaseStack {
 
     private getLambdaEnvironment(): Record<string, string> {
         // Get values from other stacks
-        const uploadsStackName = ResourceNames.stackName('Uploads', this.stage)
+        const uploadsStackName = ResourceNames.stackName('uploads', this.stage)
         const frontendStackName = ResourceNames.stackName(
             'Frontend',
             this.stage
