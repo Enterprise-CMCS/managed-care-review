@@ -15,7 +15,8 @@ import {
   getDatabaseUrl
 } from '../config';
 import { getLambdaEnvironment } from '@config/index';
-import { getBundlingConfig } from '@constructs/lambda/bundling-utils';
+// TODO: Re-implement getBundlingConfig when needed
+// import { getBundlingConfig } from '@constructs/lambda/bundling-utils';
 
 // Lambda configuration (moved from shared config)
 const LAMBDA_DEFAULTS = {

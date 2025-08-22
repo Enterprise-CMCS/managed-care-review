@@ -5,7 +5,8 @@
  */
 
 import { Construct } from 'constructs';
-import { BaseLambdaFunction } from '@constructs/lambda';
+// TODO: Re-implement BaseLambdaFunction when needed
+// import { BaseLambdaFunction } from '@constructs/lambda';
 import * as events from 'aws-cdk-lib/aws-events';
 import * as targets from 'aws-cdk-lib/aws-events-targets';
 import * as sns from 'aws-cdk-lib/aws-sns';
@@ -24,7 +25,8 @@ const FILE_SIZE_LIMITS = {
   QUARANTINE_THRESHOLD_MB: 1024,
   MAX_SCAN_SIZE_BYTES: 512 * 1024 * 1024, // 512MB in bytes
 } as const;
-import { LambdaEnvironmentFactory } from '@constructs/lambda/environment-factory';
+// TODO: Re-implement LambdaEnvironmentFactory when needed
+// import { LambdaEnvironmentFactory } from '@constructs/lambda/environment-factory';
 import { StageConfig } from '@config/index';
 
 export interface ScanEventProcessorProps {

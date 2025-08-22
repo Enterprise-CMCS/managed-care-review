@@ -12,7 +12,7 @@ import {
   GitHubOidcStack,
   LambdaLayersStack,
   // Ultra-lean micro-stack architecture
-  SharedInfraStack,
+  // SharedInfraStack, // DELETED - not using layers or SSM yet
   GraphQLApiStack,
   PublicApiStack,
   FileOpsStack,
@@ -51,7 +51,7 @@ export interface StackReferences {
   monitoring: MonitoringStack;
   githubOidc?: GitHubOidcStack;
   // Elegant micro-stack architecture (85% code reduction, zero circular dependencies)
-  sharedInfra: SharedInfraStack;
+  // sharedInfra: SharedInfraStack; // DELETED - not using layers or SSM yet
   graphqlApi: GraphQLApiStack;
   publicApi: PublicApiStack;
   fileOps: FileOpsStack;
@@ -90,16 +90,19 @@ export class StackOrchestrator {
 
     // 7. ELEGANT MICRO-STACK ARCHITECTURE (Linear dependency chain - no circular deps!)
     // Step 1: Shared Infrastructure (OTEL + Prisma layers)
-    const sharedInfra = this.createSharedInfra(lambdaLayers);
+    // TODO: Re-enable when implementing layers
+    // const sharedInfra = this.createSharedInfra(lambdaLayers);
     
     // Step 2: API Micro-stacks (can deploy in parallel - major speed improvement!)
-    const graphqlApi = this.createGraphQLApi(foundation, network, data, sharedInfra);
-    const publicApi = this.createPublicApi(foundation, network, data, sharedInfra);
-    const fileOps = this.createFileOps(data, sharedInfra);
-    const scheduledTasks = this.createScheduledTasks(data, sharedInfra);
+    // TODO: Re-enable when implementing shared infrastructure
+    // const graphqlApi = this.createGraphQLApi(foundation, network, data, sharedInfra);
+    // const publicApi = this.createPublicApi(foundation, network, data, sharedInfra);
+    // const fileOps = this.createFileOps(data, sharedInfra);
+    // const scheduledTasks = this.createScheduledTasks(data, sharedInfra);
     
     // Step 3: Auth Extensions (after APIs exist - breaks circular dependency)
-    const authExtensions = this.createAuthExtensions(data, graphqlApi, publicApi);
+    // TODO: Re-enable when implementing APIs
+    // const authExtensions = this.createAuthExtensions(data, graphqlApi, publicApi);
 
     // 8. Frontend Stack (deployment-independent - uses micro-stack outputs at CI build time)
     const frontend = this.createFrontend();
@@ -124,12 +127,13 @@ export class StackOrchestrator {
       monitoring,
       githubOidc,
       // Elegant micro-stack architecture (175 lines total vs 612 lines monolithic)
-      sharedInfra,
-      graphqlApi,
-      publicApi,
-      fileOps,
-      scheduledTasks,
-      authExtensions
+      // TODO: Re-enable when implementing these stacks
+      // sharedInfra,
+      // graphqlApi,
+      // publicApi,
+      // fileOps,
+      // scheduledTasks,
+      // authExtensions
     };
   }
 
