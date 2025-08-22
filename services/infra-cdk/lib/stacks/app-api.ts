@@ -8,8 +8,6 @@ import {
     RestApi,
     type IRestApi,
     LambdaIntegration,
-    AuthorizationType,
-    RequestAuthorizer,
     Deployment,
     Stage,
 } from 'aws-cdk-lib/aws-apigateway'
@@ -20,12 +18,9 @@ import {
     ServicePrincipal,
     ManagedPolicy,
 } from 'aws-cdk-lib/aws-iam'
-import { Vpc, SecurityGroup } from 'aws-cdk-lib/aws-ec2'
-import { StringParameter } from 'aws-cdk-lib/aws-ssm'
-import { CfnOutput, Duration, Fn, Size } from 'aws-cdk-lib'
+import { CfnOutput, Duration, Fn } from 'aws-cdk-lib'
 import { ResourceNames } from '../config'
-import { getAppApiLambdaConfig } from '../constructs/lambda/app-api-lambda-config'
-import { LayerVersion, Runtime, Architecture } from 'aws-cdk-lib/aws-lambda'
+import { Architecture, Runtime } from 'aws-cdk-lib/aws-lambda'
 import { CfnWebACLAssociation } from 'aws-cdk-lib/aws-wafv2'
 import * as path from 'path'
 
@@ -34,17 +29,20 @@ import * as path from 'path'
  * Matches the app-api serverless service functionality but uses existing infra-api Gateway
  */
 export class AppApiStack extends BaseStack {
-    public readonly graphqlFunction: NodejsFunction
+    // Start with simple lambdas only
     public readonly healthFunction: NodejsFunction
-    public readonly oauthTokenFunction: NodejsFunction
-    public readonly zipKeysFunction: NodejsFunction
-    public readonly migrateFunction: NodejsFunction
     public readonly emailSubmitFunction: NodejsFunction
     public readonly otelFunction: NodejsFunction
-    public readonly cleanupFunction: NodejsFunction
-    public readonly auditFilesFunction: NodejsFunction
-    public readonly migrateDocumentZipsFunction: NodejsFunction
     public readonly thirdPartyApiAuthorizerFunction: NodejsFunction
+
+    // TODO: Add complex lambdas later
+    // public readonly graphqlFunction: NodejsFunction
+    // public readonly oauthTokenFunction: NodejsFunction
+    // public readonly zipKeysFunction: NodejsFunction
+    // public readonly migrateFunction: NodejsFunction
+    // public readonly cleanupFunction: NodejsFunction
+    // public readonly auditFilesFunction: NodejsFunction
+    // public readonly migrateDocumentZipsFunction: NodejsFunction
 
     constructor(scope: Construct, id: string, props: BaseStackProps) {
         super(scope, id, {
@@ -73,73 +71,13 @@ export class AppApiStack extends BaseStack {
             }
         )
 
-        // Import VPC and security groups from network stack
-        const vpcId = StringParameter.valueFromLookup(
-            this,
-            `/mcr-cdk/${this.stage}/network/vpc-id`
-        )
-        const vpc = Vpc.fromLookup(this, 'Vpc', { vpcId })
-
-        const sgId = StringParameter.valueFromLookup(
-            this,
-            `/mcr-cdk/${this.stage}/network/lambda-sg-id`
-        )
-        const securityGroup = SecurityGroup.fromSecurityGroupId(
-            this,
-            'LambdaSecurityGroup',
-            sgId
-        )
-
-        // Import Lambda layers
-        const prismaEngineLayerArn = StringParameter.valueFromLookup(
-            this,
-            `/mcr-cdk/${this.stage}/layers/prisma-engine-layer-arn`
-        )
-        const prismaMigrationLayerArn = StringParameter.valueFromLookup(
-            this,
-            `/mcr-cdk/${this.stage}/layers/prisma-migration-layer-arn`
-        )
-        const otelLayerArn =
-            'arn:aws:lambda:us-east-1:901920570463:layer:aws-otel-nodejs-amd64-ver-1-18-1:4'
-
-        const prismaEngineLayer = LayerVersion.fromLayerVersionArn(
-            this,
-            'PrismaEngineLayer',
-            prismaEngineLayerArn
-        )
-        const prismaMigrationLayer = LayerVersion.fromLayerVersionArn(
-            this,
-            'PrismaMigrationLayer',
-            prismaMigrationLayerArn
-        )
-        const otelLayer = LayerVersion.fromLayerVersionArn(
-            this,
-            'OtelLayer',
-            otelLayerArn
-        )
-
         // Create Lambda execution role
         const lambdaRole = this.createLambdaRole()
 
         // Get environment variables
         const environment = this.getLambdaEnvironment()
 
-        // Create Lambda functions using NodejsFunction with proper bundling
-        this.graphqlFunction = this.createFunction(
-            'graphql',
-            'apollo_gql',
-            'gqlHandler',
-            {
-                timeout: Duration.seconds(30),
-                memorySize: 1024,
-                layers: [prismaEngineLayer, otelLayer],
-                vpc,
-                securityGroups: [securityGroup],
-                environment,
-                role: lambdaRole,
-            }
-        )
-
+        // Create simple Lambda functions first (no VPC, layers, or complex dependencies)
         this.healthFunction = this.createFunction(
             'health',
             'health_check',
@@ -147,52 +85,6 @@ export class AppApiStack extends BaseStack {
             {
                 timeout: Duration.seconds(30),
                 memorySize: 1024,
-                environment,
-                role: lambdaRole,
-            }
-        )
-
-        this.oauthTokenFunction = this.createFunction(
-            'oauth-token',
-            'oauth_token',
-            'main',
-            {
-                timeout: Duration.seconds(30),
-                memorySize: 1024,
-                layers: [prismaEngineLayer, otelLayer],
-                vpc,
-                securityGroups: [securityGroup],
-                environment,
-                role: lambdaRole,
-            }
-        )
-
-        this.zipKeysFunction = this.createFunction(
-            'zip-keys',
-            'bulk_download',
-            'main',
-            {
-                timeout: Duration.seconds(60),
-                memorySize: this.stage === 'prod' ? 4096 : 1024,
-                ephemeralStorageSize:
-                    this.stage === 'prod'
-                        ? Size.mebibytes(2048)
-                        : Size.mebibytes(512),
-                environment,
-                role: lambdaRole,
-            }
-        )
-
-        this.migrateFunction = this.createFunction(
-            'migrate',
-            'postgres_migrate',
-            'main',
-            {
-                timeout: Duration.seconds(60),
-                memorySize: 1024,
-                layers: [prismaMigrationLayer, otelLayer],
-                vpc,
-                securityGroups: [securityGroup],
                 environment,
                 role: lambdaRole,
             }
@@ -217,53 +109,6 @@ export class AppApiStack extends BaseStack {
             role: lambdaRole,
         })
 
-        this.cleanupFunction = this.createFunction(
-            'cleanup',
-            'cleanup',
-            'main',
-            {
-                timeout: Duration.seconds(30),
-                memorySize: 1024,
-                layers: [otelLayer],
-                environment,
-                role: lambdaRole,
-            }
-        )
-
-        this.auditFilesFunction = this.createFunction(
-            'audit-files',
-            'audit_s3',
-            'main',
-            {
-                timeout: Duration.seconds(60),
-                memorySize: 1024,
-                layers: [prismaEngineLayer, otelLayer],
-                vpc,
-                securityGroups: [securityGroup],
-                environment,
-                role: lambdaRole,
-            }
-        )
-
-        this.migrateDocumentZipsFunction = this.createFunction(
-            'migrate-document-zips',
-            'migrate_document_zips',
-            'main',
-            {
-                timeout: Duration.minutes(15),
-                memorySize: this.stage === 'prod' ? 4096 : 1024,
-                ephemeralStorageSize:
-                    this.stage === 'prod'
-                        ? Size.mebibytes(2048)
-                        : Size.mebibytes(512),
-                layers: [prismaEngineLayer, otelLayer],
-                vpc,
-                securityGroups: [securityGroup],
-                environment,
-                role: lambdaRole,
-            }
-        )
-
         this.thirdPartyApiAuthorizerFunction = this.createFunction(
             'third-party-api-authorizer',
             'third_party_API_authorizer',
@@ -275,6 +120,15 @@ export class AppApiStack extends BaseStack {
                 role: lambdaRole,
             }
         )
+
+        // TODO: Add complex functions later (with VPC, layers, etc.)
+        // this.graphqlFunction = this.createFunction('graphql', 'apollo_gql', 'gqlHandler', {...})
+        // this.oauthTokenFunction = this.createFunction('oauth-token', 'oauth_token', 'main', {...})
+        // this.zipKeysFunction = this.createFunction('zip-keys', 'bulk_download', 'main', {...})
+        // this.migrateFunction = this.createFunction('migrate', 'postgres_migrate', 'main', {...})
+        // this.cleanupFunction = this.createFunction('cleanup', 'cleanup', 'main', {...})
+        // this.auditFilesFunction = this.createFunction('audit-files', 'audit_s3', 'main', {...})
+        // this.migrateDocumentZipsFunction = this.createFunction('migrate-document-zips', 'migrate_document_zips', 'main', {...})
 
         // Create API Gateway resources and methods
         this.setupApiGatewayRoutes(apiGateway)
@@ -306,7 +160,7 @@ export class AppApiStack extends BaseStack {
                 'handlers',
                 `${handlerFile}.ts`
             ),
-            bundling: getAppApiLambdaConfig(functionName, this.stage),
+            // Use CDK default bundling for now - will configure per function as needed
             ...options,
         })
     }
@@ -457,32 +311,18 @@ export class AppApiStack extends BaseStack {
             stage: this.stage,
             REGION: this.region,
             // Database URL will be resolved at runtime via secrets manager
-            DATABASE_URL: `postgresql://placeholder:placeholder@placeholder:5432/postgres?schema=public&connection_limit=5`,
-            VITE_APP_AUTH_MODE: 'AWS_COGNITO',
-            API_APP_OTEL_COLLECTOR_URL: StringParameter.valueFromLookup(
-                this,
-                '/configuration/api_app_otel_collector_url'
-            ),
+            DATABASE_URL: process.env.DATABASE_URL || '',
+            VITE_APP_AUTH_MODE: process.env.VITE_APP_AUTH_MODE || 'AWS_COGNITO',
+            API_APP_OTEL_COLLECTOR_URL:
+                process.env.API_APP_OTEL_COLLECTOR_URL || '',
             SECRETS_MANAGER_SECRET: `aurora_postgres_${this.stage}`,
-            EMAILER_MODE: StringParameter.valueFromLookup(
-                this,
-                '/configuration/emailer_mode'
-            ),
-            PARAMETER_STORE_MODE: StringParameter.valueFromLookup(
-                this,
-                '/configuration/parameterStoreMode'
-            ),
+            EMAILER_MODE: process.env.EMAILER_MODE || '',
+            PARAMETER_STORE_MODE: process.env.PARAMETER_STORE_MODE || '',
             APPLICATION_ENDPOINT: applicationEndpoint,
             AWS_LAMBDA_EXEC_WRAPPER: '/opt/otel-handler',
             OPENTELEMETRY_COLLECTOR_CONFIG_FILE: '/var/task/collector.yml',
-            LD_SDK_KEY: StringParameter.valueFromLookup(
-                this,
-                '/configuration/ld_sdk_key_feds'
-            ),
-            JWT_SECRET: StringParameter.valueFromLookup(
-                this,
-                `/aws/reference/secretsmanager/api_jwt_secret_${this.stage}`
-            ),
+            LD_SDK_KEY: process.env.LD_SDK_KEY || '',
+            JWT_SECRET: process.env.JWT_SECRET || '',
             VITE_APP_S3_QA_BUCKET: qaUploadsBucketName,
             VITE_APP_S3_DOCUMENTS_BUCKET: documentUploadsBucketName,
         }
@@ -499,74 +339,35 @@ export class AppApiStack extends BaseStack {
             }
         )
 
-        // OAuth token endpoint
-        const oauthResource = apiGateway.root.addResource('oauth')
-        const tokenResource = oauthResource.addResource('token')
-        tokenResource.addMethod(
-            'POST',
-            new LambdaIntegration(this.oauthTokenFunction)
-        )
-
         // OTEL endpoint
         const otelResource = apiGateway.root.addResource('otel')
         otelResource.addMethod('POST', new LambdaIntegration(this.otelFunction))
 
-        // GraphQL endpoint with IAM authorization
-        const graphqlResource = apiGateway.root.addResource('graphql')
-        graphqlResource.addMethod(
-            'POST',
-            new LambdaIntegration(this.graphqlFunction),
-            {
-                authorizationType: AuthorizationType.IAM,
-            }
-        )
-        graphqlResource.addMethod(
-            'GET',
-            new LambdaIntegration(this.graphqlFunction),
-            {
-                authorizationType: AuthorizationType.IAM,
-            }
-        )
+        // TODO: Add complex routes later when functions are enabled
+        // OAuth token endpoint
+        // const oauthResource = apiGateway.root.addResource('oauth')
+        // const tokenResource = oauthResource.addResource('token')
+        // tokenResource.addMethod('POST', new LambdaIntegration(this.oauthTokenFunction))
 
-        // External GraphQL endpoint with custom authorizer
-        const v1Resource = apiGateway.root.addResource('v1')
-        const v1GraphqlResource = v1Resource.addResource('graphql')
-        const externalResource = v1GraphqlResource.addResource('external')
+        // GraphQL endpoints
+        // const graphqlResource = apiGateway.root.addResource('graphql')
+        // graphqlResource.addMethod('POST', new LambdaIntegration(this.graphqlFunction), {...})
+        // graphqlResource.addMethod('GET', new LambdaIntegration(this.graphqlFunction), {...})
 
-        // Create custom authorizer
-        const customAuthorizer = new RequestAuthorizer(
-            this,
-            'ThirdPartyApiAuthorizer',
-            {
-                handler: this.thirdPartyApiAuthorizerFunction,
-                identitySources: ['method.request.header.Authorization'],
-            }
-        )
+        // External GraphQL with custom authorizer
+        // const customAuthorizer = new RequestAuthorizer(this, 'ThirdPartyApiAuthorizer', {
+        //     handler: this.thirdPartyApiAuthorizerFunction,
+        //     identitySources: ['method.request.header.Authorization'],
+        // })
+        // const v1Resource = apiGateway.root.addResource('v1')
+        // const v1GraphqlResource = v1Resource.addResource('graphql')
+        // const externalResource = v1GraphqlResource.addResource('external')
+        // externalResource.addMethod('POST', new LambdaIntegration(this.graphqlFunction), { authorizer: customAuthorizer })
+        // externalResource.addMethod('GET', new LambdaIntegration(this.graphqlFunction), { authorizer: customAuthorizer })
 
-        externalResource.addMethod(
-            'POST',
-            new LambdaIntegration(this.graphqlFunction),
-            {
-                authorizer: customAuthorizer,
-            }
-        )
-        externalResource.addMethod(
-            'GET',
-            new LambdaIntegration(this.graphqlFunction),
-            {
-                authorizer: customAuthorizer,
-            }
-        )
-
-        // Zip endpoint with IAM authorization
-        const zipResource = apiGateway.root.addResource('zip')
-        zipResource.addMethod(
-            'POST',
-            new LambdaIntegration(this.zipKeysFunction),
-            {
-                authorizationType: AuthorizationType.IAM,
-            }
-        )
+        // Zip endpoint
+        // const zipResource = apiGateway.root.addResource('zip')
+        // zipResource.addMethod('POST', new LambdaIntegration(this.zipKeysFunction), { authorizationType: AuthorizationType.IAM })
 
         // Create a new deployment to include all the new methods
         const deployment = new Deployment(this, 'ApiDeployment', {
@@ -597,10 +398,10 @@ export class AppApiStack extends BaseStack {
     }
 
     private createOutputs(): void {
-        new CfnOutput(this, 'GraphqlFunctionName', {
-            value: this.graphqlFunction.functionName,
-            exportName: this.exportName('GraphqlFunctionName'),
-            description: 'GraphQL Lambda function name',
+        new CfnOutput(this, 'HealthFunctionName', {
+            value: this.healthFunction.functionName,
+            exportName: this.exportName('HealthFunctionName'),
+            description: 'Health check Lambda function name',
         })
 
         new CfnOutput(this, 'ApiAuthMode', {
@@ -614,5 +415,12 @@ export class AppApiStack extends BaseStack {
             exportName: this.exportName('Region'),
             description: 'AWS Region',
         })
+
+        // TODO: Add GraphQL function output when enabled
+        // new CfnOutput(this, 'GraphqlFunctionName', {
+        //     value: this.graphqlFunction.functionName,
+        //     exportName: this.exportName('GraphqlFunctionName'),
+        //     description: 'GraphQL Lambda function name',
+        // })
     }
 }
