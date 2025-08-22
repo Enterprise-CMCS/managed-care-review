@@ -62,26 +62,6 @@ export interface Context {
     }
 }
 
-// Helper function to check if origin matches allowed patterns
-export const isOriginAllowed = (
-    requestOrigin: string,
-    allowedOrigins: string[]
-) => {
-    if (allowedOrigins.length === 0) return false
-
-    return allowedOrigins.some((allowed) => {
-        // If it starts with '*.', treat as domain wildcard
-        if (allowed.startsWith('*.')) {
-            const domain = allowed.substring(2) // Remove the '*.'
-            return (
-                requestOrigin.endsWith('.' + domain) || requestOrigin === domain
-            )
-        }
-        // Otherwise, exact match
-        return requestOrigin === allowed
-    })
-}
-
 // This function pulls auth info out of the cognitoAuthenticationProvider in the lambda event
 // and turns that into our GQL resolver context object
 function contextForRequestForFetcher(userFetcher: userFromAuthProvider): ({
