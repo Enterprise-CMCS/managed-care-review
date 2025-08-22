@@ -5,6 +5,7 @@ query fetchDocument($input: FetchDocumentInput!) {
             name
             s3URL
             downloadURL
+            type
         }
     }
 }
