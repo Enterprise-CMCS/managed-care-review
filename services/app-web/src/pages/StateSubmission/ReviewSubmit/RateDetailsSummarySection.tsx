@@ -9,6 +9,7 @@ import { MultiColumnGrid } from '../../../components/MultiColumnGrid'
 import { UploadedDocumentsTable } from '../../../components/SubmissionSummarySection'
 import { usePreviousSubmission } from '../../../hooks/usePreviousSubmission'
 import styles from '../../../components/SubmissionSummarySection/SubmissionSummarySection.module.scss'
+import sectionStyle from '../ReviewSubmit/ReviewSubmit.module.scss'
 import { GenericErrorPage } from '../../Errors/GenericErrorPage'
 
 import { DataDetailMissingField } from '../../../components/DataDetail/DataDetailMissingField'
@@ -229,7 +230,7 @@ export const RateDetailsSummarySection = ({
     }
 
     return (
-        <SectionCard id="rateDetails" className={styles.summarySection}>
+        <SectionCard id="rateDetails" className={sectionStyle.summarySection}>
             <SectionHeader
                 header="Rate details"
                 editNavigateTo={editNavigateTo}

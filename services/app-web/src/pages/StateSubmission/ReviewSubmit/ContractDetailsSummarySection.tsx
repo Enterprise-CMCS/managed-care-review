@@ -11,6 +11,7 @@ import { formatCalendarDate } from '@mc-review/dates'
 import { MultiColumnGrid } from '../../../components/MultiColumnGrid'
 import { usePreviousSubmission } from '../../../hooks/usePreviousSubmission'
 import styles from '../../SubmissionSummary/SubmissionSummary.module.scss'
+import sectionStyle from '../ReviewSubmit/ReviewSubmit.module.scss'
 import { useAuth } from '../../../contexts/AuthContext'
 import { dsnpTriggers } from '@mc-review/common-code'
 
@@ -173,7 +174,7 @@ export const ContractDetailsSummarySection = ({
     return (
         <SectionCard
             id="contractDetailsSection"
-            className={styles.contractDetailsSection}
+            className={sectionStyle.summarySection}
         >
             <SectionHeader
                 header="Contract details"

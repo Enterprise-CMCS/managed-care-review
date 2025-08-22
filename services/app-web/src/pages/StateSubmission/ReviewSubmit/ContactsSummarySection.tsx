@@ -1,5 +1,5 @@
 import { Grid, GridContainer } from '@trussworks/react-uswds'
-import styles from '../StateSubmissionForm.module.scss'
+import styles from '../ReviewSubmit/ReviewSubmit.module.scss'
 
 import { SectionHeader } from '../../../components/SectionHeader'
 import {
@@ -32,10 +32,7 @@ export const ContactsSummarySection = ({
         isStateUser
     )
     return (
-        <SectionCard
-            id="stateContacts"
-            className={styles.stateContactsReviewSection}
-        >
+        <SectionCard id="stateContacts" className={styles.summarySection}>
             <SectionHeader
                 header="State contacts"
                 editNavigateTo={editNavigateTo}
