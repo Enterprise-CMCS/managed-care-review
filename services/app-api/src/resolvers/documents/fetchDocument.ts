@@ -93,6 +93,10 @@ export function fetchDocumentResolver(
             'CONTRACT_QUESTION_RESPONSE_DOC',
             'RATE_QUESTION_DOC',
             'RATE_QUESTION_RESPONSE_DOC',
+            'contractQuestionDoc',
+            'contractQuestionResponseDoc',
+            'rateQuestionDoc',
+            'rateQuestionResponseDoc',
         ]
         const bucketName = qaDocs.includes(
             input.documentType || fetchedDocument.type || ''

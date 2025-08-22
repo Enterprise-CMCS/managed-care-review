@@ -42,32 +42,32 @@ export async function findAllDocuments(
         const allDocs = [
             ...contractDocs.map((doc) => ({
                 ...doc,
-                type: 'CONTRACT_DOC' as const,
+                type: 'contractDoc' as const,
             })),
-            ...rateDocs.map((doc) => ({ ...doc, type: 'RATE_DOC' as const })),
+            ...rateDocs.map((doc) => ({ ...doc, type: 'rateDoc' as const })),
             ...contractSupportingDocs.map((doc) => ({
                 ...doc,
-                type: 'CONTRACT_SUPPORTING_DOC' as const,
+                type: 'contractSupportingDoc' as const,
             })),
             ...rateSupportingDocs.map((doc) => ({
                 ...doc,
-                type: 'RATE_SUPPORTING_DOC' as const,
+                type: 'rateSupportingDoc' as const,
             })),
             ...contractQuestionDocs.map((doc) => ({
                 ...doc,
-                type: 'CONTRACT_QUESTION_DOC' as const,
+                type: 'contractQuestionDoc' as const,
             })),
             ...contractQuestionResponseDocs.map((doc) => ({
                 ...doc,
-                type: 'CONTRACT_QUESTION_RESPONSE_DOC' as const,
+                type: 'contractQuestionResponseDoc' as const,
             })),
             ...rateQuestionDocs.map((doc) => ({
                 ...doc,
-                type: 'RATE_QUESTION_DOC' as const,
+                type: 'rateQuestionDoc' as const,
             })),
             ...rateQuestionResponseDocs.map((doc) => ({
                 ...doc,
-                type: 'RATE_QUESTION_RESPONSE_DOC' as const,
+                type: 'rateQuestionResponseDoc' as const,
             })),
         ]
 
@@ -102,7 +102,7 @@ export async function findAllDocuments(
 }
 
 async function getContractDocuments(
-    prisma: ExtendedPrismaClient
+    prisma: PrismaClient
 ): Promise<Omit<AuditDocument, 'type'>[] | Error> {
     try {
         const docs = await prisma.contractDocument.findMany()
@@ -118,7 +118,7 @@ async function getContractDocuments(
 }
 
 async function getRateDocuments(
-    prisma: ExtendedPrismaClient
+    prisma: PrismaClient
 ): Promise<Omit<AuditDocument, 'type'>[] | Error> {
     try {
         const docs = await prisma.rateDocument.findMany()
@@ -134,7 +134,7 @@ async function getRateDocuments(
 }
 
 async function getContractSupportingDocuments(
-    prisma: ExtendedPrismaClient
+    prisma: PrismaClient
 ): Promise<Omit<AuditDocument, 'type'>[] | Error> {
     try {
         const docs = await prisma.contractSupportingDocument.findMany()
@@ -150,7 +150,7 @@ async function getContractSupportingDocuments(
 }
 
 async function getRateSupportingDocuments(
-    prisma: ExtendedPrismaClient
+    prisma: PrismaClient
 ): Promise<Omit<AuditDocument, 'type'>[] | Error> {
     try {
         const docs = await prisma.rateSupportingDocument.findMany()
@@ -166,7 +166,7 @@ async function getRateSupportingDocuments(
 }
 
 async function getContractQuestionDocument(
-    prisma: ExtendedPrismaClient
+    prisma: PrismaClient
 ): Promise<Omit<AuditDocument, 'type'>[] | Error> {
     try {
         const docs = await prisma.contractQuestionDocument.findMany()
@@ -182,7 +182,7 @@ async function getContractQuestionDocument(
 }
 
 async function getContractQuestionResponseDocument(
-    prisma: ExtendedPrismaClient
+    prisma: PrismaClient
 ): Promise<Omit<AuditDocument, 'type'>[] | Error> {
     try {
         const docs = await prisma.contractQuestionResponseDocument.findMany()
@@ -198,7 +198,7 @@ async function getContractQuestionResponseDocument(
 }
 
 async function getRateQuestionDocument(
-    prisma: ExtendedPrismaClient
+    prisma: PrismaClient
 ): Promise<Omit<AuditDocument, 'type'>[] | Error> {
     try {
         const docs = await prisma.rateQuestionDocument.findMany()
@@ -214,7 +214,7 @@ async function getRateQuestionDocument(
 }
 
 async function getRateQuestionResponseDocument(
-    prisma: ExtendedPrismaClient
+    prisma: PrismaClient
 ): Promise<Omit<AuditDocument, 'type'>[] | Error> {
     try {
         const docs = await prisma.rateQuestionResponseDocument.findMany()
