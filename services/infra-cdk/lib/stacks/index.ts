@@ -12,7 +12,6 @@ export * from './github-oidc-service-role-stack'
 export * from './lambda-layers-stack'
 
 // New elegant micro-stacks (replacing ApiComputeStack bloat)
-export * from './shared-infra-stack'
 export * from './graphql-api-stack'
 export * from './public-api-stack'
 export * from './file-ops-stack'

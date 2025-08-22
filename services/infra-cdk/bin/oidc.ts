@@ -12,12 +12,12 @@
  */
 
 import 'source-map-support/register'
-import * as cdk from 'aws-cdk-lib'
+import { App, CliCredentialsStackSynthesizer } from 'aws-cdk-lib'
 import { GitHubOidcServiceRoleStack } from '../lib/stacks'
 import { getCdkEnvironment } from '../lib/config'
 
-const app = new cdk.App({
-    defaultStackSynthesizer: new cdk.CliCredentialsStackSynthesizer({
+const app = new App({
+    defaultStackSynthesizer: new CliCredentialsStackSynthesizer({
         qualifier: 'mcreview',
     }),
 })
