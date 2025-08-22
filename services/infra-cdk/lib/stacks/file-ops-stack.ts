@@ -6,7 +6,7 @@ import { NodejsFunction, OutputFormat } from 'aws-cdk-lib/aws-lambda-nodejs';
 import * as s3 from 'aws-cdk-lib/aws-s3';
 import * as s3n from 'aws-cdk-lib/aws-s3-notifications';
 import * as ssm from 'aws-cdk-lib/aws-ssm';
-import { Duration, CfnOutput } from 'aws-cdk-lib';
+import { Duration, CfnOutput, Size } from 'aws-cdk-lib';
 import * as path from 'path';
 import { 
   getEnvironment, 
@@ -92,6 +92,7 @@ export class FileOpsStack extends Stack {
       architecture: lambda.Architecture.X86_64,
       timeout: LAMBDA_DEFAULTS.TIMEOUT_EXTENDED,
       memorySize: config.lambda.memorySize,
+      ephemeralStorageSize: Size.mebibytes(this.stage === 'prod' ? 2048 : 512),
       // Layers added by Lambda Monitoring Aspect (Zip operations don't need Prisma)
       environment: this.getEnvironmentVariables(),
       description: 'Process file compression and S3 operations - v2',

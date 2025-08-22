@@ -11,7 +11,7 @@ import * as s3 from 'aws-cdk-lib/aws-s3';
 import * as secretsmanager from 'aws-cdk-lib/aws-secretsmanager';
 import * as rds from 'aws-cdk-lib/aws-rds';
 import * as ssm from 'aws-cdk-lib/aws-ssm';
-import { Duration, RemovalPolicy, Tags, CfnOutput } from 'aws-cdk-lib';
+import { Duration, RemovalPolicy, Tags, CfnOutput, Size } from 'aws-cdk-lib';
 import { getBundlingConfig } from '../lambda-bundling';
 import { getEnvironment, SERVICES, ResourceNames, CDK_DEPLOYMENT_SUFFIX, PROJECT_PREFIX, PERMISSION_BOUNDARIES, SSM_PATHS, AWS_ACCOUNTS, EXTERNAL_ENDPOINTS } from '../config';
 
@@ -394,6 +394,7 @@ export class DatabaseOperationsStack extends Stack {
       architecture: lambda.Architecture.X86_64,
       timeout: Duration.minutes(15), // 900s = 15 minutes
       memorySize: config.environment === 'prod' ? 4096 : LAMBDA_DEFAULTS.MEMORY_XLARGE,
+      ephemeralStorageSize: Size.mebibytes(config.environment === 'prod' ? 2048 : 512),
       environment: {
         ...this.getLambdaEnvironment(config),
         DATABASE_URL: 'AWS_SM', // Use Secrets Manager for proper URL encoding

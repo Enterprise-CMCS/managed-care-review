@@ -114,6 +114,7 @@ export class CognitoAuth extends Construct {
       userPool: this.userPool,
       userPoolClientName: `${props.userPoolName}-${props.stage}-client`,
       authFlows: {
+        adminUserPassword: true,
         userPassword: true,
         userSrp: true,
         custom: true

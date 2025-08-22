@@ -225,7 +225,7 @@ export class GraphQLApiStack extends Stack {
       defaultCorsPreflightOptions: {
         allowOrigins: ['*'], // Matches serverless cors: true
         allowMethods: ['GET', 'POST', 'OPTIONS'],
-        allowHeaders: ['Content-Type', 'Authorization'],
+        allowHeaders: ['Content-Type', 'Authorization', 'X-Amz-Date', 'X-Amz-Security-Token'],
         allowCredentials: false
       },
       

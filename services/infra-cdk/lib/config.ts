@@ -80,7 +80,7 @@ export const config = {
       requireEmailSender: true
     },
     lambda: {
-      memorySize: 2048,
+      memorySize: 4096,
       timeout: 60
     },
     database: {
