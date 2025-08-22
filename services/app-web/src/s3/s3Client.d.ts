@@ -15,9 +15,4 @@ export type S3ClientT = {
         filename: string,
         bucket: BucketShortName
     ) => Promise<string>
-    getBulkDlURL: (
-        keys: string[],
-        filename: string,
-        bucket: BucketShortName
-    ) => Promise<string | Error>
 }

@@ -109,17 +109,5 @@ export function newDeployedS3Client(
             })
             return signedUrl
         },
-        getBulkDlURL: async (
-            keys: string[],
-            filename: string,
-            bucket: BucketShortName
-        ): Promise<string | Error> => {
-            const command = new GetObjectCommand({
-                Bucket: bucketConfig[bucket],
-                Key: filename,
-            })
-            const signedUrl = await getSignedUrl(s3Client, command)
-            return signedUrl
-        },
     }
 }

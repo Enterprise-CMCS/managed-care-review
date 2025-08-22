@@ -1,5 +1,5 @@
 import { parseKey } from '@mc-review/helpers'
-import { Storage, API } from 'aws-amplify'
+import { Storage } from 'aws-amplify'
 import { v4 as uuidv4 } from 'uuid'
 import type { S3ClientT } from './s3Client'
 import type { S3Error } from './s3Error'
@@ -169,32 +169,6 @@ function newAmplifyS3Client(bucketConfig: S3BucketConfigType): S3ClientT {
                 recordJSException(error)
                 throw error
             }
-        },
-        getBulkDlURL: async (
-            keys: string[],
-            filename: string,
-            bucket: BucketShortName
-        ): Promise<string | Error> => {
-            const prependedKeys = keys.map((key) => `allusers/${key}`)
-            const prependedFilename = `allusers/${filename}`
-
-            const zipRequestParams = {
-                keys: prependedKeys,
-                bucket: bucketConfig[bucket],
-                zipFileName: prependedFilename,
-            }
-
-            try {
-                await API.post('api', '/zip', {
-                    response: true,
-                    body: zipRequestParams,
-                })
-            } catch (err) {
-                const error = new Error('Could not get a bulk DL URL: ' + err)
-                recordJSException(error)
-                return error
-            }
-            return await Storage.get(filename, { expires: 3600 })
         },
     }
 }
