@@ -20,7 +20,7 @@ export class Uploads extends BaseStack {
     constructor(scope: Construct, id: string, props: UploadsProps) {
         super(scope, id, {
             ...props,
-            serviceName: 'Uploads',
+            serviceName: 'uploads',
             description:
                 'Uploads stack for mc-review - S3 buckets and file processing',
         })
