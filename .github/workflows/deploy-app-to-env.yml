@@ -45,7 +45,7 @@ on:
       subnet_public_a_id:
         required: false
       internal_allowed_origins:
-        required: true
+        required: false
 permissions:
   id-token: write
 
