@@ -53,7 +53,7 @@ export class AppApiStack extends BaseStack {
 
         // Import existing API Gateway from infra-api stack
         const infraApiStackName = ResourceNames.stackName(
-            'InfraApi',
+            'infra-api',
             this.stage
         )
         const apiGatewayId = Fn.importValue(
@@ -200,7 +200,7 @@ export class AppApiStack extends BaseStack {
 
         // Database permissions
         const postgresStackName = ResourceNames.stackName(
-            'Postgres',
+            'postgres',
             this.stage
         )
         const auroraArn = Fn.importValue(
@@ -294,7 +294,7 @@ export class AppApiStack extends BaseStack {
         // Get values from other stacks
         const uploadsStackName = ResourceNames.stackName('uploads', this.stage)
         const frontendStackName = ResourceNames.stackName(
-            'Frontend',
+            'frontend',
             this.stage
         )
 
@@ -386,7 +386,7 @@ export class AppApiStack extends BaseStack {
     private setupWafAssociation(apiGateway: IRestApi): void {
         // Import WAF ACL ARN from infra-api stack
         const infraApiStackName = ResourceNames.stackName(
-            'InfraApi',
+            'infra-api',
             this.stage
         )
         const wafAclArn = Fn.importValue(`${infraApiStackName}-WafPluginAclArn`)
