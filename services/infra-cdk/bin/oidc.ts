@@ -14,7 +14,7 @@
 import 'source-map-support/register'
 import { App, CliCredentialsStackSynthesizer } from 'aws-cdk-lib'
 import { GitHubOidcServiceRoleStack } from '../lib/stacks'
-import { getCdkEnvironment } from '../lib/config'
+import { getCdkEnvironment, getEnvironment } from '../lib/config'
 
 const app = new App({
     defaultStackSynthesizer: new CliCredentialsStackSynthesizer({
@@ -31,11 +31,14 @@ if (!stage) {
 }
 
 const env = getCdkEnvironment(stage)
+const config = getEnvironment(stage)
 
 // Create only the GitHub OIDC service role
 new GitHubOidcServiceRoleStack(app, `MCR-GitHubOIDC-${stage}`, {
     env,
     stage,
+    stageConfig: config,
+    serviceName: 'github-oidc',
     description: `GitHub OIDC service role for (${stage})`,
 })
 

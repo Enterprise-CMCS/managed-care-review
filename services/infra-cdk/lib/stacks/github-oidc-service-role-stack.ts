@@ -1,10 +1,9 @@
-import { Stack, type StackProps, CfnOutput, Duration } from 'aws-cdk-lib'
+import { CfnOutput, Duration } from 'aws-cdk-lib'
 import type { Construct } from 'constructs'
 import * as iam from 'aws-cdk-lib/aws-iam'
+import { BaseStack, type BaseStackProps } from '../constructs/base'
 
-export interface GitHubOidcServiceRoleStackProps extends StackProps {
-    stage: string
-}
+export interface GitHubOidcServiceRoleStackProps extends BaseStackProps {}
 
 /**
  * Stack for creating GitHub Actions OIDC service role for a specific stage
@@ -14,7 +13,7 @@ export interface GitHubOidcServiceRoleStackProps extends StackProps {
  *
  * Mirrors the behavior of services/github-oidc/serverless.yml but using CDK.
  */
-export class GitHubOidcServiceRoleStack extends Stack {
+export class GitHubOidcServiceRoleStack extends BaseStack {
     public readonly serviceRole: iam.Role
 
     constructor(
@@ -22,21 +21,24 @@ export class GitHubOidcServiceRoleStack extends Stack {
         id: string,
         props: GitHubOidcServiceRoleStackProps
     ) {
-        super(scope, id, props)
-
-        const { stage } = props
+        super(scope, id, {
+            ...props,
+            description:
+                props.description ||
+                `GitHub OIDC service role for ${props.stage} stage`,
+        })
 
         // Reference the existing OIDC provider (created 2 years ago)
         const existingOidcProviderArn = `arn:aws:iam::${this.account}:oidc-provider/token.actions.githubusercontent.com`
 
         // Determine subject claim based on stage (matching Serverless logic)
-        const subjectClaim = ['val', 'prod'].includes(stage)
-            ? `repo:Enterprise-CMCS/managed-care-review:environment:${stage}`
+        const subjectClaim = ['val', 'prod'].includes(this.stage)
+            ? `repo:Enterprise-CMCS/managed-care-review:environment:${this.stage}`
             : 'repo:Enterprise-CMCS/managed-care-review:environment:dev'
 
         // Create the stage-specific service role (CDK version to avoid Serverless conflict)
         this.serviceRole = new iam.Role(this, 'GitHubActionsServiceRole', {
-            roleName: `github-oidc-cdk-${stage}-ServiceRole`,
+            roleName: `github-oidc-cdk-${this.stage}-ServiceRole`,
             assumedBy: new iam.WebIdentityPrincipal(existingOidcProviderArn, {
                 StringEquals: {
                     'token.actions.githubusercontent.com:sub': subjectClaim,
@@ -44,7 +46,7 @@ export class GitHubOidcServiceRoleStack extends Stack {
                         'sts.amazonaws.com',
                 },
             }),
-            description: `GitHub OIDC service role for ${stage} stage`,
+            description: `GitHub OIDC service role for ${this.stage} stage`,
             maxSessionDuration: Duration.hours(2),
             // CMS IAM requirements
             path: '/delegatedadmin/developer/',
@@ -104,8 +106,8 @@ export class GitHubOidcServiceRoleStack extends Stack {
         // Output the role ARN for verification
         new CfnOutput(this, 'ServiceRoleArn', {
             value: this.serviceRole.roleArn,
-            description: `GitHub OIDC service role ARN for ${stage} stage`,
-            exportName: `GitHubOIDCServiceRole-${stage}`,
+            description: `GitHub OIDC service role ARN for ${this.stage} stage`,
+            exportName: this.exportName('ServiceRoleArn'),
         })
     }
 }
