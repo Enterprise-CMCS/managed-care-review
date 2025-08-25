@@ -170,33 +170,33 @@ export class Postgres extends BaseStack {
         new CfnOutput(this, 'PostgresSecretArn', {
             value: this.databaseSecret.secretArn,
             description: 'CDK PostgreSQL database secret ARN',
-            exportName: `MCR-Postgres-${this.stage}-SecretArn-cdk`,
+            exportName: this.exportName('PostgresSecretArn'),
         })
 
         if (this.cluster) {
             new CfnOutput(this, 'PostgresAuroraV2Arn', {
                 value: this.cluster.clusterArn,
                 description: 'CDK PostgreSQL Aurora cluster ARN',
-                exportName: `MCR-Postgres-${this.stage}-cdk-PostgresAuroraV2Arn`,
+                exportName: this.exportName('PostgresAuroraV2Arn'),
             })
 
             new CfnOutput(this, 'PostgresClusterEndpoint', {
                 value: this.cluster.clusterEndpoint.hostname,
                 description: 'CDK PostgreSQL Aurora cluster endpoint',
-                exportName: `MCR-Postgres-${this.stage}-ClusterEndpoint-cdk`,
+                exportName: this.exportName('PostgresClusterEndpoint'),
             })
         }
 
         new CfnOutput(this, 'LogicalDbManagerFunctionArn', {
             value: this.logicalDbManagerFunction.functionArn,
             description: 'Logical database manager Lambda function ARN',
-            exportName: `MCR-Postgres-${this.stage}-LogicalDbManager-cdk`,
+            exportName: this.exportName('LogicalDbManagerFunctionArn'),
         })
 
         new CfnOutput(this, 'VpcEndpointId', {
             value: this.vpcEndpoint.vpcEndpointId,
             description: 'Secrets Manager VPC endpoint ID',
-            exportName: `MCR-Postgres-${this.stage}-VpcEndpoint-cdk`,
+            exportName: this.exportName('VpcEndpointId'),
         })
     }
 }
