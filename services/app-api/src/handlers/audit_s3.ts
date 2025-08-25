@@ -202,7 +202,7 @@ type DocumentWithAssociation = AuditDocument & {
 
 type FetchError = {
     documentId: string
-    type: 'contractDoc' | 'rateDoc'
+    type: 'CONTRACT_DOC' | 'RATE_DOC'
     error: Error | NotFoundError
     revisionId: string | null
 }
@@ -221,7 +221,7 @@ async function fetchAssociatedData(
         let associatedData: ContractRevisionTable | RateRevisionTable | null =
             null
 
-        if (doc.type === 'contractDoc' && doc.contractRevisionID) {
+        if (doc.type === 'CONTRACT_DOC' && doc.contractRevisionID) {
             const contractResult = await store.findContractRevision(
                 doc.contractRevisionID
             )
@@ -238,7 +238,7 @@ async function fetchAssociatedData(
             } else {
                 associatedData = contractResult
             }
-        } else if (doc.type === 'rateDoc' && doc.rateRevisionID) {
+        } else if (doc.type === 'RATE_DOC' && doc.rateRevisionID) {
             const rateResult = await store.findRateRevision(doc.rateRevisionID)
             if (
                 rateResult instanceof Error ||
@@ -258,11 +258,11 @@ async function fetchAssociatedData(
         results.push({
             ...doc,
             associatedContract:
-                doc.type === 'contractDoc'
+                doc.type === 'CONTRACT_DOC'
                     ? (associatedData as ContractRevisionTable)
                     : undefined,
             associatedRate:
-                doc.type === 'rateDoc'
+                doc.type === 'RATE_DOC'
                     ? (associatedData as RateRevisionTable)
                     : undefined,
         })

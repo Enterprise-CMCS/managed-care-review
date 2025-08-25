@@ -53,27 +53,27 @@ const rateQuestionResponseDocumentSchema = baseDocumentSchema.extend({
 })
 
 const auditDocumentSchema = z.union([
-    contractDocumentSchema.extend({ type: z.literal('contractDoc') }),
-    rateDocumentSchema.extend({ type: z.literal('rateDoc') }),
+    contractDocumentSchema.extend({ type: z.literal('CONTRACT_DOC') }),
+    rateDocumentSchema.extend({ type: z.literal('RATE_DOC') }),
     contractSupportingDocumentSchema.extend({
-        type: z.literal('contractSupportingDoc'),
+        type: z.literal('CONTRACT_SUPPORTING_DOC'),
     }),
     rateSupportingDocumentSchema.extend({
-        type: z.literal('rateSupportingDoc'),
+        type: z.literal('RATE_SUPPORTING_DOC'),
     }),
 
     contractQuestionDocumentSchema.extend({
-        type: z.literal('contractQuestionDoc'),
+        type: z.literal('CONTRACT_QUESTION_DOC'),
     }),
 
     contractQuestionResponseDocumentSchema.extend({
-        type: z.literal('contractQuestionResponseDoc'),
+        type: z.literal('CONTRACT_QUESTION_RESPONSE_DOC'),
     }),
     rateQuestionDocumentSchema.extend({
-        type: z.literal('rateQuestionDoc'),
+        type: z.literal('RATE_QUESTION_DOC'),
     }),
     rateQuestionResponseDocumentSchema.extend({
-        type: z.literal('rateQuestionResponseDoc'),
+        type: z.literal('RATE_QUESTION_RESPONSE_DOC'),
     }),
 ])
 
