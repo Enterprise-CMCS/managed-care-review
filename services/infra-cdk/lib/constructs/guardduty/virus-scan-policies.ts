@@ -60,14 +60,16 @@ export class VirusScanPolicies extends Construct {
       effect: iam.Effect.DENY,
       principals: [new iam.AnyPrincipal()],
       actions: ['s3:GetObject'],
-      resources: [`${bucket.bucketArn}/*`]
-    });
-
-    // Add conditions - must match serverless implementation logic (AND logic)
-    policy.addCondition('StringNotEquals', {
-      's3:ExistingObjectTag/virusScanStatus': ['CLEAN'],
-      's3:ExistingObjectTag/contentsPreviouslyScanned': ['TRUE'],
-      'aws:PrincipalArn': lambdaRoleArn
+      resources: [`${bucket.bucketArn}/*`],
+      conditions: {
+        StringNotEquals: {
+          'aws:PrincipalArn': lambdaRoleArn
+        },
+        'ForAllValues:StringNotEquals': {
+          's3:ExistingObjectTag/virusScanStatus': 'CLEAN',
+          's3:ExistingObjectTag/contentsPreviouslyScanned': 'TRUE'
+        }
+      }
     });
 
     bucket.addToResourcePolicy(policy);
