@@ -93,6 +93,20 @@ type Query {
     """
     fetchContract(input: FetchContractInput!): FetchContractPayload!
 
+"""
+    fetchDocument returns a single document
+    given a documentID
+    an explicit expirationDate can be supplied
+    otherwise it defaults to expiring in 3600 seconds (1 hour)
+
+    It can be called by CMS or State users
+
+    Errors:
+    - BadInputError: An expiredIn value that exceeds the limit of 604,800 seconds (1 week)
+    - NotFoundError: document for documentID not found in database
+    - ForbiddenError: OAuth client must have read permissions granted
+    """
+    fetchDocument(input: FetchDocumentInput!): FetchDocumentPayload!
     """
     fetchMcReviewSettings returns settings for the MC review app
 
@@ -1296,6 +1310,19 @@ type Document {
 }
 
 """
+SharedDocument represents a document that has been uploaded to S3. It can be retrieved at the s3URL
+by an authenticated user. Can be used to represent either QA or state submission docs
+"""
+type SharedDocument {
+    id: String!
+    name: String!
+    s3URL: String!
+    sha256: String
+    type: String
+    downloadURL: String
+}
+
+"""
 ContractQuestion is a question sent by CMS to the States for a response, associated with a single contract.
 CMS may upload one or more documents full of questions to a single ContractQuestion. States submit a
 QuestionResponse with documents that answer the questions posed by CMS.
@@ -2339,6 +2366,33 @@ input FetchContractInput {
     contractID: ID!
 }
 
+type FetchDocumentPayload {
+    document: SharedDocument!
+}
+
+input FetchDocumentInput {
+    documentID: ID!
+    """
+    documentType indicates which of the document tables to query
+    can be one of: 
+    - CONTRACT_DOC
+    - CONTRACT_SUPPORTING_DOC
+    - RATE_DOC
+    - RATE_SUPPORTING_DOC
+    - CONTRACT_QUESTION_DOC
+    - CONTRACT_QUESTION_RESPONSE_DOC
+    - RATE_QUESTION_DOC
+    - RATE_QUESTION_RESPONSE_DOC
+    """
+    documentType: DocumentType
+    """
+    ExpiresIn represents times in seconds until the downloadURL's expiration.
+    Valid range from 1 second to 604,800 seconds (1 week).
+    Defaults to 3600 seconds (1 hour)
+    """
+    expiresIn: Int
+}
+
 type UnlockRatePayload {
     rate: Rate!
 }
@@ -2630,6 +2684,18 @@ enum DocumentZipType {
     CONTRACT_DOCUMENTS
     RATE_DOCUMENTS
 }
+
+enum DocumentType {
+    CONTRACT_DOC
+    CONTRACT_SUPPORTING_DOC
+    RATE_DOC
+    RATE_SUPPORTING_DOC
+    CONTRACT_QUESTION_DOC
+    CONTRACT_QUESTION_RESPONSE_DOC
+    RATE_QUESTION_DOC
+    RATE_QUESTION_RESPONSE_DOC
+}
+
 type OauthClient {
     id: ID!
     clientId: String!

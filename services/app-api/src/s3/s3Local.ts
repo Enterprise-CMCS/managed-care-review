@@ -84,14 +84,17 @@ export function newLocalS3Client(
         },
         getURL: async (
             s3key: string,
-            bucket: BucketShortName
+            bucket: BucketShortName,
+            expiresIn?: number
         ): Promise<string> => {
             const command = new GetObjectCommand({
                 Bucket: bucketConfig[bucket],
                 Key: s3key,
             })
             // Create the presigned URL.
-            const signedUrl = await getSignedUrl(s3Client, command)
+            const signedUrl = await getSignedUrl(s3Client, command, {
+                expiresIn: expiresIn || 3600,
+            })
             return signedUrl
         },
         getBulkDlURL: async (

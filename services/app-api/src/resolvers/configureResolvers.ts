@@ -71,6 +71,7 @@ import {
     updateOauthClientResolver,
 } from './oauthClient'
 import type { DocumentZipService } from '../zip/generateZip'
+import { fetchDocumentResolver } from './documents/fetchDocument'
 
 export function configureResolvers(
     store: Store,
@@ -88,6 +89,7 @@ export function configureResolvers(
             fetchCurrentUser: fetchCurrentUserResolver(),
             fetchHealthPlanPackage: fetchHealthPlanPackageResolver(store),
             indexHealthPlanPackages: indexHealthPlanPackagesResolver(store),
+            fetchDocument: fetchDocumentResolver(store, s3Client),
             indexContracts: indexContractsResolver(store),
             indexUsers: indexUsersResolver(store),
             fetchMcReviewSettings: fetchMcReviewSettings(store, emailer),

@@ -8,6 +8,14 @@ const baseDocumentSchema = z.object({
     s3URL: z.string(),
 })
 
+const sharedDocumentSchema = z.object({
+    id: z.string(),
+    name: z.string(),
+    s3URL: z.string(),
+    sha256: z.string().optional(),
+    downloadURL: z.string().optional(),
+})
+
 const contractDocumentSchema = baseDocumentSchema.extend({
     contractRevisionID: z.string(),
     sha256: z.string(),
@@ -69,6 +77,19 @@ const auditDocumentSchema = z.union([
     }),
 ])
 
-export type AuditDocument = z.infer<typeof auditDocumentSchema>
+const documentTypesSchema = z.union([
+    z.literal('CONTRACT_DOC'),
+    z.literal('CONTRACT_SUPPORTING_DOC'),
+    z.literal('RATE_DOC'),
+    z.literal('RATE_SUPPORTING_DOC'),
+    z.literal('CONTRACT_QUESTION_DOC'),
+    z.literal('CONTRACT_QUESTION_RESPONSE_DOC'),
+    z.literal('RATE_QUESTION_DOC'),
+    z.literal('RATE_QUESTION_RESPONSE_DOC'),
+])
 
-export { auditDocumentSchema }
+export type AuditDocument = z.infer<typeof auditDocumentSchema>
+export type SharedDocument = z.infer<typeof sharedDocumentSchema>
+export type DocumentTypes = z.infer<typeof documentTypesSchema>
+
+export { auditDocumentSchema, sharedDocumentSchema, documentTypesSchema }
