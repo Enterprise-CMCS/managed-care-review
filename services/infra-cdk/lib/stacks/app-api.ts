@@ -8,8 +8,6 @@ import {
     RestApi,
     type IRestApi,
     LambdaIntegration,
-    Deployment,
-    Stage,
 } from 'aws-cdk-lib/aws-apigateway'
 import {
     PolicyStatement,
@@ -21,12 +19,12 @@ import {
 import { CfnOutput, Duration, Fn } from 'aws-cdk-lib'
 import { ResourceNames } from '../config'
 import { Architecture, Runtime } from 'aws-cdk-lib/aws-lambda'
-import { CfnWebACLAssociation } from 'aws-cdk-lib/aws-wafv2'
+import { CfnWebACL, CfnWebACLAssociation } from 'aws-cdk-lib/aws-wafv2'
 import * as path from 'path'
 
 /**
- * App API stack - GraphQL API with Lambda functions
- * Matches the app-api serverless service functionality but uses existing infra-api Gateway
+ * App API stack - GraphQL API with Lambda functions and dedicated API Gateway
+ * Matches the app-api serverless service functionality with integrated WAF protection
  */
 export class AppApiStack extends BaseStack {
     // Start with simple lambdas only
@@ -51,25 +49,19 @@ export class AppApiStack extends BaseStack {
                 'App API - GraphQL Lambda functions and API Gateway integration',
         })
 
-        // Import existing API Gateway from infra-api stack
-        const infraApiStackName = ResourceNames.stackName(
-            'infra-api',
-            this.stage
-        )
-        const apiGatewayId = Fn.importValue(
-            `${infraApiStackName}-ApiGatewayRestApiId`
-        )
-        const apiGatewayRootResourceId = Fn.importValue(
-            `${infraApiStackName}-AppApiGatewayRootResourceId`
-        )
-        const apiGateway = RestApi.fromRestApiAttributes(
-            this,
-            'ImportedApiGateway',
-            {
-                restApiId: apiGatewayId,
-                rootResourceId: apiGatewayRootResourceId,
-            }
-        )
+        // Create dedicated API Gateway for app-api
+        const apiGateway = new RestApi(this, 'AppApiGateway', {
+            restApiName: `${ResourceNames.apiName('app-api', this.stage)}-gateway`,
+            description: 'API Gateway for app-api Lambda functions',
+            deployOptions: {
+                stageName: this.stage,
+            },
+            defaultCorsPreflightOptions: {
+                allowOrigins: ['*'],
+                allowMethods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+                allowHeaders: ['Content-Type', 'Authorization'],
+            },
+        })
 
         // Create Lambda execution role
         const lambdaRole = this.createLambdaRole()
@@ -370,31 +362,49 @@ export class AppApiStack extends BaseStack {
         // const zipResource = apiGateway.root.addResource('zip')
         // zipResource.addMethod('POST', new LambdaIntegration(this.zipKeysFunction), { authorizationType: AuthorizationType.IAM })
 
-        // Create a new deployment to include all the new methods
-        const deployment = new Deployment(this, 'ApiDeployment', {
-            api: apiGateway,
-            description: `App API deployment for ${this.stage}`,
-        })
-
-        // Create stage
-        new Stage(this, 'ApiStage', {
-            deployment,
-            stageName: this.stage,
-        })
+        // Deployment and stage are automatically handled by RestApi construct
     }
 
     private setupWafAssociation(apiGateway: IRestApi): void {
-        // Import WAF ACL ARN from infra-api stack
-        const infraApiStackName = ResourceNames.stackName(
-            'infra-api',
-            this.stage
-        )
-        const wafAclArn = Fn.importValue(`${infraApiStackName}-WafPluginAclArn`)
+        // Create WAF Web ACL for app-api
+        const webAcl = new CfnWebACL(this, 'AppApiWebAcl', {
+            scope: 'REGIONAL',
+            defaultAction: { allow: {} },
+            name: `${this.stage}-app-api-cdk-webacl`,
+            rules: [
+                {
+                    name: `${this.stage}-AWS-AWSManagedRulesCommonRuleSet`,
+                    priority: 1,
+                    overrideAction: { none: {} },
+                    statement: {
+                        managedRuleGroupStatement: {
+                            vendorName: 'AWS',
+                            name: 'AWSManagedRulesCommonRuleSet',
+                            excludedRules: [
+                                {
+                                    name: 'SizeRestrictions_BODY',
+                                },
+                            ],
+                        },
+                    },
+                    visibilityConfig: {
+                        sampledRequestsEnabled: true,
+                        cloudWatchMetricsEnabled: true,
+                        metricName: 'CommonRuleSetMetric',
+                    },
+                },
+            ],
+            visibilityConfig: {
+                cloudWatchMetricsEnabled: true,
+                sampledRequestsEnabled: true,
+                metricName: `${this.stage}-app-api-webacl`,
+            },
+        })
 
         // Associate WAF with API Gateway stage
         new CfnWebACLAssociation(this, 'ApiGwWebAclAssociation', {
             resourceArn: `arn:aws:apigateway:${this.region}::/restapis/${apiGateway.restApiId}/stages/${this.stage}`,
-            webAclArn: wafAclArn,
+            webAclArn: webAcl.attrArn,
         })
     }
 

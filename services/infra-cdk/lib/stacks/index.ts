@@ -17,7 +17,11 @@ export * from './file-ops-stack'
 export * from './scheduled-tasks-stack'
 export * from './auth-extensions-stack'
 
-// Testing review environments
+// Testing review environments (individual service stacks)
 export * from './network'
-// export * from './postgres' // TODO: Add when postgres stack is ready
+export * from './postgres'
 export * from './uploads'
+export * from './frontend'
+export * from './cognito'
+export * from './storybook'
+export * from './app-api'
