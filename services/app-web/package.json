@@ -180,7 +180,7 @@
         "serverless": "4.2.3",
         "serverless-cf-invalidate-proxy": "^1.0.1",
         "serverless-plugin-scripts": "^1.0.2",
-        "serverless-s3-sync": "^3.3.0",
+        "serverless-s3-sync": "^3.4.0",
         "serverless-stack-termination-protection": "^2.0.2",
         "storybook": "^9.1.2",
         "stylelint": "^16.23.1",
