@@ -10,7 +10,7 @@ export async function findDocumentById(
     client: ExtendedPrismaClient,
     docID: string,
     docType?: DocumentTypes
-): Promise<SharedDocument | NotFoundError | Error> {
+): Promise<SharedDocument | Error> {
     try {
         if (docType) {
             switch (docType) {
