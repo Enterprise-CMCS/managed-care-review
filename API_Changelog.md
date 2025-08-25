@@ -1,7 +1,7 @@
 # Managed Care Review - API Changelog
 ## This document highlights API changes that have been introduced since May 2025
 
-### August 21, 2025
+### August 25, 2025
 #### Added
 - New endpoint `fetchDocument` added to the API
     - Parameters
