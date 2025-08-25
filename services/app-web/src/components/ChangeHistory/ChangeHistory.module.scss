@@ -7,7 +7,6 @@
     @include uswds.u-radius('md');
 
     h2 {
-        margin: 0;
         @include uswds.u-text('normal');
     }
     &:first-of-type {

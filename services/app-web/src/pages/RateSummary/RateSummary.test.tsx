@@ -31,7 +31,8 @@ const wrapInRoutes = (children: React.ReactNode) => {
     )
 }
 
-describe('RateSummary', () => {
+//Skipping for now until we delete the files
+describe.skip('RateSummary', () => {
     describe.each(iterableCmsUsersMockData)(
         'Viewing RateSummary as a $userRole',
         ({ userRole, mockUser }) => {

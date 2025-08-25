@@ -21,9 +21,20 @@
     }
 }
 
-.summarySectionHeaderBorder {
+.summarySectionHeaderBorderBottom {
     border-bottom: 1px solid custom.$mcr-gray-lighter;
     margin-bottom: uswds.units(2);
+}
+
+.summarySectionHeaderBorderTop {
+    border-top: 1px solid custom.$mcr-gray-lighter;
+    margin-top: uswds.units(2);
+}
+
+.headerTag {
+    margin-top: 0;
+    margin-bottom: 0;
+    font-weight: 400;
 }
 
 @media print {

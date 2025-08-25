@@ -80,7 +80,7 @@ $mcr-single-page-width: 40rem; // based on figma - however, 40rem is also media 
 @mixin sectionCard {
     padding: uswds.units(4);
     margin-bottom: uswds.units(2);
-    margin-top: uswds.units(2);
+    margin-top: 0;
     background: $mcr-foundation-white;
     border: 1px solid $mcr-gray-lighter;
     @include uswds.u-radius('md');

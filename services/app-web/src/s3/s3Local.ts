@@ -2,7 +2,6 @@ import {
     S3Client,
     GetObjectCommand,
     PutObjectCommand,
-    DeleteObjectCommand,
 } from '@aws-sdk/client-s3'
 import { getSignedUrl } from '@aws-sdk/s3-request-presigner'
 
@@ -96,15 +95,15 @@ export function newLocalS3Client(
             const signedUrl = await getSignedUrl(s3Client, command)
             return signedUrl
         },
-        getBulkDlURL: async (
-            keys: string[],
-            filename: string,
+        getZipURL: async (
+            s3key: string,
             bucket: BucketShortName
-        ): Promise<string | Error> => {
+        ): Promise<string> => {
             const command = new GetObjectCommand({
                 Bucket: bucketConfig[bucket],
-                Key: filename,
+                Key: s3key,
             })
+            // Create the presigned URL.
             const signedUrl = await getSignedUrl(s3Client, command)
             return signedUrl
         },
