@@ -394,7 +394,7 @@ jobs:
             --require-approval never
 
   deploy-cdk-layers:
-    needs: [begin-deployment, deploy-cdk-foundation, build-lambda-layers]
+    needs: [begin-deployment, deploy-github-oidc, build-lambda-layers]
     name: deploy - CDK Lambda layers
     runs-on: ubuntu-24.04
     environment: dev
