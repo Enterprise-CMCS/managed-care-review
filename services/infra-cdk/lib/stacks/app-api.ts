@@ -20,25 +20,24 @@ import { CfnOutput, Duration, Fn } from 'aws-cdk-lib'
 import { ResourceNames } from '../config'
 import { Architecture, Runtime } from 'aws-cdk-lib/aws-lambda'
 import { CfnWebACL, CfnWebACLAssociation } from 'aws-cdk-lib/aws-wafv2'
-import * as path from 'path'
+import path from 'path'
 
 /**
  * App API stack - GraphQL API with Lambda functions and dedicated API Gateway
- * Matches the app-api serverless service functionality with integrated WAF protection
  */
 export class AppApiStack extends BaseStack {
-    // Start with simple lambdas only
+    // Lambda functions
     public readonly healthFunction: NodejsFunction
     public readonly emailSubmitFunction: NodejsFunction
     public readonly otelFunction: NodejsFunction
     public readonly thirdPartyApiAuthorizerFunction: NodejsFunction
+    public readonly oauthTokenFunction: NodejsFunction
+    public readonly cleanupFunction: NodejsFunction
 
-    // TODO: Add complex lambdas later
+    // TODO: Add remaining lambdas
     // public readonly graphqlFunction: NodejsFunction
-    // public readonly oauthTokenFunction: NodejsFunction
     // public readonly zipKeysFunction: NodejsFunction
     // public readonly migrateFunction: NodejsFunction
-    // public readonly cleanupFunction: NodejsFunction
     // public readonly auditFilesFunction: NodejsFunction
     // public readonly migrateDocumentZipsFunction: NodejsFunction
 
@@ -113,12 +112,34 @@ export class AppApiStack extends BaseStack {
             }
         )
 
-        // TODO: Add complex functions later (with VPC, layers, etc.)
+        this.oauthTokenFunction = this.createFunction(
+            'oauth-token',
+            'oauth_token',
+            'main',
+            {
+                timeout: Duration.seconds(30),
+                memorySize: 1024,
+                environment,
+                role: lambdaRole,
+            }
+        )
+
+        this.cleanupFunction = this.createFunction(
+            'cleanup',
+            'cleanup',
+            'main',
+            {
+                timeout: Duration.seconds(30),
+                memorySize: 1024,
+                environment,
+                role: lambdaRole,
+            }
+        )
+
+        // TODO: Add remaining complex functions later (with VPC, layers, etc.)
         // this.graphqlFunction = this.createFunction('graphql', 'apollo_gql', 'gqlHandler', {...})
-        // this.oauthTokenFunction = this.createFunction('oauth-token', 'oauth_token', 'main', {...})
         // this.zipKeysFunction = this.createFunction('zip-keys', 'bulk_download', 'main', {...})
         // this.migrateFunction = this.createFunction('migrate', 'postgres_migrate', 'main', {...})
-        // this.cleanupFunction = this.createFunction('cleanup', 'cleanup', 'main', {...})
         // this.auditFilesFunction = this.createFunction('audit-files', 'audit_s3', 'main', {...})
         // this.migrateDocumentZipsFunction = this.createFunction('migrate-document-zips', 'migrate_document_zips', 'main', {...})
 
@@ -336,11 +357,15 @@ export class AppApiStack extends BaseStack {
         const otelResource = apiGateway.root.addResource('otel')
         otelResource.addMethod('POST', new LambdaIntegration(this.otelFunction))
 
-        // TODO: Add complex routes later when functions are enabled
         // OAuth token endpoint
-        // const oauthResource = apiGateway.root.addResource('oauth')
-        // const tokenResource = oauthResource.addResource('token')
-        // tokenResource.addMethod('POST', new LambdaIntegration(this.oauthTokenFunction))
+        const oauthResource = apiGateway.root.addResource('oauth')
+        const tokenResource = oauthResource.addResource('token')
+        tokenResource.addMethod(
+            'POST',
+            new LambdaIntegration(this.oauthTokenFunction)
+        )
+
+        // TODO: Add remaining complex routes later when functions are enabled
 
         // GraphQL endpoints
         // const graphqlResource = apiGateway.root.addResource('graphql')
@@ -434,7 +459,19 @@ export class AppApiStack extends BaseStack {
             description: 'AWS Region',
         })
 
-        // TODO: Add GraphQL function output when enabled
+        new CfnOutput(this, 'OauthTokenFunctionName', {
+            value: this.oauthTokenFunction.functionName,
+            exportName: this.exportName('OauthTokenFunctionName'),
+            description: 'OAuth token Lambda function name',
+        })
+
+        new CfnOutput(this, 'CleanupFunctionName', {
+            value: this.cleanupFunction.functionName,
+            exportName: this.exportName('CleanupFunctionName'),
+            description: 'Cleanup Lambda function name',
+        })
+
+        // TODO: Add remaining function outputs when enabled
         // new CfnOutput(this, 'GraphqlFunctionName', {
         //     value: this.graphqlFunction.functionName,
         //     exportName: this.exportName('GraphqlFunctionName'),
