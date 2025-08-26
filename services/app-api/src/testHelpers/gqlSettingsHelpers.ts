@@ -8,28 +8,21 @@ import {
     UpdateEmailSettingsDocument,
     FetchMcReviewSettingsDocument,
 } from '../gen/gqlClient'
-import { defaultContext } from './gqlHelpers'
+import { executeGraphQLOperation } from './gqlHelpers'
 import type { Context } from '../handlers/apollo_gql'
-
-import { extractGraphQLResponse } from './apolloV4ResponseHelper'
 
 const updateTestEmailSettings = async (
     server: ApolloServer,
-    emailConfiguration: EmailConfiguration,
-    context?: Context
+    emailConfiguration: EmailConfiguration
 ): Promise<UpdateEmailSettingsPayload> => {
-    const response = await server.executeOperation({
+    const updateEmailConfig = await executeGraphQLOperation(server, {
         query: UpdateEmailSettingsDocument,
         variables: {
             input: {
                 emailConfiguration,
             },
         },
-    }, {
-        contextValue: context || defaultContext(),
     })
-    
-    const updateEmailConfig = extractGraphQLResponse(response)
 
     if (updateEmailConfig.errors) {
         console.info('errors', updateEmailConfig.errors)
@@ -38,10 +31,7 @@ const updateTestEmailSettings = async (
         )
     }
 
-    if (
-        updateEmailConfig.data === undefined ||
-        updateEmailConfig.data === null
-    ) {
+    if (!updateEmailConfig.data.updateEmailSettings) {
         throw new Error('updateTestEmailSettings returned nothing')
     }
 
@@ -52,13 +42,9 @@ const fetchTestMcReviewSettings = async (
     server: ApolloServer,
     context?: Context
 ): Promise<FetchMcReviewSettingsPayload> => {
-    const response = await server.executeOperation({
+    const fetchMcReviewSettings = await executeGraphQLOperation(server, {
         query: FetchMcReviewSettingsDocument,
-    }, {
-        contextValue: context || defaultContext(),
     })
-    
-    const fetchMcReviewSettings = extractGraphQLResponse(response)
 
     if (fetchMcReviewSettings.errors) {
         console.info('errors', fetchMcReviewSettings.errors)
@@ -67,10 +53,7 @@ const fetchTestMcReviewSettings = async (
         )
     }
 
-    if (
-        fetchMcReviewSettings.data === undefined ||
-        fetchMcReviewSettings.data === null
-    ) {
+    if (!fetchMcReviewSettings.data.fetchMcReviewSettings) {
         throw new Error('fetchTestMcReviewSettings returned nothing')
     }
 

@@ -1,6 +1,5 @@
 import type { EmailConfiguration, EmailData, Emailer } from '../emailer'
 import { emailer } from '../emailer'
-import type { LDService } from '../launchDarkly/launchDarkly'
 import type {
     LockedHealthPlanFormDataType,
     ProgramArgType,
@@ -89,13 +88,11 @@ function testEmailer(customConfig?: EmailConfiguration): Emailer {
 
 async function testEmailerFromDatabase(
     store: Store,
-    customConfig?: EmailConfiguration,
-    ldService?: LDService
+    customConfig?: EmailConfiguration
 ): Promise<Emailer> {
     const mockEmailer = await constructTestEmailer({
         emailConfig: customConfig ?? testEmailConfig(),
         postgresStore: store,
-        ldService,
     })
 
     mockEmailer.sendEmail = vi.fn()

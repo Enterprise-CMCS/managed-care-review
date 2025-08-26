@@ -12,7 +12,7 @@ import {
     rateMedicaidPopulationsSchema,
 } from '@mc-review/hpp'
 import { statusSchema } from './statusType'
-import type { RawCreateParams, ZodTypeAny } from 'zod/lib/types'
+import type { ZodTypeAny, RawCreateParams } from 'zod'
 
 const documentSchema = z.object({
     id: z.string().optional(),
