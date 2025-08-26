@@ -5,4 +5,9 @@
     color: custom.$mcr-gold-darker;
     font-weight: 700;
     display: flex;
+    padding-top: 4px;
+}
+
+.messageText {
+    color: custom.$mcr-foundation-hint;
 }

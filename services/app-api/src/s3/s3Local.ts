@@ -84,6 +84,21 @@ export function newLocalS3Client(
         },
         getURL: async (
             s3key: string,
+            bucket: BucketShortName,
+            expiresIn?: number
+        ): Promise<string> => {
+            const command = new GetObjectCommand({
+                Bucket: bucketConfig[bucket],
+                Key: s3key,
+            })
+            // Create the presigned URL.
+            const signedUrl = await getSignedUrl(s3Client, command, {
+                expiresIn: expiresIn || 3600,
+            })
+            return signedUrl
+        },
+        getZipURL: async (
+            s3key: string,
             bucket: BucketShortName
         ): Promise<string> => {
             const command = new GetObjectCommand({
@@ -91,18 +106,6 @@ export function newLocalS3Client(
                 Key: s3key,
             })
             // Create the presigned URL.
-            const signedUrl = await getSignedUrl(s3Client, command)
-            return signedUrl
-        },
-        getBulkDlURL: async (
-            keys: string[],
-            filename: string,
-            bucket: BucketShortName
-        ): Promise<string | Error> => {
-            const command = new GetObjectCommand({
-                Bucket: bucketConfig[bucket],
-                Key: filename,
-            })
             const signedUrl = await getSignedUrl(s3Client, command)
             return signedUrl
         },

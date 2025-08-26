@@ -78,7 +78,8 @@ export function newDeployedS3Client(
         },
         getURL: async (
             s3key: string,
-            bucket: BucketShortName
+            bucket: BucketShortName,
+            expiresIn?: number
         ): Promise<string> => {
             // uploads from app-web are prepended with '/allusers'
             // hardcode the 'allusers' into the key so that the path matches
@@ -89,20 +90,24 @@ export function newDeployedS3Client(
 
             // Create the presigned URL.
             const signedUrl = await getSignedUrl(s3Client, command, {
-                expiresIn: 3600,
+                expiresIn: expiresIn || 3600,
             })
             return signedUrl
         },
-        getBulkDlURL: async (
-            keys: string[],
-            filename: string,
+        getZipURL: async (
+            s3key: string,
             bucket: BucketShortName
-        ): Promise<string | Error> => {
+        ): Promise<string> => {
+            // zip files have paths like zips/contracts/{contractRevisionId}/contract-documents.zip
             const command = new GetObjectCommand({
                 Bucket: bucketConfig[bucket],
-                Key: filename,
+                Key: s3key,
             })
-            const signedUrl = await getSignedUrl(s3Client, command)
+
+            // Create the presigned URL.
+            const signedUrl = await getSignedUrl(s3Client, command, {
+                expiresIn: 3600,
+            })
             return signedUrl
         },
     }

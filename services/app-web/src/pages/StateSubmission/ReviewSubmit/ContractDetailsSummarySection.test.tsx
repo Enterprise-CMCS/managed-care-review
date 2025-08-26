@@ -5,8 +5,11 @@ import {
     fetchCurrentUserMock,
     mockContractPackageDraft,
     mockContractPackageSubmitted,
+    mockContractPackageUnlockedWithUnlockedType,
+    mockValidCMSUser,
+    mockValidStateUser,
+    s3DlUrl,
 } from '@mc-review/mocks'
-import { testS3Client } from '../../../testHelpers/s3Helpers'
 import {
     StatutoryRegulatoryAttestation,
     StatutoryRegulatoryAttestationQuestion,
@@ -61,11 +64,8 @@ describe('ContractDetailsSummarySection', () => {
                 name: /Edit Contract supporting documents/,
             })
         ).toHaveAttribute('href', '/documents')
-        expect(
-            screen.queryByRole('link', {
-                name: 'Download all contract documents',
-            })
-        ).toBeNull()
+        const link = await screen.queryByTestId('zipDownloadLink')
+        expect(link).toBeNull()
     })
 
     it('can render state submission on summary page without errors (submission summary behavior)', async () => {
@@ -91,18 +91,10 @@ describe('ContractDetailsSummarySection', () => {
         ).toBeInTheDocument()
         expect(screen.queryByText('Edit')).not.toBeInTheDocument()
 
-        //expects loading button on component load
-        expect(screen.getByText('Loading')).toBeInTheDocument()
-
-        // expects download all button after loading has completed
-        await waitFor(() => {
-            expect(
-                screen.getByRole('link', {
-                    name: 'Download all contract documents',
-                })
-            ).toBeInTheDocument()
-            expect(screen.queryByText(/NEW/)).toBeNull()
-        })
+        //Expect zip package links to load
+        const link = await screen.findByTestId('zipDownloadLink')
+        expect(link).toBeInTheDocument()
+        expect(screen.queryByText(/NEW/)).toBeNull()
     })
 
     it('can render all contract details fields', async () => {
@@ -534,27 +526,18 @@ describe('ContractDetailsSummarySection', () => {
     })
 
     it('renders inline error when bulk URL is unavailable', async () => {
-        const s3Provider = {
-            ...testS3Client(),
-            getBulkDlURL: async (
-                _keys: string[],
-                _fileName: string
-            ): Promise<string | Error> => {
-                return new Error('Error: getBulkDlURL encountered an error')
-            },
-        }
+        const contract = mockContractPackageSubmitted()
+        //Removing pre-existing zip package
+        contract.packageSubmissions[0].contractRevision.documentZipPackages =
+            undefined
         renderWithProviders(
             <ContractDetailsSummarySection
-                contract={{
-                    ...mockContractPackageSubmitted(),
-                    status: 'SUBMITTED',
-                }}
+                contract={contract}
                 isStateUser
                 submissionName="MN-PMAP-0001"
             />,
             {
                 apolloProvider: defaultApolloMocks,
-                s3Provider,
             }
         )
 
@@ -1043,6 +1026,137 @@ describe('ContractDetailsSummarySection', () => {
                     /You must provide this information/
                 )
             ).toBeNull()
+        })
+    })
+
+    describe('Document zip package download link', () => {
+        it('renders zip package link for a SUBMITTED submission as a State user', async () => {
+            renderWithProviders(
+                <ContractDetailsSummarySection
+                    contract={{
+                        ...mockContractPackageSubmitted(),
+                        status: 'SUBMITTED',
+                    }}
+                    isStateUser={false}
+                    submissionName="MN-PMAP-0001"
+                />,
+                {
+                    apolloProvider: {
+                        mocks: [
+                            fetchCurrentUserMock({
+                                statusCode: 200,
+                                user: mockValidStateUser(),
+                            }),
+                        ],
+                    },
+                }
+            )
+
+            await waitFor(() => {
+                expect(
+                    screen.getByRole('heading', {
+                        level: 2,
+                        name: 'Contract details',
+                    })
+                ).toBeInTheDocument()
+                expect(screen.queryByText('Edit')).not.toBeInTheDocument()
+            })
+
+            //Expect zip package links to load
+            const link = await screen.findByTestId('zipDownloadLink')
+            expect(link).toBeInTheDocument()
+            expect(
+                screen.getByText('Download contract documents (3 files)')
+            ).toBeInTheDocument()
+        })
+
+        it('renders zip package link for a SUBMITTED submission as a CMS user', async () => {
+            renderWithProviders(
+                <ContractDetailsSummarySection
+                    contract={{
+                        ...mockContractPackageSubmitted(),
+                        status: 'SUBMITTED',
+                    }}
+                    isStateUser={false}
+                    submissionName="MN-PMAP-0001"
+                />,
+                {
+                    apolloProvider: {
+                        mocks: [
+                            fetchCurrentUserMock({
+                                statusCode: 200,
+                                user: mockValidCMSUser(),
+                            }),
+                        ],
+                    },
+                }
+            )
+
+            await waitFor(() => {
+                expect(
+                    screen.getByRole('heading', {
+                        level: 2,
+                        name: 'Contract details',
+                    })
+                ).toBeInTheDocument()
+                expect(screen.queryByText('Edit')).not.toBeInTheDocument()
+            })
+
+            //Expect zip package links to load
+            const link = await screen.findByTestId('zipDownloadLink')
+            expect(link).toBeInTheDocument()
+            expect(
+                screen.getByText('Download contract documents (3 files)')
+            ).toBeInTheDocument()
+        })
+
+        it('renders zip package link for an UNLOCKED submission as a CMS user', async () => {
+            const contract = mockContractPackageUnlockedWithUnlockedType()
+            contract.packageSubmissions[0].contractRevision.documentZipPackages =
+                [
+                    {
+                        id: 'zip-package-123',
+                        s3URL: 's3://bucket-name/zips/contracts/key/contract-documents.zip',
+                        sha256: 'sha123',
+                        documentType: 'CONTRACT_DOCUMENTS',
+                        createdAt: new Date('01/15/2024'),
+                        downloadUrl: s3DlUrl,
+                    },
+                ]
+            renderWithProviders(
+                <ContractDetailsSummarySection
+                    contract={contract}
+                    isStateUser={false}
+                    submissionName="MN-PMAP-0001"
+                />,
+                {
+                    apolloProvider: {
+                        mocks: [
+                            fetchCurrentUserMock({
+                                statusCode: 200,
+                                user: mockValidCMSUser(),
+                            }),
+                        ],
+                    },
+                }
+            )
+
+            await waitFor(() => {
+                expect(
+                    screen.getByRole('heading', {
+                        level: 2,
+                        name: 'Contract details',
+                    })
+                ).toBeInTheDocument()
+                expect(screen.queryByText('Edit')).not.toBeInTheDocument()
+            })
+
+            //Expect zip package links to load
+            const link = await screen.findByTestId('zipDownloadLink')
+            expect(link).toBeInTheDocument()
+            expect(
+                screen.getByText('Download contract documents (1 file)')
+            ).toBeInTheDocument()
         })
     })
 })

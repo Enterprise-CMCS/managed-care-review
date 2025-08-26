@@ -63,7 +63,7 @@ export const StateQuestionResponseTable = ({
     return (
         <>
             <div className={styles.tableHeader}>
-                <SectionHeader header={header} hideBorder />
+                <SectionHeader header={header} hideBorderBottom hideBorderTop />
             </div>
             <section
                 className={styles.questionSection}
@@ -72,6 +72,7 @@ export const StateQuestionResponseTable = ({
                 <SectionHeader
                     header="Outstanding questions"
                     headerId="outsandingContractQuestions"
+                    hideBorderTop
                 />
                 {sortedUnansweredQuestions.length ? (
                     sortedUnansweredQuestions.map((questionRound) =>
@@ -97,6 +98,7 @@ export const StateQuestionResponseTable = ({
                 <SectionHeader
                     header="Answered questions"
                     headerId="answeredContractQuestions"
+                    hideBorderTop
                 />
                 {sortedAnsweredQuestions.length ? (
                     sortedAnsweredQuestions.map((questionRound) =>
