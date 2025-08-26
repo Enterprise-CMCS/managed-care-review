@@ -21,6 +21,8 @@ import { ResourceNames } from '../config'
 import { Architecture, Runtime, LayerVersion } from 'aws-cdk-lib/aws-lambda'
 import { CfnWebACL, CfnWebACLAssociation } from 'aws-cdk-lib/aws-wafv2'
 import { SubnetType, SecurityGroup, Vpc } from 'aws-cdk-lib/aws-ec2'
+import { Rule, Schedule } from 'aws-cdk-lib/aws-events'
+import { LambdaFunction } from 'aws-cdk-lib/aws-events-targets'
 import { AWS_OTEL_LAYER_ARN } from './lambda-layers'
 import path from 'path'
 
@@ -39,9 +41,6 @@ export class AppApiStack extends BaseStack {
 
     // TODO: Add remaining lambdas
     // public readonly graphqlFunction: NodejsFunction
-    // public readonly zipKeysFunction: NodejsFunction
-    // public readonly auditFilesFunction: NodejsFunction
-    // public readonly migrateDocumentZipsFunction: NodejsFunction
 
     constructor(scope: Construct, id: string, props: BaseStackProps) {
         super(scope, id, {
@@ -146,16 +145,15 @@ export class AppApiStack extends BaseStack {
 
         // TODO: Add remaining complex functions later (with VPC, layers, etc.)
         // this.graphqlFunction = this.createFunction('graphql', 'apollo_gql', 'gqlHandler', {...})
-        // this.zipKeysFunction = this.createFunction('zip-keys', 'bulk_download', 'main', {...})
-        // this.migrateFunction = this.createFunction('migrate', 'postgres_migrate', 'main', {...})
-        // this.auditFilesFunction = this.createFunction('audit-files', 'audit_s3', 'main', {...})
-        // this.migrateDocumentZipsFunction = this.createFunction('migrate-document-zips', 'migrate_document_zips', 'main', {...})
 
         // Create API Gateway resources and methods first
         this.setupApiGatewayRoutes(apiGateway)
 
         // Setup WAF association AFTER routes are configured (ensures deployment exists)
         this.setupWafAssociation(apiGateway)
+
+        // Setup cleanup function cron schedule
+        this.setupCleanupSchedule()
 
         this.createOutputs()
     }
@@ -488,10 +486,6 @@ export class AppApiStack extends BaseStack {
         // externalResource.addMethod('POST', new LambdaIntegration(this.graphqlFunction), { authorizer: customAuthorizer })
         // externalResource.addMethod('GET', new LambdaIntegration(this.graphqlFunction), { authorizer: customAuthorizer })
 
-        // Zip endpoint
-        // const zipResource = apiGateway.root.addResource('zip')
-        // zipResource.addMethod('POST', new LambdaIntegration(this.zipKeysFunction), { authorizationType: AuthorizationType.IAM })
-
         // Deployment and stage are automatically handled by RestApi construct
     }
 
@@ -543,6 +537,30 @@ export class AppApiStack extends BaseStack {
 
         // Ensure WAF association happens after API Gateway deployment
         wafAssociation.node.addDependency(apiGateway)
+    }
+
+    /**
+     * Setup cleanup function cron schedule
+     * Runs weekdays at 1 AM UTC to delete old RDS snapshots (>30 days)
+     */
+    private setupCleanupSchedule(): void {
+        // Create CloudWatch Events rule with cron schedule
+        const cleanupRule = new Rule(this, 'CleanupScheduleRule', {
+            ruleName: `${ResourceNames.apiName('app-api', this.stage)}-cleanup-rule`,
+            description:
+                'Scheduled trigger for cleanup function to delete old RDS snapshots',
+            schedule: Schedule.cron({
+                minute: '0',
+                hour: '1', // 1 AM UTC
+                weekDay: 'MON-FRI', // Monday through Friday
+            }),
+        })
+
+        // Add cleanup function as target
+        cleanupRule.addTarget(new LambdaFunction(this.cleanupFunction))
+
+        // Grant EventBridge permission to invoke the cleanup function
+        // (This is handled automatically by the LambdaFunction target)
     }
 
     private createOutputs(): void {
