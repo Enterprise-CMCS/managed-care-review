@@ -225,6 +225,7 @@ export class AuthStack extends Stack {
    * Create stack outputs
    */
   private createOutputs(): void {
+    // Outputs for GitHub Actions workflow (existing format)
     new CfnOutput(this, 'UserPoolId', {
       value: this.userPool.userPoolId,
       description: 'Cognito User Pool ID'
@@ -240,14 +241,30 @@ export class AuthStack extends Stack {
       description: 'Cognito User Pool Client ID'
     });
 
-    // Add UserPoolClientDomain output if custom domain is configured
-    const domain = this.userPool.node.findChild('Domain') as cognito.UserPoolDomain | undefined;
-    if (domain) {
-      new CfnOutput(this, 'UserPoolClientDomain', {
-        value: domain.domainName,
-        description: 'Cognito User Pool Domain'
-      });
-    }
+    // Outputs for app-web cf: lookups (serverless compatibility)
+    new CfnOutput(this, 'UserPoolIdExport', {
+      value: this.userPool.userPoolId,
+      exportName: `ui-auth-${this.stage}-UserPoolId`,
+      description: 'Cognito User Pool ID for cf: lookups'
+    });
+
+    new CfnOutput(this, 'UserPoolClientIdExport', {
+      value: this.userPoolClient.userPoolClientId,
+      exportName: `ui-auth-${this.stage}-UserPoolClientId`,
+      description: 'Cognito User Pool Client ID for cf: lookups'
+    });
+
+    new CfnOutput(this, 'Region', {
+      value: this.region,
+      exportName: `ui-auth-${this.stage}-Region`,
+      description: 'AWS region for cf: lookups'
+    });
+
+    new CfnOutput(this, 'UserPoolClientDomain', {
+      value: `${this.stage}-login-${this.userPoolClient.userPoolClientId}.auth.${this.region}.amazoncognito.com`,
+      exportName: `ui-auth-${this.stage}-UserPoolClientDomain`,
+      description: 'Cognito User Pool Domain for cf: lookups'
+    });
 
     // Note: Identity Pool outputs will be created in AuthExtensionsStack
   }

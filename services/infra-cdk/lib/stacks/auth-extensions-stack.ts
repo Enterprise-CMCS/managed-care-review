@@ -391,6 +391,7 @@ exports.handler = async (event) => {
    * Create stack outputs
    */
   private createOutputs(): void {
+    // Output for GitHub Actions workflow (existing format)
     new CfnOutput(this, 'IdentityPoolId', {
       value: this.identityPool.ref,
       description: 'Cognito Identity Pool ID'
@@ -399,6 +400,13 @@ exports.handler = async (event) => {
     new CfnOutput(this, 'AuthenticatedRoleArn', {
       value: this.authenticatedRole.roleArn,
       description: 'Authenticated Role ARN'
+    });
+
+    // Output for app-web cf: lookups (serverless compatibility)
+    new CfnOutput(this, 'IdentityPoolIdExport', {
+      value: this.identityPool.ref,
+      exportName: `ui-auth-${this.stage}-IdentityPoolId`,
+      description: 'Cognito Identity Pool ID for cf: lookups'
     });
   }
 }
