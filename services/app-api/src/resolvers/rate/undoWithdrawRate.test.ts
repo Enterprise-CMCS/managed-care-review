@@ -97,7 +97,7 @@ describe('undoWithdrawRate', () => {
 
         // link rate contract B
         must(
-            await stateServer.executeOperation({
+            await executeGraphQLOperation(stateServer, {
                 query: UpdateDraftContractRatesDocument,
                 variables: {
                     input: {
@@ -275,7 +275,7 @@ describe('undoWithdrawRate', () => {
 
         // link rate contract B
         must(
-            await stateServer.executeOperation({
+            await executeGraphQLOperation(stateServer, {
                 query: UpdateDraftContractRatesDocument,
                 variables: {
                     input: {
@@ -448,7 +448,7 @@ describe('undoWithdrawRate', () => {
 
         // link rate contract B
         must(
-            await stateServer.executeOperation({
+            await executeGraphQLOperation(stateServer, {
                 query: UpdateDraftContractRatesDocument,
                 variables: {
                     input: {
@@ -643,7 +643,7 @@ describe('undo withdraw rate error handling', async () => {
 
         // link rate contract B
         must(
-            await stateServer.executeOperation({
+            await executeGraphQLOperation(stateServer, {
                 query: UpdateDraftContractRatesDocument,
                 variables: {
                     input: {
@@ -709,7 +709,7 @@ describe('undo withdraw rate error handling', async () => {
 
         // link rate contract B
         must(
-            await stateServer.executeOperation({
+            await executeGraphQLOperation(stateServer, {
                 query: UpdateDraftContractRatesDocument,
                 variables: {
                     input: {

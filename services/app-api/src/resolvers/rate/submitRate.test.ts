@@ -404,7 +404,7 @@ describe('submitRate', () => {
         const rateID = latestFormData(draftContractWithRate).rateInfos[0].id
 
         // submit contract and rate
-        await stateServer.executeOperation({
+        await executeGraphQLOperation(stateServer, {
             query: SubmitHealthPlanPackageDocument,
             variables: {
                 input: {

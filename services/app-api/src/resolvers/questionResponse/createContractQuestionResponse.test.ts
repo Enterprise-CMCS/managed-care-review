@@ -80,20 +80,23 @@ describe('createContractQuestionResponse', () => {
         const stateServer = await constructTestPostgresServer()
         const fakeID = 'abc-123'
 
-        const createResponseResult = await stateServer.executeOperation({
-            query: CreateContractQuestionResponseDocument,
-            variables: {
-                input: {
-                    questionID: fakeID,
-                    documents: [
-                        {
-                            name: 'Test Question',
-                            s3URL: 's3://bucketname/key/test1',
-                        },
-                    ],
+        const createResponseResult = await executeGraphQLOperation(
+            stateServer,
+            {
+                query: CreateContractQuestionResponseDocument,
+                variables: {
+                    input: {
+                        questionID: fakeID,
+                        documents: [
+                            {
+                                name: 'Test Question',
+                                s3URL: 's3://bucketname/key/test1',
+                            },
+                        ],
+                    },
                 },
-            },
-        })
+            }
+        )
 
         expect(createResponseResult).toBeDefined()
         expect(assertAnErrorCode(createResponseResult)).toBe('BAD_USER_INPUT')
@@ -113,20 +116,23 @@ describe('createContractQuestionResponse', () => {
         const createdQuestion = await createTestQuestion(cmsServer, contract.id)
         await approveTestContract(cmsServer, contract.id)
 
-        const createResponseResult = await stateServer.executeOperation({
-            query: CreateContractQuestionResponseDocument,
-            variables: {
-                input: {
-                    questionID: createdQuestion.id,
-                    documents: [
-                        {
-                            name: 'Test Question',
-                            s3URL: 's3://bucketname/key/test1',
-                        },
-                    ],
+        const createResponseResult = await executeGraphQLOperation(
+            stateServer,
+            {
+                query: CreateContractQuestionResponseDocument,
+                variables: {
+                    input: {
+                        questionID: createdQuestion.id,
+                        documents: [
+                            {
+                                name: 'Test Question',
+                                s3URL: 's3://bucketname/key/test1',
+                            },
+                        ],
+                    },
                 },
-            },
-        })
+            }
+        )
 
         expect(createResponseResult).toBeDefined()
         expect(assertAnErrorCode(createResponseResult)).toBe('BAD_USER_INPUT')

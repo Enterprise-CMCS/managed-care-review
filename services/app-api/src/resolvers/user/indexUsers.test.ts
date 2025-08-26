@@ -100,7 +100,7 @@ describe('indexUsers', () => {
             },
         })
 
-        const updateRes = await server.executeOperation({
+        const updateRes = await executeGraphQLOperation(server, {
             query: IndexUsersDocument,
             variables: {
                 input: {
@@ -118,7 +118,7 @@ describe('indexUsers', () => {
     it('returns an error if called by a CMS user', async () => {
         const server = await constructTestPostgresServer()
 
-        const updateRes = await server.executeOperation({
+        const updateRes = await executeGraphQLOperation(server, {
             query: IndexUsersDocument,
             variables: {
                 input: {

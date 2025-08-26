@@ -130,7 +130,7 @@ describe('updateDivisionAssignment', () => {
                 // setup a user in the db for us to modify
                 const cmsUserID = uuidv4()
 
-                const updateRes = await server.executeOperation({
+                const updateRes = await executeGraphQLOperation(server, {
                     query: UpdateDivisionAssignmentDocument,
                     variables: {
                         input: {
@@ -174,7 +174,7 @@ describe('updateDivisionAssignment', () => {
             throw newUser
         }
 
-        const updateRes = await server.executeOperation({
+        const updateRes = await executeGraphQLOperation(server, {
             query: UpdateDivisionAssignmentDocument,
             variables: {
                 input: {
@@ -203,7 +203,7 @@ describe('updateDivisionAssignment', () => {
         // setup a user in the db for us to modify
         const cmsUserID = uuidv4()
 
-        const updateRes = await server.executeOperation({
+        const updateRes = await executeGraphQLOperation(server, {
             query: UpdateDivisionAssignmentDocument,
             variables: {
                 input: {
@@ -229,7 +229,7 @@ describe('updateDivisionAssignment', () => {
         // setup a user in the db for us to modify
         const cmsUserID = uuidv4()
 
-        const updateRes = await server.executeOperation({
+        const updateRes = await executeGraphQLOperation(server, {
             query: UpdateDivisionAssignmentDocument,
             variables: {
                 input: {

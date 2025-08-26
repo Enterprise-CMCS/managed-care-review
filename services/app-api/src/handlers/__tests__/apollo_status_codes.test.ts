@@ -1,6 +1,7 @@
 import { ApolloServer } from '@apollo/server'
 import { gql } from '@apollo/client'
 import { GraphQLError } from 'graphql'
+import { executeGraphQLOperation } from '../../testHelpers/gqlHelpers'
 
 describe('Apollo Server v4 Status Code Behavior', () => {
     describe('Variable validation errors', () => {
@@ -26,7 +27,7 @@ describe('Apollo Server v4 Status Code Behavior', () => {
             await server.start()
 
             // Test invalid variable type (number instead of string)
-            const response = await server.executeOperation({
+            const result = await executeGraphQLOperation(server, {
                 query: gql`
                     query HelloQuery($name: String!) {
                         hello(name: $name)
@@ -35,16 +36,11 @@ describe('Apollo Server v4 Status Code Behavior', () => {
                 variables: {
                     name: 123, // Invalid: number instead of string
                 },
-            }, {
-                contextValue: {}, // Apollo v4 requires context
             })
-            
-            // Apollo Server v4 returns response with body property
-            const result = response.body.kind === 'single' ? response.body.singleResult : response
 
             // Apollo Server v4 behavior: returns validation errors
             if (!result.errors) {
-                console.log('Result:', JSON.stringify(result, null, 2))
+                throw new Error(`Result: ${JSON.stringify(result, null, 2)}`)
             }
             expect(result.errors).toBeDefined()
             expect(result.errors?.[0]?.message).toContain(
@@ -75,19 +71,14 @@ describe('Apollo Server v4 Status Code Behavior', () => {
             await server.start()
 
             // Test missing required variable
-            const response = await server.executeOperation({
+            const result = await executeGraphQLOperation(server, {
                 query: gql`
                     query HelloQuery($name: String!) {
                         hello(name: $name)
                     }
                 `,
                 variables: {}, // Missing required variable
-            }, {
-                contextValue: {}, // Apollo v4 requires context
             })
-            
-            // Apollo Server v4 returns response with body property
-            const result = response.body.kind === 'single' ? response.body.singleResult : response
 
             expect(result.errors).toBeDefined()
             expect(result.errors?.[0]?.message).toContain(
@@ -115,7 +106,7 @@ describe('Apollo Server v4 Status Code Behavior', () => {
             })
             await server.start()
 
-            const response = await server.executeOperation({
+            const result = await executeGraphQLOperation(server, {
                 query: gql`
                     query Test($input: String!) {
                         test(input: $input)
@@ -124,12 +115,7 @@ describe('Apollo Server v4 Status Code Behavior', () => {
                 variables: {
                     input: 456, // Invalid type
                 },
-            }, {
-                contextValue: {}, // Apollo v4 requires context
             })
-            
-            // Apollo Server v4 returns response with body property
-            const result = response.body.kind === 'single' ? response.body.singleResult : response
 
             // Apollo Server v4 Behavior
             // Apollo Server v4: Returns BAD_USER_INPUT with 200 HTTP status
@@ -165,7 +151,7 @@ describe('Apollo Server v4 Status Code Behavior', () => {
             })
             await server.start()
 
-            const response = await server.executeOperation({
+            const result = await executeGraphQLOperation(server, {
                 query: gql`
                     query ValidateAge($age: Int!) {
                         validateAge(age: $age)
@@ -174,12 +160,7 @@ describe('Apollo Server v4 Status Code Behavior', () => {
                 variables: {
                     age: -5,
                 },
-            }, {
-                contextValue: {}, // Apollo v4 requires context
             })
-            
-            // Apollo Server v4 returns response with body property
-            const result = response.body.kind === 'single' ? response.body.singleResult : response
 
             expect(result.errors).toBeDefined()
             expect(result.errors?.[0]?.message).toBe('Age must be positive')

@@ -278,7 +278,7 @@ describe.each(authorizedUserTests)(
                 },
             })
 
-            const updateResEmpty = await server.executeOperation({
+            const updateResEmpty = await executeGraphQLOperation(server, {
                 query: UpdateStateAssignmentsByStateDocument,
                 variables: {
                     input: {
@@ -296,7 +296,7 @@ describe.each(authorizedUserTests)(
                 assertAnErrorExtensions(updateResEmpty).argumentValues
             ).toEqual([])
 
-            const updateResUndefined = await server.executeOperation({
+            const updateResUndefined = await executeGraphQLOperation(server, {
                 query: UpdateStateAssignmentsByStateDocument,
                 variables: {
                     input: {
@@ -311,7 +311,7 @@ describe.each(authorizedUserTests)(
             )
             expect(assertAnErrorCode(updateResUndefined)).toBe('BAD_USER_INPUT')
 
-            const updateResNull = await server.executeOperation({
+            const updateResNull = await executeGraphQLOperation(server, {
                 query: UpdateStateAssignmentsByStateDocument,
                 variables: {
                     input: {
@@ -343,7 +343,7 @@ describe.each(authorizedUserTests)(
                 },
             })
 
-            const updateRes = await server.executeOperation({
+            const updateRes = await executeGraphQLOperation(server, {
                 query: UpdateStateAssignmentsByStateDocument,
                 variables: {
                     input: {
@@ -403,7 +403,7 @@ describe.each(authorizedUserTests)(
                 },
             })
 
-            const updateRes = await server.executeOperation({
+            const updateRes = await executeGraphQLOperation(server, {
                 query: UpdateStateAssignmentsByStateDocument,
                 variables: {
                     input: {
@@ -468,7 +468,7 @@ describe.each(unauthorizedUserTests)(
                 },
             })
 
-            const updateRes = await server.executeOperation({
+            const updateRes = await executeGraphQLOperation(server, {
                 query: UpdateStateAssignmentsByStateDocument,
                 variables: {
                     input: {

@@ -207,7 +207,7 @@ describe('fetchMcReviewSettings', () => {
             },
         })
 
-        const mcReviewSettings = await server.executeOperation({
+        const mcReviewSettings = await executeGraphQLOperation(server, {
             query: FetchMcReviewSettingsDocument,
         })
 

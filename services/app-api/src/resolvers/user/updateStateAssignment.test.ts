@@ -182,7 +182,7 @@ describe.each(authorizedUserTests)(
                 },
             })
 
-            const updateResEmpty = await server.executeOperation({
+            const updateResEmpty = await executeGraphQLOperation(server, {
                 query: UpdateStateAssignmentDocument,
                 variables: {
                     input: {
@@ -200,7 +200,7 @@ describe.each(authorizedUserTests)(
                 assertAnErrorExtensions(updateResEmpty).argumentValues
             ).toEqual([])
 
-            const updateResUndefined = await server.executeOperation({
+            const updateResUndefined = await executeGraphQLOperation(server, {
                 query: UpdateStateAssignmentDocument,
                 variables: {
                     input: {
@@ -218,7 +218,7 @@ describe.each(authorizedUserTests)(
                 assertAnErrorExtensions(updateResUndefined).argumentValues
             ).toBeUndefined()
 
-            const updateResNull = await server.executeOperation({
+            const updateResNull = await executeGraphQLOperation(server, {
                 query: UpdateStateAssignmentDocument,
                 variables: {
                     input: {
@@ -253,7 +253,7 @@ describe.each(authorizedUserTests)(
                 },
             })
 
-            const updateRes = await server.executeOperation({
+            const updateRes = await executeGraphQLOperation(server, {
                 query: UpdateStateAssignmentDocument,
                 variables: {
                     input: {
@@ -289,7 +289,7 @@ describe.each(authorizedUserTests)(
                 throw newStateUser
             }
 
-            const updateRes = await server.executeOperation({
+            const updateRes = await executeGraphQLOperation(server, {
                 query: UpdateStateAssignmentDocument,
                 variables: {
                     input: {
@@ -314,7 +314,7 @@ describe.each(authorizedUserTests)(
                 },
             })
 
-            const updateRes = await server.executeOperation({
+            const updateRes = await executeGraphQLOperation(server, {
                 query: UpdateStateAssignmentDocument,
                 variables: {
                     input: {
@@ -348,7 +348,7 @@ describe.each(unauthorizedUserTests)(
             // setup a user in the db for us to modify
             const cmsUserID = uuidv4()
 
-            const updateRes = await server.executeOperation({
+            const updateRes = await executeGraphQLOperation(server, {
                 query: UpdateStateAssignmentDocument,
                 variables: {
                     input: {

@@ -375,7 +375,7 @@ describe('withdrawRate', () => {
         }
 
         must(
-            await stateServer.executeOperation({
+            await executeGraphQLOperation(stateServer, {
                 query: UpdateDraftContractRatesDocument,
                 variables: {
                     input: {
@@ -499,7 +499,7 @@ describe('withdrawRate', () => {
         await withdrawTestRate(cmsServer, rateID, 'Withdraw invalid rate')
 
         must(
-            await cmsServer.executeOperation({
+            await executeGraphQLOperation(cmsServer, {
                 query: UnlockContractDocument,
                 variables: {
                     input: {
@@ -586,7 +586,7 @@ describe('withdrawRate', () => {
 
         // link rate to contract B
         must(
-            await stateServer.executeOperation({
+            await executeGraphQLOperation(stateServer, {
                 query: UpdateDraftContractRatesDocument,
                 variables: {
                     input: {
@@ -709,7 +709,7 @@ describe('withdrawRate', () => {
 
         // link rate to contract B
         must(
-            await stateServer.executeOperation({
+            await executeGraphQLOperation(stateServer, {
                 query: UpdateDraftContractRatesDocument,
                 variables: {
                     input: {
@@ -848,7 +848,7 @@ describe('withdrawRate', () => {
 
         // link rate to contract B
         must(
-            await stateServer.executeOperation({
+            await executeGraphQLOperation(stateServer, {
                 query: UpdateDraftContractRatesDocument,
                 variables: {
                     input: {
@@ -867,7 +867,7 @@ describe('withdrawRate', () => {
 
         // link rate to contract C, submit, unlock, then update child rate
         must(
-            await stateServer.executeOperation({
+            await executeGraphQLOperation(stateServer, {
                 query: UpdateDraftContractRatesDocument,
                 variables: {
                     input: {
@@ -908,7 +908,7 @@ describe('withdrawRate', () => {
 
         // update contract C child rate to assert it wasn't modified
         must(
-            await stateServer.executeOperation({
+            await executeGraphQLOperation(stateServer, {
                 query: UpdateDraftContractRatesDocument,
                 variables: {
                     input: {
@@ -945,7 +945,7 @@ describe('withdrawRate', () => {
             'unlock to make updates'
         )
         must(
-            await stateServer.executeOperation({
+            await executeGraphQLOperation(stateServer, {
                 query: UpdateDraftContractRatesDocument,
                 variables: {
                     input: {
@@ -1140,7 +1140,7 @@ describe('withdrawRate', () => {
             await createAndUpdateTestContractWithoutRates(stateServer)
 
         must(
-            await stateServer.executeOperation({
+            await executeGraphQLOperation(stateServer, {
                 query: UpdateDraftContractRatesDocument,
                 variables: {
                     input: {

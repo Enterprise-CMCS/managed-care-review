@@ -1,4 +1,4 @@
-import type { GraphQLFormattedError } from 'graphql'
+import type { DocumentNode, GraphQLFormattedError } from 'graphql'
 import type { ApolloServer } from '@apollo/server'
 
 export type TestGraphQLResponse<T = any> = {
@@ -6,9 +6,11 @@ export type TestGraphQLResponse<T = any> = {
     errors?: GraphQLFormattedError[]
 }
 
+// Helper to extract GraphQL response from Apollo v4 response structure
 export function extractGraphQLResponse<T = any>(
     response: any
 ): TestGraphQLResponse<T> {
+    // Handle Apollo v4 response structure
     if ('body' in response && response.body) {
         const result =
             response.body.kind === 'single'
@@ -30,7 +32,7 @@ export function extractGraphQLResponse<T = any>(
 export async function executeGraphQLOperation<TData = any, TVariables = any>(
     server: ApolloServer,
     options: {
-        query: any
+        query: DocumentNode
         variables?: TVariables
         contextValue?: any
     }

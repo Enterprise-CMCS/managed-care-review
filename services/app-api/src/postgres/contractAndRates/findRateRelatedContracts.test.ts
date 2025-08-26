@@ -1,9 +1,11 @@
 import { sharedTestPrismaClient } from '../../testHelpers/storeHelpers'
-import { constructTestPostgresServer } from '../../testHelpers/gqlHelpers'
+import {
+    constructTestPostgresServer,
+    executeGraphQLOperation,
+} from '../../testHelpers/gqlHelpers'
 import { testCMSUser, testStateUser } from '../../testHelpers/userHelpers'
 import {
     approveTestContract,
-    approveTestContractAsUser,
     createAndSubmitTestContractWithRate,
     createAndUpdateTestContractWithoutRates,
     submitTestContract,
@@ -17,34 +19,31 @@ import { findRateRelatedContracts } from './findRateRelatedContracts'
 it('returns related contracts with correct status', async () => {
     const client = await sharedTestPrismaClient()
 
-    const stateUser = testStateUser()
-    const cmsUser = testCMSUser()
-
     const stateServer = await constructTestPostgresServer({
         context: {
-            user: stateUser,
+            user: testStateUser(),
         },
     })
 
     const cmsServer = await constructTestPostgresServer({
         context: {
-            user: cmsUser,
+            user: testCMSUser(),
         },
     })
 
     const submittedContractA =
-        await createAndSubmitTestContractWithRate(stateServer, undefined, { user: stateUser })
+        await createAndSubmitTestContractWithRate(stateServer)
     const rateAID =
         submittedContractA.packageSubmissions[0].rateRevisions[0].rateID
 
-    await unlockTestContract(cmsServer, submittedContractA.id, 'unlock 1', { user: cmsUser })
-    await submitTestContract(stateServer, submittedContractA.id, 'submit 2', { user: stateUser })
+    await unlockTestContract(cmsServer, submittedContractA.id, 'unlock 1')
+    await submitTestContract(stateServer, submittedContractA.id, 'submit 2')
 
     const contractB = await createAndUpdateTestContractWithoutRates(stateServer)
 
     // link rate contract B
     must(
-        await stateServer.executeOperation({
+        await executeGraphQLOperation(stateServer, {
             query: UpdateDraftContractRatesDocument,
             variables: {
                 input: {
@@ -62,12 +61,10 @@ it('returns related contracts with correct status', async () => {
                     ],
                 },
             },
-        }, {
-            contextValue: { user: stateUser },
         })
     )
 
-    await submitTestContract(stateServer, contractB.id, undefined, { user: stateUser })
+    await submitTestContract(stateServer, contractB.id)
 
     let rateARelatedStrippedContracts = must(
         await findRateRelatedContracts(client, rateAID)
@@ -90,14 +87,13 @@ it('returns related contracts with correct status', async () => {
     await unlockTestContract(
         cmsServer,
         submittedContractA.id,
-        'unlocked parent contract',
-        { user: cmsUser }
+        'unlocked parent contract'
     )
 
     const contractC = await createAndUpdateTestContractWithoutRates(stateServer)
     // link rate contract C
     must(
-        await stateServer.executeOperation({
+        await executeGraphQLOperation(stateServer, {
             query: UpdateDraftContractRatesDocument,
             variables: {
                 input: {
@@ -115,18 +111,15 @@ it('returns related contracts with correct status', async () => {
                     ],
                 },
             },
-        }, {
-            contextValue: { user: stateUser },
         })
     )
 
-    await submitTestContract(stateServer, contractC.id, undefined, { user: stateUser })
+    await submitTestContract(stateServer, contractC.id)
 
     const unlockedContractB = await unlockTestContract(
         cmsServer,
         contractB.id,
-        'unlock to remove rate A',
-        { user: cmsUser }
+        'unlock to remove rate A'
     )
     const rateBID = unlockedContractB.packageSubmissions[0].rateRevisions.find(
         (rate) => rate.rateID !== rateAID
@@ -138,7 +131,7 @@ it('returns related contracts with correct status', async () => {
 
     // Remove rateA from contractB, but keep it unlocked
     must(
-        await stateServer.executeOperation({
+        await executeGraphQLOperation(stateServer, {
             query: UpdateDraftContractRatesDocument,
             variables: {
                 input: {
@@ -154,8 +147,6 @@ it('returns related contracts with correct status', async () => {
                     ],
                 },
             },
-        }, {
-            contextValue: { user: stateUser },
         })
     )
 
@@ -185,12 +176,11 @@ it('returns related contracts with correct status', async () => {
     await submitTestContract(
         stateServer,
         contractB.id,
-        'resubmit contractB without rateA',
-        { user: stateUser }
+        'resubmit contractB without rateA'
     )
 
     // approve contractC
-    await approveTestContract(cmsServer, contractC.id, undefined, { user: cmsUser })
+    await approveTestContract(cmsServer, contractC.id)
 
     rateARelatedStrippedContracts = must(
         await findRateRelatedContracts(client, rateAID)
