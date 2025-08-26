@@ -61,49 +61,6 @@ export class GeoRestrictedWaf extends Construct {
             cloudWatchMetricsEnabled: true,
             metricName: 'WafWebAcl'
           }
-        },
-        {
-          name: `${props.stage}-rate-limit-rule`,
-          priority: 1,
-          action: {
-            block: {}
-          },
-          statement: {
-            rateBasedStatement: {
-              limit: 2000,
-              aggregateKeyType: 'IP'
-            }
-          },
-          visibilityConfig: {
-            sampledRequestsEnabled: true,
-            cloudWatchMetricsEnabled: true,
-            metricName: `${props.stage}-rate-limit`
-          }
-        },
-        {
-          name: `${props.stage}-size-restriction-rule`,
-          priority: 2,
-          action: {
-            block: {}
-          },
-          statement: {
-            sizeConstraintStatement: {
-              fieldToMatch: {
-                body: {}
-              },
-              comparisonOperator: 'GT',
-              size: 8192,
-              textTransformations: [{
-                priority: 0,
-                type: 'NONE'
-              }]
-            }
-          },
-          visibilityConfig: {
-            sampledRequestsEnabled: true,
-            cloudWatchMetricsEnabled: true,
-            metricName: `${props.stage}-size-restriction`
-          }
         }
       ],
       visibilityConfig: {

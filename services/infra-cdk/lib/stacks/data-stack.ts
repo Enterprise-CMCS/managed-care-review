@@ -243,7 +243,7 @@ export class DataStack extends Stack {
       exportName: 'MCR-Data-dev-cdk:ExportsOutputRefDatabaseSecret3B81719527782CE7'
     });
 
-    // Add bucket name outputs for test script and frontend build
+    // Outputs for GitHub Actions workflow (existing format)
     new CfnOutput(this, 'DocumentUploadsBucketName', {
       value: this.uploadsBucket.bucketName,
       description: 'Name of the document uploads S3 bucket'
@@ -252,6 +252,25 @@ export class DataStack extends Stack {
     new CfnOutput(this, 'QAUploadsBucketName', {
       value: this.qaBucket.bucketName,
       description: 'Name of the QA uploads S3 bucket'
+    });
+
+    // Outputs for app-web cf: lookups (serverless compatibility)
+    new CfnOutput(this, 'DocumentUploadsBucketNameExport', {
+      value: this.uploadsBucket.bucketName,
+      exportName: `uploads-${this.stage}-DocumentUploadsBucketName`,
+      description: 'Document uploads bucket name for cf: lookups'
+    });
+
+    new CfnOutput(this, 'QAUploadsBucketNameExport', {
+      value: this.qaBucket.bucketName,
+      exportName: `uploads-${this.stage}-QAUploadsBucketName`,
+      description: 'QA uploads bucket name for cf: lookups'
+    });
+
+    new CfnOutput(this, 'RegionExport', {
+      value: this.region,
+      exportName: `uploads-${this.stage}-Region`,
+      description: 'AWS region for cf: lookups'
     });
 
     // CDK auto-generates these 6 exports when DatabaseOperationsStack references the objects:

@@ -9,10 +9,11 @@ import {
   GuardDutyMalwareProtectionStack,
   MonitoringStack,
   FrontendStack,
+  StorybookStack,
   GitHubOidcStack,
   LambdaLayersStack,
   SharedInfraStack,
-  GraphQLApiStack,
+  SharedApiGatewayStack,
   PublicApiStack,
   FileOpsStack,
   ScheduledTasksStack,
@@ -46,12 +47,13 @@ export interface StackReferences {
   apiCompute?: any; // Optional for backward compatibility during cleanup
   databaseOps: DatabaseOperationsStack;
   frontend: FrontendStack;
+  storybook: StorybookStack;
   virusScanning?: GuardDutyMalwareProtectionStack;
   monitoring: MonitoringStack;
   githubOidc?: GitHubOidcStack;
   // Elegant micro-stack architecture (85% code reduction, zero circular dependencies)
   sharedInfra: SharedInfraStack;
-  graphqlApi: GraphQLApiStack;
+  sharedApiGateway: SharedApiGatewayStack;
   publicApi: PublicApiStack;
   fileOps: FileOpsStack;
   scheduledTasks: ScheduledTasksStack;
@@ -91,21 +93,26 @@ export class StackOrchestrator {
     // Step 1: Shared Infrastructure (OTEL + Prisma layers)
     const sharedInfra = this.createSharedInfra(lambdaLayers);
     
-    // Step 2: Public API functions (must be created before GraphQL API)
+    // Step 2: Public API functions (must be created before shared API gateway)
     const publicApi = this.createPublicApi(foundation, network, data, sharedInfra);
     
-    // Step 3: API Micro-stacks (GraphQL API now includes public endpoints)
-    const graphqlApi = this.createGraphQLApi(foundation, network, data, sharedInfra, publicApi);
+    // Step 3: File operations (creates zip_keys function needed by API)
     const fileOps = this.createFileOps(data, sharedInfra);
+    
+    // Step 4: Shared API Gateway with all endpoints
+    const sharedApiGateway = this.createSharedApiGateway(foundation, network, data, sharedInfra, publicApi, fileOps);
+    
+    // Step 5: Other stacks
     const scheduledTasks = this.createScheduledTasks(data, sharedInfra);
     
-    // Step 3: Auth Extensions (after APIs exist - breaks circular dependency)
-    const authExtensions = this.createAuthExtensions(data, graphqlApi, publicApi);
+    // Step 6: Auth Extensions (after APIs exist - breaks circular dependency)
+    const authExtensions = this.createAuthExtensions(data, sharedApiGateway, publicApi);
 
     // 8. Frontend Stack (deployment-independent - uses micro-stack outputs at CI build time)
     const frontend = this.createFrontend();
 
-    // 9. Storybook integrated into Frontend Stack (ultra-clean approach)
+    // 9. Storybook Stack (separate for serverless parity)
+    const storybook = this.createStorybook();
 
     // 10. Virus Scanning Stack (GuardDuty Malware Protection)
     const virusScanning = this.createVirusScanning(data, network);
@@ -123,12 +130,13 @@ export class StackOrchestrator {
       apiCompute: undefined as any, // Maintain interface compatibility during transition
       databaseOps,
       frontend,
+      storybook,
       virusScanning,
       monitoring,
       githubOidc,
       // Elegant micro-stack architecture (175 lines total vs 612 lines monolithic)
       sharedInfra,
-      graphqlApi,
+      sharedApiGateway,
       publicApi,
       fileOps,
       scheduledTasks,
@@ -259,6 +267,17 @@ export class StackOrchestrator {
     return stack;
   }
 
+  private createStorybook(): StorybookStack {
+    const stack = new StorybookStack(this.props.app, stackName('Storybook', this.props.stage), {
+      env: this.props.env,
+      stage: this.props.stage,
+      storybookDomainName: process.env.CLOUDFRONT_SB_DOMAIN_NAME,
+      storybookCertificateArn: process.env.CLOUDFRONT_CERT_ARN
+    });
+    // Storybook stack is independent - no CDK dependencies (matches serverless)
+    return stack;
+  }
+
 
   private createVirusScanning(data: DataStack, network: NetworkStack): GuardDutyMalwareProtectionStack {
     const stack = new GuardDutyMalwareProtectionStack(this.props.app, stackName('VirusScanning', this.props.stage), {
@@ -308,16 +327,17 @@ export class StackOrchestrator {
   }
 
   /**
-   * Create GraphQL API Stack with lean config
+   * Create Shared API Gateway Stack with all endpoints
    */
-  private createGraphQLApi(
+  private createSharedApiGateway(
     foundation: FoundationStack,
     network: NetworkStack,
     data: DataStack,
     sharedInfra: SharedInfraStack,
-    publicApi: PublicApiStack
-  ): GraphQLApiStack {
-    const stack = new GraphQLApiStack(this.props.app, stackName('GraphQLApi', this.props.stage), {
+    publicApi: PublicApiStack,
+    fileOps: FileOpsStack
+  ): SharedApiGatewayStack {
+    const stack = new SharedApiGatewayStack(this.props.app, stackName('SharedApiGateway', this.props.stage), {
       env: this.props.env,
       stage: this.props.stage,
       vpc: network.vpc,
@@ -340,7 +360,8 @@ export class StackOrchestrator {
     stack.addDependency(network);
     stack.addDependency(data);
     stack.addDependency(sharedInfra);
-    stack.addDependency(publicApi); // GraphQL API depends on Public API functions
+    stack.addDependency(publicApi);
+    stack.addDependency(fileOps);
     return stack;
   }
 
@@ -413,7 +434,7 @@ export class StackOrchestrator {
    */
   private createAuthExtensions(
     data: DataStack,
-    graphqlApi: GraphQLApiStack,
+    sharedApiGateway: SharedApiGatewayStack,
     publicApi: PublicApiStack
   ): AuthExtensionsStack {
     const stack = new AuthExtensionsStack(this.props.app, stackName('AuthExtensions', this.props.stage), {
@@ -424,12 +445,12 @@ export class StackOrchestrator {
         data.qaBucket.bucketName
       ],
       apiGatewayArns: [
-        // Only one API Gateway now - all endpoints consolidated into GraphQL API
-        `arn:aws:execute-api:${this.props.env.region}:${this.props.env.account}:${graphqlApi.apiId}/${this.props.stage}/*`
+        // Only one API Gateway now - all endpoints consolidated into shared API
+        `arn:aws:execute-api:${this.props.env.region}:${this.props.env.account}:${sharedApiGateway.api.restApiId}/${this.props.stage}/*`
       ]
     });
     stack.addDependency(data);
-    stack.addDependency(graphqlApi);
+    stack.addDependency(sharedApiGateway);
     stack.addDependency(publicApi);
     return stack;
   }

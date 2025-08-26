@@ -57,7 +57,40 @@ export class GuardDutyDetectorManager extends Construct {
       handler: 'index.handler',
       code: lambda.Code.fromInline(`
         const { GuardDuty } = require('@aws-sdk/client-guardduty');
-        const response = require('cfn-response');
+        
+        const response = {
+          send: async (event, context, status, data) => {
+            const responseBody = JSON.stringify({
+              Status: status,
+              Reason: data.Error || 'See CloudWatch Log Stream: ' + context.logStreamName,
+              PhysicalResourceId: context.logStreamName,
+              StackId: event.StackId,
+              RequestId: event.RequestId,
+              LogicalResourceId: event.LogicalResourceId,
+              Data: data
+            });
+            const https = require('https');
+            const url = require('url');
+            const parsedUrl = url.parse(event.ResponseURL);
+            await new Promise((resolve, reject) => {
+              const req = https.request({
+                hostname: parsedUrl.hostname,
+                port: 443,
+                path: parsedUrl.path,
+                method: 'PUT',
+                headers: {
+                  'content-type': '',
+                  'content-length': responseBody.length
+                }
+              }, (res) => resolve(res));
+              req.on('error', reject);
+              req.write(responseBody);
+              req.end();
+            });
+          },
+          SUCCESS: 'SUCCESS',
+          FAILED: 'FAILED'
+        };
         
         exports.handler = async (event, context) => {
           const guardduty = new GuardDuty();

@@ -7,12 +7,13 @@ export * from './database-operations-stack';
 export * from './monitoring-stack';
 export * from './guardduty-malware-protection-stack';
 export * from './frontend-stack';
+export * from './storybook-stack';
 export * from './github-oidc-stack';
 export * from './lambda-layers-stack';
 
 // New elegant micro-stacks (replacing ApiComputeStack bloat)
 export * from './shared-infra-stack';
-export * from './graphql-api-stack';
+export * from './shared-api-gateway-stack';
 export * from './public-api-stack';
 export * from './file-ops-stack';
 export * from './scheduled-tasks-stack';

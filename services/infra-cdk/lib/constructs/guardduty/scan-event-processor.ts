@@ -126,7 +126,7 @@ export class ScanEventProcessor extends Construct {
         source: ['aws.guardduty'],
         detailType: ['GuardDuty Malware Protection Object Scan Result'],
         detail: {
-          scanResult: ['CLEAN', 'THREATS_FOUND', 'UNSUPPORTED', 'FAILED']
+          scanResult: ['NO_THREATS_FOUND', 'THREATS_FOUND', 'UNSUPPORTED', 'FAILED']
         }
       }
     });

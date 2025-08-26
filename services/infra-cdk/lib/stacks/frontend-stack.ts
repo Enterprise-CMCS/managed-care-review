@@ -116,7 +116,7 @@ export class FrontendStack extends Stack {
         stage: this.stage,
         appWebPath: '../app-web',
         enableImmutableAssets: true,
-        enableUnifiedStorybookDeployment: true  // Ultra-clean: Deploy Storybook to same bucket/distribution
+        enableUnifiedStorybookDeployment: false  // Separate Storybook stack for serverless parity
       });
     }
     
@@ -138,14 +138,6 @@ export class FrontendStack extends Stack {
     ServiceRegistry.putValue(this, 'frontend', 'ui-bucket-name', this.mainApp.bucket.bucketName, this.stage);
     ServiceRegistry.putValue(this, 'frontend', 'ui-distribution-id', this.mainApp.distribution.distributionId, this.stage);
     ServiceRegistry.putValue(this, 'frontend', 'ui-url', this.mainAppUrl, this.stage);
-    
-    // Storybook values (if unified deployment enabled)
-    if (this.enableAppWebIntegration) {
-      const storybookUrl = this.mainAppUrl.endsWith('/') 
-        ? `${this.mainAppUrl}storybook/` 
-        : `${this.mainAppUrl}/storybook/`;
-      ServiceRegistry.putValue(this, 'frontend', 'storybook-url', storybookUrl, this.stage);
-    }
   }
   
   /**
@@ -171,36 +163,29 @@ export class FrontendStack extends Stack {
    * Create stack outputs
    */
   private createOutputs(): void {
-    // Main app outputs
-    new CfnOutput(this, 'MainAppBucketName', {
-      value: this.mainApp.bucket.bucketName,
-      exportName: `${this.stackName}-MainAppBucketName`,
-      description: 'S3 bucket for main application'
-    });
-    
-    new CfnOutput(this, 'MainAppDistributionId', {
-      value: this.mainApp.distribution.distributionId,
-      exportName: `${this.stackName}-MainAppDistributionId`,
-      description: 'CloudFront distribution ID for main application'
-    });
-    
+    // Outputs for GitHub Actions workflow (existing format)
     new CfnOutput(this, 'ApplicationUrl', {
       value: this.mainAppUrl,
-      exportName: `${this.stackName}-ApplicationUrl`,
       description: 'CloudFront URL for main application'
     });
     
-    // Add Storybook URL output if unified deployment is enabled
-    if (this.enableAppWebIntegration) {
-      const storybookUrl = this.mainAppUrl.endsWith('/') 
-        ? `${this.mainAppUrl}storybook/` 
-        : `${this.mainAppUrl}/storybook/`;
-        
-      new CfnOutput(this, 'StorybookUrl', {
-        value: storybookUrl,
-        exportName: `${this.stackName}-StorybookUrl`,
-        description: 'CloudFront URL for Storybook (unified deployment)'
-      });
-    }
+    // Outputs for app-web cf: lookups (serverless compatibility)
+    new CfnOutput(this, 'S3BucketName', {
+      value: this.mainApp.bucket.bucketName,
+      exportName: `ui-${this.stage}-S3BucketName`,
+      description: 'S3 bucket name for cf: lookups'
+    });
+    
+    new CfnOutput(this, 'CloudFrontDistributionId', {
+      value: this.mainApp.distribution.distributionId,
+      exportName: `ui-${this.stage}-CloudFrontDistributionId`,
+      description: 'CloudFront distribution ID for cf: lookups'
+    });
+    
+    new CfnOutput(this, 'CloudFrontEndpointUrl', {
+      value: this.mainAppUrl,
+      exportName: `ui-${this.stage}-CloudFrontEndpointUrl`,
+      description: 'CloudFront URL for cf: lookups'
+    });
   }
 }

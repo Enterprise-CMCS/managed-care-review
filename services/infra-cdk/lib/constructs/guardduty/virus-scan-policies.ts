@@ -52,27 +52,26 @@ export class VirusScanPolicies extends Construct {
   /**
    * Deny access to unscanned files
    * Files must have virusScanStatus=CLEAN OR contentsPreviouslyScanned=TRUE
-   * OR be accessed by the Lambda execution role
+   * OR GuardDutyMalwareScanStatus=NO_THREATS_FOUND OR be accessed by the Lambda execution role
    */
   private addDenyUnscannedFileAccessPolicy(bucket: s3.IBucket, lambdaRoleArn: string): void {
-    const policy = new iam.PolicyStatement({
+    bucket.addToResourcePolicy(new iam.PolicyStatement({
       sid: `DenyUnscannedFileAccess${bucket.node.id}`,
       effect: iam.Effect.DENY,
       principals: [new iam.AnyPrincipal()],
       actions: ['s3:GetObject'],
       resources: [`${bucket.bucketArn}/*`],
       conditions: {
-        StringNotEquals: {
-          'aws:PrincipalArn': lambdaRoleArn
+        StringNotEquals: { 
+          'aws:PrincipalArn': lambdaRoleArn 
         },
         'ForAllValues:StringNotEquals': {
           's3:ExistingObjectTag/virusScanStatus': 'CLEAN',
-          's3:ExistingObjectTag/contentsPreviouslyScanned': 'TRUE'
+          's3:ExistingObjectTag/contentsPreviouslyScanned': 'TRUE',
+          's3:ExistingObjectTag/GuardDutyMalwareScanStatus': 'NO_THREATS_FOUND'
         }
       }
-    });
-
-    bucket.addToResourcePolicy(policy);
+    }));
   }
 
   /**

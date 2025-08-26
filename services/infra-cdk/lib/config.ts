@@ -119,7 +119,7 @@ export const getCdkEnvironment = (stage: string): Environment => {
   return { account: conf.account, region: conf.region };
 };
 
-// Naming conventions
+// Naming conventions - consistent MCR prefix
 export const stackName = (service: string, stage: string) => 
   `MCR-${service}-${stage}-cdk`;
 

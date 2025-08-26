@@ -482,9 +482,11 @@ jobs:
         DOCUMENTS_BUCKET=$(get_output "MCR-Data-$STAGE-cdk" "DocumentUploadsBucketName")
         QA_BUCKET=$(get_output "MCR-Data-$STAGE-cdk" "QAUploadsBucketName")
         
-        # Frontend outputs (unchanged)
+        # Frontend outputs
         APPLICATION_URL=$(get_output "MCR-Frontend-$STAGE-cdk" "ApplicationUrl")
-        STORYBOOK_URL=$(get_output "MCR-Frontend-$STAGE-cdk" "StorybookUrl")
+        
+        # Storybook output from separate stack (serverless parity)
+        STORYBOOK_URL=$(get_output "MCR-Storybook-$STAGE-cdk" "StorybookUrl")
         
         # Export for downstream GitHub Actions jobs - UPDATED for micro-stack architecture
         echo "api-url=$GRAPHQL_API_URL" >> $GITHUB_OUTPUT                          # NEW: GraphQL micro-stack
