@@ -62,13 +62,15 @@ export const SubmissionTypeSummarySection = ({
     return (
         <SectionCard
             id="submissionTypeSection"
-            className={styles.summarySection}
+            className={styles.submissionTypeSection}
         >
             <SectionHeader
                 header={submissionName}
                 subHeaderComponent={subHeaderComponent}
                 editNavigateTo={editNavigateTo}
                 headerId={'submissionName'}
+                hideBorderTop
+                fontSize="38px"
             >
                 {headerChildComponent && headerChildComponent}
             </SectionHeader>

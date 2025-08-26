@@ -13,14 +13,11 @@ export type S3ClientT = {
         bucket: BucketShortName,
         expiresIn?: number
     ) => Promise<string>
+    getZipURL: (key: string, bucket: BucketShortName) => Promise<string>
     getS3URL: (
         key: string,
         filename: string,
         bucket: BucketShortName
     ) => Promise<string>
-    getBulkDlURL: (
-        keys: string[],
-        filename: string,
-        bucket: BucketShortName
-    ) => Promise<string | Error>
+    generateDocumentZip?: GenerateDocumentZipFunctionType
 }

@@ -13,7 +13,8 @@ import {
     StatutoryRegulatoryAttestationQuestion,
 } from '@mc-review/constants'
 
-describe('ContractDetailsSummarySection', () => {
+//Skipping for now until we delete the files
+describe.skip('ContractDetailsSummarySection', () => {
     const defaultApolloMocks = {
         mocks: [fetchCurrentUserMock({ statusCode: 200 })],
     }

@@ -94,16 +94,20 @@ export function newDeployedS3Client(
             })
             return signedUrl
         },
-        getBulkDlURL: async (
-            keys: string[],
-            filename: string,
+        getZipURL: async (
+            s3key: string,
             bucket: BucketShortName
-        ): Promise<string | Error> => {
+        ): Promise<string> => {
+            // zip files have paths like zips/contracts/{contractRevisionId}/contract-documents.zip
             const command = new GetObjectCommand({
                 Bucket: bucketConfig[bucket],
-                Key: filename,
+                Key: s3key,
             })
-            const signedUrl = await getSignedUrl(s3Client, command)
+
+            // Create the presigned URL.
+            const signedUrl = await getSignedUrl(s3Client, command, {
+                expiresIn: 3600,
+            })
             return signedUrl
         },
     }

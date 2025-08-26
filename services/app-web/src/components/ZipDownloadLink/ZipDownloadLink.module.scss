@@ -1,0 +1,20 @@
+@use '../../styles/custom.scss' as custom;
+
+.contract {
+    font-size: 17px;
+    color: custom.$mcr-primary-base;
+}
+
+.rate {
+    font-size: 17px;
+    color: custom.$mcr-primary-base;
+}
+
+.singleRate {
+    font-size: 17px;
+    color: custom.$mcr-primary-base;
+}
+
+.downloadIcon {
+    vertical-align: sub;
+}

@@ -14,7 +14,7 @@ export function documentZipPackageResolver(
                 throw new Error('S3 needs to be provided a valid key')
             }
 
-            const url = await s3Client.getURL(key, 'HEALTH_PLAN_DOCS')
+            const url = await s3Client.getZipURL(key, 'HEALTH_PLAN_DOCS')
             if (!url) {
                 throw new Error('error getting download url from S3')
             }

@@ -1198,6 +1198,14 @@ function mockContractPackageSubmitted(partial?: Partial<Contract>): Contract {
                     updatedAt: '2024-12-18T16:54:39.173Z',
                     id: '123',
                     contractID: contractID,
+                    documentZipPackages: [{
+                        id: "zip-package-123",
+                        s3URL: "s3://bucket-name/zips/contracts/key/contract-documents.zip",
+                        sha256: "sha123",
+                        documentType: "CONTRACT_DOCUMENTS",
+                        createdAt: new Date('01/15/2024'),
+                        downloadUrl: s3DlUrl
+                    }],
                     submitInfo: {
                         __typename: 'UpdateInformation',
                         updatedAt: new Date(),
@@ -1298,6 +1306,14 @@ function mockContractPackageSubmitted(partial?: Partial<Contract>): Contract {
                         },
                         unlockInfo: null,
                         rate: null,
+                        documentZipPackages: [{
+                            id: "zip-package-321",
+                            s3URL: "s3://bucket-name/zips/rates/key/rate-documents.zip",
+                            sha256: "sha123",
+                            documentType: "RATE_DOCUMENTS",
+                            createdAt: new Date('01/15/2024'),
+                            downloadUrl: s3DlUrl
+                        }],
                         formData: {
                             __typename: 'RateFormData',
                             rateCertificationName: 'rate cert',

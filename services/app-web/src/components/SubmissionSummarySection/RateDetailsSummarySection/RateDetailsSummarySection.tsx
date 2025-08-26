@@ -1,11 +1,9 @@
-import React, { useEffect, useState } from 'react'
+import React, { useEffect } from 'react'
 import { DataDetail } from '../../../components/DataDetail'
 import { SectionHeader } from '../../../components/SectionHeader'
 import { UploadedDocumentsTable } from '../../../components/SubmissionSummarySection'
-import { useS3 } from '../../../contexts/S3Context'
 import { formatCalendarDate } from '@mc-review/dates'
 import { MultiColumnGrid } from '../../MultiColumnGrid'
-import { DownloadButton } from '../../DownloadButton'
 import { usePreviousSubmission } from '../../../hooks/usePreviousSubmission'
 import styles from '../SubmissionSummarySection.module.scss'
 import {
@@ -21,8 +19,6 @@ import { SharedRateCertDisplay } from '@mc-review/hpp'
 import { DataDetailMissingField } from '../../DataDetail/DataDetailMissingField'
 import { DataDetailContactField } from '../../DataDetail/DataDetailContactField/DataDetailContactField'
 import { DocumentDateLookupTableType } from '@mc-review/helpers'
-import useDeepCompareEffect from 'use-deep-compare-effect'
-import { InlineDocumentWarning } from '../../DocumentWarning'
 import { SectionCard } from '../../SectionCard'
 import { convertFromSubmissionDocumentsToGenericDocuments } from '../UploadedDocumentsTable/UploadedDocumentsTable'
 import { ActuaryCommunicationRecord } from '@mc-review/hpp'
@@ -46,22 +42,6 @@ export type RateDetailsSummarySectionProps = {
     onDocumentError?: (error: true) => void
 }
 
-export function renderDownloadButton(
-    zippedFilesURL: string | undefined | Error
-) {
-    if (zippedFilesURL instanceof Error) {
-        return (
-            <InlineDocumentWarning message="Rate document download is unavailable" />
-        )
-    }
-    return (
-        <DownloadButton
-            text="Download all rate documents"
-            zippedFilesURL={zippedFilesURL}
-        />
-    )
-}
-
 export const RateDetailsSummarySection = ({
     submission,
     editNavigateTo,
@@ -77,11 +57,6 @@ export const RateDetailsSummarySection = ({
     const isSubmitted = submission.status === 'SUBMITTED'
     const isEditing = !isSubmitted && editNavigateTo !== undefined
     const isPreviousSubmission = usePreviousSubmission()
-
-    const { getKey, getBulkDlURL } = useS3()
-    const [zippedFilesURL, setZippedFilesURL] = useState<
-        string | undefined | Error
-    >(undefined)
 
     // Return refreshed package names for state  - used rates across submissions feature
     // Use package name from api if available, otherwise use packageName coming down from proto as fallback
@@ -190,53 +165,6 @@ export const RateDetailsSummarySection = ({
         }
     }
 
-    useDeepCompareEffect(() => {
-        // skip getting urls of this if this is a previous submission or draft
-        if (!isSubmitted || isPreviousSubmission) return
-
-        // get all the keys for the documents we want to zip
-        async function fetchZipUrl() {
-            const keysFromDocs = submission.rateInfos
-                .flatMap((rateInfo) =>
-                    rateInfo.rateDocuments.concat(rateInfo.supportingDocuments)
-                )
-                .map((doc) => {
-                    const key = getKey(doc.s3URL)
-                    if (!key) return ''
-                    return key
-                })
-                .filter((key) => key !== '')
-
-            // call the lambda to zip the files and get the url
-            const zippedURL = await getBulkDlURL(
-                keysFromDocs,
-                submissionName + '-rate-details.zip',
-                'HEALTH_PLAN_DOCS'
-            )
-            if (zippedURL instanceof Error) {
-                const msg = `ERROR: getBulkDlURL failed to generate supporting document URL. ID: ${submission.id} Message: ${zippedURL}`
-                console.info(msg)
-
-                if (onDocumentError) {
-                    onDocumentError(true)
-                }
-
-                recordJSException(msg)
-            }
-
-            setZippedFilesURL(zippedURL)
-        }
-
-        void fetchZipUrl()
-    }, [
-        getKey,
-        getBulkDlURL,
-        submission,
-        submissionName,
-        isSubmitted,
-        isPreviousSubmission,
-    ])
-
     return (
         <SectionCard id="rateDetails" className={styles.summarySection}>
             <SectionHeader
@@ -245,7 +173,7 @@ export const RateDetailsSummarySection = ({
             >
                 {isSubmitted &&
                     !isPreviousSubmission &&
-                    renderDownloadButton(zippedFilesURL)}
+                    'No longer Implemented - this is a placeholder'}
             </SectionHeader>
             {submission.rateInfos.length > 0 ? (
                 submission.rateInfos.map((rateInfo) => {
