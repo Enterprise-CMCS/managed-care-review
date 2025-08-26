@@ -109,14 +109,14 @@ jobs:
         run: |
           echo "Starting CDK OIDC deployment for stage: ${STAGE_NAME}"
           echo "Stack name will be: MCR-GitHubOIDC-${STAGE_NAME}"
-          
+
           # Deploy using OIDC-only app (no layer dependencies)
           echo "=== Deploying OIDC stack ==="
           pnpm cdk deploy MCR-GitHubOIDC-${STAGE_NAME} \
             --app 'pnpm tsx bin/oidc.ts' \
             --context stage=${STAGE_NAME} \
             --require-approval never
-          
+
           echo "=== CDK OIDC deployment completed ==="
 
   web-unit-tests:
@@ -371,7 +371,6 @@ jobs:
             --context stage=${STAGE_NAME} \
             --require-approval never
 
-
       - name: Deploy CDK Storybook stack
         working-directory: services/infra-cdk
         env:
@@ -391,17 +390,6 @@ jobs:
           echo "=== Deploying Cognito stack ==="
           npx cdk deploy MCR-Cognito-${STAGE_NAME}-cdk \
             --app 'pnpm tsx bin/cognito.ts' \
-            --context stage=${STAGE_NAME} \
-            --require-approval never
-
-      - name: Deploy CDK AppApi stack
-        working-directory: services/infra-cdk
-        env:
-          STAGE_NAME: ${{ needs.begin-deployment.outputs.stage-name }}
-        run: |
-          echo "=== Deploying AppApi stack ==="
-          npx cdk deploy MCR-AppApi-${STAGE_NAME}-cdk \
-            --app 'pnpm tsx bin/app-api.ts' \
             --context stage=${STAGE_NAME} \
             --require-approval never
 
@@ -437,17 +425,16 @@ jobs:
           name: lambda-layers-prisma-client-engine
           path: ./services/infra-cdk/lambda-layers-prisma-client-engine
 
-      - name: Download Postgres tools layers
-        uses: actions/download-artifact@v4
-        with:
-          name: lambda-layers-postgres-tools
-          path: ./services/infra-cdk/lambda-layers-postgres-tools
-
       - name: Deploy CDK Lambda layers
         working-directory: services/infra-cdk
         env:
           STAGE_NAME: ${{ needs.begin-deployment.outputs.stage-name }}
-        run: ./scripts/deploy-layers.sh $STAGE_NAME
+        run: |
+          echo "=== Deploying Lambda Layers stack ==="
+          npx cdk deploy MCR-lambda-layers-${STAGE_NAME}-cdk \
+            --app 'pnpm tsx bin/lambda-layers.ts' \
+            --context stage=${STAGE_NAME} \
+            --require-approval never
 
   deploy-cdk-app:
     needs: [begin-deployment, deploy-cdk-layers, web-unit-tests, api-unit-tests]
@@ -481,6 +468,19 @@ jobs:
           account-id: ${{ secrets.DEV_AWS_ACCOUNT_ID }}
           stage-name: ${{ needs.begin-deployment.outputs.stage-name }}
           use-cdk-role: 'true'
+
+      - name: Deploy CDK AppApi stack
+        working-directory: services/infra-cdk
+        env:
+          STAGE_NAME: ${{ needs.begin-deployment.outputs.stage-name }}
+          VPC_ID: ${{ secrets.DEV_VPC_ID }}
+          SG_ID: ${{ secrets.DEV_SG_ID }}
+        run: |
+          echo "=== Deploying AppApi stack ==="
+          npx cdk deploy MCR-AppApi-${STAGE_NAME}-cdk \
+            --app 'pnpm tsx bin/app-api.ts' \
+            --context stage=${STAGE_NAME} \
+            --require-approval never
 
       - name: Deploy CDK compute stacks
         working-directory: services/infra-cdk

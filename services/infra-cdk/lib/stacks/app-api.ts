@@ -18,8 +18,10 @@ import {
 } from 'aws-cdk-lib/aws-iam'
 import { CfnOutput, Duration, Fn } from 'aws-cdk-lib'
 import { ResourceNames } from '../config'
-import { Architecture, Runtime } from 'aws-cdk-lib/aws-lambda'
+import { Architecture, Runtime, LayerVersion } from 'aws-cdk-lib/aws-lambda'
 import { CfnWebACL, CfnWebACLAssociation } from 'aws-cdk-lib/aws-wafv2'
+import { SubnetType, SecurityGroup, Vpc } from 'aws-cdk-lib/aws-ec2'
+import { AWS_OTEL_LAYER_ARN } from './lambda-layers'
 import path from 'path'
 
 /**
@@ -33,11 +35,11 @@ export class AppApiStack extends BaseStack {
     public readonly thirdPartyApiAuthorizerFunction: NodejsFunction
     public readonly oauthTokenFunction: NodejsFunction
     public readonly cleanupFunction: NodejsFunction
+    public readonly migrateFunction: NodejsFunction
 
     // TODO: Add remaining lambdas
     // public readonly graphqlFunction: NodejsFunction
     // public readonly zipKeysFunction: NodejsFunction
-    // public readonly migrateFunction: NodejsFunction
     // public readonly auditFilesFunction: NodejsFunction
     // public readonly migrateDocumentZipsFunction: NodejsFunction
 
@@ -136,6 +138,12 @@ export class AppApiStack extends BaseStack {
             }
         )
 
+        // Create migrate function with VPC and layers
+        this.migrateFunction = this.createMigrateFunction(
+            lambdaRole,
+            environment
+        )
+
         // TODO: Add remaining complex functions later (with VPC, layers, etc.)
         // this.graphqlFunction = this.createFunction('graphql', 'apollo_gql', 'gqlHandler', {...})
         // this.zipKeysFunction = this.createFunction('zip-keys', 'bulk_download', 'main', {...})
@@ -176,6 +184,103 @@ export class AppApiStack extends BaseStack {
             // Use CDK default bundling for now - will configure per function as needed
             ...options,
         })
+    }
+
+    /**
+     * Create the migrate function with VPC, layers, and extended permissions
+     */
+    private createMigrateFunction(
+        role: Role,
+        environment: Record<string, string>
+    ): NodejsFunction {
+        // Import VPC and security group
+        const vpcId = process.env.VPC_ID
+        const sgId = process.env.SG_ID
+
+        if (!vpcId || !sgId) {
+            throw new Error(
+                'Missing required environment variables: VPC_ID, SG_ID for migrate function'
+            )
+        }
+
+        const vpc = Vpc.fromLookup(this, 'ImportedVpc', {
+            vpcId,
+        })
+
+        const lambdaSecurityGroup = SecurityGroup.fromSecurityGroupId(
+            this,
+            'ImportedSecurityGroup',
+            sgId
+        )
+
+        // Import lambda layers using CloudFormation exports (matches other stack patterns)
+        const lambdaLayersStackName = ResourceNames.stackName(
+            'lambda-layers',
+            this.stage
+        )
+        const prismaMigrationLayerArn = Fn.importValue(
+            `${lambdaLayersStackName}-PrismaMigrationLayerArn`
+        )
+
+        const prismaMigrationLayer = LayerVersion.fromLayerVersionArn(
+            this,
+            'PrismaMigrationLayer',
+            prismaMigrationLayerArn
+        )
+
+        // Use centralized OTEL layer ARN constant
+        const otelLayer = LayerVersion.fromLayerVersionArn(
+            this,
+            'OtelLayer',
+            AWS_OTEL_LAYER_ARN
+        )
+
+        // Create migrate function with all required configuration
+        const migrateFunction = new NodejsFunction(this, 'migrateFunction', {
+            functionName: `${ResourceNames.apiName('app-api', this.stage)}-migrate`,
+            runtime: Runtime.NODEJS_20_X,
+            architecture: Architecture.X86_64,
+            handler: 'main',
+            entry: path.join(
+                __dirname,
+                '..',
+                '..',
+                '..',
+                'app-api',
+                'src',
+                'handlers',
+                'postgres_migrate.ts'
+            ),
+            timeout: Duration.seconds(60), // Extended timeout for DB operations
+            memorySize: 1024,
+            environment: {
+                ...environment,
+                SCHEMA_PATH: '/opt/nodejs/prisma/schema.prisma',
+                CONNECT_TIMEOUT: '60',
+            },
+            role,
+            layers: [prismaMigrationLayer, otelLayer],
+            vpc,
+            vpcSubnets: {
+                subnetType: SubnetType.PRIVATE_WITH_EGRESS,
+            },
+            securityGroups: [lambdaSecurityGroup],
+        })
+
+        // Grant additional RDS permissions for snapshot creation
+        role.addToPolicy(
+            new PolicyStatement({
+                effect: Effect.ALLOW,
+                actions: [
+                    'rds:CreateDBClusterSnapshot',
+                    'rds:DescribeDBClusterSnapshots',
+                    'rds:DescribeDBClusters',
+                ],
+                resources: ['*'],
+            })
+        )
+
+        return migrateFunction
     }
 
     private createLambdaRole(): Role {
@@ -469,6 +574,12 @@ export class AppApiStack extends BaseStack {
             value: this.cleanupFunction.functionName,
             exportName: this.exportName('CleanupFunctionName'),
             description: 'Cleanup Lambda function name',
+        })
+
+        new CfnOutput(this, 'MigrateFunctionName', {
+            value: this.migrateFunction.functionName,
+            exportName: this.exportName('MigrateFunctionName'),
+            description: 'Database migrate Lambda function name',
         })
 
         // TODO: Add remaining function outputs when enabled
