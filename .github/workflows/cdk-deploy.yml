@@ -336,7 +336,7 @@ jobs:
         
         # NEW: Get API URLs from micro-stacks
         GRAPHQL_API_URL=$(get_output "MCR-GraphQLApi-$STAGE-cdk" "GraphQLApiUrl")
-        OTEL_API_URL=$(get_output "MCR-PublicApi-$STAGE-cdk" "OtelApiUrl")
+        OTEL_API_URL="${GRAPHQL_API_URL}otel"
         
         # NEW: Get auth from AuthExtensions stack (breaks circular dependency!)
         IDENTITY_POOL_ID=$(get_output "MCR-AuthExtensions-$STAGE-cdk" "IdentityPoolId")
@@ -406,7 +406,7 @@ jobs:
         # Match serverless environment variables exactly - UPDATED for micro-stacks
         VITE_APP_AUTH_MODE: AWS_COGNITO
         VITE_APP_API_URL: ${{ steps.infra-outputs.outputs.graphql-api-url }}           # NEW: GraphQL micro-stack
-        VITE_APP_APPLICATION_ENDPOINT: https://${{ env.STAGE == 'prod' && 'app' || env.STAGE }}.mcr.cms.gov
+        VITE_APP_APPLICATION_ENDPOINT: ${{ steps.export-config.outputs.application-endpoint }}
         VITE_APP_COGNITO_REGION: ${{ env.AWS_REGION }}
         VITE_APP_COGNITO_ID_POOL_ID: ${{ steps.infra-outputs.outputs.identity-pool-id }}  # NEW: From AuthExtensions
         VITE_APP_COGNITO_USER_POOL_ID: ${{ steps.infra-outputs.outputs.user-pool-id }}
@@ -520,8 +520,8 @@ jobs:
         echo "" >> $GITHUB_STEP_SUMMARY
         echo "| Service | URL |" >> $GITHUB_STEP_SUMMARY
         echo "|---------|-----|" >> $GITHUB_STEP_SUMMARY
-        echo "| Application | https://${{ steps.export-config.outputs.application-endpoint }} |" >> $GITHUB_STEP_SUMMARY
-        echo "| Storybook | https://${{ steps.export-config.outputs.storybook-endpoint }} |" >> $GITHUB_STEP_SUMMARY
+        echo "| Application | ${{ steps.export-config.outputs.application-endpoint }} |" >> $GITHUB_STEP_SUMMARY
+        echo "| Storybook | ${{ steps.export-config.outputs.storybook-endpoint }} |" >> $GITHUB_STEP_SUMMARY
         echo "| API | ${{ steps.export-config.outputs.api-url }} |" >> $GITHUB_STEP_SUMMARY
         echo "" >> $GITHUB_STEP_SUMMARY
         echo "### Build Information" >> $GITHUB_STEP_SUMMARY
@@ -635,7 +635,7 @@ jobs:
         max_attempts=10
         attempt=1
         while [ $attempt -le $max_attempts ]; do
-          if curl -f "${{ needs.deploy.outputs.api-url }}health" > /dev/null 2>&1; then
+          if curl -f "${{ needs.deploy.outputs.api-url }}health_check" > /dev/null 2>&1; then
             echo "✅ API is healthy"
             break
           fi
