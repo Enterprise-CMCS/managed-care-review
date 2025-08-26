@@ -122,10 +122,10 @@ export class AppApiStack extends BaseStack {
         // this.auditFilesFunction = this.createFunction('audit-files', 'audit_s3', 'main', {...})
         // this.migrateDocumentZipsFunction = this.createFunction('migrate-document-zips', 'migrate_document_zips', 'main', {...})
 
-        // Create API Gateway resources and methods
+        // Create API Gateway resources and methods first
         this.setupApiGatewayRoutes(apiGateway)
 
-        // Setup WAF association (matches serverless dependencies)
+        // Setup WAF association AFTER routes are configured (ensures deployment exists)
         this.setupWafAssociation(apiGateway)
 
         this.createOutputs()
@@ -402,10 +402,17 @@ export class AppApiStack extends BaseStack {
         })
 
         // Associate WAF with API Gateway stage
-        new CfnWebACLAssociation(this, 'ApiGwWebAclAssociation', {
-            resourceArn: `arn:aws:apigateway:${this.region}::/restapis/${apiGateway.restApiId}/stages/${this.stage}`,
-            webAclArn: webAcl.attrArn,
-        })
+        const wafAssociation = new CfnWebACLAssociation(
+            this,
+            'ApiGwWebAclAssociation',
+            {
+                resourceArn: `arn:aws:apigateway:${this.region}::/restapis/${apiGateway.restApiId}/stages/${this.stage}`,
+                webAclArn: webAcl.attrArn,
+            }
+        )
+
+        // Ensure WAF association happens after API Gateway deployment
+        wafAssociation.node.addDependency(apiGateway)
     }
 
     private createOutputs(): void {
