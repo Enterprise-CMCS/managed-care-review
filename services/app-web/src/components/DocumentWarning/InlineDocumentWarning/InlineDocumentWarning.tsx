@@ -28,7 +28,9 @@ export const InlineDocumentWarning = ({
             <span>
                 <Icon aria-label={`An ${type} icon`} size={3} />
             </span>
-            <span>{requiredFieldMissingText}</span>
+            <span className={styles.messageText}>
+                {requiredFieldMissingText}
+            </span>
         </span>
     )
 }

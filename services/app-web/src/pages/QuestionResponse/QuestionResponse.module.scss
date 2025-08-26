@@ -55,9 +55,6 @@
 
 .yourQuestionSection {
     @extend %questionSection;
-    h2 {
-        font-weight: bold;
-    }
 }
 
 .breadcrumbs {

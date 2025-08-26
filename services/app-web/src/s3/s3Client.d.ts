@@ -9,14 +9,10 @@ export type S3ClientT = {
     scanFile: (key: string, bucket: BucketShortName) => Promise<void | S3Error>
     getKey: (S3URL: string) => string | null
     getURL: (key: string, bucket: BucketShortName) => Promise<string>
+    getZipURL: (key: string, bucket: BucketShortName) => Promise<string>
     getS3URL: (
         key: string,
         filename: string,
         bucket: BucketShortName
     ) => Promise<string>
-    getBulkDlURL: (
-        keys: string[],
-        filename: string,
-        bucket: BucketShortName
-    ) => Promise<string | Error>
 }

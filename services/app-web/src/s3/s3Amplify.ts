@@ -1,5 +1,5 @@
 import { parseKey } from '@mc-review/helpers'
-import { Storage, API } from 'aws-amplify'
+import { Storage } from 'aws-amplify'
 import { v4 as uuidv4 } from 'uuid'
 import type { S3ClientT } from './s3Client'
 import type { S3Error } from './s3Error'
@@ -144,31 +144,31 @@ function newAmplifyS3Client(bucketConfig: S3BucketConfigType): S3ClientT {
                 throw error
             }
         },
-        getBulkDlURL: async (
-            keys: string[],
-            filename: string,
+        getZipURL: async (
+            s3key: string,
             bucket: BucketShortName
-        ): Promise<string | Error> => {
-            const prependedKeys = keys.map((key) => `allusers/${key}`)
-            const prependedFilename = `allusers/${filename}`
-
-            const zipRequestParams = {
-                keys: prependedKeys,
-                bucket: bucketConfig[bucket],
-                zipFileName: prependedFilename,
-            }
-
+        ): Promise<string> => {
             try {
-                await API.post('api', '/zip', {
-                    response: true,
-                    body: zipRequestParams,
+                const result = await Storage.get(s3key, {
+                    bucket: bucketConfig[bucket],
+                    expires: 3600,
                 })
+
+                //Maybe overkill?
+                if (typeof result !== 'string') {
+                    const error = new Error(
+                        `Unexpected result type from Storage.get for key: ${s3key}`
+                    )
+                    recordJSException(error)
+                    throw error
+                }
+
+                return result
             } catch (err) {
-                const error = new Error('Could not get a bulk DL URL: ' + err)
+                const error = new Error(`Could not retrieve zip URL: ${err}`)
                 recordJSException(error)
-                return error
+                throw error
             }
-            return await Storage.get(filename, { expires: 3600 })
         },
     }
 }

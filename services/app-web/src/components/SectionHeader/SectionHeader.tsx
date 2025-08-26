@@ -2,6 +2,8 @@ import styles from './SectionHeader.module.scss'
 import classNames from 'classnames'
 import { NavLinkWithLogging } from '../TealiumLogging/Link'
 
+type HeadingTag = 'h1' | 'h2' | 'h3' | 'h4' | 'h5' | 'h6'
+
 export type SectionHeaderProps = {
     header: string
     children?: React.ReactNode
@@ -9,7 +11,10 @@ export type SectionHeaderProps = {
     subHeaderComponent?: React.ReactNode // Controls appearance of additional component below main heading
     sectionId?: string
     headerId?: string
-    hideBorder?: boolean
+    hideBorderBottom?: boolean
+    hideBorderTop?: boolean
+    as?: HeadingTag
+    fontSize?: string
 }
 
 export const SectionHeader = ({
@@ -19,11 +24,15 @@ export const SectionHeader = ({
     children,
     sectionId,
     headerId,
-    hideBorder,
+    hideBorderBottom,
+    hideBorderTop,
+    as,
+    fontSize,
 }: SectionHeaderProps & JSX.IntrinsicElements['div']): React.ReactElement => {
     const classes = classNames({
         [styles.summarySectionHeader]: true,
-        [styles.summarySectionHeaderBorder]: !hideBorder,
+        [styles.summarySectionHeaderBorderBottom]: !hideBorderBottom,
+        [styles.summarySectionHeaderBorderTop]: !hideBorderTop,
         [styles.hasSubheader]: subHeaderComponent,
     })
 
@@ -31,10 +40,21 @@ export const SectionHeader = ({
         [styles.primaryDiv]: !!(editNavigateTo || children),
     })
 
+    //This lets you customize the header level
+    const Tag = as ?? 'h2'
+
     return (
         <div className={classes} id={sectionId}>
             <div className={primaryDivClasses}>
-                <h2 id={headerId}>{header}</h2>
+                <Tag
+                    id={headerId}
+                    className={styles.headerTag}
+                    style={{
+                        fontSize,
+                    }}
+                >
+                    {header}
+                </Tag>
                 {subHeaderComponent}
             </div>
             <div>
