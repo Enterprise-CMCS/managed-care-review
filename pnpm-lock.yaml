@@ -39,8 +39,8 @@ importers:
         specifier: ^3.873.0
         version: 3.873.0
       '@aws-sdk/client-ec2':
-        specifier: ^3.873.0
-        version: 3.873.0
+        specifier: ^3.875.0
+        version: 3.875.0
       '@aws-sdk/client-secrets-manager':
         specifier: ^3.873.0
         version: 3.873.0
@@ -1564,8 +1564,8 @@ packages:
     resolution: {integrity: sha512-Y2ixlSTjjAp2HJhkUArtYqC/X+zG5Qqu3Bl+Ez22u4u4YnG8HsNFD6FE1axuWSdSa5AFtWTEt+Cz2Ghj/tDySA==}
     engines: {node: '>=10.0.0'}
 
-  '@aws-sdk/client-ec2@3.873.0':
-    resolution: {integrity: sha512-QPJunnHTEutRDY/nl2v4zYeEMmSlPHhhHNWqbUbj00oJ4rjzSE48VUBFDrZhcogSs5BsDFfgoGokv8MeBiw+XQ==}
+  '@aws-sdk/client-ec2@3.875.0':
+    resolution: {integrity: sha512-3NNOQvFML3XwT6Z7AyrTlQmSINdG0lLK3YqdTBhP/3pgbzR+3xiPbOd/E7fmfcpuixdOQ3sQv3yAzlQxALk4KA==}
     engines: {node: '>=18.0.0'}
 
   '@aws-sdk/client-firehose@3.6.1':
@@ -7754,8 +7754,8 @@ packages:
   bottleneck@2.19.5:
     resolution: {integrity: sha512-VHiNCbI1lKdl44tGrhNfU3lup0Tj/ZBMJB5/2ZbNXRCPuRCO7ed2mgcK4r17y+KB2EfuYuRaVlwNbAeaWGSpbw==}
 
-  bowser@2.12.0:
-    resolution: {integrity: sha512-HcOcTudTeEWgbHh0Y1Tyb6fdeR71m4b/QACf0D4KswGTsNeIJQmg38mRENZPAYPZvGFN3fk3604XbQEPdxXdKg==}
+  bowser@2.12.1:
+    resolution: {integrity: sha512-z4rE2Gxh7tvshQ4hluIT7XcFrgLIQaw9X3A+kTTRdovCz5PMukm/0QC/BKSYPj3omF5Qfypn9O/c5kgpmvYUCw==}
 
   boxen@7.1.1:
     resolution: {integrity: sha512-2hCgjEmP8YLWQ130n2FerGv7rYpfBmnmp9Uy2Le1vge6X3gZIfSmEzP5QTDElFxcvVcXlEn8Aq6MU/PZygIOog==}
@@ -15043,7 +15043,7 @@ snapshots:
     transitivePeerDependencies:
       - react-native
 
-  '@aws-sdk/client-ec2@3.873.0':
+  '@aws-sdk/client-ec2@3.875.0':
     dependencies:
       '@aws-crypto/sha256-browser': 5.2.0
       '@aws-crypto/sha256-js': 5.2.0
@@ -17203,7 +17203,7 @@ snapshots:
     dependencies:
       '@aws-sdk/property-provider': 3.186.0
       '@aws-sdk/types': 3.186.0
-      bowser: 2.12.0
+      bowser: 2.12.1
       tslib: 2.8.1
 
   '@aws-sdk/util-defaults-mode-node@3.186.0':
@@ -17270,27 +17270,27 @@ snapshots:
   '@aws-sdk/util-user-agent-browser@3.186.0':
     dependencies:
       '@aws-sdk/types': 3.186.0
-      bowser: 2.12.0
+      bowser: 2.12.1
       tslib: 2.8.1
 
   '@aws-sdk/util-user-agent-browser@3.6.1':
     dependencies:
       '@aws-sdk/types': 3.6.1
-      bowser: 2.12.0
+      bowser: 2.12.1
       tslib: 1.14.1
 
   '@aws-sdk/util-user-agent-browser@3.734.0':
     dependencies:
       '@aws-sdk/types': 3.734.0
       '@smithy/types': 4.3.2
-      bowser: 2.12.0
+      bowser: 2.12.1
       tslib: 2.8.1
 
   '@aws-sdk/util-user-agent-browser@3.873.0':
     dependencies:
       '@aws-sdk/types': 3.862.0
       '@smithy/types': 4.3.2
-      bowser: 2.12.0
+      bowser: 2.12.1
       tslib: 2.8.1
 
   '@aws-sdk/util-user-agent-node@3.186.0':
@@ -22841,7 +22841,7 @@ snapshots:
       '@smithy/property-provider': 4.0.5
       '@smithy/smithy-client': 4.4.10
       '@smithy/types': 4.3.2
-      bowser: 2.12.0
+      bowser: 2.12.1
       tslib: 2.8.1
 
   '@smithy/util-defaults-mode-node@4.0.26':
@@ -24820,7 +24820,7 @@ snapshots:
 
   bottleneck@2.19.5: {}
 
-  bowser@2.12.0: {}
+  bowser@2.12.1: {}
 
   boxen@7.1.1:
     dependencies:
