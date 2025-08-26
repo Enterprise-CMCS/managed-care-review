@@ -1,4 +1,7 @@
-import { constructTestPostgresServer, extractGraphQLResponse } from '../../testHelpers/gqlHelpers'
+import {
+    constructTestPostgresServer,
+    executeGraphQLOperation,
+} from '../../testHelpers/gqlHelpers'
 import { UpdateDivisionAssignmentDocument } from '../../gen/gqlClient'
 import type { InsertUserArgsType } from '../../postgres'
 import { NewPostgresStore } from '../../postgres'
@@ -10,7 +13,6 @@ import { AuditAction } from '@prisma/client'
 import {
     iterableCmsUsersMockData,
     testAdminUser,
-    testStateUser,
 } from '../../testHelpers/userHelpers'
 
 describe('updateDivisionAssignment', () => {
@@ -43,7 +45,7 @@ describe('updateDivisionAssignment', () => {
                 }
 
                 // make the first update to the division assignment
-                const firstUpdateRes = await server.executeOperation({
+                const firstUpdateRes = await executeGraphQLOperation(server, {
                     query: UpdateDivisionAssignmentDocument,
                     variables: {
                         input: {
@@ -51,22 +53,17 @@ describe('updateDivisionAssignment', () => {
                             divisionAssignment: firstDivisionAssignment,
                         },
                     },
-                }, {
-                    contextValue: {
-                        user: adminUser,
-                    },
                 })
 
-                const firstResult = extractGraphQLResponse(firstUpdateRes)
-                expect(firstResult.data).toBeDefined()
-                expect(firstResult.errors).toBeUndefined()
+                expect(firstUpdateRes.data).toBeDefined()
+                expect(firstUpdateRes.errors).toBeUndefined()
 
-                if (!firstResult.data) {
+                if (!firstUpdateRes.data) {
                     throw new Error('no data')
                 }
 
                 const firstUpdateToUser =
-                    firstResult.data.updateDivisionAssignment.user
+                    firstUpdateRes.data.updateDivisionAssignment.user
                 expect(firstUpdateToUser.email).toBe(newUser.email)
                 // division assignment should now be set
                 expect(firstUpdateToUser.divisionAssignment).toBe(
@@ -74,7 +71,7 @@ describe('updateDivisionAssignment', () => {
                 )
 
                 // make the second update to the division assignment
-                const secondUpdateRes = await server.executeOperation({
+                const secondUpdateRes = await executeGraphQLOperation(server, {
                     query: UpdateDivisionAssignmentDocument,
                     variables: {
                         input: {
@@ -82,22 +79,17 @@ describe('updateDivisionAssignment', () => {
                             divisionAssignment: secondDivisionAssignment,
                         },
                     },
-                }, {
-                    contextValue: {
-                        user: adminUser,
-                    },
                 })
 
-                const secondResult = extractGraphQLResponse(secondUpdateRes)
-                expect(secondResult.data).toBeDefined()
-                expect(secondResult.errors).toBeUndefined()
+                expect(secondUpdateRes.data).toBeDefined()
+                expect(secondUpdateRes.errors).toBeUndefined()
 
-                if (!secondResult.data) {
+                if (!secondUpdateRes.data) {
                     throw new Error('no data')
                 }
 
                 const secondUpdateToUser =
-                    secondResult.data.updateDivisionAssignment.user
+                    secondUpdateRes.data.updateDivisionAssignment.user
                 expect(secondUpdateToUser.email).toBe(newUser.email)
                 expect(secondUpdateToUser.divisionAssignment).toBe(
                     secondDivisionAssignment
@@ -146,10 +138,6 @@ describe('updateDivisionAssignment', () => {
                             divisionAssignment: 'OACT',
                         },
                     },
-                }, {
-                    contextValue: {
-                        user: mockUser(),
-                    },
                 })
 
                 expect(assertAnError(updateRes).message).toContain(
@@ -163,11 +151,10 @@ describe('updateDivisionAssignment', () => {
     it('errors if the target is not a CMS user', async () => {
         const prismaClient = await sharedTestPrismaClient()
         const postgresStore = NewPostgresStore(prismaClient)
-        const adminUser = testAdminUser()
         const server = await constructTestPostgresServer({
             store: postgresStore,
             context: {
-                user: adminUser,
+                user: testAdminUser(),
             },
         })
 
@@ -195,10 +182,6 @@ describe('updateDivisionAssignment', () => {
                     divisionAssignment: 'OACT',
                 },
             },
-        }, {
-            contextValue: {
-                user: adminUser,
-            },
         })
 
         expect(assertAnError(updateRes).message).toContain(
@@ -210,11 +193,10 @@ describe('updateDivisionAssignment', () => {
     it('errors if the userID doesnt exist', async () => {
         const prismaClient = await sharedTestPrismaClient()
         const postgresStore = NewPostgresStore(prismaClient)
-        const adminUser = testAdminUser()
         const server = await constructTestPostgresServer({
             store: postgresStore,
             context: {
-                user: adminUser,
+                user: testAdminUser(),
             },
         })
 
@@ -228,10 +210,6 @@ describe('updateDivisionAssignment', () => {
                     cmsUserID: cmsUserID,
                     divisionAssignment: 'OACT',
                 },
-            },
-        }, {
-            contextValue: {
-                user: adminUser,
             },
         })
 
@@ -244,12 +222,8 @@ describe('updateDivisionAssignment', () => {
     it('errors if called by a state user', async () => {
         const prismaClient = await sharedTestPrismaClient()
         const postgresStore = NewPostgresStore(prismaClient)
-        const stateUser = testStateUser()
         const server = await constructTestPostgresServer({
             store: postgresStore,
-            context: {
-                user: stateUser,
-            },
         })
 
         // setup a user in the db for us to modify
@@ -262,10 +236,6 @@ describe('updateDivisionAssignment', () => {
                     cmsUserID: cmsUserID,
                     divisionAssignment: 'OACT',
                 },
-            },
-        }, {
-            contextValue: {
-                user: stateUser,
             },
         })
 

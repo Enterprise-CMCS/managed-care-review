@@ -1,4 +1,7 @@
-import { constructTestPostgresServer } from '../../testHelpers/gqlHelpers'
+import {
+    constructTestPostgresServer,
+    executeGraphQLOperation,
+} from '../../testHelpers/gqlHelpers'
 import { sharedTestPrismaClient } from '../../testHelpers/storeHelpers'
 import {
     testAdminUser,
@@ -9,7 +12,6 @@ import {
     CreateOauthClientDocument,
     UpdateOauthClientDocument,
 } from '../../gen/gqlClient'
-import { extractGraphQLResponse } from '../../testHelpers/apolloV4ResponseHelper'
 
 describe('updateOauthClient', () => {
     it('updates an OAuth client as ADMIN', async () => {
@@ -32,7 +34,7 @@ describe('updateOauthClient', () => {
             context: { user: adminUser },
         })
 
-        const createResponse = await server.executeOperation({
+        const createRes = await executeGraphQLOperation(server, {
             query: CreateOauthClientDocument,
             variables: {
                 input: {
@@ -41,10 +43,7 @@ describe('updateOauthClient', () => {
                     userID: cmsUser.id,
                 },
             },
-        }, {
-            contextValue: { user: adminUser },
         })
-        const createRes = extractGraphQLResponse(createResponse)
         expect(createRes.errors).toBeUndefined()
         const clientId = createRes.data?.createOauthClient.oauthClient.clientId
 
@@ -55,13 +54,10 @@ describe('updateOauthClient', () => {
             grants: ['client_credentials', 'refresh_token'],
         }
 
-        const response = await server.executeOperation({
+        const res = await executeGraphQLOperation(server, {
             query: UpdateOauthClientDocument,
             variables: { input: updateInput },
-        }, {
-            contextValue: { user: adminUser },
         })
-        const res = extractGraphQLResponse(response)
 
         expect(res.errors).toBeUndefined()
         const oauthClient = res.data?.updateOauthClient.oauthClient
@@ -94,7 +90,7 @@ describe('updateOauthClient', () => {
             context: { user: adminUser },
         })
 
-        const createResponse = await server.executeOperation({
+        const createRes = await executeGraphQLOperation(server, {
             query: CreateOauthClientDocument,
             variables: {
                 input: {
@@ -103,10 +99,7 @@ describe('updateOauthClient', () => {
                     userID: cmsUser.id,
                 },
             },
-        }, {
-            contextValue: { user: adminUser },
         })
-        const createRes = extractGraphQLResponse(createResponse)
         expect(createRes.errors).toBeUndefined()
         const clientId = createRes.data?.createOauthClient.oauthClient.clientId
 
@@ -117,13 +110,10 @@ describe('updateOauthClient', () => {
             grants: [],
         }
 
-        const response = await server.executeOperation({
+        const res = await executeGraphQLOperation(server, {
             query: UpdateOauthClientDocument,
             variables: { input: updateInput },
-        }, {
-            contextValue: { user: adminUser },
         })
-        const res = extractGraphQLResponse(response)
 
         expect(res.errors).toBeUndefined()
         const oauthClient = res.data?.updateOauthClient.oauthClient
@@ -141,13 +131,10 @@ describe('updateOauthClient', () => {
             clientId: 'test-client-id',
             description: 'Should fail',
         }
-        const response = await server.executeOperation({
+        const res = await executeGraphQLOperation(server, {
             query: UpdateOauthClientDocument,
             variables: { input },
-        }, {
-            contextValue: { user: testStateUser() },
         })
-        const res = extractGraphQLResponse(response)
         expect(res.errors?.[0].message).toMatch(/not authorized/i)
         expect(res.errors?.[0].extensions?.code).toBe('FORBIDDEN')
     })
@@ -160,13 +147,10 @@ describe('updateOauthClient', () => {
             clientId: 'non-existent-client-id',
             description: 'Should fail',
         }
-        const response = await server.executeOperation({
+        const res = await executeGraphQLOperation(server, {
             query: UpdateOauthClientDocument,
             variables: { input },
-        }, {
-            contextValue: { user: testAdminUser() },
         })
-        const res = extractGraphQLResponse(response)
         expect(res.errors?.[0].message).toMatch(/not found/i)
         expect(res.errors?.[0].extensions?.code).toBe('NOT_FOUND')
         expect(res.errors?.[0].extensions?.cause).toBe('CLIENT_NOT_FOUND')
@@ -184,13 +168,10 @@ describe('updateOauthClient', () => {
             clientId: 'fail',
             description: 'DB fail',
         }
-        const response = await server.executeOperation({
+        const res = await executeGraphQLOperation(server, {
             query: UpdateOauthClientDocument,
             variables: { input },
-        }, {
-            contextValue: { user: testAdminUser() },
         })
-        const res = extractGraphQLResponse(response)
         expect(res.errors?.[0].message).toMatch(/fail/i)
         expect(res.errors?.[0].extensions?.code).toBe('INTERNAL_SERVER_ERROR')
         expect(res.errors?.[0].extensions?.cause).toBe('DB_ERROR')

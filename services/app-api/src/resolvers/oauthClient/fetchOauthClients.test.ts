@@ -1,4 +1,7 @@
-import { constructTestPostgresServer } from '../../testHelpers/gqlHelpers'
+import {
+    constructTestPostgresServer,
+    executeGraphQLOperation,
+} from '../../testHelpers/gqlHelpers'
 import {
     testAdminUser,
     testStateUser,
@@ -9,7 +12,6 @@ import {
     FetchOauthClientsDocument,
 } from '../../gen/gqlClient'
 import { sharedTestPrismaClient } from '../../testHelpers/storeHelpers'
-import { extractGraphQLResponse } from '../../testHelpers/apolloV4ResponseHelper'
 
 describe('fetchOauthClients', () => {
     it('fetches all OAuth clients as ADMIN', async () => {
@@ -39,7 +41,7 @@ describe('fetchOauthClients', () => {
             context: { user: adminUser },
         })
         // Create two clients
-        const client1Response = await server.executeOperation({
+        const client1Res = await executeGraphQLOperation(server, {
             query: CreateOauthClientDocument,
             variables: {
                 input: {
@@ -48,15 +50,12 @@ describe('fetchOauthClients', () => {
                     userID: cmsUser.id,
                 },
             },
-        }, {
-            contextValue: { user: adminUser },
         })
-        const client1Res = extractGraphQLResponse(client1Response)
         expect(client1Res.errors).toBeUndefined()
         const client1Id =
             client1Res.data?.createOauthClient.oauthClient.clientId
 
-        const client2Response = await server.executeOperation({
+        const client2Res = await executeGraphQLOperation(server, {
             query: CreateOauthClientDocument,
             variables: {
                 input: {
@@ -65,21 +64,15 @@ describe('fetchOauthClients', () => {
                     userID: cmsUser.id,
                 },
             },
-        }, {
-            contextValue: { user: adminUser },
         })
-        const client2Res = extractGraphQLResponse(client2Response)
         expect(client2Res.errors).toBeUndefined()
         const client2Id =
             client2Res.data?.createOauthClient.oauthClient.clientId
 
-        const response = await server.executeOperation({
+        const res = await executeGraphQLOperation(server, {
             query: FetchOauthClientsDocument,
             variables: { input: { clientIds: [client1Id, client2Id] } },
-        }, {
-            contextValue: { user: adminUser },
         })
-        const res = extractGraphQLResponse(response)
         expect(res.errors).toBeUndefined()
         const oauthClients = res.data?.fetchOauthClients.oauthClients
         expect(Array.isArray(oauthClients)).toBe(true)
@@ -108,13 +101,10 @@ describe('fetchOauthClients', () => {
         await client.oAuthClient.deleteMany()
 
         // Fetch all should return empty array after cleanup
-        const emptyResponse = await server.executeOperation({
+        const emptyRes = await executeGraphQLOperation(server, {
             query: FetchOauthClientsDocument,
             variables: { input: {} },
-        }, {
-            contextValue: { user: adminUser },
         })
-        const emptyRes = extractGraphQLResponse(emptyResponse)
         expect(emptyRes.errors).toBeUndefined()
         expect(emptyRes.data?.fetchOauthClients.oauthClients).toHaveLength(0)
 
@@ -138,7 +128,7 @@ describe('fetchOauthClients', () => {
         })
 
         // Create an OAuth client
-        const createResponse = await server.executeOperation({
+        const createRes = await executeGraphQLOperation(server, {
             query: CreateOauthClientDocument,
             variables: {
                 input: {
@@ -147,20 +137,14 @@ describe('fetchOauthClients', () => {
                     userID: cmsUser.id,
                 },
             },
-        }, {
-            contextValue: { user: adminUser },
         })
-        const createRes = extractGraphQLResponse(createResponse)
         expect(createRes.errors).toBeUndefined()
 
         // Now fetch all should return our client
-        const response = await server.executeOperation({
+        const res = await executeGraphQLOperation(server, {
             query: FetchOauthClientsDocument,
             variables: { input: {} },
-        }, {
-            contextValue: { user: adminUser },
         })
-        const res = extractGraphQLResponse(response)
         expect(res.errors).toBeUndefined()
         const oauthClients = res.data?.fetchOauthClients.oauthClients
         expect(Array.isArray(oauthClients)).toBe(true)
@@ -203,7 +187,7 @@ describe('fetchOauthClients', () => {
             context: { user: adminUser },
         })
         // Create a client
-        const createResponse = await server.executeOperation({
+        const createRes = await executeGraphQLOperation(server, {
             query: CreateOauthClientDocument,
             variables: {
                 input: {
@@ -212,19 +196,13 @@ describe('fetchOauthClients', () => {
                     userID: cmsUser.id,
                 },
             },
-        }, {
-            contextValue: { user: adminUser },
         })
-        const createRes = extractGraphQLResponse(createResponse)
         expect(createRes.errors).toBeUndefined()
         const clientId = createRes.data?.createOauthClient.oauthClient.clientId
-        const response = await server.executeOperation({
+        const res = await executeGraphQLOperation(server, {
             query: FetchOauthClientsDocument,
             variables: { input: { clientIds: [clientId] } },
-        }, {
-            contextValue: { user: adminUser },
         })
-        const res = extractGraphQLResponse(response)
         expect(res.errors).toBeUndefined()
         const oauthClients = res.data?.fetchOauthClients.oauthClients
         expect(Array.isArray(oauthClients)).toBe(true)
@@ -238,13 +216,10 @@ describe('fetchOauthClients', () => {
         const server = await constructTestPostgresServer({
             context: { user: testAdminUser() },
         })
-        const response = await server.executeOperation({
+        const res = await executeGraphQLOperation(server, {
             query: FetchOauthClientsDocument,
             variables: { input: { clientIds: ['nonexistent'] } },
-        }, {
-            contextValue: { user: testAdminUser() },
         })
-        const res = extractGraphQLResponse(response)
         expect(res.errors).toBeUndefined()
         const oauthClients = res.data?.fetchOauthClients.oauthClients
         expect(Array.isArray(oauthClients)).toBe(true)
@@ -255,12 +230,9 @@ describe('fetchOauthClients', () => {
         const server = await constructTestPostgresServer({
             context: { user: testStateUser() },
         })
-        const response = await server.executeOperation({
+        const res = await executeGraphQLOperation(server, {
             query: FetchOauthClientsDocument,
-        }, {
-            contextValue: { user: testStateUser() },
         })
-        const res = extractGraphQLResponse(response)
         expect(res.errors?.[0].message).toMatch(/not authorized/i)
     })
 
@@ -274,12 +246,9 @@ describe('fetchOauthClients', () => {
                 getOAuthClientByClientId: async () => new Error('DB fail'),
             },
         })
-        const response = await server.executeOperation({
+        const res = await executeGraphQLOperation(server, {
             query: FetchOauthClientsDocument,
-        }, {
-            contextValue: { user: testAdminUser() },
         })
-        const res = extractGraphQLResponse(response)
         expect(res.errors?.[0].message).toMatch(/db fail/i)
     })
 })

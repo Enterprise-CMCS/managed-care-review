@@ -1,17 +1,18 @@
 import {
     createDBUsersWithFullData,
     testCMSUser,
-    testAdminUser,
 } from '../../testHelpers/userHelpers'
 import {
     constructTestPostgresServer,
     createTestRateQuestion,
     createTestRateQuestionResponse,
+    executeGraphQLOperation,
     updateTestStateAssignments,
 } from '../../testHelpers/gqlHelpers'
 import { createAndSubmitTestContractWithRate } from '../../testHelpers/gqlContractHelpers'
 import { assertAnError, assertAnErrorCode, must } from '../../testHelpers'
 import { testEmailConfig, testEmailer } from '../../testHelpers/emailerHelpers'
+import { CreateRateQuestionResponseDocument } from '../../gen/gqlClient'
 
 describe('createRateQuestionResponse', () => {
     const cmsUser = testCMSUser()
@@ -32,22 +33,12 @@ describe('createRateQuestionResponse', () => {
         const rateID =
             contractWithRate.packageSubmissions[0].rateRevisions[0].rateID
 
-        const question = await createTestRateQuestion(
-            cmsServer,
-            rateID,
-            undefined,
-            { user: cmsUser }
-        )
+        const question = await createTestRateQuestion(cmsServer, rateID)
 
-        const questionResponse = await createTestRateQuestionResponse(
+        const questionWithResponse = await createTestRateQuestionResponse(
             stateServer,
-            question.question.id
+            question.id
         )
-
-        expect(questionResponse).toBeDefined()
-        expect(questionResponse.question).toBeDefined()
-
-        const questionWithResponse = questionResponse.question
 
         expect(questionWithResponse).toEqual(
             expect.objectContaining({
@@ -76,11 +67,26 @@ describe('createRateQuestionResponse', () => {
     it('returns an error when attempting to create a response for a question that does not exist', async () => {
         const stateServer = await constructTestPostgresServer()
         const invalidID = 'Not-valid-rate-id'
-        const questionResponseResult = await createTestRateQuestionResponse(
+
+        const questionResponseResult = await executeGraphQLOperation(
             stateServer,
-            invalidID
+            {
+                query: CreateRateQuestionResponseDocument,
+                variables: {
+                    input: {
+                        documents: [
+                            {
+                                name: 'Test Question Response',
+                                s3URL: 's3://bucketname/key/test1',
+                            },
+                        ],
+                        questionID: invalidID,
+                    },
+                },
+            }
         )
-        expect(questionResponseResult).toBeDefined()
+
+        expect(questionResponseResult.errors).toBeDefined()
         expect(assertAnErrorCode(questionResponseResult)).toBe('BAD_USER_INPUT')
         expect(assertAnError(questionResponseResult).message).toBe(
             `Rate question with ID: ${invalidID} not found to attach response to`
@@ -98,18 +104,24 @@ describe('createRateQuestionResponse', () => {
         const rateID =
             contractWithRate.packageSubmissions[0].rateRevisions[0].rateID
 
-        const question = await createTestRateQuestion(
-            cmsServer,
-            rateID,
-            undefined,
-            { user: cmsUser }
-        )
+        const question = await createTestRateQuestion(cmsServer, rateID)
 
-        const questionResponseResult = await createTestRateQuestionResponse(
+        const questionResponseResult = await executeGraphQLOperation(
             cmsServer,
-            question.question.id,
-            undefined,
-            { user: cmsUser }
+            {
+                query: CreateRateQuestionResponseDocument,
+                variables: {
+                    input: {
+                        documents: [
+                            {
+                                name: 'Test Question Response',
+                                s3URL: 's3://bucketname/key/test1',
+                            },
+                        ],
+                        questionID: question.id,
+                    },
+                },
+            }
         )
 
         expect(questionResponseResult.errors).toBeDefined()
@@ -140,28 +152,19 @@ describe('createRateQuestionResponse', () => {
             contractWithRate.packageSubmissions[0].rateRevisions[0].formData
                 .rateCertificationName
 
-        const question = await createTestRateQuestion(
-            cmsServer,
-            rateID,
-            undefined,
-            { user: cmsUser }
-        )
+        const question = await createTestRateQuestion(cmsServer, rateID)
 
-        await createTestRateQuestionResponse(stateServer, question.question.id)
+        await createTestRateQuestionResponse(stateServer, question.id)
 
         expect(mockEmailer.sendEmail).toHaveBeenNthCalledWith(
-            6, // New response state email notification is the sixth email
+            6, // New response state email notification is the sixth email, CMS email is sent first
             expect.objectContaining({
                 subject: expect.stringContaining(
                     `[LOCAL] Response submitted to CMS for ${rateName}`
                 ),
                 sourceEmail: emailConfig.emailSource,
-                toAddresses: expect.arrayContaining([
-                    'james@example.com',
-                    'email@example.com',
-                ]),
                 bodyText: expect.stringContaining(
-                    'Response to DMCO rate questions was successfully submitted'
+                    'Response to DMCO rate questions was successfully submitted.'
                 ),
                 bodyHTML: expect.stringContaining(
                     `<a href="http://localhost/submissions/${contractWithRate.id}/rates/${rateID}/question-and-answers">View response</a>`
@@ -176,19 +179,12 @@ describe('createRateQuestionResponse', () => {
         const oactCMS = testCMSUser({
             divisionAssignment: 'OACT' as const,
         })
-        const adminUser = testAdminUser()
         const stateServer = await constructTestPostgresServer({
             emailer: mockEmailer,
         })
         const cmsServer = await constructTestPostgresServer({
             context: {
                 user: oactCMS,
-            },
-            emailer: mockEmailer,
-        })
-        const adminServer = await constructTestPostgresServer({
-            context: {
-                user: adminUser,
             },
             emailer: mockEmailer,
         })
@@ -205,14 +201,12 @@ describe('createRateQuestionResponse', () => {
             }),
         ]
 
-        await createDBUsersWithFullData([...assignedUsers, oactCMS, adminUser])
+        await createDBUsersWithFullData(assignedUsers)
 
         const assignedUserIDs = assignedUsers.map((u) => u.id)
         const assignedUserEmails = assignedUsers.map((u) => u.email)
 
-        await updateTestStateAssignments(adminServer, 'FL', assignedUserIDs, {
-            user: adminUser,
-        })
+        await updateTestStateAssignments(cmsServer, 'FL', assignedUserIDs)
 
         const submittedContractAndRate =
             await createAndSubmitTestContractWithRate(stateServer)
@@ -220,22 +214,16 @@ describe('createRateQuestionResponse', () => {
             submittedContractAndRate.packageSubmissions[0].rateRevisions[0]
         const rateID = rateRevision.rateID
 
-        const rateQuestion = must(
-            await createTestRateQuestion(cmsServer, rateID, undefined, {
-                user: oactCMS,
-            })
-        )
+        const question = must(await createTestRateQuestion(cmsServer, rateID))
 
-        await createTestRateQuestionResponse(
-            stateServer,
-            rateQuestion.question.id
-        )
+        await createTestRateQuestionResponse(stateServer, question.id)
 
         const rateName = rateRevision.formData.rateCertificationName
 
         const cmsRecipientEmails = [
             ...assignedUserEmails,
             ...emailConfig.devReviewTeamEmails,
+            ...emailConfig.oactEmails,
         ]
 
         expect(mockEmailer.sendEmail).toHaveBeenNthCalledWith(
@@ -249,7 +237,7 @@ describe('createRateQuestionResponse', () => {
                     Array.from(cmsRecipientEmails)
                 ),
                 bodyText: expect.stringContaining(
-                    `The state submitted responses to ${oactCMS.divisionAssignment}'s questions about ${rateName}`
+                    `The state submitted responses to OACT's questions about ${rateName}`
                 ),
                 bodyHTML: expect.stringContaining(
                     `<a href="http://localhost/rates/${rateID}/question-and-answers">View rate Q&A</a>`

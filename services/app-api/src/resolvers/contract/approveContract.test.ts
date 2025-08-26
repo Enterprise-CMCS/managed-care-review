@@ -1,11 +1,13 @@
-import { constructTestPostgresServer, executeGraphQLOperation } from '../../testHelpers/gqlHelpers'
+import {
+    constructTestPostgresServer,
+    executeGraphQLOperation,
+} from '../../testHelpers/gqlHelpers'
 import { ApproveContractDocument } from '../../gen/gqlClient'
-import { testCMSUser, testStateUser } from '../../testHelpers/userHelpers'
+import { testCMSUser } from '../../testHelpers/userHelpers'
 import {
     approveTestContract,
     createTestContract,
     unlockTestContract,
-    unlockTestContractAsUser,
     createAndSubmitTestContractWithRate,
 } from '../../testHelpers/gqlContractHelpers'
 import { testS3Client } from '../../testHelpers'
@@ -14,11 +16,10 @@ describe('approveContract', () => {
     const mockS3 = testS3Client()
 
     it('approves the contract', async () => {
-        const cmsUser = testCMSUser()
         const cmsServer = await constructTestPostgresServer({
             s3Client: mockS3,
             context: {
-                user: cmsUser,
+                user: testCMSUser(),
             },
         })
 
@@ -30,9 +31,7 @@ describe('approveContract', () => {
 
         const approvedContract = await approveTestContract(
             cmsServer,
-            contract.id,
-            undefined,
-            { user: cmsUser }
+            contract.id
         )
         expect(approvedContract.reviewStatusActions).toHaveLength(1)
         expect(approvedContract.reviewStatusActions![0]?.contractID).toBe(
@@ -48,18 +47,20 @@ describe('approveContract', () => {
     })
 
     it('errors if contract status is in DRAFT', async () => {
-        const stateUser = testStateUser()
         const stateServer = await constructTestPostgresServer({
             s3Client: mockS3,
+        })
+
+        const cmsServer = await constructTestPostgresServer({
+            s3Client: mockS3,
             context: {
-                user: stateUser,
+                user: testCMSUser(),
             },
         })
 
-        const draftContract = await createTestContract(stateServer, undefined, undefined, { user: stateUser })
+        const draftContract = await createTestContract(stateServer)
 
-        const cmsUser = testCMSUser()
-        const approveContractResult = await executeGraphQLOperation(stateServer, {
+        const approveContractResult = await executeGraphQLOperation(cmsServer, {
             query: ApproveContractDocument,
             variables: {
                 input: {
@@ -67,7 +68,6 @@ describe('approveContract', () => {
                     dateApprovalReleasedToState: '2024-12-12',
                 },
             },
-            contextValue: { user: cmsUser },
         })
 
         expect(approveContractResult.errors).toBeDefined()
@@ -88,21 +88,19 @@ describe('approveContract', () => {
             s3Client: mockS3,
         })
 
-        const cmsUser = testCMSUser()
         const cmsServer = await constructTestPostgresServer({
             s3Client: mockS3,
             context: {
-                user: cmsUser,
+                user: testCMSUser(),
             },
         })
 
         const contract = await createAndSubmitTestContractWithRate(stateServer)
 
-        const unlockedContract = await unlockTestContractAsUser(
+        const unlockedContract = await unlockTestContract(
             cmsServer,
             contract.id,
-            'unlock to resubmit',
-            cmsUser
+            'unlock to resubmit'
         )
 
         const approveContractResult = await executeGraphQLOperation(cmsServer, {
@@ -113,7 +111,6 @@ describe('approveContract', () => {
                     dateApprovalReleasedToState: '2024-12-12',
                 },
             },
-            contextValue: { user: cmsUser },
         })
 
         expect(approveContractResult.errors).toBeDefined()
@@ -130,34 +127,20 @@ describe('approveContract', () => {
     })
 
     it('errors if contract review status is APPROVED', async () => {
-        const stateUser = testStateUser()
         const stateServer = await constructTestPostgresServer({
             s3Client: mockS3,
-            context: {
-                user: stateUser,
-            },
         })
 
-        const cmsUser = testCMSUser()
         const cmsServer = await constructTestPostgresServer({
             s3Client: mockS3,
             context: {
-                user: cmsUser,
+                user: testCMSUser(),
             },
         })
 
-        const contract = await createAndSubmitTestContractWithRate(stateServer, undefined, { user: stateUser })
+        const contract = await createAndSubmitTestContractWithRate(stateServer)
 
-        await executeGraphQLOperation(cmsServer, {
-            query: ApproveContractDocument,
-            variables: {
-                input: {
-                    contractID: contract.id,
-                    dateApprovalReleasedToState: '2024-11-11',
-                },
-            },
-            contextValue: { user: cmsUser },
-        })
+        await approveTestContract(cmsServer, contract.id, '2024-11-11')
 
         const secondApprovalResult = await executeGraphQLOperation(cmsServer, {
             query: ApproveContractDocument,
@@ -167,7 +150,6 @@ describe('approveContract', () => {
                     dateApprovalReleasedToState: '2024-12-12',
                 },
             },
-            contextValue: { user: cmsUser },
         })
 
         expect(secondApprovalResult.errors).toBeDefined()
@@ -184,23 +166,18 @@ describe('approveContract', () => {
     })
 
     it('errors if date approval released is a future date', async () => {
-        const stateUser = testStateUser()
-        const stateServer = await constructTestPostgresServer({
-            s3Client: mockS3,
-            context: {
-                user: stateUser,
-            },
-        })
-
-        const cmsUser = testCMSUser()
         const cmsServer = await constructTestPostgresServer({
             s3Client: mockS3,
             context: {
-                user: cmsUser,
+                user: testCMSUser(),
             },
         })
 
-        const contract = await createAndSubmitTestContractWithRate(stateServer, undefined, { user: stateUser })
+        const stateServer = await constructTestPostgresServer({
+            s3Client: mockS3,
+        })
+
+        const contract = await createAndSubmitTestContractWithRate(stateServer)
         const approveContractResult = await executeGraphQLOperation(cmsServer, {
             query: ApproveContractDocument,
             variables: {
@@ -209,7 +186,6 @@ describe('approveContract', () => {
                     dateApprovalReleasedToState: '3009-11-11',
                 },
             },
-            contextValue: { user: cmsUser },
         })
         expect(approveContractResult.errors).toBeDefined()
         if (approveContractResult.errors === undefined) {
@@ -225,26 +201,24 @@ describe('approveContract', () => {
     })
 
     it('errors if a non CMS/CMS Approver user calls it', async () => {
-        const stateUser = testStateUser()
         const stateServer = await constructTestPostgresServer({
             s3Client: mockS3,
-            context: {
-                user: stateUser,
-            },
         })
 
-        const contract = await createAndSubmitTestContractWithRate(stateServer, undefined, { user: stateUser })
+        const contract = await createAndSubmitTestContractWithRate(stateServer)
 
-        const approveContractResult = await executeGraphQLOperation(stateServer, {
-            query: ApproveContractDocument,
-            variables: {
-                input: {
-                    contractID: contract.id,
-                    dateApprovalReleasedToState: '2024-12-12',
+        const approveContractResult = await executeGraphQLOperation(
+            stateServer,
+            {
+                query: ApproveContractDocument,
+                variables: {
+                    input: {
+                        contractID: contract.id,
+                        dateApprovalReleasedToState: '2024-12-12',
+                    },
                 },
-            },
-            contextValue: { user: testStateUser() },
-        })
+            }
+        )
 
         expect(approveContractResult.errors).toBeDefined()
         if (approveContractResult.errors === undefined) {

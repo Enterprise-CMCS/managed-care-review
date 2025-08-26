@@ -1,8 +1,10 @@
-import { constructTestPostgresServer } from '../../testHelpers/gqlHelpers'
+import {
+    constructTestPostgresServer,
+    executeGraphQLOperation,
+} from '../../testHelpers/gqlHelpers'
 import { CreateApiKeyDocument } from '../../gen/gqlClient'
 import { newJWTLib } from '../../jwt'
 import { testCMSUser } from '../../testHelpers/userHelpers'
-import { extractGraphQLResponse } from '../../testHelpers/apolloV4ResponseHelper'
 
 describe('createAPIKey', () => {
     it('creates a new API key', async () => {
@@ -19,12 +21,9 @@ describe('createAPIKey', () => {
             context: { user },
         })
 
-        const response = await server.executeOperation({
+        const result = await executeGraphQLOperation(server, {
             query: CreateApiKeyDocument,
-        }, {
-            contextValue: { user },
         })
-        const result = extractGraphQLResponse(response)
 
         const keyResult = result.data?.createAPIKey
 

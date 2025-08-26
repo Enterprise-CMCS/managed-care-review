@@ -6,25 +6,26 @@ import {
     testStateUser,
 } from '../../testHelpers/userHelpers'
 import { v4 as uuidv4 } from 'uuid'
-import { constructTestPostgresServer } from '../../testHelpers/gqlHelpers'
+import {
+    constructTestPostgresServer,
+    executeGraphQLOperation,
+} from '../../testHelpers/gqlHelpers'
 import {
     FetchMcReviewSettingsDocument,
     UpdateStateAssignmentDocument,
 } from '../../gen/gqlClient'
 import { assertAnError, must } from '../../testHelpers'
 import { testLDService } from '../../testHelpers/launchDarklyHelpers'
-import { extractGraphQLResponse } from '../../testHelpers/apolloV4ResponseHelper'
 
 describe('fetchMcReviewSettings', () => {
     it('returns states with assignments', async () => {
         const prismaClient = await sharedTestPrismaClient()
         const postgresStore = NewPostgresStore(prismaClient)
 
-        const adminUser = testAdminUser()
         const server = await constructTestPostgresServer({
             store: postgresStore,
             context: {
-                user: adminUser,
+                user: testAdminUser(),
             },
         })
 
@@ -48,18 +49,18 @@ describe('fetchMcReviewSettings', () => {
         )
 
         // Assign states to each CMS user
-        const assignedOhioCMSUserResponse = await server.executeOperation({
-            query: UpdateStateAssignmentDocument,
-            variables: {
-                input: {
-                    cmsUserID: newCMSUser1.id,
-                    stateAssignments: ['OH'],
+        const assignedOhioCMSUserResult = await executeGraphQLOperation(
+            server,
+            {
+                query: UpdateStateAssignmentDocument,
+                variables: {
+                    input: {
+                        cmsUserID: newCMSUser1.id,
+                        stateAssignments: ['OH'],
+                    },
                 },
-            },
-        }, {
-            contextValue: { user: adminUser },
-        })
-        const assignedOhioCMSUserResult = extractGraphQLResponse(assignedOhioCMSUserResponse)
+            }
+        )
 
         if (!assignedOhioCMSUserResult.data?.updateStateAssignment) {
             throw new Error(
@@ -69,18 +70,18 @@ describe('fetchMcReviewSettings', () => {
         const assignedOhioCMSUser =
             assignedOhioCMSUserResult.data.updateStateAssignment.user
 
-        const assignedTexasCMSUserResponse = await server.executeOperation({
-            query: UpdateStateAssignmentDocument,
-            variables: {
-                input: {
-                    cmsUserID: newCMSUser2.id,
-                    stateAssignments: ['TX'],
+        const assignedTexasCMSUserResult = await executeGraphQLOperation(
+            server,
+            {
+                query: UpdateStateAssignmentDocument,
+                variables: {
+                    input: {
+                        cmsUserID: newCMSUser2.id,
+                        stateAssignments: ['TX'],
+                    },
                 },
-            },
-        }, {
-            contextValue: { user: adminUser },
-        })
-        const assignedTexasCMSUserResult = extractGraphQLResponse(assignedTexasCMSUserResponse)
+            }
+        )
 
         if (!assignedTexasCMSUserResult.data?.updateStateAssignment) {
             throw new Error(
@@ -90,19 +91,18 @@ describe('fetchMcReviewSettings', () => {
         const assignedTexasCMSUser =
             assignedTexasCMSUserResult.data.updateStateAssignment.user
 
-        const floridaResponse = await server.executeOperation({
-            query: UpdateStateAssignmentDocument,
-            variables: {
-                input: {
-                    cmsUserID: newCMSUser3.id,
-                    stateAssignments: ['FL'],
+        const assignedFloridaCMSUserResult = await executeGraphQLOperation(
+            server,
+            {
+                query: UpdateStateAssignmentDocument,
+                variables: {
+                    input: {
+                        cmsUserID: newCMSUser3.id,
+                        stateAssignments: ['FL'],
+                    },
                 },
-            },
-        }, {
-            contextValue: { user: adminUser },
-        })
-
-        const assignedFloridaCMSUserResult = extractGraphQLResponse(floridaResponse)
+            }
+        )
 
         if (!assignedFloridaCMSUserResult.data?.updateStateAssignment) {
             throw new Error(
@@ -112,13 +112,9 @@ describe('fetchMcReviewSettings', () => {
         const assignedFloridaCMSUser =
             assignedFloridaCMSUserResult.data.updateStateAssignment.user
 
-        const settingsResponse = await server.executeOperation({
+        const mcReviewSettings = await executeGraphQLOperation(server, {
             query: FetchMcReviewSettingsDocument,
-        }, {
-            contextValue: { user: adminUser },
         })
-
-        const mcReviewSettings = extractGraphQLResponse(settingsResponse)
 
         if (!mcReviewSettings.data?.fetchMcReviewSettings?.stateAssignments) {
             throw new Error(
@@ -190,18 +186,14 @@ describe('fetchMcReviewSettings', () => {
         })
 
         // make a mock request
-        const res = await server.executeOperation({
+        const res = await executeGraphQLOperation(server, {
             query: FetchMcReviewSettingsDocument,
-        }, {
-            contextValue: { user: testUserAdmin },
         })
 
-        const result = extractGraphQLResponse(res)
-
         // confirm that we get what we got
-        expect(result.errors).toBeUndefined()
+        expect(res.errors).toBeUndefined()
 
-        expect(result.data?.fetchMcReviewSettings.emailConfiguration).toBeDefined()
+        expect(res.data?.fetchMcReviewSettings.emailConfiguration).toBeDefined()
     })
 
     it('errors when called by state user', async () => {
@@ -217,13 +209,9 @@ describe('fetchMcReviewSettings', () => {
 
         const mcReviewSettings = await server.executeOperation({
             query: FetchMcReviewSettingsDocument,
-        }, {
-            contextValue: { user: testStateUser() },
         })
 
-        const result = extractGraphQLResponse(mcReviewSettings)
-
-        expect(assertAnError(result).message).toContain(
+        expect(assertAnError(mcReviewSettings).message).toContain(
             'user not authorized to fetch mc review settings'
         )
     })
@@ -231,43 +219,50 @@ describe('fetchMcReviewSettings', () => {
     it('uses email settings from database with remove-parameter-store flag on', async () => {
         const prismaClient = await sharedTestPrismaClient()
         const postgresStore = NewPostgresStore(prismaClient)
-        const adminUser = testAdminUser()
 
         const server = await constructTestPostgresServer({
             context: {
-                user: adminUser,
+                user: testAdminUser(),
             },
-            ldService: testLDService(
-                {
-                    'remove-parameter-store': true
-                }
-            )
+            ldService: testLDService({
+                'remove-parameter-store': true,
+            }),
         })
 
         const emailSettings = must(await postgresStore.findEmailSettings())
 
-        const response = await server.executeOperation({
-            query: FetchMcReviewSettingsDocument,
-        }, {
-            contextValue: { user: adminUser },
-        })
-        
-        const mcReviewSettings = extractGraphQLResponse(response)
-        must(mcReviewSettings.data)
+        const mcReviewSettings = must(
+            await executeGraphQLOperation(server, {
+                query: FetchMcReviewSettingsDocument,
+            })
+        )
 
-        const emailConfig = mcReviewSettings.data.fetchMcReviewSettings.emailConfiguration
+        const emailConfig =
+            mcReviewSettings.data?.fetchMcReviewSettings.emailConfiguration
 
         // Expect the default email settings from database
         expect(emailConfig.emailSource).toEqual(emailSettings.emailSource)
-        expect(emailConfig.devReviewTeamEmails).toEqual(emailSettings.devReviewTeamEmails)
+        expect(emailConfig.devReviewTeamEmails).toEqual(
+            emailSettings.devReviewTeamEmails
+        )
         expect(emailConfig.oactEmails).toEqual(emailSettings.oactEmails)
-        expect(emailConfig.dmcpReviewEmails).toEqual(emailSettings.dmcpReviewEmails)
-        expect(emailConfig.dmcpSubmissionEmails).toEqual(emailSettings.dmcpSubmissionEmails)
+        expect(emailConfig.dmcpReviewEmails).toEqual(
+            emailSettings.dmcpReviewEmails
+        )
+        expect(emailConfig.dmcpSubmissionEmails).toEqual(
+            emailSettings.dmcpSubmissionEmails
+        )
         expect(emailConfig.dmcoEmails).toEqual(emailSettings.dmcoEmails)
-        
+
         //These emails are arrays in the DB, but single strings in EmailConfiguration type.
-        expect(emailConfig.cmsReviewHelpEmailAddress).toEqual(emailSettings.cmsReviewHelpEmailAddress[0])
-        expect(emailConfig.cmsRateHelpEmailAddress).toEqual(emailSettings.cmsRateHelpEmailAddress[0])
-        expect(emailConfig.helpDeskEmail).toEqual(emailSettings.helpDeskEmail[0])
+        expect(emailConfig.cmsReviewHelpEmailAddress).toEqual(
+            emailSettings.cmsReviewHelpEmailAddress[0]
+        )
+        expect(emailConfig.cmsRateHelpEmailAddress).toEqual(
+            emailSettings.cmsRateHelpEmailAddress[0]
+        )
+        expect(emailConfig.helpDeskEmail).toEqual(
+            emailSettings.helpDeskEmail[0]
+        )
     })
 })

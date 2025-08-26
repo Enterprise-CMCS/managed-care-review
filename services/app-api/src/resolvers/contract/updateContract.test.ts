@@ -1,27 +1,24 @@
 import { UpdateContractDocument } from '../../gen/gqlClient'
-import { constructTestPostgresServer } from '../../testHelpers/gqlHelpers'
-import { iterableCmsUsersMockData, testStateUser } from '../../testHelpers/userHelpers'
+import {
+    constructTestPostgresServer,
+    executeGraphQLOperation,
+} from '../../testHelpers/gqlHelpers'
+import { iterableCmsUsersMockData } from '../../testHelpers/userHelpers'
 import {
     createAndSubmitTestContractWithRate,
     createTestContract,
 } from '../../testHelpers/gqlContractHelpers'
-import { extractGraphQLResponse } from '../../testHelpers/apolloV4ResponseHelper'
 describe('updateContract', () => {
     describe.each(iterableCmsUsersMockData)(
         '$userRole tests',
         ({ mockUser }) => {
             const cmsUser = mockUser()
             it('updates the contract', async () => {
-                const stateUser = testStateUser()
-                const stateServer = await constructTestPostgresServer({
-                    context: {
-                        user: stateUser,
-                    },
-                })
+                const stateServer = await constructTestPostgresServer()
 
                 // First, create a new submitted contract
                 const contract =
-                    await createAndSubmitTestContractWithRate(stateServer, undefined, { user: stateUser })
+                    await createAndSubmitTestContractWithRate(stateServer)
 
                 const cmsServer = await constructTestPostgresServer({
                     context: {
@@ -30,7 +27,7 @@ describe('updateContract', () => {
                 })
 
                 // Update
-                const response = await cmsServer.executeOperation({
+                const updateResult = await executeGraphQLOperation(cmsServer, {
                     query: UpdateContractDocument,
                     variables: {
                         input: {
@@ -38,32 +35,26 @@ describe('updateContract', () => {
                             mccrsID: '1234',
                         },
                     },
-                }, {
-                    contextValue: { user: cmsUser },
                 })
-                
-                const updateResult = extractGraphQLResponse(response)
 
                 expect(updateResult.errors).toBeUndefined()
                 const updatedSub = updateResult?.data?.updateContract.contract
                 expect(updatedSub.mccrsID).toBe('1234')
 
                 // Remove MCCRSID number
-                const responseWithNoMCCRSID =
-                    await cmsServer.executeOperation({
+                const updateResultWithNoMCCRSID = await executeGraphQLOperation(
+                    cmsServer,
+                    {
                         query: UpdateContractDocument,
                         variables: {
                             input: {
                                 id: contract.id,
                             },
                         },
-                    }, {
-                        contextValue: { user: cmsUser },
-                    })
-                    
-                const updateResultWithNoMCCRSID = extractGraphQLResponse(responseWithNoMCCRSID)
+                    }
+                )
 
-                expect(updateResultWithNoMCCRSID.errors).toBeUndefined()
+                expect(updateResult.errors).toBeUndefined()
                 const updatedSubWithNoMCCRSID =
                     updateResultWithNoMCCRSID?.data?.updateContract.contract
 
@@ -71,15 +62,10 @@ describe('updateContract', () => {
             })
 
             it('errors if the contract is not submitted', async () => {
-                const stateUser = testStateUser()
-                const stateServer = await constructTestPostgresServer({
-                    context: {
-                        user: stateUser,
-                    },
-                })
+                const stateServer = await constructTestPostgresServer()
 
                 // First, create a draft submission
-                const draftContract = await createTestContract(stateServer, undefined, undefined, { user: stateUser })
+                const draftContract = await createTestContract(stateServer)
                 const cmsServer = await constructTestPostgresServer({
                     context: {
                         user: cmsUser,
@@ -87,7 +73,7 @@ describe('updateContract', () => {
                 })
 
                 // Attempt update
-                const response = await cmsServer.executeOperation({
+                const updateResult = await executeGraphQLOperation(cmsServer, {
                     query: UpdateContractDocument,
                     variables: {
                         input: {
@@ -95,11 +81,7 @@ describe('updateContract', () => {
                             mccrsID: '1234',
                         },
                     },
-                }, {
-                    contextValue: { user: cmsUser },
                 })
-                
-                const updateResult = extractGraphQLResponse(response)
                 expect(updateResult.errors).toBeDefined()
                 if (updateResult.errors === undefined) {
                     throw new Error('type narrow')
@@ -114,30 +96,24 @@ describe('updateContract', () => {
             })
 
             it('errors if a State user calls it', async () => {
-                const stateUser = testStateUser()
-                const stateServer = await constructTestPostgresServer({
-                    context: {
-                        user: stateUser,
-                    },
-                })
+                const stateServer = await constructTestPostgresServer()
 
                 // First, create a new submitted contract
                 const contract =
-                    await createAndSubmitTestContractWithRate(stateServer, undefined, { user: stateUser })
+                    await createAndSubmitTestContractWithRate(stateServer)
                 // Update
-                const response = await stateServer.executeOperation({
-                    query: UpdateContractDocument,
-                    variables: {
-                        input: {
-                            id: contract.id,
-                            mccrsID: '1234',
+                const updateResult = await executeGraphQLOperation(
+                    stateServer,
+                    {
+                        query: UpdateContractDocument,
+                        variables: {
+                            input: {
+                                id: contract.id,
+                                mccrsID: '1234',
+                            },
                         },
-                    },
-                }, {
-                    contextValue: { user: stateUser },
-                })
-                
-                const updateResult = extractGraphQLResponse(response)
+                    }
+                )
                 expect(updateResult.errors).toBeDefined()
                 if (updateResult.errors === undefined) {
                     throw new Error('type narrow')

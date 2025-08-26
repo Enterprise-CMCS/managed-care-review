@@ -2,7 +2,10 @@ import {
     type EmailConfiguration,
     UpdateEmailSettingsDocument,
 } from '../../gen/gqlClient'
-import { constructTestPostgresServer, extractGraphQLResponse } from '../../testHelpers/gqlHelpers'
+import {
+    constructTestPostgresServer,
+    executeGraphQLOperation,
+} from '../../testHelpers/gqlHelpers'
 import {
     fetchTestMcReviewSettings,
     updateTestEmailSettings,
@@ -35,13 +38,13 @@ describe('updateEmailSettings', () => {
     })
 
     it('updates email settings', async () => {
-        const adminUser = testAdminUser()
-        const adminContext = { user: adminUser }
         const adminServer = await constructTestPostgresServer({
-            context: adminContext,
+            context: {
+                user: testAdminUser(),
+            },
         })
 
-        const mcReviewSettings = await fetchTestMcReviewSettings(adminServer, adminContext)
+        const mcReviewSettings = await fetchTestMcReviewSettings(adminServer)
         const defaultEmailConfig = mcReviewSettings.emailConfiguration
 
         if (!defaultEmailConfig) {
@@ -51,8 +54,7 @@ describe('updateEmailSettings', () => {
         const emailConfigUpdate = mockEmailConfigUpdate()
         const updatedEmailSettings = await updateTestEmailSettings(
             adminServer,
-            emailConfigUpdate,
-            adminContext
+            emailConfigUpdate
         )
 
         // expect our changes to match the updated email settings
@@ -63,8 +65,7 @@ describe('updateEmailSettings', () => {
         // reset email settings so other tests do no fail
         const restoredEmailSettings = await updateTestEmailSettings(
             adminServer,
-            defaultEmailConfig,
-            adminContext
+            defaultEmailConfig
         )
         expect(restoredEmailSettings.emailConfiguration).toEqual(
             defaultEmailConfig
@@ -84,22 +85,17 @@ describe('updateEmailSettings', () => {
             ],
         })
 
-        const updateEmailConfig = await cmsServer.executeOperation({
+        const updateEmailConfig = await executeGraphQLOperation(cmsServer, {
             query: UpdateEmailSettingsDocument,
             variables: {
                 input: {
                     emailConfiguration: emailConfigUpdate,
                 },
             },
-        }, {
-            contextValue: {
-                user: testAdminUser(),
-            },
         })
 
-        const result = extractGraphQLResponse(updateEmailConfig)
-        expect(result.errors).toBeDefined()
-        expect(result.errors?.[0].message).toContain(
+        expect(updateEmailConfig.errors).toBeDefined()
+        expect(updateEmailConfig.errors?.[0].message).toContain(
             'Invalid email settings'
         )
     })
@@ -111,22 +107,17 @@ describe('updateEmailSettings', () => {
         })
 
         const emailConfigUpdate = mockEmailConfigUpdate()
-        const updateEmailConfig = await cmsServer.executeOperation({
+        const updateEmailConfig = await executeGraphQLOperation(cmsServer, {
             query: UpdateEmailSettingsDocument,
             variables: {
                 input: {
                     emailConfiguration: emailConfigUpdate,
                 },
             },
-        }, {
-            contextValue: {
-                user: testCMSUser(),
-            },
         })
 
-        const result = extractGraphQLResponse(updateEmailConfig)
-        expect(result.errors).toBeDefined()
-        expect(result.errors?.[0].message).toBe(
+        expect(updateEmailConfig.errors).toBeDefined()
+        expect(updateEmailConfig.errors?.[0].message).toBe(
             'user not authorized to update email settings'
         )
     })

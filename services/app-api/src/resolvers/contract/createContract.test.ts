@@ -4,7 +4,7 @@ import {
 } from '../../testHelpers/gqlHelpers'
 import type { CreateContractInput, Contract } from '../../gen/gqlServer'
 import { CreateContractDocument } from '../../gen/gqlClient'
-import { testCMSUser, testStateUser } from '../../testHelpers/userHelpers'
+import { testCMSUser } from '../../testHelpers/userHelpers'
 
 describe('createContract', () => {
     it('returns contract with unlocked form data', async () => {
@@ -24,7 +24,6 @@ describe('createContract', () => {
         const res = await executeGraphQLOperation(server, {
             query: CreateContractDocument,
             variables: { input },
-            contextValue: { user: testStateUser() },
         })
 
         expect(res.errors).toBeUndefined()
@@ -62,7 +61,6 @@ describe('createContract', () => {
         const res = await executeGraphQLOperation(server, {
             query: CreateContractDocument,
             variables: { input },
-            contextValue: { user: testStateUser() },
         })
 
         expect(res.errors).toBeDefined()
@@ -72,11 +70,15 @@ describe('createContract', () => {
     })
 
     it('returns an error if a CMS user attempts to create', async () => {
-        const server = await constructTestPostgresServer()
+        const server = await constructTestPostgresServer({
+            context: {
+                user: testCMSUser(),
+            },
+        })
 
         const input: CreateContractInput = {
             populationCovered: 'MEDICAID',
-            programIDs: ['5c10fe9f-bec9-416f-a20c-718b152ad633'],
+            programIDs: ['xyz123'],
             riskBasedContract: false,
             submissionType: 'CONTRACT_ONLY',
             submissionDescription: 'A real submission',
@@ -85,7 +87,6 @@ describe('createContract', () => {
         const res = await executeGraphQLOperation(server, {
             query: CreateContractDocument,
             variables: { input },
-            contextValue: { user: testCMSUser() },
         })
 
         expect(res.errors).toBeDefined()

@@ -1,7 +1,7 @@
 import {
     constructTestPostgresServer,
     defaultFloridaProgram,
-    defaultFloridaRateProgram,
+    executeGraphQLOperation,
     unlockTestHealthPlanPackage,
     updateTestStateAssignments,
 } from '../../testHelpers/gqlHelpers'
@@ -9,7 +9,7 @@ import {
     UnlockContractDocument,
     UpdateDraftContractRatesDocument,
 } from '../../gen/gqlClient'
-import { testS3Client } from '../../../../app-web/src/testHelpers/s3Helpers'
+import { testS3Client } from '../../testHelpers'
 import { expectToBeDefined } from '../../testHelpers/assertionHelpers'
 
 import {
@@ -18,7 +18,6 @@ import {
     testCMSUser,
     testStateUser,
 } from '../../testHelpers/userHelpers'
-import { extractGraphQLResponse } from '../../testHelpers/apolloV4ResponseHelper'
 import {
     createAndSubmitTestContractWithRate,
     createAndUpdateTestContractWithoutRates,
@@ -38,14 +37,11 @@ import {
 import { testLDService } from '../../testHelpers/launchDarklyHelpers'
 import { testEmailConfig, testEmailer } from '../../testHelpers/emailerHelpers'
 import { packageName } from '@mc-review/hpp'
-import { generateRateCertificationName } from '../rate/generateRateCertificationName'
-import { nullsToUndefined } from '../../domain-models/nullstoUndefined'
 import { NewPostgresStore } from '../../postgres'
 import { sharedTestPrismaClient } from '../../testHelpers/storeHelpers'
 
 describe('unlockContract', () => {
     const mockS3 = testS3Client()
-
     afterEach(() => {
         vi.resetAllMocks()
     })
@@ -54,13 +50,12 @@ describe('unlockContract', () => {
         '$userRole unlockContract tests',
         ({ mockUser }) => {
             it('changes contract status to UNLOCKED and creates a new draft revision with unlock info', async () => {
-                const cmsUser = mockUser()
                 const stateServer = await constructTestPostgresServer({
                     s3Client: mockS3,
                 })
                 const cmsServer = await constructTestPostgresServer({
                     context: {
-                        user: cmsUser,
+                        user: mockUser(),
                     },
                     s3Client: mockS3,
                 })
@@ -79,8 +74,7 @@ describe('unlockContract', () => {
                 const unlockedContract = await unlockTestContract(
                     cmsServer,
                     contract.id,
-                    'test unlock',
-                    { user: cmsUser }
+                    'test unlock'
                 )
 
                 expect(unlockedContract.draftRevision).toBeDefined()
@@ -100,40 +94,31 @@ describe('unlockContract', () => {
             })
 
             it('returns status error if contract is actively being edited in draft', async () => {
-                const cmsUser = mockUser()
                 const stateServer = await constructTestPostgresServer({
                     s3Client: mockS3,
                 })
                 const cmsServer = await constructTestPostgresServer({
                     context: {
-                        user: cmsUser,
+                        user: mockUser(),
                     },
                     s3Client: mockS3,
                 })
 
                 const contract = await createSubmitAndUnlockTestContract(
                     stateServer,
-                    cmsServer,
-                    cmsUser
+                    cmsServer
                 )
 
                 // Try to unlock the contract again
-                const unlockResponse2 = await cmsServer.executeOperation(
-                    {
-                        query: UnlockContractDocument,
-                        variables: {
-                            input: {
-                                contractID: contract.id,
-                                unlockedReason: 'Super duper good reason.',
-                            },
+                const unlockResult2 = await executeGraphQLOperation(cmsServer, {
+                    query: UnlockContractDocument,
+                    variables: {
+                        input: {
+                            contractID: contract.id,
+                            unlockedReason: 'Super duper good reason.',
                         },
                     },
-                    {
-                        contextValue: { user: cmsUser },
-                    }
-                )
-
-                const unlockResult2 = extractGraphQLResponse(unlockResponse2)
+                })
 
                 expectToBeDefined(unlockResult2.errors)
                 expect(unlockResult2.errors[0].message).toBe(
@@ -143,7 +128,6 @@ describe('unlockContract', () => {
 
             it('can unlock resubmit complex contracts to remove child rates', async () => {
                 const ldService = testLDService({})
-                const cmsUser = testCMSUser()
 
                 const stateServer = await constructTestPostgresServer({
                     ldService,
@@ -152,7 +136,7 @@ describe('unlockContract', () => {
                 const cmsServer = await constructTestPostgresServer({
                     ldService,
                     context: {
-                        user: cmsUser,
+                        user: testCMSUser(),
                     },
                     s3Client: mockS3,
                 })
@@ -190,8 +174,7 @@ describe('unlockContract', () => {
                 await unlockTestHealthPlanPackage(
                     cmsServer,
                     contractB0.id,
-                    'remove that child rate',
-                    { user: cmsUser }
+                    'remove that child rate'
                 )
 
                 const unlockedB0 = await fetchTestContract(
@@ -222,8 +205,7 @@ describe('unlockContract', () => {
                 await unlockTestHealthPlanPackage(
                     cmsServer,
                     updatedUnlockedB0.id,
-                    'dont try and reunlock',
-                    { user: cmsUser }
+                    'dont try and reunlock'
                 )
                 const unlockedB1 = await fetchTestContract(
                     stateServer,
@@ -234,13 +216,12 @@ describe('unlockContract', () => {
             })
 
             it('returns status error if contract has been approved', async () => {
-                const cmsUser = mockUser()
                 const stateServer = await constructTestPostgresServer({
                     s3Client: mockS3,
                 })
                 const cmsServer = await constructTestPostgresServer({
                     context: {
-                        user: cmsUser,
+                        user: mockUser(),
                     },
                     s3Client: mockS3,
                 })
@@ -251,28 +232,19 @@ describe('unlockContract', () => {
                 // approve contract
                 const approvedContract = await approveTestContract(
                     cmsServer,
-                    contract.id,
-                    undefined,
-                    { user: cmsUser }
+                    contract.id
                 )
 
                 // Try to unlock the contract
-                const unlockResponse = await cmsServer.executeOperation(
-                    {
-                        query: UnlockContractDocument,
-                        variables: {
-                            input: {
-                                contractID: approvedContract.id,
-                                unlockedReason: 'Super duper good reason.',
-                            },
+                const unlockResult = await executeGraphQLOperation(cmsServer, {
+                    query: UnlockContractDocument,
+                    variables: {
+                        input: {
+                            contractID: approvedContract.id,
+                            unlockedReason: 'Super duper good reason.',
                         },
                     },
-                    {
-                        contextValue: { user: cmsUser },
-                    }
-                )
-
-                const unlockResult = extractGraphQLResponse(unlockResponse)
+                })
 
                 expectToBeDefined(unlockResult.errors)
                 expect(unlockResult.errors[0].message).toBe(
@@ -291,10 +263,9 @@ describe('unlockContract', () => {
             s3Client: mockS3,
         })
 
-        const cmsUser = testCMSUser()
         const cmsServer = await constructTestPostgresServer({
             context: {
-                user: cmsUser,
+                user: testCMSUser(),
             },
             ldService,
             s3Client: mockS3,
@@ -334,8 +305,7 @@ describe('unlockContract', () => {
         await unlockTestHealthPlanPackage(
             cmsServer,
             contractB0.id,
-            'test unlock',
-            { user: cmsUser }
+            'test unlock'
         )
 
         const unlockedB = await fetchTestContract(stateServer, contractB0.id)
@@ -380,10 +350,9 @@ describe('unlockContract', () => {
             s3Client: mockS3,
         })
 
-        const cmsUser = testCMSUser()
         const cmsServer = await constructTestPostgresServer({
             context: {
-                user: cmsUser,
+                user: testCMSUser(),
             },
             ldService,
             s3Client: mockS3,
@@ -431,18 +400,12 @@ describe('unlockContract', () => {
         ).toEqual(['2021-01-01', '2023-03-03'])
 
         // unlock A
-        await unlockTestHealthPlanPackage(
-            cmsServer,
-            contractA0.id,
-            'unlock a',
-            { user: cmsUser }
-        )
+        await unlockTestHealthPlanPackage(cmsServer, contractA0.id, 'unlock a')
         // unlock B, rate 3 should unlock, rate 1 should not.
         await unlockTestHealthPlanPackage(
             cmsServer,
             contractB0.id,
-            'test unlock',
-            { user: cmsUser }
+            'test unlock'
         )
         const unlockedB = await fetchTestContract(stateServer, contractB0.id)
         if (!unlockedB.draftRates) {
@@ -478,19 +441,12 @@ describe('unlockContract', () => {
         rateUpdateInput.updatedRates[1].formData.rateDateCertified =
             '2000-01-22'
 
-        const updateResponse = await stateServer.executeOperation(
-            {
-                query: UpdateDraftContractRatesDocument,
-                variables: {
-                    input: rateUpdateInput,
-                },
+        const updateResult = await executeGraphQLOperation(stateServer, {
+            query: UpdateDraftContractRatesDocument,
+            variables: {
+                input: rateUpdateInput,
             },
-            {
-                contextValue: { user: testStateUser() },
-            }
-        )
-
-        const updateResult = extractGraphQLResponse(updateResponse)
+        })
 
         expect(updateResult.errors).toBeDefined()
         if (!updateResult.errors) {
@@ -511,10 +467,9 @@ describe('unlockContract', () => {
             s3Client: mockS3,
         })
 
-        const cmsUser = testCMSUser()
         const cmsServer = await constructTestPostgresServer({
             context: {
-                user: cmsUser,
+                user: testCMSUser(),
             },
             ldService,
             s3Client: mockS3,
@@ -562,18 +517,12 @@ describe('unlockContract', () => {
         ).toEqual(['2021-01-01', '2023-03-03'])
 
         // unlock A
-        await unlockTestHealthPlanPackage(
-            cmsServer,
-            contractA0.id,
-            'unlock a',
-            { user: cmsUser }
-        )
+        await unlockTestHealthPlanPackage(cmsServer, contractA0.id, 'unlock a')
         // unlock B, rate 3 should unlock, rate 1 should not.
         await unlockTestHealthPlanPackage(
             cmsServer,
             contractB0.id,
-            'test unlock',
-            { user: cmsUser }
+            'test unlock'
         )
 
         const unlockedB = await fetchTestContract(stateServer, contractB0.id)
@@ -610,19 +559,12 @@ describe('unlockContract', () => {
         rateUpdateInput.updatedRates[1].formData.rateDateCertified =
             '2000-01-22'
 
-        const updateResponse = await stateServer.executeOperation(
-            {
-                query: UpdateDraftContractRatesDocument,
-                variables: {
-                    input: rateUpdateInput,
-                },
+        const updateResult = await executeGraphQLOperation(stateServer, {
+            query: UpdateDraftContractRatesDocument,
+            variables: {
+                input: rateUpdateInput,
             },
-            {
-                contextValue: { user: testStateUser() },
-            }
-        )
-
-        const updateResult = extractGraphQLResponse(updateResponse)
+        })
 
         expect(updateResult.errors).toBeDefined()
         if (!updateResult.errors) {
@@ -641,22 +583,15 @@ describe('unlockContract', () => {
 
         const contract = await createAndSubmitTestContractWithRate(stateServer)
 
-        const unlockResponse = await stateServer.executeOperation(
-            {
-                query: UnlockContractDocument,
-                variables: {
-                    input: {
-                        contractID: contract.id,
-                        unlockedReason: 'Super duper good reason.',
-                    },
+        const unlockResult = await executeGraphQLOperation(stateServer, {
+            query: UnlockContractDocument,
+            variables: {
+                input: {
+                    contractID: contract.id,
+                    unlockedReason: 'Super duper good reason.',
                 },
             },
-            {
-                contextValue: { user: testStateUser() },
-            }
-        )
-
-        const unlockResult = extractGraphQLResponse(unlockResponse)
+        })
 
         expectToBeDefined(unlockResult.errors)
         expect(unlockResult.errors[0].message).toBe(
@@ -674,10 +609,9 @@ describe('unlockContract', () => {
         const stateServer = await constructTestPostgresServer({
             store: postgresStore,
         })
-        const cmsUser = testCMSUser()
         const cmsServer = await constructTestPostgresServer({
             context: {
-                user: cmsUser,
+                user: testCMSUser(),
             },
             emailer: mockEmailer,
             store: postgresStore,
@@ -700,9 +634,7 @@ describe('unlockContract', () => {
         const assignedUserIDs = assignedUsers.map((u) => u.id)
         const assignedUserEmails = assignedUsers.map((u) => u.email)
 
-        await updateTestStateAssignments(cmsServer, 'FL', assignedUserIDs, {
-            user: cmsUser,
-        })
+        await updateTestStateAssignments(cmsServer, 'FL', assignedUserIDs)
 
         // First, create a new submitted submission
         const stateSubmission = await createAndSubmitTestContractWithRate(
@@ -715,14 +647,12 @@ describe('unlockContract', () => {
         const unlockResult = await unlockTestContract(
             cmsServer,
             stateSubmission.id,
-            'Super duper good reason.',
-            { user: cmsUser }
+            'Super duper good reason.'
         )
 
         const currentRevision = unlockResult.draftRevision
 
         const programs = [defaultFloridaProgram()]
-        const ratePrograms = [defaultFloridaRateProgram()]
         const name = packageName(
             unlockResult.stateCode,
             unlockResult.stateNumber,
@@ -736,15 +666,11 @@ describe('unlockContract', () => {
             throw new Error('should have a first rate with form data')
         }
 
-        const convertedFirstRateFormData = nullsToUndefined(
-            Object.assign({}, firstRateFormData)
-        )
+        const rateName = firstRateFormData.rateCertificationName
 
-        const rateName = generateRateCertificationName(
-            convertedFirstRateFormData,
-            unlockResult.stateCode,
-            ratePrograms
-        )
+        if (!rateName) {
+            throw new Error('should have a rate name')
+        }
 
         const cmsEmails = [
             ...config.devReviewTeamEmails,
@@ -776,10 +702,9 @@ describe('unlockContract', () => {
                 }),
             },
         })
-        const cmsUser = testCMSUser()
         const cmsServer = await constructTestPostgresServer({
             context: {
-                user: cmsUser,
+                user: testCMSUser(),
             },
             emailer: mockEmailer,
         })
@@ -795,8 +720,7 @@ describe('unlockContract', () => {
         const unlockResult = await unlockTestContract(
             cmsServer,
             stateSubmission.id,
-            'Super duper good reason.',
-            { user: cmsUser }
+            'Super duper good reason.'
         )
 
         await submitTestContract(
@@ -808,14 +732,12 @@ describe('unlockContract', () => {
         await unlockTestContract(
             cmsServer,
             stateSubmission.id,
-            'For a second time.',
-            { user: cmsUser }
+            'For a second time.'
         )
 
         const currentRevision = unlockResult.draftRevision
 
         const programs = [defaultFloridaProgram()]
-        const ratePrograms = [defaultFloridaRateProgram()]
         const name = packageName(
             unlockResult.stateCode,
             unlockResult.stateNumber,
@@ -829,29 +751,30 @@ describe('unlockContract', () => {
             throw new Error('should have a first rate with form data')
         }
 
-        const convertedFirstRateFormData = nullsToUndefined(
-            Object.assign({}, firstRateFormData)
-        )
+        const rateName = firstRateFormData.rateCertificationName
 
-        const rateName = generateRateCertificationName(
-            convertedFirstRateFormData,
-            unlockResult.stateCode,
-            ratePrograms
-        )
+        if (!rateName) {
+            throw new Error('should have a rate name')
+        }
 
-        const stateContacts = currentRevision.formData.stateContacts.map(
-            (contact) => contact.email
-        )
-
+        const stateReceiverEmails = [
+            'james@example.com',
+            'notspiderman@example.com',
+            ...currentRevision.formData.stateContacts.map(
+                (contact) => contact.email
+            ),
+        ]
         // email subject line is correct for State email
-        const fourthEmailCall = mockEmailer.sendEmail.mock.calls[3][0]
-        expect(fourthEmailCall.subject).toContain(`${name} was unlocked by CMS`)
-        expect(fourthEmailCall.sourceEmail).toBe(config.emailSource)
-        expect(fourthEmailCall.bodyHTML).toContain(rateName)
-        // Check that state contacts and original submitter are included
-        expect(fourthEmailCall.toAddresses).toContain('james@example.com') // original submitter
-        stateContacts.forEach((email) => {
-            expect(fourthEmailCall.toAddresses).toContain(email)
-        })
+        expect(mockEmailer.sendEmail).toHaveBeenNthCalledWith(
+            4,
+            expect.objectContaining({
+                subject: expect.stringContaining(`${name} was unlocked by CMS`),
+                sourceEmail: config.emailSource,
+                toAddresses: expect.arrayContaining(
+                    Array.from(stateReceiverEmails)
+                ),
+                bodyHTML: expect.stringContaining(rateName),
+            })
+        )
     })
 })

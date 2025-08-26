@@ -1,6 +1,7 @@
 import {
     constructTestPostgresServer,
     createTestRateQuestion,
+    executeGraphQLOperation,
     updateTestStateAssignments,
 } from '../../testHelpers/gqlHelpers'
 import {
@@ -38,12 +39,10 @@ describe('createRateQuestion', () => {
             submittedContractAndRate.packageSubmissions[0].rateRevisions[0]
                 .rateID
         const rateQuestion = must(
-            await createTestRateQuestion(cmsServer, rateID, undefined, {
-                user: cmsUser,
-            })
+            await createTestRateQuestion(cmsServer, rateID)
         )
 
-        expect(rateQuestion?.question).toEqual(
+        expect(rateQuestion).toEqual(
             expect.objectContaining({
                 id: expect.any(String),
                 rateID: rateID,
@@ -73,16 +72,11 @@ describe('createRateQuestion', () => {
         await unlockTestContract(
             cmsServer,
             submittedContractAndRate.id,
-            'Test unlock reason',
-            { user: cmsUser }
+            'Test unlock reason'
         )
-        const rateQuestion = must(
-            await createTestRateQuestion(cmsServer, rateID, undefined, {
-                user: cmsUser,
-            })
-        )
+        const rateQuestion = await createTestRateQuestion(cmsServer, rateID)
 
-        expect(rateQuestion?.question).toEqual(
+        expect(rateQuestion).toEqual(
             expect.objectContaining({
                 id: expect.any(String),
                 rateID: rateID,
@@ -102,23 +96,16 @@ describe('createRateQuestion', () => {
             submittedContractAndRate.id,
             'Test resubmit reason'
         )
-        const rateQuestion2 = must(
-            await createTestRateQuestion(
-                cmsServer,
-                rateID,
+        const rateQuestion2 = await createTestRateQuestion(cmsServer, rateID, {
+            documents: [
                 {
-                    documents: [
-                        {
-                            name: 'Test Question 2',
-                            s3URL: 's3://bucketname/key/test1',
-                        },
-                    ],
+                    name: 'Test Question 2',
+                    s3URL: 's3://bucketname/key/test1',
                 },
-                { user: cmsUser }
-            )
-        )
+            ],
+        })
 
-        expect(rateQuestion2.question).toEqual(
+        expect(rateQuestion2).toEqual(
             expect.objectContaining({
                 id: expect.any(String),
                 rateID: rateID,
@@ -156,30 +143,49 @@ describe('createRateQuestion', () => {
             )
         }
 
-        const rateQuestionRes = await createTestRateQuestion(
-            cmsServer,
-            rateID,
-            undefined,
-            { user: cmsUser }
-        )
+        const rateQuestion = await executeGraphQLOperation(cmsServer, {
+            query: CreateRateQuestionDocument,
+            variables: {
+                input: {
+                    rateID,
+                    documents: [
+                        {
+                            name: 'Test Question',
+                            s3URL: 's3://bucketname/key/test1',
+                        },
+                    ],
+                },
+            },
+        })
 
-        expect(rateQuestionRes.errors).toBeDefined()
-        expect(assertAnErrorCode(rateQuestionRes)).toBe('BAD_USER_INPUT')
-        expect(assertAnError(rateQuestionRes).message).toBe(
+        expect(rateQuestion.errors).toBeDefined()
+        expect(assertAnErrorCode(rateQuestion)).toBe('BAD_USER_INPUT')
+        expect(assertAnError(rateQuestion).message).toBe(
             'Issue creating question for rate. Message: Rate is in a invalid statius: DRAFT'
         )
 
         const withdrawnRate = await withdrawTestRate(
             cmsServer,
             rateToWithdraw.rateID,
-            'Withdraw rate',
-            { user: cmsUser }
+            'Withdraw rate'
         )
-        const rateQuestionForWithdrawnRate = await createTestRateQuestion(
+
+        const rateQuestionForWithdrawnRate = await executeGraphQLOperation(
             cmsServer,
-            withdrawnRate.id,
-            undefined,
-            { user: cmsUser }
+            {
+                query: CreateRateQuestionDocument,
+                variables: {
+                    input: {
+                        rateID: withdrawnRate.id,
+                        documents: [
+                            {
+                                name: 'Test Question',
+                                s3URL: 's3://bucketname/key/test1',
+                            },
+                        ],
+                    },
+                },
+            }
         )
 
         expect(rateQuestionForWithdrawnRate.errors).toBeDefined()
@@ -197,7 +203,20 @@ describe('createRateQuestion', () => {
         const rateID =
             submittedContractAndRate.packageSubmissions[0].rateRevisions[0]
                 .rateID
-        const rateQuestion = await createTestRateQuestion(stateServer, rateID)
+        const rateQuestion = await executeGraphQLOperation(stateServer, {
+            query: CreateRateQuestionDocument,
+            variables: {
+                input: {
+                    rateID,
+                    documents: [
+                        {
+                            name: 'Test Question',
+                            s3URL: 's3://bucketname/key/test1',
+                        },
+                    ],
+                },
+            },
+        })
 
         expect(rateQuestion.errors).toBeDefined()
         expect(assertAnErrorCode(rateQuestion)).toBe('FORBIDDEN')
@@ -212,12 +231,21 @@ describe('createRateQuestion', () => {
             },
         })
         const invalidRateID = 'invalidID'
-        const rateQuestionRes = await createTestRateQuestion(
-            cmsServer,
-            invalidRateID,
-            undefined,
-            { user: cmsUser }
-        )
+
+        const rateQuestionRes = await executeGraphQLOperation(cmsServer, {
+            query: CreateRateQuestionDocument,
+            variables: {
+                input: {
+                    rateID: invalidRateID,
+                    documents: [
+                        {
+                            name: 'Test Question',
+                            s3URL: 's3://bucketname/key/test1',
+                        },
+                    ],
+                },
+            },
+        })
 
         expect(rateQuestionRes.errors).toBeDefined()
         expect(assertAnErrorCode(rateQuestionRes)).toBe('NOT_FOUND')
@@ -243,12 +271,21 @@ describe('createRateQuestion', () => {
             submittedContractAndRate.packageSubmissions[0].rateRevisions[0]
                 .rateID
 
-        const rateQuestionRes = await createTestRateQuestion(
-            cmsServer,
-            rateID,
-            undefined,
-            { user: cmsUserWithNoDivision }
-        )
+        // THIS ERROR IS GETTING USER INPUT INSTEAD OF FORBIDDEN
+        const rateQuestionRes = await executeGraphQLOperation(cmsServer, {
+            query: CreateRateQuestionDocument,
+            variables: {
+                input: {
+                    rateID,
+                    documents: [
+                        {
+                            name: 'Test Question',
+                            s3URL: 's3://bucketname/key/test1',
+                        },
+                    ],
+                },
+            },
+        })
 
         expect(rateQuestionRes.errors).toBeDefined()
         expect(assertAnErrorCode(rateQuestionRes)).toBe('FORBIDDEN')
@@ -274,11 +311,7 @@ describe('createRateQuestion', () => {
             submittedContractAndRate.packageSubmissions[0].rateRevisions[0]
         const rateID = rateRevision.rateID
 
-        must(
-            await createTestRateQuestion(cmsServer, rateID, undefined, {
-                user: cmsUser,
-            })
-        )
+        must(await createTestRateQuestion(cmsServer, rateID))
 
         expect(mockEmailer.sendEmail).toHaveBeenNthCalledWith(
             1,
@@ -325,9 +358,7 @@ describe('createRateQuestion', () => {
         const assignedUserIDs = assignedUsers.map((u) => u.id)
         const assignedUserEmails = assignedUsers.map((u) => u.email)
 
-        await updateTestStateAssignments(cmsServer, 'FL', assignedUserIDs, {
-            user: cmsUser,
-        })
+        await updateTestStateAssignments(cmsServer, 'FL', assignedUserIDs)
 
         const submittedContractAndRate =
             await createAndSubmitTestContractWithRate(stateServer)
@@ -335,11 +366,7 @@ describe('createRateQuestion', () => {
             submittedContractAndRate.packageSubmissions[0].rateRevisions[0]
         const rateID = rateRevision.rateID
 
-        must(
-            await createTestRateQuestion(cmsServer, rateID, undefined, {
-                user: cmsUser,
-            })
-        )
+        must(await createTestRateQuestion(cmsServer, rateID))
 
         const cmsEmails = [...config.devReviewTeamEmails, ...assignedUserEmails]
 
@@ -373,13 +400,11 @@ describe('createRateQuestion', () => {
             emailer: mockEmailer,
         })
 
-        const oactUser = testCMSUser({
-            divisionAssignment: 'OACT',
-        })
-        await createDBUsersWithFullData([oactUser])
         const oactServer = await constructTestPostgresServer({
             context: {
-                user: oactUser,
+                user: testCMSUser({
+                    divisionAssignment: 'OACT',
+                }),
             },
             emailer: mockEmailer,
         })
@@ -391,23 +416,11 @@ describe('createRateQuestion', () => {
         const rateID = rateRevision.rateID
 
         // round 1 dmco question
-        must(
-            await createTestRateQuestion(cmsServer, rateID, undefined, {
-                user: cmsUser,
-            })
-        )
+        must(await createTestRateQuestion(cmsServer, rateID))
         // round 1 oact question
-        must(
-            await createTestRateQuestion(oactServer, rateID, undefined, {
-                user: oactUser,
-            })
-        )
+        must(await createTestRateQuestion(oactServer, rateID))
         // round 2 dmco
-        must(
-            await createTestRateQuestion(cmsServer, rateID, undefined, {
-                user: cmsUser,
-            })
-        )
+        must(await createTestRateQuestion(cmsServer, rateID))
 
         expect(mockEmailer.sendEmail).toHaveBeenNthCalledWith(
             6,
@@ -430,38 +443,20 @@ describe('createRateQuestion', () => {
             emailer: mockEmailer,
         })
 
-        const response = await cmsServer.executeOperation(
-            {
-                query: CreateRateQuestionDocument,
-                variables: {
-                    input: {
-                        rateID: '1234',
-                        documents: [
-                            {
-                                name: 'Test Question',
-                                s3URL: 's3://bucketname/key/test1',
-                            },
-                        ],
-                    },
+        const submitResult = await executeGraphQLOperation(cmsServer, {
+            query: CreateRateQuestionDocument,
+            variables: {
+                input: {
+                    rateID: '1234',
+                    documents: [
+                        {
+                            name: 'Test Question',
+                            s3URL: 's3://bucketname/key/test1',
+                        },
+                    ],
                 },
             },
-            {
-                contextValue: {
-                    user: cmsUser,
-                },
-            }
-        )
-
-        // Handle Apollo v4 response structure
-        let submitResult: any
-        if ('body' in response && response.body) {
-            submitResult =
-                response.body.kind === 'single'
-                    ? response.body.singleResult
-                    : response.body
-        } else {
-            submitResult = response
-        }
+        })
 
         expect(submitResult.errors).toBeDefined()
         expect(mockEmailer.sendEmail).not.toHaveBeenCalled()

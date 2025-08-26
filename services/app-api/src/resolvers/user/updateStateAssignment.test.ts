@@ -11,21 +11,16 @@ import type { InsertUserArgsType } from '../../postgres'
 import { NewPostgresStore } from '../../postgres'
 import { sharedTestPrismaClient } from '../../testHelpers/storeHelpers'
 import { UpdateStateAssignmentDocument } from '../../gen/gqlClient'
-import { constructTestPostgresServer } from '../../testHelpers/gqlHelpers'
+import {
+    constructTestPostgresServer,
+    executeGraphQLOperation,
+} from '../../testHelpers/gqlHelpers'
 import type { State } from '../../gen/gqlServer'
 import {
     assertAnError,
     assertAnErrorCode,
     assertAnErrorExtensions,
 } from '../../testHelpers'
-
-// Helper to extract GraphQL response from Apollo v4 response structure
-function extractTestResponse(response: any): any {
-    if ('body' in response && response.body) {
-        return response.body.kind === 'single' ? response.body.singleResult : response.body
-    }
-    return response
-}
 
 const authorizedUserTests = [
     {
@@ -121,7 +116,7 @@ describe.each(authorizedUserTests)(
                 },
             })
 
-            const updateRes = await server.executeOperation({
+            const updateRes = await executeGraphQLOperation(server, {
                 query: UpdateStateAssignmentDocument,
                 variables: {
                     input: {
@@ -129,28 +124,23 @@ describe.each(authorizedUserTests)(
                         stateAssignments: ['CA'],
                     },
                 },
-            }, {
-                contextValue: {
-                    user: mockUser,
-                },
             })
 
-            const result = extractTestResponse(updateRes)
-            expect(result.data).toBeDefined()
-            expect(result.errors).toBeUndefined()
+            expect(updateRes.data).toBeDefined()
+            expect(updateRes.errors).toBeUndefined()
 
-            if (!result.data) {
+            if (!updateRes.data) {
                 throw new Error('no data')
             }
 
-            const user = result.data.updateStateAssignment.user
+            const user = updateRes.data.updateStateAssignment.user
             expect(user.email).toBe(newUser.email)
             expect(user.stateAssignments).toHaveLength(1)
             expect(user.stateAssignments[0].code).toBe('CA')
             expect(user.divisionAssignment).toBe('OACT')
 
             // change the value and see if it updates
-            const updateRes2 = await server.executeOperation({
+            const updateRes2 = await executeGraphQLOperation(server, {
                 query: UpdateStateAssignmentDocument,
                 variables: {
                     input: {
@@ -158,21 +148,16 @@ describe.each(authorizedUserTests)(
                         stateAssignments: ['VA', 'MA'],
                     },
                 },
-            }, {
-                contextValue: {
-                    user: mockUser,
-                },
             })
 
-            const result2 = extractTestResponse(updateRes2)
-            expect(result2.data).toBeDefined()
-            expect(result2.errors).toBeUndefined()
+            expect(updateRes2.data).toBeDefined()
+            expect(updateRes2.errors).toBeUndefined()
 
-            if (!result2.data) {
+            if (!updateRes2.data) {
                 throw new Error('no data')
             }
 
-            const user2 = result2.data.updateStateAssignment.user
+            const user2 = updateRes2.data.updateStateAssignment.user
             expect(user2.email).toBe(newUser.email)
             expect(user2.stateAssignments).toHaveLength(2)
             expect(user2.stateAssignments.map((s: State) => s.code)).toEqual(
@@ -205,10 +190,6 @@ describe.each(authorizedUserTests)(
                         stateAssignments: [],
                     },
                 },
-            }, {
-                contextValue: {
-                    user: mockUser,
-                },
             })
 
             expect(assertAnError(updateResEmpty).message).toContain(
@@ -227,10 +208,6 @@ describe.each(authorizedUserTests)(
                         stateAssignments: undefined,
                     },
                 },
-            }, {
-                contextValue: {
-                    user: mockUser,
-                },
             })
 
             expect(assertAnError(updateResUndefined).message).toContain(
@@ -248,10 +225,6 @@ describe.each(authorizedUserTests)(
                         cmsUserID: newUser.id,
                         stateAssignments: null,
                     },
-                },
-            }, {
-                contextValue: {
-                    user: mockUser,
                 },
             })
 
@@ -287,10 +260,6 @@ describe.each(authorizedUserTests)(
                         cmsUserID: newUser.id,
                         stateAssignments: ['CA', 'XX', 'BS'],
                     },
-                },
-            }, {
-                contextValue: {
-                    user: mockUser,
                 },
             })
 
@@ -328,10 +297,6 @@ describe.each(authorizedUserTests)(
                         stateAssignments: ['CA'],
                     },
                 },
-            }, {
-                contextValue: {
-                    user: mockUser,
-                },
             })
 
             expect(assertAnError(updateRes).message).toContain(
@@ -356,10 +321,6 @@ describe.each(authorizedUserTests)(
                         cmsUserID: 'not-an-existing-user',
                         stateAssignments: ['CA'],
                     },
-                },
-            }, {
-                contextValue: {
-                    user: mockUser,
                 },
             })
 
@@ -394,10 +355,6 @@ describe.each(unauthorizedUserTests)(
                         cmsUserID: cmsUserID,
                         stateAssignments: ['CA'],
                     },
-                },
-            }, {
-                contextValue: {
-                    user: mockUser,
                 },
             })
 

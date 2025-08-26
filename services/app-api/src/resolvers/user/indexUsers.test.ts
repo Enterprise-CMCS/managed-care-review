@@ -2,11 +2,14 @@ import type { InsertUserArgsType } from '../../postgres'
 import { NewPostgresStore } from '../../postgres'
 import { IndexUsersDocument } from '../../gen/gqlClient'
 import { v4 as uuidv4 } from 'uuid'
-import { constructTestPostgresServer, extractGraphQLResponse } from '../../testHelpers/gqlHelpers'
+import {
+    constructTestPostgresServer,
+    executeGraphQLOperation,
+} from '../../testHelpers/gqlHelpers'
 import { sharedTestPrismaClient } from '../../testHelpers/storeHelpers'
 import type { UserEdge, User } from '../../gen/gqlServer'
 import { assertAnError } from '../../testHelpers'
-import { testAdminUser, testStateUser, testCMSUser } from '../../testHelpers/userHelpers'
+import { testAdminUser, testStateUser } from '../../testHelpers/userHelpers'
 
 describe('indexUsers', () => {
     it('lists all known users', async () => {
@@ -66,20 +69,15 @@ describe('indexUsers', () => {
             throw newUsers
         }
 
-        const updateRes = await server.executeOperation({
+        const updateRes = await executeGraphQLOperation(server, {
             query: IndexUsersDocument,
-        }, {
-            contextValue: {
-                user: testAdminUser(),
-            },
         })
 
-        const result = extractGraphQLResponse(updateRes)
-        expect(result.data).toBeDefined()
-        expect(result.errors).toBeUndefined()
+        expect(updateRes.data).toBeDefined()
+        expect(updateRes.errors).toBeUndefined()
 
         const ourUserIDs = usersToInsert.map((u) => u.userID)
-        const ourUsers = result.data?.indexUsers.edges
+        const ourUsers = updateRes.data?.indexUsers.edges
             .filter((edge: UserEdge) => ourUserIDs.includes(edge.node.id))
             .map((edge: UserEdge) => edge.node)
 
@@ -104,9 +102,11 @@ describe('indexUsers', () => {
 
         const updateRes = await server.executeOperation({
             query: IndexUsersDocument,
-        }, {
-            contextValue: {
-                user: testStateUser(),
+            variables: {
+                input: {
+                    cmsUserID: uuidv4(),
+                    stateAssignments: ['CA'],
+                },
             },
         })
 
@@ -115,25 +115,21 @@ describe('indexUsers', () => {
         )
     })
 
-    it('allows CMS users to index users', async () => {
-        const cmsUser = testCMSUser()
-        const server = await constructTestPostgresServer({
-            context: {
-                user: cmsUser,
-            },
-        })
+    it('returns an error if called by a CMS user', async () => {
+        const server = await constructTestPostgresServer()
 
         const updateRes = await server.executeOperation({
             query: IndexUsersDocument,
-        }, {
-            contextValue: {
-                user: cmsUser,
+            variables: {
+                input: {
+                    cmsUserID: uuidv4(),
+                    stateAssignments: ['CA'],
+                },
             },
         })
 
-        const result = extractGraphQLResponse(updateRes)
-        expect(result.data).toBeDefined()
-        expect(result.errors).toBeUndefined()
-        expect(result.data?.indexUsers).toBeDefined()
+        expect(assertAnError(updateRes).message).toBe(
+            'user not authorized to fetch users'
+        )
     })
 })

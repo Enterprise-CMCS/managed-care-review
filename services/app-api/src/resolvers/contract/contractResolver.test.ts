@@ -3,6 +3,7 @@ import {
     constructTestPostgresServer,
     createTestQuestion,
     createTestQuestionResponse,
+    executeGraphQLOperation,
 } from '../../testHelpers/gqlHelpers'
 import {
     createAndUpdateTestContractWithRate,
@@ -15,7 +16,6 @@ import {
     testCMSUser,
     testStateUser,
 } from '../../testHelpers/userHelpers'
-import { extractGraphQLResponse } from '../../testHelpers/apolloV4ResponseHelper'
 
 describe('contractResolver', () => {
     const dmcoCMSUser = testCMSUser({
@@ -35,12 +35,8 @@ describe('contractResolver', () => {
     })
 
     it('returns questions associated with a contract', async () => {
-        const stateUser = testStateUser()
         const stateServer = await constructTestPostgresServer({
             s3Client: mockS3,
-            context: {
-                user: stateUser,
-            },
         })
 
         const dmcoCMSServer = await constructTestPostgresServer({
@@ -62,8 +58,8 @@ describe('contractResolver', () => {
             s3Client: mockS3,
         })
 
-        const draft = await createAndUpdateTestContractWithRate(stateServer, undefined, { user: stateUser })
-        const stateSubmission = await submitTestContract(stateServer, draft.id, undefined, { user: stateUser })
+        const draft = await createAndUpdateTestContractWithRate(stateServer)
+        const stateSubmission = await submitTestContract(stateServer, draft.id)
 
         const createdDMCOQuestion = await createTestQuestion(
             dmcoCMSServer,
@@ -75,15 +71,12 @@ describe('contractResolver', () => {
                         s3URL: 's3://bucketname/key/test11',
                     },
                 ],
-            },
-            { user: dmcoCMSUser }
+            }
         )
 
         const responseToDMCO = await createTestQuestionResponse(
             stateServer,
-            createdDMCOQuestion.question.id,
-            undefined,
-            { user: stateUser }
+            createdDMCOQuestion.id
         )
 
         const createdDMCPQuestion = await createTestQuestion(
@@ -96,15 +89,12 @@ describe('contractResolver', () => {
                         s3URL: 's3://bucketname/key/test12',
                     },
                 ],
-            },
-            { user: dmcpCMSUser }
+            }
         )
 
         const responseToDMCP = await createTestQuestionResponse(
             stateServer,
-            createdDMCPQuestion.question.id,
-            undefined,
-            { user: stateUser }
+            createdDMCPQuestion.id
         )
 
         const createdOACTQuestion = await createTestQuestion(
@@ -117,37 +107,29 @@ describe('contractResolver', () => {
                         s3URL: 's3://bucketname/key/test13',
                     },
                 ],
-            },
-            { user: oactCMSUser }
+            }
         )
 
         const responseToOACT = await createTestQuestionResponse(
             stateServer,
-            createdOACTQuestion.question.id,
-            undefined,
-            { user: stateUser }
+            createdOACTQuestion.id
         )
 
         const contractWithQuestions = await fetchTestContractWithQuestions(
             stateServer,
-            stateSubmission.id,
-            { user: stateUser }
+            stateSubmission.id
         )
         const indexQuestionsResult = contractWithQuestions.questions
 
         draft.questions = indexQuestionsResult
-        const response = await stateServer.executeOperation({
+        const fetchContractResult = await executeGraphQLOperation(stateServer, {
             query: FetchContractWithQuestionsDocument,
             variables: {
                 input: {
                     contractID: stateSubmission.id,
                 },
             },
-        }, {
-            contextValue: { user: stateUser },
         })
-        
-        const fetchContractResult = extractGraphQLResponse(response)
 
         expect(fetchContractResult.errors).toBeUndefined()
 
@@ -171,7 +153,7 @@ describe('contractResolver', () => {
                                         downloadURL: expect.any(String),
                                     },
                                 ],
-                                addedBy: responseToDMCO.question.addedBy,
+                                addedBy: responseToDMCO.addedBy,
                             }),
                         },
                     ]),
@@ -192,7 +174,7 @@ describe('contractResolver', () => {
                                         downloadURL: expect.any(String),
                                     },
                                 ],
-                                addedBy: responseToDMCP.question.addedBy,
+                                addedBy: responseToDMCP.addedBy,
                             }),
                         },
                     ],
@@ -213,7 +195,7 @@ describe('contractResolver', () => {
                                         downloadURL: expect.any(String),
                                     },
                                 ],
-                                addedBy: responseToOACT.question.addedBy,
+                                addedBy: responseToOACT.addedBy,
                             }),
                         },
                     ],
@@ -233,29 +215,23 @@ describe('contractResolver', () => {
             draft.id
         )
 
-        const vaUser = testStateUser({
-            stateCode: 'VA',
-            email: 'aang@mn.gov',
-        })
         const stateServerVA = await constructTestPostgresServer({
             context: {
-                user: vaUser,
+                user: testStateUser({
+                    stateCode: 'VA',
+                    email: 'aang@mn.gov',
+                }),
             },
-            s3Client: mockS3,
         })
 
-        const response = await stateServerVA.executeOperation({
+        const fetchResult = await executeGraphQLOperation(stateServerVA, {
             query: FetchContractWithQuestionsDocument,
             variables: {
                 input: {
                     contractID: stateSubmission.id,
                 },
             },
-        }, {
-            contextValue: { user: vaUser },
         })
-        
-        const fetchResult = extractGraphQLResponse(response)
 
         expect(fetchResult.errors).toBeDefined()
         if (fetchResult.errors === undefined) {

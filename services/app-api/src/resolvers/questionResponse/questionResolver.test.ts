@@ -43,8 +43,7 @@ describe(`questionResolver`, () => {
                         s3URL: 's3://bucketname/key/test12',
                     },
                 ],
-            },
-            { user: dmcpCMSUser }
+            }
         )
 
         const createdDMCPQuestion2 = await createTestQuestion(
@@ -57,8 +56,7 @@ describe(`questionResolver`, () => {
                         s3URL: 's3://bucketname/key/test12',
                     },
                 ],
-            },
-            { user: dmcpCMSUser }
+            }
         )
 
         const contractWithQuestions = await fetchTestContractWithQuestions(
@@ -68,11 +66,11 @@ describe(`questionResolver`, () => {
         const indexQuestionsResult = contractWithQuestions.questions
         const firstDMCPQuestion =
             indexQuestionsResult?.DMCPQuestions.edges.find(
-                (q) => q.node.id === createdDMCPQuestion.question.id
+                (q) => q.node.id === createdDMCPQuestion.id
             )
         const secondDMCPQuestion =
             indexQuestionsResult?.DMCPQuestions.edges.find(
-                (q) => q.node.id === createdDMCPQuestion2.question.id
+                (q) => q.node.id === createdDMCPQuestion2.id
             )
         expect(firstDMCPQuestion?.node.round).toBe(1)
         expect(secondDMCPQuestion?.node.round).toBe(2)

@@ -5,7 +5,7 @@ import {
     createAndSubmitTestContractWithRate,
     createAndUpdateTestContractWithoutRates,
     submitTestContract,
-    unlockTestContractAsUser,
+    unlockTestContract,
 } from '../../testHelpers/gqlContractHelpers'
 import { findAllRatesStripped } from './findAllRatesStripped'
 import { must } from '../../testHelpers'
@@ -21,30 +21,27 @@ import { expect } from 'vitest'
 it('returns all rates with stripped down data', async () => {
     const client = await sharedTestPrismaClient()
 
-    const stateUser = testStateUser()
-    const cmsUser = testCMSUser()
-
     const stateServer = await constructTestPostgresServer({
         context: {
-            user: stateUser,
+            user: testStateUser(),
         },
     })
 
     const cmsServer = await constructTestPostgresServer({
         context: {
-            user: cmsUser,
+            user: testCMSUser(),
         },
     })
 
     const submittedContractA =
-        await createAndSubmitTestContractWithRate(stateServer, undefined, { user: stateUser })
+        await createAndSubmitTestContractWithRate(stateServer)
     const rateAID =
         submittedContractA.packageSubmissions[0].rateRevisions[0].rateID
 
-    await unlockTestContractAsUser(cmsServer, submittedContractA.id, 'unlock 1', cmsUser)
-    await submitTestContract(stateServer, submittedContractA.id, 'submit 2', { user: stateUser })
+    await unlockTestContract(cmsServer, submittedContractA.id, 'unlock 1')
+    await submitTestContract(stateServer, submittedContractA.id, 'submit 2')
 
-    await unlockTestContractAsUser(cmsServer, submittedContractA.id, 'unlock 2', cmsUser)
+    await unlockTestContract(cmsServer, submittedContractA.id, 'unlock 2')
 
     const contractB = await createAndUpdateTestContractWithoutRates(stateServer)
     // link rate contract B
@@ -67,16 +64,12 @@ it('returns all rates with stripped down data', async () => {
                     ],
                 },
             },
-        }, {
-            contextValue: { user: stateUser },
         })
     )
 
     const submittedContractB = await submitTestContract(
         stateServer,
-        contractB.id,
-        undefined,
-        { user: stateUser }
+        contractB.id
     )
     const rateBID = submittedContractB.packageSubmissions[0].rateRevisions.find(
         (rate) => rate.rateID !== rateAID
@@ -86,7 +79,7 @@ it('returns all rates with stripped down data', async () => {
         throw new Error('Unexpected error: rateBID should exist, but does not.')
     }
 
-    await withdrawTestRate(cmsServer, rateBID, 'Withdraw invalid rate', { user: cmsUser })
+    await withdrawTestRate(cmsServer, rateBID, 'Withdraw invalid rate')
 
     const strippedRatesOrErrors = must(await findAllRatesStripped(client))
     const strippedRates: StrippedRateType[] = []
@@ -130,7 +123,7 @@ it('returns all rates with stripped down data', async () => {
     expect(rateBFromArray?.reviewStatusActions?.[0].actionType).toBe('WITHDRAW')
 
     // Undo the rate withdraw
-    await undoWithdrawTestRate(cmsServer, rateBID, 'Undo withdraw rateB', { user: cmsUser })
+    await undoWithdrawTestRate(cmsServer, rateBID, 'Undo withdraw rateB')
 
     const strippedRatesOrErrorsAgain = must(await findAllRatesStripped(client))
     const strippedRatesAgain: StrippedRateType[] = []

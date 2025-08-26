@@ -1,4 +1,7 @@
-import { constructTestPostgresServer, extractGraphQLResponse } from '../../testHelpers/gqlHelpers'
+import {
+    constructTestPostgresServer,
+    executeGraphQLOperation,
+} from '../../testHelpers/gqlHelpers'
 import { FetchRateDocument } from '../../gen/gqlClient'
 import { testCMSUser } from '../../testHelpers/userHelpers'
 import { testLDService } from '../../testHelpers/launchDarklyHelpers'
@@ -28,8 +31,7 @@ describe(`genericDocumentResolver`, () => {
         // Create a rate
         const submittedRate = await createSubmitAndUnlockTestRate(
             server,
-            cmsServer,
-            cmsUser
+            cmsServer
         )
         expect(submittedRate).toBeDefined()
 
@@ -38,18 +40,12 @@ describe(`genericDocumentResolver`, () => {
         }
 
         // fetch rate
-        const response = await cmsServer.executeOperation({
+        const result = await executeGraphQLOperation(cmsServer, {
             query: FetchRateDocument,
             variables: {
                 input,
             },
-        }, {
-            contextValue: { user: cmsUser },
         })
-        
-        const result = extractGraphQLResponse(response)
-        expect(result.errors).toBeUndefined()
-        expect(result.data).toBeDefined()
 
         const fetchedRate = result.data?.fetchRate.rate
 

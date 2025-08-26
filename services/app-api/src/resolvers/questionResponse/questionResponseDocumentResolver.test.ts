@@ -2,7 +2,6 @@ import {
     constructTestPostgresServer,
     createTestQuestion,
     createTestQuestionResponse,
-    defaultContext,
 } from '../../testHelpers/gqlHelpers'
 import {
     testCMSUser,
@@ -61,14 +60,11 @@ describe(`questionResponseDocumentResolver`, () => {
                         s3URL: 's3://bucketname/key/test11',
                     },
                 ],
-            },
-            { user: dmcoCMSUser }
+            }
         )
         const responseToDMCO = await createTestQuestionResponse(
             stateServer,
-            createdDMCOQuestion.question.id,
-            undefined,
-            defaultContext()
+            createdDMCOQuestion.id
         )
         const createdDMCPQuestion = await createTestQuestion(
             dmcpCMSServer,
@@ -80,14 +76,11 @@ describe(`questionResponseDocumentResolver`, () => {
                         s3URL: 's3://bucketname/key/test12',
                     },
                 ],
-            },
-            { user: dmcpCMSUser }
+            }
         )
         const responseToDMCP = await createTestQuestionResponse(
             stateServer,
-            createdDMCPQuestion.question.id,
-            undefined,
-            defaultContext()
+            createdDMCPQuestion.id
         )
         const createdOACTQuestion = await createTestQuestion(
             oactCMServer,
@@ -99,14 +92,11 @@ describe(`questionResponseDocumentResolver`, () => {
                         s3URL: 's3://bucketname/key/test13',
                     },
                 ],
-            },
-            { user: oactCMSUser }
+            }
         )
         const responseToOACT = await createTestQuestionResponse(
             stateServer,
-            createdOACTQuestion.question.id,
-            undefined,
-            defaultContext()
+            createdOACTQuestion.id
         )
         const contractWithQuestions = await fetchTestContractWithQuestions(
             stateServer,
@@ -132,7 +122,7 @@ describe(`questionResponseDocumentResolver`, () => {
                                         downloadURL: expect.any(String),
                                     },
                                 ],
-                                addedBy: responseToDMCO.question.addedBy,
+                                addedBy: responseToDMCO.addedBy,
                             }),
                         },
                     ]),
@@ -153,7 +143,7 @@ describe(`questionResponseDocumentResolver`, () => {
                                         downloadURL: expect.any(String),
                                     },
                                 ],
-                                addedBy: responseToDMCP.question.addedBy,
+                                addedBy: responseToDMCP.addedBy,
                             }),
                         },
                     ],
@@ -174,7 +164,7 @@ describe(`questionResponseDocumentResolver`, () => {
                                         downloadURL: expect.any(String),
                                     },
                                 ],
-                                addedBy: responseToOACT.question.addedBy,
+                                addedBy: responseToOACT.addedBy,
                             }),
                         },
                     ],
