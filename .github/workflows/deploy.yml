@@ -321,7 +321,7 @@ jobs:
       needs.api-unit-tests.result == 'success' &&
       needs.build-lambda-layers.result == 'success' &&
       needs.begin-deployment.result == 'success'
-    uses: Enterprise-CMCS/managed-care-review/.github/workflows/deploy-app-to-env.yml@shamoons-mcr-5425-apollo-upgrade
+    uses: Enterprise-CMCS/managed-care-review/.github/workflows/deploy-app-to-env.yml@apollo-upgrade
     with:
       environment: dev
       stage_name: ${{ needs.begin-deployment.outputs.stage-name }}
