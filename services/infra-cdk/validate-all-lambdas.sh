@@ -289,6 +289,8 @@ validate_lambda_config() {
     local vpc_config=$(jq -r '.Configuration.VpcConfig.VpcId // "none"' "$config_file" 2>/dev/null || echo "none")
     
     # VPC configuration validation
+    local lambda_base_name=$(echo "$lambda_name" | sed "s/$STAGE/{stage}/g")
+    local lambda_config=$(jq ".lambdas[\"$lambda_base_name\"] // {}" "$CONFIG_FILE" 2>/dev/null || echo "{}")
     local requires_vpc=$(echo "$lambda_config" | jq -r '.requires_vpc // false' 2>/dev/null)
     if [[ "$requires_vpc" == "true" ]] || [[ "$lambda_name" =~ (graphql|oauth|db|migrate) ]]; then
         if [[ "$vpc_config" == "none" || "$vpc_config" == "null" ]]; then
@@ -385,10 +387,17 @@ validate_lambda_config() {
     local common_required=($(jq -r '.common_env_vars.required[]' "$CONFIG_FILE" 2>/dev/null || echo "STAGE REGION NODE_OPTIONS"))
     
     # Get lambda-specific required env vars
-    local specific_required=($(echo "$lambda_config" | jq -r '.required_env_vars[]?' 2>/dev/null || echo ""))
+    local specific_required_raw=$(echo "$lambda_config" | jq -r '.required_env_vars[]?' 2>/dev/null || echo "")
+    local specific_required=()
+    if [[ -n "$specific_required_raw" ]]; then
+        IFS=$'\n' read -rd '' -a specific_required <<< "$specific_required_raw" || true
+    fi
     
     # Combine all required env vars
-    local all_required_vars=("${common_required[@]}" "${specific_required[@]}")
+    local all_required_vars=("${common_required[@]}")
+    if [[ ${#specific_required[@]} -gt 0 ]]; then
+        all_required_vars+=("${specific_required[@]}")
+    fi
     
     # Remove duplicates
     local unique_required=($(echo "${all_required_vars[@]}" | tr ' ' '\n' | sort -u | tr '\n' ' '))

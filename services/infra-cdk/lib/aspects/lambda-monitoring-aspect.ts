@@ -6,12 +6,13 @@ import * as ssm from "aws-cdk-lib/aws-ssm";
 import { ServiceRegistry } from "../constructs/base/service-registry";
 
 /**
- * Lambda Monitoring Aspect - Automatically applies DataDog monitoring
+ * Lambda Monitoring Aspect - Automatically applies monitoring layers and configuration
  * to all Lambda functions in the application.
  * 
  * This aspect:
- * - Only adds DataDog Extension for monitoring (OTEL handled by constructs)
- * - Configures proper tagging for DataDog
+ * - Always adds OTEL layer for New Relic monitoring
+ * - Conditionally adds Datadog Extension for dual monitoring
+ * - Configures proper tagging for both platforms
  * - Grants necessary IAM permissions
  */
 export class LambdaMonitoringAspect implements IAspect {
@@ -38,8 +39,29 @@ export class LambdaMonitoringAspect implements IAspect {
       return;
     }
     
-    // Only handle DataDog monitoring (OTEL handled by individual constructs)
+    // Check if function already has OTEL layer from stack definition
     const existingLayers = (node as any).layers || [];
+    const hasOtelLayer = existingLayers.some((layer: lambda.ILayerVersion) => {
+      const layerArn = (layer as any).layerVersionArn || 
+                       (layer as any).layerArn || 
+                       layer.layerVersionArn ||
+                       '';
+      const arnString = String(layerArn);
+      return arnString.includes('aws-otel-nodejs');
+    });
+    
+    // Also check if we've already added monitoring via aspect
+    const hasAspectOtelLayer = node.node.tryFindChild(`${node.node.id}-AspectOtelLayer`);
+    
+    // Only add OTEL layer if it doesn't exist
+    if (!hasOtelLayer && !hasAspectOtelLayer) {
+      const otelLayer = lambda.LayerVersion.fromLayerVersionArn(
+        node, 
+        `${node.node.id}-AspectOtelLayer`,
+        ServiceRegistry.getLayerArn(node, this.stage, 'otel')
+      );
+      node.addLayers(otelLayer);
+    }
     
     // Conditionally add Datadog monitoring
     if (this.enableDatadog) {

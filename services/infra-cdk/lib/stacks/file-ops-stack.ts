@@ -101,7 +101,7 @@ export class FileOpsStack extends Stack {
 
     // Grant S3 permissions for ZIP Keys function (needed for creating/managing zip files)
     uploadsBucket.grantReadWrite(zipKeysFunction);
-    // Note: This function is invoked via API Gateway POST /zip endpoint (defined in GraphQLApiStack)
+    // Note: This function is invoked via API Gateway POST /zip endpoint (defined in SharedApiGateway)
     // It requires S3 access to create and manage zip files, but NOT S3 event triggers
 
     // Audit Files function using CDK NodejsFunction for S3 integration

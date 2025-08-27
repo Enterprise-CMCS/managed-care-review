@@ -4,6 +4,7 @@
  */
 
 import { Environment } from 'aws-cdk-lib';
+import * as iam from 'aws-cdk-lib/aws-iam';
 
 // Stage configuration
 export const config = {
@@ -185,6 +186,36 @@ export const getOtelEnvironment = (stage: string): Record<string, string> => ({
   VITE_APP_OTEL_COLLECTOR_URL: process.env.VITE_APP_OTEL_COLLECTOR_URL || '',
   NR_LICENSE_KEY: process.env.NR_LICENSE_KEY || ''
 });
+
+// DRY IAM Policy Helpers (exact serverless parity)
+export const attachS3PathAccess = (role: iam.Role, uploadsArn: string, qaArn: string): void => {
+  // S3 object permissions (allusers and zips paths)
+  role.addToPolicy(new iam.PolicyStatement({
+    effect: iam.Effect.ALLOW,
+    actions: ['s3:GetObject', 's3:PutObject', 's3:DeleteObject'],
+    resources: [
+      `${uploadsArn}/allusers/*`,
+      `${uploadsArn}/zips/*`, 
+      `${qaArn}/allusers/*`,
+      `${qaArn}/zips/*`
+    ]
+  }));
+  
+  // S3 bucket list permissions
+  role.addToPolicy(new iam.PolicyStatement({
+    effect: iam.Effect.ALLOW,
+    actions: ['s3:ListBucket'],
+    resources: [uploadsArn, qaArn]
+  }));
+};
+
+export const attachSsmRead = (role: iam.Role): void => {
+  role.addToPolicy(new iam.PolicyStatement({
+    effect: iam.Effect.ALLOW,
+    actions: ['ssm:GetParameter', 'ssm:GetParameters'],
+    resources: ['arn:aws:ssm:*:*:parameter/configuration/*']
+  }));
+};
 
 // Cognito callback URLs
 export const getCallbackUrls = (stage: string, applicationEndpoint?: string): string[] => {
