@@ -35,6 +35,7 @@ $mcr-single-page-width: 40rem; // based on figma - however, 40rem is also media 
     width: $mcr-container-standard-width-fixed;
 }
 
+// Ignoring lint issues for spinner-size, due to bug in stylelint https://github.com/stylelint/stylelint/issues/8727
 @mixin form-fields {
     > [class^='usa-fieldset'] {
         padding: uswds.units(4);
@@ -50,6 +51,7 @@ $mcr-single-page-width: 40rem; // based on figma - however, 40rem is also media 
         font-weight: bold;
     }
 
+    // stylelint-disable-next-line nesting-selector-no-missing-scoping-root
     &[class^='usa-form'] {
         min-width: 100%;
         max-width: 100%;
