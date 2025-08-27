@@ -260,8 +260,10 @@ export class AuthStack extends Stack {
       description: 'AWS region for cf: lookups'
     });
 
+    // Get actual domain from CognitoAuth construct
+    const domain = this.userPool.node.tryFindChild('Domain') as cognito.UserPoolDomain | undefined;
     new CfnOutput(this, 'UserPoolClientDomain', {
-      value: `${this.stage}-login-${this.userPoolClient.userPoolClientId}.auth.${this.region}.amazoncognito.com`,
+      value: domain ? `${domain.domainName}.auth.${this.region}.amazoncognito.com` : '',
       exportName: `ui-auth-${this.stage}-UserPoolClientDomain`,
       description: 'Cognito User Pool Domain for cf: lookups'
     });

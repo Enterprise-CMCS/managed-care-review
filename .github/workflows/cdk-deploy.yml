@@ -335,7 +335,7 @@ jobs:
         echo "🔍 Gathering outputs from elegant micro-stack architecture..."
         
         # NEW: Get API URLs from micro-stacks
-        GRAPHQL_API_URL=$(get_output "MCR-GraphQLApi-$STAGE-cdk" "GraphQLApiUrl")
+        GRAPHQL_API_URL=$(get_output "MCR-SharedApiGateway-$STAGE-cdk" "ApiGatewayRestApiUrl")
         OTEL_API_URL="${GRAPHQL_API_URL}otel"
         
         # NEW: Get auth from AuthExtensions stack (breaks circular dependency!)
@@ -470,7 +470,7 @@ jobs:
         echo "🔄 Exporting final outputs from elegant micro-stack architecture..."
         
         # NEW: Primary API URL from GraphQL micro-stack (replaces monolithic ApiCompute)
-        GRAPHQL_API_URL=$(get_output "MCR-GraphQLApi-$STAGE-cdk" "GraphQLApiUrl")
+        GRAPHQL_API_URL=$(get_output "MCR-SharedApiGateway-$STAGE-cdk" "ApiGatewayRestApiUrl")
         
         # Auth outputs - NEW: Identity Pool from AuthExtensions (breaks circular dependency)
         IDENTITY_POOL_ID=$(get_output "MCR-AuthExtensions-$STAGE-cdk" "IdentityPoolId")
@@ -485,8 +485,10 @@ jobs:
         # Frontend outputs
         APPLICATION_URL=$(get_output "MCR-Frontend-$STAGE-cdk" "ApplicationUrl")
         
-        # Storybook output from separate stack (serverless parity)
+        # Storybook outputs from separate stack (serverless parity)
         STORYBOOK_URL=$(get_output "MCR-Storybook-$STAGE-cdk" "StorybookUrl")
+        STORYBOOK_BUCKET=$(get_output "MCR-Storybook-$STAGE-cdk" "S3BucketName")
+        STORYBOOK_DISTRIBUTION_ID=$(get_output "MCR-Storybook-$STAGE-cdk" "CloudFrontDistributionId")
         
         # Export for downstream GitHub Actions jobs - UPDATED for micro-stack architecture
         echo "api-url=$GRAPHQL_API_URL" >> $GITHUB_OUTPUT                          # NEW: GraphQL micro-stack
@@ -499,6 +501,8 @@ jobs:
         echo "s3-qa-bucket=$QA_BUCKET" >> $GITHUB_OUTPUT
         echo "application-endpoint=$APPLICATION_URL" >> $GITHUB_OUTPUT
         echo "storybook-endpoint=$STORYBOOK_URL" >> $GITHUB_OUTPUT
+        echo "storybook-bucket=$STORYBOOK_BUCKET" >> $GITHUB_OUTPUT
+        echo "storybook-distribution-id=$STORYBOOK_DISTRIBUTION_ID" >> $GITHUB_OUTPUT
         
         echo "✅ Elegant micro-stack outputs exported successfully!"
         echo "📊 Final API endpoints:"
@@ -509,6 +513,21 @@ jobs:
         
         chmod +x export-final-outputs.sh
         ./export-final-outputs.sh ${{ env.STAGE }}
+
+    # 19.1 Upload Storybook artifacts and Invalidate distribution (serverless parity)
+    - name: Upload Storybook to S3 and Invalidate
+      if: steps.export-config.outputs.storybook-bucket != ''
+      run: |
+        SB_BUCKET="${{ steps.export-config.outputs.storybook-bucket }}"
+        SB_DIST_ID="${{ steps.export-config.outputs.storybook-distribution-id }}"
+        if [ -d services/app-web/storybook-static ]; then
+          echo "Syncing Storybook to s3://$SB_BUCKET/ ..."
+          aws s3 sync services/app-web/storybook-static "s3://$SB_BUCKET/" --delete
+          echo "Creating CloudFront invalidation for Storybook ..."
+          aws cloudfront create-invalidation --distribution-id "$SB_DIST_ID" --paths "/*"
+        else
+          echo "No storybook-static directory found; skipping upload"
+        fi
 
     # 20. Output deployment information
     - name: Output Deployment Summary
@@ -819,4 +838,3 @@ jobs:
         ./test-guardduty-ci.sh ${{ env.STAGE }}
         
         echo "✅ GuardDuty test complete"
-

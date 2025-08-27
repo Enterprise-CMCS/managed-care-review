@@ -9,6 +9,7 @@ import * as ec2 from 'aws-cdk-lib/aws-ec2';
 import * as ssm from 'aws-cdk-lib/aws-ssm';
 import * as path from 'path';
 import { getBundlingConfig } from '../../lambda-bundling';
+import { OtelLambda } from '../otel-lambda';
 import { 
   resourceName,
   getLambdaEnvironment,
@@ -84,30 +85,27 @@ export class GraphqlApiConstruct extends Construct {
     this.addPublicEndpoints(props.api);
   }
 
-  private createGraphQLLambda(): NodejsFunction {
-    return new NodejsFunction(this, 'GraphQLFunction', {
+  private createGraphQLLambda(): OtelLambda {
+    return new OtelLambda(this, 'GraphQLFunction', {
       functionName: resourceName('graphql-api', 'graphql', this.stage),
       entry: path.join(__dirname, '..', '..', '..', '..', 'app-api', 'src', 'handlers', 'apollo_gql.ts'),
       handler: 'gqlHandler',
-      runtime: lambda.Runtime.NODEJS_20_X,
-      architecture: lambda.Architecture.X86_64,
       timeout: Duration.seconds(30),
       memorySize: this.getMemorySize(),
       vpc: this.vpc,
       securityGroups: [this.lambdaSecurityGroup],
       environment: this.getGraphQLEnvironment(),
-      bundling: getBundlingConfig('apollo_gql', this.stage),
+      bundlingType: 'graphql',
+      stage: this.stage,
       role: this.createGraphQLRole()
     });
   }
 
-  private createCustomAuthorizer(): NodejsFunction {
-    return new NodejsFunction(this, 'CustomAuthorizer', {
+  private createCustomAuthorizer(): OtelLambda {
+    return new OtelLambda(this, 'CustomAuthorizer', {
       functionName: resourceName('graphql-api', 'authorizer', this.stage),
       entry: path.join(__dirname, '..', '..', '..', '..', 'app-api', 'src', 'handlers', 'third_party_API_authorizer.ts'),
       handler: 'main',
-      runtime: lambda.Runtime.NODEJS_20_X,
-      architecture: lambda.Architecture.X86_64,
       timeout: Duration.seconds(30),
       memorySize: 256,
       environment: {
@@ -116,10 +114,10 @@ export class GraphqlApiConstruct extends Construct {
         DATABASE_ENGINE: 'postgres',
         JWT_SECRET: `{{resolve:secretsmanager:${ssm.StringParameter.valueForStringParameter(this, `/mcr-cdk/${this.stage}/foundation/jwt-secret-arn`)}:SecretString:jwtsigningkey}}`,
         NR_LICENSE_KEY: ssm.StringParameter.valueForStringParameter(this, SSM_PATHS.NR_LICENSE_KEY),
-        DEPLOYMENT_TIMESTAMP: new Date().toISOString(),
-        ...getLambdaEnvironment(this.stage)
+        DEPLOYMENT_TIMESTAMP: new Date().toISOString()
       },
-      bundling: getBundlingConfig('third_party_API_authorizer', this.stage),
+      bundlingType: 'default',
+      stage: this.stage,
       role: this.createAuthorizerRole()
     });
   }

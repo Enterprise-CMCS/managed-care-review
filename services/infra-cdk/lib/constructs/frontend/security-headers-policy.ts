@@ -23,6 +23,12 @@ export interface SecurityHeadersPolicyProps {
    * @default DENY
    */
   frameOption?: cloudfront.HeadersFrameOption;
+  
+  /**
+   * Enable serverless parity mode (HSTS only)
+   * When true, only includes HSTS header to match serverless exactly
+   */
+  parityMode?: boolean;
 }
 
 /**
@@ -39,56 +45,72 @@ export class SecurityHeadersPolicy extends Construct {
       responseHeadersPolicyName: `mcr-cdk-${props.stage}-${props.websiteName}-security-headers`,
       comment: `Security headers for ${props.websiteName} in ${props.stage}`,
       securityHeadersBehavior: {
-        // X-Content-Type-Options
-        contentTypeOptions: { 
-          override: true 
-        },
-        
-        // X-Frame-Options
-        frameOptions: { 
-          frameOption: props.frameOption || cloudfront.HeadersFrameOption.DENY, 
-          override: true 
-        },
-        
-        // Referrer-Policy
-        referrerPolicy: { 
-          referrerPolicy: cloudfront.HeadersReferrerPolicy.SAME_ORIGIN, 
-          override: true 
-        },
-        
-        // Strict-Transport-Security (HSTS)
-        ...(props.enableHsts !== false && {
-          strictTransportSecurity: { 
-            accessControlMaxAge: Duration.seconds(63072000), // 2 years
-            includeSubdomains: true,
-            preload: true,
+        // In parity mode, only include HSTS (serverless has only HSTS)
+        ...(props.parityMode ? {
+          // Strict-Transport-Security (HSTS) - matches serverless exactly
+          ...(props.enableHsts !== false && {
+            strictTransportSecurity: { 
+              accessControlMaxAge: Duration.seconds(63072000), // 2 years
+              includeSubdomains: true,
+              preload: true,
+              override: true 
+            }
+          })
+        } : {
+          // Full security headers (CDK enhanced mode)
+          // X-Content-Type-Options
+          contentTypeOptions: { 
+            override: true 
+          },
+          
+          // X-Frame-Options
+          frameOptions: { 
+            frameOption: props.frameOption || cloudfront.HeadersFrameOption.DENY, 
+            override: true 
+          },
+          
+          // Referrer-Policy
+          referrerPolicy: { 
+            referrerPolicy: cloudfront.HeadersReferrerPolicy.SAME_ORIGIN, 
+            override: true 
+          },
+          
+          // Strict-Transport-Security (HSTS)
+          ...(props.enableHsts !== false && {
+            strictTransportSecurity: { 
+              accessControlMaxAge: Duration.seconds(63072000), // 2 years
+              includeSubdomains: true,
+              preload: true,
+              override: true 
+            }
+          }),
+          
+          // X-XSS-Protection
+          xssProtection: { 
+            protection: true, 
+            modeBlock: true, 
             override: true 
           }
-        }),
-        
-        // X-XSS-Protection
-        xssProtection: { 
-          protection: true, 
-          modeBlock: true, 
-          override: true 
-        }
+        })
       },
       
-      // Custom headers to match serverless exactly
-      customHeadersBehavior: {
-        customHeaders: [
-          {
-            header: 'Permissions-Policy',
-            value: 'geolocation=(), microphone=(), camera=()',
-            override: true
-          },
-          {
-            header: 'X-Permitted-Cross-Domain-Policies',
-            value: 'none',
-            override: true
-          }
-        ]
-      }
+      // Custom headers only in enhanced mode (not serverless parity)
+      ...(!props.parityMode && {
+        customHeadersBehavior: {
+          customHeaders: [
+            {
+              header: 'Permissions-Policy',
+              value: 'geolocation=(), microphone=(), camera=()',
+              override: true
+            },
+            {
+              header: 'X-Permitted-Cross-Domain-Policies',
+              value: 'none',
+              override: true
+            }
+          ]
+        }
+      })
     });
   }
 }

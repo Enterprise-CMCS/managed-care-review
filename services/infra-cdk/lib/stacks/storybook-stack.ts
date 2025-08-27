@@ -120,9 +120,10 @@ export class StorybookStack extends Stack {
         }
       ],
       webAclId: webAcl.attrArn,
-      logBucket: this.bucket,
-      logFilePrefix: `${props.stage}-storybook-cloudfront-logs/`,
-      minimumProtocolVersion: cloudfront.SecurityPolicyProtocol.TLS_V1, // Matches serverless exactly
+      enableLogging: false, // Serverless parity - no CloudFront logging  
+      minimumProtocolVersion: props.stage === 'prod' 
+        ? cloudfront.SecurityPolicyProtocol.TLS_V1_2_2021 
+        : cloudfront.SecurityPolicyProtocol.TLS_V1, // Secure TLS for prod
       domainNames: props.storybookDomainName ? [props.storybookDomainName] : undefined,
       certificate: props.storybookCertificateArn ? 
         acm.Certificate.fromCertificateArn(this, 'Certificate', props.storybookCertificateArn) : 

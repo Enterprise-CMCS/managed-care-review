@@ -59,6 +59,12 @@ export interface StaticWebsiteProps {
    * Error response code (200 for SPA, 403 for static)
    */
   errorResponseCode: number;
+  
+  /**
+   * Enable extra cache behaviors for static assets
+   * When false, only uses default behavior (serverless parity)
+   */
+  enableExtraCacheBehaviors?: boolean;
 }
 
 /**
@@ -141,37 +147,39 @@ export class StaticWebsite extends Construct {
         edgeLambdas: this.buildEdgeLambdas(props.edgeLambdas),
       },
 
-      // Additional cache behaviors for static assets
-      additionalBehaviors: {
-        '/_next/static/*': {
-          origin: cloudfrontOrigins.S3BucketOrigin.withOriginAccessIdentity(this.bucket, {
-            originAccessIdentity: this.oai,
-          }),
-          compress: true,
-          viewerProtocolPolicy: cloudfront.ViewerProtocolPolicy.REDIRECT_TO_HTTPS,
-          allowedMethods: cloudfront.AllowedMethods.ALLOW_GET_HEAD,
-          cachedMethods: cloudfront.CachedMethods.CACHE_GET_HEAD,
-          cachePolicy: cloudfront.CachePolicy.CACHING_OPTIMIZED,
-          responseHeadersPolicy: props.responseHeadersPolicy,
-        },
-        '/static/*': {
-          origin: cloudfrontOrigins.S3BucketOrigin.withOriginAccessIdentity(this.bucket, {
-            originAccessIdentity: this.oai,
-          }),
-          compress: true,
-          viewerProtocolPolicy: cloudfront.ViewerProtocolPolicy.REDIRECT_TO_HTTPS,
-          allowedMethods: cloudfront.AllowedMethods.ALLOW_GET_HEAD,
-          cachedMethods: cloudfront.CachedMethods.CACHE_GET_HEAD,
-          cachePolicy: new cloudfront.CachePolicy(this, 'StaticCachePolicy', {
-            cachePolicyName: `${props.websiteName}-${props.stage}-static-cache-policy`,
-            defaultTtl: Duration.hours(1),
-            minTtl: Duration.seconds(0),
-            maxTtl: Duration.hours(24),
-            queryStringBehavior: cloudfront.CacheQueryStringBehavior.all(),
-          }),
-          responseHeadersPolicy: props.responseHeadersPolicy,
-        },
-      },
+      // Additional cache behaviors for static assets (optional for serverless parity)
+      ...(props.enableExtraCacheBehaviors && {
+        additionalBehaviors: {
+          '/_next/static/*': {
+            origin: cloudfrontOrigins.S3BucketOrigin.withOriginAccessIdentity(this.bucket, {
+              originAccessIdentity: this.oai,
+            }),
+            compress: true,
+            viewerProtocolPolicy: cloudfront.ViewerProtocolPolicy.REDIRECT_TO_HTTPS,
+            allowedMethods: cloudfront.AllowedMethods.ALLOW_GET_HEAD,
+            cachedMethods: cloudfront.CachedMethods.CACHE_GET_HEAD,
+            cachePolicy: cloudfront.CachePolicy.CACHING_OPTIMIZED,
+            responseHeadersPolicy: props.responseHeadersPolicy,
+          },
+          '/static/*': {
+            origin: cloudfrontOrigins.S3BucketOrigin.withOriginAccessIdentity(this.bucket, {
+              originAccessIdentity: this.oai,
+            }),
+            compress: true,
+            viewerProtocolPolicy: cloudfront.ViewerProtocolPolicy.REDIRECT_TO_HTTPS,
+            allowedMethods: cloudfront.AllowedMethods.ALLOW_GET_HEAD,
+            cachedMethods: cloudfront.CachedMethods.CACHE_GET_HEAD,
+            cachePolicy: new cloudfront.CachePolicy(this, 'StaticCachePolicy', {
+              cachePolicyName: `${props.websiteName}-${props.stage}-static-cache-policy`,
+              defaultTtl: Duration.hours(1),
+              minTtl: Duration.seconds(0),
+              maxTtl: Duration.hours(24),
+              queryStringBehavior: cloudfront.CacheQueryStringBehavior.all(),
+            }),
+            responseHeadersPolicy: props.responseHeadersPolicy,
+          },
+        }
+      }),
 
       errorResponses: [
         {
@@ -193,11 +201,12 @@ export class StaticWebsite extends Construct {
       certificate: props.customDomain
         ? acm.Certificate.fromCertificateArn(this, 'Certificate', props.customDomain.certificateArn)
         : undefined,
+      minimumProtocolVersion: props.customDomain?.minimumProtocolVersion 
+        ? cloudfront.SecurityPolicyProtocol[props.customDomain.minimumProtocolVersion as keyof typeof cloudfront.SecurityPolicyProtocol]
+        : undefined,
 
-      // Logging configuration (always enabled to match serverless)
-      enableLogging: true,
-      logBucket: this.bucket,
-      logFilePrefix: `${props.stage}-${props.websiteName}-cdk-cloudfront-logs/`,
+      // Logging configuration (disabled for serverless parity)
+      enableLogging: false,
     };
 
     this.distribution = new cloudfront.Distribution(this, 'Distribution', distributionProps);

@@ -188,7 +188,7 @@ export class AuthExtensionsStack extends Stack {
       // Add shared access paths
       s3WriteResources.push(`arn:aws:s3:::${bucketName}/allusers/*`);
       // Add user-specific access paths
-      s3WriteResources.push(`arn:aws:s3:::${bucketName}/private/\${cognito-identity.amazonaws.com:sub}/*`);
+      s3WriteResources.push(`arn:aws:s3:::${bucketName}/private/$\{cognito-identity.amazonaws.com:sub}/*`);
     });
 
     this.authenticatedRole.addToPolicy(new iam.PolicyStatement({

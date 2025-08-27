@@ -76,7 +76,8 @@ export class FrontendStack extends Stack {
     const mainAppHeadersPolicy = new SecurityHeadersPolicy(this, 'MainAppHeaders', {
       stage: this.stage,
       websiteName: SERVICES.UI,
-      enableHsts: this.enableHsts
+      enableHsts: this.enableHsts,
+      parityMode: true
     });
     
     // Create Basic Auth Lambda@Edge for non-prod environments
@@ -97,7 +98,8 @@ export class FrontendStack extends Stack {
       webAcl: waf.webAcl,
       customDomain: this.appDomainName && this.appCertificateArn ? {
         domainName: this.appDomainName,
-        certificateArn: this.appCertificateArn
+        certificateArn: this.appCertificateArn,
+        minimumProtocolVersion: 'TLSv1_2_2021'
       } : undefined,
       responseHeadersPolicy: mainAppHeadersPolicy.policy,
       edgeLambdas: basicAuthFunction ? {
@@ -108,7 +110,7 @@ export class FrontendStack extends Stack {
     
     this.mainAppUrl = this.mainApp.distributionUrl;
     
-    // Add app-web integration if enabled
+    // Add app-web integration if enabled (UI only - Storybook handled by app-web s3-sync)
     if (this.enableAppWebIntegration) {
       new AppWebIntegration(this, 'AppWebIntegration', {
         mainAppBucket: this.mainApp.bucket,
@@ -116,7 +118,7 @@ export class FrontendStack extends Stack {
         stage: this.stage,
         appWebPath: '../app-web',
         enableImmutableAssets: true,
-        enableUnifiedStorybookDeployment: false  // Separate Storybook stack for serverless parity
+        enableUnifiedStorybookDeployment: false  // app-web deploys to separate storybook via cf: lookups
       });
     }
     

@@ -311,10 +311,11 @@ export class CognitoAuth extends Construct {
     bucketNames.forEach(bucketName => {
       // Add /allusers/* path for shared access
       s3Resources.push(`arn:aws:s3:::${bucketName}/allusers/*`);
-      
+
       // Add /private/${cognito-identity.amazonaws.com:sub}/* for user-specific access
-      // Note: Using Fn::Join to properly interpolate the cognito sub
-      s3Resources.push(`arn:aws:s3:::${bucketName}/private/\${cognito-identity.amazonaws.com:sub}/*`);
+      // Important: render the IAM variable literally so it is expanded by IAM at runtime
+      // Use string concatenation to avoid TypeScript template interpolation
+      s3Resources.push('arn:aws:s3:::' + bucketName + '/private/${cognito-identity.amazonaws.com:sub}/*');
     });
 
     // Grant S3 permissions matching serverless configuration
