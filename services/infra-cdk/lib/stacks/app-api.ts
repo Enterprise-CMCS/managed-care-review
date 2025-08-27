@@ -20,7 +20,12 @@ import {
 } from 'aws-cdk-lib/aws-iam'
 import { CfnOutput, Duration, Fn } from 'aws-cdk-lib'
 import { ResourceNames } from '../config'
-import { Architecture, Runtime, LayerVersion } from 'aws-cdk-lib/aws-lambda'
+import {
+    Architecture,
+    Runtime,
+    LayerVersion,
+    Code,
+} from 'aws-cdk-lib/aws-lambda'
 import { CfnWebACL, CfnWebACLAssociation } from 'aws-cdk-lib/aws-wafv2'
 import { SubnetType, SecurityGroup, Vpc } from 'aws-cdk-lib/aws-ec2'
 import { Rule, Schedule } from 'aws-cdk-lib/aws-events'
@@ -215,19 +220,23 @@ export class AppApiStack extends BaseStack {
             sgId
         )
 
-        // Import lambda layers using CloudFormation exports (matches other stack patterns)
-        const lambdaLayersStackName = ResourceNames.stackName(
-            'lambda-layers',
-            this.stage
-        )
-        const prismaMigrationLayerArn = Fn.importValue(
-            `${lambdaLayersStackName}-PrismaMigrationLayerArn`
-        )
-
-        const prismaMigrationLayer = LayerVersion.fromLayerVersionArn(
+        const prismaMigrationLayer = new LayerVersion(
             this,
             'PrismaMigrationLayer',
-            prismaMigrationLayerArn
+            {
+                layerVersionName: `${ResourceNames.apiName('app-api', this.stage)}-prisma-migration`,
+                description: 'Prisma migration layer for app-api',
+                compatibleRuntimes: [Runtime.NODEJS_20_X],
+                compatibleArchitectures: [Architecture.X86_64],
+                code: Code.fromAsset(
+                    path.join(
+                        __dirname,
+                        '..',
+                        '..',
+                        'lambda-layers-prisma-client-migration'
+                    )
+                ),
+            }
         )
 
         // Use centralized OTEL layer ARN constant
@@ -312,20 +321,20 @@ export class AppApiStack extends BaseStack {
             sgId
         )
 
-        // Import Prisma Engine layer using CloudFormation exports (matches migrate function pattern)
-        const lambdaLayersStackName = ResourceNames.stackName(
-            'lambda-layers',
-            this.stage
-        )
-        const prismaEngineLayerArn = Fn.importValue(
-            `${lambdaLayersStackName}-PrismaEngineLayerArn`
-        )
-
-        const prismaEngineLayer = LayerVersion.fromLayerVersionArn(
-            this,
-            'GraphqlPrismaEngineLayer',
-            prismaEngineLayerArn
-        )
+        const prismaEngineLayer = new LayerVersion(this, 'PrismaEngineLayer', {
+            layerVersionName: `${ResourceNames.apiName('app-api', this.stage)}-prisma-engine`,
+            description: 'Prisma engine layer for app-api',
+            compatibleRuntimes: [Runtime.NODEJS_20_X],
+            compatibleArchitectures: [Architecture.X86_64],
+            code: Code.fromAsset(
+                path.join(
+                    __dirname,
+                    '..',
+                    '..',
+                    'lambda-layers-prisma-client-engine'
+                )
+            ),
+        })
 
         // Use centralized OTEL layer ARN constant
         const otelLayer = LayerVersion.fromLayerVersionArn(
