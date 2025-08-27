@@ -371,7 +371,13 @@ export class AppApiStack extends BaseStack {
                         inputDir: string,
                         outputDir: string
                     ): string[] {
-                        return []
+                        return [
+                            // Debug: show what's in the inputDir and find our files
+                            `echo "CDK inputDir: ${inputDir}"`,
+                            `ls -la ${inputDir} || true`,
+                            `find ${inputDir} -name "collector.yml" 2>/dev/null || true`,
+                            `find ${inputDir} -name "etaTemplates" -type d 2>/dev/null || true`,
+                        ]
                     },
                     beforeInstall(): string[] {
                         return []
@@ -380,12 +386,17 @@ export class AppApiStack extends BaseStack {
                         inputDir: string,
                         outputDir: string
                     ): string[] {
+                        // Use absolute path to the app-api directory since CDK bundling
+                        // runs from the cdk directory, not app-api directory
+                        const repoRoot =
+                            '/home/runner/work/managed-care-review/managed-care-review'
+                        const appApiPath = `${repoRoot}/services/app-api`
                         return [
                             // Copy collector.yml for OTEL configuration
-                            `cp ${inputDir}/collector.yml ${outputDir}/collector.yml || true`,
+                            `cp ${appApiPath}/collector.yml ${outputDir}/collector.yml || echo "collector.yml not found at ${appApiPath}/collector.yml"`,
                             // Copy eta templates for email functionality
                             `mkdir -p ${outputDir}/src/handlers/etaTemplates || true`,
-                            `cp -r ${inputDir}/src/emailer/etaTemplates/* ${outputDir}/src/handlers/etaTemplates/ || true`,
+                            `cp -r ${appApiPath}/src/emailer/etaTemplates/* ${outputDir}/src/handlers/etaTemplates/ || echo "etaTemplates not found at ${appApiPath}/src/emailer/etaTemplates/"`,
                         ]
                     },
                 },
