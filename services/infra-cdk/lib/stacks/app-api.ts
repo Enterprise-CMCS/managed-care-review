@@ -360,6 +360,40 @@ export class AppApiStack extends BaseStack {
                 subnetType: SubnetType.PRIVATE_WITH_EGRESS,
             },
             securityGroups: [lambdaSecurityGroup],
+            // Custom bundling to handle .graphql files and other assets
+            bundling: {
+                minify: false,
+                sourceMap: true,
+                target: 'node20',
+                externalModules: ['prisma', '@prisma/client'],
+                commandHooks: {
+                    beforeBundling(
+                        inputDir: string,
+                        outputDir: string
+                    ): string[] {
+                        return []
+                    },
+                    beforeInstall(): string[] {
+                        return []
+                    },
+                    afterBundling(
+                        inputDir: string,
+                        outputDir: string
+                    ): string[] {
+                        return [
+                            // Copy collector.yml for OTEL configuration
+                            `cp ${inputDir}/collector.yml ${outputDir}/collector.yml || true`,
+                            // Copy eta templates for email functionality
+                            `mkdir -p ${outputDir}/src/handlers/etaTemplates || true`,
+                            `cp -r ${inputDir}/src/emailer/etaTemplates/* ${outputDir}/src/handlers/etaTemplates/ || true`,
+                        ]
+                    },
+                },
+                esbuildArgs: {
+                    '--loader:.graphql': 'text',
+                    '--loader:.gql': 'text',
+                },
+            },
         })
 
         return graphqlFunction
