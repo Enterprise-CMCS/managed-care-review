@@ -349,8 +349,8 @@ jobs:
         DOCUMENTS_BUCKET=$(get_output "MCR-Data-$STAGE-cdk" "DocumentUploadsBucketName")
         QA_BUCKET=$(get_output "MCR-Data-$STAGE-cdk" "QAUploadsBucketName")
         
-        # Construct user pool domain (matching serverless pattern)
-        USER_POOL_DOMAIN="${STAGE}-login-${USER_POOL_CLIENT_ID}.auth.${AWS_REGION}.amazoncognito.com"
+        # Get Hosted UI domain from Auth stack output (accurate domain)
+        USER_POOL_DOMAIN=$(get_output "MCR-Auth-$STAGE-cdk" "UserPoolClientDomain")
         
         # Output for GitHub Actions - NEW micro-stack architecture
         echo "api-url=$GRAPHQL_API_URL" >> $GITHUB_OUTPUT              # Main API (GraphQL)
@@ -476,7 +476,7 @@ jobs:
         IDENTITY_POOL_ID=$(get_output "MCR-AuthExtensions-$STAGE-cdk" "IdentityPoolId")
         USER_POOL_ID=$(get_output "MCR-Auth-$STAGE-cdk" "UserPoolId")
         USER_POOL_CLIENT_ID=$(get_output "MCR-Auth-$STAGE-cdk" "UserPoolClientId")
-        USER_POOL_DOMAIN="${STAGE}-login-${USER_POOL_CLIENT_ID}.auth.${AWS_REGION}.amazoncognito.com"
+        USER_POOL_DOMAIN=$(get_output "MCR-Auth-$STAGE-cdk" "UserPoolClientDomain")
         
         # Data outputs (unchanged)
         DOCUMENTS_BUCKET=$(get_output "MCR-Data-$STAGE-cdk" "DocumentUploadsBucketName")
