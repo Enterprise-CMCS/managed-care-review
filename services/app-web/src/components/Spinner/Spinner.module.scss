@@ -68,7 +68,7 @@ $animation-speed-4: 0.8s * $speed-base !default;
     $padding: math.div($outer-size - $inner-size, 2);
 
     // Ignoring lint issues for spinner-size, due to bug in stylelint https://github.com/stylelint/stylelint/issues/8727
-    // stylelint-disable-next-line nesting-selector-no-missing-scoping-root
+    /* stylelint-disable nesting-selector-no-missing-scoping-root */
     &::before,
     &::after {
         border-width: (math.div($inner-size, 8));
