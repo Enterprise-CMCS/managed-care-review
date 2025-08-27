@@ -8,6 +8,8 @@ import {
     RestApi,
     type IRestApi,
     LambdaIntegration,
+    RequestAuthorizer,
+    AuthorizationType,
 } from 'aws-cdk-lib/aws-apigateway'
 import {
     PolicyStatement,
@@ -39,8 +41,7 @@ export class AppApiStack extends BaseStack {
     public readonly cleanupFunction: NodejsFunction
     public readonly migrateFunction: NodejsFunction
 
-    // TODO: Add remaining lambdas
-    // public readonly graphqlFunction: NodejsFunction
+    public readonly graphqlFunction: NodejsFunction
 
     constructor(scope: Construct, id: string, props: BaseStackProps) {
         super(scope, id, {
@@ -143,8 +144,11 @@ export class AppApiStack extends BaseStack {
             environment
         )
 
-        // TODO: Add remaining complex functions later (with VPC, layers, etc.)
-        // this.graphqlFunction = this.createFunction('graphql', 'apollo_gql', 'gqlHandler', {...})
+        // Create GraphQL function with VPC and layers
+        this.graphqlFunction = this.createGraphqlFunction(
+            lambdaRole,
+            environment
+        )
 
         // Create API Gateway resources and methods first
         this.setupApiGatewayRoutes(apiGateway)
@@ -279,6 +283,86 @@ export class AppApiStack extends BaseStack {
         )
 
         return migrateFunction
+    }
+
+    /**
+     * Create the GraphQL function with VPC, layers, and extended timeout
+     */
+    private createGraphqlFunction(
+        role: Role,
+        environment: Record<string, string>
+    ): NodejsFunction {
+        // Import VPC and security group (same as migrate function)
+        const vpcId = process.env.VPC_ID
+        const sgId = process.env.SG_ID
+
+        if (!vpcId || !sgId) {
+            throw new Error(
+                'Missing required environment variables: VPC_ID, SG_ID for GraphQL function'
+            )
+        }
+
+        const vpc = Vpc.fromLookup(this, 'GraphqlVpc', {
+            vpcId,
+        })
+
+        const lambdaSecurityGroup = SecurityGroup.fromSecurityGroupId(
+            this,
+            'GraphqlSecurityGroup',
+            sgId
+        )
+
+        // Import Prisma Engine layer using CloudFormation exports (matches migrate function pattern)
+        const lambdaLayersStackName = ResourceNames.stackName(
+            'lambda-layers',
+            this.stage
+        )
+        const prismaEngineLayerArn = Fn.importValue(
+            `${lambdaLayersStackName}-PrismaEngineLayerArn`
+        )
+
+        const prismaEngineLayer = LayerVersion.fromLayerVersionArn(
+            this,
+            'GraphqlPrismaEngineLayer',
+            prismaEngineLayerArn
+        )
+
+        // Use centralized OTEL layer ARN constant
+        const otelLayer = LayerVersion.fromLayerVersionArn(
+            this,
+            'GraphqlOtelLayer',
+            AWS_OTEL_LAYER_ARN
+        )
+
+        // Create GraphQL function with all required configuration
+        const graphqlFunction = new NodejsFunction(this, 'graphqlFunction', {
+            functionName: `${ResourceNames.apiName('app-api', this.stage)}-graphql`,
+            runtime: Runtime.NODEJS_20_X,
+            architecture: Architecture.X86_64,
+            handler: 'gqlHandler',
+            entry: path.join(
+                __dirname,
+                '..',
+                '..',
+                '..',
+                'app-api',
+                'src',
+                'handlers',
+                'apollo_gql.ts'
+            ),
+            timeout: Duration.seconds(30), // Extended timeout for GraphQL operations
+            memorySize: 1024,
+            environment,
+            role,
+            layers: [prismaEngineLayer, otelLayer],
+            vpc,
+            vpcSubnets: {
+                subnetType: SubnetType.PRIVATE_WITH_EGRESS,
+            },
+            securityGroups: [lambdaSecurityGroup],
+        })
+
+        return graphqlFunction
     }
 
     private createLambdaRole(): Role {
@@ -468,23 +552,55 @@ export class AppApiStack extends BaseStack {
             new LambdaIntegration(this.oauthTokenFunction)
         )
 
-        // TODO: Add remaining complex routes later when functions are enabled
-
-        // GraphQL endpoints
-        // const graphqlResource = apiGateway.root.addResource('graphql')
-        // graphqlResource.addMethod('POST', new LambdaIntegration(this.graphqlFunction), {...})
-        // graphqlResource.addMethod('GET', new LambdaIntegration(this.graphqlFunction), {...})
+        // GraphQL endpoints with IAM authorization
+        const graphqlResource = apiGateway.root.addResource('graphql')
+        graphqlResource.addMethod(
+            'POST',
+            new LambdaIntegration(this.graphqlFunction),
+            {
+                authorizationType: AuthorizationType.IAM,
+                methodResponses: [{ statusCode: '200' }],
+            }
+        )
+        graphqlResource.addMethod(
+            'GET',
+            new LambdaIntegration(this.graphqlFunction),
+            {
+                authorizationType: AuthorizationType.IAM,
+                methodResponses: [{ statusCode: '200' }],
+            }
+        )
 
         // External GraphQL with custom authorizer
-        // const customAuthorizer = new RequestAuthorizer(this, 'ThirdPartyApiAuthorizer', {
-        //     handler: this.thirdPartyApiAuthorizerFunction,
-        //     identitySources: ['method.request.header.Authorization'],
-        // })
-        // const v1Resource = apiGateway.root.addResource('v1')
-        // const v1GraphqlResource = v1Resource.addResource('graphql')
-        // const externalResource = v1GraphqlResource.addResource('external')
-        // externalResource.addMethod('POST', new LambdaIntegration(this.graphqlFunction), { authorizer: customAuthorizer })
-        // externalResource.addMethod('GET', new LambdaIntegration(this.graphqlFunction), { authorizer: customAuthorizer })
+        const customAuthorizer = new RequestAuthorizer(
+            this,
+            'ThirdPartyApiAuthorizer',
+            {
+                handler: this.thirdPartyApiAuthorizerFunction,
+                identitySources: ['method.request.header.Authorization'],
+                authorizerName: `${ResourceNames.apiName('app-api', this.stage)}-third-party-authorizer`,
+            }
+        )
+
+        const v1Resource = apiGateway.root.addResource('v1')
+        const v1GraphqlResource = v1Resource.addResource('graphql')
+        const externalResource = v1GraphqlResource.addResource('external')
+        externalResource.addMethod(
+            'POST',
+            new LambdaIntegration(this.graphqlFunction),
+            {
+                authorizer: customAuthorizer,
+                methodResponses: [{ statusCode: '200' }],
+            }
+        )
+        externalResource.addMethod(
+            'GET',
+            new LambdaIntegration(this.graphqlFunction),
+            {
+                authorizer: customAuthorizer,
+                methodResponses: [{ statusCode: '200' }],
+            }
+        )
 
         // Deployment and stage are automatically handled by RestApi construct
     }
@@ -600,11 +716,10 @@ export class AppApiStack extends BaseStack {
             description: 'Database migrate Lambda function name',
         })
 
-        // TODO: Add remaining function outputs when enabled
-        // new CfnOutput(this, 'GraphqlFunctionName', {
-        //     value: this.graphqlFunction.functionName,
-        //     exportName: this.exportName('GraphqlFunctionName'),
-        //     description: 'GraphQL Lambda function name',
-        // })
+        new CfnOutput(this, 'GraphqlFunctionName', {
+            value: this.graphqlFunction.functionName,
+            exportName: this.exportName('GraphqlFunctionName'),
+            description: 'GraphQL Lambda function name',
+        })
     }
 }
