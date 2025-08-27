@@ -149,13 +149,13 @@ export const UploadedDocumentsTable = ({
         return (
             <div className={supportingDocsTopMarginStyles}>
                 <div className={styles.captionContainer}>{tableCaptionJSX}</div>
-                <p
+                <div
                     className={`${borderTopGradientStyles} ${styles.supportingDocsEmpty}`}
                 >
                     {isSupportingDocuments
                         ? 'No supporting documents'
                         : 'No documents'}
-                </p>
+                </div>
             </div>
         )
     }

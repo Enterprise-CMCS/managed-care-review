@@ -376,6 +376,7 @@ export const SingleRateSummarySection = ({
                     packagesWithSharedRateCerts={appendDraftToSharedPackages}
                     previousSubmissionDate={lastSubmittedDate}
                     caption="Rate supporting documents"
+                    isSupportingDocuments
                     hideDynamicFeedback={!isSubmittedOrCMSUser}
                 />
             </SectionCard>
