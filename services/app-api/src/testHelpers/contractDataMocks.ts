@@ -72,6 +72,7 @@ const mockContractRevision = (
                 stateCode: stateCode,
             },
         },
+        dsnpContract: null,
         unlockInfo: null,
         contractID: 'contractID',
         submitInfoID: null,

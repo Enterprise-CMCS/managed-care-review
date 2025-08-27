@@ -1,10 +1,11 @@
-import { ApolloServer } from 'apollo-server-lambda'
+import { ApolloServer } from '@apollo/server'
 import { gql } from '@apollo/client'
 import { GraphQLError } from 'graphql'
+import { executeGraphQLOperation } from '../../testHelpers/gqlHelpers'
 
-describe('Apollo Server v3 Status Code Behavior', () => {
+describe('Apollo Server v4 Status Code Behavior', () => {
     describe('Variable validation errors', () => {
-        it('Apollo Server v3 returns BAD_USER_INPUT for invalid variable types', async () => {
+        it('Apollo Server v4 returns BAD_USER_INPUT for invalid variable types', async () => {
             // Simple test schema that doesn't require database
             const typeDefs = gql`
                 type Query {
@@ -23,9 +24,10 @@ describe('Apollo Server v3 Status Code Behavior', () => {
                 typeDefs,
                 resolvers,
             })
+            await server.start()
 
             // Test invalid variable type (number instead of string)
-            const result = await server.executeOperation({
+            const result = await executeGraphQLOperation(server, {
                 query: gql`
                     query HelloQuery($name: String!) {
                         hello(name: $name)
@@ -36,15 +38,19 @@ describe('Apollo Server v3 Status Code Behavior', () => {
                 },
             })
 
-            // Apollo Server v3 behavior: returns BAD_USER_INPUT for variable validation errors
+            // Apollo Server v4 behavior: returns validation errors
+            if (!result.errors) {
+                throw new Error(`Result: ${JSON.stringify(result, null, 2)}`)
+            }
             expect(result.errors).toBeDefined()
             expect(result.errors?.[0]?.message).toContain(
                 'Variable "$name" got invalid value 123'
             )
+            // Apollo Server v4 validation errors include BAD_USER_INPUT code
             expect(result.errors?.[0]?.extensions?.code).toBe('BAD_USER_INPUT')
         })
 
-        it('Apollo Server v3 returns BAD_USER_INPUT for missing required variables', async () => {
+        it('Apollo Server v4 returns BAD_USER_INPUT for missing required variables', async () => {
             const typeDefs = gql`
                 type Query {
                     hello(name: String!): String
@@ -62,9 +68,10 @@ describe('Apollo Server v3 Status Code Behavior', () => {
                 typeDefs,
                 resolvers,
             })
+            await server.start()
 
             // Test missing required variable
-            const result = await server.executeOperation({
+            const result = await executeGraphQLOperation(server, {
                 query: gql`
                     query HelloQuery($name: String!) {
                         hello(name: $name)
@@ -97,8 +104,9 @@ describe('Apollo Server v3 Status Code Behavior', () => {
                 typeDefs,
                 resolvers,
             })
+            await server.start()
 
-            const result = await server.executeOperation({
+            const result = await executeGraphQLOperation(server, {
                 query: gql`
                     query Test($input: String!) {
                         test(input: $input)
@@ -109,9 +117,9 @@ describe('Apollo Server v3 Status Code Behavior', () => {
                 },
             })
 
-            // Apollo Server v3 vs v4 Behavior
-            // Apollo Server v3 (current): Returns BAD_USER_INPUT with 400 status
-            // Apollo Server v4 would: Return BAD_USER_INPUT with 200 status (needs workaround)
+            // Apollo Server v4 Behavior
+            // Apollo Server v4: Returns BAD_USER_INPUT with 200 HTTP status
+            // Errors are included in the GraphQL response body
             expect(result.errors?.[0]?.extensions?.code).toBe('BAD_USER_INPUT')
         })
     })
@@ -141,8 +149,9 @@ describe('Apollo Server v3 Status Code Behavior', () => {
                 typeDefs,
                 resolvers,
             })
+            await server.start()
 
-            const result = await server.executeOperation({
+            const result = await executeGraphQLOperation(server, {
                 query: gql`
                     query ValidateAge($age: Int!) {
                         validateAge(age: $age)
@@ -162,17 +171,17 @@ describe('Apollo Server v3 Status Code Behavior', () => {
     describe('HTTP status code implications', () => {
         it('Documents expected HTTP status behavior', () => {
             // HTTP Status Code Behavior
-            // Apollo Server v3 (current implementation):
-            // - Variable validation errors → 400 Bad Request
+            // Apollo Server v4 (current implementation):
+            // - Variable validation errors → 200 OK (with errors in response)
             // - GraphQL execution errors → 200 OK (with errors in response)
             // - Network/parsing errors → 400 Bad Request
             //
-            // Apollo Server v4 changes:
-            // - Variable validation errors → 200 OK (with errors in response)
-            // - Requires explicit error formatting for proper status codes
+            // Apollo Server v4 behavior:
+            // - All GraphQL errors return 200 OK
+            // - Errors are included in the response body
             //
             // Current project status:
-            // - Using Apollo Server v3 (apollo-server-lambda ^3.5.0)
+            // - Using Apollo Server v4 (@apollo/server ^4.11.0)
             // - Variable validation should return 400 status codes
             // - Custom error handling uses GraphQLError with extensions.code
 

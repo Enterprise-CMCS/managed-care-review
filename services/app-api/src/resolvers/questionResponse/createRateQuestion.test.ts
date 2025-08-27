@@ -1,6 +1,7 @@
 import {
     constructTestPostgresServer,
     createTestRateQuestion,
+    executeGraphQLOperation,
     updateTestStateAssignments,
 } from '../../testHelpers/gqlHelpers'
 import {
@@ -37,12 +38,11 @@ describe('createRateQuestion', () => {
         const rateID =
             submittedContractAndRate.packageSubmissions[0].rateRevisions[0]
                 .rateID
-        const rateQuestionRes = must(
+        const rateQuestion = must(
             await createTestRateQuestion(cmsServer, rateID)
         )
-        const rateQuestion = rateQuestionRes?.data?.createRateQuestion
 
-        expect(rateQuestion.question).toEqual(
+        expect(rateQuestion).toEqual(
             expect.objectContaining({
                 id: expect.any(String),
                 rateID: rateID,
@@ -74,12 +74,9 @@ describe('createRateQuestion', () => {
             submittedContractAndRate.id,
             'Test unlock reason'
         )
-        const rateQuestionRes = must(
-            await createTestRateQuestion(cmsServer, rateID)
-        )
-        const rateQuestion = rateQuestionRes?.data?.createRateQuestion
+        const rateQuestion = await createTestRateQuestion(cmsServer, rateID)
 
-        expect(rateQuestion.question).toEqual(
+        expect(rateQuestion).toEqual(
             expect.objectContaining({
                 id: expect.any(String),
                 rateID: rateID,
@@ -99,19 +96,16 @@ describe('createRateQuestion', () => {
             submittedContractAndRate.id,
             'Test resubmit reason'
         )
-        const rateQuestionRes2 = must(
-            await createTestRateQuestion(cmsServer, rateID, {
-                documents: [
-                    {
-                        name: 'Test Question 2',
-                        s3URL: 's3://bucketname/key/test1',
-                    },
-                ],
-            })
-        )
-        const rateQuestion2 = rateQuestionRes2?.data?.createRateQuestion
+        const rateQuestion2 = await createTestRateQuestion(cmsServer, rateID, {
+            documents: [
+                {
+                    name: 'Test Question 2',
+                    s3URL: 's3://bucketname/key/test1',
+                },
+            ],
+        })
 
-        expect(rateQuestion2.question).toEqual(
+        expect(rateQuestion2).toEqual(
             expect.objectContaining({
                 id: expect.any(String),
                 rateID: rateID,
@@ -149,11 +143,24 @@ describe('createRateQuestion', () => {
             )
         }
 
-        const rateQuestionRes = await createTestRateQuestion(cmsServer, rateID)
+        const rateQuestion = await executeGraphQLOperation(cmsServer, {
+            query: CreateRateQuestionDocument,
+            variables: {
+                input: {
+                    rateID,
+                    documents: [
+                        {
+                            name: 'Test Question',
+                            s3URL: 's3://bucketname/key/test1',
+                        },
+                    ],
+                },
+            },
+        })
 
-        expect(rateQuestionRes.errors).toBeDefined()
-        expect(assertAnErrorCode(rateQuestionRes)).toBe('BAD_USER_INPUT')
-        expect(assertAnError(rateQuestionRes).message).toBe(
+        expect(rateQuestion.errors).toBeDefined()
+        expect(assertAnErrorCode(rateQuestion)).toBe('BAD_USER_INPUT')
+        expect(assertAnError(rateQuestion).message).toBe(
             'Issue creating question for rate. Message: Rate is in a invalid statius: DRAFT'
         )
 
@@ -162,9 +169,23 @@ describe('createRateQuestion', () => {
             rateToWithdraw.rateID,
             'Withdraw rate'
         )
-        const rateQuestionForWithdrawnRate = await createTestRateQuestion(
+
+        const rateQuestionForWithdrawnRate = await executeGraphQLOperation(
             cmsServer,
-            withdrawnRate.id
+            {
+                query: CreateRateQuestionDocument,
+                variables: {
+                    input: {
+                        rateID: withdrawnRate.id,
+                        documents: [
+                            {
+                                name: 'Test Question',
+                                s3URL: 's3://bucketname/key/test1',
+                            },
+                        ],
+                    },
+                },
+            }
         )
 
         expect(rateQuestionForWithdrawnRate.errors).toBeDefined()
@@ -182,7 +203,20 @@ describe('createRateQuestion', () => {
         const rateID =
             submittedContractAndRate.packageSubmissions[0].rateRevisions[0]
                 .rateID
-        const rateQuestion = await createTestRateQuestion(stateServer, rateID)
+        const rateQuestion = await executeGraphQLOperation(stateServer, {
+            query: CreateRateQuestionDocument,
+            variables: {
+                input: {
+                    rateID,
+                    documents: [
+                        {
+                            name: 'Test Question',
+                            s3URL: 's3://bucketname/key/test1',
+                        },
+                    ],
+                },
+            },
+        })
 
         expect(rateQuestion.errors).toBeDefined()
         expect(assertAnErrorCode(rateQuestion)).toBe('FORBIDDEN')
@@ -197,10 +231,21 @@ describe('createRateQuestion', () => {
             },
         })
         const invalidRateID = 'invalidID'
-        const rateQuestionRes = await createTestRateQuestion(
-            cmsServer,
-            invalidRateID
-        )
+
+        const rateQuestionRes = await executeGraphQLOperation(cmsServer, {
+            query: CreateRateQuestionDocument,
+            variables: {
+                input: {
+                    rateID: invalidRateID,
+                    documents: [
+                        {
+                            name: 'Test Question',
+                            s3URL: 's3://bucketname/key/test1',
+                        },
+                    ],
+                },
+            },
+        })
 
         expect(rateQuestionRes.errors).toBeDefined()
         expect(assertAnErrorCode(rateQuestionRes)).toBe('NOT_FOUND')
@@ -226,7 +271,21 @@ describe('createRateQuestion', () => {
             submittedContractAndRate.packageSubmissions[0].rateRevisions[0]
                 .rateID
 
-        const rateQuestionRes = await createTestRateQuestion(cmsServer, rateID)
+        // THIS ERROR IS GETTING USER INPUT INSTEAD OF FORBIDDEN
+        const rateQuestionRes = await executeGraphQLOperation(cmsServer, {
+            query: CreateRateQuestionDocument,
+            variables: {
+                input: {
+                    rateID,
+                    documents: [
+                        {
+                            name: 'Test Question',
+                            s3URL: 's3://bucketname/key/test1',
+                        },
+                    ],
+                },
+            },
+        })
 
         expect(rateQuestionRes.errors).toBeDefined()
         expect(assertAnErrorCode(rateQuestionRes)).toBe('FORBIDDEN')
@@ -384,7 +443,7 @@ describe('createRateQuestion', () => {
             emailer: mockEmailer,
         })
 
-        const submitResult = await cmsServer.executeOperation({
+        const submitResult = await executeGraphQLOperation(cmsServer, {
             query: CreateRateQuestionDocument,
             variables: {
                 input: {

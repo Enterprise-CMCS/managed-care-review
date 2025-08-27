@@ -3,6 +3,7 @@ import {
     constructTestPostgresServer,
     createTestQuestion,
     createTestQuestionResponse,
+    executeGraphQLOperation,
 } from '../../testHelpers/gqlHelpers'
 import {
     createAndUpdateTestContractWithRate,
@@ -75,7 +76,7 @@ describe('contractResolver', () => {
 
         const responseToDMCO = await createTestQuestionResponse(
             stateServer,
-            createdDMCOQuestion.question.id
+            createdDMCOQuestion.id
         )
 
         const createdDMCPQuestion = await createTestQuestion(
@@ -93,7 +94,7 @@ describe('contractResolver', () => {
 
         const responseToDMCP = await createTestQuestionResponse(
             stateServer,
-            createdDMCPQuestion.question.id
+            createdDMCPQuestion.id
         )
 
         const createdOACTQuestion = await createTestQuestion(
@@ -111,7 +112,7 @@ describe('contractResolver', () => {
 
         const responseToOACT = await createTestQuestionResponse(
             stateServer,
-            createdOACTQuestion.question.id
+            createdOACTQuestion.id
         )
 
         const contractWithQuestions = await fetchTestContractWithQuestions(
@@ -121,7 +122,7 @@ describe('contractResolver', () => {
         const indexQuestionsResult = contractWithQuestions.questions
 
         draft.questions = indexQuestionsResult
-        const fetchContractResult = await stateServer.executeOperation({
+        const fetchContractResult = await executeGraphQLOperation(stateServer, {
             query: FetchContractWithQuestionsDocument,
             variables: {
                 input: {
@@ -152,7 +153,7 @@ describe('contractResolver', () => {
                                         downloadURL: expect.any(String),
                                     },
                                 ],
-                                addedBy: responseToDMCO.question.addedBy,
+                                addedBy: responseToDMCO.addedBy,
                             }),
                         },
                     ]),
@@ -173,7 +174,7 @@ describe('contractResolver', () => {
                                         downloadURL: expect.any(String),
                                     },
                                 ],
-                                addedBy: responseToDMCP.question.addedBy,
+                                addedBy: responseToDMCP.addedBy,
                             }),
                         },
                     ],
@@ -194,7 +195,7 @@ describe('contractResolver', () => {
                                         downloadURL: expect.any(String),
                                     },
                                 ],
-                                addedBy: responseToOACT.question.addedBy,
+                                addedBy: responseToOACT.addedBy,
                             }),
                         },
                     ],
@@ -223,7 +224,7 @@ describe('contractResolver', () => {
             },
         })
 
-        const fetchResult = await stateServerVA.executeOperation({
+        const fetchResult = await executeGraphQLOperation(stateServerVA, {
             query: FetchContractWithQuestionsDocument,
             variables: {
                 input: {

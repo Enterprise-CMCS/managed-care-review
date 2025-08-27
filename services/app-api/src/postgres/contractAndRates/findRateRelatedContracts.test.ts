@@ -1,5 +1,8 @@
 import { sharedTestPrismaClient } from '../../testHelpers/storeHelpers'
-import { constructTestPostgresServer } from '../../testHelpers/gqlHelpers'
+import {
+    constructTestPostgresServer,
+    executeGraphQLOperation,
+} from '../../testHelpers/gqlHelpers'
 import { testCMSUser, testStateUser } from '../../testHelpers/userHelpers'
 import {
     approveTestContract,
@@ -40,7 +43,7 @@ it('returns related contracts with correct status', async () => {
 
     // link rate contract B
     must(
-        await stateServer.executeOperation({
+        await executeGraphQLOperation(stateServer, {
             query: UpdateDraftContractRatesDocument,
             variables: {
                 input: {
@@ -90,7 +93,7 @@ it('returns related contracts with correct status', async () => {
     const contractC = await createAndUpdateTestContractWithoutRates(stateServer)
     // link rate contract C
     must(
-        await stateServer.executeOperation({
+        await executeGraphQLOperation(stateServer, {
             query: UpdateDraftContractRatesDocument,
             variables: {
                 input: {
@@ -128,7 +131,7 @@ it('returns related contracts with correct status', async () => {
 
     // Remove rateA from contractB, but keep it unlocked
     must(
-        await stateServer.executeOperation({
+        await executeGraphQLOperation(stateServer, {
             query: UpdateDraftContractRatesDocument,
             variables: {
                 input: {

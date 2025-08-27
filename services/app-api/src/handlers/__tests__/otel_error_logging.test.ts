@@ -1,9 +1,10 @@
-import { ApolloServer } from 'apollo-server-lambda'
+import { ApolloServer } from '@apollo/server'
 import { gql } from '@apollo/client'
 import { createTracer } from '../../otel/otel_handler'
 import { recordException } from '../../../../uploads/src/lib/otel'
 import { GraphQLError } from 'graphql'
 import { vi } from 'vitest'
+import { executeGraphQLOperation } from '../../testHelpers/gqlHelpers'
 
 describe('OTEL Error Logging', () => {
     describe('Apollo Server error logging', () => {
@@ -35,7 +36,7 @@ describe('OTEL Error Logging', () => {
                 .spyOn(console, 'error')
                 .mockImplementation(() => {})
 
-            const result = await server.executeOperation({
+            const result = await executeGraphQLOperation(server, {
                 query: gql`
                     query {
                         triggerError
@@ -137,7 +138,7 @@ describe('OTEL Error Logging', () => {
                 resolvers,
             })
 
-            const result = await server.executeOperation({
+            const result = await executeGraphQLOperation(server, {
                 query: gql`
                     query {
                         triggerCustomError

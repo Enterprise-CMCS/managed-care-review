@@ -8,6 +8,7 @@ import {
     constructTestPostgresServer,
     createTestRateQuestion,
     defaultFloridaRateProgram,
+    executeGraphQLOperation,
     unlockTestHealthPlanPackage,
     updateTestHealthPlanFormData,
 } from '../../testHelpers/gqlHelpers'
@@ -170,7 +171,7 @@ describe('fetchRate', () => {
         // fetch and check rate 1 which was resubmitted with no changes
         expect(firstRateID).toBe(resubmittedRate.id) // first rate ID should be unchanged
 
-        const result1 = await cmsServer.executeOperation({
+        const result1 = await executeGraphQLOperation(cmsServer, {
             query: FetchRateDocument,
             variables: {
                 input: { rateID: firstRateID },
@@ -357,7 +358,7 @@ describe('fetchRate', () => {
         }
 
         // fetch rate
-        const result = await cmsServer.executeOperation({
+        const result = await executeGraphQLOperation(cmsServer, {
             query: FetchRateDocument,
             variables: {
                 input,
@@ -403,7 +404,7 @@ describe('fetchRate', () => {
         }
 
         // fetch rate
-        const result = await cmsServer.executeOperation({
+        const result = await executeGraphQLOperation(cmsServer, {
             query: FetchRateDocument,
             variables: {
                 input,
@@ -653,7 +654,7 @@ describe('fetchRate', () => {
         await createTestRateQuestion(dmcpServer, rateID)
         await createTestRateQuestion(oactServer, rateID)
 
-        const result = await server.executeOperation({
+        const result = await executeGraphQLOperation(server, {
             query: FetchRateWithQuestionsDocument,
             variables: {
                 input: {
@@ -679,7 +680,7 @@ describe('fetchRate', () => {
 
         // Test newly created dmco question and its order
         await createTestRateQuestion(dmco2Server, rateID)
-        const result2 = await server.executeOperation({
+        const result2 = await executeGraphQLOperation(server, {
             query: FetchRateWithQuestionsDocument,
             variables: {
                 input: {
@@ -730,7 +731,7 @@ describe('fetchRate', () => {
             s3Client: mockS3,
         })
 
-        const fetchResult = await oauthServer.executeOperation({
+        const fetchResult = await executeGraphQLOperation(oauthServer, {
             query: FetchRateDocument,
             variables: {
                 input: {
@@ -773,7 +774,7 @@ describe('fetchRate', () => {
             s3Client: mockS3,
         })
 
-        const fetchResult = await oauthServer.executeOperation({
+        const fetchResult = await executeGraphQLOperation(oauthServer, {
             query: FetchRateDocument,
             variables: {
                 input: {

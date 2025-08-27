@@ -1,6 +1,10 @@
 import type { Context as OTELContext, Span, Tracer } from '@opentelemetry/api'
 import { propagation, ROOT_CONTEXT } from '@opentelemetry/api'
-import { ApolloServer } from 'apollo-server-lambda'
+import { ApolloServer } from '@apollo/server'
+import {
+    startServerAndCreateLambdaHandler,
+    handlers,
+} from '@as-integrations/aws-lambda'
 import { initTracer, recordException } from '../../../uploads/src/lib/otel'
 import type {
     APIGatewayProxyEvent,
@@ -17,7 +21,7 @@ import {
     userFromLocalAuthProvider,
     userFromThirdPartyAuthorizer,
 } from '../authn'
-import { NewPostgresStore } from '../postgres/postgresStore'
+import { NewPostgresStore } from '../postgres'
 import { configureResolvers } from '../resolvers'
 import { configurePostgres, configureEmailer } from './configuration'
 import { createTracer } from '../otel/otel_handler'
@@ -30,17 +34,17 @@ import { ldService, offlineLDService } from '../launchDarkly/launchDarkly'
 import type { LDClient } from '@launchdarkly/node-server-sdk'
 import * as ld from '@launchdarkly/node-server-sdk'
 import { newJWTLib } from '../jwt'
-import {
-    ApolloServerPluginLandingPageDisabled,
-    ApolloServerPluginLandingPageLocalDefault,
-} from 'apollo-server-core'
+import { ApolloServerPluginLandingPageDisabled } from '@apollo/server/plugin/disabled'
+import { ApolloServerPluginLandingPageLocalDefault } from '@apollo/server/plugin/landingPage/default'
 import { newDeployedS3Client, newLocalS3Client } from '../s3'
 import type { S3ClientT, S3BucketConfigType } from '../s3'
 import {
     documentZipService,
     generateDocumentZip,
     localGenerateDocumentZip,
-} from '../zip/generateZip'
+} from '../zip'
+import { logError } from '../logger'
+import { configureCorsHeaders } from '../cors/configureCorsHelpers'
 
 let ldClient: LDClient
 let s3Client: S3ClientT
@@ -64,7 +68,7 @@ function contextForRequestForFetcher(userFetcher: userFromAuthProvider): ({
     event,
 }: {
     event: APIGatewayProxyEvent
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+
     context: any
 }) => Promise<Context> {
     return async ({ event, context }) => {
@@ -373,22 +377,19 @@ async function initializeGQLHandler(): Promise<Handler> {
     const server = new ApolloServer({
         typeDefs,
         resolvers,
-        context: contextForRequest,
         plugins,
         introspection: introspectionAllowed,
     })
 
-    const handler = server.createHandler({
-        expressGetMiddlewareOptions: {
-            cors: {
-                origin: true,
-                credentials: true,
+    const handler = startServerAndCreateLambdaHandler(
+        server,
+        handlers.createAPIGatewayProxyEventRequestHandler(),
+        {
+            context: async ({ event, context }) => {
+                return await contextForRequest({ event, context })
             },
-            bodyParserConfig: {
-                limit: '10mb',
-            },
-        },
-    })
+        }
+    )
 
     // Locally, we wrap our handler in a middleware that returns 403 for unauthenticated requests
     const isLocal = authMode === 'LOCAL'
@@ -401,16 +402,26 @@ const gqlHandler: Handler = async (event, context, completion) => {
     // Once initialized, future awaits will return immediately
     const initializedHandler = await handlerPromise
 
-    const response = await initializedHandler(event, context, completion)
-    const payloadSize = Buffer.from(event.body).length
-    const serviceName = 'gql-handler'
     const otelCollectorUrl = process.env.API_APP_OTEL_COLLECTOR_URL
     if (otelCollectorUrl === undefined || otelCollectorUrl === '') {
         throw new Error(
             'Configuration Error: API_APP_OTEL_COLLECTOR_URL is required to run app-api'
         )
     }
+    const serviceName = 'gql-handler'
     initTracer(serviceName, otelCollectorUrl)
+
+    const response = await initializedHandler(event, context, completion)
+
+    // Configure cors headers
+    const corsError = configureCorsHeaders(response, event)
+
+    if (corsError) {
+        logError('configureCorsHeaders', corsError.message)
+        recordException(corsError.message, serviceName, 'requestPayload')
+    }
+
+    const payloadSize = Buffer.from(event.body).length
     if (payloadSize > 5.5 * 1024 * 1024) {
         const errMsg = `Large request payload detected: ${payloadSize} bytes`
         console.warn(errMsg)

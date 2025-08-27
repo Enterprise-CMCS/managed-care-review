@@ -2,6 +2,7 @@ import { testCMSUser, testStateUser } from '../../testHelpers/userHelpers'
 import {
     constructTestPostgresServer,
     defaultFloridaProgram,
+    executeGraphQLOperation,
 } from '../../testHelpers/gqlHelpers'
 import {
     createAndSubmitTestContractWithRate,
@@ -96,7 +97,7 @@ describe('undoWithdrawRate', () => {
 
         // link rate contract B
         must(
-            await stateServer.executeOperation({
+            await executeGraphQLOperation(stateServer, {
                 query: UpdateDraftContractRatesDocument,
                 variables: {
                     input: {
@@ -274,7 +275,7 @@ describe('undoWithdrawRate', () => {
 
         // link rate contract B
         must(
-            await stateServer.executeOperation({
+            await executeGraphQLOperation(stateServer, {
                 query: UpdateDraftContractRatesDocument,
                 variables: {
                     input: {
@@ -447,7 +448,7 @@ describe('undoWithdrawRate', () => {
 
         // link rate contract B
         must(
-            await stateServer.executeOperation({
+            await executeGraphQLOperation(stateServer, {
                 query: UpdateDraftContractRatesDocument,
                 variables: {
                     input: {
@@ -642,7 +643,7 @@ describe('undo withdraw rate error handling', async () => {
 
         // link rate contract B
         must(
-            await stateServer.executeOperation({
+            await executeGraphQLOperation(stateServer, {
                 query: UpdateDraftContractRatesDocument,
                 variables: {
                     input: {
@@ -669,7 +670,7 @@ describe('undo withdraw rate error handling', async () => {
 
         await approveTestContract(cmsServer, contractB.id)
 
-        const unwithdrawnRate = await cmsServer.executeOperation({
+        const unwithdrawnRate = await executeGraphQLOperation(cmsServer, {
             query: UndoWithdrawnRateDocument,
             variables: {
                 input: {
@@ -708,7 +709,7 @@ describe('undo withdraw rate error handling', async () => {
 
         // link rate contract B
         must(
-            await stateServer.executeOperation({
+            await executeGraphQLOperation(stateServer, {
                 query: UpdateDraftContractRatesDocument,
                 variables: {
                     input: {
@@ -739,7 +740,7 @@ describe('undo withdraw rate error handling', async () => {
             'Withdraw ContractA'
         )
 
-        const unwithdrawnRate = await cmsServer.executeOperation({
+        const unwithdrawnRate = await executeGraphQLOperation(cmsServer, {
             query: UndoWithdrawnRateDocument,
             variables: {
                 input: {
@@ -775,7 +776,7 @@ describe('undo withdraw rate error handling', async () => {
 
         await withdrawTestRate(cmsServer, rateID, 'Withdraw invalid rate')
 
-        const unwithdrawnRate = await stateServer.executeOperation({
+        const unwithdrawnRate = await executeGraphQLOperation(stateServer, {
             query: UndoWithdrawnRateDocument,
             variables: {
                 input: {
@@ -814,7 +815,7 @@ describe('undo withdraw rate error handling', async () => {
 
         await withdrawTestRate(cmsServer, rateID, 'Withdraw invalid rate')
 
-        const unwithdrawnRate = await cmsServer.executeOperation({
+        const unwithdrawnRate = await executeGraphQLOperation(cmsServer, {
             query: UndoWithdrawnRateDocument,
             variables: {
                 input: {
@@ -855,7 +856,7 @@ describe('undo withdraw rate error handling', async () => {
             throw new Error('Unexpected error: rate not found')
         }
 
-        const unwithdrawnRate = await cmsServer.executeOperation({
+        const unwithdrawnRate = await executeGraphQLOperation(cmsServer, {
             query: UndoWithdrawnRateDocument,
             variables: {
                 input: {

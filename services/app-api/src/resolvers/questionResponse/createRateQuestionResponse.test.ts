@@ -6,11 +6,13 @@ import {
     constructTestPostgresServer,
     createTestRateQuestion,
     createTestRateQuestionResponse,
+    executeGraphQLOperation,
     updateTestStateAssignments,
 } from '../../testHelpers/gqlHelpers'
 import { createAndSubmitTestContractWithRate } from '../../testHelpers/gqlContractHelpers'
 import { assertAnError, assertAnErrorCode, must } from '../../testHelpers'
 import { testEmailConfig, testEmailer } from '../../testHelpers/emailerHelpers'
+import { CreateRateQuestionResponseDocument } from '../../gen/gqlClient'
 
 describe('createRateQuestionResponse', () => {
     const cmsUser = testCMSUser()
@@ -31,18 +33,12 @@ describe('createRateQuestionResponse', () => {
         const rateID =
             contractWithRate.packageSubmissions[0].rateRevisions[0].rateID
 
-        const rateQuestionResult = await createTestRateQuestion(
-            cmsServer,
-            rateID
-        )
-        const question = rateQuestionResult.data?.createRateQuestion.question
+        const question = await createTestRateQuestion(cmsServer, rateID)
 
-        const questionResponseResult = await createTestRateQuestionResponse(
+        const questionWithResponse = await createTestRateQuestionResponse(
             stateServer,
             question.id
         )
-        const questionWithResponse =
-            questionResponseResult.data?.createRateQuestionResponse.question
 
         expect(questionWithResponse).toEqual(
             expect.objectContaining({
@@ -71,11 +67,26 @@ describe('createRateQuestionResponse', () => {
     it('returns an error when attempting to create a response for a question that does not exist', async () => {
         const stateServer = await constructTestPostgresServer()
         const invalidID = 'Not-valid-rate-id'
-        const questionResponseResult = await createTestRateQuestionResponse(
+
+        const questionResponseResult = await executeGraphQLOperation(
             stateServer,
-            invalidID
+            {
+                query: CreateRateQuestionResponseDocument,
+                variables: {
+                    input: {
+                        documents: [
+                            {
+                                name: 'Test Question Response',
+                                s3URL: 's3://bucketname/key/test1',
+                            },
+                        ],
+                        questionID: invalidID,
+                    },
+                },
+            }
         )
-        expect(questionResponseResult).toBeDefined()
+
+        expect(questionResponseResult.errors).toBeDefined()
         expect(assertAnErrorCode(questionResponseResult)).toBe('BAD_USER_INPUT')
         expect(assertAnError(questionResponseResult).message).toBe(
             `Rate question with ID: ${invalidID} not found to attach response to`
@@ -93,15 +104,24 @@ describe('createRateQuestionResponse', () => {
         const rateID =
             contractWithRate.packageSubmissions[0].rateRevisions[0].rateID
 
-        const rateQuestionResult = await createTestRateQuestion(
-            cmsServer,
-            rateID
-        )
-        const question = rateQuestionResult.data?.createRateQuestion.question
+        const question = await createTestRateQuestion(cmsServer, rateID)
 
-        const questionResponseResult = await createTestRateQuestionResponse(
+        const questionResponseResult = await executeGraphQLOperation(
             cmsServer,
-            question.id
+            {
+                query: CreateRateQuestionResponseDocument,
+                variables: {
+                    input: {
+                        documents: [
+                            {
+                                name: 'Test Question Response',
+                                s3URL: 's3://bucketname/key/test1',
+                            },
+                        ],
+                        questionID: question.id,
+                    },
+                },
+            }
         )
 
         expect(questionResponseResult.errors).toBeDefined()
@@ -132,11 +152,7 @@ describe('createRateQuestionResponse', () => {
             contractWithRate.packageSubmissions[0].rateRevisions[0].formData
                 .rateCertificationName
 
-        const rateQuestionResult = await createTestRateQuestion(
-            cmsServer,
-            rateID
-        )
-        const question = rateQuestionResult.data?.createRateQuestion.question
+        const question = await createTestRateQuestion(cmsServer, rateID)
 
         await createTestRateQuestionResponse(stateServer, question.id)
 
@@ -198,10 +214,7 @@ describe('createRateQuestionResponse', () => {
             submittedContractAndRate.packageSubmissions[0].rateRevisions[0]
         const rateID = rateRevision.rateID
 
-        const rateQuestionResult = must(
-            await createTestRateQuestion(cmsServer, rateID)
-        )
-        const question = rateQuestionResult.data?.createRateQuestion.question
+        const question = must(await createTestRateQuestion(cmsServer, rateID))
 
         await createTestRateQuestionResponse(stateServer, question.id)
 

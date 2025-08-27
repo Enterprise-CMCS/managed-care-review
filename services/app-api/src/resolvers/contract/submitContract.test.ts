@@ -1,10 +1,10 @@
-/* eslint-disable  @typescript-eslint/no-non-null-assertion */
 import {
     constructTestPostgresServer,
     defaultFloridaProgram,
     unlockTestHealthPlanPackage,
     updateTestHealthPlanFormData,
     updateTestStateAssignments,
+    executeGraphQLOperation,
 } from '../../testHelpers/gqlHelpers'
 import { SubmitContractDocument } from '../../gen/gqlClient'
 import { testS3Client } from '../../testHelpers'
@@ -80,7 +80,6 @@ describe('submitContract', () => {
         expect(sub.submittedRevisions).toHaveLength(2)
 
         // check form data is unchanged
-        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
         const draftFormData = updatedDraft.draftRevision!.formData
         const submittedFormData = sub.contractRevision.formData
 
@@ -114,9 +113,10 @@ describe('submitContract', () => {
             s3Client: mockS3,
         })
 
+        const cmsUser = testCMSUser()
         const cmsServer = await constructTestPostgresServer({
             context: {
-                user: testCMSUser(),
+                user: cmsUser,
             },
             s3Client: mockS3,
         })
@@ -188,9 +188,10 @@ describe('submitContract', () => {
         const stateServer = await constructTestPostgresServer({
             s3Client: mockS3,
         })
+        const cmsUser = testCMSUser()
         const cmsServer = await constructTestPostgresServer({
             context: {
-                user: testCMSUser(),
+                user: cmsUser,
             },
             s3Client: mockS3,
         })
@@ -212,11 +213,7 @@ describe('submitContract', () => {
         await addLinkedRateToTestContract(stateServer, draftB0, OneID)
 
         // 3. Unlock A0, edit and resubmit
-        await unlockTestHealthPlanPackage(
-            cmsServer,
-            AID,
-            'edit the linked rate, please'
-        )
+        await unlockTestContract(cmsServer, AID, 'edit the linked rate, please')
 
         const resubmittedA = await submitTestContract(
             stateServer,
@@ -234,10 +231,11 @@ describe('submitContract', () => {
             ldService,
             s3Client: mockS3,
         })
+        const cmsUser = testCMSUser()
         const cmsServer = await constructTestPostgresServer({
             ldService,
             context: {
-                user: testCMSUser(),
+                user: cmsUser,
             },
             s3Client: mockS3,
         })
@@ -352,9 +350,10 @@ describe('submitContract', () => {
             s3Client: mockS3,
         })
 
+        const cmsUser = testCMSUser()
         const cmsServer = await constructTestPostgresServer({
             context: {
-                user: testCMSUser(),
+                user: cmsUser,
             },
             s3Client: mockS3,
         })
@@ -822,6 +821,7 @@ describe('submitContract', () => {
     it('returns the correct dateAdded for documents', async () => {
         const ldService = testLDService({})
         const prismaClient = await sharedTestPrismaClient()
+        const cmsUser = testCMSUser()
         const stateServer = await constructTestPostgresServer({
             ldService,
             s3Client: mockS3,
@@ -829,7 +829,7 @@ describe('submitContract', () => {
         const cmsServer = await constructTestPostgresServer({
             ldService,
             context: {
-                user: testCMSUser(),
+                user: cmsUser,
             },
             s3Client: mockS3,
         })
@@ -1075,19 +1075,23 @@ describe('submitContract', () => {
             submittedReason: 'Test cms user calling state user func',
         }
 
-        const res = await cmsServer.executeOperation({
+        const response = await executeGraphQLOperation(cmsServer, {
             query: SubmitContractDocument,
             variables: { input },
         })
 
-        expect(res.errors).toBeDefined()
-        expect(res.errors && res.errors[0].message).toBe(
+        expect(response.errors).toBeDefined()
+        expect(response.errors && response.errors[0].message).toBe(
             'user not authorized to fetch state data'
         )
     })
 
     it('returns an error if it is incomplete', async () => {
-        const stateServer = await constructTestPostgresServer()
+        const stateServer = await constructTestPostgresServer({
+            context: {
+                user: testStateUser(),
+            },
+        })
 
         const contract = await createTestContract(stateServer)
 
@@ -1114,7 +1118,7 @@ describe('submitContract', () => {
             }
         )
 
-        const res = await stateServer.executeOperation({
+        const response = await executeGraphQLOperation(stateServer, {
             query: SubmitContractDocument,
             variables: {
                 input: {
@@ -1123,7 +1127,7 @@ describe('submitContract', () => {
             },
         })
 
-        expect(res.errors).toBeDefined()
+        expect(response.errors).toBeDefined()
     })
 
     it('returns an error if a CONTRACT_AND_RATES submission is missing rates', async () => {
@@ -1132,7 +1136,7 @@ describe('submitContract', () => {
         })
 
         const draft = await createAndUpdateTestContractWithoutRates(stateServer)
-        const res = await stateServer.executeOperation({
+        const response = await executeGraphQLOperation(stateServer, {
             query: SubmitContractDocument,
             variables: {
                 input: {
@@ -1141,8 +1145,8 @@ describe('submitContract', () => {
             },
         })
 
-        expect(res.errors).toBeDefined()
-        expect(res.errors).toEqual([
+        expect(response.errors).toBeDefined()
+        expect(response.errors).toEqual([
             expect.objectContaining({
                 message: expect.stringMatching(
                     `Attempted to submit a contract and rates contract without rates: ${draft.id}`
@@ -1221,7 +1225,6 @@ describe('submitContract', () => {
             )
         })
 
-        // eslint-disable-next-line jest/no-focused-tests
         it('send CMS email on contract only re-submission', async () => {
             const config = testEmailConfig()
             const mockEmailer = testEmailer(config)
@@ -1356,7 +1359,7 @@ describe('submitContract', () => {
             )
             const draftID = draft.id
 
-            await server.executeOperation({
+            await executeGraphQLOperation(server, {
                 query: SubmitContractDocument,
                 variables: {
                     input: {
@@ -1375,7 +1378,6 @@ describe('submitContract', () => {
         })
 
         // TODO: reimplement this test without using jest
-        // eslint-disable-next-line jest/no-commented-out-tests
         // it('does log error when request for state specific analysts emails failed', async () => {
         //     const consoleErrorSpy = jest.spyOn(console, 'error')
         //     const error = {
@@ -1421,7 +1423,7 @@ describe('submitContract', () => {
             const draft = await createAndUpdateTestContractWithRate(server)
             const draftID = draft.id
 
-            const submitResult = await server.executeOperation({
+            const submitResult = await executeGraphQLOperation(server, {
                 query: SubmitContractDocument,
                 variables: {
                     input: {
@@ -1470,19 +1472,14 @@ describe('submitContract', () => {
                 'Test unlock reason.'
             )
 
-            const submitResult = await stateServer.executeOperation({
-                query: SubmitContractDocument,
-                variables: {
-                    input: {
-                        contractID: stateSubmission.id,
-                        submittedReason: 'Test resubmitted reason',
-                    },
-                },
-            })
+            const submitContract = await submitTestContract(
+                stateServer,
+                stateSubmission.id,
+                'Test resubmitted reason'
+            )
 
             const currentRevision =
-                submitResult?.data?.submitContract?.contract
-                    .packageSubmissions[0].contractRevision
+                submitContract.packageSubmissions[0].contractRevision
 
             const name = currentRevision.contractName
 
@@ -1505,20 +1502,24 @@ describe('submitContract', () => {
             const config = testEmailConfig()
             const mockEmailer = testEmailer(config)
             //mock invoke email submit lambda
+            const stateUser1 = testStateUser({
+                email: 'alsonotspiderman@example.com',
+            })
+            const stateUser2 = testStateUser({
+                email: 'notspiderman@example.com',
+            })
+            const cmsUser = testCMSUser()
+            await createDBUsersWithFullData([stateUser1, stateUser2, cmsUser])
             const stateServer = await constructTestPostgresServer({
                 context: {
-                    user: testStateUser({
-                        email: 'alsonotspiderman@example.com',
-                    }),
+                    user: stateUser1,
                 },
             })
 
             const stateServerTwo = await constructTestPostgresServer({
                 emailer: mockEmailer,
                 context: {
-                    user: testStateUser({
-                        email: 'notspiderman@example.com',
-                    }),
+                    user: stateUser2,
                 },
             })
 
@@ -1530,7 +1531,7 @@ describe('submitContract', () => {
 
             const cmsServer = await constructTestPostgresServer({
                 context: {
-                    user: testCMSUser(),
+                    user: cmsUser,
                 },
             })
 
@@ -1551,8 +1552,9 @@ describe('submitContract', () => {
 
             const name = currentRevision.contractName
 
-            // email subject line is correct for CMS email and contains correct email body text
-            expect(mockEmailer.sendEmail).toHaveBeenCalledWith(
+            // email subject line is correct for STATE email and contains correct email body text
+            expect(mockEmailer.sendEmail).toHaveBeenNthCalledWith(
+                2, // The second email is the state email
                 expect.objectContaining({
                     subject: expect.stringContaining(`${name} was resubmitted`),
                     sourceEmail: config.emailSource,
@@ -1573,7 +1575,7 @@ describe('submitContract', () => {
             // Invalid contract ID
             const draftID = '123'
 
-            const submitResult = await server.executeOperation({
+            const submitResult = await executeGraphQLOperation(server, {
                 query: SubmitContractDocument,
                 variables: {
                     input: {
@@ -1588,15 +1590,53 @@ describe('submitContract', () => {
 
         it('uses email settings from database with remove-parameter-store flag on', async () => {
             const prismaClient = await sharedTestPrismaClient()
+
+            // Restore email settings
+            await prismaClient.emailSettings.update({
+                where: { id: 1 },
+                data: {
+                    emailSource: 'mc-review@cms.hhs.gov',
+                    devReviewTeamEmails: ['mc-review-qa+DevTeam@truss.works'],
+                    cmsReviewHelpEmailAddress: [
+                        'mc-review-qa+MCOGDMCOActionsHelp@truss.works',
+                    ],
+                    cmsRateHelpEmailAddress: [
+                        'mc-review-qa+MMCratesettingHelp@truss.works',
+                    ],
+                    oactEmails: [
+                        'mc-review-qa+OACTdev1@truss.works',
+                        'mc-review-qa+OACTdev2@truss.works',
+                    ],
+                    dmcpReviewEmails: [
+                        'mc-review-qa+DMCPreviewdev1@truss.works',
+                        'mc-review-qa+DMCPreivewdev2@truss.works',
+                    ],
+                    dmcpSubmissionEmails: [
+                        'mc-review-qa+DMCPsubmissiondev1@truss.works',
+                        'mc-review-qa+DMCPsubmissiondev2@truss.works',
+                    ],
+                    dmcoEmails: [
+                        'mc-review-qa+DMCO1@truss.works',
+                        'mc-review-qa+DMCO2@truss.works',
+                    ],
+                    helpDeskEmail: [
+                        'mc-review-qa+MC_Review_HelpDesk@truss.works',
+                    ],
+                    applicationSettingsId: 1,
+                },
+            })
+
             const store = NewPostgresStore(prismaClient)
-            const mockEmailer = await testEmailerFromDatabase(store)
             const ldService = testLDService({
                 'remove-parameter-store': true,
             })
+            const mockEmailer = await testEmailerFromDatabase(store, undefined)
+            const stateUser = testStateUser()
+            await createDBUsersWithFullData([stateUser])
 
             const stateServer = await constructTestPostgresServer({
                 context: {
-                    user: testStateUser(),
+                    user: stateUser,
                 },
                 ldService,
                 emailer: mockEmailer,
@@ -1616,20 +1656,25 @@ describe('submitContract', () => {
                     subject: expect.stringContaining(
                         `New Managed Care Submission: ${name}`
                     ),
-                    sourceEmail: 'mc-review@cms.hhs.gov',
-                    toAddresses: expect.arrayContaining(
-                        Array.from([
-                            'mc-review-qa+DevTeam@truss.works',
-                            'mc-review-qa+DMCPsubmissiondev1@truss.works',
-                            'mc-review-qa+DMCPsubmissiondev2@truss.works',
-                        ])
+                    sourceEmail: expect.stringContaining(
+                        'mc-review@cms.hhs.gov'
                     ),
+                    toAddresses: expect.arrayContaining([
+                        expect.stringContaining(
+                            'mc-review-qa+DevTeam@truss.works'
+                        ),
+                        expect.stringContaining(
+                            'mc-review-qa+DMCPsubmissiondev1@truss.works'
+                        ),
+                        expect.stringContaining(
+                            'mc-review-qa+DMCPsubmissiondev2@truss.works'
+                        ),
+                    ]),
                 })
             )
         })
 
         // TODO: reimplement this test without using jest
-        // eslint-disable-next-line jest/no-commented-out-tests
         // it('errors when SES email has failed.', async () => {
         //     const mockEmailer = testEmailer()
 
@@ -1688,7 +1733,7 @@ describe('submitContract', () => {
             await new Promise((resolve) => setTimeout(resolve, 2000))
 
             // submit
-            const submitResult = await server.executeOperation({
+            const submitResult = await executeGraphQLOperation(server, {
                 query: SubmitContractDocument,
                 variables: {
                     input: {
@@ -1716,7 +1761,7 @@ describe('submitContract', () => {
             await new Promise((resolve) => setTimeout(resolve, 2000))
 
             // submit
-            const submitResult = await server.executeOperation({
+            const submitResult = await executeGraphQLOperation(server, {
                 query: SubmitContractDocument,
                 variables: {
                     input: {
@@ -1748,7 +1793,7 @@ describe('submitContract', () => {
             await new Promise((resolve) => setTimeout(resolve, 2000))
 
             // submit
-            const submitResult = await server.executeOperation({
+            const submitResult = await executeGraphQLOperation(server, {
                 query: SubmitContractDocument,
                 variables: {
                     input: {

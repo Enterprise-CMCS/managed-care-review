@@ -6,7 +6,10 @@ import {
     testStateUser,
 } from '../../testHelpers/userHelpers'
 import { v4 as uuidv4 } from 'uuid'
-import { constructTestPostgresServer } from '../../testHelpers/gqlHelpers'
+import {
+    constructTestPostgresServer,
+    executeGraphQLOperation,
+} from '../../testHelpers/gqlHelpers'
 import {
     FetchMcReviewSettingsDocument,
     UpdateStateAssignmentDocument,
@@ -46,15 +49,18 @@ describe('fetchMcReviewSettings', () => {
         )
 
         // Assign states to each CMS user
-        const assignedOhioCMSUserResult = await server.executeOperation({
-            query: UpdateStateAssignmentDocument,
-            variables: {
-                input: {
-                    cmsUserID: newCMSUser1.id,
-                    stateAssignments: ['OH'],
+        const assignedOhioCMSUserResult = await executeGraphQLOperation(
+            server,
+            {
+                query: UpdateStateAssignmentDocument,
+                variables: {
+                    input: {
+                        cmsUserID: newCMSUser1.id,
+                        stateAssignments: ['OH'],
+                    },
                 },
-            },
-        })
+            }
+        )
 
         if (!assignedOhioCMSUserResult.data?.updateStateAssignment) {
             throw new Error(
@@ -64,15 +70,18 @@ describe('fetchMcReviewSettings', () => {
         const assignedOhioCMSUser =
             assignedOhioCMSUserResult.data.updateStateAssignment.user
 
-        const assignedTexasCMSUserResult = await server.executeOperation({
-            query: UpdateStateAssignmentDocument,
-            variables: {
-                input: {
-                    cmsUserID: newCMSUser2.id,
-                    stateAssignments: ['TX'],
+        const assignedTexasCMSUserResult = await executeGraphQLOperation(
+            server,
+            {
+                query: UpdateStateAssignmentDocument,
+                variables: {
+                    input: {
+                        cmsUserID: newCMSUser2.id,
+                        stateAssignments: ['TX'],
+                    },
                 },
-            },
-        })
+            }
+        )
 
         if (!assignedTexasCMSUserResult.data?.updateStateAssignment) {
             throw new Error(
@@ -82,15 +91,18 @@ describe('fetchMcReviewSettings', () => {
         const assignedTexasCMSUser =
             assignedTexasCMSUserResult.data.updateStateAssignment.user
 
-        const assignedFloridaCMSUserResult = await server.executeOperation({
-            query: UpdateStateAssignmentDocument,
-            variables: {
-                input: {
-                    cmsUserID: newCMSUser3.id,
-                    stateAssignments: ['FL'],
+        const assignedFloridaCMSUserResult = await executeGraphQLOperation(
+            server,
+            {
+                query: UpdateStateAssignmentDocument,
+                variables: {
+                    input: {
+                        cmsUserID: newCMSUser3.id,
+                        stateAssignments: ['FL'],
+                    },
                 },
-            },
-        })
+            }
+        )
 
         if (!assignedFloridaCMSUserResult.data?.updateStateAssignment) {
             throw new Error(
@@ -100,7 +112,7 @@ describe('fetchMcReviewSettings', () => {
         const assignedFloridaCMSUser =
             assignedFloridaCMSUserResult.data.updateStateAssignment.user
 
-        const mcReviewSettings = await server.executeOperation({
+        const mcReviewSettings = await executeGraphQLOperation(server, {
             query: FetchMcReviewSettingsDocument,
         })
 
@@ -174,7 +186,7 @@ describe('fetchMcReviewSettings', () => {
         })
 
         // make a mock request
-        const res = await server.executeOperation({
+        const res = await executeGraphQLOperation(server, {
             query: FetchMcReviewSettingsDocument,
         })
 
@@ -195,7 +207,7 @@ describe('fetchMcReviewSettings', () => {
             },
         })
 
-        const mcReviewSettings = await server.executeOperation({
+        const mcReviewSettings = await executeGraphQLOperation(server, {
             query: FetchMcReviewSettingsDocument,
         })
 
@@ -212,32 +224,45 @@ describe('fetchMcReviewSettings', () => {
             context: {
                 user: testAdminUser(),
             },
-            ldService: testLDService(
-                {
-                    'remove-parameter-store': true
-                }
-            )
+            ldService: testLDService({
+                'remove-parameter-store': true,
+            }),
         })
 
         const emailSettings = must(await postgresStore.findEmailSettings())
 
-        const mcReviewSettings = must(await server.executeOperation({
-            query: FetchMcReviewSettingsDocument,
-        }))
+        const mcReviewSettings = must(
+            await executeGraphQLOperation(server, {
+                query: FetchMcReviewSettingsDocument,
+            })
+        )
 
-        const emailConfig = mcReviewSettings.data?.fetchMcReviewSettings.emailConfiguration
+        const emailConfig =
+            mcReviewSettings.data?.fetchMcReviewSettings.emailConfiguration
 
         // Expect the default email settings from database
         expect(emailConfig.emailSource).toEqual(emailSettings.emailSource)
-        expect(emailConfig.devReviewTeamEmails).toEqual(emailSettings.devReviewTeamEmails)
+        expect(emailConfig.devReviewTeamEmails).toEqual(
+            emailSettings.devReviewTeamEmails
+        )
         expect(emailConfig.oactEmails).toEqual(emailSettings.oactEmails)
-        expect(emailConfig.dmcpReviewEmails).toEqual(emailSettings.dmcpReviewEmails)
-        expect(emailConfig.dmcpSubmissionEmails).toEqual(emailSettings.dmcpSubmissionEmails)
+        expect(emailConfig.dmcpReviewEmails).toEqual(
+            emailSettings.dmcpReviewEmails
+        )
+        expect(emailConfig.dmcpSubmissionEmails).toEqual(
+            emailSettings.dmcpSubmissionEmails
+        )
         expect(emailConfig.dmcoEmails).toEqual(emailSettings.dmcoEmails)
-        
+
         //These emails are arrays in the DB, but single strings in EmailConfiguration type.
-        expect(emailConfig.cmsReviewHelpEmailAddress).toEqual(emailSettings.cmsReviewHelpEmailAddress[0])
-        expect(emailConfig.cmsRateHelpEmailAddress).toEqual(emailSettings.cmsRateHelpEmailAddress[0])
-        expect(emailConfig.helpDeskEmail).toEqual(emailSettings.helpDeskEmail[0])
+        expect(emailConfig.cmsReviewHelpEmailAddress).toEqual(
+            emailSettings.cmsReviewHelpEmailAddress[0]
+        )
+        expect(emailConfig.cmsRateHelpEmailAddress).toEqual(
+            emailSettings.cmsRateHelpEmailAddress[0]
+        )
+        expect(emailConfig.helpDeskEmail).toEqual(
+            emailSettings.helpDeskEmail[0]
+        )
     })
 })

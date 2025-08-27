@@ -1,4 +1,7 @@
-import { constructTestPostgresServer } from '../../testHelpers/gqlHelpers'
+import {
+    constructTestPostgresServer,
+    executeGraphQLOperation,
+} from '../../testHelpers/gqlHelpers'
 import {
     testAdminUser,
     testStateUser,
@@ -32,7 +35,7 @@ describe('createOauthClient', () => {
             description: 'Test client',
             userID: cmsUser.id,
         }
-        const res = await server.executeOperation({
+        const res = await executeGraphQLOperation(server, {
             query: CreateOauthClientDocument,
             variables: { input },
         })
@@ -70,7 +73,7 @@ describe('createOauthClient', () => {
             description: 'No grants',
             userID: cmsUser.id,
         }
-        const res = await server.executeOperation({
+        const res = await executeGraphQLOperation(server, {
             query: CreateOauthClientDocument,
             variables: { input },
         })
@@ -89,7 +92,7 @@ describe('createOauthClient', () => {
             userID: stateUser.id,
             description: 'Should fail',
         }
-        const res = await server.executeOperation({
+        const res = await executeGraphQLOperation(server, {
             query: CreateOauthClientDocument,
             variables: { input },
         })
@@ -113,7 +116,7 @@ describe('createOauthClient', () => {
             userID: cmsUser.id,
             description: 'DB fail',
         }
-        const res = await server.executeOperation({
+        const res = await executeGraphQLOperation(server, {
             query: CreateOauthClientDocument,
             variables: { input },
         })
@@ -133,7 +136,7 @@ describe('createOauthClient', () => {
             userID: 'invalid-user-id',
             description: 'Should fail',
         }
-        const res = await server.executeOperation({
+        const res = await executeGraphQLOperation(server, {
             query: CreateOauthClientDocument,
             variables: { input },
         })
@@ -156,7 +159,7 @@ describe('createOauthClient', () => {
             userID: 'invalid-user-id',
             description: 'Should fail',
         }
-        const res = await server.executeOperation({
+        const res = await executeGraphQLOperation(server, {
             query: CreateOauthClientDocument,
             variables: { input },
         })
@@ -182,7 +185,7 @@ describe('createOauthClient', () => {
         const server = await constructTestPostgresServer({
             context: { user: adminUser },
         })
-        const res = await server.executeOperation({
+        const res = await executeGraphQLOperation(server, {
             query: CreateOauthClientDocument,
             variables: {
                 input: {
@@ -221,7 +224,7 @@ describe('createOauthClient', () => {
             grants: ['client_credentials'],
             userID: stateUser.id,
         }
-        const res = await server.executeOperation({
+        const res = await executeGraphQLOperation(server, {
             query: CreateOauthClientDocument,
             variables: { input },
         })
