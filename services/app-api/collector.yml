@@ -5,6 +5,7 @@ receivers:
       http:
 
 exporters:
+  # New Relic exporter
   otlp:
     endpoint: https://gov-otlp.nr-data.net:4317
     headers:
@@ -14,4 +15,5 @@ service:
   pipelines:
     traces:
       receivers: [otlp]
-      exporters: [otlp]
+      exporters: [otlp]  # Export to New Relic
+      # Note: Datadog Extension handles telemetry collection automatically when enabled

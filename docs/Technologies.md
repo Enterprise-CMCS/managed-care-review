@@ -1,6 +1,29 @@
 # Technology
 
-MC-Review is built on Serverless architecture (services deployed as AWS Lambdas) with a React client, Node server, and GraphQL as the api protocol. Postgres is used as the database and is running in AWS Aurora for deployed environments. The codebase is written primarily in Typescript. Additional technologies of interest are listed below.
+MC-Review is built on AWS CDK architecture (services deployed as AWS Lambdas) with a React client, Node server, and GraphQL as the api protocol. Postgres is used as the database and is running in AWS Aurora for deployed environments. The codebase is written primarily in Typescript. Additional technologies of interest are listed below.
+
+## Infrastructure as Code
+
+### AWS Cloud Development Kit (CDK)
+
+[AWS CDK](https://aws.amazon.com/cdk/) is our infrastructure as code tool that allows us to define cloud infrastructure using TypeScript. CDK provides:
+- Type-safe infrastructure definitions
+- Reusable constructs for common patterns
+- Built-in best practices for security and compliance
+- Easy cross-stack references and dependency management
+
+Our CDK infrastructure is organized into multiple stacks:
+- **Foundation Stack**: Core SSM parameters and shared configuration
+- **Network Stack**: VPC and security groups
+- **Lambda Layers Stack**: Shared dependencies for Lambda functions
+- **Data Stack**: RDS Aurora PostgreSQL database
+- **Auth Stack**: Cognito user pools and authentication
+- **Database Operations Stack**: Database migrations and maintenance
+- **API Compute Stack**: Lambda functions and API Gateway
+- **Frontend Stack**: S3 buckets and CloudFront distribution
+- **Monitoring Stack**: CloudWatch dashboards and alarms
+
+For more details, see our [CDK Architecture Guide](../services/infra-cdk/docs/CDK_ARCHITECTURE_GUIDE.md).
 
 ## User authentication
 
