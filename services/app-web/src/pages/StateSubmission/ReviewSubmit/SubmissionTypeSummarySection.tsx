@@ -1,7 +1,10 @@
 import { Grid } from '@trussworks/react-uswds'
-import { DataDetail } from '../../../components/DataDetail'
-import { MultiColumnGrid } from '../../../components/MultiColumnGrid'
-import { SectionHeader } from '../../../components/SectionHeader'
+import {
+    DataDetail,
+    MultiColumnGrid,
+    SectionHeader,
+    SectionCard,
+} from '../../../components'
 import {
     SubmissionTypeRecord,
     ContractTypeRecord,
@@ -15,9 +18,8 @@ import {
     UnlockedContract,
     ContractRevision,
 } from '../../../gen/gqlClient'
-import { booleanAsYesNoUserValue } from '../../../components/Form/FieldYesNo/FieldYesNo'
-import { SectionCard } from '../../../components/SectionCard'
-import styles from '../../../components/SubmissionSummarySection/SubmissionSummarySection.module.scss'
+import { booleanAsYesNoUserValue } from '../../../components/Form/FieldYesNo'
+import styles from './ReviewSubmit.module.scss'
 import { formatCalendarDate } from '@mc-review/dates'
 
 export type SubmissionTypeSummarySectionProps = {
@@ -62,7 +64,7 @@ export const SubmissionTypeSummarySection = ({
     return (
         <SectionCard
             id="submissionTypeSection"
-            className={styles.submissionTypeSection}
+            className={styles.summarySection}
         >
             <SectionHeader
                 header={submissionName}
@@ -154,7 +156,7 @@ export const SubmissionTypeSummarySection = ({
                     )}
                 </MultiColumnGrid>
 
-                <Grid row gap className={styles.reviewDataRow}>
+                <Grid row gap>
                     <Grid col={12}>
                         {(contractFormData.submissionDescription ||
                             !isSubmitted) && (

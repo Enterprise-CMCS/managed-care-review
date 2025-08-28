@@ -27,6 +27,7 @@
 .supportingDocsEmpty {
     text-align: center;
     padding: 1rem;
+    margin-bottom: 1rem;
 }
 
 .captionContainer {
@@ -66,4 +67,8 @@ h5 {
     :first-child {
         margin-right: 5px;
     }
+}
+
+.withMarginTop {
+    margin-top: 1rem;
 }

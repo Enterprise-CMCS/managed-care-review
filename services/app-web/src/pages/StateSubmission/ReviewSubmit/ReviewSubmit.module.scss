@@ -16,7 +16,6 @@
     margin: uswds.units(2) auto;
     background: custom.$mcr-foundation-white;
     padding: uswds.units(2) uswds.units(4);
-    padding-top: uswds.units(2) !important;
     border: 1px solid custom.$mcr-gray-lighter;
     line-height: uswds.units(3);
 
@@ -24,17 +23,12 @@
         margin: 0;
         @include uswds.u-text('normal');
     }
-    &:first-of-type {
-        h2 {
-            @include uswds.u-text('bold');
-            font-size: size('body', 'lg');
-        }
-    }
+
     ul {
         margin: 0;
 
         li {
-            padding: uswds.units(1) 0;
+            padding: 0 0;
         }
         &.commaList {
             li {
@@ -50,16 +44,21 @@
     }
 
     // align state contacts
-    dl div[class^='grid-container'] {
-        padding: 0;
+    div[class^='grid-container'] {
+        padding-left: 0;
+        dl {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            padding: 0;
 
-        div {
-            padding-bottom: uswds.units(2);
-        }
+            div {
+                padding-bottom: uswds.units(2);
+            }
 
-        // dont bottom pad last two grid items
-        div:nth-last-child(-n + 2) {
-            padding-bottom: 0;
+            // dont bottom pad last two grid items
+            div:nth-last-child(-n + 2) {
+                padding-bottom: 0;
+            }
         }
     }
     table:last-of-type {
