@@ -1,6 +1,7 @@
 import type { Context as OTELContext, Span, Tracer } from '@opentelemetry/api'
 import { propagation, ROOT_CONTEXT } from '@opentelemetry/api'
 import { ApolloServer } from '@apollo/server'
+import type { middleware } from '@as-integrations/aws-lambda'
 import {
     startServerAndCreateLambdaHandler,
     handlers,
@@ -157,6 +158,20 @@ function contextForRequestForFetcher(
             }
         } else {
             throw new Error('Log: no AuthProvider from an internal API user.')
+        }
+    }
+}
+
+const requestHandler = handlers.createAPIGatewayProxyEventRequestHandler()
+
+const corsMiddleware: middleware.MiddlewareFn<typeof requestHandler> = async (
+    event
+) => {
+    return async (result) => {
+        const corsError = configureCorsHeaders(result, event)
+
+        if (corsError) {
+            logError('configureCorsHeaders', corsError.message)
         }
     }
 }
@@ -382,15 +397,12 @@ async function initializeGQLHandler(): Promise<Handler> {
         introspection: introspectionAllowed,
     })
 
-    const handler = startServerAndCreateLambdaHandler(
-        server,
-        handlers.createAPIGatewayProxyEventRequestHandler(),
-        {
-            context: async ({ event, context }) => {
-                return await contextForRequest({ event, context })
-            },
-        }
-    )
+    const handler = startServerAndCreateLambdaHandler(server, requestHandler, {
+        context: async ({ event, context }) => {
+            return await contextForRequest({ event, context })
+        },
+        middleware: [corsMiddleware],
+    })
 
     // Locally, we wrap our handler in a middleware that returns 403 for unauthenticated requests
     const isLocal = authMode === 'LOCAL'
@@ -413,15 +425,6 @@ const gqlHandler: Handler = async (event, context, completion) => {
     initTracer(serviceName, otelCollectorUrl)
 
     const response = await initializedHandler(event, context, completion)
-
-    // Configure cors headers
-    const corsError = configureCorsHeaders(response, event)
-
-    if (corsError) {
-        logError('configureCorsHeaders', corsError.message)
-        recordException(corsError.message, serviceName, 'requestPayload')
-    }
-
     const payloadSize = Buffer.from(event.body).length
     if (payloadSize > 5.5 * 1024 * 1024) {
         const errMsg = `Large request payload detected: ${payloadSize} bytes`
