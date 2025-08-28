@@ -1,5 +1,5 @@
 import { Grid, GridContainer } from '@trussworks/react-uswds'
-import styles from '../StateSubmissionForm.module.scss'
+import styles from '../ReviewSubmit/ReviewSubmit.module.scss'
 
 import { SectionHeader } from '../../../components/SectionHeader'
 import {
@@ -36,6 +36,8 @@ export const ContactsSummarySection = ({
             <SectionHeader
                 header="State contacts"
                 editNavigateTo={editNavigateTo}
+                hideBorderTop
+                fontSize="38px"
             />
 
             <GridContainer className="padding-left-0">

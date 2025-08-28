@@ -26,6 +26,7 @@ const s3Client = new S3Client({
 
 // Maximum total size for document zip packages (1.5GB)
 const MAX_ZIP_SIZE_BYTES = 1536 * 1024 * 1024
+
 /**
  * Extracts bucket name from S3 URL
  */
@@ -603,8 +604,10 @@ export function documentZipService(
         },
         generateContractDocumentsZip: async (contractRevision, span) => {
             const contractRevisionID = contractRevision.id
-            const contractDocuments =
-                contractRevision.formData.contractDocuments
+            const contractDocuments = [
+                ...(contractRevision.formData.contractDocuments || []),
+                ...(contractRevision.formData.supportingDocuments || []),
+            ]
 
             if (!contractDocuments || contractDocuments.length === 0) {
                 // No documents to zip

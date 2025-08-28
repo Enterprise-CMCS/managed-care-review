@@ -119,6 +119,7 @@ export const OauthClients = () => {
     useEffect(() => {
         updateActiveMainContent(activeMainContentId)
     }, [activeMainContentId, updateActiveMainContent])
+
     if (fetchOauthClientsResult.status === 'LOADING') {
         return <Loading />
     } else if (fetchOauthClientsResult.status === 'ERROR') {

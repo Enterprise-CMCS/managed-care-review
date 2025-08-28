@@ -27,6 +27,30 @@ export const AccessibleSelect = <
                     color: '#3D4551', // 7:1 contrast rule. Not aware of background color
                     ...passedStyles?.placeholder,
                 }),
+                dropdownIndicator: (baseStyles) => ({
+                    ...baseStyles,
+                    color: '#565C65', // 3:1 UI contrast rule
+                    '&:hover': {
+                        color: '#565C65', // 3:1 UI contrast rule
+                    },
+                    ...passedStyles?.dropdownIndicator,
+                }),
+                clearIndicator: (baseStyles) => ({
+                    ...baseStyles,
+                    color: '#565C65', // 3:1 UI contrast rule
+                    '&:hover': {
+                        color: '#565C65', // 3:1 UI contrast rule
+                    },
+                    ...passedStyles?.clearIndicator,
+                }),
+                control: (baseStyles, state) => ({
+                    ...baseStyles,
+                    borderColor: '#565C65', // 3:1 UI contrast rule
+                    '&:hover': {
+                        borderColor: '#565C65', // 3:1 UI contrast rule
+                    },
+                    ...passedStyles?.control,
+                }),
             }}
         />
     )

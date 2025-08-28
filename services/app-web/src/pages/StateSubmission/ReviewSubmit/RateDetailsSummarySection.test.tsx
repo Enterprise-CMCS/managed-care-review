@@ -11,11 +11,11 @@ import {
     mockContractWithLinkedRateDraft,
     mockContractWithLinkedRateSubmitted,
     mockWithdrawnRates,
+    s3DlUrl,
 } from '@mc-review/mocks'
 import { renderWithProviders } from '../../../testHelpers/jestHelpers'
 import { RateDetailsSummarySection } from './RateDetailsSummarySection'
 import { Rate } from '../../../gen/gqlClient'
-import { testS3Client } from '../../../testHelpers/s3Helpers'
 import { ActuaryCommunicationRecord } from '@mc-review/hpp'
 import * as usePreviousSubmission from '../../../hooks/usePreviousSubmission'
 
@@ -211,17 +211,11 @@ describe('RateDetailsSummarySection', () => {
                 name: 'Rate details',
             })
         ).toBeInTheDocument()
-        // Is this the best way to check that the link is not present?
+
         expect(screen.queryByText('Edit')).not.toBeInTheDocument()
 
-        // expects download all button after loading has completed
-        await waitFor(() => {
-            expect(
-                screen.getByRole('link', {
-                    name: 'Download all rate documents',
-                })
-            ).toBeInTheDocument()
-        })
+        const link = await screen.findByTestId('zipDownloadLink')
+        expect(link).toBeInTheDocument()
     })
 
     it('can render all rate details fields for amendment to prior rate certification submission', () => {
@@ -324,43 +318,71 @@ describe('RateDetailsSummarySection', () => {
     it('can render all rate details fields for new rate certification submission', async () => {
         const statePrograms = mockMNState().programs
         const contract = mockContractPackageSubmitted()
+        contract.packageSubmissions[0].contractRevision.formData.dsnpContract =
+            true
         contract.packageSubmissions[0].rateRevisions[0].formData.rateCertificationName =
             'MCR-MN-0005-SNBC-RATE-20221014-20221014-CERTIFICATION-20221014'
         contract.packageSubmissions[0].rateRevisions[0].formData.rateType =
             'NEW'
         contract.packageSubmissions[0].rateRevisions[0].formData.amendmentEffectiveDateStart =
             null
-        await waitFor(() => {
-            renderWithProviders(
-                <RateDetailsSummarySection
-                    contract={contract}
-                    submissionName="MN-MSHO-0003"
-                    statePrograms={statePrograms}
-                />,
-                {
-                    apolloProvider: apolloProviderCMSUser,
-                }
-            )
-        })
+        contract.packageSubmissions[0].rateRevisions[0].formData.rateMedicaidPopulations =
+            [
+                'MEDICAID_ONLY',
+                'MEDICARE_MEDICAID_WITHOUT_DSNP',
+                'MEDICARE_MEDICAID_WITH_DSNP',
+            ]
+
+        renderWithProviders(
+            <RateDetailsSummarySection
+                contract={contract}
+                submissionName="MN-MSHO-0003"
+                statePrograms={statePrograms}
+            />,
+            {
+                apolloProvider: apolloProviderCMSUser,
+                featureFlags: { dsnp: true },
+            }
+        )
 
         const rateName =
             'MCR-MN-0005-SNBC-RATE-20221014-20221014-CERTIFICATION-20221014'
 
-        expect(screen.getByText(rateName)).toBeInTheDocument()
-        expect(
-            screen.getByRole('definition', { name: 'Rate certification type' })
-        ).toBeInTheDocument()
-        expect(
-            screen.getByRole('definition', {
-                name: 'Rates this rate certification covers',
-            })
-        ).toBeInTheDocument()
-        expect(
-            screen.getByRole('definition', { name: 'Rating period' })
-        ).toBeInTheDocument()
-        expect(
-            screen.getByRole('definition', { name: 'Date certified' })
-        ).toBeInTheDocument()
+        await waitFor(() => {
+            expect(screen.getByText(rateName)).toBeInTheDocument()
+            expect(
+                screen.getByRole('definition', {
+                    name: 'Rates this rate certification covers',
+                })
+            ).toBeInTheDocument()
+            expect(
+                screen.getByRole('definition', {
+                    name: 'Medicaid populations included in this rate certification',
+                })
+            ).toBeInTheDocument()
+            expect(
+                screen.getByTestId(
+                    'Medicare-Medicaid dually eligible individuals enrolled through a Dual-Eligible Special Needs Plan (D-SNP)'
+                )
+            ).toBeInTheDocument()
+            expect(screen.getByTestId('Medicaid-only')).toBeInTheDocument()
+            expect(
+                screen.getByTestId(
+                    'Medicare-Medicaid dually eligible individuals not enrolled through a D-SNP'
+                )
+            ).toBeInTheDocument()
+            expect(
+                screen.getByRole('definition', {
+                    name: 'Rate certification type',
+                })
+            ).toBeInTheDocument()
+            expect(
+                screen.getByRole('definition', { name: 'Rating period' })
+            ).toBeInTheDocument()
+            expect(
+                screen.getByRole('definition', { name: 'Date certified' })
+            ).toBeInTheDocument()
+        })
     })
 
     it('can render the deprecated rate programs when present and no new rate programs added to CMS user viewing an existing rate certification submission', async () => {
@@ -1082,24 +1104,48 @@ describe('RateDetailsSummarySection', () => {
         })
     })
 
+    it('displays missing info text for state users on unlocked submissions when Rate Medicaid populations not populated on historic submission with dsnp contract', async () => {
+        const draftContract = mockContractPackageDraft()
+        draftContract.draftRevision!.formData.dsnpContract = true
+        draftContract.draftRates![0].draftRevision!.formData.rateMedicaidPopulations =
+            []
+
+        renderWithProviders(
+            <RateDetailsSummarySection
+                contract={draftContract}
+                editNavigateTo="rate-details"
+                submissionName="MN-PMAP-0001"
+                statePrograms={statePrograms}
+                explainMissingData
+            />,
+            {
+                apolloProvider: apolloProviderStateUser,
+                featureFlags: { dsnp: true },
+            }
+        )
+        expect(
+            await screen.findByText(
+                'Medicaid populations included in this rate certification'
+            )
+        ).toBeInTheDocument()
+        const medicaidPop = await screen.getByTestId('medicaidPop')
+        expect(
+            within(medicaidPop).queryByText(/You must provide this information/)
+        ).toBeInTheDocument()
+    })
+
     it('renders inline error when bulk URL is unavailable', async () => {
-        const s3Provider = {
-            ...testS3Client(),
-            getBulkDlURL: async (
-                _keys: string[],
-                _fileName: string
-            ): Promise<string | Error> => {
-                return new Error('Error: getBulkDlURL encountered an error')
-            },
-        }
+        const mockOnDocumentError = vi.fn()
+        submittedContract.packageSubmissions[0].rateRevisions[0].documentZipPackages =
+            null
         renderWithProviders(
             <RateDetailsSummarySection
                 contract={submittedContract}
                 submissionName="MN-MSHO-0003"
                 statePrograms={statePrograms}
+                onDocumentError={mockOnDocumentError}
             />,
             {
-                s3Provider,
                 apolloProvider: apolloProviderCMSUser,
             }
         )
@@ -1108,6 +1154,7 @@ describe('RateDetailsSummarySection', () => {
             expect(
                 screen.getByText('Rate document download is unavailable')
             ).toBeInTheDocument()
+            expect(mockOnDocumentError).toHaveBeenCalledWith(true)
         })
     })
 
@@ -1219,13 +1266,8 @@ describe('RateDetailsSummarySection', () => {
         expect(screen.queryByText('Edit')).not.toBeInTheDocument()
 
         // expects download all button after loading has completed
-        await waitFor(() => {
-            expect(
-                screen.getByRole('link', {
-                    name: 'Download all rate documents',
-                })
-            ).toBeInTheDocument()
-        })
+        const link = await screen.findByTestId('zipDownloadLink')
+        expect(link).toBeInTheDocument()
 
         // expect withdrawn rates to be on the screen
         expect(
@@ -1240,5 +1282,115 @@ describe('RateDetailsSummarySection', () => {
                 name: /WITHDRAWN-RATE-2-NAME/,
             })
         ).toBeInTheDocument()
+    })
+
+    describe('Document zip package download link', () => {
+        it('renders zip package link for a SUBMITTED submission as a CMS user', async () => {
+            renderWithProviders(
+                <RateDetailsSummarySection
+                    contract={{
+                        ...mockContractPackageSubmitted(),
+                        status: 'SUBMITTED',
+                    }}
+                    submissionName="MN-MSHO-0003"
+                    statePrograms={statePrograms}
+                />,
+                {
+                    apolloProvider: apolloProviderCMSUser,
+                }
+            )
+
+            await waitFor(() => {
+                expect(
+                    screen.getByRole('heading', {
+                        level: 2,
+                        name: 'Rate details',
+                    })
+                ).toBeInTheDocument()
+                expect(screen.queryByText('Edit')).not.toBeInTheDocument()
+            })
+
+            // expects download all button after loading has completed
+            const link = await screen.findByTestId('zipDownloadLink')
+            expect(link).toBeInTheDocument()
+            expect(
+                screen.getByText('Download rate documents (3 files)')
+            ).toBeInTheDocument()
+        })
+
+        it('renders zip package link for an UNLOCKED submission as a CMS user', async () => {
+            const contract = mockContractPackageUnlockedWithUnlockedType()
+            contract.packageSubmissions[0].rateRevisions[0].documentZipPackages =
+                [
+                    {
+                        id: 'zip-package-123',
+                        s3URL: 's3://bucket-name/zips/rates/key/contract-documents.zip',
+                        sha256: 'sha123',
+                        documentType: 'RATE_DOCUMENTS',
+                        createdAt: new Date('01/15/2024'),
+                        downloadUrl: s3DlUrl,
+                    },
+                ]
+            renderWithProviders(
+                <RateDetailsSummarySection
+                    contract={contract}
+                    submissionName="MN-MSHO-0003"
+                    statePrograms={statePrograms}
+                />,
+                {
+                    apolloProvider: apolloProviderCMSUser,
+                }
+            )
+
+            await waitFor(() => {
+                expect(
+                    screen.getByRole('heading', {
+                        level: 2,
+                        name: 'Rate details',
+                    })
+                ).toBeInTheDocument()
+                expect(screen.queryByText('Edit')).not.toBeInTheDocument()
+            })
+
+            // expects download all button after loading has completed
+            const link = await screen.findByTestId('zipDownloadLink')
+            expect(link).toBeInTheDocument()
+            expect(
+                screen.getByText('Download rate documents (1 file)')
+            ).toBeInTheDocument()
+        })
+
+        it('renders zip package link for a SUBMITTED submission as a State user', async () => {
+            renderWithProviders(
+                <RateDetailsSummarySection
+                    contract={{
+                        ...mockContractPackageSubmitted(),
+                        status: 'SUBMITTED',
+                    }}
+                    submissionName="MN-MSHO-0003"
+                    statePrograms={statePrograms}
+                />,
+                {
+                    apolloProvider: apolloProviderStateUser,
+                }
+            )
+
+            await waitFor(() => {
+                expect(
+                    screen.getByRole('heading', {
+                        level: 2,
+                        name: 'Rate details',
+                    })
+                ).toBeInTheDocument()
+                expect(screen.queryByText('Edit')).not.toBeInTheDocument()
+            })
+
+            // expects download all button after loading has completed
+            const link = await screen.findByTestId('zipDownloadLink')
+            expect(link).toBeInTheDocument()
+            expect(
+                screen.getByText('Download rate documents (3 files)')
+            ).toBeInTheDocument()
+        })
     })
 })

@@ -15,7 +15,7 @@ jobs:
     runs-on: ubuntu-24.04
     steps:
       - name: Check out repo
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
 
       - name: Get AWS credentials
         uses: ./.github/actions/get_aws_credentials
@@ -25,7 +25,7 @@ jobs:
           stage-name: prod
 
       - name: Sync Security Hub and Jira
-        uses: Enterprise-CMCS/mac-fc-security-hub-visibility@v2.1.8
+        uses: Enterprise-CMCS/mac-fc-security-hub-visibility@v2.1.9
         with:
           jira-token: ${{ secrets.JIRA_TOKEN }}
           jira-username: ${{ secrets.JIRA_USERNAME }}

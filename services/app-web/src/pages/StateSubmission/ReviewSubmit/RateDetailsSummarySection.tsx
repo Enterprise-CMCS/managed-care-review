@@ -1,20 +1,19 @@
-import React, { useState } from 'react'
-import { DataDetail } from '../../../components/DataDetail'
+import React from 'react'
+import {
+    DataDetail,
+    DataDetailCheckboxList,
+} from '../../../components/DataDetail'
 import { SectionHeader } from '../../../components/SectionHeader'
-import { useS3 } from '../../../contexts/S3Context'
 import { formatCalendarDate } from '@mc-review/dates'
 import { MultiColumnGrid } from '../../../components/MultiColumnGrid'
-import { DownloadButton } from '../../../components/DownloadButton'
 import { UploadedDocumentsTable } from '../../../components/SubmissionSummarySection'
 import { usePreviousSubmission } from '../../../hooks/usePreviousSubmission'
 import styles from '../../../components/SubmissionSummarySection/SubmissionSummarySection.module.scss'
+import sectionStyle from '../ReviewSubmit/ReviewSubmit.module.scss'
 import { GenericErrorPage } from '../../Errors/GenericErrorPage'
 
-import { recordJSException } from '@mc-review/otel'
 import { DataDetailMissingField } from '../../../components/DataDetail/DataDetailMissingField'
 import { DataDetailContactField } from '../../../components/DataDetail/DataDetailContactField/DataDetailContactField'
-import useDeepCompareEffect from 'use-deep-compare-effect'
-import { InlineDocumentWarning } from '../../../components/DocumentWarning'
 import { SectionCard } from '../../../components/SectionCard'
 import {
     Rate,
@@ -35,10 +34,16 @@ import {
     getVisibleLatestRateRevisions,
 } from '@mc-review/helpers'
 import { useAuth } from '../../../contexts/AuthContext'
-import { ActuaryCommunicationRecord } from '@mc-review/hpp'
+import {
+    ActuaryCommunicationRecord,
+    RateMedicaidPopulationsRecord,
+} from '@mc-review/hpp'
 import { useParams } from 'react-router-dom'
 import { hasCMSUserPermissions } from '@mc-review/helpers'
 import { InfoTag } from '../../../components/InfoTag/InfoTag'
+import { featureFlags } from '@mc-review/common-code'
+import { useLDClient } from 'launchdarkly-react-client-sdk'
+import { DocumentHeader } from '../../../components/DocumentHeader/DocumentHeader'
 
 export type RateDetailsSummarySectionProps = {
     contract: Contract | UnlockedContract
@@ -64,22 +69,6 @@ type PackageNamesLookupType = {
     }
 }
 
-export function renderDownloadButton(
-    zippedFilesURL: string | undefined | Error
-) {
-    if (zippedFilesURL instanceof Error || !zippedFilesURL) {
-        return (
-            <InlineDocumentWarning message="Rate document download is unavailable" />
-        )
-    }
-    return (
-        <DownloadButton
-            text="Download all rate documents"
-            zippedFilesURL={zippedFilesURL}
-        />
-    )
-}
-
 export const RateDetailsSummarySection = ({
     contract,
     rateRevisions,
@@ -91,6 +80,7 @@ export const RateDetailsSummarySection = ({
 }: RateDetailsSummarySectionProps): React.ReactElement => {
     const { loggedInUser } = useAuth()
     const { revisionVersion } = useParams()
+    const ldClient = useLDClient()
     const isSubmitted =
         contract.status === 'SUBMITTED' || contract.status === 'RESUBMITTED'
     const isCMSUser = hasCMSUserPermissions(loggedInUser)
@@ -99,6 +89,10 @@ export const RateDetailsSummarySection = ({
     const isEditing = !isSubmittedOrCMSUser && editNavigateTo !== undefined
     const isPreviousSubmission = usePreviousSubmission()
     const isInitialSubmission = contract.packageSubmissions.length === 1
+    const isDsnpEnabled = ldClient?.variation(
+        featureFlags.DSNP.flag,
+        featureFlags.DSNP.defaultValue
+    )
 
     const rateRevs = rateRevisions
         ? rateRevisions
@@ -122,11 +116,6 @@ export const RateDetailsSummarySection = ({
         ? getPackageSubmissionAtIndex(contract, lastSubmittedIndex)?.submitInfo
               .updatedAt
         : (getLastContractSubmission(contract)?.submitInfo.updatedAt ?? null)
-
-    const { getKey, getBulkDlURL } = useS3()
-    const [zippedFilesURL, setZippedFilesURL] = useState<
-        string | undefined | Error
-    >(undefined)
     const [packageNamesLookup] = React.useState<PackageNamesLookupType | null>(
         null
     )
@@ -225,66 +214,6 @@ export const RateDetailsSummarySection = ({
         }
         return true
     }
-    useDeepCompareEffect(() => {
-        // skip getting urls of this if this is a previous submission or draft
-        if (!isSubmittedOrCMSUser || isPreviousSubmission) return
-
-        // get all the keys for the documents we want to zip
-        async function fetchZipUrl() {
-            const submittedRates =
-                getLastContractSubmission(contract)?.rateRevisions ?? []
-
-            // skip if no rates
-            if (submittedRates.length > 0) {
-                const keysFromDocs = submittedRates
-                    .flatMap((rateInfo) =>
-                        rateInfo.formData.rateDocuments.concat(
-                            rateInfo.formData.supportingDocuments
-                        )
-                    )
-                    .map((doc) => {
-                        const key = getKey(doc.s3URL)
-                        if (!key) return ''
-                        return key
-                    })
-                    .filter((key) => key !== '')
-
-                // call the lambda to zip the files and get the url
-                const zippedURL = await getBulkDlURL(
-                    keysFromDocs,
-                    submissionName + '-rate-details.zip',
-                    'HEALTH_PLAN_DOCS'
-                )
-                if (zippedURL instanceof Error) {
-                    const msg = `ERROR: getBulkDlURL failed to generate supporting document URL. ID: ${contract.id} Message: ${zippedURL}`
-                    console.info(msg)
-
-                    if (onDocumentError) {
-                        onDocumentError(true)
-                    }
-
-                    recordJSException(msg)
-                }
-
-                setZippedFilesURL(zippedURL)
-            }
-        }
-
-        void fetchZipUrl()
-    }, [
-        getKey,
-        getBulkDlURL,
-        contract,
-        submissionName,
-        isSubmittedOrCMSUser,
-        isPreviousSubmission,
-    ])
-
-    const showDownloadAllButton =
-        isSubmittedOrCMSUser &&
-        !isPreviousSubmission &&
-        rateRevs &&
-        rateRevs.length > 0
 
     const noRatesMessage = () => {
         if (isStateUser) {
@@ -301,13 +230,14 @@ export const RateDetailsSummarySection = ({
     }
 
     return (
-        <SectionCard id="rateDetails" className={styles.summarySection}>
+        <SectionCard id="rateDetails" className={sectionStyle.summarySection}>
             <SectionHeader
                 header="Rate details"
                 editNavigateTo={editNavigateTo}
-            >
-                {showDownloadAllButton && renderDownloadButton(zippedFilesURL)}
-            </SectionHeader>
+                hideBorderTop
+                hideBorderBottom
+                fontSize="38px"
+            />
             {rateRevs && rateRevs.length > 0
                 ? rateRevs.map((rateRev) => {
                       const rateFormData = getRateFormData(rateRev)
@@ -316,7 +246,22 @@ export const RateDetailsSummarySection = ({
                       const hasNoRatePrograms =
                           rateFormData.rateProgramIDs.length === 0
                       const isLinkedRate = rateRev.isLinked
-
+                      const medicaidPopulations =
+                          (rateFormData.rateMedicaidPopulations ??
+                              []) as string[]
+                      const contractIsDsnp =
+                          contract.packageSubmissions[0]?.contractRevision
+                              ?.formData?.dsnpContract === true ||
+                          contract.draftRevision?.formData?.dsnpContract ===
+                              true
+                      const rateDocumentCount =
+                          rateFormData.supportingDocuments &&
+                          rateFormData.rateDocuments &&
+                          rateFormData.supportingDocuments.length +
+                              rateFormData.rateDocuments.length
+                      const documentZipPackage = rateRev?.documentZipPackages
+                          ? rateRev.documentZipPackages
+                          : undefined
                       /**
                     Rate programs switched in summer 2024. We still show deprecated program field values when
                     - there's no new field values present and CMS user is viewing
@@ -336,7 +281,7 @@ export const RateDetailsSummarySection = ({
                               id={`rate-details-${rateRev.id}`}
                               key={rateRev.id}
                           >
-                              <div>
+                              <div className={styles.rateNameContainer}>
                                   <h3
                                       aria-label={`Rate ID: ${rateFormData.rateCertificationName}`}
                                       className={styles.rateName}
@@ -373,6 +318,31 @@ export const RateDetailsSummarySection = ({
                                               )}
                                           />
                                       )}
+                                      {isDsnpEnabled && contractIsDsnp && (
+                                          <DataDetail
+                                              id="medicaidPop"
+                                              label="Medicaid populations included in this rate certification"
+                                              explainMissingData={
+                                                  isLinkedRate
+                                                      ? false
+                                                      : explainMissingData &&
+                                                        rateRev.formData
+                                                            .rateMedicaidPopulations
+                                                            ?.length === 0
+                                              }
+                                              children={
+                                                  <DataDetailCheckboxList
+                                                      list={medicaidPopulations}
+                                                      dict={
+                                                          RateMedicaidPopulationsRecord
+                                                      }
+                                                      displayEmptyList={
+                                                          !explainMissingData
+                                                      }
+                                                  />
+                                              }
+                                          />
+                                      )}
                                       <DataDetail
                                           id="rateType"
                                           label="Rate certification type"
@@ -385,6 +355,8 @@ export const RateDetailsSummarySection = ({
                                               rateRev
                                           )}
                                       />
+                                  </MultiColumnGrid>
+                                  <MultiColumnGrid columns={2}>
                                       <DataDetail
                                           id="ratingPeriod"
                                           label={
@@ -490,6 +462,8 @@ export const RateDetailsSummarySection = ({
                                               />
                                           )
                                       )}
+                                  </MultiColumnGrid>
+                                  <MultiColumnGrid columns={1}>
                                       <DataDetail
                                           id="communicationPreference"
                                           label="Actuaries’ communication preference"
@@ -508,6 +482,19 @@ export const RateDetailsSummarySection = ({
                                       />
                                   </MultiColumnGrid>
                               </dl>
+                              <DocumentHeader
+                                  type={'RATE'}
+                                  documentZipPackages={documentZipPackage}
+                                  documentCount={rateDocumentCount}
+                                  onDocumentError={onDocumentError}
+                                  renderZipLink={
+                                      !!(
+                                          isSubmittedOrCMSUser &&
+                                          !isPreviousSubmission &&
+                                          !editNavigateTo
+                                      )
+                                  }
+                              />
                               {rateFormData.rateDocuments && (
                                   <UploadedDocumentsTable
                                       documents={rateFormData.rateDocuments}

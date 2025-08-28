@@ -95,7 +95,7 @@ export const CMSQuestionResponseTable = ({
                 className={styles.yourQuestionSection}
                 data-testid={'usersDivisionQuestions'}
             >
-                <SectionHeader header="Your division's questions">
+                <SectionHeader header="Your division's questions" hideBorderTop>
                     {canAddQuestions && (
                         <NavLinkWithLogging
                             className="usa-button"
@@ -125,7 +125,10 @@ export const CMSQuestionResponseTable = ({
                 className={styles.questionSection}
                 data-testid={'otherDivisionQuestions'}
             >
-                <SectionHeader header="Other divisions' questions" />
+                <SectionHeader
+                    header="Other divisions' questions"
+                    hideBorderTop
+                />
                 {otherRounds.length ? (
                     otherRounds.map((questionRound, index) =>
                         questionRound.map(({ roundTitle, questionData }) => (

@@ -308,6 +308,18 @@
                     "fullName": "Children’s Medical Services ",
                     "name": "CMS",
                     "isRateProgram": false
+                },
+                {
+                    "id": "ec5fef8a-99fc-4f5b-8782-d4fc0fd1f5b3",
+                    "fullName": "HIDE D-SNP",
+                    "name": "HIDE D-SNP",
+                    "isRateProgram": false
+                },
+                {
+                    "id": "ff7ed09e-cfcf-4725-8732-abe51f660d21",
+                    "fullName": "FIDE D-SNP",
+                    "name": "FIDE D-SNP",
+                    "isRateProgram": false
                 }
             ],
             "code": "FL"
@@ -636,7 +648,7 @@
                 {
                     "id": "f1194072-b554-4247-8ba7-6d29ccf5d27b",
                     "fullName": "Managed Care Health Plan Comprehensive Health Care Program",
-                    "name": "MCHP CHCP",
+                    "name": "MCHP",
                     "isRateProgram": false
                 }
             ],

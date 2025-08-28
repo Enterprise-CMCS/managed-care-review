@@ -1,0 +1,11 @@
+query fetchDocument($input: FetchDocumentInput!) {
+    fetchDocument(input: $input) {
+        document {
+            id
+            name
+            s3URL
+            downloadURL
+            type
+        }
+    }
+}

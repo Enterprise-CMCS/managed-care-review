@@ -1,5 +1,21 @@
 import { FileUpload, S3FileData } from './FileUpload'
-import { fakeRequest } from '../../testHelpers/jestHelpers'
+
+function fakeRequest<T>(
+    success: boolean,
+    returnData: T,
+    timeout?: number
+): Promise<T> {
+    const t = timeout || Math.round(Math.random() * 1000)
+    return new Promise((resolve, reject) => {
+        setTimeout(() => {
+            if (success) {
+                resolve(returnData)
+            } else {
+                reject(new Error('Error'))
+            }
+        }, t)
+    })
+}
 
 export default {
     title: 'Components/Forms/FileUpload',

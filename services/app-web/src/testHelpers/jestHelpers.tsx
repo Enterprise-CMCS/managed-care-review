@@ -35,7 +35,7 @@ import { tealiumTestClient } from './tealiumHelpers'
 import type { TealiumClientType } from '../tealium'
 
 import { vi } from 'vitest'
-import { TraceProvider } from '../contexts/TraceContext'
+import { MockTraceProvider } from '../contexts/TraceContext'
 import { TracingInitializer } from '../pages/App/App'
 
 function ldClientMock(featureFlags: FeatureFlagSettings): LDClient {
@@ -109,7 +109,7 @@ const renderWithProviders = (
 
     const renderResult = render(
         <LDProvider {...ldProviderConfig}>
-            <TraceProvider>
+            <MockTraceProvider>
                 <TracingInitializer>
                     <MockedProvider {...apolloProvider}>
                         <MemoryRouter initialEntries={[route || '']}>
@@ -131,7 +131,7 @@ const renderWithProviders = (
                         </MemoryRouter>
                     </MockedProvider>
                 </TracingInitializer>
-            </TraceProvider>
+            </MockTraceProvider>
         </LDProvider>
     )
     return {

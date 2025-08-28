@@ -13,7 +13,8 @@ import { RateDetailsSummarySection } from './RateDetailsSummarySection'
 import { RateInfoType } from '@mc-review/hpp'
 import { testS3Client } from '../../../testHelpers/s3Helpers'
 
-describe('RateDetailsSummarySection', () => {
+//Skipping for now until we delete the files
+describe.skip('RateDetailsSummarySection', () => {
     const draftSubmission = mockContractAndRatesDraft()
     const stateSubmission = mockStateSubmission()
     const statePrograms = mockMNState().programs

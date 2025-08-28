@@ -42,32 +42,32 @@ export async function findAllDocuments(
         const allDocs = [
             ...contractDocs.map((doc) => ({
                 ...doc,
-                type: 'contractDoc' as const,
+                type: 'CONTRACT_DOC' as const,
             })),
-            ...rateDocs.map((doc) => ({ ...doc, type: 'rateDoc' as const })),
+            ...rateDocs.map((doc) => ({ ...doc, type: 'RATE_DOC' as const })),
             ...contractSupportingDocs.map((doc) => ({
                 ...doc,
-                type: 'contractSupportingDoc' as const,
+                type: 'CONTRACT_SUPPORTING_DOC' as const,
             })),
             ...rateSupportingDocs.map((doc) => ({
                 ...doc,
-                type: 'rateSupportingDoc' as const,
+                type: 'RATE_SUPPORTING_DOC' as const,
             })),
             ...contractQuestionDocs.map((doc) => ({
                 ...doc,
-                type: 'contractQuestionDoc' as const,
+                type: 'CONTRACT_QUESTION_DOC' as const,
             })),
             ...contractQuestionResponseDocs.map((doc) => ({
                 ...doc,
-                type: 'contractQuestionResponseDoc' as const,
+                type: 'CONTRACT_QUESTION_RESPONSE_DOC' as const,
             })),
             ...rateQuestionDocs.map((doc) => ({
                 ...doc,
-                type: 'rateQuestionDoc' as const,
+                type: 'RATE_QUESTION_DOC' as const,
             })),
             ...rateQuestionResponseDocs.map((doc) => ({
                 ...doc,
-                type: 'rateQuestionResponseDoc' as const,
+                type: 'RATE_QUESTION_RESPONSE_DOC' as const,
             })),
         ]
 
