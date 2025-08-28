@@ -7,11 +7,7 @@ import {
     handlers,
 } from '@as-integrations/aws-lambda'
 import { initTracer, recordException } from '../../../uploads/src/lib/otel'
-import type {
-    APIGatewayProxyEvent,
-    APIGatewayProxyHandler,
-    Handler,
-} from 'aws-lambda'
+import type { APIGatewayProxyEvent, Handler } from 'aws-lambda'
 
 import typeDefs from '../../../app-graphql/src/schema.graphql'
 import { assertIsAuthMode } from '@mc-review/common-code'
@@ -44,7 +40,6 @@ import {
     generateDocumentZip,
     localGenerateDocumentZip,
 } from '../zip'
-import { logError } from '../logger'
 import { configureCorsHeaders } from '../cors/configureCorsHelpers'
 
 let ldClient: LDClient
@@ -167,36 +162,29 @@ const requestHandler = handlers.createAPIGatewayProxyEventRequestHandler()
 const corsMiddleware: middleware.MiddlewareFn<typeof requestHandler> = async (
     event
 ) => {
-    return async (result) => {
-        const corsError = configureCorsHeaders(result, event)
-
-        if (corsError) {
-            logError('configureCorsHeaders', corsError.message)
-        }
-    }
+    return async (result) => configureCorsHeaders(result, event)
 }
 
 // This middleware returns an error if the local request is missing authentication info
-function localAuthMiddleware(wrapped: APIGatewayProxyHandler): Handler {
-    return async function (event, context, completion) {
-        const userHeader =
-            event.requestContext.identity.cognitoAuthenticationProvider
+const localAuthMiddleware: middleware.MiddlewareFn<
+    typeof requestHandler
+> = async (event) => {
+    const userHeader =
+        event.requestContext.identity.cognitoAuthenticationProvider
 
-        if (userHeader === 'NO_USER') {
-            console.info('NO_USER info set, returning 403')
-            return Promise.resolve({
-                statusCode: 403,
-                body: '{ "error": "No User Sent in cognitoAuthenticationProvider header"}\n',
-                headers: {
-                    'Access-Control-Allow-Origin': '*',
-                    'Access-Control-Allow-Credentials': true,
-                },
-            })
-        }
-
-        const result = await wrapped(event, context, completion)
-
-        return result
+    if (
+        userHeader === 'NO_USER' &&
+        process.env.VITE_APP_AUTH_MODE === 'LOCAL'
+    ) {
+        console.info('NO_USER info set, returning 403')
+        return Promise.resolve({
+            statusCode: 403,
+            body: '{ "error": "No User Sent in cognitoAuthenticationProvider header"}\n',
+            headers: {
+                'Access-Control-Allow-Origin': '*',
+                'Access-Control-Allow-Credentials': true,
+            },
+        })
     }
 }
 
@@ -397,16 +385,12 @@ async function initializeGQLHandler(): Promise<Handler> {
         introspection: introspectionAllowed,
     })
 
-    const handler = startServerAndCreateLambdaHandler(server, requestHandler, {
+    return startServerAndCreateLambdaHandler(server, requestHandler, {
         context: async ({ event, context }) => {
             return await contextForRequest({ event, context })
         },
-        middleware: [corsMiddleware],
+        middleware: [corsMiddleware, localAuthMiddleware],
     })
-
-    // Locally, we wrap our handler in a middleware that returns 403 for unauthenticated requests
-    const isLocal = authMode === 'LOCAL'
-    return isLocal ? localAuthMiddleware(handler) : handler
 }
 
 const handlerPromise = initializeGQLHandler()
@@ -414,23 +398,26 @@ const handlerPromise = initializeGQLHandler()
 const gqlHandler: Handler = async (event, context, completion) => {
     // Once initialized, future awaits will return immediately
     const initializedHandler = await handlerPromise
-
     const otelCollectorUrl = process.env.API_APP_OTEL_COLLECTOR_URL
+    const serviceName = 'gql-handler'
+
     if (otelCollectorUrl === undefined || otelCollectorUrl === '') {
         throw new Error(
             'Configuration Error: API_APP_OTEL_COLLECTOR_URL is required to run app-api'
         )
     }
-    const serviceName = 'gql-handler'
+
     initTracer(serviceName, otelCollectorUrl)
 
     const response = await initializedHandler(event, context, completion)
     const payloadSize = Buffer.from(event.body).length
+
     if (payloadSize > 5.5 * 1024 * 1024) {
         const errMsg = `Large request payload detected: ${payloadSize} bytes`
         console.warn(errMsg)
         recordException(errMsg, serviceName, 'requestPayload')
     }
+
     // Log response size metrics without modifying the response
     if (response && response.body) {
         const bodySize = Buffer.from(response.body).length

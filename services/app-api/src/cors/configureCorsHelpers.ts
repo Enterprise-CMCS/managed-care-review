@@ -1,4 +1,5 @@
 import type { APIGatewayProxyEvent } from 'aws-lambda'
+import { logError } from '../logger'
 
 // Helper function to check if origin matches allowed patterns
 export const isOriginAllowed = (
@@ -24,20 +25,21 @@ export const isOriginAllowed = (
 export const configureCorsHeaders = (
     response: any,
     event: APIGatewayProxyEvent
-): void | Error => {
+): void => {
     if (response && typeof response === 'object' && 'headers' in response) {
         const requestOrigin = event.headers?.origin || event.headers?.Origin
 
         if (!requestOrigin) {
-            return new Error(
-                'Cors configuration error. Request origin is undefined.'
-            )
+            const msg = 'Cors configuration error. Request origin is undefined.'
+            logError('configureCorsHeaders', msg)
+            return
         }
 
         if (!process.env.APPLICATION_ENDPOINT) {
-            return new Error(
+            const msg =
                 'Cors configuration error. APPLICATION_ENDPOINT environment variable is undefined.'
-            )
+            logError('configureCorsHeaders', msg)
+            return
         }
 
         const allowedOrigins = [
@@ -49,9 +51,9 @@ export const configureCorsHeaders = (
 
         // Return no cors headers if origin is not allowed.
         if (!isOriginAllowed(requestOrigin, allowedOrigins)) {
-            return new Error(
-                `Cors configuration error. Request origin ${requestOrigin} not allowed. Allowed Origins: ${allowedOrigins}`
-            )
+            const msg = `Cors configuration error. Request origin ${requestOrigin} not allowed. Allowed Origins: ${allowedOrigins}`
+            logError('configureCorsHeaders', msg)
+            return
         }
 
         console.info('Cors Configuration:', {
