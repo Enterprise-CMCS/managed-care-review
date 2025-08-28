@@ -61,6 +61,7 @@ const contractFormData = (
     contractDateEnd: '2024-05-31',
     managedCareEntities: ['MCO'],
     federalAuthorities: ['STATE_PLAN'],
+    dsnpContract: false,
     inLieuServicesAndSettings: true,
     modifiedBenefitsProvided: true,
     modifiedGeoAreaServed: true,
@@ -368,8 +369,10 @@ function fetchResponseFromAxios(axiosResponse: AxiosResponse): Response {
         redirected: false,
         type: 'basic',
         url: axiosResponse.request.url,
-
         body: axiosResponse.data,
+        bytes: () => {
+            throw new Error('fetchResponseFromAxios: never call bytes')
+        },
 
         // this appears to actually be called by apollo-client and matter
         text: () => {
