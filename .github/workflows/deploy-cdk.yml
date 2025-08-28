@@ -290,9 +290,9 @@ jobs:
           name: lambda-layers-clamav
           path: ./services/uploads/src/avLayer/build/lambda_layer.zip
 
-  deploy-cdk-foundation:
+  deploy-cdk-infrastructure:
     needs: [begin-deployment, deploy-github-oidc, build-clamav-layer]
-    name: deploy - CDK foundation stacks
+    name: deploy - CDK infrastructure stacks
     runs-on: ubuntu-24.04
     environment: dev
     steps:
@@ -317,7 +317,7 @@ jobs:
           stage-name: ${{ needs.begin-deployment.outputs.stage-name }}
           use-cdk-role: 'true'
 
-      - name: Deploy CDK Network stack
+      - name: Deploy Network stack
         working-directory: services/infra-cdk
         env:
           STAGE_NAME: ${{ needs.begin-deployment.outputs.stage-name }}
@@ -333,7 +333,7 @@ jobs:
             --context stage=${STAGE_NAME} \
             --require-approval never
 
-      - name: Deploy CDK Uploads stack
+      - name: Deploy Uploads stack
         working-directory: services/infra-cdk
         env:
           STAGE_NAME: ${{ needs.begin-deployment.outputs.stage-name }}
@@ -344,7 +344,7 @@ jobs:
             --context stage=${STAGE_NAME} \
             --require-approval never
 
-      - name: Deploy CDK Postgres stack
+      - name: Deploy Postgres stack
         working-directory: services/infra-cdk
         env:
           STAGE_NAME: ${{ needs.begin-deployment.outputs.stage-name }}
@@ -360,12 +360,12 @@ jobs:
             --context stage=${STAGE_NAME} \
             --require-approval never
 
-      - name: Deploy CDK Frontend Infrastructure stack only
+      - name: Deploy Frontend Infrastructure stack
         working-directory: services/infra-cdk
         env:
           STAGE_NAME: ${{ needs.begin-deployment.outputs.stage-name }}
         run: |
-          echo "=== Deploying Frontend Infrastructure stack only ==="
+          echo "=== Deploying Frontend Infrastructure stack ==="
           npx cdk deploy MCR-frontend-infra-${STAGE_NAME}-cdk \
             --app 'pnpm tsx bin/frontend.ts' \
             --context stage=${STAGE_NAME} \
@@ -373,10 +373,15 @@ jobs:
 
   deploy-frontend-app:
     needs:
-      [begin-deployment, deploy-cdk-foundation, web-unit-tests, api-unit-tests]
+      [
+        begin-deployment,
+        deploy-cdk-infrastructure,
+        web-unit-tests,
+        api-unit-tests,
+      ]
     if: |
       always() &&
-      needs.deploy-cdk-foundation.result == 'success' &&
+      needs.deploy-cdk-infrastructure.result == 'success' &&
       needs.web-unit-tests.result == 'success' &&
       needs.api-unit-tests.result == 'success' &&
       needs.begin-deployment.result == 'success'
@@ -438,7 +443,7 @@ jobs:
           pnpm build
           pnpm storybook:build
 
-      - name: Deploy CDK Frontend App stack
+      - name: Deploy Frontend App stack
         working-directory: services/infra-cdk
         env:
           STAGE_NAME: ${{ needs.begin-deployment.outputs.stage-name }}
@@ -449,7 +454,7 @@ jobs:
             --context stage=${STAGE_NAME} \
             --require-approval never
 
-      - name: Deploy CDK Cognito stack
+      - name: Deploy Cognito stack
         working-directory: services/infra-cdk
         env:
           STAGE_NAME: ${{ needs.begin-deployment.outputs.stage-name }}
@@ -513,7 +518,7 @@ jobs:
           name: lambda-layers-prisma-client-engine
           path: ./services/infra-cdk/lambda-layers-prisma-client-engine
 
-      - name: Deploy CDK AppApi stack
+      - name: Deploy AppApi stack
         working-directory: services/infra-cdk
         env:
           STAGE_NAME: ${{ needs.begin-deployment.outputs.stage-name }}
@@ -534,14 +539,6 @@ jobs:
           cd scripts
           pnpm tsc
           node ./add_cypress_test_users.js $STAGE_NAME $TEST_USERS_PASS
-
-      - name: Run migrate to turn on Aurora
-        id: run-migrations
-        working-directory: services/app-api
-        env:
-          STAGE_NAME: ${{ needs.begin-deployment.outputs.stage-name }}
-        run: |
-          ./scripts/invoke-migrate-lambda.sh app-api-$STAGE_NAME-migrate
 
       # TODO: These output commands need to be adapted for CDK stack outputs
       # For now, we'll use placeholder values to get the workflow working
