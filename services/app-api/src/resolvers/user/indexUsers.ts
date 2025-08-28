@@ -1,4 +1,4 @@
-import { ForbiddenError } from 'apollo-server-lambda'
+import { createForbiddenError } from '../errorUtils'
 import type { UserType } from '../../domain-models'
 import { hasAdminPermissions, hasCMSPermissions } from '../../domain-models'
 import type { QueryResolvers } from '../../gen/gqlServer'
@@ -22,7 +22,7 @@ export function indexUsersResolver(store: Store): QueryResolvers['indexUsers'] {
             const errMsg = 'user not authorized to fetch users'
             logError('indexUsers', errMsg)
             setErrorAttributesOnActiveSpan(errMsg, span)
-            throw new ForbiddenError(errMsg)
+            throw createForbiddenError(errMsg)
         }
 
         const findResult = await store.findAllUsers()

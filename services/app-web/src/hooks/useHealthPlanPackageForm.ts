@@ -12,9 +12,8 @@ import {
 import { UnlockedHealthPlanFormDataType, packageName } from '@mc-review/hpp'
 import { domainToBase64 } from '@mc-review/hpp'
 import { recordJSException } from '@mc-review/otel'
-import { handleApolloError } from '@mc-review/helpers'
+import { handleApolloError, makeDocumentDateTable } from '@mc-review/helpers'
 import { ApolloError } from '@apollo/client'
-import { makeDocumentDateTable } from '@mc-review/helpers'
 import { DocumentDateLookupTableType } from '@mc-review/helpers'
 import type { InterimState } from '../pages/StateSubmission/ErrorOrLoadingPage'
 
@@ -99,7 +98,7 @@ const useHealthPlanPackageForm = (
                 setShowPageErrorMessage(true)
                 console.info('Failed to update form data', createResult)
                 recordJSException(
-                    `StateSubmissionForm: Apollo error reported. Error message: Failed to create form data ${createResult}`
+                    `StateSubmissionForm: GraphQL error reported. Error message: Failed to create form data ${createResult}`
                 )
                 return new Error('Failed to create form data')
             }
@@ -108,7 +107,7 @@ const useHealthPlanPackageForm = (
         } catch (serverError) {
             setShowPageErrorMessage(true)
             recordJSException(
-                `StateSubmissionForm: Apollo error reported. Error message: ${serverError.message}`
+                `StateSubmissionForm: GraphQL error reported. Error message: ${serverError.message}`
             )
             return new Error(serverError)
         }
@@ -137,7 +136,7 @@ const useHealthPlanPackageForm = (
                 setShowPageErrorMessage(true)
                 console.info('Failed to update form data', updateResult)
                 recordJSException(
-                    `StateSubmissionForm: Apollo error reported. Error message: Failed to update form data ${updateResult}`
+                    `StateSubmissionForm: GraphQL error reported. Error message: Failed to update form data ${updateResult}`
                 )
                 return new Error('Failed to update form data')
             }
@@ -146,7 +145,7 @@ const useHealthPlanPackageForm = (
         } catch (serverError) {
             setShowPageErrorMessage(true)
             recordJSException(
-                `StateSubmissionForm: Apollo error reported. Error message: ${serverError.message}`
+                `StateSubmissionForm: GraphQL error reported. Error message: ${serverError.message}`
             )
             return new Error(serverError)
         }

@@ -44,7 +44,8 @@ on:
         required: true
       subnet_public_a_id:
         required: false
-
+      internal_allowed_origins:
+        required: false
 permissions:
   id-token: write
 
@@ -159,6 +160,7 @@ jobs:
           SUBNET_PRIVATE_C_ID: ${{ secrets.subnet_private_c_id }}
           IAM_PERMISSIONS_BOUNDARY: ${{ secrets.iam_permissions_boundary }}
           IAM_PATH: ${{ secrets.iam_path }}
+          INTERNAL_ALLOWED_ORIGINS: ${{ secrets.internal_allowed_origins }}
         run: |
           pushd services/app-api && npx serverless deploy --stage ${{ inputs.stage_name }}
 

@@ -100,7 +100,7 @@ export const UndoSubmissionWithdraw = (): React.ReactElement => {
             navigate(`/submissions/${id}?showTempUndoWithdrawBanner=true`)
         } catch (err) {
             recordJSException(
-                `undoWithdrawSubmission: Apollo error reported. Error message: ${err}`
+                `undoWithdrawSubmission: GraphQL error reported. Error message: ${err}`
             )
         }
     }

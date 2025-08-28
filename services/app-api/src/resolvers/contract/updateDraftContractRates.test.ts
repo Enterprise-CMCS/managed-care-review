@@ -7,6 +7,7 @@ import {
     createAndSubmitTestHealthPlanPackage,
     createAndUpdateTestHealthPlanPackage,
     createTestHealthPlanPackage,
+    executeGraphQLOperation,
     unlockTestHealthPlanPackage,
 } from '../../testHelpers/gqlHelpers'
 import {
@@ -22,6 +23,7 @@ import {
     createAndSubmitTestContractWithRate,
     createAndUpdateTestContractWithoutRates,
     createAndUpdateTestContractWithRate,
+    createTestContract,
 } from '../../testHelpers/gqlContractHelpers'
 import { must } from '../../testHelpers'
 
@@ -33,7 +35,7 @@ describe('updateDraftContractRates', () => {
             s3Client: mockS3,
         })
 
-        const result = await stateServer.executeOperation({
+        const result = await executeGraphQLOperation(stateServer, {
             query: UpdateDraftContractRatesDocument,
             variables: {
                 input: {
@@ -71,7 +73,7 @@ describe('updateDraftContractRates', () => {
             },
         })
 
-        const result = await otherStateServer.executeOperation({
+        const result = await executeGraphQLOperation(otherStateServer, {
             query: UpdateDraftContractRatesDocument,
             variables: {
                 input: {
@@ -108,7 +110,7 @@ describe('updateDraftContractRates', () => {
             s3Client: mockS3,
         })
 
-        const result = await otherStateServer.executeOperation({
+        const result = await executeGraphQLOperation(otherStateServer, {
             query: UpdateDraftContractRatesDocument,
             variables: {
                 input: {
@@ -138,7 +140,7 @@ describe('updateDraftContractRates', () => {
         const draft = await createAndSubmitTestHealthPlanPackage(stateServer)
         const draftFD = latestFormData(draft)
 
-        const result = await stateServer.executeOperation({
+        const result = await executeGraphQLOperation(stateServer, {
             query: UpdateDraftContractRatesDocument,
             variables: {
                 input: {
@@ -167,7 +169,7 @@ describe('updateDraftContractRates', () => {
 
         const draft = await createTestHealthPlanPackage(stateServer)
 
-        const result = await stateServer.executeOperation({
+        const result = await executeGraphQLOperation(stateServer, {
             query: UpdateDraftContractRatesDocument,
             variables: {
                 input: {
@@ -228,7 +230,7 @@ describe('updateDraftContractRates', () => {
         const draft = await createAndSubmitTestHealthPlanPackage(stateServer)
         const draftFD = latestFormData(draft)
 
-        const result = await stateServer.executeOperation({
+        const result = await executeGraphQLOperation(stateServer, {
             query: UpdateDraftContractRatesDocument,
             variables: {
                 input: {
@@ -309,7 +311,7 @@ describe('updateDraftContractRates', () => {
         const draft = await createTestHealthPlanPackage(stateServer)
         const draftFD = latestFormData(draft)
 
-        const result = await stateServer.executeOperation({
+        const result = await executeGraphQLOperation(stateServer, {
             query: UpdateDraftContractRatesDocument,
             variables: {
                 input: {
@@ -392,7 +394,7 @@ describe('updateDraftContractRates', () => {
         const draftFD = latestFormData(draft)
         const rate = draftFD.rateInfos[0]
 
-        const result = await stateServer.executeOperation({
+        const result = await executeGraphQLOperation(stateServer, {
             query: UpdateDraftContractRatesDocument,
             variables: {
                 input: {
@@ -479,7 +481,7 @@ describe('updateDraftContractRates', () => {
         const draft = await createAndUpdateTestHealthPlanPackage(stateServer)
         const draftFD = latestFormData(draft)
 
-        const result = await stateServer.executeOperation({
+        const result = await executeGraphQLOperation(stateServer, {
             query: UpdateDraftContractRatesDocument,
             variables: {
                 input: {
@@ -560,7 +562,7 @@ describe('updateDraftContractRates', () => {
         const draft2FD = latestFormData(draft2)
         const rate = draft2FD.rateInfos[0]
 
-        const result = await stateServer.executeOperation({
+        const result = await executeGraphQLOperation(stateServer, {
             query: UpdateDraftContractRatesDocument,
             variables: {
                 input: {
@@ -635,8 +637,12 @@ describe('updateDraftContractRates', () => {
             s3Client: mockS3,
         })
 
-        const contractDraft = await createTestHealthPlanPackage(stateServer)
-        const draftFD = latestFormData(contractDraft)
+        const contractDraft = await createTestContract(stateServer)
+        const draftFD = contractDraft.draftRevision
+
+        if (!draftFD) {
+            throw new Error('expected draft revision')
+        }
 
         const ratesDraft = await createTestDraftRateOnContract(
             stateServer,
@@ -706,7 +712,7 @@ describe('updateDraftContractRates', () => {
         const contractDraft = await createTestHealthPlanPackage(stateServer)
         const draftFD = latestFormData(contractDraft)
 
-        const result = await stateServer.executeOperation({
+        const result = await executeGraphQLOperation(stateServer, {
             query: UpdateDraftContractRatesDocument,
             variables: {
                 input: {
@@ -753,7 +759,7 @@ describe('updateDraftContractRates', () => {
         const contractDraft = await createTestHealthPlanPackage(stateServer)
         const draftFD = latestFormData(contractDraft)
 
-        const result = await stateServer.executeOperation({
+        const result = await executeGraphQLOperation(stateServer, {
             query: UpdateDraftContractRatesDocument,
             variables: {
                 input: {
@@ -784,7 +790,7 @@ describe('updateDraftContractRates', () => {
 
         const rateID = draftRates[0].id
 
-        const updateResult = await stateServer.executeOperation({
+        const updateResult = await executeGraphQLOperation(stateServer, {
             query: UpdateDraftContractRatesDocument,
             variables: {
                 input: {
@@ -868,7 +874,7 @@ describe('updateDraftContractRates', () => {
         const contractDraft =
             await createAndUpdateTestContractWithRate(stateServer)
 
-        const result = await stateServer.executeOperation({
+        const result = await executeGraphQLOperation(stateServer, {
             query: UpdateDraftContractRatesDocument,
             variables: {
                 input: {
@@ -922,7 +928,7 @@ describe('updateDraftContractRates', () => {
         const contractDraft =
             await createAndUpdateTestContractWithoutRates(stateServer)
 
-        const result = await stateServer.executeOperation({
+        const result = await executeGraphQLOperation(stateServer, {
             query: UpdateDraftContractRatesDocument,
             variables: {
                 input: {
@@ -975,7 +981,7 @@ describe('updateDraftContractRates', () => {
         const contractDraft = await createTestHealthPlanPackage(stateServer)
         const draftFD = latestFormData(contractDraft)
 
-        const linkResult = await stateServer.executeOperation({
+        const linkResult = await executeGraphQLOperation(stateServer, {
             query: UpdateDraftContractRatesDocument,
             variables: {
                 input: {
@@ -996,7 +1002,7 @@ describe('updateDraftContractRates', () => {
         const draftRevision =
             linkResult?.data?.updateDraftContractRates.contract.draftRevision
 
-        const result = await stateServer.executeOperation({
+        const result = await executeGraphQLOperation(stateServer, {
             query: UpdateDraftContractRatesDocument,
             variables: {
                 input: {
@@ -1086,7 +1092,7 @@ describe('updateDraftContractRates', () => {
         const contractDraft = await createTestHealthPlanPackage(stateServer)
         const draftFD = latestFormData(contractDraft)
 
-        const linkResult = await stateServer.executeOperation({
+        const linkResult = await executeGraphQLOperation(stateServer, {
             query: UpdateDraftContractRatesDocument,
             variables: {
                 input: {
@@ -1115,7 +1121,7 @@ describe('updateDraftContractRates', () => {
 
         expect(draftRates).toHaveLength(1)
 
-        const unlinkResult = await stateServer.executeOperation({
+        const unlinkResult = await executeGraphQLOperation(stateServer, {
             query: UpdateDraftContractRatesDocument,
             variables: {
                 input: {
@@ -1153,7 +1159,7 @@ describe('updateDraftContractRates', () => {
         const existingRateResult = await fetchTestRateById(stateServer, rate.id)
         expect(existingRateResult.id).toBeDefined()
 
-        const result = await stateServer.executeOperation({
+        const result = await executeGraphQLOperation(stateServer, {
             query: UpdateDraftContractRatesDocument,
             variables: {
                 input: {
@@ -1174,10 +1180,13 @@ describe('updateDraftContractRates', () => {
 
         expect(draftRates).toHaveLength(0)
 
-        const nonexistantRateResult = await stateServer.executeOperation({
-            query: FetchRateDocument,
-            variables: { input: { rateID: rate.id } },
-        })
+        const nonexistantRateResult = await executeGraphQLOperation(
+            stateServer,
+            {
+                query: FetchRateDocument,
+                variables: { input: { rateID: rate.id } },
+            }
+        )
 
         expect(nonexistantRateResult.errors).toBeDefined()
         if (!nonexistantRateResult.errors) {

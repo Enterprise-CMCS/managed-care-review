@@ -1,4 +1,7 @@
-import { constructTestPostgresServer } from '../../testHelpers/gqlHelpers'
+import {
+    constructTestPostgresServer,
+    executeGraphQLOperation,
+} from '../../testHelpers/gqlHelpers'
 import { FetchDocumentDocument } from '../../gen/gqlClient'
 import { createAndUpdateTestContractWithoutRates } from '../../testHelpers/gqlContractHelpers'
 import { testS3Client } from '../../testHelpers'
@@ -16,7 +19,7 @@ describe('fetchDocument', () => {
             await createAndUpdateTestContractWithoutRates(stateServer)
         const doc = stateSubmission.draftRevision?.formData.contractDocuments[0]
 
-        const fetchResult = await stateServer.executeOperation({
+        const fetchResult = await executeGraphQLOperation(stateServer, {
             query: FetchDocumentDocument,
             variables: {
                 input: {
@@ -36,7 +39,7 @@ describe('fetchDocument', () => {
             s3Client: mockS3,
         })
 
-        const fetchResult = await stateServer.executeOperation({
+        const fetchResult = await executeGraphQLOperation(stateServer, {
             query: FetchDocumentDocument,
             variables: {
                 input: {
@@ -67,7 +70,7 @@ describe('fetchDocument', () => {
             await createAndUpdateTestContractWithoutRates(stateServer)
         const doc = stateSubmission.draftRevision?.formData.contractDocuments[0]
 
-        const fetchResult = await stateServer.executeOperation({
+        const fetchResult = await executeGraphQLOperation(stateServer, {
             query: FetchDocumentDocument,
             variables: {
                 input: {
@@ -99,7 +102,7 @@ describe('fetchDocument', () => {
             await createAndUpdateTestContractWithoutRates(stateServer)
         const doc = stateSubmission.draftRevision?.formData.contractDocuments[0]
 
-        const fetchResult = await stateServer.executeOperation({
+        const fetchResult = await executeGraphQLOperation(stateServer, {
             query: FetchDocumentDocument,
             variables: {
                 input: {
@@ -145,7 +148,7 @@ describe('fetchDocument', () => {
 
         const doc = stateSubmission.draftRevision?.formData.contractDocuments[0]
 
-        const fetchResult = await oauthServer.executeOperation({
+        const fetchResult = await executeGraphQLOperation(oauthServer, {
             query: FetchDocumentDocument,
             variables: {
                 input: {

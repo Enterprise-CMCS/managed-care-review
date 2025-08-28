@@ -1,4 +1,7 @@
-import { constructTestPostgresServer } from '../../testHelpers/gqlHelpers'
+import {
+    constructTestPostgresServer,
+    executeGraphQLOperation,
+} from '../../testHelpers/gqlHelpers'
 import { sharedTestPrismaClient } from '../../testHelpers/storeHelpers'
 import {
     testAdminUser,
@@ -31,7 +34,7 @@ describe('updateOauthClient', () => {
             context: { user: adminUser },
         })
 
-        const createRes = await server.executeOperation({
+        const createRes = await executeGraphQLOperation(server, {
             query: CreateOauthClientDocument,
             variables: {
                 input: {
@@ -51,7 +54,7 @@ describe('updateOauthClient', () => {
             grants: ['client_credentials', 'refresh_token'],
         }
 
-        const res = await server.executeOperation({
+        const res = await executeGraphQLOperation(server, {
             query: UpdateOauthClientDocument,
             variables: { input: updateInput },
         })
@@ -87,7 +90,7 @@ describe('updateOauthClient', () => {
             context: { user: adminUser },
         })
 
-        const createRes = await server.executeOperation({
+        const createRes = await executeGraphQLOperation(server, {
             query: CreateOauthClientDocument,
             variables: {
                 input: {
@@ -107,7 +110,7 @@ describe('updateOauthClient', () => {
             grants: [],
         }
 
-        const res = await server.executeOperation({
+        const res = await executeGraphQLOperation(server, {
             query: UpdateOauthClientDocument,
             variables: { input: updateInput },
         })
@@ -128,7 +131,7 @@ describe('updateOauthClient', () => {
             clientId: 'test-client-id',
             description: 'Should fail',
         }
-        const res = await server.executeOperation({
+        const res = await executeGraphQLOperation(server, {
             query: UpdateOauthClientDocument,
             variables: { input },
         })
@@ -144,7 +147,7 @@ describe('updateOauthClient', () => {
             clientId: 'non-existent-client-id',
             description: 'Should fail',
         }
-        const res = await server.executeOperation({
+        const res = await executeGraphQLOperation(server, {
             query: UpdateOauthClientDocument,
             variables: { input },
         })
@@ -165,7 +168,7 @@ describe('updateOauthClient', () => {
             clientId: 'fail',
             description: 'DB fail',
         }
-        const res = await server.executeOperation({
+        const res = await executeGraphQLOperation(server, {
             query: UpdateOauthClientDocument,
             variables: { input },
         })

@@ -2,7 +2,7 @@ import type { MutationResolvers } from '../../gen/gqlServer'
 import type { Store } from '../../postgres'
 import type { Context } from '../../handlers/apollo_gql'
 import { logSuccess, logError } from '../../logger'
-import { ForbiddenError } from 'apollo-server-core'
+import { createForbiddenError } from '../errorUtils'
 import {
     setSuccessAttributesOnActiveSpan,
     setResolverDetailsOnActiveSpan,
@@ -37,7 +37,7 @@ export function updateOauthClientResolver(
             const message = 'user not authorized to update OAuth clients'
             logError('updateOauthClient', message)
             setErrorAttributesOnActiveSpan(message, span)
-            throw new ForbiddenError(message)
+            throw createForbiddenError(message)
         }
 
         // Build update data object with only provided fields

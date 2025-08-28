@@ -1,4 +1,7 @@
-import { constructTestPostgresServer } from '../../testHelpers/gqlHelpers'
+import {
+    constructTestPostgresServer,
+    executeGraphQLOperation,
+} from '../../testHelpers/gqlHelpers'
 import {
     testAdminUser,
     testStateUser,
@@ -31,7 +34,7 @@ describe('deleteOauthClient', () => {
             context: { user: adminUser },
         })
         // Create a client first
-        const createRes = await server.executeOperation({
+        const createRes = await executeGraphQLOperation(server, {
             query: CreateOauthClientDocument,
             variables: {
                 input: {
@@ -44,7 +47,7 @@ describe('deleteOauthClient', () => {
         expect(createRes.errors).toBeUndefined()
         const clientId = createRes.data?.createOauthClient.oauthClient.clientId
         // Delete it
-        const deleteRes = await server.executeOperation({
+        const deleteRes = await executeGraphQLOperation(server, {
             query: DeleteOauthClientDocument,
             variables: { input: { clientId } },
         })
@@ -62,7 +65,7 @@ describe('deleteOauthClient', () => {
         const server = await constructTestPostgresServer({
             context: { user: testStateUser() },
         })
-        const res = await server.executeOperation({
+        const res = await executeGraphQLOperation(server, {
             query: DeleteOauthClientDocument,
             variables: { input: { clientId: 'fake' } },
         })
@@ -75,7 +78,7 @@ describe('deleteOauthClient', () => {
         const server = await constructTestPostgresServer({
             context: { user: testAdminUser() },
         })
-        const res = await server.executeOperation({
+        const res = await executeGraphQLOperation(server, {
             query: DeleteOauthClientDocument,
             variables: { input: { clientId: 'nonexistent' } },
         })
@@ -92,7 +95,7 @@ describe('deleteOauthClient', () => {
                 deleteOAuthClient: async () => new Error('DB fail'),
             },
         })
-        const res = await server.executeOperation({
+        const res = await executeGraphQLOperation(server, {
             query: DeleteOauthClientDocument,
             variables: { input: { clientId: 'fail' } },
         })

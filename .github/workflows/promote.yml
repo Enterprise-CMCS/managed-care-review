@@ -218,6 +218,7 @@ jobs:
       subnet_private_b_id: ${{ secrets.DEV_SUBNET_PRIVATE_B_ID }}
       subnet_private_c_id: ${{ secrets.DEV_SUBNET_PRIVATE_C_ID }}
       subnet_public_a_id: ${{ secrets.DEV_SUBNET_PUBLIC_A_ID }}
+      internal_allowed_origins: ${{ secrets.DEV_INTERNAL_ALLOWED_ORIGINS }}
 
   promote-infra-val:
     needs: [promote-app-dev, unit-tests]
@@ -270,6 +271,7 @@ jobs:
       subnet_private_b_id: ${{ secrets.VAL_SUBNET_PRIVATE_B_ID }}
       subnet_private_c_id: ${{ secrets.VAL_SUBNET_PRIVATE_C_ID }}
       subnet_public_a_id: ${{ secrets.VAL_SUBNET_PUBLIC_A_ID }}
+      internal_allowed_origins: ${{ secrets.VAL_INTERNAL_ALLOWED_ORIGINS }}
 
   promote-infra-prod:
     needs: [promote-app-val, unit-tests]
@@ -322,6 +324,7 @@ jobs:
       subnet_private_b_id: ${{ secrets.PROD_SUBNET_PRIVATE_B_ID }}
       subnet_private_c_id: ${{ secrets.PROD_SUBNET_PRIVATE_C_ID }}
       subnet_public_a_id: ${{ secrets.PROD_SUBNET_PUBLIC_A_ID }}
+      internal_allowed_origins: ${{ secrets.PROD_INTERNAL_ALLOWED_ORIGINS }}
 
   cypress-prod:
     name: prod - cypress

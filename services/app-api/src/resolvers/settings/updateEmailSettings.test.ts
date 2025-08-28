@@ -2,7 +2,10 @@ import {
     type EmailConfiguration,
     UpdateEmailSettingsDocument,
 } from '../../gen/gqlClient'
-import { constructTestPostgresServer } from '../../testHelpers/gqlHelpers'
+import {
+    constructTestPostgresServer,
+    executeGraphQLOperation,
+} from '../../testHelpers/gqlHelpers'
 import {
     fetchTestMcReviewSettings,
     updateTestEmailSettings,
@@ -82,7 +85,7 @@ describe('updateEmailSettings', () => {
             ],
         })
 
-        const updateEmailConfig = await cmsServer.executeOperation({
+        const updateEmailConfig = await executeGraphQLOperation(cmsServer, {
             query: UpdateEmailSettingsDocument,
             variables: {
                 input: {
@@ -104,7 +107,7 @@ describe('updateEmailSettings', () => {
         })
 
         const emailConfigUpdate = mockEmailConfigUpdate()
-        const updateEmailConfig = await cmsServer.executeOperation({
+        const updateEmailConfig = await executeGraphQLOperation(cmsServer, {
             query: UpdateEmailSettingsDocument,
             variables: {
                 input: {

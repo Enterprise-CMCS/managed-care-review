@@ -1,12 +1,13 @@
 import type { Context as OTELContext, Span, Tracer } from '@opentelemetry/api'
 import { propagation, ROOT_CONTEXT } from '@opentelemetry/api'
-import { ApolloServer } from 'apollo-server-lambda'
+import { ApolloServer } from '@apollo/server'
+import type { middleware } from '@as-integrations/aws-lambda'
+import {
+    startServerAndCreateLambdaHandler,
+    handlers,
+} from '@as-integrations/aws-lambda'
 import { initTracer, recordException } from '../../../uploads/src/lib/otel'
-import type {
-    APIGatewayProxyEvent,
-    APIGatewayProxyHandler,
-    Handler,
-} from 'aws-lambda'
+import type { APIGatewayProxyEvent, Handler } from 'aws-lambda'
 
 import typeDefs from '../../../app-graphql/src/schema.graphql'
 import { assertIsAuthMode } from '@mc-review/common-code'
@@ -17,7 +18,7 @@ import {
     userFromLocalAuthProvider,
     userFromThirdPartyAuthorizer,
 } from '../authn'
-import { NewPostgresStore } from '../postgres/postgresStore'
+import { NewPostgresStore } from '../postgres'
 import { configureResolvers } from '../resolvers'
 import { configurePostgres, configureEmailer } from './configuration'
 import { createTracer } from '../otel/otel_handler'
@@ -30,17 +31,17 @@ import { ldService, offlineLDService } from '../launchDarkly/launchDarkly'
 import type { LDClient } from '@launchdarkly/node-server-sdk'
 import * as ld from '@launchdarkly/node-server-sdk'
 import { newJWTLib } from '../jwt'
-import {
-    ApolloServerPluginLandingPageDisabled,
-    ApolloServerPluginLandingPageLocalDefault,
-} from 'apollo-server-core'
+import { ApolloServerPluginLandingPageDisabled } from '@apollo/server/plugin/disabled'
+import { ApolloServerPluginLandingPageLocalDefault } from '@apollo/server/plugin/landingPage/default'
 import { newDeployedS3Client, newLocalS3Client } from '../s3'
 import type { S3ClientT, S3BucketConfigType } from '../s3'
 import {
     documentZipService,
     generateDocumentZip,
     localGenerateDocumentZip,
-} from '../zip/generateZip'
+} from '../zip'
+import { configureCorsHeaders } from '../cors/configureCorsHelpers'
+import { logError } from '../logger'
 
 let ldClient: LDClient
 let s3Client: S3ClientT
@@ -60,11 +61,12 @@ export interface Context {
 
 // This function pulls auth info out of the cognitoAuthenticationProvider in the lambda event
 // and turns that into our GQL resolver context object
-function contextForRequestForFetcher(userFetcher: userFromAuthProvider): ({
+function contextForRequestForFetcher(
+    userFetcher: userFromAuthProvider
+): ({
     event,
 }: {
     event: APIGatewayProxyEvent
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     context: any
 }) => Promise<Context> {
     return async ({ event, context }) => {
@@ -156,27 +158,39 @@ function contextForRequestForFetcher(userFetcher: userFromAuthProvider): ({
     }
 }
 
-// This middleware returns an error if the local request is missing authentication info
-function localAuthMiddleware(wrapped: APIGatewayProxyHandler): Handler {
-    return async function (event, context, completion) {
-        const userHeader =
-            event.requestContext.identity.cognitoAuthenticationProvider
+const requestHandler = handlers.createAPIGatewayProxyEventRequestHandler()
 
-        if (userHeader === 'NO_USER') {
-            console.info('NO_USER info set, returning 403')
-            return Promise.resolve({
-                statusCode: 403,
-                body: '{ "error": "No User Sent in cognitoAuthenticationProvider header"}\n',
-                headers: {
-                    'Access-Control-Allow-Origin': '*',
-                    'Access-Control-Allow-Credentials': true,
-                },
-            })
+const corsMiddleware: middleware.MiddlewareFn<typeof requestHandler> = async (
+    event
+) => {
+    return async (result) => {
+        const errors = configureCorsHeaders(result, event)
+        if (errors) {
+            logError('configureCorsHeaders', errors.message)
         }
+    }
+}
 
-        const result = await wrapped(event, context, completion)
+// This middleware returns an error if the local request is missing authentication info
+const localAuthMiddleware: middleware.MiddlewareFn<
+    typeof requestHandler
+> = async (event) => {
+    const userHeader =
+        event.requestContext.identity.cognitoAuthenticationProvider
 
-        return result
+    if (
+        userHeader === 'NO_USER' &&
+        process.env.VITE_APP_AUTH_MODE === 'LOCAL'
+    ) {
+        console.info('NO_USER info set, returning 403')
+        return Promise.resolve({
+            statusCode: 403,
+            body: '{ "error": "No User Sent in cognitoAuthenticationProvider header"}\n',
+            headers: {
+                'Access-Control-Allow-Origin': '*',
+                'Access-Control-Allow-Credentials': true,
+            },
+        })
     }
 }
 
@@ -373,26 +387,16 @@ async function initializeGQLHandler(): Promise<Handler> {
     const server = new ApolloServer({
         typeDefs,
         resolvers,
-        context: contextForRequest,
         plugins,
         introspection: introspectionAllowed,
     })
 
-    const handler = server.createHandler({
-        expressGetMiddlewareOptions: {
-            cors: {
-                origin: true,
-                credentials: true,
-            },
-            bodyParserConfig: {
-                limit: '10mb',
-            },
+    return startServerAndCreateLambdaHandler(server, requestHandler, {
+        context: async ({ event, context }) => {
+            return await contextForRequest({ event, context })
         },
+        middleware: [corsMiddleware, localAuthMiddleware],
     })
-
-    // Locally, we wrap our handler in a middleware that returns 403 for unauthenticated requests
-    const isLocal = authMode === 'LOCAL'
-    return isLocal ? localAuthMiddleware(handler) : handler
 }
 
 const handlerPromise = initializeGQLHandler()
@@ -400,22 +404,26 @@ const handlerPromise = initializeGQLHandler()
 const gqlHandler: Handler = async (event, context, completion) => {
     // Once initialized, future awaits will return immediately
     const initializedHandler = await handlerPromise
-
-    const response = await initializedHandler(event, context, completion)
-    const payloadSize = Buffer.from(event.body).length
-    const serviceName = 'gql-handler'
     const otelCollectorUrl = process.env.API_APP_OTEL_COLLECTOR_URL
+    const serviceName = 'gql-handler'
+
     if (otelCollectorUrl === undefined || otelCollectorUrl === '') {
         throw new Error(
             'Configuration Error: API_APP_OTEL_COLLECTOR_URL is required to run app-api'
         )
     }
+
     initTracer(serviceName, otelCollectorUrl)
+
+    const response = await initializedHandler(event, context, completion)
+    const payloadSize = Buffer.from(event.body).length
+
     if (payloadSize > 5.5 * 1024 * 1024) {
         const errMsg = `Large request payload detected: ${payloadSize} bytes`
         console.warn(errMsg)
         recordException(errMsg, serviceName, 'requestPayload')
     }
+
     // Log response size metrics without modifying the response
     if (response && response.body) {
         const bodySize = Buffer.from(response.body).length

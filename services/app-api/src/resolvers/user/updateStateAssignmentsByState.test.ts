@@ -14,7 +14,10 @@ import {
     UpdateStateAssignmentsByStateDocument,
     IndexUsersDocument,
 } from '../../gen/gqlClient'
-import { constructTestPostgresServer } from '../../testHelpers/gqlHelpers'
+import {
+    constructTestPostgresServer,
+    executeGraphQLOperation,
+} from '../../testHelpers/gqlHelpers'
 import type { User, UserEdge } from '../../gen/gqlServer'
 import {
     assertAnError,
@@ -122,7 +125,7 @@ describe.each(authorizedUserTests)(
                 },
             })
 
-            const updateRes = await server.executeOperation({
+            const updateRes = await executeGraphQLOperation(server, {
                 query: UpdateStateAssignmentsByStateDocument,
                 variables: {
                     input: {
@@ -148,7 +151,7 @@ describe.each(authorizedUserTests)(
             expect(user.divisionAssignment).toBe('OACT')
 
             // change the value and see if it updates
-            const updateRes2 = await server.executeOperation({
+            const updateRes2 = await executeGraphQLOperation(server, {
                 query: UpdateStateAssignmentsByStateDocument,
                 variables: {
                     input: {
@@ -169,7 +172,7 @@ describe.each(authorizedUserTests)(
                 updateRes2.data.updateStateAssignmentsByState.assignedUsers
             expect(users2).toHaveLength(2)
 
-            const updateRes3 = await server.executeOperation({
+            const updateRes3 = await executeGraphQLOperation(server, {
                 query: UpdateStateAssignmentsByStateDocument,
                 variables: {
                     input: {
@@ -182,7 +185,7 @@ describe.each(authorizedUserTests)(
             expect(updateRes3.data).toBeDefined()
             expect(updateRes3.errors).toBeUndefined()
 
-            const allUsersQuery = await server.executeOperation({
+            const allUsersQuery = await executeGraphQLOperation(server, {
                 query: IndexUsersDocument,
                 variables: {},
             })
@@ -275,7 +278,7 @@ describe.each(authorizedUserTests)(
                 },
             })
 
-            const updateResEmpty = await server.executeOperation({
+            const updateResEmpty = await executeGraphQLOperation(server, {
                 query: UpdateStateAssignmentsByStateDocument,
                 variables: {
                     input: {
@@ -293,7 +296,7 @@ describe.each(authorizedUserTests)(
                 assertAnErrorExtensions(updateResEmpty).argumentValues
             ).toEqual([])
 
-            const updateResUndefined = await server.executeOperation({
+            const updateResUndefined = await executeGraphQLOperation(server, {
                 query: UpdateStateAssignmentsByStateDocument,
                 variables: {
                     input: {
@@ -308,7 +311,7 @@ describe.each(authorizedUserTests)(
             )
             expect(assertAnErrorCode(updateResUndefined)).toBe('BAD_USER_INPUT')
 
-            const updateResNull = await server.executeOperation({
+            const updateResNull = await executeGraphQLOperation(server, {
                 query: UpdateStateAssignmentsByStateDocument,
                 variables: {
                     input: {
@@ -340,7 +343,7 @@ describe.each(authorizedUserTests)(
                 },
             })
 
-            const updateRes = await server.executeOperation({
+            const updateRes = await executeGraphQLOperation(server, {
                 query: UpdateStateAssignmentsByStateDocument,
                 variables: {
                     input: {
@@ -373,7 +376,7 @@ describe.each(authorizedUserTests)(
                 throw newStateUser
             }
 
-            const updateRes = await server.executeOperation({
+            const updateRes = await executeGraphQLOperation(server, {
                 query: UpdateStateAssignmentsByStateDocument,
                 variables: {
                     input: {
@@ -400,7 +403,7 @@ describe.each(authorizedUserTests)(
                 },
             })
 
-            const updateRes = await server.executeOperation({
+            const updateRes = await executeGraphQLOperation(server, {
                 query: UpdateStateAssignmentsByStateDocument,
                 variables: {
                     input: {
@@ -432,7 +435,7 @@ describe.each(authorizedUserTests)(
                 throw newCMSUser
             }
 
-            const updateRes = await server.executeOperation({
+            const updateRes = await executeGraphQLOperation(server, {
                 query: UpdateStateAssignmentsByStateDocument,
                 variables: {
                     input: {
@@ -465,7 +468,7 @@ describe.each(unauthorizedUserTests)(
                 },
             })
 
-            const updateRes = await server.executeOperation({
+            const updateRes = await executeGraphQLOperation(server, {
                 query: UpdateStateAssignmentsByStateDocument,
                 variables: {
                     input: {

@@ -1,4 +1,7 @@
-import { constructTestPostgresServer } from '../../testHelpers/gqlHelpers'
+import {
+    constructTestPostgresServer,
+    executeGraphQLOperation,
+} from '../../testHelpers/gqlHelpers'
 import { ApproveContractDocument } from '../../gen/gqlClient'
 import { testCMSUser } from '../../testHelpers/userHelpers'
 import {
@@ -57,7 +60,7 @@ describe('approveContract', () => {
 
         const draftContract = await createTestContract(stateServer)
 
-        const approveContractResult = await cmsServer.executeOperation({
+        const approveContractResult = await executeGraphQLOperation(cmsServer, {
             query: ApproveContractDocument,
             variables: {
                 input: {
@@ -100,7 +103,7 @@ describe('approveContract', () => {
             'unlock to resubmit'
         )
 
-        const approveContractResult = await cmsServer.executeOperation({
+        const approveContractResult = await executeGraphQLOperation(cmsServer, {
             query: ApproveContractDocument,
             variables: {
                 input: {
@@ -137,17 +140,9 @@ describe('approveContract', () => {
 
         const contract = await createAndSubmitTestContractWithRate(stateServer)
 
-        await cmsServer.executeOperation({
-            query: ApproveContractDocument,
-            variables: {
-                input: {
-                    contractID: contract.id,
-                    dateApprovalReleasedToState: '2024-11-11',
-                },
-            },
-        })
+        await approveTestContract(cmsServer, contract.id, '2024-11-11')
 
-        const secondApprovalResult = await cmsServer.executeOperation({
+        const secondApprovalResult = await executeGraphQLOperation(cmsServer, {
             query: ApproveContractDocument,
             variables: {
                 input: {
@@ -183,7 +178,7 @@ describe('approveContract', () => {
         })
 
         const contract = await createAndSubmitTestContractWithRate(stateServer)
-        const approveContractResult = await cmsServer.executeOperation({
+        const approveContractResult = await executeGraphQLOperation(cmsServer, {
             query: ApproveContractDocument,
             variables: {
                 input: {
@@ -212,15 +207,18 @@ describe('approveContract', () => {
 
         const contract = await createAndSubmitTestContractWithRate(stateServer)
 
-        const approveContractResult = await stateServer.executeOperation({
-            query: ApproveContractDocument,
-            variables: {
-                input: {
-                    contractID: contract.id,
-                    dateApprovalReleasedToState: '2024-12-12',
+        const approveContractResult = await executeGraphQLOperation(
+            stateServer,
+            {
+                query: ApproveContractDocument,
+                variables: {
+                    input: {
+                        contractID: contract.id,
+                        dateApprovalReleasedToState: '2024-12-12',
+                    },
                 },
-            },
-        })
+            }
+        )
 
         expect(approveContractResult.errors).toBeDefined()
         if (approveContractResult.errors === undefined) {
