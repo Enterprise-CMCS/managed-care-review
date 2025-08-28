@@ -854,7 +854,7 @@ describe('undo withdraw rate error handling', async () => {
             throw new Error('Unexpected error: rate not found')
         }
 
-        const unwithdrawnRate = await cmsServer.executeOperation({
+        const unwithdrawnRate = await executeGraphQLOperation(cmsServer, {
             query: UndoWithdrawnRateDocument,
             variables: {
                 input: {
