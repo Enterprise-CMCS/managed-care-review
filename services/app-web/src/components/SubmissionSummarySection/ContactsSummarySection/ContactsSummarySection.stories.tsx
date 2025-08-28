@@ -4,10 +4,10 @@ import {
     ContactsSummarySectionProps,
     ContactsSummarySection,
 } from './ContactsSummarySection'
-import { mockContractAndRatesDraft } from '@mc-review/mocks'
+import { mockContractPackageDraft } from '@mc-review/mocks'
 
 export default {
-    title: 'Components/SubmissionSummary/ContactsSummarySection',
+    title: 'Components/SubmissionSummary/ContactsSummarySection/V2',
     component: ContactsSummarySection,
     parameters: {
         componentSubtitle:
@@ -23,7 +23,7 @@ export const WithAction = Template.bind({})
 WithAction.decorators = [(StoryFn) => ProvidersDecorator(StoryFn, {})]
 
 WithAction.args = {
-    submission: mockContractAndRatesDraft(),
+    contract: mockContractPackageDraft(),
     editNavigateTo: 'contract-details',
 }
 
@@ -31,5 +31,5 @@ export const WithoutAction = Template.bind({})
 WithoutAction.decorators = [(StoryFn) => ProvidersDecorator(StoryFn, {})]
 
 WithoutAction.args = {
-    submission: mockContractAndRatesDraft(),
+    contract: mockContractPackageDraft(),
 }

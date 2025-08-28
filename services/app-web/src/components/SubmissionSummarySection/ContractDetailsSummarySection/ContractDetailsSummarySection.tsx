@@ -1,17 +1,17 @@
 import React from 'react'
-import { DataDetail } from '../../../components/DataDetail'
-import { SectionHeader } from '../../../components/SectionHeader'
-import { UploadedDocumentsTable } from '../../../components/SubmissionSummarySection'
+import { DataDetail } from '../../DataDetail'
+import { SectionHeader } from '../../SectionHeader'
+import { UploadedDocumentsTable } from '..'
 import {
     ContractExecutionStatusRecord,
     FederalAuthorityRecord,
     ManagedCareEntityRecord,
 } from '@mc-review/hpp'
 import { formatCalendarDate } from '@mc-review/dates'
-import { MultiColumnGrid } from '../../../components/MultiColumnGrid'
+import { MultiColumnGrid } from '../../MultiColumnGrid'
 import { usePreviousSubmission } from '../../../hooks/usePreviousSubmission'
-import styles from '../../SubmissionSummary/SubmissionSummary.module.scss'
-import sectionStyle from '../ReviewSubmit/ReviewSubmit.module.scss'
+import styles from '../SubmissionSummarySection.module.scss'
+import sectionStyle from '../../../pages/StateSubmission/ReviewSubmit/ReviewSubmit.module.scss'
 import { useAuth } from '../../../contexts/AuthContext'
 import { dsnpTriggers } from '@mc-review/common-code'
 
@@ -20,7 +20,7 @@ import {
     isMissingProvisions,
     getProvisionDictionary,
 } from '@mc-review/common-code'
-import { DataDetailCheckboxList } from '../../../components/DataDetail/DataDetailCheckboxList'
+import { DataDetailCheckboxList } from '../../DataDetail/DataDetailCheckboxList'
 import {
     isBaseContract,
     isCHIPOnly,
@@ -36,12 +36,12 @@ import { Grid } from '@trussworks/react-uswds'
 import {
     booleanAsYesNoFormValue,
     booleanAsYesNoUserValue,
-} from '../../../components/Form/FieldYesNo'
+} from '../../Form/FieldYesNo'
 import {
     StatutoryRegulatoryAttestation,
     StatutoryRegulatoryAttestationQuestion,
 } from '@mc-review/constants'
-import { SectionCard } from '../../../components/SectionCard'
+import { SectionCard } from '../../SectionCard'
 import {
     Contract,
     ContractRevision,
@@ -55,7 +55,7 @@ import {
     getVisibleLatestContractFormData,
 } from '@mc-review/helpers'
 import { hasCMSUserPermissions } from '@mc-review/helpers'
-import { DocumentHeader } from '../../../components/DocumentHeader/DocumentHeader'
+import { DocumentHeader } from '../../DocumentHeader/DocumentHeader'
 
 export type ContractDetailsSummarySectionProps = {
     contract: Contract | UnlockedContract

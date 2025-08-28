@@ -33,11 +33,7 @@ export { PoliteErrorMessage } from './PoliteErrorMessage'
 export { Spinner } from './Spinner'
 export { SectionHeader } from './SectionHeader'
 export { PageHeading } from './PageHeading'
-export {
-    SubmissionTypeSummarySection,
-    ContactsSummarySection,
-    UploadedDocumentsTable,
-} from './SubmissionSummarySection'
+export { UploadedDocumentsTable } from './SubmissionSummarySection'
 
 export { SubmissionCard } from './SubmissionCard'
 

@@ -1,130 +1,172 @@
 import { Grid } from '@trussworks/react-uswds'
-import dayjs from 'dayjs'
-import { HealthPlanFormDataType } from '@mc-review/hpp'
-import { DataDetail } from '../../../components/DataDetail'
+import { DataDetail } from '../../DataDetail'
 import { MultiColumnGrid } from '../../MultiColumnGrid'
-import { SectionHeader } from '../../../components/SectionHeader'
+import { SectionHeader } from '../../SectionHeader'
 import {
     SubmissionTypeRecord,
     ContractTypeRecord,
     PopulationCoveredRecord,
 } from '@mc-review/hpp'
-import { Program } from '../../../gen/gqlClient'
-import { usePreviousSubmission } from '../../../hooks/usePreviousSubmission'
-import { booleanAsYesNoUserValue } from '../../../components/Form/FieldYesNo/FieldYesNo'
-import styles from '../SubmissionSummarySection.module.scss'
+import { GenericErrorPage } from '../../../pages/Errors/GenericErrorPage'
+import { getVisibleLatestContractFormData } from '@mc-review/helpers'
+import {
+    Program,
+    Contract,
+    UnlockedContract,
+    ContractRevision,
+} from '../../../gen/gqlClient'
+import { booleanAsYesNoUserValue } from '../../Form/FieldYesNo/FieldYesNo'
 import { SectionCard } from '../../SectionCard'
+import styles from '../../../components/SubmissionSummarySection/SubmissionSummarySection.module.scss'
+import { formatCalendarDate } from '@mc-review/dates'
 
 export type SubmissionTypeSummarySectionProps = {
-    submission: HealthPlanFormDataType
+    contract: Contract | UnlockedContract
     statePrograms: Program[]
+    contractRev?: ContractRevision
     editNavigateTo?: string
     headerChildComponent?: React.ReactElement
     subHeaderComponent?: React.ReactElement
     initiallySubmittedAt?: Date
     submissionName: string
+    isStateUser: boolean
+    explainMissingData?: boolean
 }
 
 export const SubmissionTypeSummarySection = ({
-    submission,
+    contract,
+    contractRev,
     statePrograms,
     editNavigateTo,
     subHeaderComponent,
     headerChildComponent,
     initiallySubmittedAt,
     submissionName,
+    isStateUser,
+    explainMissingData,
 }: SubmissionTypeSummarySectionProps): React.ReactElement => {
-    const isPreviousSubmission = usePreviousSubmission()
+    const contractOrRev = contractRev ? contractRev : contract
+    const contractFormData = getVisibleLatestContractFormData(
+        contractOrRev,
+        isStateUser
+    )
+    if (!contractFormData) return <GenericErrorPage />
+
     const programNames = statePrograms
-        .filter((p) => submission.programIDs.includes(p.id))
+        .filter((p) => contractFormData?.programIDs.includes(p.id))
         .map((p) => p.name)
-    const isSubmitted = submission.status === 'SUBMITTED'
+    const isSubmitted =
+        contract.status === 'SUBMITTED' || contract.status === 'RESUBMITTED'
+    const isUnlocked = contract.status === 'UNLOCKED'
 
     return (
         <SectionCard
             id="submissionTypeSection"
-            className={styles.summarySection}
+            className={styles.submissionTypeSection}
         >
             <SectionHeader
                 header={submissionName}
                 subHeaderComponent={subHeaderComponent}
                 editNavigateTo={editNavigateTo}
                 headerId={'submissionName'}
+                hideBorderTop
+                fontSize="38px"
             >
                 {headerChildComponent && headerChildComponent}
             </SectionHeader>
-
             <dl>
-                {isSubmitted && !isPreviousSubmission && (
-                    <MultiColumnGrid columns={2}>
+                {initiallySubmittedAt &&
+                    (isSubmitted || (!isStateUser && isUnlocked)) && (
+                        <MultiColumnGrid columns={2}>
+                            <DataDetail
+                                id="submitted"
+                                label="Submitted"
+                                children={
+                                    <span>
+                                        {formatCalendarDate(
+                                            initiallySubmittedAt,
+                                            'America/Los_Angeles'
+                                        )}
+                                    </span>
+                                }
+                            />
+                        </MultiColumnGrid>
+                    )}
+                <MultiColumnGrid columns={2}>
+                    {(programNames?.length > 0 || !isSubmitted) && (
                         <DataDetail
-                            id="submitted"
-                            label="Submitted"
+                            id="program"
+                            label="Program(s)"
+                            explainMissingData={explainMissingData}
+                            children={programNames}
+                        />
+                    )}
+                    {(contractFormData.submissionType || !isSubmitted) && (
+                        <DataDetail
+                            id="submissionType"
+                            label="Submission type"
+                            explainMissingData={explainMissingData}
                             children={
-                                <span>
-                                    {dayjs(initiallySubmittedAt).format(
-                                        'MM/DD/YY'
-                                    )}
-                                </span>
+                                SubmissionTypeRecord[
+                                    contractFormData.submissionType
+                                ]
                             }
                         />
-                        <></>
-                    </MultiColumnGrid>
-                )}
-                <MultiColumnGrid columns={2}>
-                    <DataDetail
-                        id="program"
-                        label="Program(s)"
-                        explainMissingData={!isSubmitted}
-                        children={programNames}
-                    />
-                    <DataDetail
-                        id="submissionType"
-                        label="Submission type"
-                        explainMissingData={!isSubmitted}
-                        children={
-                            SubmissionTypeRecord[submission.submissionType]
-                        }
-                    />
-                    <DataDetail
-                        id="contractType"
-                        label="Contract action type"
-                        explainMissingData={!isSubmitted}
-                        children={
-                            submission.contractType
-                                ? ContractTypeRecord[submission.contractType]
-                                : ''
-                        }
-                    />
-                    <DataDetail
-                        id="riskBasedContract"
-                        label="Is this a risk based contract"
-                        explainMissingData={!isSubmitted}
-                        children={booleanAsYesNoUserValue(
-                            submission.riskBasedContract
-                        )}
-                    />
-                    <DataDetail
-                        id="populationCoverage"
-                        label="Which populations does this contract action cover?"
-                        explainMissingData={!isSubmitted}
-                        children={
-                            submission.populationCovered &&
-                            PopulationCoveredRecord[
-                                submission.populationCovered
-                            ]
-                        }
-                    />
+                    )}
+                    {(contractFormData.contractType || !isSubmitted) && (
+                        <DataDetail
+                            id="contractType"
+                            label="Contract action type"
+                            explainMissingData={explainMissingData}
+                            children={
+                                contractFormData.contractType
+                                    ? ContractTypeRecord[
+                                          contractFormData.contractType
+                                      ]
+                                    : ''
+                            }
+                        />
+                    )}
+                    {(contractFormData.riskBasedContract !== null ||
+                        (!isSubmitted &&
+                            contractFormData.riskBasedContract !== null)) && (
+                        <DataDetail
+                            id="riskBasedContract"
+                            label="Is this a risk based contract"
+                            explainMissingData={explainMissingData}
+                            children={booleanAsYesNoUserValue(
+                                contractFormData.riskBasedContract
+                            )}
+                        />
+                    )}
+                    {(contractFormData.populationCovered || !isSubmitted) && (
+                        <DataDetail
+                            id="populationCoverage"
+                            label="Which populations does this contract action cover?"
+                            explainMissingData={explainMissingData}
+                            children={
+                                contractFormData.populationCovered &&
+                                PopulationCoveredRecord[
+                                    contractFormData.populationCovered
+                                ]
+                            }
+                        />
+                    )}
                 </MultiColumnGrid>
 
                 <Grid row gap className={styles.reviewDataRow}>
                     <Grid col={12}>
-                        <DataDetail
-                            id="submissionDescription"
-                            label="Submission description"
-                            explainMissingData={!isSubmitted}
-                            children={submission.submissionDescription}
-                        />
+                        {(contractFormData.submissionDescription ||
+                            !isSubmitted) && (
+                            <DataDetail
+                                id="submissionDescription"
+                                label="Submission description"
+                                explainMissingData={explainMissingData}
+                                children={
+                                    contractFormData.submissionDescription
+                                }
+                            />
+                        )}
                     </Grid>
                 </Grid>
             </dl>
