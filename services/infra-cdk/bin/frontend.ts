@@ -6,7 +6,8 @@ import { Aspects } from 'aws-cdk-lib'
 import { IamPathAspect } from '../lib/aspects/iam-path-aspects'
 import { IamPermissionsBoundaryAspect } from '../lib/aspects/iam-permissions-boundary-aspects'
 import { getEnvironment, getCdkEnvironment, ResourceNames } from '../lib/config'
-import { FrontendStack } from '../lib/stacks/frontend'
+import { FrontendInfraStack } from '../lib/stacks/frontend-infra'
+import { FrontendAppStack } from '../lib/stacks/frontend-app'
 
 async function main(): Promise<void> {
     try {
@@ -31,15 +32,32 @@ async function main(): Promise<void> {
         const config = getEnvironment(appConfig.stage)
         const env = getCdkEnvironment(appConfig.stage)
 
-        // Create Frontend stack
-        new FrontendStack(
+        // Create Frontend Infrastructure stack (S3 + CloudFront + WAF)
+        const frontendInfra = new FrontendInfraStack(
             app,
-            ResourceNames.stackName('Frontend', appConfig.stage),
+            ResourceNames.stackName('frontend-infra', appConfig.stage),
             {
                 env,
                 stage: appConfig.stage,
                 stageConfig: config,
-                serviceName: 'frontend',
+                serviceName: 'frontend-infra',
+            }
+        )
+
+        // Create Frontend App stack (deploys React app and Storybook)
+        new FrontendAppStack(
+            app,
+            ResourceNames.stackName('frontend-app', appConfig.stage),
+            {
+                env,
+                stage: appConfig.stage,
+                stageConfig: config,
+                serviceName: 'frontend-app',
+                // Pass infrastructure resources from frontend-infra stack
+                mainAppBucket: frontendInfra.bucket,
+                mainAppDistribution: frontendInfra.distribution,
+                storybookBucket: frontendInfra.storybookBucket,
+                storybookDistribution: frontendInfra.storybookDistribution,
             }
         )
 
@@ -65,7 +83,7 @@ async function main(): Promise<void> {
         app.synth()
 
         console.info(
-            `CDK synthesis completed for Frontend stack: ${appConfig.stage}`
+            `CDK synthesis completed for Frontend stacks: ${appConfig.stage}`
         )
     } catch (error) {
         console.error('Frontend stack initialization failed:', error)

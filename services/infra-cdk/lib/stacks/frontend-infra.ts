@@ -24,18 +24,24 @@ import { CfnOutput } from 'aws-cdk-lib'
 import { ResourceNames } from '../config'
 
 /**
- * Simple frontend stack - S3 + CloudFront + WAF
+ * Frontend infrastructure stack - S3 + CloudFront + WAF for both main app and storybook
+ * Infrastructure only - no app deployment
  */
-export class FrontendStack extends BaseStack {
+export class FrontendInfraStack extends BaseStack {
     public readonly bucket: Bucket
     public readonly distribution: Distribution
     public readonly applicationUrl: string
+
+    // Storybook resources
+    public readonly storybookBucket: Bucket
+    public readonly storybookDistribution: Distribution
+    public readonly storybookUrl: string
 
     constructor(scope: Construct, id: string, props: BaseStackProps) {
         super(scope, id, {
             ...props,
             description:
-                'Frontend hosting - S3 bucket and CloudFront distribution for React app',
+                'Frontend infrastructure - S3 buckets and CloudFront distributions for React app and Storybook',
         })
 
         // Create S3 bucket (matches serverless ui config)
@@ -154,6 +160,84 @@ function handler(event) {
 
         this.applicationUrl = `https://${this.distribution.distributionDomainName}`
 
+        // Create storybook S3 bucket (matches serverless storybook config)
+        this.storybookBucket = new Bucket(this, 'StorybookS3Bucket', {
+            bucketName: ResourceNames.resourceName(
+                'storybook',
+                'bucket',
+                this.stage
+            ),
+            websiteIndexDocument: 'index.html',
+            websiteErrorDocument: 'index.html',
+            encryption: BucketEncryption.S3_MANAGED,
+            blockPublicAccess: BlockPublicAccess.BLOCK_ALL,
+            objectOwnership: ObjectOwnership.OBJECT_WRITER,
+            enforceSSL: true,
+        })
+
+        // Create storybook Origin Access Identity
+        const storybookOai = new OriginAccessIdentity(
+            this,
+            'StorybookCloudFrontOriginAccessIdentity',
+            {
+                comment:
+                    'OAI to prevent direct public access to the storybook bucket',
+            }
+        )
+
+        // Grant storybook OAI access to bucket
+        this.storybookBucket.addToResourcePolicy(
+            new PolicyStatement({
+                effect: Effect.ALLOW,
+                principals: [storybookOai.grantPrincipal],
+                actions: ['s3:GetObject'],
+                resources: [`${this.storybookBucket.bucketArn}/*`],
+            })
+        )
+
+        // Create storybook CloudFront distribution (matches serverless storybook config)
+        this.storybookDistribution = new Distribution(
+            this,
+            'StorybookCloudFrontDistribution',
+            {
+                comment:
+                    'CloudFront Distro for the storybook static website hosted in S3',
+                defaultRootObject: 'index.html',
+                httpVersion: HttpVersion.HTTP2,
+
+                defaultBehavior: {
+                    origin: S3BucketOrigin.withOriginAccessIdentity(
+                        this.storybookBucket,
+                        {
+                            originAccessIdentity: storybookOai,
+                        }
+                    ),
+                    compress: true,
+                    viewerProtocolPolicy:
+                        ViewerProtocolPolicy.REDIRECT_TO_HTTPS,
+                    allowedMethods: AllowedMethods.ALLOW_GET_HEAD,
+                },
+
+                // Storybook error handling - return 403 for error responses
+                errorResponses: [
+                    {
+                        httpStatus: 403,
+                        responseHttpStatus: 403,
+                        responsePagePath: '/index.html',
+                    },
+                ],
+
+                webAclId: webAcl.attrArn,
+
+                // Logging to same bucket (matches serverless)
+                enableLogging: true,
+                logBucket: this.storybookBucket,
+                logFilePrefix: `${this.stage}-storybook-cloudfront-logs/`,
+            }
+        )
+
+        this.storybookUrl = `https://${this.storybookDistribution.distributionDomainName}`
+
         this.createOutputs()
     }
 
@@ -174,6 +258,25 @@ function handler(event) {
             value: this.applicationUrl,
             exportName: this.exportName('CloudFrontEndpointUrl'),
             description: 'CloudFront URL for React app',
+        })
+
+        // Storybook outputs
+        new CfnOutput(this, 'StorybookS3BucketName', {
+            value: this.storybookBucket.bucketName,
+            exportName: this.exportName('StorybookS3BucketName'),
+            description: 'S3 bucket for Storybook',
+        })
+
+        new CfnOutput(this, 'StorybookCloudFrontDistributionId', {
+            value: this.storybookDistribution.distributionId,
+            exportName: this.exportName('StorybookCloudFrontDistributionId'),
+            description: 'CloudFront distribution ID for Storybook',
+        })
+
+        new CfnOutput(this, 'StorybookCloudFrontEndpointUrl', {
+            value: this.storybookUrl,
+            exportName: this.exportName('StorybookCloudFrontEndpointUrl'),
+            description: 'CloudFront URL for Storybook',
         })
     }
 }
