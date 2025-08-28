@@ -1,9 +1,11 @@
-import { Grid, GridContainer } from '@trussworks/react-uswds'
+import { GridContainer } from '@trussworks/react-uswds'
 import styles from '../../../pages/StateSubmission/ReviewSubmit/ReviewSubmit.module.scss'
-
-import { SectionHeader } from '../../SectionHeader'
-import { DataDetail, DataDetailContactField } from '../../DataDetail'
-import { SectionCard } from '../../SectionCard'
+import {
+    DataDetail,
+    DataDetailContactField,
+    SectionHeader,
+    SectionCard,
+} from '../../../components'
 import { Contract, ContractRevision } from '../../../gen/gqlClient'
 import { getVisibleLatestContractFormData } from '@mc-review/helpers'
 
@@ -37,35 +39,33 @@ export const ContactsSummarySection = ({
                 fontSize="38px"
             />
 
-            <GridContainer className="padding-left-0">
-                <Grid row>
-                    <dl>
-                        {contractFormData &&
-                        contractFormData.stateContacts.length > 0 ? (
-                            contractFormData?.stateContacts.map(
-                                (stateContact, index) => (
-                                    <DataDetail
-                                        key={'statecontact_' + index}
-                                        id={'statecontact_' + index}
-                                        label={`Contact ${index + 1}`}
-                                        children={
-                                            <DataDetailContactField
-                                                contact={stateContact}
-                                            />
-                                        }
-                                    />
-                                )
+            <GridContainer>
+                <dl>
+                    {contractFormData &&
+                    contractFormData.stateContacts.length > 0 ? (
+                        contractFormData?.stateContacts.map(
+                            (stateContact, index) => (
+                                <DataDetail
+                                    key={'statecontact_' + index}
+                                    id={'statecontact_' + index}
+                                    label={`Contact ${index + 1}`}
+                                    children={
+                                        <DataDetailContactField
+                                            contact={stateContact}
+                                        />
+                                    }
+                                />
                             )
-                        ) : (
-                            <DataDetail
-                                id="statecontact"
-                                label="Contact"
-                                explainMissingData={explainMissingData}
-                                children={undefined}
-                            />
-                        )}
-                    </dl>
-                </Grid>
+                        )
+                    ) : (
+                        <DataDetail
+                            id="statecontact"
+                            label="Contact"
+                            explainMissingData={explainMissingData}
+                            children={undefined}
+                        />
+                    )}
+                </dl>
             </GridContainer>
         </SectionCard>
     )

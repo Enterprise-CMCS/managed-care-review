@@ -20,13 +20,13 @@
         ]
     },
     "dependencies": {
-        "@aws-sdk/client-cloudfront": "^3.873.0",
-        "@aws-sdk/client-ec2": "^3.873.0",
-        "@aws-sdk/client-secrets-manager": "^3.873.0",
+        "@aws-sdk/client-cloudfront": "^3.876.0",
+        "@aws-sdk/client-ec2": "^3.876.0",
+        "@aws-sdk/client-secrets-manager": "^3.876.0",
         "axios": "^1.11.0",
         "node-ssh": "^13.2.1",
         "prompts": "^2.4.2",
-        "yargs": "^17.2.1"
+        "yargs": "^18.0.0"
     },
     "devDependencies": {
         "@types/eslint": "^9.6.1",

@@ -1,4 +1,4 @@
-import type { RateType } from '../../domain-models/contractAndRates'
+import type { RateType } from '../../domain-models'
 import type { ExtendedPrismaClient } from '../prismaClient'
 import type { PrismaTransactionType } from '../prismaTypes'
 import { findRateWithHistory } from './findRateWithHistory'
@@ -109,6 +109,7 @@ async function unlockRateInDB(
             rateCertificationName: currentRev.rateCertificationName,
             actuaryCommunicationPreference:
                 currentRev.actuaryCommunicationPreference,
+            rateMedicaidPopulations: currentRev.rateMedicaidPopulations,
 
             rateDocuments: {
                 create: currentRev.rateDocuments.map((d) => ({
