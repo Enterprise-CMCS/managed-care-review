@@ -43,4 +43,4 @@ fi
 # build and run dev.ts
 # tsc is configured to build what we expect in tsconfig.json
 pnpm run -r build:dev 
-node ./dev_tool/build/dev.js "$@"
+node ./dev_tool/build/src/dev.js "$@"
