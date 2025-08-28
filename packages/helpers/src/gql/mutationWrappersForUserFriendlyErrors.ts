@@ -31,7 +31,7 @@ import {
     CreateRateQuestionResponseMutation,
     ApproveContractMutationFn,
 } from '../gen/gqlClient'
-import { GraphQLError } from 'graphql'
+import { GraphQLErrors } from '@apollo/client/errors'
 
 import { recordJSException } from '@mc-review/otel'
 import { handleGQLErrors as handleGQLErrorLogging } from './apolloErrors'
@@ -87,8 +87,8 @@ export const handleGraphQLErrorsAndAddUserFacingMessages = (
     }
 
     // Extract GraphQL errors from ApolloError
-    let graphQLErrors: readonly GraphQLError[] = []
-    
+    let graphQLErrors: GraphQLErrors = []
+
     if (error instanceof ApolloError && error.graphQLErrors) {
         graphQLErrors = error.graphQLErrors
     }
@@ -129,7 +129,7 @@ export const unlockMutationWrapper = async (
     unlockHealthPlanPackage: UnlockHealthPlanPackageMutationFn,
     id: string,
     unlockedReason: string
-): Promise<HealthPlanPackage | GraphQLError | Error> => {
+): Promise<HealthPlanPackage | GraphQLErrors | Error> => {
     try {
         const { data } = await unlockHealthPlanPackage({
             variables: {
@@ -160,7 +160,7 @@ export const unlockMutationWrapperV2 = async (
     unlockContract: UnlockContractMutationFn,
     id: string,
     unlockedReason: string
-): Promise<UnlockedContract | GraphQLError | Error> => {
+): Promise<UnlockedContract | GraphQLErrors | Error> => {
     try {
         const { data } = await unlockContract({
             variables: {
@@ -191,7 +191,7 @@ export const submitMutationWrapper = async (
     submitDraftSubmission: SubmitHealthPlanPackageMutationFn,
     id: string,
     submittedReason?: string
-): Promise<Partial<HealthPlanPackage> | GraphQLError | Error> => {
+): Promise<Partial<HealthPlanPackage> | GraphQLErrors | Error> => {
     const input = { pkgID: id }
 
     if (submittedReason) {
@@ -227,7 +227,7 @@ export const submitMutationWrapperV2 = async (
     submitContract: SubmitContractMutationFn,
     id: string,
     submittedReason?: string
-): Promise<Partial<Contract> | GraphQLError | Error> => {
+): Promise<Partial<Contract> | GraphQLErrors | Error> => {
     const input = { contractID: id }
 
     if (submittedReason) {
@@ -263,7 +263,7 @@ export const approveMutationWrapper = async (
     approveContract: ApproveContractMutationFn,
     id: string,
     dateApprovalReleasedToState: string
-): Promise<Partial<Contract> | GraphQLError | Error> => {
+): Promise<Partial<Contract> | GraphQLErrors | Error> => {
     const input = {
         contractID: id,
         dateApprovalReleasedToState,
@@ -296,7 +296,7 @@ export async function updateStateAssignmentsWrapper(
     updateStateAssignments: UpdateStateAssignmentsByStateMutationFn,
     stateCode: string,
     assignedUserIDs: string[]
-): Promise<undefined | GraphQLError | Error> {
+): Promise<undefined | GraphQLErrors | Error> {
     const input = {
         stateCode,
         assignedUsers: assignedUserIDs,
@@ -378,7 +378,7 @@ export async function updateStateAssignmentsWrapper(
 export const createContractQuestionWrapper = async (
     createQuestion: CreateContractQuestionMutationFn,
     input: CreateContractQuestionInput
-): Promise<CreateContractQuestionMutation | GraphQLError | Error> => {
+): Promise<CreateContractQuestionMutation | GraphQLErrors | Error> => {
     try {
         const result = await createQuestion({
             variables: { input },
@@ -461,7 +461,7 @@ export const createContractQuestionWrapper = async (
 export const createRateQuestionWrapper = async (
     createQuestion: CreateRateQuestionMutationFn,
     input: CreateRateQuestionInput
-): Promise<CreateRateQuestionMutation | GraphQLError | Error> => {
+): Promise<CreateRateQuestionMutation | GraphQLErrors | Error> => {
     try {
         const result = await createQuestion({
             variables: { input },
@@ -557,7 +557,7 @@ export const createContractResponseWrapper = async (
     contractID: string,
     input: CreateQuestionResponseInput,
     division: Division
-): Promise<CreateContractQuestionResponseMutation | GraphQLError | Error> => {
+): Promise<CreateContractQuestionResponseMutation | GraphQLErrors | Error> => {
     try {
         const result = await createResponse({
             variables: { input },
@@ -649,7 +649,7 @@ export const createRateQuestionResponseWrapper = async (
     rateID: string,
     input: CreateQuestionResponseInput,
     division: Division
-): Promise<CreateRateQuestionResponseMutation | GraphQLError | Error> => {
+): Promise<CreateRateQuestionResponseMutation | GraphQLErrors | Error> => {
     try {
         const result = await createResponse({
             variables: { input },

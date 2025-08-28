@@ -480,6 +480,42 @@ describe('fetchRate', () => {
             },
         })
 
+        // Change rate submission date and document dateAdded
+        await prismaClient.rateRevisionTable.update({
+            where: {
+                id: rate10.id,
+            },
+            data: {
+                submitInfo: {
+                    update: {
+                        updatedAt: new Date('2024-01-01'),
+                    },
+                },
+                rateDocuments: {
+                    updateMany: rate10.formData.rateDocuments.map((doc) => ({
+                        where: {
+                            id: doc.id!,
+                        },
+                        data: {
+                            dateAdded: new Date('2024-01-01'),
+                        },
+                    })),
+                },
+                supportingDocuments: {
+                    updateMany: rate10.formData.supportingDocuments.map(
+                        (doc) => ({
+                            where: {
+                                id: doc.id!,
+                            },
+                            data: {
+                                dateAdded: new Date('2024-01-01'),
+                            },
+                        })
+                    ),
+                },
+            },
+        })
+
         const fixSubmitA0 = await fetchTestRateById(stateServer, OneID)
         const rateRev = fixSubmitA0.revisions[0]
         if (
@@ -540,6 +576,19 @@ describe('fetchRate', () => {
             'Submit A.1'
         )
         const a1sub = submittedA1.packageSubmissions[0]
+        const rateUpdated = a1sub.rateRevisions[0]
+        const dummyRateDocR2 = rateUpdated.formData.rateDocuments.find(
+            (doc) => doc.name === 'docr2.pdf'
+        )
+        const dummyRateDocS2 = rateUpdated.formData.supportingDocuments.find(
+            (doc) => doc.name === 'docx2.pdf'
+        )
+
+        if (!dummyRateDocR2 || !dummyRateDocS2) {
+            throw new Error(
+                'Unexpected error: Additional docs where not found in submission'
+            )
+        }
 
         // CHANGE SUBMISSION DATE
         await prismaClient.contractRevisionTable.update({
@@ -550,6 +599,40 @@ describe('fetchRate', () => {
                 submitInfo: {
                     update: {
                         updatedAt: new Date('2024-02-02'),
+                    },
+                },
+            },
+        })
+
+        // Change rate submission date and document added for new docs only
+        await prismaClient.rateRevisionTable.update({
+            where: {
+                id: rateUpdated.id,
+            },
+            data: {
+                submitInfo: {
+                    update: {
+                        updatedAt: new Date('2024-02-02'),
+                    },
+                },
+                rateDocuments: {
+                    update: {
+                        where: {
+                            id: dummyRateDocR2.id!,
+                        },
+                        data: {
+                            dateAdded: new Date('2024-02-02'),
+                        },
+                    },
+                },
+                supportingDocuments: {
+                    update: {
+                        where: {
+                            id: dummyRateDocS2.id!,
+                        },
+                        data: {
+                            dateAdded: new Date('2024-02-02'),
+                        },
                     },
                 },
             },

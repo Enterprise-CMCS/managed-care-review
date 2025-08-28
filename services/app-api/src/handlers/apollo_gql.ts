@@ -64,11 +64,12 @@ export interface Context {
 
 // This function pulls auth info out of the cognitoAuthenticationProvider in the lambda event
 // and turns that into our GQL resolver context object
-function contextForRequestForFetcher(userFetcher: userFromAuthProvider): ({
+function contextForRequestForFetcher(
+    userFetcher: userFromAuthProvider
+): ({
     event,
 }: {
     event: APIGatewayProxyEvent
-
     context: any
 }) => Promise<Context> {
     return async ({ event, context }) => {

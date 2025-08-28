@@ -285,8 +285,7 @@ const constructTestEmailer = async (opts: {
 
 const createTestHealthPlanPackage = async (
     server: ApolloServer,
-    stateCode?: StateCodeType,
-    context?: Context
+    stateCode?: StateCodeType
 ): Promise<HealthPlanPackage> => {
     const programs = stateCode
         ? [must(findStatePrograms(stateCode))[0]]

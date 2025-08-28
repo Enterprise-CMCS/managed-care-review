@@ -166,7 +166,6 @@ describe('undoWithdrawRate', () => {
             unwithdrawnRate.packageSubmissions[0].rateRevision.formData
         ).toEqual({
             ...formData,
-            rateMedicaidPopulations: [],
             rateDocuments: expect.arrayContaining(
                 formData.rateDocuments.map((doc) =>
                     expect.objectContaining({
@@ -338,7 +337,6 @@ describe('undoWithdrawRate', () => {
             unwithdrawnRate.packageSubmissions[0].rateRevision.formData
         ).toEqual({
             ...formData,
-            rateMedicaidPopulations: [],
             rateDocuments: expect.arrayContaining(
                 formData.rateDocuments.map((doc) =>
                     expect.objectContaining({
@@ -856,7 +854,7 @@ describe('undo withdraw rate error handling', async () => {
             throw new Error('Unexpected error: rate not found')
         }
 
-        const unwithdrawnRate = await executeGraphQLOperation(cmsServer, {
+        const unwithdrawnRate = await cmsServer.executeOperation({
             query: UndoWithdrawnRateDocument,
             variables: {
                 input: {

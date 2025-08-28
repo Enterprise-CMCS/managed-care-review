@@ -186,6 +186,7 @@ async function unlockContractInsideTransaction(
             submissionType: currentRev.submissionType,
             submissionDescription: currentRev.submissionDescription,
             contractType: currentRev.contractType,
+            dsnpContract: currentRev.dsnpContract,
             contractExecutionStatus: currentRev.contractExecutionStatus,
             contractDateStart: currentRev.contractDateStart,
             contractDateEnd: currentRev.contractDateEnd,
