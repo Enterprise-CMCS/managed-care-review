@@ -1,49 +1,91 @@
-name: Sync Security Hub findings and Jira issues
+name: Security Sync
 
 on:
   workflow_dispatch: # for testing and manual runs
-  schedule:
-    - cron: '25 1 * * *' # daily at 6:25 am EST
+#  schedule:
+#    - cron: "25 1 * * *" # daily at 01:25 UTC
+  push:
+    branches:
+      - security-sync-fix
 
 permissions:
   id-token: write
+  contents: read
 
 jobs:
   sync:
     name: Run sync
-    environment: prod
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-latest
+    strategy:
+      max-parallel: 1
+      matrix:
+        environment: ["prod"]  # add more like "val","master" later if needed
+      fail-fast: false
+    environment:
+      name: ${{ matrix.environment }}
+    outputs:
+      failed_step: ${{ steps.set_failed_info.outputs.failed_step }}
+      error_message: ${{ steps.set_failed_info.outputs.error_message }}
     steps:
       - name: Check out repo
-        uses: actions/checkout@v5
+        id: checkout_step
+        uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
 
+      # Uses your existing composite action, but hooked into the standardized flow
       - name: Get AWS credentials
+        id: aws_creds_step
         uses: ./.github/actions/get_aws_credentials
         with:
           region: ${{ vars.AWS_DEFAULT_REGION }}
           account-id: ${{ secrets.PROD_AWS_ACCOUNT_ID }}
-          stage-name: prod
+          stage-name: ${{ matrix.environment }}
 
       - name: Sync Security Hub and Jira
+        id: sync_step
         uses: Enterprise-CMCS/mac-fc-security-hub-visibility@v2.1.9
         with:
           jira-token: ${{ secrets.JIRA_TOKEN }}
           jira-username: ${{ secrets.JIRA_USERNAME }}
           jira-host: jiraent.cms.gov
-          jira-project-key: 'MCR' # add issues to the 'MC-Review' project
-          jira-custom-fields: '{ "customfield_10104": 32589, "customfield_10100": "MCR-2480"}' # Sprint, Epic
+          jira-project-key: "MCR" # add issues to the 'MC-Review' project
+          jira-custom-fields: '{"customfield_10104":32589,"customfield_10100":"MCR-2480"}' # Sprint, Epic
           jira-ignore-statuses: Done, Closed, Canceled
           aws-region: us-east-1
           aws-severities: CRITICAL, HIGH, MEDIUM
 
-      - name: Alert Slack On Failure
-        uses: rtCamp/action-slack-notify@v2
+      - name: Set failed info
+        id: set_failed_info
         if: failure()
-        env:
-          SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK }}
-          SLACK_USERNAME: Deploy Alerts
-          SLACK_ICON_EMOJI: ':bell:'
-          SLACK_COLOR: failure
-          SLACK_FOOTER: ''
-          SLACK_MESSAGE: 'Failure syncing Security Hub findings and Jira issues'
-          MSG_MINIMAL: actions url
+        run: |
+          if [ "${{ steps.checkout_step.outcome }}" = "failure" ]; then
+            echo "failed_step=Check out repo" >> $GITHUB_OUTPUT
+            echo "error_message=Failed to check out repository" >> $GITHUB_OUTPUT
+            exit 1
+          elif [ "${{ steps.aws_creds_step.outcome }}" = "failure" ]; then
+            echo "failed_step=Get AWS credentials" >> $GITHUB_OUTPUT
+            echo "error_message=Failed to obtain AWS credentials" >> $GITHUB_OUTPUT
+            exit 1
+          elif [ "${{ steps.sync_step.outcome }}" = "failure" ]; then
+            echo "failed_step=Security Sync" >> $GITHUB_OUTPUT
+            echo "error_message=Failed to sync Security Hub findings with Jira" >> $GITHUB_OUTPUT
+            exit 1
+          else
+            echo "failed_step=Unknown" >> $GITHUB_OUTPUT
+            echo "error_message=Unknown error" >> $GITHUB_OUTPUT
+            exit 1
+          fi
+
+  alert:
+    needs: sync
+    if: failure()
+    runs-on: ubuntu-24.04
+    env:
+      FAILED_STEP: ${{ needs.sync.outputs.failed_step }}
+      ERROR_MESSAGE: ${{ needs.sync.outputs.error_message }}
+    steps:
+      - name: Alert Slack On Failure
+        run: |
+          MESSAGE="Failure completing '${{ github.workflow }}' for env '${{ needs.sync.outputs.environment || 'prod' }}'. Run: https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}. Failed step: ${FAILED_STEP:-Unknown}. Error: ${ERROR_MESSAGE:-Unknown}."
+          curl -X POST -H 'Content-type: application/json' --data "{\"text\": \"$MESSAGE\"}" ${{ secrets.SLACK_WEBHOOK }}
