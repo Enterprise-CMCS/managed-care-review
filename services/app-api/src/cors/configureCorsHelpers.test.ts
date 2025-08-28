@@ -197,7 +197,7 @@ describe('isOriginAllowed', () => {
 describe('configureCorsHeaders', () => {
     const originalEnv = {
         APPLICATION_ENDPOINT: process.env.APPLICATION_ENDPOINT,
-        INTERNAL_ALLOWED_ORIGINS: process.env.INTERNAL_ALLOWED_ORIGINS,
+        INTERNAL_ALLOWED_ORIGINS: '',
     }
 
     // Spy on isOriginAllowed only within this describe block
@@ -398,33 +398,6 @@ describe('configureCorsHeaders', () => {
                 'Access-Control-Allow-Methods': 'GET,POST,OPTIONS',
                 'Access-Control-Allow-Credentials': 'true',
             })
-        })
-
-        it.skip('should handle INTERNAL_ALLOWED_ORIGINS with whitespace and empty values', () => {
-            process.env.INTERNAL_ALLOWED_ORIGINS =
-                ' *.salesforce.com , , *.cms.gov , '
-            const response = createMockResponse()
-            const event = createMockEvent('https://test.salesforce.com')
-
-            configureCorsHeaders(response, event)
-
-            expect(mockIsOriginAllowed).toHaveBeenCalledWith(
-                'https://test.salesforce.com',
-                ['https://app.com', '*.salesforce.com', '*.cms.gov']
-            )
-        })
-
-        it.skip('should work when INTERNAL_ALLOWED_ORIGINS is undefined', () => {
-            delete process.env.INTERNAL_ALLOWED_ORIGINS
-            const response = createMockResponse()
-            const event = createMockEvent('https://app.com')
-
-            configureCorsHeaders(response, event)
-
-            expect(mockIsOriginAllowed).toHaveBeenCalledWith(
-                'https://app.com',
-                ['https://app.com']
-            )
         })
     })
 })

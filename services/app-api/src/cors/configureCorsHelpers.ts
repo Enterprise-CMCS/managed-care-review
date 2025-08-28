@@ -1,5 +1,4 @@
 import type { APIGatewayProxyEvent } from 'aws-lambda'
-import { logError } from '../logger'
 
 // Helper function to check if origin matches allowed patterns
 export const isOriginAllowed = (
@@ -25,35 +24,34 @@ export const isOriginAllowed = (
 export const configureCorsHeaders = (
     response: any,
     event: APIGatewayProxyEvent
-): void => {
+): void | Error => {
     if (response && typeof response === 'object' && 'headers' in response) {
         const requestOrigin = event.headers?.origin || event.headers?.Origin
 
         if (!requestOrigin) {
-            const msg = 'Cors configuration error. Request origin is undefined.'
-            logError('configureCorsHeaders', msg)
-            return
+            return Error(
+                'Cors configuration error. Request origin is undefined.'
+            )
         }
 
         if (!process.env.APPLICATION_ENDPOINT) {
-            const msg =
+            return Error(
                 'Cors configuration error. APPLICATION_ENDPOINT environment variable is undefined.'
-            logError('configureCorsHeaders', msg)
-            return
+            )
         }
 
         const allowedOrigins = [
             process.env.APPLICATION_ENDPOINT,
             ...(process.env.INTERNAL_ALLOWED_ORIGINS?.split(',')
-                .filter(Boolean)
-                .map((origin) => origin.trim()) || []),
+                .map((origin) => origin.trim())
+                .filter(Boolean) || []),
         ]
 
         // Return no cors headers if origin is not allowed.
         if (!isOriginAllowed(requestOrigin, allowedOrigins)) {
-            const msg = `Cors configuration error. Request origin ${requestOrigin} not allowed. Allowed Origins: ${allowedOrigins}`
-            logError('configureCorsHeaders', msg)
-            return
+            return Error(
+                `Cors configuration error. Request origin ${requestOrigin} not allowed. Allowed Origins: ${allowedOrigins}`
+            )
         }
 
         console.info('Cors Configuration:', {

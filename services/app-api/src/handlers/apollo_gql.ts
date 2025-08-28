@@ -41,6 +41,7 @@ import {
     localGenerateDocumentZip,
 } from '../zip'
 import { configureCorsHeaders } from '../cors/configureCorsHelpers'
+import { logError } from '../logger'
 
 let ldClient: LDClient
 let s3Client: S3ClientT
@@ -162,7 +163,12 @@ const requestHandler = handlers.createAPIGatewayProxyEventRequestHandler()
 const corsMiddleware: middleware.MiddlewareFn<typeof requestHandler> = async (
     event
 ) => {
-    return async (result) => configureCorsHeaders(result, event)
+    return async (result) => {
+        const errors = configureCorsHeaders(result, event)
+        if (errors) {
+            logError('configureCorsHeaders', errors.message)
+        }
+    }
 }
 
 // This middleware returns an error if the local request is missing authentication info
