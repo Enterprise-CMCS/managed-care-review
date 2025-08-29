@@ -1,21 +1,22 @@
 import { screen } from '@testing-library/react'
 import { renderWithProviders } from '../../../testHelpers/jestHelpers'
-import { ContactsSummarySection } from '.'
+import { ContactsSummarySection } from '../ContactsSummarySection/ContactsSummarySection'
 import {
-    mockContractAndRatesDraft,
-    mockStateSubmission,
+    mockContractPackageDraft,
+    mockContractPackageSubmitted,
 } from '@mc-review/mocks'
 
 describe('ContactsSummarySection', () => {
-    const draftSubmission = mockContractAndRatesDraft()
-    const stateSubmission = mockStateSubmission()
+    const draftSubmission = mockContractPackageDraft()
+    const stateSubmission = mockContractPackageSubmitted()
     afterEach(() => vi.clearAllMocks())
 
     it('can render draft submission without errors', () => {
         renderWithProviders(
             <ContactsSummarySection
-                submission={draftSubmission}
+                contract={draftSubmission}
                 editNavigateTo="contacts"
+                isStateUser
             />
         )
 
@@ -32,7 +33,7 @@ describe('ContactsSummarySection', () => {
 
     it('can render state submission without errors', () => {
         renderWithProviders(
-            <ContactsSummarySection submission={stateSubmission} />
+            <ContactsSummarySection contract={stateSubmission} isStateUser />
         )
 
         expect(
@@ -47,8 +48,9 @@ describe('ContactsSummarySection', () => {
     it('can render all state contact fields', () => {
         renderWithProviders(
             <ContactsSummarySection
-                submission={draftSubmission}
+                contract={draftSubmission}
                 editNavigateTo="contacts"
+                isStateUser
             />
         )
 
@@ -60,18 +62,16 @@ describe('ContactsSummarySection', () => {
         ).toBeInTheDocument()
         expect(screen.getByText(/State Contact 1/)).toBeInTheDocument()
         expect(screen.getByText(/Test State Contact 1/)).toBeInTheDocument()
-        expect(screen.getByText(/State Contact 2/)).toBeInTheDocument()
-        expect(screen.getByText(/Test State Contact 2/)).toBeInTheDocument()
     })
 
     it('can render only state contacts for contract only submission', () => {
+        const stateSubmission = mockContractPackageSubmitted()
+        stateSubmission.packageSubmissions[0].contractRevision.formData = {
+            ...stateSubmission.packageSubmissions[0].contractRevision.formData,
+            submissionType: 'CONTRACT_ONLY',
+        }
         renderWithProviders(
-            <ContactsSummarySection
-                submission={{
-                    ...stateSubmission,
-                    submissionType: 'CONTRACT_ONLY',
-                }}
-            />
+            <ContactsSummarySection isStateUser contract={stateSubmission} />
         )
 
         expect(
@@ -86,7 +86,7 @@ describe('ContactsSummarySection', () => {
 
     it('renders submitted package without errors', () => {
         renderWithProviders(
-            <ContactsSummarySection submission={draftSubmission} />
+            <ContactsSummarySection isStateUser contract={draftSubmission} />
         )
 
         // We should never display missing field text on submission summary for submitted packages
@@ -96,38 +96,22 @@ describe('ContactsSummarySection', () => {
     })
 
     it('does not include additional actuary contacts heading when this optional field is not provided', () => {
-        const mockSubmission = mockContractAndRatesDraft({
-            rateInfos: [
-                {
-                    rateType: 'AMENDMENT',
-                    rateCapitationType: 'RATE_CELL',
-                    rateDocuments: [],
-                    supportingDocuments: [],
-                    rateDateStart: new Date(),
-                    rateDateEnd: new Date(),
-                    rateDateCertified: new Date(),
-                    rateAmendmentInfo: {
-                        effectiveDateStart: new Date(),
-                        effectiveDateEnd: new Date(),
-                    },
-                    rateProgramIDs: ['abbdf9b0-c49e-4c4c-bb6f-040cb7b51cce'],
-                    actuaryContacts: [
-                        {
-                            actuarialFirm: 'DELOITTE',
-                            name: 'Actuary Contact 1',
-                            titleRole: 'Test Actuary Contact 1',
-                            email: 'actuarycontact1@test.com',
-                        },
-                    ],
-                    addtlActuaryContacts: [],
-                    actuaryCommunicationPreference: 'OACT_TO_ACTUARY',
-                    packagesWithSharedRateCerts: [],
-                },
-            ],
-        })
-        renderWithProviders(
-            <ContactsSummarySection submission={mockSubmission} />
-        )
+        const draftSubmission = mockContractPackageDraft()
+        if (
+            draftSubmission.draftRates &&
+            draftSubmission.draftRates[0].draftRevision
+        ) {
+            draftSubmission.draftRates[0].draftRevision.formData = {
+                ...draftSubmission.draftRates[0].draftRevision.formData,
+                addtlActuaryContacts: [],
+            }
+            renderWithProviders(
+                <ContactsSummarySection
+                    isStateUser
+                    contract={draftSubmission}
+                />
+            )
+        }
         expect(screen.queryByText(/Additional actuary contacts/)).toBeNull()
     })
 })

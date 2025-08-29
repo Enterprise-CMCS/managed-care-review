@@ -3,45 +3,45 @@ import { renderWithProviders } from '../../../testHelpers/jestHelpers'
 import { ContractDetailsSummarySection } from './ContractDetailsSummarySection'
 import {
     fetchCurrentUserMock,
-    mockContractAndRatesDraft,
-    mockStateSubmission,
+    mockContractPackageDraft,
+    mockContractPackageSubmitted,
+    mockContractPackageUnlockedWithUnlockedType,
+    mockValidCMSUser,
+    mockValidStateUser,
+    s3DlUrl,
 } from '@mc-review/mocks'
-import { UnlockedHealthPlanFormDataType } from '@mc-review/hpp'
-import { testS3Client } from '../../../testHelpers/s3Helpers'
 import {
     StatutoryRegulatoryAttestation,
     StatutoryRegulatoryAttestationQuestion,
 } from '@mc-review/constants'
+import { mockContractFormData } from '@mc-review/mocks'
 
-//Skipping for now until we delete the files
-describe.skip('ContractDetailsSummarySection', () => {
+describe('ContractDetailsSummarySection', () => {
     const defaultApolloMocks = {
         mocks: [fetchCurrentUserMock({ statusCode: 200 })],
     }
 
     it('can render draft submission without errors (review and submit behavior)', async () => {
-        const testSubmission = {
-            ...mockContractAndRatesDraft(),
+        const testContract = {
+            ...mockContractPackageDraft(),
             documents: [
                 {
                     s3URL: 's3://bucketname/key/test1',
                     name: 'supporting docs test 1',
                     sha256: 'fakesha',
-                    dateAdded: new Date(),
                 },
                 {
                     s3URL: 's3://bucketname/key/test3',
                     name: 'supporting docs test 3',
                     sha256: 'fakesha',
-                    dateAdded: new Date(),
                 },
             ],
         }
 
         renderWithProviders(
             <ContractDetailsSummarySection
-                documentDateLookupTable={{ previousSubmissionDate: '01/01/01' }}
-                submission={testSubmission}
+                contract={testContract}
+                isStateUser
                 editNavigateTo="contract-details"
                 submissionName="MN-PMAP-0001"
             />,
@@ -64,21 +64,18 @@ describe.skip('ContractDetailsSummarySection', () => {
                 name: /Edit Contract supporting documents/,
             })
         ).toHaveAttribute('href', '/documents')
-        expect(
-            screen.queryByRole('link', {
-                name: 'Download all contract documents',
-            })
-        ).toBeNull()
+        const link = await screen.queryByTestId('zipDownloadLink')
+        expect(link).toBeNull()
     })
 
     it('can render state submission on summary page without errors (submission summary behavior)', async () => {
         renderWithProviders(
             <ContractDetailsSummarySection
-                documentDateLookupTable={{ previousSubmissionDate: '01/01/01' }}
-                submission={{
-                    ...mockStateSubmission(),
+                contract={{
+                    ...mockContractPackageSubmitted(),
                     status: 'SUBMITTED',
                 }}
+                isStateUser
                 submissionName="MN-PMAP-0001"
             />,
             {
@@ -94,33 +91,25 @@ describe.skip('ContractDetailsSummarySection', () => {
         ).toBeInTheDocument()
         expect(screen.queryByText('Edit')).not.toBeInTheDocument()
 
-        //expects loading button on component load
-        expect(screen.getByText('Loading')).toBeInTheDocument()
-
-        // expects download all button after loading has completed
-        await waitFor(() => {
-            expect(
-                screen.getByRole('link', {
-                    name: 'Download all contract documents',
-                })
-            ).toBeInTheDocument()
-        })
+        //Expect zip package links to load
+        const link = await screen.findByTestId('zipDownloadLink')
+        expect(link).toBeInTheDocument()
+        expect(screen.queryByText(/NEW/)).toBeNull()
     })
 
     it('can render all contract details fields', async () => {
-        const submission = mockContractAndRatesDraft({
-            statutoryRegulatoryAttestation: true,
-        })
+        const contract = mockContractPackageDraft()
+
         renderWithProviders(
             <ContractDetailsSummarySection
-                documentDateLookupTable={{ previousSubmissionDate: '01/01/01' }}
-                submission={submission}
+                contract={contract}
+                isStateUser
                 editNavigateTo="contract-details"
                 submissionName="MN-PMAP-0001"
             />,
             {
                 apolloProvider: defaultApolloMocks,
-                featureFlags: { '438-attestation': true },
+                featureFlags: { '438-attestation': true, dsnp: true },
             }
         )
 
@@ -158,26 +147,35 @@ describe.skip('ContractDetailsSummarySection', () => {
                 name: 'This contract action does NOT include new or modified provisions related to the following',
             })
         ).toBeInTheDocument()
+        expect(
+            screen.getByRole('definition', {
+                name: 'Is this contract associated with a Dual-Eligible Special Needs Plan (D-SNP) that covers Medicaid benefits?',
+            })
+        ).toBeInTheDocument()
     })
 
     it('displays correct contract 438 attestation yes and no text and description', async () => {
-        const submission = mockContractAndRatesDraft({
-            statutoryRegulatoryAttestation: false,
-            statutoryRegulatoryAttestationDescription: 'No compliance',
-        })
-        renderWithProviders(
-            <ContractDetailsSummarySection
-                documentDateLookupTable={{ previousSubmissionDate: '01/01/01' }}
-                submission={submission}
-                editNavigateTo="contract-details"
-                submissionName="MN-PMAP-0001"
-            />,
-            {
-                apolloProvider: defaultApolloMocks,
-                featureFlags: { '438-attestation': true },
+        const contract = mockContractPackageDraft()
+        if (contract.draftRevision) {
+            contract.draftRevision.formData = {
+                ...contract.draftRevision.formData,
+                statutoryRegulatoryAttestation: false,
+                statutoryRegulatoryAttestationDescription: 'No compliance',
             }
-        )
 
+            renderWithProviders(
+                <ContractDetailsSummarySection
+                    contract={contract}
+                    isStateUser
+                    editNavigateTo="contract-details"
+                    submissionName="MN-PMAP-0001"
+                />,
+                {
+                    apolloProvider: defaultApolloMocks,
+                    featureFlags: { '438-attestation': true },
+                }
+            )
+        }
         await waitFor(() => {
             expect(
                 screen.getByRole('definition', {
@@ -197,21 +195,91 @@ describe.skip('ContractDetailsSummarySection', () => {
         expect(await screen.findByText('No compliance')).toBeInTheDocument()
     })
 
-    it('displays correct effective dates text for base contract', async () => {
-        await waitFor(() => {
+    it('displays missing info error when contract is associated with DSNP field is null', async () => {
+        const contract = mockContractPackageDraft()
+        if (contract.draftRevision) {
+            contract.draftRevision.formData = {
+                ...contract.draftRevision.formData,
+                federalAuthorities: ['STATE_PLAN'], // DSNP triggering fed authority
+                dsnpContract: null,
+            }
+
             renderWithProviders(
                 <ContractDetailsSummarySection
-                    documentDateLookupTable={{
-                        previousSubmissionDate: '01/01/01',
-                    }}
-                    submission={mockStateSubmission()}
+                    contract={contract}
+                    isStateUser
+                    editNavigateTo="contract-details"
                     submissionName="MN-PMAP-0001"
+                    explainMissingData
+                />,
+                {
+                    apolloProvider: defaultApolloMocks,
+                    featureFlags: { dsnp: true },
+                }
+            )
+        }
+        await screen.findAllByText('Contract details')
+
+        expect(
+            await screen.findByText(
+                'Is this contract associated with a Dual-Eligible Special Needs Plan (D-SNP) that covers Medicaid benefits?'
+            )
+        ).toBeInTheDocument()
+        const dsnpField = await screen.getByTestId('dsnp')
+        expect(
+            within(dsnpField).queryByText(/You must provide this information/)
+        ).toBeInTheDocument()
+    })
+
+    it('displays correctly if the contract is associated with a DSNP', async () => {
+        const contract = mockContractPackageDraft()
+        if (contract.draftRevision) {
+            contract.draftRevision.formData = {
+                ...contract.draftRevision.formData,
+                dsnpContract: false,
+            }
+
+            renderWithProviders(
+                <ContractDetailsSummarySection
+                    contract={contract}
+                    isStateUser
+                    editNavigateTo="contract-details"
+                    submissionName="MN-PMAP-0001"
+                    explainMissingData
+                />,
+                {
+                    apolloProvider: defaultApolloMocks,
+                    featureFlags: { dsnp: true },
+                }
+            )
+        }
+        expect(
+            await screen.findByText(
+                'Is this contract associated with a Dual-Eligible Special Needs Plan (D-SNP) that covers Medicaid benefits?'
+            )
+        ).toBeInTheDocument()
+    })
+
+    it('displays correct effective dates text for base contract', async () => {
+        const contract = mockContractPackageDraft()
+        if (contract.draftRevision) {
+            contract.draftRevision.formData = {
+                ...contract.draftRevision.formData,
+                contractType: 'BASE',
+            }
+
+            renderWithProviders(
+                <ContractDetailsSummarySection
+                    contract={contract}
+                    isStateUser
+                    submissionName="MN-PMAP-0001"
+                    explainMissingData
                 />,
                 {
                     apolloProvider: defaultApolloMocks,
                 }
             )
-        })
+        }
 
         expect(screen.getByText('Contract effective dates')).toBeInTheDocument()
     })
@@ -219,9 +287,10 @@ describe.skip('ContractDetailsSummarySection', () => {
     it('displays correct effective dates text for contract amendment', () => {
         renderWithProviders(
             <ContractDetailsSummarySection
-                documentDateLookupTable={{ previousSubmissionDate: '01/01/01' }}
-                submission={mockContractAndRatesDraft()}
+                contract={mockContractPackageDraft()}
                 submissionName="MN-PMAP-0001"
+                editNavigateTo="/contract-details"
+                isStateUser
             />,
             {
                 apolloProvider: defaultApolloMocks,
@@ -233,47 +302,52 @@ describe.skip('ContractDetailsSummarySection', () => {
     })
 
     it('render supporting contract docs when they exist', async () => {
-        const testSubmission = {
-            ...mockContractAndRatesDraft(),
-            contractDocuments: [
-                {
-                    s3URL: 's3://foo/bar/contract',
-                    name: 'contract test 1',
-                    sha256: 'fakesha',
-                    dateAdded: new Date(),
-                },
-            ],
-            documents: [
-                {
-                    s3URL: 's3://bucketname/key/test1',
-                    name: 'supporting docs test 1',
-                    sha256: 'fakesha',
-                    dateAdded: new Date(),
-                },
-                {
-                    s3URL: 's3://bucketname/key/test2',
-                    name: 'supporting docs test 2',
-                    sha256: 'fakesha',
-                    dateAdded: new Date(),
-                },
-                {
-                    s3URL: 's3://bucketname/key/test3',
-                    name: 'supporting docs test 3',
-                    sha256: 'fakesha',
-                    dateAdded: new Date(),
-                },
-            ],
-        }
-        renderWithProviders(
-            <ContractDetailsSummarySection
-                documentDateLookupTable={{ previousSubmissionDate: '01/01/01' }}
-                submission={testSubmission}
-                submissionName="MN-PMAP-0001"
-            />,
-            {
-                apolloProvider: defaultApolloMocks,
+        const contract = mockContractPackageDraft()
+        if (contract.draftRevision) {
+            contract.draftRevision.formData = {
+                ...contract.draftRevision.formData,
+                contractDocuments: [
+                    {
+                        s3URL: 's3://foo/bar/contract',
+                        name: 'contract test 1',
+                        sha256: 'fakesha',
+                        dateAdded: new Date(),
+                    },
+                ],
+                supportingDocuments: [
+                    {
+                        s3URL: 's3://bucketname/key/test1',
+                        name: 'supporting docs test 1',
+                        sha256: 'fakesha',
+                        dateAdded: new Date(),
+                    },
+                    {
+                        s3URL: 's3://bucketname/key/test2',
+                        name: 'supporting docs test 2',
+                        sha256: 'fakesha',
+                        dateAdded: new Date(),
+                    },
+                    {
+                        s3URL: 's3://bucketname/key/test3',
+                        name: 'supporting docs test 3',
+                        sha256: 'fakesha',
+                        dateAdded: new Date(),
+                    },
+                ],
             }
-        )
+
+            renderWithProviders(
+                <ContractDetailsSummarySection
+                    contract={contract}
+                    isStateUser
+                    submissionName="MN-PMAP-0001"
+                    editNavigateTo="/contract-details"
+                />,
+                {
+                    apolloProvider: defaultApolloMocks,
+                }
+            )
+        }
 
         await waitFor(() => {
             const contractDocsTable = screen.getByRole('table', {
@@ -314,8 +388,22 @@ describe.skip('ContractDetailsSummarySection', () => {
     it('does not render supporting contract documents table when no documents exist', () => {
         renderWithProviders(
             <ContractDetailsSummarySection
-                documentDateLookupTable={{ previousSubmissionDate: '01/01/01' }}
-                submission={mockContractAndRatesDraft()}
+                isStateUser
+                contract={mockContractPackageDraft({
+                    draftRevision: {
+                        __typename: 'ContractRevision',
+                        submitInfo: undefined,
+                        unlockInfo: undefined,
+                        id: '123',
+                        contractID: 'test-abc-123',
+                        createdAt: new Date(),
+                        updatedAt: new Date(),
+                        contractName: 'MCR-0005-alvhalfhdsalfdd',
+                        formData: mockContractFormData({
+                            supportingDocuments: [],
+                        }),
+                    },
+                })}
                 submissionName="MN-PMAP-0001"
             />,
             {
@@ -333,8 +421,8 @@ describe.skip('ContractDetailsSummarySection', () => {
     it('does not render download all button when on previous submission', () => {
         renderWithProviders(
             <ContractDetailsSummarySection
-                documentDateLookupTable={{ previousSubmissionDate: '01/01/01' }}
-                submission={mockContractAndRatesDraft()}
+                contract={mockContractPackageDraft()}
+                isStateUser
                 submissionName="MN-PMAP-0001"
             />,
             {
@@ -349,27 +437,32 @@ describe.skip('ContractDetailsSummarySection', () => {
     })
 
     it('renders federal authorities for a medicaid contract', async () => {
-        renderWithProviders(
-            <ContractDetailsSummarySection
-                documentDateLookupTable={{ previousSubmissionDate: '01/01/01' }}
-                submission={{
-                    ...mockContractAndRatesDraft(),
-                    // Add all medicaid federal authorities, as if medicaid contract being unlocked
-                    federalAuthorities: [
-                        'STATE_PLAN',
-                        'WAIVER_1915B',
-                        'WAIVER_1115',
-                        'VOLUNTARY',
-                        'BENCHMARK',
-                        'TITLE_XXI',
-                    ],
-                }}
-                submissionName="MN-PMAP-0001"
-            />,
-            {
-                apolloProvider: defaultApolloMocks,
+        const contract = mockContractPackageDraft()
+        if (contract.draftRevision) {
+            contract.draftRevision.formData = {
+                ...contract.draftRevision.formData,
+                // Add all medicaid federal authorities, as if medicaid contract being unlocked
+                federalAuthorities: [
+                    'STATE_PLAN',
+                    'WAIVER_1915B',
+                    'WAIVER_1115',
+                    'VOLUNTARY',
+                    'BENCHMARK',
+                    'TITLE_XXI',
+                ],
             }
-        )
+            renderWithProviders(
+                <ContractDetailsSummarySection
+                    contract={contract}
+                    isStateUser
+                    submissionName="MN-PMAP-0001"
+                    editNavigateTo="/contract-details"
+                />,
+                {
+                    apolloProvider: defaultApolloMocks,
+                }
+            )
+        }
 
         expect(
             await screen.findByText(
@@ -388,28 +481,33 @@ describe.skip('ContractDetailsSummarySection', () => {
     })
 
     it('renders federal authorities for a CHIP contract as expected, removing invalid authorities', async () => {
-        renderWithProviders(
-            <ContractDetailsSummarySection
-                documentDateLookupTable={{ previousSubmissionDate: '01/01/01' }}
-                submission={{
-                    ...mockContractAndRatesDraft(),
-                    populationCovered: 'CHIP',
-                    // Add all medicaid federal authorities, as if medicaid contract being unlocked
-                    federalAuthorities: [
-                        'STATE_PLAN',
-                        'WAIVER_1915B',
-                        'WAIVER_1115',
-                        'VOLUNTARY',
-                        'BENCHMARK',
-                        'TITLE_XXI',
-                    ],
-                }}
-                submissionName="MN-PMAP-0001"
-            />,
-            {
-                apolloProvider: defaultApolloMocks,
+        const contract = mockContractPackageDraft()
+        if (contract.draftRevision) {
+            contract.draftRevision.formData = {
+                ...contract.draftRevision.formData,
+                populationCovered: 'CHIP',
+                // Add all medicaid federal authorities, as if medicaid contract being unlocked
+                federalAuthorities: [
+                    'STATE_PLAN',
+                    'WAIVER_1915B',
+                    'WAIVER_1115',
+                    'VOLUNTARY',
+                    'BENCHMARK',
+                    'TITLE_XXI',
+                ],
             }
-        )
+            renderWithProviders(
+                <ContractDetailsSummarySection
+                    contract={contract}
+                    isStateUser
+                    submissionName="MN-PMAP-0001"
+                    editNavigateTo="/contract-details"
+                />,
+                {
+                    apolloProvider: defaultApolloMocks,
+                }
+            )
+        }
 
         expect(
             await screen.findByText(
@@ -426,28 +524,20 @@ describe.skip('ContractDetailsSummarySection', () => {
             screen.queryByText('1937 Benchmark Authority')
         ).not.toBeInTheDocument()
     })
+
     it('renders inline error when bulk URL is unavailable', async () => {
-        const s3Provider = {
-            ...testS3Client(),
-            getBulkDlURL: async (
-                _keys: string[],
-                _fileName: string
-            ): Promise<string | Error> => {
-                return new Error('Error: getBulkDlURL encountered an error')
-            },
-        }
+        const contract = mockContractPackageSubmitted()
+        //Removing pre-existing zip package
+        contract.packageSubmissions[0].contractRevision.documentZipPackages =
+            undefined
         renderWithProviders(
             <ContractDetailsSummarySection
-                documentDateLookupTable={{ previousSubmissionDate: '01/01/01' }}
-                submission={{
-                    ...mockStateSubmission(),
-                    status: 'SUBMITTED',
-                }}
+                contract={contract}
+                isStateUser
                 submissionName="MN-PMAP-0001"
             />,
             {
                 apolloProvider: defaultApolloMocks,
-                s3Provider,
             }
         )
 
@@ -457,15 +547,14 @@ describe.skip('ContractDetailsSummarySection', () => {
             ).toBeInTheDocument()
         })
     })
+
     describe('contract provisions', () => {
         it('renders provisions and MLR references for a medicaid amendment', () => {
             renderWithProviders(
                 <ContractDetailsSummarySection
-                    documentDateLookupTable={{
-                        previousSubmissionDate: '01/01/01',
-                    }}
-                    submission={mockContractAndRatesDraft()}
+                    contract={mockContractPackageDraft()}
                     submissionName="MN-PMAP-0001"
+                    isStateUser
                 />,
                 {
                     apolloProvider: defaultApolloMocks,
@@ -558,20 +647,23 @@ describe.skip('ContractDetailsSummarySection', () => {
         })
 
         it('renders provisions and MLR references for a medicaid base contract', () => {
-            renderWithProviders(
-                <ContractDetailsSummarySection
-                    documentDateLookupTable={{
-                        previousSubmissionDate: '01/01/01',
-                    }}
-                    submission={mockContractAndRatesDraft({
-                        contractType: 'BASE',
-                    })}
-                    submissionName="MN-PMAP-0001"
-                />,
-                {
-                    apolloProvider: defaultApolloMocks,
+            const contract = mockContractPackageDraft()
+            if (contract.draftRevision) {
+                contract.draftRevision.formData = {
+                    ...contract.draftRevision.formData,
+                    contractType: 'BASE',
                 }
-            )
+                renderWithProviders(
+                    <ContractDetailsSummarySection
+                        contract={contract}
+                        submissionName="MN-PMAP-0001"
+                        isStateUser
+                    />,
+                    {
+                        apolloProvider: defaultApolloMocks,
+                    }
+                )
+            }
 
             const modifiedProvisions = screen.getByLabelText(
                 'This contract action includes provisions related to the following'
@@ -612,21 +704,23 @@ describe.skip('ContractDetailsSummarySection', () => {
         })
 
         it('renders provisions with correct MLR references for CHIP amendment', () => {
-            renderWithProviders(
-                <ContractDetailsSummarySection
-                    documentDateLookupTable={{
-                        previousSubmissionDate: '01/01/01',
-                    }}
-                    submission={{
-                        ...mockContractAndRatesDraft(),
-                        populationCovered: 'CHIP',
-                    }}
-                    submissionName="MN-PMAP-0001"
-                />,
-                {
-                    apolloProvider: defaultApolloMocks,
+            const contract = mockContractPackageDraft()
+            if (contract.draftRevision) {
+                contract.draftRevision.formData = {
+                    ...contract.draftRevision.formData,
+                    populationCovered: 'CHIP',
                 }
-            )
+                renderWithProviders(
+                    <ContractDetailsSummarySection
+                        contract={contract}
+                        isStateUser
+                        submissionName="MN-PMAP-0001"
+                    />,
+                    {
+                        apolloProvider: defaultApolloMocks,
+                    }
+                )
+            }
             expect(
                 screen.getByText('Benefits provided by the managed care plans')
             ).toBeInTheDocument()
@@ -685,24 +779,43 @@ describe.skip('ContractDetailsSummarySection', () => {
         })
 
         it('shows missing field error when provisions list is empty and section is in edit mode', () => {
-            const contractWithUnansweredProvisions: UnlockedHealthPlanFormDataType =
-                {
-                    ...mockContractAndRatesDraft(),
-                    contractAmendmentInfo: undefined,
+            const contract = mockContractPackageDraft()
+            if (contract.draftRevision) {
+                contract.draftRevision.formData = {
+                    ...contract.draftRevision.formData,
+                    inLieuServicesAndSettings: undefined,
+                    modifiedBenefitsProvided: undefined,
+                    modifiedGeoAreaServed: undefined,
+                    modifiedMedicaidBeneficiaries: undefined,
+                    modifiedRiskSharingStrategy: undefined,
+                    modifiedIncentiveArrangements: undefined,
+                    modifiedWitholdAgreements: undefined,
+                    modifiedStateDirectedPayments: undefined,
+                    modifiedPassThroughPayments: undefined,
+                    modifiedPaymentsForMentalDiseaseInstitutions: undefined,
+                    modifiedMedicalLossRatioStandards: undefined,
+                    modifiedOtherFinancialPaymentIncentive: undefined,
+                    modifiedEnrollmentProcess: undefined,
+                    modifiedGrevienceAndAppeal: undefined,
+                    modifiedNetworkAdequacyStandards: undefined,
+                    modifiedLengthOfContract: undefined,
+                    modifiedNonRiskPaymentArrangements: undefined,
+                    statutoryRegulatoryAttestation: undefined,
+                    statutoryRegulatoryAttestationDescription: undefined,
                 }
-            renderWithProviders(
-                <ContractDetailsSummarySection
-                    documentDateLookupTable={{
-                        previousSubmissionDate: '01/01/01',
-                    }}
-                    submission={contractWithUnansweredProvisions}
-                    submissionName="MN-PMAP-0001"
-                    editNavigateTo="contract-details"
-                />,
-                {
-                    apolloProvider: defaultApolloMocks,
-                }
-            )
+                renderWithProviders(
+                    <ContractDetailsSummarySection
+                        contract={contract}
+                        submissionName="MN-PMAP-0001"
+                        editNavigateTo="contract-details"
+                        isStateUser
+                        explainMissingData
+                    />,
+                    {
+                        apolloProvider: defaultApolloMocks,
+                    }
+                )
+            }
 
             const modifiedProvisions = screen.getByLabelText(
                 'This contract action includes new or modified provisions related to the following'
@@ -724,34 +837,30 @@ describe.skip('ContractDetailsSummarySection', () => {
         })
 
         it('shows missing field error when provisions list is incomplete and summary section is in edit mode', () => {
-            const contractWithUnansweredProvisions: UnlockedHealthPlanFormDataType =
-                {
-                    ...mockContractAndRatesDraft(),
-                    populationCovered: 'MEDICAID',
-                    contractAmendmentInfo: {
-                        // intentionally putting CHIP population provisions here instead of what Medicaid contract amendment requires
-                        modifiedProvisions: {
-                            modifiedBenefitsProvided: false,
-                            modifiedGrevienceAndAppeal: false,
-                            modifiedNetworkAdequacyStandards: false,
-                            modifiedLengthOfContract: true,
-                            modifiedNonRiskPaymentArrangements: false,
-                        },
-                    },
+            const contract = mockContractPackageDraft()
+            if (contract.draftRevision) {
+                contract.draftRevision.formData = {
+                    ...contract.draftRevision.formData,
+                    modifiedBenefitsProvided: false,
+                    modifiedGrevienceAndAppeal: false,
+                    modifiedNetworkAdequacyStandards: false,
+                    modifiedLengthOfContract: null,
+                    modifiedNonRiskPaymentArrangements: false,
                 }
-            renderWithProviders(
-                <ContractDetailsSummarySection
-                    documentDateLookupTable={{
-                        previousSubmissionDate: '01/01/01',
-                    }}
-                    submission={contractWithUnansweredProvisions}
-                    submissionName="MN-PMAP-0001"
-                    editNavigateTo="contract-details"
-                />,
-                {
-                    apolloProvider: defaultApolloMocks,
-                }
-            )
+
+                renderWithProviders(
+                    <ContractDetailsSummarySection
+                        contract={contract}
+                        isStateUser
+                        submissionName="MN-PMAP-0001"
+                        editNavigateTo="contract-details"
+                        explainMissingData
+                    />,
+                    {
+                        apolloProvider: defaultApolloMocks,
+                    }
+                )
+            }
 
             const modifiedProvisions = screen.getByLabelText(
                 'This contract action includes new or modified provisions related to the following'
@@ -773,33 +882,28 @@ describe.skip('ContractDetailsSummarySection', () => {
         })
 
         it('does not show missing field error when provisions list is incomplete and summary section is in view only mode', () => {
-            const contractWithUnansweredProvisions: UnlockedHealthPlanFormDataType =
-                {
-                    ...mockContractAndRatesDraft(),
-                    populationCovered: 'MEDICAID',
-                    contractAmendmentInfo: {
-                        // intentionally putting CHIP population provisions here instead of what Medicaid contract amendment requires
-                        modifiedProvisions: {
-                            modifiedBenefitsProvided: false,
-                            modifiedGrevienceAndAppeal: false,
-                            modifiedNetworkAdequacyStandards: false,
-                            modifiedLengthOfContract: true,
-                            modifiedNonRiskPaymentArrangements: false,
-                        },
-                    },
+            const contract = mockContractPackageDraft()
+            if (contract.draftRevision) {
+                contract.draftRevision.formData = {
+                    ...contract.draftRevision.formData,
+                    modifiedBenefitsProvided: false,
+                    modifiedGrevienceAndAppeal: false,
+                    modifiedNetworkAdequacyStandards: false,
+                    modifiedLengthOfContract: true,
+                    modifiedNonRiskPaymentArrangements: false,
                 }
-            renderWithProviders(
-                <ContractDetailsSummarySection
-                    documentDateLookupTable={{
-                        previousSubmissionDate: '01/01/01',
-                    }}
-                    submission={contractWithUnansweredProvisions}
-                    submissionName="MN-PMAP-0001"
-                />,
-                {
-                    apolloProvider: defaultApolloMocks,
-                }
-            )
+
+                renderWithProviders(
+                    <ContractDetailsSummarySection
+                        contract={contract}
+                        isStateUser
+                        submissionName="MN-PMAP-0001"
+                    />,
+                    {
+                        apolloProvider: defaultApolloMocks,
+                    }
+                )
+            }
 
             const modifiedProvisions = screen.getByLabelText(
                 'This contract action includes new or modified provisions related to the following'
@@ -821,38 +925,34 @@ describe.skip('ContractDetailsSummarySection', () => {
         })
 
         it('does not show missing field error for CHIP amendment when all provisions required are valid', () => {
-            const contractWithAllUnmodifiedProvisions: UnlockedHealthPlanFormDataType =
-                {
-                    ...mockContractAndRatesDraft(),
-                    populationCovered: 'CHIP',
-                    contractAmendmentInfo: {
-                        modifiedProvisions: {
-                            modifiedBenefitsProvided: false,
-                            modifiedGeoAreaServed: false,
-                            modifiedMedicaidBeneficiaries: true,
-                            modifiedMedicalLossRatioStandards: false,
-                            modifiedOtherFinancialPaymentIncentive: false,
-                            modifiedEnrollmentProcess: false,
-                            modifiedGrevienceAndAppeal: false,
-                            modifiedNetworkAdequacyStandards: false,
-                            modifiedLengthOfContract: true,
-                            modifiedNonRiskPaymentArrangements: false,
-                        },
-                    },
+            const contract = mockContractPackageDraft()
+            if (contract.draftRevision) {
+                contract.draftRevision.formData = {
+                    ...contract.draftRevision.formData,
+                    modifiedBenefitsProvided: false,
+                    modifiedGeoAreaServed: false,
+                    modifiedMedicaidBeneficiaries: true,
+                    modifiedMedicalLossRatioStandards: false,
+                    modifiedOtherFinancialPaymentIncentive: false,
+                    modifiedEnrollmentProcess: false,
+                    modifiedGrevienceAndAppeal: false,
+                    modifiedNetworkAdequacyStandards: false,
+                    modifiedLengthOfContract: true,
+                    modifiedNonRiskPaymentArrangements: false,
                 }
-            renderWithProviders(
-                <ContractDetailsSummarySection
-                    documentDateLookupTable={{
-                        previousSubmissionDate: '01/01/01',
-                    }}
-                    submission={contractWithAllUnmodifiedProvisions}
-                    submissionName="MN-PMAP-0001"
-                    editNavigateTo="contract-details"
-                />,
-                {
-                    apolloProvider: defaultApolloMocks,
-                }
-            )
+
+                renderWithProviders(
+                    <ContractDetailsSummarySection
+                        contract={contract}
+                        isStateUser
+                        submissionName="MN-PMAP-0001"
+                        editNavigateTo="contract-details"
+                    />,
+                    {
+                        apolloProvider: defaultApolloMocks,
+                    }
+                )
+            }
 
             const modifiedProvisions = screen.getByLabelText(
                 'This contract action includes new or modified provisions related to the following'
@@ -874,44 +974,40 @@ describe.skip('ContractDetailsSummarySection', () => {
         })
 
         it('does not show missing field error for Medicaid amendment when all provisions required are valid', () => {
-            const contractWithAllUnmodifiedProvisions: UnlockedHealthPlanFormDataType =
-                {
-                    ...mockContractAndRatesDraft(),
-                    populationCovered: 'MEDICAID',
-                    contractAmendmentInfo: {
-                        modifiedProvisions: {
-                            inLieuServicesAndSettings: true,
-                            modifiedBenefitsProvided: false,
-                            modifiedGeoAreaServed: false,
-                            modifiedMedicaidBeneficiaries: false,
-                            modifiedRiskSharingStrategy: false,
-                            modifiedIncentiveArrangements: false,
-                            modifiedWitholdAgreements: false,
-                            modifiedStateDirectedPayments: false,
-                            modifiedPassThroughPayments: false,
-                            modifiedPaymentsForMentalDiseaseInstitutions: false,
-                            modifiedMedicalLossRatioStandards: false,
-                            modifiedOtherFinancialPaymentIncentive: false,
-                            modifiedEnrollmentProcess: false,
-                            modifiedGrevienceAndAppeal: false,
-                            modifiedNetworkAdequacyStandards: false,
-                            modifiedLengthOfContract: false,
-                            modifiedNonRiskPaymentArrangements: false,
-                        },
-                    },
+            const contract = mockContractPackageDraft()
+            if (contract.draftRevision) {
+                contract.draftRevision.formData = {
+                    ...contract.draftRevision.formData,
+                    inLieuServicesAndSettings: true,
+                    modifiedBenefitsProvided: false,
+                    modifiedGeoAreaServed: false,
+                    modifiedMedicaidBeneficiaries: false,
+                    modifiedRiskSharingStrategy: false,
+                    modifiedIncentiveArrangements: false,
+                    modifiedWitholdAgreements: false,
+                    modifiedStateDirectedPayments: false,
+                    modifiedPassThroughPayments: false,
+                    modifiedPaymentsForMentalDiseaseInstitutions: false,
+                    modifiedMedicalLossRatioStandards: false,
+                    modifiedOtherFinancialPaymentIncentive: false,
+                    modifiedEnrollmentProcess: false,
+                    modifiedGrevienceAndAppeal: false,
+                    modifiedNetworkAdequacyStandards: false,
+                    modifiedLengthOfContract: false,
+                    modifiedNonRiskPaymentArrangements: false,
                 }
-            renderWithProviders(
-                <ContractDetailsSummarySection
-                    documentDateLookupTable={{
-                        previousSubmissionDate: '01/01/01',
-                    }}
-                    submission={contractWithAllUnmodifiedProvisions}
-                    submissionName="MN-PMAP-0001"
-                />,
-                {
-                    apolloProvider: defaultApolloMocks,
-                }
-            )
+
+                renderWithProviders(
+                    <ContractDetailsSummarySection
+                        contract={contract}
+                        isStateUser
+                        submissionName="MN-PMAP-0001"
+                    />,
+                    {
+                        apolloProvider: defaultApolloMocks,
+                    }
+                )
+            }
 
             const modifiedProvisions = screen.getByLabelText(
                 'This contract action includes new or modified provisions related to the following'
@@ -930,6 +1026,137 @@ describe.skip('ContractDetailsSummarySection', () => {
                     /You must provide this information/
                 )
             ).toBeNull()
+        })
+    })
+
+    describe('Document zip package download link', () => {
+        it('renders zip package link for a SUBMITTED submission as a State user', async () => {
+            renderWithProviders(
+                <ContractDetailsSummarySection
+                    contract={{
+                        ...mockContractPackageSubmitted(),
+                        status: 'SUBMITTED',
+                    }}
+                    isStateUser={false}
+                    submissionName="MN-PMAP-0001"
+                />,
+                {
+                    apolloProvider: {
+                        mocks: [
+                            fetchCurrentUserMock({
+                                statusCode: 200,
+                                user: mockValidStateUser(),
+                            }),
+                        ],
+                    },
+                }
+            )
+
+            await waitFor(() => {
+                expect(
+                    screen.getByRole('heading', {
+                        level: 2,
+                        name: 'Contract details',
+                    })
+                ).toBeInTheDocument()
+                expect(screen.queryByText('Edit')).not.toBeInTheDocument()
+            })
+
+            //Expect zip package links to load
+            const link = await screen.findByTestId('zipDownloadLink')
+            expect(link).toBeInTheDocument()
+            expect(
+                screen.getByText('Download contract documents (3 files)')
+            ).toBeInTheDocument()
+        })
+
+        it('renders zip package link for a SUBMITTED submission as a CMS user', async () => {
+            renderWithProviders(
+                <ContractDetailsSummarySection
+                    contract={{
+                        ...mockContractPackageSubmitted(),
+                        status: 'SUBMITTED',
+                    }}
+                    isStateUser={false}
+                    submissionName="MN-PMAP-0001"
+                />,
+                {
+                    apolloProvider: {
+                        mocks: [
+                            fetchCurrentUserMock({
+                                statusCode: 200,
+                                user: mockValidCMSUser(),
+                            }),
+                        ],
+                    },
+                }
+            )
+
+            await waitFor(() => {
+                expect(
+                    screen.getByRole('heading', {
+                        level: 2,
+                        name: 'Contract details',
+                    })
+                ).toBeInTheDocument()
+                expect(screen.queryByText('Edit')).not.toBeInTheDocument()
+            })
+
+            //Expect zip package links to load
+            const link = await screen.findByTestId('zipDownloadLink')
+            expect(link).toBeInTheDocument()
+            expect(
+                screen.getByText('Download contract documents (3 files)')
+            ).toBeInTheDocument()
+        })
+
+        it('renders zip package link for an UNLOCKED submission as a CMS user', async () => {
+            const contract = mockContractPackageUnlockedWithUnlockedType()
+            contract.packageSubmissions[0].contractRevision.documentZipPackages =
+                [
+                    {
+                        id: 'zip-package-123',
+                        s3URL: 's3://bucket-name/zips/contracts/key/contract-documents.zip',
+                        sha256: 'sha123',
+                        documentType: 'CONTRACT_DOCUMENTS',
+                        createdAt: new Date('01/15/2024'),
+                        downloadUrl: s3DlUrl,
+                    },
+                ]
+            renderWithProviders(
+                <ContractDetailsSummarySection
+                    contract={contract}
+                    isStateUser={false}
+                    submissionName="MN-PMAP-0001"
+                />,
+                {
+                    apolloProvider: {
+                        mocks: [
+                            fetchCurrentUserMock({
+                                statusCode: 200,
+                                user: mockValidCMSUser(),
+                            }),
+                        ],
+                    },
+                }
+            )
+
+            await waitFor(() => {
+                expect(
+                    screen.getByRole('heading', {
+                        level: 2,
+                        name: 'Contract details',
+                    })
+                ).toBeInTheDocument()
+                expect(screen.queryByText('Edit')).not.toBeInTheDocument()
+            })
+
+            //Expect zip package links to load
+            const link = await screen.findByTestId('zipDownloadLink')
+            expect(link).toBeInTheDocument()
+            expect(
+                screen.getByText('Download contract documents (1 file)')
+            ).toBeInTheDocument()
         })
     })
 })

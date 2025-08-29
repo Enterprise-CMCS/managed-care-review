@@ -13,11 +13,11 @@ import {
     mockWithdrawnRates,
     s3DlUrl,
 } from '@mc-review/mocks'
-import { renderWithProviders } from '../../../testHelpers/jestHelpers'
+import { renderWithProviders } from '../../../../testHelpers/jestHelpers'
 import { RateDetailsSummarySection } from './RateDetailsSummarySection'
-import { Rate } from '../../../gen/gqlClient'
+import { Rate } from '../../../../gen/gqlClient'
 import { ActuaryCommunicationRecord } from '@mc-review/hpp'
-import * as usePreviousSubmission from '../../../hooks/usePreviousSubmission'
+import * as usePreviousSubmission from '../../../../hooks/usePreviousSubmission'
 
 describe('RateDetailsSummarySection', () => {
     const draftContract = mockContractPackageDraft()

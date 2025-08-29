@@ -1,20 +1,16 @@
 import React from 'react'
-import {
-    DataDetail,
-    DataDetailCheckboxList,
-} from '../../../components/DataDetail'
-import { SectionHeader } from '../../../components/SectionHeader'
+import { DataDetail, DataDetailCheckboxList } from '../../../DataDetail'
+import { SectionHeader } from '../../../SectionHeader'
 import { formatCalendarDate } from '@mc-review/dates'
-import { MultiColumnGrid } from '../../../components/MultiColumnGrid'
-import { UploadedDocumentsTable } from '../../../components/SubmissionSummarySection'
-import { usePreviousSubmission } from '../../../hooks/usePreviousSubmission'
-import styles from '../../../components/SubmissionSummarySection/SubmissionSummarySection.module.scss'
-import sectionStyle from '../ReviewSubmit/ReviewSubmit.module.scss'
-import { GenericErrorPage } from '../../Errors/GenericErrorPage'
+import { MultiColumnGrid } from '../../../MultiColumnGrid'
+import { UploadedDocumentsTable } from '../..'
+import { usePreviousSubmission } from '../../../../hooks/usePreviousSubmission'
+import styles from '../../SubmissionSummarySection.module.scss'
+import { GenericErrorPage } from '../../../../pages/Errors/GenericErrorPage'
 
-import { DataDetailMissingField } from '../../../components/DataDetail/DataDetailMissingField'
-import { DataDetailContactField } from '../../../components/DataDetail/DataDetailContactField/DataDetailContactField'
-import { SectionCard } from '../../../components/SectionCard'
+import { DataDetailMissingField } from '../../../DataDetail/DataDetailMissingField'
+import { DataDetailContactField } from '../../../DataDetail/DataDetailContactField/DataDetailContactField'
+import { SectionCard } from '../../../SectionCard'
 import {
     Rate,
     Contract,
@@ -25,7 +21,7 @@ import {
     RateFormData,
     HealthPlanPackageStatus,
     ActuaryContact,
-} from '../../../gen/gqlClient'
+} from '../../../../gen/gqlClient'
 import {
     RateRevisionWithIsLinked,
     getIndexFromRevisionVersion,
@@ -33,17 +29,17 @@ import {
     getPackageSubmissionAtIndex,
     getVisibleLatestRateRevisions,
 } from '@mc-review/helpers'
-import { useAuth } from '../../../contexts/AuthContext'
+import { useAuth } from '../../../../contexts/AuthContext'
 import {
     ActuaryCommunicationRecord,
     RateMedicaidPopulationsRecord,
 } from '@mc-review/hpp'
 import { useParams } from 'react-router-dom'
 import { hasCMSUserPermissions } from '@mc-review/helpers'
-import { InfoTag } from '../../../components/InfoTag/InfoTag'
+import { InfoTag } from '../../../InfoTag/InfoTag'
 import { featureFlags } from '@mc-review/common-code'
 import { useLDClient } from 'launchdarkly-react-client-sdk'
-import { DocumentHeader } from '../../../components/DocumentHeader/DocumentHeader'
+import { DocumentHeader } from '../../../DocumentHeader/DocumentHeader'
 
 export type RateDetailsSummarySectionProps = {
     contract: Contract | UnlockedContract
@@ -230,7 +226,7 @@ export const RateDetailsSummarySection = ({
     }
 
     return (
-        <SectionCard id="rateDetails" className={sectionStyle.summarySection}>
+        <SectionCard id="rateDetails" className={styles.summarySection}>
             <SectionHeader
                 header="Rate details"
                 editNavigateTo={editNavigateTo}

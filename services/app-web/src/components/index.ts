@@ -32,14 +32,8 @@ export { Logo } from './Logo'
 export { PoliteErrorMessage } from './PoliteErrorMessage'
 export { Spinner } from './Spinner'
 export { SectionHeader } from './SectionHeader'
-export {PageHeading} from './PageHeading'
-export {
-    SubmissionTypeSummarySection,
-    ContractDetailsSummarySection,
-    RateDetailsSummarySection,
-    ContactsSummarySection,
-    UploadedDocumentsTable,
-} from './SubmissionSummarySection'
+export { PageHeading } from './PageHeading'
+export { UploadedDocumentsTable } from './SubmissionSummarySection'
 
 export { SubmissionCard } from './SubmissionCard'
 
@@ -85,7 +79,12 @@ export { Breadcrumbs } from './Breadcrumbs'
 export { InlineDocumentWarning } from './DocumentWarning'
 export { SectionCard } from './SectionCard'
 
-export { NavLinkWithLogging, LinkWithLogging, ReactRouterLinkWithLogging, ButtonWithLogging } from './TealiumLogging'
+export {
+    NavLinkWithLogging,
+    LinkWithLogging,
+    ReactRouterLinkWithLogging,
+    ButtonWithLogging,
+} from './TealiumLogging'
 
-export { FormContainer, FormNotificationContainer} from './FormContainer'
+export { FormContainer, FormNotificationContainer } from './FormContainer'
 export { RowCellElement } from './Tables'

@@ -5,14 +5,75 @@
     max-width: 50rem;
 }
 
-.summarySection dd[aria-labelledby='submittedWithContract'] ul {
-    list-style-type: none;
-    padding: 0;
-}
-
 .submissionTypeSection {
     padding-bottom: uswds.units(2) !important;
     padding-top: uswds.units(2) !important;
+}
+
+.summarySection {
+    margin: uswds.units(2) auto;
+    background: custom.$mcr-foundation-white;
+    padding: uswds.units(2) uswds.units(4);
+    padding-top: 16px !important;
+    border: 1px solid custom.$mcr-gray-lighter;
+    line-height: uswds.units(3);
+
+    h2 {
+        margin: 0;
+        @include uswds.u-text('normal');
+    }
+
+    ul {
+        margin: 0;
+
+        li {
+            padding: 0 0;
+        }
+        &.commaList {
+            li {
+                padding: 0;
+            }
+            li:after {
+                content: ', ';
+            }
+            li:last-of-type::after {
+                display: none;
+            }
+        }
+    }
+
+    // align state contacts
+    div[class^='grid-container'] {
+        padding-left: 0;
+        dl {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            padding: 0;
+
+            div {
+                padding-bottom: uswds.units(2);
+            }
+
+            // dont bottom pad last two grid items
+            div:nth-last-child(-n + 2) {
+                padding-bottom: 0;
+            }
+        }
+    }
+    table:last-of-type {
+        margin-bottom: uswds.units(2);
+    }
+
+    // with nested sections, collapse bottom margin/padding for last in list
+    // rely on margin from the parent .summarySection. Relevant for multi-rate experience
+    section:last-of-type {
+        margin-bottom: 0 !important;
+    }
+}
+
+.summarySection dd[aria-labelledby='submittedWithContract'] ul {
+    list-style-type: none;
+    padding: 0;
 }
 
 .contactInfo p {
