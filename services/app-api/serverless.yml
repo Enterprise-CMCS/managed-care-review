@@ -268,7 +268,6 @@ resources:
         - ApiGatewayMethodGraphqlGet
         - ApiGatewayMethodV1GraphqlExternalPost
         - ApiGatewayMethodV1GraphqlExternalGet
-        - ApiGatewayMethodZipPost
         # API Gateway resources (paths and endpoints)
         - ApiGatewayResourceHealthcheck
         - ApiGatewayResourceOtel
@@ -276,7 +275,6 @@ resources:
         - ApiGatewayResourceV1
         - ApiGatewayResourceV1Graphql
         - ApiGatewayResourceV1GraphqlExternal
-        - ApiGatewayResourceZip
         # API Gateway authorizer
         - ThirdUnderscorepartyUnderscoreapiUnderscoreauthorizerApiGatewayAuthorizer
         # CORS OPTIONS methods
@@ -284,7 +282,6 @@ resources:
         - ApiGatewayMethodOtelOptions
         - ApiGatewayMethodGraphqlOptions
         - ApiGatewayMethodV1GraphqlExternalOptions
-        - ApiGatewayMethodZipOptions
 
       Properties:
         ResourceArn: arn:aws:apigateway:${self:provider.region}::/restapis/${self:custom.appApiGatewayId}/stages/${sls:stage}
