@@ -371,6 +371,17 @@ jobs:
             --context stage=${STAGE_NAME} \
             --require-approval never
 
+      - name: Deploy Cognito stack
+        working-directory: services/infra-cdk
+        env:
+          STAGE_NAME: ${{ needs.begin-deployment.outputs.stage-name }}
+        run: |
+          echo "=== Deploying Cognito stack ==="
+          npx cdk deploy MCR-Cognito-${STAGE_NAME}-cdk \
+            --app 'pnpm tsx bin/cognito.ts' \
+            --context stage=${STAGE_NAME} \
+            --require-approval never
+
   deploy-frontend-app:
     needs:
       [
@@ -451,17 +462,6 @@ jobs:
           echo "=== Deploying Frontend App stack with built assets ==="
           npx cdk deploy MCR-frontend-app-${STAGE_NAME}-cdk \
             --app 'pnpm tsx bin/frontend-app.ts' \
-            --context stage=${STAGE_NAME} \
-            --require-approval never
-
-      - name: Deploy Cognito stack
-        working-directory: services/infra-cdk
-        env:
-          STAGE_NAME: ${{ needs.begin-deployment.outputs.stage-name }}
-        run: |
-          echo "=== Deploying Cognito stack ==="
-          npx cdk deploy MCR-Cognito-${STAGE_NAME}-cdk \
-            --app 'pnpm tsx bin/cognito.ts' \
             --context stage=${STAGE_NAME} \
             --require-approval never
 
