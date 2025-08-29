@@ -21,7 +21,7 @@
     },
     "dependencies": {
         "@aws-sdk/client-cloudfront": "^3.876.0",
-        "@aws-sdk/client-ec2": "^3.876.0",
+        "@aws-sdk/client-ec2": "^3.878.0",
         "@aws-sdk/client-secrets-manager": "^3.876.0",
         "axios": "^1.11.0",
         "node-ssh": "^13.2.1",
