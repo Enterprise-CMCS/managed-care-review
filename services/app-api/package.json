@@ -27,13 +27,13 @@
     "dependencies": {
         "@apollo/client": "3.8.8",
         "@aws-sdk/client-cognito-identity-provider": "^3.876.0",
-        "@aws-sdk/client-rds": "^3.876.0",
-        "@aws-sdk/client-s3": "^3.876.0",
+        "@aws-sdk/client-rds": "^3.878.0",
+        "@aws-sdk/client-s3": "^3.878.0",
         "@aws-sdk/client-secrets-manager": "^3.876.0",
         "@aws-sdk/client-ses": "^3.876.0",
         "@aws-sdk/client-ssm": "^3.876.0",
-        "@aws-sdk/lib-storage": "^3.876.0",
-        "@aws-sdk/s3-request-presigner": "^3.876.0",
+        "@aws-sdk/lib-storage": "^3.878.0",
+        "@aws-sdk/s3-request-presigner": "^3.878.0",
         "@launchdarkly/node-server-sdk": "9.10.1",
         "@mc-review/common-code": "workspace:*",
         "@mc-review/constants": "workspace:*",
@@ -81,7 +81,7 @@
         "@typescript-eslint/eslint-plugin": "^8.39.1",
         "@typescript-eslint/parser": "^8.29.1",
         "@vitest/coverage-v8": "^3.2.4",
-        "eslint": "^9.31.0",
+        "eslint": "^9.34.0",
         "eslint-config-prettier": "^10.1.8",
         "eslint-plugin-jest": "^29.0.1",
         "eslint-plugin-prettier": "^5.5.4",
@@ -98,7 +98,7 @@
         "serverless-s3-bucket-helper": "https://github.com/CMSgov/serverless-s3-bucket-helper",
         "serverless-stack-termination-protection": "^2.0.2",
         "typescript": "5.9.2",
-        "typescript-eslint": "^8.37.0",
+        "typescript-eslint": "^8.41.0",
         "vitest": "^3.2.4"
     }
 }
