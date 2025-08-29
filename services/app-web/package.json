@@ -186,7 +186,7 @@
         "stylelint": "^16.23.1",
         "stylelint-config-recommended-scss": "^16.0.0",
         "typescript": "5.9.2",
-        "typescript-eslint": "^8.37.0",
+        "typescript-eslint": "^8.41.0",
         "vite-plugin-graphql-loader": "^4.0.4",
         "vite-plugin-svgr": "^4.3.0",
         "vitest": "^3.2.4"
