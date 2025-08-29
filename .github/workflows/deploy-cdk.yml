@@ -367,7 +367,7 @@ jobs:
         run: |
           echo "=== Deploying Frontend Infrastructure stack ==="
           npx cdk deploy MCR-frontend-infra-${STAGE_NAME}-cdk \
-            --app 'pnpm tsx bin/frontend.ts' \
+            --app 'pnpm tsx bin/frontend-infra.ts' \
             --context stage=${STAGE_NAME} \
             --require-approval never
 
@@ -450,7 +450,7 @@ jobs:
         run: |
           echo "=== Deploying Frontend App stack with built assets ==="
           npx cdk deploy MCR-frontend-app-${STAGE_NAME}-cdk \
-            --app 'pnpm tsx bin/frontend.ts' \
+            --app 'pnpm tsx bin/frontend-app.ts' \
             --context stage=${STAGE_NAME} \
             --require-approval never
 

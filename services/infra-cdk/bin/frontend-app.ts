@@ -6,8 +6,9 @@ import { Aspects } from 'aws-cdk-lib'
 import { IamPathAspect } from '../lib/aspects/iam-path-aspects'
 import { IamPermissionsBoundaryAspect } from '../lib/aspects/iam-permissions-boundary-aspects'
 import { getEnvironment, getCdkEnvironment, ResourceNames } from '../lib/config'
-import { FrontendInfraStack } from '../lib/stacks/frontend-infra'
 import { FrontendAppStack } from '../lib/stacks/frontend-app'
+import { Bucket } from 'aws-cdk-lib/aws-s3'
+import { Distribution } from 'aws-cdk-lib/aws-cloudfront'
 
 async function main(): Promise<void> {
     try {
@@ -32,15 +33,42 @@ async function main(): Promise<void> {
         const config = getEnvironment(appConfig.stage)
         const env = getCdkEnvironment(appConfig.stage)
 
-        // Create Frontend Infrastructure stack (S3 + CloudFront + WAF)
-        const frontendInfra = new FrontendInfraStack(
+        // Import infrastructure resources from frontend-infra stack
+        const mainAppBucket = Bucket.fromBucketName(
             app,
-            ResourceNames.stackName('frontend-infra', appConfig.stage),
+            'ImportedMainAppBucket',
+            `mcr-cdk-${appConfig.stage}-ui-bucket`
+        )
+
+        const storybookBucket = Bucket.fromBucketName(
+            app,
+            'ImportedStorybookBucket',
+            `mcr-cdk-${appConfig.stage}-storybook-bucket`
+        )
+
+        const mainAppDistribution = Distribution.fromDistributionAttributes(
+            app,
+            'ImportedMainAppDistribution',
             {
-                env,
-                stage: appConfig.stage,
-                stageConfig: config,
-                serviceName: 'frontend-infra',
+                distributionId: cdk.Fn.importValue(
+                    `MCR-frontend-infra-${appConfig.stage}-cdk-CloudFrontDistributionId`
+                ),
+                domainName: cdk.Fn.importValue(
+                    `MCR-frontend-infra-${appConfig.stage}-cdk-CloudFrontEndpointUrl`
+                ).replace('https://', ''),
+            }
+        )
+
+        const storybookDistribution = Distribution.fromDistributionAttributes(
+            app,
+            'ImportedStorybookDistribution',
+            {
+                distributionId: cdk.Fn.importValue(
+                    `MCR-frontend-infra-${appConfig.stage}-cdk-StorybookCloudFrontDistributionId`
+                ),
+                domainName: cdk.Fn.importValue(
+                    `MCR-frontend-infra-${appConfig.stage}-cdk-StorybookCloudFrontEndpointUrl`
+                ).replace('https://', ''),
             }
         )
 
@@ -53,11 +81,11 @@ async function main(): Promise<void> {
                 stage: appConfig.stage,
                 stageConfig: config,
                 serviceName: 'frontend-app',
-                // Pass infrastructure resources from frontend-infra stack
-                mainAppBucket: frontendInfra.bucket,
-                mainAppDistribution: frontendInfra.distribution,
-                storybookBucket: frontendInfra.storybookBucket,
-                storybookDistribution: frontendInfra.storybookDistribution,
+                // Pass imported infrastructure resources
+                mainAppBucket,
+                mainAppDistribution,
+                storybookBucket,
+                storybookDistribution,
             }
         )
 
@@ -83,13 +111,14 @@ async function main(): Promise<void> {
         app.synth()
 
         console.info(
-            `CDK synthesis completed for Frontend stacks: ${appConfig.stage}`
+            `CDK synthesis completed for Frontend App stack: ${appConfig.stage}`
         )
     } catch (error) {
-        console.error('Frontend stack initialization failed:', error)
+        console.error('Frontend App stack initialization failed:', error)
         console.error('\nTroubleshooting:')
         console.error('- Check AWS credentials and region configuration')
         console.error('- Ensure CDK bootstrap and proper AWS permissions')
+        console.error('- Verify frontend-infra stack is deployed first')
         process.exit(1)
     }
 }
