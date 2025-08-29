@@ -40,7 +40,7 @@ echo "=== Fetching CDK Stack Outputs ==="
 
 # CDK export naming: MCR-<Service>-<Stage>-cdk-<OutputName>
 APPAPI_PREFIX="MCR-AppApi-${STAGE_NAME}-cdk"
-COGNITO_PREFIX="MCR-Cognito-${STAGE_NAME}-cdk"
+COGNITO_PREFIX="MCR-cognito-${STAGE_NAME}-cdk"
 UPLOADS_PREFIX="MCR-uploads-${STAGE_NAME}-cdk"
 FRONTEND_PREFIX="MCR-frontend-infra-${STAGE_NAME}-cdk"
 

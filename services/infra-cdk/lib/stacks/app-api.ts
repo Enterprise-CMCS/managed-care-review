@@ -548,7 +548,7 @@ export class AppApiStack extends BaseStack {
         // Get values from other stacks
         const uploadsStackName = ResourceNames.stackName('uploads', this.stage)
         const frontendStackName = ResourceNames.stackName(
-            'frontend',
+            'frontend-infra',
             this.stage
         )
 
