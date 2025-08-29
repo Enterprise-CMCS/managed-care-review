@@ -1,1 +1,1 @@
-export { ReviewSubmit } from './ReviewSubmitV2'
+export { ReviewSubmit } from './ReviewSubmit'

@@ -1,10 +1,12 @@
 import { GridContainer, Link, ModalRef, Grid } from '@trussworks/react-uswds'
 import React, { useEffect, useMemo, useRef, useState } from 'react'
 import { useAuth } from '../../contexts/AuthContext'
-import { ContractDetailsSummarySection } from '../../components/SubmissionSummarySection/ContractDetailsSummarySection/ContractDetailsSummarySection'
-import { ContactsSummarySection } from '../../components/SubmissionSummarySection/ContactsSummarySection/ContactsSummarySection'
-import { RateDetailsSummarySection } from '../../components/SubmissionSummarySection/RateDetailsSummarySection/RateDetailsSummary/RateDetailsSummarySection'
-import { SubmissionTypeSummarySection } from '../../components/SubmissionSummarySection/SubmissionTypeSummarySection/SubmissionTypeSummarySection'
+import {
+    ContractDetailsSummarySection,
+    ContactsSummarySection,
+    RateDetailsSummarySection,
+    SubmissionTypeSummarySection,
+} from '../../components/SubmissionSummarySection'
 import {
     SubmissionUnlockedBanner,
     SubmissionUpdatedBanner,

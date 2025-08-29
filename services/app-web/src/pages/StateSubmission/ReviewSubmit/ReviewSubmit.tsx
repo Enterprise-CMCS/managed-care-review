@@ -11,10 +11,12 @@ import { useLDClient } from 'launchdarkly-react-client-sdk'
 import { UnlockSubmitModal } from '../../../components/Modal/UnlockSubmitModal'
 import { getVisibleLatestContractFormData } from '@mc-review/helpers'
 import { useAuth } from '../../../contexts/AuthContext'
-import { RateDetailsSummarySection } from '../../../components/SubmissionSummarySection/RateDetailsSummarySection/RateDetailsSummary/RateDetailsSummarySection'
-import { ContactsSummarySection } from '../../../components/SubmissionSummarySection/ContactsSummarySection/ContactsSummarySection'
-import { ContractDetailsSummarySection } from '../../../components/SubmissionSummarySection/ContractDetailsSummarySection/ContractDetailsSummarySection'
-import { SubmissionTypeSummarySection } from '../../../components/SubmissionSummarySection/SubmissionTypeSummarySection/SubmissionTypeSummarySection'
+import {
+    RateDetailsSummarySection,
+    ContactsSummarySection,
+    ContractDetailsSummarySection,
+    SubmissionTypeSummarySection,
+} from '../../../components/SubmissionSummarySection'
 import { useFetchContractQuery } from '../../../gen/gqlClient'
 import { ErrorForbiddenPage } from '../../Errors/ErrorForbiddenPage'
 import { Error404 } from '../../Errors/Error404Page'

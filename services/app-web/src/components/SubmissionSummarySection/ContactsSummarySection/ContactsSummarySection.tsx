@@ -1,5 +1,5 @@
 import { GridContainer } from '@trussworks/react-uswds'
-import styles from '../../../pages/StateSubmission/ReviewSubmit/ReviewSubmit.module.scss'
+import styles from '../SubmissionSummarySection.module.scss'
 import {
     DataDetail,
     DataDetailContactField,

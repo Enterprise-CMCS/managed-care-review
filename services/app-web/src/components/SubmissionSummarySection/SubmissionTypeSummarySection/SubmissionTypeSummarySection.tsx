@@ -19,7 +19,7 @@ import {
     ContractRevision,
 } from '../../../gen/gqlClient'
 import { booleanAsYesNoUserValue } from '../../../components/Form/FieldYesNo'
-import styles from '../../../pages/StateSubmission/ReviewSubmit/ReviewSubmit.module.scss'
+import styles from '../SubmissionSummarySection.module.scss'
 import { formatCalendarDate } from '@mc-review/dates'
 
 export type SubmissionTypeSummarySectionProps = {
