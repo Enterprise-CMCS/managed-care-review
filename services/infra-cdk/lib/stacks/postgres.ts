@@ -193,6 +193,12 @@ export class Postgres extends BaseStack {
             exportName: this.exportName('LogicalDbManagerFunctionArn'),
         })
 
+        new CfnOutput(this, 'LogicalDbManagerFunctionName', {
+            value: this.logicalDbManagerFunction.functionName,
+            description: 'Logical database manager Lambda function name',
+            exportName: this.exportName('LogicalDbManagerFunctionName'),
+        })
+
         new CfnOutput(this, 'VpcEndpointId', {
             value: this.vpcEndpoint.vpcEndpointId,
             description: 'Secrets Manager VPC endpoint ID',

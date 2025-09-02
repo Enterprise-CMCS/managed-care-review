@@ -37,6 +37,9 @@ import path from 'path'
  * App API stack - GraphQL API with Lambda functions and dedicated API Gateway
  */
 export class AppApiStack extends BaseStack {
+    // API Gateway
+    public readonly apiGateway: RestApi
+
     // Lambda functions
     public readonly healthFunction: NodejsFunction
     public readonly emailSubmitFunction: NodejsFunction
@@ -56,7 +59,7 @@ export class AppApiStack extends BaseStack {
         })
 
         // Create dedicated API Gateway for app-api
-        const apiGateway = new RestApi(this, 'AppApiGateway', {
+        this.apiGateway = new RestApi(this, 'AppApiGateway', {
             restApiName: `${ResourceNames.apiName('app-api', this.stage)}-gateway`,
             description: 'API Gateway for app-api Lambda functions',
             deployOptions: {
@@ -156,10 +159,10 @@ export class AppApiStack extends BaseStack {
         )
 
         // Create API Gateway resources and methods first
-        this.setupApiGatewayRoutes(apiGateway)
+        this.setupApiGatewayRoutes(this.apiGateway)
 
         // Setup WAF association AFTER routes are configured (ensures deployment exists)
-        this.setupWafAssociation(apiGateway)
+        this.setupWafAssociation(this.apiGateway)
 
         // Setup cleanup function cron schedule
         this.setupCleanupSchedule()
@@ -774,6 +777,12 @@ export class AppApiStack extends BaseStack {
             value: this.graphqlFunction.functionName,
             exportName: this.exportName('GraphqlFunctionName'),
             description: 'GraphQL Lambda function name',
+        })
+
+        new CfnOutput(this, 'ApiGatewayUrl', {
+            value: `https://${this.apiGateway.restApiId}.execute-api.${this.region}.amazonaws.com/${this.stage}`,
+            exportName: this.exportName('ApiGatewayUrl'),
+            description: 'App API Gateway URL',
         })
     }
 }

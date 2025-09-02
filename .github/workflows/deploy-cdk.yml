@@ -540,15 +540,65 @@ jobs:
           pnpm tsc
           node ./add_cypress_test_users.js $STAGE_NAME $TEST_USERS_PASS
 
-      # TODO: These output commands need to be adapted for CDK stack outputs
-      # For now, we'll use placeholder values to get the workflow working
+      - name: Create logical database
+        env:
+          STAGE_NAME: ${{ needs.begin-deployment.outputs.stage-name }}
+          DEV_DB_SM_ARN: ${{ secrets.DEV_DB_SM_ARN }}
+        run: |
+          echo "=== Creating logical database for review environment ==="
+          # Use CDK function naming pattern: postgres-{stage}-dbManager-cdk
+          db_manager_function="postgres-${STAGE_NAME}-dbManager-cdk"
+          
+          echo "Using CDK logical database manager function: $db_manager_function"
+          
+          # Create payload for the Lambda function
+          payload=$(cat <<EOF
+          {
+            "action": "create",
+            "stageName": "$STAGE_NAME",
+            "devDbSecretArn": "$DEV_DB_SM_ARN"
+          }
+          EOF
+          )
+          
+          echo "Creating logical database..."
+          aws lambda invoke \
+            --function-name "$db_manager_function" \
+            --payload "$payload" \
+            --cli-binary-format raw-in-base64-out \
+            lambda_response.json
+          
+          # Check response
+          if jq -e '.FunctionError' lambda_response.json > /dev/null; then
+            echo "Error: Database creation failed"
+            cat lambda_response.json
+            exit 1
+          fi
+          
+          echo "Logical database creation completed successfully!"
+
+      - name: Run database migrations
+        env:
+          STAGE_NAME: ${{ needs.begin-deployment.outputs.stage-name }}
+        run: |
+          echo "=== Running database migrations ==="
+          cd services/app-api
+          ./scripts/invoke-migrate-lambda.sh mcr-cdk-${STAGE_NAME}-app-api-migrate
+
       - name: get application endpoint
         id: save-app-endpoint
         env:
           STAGE_NAME: ${{ needs.begin-deployment.outputs.stage-name }}
         run: |
-          # TODO: Extract from CDK outputs
-          endpoint="https://$STAGE_NAME.mcr.cms.gov"
+          echo "=== Extracting application endpoint from CDK outputs ==="
+          endpoint=$(aws cloudformation list-exports --query "Exports[?Name=='MCR-frontend-infra-${STAGE_NAME}-cdk-CloudFrontEndpointUrl'].Value | [0]" --output text)
+          
+          if [ "$endpoint" = "None" ] || [ -z "$endpoint" ]; then
+            echo "Error: Could not find application endpoint from CDK outputs"
+            exit 1
+          fi
+          
+          echo "Application endpoint: $endpoint"
           echo "app-endpoint=$endpoint" >> "$GITHUB_OUTPUT"
 
       - name: get api endpoint
@@ -556,8 +606,15 @@ jobs:
         env:
           STAGE_NAME: ${{ needs.begin-deployment.outputs.stage-name }}
         run: |
-          # TODO: Extract from CDK outputs
-          endpoint="https://api-$STAGE_NAME.mcr.cms.gov"
+          echo "=== Extracting API endpoint from CDK outputs ==="
+          endpoint=$(aws cloudformation list-exports --query "Exports[?Name=='MCR-AppApi-${STAGE_NAME}-cdk-ApiGatewayUrl'].Value | [0]" --output text)
+          
+          if [ "$endpoint" = "None" ] || [ -z "$endpoint" ]; then
+            echo "Error: Could not find API endpoint from CDK outputs"
+            exit 1
+          fi
+          
+          echo "API endpoint: $endpoint"
           echo "api-endpoint=$endpoint" >> "$GITHUB_OUTPUT"
 
       - name: get cognito user pool id
@@ -565,31 +622,64 @@ jobs:
         env:
           STAGE_NAME: ${{ needs.begin-deployment.outputs.stage-name }}
         run: |
-          # TODO: Extract from CDK outputs
-          echo "value=us-east-1_placeholder" >> "$GITHUB_OUTPUT"
+          echo "=== Extracting Cognito User Pool ID from CDK outputs ==="
+          value=$(aws cloudformation list-exports --query "Exports[?Name=='MCR-Cognito-${STAGE_NAME}-cdk-UserPoolId'].Value | [0]" --output text)
+          
+          if [ "$value" = "None" ] || [ -z "$value" ]; then
+            echo "Error: Could not find Cognito User Pool ID from CDK outputs"
+            exit 1
+          fi
+          
+          echo "Cognito User Pool ID: $value"
+          echo "value=$value" >> "$GITHUB_OUTPUT"
 
       - name: get cognito region
         id: save-cognito-region
         env:
           STAGE_NAME: ${{ needs.begin-deployment.outputs.stage-name }}
         run: |
-          echo "value=us-east-1" >> "$GITHUB_OUTPUT"
+          echo "=== Extracting Cognito region from CDK outputs ==="
+          value=$(aws cloudformation list-exports --query "Exports[?Name=='MCR-Cognito-${STAGE_NAME}-cdk-Region'].Value | [0]" --output text)
+          
+          if [ "$value" = "None" ] || [ -z "$value" ]; then
+            echo "Error: Could not find Cognito region from CDK outputs"
+            exit 1
+          fi
+          
+          echo "Cognito region: $value"
+          echo "value=$value" >> "$GITHUB_OUTPUT"
 
       - name: get cognito identity pool id
         id: save-cognito-identity-pool-id
         env:
           STAGE_NAME: ${{ needs.begin-deployment.outputs.stage-name }}
         run: |
-          # TODO: Extract from CDK outputs
-          echo "value=us-east-1:placeholder" >> "$GITHUB_OUTPUT"
+          echo "=== Extracting Cognito Identity Pool ID from CDK outputs ==="
+          value=$(aws cloudformation list-exports --query "Exports[?Name=='MCR-Cognito-${STAGE_NAME}-cdk-IdentityPoolId'].Value | [0]" --output text)
+          
+          if [ "$value" = "None" ] || [ -z "$value" ]; then
+            echo "Error: Could not find Cognito Identity Pool ID from CDK outputs"
+            exit 1
+          fi
+          
+          echo "Cognito Identity Pool ID: $value"
+          echo "value=$value" >> "$GITHUB_OUTPUT"
 
       - name: get cognito user pool web client id
         id: save-cognito-user-pool-web-client-id
         env:
           STAGE_NAME: ${{ needs.begin-deployment.outputs.stage-name }}
         run: |
-          # TODO: Extract from CDK outputs
-          echo "value=placeholder" >> "$GITHUB_OUTPUT"
+          echo "=== Extracting Cognito User Pool Client ID from CDK outputs ==="
+          value=$(aws cloudformation list-exports --query "Exports[?Name=='MCR-Cognito-${STAGE_NAME}-cdk-UserPoolClientId'].Value | [0]" --output text)
+          
+          if [ "$value" = "None" ] || [ -z "$value" ]; then
+            echo "Error: Could not find Cognito User Pool Client ID from CDK outputs"
+            exit 1
+          fi
+          
+          echo "Cognito User Pool Client ID: $value"
+          echo "value=$value" >> "$GITHUB_OUTPUT"
 
   end-deployment:
     needs: [begin-deployment, deploy-cdk-app, deploy-frontend-app]
