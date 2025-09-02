@@ -279,6 +279,39 @@ export class AppApiStack extends BaseStack {
                 subnetType: SubnetType.PRIVATE_WITH_EGRESS,
             },
             securityGroups: [lambdaSecurityGroup],
+            bundling: {
+                commandHooks: {
+                    beforeBundling(
+                        inputDir: string,
+                        outputDir: string
+                    ): string[] {
+                        return [
+                            `echo "CDK inputDir: ${inputDir}"`,
+                            `find ${inputDir} -name "collector.yml" 2>/dev/null || true`,
+                        ]
+                    },
+                    beforeInstall(): string[] {
+                        return []
+                    },
+                    afterBundling(
+                        inputDir: string,
+                        outputDir: string
+                    ): string[] {
+                        // Same bundling commands as GraphQL function for consistency
+                        const repoRoot =
+                            '/home/runner/work/managed-care-review/managed-care-review'
+                        const appApiPath = `${repoRoot}/services/app-api`
+                        return [
+                            // Copy collector.yml for OTEL configuration
+                            `cp ${appApiPath}/collector.yml ${outputDir}/collector.yml || echo "collector.yml not found at ${appApiPath}/collector.yml"`,
+                        ]
+                    },
+                },
+                esbuildArgs: {
+                    '--loader:.graphql': 'text',
+                    '--loader:.gql': 'text',
+                },
+            },
         })
 
         // Grant additional RDS permissions for snapshot creation
