@@ -3,10 +3,7 @@ name: Security Sync
 on:
   workflow_dispatch: # for testing and manual runs
   schedule:
-    - cron: "25 1 * * *" # daily at 01:25 UTC
-  push:
-    branches:
-      - security-sync-fix
+    - cron: "25 1 * * *" # daily at 8:25 PM EST
 
 permissions:
   id-token: write
@@ -29,7 +26,7 @@ jobs:
     steps:
       - name: Check out repo
         id: checkout_step
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
 
