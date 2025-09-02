@@ -9,7 +9,7 @@
     },
     "dependencies": {
         "@apollo/client": "3.8.8",
-        "dayjs": "^1.11.13",
+        "dayjs": "^1.11.18",
         "typescript": "5.9.2",
         "zod": "^4.0.14"
     },
