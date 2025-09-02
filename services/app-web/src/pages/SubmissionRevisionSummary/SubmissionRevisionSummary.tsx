@@ -2,10 +2,12 @@ import React, { useEffect } from 'react'
 import { GridContainer } from '@trussworks/react-uswds'
 import { useParams } from 'react-router-dom'
 import { useAuth } from '../../contexts/AuthContext'
-import { ContractDetailsSummarySection } from '../StateSubmission/ReviewSubmit/ContractDetailsSummarySection'
-import { ContactsSummarySection } from '../StateSubmission/ReviewSubmit/ContactsSummarySection'
-import { RateDetailsSummarySection } from '../StateSubmission/ReviewSubmit/RateDetailsSummarySection'
-import { SubmissionTypeSummarySection } from '../StateSubmission/ReviewSubmit/SubmissionTypeSummarySection'
+import {
+    ContractDetailsSummarySection,
+    ContactsSummarySection,
+    RateDetailsSummarySection,
+    SubmissionTypeSummarySection,
+} from '../../components/SubmissionSummarySection'
 import { usePage } from '../../contexts/PageContext'
 import { formatToPacificTime } from '@mc-review/dates'
 import styles from './SubmissionRevisionSummary.module.scss'

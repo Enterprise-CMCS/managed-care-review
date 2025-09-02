@@ -17,7 +17,7 @@ import {
 import styles from '../SubmissionSummary/SubmissionSummary.module.scss'
 import { GenericErrorPage } from '../Errors/GenericErrorPage'
 import { ERROR_MESSAGES, RoutesRecord } from '@mc-review/constants'
-import { SingleRateSummarySection } from '../../components/SubmissionSummarySection/RateDetailsSummarySection/SingleRateSummarySection'
+import { SingleRateSummarySection } from '../../components/SubmissionSummarySection/RateDetailsSummarySection/SingleRateSummary/SingleRateSummarySection'
 import { useAuth } from '../../contexts/AuthContext'
 import { ErrorForbiddenPage } from '../Errors/ErrorForbiddenPage'
 import { Error404 } from '../Errors/Error404Page'

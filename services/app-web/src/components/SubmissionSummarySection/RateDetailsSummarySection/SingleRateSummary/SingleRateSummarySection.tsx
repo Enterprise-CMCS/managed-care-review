@@ -1,11 +1,11 @@
 import React from 'react'
-import styles from '../SubmissionSummarySection.module.scss'
-import { MultiColumnGrid } from '../../MultiColumnGrid'
+import styles from '../../SubmissionSummarySection.module.scss'
+import { MultiColumnGrid } from '../../../MultiColumnGrid'
 import {
     DataDetail,
     DataDetailCheckboxList,
     DataDetailContactField,
-} from '../../DataDetail'
+} from '../../../DataDetail'
 import { formatCalendarDate } from '@mc-review/dates'
 import {
     ActuaryContact,
@@ -13,23 +13,23 @@ import {
     Program,
     Rate,
     RateFormData,
-} from '../../../gen/gqlClient'
-import { UploadedDocumentsTable } from '../UploadedDocumentsTable'
-import { SectionHeader } from '../../SectionHeader'
-import { DocumentWarningBanner } from '../../Banner'
+} from '../../../../gen/gqlClient'
+import { UploadedDocumentsTable } from '../../UploadedDocumentsTable'
+import { SectionHeader } from '../../../SectionHeader'
+import { DocumentWarningBanner } from '../../../Banner'
 import { Grid } from '@trussworks/react-uswds'
-import { UploadedDocumentsTableProps } from '../UploadedDocumentsTable/UploadedDocumentsTable'
-import { useAuth } from '../../../contexts/AuthContext'
-import { SectionCard } from '../../SectionCard'
+import { UploadedDocumentsTableProps } from '../../UploadedDocumentsTable/UploadedDocumentsTable'
+import { useAuth } from '../../../../contexts/AuthContext'
+import { SectionCard } from '../../../SectionCard'
 import {
     ActuaryCommunicationRecord,
     RateMedicaidPopulationsRecord,
 } from '@mc-review/hpp'
-import { NavLinkWithLogging } from '../../TealiumLogging'
+import { NavLinkWithLogging } from '../../../TealiumLogging'
 import { hasCMSUserPermissions } from '@mc-review/helpers'
 import { featureFlags } from '@mc-review/common-code'
 import { useLDClient } from 'launchdarkly-react-client-sdk'
-import { DocumentHeader } from '../../DocumentHeader/DocumentHeader'
+import { DocumentHeader } from '../../../DocumentHeader/DocumentHeader'
 
 const rateCapitationType = (formData: RateFormData) =>
     formData.rateCapitationType
@@ -376,6 +376,7 @@ export const SingleRateSummarySection = ({
                     packagesWithSharedRateCerts={appendDraftToSharedPackages}
                     previousSubmissionDate={lastSubmittedDate}
                     caption="Rate supporting documents"
+                    isSupportingDocuments
                     hideDynamicFeedback={!isSubmittedOrCMSUser}
                 />
             </SectionCard>

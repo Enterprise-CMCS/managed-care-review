@@ -62,12 +62,13 @@ $animation-speed-4: 0.8s * $speed-base !default;
 }
 
 // Below is all from the CMS Design system for the spinner
-
 @mixin spinner-size($inner-size, $outer-size) {
     height: $outer-size;
     width: $outer-size;
     $padding: math.div($outer-size - $inner-size, 2);
 
+    // Ignoring lint issues for spinner-size, due to bug in stylelint https://github.com/stylelint/stylelint/issues/8727
+    /* stylelint-disable nesting-selector-no-missing-scoping-root */
     &::before,
     &::after {
         border-width: (math.div($inner-size, 8));

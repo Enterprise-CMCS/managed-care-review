@@ -1,5 +1,5 @@
 import { StoryFn } from '@storybook/react'
-import ProvidersDecorator from '../../../../.storybook/providersDecorator'
+import ProvidersDecorator from '../../../../../.storybook/providersDecorator'
 import {
     RateDetailsSummarySectionProps,
     RateDetailsSummarySection,
