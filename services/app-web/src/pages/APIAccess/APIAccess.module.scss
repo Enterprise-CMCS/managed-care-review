@@ -13,7 +13,7 @@
 }
 
 .wrapKey {
-    word-wrap: break-word;
+    overflow-wrap: break-word;
     white-space: pre-wrap;
     background: custom.$mcr-gray-lighter;
     display: block;

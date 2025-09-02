@@ -1,4 +1,4 @@
-import { renderWithProviders } from '../../../testHelpers'
+import { renderWithProviders } from '../../../../testHelpers'
 import { SingleRateSummarySection } from './SingleRateSummarySection'
 import {
     fetchCurrentUserMock,
@@ -11,7 +11,7 @@ import {
 } from '@mc-review/mocks'
 import { screen, within } from '@testing-library/react'
 import { rateWithHistoryMock } from '@mc-review/mocks'
-import type { Contract } from '../../../gen/gqlClient'
+import type { Contract } from '../../../../gen/gqlClient'
 
 describe('SingleRateSummarySection', () => {
     it('can render rate details without errors', async () => {

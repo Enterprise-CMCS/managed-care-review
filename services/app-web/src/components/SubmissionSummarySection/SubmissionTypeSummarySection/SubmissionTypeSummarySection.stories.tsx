@@ -4,10 +4,10 @@ import {
     SubmissionTypeSummarySectionProps,
     SubmissionTypeSummarySection,
 } from './SubmissionTypeSummarySection'
-import { mockContractAndRatesDraft } from '@mc-review/mocks'
+import { mockContractPackageDraft } from '@mc-review/mocks'
 
 export default {
-    title: 'Components/SubmissionSummary/SubmissionTypeSummarySection',
+    title: 'Components/SubmissionSummary/SubmissionTypeSummarySection/V2',
     component: SubmissionTypeSummarySection,
     parameters: {
         componentSubtitle:
@@ -23,7 +23,7 @@ export const WithAction = Template.bind({})
 WithAction.decorators = [(StoryFn) => ProvidersDecorator(StoryFn, {})]
 
 WithAction.args = {
-    submission: mockContractAndRatesDraft(),
+    contract: mockContractPackageDraft(),
     //TODO: Use better mock program data
     statePrograms: [],
     editNavigateTo: 'submission-type',
@@ -33,6 +33,6 @@ export const WithoutAction = Template.bind({})
 WithoutAction.decorators = [(StoryFn) => ProvidersDecorator(StoryFn, {})]
 
 WithoutAction.args = {
-    submission: mockContractAndRatesDraft(),
+    contract: mockContractPackageDraft(),
     statePrograms: [],
 }

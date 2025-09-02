@@ -1,31 +1,33 @@
 import { GridContainer, ModalRef } from '@trussworks/react-uswds'
 import React, { useRef, useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { DynamicStepIndicator } from '../../../../../components'
-import { PageActionsContainer } from '../../../PageActions'
-import styles from '../../ReviewSubmit.module.scss'
-import { ActionButton } from '../../../../../components/ActionButton'
-import { useRouteParams, useStatePrograms } from '../../../../../hooks'
+import { DynamicStepIndicator } from '../../../components'
+import { PageActionsContainer } from '../PageActions'
+import styles from '../ReviewSubmit/ReviewSubmit.module.scss'
+import { ActionButton } from '../../../components/ActionButton'
+import { useRouteParams, useStatePrograms } from '../../../hooks'
 import { useLDClient } from 'launchdarkly-react-client-sdk'
 
-import { UnlockSubmitModal } from '../../../../../components/Modal/UnlockSubmitModal'
+import { UnlockSubmitModal } from '../../../components/Modal/UnlockSubmitModal'
 import { getVisibleLatestContractFormData } from '@mc-review/helpers'
-import { useAuth } from '../../../../../contexts/AuthContext'
-import { RateDetailsSummarySection } from '../../RateDetailsSummarySection'
-import { ContactsSummarySection } from '../../ContactsSummarySection'
-import { ContractDetailsSummarySection } from '../../ContractDetailsSummarySection'
-import { SubmissionTypeSummarySection } from '../../SubmissionTypeSummarySection'
-import { useFetchContractQuery } from '../../../../../gen/gqlClient'
-import { ErrorForbiddenPage } from '../../../../Errors/ErrorForbiddenPage'
-import { Error404 } from '../../../../Errors/Error404Page'
-import { GenericErrorPage } from '../../../../Errors/GenericErrorPage'
-import { Loading, FormNotificationContainer } from '../../../../../components'
-import { PageBannerAlerts } from '../../../PageBannerAlerts'
+import { useAuth } from '../../../contexts/AuthContext'
+import {
+    RateDetailsSummarySection,
+    ContactsSummarySection,
+    ContractDetailsSummarySection,
+    SubmissionTypeSummarySection,
+} from '../../../components/SubmissionSummarySection'
+import { useFetchContractQuery } from '../../../gen/gqlClient'
+import { ErrorForbiddenPage } from '../../Errors/ErrorForbiddenPage'
+import { Error404 } from '../../Errors/Error404Page'
+import { GenericErrorPage } from '../../Errors/GenericErrorPage'
+import { Loading, FormNotificationContainer } from '../../../components'
+import { PageBannerAlerts } from '../PageBannerAlerts'
 import { packageName } from '@mc-review/hpp'
-import { usePage } from '../../../../../contexts/PageContext'
-import { activeFormPages } from '../../../StateSubmissionForm'
+import { usePage } from '../../../contexts/PageContext'
+import { activeFormPages } from '../StateSubmissionForm'
 import { featureFlags } from '@mc-review/common-code'
-import { ModalOpenButton } from '../../../../../components/Modal'
+import { ModalOpenButton } from '../../../components/Modal'
 
 export const ReviewSubmit = (): React.ReactElement => {
     const navigate = useNavigate()

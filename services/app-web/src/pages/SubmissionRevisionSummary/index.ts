@@ -1,1 +1,1 @@
-export { SubmissionRevisionSummary } from './SubmissionRevisionSummaryV2'
+export { SubmissionRevisionSummary } from './SubmissionRevisionSummary'

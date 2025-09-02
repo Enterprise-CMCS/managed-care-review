@@ -8,7 +8,7 @@ import {
     iterableCmsUsersMockData,
 } from '@mc-review/mocks'
 import { renderWithProviders } from '../../testHelpers/jestHelpers'
-import { SubmissionRevisionSummary } from './SubmissionRevisionSummaryV2'
+import { SubmissionRevisionSummary } from './SubmissionRevisionSummary'
 import { formatCalendarDate } from '@mc-review/dates'
 import { mockContractPackageWithDifferentProgramsInRevisions } from '@mc-review/mocks'
 

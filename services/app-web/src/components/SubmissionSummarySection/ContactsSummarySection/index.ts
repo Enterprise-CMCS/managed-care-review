@@ -1,3 +1,1 @@
-export {
-    ContactsSummarySection,
-} from './ContactsSummarySection'
+export { ContactsSummarySection } from './ContactsSummarySection'
