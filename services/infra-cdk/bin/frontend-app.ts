@@ -7,8 +7,6 @@ import { IamPathAspect } from '../lib/aspects/iam-path-aspects'
 import { IamPermissionsBoundaryAspect } from '../lib/aspects/iam-permissions-boundary-aspects'
 import { getEnvironment, getCdkEnvironment, ResourceNames } from '../lib/config'
 import { FrontendAppStack } from '../lib/stacks/frontend-app'
-import { Bucket } from 'aws-cdk-lib/aws-s3'
-import { Distribution } from 'aws-cdk-lib/aws-cloudfront'
 
 async function main(): Promise<void> {
     try {
@@ -33,46 +31,8 @@ async function main(): Promise<void> {
         const config = getEnvironment(appConfig.stage)
         const env = getCdkEnvironment(appConfig.stage)
 
-        // Import infrastructure resources from frontend-infra stack
-        const mainAppBucket = Bucket.fromBucketName(
-            app,
-            'ImportedMainAppBucket',
-            `mcr-cdk-${appConfig.stage}-ui-bucket`
-        )
-
-        const storybookBucket = Bucket.fromBucketName(
-            app,
-            'ImportedStorybookBucket',
-            `mcr-cdk-${appConfig.stage}-storybook-bucket`
-        )
-
-        const mainAppDistribution = Distribution.fromDistributionAttributes(
-            app,
-            'ImportedMainAppDistribution',
-            {
-                distributionId: cdk.Fn.importValue(
-                    `MCR-frontend-infra-${appConfig.stage}-cdk-CloudFrontDistributionId`
-                ),
-                domainName: cdk.Fn.importValue(
-                    `MCR-frontend-infra-${appConfig.stage}-cdk-CloudFrontEndpointUrl`
-                ).replace('https://', ''),
-            }
-        )
-
-        const storybookDistribution = Distribution.fromDistributionAttributes(
-            app,
-            'ImportedStorybookDistribution',
-            {
-                distributionId: cdk.Fn.importValue(
-                    `MCR-frontend-infra-${appConfig.stage}-cdk-StorybookCloudFrontDistributionId`
-                ),
-                domainName: cdk.Fn.importValue(
-                    `MCR-frontend-infra-${appConfig.stage}-cdk-StorybookCloudFrontEndpointUrl`
-                ).replace('https://', ''),
-            }
-        )
-
         // Create Frontend App stack (deploys React app and Storybook)
+        // Resources are imported internally within the stack
         new FrontendAppStack(
             app,
             ResourceNames.stackName('frontend-app', appConfig.stage),
@@ -81,11 +41,6 @@ async function main(): Promise<void> {
                 stage: appConfig.stage,
                 stageConfig: config,
                 serviceName: 'frontend-app',
-                // Pass imported infrastructure resources
-                mainAppBucket,
-                mainAppDistribution,
-                storybookBucket,
-                storybookDistribution,
             }
         )
 
