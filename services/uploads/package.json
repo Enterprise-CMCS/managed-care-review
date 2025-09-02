@@ -34,7 +34,7 @@
         "@opentelemetry/semantic-conventions": "^1.30.0",
         "aws-lambda": "^1.0.7",
         "file-type": "^19.5.0",
-        "mime-types": "^2.1.35"
+        "mime-types": "^3.0.1"
     },
     "devDependencies": {
         "@types/aws-lambda": "^8.10.152",
