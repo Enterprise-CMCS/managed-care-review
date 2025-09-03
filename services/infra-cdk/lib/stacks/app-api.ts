@@ -19,6 +19,8 @@ import {
     ManagedPolicy,
 } from 'aws-cdk-lib/aws-iam'
 import { CfnOutput, Duration, Fn } from 'aws-cdk-lib'
+import { StringParameter } from 'aws-cdk-lib/aws-ssm'
+import { Secret } from 'aws-cdk-lib/aws-secretsmanager'
 import { ResourceNames } from '../config'
 import {
     Architecture,
@@ -598,22 +600,61 @@ export class AppApiStack extends BaseStack {
             `${frontendStackName}-CloudFrontEndpointUrl`
         )
 
+        // Get values from environment variables with SSM/Secrets Manager fallbacks
+        const otelCollectorUrl =
+            process.env.API_APP_OTEL_COLLECTOR_URL ||
+            StringParameter.valueForStringParameter(
+                this,
+                '/configuration/api_app_otel_collector_url'
+            )
+
+        const emailerMode =
+            process.env.EMAILER_MODE ||
+            StringParameter.valueForStringParameter(
+                this,
+                '/configuration/emailer_mode'
+            )
+
+        const parameterStoreMode =
+            process.env.PARAMETER_STORE_MODE ||
+            StringParameter.valueForStringParameter(
+                this,
+                '/configuration/parameterStoreMode'
+            )
+
+        const ldSdkKey =
+            process.env.LD_SDK_KEY ||
+            StringParameter.valueForStringParameter(
+                this,
+                '/configuration/ld_sdk_key_feds'
+            )
+
+        // JWT Secret from Secrets Manager - similar to serverless pattern
+        const jwtSecret =
+            process.env.JWT_SECRET ||
+            Secret.fromSecretNameV2(
+                this,
+                'JwtSecret',
+                `api_jwt_secret_${this.stage}`
+            )
+                .secretValueFromJson('jwtsigningkey')
+                .unsafeUnwrap()
+
         return {
             stage: this.stage,
             REGION: this.region,
             // Database URL will be resolved at runtime via secrets manager
             DATABASE_URL: process.env.DATABASE_URL || '',
             VITE_APP_AUTH_MODE: process.env.VITE_APP_AUTH_MODE || 'AWS_COGNITO',
-            API_APP_OTEL_COLLECTOR_URL:
-                process.env.API_APP_OTEL_COLLECTOR_URL || '',
+            API_APP_OTEL_COLLECTOR_URL: otelCollectorUrl,
             SECRETS_MANAGER_SECRET: `aurora_postgres_${this.stage}`,
-            EMAILER_MODE: process.env.EMAILER_MODE || '',
-            PARAMETER_STORE_MODE: process.env.PARAMETER_STORE_MODE || '',
+            EMAILER_MODE: emailerMode,
+            PARAMETER_STORE_MODE: parameterStoreMode,
             APPLICATION_ENDPOINT: applicationEndpoint,
             AWS_LAMBDA_EXEC_WRAPPER: '/opt/otel-handler',
             OPENTELEMETRY_COLLECTOR_CONFIG_FILE: '/var/task/collector.yml',
-            LD_SDK_KEY: process.env.LD_SDK_KEY || '',
-            JWT_SECRET: process.env.JWT_SECRET || '',
+            LD_SDK_KEY: ldSdkKey,
+            JWT_SECRET: jwtSecret,
             VITE_APP_S3_QA_BUCKET: qaUploadsBucketName,
             VITE_APP_S3_DOCUMENTS_BUCKET: documentUploadsBucketName,
         }
