@@ -8,15 +8,19 @@ const questionResponseDocument = z.object({
 })
 
 const questionResponseType = z.object({
-    id: z.string().uuid(),
+    id: z.uuid(),
     questionID: z.string().uuid(),
     createdAt: z.date(),
     addedBy: stateUserSchema,
-    documents: z.array(questionResponseDocument),
+    documents: z.array(
+        questionResponseDocument.extend({
+            id: z.uuid(), // Response documents have an id after DB insert.
+        })
+    ),
 })
 
 const insertQuestionResponseArgs = z.object({
-    questionID: z.string().uuid(),
+    questionID: z.uuid(),
     documents: z.array(questionResponseDocument),
 })
 

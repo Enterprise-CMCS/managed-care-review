@@ -10,20 +10,24 @@ const document = z.object({
 })
 
 const commonQuestionSchema = z.object({
-    id: z.string().uuid(),
+    id: z.uuid(),
     createdAt: z.date(),
     addedBy: cmsUsersUnionSchema,
     division: divisionType, // DMCO, DMCP, OACT
-    documents: z.array(document),
+    documents: z.array(
+        document.extend({
+            id: z.uuid(), // Question documents have an id after DB insert.
+        })
+    ),
     responses: z.array(questionResponseType),
 })
 
 const contractQuestion = commonQuestionSchema.extend({
-    contractID: z.string().uuid(),
+    contractID: z.uuid(),
 })
 
 const rateQuestion = commonQuestionSchema.extend({
-    rateID: z.string().uuid(),
+    rateID: z.uuid(),
 })
 
 const contractQuestionEdge = z.object({
@@ -61,12 +65,12 @@ const createContractQuestionPayload = z.object({
 })
 
 const createContractQuestionInput = z.object({
-    contractID: z.string().uuid(),
+    contractID: z.uuid(),
     documents: z.array(document),
 })
 
 const createRateQuestionInput = z.object({
-    rateID: z.string().uuid(),
+    rateID: z.uuid(),
     documents: z.array(document),
 })
 
