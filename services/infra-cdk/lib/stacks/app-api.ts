@@ -643,8 +643,8 @@ export class AppApiStack extends BaseStack {
         return {
             stage: this.stage,
             REGION: this.region,
-            // Database URL will be resolved at runtime via secrets manager
-            DATABASE_URL: process.env.DATABASE_URL || '',
+            // Database URL set to AWS_SM to fetch connection from Secrets Manager at runtime
+            DATABASE_URL: process.env.DATABASE_URL || 'AWS_SM',
             VITE_APP_AUTH_MODE: process.env.VITE_APP_AUTH_MODE || 'AWS_COGNITO',
             API_APP_OTEL_COLLECTOR_URL: otelCollectorUrl,
             SECRETS_MANAGER_SECRET: `aurora_postgres_${this.stage}`,
