@@ -273,6 +273,7 @@ export class AppApiStack extends BaseStack {
                 ...environment,
                 SCHEMA_PATH: '/opt/nodejs/prisma/schema.prisma',
                 CONNECT_TIMEOUT: '60',
+                NODE_PATH: '/opt/nodejs/node_modules',
             },
             role,
             layers: [prismaMigrationLayer, otelLayer],
@@ -282,7 +283,7 @@ export class AppApiStack extends BaseStack {
             },
             securityGroups: [lambdaSecurityGroup],
             bundling: {
-                externalModules: ['prisma', '@prisma/client'],
+                externalModules: ['prisma', '@prisma/client', '.prisma'],
                 commandHooks: {
                     beforeBundling(
                         inputDir: string,
