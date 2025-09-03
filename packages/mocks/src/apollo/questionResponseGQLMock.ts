@@ -57,7 +57,12 @@ const createContractQuestionSuccess = (
                         createdAt: new Date(),
                         addedBy: mockValidCMSUser(),
                         division: 'DMCO',
-                        documents: testInput.documents,
+                        documents: testInput.documents.map(doc => ({
+                            ...doc,
+                            id: doc.name,
+                        })),
+                        round: 1,
+                        responses: []
                     },
                 },
             },
@@ -103,10 +108,16 @@ const createRateQuestionSuccess = (
                 createRateQuestion: {
                     question: {
                         id: 'test123',
+                        createdAt: new Date(),
                         rateID: testInput.rateID,
                         addedBy: mockValidCMSUser(),
                         division: 'DMCO',
-                        documents: testInput.documents,
+                        round: 1,
+                        documents: testInput.documents.map(doc => ({
+                            ...doc,
+                            id: doc.name,
+                        })),
+                        responses: []
                     },
                 },
             },
