@@ -1,51 +1,11 @@
 fragment contractQuestionEdgeFragment on ContractQuestionEdge {
     node {
-        id
-        contractID
-        createdAt
-        addedBy {
-            ... on CMSUser {
-                ...cmsUserFragment
-            }
-            ... on CMSApproverUser {
-                ...cmsApproverUserFragment
-            }
-        }
-        division
-        round
-        documents {
-            s3URL
-            name
-            downloadURL
-        }
-        responses {
-            ...questionResponseFragment
-        }
+        ...contractQuestionFragment
     }
 }
 
 fragment rateQuestionEdgeFragment on RateQuestionEdge {
     node {
-        id
-        rateID
-        createdAt
-        addedBy {
-            ... on CMSUser {
-                ...cmsUserFragment
-            }
-            ... on CMSApproverUser {
-                ...cmsApproverUserFragment
-            }
-        }
-        division
-        round
-        documents {
-            s3URL
-            name
-            downloadURL
-        }
-        responses {
-            ...questionResponseFragment
-        }
+        ...rateQuestionFragment
     }
 }
