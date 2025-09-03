@@ -6,7 +6,6 @@ import type {
     RateRevisionType,
     PackageStatusType,
     UpdateInfoType,
-    ContractRevisionType,
     ConsolidatedContractStatusType,
 } from '../../domain-models/contractAndRates'
 import { findStatePrograms } from '../state'
@@ -530,67 +529,6 @@ function rateRevisionToDomainModel(
     }
 }
 
-// setDateAddedForContractRevisions takes a list of contractRevs and sets dateAdded
-// for all documents based on when the doc first appears in the list. The contractRevs
-// should be in createdAt order.
-function setDateAddedForContractRevisions(
-    contractRevs: ContractRevisionType[]
-) {
-    const firstSeenDate: { [sha: string]: Date } = {}
-    for (const contractRev of contractRevs) {
-        const sinceDate = contractRev.submitInfo?.updatedAt
-        if (!sinceDate) break
-        for (const doc of contractRev.formData.contractDocuments) {
-            if (!firstSeenDate[doc.sha256]) {
-                // still set the hashmap of docs with db date added.
-                firstSeenDate[doc.sha256] = doc.dateAdded ?? sinceDate
-            }
-            // use db date added, fallback to hashmap
-            doc.dateAdded = doc.dateAdded ?? firstSeenDate[doc.sha256]
-        }
-        for (const doc of contractRev.formData.supportingDocuments) {
-            if (!firstSeenDate[doc.sha256]) {
-                // still set the hashmap of docs with db date added.
-                firstSeenDate[doc.sha256] = doc.dateAdded ?? sinceDate
-            }
-            // use db date added, fallback to hashmap
-            doc.dateAdded = doc.dateAdded ?? firstSeenDate[doc.sha256]
-        }
-    }
-}
-
-// setDateAddedForRateRevisions takes a list of rateRevs and sets dateAdded
-// for all documents based on when the doc first appears in the list. The contractRevs
-// should be in createdAt order.
-function setDateAddedForRateRevisions(rateRevs: RateRevisionType[]) {
-    const firstSeenDate: { [sha: string]: Date } = {}
-
-    for (const rateRev of rateRevs) {
-        const sinceDate = rateRev.submitInfo?.updatedAt
-        if (!sinceDate) break
-        if (rateRev.formData.rateDocuments) {
-            for (const doc of rateRev.formData.rateDocuments) {
-                if (!firstSeenDate[doc.sha256]) {
-                    // still set the hashmap of docs with db date added.
-                    firstSeenDate[doc.sha256] = doc.dateAdded ?? sinceDate
-                }
-                // use db date added, fallback to hashmap
-                doc.dateAdded = doc.dateAdded ?? firstSeenDate[doc.sha256]
-            }
-        }
-        if (rateRev.formData.supportingDocuments) {
-            for (const doc of rateRev.formData.supportingDocuments) {
-                if (!firstSeenDate[doc.sha256]) {
-                    // still set the hashmap of docs with db date added.
-                    firstSeenDate[doc.sha256] = doc.dateAdded ?? sinceDate
-                }
-                // use db date added, fallback to hashmap
-                doc.dateAdded = doc.dateAdded ?? firstSeenDate[doc.sha256]
-            }
-        }
-    }
-}
-
 function ratesRevisionsToDomainModel(
     rateRevisions: RateRevisionTableWithFormData[]
 ): RateRevisionType[] | Error {
@@ -740,8 +678,6 @@ export {
     rateRevisionToDomainModel,
     ratesRevisionsToDomainModel,
     unsortedRatesRevisionsToDomainModel,
-    setDateAddedForContractRevisions,
-    setDateAddedForRateRevisions,
     getRateReviewStatus,
     getParentContractID,
     getRelatedContracts,
