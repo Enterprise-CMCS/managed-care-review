@@ -56,6 +56,7 @@ describe('createRateQuestionResponse', () => {
                         }),
                         documents: [
                             {
+                                id: expect.any(String),
                                 name: 'Test Question Response',
                                 s3URL: 's3://bucketname/key/test1',
                                 downloadURL:
