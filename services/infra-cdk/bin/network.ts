@@ -30,7 +30,7 @@ async function main(): Promise<void> {
         const config = getEnvironment(appConfig.stage)
         const env = getCdkEnvironment(appConfig.stage)
 
-        new Network(app, ResourceNames.stackName('Network', appConfig.stage), {
+        new Network(app, ResourceNames.stackName('network', appConfig.stage), {
             env,
             stage: appConfig.stage,
             stageConfig: config,

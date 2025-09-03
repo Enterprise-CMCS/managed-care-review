@@ -30,7 +30,7 @@ async function main(): Promise<void> {
 
         new AppApiStack(
             app,
-            ResourceNames.stackName('AppApi', appConfig.stage),
+            ResourceNames.stackName('app-api', appConfig.stage),
             {
                 env,
                 stage: appConfig.stage,

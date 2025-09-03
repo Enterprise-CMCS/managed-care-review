@@ -34,7 +34,7 @@ async function main(): Promise<void> {
         // Create Network stack (Postgres depends on it)
         const network = new Network(
             app,
-            ResourceNames.stackName('Network', appConfig.stage),
+            ResourceNames.stackName('network', appConfig.stage),
             {
                 env,
                 stage: appConfig.stage,
@@ -46,7 +46,7 @@ async function main(): Promise<void> {
         // Create Postgres stack
         const postgres = new Postgres(
             app,
-            ResourceNames.stackName('Postgres', appConfig.stage),
+            ResourceNames.stackName('postgres', appConfig.stage),
             {
                 env,
                 stage: appConfig.stage,

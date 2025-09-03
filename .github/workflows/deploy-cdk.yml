@@ -108,11 +108,11 @@ jobs:
           STAGE_NAME: ${{ needs.begin-deployment.outputs.stage-name }}
         run: |
           echo "Starting CDK OIDC deployment for stage: ${STAGE_NAME}"
-          echo "Stack name will be: MCR-GitHubOIDC-${STAGE_NAME}"
+          echo "Stack name will be: GitHubOIDC-${STAGE_NAME}"
 
           # Deploy using OIDC-only app (no layer dependencies)
           echo "=== Deploying OIDC stack ==="
-          pnpm cdk deploy MCR-GitHubOIDC-${STAGE_NAME} \
+          pnpm cdk deploy GitHubOIDC-${STAGE_NAME} \
             --app 'pnpm tsx bin/oidc.ts' \
             --context stage=${STAGE_NAME} \
             --require-approval never
@@ -328,7 +328,7 @@ jobs:
           SUBNET_PRIVATE_C_ID: ${{ secrets.DEV_SUBNET_PRIVATE_C_ID }}
         run: |
           echo "=== Deploying Network stack ==="
-          npx cdk deploy MCR-Network-${STAGE_NAME}-cdk \
+          npx cdk deploy network-${STAGE_NAME}-cdk \
             --app 'pnpm tsx bin/network.ts' \
             --context stage=${STAGE_NAME} \
             --require-approval never
@@ -339,7 +339,7 @@ jobs:
           STAGE_NAME: ${{ needs.begin-deployment.outputs.stage-name }}
         run: |
           echo "=== Deploying Uploads stack ==="
-          npx cdk deploy MCR-uploads-${STAGE_NAME}-cdk \
+          npx cdk deploy uploads-${STAGE_NAME}-cdk \
             --app 'pnpm tsx bin/uploads.ts' \
             --context stage=${STAGE_NAME} \
             --require-approval never
@@ -355,7 +355,7 @@ jobs:
           SUBNET_PRIVATE_C_ID: ${{ secrets.DEV_SUBNET_PRIVATE_C_ID }}
         run: |
           echo "=== Deploying Postgres stack ==="
-          npx cdk deploy MCR-Postgres-${STAGE_NAME}-cdk \
+          npx cdk deploy postgres-${STAGE_NAME}-cdk \
             --app 'pnpm tsx bin/postgres.ts' \
             --context stage=${STAGE_NAME} \
             --require-approval never
@@ -366,7 +366,7 @@ jobs:
           STAGE_NAME: ${{ needs.begin-deployment.outputs.stage-name }}
         run: |
           echo "=== Deploying Frontend Infrastructure stack ==="
-          npx cdk deploy MCR-frontend-infra-${STAGE_NAME}-cdk \
+          npx cdk deploy frontend-infra-${STAGE_NAME}-cdk \
             --app 'pnpm tsx bin/frontend-infra.ts' \
             --context stage=${STAGE_NAME} \
             --require-approval never
@@ -377,7 +377,7 @@ jobs:
           STAGE_NAME: ${{ needs.begin-deployment.outputs.stage-name }}
         run: |
           echo "=== Deploying Cognito stack ==="
-          npx cdk deploy MCR-Cognito-${STAGE_NAME}-cdk \
+          npx cdk deploy cognito-${STAGE_NAME}-cdk \
             --app 'pnpm tsx bin/cognito.ts' \
             --context stage=${STAGE_NAME} \
             --require-approval never
@@ -460,7 +460,7 @@ jobs:
           STAGE_NAME: ${{ needs.begin-deployment.outputs.stage-name }}
         run: |
           echo "=== Deploying Frontend App stack with built assets ==="
-          npx cdk deploy MCR-frontend-app-${STAGE_NAME}-cdk \
+          npx cdk deploy frontend-app-${STAGE_NAME}-cdk \
             --app 'pnpm tsx bin/frontend-app.ts' \
             --context stage=${STAGE_NAME} \
             --require-approval never
@@ -535,7 +535,7 @@ jobs:
           SG_ID: ${{ secrets.DEV_SG_ID }}
         run: |
           echo "=== Deploying AppApi stack ==="
-          npx cdk deploy MCR-AppApi-${STAGE_NAME}-cdk \
+          npx cdk deploy app-api-${STAGE_NAME}-cdk \
             --app 'pnpm tsx bin/app-api.ts' \
             --context stage=${STAGE_NAME} \
             --require-approval never
@@ -629,7 +629,7 @@ jobs:
           STAGE_NAME: ${{ needs.begin-deployment.outputs.stage-name }}
         run: |
           echo "=== Extracting application endpoint from CDK outputs ==="
-          endpoint=$(aws cloudformation list-exports --query "Exports[?Name=='MCR-frontend-infra-${STAGE_NAME}-cdk-CloudFrontEndpointUrl'].Value | [0]" --output text)
+          endpoint=$(aws cloudformation list-exports --query "Exports[?Name=='frontend-infra-${STAGE_NAME}-cdk-CloudFrontEndpointUrl'].Value | [0]" --output text)
           
           if [ "$endpoint" = "None" ] || [ -z "$endpoint" ]; then
             echo "Error: Could not find application endpoint from CDK outputs"
@@ -645,7 +645,7 @@ jobs:
           STAGE_NAME: ${{ needs.begin-deployment.outputs.stage-name }}
         run: |
           echo "=== Extracting API endpoint from CDK outputs ==="
-          endpoint=$(aws cloudformation list-exports --query "Exports[?Name=='MCR-AppApi-${STAGE_NAME}-cdk-ApiGatewayUrl'].Value | [0]" --output text)
+          endpoint=$(aws cloudformation list-exports --query "Exports[?Name=='app-api-${STAGE_NAME}-cdk-ApiGatewayUrl'].Value | [0]" --output text)
           
           if [ "$endpoint" = "None" ] || [ -z "$endpoint" ]; then
             echo "Error: Could not find API endpoint from CDK outputs"
@@ -661,7 +661,7 @@ jobs:
           STAGE_NAME: ${{ needs.begin-deployment.outputs.stage-name }}
         run: |
           echo "=== Extracting Cognito User Pool ID from CDK outputs ==="
-          value=$(aws cloudformation list-exports --query "Exports[?Name=='MCR-Cognito-${STAGE_NAME}-cdk-UserPoolId'].Value | [0]" --output text)
+          value=$(aws cloudformation list-exports --query "Exports[?Name=='cognito-${STAGE_NAME}-cdk-UserPoolId'].Value | [0]" --output text)
           
           if [ "$value" = "None" ] || [ -z "$value" ]; then
             echo "Error: Could not find Cognito User Pool ID from CDK outputs"
@@ -677,9 +677,15 @@ jobs:
           STAGE_NAME: ${{ needs.begin-deployment.outputs.stage-name }}
         run: |
           echo "=== Extracting Cognito region from CDK outputs ==="
-          value=$(aws cloudformation list-exports --query "Exports[?Name=='MCR-Cognito-${STAGE_NAME}-cdk-Region'].Value | [0]" --output text)
+          value=$(aws cloudformation list-exports --query "Exports[?Name=='cognito-${STAGE_NAME}-cdk-Region'].Value | [0]" --output text)
           
-          echo "Cognito region: $value"
+          # Fallback to AWS region if CDK export doesn't exist
+          if [ "$value" = "None" ] || [ -z "$value" ]; then
+            value="${{ vars.AWS_DEFAULT_REGION }}"
+            echo "Using fallback region: $value"
+          else
+            echo "Cognito region: $value"
+          fi
           echo "value=$value" >> "$GITHUB_OUTPUT"
 
       - name: get cognito identity pool id
@@ -688,7 +694,7 @@ jobs:
           STAGE_NAME: ${{ needs.begin-deployment.outputs.stage-name }}
         run: |
           echo "=== Extracting Cognito Identity Pool ID from CDK outputs ==="
-          value=$(aws cloudformation list-exports --query "Exports[?Name=='MCR-Cognito-${STAGE_NAME}-cdk-IdentityPoolId'].Value | [0]" --output text)
+          value=$(aws cloudformation list-exports --query "Exports[?Name=='cognito-${STAGE_NAME}-cdk-IdentityPoolId'].Value | [0]" --output text)
           
           echo "Cognito Identity Pool ID: $value"
           echo "value=$value" >> "$GITHUB_OUTPUT"
@@ -699,7 +705,7 @@ jobs:
           STAGE_NAME: ${{ needs.begin-deployment.outputs.stage-name }}
         run: |
           echo "=== Extracting Cognito User Pool Client ID from CDK outputs ==="
-          value=$(aws cloudformation list-exports --query "Exports[?Name=='MCR-Cognito-${STAGE_NAME}-cdk-UserPoolClientId'].Value | [0]" --output text)
+          value=$(aws cloudformation list-exports --query "Exports[?Name=='cognito-${STAGE_NAME}-cdk-UserPoolClientId'].Value | [0]" --output text)
           
           echo "Cognito User Pool Client ID: $value"
           echo "value=$value" >> "$GITHUB_OUTPUT"

@@ -29,7 +29,7 @@ async function main(): Promise<void> {
 
         new CognitoStack(
             app,
-            ResourceNames.stackName('Cognito', appConfig.stage),
+            ResourceNames.stackName('cognito', appConfig.stage),
             {
                 env,
                 stage: appConfig.stage,
