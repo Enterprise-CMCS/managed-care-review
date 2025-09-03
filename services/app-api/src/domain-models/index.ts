@@ -73,18 +73,14 @@ export type {
     CreateContractQuestionPayload,
     CreateContractQuestionInput,
     ContractQuestionType,
-    Document,
     ContractQuestionList,
     RateQuestionType,
     CreateRateQuestionInputType,
     IndexRateQuestionsPayload,
-} from './QuestionsType'
-
-export type {
     InsertQuestionResponseArgs,
     QuestionResponseType,
-    QuestionResponseDocument,
-} from './QuestionResponseType'
+    QuestionAndResponseDocument,
+} from './QuestionsType'
 
 export type { APIKeyType } from './apiKey'
 

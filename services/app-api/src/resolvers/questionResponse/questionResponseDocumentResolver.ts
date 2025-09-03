@@ -2,13 +2,13 @@ import type { Resolvers } from '../../gen/gqlServer'
 
 import { parseBucketName, parseKey } from '../../s3'
 import type { S3ClientT } from '../../s3'
-import type { QuestionResponseDocument } from '../../domain-models'
+import type { QuestionAndResponseDocument } from '../../domain-models'
 
 export function questionResponseDocumentResolver(
     s3Client: S3ClientT
 ): Resolvers['QuestionResponseDocument'] {
     return {
-        downloadURL: async (parent: QuestionResponseDocument) => {
+        downloadURL: async (parent: QuestionAndResponseDocument) => {
             const s3URL = parent.s3URL ?? ''
             const key = parseKey(s3URL)
             const bucket = parseBucketName(s3URL)

@@ -1,4 +1,3 @@
-
 import type { ContractQuestionType } from '../../domain-models'
 import type { ExtendedPrismaClient } from '../prismaClient'
 import {
