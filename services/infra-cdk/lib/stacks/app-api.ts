@@ -283,7 +283,7 @@ export class AppApiStack extends BaseStack {
             },
             securityGroups: [lambdaSecurityGroup],
             bundling: {
-                nodeModules: ['@prisma/client', 'prisma'],
+                externalModules: ['prisma', '@prisma/client', '.prisma'],
                 commandHooks: {
                     beforeBundling(
                         inputDir: string,

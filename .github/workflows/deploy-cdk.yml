@@ -512,11 +512,27 @@ jobs:
           name: lambda-layers-prisma-client-migration
           path: ./services/infra-cdk/lambda-layers-prisma-client-migration
 
+      - name: Extract Prisma migration layer
+        working-directory: ./services/infra-cdk/lambda-layers-prisma-client-migration
+        run: |
+          echo "=== Extracting Prisma migration layer ==="
+          tar -xzf nodejs.tar.gz
+          rm nodejs.tar.gz
+          ls -la
+
       - name: Download Prisma engine layers
         uses: actions/download-artifact@v4
         with:
           name: lambda-layers-prisma-client-engine
           path: ./services/infra-cdk/lambda-layers-prisma-client-engine
+
+      - name: Extract Prisma engine layer
+        working-directory: ./services/infra-cdk/lambda-layers-prisma-client-engine
+        run: |
+          echo "=== Extracting Prisma engine layer ==="
+          tar -xzf nodejs.tar.gz
+          rm nodejs.tar.gz
+          ls -la
 
       - name: Deploy AppApi stack
         working-directory: services/infra-cdk
