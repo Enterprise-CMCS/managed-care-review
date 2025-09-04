@@ -628,7 +628,7 @@ jobs:
           STAGE_NAME: ${{ needs.begin-deployment.outputs.stage-name }}
         run: |
           echo "=== Extracting application endpoint from CDK outputs ==="
-          endpoint=$(aws cloudformation list-exports --query "Exports[?Name=='frontend-infra-${STAGE_NAME}-cdk-CloudFrontEndpointUrl'].Value | [0]" --output text)
+          endpoint=$(aws cloudformation list-exports --query "Exports[?Name=='frontend-infra-${STAGE_NAME}-cdk-CloudFrontEndpointUrl'].Value" --output text)
 
           if [ "$endpoint" = "None" ] || [ -z "$endpoint" ]; then
             echo "Error: Could not find application endpoint from CDK outputs"
@@ -644,7 +644,7 @@ jobs:
           STAGE_NAME: ${{ needs.begin-deployment.outputs.stage-name }}
         run: |
           echo "=== Extracting API endpoint from CDK outputs ==="
-          endpoint=$(aws cloudformation list-exports --query "Exports[?Name=='app-api-${STAGE_NAME}-cdk-ApiGatewayUrl'].Value | [0]" --output text)
+          endpoint=$(aws cloudformation list-exports --query "Exports[?Name=='app-api-${STAGE_NAME}-cdk-ApiGatewayUrl'].Value" --output text)
 
           if [ "$endpoint" = "None" ] || [ -z "$endpoint" ]; then
             echo "Error: Could not find API endpoint from CDK outputs"
@@ -660,31 +660,25 @@ jobs:
           STAGE_NAME: ${{ needs.begin-deployment.outputs.stage-name }}
         run: |
           echo "=== Extracting Cognito User Pool ID from CDK outputs ==="
-          echo "Looking for export: cognito-${STAGE_NAME}-cdk-UserPoolId"
-
-          # Debug: List all exports that contain cognito
-          echo "Available cognito-related exports:"
-          aws cloudformation list-exports --query "Exports[?contains(Name, 'cognito')].{Name: Name, Value: Value}" --output table || true
-
-          # Debug: Show the exact stage name we're using
-          echo "Stage name being used: '${STAGE_NAME}'"
-          echo "Full export name being searched: 'cognito-${STAGE_NAME}-cdk-UserPoolId'"
-
-          value=$(aws cloudformation list-exports --query "Exports[?Name=='cognito-${STAGE_NAME}-cdk-UserPoolId'].Value | [0]" --output text)
-
+          echo "Stage name: ${STAGE_NAME}"
+          echo "Looking for: cognito-${STAGE_NAME}-cdk-UserPoolId"
+          
+          # Test the exact query that should work based on your AWS CLI output
+          echo "Testing exact export name: cognito-mtcdkoidc-cdk-UserPoolId"
+          test_value=$(aws cloudformation list-exports --query "Exports[?Name=='cognito-mtcdkoidc-cdk-UserPoolId'].Value" --output text)
+          echo "Direct test result: $test_value"
+          
+          # Now try with the stage variable
+          value=$(aws cloudformation list-exports --query "Exports[?Name=='cognito-${STAGE_NAME}-cdk-UserPoolId'].Value" --output text)
+          echo "Variable test result: $value"
+          
+          # If still None, set to empty string to avoid GitHub Actions format errors
           if [ "$value" = "None" ] || [ -z "$value" ]; then
-            echo "Warning: Could not find Cognito User Pool ID from CDK outputs"
-            echo "Trying to find any cognito UserPoolId export as fallback..."
-            value=$(aws cloudformation list-exports --query "Exports[?contains(Name, 'UserPoolId')].Value | [0]" --output text)
-            if [ "$value" != "None" ] && [ -n "$value" ]; then
-              echo "Found fallback Cognito User Pool ID: $value"
-            else
-              echo "No cognito UserPoolId found, setting empty value"
-              value=""
-            fi
-          else
-            echo "Cognito User Pool ID: $value"
+            echo "Setting empty value to avoid GitHub Actions format error"
+            value=""
           fi
+          
+          echo "Final value: '$value'"
           echo "value=$value" >> "$GITHUB_OUTPUT"
 
       - name: get cognito region
@@ -693,7 +687,7 @@ jobs:
           STAGE_NAME: ${{ needs.begin-deployment.outputs.stage-name }}
         run: |
           echo "=== Extracting Cognito region from CDK outputs ==="
-          value=$(aws cloudformation list-exports --query "Exports[?Name=='cognito-${STAGE_NAME}-cdk-Region'].Value | [0]" --output text)
+          value=$(aws cloudformation list-exports --query "Exports[?Name=='cognito-${STAGE_NAME}-cdk-Region'].Value" --output text)
 
           # Fallback to AWS region if CDK export doesn't exist
           if [ "$value" = "None" ] || [ -z "$value" ]; then
@@ -712,12 +706,12 @@ jobs:
           echo "=== Extracting Cognito Identity Pool ID from CDK outputs ==="
           echo "Looking for export: cognito-${STAGE_NAME}-cdk-IdentityPoolId"
 
-          value=$(aws cloudformation list-exports --query "Exports[?Name=='cognito-${STAGE_NAME}-cdk-IdentityPoolId'].Value | [0]" --output text)
+          value=$(aws cloudformation list-exports --query "Exports[?Name=='cognito-${STAGE_NAME}-cdk-IdentityPoolId'].Value" --output text)
 
           if [ "$value" = "None" ] || [ -z "$value" ]; then
             echo "Warning: Could not find Cognito Identity Pool ID with stage-specific name"
             echo "Trying fallback search for any IdentityPoolId export..."
-            value=$(aws cloudformation list-exports --query "Exports[?contains(Name, 'IdentityPoolId')].Value | [0]" --output text)
+            value=$(aws cloudformation list-exports --query "Exports[?contains(Name, 'IdentityPoolId')].Value" --output text)
             if [ "$value" != "None" ] && [ -n "$value" ]; then
               echo "Found fallback Cognito Identity Pool ID: $value"
             else
@@ -737,12 +731,12 @@ jobs:
           echo "=== Extracting Cognito User Pool Client ID from CDK outputs ==="
           echo "Looking for export: cognito-${STAGE_NAME}-cdk-UserPoolClientId"
 
-          value=$(aws cloudformation list-exports --query "Exports[?Name=='cognito-${STAGE_NAME}-cdk-UserPoolClientId'].Value | [0]" --output text)
+          value=$(aws cloudformation list-exports --query "Exports[?Name=='cognito-${STAGE_NAME}-cdk-UserPoolClientId'].Value" --output text)
 
           if [ "$value" = "None" ] || [ -z "$value" ]; then
             echo "Warning: Could not find Cognito User Pool Client ID with stage-specific name"
             echo "Trying fallback search for any UserPoolClientId export..."
-            value=$(aws cloudformation list-exports --query "Exports[?contains(Name, 'UserPoolClientId')].Value | [0]" --output text)
+            value=$(aws cloudformation list-exports --query "Exports[?contains(Name, 'UserPoolClientId')].Value" --output text)
             if [ "$value" != "None" ] && [ -n "$value" ]; then
               echo "Found fallback Cognito User Pool Client ID: $value"
             else
