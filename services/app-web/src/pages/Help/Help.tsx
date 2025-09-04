@@ -81,17 +81,20 @@ export const Help = (): React.ReactElement => {
                     <ul>
                         <li>
                             This contract includes both Medicaid managed care
-                            and D-SNP requirements
+                            and D-SNP requirements.
                         </li>
                         <li>
                             This contract is with a D-SNP that covers Medicaid
-                            benefits directly, or the contract fulfills a
-                            regulatory requirement under 42 CFR § 422 for a
-                            Highly Integrated Dual Eligible Special Needs Plan
-                            (HIDE D-SNP) (or affiliated legal entity) or a Fully
-                            Integrated Dual Eligible Special Needs Plan (FIDE
-                            D-SNP) entity to also offer a Medicaid managed care
-                            plan
+                            benefits directly. This includes Coordination-Only
+                            (CO) D-SNPs.
+                        </li>
+                        <li>
+                            The contract fulfills a regulatory requirement under
+                            42 CFR § 422 for a Highly Integrated Dual Eligible
+                            Special Needs Plan (HIDE-SNP) (or affiliated legal
+                            entity) or a Fully Integrated Dual Eligible Special
+                            Needs Plan (FIDE-SNP) entity to also offer a
+                            Medicaid managed care plan.
                         </li>
                     </ul>
                 </p>
