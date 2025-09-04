@@ -38,11 +38,11 @@ get_ssm_param() {
 
 echo "=== Fetching CDK Stack Outputs ==="
 
-# CDK export naming: MCR-<Service>-<Stage>-cdk-<OutputName>
-APPAPI_PREFIX="MCR-AppApi-${STAGE_NAME}-cdk"
-COGNITO_PREFIX="MCR-cognito-${STAGE_NAME}-cdk"
-UPLOADS_PREFIX="MCR-uploads-${STAGE_NAME}-cdk"
-FRONTEND_PREFIX="MCR-frontend-infra-${STAGE_NAME}-cdk"
+# CDK export naming: <service>-<stage>-cdk-<OutputName>
+APPAPI_PREFIX="app-api-${STAGE_NAME}-cdk"
+COGNITO_PREFIX="cognito-${STAGE_NAME}-cdk"
+UPLOADS_PREFIX="uploads-${STAGE_NAME}-cdk"
+FRONTEND_PREFIX="frontend-infra-${STAGE_NAME}-cdk"
 
 # Get stack outputs via CloudFormation exports
 echo "Fetching API configuration..."
@@ -98,9 +98,9 @@ if [ ${#missing_vars[@]} -gt 0 ]; then
   printf ' - %s\n' "${missing_vars[@]}"
   echo ""
   echo "Make sure the following CDK stacks are deployed:"
-  echo " - MCR-Cognito-${STAGE_NAME}-cdk"
-  echo " - MCR-uploads-${STAGE_NAME}-cdk"
-  echo " - MCR-AppApi-${STAGE_NAME}-cdk (optional for API_URL)"
+  echo " - cognito-${STAGE_NAME}-cdk"
+  echo " - uploads-${STAGE_NAME}-cdk"
+  echo " - app-api-${STAGE_NAME}-cdk (optional for API_URL)"
   exit 1
 fi
 
