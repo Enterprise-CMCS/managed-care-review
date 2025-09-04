@@ -46,10 +46,11 @@ FRONTEND_PREFIX="frontend-infra-${STAGE_NAME}-cdk"
 
 # Get stack outputs via CloudFormation exports
 echo "Fetching API configuration..."
-API_URL=$(get_stack_export "${APPAPI_PREFIX}-ApiGatewayRestApiUrl" || echo "")
+API_URL=$(get_stack_export "${APPAPI_PREFIX}-ApiGatewayUrl" || echo "")
 if [ -z "$API_URL" ]; then
-  echo "Warning: API_URL not found, using fallback construction"
-  API_URL="https://api-${STAGE_NAME}.mcr.cms.gov"
+  echo "ERROR: Could not find API Gateway URL export: ${APPAPI_PREFIX}-ApiGatewayUrl"
+  echo "Make sure the app-api CDK stack is deployed successfully."
+  exit 1
 fi
 
 echo "Fetching Cognito configuration..."
@@ -67,8 +68,9 @@ S3_DOCUMENTS_BUCKET_REGION=$COGNITO_REGION
 echo "Fetching frontend URL..."
 APPLICATION_ENDPOINT=$(get_stack_export "${FRONTEND_PREFIX}-CloudFrontEndpointUrl" || echo "")
 if [ -z "$APPLICATION_ENDPOINT" ]; then
-  echo "Warning: APPLICATION_ENDPOINT not found, using fallback construction"
-  APPLICATION_ENDPOINT="https://${STAGE_NAME}.mcr.cms.gov"
+  echo "ERROR: Could not find CloudFront endpoint export: ${FRONTEND_PREFIX}-CloudFrontEndpointUrl"
+  echo "Make sure the frontend-infra CDK stack is deployed successfully."
+  exit 1
 fi
 
 echo "=== Fetching Optional SSM Parameters ==="
