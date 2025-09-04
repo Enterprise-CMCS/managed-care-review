@@ -8,13 +8,13 @@
  * authentication in review environments before the full stack deployment.
  *
  * Usage:
- *   pnpm cdk deploy MCR-GitHubOIDC-<stage> --app 'pnpm tsx bin/oidc.ts' --context stage=<stage>
+ *   pnpm cdk deploy github-oidc-<stage>-cdk --app 'pnpm tsx bin/oidc.ts' --context stage=<stage>
  */
 
 import 'source-map-support/register'
 import { App, CliCredentialsStackSynthesizer } from 'aws-cdk-lib'
 import { GitHubOidcServiceRoleStack } from '../lib/stacks/github-oidc-service-role-stack'
-import { getCdkEnvironment, getEnvironment } from '../lib/config'
+import { getCdkEnvironment, getEnvironment, ResourceNames } from '../lib/config'
 
 const app = new App({
     defaultStackSynthesizer: new CliCredentialsStackSynthesizer({
@@ -34,12 +34,16 @@ const env = getCdkEnvironment(stage)
 const config = getEnvironment(stage)
 
 // Create only the GitHub OIDC service role
-new GitHubOidcServiceRoleStack(app, `MCR-GitHubOIDC-${stage}`, {
-    env,
-    stage,
-    stageConfig: config,
-    serviceName: 'github-oidc',
-    description: `GitHub OIDC service role for (${stage})`,
-})
+new GitHubOidcServiceRoleStack(
+    app,
+    ResourceNames.stackName('github-oidc', stage),
+    {
+        env,
+        stage,
+        stageConfig: config,
+        serviceName: 'github-oidc',
+        description: `GitHub OIDC service role for (${stage})`,
+    }
+)
 
 console.info(`OIDC-only CDK app initialized for stage: ${stage}`)

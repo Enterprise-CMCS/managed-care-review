@@ -108,11 +108,11 @@ jobs:
           STAGE_NAME: ${{ needs.begin-deployment.outputs.stage-name }}
         run: |
           echo "Starting CDK OIDC deployment for stage: ${STAGE_NAME}"
-          echo "Stack name will be: GitHubOIDC-${STAGE_NAME}"
+          echo "Stack name will be: github-oidc-${STAGE_NAME}-cdk"
 
           # Deploy using OIDC-only app (no layer dependencies)
           echo "=== Deploying OIDC stack ==="
-          pnpm cdk deploy GitHubOIDC-${STAGE_NAME} \
+          pnpm cdk deploy github-oidc-${STAGE_NAME}-cdk \
             --app 'pnpm tsx bin/oidc.ts' \
             --context stage=${STAGE_NAME} \
             --require-approval never
