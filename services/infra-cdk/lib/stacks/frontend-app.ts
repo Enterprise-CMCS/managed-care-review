@@ -18,20 +18,20 @@ export class FrontendAppStack extends BaseStack {
         })
 
         // Import infrastructure resources from frontend-infra stack using CloudFormation exports
-        const frontendInfraStackName = `MCR-frontend-infra-${props.stage}-cdk`
+        const frontendInfraStackName = `frontend-infra-${props.stage}-cdk`
 
         // Import main app bucket
         const mainAppBucket = Bucket.fromBucketName(
             this,
             'ImportedMainAppBucket',
-            `mcr-cdk-${props.stage}-ui-bucket`
+            Fn.importValue(`${frontendInfraStackName}-S3BucketName`)
         )
 
         // Import storybook bucket
         const storybookBucket = Bucket.fromBucketName(
             this,
             'ImportedStorybookBucket',
-            `mcr-cdk-${props.stage}-storybook-bucket`
+            Fn.importValue(`${frontendInfraStackName}-StorybookS3BucketName`)
         )
 
         // Import main app distribution
