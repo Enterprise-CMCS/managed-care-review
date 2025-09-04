@@ -755,8 +755,8 @@ importers:
         specifier: ^5.0.1
         version: 5.0.1(typescript@5.9.2)(vite@7.0.3(@types/node@24.2.1)(jiti@2.4.2)(sass@1.77.2)(terser@5.44.0)(tsx@4.19.3)(yaml@2.8.1))
       web-vitals:
-        specifier: ^3.0.1
-        version: 3.5.1
+        specifier: ^5.1.0
+        version: 5.1.0
       yup:
         specifier: ^0.32.9
         version: 0.32.11
@@ -13833,8 +13833,8 @@ packages:
     resolution: {integrity: sha512-3pRGuxRF5gpuZc0W+EpwQRmCD7gRqcDOMt688KmdlDAgAyaB1XlN0zq2njfDNm44XVdIouE7pZ6GzbdyH47uIQ==}
     engines: {node: '>= 8'}
 
-  web-vitals@3.5.1:
-    resolution: {integrity: sha512-xQ9lvIpfLxUj0eSmT79ZjRoU5wIRfIr7pNukL7ZE4EcWZSmfZQqOlhuAGfkVa3EFmzPHZhWhXfm2i5ys+THVPg==}
+  web-vitals@5.1.0:
+    resolution: {integrity: sha512-ArI3kx5jI0atlTtmV0fWU3fjpLmq/nD3Zr1iFFlJLaqa5wLBkUSzINwBPySCX/8jRyjlmy1Volw1kz1g9XE4Jg==}
 
   webcrypto-core@1.8.0:
     resolution: {integrity: sha512-kR1UQNH8MD42CYuLzvibfakG5Ew5seG85dMMoAM/1LqvckxaF6pUiidLuraIu4V+YCIFabYecUZAW0TuxAoaqw==}
@@ -32157,7 +32157,7 @@ snapshots:
 
   web-streams-polyfill@3.3.2: {}
 
-  web-vitals@3.5.1: {}
+  web-vitals@5.1.0: {}
 
   webcrypto-core@1.8.0:
     dependencies:
