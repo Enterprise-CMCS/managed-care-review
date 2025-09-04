@@ -1,4 +1,3 @@
-
 import type { RateQuestionType } from '../../domain-models'
 import type { ExtendedPrismaClient } from '../prismaClient'
 import {

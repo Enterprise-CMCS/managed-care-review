@@ -50,6 +50,7 @@ function mockContractQuestions(
                         round: 1,
                         documents: [
                             {
+                                id: 'dmco-question-1-document-1',
                                 s3URL: 's3://bucketname/key/dmco-question-1-document-1',
                                 name: 'dmco-question-1-document-1',
                                 downloadURL: s3DlUrl,
@@ -65,6 +66,7 @@ function mockContractQuestions(
                                 createdAt: new Date('2022-12-16'),
                                 documents: [
                                     {
+                                        id: 'response-to-dmco-1-document-1',
                                         s3URL: 's3://bucketname/key/response-to-dmco-1-document-1',
                                         name: 'response-to-dmco-1-document-1',
                                         downloadURL:s3DlUrl,
@@ -85,11 +87,13 @@ function mockContractQuestions(
                         round: 2,
                         documents: [
                             {
+                                id: 'dmco-question-2-document-1',
                                 s3URL: 's3://bucketname/key/dmco-question-2-document-1',
                                 name: 'dmco-question-2-document-1',
                                 downloadURL: s3DlUrl,
                             },
                             {
+                                id: 'dmco-question-2-document-2',
                                 s3URL: 's3://bucketname/key/question-2-document-2',
                                 name: 'dmco-question-2-document-2',
                                 downloadURL: s3DlUrl,
@@ -117,6 +121,7 @@ function mockContractQuestions(
                         }) as CmsUser,
                         documents: [
                             {
+                                id: 'dmcp-question-1-document-1',
                                 s3URL: 's3://bucketname/key/dmcp-question-1-document-1',
                                 name: 'dmcp-question-1-document-1',
                                 downloadURL: s3DlUrl,
@@ -132,6 +137,7 @@ function mockContractQuestions(
                                 createdAt: new Date('2022-12-16'),
                                 documents: [
                                     {
+                                        id: 'response-to-dmcp-1-document-1',
                                         s3URL: 's3://bucketname/key/response-to-dmcp-1-document-1',
                                         name: 'response-to-dmcp-1-document-1',
                                         downloadURL: s3DlUrl,
@@ -159,6 +165,7 @@ function mockContractQuestions(
                         round: 1,
                         documents: [
                             {
+                                id: 'oact-question-1-document-1',
                                 s3URL: 's3://bucketname/key/oact-question-1-document-1',
                                 name: 'oact-question-1-document-1',
                                 downloadURL: s3DlUrl,
@@ -174,6 +181,7 @@ function mockContractQuestions(
                                 createdAt: new Date('2022-12-17'),
                                 documents: [
                                     {
+                                        id: 'response-to-oact-1-document-1',
                                         s3URL: 's3://bucketname/key/response-to-oact-1-document-1',
                                         name: 'response-to-oact-1-document-1',
                                         downloadURL: s3DlUrl,
@@ -196,6 +204,7 @@ function mockContractQuestions(
                         }) as CmsUser,
                         documents: [
                             {
+                                id: 'oact-question-2-document-1',
                                 s3URL: 's3://bucketname/key/oact-question-1-document-1',
                                 name: 'oact-question-2-document-1',
                                 downloadURL: s3DlUrl,
@@ -211,6 +220,7 @@ function mockContractQuestions(
                                 createdAt: new Date('2022-12-16'),
                                 documents: [
                                     {
+                                        id: 'response-to-oact-2-document-1',
                                         s3URL: 's3://bucketname/key/response-to-oact-1-document-1',
                                         name: 'response-to-oact-2-document-1',
                                         downloadURL: s3DlUrl,

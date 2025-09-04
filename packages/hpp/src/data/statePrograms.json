@@ -1172,6 +1172,30 @@
                     "fullName": "TennCare II",
                     "name": "TennCare Non-Choices",
                     "isRateProgram": true
+                },
+                {
+                    "id": "7d85656a-be9f-47ee-82a5-8e54ffa428cd",
+                    "fullName": "TennCare",
+                    "name": "TennCare",
+                    "isRateProgram": false
+                },
+                {
+                    "id": "a2a04740-03ac-49ce-a832-b75e23118dbe",
+                    "fullName": "TennCare Select",
+                    "name": "TennCare Select",
+                    "isRateProgram": false
+                },
+                {
+                    "id": "2612f4b9-547b-413f-a074-eb0161025f1f",
+                    "fullName": "TennCare Dental Benefits Management",
+                    "name": "DBM",
+                    "isRateProgram": false
+                },
+                {
+                    "id": "5d870783-726c-435a-939d-e839a825a07d",
+                    "fullName": "TennCare Pharmacy",
+                    "name": "TennCare Pharmacy",
+                    "isRateProgram": false
                 }
             ],
             "code": "TN"

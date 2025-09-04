@@ -1,0 +1,43 @@
+fragment contractQuestionFragment on ContractQuestion {
+    id
+    contractID
+    createdAt
+    addedBy {
+        ... on CMSUser {
+            ...cmsUserFragment
+        }
+        ... on CMSApproverUser {
+            ...cmsApproverUserFragment
+        }
+    }
+    division
+    round
+    documents {
+        ...documentFragment
+    }
+    responses {
+        ...questionResponseFragment
+    }
+}
+
+fragment rateQuestionFragment on RateQuestion {
+    id
+    rateID
+    createdAt
+    addedBy {
+        ... on CMSUser {
+            ...cmsUserFragment
+        }
+        ... on CMSApproverUser {
+            ...cmsApproverUserFragment
+        }
+    }
+    division
+    round
+    documents {
+        ...documentFragment
+    }
+    responses {
+        ...questionResponseFragment
+    }
+}

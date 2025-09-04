@@ -6,7 +6,7 @@ import {
     testCMSUser,
     createDBUsersWithFullData,
 } from '../../testHelpers/userHelpers'
-import { testS3Client } from '../../testHelpers/s3Helpers'
+import { testS3Client } from '../../testHelpers'
 import { fetchTestContractWithQuestions } from '../../testHelpers'
 import { createAndSubmitTestContractWithRate } from '../../testHelpers/gqlContractHelpers'
 

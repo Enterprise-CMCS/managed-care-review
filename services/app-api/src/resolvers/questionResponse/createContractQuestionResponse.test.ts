@@ -63,8 +63,10 @@ describe('createContractQuestionResponse', () => {
                         questionID: createdQuestion.id,
                         documents: [
                             {
+                                id: expect.any(String),
                                 name: 'Test Question Response',
                                 s3URL: 's3://bucketname/key/test1',
+                                downloadURL: expect.any(String),
                             },
                         ],
                         addedBy: expect.objectContaining({

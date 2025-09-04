@@ -1314,6 +1314,7 @@ Document represents a document that has been uploaded to S3. It can be retrieved
 by an authenticated user.
 """
 type Document {
+    id: ID
     name: String!
     s3URL: String!
     downloadURL: String
