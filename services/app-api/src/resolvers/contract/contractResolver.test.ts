@@ -147,6 +147,7 @@ describe('contractResolver', () => {
                                 division: 'DMCO',
                                 documents: [
                                     {
+                                        id: expect.any(String),
                                         name: 'Test Question 1',
                                         s3URL: 's3://bucketname/key/test11',
                                         downloadURL: expect.any(String),
@@ -168,6 +169,7 @@ describe('contractResolver', () => {
                                 division: 'DMCP',
                                 documents: [
                                     {
+                                        id: expect.any(String),
                                         name: 'Test Question 2',
                                         s3URL: 's3://bucketname/key/test12',
                                         downloadURL: expect.any(String),
@@ -189,6 +191,7 @@ describe('contractResolver', () => {
                                 division: 'OACT',
                                 documents: [
                                     {
+                                        id: expect.any(String),
                                         name: 'Test Question 3',
                                         s3URL: 's3://bucketname/key/test13',
                                         downloadURL: expect.any(String),

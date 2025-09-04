@@ -8,8 +8,6 @@ fragment questionResponseFragment on QuestionResponse {
         }
     }
     documents {
-        name
-        s3URL
-        downloadURL
+        ...documentFragment
     }
 }

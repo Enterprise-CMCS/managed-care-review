@@ -49,8 +49,10 @@ describe('createRateQuestion', () => {
                 division: 'DMCO',
                 documents: [
                     {
+                        id: expect.any(String),
                         name: 'Test Question',
                         s3URL: 's3://bucketname/key/test1',
+                        downloadURL: expect.any(String),
                     },
                 ],
                 addedBy: cmsUser,
@@ -86,8 +88,10 @@ describe('createRateQuestion', () => {
                 division: 'DMCO',
                 documents: [
                     {
+                        id: expect.any(String),
                         name: 'Test Question',
                         s3URL: 's3://bucketname/key/test1',
+                        downloadURL: expect.any(String),
                     },
                 ],
                 addedBy: cmsUser,
@@ -118,8 +122,10 @@ describe('createRateQuestion', () => {
                 division: 'DMCO',
                 documents: [
                     {
+                        id: expect.any(String),
                         name: 'Test Question 2',
                         s3URL: 's3://bucketname/key/test1',
+                        downloadURL: expect.any(String),
                     },
                 ],
                 addedBy: cmsUser,

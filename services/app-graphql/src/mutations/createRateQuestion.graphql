@@ -1,21 +1,7 @@
 mutation createRateQuestion($input: CreateRateQuestionInput!) {
     createRateQuestion(input: $input) {
         question {
-            id
-            rateID
-            addedBy {
-                ... on CMSUser {
-                    ...cmsUserFragment
-                }
-                ... on CMSApproverUser {
-                    ...cmsApproverUserFragment
-                }
-            }
-            division
-            documents {
-                name
-                s3URL
-            }
+            ...rateQuestionFragment
         }
     }
 }

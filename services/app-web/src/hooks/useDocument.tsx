@@ -1,7 +1,7 @@
 import { useCallback } from 'react'
 import { Document, GenericDocument } from '../gen/gqlClient'
 import { useS3 } from '../contexts/S3Context'
-import { BucketShortName } from '../s3/s3Amplify'
+import { BucketShortName } from '../s3'
 
 type ParsedDocumentWithLinkType =
     | ({ url: string | null } & Document)
