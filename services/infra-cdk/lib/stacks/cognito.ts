@@ -142,6 +142,7 @@ export class CognitoStack extends BaseStack {
                 },
                 authFlows: {
                     adminUserPassword: true,
+                    userSrp: true,
                 },
                 generateSecret: false,
                 supportedIdentityProviders: [
