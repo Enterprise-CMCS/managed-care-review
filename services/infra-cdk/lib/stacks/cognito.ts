@@ -6,6 +6,7 @@ import {
     UserPoolDomain,
     UserPoolIdentityProviderSaml,
     CfnIdentityPool,
+    CfnIdentityPoolRoleAttachment,
     UserPoolClientIdentityProvider,
     StringAttribute,
     UserPoolEmail,
@@ -225,7 +226,13 @@ export class CognitoStack extends BaseStack {
             })
         )
 
-        // Note: CfnIdentityPool role attachment is handled separately
+        // Attach the authenticated role to the Identity Pool
+        new CfnIdentityPoolRoleAttachment(this, 'IdentityPoolRoleAttachment', {
+            identityPoolId: this.identityPool.ref,
+            roles: {
+                authenticated: this.authRole.roleArn,
+            },
+        })
 
         this.createOutputs()
     }
