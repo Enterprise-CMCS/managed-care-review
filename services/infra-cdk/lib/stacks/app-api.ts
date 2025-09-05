@@ -10,6 +10,7 @@ import {
     LambdaIntegration,
     RequestAuthorizer,
     AuthorizationType,
+    ResponseType,
 } from 'aws-cdk-lib/aws-apigateway'
 import {
     PolicyStatement,
@@ -80,6 +81,47 @@ export class AppApiStack extends BaseStack {
                     'x-api-key',
                     'x-amz-security-token',
                 ],
+            },
+        })
+
+        // Add Gateway Responses to ensure CORS headers are included in error responses
+        this.apiGateway.addGatewayResponse('Default4xx', {
+            type: ResponseType.DEFAULT_4XX,
+            responseHeaders: {
+                'Access-Control-Allow-Origin': "'*'",
+                'Access-Control-Allow-Headers':
+                    "'Content-Type,Authorization,x-amzn-trace-id,x-amzn-requestid,x-amz-date,x-api-key,x-amz-security-token'",
+                'Access-Control-Allow-Methods': "'GET,POST,PUT,DELETE,OPTIONS'",
+            },
+        })
+
+        this.apiGateway.addGatewayResponse('Default5xx', {
+            type: ResponseType.DEFAULT_5XX,
+            responseHeaders: {
+                'Access-Control-Allow-Origin': "'*'",
+                'Access-Control-Allow-Headers':
+                    "'Content-Type,Authorization,x-amzn-trace-id,x-amzn-requestid,x-amz-date,x-api-key,x-amz-security-token'",
+                'Access-Control-Allow-Methods': "'GET,POST,PUT,DELETE,OPTIONS'",
+            },
+        })
+
+        this.apiGateway.addGatewayResponse('Unauthorized', {
+            type: ResponseType.UNAUTHORIZED,
+            responseHeaders: {
+                'Access-Control-Allow-Origin': "'*'",
+                'Access-Control-Allow-Headers':
+                    "'Content-Type,Authorization,x-amzn-trace-id,x-amzn-requestid,x-amz-date,x-api-key,x-amz-security-token'",
+                'Access-Control-Allow-Methods': "'GET,POST,PUT,DELETE,OPTIONS'",
+            },
+        })
+
+        this.apiGateway.addGatewayResponse('AccessDenied', {
+            type: ResponseType.ACCESS_DENIED,
+            responseHeaders: {
+                'Access-Control-Allow-Origin': "'*'",
+                'Access-Control-Allow-Headers':
+                    "'Content-Type,Authorization,x-amzn-trace-id,x-amzn-requestid,x-amz-date,x-api-key,x-amz-security-token'",
+                'Access-Control-Allow-Methods': "'GET,POST,PUT,DELETE,OPTIONS'",
             },
         })
 
