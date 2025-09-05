@@ -77,7 +77,7 @@ export const Help = (): React.ReactElement => {
                     Needs Plan (D-SNP) that covers Medicaid benefits?
                 </h4>
                 <p className="line-height-sans-4 measure-6">
-                    Choose ‘Yes’ if either of the following applies:
+                    Choose ‘Yes’ if any of the following apply:
                     <ul>
                         <li>
                             This contract includes both Medicaid managed care
