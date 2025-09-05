@@ -156,11 +156,61 @@ export class AppApiStack extends BaseStack {
             }
         )
 
-        this.otelFunction = this.createFunction('otel', 'otel_proxy', 'main', {
+        // OTEL function needs the ADOT layer and collector.yml file
+        const otelLayer = LayerVersion.fromLayerVersionArn(
+            this,
+            'OtelProxyOtelLayer',
+            AWS_OTEL_LAYER_ARN
+        )
+
+        this.otelFunction = new NodejsFunction(this, 'otelFunction', {
+            functionName: `${ResourceNames.apiName('app-api', this.stage)}-otel`,
+            runtime: Runtime.NODEJS_20_X,
+            architecture: Architecture.X86_64,
+            handler: 'main',
+            entry: path.join(
+                __dirname,
+                '..',
+                '..',
+                '..',
+                'app-api',
+                'src',
+                'handlers',
+                'otel_proxy.ts'
+            ),
             timeout: Duration.seconds(30),
             memorySize: 1024,
             environment,
             role: lambdaRole,
+            layers: [otelLayer],
+            bundling: {
+                commandHooks: {
+                    beforeBundling(
+                        inputDir: string,
+                        outputDir: string
+                    ): string[] {
+                        return [
+                            `echo "CDK OTEL inputDir: ${inputDir}"`,
+                            `find ${inputDir} -name "collector.yml" 2>/dev/null || true`,
+                        ]
+                    },
+                    beforeInstall(): string[] {
+                        return []
+                    },
+                    afterBundling(
+                        inputDir: string,
+                        outputDir: string
+                    ): string[] {
+                        const repoRoot =
+                            '/home/runner/work/managed-care-review/managed-care-review'
+                        const appApiPath = `${repoRoot}/services/app-api`
+                        return [
+                            // Copy collector.yml for OTEL configuration
+                            `cp ${appApiPath}/collector.yml ${outputDir}/collector.yml || echo "collector.yml not found at ${appApiPath}/collector.yml"`,
+                        ]
+                    },
+                },
+            },
         })
 
         this.thirdPartyApiAuthorizerFunction = this.createFunction(
