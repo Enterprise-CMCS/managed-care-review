@@ -5,7 +5,6 @@ import {
     Fieldset,
     FormGroup,
     Label,
-    Link,
 } from '@trussworks/react-uswds'
 import classnames from 'classnames'
 import {
@@ -26,7 +25,6 @@ import {
     ACCEPTED_RATE_CERTIFICATION_FILE_TYPES,
 } from '../../../components/FileUpload'
 import { useS3 } from '../../../contexts/S3Context'
-import { RateMedicaidPopulationsRecord } from '@mc-review/hpp'
 
 import {
     FieldArray,
@@ -283,7 +281,9 @@ export const SingleRateFormFields = ({
                         </div>
                         <LinkWithLogging
                             aria-label="Medicaid Managed Care Rate Development Guide (opens in new window)"
-                            href={'https://www.medicaid.gov/medicaid/managed-care/guidance/rate-review-and-rate-guides'}
+                            href={
+                                'https://www.medicaid.gov/medicaid/managed-care/guidance/rate-review-and-rate-guides'
+                            }
                             variant="external"
                             target="_blank"
                         >
@@ -302,9 +302,7 @@ export const SingleRateFormFields = ({
                         <FieldCheckbox
                             id={`${fieldNamePrefix}.withDSNP`}
                             name={`${fieldNamePrefix}.rateMedicaidPopulations`}
-                            label={
-                                RateMedicaidPopulationsRecord.MEDICARE_MEDICAID_WITH_DSNP
-                            }
+                            label="Medicare-Medicaid dually eligible individuals enrolled through a Dual-Eligible Special Needs Plan (D-SNP)"
                             value="MEDICARE_MEDICAID_WITH_DSNP"
                             heading="Which Medicaid populations are included in this rate certification"
                             parent_component_heading={formHeading}
@@ -312,7 +310,7 @@ export const SingleRateFormFields = ({
                         <FieldCheckbox
                             id={`${fieldNamePrefix}.medicaidOnly`}
                             name={`${fieldNamePrefix}.rateMedicaidPopulations`}
-                            label={RateMedicaidPopulationsRecord.MEDICAID_ONLY}
+                            label="Medicaid-only"
                             value="MEDICAID_ONLY"
                             heading="Which Medicaid populations are included in this rate certification"
                             parent_component_heading={formHeading}
@@ -324,14 +322,9 @@ export const SingleRateFormFields = ({
                                 <span>
                                     Medicare-Medicaid dually eligible
                                     individuals{' '}
-                                    <span style={{ fontWeight: 600 }}>
-                                        not
-                                    </span>{' '}
+                                    <span style={{ fontWeight: 600 }}>not</span>{' '}
                                     enrolled through a D-SNP
                                 </span>
-                            }
-                            tealiumLabel={
-                                RateMedicaidPopulationsRecord.MEDICARE_MEDICAID_WITHOUT_DSNP
                             }
                             value="MEDICARE_MEDICAID_WITHOUT_DSNP"
                             heading="Which Medicaid populations are included in this rate certification"
