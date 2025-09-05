@@ -668,8 +668,8 @@ importers:
         specifier: ^1.30.0
         version: 1.30.0
       '@tanstack/react-table':
-        specifier: ^8.20.5
-        version: 8.20.5(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
+        specifier: ^8.21.3
+        version: 8.21.3(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       '@trussworks/react-uswds':
         specifier: ^4.0.0
         version: 4.2.1(@uswds/uswds@3.1.0)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
@@ -6450,15 +6450,15 @@ packages:
     peerDependencies:
       '@svgr/core': '*'
 
-  '@tanstack/react-table@8.20.5':
-    resolution: {integrity: sha512-WEHopKw3znbUZ61s9i0+i9g8drmDo6asTWbrQh8Us63DAk/M0FkmIqERew6P71HI75ksZ2Pxyuf4vvKh9rAkiA==}
+  '@tanstack/react-table@8.21.3':
+    resolution: {integrity: sha512-5nNMTSETP4ykGegmVkhjcS8tTLW6Vl4axfEGQN3v0zdHYbK4UfoqfPChclTrJ4EoK9QynqAu9oUf8VEmrpZ5Ww==}
     engines: {node: '>=12'}
     peerDependencies:
       react: '>=16.8'
       react-dom: '>=16.8'
 
-  '@tanstack/table-core@8.20.5':
-    resolution: {integrity: sha512-P9dF7XbibHph2PFRz8gfBKEXEY/HJPOhym8CHmjF8y3q5mWpKx9xtZapXQUWCgkqvsK0R46Azuz+VaxD4Xl+Tg==}
+  '@tanstack/table-core@8.21.3':
+    resolution: {integrity: sha512-ldZXEhOBb8Is7xLs01fR3YEc3DERiz5silj8tnGkFZytt1abEvl/GhUmCE0PMLaMPTa3Jk4HbKmRlHmu+gCftg==}
     engines: {node: '>=12'}
 
   '@testing-library/cypress@10.0.1':
@@ -9287,6 +9287,10 @@ packages:
 
   flow-parser@0.280.0:
     resolution: {integrity: sha512-BblDQXb41t9gwFHJNR8EhLdS/9fqK/mCBZLRHiUccA2V1VoYIKuutglO/TAuJfUU3tolQlvMaW1S/KbRDR0rNQ==}
+    engines: {node: '>=0.4.0'}
+
+  flow-parser@0.281.0:
+    resolution: {integrity: sha512-T97TugUp9nRqpkTTHhdOQWGKCpt5Ym49Cn6HVLJib6kn47jv3KZAXtyFWnQm51E+VFigUIcH7EyRFQKUeTWwYQ==}
     engines: {node: '>=0.4.0'}
 
   fn.name@1.1.0:
@@ -23021,13 +23025,13 @@ snapshots:
     transitivePeerDependencies:
       - supports-color
 
-  '@tanstack/react-table@8.20.5(react-dom@18.3.1(react@18.3.1))(react@18.3.1)':
+  '@tanstack/react-table@8.21.3(react-dom@18.3.1(react@18.3.1))(react@18.3.1)':
     dependencies:
-      '@tanstack/table-core': 8.20.5
+      '@tanstack/table-core': 8.21.3
       react: 18.3.1
       react-dom: 18.3.1(react@18.3.1)
 
-  '@tanstack/table-core@8.20.5': {}
+  '@tanstack/table-core@8.21.3': {}
 
   '@testing-library/cypress@10.0.1(cypress@13.13.2)':
     dependencies:
@@ -26791,6 +26795,8 @@ snapshots:
 
   flow-parser@0.280.0: {}
 
+  flow-parser@0.281.0: {}
+
   fn.name@1.1.0: {}
 
   follow-redirects@1.15.9: {}
@@ -28217,7 +28223,7 @@ snapshots:
       '@babel/register': 7.28.3(@babel/core@7.28.3)
       babel-core: 7.0.0-bridge.0(@babel/core@7.28.3)
       chalk: 4.1.2
-      flow-parser: 0.280.0
+      flow-parser: 0.281.0
       graceful-fs: 4.2.11
       micromatch: 4.0.8
       neo-async: 2.6.2
