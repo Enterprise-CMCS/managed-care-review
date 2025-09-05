@@ -362,7 +362,7 @@ describe('RateDetailsSummarySection', () => {
             ).toBeInTheDocument()
             expect(
                 screen.getByTestId(
-                    'Medicare-Medicaid dually eligible individuals enrolled through a Dual-Eligible Special Needs Plan (D-SNP)'
+                    'Medicare-Medicaid dual eligibles enrolled through a D-SNP (on summary page)'
                 )
             ).toBeInTheDocument()
             expect(screen.getByTestId('Medicaid-only')).toBeInTheDocument()
