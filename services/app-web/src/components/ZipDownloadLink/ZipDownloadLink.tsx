@@ -27,16 +27,7 @@ export const ZipDownloadLink = ({
         type === 'CONTRACT'
             ? getContractZipDownloadUrl(documentZipPackages)
             : getRateZipDownloadUrl(documentZipPackages)
-    const className = (type: string) => {
-        switch (type) {
-            case 'CONTRACT':
-                return styles.contract
-            case 'RATE':
-                return styles.rate
-            case 'SINGLE-RATE':
-                return styles.singleRate
-        }
-    }
+
     if (!zippedFilesURL) {
         if (onDocumentError) {
             onDocumentError(true)
@@ -49,17 +40,13 @@ export const ZipDownloadLink = ({
     }
 
     return (
-        <LinkWithLogging
-            variant="unstyled"
-            href={zippedFilesURL}
-            target="_blank"
-        >
-            <p className={className(type)} data-testid="zipDownloadLink">
+        <LinkWithLogging href={zippedFilesURL} target="_blank">
+            <span data-testid="zipDownloadLink">
                 <Icon.FileDownload className={styles.downloadIcon} />
                 Download {`${contractOrRate}`} documents{' '}
                 {documentCount &&
                     `(${documentCount} file${documentCount > 1 ? 's' : ''})`}
-            </p>
+            </span>
         </LinkWithLogging>
     )
 }
