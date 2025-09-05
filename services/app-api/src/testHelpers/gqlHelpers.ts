@@ -1,34 +1,34 @@
 import { ApolloServer } from '@apollo/server'
 import {
-    extractGraphQLResponse,
     executeGraphQLOperation,
+    extractGraphQLResponse,
 } from './apolloV4ResponseHelper'
 import type { ContractQuestion, RateQuestion } from '../gen/gqlClient'
 import {
+    CreateContractQuestionDocument,
+    CreateContractQuestionResponseDocument,
     CreateHealthPlanPackageDocument,
+    CreateRateQuestionDocument,
+    CreateRateQuestionResponseDocument,
+    FetchHealthPlanPackageDocument,
     SubmitHealthPlanPackageDocument,
     UnlockHealthPlanPackageDocument,
-    FetchHealthPlanPackageDocument,
-    UpdateStateAssignmentsByStateDocument,
-    CreateRateQuestionResponseDocument,
     UpdateHealthPlanFormDataDocument,
-    CreateRateQuestionDocument,
-    CreateContractQuestionResponseDocument,
-    CreateContractQuestionDocument,
+    UpdateStateAssignmentsByStateDocument,
 } from '../gen/gqlClient'
 import typeDefs from 'app-graphql/src/schema.graphql'
 import type {
     HealthPlanFormDataType,
-    UnlockedHealthPlanFormDataType,
     StateCodeType,
+    UnlockedHealthPlanFormDataType,
 } from '@mc-review/hpp'
+import { domainToBase64 } from '@mc-review/hpp'
 import type {
     CreateContractQuestionInput,
-    InsertQuestionResponseArgs,
-    ProgramType,
     CreateRateQuestionInputType,
     EmailSettingsType,
-    UserType,
+    InsertQuestionResponseArgs,
+    ProgramType,
 } from '../domain-models'
 import type { EmailConfiguration, Emailer } from '../emailer'
 import type {
@@ -38,23 +38,21 @@ import type {
 } from '../gen/gqlServer'
 import type { Context } from '../handlers/apollo_gql'
 import type { Store } from '../postgres'
-import { NewPostgresStore } from '../postgres'
+import { findStatePrograms, NewPostgresStore } from '../postgres'
 import { configureResolvers } from '../resolvers'
 import { latestFormData } from './healthPlanPackageHelpers'
 import { sharedTestPrismaClient } from './storeHelpers'
-import { domainToBase64 } from '@mc-review/hpp'
 import {
-    newLocalEmailParameterStore,
     type EmailParameterStore,
+    newLocalEmailParameterStore,
 } from '../parameterStore'
 import { testLDService } from './launchDarklyHelpers'
 import type { LDService } from '../launchDarkly/launchDarkly'
 import { insertUserToLocalAurora } from '../authn'
 import { testStateUser } from './userHelpers'
-import { findStatePrograms } from '../postgres'
 import { must } from './assertionHelpers'
-import { newJWTLib } from '../jwt'
 import type { JWTLib } from '../jwt'
+import { newJWTLib } from '../jwt'
 import { testS3Client } from './s3Helpers'
 import type { S3ClientT } from '../s3'
 import { convertRateInfoToRateFormDataInput } from '../domain-models/contractAndRates/convertHPPtoContractWithRates'
@@ -70,8 +68,7 @@ import {
 // Since our programs are checked into source code, we have a program we
 // use as our default
 function defaultFloridaProgram(): ProgramType {
-    const program = must(findStatePrograms('FL'))[0]
-    return program
+    return must(findStatePrograms('FL'))[0]
 }
 
 function defaultFloridaRateProgram(): ProgramType {
@@ -87,30 +84,10 @@ function defaultFloridaRateProgram(): ProgramType {
     return rateProgram
 }
 
-// Store the default user and context instance to ensure consistency across operations
-let defaultTestUser: UserType | null = null
-let defaultTestContext: Context | null = null
-
-const getOrCreateDefaultUser = (): UserType => {
-    if (!defaultTestUser) {
-        defaultTestUser = testStateUser()
-    }
-    return defaultTestUser
-}
-
 const defaultContext = (): Context => {
-    if (!defaultTestContext) {
-        defaultTestContext = {
-            user: getOrCreateDefaultUser(),
-        }
+    return {
+        user: testStateUser(),
     }
-    return defaultTestContext
-}
-
-// Reset function for tests to ensure clean state
-export const resetDefaultTestUser = (): void => {
-    defaultTestUser = null
-    defaultTestContext = null
 }
 
 const constructTestPostgresServer = async (opts?: {
@@ -124,7 +101,7 @@ const constructTestPostgresServer = async (opts?: {
     documentZip?: DocumentZipService
 }): Promise<ApolloServer> => {
     // set defaults
-    const userForInsertion = opts?.context?.user || getOrCreateDefaultUser()
+    const context = opts?.context || defaultContext()
     const ldService = opts?.ldService || testLDService()
     const prismaClient = await sharedTestPrismaClient()
     const postgresStore = {
@@ -140,10 +117,10 @@ const constructTestPostgresServer = async (opts?: {
         })
 
     const localDocumentZip =
-        opts?.documentZip ||
+        opts?.documentZip ??
         documentZipService(postgresStore, localGenerateDocumentZip)
 
-    await insertUserToLocalAurora(postgresStore, userForInsertion)
+    await insertUserToLocalAurora(postgresStore, context.user)
     const s3TestClient = testS3Client()
     const s3 = opts?.s3Client || s3TestClient
 
@@ -197,10 +174,7 @@ const constructTestPostgresServer = async (opts?: {
             const [request, restOptions = {}] = args
 
             if (!restOptions.contextValue) {
-                restOptions.contextValue = {
-                    user: userForInsertion,
-                    ...opts?.context,
-                }
+                restOptions.contextValue = context
             }
 
             return server.executeOperation(request, restOptions)
