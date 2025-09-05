@@ -547,7 +547,7 @@ jobs:
         run: |
           cd scripts
           pnpm tsc
-          node ./add_cypress_test_users.js $STAGE_NAME $TEST_USERS_PASS
+          node ./add_cypress_test_users_cdk.js $STAGE_NAME $TEST_USERS_PASS
 
       - name: Create logical database
         env:

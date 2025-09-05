@@ -33,6 +33,7 @@ import { SubnetType, SecurityGroup, Vpc } from 'aws-cdk-lib/aws-ec2'
 import { Rule, Schedule } from 'aws-cdk-lib/aws-events'
 import { LambdaFunction } from 'aws-cdk-lib/aws-events-targets'
 import { AWS_OTEL_LAYER_ARN } from './lambda-layers'
+import { ApiEndpoint } from '../constructs/api/api-endpoint'
 import path from 'path'
 
 /**
@@ -673,9 +674,13 @@ export class AppApiStack extends BaseStack {
             }
         )
 
-        // OTEL endpoint
-        const otelResource = apiGateway.root.addResource('otel')
-        otelResource.addMethod('POST', new LambdaIntegration(this.otelFunction))
+        // OTEL endpoint with CORS support
+        const otelResource = this.apiGateway.root.addResource('otel')
+        new ApiEndpoint(this, 'otel', {
+            resource: otelResource,
+            method: 'POST',
+            handler: this.otelFunction,
+        })
 
         // OAuth token endpoint
         const oauthResource = apiGateway.root.addResource('oauth')
