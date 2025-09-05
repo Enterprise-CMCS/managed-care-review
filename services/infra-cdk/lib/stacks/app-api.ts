@@ -71,7 +71,15 @@ export class AppApiStack extends BaseStack {
             defaultCorsPreflightOptions: {
                 allowOrigins: ['*'],
                 allowMethods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-                allowHeaders: ['Content-Type', 'Authorization'],
+                allowHeaders: [
+                    'Content-Type',
+                    'Authorization',
+                    'x-amzn-trace-id',
+                    'x-amzn-requestid',
+                    'x-amz-date',
+                    'x-api-key',
+                    'x-amz-security-token',
+                ],
             },
         })
 
@@ -690,24 +698,20 @@ export class AppApiStack extends BaseStack {
             new LambdaIntegration(this.oauthTokenFunction)
         )
 
-        // GraphQL endpoints with IAM authorization
-        const graphqlResource = apiGateway.root.addResource('graphql')
-        graphqlResource.addMethod(
-            'POST',
-            new LambdaIntegration(this.graphqlFunction),
-            {
-                authorizationType: AuthorizationType.IAM,
-                methodResponses: [{ statusCode: '200' }],
-            }
-        )
-        graphqlResource.addMethod(
-            'GET',
-            new LambdaIntegration(this.graphqlFunction),
-            {
-                authorizationType: AuthorizationType.IAM,
-                methodResponses: [{ statusCode: '200' }],
-            }
-        )
+        // GraphQL endpoints with IAM authorization and CORS
+        const graphqlResource = this.apiGateway.root.addResource('graphql')
+        new ApiEndpoint(this, 'graphql-post', {
+            resource: graphqlResource,
+            method: 'POST',
+            handler: this.graphqlFunction,
+            authorizationType: AuthorizationType.IAM,
+        })
+        new ApiEndpoint(this, 'graphql-get', {
+            resource: graphqlResource,
+            method: 'GET',
+            handler: this.graphqlFunction,
+            authorizationType: AuthorizationType.IAM,
+        })
 
         // External GraphQL with custom authorizer
         const customAuthorizer = new RequestAuthorizer(
@@ -720,25 +724,21 @@ export class AppApiStack extends BaseStack {
             }
         )
 
-        const v1Resource = apiGateway.root.addResource('v1')
+        const v1Resource = this.apiGateway.root.addResource('v1')
         const v1GraphqlResource = v1Resource.addResource('graphql')
         const externalResource = v1GraphqlResource.addResource('external')
-        externalResource.addMethod(
-            'POST',
-            new LambdaIntegration(this.graphqlFunction),
-            {
-                authorizer: customAuthorizer,
-                methodResponses: [{ statusCode: '200' }],
-            }
-        )
-        externalResource.addMethod(
-            'GET',
-            new LambdaIntegration(this.graphqlFunction),
-            {
-                authorizer: customAuthorizer,
-                methodResponses: [{ statusCode: '200' }],
-            }
-        )
+        new ApiEndpoint(this, 'external-graphql-post', {
+            resource: externalResource,
+            method: 'POST',
+            handler: this.graphqlFunction,
+            authorizer: customAuthorizer,
+        })
+        new ApiEndpoint(this, 'external-graphql-get', {
+            resource: externalResource,
+            method: 'GET',
+            handler: this.graphqlFunction,
+            authorizer: customAuthorizer,
+        })
 
         // Deployment and stage are automatically handled by RestApi construct
     }
