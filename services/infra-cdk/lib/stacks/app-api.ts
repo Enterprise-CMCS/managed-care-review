@@ -544,9 +544,9 @@ export class AppApiStack extends BaseStack {
                         return [
                             // Copy collector.yml for OTEL configuration
                             `cp ${appApiPath}/collector.yml ${outputDir}/collector.yml || echo "collector.yml not found at ${appApiPath}/collector.yml"`,
-                            // Copy eta templates for email functionality
-                            `mkdir -p ${outputDir}/src/handlers/etaTemplates || true`,
-                            `cp -r ${appApiPath}/src/emailer/etaTemplates/* ${outputDir}/src/handlers/etaTemplates/ || echo "etaTemplates not found at ${appApiPath}/src/emailer/etaTemplates/"`,
+                            // Copy eta templates for email functionality to correct location
+                            `mkdir -p ${outputDir}/etaTemplates || true`,
+                            `cp -r ${appApiPath}/src/emailer/etaTemplates/* ${outputDir}/etaTemplates/ || echo "etaTemplates not found at ${appApiPath}/src/emailer/etaTemplates/"`,
                         ]
                     },
                 },
@@ -760,6 +760,7 @@ export class AppApiStack extends BaseStack {
             JWT_SECRET: jwtSecret,
             VITE_APP_S3_QA_BUCKET: qaUploadsBucketName,
             VITE_APP_S3_DOCUMENTS_BUCKET: documentUploadsBucketName,
+            VITE_APP_S3_REGION: this.region,
         }
     }
 
