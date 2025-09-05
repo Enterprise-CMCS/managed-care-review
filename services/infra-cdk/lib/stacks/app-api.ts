@@ -731,12 +731,14 @@ export class AppApiStack extends BaseStack {
             resource: externalResource,
             method: 'POST',
             handler: this.graphqlFunction,
+            authorizationType: AuthorizationType.CUSTOM,
             authorizer: customAuthorizer,
         })
         new ApiEndpoint(this, 'external-graphql-get', {
             resource: externalResource,
             method: 'GET',
             handler: this.graphqlFunction,
+            authorizationType: AuthorizationType.CUSTOM,
             authorizer: customAuthorizer,
         })
 
