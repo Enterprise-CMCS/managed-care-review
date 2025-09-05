@@ -6,8 +6,8 @@ import {
 } from '../attributeHelper'
 import { isStateUser } from '../../domain-models'
 import { logError } from '../../logger'
-import { ForbiddenError, UserInputError } from 'apollo-server-lambda'
-import { NotFoundError } from '../../postgres'
+import { createForbiddenError, createUserInputError } from '../errorUtils'
+import { NotFoundError } from '../../postgres/postgresErrors'
 import { GraphQLError } from 'graphql/index'
 import type { LDService } from '../../launchDarkly/launchDarkly'
 import { generateRateCertificationName } from './generateRateCertificationName'
@@ -55,9 +55,7 @@ export function submitRate(
         if (!featureFlags?.['rate-edit-unlock']) {
             const errMessage = `Not authorized to edit and submit a rate independently, the feature is disabled`
             logError('submitRate', errMessage)
-            throw new ForbiddenError(errMessage, {
-                message: errMessage,
-            })
+            throw createForbiddenError(errMessage)
         }
 
         // This resolver is only callable by State users
@@ -65,7 +63,7 @@ export function submitRate(
             const errMessage = 'user not authorized to submit rate'
             logError('submitRate', errMessage)
             setErrorAttributesOnActiveSpan(errMessage, span)
-            throw new ForbiddenError(errMessage)
+            throw createForbiddenError(errMessage)
         }
 
         // find the rate to submit
@@ -76,9 +74,7 @@ export function submitRate(
                 const errMessage = `A rate must exist to be submitted: ${rateID}`
                 logError('submitRate', errMessage)
                 setErrorAttributesOnActiveSpan(errMessage, span)
-                throw new UserInputError(errMessage, {
-                    argumentName: 'rateID',
-                })
+                throw createUserInputError(errMessage, 'rateID')
             }
 
             logError('submitRate', unsubmittedRate.message)
@@ -97,10 +93,7 @@ export function submitRate(
             const errMessage = `Attempted to submit a rate with invalid status: ${unsubmittedRate.consolidatedStatus}`
             logError('submitRate', errMessage)
             setErrorAttributesOnActiveSpan(errMessage, span)
-            throw new UserInputError(errMessage, {
-                argumentName: 'rateID',
-                cause: 'INVALID_PACKAGE_STATUS',
-            })
+            throw createUserInputError(errMessage, 'rateID')
         }
 
         const draftRateRevision = unsubmittedRate.draftRevision

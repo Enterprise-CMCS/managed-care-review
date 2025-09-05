@@ -1,4 +1,4 @@
-import type { ApolloServer } from 'apollo-server-lambda'
+import type { ApolloServer } from '@apollo/server'
 import type {
     EmailConfiguration,
     FetchMcReviewSettingsPayload,
@@ -8,12 +8,14 @@ import {
     UpdateEmailSettingsDocument,
     FetchMcReviewSettingsDocument,
 } from '../gen/gqlClient'
+import { executeGraphQLOperation } from './gqlHelpers'
+import type { Context } from '../handlers/apollo_gql'
 
 const updateTestEmailSettings = async (
     server: ApolloServer,
     emailConfiguration: EmailConfiguration
 ): Promise<UpdateEmailSettingsPayload> => {
-    const updateEmailConfig = await server.executeOperation({
+    const updateEmailConfig = await executeGraphQLOperation(server, {
         query: UpdateEmailSettingsDocument,
         variables: {
             input: {
@@ -25,14 +27,11 @@ const updateTestEmailSettings = async (
     if (updateEmailConfig.errors) {
         console.info('errors', updateEmailConfig.errors)
         throw new Error(
-            `updateTestEmailSettings mutation failed with errors ${updateEmailConfig.errors}`
+            `updateTestEmailSettings mutation failed with errors ${JSON.stringify(updateEmailConfig.errors)}`
         )
     }
 
-    if (
-        updateEmailConfig.data === undefined ||
-        updateEmailConfig.data === null
-    ) {
+    if (!updateEmailConfig.data.updateEmailSettings) {
         throw new Error('updateTestEmailSettings returned nothing')
     }
 
@@ -40,23 +39,21 @@ const updateTestEmailSettings = async (
 }
 
 const fetchTestMcReviewSettings = async (
-    server: ApolloServer
+    server: ApolloServer,
+    context?: Context
 ): Promise<FetchMcReviewSettingsPayload> => {
-    const fetchMcReviewSettings = await server.executeOperation({
+    const fetchMcReviewSettings = await executeGraphQLOperation(server, {
         query: FetchMcReviewSettingsDocument,
     })
 
     if (fetchMcReviewSettings.errors) {
         console.info('errors', fetchMcReviewSettings.errors)
         throw new Error(
-            `fetchTestMcReviewSettings query failed with errors ${fetchMcReviewSettings.errors}`
+            `fetchTestMcReviewSettings query failed with errors ${JSON.stringify(fetchMcReviewSettings.errors)}`
         )
     }
 
-    if (
-        fetchMcReviewSettings.data === undefined ||
-        fetchMcReviewSettings.data === null
-    ) {
+    if (!fetchMcReviewSettings.data.fetchMcReviewSettings) {
         throw new Error('fetchTestMcReviewSettings returned nothing')
     }
 

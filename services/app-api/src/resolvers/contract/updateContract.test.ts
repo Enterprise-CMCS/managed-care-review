@@ -1,5 +1,8 @@
 import { UpdateContractDocument } from '../../gen/gqlClient'
-import { constructTestPostgresServer } from '../../testHelpers/gqlHelpers'
+import {
+    constructTestPostgresServer,
+    executeGraphQLOperation,
+} from '../../testHelpers/gqlHelpers'
 import { iterableCmsUsersMockData } from '../../testHelpers/userHelpers'
 import {
     createAndSubmitTestContractWithRate,
@@ -24,7 +27,7 @@ describe('updateContract', () => {
                 })
 
                 // Update
-                const updateResult = await cmsServer.executeOperation({
+                const updateResult = await executeGraphQLOperation(cmsServer, {
                     query: UpdateContractDocument,
                     variables: {
                         input: {
@@ -39,15 +42,17 @@ describe('updateContract', () => {
                 expect(updatedSub.mccrsID).toBe('1234')
 
                 // Remove MCCRSID number
-                const updateResultWithNoMCCRSID =
-                    await cmsServer.executeOperation({
+                const updateResultWithNoMCCRSID = await executeGraphQLOperation(
+                    cmsServer,
+                    {
                         query: UpdateContractDocument,
                         variables: {
                             input: {
                                 id: contract.id,
                             },
                         },
-                    })
+                    }
+                )
 
                 expect(updateResult.errors).toBeUndefined()
                 const updatedSubWithNoMCCRSID =
@@ -68,7 +73,7 @@ describe('updateContract', () => {
                 })
 
                 // Attempt update
-                const updateResult = await cmsServer.executeOperation({
+                const updateResult = await executeGraphQLOperation(cmsServer, {
                     query: UpdateContractDocument,
                     variables: {
                         input: {
@@ -97,15 +102,18 @@ describe('updateContract', () => {
                 const contract =
                     await createAndSubmitTestContractWithRate(stateServer)
                 // Update
-                const updateResult = await stateServer.executeOperation({
-                    query: UpdateContractDocument,
-                    variables: {
-                        input: {
-                            id: contract.id,
-                            mccrsID: '1234',
+                const updateResult = await executeGraphQLOperation(
+                    stateServer,
+                    {
+                        query: UpdateContractDocument,
+                        variables: {
+                            input: {
+                                id: contract.id,
+                                mccrsID: '1234',
+                            },
                         },
-                    },
-                })
+                    }
+                )
                 expect(updateResult.errors).toBeDefined()
                 if (updateResult.errors === undefined) {
                     throw new Error('type narrow')

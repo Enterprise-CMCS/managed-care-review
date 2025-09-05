@@ -10,7 +10,11 @@ import {
     IndexRatesStrippedDocument,
 } from '../gen/gqlClient'
 import { must } from './assertionHelpers'
-import { defaultFloridaProgram, defaultFloridaRateProgram } from './gqlHelpers'
+import {
+    defaultFloridaProgram,
+    defaultFloridaRateProgram,
+    executeGraphQLOperation,
+} from './gqlHelpers'
 import { mockRateFormDataInput } from './rateDataMocks'
 import { sharedTestPrismaClient } from './storeHelpers'
 import { updateDraftRate } from '../postgres/contractAndRates/updateDraftRate'
@@ -24,7 +28,7 @@ import type {
     UpdateDraftContractRatesInput,
     Rate,
 } from '../gen/gqlServer'
-import type { ApolloServer } from 'apollo-server-lambda'
+import type { ApolloServer } from '@apollo/server'
 import type {
     RateFormEditableType,
     RateType,
@@ -37,18 +41,18 @@ const fetchTestRateById = async (
     rateID: string
 ): Promise<Rate> => {
     const input = { rateID }
-    const result = await server.executeOperation({
+    const result = await executeGraphQLOperation(server, {
         query: FetchRateDocument,
         variables: { input },
     })
 
     if (result.errors) {
         throw new Error(
-            `fetchTestRateById query failed with errors ${result.errors}`
+            `fetchTestRateById query failed with errors ${JSON.stringify(result.errors)}`
         )
     }
 
-    if (!result.data) {
+    if (!result.data.fetchRate.rate) {
         throw new Error('fetchTestRateById returned nothing')
     }
 
@@ -60,18 +64,18 @@ const fetchTestRateWithQuestionsById = async (
     rateID: string
 ): Promise<Rate> => {
     const input = { rateID }
-    const result = await server.executeOperation({
+    const result = await executeGraphQLOperation(server, {
         query: FetchRateWithQuestionsDocument,
         variables: { input },
     })
 
     if (result.errors) {
         throw new Error(
-            `fetchTestRateWithQuestionsById query failed with errors ${result.errors}`
+            `fetchTestRateWithQuestionsById query failed with errors ${JSON.stringify(result.errors)}`
         )
     }
 
-    if (!result.data) {
+    if (!result.data.fetchRate.rate) {
         throw new Error('fetchTestRateWithQuestionsById returned nothing')
     }
 
@@ -97,7 +101,7 @@ const submitTestRate = async (
     rateID: string,
     submittedReason: string
 ): Promise<Rate> => {
-    const updateResult = await server.executeOperation({
+    const updateResult = await executeGraphQLOperation(server, {
         query: SubmitRateDocument,
         variables: {
             input: {
@@ -114,7 +118,7 @@ const submitTestRate = async (
         )
     }
 
-    if (updateResult.data === undefined || updateResult.data === null) {
+    if (!updateResult.data.submitRate.rate) {
         throw new Error('submitTestRate returned nothing')
     }
 
@@ -126,7 +130,7 @@ const unlockTestRate = async (
     rateID: string,
     unlockedReason: string
 ) => {
-    const updateResult = await server.executeOperation({
+    const updateResult = await executeGraphQLOperation(server, {
         query: UnlockRateDocument,
         variables: {
             input: {
@@ -143,7 +147,7 @@ const unlockTestRate = async (
         )
     }
 
-    if (updateResult.data === undefined || updateResult.data === null) {
+    if (!updateResult.data.unlockRate.rate) {
         throw new Error('unlockTestRate returned nothing')
     }
 
@@ -154,14 +158,17 @@ async function updateTestDraftRatesOnContract(
     server: ApolloServer,
     input: UpdateDraftContractRatesInput
 ): Promise<Contract> {
-    const updateResult = await server.executeOperation({
+    const updateResult = await executeGraphQLOperation(server, {
         query: UpdateDraftContractRatesDocument,
         variables: {
             input,
         },
     })
 
-    if (updateResult.errors || !updateResult.data) {
+    if (
+        updateResult.errors ||
+        !updateResult.data.updateDraftContractRates.contract
+    ) {
         throw new Error(
             `updateDraftContractRates mutation failed with errors ${updateResult.errors}`
         )
@@ -383,7 +390,7 @@ const createTestDraftRateOnContract = async (
         rateData = mockRateFormDataInput()
     }
 
-    const updateResult = await server.executeOperation({
+    const updateResult = await executeGraphQLOperation(server, {
         query: UpdateDraftContractRatesDocument,
         variables: {
             input: {
@@ -399,7 +406,10 @@ const createTestDraftRateOnContract = async (
         },
     })
 
-    if (updateResult.errors || !updateResult.data) {
+    if (
+        updateResult.errors ||
+        !updateResult.data.updateDraftContractRates.contract
+    ) {
         console.info('errors', updateResult.errors)
         throw new Error(
             `updateDraftContractRates mutation failed with errors ${updateResult.errors}`
@@ -420,7 +430,7 @@ const updateTestDraftRateOnContract = async (
         rateData = mockRateFormDataInput()
     }
 
-    const updateResult = await server.executeOperation({
+    const updateResult = await executeGraphQLOperation(server, {
         query: UpdateDraftContractRatesDocument,
         variables: {
             input: {
@@ -437,7 +447,10 @@ const updateTestDraftRateOnContract = async (
         },
     })
 
-    if (updateResult.errors || !updateResult.data) {
+    if (
+        updateResult.errors ||
+        !updateResult.data.updateDraftContractRates.contract
+    ) {
         console.info('errors', updateResult.errors)
         throw new Error(
             `updateDraftContractRates mutation failed with errors ${updateResult.errors}`
@@ -467,7 +480,7 @@ const withdrawTestRate = async (
     rateID: string,
     updatedReason: string
 ): Promise<RateType> => {
-    const withdrawResult = await server.executeOperation({
+    const withdrawResult = await executeGraphQLOperation(server, {
         query: WithdrawRateDocument,
         variables: {
             input: {
@@ -484,7 +497,7 @@ const withdrawTestRate = async (
         )
     }
 
-    if (withdrawResult.data === undefined || withdrawResult.data === null) {
+    if (!withdrawResult.data.withdrawRate.rate) {
         throw new Error('withdrawRate returned nothing')
     }
 
@@ -496,7 +509,7 @@ const undoWithdrawTestRate = async (
     rateID: string,
     updatedReason: string
 ): Promise<RateType> => {
-    const undoWithdrawRate = await server.executeOperation({
+    const undoWithdrawRate = await executeGraphQLOperation(server, {
         query: UndoWithdrawnRateDocument,
         variables: {
             input: {
@@ -513,7 +526,7 @@ const undoWithdrawTestRate = async (
         )
     }
 
-    if (undoWithdrawRate.data === undefined || undoWithdrawRate.data === null) {
+    if (!undoWithdrawRate.data.undoWithdrawRate.rate) {
         throw new Error('undoWithdrawRate returned nothing')
     }
 
@@ -525,7 +538,7 @@ const fetchTestIndexRatesStripped = async (
     stateCode?: string,
     rateIDs?: string[]
 ): Promise<IndexRatesStrippedPayload> => {
-    const indexRatesStrippedResult = await server.executeOperation({
+    const indexRatesStrippedResult = await executeGraphQLOperation(server, {
         query: IndexRatesStrippedDocument,
         variables: {
             input: {

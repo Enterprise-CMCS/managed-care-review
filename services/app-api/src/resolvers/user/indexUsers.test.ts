@@ -2,7 +2,10 @@ import type { InsertUserArgsType } from '../../postgres'
 import { NewPostgresStore } from '../../postgres'
 import { IndexUsersDocument } from '../../gen/gqlClient'
 import { v4 as uuidv4 } from 'uuid'
-import { constructTestPostgresServer } from '../../testHelpers/gqlHelpers'
+import {
+    constructTestPostgresServer,
+    executeGraphQLOperation,
+} from '../../testHelpers/gqlHelpers'
 import { sharedTestPrismaClient } from '../../testHelpers/storeHelpers'
 import type { UserEdge, User } from '../../gen/gqlServer'
 import { assertAnError } from '../../testHelpers'
@@ -66,7 +69,7 @@ describe('indexUsers', () => {
             throw newUsers
         }
 
-        const updateRes = await server.executeOperation({
+        const updateRes = await executeGraphQLOperation(server, {
             query: IndexUsersDocument,
         })
 
@@ -97,7 +100,7 @@ describe('indexUsers', () => {
             },
         })
 
-        const updateRes = await server.executeOperation({
+        const updateRes = await executeGraphQLOperation(server, {
             query: IndexUsersDocument,
             variables: {
                 input: {
@@ -115,7 +118,7 @@ describe('indexUsers', () => {
     it('returns an error if called by a CMS user', async () => {
         const server = await constructTestPostgresServer()
 
-        const updateRes = await server.executeOperation({
+        const updateRes = await executeGraphQLOperation(server, {
             query: IndexUsersDocument,
             variables: {
                 input: {

@@ -3,6 +3,7 @@ import {
     constructTestPostgresServer,
     createTestHealthPlanPackage,
     createAndSubmitTestHealthPlanPackage,
+    executeGraphQLOperation,
 } from '../../testHelpers/gqlHelpers'
 import type { Contract, ContractEdge } from '../../gen/gqlServer'
 import {
@@ -33,7 +34,7 @@ describe(`indexContracts`, () => {
             const submittedContract =
                 await createAndSubmitTestContractWithRate(stateServer)
             // then see if we can get that same contract back from the index
-            const result = await stateServer.executeOperation({
+            const result = await executeGraphQLOperation(stateServer, {
                 query: IndexContractsForDashboardDocument,
             })
 
@@ -101,7 +102,7 @@ describe(`indexContracts`, () => {
             )
 
             // index contracts api request
-            const result = await stateServer.executeOperation({
+            const result = await executeGraphQLOperation(stateServer, {
                 query: IndexContractsForDashboardDocument,
             })
             const submissionsIndex = result.data?.indexContracts
@@ -153,7 +154,7 @@ describe(`indexContracts`, () => {
                 },
             })
 
-            const result = await otherUserServer.executeOperation({
+            const result = await executeGraphQLOperation(otherUserServer, {
                 query: IndexContractsForDashboardDocument,
                 variables: { input },
             })
@@ -187,7 +188,7 @@ describe(`indexContracts`, () => {
                 },
             })
 
-            const result = await otherUserServer.executeOperation({
+            const result = await executeGraphQLOperation(otherUserServer, {
                 query: IndexContractsForDashboardDocument,
             })
 
@@ -219,9 +220,10 @@ describe(`indexContracts`, () => {
                     await createAndUpdateTestContractWithoutRates(stateServer)
 
                 // index contracts api request
-                const result = await cmsServer.executeOperation({
+                const result = await executeGraphQLOperation(cmsServer, {
                     query: IndexContractsForDashboardDocument,
                 })
+
                 const submissionsIndex = result.data?.indexContracts
 
                 // pull out test related contracts and order them
@@ -272,7 +274,7 @@ describe(`indexContracts`, () => {
                 )
 
                 // index contracts api request
-                const result = await cmsServer.executeOperation({
+                const result = await executeGraphQLOperation(cmsServer, {
                     query: IndexContractsForDashboardDocument,
                 })
                 const submissionsIndex = result.data?.indexContracts
@@ -336,7 +338,7 @@ describe(`indexContracts`, () => {
                     draft.id
                 )
 
-                const result = await cmsServer.executeOperation({
+                const result = await executeGraphQLOperation(cmsServer, {
                     query: IndexContractsForDashboardDocument,
                 })
 

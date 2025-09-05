@@ -2,6 +2,7 @@ import { CreateContractQuestionDocument } from '../../gen/gqlClient'
 import {
     constructTestPostgresServer,
     createTestQuestion,
+    executeGraphQLOperation,
     updateTestStateAssignments,
 } from '../../testHelpers/gqlHelpers'
 import {
@@ -52,7 +53,7 @@ describe('createQuestion', () => {
 
         const createdQuestion = await createTestQuestion(cmsServer, contract.id)
 
-        expect(createdQuestion.question).toEqual(
+        expect(createdQuestion).toEqual(
             expect.objectContaining({
                 id: expect.any(String),
                 contractID: contract.id,
@@ -160,7 +161,7 @@ describe('createQuestion', () => {
 
         const draftContract = await createTestContract(stateServer)
 
-        const createdQuestion = await cmsServer.executeOperation({
+        const createdQuestion = await executeGraphQLOperation(cmsServer, {
             query: CreateContractQuestionDocument,
             variables: {
                 input: {
@@ -195,7 +196,7 @@ describe('createQuestion', () => {
             cmsServer,
             contract.id
         )
-        const createdQuestion = await cmsServer.executeOperation({
+        const createdQuestion = await executeGraphQLOperation(cmsServer, {
             query: CreateContractQuestionDocument,
             variables: {
                 input: {
@@ -220,7 +221,7 @@ describe('createQuestion', () => {
         const stateServer = await constructTestPostgresServer()
         const contract = await createAndSubmitTestContractWithRate(stateServer)
 
-        const createdQuestion = await stateServer.executeOperation({
+        const createdQuestion = await executeGraphQLOperation(stateServer, {
             query: CreateContractQuestionDocument,
             variables: {
                 input: {
@@ -251,7 +252,7 @@ describe('createQuestion', () => {
 
         await createAndSubmitTestContractWithRate(stateServer)
 
-        const createdQuestion = await cmsServer.executeOperation({
+        const createdQuestion = await executeGraphQLOperation(cmsServer, {
             query: CreateContractQuestionDocument,
             variables: {
                 input: {
@@ -286,7 +287,7 @@ describe('createQuestion', () => {
 
         await createAndSubmitTestContractWithRate(stateServer)
 
-        const createdQuestion = await cmsServer.executeOperation({
+        const createdQuestion = await executeGraphQLOperation(cmsServer, {
             query: CreateContractQuestionDocument,
             variables: {
                 input: {
@@ -321,7 +322,7 @@ describe('createQuestion', () => {
 
         await createAndSubmitTestContractWithRate(stateServer)
 
-        const createdQuestion = await cmsServer.executeOperation({
+        const createdQuestion = await executeGraphQLOperation(cmsServer, {
             query: CreateContractQuestionDocument,
             variables: {
                 input: {
@@ -503,7 +504,7 @@ describe('createQuestion', () => {
             emailer: mockEmailer,
         })
 
-        const submitResult = await cmsServer.executeOperation({
+        const submitResult = await executeGraphQLOperation(cmsServer, {
             query: CreateContractQuestionDocument,
             variables: {
                 input: {

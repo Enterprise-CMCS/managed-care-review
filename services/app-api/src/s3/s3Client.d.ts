@@ -1,5 +1,6 @@
 import type { BucketShortName } from './s3Amplify'
 import type { S3Error } from './s3Error'
+import type { GenerateDocumentZipFunctionType } from '../zip'
 
 export type S3ClientT = {
     uploadFile: (

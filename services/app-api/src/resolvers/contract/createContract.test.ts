@@ -1,4 +1,7 @@
-import { constructTestPostgresServer } from '../../testHelpers/gqlHelpers'
+import {
+    constructTestPostgresServer,
+    executeGraphQLOperation,
+} from '../../testHelpers/gqlHelpers'
 import type { CreateContractInput, Contract } from '../../gen/gqlServer'
 import { CreateContractDocument } from '../../gen/gqlClient'
 import { testCMSUser } from '../../testHelpers/userHelpers'
@@ -18,7 +21,7 @@ describe('createContract', () => {
             submissionDescription: 'A real submission',
             contractType: 'BASE',
         }
-        const res = await server.executeOperation({
+        const res = await executeGraphQLOperation(server, {
             query: CreateContractDocument,
             variables: { input },
         })
@@ -55,7 +58,7 @@ describe('createContract', () => {
             submissionDescription: 'A real submission',
             contractType: 'BASE',
         }
-        const res = await server.executeOperation({
+        const res = await executeGraphQLOperation(server, {
             query: CreateContractDocument,
             variables: { input },
         })
@@ -81,7 +84,7 @@ describe('createContract', () => {
             submissionDescription: 'A real submission',
             contractType: 'BASE',
         }
-        const res = await server.executeOperation({
+        const res = await executeGraphQLOperation(server, {
             query: CreateContractDocument,
             variables: { input },
         })

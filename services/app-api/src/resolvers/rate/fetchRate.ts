@@ -13,7 +13,7 @@ import {
     hasAdminPermissions,
 } from '../../domain-models'
 import { logError, logSuccess } from '../../logger'
-import { ForbiddenError } from 'apollo-server-core'
+import { createForbiddenError } from '../errorUtils'
 import {
     canRead,
     getAuthContextInfo,
@@ -30,7 +30,7 @@ export function fetchRateResolver(store: Store): QueryResolvers['fetchRate'] {
             const errMessage = `OAuth client does not have read permissions`
             logError('fetchRate', errMessage)
             setErrorAttributesOnActiveSpan(errMessage, span)
-            throw new ForbiddenError(errMessage)
+            throw createForbiddenError(errMessage)
         }
 
         const rateWithHistory = await store.findRateWithHistory(input.rateID)
@@ -69,13 +69,13 @@ export function fetchRateResolver(store: Store): QueryResolvers['fetchRate'] {
                     : 'State users are not authorized to fetch rate data from a different state.'
                 logError('fetchRate', errMessage)
                 setErrorAttributesOnActiveSpan(errMessage, span)
-                throw new ForbiddenError(errMessage)
+                throw createForbiddenError(errMessage)
             }
         } else if (!hasCMSPermissions(user) && !hasAdminPermissions(user)) {
             const errMessage = 'User not authorized to fetch rate data'
             logError('fetchRate', errMessage)
             setErrorAttributesOnActiveSpan(errMessage, span)
-            throw new ForbiddenError(errMessage)
+            throw createForbiddenError(errMessage)
         }
 
         setSuccessAttributesOnActiveSpan(span)

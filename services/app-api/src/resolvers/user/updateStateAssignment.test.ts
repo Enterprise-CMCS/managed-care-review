@@ -11,7 +11,10 @@ import type { InsertUserArgsType } from '../../postgres'
 import { NewPostgresStore } from '../../postgres'
 import { sharedTestPrismaClient } from '../../testHelpers/storeHelpers'
 import { UpdateStateAssignmentDocument } from '../../gen/gqlClient'
-import { constructTestPostgresServer } from '../../testHelpers/gqlHelpers'
+import {
+    constructTestPostgresServer,
+    executeGraphQLOperation,
+} from '../../testHelpers/gqlHelpers'
 import type { State } from '../../gen/gqlServer'
 import {
     assertAnError,
@@ -113,7 +116,7 @@ describe.each(authorizedUserTests)(
                 },
             })
 
-            const updateRes = await server.executeOperation({
+            const updateRes = await executeGraphQLOperation(server, {
                 query: UpdateStateAssignmentDocument,
                 variables: {
                     input: {
@@ -137,7 +140,7 @@ describe.each(authorizedUserTests)(
             expect(user.divisionAssignment).toBe('OACT')
 
             // change the value and see if it updates
-            const updateRes2 = await server.executeOperation({
+            const updateRes2 = await executeGraphQLOperation(server, {
                 query: UpdateStateAssignmentDocument,
                 variables: {
                     input: {
@@ -179,7 +182,7 @@ describe.each(authorizedUserTests)(
                 },
             })
 
-            const updateResEmpty = await server.executeOperation({
+            const updateResEmpty = await executeGraphQLOperation(server, {
                 query: UpdateStateAssignmentDocument,
                 variables: {
                     input: {
@@ -197,7 +200,7 @@ describe.each(authorizedUserTests)(
                 assertAnErrorExtensions(updateResEmpty).argumentValues
             ).toEqual([])
 
-            const updateResUndefined = await server.executeOperation({
+            const updateResUndefined = await executeGraphQLOperation(server, {
                 query: UpdateStateAssignmentDocument,
                 variables: {
                     input: {
@@ -215,7 +218,7 @@ describe.each(authorizedUserTests)(
                 assertAnErrorExtensions(updateResUndefined).argumentValues
             ).toBeUndefined()
 
-            const updateResNull = await server.executeOperation({
+            const updateResNull = await executeGraphQLOperation(server, {
                 query: UpdateStateAssignmentDocument,
                 variables: {
                     input: {
@@ -250,7 +253,7 @@ describe.each(authorizedUserTests)(
                 },
             })
 
-            const updateRes = await server.executeOperation({
+            const updateRes = await executeGraphQLOperation(server, {
                 query: UpdateStateAssignmentDocument,
                 variables: {
                     input: {
@@ -286,7 +289,7 @@ describe.each(authorizedUserTests)(
                 throw newStateUser
             }
 
-            const updateRes = await server.executeOperation({
+            const updateRes = await executeGraphQLOperation(server, {
                 query: UpdateStateAssignmentDocument,
                 variables: {
                     input: {
@@ -311,7 +314,7 @@ describe.each(authorizedUserTests)(
                 },
             })
 
-            const updateRes = await server.executeOperation({
+            const updateRes = await executeGraphQLOperation(server, {
                 query: UpdateStateAssignmentDocument,
                 variables: {
                     input: {
@@ -345,7 +348,7 @@ describe.each(unauthorizedUserTests)(
             // setup a user in the db for us to modify
             const cmsUserID = uuidv4()
 
-            const updateRes = await server.executeOperation({
+            const updateRes = await executeGraphQLOperation(server, {
                 query: UpdateStateAssignmentDocument,
                 variables: {
                     input: {

@@ -3,6 +3,7 @@ import {
     constructTestPostgresServer,
     createTestQuestion,
     createTestQuestionResponse,
+    executeGraphQLOperation,
     updateTestStateAssignments,
 } from '../../testHelpers/gqlHelpers'
 import {
@@ -50,16 +51,16 @@ describe('createContractQuestionResponse', () => {
 
         const createResponseResult = await createTestQuestionResponse(
             stateServer,
-            createdQuestion.question.id
+            createdQuestion.id
         )
 
-        expect(createResponseResult.question).toEqual(
+        expect(createResponseResult).toEqual(
             expect.objectContaining({
-                ...createdQuestion.question,
+                ...createdQuestion,
                 responses: expect.arrayContaining([
                     expect.objectContaining({
                         id: expect.any(String),
-                        questionID: createdQuestion.question.id,
+                        questionID: createdQuestion.id,
                         documents: [
                             {
                                 id: expect.any(String),
@@ -81,20 +82,23 @@ describe('createContractQuestionResponse', () => {
         const stateServer = await constructTestPostgresServer()
         const fakeID = 'abc-123'
 
-        const createResponseResult = await stateServer.executeOperation({
-            query: CreateContractQuestionResponseDocument,
-            variables: {
-                input: {
-                    questionID: fakeID,
-                    documents: [
-                        {
-                            name: 'Test Question',
-                            s3URL: 's3://bucketname/key/test1',
-                        },
-                    ],
+        const createResponseResult = await executeGraphQLOperation(
+            stateServer,
+            {
+                query: CreateContractQuestionResponseDocument,
+                variables: {
+                    input: {
+                        questionID: fakeID,
+                        documents: [
+                            {
+                                name: 'Test Question',
+                                s3URL: 's3://bucketname/key/test1',
+                            },
+                        ],
+                    },
                 },
-            },
-        })
+            }
+        )
 
         expect(createResponseResult).toBeDefined()
         expect(assertAnErrorCode(createResponseResult)).toBe('BAD_USER_INPUT')
@@ -114,20 +118,23 @@ describe('createContractQuestionResponse', () => {
         const createdQuestion = await createTestQuestion(cmsServer, contract.id)
         await approveTestContract(cmsServer, contract.id)
 
-        const createResponseResult = await stateServer.executeOperation({
-            query: CreateContractQuestionResponseDocument,
-            variables: {
-                input: {
-                    questionID: createdQuestion.question.id,
-                    documents: [
-                        {
-                            name: 'Test Question',
-                            s3URL: 's3://bucketname/key/test1',
-                        },
-                    ],
+        const createResponseResult = await executeGraphQLOperation(
+            stateServer,
+            {
+                query: CreateContractQuestionResponseDocument,
+                variables: {
+                    input: {
+                        questionID: createdQuestion.id,
+                        documents: [
+                            {
+                                name: 'Test Question',
+                                s3URL: 's3://bucketname/key/test1',
+                            },
+                        ],
+                    },
                 },
-            },
-        })
+            }
+        )
 
         expect(createResponseResult).toBeDefined()
         expect(assertAnErrorCode(createResponseResult)).toBe('BAD_USER_INPUT')
@@ -146,11 +153,11 @@ describe('createContractQuestionResponse', () => {
         const contract = await createAndSubmitTestContractWithRate(stateServer)
         const createdQuestion = await createTestQuestion(cmsServer, contract.id)
 
-        const createResponseResult = await cmsServer.executeOperation({
+        const createResponseResult = await executeGraphQLOperation(cmsServer, {
             query: CreateContractQuestionResponseDocument,
             variables: {
                 input: {
-                    questionID: createdQuestion.question.id,
+                    questionID: createdQuestion.id,
                     documents: [
                         {
                             name: 'Test Question',
@@ -199,10 +206,7 @@ describe('createContractQuestionResponse', () => {
 
         const createdQuestion = await createTestQuestion(cmsServer, contract.id)
 
-        await createTestQuestionResponse(
-            stateServer,
-            createdQuestion?.question.id
-        )
+        await createTestQuestionResponse(stateServer, createdQuestion?.id)
 
         const contractName =
             contract.packageSubmissions[0].contractRevision.contractName
@@ -253,10 +257,7 @@ describe('createContractQuestionResponse', () => {
 
         const createdQuestion = await createTestQuestion(cmsServer, contract.id)
 
-        await createTestQuestionResponse(
-            stateServer,
-            createdQuestion?.question.id
-        )
+        await createTestQuestionResponse(stateServer, createdQuestion?.id)
 
         const statePrograms = findStatePrograms(contract.stateCode)
         if (statePrograms instanceof Error) {

@@ -1,6 +1,7 @@
 import {
     constructTestPostgresServer,
     createAndUpdateTestHealthPlanPackage,
+    executeGraphQLOperation,
     unlockTestHealthPlanPackage,
 } from '../../testHelpers/gqlHelpers'
 import { FetchContractDocument } from '../../gen/gqlClient'
@@ -41,7 +42,6 @@ describe('fetchContract', () => {
         expect(draftRate[0].status).toBe('DRAFT')
         expect(draftRate[0].stateCode).toBe('FL')
         expect(
-            // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
             draftRate[0].draftRevision?.formData.rateDocuments![0].downloadURL
         ).toBeDefined()
 
@@ -57,14 +57,17 @@ describe('fetchContract', () => {
         const stateSubmission =
             await createAndUpdateTestHealthPlanPackage(stateServer)
 
-        const fetchDraftContractResult = await stateServer.executeOperation({
-            query: FetchContractDocument,
-            variables: {
-                input: {
-                    contractID: stateSubmission.id,
+        const fetchDraftContractResult = await executeGraphQLOperation(
+            stateServer,
+            {
+                query: FetchContractDocument,
+                variables: {
+                    input: {
+                        contractID: stateSubmission.id,
+                    },
                 },
-            },
-        })
+            }
+        )
 
         expect(fetchDraftContractResult.errors).toBeUndefined()
 
@@ -318,7 +321,7 @@ describe('fetchContract', () => {
             },
         })
 
-        const fetchResult = await stateServerVA.executeOperation({
+        const fetchResult = await executeGraphQLOperation(stateServerVA, {
             query: FetchContractDocument,
             variables: {
                 input: {
@@ -360,7 +363,7 @@ describe('fetchContract', () => {
             s3Client: mockS3,
         })
 
-        const fetchResult = await oauthServer.executeOperation({
+        const fetchResult = await executeGraphQLOperation(oauthServer, {
             query: FetchContractDocument,
             variables: {
                 input: {
@@ -401,7 +404,7 @@ describe('fetchContract', () => {
             s3Client: mockS3,
         })
 
-        const fetchResult = await oauthServerVA.executeOperation({
+        const fetchResult = await executeGraphQLOperation(oauthServerVA, {
             query: FetchContractDocument,
             variables: {
                 input: {
@@ -443,7 +446,7 @@ describe('fetchContract', () => {
             s3Client: mockS3,
         })
 
-        const fetchResult = await oauthServer.executeOperation({
+        const fetchResult = await executeGraphQLOperation(oauthServer, {
             query: FetchContractDocument,
             variables: {
                 input: {

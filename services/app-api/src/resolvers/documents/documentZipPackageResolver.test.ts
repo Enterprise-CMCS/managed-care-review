@@ -5,7 +5,10 @@ import {
     submitTestContract,
     updateTestContractDraftRevision,
 } from '../../testHelpers/gqlContractHelpers'
-import { constructTestPostgresServer } from '../../testHelpers/gqlHelpers'
+import {
+    constructTestPostgresServer,
+    executeGraphQLOperation,
+} from '../../testHelpers/gqlHelpers'
 import { testLDService } from '../../testHelpers/launchDarklyHelpers'
 import { testStateUser } from '../../testHelpers/userHelpers'
 import { generateDocumentZip } from '../../zip'
@@ -41,7 +44,7 @@ describe('DocumentZipPackage resolver', () => {
         const submittedContract =
             await createAndSubmitTestContractWithRate(stateServer)
 
-        const result = await stateServer.executeOperation({
+        const result = await executeGraphQLOperation(stateServer, {
             query: FetchContractDocument,
             variables: {
                 input: { contractID: submittedContract.id },
@@ -80,7 +83,7 @@ describe('DocumentZipPackage resolver', () => {
         const submittedContract =
             await createAndSubmitTestContractWithRate(stateServer)
 
-        const result = await stateServer.executeOperation({
+        const result = await executeGraphQLOperation(stateServer, {
             query: FetchContractDocument,
             variables: {
                 input: { contractID: submittedContract.id },
@@ -127,7 +130,7 @@ describe('DocumentZipPackage resolver', () => {
             updatedContract.id
         )
 
-        const result = await stateServer.executeOperation({
+        const result = await executeGraphQLOperation(stateServer, {
             query: FetchContractDocument,
             variables: {
                 input: { contractID: submittedContract.id },

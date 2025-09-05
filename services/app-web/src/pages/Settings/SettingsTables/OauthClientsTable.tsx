@@ -108,7 +108,6 @@ const OauthClientTable = ({
 
 export const OauthClients = () => {
     const { updateActiveMainContent } = usePage()
-
     const { result: fetchOauthClientsResult } = wrapApolloResult(
         useFetchOauthClientsQuery({
             fetchPolicy: 'cache-and-network',

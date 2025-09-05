@@ -7,6 +7,7 @@ import {
 import {
     constructTestPostgresServer,
     createAndUpdateTestHealthPlanPackage,
+    executeGraphQLOperation,
 } from '../../testHelpers/gqlHelpers'
 import type { RateEdge, Rate } from '../../gen/gqlServer'
 import { testCMSUser, testStateUser } from '../../testHelpers/userHelpers'
@@ -22,7 +23,6 @@ describe('indexRatesStripped', () => {
         'rate-edit-unlock': true,
     })
     const mockS3 = testS3Client()
-
     it('returns stripped rates with related contracts for cms user with no errors', async () => {
         const stateServer = await constructTestPostgresServer({
             ldService,
@@ -45,7 +45,7 @@ describe('indexRatesStripped', () => {
             contract2.packageSubmissions[0].rateRevisions[0].rateID
 
         // index rates
-        const result = await cmsServer.executeOperation({
+        const result = await executeGraphQLOperation(cmsServer, {
             query: IndexRatesStrippedWithRelatedContractsDocument,
             variables: {
                 input: {
@@ -95,7 +95,7 @@ describe('indexRatesStripped', () => {
         const draft1 = contract1.draftRates[0]
         const draft2 = contract2.draftRates[0]
 
-        const result = await cmsServer.executeOperation({
+        const result = await executeGraphQLOperation(cmsServer, {
             query: IndexRatesStrippedDocument,
         })
 
@@ -152,7 +152,7 @@ describe('indexRatesStripped', () => {
         const otherState1 = contract3.packageSubmissions[0].rateRevisions[0]
 
         // index rates
-        const result = await cmsServer.executeOperation({
+        const result = await executeGraphQLOperation(cmsServer, {
             query: IndexRatesStrippedDocument,
         })
 
@@ -208,9 +208,12 @@ describe('indexRatesStripped', () => {
         })
 
         // index rates
-        const floridaRatesResult = await flStateServer.executeOperation({
-            query: IndexRatesStrippedDocument,
-        })
+        const floridaRatesResult = await executeGraphQLOperation(
+            flStateServer,
+            {
+                query: IndexRatesStrippedDocument,
+            }
+        )
 
         expect(floridaRatesResult.errors).toBeUndefined()
 
@@ -223,9 +226,12 @@ describe('indexRatesStripped', () => {
         expect(floridaRateStateCodes.every((code) => code === 'FL')).toBe(true)
 
         // index rates
-        const virginiaRatesResult = await vaStateServer.executeOperation({
-            query: IndexRatesStrippedDocument,
-        })
+        const virginiaRatesResult = await executeGraphQLOperation(
+            vaStateServer,
+            {
+                query: IndexRatesStrippedDocument,
+            }
+        )
 
         expect(virginiaRatesResult.errors).toBeUndefined()
 

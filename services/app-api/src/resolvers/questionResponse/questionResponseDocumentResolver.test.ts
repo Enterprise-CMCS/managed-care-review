@@ -64,7 +64,7 @@ describe(`questionResponseDocumentResolver`, () => {
         )
         const responseToDMCO = await createTestQuestionResponse(
             stateServer,
-            createdDMCOQuestion.question.id
+            createdDMCOQuestion.id
         )
         const createdDMCPQuestion = await createTestQuestion(
             dmcpCMSServer,
@@ -80,7 +80,7 @@ describe(`questionResponseDocumentResolver`, () => {
         )
         const responseToDMCP = await createTestQuestionResponse(
             stateServer,
-            createdDMCPQuestion.question.id
+            createdDMCPQuestion.id
         )
         const createdOACTQuestion = await createTestQuestion(
             oactCMServer,
@@ -96,7 +96,7 @@ describe(`questionResponseDocumentResolver`, () => {
         )
         const responseToOACT = await createTestQuestionResponse(
             stateServer,
-            createdOACTQuestion.question.id
+            createdOACTQuestion.id
         )
         const contractWithQuestions = await fetchTestContractWithQuestions(
             stateServer,
@@ -123,7 +123,7 @@ describe(`questionResponseDocumentResolver`, () => {
                                         downloadURL: expect.any(String),
                                     },
                                 ],
-                                addedBy: responseToDMCO.question.addedBy,
+                                addedBy: responseToDMCO.addedBy,
                             }),
                         },
                     ]),
@@ -145,7 +145,7 @@ describe(`questionResponseDocumentResolver`, () => {
                                         downloadURL: expect.any(String),
                                     },
                                 ],
-                                addedBy: responseToDMCP.question.addedBy,
+                                addedBy: responseToDMCP.addedBy,
                             }),
                         },
                     ],
@@ -167,7 +167,7 @@ describe(`questionResponseDocumentResolver`, () => {
                                         downloadURL: expect.any(String),
                                     },
                                 ],
-                                addedBy: responseToOACT.question.addedBy,
+                                addedBy: responseToOACT.addedBy,
                             }),
                         },
                     ],

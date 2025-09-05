@@ -6,6 +6,7 @@ import {
 import {
     constructTestPostgresServer,
     defaultFloridaProgram,
+    executeGraphQLOperation,
 } from '../../testHelpers/gqlHelpers'
 import {
     createAndSubmitTestContractWithRate,
@@ -374,7 +375,7 @@ describe('withdrawRate', () => {
         }
 
         must(
-            await stateServer.executeOperation({
+            await executeGraphQLOperation(stateServer, {
                 query: UpdateDraftContractRatesDocument,
                 variables: {
                     input: {
@@ -498,7 +499,7 @@ describe('withdrawRate', () => {
         await withdrawTestRate(cmsServer, rateID, 'Withdraw invalid rate')
 
         must(
-            await cmsServer.executeOperation({
+            await executeGraphQLOperation(cmsServer, {
                 query: UnlockContractDocument,
                 variables: {
                     input: {
@@ -510,7 +511,7 @@ describe('withdrawRate', () => {
         )
 
         const resubmitContractResult = must(
-            await stateServer.executeOperation({
+            await executeGraphQLOperation(stateServer, {
                 query: SubmitContractDocument,
                 variables: {
                     input: {
@@ -585,7 +586,7 @@ describe('withdrawRate', () => {
 
         // link rate to contract B
         must(
-            await stateServer.executeOperation({
+            await executeGraphQLOperation(stateServer, {
                 query: UpdateDraftContractRatesDocument,
                 variables: {
                     input: {
@@ -708,7 +709,7 @@ describe('withdrawRate', () => {
 
         // link rate to contract B
         must(
-            await stateServer.executeOperation({
+            await executeGraphQLOperation(stateServer, {
                 query: UpdateDraftContractRatesDocument,
                 variables: {
                     input: {
@@ -847,7 +848,7 @@ describe('withdrawRate', () => {
 
         // link rate to contract B
         must(
-            await stateServer.executeOperation({
+            await executeGraphQLOperation(stateServer, {
                 query: UpdateDraftContractRatesDocument,
                 variables: {
                     input: {
@@ -866,7 +867,7 @@ describe('withdrawRate', () => {
 
         // link rate to contract C, submit, unlock, then update child rate
         must(
-            await stateServer.executeOperation({
+            await executeGraphQLOperation(stateServer, {
                 query: UpdateDraftContractRatesDocument,
                 variables: {
                     input: {
@@ -907,7 +908,7 @@ describe('withdrawRate', () => {
 
         // update contract C child rate to assert it wasn't modified
         must(
-            await stateServer.executeOperation({
+            await executeGraphQLOperation(stateServer, {
                 query: UpdateDraftContractRatesDocument,
                 variables: {
                     input: {
@@ -944,7 +945,7 @@ describe('withdrawRate', () => {
             'unlock to make updates'
         )
         must(
-            await stateServer.executeOperation({
+            await executeGraphQLOperation(stateServer, {
                 query: UpdateDraftContractRatesDocument,
                 variables: {
                     input: {
@@ -1139,7 +1140,7 @@ describe('withdrawRate', () => {
             await createAndUpdateTestContractWithoutRates(stateServer)
 
         must(
-            await stateServer.executeOperation({
+            await executeGraphQLOperation(stateServer, {
                 query: UpdateDraftContractRatesDocument,
                 variables: {
                     input: {
@@ -1244,15 +1245,18 @@ describe('withdrawRate invalid status handling', () => {
         const rateID = draftContract.draftRates?.[0].id as string
         const contractID = draftContract.id
 
-        const failedWithdrawDraftRate = await cmsServer.executeOperation({
-            query: WithdrawRateDocument,
-            variables: {
-                input: {
-                    rateID,
-                    updatedReason: 'Withdraw draft rate',
+        const failedWithdrawDraftRate = await executeGraphQLOperation(
+            cmsServer,
+            {
+                query: WithdrawRateDocument,
+                variables: {
+                    input: {
+                        rateID,
+                        updatedReason: 'Withdraw draft rate',
+                    },
                 },
-            },
-        })
+            }
+        )
 
         // expect error for attempting to withdraw a draft rate
         expect(failedWithdrawDraftRate.errors?.[0]).toBeDefined()
@@ -1263,15 +1267,18 @@ describe('withdrawRate invalid status handling', () => {
         await submitTestContract(stateServer, contractID)
         await unlockTestContract(cmsServer, draftContract.id, 'Unlock contract')
 
-        const failedWithdrawUnlockedRate = await cmsServer.executeOperation({
-            query: WithdrawRateDocument,
-            variables: {
-                input: {
-                    rateID,
-                    updatedReason: 'Withdraw unlocked rate',
+        const failedWithdrawUnlockedRate = await executeGraphQLOperation(
+            cmsServer,
+            {
+                query: WithdrawRateDocument,
+                variables: {
+                    input: {
+                        rateID,
+                        updatedReason: 'Withdraw unlocked rate',
+                    },
                 },
-            },
-        })
+            }
+        )
 
         // expect error for attempting to withdraw an unlocked rate
         expect(failedWithdrawUnlockedRate.errors?.[0]).toBeDefined()
@@ -1281,7 +1288,7 @@ describe('withdrawRate invalid status handling', () => {
 
         await submitTestContract(stateServer, contractID, 'Resubmit')
 
-        const withdrawnRateResult = await cmsServer.executeOperation({
+        const withdrawnRateResult = await executeGraphQLOperation(cmsServer, {
             query: WithdrawRateDocument,
             variables: {
                 input: {
@@ -1302,15 +1309,18 @@ describe('withdrawRate invalid status handling', () => {
             })
         )
 
-        const failedWithdrawWithdrawnRate = await cmsServer.executeOperation({
-            query: WithdrawRateDocument,
-            variables: {
-                input: {
-                    rateID,
-                    updatedReason: 'Withdraw already withdrawn rate',
+        const failedWithdrawWithdrawnRate = await executeGraphQLOperation(
+            cmsServer,
+            {
+                query: WithdrawRateDocument,
+                variables: {
+                    input: {
+                        rateID,
+                        updatedReason: 'Withdraw already withdrawn rate',
+                    },
                 },
-            },
-        })
+            }
+        )
 
         // expect error for attempting to withdraw a withdrawn rate
         expect(failedWithdrawWithdrawnRate.errors?.[0]).toBeDefined()
@@ -1327,15 +1337,18 @@ describe('withdrawRate invalid status handling', () => {
             },
         })
 
-        const failedWithdrawWithdrawnRate = await cmsServer.executeOperation({
-            query: WithdrawRateDocument,
-            variables: {
-                input: {
-                    rateID: 'not-a-valid-rate',
-                    updatedReason: 'This rate does not exist',
+        const failedWithdrawWithdrawnRate = await executeGraphQLOperation(
+            cmsServer,
+            {
+                query: WithdrawRateDocument,
+                variables: {
+                    input: {
+                        rateID: 'not-a-valid-rate',
+                        updatedReason: 'This rate does not exist',
+                    },
                 },
-            },
-        })
+            }
+        )
 
         // expect error for attempting to withdraw a rate that is not found
         expect(failedWithdrawWithdrawnRate.errors?.[0]).toBeDefined()
@@ -1364,15 +1377,18 @@ describe('withdrawRate invalid status handling', () => {
 
         const contract = await createAndSubmitTestContractWithRate(stateServer)
         const rateID = contract.packageSubmissions[0].rateRevisions[0].rateID
-        const failedWithdrawWithdrawnRate = await cmsServer.executeOperation({
-            query: WithdrawRateDocument,
-            variables: {
-                input: {
-                    rateID,
-                    updatedReason: 'This rate does not exist',
+        const failedWithdrawWithdrawnRate = await executeGraphQLOperation(
+            cmsServer,
+            {
+                query: WithdrawRateDocument,
+                variables: {
+                    input: {
+                        rateID,
+                        updatedReason: 'This rate does not exist',
+                    },
                 },
-            },
-        })
+            }
+        )
 
         // expect error for attempting to withdraw rate in postgres
         expect(failedWithdrawWithdrawnRate.errors?.[0]).toBeDefined()
@@ -1401,15 +1417,18 @@ describe('withdrawRate invalid status handling', () => {
             const rateID =
                 contract.packageSubmissions[0].rateRevisions[0].rateID
 
-            const failedWithdrawDraftRate = await server.executeOperation({
-                query: WithdrawRateDocument,
-                variables: {
-                    input: {
-                        rateID,
-                        updatedReason: 'Withdraw draft rate',
+            const failedWithdrawDraftRate = await executeGraphQLOperation(
+                server,
+                {
+                    query: WithdrawRateDocument,
+                    variables: {
+                        input: {
+                            rateID,
+                            updatedReason: 'Withdraw draft rate',
+                        },
                     },
-                },
-            })
+                }
+            )
 
             // expect error when withdrawing rate as an unauthorized user.
             expect(failedWithdrawDraftRate.errors?.[0]).toBeDefined()

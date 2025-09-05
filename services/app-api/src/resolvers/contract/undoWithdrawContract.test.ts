@@ -2,6 +2,7 @@ import { testCMSUser, testStateUser } from '../../testHelpers/userHelpers'
 import {
     constructTestPostgresServer,
     defaultFloridaProgram,
+    executeGraphQLOperation,
 } from '../../testHelpers/gqlHelpers'
 import {
     createAndUpdateTestContractWithoutRates,
@@ -264,7 +265,7 @@ describe('undoWithdrawContract', () => {
         }
 
         must(
-            await stateServer.executeOperation({
+            await executeGraphQLOperation(stateServer, {
                 query: UpdateDraftContractRatesDocument,
                 variables: {
                     input: {
@@ -322,7 +323,7 @@ describe('undoWithdrawContract', () => {
 
         // Link rate B to contract B
         must(
-            await stateServer.executeOperation({
+            await executeGraphQLOperation(stateServer, {
                 query: UpdateDraftContractRatesDocument,
                 variables: {
                     input: {
@@ -354,7 +355,7 @@ describe('undoWithdrawContract', () => {
 
         // Link rate C to contract C
         must(
-            await stateServer.executeOperation({
+            await executeGraphQLOperation(stateServer, {
                 query: UpdateDraftContractRatesDocument,
                 variables: {
                     input: {
@@ -527,7 +528,7 @@ describe('undoWithdrawContract', () => {
         }
 
         must(
-            await stateServer.executeOperation({
+            await executeGraphQLOperation(stateServer, {
                 query: UpdateDraftContractRatesDocument,
                 variables: {
                     input: {
