@@ -1,49 +1,103 @@
-name: Sync Security Hub findings and Jira issues
+name: Security Sync
 
 on:
   workflow_dispatch: # for testing and manual runs
   schedule:
-    - cron: '25 1 * * *' # daily at 6:25 am EST
+    - cron: "25 1 * * *" # daily at 8:25 PM EST
 
 permissions:
   id-token: write
+  contents: read
 
 jobs:
   sync:
     name: Run sync
-    environment: prod
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-latest
+    strategy:
+      max-parallel: 1
+      matrix:
+        environment: ["prod"]  # add more like "val","master" later if needed
+      fail-fast: false
+    environment:
+      name: ${{ matrix.environment }}
+    outputs:
+      failed_step: ${{ steps.set_failed_info.outputs.failed_step }}
+      error_message: ${{ steps.set_failed_info.outputs.error_message }}
     steps:
       - name: Check out repo
+        id: checkout_step
         uses: actions/checkout@v5
-
-      - name: Get AWS credentials
-        uses: ./.github/actions/get_aws_credentials
         with:
-          region: ${{ vars.AWS_DEFAULT_REGION }}
-          account-id: ${{ secrets.PROD_AWS_ACCOUNT_ID }}
-          stage-name: prod
+          token: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Sync Security Hub and Jira
+      - name: Debug - Log role ARNs
+        run: |
+          echo "🔍 DEBUG: Attempting to assume role:"
+          echo "Role ARN: ${{ secrets.SECHUBJIRA_AWS_OIDC_ROLE_TO_ASSUME }}"
+          echo "Deployment ARN:  ${{ secrets.AWS_OIDC_ROLE_TO_ASSUME }}"
+          echo "Region: ${{ secrets.AWS_DEFAULT_REGION }}"
+          echo "Environment: ${{ github.ref_name }}"
+
+      - name: Configure AWS credentials
+        id: aws_creds_step
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-region: ${{ secrets.AWS_DEFAULT_REGION }}
+          role-to-assume: ${{ secrets.SECHUBJIRA_AWS_OIDC_ROLE_TO_ASSUME }}
+
+      - name: Security Sync
+        id: sync_step
         uses: Enterprise-CMCS/mac-fc-security-hub-visibility@v2.1.9
         with:
-          jira-token: ${{ secrets.JIRA_TOKEN }}
+          jira-token: ${{ secrets.JIRA_ENT_USER_TOKEN }}
           jira-username: ${{ secrets.JIRA_USERNAME }}
-          jira-host: jiraent.cms.gov
-          jira-project-key: 'MCR' # add issues to the 'MC-Review' project
-          jira-custom-fields: '{ "customfield_10104": 32589, "customfield_10100": "MCR-2480"}' # Sprint, Epic
+          jira-project-key: MCR
           jira-ignore-statuses: Done, Closed, Canceled
-          aws-region: us-east-1
           aws-severities: CRITICAL, HIGH, MEDIUM
+          jira-custom-fields: '{"customfield_10104":32589,"customfield_10100":"MCR-2480"}' # Sprint, Epic
+          jira-labels-config: "[{\"labelField\":\"ProductName\",\"labelPrefix\":\"product\",\"labelDelimiter\":\":\"},{\"labelField\":\"severity\"},{\"labelField\":\"accountId\",\"labelDelimiter\":\":\",\"labelPrefix\":\"account\"},{\"labelField\":\"region\"},{\"labelField\":\"accountAlias\"}, {\"labelField\":\"identify\"},{\"labelField\":\"CVE\",\"labelPrefix\":\"\",\"labelDelimiter\":\"\"}]"
+          jira-assignee: "TZCT"
+          include-all-products: 'true'
+          jira-consolidate-tickets: true
 
-      - name: Alert Slack On Failure
-        uses: rtCamp/action-slack-notify@v2
+      - name: Set failed info
+        id: set_failed_info
         if: failure()
-        env:
-          SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK }}
-          SLACK_USERNAME: Deploy Alerts
-          SLACK_ICON_EMOJI: ':bell:'
-          SLACK_COLOR: failure
-          SLACK_FOOTER: ''
-          SLACK_MESSAGE: 'Failure syncing Security Hub findings and Jira issues'
-          MSG_MINIMAL: actions url
+        run: |
+          if [ "${{ steps.checkout_step.outcome }}" == "failure" ]; then
+            echo "failed_step=Check out repo" >> $GITHUB_OUTPUT
+            echo "error_message=Failed to check out repository" >> $GITHUB_OUTPUT
+            exit 1
+          elif [ "${{ steps.aws_creds_step.outcome }}" == "failure" ]; then
+            echo "failed_step=Configure AWS credentials" >> $GITHUB_OUTPUT
+            echo "error_message=Failed to configure AWS credentials" >> $GITHUB_OUTPUT
+            exit 1
+          elif [ "${{ steps.sync_step.outcome }}" == "failure" ]; then
+            echo "failed_step=Security Sync" >> $GITHUB_OUTPUT
+            echo "error_message=Failed to sync Security Hub findings with Jira" >> $GITHUB_OUTPUT
+            exit 1
+          else
+            echo "failed_step=Unknown" >> $GITHUB_OUTPUT
+            echo "error_message=Unknown error" >> $GITHUB_OUTPUT
+            exit 1
+          fi
+
+  alert:
+    needs: sync
+    if: failure()
+    runs-on: ubuntu-24.04
+    env:
+      FAILED_MATRIX: ${{ toJSON(needs.sync.result) }}
+      FAILED_STEP: ${{ needs.sync.outputs.failed_step }}
+      ERROR_MESSAGE: ${{ needs.sync.outputs.error_message }}
+    steps:
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-region: ${{ secrets.AWS_DEFAULT_REGION }}
+          role-to-assume: ${{ secrets.AWS_OIDC_ROLE_TO_ASSUME }}
+
+      - name: Alert Slack On Failure on SSM
+        run: |
+          MESSAGE="Failure completing ${{ github.workflow }}. The scheduled Job FAILED: https://github.com/Enterprise-CMCS/bigmac/actions/runs/${{ github.run_id }} to Sync Security Hub and Jira. Failed step: ${{ env.FAILED_STEP || 'Unknown' }}."
+          curl -X POST -H 'Content-type: application/json' --data "{\"text\": \"$MESSAGE\"}" ${{ secrets.SLACK_MACFC_EMBEDDED_WEBHOOK }}

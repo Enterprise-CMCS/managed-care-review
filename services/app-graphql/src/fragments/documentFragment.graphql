@@ -6,3 +6,10 @@ fragment genericDocumentFragment on GenericDocument {
     dateAdded
     downloadURL
 }
+
+fragment documentFragment on Document {
+    id
+    s3URL
+    name
+    downloadURL
+}
