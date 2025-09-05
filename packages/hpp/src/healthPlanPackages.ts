@@ -33,9 +33,9 @@ const RateTypeRecord: Record<RateType, string> = {
 }
 
 const RateMedicaidPopulationsRecord: Record<RateMedicaidPopulations, string> = {
-    MEDICARE_MEDICAID_WITH_DSNP: 'Medicare-Medicaid dually eligible individuals enrolled through a Dual-Eligible Special Needs Plan (D-SNP)',
+    MEDICARE_MEDICAID_WITH_DSNP: 'Medicare-Medicaid dual eligibles enrolled through a D-SNP (on summary page)',
     MEDICAID_ONLY: 'Medicaid-only',
-    MEDICARE_MEDICAID_WITHOUT_DSNP: `Medicare-Medicaid dually eligible individuals not enrolled through a D-SNP`
+    MEDICARE_MEDICAID_WITHOUT_DSNP: `Medicare-Medicaid dual eligibles not enrolled through a D-SNP`
 }
 const ContractExecutionStatusRecord: Record<ContractExecutionStatus, string> = {
     EXECUTED: 'Fully executed',
