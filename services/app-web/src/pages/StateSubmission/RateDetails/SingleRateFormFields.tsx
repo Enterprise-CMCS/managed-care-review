@@ -35,7 +35,7 @@ import {
 } from 'formik'
 import { ActuaryContactFields } from '../Contacts'
 import { FormikRateForm, RateDetailFormConfig } from './V2/RateDetailsV2'
-import { useFocus } from '../../../hooks/useFocus'
+import { useFocus } from '../../../hooks'
 import { ContactSupportLink } from '../../../components/ErrorAlert/ContactSupportLink'
 import { Contract } from '../../../gen/gqlClient'
 import { featureFlags } from '@mc-review/common-code'
