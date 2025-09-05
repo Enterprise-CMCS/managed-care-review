@@ -83,7 +83,6 @@ export type GenerateDocumentZipFunctionType = (
 
 /**
  * Generates a zip file containing the provided documents and uploads it to S3
- * Reimplemented from our zip lambda handler, bulk_downloads.ts
  *
  * @param documents Array of document information with s3URLs
  * @param outputPath The S3 path where the zip file should be stored
