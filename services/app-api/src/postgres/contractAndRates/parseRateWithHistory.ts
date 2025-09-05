@@ -28,8 +28,6 @@ import {
     rateFormDataToDomainModel,
     getParentContractID,
     DRAFT_PARENT_PLACEHOLDER,
-    setDateAddedForContractRevisions,
-    setDateAddedForRateRevisions,
 } from './prismaSharedContractRateHelpers'
 import type {
     RateTableWithoutDraftContractsPayload,
@@ -177,9 +175,6 @@ function rateWithoutDraftContractsToDomainModel(
         return parentContractID
     }
 
-    // Set the document date added
-    setDateAddedForRateRevisions(submittedRevisions)
-
     // Add contract date added
     const packageRateRevisions: RateRevisionType[] = []
     //NOTE: This will not display the actual date added for linked contracts because we do not query all the linked contract revisions
@@ -193,17 +188,6 @@ function rateWithoutDraftContractsToDomainModel(
             }
             packageContractRevisions[cRev.contract.id].push(cRev)
         }
-    }
-
-    /**
-     * Set dateAdded for packageSubmissions.
-     * Frontend currently uses rate.revisions but will migrate to packageSubmissions.
-     * This temporary fix will be removed once dateAdded is set at submission time.
-     */
-    setDateAddedForRateRevisions(packageRateRevisions)
-
-    for (const cRevs of Object.values(packageContractRevisions)) {
-        setDateAddedForContractRevisions(cRevs)
     }
 
     const status = getContractRateStatus(rateRevisions)

@@ -8,11 +8,7 @@ import type { ContractWithoutDraftRatesType } from '../../domain-models/contract
 import type { ContractPackageSubmissionType } from '../../domain-models/contractAndRates/packageSubmissions'
 import { rateWithoutDraftContractsToDomainModel } from './parseRateWithHistory'
 import type { ContractRevisionTableWithFormData } from './prismaSharedContractRateHelpers'
-import {
-    getConsolidatedContractStatus,
-    setDateAddedForContractRevisions,
-    setDateAddedForRateRevisions,
-} from './prismaSharedContractRateHelpers'
+import { getConsolidatedContractStatus } from './prismaSharedContractRateHelpers'
 import {
     rateRevisionToDomainModel,
     unsortedRatesRevisionsToDomainModel,
@@ -202,12 +198,6 @@ function contractWithHistoryToDomainModelWithoutRates(
             }
             packageRateRevisions[rrev.rateID].push(rrev)
         }
-    }
-    setDateAddedForContractRevisions(packageContractRevisions)
-
-    //NOTE: This will not display the actual date added for linked rates because we do not query all the linked rate revisions
-    for (const rrevs of Object.values(packageRateRevisions)) {
-        setDateAddedForRateRevisions(rrevs)
     }
 
     const status = getContractRateStatus(contract.revisions)
