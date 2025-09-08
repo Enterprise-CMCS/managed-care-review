@@ -47,7 +47,7 @@ jobs:
 
       - name: Security Sync
         id: sync_step
-        uses: Enterprise-CMCS/mac-fc-security-hub-visibility@v2.1.9
+        uses: Enterprise-CMCS/mac-fc-security-hub-visibility@v2.1.10
         with:
           jira-token: ${{ secrets.JIRA_ENT_USER_TOKEN }}
           jira-username: ${{ secrets.JIRA_USERNAME }}
