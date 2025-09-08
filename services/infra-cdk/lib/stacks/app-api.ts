@@ -738,7 +738,7 @@ export class AppApiStack extends BaseStack {
             Secret.fromSecretNameV2(
                 this,
                 'JwtSecret',
-                `api_jwt_secret_${this.stage}`
+                `mcr-cdk-api-jwt-secret-${this.stage}`
             )
                 .secretValueFromJson('jwtsigningkey')
                 .unsafeUnwrap()
