@@ -41,7 +41,11 @@ export class Postgres extends BaseStack {
         })
 
         const isReview = isReviewEnvironment(this.stage)
-        const isTestingBranch = this.stage === 'mtcdkoidc' //TODO: remove. temp deploy postgres in this branch
+        const isTestingBranch =
+            this.stage === 'mtcdkoidc' || this.stage === 'mtreviewcdk'
+        //TODO: remove after promotion. Temporarily allowing review branches to create their own Aurora
+        //clusters during CDK testing phase. Post-promotion, all review environments should connect
+        //to the shared CDK dev database instead of creating individual clusters.
 
         // Create VPC endpoint for Secrets Manager (needed by Lambda functions)
         this.vpcEndpoint = this.createSecretsManagerVpcEndpoint(props)
