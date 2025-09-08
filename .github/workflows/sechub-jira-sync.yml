@@ -16,7 +16,7 @@ jobs:
     strategy:
       max-parallel: 1
       matrix:
-        environment: ["prod"]  # add more like "val","master" later if needed
+        environment: ["dev"]  # add more like "val","master" later if needed
       fail-fast: false
     environment:
       name: ${{ matrix.environment }}
