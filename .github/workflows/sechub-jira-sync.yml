@@ -43,7 +43,7 @@ jobs:
         uses: aws-actions/configure-aws-credentials@v4
         with:
           aws-region: ${{ secrets.AWS_DEFAULT_REGION }}
-          role-to-assume: ${{ secrets.SECHUBJIRA_AWS_OIDC_ROLE_TO_ASSUME }}
+          role-to-assume: ${{ secrets.PROD_AWS_ACCOUNT_ID }}
 
       - name: Security Sync
         id: sync_step
