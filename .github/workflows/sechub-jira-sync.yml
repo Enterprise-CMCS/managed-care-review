@@ -2,6 +2,7 @@ name: Security Sync
 
 on:
   workflow_dispatch: # for testing and manual runs
+  push:
   schedule:
     - cron: "25 1 * * *" # daily at 8:25 PM EST
 
