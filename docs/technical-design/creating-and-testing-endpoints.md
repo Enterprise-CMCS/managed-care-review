@@ -356,8 +356,6 @@ API Gateway handlers have a hard timeout of 30 seconds, which we cannot modify o
 
 Turning our attention to `services/app-api/src/handlers/reports.main`, note the return type of the `main` function. An `APIGatewayProxyHandler` type imposes constraints on what we can return; in this case, an HTTP response. The majority of our handlers have this `APIGatewayProxyHandler` type. You can inspect that type definition in your code editor to see other possible return types.
 
-One other handler to examine as a model is `/app-api/handlers/bulk_download.ts`. This code interacts with AWS S3, which is our file storage service. It's quite common to have lambdas that upload, download, delete, or read from an S3 bucket, or that run when one of those events is triggered by another lambda.
-
 ## Summary
 
 Creating a new endpoint is fairly complex process that will require planning and collaboration. This doc is intended to orient you to the task and give you some context for terms and decision points, but when in doubt, always talk to your teammates!
