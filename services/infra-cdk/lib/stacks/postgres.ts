@@ -99,7 +99,6 @@ export class Postgres extends BaseStack {
                 subnetType: SubnetType.PRIVATE_WITH_EGRESS,
             },
             securityGroups: [props.lambdaSecurityGroup],
-            privateDnsEnabled: true,
         })
     }
 

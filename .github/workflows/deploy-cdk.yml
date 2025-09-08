@@ -468,9 +468,10 @@ jobs:
 
   deploy-cdk-app:
     needs:
-      [begin-deployment, build-lambda-layers, web-unit-tests, api-unit-tests]
+      [begin-deployment, deploy-cdk-infrastructure, build-lambda-layers, web-unit-tests, api-unit-tests]
     if: |
       always() &&
+      needs.deploy-cdk-infrastructure.result == 'success' &&
       needs.build-lambda-layers.result == 'success' &&
       needs.web-unit-tests.result == 'success' &&
       needs.api-unit-tests.result == 'success' &&
