@@ -388,12 +388,14 @@ jobs:
       [
         begin-deployment,
         deploy-cdk-infrastructure,
+        deploy-cdk-app,
         web-unit-tests,
         api-unit-tests,
       ]
     if: |
       always() &&
       needs.deploy-cdk-infrastructure.result == 'success' &&
+      needs.deploy-cdk-app.result == 'success' &&
       needs.web-unit-tests.result == 'success' &&
       needs.api-unit-tests.result == 'success' &&
       needs.begin-deployment.result == 'success'
