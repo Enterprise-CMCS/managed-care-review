@@ -202,6 +202,9 @@ describe('configureCorsHeaders', () => {
 
     // Spy on isOriginAllowed only within this describe block
     const mockIsOriginAllowed = vi.spyOn({ isOriginAllowed }, 'isOriginAllowed')
+    const mockConsoleError = vi
+        .spyOn(console, 'error')
+        .mockImplementation(() => {})
 
     beforeEach(() => {
         vi.clearAllMocks()
@@ -211,6 +214,7 @@ describe('configureCorsHeaders', () => {
     afterAll(() => {
         process.env = originalEnv
         mockIsOriginAllowed.mockRestore()
+        mockConsoleError.mockRestore()
     })
 
     const createMockEvent = (origin?: string): APIGatewayProxyEvent => ({
@@ -365,13 +369,12 @@ describe('configureCorsHeaders', () => {
                 mockIsOriginAllowed.mockReturnValue(true)
             }
 
-            const result = configureCorsHeaders(response, event)
+            configureCorsHeaders(response, event)
 
             if (expectedError) {
-                expect(result).toBeInstanceOf(Error)
-                expect((result as Error).message).toBe(expectedError)
+                expect(mockConsoleError).toHaveBeenCalledWith(expectedError)
             } else {
-                expect(result).toBeUndefined()
+                expect(mockConsoleError).not.toHaveBeenCalled()
             }
         }
     )

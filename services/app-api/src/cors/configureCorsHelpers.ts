@@ -29,15 +29,19 @@ export const configureCorsHeaders = (
         const requestOrigin = event.headers?.origin || event.headers?.Origin
 
         if (!requestOrigin) {
-            return Error(
+            console.error(
                 'Cors configuration error. Request origin is undefined.'
             )
+            console.info('Request data')
+            console.info(event.headers)
+            return
         }
 
         if (!process.env.APPLICATION_ENDPOINT) {
-            return Error(
+            console.error(
                 'Cors configuration error. APPLICATION_ENDPOINT environment variable is undefined.'
             )
+            return
         }
 
         const allowedOrigins = [
@@ -49,9 +53,10 @@ export const configureCorsHeaders = (
 
         // Return no cors headers if origin is not allowed.
         if (!isOriginAllowed(requestOrigin, allowedOrigins)) {
-            return Error(
+            console.error(
                 `Cors configuration error. Request origin ${requestOrigin} not allowed. Allowed Origins: ${allowedOrigins}`
             )
+            return
         }
 
         console.info('Cors Configuration:', {
