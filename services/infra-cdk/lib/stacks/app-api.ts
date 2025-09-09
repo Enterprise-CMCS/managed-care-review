@@ -358,19 +358,24 @@ export class AppApiStack extends BaseStack {
         role: Role,
         environment: Record<string, string>
     ): NodejsFunction {
-        // Import VPC and security group from network stack outputs
-        const networkStackName = ResourceNames.stackName('network', this.stage)
-        const vpcId = Fn.importValue(`${networkStackName}-VpcId`)
-        const sgId = Fn.importValue(`${networkStackName}-LambdaSecurityGroupId`)
+        // Validate required environment variables for VPC configuration
+        const required = ['VPC_ID', 'SG_ID']
+        const missing = required.filter((envVar) => !process.env[envVar])
+        if (missing.length > 0) {
+            throw new Error(
+                `Missing required environment variables for migrate function: ${missing.join(', ')}`
+            )
+        }
 
+        // Import VPC and security group from environment variables (matches serverless pattern)
         const vpc = Vpc.fromLookup(this, 'ImportedVpc', {
-            vpcId,
+            vpcId: process.env.VPC_ID!,
         })
 
         const lambdaSecurityGroup = SecurityGroup.fromSecurityGroupId(
             this,
             'ImportedSecurityGroup',
-            sgId
+            process.env.SG_ID!
         )
 
         const prismaMigrationLayer = new LayerVersion(
@@ -466,19 +471,24 @@ export class AppApiStack extends BaseStack {
         role: Role,
         environment: Record<string, string>
     ): NodejsFunction {
-        // Import VPC and security group from network stack outputs
-        const networkStackName = ResourceNames.stackName('network', this.stage)
-        const vpcId = Fn.importValue(`${networkStackName}-VpcId`)
-        const sgId = Fn.importValue(`${networkStackName}-LambdaSecurityGroupId`)
+        // Validate required environment variables for VPC configuration
+        const required = ['VPC_ID', 'SG_ID']
+        const missing = required.filter((envVar) => !process.env[envVar])
+        if (missing.length > 0) {
+            throw new Error(
+                `Missing required environment variables for GraphQL function: ${missing.join(', ')}`
+            )
+        }
 
+        // Import VPC and security group from environment variables (matches serverless pattern)
         const vpc = Vpc.fromLookup(this, 'GraphqlVpc', {
-            vpcId,
+            vpcId: process.env.VPC_ID!,
         })
 
         const lambdaSecurityGroup = SecurityGroup.fromSecurityGroupId(
             this,
             'GraphqlSecurityGroup',
-            sgId
+            process.env.SG_ID!
         )
 
         const prismaEngineLayer = new LayerVersion(this, 'PrismaEngineLayer', {
