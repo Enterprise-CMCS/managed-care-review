@@ -36,6 +36,7 @@ import { LambdaFunction } from 'aws-cdk-lib/aws-events-targets'
 import { AWS_OTEL_LAYER_ARN } from './lambda-layers'
 import { ApiEndpoint } from '../constructs/api/api-endpoint'
 import path from 'path'
+import type { BundlingOptions } from 'aws-cdk-lib/aws-lambda-nodejs'
 
 /**
  * App API stack - GraphQL API with Lambda functions and dedicated API Gateway
@@ -187,34 +188,9 @@ export class AppApiStack extends BaseStack {
             environment,
             role: lambdaRole,
             layers: [otelLayer],
-            bundling: {
-                commandHooks: {
-                    beforeBundling(
-                        inputDir: string,
-                        outputDir: string
-                    ): string[] {
-                        return [
-                            `echo "CDK OTEL inputDir: ${inputDir}"`,
-                            `find ${inputDir} -name "collector.yml" 2>/dev/null || true`,
-                        ]
-                    },
-                    beforeInstall(): string[] {
-                        return []
-                    },
-                    afterBundling(
-                        inputDir: string,
-                        outputDir: string
-                    ): string[] {
-                        const repoRoot =
-                            '/home/runner/work/managed-care-review/managed-care-review'
-                        const appApiPath = `${repoRoot}/services/app-api`
-                        return [
-                            // Copy collector.yml for OTEL configuration
-                            `cp ${appApiPath}/collector.yml ${outputDir}/collector.yml || echo "collector.yml not found at ${appApiPath}/collector.yml"`,
-                        ]
-                    },
-                },
-            },
+            bundling: this.createBundling('otel', [
+                this.getOtelBundlingCommands(),
+            ]),
         })
 
         this.thirdPartyApiAuthorizerFunction = this.createFunction(
@@ -280,6 +256,73 @@ export class AppApiStack extends BaseStack {
         this.createOutputs()
     }
 
+    /**
+     * Get OTEL-specific bundling commands (collector.yml copy and license key replacement)
+     * Matches behavior from serverless esbuild configuration
+     */
+    private getOtelBundlingCommands(): (
+        outputDir: string,
+        appApiPath: string
+    ) => string[] {
+        return (outputDir: string, appApiPath: string) => [
+            // Copy collector.yml for OTEL configuration
+            `cp ${appApiPath}/collector.yml ${outputDir}/collector.yml || echo "collector.yml not found at ${appApiPath}/collector.yml"`,
+            // Replace license key placeholder with actual value (matches esbuild behavior)
+            `sed -i 's/\\\\$NR_LICENSE_KEY/${process.env.NR_LICENSE_KEY || ''}/g' "${outputDir}/collector.yml"`,
+        ]
+    }
+
+    /**
+     * Get eta templates bundling commands for GraphQL function
+     */
+    private getEtaTemplatesBundlingCommands(): (
+        outputDir: string,
+        appApiPath: string
+    ) => string[] {
+        return (outputDir: string, appApiPath: string) => [
+            // Copy eta templates for email functionality to correct location
+            `mkdir -p ${outputDir}/etaTemplates || true`,
+            `cp -r ${appApiPath}/src/emailer/etaTemplates/* ${outputDir}/etaTemplates/ || echo "etaTemplates not found at ${appApiPath}/src/emailer/etaTemplates/"`,
+        ]
+    }
+
+    /**
+     * Create generic bundling configuration that can compose different bundling steps
+     */
+    private createBundling(
+        functionName: string,
+        bundlingSteps: ((
+            outputDir: string,
+            appApiPath: string
+        ) => string[])[] = [],
+        esbuildArgs?: Record<string, string>
+    ): BundlingOptions {
+        return {
+            commandHooks: {
+                beforeBundling(inputDir: string, outputDir: string): string[] {
+                    return [
+                        `echo "CDK ${functionName} inputDir: ${inputDir}"`,
+                        `find ${inputDir} -name "collector.yml" 2>/dev/null || true`,
+                    ]
+                },
+                beforeInstall(): string[] {
+                    return []
+                },
+                afterBundling(inputDir: string, outputDir: string): string[] {
+                    const repoRoot =
+                        '/home/runner/work/managed-care-review/managed-care-review'
+                    const appApiPath = `${repoRoot}/services/app-api`
+
+                    // Execute all bundling steps and flatten the results
+                    return bundlingSteps.flatMap((step) =>
+                        step(outputDir, appApiPath)
+                    )
+                },
+            },
+            ...(esbuildArgs && { esbuildArgs }),
+        }
+    }
+
     private createFunction(
         functionName: string,
         handlerFile: string,
@@ -301,7 +344,9 @@ export class AppApiStack extends BaseStack {
                 'handlers',
                 `${handlerFile}.ts`
             ),
-            // Use CDK default bundling for now - will configure per function as needed
+            bundling: this.createBundling(functionName, [
+                this.getOtelBundlingCommands(),
+            ]),
             ...options,
         })
     }
@@ -387,37 +432,14 @@ export class AppApiStack extends BaseStack {
             securityGroups: [lambdaSecurityGroup],
             bundling: {
                 externalModules: ['prisma', '@prisma/client', '.prisma'],
-                commandHooks: {
-                    beforeBundling(
-                        inputDir: string,
-                        outputDir: string
-                    ): string[] {
-                        return [
-                            `echo "CDK inputDir: ${inputDir}"`,
-                            `find ${inputDir} -name "collector.yml" 2>/dev/null || true`,
-                        ]
-                    },
-                    beforeInstall(): string[] {
-                        return []
-                    },
-                    afterBundling(
-                        inputDir: string,
-                        outputDir: string
-                    ): string[] {
-                        // Same bundling commands as GraphQL function for consistency
-                        const repoRoot =
-                            '/home/runner/work/managed-care-review/managed-care-review'
-                        const appApiPath = `${repoRoot}/services/app-api`
-                        return [
-                            // Copy collector.yml for OTEL configuration
-                            `cp ${appApiPath}/collector.yml ${outputDir}/collector.yml || echo "collector.yml not found at ${appApiPath}/collector.yml"`,
-                        ]
-                    },
-                },
-                esbuildArgs: {
-                    '--loader:.graphql': 'text',
-                    '--loader:.gql': 'text',
-                },
+                ...this.createBundling(
+                    'migrate',
+                    [this.getOtelBundlingCommands()],
+                    {
+                        '--loader:.graphql': 'text',
+                        '--loader:.gql': 'text',
+                    }
+                ),
             },
         })
 
@@ -513,44 +535,17 @@ export class AppApiStack extends BaseStack {
                 sourceMap: true,
                 target: 'node20',
                 externalModules: ['prisma', '@prisma/client'],
-                commandHooks: {
-                    beforeBundling(
-                        inputDir: string,
-                        outputDir: string
-                    ): string[] {
-                        return [
-                            // Debug: show what's in the inputDir and find our files
-                            `echo "CDK inputDir: ${inputDir}"`,
-                            `ls -la ${inputDir} || true`,
-                            `find ${inputDir} -name "collector.yml" 2>/dev/null || true`,
-                            `find ${inputDir} -name "etaTemplates" -type d 2>/dev/null || true`,
-                        ]
-                    },
-                    beforeInstall(): string[] {
-                        return []
-                    },
-                    afterBundling(
-                        inputDir: string,
-                        outputDir: string
-                    ): string[] {
-                        // Use absolute path to the app-api directory since CDK bundling
-                        // runs from the cdk directory, not app-api directory
-                        const repoRoot =
-                            '/home/runner/work/managed-care-review/managed-care-review'
-                        const appApiPath = `${repoRoot}/services/app-api`
-                        return [
-                            // Copy collector.yml for OTEL configuration
-                            `cp ${appApiPath}/collector.yml ${outputDir}/collector.yml || echo "collector.yml not found at ${appApiPath}/collector.yml"`,
-                            // Copy eta templates for email functionality to correct location
-                            `mkdir -p ${outputDir}/etaTemplates || true`,
-                            `cp -r ${appApiPath}/src/emailer/etaTemplates/* ${outputDir}/etaTemplates/ || echo "etaTemplates not found at ${appApiPath}/src/emailer/etaTemplates/"`,
-                        ]
-                    },
-                },
-                esbuildArgs: {
-                    '--loader:.graphql': 'text',
-                    '--loader:.gql': 'text',
-                },
+                ...this.createBundling(
+                    'graphql',
+                    [
+                        this.getOtelBundlingCommands(),
+                        this.getEtaTemplatesBundlingCommands(),
+                    ],
+                    {
+                        '--loader:.graphql': 'text',
+                        '--loader:.gql': 'text',
+                    }
+                ),
             },
         })
 
