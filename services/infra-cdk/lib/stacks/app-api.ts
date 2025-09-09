@@ -732,7 +732,7 @@ export class AppApiStack extends BaseStack {
                 '/configuration/ld_sdk_key_feds'
             )
 
-        // JWT Secret from Secrets Manager - similar to serverless pattern
+        // JWT Secret from Secrets Manager - reference secret created by postgres stack
         const jwtSecret =
             process.env.JWT_SECRET ||
             Secret.fromSecretNameV2(

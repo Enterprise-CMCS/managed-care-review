@@ -9,6 +9,7 @@ import {
 } from 'aws-cdk-lib/aws-ec2'
 import type { IDatabaseCluster } from 'aws-cdk-lib/aws-rds'
 import type { ISecret } from 'aws-cdk-lib/aws-secretsmanager'
+import { Secret } from 'aws-cdk-lib/aws-secretsmanager'
 import { Function, Runtime, Code } from 'aws-cdk-lib/aws-lambda'
 import { PolicyStatement, Effect } from 'aws-cdk-lib/aws-iam'
 import { CfnOutput, Duration } from 'aws-cdk-lib'
@@ -29,6 +30,7 @@ export interface PostgresProps extends BaseStackProps {
  */
 export class Postgres extends BaseStack {
     public readonly databaseSecret: ISecret
+    public readonly jwtSecret: ISecret
     public readonly cluster?: IDatabaseCluster
     public readonly logicalDbManagerFunction: Function
     public readonly vpcEndpoint: InterfaceVpcEndpoint
@@ -49,6 +51,9 @@ export class Postgres extends BaseStack {
 
         // Create VPC endpoint for Secrets Manager (needed by Lambda functions)
         this.vpcEndpoint = this.createSecretsManagerVpcEndpoint(props)
+
+        // Create JWT secret for API authentication
+        this.jwtSecret = this.createJwtSecret()
 
         if (!isReview || isTestingBranch) {
             // Create dedicated Aurora cluster for:
@@ -99,6 +104,22 @@ export class Postgres extends BaseStack {
                 subnetType: SubnetType.PRIVATE_WITH_EGRESS,
             },
             securityGroups: [props.lambdaSecurityGroup],
+        })
+    }
+
+    /**
+     * Create JWT secret for API authentication
+     */
+    private createJwtSecret(): ISecret {
+        return new Secret(this, 'JwtSecret', {
+            secretName: `mcr-cdk-api-jwt-secret-${this.stage}`,
+            description: 'JWT secret for API authentication',
+            generateSecretString: {
+                secretStringTemplate: '{}',
+                generateStringKey: 'jwtsigningkey',
+                passwordLength: 64,
+                excludeCharacters: '"@/\\',
+            },
         })
     }
 
@@ -174,6 +195,12 @@ export class Postgres extends BaseStack {
             value: this.databaseSecret.secretArn,
             description: 'CDK PostgreSQL database secret ARN',
             exportName: this.exportName('PostgresSecretArn'),
+        })
+
+        new CfnOutput(this, 'JwtSecretArn', {
+            value: this.jwtSecret.secretArn,
+            description: 'JWT secret ARN for API authentication',
+            exportName: this.exportName('JwtSecretArn'),
         })
 
         if (this.cluster) {
