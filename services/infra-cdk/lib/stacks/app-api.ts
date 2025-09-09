@@ -306,15 +306,10 @@ export class AppApiStack extends BaseStack {
         role: Role,
         environment: Record<string, string>
     ): NodejsFunction {
-        // Import VPC and security group
-        const vpcId = process.env.VPC_ID
-        const sgId = process.env.SG_ID
-
-        if (!vpcId || !sgId) {
-            throw new Error(
-                'Missing required environment variables: VPC_ID, SG_ID for migrate function'
-            )
-        }
+        // Import VPC and security group from network stack outputs
+        const networkStackName = ResourceNames.stackName('network', this.stage)
+        const vpcId = Fn.importValue(`${networkStackName}-VpcId`)
+        const sgId = Fn.importValue(`${networkStackName}-LambdaSecurityGroupId`)
 
         const vpc = Vpc.fromLookup(this, 'ImportedVpc', {
             vpcId,
@@ -442,15 +437,10 @@ export class AppApiStack extends BaseStack {
         role: Role,
         environment: Record<string, string>
     ): NodejsFunction {
-        // Import VPC and security group (same as migrate function)
-        const vpcId = process.env.VPC_ID
-        const sgId = process.env.SG_ID
-
-        if (!vpcId || !sgId) {
-            throw new Error(
-                'Missing required environment variables: VPC_ID, SG_ID for GraphQL function'
-            )
-        }
+        // Import VPC and security group from network stack outputs
+        const networkStackName = ResourceNames.stackName('network', this.stage)
+        const vpcId = Fn.importValue(`${networkStackName}-VpcId`)
+        const sgId = Fn.importValue(`${networkStackName}-LambdaSecurityGroupId`)
 
         const vpc = Vpc.fromLookup(this, 'GraphqlVpc', {
             vpcId,

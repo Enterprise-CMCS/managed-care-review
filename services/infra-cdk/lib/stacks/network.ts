@@ -1,6 +1,7 @@
 import { BaseStack, type BaseStackProps } from '../constructs/base'
 import type { Construct } from 'constructs'
 import * as ec2 from 'aws-cdk-lib/aws-ec2'
+import { CfnOutput } from 'aws-cdk-lib'
 
 export interface NetworkProps extends BaseStackProps {
     // No additional props needed - everything comes from environment variables
@@ -30,13 +31,22 @@ export class Network extends BaseStack {
         // Initialize resources directly in constructor (standard CDK pattern)
         this.vpc = this.importVpc()
         this.lambdaSecurityGroup = this.importSecurityGroup()
+
+        // Create outputs for other stacks to reference
+        this.createOutputs()
     }
 
     /**
      * Validate required environment variables are present
      */
     private validateEnvironment(): void {
-        const required = ['VPC_ID', 'SG_ID']
+        const required = [
+            'VPC_ID',
+            'SG_ID',
+            'SUBNET_PRIVATE_A_ID',
+            'SUBNET_PRIVATE_B_ID',
+            'SUBNET_PRIVATE_C_ID',
+        ]
         const missing = required.filter((envVar) => !process.env[envVar])
 
         if (missing.length > 0) {
@@ -89,5 +99,38 @@ export class Network extends BaseStack {
             securityGroupIds: [process.env.SG_ID!],
             subnetIds: this.getPrivateSubnetIds(),
         }
+    }
+
+    /**
+     * Create stack outputs for other stacks to reference
+     */
+    private createOutputs(): void {
+        new CfnOutput(this, 'VpcId', {
+            value: this.vpc.vpcId,
+            exportName: this.exportName('VpcId'),
+            description: 'VPC ID for Lambda functions',
+        })
+
+        new CfnOutput(this, 'LambdaSecurityGroupId', {
+            value: this.lambdaSecurityGroup.securityGroupId,
+            exportName: this.exportName('LambdaSecurityGroupId'),
+            description: 'Security Group ID for Lambda functions',
+        })
+
+        // Export subnet IDs for Lambda functions
+        const subnetIds = this.getPrivateSubnetIds()
+        subnetIds.forEach((subnetId, index) => {
+            new CfnOutput(
+                this,
+                `PrivateSubnetId${String.fromCharCode(65 + index)}`,
+                {
+                    value: subnetId,
+                    exportName: this.exportName(
+                        `PrivateSubnetId${String.fromCharCode(65 + index)}`
+                    ),
+                    description: `Private subnet ${String.fromCharCode(65 + index)} ID`,
+                }
+            )
+        })
     }
 }
