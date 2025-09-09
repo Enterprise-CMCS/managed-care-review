@@ -4,7 +4,7 @@
     are multiple api test that still call submitHPP.
     This will be addressed in https://jiraent.cms.gov/browse/MCR-4552
 */
-import { ForbiddenError, UserInputError } from 'apollo-server-lambda'
+import { createForbiddenError, createUserInputError } from '../errorUtils'
 import {
     hasValidContract,
     hasValidDocuments,
@@ -21,7 +21,7 @@ import { isStateUser } from '../../domain-models'
 import type { MutationResolvers, State } from '../../gen/gqlServer'
 import { logError, logSuccess } from '../../logger'
 import type { Store } from '../../postgres'
-import { NotFoundError } from '../../postgres'
+import { NotFoundError, handleNotFoundError } from '../../postgres'
 import {
     setResolverDetailsOnActiveSpan,
     setErrorAttributesOnActiveSpan,
@@ -86,7 +86,7 @@ const validateStatusAndUpdateInfo = (
         const errMessage = 'Resubmission requires a reason'
         logError('submitHealthPlanPackage', errMessage)
         setErrorAttributesOnActiveSpan(errMessage, span)
-        throw new UserInputError(errMessage)
+        throw createUserInputError(errMessage)
     } else if (status === 'RESUBMITTED' || status === 'SUBMITTED') {
         const errMessage = `Attempted to submit an already submitted package.`
         logError('submitHealthPlanPackage', errMessage)
@@ -225,7 +225,9 @@ export function submitHealthPlanPackageResolver(
                 'user not authorized to fetch state data',
                 span
             )
-            throw new ForbiddenError('user not authorized to fetch state data')
+            throw createForbiddenError(
+                'user not authorized to fetch state data'
+            )
         }
         const stateFromCurrentUser: State['code'] = user.stateCode
 
@@ -241,12 +243,7 @@ export function submitHealthPlanPackageResolver(
             setErrorAttributesOnActiveSpan(errMessage, span)
 
             if (contractWithHistory instanceof NotFoundError) {
-                throw new GraphQLError(errMessage, {
-                    extensions: {
-                        code: 'NOT_FOUND',
-                        cause: 'DB_ERROR',
-                    },
-                })
+                throw handleNotFoundError(contractWithHistory)
             }
 
             throw new GraphQLError(errMessage, {
@@ -282,7 +279,7 @@ export function submitHealthPlanPackageResolver(
                 'user not authorized to fetch data from a different state',
                 span
             )
-            throw new ForbiddenError(
+            throw createForbiddenError(
                 'user not authorized to fetch data from a different state'
             )
         }
@@ -354,9 +351,7 @@ export function submitHealthPlanPackageResolver(
             const errMessage = maybeLocked.message
             logError('submitHealthPlanPackage', errMessage)
             setErrorAttributesOnActiveSpan(errMessage, span)
-            throw new UserInputError(errMessage, {
-                message: maybeLocked.message,
-            })
+            throw createUserInputError(errMessage)
         }
 
         // If this contract is being submitted as CONTRACT_ONLY but still has associations with rates

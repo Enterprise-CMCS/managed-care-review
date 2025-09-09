@@ -1,4 +1,4 @@
-import { ForbiddenError, UserInputError } from 'apollo-server-lambda'
+import { createForbiddenError, createUserInputError } from '../errorUtils'
 import type { UnlockedHealthPlanFormDataType } from '@mc-review/hpp'
 import { base64ToDomain } from '@mc-review/hpp'
 import {
@@ -8,7 +8,7 @@ import {
 import type { MutationResolvers } from '../../gen/gqlServer'
 import { logError, logSuccess } from '../../logger'
 import type { Store } from '../../postgres'
-import { NotFoundError } from '../../postgres'
+import { NotFoundError, handleNotFoundError } from '../../postgres'
 import {
     setErrorAttributesOnActiveSpan,
     setResolverDetailsOnActiveSpan,
@@ -41,7 +41,9 @@ export function updateHealthPlanFormDataResolver(
                 'user not authorized to modify state data',
                 span
             )
-            throw new ForbiddenError('user not authorized to modify state data')
+            throw createForbiddenError(
+                'user not authorized to modify state data'
+            )
         }
 
         const formDataResult = base64ToDomain(input.healthPlanFormData)
@@ -51,9 +53,7 @@ export function updateHealthPlanFormDataResolver(
                 formDataResult.message
             logError('updateHealthPlanFormData', errMessage)
             setErrorAttributesOnActiveSpan(errMessage, span)
-            throw new UserInputError(errMessage, {
-                argumentName: 'healthPlanFormData',
-            })
+            throw createUserInputError(errMessage, 'healthPlanFormData')
         }
 
         // don't send a LockedFormData to the update endpoint
@@ -61,9 +61,7 @@ export function updateHealthPlanFormDataResolver(
             const errMessage = `Attempted to update with a StateSubmission: ${input.pkgID}`
             logError('updateHealthPlanFormData', errMessage)
             setErrorAttributesOnActiveSpan(errMessage, span)
-            throw new UserInputError(errMessage, {
-                argumentName: 'healthPlanFormData',
-            })
+            throw createUserInputError(errMessage, 'healthPlanFormData')
         }
 
         const unlockedFormData: UnlockedHealthPlanFormDataType = formDataResult
@@ -74,9 +72,10 @@ export function updateHealthPlanFormDataResolver(
                 const errMessage = `Attempted to update a rateInfo that has no ID: ${input.pkgID} ${rateFD}`
                 logError('updateHealthPlanFormData', errMessage)
                 setErrorAttributesOnActiveSpan(errMessage, span)
-                throw new UserInputError(errMessage, {
-                    argumentName: 'healthPlanFormData.rateInfo',
-                })
+                throw createUserInputError(
+                    errMessage,
+                    'healthPlanFormData.rateInfo'
+                )
             }
         }
 
@@ -100,12 +99,7 @@ export function updateHealthPlanFormDataResolver(
             setErrorAttributesOnActiveSpan(errMessage, span)
 
             if (contractWithHistory instanceof NotFoundError) {
-                throw new GraphQLError(errMessage, {
-                    extensions: {
-                        code: 'NOT_FOUND',
-                        cause: 'DB_ERROR',
-                    },
-                })
+                throw handleNotFoundError(contractWithHistory)
             }
 
             throw new GraphQLError(errMessage, {
@@ -127,7 +121,7 @@ export function updateHealthPlanFormDataResolver(
                 'user not authorized to fetch data from a different state',
                 span
             )
-            throw new ForbiddenError(
+            throw createForbiddenError(
                 'user not authorized to fetch data from a different state'
             )
         }
@@ -137,9 +131,7 @@ export function updateHealthPlanFormDataResolver(
             const errMessage = `Package is not in editable state: ${input.pkgID} status: ${contractWithHistory.status}`
             logError('updateHealthPlanFormData', errMessage)
             setErrorAttributesOnActiveSpan(errMessage, span)
-            throw new UserInputError(errMessage, {
-                argumentName: 'pkg',
-            })
+            throw createUserInputError(errMessage, 'pkg')
         }
 
         // If updatedAt does not match concurrent editing occurred.
@@ -150,7 +142,7 @@ export function updateHealthPlanFormDataResolver(
             const errMessage = `Concurrent update error: The data you are trying to modify has changed since you last retrieved it. Please refresh the page to continue.`
             logError('updateHealthPlanFormData', errMessage)
             setErrorAttributesOnActiveSpan(errMessage, span)
-            throw new UserInputError(errMessage)
+            throw createUserInputError(errMessage)
         }
 
         // Check for any rate updates

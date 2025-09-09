@@ -10,8 +10,8 @@ import { canRead } from '../../authorization/oauthAuthorization'
 import { logError, logSuccess } from '../../logger'
 import type { S3ClientT } from '../../s3'
 import { parseKey, parseBucketName } from '../../s3'
-import { UserInputError } from 'apollo-server-core'
 import type { SharedDocument } from '../../domain-models/DocumentType'
+import { createUserInputError } from '../errorUtils'
 
 export function fetchDocumentResolver(
     store: Store,
@@ -83,10 +83,7 @@ export function fetchDocumentResolver(
                 : input.expiresIn
         if (expiresIn > 604800 || expiresIn <= 0) {
             const errMessage = `expiresIn field must be in range: 1 - 604,800 seconds (1 week). currently set to ${input.expiresIn}`
-            throw new UserInputError(errMessage, {
-                argumentName: 'expiresIn',
-                cause: 'BAD_USER_INPUT',
-            })
+            throw createUserInputError(errMessage, 'expiresIn')
         }
         const qaDocs = [
             'CONTRACT_QUESTION_DOC',

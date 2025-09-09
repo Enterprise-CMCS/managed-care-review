@@ -16,9 +16,8 @@ import {
     ContractPackageSubmission,
     IndexContractsForDashboardDocument,
 } from '../gen/gqlClient'
-import { wrapApolloResult } from '@mc-review/helpers'
+import { wrapApolloResult, handleApolloError } from '@mc-review/helpers'
 import { recordJSException } from '@mc-review/otel'
-import { handleApolloError } from '@mc-review/helpers'
 import { ApolloError } from '@apollo/client'
 import type { InterimState } from '../pages/StateSubmission/ErrorOrLoadingPage'
 
@@ -106,13 +105,15 @@ const useContractForm = (contractID?: string): UseContractForm => {
             if (!createdSubmission) {
                 setShowPageErrorMessage(true)
                 recordJSException(
-                    `StateSubmissionForm: Apollo error reported. Error message: Failed to create form data ${createResult}`
+                    `StateSubmissionForm: GraphQL error reported. Error message: Failed to create form data ${createResult}`
                 )
                 return new Error('Failed to create form data')
             }
 
             // Manually add new contract into cache to prevent pop-in.
-            const indexContracts = client.readQuery({ query: IndexContractsForDashboardDocument })
+            const indexContracts = client.readQuery({
+                query: IndexContractsForDashboardDocument,
+            })
             if (indexContracts) {
                 client.writeQuery({
                     query: IndexContractsForDashboardDocument,
@@ -135,7 +136,7 @@ const useContractForm = (contractID?: string): UseContractForm => {
         } catch (serverError) {
             setShowPageErrorMessage(true)
             recordJSException(
-                `StateSubmissionForm: Apollo error reported. Error message: ${serverError.message}`
+                `StateSubmissionForm: GraphQL error reported. Error message: ${serverError.message}`
             )
             return new Error(serverError)
         }
@@ -186,7 +187,7 @@ const useContractForm = (contractID?: string): UseContractForm => {
             if (!updatedSubmission) {
                 setShowPageErrorMessage(true)
                 recordJSException(
-                    `StateSubmissionForm: Apollo error reported. Error message: Failed to update form data ${updateResult}`
+                    `StateSubmissionForm: GraphQL error reported. Error message: Failed to update form data ${updateResult}`
                 )
                 return new Error('Failed to update form data')
             }
@@ -194,7 +195,7 @@ const useContractForm = (contractID?: string): UseContractForm => {
         } catch (serverError) {
             setShowPageErrorMessage(true)
             recordJSException(
-                `StateSubmissionForm: Apollo error reported. Error message: ${serverError.message}`
+                `StateSubmissionForm: GraphQL error reported. Error message: ${serverError.message}`
             )
             return new Error(serverError)
         }

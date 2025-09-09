@@ -1,4 +1,4 @@
-import { ForbiddenError, UserInputError } from 'apollo-server-lambda'
+import { createForbiddenError, createUserInputError } from '../errorUtils'
 import { GraphQLError } from 'graphql'
 import { isValidCmsDivison, hasAdminPermissions } from '../../domain-models'
 import type { MutationResolvers } from '../../gen/gqlServer'
@@ -47,12 +47,8 @@ export function updateDivisionAssignment(
                 'user not authorized to modify assignments',
                 span
             )
-            throw new ForbiddenError(
-                'user not authorized to modify assignments',
-                {
-                    code: 'FORBIDDEN',
-                    cause: 'NOT_ADMIN',
-                }
+            throw createForbiddenError(
+                'user not authorized to modify assignments'
             )
         }
         const { cmsUserID } = input
@@ -67,11 +63,11 @@ export function updateDivisionAssignment(
                 const errMsg = 'Invalid division assignment'
                 logError('updateDivisionAssignment', errMsg)
                 setErrorAttributesOnActiveSpan(errMsg, span)
-                throw new UserInputError(errMsg, {
-                    argumentName: 'divisionAssignment',
-                    argumentValues: divisionAssignment,
-                    cause: 'INVALID_DIVISION_ASSIGNMENT',
-                })
+                throw createUserInputError(
+                    errMsg,
+                    'divisionAssignment',
+                    divisionAssignment
+                )
             }
         }
 
@@ -87,11 +83,7 @@ export function updateDivisionAssignment(
                 const errMsg = 'cmsUserID does not exist'
                 logError('updateDivisionAssignment', errMsg)
                 setErrorAttributesOnActiveSpan(errMsg, span)
-                throw new UserInputError(errMsg, {
-                    argumentName: 'cmsUserID',
-                    argumentValues: cmsUserID,
-                    cause: 'CMSUSERID_NOT_EXIST',
-                })
+                throw createUserInputError(errMsg, 'cmsUserID', cmsUserID)
             }
 
             const errMsg = `Issue assigning states to user. Message: ${result.message}`

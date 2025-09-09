@@ -1,7 +1,7 @@
 import {
     constructTestPostgresServer,
     defaultFloridaProgram,
-    defaultFloridaRateProgram,
+    executeGraphQLOperation,
     unlockTestHealthPlanPackage,
     updateTestStateAssignments,
 } from '../../testHelpers/gqlHelpers'
@@ -9,7 +9,7 @@ import {
     UnlockContractDocument,
     UpdateDraftContractRatesDocument,
 } from '../../gen/gqlClient'
-import { testS3Client } from '../../../../app-web/src/testHelpers/s3Helpers'
+import { testS3Client } from '../../testHelpers'
 import { expectToBeDefined } from '../../testHelpers/assertionHelpers'
 
 import {
@@ -37,14 +37,11 @@ import {
 import { testLDService } from '../../testHelpers/launchDarklyHelpers'
 import { testEmailConfig, testEmailer } from '../../testHelpers/emailerHelpers'
 import { packageName } from '@mc-review/hpp'
-import { generateRateCertificationName } from '../rate/generateRateCertificationName'
-import { nullsToUndefined } from '../../domain-models/nullstoUndefined'
 import { NewPostgresStore } from '../../postgres'
 import { sharedTestPrismaClient } from '../../testHelpers/storeHelpers'
 
 describe('unlockContract', () => {
     const mockS3 = testS3Client()
-
     afterEach(() => {
         vi.resetAllMocks()
     })
@@ -113,7 +110,7 @@ describe('unlockContract', () => {
                 )
 
                 // Try to unlock the contract again
-                const unlockResult2 = await cmsServer.executeOperation({
+                const unlockResult2 = await executeGraphQLOperation(cmsServer, {
                     query: UnlockContractDocument,
                     variables: {
                         input: {
@@ -239,7 +236,7 @@ describe('unlockContract', () => {
                 )
 
                 // Try to unlock the contract
-                const unlockResult = await cmsServer.executeOperation({
+                const unlockResult = await executeGraphQLOperation(cmsServer, {
                     query: UnlockContractDocument,
                     variables: {
                         input: {
@@ -444,7 +441,7 @@ describe('unlockContract', () => {
         rateUpdateInput.updatedRates[1].formData.rateDateCertified =
             '2000-01-22'
 
-        const updateResult = await stateServer.executeOperation({
+        const updateResult = await executeGraphQLOperation(stateServer, {
             query: UpdateDraftContractRatesDocument,
             variables: {
                 input: rateUpdateInput,
@@ -562,7 +559,7 @@ describe('unlockContract', () => {
         rateUpdateInput.updatedRates[1].formData.rateDateCertified =
             '2000-01-22'
 
-        const updateResult = await stateServer.executeOperation({
+        const updateResult = await executeGraphQLOperation(stateServer, {
             query: UpdateDraftContractRatesDocument,
             variables: {
                 input: rateUpdateInput,
@@ -586,7 +583,7 @@ describe('unlockContract', () => {
 
         const contract = await createAndSubmitTestContractWithRate(stateServer)
 
-        const unlockResult = await stateServer.executeOperation({
+        const unlockResult = await executeGraphQLOperation(stateServer, {
             query: UnlockContractDocument,
             variables: {
                 input: {
@@ -656,7 +653,6 @@ describe('unlockContract', () => {
         const currentRevision = unlockResult.draftRevision
 
         const programs = [defaultFloridaProgram()]
-        const ratePrograms = [defaultFloridaRateProgram()]
         const name = packageName(
             unlockResult.stateCode,
             unlockResult.stateNumber,
@@ -670,15 +666,11 @@ describe('unlockContract', () => {
             throw new Error('should have a first rate with form data')
         }
 
-        const convertedFirstRateFormData = nullsToUndefined(
-            Object.assign({}, firstRateFormData)
-        )
+        const rateName = firstRateFormData.rateCertificationName
 
-        const rateName = generateRateCertificationName(
-            convertedFirstRateFormData,
-            unlockResult.stateCode,
-            ratePrograms
-        )
+        if (!rateName) {
+            throw new Error('should have a rate name')
+        }
 
         const cmsEmails = [
             ...config.devReviewTeamEmails,
@@ -746,7 +738,6 @@ describe('unlockContract', () => {
         const currentRevision = unlockResult.draftRevision
 
         const programs = [defaultFloridaProgram()]
-        const ratePrograms = [defaultFloridaRateProgram()]
         const name = packageName(
             unlockResult.stateCode,
             unlockResult.stateNumber,
@@ -760,15 +751,11 @@ describe('unlockContract', () => {
             throw new Error('should have a first rate with form data')
         }
 
-        const convertedFirstRateFormData = nullsToUndefined(
-            Object.assign({}, firstRateFormData)
-        )
+        const rateName = firstRateFormData.rateCertificationName
 
-        const rateName = generateRateCertificationName(
-            convertedFirstRateFormData,
-            unlockResult.stateCode,
-            ratePrograms
-        )
+        if (!rateName) {
+            throw new Error('should have a rate name')
+        }
 
         const stateReceiverEmails = [
             'james@example.com',
@@ -777,7 +764,7 @@ describe('unlockContract', () => {
                 (contact) => contact.email
             ),
         ]
-        // email subject line is correct for CMS email
+        // email subject line is correct for State email
         expect(mockEmailer.sendEmail).toHaveBeenNthCalledWith(
             4,
             expect.objectContaining({

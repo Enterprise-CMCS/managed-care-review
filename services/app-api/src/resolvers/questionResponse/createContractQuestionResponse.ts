@@ -5,8 +5,8 @@ import {
     setErrorAttributesOnActiveSpan,
     setSuccessAttributesOnActiveSpan,
 } from '../attributeHelper'
-import { ForbiddenError, UserInputError } from 'apollo-server-lambda'
-import { NotFoundError } from '../../postgres'
+import { createForbiddenError, createUserInputError } from '../errorUtils'
+import { NotFoundError } from '../../postgres/postgresErrors'
 import type { Store } from '../../postgres'
 import { GraphQLError } from 'graphql/index'
 import type { Emailer } from '../../emailer'
@@ -43,14 +43,14 @@ export function createContractQuestionResponseResolver(
             const msg = 'user not authorized to create a question response'
             logError('createContractQuestionResponse', msg)
             setErrorAttributesOnActiveSpan(msg, span)
-            throw new ForbiddenError(msg)
+            throw createForbiddenError(msg)
         }
 
         if (input.documents.length === 0) {
             const msg = 'question response documents are required'
             logError('createContractQuestionResponse', msg)
             setErrorAttributesOnActiveSpan(msg, span)
-            throw new UserInputError(msg)
+            throw createUserInputError(msg)
         }
         const docs = input.documents.map((doc) => {
             return {
@@ -73,7 +73,7 @@ export function createContractQuestionResponseResolver(
                 const errMessage = `Contract question with ID: ${input.questionID} not found to attach response to`
                 logError('createContractQuestionResponse', errMessage)
                 setErrorAttributesOnActiveSpan(errMessage, span)
-                throw new UserInputError(errMessage)
+                throw createUserInputError(errMessage)
             }
 
             const errMessage = `Issue creating question response for contract question ${input.questionID}. Message: ${createResponseResult.message}`
@@ -126,7 +126,7 @@ export function createContractQuestionResponseResolver(
             const errMessage = `Issue creating response for contract. Message: Cannot create response for contract in ${contract.consolidatedStatus} status`
             logError('createContractQuestionResponse', errMessage)
             setErrorAttributesOnActiveSpan(errMessage, span)
-            throw new UserInputError(errMessage)
+            throw createUserInputError(errMessage)
         }
 
         const statePrograms = store.findStatePrograms(contract.stateCode)

@@ -7,7 +7,7 @@ import {
 } from '../attributeHelper'
 import { NotFoundError } from '../../postgres'
 import { logError, logSuccess } from '../../logger'
-import { ForbiddenError, UserInputError } from 'apollo-server-lambda'
+import { createForbiddenError, createUserInputError } from '../errorUtils'
 import { GraphQLError } from 'graphql/index'
 import { hasCMSPermissions } from '../../domain-models'
 import type { StateCodeType } from '../../testHelpers'
@@ -45,7 +45,7 @@ export function undoWithdrawContract(
                 'user not authorized to undo a submission withdrawal'
             logError('undoWithdrawContract', message)
             setErrorAttributesOnActiveSpan(message, span)
-            throw new ForbiddenError(message)
+            throw createForbiddenError(message)
         }
 
         const contractWithHistory =
@@ -56,9 +56,7 @@ export function undoWithdrawContract(
                 const errMessage = `A contract must exist to undo a submission withdrawal: ${contractID}`
                 logError('undoWithdrawContract', errMessage)
                 setErrorAttributesOnActiveSpan(errMessage, span)
-                throw new UserInputError(errMessage, {
-                    argumentName: 'contractID',
-                })
+                throw createUserInputError(errMessage, 'contractID')
             }
 
             const errMessage = `Issue finding a contract. Message: ${contractWithHistory.message}`
@@ -76,10 +74,7 @@ export function undoWithdrawContract(
             const errMessage = `Attempted to undo a submission withdrawal with invalid contract status of ${contractWithHistory.consolidatedStatus}`
             logError('undoWithdrawContract', errMessage)
             setErrorAttributesOnActiveSpan(errMessage, span)
-            throw new UserInputError(errMessage, {
-                argumentName: 'contractID',
-                cause: 'INVALID_PACKAGE_STATUS',
-            })
+            throw createUserInputError(errMessage, 'contractID')
         }
 
         const undoWithdrawResult = await store.undoWithdrawContract({
