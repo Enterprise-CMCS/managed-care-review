@@ -197,10 +197,22 @@ export class Postgres extends BaseStack {
             exportName: this.exportName('PostgresSecretArn'),
         })
 
+        new CfnOutput(this, 'PostgresSecretName', {
+            value: this.databaseSecret.secretName,
+            description: 'CDK PostgreSQL database secret name',
+            exportName: this.exportName('PostgresSecretName'),
+        })
+
         new CfnOutput(this, 'JwtSecretArn', {
             value: this.jwtSecret.secretArn,
             description: 'JWT secret ARN for API authentication',
             exportName: this.exportName('JwtSecretArn'),
+        })
+
+        new CfnOutput(this, 'JwtSecretName', {
+            value: this.jwtSecret.secretName,
+            description: 'JWT secret name for API authentication',
+            exportName: this.exportName('JwtSecretName'),
         })
 
         if (this.cluster) {

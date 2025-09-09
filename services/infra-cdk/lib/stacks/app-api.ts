@@ -688,6 +688,10 @@ export class AppApiStack extends BaseStack {
     private getLambdaEnvironment(): Record<string, string> {
         // Get values from other stacks
         const uploadsStackName = ResourceNames.stackName('uploads', this.stage)
+        const postgresStackName = ResourceNames.stackName(
+            'postgres',
+            this.stage
+        )
         const frontendStackName = ResourceNames.stackName(
             'frontend-infra',
             this.stage
@@ -733,13 +737,12 @@ export class AppApiStack extends BaseStack {
             )
 
         // JWT Secret from Secrets Manager - reference secret created by postgres stack
+        const jwtSecretName = Fn.importValue(
+            `${postgresStackName}-JwtSecretName`
+        )
         const jwtSecret =
             process.env.JWT_SECRET ||
-            Secret.fromSecretNameV2(
-                this,
-                'JwtSecret',
-                `mcr-cdk-api-jwt-secret-${this.stage}`
-            )
+            Secret.fromSecretNameV2(this, 'JwtSecret', jwtSecretName)
                 .secretValueFromJson('jwtsigningkey')
                 .unsafeUnwrap()
 
@@ -750,7 +753,9 @@ export class AppApiStack extends BaseStack {
             DATABASE_URL: process.env.DATABASE_URL || 'AWS_SM',
             VITE_APP_AUTH_MODE: process.env.VITE_APP_AUTH_MODE || 'AWS_COGNITO',
             API_APP_OTEL_COLLECTOR_URL: otelCollectorUrl,
-            SECRETS_MANAGER_SECRET: `aurora_postgres_${this.stage}`,
+            SECRETS_MANAGER_SECRET: Fn.importValue(
+                `${postgresStackName}-PostgresSecretName`
+            ),
             EMAILER_MODE: emailerMode,
             PARAMETER_STORE_MODE: parameterStoreMode,
             APPLICATION_ENDPOINT: applicationEndpoint,
