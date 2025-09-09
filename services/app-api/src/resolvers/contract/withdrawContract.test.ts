@@ -2,6 +2,7 @@ import { testCMSUser, testStateUser } from '../../testHelpers/userHelpers'
 import {
     constructTestPostgresServer,
     defaultFloridaProgram,
+    executeGraphQLOperation,
 } from '../../testHelpers/gqlHelpers'
 import {
     approveTestContract,
@@ -178,7 +179,7 @@ describe('withdrawContract', () => {
         }
 
         must(
-            await stateServer.executeOperation({
+            await executeGraphQLOperation(stateServer, {
                 query: UpdateDraftContractRatesDocument,
                 variables: {
                     input: {
@@ -235,7 +236,7 @@ describe('withdrawContract', () => {
         }
 
         must(
-            await stateServer.executeOperation({
+            await executeGraphQLOperation(stateServer, {
                 query: UpdateDraftContractRatesDocument,
                 variables: {
                     input: {
@@ -265,7 +266,7 @@ describe('withdrawContract', () => {
         }
 
         must(
-            await stateServer.executeOperation({
+            await executeGraphQLOperation(stateServer, {
                 query: UpdateDraftContractRatesDocument,
                 variables: {
                     input: {
@@ -366,7 +367,7 @@ describe('withdrawContract', () => {
         }
 
         must(
-            await stateServer.executeOperation({
+            await executeGraphQLOperation(stateServer, {
                 query: UpdateDraftContractRatesDocument,
                 variables: {
                     input: {
@@ -423,7 +424,7 @@ describe('withdrawContract', () => {
         }
 
         must(
-            await stateServer.executeOperation({
+            await executeGraphQLOperation(stateServer, {
                 query: UpdateDraftContractRatesDocument,
                 variables: {
                     input: {
@@ -526,7 +527,7 @@ describe('withdrawContract', () => {
         }
 
         must(
-            await stateServer.executeOperation({
+            await executeGraphQLOperation(stateServer, {
                 query: UpdateDraftContractRatesDocument,
                 variables: {
                     input: {
@@ -565,7 +566,7 @@ describe('withdrawContract', () => {
         }
 
         must(
-            await stateServer.executeOperation({
+            await executeGraphQLOperation(stateServer, {
                 query: UpdateDraftContractRatesDocument,
                 variables: {
                     input: {
@@ -595,7 +596,7 @@ describe('withdrawContract', () => {
         }
 
         must(
-            await stateServer.executeOperation({
+            await executeGraphQLOperation(stateServer, {
                 query: UpdateDraftContractRatesDocument,
                 variables: {
                     input: {
@@ -626,7 +627,7 @@ describe('withdrawContract', () => {
         }
 
         must(
-            await stateServer.executeOperation({
+            await executeGraphQLOperation(stateServer, {
                 query: UpdateDraftContractRatesDocument,
                 variables: {
                     input: {
@@ -690,7 +691,7 @@ describe('withdrawContract', () => {
         }
 
         must(
-            await stateServer.executeOperation({
+            await executeGraphQLOperation(stateServer, {
                 query: UpdateDraftContractRatesDocument,
                 variables: {
                     input: {
@@ -729,7 +730,7 @@ describe('withdrawContract', () => {
         }
 
         must(
-            await stateServer.executeOperation({
+            await executeGraphQLOperation(stateServer, {
                 query: UpdateDraftContractRatesDocument,
                 variables: {
                     input: {
@@ -764,7 +765,7 @@ describe('withdrawContract', () => {
         }
 
         must(
-            await stateServer.executeOperation({
+            await executeGraphQLOperation(stateServer, {
                 query: UpdateDraftContractRatesDocument,
                 variables: {
                     input: {
@@ -840,7 +841,7 @@ describe('withdrawContract', () => {
         }
 
         must(
-            await stateServer.executeOperation({
+            await executeGraphQLOperation(stateServer, {
                 query: UpdateDraftContractRatesDocument,
                 variables: {
                     input: {
@@ -926,7 +927,7 @@ describe('withdrawContract', () => {
         }
 
         must(
-            await stateServer.executeOperation({
+            await executeGraphQLOperation(stateServer, {
                 query: UpdateDraftContractRatesDocument,
                 variables: {
                     input: {
@@ -957,7 +958,7 @@ describe('withdrawContract', () => {
         expect(rateA.consolidatedStatus).toBe('WITHDRAWN')
 
         // try to resubmit unlocked contract linked to rate without previously having submitted with it.
-        const resubmitContractB = await stateServer.executeOperation({
+        const resubmitContractB = await executeGraphQLOperation(stateServer, {
             query: SubmitContractDocument,
             variables: {
                 input: {

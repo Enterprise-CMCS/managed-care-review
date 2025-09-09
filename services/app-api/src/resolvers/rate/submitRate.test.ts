@@ -3,6 +3,7 @@ import { v4 as uuidv4 } from 'uuid'
 import {
     constructTestPostgresServer,
     createAndUpdateTestHealthPlanPackage,
+    executeGraphQLOperation,
     unlockTestHealthPlanPackage,
 } from '../../testHelpers/gqlHelpers'
 import { latestFormData } from '../../testHelpers/healthPlanPackageHelpers'
@@ -64,7 +65,7 @@ describe('submitRate', () => {
 
         const rate = await createSubmitAndUnlockTestRate(stateServer, cmsServer)
 
-        const fetchDraftRate = await stateServer.executeOperation({
+        const fetchDraftRate = await executeGraphQLOperation(stateServer, {
             query: FetchRateDocument,
             variables: {
                 input: { rateID: rate.id },
@@ -75,7 +76,7 @@ describe('submitRate', () => {
             fetchDraftRate.data?.fetchRate.rate.draftRevision.formData
 
         // submitRate with no form data updates
-        const result = await stateServer.executeOperation({
+        const result = await executeGraphQLOperation(stateServer, {
             query: SubmitRateDocument,
             variables: {
                 input: {
@@ -159,7 +160,7 @@ describe('submitRate', () => {
 
         const rate = await createSubmitAndUnlockTestRate(stateServer, cmsServer)
 
-        const fetchDraftRate = await stateServer.executeOperation({
+        const fetchDraftRate = await executeGraphQLOperation(stateServer, {
             query: FetchRateDocument,
             variables: {
                 input: { rateID: rate.id },
@@ -218,7 +219,7 @@ describe('submitRate', () => {
             cmsServer
         )
 
-        const fetchDraftRate = await stateServer.executeOperation({
+        const fetchDraftRate = await executeGraphQLOperation(stateServer, {
             query: FetchRateDocument,
             variables: {
                 input: { rateID: draftRate.id },
@@ -232,7 +233,7 @@ describe('submitRate', () => {
         expect(fetchDraftRate.errors).toBeUndefined()
         expect(draftFormData).toBeDefined()
 
-        const result = await stateServer.executeOperation({
+        const result = await executeGraphQLOperation(stateServer, {
             query: SubmitRateDocument,
             variables: {
                 input: {
@@ -403,7 +404,7 @@ describe('submitRate', () => {
         const rateID = latestFormData(draftContractWithRate).rateInfos[0].id
 
         // submit contract and rate
-        await stateServer.executeOperation({
+        await executeGraphQLOperation(stateServer, {
             query: SubmitHealthPlanPackageDocument,
             variables: {
                 input: {
@@ -413,7 +414,7 @@ describe('submitRate', () => {
         })
 
         // fetch newly created rate
-        const fetchDraftRate = await stateServer.executeOperation({
+        const fetchDraftRate = await executeGraphQLOperation(stateServer, {
             query: FetchRateDocument,
             variables: {
                 input: { rateID },
@@ -425,7 +426,7 @@ describe('submitRate', () => {
         expect(draftRate.status).toBe('SUBMITTED')
 
         // unlocked the rate
-        const unlockedRateResult = await cmsServer.executeOperation({
+        const unlockedRateResult = await executeGraphQLOperation(cmsServer, {
             query: UnlockRateDocument,
             variables: {
                 input: {
@@ -442,7 +443,7 @@ describe('submitRate', () => {
         expect(unlockedRate.status).toBe('UNLOCKED')
 
         // resubmit rate
-        const result = await stateServer.executeOperation({
+        const result = await executeGraphQLOperation(stateServer, {
             query: SubmitRateDocument,
             variables: {
                 input: {
@@ -485,7 +486,7 @@ describe('submitRate', () => {
 
         await withdrawTestRate(cmsServer, rate.rateID, 'withdraw rate')
 
-        const submitResult = await await stateServer.executeOperation({
+        const submitResult = await executeGraphQLOperation(stateServer, {
             query: SubmitRateDocument,
             variables: {
                 input: {
@@ -527,7 +528,7 @@ describe('submitRate', () => {
             cmsServer
         )
 
-        const fetchDraftRate = await stateServer.executeOperation({
+        const fetchDraftRate = await executeGraphQLOperation(stateServer, {
             query: FetchRateDocument,
             variables: {
                 input: { rateID: draftRate.id },
@@ -546,7 +547,7 @@ describe('submitRate', () => {
             rateDateStart: new Date(Date.UTC(2025, 1, 1)),
         })
 
-        const result = await stateServer.executeOperation({
+        const result = await executeGraphQLOperation(stateServer, {
             query: SubmitRateDocument,
             variables: {
                 input: {
@@ -557,7 +558,7 @@ describe('submitRate', () => {
         })
 
         expect(result.errors).toBeDefined()
-        expect(result.errors?.[0].extensions?.message).toBe(
+        expect(result.errors?.[0].message).toBe(
             `Not authorized to edit and submit a rate independently, the feature is disabled`
         )
     })

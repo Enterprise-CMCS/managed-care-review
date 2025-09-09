@@ -1,4 +1,4 @@
-import { ForbiddenError, UserInputError } from 'apollo-server-lambda'
+import { createForbiddenError, createUserInputError } from '../errorUtils'
 import type { UnlockedHealthPlanFormDataType } from '@mc-review/hpp'
 import { toDomain } from '@mc-review/hpp'
 import type { UpdateInfoType, ContractType } from '../../domain-models'
@@ -10,7 +10,7 @@ import {
 import type { Emailer } from '../../emailer'
 import type { MutationResolvers } from '../../gen/gqlServer'
 import { logError, logSuccess } from '../../logger'
-import { NotFoundError } from '../../postgres'
+import { NotFoundError, handleNotFoundError } from '../../postgres'
 import type { Store } from '../../postgres'
 import {
     setErrorAttributesOnActiveSpan,
@@ -43,19 +43,14 @@ export function unlockHealthPlanPackageResolver(
                 'user not authorized to unlock package',
                 span
             )
-            throw new ForbiddenError('user not authorized to unlock package')
+            throw createForbiddenError('user not authorized to unlock package')
         }
 
         const contractResult = await store.findContractWithHistory(pkgID)
 
         if (contractResult instanceof Error) {
             if (contractResult instanceof NotFoundError) {
-                const errMessage = `A package must exist to be unlocked: ${pkgID}`
-                logError('unlockHealthPlanPackage', errMessage)
-                setErrorAttributesOnActiveSpan(errMessage, span)
-                throw new UserInputError(errMessage, {
-                    argumentName: 'pkgID',
-                })
+                throw handleNotFoundError(contractResult)
             }
 
             const errMessage = `Issue finding a package. Message: ${contractResult.message}`
@@ -75,10 +70,7 @@ export function unlockHealthPlanPackageResolver(
             const errMessage = `Attempted to unlock package with wrong status`
             logError('unlockHealthPlanPackage', errMessage)
             setErrorAttributesOnActiveSpan(errMessage, span)
-            throw new UserInputError(errMessage, {
-                argumentName: 'pkgID',
-                cause: 'INVALID_PACKAGE_STATUS',
-            })
+            throw createUserInputError(errMessage, 'pkgID')
         }
 
         // Now, unlock the contract!

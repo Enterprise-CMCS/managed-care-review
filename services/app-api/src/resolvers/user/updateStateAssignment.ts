@@ -5,7 +5,7 @@ import {
     setResolverDetailsOnActiveSpan,
 } from '../attributeHelper'
 import { logError } from '../../logger'
-import { ForbiddenError, UserInputError } from 'apollo-server-lambda'
+import { createForbiddenError, createUserInputError } from '../errorUtils'
 import { hasAdminPermissions, hasCMSPermissions } from '../../domain-models'
 import type { StateCodeType } from '@mc-review/hpp'
 import { isValidStateCode } from '@mc-review/hpp'
@@ -47,9 +47,7 @@ export function updateStateAssignment(
             const msg = 'user not authorized to modify assignments'
             logError('updateStateAssignment', msg)
             setErrorAttributesOnActiveSpan(msg, span)
-            throw new ForbiddenError(msg, {
-                cause: 'NOT_AUTHORIZED',
-            })
+            throw createForbiddenError(msg)
         }
 
         const { cmsUserID, stateAssignments } = input
@@ -77,21 +75,21 @@ export function updateStateAssignment(
                     'cannot update state assignments with invalid assignments'
                 logError('updateStateAssignment', errMsg)
                 setErrorAttributesOnActiveSpan(errMsg, span)
-                throw new UserInputError(errMsg, {
-                    argumentName: 'stateAssignments',
-                    argumentValues: invalidStateCodes,
-                    cause: 'INVALID_STATE_CODES',
-                })
+                throw createUserInputError(
+                    errMsg,
+                    'stateAssignments',
+                    invalidStateCodes
+                )
             }
         } else {
             const msg = 'cannot update state assignments with no assignments'
             logError('updateStateAssignment', msg)
             setErrorAttributesOnActiveSpan(msg, span)
-            throw new UserInputError(msg, {
-                argumentName: 'stateAssignments',
-                argumentValues: stateAssignments,
-                cause: 'INVALID_STATE_CODES',
-            })
+            throw createUserInputError(
+                msg,
+                'stateAssignments',
+                stateAssignments
+            )
         }
 
         const result = await store.updateCmsUserProperties(
@@ -107,11 +105,7 @@ export function updateStateAssignment(
                 const errMsg = 'cmsUserID does not exist'
                 logError('updateStateAssignment', errMsg)
                 setErrorAttributesOnActiveSpan(errMsg, span)
-                throw new UserInputError(errMsg, {
-                    argumentName: 'cmsUserID',
-                    argumentValues: cmsUserID,
-                    cause: 'CMSUSERID_NOT_EXIST',
-                })
+                throw createUserInputError(errMsg, 'cmsUserID', cmsUserID)
             }
 
             const errMsg = `Issue assigning states to user. Message: ${result.message}`

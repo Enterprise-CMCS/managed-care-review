@@ -31,19 +31,20 @@ import {
     CreateRateQuestionResponseMutation,
     ApproveContractMutationFn,
 } from '../gen/gqlClient'
-import { ApolloError, GraphQLErrors } from '@apollo/client/errors'
+import { GraphQLErrors } from '@apollo/client/errors'
 
 import { recordJSException } from '@mc-review/otel'
 import { handleGQLErrors as handleGQLErrorLogging } from './apolloErrors'
+import { ApolloError } from '@apollo/client/errors'
 import { ERROR_MESSAGES } from '@mc-review/constants'
 
 /*
-Adds user friendly/facing error messages to health plan package mutations.
-- Reminder, we handle graphql requests via apollo client in our web app.
-
+Adds user friendly/facing error messages to GraphQL mutations.
+- Reminder, we handle GraphQL requests via Apollo Client in our web app.
+- Now uses standard GraphQLError from graphql package instead of Apollo-specific types
 
 TODO: move out domain specific code to files named after that domain
-e.g. handleApolloErrorsAndAddUserFacingMessages can stay, anything specific to one API should be in a more narrowly scoped file
+e.g. handleGraphQLErrorAndAddUserFacingMessages can stay, anything specific to one API should be in a more narrowly scoped file
 */
 
 type MutationType =
@@ -64,8 +65,8 @@ const divisionToIndexQuestionDivision = (
 ): IndexQuestionDivisions =>
     `${division.toUpperCase()}Questions` as IndexQuestionDivisions
 
-export const handleApolloErrorsAndAddUserFacingMessages = (
-    apolloError: ApolloError,
+export const handleGraphQLErrorsAndAddUserFacingMessages = (
+    error: ApolloError | Error,
     mutation: MutationType
 ) => {
     let message
@@ -85,30 +86,37 @@ export const handleApolloErrorsAndAddUserFacingMessages = (
         cause: {},
     }
 
-    if (apolloError.graphQLErrors) {
-        handleGQLErrorLogging(apolloError.graphQLErrors)
+    // Extract GraphQL errors from ApolloError
+    let graphQLErrors: GraphQLErrors = []
 
-        apolloError.graphQLErrors.forEach(({ extensions }) => {
+    if (error instanceof ApolloError && error.graphQLErrors) {
+        graphQLErrors = error.graphQLErrors
+    }
+
+    if (graphQLErrors.length > 0) {
+        handleGQLErrorLogging(graphQLErrors)
+
+        graphQLErrors.forEach(({ extensions }) => {
             // handle most common error cases with more specific messaging
             if (
-                extensions.code === 'INTERNAL_SERVER_ERROR' &&
+                extensions?.code === 'INTERNAL_SERVER_ERROR' &&
                 extensions.cause === 'EMAIL_ERROR'
             ) {
                 message = ERROR_MESSAGES.email_error_generic
                 options.cause = extensions.cause
             }
             if (
-                extensions.code === 'BAD_USER_INPUT' &&
+                extensions?.code === 'BAD_USER_INPUT' &&
                 mutation === 'SUBMIT_HEALTH_PLAN_PACKAGE'
             ) {
                 message = ERROR_MESSAGES.submit_missing_field
                 options.cause = extensions.code
             }
             if (
-                extensions.cause === 'INVALID_PACKAGE_STATUS' &&
+                extensions?.cause === 'INVALID_PACKAGE_STATUS' &&
                 mutation === 'UNLOCK_HEALTH_PLAN_PACKAGE'
             ) {
-                message = ERROR_MESSAGES.unlock_invalid_package_status // / TODO: This is should be a custom ApolloError such as INVALID_PACKAGE_STATUS or ACTION_UNAVAILABLE, not user input error since doesn't involve form fields the user controls
+                message = ERROR_MESSAGES.unlock_invalid_package_status // / TODO: This should be a custom GraphQLError such as INVALID_PACKAGE_STATUS or ACTION_UNAVAILABLE, not user input error since doesn't involve form fields the user controls
                 options.cause = extensions.cause
             }
         })
@@ -141,7 +149,7 @@ export const unlockMutationWrapper = async (
             return new Error(ERROR_MESSAGES.unlock_error_generic)
         }
     } catch (error) {
-        return handleApolloErrorsAndAddUserFacingMessages(
+        return handleGraphQLErrorsAndAddUserFacingMessages(
             error,
             'UNLOCK_HEALTH_PLAN_PACKAGE'
         )
@@ -172,7 +180,7 @@ export const unlockMutationWrapperV2 = async (
             return new Error(ERROR_MESSAGES.unlock_error_generic)
         }
     } catch (error) {
-        return handleApolloErrorsAndAddUserFacingMessages(
+        return handleGraphQLErrorsAndAddUserFacingMessages(
             error,
             'UNLOCK_HEALTH_PLAN_PACKAGE'
         )
@@ -208,7 +216,7 @@ export const submitMutationWrapper = async (
             return new Error(ERROR_MESSAGES.submit_error_generic)
         }
     } catch (error) {
-        return handleApolloErrorsAndAddUserFacingMessages(
+        return handleGraphQLErrorsAndAddUserFacingMessages(
             error,
             'SUBMIT_HEALTH_PLAN_PACKAGE'
         )
@@ -244,7 +252,7 @@ export const submitMutationWrapperV2 = async (
             return new Error(ERROR_MESSAGES.submit_error_generic)
         }
     } catch (error) {
-        return handleApolloErrorsAndAddUserFacingMessages(
+        return handleGraphQLErrorsAndAddUserFacingMessages(
             error,
             'SUBMIT_HEALTH_PLAN_PACKAGE'
         )
@@ -277,7 +285,7 @@ export const approveMutationWrapper = async (
             return new Error(ERROR_MESSAGES.approve_error_generic)
         }
     } catch (error) {
-        return handleApolloErrorsAndAddUserFacingMessages(
+        return handleGraphQLErrorsAndAddUserFacingMessages(
             error,
             'APPROVE_SUBMISSION'
         )
@@ -355,7 +363,7 @@ export async function updateStateAssignmentsWrapper(
             return new Error(ERROR_MESSAGES.update_state_assignments_generic)
         }
     } catch (error) {
-        return handleApolloErrorsAndAddUserFacingMessages(
+        return handleGraphQLErrorsAndAddUserFacingMessages(
             error,
             'UPDATE_STATE_ASSIGNMENTS_BY_STATE'
         )
@@ -727,3 +735,6 @@ export const createRateQuestionResponseWrapper = async (
         return error
     }
 }
+
+// Legacy alias for backward compatibility
+export const handleApolloErrorsAndAddUserFacingMessages = handleGraphQLErrorsAndAddUserFacingMessages

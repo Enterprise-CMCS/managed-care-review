@@ -1,4 +1,4 @@
-import { ForbiddenError, UserInputError } from 'apollo-server-lambda'
+import { createForbiddenError, createUserInputError } from '../errorUtils'
 import { isStateUser } from '../../domain-models'
 import type { MutationResolvers, State } from '../../gen/gqlServer'
 import { logError, logSuccess } from '../../logger'
@@ -30,7 +30,9 @@ export function createHealthPlanPackageResolver(
                 'user not authorized to create state data',
                 span
             )
-            throw new ForbiddenError('user not authorized to create state data')
+            throw createForbiddenError(
+                'user not authorized to create state data'
+            )
         }
 
         const stateFromCurrentUser: State['code'] = user.stateCode
@@ -51,9 +53,11 @@ export function createHealthPlanPackageResolver(
             )} not exist in state ${stateFromCurrentUser}`
             logError('createHealthPlanPackage', errMessage)
             setErrorAttributesOnActiveSpan(errMessage, span)
-            throw new UserInputError(errMessage, {
-                argumentName: 'programIDs',
-            })
+            throw createUserInputError(
+                errMessage,
+                'programIDs',
+                input.programIDs
+            )
         }
 
         // Why do we need to do this? I feel like I don't understand Maybe here exactly.

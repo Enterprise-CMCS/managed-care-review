@@ -5,8 +5,8 @@ import { Loading } from '../../components'
 import { ErrorInvalidSubmissionStatus } from '../Errors/ErrorInvalidSubmissionStatusPage'
 import { Error404 } from '../Errors/Error404Page'
 import { handleApolloError } from '@mc-review/helpers'
-import { ApolloError } from '@apollo/client'
 import { ErrorForbiddenPage } from '../Errors/ErrorForbiddenPage'
+import { ApolloError } from '@apollo/client'
 
 type InterimState =
     | 'LOADING'
@@ -18,15 +18,18 @@ type ErrorOrLoadingPageProps = {
     state?: InterimState
 }
 
-const handleAndReturnErrorState = (error: ApolloError): InterimState => {
-    handleApolloError(error, true)
-    if (error.graphQLErrors[0]?.extensions?.code === 'NOT_FOUND') {
-        return 'NOT_FOUND'
-    } else if (error.graphQLErrors[0]?.extensions?.code === 'FORBIDDEN_ERROR') {
-        return 'FORBIDDEN'
-    } else {
-        return 'GENERIC_ERROR'
+const handleAndReturnErrorState = (error: Error): InterimState => {
+    if (error instanceof ApolloError) {
+        handleApolloError(error, true)
+        if (error.graphQLErrors[0]?.extensions?.code === 'NOT_FOUND') {
+            return 'NOT_FOUND'
+        } else if (
+            error.graphQLErrors[0]?.extensions?.code === 'FORBIDDEN_ERROR'
+        ) {
+            return 'FORBIDDEN'
+        }
     }
+    return 'GENERIC_ERROR'
 }
 const ErrorOrLoadingPage = ({
     state,

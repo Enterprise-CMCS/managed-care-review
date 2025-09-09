@@ -1,4 +1,4 @@
-import { ForbiddenError } from 'apollo-server-core'
+import { createForbiddenError } from '../errorUtils'
 import type { Span } from '@opentelemetry/api'
 import {
     setErrorAttributesOnActiveSpan,
@@ -10,7 +10,7 @@ import {
     hasCMSPermissions,
     isStateUser,
 } from '../../domain-models/user'
-import { NotFoundError } from '../../postgres'
+import { NotFoundError } from '../../postgres/postgresErrors'
 import type { QueryResolvers } from '../../gen/gqlServer'
 import type { Store } from '../../postgres'
 import type { RateOrErrorArrayType } from '../../postgres/contractAndRates'
@@ -59,7 +59,7 @@ export function indexRatesResolver(store: Store): QueryResolvers['indexRates'] {
             const errMessage = `OAuth client does not have read permissions`
             logError('indexRates', errMessage)
             setErrorAttributesOnActiveSpan(errMessage, span)
-            throw new ForbiddenError(errMessage)
+            throw createForbiddenError(errMessage)
         }
 
         // Log OAuth client access for audit trail
@@ -144,7 +144,7 @@ export function indexRatesResolver(store: Store): QueryResolvers['indexRates'] {
                 ? `OAuth client not authorized to fetch rate reviews data`
                 : 'user not authorized to fetch rate reviews data'
             setErrorAttributesOnActiveSpan(errMsg, span)
-            throw new ForbiddenError(errMsg)
+            throw createForbiddenError(errMsg)
         }
     }
 }
