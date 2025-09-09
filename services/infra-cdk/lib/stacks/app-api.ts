@@ -131,6 +131,13 @@ export class AppApiStack extends BaseStack {
         // Get environment variables
         const environment = this.getLambdaEnvironment()
 
+        // Create OTEL layer for all functions (matches serverless provider-level default)
+        const otelLayer = LayerVersion.fromLayerVersionArn(
+            this,
+            'OtelLayer',
+            AWS_OTEL_LAYER_ARN
+        )
+
         // Create simple Lambda functions first (no VPC, layers, or complex dependencies)
         this.healthFunction = this.createFunction(
             'health',
@@ -141,6 +148,7 @@ export class AppApiStack extends BaseStack {
                 memorySize: 1024,
                 environment,
                 role: lambdaRole,
+                layers: [otelLayer],
             }
         )
 
@@ -153,15 +161,11 @@ export class AppApiStack extends BaseStack {
                 memorySize: 1024,
                 environment,
                 role: lambdaRole,
+                layers: [otelLayer],
             }
         )
 
         // OTEL function needs the ADOT layer and collector.yml file
-        const otelLayer = LayerVersion.fromLayerVersionArn(
-            this,
-            'OtelProxyOtelLayer',
-            AWS_OTEL_LAYER_ARN
-        )
 
         this.otelFunction = new NodejsFunction(this, 'otelFunction', {
             functionName: `${ResourceNames.apiName('app-api', this.stage)}-otel`,
@@ -222,6 +226,7 @@ export class AppApiStack extends BaseStack {
                 memorySize: 1024,
                 environment,
                 role: lambdaRole,
+                layers: [otelLayer],
             }
         )
 
@@ -234,6 +239,7 @@ export class AppApiStack extends BaseStack {
                 memorySize: 1024,
                 environment,
                 role: lambdaRole,
+                layers: [otelLayer],
             }
         )
 
@@ -246,6 +252,7 @@ export class AppApiStack extends BaseStack {
                 memorySize: 1024,
                 environment,
                 role: lambdaRole,
+                layers: [otelLayer],
             }
         )
 
