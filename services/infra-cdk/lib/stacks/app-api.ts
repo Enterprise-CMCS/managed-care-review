@@ -27,6 +27,7 @@ import {
     Architecture,
     Runtime,
     LayerVersion,
+    type ILayerVersion,
     Code,
 } from 'aws-cdk-lib/aws-lambda'
 import { CfnWebACL, CfnWebACLAssociation } from 'aws-cdk-lib/aws-wafv2'
@@ -55,6 +56,9 @@ export class AppApiStack extends BaseStack {
     public readonly migrateFunction: NodejsFunction
 
     public readonly graphqlFunction: NodejsFunction
+
+    // Shared OTEL layer for all functions
+    private readonly otelLayer: ILayerVersion
 
     constructor(scope: Construct, id: string, props: BaseStackProps) {
         super(scope, id, {
@@ -133,7 +137,7 @@ export class AppApiStack extends BaseStack {
         const environment = this.getLambdaEnvironment()
 
         // Create OTEL layer for all functions (matches serverless provider-level default)
-        const otelLayer = LayerVersion.fromLayerVersionArn(
+        this.otelLayer = LayerVersion.fromLayerVersionArn(
             this,
             'OtelLayer',
             AWS_OTEL_LAYER_ARN
@@ -149,7 +153,7 @@ export class AppApiStack extends BaseStack {
                 memorySize: 1024,
                 environment,
                 role: lambdaRole,
-                layers: [otelLayer],
+                layers: [this.otelLayer],
             }
         )
 
@@ -162,7 +166,7 @@ export class AppApiStack extends BaseStack {
                 memorySize: 1024,
                 environment,
                 role: lambdaRole,
-                layers: [otelLayer],
+                layers: [this.otelLayer],
             }
         )
 
@@ -187,7 +191,7 @@ export class AppApiStack extends BaseStack {
             memorySize: 1024,
             environment,
             role: lambdaRole,
-            layers: [otelLayer],
+            layers: [this.otelLayer],
             bundling: this.createBundling('otel', [
                 this.getOtelBundlingCommands(),
             ]),
@@ -202,7 +206,7 @@ export class AppApiStack extends BaseStack {
                 memorySize: 1024,
                 environment,
                 role: lambdaRole,
-                layers: [otelLayer],
+                layers: [this.otelLayer],
             }
         )
 
@@ -215,7 +219,7 @@ export class AppApiStack extends BaseStack {
                 memorySize: 1024,
                 environment,
                 role: lambdaRole,
-                layers: [otelLayer],
+                layers: [this.otelLayer],
             }
         )
 
@@ -228,7 +232,7 @@ export class AppApiStack extends BaseStack {
                 memorySize: 1024,
                 environment,
                 role: lambdaRole,
-                layers: [otelLayer],
+                layers: [this.otelLayer],
             }
         )
 
@@ -397,13 +401,6 @@ export class AppApiStack extends BaseStack {
             }
         )
 
-        // Use centralized OTEL layer ARN constant
-        const otelLayer = LayerVersion.fromLayerVersionArn(
-            this,
-            'OtelLayer',
-            AWS_OTEL_LAYER_ARN
-        )
-
         // Create migrate function with all required configuration
         const migrateFunction = new NodejsFunction(this, 'migrateFunction', {
             functionName: `${ResourceNames.apiName('app-api', this.stage)}-migrate`,
@@ -429,7 +426,7 @@ export class AppApiStack extends BaseStack {
                 NODE_PATH: '/opt/nodejs/node_modules',
             },
             role,
-            layers: [prismaMigrationLayer, otelLayer],
+            layers: [prismaMigrationLayer, this.otelLayer],
             vpc,
             vpcSubnets: {
                 subnetType: SubnetType.PRIVATE_WITH_EGRESS,
@@ -506,13 +503,6 @@ export class AppApiStack extends BaseStack {
             ),
         })
 
-        // Use centralized OTEL layer ARN constant
-        const otelLayer = LayerVersion.fromLayerVersionArn(
-            this,
-            'GraphqlOtelLayer',
-            AWS_OTEL_LAYER_ARN
-        )
-
         // Create GraphQL function with all required configuration
         const graphqlFunction = new NodejsFunction(this, 'graphqlFunction', {
             functionName: `${ResourceNames.apiName('app-api', this.stage)}-graphql`,
@@ -533,7 +523,7 @@ export class AppApiStack extends BaseStack {
             memorySize: 1024,
             environment,
             role,
-            layers: [prismaEngineLayer, otelLayer],
+            layers: [prismaEngineLayer, this.otelLayer],
             vpc,
             vpcSubnets: {
                 subnetType: SubnetType.PRIVATE_WITH_EGRESS,
