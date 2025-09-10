@@ -329,14 +329,15 @@ export class VirusScanning extends BaseStack {
      */
     private getVirusScanEnvironment(): Record<string, string> {
         return {
-            // OTEL configuration (matches app-api pattern)
-            API_APP_OTEL_COLLECTOR_URL:
-                process.env.API_APP_OTEL_COLLECTOR_URL || '',
+            // OTEL configuration (matches uploads serverless pattern)
+            VITE_APP_OTEL_COLLECTOR_URL:
+                process.env.VITE_APP_OTEL_COLLECTOR_URL || '',
             AWS_LAMBDA_EXEC_WRAPPER: '/opt/otel-handler',
             OPENTELEMETRY_COLLECTOR_CONFIG_FILE: '/var/task/collector.yml',
 
             // Virus scanning configuration
-            AV_DEFINITION_S3_BUCKET: this.avDefinitionsBucket.bucketName,
+            CLAMAV_BUCKET_NAME: this.avDefinitionsBucket.bucketName,
+            PATH_TO_AV_DEFINITIONS: 'lambda/s3-antivirus/av-definitions',
             CLAMAV_HOST: this.clamavInstance.instancePrivateIp,
             CLAMAV_PORT: '3310',
 
@@ -347,36 +348,38 @@ export class VirusScanning extends BaseStack {
 
     /**
      * Setup S3 event notifications to trigger virus scanning
+     * Uses BucketNotifications to configure notifications on existing buckets
      */
     private setupS3EventNotifications(): void {
         // Import bucket ARNs from uploads stack outputs
         const uploadsStackName = ResourceNames.stackName('uploads', this.stage)
-        const documentUploadsBucketArn = Fn.importValue(
-            `${uploadsStackName}-DocumentUploadsBucketArn`
+        const documentUploadsBucketName = Fn.importValue(
+            `${uploadsStackName}-DocumentUploadsBucketName`
         )
-        const qaUploadsBucketArn = Fn.importValue(
-            `${uploadsStackName}-QAUploadsBucketArn`
+        const qaUploadsBucketName = Fn.importValue(
+            `${uploadsStackName}-QAUploadsBucketName`
         )
-        // Get bucket references from ARNs
-        const documentUploadsBucket = Bucket.fromBucketArn(
+
+        // Get bucket references by name (they're in the same account/region)
+        const documentUploadsBucket = Bucket.fromBucketName(
             this,
             'DocumentUploadsBucket',
-            documentUploadsBucketArn
+            documentUploadsBucketName
         )
 
-        const qaUploadsBucket = Bucket.fromBucketArn(
+        const qaUploadsBucket = Bucket.fromBucketName(
             this,
             'QaUploadsBucket',
-            qaUploadsBucketArn
+            qaUploadsBucketName
         )
 
-        // Setup notifications for document uploads bucket
+        // Configure S3 event notifications to trigger virus scanning
+        // Note: This will create the BucketNotificationsHandler Python Lambda
         documentUploadsBucket.addEventNotification(
             EventType.OBJECT_CREATED,
             new LambdaDestination(this.avScanFunction)
         )
 
-        // Setup notifications for QA uploads bucket
         qaUploadsBucket.addEventNotification(
             EventType.OBJECT_CREATED,
             new LambdaDestination(this.avScanFunction)
