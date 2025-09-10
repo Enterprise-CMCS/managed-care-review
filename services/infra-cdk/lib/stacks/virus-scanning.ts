@@ -18,6 +18,7 @@ import {
     Runtime,
     LayerVersion,
     type ILayerVersion,
+    Code,
 } from 'aws-cdk-lib/aws-lambda'
 import { Bucket, EventType } from 'aws-cdk-lib/aws-s3'
 import { LambdaDestination } from 'aws-cdk-lib/aws-s3-notifications'
@@ -30,6 +31,7 @@ import {
 } from 'aws-cdk-lib/aws-iam'
 // Note: EventBridge imports removed since rescan scheduling not implemented initially
 import { CfnOutput, Duration, Fn } from 'aws-cdk-lib'
+import { HostedZone, ARecord, RecordTarget } from 'aws-cdk-lib/aws-route53'
 import { ResourceNames } from '../config'
 import { AWS_OTEL_LAYER_ARN } from './lambda-layers'
 import path from 'path'
@@ -51,11 +53,17 @@ export class VirusScanning extends BaseStack {
     // ClamAV daemon EC2 instance
     public readonly clamavInstance: Instance
 
+    // Route53 private hosted zone for internal DNS
+    public readonly internalZone: HostedZone
+
     // Lambda function
     public readonly avScanFunction: NodejsFunction
 
     // Shared OTEL layer
     private readonly otelLayer: ILayerVersion
+
+    // ClamAV layer
+    private readonly clamAvLayer: ILayerVersion
 
     constructor(scope: Construct, id: string, props: VirusScanningProps) {
         super(scope, id, {
@@ -74,11 +82,28 @@ export class VirusScanning extends BaseStack {
             AWS_OTEL_LAYER_ARN
         )
 
+        // Create ClamAV layer from local build
+        this.clamAvLayer = new LayerVersion(this, 'ClamAvLayer', {
+            layerVersionName: `${ResourceNames.apiName('virus-scanning', this.stage)}-clamav`,
+            description: 'ClamAV binaries and libraries for virus scanning',
+            compatibleRuntimes: [Runtime.NODEJS_20_X],
+            compatibleArchitectures: [Architecture.X86_64],
+            code: Code.fromAsset(
+                path.join(__dirname, '..', '..', 'lambda-layers-clamav')
+            ),
+        })
+
         // Create AV definitions bucket
         this.avDefinitionsBucket = this.createAvDefinitionsBucket()
 
+        // Create Route53 private hosted zone for internal DNS
+        this.internalZone = this.createInternalHostedZone()
+
         // Create ClamAV daemon EC2 instance
         this.clamavInstance = this.createClamavInstance()
+
+        // Create DNS record for ClamAV instance
+        this.createClamavDnsRecord()
 
         // Create Lambda execution role
         const lambdaRole = this.createLambdaRole()
@@ -197,6 +222,38 @@ export class VirusScanning extends BaseStack {
     }
 
     /**
+     * Create Route53 private hosted zone for internal DNS resolution
+     * Matches serverless MCRInternalZone configuration
+     */
+    private createInternalHostedZone(): HostedZone {
+        // Import VPC for the hosted zone
+        const vpc = Vpc.fromLookup(this, 'InternalZoneVpc', {
+            vpcId: process.env.VPC_ID!,
+        })
+
+        return new HostedZone(this, 'MCRInternalZone', {
+            zoneName: 'mc-review.local',
+            vpcs: [vpc],
+            comment: 'Private hosted zone for mc-review internal services',
+        })
+    }
+
+    /**
+     * Create DNS A record for ClamAV instance
+     * Matches serverless ClamAVRecordSet configuration
+     */
+    private createClamavDnsRecord(): ARecord {
+        return new ARecord(this, 'ClamAVRecordSet', {
+            zone: this.internalZone,
+            recordName: 'clamav',
+            target: RecordTarget.fromIpAddresses(
+                this.clamavInstance.instancePrivateIp
+            ),
+            ttl: Duration.seconds(300),
+        })
+    }
+
+    /**
      * Create Lambda execution role with required permissions
      */
     private createLambdaRole(): Role {
@@ -311,7 +368,7 @@ export class VirusScanning extends BaseStack {
             memorySize: 4096, // Large memory for file processing
             environment: this.getVirusScanEnvironment(),
             role,
-            layers: [this.otelLayer],
+            layers: [this.clamAvLayer, this.otelLayer],
             vpc,
             vpcSubnets: {
                 subnetType: SubnetType.PRIVATE_WITH_EGRESS,
@@ -338,7 +395,7 @@ export class VirusScanning extends BaseStack {
             // Virus scanning configuration
             CLAMAV_BUCKET_NAME: this.avDefinitionsBucket.bucketName,
             PATH_TO_AV_DEFINITIONS: 'lambda/s3-antivirus/av-definitions',
-            CLAMAV_HOST: this.clamavInstance.instancePrivateIp,
+            CLAMAV_HOST: 'clamav.mc-review.local',
             CLAMAV_PORT: '3310',
 
             // Stage info (matches serverless pattern)
