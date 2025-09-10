@@ -358,6 +358,7 @@ jobs:
           VPC_ID: ${{ secrets.DEV_VPC_ID }}
           SG_ID: ${{ secrets.DEV_SG_ID }}
           NR_LICENSE_KEY: ${{ secrets.NR_LICENSE_KEY }}
+          VITE_APP_OTEL_COLLECTOR_URL: ${{vars.VITE_APP_OTEL_COLLECTOR_URL}}
         run: |
           echo "=== Deploying Virus Scanning stack ==="
           npx cdk deploy virus-scanning-${STAGE_NAME}-cdk \
