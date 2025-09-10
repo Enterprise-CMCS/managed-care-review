@@ -2,6 +2,7 @@ name: Security Sync
 
 on:
   workflow_dispatch: # for testing and manual runs
+  push:
   schedule:
     - cron: "25 1 * * *" # daily at 8:25 PM EST
 
@@ -16,7 +17,7 @@ jobs:
     strategy:
       max-parallel: 1
       matrix:
-        environment: ["prod"]  # add more like "val","master" later if needed
+        environment: ["dev"]  # add more like "val","master" later if needed
       fail-fast: false
     environment:
       name: ${{ matrix.environment }}
@@ -43,7 +44,7 @@ jobs:
         uses: aws-actions/configure-aws-credentials@v4
         with:
           aws-region: ${{ secrets.AWS_DEFAULT_REGION }}
-          role-to-assume: ${{ secrets.SECHUBJIRA_AWS_OIDC_ROLE_TO_ASSUME }}
+          role-to-assume: ${{ secrets.AWS_OIDC_ROLE_TO_ASSUME }}
 
       - name: Security Sync
         id: sync_step
