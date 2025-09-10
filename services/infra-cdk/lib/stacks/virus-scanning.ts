@@ -232,9 +232,9 @@ export class VirusScanning extends BaseStack {
         })
 
         return new HostedZone(this, 'MCRInternalZone', {
-            zoneName: 'mc-review.local',
+            zoneName: 'mc-review-cdk.local',
             vpcs: [vpc],
-            comment: 'Private hosted zone for mc-review internal services',
+            comment: 'Private hosted zone for mc-review CDK services',
         })
     }
 
@@ -395,7 +395,7 @@ export class VirusScanning extends BaseStack {
             // Virus scanning configuration
             CLAMAV_BUCKET_NAME: this.avDefinitionsBucket.bucketName,
             PATH_TO_AV_DEFINITIONS: 'lambda/s3-antivirus/av-definitions',
-            CLAMAV_HOST: 'clamav.mc-review.local',
+            CLAMAV_HOST: 'clamav.mc-review-cdk.local',
             CLAMAV_PORT: '3310',
 
             // Stage info (matches serverless pattern)
