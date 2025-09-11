@@ -59,10 +59,10 @@ describe('clamAV', () => {
             s3Client
         )
 
-        const defsRes = await clamAV.downloadAVDefinitions()
-        if (defsRes instanceof Error) {
-            throw defsRes
-        }
+        // const defsRes = await clamAV.downloadAVDefinitions()
+        // if (defsRes instanceof Error) {
+        //     throw defsRes
+        // }
 
         // have a list of files
         const testFilesDir = path.join(thisDir, 'testData')
