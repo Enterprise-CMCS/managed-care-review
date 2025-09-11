@@ -7,7 +7,6 @@ import type { ContractQuestion, RateQuestion } from '../gen/gqlClient'
 import {
     CreateContractQuestionDocument,
     CreateContractQuestionResponseDocument,
-    CreateHealthPlanPackageDocument,
     CreateRateQuestionDocument,
     CreateRateQuestionResponseDocument,
     FetchHealthPlanPackageDocument,
@@ -32,7 +31,6 @@ import type {
 } from '../domain-models'
 import type { EmailConfiguration, Emailer } from '../emailer'
 import type {
-    CreateHealthPlanPackageInput,
     HealthPlanPackage,
     UpdateStateAssignmentsByStatePayload,
 } from '../gen/gqlServer'
@@ -255,41 +253,6 @@ const constructTestEmailer = async (opts: {
             applicationEndpoint: emailConfig?.baseUrl ?? 'http://localtest',
         })
     )
-}
-
-const createTestHealthPlanPackage = async (
-    server: ApolloServer,
-    stateCode?: StateCodeType
-): Promise<HealthPlanPackage> => {
-    const programs = stateCode
-        ? [must(findStatePrograms(stateCode))[0]]
-        : [defaultFloridaProgram()]
-
-    const programIDs = programs.map((program) => program.id)
-    const input: CreateHealthPlanPackageInput = {
-        programIDs: programIDs,
-        populationCovered: 'MEDICAID',
-        riskBasedContract: false,
-        submissionType: 'CONTRACT_ONLY',
-        submissionDescription: 'A created submission',
-        contractType: 'BASE',
-    }
-    const result = await executeGraphQLOperation(server, {
-        query: CreateHealthPlanPackageDocument,
-        variables: { input },
-    })
-
-    if (result.errors) {
-        throw new Error(
-            `createTestHealthPlanPackage mutation failed with errors ${JSON.stringify(result.errors)}`
-        )
-    }
-
-    if (!result.data.createHealthPlanPackage.pkg) {
-        throw new Error('CreateHealthPlanPackage returned nothing')
-    }
-
-    return result.data.createHealthPlanPackage.pkg
 }
 
 const updateTestHealthPlanFormData = async (
@@ -744,7 +707,6 @@ const updateTestStateAssignments = async (
 
 export {
     constructTestPostgresServer,
-    createTestHealthPlanPackage,
     createAndUpdateTestHealthPlanPackage,
     createAndSubmitTestHealthPlanPackage,
     updateTestHealthPlanFormData,
