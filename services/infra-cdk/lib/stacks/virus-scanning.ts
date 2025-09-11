@@ -11,6 +11,7 @@ import {
     SubnetType,
     Port,
     UserData,
+    Subnet,
 } from 'aws-cdk-lib/aws-ec2'
 import { NodejsFunction } from 'aws-cdk-lib/aws-lambda-nodejs'
 import {
@@ -122,7 +123,7 @@ export class VirusScanning extends BaseStack {
      * Validate required environment variables for VPC configuration
      */
     private validateEnvironment(): void {
-        const required = ['VPC_ID', 'SG_ID']
+        const required = ['VPC_ID', 'SG_ID', 'SUBNET_PRIVATE_A_ID']
         const missing = required.filter((envVar) => !process.env[envVar])
 
         if (missing.length > 0) {
@@ -192,7 +193,13 @@ export class VirusScanning extends BaseStack {
             machineImage: MachineImage.latestAmazonLinux2023(),
             vpc,
             vpcSubnets: {
-                subnetType: SubnetType.PUBLIC, // Need public subnet for package downloads
+                subnets: [
+                    Subnet.fromSubnetId(
+                        this,
+                        'ClamavSubnet',
+                        process.env.SUBNET_PRIVATE_A_ID!
+                    ),
+                ],
             },
             securityGroup: clamavSecurityGroup,
             userData: userDataScript,
@@ -213,7 +220,14 @@ export class VirusScanning extends BaseStack {
             'scripts',
             'clamav-bootstrap.sh'
         )
-        const scriptContent = fs.readFileSync(scriptPath, 'utf8')
+        let scriptContent = fs.readFileSync(scriptPath, 'utf8')
+
+        // Replace CloudFormation variables with actual values
+        scriptContent = scriptContent.replace(
+            '${AWS::StackName}',
+            this.stackName
+        )
+        scriptContent = scriptContent.replace('${AWS::Region}', this.region)
 
         const userData = UserData.forLinux()
         userData.addCommands(scriptContent)
