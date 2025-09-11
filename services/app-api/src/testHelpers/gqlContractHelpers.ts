@@ -311,6 +311,7 @@ const createAndUpdateTestContractWithoutRates = async (
             name: 'contractDocument.pdf',
             s3URL: 's3://bucketname/key/test1',
             sha256: 'fakesha',
+            dateAdded: new Date(),
         },
     ]
     draft.managedCareEntities = ['MCO']
@@ -467,7 +468,8 @@ const updateTestContractDraftRevision = async (
     if (updateResult.errors) {
         console.info('errors', JSON.stringify(updateResult.errors))
         throw new Error(
-            `updateTestContractDraftRevision mutation failed with errors ${JSON.stringify(updateResult.errors)}`
+            `updateTestContractDraftRevision mutation failed with errors ${JSON.stringify(updateResult.errors)}
+            updatedFormDataContract ${updatedFormData.contractDocuments![0].name}`
         )
     }
 
