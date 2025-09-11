@@ -1,7 +1,6 @@
 import { IndexContractsForDashboardDocument } from '../../gen/gqlClient'
 import {
     constructTestPostgresServer,
-    createTestHealthPlanPackage,
     createAndSubmitTestHealthPlanPackage,
     executeGraphQLOperation,
 } from '../../testHelpers/gqlHelpers'
@@ -14,6 +13,7 @@ import {
 import {
     createAndSubmitTestContractWithRate,
     createAndUpdateTestContractWithoutRates,
+    createTestContract,
     submitTestContract,
     unlockTestContract,
 } from '../../testHelpers/gqlContractHelpers'
@@ -177,7 +177,7 @@ describe(`indexContracts`, () => {
         it('returns no contracts for a different states user', async () => {
             const server = await constructTestPostgresServer()
 
-            await createTestHealthPlanPackage(server)
+            await createTestContract(server)
             await createAndSubmitTestHealthPlanPackage(server)
 
             const otherUserServer = await constructTestPostgresServer({

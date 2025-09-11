@@ -203,9 +203,7 @@ describe('indexRatesStripped', () => {
 
         // submit packages from two different states
         await createAndSubmitTestContractWithRate(flStateServer)
-        await createAndSubmitTestContractWithRate(vaStateServer, {
-            stateCode: 'VA',
-        })
+        await createAndSubmitTestContractWithRate(vaStateServer, 'VA')
 
         // index rates
         const floridaRatesResult = await executeGraphQLOperation(
