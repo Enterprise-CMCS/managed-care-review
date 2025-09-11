@@ -17,7 +17,7 @@ import { GenericApiErrorProps } from '../Banner/GenericApiErrorBanner/GenericApi
 import { ERROR_MESSAGES } from '@mc-review/constants'
 import {
     submitMutationWrapperV2,
-    unlockMutationWrapperV2,
+    unlockMutationWrapper,
 } from '@mc-review/helpers'
 import { useTealium } from '../../hooks'
 
@@ -197,7 +197,7 @@ export const UnlockSubmitModal = ({
                 break
             case 'UNLOCK_CONTRACT':
                 if (unlockSubmitModalInput) {
-                    result = await unlockMutationWrapperV2(
+                    result = await unlockMutationWrapper(
                         unlockContract,
                         submissionData.id,
                         unlockSubmitModalInput
