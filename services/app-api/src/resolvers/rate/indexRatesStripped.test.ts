@@ -6,7 +6,6 @@ import {
 } from '../../gen/gqlClient'
 import {
     constructTestPostgresServer,
-    createAndUpdateTestHealthPlanPackage,
     executeGraphQLOperation,
 } from '../../testHelpers/gqlHelpers'
 import type { RateEdge, Rate } from '../../gen/gqlServer'
@@ -16,7 +15,7 @@ import {
     submitTestContract,
     createAndUpdateTestContractWithRate,
 } from '../../testHelpers/gqlContractHelpers'
-import { testS3Client } from '../../../../app-api/src/testHelpers/s3Helpers'
+import { testS3Client } from '../../testHelpers'
 
 describe('indexRatesStripped', () => {
     const ldService = testLDService({
@@ -140,9 +139,8 @@ describe('indexRatesStripped', () => {
         const contract1 = await createAndSubmitTestContractWithRate(stateServer)
         const contract2 = await createAndSubmitTestContractWithRate(stateServer)
 
-        const pkg3 = await createAndUpdateTestHealthPlanPackage(
+        const pkg3 = await createAndUpdateTestContractWithRate(
             otherStateServer,
-            {},
             'VA'
         )
         const contract3 = await submitTestContract(otherStateServer, pkg3.id)

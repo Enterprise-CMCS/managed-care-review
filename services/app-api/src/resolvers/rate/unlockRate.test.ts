@@ -11,7 +11,7 @@ import { expectToBeDefined } from '../../testHelpers/assertionHelpers'
 import { testLDService } from '../../testHelpers/launchDarklyHelpers'
 import { createSubmitAndUnlockTestRate } from '../../testHelpers/gqlRateHelpers'
 import { createAndSubmitTestContractWithRate } from '../../testHelpers/gqlContractHelpers'
-import { testS3Client } from '../../../../app-api/src/testHelpers/s3Helpers'
+import { testS3Client } from '../../testHelpers'
 import { withdrawTestRate } from '../../testHelpers/gqlRateHelpers'
 
 describe(`unlockRate`, () => {
