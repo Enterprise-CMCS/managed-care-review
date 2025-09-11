@@ -4,7 +4,6 @@ import {
     constructTestPostgresServer,
     createAndUpdateTestHealthPlanPackage,
     executeGraphQLOperation,
-    unlockTestHealthPlanPackage,
 } from '../../testHelpers/gqlHelpers'
 import { latestFormData } from '../../testHelpers/healthPlanPackageHelpers'
 import { testStateUser, testCMSUser } from '../../testHelpers/userHelpers'
@@ -33,6 +32,7 @@ import {
     createAndUpdateTestContractWithoutRates,
     fetchTestContract,
     submitTestContract,
+    unlockTestContract,
 } from '../../testHelpers/gqlContractHelpers'
 import { testS3Client } from '../../../../app-api/src/testHelpers/s3Helpers'
 import { submitRate } from '../../postgres/contractAndRates'
@@ -336,7 +336,7 @@ describe('submitRate', () => {
         )
 
         // 5. unlock and resubmit A
-        await unlockTestHealthPlanPackage(
+        await unlockTestContract(
             cmsServer,
             contractA0.id,
             'does this mess history'
