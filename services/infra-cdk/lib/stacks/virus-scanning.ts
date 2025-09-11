@@ -82,7 +82,7 @@ export class VirusScanning extends BaseStack {
             AWS_OTEL_LAYER_ARN
         )
 
-        // Create ClamAV layer from local build
+        // Create ClamAV layer from zip file built by CI
         this.clamAvLayer = new LayerVersion(this, 'ClamAvLayer', {
             layerVersionName: `${ResourceNames.apiName('virus-scanning', this.stage)}-clamav`,
             description: 'ClamAV binaries and libraries for virus scanning',

@@ -324,6 +324,14 @@ jobs:
           name: lambda-layers-clamav
           path: ./services/infra-cdk/lambda-layers-clamav
 
+      - name: Extract ClamAV layer
+        working-directory: ./services/infra-cdk/lambda-layers-clamav
+        run: |
+          echo "=== Extracting ClamAV layer ==="
+          unzip lambda_layer.zip
+          rm lambda_layer.zip
+          ls -la
+
       - name: Deploy Network stack
         working-directory: services/infra-cdk
         env:
