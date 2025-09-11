@@ -328,6 +328,11 @@ export class VirusScanning extends BaseStack {
                         `cp ${uploadsPath}/collector.yml ${outputDir}/collector.yml || echo "collector.yml not found at ${uploadsPath}/collector.yml"`,
                         // Replace license key placeholder with actual value
                         `sed -i 's/\\\\$NR_LICENSE_KEY/${process.env.NR_LICENSE_KEY || ''}/g' "${outputDir}/collector.yml"`,
+
+                        // Copy clamd.conf for ClamAV remote daemon configuration
+                        `cp ${uploadsPath}/src/avLayer/clamd.conf ${outputDir}/clamd.conf || echo "clamd.conf not found at ${uploadsPath}/src/avLayer/clamd.conf"`,
+                        // Replace serverless hostname with CDK hostname
+                        `sed -i 's/clamav\\.mc-review\\.local/clamav.mc-review-cdk.local/g' "${outputDir}/clamd.conf"`,
                     ]
                 },
             },
