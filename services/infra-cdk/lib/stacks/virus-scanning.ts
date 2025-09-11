@@ -11,7 +11,6 @@ import {
     SubnetType,
     Port,
     UserData,
-    Subnet,
 } from 'aws-cdk-lib/aws-ec2'
 import { NodejsFunction } from 'aws-cdk-lib/aws-lambda-nodejs'
 import {
@@ -193,13 +192,7 @@ export class VirusScanning extends BaseStack {
             machineImage: MachineImage.latestAmazonLinux2023(),
             vpc,
             vpcSubnets: {
-                subnets: [
-                    Subnet.fromSubnetId(
-                        this,
-                        'ClamavSubnet',
-                        process.env.SUBNET_PRIVATE_A_ID!
-                    ),
-                ],
+                subnetIds: [process.env.SUBNET_PRIVATE_A_ID!], // Explicit subnet ID like serverless
             },
             securityGroup: clamavSecurityGroup,
             userData: userDataScript,
