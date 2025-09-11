@@ -23,10 +23,10 @@ import type {
     RateFormData,
     UnlockedContract,
 } from '../gen/gqlServer'
-import type { HealthPlanFormDataType, StateCodeType } from '@mc-review/hpp'
+import type { StateCodeType } from '@mc-review/hpp'
 import { addNewRateToTestContract } from './gqlRateHelpers'
 import type { ContractFormDataType } from '../domain-models'
-import type { CreateHealthPlanPackageInput } from '../gen/gqlServer'
+import type { CreateContractInput } from '../gen/gqlServer'
 import { mockGqlContractDraftRevisionFormDataInput } from './gqlContractInputMocks'
 import type { GraphQLFormattedError } from 'graphql/index'
 import { extractGraphQLResponse } from './apolloV4ResponseHelper'
@@ -39,7 +39,10 @@ const createAndSubmitTestContract = async (
     const contract = await createAndUpdateTestContractWithoutRates(
         server,
         stateCode,
-        formData
+        {
+            ...formData,
+            submissionType: 'CONTRACT_ONLY',
+        }
     )
     return await must(
         submitTestContract(server, contract.id, 'Time to submit!')
@@ -143,7 +146,7 @@ async function createSubmitAndUnlockTestContract(
 async function createAndSubmitTestContractWithRate(
     server: ApolloServer,
     stateCode?: StateCodeType,
-    contractOverrides?: Partial<HealthPlanFormDataType>
+    contractOverrides?: Partial<ContractDraftRevisionFormDataInput>
 ): Promise<Contract> {
     const draft = await createAndUpdateTestContractWithRate(
         server,
@@ -240,7 +243,7 @@ const createTestContract = async (
         : [defaultFloridaProgram()]
 
     const programIDs = programs.map((program) => program.id)
-    const input: CreateHealthPlanPackageInput = {
+    const input: CreateContractInput = {
         programIDs: programIDs,
         populationCovered: 'MEDICAID',
         riskBasedContract: false,
