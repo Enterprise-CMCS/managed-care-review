@@ -7,7 +7,7 @@ import {
 } from '../attributeHelper'
 import { hasCMSPermissions } from '../../domain-models'
 import { logError } from '../../logger'
-import { ForbiddenError, UserInputError } from 'apollo-server-lambda'
+import { createForbiddenError, createUserInputError } from '../errorUtils'
 import { GraphQLError } from 'graphql/index'
 import type { Emailer } from '../../emailer'
 import type { StateCodeType } from '../../testHelpers'
@@ -43,7 +43,7 @@ export function withdrawContract(
             const message = 'user not authorized to withdraw a contract'
             logError('withdrawContract', message)
             setErrorAttributesOnActiveSpan(message, span)
-            throw new ForbiddenError(message)
+            throw createForbiddenError(message)
         }
 
         const contractWithHistory =
@@ -54,9 +54,7 @@ export function withdrawContract(
                 const errMessage = `A contract must exist to be withdrawn: ${contractID}`
                 logError('withdrawContract', errMessage)
                 setErrorAttributesOnActiveSpan(errMessage, span)
-                throw new UserInputError(errMessage, {
-                    argumentName: 'contractID',
-                })
+                throw createUserInputError(errMessage, 'contractID')
             }
 
             const errMessage = `Issue finding a contract. Message: ${contractWithHistory.message}`
@@ -78,10 +76,7 @@ export function withdrawContract(
             const errMessage = `Attempted to withdraw submission with invalid contract status of ${contractWithHistory.consolidatedStatus}`
             logError('withdrawContract', errMessage)
             setErrorAttributesOnActiveSpan(errMessage, span)
-            throw new UserInputError(errMessage, {
-                argumentName: 'contractID',
-                cause: 'INVALID_PACKAGE_STATUS',
-            })
+            throw createUserInputError(errMessage, 'contractID')
         }
 
         const withdrawResult = await store.withdrawContract({

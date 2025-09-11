@@ -31,7 +31,6 @@ import {
     mockUnlockedHealthPlanPackageWithDocuments,
     mockUnlockedHealthPlanPackage,
 } from './healthPlanFormDataMock'
-import { ApolloError } from '@apollo/client'
 import {
     GRAPHQL_ERROR_CAUSE_MESSAGES,
     GraphQLErrorCauseTypes,
@@ -495,7 +494,7 @@ const submitHealthPlanPackageMockError = ({
         code: GraphQLErrorCodeTypes
         cause: GraphQLErrorCauseTypes
     }
-}): MockedResponse<SubmitHealthPlanPackageMutation | ApolloError> => {
+}): MockedResponse<SubmitHealthPlanPackageMutation | GraphQLError> => {
     const graphQLError = new GraphQLError(
         error
             ? GRAPHQL_ERROR_CAUSE_MESSAGES[error.cause]
@@ -513,9 +512,6 @@ const submitHealthPlanPackageMockError = ({
             query: SubmitHealthPlanPackageDocument,
             variables: { input: { pkgID: id } },
         },
-        error: new ApolloError({
-            graphQLErrors: [graphQLError],
-        }),
         result: {
             data: null,
             errors: [graphQLError],
@@ -602,9 +598,6 @@ const unlockHealthPlanPackageMockError = ({
             query: UnlockHealthPlanPackageDocument,
             variables: { input: { pkgID: id, unlockedReason: reason } },
         },
-        error: new ApolloError({
-            graphQLErrors: [graphQLError],
-        }),
         result: {
             data: null,
             errors: [graphQLError],
@@ -641,9 +634,6 @@ const unlockContractMockError = ({
             query: UnlockContractDocument,
             variables: { input: { contractID: id, unlockedReason: reason } },
         },
-        error: new ApolloError({
-            graphQLErrors: [graphQLError],
-        }),
         result: {
             data: null,
             errors: [graphQLError],

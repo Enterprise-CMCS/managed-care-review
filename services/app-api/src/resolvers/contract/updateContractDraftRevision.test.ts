@@ -4,7 +4,10 @@ import {
     mockStoreThatErrors,
     sharedTestPrismaClient,
 } from '../../testHelpers/storeHelpers'
-import { constructTestPostgresServer } from '../../testHelpers/gqlHelpers'
+import {
+    constructTestPostgresServer,
+    executeGraphQLOperation,
+} from '../../testHelpers/gqlHelpers'
 import { testCMSUser, testStateUser } from '../../testHelpers/userHelpers'
 import {
     createTestContract,
@@ -160,7 +163,7 @@ describe(`Tests UpdateHealthPlanFormData`, () => {
             },
         })
 
-        const updateResult = await cmsUserServer.executeOperation({
+        const updateResult = await executeGraphQLOperation(cmsUserServer, {
             query: UpdateContractDraftRevisionDocument,
             variables: {
                 input: {
@@ -200,7 +203,7 @@ describe(`Tests UpdateHealthPlanFormData`, () => {
             },
         })
 
-        const updateResult = await otherUserServer.executeOperation({
+        const updateResult = await executeGraphQLOperation(otherUserServer, {
             query: UpdateContractDraftRevisionDocument,
             variables: {
                 input: {
@@ -248,7 +251,7 @@ describe(`Tests UpdateHealthPlanFormData`, () => {
             federalAuthorities: [],
         }
 
-        const updateResult = await server.executeOperation({
+        const updateResult = await executeGraphQLOperation(server, {
             query: UpdateContractDraftRevisionDocument,
             variables: {
                 input: {
@@ -281,7 +284,7 @@ describe(`Tests UpdateHealthPlanFormData`, () => {
         await submitTestContract(server, contractID)
 
         // Now test updating a submitted submission
-        const updateResult = await server.executeOperation({
+        const updateResult = await executeGraphQLOperation(server, {
             query: UpdateContractDraftRevisionDocument,
             variables: {
                 input: {
@@ -316,7 +319,7 @@ describe(`Tests UpdateHealthPlanFormData`, () => {
         }
 
         // Update the draft to have complete data for submission.
-        const updateResult = await server.executeOperation({
+        const updateResult = await executeGraphQLOperation(server, {
             query: UpdateContractDraftRevisionDocument,
             variables: {
                 input: {
@@ -362,7 +365,7 @@ describe(`Tests UpdateHealthPlanFormData`, () => {
         }
 
         // Update the draft to have complete data for submission.
-        const updateResult = await server.executeOperation({
+        const updateResult = await executeGraphQLOperation(server, {
             query: UpdateContractDraftRevisionDocument,
             variables: {
                 input: {

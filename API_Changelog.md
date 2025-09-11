@@ -1,6 +1,15 @@
 # Managed Care Review - API Changelog
 ## This document highlights API changes that have been introduced since May 2025
 
+### September 4, 2025
+#### Added
+- **ID** field added to `Document` GraphQL type (optional)
+    - The Document type is used for Q&A document responses
+    - API endpoints that return Document data will now include the document ID when available
+    - **Affected endpoints:**
+        - `fetchContract`
+        - `fetchRate`
+        - `fetchDocument`
 ### August 25, 2025
 #### Added
 - New endpoint `fetchDocument` added to the API

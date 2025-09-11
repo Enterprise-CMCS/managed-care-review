@@ -1,4 +1,7 @@
-import { constructTestPostgresServer } from '../../testHelpers/gqlHelpers'
+import {
+    constructTestPostgresServer,
+    executeGraphQLOperation,
+} from '../../testHelpers/gqlHelpers'
 import { CreateApiKeyDocument } from '../../gen/gqlClient'
 import { newJWTLib } from '../../jwt'
 import { testCMSUser } from '../../testHelpers/userHelpers'
@@ -18,13 +21,13 @@ describe('createAPIKey', () => {
             context: { user },
         })
 
-        const result = await server.executeOperation({
+        const result = await executeGraphQLOperation(server, {
             query: CreateApiKeyDocument,
         })
 
         const keyResult = result.data?.createAPIKey
 
-        const token = keyResult.key
+        const token = keyResult?.key
 
         const userID = jwt.userIDFromToken(token)
 

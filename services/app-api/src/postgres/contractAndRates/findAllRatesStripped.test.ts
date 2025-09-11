@@ -1,5 +1,8 @@
 import { sharedTestPrismaClient } from '../../testHelpers/storeHelpers'
-import { constructTestPostgresServer } from '../../testHelpers/gqlHelpers'
+import {
+    constructTestPostgresServer,
+    executeGraphQLOperation,
+} from '../../testHelpers/gqlHelpers'
 import { testCMSUser, testStateUser } from '../../testHelpers/userHelpers'
 import {
     createAndSubmitTestContractWithRate,
@@ -46,7 +49,7 @@ it('returns all rates with stripped down data', async () => {
     const contractB = await createAndUpdateTestContractWithoutRates(stateServer)
     // link rate contract B
     must(
-        await stateServer.executeOperation({
+        await executeGraphQLOperation(stateServer, {
             query: UpdateDraftContractRatesDocument,
             variables: {
                 input: {

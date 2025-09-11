@@ -3,6 +3,7 @@ import { IndexRatesDocument } from '../../gen/gqlClient'
 import {
     constructTestPostgresServer,
     createAndUpdateTestHealthPlanPackage,
+    executeGraphQLOperation,
 } from '../../testHelpers/gqlHelpers'
 import type { RateEdge, Rate } from '../../gen/gqlServer'
 import {
@@ -51,7 +52,7 @@ describe('indexRates', () => {
                     contract2.packageSubmissions[0].rateRevisions[0].rateID
 
                 // index rates
-                const result = await cmsServer.executeOperation({
+                const result = await executeGraphQLOperation(cmsServer, {
                     query: IndexRatesDocument,
                 })
 
@@ -96,7 +97,7 @@ describe('indexRates', () => {
                 const draft2 = contract2.draftRates[0]
 
                 // index rates
-                const result = await cmsServer.executeOperation({
+                const result = await executeGraphQLOperation(cmsServer, {
                     query: IndexRatesDocument,
                 })
 
@@ -161,7 +162,7 @@ describe('indexRates', () => {
                     contract3.packageSubmissions[0].rateRevisions[0]
 
                 // index rates
-                const result = await cmsServer.executeOperation({
+                const result = await executeGraphQLOperation(cmsServer, {
                     query: IndexRatesDocument,
                 })
 
