@@ -93,6 +93,7 @@ const mockContractRevision = (
                 name: 'contract supporting doc',
                 s3URL: 's3://bucketname/key/test1',
                 sha256: '2342fwlkdmwvw',
+                dateAdded: new Date(),
             },
             {
                 id: uuidv4(),
@@ -103,6 +104,7 @@ const mockContractRevision = (
                 name: 'contract supporting doc 2',
                 s3URL: 's3://bucketname/key/test1',
                 sha256: '45662342fwlkdmwvw',
+                dateAdded: new Date(),
             },
         ],
         contractType: 'BASE',
@@ -117,6 +119,7 @@ const mockContractRevision = (
                 name: 'contract doc',
                 s3URL: 's3://bucketname/key/test1',
                 sha256: '8984234fwlkdmwvw',
+                dateAdded: new Date(),
             },
         ],
         contractDateStart: new Date(Date.UTC(2025, 5, 1)),
