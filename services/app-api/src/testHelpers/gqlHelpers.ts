@@ -9,7 +9,6 @@ import {
     CreateContractQuestionResponseDocument,
     CreateRateQuestionDocument,
     CreateRateQuestionResponseDocument,
-    UnlockHealthPlanPackageDocument,
     UpdateHealthPlanFormDataDocument,
     UpdateStateAssignmentsByStateDocument,
 } from '../gen/gqlClient'
@@ -270,35 +269,6 @@ const updateTestHealthPlanFormData = async (
     return updateResult.data.updateHealthPlanFormData.pkg
 }
 
-const unlockTestHealthPlanPackage = async (
-    server: ApolloServer,
-    pkgID: string,
-    unlockedReason: string
-): Promise<HealthPlanPackage> => {
-    const updateResult = await executeGraphQLOperation(server, {
-        query: UnlockHealthPlanPackageDocument,
-        variables: {
-            input: {
-                pkgID: pkgID,
-                unlockedReason,
-            },
-        },
-    })
-
-    if (updateResult.errors) {
-        console.info('errors', updateResult.errors)
-        throw new Error(
-            `unlockTestHealthPlanPackage mutation failed with errors ${JSON.stringify(updateResult.errors)}`
-        )
-    }
-
-    if (!updateResult.data.unlockHealthPlanPackage.pkg) {
-        throw new Error('unlockTestHealthPlanPackage returned nothing')
-    }
-
-    return updateResult.data.unlockHealthPlanPackage.pkg
-}
-
 const createTestQuestion = async (
     server: ApolloServer,
     contractID: string,
@@ -478,7 +448,6 @@ const updateTestStateAssignments = async (
 export {
     constructTestPostgresServer,
     updateTestHealthPlanFormData,
-    unlockTestHealthPlanPackage,
     defaultContext,
     defaultFloridaProgram,
     defaultFloridaRateProgram,

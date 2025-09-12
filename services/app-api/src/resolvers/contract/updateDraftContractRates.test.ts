@@ -5,7 +5,6 @@ import {
 import {
     constructTestPostgresServer,
     executeGraphQLOperation,
-    unlockTestHealthPlanPackage,
 } from '../../testHelpers/gqlHelpers'
 import {
     createTestDraftRateOnContract,
@@ -20,6 +19,7 @@ import {
     createAndUpdateTestContractWithoutRates,
     createAndUpdateTestContractWithRate,
     createTestContract,
+    unlockTestContract,
 } from '../../testHelpers/gqlContractHelpers'
 import { must, testS3Client } from '../../testHelpers'
 
@@ -1004,7 +1004,7 @@ describe('updateDraftContractRates', () => {
         const otherPackage =
             await createAndSubmitTestContractWithRate(stateServer)
 
-        await unlockTestHealthPlanPackage(
+        await unlockTestContract(
             cmsServer,
             otherPackage.id,
             'unlock to not update'

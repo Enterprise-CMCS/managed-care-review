@@ -1,7 +1,6 @@
 import {
     constructTestPostgresServer,
     executeGraphQLOperation,
-    unlockTestHealthPlanPackage,
 } from '../../testHelpers/gqlHelpers'
 import { FetchContractDocument } from '../../gen/gqlClient'
 import { testCMSUser, testStateUser } from '../../testHelpers/userHelpers'
@@ -99,16 +98,16 @@ describe('fetchContract', () => {
 
         const intiallySubmitted = await submitTestContract(stateServer, AID)
 
-        await unlockTestHealthPlanPackage(cmsServer, AID, 'Unlock A.0')
+        await unlockTestContract(cmsServer, AID, 'Unlock A.0')
         await submitTestContract(stateServer, AID, 'Submit A.1')
 
-        await unlockTestHealthPlanPackage(cmsServer, AID, 'Unlock A.1')
+        await unlockTestContract(cmsServer, AID, 'Unlock A.1')
         await submitTestContract(stateServer, AID, 'Submit A.2')
 
-        await unlockTestHealthPlanPackage(cmsServer, AID, 'Unlock A.2')
+        await unlockTestContract(cmsServer, AID, 'Unlock A.2')
         await submitTestContract(stateServer, AID, 'Submit A.3')
 
-        await unlockTestHealthPlanPackage(cmsServer, AID, 'Unlock A.3')
+        await unlockTestContract(cmsServer, AID, 'Unlock A.3')
         await submitTestContract(stateServer, AID, 'Submit A.4')
 
         const submittedMultiply = await fetchTestContract(stateServer, AID)
@@ -120,7 +119,7 @@ describe('fetchContract', () => {
             intiallySubmitted.initiallySubmittedAt
         )
 
-        await unlockTestHealthPlanPackage(cmsServer, AID, 'Unlock A.4')
+        await unlockTestContract(cmsServer, AID, 'Unlock A.4')
 
         const finallyUnlocked = await fetchTestContract(stateServer, AID)
         expect(finallyUnlocked.packageSubmissions).toHaveLength(5)

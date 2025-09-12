@@ -292,7 +292,6 @@ const createAndUpdateTestContractWithoutRates = async (
     const draftContract = await createTestContract(server, stateCode)
     const draftRevision = draftContract.draftRevision
     const formData = draftRevision?.formData
-
     if (!formData) {
         throw new Error(
             'Unexpected error: draft contract does not contain a draft revision.'
@@ -317,6 +316,7 @@ const createAndUpdateTestContractWithoutRates = async (
             name: 'contractDocument.pdf',
             s3URL: 's3://bucketname/key/test1',
             sha256: 'fakesha',
+            dateAdded: new Date('01/15/2024'),
         },
     ]
     formData.managedCareEntities = ['MCO']

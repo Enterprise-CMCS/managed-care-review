@@ -3,7 +3,6 @@ import { v4 as uuidv4 } from 'uuid'
 import {
     constructTestPostgresServer,
     executeGraphQLOperation,
-    unlockTestHealthPlanPackage,
 } from '../../testHelpers/gqlHelpers'
 import { testStateUser, testCMSUser } from '../../testHelpers/userHelpers'
 import {
@@ -33,6 +32,7 @@ import {
     createAndUpdateTestContractWithRate,
     fetchTestContract,
     submitTestContract,
+    unlockTestContract,
 } from '../../testHelpers/gqlContractHelpers'
 import { submitRate } from '../../postgres/contractAndRates'
 import { sharedTestPrismaClient } from '../../testHelpers/storeHelpers'
@@ -335,7 +335,7 @@ describe('submitRate', () => {
         )
 
         // 5. unlock and resubmit A
-        await unlockTestHealthPlanPackage(
+        await unlockTestContract(
             cmsServer,
             contractA0.id,
             'does this mess history'

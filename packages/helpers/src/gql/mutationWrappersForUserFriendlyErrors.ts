@@ -2,7 +2,6 @@ import {
     CreateContractQuestionMutationFn,
     HealthPlanPackage,
     SubmitHealthPlanPackageMutationFn,
-    UnlockHealthPlanPackageMutationFn,
     UnlockContractMutationFn,
     FetchContractWithQuestionsQuery,
     FetchContractWithQuestionsDocument,
@@ -126,37 +125,6 @@ export const handleGraphQLErrorsAndAddUserFacingMessages = (
 }
 
 export const unlockMutationWrapper = async (
-    unlockHealthPlanPackage: UnlockHealthPlanPackageMutationFn,
-    id: string,
-    unlockedReason: string
-): Promise<HealthPlanPackage | GraphQLErrors | Error> => {
-    try {
-        const { data } = await unlockHealthPlanPackage({
-            variables: {
-                input: {
-                    pkgID: id,
-                    unlockedReason,
-                },
-            },
-        })
-
-        if (data?.unlockHealthPlanPackage.pkg) {
-            return data?.unlockHealthPlanPackage.pkg
-        } else {
-            recordJSException(
-                `[UNEXPECTED]: Error attempting to unlock, no data present but returning 200.`
-            )
-            return new Error(ERROR_MESSAGES.unlock_error_generic)
-        }
-    } catch (error) {
-        return handleGraphQLErrorsAndAddUserFacingMessages(
-            error,
-            'UNLOCK_HEALTH_PLAN_PACKAGE'
-        )
-    }
-}
-
-export const unlockMutationWrapperV2 = async (
     unlockContract: UnlockContractMutationFn,
     id: string,
     unlockedReason: string
