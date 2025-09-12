@@ -368,6 +368,7 @@ jobs:
           SUBNET_PRIVATE_A_ID: ${{ secrets.DEV_SUBNET_PRIVATE_A_ID }}
           SUBNET_PRIVATE_B_ID: ${{ secrets.DEV_SUBNET_PRIVATE_B_ID }}
           SUBNET_PRIVATE_C_ID: ${{ secrets.DEV_SUBNET_PRIVATE_C_ID }}
+          SUBNET_PUBLIC_A_ID: ${{ secrets.DEV_SUBNET_PUBLIC_A_ID }}
           NR_LICENSE_KEY: ${{ secrets.NR_LICENSE_KEY }}
           VITE_APP_OTEL_COLLECTOR_URL: ${{vars.VITE_APP_OTEL_COLLECTOR_URL}}
         run: |

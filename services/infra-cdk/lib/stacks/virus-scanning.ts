@@ -11,6 +11,7 @@ import {
     SubnetType,
     Port,
     UserData,
+    Subnet,
 } from 'aws-cdk-lib/aws-ec2'
 import { NodejsFunction } from 'aws-cdk-lib/aws-lambda-nodejs'
 import {
@@ -29,7 +30,6 @@ import {
     Effect,
     ManagedPolicy,
 } from 'aws-cdk-lib/aws-iam'
-// Note: EventBridge imports removed since rescan scheduling not implemented initially
 import { CfnOutput, Duration, Fn } from 'aws-cdk-lib'
 import { HostedZone, ARecord, RecordTarget } from 'aws-cdk-lib/aws-route53'
 import { ResourceNames } from '../config'
@@ -122,7 +122,7 @@ export class VirusScanning extends BaseStack {
      * Validate required environment variables for VPC configuration
      */
     private validateEnvironment(): void {
-        const required = ['VPC_ID', 'SG_ID', 'SUBNET_PRIVATE_A_ID']
+        const required = ['VPC_ID', 'SG_ID', 'SUBNET_PUBLIC_A_ID']
         const missing = required.filter((envVar) => !process.env[envVar])
 
         if (missing.length > 0) {
@@ -189,10 +189,18 @@ export class VirusScanning extends BaseStack {
                 InstanceClass.T3,
                 InstanceSize.MEDIUM
             ),
-            machineImage: MachineImage.latestAmazonLinux2023(),
+            machineImage: MachineImage.genericLinux({
+                'us-east-1': 'ami-0c7217cdde317cfec',
+            }),
             vpc,
             vpcSubnets: {
-                subnetIds: [process.env.SUBNET_PRIVATE_A_ID!], // Explicit subnet ID like serverless
+                subnets: [
+                    Subnet.fromSubnetId(
+                        this,
+                        'ClamavSubnet',
+                        process.env.SUBNET_PUBLIC_A_ID!
+                    ),
+                ],
             },
             securityGroup: clamavSecurityGroup,
             userData: userDataScript,
