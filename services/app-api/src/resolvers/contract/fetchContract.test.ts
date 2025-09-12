@@ -1,6 +1,5 @@
 import {
     constructTestPostgresServer,
-    createAndUpdateTestHealthPlanPackage,
     executeGraphQLOperation,
 } from '../../testHelpers/gqlHelpers'
 import { FetchContractDocument } from '../../gen/gqlClient'
@@ -53,8 +52,7 @@ describe('fetchContract', () => {
             s3Client: mockS3,
         })
 
-        const stateSubmission =
-            await createAndUpdateTestHealthPlanPackage(stateServer)
+        const stateSubmission = await createTestContract(stateServer)
 
         const fetchDraftContractResult = await executeGraphQLOperation(
             stateServer,
@@ -308,8 +306,7 @@ describe('fetchContract', () => {
         })
 
         // Create a submission with a rate
-        const stateSubmission =
-            await createAndUpdateTestHealthPlanPackage(stateServerFL)
+        const stateSubmission = await createTestContract(stateServerFL)
 
         const stateServerVA = await constructTestPostgresServer({
             context: {

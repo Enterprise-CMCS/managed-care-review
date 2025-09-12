@@ -851,7 +851,7 @@ describe('submitContract', () => {
             'FL',
             {
                 contractDocuments: [dummyDoc('c1')],
-                documents: [dummyDoc('s1')],
+                supportingDocuments: [dummyDoc('s1')],
             }
         )
         const AID = draftA0.id
@@ -1930,11 +1930,11 @@ describe('submitContract', () => {
             // setup
             const initialContract = await createAndUpdateTestContractWithRate(
                 server,
+                'FL',
                 {
                     statutoryRegulatoryAttestationDescription:
                         'A valid description',
                     statutoryRegulatoryAttestation: false,
-                    stateCode: 'FL',
                 }
             )
 
