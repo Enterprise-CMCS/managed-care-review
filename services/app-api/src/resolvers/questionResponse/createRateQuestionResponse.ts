@@ -1,4 +1,4 @@
-import { NotFoundError, handleNotFoundError, type Store } from '../../postgres'
+import { NotFoundError, type Store } from '../../postgres'
 import type { MutationResolvers } from '../../gen/gqlServer'
 import { isStateUser } from '../../domain-models'
 import { logError, logSuccess } from '../../logger'

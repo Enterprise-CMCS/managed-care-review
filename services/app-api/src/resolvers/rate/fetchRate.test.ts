@@ -451,7 +451,7 @@ describe('fetchRate', () => {
             'FL',
             {
                 contractDocuments: [dummyDoc('c1')],
-                documents: [dummyDoc('s1')],
+                supportingDocuments: [dummyDoc('s1')],
             }
         )
         const AID = draftA0.id

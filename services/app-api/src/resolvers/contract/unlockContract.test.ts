@@ -639,6 +639,7 @@ describe('unlockContract', () => {
         // First, create a new submitted submission
         const stateSubmission = await createAndSubmitTestContractWithRate(
             stateServer,
+            'FL',
             {
                 riskBasedContract: true,
             }
@@ -712,6 +713,7 @@ describe('unlockContract', () => {
         // First, create a new submitted submission
         const stateSubmission = await createAndSubmitTestContractWithRate(
             stateServer,
+            'FL',
             {
                 riskBasedContract: true,
             }

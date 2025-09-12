@@ -95,6 +95,7 @@ const mockRateRevision = (
         rateDateStart: new Date(),
         rateDateEnd: new Date(),
         rateDateCertified: new Date(),
+        rateMedicaidPopulations: [],
         amendmentEffectiveDateEnd: new Date(),
         amendmentEffectiveDateStart: new Date(),
         actuaryCommunicationPreference: 'OACT_TO_ACTUARY',
@@ -110,6 +111,7 @@ const mockRateRevision = (
                 name: 'rate supporting doc',
                 s3URL: 's3://bucketname/key/test1',
                 sha256: '2342fwlkdmwvw',
+                dateAdded: new Date(),
             },
             {
                 id: uuidv4(),
@@ -120,6 +122,7 @@ const mockRateRevision = (
                 name: 'rate supporting doc 2',
                 s3URL: 's3://bucketname/key/test1',
                 sha256: '45662342fwlkdmwvw',
+                dateAdded: new Date(),
             },
         ],
         rateDocuments: [
@@ -132,6 +135,7 @@ const mockRateRevision = (
                 name: 'contract doc',
                 s3URL: 's3://bucketname/key/test1',
                 sha256: '8984234fwlkdmwvw',
+                dateAdded: new Date(),
             },
         ],
         contractsWithSharedRateRevision: [],

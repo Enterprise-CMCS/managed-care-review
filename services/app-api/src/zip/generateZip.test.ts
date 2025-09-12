@@ -20,6 +20,7 @@ vi.mock('@aws-sdk/client-s3', () => {
             commandType: 'PutObject',
             ...params,
         })),
+        __mockSendFn: mockSendFn,
     }
 })
 
@@ -45,12 +46,8 @@ describe('generateDocumentZip', () => {
     beforeEach(async () => {
         vi.clearAllMocks()
 
-        // Get reference to the mock send function
-        const { S3Client } = await import('@aws-sdk/client-s3')
-        const mockS3Instance = new (S3Client as vi.MockedClass<
-            typeof S3Client
-        >)()
-        mockSend = mockS3Instance.send
+        const s3Module = await import('@aws-sdk/client-s3')
+        mockSend = (s3Module as any).__mockSendFn
 
         // Default S3 mock responses - provide successful responses by default
         mockSend.mockImplementation((command) => {

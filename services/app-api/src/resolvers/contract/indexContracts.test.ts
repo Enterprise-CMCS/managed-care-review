@@ -1,8 +1,6 @@
 import { IndexContractsForDashboardDocument } from '../../gen/gqlClient'
 import {
     constructTestPostgresServer,
-    createTestHealthPlanPackage,
-    createAndSubmitTestHealthPlanPackage,
     executeGraphQLOperation,
 } from '../../testHelpers/gqlHelpers'
 import type { Contract, ContractEdge } from '../../gen/gqlServer'
@@ -14,10 +12,11 @@ import {
 import {
     createAndSubmitTestContractWithRate,
     createAndUpdateTestContractWithoutRates,
+    createTestContract,
     submitTestContract,
     unlockTestContract,
 } from '../../testHelpers/gqlContractHelpers'
-import { testS3Client } from '../../../../app-api/src/testHelpers/s3Helpers'
+import { testS3Client } from '../../testHelpers'
 
 describe(`indexContracts`, () => {
     describe('isStateUser', () => {
@@ -176,9 +175,16 @@ describe(`indexContracts`, () => {
 
         it('returns no contracts for a different states user', async () => {
             const server = await constructTestPostgresServer()
+            const serverMN = await constructTestPostgresServer({
+                context: {
+                    user: testStateUser({
+                        stateCode: 'MN',
+                    }),
+                },
+            })
 
-            await createTestHealthPlanPackage(server)
-            await createAndSubmitTestHealthPlanPackage(server)
+            await createTestContract(server)
+            await createTestContract(serverMN, 'MN')
 
             const otherUserServer = await constructTestPostgresServer({
                 context: {

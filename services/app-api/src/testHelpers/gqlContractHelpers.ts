@@ -14,12 +14,7 @@ import {
 import { findStatePrograms } from '../postgres'
 
 import { must } from './assertionHelpers'
-import {
-    createTestHealthPlanPackage,
-    defaultFloridaProgram,
-    updateTestHealthPlanFormData,
-    executeGraphQLOperation,
-} from './gqlHelpers'
+import { defaultFloridaProgram, executeGraphQLOperation } from './gqlHelpers'
 import { type ContractType } from '../domain-models'
 import type { ApolloServer } from '@apollo/server'
 import type {
@@ -28,11 +23,10 @@ import type {
     RateFormData,
     UnlockedContract,
 } from '../gen/gqlServer'
-import { latestFormData } from './healthPlanPackageHelpers'
-import type { HealthPlanFormDataType, StateCodeType } from '@mc-review/hpp'
+import type { StateCodeType } from '@mc-review/hpp'
 import { addNewRateToTestContract } from './gqlRateHelpers'
 import type { ContractFormDataType } from '../domain-models'
-import type { CreateHealthPlanPackageInput } from '../gen/gqlServer'
+import type { CreateContractInput } from '../gen/gqlServer'
 import { mockGqlContractDraftRevisionFormDataInput } from './gqlContractInputMocks'
 import type { GraphQLFormattedError } from 'graphql/index'
 import { extractGraphQLResponse } from './apolloV4ResponseHelper'
@@ -45,7 +39,10 @@ const createAndSubmitTestContract = async (
     const contract = await createAndUpdateTestContractWithoutRates(
         server,
         stateCode,
-        formData
+        {
+            ...formData,
+            submissionType: 'CONTRACT_ONLY',
+        }
     )
     return await must(
         submitTestContract(server, contract.id, 'Time to submit!')
@@ -148,10 +145,12 @@ async function createSubmitAndUnlockTestContract(
 
 async function createAndSubmitTestContractWithRate(
     server: ApolloServer,
-    contractOverrides?: Partial<HealthPlanFormDataType>
+    stateCode?: StateCodeType,
+    contractOverrides?: Partial<ContractDraftRevisionFormDataInput>
 ): Promise<Contract> {
     const draft = await createAndUpdateTestContractWithRate(
         server,
+        stateCode,
         contractOverrides
     )
     return await submitTestContract(server, draft.id, undefined)
@@ -244,7 +243,7 @@ const createTestContract = async (
         : [defaultFloridaProgram()]
 
     const programIDs = programs.map((program) => program.id)
-    const input: CreateHealthPlanPackageInput = {
+    const input: CreateContractInput = {
         programIDs: programIDs,
         populationCovered: 'MEDICAID',
         riskBasedContract: false,
@@ -273,11 +272,12 @@ const createTestContract = async (
 
 async function createAndUpdateTestContractWithRate(
     server: ApolloServer,
-    contractOverrides?: Partial<HealthPlanFormDataType>
+    stateCode?: StateCodeType,
+    contractOverrides?: Partial<ContractDraftRevisionFormDataInput>
 ): Promise<Contract> {
     const draft = await createAndUpdateTestContractWithoutRates(
         server,
-        (contractOverrides?.stateCode as StateCodeType) ?? 'FL',
+        stateCode ?? 'FL',
         contractOverrides
     )
 
@@ -287,64 +287,70 @@ async function createAndUpdateTestContractWithRate(
 const createAndUpdateTestContractWithoutRates = async (
     server: ApolloServer,
     stateCode?: StateCodeType,
-    contractFormDataOverrides?: Partial<HealthPlanFormDataType>
+    contractFormDataOverrides?: Partial<ContractDraftRevisionFormDataInput>
 ): Promise<Contract> => {
-    const pkg = await createTestHealthPlanPackage(server, stateCode)
-    const draft = latestFormData(pkg)
+    const draftContract = await createTestContract(server, stateCode)
+    const draftRevision = draftContract.draftRevision
+    const formData = draftRevision?.formData
 
-    draft.submissionType = 'CONTRACT_AND_RATES' as const
-    draft.submissionDescription = 'An updated submission'
-    draft.stateContacts = [
+    if (!formData) {
+        throw new Error(
+            'Unexpected error: draft contract does not contain a draft revision.'
+        )
+    }
+
+    formData.submissionType = 'CONTRACT_AND_RATES' as const
+    formData.submissionDescription = 'An updated submission'
+    formData.stateContacts = [
         {
             name: 'test name',
             titleRole: 'test title',
             email: 'email@example.com',
         },
     ]
-    draft.rateInfos = []
-    draft.contractType = 'BASE' as const
-    draft.contractExecutionStatus = 'EXECUTED' as const
-    draft.contractDateStart = new Date(Date.UTC(2025, 5, 1))
-    draft.contractDateEnd = new Date(Date.UTC(2026, 4, 30))
-    draft.contractDocuments = [
+    formData.contractType = 'BASE' as const
+    formData.contractExecutionStatus = 'EXECUTED' as const
+    formData.contractDateStart = '2025-06-01'
+    formData.contractDateEnd = '2026-05-30'
+    formData.contractDocuments = [
         {
             name: 'contractDocument.pdf',
             s3URL: 's3://bucketname/key/test1',
             sha256: 'fakesha',
         },
     ]
-    draft.managedCareEntities = ['MCO']
-    draft.federalAuthorities = ['STATE_PLAN' as const]
-    draft.populationCovered = 'MEDICAID' as const
-    draft.contractAmendmentInfo = {
-        modifiedProvisions: {
-            inLieuServicesAndSettings: true,
-            modifiedRiskSharingStrategy: false,
-            modifiedIncentiveArrangements: false,
-            modifiedWitholdAgreements: false,
-            modifiedStateDirectedPayments: true,
-            modifiedPassThroughPayments: true,
-            modifiedPaymentsForMentalDiseaseInstitutions: true,
-            modifiedNonRiskPaymentArrangements: true,
-            modifiedBenefitsProvided: false,
-            modifiedGeoAreaServed: false,
-            modifiedMedicaidBeneficiaries: false,
-            modifiedMedicalLossRatioStandards: false,
-            modifiedOtherFinancialPaymentIncentive: false,
-            modifiedEnrollmentProcess: false,
-            modifiedGrevienceAndAppeal: false,
-            modifiedNetworkAdequacyStandards: false,
-            modifiedLengthOfContract: false,
-        },
-    }
-    draft.statutoryRegulatoryAttestation = false
-    draft.statutoryRegulatoryAttestationDescription = 'No compliance'
+    formData.managedCareEntities = ['MCO']
+    formData.federalAuthorities = ['STATE_PLAN' as const]
+    formData.populationCovered = 'MEDICAID' as const
+    formData.inLieuServicesAndSettings = true
+    formData.modifiedRiskSharingStrategy = false
+    formData.modifiedIncentiveArrangements = false
+    formData.modifiedWitholdAgreements = false
+    formData.modifiedStateDirectedPayments = true
+    formData.modifiedPassThroughPayments = true
+    formData.modifiedPaymentsForMentalDiseaseInstitutions = true
+    formData.modifiedNonRiskPaymentArrangements = true
+    formData.modifiedBenefitsProvided = false
+    formData.modifiedGeoAreaServed = false
+    formData.modifiedMedicaidBeneficiaries = false
+    formData.modifiedMedicalLossRatioStandards = false
+    formData.modifiedOtherFinancialPaymentIncentive = false
+    formData.modifiedEnrollmentProcess = false
+    formData.modifiedGrevienceAndAppeal = false
+    formData.modifiedNetworkAdequacyStandards = false
+    formData.modifiedLengthOfContract = false
+    formData.statutoryRegulatoryAttestation = false
+    formData.statutoryRegulatoryAttestationDescription = 'No compliance'
 
-    Object.assign(draft, contractFormDataOverrides)
+    Object.assign(formData, contractFormDataOverrides)
 
-    await updateTestHealthPlanFormData(server, draft)
-    const updatedContract = await fetchTestContract(server, draft.id)
-    return updatedContract
+    await updateTestContractDraftRevision(
+        server,
+        draftContract.id,
+        draftRevision?.updatedAt,
+        formData
+    )
+    return await fetchTestContract(server, draftContract.id)
 }
 
 const linkRateToDraftContract = async (
@@ -352,7 +358,7 @@ const linkRateToDraftContract = async (
     contractID: string,
     linkedRateID: string
 ) => {
-    const response = await executeGraphQLOperation(server, {
+    return await executeGraphQLOperation(server, {
         query: UpdateDraftContractRatesDocument,
         variables: {
             input: {
@@ -366,8 +372,6 @@ const linkRateToDraftContract = async (
             },
         },
     })
-
-    return response
 }
 
 const clearRatesOnDraftContract = async (

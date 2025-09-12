@@ -190,6 +190,18 @@ function mockStoreThatErrors(): Store {
         getOAuthClientsByUserId: async (_userID) => {
             return genericError
         },
+        findDocumentById: async (_userID) => {
+            return genericError
+        },
+        createDocumentZipPackage: async (_userID) => {
+            return genericError
+        },
+        findDocumentZipPackagesByContractRevision: async (_userID) => {
+            return genericError
+        },
+        findDocumentZipPackagesByRateRevision: async (_userID) => {
+            return genericError
+        },
     }
 }
 
