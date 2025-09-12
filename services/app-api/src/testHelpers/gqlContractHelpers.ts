@@ -468,8 +468,7 @@ const updateTestContractDraftRevision = async (
     if (updateResult.errors) {
         console.info('errors', JSON.stringify(updateResult.errors))
         throw new Error(
-            `updateTestContractDraftRevision mutation failed with errors ${JSON.stringify(updateResult.errors)}
-            updatedFormDataContract ${updatedFormData.contractDocuments![0].name}`
+            `updateTestContractDraftRevision mutation failed with errors ${JSON.stringify(updateResult.errors)}`
         )
     }
 

@@ -12,7 +12,6 @@ import {
     CreateRateQuestionResponseDocument,
     FetchHealthPlanPackageDocument,
     SubmitHealthPlanPackageDocument,
-    UnlockHealthPlanPackageDocument,
     UpdateHealthPlanFormDataDocument,
     UpdateStateAssignmentsByStateDocument,
 } from '../gen/gqlClient'
@@ -486,64 +485,6 @@ const resubmitTestHealthPlanPackage = async (
     return updateResult.data.submitHealthPlanPackage.pkg
 }
 
-const unlockTestHealthPlanPackage = async (
-    server: ApolloServer,
-    pkgID: string,
-    unlockedReason: string
-): Promise<HealthPlanPackage> => {
-    const updateResult = await executeGraphQLOperation(server, {
-        query: UnlockHealthPlanPackageDocument,
-        variables: {
-            input: {
-                pkgID: pkgID,
-                unlockedReason,
-            },
-        },
-    })
-
-    if (updateResult.errors) {
-        console.info('errors', updateResult.errors)
-        throw new Error(
-            `unlockTestHealthPlanPackage mutation failed with errors ${JSON.stringify(updateResult.errors)}`
-        )
-    }
-
-    if (!updateResult.data.unlockHealthPlanPackage.pkg) {
-        throw new Error('unlockTestHealthPlanPackage returned nothing')
-    }
-
-    return updateResult.data.unlockHealthPlanPackage.pkg
-}
-
-const unlockTestHealthPlanPackageAsUser = async (
-    server: ApolloServer,
-    pkgID: string,
-    unlockedReason: string
-): Promise<HealthPlanPackage> => {
-    const updateResult = await executeGraphQLOperation(server, {
-        query: UnlockHealthPlanPackageDocument,
-        variables: {
-            input: {
-                pkgID: pkgID,
-                unlockedReason,
-            },
-        },
-    })
-
-    if (updateResult.errors) {
-        console.info('errors', updateResult.errors)
-        throw new Error(
-            `unlockTestHealthPlanPackage mutation failed with errors ${JSON.stringify(updateResult.errors)}`
-        )
-    }
-
-    if (!updateResult.data.unlockHealthPlanPackage.pkg) {
-        throw new Error('unlockTestHealthPlanPackage returned nothing')
-    }
-
-    return updateResult.data.unlockHealthPlanPackage.pkg
-}
-
 const fetchTestHealthPlanPackageById = async (
     server: ApolloServer,
     pkgID: string
@@ -750,8 +691,6 @@ export {
     updateTestHealthPlanFormData,
     fetchTestHealthPlanPackageById,
     submitTestHealthPlanPackage,
-    unlockTestHealthPlanPackage,
-    unlockTestHealthPlanPackageAsUser,
     resubmitTestHealthPlanPackage,
     defaultContext,
     defaultFloridaProgram,

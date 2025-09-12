@@ -442,8 +442,6 @@ describe('submitContract', () => {
             'Unlock A.0'
         )
         const a0FormData = unlockedA0.draftRevision?.formData
-        a0FormData.submissionDescription = 'DESC A1'
-        // await updateTestHealthPlanFormData(stateServer, a0FormData)
         await updateTestContractDraftRevision(
             stateServer,
             AID,
