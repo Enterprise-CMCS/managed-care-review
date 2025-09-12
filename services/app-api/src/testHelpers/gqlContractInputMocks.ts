@@ -30,6 +30,7 @@ const mockGqlContractDraftRevisionFormDataInput = (
                 name: 'contractDocument1.pdf',
                 s3URL: 's3://bucketname/key/contractDocument1.pdf',
                 sha256: 'needs-to-be-there',
+                dateAdded: new Date('01/02/2024'),
             },
         ],
         supportingDocuments: [
@@ -37,6 +38,7 @@ const mockGqlContractDraftRevisionFormDataInput = (
                 name: 'supportingDocument11.pdf',
                 s3URL: 's3://bucketname/key/supportingDocument11.pdf',
                 sha256: 'needs-to-be-there',
+                dateAdded: new Date('01/02/2024'),
             },
         ],
         contractType: 'BASE',

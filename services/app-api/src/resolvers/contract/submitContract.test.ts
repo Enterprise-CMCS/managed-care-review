@@ -547,15 +547,28 @@ describe('submitContract', () => {
 
         // 6. resubmit B, add r4. Only B gets a new entry.
         console.info('---- UNLOCK B.1 ----')
-        const unlockedB0Pkg = await unlockTestContract(
+        const unlockedB0 = await unlockTestContract(
             cmsServer,
             BID,
             'Unlock B.0'
         )
-        const b0FormData = unlockedB0Pkg.draftRevision?.formData
-        // const b0FormData = latestFormData(unlockedB0Pkg)
-
+        const b0FormData = unlockedB0.draftRevision?.formData
+        b0FormData.contractDocuments = [
+            {
+                name: 'contractDocument.pdf',
+                s3URL: 's3://bucketname/key/test1',
+                sha256: 'fakesha',
+                dateAdded: new Date(),
+            },
+        ]
         b0FormData.submissionDescription = 'DESC B1'
+
+        await updateTestContractDraftRevision(
+            stateServer,
+            BID,
+            unlockedB0.draftRevision?.updatedAt,
+            b0FormData
+        )
 
         const unlockedB0Contract = await fetchTestContract(stateServer, BID)
         const b0RatesUpdates =
@@ -604,7 +617,20 @@ describe('submitContract', () => {
         )
         const c0FormData = unlockedC0.draftRevision?.formData
         c0FormData.submissionDescription = 'DESC C1'
-
+        c0FormData.contractDocuments = [
+            {
+                name: 'contractDocument.pdf',
+                s3URL: 's3://bucketname/key/test1',
+                sha256: 'fakesha',
+                dateAdded: new Date(),
+            },
+        ]
+        await updateTestContractDraftRevision(
+            stateServer,
+            CID,
+            unlockedC0.draftRevision?.updatedAt,
+            c0FormData
+        )
         const unlockedC0Contract = await fetchTestContract(stateServer, CID)
 
         const c0RatesUpdates =
