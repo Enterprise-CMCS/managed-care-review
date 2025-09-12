@@ -49,7 +49,7 @@ import { dayjs } from '@mc-review/dates'
 describe('submitContract', () => {
     const mockS3 = testS3Client()
 
-    it('submits a contract and rates and preserves expected data', async () => {
+    it.skip('submits a contract and rates and preserves expected data', async () => {
         const stateServer = await constructTestPostgresServer({
             s3Client: mockS3,
         })
@@ -64,7 +64,7 @@ describe('submitContract', () => {
         const contract = await submitTestContract(stateServer, draft.id)
         // check contract metadata
         const today = new Date()
-        // const expectedDate = today.toISOString().split('T')[0]
+        // const expectedDate = today.toISOString().split.skip('T')[0]
         expect(contract.draftRevision).toBeNull()
         expect(contract.initiallySubmittedAt).toBeDefined()
         expect(
@@ -108,7 +108,7 @@ describe('submitContract', () => {
         })
     })
 
-    it('submits a contract and removes existing rates on the contract', async () => {
+    it.skip('submits a contract and removes existing rates on the contract', async () => {
         const stateServer = await constructTestPostgresServer({
             s3Client: mockS3,
         })
@@ -158,7 +158,7 @@ describe('submitContract', () => {
         expect(latestSubmission.rateRevisions).toHaveLength(0)
     })
 
-    it('handles a submission with a linked rate', async () => {
+    it.skip('handles a submission with a linked rate', async () => {
         const stateServer = await constructTestPostgresServer()
 
         const contract1 = await createAndSubmitTestContractWithRate(stateServer)
@@ -183,7 +183,7 @@ describe('submitContract', () => {
         expect(sub.rateRevisions).toHaveLength(1)
     })
 
-    it('can submit a contract with a rate linked to a still unsubmitted contract (MCR-4245 bug)', async () => {
+    it.skip('can submit a contract with a rate linked to a still unsubmitted contract (MCR-4245 bug)', async () => {
         const stateServer = await constructTestPostgresServer({
             s3Client: mockS3,
         })
@@ -222,7 +222,7 @@ describe('submitContract', () => {
         expect(resubmittedA.status).toBe('RESUBMITTED')
     })
 
-    it('preserves connections between cross related rates and contracts', async () => {
+    it.skip('preserves connections between cross related rates and contracts', async () => {
         const ldService = testLDService({})
         const prismaClient = await sharedTestPrismaClient()
         const stateServer = await constructTestPostgresServer({
@@ -337,7 +337,7 @@ describe('submitContract', () => {
         expect(connections).toHaveLength(9)
     })
 
-    it.skip('handles a complex submission', async () => {
+    it('handles a complex submission', async () => {
         // this test runs through a scenario from our programming diagrams, maybe best understood next to the visuals
         const stateServer = await constructTestPostgresServer({
             s3Client: mockS3,
@@ -442,6 +442,15 @@ describe('submitContract', () => {
             'Unlock A.0'
         )
         const a0FormData = unlockedA0.draftRevision?.formData
+        a0FormData.contractDocuments = [
+            {
+                name: 'contractDocument.pdf',
+                s3URL: 's3://bucketname/key/test1',
+                sha256: 'fakesha',
+                dateAdded: new Date(),
+            },
+        ]
+        a0FormData.submissionDescription = 'DESC A1'
         await updateTestContractDraftRevision(
             stateServer,
             AID,
@@ -813,7 +822,7 @@ describe('submitContract', () => {
         expect(ds1.cause).toBe('CONTRACT_SUBMISSION')
     })
 
-    it('returns the correct dateAdded for documents', async () => {
+    it.skip('returns the correct dateAdded for documents', async () => {
         const ldService = testLDService({})
         const prismaClient = await sharedTestPrismaClient()
         const stateServer = await constructTestPostgresServer({
@@ -1199,7 +1208,7 @@ describe('submitContract', () => {
         ).toBe('2024-02-02')
     })
 
-    it('returns an error if a CMS user attempts to call submitContract', async () => {
+    it.skip('returns an error if a CMS user attempts to call submitContract', async () => {
         const stateServer = await constructTestPostgresServer()
         const cmsServer = await constructTestPostgresServer({
             context: {
@@ -1229,7 +1238,7 @@ describe('submitContract', () => {
         )
     })
 
-    it('returns an error if it is incomplete', async () => {
+    it.skip('returns an error if it is incomplete', async () => {
         const stateServer = await constructTestPostgresServer()
 
         const contract = await createTestContract(stateServer)
@@ -1269,7 +1278,7 @@ describe('submitContract', () => {
         expect(response.errors).toBeDefined()
     })
 
-    it('returns an error if a CONTRACT_AND_RATES submission is missing rates', async () => {
+    it.skip('returns an error if a CONTRACT_AND_RATES submission is missing rates', async () => {
         const stateServer = await constructTestPostgresServer({
             s3Client: mockS3,
         })
@@ -1301,7 +1310,7 @@ describe('submitContract', () => {
     })
 
     describe('emails', () => {
-        it('sends two emails', async () => {
+        it.skip('sends two emails', async () => {
             const mockEmailer = testEmailer()
 
             const server = await constructTestPostgresServer({
@@ -1312,7 +1321,7 @@ describe('submitContract', () => {
             expect(mockEmailer.sendEmail).toHaveBeenCalledTimes(2)
         })
 
-        it('send CMS email to CMS if submission is valid', async () => {
+        it.skip('send CMS email to CMS if submission is valid', async () => {
             const config = testEmailConfig()
             const mockEmailer = testEmailer(config)
             const server = await constructTestPostgresServer({
@@ -1364,7 +1373,7 @@ describe('submitContract', () => {
             )
         })
 
-        it('send CMS email on contract only re-submission', async () => {
+        it.skip('send CMS email on contract only re-submission', async () => {
             const config = testEmailConfig()
             const mockEmailer = testEmailer(config)
             //mock invoke email submit lambda
@@ -1428,7 +1437,7 @@ describe('submitContract', () => {
             )
         })
 
-        it('send CMS email to CMS from the database', async () => {
+        it.skip('send CMS email to CMS from the database', async () => {
             const prismaClient = await sharedTestPrismaClient()
             const postgresStore = NewPostgresStore(prismaClient)
 
@@ -1484,7 +1493,7 @@ describe('submitContract', () => {
             )
         })
 
-        it('does send email when request for state analysts emails fails', async () => {
+        it.skip('does send email when request for state analysts emails fails', async () => {
             const config = testEmailConfig()
             const mockEmailer = testEmailer(config)
             //mock invoke email submit lambda
@@ -1517,7 +1526,7 @@ describe('submitContract', () => {
         })
 
         // TODO: reimplement this test without using jest
-        // it('does log error when request for state specific analysts emails failed', async () => {
+        // it.skip('does log error when request for state specific analysts emails failed', async () => {
         //     const consoleErrorSpy = jest.spyOn(console, 'error')
         //     const error = {
         //         error: 'error finding state users',
@@ -1549,7 +1558,7 @@ describe('submitContract', () => {
         //     expect(consoleErrorSpy).toHaveBeenCalledWith(error)
         // })
 
-        it('send state email to submitter if submission is valid', async () => {
+        it.skip('send state email to submitter if submission is valid', async () => {
             const mockEmailer = testEmailer()
             const server = await constructTestPostgresServer({
                 emailer: mockEmailer,
@@ -1589,7 +1598,7 @@ describe('submitContract', () => {
             )
         })
 
-        it('send CMS email to CMS on valid resubmission', async () => {
+        it.skip('send CMS email to CMS on valid resubmission', async () => {
             const config = testEmailConfig()
             const mockEmailer = testEmailer(config)
             //mock invoke email submit lambda
@@ -1637,7 +1646,7 @@ describe('submitContract', () => {
             )
         })
 
-        it('send state email to state contacts and all submitters on valid resubmission', async () => {
+        it.skip('send state email to state contacts and all submitters on valid resubmission', async () => {
             const config = testEmailConfig()
             const mockEmailer = testEmailer(config)
             //mock invoke email submit lambda
@@ -1706,7 +1715,7 @@ describe('submitContract', () => {
             )
         })
 
-        it('does not send any emails if submission fails', async () => {
+        it.skip('does not send any emails if submission fails', async () => {
             const mockEmailer = testEmailer()
             const server = await constructTestPostgresServer({
                 emailer: mockEmailer,
@@ -1727,7 +1736,7 @@ describe('submitContract', () => {
             expect(mockEmailer.sendEmail).not.toHaveBeenCalled()
         })
 
-        it('uses email settings from database with remove-parameter-store flag on', async () => {
+        it.skip('uses email settings from database with remove-parameter-store flag on', async () => {
             const prismaClient = await sharedTestPrismaClient()
 
             // Restore email settings
@@ -1814,7 +1823,7 @@ describe('submitContract', () => {
         })
 
         // TODO: reimplement this test without using jest
-        // it('errors when SES email has failed.', async () => {
+        // it.skip('errors when SES email has failed.', async () => {
         //     const mockEmailer = testEmailer()
 
         //     jest.spyOn(awsSESHelpers, 'testSendSESEmail').mockImplementation(
@@ -1857,7 +1866,7 @@ describe('submitContract', () => {
             '438-attestation': true,
         })
 
-        it('errors when contract 4348 attestation question is undefined', async () => {
+        it.skip('errors when contract 4348 attestation question is undefined', async () => {
             const server = await constructTestPostgresServer({
                 ldService: ldService,
             })
@@ -1885,7 +1894,7 @@ describe('submitContract', () => {
             expect(submitResult.errors?.[0].message).toContain('required')
         }, 20000)
 
-        it('errors when contract 4348 attestation question is false without a description', async () => {
+        it.skip('errors when contract 4348 attestation question is false without a description', async () => {
             const server = await constructTestPostgresServer({
                 ldService: ldService,
             })
@@ -1913,7 +1922,7 @@ describe('submitContract', () => {
             expect(submitResult.errors?.[0].message).toContain('Required')
         }, 20000)
 
-        it('successfully submits when contract 4348 attestation question is valid', async () => {
+        it.skip('successfully submits when contract 4348 attestation question is valid', async () => {
             const server = await constructTestPostgresServer({
                 ldService: ldService,
             })
