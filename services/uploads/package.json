@@ -58,7 +58,7 @@
         "serverless-s3-local": "^0.8.5",
         "serverless-stack-termination-protection": "^2.0.2",
         "ts-jest": "^29.4.1",
-        "ts-loader": "^9.5.2",
+        "ts-loader": "^9.5.4",
         "vitest": "^3.2.4"
     }
 }
