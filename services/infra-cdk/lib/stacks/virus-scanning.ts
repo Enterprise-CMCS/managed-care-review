@@ -8,7 +8,6 @@ import {
     MachineImage,
     Vpc,
     SecurityGroup,
-    SubnetType,
     Port,
     UserData,
     Subnet,
@@ -389,7 +388,23 @@ export class VirusScanning extends BaseStack {
             layers: [this.clamAvLayer, this.otelLayer],
             vpc,
             vpcSubnets: {
-                subnetType: SubnetType.PRIVATE_WITH_EGRESS,
+                subnets: [
+                    Subnet.fromSubnetId(
+                        this,
+                        'LambdaPrivateA',
+                        process.env.SUBNET_PRIVATE_A_ID!
+                    ),
+                    Subnet.fromSubnetId(
+                        this,
+                        'LambdaPrivateB',
+                        process.env.SUBNET_PRIVATE_B_ID!
+                    ),
+                    Subnet.fromSubnetId(
+                        this,
+                        'LambdaPrivateC',
+                        process.env.SUBNET_PRIVATE_C_ID!
+                    ),
+                ],
             },
             securityGroups: [lambdaSecurityGroup],
             bundling: this.createVirusScanBundling('av-scan'),
