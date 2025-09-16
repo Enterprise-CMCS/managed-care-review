@@ -202,6 +202,8 @@ export class VirusScanning extends BaseStack {
             },
             securityGroup: clamavSecurityGroup,
             userData: userDataScript,
+            // Associate public IP to match serverless configuration
+            associatePublicIpAddress: true,
         })
 
         return instance
