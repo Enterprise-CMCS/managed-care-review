@@ -39,12 +39,35 @@ sed -i 's/^StandardOutput=syslog/StandardOutput=journal/' /lib/systemd/system/cl
 # Reload systemd to apply the changes
 systemctl daemon-reload
 
-# Start clamd and get defs
+# Enable services for auto-start
 systemctl enable clamav-daemon
 systemctl enable clamav-freshclam
-systemctl start clamav-daemon
+
+# Start freshclam first to download virus definitions
 systemctl start clamav-freshclam
 
-# Confirm we're up
-systemctl status clamav-daemon
-systemctl status clamav-freshclam
+# Wait for virus definitions to be downloaded
+echo "Waiting for virus definitions to download..."
+timeout=300  # 5 minutes timeout
+counter=0
+while [ ! -f /var/lib/clamav/daily.cvd ] && [ ! -f /var/lib/clamav/daily.cld ] && [ $counter -lt $timeout ]; do
+    sleep 5
+    counter=$((counter + 5))
+    echo "Still waiting for virus definitions... ($counter seconds)"
+done
+
+# Check if definitions were downloaded
+if [ -f /var/lib/clamav/daily.cvd ] || [ -f /var/lib/clamav/daily.cld ]; then
+    echo "Virus definitions downloaded successfully. Starting clamav-daemon..."
+    systemctl start clamav-daemon
+    
+    # Wait a moment for daemon to start
+    sleep 5
+    
+    # Confirm we're up
+    systemctl status clamav-daemon
+    systemctl status clamav-freshclam
+else
+    echo "ERROR: Virus definitions not downloaded within timeout. ClamAV daemon not started."
+    systemctl status clamav-freshclam
+fi
