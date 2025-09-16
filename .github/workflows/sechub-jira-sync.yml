@@ -3,8 +3,6 @@ name: Security Sync
 on:
   workflow_dispatch: # for testing and manual runs
   push:
-  branches:
-    - ruizaj-mcr-5443-fix-sechub-sync-github-action
   schedule:
     - cron: "25 1 * * *" # daily at 8:25 PM EST
 
