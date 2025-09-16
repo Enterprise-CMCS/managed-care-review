@@ -11,6 +11,7 @@ import {
     Port,
     UserData,
     Subnet,
+    SubnetType,
 } from 'aws-cdk-lib/aws-ec2'
 import { NodejsFunction } from 'aws-cdk-lib/aws-lambda-nodejs'
 import {
@@ -196,13 +197,13 @@ export class VirusScanning extends BaseStack {
                 subnets: [
                     Subnet.fromSubnetAttributes(this, 'ClamavSubnet', {
                         subnetId: process.env.SUBNET_PUBLIC_A_ID!,
-                        availabilityZone: 'us-east-1a', // Public subnet A is in AZ us-east-1a
+                        availabilityZone: 'us-east-1a',
                     }),
                 ],
+                subnetType: SubnetType.PUBLIC,
             },
             securityGroup: clamavSecurityGroup,
             userData: userDataScript,
-            // Associate public IP to match serverless configuration
             associatePublicIpAddress: true,
         })
 
