@@ -401,8 +401,8 @@ importers:
         specifier: ^1.2.1
         version: 1.2.1(@opentelemetry/api@1.9.0)
       '@opentelemetry/propagator-aws-xray':
-        specifier: ^1.26.2
-        version: 1.26.2(@opentelemetry/api@1.9.0)
+        specifier: ^2.0.0
+        version: 2.0.0(@opentelemetry/api@1.9.0)
       '@opentelemetry/resources':
         specifier: ^1.30.1
         version: 1.30.1(@opentelemetry/api@1.9.0)
@@ -653,8 +653,8 @@ importers:
         specifier: ^0.45.1
         version: 0.45.1(@opentelemetry/api@1.9.0)
       '@opentelemetry/propagator-aws-xray':
-        specifier: ^1.26.2
-        version: 1.26.2(@opentelemetry/api@1.9.0)
+        specifier: ^2.0.0
+        version: 2.0.0(@opentelemetry/api@1.9.0)
       '@opentelemetry/resources':
         specifier: ^1.30.1
         version: 1.30.1(@opentelemetry/api@1.9.0)
@@ -5252,9 +5252,9 @@ packages:
     peerDependencies:
       '@opentelemetry/api': '>=1.3.0 <1.8.0'
 
-  '@opentelemetry/propagator-aws-xray@1.26.2':
-    resolution: {integrity: sha512-k43wxTjKYvwfce9L4eT8fFYy/ATmCfPHZPZsyT/6ABimf2KE1HafoOsIcxLOtmNSZt6dCvBIYCrXaOWta20xJg==}
-    engines: {node: '>=14'}
+  '@opentelemetry/propagator-aws-xray@2.0.0':
+    resolution: {integrity: sha512-jJGNcGs8pYIgxbDANPQ6IssPI2iZj6o6eGul3ahE4gQ79X3wqlyFyrtiyg6a+l/yEj3DB/MiLrNLivVIBa0KzQ==}
+    engines: {node: ^18.19.0 || >=20.6.0}
     peerDependencies:
       '@opentelemetry/api': '>=1.0.0 <1.10.0'
 
@@ -9131,6 +9131,10 @@ packages:
 
   flow-parser@0.282.0:
     resolution: {integrity: sha512-rFveu+DQNZ8Jt/Vp8/tiTEULCF6jB4WJMEXwBHsFgZwu41Qn5iHaLBaqO05lx+ny3whVpwnHMqMFBKs76P8FbA==}
+    engines: {node: '>=0.4.0'}
+
+  flow-parser@0.283.0:
+    resolution: {integrity: sha512-PNpYZX8guJSDiHv7DQo+BLgiRNjbUQrag52b/8/znK+n0kGBbGtG9Smklb0VRdBdHg+UYKk9hSpWez3nXI5nEw==}
     engines: {node: '>=0.4.0'}
 
   fn.name@1.1.0:
@@ -21455,7 +21459,7 @@ snapshots:
       '@opentelemetry/sdk-metrics': 1.18.1(@opentelemetry/api@1.9.0)
       '@opentelemetry/sdk-trace-base': 1.18.1(@opentelemetry/api@1.9.0)
 
-  '@opentelemetry/propagator-aws-xray@1.26.2(@opentelemetry/api@1.9.0)':
+  '@opentelemetry/propagator-aws-xray@2.0.0(@opentelemetry/api@1.9.0)':
     dependencies:
       '@opentelemetry/api': 1.9.0
 
@@ -26473,6 +26477,8 @@ snapshots:
 
   flow-parser@0.282.0: {}
 
+  flow-parser@0.283.0: {}
+
   fn.name@1.1.0: {}
 
   follow-redirects@1.15.11: {}
@@ -27899,7 +27905,7 @@ snapshots:
       '@babel/register': 7.28.3(@babel/core@7.28.4)
       babel-core: 7.0.0-bridge.0(@babel/core@7.28.4)
       chalk: 4.1.2
-      flow-parser: 0.282.0
+      flow-parser: 0.283.0
       graceful-fs: 4.2.11
       micromatch: 4.0.8
       neo-async: 2.6.2
