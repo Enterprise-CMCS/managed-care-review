@@ -14,7 +14,11 @@ EOF
 chown ubuntu:ubuntu /home/ubuntu/.ssh/authorized_keys
 chmod 600 /home/ubuntu/.ssh/authorized_keys
 
-# Write to the clamd.conf
+# Configure clamd for TCP mode (disable Unix socket, enable TCP)
+sed -i 's/^LocalSocket/#LocalSocket/' /etc/clamav/clamd.conf
+sed -i 's/^FixStaleSocket/#FixStaleSocket/' /etc/clamav/clamd.conf
+sed -i 's/^LocalSocketGroup/#LocalSocketGroup/' /etc/clamav/clamd.conf
+sed -i 's/^LocalSocketMode/#LocalSocketMode/' /etc/clamav/clamd.conf
 echo "TCPSocket 3310" >> /etc/clamav/clamd.conf
 echo "TCPAddr 0.0.0.0" >> /etc/clamav/clamd.conf 
 sed -i 's/^StreamMaxLength .*/StreamMaxLength 50M/' /etc/clamav/clamd.conf
