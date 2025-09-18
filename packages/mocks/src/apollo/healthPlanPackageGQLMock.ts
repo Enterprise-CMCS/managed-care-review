@@ -5,7 +5,6 @@ import { unlockedWithALittleBitOfEverything } from '@mc-review/hpp'
 import { UnlockedHealthPlanFormDataType } from '@mc-review/hpp'
 import { domainToBase64 } from '@mc-review/hpp'
 import {
-    FetchHealthPlanPackageDocument,
     UpdateHealthPlanFormDataDocument,
     IndexHealthPlanPackagesDocument,
     HealthPlanPackage,
@@ -14,7 +13,6 @@ import {
     UnlockHealthPlanPackageMutation,
     SubmitHealthPlanPackageMutation,
     IndexHealthPlanPackagesQuery,
-    FetchHealthPlanPackageQuery,
     UpdateHealthPlanFormDataMutation,
     CreateHealthPlanPackageDocument,
     CreateHealthPlanPackageMutation,
@@ -37,17 +35,6 @@ import {
     GraphQLErrorCodeTypes,
 } from './apolloErrorCodeMocks'
 import { mockContractPackageUnlockedWithUnlockedType } from './contractPackageDataMock'
-
-/*
-    DEPRECATED - Remove after Wave 2
-
-    Mock different health plan form data that match frontend types.
-*/
-
-type fetchHealthPlanPackageMockProps = {
-    submission?: HealthPlanPackage
-    id: string
-}
 
 const mockSubmittedHealthPlanPackageWithRevision = ({
     currentSubmissionData,

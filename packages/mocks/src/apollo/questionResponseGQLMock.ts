@@ -5,8 +5,6 @@ import {
     CreateContractQuestionInput,
     CreateContractQuestionMutation,
     QuestionResponse as QuestionResponseType,
-    FetchHealthPlanPackageWithQuestionsDocument,
-    FetchHealthPlanPackageWithQuestionsQuery,
     HealthPlanPackage,
     IndexContractQuestionsPayload,
     CreateRateQuestionInput,
