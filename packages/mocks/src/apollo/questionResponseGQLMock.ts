@@ -5,8 +5,6 @@ import {
     CreateContractQuestionInput,
     CreateContractQuestionMutation,
     QuestionResponse as QuestionResponseType,
-    FetchHealthPlanPackageWithQuestionsDocument,
-    FetchHealthPlanPackageWithQuestionsQuery,
     HealthPlanPackage,
     IndexContractQuestionsPayload,
     CreateRateQuestionInput,
@@ -155,66 +153,11 @@ const createRateQuestionResponseNetworkFailure = (
     }
 }
 
-const fetchStateHealthPlanPackageWithQuestionsMockSuccess = ({
-    stateSubmission = mockSubmittedHealthPlanPackage(),
-    id,
-    questions,
-}: fetchStateHealthPlanPackageWithQuestionsProps): MockedResponse<
-    Record<string, unknown>
-> => {
-    const questionPayload = questions || mockQuestionsPayload(id)
-    const pkg = {
-        ...stateSubmission,
-        questions: questionPayload,
-    }
-
-    // override the ID of the returned draft to match the queried id.
-    const mergedStateSubmission = Object.assign({}, pkg, { id })
-
-    return {
-        request: {
-            query: FetchHealthPlanPackageWithQuestionsDocument,
-            variables: { input: { pkgID: id } },
-        },
-        result: {
-            data: {
-                fetchHealthPlanPackage: {
-                    pkg: mergedStateSubmission,
-                },
-            },
-        },
-    }
-}
-
-const fetchStateHealthPlanPackageWithQuestionsMockNotFound = ({
-    id,
-}: fetchStateHealthPlanPackageWithQuestionsProps): MockedResponse<FetchHealthPlanPackageWithQuestionsQuery> => {
-    const graphQLError = new GraphQLError(
-        'Issue finding a package with id a6039ed6-39cc-4814-8eaa-0c99f25e325d. Message: Result was undefined.',
-        {
-            extensions: {
-                code: 'NOT_FOUND',
-            },
-        }
-    )
-
-    return {
-        request: {
-            query: FetchHealthPlanPackageWithQuestionsDocument,
-            variables: { input: { pkgID: id } },
-        },
-        result: {
-            errors: [graphQLError],
-        },
-    }
-}
 
 export {
     createContractQuestionNetworkFailure,
     createContractQuestionResponseNetworkFailure,
     createContractQuestionSuccess,
-    fetchStateHealthPlanPackageWithQuestionsMockSuccess,
-    fetchStateHealthPlanPackageWithQuestionsMockNotFound,
     createRateQuestionNetworkFailure,
     createRateQuestionResponseNetworkFailure,
     createRateQuestionSuccess,

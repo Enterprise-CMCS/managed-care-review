@@ -1,15 +1,11 @@
 import { screen, waitFor } from '@testing-library/react'
 import { generatePath, Location, Route, Routes } from 'react-router-dom'
 import userEvent from '@testing-library/user-event'
-import { SubmissionDocument } from '@mc-review/hpp'
 import { RoutesRecord } from '@mc-review/constants'
 import { fetchCurrentUserMock } from '@mc-review/mocks'
 import {
     mockContractPackageSubmitted,
-    mockDraftHealthPlanPackage,
-    mockUnlockedHealthPlanPackage,
     mockValidCMSUser,
-    mockUnlockedHealthPlanPackageWithDocuments,
     updateContractDraftRevisionMockSuccess,
 } from '@mc-review/mocks'
 import {
@@ -20,7 +16,6 @@ import {
     mockContractPackageUnlockedWithUnlockedType,
     fetchContractWithQuestionsMockSuccess,
 } from '@mc-review/mocks'
-import { fetchHealthPlanPackageMockSuccess } from '@mc-review/mocks'
 // some spies will not work with indexed exports, so I refactored to import them directly from their files
 import { renderWithProviders } from '../../testHelpers/jestHelpers'
 
@@ -28,7 +23,7 @@ import { StateSubmissionForm } from './StateSubmissionForm'
 import { testS3Client } from '../../testHelpers/s3Helpers'
 import { getYesNoFieldValue } from '../../testHelpers/fieldHelpers'
 import { SubmissionSideNav } from '../SubmissionSideNav'
-import { fetchStateHealthPlanPackageWithQuestionsMockSuccess } from '@mc-review/mocks'
+import { GenericDocument } from '../../gen/gqlClient'
 
 describe('StateSubmissionForm', () => {
     describe('loads draft submission', () => {
@@ -129,9 +124,8 @@ describe('StateSubmissionForm', () => {
             })
         })
 
-        it('loads documents fields for /submissions/:id/edit/documents', async () => {
+        it('loads documents fields for /submissions/:id/edit/contract-details', async () => {
             const mockContract = mockContractPackageDraft()
-            const mockSubmission = mockDraftHealthPlanPackage()
             renderWithProviders(
                 <Routes>
                     <Route element={<SubmissionSideNav />}>
@@ -145,15 +139,6 @@ describe('StateSubmissionForm', () => {
                     apolloProvider: {
                         mocks: [
                             fetchCurrentUserMock({ statusCode: 200 }),
-                            fetchHealthPlanPackageMockSuccess({
-                                id: '12',
-                            }),
-                            fetchStateHealthPlanPackageWithQuestionsMockSuccess(
-                                {
-                                    id: '12',
-                                    stateSubmission: mockSubmission,
-                                }
-                            ),
                             fetchContractWithQuestionsMockSuccess({
                                 contract: {
                                     ...mockContract,
@@ -169,24 +154,25 @@ describe('StateSubmissionForm', () => {
                         ],
                     },
                     routerProvider: {
-                        route: '/submissions/12/edit/documents',
+                        route: '/submissions/12/edit/contract-details',
+                    },
+                    featureFlags: {
+                        'hide-supporting-docs-page': true,
                     },
                 }
             )
+            await screen.findByText('Contract Details')
 
-            await waitFor(() => {
-                expect(
-                    screen.getByText('Upload contract-supporting documents')
-                ).toBeInTheDocument()
-                expect(screen.getByTestId('file-input')).toBeInTheDocument()
-            })
+            expect(
+                screen.getByLabelText('Upload contract-supporting documents')
+            ).toBeInTheDocument()
+            expect(screen.getAllByTestId('file-input')).toHaveLength(2)
         })
     })
 
     describe('loads unlocked submission', () => {
         it('displays unlock banner with correct data for an unlocked submission', async () => {
             const mockContract = mockContractPackageUnlockedWithUnlockedType()
-            const mockSubmission = mockUnlockedHealthPlanPackage()
             renderWithProviders(
                 <Routes>
                     <Route element={<SubmissionSideNav />}>
@@ -212,20 +198,10 @@ describe('StateSubmissionForm', () => {
                                     id: '15',
                                 },
                             }),
-                            fetchStateHealthPlanPackageWithQuestionsMockSuccess(
-                                {
-                                    id: '15',
-                                    stateSubmission: mockSubmission,
-                                }
-                            ),
-                            fetchHealthPlanPackageMockSuccess({
-                                id: '15',
-                                submission: mockSubmission,
-                            }),
                         ],
                     },
                     routerProvider: {
-                        route: '/submissions/15/edit/documents',
+                        route: '/submissions/15/edit/review-and-submit',
                     },
                 }
             )
@@ -237,10 +213,10 @@ describe('StateSubmissionForm', () => {
                 /Unlocked on: (0?[1-9]|[12][0-9]|3[01])\/[0-9]+\/[0-9]+\s[0-9]+:[0-9]+[a-zA-Z]+\s[a-zA-Z]+/i
             )
             expect(banner).toHaveTextContent(
-                'Unlocked by: bob@dmas.mn.govUnlocked'
+                'Unlocked by: cms@example.comUnlocked'
             )
             expect(banner).toHaveTextContent(
-                'Reason for unlock: Test unlock reason'
+                'Reason for unlock: unlocked for a test'
             )
         })
     })
@@ -305,7 +281,7 @@ describe('StateSubmissionForm', () => {
         })
 
         it('works even if other sections of the form have been filled out', async () => {
-            const mockDocs: SubmissionDocument[] = [
+            const mockDocs: GenericDocument[] = [
                 {
                     name: 'somedoc.pdf',
                     s3URL: 's3://bucketName/key/somedoc.pdf',
@@ -568,8 +544,27 @@ describe('StateSubmissionForm', () => {
         const mockS3 = testS3Client()
 
         it('does not delete files from past revisions', async () => {
-            const submission = mockUnlockedHealthPlanPackageWithDocuments()
             const mockSubmission = mockContractPackageUnlockedWithUnlockedType()
+
+            const docs: GenericDocument[] = [
+                {
+                    s3URL: 's3://bucketname/one-two/one-two.png',
+                    sha256: 'fakesha',
+                    name: 'one two',
+                },
+                {
+                    s3URL: 's3://bucketname/two-one/two-one.png',
+                    sha256: 'fakesha',
+                    name: 'two one',
+                },
+                {
+                    s3URL: 's3://bucketname/three-one/three-one.png',
+                    sha256: 'fakesha',
+                    name: 'three one',
+                },
+            ]
+
+            mockSubmission.draftRevision!.formData.contractDocuments = docs
             renderWithProviders(
                 <Routes>
                     <Route element={<SubmissionSideNav />}>
@@ -583,10 +578,6 @@ describe('StateSubmissionForm', () => {
                     apolloProvider: {
                         mocks: [
                             fetchCurrentUserMock({ statusCode: 200 }),
-                            fetchHealthPlanPackageMockSuccess({
-                                id: '15',
-                                submission,
-                            }),
                             fetchContractMockSuccess({
                                 contract: {
                                     ...mockSubmission,
@@ -599,18 +590,18 @@ describe('StateSubmissionForm', () => {
                                     id: '15',
                                 },
                             }),
-                            fetchStateHealthPlanPackageWithQuestionsMockSuccess(
-                                {
-                                    id: '15',
-                                    stateSubmission: submission,
-                                }
-                            ),
                         ],
                     },
-                    routerProvider: { route: '/submissions/15/edit/documents' },
+                    routerProvider: {
+                        route: '/submissions/15/edit/contract-details',
+                    },
+                    featureFlags: {
+                        'hide-supporting-docs-page': true,
+                    },
                     s3Provider: mockS3,
                 }
             )
+            await screen.findByText('Contract Details')
 
             // PERFORM
 
@@ -641,7 +632,7 @@ describe('StateSubmissionForm', () => {
                 screen.queryByText('Remove three one document')
             ).not.toBeInTheDocument()
 
-            expect(screen.getByText(/0 files added/)).toBeInTheDocument()
+            expect(screen.getAllByText(/0 files added/)).toHaveLength(2)
         })
 
         it('loads contract details fields for /submissions/:id/edit/contract-details with amendments', async () => {
