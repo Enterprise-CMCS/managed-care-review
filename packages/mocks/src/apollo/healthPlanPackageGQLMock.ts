@@ -5,15 +5,11 @@ import { unlockedWithALittleBitOfEverything } from '@mc-review/hpp'
 import { UnlockedHealthPlanFormDataType } from '@mc-review/hpp'
 import { domainToBase64 } from '@mc-review/hpp'
 import {
-    UpdateHealthPlanFormDataDocument,
     HealthPlanPackage,
     SubmitHealthPlanPackageDocument,
     UnlockHealthPlanPackageDocument,
     UnlockHealthPlanPackageMutation,
     SubmitHealthPlanPackageMutation,
-    UpdateHealthPlanFormDataMutation,
-    CreateHealthPlanPackageDocument,
-    CreateHealthPlanPackageMutation,
     HealthPlanRevision,
     UnlockContractMutation,
     UnlockContractDocument,
@@ -23,9 +19,6 @@ import {
 import {
     mockContractAndRatesDraft,
     mockDraftHealthPlanPackage,
-    mockSubmittedHealthPlanPackage,
-    mockUnlockedHealthPlanPackageWithDocuments,
-    mockUnlockedHealthPlanPackage,
 } from './healthPlanFormDataMock'
 import {
     GRAPHQL_ERROR_CAUSE_MESSAGES,
@@ -285,80 +278,6 @@ const mockSubmittedHealthPlanPackageWithRevision = ({
     }
 }
 
-type updateHealthPlanFormDataMockSuccessProps = {
-    pkg?: HealthPlanPackage
-    updatedFormData: string
-    id: string
-}
-
-const updateHealthPlanFormDataMockSuccess = ({
-    pkg = mockUnlockedHealthPlanPackageWithDocuments(),
-    updatedFormData,
-    id,
-}: updateHealthPlanFormDataMockSuccessProps): MockedResponse<UpdateHealthPlanFormDataMutation> => {
-    return {
-        request: {
-            query: UpdateHealthPlanFormDataDocument,
-            variables: {
-                input: { pkgID: id, healthPlanFormData: updatedFormData },
-            },
-        },
-        result: { data: { updateHealthPlanFormData: { pkg } } },
-    }
-}
-
-const updateHealthPlanFormDataMockAuthFailure =
-    (): MockedResponse<UpdateHealthPlanFormDataMutation> => {
-        return {
-            request: { query: UpdateHealthPlanFormDataDocument },
-            error: new Error('You are not logged in'),
-        }
-    }
-
-const updateHealthPlanFormDataMockNetworkFailure =
-    (): MockedResponse<UpdateHealthPlanFormDataMutation> => {
-        return {
-            request: { query: UpdateHealthPlanFormDataDocument },
-            error: new Error('A network error occurred'),
-        }
-    }
-
-const createHealthPlanPackageMockSuccess =
-    (): MockedResponse<CreateHealthPlanPackageMutation> => {
-        const submissionData: Partial<UnlockedHealthPlanFormDataType> = {
-            programIDs: ['d95394e5-44d1-45df-8151-1cc1ee66f100'],
-            submissionType: 'CONTRACT_ONLY',
-            riskBasedContract: true,
-            submissionDescription: 'A submitted submission',
-        }
-        const pkg = mockDraftHealthPlanPackage()
-        return {
-            request: {
-                query: CreateHealthPlanPackageDocument,
-                variables: {
-                    input: submissionData,
-                },
-            },
-            result: { data: { createHealthPlanPackage: { pkg } } },
-        }
-    }
-
-const createHealthPlanPackageMockAuthFailure =
-    (): MockedResponse<CreateHealthPlanPackageMutation> => {
-        return {
-            request: { query: UpdateHealthPlanFormDataDocument },
-            error: new Error('You are not logged in'),
-        }
-    }
-
-const createHealthPlanPackageMockNetworkFailure =
-    (): MockedResponse<CreateHealthPlanPackageMutation> => {
-        return {
-            request: { query: UpdateHealthPlanFormDataDocument },
-            error: new Error('A network error occurred'),
-        }
-    }
-
 type submitHealthPlanPackageMockSuccessProps = {
     stateSubmission?: HealthPlanPackage
     id: string
@@ -411,26 +330,6 @@ const submitHealthPlanPackageMockError = ({
             data: null,
             errors: [graphQLError],
         },
-    }
-}
-
-type unlockHealthPlanPackageMockSuccessProps = {
-    pkg?: HealthPlanPackage
-    id: string
-    reason: string
-}
-
-const unlockHealthPlanPackageMockSuccess = ({
-    pkg = mockUnlockedHealthPlanPackage(),
-    id,
-    reason,
-}: unlockHealthPlanPackageMockSuccessProps): MockedResponse<UnlockHealthPlanPackageMutation> => {
-    return {
-        request: {
-            query: UnlockHealthPlanPackageDocument,
-            variables: { input: { pkgID: id, unlockedReason: reason } },
-        },
-        result: { data: { unlockHealthPlanPackage: { pkg } } },
     }
 }
 
@@ -537,17 +436,10 @@ const unlockContractMockError = ({
 }
 
 export {
-    updateHealthPlanFormDataMockAuthFailure,
-    updateHealthPlanFormDataMockNetworkFailure,
-    updateHealthPlanFormDataMockSuccess,
     submitHealthPlanPackageMockSuccess,
     submitHealthPlanPackageMockError,
-    unlockHealthPlanPackageMockSuccess,
     unlockHealthPlanPackageMockError,
     unlockContractMockSuccess,
     unlockContractMockError,
     mockSubmittedHealthPlanPackageWithRevision,
-    createHealthPlanPackageMockSuccess,
-    createHealthPlanPackageMockAuthFailure,
-    createHealthPlanPackageMockNetworkFailure,
 }
