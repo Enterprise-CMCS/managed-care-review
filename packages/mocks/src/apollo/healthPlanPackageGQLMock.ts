@@ -6,13 +6,11 @@ import { UnlockedHealthPlanFormDataType } from '@mc-review/hpp'
 import { domainToBase64 } from '@mc-review/hpp'
 import {
     UpdateHealthPlanFormDataDocument,
-    IndexHealthPlanPackagesDocument,
     HealthPlanPackage,
     SubmitHealthPlanPackageDocument,
     UnlockHealthPlanPackageDocument,
     UnlockHealthPlanPackageMutation,
     SubmitHealthPlanPackageMutation,
-    IndexHealthPlanPackagesQuery,
     UpdateHealthPlanFormDataMutation,
     CreateHealthPlanPackageDocument,
     CreateHealthPlanPackageMutation,
@@ -538,39 +536,12 @@ const unlockContractMockError = ({
     }
 }
 
-const indexHealthPlanPackagesMockSuccess = (
-    submissions: HealthPlanPackage[] = [
-        { ...mockUnlockedHealthPlanPackage(), id: 'test-id-123' },
-        { ...mockSubmittedHealthPlanPackage(), id: 'test-id-124' },
-    ]
-): MockedResponse<IndexHealthPlanPackagesQuery> => {
-    const submissionEdges = submissions.map((sub) => {
-        return {
-            node: sub,
-        }
-    })
-    return {
-        request: {
-            query: IndexHealthPlanPackagesDocument,
-        },
-        result: {
-            data: {
-                indexHealthPlanPackages: {
-                    totalCount: submissionEdges.length,
-                    edges: submissionEdges,
-                },
-            },
-        },
-    }
-}
-
 export {
     updateHealthPlanFormDataMockAuthFailure,
     updateHealthPlanFormDataMockNetworkFailure,
     updateHealthPlanFormDataMockSuccess,
     submitHealthPlanPackageMockSuccess,
     submitHealthPlanPackageMockError,
-    indexHealthPlanPackagesMockSuccess,
     unlockHealthPlanPackageMockSuccess,
     unlockHealthPlanPackageMockError,
     unlockContractMockSuccess,
