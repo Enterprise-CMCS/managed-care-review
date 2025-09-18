@@ -97,7 +97,7 @@ export function configureResolvers(
             indexRates: indexRatesResolver(store),
             indexRatesStripped: indexRatesStripped(store),
             fetchRate: fetchRateResolver(store),
-            fetchContract: fetchContractResolver(store),
+            fetchContract: fetchContractResolver(store, documentZip),
             fetchOauthClients: fetchOauthClientsResolver(store),
         },
         Mutation: {

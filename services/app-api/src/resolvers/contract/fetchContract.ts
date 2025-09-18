@@ -16,9 +16,11 @@ import {
     getAuthContextInfo,
 } from '../../authorization/oauthAuthorization'
 import { logError, logSuccess } from '../../logger'
+import type { DocumentZipService } from '../../zip/generateZip'
 
 export function fetchContractResolver(
-    store: Store
+    store: Store,
+    documentZip: DocumentZipService
 ): QueryResolvers['fetchContract'] {
     return async (_parent, { input }, context) => {
         const { user, ctx, tracer } = context
@@ -99,7 +101,33 @@ export function fetchContractResolver(
                 },
             })
         }
+        // Generate zips!
+        const contractZipRes = await documentZip.createContractZips(
+            contractWithHistory,
+            span
+        )
+        if (contractZipRes instanceof Error) {
+            const errMessage = `Failed to zip files for contract revision with ID: ${contractWithHistory.packageSubmissions[0]?.contractRevision.id}: ${contractZipRes.message}`
+            logError('fetchContract', errMessage)
+            setErrorAttributesOnActiveSpan(errMessage, span)
+        }
 
+        const rateZipRes = await documentZip.createRateZips(
+            contractWithHistory,
+            span
+        )
+        if (rateZipRes instanceof Array) {
+            const errorMessage = `Failed to zip files for ${rateZipRes.length} rate revision(s) on contract ${contractWithHistory.packageSubmissions[0]?.contractRevision.id}`
+            logError('fetchContract', errorMessage)
+            setErrorAttributesOnActiveSpan(errorMessage, span)
+
+            rateZipRes.forEach((error, index) => {
+                logError(
+                    'fetchContract',
+                    `Rate zip error ${index + 1}: ${error.message}`
+                )
+            })
+        }
         logSuccess('fetchContract')
         setSuccessAttributesOnActiveSpan(span)
         return { contract: contractWithHistory }
