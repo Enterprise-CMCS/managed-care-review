@@ -49,96 +49,6 @@ type fetchHealthPlanPackageMockProps = {
     id: string
 }
 
-const fetchHealthPlanPackageMockSuccess = ({
-    submission = mockDraftHealthPlanPackage(),
-    id,
-}: fetchHealthPlanPackageMockProps): MockedResponse<FetchHealthPlanPackageQuery> => {
-    // override the ID of the returned draft to match the queried id.
-    const mergedDraftSubmission = Object.assign({}, submission, { id })
-    return {
-        request: {
-            query: FetchHealthPlanPackageDocument,
-            variables: { input: { pkgID: id } },
-        },
-        result: {
-            data: {
-                fetchHealthPlanPackage: {
-                    pkg: mergedDraftSubmission,
-                },
-            },
-        },
-    }
-}
-
-const fetchHealthPlanPackageMockNotFound = ({
-    id,
-}: fetchHealthPlanPackageMockProps): MockedResponse<FetchHealthPlanPackageQuery> => {
-    const graphQLError = new GraphQLError(
-        'Issue finding a package with id a6039ed6-39cc-4814-8eaa-0c99f25e325d. Message: Result was undefined.',
-        {
-            extensions: {
-                code: 'NOT_FOUND',
-            },
-        }
-    )
-
-    return {
-        request: {
-            query: FetchHealthPlanPackageDocument,
-            variables: { input: { pkgID: id } },
-        },
-        result: {
-            errors: [graphQLError],
-        },
-    }
-}
-
-const fetchHealthPlanPackageMockAuthFailure =
-    (): MockedResponse<FetchHealthPlanPackageQuery> => {
-        return {
-            request: { query: FetchHealthPlanPackageDocument },
-            error: new Error('You are not logged in'),
-        }
-    }
-
-const fetchHealthPlanPackageMockNetworkFailure =
-    (): MockedResponse<FetchHealthPlanPackageQuery> => {
-        return {
-            request: { query: FetchHealthPlanPackageDocument },
-            error: new Error('A network error occurred'),
-        }
-    }
-
-type fetchStateHealthPlanPackageMockSuccessProps = {
-    stateSubmission?: HealthPlanPackage | Partial<HealthPlanPackage>
-    id: string
-}
-
-const fetchStateHealthPlanPackageMockSuccess = ({
-    stateSubmission = mockSubmittedHealthPlanPackage(),
-    id,
-}: fetchStateHealthPlanPackageMockSuccessProps): MockedResponse<
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    Record<string, any>
-> => {
-    // override the ID of the returned draft to match the queried id.
-    const mergedStateSubmission = Object.assign({}, stateSubmission, { id })
-
-    return {
-        request: {
-            query: FetchHealthPlanPackageDocument,
-            variables: { input: { pkgID: id } },
-        },
-        result: {
-            data: {
-                fetchHealthPlanPackage: {
-                    pkg: mergedStateSubmission,
-                },
-            },
-        },
-    }
-}
-
 const mockSubmittedHealthPlanPackageWithRevision = ({
     currentSubmissionData,
     currentSubmitInfo,
@@ -668,11 +578,6 @@ const indexHealthPlanPackagesMockSuccess = (
 }
 
 export {
-    fetchHealthPlanPackageMockSuccess,
-    fetchHealthPlanPackageMockNotFound,
-    fetchHealthPlanPackageMockNetworkFailure,
-    fetchHealthPlanPackageMockAuthFailure,
-    fetchStateHealthPlanPackageMockSuccess,
     updateHealthPlanFormDataMockAuthFailure,
     updateHealthPlanFormDataMockNetworkFailure,
     updateHealthPlanFormDataMockSuccess,
