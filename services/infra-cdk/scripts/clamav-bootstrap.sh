@@ -35,7 +35,22 @@ cat <<EOF > /etc/systemd/system/clamav-daemon.service.d/override.conf
 After=network.target
 StartLimitIntervalSec=1h
 StartLimitBurst=5
+Requires=
 EOF
+
+# Create TCP override to disable socket activation
+cat <<EOF > /etc/systemd/system/clamav-daemon.service.d/tcp-override.conf
+[Unit]
+Requires=
+After=network.target
+
+[Install]
+Also=
+EOF
+
+# Disable and mask the socket to force TCP mode
+systemctl disable clamav-daemon.socket
+systemctl mask clamav-daemon.socket
 
 # Fix the systemctl setting
 sed -i 's/^StandardOutput=syslog/StandardOutput=journal/' /lib/systemd/system/clamav-daemon.service
