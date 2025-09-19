@@ -14,11 +14,7 @@ EOF
 chown ubuntu:ubuntu /home/ubuntu/.ssh/authorized_keys
 chmod 600 /home/ubuntu/.ssh/authorized_keys
 
-# Configure clamd for TCP mode (disable Unix socket, enable TCP)
-sed -i 's/^LocalSocket/#LocalSocket/' /etc/clamav/clamd.conf
-sed -i 's/^FixStaleSocket/#FixStaleSocket/' /etc/clamav/clamd.conf
-sed -i 's/^LocalSocketGroup/#LocalSocketGroup/' /etc/clamav/clamd.conf
-sed -i 's/^LocalSocketMode/#LocalSocketMode/' /etc/clamav/clamd.conf
+# Write to the clamd.conf
 echo "TCPSocket 3310" >> /etc/clamav/clamd.conf
 echo "TCPAddr 0.0.0.0" >> /etc/clamav/clamd.conf 
 sed -i 's/^StreamMaxLength .*/StreamMaxLength 50M/' /etc/clamav/clamd.conf
@@ -35,22 +31,7 @@ cat <<EOF > /etc/systemd/system/clamav-daemon.service.d/override.conf
 After=network.target
 StartLimitIntervalSec=1h
 StartLimitBurst=5
-Requires=
 EOF
-
-# Create TCP override to disable socket activation
-cat <<EOF > /etc/systemd/system/clamav-daemon.service.d/tcp-override.conf
-[Unit]
-Requires=
-After=network.target
-
-[Install]
-Also=
-EOF
-
-# Disable and mask the socket to force TCP mode
-systemctl disable clamav-daemon.socket
-systemctl mask clamav-daemon.socket
 
 # Fix the systemctl setting
 sed -i 's/^StandardOutput=syslog/StandardOutput=journal/' /lib/systemd/system/clamav-daemon.service
@@ -58,35 +39,12 @@ sed -i 's/^StandardOutput=syslog/StandardOutput=journal/' /lib/systemd/system/cl
 # Reload systemd to apply the changes
 systemctl daemon-reload
 
-# Enable services for auto-start
+# Start clamd and get defs
 systemctl enable clamav-daemon
 systemctl enable clamav-freshclam
-
-# Start freshclam first to download virus definitions
+systemctl start clamav-daemon
 systemctl start clamav-freshclam
 
-# Wait for virus definitions to be downloaded
-echo "Waiting for virus definitions to download..."
-timeout=300  # 5 minutes timeout
-counter=0
-while [ ! -f /var/lib/clamav/daily.cvd ] && [ ! -f /var/lib/clamav/daily.cld ] && [ $counter -lt $timeout ]; do
-    sleep 5
-    counter=$((counter + 5))
-    echo "Still waiting for virus definitions... ($counter seconds)"
-done
-
-# Check if definitions were downloaded
-if [ -f /var/lib/clamav/daily.cvd ] || [ -f /var/lib/clamav/daily.cld ]; then
-    echo "Virus definitions downloaded successfully. Starting clamav-daemon..."
-    systemctl start clamav-daemon
-    
-    # Wait a moment for daemon to start
-    sleep 5
-    
-    # Confirm we're up
-    systemctl status clamav-daemon
-    systemctl status clamav-freshclam
-else
-    echo "ERROR: Virus definitions not downloaded within timeout. ClamAV daemon not started."
-    systemctl status clamav-freshclam
-fi
+# Confirm we're up
+systemctl status clamav-daemon
+systemctl status clamav-freshclam
