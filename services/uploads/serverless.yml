@@ -115,7 +115,6 @@ functions:
       subnetIds: ${self:custom.privateSubnets}
     environment:
       stage: ${sls:stage}
-      CLAMAV_BUCKET_NAME: !Ref ClamDefsBucket
       PATH_TO_AV_DEFINITIONS: 'lambda/s3-antivirus/av-definitions'
       AWS_LAMBDA_EXEC_WRAPPER: /opt/otel-handler
       OPENTELEMETRY_COLLECTOR_CONFIG_FILE: /var/task/collector.yml
@@ -131,7 +130,6 @@ functions:
     environment:
       stage: ${sls:stage}
       AUDIT_BUCKET_NAME: !Ref DocumentUploadsBucket
-      CLAMAV_BUCKET_NAME: !Ref ClamDefsBucket
       PATH_TO_AV_DEFINITIONS: 'lambda/s3-antivirus/av-definitions'
       AWS_LAMBDA_EXEC_WRAPPER: /opt/otel-handler
       OPENTELEMETRY_COLLECTOR_CONFIG_FILE: /var/task/collector.yml
@@ -150,7 +148,6 @@ functions:
     environment:
       stage: ${sls:stage}
       AUDIT_BUCKET_NAME: !Ref DocumentUploadsBucket
-      CLAMAV_BUCKET_NAME: !Ref ClamDefsBucket
       PATH_TO_AV_DEFINITIONS: 'lambda/s3-antivirus/av-definitions'
       AWS_LAMBDA_EXEC_WRAPPER: /opt/otel-handler
       OPENTELEMETRY_COLLECTOR_CONFIG_FILE: /var/task/collector.yml
@@ -247,32 +244,6 @@ resources:
         Principal: s3.amazonaws.com
         SourceAccount: !Sub ${AWS::AccountId}
         SourceArn: !Sub arn:aws:s3:::${self:service}-${sls:stage}-uploads-${AWS::AccountId}
-
-    ClamDefsBucket:
-      Type: AWS::S3::Bucket
-      Properties:
-        BucketName: !Sub ${self:service}-${sls:stage}-avscan-${AWS::AccountId}
-        BucketEncryption:
-          ServerSideEncryptionConfiguration:
-            - ServerSideEncryptionByDefault:
-                SSEAlgorithm: AES256
-        AccessControl: Private
-    ClamsDefsBucketPolicy:
-      Type: AWS::S3::BucketPolicy
-      Properties:
-        Bucket: !Ref ClamDefsBucket
-        PolicyDocument:
-          Statement:
-            - Effect: Deny
-              Action: 's3:*'
-              Principal: '*'
-              Condition:
-                Bool:
-                  'aws:SecureTransport': false
-              Resource:
-                - !Sub ${ClamDefsBucket.Arn}
-                - !Sub ${ClamDefsBucket.Arn}/*
-              Sid: DenyUnencryptedConnections
 
     QAUploadsBucket:
       Type: AWS::S3::Bucket
