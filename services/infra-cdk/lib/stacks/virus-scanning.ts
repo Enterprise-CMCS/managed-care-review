@@ -11,7 +11,6 @@ import {
     Port,
     UserData,
     Subnet,
-    SubnetType,
 } from 'aws-cdk-lib/aws-ec2'
 import { NodejsFunction } from 'aws-cdk-lib/aws-lambda-nodejs'
 import {
@@ -194,7 +193,13 @@ export class VirusScanning extends BaseStack {
             }),
             vpc,
             vpcSubnets: {
-                subnetType: SubnetType.PUBLIC,
+                subnets: [
+                    Subnet.fromSubnetId(
+                        this,
+                        'ClamAVPublicSubnet',
+                        process.env.SUBNET_PUBLIC_A_ID!
+                    ),
+                ],
             },
             securityGroup: clamavSecurityGroup,
             userData: userDataScript,
