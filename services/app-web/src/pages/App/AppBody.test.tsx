@@ -5,10 +5,7 @@ import {
     userClickSignIn,
 } from '../../testHelpers/jestHelpers'
 import { AppBody } from './AppBody'
-import {
-    fetchCurrentUserMock,
-    indexHealthPlanPackagesMockSuccess,
-} from '@mc-review/mocks'
+import { fetchCurrentUserMock } from '@mc-review/mocks'
 import { beforeEach } from 'vitest'
 
 // Looking for routing tests? Check AppRoutes.test.tsx
@@ -100,10 +97,7 @@ describe('AppBody', () => {
             import.meta.env.VITE_APP_STAGE_NAME = 'val'
             renderWithProviders(<AppBody authMode={'AWS_COGNITO'} />, {
                 apolloProvider: {
-                    mocks: [
-                        fetchCurrentUserMock({ statusCode: 200 }),
-                        indexHealthPlanPackagesMockSuccess(),
-                    ],
+                    mocks: [fetchCurrentUserMock({ statusCode: 200 })],
                 },
                 featureFlags: { 'session-expiring-modal': false },
             })
@@ -117,10 +111,7 @@ describe('AppBody', () => {
             import.meta.env.VITE_APP_STAGE_NAME = 'prod'
             renderWithProviders(<AppBody authMode={'AWS_COGNITO'} />, {
                 apolloProvider: {
-                    mocks: [
-                        fetchCurrentUserMock({ statusCode: 200 }),
-                        indexHealthPlanPackagesMockSuccess(),
-                    ],
+                    mocks: [fetchCurrentUserMock({ statusCode: 200 })],
                 },
                 featureFlags: { 'session-expiring-modal': false },
             })
@@ -133,10 +124,7 @@ describe('AppBody', () => {
         it('displays maintenance banner when feature flag is on', async () => {
             renderWithProviders(<AppBody authMode={'AWS_COGNITO'} />, {
                 apolloProvider: {
-                    mocks: [
-                        fetchCurrentUserMock({ statusCode: 200 }),
-                        indexHealthPlanPackagesMockSuccess(),
-                    ],
+                    mocks: [fetchCurrentUserMock({ statusCode: 200 })],
                 },
                 featureFlags: {
                     'site-under-maintenance-banner': 'UNSCHEDULED',
@@ -156,10 +144,7 @@ describe('AppBody', () => {
         it('does not display maintenance banner when flag is off', async () => {
             renderWithProviders(<AppBody authMode={'AWS_COGNITO'} />, {
                 apolloProvider: {
-                    mocks: [
-                        fetchCurrentUserMock({ statusCode: 200 }),
-                        indexHealthPlanPackagesMockSuccess(),
-                    ],
+                    mocks: [fetchCurrentUserMock({ statusCode: 200 })],
                 },
                 featureFlags: { 'session-expiring-modal': false },
             })

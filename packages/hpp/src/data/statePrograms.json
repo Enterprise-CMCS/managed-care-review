@@ -947,7 +947,7 @@
             "programs": [
                 {
                     "id": "bf868e4d-4706-46ae-b32e-c2dfe79c07be",
-                    "fullName": "Health and Recovery Plans",
+                    "fullName": "Health and Recovery Plan",
                     "name": "HARP",
                     "isRateProgram": false
                 },
@@ -965,14 +965,26 @@
                 },
                 {
                     "id": "6c94f55a-79a7-4e65-97cf-a3f6fdf40455",
-                    "fullName": "Partial Capitation",
-                    "name": "Partial Capitation",
+                    "fullName": "Managed Long Term Care Partial Capitation",
+                    "name": "MLTCP",
                     "isRateProgram": false
                 },
                 {
                     "id": "01e1c24b-14aa-40bb-9365-a17271468bd2",
                     "fullName": "Human Immunodeficiency Virus Special Needs Plan",
                     "name": "HIV SNP",
+                    "isRateProgram": false
+                },
+                {
+                    "id": "a929d116-b772-4de4-868c-4107d2323f4b",
+                    "fullName": "Children’s Health Insurance Program",
+                    "name": "CHIP",
+                    "isRateProgram": false
+                },
+                {
+                    "id": "0c1f6309-9522-4538-843c-5301d5b6fc1e",
+                    "fullName": "Fully Integrated Duals Advantage for Individuals with Intellectual & Developmental Disabilities",
+                    "name": "FIDA-IDD",
                     "isRateProgram": false
                 }
             ],

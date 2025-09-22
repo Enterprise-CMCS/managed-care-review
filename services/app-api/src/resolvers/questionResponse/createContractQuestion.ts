@@ -6,8 +6,7 @@ import {
     setSuccessAttributesOnActiveSpan,
 } from '../attributeHelper'
 import { createForbiddenError, createUserInputError } from '../errorUtils'
-import { NotFoundError, handleNotFoundError } from '../../postgres/postgresErrors'
-import type { Store } from '../../postgres'
+import { NotFoundError, type Store } from '../../postgres'
 import { GraphQLError } from 'graphql'
 import { isValidCmsDivison } from '../../domain-models'
 import type { Emailer } from '../../emailer'

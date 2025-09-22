@@ -58,11 +58,11 @@
         "@mc-review/hpp": "workspace:*",
         "cypress-file-upload": "^5.0.8",
         "cypress-pipe": "^2.0.1",
-        "axios": "^1.11.0",
+        "axios": "^1.12.0",
         "graphql": "^16.9.0",
         "@aws-sdk/signature-v4": "^3.374.0",
-        "@aws-sdk/client-cognito-identity-provider": "^3.883.0",
-        "@aws-sdk/client-cognito-identity": "^3.883.0",
+        "@aws-sdk/client-cognito-identity-provider": "^3.890.0",
+        "@aws-sdk/client-cognito-identity": "^3.890.0",
         "@aws-sdk/protocol-http": "^3.374.0",
         "@aws-crypto/sha256-js": "^5.2.0"
     }

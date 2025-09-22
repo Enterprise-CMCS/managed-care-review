@@ -336,6 +336,7 @@ const mockRate = (ratePartial?: Partial<RateType>): RateType => {
                             division: 'DMCO',
                             documents: [
                                 {
+                                    id: 'dmco-rate-question-1',
                                     name: 'dmco-rate-question-1',
                                     s3URL: 's3://bucketName/key/dmco-rate-question-1-doc',
                                     downloadURL:

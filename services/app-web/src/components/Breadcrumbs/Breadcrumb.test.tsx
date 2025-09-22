@@ -17,11 +17,12 @@ describe('Breadcrumbs', () => {
         const items = [
             { text: 'First link', link: '/firstlink' },
             { text: 'Second link', link: '/secondlink' },
-            { text: 'Active link', link: '/thirdlink' },
+            { text: 'Active link', link: '/thirdlink', current: true },
         ]
         renderWithProviders(<Breadcrumbs items={items} />)
         expect(screen.getAllByRole('listitem')).toHaveLength(items.length)
-        expect(screen.getAllByRole('link')).toHaveLength(items.length)
+        //Expect links to be 1 less than the total amount of crumbs, last crumb is current page.
+        expect(screen.getAllByRole('link')).toHaveLength(items.length - 1)
     })
 
     it('renders nothing if no items passed in', () => {

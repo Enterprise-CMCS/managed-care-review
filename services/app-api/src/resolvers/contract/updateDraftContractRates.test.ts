@@ -4,11 +4,7 @@ import {
 } from '../../gen/gqlClient'
 import {
     constructTestPostgresServer,
-    createAndSubmitTestHealthPlanPackage,
-    createAndUpdateTestHealthPlanPackage,
-    createTestHealthPlanPackage,
     executeGraphQLOperation,
-    unlockTestHealthPlanPackage,
 } from '../../testHelpers/gqlHelpers'
 import {
     createTestDraftRateOnContract,
@@ -16,16 +12,16 @@ import {
     updateTestDraftRateOnContract,
     withdrawTestRate,
 } from '../../testHelpers/gqlRateHelpers'
-import { latestFormData } from '../../testHelpers/healthPlanPackageHelpers'
 import { testCMSUser, testStateUser } from '../../testHelpers/userHelpers'
-import { testS3Client } from '../../../../app-api/src/testHelpers/s3Helpers'
 import {
+    createAndSubmitTestContract,
     createAndSubmitTestContractWithRate,
     createAndUpdateTestContractWithoutRates,
     createAndUpdateTestContractWithRate,
     createTestContract,
+    unlockTestContract,
 } from '../../testHelpers/gqlContractHelpers'
-import { must } from '../../testHelpers'
+import { must, testS3Client } from '../../testHelpers'
 
 describe('updateDraftContractRates', () => {
     const mockS3 = testS3Client()
@@ -62,8 +58,8 @@ describe('updateDraftContractRates', () => {
             s3Client: mockS3,
         })
 
-        const draft = await createTestHealthPlanPackage(stateServer)
-        const draftFD = latestFormData(draft)
+        const draft = await createTestContract(stateServer)
+        const draftFD = draft.draftRevision!
 
         const otherStateServer = await constructTestPostgresServer({
             context: {
@@ -100,8 +96,8 @@ describe('updateDraftContractRates', () => {
             s3Client: mockS3,
         })
 
-        const draft = await createTestHealthPlanPackage(stateServer)
-        const draftFD = latestFormData(draft)
+        const draft = await createTestContract(stateServer)
+        const draftFD = draft.draftRevision!
 
         const otherStateServer = await constructTestPostgresServer({
             context: {
@@ -137,16 +133,48 @@ describe('updateDraftContractRates', () => {
             s3Client: mockS3,
         })
 
-        const draft = await createAndSubmitTestHealthPlanPackage(stateServer)
-        const draftFD = latestFormData(draft)
+        const draft = await createAndSubmitTestContract(stateServer)
 
         const result = await executeGraphQLOperation(stateServer, {
             query: UpdateDraftContractRatesDocument,
             variables: {
                 input: {
                     contractID: draft.id,
-                    lastSeenUpdatedAt: draftFD.updatedAt,
-                    updatedRates: [],
+                    lastSeenUpdatedAt: draft.updatedAt,
+                    updatedRates: [
+                        {
+                            type: 'CREATE',
+                            formData: {
+                                rateType: 'NEW',
+                                rateCapitationType: 'RATE_CELL',
+                                rateDateStart: '2024-01-01',
+                                rateDateEnd: '2025-01-01',
+                                rateProgramIDs: ['foo'],
+                                rateMedicaidPopulations: ['MEDICAID_ONLY'],
+                                deprecatedRateProgramIDs: [],
+
+                                rateDocuments: [
+                                    {
+                                        s3URL: 's3://bucketname/key/test1',
+                                        name: 'ratedoc1.doc',
+                                        sha256: 'foobar',
+                                    },
+                                ],
+                                supportingDocuments: [],
+                                certifyingActuaryContacts: [
+                                    {
+                                        name: 'Foo Person',
+                                        titleRole: 'Bar Job',
+                                        email: 'foo@example.com',
+                                        actuarialFirm: 'GUIDEHOUSE',
+                                    },
+                                ],
+                                addtlActuaryContacts: [],
+                                actuaryCommunicationPreference:
+                                    'OACT_TO_ACTUARY',
+                            },
+                        },
+                    ],
                 },
             },
         })
@@ -167,7 +195,7 @@ describe('updateDraftContractRates', () => {
             s3Client: mockS3,
         })
 
-        const draft = await createTestHealthPlanPackage(stateServer)
+        const draft = await createTestContract(stateServer)
 
         const result = await executeGraphQLOperation(stateServer, {
             query: UpdateDraftContractRatesDocument,
@@ -227,8 +255,8 @@ describe('updateDraftContractRates', () => {
             s3Client: mockS3,
         })
 
-        const draft = await createAndSubmitTestHealthPlanPackage(stateServer)
-        const draftFD = latestFormData(draft)
+        const draft = await createTestContract(stateServer)
+        const draftFD = draft.draftRevision!
 
         const result = await executeGraphQLOperation(stateServer, {
             query: UpdateDraftContractRatesDocument,
@@ -308,8 +336,8 @@ describe('updateDraftContractRates', () => {
             s3Client: mockS3,
         })
 
-        const draft = await createTestHealthPlanPackage(stateServer)
-        const draftFD = latestFormData(draft)
+        const draft = await createTestContract(stateServer)
+        const draftFD = draft.draftRevision!
 
         const result = await executeGraphQLOperation(stateServer, {
             query: UpdateDraftContractRatesDocument,
@@ -390,9 +418,13 @@ describe('updateDraftContractRates', () => {
             s3Client: mockS3,
         })
 
-        const draft = await createAndUpdateTestHealthPlanPackage(stateServer)
-        const draftFD = latestFormData(draft)
-        const rate = draftFD.rateInfos[0]
+        const draft = await createAndUpdateTestContractWithRate(stateServer)
+        const draftFD = draft.draftRevision!
+        const rate = draft.draftRates?.[0]
+
+        if (!rate) {
+            throw new Error('Unexpected error: Rate not found in contract data')
+        }
 
         const result = await executeGraphQLOperation(stateServer, {
             query: UpdateDraftContractRatesDocument,
@@ -478,8 +510,8 @@ describe('updateDraftContractRates', () => {
             s3Client: mockS3,
         })
 
-        const draft = await createAndUpdateTestHealthPlanPackage(stateServer)
-        const draftFD = latestFormData(draft)
+        const draft = await createTestContract(stateServer)
+        const draftFD = draft.draftRevision!
 
         const result = await executeGraphQLOperation(stateServer, {
             query: UpdateDraftContractRatesDocument,
@@ -556,11 +588,14 @@ describe('updateDraftContractRates', () => {
             s3Client: mockS3,
         })
 
-        const draft = await createAndUpdateTestHealthPlanPackage(stateServer)
-        const draftFD = latestFormData(draft)
-        const draft2 = await createAndUpdateTestHealthPlanPackage(stateServer)
-        const draft2FD = latestFormData(draft2)
-        const rate = draft2FD.rateInfos[0]
+        const draft = await createAndUpdateTestContractWithRate(stateServer)
+        const draftFD = draft.draftRevision!
+        const draft2 = await createAndUpdateTestContractWithRate(stateServer)
+        const rate = draft2.draftRates?.[0]
+
+        if (!rate) {
+            throw new Error('Unexpected error: Rate not found in contract data')
+        }
 
         const result = await executeGraphQLOperation(stateServer, {
             query: UpdateDraftContractRatesDocument,
@@ -704,13 +739,13 @@ describe('updateDraftContractRates', () => {
         })
 
         const otherPackage =
-            await createAndSubmitTestHealthPlanPackage(stateServer)
+            await createAndSubmitTestContractWithRate(stateServer)
 
-        const otherFD = latestFormData(otherPackage)
-        const foreignRateID = otherFD.rateInfos[0].id
+        const foreignRateID =
+            otherPackage.packageSubmissions?.[0].rateRevisions[0].rateID
 
-        const contractDraft = await createTestHealthPlanPackage(stateServer)
-        const draftFD = latestFormData(contractDraft)
+        const contractDraft = await createTestContract(stateServer)
+        const draftFD = contractDraft.draftRevision!
 
         const result = await executeGraphQLOperation(stateServer, {
             query: UpdateDraftContractRatesDocument,
@@ -740,9 +775,9 @@ describe('updateDraftContractRates', () => {
 
         const rateFormData = draftRates[0].revisions[0].formData
 
-        expect(rateFormData.rateType).toBe('NEW')
+        expect(rateFormData.rateType).toBe('AMENDMENT')
         expect(rateFormData.rateDocuments).toHaveLength(1)
-        expect(rateFormData.rateDocuments[0].name).toBe('rateDocument.pdf')
+        expect(rateFormData.rateDocuments[0].name).toBe('ratedoc1.doc')
     })
 
     it('doesnt allow updating a linked rate', async () => {
@@ -751,13 +786,13 @@ describe('updateDraftContractRates', () => {
         })
 
         const otherPackage =
-            await createAndSubmitTestHealthPlanPackage(stateServer)
+            await createAndSubmitTestContractWithRate(stateServer)
 
-        const otherFD = latestFormData(otherPackage)
-        const foreignRateID = otherFD.rateInfos[0].id
+        const foreignRateID =
+            otherPackage.packageSubmissions?.[0].rateRevisions[0].rateID
 
-        const contractDraft = await createTestHealthPlanPackage(stateServer)
-        const draftFD = latestFormData(contractDraft)
+        const contractDraft = await createTestContract(stateServer)
+        const draftFD = contractDraft.draftRevision!
 
         const result = await executeGraphQLOperation(stateServer, {
             query: UpdateDraftContractRatesDocument,
@@ -967,19 +1002,19 @@ describe('updateDraftContractRates', () => {
         })
 
         const otherPackage =
-            await createAndSubmitTestHealthPlanPackage(stateServer)
+            await createAndSubmitTestContractWithRate(stateServer)
 
-        await unlockTestHealthPlanPackage(
+        await unlockTestContract(
             cmsServer,
             otherPackage.id,
             'unlock to not update'
         )
 
-        const otherFD = latestFormData(otherPackage)
-        const foreignRateID = otherFD.rateInfos[0].id
+        const foreignRateID =
+            otherPackage.packageSubmissions[0]?.rateRevisions[0].rateID
 
-        const contractDraft = await createTestHealthPlanPackage(stateServer)
-        const draftFD = latestFormData(contractDraft)
+        const contractDraft = await createTestContract(stateServer)
+        const draftFD = contractDraft.draftRevision!
 
         const linkResult = await executeGraphQLOperation(stateServer, {
             query: UpdateDraftContractRatesDocument,
@@ -1084,13 +1119,13 @@ describe('updateDraftContractRates', () => {
         })
 
         const otherPackage =
-            await createAndSubmitTestHealthPlanPackage(stateServer)
+            await createAndSubmitTestContractWithRate(stateServer)
 
-        const otherFD = latestFormData(otherPackage)
-        const foreignRateID = otherFD.rateInfos[0].id
+        const foreignRateID =
+            otherPackage.packageSubmissions?.[0].rateRevisions[0].rateID
 
-        const contractDraft = await createTestHealthPlanPackage(stateServer)
-        const draftFD = latestFormData(contractDraft)
+        const contractDraft = await createTestContract(stateServer)
+        const draftFD = contractDraft.draftRevision!
 
         const linkResult = await executeGraphQLOperation(stateServer, {
             query: UpdateDraftContractRatesDocument,
@@ -1148,15 +1183,15 @@ describe('updateDraftContractRates', () => {
             s3Client: mockS3,
         })
 
-        const draft = await createAndUpdateTestHealthPlanPackage(stateServer)
-        const draftFD = latestFormData(draft)
-        const rate = draftFD.rateInfos[0]
+        const draft = await createAndUpdateTestContractWithRate(stateServer)
+        const draftFD = draft.draftRevision!
+        const rateID = draft.draftRates?.[0].id!
 
-        if (!rate.id) {
+        if (!rateID) {
             throw new Error('rate no id')
         }
 
-        const existingRateResult = await fetchTestRateById(stateServer, rate.id)
+        const existingRateResult = await fetchTestRateById(stateServer, rateID)
         expect(existingRateResult.id).toBeDefined()
 
         const result = await executeGraphQLOperation(stateServer, {
@@ -1184,7 +1219,7 @@ describe('updateDraftContractRates', () => {
             stateServer,
             {
                 query: FetchRateDocument,
-                variables: { input: { rateID: rate.id } },
+                variables: { input: { rateID } },
             }
         )
 

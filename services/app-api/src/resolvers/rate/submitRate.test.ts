@@ -2,11 +2,8 @@ import { testLDService } from '../../testHelpers/launchDarklyHelpers'
 import { v4 as uuidv4 } from 'uuid'
 import {
     constructTestPostgresServer,
-    createAndUpdateTestHealthPlanPackage,
     executeGraphQLOperation,
-    unlockTestHealthPlanPackage,
 } from '../../testHelpers/gqlHelpers'
-import { latestFormData } from '../../testHelpers/healthPlanPackageHelpers'
 import { testStateUser, testCMSUser } from '../../testHelpers/userHelpers'
 import {
     SubmitRateDocument,
@@ -18,6 +15,7 @@ import {
     clearMetadataFromRateFormData,
     submitTestRate,
     updateTestRate,
+    testS3Client,
 } from '../../testHelpers'
 import {
     addLinkedRateToTestContract,
@@ -31,10 +29,11 @@ import {
 import {
     createAndSubmitTestContractWithRate,
     createAndUpdateTestContractWithoutRates,
+    createAndUpdateTestContractWithRate,
     fetchTestContract,
     submitTestContract,
+    unlockTestContract,
 } from '../../testHelpers/gqlContractHelpers'
-import { testS3Client } from '../../../../app-api/src/testHelpers/s3Helpers'
 import { submitRate } from '../../postgres/contractAndRates'
 import { sharedTestPrismaClient } from '../../testHelpers/storeHelpers'
 
@@ -336,7 +335,7 @@ describe('submitRate', () => {
         )
 
         // 5. unlock and resubmit A
-        await unlockTestHealthPlanPackage(
+        await unlockTestContract(
             cmsServer,
             contractA0.id,
             'does this mess history'
@@ -400,8 +399,8 @@ describe('submitRate', () => {
         })
 
         const draftContractWithRate =
-            await createAndUpdateTestHealthPlanPackage(stateServer)
-        const rateID = latestFormData(draftContractWithRate).rateInfos[0].id
+            await createAndUpdateTestContractWithRate(stateServer)
+        const rateID = draftContractWithRate.draftRates?.[0].id
 
         // submit contract and rate
         await executeGraphQLOperation(stateServer, {
