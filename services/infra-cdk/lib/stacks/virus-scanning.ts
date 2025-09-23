@@ -11,6 +11,7 @@ import {
     UserData,
     Subnet,
     MachineImage,
+    SubnetType,
 } from 'aws-cdk-lib/aws-ec2'
 import { NodejsFunction } from 'aws-cdk-lib/aws-lambda-nodejs'
 import {
@@ -194,12 +195,8 @@ export class VirusScanning extends BaseStack {
             }),
             vpc,
             vpcSubnets: {
-                subnets: [
-                    Subnet.fromSubnetAttributes(this, 'ClamAVPublicSubnet', {
-                        subnetId: process.env.SUBNET_PUBLIC_A_ID!,
-                        availabilityZone: this.availabilityZones[0], // Use first AZ from the region
-                    }),
-                ],
+                subnetType: SubnetType.PUBLIC,
+                availabilityZones: [this.availabilityZones[0]], // Constrain to first AZ
             },
             securityGroup: clamavSecurityGroup,
             userData: userDataScript,
