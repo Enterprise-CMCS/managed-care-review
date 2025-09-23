@@ -112,6 +112,9 @@ export class VirusScanning extends BaseStack {
         // Create Lambda function
         this.avScanFunction = this.createAvScanFunction(lambdaRole)
 
+        // Create test connectivity function (temporary for debugging)
+        this.createTestConnectivityFunction(lambdaRole)
+
         // Setup S3 event notifications for virus scanning
         this.setupS3EventNotifications()
 
@@ -440,6 +443,61 @@ export class VirusScanning extends BaseStack {
             },
             securityGroups: [lambdaSecurityGroup],
             bundling: this.createVirusScanBundling('av-scan'),
+        })
+    }
+
+    /**
+     * Create test connectivity Lambda function (temporary for debugging)
+     */
+    private createTestConnectivityFunction(role: Role): NodejsFunction {
+        // Import VPC for Lambda function
+        const vpc = Vpc.fromLookup(this, 'TestConnectivityVpc', {
+            vpcId: process.env.VPC_ID!,
+        })
+
+        const lambdaSecurityGroup = SecurityGroup.fromSecurityGroupId(
+            this,
+            'TestConnectivitySecurityGroup',
+            process.env.SG_ID!
+        )
+
+        return new NodejsFunction(this, 'TestConnectivityFunction', {
+            functionName: `${ResourceNames.apiName('virus-scanning', this.stage)}-test-connectivity`,
+            runtime: Runtime.NODEJS_20_X,
+            architecture: Architecture.X86_64,
+            handler: 'main',
+            entry: path.join(
+                __dirname,
+                '..',
+                '..',
+                '..',
+                'uploads',
+                'src',
+                'lambdas',
+                'testConnectivity.ts'
+            ),
+            timeout: Duration.seconds(30),
+            memorySize: 512,
+            environment: {
+                CLAMAV_HOST: 'clamav.mc-review-cdk.local',
+                CLAMAV_PORT: '3310',
+                stage: this.stage,
+            },
+            role,
+            vpc,
+            vpcSubnets: {
+                subnets: [
+                    Subnet.fromSubnetAttributes(
+                        this,
+                        'TestConnectivityPrivateA',
+                        {
+                            subnetId: process.env.SUBNET_PRIVATE_A_ID!,
+                            availabilityZone: this.availabilityZones[0],
+                        }
+                    ),
+                ],
+            },
+            securityGroups: [lambdaSecurityGroup],
         })
     }
 
