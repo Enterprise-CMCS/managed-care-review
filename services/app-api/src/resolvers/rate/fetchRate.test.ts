@@ -8,8 +8,7 @@ import {
     constructTestPostgresServer,
     createTestRateQuestion,
     defaultFloridaRateProgram,
-    unlockTestHealthPlanPackage,
-    updateTestHealthPlanFormData,
+    executeGraphQLOperation,
 } from '../../testHelpers/gqlHelpers'
 import {
     createDBUsersWithFullData,
@@ -34,7 +33,6 @@ import {
     submitTestContract,
     unlockTestContract,
 } from '../../testHelpers/gqlContractHelpers'
-import { latestFormData } from '../../testHelpers/healthPlanPackageHelpers'
 import { testS3Client } from '../../../../app-api/src/testHelpers/s3Helpers'
 import { dayjs } from '@mc-review/dates'
 
@@ -170,7 +168,7 @@ describe('fetchRate', () => {
         // fetch and check rate 1 which was resubmitted with no changes
         expect(firstRateID).toBe(resubmittedRate.id) // first rate ID should be unchanged
 
-        const result1 = await cmsServer.executeOperation({
+        const result1 = await executeGraphQLOperation(cmsServer, {
             query: FetchRateDocument,
             variables: {
                 input: { rateID: firstRateID },
@@ -357,7 +355,7 @@ describe('fetchRate', () => {
         }
 
         // fetch rate
-        const result = await cmsServer.executeOperation({
+        const result = await executeGraphQLOperation(cmsServer, {
             query: FetchRateDocument,
             variables: {
                 input,
@@ -403,7 +401,7 @@ describe('fetchRate', () => {
         }
 
         // fetch rate
-        const result = await cmsServer.executeOperation({
+        const result = await executeGraphQLOperation(cmsServer, {
             query: FetchRateDocument,
             variables: {
                 input,
@@ -450,7 +448,7 @@ describe('fetchRate', () => {
             'FL',
             {
                 contractDocuments: [dummyDoc('c1')],
-                documents: [dummyDoc('s1')],
+                supportingDocuments: [dummyDoc('s1')],
             }
         )
         const AID = draftA0.id
@@ -544,17 +542,15 @@ describe('fetchRate', () => {
         ).toBe('2024-01-01')
 
         // 2. Unlock and add more documents
-        const unlockedA0Pkg = await unlockTestHealthPlanPackage(
+        const unlockedA0 = await unlockTestContract(
             cmsServer,
             AID,
             'Unlock A.0'
         )
-        const a0FormData = latestFormData(unlockedA0Pkg)
+        const a0FormData = unlockedA0.draftRevision?.formData
         a0FormData.submissionDescription = 'DESC A1'
         a0FormData.contractDocuments.push(dummyDoc('c2'))
-        a0FormData.documents.push(dummyDoc('s2'))
-
-        await updateTestHealthPlanFormData(stateServer, a0FormData)
+        a0FormData.contractDocuments.push(dummyDoc('s2'))
 
         const unlockedA0Contract = await fetchTestContract(stateServer, AID)
         const a0RatesUpdates =
@@ -736,7 +732,7 @@ describe('fetchRate', () => {
         await createTestRateQuestion(dmcpServer, rateID)
         await createTestRateQuestion(oactServer, rateID)
 
-        const result = await server.executeOperation({
+        const result = await executeGraphQLOperation(server, {
             query: FetchRateWithQuestionsDocument,
             variables: {
                 input: {
@@ -762,7 +758,7 @@ describe('fetchRate', () => {
 
         // Test newly created dmco question and its order
         await createTestRateQuestion(dmco2Server, rateID)
-        const result2 = await server.executeOperation({
+        const result2 = await executeGraphQLOperation(server, {
             query: FetchRateWithQuestionsDocument,
             variables: {
                 input: {
@@ -813,7 +809,7 @@ describe('fetchRate', () => {
             s3Client: mockS3,
         })
 
-        const fetchResult = await oauthServer.executeOperation({
+        const fetchResult = await executeGraphQLOperation(oauthServer, {
             query: FetchRateDocument,
             variables: {
                 input: {
@@ -856,7 +852,7 @@ describe('fetchRate', () => {
             s3Client: mockS3,
         })
 
-        const fetchResult = await oauthServer.executeOperation({
+        const fetchResult = await executeGraphQLOperation(oauthServer, {
             query: FetchRateDocument,
             variables: {
                 input: {

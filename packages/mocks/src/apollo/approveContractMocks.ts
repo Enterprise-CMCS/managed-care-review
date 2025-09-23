@@ -5,7 +5,6 @@ import {
     Contract,
 } from '../gen/gqlClient'
 import { mockContractPackageSubmittedWithQuestions } from './contractPackageDataMock'
-import { ApolloError } from '@apollo/client'
 import { GraphQLError } from 'graphql/index'
 import {
     GRAPHQL_ERROR_CAUSE_MESSAGES,
@@ -100,9 +99,6 @@ const approveContractMockFailure = ({
                 },
             },
         },
-        error: new ApolloError({
-            graphQLErrors: [graphQLError],
-        }),
         result: {
             data: null,
             errors: [graphQLError],

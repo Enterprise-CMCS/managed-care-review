@@ -1,4 +1,4 @@
-import { ForbiddenError } from 'apollo-server-core'
+import { createForbiddenError } from '../errorUtils'
 import type { Span } from '@opentelemetry/api'
 import {
     setErrorAttributesOnActiveSpan,
@@ -10,7 +10,7 @@ import {
     hasCMSPermissions,
     isStateUser,
 } from '../../domain-models/user'
-import { NotFoundError } from '../../postgres'
+import { NotFoundError } from '../../postgres/postgresErrors'
 import type { QueryResolvers } from '../../gen/gqlServer'
 import type { Store } from '../../postgres'
 import { logError } from '../../logger'
@@ -119,7 +119,7 @@ export function indexRatesStripped(
         } else {
             const errMsg = 'user not authorized to fetch rate reviews data'
             setErrorAttributesOnActiveSpan(errMsg, span)
-            throw new ForbiddenError(errMsg)
+            throw createForbiddenError(errMsg)
         }
     }
 }

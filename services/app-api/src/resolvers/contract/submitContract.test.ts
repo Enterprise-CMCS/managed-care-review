@@ -1,9 +1,8 @@
 import {
     constructTestPostgresServer,
     defaultFloridaProgram,
-    unlockTestHealthPlanPackage,
-    updateTestHealthPlanFormData,
     updateTestStateAssignments,
+    executeGraphQLOperation,
 } from '../../testHelpers/gqlHelpers'
 import { SubmitContractDocument } from '../../gen/gqlClient'
 import {
@@ -38,7 +37,6 @@ import {
     updateTestDraftRatesOnContract,
 } from '../../testHelpers/gqlRateHelpers'
 import { testLDService } from '../../testHelpers/launchDarklyHelpers'
-import { latestFormData } from '../../testHelpers/healthPlanPackageHelpers'
 import { sharedTestPrismaClient } from '../../testHelpers/storeHelpers'
 import {
     testEmailConfig,
@@ -82,7 +80,6 @@ describe('submitContract', () => {
         expect(sub.submittedRevisions).toHaveLength(2)
 
         // check form data is unchanged
-
         const draftFormData = updatedDraft.draftRevision!.formData
         const submittedFormData = sub.contractRevision.formData
 
@@ -214,11 +211,7 @@ describe('submitContract', () => {
         await addLinkedRateToTestContract(stateServer, draftB0, OneID)
 
         // 3. Unlock A0, edit and resubmit
-        await unlockTestHealthPlanPackage(
-            cmsServer,
-            AID,
-            'edit the linked rate, please'
-        )
+        await unlockTestContract(cmsServer, AID, 'edit the linked rate, please')
 
         const resubmittedA = await submitTestContract(
             stateServer,
@@ -312,11 +305,7 @@ describe('submitContract', () => {
         expect(subC0.rateRevisions[2].rateID).toBe(ThreeID)
 
         // resubmit A, connecting it to B and C's
-        await unlockTestHealthPlanPackage(
-            cmsServer,
-            AID,
-            'unlock to weave the web'
-        )
+        await unlockTestContract(cmsServer, AID, 'unlock to weave the web')
         const unlockedA0 = await fetchTestContract(stateServer, AID)
         const unlockedA0Three = await addLinkedRateToTestContract(
             stateServer,
@@ -447,14 +436,27 @@ describe('submitContract', () => {
 
         // 5. resubmit A, 1, and 2. B and C will get new entries.
         console.info('---- UNLOCK A.1 ----')
-        const unlockedA0Pkg = await unlockTestHealthPlanPackage(
+        const unlockedA0 = await unlockTestContract(
             cmsServer,
             AID,
             'Unlock A.0'
         )
-        const a0FormData = latestFormData(unlockedA0Pkg)
+        const a0FormData = unlockedA0.draftRevision?.formData
+        a0FormData.contractDocuments = [
+            {
+                name: 'contractDocument.pdf',
+                s3URL: 's3://bucketname/key/test1',
+                sha256: 'fakesha',
+                dateAdded: new Date(),
+            },
+        ]
         a0FormData.submissionDescription = 'DESC A1'
-        await updateTestHealthPlanFormData(stateServer, a0FormData)
+        await updateTestContractDraftRevision(
+            stateServer,
+            AID,
+            unlockedA0.draftRevision?.updatedAt,
+            a0FormData
+        )
         const unlockedA0Contract = await fetchTestContract(stateServer, AID)
         const a0RatesUpdates =
             updateRatesInputFromDraftContract(unlockedA0Contract)
@@ -545,15 +547,28 @@ describe('submitContract', () => {
 
         // 6. resubmit B, add r4. Only B gets a new entry.
         console.info('---- UNLOCK B.1 ----')
-        const unlockedB0Pkg = await unlockTestHealthPlanPackage(
+        const unlockedB0 = await unlockTestContract(
             cmsServer,
             BID,
             'Unlock B.0'
         )
-        const b0FormData = latestFormData(unlockedB0Pkg)
-
+        const b0FormData = unlockedB0.draftRevision?.formData
+        b0FormData.contractDocuments = [
+            {
+                name: 'contractDocument.pdf',
+                s3URL: 's3://bucketname/key/test1',
+                sha256: 'fakesha',
+                dateAdded: new Date(),
+            },
+        ]
         b0FormData.submissionDescription = 'DESC B1'
-        await updateTestHealthPlanFormData(stateServer, b0FormData)
+
+        await updateTestContractDraftRevision(
+            stateServer,
+            BID,
+            unlockedB0.draftRevision?.updatedAt,
+            b0FormData
+        )
 
         const unlockedB0Contract = await fetchTestContract(stateServer, BID)
         const b0RatesUpdates =
@@ -595,15 +610,27 @@ describe('submitContract', () => {
         expect(thirdD.packageSubmissions).toHaveLength(1)
 
         // 7. Resubmit C, remove rate 2. B should also get an update.
-        const unlockedC0Pkg = await unlockTestHealthPlanPackage(
+        const unlockedC0 = await unlockTestContract(
             cmsServer,
             CID,
             'Unlock C.0'
         )
-        const c0FormData = latestFormData(unlockedC0Pkg)
+        const c0FormData = unlockedC0.draftRevision?.formData
         c0FormData.submissionDescription = 'DESC C1'
-        await updateTestHealthPlanFormData(stateServer, c0FormData)
-
+        c0FormData.contractDocuments = [
+            {
+                name: 'contractDocument.pdf',
+                s3URL: 's3://bucketname/key/test1',
+                sha256: 'fakesha',
+                dateAdded: new Date(),
+            },
+        ]
+        await updateTestContractDraftRevision(
+            stateServer,
+            CID,
+            unlockedC0.draftRevision?.updatedAt,
+            c0FormData
+        )
         const unlockedC0Contract = await fetchTestContract(stateServer, CID)
 
         const c0RatesUpdates =
@@ -850,7 +877,7 @@ describe('submitContract', () => {
             'FL',
             {
                 contractDocuments: [dummyDoc('c1')],
-                documents: [dummyDoc('s1')],
+                supportingDocuments: [dummyDoc('s1')],
             }
         )
         const AID = draftA0.id
@@ -1226,13 +1253,13 @@ describe('submitContract', () => {
             submittedReason: 'Test cms user calling state user func',
         }
 
-        const res = await cmsServer.executeOperation({
+        const response = await executeGraphQLOperation(cmsServer, {
             query: SubmitContractDocument,
             variables: { input },
         })
 
-        expect(res.errors).toBeDefined()
-        expect(res.errors && res.errors[0].message).toBe(
+        expect(response.errors).toBeDefined()
+        expect(response.errors && response.errors[0].message).toBe(
             'user not authorized to fetch state data'
         )
     })
@@ -1265,7 +1292,7 @@ describe('submitContract', () => {
             }
         )
 
-        const res = await stateServer.executeOperation({
+        const response = await executeGraphQLOperation(stateServer, {
             query: SubmitContractDocument,
             variables: {
                 input: {
@@ -1274,7 +1301,7 @@ describe('submitContract', () => {
             },
         })
 
-        expect(res.errors).toBeDefined()
+        expect(response.errors).toBeDefined()
     })
 
     it('returns an error if a CONTRACT_AND_RATES submission is missing rates', async () => {
@@ -1283,7 +1310,7 @@ describe('submitContract', () => {
         })
 
         const draft = await createAndUpdateTestContractWithoutRates(stateServer)
-        const res = await stateServer.executeOperation({
+        const response = await executeGraphQLOperation(stateServer, {
             query: SubmitContractDocument,
             variables: {
                 input: {
@@ -1292,8 +1319,8 @@ describe('submitContract', () => {
             },
         })
 
-        expect(res.errors).toBeDefined()
-        expect(res.errors).toEqual([
+        expect(response.errors).toBeDefined()
+        expect(response.errors).toEqual([
             expect.objectContaining({
                 message: expect.stringMatching(
                     `Attempted to submit a contract and rates contract without rates: ${draft.id}`
@@ -1301,7 +1328,7 @@ describe('submitContract', () => {
                 path: ['submitContract'],
                 extensions: expect.objectContaining({
                     argumentName: 'contractID',
-                    cause: 'BAD_USER_INPUT',
+                    argumentValues: draft.id,
                     code: 'BAD_USER_INPUT',
                 }),
             }),
@@ -1506,7 +1533,7 @@ describe('submitContract', () => {
             )
             const draftID = draft.id
 
-            await server.executeOperation({
+            await executeGraphQLOperation(server, {
                 query: SubmitContractDocument,
                 variables: {
                     input: {
@@ -1525,7 +1552,6 @@ describe('submitContract', () => {
         })
 
         // TODO: reimplement this test without using jest
-
         // it('does log error when request for state specific analysts emails failed', async () => {
         //     const consoleErrorSpy = jest.spyOn(console, 'error')
         //     const error = {
@@ -1571,7 +1597,7 @@ describe('submitContract', () => {
             const draft = await createAndUpdateTestContractWithRate(server)
             const draftID = draft.id
 
-            const submitResult = await server.executeOperation({
+            const submitResult = await executeGraphQLOperation(server, {
                 query: SubmitContractDocument,
                 variables: {
                     input: {
@@ -1620,19 +1646,14 @@ describe('submitContract', () => {
                 'Test unlock reason.'
             )
 
-            const submitResult = await stateServer.executeOperation({
-                query: SubmitContractDocument,
-                variables: {
-                    input: {
-                        contractID: stateSubmission.id,
-                        submittedReason: 'Test resubmitted reason',
-                    },
-                },
-            })
+            const submitContract = await submitTestContract(
+                stateServer,
+                stateSubmission.id,
+                'Test resubmitted reason'
+            )
 
             const currentRevision =
-                submitResult?.data?.submitContract?.contract
-                    .packageSubmissions[0].contractRevision
+                submitContract.packageSubmissions[0].contractRevision
 
             const name = currentRevision.contractName
 
@@ -1655,20 +1676,24 @@ describe('submitContract', () => {
             const config = testEmailConfig()
             const mockEmailer = testEmailer(config)
             //mock invoke email submit lambda
+            const stateUser1 = testStateUser({
+                email: 'alsonotspiderman@example.com',
+            })
+            const stateUser2 = testStateUser({
+                email: 'notspiderman@example.com',
+            })
+            const cmsUser = testCMSUser()
+            await createDBUsersWithFullData([stateUser1, stateUser2, cmsUser])
             const stateServer = await constructTestPostgresServer({
                 context: {
-                    user: testStateUser({
-                        email: 'alsonotspiderman@example.com',
-                    }),
+                    user: stateUser1,
                 },
             })
 
             const stateServerTwo = await constructTestPostgresServer({
                 emailer: mockEmailer,
                 context: {
-                    user: testStateUser({
-                        email: 'notspiderman@example.com',
-                    }),
+                    user: stateUser2,
                 },
             })
 
@@ -1680,7 +1705,7 @@ describe('submitContract', () => {
 
             const cmsServer = await constructTestPostgresServer({
                 context: {
-                    user: testCMSUser(),
+                    user: cmsUser,
                 },
             })
 
@@ -1701,8 +1726,9 @@ describe('submitContract', () => {
 
             const name = currentRevision.contractName
 
-            // email subject line is correct for CMS email and contains correct email body text
-            expect(mockEmailer.sendEmail).toHaveBeenCalledWith(
+            // email subject line is correct for STATE email and contains correct email body text
+            expect(mockEmailer.sendEmail).toHaveBeenNthCalledWith(
+                2, // The second email is the state email
                 expect.objectContaining({
                     subject: expect.stringContaining(`${name} was resubmitted`),
                     sourceEmail: config.emailSource,
@@ -1723,7 +1749,7 @@ describe('submitContract', () => {
             // Invalid contract ID
             const draftID = '123'
 
-            const submitResult = await server.executeOperation({
+            const submitResult = await executeGraphQLOperation(server, {
                 query: SubmitContractDocument,
                 variables: {
                     input: {
@@ -1738,15 +1764,53 @@ describe('submitContract', () => {
 
         it('uses email settings from database with remove-parameter-store flag on', async () => {
             const prismaClient = await sharedTestPrismaClient()
+
+            // Restore email settings
+            await prismaClient.emailSettings.update({
+                where: { id: 1 },
+                data: {
+                    emailSource: 'mc-review@cms.hhs.gov',
+                    devReviewTeamEmails: ['mc-review-qa+DevTeam@truss.works'],
+                    cmsReviewHelpEmailAddress: [
+                        'mc-review-qa+MCOGDMCOActionsHelp@truss.works',
+                    ],
+                    cmsRateHelpEmailAddress: [
+                        'mc-review-qa+MMCratesettingHelp@truss.works',
+                    ],
+                    oactEmails: [
+                        'mc-review-qa+OACTdev1@truss.works',
+                        'mc-review-qa+OACTdev2@truss.works',
+                    ],
+                    dmcpReviewEmails: [
+                        'mc-review-qa+DMCPreviewdev1@truss.works',
+                        'mc-review-qa+DMCPreivewdev2@truss.works',
+                    ],
+                    dmcpSubmissionEmails: [
+                        'mc-review-qa+DMCPsubmissiondev1@truss.works',
+                        'mc-review-qa+DMCPsubmissiondev2@truss.works',
+                    ],
+                    dmcoEmails: [
+                        'mc-review-qa+DMCO1@truss.works',
+                        'mc-review-qa+DMCO2@truss.works',
+                    ],
+                    helpDeskEmail: [
+                        'mc-review-qa+MC_Review_HelpDesk@truss.works',
+                    ],
+                    applicationSettingsId: 1,
+                },
+            })
+
             const store = NewPostgresStore(prismaClient)
-            const mockEmailer = await testEmailerFromDatabase(store)
             const ldService = testLDService({
                 'remove-parameter-store': true,
             })
+            const mockEmailer = await testEmailerFromDatabase(store, undefined)
+            const stateUser = testStateUser()
+            await createDBUsersWithFullData([stateUser])
 
             const stateServer = await constructTestPostgresServer({
                 context: {
-                    user: testStateUser(),
+                    user: stateUser,
                 },
                 ldService,
                 emailer: mockEmailer,
@@ -1766,20 +1830,25 @@ describe('submitContract', () => {
                     subject: expect.stringContaining(
                         `New Managed Care Submission: ${name}`
                     ),
-                    sourceEmail: 'mc-review@cms.hhs.gov',
-                    toAddresses: expect.arrayContaining(
-                        Array.from([
-                            'mc-review-qa+DevTeam@truss.works',
-                            'mc-review-qa+DMCPsubmissiondev1@truss.works',
-                            'mc-review-qa+DMCPsubmissiondev2@truss.works',
-                        ])
+                    sourceEmail: expect.stringContaining(
+                        'mc-review@cms.hhs.gov'
                     ),
+                    toAddresses: expect.arrayContaining([
+                        expect.stringContaining(
+                            'mc-review-qa+DevTeam@truss.works'
+                        ),
+                        expect.stringContaining(
+                            'mc-review-qa+DMCPsubmissiondev1@truss.works'
+                        ),
+                        expect.stringContaining(
+                            'mc-review-qa+DMCPsubmissiondev2@truss.works'
+                        ),
+                    ]),
                 })
             )
         })
 
         // TODO: reimplement this test without using jest
-
         // it('errors when SES email has failed.', async () => {
         //     const mockEmailer = testEmailer()
 
@@ -1838,7 +1907,7 @@ describe('submitContract', () => {
             await new Promise((resolve) => setTimeout(resolve, 2000))
 
             // submit
-            const submitResult = await server.executeOperation({
+            const submitResult = await executeGraphQLOperation(server, {
                 query: SubmitContractDocument,
                 variables: {
                     input: {
@@ -1866,7 +1935,7 @@ describe('submitContract', () => {
             await new Promise((resolve) => setTimeout(resolve, 2000))
 
             // submit
-            const submitResult = await server.executeOperation({
+            const submitResult = await executeGraphQLOperation(server, {
                 query: SubmitContractDocument,
                 variables: {
                     input: {
@@ -1876,9 +1945,7 @@ describe('submitContract', () => {
             })
 
             expect(submitResult.errors).toBeDefined()
-            expect(submitResult.errors?.[0].extensions?.message).toContain(
-                'Required'
-            )
+            expect(submitResult.errors?.[0].message).toContain('Required')
         }, 20000)
 
         it('successfully submits when contract 4348 attestation question is valid', async () => {
@@ -1889,18 +1956,18 @@ describe('submitContract', () => {
             // setup
             const initialContract = await createAndUpdateTestContractWithRate(
                 server,
+                'FL',
                 {
                     statutoryRegulatoryAttestationDescription:
                         'A valid description',
                     statutoryRegulatoryAttestation: false,
-                    stateCode: 'FL',
                 }
             )
 
             await new Promise((resolve) => setTimeout(resolve, 2000))
 
             // submit
-            const submitResult = await server.executeOperation({
+            const submitResult = await executeGraphQLOperation(server, {
                 query: SubmitContractDocument,
                 variables: {
                     input: {

@@ -1,4 +1,7 @@
-import { constructTestPostgresServer } from '../../testHelpers/gqlHelpers'
+import {
+    constructTestPostgresServer,
+    executeGraphQLOperation,
+} from '../../testHelpers/gqlHelpers'
 import { UnlockRateDocument } from '../../gen/gqlClient'
 import {
     iterableCmsUsersMockData,
@@ -8,7 +11,7 @@ import { expectToBeDefined } from '../../testHelpers/assertionHelpers'
 import { testLDService } from '../../testHelpers/launchDarklyHelpers'
 import { createSubmitAndUnlockTestRate } from '../../testHelpers/gqlRateHelpers'
 import { createAndSubmitTestContractWithRate } from '../../testHelpers/gqlContractHelpers'
-import { testS3Client } from '../../../../app-api/src/testHelpers/s3Helpers'
+import { testS3Client } from '../../testHelpers'
 import { withdrawTestRate } from '../../testHelpers/gqlRateHelpers'
 
 describe(`unlockRate`, () => {
@@ -74,7 +77,7 @@ describe(`unlockRate`, () => {
                 )
 
                 // Try to unlock the rate again
-                const unlockResult2 = await cmsServer.executeOperation({
+                const unlockResult2 = await executeGraphQLOperation(cmsServer, {
                     query: UnlockRateDocument,
                     variables: {
                         input: {
@@ -102,15 +105,18 @@ describe(`unlockRate`, () => {
                 const rate = contract.packageSubmissions[0].rateRevisions[0]
 
                 // Unlock the rate
-                const unlockResult = await stateServer.executeOperation({
-                    query: UnlockRateDocument,
-                    variables: {
-                        input: {
-                            rateID: rate.id,
-                            unlockedReason: 'Super duper good reason.',
+                const unlockResult = await executeGraphQLOperation(
+                    stateServer,
+                    {
+                        query: UnlockRateDocument,
+                        variables: {
+                            input: {
+                                rateID: rate.id,
+                                unlockedReason: 'Super duper good reason.',
+                            },
                         },
-                    },
-                })
+                    }
+                )
 
                 expectToBeDefined(unlockResult.errors)
                 expect(unlockResult.errors[0].message).toBe(
@@ -140,7 +146,7 @@ describe(`unlockRate`, () => {
 
         await withdrawTestRate(cmsServer, rateID, 'withdrawRate')
 
-        const unlockResult = await cmsServer.executeOperation({
+        const unlockResult = await executeGraphQLOperation(cmsServer, {
             query: UnlockRateDocument,
             variables: {
                 input: {

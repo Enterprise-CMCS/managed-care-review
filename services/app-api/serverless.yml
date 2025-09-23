@@ -34,6 +34,7 @@ custom:
   apiAppOtelCollectorUrl: ${env:API_APP_OTEL_COLLECTOR_URL, ssm:/configuration/api_app_otel_collector_url}
   dbURL: ${env:DATABASE_URL}
   ldSDKKey: ${env:LD_SDK_KEY, ssm:/configuration/ld_sdk_key_feds}
+  internalAllowedOrigins: ${env:INTERNAL_ALLOWED_ORIGINS, ''}
   # because the secret is in JSON in secret manager, we have to pass it into jwtSecret when not running locally
   jwtSecretJSON: ${env:CF_CONFIG_IGNORED_LOCALLY, ssm:/aws/reference/secretsmanager/api_jwt_secret_${sls:stage}}
   jwtSecret: ${env:JWT_SECRET, self:custom.jwtSecretJSON.jwtsigningkey}
@@ -147,6 +148,7 @@ provider:
     JWT_SECRET: ${self:custom.jwtSecret}
     VITE_APP_S3_QA_BUCKET: ${self:custom.reactAppS3QABucket}
     VITE_APP_S3_DOCUMENTS_BUCKET: ${self:custom.reactAppS3DocumentUploadsBucket}
+    INTERNAL_ALLOWED_ORIGINS: ${self:custom.internalAllowedOrigins, ''}
 layers:
   prismaClientMigration:
     path: lambda-layers-prisma-client-migration
@@ -238,31 +240,6 @@ functions:
       - !Ref PrismaClientMigrationLambdaLayer
       - arn:aws:lambda:us-east-1:901920570463:layer:aws-otel-nodejs-amd64-ver-1-18-1:4
 
-  migrate_document_zips:
-    handler: src/handlers/migrate_document_zips.main
-    timeout: 900 # 15 minutes - zip generation can take time
-    memorySize: ${self:custom.lambdaMemory.${sls:stage}, self:custom.lambdaMemory.default}
-    ephemeralStorageSize: ${self:custom.lambdaTmp.${sls:stage}, self:custom.lambdaTmp.default}
-    vpc:
-      securityGroupIds:
-        - ${self:custom.sgId}
-      subnetIds: ${self:custom.privateSubnets}
-    layers:
-      - !Ref PrismaClientEngineLambdaLayer
-      - arn:aws:lambda:us-east-1:901920570463:layer:aws-otel-nodejs-amd64-ver-1-18-1:4
-
-  zip_keys:
-    handler: src/handlers/bulk_download.main
-    events:
-      - http:
-          path: zip
-          method: post
-          cors: true
-          authorizer: aws_iam
-    timeout: 60
-    memorySize: ${self:custom.lambdaMemory.${sls:stage}, self:custom.lambdaMemory.default}
-    ephemeralStorageSize: ${self:custom.lambdaTmp.${sls:stage}, self:custom.lambdaTmp.default}
-
   cleanup:
     handler: src/handlers/cleanup.main
     events:
@@ -293,7 +270,6 @@ resources:
         - ApiGatewayMethodGraphqlGet
         - ApiGatewayMethodV1GraphqlExternalPost
         - ApiGatewayMethodV1GraphqlExternalGet
-        - ApiGatewayMethodZipPost
         # API Gateway resources (paths and endpoints)
         - ApiGatewayResourceHealthcheck
         - ApiGatewayResourceOtel
@@ -301,7 +277,6 @@ resources:
         - ApiGatewayResourceV1
         - ApiGatewayResourceV1Graphql
         - ApiGatewayResourceV1GraphqlExternal
-        - ApiGatewayResourceZip
         # API Gateway authorizer
         - ThirdUnderscorepartyUnderscoreapiUnderscoreauthorizerApiGatewayAuthorizer
         # CORS OPTIONS methods
@@ -309,7 +284,6 @@ resources:
         - ApiGatewayMethodOtelOptions
         - ApiGatewayMethodGraphqlOptions
         - ApiGatewayMethodV1GraphqlExternalOptions
-        - ApiGatewayMethodZipOptions
 
       Properties:
         ResourceArn: arn:aws:apigateway:${self:provider.region}::/restapis/${self:custom.appApiGatewayId}/stages/${sls:stage}

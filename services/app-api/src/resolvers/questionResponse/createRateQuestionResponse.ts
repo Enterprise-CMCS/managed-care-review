@@ -7,7 +7,7 @@ import {
     setErrorAttributesOnActiveSpan,
     setSuccessAttributesOnActiveSpan,
 } from '../attributeHelper'
-import { ForbiddenError, UserInputError } from 'apollo-server-lambda'
+import { createForbiddenError, createUserInputError } from '../errorUtils'
 import type { Emailer } from '../../emailer'
 import type { StateCodeType } from '@mc-review/hpp'
 import { canWrite } from '../../authorization/oauthAuthorization'
@@ -38,14 +38,14 @@ export function createRateQuestionResponseResolver(
             const msg = 'user not authorized to create a question response'
             logError('createRateQuestionResponse', msg)
             setErrorAttributesOnActiveSpan(msg, span)
-            throw new ForbiddenError(msg)
+            throw createForbiddenError(msg)
         }
 
         if (input.documents.length === 0) {
             const msg = 'question response documents are required'
             logError('createRateQuestionResponse', msg)
             setErrorAttributesOnActiveSpan(msg, span)
-            throw new UserInputError(msg)
+            throw createUserInputError(msg)
         }
         const docs = input.documents.map((doc) => {
             return {
@@ -69,7 +69,7 @@ export function createRateQuestionResponseResolver(
                 const errMessage = `Rate question with ID: ${input.questionID} not found to attach response to`
                 logError('createRateQuestionResponse', errMessage)
                 setErrorAttributesOnActiveSpan(errMessage, span)
-                throw new UserInputError(errMessage)
+                throw createUserInputError(errMessage)
             }
 
             const errMessage = `Issue creating question response for rate question ${input.questionID}. Message: ${createResponseResult.message}`

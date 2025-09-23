@@ -33,7 +33,7 @@ const RateTypeRecord: Record<RateType, string> = {
 }
 
 const RateMedicaidPopulationsRecord: Record<RateMedicaidPopulations, string> = {
-    MEDICARE_MEDICAID_WITH_DSNP: 'Medicare-Medicaid dual eligibles enrolled through a D-SNP (on summary page)',
+    MEDICARE_MEDICAID_WITH_DSNP: 'Medicare-Medicaid dual eligibles enrolled through a D-SNP',
     MEDICAID_ONLY: 'Medicaid-only',
     MEDICARE_MEDICAID_WITHOUT_DSNP: `Medicare-Medicaid dual eligibles not enrolled through a D-SNP`
 }

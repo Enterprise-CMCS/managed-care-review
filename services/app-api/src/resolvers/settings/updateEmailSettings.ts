@@ -7,7 +7,7 @@ import type { MutationResolvers } from '../../gen/gqlServer'
 import { logError } from '../../logger'
 import type { Store } from '../../postgres'
 import { setErrorAttributesOnActiveSpan } from '../attributeHelper'
-import { ForbiddenError, UserInputError } from 'apollo-server-core'
+import { createForbiddenError, createUserInputError } from '../errorUtils'
 import { GraphQLError } from 'graphql'
 import type { EmailConfiguration } from '../../gen/gqlClient'
 import { canWrite } from '../../authorization/oauthAuthorization'
@@ -74,9 +74,7 @@ export function updateEmailSettings(
             const msg = 'user not authorized to update email settings'
             logError('updateEmailSettings', msg)
             setErrorAttributesOnActiveSpan(msg, span)
-            throw new ForbiddenError(msg, {
-                cause: 'NOT_AUTHORIZED',
-            })
+            throw createForbiddenError(msg)
         }
 
         const emailSettings = emailConfigToEmailSettings(emailConfiguration)
@@ -87,10 +85,11 @@ export function updateEmailSettings(
             const msg = `Invalid email settings: ${validatedEmailSettings.error}`
             logError('updateEmailSettings', msg)
             setErrorAttributesOnActiveSpan(msg, span)
-            throw new UserInputError(msg, {
-                argumentName: 'emailConfiguration',
-                cause: 'VALIDATION_ERROR',
-            })
+            throw createUserInputError(
+                msg,
+                'emailConfiguration',
+                emailConfiguration
+            )
         }
 
         const updatedEmailSettings =

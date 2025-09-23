@@ -1,8 +1,7 @@
 import { IndexContractsForDashboardDocument } from '../../gen/gqlClient'
 import {
     constructTestPostgresServer,
-    createTestHealthPlanPackage,
-    createAndSubmitTestHealthPlanPackage,
+    executeGraphQLOperation,
 } from '../../testHelpers/gqlHelpers'
 import type { Contract, ContractEdge } from '../../gen/gqlServer'
 import {
@@ -13,10 +12,11 @@ import {
 import {
     createAndSubmitTestContractWithRate,
     createAndUpdateTestContractWithoutRates,
+    createTestContract,
     submitTestContract,
     unlockTestContract,
 } from '../../testHelpers/gqlContractHelpers'
-import { testS3Client } from '../../../../app-api/src/testHelpers/s3Helpers'
+import { testS3Client } from '../../testHelpers'
 
 describe(`indexContracts`, () => {
     describe('isStateUser', () => {
@@ -33,7 +33,7 @@ describe(`indexContracts`, () => {
             const submittedContract =
                 await createAndSubmitTestContractWithRate(stateServer)
             // then see if we can get that same contract back from the index
-            const result = await stateServer.executeOperation({
+            const result = await executeGraphQLOperation(stateServer, {
                 query: IndexContractsForDashboardDocument,
             })
 
@@ -101,7 +101,7 @@ describe(`indexContracts`, () => {
             )
 
             // index contracts api request
-            const result = await stateServer.executeOperation({
+            const result = await executeGraphQLOperation(stateServer, {
                 query: IndexContractsForDashboardDocument,
             })
             const submissionsIndex = result.data?.indexContracts
@@ -153,7 +153,7 @@ describe(`indexContracts`, () => {
                 },
             })
 
-            const result = await otherUserServer.executeOperation({
+            const result = await executeGraphQLOperation(otherUserServer, {
                 query: IndexContractsForDashboardDocument,
                 variables: { input },
             })
@@ -175,9 +175,16 @@ describe(`indexContracts`, () => {
 
         it('returns no contracts for a different states user', async () => {
             const server = await constructTestPostgresServer()
+            const serverMN = await constructTestPostgresServer({
+                context: {
+                    user: testStateUser({
+                        stateCode: 'MN',
+                    }),
+                },
+            })
 
-            await createTestHealthPlanPackage(server)
-            await createAndSubmitTestHealthPlanPackage(server)
+            await createTestContract(server)
+            await createTestContract(serverMN, 'MN')
 
             const otherUserServer = await constructTestPostgresServer({
                 context: {
@@ -187,7 +194,7 @@ describe(`indexContracts`, () => {
                 },
             })
 
-            const result = await otherUserServer.executeOperation({
+            const result = await executeGraphQLOperation(otherUserServer, {
                 query: IndexContractsForDashboardDocument,
             })
 
@@ -219,9 +226,10 @@ describe(`indexContracts`, () => {
                     await createAndUpdateTestContractWithoutRates(stateServer)
 
                 // index contracts api request
-                const result = await cmsServer.executeOperation({
+                const result = await executeGraphQLOperation(cmsServer, {
                     query: IndexContractsForDashboardDocument,
                 })
+
                 const submissionsIndex = result.data?.indexContracts
 
                 // pull out test related contracts and order them
@@ -272,7 +280,7 @@ describe(`indexContracts`, () => {
                 )
 
                 // index contracts api request
-                const result = await cmsServer.executeOperation({
+                const result = await executeGraphQLOperation(cmsServer, {
                     query: IndexContractsForDashboardDocument,
                 })
                 const submissionsIndex = result.data?.indexContracts
@@ -336,7 +344,7 @@ describe(`indexContracts`, () => {
                     draft.id
                 )
 
-                const result = await cmsServer.executeOperation({
+                const result = await executeGraphQLOperation(cmsServer, {
                     query: IndexContractsForDashboardDocument,
                 })
 

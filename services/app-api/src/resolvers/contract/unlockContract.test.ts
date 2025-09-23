@@ -1,15 +1,14 @@
 import {
     constructTestPostgresServer,
     defaultFloridaProgram,
-    defaultFloridaRateProgram,
-    unlockTestHealthPlanPackage,
+    executeGraphQLOperation,
     updateTestStateAssignments,
 } from '../../testHelpers/gqlHelpers'
 import {
     UnlockContractDocument,
     UpdateDraftContractRatesDocument,
 } from '../../gen/gqlClient'
-import { testS3Client } from '../../../../app-web/src/testHelpers/s3Helpers'
+import { testS3Client } from '../../testHelpers'
 import { expectToBeDefined } from '../../testHelpers/assertionHelpers'
 
 import {
@@ -37,14 +36,11 @@ import {
 import { testLDService } from '../../testHelpers/launchDarklyHelpers'
 import { testEmailConfig, testEmailer } from '../../testHelpers/emailerHelpers'
 import { packageName } from '@mc-review/hpp'
-import { generateRateCertificationName } from '../rate/generateRateCertificationName'
-import { nullsToUndefined } from '../../domain-models/nullstoUndefined'
 import { NewPostgresStore } from '../../postgres'
 import { sharedTestPrismaClient } from '../../testHelpers/storeHelpers'
 
 describe('unlockContract', () => {
     const mockS3 = testS3Client()
-
     afterEach(() => {
         vi.resetAllMocks()
     })
@@ -113,7 +109,7 @@ describe('unlockContract', () => {
                 )
 
                 // Try to unlock the contract again
-                const unlockResult2 = await cmsServer.executeOperation({
+                const unlockResult2 = await executeGraphQLOperation(cmsServer, {
                     query: UnlockContractDocument,
                     variables: {
                         input: {
@@ -174,7 +170,7 @@ describe('unlockContract', () => {
                 expect(subB0.rateRevisions[0].rateID).toBe(OneID)
 
                 // 3. unlock and resubmit B, removing Three
-                await unlockTestHealthPlanPackage(
+                await unlockTestContract(
                     cmsServer,
                     contractB0.id,
                     'remove that child rate'
@@ -205,7 +201,7 @@ describe('unlockContract', () => {
                 )
 
                 // 4. Unlock again, should not error
-                await unlockTestHealthPlanPackage(
+                await unlockTestContract(
                     cmsServer,
                     updatedUnlockedB0.id,
                     'dont try and reunlock'
@@ -239,7 +235,7 @@ describe('unlockContract', () => {
                 )
 
                 // Try to unlock the contract
-                const unlockResult = await cmsServer.executeOperation({
+                const unlockResult = await executeGraphQLOperation(cmsServer, {
                     query: UnlockContractDocument,
                     variables: {
                         input: {
@@ -305,11 +301,7 @@ describe('unlockContract', () => {
         expect(subB0.rateRevisions[0].rateID).toBe(OneID)
 
         // unlock B, rate 3 should unlock, rate 1 should not.
-        await unlockTestHealthPlanPackage(
-            cmsServer,
-            contractB0.id,
-            'test unlock'
-        )
+        await unlockTestContract(cmsServer, contractB0.id, 'test unlock')
 
         const unlockedB = await fetchTestContract(stateServer, contractB0.id)
         if (!unlockedB.draftRates) {
@@ -403,13 +395,9 @@ describe('unlockContract', () => {
         ).toEqual(['2021-01-01', '2023-03-03'])
 
         // unlock A
-        await unlockTestHealthPlanPackage(cmsServer, contractA0.id, 'unlock a')
+        await unlockTestContract(cmsServer, contractA0.id, 'unlock a')
         // unlock B, rate 3 should unlock, rate 1 should not.
-        await unlockTestHealthPlanPackage(
-            cmsServer,
-            contractB0.id,
-            'test unlock'
-        )
+        await unlockTestContract(cmsServer, contractB0.id, 'test unlock')
         const unlockedB = await fetchTestContract(stateServer, contractB0.id)
         if (!unlockedB.draftRates) {
             throw new Error('no draft rates')
@@ -444,7 +432,7 @@ describe('unlockContract', () => {
         rateUpdateInput.updatedRates[1].formData.rateDateCertified =
             '2000-01-22'
 
-        const updateResult = await stateServer.executeOperation({
+        const updateResult = await executeGraphQLOperation(stateServer, {
             query: UpdateDraftContractRatesDocument,
             variables: {
                 input: rateUpdateInput,
@@ -520,13 +508,9 @@ describe('unlockContract', () => {
         ).toEqual(['2021-01-01', '2023-03-03'])
 
         // unlock A
-        await unlockTestHealthPlanPackage(cmsServer, contractA0.id, 'unlock a')
+        await unlockTestContract(cmsServer, contractA0.id, 'unlock a')
         // unlock B, rate 3 should unlock, rate 1 should not.
-        await unlockTestHealthPlanPackage(
-            cmsServer,
-            contractB0.id,
-            'test unlock'
-        )
+        await unlockTestContract(cmsServer, contractB0.id, 'test unlock')
 
         const unlockedB = await fetchTestContract(stateServer, contractB0.id)
         if (!unlockedB.draftRates) {
@@ -562,7 +546,7 @@ describe('unlockContract', () => {
         rateUpdateInput.updatedRates[1].formData.rateDateCertified =
             '2000-01-22'
 
-        const updateResult = await stateServer.executeOperation({
+        const updateResult = await executeGraphQLOperation(stateServer, {
             query: UpdateDraftContractRatesDocument,
             variables: {
                 input: rateUpdateInput,
@@ -586,7 +570,7 @@ describe('unlockContract', () => {
 
         const contract = await createAndSubmitTestContractWithRate(stateServer)
 
-        const unlockResult = await stateServer.executeOperation({
+        const unlockResult = await executeGraphQLOperation(stateServer, {
             query: UnlockContractDocument,
             variables: {
                 input: {
@@ -642,6 +626,7 @@ describe('unlockContract', () => {
         // First, create a new submitted submission
         const stateSubmission = await createAndSubmitTestContractWithRate(
             stateServer,
+            'FL',
             {
                 riskBasedContract: true,
             }
@@ -656,7 +641,6 @@ describe('unlockContract', () => {
         const currentRevision = unlockResult.draftRevision
 
         const programs = [defaultFloridaProgram()]
-        const ratePrograms = [defaultFloridaRateProgram()]
         const name = packageName(
             unlockResult.stateCode,
             unlockResult.stateNumber,
@@ -670,15 +654,11 @@ describe('unlockContract', () => {
             throw new Error('should have a first rate with form data')
         }
 
-        const convertedFirstRateFormData = nullsToUndefined(
-            Object.assign({}, firstRateFormData)
-        )
+        const rateName = firstRateFormData.rateCertificationName
 
-        const rateName = generateRateCertificationName(
-            convertedFirstRateFormData,
-            unlockResult.stateCode,
-            ratePrograms
-        )
+        if (!rateName) {
+            throw new Error('should have a rate name')
+        }
 
         const cmsEmails = [
             ...config.devReviewTeamEmails,
@@ -720,6 +700,7 @@ describe('unlockContract', () => {
         // First, create a new submitted submission
         const stateSubmission = await createAndSubmitTestContractWithRate(
             stateServer,
+            'FL',
             {
                 riskBasedContract: true,
             }
@@ -746,7 +727,6 @@ describe('unlockContract', () => {
         const currentRevision = unlockResult.draftRevision
 
         const programs = [defaultFloridaProgram()]
-        const ratePrograms = [defaultFloridaRateProgram()]
         const name = packageName(
             unlockResult.stateCode,
             unlockResult.stateNumber,
@@ -760,15 +740,11 @@ describe('unlockContract', () => {
             throw new Error('should have a first rate with form data')
         }
 
-        const convertedFirstRateFormData = nullsToUndefined(
-            Object.assign({}, firstRateFormData)
-        )
+        const rateName = firstRateFormData.rateCertificationName
 
-        const rateName = generateRateCertificationName(
-            convertedFirstRateFormData,
-            unlockResult.stateCode,
-            ratePrograms
-        )
+        if (!rateName) {
+            throw new Error('should have a rate name')
+        }
 
         const stateReceiverEmails = [
             'james@example.com',
@@ -777,7 +753,7 @@ describe('unlockContract', () => {
                 (contact) => contact.email
             ),
         ]
-        // email subject line is correct for CMS email
+        // email subject line is correct for State email
         expect(mockEmailer.sendEmail).toHaveBeenNthCalledWith(
             4,
             expect.objectContaining({

@@ -1,7 +1,6 @@
 import {
     constructTestPostgresServer,
-    createAndUpdateTestHealthPlanPackage,
-    unlockTestHealthPlanPackage,
+    executeGraphQLOperation,
 } from '../../testHelpers/gqlHelpers'
 import { FetchContractDocument } from '../../gen/gqlClient'
 import { testCMSUser, testStateUser } from '../../testHelpers/userHelpers'
@@ -41,7 +40,6 @@ describe('fetchContract', () => {
         expect(draftRate[0].status).toBe('DRAFT')
         expect(draftRate[0].stateCode).toBe('FL')
         expect(
-            // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
             draftRate[0].draftRevision?.formData.rateDocuments![0].downloadURL
         ).toBeDefined()
 
@@ -54,17 +52,19 @@ describe('fetchContract', () => {
             s3Client: mockS3,
         })
 
-        const stateSubmission =
-            await createAndUpdateTestHealthPlanPackage(stateServer)
+        const stateSubmission = await createTestContract(stateServer)
 
-        const fetchDraftContractResult = await stateServer.executeOperation({
-            query: FetchContractDocument,
-            variables: {
-                input: {
-                    contractID: stateSubmission.id,
+        const fetchDraftContractResult = await executeGraphQLOperation(
+            stateServer,
+            {
+                query: FetchContractDocument,
+                variables: {
+                    input: {
+                        contractID: stateSubmission.id,
+                    },
                 },
-            },
-        })
+            }
+        )
 
         expect(fetchDraftContractResult.errors).toBeUndefined()
 
@@ -98,16 +98,16 @@ describe('fetchContract', () => {
 
         const intiallySubmitted = await submitTestContract(stateServer, AID)
 
-        await unlockTestHealthPlanPackage(cmsServer, AID, 'Unlock A.0')
+        await unlockTestContract(cmsServer, AID, 'Unlock A.0')
         await submitTestContract(stateServer, AID, 'Submit A.1')
 
-        await unlockTestHealthPlanPackage(cmsServer, AID, 'Unlock A.1')
+        await unlockTestContract(cmsServer, AID, 'Unlock A.1')
         await submitTestContract(stateServer, AID, 'Submit A.2')
 
-        await unlockTestHealthPlanPackage(cmsServer, AID, 'Unlock A.2')
+        await unlockTestContract(cmsServer, AID, 'Unlock A.2')
         await submitTestContract(stateServer, AID, 'Submit A.3')
 
-        await unlockTestHealthPlanPackage(cmsServer, AID, 'Unlock A.3')
+        await unlockTestContract(cmsServer, AID, 'Unlock A.3')
         await submitTestContract(stateServer, AID, 'Submit A.4')
 
         const submittedMultiply = await fetchTestContract(stateServer, AID)
@@ -119,7 +119,7 @@ describe('fetchContract', () => {
             intiallySubmitted.initiallySubmittedAt
         )
 
-        await unlockTestHealthPlanPackage(cmsServer, AID, 'Unlock A.4')
+        await unlockTestContract(cmsServer, AID, 'Unlock A.4')
 
         const finallyUnlocked = await fetchTestContract(stateServer, AID)
         expect(finallyUnlocked.packageSubmissions).toHaveLength(5)
@@ -306,8 +306,7 @@ describe('fetchContract', () => {
         })
 
         // Create a submission with a rate
-        const stateSubmission =
-            await createAndUpdateTestHealthPlanPackage(stateServerFL)
+        const stateSubmission = await createTestContract(stateServerFL)
 
         const stateServerVA = await constructTestPostgresServer({
             context: {
@@ -318,7 +317,7 @@ describe('fetchContract', () => {
             },
         })
 
-        const fetchResult = await stateServerVA.executeOperation({
+        const fetchResult = await executeGraphQLOperation(stateServerVA, {
             query: FetchContractDocument,
             variables: {
                 input: {
@@ -360,7 +359,7 @@ describe('fetchContract', () => {
             s3Client: mockS3,
         })
 
-        const fetchResult = await oauthServer.executeOperation({
+        const fetchResult = await executeGraphQLOperation(oauthServer, {
             query: FetchContractDocument,
             variables: {
                 input: {
@@ -401,7 +400,7 @@ describe('fetchContract', () => {
             s3Client: mockS3,
         })
 
-        const fetchResult = await oauthServerVA.executeOperation({
+        const fetchResult = await executeGraphQLOperation(oauthServerVA, {
             query: FetchContractDocument,
             variables: {
                 input: {
@@ -443,7 +442,7 @@ describe('fetchContract', () => {
             s3Client: mockS3,
         })
 
-        const fetchResult = await oauthServer.executeOperation({
+        const fetchResult = await executeGraphQLOperation(oauthServer, {
             query: FetchContractDocument,
             variables: {
                 input: {

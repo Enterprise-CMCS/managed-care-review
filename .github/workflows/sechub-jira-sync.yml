@@ -33,21 +33,21 @@ jobs:
       - name: Debug - Log role ARNs
         run: |
           echo "🔍 DEBUG: Attempting to assume role:"
-          echo "Role ARN: ${{ secrets.SECHUBJIRA_AWS_OIDC_ROLE_TO_ASSUME }}"
+          echo "Role ARN: ${{ secrets.AWS_OIDC_ROLE_TO_ASSUME }}"
           echo "Deployment ARN:  ${{ secrets.AWS_OIDC_ROLE_TO_ASSUME }}"
           echo "Region: ${{ secrets.AWS_DEFAULT_REGION }}"
           echo "Environment: ${{ github.ref_name }}"
 
       - name: Configure AWS credentials
         id: aws_creds_step
-        uses: aws-actions/configure-aws-credentials@v4
+        uses: aws-actions/configure-aws-credentials@v5
         with:
           aws-region: ${{ secrets.AWS_DEFAULT_REGION }}
           role-to-assume: ${{ secrets.AWS_OIDC_ROLE_TO_ASSUME }}
 
       - name: Security Sync
         id: sync_step
-        uses: Enterprise-CMCS/mac-fc-security-hub-visibility@v2.1.9
+        uses: Enterprise-CMCS/mac-fc-security-hub-visibility@v2.1.10
         with:
           jira-token: ${{ secrets.ZARATE_ENT_JIRA_TOKEN }}
           jira-username: ${{ secrets.JIRA_USERNAME }}
@@ -92,7 +92,7 @@ jobs:
       ERROR_MESSAGE: ${{ needs.sync.outputs.error_message }}
     steps:
       - name: Configure AWS credentials
-        uses: aws-actions/configure-aws-credentials@v4
+        uses: aws-actions/configure-aws-credentials@v5
         with:
           aws-region: ${{ secrets.AWS_DEFAULT_REGION }}
           role-to-assume: ${{ secrets.AWS_OIDC_ROLE_TO_ASSUME }}
