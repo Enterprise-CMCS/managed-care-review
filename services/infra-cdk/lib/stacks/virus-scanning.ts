@@ -5,12 +5,12 @@ import {
     InstanceType,
     InstanceClass,
     InstanceSize,
-    MachineImage,
     Vpc,
     SecurityGroup,
     Port,
     UserData,
     Subnet,
+    MachineImage,
 } from 'aws-cdk-lib/aws-ec2'
 import { NodejsFunction } from 'aws-cdk-lib/aws-lambda-nodejs'
 import {
@@ -28,6 +28,7 @@ import {
     PolicyStatement,
     Effect,
     ManagedPolicy,
+    InstanceProfile,
 } from 'aws-cdk-lib/aws-iam'
 import { CfnOutput, Duration, Fn } from 'aws-cdk-lib'
 import { HostedZone, ARecord, RecordTarget } from 'aws-cdk-lib/aws-route53'
@@ -194,11 +195,10 @@ export class VirusScanning extends BaseStack {
             vpc,
             vpcSubnets: {
                 subnets: [
-                    Subnet.fromSubnetId(
-                        this,
-                        'ClamAVPublicSubnet',
-                        process.env.SUBNET_PUBLIC_A_ID!
-                    ),
+                    Subnet.fromSubnetAttributes(this, 'ClamAVPublicSubnet', {
+                        subnetId: process.env.SUBNET_PUBLIC_A_ID!,
+                        availabilityZone: this.availabilityZones[0], // Use first AZ from the region
+                    }),
                 ],
             },
             securityGroup: clamavSecurityGroup,
@@ -233,6 +233,33 @@ export class VirusScanning extends BaseStack {
         userData.addCommands(scriptContent)
 
         return userData
+    }
+
+    /**
+     * Create IAM instance profile for ClamAV EC2 instance
+     */
+    private createInstanceProfile(): InstanceProfile {
+        const role = new Role(this, 'ClamAVInstanceRole', {
+            assumedBy: new ServicePrincipal('ec2.amazonaws.com'),
+            description: 'IAM role for ClamAV EC2 instance',
+        })
+
+        // Add basic CloudWatch logs permissions
+        role.addToPolicy(
+            new PolicyStatement({
+                effect: Effect.ALLOW,
+                actions: [
+                    'logs:CreateLogGroup',
+                    'logs:CreateLogStream',
+                    'logs:PutLogEvents',
+                ],
+                resources: ['*'],
+            })
+        )
+
+        return new InstanceProfile(this, 'ClamAVInstanceProfile', {
+            role,
+        })
     }
 
     /**
