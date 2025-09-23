@@ -196,7 +196,16 @@ export class VirusScanning extends BaseStack {
             vpc,
             vpcSubnets: {
                 subnetType: SubnetType.PUBLIC,
-                availabilityZones: [this.availabilityZones[0]], // Constrain to first AZ
+                subnetFilters: [
+                    {
+                        selectSubnets: (subnets) =>
+                            subnets.filter(
+                                (subnet) =>
+                                    subnet.subnetId ===
+                                    process.env.SUBNET_PUBLIC_A_ID!
+                            ),
+                    },
+                ],
             },
             securityGroup: clamavSecurityGroup,
             userData: userDataScript,
