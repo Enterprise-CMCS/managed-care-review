@@ -186,10 +186,7 @@ export class VirusScanning extends BaseStack {
 
         // Create EC2 instance
         const instance = new Instance(this, 'ClamavInstance', {
-            instanceType: InstanceType.of(
-                InstanceClass.T3,
-                InstanceSize.MEDIUM
-            ),
+            instanceType: InstanceType.of(InstanceClass.T3, InstanceSize.SMALL),
             machineImage: MachineImage.genericLinux({
                 'us-east-1': 'ami-0c7217cdde317cfec',
             }),
