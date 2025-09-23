@@ -4,7 +4,7 @@ on:
   workflow_dispatch: # for testing and manual runs
   schedule:
     - cron: "25 1 * * *" # daily at 8:25 PM EST
-
+  
 permissions:
   id-token: write
   contents: read
@@ -16,7 +16,7 @@ jobs:
     strategy:
       max-parallel: 1
       matrix:
-        environment: ["prod"]  # add more like "val","master" later if needed
+        environment: ["dev"]  # add more like "val","master" later if needed
       fail-fast: false
     environment:
       name: ${{ matrix.environment }}
@@ -49,7 +49,7 @@ jobs:
         id: sync_step
         uses: Enterprise-CMCS/mac-fc-security-hub-visibility@v2.1.10
         with:
-          jira-token: ${{ secrets.ENT_JIRA_TOKEN }}
+          jira-token: ${{ secrets.ZARATE_ENT_JIRA_TOKEN }}
           jira-username: ${{ secrets.JIRA_USERNAME }}
           jira-project-key: MCR
           jira-ignore-statuses: Done, Closed, Canceled
