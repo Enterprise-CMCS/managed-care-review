@@ -250,7 +250,7 @@ export class VirusScanning extends BaseStack {
      * Matches serverless ClamAVInstanceRole configuration
      */
     private createInstanceProfile(): InstanceProfile {
-        const role = new Role(this, 'ClamAVInstanceRole', {
+        const role = new Role(this, 'ClamAVInstanceRoleV001', {
             assumedBy: new ServicePrincipal('ec2.amazonaws.com'),
             description: 'IAM role for ClamAV EC2 instance',
             path: '/delegatedadmin/developer/',
@@ -276,7 +276,7 @@ export class VirusScanning extends BaseStack {
             })
         )
 
-        return new InstanceProfile(this, 'ClamAVInstanceProfile', {
+        return new InstanceProfile(this, 'ClamAVInstanceProfileV001', {
             role,
             path: '/delegatedadmin/developer/',
         })
@@ -326,7 +326,7 @@ export class VirusScanning extends BaseStack {
         const qaUploadsBucketArn = Fn.importValue(
             `${uploadsStackName}-QAUploadsBucketArn`
         )
-        const role = new Role(this, 'VirusScanLambdaRole', {
+        const role = new Role(this, 'VirusScanLambdaRoleV001', {
             assumedBy: new ServicePrincipal('lambda.amazonaws.com'),
             description: 'Execution role for virus scanning Lambda functions',
             path: process.env.IAM_PATH || '/delegatedadmin/developer/',
