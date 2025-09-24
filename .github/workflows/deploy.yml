@@ -7,6 +7,8 @@ on:
       - 'dependabot/**'
       - '!skipci*'
       - '!main'
+      - '!mt-cdk-oidc'
+      - '!mt-review-cdk'
 
 permissions:
   id-token: write
