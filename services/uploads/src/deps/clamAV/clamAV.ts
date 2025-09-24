@@ -12,7 +12,6 @@ interface ClamAV {
 }
 
 interface ClamAVConfig {
-    bucketName: string
     definitionsPath: string
     pathToClamav: string
     pathToFreshclam: string
@@ -26,12 +25,11 @@ interface ClamAVConfig {
 }
 
 function NewClamAV(config: Partial<ClamAVConfig>, s3Client: S3UploadsClient) {
-    if (!config.bucketName || !config.definitionsPath) {
-        throw new Error('BucketName and DefinitionsPath are required')
+    if (!config.definitionsPath) {
+        throw new Error('DefinitionsPath are required')
     }
 
     const fullConfig: ClamAVConfig = {
-        bucketName: config.bucketName,
         definitionsPath: config.definitionsPath,
 
         pathToClamav: config.pathToClamav || '/opt/bin/clamscan',

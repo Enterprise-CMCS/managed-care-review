@@ -29,15 +29,6 @@ async function main(event: S3Event, _context: Context) {
     initTracer(serviceName, otelCollectorURL)
     initMeter(serviceName)
 
-    const clamAVBucketName = process.env.CLAMAV_BUCKET_NAME
-    if (!clamAVBucketName || clamAVBucketName === '') {
-        const err = new Error(
-            'Configuration Error: CLAMAV_BUCKET_NAME must be set'
-        )
-        recordException(err, serviceName, 'clamAVEnvCheck')
-        throw err
-    }
-
     const clamAVDefintionsPath = process.env.PATH_TO_AV_DEFINITIONS
     if (!clamAVDefintionsPath || clamAVDefintionsPath === '') {
         const err = new Error(
@@ -53,7 +44,6 @@ async function main(event: S3Event, _context: Context) {
 
     const clamAV = NewClamAV(
         {
-            bucketName: clamAVBucketName,
             definitionsPath: clamAVDefintionsPath,
         },
         s3Client
