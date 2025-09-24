@@ -29,7 +29,6 @@ import {
     PolicyStatement,
     Effect,
     ManagedPolicy,
-    InstanceProfile,
 } from 'aws-cdk-lib/aws-iam'
 import { CfnOutput, Duration, Fn, Tags } from 'aws-cdk-lib'
 import { HostedZone, ARecord, RecordTarget } from 'aws-cdk-lib/aws-route53'
@@ -187,6 +186,9 @@ export class VirusScanning extends BaseStack {
         // Load bootstrap script from external file
         const userDataScript = this.createClamavUserDataScript()
 
+        // Create the IAM role for the EC2 instance
+        const instanceRole = this.createClamavInstanceRole()
+
         // Create EC2 instance
         const instance = new Instance(this, 'ClamavInstanceV001', {
             instanceType: InstanceType.of(InstanceClass.T3, InstanceSize.SMALL),
@@ -210,6 +212,7 @@ export class VirusScanning extends BaseStack {
             securityGroup: clamavSecurityGroup,
             userData: userDataScript,
             associatePublicIpAddress: true,
+            role: instanceRole,
         })
 
         // Add tags to match serverless configuration
@@ -246,10 +249,10 @@ export class VirusScanning extends BaseStack {
     }
 
     /**
-     * Create IAM instance profile for ClamAV EC2 instance
+     * Create IAM role for ClamAV EC2 instance
      * Matches serverless ClamAVInstanceRole configuration
      */
-    private createInstanceProfile(): InstanceProfile {
+    private createClamavInstanceRole(): Role {
         const role = new Role(this, 'ClamAVInstanceRoleV001', {
             assumedBy: new ServicePrincipal('ec2.amazonaws.com'),
             description: 'IAM role for ClamAV EC2 instance',
@@ -276,10 +279,7 @@ export class VirusScanning extends BaseStack {
             })
         )
 
-        return new InstanceProfile(this, 'ClamAVInstanceProfileV001', {
-            role,
-            path: '/delegatedadmin/developer/',
-        })
+        return role
     }
 
     /**
