@@ -188,7 +188,7 @@ export class VirusScanning extends BaseStack {
         const userDataScript = this.createClamavUserDataScript()
 
         // Create EC2 instance
-        const instance = new Instance(this, 'ClamavInstance', {
+        const instance = new Instance(this, 'ClamavInstanceV001', {
             instanceType: InstanceType.of(InstanceClass.T3, InstanceSize.SMALL),
             machineImage: MachineImage.genericLinux({
                 'us-east-1': 'ami-0c7217cdde317cfec',
