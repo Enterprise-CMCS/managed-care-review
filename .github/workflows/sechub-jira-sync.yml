@@ -4,7 +4,7 @@ on:
   workflow_dispatch: # for testing and manual runs
   schedule:
     - cron: "25 1 * * *" # daily at 8:25 PM EST
-
+  push:
 permissions:
   id-token: write
   contents: read
