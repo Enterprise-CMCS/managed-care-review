@@ -31,7 +31,7 @@ import {
     ManagedPolicy,
     InstanceProfile,
 } from 'aws-cdk-lib/aws-iam'
-import { CfnOutput, Duration, Fn } from 'aws-cdk-lib'
+import { CfnOutput, Duration, Fn, Tags } from 'aws-cdk-lib'
 import { HostedZone, ARecord, RecordTarget } from 'aws-cdk-lib/aws-route53'
 import { ResourceNames } from '../config'
 import { AWS_OTEL_LAYER_ARN } from './lambda-layers'
@@ -212,6 +212,10 @@ export class VirusScanning extends BaseStack {
             associatePublicIpAddress: true,
         })
 
+        // Add tags to match serverless configuration
+        Tags.of(instance).add('Name', `clamavd-${this.stage}`)
+        Tags.of(instance).add('mcr-vmuse', 'clamavd')
+
         return instance
     }
 
@@ -243,16 +247,25 @@ export class VirusScanning extends BaseStack {
 
     /**
      * Create IAM instance profile for ClamAV EC2 instance
+     * Matches serverless ClamAVInstanceRole configuration
      */
     private createInstanceProfile(): InstanceProfile {
         const role = new Role(this, 'ClamAVInstanceRole', {
             assumedBy: new ServicePrincipal('ec2.amazonaws.com'),
             description: 'IAM role for ClamAV EC2 instance',
+            path: '/delegatedadmin/developer/',
+            permissionsBoundary: ManagedPolicy.fromManagedPolicyArn(
+                this,
+                'ClamAVPermissionsBoundary',
+                `arn:aws:iam::${this.account}:policy/cms-cloud-admin/ct-ado-poweruser-permissions-boundary-policy`
+            ),
+            roleName: `clamavdVm-${this.stage}-ServiceRole`,
         })
 
-        // Add basic CloudWatch logs permissions
+        // Add ClamAV instance policy (matches serverless)
         role.addToPolicy(
             new PolicyStatement({
+                sid: 'ClamAVInstancePolicy',
                 effect: Effect.ALLOW,
                 actions: [
                     'logs:CreateLogGroup',
@@ -265,6 +278,7 @@ export class VirusScanning extends BaseStack {
 
         return new InstanceProfile(this, 'ClamAVInstanceProfile', {
             role,
+            path: '/delegatedadmin/developer/',
         })
     }
 
@@ -315,6 +329,13 @@ export class VirusScanning extends BaseStack {
         const role = new Role(this, 'VirusScanLambdaRole', {
             assumedBy: new ServicePrincipal('lambda.amazonaws.com'),
             description: 'Execution role for virus scanning Lambda functions',
+            path: process.env.IAM_PATH || '/delegatedadmin/developer/',
+            permissionsBoundary: ManagedPolicy.fromManagedPolicyArn(
+                this,
+                'VirusScanPermissionsBoundary',
+                process.env.IAM_PERMISSIONS_BOUNDARY ||
+                    `arn:aws:iam::${this.account}:policy/cms-cloud-admin/ct-ado-poweruser-permissions-boundary-policy`
+            ),
         })
 
         // Basic Lambda execution permissions
@@ -324,14 +345,18 @@ export class VirusScanning extends BaseStack {
             )
         )
 
-        // S3 permissions for scanning files and managing definitions
+        // S3 permissions for scanning files and managing definitions (matches serverless exactly)
         role.addToPolicy(
             new PolicyStatement({
                 effect: Effect.ALLOW,
                 actions: [
                     's3:GetObject',
                     's3:GetObjectTagging',
+                    's3:PutObject',
+                    's3:PutObjectAcl',
                     's3:PutObjectTagging',
+                    's3:PutObjectVersionTagging',
+                    's3:DeleteObject',
                     's3:ListBucket',
                 ],
                 resources: [
@@ -345,8 +370,30 @@ export class VirusScanning extends BaseStack {
             })
         )
 
-        // Note: Lambda invocation permissions for rescan workers removed
-        // (rescan functions not implemented in initial CDK version)
+        // ListBucket permissions (separate statement like serverless)
+        role.addToPolicy(
+            new PolicyStatement({
+                effect: Effect.ALLOW,
+                actions: ['s3:ListBucket'],
+                resources: [
+                    documentUploadsBucketArn,
+                    qaUploadsBucketArn,
+                    this.avDefinitionsBucket.bucketArn,
+                ],
+            })
+        )
+
+        // Lambda invocation permissions (matches serverless - for future rescan functions)
+        role.addToPolicy(
+            new PolicyStatement({
+                effect: Effect.ALLOW,
+                actions: ['lambda:InvokeFunction'],
+                resources: [
+                    `arn:aws:lambda:${this.region}:${this.account}:function:${ResourceNames.apiName('virus-scanning', this.stage)}-avAuditFiles`,
+                    `arn:aws:lambda:${this.region}:${this.account}:function:${ResourceNames.apiName('virus-scanning', this.stage)}-rescanWorker`,
+                ],
+            })
+        )
 
         return role
     }
