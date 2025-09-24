@@ -7,22 +7,11 @@ import type { ContractQuestion, RateQuestion } from '../gen/gqlClient'
 import {
     CreateContractQuestionDocument,
     CreateContractQuestionResponseDocument,
-    CreateHealthPlanPackageDocument,
     CreateRateQuestionDocument,
     CreateRateQuestionResponseDocument,
-    FetchHealthPlanPackageDocument,
-    SubmitHealthPlanPackageDocument,
-    UnlockHealthPlanPackageDocument,
-    UpdateHealthPlanFormDataDocument,
     UpdateStateAssignmentsByStateDocument,
 } from '../gen/gqlClient'
 import typeDefs from 'app-graphql/src/schema.graphql'
-import type {
-    HealthPlanFormDataType,
-    StateCodeType,
-    UnlockedHealthPlanFormDataType,
-} from '@mc-review/hpp'
-import { domainToBase64 } from '@mc-review/hpp'
 import type {
     CreateContractQuestionInput,
     CreateRateQuestionInputType,
@@ -31,16 +20,11 @@ import type {
     ProgramType,
 } from '../domain-models'
 import type { EmailConfiguration, Emailer } from '../emailer'
-import type {
-    CreateHealthPlanPackageInput,
-    HealthPlanPackage,
-    UpdateStateAssignmentsByStatePayload,
-} from '../gen/gqlServer'
+import type { UpdateStateAssignmentsByStatePayload } from '../gen/gqlServer'
 import type { Context } from '../handlers/apollo_gql'
 import type { Store } from '../postgres'
 import { findStatePrograms, NewPostgresStore } from '../postgres'
 import { configureResolvers } from '../resolvers'
-import { latestFormData } from './healthPlanPackageHelpers'
 import { sharedTestPrismaClient } from './storeHelpers'
 import {
     type EmailParameterStore,
@@ -55,9 +39,6 @@ import type { JWTLib } from '../jwt'
 import { newJWTLib } from '../jwt'
 import { testS3Client } from './s3Helpers'
 import type { S3ClientT } from '../s3'
-import { convertRateInfoToRateFormDataInput } from '../domain-models/contractAndRates/convertHPPtoContractWithRates'
-import { createAndUpdateTestContractWithoutRates } from './gqlContractHelpers'
-import { addNewRateToTestContract } from './gqlRateHelpers'
 import { configureEmailer } from '../handlers/configuration'
 import type { DocumentZipService } from '../zip/generateZip'
 import {
@@ -145,10 +126,6 @@ const constructTestPostgresServer = async (opts?: {
             postgresStore,
             ldService,
         }))
-
-    if (emailer instanceof Error) {
-        throw new Error(`Failed to configure emailer: ${emailer.message}`)
-    }
 
     const postgresResolvers = configureResolvers(
         postgresStore,
@@ -255,315 +232,6 @@ const constructTestEmailer = async (opts: {
             applicationEndpoint: emailConfig?.baseUrl ?? 'http://localtest',
         })
     )
-}
-
-const createTestHealthPlanPackage = async (
-    server: ApolloServer,
-    stateCode?: StateCodeType
-): Promise<HealthPlanPackage> => {
-    const programs = stateCode
-        ? [must(findStatePrograms(stateCode))[0]]
-        : [defaultFloridaProgram()]
-
-    const programIDs = programs.map((program) => program.id)
-    const input: CreateHealthPlanPackageInput = {
-        programIDs: programIDs,
-        populationCovered: 'MEDICAID',
-        riskBasedContract: false,
-        submissionType: 'CONTRACT_ONLY',
-        submissionDescription: 'A created submission',
-        contractType: 'BASE',
-    }
-    const result = await executeGraphQLOperation(server, {
-        query: CreateHealthPlanPackageDocument,
-        variables: { input },
-    })
-
-    if (result.errors) {
-        throw new Error(
-            `createTestHealthPlanPackage mutation failed with errors ${JSON.stringify(result.errors)}`
-        )
-    }
-
-    if (!result.data.createHealthPlanPackage.pkg) {
-        throw new Error('CreateHealthPlanPackage returned nothing')
-    }
-
-    return result.data.createHealthPlanPackage.pkg
-}
-
-const updateTestHealthPlanFormData = async (
-    server: ApolloServer,
-    updatedFormData: HealthPlanFormDataType
-): Promise<HealthPlanPackage> => {
-    const updatedB64 = domainToBase64(updatedFormData)
-    const updateResult = await executeGraphQLOperation(server, {
-        query: UpdateHealthPlanFormDataDocument,
-        variables: {
-            input: {
-                pkgID: updatedFormData.id,
-                healthPlanFormData: updatedB64,
-            },
-        },
-    })
-
-    if (updateResult.errors) {
-        console.info('errors', JSON.stringify(updateResult.errors))
-        throw new Error(
-            `updateTestHealthPlanFormData mutation failed with errors ${JSON.stringify(updateResult.errors)}`
-        )
-    }
-
-    if (!updateResult.data.updateHealthPlanFormData.pkg) {
-        throw new Error('updateTestHealthPlanFormData returned nothing')
-    }
-
-    return updateResult.data.updateHealthPlanFormData.pkg
-}
-
-const updateTestHealthPlanPackage = async (
-    server: ApolloServer,
-    pkgID: string,
-    partialUpdates?: Partial<UnlockedHealthPlanFormDataType>
-): Promise<HealthPlanPackage> => {
-    const pkg = await fetchTestHealthPlanPackageById(server, pkgID)
-    const draft = latestFormData(pkg)
-
-    Object.assign(draft, partialUpdates)
-
-    const updateResult = await executeGraphQLOperation(server, {
-        query: UpdateHealthPlanFormDataDocument,
-        variables: {
-            input: {
-                pkgID: pkgID,
-                healthPlanFormData: domainToBase64(draft),
-            },
-        },
-    })
-
-    if (updateResult.errors) {
-        console.info('errors', JSON.stringify(updateResult.errors))
-        throw new Error(
-            `updateTestHealthPlanFormData mutation failed with errors ${JSON.stringify(updateResult.errors)}`
-        )
-    }
-
-    if (!updateResult.data.updateHealthPlanFormData.pkg) {
-        throw new Error('updateTestHealthPlanFormData returned nothing')
-    }
-
-    return updateResult.data.updateHealthPlanFormData.pkg
-}
-
-const createAndUpdateTestHealthPlanPackage = async (
-    server: ApolloServer,
-    partialUpdates?: Partial<UnlockedHealthPlanFormDataType>,
-    stateCode?: StateCodeType
-): Promise<HealthPlanPackage> => {
-    // the rates have to be added separately now
-    let rateFormDatas = []
-    if (partialUpdates?.rateInfos) {
-        rateFormDatas = convertRateInfoToRateFormDataInput(
-            partialUpdates?.rateInfos || []
-        )
-    } else {
-        const ratePrograms = stateCode
-            ? [must(findStatePrograms(stateCode))[0]]
-            : [defaultFloridaRateProgram()]
-        // let's have some default test data:
-        rateFormDatas = [
-            {
-                rateType: 'NEW' as const,
-                rateDateStart: '2025-05-01',
-                rateDateEnd: '2026-04-30',
-                amendmentEffectiveDateStart: undefined,
-                amendmentEffectiveDateEnd: undefined,
-                rateDateCertified: '2025-03-15',
-                rateDocuments: [
-                    {
-                        name: 'rateDocument.pdf',
-                        s3URL: 's3://bucketname/key/test',
-                        sha256: 'fakesha',
-                    },
-                ],
-                supportingDocuments: [],
-                //We only want one rate ID and use last program in list to differentiate from programID if possible.
-                rateProgramIDs: [ratePrograms.reverse()[0].id],
-                certifyingActuaryContacts: [
-                    {
-                        name: 'test name',
-                        titleRole: 'test title',
-                        email: 'email@example.com',
-                        actuarialFirm: 'MERCER' as const,
-                        actuarialFirmOther: '',
-                    },
-                ],
-                actuaryCommunicationPreference: 'OACT_TO_ACTUARY' as const,
-            },
-        ]
-    }
-
-    let contract = await createAndUpdateTestContractWithoutRates(
-        server,
-        stateCode,
-        partialUpdates
-    )
-    for (const rateData of rateFormDatas) {
-        contract = await addNewRateToTestContract(server, contract, rateData)
-    }
-    const updatedDraft = await fetchTestHealthPlanPackageById(
-        server,
-        contract.id
-    )
-    return updatedDraft
-}
-
-const createAndSubmitTestHealthPlanPackage = async (
-    server: ApolloServer,
-    partialUpdates?: Partial<UnlockedHealthPlanFormDataType>
-): Promise<HealthPlanPackage> => {
-    const pkg = await createAndUpdateTestHealthPlanPackage(
-        server,
-        partialUpdates
-    )
-
-    return await submitTestHealthPlanPackage(server, pkg.id)
-}
-
-const submitTestHealthPlanPackage = async (
-    server: ApolloServer,
-    pkgID: string
-) => {
-    const updateResult = await executeGraphQLOperation(server, {
-        query: SubmitHealthPlanPackageDocument,
-        variables: {
-            input: {
-                pkgID,
-            },
-        },
-    })
-
-    if (updateResult.errors) {
-        console.info('errors', updateResult.errors)
-        throw new Error(
-            `submitTestHealthPlanPackage mutation failed with errors ${JSON.stringify(updateResult.errors)}`
-        )
-    }
-
-    if (updateResult.data === undefined || updateResult.data === null) {
-        throw new Error('submitTestHealthPlanPackage returned nothing')
-    }
-
-    return updateResult.data.submitHealthPlanPackage.pkg
-}
-
-const resubmitTestHealthPlanPackage = async (
-    server: ApolloServer,
-    pkgID: string,
-    submittedReason: string
-) => {
-    const updateResult = await executeGraphQLOperation(server, {
-        query: SubmitHealthPlanPackageDocument,
-        variables: {
-            input: {
-                pkgID,
-                submittedReason,
-            },
-        },
-    })
-
-    if (updateResult.errors) {
-        console.info('errors', updateResult.errors)
-        throw new Error(
-            `resubmitTestHealthPlanPackage mutation failed with errors ${JSON.stringify(updateResult.errors)}`
-        )
-    }
-
-    if (!updateResult.data.submitHealthPlanPackage.pkg) {
-        throw new Error('resubmitTestHealthPlanPackage returned nothing')
-    }
-
-    return updateResult.data.submitHealthPlanPackage.pkg
-}
-
-const unlockTestHealthPlanPackage = async (
-    server: ApolloServer,
-    pkgID: string,
-    unlockedReason: string
-): Promise<HealthPlanPackage> => {
-    const updateResult = await executeGraphQLOperation(server, {
-        query: UnlockHealthPlanPackageDocument,
-        variables: {
-            input: {
-                pkgID: pkgID,
-                unlockedReason,
-            },
-        },
-    })
-
-    if (updateResult.errors) {
-        console.info('errors', updateResult.errors)
-        throw new Error(
-            `unlockTestHealthPlanPackage mutation failed with errors ${JSON.stringify(updateResult.errors)}`
-        )
-    }
-
-    if (!updateResult.data.unlockHealthPlanPackage.pkg) {
-        throw new Error('unlockTestHealthPlanPackage returned nothing')
-    }
-
-    return updateResult.data.unlockHealthPlanPackage.pkg
-}
-
-const unlockTestHealthPlanPackageAsUser = async (
-    server: ApolloServer,
-    pkgID: string,
-    unlockedReason: string
-): Promise<HealthPlanPackage> => {
-    const updateResult = await executeGraphQLOperation(server, {
-        query: UnlockHealthPlanPackageDocument,
-        variables: {
-            input: {
-                pkgID: pkgID,
-                unlockedReason,
-            },
-        },
-    })
-
-    if (updateResult.errors) {
-        console.info('errors', updateResult.errors)
-        throw new Error(
-            `unlockTestHealthPlanPackage mutation failed with errors ${JSON.stringify(updateResult.errors)}`
-        )
-    }
-
-    if (!updateResult.data.unlockHealthPlanPackage.pkg) {
-        throw new Error('unlockTestHealthPlanPackage returned nothing')
-    }
-
-    return updateResult.data.unlockHealthPlanPackage.pkg
-}
-
-const fetchTestHealthPlanPackageById = async (
-    server: ApolloServer,
-    pkgID: string
-): Promise<HealthPlanPackage> => {
-    const input = { pkgID }
-    const result = await executeGraphQLOperation(server, {
-        query: FetchHealthPlanPackageDocument,
-        variables: { input },
-    })
-
-    if (result.errors)
-        throw new Error(
-            `fetchTestHealthPlanPackageById query failed with errors ${JSON.stringify(result.errors)}`
-        )
-
-    if (!result.data.fetchHealthPlanPackage.pkg) {
-        throw new Error('fetchTestHealthPlanPackageById returned nothing')
-    }
-
-    return result.data.fetchHealthPlanPackage.pkg
 }
 
 const createTestQuestion = async (
@@ -744,21 +412,11 @@ const updateTestStateAssignments = async (
 
 export {
     constructTestPostgresServer,
-    createTestHealthPlanPackage,
-    createAndUpdateTestHealthPlanPackage,
-    createAndSubmitTestHealthPlanPackage,
-    updateTestHealthPlanFormData,
-    fetchTestHealthPlanPackageById,
-    submitTestHealthPlanPackage,
-    unlockTestHealthPlanPackage,
-    unlockTestHealthPlanPackageAsUser,
-    resubmitTestHealthPlanPackage,
     defaultContext,
     defaultFloridaProgram,
     defaultFloridaRateProgram,
     createTestQuestion,
     createTestQuestionResponse,
-    updateTestHealthPlanPackage,
     updateTestStateAssignments,
     createTestRateQuestion,
     createTestRateQuestionResponse,

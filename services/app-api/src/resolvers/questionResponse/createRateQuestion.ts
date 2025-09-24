@@ -1,4 +1,3 @@
-import type { Store } from '../../postgres'
 import type { MutationResolvers } from '../../gen/gqlServer'
 import { hasCMSPermissions, isValidCmsDivison } from '../../domain-models'
 import { logError, logSuccess } from '../../logger'
@@ -7,7 +6,7 @@ import {
     setSuccessAttributesOnActiveSpan,
 } from '../attributeHelper'
 import { createForbiddenError, createUserInputError } from '../errorUtils'
-import { NotFoundError } from '../../postgres/postgresErrors'
+import { NotFoundError, type Store } from '../../postgres'
 import { GraphQLError } from 'graphql/index'
 import type { Emailer } from '../../emailer'
 import type { StateCodeType } from '../../testHelpers'

@@ -198,8 +198,8 @@ describe('createContractQuestionResponse', () => {
 
         const contract = await createAndSubmitTestContractWithRate(
             stateServer,
+            'FL',
             {
-                stateCode: 'FL',
                 riskBasedContract: true,
             }
         )

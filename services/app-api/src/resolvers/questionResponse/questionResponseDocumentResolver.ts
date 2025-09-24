@@ -1,7 +1,5 @@
 import type { Resolvers } from '../../gen/gqlServer'
-
-import { parseBucketName, parseKey } from '../../s3'
-import type { S3ClientT } from '../../s3'
+import { parseBucketName, parseKey, type S3ClientT } from '../../s3'
 import type { QuestionAndResponseDocument } from '../../domain-models'
 
 export function questionResponseDocumentResolver(
@@ -13,10 +11,9 @@ export function questionResponseDocumentResolver(
             const key = parseKey(s3URL)
             const bucket = parseBucketName(s3URL)
             if (key instanceof Error || bucket instanceof Error) {
-                const err = new Error(
+                throw new Error(
                     'S3 needs to be provided a valid key and bucket'
                 )
-                throw err
             }
 
             const url = await s3Client.getURL(key, 'QUESTION_ANSWER_DOCS')

@@ -268,7 +268,7 @@ jobs:
       - name: Check out repository
         uses: actions/checkout@v5
 
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@v5
         with:
           node-version-file: '.nvmrc'
 
@@ -323,7 +323,7 @@ jobs:
       needs.api-unit-tests.result == 'success' &&
       needs.build-lambda-layers.result == 'success' &&
       needs.begin-deployment.result == 'success'
-    uses: Enterprise-CMCS/managed-care-review/.github/workflows/deploy-app-to-env.yml@jl-apollo-server-upgrade-to-v4
+    uses: Enterprise-CMCS/managed-care-review/.github/workflows/deploy-app-to-env.yml@main
     with:
       environment: dev
       stage_name: ${{ needs.begin-deployment.outputs.stage-name }}

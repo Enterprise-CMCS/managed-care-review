@@ -9,8 +9,6 @@ import {
     createTestRateQuestion,
     defaultFloridaRateProgram,
     executeGraphQLOperation,
-    unlockTestHealthPlanPackage,
-    updateTestHealthPlanFormData,
 } from '../../testHelpers/gqlHelpers'
 import {
     createDBUsersWithFullData,
@@ -35,7 +33,6 @@ import {
     submitTestContract,
     unlockTestContract,
 } from '../../testHelpers/gqlContractHelpers'
-import { latestFormData } from '../../testHelpers/healthPlanPackageHelpers'
 import { testS3Client } from '../../../../app-api/src/testHelpers/s3Helpers'
 import { dayjs } from '@mc-review/dates'
 
@@ -451,7 +448,7 @@ describe('fetchRate', () => {
             'FL',
             {
                 contractDocuments: [dummyDoc('c1')],
-                documents: [dummyDoc('s1')],
+                supportingDocuments: [dummyDoc('s1')],
             }
         )
         const AID = draftA0.id
@@ -545,17 +542,15 @@ describe('fetchRate', () => {
         ).toBe('2024-01-01')
 
         // 2. Unlock and add more documents
-        const unlockedA0Pkg = await unlockTestHealthPlanPackage(
+        const unlockedA0 = await unlockTestContract(
             cmsServer,
             AID,
             'Unlock A.0'
         )
-        const a0FormData = latestFormData(unlockedA0Pkg)
+        const a0FormData = unlockedA0.draftRevision?.formData
         a0FormData.submissionDescription = 'DESC A1'
         a0FormData.contractDocuments.push(dummyDoc('c2'))
-        a0FormData.documents.push(dummyDoc('s2'))
-
-        await updateTestHealthPlanFormData(stateServer, a0FormData)
+        a0FormData.contractDocuments.push(dummyDoc('s2'))
 
         const unlockedA0Contract = await fetchTestContract(stateServer, AID)
         const a0RatesUpdates =

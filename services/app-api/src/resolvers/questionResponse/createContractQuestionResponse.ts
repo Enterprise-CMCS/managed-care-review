@@ -6,8 +6,7 @@ import {
     setSuccessAttributesOnActiveSpan,
 } from '../attributeHelper'
 import { createForbiddenError, createUserInputError } from '../errorUtils'
-import { NotFoundError } from '../../postgres/postgresErrors'
-import type { Store } from '../../postgres'
+import { NotFoundError, type Store } from '../../postgres'
 import { GraphQLError } from 'graphql/index'
 import type { Emailer } from '../../emailer'
 import type { StateCodeType } from '@mc-review/hpp'

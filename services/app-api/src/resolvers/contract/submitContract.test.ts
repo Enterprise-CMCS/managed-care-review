@@ -1,8 +1,6 @@
 import {
     constructTestPostgresServer,
     defaultFloridaProgram,
-    unlockTestHealthPlanPackage,
-    updateTestHealthPlanFormData,
     updateTestStateAssignments,
     executeGraphQLOperation,
 } from '../../testHelpers/gqlHelpers'
@@ -39,7 +37,6 @@ import {
     updateTestDraftRatesOnContract,
 } from '../../testHelpers/gqlRateHelpers'
 import { testLDService } from '../../testHelpers/launchDarklyHelpers'
-import { latestFormData } from '../../testHelpers/healthPlanPackageHelpers'
 import { sharedTestPrismaClient } from '../../testHelpers/storeHelpers'
 import {
     testEmailConfig,
@@ -214,11 +211,7 @@ describe('submitContract', () => {
         await addLinkedRateToTestContract(stateServer, draftB0, OneID)
 
         // 3. Unlock A0, edit and resubmit
-        await unlockTestHealthPlanPackage(
-            cmsServer,
-            AID,
-            'edit the linked rate, please'
-        )
+        await unlockTestContract(cmsServer, AID, 'edit the linked rate, please')
 
         const resubmittedA = await submitTestContract(
             stateServer,
@@ -312,11 +305,7 @@ describe('submitContract', () => {
         expect(subC0.rateRevisions[2].rateID).toBe(ThreeID)
 
         // resubmit A, connecting it to B and C's
-        await unlockTestHealthPlanPackage(
-            cmsServer,
-            AID,
-            'unlock to weave the web'
-        )
+        await unlockTestContract(cmsServer, AID, 'unlock to weave the web')
         const unlockedA0 = await fetchTestContract(stateServer, AID)
         const unlockedA0Three = await addLinkedRateToTestContract(
             stateServer,
@@ -447,14 +436,27 @@ describe('submitContract', () => {
 
         // 5. resubmit A, 1, and 2. B and C will get new entries.
         console.info('---- UNLOCK A.1 ----')
-        const unlockedA0Pkg = await unlockTestHealthPlanPackage(
+        const unlockedA0 = await unlockTestContract(
             cmsServer,
             AID,
             'Unlock A.0'
         )
-        const a0FormData = latestFormData(unlockedA0Pkg)
+        const a0FormData = unlockedA0.draftRevision?.formData
+        a0FormData.contractDocuments = [
+            {
+                name: 'contractDocument.pdf',
+                s3URL: 's3://bucketname/key/test1',
+                sha256: 'fakesha',
+                dateAdded: new Date(),
+            },
+        ]
         a0FormData.submissionDescription = 'DESC A1'
-        await updateTestHealthPlanFormData(stateServer, a0FormData)
+        await updateTestContractDraftRevision(
+            stateServer,
+            AID,
+            unlockedA0.draftRevision?.updatedAt,
+            a0FormData
+        )
         const unlockedA0Contract = await fetchTestContract(stateServer, AID)
         const a0RatesUpdates =
             updateRatesInputFromDraftContract(unlockedA0Contract)
@@ -545,15 +547,28 @@ describe('submitContract', () => {
 
         // 6. resubmit B, add r4. Only B gets a new entry.
         console.info('---- UNLOCK B.1 ----')
-        const unlockedB0Pkg = await unlockTestHealthPlanPackage(
+        const unlockedB0 = await unlockTestContract(
             cmsServer,
             BID,
             'Unlock B.0'
         )
-        const b0FormData = latestFormData(unlockedB0Pkg)
-
+        const b0FormData = unlockedB0.draftRevision?.formData
+        b0FormData.contractDocuments = [
+            {
+                name: 'contractDocument.pdf',
+                s3URL: 's3://bucketname/key/test1',
+                sha256: 'fakesha',
+                dateAdded: new Date(),
+            },
+        ]
         b0FormData.submissionDescription = 'DESC B1'
-        await updateTestHealthPlanFormData(stateServer, b0FormData)
+
+        await updateTestContractDraftRevision(
+            stateServer,
+            BID,
+            unlockedB0.draftRevision?.updatedAt,
+            b0FormData
+        )
 
         const unlockedB0Contract = await fetchTestContract(stateServer, BID)
         const b0RatesUpdates =
@@ -595,15 +610,27 @@ describe('submitContract', () => {
         expect(thirdD.packageSubmissions).toHaveLength(1)
 
         // 7. Resubmit C, remove rate 2. B should also get an update.
-        const unlockedC0Pkg = await unlockTestHealthPlanPackage(
+        const unlockedC0 = await unlockTestContract(
             cmsServer,
             CID,
             'Unlock C.0'
         )
-        const c0FormData = latestFormData(unlockedC0Pkg)
+        const c0FormData = unlockedC0.draftRevision?.formData
         c0FormData.submissionDescription = 'DESC C1'
-        await updateTestHealthPlanFormData(stateServer, c0FormData)
-
+        c0FormData.contractDocuments = [
+            {
+                name: 'contractDocument.pdf',
+                s3URL: 's3://bucketname/key/test1',
+                sha256: 'fakesha',
+                dateAdded: new Date(),
+            },
+        ]
+        await updateTestContractDraftRevision(
+            stateServer,
+            CID,
+            unlockedC0.draftRevision?.updatedAt,
+            c0FormData
+        )
         const unlockedC0Contract = await fetchTestContract(stateServer, CID)
 
         const c0RatesUpdates =
@@ -850,7 +877,7 @@ describe('submitContract', () => {
             'FL',
             {
                 contractDocuments: [dummyDoc('c1')],
-                documents: [dummyDoc('s1')],
+                supportingDocuments: [dummyDoc('s1')],
             }
         )
         const AID = draftA0.id
@@ -1929,11 +1956,11 @@ describe('submitContract', () => {
             // setup
             const initialContract = await createAndUpdateTestContractWithRate(
                 server,
+                'FL',
                 {
                     statutoryRegulatoryAttestationDescription:
                         'A valid description',
                     statutoryRegulatoryAttestation: false,
-                    stateCode: 'FL',
                 }
             )
 

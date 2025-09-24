@@ -2,7 +2,6 @@ import {
     constructTestPostgresServer,
     defaultFloridaProgram,
     executeGraphQLOperation,
-    unlockTestHealthPlanPackage,
     updateTestStateAssignments,
 } from '../../testHelpers/gqlHelpers'
 import {
@@ -171,7 +170,7 @@ describe('unlockContract', () => {
                 expect(subB0.rateRevisions[0].rateID).toBe(OneID)
 
                 // 3. unlock and resubmit B, removing Three
-                await unlockTestHealthPlanPackage(
+                await unlockTestContract(
                     cmsServer,
                     contractB0.id,
                     'remove that child rate'
@@ -202,7 +201,7 @@ describe('unlockContract', () => {
                 )
 
                 // 4. Unlock again, should not error
-                await unlockTestHealthPlanPackage(
+                await unlockTestContract(
                     cmsServer,
                     updatedUnlockedB0.id,
                     'dont try and reunlock'
@@ -302,11 +301,7 @@ describe('unlockContract', () => {
         expect(subB0.rateRevisions[0].rateID).toBe(OneID)
 
         // unlock B, rate 3 should unlock, rate 1 should not.
-        await unlockTestHealthPlanPackage(
-            cmsServer,
-            contractB0.id,
-            'test unlock'
-        )
+        await unlockTestContract(cmsServer, contractB0.id, 'test unlock')
 
         const unlockedB = await fetchTestContract(stateServer, contractB0.id)
         if (!unlockedB.draftRates) {
@@ -400,13 +395,9 @@ describe('unlockContract', () => {
         ).toEqual(['2021-01-01', '2023-03-03'])
 
         // unlock A
-        await unlockTestHealthPlanPackage(cmsServer, contractA0.id, 'unlock a')
+        await unlockTestContract(cmsServer, contractA0.id, 'unlock a')
         // unlock B, rate 3 should unlock, rate 1 should not.
-        await unlockTestHealthPlanPackage(
-            cmsServer,
-            contractB0.id,
-            'test unlock'
-        )
+        await unlockTestContract(cmsServer, contractB0.id, 'test unlock')
         const unlockedB = await fetchTestContract(stateServer, contractB0.id)
         if (!unlockedB.draftRates) {
             throw new Error('no draft rates')
@@ -517,13 +508,9 @@ describe('unlockContract', () => {
         ).toEqual(['2021-01-01', '2023-03-03'])
 
         // unlock A
-        await unlockTestHealthPlanPackage(cmsServer, contractA0.id, 'unlock a')
+        await unlockTestContract(cmsServer, contractA0.id, 'unlock a')
         // unlock B, rate 3 should unlock, rate 1 should not.
-        await unlockTestHealthPlanPackage(
-            cmsServer,
-            contractB0.id,
-            'test unlock'
-        )
+        await unlockTestContract(cmsServer, contractB0.id, 'test unlock')
 
         const unlockedB = await fetchTestContract(stateServer, contractB0.id)
         if (!unlockedB.draftRates) {
@@ -639,6 +626,7 @@ describe('unlockContract', () => {
         // First, create a new submitted submission
         const stateSubmission = await createAndSubmitTestContractWithRate(
             stateServer,
+            'FL',
             {
                 riskBasedContract: true,
             }
@@ -712,6 +700,7 @@ describe('unlockContract', () => {
         // First, create a new submitted submission
         const stateSubmission = await createAndSubmitTestContractWithRate(
             stateServer,
+            'FL',
             {
                 riskBasedContract: true,
             }
