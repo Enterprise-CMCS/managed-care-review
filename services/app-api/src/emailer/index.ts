@@ -5,8 +5,6 @@ export {
     newContractStateEmail,
     unlockContractCMSEmail,
     unlockContractStateEmail,
-    unlockPackageCMSEmail,
-    unlockPackageStateEmail,
     resubmitContractStateEmail,
     resubmitContractCMSEmail,
     sendQuestionStateEmail,
