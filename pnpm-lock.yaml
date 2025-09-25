@@ -725,8 +725,8 @@ importers:
         specifier: ^5.7.2
         version: 5.7.2(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       react-router:
-        specifier: ^6.23.1
-        version: 6.23.1(react@18.3.1)
+        specifier: ^7.9.2
+        version: 7.9.2(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       react-router-dom:
         specifier: ^6.23.1
         version: 6.23.1(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
@@ -7991,6 +7991,10 @@ packages:
     resolution: {integrity: sha512-6DnInpx7SJ2AK3+CTUE/ZM0vWTUboZCegxhC2xiIydHR9jNuTAASBrfEpHhiGOZw/nX51bHt6YQl8jsGo4y/0w==}
     engines: {node: '>= 0.6'}
 
+  cookie@1.0.2:
+    resolution: {integrity: sha512-9Kr/j4O16ISv8zBBhJoi4bXOYNTkFLOqSL3UDB0njXxCXNezjeyVrJyGOWtgfs/q2km1gwBcfH8q1yEGoMYunA==}
+    engines: {node: '>=18'}
+
   cookies@0.8.0:
     resolution: {integrity: sha512-8aPsApQfebXnuI+537McwYsDtjVxGm8gTIzQI3FDW6t5t/DAhERxtnbEPN/8RX+uZthoz4eCOgloXaE5cYyNow==}
     engines: {node: '>= 0.8'}
@@ -11947,6 +11951,16 @@ packages:
     peerDependencies:
       react: '>=16.8'
 
+  react-router@7.9.2:
+    resolution: {integrity: sha512-i2TPp4dgaqrOqiRGLZmqh2WXmbdFknUyiCRmSKs0hf6fWXkTKg5h56b+9F22NbGRAMxjYfqQnpi63egzD2SuZA==}
+    engines: {node: '>=20.0.0'}
+    peerDependencies:
+      react: '>=18'
+      react-dom: '>=18'
+    peerDependenciesMeta:
+      react-dom:
+        optional: true
+
   react-select-event@5.5.1:
     resolution: {integrity: sha512-goAx28y0+iYrbqZA2FeRTreHHs/ZtSuKxtA+J5jpKT5RHPCbVZJ4MqACfPnWyFXsEec+3dP5bCrNTxIX8oYe9A==}
 
@@ -12416,6 +12430,9 @@ packages:
 
   set-blocking@2.0.0:
     resolution: {integrity: sha512-KiKBS8AnWGEyLzofFfmvKwpdPzqiy16LvQfK3yv/fVH7Bj13/wl3JSR1J+rfgRE9q7xUJK4qvgS8raSOeLUehw==}
+
+  set-cookie-parser@2.7.1:
+    resolution: {integrity: sha512-IOc8uWeOZgnb3ptbCURJWNjWUPcO3ZnTTdzsurqERrP6nPyv+paC55vJM0LpOlT2ne+Ix+9+CRG1MNLlyZ4GjQ==}
 
   set-function-length@1.2.2:
     resolution: {integrity: sha512-pgRc4hJ4/sNjWCSS9AmnS40x3bNMDTknHgL5UaMBTMyJnU90EgWh1Rz+MC9eFu4BuN/UwZjKQuY/1v3rM7HMfg==}
@@ -24202,6 +24219,8 @@ snapshots:
 
   cookie@0.7.1: {}
 
+  cookie@1.0.2: {}
+
   cookies@0.8.0:
     dependencies:
       depd: 2.0.0
@@ -29001,6 +29020,14 @@ snapshots:
       '@remix-run/router': 1.16.1
       react: 18.3.1
 
+  react-router@7.9.2(react-dom@18.3.1(react@18.3.1))(react@18.3.1):
+    dependencies:
+      cookie: 1.0.2
+      react: 18.3.1
+      set-cookie-parser: 2.7.1
+    optionalDependencies:
+      react-dom: 18.3.1(react@18.3.1)
+
   react-select-event@5.5.1:
     dependencies:
       '@testing-library/dom': 10.4.1
@@ -29670,6 +29697,8 @@ snapshots:
       - debug
 
   set-blocking@2.0.0: {}
+
+  set-cookie-parser@2.7.1: {}
 
   set-function-length@1.2.2:
     dependencies:
