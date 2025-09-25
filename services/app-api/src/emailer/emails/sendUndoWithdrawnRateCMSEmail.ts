@@ -4,8 +4,10 @@ import type {
     StateAnalystsEmails,
 } from '../emailer'
 import type { ProgramType, RateType } from '../../domain-models'
-import type { undoWithdrawnRateEtaData } from './sendUndoWithdrawnRateStateEmail'
-import { validateAndParseUnwithdrawnRate } from './sendUndoWithdrawnRateStateEmail'
+import {
+    validateAndParseUnwithdrawnRate,
+    type undoWithdrawnRateEtaData,
+} from './sendUndoWithdrawnRateStateEmail'
 import { pruneDuplicateEmails } from '../formatters'
 import { formatCalendarDate } from '@mc-review/dates'
 import { renderTemplate, stripHTMLFromTemplate } from '../templateHelpers'

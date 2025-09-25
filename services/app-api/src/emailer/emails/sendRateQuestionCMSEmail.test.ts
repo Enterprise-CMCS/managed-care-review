@@ -1,9 +1,9 @@
 import {
     mockRateQuestionAndResponses,
     testEmailConfig,
+    mockRate,
 } from '../../testHelpers/emailerHelpers'
 import { sendRateQuestionCMSEmail } from './sendRateQuestionCMSEmail'
-import { mockRate } from '../../testHelpers/emailerHelpers'
 import { getTestStateAnalystsEmails } from '../../testHelpers/parameterStoreHelpers'
 import type { DivisionType, RateQuestionType } from '../../domain-models'
 
