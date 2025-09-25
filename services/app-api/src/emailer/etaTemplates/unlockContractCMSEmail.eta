@@ -1,5 +1,5 @@
 Submission <%= it.packageName %> was unlocked<br />
 <br />
-<%~ includeFile('./unlockPackageSummary', it) %>
+<%~ includeFile('./unlockContractSummary', it) %>
 <br />
 You will receive another notification when the state resubmits.
