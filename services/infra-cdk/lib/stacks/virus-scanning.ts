@@ -44,11 +44,25 @@ export class VirusScanning extends BaseStack {
                 assumedBy: new iam.ServicePrincipal(
                     'malware-protection.guardduty.amazonaws.com'
                 ),
-                managedPolicies: [
-                    iam.ManagedPolicy.fromAwsManagedPolicyName(
-                        'AmazonGuardDutyMalwareProtectionServiceRole'
-                    ),
-                ],
+                inlinePolicies: {
+                    MalwareProtectionPolicy: new iam.PolicyDocument({
+                        statements: [
+                            new iam.PolicyStatement({
+                                effect: iam.Effect.ALLOW,
+                                actions: [
+                                    's3:GetObject',
+                                    's3:GetObjectVersion',
+                                    's3:PutObjectTagging',
+                                    's3:PutObjectVersionTagging',
+                                ],
+                                resources: [
+                                    `arn:aws:s3:::uploads-${this.stage}-uploads-${this.account}/*`,
+                                    `arn:aws:s3:::uploads-${this.stage}-qa-${this.account}/*`,
+                                ],
+                            }),
+                        ],
+                    }),
+                },
             }
         )
 
