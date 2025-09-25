@@ -7,6 +7,7 @@ import * as guardduty from 'aws-cdk-lib/aws-guardduty'
 import * as events from 'aws-cdk-lib/aws-events'
 import * as targets from 'aws-cdk-lib/aws-events-targets'
 import * as iam from 'aws-cdk-lib/aws-iam'
+import * as s3 from 'aws-cdk-lib/aws-s3'
 import * as path from 'path'
 import { CfnOutput } from 'aws-cdk-lib'
 
@@ -30,13 +31,26 @@ export class VirusScanning extends BaseStack {
         // All environments use the same detector, but create their own protection plans
         const detectorId = this.getExistingDetectorId()
 
+        // Import the uploads buckets from the uploads stack
+        const uploadsBucket = s3.Bucket.fromBucketName(
+            this,
+            'ImportedUploadsBucket',
+            `uploads-${this.stage}-uploads-${this.account}`
+        )
+
+        const qaBucket = s3.Bucket.fromBucketName(
+            this,
+            'ImportedQaBucket',
+            `uploads-${this.stage}-qa-${this.account}`
+        )
+
         // We don't create the detector - it's managed externally
         // We just reference it by ID for malware protection plans
         const detector = {
             attrId: detectorId,
         } as guardduty.CfnDetector
 
-        // Create IAM role for malware protection
+        // Create IAM role for malware protection (using working pattern)
         const malwareProtectionRole = new iam.Role(
             this,
             'MalwareProtectionRole',
@@ -44,43 +58,51 @@ export class VirusScanning extends BaseStack {
                 assumedBy: new iam.ServicePrincipal(
                     'malware-protection.guardduty.amazonaws.com'
                 ),
-                managedPolicies: [
-                    iam.ManagedPolicy.fromAwsManagedPolicyName(
-                        'aws-service-role/AmazonGuardDutyMalwareProtectionServiceRolePolicy'
-                    ),
-                ],
                 inlinePolicies: {
-                    S3MalwareProtectionPolicy: new iam.PolicyDocument({
+                    S3ScanPolicy: new iam.PolicyDocument({
                         statements: [
-                            // S3 object permissions for malware scanning
+                            // Read permissions for scanning (from working pattern)
                             new iam.PolicyStatement({
                                 effect: iam.Effect.ALLOW,
                                 actions: [
                                     's3:GetObject',
-                                    's3:GetObjectTagging',
                                     's3:GetObjectVersion',
-                                    's3:PutObjectTagging',
-                                    's3:PutObjectVersionTagging',
+                                    's3:GetObjectAttributes',
+                                    's3:ListBucket',
                                 ],
                                 resources: [
-                                    `arn:aws:s3:::uploads-${this.stage}-uploads-${this.account}/*`,
-                                    `arn:aws:s3:::uploads-${this.stage}-qa-${this.account}/*`,
+                                    uploadsBucket.bucketArn,
+                                    qaBucket.bucketArn,
+                                    `${uploadsBucket.bucketArn}/*`,
+                                    `${qaBucket.bucketArn}/*`,
                                 ],
                             }),
-                            // S3 bucket permissions for ownership validation
+                            // Tagging permissions for scan results (from working pattern)
                             new iam.PolicyStatement({
                                 effect: iam.Effect.ALLOW,
                                 actions: [
-                                    's3:GetBucketLocation',
-                                    's3:GetBucketVersioning',
-                                    's3:ListBucket',
-                                    's3:GetBucketNotification',
-                                    's3:GetBucketTagging',
+                                    's3:PutObjectTagging',
+                                    's3:PutObjectVersionTagging',
+                                    's3:GetObjectTagging',
+                                    's3:GetObjectVersionTagging',
                                 ],
                                 resources: [
-                                    `arn:aws:s3:::uploads-${this.stage}-uploads-${this.account}`,
-                                    `arn:aws:s3:::uploads-${this.stage}-qa-${this.account}`,
+                                    `${uploadsBucket.bucketArn}/*`,
+                                    `${qaBucket.bucketArn}/*`,
                                 ],
+                            }),
+                            // KMS permissions for encrypted buckets (from working pattern)
+                            new iam.PolicyStatement({
+                                effect: iam.Effect.ALLOW,
+                                actions: ['kms:Decrypt', 'kms:DescribeKey'],
+                                resources: ['*'],
+                                conditions: {
+                                    StringEquals: {
+                                        'kms:ViaService': [
+                                            `s3.${this.region}.amazonaws.com`,
+                                        ],
+                                    },
+                                },
                             }),
                         ],
                     }),
@@ -88,12 +110,28 @@ export class VirusScanning extends BaseStack {
             }
         )
 
-        // Create malware protection plan for uploads bucket
+        // Create malware protection plan for uploads bucket (using working pattern)
         new guardduty.CfnMalwareProtectionPlan(this, 'UploadsProtection', {
             role: malwareProtectionRole.roleArn,
             protectedResource: {
                 s3Bucket: {
-                    bucketName: `uploads-${this.stage}-uploads-${this.account}`,
+                    bucketName: uploadsBucket.bucketName,
+                    objectPrefixes: ['*'],
+                },
+            },
+            actions: {
+                tagging: {
+                    status: 'ENABLED',
+                },
+            },
+        })
+
+        // Create malware protection plan for QA bucket
+        new guardduty.CfnMalwareProtectionPlan(this, 'QaProtection', {
+            role: malwareProtectionRole.roleArn,
+            protectedResource: {
+                s3Bucket: {
+                    bucketName: qaBucket.bucketName,
                     objectPrefixes: ['*'],
                 },
             },
