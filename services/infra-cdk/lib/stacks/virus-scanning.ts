@@ -183,8 +183,70 @@ export class VirusScanning extends BaseStack {
             'Allow Lambda functions to connect to ClamAV daemon'
         )
 
-        // Load bootstrap script from external file
-        const userDataScript = this.createClamavUserDataScript()
+        // Create inline user data script
+        const userDataScript = UserData.forLinux()
+        userDataScript.addCommands(
+            '#!/bin/bash',
+            'set -e',
+            'exec > >(tee /var/log/clamav-bootstrap.log)',
+            'exec 2>&1',
+            '',
+            'echo "=== ClamAV Bootstrap Script Starting ==="',
+            'echo "Timestamp: $(date)"',
+            '',
+            'echo "=== Updating package list ==="',
+            'apt-get update',
+            '',
+            'echo "=== Installing ClamAV packages ==="',
+            'apt-get install -y clamav clamav-daemon',
+            '',
+            '# Setup SSH keys',
+            "cat > /home/ubuntu/.ssh/authorized_keys << 'EOF'",
+            'ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAACAQDaR+UVq61k14jcuSFfoCfTxvB1IyhU3IQFp4OjpiN4fYMBjE9USeNoHon2ux8VTvL0nRc7Zn4g9HemxiDjdawUxh2oJ8GOTsiFTEWic2nf90SnbjBMn1OZELvMiZzoYDjQFvEp+AgETBA5nhrbHyxWQWIBa7A+XqiqnX0lcZ1p+x8sLIl4F0e583lJeuPQPVkpCicf2GDdtG1TnPxltqJgGaeVSONivpxeVofJwG4DCXy1b1xSo1NG0gzy9BWFJwOWKmZAk6nYq+rcxZg+TgU1x5WJ6z8/CS0PMSoTMRRIejm734PSmkGCU+WkR139Dl8o3DvQh/VQD71fxw30aONG98PSBJEUd5IouuiPPNYGP+fuDWgCBkaoA6JKlSVtbneNt1Qkm10FFHqExqzGWaSDeUCh6da3WG1BW4KZcC3MQ8CTEG47LFqUG5TvhklhiAAJH7cGF9W9SU1Beq2A6Wx1R/yGvgH/7U6X0/QfJi1ljY32pPzP2S+gzzOVGJgrMz3qRRgNvcY5k8EMbIuTK2yanFFHuVaWQq/zZW1T376oyHMfWdBB9WAtIKwpCgA5kYUu0XCo3XM0fWibZFIa/cEBNSKH1gEFKCBXolsc2+c4iZtdbG4YCHLgzOOqklERMEeK5dXq9Rz7UjoE91UVIyO2/d+mXmiVDRgtUsiQ34Sxyw== mojo.talantikite@gmail.com',
+            'ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAACAQDRrQOylmfnH6ptruU7nUzMvwkV6Q2WCFLJlGxbVTKlFiEepsSb4y/P3ZUL+regv8GZiZkWc+x1hiIGDQxF68nTSHv0G9otHeG44nrrQdeJ1rghy+eptyxIcAenUtP3eRhSR3c2/8IP7XPJutrFbQOADlQqwimKYrk1fdcONWt1TB1uPqk/i9mEdAcFn2VVQnWYbJ/mLwd0EPFqqnPFFnUzayaiYQnEZU9xLSSDYCurPEWuYDipJgyH0xsMloSwpV8U7m/v/4cPHU9E4NpnNY4Ke5DNljeqmZxQWbwZMGTWSYt7um3Zn5entr9iWJf0uu5nC03YPl3mgMxeu5wuui2HKiJBQCL1Yinz7ErRm7vR/Q11F8q3vyxey3tjNaMV7wMibtuQZh2ZdCGMlisoM9G44nS/EwDuuvt6PT87fgr2ur2SucOw52NokC6eO49DqXQXB5AVFnFoUMXTEQxz4Jq4uoEP9fz7cJVHrY5LVmtwy1yxoLujldhlRTg+G6bKOnY8embgFMJ+lBI8/R1N0f2r4EkTp3GwMgsDkZs3H/djaQMEdK7daKGYltwnXPiOR1Q0PNnnGMOctE9hSojiV1FX80aycYFEjmkOZzqUHJHgm6OPzYRC+CB5/OEBT+1MPjPcOXmMGa6JrNyc/LJeA5GOlj9JzRO3fOHnp4DlA4ZHEw== maolin@Maos-MacBook-Pro.local',
+            'ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABgQDAk11E+dW51OKueXqW5fQmqAzjeJJVwob8QtiEh5JWAb7RRl7R67pRsoYRGQUp01D6PviEWlGU0gVoBENqhrM18sQCAH9oXoAn1hjwek8tXwh8oUJrGgUJOD/ZaHsRr5oLWUdSB7uYHw17B8VdcuK2EhEQx3dV6uS8ts1Kh+lqb3gdaS5BSQffKszY18TT9Mx9UgP2dwfEqr9cf40K5pm8l3M4G5grJK4taKKG8DopjBjQTMCOK44PBC77BkoEbzJPj+hQ1aZSlPsqcGcGFnzJyhwJkR2WeB5MyIN0eu2y4JKQ4vJWPINR4Jq7CTHtJsZUa39LNl5dJY1MuOFD1v/G4Zj+WsnLMAEpGaSUQ3ZoBC2aya2jfO972e41jNci4NfOtvNiycyJSAg6e6rRu7mfaLag2OUc7ZdAwWcamrYxnWWQjFGaVIzbgn4GHifJ0gtfsKYFHz/8UQctW44G5S3U8Du9UHKA//PaF8MWtLY9fNI6RnF2VlAuT2FiyoqbF5U= meghanmurphy@meghans-mbp.lan',
+            'ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAACAQCpKV/Qu1f9lv1OP0kiCvh56hRpGLOU6gSwPgvzglyak3mR8ec4quAcctaCgfOl/5dm7a3dhkY6WSCO09lSpixsNGiDEuGuESHis8GGOaepjq3jgrD7CkRvdSU8725XPNVwC9nZiUqgYbl8lCoCofCaTovKG1tiXTAMl6+RhRbv6AaJKOh+EYabmS0hTT/nv1QJ1P9aoMfMpx+FBFMDiCktjdsuPq5wLSVe9pxbzWI9PCTN55sRaBjbRcFdUdy+pT4B/lAKxJ5z7Oxq6QBI+SvvdnfPmkrCOg+9pEftuyLT+fURnsCIcs2DQJz2Pjkdv8xxwTNWB1+qfWC+LyJ934jcykJGtV/r4GZ2VzXGz0t7z7PgbkIdFHL3dg/JYR7cQdiCFwIa0Ml7bL5rKuQjNWXOBmCHME2lBol8jT1U1plYTjbz4kA6iCrfzgvQ5/MpkOfxRhLkSnYMCmYMOiRNskAW+FdZO5RD/0IFv0s0RUoJpD35Qt6TxBBP6TM0qPhuUlmTPQpWWTSwc/lSzVsEjSrAc/CxevC57A12JAsUcPFVljjAP+hjuGaHq41p2CrFyLqdIsP0td0uXk9CFUe+IuFGFP9OfhN/Kf/HOXWlE0YD1ZmV0k5sg1cEnyC0fusT9Tz0y/8MjzrJVjZBEvEEjlhk/aeo4Y6XLhVmGlMSXoYkgw== pearlroos@Pearls-MacBook-Pro.local',
+            'EOF',
+            'chown ubuntu:ubuntu /home/ubuntu/.ssh/authorized_keys',
+            'chmod 600 /home/ubuntu/.ssh/authorized_keys',
+            '',
+            'echo "=== Configuring ClamAV ==="',
+            '# Write to the clamd.conf',
+            'echo "TCPSocket 3310" >> /etc/clamav/clamd.conf',
+            'echo "TCPAddr 0.0.0.0" >> /etc/clamav/clamd.conf',
+            "sed -i 's/^StreamMaxLength .*/StreamMaxLength 50M/' /etc/clamav/clamd.conf",
+            '',
+            '# Create systemd override directory',
+            'mkdir -p /etc/systemd/system/clamav-daemon.service.d',
+            '',
+            '# Create systemd service override',
+            'cat <<EOF > /etc/systemd/system/clamav-daemon.service.d/override.conf',
+            '[Unit]',
+            'After=network.target',
+            'StartLimitIntervalSec=1h',
+            'StartLimitBurst=5',
+            'EOF',
+            '',
+            '# Fix the systemctl setting',
+            "sed -i 's/^StandardOutput=syslog/StandardOutput=journal/' /lib/systemd/system/clamav-daemon.service",
+            '',
+            'echo "=== Reloading systemd ==="',
+            'systemctl daemon-reload',
+            '',
+            'echo "=== Starting ClamAV services ==="',
+            'systemctl enable clamav-daemon',
+            'systemctl enable clamav-freshclam',
+            'systemctl start clamav-freshclam',
+            'sleep 10',
+            'systemctl start clamav-daemon',
+            '',
+            'echo "=== Checking service status ==="',
+            'systemctl status clamav-daemon',
+            'systemctl status clamav-freshclam',
+            '',
+            'echo "=== Bootstrap script completed ==="',
+            'echo "Timestamp: $(date)"'
+        )
 
         // Create the IAM role for the EC2 instance
         const instanceRole = this.createClamavInstanceRole()
