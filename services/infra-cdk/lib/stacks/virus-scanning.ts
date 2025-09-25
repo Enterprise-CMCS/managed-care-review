@@ -47,17 +47,35 @@ export class VirusScanning extends BaseStack {
                 inlinePolicies: {
                     MalwareProtectionPolicy: new iam.PolicyDocument({
                         statements: [
+                            // S3 object permissions
                             new iam.PolicyStatement({
                                 effect: iam.Effect.ALLOW,
                                 actions: [
                                     's3:GetObject',
+                                    's3:GetObjectTagging',
                                     's3:GetObjectVersion',
+                                    's3:PutObject',
+                                    's3:PutObjectAcl',
                                     's3:PutObjectTagging',
                                     's3:PutObjectVersionTagging',
+                                    's3:DeleteObject',
                                 ],
                                 resources: [
                                     `arn:aws:s3:::uploads-${this.stage}-uploads-${this.account}/*`,
                                     `arn:aws:s3:::uploads-${this.stage}-qa-${this.account}/*`,
+                                ],
+                            }),
+                            // S3 bucket permissions for ownership validation
+                            new iam.PolicyStatement({
+                                effect: iam.Effect.ALLOW,
+                                actions: [
+                                    's3:GetBucketLocation',
+                                    's3:GetBucketVersioning',
+                                    's3:ListBucket',
+                                ],
+                                resources: [
+                                    `arn:aws:s3:::uploads-${this.stage}-uploads-${this.account}`,
+                                    `arn:aws:s3:::uploads-${this.stage}-qa-${this.account}`,
                                 ],
                             }),
                         ],
