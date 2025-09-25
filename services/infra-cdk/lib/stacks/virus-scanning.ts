@@ -44,21 +44,23 @@ export class VirusScanning extends BaseStack {
                 assumedBy: new iam.ServicePrincipal(
                     'malware-protection.guardduty.amazonaws.com'
                 ),
+                managedPolicies: [
+                    iam.ManagedPolicy.fromAwsManagedPolicyName(
+                        'aws-service-role/AmazonGuardDutyMalwareProtectionServiceRolePolicy'
+                    ),
+                ],
                 inlinePolicies: {
-                    MalwareProtectionPolicy: new iam.PolicyDocument({
+                    S3MalwareProtectionPolicy: new iam.PolicyDocument({
                         statements: [
-                            // S3 object permissions
+                            // S3 object permissions for malware scanning
                             new iam.PolicyStatement({
                                 effect: iam.Effect.ALLOW,
                                 actions: [
                                     's3:GetObject',
                                     's3:GetObjectTagging',
                                     's3:GetObjectVersion',
-                                    's3:PutObject',
-                                    's3:PutObjectAcl',
                                     's3:PutObjectTagging',
                                     's3:PutObjectVersionTagging',
-                                    's3:DeleteObject',
                                 ],
                                 resources: [
                                     `arn:aws:s3:::uploads-${this.stage}-uploads-${this.account}/*`,
@@ -72,6 +74,8 @@ export class VirusScanning extends BaseStack {
                                     's3:GetBucketLocation',
                                     's3:GetBucketVersioning',
                                     's3:ListBucket',
+                                    's3:GetBucketNotification',
+                                    's3:GetBucketTagging',
                                 ],
                                 resources: [
                                     `arn:aws:s3:::uploads-${this.stage}-uploads-${this.account}`,
