@@ -26,16 +26,15 @@ export class VirusScanning extends BaseStack {
             description: 'GuardDuty malware protection for S3 uploads',
         })
 
-        // Enable GuardDuty detector with S3 protection
-        const detector = new guardduty.CfnDetector(this, 'Detector', {
-            enable: true,
-            features: [
-                {
-                    name: 'S3_DATA_EVENTS',
-                    status: 'ENABLED',
-                },
-            ],
-        })
+        // Import existing GuardDuty detector (managed by corporate IT)
+        // All environments use the same detector, but create their own protection plans
+        const detectorId = this.getExistingDetectorId()
+
+        // We don't create the detector - it's managed externally
+        // We just reference it by ID for malware protection plans
+        const detector = {
+            attrId: detectorId,
+        } as guardduty.CfnDetector
 
         // Create IAM role for malware protection
         const malwareProtectionRole = new iam.Role(
@@ -116,15 +115,43 @@ export class VirusScanning extends BaseStack {
             targets: [new targets.LambdaFunction(scanProcessor)],
         })
 
-        // Export GuardDuty detector ID for reference
+        // Export GuardDuty detector ID for reference (imported from existing detector)
         new CfnOutput(this, 'GuardDutyDetectorId', {
             value: detector.attrId,
             exportName: `${this.stackName}-DetectorId`,
+            description: 'GuardDuty detector ID (managed by corporate IT)',
         })
 
         new CfnOutput(this, 'ScanProcessorFunctionName', {
             value: scanProcessor.functionName,
             exportName: `${this.stackName}-ScanProcessorFunctionName`,
         })
+    }
+
+    /**
+     * Get the existing GuardDuty detector ID (managed by corporate IT)
+     * Can be overridden with context or environment variable
+     */
+    private getExistingDetectorId(): string {
+        // Try context first (for flexibility in deployments)
+        const contextDetectorId = this.node.tryGetContext(
+            'guardduty-detector-id'
+        )
+        if (contextDetectorId) {
+            return contextDetectorId
+        }
+
+        // Try environment variable
+        const envDetectorId = process.env.GUARDDUTY_DETECTOR_ID
+        if (envDetectorId) {
+            return envDetectorId
+        }
+
+        // For now, we need to look up the detector ID
+        // In a real deployment, you'd get this from corporate IT or AWS CLI
+        // aws guardduty list-detectors --region us-east-1 --query 'DetectorIds[0]' --output text
+        throw new Error(
+            'GuardDuty detector ID not found. Please provide via context "--context guardduty-detector-id=<id>" or environment variable GUARDDUTY_DETECTOR_ID'
+        )
     }
 }
