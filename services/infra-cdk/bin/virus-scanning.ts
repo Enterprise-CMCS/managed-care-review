@@ -66,7 +66,7 @@ async function main(): Promise<void> {
         app.synth()
 
         console.info(
-            `CDK synthesis completed for VirusScanning stack: ${appConfig.stage}`
+            `CDK synthesis completed for VirusScanning (GuardDuty) stack: ${appConfig.stage}`
         )
     } catch (error) {
         console.error('Virus Scanning stack initialization failed:', error)

@@ -271,28 +271,8 @@ jobs:
           name: lambda-layers-postgres-tools
           path: ./services/postgres/lambda-layers-postgres-tools
 
-  build-clamav-layer:
-    name: build - clamav layer
-    runs-on: ubuntu-24.04
-    steps:
-      - name: Check out repository
-        uses: actions/checkout@v4
-
-      - uses: actions/setup-node@v4
-        with:
-          node-version-file: '.nvmrc'
-
-      - name: Prepare ClamAV layer
-        working-directory: services/uploads/src/avLayer
-        run: ./dockerbuild.sh
-
-      - uses: actions/upload-artifact@v4
-        with:
-          name: lambda-layers-clamav
-          path: ./services/uploads/src/avLayer/build/lambda_layer.zip
-
   deploy-cdk-infrastructure:
-    needs: [begin-deployment, deploy-github-oidc, build-clamav-layer]
+    needs: [begin-deployment, deploy-github-oidc]
     name: deploy - CDK infrastructure stacks
     runs-on: ubuntu-24.04
     environment: dev
@@ -317,20 +297,6 @@ jobs:
           account-id: ${{ secrets.DEV_AWS_ACCOUNT_ID }}
           stage-name: ${{ needs.begin-deployment.outputs.stage-name }}
           use-cdk-role: 'true'
-
-      - name: Download ClamAV layer
-        uses: actions/download-artifact@v4
-        with:
-          name: lambda-layers-clamav
-          path: ./services/infra-cdk/lambda-layers-clamav
-
-      - name: Extract ClamAV layer
-        working-directory: ./services/infra-cdk/lambda-layers-clamav
-        run: |
-          echo "=== Extracting ClamAV layer ==="
-          unzip lambda_layer.zip
-          rm lambda_layer.zip
-          ls -la
 
       - name: Deploy Network stack
         working-directory: services/infra-cdk
@@ -503,7 +469,13 @@ jobs:
 
   deploy-cdk-app:
     needs:
-      [begin-deployment, deploy-cdk-infrastructure, build-lambda-layers, web-unit-tests, api-unit-tests]
+      [
+        begin-deployment,
+        deploy-cdk-infrastructure,
+        build-lambda-layers,
+        web-unit-tests,
+        api-unit-tests,
+      ]
     if: |
       always() &&
       needs.deploy-cdk-infrastructure.result == 'success' &&
@@ -928,12 +900,3 @@ jobs:
         uses: ./.github/actions/clean_up_deployments
         with:
           environment: review-apps-cdk
-
-  # TODO: Add Cypress tests once endpoints are properly extracted
-  # cypress:
-  #   name: cypress-cdk-run
-  #   timeout-minutes: 25
-  #   needs: [begin-deployment, deploy-cdk-app]
-  #   environment: dev
-  #   if: always() && needs.deploy-cdk-app.result == 'success'
-  #   # ... (similar to original cypress job but using CDK outputs)
