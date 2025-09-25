@@ -1,10 +1,6 @@
 import type { EmailConfiguration, EmailData, Emailer } from '../emailer'
 import { emailer } from '../emailer'
-import type {
-    LockedHealthPlanFormDataType,
-    ProgramArgType,
-    UnlockedHealthPlanFormDataType,
-} from '@mc-review/hpp'
+import type { ProgramArgType } from '@mc-review/hpp'
 import type {
     ContractRevisionType,
     ContractType,
@@ -370,6 +366,7 @@ const mockUnlockedContract = (
         : [mockRate()]
 
     return {
+        ...mockContract(),
         id: 'test-contract-123',
         createdAt: new Date('01/01/2021'),
         updatedAt: new Date('02/01/2021'),
@@ -378,12 +375,8 @@ const mockUnlockedContract = (
         reviewStatus: 'UNDER_REVIEW',
         stateCode: 'MN',
         stateNumber: 4,
-
         draftRevision: mockContractRev(),
         draftRates,
-
-        revisions: [],
-        packageSubmissions: [],
         ...contractPartial,
     }
 }
@@ -571,359 +564,6 @@ const mockContract = (
     }
 }
 
-const mockContractAndRatesFormData = (
-    submissionPartial?: Partial<LockedHealthPlanFormDataType>
-): LockedHealthPlanFormDataType => {
-    return {
-        createdAt: new Date('01/01/2021'),
-        updatedAt: new Date('02/01/2021'),
-        status: 'SUBMITTED',
-        stateNumber: 3,
-        id: 'test-abc-125',
-        stateCode: 'MN',
-        programIDs: ['abbdf9b0-c49e-4c4c-bb6f-040cb7b51cce'],
-        submissionType: 'CONTRACT_AND_RATES',
-        riskBasedContract: false,
-        submissionDescription: 'A submitted submission',
-        submittedAt: new Date('02/01/2021'),
-        documents: [
-            {
-                s3URL: 's3://bucketname/key/test1',
-                name: 'foo',
-                sha256: 'fakesha',
-            },
-        ],
-        contractType: 'BASE',
-        contractExecutionStatus: 'EXECUTED',
-        contractDocuments: [
-            {
-                s3URL: 's3://bucketname/key/test1',
-                name: 'foo',
-                sha256: 'fakesha',
-            },
-        ],
-        contractDateStart: new Date('01/01/2021'),
-        contractDateEnd: new Date('01/01/2022'),
-        managedCareEntities: ['PCCM'],
-        federalAuthorities: ['VOLUNTARY', 'BENCHMARK'],
-        rateInfos: [
-            {
-                rateType: 'NEW',
-                rateDocuments: [
-                    {
-                        s3URL: 's3://bucketname/key/test1',
-                        name: 'foo',
-                        sha256: 'fakesha',
-                    },
-                ],
-                supportingDocuments: [],
-                rateDateCertified: new Date('01/02/2021'),
-                rateProgramIDs: ['3fd36500-bf2c-47bc-80e8-e7aa417184c5'],
-                rateAmendmentInfo: undefined,
-                rateDateStart: new Date('01/01/2021'),
-                rateDateEnd: new Date('01/01/2022'),
-                actuaryContacts: [
-                    {
-                        actuarialFirm: 'DELOITTE',
-                        name: 'Actuary Contact 1',
-                        titleRole: 'Test Actuary Contact 1',
-                        email: 'actuarycontact1@example.com',
-                    },
-                ],
-                actuaryCommunicationPreference: 'OACT_TO_ACTUARY',
-                packagesWithSharedRateCerts: [],
-            },
-        ],
-        stateContacts: [
-            {
-                name: 'Test Person',
-                titleRole: 'A Role',
-                email: 'test+state+contact@example.com',
-            },
-        ],
-        addtlActuaryContacts: [
-            {
-                actuarialFirm: 'DELOITTE',
-                name: 'Additional Contact 1',
-                titleRole: 'Test Actuary Contact 1',
-                email: 'actuarycontact1@example.com',
-            },
-        ],
-        addtlActuaryCommunicationPreference: 'OACT_TO_ACTUARY',
-        ...submissionPartial,
-        statutoryRegulatoryAttestation: false,
-        statutoryRegulatoryAttestationDescription: 'No compliance',
-    }
-}
-
-const mockUnlockedContractAndRatesFormData = (
-    submissionPartial?: Partial<UnlockedHealthPlanFormDataType>
-): UnlockedHealthPlanFormDataType => {
-    return {
-        createdAt: new Date('01/01/2021'),
-        updatedAt: new Date('02/01/2021'),
-        status: 'DRAFT',
-        stateNumber: 3,
-        id: 'test-abc-125',
-        stateCode: 'MN',
-        programIDs: ['abbdf9b0-c49e-4c4c-bb6f-040cb7b51cce'],
-        submissionType: 'CONTRACT_AND_RATES',
-        riskBasedContract: false,
-        submissionDescription: 'A submitted submission',
-        documents: [
-            {
-                s3URL: 's3://bucketname/key/test1',
-                name: 'foo',
-                sha256: 'fakesha',
-            },
-        ],
-        contractType: 'BASE',
-        contractExecutionStatus: 'EXECUTED',
-        contractDocuments: [
-            {
-                s3URL: 's3://bucketname/key/test1',
-                name: 'foo',
-                sha256: 'fakesha',
-            },
-        ],
-        contractDateStart: new Date('01/01/2021'),
-        contractDateEnd: new Date('01/01/2022'),
-        managedCareEntities: ['PCCM'],
-        federalAuthorities: ['VOLUNTARY', 'BENCHMARK'],
-        rateInfos: [
-            {
-                rateType: 'NEW',
-                rateDocuments: [
-                    {
-                        s3URL: 's3://bucketname/key/test1',
-                        name: 'foo',
-                        sha256: 'fakesha',
-                    },
-                ],
-                supportingDocuments: [],
-                rateDateStart: new Date('01/01/2021'),
-                rateDateEnd: new Date('01/01/2022'),
-                rateDateCertified: new Date('01/02/2021'),
-                rateProgramIDs: ['3fd36500-bf2c-47bc-80e8-e7aa417184c5'],
-                rateAmendmentInfo: undefined,
-                actuaryContacts: [
-                    {
-                        actuarialFirm: 'DELOITTE',
-                        name: 'Actuary Contact 1',
-                        titleRole: 'Test Actuary Contact 1',
-                        email: 'actuarycontact1@example.com',
-                    },
-                ],
-                actuaryCommunicationPreference: 'OACT_TO_ACTUARY',
-                packagesWithSharedRateCerts: [],
-            },
-        ],
-        stateContacts: [
-            {
-                name: 'Test Person',
-                titleRole: 'A Role',
-                email: 'test+state+contact@example.com',
-            },
-        ],
-        addtlActuaryContacts: [
-            {
-                actuarialFirm: 'DELOITTE',
-                name: 'Additional Contact 1',
-                titleRole: 'Test Actuary Contact 1',
-                email: 'actuarycontact1@example.com',
-            },
-        ],
-        addtlActuaryCommunicationPreference: 'OACT_TO_ACTUARY',
-        statutoryRegulatoryAttestation: false,
-        statutoryRegulatoryAttestationDescription: 'No compliance',
-        ...submissionPartial,
-    }
-}
-
-const mockUnlockedContractOnlyFormData = (
-    submissionPartial?: Partial<UnlockedHealthPlanFormDataType>
-): UnlockedHealthPlanFormDataType => {
-    return {
-        createdAt: new Date('01/01/2021'),
-        updatedAt: new Date('02/01/2021'),
-        status: 'DRAFT',
-        stateNumber: 3,
-        id: 'test-abc-125',
-        stateCode: 'MN',
-        programIDs: ['abbdf9b0-c49e-4c4c-bb6f-040cb7b51cce'],
-        submissionType: 'CONTRACT_ONLY',
-        riskBasedContract: false,
-        submissionDescription: 'A submitted submission',
-        documents: [
-            {
-                s3URL: 's3://bucketname/key/test1',
-                name: 'foo',
-                sha256: 'fakesha',
-            },
-        ],
-        contractType: 'BASE',
-        contractExecutionStatus: 'EXECUTED',
-        contractDocuments: [
-            {
-                s3URL: 's3://bucketname/key/test1',
-                name: 'foo',
-                sha256: 'fakesha',
-            },
-        ],
-        contractDateStart: new Date('01/01/2021'),
-        contractDateEnd: new Date('01/01/2022'),
-        managedCareEntities: ['PCCM'],
-        federalAuthorities: ['VOLUNTARY', 'BENCHMARK'],
-        rateInfos: [],
-        stateContacts: [
-            {
-                name: 'Test Person',
-                titleRole: 'A Role',
-                email: 'test+state+contact@example.com',
-            },
-        ],
-        addtlActuaryContacts: [],
-        statutoryRegulatoryAttestation: false,
-        statutoryRegulatoryAttestationDescription: 'No compliance',
-        ...submissionPartial,
-    }
-}
-
-const mockContractOnlyFormData = (
-    submissionPartial?: Partial<LockedHealthPlanFormDataType>
-): LockedHealthPlanFormDataType => {
-    return {
-        createdAt: new Date('01/01/2021'),
-        updatedAt: new Date('02/01/2021'),
-        status: 'SUBMITTED',
-        stateNumber: 3,
-        id: 'test-abc-125',
-        stateCode: 'MN',
-        programIDs: ['abbdf9b0-c49e-4c4c-bb6f-040cb7b51cce'],
-        submissionType: 'CONTRACT_ONLY',
-        riskBasedContract: false,
-        submissionDescription: 'A submitted submission',
-        submittedAt: new Date('02/01/2021'),
-        documents: [
-            {
-                s3URL: 's3://bucketname/key/test1',
-                name: 'foo',
-                sha256: 'fakesha',
-            },
-        ],
-        contractType: 'BASE',
-        contractExecutionStatus: 'EXECUTED',
-        contractDocuments: [
-            {
-                s3URL: 's3://bucketname/key/test1',
-                name: 'foo',
-                sha256: 'fakesha',
-            },
-        ],
-        contractDateStart: new Date('01/01/2021'),
-        contractDateEnd: new Date('01/01/2022'),
-        managedCareEntities: ['PCCM'],
-        federalAuthorities: ['VOLUNTARY', 'BENCHMARK'],
-        rateInfos: [],
-        stateContacts: [
-            {
-                name: 'Test Person',
-                titleRole: 'A Role',
-                email: 'test+state+contact@example.com',
-            },
-        ],
-        addtlActuaryContacts: [],
-        statutoryRegulatoryAttestation: false,
-        statutoryRegulatoryAttestationDescription: 'No compliance',
-        ...submissionPartial,
-    }
-}
-
-const mockContractAmendmentFormData = (
-    submissionPartial?: Partial<LockedHealthPlanFormDataType>
-): LockedHealthPlanFormDataType => {
-    return {
-        createdAt: new Date('01/01/2021'),
-        updatedAt: new Date('02/01/2021'),
-        status: 'SUBMITTED',
-        stateNumber: 3,
-        id: 'test-abc-125',
-        stateCode: 'MN',
-        programIDs: ['abbdf9b0-c49e-4c4c-bb6f-040cb7b51cce'],
-        riskBasedContract: false,
-        submissionType: 'CONTRACT_AND_RATES',
-        submissionDescription: 'A submitted submission',
-        submittedAt: new Date('02/01/2021'),
-        documents: [
-            {
-                s3URL: 's3://bucketname/key/test1',
-                name: 'foo',
-                sha256: 'fakesha',
-            },
-        ],
-        contractType: 'AMENDMENT',
-        contractExecutionStatus: 'UNEXECUTED',
-        contractDocuments: [
-            {
-                s3URL: 's3://bucketname/key/test1',
-                name: 'foo',
-                sha256: 'fakesha',
-            },
-        ],
-        contractDateStart: new Date('01/01/2021'),
-        contractDateEnd: new Date('01/01/2022'),
-        managedCareEntities: ['PCCM'],
-        federalAuthorities: ['VOLUNTARY', 'BENCHMARK'],
-        rateInfos: [
-            {
-                rateType: 'NEW',
-                rateDocuments: [
-                    {
-                        s3URL: 's3://bucketname/key/test1',
-                        name: 'foo',
-                        sha256: 'fakesha',
-                    },
-                ],
-                supportingDocuments: [],
-                rateDateStart: new Date('01/01/2021'),
-                rateDateEnd: new Date('01/01/2022'),
-                rateDateCertified: new Date('01/02/2021'),
-                rateAmendmentInfo: undefined,
-                rateProgramIDs: ['3fd36500-bf2c-47bc-80e8-e7aa417184c5'],
-                actuaryContacts: [
-                    {
-                        actuarialFirm: 'DELOITTE',
-                        name: 'Actuary Contact 1',
-                        titleRole: 'Test Actuary Contact 1',
-                        email: 'actuarycontact1@example.com',
-                    },
-                ],
-                actuaryCommunicationPreference: 'OACT_TO_ACTUARY',
-                packagesWithSharedRateCerts: [],
-            },
-        ],
-        stateContacts: [
-            {
-                name: 'Test Person',
-                titleRole: 'A Role',
-                email: 'test+state+contact@example.com',
-            },
-        ],
-        addtlActuaryContacts: [
-            {
-                actuarialFirm: 'DELOITTE',
-                name: 'Additional Contact 1',
-                titleRole: 'Test Actuary Contact 1',
-                email: 'actuarycontact1@example.com',
-            },
-        ],
-        addtlActuaryCommunicationPreference: 'OACT_TO_ACTUARY',
-        statutoryRegulatoryAttestation: false,
-        statutoryRegulatoryAttestationDescription: 'No compliance',
-        ...submissionPartial,
-    }
-}
-
 const mockCommonQuestionAndResponses = <
     T extends
         | (Partial<ContractQuestionType> & { contractID: string })
@@ -1009,17 +649,13 @@ export {
     testStateAnalystsEmails,
     testDuplicateEmailConfig,
     testDuplicateStateAnalystsEmails,
-    mockContractAmendmentFormData,
-    mockContractOnlyFormData,
     mockContractRev,
     mockContract,
-    mockContractAndRatesFormData,
     mockUnlockedContract,
-    mockUnlockedContractAndRatesFormData,
-    mockUnlockedContractOnlyFormData,
     testEmailer,
     mockQuestionAndResponses,
     mockRateQuestionAndResponses,
     mockRate,
     testEmailerFromDatabase,
+    mockRateRevision,
 }

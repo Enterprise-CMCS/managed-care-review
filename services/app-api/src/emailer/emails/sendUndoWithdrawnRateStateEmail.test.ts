@@ -7,6 +7,7 @@ import {
     testEmailConfig,
 } from '../../testHelpers/emailerHelpers'
 import { sendUndoWithdrawnRateStateEmail } from './sendUndoWithdrawnRateStateEmail'
+import type { RateType } from '../../domain-models'
 
 const testRate = mockRate({
     id: 'test-rate',
@@ -274,10 +275,11 @@ describe('sendUndoWithdrawnRateStateEmail error handling', () => {
     })
 
     it('returns an error if there is no rateCertificationName', async () => {
-        const rateWithoutRateCertificationName = {
+        const rateWithoutRateCertificationName: RateType = {
             ...testRate,
             packageSubmissions: [
                 {
+                    ...testRate.packageSubmissions[0],
                     rateRevision: {
                         id: 'test-rate-revision',
                         rateID: 'test-rate',
@@ -345,10 +347,11 @@ describe('sendUndoWithdrawnRateStateEmail error handling', () => {
     })
 
     it('returns an error if there is no rateID', async () => {
-        const rateWithoutRateCertificationName = {
+        const rateWithoutRateCertificationName: RateType = {
             ...testRate,
             packageSubmissions: [
                 {
+                    ...testRate.packageSubmissions[0],
                     rateRevision: {
                         id: 'test-rate-revision',
                         rateID: 'test-rate',
@@ -414,10 +417,11 @@ describe('sendUndoWithdrawnRateStateEmail error handling', () => {
     })
 
     it('returns an error if there are no contractRevisions', async () => {
-        const rateWithoutContractRevisions = {
+        const rateWithoutContractRevisions: RateType = {
             ...testRate,
             packageSubmissions: [
                 {
+                    ...testRate.packageSubmissions[0],
                     rateRevision: {
                         id: 'test-rate-revision',
                         rateID: 'test-rate',
