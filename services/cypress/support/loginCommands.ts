@@ -145,7 +145,7 @@ Cypress.Commands.add(
         if (initialURL === '/mc-review-settings') {
             cy.wait('@fetchMcReviewSettingsQuery')
         } else if (initialURL?.includes('submissions')) {
-            cy.wait('@fetchHealthPlanPackageQuery', { timeout: 20_000 })
+            cy.wait('@fetchContractWithQuestionsQuery', { timeout: 20_000 })
         } else {
             cy.wait('@indexContractsForDashboardQuery', { timeout: 80_000 })
             cy.findByTestId('cms-dashboard-page', { timeout: 10_000 }).should(
