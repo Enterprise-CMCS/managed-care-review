@@ -29,8 +29,6 @@ export class Uploads extends BaseStack {
         const buckets = this.createS3Buckets()
         this.uploadsBucket = buckets.uploadsBucket
         this.qaBucket = buckets.qaBucket
-
-        // TODO: Add virus scanning
     }
 
     /**
@@ -89,6 +87,10 @@ export class Uploads extends BaseStack {
         this.addFileTypeRestrictions(uploadsBucketInstance)
         this.addFileTypeRestrictions(qaBucketInstance)
 
+        // Add GuardDuty malware protection permissions
+        this.addGuardDutyMalwareProtectionAccess(uploadsBucketInstance)
+        this.addGuardDutyMalwareProtectionAccess(qaBucketInstance)
+
         // Create outputs
         this.createOutputs(uploadsBucketInstance, qaBucketInstance)
 
@@ -121,6 +123,35 @@ export class Uploads extends BaseStack {
                     `${bucket.bucketArn}/*.xltm`,
                     `${bucket.bucketArn}/*.xlam`,
                 ],
+            })
+        )
+    }
+
+    /**
+     * Add GuardDuty malware protection service access to bucket
+     * This allows GuardDuty to scan objects and validate bucket ownership
+     */
+    private addGuardDutyMalwareProtectionAccess(bucket: s3.IBucket): void {
+        bucket.addToResourcePolicy(
+            new iam.PolicyStatement({
+                sid: 'AllowGuardDutyMalwareProtection',
+                effect: iam.Effect.ALLOW,
+                principals: [
+                    new iam.ServicePrincipal(
+                        'malware-protection.guardduty.amazonaws.com'
+                    ),
+                ],
+                actions: [
+                    's3:GetObject',
+                    's3:GetObjectVersion',
+                    's3:GetObjectAttributes',
+                    's3:GetObjectTagging',
+                    's3:GetObjectVersionTagging',
+                    's3:ListBucket',
+                    's3:PutObjectTagging',
+                    's3:PutObjectVersionTagging',
+                ],
+                resources: [bucket.bucketArn, `${bucket.bucketArn}/*`],
             })
         )
     }
