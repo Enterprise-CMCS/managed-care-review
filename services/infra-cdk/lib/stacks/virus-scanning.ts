@@ -11,6 +11,7 @@ import { Rule } from 'aws-cdk-lib/aws-events'
 import { LambdaFunction } from 'aws-cdk-lib/aws-events-targets'
 import {
     Role,
+    Policy,
     ServicePrincipal,
     PolicyDocument,
     PolicyStatement,
@@ -58,13 +59,13 @@ export class VirusScanning extends BaseStack {
             attrId: detectorId,
         } as CfnDetector
 
-        // Create IAM role for malware protection
-        const malwareProtectionRole = new Role(this, 'MalwareProtectionRole', {
-            assumedBy: new ServicePrincipal(
-                'malware-protection.guardduty.amazonaws.com'
-            ),
-            inlinePolicies: {
-                S3ScanPolicy: new PolicyDocument({
+        // Create IAM policy for malware protection (separate from role)
+        const malwareProtectionPolicy = new Policy(
+            this,
+            'MalwareProtectionPolicy',
+            {
+                policyName: `virus-scanning-${this.stage}-malware-protection-policy`,
+                document: new PolicyDocument({
                     statements: [
                         // Bucket-level permissions for ownership validation and setup
                         new PolicyStatement({
@@ -158,8 +159,19 @@ export class VirusScanning extends BaseStack {
                         }),
                     ],
                 }),
-            },
+            }
+        )
+
+        // Create IAM role for malware protection (separate from policy)
+        const malwareProtectionRole = new Role(this, 'MalwareProtectionRole', {
+            roleName: `virus-scanning-${this.stage}-malware-protection-role`,
+            assumedBy: new ServicePrincipal(
+                'malware-protection.guardduty.amazonaws.com'
+            ),
         })
+
+        // Attach policy to role (creating explicit dependency chain)
+        malwareProtectionRole.attachInlinePolicy(malwareProtectionPolicy)
 
         // Create malware protection plan for uploads bucket (with dependency)
         const uploadsProtectionPlan = new CfnMalwareProtectionPlan(
@@ -181,7 +193,8 @@ export class VirusScanning extends BaseStack {
             }
         )
 
-        // Ensure IAM role is fully created before malware protection plan
+        // Ensure IAM policy and role are fully created before malware protection plan
+        uploadsProtectionPlan.node.addDependency(malwareProtectionPolicy)
         uploadsProtectionPlan.node.addDependency(malwareProtectionRole)
 
         // Create malware protection plan for QA bucket (with dependency)
@@ -204,7 +217,8 @@ export class VirusScanning extends BaseStack {
             }
         )
 
-        // Ensure IAM role is fully created before malware protection plan
+        // Ensure IAM policy and role are fully created before malware protection plan
+        qaProtectionPlan.node.addDependency(malwareProtectionPolicy)
         qaProtectionPlan.node.addDependency(malwareProtectionRole)
 
         // Create Lambda function to process GuardDuty scan results
