@@ -12,29 +12,6 @@ type Query {
     fetchCurrentUser: User!
 
     """
-    fetchHealthPlanPackage returns a specific HealthPlanPackage by id
-
-    If a package with the given ID cannot be found, this query returns undefined
-    CMS users cannot fetch a DRAFT HealthPlanPackage
-
-    Errors:
-    - ForbiddenError:
-        - A state user from a different state called this.
-        - A CMSUser attempted to fetch a DRAFT HealthPlanPackage
-    """
-    fetchHealthPlanPackage(
-        input: FetchHealthPlanPackageInput!
-    ): FetchHealthPlanPackagePayload!
-
-    """
-    indexHealthPlanPackages returns all of the HealthPlanPackages the current user can see.
-
-    StateUsers can find all the packages for their state
-    CMSUsers can find all the packages that do not have the DRAFT status
-    """
-    indexHealthPlanPackages: IndexHealthPlanPackagesPayload!
-
-    """
     indexContracts returns all of the contracts the current user can see.
 
     StateUsers can find all the contracts for their state
@@ -132,24 +109,6 @@ type Query {
 
 type Mutation {
     """
-    createHealthPlanPackage creates a new HealthPlanPackage.
-
-    The new HealthPlanPackage is created with a single HealthPlanRevision with
-    the information specified in the input parameters. The created package will have
-    the DRAFT status. The stateCode of the package will be set to the state the
-    user that calls this mutation is from.
-
-    This can only be called by StateUsers
-
-    Errors:
-    - ForbiddenError: A CMSUser calls this mutation
-    - UserInputError: ProgramID not found in this state's programs
-    """
-    createHealthPlanPackage(
-        input: CreateHealthPlanPackageInput!
-    ): CreateHealthPlanPackagePayload!
-
-    """
     createContract creates a new Contract.
 
     The new Contract is created with a single contractRevision with
@@ -164,36 +123,6 @@ type Mutation {
     - UserInputError: ProgramID not found in this state's programs
     """
     createContract(input: CreateContractInput!): CreateContractPayload!
-
-    """
-    updateHealthPlanFormData updates a single package with the current
-    state of the form encoded as a protobuf.
-
-    The package must be either in the DRAFT or UNLOCKED state.
-    Only a state user from the state this package is attached to can call this mutation
-
-    There are some fields in the healthPlanFormData type that must not be modified
-    by this mutation. They are set on the initial submission and are only changed by the server:
-    - id
-    - stateCode
-    - stateNumber
-    - createdAt
-    - updatedAt
-
-    Errors:
-    - ForbiddenError:
-        - A CMSUser called this
-        - A state user from a different state called this.
-    - UserInputError:
-        - The healthPlanFormData proto did not decode correctly
-        - The healthPlanFormData decodes to a LockedHealthPlanFormData
-        - The package is in the LOCKED or RESUBMITTED status
-        - A package cannot be found with the given `pkgID`
-        - The healthPlanFormData includes changes to any of the fields that are fixed on submission
-    """
-    updateHealthPlanFormData(
-        input: UpdateHealthPlanFormDataInput!
-    ): UpdateHealthPlanFormDataPayload!
 
     """
     updateContract can be used to update fields on the contract
@@ -241,69 +170,9 @@ type Mutation {
         input: UpdateDraftContractRatesInput!
     ): UpdateDraftContractRatesPayload!
 
-    """
-    submitHealthPlanPackage submits the given package for review by CMS.
-
-    This can only be called by a StateUser from the state the package is for.
-    The package must be either in DRAFT or UNLOCKED state to be submitted
-    On resubmit the `submittedReason` field must be filled out.
-    The submission must be complete for this mutation to succeed. All required fields
-    in the healthPlanFormData must be filled out correctly.
-    Email notifications will be sent to all the relevant parties
-
-    Errors:
-    - ForbiddenError:
-        - A CMSUser called this
-        - A state user from a different state called this.
-    - UserInputError
-        - A package cannot be found with the given `pkgID`
-        - The healthPlanFormData does not have all required field filled out
-    - INTERNAL_SERVER_ERROR
-        - DB_ERROR
-            - Postgres returns error when attempting to find a package
-            - Postgres returns error when attempting to update a package
-            - Attempt to find state programs from json file returns an error
-        - INVALID_PACKAGE_STATUS
-            - Attempted to submit a package in the SUBMITTED or RESUBMITTED state
-        - PROTO_DECODE_ERROR
-            - Failed to decode draft proto
-        - EMAIL_ERROR
-            - Sending state or CMS email failed.
-    """
-    submitHealthPlanPackage(
-        input: SubmitHealthPlanPackageInput!
-    ): SubmitHealthPlanPackagePayload!
 
     """
-    unlockHealthPlanPackage returns a submitted package to the state for additional
-    edits.
-
-    This can only be called by a CMSUser.
-    The package must be in the SUBMITTED or RESUBMITTED state to be unlocked.
-    Email notifications will be sent to all the relevant parties
-
-    Errors:
-    - ForbiddenError:
-        - A non CMSuser called this
-    - UserInputError
-        - A package cannot be found with the given `pkgID`
-    - INTERNAL_SERVER_ERROR
-        - DB_ERROR
-            - Postgres returns error when attempting to finding a package
-            - Postgres returns error when attempting to update a package
-        - INVALID_PACKAGE_STATUS
-            - Attempted to unlock a package in the DRAFT or UNLOCKED state
-        - PROTO_DECODE_ERROR
-            - Failed to decode draft proto
-        - EMAIL_ERROR
-            - Sending state or CMS email failed.
-    """
-    unlockHealthPlanPackage(
-        input: UnlockHealthPlanPackageInput!
-    ): UnlockHealthPlanPackagePayload!
-
-    """
-    unlockHealthPlanPackage returns a submitted package to the state for additional
+    unlockContract returns a submitted package to the state for additional
     edits.
 
     This can only be called by a CMSUser.
@@ -410,7 +279,7 @@ type Mutation {
     ): CreateContractQuestionPayload!
 
     #    """
-    #    updateQuestion updates a Question for the given HealthPlanPackage
+    #    updateQuestion updates a Question for the given Contract
     #    Only the due date can be changed
     #
     #    This can only be called by a CMSUser
@@ -621,37 +490,6 @@ type Mutation {
     updateOauthClient(input: UpdateOauthClientInput!): UpdateOauthClientPayload!
 }
 
-input CreateHealthPlanPackageInput {
-    """
-    The large overarching population of people that the program covers.
-    Options are MEDICAID, CHIP, MEDICAID_AND_CHIP
-    """
-    populationCovered: PopulationCoveredType!
-    "An array of managed care program IDs this package covers"
-    programIDs: [ID!]!
-    "Whether or not this contract is risk based"
-    riskBasedContract: Boolean
-    "Whether or not this contract is associated with a Dual-Eligible Special Needs Plan (D-SNP) that covers Medicaid benefits"
-    dsnpContract: Boolean
-    """
-    The submission type of this package
-    Options are CONTRACT_ONLY and CONTRACT_AND_RATES
-    """
-    submissionType: SubmissionType!
-    "User description of the reason for the submission"
-    submissionDescription: String!
-    """
-    Type of contract the state is submitting
-    Options are: BASE, AMENDMENT
-    """
-    contractType: ContractType!
-}
-
-type CreateHealthPlanPackagePayload {
-    "The newly created HealthPlanPackage"
-    pkg: HealthPlanPackage!
-}
-
 input CreateContractInput {
     """
     The large overarching population of people that the program covers.
@@ -729,27 +567,8 @@ input UndoWithdrawContractInput {
     updatedReason: String!
 }
 
-input FetchHealthPlanPackageInput {
-    "The ID of the package to fetch"
-    pkgID: ID!
-}
-
-type FetchHealthPlanPackagePayload {
-    "A single HealthPlanPackage"
-    pkg: HealthPlanPackage!
-}
-
-type HealthPlanPackageEdge {
-    node: HealthPlanPackage!
-}
-
 type ContractEdge {
     node: Contract!
-}
-
-type IndexHealthPlanPackagesPayload {
-    totalCount: Int
-    edges: [HealthPlanPackageEdge!]!
 }
 
 type IndexContractsPayload {
@@ -879,16 +698,6 @@ type IndexUsersPayload {
     edges: [UserEdge!]!
 }
 
-input SubmitHealthPlanPackageInput {
-    pkgID: ID!
-    "User given reason this package was re-submitted. Left blank on initial submit."
-    submittedReason: String
-}
-
-type SubmitHealthPlanPackagePayload {
-    pkg: HealthPlanPackage!
-}
-
 input SubmitContractInput {
     contractID: ID!
     "User given reason this package was re-submitted. Left blank on initial submit."
@@ -899,39 +708,14 @@ type SubmitContractPayload {
     contract: Contract!
 }
 
-input UnlockHealthPlanPackageInput {
-    pkgID: ID!
-    "User given reason this package was unlocked"
-    unlockedReason: String!
-}
-
 input UnlockContractInput {
     contractID: ID!
     "User given reason this contract was unlocked"
     unlockedReason: String!
 }
 
-type UnlockHealthPlanPackagePayload {
-    pkg: HealthPlanPackage!
-}
-
 type UnlockContractPayload {
     contract: UnlockedContract!
-}
-
-input UpdateHealthPlanFormDataInput {
-    "ID of the package to be updated, must be DRAFT or UNLOCKED"
-    pkgID: ID!
-    """
-    base64 encoded HealthPlanFormData protobuf. This contains all the data
-    from the health plan pacakge form that the state user fills out and submits.
-    Its schema can be found in health_plan_form_data.proto
-    """
-    healthPlanFormData: String!
-}
-
-type UpdateHealthPlanFormDataPayload {
-    pkg: HealthPlanPackage!
 }
 
 enum Division {
@@ -1094,7 +878,7 @@ type Program {
 }
 
 """
-HealthPlanPackageStatus tracks the editing vs. submitted status of the package.
+contractOrRateStatus tracks the editing vs. submitted status of the package.
 It is not intended to track the overall status of the package through the review process
 as that is fleshed out.
 
@@ -1108,7 +892,7 @@ DRAFT -> SUBMITTED -> UNLOCKED -> RESUBMITTED
 This status is used to determine whether the package is currently being edited by a state user
 or if it has been submitted and is being reviewed by CMS users.
 """
-enum HealthPlanPackageStatus {
+enum contractOrRateStatus {
     DRAFT
     SUBMITTED
     UNLOCKED
@@ -1174,40 +958,6 @@ enum RateActionType {
     WITHDRAW
 }
 
-"""
-HealthPlanPackage is the core type for a single package submission. All the
-submission data is contained in the HealthPlanRevision type, allowing us to store
-the full history of packages previously submitted.
-
-HealthPlanPackages are submitted by state users and reviewed by CMS users.
-Initally created in DRAFT state, they are submitted using the submitHealthPlanPackage mutation.
-CMS users are able to use the unlockHealthPlanPackage mutation to return it to the state user in
-the UNLOCKED state for corrections. State users can then resubmit.
-"""
-type HealthPlanPackage {
-    "uuid"
-    id: ID!
-    """
-    Where the package is in the submission flow.
-    SUBMITTED and RESUBMITTED packages cannot be modified
-    """
-    status: HealthPlanPackageStatus!
-    "The initial date this package was submitted at. Is not changed by unlock or resubmission."
-    initiallySubmittedAt: Date
-    "The state code (e.g. CA or TN) for the submitting state"
-    stateCode: String!
-    "Fuller state data for the submitting state"
-    state: State!
-    "MC-CRS record number provided by CMS user (e.g. 1234)"
-    mccrsID: String
-    """
-    Array of revisions for this package. Each revision represents a single submission
-    for the package and contains the full data from when it was submitted
-    """
-    revisions: [HealthPlanRevisionEdge!]!
-    questions: IndexContractQuestionsPayload
-}
-
 type UpdatedBy {
     role: String!
     email: String!
@@ -1216,7 +966,7 @@ type UpdatedBy {
 }
 
 """
-UpdateInformation is used for the unlockInfo and the submitInfo on HealthPlanRevision.
+UpdateInformation is used for the unlockInfo and the submitInfo on a contract or rate revision.
 It tracks who, when, and why the submission or unlock was performed.
 """
 type UpdateInformation {
@@ -1258,39 +1008,6 @@ type RateReviewStatusActions {
     "type of action"
     actionType: RateActionType!
     rateID: ID!
-}
-
-"""
-HealthPlanRevision is a single revision of the package. It contains all the
-data from the form filled out by a state user about their package. When a
-HealthPlanPackage is initially created, a single revision is created as well. That
-revision has its submitInfo filled out when it is submitted, which is what marks
-the HealthPlanPackage as SUBMITTED.
-
-When a HealthPlanPackage is unlocked with the unlockHealthPlanPackage mutation
-a new revision is created with a copy of the previous revision's formDataProto and its
-unlockInfo filled out. This can then be modified by the state user and resubmitted.
-"""
-type HealthPlanRevision {
-    id: ID!
-    """
-    Information about who, when, and why this revision was unlocked.
-    Will be blank on the initial revision.
-    """
-    unlockInfo: UpdateInformation
-    "Information on who, when, and why this revision was submitted."
-    submitInfo: UpdateInformation
-    createdAt: DateTime!
-    """
-    base64 encoded HealthPlanFormData protobuf. This contains all the data
-    from the health plan pacakge form that the state user fills out and submits.
-    Its schema can be found in health_plan_form_data.proto
-    """
-    formDataProto: String!
-}
-
-type HealthPlanRevisionEdge {
-    node: HealthPlanRevision!
 }
 
 enum PopulationCoveredType {
@@ -1707,7 +1424,7 @@ It's used as a part of RateFormData
 type PackageWithSameRate {
     packageName: String!
     packageId: String!
-    packageStatus: HealthPlanPackageStatus
+    packageStatus: contractOrRateStatus
 }
 
 """
@@ -1985,7 +1702,7 @@ type Rate {
     Options are DRAFT, SUBMITTED, RESUBMITTED and UNLOCKED
     SUBMITTED and RESUBMITTED packages cannot be modified
     """
-    status: HealthPlanPackageStatus!
+    status: contractOrRateStatus!
     """
     Where the rate is in the review submission flow
     Options are UNDER_REVIEW, WITHDRAWN
@@ -2053,7 +1770,7 @@ type RateStripped {
     Options are DRAFT, SUBMITTED, RESUBMITTED and UNLOCKED
     SUBMITTED and RESUBMITTED packages cannot be modified
     """
-    status: HealthPlanPackageStatus!
+    status: contractOrRateStatus!
     """
     Where the rate is in the review submission flow
     Options are UNDER_REVIEW, WITHDRAWN
@@ -2186,7 +1903,7 @@ type Contract {
     Options are DRAFT, SUBMITTED, RESUBMITTED and UNLOCKED
     SUBMITTED and RESUBMITTED packages cannot be modified
     """
-    status: HealthPlanPackageStatus!
+    status: contractOrRateStatus!
     """
     Where the contract is in the review submission flow
     Options are UNDER_REVIEW, APPROVED, WITHDRAWN

@@ -2,15 +2,7 @@ import { GraphQLDate, GraphQLDateTime } from 'graphql-scalars'
 import type { Emailer } from '../emailer'
 import type { Resolvers } from '../gen/gqlServer'
 import type { Store } from '../postgres'
-import {
-    createHealthPlanPackageResolver,
-    fetchHealthPlanPackageResolver,
-    indexHealthPlanPackagesResolver,
-    healthPlanPackageResolver,
-    submitHealthPlanPackageResolver,
-    unlockHealthPlanPackageResolver,
-    updateHealthPlanFormDataResolver,
-} from './healthPlanPackage'
+
 import {
     createContractQuestionResolver,
     createContractQuestionResponseResolver,
@@ -87,8 +79,6 @@ export function configureResolvers(
         DateTime: GraphQLDateTime,
         Query: {
             fetchCurrentUser: fetchCurrentUserResolver(),
-            fetchHealthPlanPackage: fetchHealthPlanPackageResolver(store),
-            indexHealthPlanPackages: indexHealthPlanPackagesResolver(store),
             fetchDocument: fetchDocumentResolver(store, s3Client),
             indexContracts: indexContractsResolver(store),
             indexUsers: indexUsersResolver(store),
@@ -101,24 +91,11 @@ export function configureResolvers(
             fetchOauthClients: fetchOauthClientsResolver(store),
         },
         Mutation: {
-            createHealthPlanPackage: createHealthPlanPackageResolver(store),
-            updateHealthPlanFormData: updateHealthPlanFormDataResolver(
-                store,
-                launchDarkly
-            ),
-            submitHealthPlanPackage: submitHealthPlanPackageResolver(
-                store,
-                launchDarkly
-            ),
             submitContract: submitContract(
                 store,
                 emailer,
                 launchDarkly,
                 documentZip
-            ),
-            unlockHealthPlanPackage: unlockHealthPlanPackageResolver(
-                store,
-                emailer
             ),
             unlockContract: unlockContractResolver(store, emailer),
             createContract: createContract(store),
@@ -200,7 +177,6 @@ export function configureResolvers(
         StateUser: stateUserResolver,
         CMSUser: cmsUserResolver,
         CMSApproverUser: cmsApproverUserResolver,
-        HealthPlanPackage: healthPlanPackageResolver(store),
         Rate: rateResolver(store, applicationEndpoint),
         RateStripped: rateStrippedResolver(store, applicationEndpoint),
         RateRevision: rateRevisionResolver(store),
