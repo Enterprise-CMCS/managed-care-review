@@ -1,14 +1,10 @@
 import { BaseStack, type BaseStackProps } from '../constructs/base/base-stack'
 import type { Construct } from 'constructs'
-import { NodejsFunction } from 'aws-cdk-lib/aws-lambda-nodejs'
-import { Runtime, Architecture } from 'aws-cdk-lib/aws-lambda'
-import { Duration, CfnOutput, Fn } from 'aws-cdk-lib'
+import { CfnOutput, Fn } from 'aws-cdk-lib'
 import {
     CfnMalwareProtectionPlan,
     type CfnDetector,
 } from 'aws-cdk-lib/aws-guardduty'
-import { Rule } from 'aws-cdk-lib/aws-events'
-import { LambdaFunction } from 'aws-cdk-lib/aws-events-targets'
 import {
     Role,
     Policy,
@@ -18,7 +14,6 @@ import {
     Effect,
 } from 'aws-cdk-lib/aws-iam'
 import { Bucket } from 'aws-cdk-lib/aws-s3'
-import * as path from 'path'
 
 export interface VirusScanningProps extends BaseStackProps {
     // Simple - just needs basic config
@@ -186,63 +181,14 @@ export class VirusScanning extends BaseStack {
         qaProtectionPlan.node.addDependency(rolePolicy)
         qaProtectionPlan.node.addDependency(qaBucket)
 
-        // Create Lambda function to process GuardDuty scan results
-        const scanProcessor = new NodejsFunction(this, 'ScanProcessor', {
-            functionName: `virus-scanning-${this.stage}-scan-processor`,
-            runtime: Runtime.NODEJS_20_X,
-            architecture: Architecture.X86_64,
-            handler: 'handler',
-            entry: path.join(
-                __dirname,
-                '..',
-                '..',
-                '..',
-                'uploads',
-                'src',
-                'lambdas',
-                'guardDutyScanProcessor.ts'
-            ),
-            timeout: Duration.seconds(60),
-            memorySize: 256,
-            environment: {
-                STAGE: this.stage,
-            },
-        })
-
-        // Grant Lambda permissions to tag S3 objects
-        scanProcessor.addToRolePolicy(
-            new PolicyStatement({
-                effect: Effect.ALLOW,
-                actions: ['s3:GetObjectTagging', 's3:PutObjectTagging'],
-                resources: [
-                    `${uploadsBucket.bucketArn}/*`,
-                    `${qaBucket.bucketArn}/*`,
-                ],
-            })
-        )
-
-        // EventBridge rule to process GuardDuty scan results
-        new Rule(this, 'ScanResultsRule', {
-            eventPattern: {
-                source: ['aws.guardduty'],
-                detailType: ['GuardDuty Malware Scan'],
-                detail: {
-                    'scan-status': ['COMPLETED', 'FAILED', 'SKIPPED'],
-                },
-            },
-            targets: [new LambdaFunction(scanProcessor)],
-        })
+        // Native GuardDuty tagging handles everything we need
+        // No custom Lambda processing required
 
         // Export GuardDuty detector ID for reference (imported from existing detector)
         new CfnOutput(this, 'GuardDutyDetectorId', {
             value: detector.attrId,
             exportName: `${this.stackName}-DetectorId`,
             description: 'GuardDuty detector ID (managed by corporate IT)',
-        })
-
-        new CfnOutput(this, 'ScanProcessorFunctionName', {
-            value: scanProcessor.functionName,
-            exportName: `${this.stackName}-ScanProcessorFunctionName`,
         })
     }
 
