@@ -61,13 +61,16 @@ export class VirusScanning extends BaseStack {
                 inlinePolicies: {
                     S3ScanPolicy: new iam.PolicyDocument({
                         statements: [
-                            // Read permissions for scanning (from working pattern)
+                            // Bucket-level permissions for ownership validation and setup
                             new iam.PolicyStatement({
                                 effect: iam.Effect.ALLOW,
                                 actions: [
+                                    's3:GetBucketAcl',
+                                    's3:GetBucketLocation',
+                                    's3:GetBucketNotification',
                                     's3:GetObject',
-                                    's3:GetObjectVersion',
                                     's3:GetObjectAttributes',
+                                    's3:GetObjectVersion',
                                     's3:ListBucket',
                                 ],
                                 resources: [
@@ -77,24 +80,29 @@ export class VirusScanning extends BaseStack {
                                     `${qaBucket.bucketArn}/*`,
                                 ],
                             }),
-                            // Tagging permissions for scan results (from working pattern)
+                            // Object-level permissions for scan results and artifacts
                             new iam.PolicyStatement({
                                 effect: iam.Effect.ALLOW,
                                 actions: [
-                                    's3:PutObjectTagging',
-                                    's3:PutObjectVersionTagging',
                                     's3:GetObjectTagging',
                                     's3:GetObjectVersionTagging',
+                                    's3:PutObject',
+                                    's3:PutObjectTagging',
+                                    's3:PutObjectVersionTagging',
                                 ],
                                 resources: [
                                     `${uploadsBucket.bucketArn}/*`,
                                     `${qaBucket.bucketArn}/*`,
                                 ],
                             }),
-                            // KMS permissions for encrypted buckets (from working pattern)
+                            // KMS permissions for encrypted buckets
                             new iam.PolicyStatement({
                                 effect: iam.Effect.ALLOW,
-                                actions: ['kms:Decrypt', 'kms:DescribeKey'],
+                                actions: [
+                                    'kms:Decrypt',
+                                    'kms:DescribeKey',
+                                    'kms:GenerateDataKey',
+                                ],
                                 resources: ['*'],
                                 conditions: {
                                     StringEquals: {
@@ -103,6 +111,32 @@ export class VirusScanning extends BaseStack {
                                         ],
                                     },
                                 },
+                            }),
+                            // Bucket notification permissions for scan triggers
+                            new iam.PolicyStatement({
+                                effect: iam.Effect.ALLOW,
+                                actions: ['s3:PutBucketNotification'],
+                                resources: [
+                                    uploadsBucket.bucketArn,
+                                    qaBucket.bucketArn,
+                                ],
+                            }),
+                            // EventBridge permissions for scan result processing
+                            new iam.PolicyStatement({
+                                effect: iam.Effect.ALLOW,
+                                actions: [
+                                    'events:DeleteRule',
+                                    'events:DescribeRule',
+                                    'events:DisableRule',
+                                    'events:EnableRule',
+                                    'events:ListTargetsByRule',
+                                    'events:PutRule',
+                                    'events:PutTargets',
+                                    'events:RemoveTargets',
+                                ],
+                                resources: [
+                                    `arn:aws:events:*:${this.account}:rule/DO-NOT-DELETE-AmazonGuardDutyMalwareProtectionS3*`,
+                                ],
                             }),
                         ],
                     }),
