@@ -9,14 +9,7 @@ import {
 } from 'aws-cdk-lib/aws-guardduty'
 import { Rule } from 'aws-cdk-lib/aws-events'
 import { LambdaFunction } from 'aws-cdk-lib/aws-events-targets'
-import {
-    Role,
-    Policy,
-    ServicePrincipal,
-    PolicyDocument,
-    PolicyStatement,
-    Effect,
-} from 'aws-cdk-lib/aws-iam'
+import { PolicyStatement, Effect } from 'aws-cdk-lib/aws-iam'
 import { Bucket } from 'aws-cdk-lib/aws-s3'
 import * as path from 'path'
 
@@ -61,135 +54,41 @@ export class VirusScanning extends BaseStack {
             attrId: detectorId,
         } as CfnDetector
 
-        // Create IAM policy for malware protection (separate from role)
-        const malwareProtectionPolicy = new Policy(
-            this,
-            'MalwareProtectionPolicy',
-            {
-                policyName: `virus-scanning-${this.stage}-malware-protection-policy`,
-                document: new PolicyDocument({
-                    statements: [
-                        new PolicyStatement({
-                            effect: Effect.ALLOW,
-                            actions: ['s3:*'],
-                            resources: [
-                                uploadsBucket.bucketArn,
-                                qaBucket.bucketArn,
-                                `${uploadsBucket.bucketArn}/*`,
-                                `${qaBucket.bucketArn}/*`,
-                            ],
-                        }),
-                        // KMS permissions for encrypted buckets
-                        new PolicyStatement({
-                            effect: Effect.ALLOW,
-                            actions: [
-                                'kms:Decrypt',
-                                'kms:DescribeKey',
-                                'kms:GenerateDataKey',
-                            ],
-                            resources: ['*'],
-                            conditions: {
-                                StringEquals: {
-                                    'kms:ViaService': [
-                                        `s3.${this.region}.amazonaws.com`,
-                                    ],
-                                },
-                            },
-                        }),
-                        // EventBridge permissions for scan result processing (managed rules)
-                        new PolicyStatement({
-                            sid: 'AllowManagedRuleToSendS3EventsToGuardDuty',
-                            effect: Effect.ALLOW,
-                            actions: [
-                                'events:PutRule',
-                                'events:DeleteRule',
-                                'events:PutTargets',
-                                'events:RemoveTargets',
-                            ],
-                            resources: [
-                                `arn:aws:events:*:${this.account}:rule/DO-NOT-DELETE-AmazonGuardDutyMalwareProtectionS3*`,
-                            ],
-                            conditions: {
-                                StringLike: {
-                                    'events:ManagedBy':
-                                        'malware-protection-plan.guardduty.amazonaws.com',
-                                },
-                            },
-                        }),
-                        // EventBridge monitoring permissions
-                        new PolicyStatement({
-                            effect: Effect.ALLOW,
-                            actions: [
-                                'events:DescribeRule',
-                                'events:ListTargetsByRule',
-                            ],
-                            resources: [
-                                `arn:aws:events:*:${this.account}:rule/DO-NOT-DELETE-AmazonGuardDutyMalwareProtectionS3*`,
-                            ],
-                        }),
-                    ],
-                }),
-            }
-        )
+        // Use the existing AWS service-linked role for GuardDuty Malware Protection
+        // This role is automatically created by AWS and has all necessary permissions
+        const malwareProtectionRoleArn = `arn:aws:iam::${this.account}:role/aws-service-role/malware-protection.guardduty.amazonaws.com/AWSServiceRoleForAmazonGuardDutyMalwareProtection`
 
-        // Create IAM role for malware protection (separate from policy)
-        const malwareProtectionRole = new Role(this, 'MalwareProtectionRole', {
-            roleName: `virus-scanning-${this.stage}-malware-protection-role`,
-            assumedBy: new ServicePrincipal(
-                'malware-protection.guardduty.amazonaws.com'
-            ),
+        // Create malware protection plan for uploads bucket (using service-linked role)
+        new CfnMalwareProtectionPlan(this, 'UploadsProtection', {
+            role: malwareProtectionRoleArn,
+            protectedResource: {
+                s3Bucket: {
+                    bucketName: uploadsBucket.bucketName,
+                    objectPrefixes: ['*'],
+                },
+            },
+            actions: {
+                tagging: {
+                    status: 'ENABLED',
+                },
+            },
         })
 
-        // Attach policy to role (creating explicit dependency chain)
-        malwareProtectionRole.attachInlinePolicy(malwareProtectionPolicy)
-
-        // Create malware protection plan for uploads bucket (with dependency)
-        const uploadsProtectionPlan = new CfnMalwareProtectionPlan(
-            this,
-            'UploadsProtection',
-            {
-                role: malwareProtectionRole.roleArn,
-                protectedResource: {
-                    s3Bucket: {
-                        bucketName: uploadsBucket.bucketName,
-                    },
+        // Create malware protection plan for QA bucket (using service-linked role)
+        new CfnMalwareProtectionPlan(this, 'QaProtection', {
+            role: malwareProtectionRoleArn,
+            protectedResource: {
+                s3Bucket: {
+                    bucketName: qaBucket.bucketName,
+                    objectPrefixes: ['*'],
                 },
-                actions: {
-                    tagging: {
-                        status: 'ENABLED',
-                    },
+            },
+            actions: {
+                tagging: {
+                    status: 'ENABLED',
                 },
-            }
-        )
-
-        // Ensure IAM policy and role are fully created before malware protection plan
-        uploadsProtectionPlan.node.addDependency(malwareProtectionPolicy)
-        uploadsProtectionPlan.node.addDependency(malwareProtectionRole)
-        uploadsProtectionPlan.node.addDependency(uploadsBucket)
-
-        // Create malware protection plan for QA bucket (with dependency)
-        const qaProtectionPlan = new CfnMalwareProtectionPlan(
-            this,
-            'QaProtection',
-            {
-                role: malwareProtectionRole.roleArn,
-                protectedResource: {
-                    s3Bucket: {
-                        bucketName: qaBucket.bucketName,
-                    },
-                },
-                actions: {
-                    tagging: {
-                        status: 'ENABLED',
-                    },
-                },
-            }
-        )
-
-        // Ensure IAM policy and role are fully created before malware protection plan
-        qaProtectionPlan.node.addDependency(malwareProtectionPolicy)
-        qaProtectionPlan.node.addDependency(malwareProtectionRole)
-        qaProtectionPlan.node.addDependency(qaBucket)
+            },
+        })
 
         // Create Lambda function to process GuardDuty scan results
         const scanProcessor = new NodejsFunction(this, 'ScanProcessor', {
