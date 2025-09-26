@@ -2,14 +2,22 @@ import { BaseStack, type BaseStackProps } from '../constructs/base/base-stack'
 import type { Construct } from 'constructs'
 import { NodejsFunction } from 'aws-cdk-lib/aws-lambda-nodejs'
 import { Runtime, Architecture } from 'aws-cdk-lib/aws-lambda'
-import { Duration } from 'aws-cdk-lib'
-import * as guardduty from 'aws-cdk-lib/aws-guardduty'
-import * as events from 'aws-cdk-lib/aws-events'
-import * as targets from 'aws-cdk-lib/aws-events-targets'
-import * as iam from 'aws-cdk-lib/aws-iam'
-import * as s3 from 'aws-cdk-lib/aws-s3'
+import { Duration, CfnOutput } from 'aws-cdk-lib'
+import {
+    CfnMalwareProtectionPlan,
+    type CfnDetector,
+} from 'aws-cdk-lib/aws-guardduty'
+import { Rule } from 'aws-cdk-lib/aws-events'
+import { LambdaFunction } from 'aws-cdk-lib/aws-events-targets'
+import {
+    Role,
+    ServicePrincipal,
+    PolicyDocument,
+    PolicyStatement,
+    Effect,
+} from 'aws-cdk-lib/aws-iam'
+import { Bucket } from 'aws-cdk-lib/aws-s3'
 import * as path from 'path'
-import { CfnOutput } from 'aws-cdk-lib'
 
 export interface VirusScanningProps extends BaseStackProps {
     // Simple - just needs basic config
@@ -27,18 +35,18 @@ export class VirusScanning extends BaseStack {
             description: 'GuardDuty malware protection for S3 uploads',
         })
 
-        // Import existing GuardDuty detector (managed by corporate IT)
+        // Import existing GuardDuty detector
         // All environments use the same detector, but create their own protection plans
         const detectorId = this.getExistingDetectorId()
 
-        // Import the uploads buckets from the uploads stack (using correct CDK naming)
-        const uploadsBucket = s3.Bucket.fromBucketName(
+        // Import the uploads buckets from the uploads stack
+        const uploadsBucket = Bucket.fromBucketName(
             this,
             'ImportedUploadsBucket',
             `mcr-cdk-${this.stage}-uploads-documents-bucket`
         )
 
-        const qaBucket = s3.Bucket.fromBucketName(
+        const qaBucket = Bucket.fromBucketName(
             this,
             'ImportedQaBucket',
             `mcr-cdk-${this.stage}-uploads-qa-bucket`
@@ -48,133 +56,156 @@ export class VirusScanning extends BaseStack {
         // We just reference it by ID for malware protection plans
         const detector = {
             attrId: detectorId,
-        } as guardduty.CfnDetector
+        } as CfnDetector
 
-        // Create IAM role for malware protection (using working pattern)
-        const malwareProtectionRole = new iam.Role(
-            this,
-            'MalwareProtectionRole',
-            {
-                assumedBy: new iam.ServicePrincipal(
-                    'malware-protection.guardduty.amazonaws.com'
-                ),
-                inlinePolicies: {
-                    S3ScanPolicy: new iam.PolicyDocument({
-                        statements: [
-                            // Bucket-level permissions for ownership validation and setup
-                            new iam.PolicyStatement({
-                                effect: iam.Effect.ALLOW,
-                                actions: [
-                                    's3:GetBucketAcl',
-                                    's3:GetBucketLocation',
-                                    's3:GetBucketNotification',
-                                    's3:GetObject',
-                                    's3:GetObjectAttributes',
-                                    's3:GetObjectVersion',
-                                    's3:ListBucket',
-                                ],
-                                resources: [
-                                    uploadsBucket.bucketArn,
-                                    qaBucket.bucketArn,
-                                    `${uploadsBucket.bucketArn}/*`,
-                                    `${qaBucket.bucketArn}/*`,
-                                ],
-                            }),
-                            // Object-level permissions for scan results and artifacts
-                            new iam.PolicyStatement({
-                                effect: iam.Effect.ALLOW,
-                                actions: [
-                                    's3:GetObjectTagging',
-                                    's3:GetObjectVersionTagging',
-                                    's3:PutObject',
-                                    's3:PutObjectTagging',
-                                    's3:PutObjectVersionTagging',
-                                ],
-                                resources: [
-                                    `${uploadsBucket.bucketArn}/*`,
-                                    `${qaBucket.bucketArn}/*`,
-                                ],
-                            }),
-                            // KMS permissions for encrypted buckets
-                            new iam.PolicyStatement({
-                                effect: iam.Effect.ALLOW,
-                                actions: [
-                                    'kms:Decrypt',
-                                    'kms:DescribeKey',
-                                    'kms:GenerateDataKey',
-                                ],
-                                resources: ['*'],
-                                conditions: {
-                                    StringEquals: {
-                                        'kms:ViaService': [
-                                            `s3.${this.region}.amazonaws.com`,
-                                        ],
-                                    },
+        // Create IAM role for malware protection
+        const malwareProtectionRole = new Role(this, 'MalwareProtectionRole', {
+            assumedBy: new ServicePrincipal(
+                'malware-protection.guardduty.amazonaws.com'
+            ),
+            inlinePolicies: {
+                S3ScanPolicy: new PolicyDocument({
+                    statements: [
+                        // Bucket-level permissions for ownership validation and setup
+                        new PolicyStatement({
+                            effect: Effect.ALLOW,
+                            actions: [
+                                's3:GetBucketAcl',
+                                's3:GetBucketLocation',
+                                's3:GetBucketNotification',
+                                's3:GetObject',
+                                's3:GetObjectAttributes',
+                                's3:GetObjectVersion',
+                                's3:ListBucket',
+                            ],
+                            resources: [
+                                uploadsBucket.bucketArn,
+                                qaBucket.bucketArn,
+                                `${uploadsBucket.bucketArn}/*`,
+                                `${qaBucket.bucketArn}/*`,
+                            ],
+                        }),
+                        // Object-level permissions for scan results and artifacts
+                        new PolicyStatement({
+                            effect: Effect.ALLOW,
+                            actions: [
+                                's3:GetObjectTagging',
+                                's3:GetObjectVersionTagging',
+                                's3:PutObject',
+                                's3:PutObjectTagging',
+                                's3:PutObjectVersionTagging',
+                            ],
+                            resources: [
+                                `${uploadsBucket.bucketArn}/*`,
+                                `${qaBucket.bucketArn}/*`,
+                            ],
+                        }),
+                        // KMS permissions for encrypted buckets
+                        new PolicyStatement({
+                            effect: Effect.ALLOW,
+                            actions: [
+                                'kms:Decrypt',
+                                'kms:DescribeKey',
+                                'kms:GenerateDataKey',
+                            ],
+                            resources: ['*'],
+                            conditions: {
+                                StringEquals: {
+                                    'kms:ViaService': [
+                                        `s3.${this.region}.amazonaws.com`,
+                                    ],
                                 },
-                            }),
-                            // Bucket notification permissions for scan triggers
-                            new iam.PolicyStatement({
-                                effect: iam.Effect.ALLOW,
-                                actions: ['s3:PutBucketNotification'],
-                                resources: [
-                                    uploadsBucket.bucketArn,
-                                    qaBucket.bucketArn,
-                                ],
-                            }),
-                            // EventBridge permissions for scan result processing
-                            new iam.PolicyStatement({
-                                effect: iam.Effect.ALLOW,
-                                actions: [
-                                    'events:DeleteRule',
-                                    'events:DescribeRule',
-                                    'events:DisableRule',
-                                    'events:EnableRule',
-                                    'events:ListTargetsByRule',
-                                    'events:PutRule',
-                                    'events:PutTargets',
-                                    'events:RemoveTargets',
-                                ],
-                                resources: [
-                                    `arn:aws:events:*:${this.account}:rule/DO-NOT-DELETE-AmazonGuardDutyMalwareProtectionS3*`,
-                                ],
-                            }),
-                        ],
-                    }),
+                            },
+                        }),
+                        // Bucket notification permissions for scan triggers
+                        new PolicyStatement({
+                            effect: Effect.ALLOW,
+                            actions: ['s3:PutBucketNotification'],
+                            resources: [
+                                uploadsBucket.bucketArn,
+                                qaBucket.bucketArn,
+                            ],
+                        }),
+                        // EventBridge permissions for scan result processing (managed rules)
+                        new PolicyStatement({
+                            effect: Effect.ALLOW,
+                            actions: [
+                                'events:PutRule',
+                                'events:DeleteRule',
+                                'events:PutTargets',
+                                'events:RemoveTargets',
+                            ],
+                            resources: [
+                                `arn:aws:events:*:${this.account}:rule/DO-NOT-DELETE-AmazonGuardDutyMalwareProtectionS3*`,
+                            ],
+                            conditions: {
+                                StringLike: {
+                                    'events:ManagedBy':
+                                        'malware-protection-plan.guardduty.amazonaws.com',
+                                },
+                            },
+                        }),
+                        // EventBridge monitoring permissions
+                        new PolicyStatement({
+                            effect: Effect.ALLOW,
+                            actions: [
+                                'events:DescribeRule',
+                                'events:ListTargetsByRule',
+                            ],
+                            resources: [
+                                `arn:aws:events:*:${this.account}:rule/DO-NOT-DELETE-AmazonGuardDutyMalwareProtectionS3*`,
+                            ],
+                        }),
+                    ],
+                }),
+            },
+        })
+
+        // Create malware protection plan for uploads bucket (with dependency)
+        const uploadsProtectionPlan = new CfnMalwareProtectionPlan(
+            this,
+            'UploadsProtection',
+            {
+                role: malwareProtectionRole.roleArn,
+                protectedResource: {
+                    s3Bucket: {
+                        bucketName: uploadsBucket.bucketName,
+                        objectPrefixes: ['*'],
+                    },
+                },
+                actions: {
+                    tagging: {
+                        status: 'ENABLED',
+                    },
                 },
             }
         )
 
-        // Create malware protection plan for uploads bucket (using working pattern)
-        new guardduty.CfnMalwareProtectionPlan(this, 'UploadsProtection', {
-            role: malwareProtectionRole.roleArn,
-            protectedResource: {
-                s3Bucket: {
-                    bucketName: uploadsBucket.bucketName,
-                    objectPrefixes: ['*'],
-                },
-            },
-            actions: {
-                tagging: {
-                    status: 'ENABLED',
-                },
-            },
-        })
+        // Ensure IAM role is fully created before malware protection plan
+        uploadsProtectionPlan.node.addDependency(malwareProtectionRole)
 
-        // Create malware protection plan for QA bucket
-        new guardduty.CfnMalwareProtectionPlan(this, 'QaProtection', {
-            role: malwareProtectionRole.roleArn,
-            protectedResource: {
-                s3Bucket: {
-                    bucketName: qaBucket.bucketName,
-                    objectPrefixes: ['*'],
+        // Create malware protection plan for QA bucket (with dependency)
+        const qaProtectionPlan = new CfnMalwareProtectionPlan(
+            this,
+            'QaProtection',
+            {
+                role: malwareProtectionRole.roleArn,
+                protectedResource: {
+                    s3Bucket: {
+                        bucketName: qaBucket.bucketName,
+                        objectPrefixes: ['*'],
+                    },
                 },
-            },
-            actions: {
-                tagging: {
-                    status: 'ENABLED',
+                actions: {
+                    tagging: {
+                        status: 'ENABLED',
+                    },
                 },
-            },
-        })
+            }
+        )
+
+        // Ensure IAM role is fully created before malware protection plan
+        qaProtectionPlan.node.addDependency(malwareProtectionRole)
 
         // Create Lambda function to process GuardDuty scan results
         const scanProcessor = new NodejsFunction(this, 'ScanProcessor', {
@@ -201,8 +232,8 @@ export class VirusScanning extends BaseStack {
 
         // Grant Lambda permissions to tag S3 objects
         scanProcessor.addToRolePolicy(
-            new iam.PolicyStatement({
-                effect: iam.Effect.ALLOW,
+            new PolicyStatement({
+                effect: Effect.ALLOW,
                 actions: ['s3:GetObjectTagging', 's3:PutObjectTagging'],
                 resources: [
                     `${uploadsBucket.bucketArn}/*`,
@@ -212,7 +243,7 @@ export class VirusScanning extends BaseStack {
         )
 
         // EventBridge rule to process GuardDuty scan results
-        new events.Rule(this, 'ScanResultsRule', {
+        new Rule(this, 'ScanResultsRule', {
             eventPattern: {
                 source: ['aws.guardduty'],
                 detailType: ['GuardDuty Malware Scan'],
@@ -220,7 +251,7 @@ export class VirusScanning extends BaseStack {
                     'scan-status': ['COMPLETED', 'FAILED', 'SKIPPED'],
                 },
             },
-            targets: [new targets.LambdaFunction(scanProcessor)],
+            targets: [new LambdaFunction(scanProcessor)],
         })
 
         // Export GuardDuty detector ID for reference (imported from existing detector)
