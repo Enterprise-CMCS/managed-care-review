@@ -147,7 +147,6 @@ export class VirusScanning extends BaseStack {
                 protectedResource: {
                     s3Bucket: {
                         bucketName: uploadsBucket.bucketName,
-                        objectPrefixes: ['*'],
                     },
                 },
                 actions: {
@@ -172,7 +171,6 @@ export class VirusScanning extends BaseStack {
                 protectedResource: {
                     s3Bucket: {
                         bucketName: qaBucket.bucketName,
-                        objectPrefixes: ['*'],
                     },
                 },
                 actions: {
