@@ -31,17 +31,17 @@ export class VirusScanning extends BaseStack {
         // All environments use the same detector, but create their own protection plans
         const detectorId = this.getExistingDetectorId()
 
-        // Import the uploads buckets from the uploads stack
+        // Import the uploads buckets from the uploads stack (using correct CDK naming)
         const uploadsBucket = s3.Bucket.fromBucketName(
             this,
             'ImportedUploadsBucket',
-            `uploads-${this.stage}-uploads-${this.account}`
+            `mcr-cdk-${this.stage}-uploads-documents-bucket`
         )
 
         const qaBucket = s3.Bucket.fromBucketName(
             this,
             'ImportedQaBucket',
-            `uploads-${this.stage}-qa-${this.account}`
+            `mcr-cdk-${this.stage}-uploads-qa-bucket`
         )
 
         // We don't create the detector - it's managed externally
@@ -171,8 +171,8 @@ export class VirusScanning extends BaseStack {
                 effect: iam.Effect.ALLOW,
                 actions: ['s3:GetObjectTagging', 's3:PutObjectTagging'],
                 resources: [
-                    `arn:aws:s3:::uploads-${this.stage}-uploads-${this.account}/*`,
-                    `arn:aws:s3:::uploads-${this.stage}-qa-${this.account}/*`,
+                    `${uploadsBucket.bucketArn}/*`,
+                    `${qaBucket.bucketArn}/*`,
                 ],
             })
         )
