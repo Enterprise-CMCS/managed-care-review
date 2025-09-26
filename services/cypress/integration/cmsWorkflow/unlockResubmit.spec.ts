@@ -247,43 +247,34 @@ describe('CMS user', () => {
         cy.apiCreateAndSubmitContractWithRates(stateUser()).then(() => {
             cy.logInAsStateUser()
 
-            // This section still uses old API, so we want to do that first before using the new link-rates UI
             cy.startNewContractAndRatesSubmission()
             cy.fillOutBaseContractDetails()
 
             cy.navigateContractForm('CONTINUE')
-            cy.findByRole('heading', { level: 2, name: /Rate details/ })
+
+            cy.findByRole('heading', {
+                level: 2,
+                name: /Rate details/,
+            }).should('exist')
+            cy.fillOutNewRateCertification()
+
+            cy.navigateContractRatesForm('CONTINUE')
+
+            cy.findByRole('heading', {
+                level: 2,
+                name: /Contacts/,
+            }).should('exist')
+            cy.fillOutStateContact()
+
+            cy.navigateContractForm('CONTINUE')
+            cy.findByRole('heading', { level: 2, name: /Review and submit/ })
 
             // Test unlock and resubmit with a linked rate submission
             cy.location().then((fullUrl) => {
                 const submissionURL = fullUrl.toString().replace(
-                    'edit/rate-details',
+                    'edit/review-and-submit',
                     ''
                 )
-                const reviewURL = `${submissionURL}edit/review-and-submit`
-
-                /**
-                 * The updateHealthPlanFormData endpoint fails to update rates when the flag is on, causing an error after
-                 * the rate details page due to Cypress's inability to toggle backend flags. This is due to the API's
-                 * attempt to update the new rate format with HPP. The solution is to apply old API updates before new
-                 * rate API updates in a non-sequential order.
-                 */
-                cy.navigateFormByDirectLink(`${submissionURL}edit/contacts`)
-                cy.findByRole('heading', { level: 2, name: /Contacts/ })
-                cy.fillOutStateContact()
-
-                cy.navigateContractForm('CONTINUE')
-
-                // New API
-                cy.navigateFormByDirectLink(`${submissionURL}edit/rate-details`)
-                cy.findByRole('heading', { level: 2, name: /Rate details/ })
-                cy.fillOutLinkedRate()
-
-                cy.navigateContractRatesForm('CONTINUE')
-                cy.findByRole('heading', { level: 2, name: /Contacts/ })
-                cy.visit(`${submissionURL}edit/review-and-submit`)
-
-                cy.findByRole('heading', { level: 2, name: /Review and submit/ })
 
                 // Submit, sent to dashboard
                 cy.submitStateSubmissionForm()
@@ -328,7 +319,7 @@ describe('CMS user', () => {
                         .should('have.attr', 'href')
                         .and('include', 'review-and-submit')
 
-                    cy.navigateFormByDirectLink(reviewURL)
+                    cy.navigateFormByDirectLink(submissionURL)
                     cy.wait('@fetchContractQuery', { timeout: 20_000 })
 
                     //Unlock banner for state user to be present with correct data.
@@ -419,7 +410,7 @@ describe('CMS user', () => {
                     // Resubmit again
                     cy.logOut()
                     cy.logInAsStateUser()
-                    cy.visit(reviewURL)
+                    cy.visit(submissionURL)
                     cy.wait('@fetchContractQuery', { timeout: 20_000 })
                     cy.findByTestId('unlockedBanner').should('exist')
                     cy.submitStateSubmissionForm({
@@ -463,5 +454,5 @@ describe('CMS user', () => {
             })
         })
     })
-    // it('can unlock and resubmit combination of linked and child rates as expected' )
+    // it('can unlock and resubmit a combination of linked and child rates as expected' )
 })
