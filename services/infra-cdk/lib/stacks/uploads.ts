@@ -141,18 +141,7 @@ export class Uploads extends BaseStack {
                         'malware-protection.guardduty.amazonaws.com'
                     ),
                 ],
-                actions: [
-                    's3:GetObject',
-                    's3:GetObjectVersion',
-                    's3:GetObjectAttributes',
-                    's3:GetObjectTagging',
-                    's3:GetObjectVersionTagging',
-                    's3:ListBucket',
-                    's3:PutObject',
-                    's3:PutObjectTagging',
-                    's3:PutObjectVersionTagging',
-                    's3:DeleteObject',
-                ],
+                actions: ['s3:*'],
                 resources: [bucket.bucketArn, `${bucket.bucketArn}/*`],
             })
         )

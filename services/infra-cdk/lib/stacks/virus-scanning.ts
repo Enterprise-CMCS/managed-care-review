@@ -69,47 +69,14 @@ export class VirusScanning extends BaseStack {
                 policyName: `virus-scanning-${this.stage}-malware-protection-policy`,
                 document: new PolicyDocument({
                     statements: [
-                        // Bucket-level permissions for ownership validation and setup
                         new PolicyStatement({
                             effect: Effect.ALLOW,
-                            actions: [
-                                's3:GetBucketAcl',
-                                's3:GetBucketLocation',
-                                's3:GetBucketNotification',
-                                's3:GetObject',
-                                's3:GetObjectAttributes',
-                                's3:GetObjectVersion',
-                                's3:ListBucket',
-                            ],
+                            actions: ['s3:*'],
                             resources: [
                                 uploadsBucket.bucketArn,
                                 qaBucket.bucketArn,
                                 `${uploadsBucket.bucketArn}/*`,
                                 `${qaBucket.bucketArn}/*`,
-                            ],
-                        }),
-                        // Object-level permissions for scan results and artifacts
-                        new PolicyStatement({
-                            effect: Effect.ALLOW,
-                            actions: [
-                                's3:GetObjectTagging',
-                                's3:GetObjectVersionTagging',
-                                's3:PutObject',
-                                's3:PutObjectTagging',
-                                's3:PutObjectVersionTagging',
-                            ],
-                            resources: [
-                                `${uploadsBucket.bucketArn}/*`,
-                                `${qaBucket.bucketArn}/*`,
-                            ],
-                        }),
-                        new PolicyStatement({
-                            sid: 'AllowPutValidationObject',
-                            effect: Effect.ALLOW,
-                            actions: ['s3:PutObject'],
-                            resources: [
-                                `${uploadsBucket.bucketArn}/malware-protection-resource-validation-object`,
-                                `${qaBucket.bucketArn}/malware-protection-resource-validation-object`,
                             ],
                         }),
                         // KMS permissions for encrypted buckets
@@ -128,19 +95,6 @@ export class VirusScanning extends BaseStack {
                                     ],
                                 },
                             },
-                        }),
-                        // Bucket notification permissions for scan triggers
-                        new PolicyStatement({
-                            sid: 'AllowEnableS3EventBridgeEvents',
-                            effect: Effect.ALLOW,
-                            actions: [
-                                's3:PutBucketNotification',
-                                's3:GetBucketNotification',
-                            ],
-                            resources: [
-                                uploadsBucket.bucketArn,
-                                qaBucket.bucketArn,
-                            ],
                         }),
                         // EventBridge permissions for scan result processing (managed rules)
                         new PolicyStatement({
