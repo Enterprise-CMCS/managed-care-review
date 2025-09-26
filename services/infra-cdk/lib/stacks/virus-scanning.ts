@@ -101,6 +101,15 @@ export class VirusScanning extends BaseStack {
                                 `${qaBucket.bucketArn}/*`,
                             ],
                         }),
+                        new PolicyStatement({
+                            sid: 'AllowPutValidationObject',
+                            effect: Effect.ALLOW,
+                            actions: ['s3:PutObject'],
+                            resources: [
+                                `${uploadsBucket.bucketArn}/malware-protection-resource-validation-object`,
+                                `${qaBucket.bucketArn}/malware-protection-resource-validation-object`,
+                            ],
+                        }),
                         // KMS permissions for encrypted buckets
                         new PolicyStatement({
                             effect: Effect.ALLOW,
@@ -120,8 +129,12 @@ export class VirusScanning extends BaseStack {
                         }),
                         // Bucket notification permissions for scan triggers
                         new PolicyStatement({
+                            sid: 'AllowEnableS3EventBridgeEvents',
                             effect: Effect.ALLOW,
-                            actions: ['s3:PutBucketNotification'],
+                            actions: [
+                                's3:PutBucketNotification',
+                                's3:GetBucketNotification',
+                            ],
                             resources: [
                                 uploadsBucket.bucketArn,
                                 qaBucket.bucketArn,
@@ -129,6 +142,7 @@ export class VirusScanning extends BaseStack {
                         }),
                         // EventBridge permissions for scan result processing (managed rules)
                         new PolicyStatement({
+                            sid: 'AllowManagedRuleToSendS3EventsToGuardDuty',
                             effect: Effect.ALLOW,
                             actions: [
                                 'events:PutRule',
