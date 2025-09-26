@@ -21,11 +21,6 @@ async function scanAndTagFiles(
     keys: string[]
 ): Promise<string[] | Error> {
     // Check required environment variables
-    const clamAVBucketName = process.env.CLAMAV_BUCKET_NAME
-    if (!clamAVBucketName || clamAVBucketName === '') {
-        throw new Error('Configuration Error: CLAMAV_BUCKET_NAME must be set')
-    }
-
     const clamAVDefinitionsPath = process.env.PATH_TO_AV_DEFINITIONS
     if (!clamAVDefinitionsPath || clamAVDefinitionsPath === '') {
         throw new Error(
@@ -37,7 +32,6 @@ async function scanAndTagFiles(
     const s3Client = NewS3UploadsClient()
     const clamAV = NewClamAV(
         {
-            bucketName: clamAVBucketName,
             definitionsPath: clamAVDefinitionsPath,
         },
         s3Client
