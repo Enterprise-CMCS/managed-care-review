@@ -1,5 +1,9 @@
 import { formatCalendarDate } from '@mc-review/dates'
-import type { UnlockedContractType } from '../../domain-models'
+import type {
+    UnlockedContractType,
+    ProgramType,
+    UpdateInfoType,
+} from '../../domain-models'
 import { packageName as generatePackageName } from '@mc-review/hpp'
 
 import {
@@ -9,7 +13,6 @@ import {
     generateCMSReviewerEmailsForUnlockedContract,
 } from '../templateHelpers'
 import type { EmailData, EmailConfiguration, StateAnalystsEmails } from '../'
-import type { ProgramType, UpdateInfoType } from '../../domain-models'
 
 export const unlockContractCMSEmail = async (
     contract: UnlockedContractType,
@@ -67,7 +70,7 @@ export const unlockContractCMSEmail = async (
     }
 
     const result = await renderTemplate<typeof data>(
-        'unlockPackageCMSEmail',
+        'unlockContractCMSEmail',
         data
     )
     if (result instanceof Error) {

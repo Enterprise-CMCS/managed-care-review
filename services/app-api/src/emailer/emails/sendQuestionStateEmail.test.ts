@@ -7,8 +7,6 @@ import type {
     CMSUserType,
     ContractRevisionType,
     StateType,
-} from '../../domain-models'
-import type {
     ContractFormDataType,
     ContractQuestionType,
 } from '../../domain-models'

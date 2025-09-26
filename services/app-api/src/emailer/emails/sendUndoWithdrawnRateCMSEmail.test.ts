@@ -8,6 +8,8 @@ import {
     testStateAnalystsEmails,
 } from '../../testHelpers/emailerHelpers'
 import { sendUndoWithdrawnRateCMSEmail } from './sendUndoWithdrawnRateCMSEmail'
+import type { RateType } from '../../domain-models'
+import { mockRateRevision } from '../../testHelpers'
 
 const testRate = mockRate({
     id: 'test-rate',
@@ -282,11 +284,13 @@ describe('sendUndoWithdrawnRateCMSEmail error handling', () => {
     })
 
     it('returns an error if there is no rateCertificationName', async () => {
-        const rateWithoutRateCertificationName = {
+        const rateWithoutRateCertificationName: RateType = {
             ...testRate,
             packageSubmissions: [
                 {
+                    ...testRate.packageSubmissions[0],
                     rateRevision: {
+                        ...mockRateRevision(),
                         id: 'test-rate-revision',
                         rateID: 'test-rate',
                         submitInfo: {
@@ -296,6 +300,7 @@ describe('sendUndoWithdrawnRateCMSEmail error handling', () => {
                                 email: 'undoer-of-withdraws@example.com',
                             }),
                         },
+                        unlockInfo: undefined,
                         createdAt: new Date('2025-03-05'),
                         updatedAt: new Date('2025-03-05'),
                         formData: {
@@ -353,10 +358,11 @@ describe('sendUndoWithdrawnRateCMSEmail error handling', () => {
     })
 
     it('returns an error if there is no rateID', async () => {
-        const rateWithoutRateID = {
+        const rateWithoutRateID: RateType = {
             ...testRate,
             packageSubmissions: [
                 {
+                    ...testRate.packageSubmissions[0],
                     rateRevision: {
                         id: 'test-rate-revision',
                         rateID: 'test-rate',
@@ -422,10 +428,11 @@ describe('sendUndoWithdrawnRateCMSEmail error handling', () => {
     })
 
     it('returns an error if there are no contractRevisions', async () => {
-        const rateWithoutContractRevisions = {
+        const rateWithoutContractRevisions: RateType = {
             ...testRate,
             packageSubmissions: [
                 {
+                    ...testRate.packageSubmissions[0],
                     rateRevision: {
                         id: 'test-rate-revision',
                         rateID: 'test-rate',

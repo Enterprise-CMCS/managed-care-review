@@ -1,34 +1,35 @@
 import {
     filterChipAndPRSubmissionReviewers,
     findContractPrograms,
-    generateCMSReviewerEmails,
     getQuestionRound,
-    handleAsCHIPSubmission,
+    handleAsCHIPSubmissionForContract,
+    generateCMSReviewerEmailsForUnlockedContract,
 } from './templateHelpers'
-import type { UnlockedHealthPlanFormDataType } from '@mc-review/hpp'
 import {
-    mockUnlockedContractAndRatesFormData,
-    mockUnlockedContractOnlyFormData,
     mockContractRev,
     testEmailConfig,
     testStateAnalystsEmails,
     mockQuestionAndResponses,
+    mockUnlockedContract,
+    mockRateRevision,
+    mockRate,
+    mockContract,
 } from '../testHelpers/emailerHelpers'
 import type { EmailConfiguration, StateAnalystsEmails } from './emailer'
-import type { ProgramType } from '../domain-models'
+import type { ProgramType, UnlockedContractType } from '../domain-models'
 
 describe('generateCMSReviewerEmails', () => {
-    const sub = mockUnlockedContractAndRatesFormData()
-    sub.riskBasedContract = true
+    const contract = mockUnlockedContract()
+    contract.draftRevision.formData.riskBasedContract = true
     const contractOnlyWithValidRateData: {
-        submission: UnlockedHealthPlanFormDataType
+        submission: UnlockedContractType
         emailConfig: EmailConfiguration
         stateAnalystsEmails: StateAnalystsEmails
         testDescription: string
         expectedResult: string[] | Error
     }[] = [
         {
-            submission: mockUnlockedContractOnlyFormData(),
+            submission: contract,
             emailConfig: testEmailConfig(),
             stateAnalystsEmails: testStateAnalystsEmails,
             testDescription: 'contract only submission',
@@ -39,7 +40,7 @@ describe('generateCMSReviewerEmails', () => {
             ],
         },
         {
-            submission: sub,
+            submission: contract,
             emailConfig: testEmailConfig(),
             stateAnalystsEmails: testStateAnalystsEmails,
             testDescription: 'contract and rates submission',
@@ -51,9 +52,23 @@ describe('generateCMSReviewerEmails', () => {
             ],
         },
         {
-            submission: mockUnlockedContractAndRatesFormData({
+            submission: mockUnlockedContract({
                 stateCode: 'MS',
-                programIDs: ['36c54daf-7611-4a15-8c3b-cdeb3fd7e25a'],
+                draftRevision: {
+                    ...mockContractRev({
+                        contract: {
+                            stateCode: 'MS',
+                            stateNumber: 4,
+                            id: 'test-contract-123',
+                        },
+                        formData: {
+                            ...mockContractRev().formData,
+                            programIDs: [
+                                '36c54daf-7611-4a15-8c3b-cdeb3fd7e25a',
+                            ],
+                        },
+                    }),
+                },
             }),
             emailConfig: testEmailConfig(),
             stateAnalystsEmails: testStateAnalystsEmails,
@@ -67,37 +82,44 @@ describe('generateCMSReviewerEmails', () => {
             ],
         },
         {
-            submission: mockUnlockedContractAndRatesFormData({
+            submission: mockUnlockedContract({
                 stateCode: 'MS',
-                rateInfos: [
-                    {
-                        rateType: 'NEW',
-                        rateDocuments: [
-                            {
-                                s3URL: 's3://bucketname/key/test1',
-                                name: 'foo',
-                                sha256: 'fakesha',
-                            },
+                draftRates: [
+                    mockRate({
+                        stateCode: 'MS',
+                        revisions: [
+                            mockRateRevision({
+                                formData: {
+                                    ...mockRateRevision().formData,
+                                    rateType: 'NEW',
+                                    rateDocuments: [
+                                        {
+                                            s3URL: 's3://bucketname/key/test1',
+                                            name: 'foo',
+                                            sha256: 'fakesha',
+                                        },
+                                    ],
+                                    supportingDocuments: [],
+                                    rateDateStart: new Date(),
+                                    rateDateEnd: new Date(),
+                                    rateDateCertified: new Date(),
+                                    rateProgramIDs: [
+                                        '36c54daf-7611-4a15-8c3b-cdeb3fd7e25a',
+                                    ],
+                                    certifyingActuaryContacts: [
+                                        {
+                                            actuarialFirm: 'DELOITTE',
+                                            name: 'Actuary Contact 1',
+                                            titleRole: 'Test Actuary Contact 1',
+                                            email: 'actuarycontact1@example.com',
+                                        },
+                                    ],
+                                    actuaryCommunicationPreference:
+                                        'OACT_TO_ACTUARY',
+                                },
+                            }),
                         ],
-                        supportingDocuments: [],
-                        rateDateStart: new Date(),
-                        rateDateEnd: new Date(),
-                        rateDateCertified: new Date(),
-                        rateProgramIDs: [
-                            '36c54daf-7611-4a15-8c3b-cdeb3fd7e25a',
-                        ],
-                        rateAmendmentInfo: undefined,
-                        actuaryContacts: [
-                            {
-                                actuarialFirm: 'DELOITTE',
-                                name: 'Actuary Contact 1',
-                                titleRole: 'Test Actuary Contact 1',
-                                email: 'actuarycontact1@example.com',
-                            },
-                        ],
-                        actuaryCommunicationPreference: 'OACT_TO_ACTUARY',
-                        packagesWithSharedRateCerts: [],
-                    },
+                    }),
                 ],
             }),
             emailConfig: testEmailConfig(),
@@ -112,7 +134,7 @@ describe('generateCMSReviewerEmails', () => {
             ],
         },
         {
-            submission: mockUnlockedContractAndRatesFormData({
+            submission: mockUnlockedContract({
                 stateCode: 'PR',
             }),
             emailConfig: testEmailConfig(),
@@ -126,8 +148,15 @@ describe('generateCMSReviewerEmails', () => {
             ],
         },
         {
-            submission: mockUnlockedContractAndRatesFormData({
-                submissionType: undefined,
+            submission: mockUnlockedContract({
+                draftRevision: {
+                    ...mockContractRev(),
+                    formData: {
+                        ...mockContractRev().formData,
+                        // @ts-ignore
+                        submissionType: undefined,
+                    },
+                },
             }),
             emailConfig: testEmailConfig(),
             stateAnalystsEmails: testStateAnalystsEmails,
@@ -141,7 +170,7 @@ describe('generateCMSReviewerEmails', () => {
         '$testDescription',
         ({ submission, emailConfig, stateAnalystsEmails, expectedResult }) => {
             expect(
-                generateCMSReviewerEmails(
+                generateCMSReviewerEmailsForUnlockedContract(
                     emailConfig,
                     submission,
                     stateAnalystsEmails
@@ -152,41 +181,102 @@ describe('generateCMSReviewerEmails', () => {
 })
 
 describe('handleAsCHIPSubmission', () => {
+    const defaultPackageSubmissions = mockContract().packageSubmissions
     test.each([
         {
-            pkg: mockUnlockedContractAndRatesFormData({
-                populationCovered: 'CHIP',
+            contract: mockContract({
+                packageSubmissions: [
+                    {
+                        ...defaultPackageSubmissions[0],
+                        contractRevision: {
+                            ...mockContractRev(),
+                            formData: {
+                                ...mockContractRev().formData,
+                                populationCovered: 'CHIP',
+                            },
+                        },
+                    },
+                ],
             }),
             testDescription: 'for valid CHIP submission',
             expectedResult: true,
         },
         {
-            pkg: mockUnlockedContractAndRatesFormData({
+            contract: mockContract({
                 stateCode: 'MS',
-                populationCovered: undefined,
-                programIDs: ['36c54daf-7611-4a15-8c3b-cdeb3fd7e25a'],
+                packageSubmissions: [
+                    {
+                        ...defaultPackageSubmissions[0],
+                        contractRevision: {
+                            ...mockContractRev(),
+                            contract: {
+                                stateCode: 'MS',
+                                stateNumber: 4,
+                                id: 'test-contract-123',
+                            },
+                            formData: {
+                                ...mockContractRev().formData,
+                                populationCovered: undefined,
+                                programIDs: [
+                                    '36c54daf-7611-4a15-8c3b-cdeb3fd7e25a',
+                                ],
+                            },
+                        },
+                    },
+                ],
             }),
             testDescription:
                 'for MS submission with a CHIP associated ID for legacy reasons',
             expectedResult: true,
         },
         {
-            pkg: mockUnlockedContractAndRatesFormData({
+            contract: mockContract({
                 stateCode: 'AZ',
-                populationCovered: undefined,
+                packageSubmissions: [
+                    {
+                        ...defaultPackageSubmissions[0],
+                        contractRevision: {
+                            ...mockContractRev(),
+                            contract: {
+                                stateCode: 'AZ',
+                                stateNumber: 4,
+                                id: 'test-contract-123',
+                            },
+                            formData: {
+                                ...mockContractRev().formData,
+                                populationCovered: undefined,
+                            },
+                        },
+                    },
+                ],
             }),
             testDescription: 'for non MS submission with no population covered',
             expectedResult: false,
         },
         {
-            pkg: mockUnlockedContractAndRatesFormData({
-                populationCovered: 'MEDICAID',
+            contract: mockContract({
+                packageSubmissions: [
+                    {
+                        ...defaultPackageSubmissions[0],
+                        contractRevision: {
+                            ...mockContractRev(),
+                            formData: {
+                                ...mockContractRev().formData,
+                                populationCovered: 'MEDICAID',
+                            },
+                        },
+                    },
+                ],
             }),
             testDescription: 'for non CHIP submission',
             expectedResult: false,
         },
-    ])('$testDescription', ({ pkg, expectedResult }) => {
-        expect(handleAsCHIPSubmission(pkg)).toEqual(expectedResult)
+    ])('$testDescription', ({ contract, expectedResult }) => {
+        const contractRev = contract.packageSubmissions[0].contractRevision
+        const rateRevs = contract.packageSubmissions[0].rateRevisions
+        expect(
+            handleAsCHIPSubmissionForContract(contractRev, rateRevs)
+        ).toEqual(expectedResult)
     })
 })
 

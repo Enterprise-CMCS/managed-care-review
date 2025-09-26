@@ -10,23 +10,20 @@ import {
     WithdrawContractDocument,
     UndoWithdrawContractDocument,
 } from '../gen/gqlClient'
-
 import { findStatePrograms } from '../postgres'
-
 import { must } from './assertionHelpers'
 import { defaultFloridaProgram, executeGraphQLOperation } from './gqlHelpers'
-import { type ContractType } from '../domain-models'
 import type { ApolloServer } from '@apollo/server'
 import type {
     Contract,
     ContractDraftRevisionFormDataInput,
     RateFormData,
     UnlockedContract,
+    CreateContractInput,
 } from '../gen/gqlServer'
 import type { StateCodeType } from '@mc-review/hpp'
 import { addNewRateToTestContract } from './gqlRateHelpers'
-import type { ContractFormDataType } from '../domain-models'
-import type { CreateContractInput } from '../gen/gqlServer'
+import type { ContractFormDataType, ContractType } from '../domain-models'
 import { mockGqlContractDraftRevisionFormDataInput } from './gqlContractInputMocks'
 import type { GraphQLFormattedError } from 'graphql/index'
 import { extractGraphQLResponse } from './apolloV4ResponseHelper'

@@ -10,7 +10,6 @@ import {
     stripHTMLFromTemplate,
     findContractPrograms,
 } from '../templateHelpers'
-
 import type { EmailData, EmailConfiguration } from '../'
 import { pruneDuplicateEmails } from '../formatters'
 

@@ -1,5 +1,4 @@
-import type { Store } from '../postgres'
-import { NewPrismaClient } from '../postgres'
+import { NewPrismaClient, type Store } from '../postgres'
 import type { ExtendedPrismaClient } from '../postgres/prismaClient'
 
 async function configurePrismaClient(): Promise<ExtendedPrismaClient> {

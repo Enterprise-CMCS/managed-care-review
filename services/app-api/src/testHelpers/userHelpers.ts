@@ -1,5 +1,4 @@
-import type { InsertUserArgsType } from '../postgres'
-import { NewPostgresStore } from '../postgres'
+import { NewPostgresStore, type InsertUserArgsType } from '../postgres'
 import type {
     AdminUserType,
     CMSApproverUserType,

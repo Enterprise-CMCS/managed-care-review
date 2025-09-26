@@ -1,11 +1,5 @@
 import * as Eta from 'eta'
 import * as path from 'path'
-
-import type {
-    LockedHealthPlanFormDataType,
-    UnlockedHealthPlanFormDataType,
-    SubmissionType,
-} from '@mc-review/hpp'
 import type { EmailConfiguration, StateAnalystsEmails } from '.'
 import type {
     ContractRevisionType,
@@ -19,7 +13,11 @@ import type {
 } from '../domain-models'
 import { logError } from '../logger'
 import { pruneDuplicateEmails } from './formatters'
-import { findStatePrograms, packageName } from '@mc-review/hpp'
+import {
+    findStatePrograms,
+    packageName,
+    type SubmissionType,
+} from '@mc-review/hpp'
 import { rateSummaryURL, submissionSummaryURL } from './generateURLs'
 import { formatCalendarDate } from '@mc-review/dates'
 
@@ -64,27 +62,6 @@ const renderTemplate = async <T extends object>(
 const SubmissionTypeRecord: Record<SubmissionType, string> = {
     CONTRACT_ONLY: 'Contract action only',
     CONTRACT_AND_RATES: 'Contract action and rate certification',
-}
-
-// Util Functions
-const handleAsCHIPSubmission = (
-    pkg: LockedHealthPlanFormDataType | UnlockedHealthPlanFormDataType
-): boolean => {
-    //  This const is deprecated. No longer in use once we added population covered question, code remains only for backwards compatibility for existing Mississippi submissions.
-    const LEGACY_CHIP_PROGRAMS_UUID = {
-        MS: '36c54daf-7611-4a15-8c3b-cdeb3fd7e25a',
-    }
-
-    if (pkg.populationCovered === 'CHIP') {
-        return true
-    } else if (!pkg.populationCovered && pkg.stateCode === 'MS') {
-        const programIDs = findAllPackageProgramIds(pkg)
-        return programIDs.some(
-            (id: string) => LEGACY_CHIP_PROGRAMS_UUID.MS === id
-        )
-    } else {
-        return false
-    }
 }
 
 const handleAsCHIPSubmissionForContract = (
@@ -250,77 +227,6 @@ const generateCMSReviewerEmailsForSubmittedContract = (
     return pruneDuplicateEmails(reviewers)
 }
 
-/* 
-    Determine reviewers for a given health plan package and state
-    - devReviewTeamEmails added to all emails by default
-    - dmcpSubmissionEmails added in both CONTRACT_ONLY and CONTRACT_AND_RATES
-    - oactEmails added for CONTRACT_AND_RATES
-    - dmco is added to emails via state analysts
-    
-    Return should be wrapped in pruneDuplicate to ensure even if config is added twice, we get unique list of reviewers
-*/
-const generateCMSReviewerEmails = (
-    config: EmailConfiguration,
-    pkg: LockedHealthPlanFormDataType | UnlockedHealthPlanFormDataType,
-    stateAnalystsEmails: StateAnalystsEmails
-): string[] | Error => {
-    if (
-        pkg.submissionType !== 'CONTRACT_AND_RATES' &&
-        pkg.submissionType !== 'CONTRACT_ONLY'
-    ) {
-        return new Error(
-            `generateCMSReviewerEmails does not currently support submission type: ${pkg.submissionType}.`
-        )
-    }
-
-    const { oactEmails, dmcpSubmissionEmails } = config
-    let reviewers: string[] = []
-
-    if (pkg.submissionType === 'CONTRACT_ONLY') {
-        // Contract submissions reviewer emails
-        reviewers = [
-            ...config.devReviewTeamEmails,
-            ...stateAnalystsEmails,
-            ...dmcpSubmissionEmails,
-        ]
-    } else if (pkg.submissionType === 'CONTRACT_AND_RATES') {
-        //Contract and rate submissions reviewer emails.
-        reviewers = [
-            ...config.devReviewTeamEmails,
-            ...stateAnalystsEmails,
-            ...dmcpSubmissionEmails,
-        ]
-        if (pkg.riskBasedContract) {
-            reviewers = [...reviewers, ...oactEmails]
-        }
-    }
-
-    //Remove OACT and DMCP emails from CHIP or State of PR submissions
-    if (handleAsCHIPSubmission(pkg) || pkg.stateCode === 'PR') {
-        reviewers = filterChipAndPRSubmissionReviewers(reviewers, config)
-    }
-
-    return pruneDuplicateEmails(reviewers)
-}
-
-//Finds all package program and rate program ids in a package and combines them into one array removing duplicates.
-const findAllPackageProgramIds = (
-    pkg: UnlockedHealthPlanFormDataType | LockedHealthPlanFormDataType
-): string[] => {
-    const programs = [...pkg.programIDs]
-    if (pkg.submissionType === 'CONTRACT_AND_RATES' && !!pkg.rateInfos.length) {
-        const ratePrograms = pkg.rateInfos.flatMap(
-            (rateInfo) => rateInfo.rateProgramIDs
-        )
-        if (ratePrograms?.length) {
-            ratePrograms.forEach(
-                (id) => id && !programs.includes(id) && programs.push(id)
-            )
-        }
-    }
-    return programs
-}
-
 //Finds all contract program and rate program ids in a contract and combines them into one array removing duplicates.
 const findAllContractProgramIds = (
     contractRev: ContractRevisionType,
@@ -341,23 +247,6 @@ const findAllContractProgramIds = (
             )
         }
     }
-    return programs
-}
-//Find state programs from package programs ids
-const findPackagePrograms = (
-    pkg: UnlockedHealthPlanFormDataType | LockedHealthPlanFormDataType,
-    statePrograms: ProgramType[]
-): ProgramType[] | Error => {
-    const programIDs = findAllPackageProgramIds(pkg)
-    const programs = statePrograms.filter((program) =>
-        programIDs.includes(program.id)
-    )
-    if (!programs || programs.length !== programIDs.length) {
-        const errMessage = `Can't find programs ${programIDs} from state ${pkg.stateCode}`
-        logError('newPackageCMSEmail', errMessage)
-        return new Error(errMessage)
-    }
-
     return programs
 }
 
@@ -555,16 +444,12 @@ const parseEmailDataWithdrawSubmission = (
 
 export {
     stripHTMLFromTemplate,
-    handleAsCHIPSubmission,
     handleAsCHIPSubmissionForContract,
-    generateCMSReviewerEmails,
     generateCMSReviewerEmailsForSubmittedContract,
     generateCMSReviewerEmailsForUnlockedContract,
     renderTemplate,
     SubmissionTypeRecord,
-    findAllPackageProgramIds,
     findAllContractProgramIds,
-    findPackagePrograms,
     findContractPrograms,
     filterChipAndPRSubmissionReviewers,
     getQuestionRound,

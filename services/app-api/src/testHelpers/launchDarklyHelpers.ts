@@ -1,10 +1,11 @@
-import type { LDService } from '../launchDarkly/launchDarkly'
 import type {
     FeatureFlagLDConstant,
     FeatureFlagSettings,
 } from '@mc-review/common-code'
-
-import { defaultFeatureFlags } from '../launchDarkly/launchDarkly'
+import {
+    defaultFeatureFlags,
+    type LDService,
+} from '../launchDarkly/launchDarkly'
 
 function testLDService(mockFeatureFlags?: FeatureFlagSettings): LDService {
     const featureFlags = defaultFeatureFlags()

@@ -1,12 +1,11 @@
-import type { InsertContractArgsType } from '../postgres/contractAndRates/insertContract'
 import { v4 as uuidv4 } from 'uuid'
 import type {
     ContractRevisionTableWithRates,
     ContractTableFullPayload,
 } from '../postgres/contractAndRates/prismaFullContractRateHelpers'
 import type { StateCodeType } from '@mc-review/hpp'
-import type { ContractFormDataType } from '../domain-models/contractAndRates'
-import { findStatePrograms } from '../postgres'
+import type { ContractFormDataType } from '../domain-models'
+import { findStatePrograms, type InsertContractArgsType } from '../postgres'
 import { must } from './assertionHelpers'
 
 const defaultContractData = () => ({

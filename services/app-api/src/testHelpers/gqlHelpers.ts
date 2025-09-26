@@ -22,8 +22,7 @@ import type {
 import type { EmailConfiguration, Emailer } from '../emailer'
 import type { UpdateStateAssignmentsByStatePayload } from '../gen/gqlServer'
 import type { Context } from '../handlers/apollo_gql'
-import type { Store } from '../postgres'
-import { findStatePrograms, NewPostgresStore } from '../postgres'
+import { findStatePrograms, NewPostgresStore, type Store } from '../postgres'
 import { configureResolvers } from '../resolvers'
 import { sharedTestPrismaClient } from './storeHelpers'
 import {
@@ -35,15 +34,14 @@ import type { LDService } from '../launchDarkly/launchDarkly'
 import { insertUserToLocalAurora } from '../authn'
 import { testStateUser } from './userHelpers'
 import { must } from './assertionHelpers'
-import type { JWTLib } from '../jwt'
-import { newJWTLib } from '../jwt'
+import { newJWTLib, type JWTLib } from '../jwt'
 import { testS3Client } from './s3Helpers'
 import type { S3ClientT } from '../s3'
 import { configureEmailer } from '../handlers/configuration'
-import type { DocumentZipService } from '../zip/generateZip'
 import {
     documentZipService,
     localGenerateDocumentZip,
+    type DocumentZipService,
 } from '../zip/generateZip'
 
 // Since our programs are checked into source code, we have a program we

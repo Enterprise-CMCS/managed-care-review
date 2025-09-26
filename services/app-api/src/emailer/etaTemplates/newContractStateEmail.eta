@@ -1,6 +1,6 @@
 <%= it.packageName %> was successfully submitted.
 <br /><br />
-<%~ includeFile('./newPackageSummary', it) %>
+<%~ includeFile('./newContractSummary', it) %>
 <br /><br />
 If you need to make any changes, please contact CMS.
 <br /><br />
