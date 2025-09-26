@@ -2,7 +2,7 @@ import { BaseStack, type BaseStackProps } from '../constructs/base/base-stack'
 import type { Construct } from 'constructs'
 import { NodejsFunction } from 'aws-cdk-lib/aws-lambda-nodejs'
 import { Runtime, Architecture } from 'aws-cdk-lib/aws-lambda'
-import { Duration, CfnOutput } from 'aws-cdk-lib'
+import { Duration, CfnOutput, Fn } from 'aws-cdk-lib'
 import {
     CfnMalwareProtectionPlan,
     type CfnDetector,
@@ -40,17 +40,19 @@ export class VirusScanning extends BaseStack {
         // All environments use the same detector, but create their own protection plans
         const detectorId = this.getExistingDetectorId()
 
-        // Import the uploads buckets from the uploads stack
+        // Import the uploads buckets from CloudFormation exports
+        const uploadsStackName = `uploads-${this.stage}-cdk`
+
         const uploadsBucket = Bucket.fromBucketName(
             this,
             'ImportedUploadsBucket',
-            `mcr-cdk-${this.stage}-uploads-documents-bucket`
+            Fn.importValue(`${uploadsStackName}-DocumentUploadsBucketName`)
         )
 
         const qaBucket = Bucket.fromBucketName(
             this,
             'ImportedQaBucket',
-            `mcr-cdk-${this.stage}-uploads-qa-bucket`
+            Fn.importValue(`${uploadsStackName}-QAUploadsBucketName`)
         )
 
         // We don't create the detector - it's managed externally
@@ -196,7 +198,6 @@ export class VirusScanning extends BaseStack {
                 protectedResource: {
                     s3Bucket: {
                         bucketName: uploadsBucket.bucketName,
-                        objectPrefixes: ['*'],
                     },
                 },
                 actions: {
@@ -210,6 +211,7 @@ export class VirusScanning extends BaseStack {
         // Ensure IAM policy and role are fully created before malware protection plan
         uploadsProtectionPlan.node.addDependency(malwareProtectionPolicy)
         uploadsProtectionPlan.node.addDependency(malwareProtectionRole)
+        uploadsProtectionPlan.node.addDependency(uploadsBucket)
 
         // Create malware protection plan for QA bucket (with dependency)
         const qaProtectionPlan = new CfnMalwareProtectionPlan(
@@ -220,7 +222,6 @@ export class VirusScanning extends BaseStack {
                 protectedResource: {
                     s3Bucket: {
                         bucketName: qaBucket.bucketName,
-                        objectPrefixes: ['*'],
                     },
                 },
                 actions: {
@@ -234,6 +235,7 @@ export class VirusScanning extends BaseStack {
         // Ensure IAM policy and role are fully created before malware protection plan
         qaProtectionPlan.node.addDependency(malwareProtectionPolicy)
         qaProtectionPlan.node.addDependency(malwareProtectionRole)
+        qaProtectionPlan.node.addDependency(qaBucket)
 
         // Create Lambda function to process GuardDuty scan results
         const scanProcessor = new NodejsFunction(this, 'ScanProcessor', {
