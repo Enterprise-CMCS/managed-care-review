@@ -70,6 +70,7 @@ export class GitHubOidcServiceRoleStack extends BaseStack {
             'ecr:*',
             'events:*',
             'firehose:*',
+            'guardduty:*',
             'iam:*',
             'kms:*',
             'lambda:*',
