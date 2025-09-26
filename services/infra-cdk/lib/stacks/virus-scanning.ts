@@ -9,7 +9,14 @@ import {
 } from 'aws-cdk-lib/aws-guardduty'
 import { Rule } from 'aws-cdk-lib/aws-events'
 import { LambdaFunction } from 'aws-cdk-lib/aws-events-targets'
-import { PolicyStatement, Effect } from 'aws-cdk-lib/aws-iam'
+import {
+    Role,
+    Policy,
+    ServicePrincipal,
+    PolicyDocument,
+    PolicyStatement,
+    Effect,
+} from 'aws-cdk-lib/aws-iam'
 import { Bucket } from 'aws-cdk-lib/aws-s3'
 import * as path from 'path'
 
@@ -54,41 +61,132 @@ export class VirusScanning extends BaseStack {
             attrId: detectorId,
         } as CfnDetector
 
-        // Use the existing AWS service-linked role for GuardDuty Malware Protection
-        // This role is automatically created by AWS and has all necessary permissions
-        const malwareProtectionRoleArn = `arn:aws:iam::${this.account}:role/aws-service-role/malware-protection.guardduty.amazonaws.com/AWSServiceRoleForAmazonGuardDutyMalwareProtection`
+        // Create IAM role for GuardDuty Malware Protection (following AWS sample)
+        const guardDutyPassRole = new Role(
+            this,
+            'GuardDutyMalwareProtectionPassRole',
+            {
+                roleName: `GuardDutyMalwareProtectionPassRole-${this.stage}`,
+                assumedBy: new ServicePrincipal(
+                    'malware-protection-plan.guardduty.amazonaws.com'
+                ), // Note: different from service-linked role!
+                description:
+                    'IAM pass role for GuardDuty malware protection service',
+            }
+        )
 
-        // Create malware protection plan for uploads bucket (using service-linked role)
-        new CfnMalwareProtectionPlan(this, 'UploadsProtection', {
-            role: malwareProtectionRoleArn,
-            protectedResource: {
-                s3Bucket: {
-                    bucketName: uploadsBucket.bucketName,
-                    objectPrefixes: ['*'],
-                },
-            },
-            actions: {
-                tagging: {
-                    status: 'ENABLED',
-                },
-            },
-        })
+        // Create IAM policy with comprehensive permissions (AWS sample pattern)
+        const rolePolicy = new Policy(
+            this,
+            'GuardDutyMalwareProtectionRolePolicy',
+            {
+                policyName: `GuardDutyMalwareProtectionRolePolicy-${this.stage}`,
+                document: new PolicyDocument({
+                    statements: [
+                        // S3 permissions for scanning and tagging (using CloudFormation imports)
+                        new PolicyStatement({
+                            effect: Effect.ALLOW,
+                            actions: ['s3:*'],
+                            resources: [
+                                uploadsBucket.bucketArn,
+                                qaBucket.bucketArn,
+                                `${uploadsBucket.bucketArn}/*`,
+                                `${qaBucket.bucketArn}/*`,
+                            ],
+                        }),
+                        // EventBridge permissions
+                        new PolicyStatement({
+                            effect: Effect.ALLOW,
+                            actions: [
+                                'events:PutRule',
+                                'events:DeleteRule',
+                                'events:PutTargets',
+                                'events:RemoveTargets',
+                                'events:DescribeRule',
+                                'events:ListTargetsByRule',
+                            ],
+                            resources: [
+                                `arn:aws:events:*:${this.account}:rule/DO-NOT-DELETE-AmazonGuardDutyMalwareProtectionS3*`,
+                            ],
+                        }),
+                        // KMS permissions
+                        new PolicyStatement({
+                            effect: Effect.ALLOW,
+                            actions: [
+                                'kms:Decrypt',
+                                'kms:DescribeKey',
+                                'kms:GenerateDataKey',
+                            ],
+                            resources: ['*'],
+                            conditions: {
+                                StringEquals: {
+                                    'kms:ViaService': [
+                                        `s3.${this.region}.amazonaws.com`,
+                                    ],
+                                },
+                            },
+                        }),
+                    ],
+                }),
+            }
+        )
 
-        // Create malware protection plan for QA bucket (using service-linked role)
-        new CfnMalwareProtectionPlan(this, 'QaProtection', {
-            role: malwareProtectionRoleArn,
-            protectedResource: {
-                s3Bucket: {
-                    bucketName: qaBucket.bucketName,
-                    objectPrefixes: ['*'],
+        // Attach policy to role
+        rolePolicy.attachToRole(guardDutyPassRole)
+
+        // Ensure IAM policy can reference bucket ARNs (depends on bucket imports)
+        rolePolicy.node.addDependency(uploadsBucket)
+        rolePolicy.node.addDependency(qaBucket)
+
+        // Create malware protection plan for uploads bucket (with proper dependencies)
+        const uploadsProtectionPlan = new CfnMalwareProtectionPlan(
+            this,
+            'UploadsProtection',
+            {
+                role: guardDutyPassRole.roleArn,
+                protectedResource: {
+                    s3Bucket: {
+                        bucketName: uploadsBucket.bucketName,
+                        objectPrefixes: ['*'],
+                    },
                 },
-            },
-            actions: {
-                tagging: {
-                    status: 'ENABLED',
+                actions: {
+                    tagging: {
+                        status: 'ENABLED',
+                    },
                 },
-            },
-        })
+            }
+        )
+
+        // Ensure malware protection plan is created after role and bucket are ready
+        uploadsProtectionPlan.node.addDependency(guardDutyPassRole)
+        uploadsProtectionPlan.node.addDependency(rolePolicy)
+        uploadsProtectionPlan.node.addDependency(uploadsBucket)
+
+        // Create malware protection plan for QA bucket (with proper dependencies)
+        const qaProtectionPlan = new CfnMalwareProtectionPlan(
+            this,
+            'QaProtection',
+            {
+                role: guardDutyPassRole.roleArn,
+                protectedResource: {
+                    s3Bucket: {
+                        bucketName: qaBucket.bucketName,
+                        objectPrefixes: ['*'],
+                    },
+                },
+                actions: {
+                    tagging: {
+                        status: 'ENABLED',
+                    },
+                },
+            }
+        )
+
+        // Ensure malware protection plan is created after role and bucket are ready
+        qaProtectionPlan.node.addDependency(guardDutyPassRole)
+        qaProtectionPlan.node.addDependency(rolePolicy)
+        qaProtectionPlan.node.addDependency(qaBucket)
 
         // Create Lambda function to process GuardDuty scan results
         const scanProcessor = new NodejsFunction(this, 'ScanProcessor', {
