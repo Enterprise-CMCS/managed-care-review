@@ -132,6 +132,7 @@ export class Uploads extends BaseStack {
      * This allows GuardDuty to scan objects and validate bucket ownership
      */
     private addGuardDutyMalwareProtectionAccess(bucket: s3.IBucket): void {
+        // Main GuardDuty malware protection permissions
         bucket.addToResourcePolicy(
             new iam.PolicyStatement({
                 sid: 'AllowGuardDutyMalwareProtection',
@@ -143,6 +144,30 @@ export class Uploads extends BaseStack {
                 ],
                 actions: ['s3:*'],
                 resources: [bucket.bucketArn, `${bucket.bucketArn}/*`],
+            })
+        )
+
+        // Additional permissions for GuardDuty test object creation/validation
+        bucket.addToResourcePolicy(
+            new iam.PolicyStatement({
+                sid: 'AllowGuardDutyTestObjects',
+                effect: iam.Effect.ALLOW,
+                principals: [
+                    new iam.ServicePrincipal(
+                        'malware-protection-plan.guardduty.amazonaws.com'
+                    ),
+                ],
+                actions: [
+                    's3:PutObject',
+                    's3:GetObject',
+                    's3:DeleteObject',
+                    's3:PutObjectTagging',
+                    's3:GetObjectTagging',
+                ],
+                resources: [
+                    `${bucket.bucketArn}/aws-guardduty-malware-protection-test-*`,
+                    `${bucket.bucketArn}/malware-protection-resource-validation-object`,
+                ],
             })
         )
     }
