@@ -106,7 +106,7 @@
         "dayjs": "^1.11.18",
         "formik": "^2.4.6",
         "graphql": "^16.9.0",
-        "jotai": "^2.9.3",
+        "jotai": "^2.15.0",
         "jotai-location": "^0.6.2",
         "jsdom": "^26.1.0",
         "launchdarkly-react-client-sdk": "^3.6.0",
