@@ -148,8 +148,10 @@ export class Uploads extends BaseStack {
                     's3:GetObjectTagging',
                     's3:GetObjectVersionTagging',
                     's3:ListBucket',
+                    's3:PutObject',
                     's3:PutObjectTagging',
                     's3:PutObjectVersionTagging',
+                    's3:DeleteObject',
                 ],
                 resources: [bucket.bucketArn, `${bucket.bucketArn}/*`],
             })
