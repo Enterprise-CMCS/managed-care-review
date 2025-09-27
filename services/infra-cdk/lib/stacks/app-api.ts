@@ -758,6 +758,8 @@ export class AppApiStack extends BaseStack {
             VITE_APP_S3_QA_BUCKET: qaUploadsBucketName,
             VITE_APP_S3_DOCUMENTS_BUCKET: documentUploadsBucketName,
             VITE_APP_S3_REGION: this.region,
+            INTERNAL_ALLOWED_ORIGINS:
+                process.env.INTERNAL_ALLOWED_ORIGINS || '',
         }
     }
 
@@ -783,10 +785,20 @@ export class AppApiStack extends BaseStack {
         // OAuth token endpoint
         const oauthResource = apiGateway.root.addResource('oauth')
         const tokenResource = oauthResource.addResource('token')
-        tokenResource.addMethod(
-            'POST',
-            new LambdaIntegration(this.oauthTokenFunction)
-        )
+        new ApiEndpoint(this, 'oauth-token-post', {
+            resource: tokenResource,
+            method: 'POST',
+            handler: this.oauthTokenFunction,
+            authorizationType: AuthorizationType.NONE,
+        })
+
+        // Add CORS preflight support for OAuth token endpoint
+        tokenResource.addCorsPreflight({
+            allowOrigins: ['*'],
+            allowMethods: ['POST', 'OPTIONS'],
+            allowHeaders: ['Content-Type', 'Authorization'],
+            allowCredentials: true,
+        })
 
         // GraphQL endpoints with IAM authorization and CORS
         const graphqlResource = this.apiGateway.root.addResource('graphql')
@@ -830,6 +842,20 @@ export class AppApiStack extends BaseStack {
             handler: this.graphqlFunction,
             authorizationType: AuthorizationType.CUSTOM,
             authorizer: customAuthorizer,
+        })
+
+        // Add CORS preflight support for external GraphQL endpoint
+        externalResource.addCorsPreflight({
+            allowOrigins: ['*'],
+            allowMethods: ['GET', 'POST', 'OPTIONS'],
+            allowHeaders: [
+                'Content-Type',
+                'Authorization',
+                'X-Amz-Date',
+                'X-Api-Key',
+                'X-Amz-Security-Token',
+            ],
+            allowCredentials: true,
         })
 
         // Deployment and stage are automatically handled by RestApi construct
