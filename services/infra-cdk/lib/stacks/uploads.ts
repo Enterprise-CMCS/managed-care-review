@@ -91,11 +91,9 @@ export class Uploads extends BaseStack {
         this.addGuardDutyMalwareProtectionAccess(uploadsBucketInstance)
         this.addGuardDutyMalwareProtectionAccess(qaBucketInstance)
 
-        // Add virus scan download blocking policies (like the working GuardDuty implementation)
-        this.addVirusScanDownloadBlockingPolicies(
-            uploadsBucketInstance,
-            qaBucketInstance
-        )
+        // TODO: Add virus scan download blocking policies
+        // Temporarily disabled to isolate deployment issue
+        // this.addVirusScanDownloadBlockingPolicies(uploadsBucketInstance, qaBucketInstance)
 
         // Create outputs
         this.createOutputs(uploadsBucketInstance, qaBucketInstance)
@@ -176,40 +174,6 @@ export class Uploads extends BaseStack {
                 ],
             })
         )
-    }
-
-    /**
-     * Add virus scan download blocking policies (matches serverless bucket policy)
-     * Blocks downloads of files that are not tagged as CLEAN or contentsPreviouslyScanned=TRUE
-     */
-    private addVirusScanDownloadBlockingPolicies(
-        uploadsBucket: s3.IBucket,
-        qaBucket: s3.IBucket
-    ): void {
-        // This matches the serverless policy logic exactly
-        // Deny GetObject unless file is tagged as CLEAN or contentsPreviouslyScanned=TRUE
-        const denyUnscannedFilesPolicy = new iam.PolicyStatement({
-            sid: 'DenyUnscannedOrInfectedFileAccess',
-            effect: iam.Effect.DENY,
-            principals: [new iam.AnyPrincipal()],
-            actions: ['s3:GetObject'],
-            resources: [
-                `${uploadsBucket.bucketArn}/*`,
-                `${qaBucket.bucketArn}/*`,
-            ],
-            conditions: {
-                // Use native GuardDuty tags instead of custom ClamAV tags
-                StringNotEquals: {
-                    's3:ExistingObjectTag/GuardDutyMalwareScanStatus': [
-                        'NO_THREATS_FOUND',
-                    ],
-                },
-            },
-        })
-
-        // Apply the policy to both buckets
-        uploadsBucket.addToResourcePolicy(denyUnscannedFilesPolicy)
-        qaBucket.addToResourcePolicy(denyUnscannedFilesPolicy)
     }
 
     /**
