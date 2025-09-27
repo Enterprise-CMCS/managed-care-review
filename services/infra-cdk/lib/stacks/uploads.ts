@@ -91,9 +91,11 @@ export class Uploads extends BaseStack {
         this.addGuardDutyMalwareProtectionAccess(uploadsBucketInstance)
         this.addGuardDutyMalwareProtectionAccess(qaBucketInstance)
 
-        // TODO: Add virus scan download blocking policies
-        // Temporarily disabled to isolate deployment issue
-        // this.addVirusScanDownloadBlockingPolicies(uploadsBucketInstance, qaBucketInstance)
+        // Add virus scan download blocking policies
+        this.addVirusScanDownloadBlockingPolicies(
+            uploadsBucketInstance,
+            qaBucketInstance
+        )
 
         // Create outputs
         this.createOutputs(uploadsBucketInstance, qaBucketInstance)
@@ -172,6 +174,49 @@ export class Uploads extends BaseStack {
                     `${bucket.bucketArn}/aws-guardduty-malware-protection-test-*`,
                     `${bucket.bucketArn}/malware-protection-resource-validation-object`,
                 ],
+            })
+        )
+    }
+
+    /**
+     * Add virus scan download blocking policies
+     * Blocks downloads of files that don't have GuardDutyMalwareScanStatus=NO_THREATS_FOUND
+     */
+    private addVirusScanDownloadBlockingPolicies(
+        uploadsBucket: s3.IBucket,
+        qaBucket: s3.IBucket
+    ): void {
+        // Add deny policy to uploads bucket
+        uploadsBucket.addToResourcePolicy(
+            new iam.PolicyStatement({
+                sid: 'DenyInfectedFileAccess',
+                effect: iam.Effect.DENY,
+                principals: [new iam.AnyPrincipal()],
+                actions: ['s3:GetObject'],
+                resources: [`${uploadsBucket.bucketArn}/*`],
+                conditions: {
+                    StringNotEquals: {
+                        's3:ExistingObjectTag/GuardDutyMalwareScanStatus':
+                            'NO_THREATS_FOUND',
+                    },
+                },
+            })
+        )
+
+        // Add deny policy to QA bucket
+        qaBucket.addToResourcePolicy(
+            new iam.PolicyStatement({
+                sid: 'DenyInfectedFileAccess',
+                effect: iam.Effect.DENY,
+                principals: [new iam.AnyPrincipal()],
+                actions: ['s3:GetObject'],
+                resources: [`${qaBucket.bucketArn}/*`],
+                conditions: {
+                    StringNotEquals: {
+                        's3:ExistingObjectTag/GuardDutyMalwareScanStatus':
+                            'NO_THREATS_FOUND',
+                    },
+                },
             })
         )
     }
