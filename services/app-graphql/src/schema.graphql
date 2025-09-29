@@ -12,14 +12,6 @@ type Query {
     fetchCurrentUser: User!
 
     """
-    indexHealthPlanPackages returns all of the HealthPlanPackages the current user can see.
-
-    StateUsers can find all the packages for their state
-    CMSUsers can find all the packages that do not have the DRAFT status
-    """
-    indexHealthPlanPackages: IndexHealthPlanPackagesPayload!
-
-    """
     indexContracts returns all of the contracts the current user can see.
 
     StateUsers can find all the contracts for their state
@@ -720,11 +712,6 @@ type HealthPlanPackageEdge {
 
 type ContractEdge {
     node: Contract!
-}
-
-type IndexHealthPlanPackagesPayload {
-    totalCount: Int
-    edges: [HealthPlanPackageEdge!]!
 }
 
 type IndexContractsPayload {
