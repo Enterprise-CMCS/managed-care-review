@@ -72,9 +72,7 @@ async function configurePostgres(
         return new Error('Failed to create Prisma Client')
     }
 
-    const client: ExtendedPrismaClient = prismaResult
-
-    return client
+    return prismaResult
 }
 
 async function getDBClusterID(secretName: string): Promise<string | Error> {
@@ -86,8 +84,7 @@ async function getDBClusterID(secretName: string): Promise<string | Error> {
         )
         return secretsResult
     }
-    const dbID = secretsResult.dbClusterIdentifier.split(':').slice(-1)[0]
-    return dbID
+    return secretsResult.dbClusterIdentifier.split(':').slice(-1)[0]
 }
 
 async function configureEmailerFromDatabase(
@@ -190,7 +187,7 @@ async function configureEmailer({
     const removeParameterStore = await ldService.getFeatureFlag({
         key: 'throwaway-key-email-configuration', // we usually use unique user specific key from apollo context, this is an one off pattern for parameter store flag since its configured before we have that user in apollo context
         flag: 'remove-parameter-store',
-        anonymous: true
+        anonymous: true,
     })
     const emailSettings = removeParameterStore
         ? await configureEmailerFromDatabase(store)

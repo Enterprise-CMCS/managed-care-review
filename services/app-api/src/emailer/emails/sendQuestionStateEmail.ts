@@ -2,14 +2,17 @@ import { packageName as generatePackageName } from '@mc-review/hpp'
 import { formatCalendarDate } from '@mc-review/dates'
 import { pruneDuplicateEmails } from '../formatters'
 import type { EmailConfiguration, EmailData } from '..'
-import type { ProgramType, ContractQuestionType } from '../../domain-models'
+import type {
+    ProgramType,
+    ContractQuestionType,
+    ContractRevisionType,
+} from '../../domain-models'
 import {
     stripHTMLFromTemplate,
     renderTemplate,
     findContractPrograms,
 } from '../templateHelpers'
 import { submissionQuestionResponseURL } from '../generateURLs'
-import type { ContractRevisionType } from '../../domain-models'
 
 export const sendQuestionStateEmail = async (
     contractRev: ContractRevisionType,

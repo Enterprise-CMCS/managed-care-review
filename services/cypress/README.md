@@ -120,7 +120,7 @@ Using the app to navigate allows us to check a11y without injecting the runtime 
         cy.checkA11yWithWcag22aa()
 
         cy.fillOutContractActionAndRateCertification()
-        cy.deprecatedNavigateV1Form('CONTINUE_FROM_START_NEW')
+        cy.navigateContractRatesForm('CONTINUE_FROM_START_NEW')
 
         cy.findByRole('heading', { level: 2, name: /Contract details/ })
         cy.findByRole('button', {
@@ -196,38 +196,28 @@ We mimicked the same setup in the application in Cypress to make graphql request
             ```ts
             Cypress.Commands.add(
                 'apiCreateAndSubmitContractOnlySubmission',
-                (): Cypress.Chainable<HealthPlanPackage> => {
-                    return cy
-                        .task<string>('readGraphQLSchema')
-                        .then((schema) => createAndSubmitPackage(schema))
-                }
+                (stateUser): Cypress.Chainable<Contract> => 
+                    cy.task<DocumentNode>('readGraphQLSchema').then({ timeout: 30000 },(schema) => 
+                        apolloClientWrapper(
+                            schema,
+                            stateUser,
+                            createAndSubmitContractOnlyPackage
+                        )
+                    )
             )
             ```
 -   `Amplify` for CI
 
-    -   In `apollo-test-utils.ts` we are configuring `Amplify` in order to pass authentication through the `Apollo` client.
+    -   In `apollo-test-utils.ts` we implemented our own service `AuthAPIManager` to perform API requests. Since our Cypress commands run in a node environment, we had to implement our own service instead of using Amplify.
         ```ts
-        Amplify.configure({
-            Auth: {
-                mandatorySignIn: true,
-                region: Cypress.env('COGNITO_REGION'),
-                userPoolId: Cypress.env('COGNITO_USER_POOL_ID'),
-                identityPoolId: Cypress.env('COGNITO_IDENTITY_POOL_ID'),
-                userPoolWebClientId: Cypress.env(
-                    'COGNITO_USER_POOL_WEB_CLIENT_ID'
-                ),
-            },
-            API: {
-                endpoints: [
-                    {
-                        name: 'api',
-                        endpoint: Cypress.env('API_URL'),
-                    },
-                ],
-            },
-        })
+        // Method to sign into app as user
+        AuthAPIManager.signIn()
+        // Method to sign out of app
+        AuthAPIManager.signOut()
+        // Method for sending request
+        AuthAPIManager.post()
         ```
-        -   All the env variables are passed into Cypress in CI. You can take a look in `.github/workflows/deploy.yml` at the `Cypress -- Chrome` step to see the environment variables being set.
+    -   All the env variables are passed into Cypress in CI. You can take a look in `.github/workflows/deploy.yml` at the `Cypress -- Chrome` step to see the environment variables being set. The env variables are read and used to configure `AuthAPIManager`.
 
 -   `Apollo` client
     -   In `apollo-test-utils.ts` we have the `apolloClientWrapper` function where a new `Apollo` client is created.
@@ -239,8 +229,8 @@ We mimicked the same setup in the application in Cypress to make graphql request
             ```ts
             Cypress.Commands.add(
                 'apiCreateAndSubmitContractOnlySubmission',
-                (stateUser): Cypress.Chainable<HealthPlanPackage> => {
-                    cy.task<string>('readGraphQLSchema').then((schema) =>
+                (stateUser): Cypress.Chainable<Contract> => {
+                    cy.task<DocumentNode>('readGraphQLSchema').then({ timeout: 30000 }, (schema) =>
                         apolloClientWrapper(schema, stateUser, callback)
                     )
                 }
@@ -269,7 +259,7 @@ We mimicked the same setup in the application in Cypress to make graphql request
     -   We can import our `gql` mutations and queries from the generated file `gen/gqlClient.ts`.
         ```ts
         const newSubmission = await apolloClient.mutate({
-            mutation: CreateHealthPlanPackageDocument,
+            mutation: CreateContractDocument,
             variables: {
                 input: newSubmissionInput,
             },
@@ -282,12 +272,12 @@ We can use the `apiCreateAndSubmitContractOnlySubmission` cypress command as an 
 
 -   To see a full example on how this command works, look at `integration/stateWorkflow/questionResponse/questionResponse.spec.ts` test.
 
-1. In `cypress/support/apiCommands.ts` we can add a new API command that has a return type of `Cypress.Chainable<HealthPlanPackage>`. This is important because the type allows us to use the `.then()` when using the command to wait for API requests to finish before continuing with the test.
+1. In `cypress/support/apiCommands.ts` we can add a new API command that has a return type of `Cypress.Chainable<Contract>`. This is important because the type allows us to use the `.then()` when using the command to wait for API requests to finish before continuing with the test.
 
     ```ts
     Cypress.Commands.add(
         'apiCreateAndSubmitContractOnlySubmission',
-        (stateUser): Cypress.Chainable<HealthPlanPackage> => {}
+        (stateUser): Cypress.Chainable<Contract> => {}
     )
     ```
 
@@ -299,7 +289,7 @@ We can use the `apiCreateAndSubmitContractOnlySubmission` cypress command as an 
                 // ...other commands
                 apiCreateAndSubmitContractOnlySubmission(
                     stateUser: StateUserType
-                ): Cypress.Chainable<HealthPlanPackage>
+                ): Cypress.Chainable<Contract>
             }
         }
     }
@@ -308,14 +298,10 @@ We can use the `apiCreateAndSubmitContractOnlySubmission` cypress command as an 
     ```ts
     Cypress.Commands.add(
         'apiCreateAndSubmitContractOnlySubmission',
-        (stateUser): Cypress.Chainable<HealthPlanPackage> => {
-            return cy
-                .task<string>('readGraphQLSchema')
-                .then(
-                    (schema) =>
-                        `our function for the api requests will go here in the next step`
-                )
-        }
+        (stateUser): Cypress.Chainable<Contract> => 
+            cy.task<DocumentNode>('readGraphQLSchema').then((schema) =>
+                `our function for the api requests will go here in the next step`
+            )
     )
     ```
 4. Once we have the `schema` we first call `apolloClientWrapper` that handles the `Amplify` authentication, configuring the `Apollo` client, and passing client to the callback function.
@@ -326,9 +312,9 @@ We can use the `apiCreateAndSubmitContractOnlySubmission` cypress command as an 
             ```ts
             Cypress.Commands.add(
                 'apiCreateAndSubmitContractOnlySubmission',
-                (stateUser): Cypress.Chainable<HealthPlanPackage> => {
-                    cy.task<string>('readGraphQLSchema').then((schema) =>
-                        apolloClientWrapper(schema, stateUser, callback)
+                (stateUser): Cypress.Chainable<Contract> => {
+                    cy.task<DocumentNode>('readGraphQLSchema').then((schema) =>
+                        apolloClientWrapper(schema, stateUser, createAndSubmitContractOnlyPackage)
                     )
                 }
             )
@@ -336,52 +322,45 @@ We can use the `apiCreateAndSubmitContractOnlySubmission` cypress command as an 
 5. To make our callback function that does all the API requests we start by creating a function accepts `apollClient` as an argument with the type `ApolloClient<NormalizedCacheObject>`. In this function we can now make requests using the apollo client and our `gql` mutations and queries from `gen/gqlClient.ts`
 
     ```ts
-    const createAndSubmitPackage = async (
+    const createAndSubmitContractOnlyPackage = async (
         apolloClient: ApolloClient<NormalizedCacheObject>
-    ): Promise<HealthPlanPackage> => {
-        const newSubmission = await apolloClient.mutate({
-            mutation: CreateHealthPlanPackageDocument,
+    ): Promise<Contract> => {
+        const newContract = await apolloClient.mutate({
+            mutation: CreateContractDocument,
             variables: {
-                input: newSubmissionInput,
-            },
+                input: newSubmissionInput(),
+            }
         })
-
-        const pkg = newSubmission.data.createHealthPlanPackage.pkg
-        const revision = pkg.revisions[0].node
-
-        const formData = base64ToDomain(revision.formDataProto)
-        if (formData instanceof Error) {
-            throw new Error(formData.message)
+    
+        const draftContract = newContract.data.createContract.contract
+        const draftRevision = draftContract.draftRevision
+        const updateFormData = contractFormData({
+            submissionType: 'CONTRACT_ONLY'
+        })
+    
+        const updateContractDraftRevisionInput: UpdateContractDraftRevisionInput = {
+            contractID: draftContract.id,
+            lastSeenUpdatedAt: draftRevision.updatedAt,
+            formData: updateFormData
         }
-
-        const fullFormData = {
-            ...formData,
-            ...contractOnlyData,
-        }
-
-        const formDataProto = domainToBase64(fullFormData)
-
+    
         await apolloClient.mutate({
-            mutation: UpdateHealthPlanFormDataDocument,
+            mutation: UpdateContractDraftRevisionDocument,
             variables: {
-                input: {
-                    healthPlanFormData: formDataProto,
-                    pkgID: pkg.id,
-                },
-            },
+                input: updateContractDraftRevisionInput
+            }
         })
-
+    
         const submission = await apolloClient.mutate({
-            mutation: SubmitHealthPlanPackageDocument,
+            mutation: SubmitContractDocument,
             variables: {
                 input: {
-                    pkgID: pkg.id,
-                    submittedReason: 'Submit package for Q&A Tests',
+                    contractID: draftContract.id,
                 },
             },
         })
-
-        return submission.data.submitHealthPlanPackage.pkg
+    
+        return submission.data.submitContract.contract
     }
     ```
 
@@ -389,16 +368,14 @@ We can use the `apiCreateAndSubmitContractOnlySubmission` cypress command as an 
     ```ts
     Cypress.Commands.add(
         'apiCreateAndSubmitContractOnlySubmission',
-        (stateUser): Cypress.Chainable<HealthPlanPackage> =>
-            cy
-                .task<string>('readGraphQLSchema')
-                .then((schema) =>
-                    apolloClientWrapper(
-                        schema,
-                        stateUser,
-                        createAndSubmitPackage
-                    )
+        (stateUser): Cypress.Chainable<Contract> =>
+            cy.task<DocumentNode>('readGraphQLSchema').then((schema) =>
+                apolloClientWrapper(
+                    schema,
+                    stateUser,
+                    createAndSubmitContractOnlyPackage
                 )
+            )
     )
     ```
 7. In a test spec we can use `cy.apiCreateAndSubmitContractOnlySubmission` to perform the API requests.
@@ -409,7 +386,7 @@ We can use the `apiCreateAndSubmitContractOnlySubmission` cypress command as an 
     describe('API Requests', () => {
         it('Makes API requests then does things', () => {
             cy.apiCreateAndSubmitContractOnlySubmission(stateUser).then(
-                (pkg) => {
+                (contract) => {
                     // Rest of the test runs after API requests are finished
                 }
             )

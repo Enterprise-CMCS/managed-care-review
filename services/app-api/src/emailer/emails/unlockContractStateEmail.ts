@@ -13,6 +13,7 @@ import type {
 } from '../../domain-models'
 import { reviewAndSubmitURL } from '../generateURLs'
 import { pruneDuplicateEmails } from '../formatters'
+
 export const unlockContractStateEmail = async (
     contract: UnlockedContractType,
     updateInfo: UpdateInfoType,

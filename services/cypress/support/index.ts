@@ -27,9 +27,8 @@ import {
 } from '@mc-review/common-code'
 import './apiCommands'
 import './accessibilityCommands'
-import { Contract, HealthPlanPackage, Division} from '../gen/gqlClient'
+import { Contract, Division} from '../gen/gqlClient'
 import { CMSUserType, StateUserType } from '../utils/apollo-test-utils'
-import { UnlockedHealthPlanFormDataType } from '@mc-review/hpp'
 import { CMSUserLoginNames } from './loginCommands'
 
 type FormButtonKey =
@@ -81,10 +80,6 @@ declare global {
             unlockSubmission(unlockReason?: string): void
 
             // navigate commands
-            deprecatedNavigateV1Form(
-                buttonName: FormButtonKey,
-                waitForLoad?: boolean
-            ): void
             navigateContractRatesForm(
                 buttonName: FormButtonKey,
                 waitForLoad?: boolean
@@ -126,10 +121,6 @@ declare global {
             apiCreateAndSubmitContractWithRates(
                 stateUser: StateUserType
             ): Cypress.Chainable<Contract>
-            apiDeprecatedCreateSubmitHPP(
-                stateUser: StateUserType,
-                formData?: Partial<UnlockedHealthPlanFormDataType>
-            ): Cypress.Chainable<HealthPlanPackage>
             apiCreateAndSubmitBaseContract(
                 stateUser: StateUserType
             ): Cypress.Chainable<Contract>

@@ -13,10 +13,12 @@ import { hasCMSPermissions } from '../../domain-models'
 import type { StateCodeType } from '../../testHelpers'
 import type { Emailer } from '../../emailer'
 import { canWrite } from '../../authorization/oauthAuthorization'
+import type { DocumentZipService } from '../../zip/generateZip'
 
 export function undoWithdrawContract(
     store: Store,
-    emailer: Emailer
+    emailer: Emailer,
+    documentZip: DocumentZipService
 ): MutationResolvers['undoWithdrawContract'] {
     return async (_parent, { input }, context) => {
         const { user, ctx, tracer } = context
@@ -105,7 +107,29 @@ export function undoWithdrawContract(
         }
 
         const { contract, ratesForDisplay } = undoWithdrawResult
+        // Generate zips!
+        const contractZipRes = await documentZip.createContractZips(
+            contract,
+            span
+        )
+        if (contractZipRes instanceof Error) {
+            const errMessage = `Failed to zip files for contract revision with ID: ${contract.id}: ${contractZipRes.message}`
+            logError('submitContract', errMessage)
+            setErrorAttributesOnActiveSpan(errMessage, span)
+        }
+        const rateZipRes = await documentZip.createRateZips(contract, span)
+        if (rateZipRes instanceof Array) {
+            const errorMessage = `Failed to zip files for ${rateZipRes.length} rate revision(s) on contract ${contract.id}`
+            logError('submitContract', errorMessage)
+            setErrorAttributesOnActiveSpan(errorMessage, span)
 
+            rateZipRes.forEach((error, index) => {
+                logError(
+                    'submitContract',
+                    `Rate zip error ${index + 1}: ${error.message}`
+                )
+            })
+        }
         let stateAnalystsEmails: string[] = []
         const stateAnalystsEmailsResult = await store.findStateAssignedUsers(
             contract.stateCode as StateCodeType

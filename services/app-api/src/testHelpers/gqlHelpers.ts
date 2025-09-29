@@ -9,12 +9,9 @@ import {
     CreateContractQuestionResponseDocument,
     CreateRateQuestionDocument,
     CreateRateQuestionResponseDocument,
-    UpdateHealthPlanFormDataDocument,
     UpdateStateAssignmentsByStateDocument,
 } from '../gen/gqlClient'
 import typeDefs from 'app-graphql/src/schema.graphql'
-import type { HealthPlanFormDataType } from '@mc-review/hpp'
-import { domainToBase64 } from '@mc-review/hpp'
 import type {
     CreateContractQuestionInput,
     CreateRateQuestionInputType,
@@ -23,13 +20,9 @@ import type {
     ProgramType,
 } from '../domain-models'
 import type { EmailConfiguration, Emailer } from '../emailer'
-import type {
-    HealthPlanPackage,
-    UpdateStateAssignmentsByStatePayload,
-} from '../gen/gqlServer'
+import type { UpdateStateAssignmentsByStatePayload } from '../gen/gqlServer'
 import type { Context } from '../handlers/apollo_gql'
-import type { Store } from '../postgres'
-import { findStatePrograms, NewPostgresStore } from '../postgres'
+import { findStatePrograms, NewPostgresStore, type Store } from '../postgres'
 import { configureResolvers } from '../resolvers'
 import { sharedTestPrismaClient } from './storeHelpers'
 import {
@@ -41,15 +34,14 @@ import type { LDService } from '../launchDarkly/launchDarkly'
 import { insertUserToLocalAurora } from '../authn'
 import { testStateUser } from './userHelpers'
 import { must } from './assertionHelpers'
-import type { JWTLib } from '../jwt'
-import { newJWTLib } from '../jwt'
+import { newJWTLib, type JWTLib } from '../jwt'
 import { testS3Client } from './s3Helpers'
 import type { S3ClientT } from '../s3'
 import { configureEmailer } from '../handlers/configuration'
-import type { DocumentZipService } from '../zip/generateZip'
 import {
     documentZipService,
     localGenerateDocumentZip,
+    type DocumentZipService,
 } from '../zip/generateZip'
 
 // Since our programs are checked into source code, we have a program we
@@ -240,35 +232,6 @@ const constructTestEmailer = async (opts: {
     )
 }
 
-const updateTestHealthPlanFormData = async (
-    server: ApolloServer,
-    updatedFormData: HealthPlanFormDataType
-): Promise<HealthPlanPackage> => {
-    const updatedB64 = domainToBase64(updatedFormData)
-    const updateResult = await executeGraphQLOperation(server, {
-        query: UpdateHealthPlanFormDataDocument,
-        variables: {
-            input: {
-                pkgID: updatedFormData.id,
-                healthPlanFormData: updatedB64,
-            },
-        },
-    })
-
-    if (updateResult.errors) {
-        console.info('errors', JSON.stringify(updateResult.errors))
-        throw new Error(
-            `updateTestHealthPlanFormData mutation failed with errors ${JSON.stringify(updateResult.errors)}`
-        )
-    }
-
-    if (!updateResult.data.updateHealthPlanFormData.pkg) {
-        throw new Error('updateTestHealthPlanFormData returned nothing')
-    }
-
-    return updateResult.data.updateHealthPlanFormData.pkg
-}
-
 const createTestQuestion = async (
     server: ApolloServer,
     contractID: string,
@@ -447,7 +410,6 @@ const updateTestStateAssignments = async (
 
 export {
     constructTestPostgresServer,
-    updateTestHealthPlanFormData,
     defaultContext,
     defaultFloridaProgram,
     defaultFloridaRateProgram,

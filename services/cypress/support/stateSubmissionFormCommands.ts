@@ -6,7 +6,7 @@ Cypress.Commands.add('startNewContractOnlySubmissionWithBaseContract', () => {
 
     cy.fillOutContractActionOnlyWithBaseContract()
 
-    cy.deprecatedNavigateV1Form('CONTINUE_FROM_START_NEW')
+    cy.navigateContractForm('CONTINUE_FROM_START_NEW')
     cy.findByRole('heading', { level: 2, name: /Contract details/ })
 })
 
@@ -30,7 +30,7 @@ Cypress.Commands.add('startNewContractOnlySubmissionWithAmendment', () => {
 
     cy.fillOutContractActionOnlyWithAmendment()
 
-    cy.deprecatedNavigateV1Form('CONTINUE_FROM_START_NEW')
+    cy.navigateContractForm('CONTINUE_FROM_START_NEW')
     cy.findByRole('heading', { level: 2, name: /Contract details/ })
 })
 
@@ -42,7 +42,7 @@ Cypress.Commands.add('startNewContractAndRatesSubmission', () => {
 
     cy.fillOutContractActionAndRateCertification()
 
-    cy.deprecatedNavigateV1Form('CONTINUE_FROM_START_NEW')
+    cy.navigateContractRatesForm('CONTINUE_FROM_START_NEW')
     cy.findByRole('heading', { level: 2, name: /Contract details/ })
 })
 
@@ -400,9 +400,7 @@ Cypress.Commands.add('fillOutNewRateCertification', () => {
             cy.verifyDocumentsHaveNoErrors()
             cy.waitForDocumentsToLoad()
             cy.findAllByTestId('errorMessage').should('have.length', 0)
-
     }
-
 )
 
 Cypress.Commands.add('fillOutLinkedRate', () => {
@@ -531,7 +529,7 @@ Cypress.Commands.add('fillOutSupportingDocuments', () => {
     cy.findAllByTestId('errorMessage').should('have.length', 0)
 })
 
-// for fileupload with the table view and checkboxes- tableView can be assigned to a number that representes how many items in the list should be preses
+// for file upload with the table view and checkboxes- tableView can be assigned to a number that represents how many items in the list should be preses
 Cypress.Commands.add('waitForDocumentsToLoad', () => {
     // list view is the default behavior
     cy.findAllByTestId('file-input-preview-image', {

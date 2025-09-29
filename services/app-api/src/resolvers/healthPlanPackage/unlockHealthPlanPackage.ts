@@ -1,10 +1,8 @@
 import { createForbiddenError, createUserInputError } from '../errorUtils'
-import type { UnlockedHealthPlanFormDataType } from '@mc-review/hpp'
 import { toDomain } from '@mc-review/hpp'
-import type { UpdateInfoType, ContractType } from '../../domain-models'
+import type { ContractType } from '../../domain-models'
 import {
     convertContractWithRatesToUnlockedHPP,
-    packageSubmitters,
     hasCMSPermissions,
 } from '../../domain-models'
 import type { Emailer } from '../../emailer'
@@ -18,7 +16,6 @@ import {
     setSuccessAttributesOnActiveSpan,
 } from '../attributeHelper'
 import { GraphQLError } from 'graphql'
-import type { StateCodeType } from '@mc-review/hpp'
 
 // unlockHealthPlanPackageResolver is a state machine transition for HealthPlanPackage
 export function unlockHealthPlanPackageResolver(
@@ -137,98 +134,6 @@ export function unlockHealthPlanPackageResolver(
                 extensions: {
                     code: 'INTERNAL_SERVER_ERROR',
                     cause: 'DB_ERROR',
-                },
-            })
-        }
-
-        const draftformData: UnlockedHealthPlanFormDataType = formDataResult
-
-        let stateAnalystsEmails: string[] = []
-        // not great that state code type isn't being used in ContractType but I'll risk the conversion for now
-        const stateAnalystsEmailsResult = await store.findStateAssignedUsers(
-            unlockContractResult.stateCode as StateCodeType
-        )
-
-        if (stateAnalystsEmailsResult instanceof Error) {
-            logError(
-                'getStateAnalystsEmails',
-                stateAnalystsEmailsResult.message
-            )
-            setErrorAttributesOnActiveSpan(
-                stateAnalystsEmailsResult.message,
-                span
-            )
-        } else {
-            stateAnalystsEmails = stateAnalystsEmailsResult.map((u) => u.email)
-        }
-
-        //If error, log it and set stateAnalystsEmails to empty string as to not interrupt the emails.
-        if (stateAnalystsEmails instanceof Error) {
-            logError('getStateAnalystsEmails', stateAnalystsEmails.message)
-            setErrorAttributesOnActiveSpan(stateAnalystsEmails.message, span)
-            stateAnalystsEmails = []
-        }
-
-        // Get submitter email from every pkg submitted revision.
-        const submitterEmails = packageSubmitters(unlockedPackage)
-
-        const statePrograms = store.findStatePrograms(draftformData.stateCode)
-
-        if (statePrograms instanceof Error) {
-            logError('findStatePrograms', statePrograms.message)
-            setErrorAttributesOnActiveSpan(statePrograms.message, span)
-            throw new GraphQLError(statePrograms.message, {
-                extensions: {
-                    code: 'INTERNAL_SERVER_ERROR',
-                    cause: 'DB_ERROR',
-                },
-            })
-        }
-
-        const updateInfo: UpdateInfoType = {
-            updatedAt: new Date(), // technically this is not right but it's close enough while we are supporting two systems
-            updatedBy: context.user,
-            updatedReason: unlockedReason,
-        }
-
-        const unlockPackageCMSEmailResult =
-            await emailer.sendUnlockPackageCMSEmail(
-                draftformData,
-                updateInfo,
-                stateAnalystsEmails,
-                statePrograms
-            )
-
-        const unlockPackageStateEmailResult =
-            await emailer.sendUnlockPackageStateEmail(
-                draftformData,
-                updateInfo,
-                statePrograms,
-                submitterEmails
-            )
-
-        if (
-            unlockPackageCMSEmailResult instanceof Error ||
-            unlockPackageStateEmailResult instanceof Error
-        ) {
-            if (unlockPackageCMSEmailResult instanceof Error) {
-                logError(
-                    'unlockPackageCMSEmail - CMS email failed',
-                    unlockPackageCMSEmailResult
-                )
-                setErrorAttributesOnActiveSpan('CMS email failed', span)
-            }
-            if (unlockPackageStateEmailResult instanceof Error) {
-                logError(
-                    'unlockPackageStateEmail - state email failed',
-                    unlockPackageStateEmailResult
-                )
-                setErrorAttributesOnActiveSpan('state email failed', span)
-            }
-            throw new GraphQLError('Email failed.', {
-                extensions: {
-                    code: 'INTERNAL_SERVER_ERROR',
-                    cause: 'EMAIL_ERROR',
                 },
             })
         }
