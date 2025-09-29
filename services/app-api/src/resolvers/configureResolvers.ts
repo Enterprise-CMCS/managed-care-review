@@ -3,7 +3,6 @@ import type { Emailer } from '../emailer'
 import type { Resolvers } from '../gen/gqlServer'
 import type { Store } from '../postgres'
 import {
-    createHealthPlanPackageResolver,
     healthPlanPackageResolver,
     submitHealthPlanPackageResolver,
     unlockHealthPlanPackageResolver,
@@ -97,7 +96,6 @@ export function configureResolvers(
             fetchOauthClients: fetchOauthClientsResolver(store),
         },
         Mutation: {
-            createHealthPlanPackage: createHealthPlanPackageResolver(store),
             updateHealthPlanFormData: updateHealthPlanFormDataResolver(
                 store,
                 launchDarkly

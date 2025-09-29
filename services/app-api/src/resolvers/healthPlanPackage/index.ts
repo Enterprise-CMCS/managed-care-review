@@ -1,4 +1,3 @@
-export { createHealthPlanPackageResolver } from './createHealthPlanPackage'
 export { healthPlanPackageResolver } from './healthPlanPackageResolver'
 export { submitHealthPlanPackageResolver } from './submitHealthPlanPackage'
 export { unlockHealthPlanPackageResolver } from './unlockHealthPlanPackage'

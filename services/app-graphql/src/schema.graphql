@@ -109,24 +109,6 @@ type Query {
 
 type Mutation {
     """
-    createHealthPlanPackage creates a new HealthPlanPackage.
-
-    The new HealthPlanPackage is created with a single HealthPlanRevision with
-    the information specified in the input parameters. The created package will have
-    the DRAFT status. The stateCode of the package will be set to the state the
-    user that calls this mutation is from.
-
-    This can only be called by StateUsers
-
-    Errors:
-    - ForbiddenError: A CMSUser calls this mutation
-    - UserInputError: ProgramID not found in this state's programs
-    """
-    createHealthPlanPackage(
-        input: CreateHealthPlanPackageInput!
-    ): CreateHealthPlanPackagePayload!
-
-    """
     createContract creates a new Contract.
 
     The new Contract is created with a single contractRevision with
@@ -596,37 +578,6 @@ type Mutation {
     deleteOauthClient(input: DeleteOauthClientInput!): DeleteOauthClientPayload!
 
     updateOauthClient(input: UpdateOauthClientInput!): UpdateOauthClientPayload!
-}
-
-input CreateHealthPlanPackageInput {
-    """
-    The large overarching population of people that the program covers.
-    Options are MEDICAID, CHIP, MEDICAID_AND_CHIP
-    """
-    populationCovered: PopulationCoveredType!
-    "An array of managed care program IDs this package covers"
-    programIDs: [ID!]!
-    "Whether or not this contract is risk based"
-    riskBasedContract: Boolean
-    "Whether or not this contract is associated with a Dual-Eligible Special Needs Plan (D-SNP) that covers Medicaid benefits"
-    dsnpContract: Boolean
-    """
-    The submission type of this package
-    Options are CONTRACT_ONLY and CONTRACT_AND_RATES
-    """
-    submissionType: SubmissionType!
-    "User description of the reason for the submission"
-    submissionDescription: String!
-    """
-    Type of contract the state is submitting
-    Options are: BASE, AMENDMENT
-    """
-    contractType: ContractType!
-}
-
-type CreateHealthPlanPackagePayload {
-    "The newly created HealthPlanPackage"
-    pkg: HealthPlanPackage!
 }
 
 input CreateContractInput {
