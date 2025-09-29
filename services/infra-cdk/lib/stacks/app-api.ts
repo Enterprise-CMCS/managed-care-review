@@ -8,7 +8,7 @@ import {
     RestApi,
     type IRestApi,
     LambdaIntegration,
-    RequestAuthorizer,
+    TokenAuthorizer,
     AuthorizationType,
     ResponseType,
 } from 'aws-cdk-lib/aws-apigateway'
@@ -808,12 +808,12 @@ export class AppApiStack extends BaseStack {
         })
 
         // External GraphQL with custom authorizer
-        const customAuthorizer = new RequestAuthorizer(
+        const customAuthorizer = new TokenAuthorizer(
             this,
             'ThirdPartyApiAuthorizer',
             {
                 handler: this.thirdPartyApiAuthorizerFunction,
-                identitySources: ['method.request.header.Authorization'],
+                identitySource: 'method.request.header.Authorization',
                 authorizerName: `${ResourceNames.apiName('app-api', this.stage)}-third-party-authorizer`,
             }
         )
