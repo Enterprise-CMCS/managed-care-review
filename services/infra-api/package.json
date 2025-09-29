@@ -9,7 +9,7 @@
     "license": "CC0-1.0",
     "devDependencies": {
         "@enterprise-cmcs/serverless-waf-plugin": "^1.4.0",
-        "serverless": "4.2.3",
+        "serverless": "4.19.1",
         "serverless-iam-helper": "https://github.com/CMSgov/serverless-iam-helper",
         "serverless-s3-bucket-helper": "https://github.com/CMSgov/serverless-s3-bucket-helper",
         "serverless-stack-termination-protection": "^2.0.2"

@@ -50,7 +50,7 @@
         "eslint-plugin-prettier": "^5.5.4",
         "jiti": "^2.0.0",
         "lint-staged": "^15.2.7",
-        "serverless": "4.2.3",
+        "serverless": "4.19.1",
         "serverless-esbuild": "^1.55.1",
         "serverless-iam-helper": "https://github.com/CMSgov/serverless-iam-helper.git",
         "serverless-offline": "^14.4.0",
