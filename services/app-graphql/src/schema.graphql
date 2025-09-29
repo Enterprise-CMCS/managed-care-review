@@ -125,36 +125,6 @@ type Mutation {
     createContract(input: CreateContractInput!): CreateContractPayload!
 
     """
-    updateHealthPlanFormData updates a single package with the current
-    state of the form encoded as a protobuf.
-
-    The package must be either in the DRAFT or UNLOCKED state.
-    Only a state user from the state this package is attached to can call this mutation
-
-    There are some fields in the healthPlanFormData type that must not be modified
-    by this mutation. They are set on the initial submission and are only changed by the server:
-    - id
-    - stateCode
-    - stateNumber
-    - createdAt
-    - updatedAt
-
-    Errors:
-    - ForbiddenError:
-        - A CMSUser called this
-        - A state user from a different state called this.
-    - UserInputError:
-        - The healthPlanFormData proto did not decode correctly
-        - The healthPlanFormData decodes to a LockedHealthPlanFormData
-        - The package is in the LOCKED or RESUBMITTED status
-        - A package cannot be found with the given `pkgID`
-        - The healthPlanFormData includes changes to any of the fields that are fixed on submission
-    """
-    updateHealthPlanFormData(
-        input: UpdateHealthPlanFormDataInput!
-    ): UpdateHealthPlanFormDataPayload!
-
-    """
     updateContract can be used to update fields on the contract
     as opposed to an individual revision
     """
@@ -830,21 +800,6 @@ type UnlockHealthPlanPackagePayload {
 
 type UnlockContractPayload {
     contract: UnlockedContract!
-}
-
-input UpdateHealthPlanFormDataInput {
-    "ID of the package to be updated, must be DRAFT or UNLOCKED"
-    pkgID: ID!
-    """
-    base64 encoded HealthPlanFormData protobuf. This contains all the data
-    from the health plan pacakge form that the state user fills out and submits.
-    Its schema can be found in health_plan_form_data.proto
-    """
-    healthPlanFormData: String!
-}
-
-type UpdateHealthPlanFormDataPayload {
-    pkg: HealthPlanPackage!
 }
 
 enum Division {

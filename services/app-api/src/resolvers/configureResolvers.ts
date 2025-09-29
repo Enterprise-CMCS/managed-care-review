@@ -6,7 +6,6 @@ import {
     healthPlanPackageResolver,
     submitHealthPlanPackageResolver,
     unlockHealthPlanPackageResolver,
-    updateHealthPlanFormDataResolver,
 } from './healthPlanPackage'
 import {
     createContractQuestionResolver,
@@ -96,10 +95,6 @@ export function configureResolvers(
             fetchOauthClients: fetchOauthClientsResolver(store),
         },
         Mutation: {
-            updateHealthPlanFormData: updateHealthPlanFormDataResolver(
-                store,
-                launchDarkly
-            ),
             submitHealthPlanPackage: submitHealthPlanPackageResolver(
                 store,
                 launchDarkly
