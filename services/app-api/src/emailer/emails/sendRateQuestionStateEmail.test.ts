@@ -186,6 +186,7 @@ describe('sendRateQuestionStateEmail', () => {
             division: 'DMCO',
             documents: [
                 {
+                    id: 'dmco-rate-question-1',
                     name: 'dmco-rate-question-1',
                     s3URL: 's3://bucketName/key/dmco-rate-question-1-doc',
                     downloadURL: 'https://fake-bucket.s3.amazonaws.com/test',

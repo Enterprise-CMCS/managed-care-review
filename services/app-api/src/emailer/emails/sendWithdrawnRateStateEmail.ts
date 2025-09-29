@@ -1,7 +1,6 @@
 import { formatCalendarDate } from '@mc-review/dates'
 import type { ProgramType, RateType } from '../../domain-models'
-import type { EmailData } from '../emailer'
-import type { EmailConfiguration } from '../emailer'
+import type { EmailData, EmailConfiguration } from '../emailer'
 import { renderTemplate, stripHTMLFromTemplate } from '../templateHelpers'
 import { pruneDuplicateEmails } from '../formatters'
 import { validateAndParseWithdrawnRate } from './sendWithdrawnRateCMSEmail'

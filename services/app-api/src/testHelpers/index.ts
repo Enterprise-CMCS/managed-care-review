@@ -19,7 +19,6 @@ export {
 
 export { testS3Client } from './s3Helpers'
 export { getStateRecord } from './stateHelpers'
-export type { StateCodeType } from './stateHelpers'
 
 export { consoleLogFullData } from './debugHelpers'
 

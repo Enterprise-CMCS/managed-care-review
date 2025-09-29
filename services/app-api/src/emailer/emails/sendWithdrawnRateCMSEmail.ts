@@ -5,8 +5,11 @@ import type {
     RateType,
     RateReviewType,
 } from '../../domain-models'
-import type { EmailData, StateAnalystsEmails } from '../emailer'
-import type { EmailConfiguration } from '../emailer'
+import type {
+    EmailData,
+    StateAnalystsEmails,
+    EmailConfiguration,
+} from '../emailer'
 import {
     findContractPrograms,
     renderTemplate,

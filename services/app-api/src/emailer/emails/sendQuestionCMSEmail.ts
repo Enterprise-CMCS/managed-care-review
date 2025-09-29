@@ -2,7 +2,11 @@ import { packageName as generatePackageName } from '@mc-review/hpp'
 import { formatCalendarDate } from '@mc-review/dates'
 import { pruneDuplicateEmails } from '../formatters'
 import type { EmailConfiguration, EmailData, StateAnalystsEmails } from '..'
-import type { ProgramType, ContractQuestionType } from '../../domain-models'
+import type {
+    ProgramType,
+    ContractQuestionType,
+    ContractRevisionType,
+} from '../../domain-models'
 import {
     stripHTMLFromTemplate,
     renderTemplate,
@@ -10,7 +14,6 @@ import {
     getQuestionRound,
 } from '../templateHelpers'
 import { submissionQuestionResponseURL } from '../generateURLs'
-import type { ContractRevisionType } from '../../domain-models/contractAndRates'
 
 export const sendQuestionCMSEmail = async (
     contractRev: ContractRevisionType,
