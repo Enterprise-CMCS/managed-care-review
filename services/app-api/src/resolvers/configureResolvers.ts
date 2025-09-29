@@ -4,7 +4,6 @@ import type { Resolvers } from '../gen/gqlServer'
 import type { Store } from '../postgres'
 import {
     createHealthPlanPackageResolver,
-    fetchHealthPlanPackageResolver,
     indexHealthPlanPackagesResolver,
     healthPlanPackageResolver,
     submitHealthPlanPackageResolver,
@@ -87,7 +86,6 @@ export function configureResolvers(
         DateTime: GraphQLDateTime,
         Query: {
             fetchCurrentUser: fetchCurrentUserResolver(),
-            fetchHealthPlanPackage: fetchHealthPlanPackageResolver(store),
             indexHealthPlanPackages: indexHealthPlanPackagesResolver(store),
             fetchDocument: fetchDocumentResolver(store, s3Client),
             indexContracts: indexContractsResolver(store),

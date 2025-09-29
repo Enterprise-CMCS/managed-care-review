@@ -12,21 +12,6 @@ type Query {
     fetchCurrentUser: User!
 
     """
-    fetchHealthPlanPackage returns a specific HealthPlanPackage by id
-
-    If a package with the given ID cannot be found, this query returns undefined
-    CMS users cannot fetch a DRAFT HealthPlanPackage
-
-    Errors:
-    - ForbiddenError:
-        - A state user from a different state called this.
-        - A CMSUser attempted to fetch a DRAFT HealthPlanPackage
-    """
-    fetchHealthPlanPackage(
-        input: FetchHealthPlanPackageInput!
-    ): FetchHealthPlanPackagePayload!
-
-    """
     indexHealthPlanPackages returns all of the HealthPlanPackages the current user can see.
 
     StateUsers can find all the packages for their state
@@ -729,16 +714,6 @@ input UndoWithdrawContractInput {
     updatedReason: String!
 }
 
-input FetchHealthPlanPackageInput {
-    "The ID of the package to fetch"
-    pkgID: ID!
-}
-
-type FetchHealthPlanPackagePayload {
-    "A single HealthPlanPackage"
-    pkg: HealthPlanPackage!
-}
-
 type HealthPlanPackageEdge {
     node: HealthPlanPackage!
 }
@@ -1263,7 +1238,7 @@ type RateReviewStatusActions {
 """
 HealthPlanRevision is a single revision of the package. It contains all the
 data from the form filled out by a state user about their package. When a
-HealthPlanPackage is initially created, a single revision is created as well. That
+ is initially created, a single revision is created as well. That
 revision has its submitInfo filled out when it is submitted, which is what marks
 the HealthPlanPackage as SUBMITTED.
 
