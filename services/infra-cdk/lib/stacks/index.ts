@@ -4,13 +4,6 @@ export * from './github-oidc-service-role-stack'
 // Lambda layers (exports AWS_OTEL_LAYER_ARN constant used by app-api)
 export * from './lambda-layers'
 
-// Planned micro-stacks (not yet used in CI/CD)
-export * from './graphql-api-stack'
-export * from './public-api-stack'
-export * from './file-ops-stack'
-export * from './scheduled-tasks-stack'
-export * from './auth-extensions-stack'
-
 // Currently deployed review environment stacks
 export * from './network'
 export * from './postgres'
