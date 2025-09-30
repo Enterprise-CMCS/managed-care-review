@@ -6,7 +6,7 @@ PUBLIC_IP=$(ec2-metadata --public-ipv4 | cut -d " " -f 2)
 INSTANCE_TYPE=$(ec2-metadata --instance-type | cut -d " " -f 2)
 
 # Send notification to Slack
-if [ ! -z "SLACK_WEBHOOK" ]; then
+if [ ! -z "$SLACK_WEBHOOK" ]; then
     curl -X POST -H 'Content-type: application/json' \
         --data "{
             \"text\": \"PostgreSQL Jumpbox Started\",
