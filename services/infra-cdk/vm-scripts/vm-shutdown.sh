@@ -4,7 +4,7 @@
 INSTANCE_ID=$(ec2-metadata --instance-id | cut -d " " -f 2)
 
 # Send notification to Slack
-if [ ! -z "SLACK_WEBHOOK" ]; then
+if [ ! -z "$SLACK_WEBHOOK" ]; then
     curl -X POST -H 'Content-type: application/json' \
         --data "{
             \"text\": \"PostgreSQL Jumpbox Stopping\",
