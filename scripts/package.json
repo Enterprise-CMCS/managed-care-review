@@ -33,6 +33,6 @@
         "csv-parser": "^3.2.0",
         "lint-staged": "^15.2.7",
         "typescript": "5.9.2",
-        "uuid": "^9.0.0"
+        "uuid": "^13.0.0"
     }
 }

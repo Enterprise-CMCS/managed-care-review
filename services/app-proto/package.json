@@ -25,7 +25,7 @@
     "license": "ISC",
     "dependencies": {
         "protobufjs": "^7.3.0",
-        "uuid": "^9.0.0"
+        "uuid": "^13.0.0"
     },
     "devDependencies": {
         "lint-staged": "^15.2.7",
