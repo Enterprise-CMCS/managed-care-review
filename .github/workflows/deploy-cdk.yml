@@ -8,6 +8,11 @@ on:
       - "!main"
   workflow_dispatch:
 
+# Prevent concurrent deployments to the same branch
+concurrency:
+  group: deploy-cdk-${{ github.ref }}
+  cancel-in-progress: true
+
 permissions:
   id-token: write
   contents: read
@@ -51,11 +56,6 @@ jobs:
         id: branch-name
         shell: bash
         run: echo "branch-name=$(echo ${GITHUB_REF#refs/heads/})" >> "$GITHUB_OUTPUT"
-
-      - name: lock this branch to prevent concurrent deploys
-        run: ./.github/github-lock.sh
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Setup env
         uses: ./.github/actions/setup_env
