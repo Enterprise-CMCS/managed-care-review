@@ -25,12 +25,11 @@ We have two ways to access the Apollo Explorer tool:
 >   - Depending on the user, performing certain GraphQL operations will be restricted. The operation authorization is done in the resolvers, `services/app-api/src/resolvers`.
 >   - For example, a state user will not be allowed to unlock a submission. The GraphQL operation will return an unauthorized error.
 >- Once logged in, input this url `[hostname]/dev/graphql-explorer` to access the tool.
->- Create a new workspace in the operations editor to build a new request (`+` sign in main editor).
->- Use the Documentation panel to create your request. Walk through the schema and select fields to add to your request. Add any input parameters in the `variables` section. For more on usage of the query builder see [video tutorial](https://www.youtube.com/watch?v=j8b0Bda_TIw).
->- If you need to make quickly decode/encode and make changes to protos use [ProtobufPal](https://www.protobufpal.com/). This tool should be used only with test and anonymized data (don't feed any private data in here).
+>- Create a new workspace in the operation editor to build a new request (`+` sign in the main editor).
+>- Use the Documentation panel to create your request. Walk through the schema and select fields to add to your request. Add any input parameters in the `variables` section. For more on usage of the query builder, see [video tutorial](https://www.youtube.com/watch?v=j8b0Bda_TIw).
 
 **External Apollo Explorer Tool**:
->Apollo Explorer is embedded in the local deployment, so there's no need to access it externally, except in rare cases like executing GraphQL operations as user role `ADMIN_USER` when no users with that role has been added.
+>Apollo Explorer is embedded in the local deployment, so there's no need to access it externally, except in rare cases like executing GraphQL operations as user role `ADMIN_USER` when no users with that role have been added.
 >
 >To connect Apollo Explorer to our local GraphQL api, we must manually configure connection settings in the Explorer tool.
 >
@@ -176,7 +175,7 @@ dataExport: () => Promise<DataExportType | undefined>
 And then in the NewPostgresStore:
 
 ```typescript
-dataExport: () => dataExport(client),
+dataExport: () => dataExport(client)
 ```
 
 When we access the store in our app, the dataExport method we defined above will be available to us.
@@ -219,7 +218,7 @@ import { dataExportResolver } from './dataExport'
 And also add it to the Resolvers object. We've made a query, so this line will be added to the query methods.
 
 ```typescript
-dataExport: dataExportResolver(store),
+dataExport: dataExportResolver(store)
 ```
 ### Generating prisma code and types
 
@@ -259,7 +258,7 @@ Specifically, `cmsUserResolver` adds `stateAssignments` to CMS users returned fr
 This is set up in `configureResolvers` just like basic resolvers. In addition, there is code added to `codegen.yml` the config file for our graphql-to-typescript dependency.
     - See `mappers` key in `codegen.yml`. By adding the specific typescript definition we want to be returned, we ensure that our GRAPHQL resolvers return types match types elsewhere in the application.
 
-Again, this isn't needed for every piece of data returned by GraphQL. It is useful when dealing with those data model types that persist through the frontend and backend. They may have long definitions or validators set up outside both Prisma and GraphQL (like health plan package which is defined by proto or rates and contracts which are defined in zod).
+Again, this isn't needed for every piece of data returned by GraphQL. It is useful when dealing with those data model types that persist through the frontend and backend. They may have long definitions or validators set up outside both Prisma and GraphQL (like rate and contract types which are defined in zod).
 
 
 ## Lambda

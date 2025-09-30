@@ -1,5 +1,7 @@
 # ADR: The Form Changes Over Time
 
+## This ADR is deprecated as we removed Protobufs and the HealthPlanPackage type from the codebase. There is not a superseding ADR on form changing over time. Leaving this ADR here for historical context.
+
 ## Background
 
 The heart of MC Review is the Health Plan Package Form, wherein a state files the contract and rate documents and answers a series of questions all in one place for review by the CMS teams. The app asks all these questions of the states, and then after submission displays the answers to CMS. These questions are not frozen in time, what is relevant to a good review will change over the years, we saw that first hand with respect to COVID 19; when we showed up we asked a question about whether this submission was related to COVID, now that's no longer a useful question to ask so we stripped it from the form. 
