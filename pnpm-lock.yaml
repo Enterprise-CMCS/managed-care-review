@@ -461,9 +461,6 @@ importers:
         specifier: ^4.1.11
         version: 4.1.11
     devDependencies:
-      '@graphql-tools/jest-transform':
-        specifier: ^2.0.0
-        version: 2.0.0(graphql@16.9.0)
       '@luckycatfactory/esbuild-graphql-loader':
         specifier: ^3.8.1
         version: 3.8.1(esbuild@0.25.9)(graphql-tag@2.12.6(graphql@16.9.0))(graphql@16.9.0)
@@ -4353,12 +4350,6 @@ packages:
     peerDependencies:
       graphql: ^14.0.0 || ^15.0.0 || ^16.0.0 || ^17.0.0
 
-  '@graphql-tools/jest-transform@2.0.0':
-    resolution: {integrity: sha512-7dVVs7f9qlJp2l3CSpy+B1sbaWprNNy72/KTC6fp4k1lNtXYPP9g76D7HpNbgwvdUBRZfiPlOiztnwTcKCzUdA==}
-    engines: {node: '>=16.0.0'}
-    peerDependencies:
-      graphql: ^14.0.0 || ^15.0.0 || ^16.0.0 || ^17.0.0
-
   '@graphql-tools/json-file-loader@8.0.18':
     resolution: {integrity: sha512-JjjIxxewgk8HeMR3npR3YbOkB7fxmdgmqB9kZLWdkRKBxrRXVzhryyq+mhmI0Evzt6pNoHIc3vqwmSctG2sddg==}
     engines: {node: '>=16.0.0'}
@@ -4458,18 +4449,6 @@ packages:
 
   '@graphql-tools/utils@9.2.1':
     resolution: {integrity: sha512-WUw506Ql6xzmOORlriNrD6Ugx+HjVgYxt9KCXD9mHAak+eaXSwuGGPyE60hy9xaDEoXKBsG7SkG69ybitaVl6A==}
-    peerDependencies:
-      graphql: ^14.0.0 || ^15.0.0 || ^16.0.0 || ^17.0.0
-
-  '@graphql-tools/webpack-loader-runtime@7.0.0':
-    resolution: {integrity: sha512-E5Flr2NbuTH+sfiMY2HacLbczJEDmqfKC0haOsc24wN0hV3rJvvPiqYIROgILgwVSJPQIQ4cOf/XcRsatrGDvQ==}
-    engines: {node: '>=16.0.0'}
-    peerDependencies:
-      graphql: ^14.0.0 || ^15.0.0 || ^16.0.0 || ^17.0.0
-
-  '@graphql-tools/webpack-loader@7.0.0':
-    resolution: {integrity: sha512-Mf2ZkoVR5+J5pFu5P0LPjvHZCObIs61IuQR8sFanMQXQDaM/f2dMn1Ie8pQ42YfDgLDbvJ+4XIikicJH1oDIDw==}
-    engines: {node: '>=16.0.0'}
     peerDependencies:
       graphql: ^14.0.0 || ^15.0.0 || ^16.0.0 || ^17.0.0
 
@@ -19302,16 +19281,6 @@ snapshots:
       resolve-from: 5.0.0
       tslib: 2.8.1
 
-  '@graphql-tools/jest-transform@2.0.0(graphql@16.9.0)':
-    dependencies:
-      '@graphql-tools/webpack-loader': 7.0.0(graphql@16.9.0)
-      '@jest/transform': 29.7.0
-      '@jest/types': 29.6.3
-      graphql: 16.9.0
-      tslib: 2.6.3
-    transitivePeerDependencies:
-      - supports-color
-
   '@graphql-tools/json-file-loader@8.0.18(graphql@16.9.0)':
     dependencies:
       '@graphql-tools/utils': 10.8.6(graphql@16.9.0)
@@ -19477,17 +19446,6 @@ snapshots:
   '@graphql-tools/utils@9.2.1(graphql@16.9.0)':
     dependencies:
       '@graphql-typed-document-node/core': 3.2.0(graphql@16.9.0)
-      graphql: 16.9.0
-      tslib: 2.8.1
-
-  '@graphql-tools/webpack-loader-runtime@7.0.0(graphql@16.9.0)':
-    dependencies:
-      graphql: 16.9.0
-
-  '@graphql-tools/webpack-loader@7.0.0(graphql@16.9.0)':
-    dependencies:
-      '@graphql-tools/optimize': 2.0.0(graphql@16.9.0)
-      '@graphql-tools/webpack-loader-runtime': 7.0.0(graphql@16.9.0)
       graphql: 16.9.0
       tslib: 2.8.1
 
