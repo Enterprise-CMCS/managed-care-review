@@ -69,7 +69,6 @@
         "zod": "^4.1.11"
     },
     "devDependencies": {
-        "@graphql-tools/jest-transform": "^2.0.0",
         "@luckycatfactory/esbuild-graphql-loader": "^3.8.1",
         "@types/archiver": "^6.0.3",
         "@types/aws-lambda": "^8.10.152",
