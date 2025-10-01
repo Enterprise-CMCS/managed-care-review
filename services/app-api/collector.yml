@@ -13,7 +13,7 @@ exporters:
   datadog:
     api:
       key: $DD_API_KEY
-      site: $DD_SITE
+      site: https://app.ddog-gov.com
 
 
 service:

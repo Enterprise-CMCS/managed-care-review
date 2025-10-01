@@ -34,7 +34,6 @@ custom:
   react_app_auth_mode: ${env:VITE_APP_AUTH_MODE}
   nr_license_key: ${env:NR_LICENSE_KEY, ssm:/configuration/nr_license_key}
   dd_api_key: ${env:DD_API_KEY, ssm:/configuration/dd_api_key}
-  dd_site: ${env:DD_SITE, ssm:/configuration/dd_site}
   react_app_ld_client_id: ${env:VITE_APP_LD_CLIENT_ID, ssm:/configuration/react_app_ld_client_id_feds}
   react_app_nr_account_id: ${env:VITE_APP_NR_ACCOUNT_ID, ssm:/configuration/react_app_nr_account_id}
   react_app_nr_trust_key: ${env:VITE_APP_NR_TRUST_KEY, ssm:/configuration/react_app_nr_trust_key}
