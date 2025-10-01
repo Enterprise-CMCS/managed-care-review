@@ -10,7 +10,7 @@ exporters:
       api-key: $NR_LICENSE_KEY
   datadog:
     api:
-      key: $DD_API_KEY
+      key: ${DD_API_KEY}
       site: ddog-gov.com
 
 service:

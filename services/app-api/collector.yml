@@ -12,7 +12,7 @@ exporters:
   
   datadog:
     api:
-      key: $DD_API_KEY
+      key: ${DD_API_KEY}
       site: ddog-gov.com
 
 
