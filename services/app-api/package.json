@@ -65,7 +65,7 @@
         "protobufjs": "^7.3.0",
         "purify-ts": "^2.1.2",
         "url-parse": "^1.5.10",
-        "uuid": "^9.0.0",
+        "uuid": "^13.0.0",
         "zod": "^4.1.11"
     },
     "devDependencies": {
