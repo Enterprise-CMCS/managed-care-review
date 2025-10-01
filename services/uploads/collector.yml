@@ -11,7 +11,7 @@ exporters:
   datadog:
     api:
       key: $DD_API_KEY
-      site: https://app.ddog-gov.com
+      site: ddog-gov.com
 
 service:
   pipelines:
