@@ -169,7 +169,7 @@ jobs:
 
   promote-infra-dev:
     needs: [build-prisma-client-lambda-layer, build-clamav-layer, unit-tests]
-    uses: Enterprise-CMCS/managed-care-review/.github/workflows/deploy-infra-to-env.yml@main
+    uses: Enterprise-CMCS/managed-care-review/.github/workflows/deploy-infra-to-env.yml@ruizaj-mcr-5449-configure-otel-to-point-to-datadog
     with:
       environment: dev
       stage_name: main
@@ -199,7 +199,7 @@ jobs:
 
   promote-app-dev:
     needs: [promote-infra-dev, build-prisma-client-lambda-layer, unit-tests]
-    uses: Enterprise-CMCS/managed-care-review/.github/workflows/deploy-app-to-env.yml@main
+    uses: Enterprise-CMCS/managed-care-review/.github/workflows/deploy-app-to-env.yml@ruizaj-mcr-5449-configure-otel-to-point-to-datadog
     with:
       environment: dev
       stage_name: main
@@ -224,7 +224,7 @@ jobs:
 
   promote-infra-val:
     needs: [promote-app-dev, unit-tests]
-    uses: Enterprise-CMCS/managed-care-review/.github/workflows/deploy-infra-to-env.yml@main
+    uses: Enterprise-CMCS/managed-care-review/.github/workflows/deploy-infra-to-env.yml@ruizaj-mcr-5449-configure-otel-to-point-to-datadog
     with:
       environment: val
       stage_name: val
@@ -254,7 +254,7 @@ jobs:
 
   promote-app-val:
     needs: [promote-app-dev, promote-infra-val, unit-tests]
-    uses: Enterprise-CMCS/managed-care-review/.github/workflows/deploy-app-to-env.yml@main
+    uses: Enterprise-CMCS/managed-care-review/.github/workflows/deploy-app-to-env.yml@ruizaj-mcr-5449-configure-otel-to-point-to-datadog
     with:
       environment: val
       stage_name: val
@@ -279,7 +279,7 @@ jobs:
 
   promote-infra-prod:
     needs: [promote-app-val, unit-tests]
-    uses: Enterprise-CMCS/managed-care-review/.github/workflows/deploy-infra-to-env.yml@main
+    uses: Enterprise-CMCS/managed-care-review/.github/workflows/deploy-infra-to-env.yml@ruizaj-mcr-5449-configure-otel-to-point-to-datadog
     with:
       environment: prod
       stage_name: prod
@@ -309,7 +309,7 @@ jobs:
 
   promote-app-prod:
     needs: [promote-app-val, promote-infra-prod, unit-tests]
-    uses: Enterprise-CMCS/managed-care-review/.github/workflows/deploy-app-to-env.yml@main
+    uses: Enterprise-CMCS/managed-care-review/.github/workflows/deploy-app-to-env.yml@ruizaj-mcr-5449-configure-otel-to-point-to-datadog
     with:
       environment: prod
       stage_name: prod
