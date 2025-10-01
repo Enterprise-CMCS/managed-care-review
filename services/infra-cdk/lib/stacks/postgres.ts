@@ -112,7 +112,7 @@ export class Postgres extends BaseStack {
      */
     private createJwtSecret(): ISecret {
         return new Secret(this, 'JwtSecret', {
-            secretName: `mcr-cdk-api-jwt-secret-${this.stage}`,
+            secretName: `api-jwt-secret-${this.stage}-cdk`,
             description: 'JWT secret for API authentication',
             generateSecretString: {
                 secretStringTemplate: '{}',

@@ -71,7 +71,7 @@ export class AuroraServerlessV2 extends Construct {
         // Create database credentials secret
         // Use CDK-specific naming to avoid conflicts with serverless
         this.secret = new Secret(this, 'Secret', {
-            secretName: `mcr-cdk-aurora-postgres-${props.stage}`,
+            secretName: `aurora-postgres-${props.stage}-cdk`,
             description: `Database credentials for ${props.databaseName} - ${props.stage}`,
             generateSecretString: {
                 secretStringTemplate: JSON.stringify({
