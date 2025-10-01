@@ -160,7 +160,7 @@ it('does not error when risk based question is undefined and rate-cert-assurance
     })
 
     // setup
-    const initialPkg = await createAndUpdateTestHealthPlanPackage(server, {
+    const initialPkg = await createTestContract(server, {
       riskBasedContract: undefined,
     })
 
