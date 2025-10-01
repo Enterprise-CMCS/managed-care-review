@@ -281,7 +281,7 @@ jobs:
 
   deploy-infra:
     needs: [begin-deployment, build-clamav-layer]
-    uses: Enterprise-CMCS/managed-care-review/.github/workflows/deploy-infra-to-env.yml@6786c09ef92f69dbf341eb8bbeb10fddcb08ce97
+    uses: Enterprise-CMCS/managed-care-review/.github/workflows/deploy-infra-to-env.yml@ruizaj-mcr-5449-configure-otel-to-point-to-datadog
     with:
       environment: dev
       stage_name: ${{ needs.begin-deployment.outputs.stage-name}}
