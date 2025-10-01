@@ -12,8 +12,8 @@ exporters:
   
   datadog:
     api:
-      key: ${DD_API_KEY}
-      site: ${DD_SITE}
+      key: $DD_API_KEY
+      site: $DD_SITE
 
 
 service:

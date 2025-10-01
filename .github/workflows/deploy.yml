@@ -290,6 +290,8 @@ jobs:
     secrets:
       aws_account_id: ${{ secrets.DEV_AWS_ACCOUNT_ID }}
       nr_license_key: ${{ secrets.NR_LICENSE_KEY }}
+      dd_api_key: ${{ secrets.DD_API_KEY }}
+      dd_site: ${{ secrets.DD_SITE }}
       slack_webhook_url: ${{ secrets.SLACK_WEBHOOK }}
       serverless_license_key: ${{ secrets.SERVERLESS_V4_LICENSE }}
       vpc_id: ${{ secrets.DEV_VPC_ID }}
@@ -332,6 +334,8 @@ jobs:
     secrets:
       aws_account_id: ${{ secrets.DEV_AWS_ACCOUNT_ID }}
       nr_license_key: ${{ secrets.NR_LICENSE_KEY }}
+      dd_api_key: ${{ secrets.DD_API_KEY }}
+      dd_site: ${{ secrets.DD_SITE }}
       serverless_license_key: ${{ secrets.SERVERLESS_V4_LICENSE }}
       vpc_id: ${{ secrets.DEV_VPC_ID }}
       sg_id: ${{ secrets.DEV_SG_ID }}

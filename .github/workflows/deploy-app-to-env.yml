@@ -26,6 +26,10 @@ on:
         required: true
       nr_license_key:
         required: true
+      dd_api_key: 
+        required: true
+      dd_site:
+        required: true
       serverless_license_key:
         required: true
       vpc_id:
@@ -152,6 +156,8 @@ jobs:
           VITE_APP_AUTH_MODE: ${{ inputs.vite_app_auth_mode }}
           EMAILER_MODE: SES
           NR_LICENSE_KEY: ${{ secrets.nr_license_key }}
+          DD_API_KEY: ${{ secrets.dd_api_key }}
+          DD_SITE: ${{ secrets.dd_site }}
           SERVERLESS_ACCESS_KEY: ${{ secrets.serverless_license_key }}
           VPC_ID: ${{ secrets.vpc_id }}
           SG_ID: ${{ secrets.sg_id }}
