@@ -2,10 +2,7 @@ import { GraphQLDate, GraphQLDateTime } from 'graphql-scalars'
 import type { Emailer } from '../emailer'
 import type { Resolvers } from '../gen/gqlServer'
 import type { Store } from '../postgres'
-import {
-    healthPlanPackageResolver,
-    unlockHealthPlanPackageResolver,
-} from './healthPlanPackage'
+import { healthPlanPackageResolver } from './healthPlanPackage'
 import {
     createContractQuestionResolver,
     createContractQuestionResponseResolver,
@@ -99,10 +96,6 @@ export function configureResolvers(
                 emailer,
                 launchDarkly,
                 documentZip
-            ),
-            unlockHealthPlanPackage: unlockHealthPlanPackageResolver(
-                store,
-                emailer
             ),
             unlockContract: unlockContractResolver(store, emailer),
             createContract: createContract(store),

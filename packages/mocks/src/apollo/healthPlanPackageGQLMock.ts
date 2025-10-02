@@ -6,8 +6,6 @@ import { UnlockedHealthPlanFormDataType } from '@mc-review/hpp'
 import { domainToBase64 } from '@mc-review/hpp'
 import {
     HealthPlanPackage,
-    UnlockHealthPlanPackageDocument,
-    UnlockHealthPlanPackageMutation,
     HealthPlanRevision,
     UnlockContractMutation,
     UnlockContractDocument,
@@ -306,42 +304,6 @@ const unlockContractMockSuccess = ({
     }
 }
 
-const unlockHealthPlanPackageMockError = ({
-    id,
-    reason,
-    error,
-}: {
-    id: string
-    reason: string
-    error?: {
-        code: GraphQLErrorCodeTypes
-        cause: GraphQLErrorCauseTypes
-    }
-}): MockedResponse<UnlockHealthPlanPackageMutation> => {
-    const graphQLError = new GraphQLError(
-        error
-            ? GRAPHQL_ERROR_CAUSE_MESSAGES[error.cause]
-            : 'Error attempting to submit.',
-        {
-            extensions: {
-                code: error?.code,
-                cause: error?.cause,
-            },
-        }
-    )
-
-    return {
-        request: {
-            query: UnlockHealthPlanPackageDocument,
-            variables: { input: { pkgID: id, unlockedReason: reason } },
-        },
-        result: {
-            data: null,
-            errors: [graphQLError],
-        },
-    }
-}
-
 const unlockContractMockError = ({
     id,
     reason,
@@ -379,7 +341,6 @@ const unlockContractMockError = ({
 }
 
 export {
-    unlockHealthPlanPackageMockError,
     unlockContractMockSuccess,
     unlockContractMockError,
     mockSubmittedHealthPlanPackageWithRevision,
