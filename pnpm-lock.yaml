@@ -528,14 +528,14 @@ importers:
         specifier: ^1.55.1
         version: 1.55.1(esbuild@0.25.10)
       serverless-iam-helper:
-        specifier: https://github.com/CMSgov/serverless-iam-helper
-        version: git+https://git@github.com:CMSgov/serverless-iam-helper.git#2cfc4c2153666025e6f7593c92df7efd2f2b9790(serverless@4.2.3)
+        specifier: https://github.com/Enterprise-CMCS/serverless-iam-helper
+        version: https://codeload.github.com/Enterprise-CMCS/serverless-iam-helper/tar.gz/2cfc4c2153666025e6f7593c92df7efd2f2b9790(serverless@4.2.3)
       serverless-offline:
         specifier: ^14.4.0
         version: 14.4.0(serverless@4.2.3)
       serverless-s3-bucket-helper:
-        specifier: https://github.com/CMSgov/serverless-s3-bucket-helper
-        version: git+https://git@github.com:CMSgov/serverless-s3-bucket-helper.git#e150b50b5663df8816cb425e39a9c934aa202d13(serverless@4.2.3)
+        specifier: https://github.com/Enterprise-CMCS/serverless-s3-bucket-helper
+        version: https://codeload.github.com/Enterprise-CMCS/serverless-s3-bucket-helper/tar.gz/e150b50b5663df8816cb425e39a9c934aa202d13(serverless@4.2.3)
       serverless-stack-termination-protection:
         specifier: ^2.0.2
         version: 2.0.2
@@ -1030,11 +1030,11 @@ importers:
         specifier: 4.2.3
         version: 4.2.3
       serverless-iam-helper:
-        specifier: https://github.com/CMSgov/serverless-iam-helper
-        version: git+https://git@github.com:CMSgov/serverless-iam-helper.git#2cfc4c2153666025e6f7593c92df7efd2f2b9790(serverless@4.2.3)
+        specifier: https://github.com/Enterprise-CMCS/serverless-iam-helper
+        version: https://codeload.github.com/Enterprise-CMCS/serverless-iam-helper/tar.gz/2cfc4c2153666025e6f7593c92df7efd2f2b9790(serverless@4.2.3)
       serverless-s3-bucket-helper:
-        specifier: https://github.com/CMSgov/serverless-s3-bucket-helper
-        version: git+https://git@github.com:CMSgov/serverless-s3-bucket-helper.git#e150b50b5663df8816cb425e39a9c934aa202d13(serverless@4.2.3)
+        specifier: https://github.com/Enterprise-CMCS/serverless-s3-bucket-helper
+        version: https://codeload.github.com/Enterprise-CMCS/serverless-s3-bucket-helper/tar.gz/e150b50b5663df8816cb425e39a9c934aa202d13(serverless@4.2.3)
       serverless-stack-termination-protection:
         specifier: ^2.0.2
         version: 2.0.2
@@ -1097,11 +1097,11 @@ importers:
         specifier: ^1.55.1
         version: 1.55.1(esbuild@0.25.10)
       serverless-iam-helper:
-        specifier: https://github.com/CMSgov/serverless-iam-helper
-        version: git+https://git@github.com:CMSgov/serverless-iam-helper.git#2cfc4c2153666025e6f7593c92df7efd2f2b9790(serverless@4.2.3)
+        specifier: https://github.com/Enterprise-CMCS/serverless-iam-helper
+        version: https://codeload.github.com/Enterprise-CMCS/serverless-iam-helper/tar.gz/2cfc4c2153666025e6f7593c92df7efd2f2b9790(serverless@4.2.3)
       serverless-s3-bucket-helper:
-        specifier: https://github.com/CMSgov/serverless-s3-bucket-helper
-        version: git+https://git@github.com:CMSgov/serverless-s3-bucket-helper.git#e150b50b5663df8816cb425e39a9c934aa202d13(serverless@4.2.3)
+        specifier: https://github.com/Enterprise-CMCS/serverless-s3-bucket-helper
+        version: https://codeload.github.com/Enterprise-CMCS/serverless-s3-bucket-helper/tar.gz/e150b50b5663df8816cb425e39a9c934aa202d13(serverless@4.2.3)
       serverless-stack-termination-protection:
         specifier: ^2.0.2
         version: 2.0.2
@@ -1115,8 +1115,8 @@ importers:
         specifier: 4.2.3
         version: 4.2.3
       serverless-s3-bucket-helper:
-        specifier: https://github.com/CMSgov/serverless-s3-bucket-helper
-        version: git+https://git@github.com:CMSgov/serverless-s3-bucket-helper.git#e150b50b5663df8816cb425e39a9c934aa202d13(serverless@4.2.3)
+        specifier: https://github.com/Enterprise-CMCS/serverless-s3-bucket-helper
+        version: https://codeload.github.com/Enterprise-CMCS/serverless-s3-bucket-helper/tar.gz/e150b50b5663df8816cb425e39a9c934aa202d13(serverless@4.2.3)
       serverless-stack-termination-protection:
         specifier: ^2.0.2
         version: 2.0.2
@@ -1127,8 +1127,8 @@ importers:
         specifier: 4.2.3
         version: 4.2.3
       serverless-s3-bucket-helper:
-        specifier: https://github.com/CMSgov/serverless-s3-bucket-helper
-        version: git+https://git@github.com:CMSgov/serverless-s3-bucket-helper.git#e150b50b5663df8816cb425e39a9c934aa202d13(serverless@4.2.3)
+        specifier: https://github.com/Enterprise-CMCS/serverless-s3-bucket-helper
+        version: https://codeload.github.com/Enterprise-CMCS/serverless-s3-bucket-helper/tar.gz/e150b50b5663df8816cb425e39a9c934aa202d13(serverless@4.2.3)
       serverless-stack-termination-protection:
         specifier: ^2.0.2
         version: 2.0.2
@@ -1142,11 +1142,11 @@ importers:
         specifier: 4.2.3
         version: 4.2.3
       serverless-iam-helper:
-        specifier: https://github.com/CMSgov/serverless-iam-helper
-        version: git+https://git@github.com:CMSgov/serverless-iam-helper.git#2cfc4c2153666025e6f7593c92df7efd2f2b9790(serverless@4.2.3)
+        specifier: https://github.com/Enterprise-CMCS/serverless-iam-helper
+        version: https://codeload.github.com/Enterprise-CMCS/serverless-iam-helper/tar.gz/2cfc4c2153666025e6f7593c92df7efd2f2b9790(serverless@4.2.3)
       serverless-s3-bucket-helper:
-        specifier: https://github.com/CMSgov/serverless-s3-bucket-helper
-        version: git+https://git@github.com:CMSgov/serverless-s3-bucket-helper.git#e150b50b5663df8816cb425e39a9c934aa202d13(serverless@4.2.3)
+        specifier: https://github.com/Enterprise-CMCS/serverless-s3-bucket-helper
+        version: https://codeload.github.com/Enterprise-CMCS/serverless-s3-bucket-helper/tar.gz/e150b50b5663df8816cb425e39a9c934aa202d13(serverless@4.2.3)
       serverless-stack-termination-protection:
         specifier: ^2.0.2
         version: 2.0.2
@@ -1248,14 +1248,14 @@ importers:
         specifier: ^1.55.1
         version: 1.55.1(esbuild@0.25.10)
       serverless-iam-helper:
-        specifier: https://github.com/CMSgov/serverless-iam-helper.git
-        version: git+https://git@github.com:CMSgov/serverless-iam-helper.git#2cfc4c2153666025e6f7593c92df7efd2f2b9790(serverless@4.2.3)
+        specifier: https://github.com/Enterprise-CMCS/serverless-iam-helper.git
+        version: https://codeload.github.com/Enterprise-CMCS/serverless-iam-helper/tar.gz/2cfc4c2153666025e6f7593c92df7efd2f2b9790(serverless@4.2.3)
       serverless-offline:
         specifier: ^14.4.0
         version: 14.4.0(serverless@4.2.3)
       serverless-s3-bucket-helper:
-        specifier: https://github.com/CMSgov/serverless-s3-bucket-helper
-        version: git+https://git@github.com:CMSgov/serverless-s3-bucket-helper.git#e150b50b5663df8816cb425e39a9c934aa202d13(serverless@4.2.3)
+        specifier: https://github.com/Enterprise-CMCS/serverless-s3-bucket-helper
+        version: https://codeload.github.com/Enterprise-CMCS/serverless-s3-bucket-helper/tar.gz/e150b50b5663df8816cb425e39a9c934aa202d13(serverless@4.2.3)
       serverless-s3-local:
         specifier: ^0.8.5
         version: 0.8.5(serverless@4.2.3)
@@ -12559,8 +12559,8 @@ packages:
       esbuild-node-externals:
         optional: true
 
-  serverless-iam-helper@git+https://git@github.com:CMSgov/serverless-iam-helper.git#2cfc4c2153666025e6f7593c92df7efd2f2b9790:
-    resolution: {commit: 2cfc4c2153666025e6f7593c92df7efd2f2b9790, repo: git@github.com:CMSgov/serverless-iam-helper.git, type: git}
+  serverless-iam-helper@https://codeload.github.com/Enterprise-CMCS/serverless-iam-helper/tar.gz/2cfc4c2153666025e6f7593c92df7efd2f2b9790:
+    resolution: {tarball: https://codeload.github.com/Enterprise-CMCS/serverless-iam-helper/tar.gz/2cfc4c2153666025e6f7593c92df7efd2f2b9790}
     version: 1.0.0
     engines: {node: '>=10.0'}
     peerDependencies:
@@ -12581,8 +12581,8 @@ packages:
   serverless-plugin-scripts@1.0.2:
     resolution: {integrity: sha512-+OL9fFz5r6BXNHfpu9MDLehS/haC0fy/T3V5uJsTfLAnNsn+PzM6BmvefUfWG372hBT7piTbywB1Vl1+4LmI5Q==}
 
-  serverless-s3-bucket-helper@git+https://git@github.com:CMSgov/serverless-s3-bucket-helper.git#e150b50b5663df8816cb425e39a9c934aa202d13:
-    resolution: {commit: e150b50b5663df8816cb425e39a9c934aa202d13, repo: git@github.com:CMSgov/serverless-s3-bucket-helper.git, type: git}
+  serverless-s3-bucket-helper@https://codeload.github.com/Enterprise-CMCS/serverless-s3-bucket-helper/tar.gz/e150b50b5663df8816cb425e39a9c934aa202d13:
+    resolution: {tarball: https://codeload.github.com/Enterprise-CMCS/serverless-s3-bucket-helper/tar.gz/e150b50b5663df8816cb425e39a9c934aa202d13}
     version: 1.0.0
     engines: {node: '>=10.0'}
     peerDependencies:
@@ -29905,7 +29905,7 @@ snapshots:
       - bufferutil
       - utf-8-validate
 
-  serverless-iam-helper@git+https://git@github.com:CMSgov/serverless-iam-helper.git#2cfc4c2153666025e6f7593c92df7efd2f2b9790(serverless@4.2.3):
+  serverless-iam-helper@https://codeload.github.com/Enterprise-CMCS/serverless-iam-helper/tar.gz/2cfc4c2153666025e6f7593c92df7efd2f2b9790(serverless@4.2.3):
     dependencies:
       lodash: 4.17.21
       serverless: 4.2.3
@@ -29978,7 +29978,7 @@ snapshots:
 
   serverless-plugin-scripts@1.0.2: {}
 
-  serverless-s3-bucket-helper@git+https://git@github.com:CMSgov/serverless-s3-bucket-helper.git#e150b50b5663df8816cb425e39a9c934aa202d13(serverless@4.2.3):
+  serverless-s3-bucket-helper@https://codeload.github.com/Enterprise-CMCS/serverless-s3-bucket-helper/tar.gz/e150b50b5663df8816cb425e39a9c934aa202d13(serverless@4.2.3):
     dependencies:
       serverless: 4.2.3
 
