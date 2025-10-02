@@ -204,15 +204,16 @@ export class Postgres extends BaseStack {
         const isReview = isReviewEnvironment(this.stage)
 
         // For review environments, output the logical database secret name (created by Lambda)
+        // Lambda uses default naming: aurora_postgres_{stageName} (with underscores, no -cdk suffix)
         // For dev/val/prod, output the actual Aurora secret
         const secretName = isReview
-            ? `aurora-postgres-${this.stage}-cdk`
+            ? `aurora_postgres_${this.stage}`
             : this.databaseSecret.secretName
 
         // Note: For review environments, the ARN won't be resolvable until the Lambda creates it
         // but we can construct it predictably
         const secretArn = isReview
-            ? `arn:aws:secretsmanager:${this.region}:${this.account}:secret:aurora-postgres-${this.stage}-cdk-??????`
+            ? `arn:aws:secretsmanager:${this.region}:${this.account}:secret:aurora_postgres_${this.stage}-??????`
             : this.databaseSecret.secretArn
 
         new CfnOutput(this, 'PostgresSecretArn', {
