@@ -183,7 +183,10 @@ export class Postgres extends BaseStack {
                 actions: [
                     'secretsmanager:CreateSecret',
                     'secretsmanager:UpdateSecret',
+                    'secretsmanager:PutSecretValue',
                     'secretsmanager:DeleteSecret',
+                    'secretsmanager:DescribeSecret',
+                    'secretsmanager:UpdateSecretVersionStage',
                     'secretsmanager:GetRandomPassword',
                 ],
                 resources: ['*'],
