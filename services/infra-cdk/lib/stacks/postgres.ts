@@ -13,7 +13,7 @@ import { Secret } from 'aws-cdk-lib/aws-secretsmanager'
 import { Runtime, Architecture } from 'aws-cdk-lib/aws-lambda'
 import { NodejsFunction } from 'aws-cdk-lib/aws-lambda-nodejs'
 import { PolicyStatement, Effect } from 'aws-cdk-lib/aws-iam'
-import { CfnOutput, Duration } from 'aws-cdk-lib'
+import { CfnOutput, Duration, Fn } from 'aws-cdk-lib'
 import { AuroraServerlessV2 } from '../constructs/database'
 import { isReviewEnvironment } from '../config/environments'
 import * as path from 'path'
@@ -251,13 +251,20 @@ export class Postgres extends BaseStack {
             exportName: this.exportName('JwtSecretName'),
         })
 
-        if (this.cluster) {
-            new CfnOutput(this, 'PostgresAuroraV2Arn', {
-                value: this.cluster.clusterArn,
-                description: 'CDK PostgreSQL Aurora cluster ARN',
-                exportName: this.exportName('PostgresAuroraV2Arn'),
-            })
+        // Export Aurora ARN - for review environments, reference the dev cluster
+        const auroraArn = this.cluster
+            ? this.cluster.clusterArn
+            : Fn.importValue('postgres-dev-cdk-PostgresAuroraV2Arn')
 
+        new CfnOutput(this, 'PostgresAuroraV2Arn', {
+            value: auroraArn,
+            description: isReview
+                ? 'CDK PostgreSQL Aurora cluster ARN (shared dev cluster)'
+                : 'CDK PostgreSQL Aurora cluster ARN',
+            exportName: this.exportName('PostgresAuroraV2Arn'),
+        })
+
+        if (this.cluster) {
             new CfnOutput(this, 'PostgresClusterEndpoint', {
                 value: this.cluster.clusterEndpoint.hostname,
                 description: 'CDK PostgreSQL Aurora cluster endpoint',
