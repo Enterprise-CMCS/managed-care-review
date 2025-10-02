@@ -9,15 +9,14 @@ exporters:
     endpoint: https://gov-otlp.nr-data.net:4317
     headers:
       api-key: $NR_LICENSE_KEY
-  
-  datadog:
+  datadog/exporter:
     api:
-      key: ${DD_API_KEY}
       site: ddog-gov.com
+      key: ${env:DD_API_KEY}
 
 
 service:
   pipelines:
     traces:
       receivers: [otlp]
-      exporters: [otlp, datadog]
+      exporters: [otlp, datadog/exporter]
