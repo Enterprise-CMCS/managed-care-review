@@ -50,6 +50,10 @@ module.exports = () => {
                             '$NR_LICENSE_KEY',
                             process.env.NR_LICENSE_KEY
                         );
+                        contents = contents.replace(
+                            '$DD_API_KEY',
+                            process.env.DD_API_KEY
+                        );
                         fs.writeFileSync(filePath, contents);
                     });
                 },
