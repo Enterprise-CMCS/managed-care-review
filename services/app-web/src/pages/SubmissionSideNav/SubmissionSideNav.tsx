@@ -86,7 +86,7 @@ export const SubmissionSideNav = () => {
         }
 
         recordJSException(err)
-        return <GenericErrorPage /> // api failure or protobuf decode failure
+        return <GenericErrorPage /> // api failure
     } else if (!loggedInUser || !contract) {
         return <GenericErrorPage />
     }

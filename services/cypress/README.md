@@ -178,7 +178,7 @@ The reason for making direct API request through Cypress was to speed up testing
 We mimicked the same setup in the application in Cypress to make graphql request.
 
 -   `GraphQL`
-    -   Like `app-web` and `app-api`, `cypress` also has a `gen` folder where our `GraphQL` and `ProtoBuf` files will be generated.
+    -   Like `app-web` and `app-api`, `cypress` also has a `gen` folder where our `GraphQL` files will be generated.
     -   Specifically the `schema.graphql` file from the `gen` folder is used in `cypress.config.ts` to configure the `Apollo` client.
         -   In `cypress.config` under `setupNodeEvents` there is a task, `readGraphQLSchema`, that can be called in Cypress to load our `GraphQL` schema and convert it to `gql`.
             ```ts

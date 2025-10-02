@@ -3,7 +3,7 @@
 <a href="https://codeclimate.com/github/Enterprise-CMCS/managed-care-review/maintainability"><img src="https://api.codeclimate.com/v1/badges/9ec6eca87429a4572f67/maintainability" /></a><a href="https://codeclimate.com/github/Enterprise-CMCS/managed-care-review/test_coverage"><img src="https://api.codeclimate.com/v1/badges/9ec6eca87429a4572f67/test_coverage" /></a>
 [![CodeQL](https://github.com/Enterprise-CMCS/managed-care-review/actions/workflows/codeql.yml/badge.svg?branch=main)](https://github.com/Enterprise-CMCS/managed-care-review/actions/workflows/codeql.yml)
 
-Managed Care Review is an application that accepts Managed Care contract and rate submissions from states and packages them for review by CMS. It uses a Serverless architecture (services deployed as AWS Lambdas) with React and Node as client/server and GraphQL as the api protocol. The codebase is a Typescript monorepo. An [architectural diagram](.images/architecture.svg) is also available.
+Managed Care Review is an application that accepts Managed Care contract and rate submissions from states and packages them for review by CMS. It uses a Serverless architecture (services deployed as AWS Lambdas) with React and Node as client/server and GraphQL as the api protocol. The codebase is a TypeScript monorepo. An [architectural diagram](.images/architecture.svg) is also available.
 
 ## Key Documentation
 
@@ -32,8 +32,6 @@ For monorepo tooling we just rely on the workspace configuration of `pnpm`. If g
 To get the tools needed for local development, you can run:
 
 ```bash
-brew tap yoheimuta/protolint
-brew install pnpm direnv shellcheck protolint detect-secrets
 pnpm husky install
 ```
 
@@ -98,7 +96,7 @@ Run all the services locally with the command `./dev local`.
 
 See the above Requirements section if the command asks for any prerequisites you don't have installed.
 
-The ./dev script is written in typescript in `./src`. The entry-point is `./src/dev.ts`, it manages running the moving pieces locally: the API, the database, the file store, and the frontend.
+The ./dev script is written in TypeScript in `./src`. The entry-point is `./src/dev.ts`, it manages running the moving pieces locally: the API, the database, the file store, and the frontend.
 
 Local dev is built around the Serverless plugin [`serverless-offline`](https://github.com/dherault/serverless-offline). `serverless-offline` runs an API gateway locally configured by `./services/app-api/serverless.yml` and hot reloads your lambdas on every save. The plugin [`serverless-s3-local`](https://github.com/ar90n/serverless-s3-local) stands up the local s3 in a similar fashion.
 
@@ -148,7 +146,7 @@ Run web app locally, but configured to run against a deployed backend
 
 #### Run cypress tests in a linux docker container
 
-We've had a number of issues only reproduce in cypress being run in Github Actions. We've added tooling to dev to run our cypress tests locally in a linux docker container which has been able to reproduce those issues. To do so, you'll need to have docker installed and running and run the app locally with `./dev local` like normal to provide the api & postgres & s3 (you could just run those three services if you like). Unfortunately, docker networking is a little weird, so we have to run a separate `web` in order for the cypress tests to be able to reach our app correctly. That's started with `./dev local web --for-docker`. Finally you can run the tests themselves with `./dev test browser --in-docker`. So minimally:
+We've had a number of issues only reproduced in cypress being run in GitHub Actions. We've added tooling to dev to run our cypress tests locally in a linux docker container which has been able to reproduce those issues. To do so, you'll need to have docker installed and running and run the app locally with `./dev local` like normal to provide the api & postgres & s3 (you could just run those three services if you like). Unfortunately, docker networking is a little weird, so we have to run a separate `web` in order for the cypress tests to be able to reach our app correctly. That's started with `./dev local web --for-docker`. Finally, you can run the tests themselves with `./dev test browser --in-docker`. So minimally:
 
 ```bash
 ./dev local --api --postgres --s3
@@ -164,7 +162,7 @@ We are using Postgres as our primary data store and [Prisma](https://prisma.io) 
 
 We describe our database tables and relationships between them in our Prisma schema at /services/app-api/prisma/schema.prisma. If you want to change our database, start by changing [that schema file](https://www.prisma.io/docs/concepts/components/prisma-schema) how you like.
 
-For more suggestions about how to run a migration see [how to complete migrations](/docs//technical-design/howto-migrations.md)
+For more suggestions about how to run a migration, see [how to complete migrations](/docs//technical-design/howto-migrations.md)
 
 ## Build & Deploy in CI
 
@@ -174,17 +172,17 @@ This application is built and deployed via GitHub Actions. See `.github/workflow
 
 This application is deployed into three different AWS accounts: Dev, Val, and Prod. Anytime the main branch is updated (i.e. a PR is merged) we deploy to each environment in turn. If interacting with those accounts directly, each one will require different AWS keys.
 
-In the Dev account, in addition to deploying the main branch, we deploy a full version of the app on every branch that is pushed that is not the main branch. We call these deployments "review apps" since they host all the changes for a PR in a full deployment. These review apps are differentiated by their Serverless "stack" name. This is set to the branch name and all infra ends up being prefixed with it to keep from there being any overlapping.
+In the Dev account, in addition to deploying the main branch, we deploy a full version of the app on every branch that is pushed that is not the main branch. We call these deployments "review apps" since they host all the changes for a PR in a full deployment. These review apps are differentiated by their Serverless "stack" name. This is set to the branch name, and all infra ends up being prefixed with it to keep from there being any overlapping.
 
 #### CI stage skipping script
 
-We have a script (`getChangedServices`) that runs in CI to check if a service needs to be re-deployed due to your most recent commit or if a service can be skipped in order to save CI deploy time. For example, if you're just making changes to `app-web`, it's likely that you won't need to re-deploy any infra services, such as postgres, after an initial branch deploy. However, if you do need your branch to be fully re-deployed, you can add the string `force-ci-run` to your commit message and the entire deploy workflow will be run. If you have a failing Cypress container and want to skip over deploying infra and the application, use the string `cypress re-run` in a commit message and the `getChangedServices` script will skip you to the Cypress run (unit tests will still run, but it still saves time).
+We have a script (`getChangedServices`) that runs in CI to check if a service needs to be re-deployed due to your most recent commit or if a service can be skipped in order to save CI deploy time. For example, if you're just making changes to `app-web`, it's likely that you won't need to re-deploy any infra services, such as postgres, after an initial branch deploys. However, if you do need your branch to be fully re-deployed, you can add the string `force-ci-run` to your commit message and the entire deployment workflow will be run. If you have a failing Cypress container and want to skip over deploying infra and the application, use the string `cypress re-run` in a commit message and the `getChangedServices` script will skip you to the Cypress run (unit tests will still run, but it still saves time).
 
-You can see the deploys for review apps [here](https://github.com/Enterprise-CMCS/managed-care-review/actions/workflows/deploy.yml)
+You can see the deployments for review apps [here](https://github.com/Enterprise-CMCS/managed-care-review/actions/workflows/deploy.yml)
 
 ### Building scripts
 
-When a script gets too complicated, we prefer it not be written in Bash. Since we're using typescript for everything else, we're writing scripts in typescript as well. They are located in /src/scripts and are compiled along with dev.ts any time you execute `./dev`. They can be invoked like `node build_dev/scripts/add_cypress_test_users.js`
+When a script gets too complicated, we prefer it not be written in Bash. Since we're using typescript for everything else, we're writing scripts in TypeScript as well. They are located in /src/scripts and are compiled along with dev.ts any time you execute `./dev`. They can be invoked like `node build_dev/scripts/add_cypress_test_users.js`
 
 ## Infrastructure Dependencies
 
@@ -192,7 +190,7 @@ These dependencies can be installed if you are wanting or needing to run `aws` o
 
 Before beginning, it is assumed you have:
 
-1. Added your public key to your GitHub account
+1. Add your public key to your GitHub account
 2. Cloned this repo locally
 
 The following should install everything you need on macOS:
@@ -205,7 +203,7 @@ brew install awscli shellcheck
 
 AWS access is managed via Active Directory and Cloudtamer.
 
-In order to run commands against a live AWS environment you need to configure AWS keys to grant you authorization to do so. You will need this for sure to run the `./dev hybrid` command, and might be necessary to run any serverless commands directly by hand.
+In order to run commands against a live AWS environment, you need to configure AWS keys to grant you authorization to do so. You will need this for sure to run the `./dev hybrid` command, and might be necessary to run any serverless commands directly by hand.
 
 We can use the `ctkey` tool to make setting up the appropriate access easier, which is described below.
 
@@ -259,7 +257,7 @@ export AWS_ACCOUNT_ID=''
 
 Your `CTKEY_USERNAME` and `CTKEY_PASSWORD` should be the credentials you use to log in to EUA. They will need to be updated whenever your EUA password expires and has been rotated.
 
-Your `AWS_ACCOUNT_ID` is the ID of the environment you wish to access locally. Typically this will be the AWS ID of the dev environment.
+Your `AWS_ACCOUNT_ID` is the ID of the environment you wish to access locally. Typically, this will be the AWS ID of the dev environment.
 
 Currently, `ctkey-wrapper` requires the user to be running the openconnect-tinyproxy
 container [here](https://github.com/trussworks/openconnect-tinyproxy) to connect
@@ -277,18 +275,18 @@ which serverless
 
 This will output the path to the tool, which is likely installed locally to your `~/Library/pnpm/*` path.
 
-We can then verify things are working by running any serverless command , e.g. `cd services/app-api && serverless info --stage main`. This command should print information and not return any Serverless errors around AWS credentials. If you do receive errors about AWS credentials, the tool may have been accidentally installed as a version `> 4.2.3` and you'll need to downgrade to that version. Unfortunately, Serverless decided to break local development by requiring AWS connections in versions after `4.2.3`, so we've pinned our version until we can fully move to AWS CDK in Spring 2025.
+We can then verify things are working by running any serverless command, e.g. `cd services/app-api && serverless info --stage main`. This command should print information and not return any Serverless errors around AWS credentials. If you do receive errors about AWS credentials, the tool may have been accidentally installed as a version `> 4.2.3` and you'll need to downgrade to that version. Unfortunately, Serverless decided to break local development by requiring AWS connections in versions after `4.2.3`, so we've pinned our version until we can fully move to AWS CDK in Spring 2025.
 
 ## Adding a Service
 
-The Serverless framework calls encapsulated units of lambdas + AWS infrastructure a "service", so we've inherited this terminology from that project. All of our services live under the `./services/` directory. If you need to add a new service to the project a few things need to happen:
+The Serverless framework calls encapsulated units of lambdas + AWS infrastructure a "service", so we've inherited this terminology from that project. All of our services live under the `./services/` directory. If you need to add a new service to the project, a few things need to happen:
 
 - Add a `serverless.yml` file to the root directory of this new service. You can copy off of an existing config or run the `serverless` command in `./services/${service-name}` to use one of their starter templates.
 - If this service is going to require js or ts code, you'll want to create a `src` directory as well as copy over the appropriate `tsconfig.json` and `.eslintrc` configs. Refer to one of the existing services to get an idea of how we are currently doing this.
 
 You'll need to add this service to our deployment GitHub Actions workflows:
 
-- If it is only infrastructure it can be added to `./.github/workflows/deploy-infra-to-env.yml`.
+- If it is only infrastructure, it can be added to `./.github/workflows/deploy-infra-to-env.yml`.
 - Services that include application code can be added to `./.github/workflows/deploy-app-to-env.yml`.
 - We have a CI script that skips branch redeploys when possible in `./scripts/get-changed-services/index.ts`. Make sure your service is added to that list.
 

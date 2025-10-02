@@ -88,7 +88,7 @@ export const RateSummarySideNav = () => {
         }
 
         recordJSException(err)
-        return <GenericErrorPage /> // api failure or protobuf decode failure
+        return <GenericErrorPage /> // api failure
     } else if (!loggedInUser || !rate || rate.status === 'DRAFT') {
         return <GenericErrorPage />
     }

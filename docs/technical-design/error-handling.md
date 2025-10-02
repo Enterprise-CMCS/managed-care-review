@@ -24,9 +24,9 @@ For other error codes, we now use helper functions from our `errorUtils.ts` file
 ```typescript
 import { createForbiddenError, createUserInputError } from '../errorUtils'
 
-if (planPackage.stateCode !== stateFromCurrentUser) {
+if (contractWithHistory.stateCode !== stateFromCurrentUser) {
     logError(
-        'submitHealthPlanPackage',
+        'submitContract',
         'user not authorized to fetch data from a different state'
     )
     setErrorAttributesOnActiveSpan(
@@ -38,11 +38,15 @@ if (planPackage.stateCode !== stateFromCurrentUser) {
     )
 }
 
-if (result === undefined) {
-    const errMessage = `A draft must exist to be submitted: ${input.pkgID}`
-    logError('submitHealthPlanPackage', errMessage)
+if (['WITHDRAWN'].includes(draftRate.consolidatedStatus)) {
+    const errMessage = `Attempted to submit a contract with a withdrawn rate. Rate id: ${draftRate.id}`
+    logError('submitContract', errMessage)
     setErrorAttributesOnActiveSpan(errMessage, span)
-    throw createUserInputError(errMessage, 'pkgID')
+    throw createUserInputError(
+        errMessage,
+        'rateID',
+        draftRate.id
+    )
 }
 ```
 
