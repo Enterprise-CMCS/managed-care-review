@@ -2,7 +2,6 @@ import { GraphQLDate, GraphQLDateTime } from 'graphql-scalars'
 import type { Emailer } from '../emailer'
 import type { Resolvers } from '../gen/gqlServer'
 import type { Store } from '../postgres'
-import { healthPlanPackageResolver } from './healthPlanPackage'
 import {
     createContractQuestionResolver,
     createContractQuestionResponseResolver,
@@ -177,7 +176,6 @@ export function configureResolvers(
         StateUser: stateUserResolver,
         CMSUser: cmsUserResolver,
         CMSApproverUser: cmsApproverUserResolver,
-        HealthPlanPackage: healthPlanPackageResolver(store),
         Rate: rateResolver(store, applicationEndpoint),
         RateStripped: rateStrippedResolver(store, applicationEndpoint),
         RateRevision: rateRevisionResolver(store),
