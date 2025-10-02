@@ -71,8 +71,8 @@ export class Postgres extends BaseStack {
             this.databaseSecret = auroraCluster.secret
         } else {
             // Review environments use shared CDK dev Aurora via logical databases
-            // The logicalDbManagerFunction will create a logical database for this review environment
-            this.databaseSecret = this.createOrReferenceCdkDevSecret()
+            // Create a placeholder secret that the logicalDbManagerFunction will update with actual credentials
+            this.databaseSecret = this.createReviewEnvironmentSecret()
         }
 
         // Create the logical database manager Lambda
@@ -117,15 +117,22 @@ export class Postgres extends BaseStack {
     }
 
     /**
-     * Reference CDK dev Aurora secret for review environments
-     * Review environments use logical databases in the shared dev Aurora cluster
+     * Create placeholder secret for review environments
+     * The logicalDbManagerFunction will update this secret with actual logical database credentials
      */
-    private createOrReferenceCdkDevSecret(): ISecret {
-        // Reference the dev database secret by its known name
-        // This secret is created by the postgres-dev-cdk stack (deployed via promote-cdk.yml)
-        const devSecretName = 'aurora-postgres-dev-cdk'
-
-        return Secret.fromSecretNameV2(this, 'DevDatabaseSecret', devSecretName)
+    private createReviewEnvironmentSecret(): ISecret {
+        // Create a placeholder secret matching serverless naming: aurora_postgres_{stage}
+        // The Lambda will update this with the actual logical database connection info
+        return new Secret(this, 'ReviewDatabaseSecret', {
+            secretName: `aurora_postgres_${this.stage}`,
+            description: `Logical database credentials for review environment ${this.stage}`,
+            generateSecretString: {
+                secretStringTemplate: '{"username": "placeholder"}',
+                generateStringKey: 'password',
+                passwordLength: 30,
+                excludeCharacters: ' %+~`#$&*()|[]{}:;<>?!\'/@"\\',
+            },
+        })
     }
 
     /**
