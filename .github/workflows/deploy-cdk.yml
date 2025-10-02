@@ -362,6 +362,42 @@ jobs:
             --context stage=${STAGE_NAME} \
             --require-approval never
 
+      - name: Create logical database for review environment
+        run: |
+          echo "=== Creating logical database for review environment ==="
+
+          # Get the logicalDbManagerFunction name from CloudFormation outputs
+          FUNCTION_NAME=$(aws cloudformation describe-stacks \
+            --stack-name postgres-${{ needs.begin-deployment.outputs.stage-name }}-cdk \
+            --query 'Stacks[0].Outputs[?OutputKey==`LogicalDbManagerFunctionName`].OutputValue' \
+            --output text)
+
+          # Get the dev database secret ARN
+          DEV_SECRET_ARN=$(aws secretsmanager describe-secret \
+            --secret-id aurora-postgres-dev-cdk \
+            --query 'ARN' \
+            --output text)
+
+          # Invoke the Lambda to create the logical database
+          aws lambda invoke \
+            --function-name ${FUNCTION_NAME} \
+            --payload "{\"action\":\"create\",\"stageName\":\"${{ needs.begin-deployment.outputs.stage-name }}\",\"devDbSecretArn\":\"${DEV_SECRET_ARN}\",\"prSecretName\":\"aurora-postgres-${{ needs.begin-deployment.outputs.stage-name }}-cdk\"}" \
+            --cli-binary-format raw-in-base64-out \
+            /tmp/lambda-response.json
+
+          # Check the response
+          cat /tmp/lambda-response.json
+
+          # Verify it succeeded (statusCode 200)
+          STATUS_CODE=$(cat /tmp/lambda-response.json | jq -r '.statusCode')
+          if [ "$STATUS_CODE" != "200" ]; then
+            echo "ERROR: Logical database creation failed with status code: $STATUS_CODE"
+            cat /tmp/lambda-response.json | jq '.'
+            exit 1
+          fi
+
+          echo "Logical database created successfully for ${{ needs.begin-deployment.outputs.stage-name }}"
+
       - name: Deploy Frontend Infrastructure stack
         working-directory: services/infra-cdk
         env:

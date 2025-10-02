@@ -43,11 +43,6 @@ export class Postgres extends BaseStack {
         })
 
         const isReview = isReviewEnvironment(this.stage)
-        const isTestingBranch =
-            this.stage === 'mtcdkoidc' || this.stage === 'mtreviewcdk'
-        //TODO: remove after promotion. Temporarily allowing review branches to create their own Aurora
-        //clusters during CDK testing phase. Post-promotion, all review environments should connect
-        //to the shared CDK dev database instead of creating individual clusters.
 
         // Create VPC endpoint for Secrets Manager (needed by Lambda functions)
         this.vpcEndpoint = this.createSecretsManagerVpcEndpoint(props)
@@ -55,13 +50,9 @@ export class Postgres extends BaseStack {
         // Create JWT secret for API authentication
         this.jwtSecret = this.createJwtSecret()
 
-        if (!isReview || isTestingBranch) {
-            // Create dedicated Aurora cluster for:
-            // - dev/val/prod (always)
-            // - review environments during testing phase (temporary)
-            const databaseName = isReview
-                ? `mcr_cdk_review_${this.stage}`
-                : `mcr_cdk_${this.stage}`
+        if (!isReview) {
+            // Create dedicated Aurora cluster for dev/val/prod
+            const databaseName = `mcr_cdk_${this.stage}`
 
             const auroraCluster = new AuroraServerlessV2(this, 'Aurora', {
                 databaseName,
@@ -77,8 +68,8 @@ export class Postgres extends BaseStack {
             this.cluster = auroraCluster.cluster
             this.databaseSecret = auroraCluster.secret
         } else {
-            // Future: Review environments use shared CDK dev Aurora via logical databases
-            // This will be enabled after promotion creates the CDK dev Aurora cluster
+            // Review environments use shared CDK dev Aurora via logical databases
+            // The logicalDbManagerFunction will create a logical database for this review environment
             this.databaseSecret = this.createOrReferenceCdkDevSecret()
         }
 
@@ -124,15 +115,15 @@ export class Postgres extends BaseStack {
     }
 
     /**
-     * Create or reference CDK dev secret for review environments
-     * TODO: Implement after CDK dev Aurora is promoted
+     * Reference CDK dev Aurora secret for review environments
+     * Review environments use logical databases in the shared dev Aurora cluster
      */
     private createOrReferenceCdkDevSecret(): ISecret {
-        // For now, throw an error - this will be implemented post-promotion
-        throw new Error(
-            'Review environments using shared CDK dev Aurora not yet implemented. ' +
-                'This will be enabled after CDK postgres stack is promoted to dev.'
-        )
+        // Reference the dev database secret by its known name
+        // This secret is created by the postgres-dev-cdk stack (deployed via promote-cdk.yml)
+        const devSecretName = 'aurora-postgres-dev-cdk'
+
+        return Secret.fromSecretNameV2(this, 'DevDatabaseSecret', devSecretName)
     }
 
     /**
@@ -191,15 +182,33 @@ export class Postgres extends BaseStack {
      * Create stack outputs that match serverless outputs
      */
     private createOutputs(): void {
+        const isReview = isReviewEnvironment(this.stage)
+
+        // For review environments, output the logical database secret name (created by Lambda)
+        // For dev/val/prod, output the actual Aurora secret
+        const secretName = isReview
+            ? `aurora-postgres-${this.stage}-cdk`
+            : this.databaseSecret.secretName
+
+        // Note: For review environments, the ARN won't be resolvable until the Lambda creates it
+        // but we can construct it predictably
+        const secretArn = isReview
+            ? `arn:aws:secretsmanager:${this.region}:${this.account}:secret:aurora-postgres-${this.stage}-cdk-??????`
+            : this.databaseSecret.secretArn
+
         new CfnOutput(this, 'PostgresSecretArn', {
-            value: this.databaseSecret.secretArn,
-            description: 'CDK PostgreSQL database secret ARN',
+            value: secretArn,
+            description: isReview
+                ? 'CDK PostgreSQL logical database secret ARN (created by logicalDbManagerFunction)'
+                : 'CDK PostgreSQL database secret ARN',
             exportName: this.exportName('PostgresSecretArn'),
         })
 
         new CfnOutput(this, 'PostgresSecretName', {
-            value: this.databaseSecret.secretName,
-            description: 'CDK PostgreSQL database secret name',
+            value: secretName,
+            description: isReview
+                ? 'CDK PostgreSQL logical database secret name (created by logicalDbManagerFunction)'
+                : 'CDK PostgreSQL database secret name',
             exportName: this.exportName('PostgresSecretName'),
         })
 
