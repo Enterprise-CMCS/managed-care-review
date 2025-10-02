@@ -379,9 +379,10 @@ jobs:
             --output text)
 
           # Invoke the Lambda to create the logical database
+          # Note: Not passing prSecretName to use default naming: aurora_postgres_{stageName}
           aws lambda invoke \
             --function-name ${FUNCTION_NAME} \
-            --payload "{\"action\":\"create\",\"stageName\":\"${{ needs.begin-deployment.outputs.stage-name }}\",\"devDbSecretArn\":\"${DEV_SECRET_ARN}\",\"prSecretName\":\"aurora-postgres-${{ needs.begin-deployment.outputs.stage-name }}-cdk\"}" \
+            --payload "{\"action\":\"create\",\"stageName\":\"${{ needs.begin-deployment.outputs.stage-name }}\",\"devDbSecretArn\":\"${DEV_SECRET_ARN}\"}" \
             --cli-binary-format raw-in-base64-out \
             /tmp/lambda-response.json
 
