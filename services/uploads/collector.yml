@@ -12,6 +12,8 @@ exporters:
     endpoint: https://trace.agent.ddog-gov.com/v1/traces
     headers:
       DD-API-KEY: ${DD_API_KEY}
+  logging:
+    loglevel: debug
 
 service:
   pipelines:
@@ -20,4 +22,4 @@ service:
       exporters: [otlphttp, otlphttp/ddog]
     metrics:
       receivers: [otlp]
-      exporters: [otlphttp, otlphttp/ddog]
+      exporters: [otlphttp, otlphttp/ddog, logging]
