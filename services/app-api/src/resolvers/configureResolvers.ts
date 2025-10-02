@@ -4,7 +4,6 @@ import type { Resolvers } from '../gen/gqlServer'
 import type { Store } from '../postgres'
 import {
     healthPlanPackageResolver,
-    submitHealthPlanPackageResolver,
     unlockHealthPlanPackageResolver,
 } from './healthPlanPackage'
 import {
@@ -95,10 +94,6 @@ export function configureResolvers(
             fetchOauthClients: fetchOauthClientsResolver(store),
         },
         Mutation: {
-            submitHealthPlanPackage: submitHealthPlanPackageResolver(
-                store,
-                launchDarkly
-            ),
             submitContract: submitContract(
                 store,
                 emailer,

@@ -1,7 +1,6 @@
 import {
     CreateContractQuestionMutationFn,
     HealthPlanPackage,
-    SubmitHealthPlanPackageMutationFn,
     UnlockContractMutationFn,
     FetchContractWithQuestionsQuery,
     FetchContractWithQuestionsDocument,
@@ -156,42 +155,6 @@ export const unlockMutationWrapper = async (
 }
 
 export const submitMutationWrapper = async (
-    submitDraftSubmission: SubmitHealthPlanPackageMutationFn,
-    id: string,
-    submittedReason?: string
-): Promise<Partial<HealthPlanPackage> | GraphQLErrors | Error> => {
-    const input = { pkgID: id }
-
-    if (submittedReason) {
-        Object.assign(input, {
-            submittedReason,
-        })
-    }
-
-    try {
-        const { data } = await submitDraftSubmission({
-            variables: {
-                input,
-            },
-        })
-
-        if (data?.submitHealthPlanPackage.pkg) {
-            return data.submitHealthPlanPackage.pkg
-        } else {
-            recordJSException(
-                `[UNEXPECTED]: Error attempting to submit, no data present but returning 200.`
-            )
-            return new Error(ERROR_MESSAGES.submit_error_generic)
-        }
-    } catch (error) {
-        return handleGraphQLErrorsAndAddUserFacingMessages(
-            error,
-            'SUBMIT_HEALTH_PLAN_PACKAGE'
-        )
-    }
-}
-
-export const submitMutationWrapperV2 = async (
     submitContract: SubmitContractMutationFn,
     id: string,
     submittedReason?: string
