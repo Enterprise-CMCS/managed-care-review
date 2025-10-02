@@ -10,11 +10,13 @@ import {
 import type { IDatabaseCluster } from 'aws-cdk-lib/aws-rds'
 import type { ISecret } from 'aws-cdk-lib/aws-secretsmanager'
 import { Secret } from 'aws-cdk-lib/aws-secretsmanager'
-import { Function, Runtime, Code } from 'aws-cdk-lib/aws-lambda'
+import { Runtime, Architecture } from 'aws-cdk-lib/aws-lambda'
+import { NodejsFunction } from 'aws-cdk-lib/aws-lambda-nodejs'
 import { PolicyStatement, Effect } from 'aws-cdk-lib/aws-iam'
 import { CfnOutput, Duration } from 'aws-cdk-lib'
 import { AuroraServerlessV2 } from '../constructs/database'
 import { isReviewEnvironment } from '../config/environments'
+import * as path from 'path'
 
 export interface PostgresProps extends BaseStackProps {
     vpc: IVpc
@@ -32,7 +34,7 @@ export class Postgres extends BaseStack {
     public readonly databaseSecret: ISecret
     public readonly jwtSecret: ISecret
     public readonly cluster?: IDatabaseCluster
-    public readonly logicalDbManagerFunction: Function
+    public readonly logicalDbManagerFunction: NodejsFunction
     public readonly vpcEndpoint: InterfaceVpcEndpoint
 
     constructor(scope: Construct, id: string, props: PostgresProps) {
@@ -129,30 +131,43 @@ export class Postgres extends BaseStack {
     /**
      * Create logical database manager Lambda function
      */
-    private createLogicalDbManagerLambda(props: PostgresProps): Function {
-        // Simple Lambda function - no complex factory needed
-        const dbManagerFunction = new Function(this, 'LogicalDatabaseManager', {
-            functionName: `postgres-${this.stage}-dbManager-cdk`,
-            description:
-                'Manages logical databases in the CDK PostgreSQL Aurora cluster',
-            runtime: Runtime.NODEJS_20_X,
-            handler: 'logicalDatabaseManager.handler',
-            code: Code.fromAsset('src/lambdas/postgres'),
-            timeout: Duration.seconds(60),
-            memorySize: this.stageConfig.lambda.memorySize,
-            vpc: props.vpc,
-            vpcSubnets: {
-                subnetType: SubnetType.PRIVATE_WITH_EGRESS,
-            },
-            securityGroups: [props.lambdaSecurityGroup],
-            environment: {
-                SECRETS_MANAGER_ENDPOINT: `https://secretsmanager.${this.region}.amazonaws.com`,
-                DB_SECRET_ARN: this.databaseSecret.secretArn,
-                ...(this.cluster && {
-                    DB_CLUSTER_ARN: this.cluster.clusterArn,
-                }),
-            },
-        })
+    private createLogicalDbManagerLambda(props: PostgresProps): NodejsFunction {
+        // Use NodejsFunction to bundle the TypeScript code from postgres service
+        const dbManagerFunction = new NodejsFunction(
+            this,
+            'LogicalDatabaseManager',
+            {
+                functionName: `postgres-${this.stage}-dbManager-cdk`,
+                description:
+                    'Manages logical databases in the CDK PostgreSQL Aurora cluster',
+                runtime: Runtime.NODEJS_20_X,
+                architecture: Architecture.X86_64,
+                handler: 'handler',
+                entry: path.join(
+                    __dirname,
+                    '..',
+                    '..',
+                    '..',
+                    'postgres',
+                    'src',
+                    'logicalDatabaseManager.ts'
+                ),
+                timeout: Duration.seconds(60),
+                memorySize: this.stageConfig.lambda.memorySize,
+                vpc: props.vpc,
+                vpcSubnets: {
+                    subnetType: SubnetType.PRIVATE_WITH_EGRESS,
+                },
+                securityGroups: [props.lambdaSecurityGroup],
+                environment: {
+                    SECRETS_MANAGER_ENDPOINT: `https://secretsmanager.${this.region}.amazonaws.com`,
+                    DB_SECRET_ARN: this.databaseSecret.secretArn,
+                    ...(this.cluster && {
+                        DB_CLUSTER_ARN: this.cluster.clusterArn,
+                    }),
+                },
+            }
+        )
 
         // Grant permissions
         this.databaseSecret.grantRead(dbManagerFunction)
