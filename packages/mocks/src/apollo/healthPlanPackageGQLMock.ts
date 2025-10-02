@@ -14,7 +14,6 @@ import {
 } from '../gen/gqlClient'
 import {
     mockContractAndRatesDraft,
-    mockDraftHealthPlanPackage,
 } from './healthPlanFormDataMock'
 import {
     GRAPHQL_ERROR_CAUSE_MESSAGES,

@@ -1,6 +1,5 @@
 import {
     CreateContractQuestionMutationFn,
-    HealthPlanPackage,
     UnlockContractMutationFn,
     FetchContractWithQuestionsQuery,
     FetchContractWithQuestionsDocument,
