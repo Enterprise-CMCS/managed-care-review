@@ -16,6 +16,7 @@ import {
     ViewerProtocolPolicy,
     AllowedMethods,
     FunctionEventType,
+    SecurityPolicyProtocol,
 } from 'aws-cdk-lib/aws-cloudfront'
 import { S3BucketOrigin } from 'aws-cdk-lib/aws-cloudfront-origins'
 import { CfnWebACL } from 'aws-cdk-lib/aws-wafv2'
@@ -152,6 +153,9 @@ function handler(event) {
 
             webAclId: webAcl.attrArn,
 
+            // Security: Enforce TLS 1.2 as minimum protocol version (Security Hub compliance)
+            minimumProtocolVersion: SecurityPolicyProtocol.TLS_V1_2_2021,
+
             // Logging to same bucket (matches serverless)
             enableLogging: true,
             logBucket: this.bucket,
@@ -228,6 +232,9 @@ function handler(event) {
                 ],
 
                 webAclId: webAcl.attrArn,
+
+                // Security: Enforce TLS 1.2 as minimum protocol version (Security Hub compliance)
+                minimumProtocolVersion: SecurityPolicyProtocol.TLS_V1_2_2021,
 
                 // Logging to same bucket (matches serverless)
                 enableLogging: true,
