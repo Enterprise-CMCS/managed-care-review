@@ -103,17 +103,18 @@ jobs:
           stage-name: main
           changed-services: "github-oidc"
 
-      - name: Bootstrap CDK with pure defaults (testing)
+      - name: Bootstrap CDK with defaults (qualifier: mcreview)
         working-directory: services/infra-cdk
         env:
           STAGE_NAME: ${{ needs.begin-deployment.outputs.stage-name }}
         run: |
-          echo "=== Testing pure default CDK bootstrap (no custom permissions boundary) ==="
+          echo "=== Bootstrapping CDK with qualifier 'mcreview' (no custom permissions boundary or IAM paths) ==="
           pnpm cdk bootstrap \
             --app 'pnpm tsx bin/oidc.ts' \
             --context stage=${STAGE_NAME} \
-            --verbose || echo "Bootstrap failed or already exists with defaults"
-          echo "=== Bootstrap attempt completed ==="
+            --qualifier mcreview \
+            --verbose || echo "Bootstrap failed or already exists"
+          echo "=== Bootstrap completed ==="
 
       - name: deploy github-oidc with CDK
         id: deploy-github-oidc-cdk
