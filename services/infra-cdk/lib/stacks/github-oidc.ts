@@ -3,7 +3,6 @@ import type { Construct } from 'constructs'
 import {
     Role,
     WebIdentityPrincipal,
-    ManagedPolicy,
     PolicyStatement,
     Effect,
 } from 'aws-cdk-lib/aws-iam'
@@ -54,13 +53,13 @@ export class GitHubOidcServiceRoleStack extends BaseStack {
             }),
             description: `GitHub OIDC service role for ${this.stage} stage`,
             maxSessionDuration: Duration.hours(2),
-            // CMS IAM requirements
-            path: '/delegatedadmin/developer/',
-            permissionsBoundary: ManagedPolicy.fromManagedPolicyArn(
-                this,
-                'PermissionsBoundary',
-                `arn:aws:iam::${this.account}:policy/cms-cloud-admin/ct-ado-poweruser-permissions-boundary-policy`
-            ),
+            // Testing: removed path and permissions boundary to use CDK defaults
+            // path: '/delegatedadmin/developer/',
+            // permissionsBoundary: ManagedPolicy.fromManagedPolicyArn(
+            //     this,
+            //     'PermissionsBoundary',
+            //     `arn:aws:iam::${this.account}:policy/cms-cloud-admin/ct-ado-poweruser-permissions-boundary-policy`
+            // ),
         })
 
         // Add the same permissions as Serverless version
