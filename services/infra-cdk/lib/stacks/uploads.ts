@@ -1,8 +1,13 @@
 import { BaseStack, type BaseStackProps } from '../constructs/base'
 import { SecureS3Bucket } from '@constructs/storage'
 import type { Construct } from 'constructs'
-import * as s3 from 'aws-cdk-lib/aws-s3'
-import * as iam from 'aws-cdk-lib/aws-iam'
+import { type IBucket, HttpMethods } from 'aws-cdk-lib/aws-s3'
+import {
+    PolicyStatement,
+    Effect,
+    AnyPrincipal,
+    ServicePrincipal,
+} from 'aws-cdk-lib/aws-iam'
 import { CfnOutput } from 'aws-cdk-lib'
 
 export interface UploadsProps extends BaseStackProps {
@@ -14,8 +19,8 @@ export interface UploadsProps extends BaseStackProps {
  * Matches serverless uploads service pattern
  */
 export class Uploads extends BaseStack {
-    public readonly uploadsBucket: s3.IBucket
-    public readonly qaBucket: s3.IBucket
+    public readonly uploadsBucket: IBucket
+    public readonly qaBucket: IBucket
 
     constructor(scope: Construct, id: string, props: UploadsProps) {
         super(scope, id, {
@@ -36,8 +41,8 @@ export class Uploads extends BaseStack {
      * Matches services/uploads/serverless.yml bucket setup
      */
     private createS3Buckets(): {
-        uploadsBucket: s3.IBucket
-        qaBucket: s3.IBucket
+        uploadsBucket: IBucket
+        qaBucket: IBucket
     } {
         // Create uploads bucket that matches serverless naming: uploads-${stage}-uploads-${account}
         const uploadsBucket = new SecureS3Bucket(this, 'UploadsBucket', {
@@ -46,11 +51,11 @@ export class Uploads extends BaseStack {
             cors: [
                 {
                     allowedMethods: [
-                        s3.HttpMethods.GET,
-                        s3.HttpMethods.PUT,
-                        s3.HttpMethods.POST,
-                        s3.HttpMethods.DELETE,
-                        s3.HttpMethods.HEAD,
+                        HttpMethods.GET,
+                        HttpMethods.PUT,
+                        HttpMethods.POST,
+                        HttpMethods.DELETE,
+                        HttpMethods.HEAD,
                     ],
                     allowedOrigins: ['*'],
                     allowedHeaders: ['*'],
@@ -68,11 +73,11 @@ export class Uploads extends BaseStack {
             cors: [
                 {
                     allowedMethods: [
-                        s3.HttpMethods.GET,
-                        s3.HttpMethods.PUT,
-                        s3.HttpMethods.POST,
-                        s3.HttpMethods.DELETE,
-                        s3.HttpMethods.HEAD,
+                        HttpMethods.GET,
+                        HttpMethods.PUT,
+                        HttpMethods.POST,
+                        HttpMethods.DELETE,
+                        HttpMethods.HEAD,
                     ],
                     allowedOrigins: ['*'],
                     allowedHeaders: ['*'],
@@ -109,12 +114,12 @@ export class Uploads extends BaseStack {
     /**
      * Add file type restrictions matching serverless bucket policies
      */
-    private addFileTypeRestrictions(bucket: s3.IBucket): void {
+    private addFileTypeRestrictions(bucket: IBucket): void {
         bucket.addToResourcePolicy(
-            new iam.PolicyStatement({
+            new PolicyStatement({
                 sid: 'DenyUnsupportedFileTypes',
-                effect: iam.Effect.DENY,
-                principals: [new iam.AnyPrincipal()],
+                effect: Effect.DENY,
+                principals: [new AnyPrincipal()],
                 actions: ['s3:PutObject'],
                 notResources: [
                     `${bucket.bucketArn}/*.csv`,
@@ -137,14 +142,14 @@ export class Uploads extends BaseStack {
      * Add GuardDuty malware protection service access to bucket
      * This allows GuardDuty to scan objects and validate bucket ownership
      */
-    private addGuardDutyMalwareProtectionAccess(bucket: s3.IBucket): void {
+    private addGuardDutyMalwareProtectionAccess(bucket: IBucket): void {
         // Main GuardDuty malware protection permissions
         bucket.addToResourcePolicy(
-            new iam.PolicyStatement({
+            new PolicyStatement({
                 sid: 'AllowGuardDutyMalwareProtection',
-                effect: iam.Effect.ALLOW,
+                effect: Effect.ALLOW,
                 principals: [
-                    new iam.ServicePrincipal(
+                    new ServicePrincipal(
                         'malware-protection.guardduty.amazonaws.com'
                     ),
                 ],
@@ -155,11 +160,11 @@ export class Uploads extends BaseStack {
 
         // Additional permissions for GuardDuty test object creation/validation
         bucket.addToResourcePolicy(
-            new iam.PolicyStatement({
+            new PolicyStatement({
                 sid: 'AllowGuardDutyTestObjects',
-                effect: iam.Effect.ALLOW,
+                effect: Effect.ALLOW,
                 principals: [
-                    new iam.ServicePrincipal(
+                    new ServicePrincipal(
                         'malware-protection-plan.guardduty.amazonaws.com'
                     ),
                 ],
@@ -183,15 +188,15 @@ export class Uploads extends BaseStack {
      * Blocks downloads of files that don't have GuardDutyMalwareScanStatus=NO_THREATS_FOUND
      */
     private addVirusScanDownloadBlockingPolicies(
-        uploadsBucket: s3.IBucket,
-        qaBucket: s3.IBucket
+        uploadsBucket: IBucket,
+        qaBucket: IBucket
     ): void {
         // Add deny policy to uploads bucket
         uploadsBucket.addToResourcePolicy(
-            new iam.PolicyStatement({
+            new PolicyStatement({
                 sid: 'DenyInfectedFileAccess',
-                effect: iam.Effect.DENY,
-                principals: [new iam.AnyPrincipal()],
+                effect: Effect.DENY,
+                principals: [new AnyPrincipal()],
                 actions: ['s3:GetObject'],
                 resources: [`${uploadsBucket.bucketArn}/*`],
                 conditions: {
@@ -205,10 +210,10 @@ export class Uploads extends BaseStack {
 
         // Add deny policy to QA bucket
         qaBucket.addToResourcePolicy(
-            new iam.PolicyStatement({
+            new PolicyStatement({
                 sid: 'DenyInfectedFileAccess',
-                effect: iam.Effect.DENY,
-                principals: [new iam.AnyPrincipal()],
+                effect: Effect.DENY,
+                principals: [new AnyPrincipal()],
                 actions: ['s3:GetObject'],
                 resources: [`${qaBucket.bucketArn}/*`],
                 conditions: {
@@ -224,10 +229,7 @@ export class Uploads extends BaseStack {
     /**
      * Create stack outputs that match serverless outputs
      */
-    private createOutputs(
-        uploadsBucket: s3.IBucket,
-        qaBucket: s3.IBucket
-    ): void {
+    private createOutputs(uploadsBucket: IBucket, qaBucket: IBucket): void {
         new CfnOutput(this, 'DocumentUploadsBucketName', {
             value: uploadsBucket.bucketName,
             description: 'Document uploads S3 bucket name',

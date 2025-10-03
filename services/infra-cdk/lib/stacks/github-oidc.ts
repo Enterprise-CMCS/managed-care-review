@@ -1,6 +1,12 @@
 import { CfnOutput, Duration } from 'aws-cdk-lib'
 import type { Construct } from 'constructs'
-import * as iam from 'aws-cdk-lib/aws-iam'
+import {
+    Role,
+    WebIdentityPrincipal,
+    ManagedPolicy,
+    PolicyStatement,
+    Effect,
+} from 'aws-cdk-lib/aws-iam'
 import { BaseStack, type BaseStackProps } from '../constructs/base'
 
 export interface GitHubOidcServiceRoleStackProps extends BaseStackProps {}
@@ -14,7 +20,7 @@ export interface GitHubOidcServiceRoleStackProps extends BaseStackProps {}
  * Mirrors the behavior of services/github-oidc/serverless.yml but using CDK.
  */
 export class GitHubOidcServiceRoleStack extends BaseStack {
-    public readonly serviceRole: iam.Role
+    public readonly serviceRole: Role
 
     constructor(
         scope: Construct,
@@ -37,9 +43,9 @@ export class GitHubOidcServiceRoleStack extends BaseStack {
             : 'repo:Enterprise-CMCS/managed-care-review:environment:dev'
 
         // Create the stage-specific service role (CDK version to avoid Serverless conflict)
-        this.serviceRole = new iam.Role(this, 'GitHubActionsServiceRole', {
+        this.serviceRole = new Role(this, 'GitHubActionsServiceRole', {
             roleName: `github-oidc-cdk-${this.stage}-ServiceRole`,
-            assumedBy: new iam.WebIdentityPrincipal(existingOidcProviderArn, {
+            assumedBy: new WebIdentityPrincipal(existingOidcProviderArn, {
                 StringEquals: {
                     'token.actions.githubusercontent.com:sub': subjectClaim,
                     'token.actions.githubusercontent.com:aud':
@@ -50,7 +56,7 @@ export class GitHubOidcServiceRoleStack extends BaseStack {
             maxSessionDuration: Duration.hours(2),
             // CMS IAM requirements
             path: '/delegatedadmin/developer/',
-            permissionsBoundary: iam.ManagedPolicy.fromManagedPolicyArn(
+            permissionsBoundary: ManagedPolicy.fromManagedPolicyArn(
                 this,
                 'PermissionsBoundary',
                 `arn:aws:iam::${this.account}:policy/cms-cloud-admin/ct-ado-poweruser-permissions-boundary-policy`
@@ -86,8 +92,8 @@ export class GitHubOidcServiceRoleStack extends BaseStack {
         ]
 
         this.serviceRole.addToPolicy(
-            new iam.PolicyStatement({
-                effect: iam.Effect.ALLOW,
+            new PolicyStatement({
+                effect: Effect.ALLOW,
                 actions: allowedActions,
                 resources: ['*'],
             })
@@ -95,8 +101,8 @@ export class GitHubOidcServiceRoleStack extends BaseStack {
 
         // Add cross-account assume role permission (from Serverless)
         this.serviceRole.addToPolicy(
-            new iam.PolicyStatement({
-                effect: iam.Effect.ALLOW,
+            new PolicyStatement({
+                effect: Effect.ALLOW,
                 actions: ['sts:AssumeRole'],
                 resources: [
                     `arn:aws:iam::${this.account}:role/delegatedadmin/developer/ct-cmcs-mac-fc-dso-metrics-report-events-role`,

@@ -1,8 +1,13 @@
 import { BaseStack, type BaseStackProps } from '../constructs/base'
 import type { Construct } from 'constructs'
-import * as lambda from 'aws-cdk-lib/aws-lambda'
+import {
+    LayerVersion,
+    Runtime,
+    Architecture,
+    Code,
+} from 'aws-cdk-lib/aws-lambda'
 import { CfnOutput, RemovalPolicy } from 'aws-cdk-lib'
-import * as path from 'path'
+import { join } from 'path'
 
 // Centralized OTEL layer ARN - update version here for all functions
 export const AWS_OTEL_LAYER_ARN =
@@ -18,8 +23,8 @@ export interface LambdaLayersProps extends BaseStackProps {
  * Follows same CloudFormation export pattern as other CDK stacks
  */
 export class LambdaLayers extends BaseStack {
-    public readonly prismaMigrationLayer: lambda.LayerVersion
-    public readonly prismaEngineLayer: lambda.LayerVersion
+    public readonly prismaMigrationLayer: LayerVersion
+    public readonly prismaEngineLayer: LayerVersion
 
     constructor(scope: Construct, id: string, props: LambdaLayersProps) {
         super(scope, id, {
@@ -40,15 +45,15 @@ export class LambdaLayers extends BaseStack {
      * Create Prisma Migration layer from CI-built artifacts
      * Contains Prisma CLI, migration tools, schema files, and data migrations
      */
-    private createPrismaMigrationLayer(): lambda.LayerVersion {
-        return new lambda.LayerVersion(this, 'PrismaMigrationLayer', {
+    private createPrismaMigrationLayer(): LayerVersion {
+        return new LayerVersion(this, 'PrismaMigrationLayer', {
             layerVersionName: `mcr-prisma-migration-${this.stage}-layer`,
             description: 'Prisma migration layer with CLI and migration tools',
-            compatibleRuntimes: [lambda.Runtime.NODEJS_20_X],
-            compatibleArchitectures: [lambda.Architecture.X86_64],
+            compatibleRuntimes: [Runtime.NODEJS_20_X],
+            compatibleArchitectures: [Architecture.X86_64],
             removalPolicy: RemovalPolicy.RETAIN,
-            code: lambda.Code.fromAsset(
-                path.join(
+            code: Code.fromAsset(
+                join(
                     __dirname,
                     '..',
                     '..',
@@ -62,15 +67,15 @@ export class LambdaLayers extends BaseStack {
      * Create Prisma Engine layer from CI-built artifacts
      * Contains Prisma client and query engines for runtime operations
      */
-    private createPrismaEngineLayer(): lambda.LayerVersion {
-        return new lambda.LayerVersion(this, 'PrismaEngineLayer', {
+    private createPrismaEngineLayer(): LayerVersion {
+        return new LayerVersion(this, 'PrismaEngineLayer', {
             layerVersionName: `mcr-prisma-engine-${this.stage}-layer`,
             description: 'Prisma engine layer with query engines',
-            compatibleRuntimes: [lambda.Runtime.NODEJS_20_X],
-            compatibleArchitectures: [lambda.Architecture.X86_64],
+            compatibleRuntimes: [Runtime.NODEJS_20_X],
+            compatibleArchitectures: [Architecture.X86_64],
             removalPolicy: RemovalPolicy.RETAIN,
-            code: lambda.Code.fromAsset(
-                path.join(
+            code: Code.fromAsset(
+                join(
                     __dirname,
                     '..',
                     '..',

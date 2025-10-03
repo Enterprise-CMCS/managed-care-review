@@ -1,6 +1,11 @@
 import { BaseStack, type BaseStackProps } from '../constructs/base'
 import type { Construct } from 'constructs'
-import * as ec2 from 'aws-cdk-lib/aws-ec2'
+import {
+    type ISecurityGroup,
+    type IVpc,
+    SecurityGroup,
+    Vpc,
+} from 'aws-cdk-lib/aws-ec2'
 import { CfnOutput } from 'aws-cdk-lib'
 
 export interface NetworkProps extends BaseStackProps {
@@ -16,8 +21,8 @@ export interface NetworkProps extends BaseStackProps {
  * - SG_ID: The existing security group ID for Lambda functions
  */
 export class Network extends BaseStack {
-    public readonly vpc: ec2.IVpc
-    public readonly lambdaSecurityGroup: ec2.ISecurityGroup
+    public readonly vpc: IVpc
+    public readonly lambdaSecurityGroup: ISecurityGroup
 
     constructor(scope: Construct, id: string, props: NetworkProps) {
         super(scope, id, {
@@ -60,8 +65,8 @@ export class Network extends BaseStack {
      * Import existing VPC using VPC_ID environment variable
      * Same pattern as serverless: vpcId: ${env:VPC_ID}
      */
-    private importVpc(): ec2.IVpc {
-        return ec2.Vpc.fromLookup(this, 'ExistingVpc', {
+    private importVpc(): IVpc {
+        return Vpc.fromLookup(this, 'ExistingVpc', {
             vpcId: process.env.VPC_ID!,
         })
     }
@@ -70,8 +75,8 @@ export class Network extends BaseStack {
      * Import existing security group using SG_ID environment variable
      * Same pattern as serverless: securityGroupIds: - ${self:custom.sgId}
      */
-    private importSecurityGroup(): ec2.ISecurityGroup {
-        return ec2.SecurityGroup.fromSecurityGroupId(
+    private importSecurityGroup(): ISecurityGroup {
+        return SecurityGroup.fromSecurityGroupId(
             this,
             'ExistingLambdaSG',
             process.env.SG_ID!

@@ -3,7 +3,7 @@
  */
 
 import { Duration } from 'aws-cdk-lib'
-import * as logs from 'aws-cdk-lib/aws-logs'
+import { RetentionDays } from 'aws-cdk-lib/aws-logs'
 
 export type Environment = 'dev' | 'val' | 'prod' | 'review'
 
@@ -32,7 +32,7 @@ export interface SecurityConfig {
 }
 
 export interface MonitoringConfig {
-    logRetentionDays: logs.RetentionDays
+    logRetentionDays: RetentionDays
     tracingEnabled: boolean
     dashboardEnabled?: boolean
 }
@@ -82,7 +82,7 @@ const STAGE_OVERRIDES = {
             apiThrottleBurst: 200,
         },
         monitoring: {
-            logRetentionDays: logs.RetentionDays.ONE_WEEK,
+            logRetentionDays: RetentionDays.ONE_WEEK,
             tracingEnabled: true,
             dashboardEnabled: false,
         },
@@ -104,7 +104,7 @@ const STAGE_OVERRIDES = {
             apiThrottleBurst: 2000,
         },
         monitoring: {
-            logRetentionDays: logs.RetentionDays.ONE_MONTH,
+            logRetentionDays: RetentionDays.ONE_MONTH,
             tracingEnabled: true,
             dashboardEnabled: true,
         },
@@ -130,7 +130,7 @@ const STAGE_OVERRIDES = {
             apiThrottleBurst: 20000,
         },
         monitoring: {
-            logRetentionDays: logs.RetentionDays.THREE_MONTHS,
+            logRetentionDays: RetentionDays.THREE_MONTHS,
             tracingEnabled: true,
             dashboardEnabled: true,
         },
@@ -152,7 +152,7 @@ const STAGE_OVERRIDES = {
             apiThrottleBurst: 200,
         },
         monitoring: {
-            logRetentionDays: logs.RetentionDays.THREE_DAYS,
+            logRetentionDays: RetentionDays.THREE_DAYS,
             tracingEnabled: false,
             dashboardEnabled: false,
         },

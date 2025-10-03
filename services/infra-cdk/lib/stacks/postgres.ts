@@ -16,7 +16,7 @@ import { PolicyStatement, Effect } from 'aws-cdk-lib/aws-iam'
 import { CfnOutput, Duration, Fn } from 'aws-cdk-lib'
 import { AuroraServerlessV2 } from '../constructs/database'
 import { isReviewEnvironment } from '../config/environments'
-import * as path from 'path'
+import { join } from 'path'
 
 export interface PostgresProps extends BaseStackProps {
     vpc: IVpc
@@ -150,7 +150,7 @@ export class Postgres extends BaseStack {
                 runtime: Runtime.NODEJS_20_X,
                 architecture: Architecture.X86_64,
                 handler: 'handler',
-                entry: path.join(
+                entry: join(
                     __dirname,
                     '..',
                     '..',

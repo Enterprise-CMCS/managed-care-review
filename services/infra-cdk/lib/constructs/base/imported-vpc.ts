@@ -1,10 +1,14 @@
-import { Construct } from 'constructs';
-import * as ec2 from 'aws-cdk-lib/aws-ec2';
-import * as ssm from 'aws-cdk-lib/aws-ssm';
-import { Fn } from 'aws-cdk-lib';
+import { Construct } from 'constructs'
+import {
+    type ISubnet,
+    type IVpc,
+    type SubnetSelection,
+    Vpc,
+} from 'aws-cdk-lib/aws-ec2'
+import { StringParameter } from 'aws-cdk-lib/aws-ssm'
 
 export interface ImportedVpcProps {
-  stage: string;
+    stage: string
 }
 
 /**
@@ -13,82 +17,86 @@ export interface ImportedVpcProps {
  * Security groups will be created by NetworkStack, not imported here.
  */
 export class ImportedVpc extends Construct {
-  public readonly vpc: ec2.IVpc;
-  public readonly privateSubnets: ec2.ISubnet[];
+    public readonly vpc: IVpc
+    public readonly privateSubnets: ISubnet[]
 
-  constructor(scope: Construct, id: string, props: ImportedVpcProps) {
-    super(scope, id);
+    constructor(scope: Construct, id: string, props: ImportedVpcProps) {
+        super(scope, id)
 
-    // Get VPC configuration from SSM Parameter Store
-    const vpcId = ssm.StringParameter.valueForStringParameter(
-      scope, 
-      '/configuration/default/vpc/id'
-    );
+        // Get VPC configuration from SSM Parameter Store
+        const vpcId = StringParameter.valueForStringParameter(
+            scope,
+            '/configuration/default/vpc/id'
+        )
 
-    // Get VPC CIDR block from SSM
-    const vpcCidrBlock = ssm.StringParameter.valueForStringParameter(
-      scope, 
-      '/configuration/default/vpc/cidr'
-    );
+        // Get VPC CIDR block from SSM
+        const vpcCidrBlock = StringParameter.valueForStringParameter(
+            scope,
+            '/configuration/default/vpc/cidr'
+        )
 
-    // Get individual private subnet IDs from SSM
-    const privateSubnetIdA = ssm.StringParameter.valueForStringParameter(
-      scope, 
-      '/configuration/default/vpc/subnets/private/a/id'
-    );
-    
-    const privateSubnetIdB = ssm.StringParameter.valueForStringParameter(
-      scope, 
-      '/configuration/default/vpc/subnets/private/b/id'
-    );
-    
-    const privateSubnetIdC = ssm.StringParameter.valueForStringParameter(
-      scope, 
-      '/configuration/default/vpc/subnets/private/c/id'
-    );
+        // Get individual private subnet IDs from SSM
+        const privateSubnetIdA = StringParameter.valueForStringParameter(
+            scope,
+            '/configuration/default/vpc/subnets/private/a/id'
+        )
 
-    // Build arrays for subnet IDs and availability zones
-    const privateSubnetIds = [privateSubnetIdA, privateSubnetIdB, privateSubnetIdC];
-    
-    // Get the region and construct availability zones
-    const region = scope.node.tryGetContext('aws:cdk:region') || 'us-east-1';
-    const availabilityZones = [`${region}a`, `${region}b`, `${region}c`];
+        const privateSubnetIdB = StringParameter.valueForStringParameter(
+            scope,
+            '/configuration/default/vpc/subnets/private/b/id'
+        )
 
-    // Import VPC using attributes (works with CDK Tokens)
-    this.vpc = ec2.Vpc.fromVpcAttributes(this, 'ImportedVpc', {
-      vpcId: vpcId,
-      vpcCidrBlock: vpcCidrBlock,
-      availabilityZones: availabilityZones,
-      privateSubnetIds: privateSubnetIds,
-      privateSubnetRouteTableIds: privateSubnetIds // Assume one route table per subnet
-    });
+        const privateSubnetIdC = StringParameter.valueForStringParameter(
+            scope,
+            '/configuration/default/vpc/subnets/private/c/id'
+        )
 
-    // Get the private subnets from the imported VPC
-    this.privateSubnets = this.vpc.privateSubnets;
-  }
+        // Build arrays for subnet IDs and availability zones
+        const privateSubnetIds = [
+            privateSubnetIdA,
+            privateSubnetIdB,
+            privateSubnetIdC,
+        ]
 
-  /**
-   * Get subnet selection for Lambda functions
-   */
-  get lambdaSubnetSelection(): ec2.SubnetSelection {
-    return {
-      subnets: this.privateSubnets
-    };
-  }
+        // Get the region and construct availability zones
+        const region = scope.node.tryGetContext('aws:cdk:region') || 'us-east-1'
+        const availabilityZones = [`${region}a`, `${region}b`, `${region}c`]
 
-  /**
-   * Get subnet selection for databases
-   */
-  get databaseSubnetSelection(): ec2.SubnetSelection {
-    return {
-      subnets: this.privateSubnets
-    };
-  }
+        // Import VPC using attributes (works with CDK Tokens)
+        this.vpc = Vpc.fromVpcAttributes(this, 'ImportedVpc', {
+            vpcId: vpcId,
+            vpcCidrBlock: vpcCidrBlock,
+            availabilityZones: availabilityZones,
+            privateSubnetIds: privateSubnetIds,
+            privateSubnetRouteTableIds: privateSubnetIds, // Assume one route table per subnet
+        })
 
-  /**
-   * Get all availability zones
-   */
-  get availabilityZones(): string[] {
-    return [...new Set(this.privateSubnets.map(s => s.availabilityZone))];
-  }
+        // Get the private subnets from the imported VPC
+        this.privateSubnets = this.vpc.privateSubnets
+    }
+
+    /**
+     * Get subnet selection for Lambda functions
+     */
+    get lambdaSubnetSelection(): SubnetSelection {
+        return {
+            subnets: this.privateSubnets,
+        }
+    }
+
+    /**
+     * Get subnet selection for databases
+     */
+    get databaseSubnetSelection(): SubnetSelection {
+        return {
+            subnets: this.privateSubnets,
+        }
+    }
+
+    /**
+     * Get all availability zones
+     */
+    get availabilityZones(): string[] {
+        return [...new Set(this.privateSubnets.map((s) => s.availabilityZone))]
+    }
 }
