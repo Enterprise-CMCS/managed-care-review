@@ -5,6 +5,8 @@ receivers:
       http:
 
 exporters:
+  debug:
+    verbosity: detailed
   otlp:
     endpoint: https://gov-otlp.nr-data.net:4317
     headers:
@@ -21,6 +23,3 @@ service:
     traces:
       receivers: [otlp]
       exporters: [otlp, otlphttp/ddog, logging]
-  telemetry:
-    logs:
-      level: debug
