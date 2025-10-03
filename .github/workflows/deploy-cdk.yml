@@ -103,18 +103,15 @@ jobs:
           stage-name: main
           changed-services: "github-oidc"
 
-      - name: Bootstrap CDK with default settings (testing)
+      - name: Bootstrap CDK with pure defaults (testing)
         working-directory: services/infra-cdk
         env:
-          PERMISSIONS_BOUNDARY_ARN: arn:aws:iam::${{ secrets.DEV_AWS_ACCOUNT_ID }}:policy/cms-cloud-admin/ct-ado-poweruser-permissions-boundary-policy
           STAGE_NAME: ${{ needs.begin-deployment.outputs.stage-name }}
         run: |
-          echo "=== Testing CDK bootstrap with default qualifier and CMS permissions boundary ==="
+          echo "=== Testing pure default CDK bootstrap (no custom permissions boundary) ==="
           pnpm cdk bootstrap \
             --app 'pnpm tsx bin/oidc.ts' \
             --context stage=${STAGE_NAME} \
-            --custom-permissions-boundary ${PERMISSIONS_BOUNDARY_ARN} \
-            --cloudformation-execution-policies arn:aws:iam::aws:policy/AdministratorAccess \
             --verbose || echo "Bootstrap failed or already exists with defaults"
           echo "=== Bootstrap attempt completed ==="
 
