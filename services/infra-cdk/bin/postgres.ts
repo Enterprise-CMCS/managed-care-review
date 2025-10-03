@@ -1,9 +1,8 @@
-import { App, Tags, Aspects, DefaultStackSynthesizer } from 'aws-cdk-lib'
 import { AppConfigLoader } from '../lib/config/app'
-import { IamPermissionsBoundaryAspect } from '../lib/aspects/iam-permissions-boundary-aspects'
 import { Network } from '../lib/stacks/network'
 import { Postgres } from '../lib/stacks/postgres'
 import { getEnvironment, getCdkEnvironment, ResourceNames } from '../lib/config'
+import { App, DefaultStackSynthesizer, Tags } from 'aws-cdk-lib'
 
 // Simplified version - using default synthesizer with mcreview qualifier
 function main(): void {
@@ -55,13 +54,6 @@ function main(): void {
         postgres.addDependency(network)
 
         // Keep permissions boundary if still required by CMS
-        if (appConfig.permissionsBoundaryArn) {
-            Aspects.of(app).add(
-                new IamPermissionsBoundaryAspect(
-                    appConfig.permissionsBoundaryArn
-                )
-            )
-        }
 
         // Add resource tags
         Tags.of(app).add('Project', 'mc-review')

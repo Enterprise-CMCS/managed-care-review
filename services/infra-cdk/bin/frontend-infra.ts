@@ -1,9 +1,8 @@
 #!/usr/bin/env node
-import { App, Tags, Aspects, DefaultStackSynthesizer } from 'aws-cdk-lib'
 import { AppConfigLoader } from '../lib/config/app'
-import { IamPermissionsBoundaryAspect } from '../lib/aspects/iam-permissions-boundary-aspects'
 import { getEnvironment, getCdkEnvironment, ResourceNames } from '../lib/config'
 import { FrontendInfraStack } from '../lib/stacks/frontend-infra'
+import { App, DefaultStackSynthesizer, Tags } from 'aws-cdk-lib'
 
 // Simplified version - using default synthesizer with mcreview qualifier
 function main(): void {
@@ -38,13 +37,6 @@ function main(): void {
         )
 
         // Keep permissions boundary if still required by CMS
-        if (appConfig.permissionsBoundaryArn) {
-            Aspects.of(app).add(
-                new IamPermissionsBoundaryAspect(
-                    appConfig.permissionsBoundaryArn
-                )
-            )
-        }
 
         // Add resource tags
         Tags.of(app).add('Project', 'mc-review')

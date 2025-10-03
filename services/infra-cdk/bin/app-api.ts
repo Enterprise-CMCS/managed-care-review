@@ -1,8 +1,7 @@
 #!/usr/bin/env node
 import 'source-map-support/register'
-import { App, Tags, Aspects, DefaultStackSynthesizer } from 'aws-cdk-lib'
+import { App, Tags, DefaultStackSynthesizer } from 'aws-cdk-lib'
 import { AppConfigLoader } from '../lib/config/app'
-import { IamPermissionsBoundaryAspect } from '../lib/aspects/iam-permissions-boundary-aspects'
 import { getEnvironment, getCdkEnvironment, ResourceNames } from '../lib/config'
 import { AppApiStack } from '../lib/stacks/app-api'
 
@@ -33,15 +32,6 @@ function main(): void {
                 serviceName: 'app-api',
             }
         )
-
-        // Keep permissions boundary if still required by CMS
-        if (appConfig.permissionsBoundaryArn) {
-            Aspects.of(app).add(
-                new IamPermissionsBoundaryAspect(
-                    appConfig.permissionsBoundaryArn
-                )
-            )
-        }
 
         Tags.of(app).add('Project', 'mc-review')
         Tags.of(app).add('Environment', appConfig.stage)

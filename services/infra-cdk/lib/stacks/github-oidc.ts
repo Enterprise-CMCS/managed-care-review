@@ -3,6 +3,7 @@ import type { Construct } from 'constructs'
 import {
     Role,
     WebIdentityPrincipal,
+    ManagedPolicy,
     PolicyStatement,
     Effect,
 } from 'aws-cdk-lib/aws-iam'
