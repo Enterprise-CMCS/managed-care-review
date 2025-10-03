@@ -1,5 +1,5 @@
 // Export GitHub OIDC stack (used by bin/oidc.ts)
-export * from './github-oidc-service-role-stack'
+export * from './github-oidc'
 
 // Lambda layers (exports AWS_OTEL_LAYER_ARN constant used by app-api)
 export * from './lambda-layers'

@@ -1,6 +1,5 @@
 *.js
 !jest.config.js
-!lib/cloudfront-functions/**/*.js
 *.d.ts
 node_modules/
 

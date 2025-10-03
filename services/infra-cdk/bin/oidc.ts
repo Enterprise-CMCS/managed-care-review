@@ -13,7 +13,7 @@
 
 import 'source-map-support/register'
 import { App, CliCredentialsStackSynthesizer } from 'aws-cdk-lib'
-import { GitHubOidcServiceRoleStack } from '../lib/stacks/github-oidc-service-role-stack'
+import { GitHubOidcServiceRoleStack } from '../lib/stacks/github-oidc'
 import { getCdkEnvironment, getEnvironment, ResourceNames } from '../lib/config'
 
 const app = new App({
