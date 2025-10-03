@@ -6,7 +6,6 @@ import userEvent from '@testing-library/user-event'
 import {
     mockContractPackageDraft,
     mockContractPackageSubmitted,
-    unlockHealthPlanPackageMockError,
 } from '@mc-review/mocks'
 import { UnlockSubmitModal } from './UnlockSubmitModal'
 import { renderWithProviders } from '../../testHelpers'
@@ -355,7 +354,7 @@ describe('UnlockSubmitModal', () => {
                 {
                     apolloProvider: {
                         mocks: [
-                            unlockHealthPlanPackageMockError({
+                            unlockContractMockError({
                                 id: mockContractPackageSubmitted().id,
                                 reason: 'Test unlock summary',
                             }),

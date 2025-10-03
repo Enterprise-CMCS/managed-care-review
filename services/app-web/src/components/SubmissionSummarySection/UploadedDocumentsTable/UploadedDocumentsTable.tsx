@@ -1,13 +1,12 @@
 import React, { useEffect, useState } from 'react'
 import { dayjs } from '@mc-review/dates'
 import styles from './UploadedDocumentsTable.module.scss'
-import { SharedRateCertDisplay, SubmissionDocument } from '@mc-review/hpp'
+import { SharedRateCertDisplay } from '@mc-review/hpp'
 import { DocumentTag } from './DocumentTag'
 import { useDocument } from '../../../hooks/useDocument'
 import { useAuth } from '../../../contexts/AuthContext'
 import { DataDetailMissingField } from '../../DataDetail/DataDetailMissingField'
 import { GenericDocument } from '../../../gen/gqlClient'
-import { DocumentDateLookupTableType } from '@mc-review/helpers'
 import { LinkWithLogging, NavLinkWithLogging } from '../../TealiumLogging'
 import { hasCMSUserPermissions } from '@mc-review/helpers'
 import { useLDClient } from 'launchdarkly-react-client-sdk'
@@ -15,18 +14,6 @@ import { featureFlags } from '@mc-review/common-code'
 import { formatCalendarDate } from '@mc-review/dates'
 import { usePreviousSubmission } from '../../../hooks'
 
-// This is used to convert from deprecated FE domain types from protos to GQL GenericDocuments by added in a dateAdded
-export const convertFromSubmissionDocumentsToGenericDocuments = (
-    deprecatedDocs: SubmissionDocument[],
-    dateTableLookup: DocumentDateLookupTableType
-): GenericDocument[] => {
-    return deprecatedDocs.map((doc) => {
-        return {
-            ...doc,
-            dateAdded: dateTableLookup[doc.sha256],
-        }
-    })
-}
 export type UploadedDocumentsTableProps = {
     documents: GenericDocument[]
     caption: string | null

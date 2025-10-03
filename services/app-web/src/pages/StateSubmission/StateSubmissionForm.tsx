@@ -19,7 +19,6 @@ import {
 import { getRelativePath } from '../../routeHelpers'
 import { ContractDetails } from './ContractDetails'
 import { Contacts } from './Contacts'
-import { Documents } from './Documents'
 import { ReviewSubmit } from './ReviewSubmit'
 import { SubmissionType } from './SubmissionType'
 import { UnlockedHealthPlanFormDataType } from '@mc-review/hpp'
@@ -69,12 +68,6 @@ export const StateSubmissionForm = (): React.ReactElement => {
                         'SUBMISSIONS_CONTACTS'
                     )}
                     element={<Contacts />}
-                />
-                <Route
-                    path={getRelativePathFromNestedRoute(
-                        'SUBMISSIONS_DOCUMENTS'
-                    )}
-                    element={<Documents />}
                 />
                 <Route
                     path={getRelativePathFromNestedRoute(

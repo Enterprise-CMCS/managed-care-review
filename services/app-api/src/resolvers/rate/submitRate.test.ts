@@ -9,7 +9,7 @@ import {
     SubmitRateDocument,
     FetchRateDocument,
     UnlockRateDocument,
-    SubmitHealthPlanPackageDocument,
+    SubmitContractDocument,
 } from '../../gen/gqlClient'
 import {
     clearMetadataFromRateFormData,
@@ -404,10 +404,10 @@ describe('submitRate', () => {
 
         // submit contract and rate
         await executeGraphQLOperation(stateServer, {
-            query: SubmitHealthPlanPackageDocument,
+            query: SubmitContractDocument,
             variables: {
                 input: {
-                    pkgID: draftContractWithRate.id,
+                    contractID: draftContractWithRate.id,
                 },
             },
         })

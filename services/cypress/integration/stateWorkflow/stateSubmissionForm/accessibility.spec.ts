@@ -75,18 +75,6 @@ describe('state user in state submission form', () => {
             }).safeClick()
             cy.checkA11yWithWcag22aa()
 
-            //Check accessibility on documents page
-            cy.navigateFormByDirectLink(`${submissionURL}edit/documents`)
-            cy.findByRole('heading', { level: 2, name: /Supporting documents/ })
-            cy.injectAxe()
-            cy.findByRole('button', {
-                name: 'Continue',
-            }).should('not.have.attr', 'aria-disabled')
-            cy.findByRole('button', {
-                name: 'Continue',
-            }).safeClick()
-            cy.checkA11yWithWcag22aa()
-
             //Check accessibility on review and submit page
             cy.navigateFormByDirectLink(`${submissionURL}edit/review-and-submit`)
             cy.findByRole('heading', { level: 2, name: /Review and submit/ })

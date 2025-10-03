@@ -16,7 +16,7 @@ import * as Yup from 'yup'
 import { GenericApiErrorProps } from '../Banner/GenericApiErrorBanner/GenericApiErrorBanner'
 import { ERROR_MESSAGES } from '@mc-review/constants'
 import {
-    submitMutationWrapperV2,
+    submitMutationWrapper,
     unlockMutationWrapper,
 } from '@mc-review/helpers'
 import { useTealium } from '../../hooks'
@@ -182,14 +182,14 @@ export const UnlockSubmitModal = ({
                 console.info('submit rate not implemented yet')
                 break
             case 'SUBMIT_CONTRACT':
-                result = await submitMutationWrapperV2(
+                result = await submitMutationWrapper(
                     submitContract,
                     submissionData.id,
                     unlockSubmitModalInput
                 )
                 break
             case 'RESUBMIT_CONTRACT':
-                result = await submitMutationWrapperV2(
+                result = await submitMutationWrapper(
                     submitContract,
                     submissionData.id,
                     unlockSubmitModalInput
