@@ -1,28 +1,22 @@
 #!/usr/bin/env node
 import 'source-map-support/register'
-import * as cdk from 'aws-cdk-lib'
+import { App, Tags, Aspects, DefaultStackSynthesizer } from 'aws-cdk-lib'
 import { AppConfigLoader } from '../lib/config/app'
-import { SynthesizerConfigLoader } from '../lib/config/synthesizer'
-import { Aspects } from 'aws-cdk-lib'
-import { IamPathAspect } from '../lib/aspects/iam-path-aspects'
 import { IamPermissionsBoundaryAspect } from '../lib/aspects/iam-permissions-boundary-aspects'
 import { VirusScanning } from '../lib/stacks/virus-scanning'
 import { getEnvironment, getCdkEnvironment, ResourceNames } from '../lib/config'
 
-async function main(): Promise<void> {
+// Simplified version - using default synthesizer with mcreview qualifier
+function main(): void {
     try {
         // Load configuration
         const appConfig = AppConfigLoader.load()
-        const synthesizerLoader = new SynthesizerConfigLoader(
-            appConfig.awsRegion
-        )
-        const synthConfig = await synthesizerLoader.load()
 
-        // Create CDK app
-        const app = new cdk.App({
-            defaultStackSynthesizer: new cdk.DefaultStackSynthesizer(
-                synthConfig
-            ),
+        // Create CDK app with mcreview qualifier
+        const app = new App({
+            defaultStackSynthesizer: new DefaultStackSynthesizer({
+                qualifier: 'mcreview',
+            }),
         })
 
         // Set stage context
@@ -44,8 +38,7 @@ async function main(): Promise<void> {
             }
         )
 
-        // Apply IAM aspects
-        Aspects.of(app).add(new IamPathAspect(appConfig.iamPath))
+        // Keep permissions boundary if still required by CMS
         if (appConfig.permissionsBoundaryArn) {
             Aspects.of(app).add(
                 new IamPermissionsBoundaryAspect(
@@ -55,10 +48,10 @@ async function main(): Promise<void> {
         }
 
         // Add resource tags
-        cdk.Tags.of(app).add('Project', 'mc-review')
-        cdk.Tags.of(app).add('Environment', appConfig.stage)
-        cdk.Tags.of(app).add('ManagedBy', 'CDK')
-        cdk.Tags.of(app).add(
+        Tags.of(app).add('Project', 'mc-review')
+        Tags.of(app).add('Environment', appConfig.stage)
+        Tags.of(app).add('ManagedBy', 'CDK')
+        Tags.of(app).add(
             'Repository',
             'https://github.com/Enterprise-CMCS/managed-care-review'
         )
@@ -74,4 +67,4 @@ async function main(): Promise<void> {
     }
 }
 
-void main()
+main()
