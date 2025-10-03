@@ -54,8 +54,8 @@ export class GitHubOidcServiceRoleStack extends BaseStack {
             }),
             description: `GitHub OIDC service role for ${this.stage} stage`,
             maxSessionDuration: Duration.hours(2),
-            // OIDC role needs permissions boundary (required by CMS for GitHub Actions assume role)
-            // Testing: trying without custom IAM path
+            // CMS IAM requirements - OIDC role needs both path and permissions boundary
+            path: '/delegatedadmin/developer/',
             permissionsBoundary: ManagedPolicy.fromManagedPolicyArn(
                 this,
                 'PermissionsBoundary',
