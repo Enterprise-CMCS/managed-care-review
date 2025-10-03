@@ -12,15 +12,12 @@
  */
 
 import 'source-map-support/register'
-import { App, CliCredentialsStackSynthesizer } from 'aws-cdk-lib'
+import { App } from 'aws-cdk-lib'
 import { GitHubOidcServiceRoleStack } from '../lib/stacks/github-oidc'
 import { getCdkEnvironment, getEnvironment, ResourceNames } from '../lib/config'
 
-const app = new App({
-    defaultStackSynthesizer: new CliCredentialsStackSynthesizer({
-        qualifier: 'mcreview',
-    }),
-})
+// Simplified - testing if CDK defaults work without custom synthesizer
+const app = new App()
 
 const stage = app.node.tryGetContext('stage') || process.env.STAGE_NAME
 
