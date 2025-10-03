@@ -16,10 +16,11 @@ exporters:
   logging:
     loglevel: debug
 
-
-
 service:
   pipelines:
     traces:
       receivers: [otlp]
       exporters: [otlp, otlphttp/ddog, logging]
+  telemetry:
+    logs:
+      level: debug
