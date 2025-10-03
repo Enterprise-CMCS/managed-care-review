@@ -1,17 +1,21 @@
-import { App, Tags, Aspects } from 'aws-cdk-lib'
+import { App, Tags, Aspects, DefaultStackSynthesizer } from 'aws-cdk-lib'
 import { AppConfigLoader } from '../lib/config/app'
 import { IamPermissionsBoundaryAspect } from '../lib/aspects/iam-permissions-boundary-aspects'
 import { Network } from '../lib/stacks/network'
 import { getEnvironment, getCdkEnvironment, ResourceNames } from '../lib/config'
 
-// Simplified version - testing if we can use CDK defaults
+// Simplified version - using default synthesizer with mcreview qualifier
 function main(): void {
     try {
         // Load configuration
         const appConfig = AppConfigLoader.load()
 
-        // Create CDK app with defaults - no custom synthesizer
-        const app = new App()
+        // Create CDK app with mcreview qualifier
+        const app = new App({
+            defaultStackSynthesizer: new DefaultStackSynthesizer({
+                qualifier: 'mcreview',
+            }),
+        })
 
         // Set stage context
         app.node.setContext('stage', appConfig.stage)

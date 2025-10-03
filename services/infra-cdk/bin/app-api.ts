@@ -1,18 +1,22 @@
 #!/usr/bin/env node
 import 'source-map-support/register'
-import { App, Tags, Aspects } from 'aws-cdk-lib'
+import { App, Tags, Aspects, DefaultStackSynthesizer } from 'aws-cdk-lib'
 import { AppConfigLoader } from '../lib/config/app'
 import { IamPermissionsBoundaryAspect } from '../lib/aspects/iam-permissions-boundary-aspects'
 import { getEnvironment, getCdkEnvironment, ResourceNames } from '../lib/config'
 import { AppApiStack } from '../lib/stacks/app-api'
 
-// Simplified version - testing if we can use CDK defaults instead of custom synthesizer
+// Simplified version - using default synthesizer with mcreview qualifier
 function main(): void {
     try {
         const appConfig = AppConfigLoader.load()
 
-        // Use CDK defaults - no custom synthesizer
-        const app = new App()
+        // Use default synthesizer with mcreview qualifier
+        const app = new App({
+            defaultStackSynthesizer: new DefaultStackSynthesizer({
+                qualifier: 'mcreview',
+            }),
+        })
 
         app.node.setContext('stage', appConfig.stage)
 
