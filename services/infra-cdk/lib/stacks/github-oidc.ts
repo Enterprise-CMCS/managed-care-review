@@ -53,13 +53,13 @@ export class GitHubOidcServiceRoleStack extends BaseStack {
             }),
             description: `GitHub OIDC service role for ${this.stage} stage`,
             maxSessionDuration: Duration.hours(2),
-            // Testing: removed path and permissions boundary to use CDK defaults
-            // path: '/delegatedadmin/developer/',
-            // permissionsBoundary: ManagedPolicy.fromManagedPolicyArn(
-            //     this,
-            //     'PermissionsBoundary',
-            //     `arn:aws:iam::${this.account}:policy/cms-cloud-admin/ct-ado-poweruser-permissions-boundary-policy`
-            // ),
+            // OIDC role needs permissions boundary (required by CMS for GitHub Actions assume role)
+            // Testing: trying without custom IAM path
+            permissionsBoundary: ManagedPolicy.fromManagedPolicyArn(
+                this,
+                'PermissionsBoundary',
+                `arn:aws:iam::${this.account}:policy/cms-cloud-admin/ct-ado-poweruser-permissions-boundary-policy`
+            ),
         })
 
         // Add the same permissions as Serverless version
