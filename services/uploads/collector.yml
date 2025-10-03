@@ -4,8 +4,6 @@ receivers:
       http:
 
 exporters:
-  debug:
-    verbosity: detailed
   otlphttp:
     endpoint: https://gov-otlp.nr-data.net:4318
     headers:
@@ -16,6 +14,8 @@ exporters:
       DD-API-KEY: ${DD_API_KEY}
   logging:
     loglevel: debug
+    sampling_initial: 1
+    sampling_thereafter: 1    
 
 service:
   pipelines:
