@@ -289,8 +289,8 @@ importers:
   scripts:
     dependencies:
       '@aws-sdk/client-cloudformation':
-        specifier: ^3.901.0
-        version: 3.901.0
+        specifier: ^3.902.0
+        version: 3.902.0
       '@aws-sdk/client-cognito-identity-provider':
         specifier: ^3.901.0
         version: 3.901.0
@@ -1042,8 +1042,8 @@ importers:
   services/postgres:
     dependencies:
       '@aws-sdk/client-cloudformation':
-        specifier: ^3.901.0
-        version: 3.901.0
+        specifier: ^3.902.0
+        version: 3.902.0
       '@aws-sdk/client-s3':
         specifier: ^3.901.0
         version: 3.901.0
@@ -1560,8 +1560,8 @@ packages:
     resolution: {integrity: sha512-gn9EzMOdYcjlMYJVsYJk7xenSJQYa6M4KT0twte3bfYjxJU0Rk3uIkwpRKtuD2fEGTwXFbFVx17FRmN1IWIC6g==}
     engines: {node: '>=18.0.0'}
 
-  '@aws-sdk/client-cloudformation@3.901.0':
-    resolution: {integrity: sha512-Al0Opsma7AI0PQnqk+08VNTwfIWNPTpf/cRGaJCqrMbNkVL70IPjUArAF0coPyl1IH98jQfxeX/QTRwKeBTFDw==}
+  '@aws-sdk/client-cloudformation@3.902.0':
+    resolution: {integrity: sha512-YqhLj8DQmvt66YJngoT5ZAEOEuQXJdtAxQXzbdJo3eaKqnwvER2v0WLDalxXZ/7tXj7lKsNPEf3K0ov/BOpRUA==}
     engines: {node: '>=18.0.0'}
 
   '@aws-sdk/client-cloudfront@3.901.0':
@@ -14625,7 +14625,7 @@ snapshots:
     transitivePeerDependencies:
       - aws-crt
 
-  '@aws-sdk/client-cloudformation@3.901.0':
+  '@aws-sdk/client-cloudformation@3.902.0':
     dependencies:
       '@aws-crypto/sha256-browser': 5.2.0
       '@aws-crypto/sha256-js': 5.2.0
