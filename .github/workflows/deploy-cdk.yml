@@ -103,7 +103,7 @@ jobs:
           stage-name: main
           changed-services: "github-oidc"
 
-      - name: Bootstrap CDK with defaults (qualifier: mcreview)
+      - name: Bootstrap CDK with defaults
         working-directory: services/infra-cdk
         env:
           STAGE_NAME: ${{ needs.begin-deployment.outputs.stage-name }}
