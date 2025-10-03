@@ -286,8 +286,8 @@ importers:
   scripts:
     dependencies:
       '@aws-sdk/client-cloudformation':
-        specifier: ^3.901.0
-        version: 3.901.0
+        specifier: ^3.902.0
+        version: 3.902.0
       '@aws-sdk/client-cognito-identity-provider':
         specifier: ^3.901.0
         version: 3.901.0
@@ -822,8 +822,8 @@ importers:
         specifier: ^1.0.3
         version: 1.0.3
       '@types/qs':
-        specifier: ^6.9.17
-        version: 6.9.17
+        specifier: ^6.14.0
+        version: 6.14.0
       '@types/react':
         specifier: ^18.0.14
         version: 18.3.3
@@ -1154,8 +1154,8 @@ importers:
   services/postgres:
     dependencies:
       '@aws-sdk/client-cloudformation':
-        specifier: ^3.901.0
-        version: 3.901.0
+        specifier: ^3.902.0
+        version: 3.902.0
       '@aws-sdk/client-s3':
         specifier: ^3.901.0
         version: 3.901.0
@@ -1685,8 +1685,8 @@ packages:
     resolution: {integrity: sha512-gn9EzMOdYcjlMYJVsYJk7xenSJQYa6M4KT0twte3bfYjxJU0Rk3uIkwpRKtuD2fEGTwXFbFVx17FRmN1IWIC6g==}
     engines: {node: '>=18.0.0'}
 
-  '@aws-sdk/client-cloudformation@3.901.0':
-    resolution: {integrity: sha512-Al0Opsma7AI0PQnqk+08VNTwfIWNPTpf/cRGaJCqrMbNkVL70IPjUArAF0coPyl1IH98jQfxeX/QTRwKeBTFDw==}
+  '@aws-sdk/client-cloudformation@3.902.0':
+    resolution: {integrity: sha512-YqhLj8DQmvt66YJngoT5ZAEOEuQXJdtAxQXzbdJo3eaKqnwvER2v0WLDalxXZ/7tXj7lKsNPEf3K0ov/BOpRUA==}
     engines: {node: '>=18.0.0'}
 
   '@aws-sdk/client-cloudfront@3.901.0':
@@ -6691,8 +6691,8 @@ packages:
   '@types/prop-types@15.7.5':
     resolution: {integrity: sha512-JCB8C6SnDoQf0cNycqd/35A7MjcnK+ZTqE7judS6o7utxUCg6imJg3QK2qzHKszlTjcj2cn+NwMB2i96ubpj7w==}
 
-  '@types/qs@6.9.17':
-    resolution: {integrity: sha512-rX4/bPcfmvxHDv0XjfJELTTr+iB+tn032nPILqHm5wbthUUUuVtNGGqzhya9XUxjTP8Fpr0qYgSZZKxGY++svQ==}
+  '@types/qs@6.14.0':
+    resolution: {integrity: sha512-eOunJqu0K1923aExK6y8p6fsihYEn/BYuQ4g0CxAAgFc4b/ZLN4CrsRZ55srTdqoiLzU2B2evC+apEIxprEzkQ==}
 
   '@types/range-parser@1.2.4':
     resolution: {integrity: sha512-EEhsLsD6UsDM1yFhAvy0Cjr6VwmpMWqFBCb9w07wVugF7w9nfajxLuVmngTIpgS6svCnm6Vaw+MZhoDCKnOfsw==}
@@ -14717,7 +14717,7 @@ snapshots:
     transitivePeerDependencies:
       - aws-crt
 
-  '@aws-sdk/client-cloudformation@3.901.0':
+  '@aws-sdk/client-cloudformation@3.902.0':
     dependencies:
       '@aws-crypto/sha256-browser': 5.2.0
       '@aws-crypto/sha256-js': 5.2.0
@@ -22396,7 +22396,7 @@ snapshots:
   '@types/express-serve-static-core@4.17.35':
     dependencies:
       '@types/node': 24.3.1
-      '@types/qs': 6.9.17
+      '@types/qs': 6.14.0
       '@types/range-parser': 1.2.4
       '@types/send': 0.17.1
 
@@ -22404,7 +22404,7 @@ snapshots:
     dependencies:
       '@types/body-parser': 1.19.2
       '@types/express-serve-static-core': 4.17.35
-      '@types/qs': 6.9.17
+      '@types/qs': 6.14.0
       '@types/serve-static': 1.15.0
 
   '@types/graceful-fs@4.1.6':
@@ -22535,7 +22535,7 @@ snapshots:
 
   '@types/prop-types@15.7.5': {}
 
-  '@types/qs@6.9.17': {}
+  '@types/qs@6.14.0': {}
 
   '@types/range-parser@1.2.4': {}
 
