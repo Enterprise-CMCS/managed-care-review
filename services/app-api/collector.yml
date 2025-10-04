@@ -9,9 +9,13 @@ exporters:
     endpoint: https://gov-otlp.nr-data.net:4317
     headers:
       api-key: $NR_LICENSE_KEY
+  otlphttp/ddog:
+    endpoint: https://trace.agent.ddog-gov.com
+    headers:
+      DD-API-KEY: ${DD_API_KEY}
 
 service:
   pipelines:
     traces:
       receivers: [otlp]
-      exporters: [otlp]
+      exporters: [otlp, otlphttp/ddog]
