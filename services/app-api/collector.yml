@@ -1,24 +1,11 @@
 receivers:
-  prometheus:
-    config:
-      scrape_configs:
-      - job_name: 'otelcol'
-        scrape_interval: 10s
-        static_configs:
-        - targets: ['0.0.0.0:8888']
   otlp:
     protocols:
       grpc:
       http:
 
-processors:
-  batch:
-    send_batch_max_size: 1000
-    send_batch_size: 100
-    timeout: 10s
-
 exporters:
-  otlp:
+  otlp/newrelic:
     endpoint: https://gov-otlp.nr-data.net:4317
     headers:
       api-key: $NR_LICENSE_KEY
@@ -31,8 +18,4 @@ service:
   pipelines:
     traces:
       receivers: [otlp]
-      exporters: [otlp, otlphttp/ddog]
-    metrics:
-      receivers: [prometheus]
-      processors: [batch]
-      exporters: [otlphttp/ddog]
+      exporters: [otlp/newrelic, otlphttp/ddog]
