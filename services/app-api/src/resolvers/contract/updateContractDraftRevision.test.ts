@@ -18,7 +18,7 @@ import { testLDService } from '../../testHelpers/launchDarklyHelpers'
 import { submitTestContract } from '../../testHelpers/gqlContractHelpers'
 import { mockGqlContractDraftRevisionFormDataInput } from '../../testHelpers'
 
-describe(`Tests UpdateHealthPlanFormData`, () => {
+describe(`Tests UpdateContractDraftRevision`, () => {
     const cmsUser = testCMSUser()
 
     const validEmptyFormData: ContractDraftRevisionFormDataInput = {

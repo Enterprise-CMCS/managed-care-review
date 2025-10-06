@@ -6,10 +6,6 @@ import { UnlockedHealthPlanFormDataType } from '@mc-review/hpp'
 import { domainToBase64 } from '@mc-review/hpp'
 import {
     HealthPlanPackage,
-    SubmitHealthPlanPackageDocument,
-    UnlockHealthPlanPackageDocument,
-    UnlockHealthPlanPackageMutation,
-    SubmitHealthPlanPackageMutation,
     HealthPlanRevision,
     UnlockContractMutation,
     UnlockContractDocument,
@@ -18,7 +14,6 @@ import {
 } from '../gen/gqlClient'
 import {
     mockContractAndRatesDraft,
-    mockDraftHealthPlanPackage,
 } from './healthPlanFormDataMock'
 import {
     GRAPHQL_ERROR_CAUSE_MESSAGES,
@@ -278,61 +273,6 @@ const mockSubmittedHealthPlanPackageWithRevision = ({
     }
 }
 
-type submitHealthPlanPackageMockSuccessProps = {
-    stateSubmission?: HealthPlanPackage
-    id: string
-    submittedReason?: string
-}
-
-const submitHealthPlanPackageMockSuccess = ({
-    stateSubmission,
-    id,
-    submittedReason,
-}: submitHealthPlanPackageMockSuccessProps): MockedResponse<SubmitHealthPlanPackageMutation> => {
-    const pkg = stateSubmission ?? mockDraftHealthPlanPackage()
-    return {
-        request: {
-            query: SubmitHealthPlanPackageDocument,
-            variables: { input: { pkgID: id, submittedReason } },
-        },
-        result: { data: { submitHealthPlanPackage: { pkg } } },
-    }
-}
-
-const submitHealthPlanPackageMockError = ({
-    id,
-    error,
-}: {
-    id: string
-    error?: {
-        code: GraphQLErrorCodeTypes
-        cause: GraphQLErrorCauseTypes
-    }
-}): MockedResponse<SubmitHealthPlanPackageMutation | GraphQLError> => {
-    const graphQLError = new GraphQLError(
-        error
-            ? GRAPHQL_ERROR_CAUSE_MESSAGES[error.cause]
-            : 'Error attempting to submit.',
-        {
-            extensions: {
-                code: error?.code,
-                cause: error?.cause,
-            },
-        }
-    )
-
-    return {
-        request: {
-            query: SubmitHealthPlanPackageDocument,
-            variables: { input: { pkgID: id } },
-        },
-        result: {
-            data: null,
-            errors: [graphQLError],
-        },
-    }
-}
-
 type unlockContractMockSuccessProps = {
     contract?: Contract
     id: string
@@ -360,42 +300,6 @@ const unlockContractMockSuccess = ({
             variables: { input: { contractID: id, unlockedReason: reason } },
         },
         result: { data: { unlockContract: { contract: unlockedContract } } },
-    }
-}
-
-const unlockHealthPlanPackageMockError = ({
-    id,
-    reason,
-    error,
-}: {
-    id: string
-    reason: string
-    error?: {
-        code: GraphQLErrorCodeTypes
-        cause: GraphQLErrorCauseTypes
-    }
-}): MockedResponse<UnlockHealthPlanPackageMutation> => {
-    const graphQLError = new GraphQLError(
-        error
-            ? GRAPHQL_ERROR_CAUSE_MESSAGES[error.cause]
-            : 'Error attempting to submit.',
-        {
-            extensions: {
-                code: error?.code,
-                cause: error?.cause,
-            },
-        }
-    )
-
-    return {
-        request: {
-            query: UnlockHealthPlanPackageDocument,
-            variables: { input: { pkgID: id, unlockedReason: reason } },
-        },
-        result: {
-            data: null,
-            errors: [graphQLError],
-        },
     }
 }
 
@@ -436,9 +340,6 @@ const unlockContractMockError = ({
 }
 
 export {
-    submitHealthPlanPackageMockSuccess,
-    submitHealthPlanPackageMockError,
-    unlockHealthPlanPackageMockError,
     unlockContractMockSuccess,
     unlockContractMockError,
     mockSubmittedHealthPlanPackageWithRevision,
