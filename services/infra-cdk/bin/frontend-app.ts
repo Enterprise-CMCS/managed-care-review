@@ -2,7 +2,7 @@
 import { AppConfigLoader } from '../lib/config/app'
 import { getEnvironment, getCdkEnvironment, ResourceNames } from '../lib/config'
 import { FrontendAppStack } from '../lib/stacks/frontend-app'
-import { DefaultStackSynthesizer, Tags } from 'aws-cdk-lib'
+import { App, DefaultStackSynthesizer, Tags } from 'aws-cdk-lib'
 
 // Simplified version - using default synthesizer with mcreview qualifier
 function main(): void {
