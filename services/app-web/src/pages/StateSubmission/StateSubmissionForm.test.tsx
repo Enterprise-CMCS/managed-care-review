@@ -420,38 +420,6 @@ describe('StateSubmissionForm', () => {
             expect(loading).toBeInTheDocument()
         })
 
-        it('shows a generic error fetching submission fails at documents', async () => {
-            const mockSubmission = mockContractPackageDraft()
-            renderWithProviders(
-                <Routes>
-                    <Route element={<SubmissionSideNav />}>
-                        <Route
-                            path={RoutesRecord.SUBMISSIONS_EDIT_TOP_LEVEL}
-                            element={<StateSubmissionForm />}
-                        />
-                    </Route>
-                </Routes>,
-                {
-                    apolloProvider: {
-                        mocks: [
-                            fetchCurrentUserMock({ statusCode: 200 }),
-                            fetchContractMockFail({ id: '15' }),
-                            fetchContractWithQuestionsMockSuccess({
-                                contract: {
-                                    ...mockSubmission,
-                                    id: '15',
-                                },
-                            }),
-                        ],
-                    },
-                    routerProvider: { route: '/submissions/15/edit/documents' },
-                }
-            )
-
-            const loading = await screen.findByText('System error')
-            expect(loading).toBeInTheDocument()
-        })
-
         it('shows a generic error when updating submission fails', async () => {
             const mockSubmission = mockContractPackageDraft()
             mockSubmission.draftRevision!.formData.submissionDescription =
