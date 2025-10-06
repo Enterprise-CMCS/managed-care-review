@@ -7,6 +7,10 @@ import { SimpleSpanProcessor } from '@opentelemetry/sdk-trace-base'
 import { NodeTracerProvider } from '@opentelemetry/sdk-trace-node'
 import { AWSXRayPropagator } from '@opentelemetry/propagator-aws-xray'
 import { AWSXRayIdGenerator } from '@opentelemetry/id-generator-aws-xray'
+import {
+    CompositePropagator,
+    W3CTraceContextPropagator,
+} from '@opentelemetry/core'
 
 export function createTracer(serviceName: string): Tracer {
     const provider = new NodeTracerProvider({
@@ -26,7 +30,12 @@ export function createTracer(serviceName: string): Tracer {
 
     // Initialize the OpenTelemetry APIs to use the NodeTracerProvider bindings
     provider.register({
-        propagator: new AWSXRayPropagator(),
+        propagator: new CompositePropagator({
+            propagators: [
+                new AWSXRayPropagator(),
+                new W3CTraceContextPropagator(),
+            ],
+        }),
     })
 
     return trace.getTracer(serviceName)
