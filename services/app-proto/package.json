@@ -28,7 +28,7 @@
         "uuid": "^13.0.0"
     },
     "devDependencies": {
-        "lint-staged": "^15.2.7",
+        "lint-staged": "^16.2.3",
         "protobufjs-cli": "^1.1.3"
     }
 }
