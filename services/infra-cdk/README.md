@@ -31,6 +31,7 @@ cdk deploy "*" --context stage=dev
 ### Stack Hierarchy & Details
 
 #### 1. **Foundation Stack** - Core parameters, secrets
+
 - **JWT Secret**: Creates Secrets Manager secret for JWT signing/verification
 - **API Keys**: Stores third-party API keys (LaunchDarkly, etc.)
 - **SSM Parameters**: Configuration values accessible across stacks
@@ -39,25 +40,28 @@ cdk deploy "*" --context stage=dev
 - **Base Tagging**: Project/Environment/ManagedBy tags
 
 #### 2. **Network Stack** - Imports existing VPC, creates security groups
+
 - **VPC Import**: Reads VPC details from SSM Parameter Store (no VPC creation)
 - **Security Groups**:
-  - Lambda Security Group: Outbound HTTPS (443) and PostgreSQL (5432)
-  - Database Security Group: Inbound PostgreSQL from Lambda SG only
+    - Lambda Security Group: Outbound HTTPS (443) and PostgreSQL (5432)
+    - Database Security Group: Inbound PostgreSQL from Lambda SG only
 - **VPC Endpoints**: Private access to AWS services (S3, Secrets Manager, etc.)
 - **Flow Logs**: Network traffic monitoring in CloudWatch
 
 #### 3. **Data Stack** - Aurora PostgreSQL, S3 buckets
-- **Aurora Serverless v2**: 
-  - PostgreSQL database with stage-based retention (1/7/30 days)
-  - Deletion protection for prod/val
-  - VPN access via imported security groups
+
+- **Aurora Serverless v2**:
+    - PostgreSQL database with stage-based retention (1/7/30 days)
+    - Deletion protection for prod/val
+    - VPN access via imported security groups
 - **S3 Buckets**:
-  - Uploads: Main file storage with CORS, virus scan enforcement
-  - QA: Test file storage with same restrictions
-  - Logging: Access logs for all buckets
+    - Uploads: Main file storage with CORS, virus scan enforcement
+    - QA: Test file storage with same restrictions
+    - Logging: Access logs for all buckets
 - **Security**: File type restrictions, SSL enforcement, virus scan tags
 
 #### 4. **Auth Stack** - Cognito user pool, SAML
+
 - **Cognito User Pool**: Email-based auth, MFA optional, admin-only signup
 - **SAML Integration**: Federated auth with attribute mapping
 - **App Clients**: Web (public) and Server (confidential) clients
@@ -65,6 +69,7 @@ cdk deploy "*" --context stage=dev
 - **Security**: Advanced security mode, CloudWatch logs, account protection
 
 #### 5. **ApiCompute Stack** - API Gateway, Lambda functions
+
 - **Lambda Functions**: GraphQL, OAuth, health, email, migrations, cleanup
 - **API Gateway**: REST API with WAF, Cognito auth, request validation
 - **Lambda Layers**: Prisma (DB), OTEL (observability)
@@ -72,12 +77,14 @@ cdk deploy "*" --context stage=dev
 - **Auto-bundling**: TypeScript → JavaScript with esbuild
 
 #### 6. **DatabaseOps Stack** - DB management lambdas
+
 - **DB Manager**: Schema operations, user management, DDL execution
 - **DB Export**: Backup to S3, table exports, compression
 - **DB Import**: Restore from S3, data migration
 - **Security**: VPC-only access, IAM invocation, Secrets Manager
 
 #### 7. **VirusScanning Stack** - GuardDuty malware protection
+
 - **GuardDuty Plans**: Auto-scan uploads and QA buckets
 - **Scan Processing**: Tag files with results, send threat alerts
 - **Rescan System**: Queue-based rescanning for failed files
@@ -85,6 +92,7 @@ cdk deploy "*" --context stage=dev
 - **Serverless**: No EC2/ALB/ASG required (unlike ClamAV)
 
 #### 8. **Monitoring Stack** - CloudWatch, alarms
+
 - **Dashboards**: Unified view of all services
 - **Alarms**: Lambda errors, API latency, DB CPU, storage
 - **Tracing**: X-Ray distributed tracing
@@ -93,23 +101,32 @@ cdk deploy "*" --context stage=dev
 - **Costs**: Budget alerts and anomaly detection
 
 ### Project Structure
+
 ```
 infra-cdk/
-├── bin/mcr-app.ts          # CDK app entry point
+├── bin/                    # CDK app entry points
+│   ├── app-api.ts
+│   ├── cognito.ts
+│   ├── frontend-app.ts
+│   ├── frontend-infra.ts
+│   ├── lambda-layers.ts
+│   ├── network.ts
+│   ├── oidc.ts
+│   ├── postgres.ts
+│   ├── uploads.ts
+│   └── virus-scanning.ts
 ├── lib/
-│   ├── stacks/             # Stack definitions  
-│   ├── constructs/         # Reusable constructs
-│   │   ├── api/           # API Gateway constructs
-│   │   ├── auth/          # Cognito constructs
-│   │   ├── database/      # Aurora constructs
-│   │   ├── lambda/        # Lambda factory & layers
-│   │   └── storage/       # S3 constructs
-│   ├── config/            # Environment configs
-│   └── aspects/           # CDK aspects (IAM)
-└── src/lambdas/           # Lambda source code
+│   ├── stacks/            # Stack definitions
+│   ├── constructs/        # Reusable constructs
+│   │   ├── api/          # API Gateway constructs
+│   │   ├── base/         # Base stack
+│   │   ├── database/     # Aurora constructs
+│   │   └── storage/      # S3 constructs
+│   └── config/           # Environment configs
 ```
 
 ### Lambda Build Process
+
 - **NodejsFunction** construct auto-bundles TypeScript → JavaScript
 - **esbuild** for fast bundling with tree-shaking
 - GraphQL files loaded as modules
@@ -117,6 +134,7 @@ infra-cdk/
 - Source maps enabled for debugging
 
 ### Key Commands
+
 ```bash
 # List stacks
 cdk list --context stage=dev
@@ -135,14 +153,16 @@ pnpm clean
 ```
 
 ### Environment Variables
+
 Required for deployment:
+
 - `AWS_REGION` - AWS region
 - `CDK_STAGE` - Stage (dev/val/prod)
-- `IAM_PATH` - IAM path prefix
-- `PERM_BOUNDARY_ARN` - IAM permissions boundary
 
 ### VPC Prerequisites
+
 The Network Stack imports an existing VPC. Before deployment, ensure these SSM parameters exist:
+
 - `/configuration/default/vpc/id` - VPC ID
 - `/configuration/default/vpc/cidr` - VPC CIDR block
 - `/configuration/default/vpc/subnets/private/a/id` - Private subnet A ID
@@ -150,8 +170,9 @@ The Network Stack imports an existing VPC. Before deployment, ensure these SSM p
 - `/configuration/default/vpc/subnets/private/c/id` - Private subnet C ID
 
 ### Security
+
 - All resources tagged with Project/Environment/ManagedBy
-- IAM roles use permission boundaries
+- OIDC role uses CMS-required IAM path and permissions boundary
 - VPC endpoints for private connectivity
 - GuardDuty for malware scanning
 - Secrets in AWS Secrets Manager
