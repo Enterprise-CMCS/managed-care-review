@@ -110,6 +110,20 @@ export class GitHubOidcServiceRoleStack extends BaseStack {
             })
         )
 
+        // Add permission to assume CDK bootstrap roles
+        this.serviceRole.addToPolicy(
+            new PolicyStatement({
+                effect: Effect.ALLOW,
+                actions: ['sts:AssumeRole'],
+                resources: [
+                    `arn:aws:iam::${this.account}:role/cdk-*-lookup-role-${this.account}-*`,
+                    `arn:aws:iam::${this.account}:role/cdk-*-deploy-role-${this.account}-*`,
+                    `arn:aws:iam::${this.account}:role/cdk-*-file-publishing-role-${this.account}-*`,
+                    `arn:aws:iam::${this.account}:role/cdk-*-image-publishing-role-${this.account}-*`,
+                ],
+            })
+        )
+
         // Output the role ARN for verification
         new CfnOutput(this, 'ServiceRoleArn', {
             value: this.serviceRole.roleArn,
