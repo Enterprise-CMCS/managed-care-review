@@ -4,7 +4,8 @@ on:
   push:
     branches:
       - "main"
-      - "mt-review-cdk"  # Temporary: test promote workflow before merge
+      - "mt-review-cdk" # Temporary: test promote workflow before merge
+      - "mt-cdk-simplified" # Temporary: test promote workflow before merge
   workflow_dispatch:
 
 # Prevent concurrent dev deployments
