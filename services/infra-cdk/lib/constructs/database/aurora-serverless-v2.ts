@@ -16,7 +16,6 @@ import {
     ResourceNames,
     CDK_DEPLOYMENT_SUFFIX,
 } from '../../config/index'
-// import { NagSuppressions } from 'cdk-nag';
 
 export interface AuroraServerlessV2Props {
     databaseName: string
@@ -86,7 +85,7 @@ export class AuroraServerlessV2 extends Construct {
         // Create the Aurora Serverless v2 cluster
         this.cluster = new DatabaseCluster(this, 'Cluster', {
             engine: DatabaseClusterEngine.auroraPostgres({
-                version: AuroraPostgresEngineVersion.VER_16_6,
+                version: AuroraPostgresEngineVersion.VER_16_9,
             }),
             credentials: Credentials.fromSecret(this.secret),
             clusterIdentifier:

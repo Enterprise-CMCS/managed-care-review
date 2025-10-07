@@ -21,7 +21,6 @@ import {
 import type { IKey } from 'aws-cdk-lib/aws-kms'
 import { Duration, RemovalPolicy } from 'aws-cdk-lib'
 import { ResourceNames } from '@config/index'
-// import { NagSuppressions } from 'cdk-nag';
 
 export interface SecureS3BucketProps {
     bucketName: string

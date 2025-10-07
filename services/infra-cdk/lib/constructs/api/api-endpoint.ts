@@ -16,7 +16,6 @@ import {
 } from 'aws-cdk-lib/aws-apigateway'
 import type { IFunction } from 'aws-cdk-lib/aws-lambda'
 import type { IUserPool } from 'aws-cdk-lib/aws-cognito'
-// import { NagSuppressions } from 'cdk-nag';
 
 export interface ApiEndpointProps {
     resource: Resource
