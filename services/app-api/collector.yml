@@ -10,7 +10,7 @@ exporters:
     headers:
       api-key: $NR_LICENSE_KEY
   otlphttp/ddog:
-    endpoint: https://trace.agent.ddog-gov.com
+    endpoint: https://ddog-gov.com
     headers:
       DD-API-KEY: ${DD_API_KEY}
   logging:
