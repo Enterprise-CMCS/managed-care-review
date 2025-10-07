@@ -87,7 +87,7 @@ const STAGE_OVERRIDES = {
             dashboardEnabled: false,
         },
         features: {
-            enablePostgresVm: false,
+            enablePostgresVm: true,
             enableCrossAccountRoles: false,
             enableDataExportBucket: false,
             requireEmailSender: false,

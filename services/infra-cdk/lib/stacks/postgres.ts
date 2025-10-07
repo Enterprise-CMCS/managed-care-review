@@ -6,14 +6,29 @@ import {
     type IVpc,
     type ISecurityGroup,
     SubnetType,
+    Instance,
+    InstanceType,
+    InstanceClass,
+    InstanceSize,
+    MachineImage,
+    UserData,
+    AmazonLinuxCpuType,
+    BlockDeviceVolume,
+    EbsDeviceVolumeType,
 } from 'aws-cdk-lib/aws-ec2'
 import type { IDatabaseCluster } from 'aws-cdk-lib/aws-rds'
 import type { ISecret } from 'aws-cdk-lib/aws-secretsmanager'
 import { Secret } from 'aws-cdk-lib/aws-secretsmanager'
 import { Runtime, Architecture } from 'aws-cdk-lib/aws-lambda'
 import { NodejsFunction } from 'aws-cdk-lib/aws-lambda-nodejs'
-import { PolicyStatement, Effect } from 'aws-cdk-lib/aws-iam'
-import { CfnOutput, Duration, Fn } from 'aws-cdk-lib'
+import {
+    PolicyStatement,
+    Effect,
+    Role,
+    ServicePrincipal,
+    ManagedPolicy,
+} from 'aws-cdk-lib/aws-iam'
+import { CfnOutput, Duration, Fn, Tags } from 'aws-cdk-lib'
 import { AuroraServerlessV2 } from '../constructs/database'
 import { isReviewEnvironment } from '../config/environments'
 import { join } from 'path'
@@ -36,6 +51,7 @@ export class Postgres extends BaseStack {
     public readonly cluster?: IDatabaseCluster
     public readonly logicalDbManagerFunction: NodejsFunction
     public readonly vpcEndpoint: InterfaceVpcEndpoint
+    public readonly bastionHost?: Instance
 
     constructor(scope: Construct, id: string, props: PostgresProps) {
         super(scope, id, {
@@ -69,6 +85,11 @@ export class Postgres extends BaseStack {
 
             this.cluster = auroraCluster.cluster
             this.databaseSecret = auroraCluster.secret
+
+            // Create optional bastion host for database access
+            if (this.stageConfig.features.enablePostgresVm) {
+                this.bastionHost = this.createBastionHost(props)
+            }
         } else {
             // Review environments use shared CDK dev Aurora via logical databases
             // Create a placeholder secret that the logicalDbManagerFunction will update with actual credentials
@@ -205,6 +226,100 @@ export class Postgres extends BaseStack {
     }
 
     /**
+     * Create bastion host for database access via SSM Session Manager
+     * Uses gp3 volumes and includes PostgreSQL client tools
+     */
+    private createBastionHost(props: PostgresProps): Instance {
+        // Create IAM role for bastion with SSM access
+        const bastionRole = new Role(this, 'BastionRole', {
+            assumedBy: new ServicePrincipal('ec2.amazonaws.com'),
+            description: 'IAM role for PostgreSQL bastion host',
+            managedPolicies: [
+                // SSM Session Manager access
+                ManagedPolicy.fromAwsManagedPolicyName(
+                    'AmazonSSMManagedInstanceCore'
+                ),
+                // CloudWatch logs
+                ManagedPolicy.fromAwsManagedPolicyName(
+                    'CloudWatchAgentServerPolicy'
+                ),
+            ],
+        })
+
+        // Grant read access to database secret
+        this.databaseSecret.grantRead(bastionRole)
+
+        // User data script to install PostgreSQL client
+        const userData = UserData.forLinux()
+        userData.addCommands(
+            '#!/bin/bash',
+            'yum update -y',
+            '',
+            '# Install PostgreSQL 16 client',
+            'dnf install postgresql16 -y',
+            '',
+            '# Install Session Manager plugin',
+            'yum install -y amazon-ssm-agent',
+            'systemctl enable amazon-ssm-agent',
+            'systemctl start amazon-ssm-agent',
+            '',
+            '# Create helper script for database connection',
+            'cat > /usr/local/bin/connect-db << EOF',
+            '#!/bin/bash',
+            '# Get database credentials from Secrets Manager',
+            `SECRET_JSON=$(aws secretsmanager get-secret-value --secret-id ${this.databaseSecret.secretArn} --region ${this.region} --query SecretString --output text)`,
+            'DB_HOST=$(echo $SECRET_JSON | jq -r .host)',
+            'DB_PORT=$(echo $SECRET_JSON | jq -r .port)',
+            'DB_NAME=$(echo $SECRET_JSON | jq -r .dbname)',
+            'DB_USER=$(echo $SECRET_JSON | jq -r .username)',
+            'export PGPASSWORD=$(echo $SECRET_JSON | jq -r .password)',
+            '',
+            'echo "Connecting to PostgreSQL database..."',
+            'psql -h $DB_HOST -p $DB_PORT -U $DB_USER -d $DB_NAME',
+            'EOF',
+            '',
+            'chmod +x /usr/local/bin/connect-db',
+            '',
+            '# Install jq for parsing JSON',
+            'yum install -y jq',
+            '',
+            'echo "Bastion host setup complete. Use \'connect-db\' to access the database."'
+        )
+
+        // Create the bastion instance
+        const bastion = new Instance(this, 'BastionHost', {
+            instanceType: InstanceType.of(InstanceClass.T3, InstanceSize.MICRO),
+            machineImage: MachineImage.latestAmazonLinux2023({
+                cpuType: AmazonLinuxCpuType.X86_64,
+            }),
+            vpc: props.vpc,
+            vpcSubnets: {
+                subnetType: SubnetType.PRIVATE_WITH_EGRESS,
+            },
+            securityGroup: props.lambdaSecurityGroup,
+            role: bastionRole,
+            userData,
+            blockDevices: [
+                {
+                    deviceName: '/dev/xvda',
+                    volume: BlockDeviceVolume.ebs(8, {
+                        volumeType: EbsDeviceVolumeType.GP3,
+                        deleteOnTermination: true,
+                        encrypted: true,
+                    }),
+                },
+            ],
+        })
+
+        // Add tags
+        Tags.of(bastion).add('Name', `postgres-${this.stage}-bastion`)
+        Tags.of(bastion).add('Purpose', 'database-access')
+        Tags.of(bastion).add('ManagedBy', 'CDK')
+
+        return bastion
+    }
+
+    /**
      * Create stack outputs that match serverless outputs
      */
     private createOutputs(): void {
@@ -289,5 +404,20 @@ export class Postgres extends BaseStack {
             description: 'Secrets Manager VPC endpoint ID',
             exportName: this.exportName('VpcEndpointId'),
         })
+
+        // Bastion host outputs (only for val/prod where it's enabled)
+        if (this.bastionHost) {
+            new CfnOutput(this, 'BastionInstanceId', {
+                value: this.bastionHost.instanceId,
+                description: 'Bastion host EC2 instance ID for SSM access',
+                exportName: this.exportName('BastionInstanceId'),
+            })
+
+            new CfnOutput(this, 'BastionConnectCommand', {
+                value: `aws ssm start-session --target ${this.bastionHost.instanceId}`,
+                description:
+                    'Command to connect to bastion via SSM Session Manager',
+            })
+        }
     }
 }

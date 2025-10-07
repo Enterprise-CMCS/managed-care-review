@@ -1,6 +1,0 @@
-# Authorized SSH keys for PostgreSQL jumpbox
-# Add team member SSH public keys here
-# Format: ssh-rsa AAAAB3... user@host
-
-# Example:
-# ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQDaR... user@example.com
