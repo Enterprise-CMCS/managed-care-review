@@ -10,6 +10,9 @@ exporters:
     headers:
       api-key: $NR_LICENSE_KEY
   otlphttp/ddog:
+    traces:
+      compute_stats_by_span_kind: true
+      trace_buffer: 500
     endpoint: https://trace.agent.ddog-gov.com
     headers:
       DD-API-KEY: ${DD_API_KEY}
@@ -18,8 +21,13 @@ exporters:
     sampling_initial: 1
     sampling_thereafter: 1
 
+connectors:
+    ddog/connector:
+      traces:
+        compute_stats_by_span_kind: true
+
 service:
   pipelines:
     traces:
       receivers: [otlp]
-      exporters: [otlp/newrelic, otlphttp/ddog, logging]
+      exporters: [otlp/newrelic, otlphttp/ddog, ddog/connector, logging]
