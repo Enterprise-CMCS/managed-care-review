@@ -679,7 +679,7 @@ jobs:
         with:
           token: "${{ github.token }}"
           state: "failure"
-          deployment_id: ${{ needs.begin-deployment.outputs.deploy-id }}
+          deployment-id: ${{ needs.begin-deployment.outputs.deploy-id }}
 
       - name: Update deployment status (success)
         if: needs.deploy-cdk-app.result == 'success' && needs.deploy-frontend-app.result == 'success' && needs.cypress-dev.result == 'success'
