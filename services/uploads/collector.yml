@@ -11,10 +11,10 @@ exporters:
   otlphttp/ddog:
     traces:
       compute_stats_by_span_kind: true
-      trace_buffer: 500  
-    endpoint: https://trace.agent.ddog-gov.com
-    headers:
-      DD-API-KEY: ${DD_API_KEY}
+      trace_buffer: 500
+    api:
+      key: ${DD_API_KEY}
+      site: https://trace.agent.ddog-gov.com
   logging:
     loglevel: debug
     sampling_initial: 1
