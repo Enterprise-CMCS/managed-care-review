@@ -261,8 +261,8 @@ importers:
         specifier: ^24.2.1
         version: 24.2.1
       '@types/uuid':
-        specifier: ^9.0.0
-        version: 9.0.8
+        specifier: ^11.0.0
+        version: 11.0.0
 
   packages/otel:
     dependencies:
@@ -301,8 +301,8 @@ importers:
         specifier: ^5.3.15
         version: 5.3.15
       '@types/uuid':
-        specifier: ^9.0.0
-        version: 9.0.8
+        specifier: ^11.0.0
+        version: 11.0.0
       octokit:
         specifier: ^5.0.3
         version: 5.0.3
@@ -480,8 +480,8 @@ importers:
         specifier: ^1.4.3
         version: 1.4.11
       '@types/uuid':
-        specifier: ^9.0.0
-        version: 9.0.8
+        specifier: ^11.0.0
+        version: 11.0.0
       '@typescript-eslint/eslint-plugin':
         specifier: ^8.39.1
         version: 8.39.1(@typescript-eslint/parser@8.37.0(eslint@9.34.0(jiti@2.4.2))(typescript@5.9.2))(eslint@9.34.0(jiti@2.4.2))(typescript@5.9.2)
@@ -834,8 +834,8 @@ importers:
         specifier: ^18.0.0
         version: 18.3.0
       '@types/uuid':
-        specifier: ^9.0.0
-        version: 9.0.8
+        specifier: ^11.0.0
+        version: 11.0.0
       '@typescript-eslint/eslint-plugin':
         specifier: ^8.39.1
         version: 8.39.1(@typescript-eslint/parser@8.37.0(eslint@9.34.0(jiti@2.4.2))(typescript@5.9.2))(eslint@9.34.0(jiti@2.4.2))(typescript@5.9.2)
@@ -6740,8 +6740,9 @@ packages:
   '@types/url-parse@1.4.11':
     resolution: {integrity: sha512-FKvKIqRaykZtd4n47LbK/W/5fhQQ1X7cxxzG9A48h0BGN+S04NH7ervcCjM8tyR0lyGru83FAHSmw2ObgKoESg==}
 
-  '@types/uuid@9.0.8':
-    resolution: {integrity: sha512-jg+97EGIcY9AGHJJRaaPVgetKDsrTgbRjQ5Msgjh/DQKEFl0DtyRr/VCOyD1T2R1MNeWPK/u7JoGhlDZnKBAfA==}
+  '@types/uuid@11.0.0':
+    resolution: {integrity: sha512-HVyk8nj2m+jcFRNazzqyVKiZezyhDKrGUA3jlEcg/nZ6Ms+qHwocba1Y/AaVaznJTAM9xpdFSh+ptbNrhOGvZA==}
+    deprecated: This is a stub types definition. uuid provides its own type definitions, so you do not need this installed.
 
   '@types/whatwg-mimetype@3.0.2':
     resolution: {integrity: sha512-c2AKvDT8ToxLIOUlN51gTiHXflsfIFisS4pO7pDPoKouJCESkhZnEy623gwP9laCy5lnLDAw1vAzu2vM2YLOrA==}
@@ -22408,7 +22409,9 @@ snapshots:
 
   '@types/url-parse@1.4.11': {}
 
-  '@types/uuid@9.0.8': {}
+  '@types/uuid@11.0.0':
+    dependencies:
+      uuid: 13.0.0
 
   '@types/whatwg-mimetype@3.0.2': {}
 
