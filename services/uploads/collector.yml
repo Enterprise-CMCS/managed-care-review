@@ -8,13 +8,10 @@ exporters:
     endpoint: https://gov-otlp.nr-data.net:4318
     headers:
       api-key: $NR_LICENSE_KEY
-  otlphttp/ddog:
-    traces:
-      compute_stats_by_span_kind: true
-      trace_buffer: 500
+  datadog/exporter:
     api:
-      key: ${DD_API_KEY}
       site: ddog-gov.com
+      key: ${env:DD_API_KEY}
   logging:
     loglevel: debug
     sampling_initial: 1
@@ -25,11 +22,18 @@ connectors:
       traces:
         compute_stats_by_span_kind: true
 
+processors:
+  batch:
+    send_batch_max_size: 100
+    send_batch_size: 10
+    timeout: 10s
+
 service:
   pipelines:
     traces:
       receivers: [otlp]
-      exporters: [otlphttp, otlphttp/ddog, ddog/connector]
+      exporters: [otlphttp, datadog/exporter]
+      processors: [batch]
     metrics:
       receivers: [otlp]
-      exporters: [otlphttp, otlphttp/ddog]
+      exporters: [otlphttp, datadog/exporter]
