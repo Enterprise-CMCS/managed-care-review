@@ -15,7 +15,7 @@ exporters:
       trace_buffer: 500
     api:
       key: ${DD_API_KEY}
-      site: https://trace.agent.ddog-gov.com
+      site: ddog-gov.com
   logging:
     loglevel: debug
     sampling_initial: 1
