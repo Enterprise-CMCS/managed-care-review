@@ -289,7 +289,7 @@ jobs:
           SUBNET_PRIVATE_C_ID: ${{ secrets.DEV_SUBNET_PRIVATE_C_ID }}
         run: |
           echo "=== Deploying Network stack ==="
-          npx cdk deploy network-dev-cdk \
+          pnpm cdk deploy network-dev-cdk \
             --app 'pnpm tsx bin/network.ts' \
             --context stage=dev \
             --require-approval never
@@ -300,7 +300,7 @@ jobs:
           STAGE_NAME: dev
         run: |
           echo "=== Deploying Uploads stack ==="
-          npx cdk deploy uploads-dev-cdk \
+          pnpm cdk deploy uploads-dev-cdk \
             --app 'pnpm tsx bin/uploads.ts' \
             --context stage=dev \
             --require-approval never
@@ -320,7 +320,7 @@ jobs:
           GUARDDUTY_DETECTOR_ID: ${{ secrets.DEV_GUARDDUTY_DETECTOR_ID }}
         run: |
           echo "=== Deploying Virus Scanning stack ==="
-          npx cdk deploy virus-scanning-dev-cdk \
+          pnpm cdk deploy virus-scanning-dev-cdk \
             --app 'pnpm tsx bin/virus-scanning.ts' \
             --context stage=dev \
             --require-approval never
@@ -336,7 +336,7 @@ jobs:
           SUBNET_PRIVATE_C_ID: ${{ secrets.DEV_SUBNET_PRIVATE_C_ID }}
         run: |
           echo "=== Deploying Postgres stack ==="
-          npx cdk deploy postgres-dev-cdk \
+          pnpm cdk deploy postgres-dev-cdk \
             --app 'pnpm tsx bin/postgres.ts' \
             --context stage=dev \
             --require-approval never
@@ -347,7 +347,7 @@ jobs:
           STAGE_NAME: dev
         run: |
           echo "=== Deploying Frontend Infrastructure stack ==="
-          npx cdk deploy frontend-infra-dev-cdk \
+          pnpm cdk deploy frontend-infra-dev-cdk \
             --app 'pnpm tsx bin/frontend-infra.ts' \
             --context stage=dev \
             --require-approval never
@@ -358,7 +358,7 @@ jobs:
           STAGE_NAME: dev
         run: |
           echo "=== Deploying Cognito stack ==="
-          npx cdk deploy cognito-dev-cdk \
+          pnpm cdk deploy cognito-dev-cdk \
             --app 'pnpm tsx bin/cognito.ts' \
             --context stage=dev \
             --require-approval never
@@ -443,7 +443,7 @@ jobs:
           STAGE_NAME: dev
         run: |
           echo "=== Deploying Frontend App stack with built assets ==="
-          npx cdk deploy frontend-app-dev-cdk \
+          pnpm cdk deploy frontend-app-dev-cdk \
             --app 'pnpm tsx bin/frontend-app.ts' \
             --context stage=dev \
             --require-approval never
@@ -526,7 +526,7 @@ jobs:
           INTERNAL_ALLOWED_ORIGINS: ${{ secrets.DEV_INTERNAL_ALLOWED_ORIGINS }}
         run: |
           echo "=== Deploying AppApi stack ==="
-          npx cdk deploy app-api-dev-cdk \
+          pnpm cdk deploy app-api-dev-cdk \
             --app 'pnpm tsx bin/app-api.ts' \
             --context stage=dev \
             --require-approval never

@@ -410,10 +410,20 @@ async function deleteStack(stackName: string): Promise<void | Error> {
 
         console.info(`Deleting stack: ${stackName}`)
 
-        // Delete the stack
-        const commandDeleteStack = new DeleteStackCommand({
+        // Delete the stack - optionally use a specific role if provided via env var
+        // Otherwise let CloudFormation use the caller's credentials
+        const deleteParams: any = {
             StackName: stackName,
-        })
+        }
+
+        if (process.env.CDK_CLEANUP_ROLE_ARN) {
+            console.info(`Using role for deletion: ${process.env.CDK_CLEANUP_ROLE_ARN}`)
+            deleteParams.RoleARN = process.env.CDK_CLEANUP_ROLE_ARN
+        } else {
+            console.info(`Deleting stack using caller credentials (no role override)`)
+        }
+
+        const commandDeleteStack = new DeleteStackCommand(deleteParams)
         await cf.send(commandDeleteStack)
 
         console.info(`Waiting for stack ${stackName} to be deleted...`)
