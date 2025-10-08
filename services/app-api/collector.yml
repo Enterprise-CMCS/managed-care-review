@@ -12,7 +12,7 @@ exporters:
   datadog/exporter:
     api:
       site: ddog-gov.com
-      key: ${env:DD_API_KEY}
+      key: $DD_API_KEY
   logging:
     loglevel: debug
     sampling_initial: 1
