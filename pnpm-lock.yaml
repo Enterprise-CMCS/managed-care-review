@@ -722,8 +722,8 @@ importers:
         specifier: ^5.7.2
         version: 5.7.2(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       react-router:
-        specifier: ^6.23.1
-        version: 6.23.1(react@18.3.1)
+        specifier: ^6.29.0
+        version: 6.29.0(react@18.3.1)
       react-router-dom:
         specifier: ^6.23.1
         version: 6.23.1(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
@@ -5759,6 +5759,10 @@ packages:
 
   '@remix-run/router@1.16.1':
     resolution: {integrity: sha512-es2g3dq6Nb07iFxGk5GuHN20RwBZOsuDQN7izWIisUcv9r+d2C5jQxqmgkdebXgReWfiyUabcki6Fg77mSNrig==}
+    engines: {node: '>=14.0.0'}
+
+  '@remix-run/router@1.22.0':
+    resolution: {integrity: sha512-MBOl8MeOzpK0HQQQshKB7pABXbmyHizdTpqnrIseTbsv0nAepwC2ENZa1aaBExNQcpLoXmWthhak8SABLzvGPw==}
     engines: {node: '>=14.0.0'}
 
   '@repeaterjs/repeater@3.0.6':
@@ -11929,6 +11933,12 @@ packages:
     peerDependencies:
       react: '>=16.8'
 
+  react-router@6.29.0:
+    resolution: {integrity: sha512-DXZJoE0q+KyeVw75Ck6GkPxFak63C4fGqZGNijnWgzB/HzSP1ZfTlBj5COaGWwhrMQ/R8bXiq5Ooy4KG+ReyjQ==}
+    engines: {node: '>=14.0.0'}
+    peerDependencies:
+      react: '>=16.8'
+
   react-select-event@5.5.1:
     resolution: {integrity: sha512-goAx28y0+iYrbqZA2FeRTreHHs/ZtSuKxtA+J5jpKT5RHPCbVZJ4MqACfPnWyFXsEec+3dP5bCrNTxIX8oYe9A==}
 
@@ -12299,6 +12309,11 @@ packages:
 
   semver@7.7.2:
     resolution: {integrity: sha512-RF0Fw+rO5AMf9MAyaRXI4AV0Ulj5lMHqVxxdSgiVbixSCXoEmmX/jk0CuJw4+3SqroYO9VoUh+HcuJivvtJemA==}
+    engines: {node: '>=10'}
+    hasBin: true
+
+  semver@7.7.3:
+    resolution: {integrity: sha512-SdsKMrI9TdgjdweUSR9MweHA4EJ8YxHn8DFaDisvhVlUOe4BF1tLD7GAj0lIqWVl+dPb/rExr0Btby5loQm20Q==}
     engines: {node: '>=10'}
     hasBin: true
 
@@ -21047,7 +21062,7 @@ snapshots:
       hermes-profile-transformer: 0.0.6
       node-stream-zip: 1.15.0
       ora: 5.4.1
-      semver: 7.7.2
+      semver: 7.7.3
       strip-ansi: 5.2.0
       wcwidth: 1.0.1
       yaml: 2.8.1
@@ -21118,7 +21133,7 @@ snapshots:
       node-fetch: 2.7.0(encoding@0.1.13)
       open: 6.4.0
       ora: 5.4.1
-      semver: 7.7.2
+      semver: 7.7.3
       shell-quote: 1.8.3
       sudo-prompt: 9.2.1
     transitivePeerDependencies:
@@ -21146,7 +21161,7 @@ snapshots:
       fs-extra: 8.1.0
       graceful-fs: 4.2.11
       prompts: 2.4.2
-      semver: 7.7.2
+      semver: 7.7.3
     transitivePeerDependencies:
       - bufferutil
       - encoding
@@ -21295,6 +21310,8 @@ snapshots:
       '@types/react': 18.3.3
 
   '@remix-run/router@1.16.1': {}
+
+  '@remix-run/router@1.22.0': {}
 
   '@repeaterjs/repeater@3.0.6': {}
 
@@ -28832,6 +28849,11 @@ snapshots:
       '@remix-run/router': 1.16.1
       react: 18.3.1
 
+  react-router@6.29.0(react@18.3.1):
+    dependencies:
+      '@remix-run/router': 1.22.0
+      react: 18.3.1
+
   react-select-event@5.5.1:
     dependencies:
       '@testing-library/dom': 10.4.1
@@ -29286,6 +29308,8 @@ snapshots:
   semver@7.6.3: {}
 
   semver@7.7.2: {}
+
+  semver@7.7.3: {}
 
   send@0.19.0:
     dependencies:
