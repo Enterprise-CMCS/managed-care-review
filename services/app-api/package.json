@@ -32,7 +32,7 @@
         "@aws-sdk/client-secrets-manager": "^3.901.0",
         "@aws-sdk/client-ses": "^3.901.0",
         "@aws-sdk/client-ssm": "^3.901.0",
-        "@aws-sdk/lib-storage": "^3.903.0",
+        "@aws-sdk/lib-storage": "^3.905.0",
         "@aws-sdk/s3-request-presigner": "^3.901.0",
         "@launchdarkly/node-server-sdk": "9.10.1",
         "@mc-review/common-code": "workspace:*",
