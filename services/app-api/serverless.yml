@@ -35,6 +35,7 @@ custom:
   dbURL: ${env:DATABASE_URL}
   ldSDKKey: ${env:LD_SDK_KEY, ssm:/configuration/ld_sdk_key_feds}
   internalAllowedOrigins: ${env:INTERNAL_ALLOWED_ORIGINS, ''}
+  ddApiKey: ${env:DD_API_KEY}
   # because the secret is in JSON in secret manager, we have to pass it into jwtSecret when not running locally
   jwtSecretJSON: ${env:CF_CONFIG_IGNORED_LOCALLY, ssm:/aws/reference/secretsmanager/api_jwt_secret_${sls:stage}}
   jwtSecret: ${env:JWT_SECRET, self:custom.jwtSecretJSON.jwtsigningkey}
@@ -149,6 +150,7 @@ provider:
     VITE_APP_S3_QA_BUCKET: ${self:custom.reactAppS3QABucket}
     VITE_APP_S3_DOCUMENTS_BUCKET: ${self:custom.reactAppS3DocumentUploadsBucket}
     INTERNAL_ALLOWED_ORIGINS: ${self:custom.internalAllowedOrigins, ''}
+    DD_API_KEY: ${self:custom.ddApiKey}
 layers:
   prismaClientMigration:
     path: lambda-layers-prisma-client-migration
