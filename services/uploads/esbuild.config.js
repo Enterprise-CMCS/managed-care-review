@@ -30,7 +30,7 @@ module.exports = () => {
                             process.env.NR_LICENSE_KEY
                         );
                         contents = contents.replace(
-                            '$DD_API_KEY',
+                            '${env:DD_API_KEY}',
                             process.env.DD_API_KEY
                         );
                         fs.writeFileSync(filePath, contents);
