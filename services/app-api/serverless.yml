@@ -74,7 +74,7 @@ provider:
     restApiId: ${self:custom.appApiGatewayId}
     restApiRootResourceId: ${self:custom.appApiGatewayRootResourceId}
   layers:
-    - arn:aws:lambda:us-east-1:901920570463:layer:aws-otel-nodejs-amd64-ver-1-18-1:4
+    - arn:aws:lambda:us-east-1:901920570463:layer:aws-otel-nodejs-amd64-ver-1-30-2:1
   iam:
     role:
       path: ${self:custom.iamPath}
@@ -174,7 +174,7 @@ functions:
       subnetIds: ${self:custom.privateSubnets}
     layers:
       - !Ref PrismaClientEngineLambdaLayer
-      - arn:aws:lambda:us-east-1:901920570463:layer:aws-otel-nodejs-amd64-ver-1-18-1:4
+      - arn:aws:lambda:us-east-1:901920570463:layer:aws-otel-nodejs-amd64-ver-1-30-2:1
 
   health:
     handler: src/handlers/health_check.main
@@ -221,7 +221,7 @@ functions:
       subnetIds: ${self:custom.privateSubnets}
     layers:
       - !Ref PrismaClientEngineLambdaLayer
-      - arn:aws:lambda:us-east-1:901920570463:layer:aws-otel-nodejs-amd64-ver-1-18-1:4
+      - arn:aws:lambda:us-east-1:901920570463:layer:aws-otel-nodejs-amd64-ver-1-30-2:1
 
   migrate:
     handler: src/handlers/postgres_migrate.main
@@ -232,14 +232,14 @@ functions:
       subnetIds: ${self:custom.privateSubnets}
     layers:
       - !Ref PrismaClientMigrationLambdaLayer
-      - arn:aws:lambda:us-east-1:901920570463:layer:aws-otel-nodejs-amd64-ver-1-18-1:4
+      - arn:aws:lambda:us-east-1:901920570463:layer:aws-otel-nodejs-amd64-ver-1-30-2:1
 
   cleanup:
     handler: src/handlers/cleanup.main
     events:
       - schedule: cron(0 14 ? * MON-FRI *)
     layers:
-      - arn:aws:lambda:us-east-1:901920570463:layer:aws-otel-nodejs-amd64-ver-1-18-1:4
+      - arn:aws:lambda:us-east-1:901920570463:layer:aws-otel-nodejs-amd64-ver-1-30-2:1
 
   auditFiles:
     handler: src/handlers/audit_s3.main
@@ -250,7 +250,7 @@ functions:
       subnetIds: ${self:custom.privateSubnets}
     layers:
       - !Ref PrismaClientEngineLambdaLayer
-      - arn:aws:lambda:us-east-1:901920570463:layer:aws-otel-nodejs-amd64-ver-1-18-1:4
+      - arn:aws:lambda:us-east-1:901920570463:layer:aws-otel-nodejs-amd64-ver-1-30-2:1
 
 resources:
   Resources:
