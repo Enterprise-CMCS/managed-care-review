@@ -74,7 +74,7 @@ const stateNames = {
     WV: 'West Virginia',
     WI: 'Wisconsin',
     WY: 'Wyoming',
-    DC: 'Washington, DC',
+    DC: 'District of Columbia',
     PR: 'Puerto Rico',
 }
 
