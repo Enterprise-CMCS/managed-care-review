@@ -9,19 +9,11 @@ exporters:
     headers:
       dd-api-key: $DD_API_KEY
 
-processors:
-  batch:
-    send_batch_max_size: 100
-    send_batch_size: 10
-    timeout: 10s
-
 service:
   pipelines:
     traces:
       receivers: [otlp]
       exporters: [otlphttp/datadog]
-      processors: [batch]
     metrics:
       receivers: [otlp]
       exporters: [otlphttp/datadog]
-      processors: [batch]
