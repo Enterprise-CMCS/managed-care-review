@@ -31,7 +31,7 @@ custom:
   qa_uploads_bucket_arn: ${env:CF_CONFIG_IGNORED_LOCALLY, cf:uploads-${sls:stage}.QAUploadsBucketArn}
   secretsManagerSecret: aurora_postgres_${sls:stage} #pragma: allowlist secret
   reactAppAuthMode: ${env:VITE_APP_AUTH_MODE}
-  apiAppOtelCollectorUrl: ${env:API_APP_OTEL_COLLECTOR_URL, ssm:/configuration/api_app_otel_collector_url}
+  otelCollectorUrl: ${env:OTEL_COLLECTOR_URL}
   dbURL: ${env:DATABASE_URL}
   ldSDKKey: ${env:LD_SDK_KEY, ssm:/configuration/ld_sdk_key_feds}
   internalAllowedOrigins: ${env:INTERNAL_ALLOWED_ORIGINS, ''}
@@ -138,7 +138,7 @@ provider:
     REGION: ${self:provider.region}
     DATABASE_URL: ${self:custom.dbURL}
     VITE_APP_AUTH_MODE: ${self:custom.reactAppAuthMode}
-    API_APP_OTEL_COLLECTOR_URL: ${self:custom.apiAppOtelCollectorUrl}
+    OTEL_COLLECTOR_URL: ${self:custom.otelCollectorUrl}
     SECRETS_MANAGER_SECRET: ${self:custom.secretsManagerSecret}
     EMAILER_MODE: ${self:custom.emailerMode}
     PARAMETER_STORE_MODE: ${self:custom.parameterStoreMode}
@@ -186,14 +186,6 @@ functions:
 
   third_party_api_authorizer:
     handler: src/handlers/third_party_API_authorizer.main
-
-  otel:
-    handler: src/handlers/otel_proxy.main
-    events:
-      - http:
-          path: otel
-          method: post
-          cors: true
 
   graphql:
     handler: src/handlers/apollo_gql.gqlHandler

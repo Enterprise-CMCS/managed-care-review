@@ -28,6 +28,8 @@ on:
         required: true
       dd_api_key:
         required: true
+      otel_collector_url:
+        required: true
       serverless_license_key:
         required: true
       cloudfront_cert_arn:
@@ -281,6 +283,7 @@ jobs:
       - name: deploy uploads
         id: deploy-uploads
         env:
+          OTEL_COLLECTOR_URL: ${{ secrets.otel_collector_url }}
           NR_LICENSE_KEY: ${{ secrets.nr_license_key }}
           DD_API_KEY: ${{ secrets.dd_api_key }}
           SERVERLESS_ACCESS_KEY: ${{ secrets.serverless_license_key }}

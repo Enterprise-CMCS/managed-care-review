@@ -4,10 +4,6 @@ receivers:
       http:
 
 exporters:
-  otlphttp:
-    endpoint: https://gov-otlp.nr-data.net:4318
-    headers:
-      api-key: $NR_LICENSE_KEY
   otlphttp/datadog:
     endpoint: https://otlp-intake.ddog-gov.com:4318
     headers:
@@ -23,9 +19,9 @@ service:
   pipelines:
     traces:
       receivers: [otlp]
-      exporters: [otlphttp, otlphttp/datadog]
+      exporters: [otlphttp/datadog]
       processors: [batch]
     metrics:
       receivers: [otlp]
-      exporters: [otlphttp, otlphttp/datadog]
+      exporters: [otlphttp/datadog]
       processors: [batch]

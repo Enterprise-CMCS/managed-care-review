@@ -18,17 +18,13 @@ module.exports = () => {
                             '.esbuild/.build/collector.yml'
                         );
                     });
-                    // replace the license key
+                    // replace the API key
                     build.onEnd(() => {
                         const filePath = path.join(
                             __dirname,
                             '.esbuild/.build/collector.yml'
                         );
                         let contents = fs.readFileSync(filePath, 'utf8');
-                        contents = contents.replace(
-                            '$NR_LICENSE_KEY',
-                            process.env.NR_LICENSE_KEY
-                        );
                         contents = contents.replace(
                             '$DD_API_KEY',
                             process.env.DD_API_KEY

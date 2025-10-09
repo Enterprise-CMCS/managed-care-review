@@ -179,6 +179,8 @@ jobs:
       aws_account_id: ${{ secrets.DEV_AWS_ACCOUNT_ID }}
       nr_license_key: ${{ secrets.NR_LICENSE_KEY }}
       dd_api_key: ${{ secrets.DD_API_KEY }}
+      dd_otel_url: ${{ secrets.DD_OTEL_URL }}
+      otel_collector_url: ${{ secrets.OTEL_COLLECTOR_URL }}
       slack_webhook_url: ${{ secrets.SLACK_WEBHOOK }}
       serverless_license_key: ${{ secrets.SERVERLESS_V4_LICENSE }}
       cloudfront_cert_arn: ${{ secrets.DEV_CERTIFICATE_ARN}}
@@ -211,6 +213,8 @@ jobs:
       aws_account_id: ${{ secrets.DEV_AWS_ACCOUNT_ID }}
       nr_license_key: ${{ secrets.NR_LICENSE_KEY }}
       dd_api_key: ${{ secrets.DD_API_KEY }}
+      dd_otel_url: ${{ secrets.DD_OTEL_URL }}
+      otel_collector_url: ${{ secrets.OTEL_COLLECTOR_URL }}
       serverless_license_key: ${{ secrets.SERVERLESS_V4_LICENSE }}
       vpc_id: ${{ secrets.DEV_VPC_ID }}
       sg_id: ${{ secrets.DEV_SG_ID }}
@@ -234,6 +238,8 @@ jobs:
       aws_account_id: ${{ secrets.VAL_AWS_ACCOUNT_ID }}
       nr_license_key: ${{ secrets.NR_LICENSE_KEY }}
       dd_api_key: ${{ secrets.DD_API_KEY }}
+      dd_otel_url: ${{ secrets.DD_OTEL_URL }}
+      otel_collector_url: ${{ secrets.OTEL_COLLECTOR_URL }}
       slack_webhook_url: ${{ secrets.SLACK_WEBHOOK }}
       serverless_license_key: ${{ secrets.SERVERLESS_V4_LICENSE }}
       cloudfront_cert_arn: ${{ secrets.VAL_CERTIFICATE_ARN}}
@@ -266,6 +272,8 @@ jobs:
       aws_account_id: ${{ secrets.VAL_AWS_ACCOUNT_ID }}
       nr_license_key: ${{ secrets.NR_LICENSE_KEY }}
       dd_api_key: ${{ secrets.DD_API_KEY }}
+      dd_otel_url: ${{ secrets.DD_OTEL_URL }}
+      otel_collector_url: ${{ secrets.OTEL_COLLECTOR_URL }}
       serverless_license_key: ${{ secrets.SERVERLESS_V4_LICENSE }}
       vpc_id: ${{ secrets.VAL_VPC_ID }}
       sg_id: ${{ secrets.VAL_SG_ID }}
@@ -289,6 +297,8 @@ jobs:
       aws_account_id: ${{ secrets.PROD_AWS_ACCOUNT_ID }}
       nr_license_key: ${{ secrets.NR_LICENSE_KEY }}
       dd_api_key: ${{ secrets.DD_API_KEY }}
+      dd_otel_url: ${{ secrets.DD_OTEL_URL }}
+      otel_collector_url: ${{ secrets.OTEL_COLLECTOR_URL }}
       slack_webhook_url: ${{ secrets.SLACK_WEBHOOK }}
       serverless_license_key: ${{ secrets.SERVERLESS_V4_LICENSE }}
       cloudfront_cert_arn: ${{ secrets.PROD_CERTIFICATE_ARN}}
@@ -321,6 +331,8 @@ jobs:
       aws_account_id: ${{ secrets.PROD_AWS_ACCOUNT_ID }}
       nr_license_key: ${{ secrets.NR_LICENSE_KEY }}
       dd_api_key: ${{ secrets.DD_API_KEY }}
+      dd_otel_url: ${{ secrets.DD_OTEL_URL }}
+      otel_collector_url: ${{ secrets.OTEL_COLLECTOR_URL }}
       serverless_license_key: ${{ secrets.SERVERLESS_V4_LICENSE }}
       vpc_id: ${{ secrets.PROD_VPC_ID }}
       sg_id: ${{ secrets.PROD_SG_ID }}

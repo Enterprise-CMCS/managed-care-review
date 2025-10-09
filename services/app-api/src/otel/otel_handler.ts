@@ -16,9 +16,9 @@ export function createTracer(serviceName: string): Tracer {
         }),
     })
 
-    // log to console and send to New Relic
+    // send to local OTEL collector
     const exporter = new OTLPTraceExporter({
-        url: process.env.API_APP_OTEL_COLLECTOR_URL,
+        url: process.env.OTEL_COLLECTOR_URL,
         headers: {},
     })
 

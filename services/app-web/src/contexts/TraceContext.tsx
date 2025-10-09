@@ -46,8 +46,10 @@ function initializeTracer() {
     })
 
     const collectorOptions = {
-        url: import.meta.env.VITE_APP_OTEL_COLLECTOR_URL,
-        headers: {},
+        url: import.meta.env.VITE_APP_DD_OTEL_URL,
+        headers: {
+            'dd-api-key': import.meta.env.VITE_APP_DD_API_KEY,
+        },
     }
 
     const exporter = new OTLPTraceExporter(collectorOptions)
