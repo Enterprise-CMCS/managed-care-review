@@ -87,8 +87,6 @@ jobs:
         env:
           NODE_OPTIONS: --max_old_space_size=6000
           VITE_APP_AUTH_MODE: ${{ inputs.vite_app_auth_mode }}
-          VITE_APP_DD_OTEL_URL: ${{ secrets.dd_otel_url }}
-          VITE_APP_DD_API_KEY: ${{ secrets.dd_api_key }}
           SERVERLESS_ACCESS_KEY: ${{ secrets.serverless_license_key }}
         run: |
           pushd services/app-web && npx serverless deploy --stage ${{ inputs.stage_name }}
@@ -160,6 +158,7 @@ jobs:
           VITE_APP_AUTH_MODE: ${{ inputs.vite_app_auth_mode }}
           EMAILER_MODE: SES
           OTEL_COLLECTOR_URL: ${{ secrets.otel_collector_url }}
+          DD_OTEL_URL: ${{ secrets.dd_otel_url }}
           NR_LICENSE_KEY: ${{ secrets.nr_license_key }}
           DD_API_KEY: ${{ secrets.dd_api_key }}
           SERVERLESS_ACCESS_KEY: ${{ secrets.serverless_license_key }}

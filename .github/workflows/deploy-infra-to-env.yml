@@ -29,7 +29,7 @@ on:
       dd_api_key:
         required: true
       otel_collector_url:
-        required: true
+        required: false
       serverless_license_key:
         required: true
       cloudfront_cert_arn:

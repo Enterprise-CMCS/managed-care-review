@@ -136,13 +136,11 @@ if (s3Region) {
     )
 }
 
-const ddOtelUrl = import.meta.env.VITE_APP_DD_OTEL_URL
-const ddApiKey = import.meta.env.VITE_APP_DD_API_KEY
-if (ddOtelUrl === undefined) {
-    throw new Error('To configure OTEL, you must set VITE_APP_DD_OTEL_URL')
-}
-if (ddApiKey === undefined) {
-    throw new Error('To configure OTEL, you must set VITE_APP_DD_API_KEY')
+const otelCollectorUrl = import.meta.env.VITE_APP_OTEL_COLLECTOR_URL
+if (otelCollectorUrl === undefined) {
+    throw new Error(
+        'To configure OTEL, you must set VITE_APP_OTEL_COLLECTOR_URL'
+    )
 }
 
 const ldClientId = import.meta.env.VITE_APP_LD_CLIENT_ID

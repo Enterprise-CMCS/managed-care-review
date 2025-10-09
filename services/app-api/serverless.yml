@@ -36,6 +36,7 @@ custom:
   ldSDKKey: ${env:LD_SDK_KEY, ssm:/configuration/ld_sdk_key_feds}
   internalAllowedOrigins: ${env:INTERNAL_ALLOWED_ORIGINS, ''}
   ddApiKey: ${env:DD_API_KEY}
+  ddOtelUrl: ${env:DD_OTEL_URL}
   # because the secret is in JSON in secret manager, we have to pass it into jwtSecret when not running locally
   jwtSecretJSON: ${env:CF_CONFIG_IGNORED_LOCALLY, ssm:/aws/reference/secretsmanager/api_jwt_secret_${sls:stage}}
   jwtSecret: ${env:JWT_SECRET, self:custom.jwtSecretJSON.jwtsigningkey}
@@ -187,6 +188,16 @@ functions:
   third_party_api_authorizer:
     handler: src/handlers/third_party_API_authorizer.main
 
+  otel:
+    handler: src/handlers/otel_proxy.main
+    environment:
+      DD_OTEL_URL: ${self:custom.ddOtelUrl}
+    events:
+      - http:
+          path: otel
+          method: post
+          cors: true
+
   graphql:
     handler: src/handlers/apollo_gql.gqlHandler
     events:
@@ -259,12 +270,14 @@ resources:
       DependsOn:
         # API Gateway methods
         - ApiGatewayMethodHealthcheckGet
+        - ApiGatewayMethodOtelPost
         - ApiGatewayMethodGraphqlPost
         - ApiGatewayMethodGraphqlGet
         - ApiGatewayMethodV1GraphqlExternalPost
         - ApiGatewayMethodV1GraphqlExternalGet
         # API Gateway resources (paths and endpoints)
         - ApiGatewayResourceHealthcheck
+        - ApiGatewayResourceOtel
         - ApiGatewayResourceGraphql
         - ApiGatewayResourceV1
         - ApiGatewayResourceV1Graphql
@@ -273,6 +286,7 @@ resources:
         - ThirdUnderscorepartyUnderscoreapiUnderscoreauthorizerApiGatewayAuthorizer
         # CORS OPTIONS methods
         - ApiGatewayMethodHealthcheckOptions
+        - ApiGatewayMethodOtelOptions
         - ApiGatewayMethodGraphqlOptions
         - ApiGatewayMethodV1GraphqlExternalOptions
 

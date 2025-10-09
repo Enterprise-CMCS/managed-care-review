@@ -3,10 +3,10 @@ name: Deploy
 on:
   push:
     branches:
-      - '*'
-      - 'dependabot/**'
-      - '!skipci*'
-      - '!main'
+      - "*"
+      - "dependabot/**"
+      - "!skipci*"
+      - "!main"
 
 permissions:
   id-token: write
@@ -79,7 +79,7 @@ jobs:
         name: Create GitHub deployment
         id: ghdeployment
         with:
-          token: '${{ github.token }}'
+          token: "${{ github.token }}"
           environment: review-apps
           transient-environment: true
           description: stack ${{ steps.branch-name.outputs.stage-name-for-branch}}
@@ -268,7 +268,7 @@ jobs:
 
       - uses: actions/setup-node@v5
         with:
-          node-version-file: '.nvmrc'
+          node-version-file: ".nvmrc"
 
       - name: Prepare ClamAV layer
         working-directory: services/uploads/src/avLayer
@@ -354,8 +354,8 @@ jobs:
     env:
       SERVERLESS_ACCESS_KEY: ${{ secrets.SERVERLESS_V4_LICENSE }}
       CLOUDFRONT_CERT_ARN: ${{ secrets.DEV_CERTIFICATE_ARN }}
-      CLOUDFRONT_SB_DOMAIN_NAME: ''
-      CLOUDFRONT_DOMAIN_NAME: ''
+      CLOUDFRONT_SB_DOMAIN_NAME: ""
+      CLOUDFRONT_DOMAIN_NAME: ""
       VPC_ID: ${{ secrets.DEV_VPC_ID }}
       SG_ID: ${{ secrets.DEV_SG_ID }}
       SUBNET_PRIVATE_A_ID: ${{ secrets.DEV_SUBNET_PRIVATE_A_ID }}
@@ -490,17 +490,17 @@ jobs:
         if: failure() && needs.begin-deployment.result == 'success'
         uses: chrnorm/deployment-status@v2
         with:
-          token: '${{ github.token }}'
-          state: 'failure'
+          token: "${{ github.token }}"
+          state: "failure"
           deployment_id: ${{ needs.begin-deployment.outputs.deploy-id }}
 
       - name: Update deployment status (success)
         if: needs.deploy-app.result == 'success'
         uses: chrnorm/deployment-status@v2
         with:
-          token: '${{ github.token }}'
+          token: "${{ github.token }}"
           environment-url: ${{ needs.finishing-prep.outputs.application-endpoint }}
-          state: 'success'
+          state: "success"
           deployment-id: ${{ needs.begin-deployment.outputs.deploy-id }}
 
       # GitHub creates a deployment each time you reference an environment, and you can't opt out: https://github.com/actions/runner/issues/2120
@@ -536,7 +536,7 @@ jobs:
         uses: ./.github/actions/setup_env
 
       - name: Get AWS credentials
-        id: 'creds'
+        id: "creds"
         uses: ./.github/actions/get_aws_credentials
         with:
           region: ${{ vars.AWS_DEFAULT_REGION }}
@@ -569,7 +569,7 @@ jobs:
           record: true
           parallel: true
           browser: chrome
-          group: 'Chrome'
+          group: "Chrome"
           ci-build-id: ${{ github.run_id }}-${{ github.run_attempt }}
           # Point to the cypress config file from root
           config-file: services/cypress/cypress.config.ts
