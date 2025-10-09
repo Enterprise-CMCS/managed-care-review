@@ -259,14 +259,12 @@ resources:
       DependsOn:
         # API Gateway methods
         - ApiGatewayMethodHealthcheckGet
-        - ApiGatewayMethodOtelPost
         - ApiGatewayMethodGraphqlPost
         - ApiGatewayMethodGraphqlGet
         - ApiGatewayMethodV1GraphqlExternalPost
         - ApiGatewayMethodV1GraphqlExternalGet
         # API Gateway resources (paths and endpoints)
         - ApiGatewayResourceHealthcheck
-        - ApiGatewayResourceOtel
         - ApiGatewayResourceGraphql
         - ApiGatewayResourceV1
         - ApiGatewayResourceV1Graphql
@@ -275,7 +273,6 @@ resources:
         - ThirdUnderscorepartyUnderscoreapiUnderscoreauthorizerApiGatewayAuthorizer
         # CORS OPTIONS methods
         - ApiGatewayMethodHealthcheckOptions
-        - ApiGatewayMethodOtelOptions
         - ApiGatewayMethodGraphqlOptions
         - ApiGatewayMethodV1GraphqlExternalOptions
 
