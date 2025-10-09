@@ -190,8 +190,6 @@ functions:
 
   otel:
     handler: src/handlers/otel_proxy.main
-    environment:
-      DD_OTEL_URL: ${self:custom.ddOtelUrl}
     events:
       - http:
           path: otel
