@@ -20,7 +20,7 @@ import {
 } from 'aws-cdk-lib/aws-iam'
 import type { IKey } from 'aws-cdk-lib/aws-kms'
 import { Duration, RemovalPolicy } from 'aws-cdk-lib'
-import { ResourceNames } from '@config/index'
+import { ResourceNames } from '../../config/shared'
 
 export interface SecureS3BucketProps {
     bucketName: string

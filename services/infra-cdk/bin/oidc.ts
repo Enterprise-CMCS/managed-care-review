@@ -14,7 +14,8 @@
 import 'source-map-support/register'
 import { App, DefaultStackSynthesizer } from 'aws-cdk-lib'
 import { GitHubOidcServiceRoleStack } from '../lib/stacks/github-oidc'
-import { getCdkEnvironment, getEnvironment, ResourceNames } from '../lib/config'
+import { getCdkEnvironment, getEnvironment } from '../lib/config/environments'
+import { ResourceNames } from '../lib/config/shared'
 
 // Simplified - using default synthesizer with mcreview qualifier
 const app = new App({

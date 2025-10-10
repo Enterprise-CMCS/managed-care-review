@@ -1,18 +1,13 @@
-// Environment configuration (the main export)
-export * from './environments'
-
-// Shared constants and utilities
-export * from './shared'
-
-// Legacy compatibility exports (temporary during migration)
 import type { EnvironmentConfig } from './environments'
+import { getEnvironment } from './environments'
+
 export type StageConfig = EnvironmentConfig
 export const StageConfiguration = {
-    get: (stage: string) => require('./environments').getEnvironment(stage),
+    get: (stage: string) => getEnvironment(stage),
 }
 export const loadEnvironment = (): void => {} // No-op
 export const validateEnvironment = (stage: string): void => {
-    require('./environments').getEnvironment(stage)
+    getEnvironment(stage)
 }
 
 /**

@@ -22,7 +22,7 @@ import {
 import { CfnOutput, Duration, Fn } from 'aws-cdk-lib'
 import { StringParameter } from 'aws-cdk-lib/aws-ssm'
 import { Secret } from 'aws-cdk-lib/aws-secretsmanager'
-import { ResourceNames } from '../config'
+import { ResourceNames } from '../config/shared'
 import {
     Architecture,
     Runtime,

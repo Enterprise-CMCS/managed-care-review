@@ -9,6 +9,10 @@ import {
 } from 'aws-cdk-lib/aws-iam'
 import { BaseStack, type BaseStackProps } from '../constructs/base'
 
+// CMS IAM permissions boundary requirement
+const PERMISSION_BOUNDARY_ARN = (accountId: string) =>
+    `arn:aws:iam::${accountId}:policy/cms-cloud-admin/ct-ado-poweruser-permissions-boundary-policy`
+
 export interface GitHubOidcServiceRoleStackProps extends BaseStackProps {}
 
 /**
@@ -59,7 +63,7 @@ export class GitHubOidcServiceRoleStack extends BaseStack {
             permissionsBoundary: ManagedPolicy.fromManagedPolicyArn(
                 this,
                 'PermissionsBoundary',
-                `arn:aws:iam::${this.account}:policy/cms-cloud-admin/ct-ado-poweruser-permissions-boundary-policy`
+                PERMISSION_BOUNDARY_ARN(this.account)
             ),
         })
 

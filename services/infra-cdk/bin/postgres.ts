@@ -1,7 +1,8 @@
 import { AppConfigLoader } from '../lib/config/app'
 import { Network } from '../lib/stacks/network'
 import { Postgres } from '../lib/stacks/postgres'
-import { getEnvironment, getCdkEnvironment, ResourceNames } from '../lib/config'
+import { getEnvironment, getCdkEnvironment } from '../lib/config/environments'
+import { ResourceNames } from '../lib/config/shared'
 import { App, DefaultStackSynthesizer, Tags } from 'aws-cdk-lib'
 
 // Simplified version - using default synthesizer with mcreview qualifier

@@ -2,7 +2,8 @@
 import 'source-map-support/register'
 import { App, Tags, DefaultStackSynthesizer } from 'aws-cdk-lib'
 import { AppConfigLoader } from '../lib/config/app'
-import { getEnvironment, getCdkEnvironment, ResourceNames } from '../lib/config'
+import { getEnvironment, getCdkEnvironment } from '../lib/config/environments'
+import { ResourceNames } from '../lib/config/shared'
 import { AppApiStack } from '../lib/stacks/app-api'
 
 // Simplified version - using default synthesizer with mcreview qualifier

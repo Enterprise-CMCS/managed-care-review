@@ -1,10 +1,9 @@
 import { Stack, type StackProps, Tags } from 'aws-cdk-lib'
 import type { Construct } from 'constructs'
-import {
-    PROJECT_NAME,
-    ResourceNames,
-    type StageConfig,
-} from '../../config/index'
+import type { EnvironmentConfig } from '../../config/environments'
+import { ResourceNames } from '../../config/shared'
+
+const PROJECT_NAME = 'Managed Care Review'
 
 // Base stack specific constants (moved from shared config)
 const MANDATORY_TAGS = {
@@ -17,7 +16,7 @@ const MANDATORY_TAGS = {
 
 export interface BaseStackProps extends StackProps {
     stage: string
-    stageConfig: StageConfig
+    stageConfig: EnvironmentConfig
     serviceName: string
     description?: string
 }
@@ -28,7 +27,7 @@ export interface BaseStackProps extends StackProps {
  */
 export abstract class BaseStack extends Stack {
     protected readonly stage: string
-    protected readonly stageConfig: StageConfig
+    protected readonly stageConfig: EnvironmentConfig
     protected readonly serviceName: string
 
     constructor(scope: Construct, id: string, props: BaseStackProps) {

@@ -22,7 +22,7 @@ import { S3BucketOrigin } from 'aws-cdk-lib/aws-cloudfront-origins'
 import { CfnWebACL } from 'aws-cdk-lib/aws-wafv2'
 import { PolicyStatement, Effect } from 'aws-cdk-lib/aws-iam'
 import { CfnOutput } from 'aws-cdk-lib'
-import { ResourceNames } from '../config'
+import { ResourceNames } from '../config/shared'
 
 /**
  * Frontend infrastructure stack - S3 + CloudFront + WAF for both main app and storybook

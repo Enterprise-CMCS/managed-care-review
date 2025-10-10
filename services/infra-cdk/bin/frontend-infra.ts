@@ -1,6 +1,7 @@
 #!/usr/bin/env node
 import { AppConfigLoader } from '../lib/config/app'
-import { getEnvironment, getCdkEnvironment, ResourceNames } from '../lib/config'
+import { getEnvironment, getCdkEnvironment } from '../lib/config/environments'
+import { ResourceNames } from '../lib/config/shared'
 import { FrontendInfraStack } from '../lib/stacks/frontend-infra'
 import { App, DefaultStackSynthesizer, Tags } from 'aws-cdk-lib'
 

@@ -9,7 +9,7 @@ import {
 import { CfnOutput, RemovalPolicy } from 'aws-cdk-lib'
 import { join } from 'path'
 
-// Centralized OTEL layer ARN - update version here for all functions
+// AWS OTEL Lambda Layer ARN - update version here when needed
 export const AWS_OTEL_LAYER_ARN =
     'arn:aws:lambda:us-east-1:901920570463:layer:aws-otel-nodejs-amd64-ver-1-18-1:4'
 

@@ -1,6 +1,7 @@
 import { AppConfigLoader } from '../lib/config/app'
 import { Uploads } from '../lib/stacks/uploads'
-import { getEnvironment, getCdkEnvironment, ResourceNames } from '../lib/config'
+import { getEnvironment, getCdkEnvironment } from '../lib/config/environments'
+import { ResourceNames } from '../lib/config/shared'
 import { App, DefaultStackSynthesizer, Tags } from 'aws-cdk-lib'
 
 // Simplified version - using default synthesizer with mcreview qualifier

@@ -11,11 +11,8 @@ import type { IVpc, SubnetSelection, ISecurityGroup } from 'aws-cdk-lib/aws-ec2'
 import type { IGrantable, Grant } from 'aws-cdk-lib/aws-iam'
 import { Secret, type ISecret } from 'aws-cdk-lib/aws-secretsmanager'
 import { Duration, RemovalPolicy, Stack } from 'aws-cdk-lib'
-import {
-    type DatabaseConfig,
-    ResourceNames,
-    CDK_DEPLOYMENT_SUFFIX,
-} from '../../config/index'
+import type { DatabaseConfig } from '../../config/environments'
+import { ResourceNames } from '../../config/shared'
 
 export interface AuroraServerlessV2Props {
     databaseName: string
@@ -88,11 +85,13 @@ export class AuroraServerlessV2 extends Construct {
                 version: AuroraPostgresEngineVersion.VER_16_9,
             }),
             credentials: Credentials.fromSecret(this.secret),
-            clusterIdentifier:
-                ResourceNames.resourceName('database', 'cluster', props.stage) +
-                CDK_DEPLOYMENT_SUFFIX,
-            // RDS database names must be alphanumeric only (no underscores)
-            defaultDatabaseName: `aurorapostgres${props.stage}${Stack.of(this).account}cdk`,
+            clusterIdentifier: ResourceNames.resourceName(
+                'postgres',
+                'cluster',
+                props.stage
+            ),
+            // Database name matches serverless pattern: aurora_postgres_{stage}_{account}_cdk
+            defaultDatabaseName: `aurora_postgres_${props.stage}_${Stack.of(this).account}_cdk`,
             vpc: props.vpc,
             vpcSubnets: props.vpcSubnets,
             securityGroups: [

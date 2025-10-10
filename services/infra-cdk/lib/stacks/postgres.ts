@@ -70,7 +70,8 @@ export class Postgres extends BaseStack {
 
         if (!isReview) {
             // Create dedicated Aurora cluster for dev/val/prod
-            const databaseName = `mcr_cdk_${this.stage}`
+            // PostgreSQL logical database name - matches naming pattern
+            const databaseName = `postgres_${this.stage}_cdk`
 
             const auroraCluster = new AuroraServerlessV2(this, 'Aurora', {
                 databaseName,
