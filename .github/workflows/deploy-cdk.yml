@@ -1,12 +1,11 @@
 name: Deploy Review Environment (CDK)
 
 on:
-  # Temporarily disabled while we bootstrap dev environment
-  # push:
-  #   branches:
-  #     - "*"
-  #     - "dependabot/**"
-  #     - "!main"
+  push:
+    branches:
+      - "*"
+      - "dependabot/**"
+      - "!main"
   workflow_dispatch:
 
 # Prevent concurrent deployments to the same branch
