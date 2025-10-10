@@ -546,7 +546,7 @@ jobs:
         run: |
           echo "=== Running database migrations ==="
           cd services/app-api
-          ./scripts/invoke-migrate-lambda.sh mcr-cdk-dev-app-api-migrate
+          ./scripts/invoke-migrate-lambda.sh app-api-dev-cdk-migrate
 
   extract-endpoints:
     needs: [begin-deployment, deploy-cdk-app, deploy-frontend-app]
