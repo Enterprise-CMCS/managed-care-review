@@ -10,10 +10,9 @@ import type { ContractRevisionTable, RateRevisionTable } from '@prisma/client'
 
 const main: Handler = async (): Promise<APIGatewayProxyResultV2> => {
     // setup otel tracing
-    const otelCollectorURL = process.env.API_APP_OTEL_COLLECTOR_URL
+    const otelCollectorURL = process.env.OTEL_COLLECTOR_URL
     if (!otelCollectorURL || otelCollectorURL === '') {
-        const errMsg =
-            'Configuration Error: API_APP_OTEL_COLLECTOR_URL must be set'
+        const errMsg = 'Configuration Error: OTEL_COLLECTOR_URL must be set'
         return fmtAuditError(errMsg)
     }
     const serviceName = 'audit-s3'

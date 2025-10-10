@@ -209,7 +209,7 @@ async function initializeGQLHandler(): Promise<Handler> {
     const stageName = process.env.stage
     const applicationEndpoint = process.env.APPLICATION_ENDPOINT
     const emailerMode = process.env.EMAILER_MODE
-    const otelCollectorUrl = process.env.API_APP_OTEL_COLLECTOR_URL
+    const otelCollectorUrl = process.env.OTEL_COLLECTOR_URL
     const parameterStoreMode = process.env.PARAMETER_STORE_MODE
     const ldSDKKey = process.env.LD_SDK_KEY
     const jwtSecret = process.env.JWT_SECRET
@@ -235,7 +235,7 @@ async function initializeGQLHandler(): Promise<Handler> {
 
     if (otelCollectorUrl === undefined || otelCollectorUrl === '') {
         throw new Error(
-            'Configuration Error: API_APP_OTEL_COLLECTOR_URL is required to run app-api'
+            'Configuration Error: OTEL_COLLECTOR_URL is required to run app-api'
         )
     }
 
@@ -404,12 +404,12 @@ const handlerPromise = initializeGQLHandler()
 const gqlHandler: Handler = async (event, context, completion) => {
     // Once initialized, future awaits will return immediately
     const initializedHandler = await handlerPromise
-    const otelCollectorUrl = process.env.API_APP_OTEL_COLLECTOR_URL
+    const otelCollectorUrl = process.env.OTEL_COLLECTOR_URL
     const serviceName = 'gql-handler'
 
     if (otelCollectorUrl === undefined || otelCollectorUrl === '') {
         throw new Error(
-            'Configuration Error: API_APP_OTEL_COLLECTOR_URL is required to run app-api'
+            'Configuration Error: OTEL_COLLECTOR_URL is required to run app-api'
         )
     }
 

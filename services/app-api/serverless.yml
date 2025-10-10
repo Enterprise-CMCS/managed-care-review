@@ -31,10 +31,12 @@ custom:
   qa_uploads_bucket_arn: ${env:CF_CONFIG_IGNORED_LOCALLY, cf:uploads-${sls:stage}.QAUploadsBucketArn}
   secretsManagerSecret: aurora_postgres_${sls:stage} #pragma: allowlist secret
   reactAppAuthMode: ${env:VITE_APP_AUTH_MODE}
-  apiAppOtelCollectorUrl: ${env:API_APP_OTEL_COLLECTOR_URL, ssm:/configuration/api_app_otel_collector_url}
+  otelCollectorUrl: ${env:OTEL_COLLECTOR_URL}
   dbURL: ${env:DATABASE_URL}
   ldSDKKey: ${env:LD_SDK_KEY, ssm:/configuration/ld_sdk_key_feds}
   internalAllowedOrigins: ${env:INTERNAL_ALLOWED_ORIGINS, ''}
+  ddApiKey: ${env:DD_API_KEY}
+  ddOtelUrl: ${env:DD_OTEL_URL}
   # because the secret is in JSON in secret manager, we have to pass it into jwtSecret when not running locally
   jwtSecretJSON: ${env:CF_CONFIG_IGNORED_LOCALLY, ssm:/aws/reference/secretsmanager/api_jwt_secret_${sls:stage}}
   jwtSecret: ${env:JWT_SECRET, self:custom.jwtSecretJSON.jwtsigningkey}
@@ -73,7 +75,7 @@ provider:
     restApiId: ${self:custom.appApiGatewayId}
     restApiRootResourceId: ${self:custom.appApiGatewayRootResourceId}
   layers:
-    - arn:aws:lambda:us-east-1:901920570463:layer:aws-otel-nodejs-amd64-ver-1-18-1:4
+    - arn:aws:lambda:us-east-1:901920570463:layer:aws-otel-nodejs-amd64-ver-1-30-2:1
   iam:
     role:
       path: ${self:custom.iamPath}
@@ -137,7 +139,7 @@ provider:
     REGION: ${self:provider.region}
     DATABASE_URL: ${self:custom.dbURL}
     VITE_APP_AUTH_MODE: ${self:custom.reactAppAuthMode}
-    API_APP_OTEL_COLLECTOR_URL: ${self:custom.apiAppOtelCollectorUrl}
+    OTEL_COLLECTOR_URL: ${self:custom.otelCollectorUrl}
     SECRETS_MANAGER_SECRET: ${self:custom.secretsManagerSecret}
     EMAILER_MODE: ${self:custom.emailerMode}
     PARAMETER_STORE_MODE: ${self:custom.parameterStoreMode}
@@ -149,6 +151,7 @@ provider:
     VITE_APP_S3_QA_BUCKET: ${self:custom.reactAppS3QABucket}
     VITE_APP_S3_DOCUMENTS_BUCKET: ${self:custom.reactAppS3DocumentUploadsBucket}
     INTERNAL_ALLOWED_ORIGINS: ${self:custom.internalAllowedOrigins, ''}
+    DD_API_KEY: ${self:custom.ddApiKey}
 layers:
   prismaClientMigration:
     path: lambda-layers-prisma-client-migration
@@ -172,7 +175,7 @@ functions:
       subnetIds: ${self:custom.privateSubnets}
     layers:
       - !Ref PrismaClientEngineLambdaLayer
-      - arn:aws:lambda:us-east-1:901920570463:layer:aws-otel-nodejs-amd64-ver-1-18-1:4
+      - arn:aws:lambda:us-east-1:901920570463:layer:aws-otel-nodejs-amd64-ver-1-30-2:1
 
   health:
     handler: src/handlers/health_check.main
@@ -227,7 +230,7 @@ functions:
       subnetIds: ${self:custom.privateSubnets}
     layers:
       - !Ref PrismaClientEngineLambdaLayer
-      - arn:aws:lambda:us-east-1:901920570463:layer:aws-otel-nodejs-amd64-ver-1-18-1:4
+      - arn:aws:lambda:us-east-1:901920570463:layer:aws-otel-nodejs-amd64-ver-1-30-2:1
 
   migrate:
     handler: src/handlers/postgres_migrate.main
@@ -238,14 +241,14 @@ functions:
       subnetIds: ${self:custom.privateSubnets}
     layers:
       - !Ref PrismaClientMigrationLambdaLayer
-      - arn:aws:lambda:us-east-1:901920570463:layer:aws-otel-nodejs-amd64-ver-1-18-1:4
+      - arn:aws:lambda:us-east-1:901920570463:layer:aws-otel-nodejs-amd64-ver-1-30-2:1
 
   cleanup:
     handler: src/handlers/cleanup.main
     events:
       - schedule: cron(0 14 ? * MON-FRI *)
     layers:
-      - arn:aws:lambda:us-east-1:901920570463:layer:aws-otel-nodejs-amd64-ver-1-18-1:4
+      - arn:aws:lambda:us-east-1:901920570463:layer:aws-otel-nodejs-amd64-ver-1-30-2:1
 
   auditFiles:
     handler: src/handlers/audit_s3.main
@@ -256,7 +259,7 @@ functions:
       subnetIds: ${self:custom.privateSubnets}
     layers:
       - !Ref PrismaClientEngineLambdaLayer
-      - arn:aws:lambda:us-east-1:901920570463:layer:aws-otel-nodejs-amd64-ver-1-18-1:4
+      - arn:aws:lambda:us-east-1:901920570463:layer:aws-otel-nodejs-amd64-ver-1-30-2:1
 
 resources:
   Resources:
