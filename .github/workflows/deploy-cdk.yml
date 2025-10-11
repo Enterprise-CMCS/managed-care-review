@@ -641,7 +641,7 @@ jobs:
         run: |
           echo "=== Running database migrations ==="
           cd services/app-api
-          ./scripts/invoke-migrate-lambda.sh mcr-cdk-${STAGE_NAME}-app-api-migrate
+          ./scripts/invoke-migrate-lambda.sh app-api-${STAGE_NAME}-cdk-migrate
 
   extract-endpoints:
     needs: [begin-deployment, deploy-cdk-app, deploy-frontend-app]
@@ -712,22 +712,16 @@ jobs:
           echo "Stage name: ${STAGE_NAME}"
           echo "Looking for: cognito-${STAGE_NAME}-cdk-UserPoolId"
 
-          # Test the exact query that should work based on your AWS CLI output
-          echo "Testing exact export name: cognito-mtcdkoidc-cdk-UserPoolId"
-          test_value=$(aws cloudformation list-exports --query "Exports[?Name=='cognito-mtcdkoidc-cdk-UserPoolId'].Value" --output text)
-          echo "Direct test result: $test_value"
-
-          # Now try with the stage variable
           value=$(aws cloudformation list-exports --query "Exports[?Name=='cognito-${STAGE_NAME}-cdk-UserPoolId'].Value" --output text)
-          echo "Variable test result: $value"
 
           # If still None, set to empty string to avoid GitHub Actions format errors
           if [ "$value" = "None" ] || [ -z "$value" ]; then
-            echo "Setting empty value to avoid GitHub Actions format error"
+            echo "Warning: Could not find Cognito User Pool ID export"
             value=""
+          else
+            echo "Cognito User Pool ID: $value"
           fi
 
-          echo "Final value: '$value'"
           echo "value=$value" >> "$GITHUB_OUTPUT"
 
       - name: get cognito region
