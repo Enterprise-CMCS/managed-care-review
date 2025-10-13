@@ -34,7 +34,7 @@
         "@aws-sdk/client-ssm": "^3.907.0",
         "@aws-sdk/lib-storage": "^3.907.0",
         "@aws-sdk/s3-request-presigner": "^3.907.0",
-        "@launchdarkly/node-server-sdk": "9.10.1",
+        "@launchdarkly/node-server-sdk": "9.10.2",
         "@mc-review/common-code": "workspace:*",
         "@mc-review/constants": "workspace:*",
         "@mc-review/dates": "workspace:*",
