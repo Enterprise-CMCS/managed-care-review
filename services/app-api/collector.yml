@@ -1,17 +1,16 @@
 receivers:
   otlp:
     protocols:
-      grpc:
       http:
 
 exporters:
-  otlp:
-    endpoint: https://gov-otlp.nr-data.net:4317
+  otlphttp/datadog:
+    endpoint: https://otlp-intake.ddog-gov.com:4318
     headers:
-      api-key: $NR_LICENSE_KEY
+      dd-api-key: $DD_API_KEY
 
 service:
   pipelines:
     traces:
       receivers: [otlp]
-      exporters: [otlp]
+      exporters: [otlphttp/datadog]
