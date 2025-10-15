@@ -59,6 +59,7 @@ function ldClientMock(featureFlags: FeatureFlagSettings): LDClient {
             ) => featureFlags[flag] ?? defaultValue
         ),
         allFlags: vi.fn(() => featureFlags),
+        addHook: vi.fn(),
     }
 }
 
