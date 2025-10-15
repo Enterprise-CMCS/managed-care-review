@@ -18,22 +18,22 @@
         ]
     },
     "dependencies": {
-        "@aws-sdk/client-cloudformation": "^3.902.0",
-        "@aws-sdk/client-cognito-identity-provider": "^3.901.0",
         "@aws-sdk/client-lambda": "^3.901.0",
-        "@aws-sdk/client-s3": "^3.901.0",
         "@aws-sdk/client-secrets-manager": "^3.901.0",
-        "@types/papaparse": "^5.3.15",
-        "@types/uuid": "^9.0.0",
+        "@aws-sdk/client-cloudformation": "^3.907.0",
+        "@aws-sdk/client-cognito-identity-provider": "^3.907.0",
+        "@aws-sdk/client-s3": "^3.907.0",
+        "@types/papaparse": "^5.3.16",
+        "@types/uuid": "^11.0.0",
         "octokit": "^5.0.3",
-        "papaparse": "^5.4.1"
+        "papaparse": "^5.5.3"
     },
     "devDependencies": {
         "@actions/core": "^1.11.1",
         "@octokit/action": "^8.0.2",
         "@octokit/openapi-types": "^25.1.0",
         "csv-parser": "^3.2.0",
-        "lint-staged": "^15.2.7",
+        "lint-staged": "^16.2.3",
         "typescript": "5.9.2",
         "uuid": "^13.0.0"
     }

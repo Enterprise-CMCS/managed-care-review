@@ -26,9 +26,9 @@
         "typescript": "5.9.2"
     },
     "dependencies": {
-        "@aws-sdk/client-cloudformation": "^3.902.0",
-        "@aws-sdk/client-secrets-manager": "^3.901.0",
-        "@aws-sdk/client-s3": "^3.901.0",
+        "@aws-sdk/client-cloudformation": "^3.907.0",
+        "@aws-sdk/client-secrets-manager": "^3.907.0",
+        "@aws-sdk/client-s3": "^3.907.0",
         "pg": "^8.16.3",
         "@prisma/client": "^5.21.1",
         "prisma": "5.22.0"
