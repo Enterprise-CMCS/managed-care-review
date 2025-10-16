@@ -8,12 +8,27 @@ exporters:
     endpoint: https://gov-otlp.nr-data.net:4318
     headers:
       api-key: $NR_LICENSE_KEY
+  datadog/exporter:
+    api:
+      site: ddog-gov.com
+      key: ${env:DD_API_KEY}
+  logging:
+    loglevel: debug
+    sampling_initial: 1
+    sampling_thereafter: 1
+
+processors:
+  batch:
+    send_batch_max_size: 100
+    send_batch_size: 10
+    timeout: 10s
 
 service:
   pipelines:
     traces:
       receivers: [otlp]
-      exporters: [otlphttp]
+      exporters: [otlphttp, datadog/exporter]
+      processors: [batch]
     metrics:
       receivers: [otlp]
-      exporters: [otlphttp]
+      exporters: [otlphttp, datadog/exporter]
