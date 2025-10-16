@@ -22,6 +22,7 @@ import {
     getAuthContextInfo,
 } from '../../authorization/oauthAuthorization'
 import { getLastUpdatedForDisplay } from '../helpers'
+import type { ConsolidatedContractStatus } from '../../gen/gqlClient'
 
 const parseContracts = (
     contractsWithHistory: ContractOrErrorArrayType,
@@ -52,9 +53,27 @@ const parseContracts = (
     return parsedContracts
 }
 
-const formatContracts = (results: ContractType[]) => {
-    const contracts: ContractType[] = results
+const formatContracts = (
+    results: ContractType[],
+    updatedWithin?: number | null,
+    statusesToInclude?: ConsolidatedContractStatus[] | null
+) => {
+    let contracts: ContractType[] = results
+    if (statusesToInclude) {
+        contracts = contracts.filter((contract: ContractType) => {
+            return statusesToInclude?.includes(contract.consolidatedStatus)
+        })
+    }
+    if (updatedWithin) {
+        const now = new Date()
+        const cutoff = new Date(now.getTime() - updatedWithin! * 1000)
 
+        contracts = contracts.filter((contract: ContractType) => {
+            const lastUpdated = getLastUpdatedForDisplay(contract)
+            if (!lastUpdated) return false
+            return lastUpdated.getTime() > cutoff.getTime()
+        })
+    }
     const edges = contracts.map((contract) => {
         return {
             node: {
@@ -145,33 +164,17 @@ export function indexContractsResolver(
             logSuccess('indexContracts')
             setSuccessAttributesOnActiveSpan(span)
             let contracts: any = contractsWithHistory
-            if (input?.statusesToInclude) {
-                contracts = contracts.filter((contractOrError: any) => {
-                    return input.statusesToInclude?.includes(
-                        contractOrError.contract.consolidatedStatus
-                    )
-                })
-            }
-            if (input?.updatedWithin) {
-                const now = new Date()
-                const cutoff = new Date(
-                    now.getTime() - input.updatedWithin! * 1000
-                )
 
-                contracts = contracts.filter((contractOrError: any) => {
-                    if (!('id' in contractOrError.contract)) {
-                        return false
-                    }
-                    const lastUpdated = getLastUpdatedForDisplay(
-                        contractOrError.contract
-                    )
-                    if (!lastUpdated) return false
-                    return lastUpdated.getTime() > cutoff.getTime()
-                })
-            }
             const parsedContracts = parseContracts(contracts, span)
-
-            return formatContracts(parsedContracts)
+            const cleanedStatuses =
+                input?.statusesToInclude?.filter(
+                    (s): s is ConsolidatedContractStatus => s != null
+                ) ?? null
+            return formatContracts(
+                parsedContracts,
+                input?.updatedWithin,
+                cleanedStatuses
+            )
         } else {
             const authInfo = getAuthContextInfo(context)
             const errMsg = authInfo.isOAuthClient

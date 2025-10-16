@@ -1,7 +1,7 @@
-import type { Contract } from '../gen/gqlServer'
+import type { ContractType } from '../domain-models'
 
 export function getLastUpdatedForDisplay(
-    contract: Partial<Contract>
+    contract: Partial<ContractType>
 ): Date | undefined {
     const contractUpdated = contract.updatedAt
     const draftUpdated = contract.draftRevision?.updatedAt
@@ -25,7 +25,11 @@ export function getLastUpdatedForDisplay(
         contract.reviewStatusActions.length > 0
     ) {
         const latestAction = contract.reviewStatusActions[0].updatedAt
-        if (latestAction && latestAction > latestUpdatedDate) {
+        if (
+            latestAction &&
+            latestUpdatedDate &&
+            latestAction > latestUpdatedDate
+        ) {
             latestUpdatedDate = latestAction
         }
     }
