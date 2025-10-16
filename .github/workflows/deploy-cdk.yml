@@ -601,9 +601,21 @@ jobs:
       - name: Create logical database
         env:
           STAGE_NAME: ${{ needs.begin-deployment.outputs.stage-name }}
-          DEV_DB_SM_ARN: ${{ secrets.DEV_DB_SM_ARN }}
         run: |
           echo "=== Creating logical database for review environment ==="
+
+          # Get the CDK dev Aurora secret ARN from CloudFormation exports
+          DEV_DB_SECRET_ARN=$(aws cloudformation list-exports \
+            --query "Exports[?Name=='postgres-dev-cdk-PostgresSecretArn'].Value" \
+            --output text)
+
+          if [ -z "$DEV_DB_SECRET_ARN" ] || [ "$DEV_DB_SECRET_ARN" = "None" ]; then
+            echo "Error: Could not find CDK dev Aurora secret ARN"
+            exit 1
+          fi
+
+          echo "Using CDK dev Aurora secret: $DEV_DB_SECRET_ARN"
+
           # Use CDK function naming pattern: postgres-{stage}-dbManager-cdk
           db_manager_function="postgres-${STAGE_NAME}-dbManager-cdk"
 
@@ -614,7 +626,7 @@ jobs:
           {
             "action": "create",
             "stageName": "$STAGE_NAME",
-            "devDbSecretArn": "$DEV_DB_SM_ARN"
+            "devDbSecretArn": "$DEV_DB_SECRET_ARN"
           }
           EOF
           )
