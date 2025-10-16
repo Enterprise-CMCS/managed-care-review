@@ -581,8 +581,8 @@ type IndexContractsPayload {
 
 input IndexContractsInput {
     """
-        An array of statuses to include in the filtered results. 
-        Valid statuses include:
+        An array of statuses to exclude in the filtered results. 
+        Valid statuses exclude:
             DRAFT
             SUBMITTED
             UNLOCKED
@@ -590,7 +590,7 @@ input IndexContractsInput {
             APPROVED
             WITHDRAWN
     """
-    statusesToInclude: [ConsolidatedContractStatus] 
+    statusesToExclude: [ConsolidatedContractStatus] 
     "In seconds, return submissions that have been updated in this timeframe"
     updatedWithin: Int
 }

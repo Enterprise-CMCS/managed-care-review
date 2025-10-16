@@ -369,7 +369,7 @@ describe(`indexContracts`, () => {
     )
 
     describe('statusesToInclude', () => {
-        it('filters to only the requested statuses', async () => {
+        it('filters out the requested statuses', async () => {
             const cmsUser = testCMSUser()
 
             const stateServer = await constructTestPostgresServer()
@@ -388,12 +388,12 @@ describe(`indexContracts`, () => {
                 await createAndSubmitTestContractWithRate(stateServer)
             await unlockTestContract(cmsServer, unlocked.id, 'Test unlock')
 
-            // Filter for only APPROVED
+            // Filter out APPROVED contracts
             const result = await executeGraphQLOperation(cmsServer, {
                 query: IndexContractsForDashboardDocument,
                 variables: {
                     input: {
-                        statusesToInclude: ['APPROVED'],
+                        statusesToExclude: ['APPROVED'],
                     },
                 },
             })
@@ -406,16 +406,16 @@ describe(`indexContracts`, () => {
             expect(nodes).toBeDefined()
             expect(nodes.length).toBeGreaterThan(0)
 
-            // Should include only APPROVED
+            // Should not include any APPROVED
             expect(
-                nodes.every((n: any) => n.consolidatedStatus === 'APPROVED')
-            ).toBe(true)
+                nodes.some((n: any) => n.consolidatedStatus === 'APPROVED')
+            ).toBe(false)
 
-            // expect approved ones, exclude the unlocked one
+            // expect unlocked one, exclude the approved ones
             const ids = new Set(nodes.map((n: any) => n.id))
-            expect(ids.has(approvedA.id)).toBe(true)
-            expect(ids.has(approvedB.id)).toBe(true)
-            expect(ids.has(unlocked.id)).toBe(false)
+            expect(ids.has(approvedA.id)).toBe(false)
+            expect(ids.has(approvedB.id)).toBe(false)
+            expect(ids.has(unlocked.id)).toBe(true)
         })
     })
 

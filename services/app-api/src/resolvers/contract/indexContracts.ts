@@ -56,12 +56,12 @@ const parseContracts = (
 const formatContracts = (
     results: ContractType[],
     updatedWithin?: number | null,
-    statusesToInclude?: ConsolidatedContractStatus[] | null
+    statusesToExclude?: ConsolidatedContractStatus[] | null
 ) => {
     let contracts: ContractType[] = results
-    if (statusesToInclude) {
+    if (statusesToExclude) {
         contracts = contracts.filter((contract: ContractType) => {
-            return statusesToInclude?.includes(contract.consolidatedStatus)
+            return !statusesToExclude?.includes(contract.consolidatedStatus)
         })
     }
     if (updatedWithin) {
@@ -167,7 +167,7 @@ export function indexContractsResolver(
 
             const parsedContracts = parseContracts(contracts, span)
             const cleanedStatuses =
-                input?.statusesToInclude?.filter(
+                input?.statusesToExclude?.filter(
                     (s): s is ConsolidatedContractStatus => s != null
                 ) ?? null
             return formatContracts(

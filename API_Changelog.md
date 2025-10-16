@@ -5,7 +5,7 @@
 #### Updated
 - **IndexContracts** endpoint updated to accept 2 optional parameters:
     - **updatedWithin**: an integer, representing seconds. Only submissions that have been updated within the specified timeframe will be returned 
-    - **statusesToInclude**: An array of statuses to include in the filtered results. 
+    - **statusesToExclude**: An array of statuses to exclude in the filtered results. 
         Valid statuses include:
             - DRAFT
             - SUBMITTED
