@@ -10,6 +10,7 @@ import {
     testStateUser,
 } from '../../testHelpers/userHelpers'
 import {
+    approveTestContract,
     createAndSubmitTestContractWithRate,
     createAndUpdateTestContractWithoutRates,
     createTestContract,
@@ -142,9 +143,9 @@ describe(`indexContracts`, () => {
             const createdID = stateSubmission.id
 
             // then see if we can fetch that same contract
-            const input = {
-                contractID: createdID,
-            }
+            // const input = {
+            //     contractID: createdID,
+            // }
 
             // setup a server with a different user
             const otherUserServer = await constructTestPostgresServer({
@@ -155,7 +156,6 @@ describe(`indexContracts`, () => {
 
             const result = await executeGraphQLOperation(otherUserServer, {
                 query: IndexContractsForDashboardDocument,
-                variables: { input },
             })
 
             expect(result.errors).toBeUndefined()
@@ -372,4 +372,100 @@ describe(`indexContracts`, () => {
             })
         }
     )
+
+    describe('statusesToInclude', () => {
+        it('filters to only the requested statuses', async () => {
+            const cmsUser = testCMSUser()
+
+            const submitServer = await constructTestPostgresServer()
+            const cmsServer = await constructTestPostgresServer({
+                context: { user: cmsUser },
+            })
+
+            const approvedA =
+                await createAndSubmitTestContractWithRate(submitServer)
+            await approveTestContract(cmsServer, approvedA.id)
+            const approvedB =
+                await createAndSubmitTestContractWithRate(submitServer)
+            await approveTestContract(cmsServer, approvedB.id)
+
+            const unlocked =
+                await createAndSubmitTestContractWithRate(submitServer)
+            await unlockTestContract(cmsServer, unlocked.id, 'Test unlock')
+
+            // Filter for only APPROVED
+            const result = await executeGraphQLOperation(cmsServer, {
+                query: IndexContractsForDashboardDocument,
+                variables: {
+                    input: {
+                        statusesToInclude: ['APPROVED'],
+                    },
+                },
+            })
+
+            expect(result.errors).toBeUndefined()
+
+            const nodes = result.data?.indexContracts.edges.map(
+                (e: any) => e.node
+            )
+            expect(nodes).toBeDefined()
+            expect(nodes.length).toBeGreaterThan(0)
+
+            // Should include only APPROVED
+            expect(
+                nodes.every((n: any) => n.consolidatedStatus === 'APPROVED')
+            ).toBe(true)
+
+            // expect approved ones, exclude the unlocked one
+            const ids = new Set(nodes.map((n: any) => n.id))
+            expect(ids.has(approvedA.id)).toBe(true)
+            expect(ids.has(approvedB.id)).toBe(true)
+            expect(ids.has(unlocked.id)).toBe(false)
+        })
+    })
+
+    describe('updatedWithin', () => {
+        it('returns only contracts who were last updated within the cutoff', async () => {
+            const cmsUser = testCMSUser()
+
+            const submitServer = await constructTestPostgresServer()
+            const cmsServer = await constructTestPostgresServer({
+                context: { user: cmsUser },
+            })
+
+            // simulate a time gap
+            let oldContract: any
+            await new Promise<void>((resolve) => {
+                setTimeout(() => {
+                    oldContract =
+                        createAndSubmitTestContractWithRate(submitServer)
+                    resolve()
+                }, 5000)
+            })
+            // create a recent contract
+            const recentContract =
+                await createAndSubmitTestContractWithRate(submitServer)
+
+            // then query with updatedWithin = 1 second
+            const result = await executeGraphQLOperation(cmsServer, {
+                query: IndexContractsForDashboardDocument,
+                variables: { input: { updatedWithin: 5 } },
+            })
+
+            expect(result.errors).toBeUndefined()
+
+            const nodes =
+                result.data?.indexContracts.edges.map((e: any) => e.node) ?? []
+
+            // Should include the recent one
+            const hasRecent = nodes.some((n: any) => n.id === recentContract.id)
+            expect(hasRecent).toBe(true)
+
+            // Should exclude the oldContract one
+            const hasoldContract = nodes.some(
+                (n: any) => n.id === oldContract.id
+            )
+            expect(hasoldContract).toBe(false)
+        })
+    })
 })

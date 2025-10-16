@@ -21,6 +21,7 @@ import {
     canRead,
     getAuthContextInfo,
 } from '../../authorization/oauthAuthorization'
+import { getLastUpdatedForDisplay } from '../helpers'
 
 const parseContracts = (
     contractsWithHistory: ContractOrErrorArrayType,
@@ -68,7 +69,7 @@ const formatContracts = (results: ContractType[]) => {
 export function indexContractsResolver(
     store: Store
 ): QueryResolvers['indexContracts'] {
-    return async (_parent, _args, context) => {
+    return async (_parent, { input }, context) => {
         const { user, ctx, tracer } = context
         const span = tracer?.startSpan('indexContracts', {}, ctx)
         setResolverDetailsOnActiveSpan('indexContracts', user, span)
@@ -143,7 +144,32 @@ export function indexContractsResolver(
             }
             logSuccess('indexContracts')
             setSuccessAttributesOnActiveSpan(span)
-            const parsedContracts = parseContracts(contractsWithHistory, span)
+            let contracts: any = contractsWithHistory
+            if (input?.statusesToInclude) {
+                contracts = contracts.filter((contractOrError: any) => {
+                    return input.statusesToInclude?.includes(
+                        contractOrError.contract.consolidatedStatus
+                    )
+                })
+            }
+            if (input?.updatedWithin) {
+                const now = new Date()
+                const cutoff = new Date(
+                    now.getTime() - input.updatedWithin! * 1000
+                )
+
+                contracts = contracts.filter((contractOrError: any) => {
+                    if (!('id' in contractOrError.contract)) {
+                        return false
+                    }
+                    const lastUpdated = getLastUpdatedForDisplay(
+                        contractOrError.contract
+                    )
+                    if (!lastUpdated) return false
+                    return lastUpdated.getTime() > cutoff.getTime()
+                })
+            }
+            const parsedContracts = parseContracts(contracts, span)
 
             return formatContracts(parsedContracts)
         } else {

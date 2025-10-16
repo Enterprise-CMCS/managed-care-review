@@ -17,7 +17,7 @@ type Query {
     StateUsers can find all the contracts for their state
     CMSUsers can find all the contracts that do not have the DRAFT status
     """
-    indexContracts: IndexContractsPayload!
+    indexContracts(input: IndexContractsInput): IndexContractsPayload!
 
     """
     indexUsers returns all of the Users in the system.
@@ -577,6 +577,22 @@ type ContractEdge {
 type IndexContractsPayload {
     totalCount: Int
     edges: [ContractEdge!]!
+}
+
+input IndexContractsInput {
+    """
+        An of statuses to include in the filteredd results. 
+        Valid statuses include:
+            DRAFT
+            SUBMITTED
+            UNLOCKED
+            RESUBMITTED
+            APPROVED
+            WITHDRAWN
+    """
+    statusesToInclude: [ConsolidatedContractStatus] 
+    "In seconds, return submissions that have been updated in this timeframe"
+    updatedWithin: Int
 }
 
 type IndexContractQuestionsPayload {
