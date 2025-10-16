@@ -24,7 +24,7 @@ describe(`indexContracts`, () => {
     describe('isStateUser', () => {
         const cmsUser = testCMSUser()
         const mockS3 = testS3Client()
-        it.skip('returns a list of contracts that includes newly created entries', async () => {
+        it('returns a list of contracts that includes newly created entries', async () => {
             const stateServer = await constructTestPostgresServer({
                 s3Client: mockS3,
             })
@@ -62,7 +62,7 @@ describe(`indexContracts`, () => {
             expect(theseSubmissions[1].status).toBe('SUBMITTED')
         })
 
-        it.skip('synthesizes the right statuses as a contract is submitted/unlocked/etc', async () => {
+        it('synthesizes the right statuses as a contract is submitted/unlocked/etc', async () => {
             const stateServer = await constructTestPostgresServer({
                 s3Client: mockS3,
             })
@@ -135,7 +135,7 @@ describe(`indexContracts`, () => {
             expect(testContracts[0].status).toBe('DRAFT')
         })
 
-        it.skip('a different user from the same state can index contracts', async () => {
+        it('a different user from the same state can index contracts', async () => {
             const server = await constructTestPostgresServer()
 
             // First, create a new contract
@@ -169,7 +169,7 @@ describe(`indexContracts`, () => {
             )
         })
 
-        it.skip('returns no contracts for a different states user', async () => {
+        it('returns no contracts for a different states user', async () => {
             const server = await constructTestPostgresServer()
             const serverMN = await constructTestPostgresServer({
                 context: {
@@ -208,7 +208,7 @@ describe(`indexContracts`, () => {
     describe.each(iterableCmsUsersMockData)(
         '$userRole indexContracts tests',
         ({ mockUser }) => {
-            it.skip('returns an empty list if only draft contracts exist', async () => {
+            it('returns an empty list if only draft contracts exist', async () => {
                 const stateServer = await constructTestPostgresServer()
                 const cmsServer = await constructTestPostgresServer({
                     context: {
@@ -239,7 +239,7 @@ describe(`indexContracts`, () => {
                 expect(testContracts).toHaveLength(0)
             })
 
-            it.skip('synthesizes the right statuses as a contract is submitted/unlocked/etc', async () => {
+            it('synthesizes the right statuses as a contract is submitted/unlocked/etc', async () => {
                 const server = await constructTestPostgresServer()
 
                 const cmsServer = await constructTestPostgresServer({
@@ -308,7 +308,7 @@ describe(`indexContracts`, () => {
                 })
             })
 
-            it.skip('return a list of submitted contracts from multiple states', async () => {
+            it('return a list of submitted contracts from multiple states', async () => {
                 const stateServer = await constructTestPostgresServer()
                 const cmsServer = await constructTestPostgresServer({
                     context: {
@@ -370,7 +370,7 @@ describe(`indexContracts`, () => {
     )
 
     describe('statusesToInclude', () => {
-        it.skip('filters out the requested statuses', async () => {
+        it('filters out the requested statuses', async () => {
             const cmsUser = testCMSUser()
 
             const stateServer = await constructTestPostgresServer()
