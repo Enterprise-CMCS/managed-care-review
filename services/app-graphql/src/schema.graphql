@@ -581,7 +581,7 @@ type IndexContractsPayload {
 
 input IndexContractsInput {
     """
-        An of statuses to include in the filteredd results. 
+        An array of statuses to include in the filtered results. 
         Valid statuses include:
             DRAFT
             SUBMITTED

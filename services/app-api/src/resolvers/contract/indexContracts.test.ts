@@ -142,11 +142,6 @@ describe(`indexContracts`, () => {
                 await createAndSubmitTestContractWithRate(server)
             const createdID = stateSubmission.id
 
-            // then see if we can fetch that same contract
-            // const input = {
-            //     contractID: createdID,
-            // }
-
             // setup a server with a different user
             const otherUserServer = await constructTestPostgresServer({
                 context: {
@@ -377,20 +372,20 @@ describe(`indexContracts`, () => {
         it('filters to only the requested statuses', async () => {
             const cmsUser = testCMSUser()
 
-            const submitServer = await constructTestPostgresServer()
+            const stateServer = await constructTestPostgresServer()
             const cmsServer = await constructTestPostgresServer({
                 context: { user: cmsUser },
             })
 
             const approvedA =
-                await createAndSubmitTestContractWithRate(submitServer)
+                await createAndSubmitTestContractWithRate(stateServer)
             await approveTestContract(cmsServer, approvedA.id)
             const approvedB =
-                await createAndSubmitTestContractWithRate(submitServer)
+                await createAndSubmitTestContractWithRate(stateServer)
             await approveTestContract(cmsServer, approvedB.id)
 
             const unlocked =
-                await createAndSubmitTestContractWithRate(submitServer)
+                await createAndSubmitTestContractWithRate(stateServer)
             await unlockTestContract(cmsServer, unlocked.id, 'Test unlock')
 
             // Filter for only APPROVED
@@ -428,7 +423,7 @@ describe(`indexContracts`, () => {
         it('returns only contracts who were last updated within the cutoff', async () => {
             const cmsUser = testCMSUser()
 
-            const submitServer = await constructTestPostgresServer()
+            const stateServer = await constructTestPostgresServer()
             const cmsServer = await constructTestPostgresServer({
                 context: { user: cmsUser },
             })
@@ -438,15 +433,15 @@ describe(`indexContracts`, () => {
             await new Promise<void>((resolve) => {
                 setTimeout(() => {
                     oldContract =
-                        createAndSubmitTestContractWithRate(submitServer)
+                        createAndSubmitTestContractWithRate(stateServer)
                     resolve()
                 }, 5000)
             })
             // create a recent contract
             const recentContract =
-                await createAndSubmitTestContractWithRate(submitServer)
+                await createAndSubmitTestContractWithRate(stateServer)
 
-            // then query with updatedWithin = 1 second
+            // then query with updatedWithin = 5 seconds
             const result = await executeGraphQLOperation(cmsServer, {
                 query: IndexContractsForDashboardDocument,
                 variables: { input: { updatedWithin: 5 } },
