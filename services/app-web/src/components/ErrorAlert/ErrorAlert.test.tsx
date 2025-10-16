@@ -62,7 +62,7 @@ test('displays message with bold text when withEmphasis is used', () => {
     renderWithProviders(<ErrorAlert remediation="DEFAULT" withEmphasis />)
     expect(
         screen.queryByText("We're having trouble loading this page.")
-    ).toHaveStyle('font-weight: bold')
+    ).toHaveStyle('font-weight: bolder')
     expect(screen.queryByText('email the help desk')).not.toHaveStyle(
         'font-weight: bold'
     )
