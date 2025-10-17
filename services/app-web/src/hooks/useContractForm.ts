@@ -111,7 +111,9 @@ const useContractForm = (contractID?: string): UseContractForm => {
             }
 
             // Manually add new contract into cache to prevent pop-in.
-            const indexContracts = client.readQuery({ query: IndexContractsForDashboardDocument })
+            const indexContracts = client.readQuery({
+                query: IndexContractsForDashboardDocument,
+            })
             if (indexContracts) {
                 client.writeQuery({
                     query: IndexContractsForDashboardDocument,

@@ -1,12 +1,12 @@
-name: Deploy
+name: Deploy (Serverless - Legacy)
 
 on:
-  push:
-    branches:
-      - '*'
-      - 'dependabot/**'
-      - '!skipci*'
-      - '!main'
+  # Serverless deployment disabled by default - use deploy-cdk.yml for new deployments
+  # To enable serverless deployment for your branch, add it to the branches list below
+  # push:
+  #   branches:
+  #     - 'your-branch-name-here'  # Add your branch name here if you need serverless deployment
+  workflow_dispatch:
 
 permissions:
   id-token: write
