@@ -7,7 +7,11 @@ import {
     Label,
 } from '@trussworks/react-uswds'
 import classnames from 'classnames'
-import { ActuaryContact, RateCapitationType, RateType } from '@mc-review/hpp'
+import {
+    ActuaryContact,
+    RateCapitationType,
+    RateAmendmentType,
+} from '../../../gen/gqlClient'
 import {
     ButtonWithLogging,
     FieldRadio,
@@ -47,7 +51,7 @@ const isRateTypeAmendment = (values: RateCertFormType): boolean =>
 export type RateCertFormType = {
     id: string
     key: string
-    rateType: RateType | undefined
+    rateType: RateAmendmentType | undefined
     rateCapitationType: RateCapitationType | undefined
     rateDateStart: string
     rateDateEnd: string
