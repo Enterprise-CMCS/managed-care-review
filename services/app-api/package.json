@@ -31,7 +31,7 @@
         "@aws-sdk/client-s3": "^3.911.0",
         "@aws-sdk/client-secrets-manager": "^3.911.0",
         "@aws-sdk/client-ses": "^3.911.0",
-        "@aws-sdk/client-ssm": "^3.911.0",
+        "@aws-sdk/client-ssm": "^3.912.0",
         "@aws-sdk/lib-storage": "^3.911.0",
         "@aws-sdk/s3-request-presigner": "^3.911.0",
         "@launchdarkly/node-server-sdk": "9.10.2",
