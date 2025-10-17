@@ -130,7 +130,7 @@
         "yup": "^0.32.9"
     },
     "devDependencies": {
-        "@aws-sdk/client-amplify": "^3.911.0",
+        "@aws-sdk/client-amplify": "^3.912.0",
         "@aws-sdk/client-s3": "^3.911.0",
         "@aws-sdk/s3-request-presigner": "^3.911.0",
         "@chromatic-com/storybook": "^4.1.1",
