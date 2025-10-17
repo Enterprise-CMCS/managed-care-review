@@ -39,7 +39,7 @@
         "eslint": "^9.34.0",
         "eslint-config-prettier": "^10.1.8",
         "eslint-plugin-prettier": "^5.5.4",
-        "jiti": "^2.0.0",
+        "jiti": "^2.6.1",
         "lint-staged": "^16.2.3",
         "prettier": "^3.5.3",
         "typescript": "5.9.2"
