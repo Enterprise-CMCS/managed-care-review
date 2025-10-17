@@ -1,5 +1,5 @@
-query indexContractsForDashboard {
-    indexContracts {
+query indexContractsForDashboard($input: IndexContractsInput) {
+    indexContracts(input: $input) {
         totalCount
         edges {
             node {

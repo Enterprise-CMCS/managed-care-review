@@ -10,11 +10,13 @@ import {
     testStateUser,
 } from '../../testHelpers/userHelpers'
 import {
+    approveTestContract,
     createAndSubmitTestContractWithRate,
     createAndUpdateTestContractWithoutRates,
     createTestContract,
     submitTestContract,
     unlockTestContract,
+    withdrawTestContract,
 } from '../../testHelpers/gqlContractHelpers'
 import { testS3Client } from '../../testHelpers'
 
@@ -141,11 +143,6 @@ describe(`indexContracts`, () => {
                 await createAndSubmitTestContractWithRate(server)
             const createdID = stateSubmission.id
 
-            // then see if we can fetch that same contract
-            const input = {
-                contractID: createdID,
-            }
-
             // setup a server with a different user
             const otherUserServer = await constructTestPostgresServer({
                 context: {
@@ -155,7 +152,6 @@ describe(`indexContracts`, () => {
 
             const result = await executeGraphQLOperation(otherUserServer, {
                 query: IndexContractsForDashboardDocument,
-                variables: { input },
             })
 
             expect(result.errors).toBeUndefined()
@@ -372,4 +368,114 @@ describe(`indexContracts`, () => {
             })
         }
     )
+
+    describe('statusesToInclude', () => {
+        it('filters out the requested statuses', async () => {
+            const cmsUser = testCMSUser()
+
+            const stateServer = await constructTestPostgresServer()
+            const cmsServer = await constructTestPostgresServer({
+                context: { user: cmsUser },
+            })
+
+            const approvedA =
+                await createAndSubmitTestContractWithRate(stateServer)
+            await approveTestContract(cmsServer, approvedA.id)
+            const approvedB =
+                await createAndSubmitTestContractWithRate(stateServer)
+            await approveTestContract(cmsServer, approvedB.id)
+
+            const unlocked =
+                await createAndSubmitTestContractWithRate(stateServer)
+
+            await unlockTestContract(cmsServer, unlocked.id, 'Test unlock')
+            const submittedA =
+                await createAndSubmitTestContractWithRate(stateServer)
+            const submittedB =
+                await createAndSubmitTestContractWithRate(stateServer)
+            const withdrawn =
+                await createAndSubmitTestContractWithRate(stateServer)
+            await withdrawTestContract(cmsServer, withdrawn.id, 'test withdraw')
+            // Filter out APPROVED and WITHDRAWN contracts
+            const result = await executeGraphQLOperation(cmsServer, {
+                query: IndexContractsForDashboardDocument,
+                variables: {
+                    input: {
+                        statusesToExclude: ['APPROVED', 'WITHDRAWN'],
+                    },
+                },
+            })
+
+            expect(result.errors).toBeUndefined()
+
+            const nodes = result.data?.indexContracts.edges.map(
+                (e: any) => e.node
+            )
+            expect(nodes).toBeDefined()
+            expect(nodes.length).toBeGreaterThan(0)
+
+            // Should not include any APPROVED or WITHDRAWN contracts
+            expect(
+                nodes.some(
+                    (n: any) =>
+                        n.consolidatedStatus === 'APPROVED' ||
+                        n.consolidatedStatus === 'WITHDRAWN'
+                )
+            ).toBe(false)
+
+            // expect unlocked one, exclude the approved ones
+            const ids = new Set(nodes.map((n: any) => n.id))
+            expect(ids.has(approvedA.id)).toBe(false)
+            expect(ids.has(approvedB.id)).toBe(false)
+            expect(ids.has(withdrawn.id)).toBe(false)
+            expect(ids.has(unlocked.id)).toBe(true)
+            expect(ids.has(submittedA.id)).toBe(true)
+            expect(ids.has(submittedB.id)).toBe(true)
+        })
+    })
+
+    describe('updatedWithin', () => {
+        it('returns only contracts who were last updated within the cutoff', async () => {
+            const cmsUser = testCMSUser()
+
+            const stateServer = await constructTestPostgresServer()
+            const cmsServer = await constructTestPostgresServer({
+                context: { user: cmsUser },
+            })
+
+            // simulate a time gap
+            let oldContract: any
+            await new Promise<void>((resolve) => {
+                setTimeout(() => {
+                    oldContract =
+                        createAndSubmitTestContractWithRate(stateServer)
+                    resolve()
+                }, 5000)
+            })
+            // create a recent contract
+            const recentContract =
+                await createAndSubmitTestContractWithRate(stateServer)
+
+            // then query with updatedWithin = 5 seconds
+            const result = await executeGraphQLOperation(cmsServer, {
+                query: IndexContractsForDashboardDocument,
+                variables: { input: { updatedWithin: 5 } },
+            })
+
+            expect(result.errors).toBeUndefined()
+
+            const nodes =
+                result.data?.indexContracts.edges.map((e: any) => e.node) ?? []
+
+            // Should include the recent one
+            const hasRecent = nodes.some((n: any) => n.id === recentContract.id)
+            expect(hasRecent).toBe(true)
+
+            // Should exclude the oldContract one
+            const hasoldContract = nodes.some(
+                (n: any) => n.id === oldContract.id
+            )
+            expect(hasoldContract).toBe(false)
+        })
+    })
 })
