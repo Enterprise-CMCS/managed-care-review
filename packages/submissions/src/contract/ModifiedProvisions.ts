@@ -1,6 +1,6 @@
 /*
     Each provision key represents a Yes/No question asked on Contract Details. 
-    This is a types file describing the shape of this data.
+    This is a types file describing the shape of this statePrograms.
 
     There are currently three distrinct variants of the provisions questions: 
     1. For CHIP amendment
@@ -42,11 +42,6 @@ type CHIPModifiedProvisions = {
     [K in CHIPProvisionType]: boolean
 }
 
-function isCHIPProvision(
-    provision: CHIPProvisionType | GeneralizedProvisionType
-): provision is CHIPProvisionType {
-    return provisionCHIPKeys.includes(provision as CHIPProvisionType)
-}
 /*
    Medicaid base contract logic
    Relevant for base contracts that have population covered of Medicaid or Medicaid and CHIP.
@@ -68,14 +63,6 @@ type MedicaidBaseProvisionType =
 
 type ModifiedProvisionsMedicaidBase = {
     [K in MedicaidBaseProvisionType]: boolean
-}
-
-function isMedicaidBaseProvision(
-    provision: MedicaidBaseProvisionType | GeneralizedProvisionType
-): provision is MedicaidBaseProvisionType {
-    return modifiedProvisionMedicaidBaseKeys.includes(
-        provision as MedicaidBaseProvisionType
-    )
 }
 
 /*
@@ -109,14 +96,6 @@ type ModifiedProvisionsMedicaidAmendment = {
     [K in MedicaidAmendmentProvisionType]: boolean
 }
 
-function isMedicaidAmendmentProvision(
-    provision: MedicaidAmendmentProvisionType | GeneralizedProvisionType
-): provision is MedicaidAmendmentProvisionType {
-    return modifiedProvisionMedicaidAmendmentKeys.includes(
-        provision as MedicaidAmendmentProvisionType
-    )
-}
-
 export type {
     ModifiedProvisionsMedicaidAmendment,
     ModifiedProvisionsMedicaidBase,
@@ -125,14 +104,11 @@ export type {
     MedicaidAmendmentProvisionType,
     CHIPModifiedProvisions,
     GeneralizedProvisionType,
-    GeneralizedModifiedProvisions,
+    GeneralizedModifiedProvisions
 }
 
 export {
     modifiedProvisionMedicaidBaseKeys,
     modifiedProvisionMedicaidAmendmentKeys,
-    provisionCHIPKeys,
-    isCHIPProvision,
-    isMedicaidAmendmentProvision,
-    isMedicaidBaseProvision,
+    provisionCHIPKeys
 }

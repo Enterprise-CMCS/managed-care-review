@@ -1,3 +1,5 @@
+import statePrograms from './statePrograms.json'
+
 const StateCodes = [
     'AS',
     'AK',
@@ -56,11 +58,30 @@ const StateCodes = [
 
 type StateCodeType = (typeof StateCodes)[number] // iterable union type
 
+interface StatePrograms {
+    states: StateType[]
+}
+
+type StateType = {
+    code: string
+    name: string
+    programs: ProgramArgType[]
+}
+
+interface ProgramArgType {
+    id: string
+    name: string // short name. This is used most often in the application including in submission name
+    fullName: string // full name is used in submission summary page
+    isRateProgram: boolean // specifies if program relates to rates rather than contract
+}
+
 function isValidStateCode(
     maybeStateCode: string
 ): maybeStateCode is StateCodeType {
     return (StateCodes as ReadonlyArray<string>).includes(maybeStateCode)
 }
 
-export { StateCodes, isValidStateCode }
-export type { StateCodeType }
+const typedStatePrograms: StatePrograms = statePrograms
+
+export { StateCodes, isValidStateCode, typedStatePrograms }
+export type { StateCodeType, StatePrograms, ProgramArgType, StateType }

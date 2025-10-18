@@ -1,5 +1,5 @@
 {
-    "name": "@mc-review/hpp",
+    "name": "@mc-review/submissions",
     "version": "1.0.0",
     "main": "build/index.js",
     "types": "build/index.d.ts",
