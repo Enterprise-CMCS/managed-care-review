@@ -14,8 +14,6 @@ import {
     CreateRateQuestionResponseDocument,
 } from '../gen/gqlClient'
 import { mockValidCMSUser } from './userGQLMock'
-import { mockSubmittedHealthPlanPackage, mockQuestionsPayload } from './'
-import { GraphQLError } from 'graphql'
 
 type fetchStateHealthPlanPackageWithQuestionsProps = {
     stateSubmission?: HealthPlanPackage | Partial<HealthPlanPackage>
