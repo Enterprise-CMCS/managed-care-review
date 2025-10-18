@@ -1,4 +1,4 @@
-import type { UnlockedContractType } from '../../domain-models/contractAndRates'
+import type { UnlockedContractType } from '../../domain-models'
 import { findContractWithHistory } from './findContractWithHistory'
 import { NotFoundError } from '../postgresErrors'
 import { unlockRateInDB } from './unlockRate'

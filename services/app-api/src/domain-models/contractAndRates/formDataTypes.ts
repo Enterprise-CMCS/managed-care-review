@@ -1,17 +1,60 @@
 import { z } from 'zod'
-import {
-    actuarialFirmTypeSchema,
-    actuaryCommunicationTypeSchema,
-    contractExecutionStatusSchema,
-    contractTypeSchema,
-    federalAuthoritySchema,
-    populationCoveredSchema,
-    rateCapitationTypeSchema,
-    rateTypeSchema,
-    submissionTypeSchema,
-    rateMedicaidPopulationsSchema,
-} from '@mc-review/hpp'
 import { statusSchema } from './statusType'
+
+const populationCoveredSchema = z.union([
+    z.literal('MEDICAID'),
+    z.literal('CHIP'),
+    z.literal('MEDICAID_AND_CHIP'),
+])
+
+const contractTypeSchema = z.union([z.literal('BASE'), z.literal('AMENDMENT')])
+
+const contractExecutionStatusSchema = z.union([
+    z.literal('EXECUTED'),
+    z.literal('UNEXECUTED'),
+])
+
+const actuarialFirmTypeSchema = z.union([
+    z.literal('MERCER'),
+    z.literal('MILLIMAN'),
+    z.literal('OPTUMAS'),
+    z.literal('GUIDEHOUSE'),
+    z.literal('DELOITTE'),
+    z.literal('STATE_IN_HOUSE'),
+    z.literal('OTHER'),
+])
+
+const actuaryCommunicationTypeSchema = z.union([
+    z.literal('OACT_TO_ACTUARY'),
+    z.literal('OACT_TO_STATE'),
+])
+
+const federalAuthoritySchema = z.union([
+    z.literal('STATE_PLAN'),
+    z.literal('WAIVER_1915B'),
+    z.literal('WAIVER_1115'),
+    z.literal('VOLUNTARY'),
+    z.literal('BENCHMARK'),
+    z.literal('TITLE_XXI'),
+])
+
+const rateTypeSchema = z.union([z.literal('NEW'), z.literal('AMENDMENT')])
+
+const rateMedicaidPopulationsSchema = z.union([
+    z.literal('MEDICARE_MEDICAID_WITH_DSNP'),
+    z.literal('MEDICAID_ONLY'),
+    z.literal('MEDICARE_MEDICAID_WITHOUT_DSNP'),
+])
+
+const rateCapitationTypeSchema = z.union([
+    z.literal('RATE_CELL'),
+    z.literal('RATE_RANGE'),
+])
+
+const submissionTypeSchema = z.union([
+    z.literal('CONTRACT_ONLY'),
+    z.literal('CONTRACT_AND_RATES'),
+])
 
 const documentSchema = z.object({
     id: z.string().optional(),
@@ -301,6 +344,8 @@ export {
     preprocessNulls,
     documentSchema,
     strippedRateFormDataSchema,
+    contractTypeSchema,
+    populationCoveredSchema,
 }
 
 export type {

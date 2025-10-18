@@ -1,9 +1,4 @@
 import {
-    ModifiedProvisionsAmendmentRecord,
-    ModifiedProvisionsBaseContractRecord,
-    ModifiedProvisionsCHIPRecord,
-} from '@mc-review/hpp'
-import {
     type CHIPProvisionType,
     type MedicaidBaseProvisionType,
     type MedicaidAmendmentProvisionType,
@@ -11,10 +6,13 @@ import {
     provisionCHIPKeys,
     modifiedProvisionMedicaidBaseKeys,
     modifiedProvisionMedicaidAmendmentKeys,
+    ModifiedProvisionsAmendmentRecord,
+    ModifiedProvisionsBaseContractRecord,
+    ModifiedProvisionsCHIPRecord,
     isCHIPProvision,
     isMedicaidAmendmentProvision,
     isMedicaidBaseProvision,
-} from '@mc-review/hpp'
+} from '@mc-review/submissions'
 import {
     isBaseContract,
     isCHIPOnly,

@@ -1,15 +1,18 @@
 import * as Yup from 'yup'
 import { dayjs } from '@mc-review/dates'
 import { FeatureFlagSettings } from '@mc-review/common-code'
-import { validateDateFormat } from '../../../formHelpers'
 import {
     validateFileItemsList,
     validateFileItemsListSingleUpload,
-} from '../../../formHelpers/validators'
+    validateDateFormat,
+} from '../../../formHelpers'
 
 Yup.addMethod(Yup.date, 'validateDateFormat', validateDateFormat)
 
-const SingleRateCertSchema = (_activeFeatureFlags: FeatureFlagSettings, isDSNP?: boolean) =>
+const SingleRateCertSchema = (
+    _activeFeatureFlags: FeatureFlagSettings,
+    isDSNP?: boolean
+) =>
     Yup.object().shape({
         rateDocuments: validateFileItemsListSingleUpload({ required: true }),
         supportingDocuments: validateFileItemsList({ required: false }),
@@ -31,14 +34,16 @@ const SingleRateCertSchema = (_activeFeatureFlags: FeatureFlagSettings, isDSNP?:
         rateType: Yup.string().defined(
             'You must choose a rate certification type'
         ),
-        rateMedicaidPopulations: isDSNP && _activeFeatureFlags['dsnp']? 
-        Yup.array().test(
-            'medicaidPopulationSelection',
-            'You must select at least one Medicaid population',
-            (value) => {
-                return Boolean(value && value.length > 0)
-            }
-        ) : Yup.array(),
+        rateMedicaidPopulations:
+            isDSNP && _activeFeatureFlags['dsnp']
+                ? Yup.array().test(
+                      'medicaidPopulationSelection',
+                      'You must select at least one Medicaid population',
+                      (value) => {
+                          return Boolean(value && value.length > 0)
+                      }
+                  )
+                : Yup.array(),
         rateCapitationType: Yup.string().defined(
             "You must select whether you're certifying rates or rate ranges"
         ),
@@ -46,7 +51,7 @@ const SingleRateCertSchema = (_activeFeatureFlags: FeatureFlagSettings, isDSNP?:
             if (rateType) {
                 return (
                     Yup.date()
-                         
+
                         // @ts-ignore-next-line
                         .validateDateFormat('YYYY-MM-DD', true)
                         .defined('You must enter a start date')
@@ -60,7 +65,7 @@ const SingleRateCertSchema = (_activeFeatureFlags: FeatureFlagSettings, isDSNP?:
             if (rateType) {
                 return (
                     Yup.date()
-                         
+
                         // @ts-ignore-next-line
                         .validateDateFormat('YYYY-MM-DD', true)
                         .defined('You must enter an end date')
@@ -85,7 +90,7 @@ const SingleRateCertSchema = (_activeFeatureFlags: FeatureFlagSettings, isDSNP?:
             if (rateType) {
                 return (
                     Yup.date()
-                         
+
                         // @ts-ignore-next-line
                         .validateDateFormat('YYYY-MM-DD', true)
                         .defined(
@@ -94,7 +99,10 @@ const SingleRateCertSchema = (_activeFeatureFlags: FeatureFlagSettings, isDSNP?:
                         .typeError(
                             'The certified date must be in MM/DD/YYYY format'
                         )
-                        .max(dayjs(new Date()), 'The certification date cannot be a future date')
+                        .max(
+                            dayjs(new Date()),
+                            'The certification date cannot be a future date'
+                        )
                 )
             }
         }),
@@ -102,7 +110,7 @@ const SingleRateCertSchema = (_activeFeatureFlags: FeatureFlagSettings, isDSNP?:
             is: 'AMENDMENT',
             then: Yup.date()
                 .nullable()
-                 
+
                 // @ts-ignore-next-line
                 .validateDateFormat('YYYY-MM-DD', true)
                 .defined('You must enter a start date')
@@ -112,7 +120,7 @@ const SingleRateCertSchema = (_activeFeatureFlags: FeatureFlagSettings, isDSNP?:
             is: 'AMENDMENT',
             then: Yup.date()
                 .nullable()
-                 
+
                 // @ts-ignore-next-line
                 .validateDateFormat('YYYY-MM-DD', true)
                 .defined('You must enter an end date')
@@ -174,7 +182,7 @@ const SingleRateCertSchema = (_activeFeatureFlags: FeatureFlagSettings, isDSNP?:
 const RateDetailsFormSchema = (
     activeFeatureFlags?: FeatureFlagSettings,
     isMultiRate?: boolean,
-    isDSNP?: boolean,
+    isDSNP?: boolean
 ) => {
     return isMultiRate
         ? Yup.object().shape({
@@ -201,7 +209,10 @@ const RateDetailsFormSchema = (
                       .when('.ratePreviouslySubmitted', {
                           // continue with normal rate form validations when its a new rate
                           is: 'NO',
-                          then: SingleRateCertSchema(activeFeatureFlags || {}, isDSNP),
+                          then: SingleRateCertSchema(
+                              activeFeatureFlags || {},
+                              isDSNP
+                          ),
                       })
               ),
           })

@@ -1,17 +1,9 @@
-import { ActuaryContact, StateContact } from '@mc-review/hpp'
-import { getActuaryFirm } from '@mc-review/helpers'
+import { getActuaryFirm } from '@mc-review/submissions'
 import { DataDetailMissingField } from '../DataDetailMissingField'
-import {
-    ActuaryContact as GQLActuaryContact,
-    StateContact as GQLStateContact,
-} from '../../../gen/gqlClient'
-import { LinkWithLogging } from '../../TealiumLogging/Link'
+import { ActuaryContact, StateContact } from '../../../gen/gqlClient'
+import { LinkWithLogging } from '../../TealiumLogging'
 
-type Contact =
-    | ActuaryContact
-    | GQLActuaryContact
-    | StateContact
-    | GQLStateContact
+type Contact = ActuaryContact | StateContact
 function isCertainActuaryContact(contact: Contact): contact is ActuaryContact {
     return (contact as ActuaryContact).actuarialFirm !== undefined
 }

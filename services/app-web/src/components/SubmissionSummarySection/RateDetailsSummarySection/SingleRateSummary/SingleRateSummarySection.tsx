@@ -24,7 +24,7 @@ import { SectionCard } from '../../../SectionCard'
 import {
     ActuaryCommunicationRecord,
     RateMedicaidPopulationsRecord,
-} from '@mc-review/hpp'
+} from '@mc-review/submissions'
 import { NavLinkWithLogging } from '../../../TealiumLogging'
 import { hasCMSUserPermissions } from '@mc-review/helpers'
 import { featureFlags } from '@mc-review/common-code'

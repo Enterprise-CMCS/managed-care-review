@@ -1,8 +1,6 @@
-
-import type { ContractType } from '../../domain-models/contractAndRates'
 import { findContractWithHistory } from './findContractWithHistory'
 import { NotFoundError } from '../postgresErrors'
-import type { UpdateInfoType } from '../../domain-models'
+import type { UpdateInfoType, ContractType } from '../../domain-models'
 import type { PrismaTransactionType } from '../prismaTypes'
 import { submitContractAndOrRates } from './submitContractAndOrRates'
 import type { ExtendedPrismaClient } from '../prismaClient'

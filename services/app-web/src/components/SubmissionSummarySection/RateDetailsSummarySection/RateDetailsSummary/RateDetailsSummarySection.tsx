@@ -1,16 +1,4 @@
 import React from 'react'
-import { DataDetail, DataDetailCheckboxList } from '../../../DataDetail'
-import { SectionHeader } from '../../../SectionHeader'
-import { formatCalendarDate } from '@mc-review/dates'
-import { MultiColumnGrid } from '../../../MultiColumnGrid'
-import { UploadedDocumentsTable } from '../..'
-import { usePreviousSubmission } from '../../../../hooks/usePreviousSubmission'
-import styles from '../../SubmissionSummarySection.module.scss'
-import { GenericErrorPage } from '../../../../pages/Errors/GenericErrorPage'
-
-import { DataDetailMissingField } from '../../../DataDetail/DataDetailMissingField'
-import { DataDetailContactField } from '../../../DataDetail/DataDetailContactField/DataDetailContactField'
-import { SectionCard } from '../../../SectionCard'
 import {
     Rate,
     Contract,
@@ -22,24 +10,36 @@ import {
     HealthPlanPackageStatus,
     ActuaryContact,
 } from '../../../../gen/gqlClient'
+import { formatCalendarDate } from '@mc-review/dates'
+import { featureFlags } from '@mc-review/common-code'
 import {
+    ActuaryCommunicationRecord,
+    RateMedicaidPopulationsRecord,
     RateRevisionWithIsLinked,
     getIndexFromRevisionVersion,
     getLastContractSubmission,
     getPackageSubmissionAtIndex,
     getVisibleLatestRateRevisions,
-} from '@mc-review/helpers'
-import { useAuth } from '../../../../contexts/AuthContext'
-import {
-    ActuaryCommunicationRecord,
-    RateMedicaidPopulationsRecord,
-} from '@mc-review/hpp'
-import { useParams } from 'react-router-dom'
+} from '@mc-review/submissions'
 import { hasCMSUserPermissions } from '@mc-review/helpers'
+import { MultiColumnGrid } from '../../../MultiColumnGrid'
+import { UploadedDocumentsTable } from '../..'
+import { usePreviousSubmission } from '../../../../hooks'
+import { GenericErrorPage } from '../../../../pages/Errors/GenericErrorPage'
+import { SectionCard } from '../../../SectionCard'
+import { useAuth } from '../../../../contexts/AuthContext'
+import { useParams } from 'react-router-dom'
 import { InfoTag } from '../../../InfoTag/InfoTag'
-import { featureFlags } from '@mc-review/common-code'
 import { useLDClient } from 'launchdarkly-react-client-sdk'
 import { DocumentHeader } from '../../../DocumentHeader/DocumentHeader'
+import {
+    DataDetail,
+    DataDetailCheckboxList,
+    DataDetailMissingField,
+    DataDetailContactField,
+} from '../../../DataDetail'
+import { SectionHeader } from '../../../SectionHeader'
+import styles from '../../SubmissionSummarySection.module.scss'
 
 export type RateDetailsSummarySectionProps = {
     contract: Contract | UnlockedContract
@@ -53,7 +53,7 @@ export type RateDetailsSummarySectionProps = {
     explainMissingData?: boolean
 }
 
-type SharedRateCertDisplay = {
+export type SharedRateCertDisplay = {
     packageId?: string
     packageName?: string
 }

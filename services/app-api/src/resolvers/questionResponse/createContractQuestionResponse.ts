@@ -9,7 +9,7 @@ import { createForbiddenError, createUserInputError } from '../errorUtils'
 import { NotFoundError, type Store } from '../../postgres'
 import { GraphQLError } from 'graphql/index'
 import type { Emailer } from '../../emailer'
-import type { StateCodeType } from '@mc-review/hpp'
+import type { StateCodeType } from '@mc-review/submissions'
 import { canWrite } from '../../authorization/oauthAuthorization'
 
 export function createContractQuestionResponseResolver(

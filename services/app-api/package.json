@@ -39,7 +39,7 @@
         "@mc-review/constants": "workspace:*",
         "@mc-review/dates": "workspace:*",
         "@mc-review/helpers": "workspace:*",
-        "@mc-review/hpp": "workspace:*",
+        "@mc-review/submissions": "workspace:*",
         "@node-oauth/oauth2-server": "^5.2.1",
         "@opentelemetry/api": "^1.9.0",
         "@opentelemetry/core": "^1.30.1",

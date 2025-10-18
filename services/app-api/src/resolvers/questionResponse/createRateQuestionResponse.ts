@@ -9,7 +9,7 @@ import {
 } from '../attributeHelper'
 import { createForbiddenError, createUserInputError } from '../errorUtils'
 import type { Emailer } from '../../emailer'
-import type { StateCodeType } from '@mc-review/hpp'
+import type { StateCodeType } from '@mc-review/submissions'
 import { canWrite } from '../../authorization/oauthAuthorization'
 
 export function createRateQuestionResponseResolver(

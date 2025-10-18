@@ -1,8 +1,12 @@
-import { dsnpTriggers } from '@mc-review/common-code'
+import { dsnpTriggers } from '@mc-review/submissions'
 import type { FeatureFlagSettings } from '@mc-review/common-code'
 import type { ContractDraftRevisionFormDataInput } from '../../gen/gqlServer'
-import { contractFormDataSchema, preprocessNulls } from './formDataTypes'
-import { contractTypeSchema, populationCoveredSchema } from '@mc-review/hpp'
+import {
+    contractFormDataSchema,
+    preprocessNulls,
+    contractTypeSchema,
+    populationCoveredSchema,
+} from './formDataTypes'
 import { z } from 'zod'
 import type { Store } from '../../postgres'
 import { submittableContractSchema } from './contractTypes'

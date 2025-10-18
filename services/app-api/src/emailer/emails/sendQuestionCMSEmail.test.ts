@@ -9,7 +9,7 @@ import type {
     StateType,
     ContractQuestionType,
 } from '../../domain-models'
-import { packageName } from '@mc-review/hpp'
+import { packageName } from '@mc-review/submissions'
 import { sendQuestionCMSEmail } from './index'
 import { getTestStateAnalystsEmails } from '../../testHelpers/parameterStoreHelpers'
 

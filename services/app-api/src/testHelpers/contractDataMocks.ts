@@ -3,7 +3,7 @@ import type {
     ContractRevisionTableWithRates,
     ContractTableFullPayload,
 } from '../postgres/contractAndRates/prismaFullContractRateHelpers'
-import type { StateCodeType } from '@mc-review/hpp'
+import type { StateCodeType } from '@mc-review/submissions'
 import type { ContractFormDataType } from '../domain-models'
 import { findStatePrograms, type InsertContractArgsType } from '../postgres'
 import { must } from './assertionHelpers'

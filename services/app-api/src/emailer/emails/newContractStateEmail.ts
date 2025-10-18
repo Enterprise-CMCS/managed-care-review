@@ -1,4 +1,4 @@
-import { packageName as generatePackageName } from '@mc-review/hpp'
+import { packageName as generatePackageName } from '@mc-review/submissions'
 import { formatCalendarDate } from '@mc-review/dates'
 import { formatEmailAddresses, pruneDuplicateEmails } from '../formatters'
 import type { EmailConfiguration, EmailData } from '..'

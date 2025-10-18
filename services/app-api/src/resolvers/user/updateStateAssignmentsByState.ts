@@ -8,7 +8,7 @@ import {
 import { logError } from '../../logger'
 import { createForbiddenError, createUserInputError } from '../errorUtils'
 import { hasAdminPermissions, hasCMSPermissions } from '../../domain-models'
-import { isValidStateCode } from '@mc-review/hpp'
+import { isValidStateCode } from '@mc-review/submissions'
 import {
     NotFoundError,
     handleNotFoundError,

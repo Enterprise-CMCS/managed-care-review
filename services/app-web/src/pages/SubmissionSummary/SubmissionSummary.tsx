@@ -33,7 +33,7 @@ import { useRouteParams } from '../../hooks'
 import {
     getVisibleLatestContractFormData,
     getVisibleLatestRateRevisions,
-} from '@mc-review/helpers'
+} from '@mc-review/submissions'
 import {
     generatePath,
     Navigate,

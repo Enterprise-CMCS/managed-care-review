@@ -35,7 +35,7 @@ import {
 } from '../../testHelpers/storeHelpers'
 import { expect } from 'vitest'
 import { testEmailConfig, testEmailer } from '../../testHelpers/emailerHelpers'
-import { packageName } from '@mc-review/hpp/build/healthPlanFormDataType/healthPlanFormData'
+import { packageName } from '@mc-review/submissions'
 import { must } from '../../testHelpers'
 
 const testRateFormInputData = (): RateFormDataInput => ({

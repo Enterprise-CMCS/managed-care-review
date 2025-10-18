@@ -5,7 +5,7 @@ import type {
     DocumentZipPackage,
     DocumentZipType,
 } from '@prisma/client'
-import type { StateCodeType } from '@mc-review/hpp'
+import type { StateCodeType } from '@mc-review/submissions'
 import type {
     ProgramType,
     UserType,

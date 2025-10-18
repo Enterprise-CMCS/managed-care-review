@@ -74,7 +74,7 @@ generates:
       - 'typescript-react-apollo'
     config:
       enumsAsTypes: true
-  ../../packages/hpp/src/gen/gqlClient.tsx:
+  ../../packages/submissions/src/gen/gqlClient.tsx:
     documents:
       - src/fragments/*.graphql
       - src/queries/*.graphql

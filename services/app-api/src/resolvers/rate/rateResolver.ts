@@ -1,4 +1,4 @@
-import { typedStatePrograms } from '@mc-review/hpp'
+import { typedStatePrograms } from '@mc-review/submissions'
 import type { Resolvers, SubmissionReason } from '../../gen/gqlServer'
 import { GraphQLError } from 'graphql'
 import type {

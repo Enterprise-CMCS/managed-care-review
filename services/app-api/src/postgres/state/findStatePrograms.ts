@@ -1,4 +1,4 @@
-import { typedStatePrograms } from '@mc-review/hpp'
+import { typedStatePrograms } from '@mc-review/submissions'
 import type { ProgramType } from '../../domain-models'
 
 // Currently relies on state programs json; does not query postgres

@@ -1,5 +1,5 @@
 import type { Resolvers } from '../../gen/gqlServer'
-import { typedStatePrograms } from '@mc-review/hpp'
+import { typedStatePrograms } from '@mc-review/submissions'
 import type { CMSUsersUnionType } from '../../domain-models/UserType'
 
 function getStateAssignments(user: CMSUsersUnionType) {

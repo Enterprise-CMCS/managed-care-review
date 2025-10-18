@@ -8,8 +8,7 @@ import { NewPostgresStore } from '../../postgres'
 import { v4 as uuidv4 } from 'uuid'
 import { sharedTestPrismaClient } from '../../testHelpers/storeHelpers'
 import { assertAnError, assertAnErrorCode } from '../../testHelpers'
-import type { Division } from '@prisma/client'
-import { AuditAction } from '@prisma/client'
+import { AuditAction, type Division } from '@prisma/client'
 import {
     iterableCmsUsersMockData,
     testAdminUser,

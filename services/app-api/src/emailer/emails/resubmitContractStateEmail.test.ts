@@ -4,7 +4,7 @@ import {
     mockMNState,
 } from '../../testHelpers/emailerHelpers'
 import { resubmitContractStateEmail } from './index'
-import { packageName } from '@mc-review/hpp'
+import { packageName } from '@mc-review/submissions'
 import type { ContractType } from '../../domain-models'
 
 const resubmitData = {

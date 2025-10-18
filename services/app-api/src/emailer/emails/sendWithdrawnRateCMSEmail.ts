@@ -15,7 +15,7 @@ import {
     renderTemplate,
     stripHTMLFromTemplate,
 } from '../templateHelpers'
-import { packageName as generatePackageName } from '@mc-review/hpp'
+import { packageName as generatePackageName } from '@mc-review/submissions'
 import { rateSummaryURL, submissionSummaryURL } from '../generateURLs'
 import { pruneDuplicateEmails } from '../formatters'
 

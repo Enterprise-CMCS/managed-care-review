@@ -16,7 +16,7 @@ import { ConsolidatedContractStatus, Program, User } from '../../gen/gqlClient'
 import styles from './ContractTable.module.scss'
 import { Table, Tag } from '@trussworks/react-uswds'
 import qs from 'qs'
-import { SubmissionStatusRecord } from '@mc-review/hpp'
+import { SubmissionStatusRecord } from '@mc-review/submissions'
 import { SubmissionReviewStatusRecord } from '@mc-review/constants'
 import {
     FilterAccordion,
@@ -25,13 +25,12 @@ import {
     FilterOptionType,
 } from '../FilterAccordion'
 import { InfoTag, TagProps } from '../InfoTag/InfoTag'
-import { pluralize } from '@mc-review/common-code'
 import { MultiColumnGrid } from '../MultiColumnGrid'
 import { NavLinkWithLogging } from '../TealiumLogging/Link'
 import { useTealium } from '../../hooks'
 import useDeepCompareEffect from 'use-deep-compare-effect'
 import { getTealiumFiltersChanged } from '../../tealium/tealiumHelpers'
-import { titleCaseString } from '@mc-review/common-code'
+import { titleCaseString, pluralize } from '@mc-review/common-code'
 import { formatCalendarDate } from '@mc-review/dates'
 import { RowCellElement } from '..'
 

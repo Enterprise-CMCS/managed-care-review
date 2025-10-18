@@ -8,7 +8,7 @@ import {
 } from 'react-select'
 import styles from '../../../components/Select/Select.module.scss'
 import { IndexRatesInput, useFetchRateQuery, useIndexRatesStrippedQuery } from '../../../gen/gqlClient'
-import { programNames } from '@mc-review/hpp'
+import { programNames } from '@mc-review/submissions'
 import { formatCalendarDate } from '@mc-review/dates'
 import {
     FormikRateForm,

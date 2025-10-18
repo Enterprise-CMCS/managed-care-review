@@ -8,7 +8,7 @@ import { Loading } from '../../../components'
 
 import { RateInDashboardType, RateReviewsTable } from './RateReviewsTable'
 import { ErrorFailedRequestPage } from '../../Errors/ErrorFailedRequestPage'
-import { RateTypeRecord } from '@mc-review/hpp'
+import { RateTypeRecord } from '@mc-review/submissions'
 import { GenericErrorPage } from '../../Errors/GenericErrorPage'
 
 const RateReviewsDashboard = (): React.ReactElement => {

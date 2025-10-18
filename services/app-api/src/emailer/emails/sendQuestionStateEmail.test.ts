@@ -10,7 +10,7 @@ import type {
     ContractFormDataType,
     ContractQuestionType,
 } from '../../domain-models'
-import { packageName } from '@mc-review/hpp'
+import { packageName } from '@mc-review/submissions'
 import { sendQuestionStateEmail } from './index'
 
 const defaultSubmitters = ['submitter1@example.com', 'submitter2@example.com']

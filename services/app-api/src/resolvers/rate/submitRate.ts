@@ -1,4 +1,3 @@
-import type { Store } from '../../postgres'
 import type { MutationResolvers } from '../../gen/gqlServer'
 import {
     setErrorAttributesOnActiveSpan,
@@ -7,12 +6,11 @@ import {
 import { isStateUser } from '../../domain-models'
 import { logError } from '../../logger'
 import { createForbiddenError, createUserInputError } from '../errorUtils'
-import { NotFoundError } from '../../postgres/postgresErrors'
+import { NotFoundError, type Store } from '../../postgres'
 import { GraphQLError } from 'graphql/index'
 import type { LDService } from '../../launchDarkly/launchDarkly'
 import { generateRateCertificationName } from './generateRateCertificationName'
-import { findStatePrograms } from '@mc-review/hpp'
-import { nullsToUndefined } from '../../domain-models/nullstoUndefined'
+import { findStatePrograms } from '@mc-review/submissions'
 import { canWrite } from '../../authorization/oauthAuthorization'
 import type { DocumentZipService } from '../../zip/generateZip'
 
@@ -107,17 +105,11 @@ export function submitRate(
         // prepare to generate rate cert name - either use new form data coming down on submit or unsubmitted submission data already in database
         const stateCode = unsubmittedRate.stateCode
         const statePrograms = findStatePrograms(stateCode)
-        const generatedRateCertName = formData
-            ? generateRateCertificationName(
-                  nullsToUndefined(formData),
-                  stateCode,
-                  statePrograms
-              )
-            : generateRateCertificationName(
-                  draftRateRevision.formData,
-                  stateCode,
-                  statePrograms
-              )
+        const generatedRateCertName = generateRateCertificationName(
+            draftRateRevision.formData,
+            stateCode,
+            statePrograms
+        )
 
         // combine existing db draft data with any form data added on submit
         // call submit rate handler

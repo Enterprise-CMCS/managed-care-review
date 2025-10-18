@@ -1,10 +1,6 @@
 import { dayjs } from '@mc-review/dates'
-import { SubmissionDocument, ActuaryContact } from '@mc-review/hpp'
 import { FileItemT } from '../components'
-import {
-    GenericDocument,
-    ActuaryContact as GQLActuaryContact,
-} from '../gen/gqlClient'
+import { GenericDocument, ActuaryContact } from '../gen/gqlClient'
 import { S3ClientT } from '../s3'
 import { v4 as uuidv4 } from 'uuid'
 
@@ -32,7 +28,7 @@ function formatForForm<T>(attribute: T): string {
 
 // This function can be cleaned up when we move off domain types and only use graphql
 const formatActuaryContactsForForm = (
-    actuaryContacts?: ActuaryContact[] | GQLActuaryContact[]
+    actuaryContacts?: ActuaryContact[]
 ): ActuaryContact[] => {
     return actuaryContacts && actuaryContacts.length > 0
         ? actuaryContacts.map((contact) => {
@@ -63,7 +59,7 @@ const formatActuaryContactsForForm = (
 }
 
 const formatAddtlActuaryContactsForForm = (
-    actuaryContacts?: ActuaryContact[] | GQLActuaryContact[]
+    actuaryContacts?: ActuaryContact[]
 ): ActuaryContact[] => {
     return actuaryContacts && actuaryContacts.length > 0
         ? actuaryContacts.map((contact) => {
@@ -127,7 +123,7 @@ const formatDocumentsForForm = ({
     documents,
     getKey,
 }: {
-    documents?: SubmissionDocument[] | GenericDocument[]
+    documents?: GenericDocument[]
     getKey: S3ClientT['getKey'] // S3 function to call when formatting to double check we have valid documents, probably the backend should be doing this to reduce client async errors handling with bad data
 }): FileItemT[] => {
     if (!documents) return []
@@ -173,7 +169,7 @@ const formatFormDateForDomain = (attribute: string): Date | undefined => {
 
 const formatDocumentsForDomain = (
     fileItems: FileItemT[]
-): SubmissionDocument[] => {
+): GenericDocument[] => {
     return fileItems.reduce((cleanedFileItems, fileItem) => {
         if (fileItem.status === 'UPLOAD_ERROR') {
             console.info(
@@ -203,7 +199,7 @@ const formatDocumentsForDomain = (
             })
         }
         return cleanedFileItems
-    }, [] as SubmissionDocument[])
+    }, [] as GenericDocument[])
 }
 
 const formatYesNoForProto = (

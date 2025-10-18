@@ -3,13 +3,10 @@ import type {
     RateRevisionType,
     StrippedRateType,
     StrippedRateRevisionType,
-    ContractRevisionType,
-} from '../../domain-models/contractAndRates'
-import { rateSchema } from '../../domain-models/contractAndRates'
-import type {
     ContractPackageSubmissionType,
     RatePackageSubmissionType,
-} from '../../domain-models/contractAndRates/packageSubmissions'
+} from '../../domain-models'
+import { rateSchema } from '../../domain-models/contractAndRates'
 import type { RateWithoutDraftContractsType } from '../../domain-models/contractAndRates/baseContractRateTypes'
 import {
     arrayOrFirstError,
@@ -173,21 +170,6 @@ function rateWithoutDraftContractsToDomainModel(
 
     if (parentContractID instanceof Error) {
         return parentContractID
-    }
-
-    // Add contract date added
-    const packageRateRevisions: RateRevisionType[] = []
-    //NOTE: This will not display the actual date added for linked contracts because we do not query all the linked contract revisions
-    const packageContractRevisions: { [id: string]: ContractRevisionType[] } =
-        {}
-    for (const pkg of packageSubmissions) {
-        packageRateRevisions.push(pkg.rateRevision)
-        for (const cRev of pkg.contractRevisions) {
-            if (!packageContractRevisions[cRev.contract.id]) {
-                packageContractRevisions[cRev.contract.id] = []
-            }
-            packageContractRevisions[cRev.contract.id].push(cRev)
-        }
     }
 
     const status = getContractRateStatus(rateRevisions)

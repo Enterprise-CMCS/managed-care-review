@@ -21,7 +21,6 @@ import { ContractDetails } from './ContractDetails'
 import { Contacts } from './Contacts'
 import { ReviewSubmit } from './ReviewSubmit'
 import { SubmissionType } from './SubmissionType'
-import { UnlockedHealthPlanFormDataType } from '@mc-review/hpp'
 import { ContractFormData } from '../../gen/gqlClient'
 import { RateDetails } from './RateDetails'
 import formContainerStyles from '../../components/FormContainer/FormContainer.module.scss'
@@ -84,7 +83,7 @@ export const StateSubmissionForm = (): React.ReactElement => {
 // Utilities
 
 export const activeFormPages = (
-    draft: UnlockedHealthPlanFormDataType | ContractFormData,
+    draft: ContractFormData,
     hideSupportingDocs?: boolean
 ): RouteTWithUnknown[] => {
     // If submission type is contract only, rate details is left out of the step indicator

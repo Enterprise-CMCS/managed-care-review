@@ -15,6 +15,8 @@ import {
     CreateContractDocument,
     IndexContractsForDashboardDocument,
     IndexContractsForDashboardQuery,
+    UnlockContractMutation,
+    UnlockContractDocument
 } from '../gen/gqlClient'
 import { MockedResponse } from '@apollo/client/testing'
 import {
@@ -450,6 +452,72 @@ const indexContractsMockSuccess = (
     }
 }
 
+type unlockContractMockSuccessProps = {
+    contract?: Contract
+    id: string
+    reason: string
+}
+
+const transformUnlockedContractToContract = (contract: UnlockedContract): Contract => {
+    return {
+        ...contract,
+        __typename: 'Contract',
+    }
+}
+const unlockContractMockSuccess = ({
+   contract = transformUnlockedContractToContract(mockContractPackageUnlockedWithUnlockedType()),
+   id,
+   reason,
+}: unlockContractMockSuccessProps): MockedResponse<UnlockContractMutation> => {
+    // HACK, for some reason tests started failing with getting the types just right
+    // As we get those types everywhere we can revisit this.
+    const unlockedContract = contract as UnlockedContract
+
+    return {
+        request: {
+            query: UnlockContractDocument,
+            variables: { input: { contractID: id, unlockedReason: reason } },
+        },
+        result: { data: { unlockContract: { contract: unlockedContract } } },
+    }
+}
+
+const unlockContractMockError = ({
+     id,
+     reason,
+     error,
+ }: {
+    id: string
+    reason: string
+    error?: {
+        code: GraphQLErrorCodeTypes
+        cause: GraphQLErrorCauseTypes
+    }
+}): MockedResponse<UnlockContractMutation> => {
+    const graphQLError = new GraphQLError(
+        error
+            ? GRAPHQL_ERROR_CAUSE_MESSAGES[error.cause]
+            : 'Error attempting to submit.',
+        {
+            extensions: {
+                code: error?.code,
+                cause: error?.cause,
+            },
+        }
+    )
+
+    return {
+        request: {
+            query: UnlockContractDocument,
+            variables: { input: { contractID: id, unlockedReason: reason } },
+        },
+        result: {
+            data: null,
+            errors: [graphQLError],
+        },
+    }
+}
+
 export {
     fetchContractMockSuccess,
     fetchContractMockFail,
@@ -463,4 +531,6 @@ export {
     createContractMockFail,
     createContractMockSuccess,
     indexContractsMockSuccess,
+    unlockContractMockError,
+    unlockContractMockSuccess
 }

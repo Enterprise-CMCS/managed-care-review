@@ -1,4 +1,3 @@
-import { mockMNState } from '@mc-review/hpp'
 import {
     Contract,
     ContractFormData,
@@ -10,6 +9,7 @@ import {
     Rate, IndexContractQuestionsPayload,
 } from '../gen/gqlClient'
 import { s3DlUrl } from './documentDataMock'
+import { mockMNState } from './stateMock'
 
 import { mockValidCMSUser, mockValidUser } from './userGQLMock'
 

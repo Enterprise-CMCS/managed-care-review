@@ -14,7 +14,7 @@ import {
     fakeRequest,
     userClickByRole,
     renderWithProviders,
-} from '../../testHelpers/jestHelpers'
+} from '../../testHelpers'
 
 describe('FileUpload component', () => {
     const testProps: FileUploadProps = {

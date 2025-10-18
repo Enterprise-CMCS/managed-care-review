@@ -1,4 +1,4 @@
-import { packageName } from '@mc-review/hpp'
+import { packageName } from '@mc-review/submissions'
 import type { ContractRevisionType } from '../../domain-models'
 import type { Resolvers } from '../../gen/gqlServer'
 import type { Store } from '../../postgres'

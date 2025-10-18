@@ -4,7 +4,7 @@ import {
     mockUnlockedContract,
 } from '../../testHelpers/emailerHelpers'
 import { unlockContractStateEmail } from './index'
-import { packageName } from '@mc-review/hpp'
+import { packageName } from '@mc-review/submissions'
 
 const unlockData = {
     updatedBy: {

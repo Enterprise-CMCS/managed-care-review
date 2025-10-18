@@ -1,7 +1,6 @@
 import type {
     ContractType,
     ContractRevisionType,
-    RateRevisionType,
 } from '../../domain-models/contractAndRates'
 import { contractSchema } from '../../domain-models/contractAndRates'
 import type { ContractWithoutDraftRatesType } from '../../domain-models/contractAndRates/baseContractRateTypes'
@@ -183,20 +182,6 @@ function contractWithHistoryToDomainModelWithoutRates(
                 contractRevision: contractRevisionToDomainModel(revision),
                 rateRevisions: rateRevisions,
             })
-        }
-    }
-
-    // get references to every contract and rate revision in submission order and
-    // set the document dateAdded dates accordingly.
-    const packageContractRevisions: ContractRevisionType[] = []
-    const packageRateRevisions: { [id: string]: RateRevisionType[] } = {}
-    for (const pkg of packageSubmissions) {
-        packageContractRevisions.push(pkg.contractRevision)
-        for (const rrev of pkg.rateRevisions) {
-            if (!(rrev.rateID in packageRateRevisions)) {
-                packageRateRevisions[rrev.rateID] = []
-            }
-            packageRateRevisions[rrev.rateID].push(rrev)
         }
     }
 

@@ -7,7 +7,7 @@ import {
     SectionCard,
 } from '../../../components'
 import { Contract, ContractRevision } from '../../../gen/gqlClient'
-import { getVisibleLatestContractFormData } from '@mc-review/helpers'
+import { getVisibleLatestContractFormData } from '@mc-review/submissions'
 
 export type ContactsSummarySectionProps = {
     contract: Contract

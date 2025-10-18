@@ -4,7 +4,7 @@ import type {
     ProgramType,
     UpdateInfoType,
 } from '../../domain-models'
-import { packageName as generatePackageName } from '@mc-review/hpp'
+import { packageName as generatePackageName } from '@mc-review/submissions'
 
 import {
     stripHTMLFromTemplate,

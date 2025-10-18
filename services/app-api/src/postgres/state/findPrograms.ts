@@ -1,5 +1,5 @@
 import type { ProgramType } from '../../domain-models'
-import { typedStatePrograms } from '@mc-review/hpp'
+import { typedStatePrograms } from '@mc-review/submissions'
 
 // Currently relies on state programs json; does not query postgres
 function findPrograms(

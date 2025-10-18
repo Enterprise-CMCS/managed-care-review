@@ -83,7 +83,7 @@
         "@mc-review/constants": "workspace:*",
         "@mc-review/dates": "workspace:*",
         "@mc-review/helpers": "workspace:*",
-        "@mc-review/hpp": "workspace:*",
+        "@mc-review/submissions": "workspace:*",
         "@mc-review/mocks": "workspace:*",
         "@mc-review/otel": "workspace:*",
         "@opentelemetry/api": "^1.9.0",

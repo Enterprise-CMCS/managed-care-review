@@ -83,7 +83,6 @@ const Contacts = ({
         useErrorSummary()
     const { logButtonEvent } = useTealium()
 
-    // set up API handling and HPP data
     const { loggedInUser } = useAuth()
     const { currentRoute } = useCurrentRoute()
     const { id } = useRouteParams()
