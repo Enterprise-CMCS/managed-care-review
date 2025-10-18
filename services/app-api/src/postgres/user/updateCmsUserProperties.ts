@@ -1,4 +1,4 @@
-import type { StateCodeType } from '@mc-review/hpp'
+import type { StateCodeType } from '@mc-review/submissions'
 import type { Division } from '@prisma/client'
 import { AuditAction } from '@prisma/client'
 import type { CMSUsersUnionType } from '../../domain-models'

@@ -21,7 +21,7 @@ import type {
     UnlockedContract,
     CreateContractInput,
 } from '../gen/gqlServer'
-import type { StateCodeType } from '@mc-review/hpp'
+import type { StateCodeType } from '@mc-review/submissions'
 import { addNewRateToTestContract } from './gqlRateHelpers'
 import type { ContractFormDataType, ContractType } from '../domain-models'
 import { mockGqlContractDraftRevisionFormDataInput } from './gqlContractInputMocks'

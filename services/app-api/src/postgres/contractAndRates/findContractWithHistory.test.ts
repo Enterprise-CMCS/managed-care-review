@@ -10,9 +10,12 @@ import { insertDraftRate } from './insertRate'
 import { updateDraftRate } from './updateDraftRate'
 import { unlockRate } from './unlockRate'
 import { findRateWithHistory } from './findRateWithHistory'
-import { must, mockInsertContractArgs } from '../../testHelpers'
-import { mockInsertRateArgs } from '../../testHelpers/rateDataMocks'
-import { convertContractToDraftRateRevisions } from '../../domain-models/contractAndRates/convertContractWithRatesToHPP'
+import {
+    must,
+    mockInsertContractArgs,
+    mockInsertRateArgs,
+} from '../../testHelpers'
+import { getDraftContractRateRevisions } from '../../domain-models'
 import { updateDraftContractRates } from './updateDraftContractRates'
 
 describe('findContractWithHistory with full contract and rate history', () => {
@@ -220,7 +223,7 @@ describe('findContractWithHistory with full contract and rate history', () => {
             })
         )
 
-        const remainingRateRevisions = convertContractToDraftRateRevisions(
+        const remainingRateRevisions = getDraftContractRateRevisions(
             unlockedContractA
         ).filter(
             (rateRevision) =>
@@ -524,7 +527,7 @@ describe('findContractWithHistory with full contract and rate history', () => {
             })
         )
 
-        const remainingRateRevisions = convertContractToDraftRateRevisions(
+        const remainingRateRevisions = getDraftContractRateRevisions(
             unlockedContractA
         ).filter(
             (rateRevision) =>
@@ -917,7 +920,7 @@ describe('findContractWithHistory with only contract history', () => {
     // instead of initial revision). This breaks the test's expectations about parent calculation.
     // Keeping for future implementation of independent rate actions.
     //
-    // eslint-disable-next-line jest/no-disabled-tests
+
     it.skip('matches correct rate revisions to contract revision with independent rate unlocks and submits', async () => {
         const client = await sharedTestPrismaClient()
 
@@ -978,8 +981,7 @@ describe('findContractWithHistory with only contract history', () => {
         }
 
         const contractID = updatedContract.id
-        const rateID =
-            convertContractToDraftRateRevisions(updatedContract)[0].rateID
+        const rateID = getDraftContractRateRevisions(updatedContract)[0].rateID
 
         // Submit contract
         must(
@@ -1133,11 +1135,11 @@ describe('findContractWithHistory with only contract history', () => {
                     ],
                     update: [
                         {
-                            rateID: convertContractToDraftRateRevisions(
+                            rateID: getDraftContractRateRevisions(
                                 unlockedContract
                             )[0].rateID,
                             formData:
-                                convertContractToDraftRateRevisions(
+                                getDraftContractRateRevisions(
                                     unlockedContract
                                 )[0].formData,
                             ratePosition: 1,
@@ -1150,7 +1152,7 @@ describe('findContractWithHistory with only contract history', () => {
             })
         )
 
-        const secondRate = convertContractToDraftRateRevisions(
+        const secondRate = getDraftContractRateRevisions(
             updatedContractWithRates
         ).find((rr) => rr.formData.rateCertificationName === 'Second rate')
 

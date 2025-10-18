@@ -7,7 +7,7 @@ import { isStateUser, contractSubmitters } from '../../domain-models'
 import {
     type CHIPFederalAuthority,
     federalAuthorityKeysForCHIP,
-} from '@mc-review/hpp'
+} from '@mc-review/submissions'
 import { createForbiddenError, createUserInputError } from '../errorUtils'
 import { GraphQLError } from 'graphql'
 import {
@@ -19,14 +19,14 @@ import type { MutationResolvers, State } from '../../gen/gqlServer'
 import { parseContract } from '../../domain-models/contractAndRates/dataValidatorHelpers'
 import type { UpdateInfoType, PackageStatusType } from '../../domain-models'
 import type { UpdateDraftContractRatesArgsType } from '../../postgres/contractAndRates/updateDraftContractRates'
-import type { StateCodeType } from '@mc-review/hpp'
+import type { StateCodeType } from '@mc-review/submissions'
 import type { Span } from '@opentelemetry/api'
 import {
     isCHIPOnly,
     isContractWithProvisions,
     generateApplicableProvisionsList,
 } from '../../domain-models/contractAndRates'
-import type { GeneralizedModifiedProvisions } from '@mc-review/hpp'
+import type { GeneralizedModifiedProvisions } from '@mc-review/submissions'
 import { canWrite } from '../../authorization/oauthAuthorization'
 import type { DocumentZipService } from '../../zip/generateZip'
 

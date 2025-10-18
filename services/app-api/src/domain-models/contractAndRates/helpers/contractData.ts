@@ -3,6 +3,7 @@ import type {
     UnlockedContractType,
     ContractRevisionType,
     ContractPackageSubmissionType,
+    RateRevisionType,
 } from '../../'
 
 const getLastContractSubmission = (
@@ -54,6 +55,18 @@ const isContractWithProvisions = (contract: ContractType): boolean =>
 const isSubmitted = (contract: ContractType): boolean =>
     contract.status === 'SUBMITTED'
 
+const getDraftContractRateRevisions = (contract: ContractType) => {
+    const rateRevisions: RateRevisionType[] = []
+    contract.draftRates?.forEach((rate) => {
+        if (rate.draftRevision) {
+            rateRevisions.push(rate.draftRevision)
+        } else if (rate.revisions.length > 0) {
+            rateRevisions.push(rate.revisions[0])
+        }
+    })
+    return rateRevisions
+}
+
 export {
     isBaseContract,
     isCHIPOnly,
@@ -63,4 +76,5 @@ export {
     isSubmitted,
     isContractWithProvisions,
     getLastContractSubmission,
+    getDraftContractRateRevisions,
 }

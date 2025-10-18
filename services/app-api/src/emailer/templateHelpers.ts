@@ -13,13 +13,10 @@ import type {
 } from '../domain-models'
 import { logError } from '../logger'
 import { pruneDuplicateEmails } from './formatters'
-import {
-    findStatePrograms,
-    packageName,
-    type SubmissionType,
-} from '@mc-review/hpp'
+import { findStatePrograms, packageName } from '@mc-review/submissions'
 import { rateSummaryURL, submissionSummaryURL } from './generateURLs'
 import { formatCalendarDate } from '@mc-review/dates'
+import type { SubmissionType } from '../gen/gqlClient'
 
 // ETA SETUP
 Eta.configure({

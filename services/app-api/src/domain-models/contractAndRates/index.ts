@@ -14,11 +14,6 @@ export { contractRevisionSchema, rateRevisionSchema } from './revisionTypes'
 export { statusSchema } from './statusType'
 export type { ConsolidatedContractStatusType } from './statusType'
 export {
-    convertContractWithRatesRevtoHPPRev,
-    convertContractWithRatesToUnlockedHPP,
-    convertContractWithRatesToFormData,
-} from './convertContractWithRatesToHPP'
-export {
     isBaseContract,
     isCHIPOnly,
     isContractOnly,
@@ -33,6 +28,7 @@ export {
     generateProvisionLabel,
     isMissingProvisions,
     hasValidModifiedProvisions,
+    getDraftContractRateRevisions,
 } from './helpers'
 export type { ContractType, UnlockedContractType } from './contractTypes'
 export type { RateType, StrippedRateType } from './rateTypes'

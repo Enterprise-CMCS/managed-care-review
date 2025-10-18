@@ -1,5 +1,5 @@
 import { screen } from '@testing-library/react'
-import { ActuaryContact, StateContact } from '@mc-review/hpp'
+import { ActuaryContact, StateContact } from '../../../gen/gqlClient'
 
 import { DataDetailContactField } from './DataDetailContactField'
 import { renderWithProviders } from '../../../testHelpers'
