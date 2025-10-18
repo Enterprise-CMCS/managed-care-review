@@ -7,7 +7,12 @@ import {
     Label,
 } from '@trussworks/react-uswds'
 import classnames from 'classnames'
-import { ActuaryContact, RateCapitationType, RateType } from '@mc-review/hpp'
+import {
+    ActuaryContact,
+    RateCapitationType,
+    RateAmendmentType,
+    ActuaryCommunication,
+} from '../../../gen/gqlClient'
 import {
     ButtonWithLogging,
     FieldRadio,
@@ -35,9 +40,9 @@ import {
     getIn,
     useFormikContext,
 } from 'formik'
-import { ActuaryCommunicationType, SharedRateCertDisplay } from '@mc-review/hpp'
 import { ActuaryContactFields } from '../Contacts'
 import { useFocus } from '../../../hooks'
+import { SharedRateCertDisplay } from '../../../components/SubmissionSummarySection/RateDetailsSummarySection/RateDetailsSummary/RateDetailsSummarySection'
 
 const isRateTypeEmpty = (values: RateCertFormType): boolean =>
     values.rateType === undefined
@@ -47,7 +52,7 @@ const isRateTypeAmendment = (values: RateCertFormType): boolean =>
 export type RateCertFormType = {
     id: string
     key: string
-    rateType: RateType | undefined
+    rateType: RateAmendmentType | undefined
     rateCapitationType: RateCapitationType | undefined
     rateDateStart: string
     rateDateEnd: string
@@ -59,7 +64,7 @@ export type RateCertFormType = {
     supportingDocuments: FileItemT[]
     actuaryContacts: ActuaryContact[]
     addtlActuaryContacts: ActuaryContact[]
-    actuaryCommunicationPreference?: ActuaryCommunicationType
+    actuaryCommunicationPreference?: ActuaryCommunication
     packagesWithSharedRateCerts: SharedRateCertDisplay[]
     hasSharedRateCert?: 'YES' | 'NO'
 }

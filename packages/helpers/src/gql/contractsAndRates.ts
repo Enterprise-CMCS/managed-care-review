@@ -11,8 +11,9 @@ import {
     Rate,
     RateRevision,
     UnlockedContract,
+    ActuaryContact,
+    ActuarialFirm
 } from '../gen/gqlClient'
-import { ActuaryContact, ActuaryFirmsRecord } from '@mc-review/hpp'
 
 type RateRevisionWithIsLinked = {
     isLinked: boolean
@@ -131,6 +132,16 @@ const getDraftRates = (contract: Contract): Rate[] | undefined => {
     return contract.draftRates && contract.draftRates[0]
         ? contract.draftRates
         : undefined
+}
+
+const ActuaryFirmsRecord: Record<ActuarialFirm, string> = {
+    MERCER: 'Mercer',
+    MILLIMAN: 'Milliman',
+    OPTUMAS: 'Optumas',
+    GUIDEHOUSE: 'Guidehouse',
+    DELOITTE: 'Deloitte',
+    STATE_IN_HOUSE: 'State in-house',
+    OTHER: 'Other',
 }
 
 const getActuaryFirm = (actuaryContact: ActuaryContact): string => {

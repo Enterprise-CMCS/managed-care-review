@@ -53,7 +53,7 @@ export type RateDetailsSummarySectionProps = {
     explainMissingData?: boolean
 }
 
-type SharedRateCertDisplay = {
+export type SharedRateCertDisplay = {
     packageId?: string
     packageName?: string
 }
