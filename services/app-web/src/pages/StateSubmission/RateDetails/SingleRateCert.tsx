@@ -11,6 +11,7 @@ import {
     ActuaryContact,
     RateCapitationType,
     RateAmendmentType,
+    ActuaryCommunication,
 } from '../../../gen/gqlClient'
 import {
     ButtonWithLogging,
@@ -39,9 +40,9 @@ import {
     getIn,
     useFormikContext,
 } from 'formik'
-import { ActuaryCommunicationType, SharedRateCertDisplay } from '@mc-review/hpp'
 import { ActuaryContactFields } from '../Contacts'
 import { useFocus } from '../../../hooks'
+import { SharedRateCertDisplay } from '../../../components/SubmissionSummarySection/RateDetailsSummarySection/RateDetailsSummary/RateDetailsSummarySection'
 
 const isRateTypeEmpty = (values: RateCertFormType): boolean =>
     values.rateType === undefined
@@ -63,7 +64,7 @@ export type RateCertFormType = {
     supportingDocuments: FileItemT[]
     actuaryContacts: ActuaryContact[]
     addtlActuaryContacts: ActuaryContact[]
-    actuaryCommunicationPreference?: ActuaryCommunicationType
+    actuaryCommunicationPreference?: ActuaryCommunication
     packagesWithSharedRateCerts: SharedRateCertDisplay[]
     hasSharedRateCert?: 'YES' | 'NO'
 }
