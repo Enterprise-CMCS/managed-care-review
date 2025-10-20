@@ -582,6 +582,7 @@ jobs:
           VPC_ID: ${{ secrets.DEV_VPC_ID }}
           SG_ID: ${{ secrets.DEV_SG_ID }}
           INTERNAL_ALLOWED_ORIGINS: ${{ secrets.DEV_INTERNAL_ALLOWED_ORIGINS }}
+          NR_LICENSE_KEY: ${{ secrets.NR_LICENSE_KEY }}
         run: |
           echo "=== Deploying AppApi stack ==="
           pnpm cdk deploy app-api-${STAGE_NAME}-cdk \
