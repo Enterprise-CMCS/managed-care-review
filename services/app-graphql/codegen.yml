@@ -21,7 +21,6 @@ generates:
         StateUser: ../domain-models#StateUserType
         CMSUser: ../domain-models#CMSUserType
         CMSApproverUser: ../domain-model#CMSApproverUserType
-        HealthPlanPackage: ../domain-models#HealthPlanPackageType
         Rate: ../domain-models#RateType
         RateRevision: ../domain-models#RateRevisionWithContractsType
         RateStripped: ../domain-model#StrippedRateType
