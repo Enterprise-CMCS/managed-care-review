@@ -272,7 +272,7 @@ export class AppApiStack extends BaseStack {
             // Copy collector.yml for OTEL configuration
             `cp ${appApiPath}/collector.yml ${outputDir}/collector.yml || echo "collector.yml not found at ${appApiPath}/collector.yml"`,
             // Replace license key placeholder with actual value (matches esbuild behavior)
-            `sed -i 's/\\\\$NR_LICENSE_KEY/${process.env.NR_LICENSE_KEY || ''}/g' "${outputDir}/collector.yml"`,
+            `sed -i 's/\\$NR_LICENSE_KEY/${process.env.NR_LICENSE_KEY || ''}/g' "${outputDir}/collector.yml"`,
         ]
     }
 
