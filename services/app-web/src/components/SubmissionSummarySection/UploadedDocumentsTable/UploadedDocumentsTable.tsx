@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react'
 import { dayjs } from '@mc-review/dates'
 import styles from './UploadedDocumentsTable.module.scss'
-import { SharedRateCertDisplay } from '@mc-review/hpp'
+import { SharedRateCertDisplay } from '../RateDetailsSummarySection/RateDetailsSummary/RateDetailsSummarySection'
 import { DocumentTag } from './DocumentTag'
 import { useDocument } from '../../../hooks/useDocument'
 import { useAuth } from '../../../contexts/AuthContext'
