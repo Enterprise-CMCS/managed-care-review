@@ -1,6 +1,19 @@
 # Managed Care Review - API Changelog
 ## This document highlights API changes that have been introduced since May 2025
 
+### October 16, 2025
+#### Updated
+- **IndexContracts** endpoint updated to accept 2 optional parameters:
+    - **updatedWithin**: an integer, representing seconds. Only submissions that have been updated within the specified timeframe will be returned 
+    - **statusesToExclude**: An array of statuses to exclude in the filtered results. 
+        Valid statuses include:
+            - DRAFT
+            - SUBMITTED
+            - UNLOCKED
+            - RESUBMITTED
+            - APPROVED
+            - WITHDRAWN
+
 ### September 4, 2025
 #### Added
 - **ID** field added to `Document` GraphQL type (optional)

@@ -20,9 +20,9 @@
     "dependencies": {
         "@aws-sdk/client-lambda": "^3.901.0",
         "@aws-sdk/client-secrets-manager": "^3.901.0",
-        "@aws-sdk/client-cloudformation": "^3.911.0",
-        "@aws-sdk/client-cognito-identity-provider": "^3.911.0",
-        "@aws-sdk/client-s3": "^3.911.0",
+        "@aws-sdk/client-cloudformation": "^3.913.0",
+        "@aws-sdk/client-cognito-identity-provider": "^3.913.0",
+        "@aws-sdk/client-s3": "^3.913.0",
         "@types/papaparse": "^5.3.16",
         "@types/uuid": "^11.0.0",
         "octokit": "^5.0.3",

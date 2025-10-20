@@ -21,6 +21,8 @@ import {
     canRead,
     getAuthContextInfo,
 } from '../../authorization/oauthAuthorization'
+import { getLastUpdatedForDisplay } from '../helpers'
+import type { ConsolidatedContractStatus } from '../../gen/gqlClient'
 
 const parseContracts = (
     contractsWithHistory: ContractOrErrorArrayType,
@@ -51,9 +53,27 @@ const parseContracts = (
     return parsedContracts
 }
 
-const formatContracts = (results: ContractType[]) => {
-    const contracts: ContractType[] = results
+const formatContracts = (
+    results: ContractType[],
+    updatedWithin?: number | null,
+    statusesToExclude?: ConsolidatedContractStatus[] | null
+) => {
+    let contracts: ContractType[] = results
+    if (statusesToExclude) {
+        contracts = contracts.filter((contract: ContractType) => {
+            return !statusesToExclude?.includes(contract.consolidatedStatus)
+        })
+    }
+    if (updatedWithin) {
+        const now = new Date()
+        const cutoff = new Date(now.getTime() - updatedWithin! * 1000)
 
+        contracts = contracts.filter((contract: ContractType) => {
+            const lastUpdated = getLastUpdatedForDisplay(contract)
+            if (!lastUpdated) return false
+            return lastUpdated.getTime() > cutoff.getTime()
+        })
+    }
     const edges = contracts.map((contract) => {
         return {
             node: {
@@ -68,7 +88,7 @@ const formatContracts = (results: ContractType[]) => {
 export function indexContractsResolver(
     store: Store
 ): QueryResolvers['indexContracts'] {
-    return async (_parent, _args, context) => {
+    return async (_parent, { input }, context) => {
         const { user, ctx, tracer } = context
         const span = tracer?.startSpan('indexContracts', {}, ctx)
         setResolverDetailsOnActiveSpan('indexContracts', user, span)
@@ -143,9 +163,18 @@ export function indexContractsResolver(
             }
             logSuccess('indexContracts')
             setSuccessAttributesOnActiveSpan(span)
-            const parsedContracts = parseContracts(contractsWithHistory, span)
+            let contracts: any = contractsWithHistory
 
-            return formatContracts(parsedContracts)
+            const parsedContracts = parseContracts(contracts, span)
+            const cleanedStatuses =
+                input?.statusesToExclude?.filter(
+                    (s): s is ConsolidatedContractStatus => s != null
+                ) ?? null
+            return formatContracts(
+                parsedContracts,
+                input?.updatedWithin,
+                cleanedStatuses
+            )
         } else {
             const authInfo = getAuthContextInfo(context)
             const errMsg = authInfo.isOAuthClient
