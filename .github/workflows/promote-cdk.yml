@@ -18,7 +18,7 @@ permissions:
 
 jobs:
   begin-deployment:
-    name: Begin CDK Dev Deployment
+    name: Begin CDK Deployment
     runs-on: ubuntu-24.04
     environment:
       name: dev
@@ -50,53 +50,6 @@ jobs:
           environment: dev-cdk
           description: CDK dev environment deployment
           initial-status: in_progress
-
-  deploy-github-oidc:
-    needs: [begin-deployment]
-    name: deploy - GitHub OIDC service
-    runs-on: ubuntu-24.04
-    environment:
-      name: dev
-    steps:
-      - name: Check out repository
-        uses: actions/checkout@v4
-
-      - name: Setup env
-        uses: ./.github/actions/setup_env
-
-      - name: Generate Code
-        run: pnpm -r generate
-
-      - name: Build packages
-        shell: bash
-        run: pnpm build:packages
-
-      - name: Get AWS credentials (bootstrap with main OIDC role)
-        uses: ./.github/actions/get_aws_credentials
-        with:
-          region: ${{ vars.AWS_DEFAULT_REGION }}
-          account-id: ${{ secrets.DEV_AWS_ACCOUNT_ID }}
-          # Use main OIDC role for bootstrapping since dev-specific role doesn't exist yet
-          stage-name: main
-          changed-services: "github-oidc"
-
-      - name: deploy github-oidc with CDK
-        id: deploy-github-oidc-cdk
-        working-directory: services/infra-cdk
-        env:
-          STAGE_NAME: dev
-        run: |
-          echo "Starting CDK OIDC deployment for stage: dev"
-          echo "Stack name will be: github-oidc-dev-cdk"
-
-          # Deploy using OIDC-only app (no layer dependencies)
-          echo "=== Deploying OIDC stack ==="
-          pnpm cdk deploy github-oidc-dev-cdk \
-            --app 'pnpm tsx bin/oidc.ts' \
-            --context stage=dev \
-            --require-approval never
-
-          echo "=== CDK OIDC deployment completed ==="
 
   web-unit-tests:
     name: test - web unit tests
@@ -249,9 +202,56 @@ jobs:
           name: lambda-layers-postgres-tools
           path: ./services/postgres/lambda-layers-postgres-tools
 
-  deploy-cdk-infrastructure:
-    needs: [begin-deployment, deploy-github-oidc]
-    name: deploy - CDK infrastructure stacks
+  deploy-github-oidc-dev:
+    needs: [begin-deployment]
+    name: deploy - GitHub OIDC service (dev)
+    runs-on: ubuntu-24.04
+    environment:
+      name: dev
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Setup env
+        uses: ./.github/actions/setup_env
+
+      - name: Generate Code
+        run: pnpm -r generate
+
+      - name: Build packages
+        shell: bash
+        run: pnpm build:packages
+
+      - name: Get AWS credentials (bootstrap with main OIDC role)
+        uses: ./.github/actions/get_aws_credentials
+        with:
+          region: ${{ vars.AWS_DEFAULT_REGION }}
+          account-id: ${{ secrets.DEV_AWS_ACCOUNT_ID }}
+          # Use main OIDC role for bootstrapping since dev-specific role doesn't exist yet
+          stage-name: main
+          changed-services: "github-oidc"
+
+      - name: deploy github-oidc with CDK
+        id: deploy-github-oidc-cdk
+        working-directory: services/infra-cdk
+        env:
+          STAGE_NAME: dev
+        run: |
+          echo "Starting CDK OIDC deployment for stage: dev"
+          echo "Stack name will be: github-oidc-dev-cdk"
+
+          # Deploy using OIDC-only app (no layer dependencies)
+          echo "=== Deploying OIDC stack ==="
+          pnpm cdk deploy github-oidc-dev-cdk \
+            --app 'pnpm tsx bin/oidc.ts' \
+            --context stage=dev \
+            --require-approval never
+
+          echo "=== CDK OIDC deployment completed ==="
+
+  deploy-cdk-infrastructure-dev:
+    needs: [begin-deployment, deploy-github-oidc-dev]
+    name: deploy - CDK infrastructure stacks (dev)
     runs-on: ubuntu-24.04
     environment: dev
     steps:
@@ -361,23 +361,23 @@ jobs:
             --context stage=dev \
             --require-approval never
 
-  deploy-frontend-app:
+  deploy-frontend-app-dev:
     needs:
       [
         begin-deployment,
-        deploy-cdk-infrastructure,
-        deploy-cdk-app,
+        deploy-cdk-infrastructure-dev,
+        deploy-cdk-app-dev,
         web-unit-tests,
         api-unit-tests,
       ]
     if: |
       always() &&
-      needs.deploy-cdk-infrastructure.result == 'success' &&
-      needs.deploy-cdk-app.result == 'success' &&
+      needs.deploy-cdk-infrastructure-dev.result == 'success' &&
+      needs.deploy-cdk-app-dev.result == 'success' &&
       needs.web-unit-tests.result == 'success' &&
       needs.api-unit-tests.result == 'success' &&
       needs.begin-deployment.result == 'success'
-    name: deploy - Frontend app with built assets
+    name: deploy - Frontend app with built assets (dev)
     runs-on: ubuntu-24.04
     environment: dev
     steps:
@@ -446,23 +446,23 @@ jobs:
             --context stage=dev \
             --require-approval never
 
-  deploy-cdk-app:
+  deploy-cdk-app-dev:
     needs:
       [
         begin-deployment,
-        deploy-cdk-infrastructure,
+        deploy-cdk-infrastructure-dev,
         build-lambda-layers,
         web-unit-tests,
         api-unit-tests,
       ]
     if: |
       always() &&
-      needs.deploy-cdk-infrastructure.result == 'success' &&
+      needs.deploy-cdk-infrastructure-dev.result == 'success' &&
       needs.build-lambda-layers.result == 'success' &&
       needs.web-unit-tests.result == 'success' &&
       needs.api-unit-tests.result == 'success' &&
       needs.begin-deployment.result == 'success'
-    name: deploy - CDK application stacks
+    name: deploy - CDK application stacks (dev)
     runs-on: ubuntu-24.04
     environment: dev
     steps:
@@ -546,14 +546,14 @@ jobs:
           cd services/app-api
           ./scripts/invoke-migrate-lambda.sh app-api-dev-cdk-migrate
 
-  extract-endpoints:
-    needs: [begin-deployment, deploy-cdk-app, deploy-frontend-app]
+  extract-endpoints-dev:
+    needs: [begin-deployment, deploy-cdk-app-dev, deploy-frontend-app-dev]
     if: |
       always() &&
-      needs.deploy-cdk-app.result == 'success' &&
-      needs.deploy-frontend-app.result == 'success' &&
+      needs.deploy-cdk-app-dev.result == 'success' &&
+      needs.deploy-frontend-app-dev.result == 'success' &&
       needs.begin-deployment.result == 'success'
-    name: Extract deployment endpoints
+    name: Extract deployment endpoints (dev)
     runs-on: ubuntu-24.04
     environment: dev
     outputs:
@@ -587,9 +587,9 @@ jobs:
 
   cypress-dev:
     name: cypress-dev-smoke-test
-    needs: [begin-deployment, extract-endpoints]
+    needs: [begin-deployment, extract-endpoints-dev]
     environment: dev
-    if: always() && needs.extract-endpoints.result == 'success'
+    if: always() && needs.extract-endpoints-dev.result == 'success'
     runs-on: ubuntu-24.04
     container:
       image: cypress/browsers:node-20.14.0-chrome-126.0.6478.114-1-ff-127.0.1-edge-126.0.2592.61-1
@@ -629,7 +629,7 @@ jobs:
         id: cypress
         uses: cypress-io/github-action@v6
         with:
-          config: baseUrl=${{ needs.extract-endpoints.outputs.application-endpoint }}
+          config: baseUrl=${{ needs.extract-endpoints-dev.outputs.application-endpoint }}
           spec: services/cypress/integration/promoteWorkflow/promote.spec.ts
           record: true
           parallel: false
@@ -661,8 +661,14 @@ jobs:
           name: cypress-screenshots-dev
           path: services/cypress/screenshots
 
-  end-deployment:
-    needs: [begin-deployment, deploy-cdk-app, deploy-frontend-app, cypress-dev]
+  end-deployment-dev:
+    needs:
+      [
+        begin-deployment,
+        deploy-cdk-app-dev,
+        deploy-frontend-app-dev,
+        cypress-dev,
+      ]
     if: always() && needs.begin-deployment.result == 'success'
     name: End CDK Dev Deployment
     runs-on: ubuntu-24.04
@@ -680,7 +686,7 @@ jobs:
           deployment-id: ${{ needs.begin-deployment.outputs.deploy-id }}
 
       - name: Update deployment status (success)
-        if: needs.deploy-cdk-app.result == 'success' && needs.deploy-frontend-app.result == 'success' && needs.cypress-dev.result == 'success'
+        if: needs.deploy-cdk-app-dev.result == 'success' && needs.deploy-frontend-app-dev.result == 'success' && needs.cypress-dev.result == 'success'
         uses: chrnorm/deployment-status@v2
         with:
           token: "${{ github.token }}"
