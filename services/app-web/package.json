@@ -120,7 +120,7 @@
         "react-router": "^6.23.1",
         "react-router-dom": "^6.23.1",
         "react-select": "^5.10.2",
-        "sass": "^1.49.11",
+        "sass": "^1.93.2",
         "use-deep-compare-effect": "^1.8.1",
         "uswds": "^2.14.0",
         "uuid": "^13.0.0",
