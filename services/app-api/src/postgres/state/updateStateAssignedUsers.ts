@@ -1,6 +1,5 @@
 import { AuditAction } from '@prisma/client'
-
-import type { StateCodeType } from '@mc-review/hpp'
+import type { StateCodeType } from '@mc-review/submissions'
 import type { UserType } from '../../domain-models'
 import { NotFoundError, UserInputPostgresError } from '../postgresErrors'
 import type { PrismaTransactionType } from '../prismaTypes'

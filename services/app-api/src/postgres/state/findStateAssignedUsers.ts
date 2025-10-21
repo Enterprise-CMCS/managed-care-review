@@ -1,4 +1,4 @@
-import { typedStatePrograms } from '@mc-review/hpp'
+import { typedStatePrograms } from '@mc-review/submissions'
 import type { PrismaTransactionType } from '../prismaTypes'
 import type { UserType } from '../../domain-models'
 import { NotFoundError } from '../postgresErrors'

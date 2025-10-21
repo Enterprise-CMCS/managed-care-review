@@ -7,6 +7,7 @@ export {
     isSubmitted,
     isContractWithProvisions,
     getLastContractSubmission,
+    getDraftContractRateRevisions,
 } from './contractData'
 
 export {

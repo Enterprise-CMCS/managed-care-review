@@ -278,7 +278,7 @@ type Mutation {
     ): CreateContractQuestionPayload!
 
     #    """
-    #    updateQuestion updates a Question for the given HealthPlanPackage
+    #    updateQuestion updates a Question for the given Contract
     #    Only the due date can be changed
     #
     #    This can only be called by a CMSUser
@@ -564,10 +564,6 @@ input WithdrawContractInput {
 input UndoWithdrawContractInput {
     contractID: ID!
     updatedReason: String!
-}
-
-type HealthPlanPackageEdge {
-    node: HealthPlanPackage!
 }
 
 type ContractEdge {
@@ -977,40 +973,6 @@ enum RateActionType {
     WITHDRAW
 }
 
-"""
-HealthPlanPackage is the core type for a single package submission. All the
-submission data is contained in the HealthPlanRevision type, allowing us to store
-the full history of packages previously submitted.
-
-HealthPlanPackages are submitted by state users and reviewed by CMS users.
-Initally created in DRAFT state, they are submitted using the submitHealthPlanPackage mutation.
-CMS users are able to use the unlockHealthPlanPackage mutation to return it to the state user in
-the UNLOCKED state for corrections. State users can then resubmit.
-"""
-type HealthPlanPackage {
-    "uuid"
-    id: ID!
-    """
-    Where the package is in the submission flow.
-    SUBMITTED and RESUBMITTED packages cannot be modified
-    """
-    status: HealthPlanPackageStatus!
-    "The initial date this package was submitted at. Is not changed by unlock or resubmission."
-    initiallySubmittedAt: Date
-    "The state code (e.g. CA or TN) for the submitting state"
-    stateCode: String!
-    "Fuller state data for the submitting state"
-    state: State!
-    "MC-CRS record number provided by CMS user (e.g. 1234)"
-    mccrsID: String
-    """
-    Array of revisions for this package. Each revision represents a single submission
-    for the package and contains the full data from when it was submitted
-    """
-    revisions: [HealthPlanRevisionEdge!]!
-    questions: IndexContractQuestionsPayload
-}
-
 type UpdatedBy {
     role: String!
     email: String!
@@ -1061,39 +1023,6 @@ type RateReviewStatusActions {
     "type of action"
     actionType: RateActionType!
     rateID: ID!
-}
-
-"""
-HealthPlanRevision is a single revision of the package. It contains all the
-data from the form filled out by a state user about their package. When a
- is initially created, a single revision is created as well. That
-revision has its submitInfo filled out when it is submitted, which is what marks
-the HealthPlanPackage as SUBMITTED.
-
-When a HealthPlanPackage is unlocked with the unlockHealthPlanPackage mutation
-a new revision is created with a copy of the previous revision's formDataProto and its
-unlockInfo filled out. This can then be modified by the state user and resubmitted.
-"""
-type HealthPlanRevision {
-    id: ID!
-    """
-    Information about who, when, and why this revision was unlocked.
-    Will be blank on the initial revision.
-    """
-    unlockInfo: UpdateInformation
-    "Information on who, when, and why this revision was submitted."
-    submitInfo: UpdateInformation
-    createdAt: DateTime!
-    """
-    base64 encoded HealthPlanFormData protobuf. This contains all the data
-    from the health plan pacakge form that the state user fills out and submits.
-    Its schema can be found in health_plan_form_data.proto
-    """
-    formDataProto: String!
-}
-
-type HealthPlanRevisionEdge {
-    node: HealthPlanRevision!
 }
 
 enum PopulationCoveredType {

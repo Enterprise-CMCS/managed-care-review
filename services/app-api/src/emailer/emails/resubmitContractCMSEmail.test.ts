@@ -7,7 +7,7 @@ import {
 } from '../../testHelpers/emailerHelpers'
 import { resubmitContractCMSEmail } from './index'
 import type { ContractType } from '../../domain-models'
-import { packageName } from '@mc-review/hpp'
+import { packageName } from '@mc-review/submissions'
 
 describe('with rates', () => {
     const resubmitData = {

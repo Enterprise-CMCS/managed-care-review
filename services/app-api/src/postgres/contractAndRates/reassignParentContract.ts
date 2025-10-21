@@ -5,7 +5,7 @@ import { getParentContractID } from './prismaSharedContractRateHelpers'
 import { unlockContractInsideTransaction } from './unlockContract'
 import { submitContractAndOrRates } from './submitContractAndOrRates'
 import type { ProgramType } from '../../domain-models'
-import { packageName } from '@mc-review/hpp'
+import { packageName } from '@mc-review/submissions'
 
 type RatesToReassign = {
     rateID: string

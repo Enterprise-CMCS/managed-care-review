@@ -8,7 +8,7 @@
     "dependencies": {
         "@apollo/client": "3.8.8",
         "@mc-review/constants": "workspace:*",
-        "@mc-review/hpp": "workspace:*",
+        "@mc-review/submissions": "workspace:*",
         "@mc-review/mocks": "workspace:*",
         "@mc-review/otel": "workspace:*",
         "typescript": "5.9.2",

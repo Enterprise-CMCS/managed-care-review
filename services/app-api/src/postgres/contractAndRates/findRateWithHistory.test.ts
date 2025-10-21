@@ -9,12 +9,15 @@ import { insertDraftRate } from './insertRate'
 import { updateDraftRate } from './updateDraftRate'
 import { unlockRate } from './unlockRate'
 import { findRateWithHistory } from './findRateWithHistory'
-import { must, mockInsertContractArgs } from '../../testHelpers'
-import { mockInsertRateArgs } from '../../testHelpers/rateDataMocks'
+import {
+    must,
+    mockInsertContractArgs,
+    mockInsertRateArgs,
+} from '../../testHelpers'
 import { findContractWithHistory } from './findContractWithHistory'
 import type { DraftContractType } from '../../domain-models/contractAndRates/contractTypes'
 import { updateDraftContractRates } from './updateDraftContractRates'
-import { convertContractToDraftRateRevisions } from '../../domain-models/contractAndRates/convertContractWithRatesToHPP'
+import { getDraftContractRateRevisions } from '../../domain-models/'
 
 describe('findRate', () => {
     it('finds a stripped down rate with history', async () => {
@@ -761,7 +764,7 @@ describe('findRate', () => {
         )
 
         const draftRateRevision =
-            convertContractToDraftRateRevisions(updatedContract)[0]
+            getDraftContractRateRevisions(updatedContract)[0]
 
         if (!draftRateRevision) {
             throw new Error('Unexpected Error: No rate found in contract')

@@ -9,16 +9,16 @@ import {
     SubmissionTypeRecord,
     ContractTypeRecord,
     PopulationCoveredRecord,
-} from '@mc-review/hpp'
+    getVisibleLatestContractFormData,
+} from '@mc-review/submissions'
 import { GenericErrorPage } from '../../../pages/Errors/GenericErrorPage'
-import { getVisibleLatestContractFormData } from '@mc-review/helpers'
 import {
     Program,
     Contract,
     UnlockedContract,
     ContractRevision,
 } from '../../../gen/gqlClient'
-import { booleanAsYesNoUserValue } from '../../../components/Form/FieldYesNo'
+import { booleanAsYesNoUserValue } from '../../Form/FieldYesNo'
 import styles from '../SubmissionSummarySection.module.scss'
 import { formatCalendarDate } from '@mc-review/dates'
 

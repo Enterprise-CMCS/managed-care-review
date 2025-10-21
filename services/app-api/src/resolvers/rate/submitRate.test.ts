@@ -377,7 +377,6 @@ describe('submitRate', () => {
         expect(postSubmitC.packageSubmissions).toHaveLength(2)
     })
 
-    // TODO: this test needs to be updated to remove references to healthplanpackage
     it('can unlock and submit rate independent of contract status', async () => {
         const stateUser = testStateUser()
         const cmsUser = testCMSUser()

@@ -1,60 +1,50 @@
 import React from 'react'
-import { DataDetail } from '../../DataDetail'
-import { SectionHeader } from '../../SectionHeader'
-import { UploadedDocumentsTable } from '..'
-import {
-    ContractExecutionStatusRecord,
-    FederalAuthorityRecord,
-    ManagedCareEntityRecord,
-} from '@mc-review/hpp'
-import { formatCalendarDate } from '@mc-review/dates'
-import { MultiColumnGrid } from '../../MultiColumnGrid'
-import { usePreviousSubmission } from '../../../hooks/usePreviousSubmission'
-import styles from '../SubmissionSummarySection.module.scss'
-import { useAuth } from '../../../contexts/AuthContext'
-import { dsnpTriggers } from '@mc-review/common-code'
-
-import {
-    sortModifiedProvisions,
-    isMissingProvisions,
-    getProvisionDictionary,
-} from '@mc-review/common-code'
-import { DataDetailCheckboxList } from '../../DataDetail/DataDetailCheckboxList'
-import {
-    isBaseContract,
-    isCHIPOnly,
-    isContractWithProvisions,
-} from '@mc-review/common-code'
-import {
-    federalAuthorityKeysForCHIP,
-    CHIPFederalAuthority,
-} from '@mc-review/hpp'
-import { useLDClient } from 'launchdarkly-react-client-sdk'
-import { featureFlags } from '@mc-review/common-code'
-import { Grid } from '@trussworks/react-uswds'
-import {
-    booleanAsYesNoFormValue,
-    booleanAsYesNoUserValue,
-} from '../../Form/FieldYesNo'
-import {
-    StatutoryRegulatoryAttestation,
-    StatutoryRegulatoryAttestationQuestion,
-} from '@mc-review/constants'
-import { SectionCard } from '../../SectionCard'
 import {
     Contract,
     ContractRevision,
     UnlockedContract,
 } from '../../../gen/gqlClient'
 import { useParams } from 'react-router-dom'
+import { useLDClient } from 'launchdarkly-react-client-sdk'
+import { Grid } from '@trussworks/react-uswds'
+import { DataDetail, DataDetailCheckboxList } from '../../DataDetail'
+import { SectionHeader } from '../../SectionHeader'
+import { UploadedDocumentsTable } from '..'
+import { MultiColumnGrid } from '../../MultiColumnGrid'
 import {
+    booleanAsYesNoFormValue,
+    booleanAsYesNoUserValue,
+} from '../../Form/FieldYesNo'
+import { SectionCard } from '../../SectionCard'
+import { DocumentHeader } from '../../DocumentHeader/DocumentHeader'
+import { usePreviousSubmission } from '../../../hooks'
+import { useAuth } from '../../../contexts/AuthContext'
+import { formatCalendarDate } from '@mc-review/dates'
+import {
+    StatutoryRegulatoryAttestation,
+    StatutoryRegulatoryAttestationQuestion,
+} from '@mc-review/constants'
+import { featureFlags } from '@mc-review/common-code'
+import { hasCMSUserPermissions } from '@mc-review/helpers'
+import {
+    ContractExecutionStatusRecord,
+    FederalAuthorityRecord,
+    ManagedCareEntityRecord,
+    federalAuthorityKeysForCHIP,
+    CHIPFederalAuthority,
     getIndexFromRevisionVersion,
     getLastContractSubmission,
     getPackageSubmissionAtIndex,
     getVisibleLatestContractFormData,
-} from '@mc-review/helpers'
-import { hasCMSUserPermissions } from '@mc-review/helpers'
-import { DocumentHeader } from '../../DocumentHeader/DocumentHeader'
+    sortModifiedProvisions,
+    isMissingProvisions,
+    getProvisionDictionary,
+    dsnpTriggers,
+    isBaseContract,
+    isCHIPOnly,
+    isContractWithProvisions,
+} from '@mc-review/submissions'
+import styles from '../SubmissionSummarySection.module.scss'
 
 export type ContractDetailsSummarySectionProps = {
     contract: Contract | UnlockedContract
