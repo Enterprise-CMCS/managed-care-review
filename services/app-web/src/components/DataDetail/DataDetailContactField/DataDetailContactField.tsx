@@ -1,10 +1,9 @@
-import { getActuaryFirm } from '@mc-review/helpers'
+import { getActuaryFirm } from '@mc-review/submissions'
 import { DataDetailMissingField } from '../DataDetailMissingField'
 import { ActuaryContact, StateContact } from '../../../gen/gqlClient'
-import { LinkWithLogging } from '../../TealiumLogging/Link'
+import { LinkWithLogging } from '../../TealiumLogging'
 
 type Contact = ActuaryContact | StateContact
-
 function isCertainActuaryContact(contact: Contact): contact is ActuaryContact {
     return (contact as ActuaryContact).actuarialFirm !== undefined
 }

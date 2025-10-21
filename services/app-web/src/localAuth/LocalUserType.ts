@@ -1,4 +1,4 @@
-import { StateType } from '@mc-review/hpp'
+import { StateType } from '@mc-review/submissions'
 import { Division } from '../gen/gqlClient'
 
 type LocalUserType =

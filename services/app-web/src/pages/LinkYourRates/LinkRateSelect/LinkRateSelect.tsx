@@ -8,7 +8,7 @@ import {
 } from 'react-select'
 import styles from '../../../components/Select/Select.module.scss'
 import { IndexRatesInput, useFetchRateQuery, useIndexRatesStrippedQuery } from '../../../gen/gqlClient'
-import { programNames } from '@mc-review/hpp'
+import { programNames } from '@mc-review/submissions'
 import { formatCalendarDate } from '@mc-review/dates'
 import {
     FormikRateForm,
@@ -79,7 +79,7 @@ export const LinkRateSelect = ({
                 autofill(linkedRateForm, fetchRateLoading, fetchRateError)
           }
         }
-      }, [selectedRateData]);
+      }, [autofill, fetchRateError, fetchRateLoading, getKey, selectedRateData]);
     
     const rates = data?.indexRatesStripped.edges.map((e) => e.node) || []
     // Sort rates by latest submission in desc order and remove withdrawn

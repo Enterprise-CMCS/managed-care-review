@@ -35,7 +35,7 @@ import {
 } from '../../testHelpers/gqlRateHelpers'
 import { testLDService } from '../../testHelpers/launchDarklyHelpers'
 import { testEmailConfig, testEmailer } from '../../testHelpers/emailerHelpers'
-import { packageName } from '@mc-review/hpp'
+import { packageName } from '@mc-review/submissions'
 import { NewPostgresStore } from '../../postgres'
 import { sharedTestPrismaClient } from '../../testHelpers/storeHelpers'
 

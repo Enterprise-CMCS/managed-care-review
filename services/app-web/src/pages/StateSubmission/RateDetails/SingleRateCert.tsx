@@ -8,12 +8,6 @@ import {
 } from '@trussworks/react-uswds'
 import classnames from 'classnames'
 import {
-    ActuaryContact,
-    RateCapitationType,
-    RateAmendmentType,
-    ActuaryCommunication,
-} from '../../../gen/gqlClient'
-import {
     ButtonWithLogging,
     FieldRadio,
     FileItemT,
@@ -42,7 +36,17 @@ import {
 } from 'formik'
 import { ActuaryContactFields } from '../Contacts'
 import { useFocus } from '../../../hooks'
-import { SharedRateCertDisplay } from '../../../components/SubmissionSummarySection/RateDetailsSummarySection/RateDetailsSummary/RateDetailsSummarySection'
+import {
+    ActuaryCommunication,
+    ActuaryContact,
+    RateCapitationType,
+    RateAmendmentType,
+} from '../../../gen/gqlClient'
+
+type SharedRateCertDisplay = {
+    packageId?: string
+    packageName?: string
+}
 
 const isRateTypeEmpty = (values: RateCertFormType): boolean =>
     values.rateType === undefined

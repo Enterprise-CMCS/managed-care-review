@@ -17,14 +17,18 @@ import {
     PoliteErrorMessage,
     ReactRouterLinkWithLogging,
 } from '../../../components'
-import { isContractWithProvisions } from '@mc-review/common-code'
-import { PopulationCoveredRecord, SubmissionTypeRecord } from '@mc-review/hpp'
-import { ContractType, PopulationCoveredType } from '@mc-review/hpp'
+import {
+    PopulationCoveredRecord,
+    SubmissionTypeRecord,
+} from '@mc-review/submissions'
+import { isContractWithProvisions } from '@mc-review/submissions'
 import {
     SubmissionType as SubmissionTypeT,
     CreateContractInput,
     ContractDraftRevisionFormDataInput,
     UpdateContractDraftRevisionInput,
+    ContractType,
+    PopulationCoveredType,
 } from '../../../gen/gqlClient'
 import { PageActions } from '../PageActions'
 import styles from '../StateSubmissionForm.module.scss'

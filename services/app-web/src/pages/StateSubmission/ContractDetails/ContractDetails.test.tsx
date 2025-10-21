@@ -27,7 +27,7 @@ import {
     federalAuthorityKeysForCHIP,
     modifiedProvisionMedicaidAmendmentKeys,
     modifiedProvisionMedicaidBaseKeys,
-} from '@mc-review/hpp'
+} from '@mc-review/submissions'
 import {
     StatutoryRegulatoryAttestation,
     StatutoryRegulatoryAttestationDescription,

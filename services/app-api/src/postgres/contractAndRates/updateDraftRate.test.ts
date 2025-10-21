@@ -7,7 +7,6 @@ import {
 } from '../../testHelpers'
 import { updateDraftRate } from './updateDraftRate'
 import { PrismaClientValidationError } from '@prisma/client/runtime/library'
-
 import type { RateType } from '@prisma/client'
 import type { RateFormEditableType } from '../../domain-models/contractAndRates'
 import { insertDraftContract } from './insertContract'

@@ -4,7 +4,7 @@ import {
     executeGraphQLOperation,
 } from '../../testHelpers/gqlHelpers'
 import { FetchCurrentUserDocument } from '../../gen/gqlClient'
-import { typedStatePrograms } from '@mc-review/hpp'
+import { typedStatePrograms } from '@mc-review/submissions'
 import { testStateUser } from '../../testHelpers/userHelpers'
 
 describe('currentUser', () => {

@@ -1,6 +1,5 @@
 import { formatRateNameDate } from '@mc-review/dates'
-import { programNames } from '@mc-review/hpp'
-import type { ProgramArgType } from '@mc-review/hpp'
+import { programNames, type ProgramArgType } from '@mc-review/submissions'
 import type { RateFormEditableType } from '../../domain-models/contractAndRates'
 
 const naturalSort = (a: string, b: string): number => {

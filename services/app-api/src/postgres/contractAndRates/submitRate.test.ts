@@ -10,7 +10,7 @@ import { submitContract } from './submitContract'
 import { insertDraftContract } from './insertContract'
 import { unlockRate } from './unlockRate'
 import { updateDraftContractRates } from './updateDraftContractRates'
-import { convertContractToDraftRateRevisions } from '../../domain-models/contractAndRates/convertContractWithRatesToHPP'
+import { getDraftContractRateRevisions } from '../../domain-models'
 
 describe('submitRate', () => {
     it('submits rate independent of contract status', async () => {
@@ -78,7 +78,7 @@ describe('submitRate', () => {
         }
 
         const rateID =
-            convertContractToDraftRateRevisions(updatedDraftContract)[0].rateID
+            getDraftContractRateRevisions(updatedDraftContract)[0].rateID
 
         const submittedContract = must(
             await submitContract(client, {

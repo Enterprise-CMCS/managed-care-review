@@ -1,7 +1,6 @@
 import type { PrismaTransactionType } from '../prismaTypes'
 import type { RateType } from '../../domain-models'
 import { findRateWithHistory } from './findRateWithHistory'
-
 import { includeFullContract } from './prismaFullContractRateHelpers'
 import {
     getConsolidatedContractStatus,

@@ -2,23 +2,19 @@ import * as Yup from 'yup'
 import dayjs from 'dayjs'
 import { validateDateFormat } from '../../../formHelpers'
 import {
-    isCHIPProvision,
     GeneralizedProvisionType,
     federalAuthorityKeysForCHIP,
-} from '@mc-review/hpp'
-import {
     isBaseContract,
     isCHIPOnly,
     isContractAmendment,
     isContractWithProvisions,
-} from '@mc-review/common-code'
-import {
     isMedicaidAmendmentProvision,
     isMedicaidBaseProvision,
-} from '@mc-review/hpp'
-import { FeatureFlagSettings } from '@mc-review/common-code'
+    isCHIPProvision,
+} from '@mc-review/submissions'
+import { type FeatureFlagSettings } from '@mc-review/common-code'
 import { UnlockedContract } from '../../../gen/gqlClient'
-import { validateFileItemsList } from '../../../formHelpers/validators'
+import { validateFileItemsList } from '../../../formHelpers'
 
 Yup.addMethod(Yup.date, 'validateDateFormat', validateDateFormat)
 
@@ -75,7 +71,7 @@ export const ContractDetailsFormSchema = (
             'You must select a contract status'
         ),
         contractDateStart: Yup.date()
-             
+
             // @ts-ignore-next-line
             .validateDateFormat('YYYY-MM-DD', true)
             .typeError('The start date must be in MM/DD/YYYY format')
@@ -83,7 +79,7 @@ export const ContractDetailsFormSchema = (
         contractDocuments: validateFileItemsList({ required: true }),
         supportingDocuments: validateFileItemsList({ required: false }),
         contractDateEnd: Yup.date()
-             
+
             // @ts-ignore-next-line
             .validateDateFormat('YYYY-MM-DD', true)
             .typeError('The end date must be in MM/DD/YYYY format')
@@ -121,9 +117,17 @@ export const ContractDetailsFormSchema = (
             }
         ),
         dsnpContract: Yup.string().when('federalAuthorities', {
-            is: (authorities: string[]) => authorities.some(type => ['VOLUNTARY', 'WAIVER_1115', 'WAIVER_1915B', 'STATE_PLAN'].includes(type)) && activeFeatureFlags['dsnp'],
-            then: schema => schema.required('You must select yes or no'),
-            otherwise: schema => schema.notRequired()
+            is: (authorities: string[]) =>
+                authorities.some((type) =>
+                    [
+                        'VOLUNTARY',
+                        'WAIVER_1115',
+                        'WAIVER_1915B',
+                        'STATE_PLAN',
+                    ].includes(type)
+                ) && activeFeatureFlags['dsnp'],
+            then: (schema) => schema.required('You must select yes or no'),
+            otherwise: (schema) => schema.notRequired(),
         }),
         inLieuServicesAndSettings: yesNoError('inLieuServicesAndSettings'),
         modifiedBenefitsProvided: yesNoError('modifiedBenefitsProvided'),
