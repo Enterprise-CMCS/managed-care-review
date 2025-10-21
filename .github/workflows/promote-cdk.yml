@@ -4,7 +4,6 @@ on:
   push:
     branches:
       - "main"
-      - "mt-cdk-simplified"
   workflow_dispatch:
 
 # Prevent concurrent dev deployments
