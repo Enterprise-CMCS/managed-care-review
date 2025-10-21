@@ -9,15 +9,11 @@ import {
 } from '@trussworks/react-uswds'
 import { PoliteErrorMessage } from '../'
 import { recordJSException } from '@mc-review/otel'
-
 import styles from './FileUpload.module.scss'
-
 import { FileItemT } from './FileProcessor/FileProcessor'
 import { FileItemsList } from './FileItemList/FileItemsList'
-import { pluralize } from '@mc-review/common-code'
-
+import { pluralize, calculateSHA256 } from '@mc-review/common-code'
 import { recordUserInputException } from '@mc-review/otel'
-import { calculateSHA256 } from '@mc-review/common-code'
 
 export type S3FileData = {
     key: string

@@ -24,7 +24,7 @@ import {
 import { SignatureV4 } from '@aws-sdk/signature-v4'
 import { HttpRequest } from '@aws-sdk/protocol-http'
 import { Sha256 } from '@aws-crypto/sha256-js'
-import { findStatePrograms } from '@mc-review/hpp';
+import { findStatePrograms } from '@mc-review/submissions';
 
 // programs for state used in tests
 const minnesotaStatePrograms = findStatePrograms('MN')
