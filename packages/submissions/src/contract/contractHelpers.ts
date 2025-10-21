@@ -11,10 +11,6 @@ import {
     RateRevision,
     UnlockedContract,
     ActuaryContact,
-<<<<<<< HEAD:packages/helpers/src/gql/contractsAndRates.ts
-    ActuarialFirm
-} from '../gen/gqlClient'
-=======
 } from '../gen/gqlClient'
 import {
     type ProgramArgType,
@@ -23,7 +19,6 @@ import {
 import {
     ActuaryFirmsRecord
 } from './healthPlanFormDataConstants'
->>>>>>> 71ccd26ad5a11118d8a7ac525a03907e81c67a00:packages/submissions/src/contract/contractHelpers.ts
 
 type RateRevisionWithIsLinked = {
     isLinked: boolean
@@ -142,16 +137,6 @@ const getDraftRates = (contract: Contract): Rate[] | undefined => {
     return contract.draftRates && contract.draftRates[0]
         ? contract.draftRates
         : undefined
-}
-
-const ActuaryFirmsRecord: Record<ActuarialFirm, string> = {
-    MERCER: 'Mercer',
-    MILLIMAN: 'Milliman',
-    OPTUMAS: 'Optumas',
-    GUIDEHOUSE: 'Guidehouse',
-    DELOITTE: 'Deloitte',
-    STATE_IN_HOUSE: 'State in-house',
-    OTHER: 'Other',
 }
 
 const getActuaryFirm = (actuaryContact: ActuaryContact): string => {
