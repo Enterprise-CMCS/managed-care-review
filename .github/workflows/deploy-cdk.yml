@@ -1,0 +1,949 @@
+name: Deploy Review Environment (CDK)
+
+on:
+  push:
+    branches:
+      - "*"
+      - "dependabot/**"
+      - "!main"
+  workflow_dispatch:
+
+# Prevent concurrent deployments to the same branch
+concurrency:
+  group: deploy-cdk-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  id-token: write
+  contents: read
+  deployments: write
+
+jobs:
+  begin-deployment:
+    name: Begin CDK Deployment
+    runs-on: ubuntu-24.04
+    environment:
+      name: dev
+    permissions:
+      deployments: write
+    outputs:
+      deploy-id: ${{ steps.ghdeployment.outputs.deployment_id }}
+      stage-name: ${{ steps.stage-name.outputs.stage-name-for-branch}}
+      app-version: ${{ steps.branch-name.outputs.app-version}}
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 40
+
+      - name: Check for secrets
+        uses: ./.github/actions/check_secrets
+        with:
+          expected-secret: ${{ secrets.VITE_APP_AUTH_MODE }}
+
+      - name: set app version
+        id: app-version
+        shell: bash
+        run: echo "app-version=$(scripts/app_version.sh)" >> "$GITHUB_OUTPUT"
+
+      - name: set stage name
+        id: stage-name
+        shell: bash
+        run: |
+          echo "stage-name-for-branch=$(./scripts/stage_name_for_branch.sh ${GITHUB_REF#refs/heads/})" >> "$GITHUB_OUTPUT"
+
+      - name: set branch name
+        id: branch-name
+        shell: bash
+        run: echo "branch-name=$(echo ${GITHUB_REF#refs/heads/})" >> "$GITHUB_OUTPUT"
+
+      - name: Setup env
+        uses: ./.github/actions/setup_env
+
+      - name: build scripts
+        shell: bash
+        run: pnpm -r build:ci-scripts
+
+      - uses: chrnorm/deployment-action@v2
+        name: Create GitHub deployment
+        id: ghdeployment
+        with:
+          token: "${{ github.token }}"
+          environment: review-apps-cdk
+          transient-environment: true
+          description: CDK stack ${{ steps.stage-name.outputs.stage-name-for-branch}}
+          initial-status: in_progress
+
+  deploy-github-oidc:
+    needs: [begin-deployment]
+    name: deploy - GitHub OIDC service
+    runs-on: ubuntu-24.04
+    environment:
+      name: dev
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Setup env
+        uses: ./.github/actions/setup_env
+
+      - name: Generate Code
+        run: pnpm -r generate
+
+      - name: Build packages
+        shell: bash
+        run: pnpm build:packages
+
+      - name: Get AWS credentials for OIDC deployment
+        uses: ./.github/actions/get_aws_credentials
+        with:
+          region: ${{ vars.AWS_DEFAULT_REGION }}
+          account-id: ${{ secrets.DEV_AWS_ACCOUNT_ID }}
+          # Use main OIDC role since branch-specific role doesn't exist yet
+          stage-name: main
+          changed-services: "github-oidc"
+
+      - name: deploy github-oidc with CDK
+        id: deploy-github-oidc-cdk
+        working-directory: services/infra-cdk
+        env:
+          STAGE_NAME: ${{ needs.begin-deployment.outputs.stage-name }}
+        run: |
+          echo "Starting CDK OIDC deployment for stage: ${STAGE_NAME}"
+          echo "Stack name will be: github-oidc-${STAGE_NAME}-cdk"
+
+          # Deploy using OIDC-only app (no layer dependencies)
+          echo "=== Deploying OIDC stack ==="
+          pnpm cdk deploy github-oidc-${STAGE_NAME}-cdk \
+            --app 'pnpm tsx bin/oidc.ts' \
+            --context stage=${STAGE_NAME} \
+            --require-approval never
+
+          echo "=== CDK OIDC deployment completed ==="
+
+  web-unit-tests:
+    name: test - web unit tests
+    runs-on: ubuntu-24.04
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Setup env
+        uses: ./.github/actions/setup_env
+
+      - name: Generate Code
+        run: pnpm -r generate
+
+      - name: Build packages
+        shell: bash
+        run: pnpm build:packages
+
+      - name: Web Unit Tests
+        id: web-unit-tests
+        env:
+          NODE_OPTIONS: --max_old_space_size=6000
+          VITE_APP_AUTH_MODE: AWS_COGNITO
+          DATABASE_URL: postgresql://postgres:shhhsecret@localhost:5432/postgres?schema=public&connection_limit=5 #pragma: allowlist secret
+        working-directory: services/app-web
+        run: |
+          set -e
+          pnpm test:coverage
+          exit $?
+
+      - name: upload app web gen directory
+        uses: actions/upload-artifact@v4
+        with:
+          name: app-web-gen
+          path: ./services/app-web/src/gen
+
+      - name: upload cypress gen directory
+        uses: actions/upload-artifact@v4
+        with:
+          name: cypress-gen
+          path: ./services/cypress/gen
+
+      - name: upload unit test coverage
+        uses: actions/upload-artifact@v4
+        with:
+          name: unit-test-coverage
+          path: ./services/app-web/coverage/coverage-final.json
+
+  api-unit-tests:
+    name: test - api unit tests
+    runs-on: ubuntu-24.04
+    services:
+      postgres:
+        image: postgres:16.6
+        env:
+          VITE_APP_AUTH_MODE: AWS_COGNITO
+          POSTGRES_PASSWORD: shhhsecret #pragma: allowlist secret
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+        ports:
+          - 5432:5432
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Setup env
+        uses: ./.github/actions/setup_env
+
+      - name: Generate code
+        run: pnpm -r generate
+
+      - name: Generate Prisma
+        env:
+          NODE_OPTIONS: --max_old_space_size=6000
+          VITE_APP_AUTH_MODE: AWS_COGNITO
+          DATABASE_URL: postgresql://postgres:shhhsecret@localhost:5432/postgres?schema=public&connection_limit=5 #pragma: allowlist secret
+        working-directory: services/app-api
+        run: |
+          pnpm generate
+          npx prisma migrate reset --force
+
+      - name: Build packages
+        shell: bash
+        run: pnpm build:packages
+
+      - name: API Unit Tests
+        id: api-unit-tests
+        env:
+          NODE_OPTIONS: --max_old_space_size=6000
+          VITE_APP_OTEL_COLLECTOR_URL: ${{vars.VITE_APP_OTEL_COLLECTOR_URL}}
+          VITE_APP_AUTH_MODE: AWS_COGNITO
+          DATABASE_URL: postgresql://postgres:shhhsecret@localhost:5432/postgres?schema=public&connection_limit=5 #pragma: allowlist secret
+        working-directory: services/app-api
+        run: |
+          set -e
+          pnpm test:coverage
+          exit $?
+
+      - name: upload api test coverage
+        uses: actions/upload-artifact@v4
+        with:
+          name: api-test-coverage
+          path: ./services/app-api/coverage/coverage-final.json
+
+  build-lambda-layers:
+    name: build - lambda layers
+    runs-on: ubuntu-24.04
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Setup env
+        uses: ./.github/actions/setup_env
+
+      - name: Generate protos
+        working-directory: services/app-proto
+        run: pnpm generate
+
+      # Generate Prisma Client and binary that can run in a lambda environment
+      - name: Prepare prisma client
+        working-directory: services/app-api
+        env:
+          PRISMA_CLI_BINARY_TARGETS: rhel-openssl-3.0.x
+        run: pnpm prisma generate
+
+      - name: Prepare "@prisma/client" lambda layer
+        working-directory: services/app-api
+        run: ./scripts/prepare-prisma-layer.sh
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: lambda-layers-prisma-client-migration
+          path: ./services/app-api/lambda-layers-prisma-client-migration
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: lambda-layers-prisma-client-engine
+          path: ./services/app-api/lambda-layers-prisma-client-engine
+
+      - name: Prepare postgres tools lambda layer
+        working-directory: services/postgres
+        run: ./build-postgres-lambda-layer.sh
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: lambda-layers-postgres-tools
+          path: ./services/postgres/lambda-layers-postgres-tools
+
+  deploy-cdk-infrastructure:
+    needs: [begin-deployment, deploy-github-oidc]
+    name: deploy - CDK infrastructure stacks
+    runs-on: ubuntu-24.04
+    environment: dev
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Setup env
+        uses: ./.github/actions/setup_env
+
+      - name: Generate Code
+        run: pnpm -r generate
+
+      - name: Build packages
+        shell: bash
+        run: pnpm build:packages
+
+      - name: Get AWS credentials
+        uses: ./.github/actions/get_aws_credentials
+        with:
+          region: ${{ vars.AWS_DEFAULT_REGION }}
+          account-id: ${{ secrets.DEV_AWS_ACCOUNT_ID }}
+          stage-name: ${{ needs.begin-deployment.outputs.stage-name }}
+          use-cdk-role: "true"
+
+      - name: Deploy Network stack
+        working-directory: services/infra-cdk
+        env:
+          STAGE_NAME: ${{ needs.begin-deployment.outputs.stage-name }}
+          VPC_ID: ${{ secrets.DEV_VPC_ID }}
+          SG_ID: ${{ secrets.DEV_SG_ID }}
+          SUBNET_PRIVATE_A_ID: ${{ secrets.DEV_SUBNET_PRIVATE_A_ID }}
+          SUBNET_PRIVATE_B_ID: ${{ secrets.DEV_SUBNET_PRIVATE_B_ID }}
+          SUBNET_PRIVATE_C_ID: ${{ secrets.DEV_SUBNET_PRIVATE_C_ID }}
+        run: |
+          echo "=== Deploying Network stack ==="
+          pnpm cdk deploy network-${STAGE_NAME}-cdk \
+            --app 'pnpm tsx bin/network.ts' \
+            --context stage=${STAGE_NAME} \
+            --require-approval never
+
+      - name: Deploy Uploads stack
+        working-directory: services/infra-cdk
+        env:
+          STAGE_NAME: ${{ needs.begin-deployment.outputs.stage-name }}
+        run: |
+          echo "=== Deploying Uploads stack ==="
+          pnpm cdk deploy uploads-${STAGE_NAME}-cdk \
+            --app 'pnpm tsx bin/uploads.ts' \
+            --context stage=${STAGE_NAME} \
+            --require-approval never
+
+      - name: Deploy Virus Scanning stack
+        working-directory: services/infra-cdk
+        env:
+          STAGE_NAME: ${{ needs.begin-deployment.outputs.stage-name }}
+          VPC_ID: ${{ secrets.DEV_VPC_ID }}
+          SG_ID: ${{ secrets.DEV_SG_ID }}
+          SUBNET_PRIVATE_A_ID: ${{ secrets.DEV_SUBNET_PRIVATE_A_ID }}
+          SUBNET_PRIVATE_B_ID: ${{ secrets.DEV_SUBNET_PRIVATE_B_ID }}
+          SUBNET_PRIVATE_C_ID: ${{ secrets.DEV_SUBNET_PRIVATE_C_ID }}
+          SUBNET_PUBLIC_A_ID: ${{ secrets.DEV_SUBNET_PUBLIC_A_ID }}
+          NR_LICENSE_KEY: ${{ secrets.NR_LICENSE_KEY }}
+          VITE_APP_OTEL_COLLECTOR_URL: ${{vars.VITE_APP_OTEL_COLLECTOR_URL}}
+          GUARDDUTY_DETECTOR_ID: ${{ secrets.DEV_GUARDDUTY_DETECTOR_ID }}
+        run: |
+          echo "=== Deploying Virus Scanning stack ==="
+          pnpm cdk deploy virus-scanning-${STAGE_NAME}-cdk \
+            --app 'pnpm tsx bin/virus-scanning.ts' \
+            --context stage=${STAGE_NAME} \
+            --require-approval never
+
+      - name: Deploy Postgres stack
+        working-directory: services/infra-cdk
+        env:
+          STAGE_NAME: ${{ needs.begin-deployment.outputs.stage-name }}
+          VPC_ID: ${{ secrets.DEV_VPC_ID }}
+          SG_ID: ${{ secrets.DEV_SG_ID }}
+          SUBNET_PRIVATE_A_ID: ${{ secrets.DEV_SUBNET_PRIVATE_A_ID }}
+          SUBNET_PRIVATE_B_ID: ${{ secrets.DEV_SUBNET_PRIVATE_B_ID }}
+          SUBNET_PRIVATE_C_ID: ${{ secrets.DEV_SUBNET_PRIVATE_C_ID }}
+        run: |
+          echo "=== Deploying Postgres stack ==="
+          pnpm cdk deploy postgres-${STAGE_NAME}-cdk \
+            --app 'pnpm tsx bin/postgres.ts' \
+            --context stage=${STAGE_NAME} \
+            --require-approval never
+
+      - name: Create logical database for review environment
+        run: |
+          echo "=== Creating logical database for review environment ==="
+
+          # Get the logicalDbManagerFunction name from CloudFormation outputs
+          FUNCTION_NAME=$(aws cloudformation describe-stacks \
+            --stack-name postgres-${{ needs.begin-deployment.outputs.stage-name }}-cdk \
+            --query 'Stacks[0].Outputs[?OutputKey==`LogicalDbManagerFunctionName`].OutputValue' \
+            --output text)
+
+          # Get the dev database secret ARN
+          DEV_SECRET_ARN=$(aws secretsmanager describe-secret \
+            --secret-id aurora-postgres-dev-cdk \
+            --query 'ARN' \
+            --output text)
+
+          # Invoke the Lambda to create the logical database
+          # Note: Not passing prSecretName to use default naming: aurora_postgres_{stageName}
+          aws lambda invoke \
+            --function-name ${FUNCTION_NAME} \
+            --payload "{\"action\":\"create\",\"stageName\":\"${{ needs.begin-deployment.outputs.stage-name }}\",\"devDbSecretArn\":\"${DEV_SECRET_ARN}\"}" \
+            --cli-binary-format raw-in-base64-out \
+            /tmp/lambda-response.json
+
+          # Check the response
+          cat /tmp/lambda-response.json
+
+          # Verify it succeeded (statusCode 200)
+          STATUS_CODE=$(cat /tmp/lambda-response.json | jq -r '.statusCode')
+          if [ "$STATUS_CODE" != "200" ]; then
+            echo "ERROR: Logical database creation failed with status code: $STATUS_CODE"
+            cat /tmp/lambda-response.json | jq '.'
+            exit 1
+          fi
+
+          echo "Logical database created successfully for ${{ needs.begin-deployment.outputs.stage-name }}"
+
+      - name: Deploy Frontend Infrastructure stack
+        working-directory: services/infra-cdk
+        env:
+          STAGE_NAME: ${{ needs.begin-deployment.outputs.stage-name }}
+        run: |
+          echo "=== Deploying Frontend Infrastructure stack ==="
+          pnpm cdk deploy frontend-infra-${STAGE_NAME}-cdk \
+            --app 'pnpm tsx bin/frontend-infra.ts' \
+            --context stage=${STAGE_NAME} \
+            --require-approval never
+
+      - name: Deploy Cognito stack
+        working-directory: services/infra-cdk
+        env:
+          STAGE_NAME: ${{ needs.begin-deployment.outputs.stage-name }}
+        run: |
+          echo "=== Deploying Cognito stack ==="
+          pnpm cdk deploy cognito-${STAGE_NAME}-cdk \
+            --app 'pnpm tsx bin/cognito.ts' \
+            --context stage=${STAGE_NAME} \
+            --require-approval never
+
+  deploy-frontend-app:
+    needs:
+      [
+        begin-deployment,
+        deploy-cdk-infrastructure,
+        deploy-cdk-app,
+        web-unit-tests,
+        api-unit-tests,
+      ]
+    if: |
+      always() &&
+      needs.deploy-cdk-infrastructure.result == 'success' &&
+      needs.deploy-cdk-app.result == 'success' &&
+      needs.web-unit-tests.result == 'success' &&
+      needs.api-unit-tests.result == 'success' &&
+      needs.begin-deployment.result == 'success'
+    name: deploy - Frontend app with built assets
+    runs-on: ubuntu-24.04
+    environment: dev
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Setup env
+        uses: ./.github/actions/setup_env
+
+      - name: Generate Code
+        run: pnpm -r generate
+
+      - name: Build packages
+        shell: bash
+        run: pnpm build:packages
+
+      - name: Get AWS credentials
+        uses: ./.github/actions/get_aws_credentials
+        with:
+          region: ${{ vars.AWS_DEFAULT_REGION }}
+          account-id: ${{ secrets.DEV_AWS_ACCOUNT_ID }}
+          stage-name: ${{ needs.begin-deployment.outputs.stage-name }}
+          use-cdk-role: "true"
+
+      - name: Get CDK configuration for app-web build
+        env:
+          STAGE_NAME: ${{ needs.begin-deployment.outputs.stage-name }}
+          VITE_APP_AUTH_MODE: ${{ secrets.VITE_APP_AUTH_MODE }}
+        run: |
+          echo "=== Fetching CDK stack outputs for app-web build ==="
+          ./scripts/get-cdk-config.sh ${STAGE_NAME}
+
+          # Source the config to make variables available for the build step
+          echo "Sourcing configuration for build..."
+          source "/tmp/cdk-config-${STAGE_NAME}.env"
+
+          # Export to GitHub environment for subsequent steps
+          cat "/tmp/cdk-config-${STAGE_NAME}.env" >> $GITHUB_ENV
+
+      - name: Build app-web with CDK configuration
+        working-directory: services/app-web
+        run: |
+          echo "=== Building React app and Storybook with CDK configuration ==="
+
+          # Source the config file to get all environment variables
+          source "/tmp/cdk-config-${{ needs.begin-deployment.outputs.stage-name }}.env"
+
+          # Verify critical variables are set
+          echo "Using VITE_APP_API_URL: $VITE_APP_API_URL"
+          echo "Using VITE_APP_COGNITO_USER_POOL_ID: $VITE_APP_COGNITO_USER_POOL_ID"
+          echo "Using VITE_APP_S3_DOCUMENTS_BUCKET: $VITE_APP_S3_DOCUMENTS_BUCKET"
+          echo "Using VITE_APP_AUTH_MODE: $VITE_APP_AUTH_MODE"
+
+          # Build with all environment variables available
+          pnpm build
+          pnpm storybook:build
+
+      - name: Deploy Frontend App stack
+        working-directory: services/infra-cdk
+        env:
+          STAGE_NAME: ${{ needs.begin-deployment.outputs.stage-name }}
+        run: |
+          echo "=== Deploying Frontend App stack with built assets ==="
+          pnpm cdk deploy frontend-app-${STAGE_NAME}-cdk \
+            --app 'pnpm tsx bin/frontend-app.ts' \
+            --context stage=${STAGE_NAME} \
+            --require-approval never
+
+  deploy-cdk-app:
+    needs:
+      [
+        begin-deployment,
+        deploy-cdk-infrastructure,
+        build-lambda-layers,
+        web-unit-tests,
+        api-unit-tests,
+      ]
+    if: |
+      always() &&
+      needs.deploy-cdk-infrastructure.result == 'success' &&
+      needs.build-lambda-layers.result == 'success' &&
+      needs.web-unit-tests.result == 'success' &&
+      needs.api-unit-tests.result == 'success' &&
+      needs.begin-deployment.result == 'success'
+    name: deploy - CDK application stacks
+    runs-on: ubuntu-24.04
+    environment: dev
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Setup env
+        uses: ./.github/actions/setup_env
+
+      - name: Generate Code
+        run: pnpm -r generate
+
+      - name: Build packages
+        shell: bash
+        run: pnpm build:packages
+
+      - name: Get AWS credentials
+        uses: ./.github/actions/get_aws_credentials
+        with:
+          region: ${{ vars.AWS_DEFAULT_REGION }}
+          account-id: ${{ secrets.DEV_AWS_ACCOUNT_ID }}
+          stage-name: ${{ needs.begin-deployment.outputs.stage-name }}
+          use-cdk-role: "true"
+
+      - name: Download Prisma layers
+        uses: actions/download-artifact@v4
+        with:
+          name: lambda-layers-prisma-client-migration
+          path: ./services/infra-cdk/lambda-layers-prisma-client-migration
+
+      - name: Extract Prisma migration layer
+        working-directory: ./services/infra-cdk/lambda-layers-prisma-client-migration
+        run: |
+          echo "=== Extracting Prisma migration layer ==="
+          tar -xzf nodejs.tar.gz
+          rm nodejs.tar.gz
+          ls -la
+
+      - name: Download Prisma engine layers
+        uses: actions/download-artifact@v4
+        with:
+          name: lambda-layers-prisma-client-engine
+          path: ./services/infra-cdk/lambda-layers-prisma-client-engine
+
+      - name: Extract Prisma engine layer
+        working-directory: ./services/infra-cdk/lambda-layers-prisma-client-engine
+        run: |
+          echo "=== Extracting Prisma engine layer ==="
+          tar -xzf nodejs.tar.gz
+          rm nodejs.tar.gz
+          ls -la
+
+      - name: Deploy AppApi stack
+        working-directory: services/infra-cdk
+        env:
+          STAGE_NAME: ${{ needs.begin-deployment.outputs.stage-name }}
+          VPC_ID: ${{ secrets.DEV_VPC_ID }}
+          SG_ID: ${{ secrets.DEV_SG_ID }}
+          INTERNAL_ALLOWED_ORIGINS: ${{ secrets.DEV_INTERNAL_ALLOWED_ORIGINS }}
+          NR_LICENSE_KEY: ${{ secrets.NR_LICENSE_KEY }}
+        run: |
+          echo "=== Deploying AppApi stack ==="
+          pnpm cdk deploy app-api-${STAGE_NAME}-cdk \
+            --app 'pnpm tsx bin/app-api.ts' \
+            --context stage=${STAGE_NAME} \
+            --require-approval never
+
+      - name: Create Test Users
+        env:
+          STAGE_NAME: ${{ needs.begin-deployment.outputs.stage-name }}
+          TEST_USERS_PASS: ${{ secrets.TEST_USERS_PASS }}
+        run: |
+          cd scripts
+          pnpm tsc
+          node ./add_cypress_test_users_cdk.js $STAGE_NAME $TEST_USERS_PASS
+
+      - name: Create logical database
+        env:
+          STAGE_NAME: ${{ needs.begin-deployment.outputs.stage-name }}
+        run: |
+          echo "=== Creating logical database for review environment ==="
+
+          # Get the CDK dev Aurora secret ARN from CloudFormation exports
+          DEV_DB_SECRET_ARN=$(aws cloudformation list-exports \
+            --query "Exports[?Name=='postgres-dev-cdk-PostgresSecretArn'].Value" \
+            --output text)
+
+          if [ -z "$DEV_DB_SECRET_ARN" ] || [ "$DEV_DB_SECRET_ARN" = "None" ]; then
+            echo "Error: Could not find CDK dev Aurora secret ARN"
+            exit 1
+          fi
+
+          echo "Using CDK dev Aurora secret: $DEV_DB_SECRET_ARN"
+
+          # Use CDK function naming pattern: postgres-{stage}-dbManager-cdk
+          db_manager_function="postgres-${STAGE_NAME}-dbManager-cdk"
+
+          echo "Using CDK logical database manager function: $db_manager_function"
+
+          # Create payload for the Lambda function
+          payload=$(cat <<EOF
+          {
+            "action": "create",
+            "stageName": "$STAGE_NAME",
+            "devDbSecretArn": "$DEV_DB_SECRET_ARN"
+          }
+          EOF
+          )
+
+          echo "Creating logical database..."
+          aws lambda invoke \
+            --function-name "$db_manager_function" \
+            --payload "$payload" \
+            --cli-binary-format raw-in-base64-out \
+            lambda_response.json
+
+          # Check response
+          if jq -e '.FunctionError' lambda_response.json > /dev/null; then
+            echo "Error: Database creation failed"
+            cat lambda_response.json
+            exit 1
+          fi
+
+          echo "Logical database creation completed successfully!"
+
+      - name: Run database migrations
+        env:
+          STAGE_NAME: ${{ needs.begin-deployment.outputs.stage-name }}
+        run: |
+          echo "=== Running database migrations ==="
+          cd services/app-api
+          ./scripts/invoke-migrate-lambda.sh app-api-${STAGE_NAME}-cdk-migrate
+
+  extract-endpoints:
+    needs: [begin-deployment, deploy-cdk-app, deploy-frontend-app]
+    if: |
+      always() &&
+      needs.deploy-cdk-app.result == 'success' &&
+      needs.deploy-frontend-app.result == 'success' &&
+      needs.begin-deployment.result == 'success'
+    name: Extract deployment endpoints
+    runs-on: ubuntu-24.04
+    environment: dev
+    outputs:
+      application-endpoint: ${{ steps.save-app-endpoint.outputs.app-endpoint }}
+      api-endpoint: ${{ steps.save-api-endpoint.outputs.api-endpoint }}
+      cognito-user-pool-id: ${{ steps.save-cognito-user-pool-id.outputs.value }}
+      cognito-region: ${{ steps.save-cognito-region.outputs.value }}
+      cognito-identity-pool-id: ${{ steps.save-cognito-identity-pool-id.outputs.value }}
+      cognito-user-pool-web-client-id: ${{ steps.save-cognito-user-pool-web-client-id.outputs.value }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Get AWS credentials
+        uses: ./.github/actions/get_aws_credentials
+        with:
+          region: ${{ vars.AWS_DEFAULT_REGION }}
+          account-id: ${{ secrets.DEV_AWS_ACCOUNT_ID }}
+          stage-name: ${{ needs.begin-deployment.outputs.stage-name }}
+          use-cdk-role: "true"
+
+      - name: get application endpoint
+        id: save-app-endpoint
+        env:
+          STAGE_NAME: ${{ needs.begin-deployment.outputs.stage-name }}
+        run: |
+          echo "=== Extracting application endpoint from CDK outputs ==="
+          endpoint=$(aws cloudformation list-exports --query "Exports[?Name=='frontend-infra-${STAGE_NAME}-cdk-CloudFrontEndpointUrl'].Value" --output text)
+
+          if [ "$endpoint" = "None" ] || [ -z "$endpoint" ]; then
+            echo "Error: Could not find application endpoint from CDK outputs"
+            exit 1
+          fi
+
+          echo "Application endpoint: $endpoint"
+          echo "app-endpoint=$endpoint" >> "$GITHUB_OUTPUT"
+
+      - name: get api endpoint
+        id: save-api-endpoint
+        env:
+          STAGE_NAME: ${{ needs.begin-deployment.outputs.stage-name }}
+        run: |
+          echo "=== Extracting API endpoint from CDK outputs ==="
+          endpoint=$(aws cloudformation list-exports --query "Exports[?Name=='app-api-${STAGE_NAME}-cdk-ApiGatewayUrl'].Value" --output text)
+
+          if [ "$endpoint" = "None" ] || [ -z "$endpoint" ]; then
+            echo "Error: Could not find API endpoint from CDK outputs"
+            exit 1
+          fi
+
+          echo "API endpoint: $endpoint"
+          echo "api-endpoint=$endpoint" >> "$GITHUB_OUTPUT"
+
+      - name: get cognito user pool id
+        id: save-cognito-user-pool-id
+        env:
+          STAGE_NAME: ${{ needs.begin-deployment.outputs.stage-name }}
+        run: |
+          echo "=== Extracting Cognito User Pool ID from CDK outputs ==="
+          echo "Stage name: ${STAGE_NAME}"
+          echo "Looking for: cognito-${STAGE_NAME}-cdk-UserPoolId"
+
+          value=$(aws cloudformation list-exports --query "Exports[?Name=='cognito-${STAGE_NAME}-cdk-UserPoolId'].Value" --output text)
+
+          # If still None, set to empty string to avoid GitHub Actions format errors
+          if [ "$value" = "None" ] || [ -z "$value" ]; then
+            echo "Warning: Could not find Cognito User Pool ID export"
+            value=""
+          else
+            echo "Cognito User Pool ID: $value"
+          fi
+
+          echo "value=$value" >> "$GITHUB_OUTPUT"
+
+      - name: get cognito region
+        id: save-cognito-region
+        env:
+          STAGE_NAME: ${{ needs.begin-deployment.outputs.stage-name }}
+        run: |
+          echo "=== Extracting Cognito region from CDK outputs ==="
+          value=$(aws cloudformation list-exports --query "Exports[?Name=='cognito-${STAGE_NAME}-cdk-Region'].Value" --output text)
+
+          # Fallback to AWS region if CDK export doesn't exist
+          if [ "$value" = "None" ] || [ -z "$value" ]; then
+            value="${{ vars.AWS_DEFAULT_REGION }}"
+            echo "Using fallback region: $value"
+          else
+            echo "Cognito region: $value"
+          fi
+          echo "value=$value" >> "$GITHUB_OUTPUT"
+
+      - name: get cognito identity pool id
+        id: save-cognito-identity-pool-id
+        env:
+          STAGE_NAME: ${{ needs.begin-deployment.outputs.stage-name }}
+        run: |
+          echo "=== Extracting Cognito Identity Pool ID from CDK outputs ==="
+          echo "Looking for export: cognito-${STAGE_NAME}-cdk-IdentityPoolId"
+
+          value=$(aws cloudformation list-exports --query "Exports[?Name=='cognito-${STAGE_NAME}-cdk-IdentityPoolId'].Value" --output text)
+
+          if [ "$value" = "None" ] || [ -z "$value" ]; then
+            echo "Warning: Could not find Cognito Identity Pool ID with stage-specific name"
+            echo "Trying fallback search for any IdentityPoolId export..."
+            value=$(aws cloudformation list-exports --query "Exports[?contains(Name, 'IdentityPoolId')].Value" --output text)
+            if [ "$value" != "None" ] && [ -n "$value" ]; then
+              echo "Found fallback Cognito Identity Pool ID: $value"
+            else
+              echo "No cognito IdentityPoolId found, setting empty"
+              value=""
+            fi
+          else
+            echo "Cognito Identity Pool ID: $value"
+          fi
+          echo "value=$value" >> "$GITHUB_OUTPUT"
+
+      - name: get cognito user pool web client id
+        id: save-cognito-user-pool-web-client-id
+        env:
+          STAGE_NAME: ${{ needs.begin-deployment.outputs.stage-name }}
+        run: |
+          echo "=== Extracting Cognito User Pool Client ID from CDK outputs ==="
+          echo "Looking for export: cognito-${STAGE_NAME}-cdk-UserPoolClientId"
+
+          value=$(aws cloudformation list-exports --query "Exports[?Name=='cognito-${STAGE_NAME}-cdk-UserPoolClientId'].Value" --output text)
+
+          if [ "$value" = "None" ] || [ -z "$value" ]; then
+            echo "Warning: Could not find Cognito User Pool Client ID with stage-specific name"
+            echo "Trying fallback search for any UserPoolClientId export..."
+            value=$(aws cloudformation list-exports --query "Exports[?contains(Name, 'UserPoolClientId')].Value" --output text)
+            if [ "$value" != "None" ] && [ -n "$value" ]; then
+              echo "Found fallback Cognito User Pool Client ID: $value"
+            else
+              echo "No cognito UserPoolClientId found, setting empty"
+              value=""
+            fi
+          else
+            echo "Cognito User Pool Client ID: $value"
+          fi
+          echo "value=$value" >> "$GITHUB_OUTPUT"
+
+  cypress:
+    name: cypress-cdk-run
+    timeout-minutes: 25
+    needs: [begin-deployment, extract-endpoints]
+    environment: dev
+    if: always() && needs.extract-endpoints.result == 'success'
+    runs-on: ubuntu-24.04
+    container:
+      image: cypress/browsers:node-20.14.0-chrome-126.0.6478.114-1-ff-127.0.1-edge-126.0.2592.61-1
+      options: --user 1001
+    permissions:
+      deployments: write
+      id-token: write
+      contents: read
+    strategy:
+      fail-fast: true
+      matrix:
+        # run copies of the current job in parallel
+        containers: [1, 2, 3, 4, 5, 6, 7, 8]
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup env
+        uses: ./.github/actions/setup_env
+
+      - name: Get AWS credentials
+        id: "creds"
+        uses: ./.github/actions/get_aws_credentials
+        with:
+          region: ${{ vars.AWS_DEFAULT_REGION }}
+          account-id: ${{ secrets.DEV_AWS_ACCOUNT_ID }}
+          stage-name: ${{ needs.begin-deployment.outputs.stage-name }}
+          use-cdk-role: "true"
+
+      - uses: actions/download-artifact@v4
+        with:
+          name: app-web-gen
+          path: ./services/app-web/src/gen
+
+      - uses: actions/download-artifact@v4
+        with:
+          name: cypress-gen
+          path: ./services/cypress/gen
+
+      - name: Generate Code
+        run: pnpm -r generate
+
+      - name: Build packages
+        shell: bash
+        run: pnpm build:packages
+
+      - name: Cypress -- Chrome
+        id: cypress
+        uses: cypress-io/github-action@v6
+        with:
+          config: baseUrl=${{ needs.extract-endpoints.outputs.application-endpoint }}
+          record: true
+          parallel: true
+          browser: chrome
+          group: "Chrome CDK"
+          ci-build-id: ${{ github.run_id }}-${{ github.run_attempt }}
+          # Point to the cypress config file from root
+          config-file: services/cypress/cypress.config.ts
+        env:
+          VITE_APP_AUTH_MODE: AWS_COGNITO
+          CYPRESS_RECORD_KEY: ${{ secrets.CYPRESS_RECORD_KEY }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          TEST_USERS_PASS: ${{ secrets.TEST_USERS_PASS }}
+          VITE_APP_API_URL: ${{ needs.extract-endpoints.outputs.api-endpoint }}
+          COGNITO_USER_POOL_ID: ${{ needs.extract-endpoints.outputs.cognito-user-pool-id }}
+          COGNITO_REGION: ${{ needs.extract-endpoints.outputs.cognito-region }}
+          COGNITO_IDENTITY_POOL_ID: ${{ needs.extract-endpoints.outputs.cognito-identity-pool-id }}
+          COGNITO_USER_POOL_WEB_CLIENT_ID: ${{ needs.extract-endpoints.outputs.cognito-user-pool-web-client-id }}
+          AWS_ACCESS_KEY_ID: ${{ steps.creds.outputs.aws-access-key-id }}
+          AWS_SECRET_ACCESS_KEY: ${{ steps.creds.outputs.aws-secret-access-key }}
+          AWS_SESSION_TOKEN: ${{ steps.creds.outputs.aws-session-token }}
+          # Overwrites folder directories in cypress config because in CI we run from root
+          CYPRESS_SUPPORT_FILE: services/cypress/support/index.ts
+          CYPRESS_FIXTURES_FOLDER: services/cypress/fixtures
+          CYPRESS_SPEC_PATTERN: services/cypress/integration/**/*.spec.ts
+          CYPRESS_SCREEN_SHOTS_FOLDER: services/cypress/screenshots
+          CYPRESS_VIDEOS_FOLDER: services/cypress/videos
+          # Test coverage
+          CYPRESS_COVERAGE: true
+          NODE_V8_COVERAGE: ./coverage-cypress
+
+      - name: Upload cypress screenshots
+        uses: actions/upload-artifact@v4
+        if: failure() && steps.cypress.outcome == 'failure'
+        with:
+          name: cypress-screenshots-cdk-${{ matrix.containers}}
+          path: services/cypress/screenshots
+
+      - name: Upload cypress video
+        uses: actions/upload-artifact@v4
+        if: always() && steps.cypress.outcome != 'skipped'
+        with:
+          name: cypress-videos-cdk-${{ matrix.containers}}
+          path: services/cypress/videos
+
+      - name: upload partial cypress coverage
+        uses: actions/upload-artifact@v4
+        with:
+          name: partial-cypress-coverage-cdk-${{ matrix.containers}}
+          path: ./coverage-cypress/*.info
+
+      - name: upload partial cypress coverage json
+        uses: actions/upload-artifact@v4
+        with:
+          name: cypress-json-coverage-cdk-${{ matrix.containers}}
+          path: ./coverage-cypress/*.json
+
+  end-deployment:
+    needs: [begin-deployment, deploy-cdk-app, deploy-frontend-app, cypress]
+    if: always() && needs.begin-deployment.result == 'success'
+    name: End CDK Deployment
+    runs-on: ubuntu-24.04
+    permissions:
+      deployments: write
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Update deployment status (failure)
+        if: failure() && needs.begin-deployment.result == 'success'
+        uses: chrnorm/deployment-status@v2
+        with:
+          token: "${{ github.token }}"
+          state: "failure"
+          deployment-id: ${{ needs.begin-deployment.outputs.deploy-id }}
+
+      - name: Update deployment status (success)
+        if: needs.deploy-cdk-app.result == 'success' && needs.deploy-frontend-app.result == 'success'
+        uses: chrnorm/deployment-status@v2
+        with:
+          token: "${{ github.token }}"
+          environment-url: ${{ needs.deploy-cdk-app.outputs.application-endpoint }}
+          state: "success"
+          deployment-id: ${{ needs.begin-deployment.outputs.deploy-id }}
+
+      - name: Clean up review deployments
+        uses: ./.github/actions/clean_up_deployments
+        with:
+          environment: review-apps-cdk

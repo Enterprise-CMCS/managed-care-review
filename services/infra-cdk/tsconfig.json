@@ -1,0 +1,27 @@
+{
+    "extends": "../../tsconfig.json",
+    "compilerOptions": {
+        "target": "ES2022",
+        "module": "ESNext",
+        "lib": ["ES2022", "DOM"],
+        "types": ["node", "jest"],
+        "moduleResolution": "bundler",
+        "baseUrl": "./",
+        "experimentalDecorators": true,
+        "emitDecoratorMetadata": true,
+        "preserveConstEnums": true,
+        "skipLibCheck": true,
+        "esModuleInterop": true,
+        "allowSyntheticDefaultImports": true,
+        "resolveJsonModule": true,
+        "paths": {
+            "@config/*": ["lib/config/*"],
+            "@constructs/*": ["lib/constructs/*"],
+            "@stacks/*": ["lib/stacks/*"]
+        }
+    },
+    "ts-node": {
+        "esm": true
+    },
+    "include": ["src", "bin", "lib", "eslint.config.ts", "jest.config.js"]
+}
