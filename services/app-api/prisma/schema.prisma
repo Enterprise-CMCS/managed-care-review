@@ -66,8 +66,9 @@ model ContractTable {
 
   mccrsID     String?
   stateCode   String
-  state       State   @relation(fields: [stateCode], references: [stateCode])
+  state       State      @relation(fields: [stateCode], references: [stateCode])
   stateNumber Int
+  entityType  EntityType
 
   questions           ContractQuestion[]
   reviewStatusActions ContractActionTable[]
@@ -625,4 +626,9 @@ model DocumentZipPackage {
 enum DocumentZipType {
   CONTRACT_DOCUMENTS
   RATE_DOCUMENTS
+}
+
+enum EntityType {
+  HEALTH_PLAN
+  EQRO
 }
