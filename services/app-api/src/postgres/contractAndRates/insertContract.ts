@@ -1,13 +1,15 @@
 import type {
     ContractType,
     ContractFormDataType,
-} from '../../domain-models/contractAndRates'
+    EntityType,
+} from '../../domain-models'
 import type { ExtendedPrismaClient } from '../prismaClient'
 import { parseContractWithHistory } from './parseContractWithHistory'
 import { includeFullContract } from './prismaFullContractRateHelpers'
 
 type InsertContractArgsType = Partial<ContractFormDataType> & {
     // Certain fields are required on insert contract only
+    entityType: EntityType
     stateCode: string
     programIDs: ContractFormDataType['programIDs']
     submissionType: ContractFormDataType['submissionType']
@@ -68,6 +70,7 @@ async function insertDraftContract(
 
             const contract = await tx.contractTable.create({
                 data: {
+                    entityType: args.entityType,
                     stateCode: args.stateCode,
                     stateNumber: latestStateSubmissionNumber,
                     revisions: {

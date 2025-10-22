@@ -77,6 +77,8 @@ export function createContract(
         }
 
         const insertArgs: InsertContractArgsType = {
+            // TODO: Currently defaulting to HEALTH_PLAN, update this to take in GQL input entityType once it is implemented.
+            entityType: 'HEALTH_PLAN',
             stateCode: stateFromCurrentUser,
             populationCovered: input.populationCovered,
             programIDs: input.programIDs,

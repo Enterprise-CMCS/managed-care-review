@@ -63,6 +63,9 @@ export type {
     RatePackageSubmissionWithCauseType,
 } from './packageSubmissions'
 
-export type { ContractReviewStatusType } from './baseContractRateTypes'
+export type {
+    ContractReviewStatusType,
+    EntityType,
+} from './baseContractRateTypes'
 
 export { validateContractDraftRevisionInput } from './dataValidatorHelpers'

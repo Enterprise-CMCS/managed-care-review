@@ -10,6 +10,7 @@ import { must } from './assertionHelpers'
 
 const defaultContractData = () => ({
     id: uuidv4(),
+    entityType: 'HEALTH_PLAN' as const,
     createdAt: new Date(),
     updatedAt: new Date(),
     mccrsID: null,
@@ -26,6 +27,7 @@ const mockInsertContractArgs = ({
     const statePrograms = must(findStatePrograms(stateCode))
 
     return {
+        entityType: 'HEALTH_PLAN',
         stateCode: stateCode,
         submissionType: formData?.submissionType ?? 'CONTRACT_AND_RATES',
         submissionDescription:

@@ -52,6 +52,7 @@ export type {
     StrippedRateFormDataType,
     ContractReviewStatusType,
     UpdateInfoType,
+    EntityType,
 } from './contractAndRates'
 
 export type {
