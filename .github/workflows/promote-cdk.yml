@@ -1,0 +1,694 @@
+name: Promote (CDK)
+
+on:
+  push:
+    branches:
+      - "main"
+  workflow_dispatch:
+
+# Prevent concurrent dev deployments
+concurrency:
+  group: deploy-cdk-dev
+  cancel-in-progress: false
+
+permissions:
+  id-token: write
+  contents: read
+  deployments: write
+
+jobs:
+  begin-deployment:
+    name: Begin CDK Deployment
+    runs-on: ubuntu-24.04
+    environment:
+      name: dev
+    permissions:
+      deployments: write
+    outputs:
+      deploy-id: ${{ steps.ghdeployment.outputs.deployment_id }}
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Check for secrets
+        uses: ./.github/actions/check_secrets
+        with:
+          expected-secret: ${{ secrets.VITE_APP_AUTH_MODE }}
+
+      - name: Setup env
+        uses: ./.github/actions/setup_env
+
+      - name: build scripts
+        shell: bash
+        run: pnpm -r build:ci-scripts
+
+      - uses: chrnorm/deployment-action@v2
+        name: Create GitHub deployment
+        id: ghdeployment
+        with:
+          token: "${{ github.token }}"
+          environment: dev-cdk
+          description: CDK dev environment deployment
+          initial-status: in_progress
+
+  web-unit-tests:
+    name: test - web unit tests
+    runs-on: ubuntu-24.04
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Setup env
+        uses: ./.github/actions/setup_env
+
+      - name: Generate Code
+        run: pnpm -r generate
+
+      - name: Build packages
+        shell: bash
+        run: pnpm build:packages
+
+      - name: Web Unit Tests
+        id: web-unit-tests
+        env:
+          NODE_OPTIONS: --max_old_space_size=6000
+          VITE_APP_AUTH_MODE: IDM
+          DATABASE_URL: postgresql://postgres:shhhsecret@localhost:5432/postgres?schema=public&connection_limit=5 #pragma: allowlist secret
+        working-directory: services/app-web
+        run: |
+          set -e
+          pnpm test:coverage
+          exit $?
+
+      - name: upload app web gen directory
+        uses: actions/upload-artifact@v4
+        with:
+          name: app-web-gen
+          path: ./services/app-web/src/gen
+
+      - name: upload cypress gen directory
+        uses: actions/upload-artifact@v4
+        with:
+          name: cypress-gen
+          path: ./services/cypress/gen
+
+      - name: upload unit test coverage
+        uses: actions/upload-artifact@v4
+        with:
+          name: unit-test-coverage
+          path: ./services/app-web/coverage/coverage-final.json
+
+  api-unit-tests:
+    name: test - api unit tests
+    runs-on: ubuntu-24.04
+    services:
+      postgres:
+        image: postgres:16.6
+        env:
+          VITE_APP_AUTH_MODE: IDM
+          POSTGRES_PASSWORD: shhhsecret #pragma: allowlist secret
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+        ports:
+          - 5432:5432
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Setup env
+        uses: ./.github/actions/setup_env
+
+      - name: Generate code
+        run: pnpm -r generate
+
+      - name: Generate Prisma
+        env:
+          NODE_OPTIONS: --max_old_space_size=6000
+          VITE_APP_AUTH_MODE: IDM
+          DATABASE_URL: postgresql://postgres:shhhsecret@localhost:5432/postgres?schema=public&connection_limit=5 #pragma: allowlist secret
+        working-directory: services/app-api
+        run: |
+          pnpm generate
+          npx prisma migrate reset --force
+
+      - name: Build packages
+        shell: bash
+        run: pnpm build:packages
+
+      - name: API Unit Tests
+        id: api-unit-tests
+        env:
+          NODE_OPTIONS: --max_old_space_size=6000
+          VITE_APP_OTEL_COLLECTOR_URL: ${{vars.VITE_APP_OTEL_COLLECTOR_URL}}
+          VITE_APP_AUTH_MODE: IDM
+          DATABASE_URL: postgresql://postgres:shhhsecret@localhost:5432/postgres?schema=public&connection_limit=5 #pragma: allowlist secret
+        working-directory: services/app-api
+        run: |
+          set -e
+          pnpm test:coverage
+          exit $?
+
+      - name: upload api test coverage
+        uses: actions/upload-artifact@v4
+        with:
+          name: api-test-coverage
+          path: ./services/app-api/coverage/coverage-final.json
+
+  build-lambda-layers:
+    name: build - lambda layers
+    runs-on: ubuntu-24.04
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Setup env
+        uses: ./.github/actions/setup_env
+
+      - name: Generate protos
+        working-directory: services/app-proto
+        run: pnpm generate
+
+      # Generate Prisma Client and binary that can run in a lambda environment
+      - name: Prepare prisma client
+        working-directory: services/app-api
+        env:
+          PRISMA_CLI_BINARY_TARGETS: rhel-openssl-3.0.x
+        run: pnpm prisma generate
+
+      - name: Prepare "@prisma/client" lambda layer
+        working-directory: services/app-api
+        run: ./scripts/prepare-prisma-layer.sh
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: lambda-layers-prisma-client-migration
+          path: ./services/app-api/lambda-layers-prisma-client-migration
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: lambda-layers-prisma-client-engine
+          path: ./services/app-api/lambda-layers-prisma-client-engine
+
+      - name: Prepare postgres tools lambda layer
+        working-directory: services/postgres
+        run: ./build-postgres-lambda-layer.sh
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: lambda-layers-postgres-tools
+          path: ./services/postgres/lambda-layers-postgres-tools
+
+  deploy-github-oidc-dev:
+    needs: [begin-deployment]
+    name: deploy - GitHub OIDC service (dev)
+    runs-on: ubuntu-24.04
+    environment:
+      name: dev
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Setup env
+        uses: ./.github/actions/setup_env
+
+      - name: Generate Code
+        run: pnpm -r generate
+
+      - name: Build packages
+        shell: bash
+        run: pnpm build:packages
+
+      - name: Get AWS credentials (bootstrap with main OIDC role)
+        uses: ./.github/actions/get_aws_credentials
+        with:
+          region: ${{ vars.AWS_DEFAULT_REGION }}
+          account-id: ${{ secrets.DEV_AWS_ACCOUNT_ID }}
+          # Use main OIDC role for bootstrapping since dev-specific role doesn't exist yet
+          stage-name: main
+          changed-services: "github-oidc"
+
+      - name: deploy github-oidc with CDK
+        id: deploy-github-oidc-cdk
+        working-directory: services/infra-cdk
+        env:
+          STAGE_NAME: dev
+        run: |
+          echo "Starting CDK OIDC deployment for stage: dev"
+          echo "Stack name will be: github-oidc-dev-cdk"
+
+          # Deploy using OIDC-only app (no layer dependencies)
+          echo "=== Deploying OIDC stack ==="
+          pnpm cdk deploy github-oidc-dev-cdk \
+            --app 'pnpm tsx bin/oidc.ts' \
+            --context stage=dev \
+            --require-approval never
+
+          echo "=== CDK OIDC deployment completed ==="
+
+  deploy-cdk-infrastructure-dev:
+    needs: [begin-deployment, deploy-github-oidc-dev]
+    name: deploy - CDK infrastructure stacks (dev)
+    runs-on: ubuntu-24.04
+    environment: dev
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Setup env
+        uses: ./.github/actions/setup_env
+
+      - name: Generate Code
+        run: pnpm -r generate
+
+      - name: Build packages
+        shell: bash
+        run: pnpm build:packages
+
+      - name: Get AWS credentials
+        uses: ./.github/actions/get_aws_credentials
+        with:
+          region: ${{ vars.AWS_DEFAULT_REGION }}
+          account-id: ${{ secrets.DEV_AWS_ACCOUNT_ID }}
+          stage-name: dev
+          use-cdk-role: "true"
+
+      - name: Deploy Network stack
+        working-directory: services/infra-cdk
+        env:
+          STAGE_NAME: dev
+          VPC_ID: ${{ secrets.DEV_VPC_ID }}
+          SG_ID: ${{ secrets.DEV_SG_ID }}
+          SUBNET_PRIVATE_A_ID: ${{ secrets.DEV_SUBNET_PRIVATE_A_ID }}
+          SUBNET_PRIVATE_B_ID: ${{ secrets.DEV_SUBNET_PRIVATE_B_ID }}
+          SUBNET_PRIVATE_C_ID: ${{ secrets.DEV_SUBNET_PRIVATE_C_ID }}
+        run: |
+          echo "=== Deploying Network stack ==="
+          pnpm cdk deploy network-dev-cdk \
+            --app 'pnpm tsx bin/network.ts' \
+            --context stage=dev \
+            --require-approval never
+
+      - name: Deploy Uploads stack
+        working-directory: services/infra-cdk
+        env:
+          STAGE_NAME: dev
+        run: |
+          echo "=== Deploying Uploads stack ==="
+          pnpm cdk deploy uploads-dev-cdk \
+            --app 'pnpm tsx bin/uploads.ts' \
+            --context stage=dev \
+            --require-approval never
+
+      - name: Deploy Virus Scanning stack
+        working-directory: services/infra-cdk
+        env:
+          STAGE_NAME: dev
+          VPC_ID: ${{ secrets.DEV_VPC_ID }}
+          SG_ID: ${{ secrets.DEV_SG_ID }}
+          SUBNET_PRIVATE_A_ID: ${{ secrets.DEV_SUBNET_PRIVATE_A_ID }}
+          SUBNET_PRIVATE_B_ID: ${{ secrets.DEV_SUBNET_PRIVATE_B_ID }}
+          SUBNET_PRIVATE_C_ID: ${{ secrets.DEV_SUBNET_PRIVATE_C_ID }}
+          SUBNET_PUBLIC_A_ID: ${{ secrets.DEV_SUBNET_PUBLIC_A_ID }}
+          NR_LICENSE_KEY: ${{ secrets.NR_LICENSE_KEY }}
+          VITE_APP_OTEL_COLLECTOR_URL: ${{vars.VITE_APP_OTEL_COLLECTOR_URL}}
+          GUARDDUTY_DETECTOR_ID: ${{ secrets.DEV_GUARDDUTY_DETECTOR_ID }}
+        run: |
+          echo "=== Deploying Virus Scanning stack ==="
+          pnpm cdk deploy virus-scanning-dev-cdk \
+            --app 'pnpm tsx bin/virus-scanning.ts' \
+            --context stage=dev \
+            --require-approval never
+
+      - name: Deploy Postgres stack
+        working-directory: services/infra-cdk
+        env:
+          STAGE_NAME: dev
+          VPC_ID: ${{ secrets.DEV_VPC_ID }}
+          SG_ID: ${{ secrets.DEV_SG_ID }}
+          SUBNET_PRIVATE_A_ID: ${{ secrets.DEV_SUBNET_PRIVATE_A_ID }}
+          SUBNET_PRIVATE_B_ID: ${{ secrets.DEV_SUBNET_PRIVATE_B_ID }}
+          SUBNET_PRIVATE_C_ID: ${{ secrets.DEV_SUBNET_PRIVATE_C_ID }}
+        run: |
+          echo "=== Deploying Postgres stack ==="
+          pnpm cdk deploy postgres-dev-cdk \
+            --app 'pnpm tsx bin/postgres.ts' \
+            --context stage=dev \
+            --require-approval never
+
+      - name: Deploy Frontend Infrastructure stack
+        working-directory: services/infra-cdk
+        env:
+          STAGE_NAME: dev
+        run: |
+          echo "=== Deploying Frontend Infrastructure stack ==="
+          pnpm cdk deploy frontend-infra-dev-cdk \
+            --app 'pnpm tsx bin/frontend-infra.ts' \
+            --context stage=dev \
+            --require-approval never
+
+      - name: Deploy Cognito stack
+        working-directory: services/infra-cdk
+        env:
+          STAGE_NAME: dev
+        run: |
+          echo "=== Deploying Cognito stack ==="
+          pnpm cdk deploy cognito-dev-cdk \
+            --app 'pnpm tsx bin/cognito.ts' \
+            --context stage=dev \
+            --require-approval never
+
+  deploy-frontend-app-dev:
+    needs:
+      [
+        begin-deployment,
+        deploy-cdk-infrastructure-dev,
+        deploy-cdk-app-dev,
+        web-unit-tests,
+        api-unit-tests,
+      ]
+    if: |
+      always() &&
+      needs.deploy-cdk-infrastructure-dev.result == 'success' &&
+      needs.deploy-cdk-app-dev.result == 'success' &&
+      needs.web-unit-tests.result == 'success' &&
+      needs.api-unit-tests.result == 'success' &&
+      needs.begin-deployment.result == 'success'
+    name: deploy - Frontend app with built assets (dev)
+    runs-on: ubuntu-24.04
+    environment: dev
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Setup env
+        uses: ./.github/actions/setup_env
+
+      - name: Generate Code
+        run: pnpm -r generate
+
+      - name: Build packages
+        shell: bash
+        run: pnpm build:packages
+
+      - name: Get AWS credentials
+        uses: ./.github/actions/get_aws_credentials
+        with:
+          region: ${{ vars.AWS_DEFAULT_REGION }}
+          account-id: ${{ secrets.DEV_AWS_ACCOUNT_ID }}
+          stage-name: dev
+          use-cdk-role: "true"
+
+      - name: Get CDK configuration for app-web build
+        env:
+          STAGE_NAME: dev
+          VITE_APP_AUTH_MODE: IDM
+        run: |
+          echo "=== Fetching CDK stack outputs for app-web build ==="
+          ./scripts/get-cdk-config.sh dev
+
+          # Source the config to make variables available for the build step
+          echo "Sourcing configuration for build..."
+          source "/tmp/cdk-config-dev.env"
+
+          # Export to GitHub environment for subsequent steps
+          cat "/tmp/cdk-config-dev.env" >> $GITHUB_ENV
+
+      - name: Build app-web with CDK configuration
+        working-directory: services/app-web
+        run: |
+          echo "=== Building React app and Storybook with CDK configuration ==="
+
+          # Source the config file to get all environment variables
+          source "/tmp/cdk-config-dev.env"
+
+          # Verify critical variables are set
+          echo "Using VITE_APP_API_URL: $VITE_APP_API_URL"
+          echo "Using VITE_APP_COGNITO_USER_POOL_ID: $VITE_APP_COGNITO_USER_POOL_ID"
+          echo "Using VITE_APP_S3_DOCUMENTS_BUCKET: $VITE_APP_S3_DOCUMENTS_BUCKET"
+          echo "Using VITE_APP_AUTH_MODE: $VITE_APP_AUTH_MODE"
+
+          # Build with all environment variables available
+          pnpm build
+          pnpm storybook:build
+
+      - name: Deploy Frontend App stack
+        working-directory: services/infra-cdk
+        env:
+          STAGE_NAME: dev
+        run: |
+          echo "=== Deploying Frontend App stack with built assets ==="
+          pnpm cdk deploy frontend-app-dev-cdk \
+            --app 'pnpm tsx bin/frontend-app.ts' \
+            --context stage=dev \
+            --require-approval never
+
+  deploy-cdk-app-dev:
+    needs:
+      [
+        begin-deployment,
+        deploy-cdk-infrastructure-dev,
+        build-lambda-layers,
+        web-unit-tests,
+        api-unit-tests,
+      ]
+    if: |
+      always() &&
+      needs.deploy-cdk-infrastructure-dev.result == 'success' &&
+      needs.build-lambda-layers.result == 'success' &&
+      needs.web-unit-tests.result == 'success' &&
+      needs.api-unit-tests.result == 'success' &&
+      needs.begin-deployment.result == 'success'
+    name: deploy - CDK application stacks (dev)
+    runs-on: ubuntu-24.04
+    environment: dev
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Setup env
+        uses: ./.github/actions/setup_env
+
+      - name: Generate Code
+        run: pnpm -r generate
+
+      - name: Build packages
+        shell: bash
+        run: pnpm build:packages
+
+      - name: Get AWS credentials
+        uses: ./.github/actions/get_aws_credentials
+        with:
+          region: ${{ vars.AWS_DEFAULT_REGION }}
+          account-id: ${{ secrets.DEV_AWS_ACCOUNT_ID }}
+          stage-name: dev
+          use-cdk-role: "true"
+
+      - name: Download Prisma layers
+        uses: actions/download-artifact@v4
+        with:
+          name: lambda-layers-prisma-client-migration
+          path: ./services/infra-cdk/lambda-layers-prisma-client-migration
+
+      - name: Extract Prisma migration layer
+        working-directory: ./services/infra-cdk/lambda-layers-prisma-client-migration
+        run: |
+          echo "=== Extracting Prisma migration layer ==="
+          tar -xzf nodejs.tar.gz
+          rm nodejs.tar.gz
+          ls -la
+
+      - name: Download Prisma engine layers
+        uses: actions/download-artifact@v4
+        with:
+          name: lambda-layers-prisma-client-engine
+          path: ./services/infra-cdk/lambda-layers-prisma-client-engine
+
+      - name: Extract Prisma engine layer
+        working-directory: ./services/infra-cdk/lambda-layers-prisma-client-engine
+        run: |
+          echo "=== Extracting Prisma engine layer ==="
+          tar -xzf nodejs.tar.gz
+          rm nodejs.tar.gz
+          ls -la
+
+      - name: Deploy AppApi stack
+        working-directory: services/infra-cdk
+        env:
+          STAGE_NAME: dev
+          VPC_ID: ${{ secrets.DEV_VPC_ID }}
+          SG_ID: ${{ secrets.DEV_SG_ID }}
+          INTERNAL_ALLOWED_ORIGINS: ${{ secrets.DEV_INTERNAL_ALLOWED_ORIGINS }}
+        run: |
+          echo "=== Deploying AppApi stack ==="
+          pnpm cdk deploy app-api-dev-cdk \
+            --app 'pnpm tsx bin/app-api.ts' \
+            --context stage=dev \
+            --require-approval never
+
+      - name: Create Test Users
+        env:
+          STAGE_NAME: dev
+          TEST_USERS_PASS: ${{ secrets.TEST_USERS_PASS }}
+        run: |
+          cd scripts
+          pnpm tsc
+          node ./add_cypress_test_users_cdk.js dev $TEST_USERS_PASS
+
+      - name: Run database migrations
+        env:
+          STAGE_NAME: dev
+        run: |
+          echo "=== Running database migrations ==="
+          cd services/app-api
+          ./scripts/invoke-migrate-lambda.sh app-api-dev-cdk-migrate
+
+  extract-endpoints-dev:
+    needs: [begin-deployment, deploy-cdk-app-dev, deploy-frontend-app-dev]
+    if: |
+      always() &&
+      needs.deploy-cdk-app-dev.result == 'success' &&
+      needs.deploy-frontend-app-dev.result == 'success' &&
+      needs.begin-deployment.result == 'success'
+    name: Extract deployment endpoints (dev)
+    runs-on: ubuntu-24.04
+    environment: dev
+    outputs:
+      application-endpoint: ${{ steps.save-app-endpoint.outputs.app-endpoint }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Get AWS credentials
+        uses: ./.github/actions/get_aws_credentials
+        with:
+          region: ${{ vars.AWS_DEFAULT_REGION }}
+          account-id: ${{ secrets.DEV_AWS_ACCOUNT_ID }}
+          stage-name: dev
+          use-cdk-role: "true"
+
+      - name: get application endpoint
+        id: save-app-endpoint
+        env:
+          STAGE_NAME: dev
+        run: |
+          echo "=== Extracting application endpoint from CDK outputs ==="
+          endpoint=$(aws cloudformation list-exports --query "Exports[?Name=='frontend-infra-dev-cdk-CloudFrontEndpointUrl'].Value" --output text)
+
+          if [ "$endpoint" = "None" ] || [ -z "$endpoint" ]; then
+            echo "Error: Could not find application endpoint from CDK outputs"
+            exit 1
+          fi
+
+          echo "Application endpoint: $endpoint"
+          echo "app-endpoint=$endpoint" >> "$GITHUB_OUTPUT"
+
+  cypress-dev:
+    name: cypress-dev-smoke-test
+    needs: [begin-deployment, extract-endpoints-dev]
+    environment: dev
+    if: always() && needs.extract-endpoints-dev.result == 'success'
+    runs-on: ubuntu-24.04
+    container:
+      image: cypress/browsers:node-20.14.0-chrome-126.0.6478.114-1-ff-127.0.1-edge-126.0.2592.61-1
+      options: --user 1001
+    permissions:
+      deployments: write
+      id-token: write
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Generate unique ID for Cypress
+        id: uuid
+        run: echo "value=sha-$GITHUB_SHA-time-$(date +"%s")" >> "$GITHUB_OUTPUT"
+
+      - name: Setup env
+        uses: ./.github/actions/setup_env
+
+      - uses: actions/download-artifact@v4
+        with:
+          name: app-web-gen
+          path: ./services/app-web/src/gen
+
+      - uses: actions/download-artifact@v4
+        with:
+          name: cypress-gen
+          path: ./services/cypress/gen
+
+      - name: Generate Code
+        run: pnpm -r generate
+
+      - name: Build packages
+        shell: bash
+        run: pnpm build:packages
+
+      - name: Cypress smoke test on Dev -- Chrome
+        id: cypress
+        uses: cypress-io/github-action@v6
+        with:
+          config: baseUrl=${{ needs.extract-endpoints-dev.outputs.application-endpoint }}
+          spec: services/cypress/integration/promoteWorkflow/promote.spec.ts
+          record: true
+          parallel: false
+          browser: chrome
+          group: "Chrome - dev CDK"
+          ci-build-id: ${{ steps.uuid.outputs.value }}
+          config-file: services/cypress/cypress.config.ts
+        env:
+          VITE_APP_AUTH_MODE: IDM
+          CYPRESS_RECORD_KEY: ${{ secrets.CYPRESS_RECORD_KEY }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          CYPRESS_SUPPORT_FILE: services/cypress/support/index.ts
+          CYPRESS_FIXTURES_FOLDER: services/cypress/fixtures
+          CYPRESS_SPEC_PATTERN: services/cypress/integration/**/*.spec.ts
+          CYPRESS_SCREEN_SHOTS_FOLDER: services/cypress/screenshots
+          CYPRESS_VIDEOS_FOLDER: services/cypress/videos
+
+      - name: Upload cypress video
+        uses: actions/upload-artifact@v4
+        if: failure() && steps.cypress.outcome == 'failure'
+        with:
+          name: cypress-videos-dev
+          path: services/cypress/videos
+
+      - name: Upload cypress screenshots
+        uses: actions/upload-artifact@v4
+        if: failure() && steps.cypress.outcome == 'failure'
+        with:
+          name: cypress-screenshots-dev
+          path: services/cypress/screenshots
+
+  end-deployment-dev:
+    needs:
+      [
+        begin-deployment,
+        deploy-cdk-app-dev,
+        deploy-frontend-app-dev,
+        cypress-dev,
+      ]
+    if: always() && needs.begin-deployment.result == 'success'
+    name: End CDK Dev Deployment
+    runs-on: ubuntu-24.04
+    permissions:
+      deployments: write
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Update deployment status (failure)
+        if: failure() && needs.begin-deployment.result == 'success'
+        uses: chrnorm/deployment-status@v2
+        with:
+          token: "${{ github.token }}"
+          state: "failure"
+          deployment-id: ${{ needs.begin-deployment.outputs.deploy-id }}
+
+      - name: Update deployment status (success)
+        if: needs.deploy-cdk-app-dev.result == 'success' && needs.deploy-frontend-app-dev.result == 'success' && needs.cypress-dev.result == 'success'
+        uses: chrnorm/deployment-status@v2
+        with:
+          token: "${{ github.token }}"
+          state: "success"
+          deployment-id: ${{ needs.begin-deployment.outputs.deploy-id }}
