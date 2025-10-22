@@ -79,7 +79,7 @@ export const LinkRateSelect = ({
                 autofill(linkedRateForm, fetchRateLoading, fetchRateError)
           }
         }
-      }, [autofill, fetchRateError, fetchRateLoading, getKey, selectedRateData]);
+      }, [selectedRateData]);
     
     const rates = data?.indexRatesStripped.edges.map((e) => e.node) || []
     // Sort rates by latest submission in desc order and remove withdrawn
