@@ -143,10 +143,10 @@ export class Postgres extends BaseStack {
      * The logicalDbManagerFunction will update this secret with actual logical database credentials
      */
     private createReviewEnvironmentSecret(): ISecret {
-        // Create a placeholder secret matching serverless naming: aurora_postgres_{stage}
+        // Create a placeholder secret with _cdk suffix to avoid serverless conflicts: aurora_postgres_{stage}_cdk
         // The Lambda will update this with the actual logical database connection info
         return new Secret(this, 'ReviewDatabaseSecret', {
-            secretName: `aurora_postgres_${this.stage}`,
+            secretName: `aurora_postgres_${this.stage}_cdk`,
             description: `Logical database credentials for review environment ${this.stage}`,
             generateSecretString: {
                 secretStringTemplate: '{"username": "placeholder"}',
@@ -327,16 +327,16 @@ export class Postgres extends BaseStack {
         const isReview = isReviewEnvironment(this.stage)
 
         // For review environments, output the logical database secret name (created by Lambda)
-        // Lambda uses default naming: aurora_postgres_{stageName} (with underscores, no -cdk suffix)
+        // Lambda uses naming with -cdk suffix: aurora_postgres_{stageName}_cdk
         // For dev/val/prod, output the actual Aurora secret
         const secretName = isReview
-            ? `aurora_postgres_${this.stage}`
+            ? `aurora_postgres_${this.stage}_cdk`
             : this.databaseSecret.secretName
 
         // Note: For review environments, the ARN won't be resolvable until the Lambda creates it
         // but we can construct it predictably
         const secretArn = isReview
-            ? `arn:aws:secretsmanager:${this.region}:${this.account}:secret:aurora_postgres_${this.stage}-??????`
+            ? `arn:aws:secretsmanager:${this.region}:${this.account}:secret:aurora_postgres_${this.stage}_cdk-??????`
             : this.databaseSecret.secretArn
 
         new CfnOutput(this, 'PostgresSecretArn', {
