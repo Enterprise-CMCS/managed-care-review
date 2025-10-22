@@ -11,7 +11,7 @@
         "@aws-sdk/types": "^3.910.0",
         "@types/eslint": "^9.6.1",
         "@types/pg": "^8.15.5",
-        "@typescript-eslint/eslint-plugin": "^8.39.1",
+        "@typescript-eslint/eslint-plugin": "^8.46.2",
         "@typescript-eslint/parser": "^8.29.1",
         "eslint": "^9.34.0",
         "eslint-config-prettier": "^10.1.8",
