@@ -9,7 +9,7 @@ import {
 } from '../../testHelpers/emailerHelpers'
 import { newContractCMSEmail } from './index'
 import type { ContractType, RateFormDataType } from '../../domain-models'
-import { packageName } from '@mc-review/hpp'
+import { packageName } from '@mc-review/submissions'
 
 test('to addresses list includes review team email addresses', async () => {
     const sub = mockContract()

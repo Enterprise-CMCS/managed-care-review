@@ -4,6 +4,7 @@ import {
     clearDocMetadata,
     mockInsertContractArgs,
     must,
+    mockInsertRateArgs,
 } from '../../testHelpers'
 import { updateDraftContractFormData } from './updateDraftContractWithRates'
 import { PrismaClientValidationError } from '@prisma/client/runtime/library'
@@ -13,11 +14,10 @@ import type {
     RateFormEditableType,
     ContractFormEditableType,
 } from '../../domain-models/contractAndRates'
-import { mockInsertRateArgs } from '../../testHelpers/rateDataMocks'
 import { v4 as uuidv4 } from 'uuid'
 import { insertDraftRate } from './insertRate'
-import { convertContractToDraftRateRevisions } from '../../domain-models/contractAndRates/convertContractWithRatesToHPP'
 import { updateDraftContractRates } from './updateDraftContractRates'
+import { getDraftContractRateRevisions } from '../../domain-models'
 
 describe('updateDraftContractWithRates postgres', () => {
     afterEach(() => {
@@ -172,7 +172,6 @@ describe('updateDraftContractWithRates postgres', () => {
         const client = await sharedTestPrismaClient()
 
         const draftContractForm1 = mockInsertContractArgs({})
-        // eslint-disable-next-line @typescript-eslint/no-unused-vars
         const contract = must(
             await insertDraftContract(client, {
                 ...draftContractForm1,
@@ -208,7 +207,13 @@ describe('updateDraftContractWithRates postgres', () => {
         expect(draft.draftRevision).toBeDefined()
         expect(draft.draftRevision?.formData.submissionDescription).toBe('Test')
 
-        const rateID = convertContractToDraftRateRevisions(draft)[0].id
+        const rateID = draft.draftRates?.[0].id
+
+        if (!rateID) {
+            throw new Error(
+                'Unexpected error: No rate was found on draft contract'
+            )
+        }
 
         const emptyContract = emptyTestContract()
 
@@ -246,12 +251,10 @@ describe('updateDraftContractWithRates postgres', () => {
         )
 
         expect(
-            convertContractToDraftRateRevisions(emptyDraft)[0].formData
-                .rateDateStart
+            getDraftContractRateRevisions(emptyDraft)[0].formData.rateDateStart
         ).toBeUndefined()
         expect(
-            convertContractToDraftRateRevisions(emptyDraft)[0].formData
-                .rateProgramIDs
+            getDraftContractRateRevisions(emptyDraft)[0].formData.rateProgramIDs
         ).toEqual([])
     })
 
@@ -520,7 +523,7 @@ describe('updateDraftContractWithRates postgres', () => {
             throw Error('Unexpect error: draft contract missing draft revision')
         }
 
-        const newlyCreatedRates = convertContractToDraftRateRevisions(
+        const newlyCreatedRates = getDraftContractRateRevisions(
             updatedContractWithNewRates
         )
 
@@ -635,7 +638,7 @@ describe('updateDraftContractWithRates postgres', () => {
         }
 
         const updatedRateRevisions =
-            convertContractToDraftRateRevisions(updatedContractRates)
+            getDraftContractRateRevisions(updatedContractRates)
 
         // expect three updated rates
         expect(updatedRateRevisions).toHaveLength(3)
@@ -730,7 +733,7 @@ describe('updateDraftContractWithRates postgres', () => {
 
         // expect two rate revisions
         expect(
-            convertContractToDraftRateRevisions(contractAfterRateDisconnection)
+            getDraftContractRateRevisions(contractAfterRateDisconnection)
         ).toHaveLength(2)
 
         if (!contractAfterRateDisconnection.draftRates) {
@@ -779,7 +782,7 @@ describe('updateDraftContractWithRates postgres', () => {
                             rateID: contractAfterRateDisconnection.draftRates[0]
                                 .id,
                             formData: {
-                                ...convertContractToDraftRateRevisions(
+                                ...getDraftContractRateRevisions(
                                     contractAfterRateDisconnection
                                 )[0].formData,
                                 certifyingActuaryContacts: [
@@ -809,7 +812,7 @@ describe('updateDraftContractWithRates postgres', () => {
             throw Error('Unexpect error: draft contract missing draft revision')
         }
 
-        const rateRevisionsAfterManyCrud = convertContractToDraftRateRevisions(
+        const rateRevisionsAfterManyCrud = getDraftContractRateRevisions(
             contractAfterManyCrud
         )
 
@@ -940,7 +943,7 @@ describe('updateDraftContractWithRates postgres', () => {
 
         // expect two rates connected to contract
         expect(
-            convertContractToDraftRateRevisions(updatedDraftContract)
+            getDraftContractRateRevisions(updatedDraftContract)
         ).toHaveLength(2)
     })
 })

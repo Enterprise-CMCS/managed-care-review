@@ -5,8 +5,6 @@ import {
     CreateContractQuestionInput,
     CreateContractQuestionMutation,
     QuestionResponse as QuestionResponseType,
-    HealthPlanPackage,
-    IndexContractQuestionsPayload,
     CreateRateQuestionInput,
     CreateRateQuestionMutation,
     CreateRateQuestionDocument,
@@ -14,14 +12,6 @@ import {
     CreateRateQuestionResponseDocument,
 } from '../gen/gqlClient'
 import { mockValidCMSUser } from './userGQLMock'
-import { mockSubmittedHealthPlanPackage, mockQuestionsPayload } from './'
-import { GraphQLError } from 'graphql'
-
-type fetchStateHealthPlanPackageWithQuestionsProps = {
-    stateSubmission?: HealthPlanPackage | Partial<HealthPlanPackage>
-    id: string
-    questions?: IndexContractQuestionsPayload
-}
 
 const createContractQuestionSuccess = (
     question?:

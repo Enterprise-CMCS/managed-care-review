@@ -1,0 +1,138 @@
+import { CfnOutput, Duration } from 'aws-cdk-lib'
+import type { Construct } from 'constructs'
+import {
+    Role,
+    WebIdentityPrincipal,
+    ManagedPolicy,
+    PolicyStatement,
+    Effect,
+} from 'aws-cdk-lib/aws-iam'
+import { BaseStack, type BaseStackProps } from '../constructs/base'
+
+// CMS IAM permissions boundary requirement
+const PERMISSION_BOUNDARY_ARN = (accountId: string) =>
+    `arn:aws:iam::${accountId}:policy/cms-cloud-admin/ct-ado-poweruser-permissions-boundary-policy`
+
+export interface GitHubOidcServiceRoleStackProps extends BaseStackProps {}
+
+/**
+ * Stack for creating GitHub Actions OIDC service role for a specific stage
+ *
+ * This creates only the stage-specific service role, not the OIDC provider.
+ * The OIDC provider already exists and is shared across all stages.
+ *
+ * Mirrors the behavior of services/github-oidc/serverless.yml but using CDK.
+ */
+export class GitHubOidcServiceRoleStack extends BaseStack {
+    public readonly serviceRole: Role
+
+    constructor(
+        scope: Construct,
+        id: string,
+        props: GitHubOidcServiceRoleStackProps
+    ) {
+        super(scope, id, {
+            ...props,
+            description:
+                props.description ||
+                `GitHub OIDC service role for ${props.stage} stage`,
+        })
+
+        // Reference the existing OIDC provider (created 2 years ago)
+        const existingOidcProviderArn = `arn:aws:iam::${this.account}:oidc-provider/token.actions.githubusercontent.com`
+
+        // Determine subject claim based on stage (matching Serverless logic)
+        const subjectClaim = ['val', 'prod'].includes(this.stage)
+            ? `repo:Enterprise-CMCS/managed-care-review:environment:${this.stage}`
+            : 'repo:Enterprise-CMCS/managed-care-review:environment:dev'
+
+        // Create the stage-specific service role (CDK version to avoid Serverless conflict)
+        this.serviceRole = new Role(this, 'GitHubActionsServiceRole', {
+            roleName: `github-oidc-cdk-${this.stage}-ServiceRole`,
+            assumedBy: new WebIdentityPrincipal(existingOidcProviderArn, {
+                StringEquals: {
+                    'token.actions.githubusercontent.com:sub': subjectClaim,
+                    'token.actions.githubusercontent.com:aud':
+                        'sts.amazonaws.com',
+                },
+            }),
+            description: `GitHub OIDC service role for ${this.stage} stage`,
+            maxSessionDuration: Duration.hours(2),
+            // CMS IAM requirements - OIDC role needs both path and permissions boundary
+            path: '/delegatedadmin/developer/',
+            permissionsBoundary: ManagedPolicy.fromManagedPolicyArn(
+                this,
+                'PermissionsBoundary',
+                PERMISSION_BOUNDARY_ARN(this.account)
+            ),
+        })
+
+        // Add the same permissions as Serverless version
+        const allowedActions = [
+            'acm:*',
+            'apigateway:*',
+            'cloudformation:*',
+            'cloudfront:*',
+            'cloudwatch:*',
+            'cognito-identity:*',
+            'cognito-idp:*',
+            'ec2:*',
+            'ecr:*',
+            'events:*',
+            'firehose:*',
+            'guardduty:*',
+            'iam:*',
+            'kms:*',
+            'lambda:*',
+            'logs:*',
+            'route53:*',
+            'rds:*',
+            'secretsmanager:*',
+            'ssm:*',
+            's3:*',
+            'tag:*',
+            'wafv2:*',
+            'securityhub:*',
+        ]
+
+        this.serviceRole.addToPolicy(
+            new PolicyStatement({
+                effect: Effect.ALLOW,
+                actions: allowedActions,
+                resources: ['*'],
+            })
+        )
+
+        // Add cross-account assume role permission (from Serverless)
+        this.serviceRole.addToPolicy(
+            new PolicyStatement({
+                effect: Effect.ALLOW,
+                actions: ['sts:AssumeRole'],
+                resources: [
+                    `arn:aws:iam::${this.account}:role/delegatedadmin/developer/ct-cmcs-mac-fc-dso-metrics-report-events-role`,
+                ],
+            })
+        )
+
+        // Add permission to assume CDK bootstrap roles
+        this.serviceRole.addToPolicy(
+            new PolicyStatement({
+                effect: Effect.ALLOW,
+                actions: ['sts:AssumeRole'],
+                resources: [
+                    `arn:aws:iam::${this.account}:role/cdk-*-lookup-role-${this.account}-*`,
+                    `arn:aws:iam::${this.account}:role/cdk-*-deploy-role-${this.account}-*`,
+                    `arn:aws:iam::${this.account}:role/cdk-*-file-publishing-role-${this.account}-*`,
+                    `arn:aws:iam::${this.account}:role/cdk-*-image-publishing-role-${this.account}-*`,
+                ],
+            })
+        )
+
+        // Output the role ARN for verification
+        new CfnOutput(this, 'ServiceRoleArn', {
+            value: this.serviceRole.roleArn,
+            description: `GitHub OIDC service role ARN for ${this.stage} stage`,
+            exportName: this.exportName('ServiceRoleArn'),
+        })
+    }
+}

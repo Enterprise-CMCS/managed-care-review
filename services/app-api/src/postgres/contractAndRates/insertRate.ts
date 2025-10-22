@@ -1,4 +1,4 @@
-import type { StateCodeType } from '@mc-review/hpp'
+import type { StateCodeType } from '@mc-review/submissions'
 import type {
     RateFormEditableType,
     RateType,

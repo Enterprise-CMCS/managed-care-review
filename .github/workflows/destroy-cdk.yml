@@ -1,0 +1,54 @@
+name: Destroy Review Environment (CDK)
+
+on: delete
+
+permissions:
+  id-token: write
+  contents: read
+
+jobs:
+  destroy:
+    # Protected branches should be designated as such in the GitHub UI.
+    # This conditional is a backup mechanism to help prevent mistakes.
+    if: github.event.ref_type == 'branch' && !contains(fromJson('["develop", "main", "master", "impl", "val", "prod", "production"]'), github.event.ref)
+    environment: dev
+    runs-on: ubuntu-24.04
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 40
+
+      - name: Set stage name
+        id: stage-name
+        shell: bash
+        run: |
+          echo "stage_name=$(./scripts/stage_name_for_branch.sh ${{ github.event.ref }})" >> $GITHUB_ENV
+
+      - name: Setup env
+        uses: ./.github/actions/setup_env
+
+      - name: Build scripts
+        shell: bash
+        run: pnpm -r build:ci-scripts
+
+      - name: Get AWS credentials
+        uses: ./.github/actions/get_aws_credentials
+        with:
+          region: ${{ vars.AWS_DEFAULT_REGION }}
+          account-id: ${{ secrets.DEV_AWS_ACCOUNT_ID }}
+          stage-name: ${{ env.stage_name }}
+
+      - name: Destroy CDK stacks
+        run: node ./scripts/destroy-cdk.js ${{ env.stage_name }}
+
+      - name: Alert Slack on failure
+        uses: rtCamp/action-slack-notify@v2
+        if: failure()
+        env:
+          SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK }}
+          SLACK_USERNAME: CDK Destroy Alerts
+          SLACK_ICON_EMOJI: ':bell:'
+          SLACK_COLOR: ${{job.status}}
+          SLACK_FOOTER: ''
+          MSG_MINIMAL: actions url,commit,ref

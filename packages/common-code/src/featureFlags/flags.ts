@@ -69,6 +69,13 @@ const featureFlags = {
         defaultValue: true,
     },
     /**
+     * Enables EQRO submissions page
+     */
+    EQRO_SUBMISSIONS: {
+        flag: 'eqro-submissions',
+        defaultValue: false,
+    },
+    /**
      The number of minutes before the session expires and countdown modal appears
     */
     MINUTES_UNTIL_SESSION_EXPIRES: {

@@ -1,4 +1,4 @@
-import { typedStatePrograms } from '@mc-review/hpp'
+import { typedStatePrograms } from '@mc-review/submissions'
 import type { Resolvers, SubmissionReason } from '../../gen/gqlServer'
 import { GraphQLError } from 'graphql'
 import type {
@@ -160,7 +160,7 @@ function genericContractResolver<
 
             return gqlSubs
         },
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+
         questions: async (parent: ParentType, _args: any, context: Context) => {
             const { user, ctx, tracer } = context
             // add a span to OTEL

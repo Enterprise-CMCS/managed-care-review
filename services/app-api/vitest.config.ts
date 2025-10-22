@@ -60,7 +60,7 @@ export default defineConfig({
                 __dirname,
                 '../../packages/helpers'
             ),
-            '@mc-review/hpp': path.resolve(__dirname, '../../packages/hpp'),
+            '@mc-review/submissions': path.resolve(__dirname, '../../packages/submissions'),
             '@mc-review/mocks': path.resolve(__dirname, '../../packages/mocks'),
             '@mc-review/otel': path.resolve(__dirname, '../../packages/otel'),
             '@mc-review/dates': path.resolve(__dirname, '../../packages/dates'),
