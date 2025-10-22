@@ -76,6 +76,7 @@ describe('findRate', () => {
         // Add 3 contracts 1, 2, 3 pointing to rate A
         const contract1 = must(
             await insertDraftContract(client, {
+                contractSubmissionType: 'HEALTH_PLAN',
                 stateCode: 'MN',
                 submissionDescription: 'someurle.en',
                 programIDs: ['13221'],
@@ -110,6 +111,7 @@ describe('findRate', () => {
 
         const contract2 = must(
             await insertDraftContract(client, {
+                contractSubmissionType: 'HEALTH_PLAN',
                 stateCode: 'MN',
                 submissionDescription: 'twopointo',
                 programIDs: ['13221'],
@@ -144,6 +146,7 @@ describe('findRate', () => {
 
         const contract3 = must(
             await insertDraftContract(client, {
+                contractSubmissionType: 'HEALTH_PLAN',
                 stateCode: 'MN',
                 submissionDescription: 'threepointo',
                 programIDs: ['13221'],
