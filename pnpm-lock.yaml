@@ -1069,8 +1069,8 @@ importers:
         specifier: 2.92.1
         version: 2.92.1(@aws-solutions-constructs/core@2.86.0(aws-cdk-lib@2.219.0(constructs@10.4.2))(constructs@10.4.2))(aws-cdk-lib@2.219.0(constructs@10.4.2))(constructs@10.4.2)
       '@aws-solutions-constructs/aws-wafwebacl-apigateway':
-        specifier: 2.92.1
-        version: 2.92.1(@aws-solutions-constructs/core@2.86.0(aws-cdk-lib@2.219.0(constructs@10.4.2))(constructs@10.4.2))(aws-cdk-lib@2.219.0(constructs@10.4.2))(constructs@10.4.2)
+        specifier: 2.94.0
+        version: 2.94.0(@aws-solutions-constructs/core@2.86.0(aws-cdk-lib@2.219.0(constructs@10.4.2))(constructs@10.4.2))(aws-cdk-lib@2.219.0(constructs@10.4.2))(constructs@10.4.2)
       aws-cdk-lib:
         specifier: 2.219.0
         version: 2.219.0(constructs@10.4.2)
@@ -2467,11 +2467,11 @@ packages:
       aws-cdk-lib: ^2.212.0
       constructs: ^10.0.0
 
-  '@aws-solutions-constructs/aws-wafwebacl-apigateway@2.92.1':
-    resolution: {integrity: sha512-fqEsZzwSwHXJdBrfSt6DDBXeKodvjWS6QSliUzs0TLQIPG02Qhmr9vfGGmMu8m40duVgp+aW64Q0mUdjKMy08Q==}
+  '@aws-solutions-constructs/aws-wafwebacl-apigateway@2.94.0':
+    resolution: {integrity: sha512-0vz44j3CA3NAMFNKHqkcWbXUmROKUkLEieTb7ei8tDOlHZVcyIDCh6l57tDfjyBU0r+fRHYXqcZ8k7lT2fykSA==}
     peerDependencies:
-      '@aws-solutions-constructs/core': 2.92.1
-      aws-cdk-lib: ^2.212.0
+      '@aws-solutions-constructs/core': 2.94.0
+      aws-cdk-lib: ^2.219.0
       constructs: ^10.0.0
 
   '@aws-solutions-constructs/core@2.86.0':
@@ -17020,7 +17020,7 @@ snapshots:
       aws-cdk-lib: 2.219.0(constructs@10.4.2)
       constructs: 10.4.2
 
-  '@aws-solutions-constructs/aws-wafwebacl-apigateway@2.92.1(@aws-solutions-constructs/core@2.86.0(aws-cdk-lib@2.219.0(constructs@10.4.2))(constructs@10.4.2))(aws-cdk-lib@2.219.0(constructs@10.4.2))(constructs@10.4.2)':
+  '@aws-solutions-constructs/aws-wafwebacl-apigateway@2.94.0(@aws-solutions-constructs/core@2.86.0(aws-cdk-lib@2.219.0(constructs@10.4.2))(constructs@10.4.2))(aws-cdk-lib@2.219.0(constructs@10.4.2))(constructs@10.4.2)':
     dependencies:
       '@aws-solutions-constructs/core': 2.86.0(aws-cdk-lib@2.219.0(constructs@10.4.2))(constructs@10.4.2)
       aws-cdk-lib: 2.219.0(constructs@10.4.2)
