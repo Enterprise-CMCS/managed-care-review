@@ -38,7 +38,6 @@ import {
     type ContractFormPageProps,
 } from '../StateSubmissionForm'
 import {
-    formatYesNoForProto,
     formatDocumentsForGQL,
     formatDocumentsForForm,
     formatFormDateForGQL,
@@ -449,7 +448,7 @@ export const ContractDetails = ({
                         : undefined,
                 submissionType:
                     draftSubmission.draftRevision.formData.submissionType,
-                statutoryRegulatoryAttestation: formatYesNoForProto(
+                statutoryRegulatoryAttestation: yesNoFormValueAsBoolean(
                     values.statutoryRegulatoryAttestation
                 ),
                 // If contract is in compliance, we set the description to undefined. This clears out previous non-compliance description
