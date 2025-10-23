@@ -15,6 +15,7 @@ const defaultContractData = () => ({
     mccrsID: null,
     stateCode: 'MN',
     stateNumber: 111,
+    contractSubmissionType: 'HEALTH_PLAN' as const,
 })
 
 const mockInsertContractArgs = ({
@@ -26,6 +27,7 @@ const mockInsertContractArgs = ({
     const statePrograms = must(findStatePrograms(stateCode))
 
     return {
+        contractSubmissionType: 'HEALTH_PLAN' as const,
         stateCode: stateCode,
         submissionType: formData?.submissionType ?? 'CONTRACT_AND_RATES',
         submissionDescription:

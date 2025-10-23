@@ -18,6 +18,11 @@ import {
 import { contractReviewActionSchema } from './contractReviewActionType'
 import { rateReviewActionSchema } from './rateReviewActionType'
 
+const contractSubmissionTypeSchema = z.union([
+    z.literal('HEALTH_PLAN'),
+    z.literal('EQRO'),
+])
+
 // Contract represents the contract specific information in a submission package
 // All that data is contained in revisions, each revision represents the data in a single submission
 // submissions are kept intact here across time
@@ -79,11 +84,18 @@ type RateWithoutDraftContractsType = z.infer<
     typeof rateWithoutDraftContractsSchema
 >
 
-export { contractWithoutDraftRatesSchema, rateWithoutDraftContractsSchema }
+type ContractSubmissionType = z.infer<typeof contractSubmissionTypeSchema>
+
+export {
+    contractWithoutDraftRatesSchema,
+    rateWithoutDraftContractsSchema,
+    contractSubmissionTypeSchema,
+}
 
 export type {
     ContractWithoutDraftRatesType,
     RateWithoutDraftContractsType,
     ContractReviewStatusType,
     RateReviewStatusType,
+    ContractSubmissionType,
 }
