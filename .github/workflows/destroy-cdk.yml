@@ -37,7 +37,7 @@ jobs:
         with:
           region: ${{ vars.AWS_DEFAULT_REGION }}
           account-id: ${{ secrets.DEV_AWS_ACCOUNT_ID }}
-          stage-name: ${{ env.stage_name }}
+          stage-name: main
 
       - name: Destroy CDK stacks
         run: node ./scripts/destroy-cdk.js ${{ env.stage_name }}
@@ -48,7 +48,7 @@ jobs:
         env:
           SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK }}
           SLACK_USERNAME: CDK Destroy Alerts
-          SLACK_ICON_EMOJI: ':bell:'
+          SLACK_ICON_EMOJI: ":bell:"
           SLACK_COLOR: ${{job.status}}
-          SLACK_FOOTER: ''
+          SLACK_FOOTER: ""
           MSG_MINIMAL: actions url,commit,ref
