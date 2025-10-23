@@ -46,7 +46,7 @@
         "@aws-solutions-constructs/aws-eventbridge-lambda": "2.92.1",
         "@aws-solutions-constructs/aws-lambda-secretsmanager": "2.92.1",
         "@aws-solutions-constructs/aws-s3-lambda": "2.92.1",
-        "@aws-solutions-constructs/aws-wafwebacl-apigateway": "2.92.1",
+        "@aws-solutions-constructs/aws-wafwebacl-apigateway": "2.94.0",
         "aws-cdk-lib": "2.219.0",
         "constructs": "^10.0.0",
         "source-map-support": "^0.5.21"
