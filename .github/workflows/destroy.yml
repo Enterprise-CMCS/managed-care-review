@@ -1,6 +1,13 @@
-name: Destroy
+name: Destroy (Serverless - Deprecated)
 
-on: delete
+# This workflow is disabled - CDK deployments use destroy-cdk.yml instead
+on:
+  workflow_dispatch:
+    inputs:
+      stage_name:
+        description: "Stage name to destroy (serverless deployments only)"
+        required: true
+        type: string
 
 permissions:
   id-token: write
@@ -25,7 +32,7 @@ jobs:
         id: stage-name
         shell: bash
         run: |
-          echo "stage_name=$(./scripts/stage_name_for_branch.sh ${{ github.event.ref }})" >> $GITHUB_ENV
+          echo "stage_name=${{ inputs.stage_name }}" >> $GITHUB_ENV
 
       - name: Setup env
         uses: ./.github/actions/setup_env
@@ -74,7 +81,7 @@ jobs:
         env:
           SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK }}
           SLACK_USERNAME: Destroy Alerts
-          SLACK_ICON_EMOJI: ':bell:'
+          SLACK_ICON_EMOJI: ":bell:"
           SLACK_COLOR: ${{job.status}}
-          SLACK_FOOTER: ''
+          SLACK_FOOTER: ""
           MSG_MINIMAL: actions url,commit,ref
