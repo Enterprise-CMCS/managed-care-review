@@ -717,13 +717,12 @@ jobs:
         shell: bash
         run: pnpm build:packages
 
-      - name: Get AWS credentials (bootstrap with main OIDC role)
+      - name: Get AWS credentials (val)
         uses: ./.github/actions/get_aws_credentials
         with:
           region: ${{ vars.AWS_DEFAULT_REGION }}
           account-id: ${{ secrets.VAL_AWS_ACCOUNT_ID }}
-          # Use main OIDC role for bootstrapping since val-specific role doesn't exist yet
-          stage-name: main
+          stage-name: val
           changed-services: "github-oidc"
 
       - name: deploy github-oidc with CDK
@@ -1158,7 +1157,13 @@ jobs:
           path: services/cypress/screenshots
 
   end-deployment-val:
-    needs: [begin-deployment, deploy-cdk-app-val, deploy-frontend-app-val, cypress-val]
+    needs:
+      [
+        begin-deployment,
+        deploy-cdk-app-val,
+        deploy-frontend-app-val,
+        cypress-val,
+      ]
     if: always() && needs.begin-deployment.result == 'success'
     name: End CDK Val Deployment
     runs-on: ubuntu-24.04
