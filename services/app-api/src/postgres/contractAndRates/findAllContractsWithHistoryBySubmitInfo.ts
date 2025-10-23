@@ -8,20 +8,26 @@ import type { ContractType } from '../../domain-models/contractAndRates'
 type WithLatest = {
     latestQuestionCreatedAt?: Date
     latestRateQuestionCreatedAt?: Date
+    latestLinkedRateSubmitUpdatedAt?: Date
 }
 
+/**
+ * findAllContractsWithHistoryBySubmitInfo
+ *
+ * @param client Prisma transaction/client
+ * @param useZod defaults to true (existing behavior)
+ * @param skipFindingLatest if true, SKIP computing latestQuestionCreatedAt / latestRateQuestionCreatedAt / latestLinkedRateSubmitUpdatedAt
+ *                  and return parsed contracts as is (no extra processing)
+ */
 async function findAllContractsWithHistoryBySubmitInfo(
     client: PrismaTransactionType,
-    useZod: boolean = true
+    useZod: boolean = true,
+    skipFindingLatest: boolean = true
 ): Promise<ContractOrErrorArrayType | NotFoundError | Error> {
     try {
         const contracts = await client.contractTable.findMany({
             where: {
-                revisions: {
-                    some: {
-                        submitInfoID: { not: null },
-                    },
-                },
+                revisions: { some: { submitInfoID: { not: null } } },
                 stateCode: { not: 'AS' }, // exclude test state as per ADR 019
             },
             include: includeFullContract,
@@ -33,9 +39,23 @@ async function findAllContractsWithHistoryBySubmitInfo(
             return new NotFoundError(err)
         }
 
+        const parsedBase: ContractOrErrorArrayType = []
+        for (const raw of contracts) {
+            const parsed = parseContractWithHistory(raw, useZod)
+            parsedBase.push({ contractID: raw.id, contract: parsed })
+        }
+
+        if (skipFindingLatest) {
+            return parsedBase
+        }
+
+        // -------------------------------------------------------------------
+        // Extra processing (only when skipFindingLatest === false)
+        // -------------------------------------------------------------------
+
         const contractIDs = contracts.map((c) => c.id)
 
-        // A) Latest CONTRACT question per contract
+        // Latest CONTRACT question per contract
         const latestContractQ =
             contractIDs.length === 0
                 ? []
@@ -54,22 +74,13 @@ async function findAllContractsWithHistoryBySubmitInfo(
             }
         }
 
-        // B) Build contractID -> rateIDs from submissions + current draft links
-
-        // B1) Contract revisions (for submission linkage)
+        // Contract revisions (for submission linkage)
         const contractRevisions =
             contractIDs.length === 0
                 ? []
                 : await client.contractRevisionTable.findMany({
-                      where: {
-                          contractID: {
-                              in: contractIDs,
-                          },
-                      },
-                      select: {
-                          id: true,
-                          contractID: true,
-                      },
+                      where: { contractID: { in: contractIDs } },
+                      select: { id: true, contractID: true },
                   })
 
         const contractIDByRevisionID: { [revID: string]: string } = {}
@@ -79,7 +90,7 @@ async function findAllContractsWithHistoryBySubmitInfo(
             contractRevisionIDs.push(rev.id)
         }
 
-        // B2) Submission join rows -> rateRevisionIDs for those contract revisions
+        // Submission join rows -> rateRevisionIDs
         const submissionJoins =
             contractRevisionIDs.length === 0
                 ? []
@@ -93,7 +104,7 @@ async function findAllContractsWithHistoryBySubmitInfo(
                       },
                   })
 
-        // B3) Map rateRevisionID -> rateID
+        // Map rateRevisionID -> rateID
         const rateRevisionIDs: string[] = []
         for (const j of submissionJoins) {
             if (j.rateRevisionID) {
@@ -114,11 +125,9 @@ async function findAllContractsWithHistoryBySubmitInfo(
             rateIDByRateRevisionID[rr.id] = rr.rateID
         }
 
-        // B4) Start with submissions-based rate IDs
+        // Start with submissions-based related rates
         const relatedRateIDsByContract: { [contractID: string]: string[] } = {}
-        for (const cid of contractIDs) {
-            relatedRateIDsByContract[cid] = []
-        }
+        for (const cid of contractIDs) relatedRateIDsByContract[cid] = []
 
         for (const j of submissionJoins) {
             const cid = contractIDByRevisionID[j.contractRevisionID]
@@ -130,7 +139,7 @@ async function findAllContractsWithHistoryBySubmitInfo(
             }
         }
 
-        // B5) Also include current draft links (DraftRateJoinTable)
+        // Add current draft links (DraftRateJoinTable)
         const draftLinks =
             contractIDs.length === 0
                 ? []
@@ -147,17 +156,32 @@ async function findAllContractsWithHistoryBySubmitInfo(
             }
         }
 
-        // Flatten rate IDs (no need for dedupe for style consistency)
+        // Add withdrawn links (WithdrawnRatesJoinTable)
+        const withdrawnLinks =
+            contractIDs.length === 0
+                ? []
+                : await client.withdrawnRatesJoinTable.findMany({
+                      where: { contractID: { in: contractIDs } },
+                      select: { contractID: true, rateID: true },
+                  })
+
+        for (const wl of withdrawnLinks) {
+            if (relatedRateIDsByContract[wl.contractID]) {
+                relatedRateIDsByContract[wl.contractID].push(wl.rateID)
+            } else {
+                relatedRateIDsByContract[wl.contractID] = [wl.rateID]
+            }
+        }
+
+        // Collect all rateIDs
         const allRateIDs: string[] = []
         for (const cid of contractIDs) {
             const list = relatedRateIDsByContract[cid]
             if (!list || list.length === 0) continue
-            for (const rid of list) {
-                allRateIDs.push(rid)
-            }
+            for (const rid of list) allRateIDs.push(rid)
         }
 
-        // C) Latest RATE question per rate -> fold into per-contract max
+        // Latest RATE question per rate
         const latestRateQByRate =
             allRateIDs.length === 0
                 ? []
@@ -180,40 +204,81 @@ async function findAllContractsWithHistoryBySubmitInfo(
             const rateIDs = relatedRateIDsByContract[cid]
             if (!rateIDs || rateIDs.length === 0) continue
 
-            let maxDate: Date | undefined = undefined
+            let maxDate: Date | undefined
             for (const rid of rateIDs) {
                 const d = latestRateQuestionByRateID[rid]
                 if (d && (!maxDate || d.getTime() > maxDate.getTime())) {
                     maxDate = d
                 }
             }
+            if (maxDate) latestRateQuestionByContract[cid] = maxDate
+        }
 
-            if (maxDate) {
-                latestRateQuestionByContract[cid] = maxDate
+        // Latest submitted change on any related rate (RateRevision.submitInfo.updatedAt)
+        const rateRevsWithSubmit =
+            allRateIDs.length === 0
+                ? []
+                : await client.rateRevisionTable.findMany({
+                      where: {
+                          rateID: { in: allRateIDs },
+                          submitInfoID: { not: null },
+                      },
+                      select: {
+                          rateID: true,
+                          submitInfo: { select: { updatedAt: true } },
+                      },
+                  })
+
+        const latestSubmitByRateID: { [rateID: string]: Date } = {}
+        for (const rr of rateRevsWithSubmit) {
+            const d = rr.submitInfo?.updatedAt
+            if (!d) continue
+            const prev = latestSubmitByRateID[rr.rateID]
+            if (!prev || d.getTime() > prev.getTime()) {
+                latestSubmitByRateID[rr.rateID] = d
             }
         }
 
-        // D) Parse + augment
-        const parsed: ContractOrErrorArrayType = []
-        for (const raw of contracts) {
-            const base = parseContractWithHistory(raw, useZod)
-            if (base instanceof Error) {
-                parsed.push({ contractID: raw.id, contract: base })
+        const latestLinkedRateSubmitByContract: { [contractID: string]: Date } =
+            {}
+        for (const cid of contractIDs) {
+            const rateIDs = relatedRateIDsByContract[cid]
+            if (!rateIDs || rateIDs.length === 0) continue
+
+            let maxDate: Date | undefined
+            for (const rid of rateIDs) {
+                const d = latestSubmitByRateID[rid]
+                if (d && (!maxDate || d.getTime() > maxDate.getTime())) {
+                    maxDate = d
+                }
+            }
+            if (maxDate) latestLinkedRateSubmitByContract[cid] = maxDate
+        }
+
+        // Merge extra fields into parsed output
+        const parsedWithExtras: ContractOrErrorArrayType = []
+        for (const item of parsedBase) {
+            if (item.contract instanceof Error) {
+                parsedWithExtras.push(item)
                 continue
             }
-
+            const base = item.contract as ContractType
             const augmented = {
-                ...(base as ContractType),
+                ...base,
                 latestQuestionCreatedAt:
-                    latestContractQuestionByContract[raw.id],
+                    latestContractQuestionByContract[item.contractID],
                 latestRateQuestionCreatedAt:
-                    latestRateQuestionByContract[raw.id],
+                    latestRateQuestionByContract[item.contractID],
+                latestLinkedRateSubmitUpdatedAt:
+                    latestLinkedRateSubmitByContract[item.contractID],
             } as ContractType & WithLatest
-
-            parsed.push({ contractID: raw.id, contract: augmented })
+            parsedWithExtras.push({
+                contractID: item.contractID,
+                contract: augmented,
+            })
         }
 
-        return parsed
+        return parsedWithExtras
     } catch (err) {
         console.error('PRISMA ERROR', err)
         return err
