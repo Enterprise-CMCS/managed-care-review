@@ -96,7 +96,7 @@ describe('RateQuestionResponse', () => {
 
             expect(
                 screen.getByRole('heading', {
-                    name: `Rate questions: ${secondRateRev.formData.rateCertificationName}`,
+                    name: `Rate Q&A - Managed Care Review`,
                 })
             ).toBeInTheDocument()
         })
