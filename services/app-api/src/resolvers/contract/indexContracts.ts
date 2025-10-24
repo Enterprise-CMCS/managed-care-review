@@ -137,8 +137,12 @@ export function indexContractsResolver(
             const parsedContracts = parseContracts(contractsWithHistory, span)
             return formatContracts(parsedContracts)
         } else if (hasAdminPermissions(user) || hasCMSPermissions(user)) {
+            const skipFindingLatest = !!input?.updatedWithin
             const contractsWithHistory =
-                await store.findAllContractsWithHistoryBySubmitInfo(false)
+                await store.findAllContractsWithHistoryBySubmitInfo(
+                    false,
+                    skipFindingLatest
+                )
 
             if (contractsWithHistory instanceof Error) {
                 const errMessage = `Issue finding contracts with history by submit info. Message: ${contractsWithHistory.message}`
