@@ -1,9 +1,12 @@
 import type { ContractType } from '../domain-models'
 
-type WithLatestTimestamps = {
+// Local extension that mirrors the store-layer augmentations
+type WithLatest = {
     latestQuestionCreatedAt?: Date | string | null
     latestRateQuestionCreatedAt?: Date | string | null
-    latestLinkedRateSubmitUpdatedAt?: Date | string | null // NEW
+    latestLinkedRateSubmitUpdatedAt?: Date | string | null
+    latestQuestionResponseCreatedAt?: Date | string | null
+    latestRateQuestionResponseCreatedAt?: Date | string | null
 }
 
 function toDate(d?: Date | string | null): Date | undefined {
@@ -19,31 +22,36 @@ function latestDate(dates: Array<Date | undefined>): Date | undefined {
 }
 
 export function getLastUpdatedForDisplay(
-    contract: Partial<ContractType & WithLatestTimestamps>
+    contract: Partial<ContractType & WithLatest>
 ): Date | undefined {
     const contractUpdated = toDate(contract.updatedAt)
     const draftUpdated = toDate(contract.draftRevision?.updatedAt)
     const lastUnlocked = toDate(contract.draftRevision?.unlockInfo?.updatedAt)
 
-    // Package submission (newest submitInfo on the contract, not rates)
+    // Newest submit across package submissions
     const lastSubmitted = latestDate(
         (contract.packageSubmissions ?? []).map((ps) =>
             toDate(ps?.contractRevision?.submitInfo?.updatedAt)
         )
     )
 
-    // Review actions (newest)
+    // Newest review action
     const latestReviewAction = latestDate(
         (contract.reviewStatusActions ?? []).map((a) => toDate(a?.updatedAt))
     )
 
-    // Questions
-    const latestContractQ = toDate(contract.latestQuestionCreatedAt)
-    const latestRateQ = toDate(contract.latestRateQuestionCreatedAt)
-
-    // NEW: when any related/linked rate is resubmitted (e.g., docs changed), use its submit timestamp
+    // Injected by store layer:
+    const latestContractQuestion = toDate(contract.latestQuestionCreatedAt)
+    const latestRateQuestion = toDate(contract.latestRateQuestionCreatedAt)
     const latestLinkedRateSubmit = toDate(
         contract.latestLinkedRateSubmitUpdatedAt
+    )
+
+    const latestContractResponse = toDate(
+        contract.latestQuestionResponseCreatedAt
+    )
+    const latestRateResponse = toDate(
+        contract.latestRateQuestionResponseCreatedAt
     )
 
     return latestDate([
@@ -51,9 +59,11 @@ export function getLastUpdatedForDisplay(
         draftUpdated,
         lastUnlocked,
         lastSubmitted,
-        latestContractQ,
-        latestRateQ,
-        latestLinkedRateSubmit, // ← captures resubmits/edits on linked rates
         latestReviewAction,
+        latestContractQuestion,
+        latestRateQuestion,
+        latestLinkedRateSubmit,
+        latestContractResponse, // <-- counts contract responses
+        latestRateResponse, // <-- counts rate responses
     ])
 }

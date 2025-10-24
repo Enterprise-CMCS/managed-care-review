@@ -9,6 +9,8 @@ type WithLatest = {
     latestQuestionCreatedAt?: Date
     latestRateQuestionCreatedAt?: Date
     latestLinkedRateSubmitUpdatedAt?: Date
+    latestQuestionResponseCreatedAt?: Date
+    latestRateQuestionResponseCreatedAt?: Date
 }
 
 /**
@@ -16,13 +18,12 @@ type WithLatest = {
  *
  * @param client Prisma transaction/client
  * @param useZod defaults to true (existing behavior)
- * @param skipFindingLatest if true, SKIP computing latestQuestionCreatedAt / latestRateQuestionCreatedAt / latestLinkedRateSubmitUpdatedAt
- *                  and return parsed contracts as is (no extra processing)
+ * @param skipFindingLatest if true, SKIP computing all the “latest*” helper timestamps
  */
 async function findAllContractsWithHistoryBySubmitInfo(
     client: PrismaTransactionType,
     useZod: boolean = true,
-    skipFindingLatest: boolean = true
+    skipFindingLatest: boolean = false
 ): Promise<ContractOrErrorArrayType | NotFoundError | Error> {
     try {
         const contracts = await client.contractTable.findMany({
@@ -49,9 +50,9 @@ async function findAllContractsWithHistoryBySubmitInfo(
             return parsedBase
         }
 
-        // -------------------------------------------------------------------
+        // ------------------------------------------------------------------
         // Extra processing (only when skipFindingLatest === false)
-        // -------------------------------------------------------------------
+        // ------------------------------------------------------------------
 
         const contractIDs = contracts.map((c) => c.id)
 
@@ -255,6 +256,76 @@ async function findAllContractsWithHistoryBySubmitInfo(
             if (maxDate) latestLinkedRateSubmitByContract[cid] = maxDate
         }
 
+        // Latest CONTRACT question RESPONSE per contract
+        const contractResponses =
+            contractIDs.length === 0
+                ? []
+                : await client.contractQuestionResponse.findMany({
+                      where: {
+                          question: {
+                              contractID: { in: contractIDs },
+                          },
+                      },
+                      select: {
+                          createdAt: true,
+                          question: { select: { contractID: true } },
+                      },
+                  })
+
+        const latestContractResponseByContract: { [contractID: string]: Date } =
+            {}
+        for (const r of contractResponses) {
+            const cid = r.question?.contractID
+            const d = r.createdAt
+            if (!cid || !d) continue
+            const prev = latestContractResponseByContract[cid]
+            if (!prev || d.getTime() > prev.getTime()) {
+                latestContractResponseByContract[cid] = d
+            }
+        }
+
+        // Latest RATE question RESPONSE per rate
+        const rateResponses =
+            allRateIDs.length === 0
+                ? []
+                : await client.rateQuestionResponse.findMany({
+                      where: {
+                          question: {
+                              rateID: { in: allRateIDs },
+                          },
+                      },
+                      select: {
+                          createdAt: true,
+                          question: { select: { rateID: true } },
+                      },
+                  })
+
+        const latestRateResponseByRateID: { [rateID: string]: Date } = {}
+        for (const r of rateResponses) {
+            const rid = r.question?.rateID
+            const d = r.createdAt
+            if (!rid || !d) continue
+            const prev = latestRateResponseByRateID[rid]
+            if (!prev || d.getTime() > prev.getTime()) {
+                latestRateResponseByRateID[rid] = d
+            }
+        }
+
+        const latestRateResponseByContract: { [contractID: string]: Date } = {}
+        for (const cid of contractIDs) {
+            const rateIDs = relatedRateIDsByContract[cid]
+            if (!rateIDs || rateIDs.length === 0) continue
+
+            let maxDate: Date | undefined
+            for (const rid of rateIDs) {
+                const d = latestRateResponseByRateID[rid]
+                if (d && (!maxDate || d.getTime() > maxDate.getTime())) {
+                    maxDate = d
+                }
+            }
+            if (maxDate) latestRateResponseByContract[cid] = maxDate
+        }
+
         // Merge extra fields into parsed output
         const parsedWithExtras: ContractOrErrorArrayType = []
         for (const item of parsedBase) {
@@ -271,6 +342,10 @@ async function findAllContractsWithHistoryBySubmitInfo(
                     latestRateQuestionByContract[item.contractID],
                 latestLinkedRateSubmitUpdatedAt:
                     latestLinkedRateSubmitByContract[item.contractID],
+                latestQuestionResponseCreatedAt:
+                    latestContractResponseByContract[item.contractID],
+                latestRateQuestionResponseCreatedAt:
+                    latestRateResponseByContract[item.contractID],
             } as ContractType & WithLatest
             parsedWithExtras.push({
                 contractID: item.contractID,
