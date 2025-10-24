@@ -77,13 +77,9 @@ async function NewPrismaClient(
         const adapter = new PrismaPg(pool)
 
         // Create Prisma Client with adapter
+        // Note: When using driver adapters, don't specify datasources.db.url
         const prismaClient = extendedPrismaClient({
             adapter,
-            datasources: {
-                db: {
-                    url: connURL,
-                },
-            },
         })
 
         return prismaClient

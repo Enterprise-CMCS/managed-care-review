@@ -1,7 +1,6 @@
 import { PrismaClient } from '@prisma/client'
 import { PrismaPg } from '@prisma/adapter-pg'
 import { Pool } from 'pg'
-import type { PrismaTransactionType } from '../postgres/prismaTypes'
 import { migrate as migrate1 } from './migrations/20231026123042_test_migrator_works'
 // Deprecated do not use
 
@@ -9,7 +8,7 @@ import { migrate as migrate1 } from './migrations/20231026123042_test_migrator_w
 interface DBMigrationType {
     name: string
     module: {
-        migrate: (client: PrismaTransactionType) => Promise<undefined | Error>
+        migrate: (client: any) => Promise<undefined | Error>
     }
 }
 
@@ -32,13 +31,9 @@ export function newDBMigrator(dbConnString: string): MigratorType {
     const adapter = new PrismaPg(pool)
 
     // Create Prisma Client with adapter
+    // Note: When using driver adapters, don't specify datasources.db.url
     const prismaClient = new PrismaClient({
         adapter,
-        datasources: {
-            db: {
-                url: dbConnString,
-            },
-        },
     })
 
     return {
