@@ -54,15 +54,14 @@ const main: Handler = async (): Promise<APIGatewayProxyResultV2> => {
     // run the schema migration. this will add any new tables or fields from schema.prisma to postgres
     try {
         // Aurora can have long cold starts, so we extend connection timeout on migrates
-        const schemaPath =
-            process.env.SCHEMA_PATH ?? '/opt/nodejs/prisma/schema.prisma'
+        // Prisma CLI is now bundled with the function (no lambda layer)
         const prismaResult = spawnSync(
             `${process.execPath}`,
             [
-                '/opt/nodejs/node_modules/prisma/build/index.js',
+                'node_modules/prisma/build/index.js',
                 'migrate',
                 'deploy',
-                `--schema=${schemaPath}`,
+                `--schema=prisma/schema.prisma`,
             ],
             {
                 env: {
@@ -130,7 +129,7 @@ const main: Handler = async (): Promise<APIGatewayProxyResultV2> => {
 
     const migrationResult = await migrate(
         dataMigrator,
-        '/opt/nodejs/dataMigrations/migrations/'
+        'dataMigrations/migrations/'
     )
     if (migrationResult instanceof Error) {
         const errMsg = `Could not migrate the database protobufs: ${migrationResult}`
