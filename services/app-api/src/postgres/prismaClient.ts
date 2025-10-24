@@ -1,4 +1,6 @@
 import { type Prisma, PrismaClient } from '@prisma/client'
+import { PrismaPg } from '@prisma/adapter-pg'
+import { Pool } from 'pg'
 
 const errorMessages = {
     delete: 'Deletion of records is not allowed',
@@ -63,7 +65,20 @@ async function NewPrismaClient(
     connURL: string
 ): Promise<ExtendedPrismaClient | Error> {
     try {
+        // Create connection pool
+        const pool = new Pool({
+            connectionString: connURL,
+            max: 20,
+            idleTimeoutMillis: 30000,
+            connectionTimeoutMillis: 2000,
+        })
+
+        // Create Prisma adapter
+        const adapter = new PrismaPg(pool)
+
+        // Create Prisma Client with adapter
         const prismaClient = extendedPrismaClient({
+            adapter,
             datasources: {
                 db: {
                     url: connURL,

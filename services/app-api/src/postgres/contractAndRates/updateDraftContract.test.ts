@@ -6,7 +6,7 @@ import {
     must,
 } from '../../testHelpers'
 import { updateDraftContract } from './updateDraftContract'
-import { PrismaClientValidationError } from '@prisma/client/runtime/library'
+import { Prisma } from '@prisma/client'
 import type { ContractType } from '@prisma/client'
 import type {
     ContractFormDataType,
@@ -122,7 +122,6 @@ describe('updateDraftContractWithRates postgres', () => {
         const client = await sharedTestPrismaClient()
 
         const draftContractForm1 = mockInsertContractArgs({})
-        // eslint-disable-next-line @typescript-eslint/no-unused-vars
         const contract = must(
             await insertDraftContract(client, {
                 ...draftContractForm1,
@@ -350,7 +349,7 @@ describe('updateDraftContractWithRates postgres', () => {
         })
 
         // Expect a prisma error
-        expect(updatedRate).toBeInstanceOf(PrismaClientValidationError)
+        expect(updatedRate).toBeInstanceOf(Prisma.PrismaClientValidationError)
     })
 
     it('returns an error when invalid contract ID provided', async () => {
