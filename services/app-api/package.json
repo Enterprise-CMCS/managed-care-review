@@ -95,7 +95,7 @@
         "serverless-offline": "^14.4.0",
         "serverless-s3-bucket-helper": "https://github.com/Enterprise-CMCS/serverless-s3-bucket-helper",
         "serverless-stack-termination-protection": "^2.0.2",
-        "typescript": "5.9.2",
+        "typescript": "5.9.3",
         "typescript-eslint": "^8.41.0",
         "vitest": "^3.2.4"
     }

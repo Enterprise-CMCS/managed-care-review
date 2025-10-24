@@ -23,7 +23,7 @@
         "serverless-iam-helper": "https://github.com/Enterprise-CMCS/serverless-iam-helper",
         "serverless-s3-bucket-helper": "https://github.com/Enterprise-CMCS/serverless-s3-bucket-helper",
         "serverless-stack-termination-protection": "^2.0.2",
-        "typescript": "5.9.2"
+        "typescript": "5.9.3"
     },
     "dependencies": {
         "@aws-sdk/client-cloudformation": "^3.915.0",
