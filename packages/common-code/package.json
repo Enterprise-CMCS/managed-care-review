@@ -11,7 +11,7 @@
         "@mc-review/constants": "workspace:*",
         "@mc-review/helpers": "workspace:*",
         "@mc-review/submissions": "workspace:*",
-        "typescript": "5.9.2",
+        "typescript": "5.9.3",
         "url-parse": "^1.5.10",
         "zod": "^4.1.12"
     },
