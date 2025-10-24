@@ -28,16 +28,19 @@ import {
     Runtime,
     LayerVersion,
     type ILayerVersion,
-    Code,
 } from 'aws-cdk-lib/aws-lambda'
 import { CfnWebACL, CfnWebACLAssociation } from 'aws-cdk-lib/aws-wafv2'
 import { SubnetType, SecurityGroup, Vpc } from 'aws-cdk-lib/aws-ec2'
 import { Rule, Schedule } from 'aws-cdk-lib/aws-events'
 import { LambdaFunction } from 'aws-cdk-lib/aws-events-targets'
-import { AWS_OTEL_LAYER_ARN } from './lambda-layers'
 import { ApiEndpoint } from '../constructs/api/api-endpoint'
 import path from 'path'
 import type { BundlingOptions } from 'aws-cdk-lib/aws-lambda-nodejs'
+
+// AWS OTEL Lambda Layer ARN - update version here when needed
+// Latest: v1.30.0 with OpenTelemetry JavaScript Core v1.30.0, AWS Lambda Instrumentation v0.50.3, ADOT Collector v0.43.0
+const AWS_OTEL_LAYER_ARN =
+    'arn:aws:lambda:us-east-1:901920570463:layer:aws-otel-nodejs-amd64-ver-1-30-0:1'
 
 /**
  * App API stack - GraphQL API with Lambda functions and dedicated API Gateway
@@ -382,25 +385,6 @@ export class AppApiStack extends BaseStack {
             process.env.SG_ID!
         )
 
-        const prismaMigrationLayer = new LayerVersion(
-            this,
-            'PrismaMigrationLayer',
-            {
-                layerVersionName: `${ResourceNames.apiName('app-api', this.stage)}-prisma-migration`,
-                description: 'Prisma migration layer for app-api',
-                compatibleRuntimes: [Runtime.NODEJS_20_X],
-                compatibleArchitectures: [Architecture.X86_64],
-                code: Code.fromAsset(
-                    path.join(
-                        __dirname,
-                        '..',
-                        '..',
-                        'lambda-layers-prisma-client-migration'
-                    )
-                ),
-            }
-        )
-
         // Create migrate function with all required configuration
         const migrateFunction = new NodejsFunction(this, 'migrateFunction', {
             functionName: `${ResourceNames.apiName('app-api', this.stage)}-migrate`,
@@ -421,19 +405,16 @@ export class AppApiStack extends BaseStack {
             memorySize: 1024,
             environment: {
                 ...environment,
-                SCHEMA_PATH: '/opt/nodejs/prisma/schema.prisma',
                 CONNECT_TIMEOUT: '60',
-                NODE_PATH: '/opt/nodejs/node_modules',
             },
             role,
-            layers: [prismaMigrationLayer, this.otelLayer],
+            layers: [this.otelLayer],
             vpc,
             vpcSubnets: {
                 subnetType: SubnetType.PRIVATE_WITH_EGRESS,
             },
             securityGroups: [lambdaSecurityGroup],
             bundling: {
-                externalModules: ['prisma', '@prisma/client', '.prisma'],
                 ...this.createBundling(
                     'migrate',
                     [this.getOtelBundlingCommands()],
@@ -488,21 +469,6 @@ export class AppApiStack extends BaseStack {
             process.env.SG_ID!
         )
 
-        const prismaEngineLayer = new LayerVersion(this, 'PrismaEngineLayer', {
-            layerVersionName: `${ResourceNames.apiName('app-api', this.stage)}-prisma-engine`,
-            description: 'Prisma engine layer for app-api',
-            compatibleRuntimes: [Runtime.NODEJS_20_X],
-            compatibleArchitectures: [Architecture.X86_64],
-            code: Code.fromAsset(
-                path.join(
-                    __dirname,
-                    '..',
-                    '..',
-                    'lambda-layers-prisma-client-engine'
-                )
-            ),
-        })
-
         // Create GraphQL function with all required configuration
         const graphqlFunction = new NodejsFunction(this, 'graphqlFunction', {
             functionName: `${ResourceNames.apiName('app-api', this.stage)}-graphql`,
@@ -523,7 +489,7 @@ export class AppApiStack extends BaseStack {
             memorySize: 1024,
             environment,
             role,
-            layers: [prismaEngineLayer, this.otelLayer],
+            layers: [this.otelLayer],
             vpc,
             vpcSubnets: {
                 subnetType: SubnetType.PRIVATE_WITH_EGRESS,
@@ -534,7 +500,6 @@ export class AppApiStack extends BaseStack {
                 minify: false,
                 sourceMap: true,
                 target: 'node20',
-                externalModules: ['prisma', '@prisma/client'],
                 ...this.createBundling(
                     'graphql',
                     [

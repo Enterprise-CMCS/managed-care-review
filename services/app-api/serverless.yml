@@ -4,10 +4,6 @@ frameworkVersion: '4.2.3'
 
 package:
   individually: true
-  patterns:
-    - '!node_modules/prisma'
-    - '!node_modules/.prisma'
-    - '!node_modules/@prisma'
 
 plugins:
   - serverless-esbuild
@@ -149,11 +145,6 @@ provider:
     VITE_APP_S3_QA_BUCKET: ${self:custom.reactAppS3QABucket}
     VITE_APP_S3_DOCUMENTS_BUCKET: ${self:custom.reactAppS3DocumentUploadsBucket}
     INTERNAL_ALLOWED_ORIGINS: ${self:custom.internalAllowedOrigins, ''}
-layers:
-  prismaClientMigration:
-    path: lambda-layers-prisma-client-migration
-  prismaClientEngine:
-    path: lambda-layers-prisma-client-engine
 
 functions:
   email_submit:
@@ -171,7 +162,6 @@ functions:
         - ${self:custom.sgId}
       subnetIds: ${self:custom.privateSubnets}
     layers:
-      - !Ref PrismaClientEngineLambdaLayer
       - arn:aws:lambda:us-east-1:901920570463:layer:aws-otel-nodejs-amd64-ver-1-18-1:4
 
   health:
@@ -226,7 +216,6 @@ functions:
         - ${self:custom.sgId}
       subnetIds: ${self:custom.privateSubnets}
     layers:
-      - !Ref PrismaClientEngineLambdaLayer
       - arn:aws:lambda:us-east-1:901920570463:layer:aws-otel-nodejs-amd64-ver-1-18-1:4
 
   migrate:
@@ -237,7 +226,6 @@ functions:
         - ${self:custom.sgId}
       subnetIds: ${self:custom.privateSubnets}
     layers:
-      - !Ref PrismaClientMigrationLambdaLayer
       - arn:aws:lambda:us-east-1:901920570463:layer:aws-otel-nodejs-amd64-ver-1-18-1:4
 
   cleanup:
@@ -255,7 +243,6 @@ functions:
         - ${self:custom.sgId}
       subnetIds: ${self:custom.privateSubnets}
     layers:
-      - !Ref PrismaClientEngineLambdaLayer
       - arn:aws:lambda:us-east-1:901920570463:layer:aws-otel-nodejs-amd64-ver-1-18-1:4
 
 resources:
