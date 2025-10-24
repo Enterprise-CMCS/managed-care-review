@@ -64,10 +64,11 @@ model ContractTable {
   createdAt DateTime @default(now())
   updatedAt DateTime @default(now()) @updatedAt
 
-  mccrsID     String?
-  stateCode   String
-  state       State   @relation(fields: [stateCode], references: [stateCode])
-  stateNumber Int
+  mccrsID                String?
+  stateCode              String
+  state                  State                  @relation(fields: [stateCode], references: [stateCode])
+  stateNumber            Int
+  contractSubmissionType ContractSubmissionType
 
   questions           ContractQuestion[]
   reviewStatusActions ContractActionTable[]
@@ -625,4 +626,9 @@ model DocumentZipPackage {
 enum DocumentZipType {
   CONTRACT_DOCUMENTS
   RATE_DOCUMENTS
+}
+
+enum ContractSubmissionType {
+  HEALTH_PLAN
+  EQRO
 }

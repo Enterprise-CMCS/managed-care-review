@@ -1,6 +1,6 @@
 import type { EmailConfiguration, EmailData, Emailer } from '../emailer'
 import { emailer } from '../emailer'
-import type { ProgramArgType } from '@mc-review/hpp'
+import type { ProgramArgType } from '@mc-review/submissions'
 import type {
     ContractRevisionType,
     ContractType,

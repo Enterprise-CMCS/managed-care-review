@@ -9,7 +9,7 @@ import type {
     ConsolidatedContractStatusType,
 } from '../../domain-models/contractAndRates'
 import { findStatePrograms } from '../state'
-import { packageName } from '@mc-review/hpp'
+import { packageName } from '@mc-review/submissions'
 import { logError } from '../../logger'
 import type {
     ContractReviewStatusType,

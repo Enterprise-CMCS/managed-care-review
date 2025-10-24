@@ -1,0 +1,51 @@
+#!/usr/bin/env node
+
+/**
+ * OIDC-only CDK app entry point
+ *
+ * This app deploys ONLY the GitHub OIDC provider stack, with no dependencies
+ * on lambda layers or other infrastructure. Used for bootstrapping OIDC
+ * authentication in review environments before the full stack deployment.
+ *
+ * Usage:
+ *   pnpm cdk deploy github-oidc-<stage>-cdk --app 'pnpm tsx bin/oidc.ts' --context stage=<stage>
+ */
+
+import 'source-map-support/register'
+import { App, DefaultStackSynthesizer } from 'aws-cdk-lib'
+import { GitHubOidcServiceRoleStack } from '../lib/stacks/github-oidc'
+import { getCdkEnvironment, getEnvironment } from '../lib/config/environments'
+import { ResourceNames } from '../lib/config/shared'
+
+// Simplified - using default synthesizer with mcreview qualifier
+const app = new App({
+    defaultStackSynthesizer: new DefaultStackSynthesizer({
+        qualifier: 'mcreview',
+    }),
+})
+
+const stage = app.node.tryGetContext('stage') || process.env.STAGE_NAME
+
+if (!stage) {
+    throw new Error(
+        'Stage name is required. Provide via --context stage=<stage> or STAGE_NAME env var'
+    )
+}
+
+const env = getCdkEnvironment(stage)
+const config = getEnvironment(stage)
+
+// Create only the GitHub OIDC service role
+new GitHubOidcServiceRoleStack(
+    app,
+    ResourceNames.stackName('github-oidc', stage),
+    {
+        env,
+        stage,
+        stageConfig: config,
+        serviceName: 'github-oidc',
+        description: `GitHub OIDC service role for (${stage})`,
+    }
+)
+
+console.info(`OIDC-only CDK app initialized for stage: ${stage}`)

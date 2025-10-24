@@ -1,11 +1,11 @@
 import { StoryFn } from '@storybook/react'
 import { PackageSelect, PackageSelectPropType } from '../index'
-import { mockDraft, mockMNState } from '@mc-review/mocks'
+import { mockContractPackageDraft, mockMNState } from '@mc-review/mocks'
 import React from 'react'
 import ProvidersDecorator from '../../../../.storybook/providersDecorator'
 
 const draftSubmission = {
-    ...mockDraft(),
+    ...mockContractPackageDraft(),
     stateNumber: 3,
     id: 'test-shared-rate',
 }

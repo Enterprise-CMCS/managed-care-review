@@ -58,7 +58,7 @@ export const handler = async (event: LambdaEvent): Promise<LambdaResponse> => {
         const prefix = dbNamePrefix || process.env.DB_NAME_PREFIX || 'reviewapp'
         const dbName = `${prefix}_${stageName}`
         const userName = `${prefix}_user_${stageName}`
-        const secretName = prSecretName || `aurora_postgres_${stageName}`
+        const secretName = prSecretName || `aurora_postgres_${stageName}_cdk`
 
         const manager = new LogicalDatabaseManager()
 

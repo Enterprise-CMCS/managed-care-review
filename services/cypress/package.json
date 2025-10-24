@@ -55,14 +55,14 @@
     "dependencies": {
         "@apollo/client": "3.8.8",
         "@mc-review/common-code": "workspace:*",
-        "@mc-review/hpp": "workspace:*",
+        "@mc-review/submissions": "workspace:*",
         "cypress-file-upload": "^5.0.8",
         "cypress-pipe": "^2.0.1",
         "axios": "^1.12.2",
         "graphql": "^16.9.0",
         "@aws-sdk/signature-v4": "^3.374.0",
-        "@aws-sdk/client-cognito-identity-provider": "^3.911.0",
-        "@aws-sdk/client-cognito-identity": "^3.911.0",
+        "@aws-sdk/client-cognito-identity-provider": "^3.916.0",
+        "@aws-sdk/client-cognito-identity": "^3.916.0",
         "@aws-sdk/protocol-http": "^3.374.0",
         "@aws-crypto/sha256-js": "^5.2.0"
     }

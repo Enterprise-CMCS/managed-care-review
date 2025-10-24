@@ -3,7 +3,7 @@ import type {
     ContractRevisionTableWithRates,
     ContractTableFullPayload,
 } from '../postgres/contractAndRates/prismaFullContractRateHelpers'
-import type { StateCodeType } from '@mc-review/hpp'
+import type { StateCodeType } from '@mc-review/submissions'
 import type { ContractFormDataType } from '../domain-models'
 import { findStatePrograms, type InsertContractArgsType } from '../postgres'
 import { must } from './assertionHelpers'
@@ -15,6 +15,7 @@ const defaultContractData = () => ({
     mccrsID: null,
     stateCode: 'MN',
     stateNumber: 111,
+    contractSubmissionType: 'HEALTH_PLAN' as const,
 })
 
 const mockInsertContractArgs = ({
@@ -26,6 +27,7 @@ const mockInsertContractArgs = ({
     const statePrograms = must(findStatePrograms(stateCode))
 
     return {
+        contractSubmissionType: 'HEALTH_PLAN' as const,
         stateCode: stateCode,
         submissionType: formData?.submissionType ?? 'CONTRACT_AND_RATES',
         submissionDescription:

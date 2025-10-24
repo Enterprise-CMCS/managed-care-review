@@ -1,7 +1,6 @@
 import type { CMSUsersUnionType, StateType } from '../../domain-models'
-import { typedStatePrograms } from '@mc-review/hpp'
+import { typedStatePrograms } from '@mc-review/submissions'
 import type { ExtendedPrismaClient } from '../prismaClient'
-
 
 // Returns postgres state info for the states that currently supported for pilot.
 // Supported states are state that have had their programs added to the statePrograms json file.

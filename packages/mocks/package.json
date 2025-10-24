@@ -8,10 +8,10 @@
     "dependencies": {
         "@apollo/client": "3.8.8",
         "@mc-review/dates": "workspace:*",
-        "@mc-review/hpp": "workspace:*",
+        "@mc-review/submissions": "workspace:*",
         "dayjs": "^1.11.18",
         "graphql": "^16.9.0",
-        "typescript": "5.9.2",
+        "typescript": "5.9.3",
         "uuid": "^13.0.0"
     },
     "devDependencies": {

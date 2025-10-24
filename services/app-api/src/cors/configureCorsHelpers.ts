@@ -66,6 +66,7 @@ export const configureCorsHeaders = (
                 'Content-Type,Authorization,X-Amz-Date,X-Api-Key,X-Amz-Security-Token',
             'Access-Control-Allow-Methods': 'GET,POST,OPTIONS',
             'Access-Control-Allow-Credentials': 'true',
+            'X-Content-Type-Options': 'nosniff',
         }
     }
 }

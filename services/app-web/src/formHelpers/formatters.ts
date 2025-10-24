@@ -1,10 +1,6 @@
 import { dayjs } from '@mc-review/dates'
-import { SubmissionDocument, ActuaryContact } from '@mc-review/hpp'
 import { FileItemT } from '../components'
-import {
-    GenericDocument,
-    ActuaryContact as GQLActuaryContact,
-} from '../gen/gqlClient'
+import { GenericDocument, ActuaryContact } from '../gen/gqlClient'
 import { S3ClientT } from '../s3'
 import { v4 as uuidv4 } from 'uuid'
 
@@ -32,7 +28,7 @@ function formatForForm<T>(attribute: T): string {
 
 // This function can be cleaned up when we move off domain types and only use graphql
 const formatActuaryContactsForForm = (
-    actuaryContacts?: ActuaryContact[] | GQLActuaryContact[]
+    actuaryContacts?: ActuaryContact[]
 ): ActuaryContact[] => {
     return actuaryContacts && actuaryContacts.length > 0
         ? actuaryContacts.map((contact) => {
@@ -63,7 +59,7 @@ const formatActuaryContactsForForm = (
 }
 
 const formatAddtlActuaryContactsForForm = (
-    actuaryContacts?: ActuaryContact[] | GQLActuaryContact[]
+    actuaryContacts?: ActuaryContact[]
 ): ActuaryContact[] => {
     return actuaryContacts && actuaryContacts.length > 0
         ? actuaryContacts.map((contact) => {
@@ -127,7 +123,7 @@ const formatDocumentsForForm = ({
     documents,
     getKey,
 }: {
-    documents?: SubmissionDocument[] | GenericDocument[]
+    documents?: GenericDocument[]
     getKey: S3ClientT['getKey'] // S3 function to call when formatting to double check we have valid documents, probably the backend should be doing this to reduce client async errors handling with bad data
 }): FileItemT[] => {
     if (!documents) return []
@@ -161,69 +157,9 @@ const formatDocumentsForForm = ({
     )
 }
 
-// DEPRECATED
-// Domain helpers are for HPP code. We are migrating off this in favor of directly using GQL utilities
-
-const formatFormDateForDomain = (attribute: string): Date | undefined => {
-    if (attribute === '') {
-        return undefined
-    }
-    return dayjs.utc(attribute).toDate()
-}
-
-const formatDocumentsForDomain = (
-    fileItems: FileItemT[]
-): SubmissionDocument[] => {
-    return fileItems.reduce((cleanedFileItems, fileItem) => {
-        if (fileItem.status === 'UPLOAD_ERROR') {
-            console.info(
-                'Attempting to save files that failed upload, discarding invalid files'
-            )
-        } else if (fileItem.status === 'SCANNING_ERROR') {
-            console.info(
-                'Attempting to save files that failed scanning, discarding invalid files'
-            )
-        } else if (fileItem.status === 'DUPLICATE_NAME_ERROR') {
-            console.info(
-                'Attempting to save files that are duplicate names, discarding duplicate'
-            )
-        } else if (!fileItem.s3URL) {
-            console.info(
-                'Attempting to save a seemingly valid file item is not yet uploaded to S3, this should not happen on form submit. Discarding file.'
-            )
-        } else if (!fileItem.sha256) {
-            console.info(
-                'Attempting to save a seemingly valid file item does not have a sha256 yet. this should not happen on form submit. Discarding file.'
-            )
-        } else {
-            cleanedFileItems.push({
-                name: fileItem.name,
-                s3URL: fileItem.s3URL,
-                sha256: fileItem.sha256,
-            })
-        }
-        return cleanedFileItems
-    }, [] as SubmissionDocument[])
-}
-
-const formatYesNoForProto = (
-    attribute: string | undefined
-): boolean | undefined => {
-    if (attribute === 'YES') {
-        return true
-    }
-    if (attribute === 'NO') {
-        return false
-    }
-    return undefined
-}
-
 export {
     formatForApi,
     formatForForm,
-    formatYesNoForProto,
-    formatFormDateForDomain,
-    formatDocumentsForDomain,
     formatDocumentsForForm,
     formatActuaryContactsForForm,
     formatAddtlActuaryContactsForForm,

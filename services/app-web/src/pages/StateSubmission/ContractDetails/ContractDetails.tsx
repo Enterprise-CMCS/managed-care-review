@@ -38,7 +38,6 @@ import {
     type ContractFormPageProps,
 } from '../StateSubmissionForm'
 import {
-    formatYesNoForProto,
     formatDocumentsForGQL,
     formatDocumentsForForm,
     formatFormDateForGQL,
@@ -49,22 +48,15 @@ import {
     federalAuthorityKeys,
     ManagedCareEntityRecord,
     FederalAuthorityRecord,
-    type ManagedCareEntity,
-    type ContractExecutionStatus,
-    type FederalAuthority,
-} from '@mc-review/hpp'
-import {
-    generateProvisionLabel,
-    generateApplicableProvisionsList,
-} from '@mc-review/common-code'
-import {
+    dsnpTriggers,
     isBaseContract,
     isCHIPOnly,
     isContractAmendment,
     isContractWithProvisions,
-    featureFlags,
-    dsnpTriggers,
-} from '@mc-review/common-code'
+    generateProvisionLabel,
+    generateApplicableProvisionsList,
+} from '@mc-review/submissions'
+import { featureFlags } from '@mc-review/common-code'
 import {
     RoutesRecord,
     RouteT,
@@ -86,6 +78,9 @@ import { useContractForm } from '../../../hooks/useContractForm'
 import {
     UpdateContractDraftRevisionInput,
     ContractDraftRevisionFormDataInput,
+    ManagedCareEntity,
+    ContractExecutionStatus,
+    FederalAuthority,
 } from '../../../gen/gqlClient'
 import { useFocusOnRender } from '../../../hooks/useFocusOnRender'
 import { usePage } from '../../../contexts/PageContext'
@@ -163,7 +158,6 @@ export const ContractDetails = ({
     const { setFocusErrorSummaryHeading, errorSummaryHeadingRef } =
         useErrorSummary()
 
-    // set up API handling and HPP data
     const { loggedInUser } = useAuth()
     const { currentRoute } = useCurrentRoute()
     const { id } = useRouteParams()
@@ -454,7 +448,7 @@ export const ContractDetails = ({
                         : undefined,
                 submissionType:
                     draftSubmission.draftRevision.formData.submissionType,
-                statutoryRegulatoryAttestation: formatYesNoForProto(
+                statutoryRegulatoryAttestation: yesNoFormValueAsBoolean(
                     values.statutoryRegulatoryAttestation
                 ),
                 // If contract is in compliance, we set the description to undefined. This clears out previous non-compliance description

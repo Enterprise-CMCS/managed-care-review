@@ -105,7 +105,7 @@ async function findAllContractsWithHistoryBySubmitInfo(
                       },
                   })
 
-        // Map rateRevisionID -> rateID
+        // Map rateRevisionID to rateID
         const rateRevisionIDs: string[] = []
         for (const j of submissionJoins) {
             if (j.rateRevisionID) {
