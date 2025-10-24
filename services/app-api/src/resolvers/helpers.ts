@@ -1,6 +1,5 @@
 import type { ContractType } from '../domain-models'
 
-// Local extension that mirrors the store-layer augmentations
 type WithLatest = {
     latestQuestionCreatedAt?: Date | string | null
     latestRateQuestionCreatedAt?: Date | string | null
@@ -40,7 +39,6 @@ export function getLastUpdatedForDisplay(
         (contract.reviewStatusActions ?? []).map((a) => toDate(a?.updatedAt))
     )
 
-    // Injected by store layer:
     const latestContractQuestion = toDate(contract.latestQuestionCreatedAt)
     const latestRateQuestion = toDate(contract.latestRateQuestionCreatedAt)
     const latestLinkedRateSubmit = toDate(
@@ -63,7 +61,7 @@ export function getLastUpdatedForDisplay(
         latestContractQuestion,
         latestRateQuestion,
         latestLinkedRateSubmit,
-        latestContractResponse, // <-- counts contract responses
-        latestRateResponse, // <-- counts rate responses
+        latestContractResponse,
+        latestRateResponse,
     ])
 }
