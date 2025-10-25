@@ -247,6 +247,7 @@ const createTestContract = async (
         submissionType: 'CONTRACT_ONLY',
         submissionDescription: 'A created submission',
         contractType: 'BASE',
+        contractSubmissionType: 'HEALTH_PLAN',
         ...formData,
     }
     const result = await executeGraphQLOperation(server, {

@@ -13,8 +13,8 @@ import {
     setSuccessAttributesOnActiveSpan,
 } from '../attributeHelper'
 import { GraphQLError } from 'graphql'
-import type { StateCodeType } from '../../testHelpers'
 import { canWrite } from '../../authorization/oauthAuthorization'
+import type { StateCodeType } from '@mc-review/submissions'
 
 export function unlockContractResolver(
     store: Store,
