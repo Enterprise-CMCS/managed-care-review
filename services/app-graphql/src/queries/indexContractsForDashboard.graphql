@@ -12,6 +12,7 @@ query indexContractsForDashboard($input: IndexContractsInput) {
                 initiallySubmittedAt
                 lastUpdatedForDisplay
                 stateCode
+                contractSubmissionType
                 reviewStatusActions {
                     updatedAt
                     actionType

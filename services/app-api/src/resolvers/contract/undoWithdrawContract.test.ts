@@ -100,6 +100,7 @@ describe('undoWithdrawContract', () => {
             undoWithdrawnContract
         )
         expect(undoWithdrawnContract.consolidatedStatus).toBe('RESUBMITTED')
+        expect(undoWithdrawnContract.contractSubmissionType).toBe('HEALTH_PLAN')
         expect(contractHistory).toStrictEqual(
             expect.arrayContaining([
                 'Initial submission',

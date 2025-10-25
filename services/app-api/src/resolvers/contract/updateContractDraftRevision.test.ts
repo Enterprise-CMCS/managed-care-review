@@ -49,6 +49,9 @@ describe(`Tests UpdateContractDraftRevision`, () => {
             )
         }
 
+        // validate contract submission type
+        expect(draftContract.contractSubmissionType).toBe('HEALTH_PLAN')
+
         // update that draft.
         const updateFormData: ContractDraftRevisionFormDataInput =
             mockGqlContractDraftRevisionFormDataInput(draftContract.stateCode, {

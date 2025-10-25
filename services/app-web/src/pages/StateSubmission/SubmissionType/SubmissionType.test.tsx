@@ -7,7 +7,7 @@ import {
     mockContractPackageDraft,
     mockContractPackageUnlockedWithUnlockedType,
 } from '@mc-review/mocks'
-import { renderWithProviders } from '../../../testHelpers/jestHelpers'
+import { renderWithProviders } from '../../../testHelpers'
 import { SubmissionType } from './'
 import { Routes } from 'react-router'
 import { Route } from 'react-router-dom'

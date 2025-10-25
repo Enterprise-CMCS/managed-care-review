@@ -45,6 +45,9 @@ describe('fetchContract', () => {
 
         // confirm that contractID on draft rate is correct, this is now overwritten in parseContract and needs to be checked
         expect(draftRate[0].parentContractID).toBe(fetchedContract.id)
+
+        // validate correct contract submission
+        expect(fetchedContract.contractSubmissionType).toBe('HEALTH_PLAN')
     })
 
     it('gets the right contract name', async () => {

@@ -29,6 +29,7 @@ import {
     UpdateContractDraftRevisionInput,
     ContractType,
     PopulationCoveredType,
+    ContractSubmissionType,
 } from '../../../gen/gqlClient'
 import { PageActions } from '../PageActions'
 import styles from '../StateSubmissionForm.module.scss'
@@ -69,6 +70,7 @@ export interface SubmissionTypeFormValues {
     submissionDescription: string
     submissionType: string
     contractType: string
+    contractSubmissionType: ContractSubmissionType
 }
 
 type FormError =
@@ -127,6 +129,7 @@ export const SubmissionType = ({
             draftSubmission?.draftRevision?.formData.submissionType ?? '',
         contractType:
             draftSubmission?.draftRevision?.formData.contractType ?? '',
+        contractSubmissionType: 'HEALTH_PLAN',
     }
     const activeMainContentId = 'submissionTypePageMainContent'
 
@@ -192,6 +195,7 @@ export const SubmissionType = ({
                 ),
                 submissionDescription: values.submissionDescription,
                 contractType: values.contractType as ContractType,
+                contractSubmissionType: values.contractSubmissionType,
             }
 
             if (!createDraft) {

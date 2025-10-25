@@ -9,23 +9,36 @@ describe('insertContract', () => {
         vi.clearAllMocks()
     })
 
-    it('creates a new draft contract', async () => {
+    it('creates a new health plan and EQRO draft contracts', async () => {
         const client = await sharedTestPrismaClient()
 
         // create a draft contract
-        const draftContractData = mockInsertContractArgs({
+        const healthPlanContractData = mockInsertContractArgs({
             contractType: 'BASE',
+            contractSubmissionType: 'HEALTH_PLAN',
         })
-        const draftContract = must(
-            await insertDraftContract(client, draftContractData)
+        const eqroContractData = mockInsertContractArgs({
+            contractType: 'BASE',
+            contractSubmissionType: 'EQRO',
+        })
+        const draftHealPlanContract = must(
+            await insertDraftContract(client, healthPlanContractData)
         )
 
-        // Expect a new draft contract to have a draftRevision no submitted revisions
-        expect(draftContract.draftRevision).toBeDefined()
-        expect(draftContract.revisions).toHaveLength(0)
+        const draftEQROContract = must(
+            await insertDraftContract(client, eqroContractData)
+        )
+
+        // Expect a new draft health plan contract to have a draftRevision no submitted revisions
+        expect(draftHealPlanContract.draftRevision).toBeDefined()
+        expect(draftHealPlanContract.revisions).toHaveLength(0)
+        // Expect health plan contract submission type
+        expect(draftHealPlanContract.contractSubmissionType).toEqual(
+            'HEALTH_PLAN'
+        )
 
         // Expect draft contract to contain expected data.
-        expect(draftContract).toEqual(
+        expect(draftHealPlanContract).toEqual(
             expect.objectContaining({
                 id: expect.any(String),
                 stateCode: 'MN',
@@ -36,7 +49,34 @@ describe('insertContract', () => {
                         submissionType: 'CONTRACT_AND_RATES',
                         submissionDescription: 'Contract 1.0',
                         contractType: 'BASE',
-                        programIDs: draftContractData.programIDs,
+                        programIDs: healthPlanContractData.programIDs,
+                        populationCovered: 'MEDICAID',
+                        riskBasedContract: false,
+                    }),
+                }),
+                revisions: [],
+            })
+        )
+
+        // Expect a new EQRO draft contract to have a draftRevision no submitted revisions
+        expect(draftEQROContract.draftRevision).toBeDefined()
+        expect(draftEQROContract.revisions).toHaveLength(0)
+        // Expect EQRO contract submission type
+        expect(draftEQROContract.contractSubmissionType).toEqual('EQRO')
+
+        // Expect draft contract to contain expected data.
+        expect(draftEQROContract).toEqual(
+            expect.objectContaining({
+                id: expect.any(String),
+                stateCode: 'MN',
+                status: 'DRAFT',
+                stateNumber: expect.any(Number),
+                draftRevision: expect.objectContaining({
+                    formData: expect.objectContaining({
+                        submissionType: 'CONTRACT_AND_RATES',
+                        submissionDescription: 'Contract 1.0',
+                        contractType: 'BASE',
+                        programIDs: eqroContractData.programIDs,
                         populationCovered: 'MEDICAID',
                         riskBasedContract: false,
                     }),

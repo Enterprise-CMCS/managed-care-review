@@ -135,6 +135,7 @@ const newSubmissionInput = (
             riskBasedContract: false,
             submissionDescription: 'Test Q&A',
             contractType: 'BASE',
+            contractSubmissionType: 'HEALTH_PLAN'
         },
         overrides
     )

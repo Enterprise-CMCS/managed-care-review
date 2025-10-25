@@ -491,6 +491,11 @@ describe('updateDraftContractRates', () => {
         })
         expect(result.errors).toBeUndefined()
 
+        // validate contract submission type
+        expect(
+            result.data.updateDraftContractRates.contract.contractSubmissionType
+        ).toBe('HEALTH_PLAN')
+
         if (!result.data) {
             throw new Error('no data returned')
         }

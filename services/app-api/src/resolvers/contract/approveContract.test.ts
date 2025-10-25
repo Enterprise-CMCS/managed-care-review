@@ -34,6 +34,7 @@ describe('approveContract', () => {
             contract.id
         )
         expect(approvedContract.reviewStatusActions).toHaveLength(1)
+        expect(approvedContract.contractSubmissionType).toBe('HEALTH_PLAN')
         expect(approvedContract.reviewStatusActions![0]?.contractID).toBe(
             approvedContract.id
         )

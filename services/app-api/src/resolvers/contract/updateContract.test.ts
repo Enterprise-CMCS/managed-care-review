@@ -57,6 +57,10 @@ describe('updateContract', () => {
                 expect(updateResult.errors).toBeUndefined()
                 const updatedSubWithNoMCCRSID =
                     updateResultWithNoMCCRSID?.data?.updateContract.contract
+                expect(
+                    updateResult.data?.updateContract.contract
+                        .contractSubmissionType
+                ).toBe('HEALTH_PLAN')
 
                 expect(updatedSubWithNoMCCRSID.mccrsID).toBeNull()
             })

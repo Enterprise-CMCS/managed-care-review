@@ -85,6 +85,7 @@ const useContractForm = (contractID?: string): UseContractForm => {
             submissionType,
             submissionDescription,
             contractType,
+            contractSubmissionType,
         } = input
         try {
             const createResult = await createFormData({
@@ -96,6 +97,7 @@ const useContractForm = (contractID?: string): UseContractForm => {
                         submissionType,
                         submissionDescription,
                         contractType,
+                        contractSubmissionType,
                     },
                 },
             })

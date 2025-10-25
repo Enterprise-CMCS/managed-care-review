@@ -72,6 +72,7 @@ describe('submitContract', () => {
         ).toBeLessThan(1000)
         expect(contract.packageSubmissions).toHaveLength(1)
         expect(contract.status).toBe('SUBMITTED')
+        expect(contract.contractSubmissionType).toBe('HEALTH_PLAN')
 
         // check page submission metadata
         const sub = contract.packageSubmissions[0]

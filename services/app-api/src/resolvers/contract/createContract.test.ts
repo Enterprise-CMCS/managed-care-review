@@ -20,6 +20,7 @@ describe('createContract', () => {
             submissionType: 'CONTRACT_ONLY',
             submissionDescription: 'A real submission',
             contractType: 'BASE',
+            contractSubmissionType: 'HEALTH_PLAN',
         }
         const res = await executeGraphQLOperation(server, {
             query: CreateContractDocument,
@@ -35,6 +36,7 @@ describe('createContract', () => {
             throw new Error(`Unexpected error: draftRevision was undefined.`)
         }
 
+        expect(contract.contractSubmissionType).toBe('HEALTH_PLAN')
         expect(draftData.submissionDescription).toBe('A real submission')
         expect(draftData.submissionType).toBe('CONTRACT_ONLY')
         expect(draftData.programIDs).toEqual([
@@ -57,6 +59,7 @@ describe('createContract', () => {
             submissionType: 'CONTRACT_ONLY',
             submissionDescription: 'A real submission',
             contractType: 'BASE',
+            contractSubmissionType: 'HEALTH_PLAN',
         }
         const res = await executeGraphQLOperation(server, {
             query: CreateContractDocument,
@@ -83,6 +86,7 @@ describe('createContract', () => {
             submissionType: 'CONTRACT_ONLY',
             submissionDescription: 'A real submission',
             contractType: 'BASE',
+            contractSubmissionType: 'HEALTH_PLAN',
         }
         const res = await executeGraphQLOperation(server, {
             query: CreateContractDocument,
