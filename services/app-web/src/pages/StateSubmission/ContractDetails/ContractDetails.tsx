@@ -58,6 +58,7 @@ import {
 } from '@mc-review/submissions'
 import { featureFlags } from '@mc-review/common-code'
 import {
+    ContractSubmissionTypeRecord,
     RoutesRecord,
     RouteT,
     StatutoryRegulatoryAttestation,
@@ -560,6 +561,8 @@ export const ContractDetails = ({
                 navigate(
                     generatePath(RoutesRecord[options.redirectPath], {
                         id: id,
+                        contractSubmissionType:
+                            ContractSubmissionTypeRecord.HEALTH_PLAN,
                     })
                 )
             }
@@ -1442,18 +1445,30 @@ export const ContractDetails = ({
                                     actionInProgress={isSubmitting}
                                     backOnClickUrl={generatePath(
                                         RoutesRecord.SUBMISSIONS_TYPE,
-                                        { id }
+                                        {
+                                            id,
+                                            contractSubmissionType:
+                                                ContractSubmissionTypeRecord.HEALTH_PLAN,
+                                        }
                                     )}
                                     continueOnClickUrl={
                                         draftSubmission.draftRevision.formData
                                             .submissionType === 'CONTRACT_ONLY'
                                             ? generatePath(
                                                   RoutesRecord.SUBMISSIONS_RATE_DETAILS,
-                                                  { id }
+                                                  {
+                                                      id,
+                                                      contractSubmissionType:
+                                                          ContractSubmissionTypeRecord.HEALTH_PLAN,
+                                                  }
                                               )
                                             : generatePath(
                                                   RoutesRecord.SUBMISSIONS_CONTACTS,
-                                                  { id }
+                                                  {
+                                                      id,
+                                                      contractSubmissionType:
+                                                          ContractSubmissionTypeRecord.HEALTH_PLAN,
+                                                  }
                                               )
                                     }
                                 />

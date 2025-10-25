@@ -20,6 +20,7 @@ import {
     isLoadingOrHasFileErrors,
 } from '../../../../components/FileUpload'
 import {
+    ContractSubmissionTypeRecord,
     RouteT,
     RoutesRecord,
     STATE_SUBMISSION_FORM_ROUTES,
@@ -307,6 +308,8 @@ const RateDetails = ({
                     navigate(
                         generatePath(RoutesRecord[options.redirectPath], {
                             id: id,
+                            contractSubmissionType:
+                                ContractSubmissionTypeRecord.HEALTH_PLAN,
                         })
                     )
                 }
@@ -346,7 +349,11 @@ const RateDetails = ({
                 })
                 if (options.type !== 'SAVE_AS_DRAFT' && options.redirectPath) {
                     navigate(
-                        generatePath(RoutesRecord[options.redirectPath], { id })
+                        generatePath(RoutesRecord[options.redirectPath], {
+                            id,
+                            contractSubmissionType:
+                                ContractSubmissionTypeRecord.HEALTH_PLAN,
+                        })
                     )
                 }
                 setDraftSaved(true)
@@ -362,7 +369,11 @@ const RateDetails = ({
         } else {
             if (options.redirectPath) {
                 navigate(
-                    generatePath(RoutesRecord[options.redirectPath], { id })
+                    generatePath(RoutesRecord[options.redirectPath], {
+                        id,
+                        contractSubmissionType:
+                            ContractSubmissionTypeRecord.HEALTH_PLAN,
+                    })
                 )
             }
         }
@@ -776,7 +787,11 @@ const RateDetails = ({
                                             ? RoutesRecord.DASHBOARD_SUBMISSIONS
                                             : generatePath(
                                                   RoutesRecord.SUBMISSIONS_CONTRACT_DETAILS,
-                                                  { id }
+                                                  {
+                                                      id,
+                                                      contractSubmissionType:
+                                                          ContractSubmissionTypeRecord.HEALTH_PLAN,
+                                                  }
                                               )
                                     }
                                     saveAsDraftOnClickUrl={
@@ -785,7 +800,14 @@ const RateDetails = ({
                                     continueOnClickUrl={
                                         displayAsStandaloneRate
                                             ? RoutesRecord.DASHBOARD_SUBMISSIONS
-                                            : '/edit/contacts'
+                                            : generatePath(
+                                                  RoutesRecord.SUBMISSIONS_CONTACTS,
+                                                  {
+                                                      id,
+                                                      contractSubmissionType:
+                                                          ContractSubmissionTypeRecord.HEALTH_PLAN,
+                                                  }
+                                              )
                                     }
                                 />
                             </UswdsForm>

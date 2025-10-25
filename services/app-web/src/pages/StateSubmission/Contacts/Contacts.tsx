@@ -23,7 +23,11 @@ import {
     activeFormPages,
     type ContractFormPageProps,
 } from '../StateSubmissionForm'
-import { RoutesRecord, RouteT } from '@mc-review/constants'
+import {
+    ContractSubmissionTypeRecord,
+    RoutesRecord,
+    RouteT,
+} from '@mc-review/constants'
 import {
     ButtonWithLogging,
     DynamicStepIndicator,
@@ -200,6 +204,8 @@ const Contacts = ({
                     navigate(
                         generatePath(RoutesRecord[options.redirectPath], {
                             id: id,
+                            contractSubmissionType:
+                                ContractSubmissionTypeRecord.HEALTH_PLAN,
                         })
                     )
                 }
@@ -462,11 +468,19 @@ const Contacts = ({
                                                 'CONTRACT_ONLY'
                                                 ? generatePath(
                                                       RoutesRecord.SUBMISSIONS_CONTRACT_DETAILS,
-                                                      { id }
+                                                      {
+                                                          id,
+                                                          contractSubmissionType:
+                                                              ContractSubmissionTypeRecord.HEALTH_PLAN,
+                                                      }
                                                   )
                                                 : generatePath(
                                                       RoutesRecord.SUBMISSIONS_RATE_DETAILS,
-                                                      { id }
+                                                      {
+                                                          id,
+                                                          contractSubmissionType:
+                                                              ContractSubmissionTypeRecord.HEALTH_PLAN,
+                                                      }
                                                   )
                                         )
                                     }
@@ -480,11 +494,19 @@ const Contacts = ({
                                             .submissionType === 'CONTRACT_ONLY'
                                             ? generatePath(
                                                   RoutesRecord.SUBMISSIONS_CONTRACT_DETAILS,
-                                                  { id }
+                                                  {
+                                                      id,
+                                                      contractSubmissionType:
+                                                          ContractSubmissionTypeRecord.HEALTH_PLAN,
+                                                  }
                                               )
                                             : generatePath(
                                                   RoutesRecord.SUBMISSIONS_RATE_DETAILS,
-                                                  { id }
+                                                  {
+                                                      id,
+                                                      contractSubmissionType:
+                                                          ContractSubmissionTypeRecord.HEALTH_PLAN,
+                                                  }
                                               )
                                     }
                                     continueOnClickUrl="/edit/documents"
