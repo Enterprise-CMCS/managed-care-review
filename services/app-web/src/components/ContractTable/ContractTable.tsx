@@ -41,6 +41,7 @@ export type ContractInDashboardType = {
     updatedAt: Date
     status: ConsolidatedContractStatus
     programs: Program[]
+    contractSubmissionType: string
     submissionType?: string
     stateName?: string
 }
@@ -55,14 +56,15 @@ export type ContractTableProps = {
 function submissionURL(
     id: ContractInDashboardType['id'],
     status: ContractInDashboardType['status'],
+    contractSubmissionType: ContractInDashboardType['contractSubmissionType'],
     isNotStateUser: boolean
 ): string {
     if (isNotStateUser) {
         return `/submissions/${id}`
     } else if (status === 'DRAFT') {
-        return `/submissions/${id}/edit/type`
+        return `/submissions/${contractSubmissionType}/${id}/edit/type`
     } else if (status === 'UNLOCKED') {
-        return `/submissions/${id}/edit/review-and-submit`
+        return `/submissions/${contractSubmissionType}/${id}/edit/review-and-submit`
     }
     return `/submissions/${id}`
 }
@@ -263,6 +265,7 @@ export const ContractTable = ({
                         to={submissionURL(
                             info.getValue().id,
                             info.getValue().status,
+                            info.getValue().contractSubmissionType,
                             isNotStateUser
                         )}
                         className={`${styles.ID}`}
