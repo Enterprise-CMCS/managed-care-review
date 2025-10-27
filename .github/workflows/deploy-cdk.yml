@@ -32,7 +32,7 @@ jobs:
       app-version: ${{ steps.branch-name.outputs.app-version}}
     steps:
       - name: Check out repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
         with:
           fetch-depth: 40
 
@@ -82,7 +82,7 @@ jobs:
       name: dev
     steps:
       - name: Check out repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
 
       - name: Setup env
         uses: ./.github/actions/setup_env
@@ -126,7 +126,7 @@ jobs:
     runs-on: ubuntu-24.04
     steps:
       - name: Check out repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
 
       - name: Setup env
         uses: ./.github/actions/setup_env
@@ -187,7 +187,7 @@ jobs:
 
     steps:
       - name: Check out repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
 
       - name: Setup env
         uses: ./.github/actions/setup_env
@@ -233,7 +233,7 @@ jobs:
     runs-on: ubuntu-24.04
     steps:
       - name: Check out repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
 
       - name: Setup env
         uses: ./.github/actions/setup_env
@@ -279,7 +279,7 @@ jobs:
     environment: dev
     steps:
       - name: Check out repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
 
       - name: Setup env
         uses: ./.github/actions/setup_env
@@ -442,7 +442,7 @@ jobs:
     environment: dev
     steps:
       - name: Check out repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
 
       - name: Setup env
         uses: ./.github/actions/setup_env
@@ -527,7 +527,7 @@ jobs:
     environment: dev
     steps:
       - name: Check out repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
 
       - name: Setup env
         uses: ./.github/actions/setup_env
@@ -674,7 +674,7 @@ jobs:
       cognito-identity-pool-id: ${{ steps.save-cognito-identity-pool-id.outputs.value }}
       cognito-user-pool-web-client-id: ${{ steps.save-cognito-user-pool-web-client-id.outputs.value }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
 
       - name: Get AWS credentials
         uses: ./.github/actions/get_aws_credentials
@@ -824,7 +824,7 @@ jobs:
         # run copies of the current job in parallel
         containers: [1, 2, 3, 4, 5, 6, 7, 8]
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
 
       - name: Setup env
         uses: ./.github/actions/setup_env
@@ -924,7 +924,7 @@ jobs:
     permissions:
       deployments: write
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
 
       - name: Update deployment status (failure)
         if: failure() && needs.begin-deployment.result == 'success'
