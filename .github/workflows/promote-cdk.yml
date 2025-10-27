@@ -488,7 +488,7 @@ jobs:
           use-cdk-role: "true"
 
       - name: Download Prisma layers
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v6
         with:
           name: lambda-layers-prisma-client-migration
           path: ./services/infra-cdk/lambda-layers-prisma-client-migration
@@ -502,7 +502,7 @@ jobs:
           ls -la
 
       - name: Download Prisma engine layers
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v6
         with:
           name: lambda-layers-prisma-client-engine
           path: ./services/infra-cdk/lambda-layers-prisma-client-engine
@@ -608,12 +608,12 @@ jobs:
       - name: Setup env
         uses: ./.github/actions/setup_env
 
-      - uses: actions/download-artifact@v4
+      - uses: actions/download-artifact@v6
         with:
           name: app-web-gen
           path: ./services/app-web/src/gen
 
-      - uses: actions/download-artifact@v4
+      - uses: actions/download-artifact@v6
         with:
           name: cypress-gen
           path: ./services/cypress/gen
@@ -897,7 +897,7 @@ jobs:
           use-cdk-role: "true"
 
       - name: Download Prisma layers
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v6
         with:
           name: lambda-layers-prisma-client-migration
           path: ./services/infra-cdk/lambda-layers-prisma-client-migration
@@ -911,7 +911,7 @@ jobs:
           ls -la
 
       - name: Download Prisma engine layers
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v6
         with:
           name: lambda-layers-prisma-client-engine
           path: ./services/infra-cdk/lambda-layers-prisma-client-engine
@@ -1103,12 +1103,12 @@ jobs:
       - name: Setup env
         uses: ./.github/actions/setup_env
 
-      - uses: actions/download-artifact@v4
+      - uses: actions/download-artifact@v6
         with:
           name: app-web-gen
           path: ./services/app-web/src/gen
 
-      - uses: actions/download-artifact@v4
+      - uses: actions/download-artifact@v6
         with:
           name: cypress-gen
           path: ./services/cypress/gen
