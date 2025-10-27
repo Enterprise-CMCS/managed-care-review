@@ -3,7 +3,6 @@ import { RDSClient, CreateDBClusterSnapshotCommand } from '@aws-sdk/client-rds'
 import { spawnSync } from 'child_process'
 import { getDBClusterID, getPostgresURL } from './configuration'
 import { initTracer, recordException } from '../../../uploads/src/lib/otel'
-import { migrate, newDBMigrator } from '../dataMigrations/dataMigrator'
 
 const main: Handler = async (): Promise<APIGatewayProxyResultV2> => {
     // setup otel tracing
@@ -117,24 +116,6 @@ const main: Handler = async (): Promise<APIGatewayProxyResultV2> => {
             )
             return fmtMigrateError(errMsg)
         }
-    }
-
-    // Run the prisma dataMigrations.
-    // these are compiled in app-api so we can call them directly
-
-    const dataMigratorDBURL =
-        dbConnectionURL + `&connect_timeout=${connectTimeout}`
-
-    const dataMigrator = newDBMigrator(dataMigratorDBURL)
-
-    const migrationResult = await migrate(
-        dataMigrator,
-        'dataMigrations/migrations/'
-    )
-    if (migrationResult instanceof Error) {
-        const errMsg = `Could not migrate the database protobufs: ${migrationResult}`
-        recordException(errMsg, serviceName, 'migrate protos db')
-        return fmtMigrateError(errMsg)
     }
 
     const success: APIGatewayProxyResultV2 = {

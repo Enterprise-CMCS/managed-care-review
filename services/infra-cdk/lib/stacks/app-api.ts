@@ -302,9 +302,6 @@ export class AppApiStack extends BaseStack {
             `mkdir -p ${outputDir}/prisma || true`,
             `cp -r ${appApiPath}/prisma/schema.prisma ${outputDir}/prisma/schema.prisma || echo "schema.prisma not found"`,
             `cp -r ${appApiPath}/prisma/migrations ${outputDir}/prisma/migrations || echo "migrations not found"`,
-            // Copy data migrations
-            `mkdir -p ${outputDir}/dataMigrations || true`,
-            `cp -r ${appApiPath}/src/dataMigrations/migrations ${outputDir}/dataMigrations/migrations || echo "dataMigrations not found"`,
         ]
     }
 
