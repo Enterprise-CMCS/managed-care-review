@@ -294,6 +294,7 @@ describe('ContractTable for CMS User (with filters)', () => {
             {
                 ...submissions[0],
                 id: 'unlocked-submission',
+                contractSubmissionType: 'HEALTH_PLAN',
                 updatedAt: new Date('12/05/2022'),
                 status: 'UNLOCKED',
             },
@@ -312,7 +313,7 @@ describe('ContractTable for CMS User (with filters)', () => {
         const rows = await screen.findAllByRole('row')
         expect(within(rows[1]).getByRole('link')).toHaveAttribute(
             'href',
-            `/submissions/unlocked-submission`
+            `/submissions/health-plan/unlocked-submission`
         )
     })
 
@@ -957,6 +958,7 @@ describe('ContractTable state user tests', () => {
             {
                 ...submissions[0],
                 id: 'unlocked-submission',
+                contractSubmissionType: 'HEALTH_PLAN',
                 updatedAt: new Date('12/05/2022'),
                 status: 'UNLOCKED',
             },
@@ -969,6 +971,7 @@ describe('ContractTable state user tests', () => {
             {
                 ...submissions[2],
                 id: 'draft-submission',
+                contractSubmissionType: 'EQRO',
                 updatedAt: new Date('12/03/2022'),
                 status: 'DRAFT',
             },
@@ -989,15 +992,15 @@ describe('ContractTable state user tests', () => {
             within(rows[row]).getByRole('link')
         expect(submissionLink(1)).toHaveAttribute(
             'href',
-            `/submissions/unlocked-submission/edit/review-and-submit`
+            `/submissions/health-plan/unlocked-submission/edit/review-and-submit`
         )
         expect(submissionLink(2)).toHaveAttribute(
             'href',
-            `/submissions/submitted-submission`
+            `/submissions/eqro/submitted-submission`
         )
         expect(submissionLink(3)).toHaveAttribute(
             'href',
-            `/submissions/draft-submission/edit/type`
+            `/submissions/eqro/draft-submission/edit/type`
         )
     })
 })

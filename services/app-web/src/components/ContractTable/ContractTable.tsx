@@ -17,7 +17,10 @@ import styles from './ContractTable.module.scss'
 import { Table, Tag } from '@trussworks/react-uswds'
 import qs from 'qs'
 import { SubmissionStatusRecord } from '@mc-review/submissions'
-import { SubmissionReviewStatusRecord } from '@mc-review/constants'
+import {
+    ContractSubmissionTypeRecord,
+    SubmissionReviewStatusRecord,
+} from '@mc-review/constants'
 import {
     FilterAccordion,
     FilterSelect,
@@ -59,14 +62,19 @@ function submissionURL(
     contractSubmissionType: ContractInDashboardType['contractSubmissionType'],
     isNotStateUser: boolean
 ): string {
+    const submissionType =
+        contractSubmissionType === 'HEALTH_PLAN'
+            ? ContractSubmissionTypeRecord.HEALTH_PLAN
+            : ContractSubmissionTypeRecord.EQRO
+
     if (isNotStateUser) {
-        return `/submissions/${id}`
+        return `/submissions/${submissionType}/${id}`
     } else if (status === 'DRAFT') {
-        return `/submissions/${contractSubmissionType}/${id}/edit/type`
+        return `/submissions/${submissionType}/${id}/edit/type`
     } else if (status === 'UNLOCKED') {
-        return `/submissions/${contractSubmissionType}/${id}/edit/review-and-submit`
+        return `/submissions/${submissionType}/${id}/edit/review-and-submit`
     }
-    return `/submissions/${id}`
+    return `/submissions/${submissionType}/${id}`
 }
 
 const StatusTag = ({

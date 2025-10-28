@@ -215,7 +215,7 @@ export const UnlockSubmitModal = ({
 
             if (modalType !== 'UNLOCK_CONTRACT' && submissionName) {
                 navigate(
-                    `/dashboard/submissions?justSubmitted=${submissionName}`
+                    `/dashboard/submissions/${submissionData.contractSubmissionType}?justSubmitted=${submissionName}`
                 )
             } else {
                 await client.refetchQueries({
