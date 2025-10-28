@@ -203,6 +203,7 @@ function contractWithHistoryToDomainModelWithoutRates(
         reviewStatusActions: reviewStatusActions.reverse(),
         stateCode: contract.stateCode,
         stateNumber: contract.stateNumber,
+        contractSubmissionType: contract.contractSubmissionType,
         draftRevision,
         revisions: submittedRevisions.reverse(),
         packageSubmissions: packageSubmissions.reverse(),
