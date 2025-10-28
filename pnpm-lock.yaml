@@ -1054,8 +1054,8 @@ importers:
         specifier: 2.92.1
         version: 2.92.1(@aws-solutions-constructs/core@2.86.0(aws-cdk-lib@2.219.0(constructs@10.4.2))(constructs@10.4.2))(aws-cdk-lib@2.219.0(constructs@10.4.2))(constructs@10.4.2)
       '@aws-solutions-constructs/aws-cloudfront-s3':
-        specifier: 2.92.1
-        version: 2.92.1(@aws-solutions-constructs/core@2.86.0(aws-cdk-lib@2.219.0(constructs@10.4.2))(constructs@10.4.2))(@aws-solutions-constructs/resources@2.86.0(@aws-solutions-constructs/core@2.86.0(aws-cdk-lib@2.219.0(constructs@10.4.2))(constructs@10.4.2))(aws-cdk-lib@2.219.0(constructs@10.4.2))(constructs@10.4.2))(aws-cdk-lib@2.219.0(constructs@10.4.2))(constructs@10.4.2)
+        specifier: 2.94.0
+        version: 2.94.0(@aws-solutions-constructs/core@2.86.0(aws-cdk-lib@2.219.0(constructs@10.4.2))(constructs@10.4.2))(@aws-solutions-constructs/resources@2.86.0(@aws-solutions-constructs/core@2.86.0(aws-cdk-lib@2.219.0(constructs@10.4.2))(constructs@10.4.2))(aws-cdk-lib@2.219.0(constructs@10.4.2))(constructs@10.4.2))(aws-cdk-lib@2.219.0(constructs@10.4.2))(constructs@10.4.2)
       '@aws-solutions-constructs/aws-cognito-apigateway-lambda':
         specifier: 2.92.1
         version: 2.92.1(@aws-solutions-constructs/core@2.86.0(aws-cdk-lib@2.219.0(constructs@10.4.2))(constructs@10.4.2))(aws-cdk-lib@2.219.0(constructs@10.4.2))(constructs@10.4.2)
@@ -1877,6 +1877,7 @@ packages:
   '@aws-sdk/credential-provider-web-identity@3.917.0':
     resolution: {integrity: sha512-pZncQhFbwW04pB0jcD5OFv3x2gAddDYCVxyJVixgyhSw7bKCYxqu6ramfq1NxyVpmm+qsw+ijwi/3cCmhUHF/A==}
     engines: {node: '>=18.0.0'}
+    deprecated: This version contains a compilation TypeScript error https://github.com/aws/aws-sdk-js-v3/issues/7457 - please use @aws-sdk/credential-providers@3.918.0 or higher
 
   '@aws-sdk/eventstream-codec@3.186.0':
     resolution: {integrity: sha512-3kLcJ0/H+zxFlhTlE1SGoFpzd/SitwXOsTSlYVwrwdISKRjooGg0BJpm1CSTkvmWnQIUlYijJvS96TAJ+fCPIA==}
@@ -2431,12 +2432,12 @@ packages:
       aws-cdk-lib: ^2.212.0
       constructs: ^10.0.0
 
-  '@aws-solutions-constructs/aws-cloudfront-s3@2.92.1':
-    resolution: {integrity: sha512-8DkoA5sozVUGO5fWJfdXVxQ9STkb1+zPD4tHcvjqzWBXf4B9i20hDMpaiBkANsKhGiKC04bihT9uotNd/h5Jmw==}
+  '@aws-solutions-constructs/aws-cloudfront-s3@2.94.0':
+    resolution: {integrity: sha512-UMSY8IXjNwoI0t+dMpQ4KgiLQdSae+eAGFqXQmpoREGJUKaTG9Qvx2xY07LnqNZLWxDdvdSveLfn/Qksx8Y6Wg==}
     peerDependencies:
-      '@aws-solutions-constructs/core': 2.92.1
-      '@aws-solutions-constructs/resources': 2.92.1
-      aws-cdk-lib: ^2.212.0
+      '@aws-solutions-constructs/core': 2.94.0
+      '@aws-solutions-constructs/resources': 2.94.0
+      aws-cdk-lib: ^2.219.0
       constructs: ^10.0.0
 
   '@aws-solutions-constructs/aws-cognito-apigateway-lambda@2.92.1':
@@ -3429,6 +3430,7 @@ packages:
 
   '@cypress/instrument-cra@1.4.0':
     resolution: {integrity: sha512-gXf540xL0jcUXkWyrA2Ug9rzs+jRkc9EPhnRi8XfbnRjdF4lvnn108N6x0lgTApMTbbpCDbVuskHGXDmIuD3CQ==}
+    deprecated: Package no longer supported. Contact Support at https://www.npmjs.com/support for more info.
 
   '@cypress/request@3.0.1':
     resolution: {integrity: sha512-TWivJlJi8ZDx2wGOw1dbLuHJKUYX7bWySw377nlnGOW3hP9/MUKIsEdXT/YngWxVdgNCHRBmFlBipE+5/2ZZlQ==}
@@ -8584,8 +8586,8 @@ packages:
   electron-to-chromium@1.5.234:
     resolution: {integrity: sha512-RXfEp2x+VRYn8jbKfQlRImzoJU01kyDvVPBmG39eU2iuRVhuS6vQNocB8J0/8GrIMLnPzgz4eW6WiRnJkTuNWg==}
 
-  electron-to-chromium@1.5.240:
-    resolution: {integrity: sha512-OBwbZjWgrCOH+g6uJsA2/7Twpas2OlepS9uvByJjR2datRDuKGYeD+nP8lBBks2qnB7bGJNHDUx7c/YLaT3QMQ==}
+  electron-to-chromium@1.5.241:
+    resolution: {integrity: sha512-ILMvKX/ZV5WIJzzdtuHg8xquk2y0BOGlFOxBVwTpbiXqWIH0hamG45ddU4R3PQ0gYu+xgo0vdHXHli9sHIGb4w==}
 
   element-closest@2.0.2:
     resolution: {integrity: sha512-QCqAWP3kwj8Gz9UXncVXQGdrhnWxD8SQBSeZp5pOsyCcQ6RpL738L1/tfuwBiMi6F1fYkxqPnBrFBR4L+f49Cg==}
@@ -17033,7 +17035,7 @@ snapshots:
       aws-cdk-lib: 2.219.0(constructs@10.4.2)
       constructs: 10.4.2
 
-  '@aws-solutions-constructs/aws-cloudfront-s3@2.92.1(@aws-solutions-constructs/core@2.86.0(aws-cdk-lib@2.219.0(constructs@10.4.2))(constructs@10.4.2))(@aws-solutions-constructs/resources@2.86.0(@aws-solutions-constructs/core@2.86.0(aws-cdk-lib@2.219.0(constructs@10.4.2))(constructs@10.4.2))(aws-cdk-lib@2.219.0(constructs@10.4.2))(constructs@10.4.2))(aws-cdk-lib@2.219.0(constructs@10.4.2))(constructs@10.4.2)':
+  '@aws-solutions-constructs/aws-cloudfront-s3@2.94.0(@aws-solutions-constructs/core@2.86.0(aws-cdk-lib@2.219.0(constructs@10.4.2))(constructs@10.4.2))(@aws-solutions-constructs/resources@2.86.0(@aws-solutions-constructs/core@2.86.0(aws-cdk-lib@2.219.0(constructs@10.4.2))(constructs@10.4.2))(aws-cdk-lib@2.219.0(constructs@10.4.2))(constructs@10.4.2))(aws-cdk-lib@2.219.0(constructs@10.4.2))(constructs@10.4.2)':
     dependencies:
       '@aws-solutions-constructs/core': 2.86.0(aws-cdk-lib@2.219.0(constructs@10.4.2))(constructs@10.4.2)
       '@aws-solutions-constructs/resources': 2.86.0(@aws-solutions-constructs/core@2.86.0(aws-cdk-lib@2.219.0(constructs@10.4.2))(constructs@10.4.2))(aws-cdk-lib@2.219.0(constructs@10.4.2))(constructs@10.4.2)
@@ -23895,7 +23897,7 @@ snapshots:
     dependencies:
       baseline-browser-mapping: 2.8.20
       caniuse-lite: 1.0.30001751
-      electron-to-chromium: 1.5.240
+      electron-to-chromium: 1.5.241
       node-releases: 2.0.26
       update-browserslist-db: 1.1.4(browserslist@4.27.0)
 
@@ -24875,7 +24877,7 @@ snapshots:
 
   electron-to-chromium@1.5.234: {}
 
-  electron-to-chromium@1.5.240: {}
+  electron-to-chromium@1.5.241: {}
 
   element-closest@2.0.2: {}
 
