@@ -10,10 +10,10 @@ MC-Review is built on AWS CDK architecture (services deployed as AWS Lambdas) wi
 | --------------------------- | ------------------------------- | ---------------------- | ---------------------- |
 | **Node.js**                 | 20.14.0                         | MIT                    | Runtime                |
 | **TypeScript**              | 5.9.3                           | Apache-2.0             | Language               |
-| **React**                   | 18.2.0                          | MIT                    | Frontend Framework     |
+| **React**                   | 18.3.1                          | MIT                    | Frontend Framework     |
 | **Vite**                    | 7.1.11                          | MIT                    | Build Tool             |
 | **GraphQL**                 | 16.9.0                          | MIT                    | API Protocol           |
-| **Apollo Server**           | 5.0.0                           | MIT                    | GraphQL Server         |
+| **Apollo Server**           | 4.12.2                          | MIT                    | GraphQL Server         |
 | **Apollo Client**           | 3.8.8                           | MIT                    | GraphQL Client         |
 | **PostgreSQL**              | 16.9                            | PostgreSQL License     | Database               |
 | **Prisma**                  | 5.22.0                          | Apache-2.0             | ORM                    |
@@ -26,7 +26,7 @@ MC-Review is built on AWS CDK architecture (services deployed as AWS Lambdas) wi
 | **Formik**                  | 2.4.6                           | Apache-2.0             | Form Management        |
 | **React Router**            | 6.23.1                          | MIT                    | Routing                |
 | **USWDS**                   | 2.14.0                          | Public Domain/Mixed    | Design System          |
-| **@trussworks/react-uswds** | 4.0.0                           | Apache-2.0             | Component Library      |
+| **@trussworks/react-uswds** | 4.2.1                           | Apache-2.0             | Component Library      |
 | **Vitest**                  | 3.2.4                           | MIT                    | Unit Testing           |
 | **Cypress**                 | 13.13.2                         | MIT                    | E2E Testing            |
 | **React Testing Library**   | 16.3.0                          | MIT                    | Testing Utilities      |
