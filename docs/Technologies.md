@@ -6,47 +6,49 @@ MC-Review is built on AWS CDK architecture (services deployed as AWS Lambdas) wi
 
 ## Technology Stack Summary
 
-| Technology | Version | License | Category |
-|------------|---------|---------|----------|
-| **Node.js** | 20.14.0 | MIT | Runtime |
-| **TypeScript** | 5.9.3 | Apache-2.0 | Language |
-| **React** | 18.2.0 | MIT | Frontend Framework |
-| **Vite** | 7.1.11 | MIT | Build Tool |
-| **GraphQL** | 16.9.0 | MIT | API Protocol |
-| **Apollo Server** | 5.0.0 | MIT | GraphQL Server |
-| **Apollo Client** | 3.8.8 | MIT | GraphQL Client |
-| **PostgreSQL** | 16.9 | PostgreSQL License | Database |
-| **Prisma** | 5.22.0 | Apache-2.0 | ORM |
-| **AWS Amplify** | 5.0.10 | Apache-2.0 | Auth Framework |
-| **AWS Cognito** | 3.916.0 (SDK) | Apache-2.0 | Authentication |
-| **AWS Lambda** | (AWS Managed) | AWS Customer Agreement | Compute |
-| **AWS Aurora** | (AWS Managed) | AWS Customer Agreement | Database Service |
-| **AWS CDK** | 2.219.0 | Apache-2.0 | Infrastructure as Code |
-| **Serverless Framework** | 4.2.3 | MIT | Deployment |
-| **Formik** | 2.4.6 | Apache-2.0 | Form Management |
-| **React Router** | 6.23.1 | MIT | Routing |
-| **USWDS** | 2.14.0 | Public Domain/Mixed | Design System |
-| **@trussworks/react-uswds** | 4.0.0 | Apache-2.0 | Component Library |
-| **Vitest** | 3.2.4 | MIT | Unit Testing |
-| **Cypress** | 13.13.2 | MIT | E2E Testing |
-| **React Testing Library** | 16.3.0 | MIT | Testing Utilities |
-| **Storybook** | 9.1.2 | MIT | Component Development |
-| **LaunchDarkly** | 9.10.2 (server), 3.9.0 (client) | Apache-2.0 | Feature Flags |
-| **OpenTelemetry** | 1.30.x | Apache-2.0 | Observability |
-| **New Relic** | SaaS | Proprietary | Monitoring |
-| **GraphQL Code Generator** | Latest | MIT | Code Generation |
+| Technology                  | Version                         | License                | Category               |
+| --------------------------- | ------------------------------- | ---------------------- | ---------------------- |
+| **Node.js**                 | 20.14.0                         | MIT                    | Runtime                |
+| **TypeScript**              | 5.9.3                           | Apache-2.0             | Language               |
+| **React**                   | 18.2.0                          | MIT                    | Frontend Framework     |
+| **Vite**                    | 7.1.11                          | MIT                    | Build Tool             |
+| **GraphQL**                 | 16.9.0                          | MIT                    | API Protocol           |
+| **Apollo Server**           | 5.0.0                           | MIT                    | GraphQL Server         |
+| **Apollo Client**           | 3.8.8                           | MIT                    | GraphQL Client         |
+| **PostgreSQL**              | 16.9                            | PostgreSQL License     | Database               |
+| **Prisma**                  | 5.22.0                          | Apache-2.0             | ORM                    |
+| **AWS Amplify**             | 5.0.10                          | Apache-2.0             | Auth Framework         |
+| **AWS Cognito**             | 3.916.0 (SDK)                   | Apache-2.0             | Authentication         |
+| **AWS Lambda**              | (AWS Managed)                   | AWS Customer Agreement | Compute                |
+| **AWS Aurora**              | (AWS Managed)                   | AWS Customer Agreement | Database Service       |
+| **AWS CDK**                 | 2.219.0                         | Apache-2.0             | Infrastructure as Code |
+| **Serverless Framework**    | 4.2.3                           | MIT                    | Deployment             |
+| **Formik**                  | 2.4.6                           | Apache-2.0             | Form Management        |
+| **React Router**            | 6.23.1                          | MIT                    | Routing                |
+| **USWDS**                   | 2.14.0                          | Public Domain/Mixed    | Design System          |
+| **@trussworks/react-uswds** | 4.0.0                           | Apache-2.0             | Component Library      |
+| **Vitest**                  | 3.2.4                           | MIT                    | Unit Testing           |
+| **Cypress**                 | 13.13.2                         | MIT                    | E2E Testing            |
+| **React Testing Library**   | 16.3.0                          | MIT                    | Testing Utilities      |
+| **Storybook**               | 9.1.2                           | MIT                    | Component Development  |
+| **LaunchDarkly**            | 9.10.2 (server), 3.9.0 (client) | Apache-2.0             | Feature Flags          |
+| **OpenTelemetry**           | 1.30.x                          | Apache-2.0             | Observability          |
+| **New Relic**               | SaaS                            | Proprietary            | Monitoring             |
+| **GraphQL Code Generator**  | Latest                          | MIT                    | Code Generation        |
 
 ## Infrastructure as Code
 
 ### AWS Cloud Development Kit (CDK)
 
 [AWS CDK](https://aws.amazon.com/cdk/) is our infrastructure as code tool that allows us to define cloud infrastructure using TypeScript. CDK provides:
+
 - Type-safe infrastructure definitions
 - Reusable constructs for common patterns
 - Built-in best practices for security and compliance
 - Easy cross-stack references and dependency management
 
 Our CDK infrastructure is organized into multiple stacks:
+
 - **Foundation Stack**: Core SSM parameters and shared configuration
 - **Network Stack**: VPC and security groups
 - **Lambda Layers Stack**: Shared dependencies for Lambda functions
@@ -155,3 +157,15 @@ This is also one place in our app where we have implemented a ratchet in CI. The
 ### Apollo Studio Explorer
 
 [Apollo Studio Explorer](https://www.apollographql.com/docs/graphos/explorer/explorer/) is a web-based IDE for writing and executing GraphQL operations on our deployed GraphQL API, with features such as schema referencing, query linting, autocomplete, and a jump-to-definition tool. The tool allows developers to write and test GraphQL operations without the need for front-end UI to execute the operations. For information on accessing the tool, refer to the [creating-and-testing-endpoints.md](technical-design/creating-and-testing-endpoints.md#apollo-studio-explorer) documentation.
+
+## Deployment
+
+### AWS CDK Deployments
+
+We are migrating our infrastructure deployment to [AWS CDK](https://docs.aws.amazon.com/cdk/v2/guide/home.html), which uses TypeScript to define our infrastructure and deploy it via CloudFormation to AWS.
+
+**Note:** As of October 2025, we are in the process of migrating from Serverless Framework to AWS CDK. The transition is expected to be complete by the end of 2025. During this period, some services may still use Serverless Framework for deployment.
+
+### Serverless Framework (Legacy)
+
+[Serverless Framework](https://www.serverless.com/) was previously used to deploy our application. It provides a simple YAML-based configuration for defining serverless resources. We are actively migrating away from this tool to AWS CDK.
