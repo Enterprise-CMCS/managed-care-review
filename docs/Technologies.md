@@ -1,6 +1,40 @@
 # Technology
 
+**Last Updated:** October 2025
+
 MC-Review is built on AWS CDK architecture (services deployed as AWS Lambdas) with a React client, Node server, and GraphQL as the api protocol. Postgres is used as the database and is running in AWS Aurora for deployed environments. The codebase is written primarily in Typescript. Additional technologies of interest are listed below.
+
+## Technology Stack Summary
+
+| Technology | Version | License | Category |
+|------------|---------|---------|----------|
+| **Node.js** | 20.14.0 | MIT | Runtime |
+| **TypeScript** | 5.9.3 | Apache-2.0 | Language |
+| **React** | 18.2.0 | MIT | Frontend Framework |
+| **Vite** | 7.1.11 | MIT | Build Tool |
+| **GraphQL** | 16.9.0 | MIT | API Protocol |
+| **Apollo Server** | 5.0.0 | MIT | GraphQL Server |
+| **Apollo Client** | 3.8.8 | MIT | GraphQL Client |
+| **PostgreSQL** | 16.9 | PostgreSQL License | Database |
+| **Prisma** | 5.22.0 | Apache-2.0 | ORM |
+| **AWS Amplify** | 5.0.10 | Apache-2.0 | Auth Framework |
+| **AWS Cognito** | 3.916.0 (SDK) | Apache-2.0 | Authentication |
+| **AWS Lambda** | (AWS Managed) | AWS Customer Agreement | Compute |
+| **AWS Aurora** | (AWS Managed) | AWS Customer Agreement | Database Service |
+| **AWS CDK** | 2.219.0 | Apache-2.0 | Infrastructure as Code |
+| **Serverless Framework** | 4.2.3 | MIT | Deployment |
+| **Formik** | 2.4.6 | Apache-2.0 | Form Management |
+| **React Router** | 6.23.1 | MIT | Routing |
+| **USWDS** | 2.14.0 | Public Domain/Mixed | Design System |
+| **@trussworks/react-uswds** | 4.0.0 | Apache-2.0 | Component Library |
+| **Vitest** | 3.2.4 | MIT | Unit Testing |
+| **Cypress** | 13.13.2 | MIT | E2E Testing |
+| **React Testing Library** | 16.3.0 | MIT | Testing Utilities |
+| **Storybook** | 9.1.2 | MIT | Component Development |
+| **LaunchDarkly** | 9.10.2 (server), 3.9.0 (client) | Apache-2.0 | Feature Flags |
+| **OpenTelemetry** | 1.30.x | Apache-2.0 | Observability |
+| **New Relic** | SaaS | Proprietary | Monitoring |
+| **GraphQL Code Generator** | Latest | MIT | Code Generation |
 
 ## Infrastructure as Code
 
