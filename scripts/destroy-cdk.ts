@@ -31,6 +31,7 @@ const cdkStackPrefixes = [
     'frontend-infra',
     'uploads',
     'network',
+    'github-oidc', // Must be last since other stacks depend on it for permissions
 ]
 
 const protectedStages = [

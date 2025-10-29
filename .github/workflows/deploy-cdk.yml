@@ -32,7 +32,7 @@ jobs:
       app-version: ${{ steps.branch-name.outputs.app-version}}
     steps:
       - name: Check out repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
         with:
           fetch-depth: 40
 
@@ -82,7 +82,7 @@ jobs:
       name: dev
     steps:
       - name: Check out repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
 
       - name: Setup env
         uses: ./.github/actions/setup_env
@@ -126,7 +126,7 @@ jobs:
     runs-on: ubuntu-24.04
     steps:
       - name: Check out repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
 
       - name: Setup env
         uses: ./.github/actions/setup_env
@@ -151,19 +151,19 @@ jobs:
           exit $?
 
       - name: upload app web gen directory
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v5
         with:
           name: app-web-gen
           path: ./services/app-web/src/gen
 
       - name: upload cypress gen directory
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v5
         with:
           name: cypress-gen
           path: ./services/cypress/gen
 
       - name: upload unit test coverage
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v5
         with:
           name: unit-test-coverage
           path: ./services/app-web/coverage/coverage-final.json
@@ -187,7 +187,7 @@ jobs:
 
     steps:
       - name: Check out repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
 
       - name: Setup env
         uses: ./.github/actions/setup_env
@@ -223,7 +223,7 @@ jobs:
           exit $?
 
       - name: upload api test coverage
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v5
         with:
           name: api-test-coverage
           path: ./services/app-api/coverage/coverage-final.json
@@ -233,7 +233,7 @@ jobs:
     runs-on: ubuntu-24.04
     steps:
       - name: Check out repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
 
       - name: Setup env
         uses: ./.github/actions/setup_env
@@ -253,12 +253,12 @@ jobs:
         working-directory: services/app-api
         run: ./scripts/prepare-prisma-layer.sh
 
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v5
         with:
           name: lambda-layers-prisma-client-migration
           path: ./services/app-api/lambda-layers-prisma-client-migration
 
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v5
         with:
           name: lambda-layers-prisma-client-engine
           path: ./services/app-api/lambda-layers-prisma-client-engine
@@ -267,7 +267,7 @@ jobs:
         working-directory: services/postgres
         run: ./build-postgres-lambda-layer.sh
 
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v5
         with:
           name: lambda-layers-postgres-tools
           path: ./services/postgres/lambda-layers-postgres-tools
@@ -279,7 +279,7 @@ jobs:
     environment: dev
     steps:
       - name: Check out repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
 
       - name: Setup env
         uses: ./.github/actions/setup_env
@@ -442,7 +442,7 @@ jobs:
     environment: dev
     steps:
       - name: Check out repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
 
       - name: Setup env
         uses: ./.github/actions/setup_env
@@ -527,7 +527,7 @@ jobs:
     environment: dev
     steps:
       - name: Check out repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
 
       - name: Setup env
         uses: ./.github/actions/setup_env
@@ -548,7 +548,7 @@ jobs:
           use-cdk-role: "true"
 
       - name: Download Prisma layers
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v6
         with:
           name: lambda-layers-prisma-client-migration
           path: ./services/infra-cdk/lambda-layers-prisma-client-migration
@@ -562,7 +562,7 @@ jobs:
           ls -la
 
       - name: Download Prisma engine layers
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v6
         with:
           name: lambda-layers-prisma-client-engine
           path: ./services/infra-cdk/lambda-layers-prisma-client-engine
@@ -674,7 +674,7 @@ jobs:
       cognito-identity-pool-id: ${{ steps.save-cognito-identity-pool-id.outputs.value }}
       cognito-user-pool-web-client-id: ${{ steps.save-cognito-user-pool-web-client-id.outputs.value }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
 
       - name: Get AWS credentials
         uses: ./.github/actions/get_aws_credentials
@@ -824,7 +824,7 @@ jobs:
         # run copies of the current job in parallel
         containers: [1, 2, 3, 4, 5, 6, 7, 8]
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
 
       - name: Setup env
         uses: ./.github/actions/setup_env
@@ -838,12 +838,12 @@ jobs:
           stage-name: ${{ needs.begin-deployment.outputs.stage-name }}
           use-cdk-role: "true"
 
-      - uses: actions/download-artifact@v4
+      - uses: actions/download-artifact@v6
         with:
           name: app-web-gen
           path: ./services/app-web/src/gen
 
-      - uses: actions/download-artifact@v4
+      - uses: actions/download-artifact@v6
         with:
           name: cypress-gen
           path: ./services/cypress/gen
@@ -891,27 +891,27 @@ jobs:
           NODE_V8_COVERAGE: ./coverage-cypress
 
       - name: Upload cypress screenshots
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v5
         if: failure() && steps.cypress.outcome == 'failure'
         with:
           name: cypress-screenshots-cdk-${{ matrix.containers}}
           path: services/cypress/screenshots
 
       - name: Upload cypress video
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v5
         if: always() && steps.cypress.outcome != 'skipped'
         with:
           name: cypress-videos-cdk-${{ matrix.containers}}
           path: services/cypress/videos
 
       - name: upload partial cypress coverage
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v5
         with:
           name: partial-cypress-coverage-cdk-${{ matrix.containers}}
           path: ./coverage-cypress/*.info
 
       - name: upload partial cypress coverage json
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v5
         with:
           name: cypress-json-coverage-cdk-${{ matrix.containers}}
           path: ./coverage-cypress/*.json
@@ -924,7 +924,7 @@ jobs:
     permissions:
       deployments: write
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
 
       - name: Update deployment status (failure)
         if: failure() && needs.begin-deployment.result == 'success'

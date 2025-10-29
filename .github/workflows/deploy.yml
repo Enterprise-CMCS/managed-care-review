@@ -115,19 +115,19 @@ jobs:
           exit $?
 
       - name: upload app web gen directory
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v5
         with:
           name: app-web-gen
           path: ./services/app-web/src/gen
 
       - name: upload cypress gen directory
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v5
         with:
           name: cypress-gen
           path: ./services/cypress/gen
 
       - name: upload unit test coverage
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v5
         with:
           name: unit-test-coverage
           path: ./services/app-web/coverage/coverage-final.json
@@ -200,7 +200,7 @@ jobs:
           exit $?
 
       - name: upload api test coverage
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v5
         with:
           name: api-test-coverage
           path: ./services/app-api/coverage/coverage-final.json
@@ -240,12 +240,12 @@ jobs:
         working-directory: services/app-api
         run: ./scripts/prepare-prisma-layer.sh
 
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v5
         with:
           name: lambda-layers-prisma-client-migration
           path: ./services/app-api/lambda-layers-prisma-client-migration
 
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v5
         with:
           name: lambda-layers-prisma-client-engine
           path: ./services/app-api/lambda-layers-prisma-client-engine
@@ -254,7 +254,7 @@ jobs:
         working-directory: services/postgres
         run: ./build-postgres-lambda-layer.sh
 
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v5
         with:
           name: lambda-layers-postgres-tools
           path: ./services/postgres/lambda-layers-postgres-tools
@@ -274,7 +274,7 @@ jobs:
         working-directory: services/uploads/src/avLayer
         run: ./dockerbuild.sh
 
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v5
         with:
           name: lambda-layers-clamav
           path: ./services/uploads/src/avLayer/build/lambda_layer.zip
@@ -539,12 +539,12 @@ jobs:
           stage-name: ${{ needs.begin-deployment.outputs.stage-name }}
           changed-services: ${{ needs.begin-deployment.outputs.changed-services }}
 
-      - uses: actions/download-artifact@v5
+      - uses: actions/download-artifact@v6
         with:
           name: app-web-gen
           path: ./services/app-web/src/gen
 
-      - uses: actions/download-artifact@v5
+      - uses: actions/download-artifact@v6
         with:
           name: cypress-gen
           path: ./services/cypress/gen
@@ -598,27 +598,27 @@ jobs:
           ls -R ./coverage-cypress || echo "Directory not found"
 
       - name: Upload cypress screenshots
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v5
         if: failure() && steps.cypress.outcome == 'failure'
         with:
           name: cypress-screenshots-${{ matrix.containers}}
           path: services/cypress/screenshots
 
       - name: Upload cypress video
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v5
         if: always() && steps.cypress.outcome != 'skipped'
         with:
           name: cypress-videos-${{ matrix.containers}}
           path: services/cypress/videos
 
       - name: upload partial cypress coverage
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v5
         with:
           name: partial-cypress-coverage-${{ matrix.containers}}
           path: ./coverage-cypress/*.info
 
       - name: upload partial cypress coverage json
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v5
         with:
           name: cypress-json-coverage-${{ matrix.containers}}
           path: ./coverage-cypress/*.json
@@ -655,7 +655,7 @@ jobs:
           echo $(pwd)
           ls
 
-      - uses: actions/download-artifact@v5
+      - uses: actions/download-artifact@v6
 
       - name: Create combined test coverage report
         run: |
@@ -712,7 +712,7 @@ jobs:
           ls -R
 
       - name: Upload combined test coverage
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v5
         with:
           name: combined-test-coverage
           path: ./coverage-all/

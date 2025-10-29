@@ -20,9 +20,9 @@
         ]
     },
     "dependencies": {
-        "@aws-sdk/client-cloudfront": "^3.914.0",
-        "@aws-sdk/client-ec2": "^3.915.0",
-        "@aws-sdk/client-secrets-manager": "^3.914.0",
+        "@aws-sdk/client-cloudfront": "^3.919.0",
+        "@aws-sdk/client-ec2": "^3.919.0",
+        "@aws-sdk/client-secrets-manager": "^3.919.0",
         "axios": "^1.12.2",
         "node-ssh": "^13.2.1",
         "prompts": "^2.4.2",
@@ -30,7 +30,7 @@
     },
     "devDependencies": {
         "@types/eslint": "^9.6.1",
-        "@types/node": "^24.8.0",
+        "@types/node": "^24.9.1",
         "@types/prompts": "^2.4.9",
         "@types/ssh2": "^1.15.5",
         "@types/yargs": "^17.0.33",
@@ -43,6 +43,6 @@
         "jiti": "^2.6.1",
         "lint-staged": "^16.2.3",
         "prettier": "^3.5.3",
-        "typescript": "5.9.2"
+        "typescript": "5.9.3"
     }
 }

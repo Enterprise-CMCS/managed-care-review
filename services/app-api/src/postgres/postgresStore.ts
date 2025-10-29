@@ -172,7 +172,8 @@ type Store = {
         stateCode: string
     ) => Promise<ContractOrErrorArrayType | Error>
     findAllContractsWithHistoryBySubmitInfo: (
-        useZod?: boolean
+        useZod?: boolean,
+        skipFindingLatest?: boolean
     ) => Promise<ContractOrErrorArrayType | Error>
     findContractRevision: (
         contractRevID: string

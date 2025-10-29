@@ -129,12 +129,12 @@ jobs:
         working-directory: services/app-api
         run: ./scripts/prepare-prisma-layer.sh
 
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v5
         with:
           name: lambda-layers-prisma-client-migration
           path: ./services/app-api/lambda-layers-prisma-client-migration
 
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v5
         with:
           name: lambda-layers-prisma-client-engine
           path: ./services/app-api/lambda-layers-prisma-client-engine
@@ -143,7 +143,7 @@ jobs:
         working-directory: services/postgres
         run: ./build-postgres-lambda-layer.sh
 
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v5
         with:
           name: lambda-layers-postgres-tools
           path: ./services/postgres/lambda-layers-postgres-tools
@@ -162,7 +162,7 @@ jobs:
         working-directory: services/uploads/src/avLayer
         run: ./dockerbuild.sh
 
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v5
         with:
           name: lambda-layers-clamav
           path: ./services/uploads/src/avLayer/build/lambda_layer.zip
@@ -345,12 +345,12 @@ jobs:
       - name: Setup env
         uses: ./.github/actions/setup_env
 
-      - uses: actions/download-artifact@v5
+      - uses: actions/download-artifact@v6
         with:
           name: app-web-gen deploy prod
           path: ./services/app-web/src/gen
 
-      - uses: actions/download-artifact@v5
+      - uses: actions/download-artifact@v6
         with:
           name: cypress-gen deploy prod
           path: ./services/cypress/gen
@@ -387,7 +387,7 @@ jobs:
           CYPRESS_VIDEOS_FOLDER: services/cypress/videos
 
       - name: Upload cypress video
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v5
         if: failure() && steps.cypress.outcome == 'failure'
         with:
           name: cypress-videos

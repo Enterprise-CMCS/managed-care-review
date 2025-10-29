@@ -28,7 +28,7 @@ jobs:
       deploy-id: ${{ steps.ghdeployment.outputs.deployment_id }}
     steps:
       - name: Check out repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
 
       - name: Check for secrets
         uses: ./.github/actions/check_secrets
@@ -56,7 +56,7 @@ jobs:
     runs-on: ubuntu-24.04
     steps:
       - name: Check out repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
 
       - name: Setup env
         uses: ./.github/actions/setup_env
@@ -81,19 +81,19 @@ jobs:
           exit $?
 
       - name: upload app web gen directory
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v5
         with:
           name: app-web-gen
           path: ./services/app-web/src/gen
 
       - name: upload cypress gen directory
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v5
         with:
           name: cypress-gen
           path: ./services/cypress/gen
 
       - name: upload unit test coverage
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v5
         with:
           name: unit-test-coverage
           path: ./services/app-web/coverage/coverage-final.json
@@ -117,7 +117,7 @@ jobs:
 
     steps:
       - name: Check out repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
 
       - name: Setup env
         uses: ./.github/actions/setup_env
@@ -153,7 +153,7 @@ jobs:
           exit $?
 
       - name: upload api test coverage
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v5
         with:
           name: api-test-coverage
           path: ./services/app-api/coverage/coverage-final.json
@@ -163,7 +163,7 @@ jobs:
     runs-on: ubuntu-24.04
     steps:
       - name: Check out repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
 
       - name: Setup env
         uses: ./.github/actions/setup_env
@@ -183,12 +183,12 @@ jobs:
         working-directory: services/app-api
         run: ./scripts/prepare-prisma-layer.sh
 
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v5
         with:
           name: lambda-layers-prisma-client-migration
           path: ./services/app-api/lambda-layers-prisma-client-migration
 
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v5
         with:
           name: lambda-layers-prisma-client-engine
           path: ./services/app-api/lambda-layers-prisma-client-engine
@@ -197,7 +197,7 @@ jobs:
         working-directory: services/postgres
         run: ./build-postgres-lambda-layer.sh
 
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v5
         with:
           name: lambda-layers-postgres-tools
           path: ./services/postgres/lambda-layers-postgres-tools
@@ -210,7 +210,7 @@ jobs:
       name: dev
     steps:
       - name: Check out repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
 
       - name: Setup env
         uses: ./.github/actions/setup_env
@@ -256,7 +256,7 @@ jobs:
     environment: dev
     steps:
       - name: Check out repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
 
       - name: Setup env
         uses: ./.github/actions/setup_env
@@ -382,7 +382,7 @@ jobs:
     environment: dev
     steps:
       - name: Check out repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
 
       - name: Setup env
         uses: ./.github/actions/setup_env
@@ -467,7 +467,7 @@ jobs:
     environment: dev
     steps:
       - name: Check out repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
 
       - name: Setup env
         uses: ./.github/actions/setup_env
@@ -488,7 +488,7 @@ jobs:
           use-cdk-role: "true"
 
       - name: Download Prisma layers
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v6
         with:
           name: lambda-layers-prisma-client-migration
           path: ./services/infra-cdk/lambda-layers-prisma-client-migration
@@ -502,7 +502,7 @@ jobs:
           ls -la
 
       - name: Download Prisma engine layers
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v6
         with:
           name: lambda-layers-prisma-client-engine
           path: ./services/infra-cdk/lambda-layers-prisma-client-engine
@@ -559,7 +559,7 @@ jobs:
     outputs:
       application-endpoint: ${{ steps.save-app-endpoint.outputs.app-endpoint }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
 
       - name: Get AWS credentials
         uses: ./.github/actions/get_aws_credentials
@@ -599,7 +599,7 @@ jobs:
       id-token: write
       contents: read
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
 
       - name: Generate unique ID for Cypress
         id: uuid
@@ -608,12 +608,12 @@ jobs:
       - name: Setup env
         uses: ./.github/actions/setup_env
 
-      - uses: actions/download-artifact@v4
+      - uses: actions/download-artifact@v6
         with:
           name: app-web-gen
           path: ./services/app-web/src/gen
 
-      - uses: actions/download-artifact@v4
+      - uses: actions/download-artifact@v6
         with:
           name: cypress-gen
           path: ./services/cypress/gen
@@ -648,14 +648,14 @@ jobs:
           CYPRESS_VIDEOS_FOLDER: services/cypress/videos
 
       - name: Upload cypress video
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v5
         if: failure() && steps.cypress.outcome == 'failure'
         with:
           name: cypress-videos-dev
           path: services/cypress/videos
 
       - name: Upload cypress screenshots
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v5
         if: failure() && steps.cypress.outcome == 'failure'
         with:
           name: cypress-screenshots-dev
@@ -675,7 +675,7 @@ jobs:
     permissions:
       deployments: write
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
 
       - name: Update deployment status (failure)
         if: failure() && needs.begin-deployment.result == 'success'
@@ -705,7 +705,7 @@ jobs:
       name: val
     steps:
       - name: Check out repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
 
       - name: Setup env
         uses: ./.github/actions/setup_env
@@ -750,7 +750,7 @@ jobs:
     environment: val
     steps:
       - name: Check out repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
 
       - name: Setup env
         uses: ./.github/actions/setup_env
@@ -876,7 +876,7 @@ jobs:
     environment: val
     steps:
       - name: Check out repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
 
       - name: Setup env
         uses: ./.github/actions/setup_env
@@ -897,7 +897,7 @@ jobs:
           use-cdk-role: "true"
 
       - name: Download Prisma layers
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v6
         with:
           name: lambda-layers-prisma-client-migration
           path: ./services/infra-cdk/lambda-layers-prisma-client-migration
@@ -911,7 +911,7 @@ jobs:
           ls -la
 
       - name: Download Prisma engine layers
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v6
         with:
           name: lambda-layers-prisma-client-engine
           path: ./services/infra-cdk/lambda-layers-prisma-client-engine
@@ -977,7 +977,7 @@ jobs:
     environment: val
     steps:
       - name: Check out repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
 
       - name: Setup env
         uses: ./.github/actions/setup_env
@@ -1054,7 +1054,7 @@ jobs:
     outputs:
       application-endpoint: ${{ steps.save-app-endpoint.outputs.app-endpoint }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
 
       - name: Get AWS credentials
         uses: ./.github/actions/get_aws_credentials
@@ -1094,7 +1094,7 @@ jobs:
       id-token: write
       contents: read
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
 
       - name: Generate unique ID for Cypress
         id: uuid
@@ -1103,12 +1103,12 @@ jobs:
       - name: Setup env
         uses: ./.github/actions/setup_env
 
-      - uses: actions/download-artifact@v4
+      - uses: actions/download-artifact@v6
         with:
           name: app-web-gen
           path: ./services/app-web/src/gen
 
-      - uses: actions/download-artifact@v4
+      - uses: actions/download-artifact@v6
         with:
           name: cypress-gen
           path: ./services/cypress/gen
@@ -1143,14 +1143,14 @@ jobs:
           CYPRESS_VIDEOS_FOLDER: services/cypress/videos
 
       - name: Upload cypress video
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v5
         if: failure() && steps.cypress.outcome == 'failure'
         with:
           name: cypress-videos-val
           path: services/cypress/videos
 
       - name: Upload cypress screenshots
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v5
         if: failure() && steps.cypress.outcome == 'failure'
         with:
           name: cypress-screenshots-val
@@ -1170,7 +1170,7 @@ jobs:
     permissions:
       deployments: write
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
 
       - name: Update deployment status (failure)
         if: failure() && needs.begin-deployment.result == 'success'
