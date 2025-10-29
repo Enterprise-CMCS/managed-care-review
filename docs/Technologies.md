@@ -18,7 +18,7 @@ MC-Review is built on AWS CDK architecture (services deployed as AWS Lambdas) wi
 | **PostgreSQL**              | 16.9                            | PostgreSQL License     | Database               |
 | **Prisma**                  | 5.22.0                          | Apache-2.0             | ORM                    |
 | **AWS Amplify**             | 5.0.10                          | Apache-2.0             | Auth Framework         |
-| **AWS Cognito**             | 3.916.0                         | Apache-2.0             | Authentication         |
+| **AWS Cognito**             | ^3.918.0                        | Apache-2.0             | Authentication         |
 | **AWS Lambda**              | (AWS Managed)                   | AWS Customer Agreement | Compute                |
 | **AWS Aurora**              | (AWS Managed)                   | AWS Customer Agreement | Database Service       |
 | **AWS CDK**                 | 2.219.0                         | Apache-2.0             | Infrastructure as Code |
