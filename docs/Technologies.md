@@ -30,7 +30,7 @@ MC-Review is built on AWS CDK architecture (services deployed as AWS Lambdas) wi
 | **Vitest**                  | 3.2.4                           | MIT                    | Unit Testing           |
 | **Cypress**                 | 13.13.2                         | MIT                    | E2E Testing            |
 | **React Testing Library**   | 16.3.0                          | MIT                    | Testing Utilities      |
-| **Storybook**               | 9.1.2                           | MIT                    | Component Development  |
+| **Storybook**               | ^9.1.2 (core), 9.1.15 (addons)  | MIT                    | Component Development  |
 | **LaunchDarkly**            | 9.10.2 (server), 3.9.0 (client) | Apache-2.0             | Feature Flags          |
 | **OpenTelemetry**           | 1.30.x                          | Apache-2.0             | Observability          |
 | **New Relic**               | SaaS                            | Proprietary            | Monitoring             |
