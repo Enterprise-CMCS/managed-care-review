@@ -509,10 +509,16 @@ input CreateContractInput {
     "User description of the reason for the submission"
     submissionDescription: String!
     """
-    Type of contract the state is submitting
+    Type of contract action the state is submitting
     Options are: BASE, AMENDMENT
     """
     contractType: ContractType!
+
+    """
+    Type of submission the state is submitting
+    Options are: HEALTH_PLAN, EQRO
+    """
+    contractSubmissionType: ContractSubmissionType!
 }
 
 type CreateContractPayload {
@@ -1943,6 +1949,10 @@ type Contract {
     This value is used to generate the contractName
     """
     stateNumber: Int!
+
+    "contractSubmissionType is the type of the submission. It can be HEALTH_PLAN or EQRO"
+    contractSubmissionType: ContractSubmissionType!
+
     "mccrsID is the four digit id in MC-CRS that corresponds to this Contract, if set"
     mccrsID: String
 
@@ -2021,6 +2031,10 @@ type UnlockedContract {
     This value is used to generate the contractName
     """
     stateNumber: Int!
+
+    "contractSubmissionType is the type of the submission. It can be HEALTH_PLAN or EQRO"
+    contractSubmissionType: ContractSubmissionType!
+
     "mccrsID is the four digit id in MC-CRS that corresponds to this Contract, if set"
     mccrsID: String
 
@@ -2484,4 +2498,9 @@ input UpdateOauthClientInput {
 
 type UpdateOauthClientPayload {
     oauthClient: OauthClient!
+}
+
+enum ContractSubmissionType {
+    HEALTH_PLAN
+    EQRO
 }

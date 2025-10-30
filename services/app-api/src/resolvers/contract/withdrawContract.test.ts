@@ -90,6 +90,7 @@ describe('withdrawContract', () => {
 
         const contractHistory = contractHistoryToDescriptions(withdrawnContract)
         expect(withdrawnContract.consolidatedStatus).toBe('WITHDRAWN')
+        expect(withdrawnContract.contractSubmissionType).toBe('HEALTH_PLAN')
         expect(contractHistory).toStrictEqual(
             expect.arrayContaining([
                 'Initial submission',

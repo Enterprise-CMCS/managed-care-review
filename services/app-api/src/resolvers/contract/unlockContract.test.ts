@@ -77,8 +77,10 @@ describe('unlockContract', () => {
                 )
 
                 expect(unlockedContract.draftRevision).toBeDefined()
-
                 expect(unlockedContract.status).toBe('UNLOCKED')
+                expect(unlockedContract.contractSubmissionType).toBe(
+                    'HEALTH_PLAN'
+                )
 
                 if (!unlockedContract.draftRevision) {
                     throw new Error('no draftrate')
