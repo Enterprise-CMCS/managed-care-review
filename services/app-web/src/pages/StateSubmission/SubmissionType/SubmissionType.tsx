@@ -96,7 +96,7 @@ export const SubmissionType = ({
     const location = useLocation()
     const ldClient = useLDClient()
     const isNewSubmission = location.pathname === '/submissions/new'
-    const { id } = useRouteParams()
+    const { id, contractSubmissionType } = useRouteParams()
     const hideSupportingDocs = ldClient?.variation(
         featureFlags.HIDE_SUPPORTING_DOCS_PAGE.flag,
         featureFlags.HIDE_SUPPORTING_DOCS_PAGE.defaultValue
@@ -221,7 +221,9 @@ export const SubmissionType = ({
                     generatePath(RoutesRecord[options.redirectPath], {
                         id: draftSubmission.id,
                         contractSubmissionType:
-                            ContractSubmissionTypeRecord.HEALTH_PLAN,
+                            ContractSubmissionTypeRecord[
+                                draftSubmission.contractSubmissionType
+                            ],
                     })
                 )
             }
@@ -368,8 +370,7 @@ export const SubmissionType = ({
                     navigate(
                         generatePath(RoutesRecord[options.redirectPath], {
                             id: id,
-                            contractSubmissionType:
-                                ContractSubmissionTypeRecord.HEALTH_PLAN,
+                            contractSubmissionType: contractSubmissionType,
                         })
                     )
                 }

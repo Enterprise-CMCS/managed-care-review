@@ -141,7 +141,7 @@ const RateDetails = ({
 
     const newRateNameRef = React.useRef<HTMLElement | null>(null)
     const [newRateButtonRef, setNewRateButtonFocus] = useFocus() // This ref.current is always the same element
-    const { id } = useRouteParams()
+    const { id, contractSubmissionType } = useRouteParams()
 
     // API requests
     const {
@@ -789,8 +789,7 @@ const RateDetails = ({
                                                   RoutesRecord.SUBMISSIONS_CONTRACT_DETAILS,
                                                   {
                                                       id,
-                                                      contractSubmissionType:
-                                                          ContractSubmissionTypeRecord.HEALTH_PLAN,
+                                                      contractSubmissionType,
                                                   }
                                               )
                                     }
@@ -804,8 +803,7 @@ const RateDetails = ({
                                                   RoutesRecord.SUBMISSIONS_CONTACTS,
                                                   {
                                                       id,
-                                                      contractSubmissionType:
-                                                          ContractSubmissionTypeRecord.HEALTH_PLAN,
+                                                      contractSubmissionType,
                                                   }
                                               )
                                     }

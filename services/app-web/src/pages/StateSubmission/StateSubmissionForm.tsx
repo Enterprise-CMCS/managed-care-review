@@ -37,7 +37,7 @@ export const StateSubmissionForm = (): React.ReactElement => {
                 to={generatePath(RoutesRecord.SUBMISSIONS_SUMMARY, {
                     id: contract.id,
                     contractSubmissionType:
-                        ContractSubmissionTypeRecord.HEALTH_PLAN, //JUAN TODO: UPDATE THIS
+                        ContractSubmissionTypeRecord.HEALTH_PLAN, //JUAN TODO: UPDATE THIS TO COME FROM CONTRACT
                 })}
             />
         )

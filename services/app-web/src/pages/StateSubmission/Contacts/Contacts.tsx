@@ -23,11 +23,7 @@ import {
     activeFormPages,
     type ContractFormPageProps,
 } from '../StateSubmissionForm'
-import {
-    ContractSubmissionTypeRecord,
-    RoutesRecord,
-    RouteT,
-} from '@mc-review/constants'
+import { RoutesRecord, RouteT } from '@mc-review/constants'
 import {
     ButtonWithLogging,
     DynamicStepIndicator,
@@ -89,7 +85,7 @@ const Contacts = ({
 
     const { loggedInUser } = useAuth()
     const { currentRoute } = useCurrentRoute()
-    const { id } = useRouteParams()
+    const { id, contractSubmissionType } = useRouteParams()
     const { updateActiveMainContent } = usePage()
     const { draftSubmission, interimState, updateDraft, showPageErrorMessage } =
         useContractForm(id)
@@ -204,8 +200,7 @@ const Contacts = ({
                     navigate(
                         generatePath(RoutesRecord[options.redirectPath], {
                             id: id,
-                            contractSubmissionType:
-                                ContractSubmissionTypeRecord.HEALTH_PLAN,
+                            contractSubmissionType,
                         })
                     )
                 }
@@ -470,16 +465,14 @@ const Contacts = ({
                                                       RoutesRecord.SUBMISSIONS_CONTRACT_DETAILS,
                                                       {
                                                           id,
-                                                          contractSubmissionType:
-                                                              ContractSubmissionTypeRecord.HEALTH_PLAN,
+                                                          contractSubmissionType,
                                                       }
                                                   )
                                                 : generatePath(
                                                       RoutesRecord.SUBMISSIONS_RATE_DETAILS,
                                                       {
                                                           id,
-                                                          contractSubmissionType:
-                                                              ContractSubmissionTypeRecord.HEALTH_PLAN,
+                                                          contractSubmissionType,
                                                       }
                                                   )
                                         )
@@ -496,16 +489,14 @@ const Contacts = ({
                                                   RoutesRecord.SUBMISSIONS_CONTRACT_DETAILS,
                                                   {
                                                       id,
-                                                      contractSubmissionType:
-                                                          ContractSubmissionTypeRecord.HEALTH_PLAN,
+                                                      contractSubmissionType,
                                                   }
                                               )
                                             : generatePath(
                                                   RoutesRecord.SUBMISSIONS_RATE_DETAILS,
                                                   {
                                                       id,
-                                                      contractSubmissionType:
-                                                          ContractSubmissionTypeRecord.HEALTH_PLAN,
+                                                      contractSubmissionType,
                                                   }
                                               )
                                     }

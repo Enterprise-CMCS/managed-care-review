@@ -12,7 +12,12 @@ import {
 } from '@tanstack/react-table'
 import { useAtom } from 'jotai/react'
 import { atomWithHash } from 'jotai-location'
-import { ConsolidatedContractStatus, Program, User } from '../../gen/gqlClient'
+import {
+    ConsolidatedContractStatus,
+    ContractSubmissionType,
+    Program,
+    User,
+} from '../../gen/gqlClient'
 import styles from './ContractTable.module.scss'
 import { Table, Tag } from '@trussworks/react-uswds'
 import qs from 'qs'
@@ -44,7 +49,7 @@ export type ContractInDashboardType = {
     updatedAt: Date
     status: ConsolidatedContractStatus
     programs: Program[]
-    contractSubmissionType: string
+    contractSubmissionType: ContractSubmissionType
     submissionType?: string
     stateName?: string
 }
@@ -62,19 +67,14 @@ function submissionURL(
     contractSubmissionType: ContractInDashboardType['contractSubmissionType'],
     isNotStateUser: boolean
 ): string {
-    const submissionType =
-        contractSubmissionType === 'HEALTH_PLAN'
-            ? ContractSubmissionTypeRecord.HEALTH_PLAN
-            : ContractSubmissionTypeRecord.EQRO
-
     if (isNotStateUser) {
-        return `/submissions/${submissionType}/${id}`
+        return `/submissions/${ContractSubmissionTypeRecord[contractSubmissionType]}/${id}`
     } else if (status === 'DRAFT') {
-        return `/submissions/${submissionType}/${id}/edit/type`
+        return `/submissions/${ContractSubmissionTypeRecord[contractSubmissionType]}/${id}/edit/type`
     } else if (status === 'UNLOCKED') {
-        return `/submissions/${submissionType}/${id}/edit/review-and-submit`
+        return `/submissions/${ContractSubmissionTypeRecord[contractSubmissionType]}/${id}/edit/review-and-submit`
     }
-    return `/submissions/${submissionType}/${id}`
+    return `/submissions/${ContractSubmissionTypeRecord[contractSubmissionType]}/${id}`
 }
 
 const StatusTag = ({
