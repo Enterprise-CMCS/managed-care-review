@@ -965,6 +965,7 @@ describe('ContractTable state user tests', () => {
             {
                 ...submissions[1],
                 id: 'submitted-submission',
+                contractSubmissionType: 'HEALTH_PLAN',
                 updatedAt: new Date('12/04/2022'),
                 status: 'SUBMITTED',
             },
@@ -996,7 +997,7 @@ describe('ContractTable state user tests', () => {
         )
         expect(submissionLink(2)).toHaveAttribute(
             'href',
-            `/submissions/eqro/submitted-submission`
+            `/submissions/health-plan/submitted-submission`
         )
         expect(submissionLink(3)).toHaveAttribute(
             'href',
