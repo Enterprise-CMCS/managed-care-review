@@ -20,7 +20,6 @@ import {
     isLoadingOrHasFileErrors,
 } from '../../../../components/FileUpload'
 import {
-    ContractSubmissionTypeRecord,
     RouteT,
     RoutesRecord,
     STATE_SUBMISSION_FORM_ROUTES,
@@ -307,9 +306,8 @@ const RateDetails = ({
                 if (options.redirectPath) {
                     navigate(
                         generatePath(RoutesRecord[options.redirectPath], {
-                            id: id,
-                            contractSubmissionType:
-                                ContractSubmissionTypeRecord.HEALTH_PLAN,
+                            id,
+                            contractSubmissionType,
                         })
                     )
                 }
@@ -351,8 +349,7 @@ const RateDetails = ({
                     navigate(
                         generatePath(RoutesRecord[options.redirectPath], {
                             id,
-                            contractSubmissionType:
-                                ContractSubmissionTypeRecord.HEALTH_PLAN,
+                            contractSubmissionType,
                         })
                     )
                 }
@@ -371,8 +368,7 @@ const RateDetails = ({
                 navigate(
                     generatePath(RoutesRecord[options.redirectPath], {
                         id,
-                        contractSubmissionType:
-                            ContractSubmissionTypeRecord.HEALTH_PLAN,
+                        contractSubmissionType,
                     })
                 )
             }

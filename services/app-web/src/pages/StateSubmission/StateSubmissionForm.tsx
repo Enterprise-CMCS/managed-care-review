@@ -15,7 +15,6 @@ import {
     RouteT,
     RouteTWithUnknown,
     RoutesRecord,
-    ContractSubmissionTypeRecord,
 } from '@mc-review/constants'
 import { getRelativePath } from '../../routeHelpers'
 import { ContractDetails } from './ContractDetails'
@@ -36,8 +35,7 @@ export const StateSubmissionForm = (): React.ReactElement => {
             <Navigate
                 to={generatePath(RoutesRecord.SUBMISSIONS_SUMMARY, {
                     id: contract.id,
-                    contractSubmissionType:
-                        ContractSubmissionTypeRecord.HEALTH_PLAN, //JUAN TODO: UPDATE THIS TO COME FROM CONTRACT
+                    contractSubmissionType: contract.contractSubmissionType,
                 })}
             />
         )
