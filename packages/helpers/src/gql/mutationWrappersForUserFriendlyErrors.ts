@@ -126,7 +126,7 @@ export const unlockMutationWrapper = async (
     unlockContract: UnlockContractMutationFn,
     id: string,
     unlockedReason: string
-): Promise<UnlockedContract | GraphQLErrors | Error> => {
+): Promise<Partial<UnlockedContract> | GraphQLErrors | Error> => {
     try {
         const { data } = await unlockContract({
             variables: {
@@ -138,7 +138,7 @@ export const unlockMutationWrapper = async (
         })
 
         if (data?.unlockContract.contract) {
-            return data?.unlockContract.contract
+            return data.unlockContract.contract
         } else {
             recordJSException(
                 `[UNEXPECTED]: Error attempting to unlock, no data present but returning 200.`

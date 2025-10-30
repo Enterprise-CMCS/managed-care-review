@@ -446,6 +446,7 @@ function mockContractPackageDraft(partial?: Partial<Contract>): Contract {
         stateCode: 'MN',
         state: mockMNState(),
         stateNumber: 5,
+        contractSubmissionType: 'HEALTH_PLAN',
         mccrsID: null,
         draftRevision: {
             __typename: 'ContractRevision',
@@ -571,6 +572,7 @@ function mockContractPackageSubmittedWithQuestions(
         webURL: 'https://testmcreview.example/submissions/test-abc-123',
         stateCode: 'MN',
         state: mockMNState(),
+        contractSubmissionType: 'HEALTH_PLAN',
         stateNumber: 5,
         initiallySubmittedAt: '2024-12-18T16:54:39.173Z',
         mccrsID: null,
@@ -773,6 +775,7 @@ function mockContractWithLinkedRateDraft(
         stateCode: 'MN',
         state: mockMNState(),
         stateNumber: 5,
+        contractSubmissionType: 'HEALTH_PLAN',
         mccrsID: null,
         draftRevision: {
             __typename: 'ContractRevision',
@@ -1008,6 +1011,7 @@ function mockContractWithLinkedRateSubmitted(
         state: mockMNState(),
         stateNumber: 5,
         mccrsID: null,
+        contractSubmissionType: 'HEALTH_PLAN',
         withdrawnRates: [],
         packageSubmissions: [
             {
@@ -1181,6 +1185,7 @@ function mockContractPackageSubmitted(partial?: Partial<Contract>): Contract {
         stateCode: 'MN',
         state: mockMNState(),
         stateNumber: 5,
+        contractSubmissionType: 'HEALTH_PLAN',
         mccrsID: null,
         draftRevision: null,
         draftRates: [],
@@ -1439,6 +1444,7 @@ function mockContractPackageApproved(
         stateCode: 'MN',
         state: mockMNState(),
         stateNumber: 5,
+        contractSubmissionType: 'HEALTH_PLAN',
         mccrsID: null,
         draftRevision: null,
         draftRates: [],
@@ -1662,6 +1668,7 @@ function mockContractPackageSubmittedWithRevisions(
         stateCode: 'MN',
         state: mockMNState(),
         stateNumber: 5,
+        contractSubmissionType: 'HEALTH_PLAN',
         draftRevision: null,
         draftRates: null,
         withdrawnRates: [],
@@ -1765,6 +1772,7 @@ function mockContractPackageWithDifferentProgramsInRevisions(): Contract {
         webURL: 'https://testmcreview.example/submissions/e670adsfdfadsfc',
         initiallySubmittedAt: '2024-05-07T00:00:00Z',
         stateCode: 'FL',
+        contractSubmissionType: 'HEALTH_PLAN',
         mccrsID: null,
         state: {
             code: 'FL',
@@ -2201,6 +2209,7 @@ function mockContractPackageUnlockedWithUnlockedType(
         stateCode: 'MN',
         state: mockMNState(),
         stateNumber: 5,
+        contractSubmissionType: 'HEALTH_PLAN',
         mccrsID: '1234',
         draftRevision: {
             __typename: 'ContractRevision',
