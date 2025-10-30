@@ -1,7 +1,8 @@
 import { sharedTestPrismaClient } from '../testHelpers/storeHelpers'
 import { toDomain } from './proto'
 
-it('query the data', async () => {
+// Unit test used to validate prod HPP data migration
+it('Validate prod hpp data', async () => {
     const client = await sharedTestPrismaClient()
 
     const hpp = await client.healthPlanPackageTable.findMany({
@@ -43,4 +44,6 @@ it('query the data', async () => {
     expect(validateRevisions.map((rev) => rev.id).sort()).toEqual(
         hppRevisions.map((rev) => rev.id).sort()
     )
+
+    // Rate data could not be validated. There are 78 total rates in HPP data, but only 42 of them can be found in the RateTable
 })
