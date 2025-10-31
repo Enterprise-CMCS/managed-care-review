@@ -386,6 +386,7 @@ const mockContract = (
 ): ContractType => {
     return {
         id: 'test-contract-123',
+        contractSubmissionType: 'HEALTH_PLAN',
         createdAt: new Date('01/01/2021'),
         updatedAt: new Date('02/01/2021'),
         status: 'SUBMITTED',

@@ -9,7 +9,10 @@ import {
 } from '../../testHelpers/emailerHelpers'
 import { newContractCMSEmail } from './index'
 import type { ContractType, RateFormDataType } from '../../domain-models'
-import { packageName } from '@mc-review/submissions'
+import {
+    packageName,
+    formatContractSubmissionType,
+} from '@mc-review/submissions'
 
 test('to addresses list includes review team email addresses', async () => {
     const sub = mockContract()
@@ -682,7 +685,7 @@ test('includes link to submission', async () => {
     expect(template).toEqual(
         expect.objectContaining({
             bodyText: expect.stringContaining(
-                `http://localhost/submissions/${sub.id}`
+                `http://localhost/submissions/${formatContractSubmissionType(sub.contractSubmissionType)}/${sub.id}`
             ),
         })
     )
