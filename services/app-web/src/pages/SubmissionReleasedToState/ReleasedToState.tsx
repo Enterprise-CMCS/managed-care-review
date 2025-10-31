@@ -52,7 +52,10 @@ type FormError =
     FormikErrors<ReleasedToStateValues>[keyof FormikErrors<ReleasedToStateValues>]
 
 const ReleasedToState = () => {
-    const { id } = useParams<{ id: string }>()
+    const { id, contractSubmissionType } = useParams<{
+        id: string
+        contractSubmissionType: string
+    }>()
     const { updateHeading } = usePage()
     const { logFormSubmitEvent } = useTealium()
     const navigate = useNavigate()
@@ -123,7 +126,7 @@ const ReleasedToState = () => {
                     },
                 },
             })
-            navigate(`/submissions/${id}`)
+            navigate(`/submissions/${contractSubmissionType}/${id}`)
         } catch (err) {
             recordJSException(
                 `ReleasedToState: GraphQL error reported. Error message: Failed to create form data ${err}`

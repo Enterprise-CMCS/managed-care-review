@@ -63,7 +63,10 @@ describe('StateSubmissionForm', () => {
 
             await waitFor(() => {
                 expect(testLocation.pathname).toBe(
-                    generatePath(RoutesRecord.SUBMISSIONS_SUMMARY, { id: '15' })
+                    generatePath(RoutesRecord.SUBMISSIONS_SUMMARY, {
+                        id: '15',
+                        contractSubmissionType: 'HEALTH_PLAN',
+                    })
                 )
             })
         })
