@@ -12,12 +12,20 @@ import {
 } from '@tanstack/react-table'
 import { useAtom } from 'jotai/react'
 import { atomWithHash } from 'jotai-location'
-import { ConsolidatedContractStatus, Program, User } from '../../gen/gqlClient'
+import {
+    ConsolidatedContractStatus,
+    ContractSubmissionType,
+    Program,
+    User,
+} from '../../gen/gqlClient'
 import styles from './ContractTable.module.scss'
 import { Table, Tag } from '@trussworks/react-uswds'
 import qs from 'qs'
 import { SubmissionStatusRecord } from '@mc-review/submissions'
-import { SubmissionReviewStatusRecord } from '@mc-review/constants'
+import {
+    ContractSubmissionTypeRecord,
+    SubmissionReviewStatusRecord,
+} from '@mc-review/constants'
 import {
     FilterAccordion,
     FilterSelect,
@@ -41,6 +49,7 @@ export type ContractInDashboardType = {
     updatedAt: Date
     status: ConsolidatedContractStatus
     programs: Program[]
+    contractSubmissionType: ContractSubmissionType
     submissionType?: string
     stateName?: string
 }
@@ -55,16 +64,17 @@ export type ContractTableProps = {
 function submissionURL(
     id: ContractInDashboardType['id'],
     status: ContractInDashboardType['status'],
+    contractSubmissionType: ContractInDashboardType['contractSubmissionType'],
     isNotStateUser: boolean
 ): string {
     if (isNotStateUser) {
-        return `/submissions/${id}`
+        return `/submissions/${ContractSubmissionTypeRecord[contractSubmissionType]}/${id}`
     } else if (status === 'DRAFT') {
-        return `/submissions/${id}/edit/type`
+        return `/submissions/${ContractSubmissionTypeRecord[contractSubmissionType]}/${id}/edit/type`
     } else if (status === 'UNLOCKED') {
-        return `/submissions/${id}/edit/review-and-submit`
+        return `/submissions/${ContractSubmissionTypeRecord[contractSubmissionType]}/${id}/edit/review-and-submit`
     }
-    return `/submissions/${id}`
+    return `/submissions/${ContractSubmissionTypeRecord[contractSubmissionType]}/${id}`
 }
 
 const StatusTag = ({
@@ -263,6 +273,7 @@ export const ContractTable = ({
                         to={submissionURL(
                             info.getValue().id,
                             info.getValue().status,
+                            info.getValue().contractSubmissionType,
                             isNotStateUser
                         )}
                         className={`${styles.ID}`}

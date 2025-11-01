@@ -40,7 +40,7 @@ describe('MCCRSID', () => {
                             ],
                         },
                         routerProvider: {
-                            route: '/submissions/15/mccrs-record-number',
+                            route: `/submissions/${contract.contractSubmissionType}/15/mccrs-record-number`,
                         },
                     }
                 )
@@ -74,7 +74,7 @@ describe('MCCRSID', () => {
                             ],
                         },
                         routerProvider: {
-                            route: '/submissions/15/mccrs-record-number',
+                            route: `/submissions/${contract.contractSubmissionType}/15/mccrs-record-number`,
                         },
                     }
                 )
@@ -103,7 +103,7 @@ describe('MCCRSID', () => {
                             ],
                         },
                         routerProvider: {
-                            route: '/submissions/15/mccrs-record-number',
+                            route: `/submissions/${contract.contractSubmissionType}/15/mccrs-record-number`,
                         },
                     }
                 )
@@ -147,7 +147,7 @@ describe('MCCRSID', () => {
                             ],
                         },
                         routerProvider: {
-                            route: '/submissions/15/mccrs-record-number',
+                            route: `/submissions/${contract.contractSubmissionType}/15/mccrs-record-number`,
                         },
                     }
                 )

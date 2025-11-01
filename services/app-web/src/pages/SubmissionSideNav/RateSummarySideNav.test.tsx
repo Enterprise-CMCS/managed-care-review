@@ -132,7 +132,7 @@ describe('RateSummarySideNav', () => {
                     ],
                 },
                 routerProvider: {
-                    route: `/submissions/some-contract-id/rates/${rate.id}/question-and-answers`,
+                    route: `/submissions/health-plan/some-contract-id/rates/${rate.id}/question-and-answers`,
                 },
             }
         )

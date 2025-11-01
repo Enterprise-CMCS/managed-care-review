@@ -1,4 +1,7 @@
-import { packageName as generatePackageName } from '@mc-review/submissions'
+import {
+    formatContractSubmissionType,
+    packageName as generatePackageName,
+} from '@mc-review/submissions'
 import { formatCalendarDate } from '@mc-review/dates'
 import type { EmailConfiguration, EmailData, StateAnalystsEmails } from '..'
 import {
@@ -43,7 +46,11 @@ export const newContractCMSEmail = async (
         packagePrograms
     )
 
-    const packageURL = submissionSummaryURL(contract.id, config.baseUrl)
+    const packageURL = submissionSummaryURL(
+        contract.id,
+        formatContractSubmissionType(contract.contractSubmissionType),
+        config.baseUrl
+    )
 
     const isContractAndRates =
         contractRev.formData.submissionType === 'CONTRACT_AND_RATES' &&

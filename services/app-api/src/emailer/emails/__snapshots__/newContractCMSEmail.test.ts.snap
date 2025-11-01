@@ -14,6 +14,6 @@ exports[`renders overall email as expected 1`] = `
 <br />
 <b>Submission description</b>: A real submission<br />
 <br />
-<a href="http://localhost/submissions/test-contract-123">View submission</a>
+<a href="http://localhost/submissions/health-plan/test-contract-123">View submission</a>
 "
 `;

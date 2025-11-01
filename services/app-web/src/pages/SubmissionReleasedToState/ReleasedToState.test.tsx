@@ -28,6 +28,7 @@ describe('ReleasedToState', () => {
                 reviewStatus: 'UNDER_REVIEW',
                 consolidatedStatus: 'RESUBMITTED',
                 reviewStatusActions: [],
+                contractSubmissionType: 'HEALTH_PLAN',
             }
         )
 
@@ -98,7 +99,7 @@ describe('ReleasedToState', () => {
                     ],
                 },
                 routerProvider: {
-                    route: '/submissions/test-abc-123/released-to-state',
+                    route: '/submissions/health-plan/test-abc-123/released-to-state',
                 },
             }
         )
@@ -132,6 +133,7 @@ describe('ReleasedToState', () => {
             'test-abc-123',
             {
                 status: 'RESUBMITTED',
+                contractSubmissionType: 'HEALTH_PLAN',
                 reviewStatus: 'UNDER_REVIEW',
                 consolidatedStatus: 'RESUBMITTED',
                 reviewStatusActions: [],
@@ -167,7 +169,7 @@ describe('ReleasedToState', () => {
                     ],
                 },
                 routerProvider: {
-                    route: '/submissions/test-abc-123/released-to-state',
+                    route: '/submissions/health-plan/test-abc-123/released-to-state',
                 },
             }
         )
@@ -204,6 +206,7 @@ describe('ReleasedToState', () => {
                 reviewStatus: 'UNDER_REVIEW',
                 consolidatedStatus: 'RESUBMITTED',
                 reviewStatusActions: [],
+                contractSubmissionType: 'HEALTH_PLAN',
             }
         )
         const { user } = renderWithProviders(
@@ -235,7 +238,7 @@ describe('ReleasedToState', () => {
                     ],
                 },
                 routerProvider: {
-                    route: '/submissions/test-abc-123/released-to-state',
+                    route: '/submissions/health-plan/test-abc-123/released-to-state',
                 },
             }
         )
@@ -271,6 +274,7 @@ describe('ReleasedToState', () => {
                 reviewStatus: 'UNDER_REVIEW',
                 consolidatedStatus: 'RESUBMITTED',
                 reviewStatusActions: [],
+                contractSubmissionType: 'HEALTH_PLAN',
             }
         )
         const { user } = renderWithProviders(
@@ -302,7 +306,7 @@ describe('ReleasedToState', () => {
                     ],
                 },
                 routerProvider: {
-                    route: '/submissions/test-abc-123/released-to-state',
+                    route: '/submissions/health-plan/test-abc-123/released-to-state',
                 },
             }
         )
@@ -341,6 +345,7 @@ describe('ReleasedToState', () => {
                 reviewStatus: 'UNDER_REVIEW',
                 consolidatedStatus: 'RESUBMITTED',
                 reviewStatusActions: [],
+                contractSubmissionType: 'HEALTH_PLAN',
             }
         )
         const { user } = renderWithProviders(
@@ -372,7 +377,7 @@ describe('ReleasedToState', () => {
                     ],
                 },
                 routerProvider: {
-                    route: '/submissions/test-abc-123/released-to-state',
+                    route: '/submissions/health-plan/test-abc-123/released-to-state',
                 },
             }
         )

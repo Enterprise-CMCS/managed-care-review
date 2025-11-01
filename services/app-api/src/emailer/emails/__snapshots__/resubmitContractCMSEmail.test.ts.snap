@@ -12,6 +12,6 @@ exports[`renders overall email as expected 1`] = `
 <li>MCR-MN-0003-SNBC-RATE-20220201-20230201-CERTIFICATION-20220202</li>
 </ul>
 <br />
-<a href="http://localhost/submissions/test-contract-123">View the full submission</a>
+<a href="http://localhost/submissions/health-plan/test-contract-123">View the full submission</a>
 "
 `;

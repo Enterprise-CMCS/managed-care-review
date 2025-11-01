@@ -35,6 +35,7 @@ export const StateSubmissionForm = (): React.ReactElement => {
             <Navigate
                 to={generatePath(RoutesRecord.SUBMISSIONS_SUMMARY, {
                     id: contract.id,
+                    contractSubmissionType: contract.contractSubmissionType,
                 })}
             />
         )

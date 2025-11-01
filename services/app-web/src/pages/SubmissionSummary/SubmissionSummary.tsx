@@ -64,7 +64,7 @@ export const SubmissionSummary = (): React.ReactElement => {
         useState<boolean>(false)
     const [searchParams, setSearchParams] = useSearchParams()
     const { loggedInUser } = useAuth()
-    const { id } = useRouteParams()
+    const { id, contractSubmissionType } = useRouteParams()
     const hasCMSPermissions = hasCMSUserPermissions(loggedInUser)
     const isStateUser = loggedInUser?.role === 'STATE_USER'
     const isHelpDeskUser = loggedInUser?.role === 'HELPDESK_USER'
@@ -163,7 +163,10 @@ export const SubmissionSummary = (): React.ReactElement => {
         if (submissionStatus === 'DRAFT') {
             return (
                 <Navigate
-                    to={generatePath(RoutesRecord.SUBMISSIONS_TYPE, { id })}
+                    to={generatePath(RoutesRecord.SUBMISSIONS_TYPE, {
+                        id,
+                        contractSubmissionType,
+                    })}
                 />
             )
         } else {
@@ -171,6 +174,7 @@ export const SubmissionSummary = (): React.ReactElement => {
                 <Navigate
                     to={generatePath(RoutesRecord.SUBMISSIONS_REVIEW_SUBMIT, {
                         id,
+                        contractSubmissionType,
                     })}
                 />
             )

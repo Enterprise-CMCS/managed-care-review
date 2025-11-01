@@ -89,6 +89,7 @@ export const StateDashboard = (): React.ReactElement => {
                     updatedAt: subReviewActions
                         ? subReviewActions.updatedAt
                         : currentRevision.contractRevision.updatedAt,
+                    contractSubmissionType: sub.contractSubmissionType,
                 })
             } else {
                 const currentRevision = sub.draftRevision!
@@ -104,6 +105,7 @@ export const StateDashboard = (): React.ReactElement => {
                     submittedAt: sub.initiallySubmittedAt,
                     status: sub.status,
                     updatedAt: currentRevision.updatedAt,
+                    contractSubmissionType: sub.contractSubmissionType,
                 })
             }
         })

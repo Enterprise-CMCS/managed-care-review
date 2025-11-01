@@ -8,10 +8,11 @@ import { STATE_SUBMISSION_FORM_ROUTES } from '@mc-review/constants'
 
 type UseRouteParams = {
     id?: string // Add any dynamic params to this list - should match :param usage in RoutesRecord dictionary
+    contractSubmissionType?: string
 }
 
 const useRouteParams = (): UseRouteParams => {
-    const { id } = useParams<keyof UseRouteParams>()
+    const { id, contractSubmissionType } = useParams<keyof UseRouteParams>()
     const { currentRoute } = useCurrentRoute()
     if (!id) {
         if (STATE_SUBMISSION_FORM_ROUTES.includes(currentRoute)) {
@@ -20,7 +21,14 @@ const useRouteParams = (): UseRouteParams => {
             recordJSException(errorMessage)
         }
     }
-    return { id }
+    if (!contractSubmissionType) {
+        if (STATE_SUBMISSION_FORM_ROUTES.includes(currentRoute)) {
+            const errorMessage =
+                'Unexpected Error: useRouteParams = contractSubmissionType param not set.'
+            recordJSException(errorMessage)
+        }
+    }
+    return { id, contractSubmissionType }
 }
 
 export { useRouteParams }

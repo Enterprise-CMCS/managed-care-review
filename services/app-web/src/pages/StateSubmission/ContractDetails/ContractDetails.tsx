@@ -160,7 +160,7 @@ export const ContractDetails = ({
 
     const { loggedInUser } = useAuth()
     const { currentRoute } = useCurrentRoute()
-    const { id } = useRouteParams()
+    const { id, contractSubmissionType } = useRouteParams()
     const { updateActiveMainContent } = usePage()
     const { draftSubmission, interimState, updateDraft, showPageErrorMessage } =
         useContractForm(id)
@@ -559,7 +559,8 @@ export const ContractDetails = ({
             if (options.redirectPath) {
                 navigate(
                     generatePath(RoutesRecord[options.redirectPath], {
-                        id: id,
+                        id,
+                        contractSubmissionType,
                     })
                 )
             }
@@ -1442,18 +1443,27 @@ export const ContractDetails = ({
                                     actionInProgress={isSubmitting}
                                     backOnClickUrl={generatePath(
                                         RoutesRecord.SUBMISSIONS_TYPE,
-                                        { id }
+                                        {
+                                            id,
+                                            contractSubmissionType,
+                                        }
                                     )}
                                     continueOnClickUrl={
                                         draftSubmission.draftRevision.formData
                                             .submissionType === 'CONTRACT_ONLY'
                                             ? generatePath(
                                                   RoutesRecord.SUBMISSIONS_RATE_DETAILS,
-                                                  { id }
+                                                  {
+                                                      id,
+                                                      contractSubmissionType,
+                                                  }
                                               )
                                             : generatePath(
                                                   RoutesRecord.SUBMISSIONS_CONTACTS,
-                                                  { id }
+                                                  {
+                                                      id,
+                                                      contractSubmissionType,
+                                                  }
                                               )
                                     }
                                 />
