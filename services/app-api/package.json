@@ -13,6 +13,8 @@
         "generate": "pnpm prisma generate",
         "prisma:reset": "pnpm prisma migrate reset --force",
         "build": "tsc --noEmit",
+        "build:local": "node esbuild-local.config.js",
+        "start:local": "node .local-build/local-server.js",
         "start": "pnpm serverless offline start --stage local --region us-east-1 --httpPort 3030 --host 127.0.0.1"
     },
     "lint-staged": {
@@ -66,9 +68,11 @@
         "purify-ts": "^2.1.2",
         "url-parse": "^1.5.10",
         "uuid": "^13.0.0",
-        "zod": "^4.1.12"
+        "zod": "^4.1.12",
+        "express": "^4.18.2"
     },
     "devDependencies": {
+        "@types/express": "^4.17.21",
         "@luckycatfactory/esbuild-graphql-loader": "^3.8.1",
         "@types/archiver": "^6.0.3",
         "@types/aws-lambda": "^8.10.152",
@@ -79,6 +83,7 @@
         "@typescript-eslint/eslint-plugin": "^8.39.1",
         "@typescript-eslint/parser": "^8.29.1",
         "@vitest/coverage-v8": "^3.2.4",
+        "esbuild": "^0.25.5",
         "eslint": "^9.34.0",
         "eslint-config-prettier": "^10.1.8",
         "eslint-plugin-jest": "^29.0.1",
@@ -95,6 +100,8 @@
         "serverless-offline": "^14.4.0",
         "serverless-s3-bucket-helper": "https://github.com/Enterprise-CMCS/serverless-s3-bucket-helper",
         "serverless-stack-termination-protection": "^2.0.2",
+        "nodemon": "^3.1.0",
+        "tsx": "^4.20.3",
         "typescript": "5.9.3",
         "typescript-eslint": "^8.41.0",
         "vitest": "^3.2.4"

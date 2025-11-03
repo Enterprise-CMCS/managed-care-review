@@ -341,7 +341,7 @@ async function initializeGQLHandler(): Promise<Handler> {
         QUESTION_ANSWER_DOCS: s3QABucket,
     }
 
-    const s3Local = 'http://localhost:4569'
+    const s3Local = 'http://localhost:4566'
     if (authMode === 'LOCAL') {
         s3Client = newLocalS3Client(s3Local, S3_BUCKETS_CONFIG)
     } else {
@@ -438,4 +438,8 @@ const gqlHandler: Handler = async (event, context, completion) => {
     return response
 }
 
-module.exports = { gqlHandler }
+// Export for both ESM and CommonJS compatibility
+export { gqlHandler }
+
+// Also export as default for CommonJS/Lambda compatibility
+exports.gqlHandler = gqlHandler
