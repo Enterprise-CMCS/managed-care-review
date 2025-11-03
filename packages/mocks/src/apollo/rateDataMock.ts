@@ -329,6 +329,7 @@ function submittedLinkedRatesScenarioMock(): {
         stateCode: 'MN',
         state: mockMNState(),
         stateNumber: 5,
+        contractSubmissionType: 'HEALTH_PLAN',
         mccrsID: undefined,
         packageSubmissions: [c1r1r2pkg, c1r1pkg],
     }
@@ -347,6 +348,7 @@ function submittedLinkedRatesScenarioMock(): {
         stateCode: 'MN',
         state: mockMNState(),
         stateNumber: 5,
+        contractSubmissionType: 'HEALTH_PLAN',
         mccrsID: undefined,
         packageSubmissions: [c2r1r2pkg, c2r1r1pkg],
     }

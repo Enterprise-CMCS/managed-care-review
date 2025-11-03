@@ -56,8 +56,14 @@ describe(`indexContracts`, () => {
             // confirm some contract data is correct too, first in list will be draft, second is the submitted
             expect(theseSubmissions[0].initiallySubmittedAt).toBeNull()
             expect(theseSubmissions[0].status).toBe('DRAFT')
+            expect(theseSubmissions[0].contractSubmissionType).toBe(
+                'HEALTH_PLAN'
+            )
             expect(theseSubmissions[1].initiallySubmittedAt).toEqual(
                 submittedContract.packageSubmissions[0].submitInfo.updatedAt
+            )
+            expect(theseSubmissions[1].contractSubmissionType).toBe(
+                'HEALTH_PLAN'
             )
             expect(theseSubmissions[1].status).toBe('SUBMITTED')
         })

@@ -34,13 +34,13 @@
         "ts-jest": "^29.4.5",
         "ts-node": "^10.9.2",
         "tsconfig-paths": "^4.2.0",
-        "tsx": "^4.20.3",
+        "tsx": "^4.20.6",
         "typescript": "5.9.3",
         "typescript-eslint": "^8.37.0"
     },
     "dependencies": {
-        "@aws-sdk/client-secrets-manager": "^3.919.0",
-        "@aws-solutions-constructs/aws-apigateway-lambda": "2.92.1",
+        "@aws-sdk/client-secrets-manager": "^3.921.0",
+        "@aws-solutions-constructs/aws-apigateway-lambda": "2.94.0",
         "@aws-solutions-constructs/aws-cloudfront-s3": "2.94.0",
         "@aws-solutions-constructs/aws-cognito-apigateway-lambda": "2.92.1",
         "@aws-solutions-constructs/aws-eventbridge-lambda": "2.92.1",
