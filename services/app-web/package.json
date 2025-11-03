@@ -75,7 +75,7 @@
         ]
     },
     "dependencies": {
-        "@apollo/client": "3.8.8",
+        "@apollo/client": "4.0.9",
         "@apollo/explorer": "^3.7.3",
         "@cypress/code-coverage": "^3.14.5",
         "@cypress/instrument-cra": "^1.4.0",
