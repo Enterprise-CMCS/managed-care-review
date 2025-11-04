@@ -70,12 +70,14 @@ describe('RateQuestionResponse', () => {
                             contract: {
                                 ...contract,
                                 id: '15',
+                                contractSubmissionType: 'HEALTH_PLAN',
                             },
                         }),
                         fetchContractWithQuestionsMockSuccess({
                             contract: {
                                 ...contract,
                                 id: '15',
+                                contractSubmissionType: 'HEALTH_PLAN',
                             },
                         }),
                         fetchRateWithQuestionsMockSuccess({
@@ -85,7 +87,7 @@ describe('RateQuestionResponse', () => {
                     ],
                 },
                 routerProvider: {
-                    route: '/submissions/15/rates/second-rate/question-and-answers',
+                    route: '/submissions/health-plan/15/rates/second-rate/question-and-answers',
                 },
             })
 
@@ -126,7 +128,7 @@ describe('RateQuestionResponse', () => {
                         ],
                     },
                     routerProvider: {
-                        route: '/submissions/15/rates/test-rate-id/question-and-answers',
+                        route: '/submissions/health-plan/15/rates/test-rate-id/question-and-answers',
                     },
                 }
             )
@@ -232,18 +234,20 @@ describe('RateQuestionResponse', () => {
                             contract: {
                                 ...contract,
                                 id: '15',
+                                contractSubmissionType: 'HEALTH_PLAN',
                             },
                         }),
                         fetchContractWithQuestionsMockSuccess({
                             contract: {
                                 ...contract,
                                 id: '15',
+                                contractSubmissionType: 'HEALTH_PLAN',
                             },
                         }),
                     ],
                 },
                 routerProvider: {
-                    route: '/submissions/15/rates/second-rate/question-and-answers',
+                    route: '/submissions/health-plan/15/rates/second-rate/question-and-answers',
                 },
             })
 
@@ -265,18 +269,20 @@ describe('RateQuestionResponse', () => {
                             contract: {
                                 ...draftContract,
                                 id: '15',
+                                contractSubmissionType: 'HEALTH_PLAN',
                             },
                         }),
                         fetchContractWithQuestionsMockSuccess({
                             contract: {
                                 ...draftContract,
                                 id: '15',
+                                contractSubmissionType: 'HEALTH_PLAN',
                             },
                         }),
                     ],
                 },
                 routerProvider: {
-                    route: '/submissions/15/rates/second-rate/question-and-answers',
+                    route: '/submissions/health-plan/15/rates/second-rate/question-and-answers',
                 },
             })
 
