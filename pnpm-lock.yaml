@@ -39,8 +39,8 @@ importers:
         specifier: ^3.922.0
         version: 3.922.0
       '@aws-sdk/client-ec2':
-        specifier: ^3.922.0
-        version: 3.922.0
+        specifier: ^3.923.0
+        version: 3.923.0
       '@aws-sdk/client-secrets-manager':
         specifier: ^3.922.0
         version: 3.922.0
@@ -1704,8 +1704,8 @@ packages:
     resolution: {integrity: sha512-Y2ixlSTjjAp2HJhkUArtYqC/X+zG5Qqu3Bl+Ez22u4u4YnG8HsNFD6FE1axuWSdSa5AFtWTEt+Cz2Ghj/tDySA==}
     engines: {node: '>=10.0.0'}
 
-  '@aws-sdk/client-ec2@3.922.0':
-    resolution: {integrity: sha512-PghVmcIA64PPllZEixHSR8ii4iuVMq+oj757pcGbPCR3p/uxMopexfZlXWOLA8RUYTnP03QwRRYMewz8quu5vA==}
+  '@aws-sdk/client-ec2@3.923.0':
+    resolution: {integrity: sha512-h22I2Kg4h+ZXEpcztshM3wvWWbheTUGyAdRaWJ84X54+b3qIzLxBZ3gGI+8BDrdPSDjk+GMdVq03vXXEyIT0eg==}
     engines: {node: '>=18.0.0'}
 
   '@aws-sdk/client-firehose@3.6.1':
@@ -14933,7 +14933,7 @@ snapshots:
     transitivePeerDependencies:
       - react-native
 
-  '@aws-sdk/client-ec2@3.922.0':
+  '@aws-sdk/client-ec2@3.923.0':
     dependencies:
       '@aws-crypto/sha256-browser': 5.2.0
       '@aws-crypto/sha256-js': 5.2.0
