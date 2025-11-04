@@ -26,11 +26,16 @@ describe('ReviewSubmit', () => {
                 apolloProvider: {
                     mocks: [
                         fetchCurrentUserMock({ statusCode: 200 }),
-                        fetchContractMockSuccess({}),
+                        fetchContractMockSuccess({
+                            contract: {
+                                ...mockContractPackageDraft(),
+                                contractSubmissionType: 'HEALTH_PLAN',
+                            },
+                        }),
                     ],
                 },
                 routerProvider: {
-                    route: '/submissions/test-abc-123/edit/review-and-submit',
+                    route: '/submissions/health-plan/test-abc-123/edit/review-and-submit',
                 },
                 featureFlags: {},
             }
@@ -65,12 +70,13 @@ describe('ReviewSubmit', () => {
                             contract: {
                                 ...mockContractPackageDraft(),
                                 id: 'test-abc-123',
+                                contractSubmissionType: 'HEALTH_PLAN',
                             },
                         }),
                     ],
                 },
                 routerProvider: {
-                    route: '/submissions/test-abc-123/edit/review-and-submit',
+                    route: '/submissions/health-plan/test-abc-123/edit/review-and-submit',
                 },
                 featureFlags: {},
             }
@@ -106,12 +112,13 @@ describe('ReviewSubmit', () => {
                             contract: {
                                 ...mockContractPackageDraft(),
                                 id: 'test-abc-123',
+                                contractSubmissionType: 'HEALTH_PLAN',
                             },
                         }),
                     ],
                 },
                 routerProvider: {
-                    route: '/submissions/test-abc-123/edit/review-and-submit',
+                    route: '/submissions/health-plan/test-abc-123/edit/review-and-submit',
                 },
                 featureFlags: {},
             }
@@ -141,12 +148,13 @@ describe('ReviewSubmit', () => {
                             contract: {
                                 ...mockContractPackageDraft(),
                                 id: 'test-abc-123',
+                                contractSubmissionType: 'HEALTH_PLAN',
                             },
                         }),
                     ],
                 },
                 routerProvider: {
-                    route: '/submissions/test-abc-123/edit/review-and-submit',
+                    route: '/submissions/health-plan/test-abc-123/edit/review-and-submit',
                 },
                 featureFlags: {},
             }
@@ -178,7 +186,9 @@ describe('ReviewSubmit', () => {
 
     it('extracts the correct document dates from unlocked submission and displays them in tables', async () => {
         const contractMock = fetchContractMockSuccess({
-            contract: mockContractPackageUnlockedWithUnlockedType(),
+            contract: mockContractPackageUnlockedWithUnlockedType({
+                contractSubmissionType: 'HEALTH_PLAN',
+            }),
         })
 
         renderWithProviders(
@@ -196,7 +206,7 @@ describe('ReviewSubmit', () => {
                     ],
                 },
                 routerProvider: {
-                    route: '/submissions/test-abc-123/edit/review-and-submit',
+                    route: '/submissions/health-plan/test-abc-123/edit/review-and-submit',
                 },
                 featureFlags: {},
             }
@@ -229,12 +239,13 @@ describe('ReviewSubmit', () => {
                             contract: {
                                 ...mockContractPackageDraft(),
                                 id: 'test-abc-123',
+                                contractSubmissionType: 'HEALTH_PLAN',
                             },
                         }),
                     ],
                 },
                 routerProvider: {
-                    route: '/submissions/test-abc-123/edit/review-and-submit',
+                    route: '/submissions/health-plan/test-abc-123/edit/review-and-submit',
                 },
                 featureFlags: {},
             }
@@ -266,12 +277,14 @@ describe('ReviewSubmit', () => {
                         }),
                         fetchContractMockSuccess({
                             contract:
-                                mockContractPackageUnlockedWithUnlockedType(),
+                                mockContractPackageUnlockedWithUnlockedType({
+                                    contractSubmissionType: 'HEALTH_PLAN',
+                                }),
                         }),
                     ],
                 },
                 routerProvider: {
-                    route: '/submissions/test-abc-123/edit/review-and-submit',
+                    route: '/submissions/health-plan/test-abc-123/edit/review-and-submit',
                 },
                 featureFlags: {},
             }
@@ -304,12 +317,14 @@ describe('ReviewSubmit', () => {
                         }),
                         fetchContractMockSuccess({
                             contract:
-                                mockContractPackageUnlockedWithUnlockedType(),
+                                mockContractPackageUnlockedWithUnlockedType({
+                                    contractSubmissionType: 'HEALTH_PLAN',
+                                }),
                         }),
                     ],
                 },
                 routerProvider: {
-                    route: '/submissions/test-abc-123/edit/review-and-submit',
+                    route: '/submissions/health-plan/test-abc-123/edit/review-and-submit',
                 },
                 featureFlags: {},
             }
@@ -324,6 +339,7 @@ describe('ReviewSubmit', () => {
     it('renders inline error when contract and rates submissions does not have any rate certifications', async () => {
         const unlockedContract = mockContractPackageUnlockedWithUnlockedType({
             id: 'test-abc-123',
+            contractSubmissionType: 'HEALTH_PLAN',
         })
         unlockedContract.draftRates = []
 
@@ -344,7 +360,7 @@ describe('ReviewSubmit', () => {
                     ],
                 },
                 routerProvider: {
-                    route: '/submissions/test-abc-123/edit/review-and-submit',
+                    route: '/submissions/health-plan/test-abc-123/edit/review-and-submit',
                 },
                 featureFlags: {},
             }
