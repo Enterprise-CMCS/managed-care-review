@@ -10,8 +10,8 @@ import {
 import { newContractCMSEmail } from './index'
 import type { ContractType, RateFormDataType } from '../../domain-models'
 import {
-    packageName,
     formatContractSubmissionType,
+    packageName,
 } from '@mc-review/submissions'
 
 test('to addresses list includes review team email addresses', async () => {

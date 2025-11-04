@@ -70,6 +70,7 @@ const parseContractsAndContacts = (
             ),
             summaryURL: submissionSummaryURL(
                 contractRev.contract.id,
+                contractRev.contract.contractSubmissionType,
                 config.baseUrl
             ),
         }

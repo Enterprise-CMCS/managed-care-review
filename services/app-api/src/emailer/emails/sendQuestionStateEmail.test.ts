@@ -10,7 +10,10 @@ import type {
     ContractFormDataType,
     ContractQuestionType,
 } from '../../domain-models'
-import { packageName } from '@mc-review/submissions'
+import {
+    formatContractSubmissionType,
+    packageName,
+} from '@mc-review/submissions'
 import { sendQuestionStateEmail } from './index'
 
 const defaultSubmitters = ['submitter1@example.com', 'submitter2@example.com']
@@ -241,7 +244,7 @@ test('includes link to submission', async () => {
                 'Open the submission in MC-Review to answer question'
             ),
             bodyHTML: expect.stringContaining(
-                `http://localhost/submissions/${sub.contract.id}/question-and-answer`
+                `http://localhost/submissions/${formatContractSubmissionType(sub.contract.contractSubmissionType)}/${sub.contract.id}/question-and-answer`
             ),
         })
     )

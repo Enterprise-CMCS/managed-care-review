@@ -8,10 +8,10 @@ exports[`sendWithdrawnRateStateEmail > renders overall email for a withdrawn rat
 <b>Withdrawn from:</b>
 <ul>
     <li>
-        <a href="http://localhost/submissions/parent-contract">MCR-MN-0100-SNBC</a>
+        <a href="http://localhost/submissions/health-plan/parent-contract">MCR-MN-0100-SNBC</a>
     </li>
     <li>
-        <a href="http://localhost/submissions/linked-contract">MCR-MN-0222-SNBC</a>
+        <a href="http://localhost/submissions/health-plan/linked-contract">MCR-MN-0222-SNBC</a>
     </li>
 </ul>
 <div>If you have any questions, please reach out to your CMS point of contact.</div>

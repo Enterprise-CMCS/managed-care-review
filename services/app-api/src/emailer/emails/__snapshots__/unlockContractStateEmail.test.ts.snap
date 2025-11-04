@@ -10,6 +10,6 @@ exports[`renders overall email as expected 1`] = `
 <br />
 <b>You must revise the submission before CMS can continue reviewing it.<br />
 <br />
-<a href="http://localhost/submissions/12345/edit/review-and-submit">Open the submission in MC-Review to make edits.</a>
+<a href="http://localhost/submissions/health-plan/12345/edit/review-and-submit">Open the submission in MC-Review to make edits.</a>
 "
 `;

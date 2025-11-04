@@ -44,6 +44,8 @@ export const sendRateQuestionStateEmail = async (
         questionResponseURL: rateQuestionResponseURL(
             parentContractID,
             rateQuestion.rateID,
+            rate.packageSubmissions[0].contractRevisions[0].contract
+                .contractSubmissionType,
             config.baseUrl
         ),
         cmsRequestorEmail: rateQuestion.addedBy.email,

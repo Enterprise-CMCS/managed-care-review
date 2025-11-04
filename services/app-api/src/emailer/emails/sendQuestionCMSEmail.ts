@@ -49,6 +49,7 @@ export const sendQuestionCMSEmail = async (
 
     const questionResponseURL = submissionQuestionResponseURL(
         contractRev.contract.id,
+        contractRev.contract.contractSubmissionType,
         config.baseUrl
     )
     const questionRound = getQuestionRound(questions, newQuestion)

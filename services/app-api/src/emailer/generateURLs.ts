@@ -1,15 +1,17 @@
 import { URL } from 'url'
 import { compile } from 'path-to-regexp'
 import { RoutesRecord } from '@mc-review/constants'
+import { formatContractSubmissionType } from '@mc-review/submissions'
 
 function generateUrl(
     id: string,
-    contractSubmissionType: string,
     base: string,
-    pattern: string
+    pattern: string,
+    contractSubmissionType?: string,
+    rateID?: string
 ): string {
     const toPath = compile(pattern, { encode: encodeURIComponent })
-    const path = toPath({ id, contractSubmissionType })
+    const path = toPath({ id, contractSubmissionType, rateID })
 
     return new URL(path, base).href
 }
@@ -23,7 +25,12 @@ function reviewAndSubmitURL(
     base: string
 ): string {
     const pattern = RoutesRecord.SUBMISSIONS_REVIEW_SUBMIT
-    return generateUrl(id, contractSubmissionType, base, pattern)
+    return generateUrl(
+        id,
+        base,
+        pattern,
+        formatContractSubmissionType(contractSubmissionType)
+    )
 }
 
 // Generates the correct url for the submission summary page for a given package id
@@ -35,7 +42,12 @@ function submissionSummaryURL(
     base: string
 ): string {
     const pattern = RoutesRecord.SUBMISSIONS_SUMMARY
-    return generateUrl(id, contractSubmissionType, base, pattern)
+    return generateUrl(
+        id,
+        base,
+        pattern,
+        formatContractSubmissionType(contractSubmissionType)
+    )
 }
 
 function submissionQuestionResponseURL(
@@ -44,38 +56,38 @@ function submissionQuestionResponseURL(
     base: string
 ): string {
     const pattern = RoutesRecord.SUBMISSIONS_CONTRACT_QUESTIONS_AND_ANSWERS
-    return generateUrl(id, contractSubmissionType, base, pattern)
+    return generateUrl(
+        id,
+        base,
+        pattern,
+        formatContractSubmissionType(contractSubmissionType)
+    )
 }
 
-function rateSummaryURL(
-    id: string,
-    contractSubmissionType: string,
-    base: string
-): string {
+function rateSummaryURL(id: string, base: string): string {
     const pattern = RoutesRecord.RATES_SUMMARY
-    return generateUrl(id, contractSubmissionType, base, pattern)
+    return generateUrl(id, base, pattern)
 }
 
 function rateQuestionResponseURL(
     id: string,
     rateID: string,
-    base: string
-): string {
-    const pattern = RoutesRecord.SUBMISSIONS_RATE_QUESTIONS_AND_ANSWERS
-    const toPath = compile(pattern, { encode: encodeURIComponent })
-    const path = toPath({ id, rateID })
-    const url = new URL(path, base).href
-
-    return url
-}
-
-function rateSummaryQuestionResponseURL(
-    rateID: string,
     contractSubmissionType: string,
     base: string
 ): string {
+    const pattern = RoutesRecord.SUBMISSIONS_RATE_QUESTIONS_AND_ANSWERS
+    return generateUrl(
+        id,
+        base,
+        pattern,
+        formatContractSubmissionType(contractSubmissionType),
+        rateID
+    )
+}
+
+function rateSummaryQuestionResponseURL(rateID: string, base: string): string {
     const pattern = RoutesRecord.RATES_SUMMARY_QUESTIONS_AND_ANSWERS
-    return generateUrl(rateID, contractSubmissionType, base, pattern)
+    return generateUrl(rateID, base, pattern)
 }
 
 export {

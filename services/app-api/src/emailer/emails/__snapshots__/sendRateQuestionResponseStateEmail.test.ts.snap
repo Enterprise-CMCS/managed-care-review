@@ -6,7 +6,7 @@ exports[`sendRateQuestionResponseStateEmail > renders overall email for a new re
 <b>Date:</b> 01/04/2024<br />
 <b>Rate name:</b> test-rate-certification-name<br />
 <br />
-<a href="http://localhost/submissions/parent-contract/rates/test-rate/question-and-answers">View response</a><br />
+<a href="http://localhost/submissions/health-plan/parent-contract/rates/test-rate/question-and-answers">View response</a><br />
 <br />
 <b>What comes next:</b><br />
 <ol>

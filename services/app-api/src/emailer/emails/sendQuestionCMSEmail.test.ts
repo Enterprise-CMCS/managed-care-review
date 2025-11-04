@@ -9,7 +9,10 @@ import type {
     StateType,
     ContractQuestionType,
 } from '../../domain-models'
-import { packageName } from '@mc-review/submissions'
+import {
+    formatContractSubmissionType,
+    packageName,
+} from '@mc-review/submissions'
 import { sendQuestionCMSEmail } from './index'
 import { getTestStateAnalystsEmails } from '../../testHelpers/parameterStoreHelpers'
 
@@ -192,7 +195,7 @@ test('includes link to the question response page', async () => {
         expect.objectContaining({
             bodyText: expect.stringMatching(/View submission Q&A/),
             bodyHTML: expect.stringContaining(
-                `http://localhost/submissions/${sub.contract.id}/question-and-answer`
+                `http://localhost/submissions/${formatContractSubmissionType(sub.contract.contractSubmissionType)}/${sub.contract.id}/question-and-answers`
             ),
         })
     )

@@ -1,7 +1,4 @@
-import {
-    formatContractSubmissionType,
-    packageName as generatePackageName,
-} from '@mc-review/submissions'
+import { packageName as generatePackageName } from '@mc-review/submissions'
 import { formatCalendarDate } from '@mc-review/dates'
 import { formatEmailAddresses, pruneDuplicateEmails } from '../formatters'
 import type { EmailConfiguration, EmailData } from '..'
@@ -52,7 +49,7 @@ export const newContractStateEmail = async (
 
     const contractURL = submissionSummaryURL(
         contract.id,
-        formatContractSubmissionType(contract.contractSubmissionType),
+        contract.contractSubmissionType,
         config.baseUrl
     )
 
