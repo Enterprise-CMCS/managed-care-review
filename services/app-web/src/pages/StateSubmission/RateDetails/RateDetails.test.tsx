@@ -325,12 +325,13 @@ describe('RateDetails', () => {
                                 contract: {
                                     ...mockContractWithLinkedRateDraft(),
                                     id: 'test-abc-123',
+                                    contractSubmissionType: 'HEALTH_PLAN',
                                 },
                             }),
                         ],
                     },
                     routerProvider: {
-                        route: `/submissions/test-abc-123/edit/rate-details`,
+                        route: `/submissions/health-plan/test-abc-123/edit/rate-details`,
                     },
                     featureFlags: {
                         'rate-edit-unlock': false,
@@ -365,17 +366,19 @@ describe('RateDetails', () => {
                                 contract: {
                                     ...mockContractPackageDraft(),
                                     id: 'test-abc-123',
+                                    contractSubmissionType: 'HEALTH_PLAN',
                                 },
                             }),
                             updateDraftContractRatesMockSuccess({
                                 contract: {
                                     id: 'test-abc-123',
+                                    contractSubmissionType: 'HEALTH_PLAN',
                                 },
                             }),
                         ],
                     },
                     routerProvider: {
-                        route: `/submissions/test-abc-123/edit/rate-details`,
+                        route: `/submissions/health-plan/test-abc-123/edit/rate-details`,
                     },
                     featureFlags: {
                         'rate-edit-unlock': false,
@@ -412,6 +415,7 @@ describe('RateDetails', () => {
                                 contract: {
                                     ...mockContractWithLinkedRateDraft(),
                                     id: 'test-abc-123',
+                                    contractSubmissionType: 'HEALTH_PLAN',
                                     // clean draft rates for this test.
                                     draftRates: [],
                                 },
@@ -419,7 +423,7 @@ describe('RateDetails', () => {
                         ],
                     },
                     routerProvider: {
-                        route: `/submissions/test-abc-123/edit/rate-details`,
+                        route: `/submissions/health-plan/test-abc-123/edit/rate-details`,
                     },
                     featureFlags: {
                         'rate-edit-unlock': false,
@@ -472,6 +476,7 @@ describe('RateDetails', () => {
                                 contract: {
                                     ...mockContractWithLinkedRateDraft(),
                                     id: 'test-abc-123',
+                                    contractSubmissionType: 'HEALTH_PLAN',
                                     // clean draft rates for this test.
                                     draftRates: [],
                                 },
@@ -479,7 +484,7 @@ describe('RateDetails', () => {
                         ],
                     },
                     routerProvider: {
-                        route: `/submissions/test-abc-123/edit/rate-details`,
+                        route: `/submissions/health-plan/test-abc-123/edit/rate-details`,
                     },
                     featureFlags: {
                         'rate-edit-unlock': false,
@@ -530,17 +535,19 @@ describe('RateDetails', () => {
                                 contract: {
                                     ...mockContractPackageDraft(),
                                     id: 'test-abc-123',
+                                    contractSubmissionType: 'HEALTH_PLAN',
                                 },
                             }),
                             updateDraftContractRatesMockSuccess({
                                 contract: {
                                     id: 'test-abc-123',
+                                    contractSubmissionType: 'HEALTH_PLAN',
                                 },
                             }),
                         ],
                     },
                     routerProvider: {
-                        route: `/submissions/test-abc-123/edit/rate-details`,
+                        route: `/submissions/health-plan/test-abc-123/edit/rate-details`,
                     },
                     featureFlags: {
                         'rate-edit-unlock': false,
@@ -594,17 +601,19 @@ describe('RateDetails', () => {
                                         ],
                                     }),
                                     id: 'test-abc-123',
+                                    contractSubmissionType: 'HEALTH_PLAN',
                                 },
                             }),
                             updateDraftContractRatesMockSuccess({
                                 contract: {
                                     id: 'test-abc-123',
+                                    contractSubmissionType: 'HEALTH_PLAN',
                                 },
                             }),
                         ],
                     },
                     routerProvider: {
-                        route: `/submissions/test-abc-123/edit/rate-details`,
+                        route: `/submissions/health-plan/test-abc-123/edit/rate-details`,
                     },
                     featureFlags: {
                         'rate-edit-unlock': false,
@@ -658,17 +667,19 @@ describe('RateDetails', () => {
                                         }
                                     ),
                                     id: 'test-abc-123',
+                                    contractSubmissionType: 'HEALTH_PLAN',
                                 },
                             }),
                             updateDraftContractRatesMockSuccess({
                                 contract: {
                                     id: 'test-abc-123',
+                                    contractSubmissionType: 'HEALTH_PLAN',
                                 },
                             }),
                         ],
                     },
                     routerProvider: {
-                        route: `/submissions/test-abc-123/edit/rate-details`,
+                        route: `/submissions/health-plan/test-abc-123/edit/rate-details`,
                     },
                     featureFlags: {
                         'rate-edit-unlock': false,
@@ -701,17 +712,19 @@ describe('RateDetails', () => {
                                 contract: {
                                     ...mockContractWithLinkedRateDraft(),
                                     id: 'test-abc-123',
+                                    contractSubmissionType: 'HEALTH_PLAN',
                                 },
                             }),
                             updateDraftContractRatesMockSuccess({
                                 contract: {
                                     id: 'test-abc-123',
+                                    contractSubmissionType: 'HEALTH_PLAN',
                                 },
                             }),
                         ],
                     },
                     routerProvider: {
-                        route: `/submissions/test-abc-123/edit/rate-details`,
+                        route: `/submissions/health-plan/test-abc-123/edit/rate-details`,
                     },
                     featureFlags: {
                         'rate-edit-unlock': false,
@@ -747,18 +760,20 @@ describe('RateDetails', () => {
                                 contract: {
                                     ...mockContractWithLinkedRateDraft(),
                                     id: 'test-abc-123',
+                                    contractSubmissionType: 'HEALTH_PLAN',
                                 },
                             }),
                             indexRatesStrippedMockSuccess(),
                             updateDraftContractRatesMockSuccess({
                                 contract: {
                                     id: 'test-abc-123',
+                                    contractSubmissionType: 'HEALTH_PLAN',
                                 },
                             }),
                         ],
                     },
                     routerProvider: {
-                        route: `/submissions/test-abc-123/edit/rate-details`,
+                        route: `/submissions/health-plan/test-abc-123/edit/rate-details`,
                     },
                     featureFlags: {
                         'rate-edit-unlock': false,
@@ -811,6 +826,7 @@ describe('RateDetails', () => {
                             fetchContractMockSuccess({
                                 contract: {
                                     ...mockContractWithLinkedRateDraft({
+                                        contractSubmissionType: 'HEALTH_PLAN',
                                         draftRates: [
                                             rateDataMock(
                                                 {
@@ -831,6 +847,7 @@ describe('RateDetails', () => {
                             updateDraftContractRatesMockSuccess({
                                 contract: {
                                     ...mockContractWithLinkedRateDraft({
+                                        contractSubmissionType: 'HEALTH_PLAN',
                                         draftRates: [
                                             rateDataMock(
                                                 {
@@ -851,7 +868,7 @@ describe('RateDetails', () => {
                         ],
                     },
                     routerProvider: {
-                        route: `/submissions/test-abc-123/edit/rate-details`,
+                        route: `/submissions/health-plan/test-abc-123/edit/rate-details`,
                     },
                     featureFlags: {
                         'rate-edit-unlock': false,
@@ -876,7 +893,7 @@ describe('RateDetails', () => {
             //Expect the user to remain on the same page and render success banner
             await waitFor(() => {
                 expect(testLocation.pathname).toBe(
-                    `/submissions/test-abc-123/edit/rate-details`
+                    `/submissions/health-plan/test-abc-123/edit/rate-details`
                 )
                 expect(
                     screen.getByTestId('saveAsDraftSuccessBanner')
@@ -902,12 +919,13 @@ describe('RateDetails', () => {
                                 contract: {
                                     ...mockContractWithLinkedRateDraft(),
                                     id: 'test-abc-123',
+                                    contractSubmissionType: 'HEALTH_PLAN',
                                 },
                             }),
                         ],
                     },
                     routerProvider: {
-                        route: `/submissions/test-abc-123/edit/rate-details`,
+                        route: `/submissions/health-plan/test-abc-123/edit/rate-details`,
                     },
                     featureFlags: {
                         'rate-edit-unlock': false,
@@ -938,6 +956,7 @@ describe('RateDetails', () => {
         it('displays dropdown menu if yes is selected and dropdown is clicked', async () => {
             const testContract = {
                 ...mockContractWithLinkedRateDraft({
+                    contractSubmissionType: 'HEALTH_PLAN',
                     draftRates: [
                         draftRateDataMock(
                             { id: 'test-abc-124' },
@@ -987,7 +1006,7 @@ describe('RateDetails', () => {
                         ],
                     },
                     routerProvider: {
-                        route: `/submissions/test-abc-123/edit/rate-details`,
+                        route: `/submissions/health-plan/test-abc-123/edit/rate-details`,
                     },
                     featureFlags: {
                         'rate-edit-unlock': false,
@@ -1120,12 +1139,14 @@ describe('RateDetails', () => {
                             indexRatesStrippedMockSuccess(undefined, rates),
                             fetchCurrentUserMock({ statusCode: 200 }),
                             fetchContractMockSuccess({
-                                contract: mockContractWithLinkedRateDraft(),
+                                contract: mockContractWithLinkedRateDraft({
+                                    contractSubmissionType: 'HEALTH_PLAN',
+                                }),
                             }),
                         ],
                     },
                     routerProvider: {
-                        route: `/submissions/test-abc-123/edit/rate-details`,
+                        route: `/submissions/health-plan/test-abc-123/edit/rate-details`,
                     },
                     featureFlags: {
                         'rate-edit-unlock': false,
@@ -1264,12 +1285,14 @@ describe('RateDetails', () => {
                             indexRatesStrippedMockSuccess(undefined, rates),
                             fetchCurrentUserMock({ statusCode: 200 }),
                             fetchContractMockSuccess({
-                                contract: mockContractWithLinkedRateDraft(),
+                                contract: mockContractWithLinkedRateDraft({
+                                    contractSubmissionType: 'HEALTH_PLAN',
+                                }),
                             }),
                         ],
                     },
                     routerProvider: {
-                        route: `/submissions/test-abc-123/edit/rate-details`,
+                        route: `/submissions/health-plan/test-abc-123/edit/rate-details`,
                     },
                     featureFlags: {
                         'rate-edit-unlock': false,
@@ -1332,6 +1355,7 @@ describe('RateDetails', () => {
                                 contract: {
                                     ...mockContractPackageDraft(),
                                     id: 'test-abc-123',
+                                    contractSubmissionType: 'HEALTH_PLAN',
                                 },
                             }),
                             fetchDraftRateMockSuccess({
@@ -1363,7 +1387,7 @@ describe('RateDetails', () => {
                         ],
                     },
                     routerProvider: {
-                        route: `/submissions/test-abc-123/edit/rate-details`,
+                        route: `/submissions/health-plan/test-abc-123/edit/rate-details`,
                     },
                     featureFlags: {
                         'rate-edit-unlock': false,
@@ -1420,6 +1444,7 @@ describe('RateDetails', () => {
                                 contract: {
                                     ...mockContractPackageDraft(),
                                     id: 'test-abc-123',
+                                    contractSubmissionType: 'HEALTH_PLAN',
                                 },
                             }),
                             fetchDraftRateMockSuccess({
@@ -1451,7 +1476,7 @@ describe('RateDetails', () => {
                         ],
                     },
                     routerProvider: {
-                        route: `/submissions/test-abc-123/edit/rate-details`,
+                        route: `/submissions/health-plan/test-abc-123/edit/rate-details`,
                     },
                     featureFlags: {
                         'rate-edit-unlock': false,
@@ -1517,6 +1542,7 @@ describe('RateDetails', () => {
                             fetchContractMockSuccess({
                                 contract: {
                                     ...mockContractPackageDraft({
+                                        contractSubmissionType: 'HEALTH_PLAN',
                                         draftRates: [
                                             draftRateDataMock({
                                                 parentContractID:
@@ -1549,7 +1575,7 @@ describe('RateDetails', () => {
                         ],
                     },
                     routerProvider: {
-                        route: `/submissions/test-abc-123/edit/rate-details`,
+                        route: `/submissions/health-plan/test-abc-123/edit/rate-details`,
                     },
                     featureFlags: {
                         'rate-edit-unlock': false,
@@ -1595,13 +1621,14 @@ describe('RateDetails', () => {
                                 contract: {
                                     ...mockContractPackageDraft(),
                                     id: contractID,
+                                    contractSubmissionType: 'HEALTH_PLAN',
                                     draftRates: [], //clear out rates
                                 },
                             }),
                         ],
                     },
                     routerProvider: {
-                        route: `/submissions/${contractID}/edit/rate-details`,
+                        route: `/submissions/health-plan/${contractID}/edit/rate-details`,
                     },
                     featureFlags: {
                         'rate-edit-unlock': false,
@@ -1660,13 +1687,14 @@ describe('RateDetails', () => {
                                 contract: {
                                     ...mockContractPackageDraft(),
                                     id: contractID,
+                                    contractSubmissionType: 'HEALTH_PLAN',
                                     draftRates: [], //clear out rates
                                 },
                             }),
                         ],
                     },
                     routerProvider: {
-                        route: `/submissions/${contractID}/edit/rate-details`,
+                        route: `/submissions/health-plan/${contractID}/edit/rate-details`,
                     },
                     featureFlags: {
                         'rate-edit-unlock': false,
@@ -1734,13 +1762,14 @@ describe('RateDetails', () => {
                             fetchContractMockSuccess({
                                 contract: {
                                     ...contract,
+                                    contractSubmissionType: 'HEALTH_PLAN',
                                     draftRates: [], //clear out rates
                                 },
                             }),
                         ],
                     },
                     routerProvider: {
-                        route: `/submissions/${contract.id}/edit/rate-details`,
+                        route: `/submissions/health-plan/${contract.id}/edit/rate-details`,
                     },
                     featureFlags: {
                         'rate-edit-unlock': false,
@@ -1815,12 +1844,13 @@ describe('RateDetails', () => {
                                 contract: {
                                     ...mockContractPackageDraft(),
                                     id: 'test-abc-123',
+                                    contractSubmissionType: 'HEALTH_PLAN',
                                 },
                             }),
                         ],
                     },
                     routerProvider: {
-                        route: `/submissions/test-abc-123/edit/rate-details`,
+                        route: `/submissions/health-plan/test-abc-123/edit/rate-details`,
                     },
                     featureFlags: {
                         'rate-edit-unlock': false,
@@ -1893,13 +1923,14 @@ describe('RateDetails', () => {
                                 contract: {
                                     ...mockContractWithLinkedRateDraft(),
                                     id: 'test-abc-123',
+                                    contractSubmissionType: 'HEALTH_PLAN',
                                     withdrawnRates,
                                 },
                             }),
                         ],
                     },
                     routerProvider: {
-                        route: `/submissions/test-abc-123/edit/rate-details`,
+                        route: `/submissions/health-plan/test-abc-123/edit/rate-details`,
                     },
                     featureFlags: {
                         'rate-edit-unlock': false,
@@ -1949,12 +1980,13 @@ describe('RateDetails', () => {
                                 contract: {
                                     ...contract,
                                     id: 'test-abc-123',
+                                    contractSubmissionType: 'HEALTH_PLAN',
                                 },
                             }),
                         ],
                     },
                     routerProvider: {
-                        route: `/submissions/test-abc-123/edit/rate-details`,
+                        route: `/submissions/health-plan/test-abc-123/edit/rate-details`,
                     },
                     featureFlags: {
                         'rate-edit-unlock': false,
@@ -1990,12 +2022,13 @@ describe('RateDetails', () => {
                                 contract: {
                                     ...contract,
                                     id: 'test-abc-123',
+                                    contractSubmissionType: 'HEALTH_PLAN',
                                 },
                             }),
                         ],
                     },
                     routerProvider: {
-                        route: `/submissions/test-abc-123/edit/rate-details`,
+                        route: `/submissions/health-plan/test-abc-123/edit/rate-details`,
                     },
                     featureFlags: {
                         'rate-edit-unlock': false,
