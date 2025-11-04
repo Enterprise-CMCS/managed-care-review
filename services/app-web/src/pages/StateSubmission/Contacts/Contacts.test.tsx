@@ -29,12 +29,13 @@ describe('Contacts', () => {
                             contract: {
                                 ...draftContract,
                                 id: '15',
+                                contractSubmissionType: 'HEALTH_PLAN',
                             },
                         }),
                     ],
                 },
                 routerProvider: {
-                    route: '/submissions/15/edit/contacts',
+                    route: '/submissions/health-plan/15/edit/contacts',
                 },
             }
         )
@@ -65,12 +66,13 @@ describe('Contacts', () => {
                             contract: {
                                 ...draftContract,
                                 id: '15',
+                                contractSubmissionType: 'HEALTH_PLAN',
                             },
                         }),
                     ],
                 },
                 routerProvider: {
-                    route: '/submissions/15/edit/contacts',
+                    route: '/submissions/health-plan/15/edit/contacts',
                 },
             }
         )
@@ -98,12 +100,13 @@ describe('Contacts', () => {
                             contract: {
                                 ...draftContract,
                                 id: '15',
+                                contractSubmissionType: 'HEALTH_PLAN',
                             },
                         }),
                     ],
                 },
                 routerProvider: {
-                    route: '/submissions/15/edit/contacts',
+                    route: '/submissions/health-plan/15/edit/contacts',
                 },
             }
         )
@@ -136,12 +139,13 @@ describe('Contacts', () => {
                             contract: {
                                 ...draftContract,
                                 id: '15',
+                                contractSubmissionType: 'HEALTH_PLAN',
                             },
                         }),
                     ],
                 },
                 routerProvider: {
-                    route: '/submissions/15/edit/contacts',
+                    route: '/submissions/health-plan/15/edit/contacts',
                 },
             }
         )
@@ -208,12 +212,13 @@ describe('Contacts', () => {
                             contract: {
                                 ...draftContract,
                                 id: '15',
+                                contractSubmissionType: 'HEALTH_PLAN',
                             },
                         }),
                     ],
                 },
                 routerProvider: {
-                    route: '/submissions/15/edit/contacts',
+                    route: '/submissions/health-plan/15/edit/contacts',
                 },
             }
         )
@@ -253,12 +258,13 @@ describe('Contacts', () => {
                             contract: {
                                 ...draftContract,
                                 id: '15',
+                                contractSubmissionType: 'HEALTH_PLAN',
                             },
                         }),
                     ],
                 },
                 routerProvider: {
-                    route: '/submissions/15/edit/contacts',
+                    route: '/submissions/health-plan/15/edit/contacts',
                 },
             }
         )
@@ -303,12 +309,13 @@ describe('Contacts', () => {
                             contract: {
                                 ...draftContract,
                                 id: '15',
+                                contractSubmissionType: 'HEALTH_PLAN',
                             },
                         }),
                     ],
                 },
                 routerProvider: {
-                    route: '/submissions/15/edit/contacts',
+                    route: '/submissions/health-plan/15/edit/contacts',
                 },
             }
         )
@@ -355,12 +362,13 @@ describe('Contacts', () => {
                             contract: {
                                 ...draftContract,
                                 id: '15',
+                                contractSubmissionType: 'HEALTH_PLAN',
                             },
                         }),
                     ],
                 },
                 routerProvider: {
-                    route: '/submissions/15/edit/contacts',
+                    route: '/submissions/health-plan/15/edit/contacts',
                 },
             }
         )
