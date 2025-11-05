@@ -9,7 +9,7 @@
         "@apollo/client": "3.8.8",
         "@mc-review/dates": "workspace:*",
         "@mc-review/submissions": "workspace:*",
-        "dayjs": "^1.11.18",
+        "dayjs": "^1.11.19",
         "graphql": "^16.9.0",
         "typescript": "5.9.3",
         "uuid": "^13.0.0"
