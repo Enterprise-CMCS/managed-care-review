@@ -385,7 +385,7 @@ describe('createQuestion', () => {
                     `CMS asked questions about ${contractName}`
                 ),
                 bodyHTML: expect.stringContaining(
-                    `http://localhost/submissions/${contract.id}/question-and-answers`
+                    `http://localhost/submissions/health-plan/${contract.id}/question-and-answers`
                 ),
             })
         )
@@ -435,7 +435,7 @@ describe('createQuestion', () => {
                     `DMCO sent questions to the state for submission ${contractName}`
                 ),
                 bodyHTML: expect.stringContaining(
-                    `http://localhost/submissions/${contract.id}/question-and-answers`
+                    `http://localhost/submissions/health-plan/${contract.id}/question-and-answers`
                 ),
             })
         )

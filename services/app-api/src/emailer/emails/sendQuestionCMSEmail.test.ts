@@ -9,10 +9,7 @@ import type {
     StateType,
     ContractQuestionType,
 } from '../../domain-models'
-import {
-    formatContractSubmissionType,
-    packageName,
-} from '@mc-review/submissions'
+import { packageName } from '@mc-review/submissions'
 import { sendQuestionCMSEmail } from './index'
 import { getTestStateAnalystsEmails } from '../../testHelpers/parameterStoreHelpers'
 
@@ -49,6 +46,7 @@ test('to addresses list only includes state analyst when a DMCO user submits a q
 
     const template = await sendQuestionCMSEmail(
         sub,
+        'HEALTH_PLAN',
         stateAnalysts,
         testEmailConfig(),
         defaultStatePrograms,
@@ -91,6 +89,7 @@ test('to addresses list includes state analyst and OACT group emails when an OAC
     ]
     const template = await sendQuestionCMSEmail(
         sub,
+        'HEALTH_PLAN',
         stateAnalysts,
         testEmailConfig(),
         defaultStatePrograms,
@@ -126,6 +125,7 @@ test('to addresses list includes state analyst and DMCP group emails when a DMCP
     ]
     const template = await sendQuestionCMSEmail(
         sub,
+        'HEALTH_PLAN',
         stateAnalysts,
         testEmailConfig(),
         defaultStatePrograms,
@@ -158,6 +158,7 @@ test('subject line is correct', async () => {
 
     const template = await sendQuestionCMSEmail(
         sub,
+        'HEALTH_PLAN',
         stateAnalysts,
         testEmailConfig(),
         defaultStatePrograms,
@@ -181,6 +182,7 @@ test('includes link to the question response page', async () => {
     const defaultStatePrograms = mockMNState().programs
     const template = await sendQuestionCMSEmail(
         sub,
+        'HEALTH_PLAN',
         stateAnalysts,
         testEmailConfig(),
         defaultStatePrograms,
@@ -195,7 +197,7 @@ test('includes link to the question response page', async () => {
         expect.objectContaining({
             bodyText: expect.stringMatching(/View submission Q&A/),
             bodyHTML: expect.stringContaining(
-                `http://localhost/submissions/${formatContractSubmissionType(sub.contract.contractSubmissionType)}/${sub.contract.id}/question-and-answers`
+                `http://localhost/submissions/health-plan/${sub.contract.id}/question-and-answers`
             ),
         })
     )
@@ -207,6 +209,7 @@ test('includes expected data on the CMS analyst who sent the question', async ()
 
     const template = await sendQuestionCMSEmail(
         sub,
+        'HEALTH_PLAN',
         stateAnalysts,
         testEmailConfig(),
         defaultStatePrograms,
@@ -236,6 +239,7 @@ test('renders overall email for a new question as expected', async () => {
     const defaultStatePrograms = mockMNState().programs
     const result = await sendQuestionCMSEmail(
         sub,
+        'HEALTH_PLAN',
         stateAnalysts,
         testEmailConfig(),
         defaultStatePrograms,

@@ -120,6 +120,7 @@ describe('sendUndoWithdrawnRateCMSEmail', () => {
     it('renders CMS for unwithdrawn rate as expected', async () => {
         const template = await sendUndoWithdrawnRateCMSEmail(
             testRate,
+            'HEALTH_PLAN',
             statePrograms,
             stateAnalystEmails(),
             testEmailConfig()
@@ -141,6 +142,7 @@ describe('sendUndoWithdrawnRateCMSEmail', () => {
     it('renders overall email for a withdrawn rate as expected', async () => {
         const template = await sendUndoWithdrawnRateCMSEmail(
             testRate,
+            'HEALTH_PLAN',
             statePrograms,
             stateAnalystEmails(),
             testEmailConfig()
@@ -162,6 +164,7 @@ describe('sendUndoWithdrawnRateCMSEmail error handling', () => {
         }
         const template = await sendUndoWithdrawnRateCMSEmail(
             rateWithWrongStatus,
+            'HEALTH_PLAN',
             statePrograms,
             stateAnalystEmails(),
             testEmailConfig()
@@ -212,6 +215,7 @@ describe('sendUndoWithdrawnRateCMSEmail error handling', () => {
 
         const template = await sendUndoWithdrawnRateCMSEmail(
             rateWithWrongStatus,
+            'HEALTH_PLAN',
             statePrograms,
             stateAnalystEmails(),
             testEmailConfig()
@@ -231,6 +235,7 @@ describe('sendUndoWithdrawnRateCMSEmail error handling', () => {
 
         const template = await sendUndoWithdrawnRateCMSEmail(
             missingReviewStatusActions,
+            'HEALTH_PLAN',
             statePrograms,
             stateAnalystEmails(),
             testEmailConfig()
@@ -272,6 +277,7 @@ describe('sendUndoWithdrawnRateCMSEmail error handling', () => {
 
         const template = await sendUndoWithdrawnRateCMSEmail(
             rateWithWrongActionType,
+            'HEALTH_PLAN',
             statePrograms,
             stateAnalystEmails(),
             testEmailConfig()
@@ -346,6 +352,7 @@ describe('sendUndoWithdrawnRateCMSEmail error handling', () => {
 
         const template = await sendUndoWithdrawnRateCMSEmail(
             rateWithoutRateCertificationName,
+            'HEALTH_PLAN',
             statePrograms,
             stateAnalystEmails(),
             testEmailConfig()
@@ -418,6 +425,7 @@ describe('sendUndoWithdrawnRateCMSEmail error handling', () => {
 
         const template = await sendUndoWithdrawnRateCMSEmail(
             rateWithoutRateID,
+            'HEALTH_PLAN',
             statePrograms,
             stateAnalystEmails(),
             testEmailConfig()
@@ -490,6 +498,7 @@ describe('sendUndoWithdrawnRateCMSEmail error handling', () => {
 
         const template = await sendUndoWithdrawnRateCMSEmail(
             rateWithoutContractRevisions,
+            'HEALTH_PLAN',
             statePrograms,
             stateAnalystEmails(),
             testEmailConfig()

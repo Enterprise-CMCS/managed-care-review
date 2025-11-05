@@ -1,6 +1,7 @@
 import { formatCalendarDate } from '@mc-review/dates'
 import type {
     ContractRevisionType,
+    ContractSubmissionType,
     ProgramType,
     RateReviewType,
     RateType,
@@ -44,6 +45,7 @@ type rateInfo = {
 //This parses for data related to associated contracts and contacts (used within validateAndParseUnwithdrawnRate)
 const parseContractsAndContacts = (
     contractRevisions: ContractRevisionType[],
+    contractSubmissionType: ContractSubmissionType,
     statePrograms: ProgramType[],
     config: EmailConfiguration
 ) => {
@@ -70,7 +72,7 @@ const parseContractsAndContacts = (
             ),
             summaryURL: submissionSummaryURL(
                 contractRev.contract.id,
-                contractRev.contract.contractSubmissionType,
+                contractSubmissionType,
                 config.baseUrl
             ),
         }
@@ -94,6 +96,7 @@ const parseContractsAndContacts = (
 //Validates the unwithdrawn rate and parses it for necessary data
 export const validateAndParseUnwithdrawnRate = (
     rate: RateType,
+    contractSubmissionType: ContractSubmissionType,
     statePrograms: ProgramType[],
     config: EmailConfiguration
 ): Error | ValidatedUnWithdrawnRate => {
@@ -144,6 +147,7 @@ export const validateAndParseUnwithdrawnRate = (
     }
     const parsedContractsAndContacts = parseContractsAndContacts(
         contractRevisions,
+        contractSubmissionType,
         statePrograms,
         config
     )
@@ -165,11 +169,13 @@ export const validateAndParseUnwithdrawnRate = (
 
 export const sendUndoWithdrawnRateStateEmail = async (
     rate: RateType,
+    contractSubmissionType: ContractSubmissionType,
     statePrograms: ProgramType[],
     config: EmailConfiguration
 ): Promise<EmailData | Error> => {
     const undoWithdrawnRateData = validateAndParseUnwithdrawnRate(
         rate,
+        contractSubmissionType,
         statePrograms,
         config
     )

@@ -11,9 +11,13 @@ function generateUrl(
     rateID?: string
 ): string {
     const toPath = compile(pattern, { encode: encodeURIComponent })
-    const path = toPath({ id, contractSubmissionType, rateID })
-
-    return new URL(path, base).href
+    if (contractSubmissionType) {
+        const path = toPath({ id, contractSubmissionType, rateID })
+        return new URL(path, base).href
+    } else {
+        const path = toPath({ id, rateID })
+        return new URL(path, base).href
+    }
 }
 
 // Generates the correct url for the review and submit page for a given package id

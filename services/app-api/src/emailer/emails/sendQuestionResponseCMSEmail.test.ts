@@ -106,6 +106,7 @@ test.each([
     async ({ questions, currentQuestion, expectedResult }) => {
         const result = await sendQuestionResponseCMSEmail(
             contractRev,
+            'HEALTH_PLAN',
             testEmailConfig(),
             defaultMNStatePrograms,
             stateAnalysts,
@@ -130,6 +131,7 @@ test('renders overall CMS email for a new state response as expected', async () 
 
     const result = await sendQuestionResponseCMSEmail(
         contractRev,
+        'HEALTH_PLAN',
         testEmailConfig(),
         defaultMNStatePrograms,
         stateAnalysts,

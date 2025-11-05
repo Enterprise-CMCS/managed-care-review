@@ -59,7 +59,7 @@ export const unlockContractStateEmail = async (
 
     const contractURL = reviewAndSubmitURL(
         contractRev.contract.id,
-        contractRev.contract.contractSubmissionType,
+        contract.contractSubmissionType,
         config.baseUrl
     )
 

@@ -202,6 +202,7 @@ export function undoWithdrawRate(
         const sendUndoWithdrawnRateStateEmail =
             await emailer.sendUndoWithdrawnRateStateEmail(
                 undoWithdrawRate,
+                parentContract.contractSubmissionType,
                 statePrograms
             )
 
@@ -209,6 +210,7 @@ export function undoWithdrawRate(
         const sendUndoWithdrawnRateCMSEmail =
             await emailer.sendUndoWithdrawnRateCMSEmail(
                 undoWithdrawRate,
+                parentContract.contractSubmissionType,
                 statePrograms,
                 stateAnalystEmails
             )

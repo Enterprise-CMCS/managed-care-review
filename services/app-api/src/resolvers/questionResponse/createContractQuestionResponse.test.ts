@@ -18,6 +18,7 @@ import {
 import { testEmailConfig, testEmailer } from '../../testHelpers/emailerHelpers'
 import { findStatePrograms } from '../../postgres'
 import { createAndSubmitTestContractWithRate } from '../../testHelpers/gqlContractHelpers'
+import { formatContractSubmissionType } from '@mc-review/submissions'
 
 describe('createContractQuestionResponse', () => {
     const cmsUser = testCMSUser()
@@ -231,7 +232,7 @@ describe('createContractQuestionResponse', () => {
                     `The state submitted responses to OACT's questions about ${contractName}`
                 ),
                 bodyHTML: expect.stringContaining(
-                    `<a href="http://localhost/submissions/${contract.id}/question-and-answers">View submission Q&A</a>`
+                    `<a href="http://localhost/submissions/${formatContractSubmissionType(contract.contractSubmissionType)}/${contract.id}/question-and-answers">View submission Q&A</a>`
                 ),
             })
         )
@@ -289,7 +290,7 @@ describe('createContractQuestionResponse', () => {
                     `${oactCMS.divisionAssignment} round 1 response was successfully submitted`
                 ),
                 bodyHTML: expect.stringContaining(
-                    `<a href="http://localhost/submissions/${contract.id}/question-and-answers">View response</a>`
+                    `<a href="http://localhost/submissions/${formatContractSubmissionType(contract.contractSubmissionType)}/${contract.id}/question-and-answers">View response</a>`
                 ),
             })
         )

@@ -33,6 +33,7 @@ import type {
     UnlockedContractType,
     RateType,
     RateQuestionType,
+    ContractSubmissionType,
 } from '../domain-models'
 import { SESServiceException } from '@aws-sdk/client-ses'
 import type { RateForDisplayType } from './templateHelpers'
@@ -119,18 +120,21 @@ type Emailer = {
     ) => Promise<void | Error>
     sendQuestionsStateEmail: (
         contract: ContractRevisionType,
+        contractSubmissionType: ContractSubmissionType,
         submitterEmails: string[],
         statePrograms: ProgramType[],
         question: ContractQuestionType
     ) => Promise<void | Error>
     sendQuestionsCMSEmail: (
         contract: ContractRevisionType,
+        contractSubmissionType: ContractSubmissionType,
         stateAnalystsEmails: StateAnalystsEmails,
         statePrograms: ProgramType[],
         questions: ContractQuestionType[]
     ) => Promise<void | Error>
     sendQuestionResponseCMSEmail: (
         contractRevision: ContractRevisionType,
+        contractSubmissionType: ContractSubmissionType,
         statePrograms: ProgramType[],
         stateAnalystsEmails: StateAnalystsEmails,
         currentQuestion: ContractQuestionType,
@@ -138,6 +142,7 @@ type Emailer = {
     ) => Promise<void | Error>
     sendQuestionResponseStateEmail: (
         contractRevision: ContractRevisionType,
+        contractSubmissionType: ContractSubmissionType,
         statePrograms: ProgramType[],
         submitterEmails: string[],
         currentQuestion: ContractQuestionType,
@@ -145,6 +150,7 @@ type Emailer = {
     ) => Promise<void | Error>
     sendRateQuestionStateEmail: (
         rate: RateType,
+        contractSubmissionType: ContractSubmissionType,
         rateQuestion: RateQuestionType
     ) => Promise<void | Error>
     sendRateQuestionCMSEmail: (
@@ -175,10 +181,12 @@ type Emailer = {
     ) => Promise<void | Error>
     sendUndoWithdrawnRateStateEmail: (
         rate: RateType,
+        contractSubmissionType: ContractSubmissionType,
         statePrograms: ProgramType[]
     ) => Promise<void | Error>
     sendUndoWithdrawnRateCMSEmail: (
         rate: RateType,
+        contractSubmissionType: ContractSubmissionType,
         statePrograms: ProgramType[],
         stateAnalystsEmails: StateAnalystsEmails
     ) => Promise<void | Error>
@@ -328,12 +336,14 @@ function emailer(
         },
         sendQuestionsStateEmail: async function (
             contract,
+            contractSubmissionType,
             submitterEmails,
             statePrograms,
             question
         ) {
             const emailData = await sendQuestionStateEmail(
                 contract,
+                contractSubmissionType,
                 submitterEmails,
                 config,
                 statePrograms,
@@ -347,12 +357,14 @@ function emailer(
         },
         sendQuestionsCMSEmail: async function (
             contract,
+            contractSubmissionType,
             stateAnalystsEmails,
             statePrograms,
             questions
         ) {
             const emailData = await sendQuestionCMSEmail(
                 contract,
+                contractSubmissionType,
                 stateAnalystsEmails,
                 config,
                 statePrograms,
@@ -366,6 +378,7 @@ function emailer(
         },
         sendQuestionResponseCMSEmail: async function (
             contractRevision,
+            contractSubmissionType,
             statePrograms,
             stateAnalystsEmails,
             currentQuestion,
@@ -373,6 +386,7 @@ function emailer(
         ) {
             const emailData = await sendQuestionResponseCMSEmail(
                 contractRevision,
+                contractSubmissionType,
                 config,
                 statePrograms,
                 stateAnalystsEmails,
@@ -387,6 +401,7 @@ function emailer(
         },
         sendQuestionResponseStateEmail: async function (
             contractRevision,
+            contractSubmissionType,
             statePrograms,
             submitterEmails,
             currentQuestion,
@@ -394,6 +409,7 @@ function emailer(
         ) {
             const emailData = await sendQuestionResponseStateEmail(
                 contractRevision,
+                contractSubmissionType,
                 config,
                 submitterEmails,
                 statePrograms,
@@ -406,9 +422,14 @@ function emailer(
                 return await this.sendEmail(emailData)
             }
         },
-        sendRateQuestionStateEmail: async function (rate, rateQuestion) {
+        sendRateQuestionStateEmail: async function (
+            rate,
+            contractSubmissionType,
+            rateQuestion
+        ) {
             const emailData = await sendRateQuestionStateEmail(
                 rate,
+                contractSubmissionType,
                 config,
                 rateQuestion
             )
@@ -507,9 +528,14 @@ function emailer(
                 return await this.sendEmail(emailData)
             }
         },
-        sendUndoWithdrawnRateStateEmail: async function (rate, statePrograms) {
+        sendUndoWithdrawnRateStateEmail: async function (
+            rate,
+            contractSubmissionType,
+            statePrograms
+        ) {
             const emailData = await sendUndoWithdrawnRateStateEmail(
                 rate,
+                contractSubmissionType,
                 statePrograms,
                 config
             )
@@ -522,11 +548,13 @@ function emailer(
         },
         sendUndoWithdrawnRateCMSEmail: async function (
             rate,
+            contractSubmissionType,
             statePrograms,
             stateAnalystsEmails
         ) {
             const emailData = await sendUndoWithdrawnRateCMSEmail(
                 rate,
+                contractSubmissionType,
                 statePrograms,
                 stateAnalystsEmails,
                 config

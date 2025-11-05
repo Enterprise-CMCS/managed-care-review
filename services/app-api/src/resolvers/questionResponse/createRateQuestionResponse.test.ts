@@ -13,6 +13,7 @@ import { createAndSubmitTestContractWithRate } from '../../testHelpers/gqlContra
 import { assertAnError, assertAnErrorCode, must } from '../../testHelpers'
 import { testEmailConfig, testEmailer } from '../../testHelpers/emailerHelpers'
 import { CreateRateQuestionResponseDocument } from '../../gen/gqlClient'
+import { formatContractSubmissionType } from '@mc-review/submissions'
 
 describe('createRateQuestionResponse', () => {
     const cmsUser = testCMSUser()
@@ -168,7 +169,7 @@ describe('createRateQuestionResponse', () => {
                     'Response to DMCO rate questions was successfully submitted.'
                 ),
                 bodyHTML: expect.stringContaining(
-                    `<a href="http://localhost/submissions/${contractWithRate.id}/rates/${rateID}/question-and-answers">View response</a>`
+                    `<a href="http://localhost/submissions/${formatContractSubmissionType(contractWithRate.contractSubmissionType)}/${contractWithRate.id}/rates/${rateID}/question-and-answers">View response</a>`
                 ),
             })
         )

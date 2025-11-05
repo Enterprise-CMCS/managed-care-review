@@ -141,8 +141,37 @@ export function createRateQuestionResolver(
             stateAnalystsEmails = stateAnalystsEmailsResult.map((u) => u.email)
         }
 
+        const contract = await store.findContractWithHistory(
+            rate.parentContractID
+        )
+
+        if (contract instanceof Error) {
+            if (contract instanceof NotFoundError) {
+                const errMessage = `Package with id ${rate.parentContractID} does not exist`
+                logError('createContractQuestionResponse', errMessage)
+                setErrorAttributesOnActiveSpan(errMessage, span)
+                throw new GraphQLError(errMessage, {
+                    extensions: { code: 'NOT_FOUND' },
+                })
+            }
+
+            const errMessage = `Issue finding a package. Message: ${contract.message}`
+            logError('createContractQuestionResponse', errMessage)
+            setErrorAttributesOnActiveSpan(errMessage, span)
+            throw new GraphQLError(errMessage, {
+                extensions: {
+                    code: 'INTERNAL_SERVER_ERROR',
+                    cause: 'DB_ERROR',
+                },
+            })
+        }
+
         const sendRateQuestionStateEmailResult =
-            await emailer.sendRateQuestionStateEmail(rate, questionResult)
+            await emailer.sendRateQuestionStateEmail(
+                rate,
+                contract.contractSubmissionType,
+                questionResult
+            )
 
         if (sendRateQuestionStateEmailResult instanceof Error) {
             logError(
