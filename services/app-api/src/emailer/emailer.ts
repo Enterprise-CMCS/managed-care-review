@@ -167,6 +167,7 @@ type Emailer = {
     ) => Promise<void | Error>
     sendRateQuestionResponseStateEmail: (
         rate: RateType,
+        contractSubmissionType: ContractSubmissionType,
         questions: RateQuestionType[],
         currentQuestion: RateQuestionType
     ) => Promise<void | Error>
@@ -481,11 +482,13 @@ function emailer(
         },
         sendRateQuestionResponseStateEmail: async function (
             rate,
+            contractSubmissionType,
             questions,
             currentQuestion
         ) {
             const emailData = await sendRateQuestionResponseStateEmail(
                 rate,
+                contractSubmissionType,
                 config,
                 questions,
                 currentQuestion

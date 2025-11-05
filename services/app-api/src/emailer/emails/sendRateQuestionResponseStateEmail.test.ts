@@ -82,7 +82,6 @@ describe('sendRateQuestionResponseStateEmail', () => {
                             id: 'parent-contract',
                             stateCode: 'FL',
                             stateNumber: 1,
-                            contractSubmissionType: 'HEALTH_PLAN',
                         },
                         submitInfo: {
                             updatedAt: new Date('2024-04-12'),
@@ -131,7 +130,6 @@ describe('sendRateQuestionResponseStateEmail', () => {
                             id: 'second-contract',
                             stateCode: 'FL',
                             stateNumber: 1,
-                            contractSubmissionType: 'HEALTH_PLAN',
                         },
                         submitInfo: {
                             updatedAt: new Date('2024-04-12'),
@@ -200,6 +198,7 @@ describe('sendRateQuestionResponseStateEmail', () => {
     test('to addresses list includes submitter emails', async () => {
         const template = await sendRateQuestionResponseStateEmail(
             testRate,
+            'HEALTH_PLAN',
             testEmailConfig(),
             questions(),
             currentQuestion()
@@ -221,6 +220,7 @@ describe('sendRateQuestionResponseStateEmail', () => {
     test('to addresses list includes all state contacts on submission', async () => {
         const template = await sendRateQuestionResponseStateEmail(
             testRate,
+            'HEALTH_PLAN',
             testEmailConfig(),
             questions(),
             currentQuestion()
@@ -249,6 +249,7 @@ describe('sendRateQuestionResponseStateEmail', () => {
             'OACT_TO_STATE'
         const template = await sendRateQuestionResponseStateEmail(
             rate,
+            'HEALTH_PLAN',
             testEmailConfig(),
             questions(),
             currentQuestion()
@@ -271,6 +272,7 @@ describe('sendRateQuestionResponseStateEmail', () => {
     test('to addresses list does not include duplicate state receiver emails on submission', async () => {
         const template = await sendRateQuestionResponseStateEmail(
             testRate,
+            'HEALTH_PLAN',
             testEmailConfig(),
             questions(),
             currentQuestion()
@@ -292,6 +294,7 @@ describe('sendRateQuestionResponseStateEmail', () => {
     test('includes link to submission', async () => {
         const template = await sendRateQuestionResponseStateEmail(
             testRate,
+            'HEALTH_PLAN',
             testEmailConfig(),
             questions(),
             currentQuestion()
@@ -314,6 +317,7 @@ describe('sendRateQuestionResponseStateEmail', () => {
     test('subject line is correct and clearly states submission was successful', async () => {
         const template = await sendRateQuestionResponseStateEmail(
             testRate,
+            'HEALTH_PLAN',
             testEmailConfig(),
             questions(),
             currentQuestion()
@@ -335,6 +339,7 @@ describe('sendRateQuestionResponseStateEmail', () => {
     test('includes expected data', async () => {
         const template = await sendRateQuestionResponseStateEmail(
             testRate,
+            'HEALTH_PLAN',
             testEmailConfig(),
             questions(),
             currentQuestion()
@@ -382,6 +387,7 @@ describe('sendRateQuestionResponseStateEmail', () => {
     test('renders overall email for a new response as expected', async () => {
         const template = await sendRateQuestionResponseStateEmail(
             testRate,
+            'HEALTH_PLAN',
             testEmailConfig(),
             questions(),
             currentQuestion()
