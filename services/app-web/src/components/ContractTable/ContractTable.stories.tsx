@@ -10,6 +10,7 @@ import { User } from '../../gen/gqlClient'
 const tableData: ContractInDashboardType[] = [
     {
         id: '576e5a1e-6ae6-4936-9ee4-7034cb2072dd',
+        contractSubmissionType: 'HEALTH_PLAN',
         name: 'MCR-MN-0071-PMAP',
         programs: [
             {
@@ -28,6 +29,7 @@ const tableData: ContractInDashboardType[] = [
     },
     {
         id: 'a6e5eb04-833f-4050-bab4-6ebe8d1a5e75',
+        contractSubmissionType: 'HEALTH_PLAN',
         name: 'MCR-OH-0069-PMAP',
         programs: [
             {
@@ -46,6 +48,7 @@ const tableData: ContractInDashboardType[] = [
     },
     {
         id: '74c3c976-45d8-49fe-ac76-6ae3147acd12',
+        contractSubmissionType: 'HEALTH_PLAN',
         name: 'MCR-PR-0065-PMAP',
         programs: [
             {
@@ -64,6 +67,7 @@ const tableData: ContractInDashboardType[] = [
     },
     {
         id: '2f7f1274-3927-4367-bec6-870587a0f0c6',
+        contractSubmissionType: 'HEALTH_PLAN',
         name: 'MCR-MN-0063-PMAP',
         programs: [
             {

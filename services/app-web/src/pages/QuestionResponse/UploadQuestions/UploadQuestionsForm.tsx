@@ -20,7 +20,7 @@ import {
 } from '../../../components/FileUpload'
 import { PageActionsContainer } from '../../StateSubmission/PageActions'
 import { useErrorSummary } from '../../../hooks/useErrorSummary'
-import { ContractSubmissionType, Division } from '../../../gen/gqlClient'
+import { Division } from '../../../gen/gqlClient'
 import { divisionFullNames } from '../QuestionResponseHelpers'
 
 type UploadQuestionsFormProps = {
@@ -31,7 +31,7 @@ type UploadQuestionsFormProps = {
     round: number
     division: Division
     id: string
-    contractSubmissionType: ContractSubmissionType
+    contractSubmissionType: string
 }
 
 const UploadQuestionsForm = ({
