@@ -143,7 +143,10 @@ const ReleasedToState = () => {
                         link: RoutesRecord.DASHBOARD_SUBMISSIONS,
                         text: 'Dashboard',
                     },
-                    { link: `/submissions/${id}`, text: contractName },
+                    {
+                        link: `/submissions/${contractSubmissionType}/${id}`,
+                        text: contractName,
+                    },
                     {
                         text: 'Released to state',
                         link: RoutesRecord.SUBMISSIONS_RELEASED_TO_STATE,

@@ -27,12 +27,14 @@ import { Error404 } from '../../Errors/Error404Page'
 
 export const UploadRateResponse = () => {
     // router context
-    const { division, id, rateID, questionID } = useParams<{
-        division: string
-        id: string
-        rateID: string
-        questionID: string
-    }>()
+    const { division, id, rateID, questionID, contractSubmissionType } =
+        useParams<{
+            division: string
+            id: string
+            rateID: string
+            questionID: string
+            contractSubmissionType: string
+        }>()
 
     const navigate = useNavigate()
     const { updateHeading } = usePage()
@@ -147,11 +149,11 @@ export const UploadRateResponse = () => {
                         text: 'Dashboard',
                     },
                     {
-                        link: `/submissions/${parentContractID}`,
+                        link: `/submissions/${contractSubmissionType}/${parentContractID}`,
                         text: contractName ?? 'Unknown Contract',
                     },
                     {
-                        link: `/submissions/${parentContractID}/rates/${rate.id}/question-and-answers`,
+                        link: `/submissions/${contractSubmissionType}/${parentContractID}/rates/${rate.id}/question-and-answers`,
                         text: `Rate questions: ${rateName}`,
                     },
                     {

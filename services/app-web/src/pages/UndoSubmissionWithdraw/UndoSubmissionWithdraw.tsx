@@ -121,7 +121,7 @@ export const UndoSubmissionWithdraw = (): React.ReactElement => {
                         text: 'Dashboard',
                     },
                     {
-                        link: `/submissions/${id}`,
+                        link: `/submissions/${contractSubmissionType}/${id}`,
                         text: contractName || '',
                     },
                     {

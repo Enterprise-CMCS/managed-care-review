@@ -16,6 +16,7 @@ import { LinkWithLogging } from '../TealiumLogging/Link'
 import { getUpdatedByDisplayName } from '@mc-review/helpers'
 import { useTealium } from '../../hooks'
 import { formatToPacificTime } from '@mc-review/dates'
+import { formatContractSubmissionType } from '@mc-review/submissions'
 
 type ChangeHistoryProps = {
     contract: Contract | UnlockedContract
@@ -49,7 +50,7 @@ const buildChangeHistoryInfo = (
                 <br />
                 {r.revisionVersion && hasSubsequentSubmissions && (
                     <LinkWithLogging
-                        href={`/submissions/${contract.id}/revisions/${r.revisionVersion}`}
+                        href={`/submissions/${formatContractSubmissionType(contract.contractSubmissionType)}/${contract.id}/revisions/${r.revisionVersion}`}
                         data-testid={`revision-link-${r.revisionVersion}`}
                     >
                         View past submission version

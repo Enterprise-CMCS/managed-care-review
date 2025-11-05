@@ -34,7 +34,7 @@ type FormError =
 
 export const MccrsId = (): React.ReactElement => {
     const [shouldValidate, setShouldValidate] = React.useState(true)
-    const { id } = useParams()
+    const { id, contractSubmissionType } = useParams()
     if (!id) {
         throw new Error(
             'PROGRAMMING ERROR: id param not set in state submission form.'
@@ -174,12 +174,12 @@ export const MccrsId = (): React.ReactElement => {
                                     text: 'Dashboard',
                                 },
                                 {
-                                    link: `/submissions/${id}`,
+                                    link: `/submissions/${contractSubmissionType}/${id}`,
                                     text: contractName || '',
                                 },
                                 {
                                     text: 'MC-CRS record number',
-                                    link: `/submissions/${id}/mccrs-record-number`,
+                                    link: `/submissions/${contractSubmissionType}/${id}/mccrs-record-number`,
                                 },
                             ]}
                         />
