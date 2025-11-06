@@ -1024,28 +1024,22 @@
             "name": "Oklahoma",
             "programs": [
                 {
-                    "id": "6d1f77e3-1e97-4f57-9da0-e49358ab97e2",
-                    "fullName": "SoonerCare Choice",
-                    "name": "SoonerCare Choice",
-                    "isRateProgram": true
-                },
-                {
                     "id": "58b4e72f-219d-4648-84ae-deea4a703965",
                     "fullName": "SoonerSelect Dental",
                     "name": "SoonerSelect Dental",
-                    "isRateProgram": true
+                    "isRateProgram": false
                 },
                 {
                     "id": "70239e21-dd55-47ae-9156-ef910eb69e49",
                     "fullName": "SoonerSelect Children's Specialty",
                     "name": "SoonerSelect Children's Specialty",
-                    "isRateProgram": true
+                    "isRateProgram": false
                 },
                 {
                     "id": "4e274fe6-3645-432b-8629-b4b13bc0ee77",
                     "fullName": "SoonerSelect Medical",
                     "name": "SoonerSelect Medical",
-                    "isRateProgram": true
+                    "isRateProgram": false
                 }
             ],
             "code": "OK"
