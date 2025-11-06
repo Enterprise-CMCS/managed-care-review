@@ -43,9 +43,8 @@ export const RateSummary = (): React.ReactElement => {
     const [searchParams, setSearchParams] = useSearchParams()
     const [showUndoWithdrawBanner, setUndowWithdrawBanner] =
         useState<boolean>(false)
-    const { id, contractSubmissionType } = useParams() as {
+    const { id } = useParams() as {
         id: string
-        contractSubmissionType: string
     }
 
     useEffect(() => {
@@ -255,10 +254,10 @@ export const RateSummary = (): React.ReactElement => {
                 key="unlock-rate-button"
                 onClick={() => {
                     navigate(
-                        `/submissions/${contractSubmissionType}/${parentContractSubmissionID}`
+                        `/submissions/${contract.contractSubmissionType}/${parentContractSubmissionID}`
                     )
                 }}
-                link_url={`/submissions/${contractSubmissionType}/${parentContractSubmissionID}`}
+                link_url={`/submissions/${contract.contractSubmissionType}/${parentContractSubmissionID}`}
             >
                 Unlock rate
             </UnlockRateButton>
@@ -364,6 +363,7 @@ export const RateSummary = (): React.ReactElement => {
                 )}
                 <SingleRateSummarySection
                     rate={rate}
+                    contractSubmissionType={contract.contractSubmissionType}
                     isSubmitted // can assume isSubmitted because we redirect for unlocked
                     statePrograms={rate.state.programs}
                 />

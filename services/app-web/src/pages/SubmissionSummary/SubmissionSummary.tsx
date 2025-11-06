@@ -380,10 +380,10 @@ export const SubmissionSummary = (): React.ReactElement => {
                                         className="usa-button"
                                         onClick={() =>
                                             navigate(
-                                                `/submission-reviews/${contract.id}/withdraw-submission`
+                                                `/submission-reviews/${contract.contractSubmissionType}/${contract.id}/withdraw-submission`
                                             )
                                         }
-                                        link_url={`/submission-reviews/${contract.id}/withdraw-submission`}
+                                        link_url={`/submission-reviews/${contract.contractSubmissionType}/${contract.id}/withdraw-submission`}
                                     >
                                         Withdraw submission
                                     </ButtonWithLogging>
@@ -395,10 +395,10 @@ export const SubmissionSummary = (): React.ReactElement => {
                                         outline
                                         onClick={() =>
                                             navigate(
-                                                `/submission-reviews/${contract.id}/undo-withdraw-submission`
+                                                `/submission-reviews/${contract.contractSubmissionType}/${contract.id}/undo-withdraw-submission`
                                             )
                                         }
-                                        link_url={`/submission-reviews/${contract.id}/undo-withdraw-submission`}
+                                        link_url={`/submission-reviews/${contract.contractSubmissionType}/${contract.id}/undo-withdraw-submission`}
                                         style={{ width: '16rem' }}
                                     >
                                         Undo submission withdraw
