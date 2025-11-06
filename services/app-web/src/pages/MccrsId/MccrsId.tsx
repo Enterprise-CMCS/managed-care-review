@@ -25,6 +25,7 @@ import {
     Contract,
 } from '../../gen/gqlClient'
 import styles from './MccrsId.module.scss'
+import { formatContractSubmissionType } from '@mc-review/submissions'
 
 export interface MccrsIdFormValues {
     mccrsId: number | undefined
@@ -146,7 +147,9 @@ export const MccrsId = (): React.ReactElement => {
                 )
                 return new Error('Failed to update form data')
             }
-            navigate(`/submissions/${updatedSubmission.id}`)
+            navigate(
+                `/submissions/${formatContractSubmissionType(updatedSubmission.contractSubmissionType)}/${updatedSubmission.id}`
+            )
         } catch (serverError) {
             setShowPageErrorMessage(true)
             recordJSException(
@@ -220,7 +223,7 @@ export const MccrsId = (): React.ReactElement => {
                                     variant="default"
                                     data-testid="page-actions-right-primary"
                                     parent_component_type="page body"
-                                    link_url={`/submissions/${id}`}
+                                    link_url={`/submission/${contractSubmissionType}/${id}`}
                                     disabled={
                                         shouldValidate && !!errors.mccrsId
                                     }

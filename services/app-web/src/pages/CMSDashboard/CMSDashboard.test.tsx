@@ -15,6 +15,7 @@ import { CMSDashboard, RateReviewsDashboard, SubmissionsDashboard } from './'
 import { Navigate, Route, Routes } from 'react-router-dom'
 import { RoutesRecord } from '@mc-review/constants'
 import { Contract } from '../../gen/gqlClient'
+import { formatContractSubmissionType } from '@mc-review/submissions'
 
 // copy paste from AppRoutes - this is to allow texting of the react router Outlet
 const CMSDashboardNestedRoutes = () => (
@@ -126,7 +127,7 @@ describe('CMSDashboard', () => {
                         const submissionLink = within(row).queryByRole('link')
                         expect(submissionLink).not.toHaveAttribute(
                             'href',
-                            `/submissions/${draft.id}`
+                            `/submissions/${formatContractSubmissionType(draft.contractSubmissionType)}/${draft.id}`
                         )
                     })
                 })

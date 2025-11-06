@@ -39,10 +39,11 @@ const UploadResponseForm = ({
     round,
     questionBeingAsked,
 }: UploadResponseFormProps) => {
-    const { division, id, rateID } = useParams<{
+    const { division, id, rateID, contractSubmissionType } = useParams<{
         division: string
         id: string
         rateID: string
+        contractSubmissionType: string
     }>()
     const [shouldValidate, setShouldValidate] = React.useState(false)
     const navigate = useNavigate()
@@ -65,12 +66,12 @@ const UploadResponseForm = ({
 
     const cancelLink =
         type === 'contract'
-            ? `/submissions/${id}/question-and-answers`
-            : `/submissions/${id}/rates/${rateID}/question-and-answers`
+            ? `/submissions/${contractSubmissionType}/${id}/question-and-answers`
+            : `/submissions/${contractSubmissionType}/${id}/rates/${rateID}/question-and-answers`
     const submitLink =
         type === 'contract'
-            ? `/submissions/${id}/question-and-answers?submit=response`
-            : `/submissions/${id}/rates/${rateID}/question-and-answers?submit=response`
+            ? `/submissions/${contractSubmissionType}/${id}/question-and-answers?submit=response`
+            : `/submissions/${contractSubmissionType}/${id}/rates/${rateID}/question-and-answers?submit=response`
 
     const onSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault()

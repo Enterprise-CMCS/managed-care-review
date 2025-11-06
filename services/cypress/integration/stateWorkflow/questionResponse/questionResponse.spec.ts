@@ -1,3 +1,4 @@
+import { formatContractSubmissionType } from '@mc-review/submissions'
 import { stateUser, cmsUser } from '../../../utils/apollo-test-utils'
 describe('Q&A', () => {
     beforeEach(() => {
@@ -13,7 +14,7 @@ describe('Q&A', () => {
                 (contract) => {
                     // Log in as CMS user and upload question
                     cy.logInAsCMSUser({
-                        initialURL: `/submissions/${contract.contractSubmissionType}/${contract.id}/question-and-answers`,
+                        initialURL: `/submissions/${formatContractSubmissionType(contract.contractSubmissionType)}/${contract.id}/question-and-answers`,
                     })
 
                     cy.url({ timeout: 10_000 }).should(
@@ -48,7 +49,7 @@ describe('Q&A', () => {
 
                     cy.logInAsStateUser()
 
-                    cy.visit(`/submissions/${contract.contractSubmissionType}/${contract.id}`)
+                    cy.visit(`/submissions/${formatContractSubmissionType(contract.contractSubmissionType)}/${contract.id}`)
 
                     cy.findByTestId('submission-summary').should('exist')
                     cy.findByRole('link', {

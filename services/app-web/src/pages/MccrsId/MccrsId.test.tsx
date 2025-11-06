@@ -10,6 +10,7 @@ import {
 } from '@mc-review/mocks'
 import { renderWithProviders } from '../../testHelpers/jestHelpers'
 import { MccrsId } from './MccrsId'
+import { formatContractSubmissionType } from '@mc-review/submissions'
 
 describe('MCCRSID', () => {
     afterEach(() => {
@@ -40,7 +41,7 @@ describe('MCCRSID', () => {
                             ],
                         },
                         routerProvider: {
-                            route: `/submissions/${contract.contractSubmissionType}/15/mccrs-record-number`,
+                            route: `/submissions/${formatContractSubmissionType(contract.contractSubmissionType)}/15/mccrs-record-number`,
                         },
                     }
                 )
@@ -74,7 +75,7 @@ describe('MCCRSID', () => {
                             ],
                         },
                         routerProvider: {
-                            route: `/submissions/${contract.contractSubmissionType}/15/mccrs-record-number`,
+                            route: `/submissions/${formatContractSubmissionType(contract.contractSubmissionType)}/15/mccrs-record-number`,
                         },
                     }
                 )
@@ -103,7 +104,7 @@ describe('MCCRSID', () => {
                             ],
                         },
                         routerProvider: {
-                            route: `/submissions/${contract.contractSubmissionType}/15/mccrs-record-number`,
+                            route: `/submissions/${formatContractSubmissionType(contract.contractSubmissionType)}/15/mccrs-record-number`,
                         },
                     }
                 )
@@ -147,7 +148,7 @@ describe('MCCRSID', () => {
                             ],
                         },
                         routerProvider: {
-                            route: `/submissions/${contract.contractSubmissionType}/15/mccrs-record-number`,
+                            route: `/submissions/${formatContractSubmissionType(contract.contractSubmissionType)}/15/mccrs-record-number`,
                         },
                     }
                 )

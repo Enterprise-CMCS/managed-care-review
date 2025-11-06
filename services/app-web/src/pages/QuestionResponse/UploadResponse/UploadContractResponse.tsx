@@ -118,7 +118,9 @@ export const UploadContractResponse = () => {
         if (createResult instanceof Error) {
             console.info(createResult.message)
         } else {
-            navigate(`/submissions/${id}/question-and-answers?submit=response`)
+            navigate(
+                `/submissions/${contractSubmissionType}/${id}/question-and-answers?submit=response`
+            )
         }
     }
     const question = extractQuestions(contract.questions).find(

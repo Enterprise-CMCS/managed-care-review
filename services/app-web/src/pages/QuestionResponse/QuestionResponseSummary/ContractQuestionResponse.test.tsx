@@ -228,18 +228,20 @@ describe('ContractQuestionResponse', () => {
                             contract: {
                                 ...contract,
                                 id: '15',
+                                contractSubmissionType: 'HEALTH_PLAN',
                             },
                         }),
                         fetchContractWithQuestionsMockSuccess({
                             contract: {
                                 ...contract,
                                 id: '15',
+                                contractSubmissionType: 'HEALTH_PLAN',
                             },
                         }),
                     ],
                 },
                 routerProvider: {
-                    route: '/submissions/15/question-and-answers',
+                    route: '/submissions/health-plan/15/question-and-answers',
                 },
             })
 
@@ -261,18 +263,20 @@ describe('ContractQuestionResponse', () => {
                             contract: {
                                 ...draftContract,
                                 id: '15',
+                                contractSubmissionType: 'HEALTH_PLAN',
                             },
                         }),
                         fetchContractWithQuestionsMockSuccess({
                             contract: {
                                 ...draftContract,
                                 id: '15',
+                                contractSubmissionType: 'HEALTH_PLAN',
                             },
                         }),
                     ],
                 },
                 routerProvider: {
-                    route: '/submissions/15/question-and-answers',
+                    route: '/submissions/health-plan/15/question-and-answers',
                 },
             })
 

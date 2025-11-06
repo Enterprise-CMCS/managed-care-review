@@ -1,3 +1,5 @@
+import { formatContractSubmissionType } from "@mc-review/submissions"
+
 describe('rate details', () => {
     beforeEach(() => {
         cy.stubFeatureFlags()
@@ -14,7 +16,7 @@ describe('rate details', () => {
             const draftSubmissionId = pathnameArray[3]
             const draftContractSubType = pathname.split('/')[2]
             cy.navigateFormByDirectLink(
-                `/submissions/${draftContractSubType}/${draftSubmissionId}/edit/rate-details`
+                `/submissions/${formatContractSubmissionType(draftContractSubType)}/${draftSubmissionId}/edit/rate-details`
             )
 
             // Navigate to contract details page by clicking back
@@ -23,7 +25,7 @@ describe('rate details', () => {
 
             // Navigate to rate details page
             cy.navigateFormByDirectLink(
-                `/submissions/${draftContractSubType}/${draftSubmissionId}/edit/rate-details`
+                `/submissions/${formatContractSubmissionType(draftContractSubType)}/${draftSubmissionId}/edit/rate-details`
             )
             cy.navigateContractRatesForm('SAVE_DRAFT')
             cy.get('[data-testid="saveAsDraftSuccessBanner"]').should('exist')

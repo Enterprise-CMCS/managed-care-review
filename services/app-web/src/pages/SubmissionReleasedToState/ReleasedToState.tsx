@@ -226,9 +226,11 @@ const ReleasedToState = () => {
                                     variant="outline"
                                     data-testid="page-actions-left-secondary"
                                     parent_component_type="page body"
-                                    link_url={`/submissions/${id}`}
+                                    link_url={`/submissions/${contractSubmissionType}/${id}`}
                                     onClick={() =>
-                                        navigate(`/submissions/${id}`)
+                                        navigate(
+                                            `/submissions/${contractSubmissionType}/${id}`
+                                        )
                                     }
                                 >
                                     Cancel
@@ -241,7 +243,7 @@ const ReleasedToState = () => {
                                     )}
                                     data-testid="page-actions-right-primary"
                                     parent_component_type="page body"
-                                    link_url={`/submissions/${id}`}
+                                    link_url={`/submissions/${contractSubmissionType}/${id}`}
                                     animationTimeout={1000}
                                     loading={approveLoading}
                                 >

@@ -31,6 +31,7 @@ import { ModalOpenButton, UnlockSubmitModal } from '../../components/Modal'
 import { RoutesRecord } from '@mc-review/constants'
 import { useRouteParams } from '../../hooks'
 import {
+    formatContractSubmissionType,
     getVisibleLatestContractFormData,
     getVisibleLatestRateRevisions,
 } from '@mc-review/submissions'
@@ -424,7 +425,7 @@ export const SubmissionSummary = (): React.ReactElement => {
                                     </span>
                                 )}
                                 <LinkWithLogging
-                                    href={`/submissions/${contract.id}/mccrs-record-number`}
+                                    href={`/submissions/${formatContractSubmissionType(contract.contractSubmissionType)}/${contract.id}/mccrs-record-number`}
                                     className={
                                         contract.mccrsID ? styles.editLink : ''
                                     }

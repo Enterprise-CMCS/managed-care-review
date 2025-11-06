@@ -1,3 +1,5 @@
+import { formatContractSubmissionType } from "@mc-review/submissions"
+
 describe.only('documents', () => {
     beforeEach(() => {
         cy.stubFeatureFlags()
@@ -15,7 +17,7 @@ describe.only('documents', () => {
                 const draftContractSubType = pathname.split('/')[2]
 
                 cy.navigateFormByDirectLink(
-                    `/submissions/${draftContractSubType}/${draftSubmissionID}/edit/type`
+                    `/submissions/${formatContractSubmissionType(draftContractSubType)}/${draftSubmissionID}/edit/type`
                 )
                 cy.navigateContractForm('CONTINUE')
 
