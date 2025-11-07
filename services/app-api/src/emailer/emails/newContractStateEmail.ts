@@ -49,6 +49,10 @@ export const newContractStateEmail = async (
 
     const contractURL = submissionSummaryURL(contract.id, config.baseUrl)
 
+    const contractSubmissionType =
+        contract.contractSubmissionType === 'HEALTH_PLAN'
+            ? 'Health plan'
+            : 'EQRO'
     const data = {
         shouldIncludeRates: isContractAndRates,
         cmsReviewHelpEmailAddress: formatEmailAddresses(
@@ -59,6 +63,7 @@ export const newContractStateEmail = async (
         ),
         helpDeskEmail: formatEmailAddresses(config.helpDeskEmail),
         packageName,
+        contractSubmissionType,
         submissionType: SubmissionTypeRecord[formData.submissionType],
         submissionDescription: formData.submissionDescription,
         contractType: formData.contractType,
