@@ -45,8 +45,8 @@ importers:
         specifier: ^3.922.0
         version: 3.922.0
       axios:
-        specifier: ^1.12.2
-        version: 1.12.2
+        specifier: ^1.13.0
+        version: 1.13.0
       node-ssh:
         specifier: ^13.2.1
         version: 13.2.1
@@ -428,8 +428,8 @@ importers:
         specifier: ^7.0.1
         version: 7.0.1
       axios:
-        specifier: ^1.12.2
-        version: 1.12.2
+        specifier: ^1.13.0
+        version: 1.13.0
       eta:
         specifier: ^2.0.0
         version: 2.0.1
@@ -683,8 +683,8 @@ importers:
         specifier: ^5.0.10
         version: 5.3.1(encoding@0.1.13)(react-native@0.74.3(@babel/core@7.28.5)(@babel/preset-env@7.24.8(@babel/core@7.28.5))(@types/react@18.3.3)(encoding@0.1.13)(react@18.3.1))
       axios:
-        specifier: ^1.12.2
-        version: 1.12.2
+        specifier: ^1.13.0
+        version: 1.13.0
       dayjs:
         specifier: ^1.11.19
         version: 1.11.19
@@ -969,8 +969,8 @@ importers:
         specifier: workspace:*
         version: link:../../packages/submissions
       axios:
-        specifier: ^1.12.2
-        version: 1.12.2
+        specifier: ^1.13.0
+        version: 1.13.0
       cypress-file-upload:
         specifier: ^5.0.8
         version: 5.0.8(cypress@13.13.2)
@@ -7620,8 +7620,8 @@ packages:
   axios@0.26.0:
     resolution: {integrity: sha512-lKoGLMYtHvFrPVt3r+RBMp9nh34N0M8zEfCWqdWZx6phynIEhQqAdydpyBAAG211zlhX9Rgu08cOamy6XjE5Og==}
 
-  axios@1.12.2:
-    resolution: {integrity: sha512-vMJzPewAlRyOgxV2dU0Cuz2O8zzzx9VYtbJOaBgXFeLc4IV/Eg50n4LowmehOOR61S8ZMpc2K5Sa7g6A4jfkUw==}
+  axios@1.13.0:
+    resolution: {integrity: sha512-zt40Pz4zcRXra9CVV31KeyofwiNvAbJ5B6YPz9pMJ+yOSLikvPT4Yi5LjfgjRa9CawVYBaD1JQzIVcIvBejKeA==}
 
   axobject-query@4.1.0:
     resolution: {integrity: sha512-qIj0G9wZbMGNLjLmg1PT6v2mE9AH2zlnADJD/2tC6E00hgmhUOfEB6greHPAfLRSufHqROIUTkw6E+M3lH0PTQ==}
@@ -23633,7 +23633,7 @@ snapshots:
     transitivePeerDependencies:
       - debug
 
-  axios@1.12.2:
+  axios@1.13.0:
     dependencies:
       follow-redirects: 1.15.11
       form-data: 4.0.4
@@ -29794,7 +29794,7 @@ snapshots:
 
   serverless@4.2.3:
     dependencies:
-      axios: 1.12.2
+      axios: 1.13.0
       axios-proxy-builder: 0.1.2
       rimraf: 5.0.10
       xml2js: 0.6.2
