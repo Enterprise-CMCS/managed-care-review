@@ -148,7 +148,7 @@ export const UploadContractQuestions = () => {
                 round={nextRoundNumber}
                 division={realDivision}
                 id={contract.id}
-                contractSubmissionType={contract.contractSubmissionType}
+                contractSubmissionType={contractSubmissionType!}
             />
         </div>
     )

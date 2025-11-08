@@ -222,7 +222,7 @@ export const SubmissionType = ({
                         id: draftSubmission.id,
                         contractSubmissionType:
                             ContractSubmissionTypeRecord[
-                                draftSubmission.contractSubmissionType
+                                contractSubmissionType!
                             ],
                     })
                 )

@@ -15,7 +15,11 @@ import {
 } from '@mc-review/mocks'
 import { renderWithProviders } from '../../testHelpers'
 import { formatToPacificTime } from '@mc-review/dates'
-import { ContractSubmissionTypeRecord } from '@mc-review/constants'
+import {
+    ContractSubmissionTypeRecord,
+    RoutesRecord,
+} from '@mc-review/constants'
+import { Route, Routes } from 'react-router'
 
 describe('Change History', () => {
     it('can render history for initial submission', () => {
@@ -326,14 +330,30 @@ describe('Change History', () => {
     })
     it('has correct href values for previous submission links', () => {
         const submittedContract = mockContractPackageSubmittedWithRevisions()
-        renderWithProviders(<ChangeHistory contract={submittedContract} />)
+        const contractSubmissionType =
+            ContractSubmissionTypeRecord[
+                submittedContract.contractSubmissionType
+            ]
+        renderWithProviders(
+            <Routes>
+                <Route
+                    path={RoutesRecord.SUBMISSIONS_SUMMARY}
+                    element={<ChangeHistory contract={submittedContract} />}
+                />
+            </Routes>,
+            {
+                routerProvider: {
+                    route: `/submissions/${contractSubmissionType}/${submittedContract.id}`,
+                },
+            }
+        )
         expect(screen.getByTestId(`revision-link-1`)).toHaveAttribute(
             'href',
-            `/submissions/${ContractSubmissionTypeRecord[submittedContract.contractSubmissionType]}/${submittedContract.id}/revisions/1`
+            `/submissions/${contractSubmissionType}/${submittedContract.id}/revisions/1`
         )
         expect(screen.getByTestId(`revision-link-2`)).toHaveAttribute(
             'href',
-            `/submissions/${ContractSubmissionTypeRecord[submittedContract.contractSubmissionType]}/${submittedContract.id}/revisions/2`
+            `/submissions/${contractSubmissionType}/${submittedContract.id}/revisions/2`
         )
     })
     it('should list accordion items with links when appropriate', () => {
