@@ -79,7 +79,6 @@ describe('undoWithdrawRate', () => {
 
         //We need to include an extra rate in order to be able to submit
         const draftA = await createAndUpdateTestContractWithRate(stateServer)
-        draftA.contractSubmissionType = 'HEALTH_PLAN'
         const draftAWithExtraRate = await addNewRateToTestContract(
             stateServer,
             draftA
@@ -88,14 +87,12 @@ describe('undoWithdrawRate', () => {
             stateServer,
             draftAWithExtraRate.id
         )
-        contractA.contractSubmissionType = 'HEALTH_PLAN'
         const rateID = contractA.packageSubmissions[0].rateRevisions[0].rateID
         const formData =
             contractA.packageSubmissions[0].rateRevisions[0].formData
 
         const contractB =
             await createAndUpdateTestContractWithoutRates(stateServer)
-        contractB.contractSubmissionType = 'HEALTH_PLAN'
 
         // link rate contract B
         must(

@@ -94,7 +94,11 @@ function genericContractResolver<
             return dateFirstSubmitted
         },
         webURL(parent: ParentType) {
-            const urlPath = path.join('/submissions/', parent.id)
+            const urlPath = path.join(
+                '/submissions/',
+                parent.contractSubmissionType,
+                parent.id
+            )
             const fullURL = new URL(urlPath, applicationEndpoint).href
             return fullURL
         },

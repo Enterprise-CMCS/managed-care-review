@@ -196,11 +196,6 @@ function packageName(
     return `MCR-${stateCode.toUpperCase()}-${padNumber}-${formattedProgramNames}`
 }
 
-const formatContractSubmissionType = (contractSubmissionType: string): string => {
-    const formattedString = contractSubmissionType === 'HEALTH_PLAN' ? 'health-plan' : 'eqro'
-    return formattedString
-}
-
 const findStatePrograms = (stateCode: string): ProgramArgType[] => {
     const programs = typedStatePrograms.states.find(
         (state) => state.code === stateCode
@@ -225,6 +220,5 @@ export {
     packageName,
     programNames,
     naturalSort,
-    formatContractSubmissionType
 }
 export type { RateRevisionWithIsLinked }

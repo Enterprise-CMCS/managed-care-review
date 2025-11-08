@@ -1,4 +1,5 @@
-import { formatContractSubmissionType } from "@mc-review/submissions"
+import { ContractSubmissionTypeRecord } from '../../../utils/general-test-utils'
+
 
 describe('state user in state submission form', () => {
     beforeEach(() => {
@@ -25,7 +26,7 @@ describe('state user in state submission form', () => {
             const draftContractSubType = pathname.split('/')[2]
 
             cy.navigateFormByDirectLink(
-                `/submissions/${formatContractSubmissionType(draftContractSubType)}/${draftSubmissionId}/edit/type`
+                `/submissions/${ContractSubmissionTypeRecord[draftContractSubType]}/${draftSubmissionId}/edit/type`
             )
 
             // CHECK SUBMISSION TYPE PAGE NAVIGATION
@@ -48,7 +49,7 @@ describe('state user in state submission form', () => {
 
             // Link to type page
             cy.navigateFormByDirectLink(
-                `/submissions/${formatContractSubmissionType(draftContractSubType)}/${draftSubmissionId}/edit/type`
+                `/submissions/${ContractSubmissionTypeRecord[draftContractSubType]}/${draftSubmissionId}/edit/type`
             )
 
             // Change to contract and rates and contract amendment
@@ -70,7 +71,7 @@ describe('state user in state submission form', () => {
 
             // Link to type page and continue forward
             cy.navigateFormByDirectLink(
-                `/submissions/${formatContractSubmissionType(draftContractSubType)}/${draftSubmissionId}/edit/type`
+                `/submissions/${ContractSubmissionTypeRecord[draftContractSubType]}/${draftSubmissionId}/edit/type`
             )
             cy.findByTestId('step-indicator').findAllByRole('listitem').should('have.length', 5)
             cy.findByText('Rate details').should('exist')
@@ -92,7 +93,7 @@ describe('state user in state submission form', () => {
 
             // Link to contract details page and continue
                cy.navigateFormByDirectLink(
-                `/submissions/${formatContractSubmissionType(draftContractSubType)}/${draftSubmissionId}/edit/contract-details`
+                `/submissions/${ContractSubmissionTypeRecord[draftContractSubType]}/${draftSubmissionId}/edit/contract-details`
             )
             cy.navigateContractForm('CONTINUE')
 
@@ -112,7 +113,7 @@ describe('state user in state submission form', () => {
 
             // Link to rate details page, change to rate amendment, continue
             cy.navigateFormByDirectLink(
-                `/submissions/${formatContractSubmissionType(draftContractSubType)}/${draftSubmissionId}/edit/rate-details`
+                `/submissions/${ContractSubmissionTypeRecord[draftContractSubType]}/${draftSubmissionId}/edit/rate-details`
             )
             cy.fillOutAmendmentToPriorRateCertification()
             cy.navigateContractRatesForm('CONTINUE')
@@ -133,7 +134,7 @@ describe('state user in state submission form', () => {
 
             // Link to contacts page and continue
             cy.navigateFormByDirectLink(
-                `/submissions/${formatContractSubmissionType(draftContractSubType)}/${draftSubmissionId}/edit/contacts`
+                `/submissions/${ContractSubmissionTypeRecord[draftContractSubType]}/${draftSubmissionId}/edit/contacts`
             )
             cy.navigateContractForm('CONTINUE')
 
@@ -154,7 +155,7 @@ describe('state user in state submission form', () => {
             const pathnameArray = pathname.split('/')
             const draftSubmissionId = pathnameArray[3]
             const draftContractSubType = pathnameArray[2]
-            cy.navigateFormByDirectLink(`/submissions/${formatContractSubmissionType(draftContractSubType)}/${draftSubmissionId}/edit/review-and-submit`)
+            cy.navigateFormByDirectLink(`/submissions/${ContractSubmissionTypeRecord[draftContractSubType]}/${draftSubmissionId}/edit/review-and-submit`)
 
             // Testing around temporary client-side validation for contract and rates submission.
             // Ensures rate certification is included. Remove after MCR-4871 and use cy.submitStateSubmissionForm below.
@@ -186,7 +187,7 @@ describe('state user in state submission form', () => {
 
             // Add two of the same document
             cy.navigateFormByDirectLink(
-                `/submissions/${formatContractSubmissionType(draftContractSubType)}/${draftSubmissionID}/edit/rate-details`
+                `/submissions/${ContractSubmissionTypeRecord[draftContractSubType]}/${draftSubmissionID}/edit/rate-details`
             )
             cy.findByRole('radiogroup', {
                 name: /Was this rate certification included with another submission?/,

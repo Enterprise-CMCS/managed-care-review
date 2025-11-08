@@ -1,4 +1,4 @@
-import { formatContractSubmissionType } from "@mc-review/submissions"
+import { ContractSubmissionTypeRecord } from "../../../utils/general-test-utils"
 
 describe.only('documents', () => {
     beforeEach(() => {
@@ -17,7 +17,7 @@ describe.only('documents', () => {
                 const draftContractSubType = pathname.split('/')[2]
 
                 cy.navigateFormByDirectLink(
-                    `/submissions/${formatContractSubmissionType(draftContractSubType)}/${draftSubmissionID}/edit/type`
+                    `/submissions/${ContractSubmissionTypeRecord[draftContractSubType]}/${draftSubmissionID}/edit/type`
                 )
                 cy.navigateContractForm('CONTINUE')
 

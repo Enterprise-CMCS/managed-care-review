@@ -15,7 +15,7 @@ import {
 } from '@mc-review/mocks'
 import { renderWithProviders } from '../../testHelpers'
 import { formatToPacificTime } from '@mc-review/dates'
-import { formatContractSubmissionType } from '@mc-review/submissions'
+import { ContractSubmissionTypeRecord } from '@mc-review/constants'
 
 describe('Change History', () => {
     it('can render history for initial submission', () => {
@@ -329,11 +329,11 @@ describe('Change History', () => {
         renderWithProviders(<ChangeHistory contract={submittedContract} />)
         expect(screen.getByTestId(`revision-link-1`)).toHaveAttribute(
             'href',
-            `/submissions/${formatContractSubmissionType(submittedContract.contractSubmissionType)}/${submittedContract.id}/revisions/1`
+            `/submissions/${ContractSubmissionTypeRecord[submittedContract.contractSubmissionType]}/${submittedContract.id}/revisions/1`
         )
         expect(screen.getByTestId(`revision-link-2`)).toHaveAttribute(
             'href',
-            `/submissions/${formatContractSubmissionType(submittedContract.contractSubmissionType)}/${submittedContract.id}/revisions/2`
+            `/submissions/${ContractSubmissionTypeRecord[submittedContract.contractSubmissionType]}/${submittedContract.id}/revisions/2`
         )
     })
     it('should list accordion items with links when appropriate', () => {

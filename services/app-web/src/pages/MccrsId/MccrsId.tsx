@@ -25,7 +25,6 @@ import {
     Contract,
 } from '../../gen/gqlClient'
 import styles from './MccrsId.module.scss'
-import { formatContractSubmissionType } from '@mc-review/submissions'
 
 export interface MccrsIdFormValues {
     mccrsId: number | undefined
@@ -121,7 +120,10 @@ export const MccrsId = (): React.ReactElement => {
     const showFieldErrors = (error?: FormError) =>
         shouldValidate && Boolean(error)
 
-    const handleFormSubmit = async (values: MccrsIdFormValues) => {
+    const handleFormSubmit = async (
+        values: MccrsIdFormValues,
+        contractSubmissionType: string
+    ) => {
         setShowPageErrorMessage(false)
         try {
             const updateResult = await updateContract({
@@ -148,7 +150,7 @@ export const MccrsId = (): React.ReactElement => {
                 return new Error('Failed to update form data')
             }
             navigate(
-                `/submissions/${formatContractSubmissionType(updatedSubmission.contractSubmissionType)}/${updatedSubmission.id}`
+                `/submissions/${contractSubmissionType}/${updatedSubmission.id}`
             )
         } catch (serverError) {
             setShowPageErrorMessage(true)
@@ -164,7 +166,7 @@ export const MccrsId = (): React.ReactElement => {
             <Formik
                 initialValues={mccrsIDInitialValues}
                 onSubmit={(values) => {
-                    return handleFormSubmit(values)
+                    return handleFormSubmit(values, contractSubmissionType!)
                 }}
                 validationSchema={() => MccrsIdFormSchema()}
             >

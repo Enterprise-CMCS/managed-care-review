@@ -1,7 +1,9 @@
 import { URL } from 'url'
 import { compile } from 'path-to-regexp'
-import { RoutesRecord } from '@mc-review/constants'
-import { formatContractSubmissionType } from '@mc-review/submissions'
+import {
+    RoutesRecord,
+    ContractSubmissionTypeRecord,
+} from '@mc-review/constants'
 
 function generateUrl(
     id: string,
@@ -33,7 +35,7 @@ function reviewAndSubmitURL(
         id,
         base,
         pattern,
-        formatContractSubmissionType(contractSubmissionType)
+        ContractSubmissionTypeRecord[contractSubmissionType]
     )
 }
 
@@ -50,7 +52,7 @@ function submissionSummaryURL(
         id,
         base,
         pattern,
-        formatContractSubmissionType(contractSubmissionType)
+        ContractSubmissionTypeRecord[contractSubmissionType]
     )
 }
 
@@ -64,7 +66,7 @@ function submissionQuestionResponseURL(
         id,
         base,
         pattern,
-        formatContractSubmissionType(contractSubmissionType)
+        ContractSubmissionTypeRecord[contractSubmissionType]
     )
 }
 
@@ -84,7 +86,7 @@ function rateQuestionResponseURL(
         id,
         base,
         pattern,
-        formatContractSubmissionType(contractSubmissionType),
+        ContractSubmissionTypeRecord[contractSubmissionType],
         rateID
     )
 }

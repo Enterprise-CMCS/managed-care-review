@@ -1,7 +1,10 @@
 import { screen, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { Route, Routes } from 'react-router'
-import { RoutesRecord } from '@mc-review/constants'
+import {
+    RoutesRecord,
+    ContractSubmissionTypeRecord,
+} from '@mc-review/constants'
 import {
     fetchCurrentUserMock,
     fetchContractMockSuccess,
@@ -10,7 +13,6 @@ import {
 } from '@mc-review/mocks'
 import { renderWithProviders } from '../../testHelpers/jestHelpers'
 import { MccrsId } from './MccrsId'
-import { formatContractSubmissionType } from '@mc-review/submissions'
 
 describe('MCCRSID', () => {
     afterEach(() => {
@@ -41,7 +43,7 @@ describe('MCCRSID', () => {
                             ],
                         },
                         routerProvider: {
-                            route: `/submissions/${formatContractSubmissionType(contract.contractSubmissionType)}/15/mccrs-record-number`,
+                            route: `/submissions/${ContractSubmissionTypeRecord[contract.contractSubmissionType]}/15/mccrs-record-number`,
                         },
                     }
                 )
@@ -75,7 +77,7 @@ describe('MCCRSID', () => {
                             ],
                         },
                         routerProvider: {
-                            route: `/submissions/${formatContractSubmissionType(contract.contractSubmissionType)}/15/mccrs-record-number`,
+                            route: `/submissions/${ContractSubmissionTypeRecord[contract.contractSubmissionType]}/15/mccrs-record-number`,
                         },
                     }
                 )
@@ -104,7 +106,7 @@ describe('MCCRSID', () => {
                             ],
                         },
                         routerProvider: {
-                            route: `/submissions/${formatContractSubmissionType(contract.contractSubmissionType)}/15/mccrs-record-number`,
+                            route: `/submissions/${ContractSubmissionTypeRecord[contract.contractSubmissionType]}/15/mccrs-record-number`,
                         },
                     }
                 )
@@ -148,7 +150,7 @@ describe('MCCRSID', () => {
                             ],
                         },
                         routerProvider: {
-                            route: `/submissions/${formatContractSubmissionType(contract.contractSubmissionType)}/15/mccrs-record-number`,
+                            route: `/submissions/${ContractSubmissionTypeRecord[contract.contractSubmissionType]}/15/mccrs-record-number`,
                         },
                     }
                 )

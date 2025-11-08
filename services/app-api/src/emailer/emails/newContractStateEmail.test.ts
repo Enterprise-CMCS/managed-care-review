@@ -3,10 +3,8 @@ import {
     mockContract,
     mockMNState,
 } from '../../testHelpers/emailerHelpers'
-import {
-    formatContractSubmissionType,
-    packageName,
-} from '@mc-review/submissions'
+import { packageName } from '@mc-review/submissions'
+import { ContractSubmissionTypeRecord } from '@mc-review/constants'
 import { newContractStateEmail } from './index'
 import { formatEmailAddresses } from '../formatters'
 import type { ContractType, RateFormDataType } from '../../domain-models'
@@ -203,14 +201,14 @@ test('includes link to submission', async () => {
     expect(template).toEqual(
         expect.objectContaining({
             bodyText: expect.stringContaining(
-                `http://localhost/submissions/${formatContractSubmissionType(sub.contractSubmissionType)}/${sub.id}`
+                `http://localhost/submissions/${ContractSubmissionTypeRecord[sub.contractSubmissionType]}/${sub.id}`
             ),
         })
     )
     expect(template).toEqual(
         expect.objectContaining({
             bodyHTML: expect.stringContaining(
-                `href="http://localhost/submissions/${formatContractSubmissionType(sub.contractSubmissionType)}/${sub.id}"`
+                `href="http://localhost/submissions/${ContractSubmissionTypeRecord[sub.contractSubmissionType]}/${sub.id}"`
             ),
         })
     )

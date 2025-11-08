@@ -28,10 +28,12 @@ import { GenericErrorPage } from '../Errors/GenericErrorPage'
 import styles from './SubmissionSummary.module.scss'
 import { ChangeHistory } from '../../components/ChangeHistory'
 import { ModalOpenButton, UnlockSubmitModal } from '../../components/Modal'
-import { RoutesRecord } from '@mc-review/constants'
+import {
+    ContractSubmissionTypeRecord,
+    RoutesRecord,
+} from '@mc-review/constants'
 import { useRouteParams } from '../../hooks'
 import {
-    formatContractSubmissionType,
     getVisibleLatestContractFormData,
     getVisibleLatestRateRevisions,
 } from '@mc-review/submissions'
@@ -380,10 +382,10 @@ export const SubmissionSummary = (): React.ReactElement => {
                                         className="usa-button"
                                         onClick={() =>
                                             navigate(
-                                                `/submission-reviews/${contract.contractSubmissionType}/${contract.id}/withdraw-submission`
+                                                `/submission-reviews/${ContractSubmissionTypeRecord[contract.contractSubmissionType]}/${contract.id}/withdraw-submission`
                                             )
                                         }
-                                        link_url={`/submission-reviews/${contract.contractSubmissionType}/${contract.id}/withdraw-submission`}
+                                        link_url={`/submission-reviews/${ContractSubmissionTypeRecord[contract.contractSubmissionType]}/${contract.id}/withdraw-submission`}
                                     >
                                         Withdraw submission
                                     </ButtonWithLogging>
@@ -395,10 +397,10 @@ export const SubmissionSummary = (): React.ReactElement => {
                                         outline
                                         onClick={() =>
                                             navigate(
-                                                `/submission-reviews/${contract.contractSubmissionType}/${contract.id}/undo-withdraw-submission`
+                                                `/submission-reviews/${ContractSubmissionTypeRecord[contract.contractSubmissionType]}/${contract.id}/undo-withdraw-submission`
                                             )
                                         }
-                                        link_url={`/submission-reviews/${contract.contractSubmissionType}/${contract.id}/undo-withdraw-submission`}
+                                        link_url={`/submission-reviews/${ContractSubmissionTypeRecord[contract.contractSubmissionType]}/${contract.id}/undo-withdraw-submission`}
                                         style={{ width: '16rem' }}
                                     >
                                         Undo submission withdraw
@@ -425,7 +427,7 @@ export const SubmissionSummary = (): React.ReactElement => {
                                     </span>
                                 )}
                                 <LinkWithLogging
-                                    href={`/submissions/${formatContractSubmissionType(contract.contractSubmissionType)}/${contract.id}/mccrs-record-number`}
+                                    href={`/submissions/${ContractSubmissionTypeRecord[contract.contractSubmissionType]}/${contract.id}/mccrs-record-number`}
                                     className={
                                         contract.mccrsID ? styles.editLink : ''
                                     }

@@ -24,7 +24,6 @@ import { useAuth } from '../../../../contexts/AuthContext'
 import { SectionCard } from '../../../SectionCard'
 import {
     ActuaryCommunicationRecord,
-    formatContractSubmissionType,
     RateMedicaidPopulationsRecord,
 } from '@mc-review/submissions'
 import { NavLinkWithLogging } from '../../../TealiumLogging'
@@ -32,6 +31,7 @@ import { hasCMSUserPermissions } from '@mc-review/helpers'
 import { featureFlags } from '@mc-review/common-code'
 import { useLDClient } from 'launchdarkly-react-client-sdk'
 import { DocumentHeader } from '../../../DocumentHeader/DocumentHeader'
+import { ContractSubmissionTypeRecord } from '@mc-review/constants'
 
 const rateCapitationType = (formData: RateFormData) =>
     formData.rateCapitationType
@@ -86,7 +86,7 @@ const relatedSubmissions = (
             {contractRevisions.map((contractRev) => (
                 <li key={contractRev.contractID}>
                     <NavLinkWithLogging
-                        to={`/submissions/${formatContractSubmissionType(contractSubmissionType)}/${contractRev.contractID}`}
+                        to={`/submissions/${ContractSubmissionTypeRecord[contractSubmissionType]}/${contractRev.contractID}`}
                     >
                         {contractRev.contractName}
                     </NavLinkWithLogging>
