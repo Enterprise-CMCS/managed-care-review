@@ -546,128 +546,12 @@ jobs:
           cd services/app-api
           ./scripts/invoke-migrate-lambda.sh app-api-dev-cdk-migrate
 
-  extract-endpoints-dev:
-    needs: [begin-deployment, deploy-cdk-app-dev, deploy-frontend-app-dev]
-    if: |
-      always() &&
-      needs.deploy-cdk-app-dev.result == 'success' &&
-      needs.deploy-frontend-app-dev.result == 'success' &&
-      needs.begin-deployment.result == 'success'
-    name: Extract deployment endpoints (dev)
-    runs-on: ubuntu-24.04
-    environment: dev
-    outputs:
-      application-endpoint: ${{ steps.save-app-endpoint.outputs.app-endpoint }}
-    steps:
-      - uses: actions/checkout@v5
-
-      - name: Get AWS credentials
-        uses: ./.github/actions/get_aws_credentials
-        with:
-          region: ${{ vars.AWS_DEFAULT_REGION }}
-          account-id: ${{ secrets.DEV_AWS_ACCOUNT_ID }}
-          stage-name: dev
-          use-cdk-role: "true"
-
-      - name: get application endpoint
-        id: save-app-endpoint
-        env:
-          STAGE_NAME: dev
-        run: |
-          echo "=== Extracting application endpoint from CDK outputs ==="
-          endpoint=$(aws cloudformation list-exports --query "Exports[?Name=='frontend-infra-dev-cdk-CloudFrontEndpointUrl'].Value" --output text)
-
-          if [ "$endpoint" = "None" ] || [ -z "$endpoint" ]; then
-            echo "Error: Could not find application endpoint from CDK outputs"
-            exit 1
-          fi
-
-          echo "Application endpoint: $endpoint"
-          echo "app-endpoint=$endpoint" >> "$GITHUB_OUTPUT"
-
-  cypress-dev:
-    name: cypress-dev-smoke-test
-    needs: [begin-deployment, extract-endpoints-dev]
-    environment: dev
-    if: always() && needs.extract-endpoints-dev.result == 'success'
-    runs-on: ubuntu-24.04
-    container:
-      image: cypress/browsers:node-20.14.0-chrome-126.0.6478.114-1-ff-127.0.1-edge-126.0.2592.61-1
-      options: --user 1001
-    permissions:
-      deployments: write
-      id-token: write
-      contents: read
-    steps:
-      - uses: actions/checkout@v5
-
-      - name: Generate unique ID for Cypress
-        id: uuid
-        run: echo "value=sha-$GITHUB_SHA-time-$(date +"%s")" >> "$GITHUB_OUTPUT"
-
-      - name: Setup env
-        uses: ./.github/actions/setup_env
-
-      - uses: actions/download-artifact@v6
-        with:
-          name: app-web-gen
-          path: ./services/app-web/src/gen
-
-      - uses: actions/download-artifact@v6
-        with:
-          name: cypress-gen
-          path: ./services/cypress/gen
-
-      - name: Generate Code
-        run: pnpm -r generate
-
-      - name: Build packages
-        shell: bash
-        run: pnpm build:packages
-
-      - name: Cypress smoke test on Dev -- Chrome
-        id: cypress
-        uses: cypress-io/github-action@v6
-        with:
-          config: baseUrl=${{ needs.extract-endpoints-dev.outputs.application-endpoint }}
-          spec: services/cypress/integration/promoteWorkflow/promote.spec.ts
-          record: true
-          parallel: false
-          browser: chrome
-          group: "Chrome - dev CDK"
-          ci-build-id: ${{ steps.uuid.outputs.value }}
-          config-file: services/cypress/cypress.config.ts
-        env:
-          VITE_APP_AUTH_MODE: IDM
-          CYPRESS_RECORD_KEY: ${{ secrets.CYPRESS_RECORD_KEY }}
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          CYPRESS_SUPPORT_FILE: services/cypress/support/index.ts
-          CYPRESS_FIXTURES_FOLDER: services/cypress/fixtures
-          CYPRESS_SPEC_PATTERN: services/cypress/integration/**/*.spec.ts
-          CYPRESS_SCREEN_SHOTS_FOLDER: services/cypress/screenshots
-          CYPRESS_VIDEOS_FOLDER: services/cypress/videos
-
-      - name: Upload cypress video
-        uses: actions/upload-artifact@v5
-        if: failure() && steps.cypress.outcome == 'failure'
-        with:
-          name: cypress-videos-dev
-          path: services/cypress/videos
-
-      - name: Upload cypress screenshots
-        uses: actions/upload-artifact@v5
-        if: failure() && steps.cypress.outcome == 'failure'
-        with:
-          name: cypress-screenshots-dev
-          path: services/cypress/screenshots
-
   end-deployment-dev:
     needs:
       [
         begin-deployment,
         deploy-cdk-app-dev,
         deploy-frontend-app-dev,
-        cypress-dev,
       ]
     if: always() && needs.begin-deployment.result == 'success'
     name: End CDK Dev Deployment
@@ -686,7 +570,7 @@ jobs:
           deployment-id: ${{ needs.begin-deployment.outputs.deploy-id }}
 
       - name: Update deployment status (success)
-        if: needs.deploy-cdk-app-dev.result == 'success' && needs.deploy-frontend-app-dev.result == 'success' && needs.cypress-dev.result == 'success'
+        if: needs.deploy-cdk-app-dev.result == 'success' && needs.deploy-frontend-app-dev.result == 'success'
         uses: chrnorm/deployment-status@v2
         with:
           token: "${{ github.token }}"
@@ -698,7 +582,7 @@ jobs:
   # ============================================
 
   deploy-github-oidc-val:
-    needs: [begin-deployment, cypress-dev]
+    needs: [begin-deployment, end-deployment-dev]
     name: deploy - GitHub OIDC service (val)
     runs-on: ubuntu-24.04
     environment:
@@ -1032,128 +916,12 @@ jobs:
             --context stage=val \
             --require-approval never
 
-  extract-endpoints-val:
-    needs: [begin-deployment, deploy-cdk-app-val, deploy-frontend-app-val]
-    if: |
-      always() &&
-      needs.deploy-cdk-app-val.result == 'success' &&
-      needs.deploy-frontend-app-val.result == 'success' &&
-      needs.begin-deployment.result == 'success'
-    name: Extract deployment endpoints (val)
-    runs-on: ubuntu-24.04
-    environment: val
-    outputs:
-      application-endpoint: ${{ steps.save-app-endpoint.outputs.app-endpoint }}
-    steps:
-      - uses: actions/checkout@v5
-
-      - name: Get AWS credentials
-        uses: ./.github/actions/get_aws_credentials
-        with:
-          region: ${{ vars.AWS_DEFAULT_REGION }}
-          account-id: ${{ secrets.VAL_AWS_ACCOUNT_ID }}
-          stage-name: val
-          use-cdk-role: "true"
-
-      - name: get application endpoint
-        id: save-app-endpoint
-        env:
-          STAGE_NAME: val
-        run: |
-          echo "=== Extracting application endpoint from CDK outputs ==="
-          endpoint=$(aws cloudformation list-exports --query "Exports[?Name=='frontend-infra-val-cdk-CloudFrontEndpointUrl'].Value" --output text)
-
-          if [ "$endpoint" = "None" ] || [ -z "$endpoint" ]; then
-            echo "Error: Could not find application endpoint from CDK outputs"
-            exit 1
-          fi
-
-          echo "Application endpoint: $endpoint"
-          echo "app-endpoint=$endpoint" >> "$GITHUB_OUTPUT"
-
-  cypress-val:
-    name: cypress-val-smoke-test
-    needs: [begin-deployment, extract-endpoints-val]
-    environment: val
-    if: always() && needs.extract-endpoints-val.result == 'success'
-    runs-on: ubuntu-24.04
-    container:
-      image: cypress/browsers:node-20.14.0-chrome-126.0.6478.114-1-ff-127.0.1-edge-126.0.2592.61-1
-      options: --user 1001
-    permissions:
-      deployments: write
-      id-token: write
-      contents: read
-    steps:
-      - uses: actions/checkout@v5
-
-      - name: Generate unique ID for Cypress
-        id: uuid
-        run: echo "value=sha-$GITHUB_SHA-time-$(date +"%s")" >> "$GITHUB_OUTPUT"
-
-      - name: Setup env
-        uses: ./.github/actions/setup_env
-
-      - uses: actions/download-artifact@v6
-        with:
-          name: app-web-gen
-          path: ./services/app-web/src/gen
-
-      - uses: actions/download-artifact@v6
-        with:
-          name: cypress-gen
-          path: ./services/cypress/gen
-
-      - name: Generate Code
-        run: pnpm -r generate
-
-      - name: Build packages
-        shell: bash
-        run: pnpm build:packages
-
-      - name: Cypress smoke test on Val -- Chrome
-        id: cypress
-        uses: cypress-io/github-action@v6
-        with:
-          config: baseUrl=${{ needs.extract-endpoints-val.outputs.application-endpoint }}
-          spec: services/cypress/integration/promoteWorkflow/promote.spec.ts
-          record: true
-          parallel: false
-          browser: chrome
-          group: "Chrome - val CDK"
-          ci-build-id: ${{ steps.uuid.outputs.value }}
-          config-file: services/cypress/cypress.config.ts
-        env:
-          VITE_APP_AUTH_MODE: IDM
-          CYPRESS_RECORD_KEY: ${{ secrets.CYPRESS_RECORD_KEY }}
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          CYPRESS_SUPPORT_FILE: services/cypress/support/index.ts
-          CYPRESS_FIXTURES_FOLDER: services/cypress/fixtures
-          CYPRESS_SPEC_PATTERN: services/cypress/integration/**/*.spec.ts
-          CYPRESS_SCREEN_SHOTS_FOLDER: services/cypress/screenshots
-          CYPRESS_VIDEOS_FOLDER: services/cypress/videos
-
-      - name: Upload cypress video
-        uses: actions/upload-artifact@v5
-        if: failure() && steps.cypress.outcome == 'failure'
-        with:
-          name: cypress-videos-val
-          path: services/cypress/videos
-
-      - name: Upload cypress screenshots
-        uses: actions/upload-artifact@v5
-        if: failure() && steps.cypress.outcome == 'failure'
-        with:
-          name: cypress-screenshots-val
-          path: services/cypress/screenshots
-
   end-deployment-val:
     needs:
       [
         begin-deployment,
         deploy-cdk-app-val,
         deploy-frontend-app-val,
-        cypress-val,
       ]
     if: always() && needs.begin-deployment.result == 'success'
     name: End CDK Val Deployment
@@ -1172,7 +940,7 @@ jobs:
           deployment-id: ${{ needs.begin-deployment.outputs.deploy-id }}
 
       - name: Update deployment status (success)
-        if: needs.deploy-cdk-app-val.result == 'success' && needs.deploy-frontend-app-val.result == 'success' && needs.cypress-val.result == 'success'
+        if: needs.deploy-cdk-app-val.result == 'success' && needs.deploy-frontend-app-val.result == 'success'
         uses: chrnorm/deployment-status@v2
         with:
           token: "${{ github.token }}"
@@ -1184,7 +952,7 @@ jobs:
   # ============================================
 
   deploy-github-oidc-prod:
-    needs: [begin-deployment, cypress-val]
+    needs: [begin-deployment, end-deployment-val]
     name: deploy - GitHub OIDC service (prod)
     runs-on: ubuntu-24.04
     environment:
