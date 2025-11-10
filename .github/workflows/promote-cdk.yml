@@ -939,15 +939,6 @@ jobs:
             --context stage=val \
             --require-approval never
 
-      - name: Create Test Users
-        env:
-          STAGE_NAME: val
-          TEST_USERS_PASS: ${{ secrets.TEST_USERS_PASS }}
-        run: |
-          cd scripts
-          pnpm tsc
-          node ./add_cypress_test_users_cdk.js val $TEST_USERS_PASS
-
       - name: Run database migrations
         env:
           STAGE_NAME: val
@@ -1433,15 +1424,6 @@ jobs:
             --app 'pnpm tsx bin/app-api.ts' \
             --context stage=prod \
             --require-approval never
-
-      - name: Create Test Users
-        env:
-          STAGE_NAME: prod
-          TEST_USERS_PASS: ${{ secrets.TEST_USERS_PASS }}
-        run: |
-          cd scripts
-          pnpm tsc
-          node ./add_cypress_test_users_cdk.js prod $TEST_USERS_PASS
 
       - name: Run database migrations
         env:
