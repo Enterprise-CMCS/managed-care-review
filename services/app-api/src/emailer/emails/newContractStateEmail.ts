@@ -52,7 +52,7 @@ export const newContractStateEmail = async (
     const contractSubmissionType =
         contract.contractSubmissionType === 'HEALTH_PLAN'
             ? 'Health plan'
-            : 'EQRO'
+            : 'External Quality Review Organization (EQRO)'
     const data = {
         shouldIncludeRates: isContractAndRates,
         cmsReviewHelpEmailAddress: formatEmailAddresses(
