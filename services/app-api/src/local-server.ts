@@ -254,6 +254,9 @@ app.use((err: Error, req: Request, res: Response, next: NextFunction) => {
 
 // Start server
 const PORT = parseInt(process.env.PORT || '3030', 10)
+if (isNaN(PORT) || PORT < 1 || PORT > 65535) {
+    throw new Error(`Invalid PORT: ${PORT}. Must be an integer between 1 and 65535.`)
+}
 const HOST = process.env.HOST || '127.0.0.1'
 
 app.listen(PORT, HOST, () => {
