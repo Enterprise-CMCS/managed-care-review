@@ -205,7 +205,7 @@
             "code": "CO"
         },
         {
-            "name": "District of Columbia",
+            "name": "Washington, DC",
             "programs": [
                 {
                     "id": "63fb1834-fd23-4e74-80a9-888c7b614796",
@@ -1023,6 +1023,12 @@
         {
             "name": "Oklahoma",
             "programs": [
+                {
+                    "id": "6d1f77e3-1e97-4f57-9da0-e49358ab97e2",
+                    "fullName": "SoonerCare Choice",
+                    "name": "SoonerCare Choice",
+                    "isRateProgram": false
+                },
                 {
                     "id": "58b4e72f-219d-4648-84ae-deea4a703965",
                     "fullName": "SoonerSelect Dental",

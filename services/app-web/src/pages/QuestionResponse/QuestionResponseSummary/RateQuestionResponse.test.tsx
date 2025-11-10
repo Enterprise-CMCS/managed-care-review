@@ -96,7 +96,7 @@ describe('RateQuestionResponse', () => {
 
             expect(
                 screen.getByRole('heading', {
-                    name: `Rate Q&A - Managed Care Review`,
+                    name: `Rate Q&A`,
                 })
             ).toBeInTheDocument()
         })
