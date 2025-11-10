@@ -1,5 +1,4 @@
 // esbuild config for local development server
-const fs = require('fs');
 const fse = require('fs-extra');
 const {
     generateGraphQLString,
