@@ -438,8 +438,4 @@ const gqlHandler: Handler = async (event, context, completion) => {
     return response
 }
 
-// Export for both ESM and CommonJS compatibility
-export { gqlHandler }
-
-// Also export as default for CommonJS/Lambda compatibility
-exports.gqlHandler = gqlHandler
+module.exports = { gqlHandler }
