@@ -5,7 +5,6 @@ import {
     rateFormDataSchema,
     strippedRateFormDataSchema,
 } from './formDataTypes'
-import { contractSubmissionTypeSchema } from './baseContractRateTypes'
 
 const contractRevisionSchema = z.object({
     id: z.string().uuid(),
@@ -13,7 +12,7 @@ const contractRevisionSchema = z.object({
         id: z.string().uuid(),
         stateCode: z.string(),
         stateNumber: z.number().min(1),
-        contractSubmissionType: contractSubmissionTypeSchema,
+        contractSubmissionType: z.enum(['HEALTH_PLAN', 'EQRO']),
     }),
     submitInfo: updateInfoSchema.optional(),
     unlockInfo: updateInfoSchema.optional(),
