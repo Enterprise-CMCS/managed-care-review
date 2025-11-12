@@ -4,7 +4,7 @@ describe('State user can view submissions', () => {
         cy.interceptGraphQL()
     })
 
-    it('and view a specific summary page from the dashboard', () => {
+    it('and view a specific summary page from the dashboard', () => { //juan
         cy.logInAsStateUser()
 
         // add a draft contract only submission
@@ -49,7 +49,7 @@ describe('State user can view submissions', () => {
         cy.location().then((fullUrl) => {
             const { pathname } = fullUrl
             const pathnameArray = pathname.split('/')
-            submissionId = pathnameArray[2]
+            submissionId = pathnameArray[3]
         })
 
         cy.findByRole('heading', { level: 2, name: /Review and submit/ })
