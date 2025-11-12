@@ -156,35 +156,22 @@ export function createRateQuestionResponseResolver(
             })
         }
 
-        const contract = await store.findContractWithHistory(
-            rate.parentContractID
-        )
+        const contractSubmissionType = rate.packageSubmissions
+            .flatMap((pkg) => pkg.contractRevisions)
+            .find((cr) => cr.contract.id === rate.parentContractID)
+            ?.contract.contractSubmissionType
 
-        if (contract instanceof Error) {
-            if (contract instanceof NotFoundError) {
-                const errMessage = `Package with id ${rate.parentContractID} does not exist`
-                logError('createContractQuestionResponse', errMessage)
-                setErrorAttributesOnActiveSpan(errMessage, span)
-                throw new GraphQLError(errMessage, {
-                    extensions: { code: 'NOT_FOUND' },
-                })
-            }
-
-            const errMessage = `Issue finding a package. Message: ${contract.message}`
-            logError('createContractQuestionResponse', errMessage)
+        if (!contractSubmissionType) {
+            const errMessage = `Issue creating question for rate. Message: Parent contract missing contract type. Parent contract ID: ${rate.parentContractID}`
+            logError('createRateQuestion', errMessage)
             setErrorAttributesOnActiveSpan(errMessage, span)
-            throw new GraphQLError(errMessage, {
-                extensions: {
-                    code: 'INTERNAL_SERVER_ERROR',
-                    cause: 'DB_ERROR',
-                },
-            })
+            throw createUserInputError(errMessage)
         }
 
         const sendStateEmailResult =
             await emailer.sendRateQuestionResponseStateEmail(
                 rate,
-                contract.contractSubmissionType,
+                contractSubmissionType,
                 questions,
                 createResponseResult
             )
