@@ -89,7 +89,7 @@ export const ContractQuestionResponse = () => {
                     <StateQuestionResponseTable
                         indexQuestions={contract.questions}
                         contractStatus={contract.consolidatedStatus}
-                        header="Contract Q&A - Managed Care Review"
+                        header="Contract Q&A"
                     />
                 )}
             </GridContainer>

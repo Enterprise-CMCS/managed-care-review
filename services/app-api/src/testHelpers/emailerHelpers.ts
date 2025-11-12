@@ -391,6 +391,7 @@ const mockContract = (
         createdAt: new Date('01/01/2021'),
         updatedAt: new Date('02/01/2021'),
         status: 'SUBMITTED',
+        contractSubmissionType: 'HEALTH_PLAN',
         reviewStatus: 'UNDER_REVIEW',
         consolidatedStatus: 'SUBMITTED',
         stateCode: 'MN',
