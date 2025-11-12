@@ -212,6 +212,12 @@ test('includes expected data summary for a contract only submission', async () =
 
     expect(template).toEqual(
         expect.objectContaining({
+            bodyText: expect.stringContaining('Contract type: Health plan'),
+        })
+    )
+
+    expect(template).toEqual(
+        expect.objectContaining({
             bodyText: expect.stringContaining(
                 'Submission type: Contract action only'
             ),

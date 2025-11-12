@@ -44,6 +44,10 @@ export const newContractCMSEmail = async (
     )
 
     const packageURL = submissionSummaryURL(contract.id, config.baseUrl)
+    const contractSubmissionType =
+        contract.contractSubmissionType === 'HEALTH_PLAN'
+            ? 'Health plan'
+            : 'External Quality Review Organization (EQRO)'
 
     const isContractAndRates =
         contractRev.formData.submissionType === 'CONTRACT_AND_RATES' &&
@@ -64,6 +68,7 @@ export const newContractCMSEmail = async (
             contractRev.formData.contractDateStart,
             'UTC'
         ),
+        contractSubmissionType,
         contractDatesEnd: formatCalendarDate(
             contractRev.formData.contractDateEnd,
             'UTC'

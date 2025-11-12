@@ -3,6 +3,7 @@
 exports[`renders overall email for a new package with a rate amendment as expected 1`] = `
 "MCR-MN-0004-SNBC was successfully submitted.
 <br /><br />
+<b>Contract type</b>: Health plan<br />
 <b>Submission type</b>: Contract action and rate certification<br />
 <b>Contract amendment effective dates</b>: 01/01/2021 to 01/01/2025<br />
 <br />
