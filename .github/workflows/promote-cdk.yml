@@ -546,128 +546,12 @@ jobs:
           cd services/app-api
           ./scripts/invoke-migrate-lambda.sh app-api-dev-cdk-migrate
 
-  extract-endpoints-dev:
-    needs: [begin-deployment, deploy-cdk-app-dev, deploy-frontend-app-dev]
-    if: |
-      always() &&
-      needs.deploy-cdk-app-dev.result == 'success' &&
-      needs.deploy-frontend-app-dev.result == 'success' &&
-      needs.begin-deployment.result == 'success'
-    name: Extract deployment endpoints (dev)
-    runs-on: ubuntu-24.04
-    environment: dev
-    outputs:
-      application-endpoint: ${{ steps.save-app-endpoint.outputs.app-endpoint }}
-    steps:
-      - uses: actions/checkout@v5
-
-      - name: Get AWS credentials
-        uses: ./.github/actions/get_aws_credentials
-        with:
-          region: ${{ vars.AWS_DEFAULT_REGION }}
-          account-id: ${{ secrets.DEV_AWS_ACCOUNT_ID }}
-          stage-name: dev
-          use-cdk-role: "true"
-
-      - name: get application endpoint
-        id: save-app-endpoint
-        env:
-          STAGE_NAME: dev
-        run: |
-          echo "=== Extracting application endpoint from CDK outputs ==="
-          endpoint=$(aws cloudformation list-exports --query "Exports[?Name=='frontend-infra-dev-cdk-CloudFrontEndpointUrl'].Value" --output text)
-
-          if [ "$endpoint" = "None" ] || [ -z "$endpoint" ]; then
-            echo "Error: Could not find application endpoint from CDK outputs"
-            exit 1
-          fi
-
-          echo "Application endpoint: $endpoint"
-          echo "app-endpoint=$endpoint" >> "$GITHUB_OUTPUT"
-
-  cypress-dev:
-    name: cypress-dev-smoke-test
-    needs: [begin-deployment, extract-endpoints-dev]
-    environment: dev
-    if: always() && needs.extract-endpoints-dev.result == 'success'
-    runs-on: ubuntu-24.04
-    container:
-      image: cypress/browsers:node-20.14.0-chrome-126.0.6478.114-1-ff-127.0.1-edge-126.0.2592.61-1
-      options: --user 1001
-    permissions:
-      deployments: write
-      id-token: write
-      contents: read
-    steps:
-      - uses: actions/checkout@v5
-
-      - name: Generate unique ID for Cypress
-        id: uuid
-        run: echo "value=sha-$GITHUB_SHA-time-$(date +"%s")" >> "$GITHUB_OUTPUT"
-
-      - name: Setup env
-        uses: ./.github/actions/setup_env
-
-      - uses: actions/download-artifact@v6
-        with:
-          name: app-web-gen
-          path: ./services/app-web/src/gen
-
-      - uses: actions/download-artifact@v6
-        with:
-          name: cypress-gen
-          path: ./services/cypress/gen
-
-      - name: Generate Code
-        run: pnpm -r generate
-
-      - name: Build packages
-        shell: bash
-        run: pnpm build:packages
-
-      - name: Cypress smoke test on Dev -- Chrome
-        id: cypress
-        uses: cypress-io/github-action@v6
-        with:
-          config: baseUrl=${{ needs.extract-endpoints-dev.outputs.application-endpoint }}
-          spec: services/cypress/integration/promoteWorkflow/promote.spec.ts
-          record: true
-          parallel: false
-          browser: chrome
-          group: "Chrome - dev CDK"
-          ci-build-id: ${{ steps.uuid.outputs.value }}
-          config-file: services/cypress/cypress.config.ts
-        env:
-          VITE_APP_AUTH_MODE: IDM
-          CYPRESS_RECORD_KEY: ${{ secrets.CYPRESS_RECORD_KEY }}
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          CYPRESS_SUPPORT_FILE: services/cypress/support/index.ts
-          CYPRESS_FIXTURES_FOLDER: services/cypress/fixtures
-          CYPRESS_SPEC_PATTERN: services/cypress/integration/**/*.spec.ts
-          CYPRESS_SCREEN_SHOTS_FOLDER: services/cypress/screenshots
-          CYPRESS_VIDEOS_FOLDER: services/cypress/videos
-
-      - name: Upload cypress video
-        uses: actions/upload-artifact@v5
-        if: failure() && steps.cypress.outcome == 'failure'
-        with:
-          name: cypress-videos-dev
-          path: services/cypress/videos
-
-      - name: Upload cypress screenshots
-        uses: actions/upload-artifact@v5
-        if: failure() && steps.cypress.outcome == 'failure'
-        with:
-          name: cypress-screenshots-dev
-          path: services/cypress/screenshots
-
   end-deployment-dev:
     needs:
       [
         begin-deployment,
         deploy-cdk-app-dev,
         deploy-frontend-app-dev,
-        cypress-dev,
       ]
     if: always() && needs.begin-deployment.result == 'success'
     name: End CDK Dev Deployment
@@ -686,7 +570,7 @@ jobs:
           deployment-id: ${{ needs.begin-deployment.outputs.deploy-id }}
 
       - name: Update deployment status (success)
-        if: needs.deploy-cdk-app-dev.result == 'success' && needs.deploy-frontend-app-dev.result == 'success' && needs.cypress-dev.result == 'success'
+        if: needs.deploy-cdk-app-dev.result == 'success' && needs.deploy-frontend-app-dev.result == 'success'
         uses: chrnorm/deployment-status@v2
         with:
           token: "${{ github.token }}"
@@ -698,7 +582,7 @@ jobs:
   # ============================================
 
   deploy-github-oidc-val:
-    needs: [begin-deployment, cypress-dev]
+    needs: [begin-deployment, end-deployment-dev]
     name: deploy - GitHub OIDC service (val)
     runs-on: ubuntu-24.04
     environment:
@@ -1032,16 +916,386 @@ jobs:
             --context stage=val \
             --require-approval never
 
-  extract-endpoints-val:
-    needs: [begin-deployment, deploy-cdk-app-val, deploy-frontend-app-val]
+  end-deployment-val:
+    needs:
+      [
+        begin-deployment,
+        deploy-cdk-app-val,
+        deploy-frontend-app-val,
+      ]
+    if: always() && needs.begin-deployment.result == 'success'
+    name: End CDK Val Deployment
+    runs-on: ubuntu-24.04
+    permissions:
+      deployments: write
+    steps:
+      - uses: actions/checkout@v5
+
+      - name: Update deployment status (failure)
+        if: failure() && needs.begin-deployment.result == 'success'
+        uses: chrnorm/deployment-status@v2
+        with:
+          token: "${{ github.token }}"
+          state: "failure"
+          deployment-id: ${{ needs.begin-deployment.outputs.deploy-id }}
+
+      - name: Update deployment status (success)
+        if: needs.deploy-cdk-app-val.result == 'success' && needs.deploy-frontend-app-val.result == 'success'
+        uses: chrnorm/deployment-status@v2
+        with:
+          token: "${{ github.token }}"
+          state: "success"
+          deployment-id: ${{ needs.begin-deployment.outputs.deploy-id }}
+
+  # ============================================
+  # Prod Environment Deployment
+  # ============================================
+
+  deploy-github-oidc-prod:
+    needs: [begin-deployment, end-deployment-val]
+    name: deploy - GitHub OIDC service (prod)
+    runs-on: ubuntu-24.04
+    environment:
+      name: prod
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v5
+
+      - name: Setup env
+        uses: ./.github/actions/setup_env
+
+      - name: Generate Code
+        run: pnpm -r generate
+
+      - name: Build packages
+        shell: bash
+        run: pnpm build:packages
+
+      - name: Get AWS credentials (prod)
+        uses: ./.github/actions/get_aws_credentials
+        with:
+          region: ${{ vars.AWS_DEFAULT_REGION }}
+          account-id: ${{ secrets.PROD_AWS_ACCOUNT_ID }}
+          stage-name: prod
+          changed-services: "github-oidc"
+
+      - name: deploy github-oidc with CDK
+        id: deploy-github-oidc-cdk
+        working-directory: services/infra-cdk
+        env:
+          STAGE_NAME: prod
+        run: |
+          echo "Starting CDK OIDC deployment for stage: prod"
+          echo "Stack name will be: github-oidc-prod-cdk"
+
+          # Deploy using OIDC-only app (no layer dependencies)
+          echo "=== Deploying OIDC stack ==="
+          pnpm cdk deploy github-oidc-prod-cdk \
+            --app 'pnpm tsx bin/oidc.ts' \
+            --context stage=prod \
+            --require-approval never
+
+          echo "=== CDK OIDC deployment completed ==="
+
+  deploy-cdk-infrastructure-prod:
+    needs: [begin-deployment, deploy-github-oidc-prod]
+    name: deploy - CDK infrastructure stacks (prod)
+    runs-on: ubuntu-24.04
+    environment: prod
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v5
+
+      - name: Setup env
+        uses: ./.github/actions/setup_env
+
+      - name: Generate Code
+        run: pnpm -r generate
+
+      - name: Build packages
+        shell: bash
+        run: pnpm build:packages
+
+      - name: Get AWS credentials
+        uses: ./.github/actions/get_aws_credentials
+        with:
+          region: ${{ vars.AWS_DEFAULT_REGION }}
+          account-id: ${{ secrets.PROD_AWS_ACCOUNT_ID }}
+          stage-name: prod
+          use-cdk-role: "true"
+
+      - name: Deploy Network stack
+        working-directory: services/infra-cdk
+        env:
+          STAGE_NAME: prod
+          VPC_ID: ${{ secrets.PROD_VPC_ID }}
+          SG_ID: ${{ secrets.PROD_SG_ID }}
+          SUBNET_PRIVATE_A_ID: ${{ secrets.PROD_SUBNET_PRIVATE_A_ID }}
+          SUBNET_PRIVATE_B_ID: ${{ secrets.PROD_SUBNET_PRIVATE_B_ID }}
+          SUBNET_PRIVATE_C_ID: ${{ secrets.PROD_SUBNET_PRIVATE_C_ID }}
+        run: |
+          echo "=== Deploying Network stack ==="
+          pnpm cdk deploy network-prod-cdk \
+            --app 'pnpm tsx bin/network.ts' \
+            --context stage=prod \
+            --require-approval never
+
+      - name: Deploy Uploads stack
+        working-directory: services/infra-cdk
+        env:
+          STAGE_NAME: prod
+        run: |
+          echo "=== Deploying Uploads stack ==="
+          pnpm cdk deploy uploads-prod-cdk \
+            --app 'pnpm tsx bin/uploads.ts' \
+            --context stage=prod \
+            --require-approval never
+
+      - name: Deploy Virus Scanning stack
+        working-directory: services/infra-cdk
+        env:
+          STAGE_NAME: prod
+          VPC_ID: ${{ secrets.PROD_VPC_ID }}
+          SG_ID: ${{ secrets.PROD_SG_ID }}
+          SUBNET_PRIVATE_A_ID: ${{ secrets.PROD_SUBNET_PRIVATE_A_ID }}
+          SUBNET_PRIVATE_B_ID: ${{ secrets.PROD_SUBNET_PRIVATE_B_ID }}
+          SUBNET_PRIVATE_C_ID: ${{ secrets.PROD_SUBNET_PRIVATE_C_ID }}
+          SUBNET_PUBLIC_A_ID: ${{ secrets.PROD_SUBNET_PUBLIC_A_ID }}
+          NR_LICENSE_KEY: ${{ secrets.NR_LICENSE_KEY }}
+          VITE_APP_OTEL_COLLECTOR_URL: ${{vars.VITE_APP_OTEL_COLLECTOR_URL}}
+          GUARDDUTY_DETECTOR_ID: ${{ secrets.PROD_GUARDDUTY_DETECTOR_ID }}
+        run: |
+          echo "=== Deploying Virus Scanning stack ==="
+          pnpm cdk deploy virus-scanning-prod-cdk \
+            --app 'pnpm tsx bin/virus-scanning.ts' \
+            --context stage=prod \
+            --require-approval never
+
+      - name: Deploy Postgres stack
+        working-directory: services/infra-cdk
+        env:
+          STAGE_NAME: prod
+          VPC_ID: ${{ secrets.PROD_VPC_ID }}
+          SG_ID: ${{ secrets.PROD_SG_ID }}
+          SUBNET_PRIVATE_A_ID: ${{ secrets.PROD_SUBNET_PRIVATE_A_ID }}
+          SUBNET_PRIVATE_B_ID: ${{ secrets.PROD_SUBNET_PRIVATE_B_ID }}
+          SUBNET_PRIVATE_C_ID: ${{ secrets.PROD_SUBNET_PRIVATE_C_ID }}
+        run: |
+          echo "=== Deploying Postgres stack ==="
+          pnpm cdk deploy postgres-prod-cdk \
+            --app 'pnpm tsx bin/postgres.ts' \
+            --context stage=prod \
+            --require-approval never
+
+      - name: Deploy Frontend Infrastructure stack
+        working-directory: services/infra-cdk
+        env:
+          STAGE_NAME: prod
+        run: |
+          echo "=== Deploying Frontend Infrastructure stack ==="
+          pnpm cdk deploy frontend-infra-prod-cdk \
+            --app 'pnpm tsx bin/frontend-infra.ts' \
+            --context stage=prod \
+            --require-approval never
+
+      - name: Deploy Cognito stack
+        working-directory: services/infra-cdk
+        env:
+          STAGE_NAME: prod
+        run: |
+          echo "=== Deploying Cognito stack ==="
+          pnpm cdk deploy cognito-prod-cdk \
+            --app 'pnpm tsx bin/cognito.ts' \
+            --context stage=prod \
+            --require-approval never
+
+  deploy-cdk-app-prod:
+    needs:
+      [
+        begin-deployment,
+        deploy-cdk-infrastructure-prod,
+        build-lambda-layers,
+        web-unit-tests,
+        api-unit-tests,
+      ]
     if: |
       always() &&
-      needs.deploy-cdk-app-val.result == 'success' &&
-      needs.deploy-frontend-app-val.result == 'success' &&
+      needs.deploy-cdk-infrastructure-prod.result == 'success' &&
+      needs.build-lambda-layers.result == 'success' &&
+      needs.web-unit-tests.result == 'success' &&
+      needs.api-unit-tests.result == 'success' &&
       needs.begin-deployment.result == 'success'
-    name: Extract deployment endpoints (val)
+    name: deploy - CDK application stacks (prod)
     runs-on: ubuntu-24.04
-    environment: val
+    environment: prod
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v5
+
+      - name: Setup env
+        uses: ./.github/actions/setup_env
+
+      - name: Generate Code
+        run: pnpm -r generate
+
+      - name: Build packages
+        shell: bash
+        run: pnpm build:packages
+
+      - name: Get AWS credentials
+        uses: ./.github/actions/get_aws_credentials
+        with:
+          region: ${{ vars.AWS_DEFAULT_REGION }}
+          account-id: ${{ secrets.PROD_AWS_ACCOUNT_ID }}
+          stage-name: prod
+          use-cdk-role: "true"
+
+      - name: Download Prisma layers
+        uses: actions/download-artifact@v6
+        with:
+          name: lambda-layers-prisma-client-migration
+          path: ./services/infra-cdk/lambda-layers-prisma-client-migration
+
+      - name: Extract Prisma migration layer
+        working-directory: ./services/infra-cdk/lambda-layers-prisma-client-migration
+        run: |
+          echo "=== Extracting Prisma migration layer ==="
+          tar -xzf nodejs.tar.gz
+          rm nodejs.tar.gz
+          ls -la
+
+      - name: Download Prisma engine layers
+        uses: actions/download-artifact@v6
+        with:
+          name: lambda-layers-prisma-client-engine
+          path: ./services/infra-cdk/lambda-layers-prisma-client-engine
+
+      - name: Extract Prisma engine layer
+        working-directory: ./services/infra-cdk/lambda-layers-prisma-client-engine
+        run: |
+          echo "=== Extracting Prisma engine layer ==="
+          tar -xzf nodejs.tar.gz
+          rm nodejs.tar.gz
+          ls -la
+
+      - name: Deploy AppApi stack
+        working-directory: services/infra-cdk
+        env:
+          STAGE_NAME: prod
+          VPC_ID: ${{ secrets.PROD_VPC_ID }}
+          SG_ID: ${{ secrets.PROD_SG_ID }}
+          INTERNAL_ALLOWED_ORIGINS: ${{ secrets.PROD_INTERNAL_ALLOWED_ORIGINS }}
+          NR_LICENSE_KEY: ${{ secrets.NR_LICENSE_KEY }}
+        run: |
+          echo "=== Deploying AppApi stack ==="
+          pnpm cdk deploy app-api-prod-cdk \
+            --app 'pnpm tsx bin/app-api.ts' \
+            --context stage=prod \
+            --require-approval never
+
+      - name: Run database migrations
+        env:
+          STAGE_NAME: prod
+        run: |
+          echo "=== Running database migrations ==="
+          cd services/app-api
+          ./scripts/invoke-migrate-lambda.sh app-api-prod-cdk-migrate
+
+  deploy-frontend-app-prod:
+    needs:
+      [
+        begin-deployment,
+        deploy-cdk-infrastructure-prod,
+        deploy-cdk-app-prod,
+        web-unit-tests,
+        api-unit-tests,
+      ]
+    if: |
+      always() &&
+      needs.deploy-cdk-infrastructure-prod.result == 'success' &&
+      needs.deploy-cdk-app-prod.result == 'success' &&
+      needs.web-unit-tests.result == 'success' &&
+      needs.api-unit-tests.result == 'success' &&
+      needs.begin-deployment.result == 'success'
+    name: deploy - Frontend app with built assets (prod)
+    runs-on: ubuntu-24.04
+    environment: prod
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v5
+
+      - name: Setup env
+        uses: ./.github/actions/setup_env
+
+      - name: Generate Code
+        run: pnpm -r generate
+
+      - name: Build packages
+        shell: bash
+        run: pnpm build:packages
+
+      - name: Get AWS credentials
+        uses: ./.github/actions/get_aws_credentials
+        with:
+          region: ${{ vars.AWS_DEFAULT_REGION }}
+          account-id: ${{ secrets.PROD_AWS_ACCOUNT_ID }}
+          stage-name: prod
+          use-cdk-role: "true"
+
+      - name: Get CDK configuration for app-web build
+        env:
+          STAGE_NAME: prod
+          VITE_APP_AUTH_MODE: IDM
+        run: |
+          echo "=== Fetching CDK stack outputs for app-web build ==="
+          ./scripts/get-cdk-config.sh prod
+
+          # Source the config to make variables available for the build step
+          echo "Sourcing configuration for build..."
+          source "/tmp/cdk-config-prod.env"
+
+          # Export to GitHub environment for subsequent steps
+          cat "/tmp/cdk-config-prod.env" >> $GITHUB_ENV
+
+      - name: Build app-web with CDK configuration
+        working-directory: services/app-web
+        run: |
+          echo "=== Building React app and Storybook with CDK configuration ==="
+
+          # Source the config file to get all environment variables
+          source "/tmp/cdk-config-prod.env"
+
+          # Verify critical variables are set
+          echo "Using VITE_APP_API_URL: $VITE_APP_API_URL"
+          echo "Using VITE_APP_COGNITO_USER_POOL_ID: $VITE_APP_COGNITO_USER_POOL_ID"
+          echo "Using VITE_APP_S3_DOCUMENTS_BUCKET: $VITE_APP_S3_DOCUMENTS_BUCKET"
+          echo "Using VITE_APP_AUTH_MODE: $VITE_APP_AUTH_MODE"
+
+          # Build with all environment variables available
+          pnpm build
+          pnpm storybook:build
+
+      - name: Deploy Frontend App stack
+        working-directory: services/infra-cdk
+        env:
+          STAGE_NAME: prod
+        run: |
+          echo "=== Deploying Frontend App stack with built assets ==="
+          pnpm cdk deploy frontend-app-prod-cdk \
+            --app 'pnpm tsx bin/frontend-app.ts' \
+            --context stage=prod \
+            --require-approval never
+
+  extract-endpoints-prod:
+    needs: [begin-deployment, deploy-cdk-app-prod, deploy-frontend-app-prod]
+    if: |
+      always() &&
+      needs.deploy-cdk-app-prod.result == 'success' &&
+      needs.deploy-frontend-app-prod.result == 'success' &&
+      needs.begin-deployment.result == 'success'
+    name: Extract deployment endpoints (prod)
+    runs-on: ubuntu-24.04
+    environment: prod
     outputs:
       application-endpoint: ${{ steps.save-app-endpoint.outputs.app-endpoint }}
     steps:
@@ -1051,17 +1305,17 @@ jobs:
         uses: ./.github/actions/get_aws_credentials
         with:
           region: ${{ vars.AWS_DEFAULT_REGION }}
-          account-id: ${{ secrets.VAL_AWS_ACCOUNT_ID }}
-          stage-name: val
+          account-id: ${{ secrets.PROD_AWS_ACCOUNT_ID }}
+          stage-name: prod
           use-cdk-role: "true"
 
       - name: get application endpoint
         id: save-app-endpoint
         env:
-          STAGE_NAME: val
+          STAGE_NAME: prod
         run: |
           echo "=== Extracting application endpoint from CDK outputs ==="
-          endpoint=$(aws cloudformation list-exports --query "Exports[?Name=='frontend-infra-val-cdk-CloudFrontEndpointUrl'].Value" --output text)
+          endpoint=$(aws cloudformation list-exports --query "Exports[?Name=='frontend-infra-prod-cdk-CloudFrontEndpointUrl'].Value" --output text)
 
           if [ "$endpoint" = "None" ] || [ -z "$endpoint" ]; then
             echo "Error: Could not find application endpoint from CDK outputs"
@@ -1071,11 +1325,11 @@ jobs:
           echo "Application endpoint: $endpoint"
           echo "app-endpoint=$endpoint" >> "$GITHUB_OUTPUT"
 
-  cypress-val:
-    name: cypress-val-smoke-test
-    needs: [begin-deployment, extract-endpoints-val]
-    environment: val
-    if: always() && needs.extract-endpoints-val.result == 'success'
+  cypress-prod:
+    name: cypress-prod-smoke-test
+    needs: [begin-deployment, extract-endpoints-prod]
+    environment: prod
+    if: always() && needs.extract-endpoints-prod.result == 'success'
     runs-on: ubuntu-24.04
     container:
       image: cypress/browsers:node-20.14.0-chrome-126.0.6478.114-1-ff-127.0.1-edge-126.0.2592.61-1
@@ -1111,16 +1365,16 @@ jobs:
         shell: bash
         run: pnpm build:packages
 
-      - name: Cypress smoke test on Val -- Chrome
+      - name: Cypress smoke test on Prod -- Chrome
         id: cypress
         uses: cypress-io/github-action@v6
         with:
-          config: baseUrl=${{ needs.extract-endpoints-val.outputs.application-endpoint }}
+          config: baseUrl=${{ needs.extract-endpoints-prod.outputs.application-endpoint }}
           spec: services/cypress/integration/promoteWorkflow/promote.spec.ts
           record: true
           parallel: false
           browser: chrome
-          group: "Chrome - val CDK"
+          group: "Chrome - prod CDK"
           ci-build-id: ${{ steps.uuid.outputs.value }}
           config-file: services/cypress/cypress.config.ts
         env:
@@ -1137,26 +1391,26 @@ jobs:
         uses: actions/upload-artifact@v5
         if: failure() && steps.cypress.outcome == 'failure'
         with:
-          name: cypress-videos-val
+          name: cypress-videos-prod
           path: services/cypress/videos
 
       - name: Upload cypress screenshots
         uses: actions/upload-artifact@v5
         if: failure() && steps.cypress.outcome == 'failure'
         with:
-          name: cypress-screenshots-val
+          name: cypress-screenshots-prod
           path: services/cypress/screenshots
 
-  end-deployment-val:
+  end-deployment-prod:
     needs:
       [
         begin-deployment,
-        deploy-cdk-app-val,
-        deploy-frontend-app-val,
-        cypress-val,
+        deploy-cdk-app-prod,
+        deploy-frontend-app-prod,
+        cypress-prod,
       ]
     if: always() && needs.begin-deployment.result == 'success'
-    name: End CDK Val Deployment
+    name: End CDK Prod Deployment
     runs-on: ubuntu-24.04
     permissions:
       deployments: write
@@ -1172,7 +1426,7 @@ jobs:
           deployment-id: ${{ needs.begin-deployment.outputs.deploy-id }}
 
       - name: Update deployment status (success)
-        if: needs.deploy-cdk-app-val.result == 'success' && needs.deploy-frontend-app-val.result == 'success' && needs.cypress-val.result == 'success'
+        if: needs.deploy-cdk-app-prod.result == 'success' && needs.deploy-frontend-app-prod.result == 'success' && needs.cypress-prod.result == 'success'
         uses: chrnorm/deployment-status@v2
         with:
           token: "${{ github.token }}"
@@ -1182,7 +1436,7 @@ jobs:
   slack:
     name: Slack notification on failure
     runs-on: ubuntu-24.04
-    needs: [end-deployment-dev, end-deployment-val]
+    needs: [end-deployment-dev, end-deployment-val, end-deployment-prod]
     if: always()
     steps:
       # This action sets env.WORKFLOW_CONCLUSION so we can call a
