@@ -71,7 +71,7 @@ import {
 } from '../../../../components/Form/FieldYesNo'
 import { useCurrentRoute, useRouteParams } from '../../../../hooks'
 import { useAuth } from '../../../../contexts/AuthContext'
-import { ErrorOrLoadingPage } from '../ErrorOrLoadingPage'
+import { ErrorOrLoadingPage } from '../../ErrorOrLoadingPage'
 import { PageBannerAlerts } from '../../PageBannerAlerts'
 import { useErrorSummary } from '../../../../hooks/useErrorSummary'
 import { useContractForm } from '../../../../hooks/useContractForm'

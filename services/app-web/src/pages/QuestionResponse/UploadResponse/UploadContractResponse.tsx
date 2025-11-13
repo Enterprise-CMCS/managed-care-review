@@ -20,7 +20,7 @@ import {
     isValidCmsDivison,
 } from '../QuestionResponseHelpers/questionResponseHelpers'
 import { ErrorOrLoadingPage } from '../../StateSubmission'
-import { handleAndReturnErrorState } from '../../StateSubmission/HealthPlanSubmission/ErrorOrLoadingPage'
+import { handleAndReturnErrorState } from '../../StateSubmission/ErrorOrLoadingPage'
 import { QuestionDisplayTable } from '../QATable/QuestionDisplayTable'
 import { useAuth } from '../../../contexts/AuthContext'
 import { Error404 } from '../../Errors/Error404Page'

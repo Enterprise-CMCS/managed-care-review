@@ -13,7 +13,7 @@ import {
     useFetchContractQuery,
 } from '../../gen/gqlClient'
 import { ErrorOrLoadingPage } from '../StateSubmission'
-import { handleAndReturnErrorState } from '../StateSubmission/HealthPlanSubmission/ErrorOrLoadingPage'
+import { handleAndReturnErrorState } from '../StateSubmission/ErrorOrLoadingPage'
 import { GenericErrorPage } from '../Errors/GenericErrorPage'
 import {
     ButtonGroup,

@@ -11,7 +11,7 @@ import {
     useUndoWithdrawnRateMutation,
 } from '../../gen/gqlClient'
 import { ErrorOrLoadingPage } from '../StateSubmission'
-import { handleAndReturnErrorState } from '../StateSubmission/HealthPlanSubmission/ErrorOrLoadingPage'
+import { handleAndReturnErrorState } from '../StateSubmission/ErrorOrLoadingPage'
 import { RoutesRecord } from '@mc-review/constants'
 import { generatePath, useNavigate, useParams } from 'react-router-dom'
 import { ButtonGroup, Form } from '@trussworks/react-uswds'

@@ -1,11 +1,11 @@
 import React from 'react'
-import { GenericErrorPage } from '../../Errors/GenericErrorPage'
+import { GenericErrorPage } from '../Errors/GenericErrorPage'
 import { GridContainer } from '@trussworks/react-uswds'
-import { Loading } from '../../../components'
-import { ErrorInvalidSubmissionStatus } from '../../Errors/ErrorInvalidSubmissionStatusPage'
-import { Error404 } from '../../Errors/Error404Page'
+import { Loading } from '../../components'
+import { ErrorInvalidSubmissionStatus } from '../Errors/ErrorInvalidSubmissionStatusPage'
+import { Error404 } from '../Errors/Error404Page'
 import { handleApolloError } from '@mc-review/helpers'
-import { ErrorForbiddenPage } from '../../Errors/ErrorForbiddenPage'
+import { ErrorForbiddenPage } from '../Errors/ErrorForbiddenPage'
 import { ApolloError } from '@apollo/client'
 
 type InterimState =

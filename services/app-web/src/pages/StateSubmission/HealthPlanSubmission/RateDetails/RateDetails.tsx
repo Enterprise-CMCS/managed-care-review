@@ -42,7 +42,7 @@ import { useAuth } from '../../../../contexts/AuthContext'
 import {
     ErrorOrLoadingPage,
     handleAndReturnErrorState,
-} from '../ErrorOrLoadingPage'
+} from '../../ErrorOrLoadingPage'
 import { featureFlags } from '@mc-review/common-code'
 import { useLDClient } from 'launchdarkly-react-client-sdk'
 import { recordJSException } from '@mc-review/otel'

@@ -16,7 +16,7 @@ import { useFetchContractQuery } from '../../gen/gqlClient'
 import {
     ErrorOrLoadingPage,
     handleAndReturnErrorState,
-} from '../StateSubmission/HealthPlanSubmission/ErrorOrLoadingPage'
+} from '../StateSubmission/ErrorOrLoadingPage'
 import { Error404 } from '../Errors/Error404Page'
 import { hasCMSUserPermissions } from '@mc-review/helpers'
 

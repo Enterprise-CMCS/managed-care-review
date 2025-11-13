@@ -52,7 +52,7 @@ import {
 } from '@mc-review/constants'
 import { FormContainer } from '../../../../components'
 import { useCurrentRoute } from '../../../../hooks'
-import { ErrorOrLoadingPage } from '../ErrorOrLoadingPage'
+import { ErrorOrLoadingPage } from '../../ErrorOrLoadingPage'
 import { useAuth } from '../../../../contexts/AuthContext'
 import { useRouteParams } from '../../../../hooks'
 import { PageBannerAlerts } from '../../PageBannerAlerts'

@@ -36,7 +36,7 @@ import {
 import { useCurrentRoute, useRouteParams, useTealium } from '../../../../hooks'
 import { useContractForm } from '../../../../hooks/useContractForm'
 import { useAuth } from '../../../../contexts/AuthContext'
-import { ErrorOrLoadingPage } from '../ErrorOrLoadingPage'
+import { ErrorOrLoadingPage } from '../../ErrorOrLoadingPage'
 import { PageBannerAlerts } from '../../PageBannerAlerts'
 import { useErrorSummary } from '../../../../hooks/useErrorSummary'
 import { featureFlags } from '@mc-review/common-code'

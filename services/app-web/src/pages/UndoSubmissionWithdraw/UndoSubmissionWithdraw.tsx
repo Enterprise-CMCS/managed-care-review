@@ -18,7 +18,7 @@ import {
 } from '../../components'
 import { RoutesRecord } from '@mc-review/constants'
 import { ErrorOrLoadingPage } from '../StateSubmission'
-import { handleAndReturnErrorState } from '../StateSubmission/HealthPlanSubmission/ErrorOrLoadingPage'
+import { handleAndReturnErrorState } from '../StateSubmission/ErrorOrLoadingPage'
 import { GenericErrorPage } from '../Errors/GenericErrorPage'
 import { ButtonGroup, Form } from '@trussworks/react-uswds'
 import { PageActionsContainer } from '../StateSubmission/HealthPlanSubmission/PageActions'
