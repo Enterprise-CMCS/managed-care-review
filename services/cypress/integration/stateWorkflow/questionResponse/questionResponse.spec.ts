@@ -1,5 +1,5 @@
 import { stateUser, cmsUser } from '../../../utils/apollo-test-utils'
-import { ContractSubmissionTypeRecord } from '../../../utils/general-test-utils'
+import { ContractSubmissionTypeRecord } from "@mc-review/constants"
 
 describe('Q&A', () => {
     beforeEach(() => {
