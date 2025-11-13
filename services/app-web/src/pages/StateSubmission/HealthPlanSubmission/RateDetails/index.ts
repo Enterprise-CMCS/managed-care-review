@@ -2,5 +2,5 @@ export {
     RateDetails,
     type RateDetailFormConfig,
     type FormikRateForm,
-} from './RateDetailsV2'
+} from './RateDetails'
 export { convertGQLRateToRateForm } from './rateDetailsHelpers'

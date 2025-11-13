@@ -1,5 +1,5 @@
 import { fireEvent, screen, waitFor, within } from '@testing-library/react'
-import { RateDetails } from './RateDetailsV2'
+import { RateDetails } from './RateDetails'
 
 import {
     TEST_DOC_FILE,
