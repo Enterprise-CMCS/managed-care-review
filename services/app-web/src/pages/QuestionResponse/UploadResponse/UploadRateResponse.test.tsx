@@ -53,7 +53,7 @@ describe('UploadRateResponse', () => {
                 ],
             },
             routerProvider: {
-                route: `/submissions/25/rates/15/question-and-answers/${division}/${questionID}/upload-response`,
+                route: `/submissions/health-plan/25/rates/15/question-and-answers/${division}/${questionID}/upload-response`,
             },
         })
 
@@ -87,7 +87,7 @@ describe('UploadRateResponse', () => {
                 ],
             },
             routerProvider: {
-                route: `/submissions/25/rates/15/question-and-answers/dmco/${questionID}/upload-response`,
+                route: `/submissions/health-plan/25/rates/15/question-and-answers/dmco/${questionID}/upload-response`,
             },
         })
 
@@ -129,7 +129,7 @@ describe('UploadRateResponse', () => {
                 ],
             },
             routerProvider: {
-                route: `/submissions/25/rates/15/question-and-answers/dmco/${questionID}/upload-response`,
+                route: `/submissions/health-plan/25/rates/15/question-and-answers/dmco/${questionID}/upload-response`,
             },
         })
 
@@ -170,7 +170,7 @@ describe('UploadRateResponse', () => {
                 ],
             },
             routerProvider: {
-                route: `/submissions/25/rates/15/question-and-answers/dmco/${questionID}/upload-response`,
+                route: `/submissions/health-plan/25/rates/15/question-and-answers/dmco/${questionID}/upload-response`,
             },
         })
         await screen.findByRole('heading', {
@@ -215,7 +215,7 @@ describe('UploadRateResponse', () => {
                 ],
             },
             routerProvider: {
-                route: `/submissions/25/rates/15/question-and-answers/dmco/${questionID}/upload-response`,
+                route: `/submissions/health-plan/25/rates/15/question-and-answers/dmco/${questionID}/upload-response`,
             },
         })
         await screen.findByRole('heading', {
@@ -275,7 +275,7 @@ describe('UploadRateResponse', () => {
                 ],
             },
             routerProvider: {
-                route: `/submissions/25/rates/15/question-and-answers/dmco/${questionID}/upload-response`,
+                route: `/submissions/health-plan/25/rates/15/question-and-answers/dmco/${questionID}/upload-response`,
             },
         })
         await screen.findByRole('heading', {
@@ -329,7 +329,7 @@ describe('UploadRateResponse', () => {
                         ],
                     },
                     routerProvider: {
-                        route: `/submissions/25/rates/15/question-and-answers/${division}/${questionID}/upload-response`,
+                        route: `/submissions/health-plan/25/rates/15/question-and-answers/${division}/${questionID}/upload-response`,
                     },
                 }
             )

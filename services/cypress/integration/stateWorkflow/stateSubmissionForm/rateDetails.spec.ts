@@ -1,3 +1,5 @@
+import { ContractSubmissionTypeRecord } from '../../../utils/general-test-utils'
+
 describe('rate details', () => {
     beforeEach(() => {
         cy.stubFeatureFlags()
@@ -11,9 +13,10 @@ describe('rate details', () => {
         cy.location().then((fullUrl) => {
             const { pathname } = fullUrl
             const pathnameArray = pathname.split('/')
-            const draftSubmissionId = pathnameArray[2]
+            const draftSubmissionId = pathnameArray[3]
+            const draftContractSubType = pathname.split('/')[2]
             cy.navigateFormByDirectLink(
-                `/submissions/${draftSubmissionId}/edit/rate-details`
+                `/submissions/${ContractSubmissionTypeRecord[draftContractSubType]}/${draftSubmissionId}/edit/rate-details`
             )
 
             // Navigate to contract details page by clicking back
@@ -22,7 +25,7 @@ describe('rate details', () => {
 
             // Navigate to rate details page
             cy.navigateFormByDirectLink(
-                `/submissions/${draftSubmissionId}/edit/rate-details`
+                `/submissions/${ContractSubmissionTypeRecord[draftContractSubType]}/${draftSubmissionId}/edit/rate-details`
             )
             cy.navigateContractRatesForm('SAVE_DRAFT')
             cy.get('[data-testid="saveAsDraftSuccessBanner"]').should('exist')

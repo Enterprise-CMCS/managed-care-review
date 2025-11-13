@@ -48,6 +48,7 @@ import {
     RouteT,
     STATE_SUBMISSION_FORM_ROUTES_WITHOUT_SUPPORTING_DOCS,
     STATE_SUBMISSION_FORM_ROUTES,
+    ContractSubmissionTypeRecord,
 } from '@mc-review/constants'
 import { FormContainer } from '../../../components'
 import { useCurrentRoute } from '../../../hooks'
@@ -95,7 +96,7 @@ export const SubmissionType = ({
     const location = useLocation()
     const ldClient = useLDClient()
     const isNewSubmission = location.pathname === '/submissions/new'
-    const { id } = useRouteParams()
+    const { id, contractSubmissionType } = useRouteParams()
     const hideSupportingDocs = ldClient?.variation(
         featureFlags.HIDE_SUPPORTING_DOCS_PAGE.flag,
         featureFlags.HIDE_SUPPORTING_DOCS_PAGE.defaultValue
@@ -219,6 +220,10 @@ export const SubmissionType = ({
                 navigate(
                     generatePath(RoutesRecord[options.redirectPath], {
                         id: draftSubmission.id,
+                        contractSubmissionType:
+                            ContractSubmissionTypeRecord[
+                                draftSubmission.contractSubmissionType
+                            ],
                     })
                 )
             }
@@ -365,6 +370,7 @@ export const SubmissionType = ({
                     navigate(
                         generatePath(RoutesRecord[options.redirectPath], {
                             id: id,
+                            contractSubmissionType: contractSubmissionType,
                         })
                     )
                 }
@@ -879,7 +885,9 @@ export const SubmissionType = ({
                                         backOnClickUrl={
                                             RoutesRecord.DASHBOARD_SUBMISSIONS
                                         }
-                                        continueOnClickUrl="/edit/contract-details"
+                                        continueOnClickUrl={
+                                            RoutesRecord.SUBMISSIONS_CONTRACT_DETAILS
+                                        }
                                     />
                                 </UswdsForm>
                             </>

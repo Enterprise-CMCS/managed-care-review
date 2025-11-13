@@ -337,7 +337,7 @@ test('does includes the correct submission URL', async () => {
     expect(template).toEqual(
         expect.objectContaining({
             bodyText: expect.stringContaining(
-                `http://localhost/submissions/12345/edit/review-and-submit`
+                `http://localhost/submissions/health-plan/12345/edit/review-and-submit`
             ),
         })
     )

@@ -36,6 +36,7 @@ describe('SubmissionType', () => {
                         contract: {
                             ...mockContractPackageDraft(),
                             id: '15',
+                            contractSubmissionType: 'HEALTH_PLAN',
                         },
                     }),
                 ],
@@ -448,6 +449,7 @@ describe('SubmissionType', () => {
         const unlockedContract = {
             ...mockContractPackageUnlockedWithUnlockedType({
                 id: '15',
+                contractSubmissionType: 'HEALTH_PLAN',
             }),
         }
 
@@ -480,7 +482,9 @@ describe('SubmissionType', () => {
                         }),
                     ],
                 },
-                routerProvider: { route: '/submissions/15/edit/type' },
+                routerProvider: {
+                    route: '/submissions/health-plan/15/edit/type',
+                },
             }
         )
 
@@ -521,6 +525,7 @@ describe('SubmissionType', () => {
         const unlockedContract = {
             ...mockContractPackageUnlockedWithUnlockedType({
                 id: '15',
+                contractSubmissionType: 'HEALTH_PLAN',
             }),
         }
 
@@ -546,7 +551,9 @@ describe('SubmissionType', () => {
                         }),
                     ],
                 },
-                routerProvider: { route: '/submissions/15/edit/type' },
+                routerProvider: {
+                    route: '/submissions/health-plan/15/edit/type',
+                },
             }
         )
 
@@ -582,6 +589,7 @@ describe('SubmissionType', () => {
         const unlockedContract = {
             ...mockContractPackageDraft({
                 id: '15',
+                contractSubmissionType: 'HEALTH_PLAN',
             }),
         }
 
@@ -601,7 +609,9 @@ describe('SubmissionType', () => {
                         }),
                     ],
                 },
-                routerProvider: { route: '/submissions/15/edit/type' },
+                routerProvider: {
+                    route: '/submissions/health-plan/15/edit/type',
+                },
             }
         )
 

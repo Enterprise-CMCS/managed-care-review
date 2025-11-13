@@ -6,6 +6,7 @@ import type {
     ProgramType,
     ContractQuestionType,
     ContractRevisionType,
+    ContractSubmissionType,
 } from '../../domain-models'
 import {
     stripHTMLFromTemplate,
@@ -16,6 +17,7 @@ import { submissionQuestionResponseURL } from '../generateURLs'
 
 export const sendQuestionStateEmail = async (
     contractRev: ContractRevisionType,
+    contractSubmissionType: ContractSubmissionType,
     submitterEmails: string[],
     config: EmailConfiguration,
     statePrograms: ProgramType[],
@@ -47,6 +49,7 @@ export const sendQuestionStateEmail = async (
 
     const questionResponseURL = submissionQuestionResponseURL(
         contractRev.contract.id,
+        contractSubmissionType,
         config.baseUrl
     )
 

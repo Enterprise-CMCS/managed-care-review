@@ -98,6 +98,10 @@ const StateUserRoutes = ({
         featureFlags.RATE_EDIT_UNLOCK.flag,
         featureFlags.RATE_EDIT_UNLOCK.defaultValue
     )
+    const showEqroSubmissions: boolean = ldClient?.variation(
+        featureFlags.EQRO_SUBMISSIONS.flag,
+        featureFlags.EQRO_SUBMISSIONS.defaultValue
+    )
 
     return (
         <AuthenticatedRouteWrapper>
@@ -122,10 +126,19 @@ const StateUserRoutes = ({
                     path={RoutesRecord.SUBMISSIONS}
                     element={<StateDashboard />}
                 />
-                <Route
-                    path={RoutesRecord.SUBMISSIONS_NEW}
-                    element={<NewStateSubmissionForm />}
-                />
+                {showEqroSubmissions ? (
+                    <Route
+                        path={RoutesRecord.SUBMISSIONS_NEW}
+                        element={
+                            <h1>NEW EQRO CONTRACT TYPE PAGE PLACEHOLDER</h1>
+                        }
+                    />
+                ) : (
+                    <Route
+                        path={RoutesRecord.SUBMISSIONS_NEW}
+                        element={<NewStateSubmissionForm />}
+                    />
+                )}
                 {showRatePages && (
                     <>
                         <Route

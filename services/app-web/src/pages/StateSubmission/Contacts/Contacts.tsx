@@ -85,7 +85,7 @@ const Contacts = ({
 
     const { loggedInUser } = useAuth()
     const { currentRoute } = useCurrentRoute()
-    const { id } = useRouteParams()
+    const { id, contractSubmissionType } = useRouteParams()
     const { updateActiveMainContent } = usePage()
     const { draftSubmission, interimState, updateDraft, showPageErrorMessage } =
         useContractForm(id)
@@ -200,6 +200,7 @@ const Contacts = ({
                     navigate(
                         generatePath(RoutesRecord[options.redirectPath], {
                             id: id,
+                            contractSubmissionType,
                         })
                     )
                 }
@@ -462,11 +463,17 @@ const Contacts = ({
                                                 'CONTRACT_ONLY'
                                                 ? generatePath(
                                                       RoutesRecord.SUBMISSIONS_CONTRACT_DETAILS,
-                                                      { id }
+                                                      {
+                                                          id,
+                                                          contractSubmissionType,
+                                                      }
                                                   )
                                                 : generatePath(
                                                       RoutesRecord.SUBMISSIONS_RATE_DETAILS,
-                                                      { id }
+                                                      {
+                                                          id,
+                                                          contractSubmissionType,
+                                                      }
                                                   )
                                         )
                                     }
@@ -480,11 +487,17 @@ const Contacts = ({
                                             .submissionType === 'CONTRACT_ONLY'
                                             ? generatePath(
                                                   RoutesRecord.SUBMISSIONS_CONTRACT_DETAILS,
-                                                  { id }
+                                                  {
+                                                      id,
+                                                      contractSubmissionType,
+                                                  }
                                               )
                                             : generatePath(
                                                   RoutesRecord.SUBMISSIONS_RATE_DETAILS,
-                                                  { id }
+                                                  {
+                                                      id,
+                                                      contractSubmissionType,
+                                                  }
                                               )
                                     }
                                     continueOnClickUrl="/edit/documents"

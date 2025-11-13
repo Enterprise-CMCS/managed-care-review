@@ -34,7 +34,7 @@ type FormError =
 
 export const MccrsId = (): React.ReactElement => {
     const [shouldValidate, setShouldValidate] = React.useState(true)
-    const { id } = useParams()
+    const { id, contractSubmissionType } = useParams()
     if (!id) {
         throw new Error(
             'PROGRAMMING ERROR: id param not set in state submission form.'
@@ -120,7 +120,10 @@ export const MccrsId = (): React.ReactElement => {
     const showFieldErrors = (error?: FormError) =>
         shouldValidate && Boolean(error)
 
-    const handleFormSubmit = async (values: MccrsIdFormValues) => {
+    const handleFormSubmit = async (
+        values: MccrsIdFormValues,
+        contractSubmissionType: string
+    ) => {
         setShowPageErrorMessage(false)
         try {
             const updateResult = await updateContract({
@@ -146,7 +149,9 @@ export const MccrsId = (): React.ReactElement => {
                 )
                 return new Error('Failed to update form data')
             }
-            navigate(`/submissions/${updatedSubmission.id}`)
+            navigate(
+                `/submissions/${contractSubmissionType}/${updatedSubmission.id}`
+            )
         } catch (serverError) {
             setShowPageErrorMessage(true)
             recordJSException(
@@ -161,7 +166,7 @@ export const MccrsId = (): React.ReactElement => {
             <Formik
                 initialValues={mccrsIDInitialValues}
                 onSubmit={(values) => {
-                    return handleFormSubmit(values)
+                    return handleFormSubmit(values, contractSubmissionType!)
                 }}
                 validationSchema={() => MccrsIdFormSchema()}
             >
@@ -174,12 +179,12 @@ export const MccrsId = (): React.ReactElement => {
                                     text: 'Dashboard',
                                 },
                                 {
-                                    link: `/submissions/${id}`,
+                                    link: `/submissions/${contractSubmissionType}/${id}`,
                                     text: contractName || '',
                                 },
                                 {
                                     text: 'MC-CRS record number',
-                                    link: `/submissions/${id}/mccrs-record-number`,
+                                    link: `/submissions/${contractSubmissionType}/${id}/mccrs-record-number`,
                                 },
                             ]}
                         />
@@ -220,7 +225,7 @@ export const MccrsId = (): React.ReactElement => {
                                     variant="default"
                                     data-testid="page-actions-right-primary"
                                     parent_component_type="page body"
-                                    link_url={`/submissions/${id}`}
+                                    link_url={`/submission/${contractSubmissionType}/${id}`}
                                     disabled={
                                         shouldValidate && !!errors.mccrsId
                                     }

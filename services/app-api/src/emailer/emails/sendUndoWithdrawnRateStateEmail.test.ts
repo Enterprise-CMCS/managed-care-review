@@ -117,6 +117,7 @@ describe('sendUndoWithdrawnRateStateEmail', () => {
     it('renders email for unwithdrawn rate as expected', async () => {
         const template = await sendUndoWithdrawnRateStateEmail(
             testRate,
+            'HEALTH_PLAN',
             statePrograms,
             testEmailConfig()
         )
@@ -131,6 +132,7 @@ describe('sendUndoWithdrawnRateStateEmail', () => {
     it('includes expected state contacts in toAddress', async () => {
         const template = await sendUndoWithdrawnRateStateEmail(
             testRate,
+            'HEALTH_PLAN',
             statePrograms,
             testEmailConfig()
         )
@@ -157,6 +159,7 @@ describe('sendUndoWithdrawnRateStateEmail error handling', () => {
         }
         const template = await sendUndoWithdrawnRateStateEmail(
             rateWithWrongStatus,
+            'HEALTH_PLAN',
             statePrograms,
             testEmailConfig()
         )
@@ -206,6 +209,7 @@ describe('sendUndoWithdrawnRateStateEmail error handling', () => {
 
         const template = await sendUndoWithdrawnRateStateEmail(
             rateWithWrongStatus,
+            'HEALTH_PLAN',
             statePrograms,
             testEmailConfig()
         )
@@ -224,6 +228,7 @@ describe('sendUndoWithdrawnRateStateEmail error handling', () => {
 
         const template = await sendUndoWithdrawnRateStateEmail(
             missingReviewStatusActions,
+            'HEALTH_PLAN',
             statePrograms,
             testEmailConfig()
         )
@@ -264,6 +269,7 @@ describe('sendUndoWithdrawnRateStateEmail error handling', () => {
 
         const template = await sendUndoWithdrawnRateStateEmail(
             rateWithWrongActionType,
+            'HEALTH_PLAN',
             statePrograms,
             testEmailConfig()
         )
@@ -336,6 +342,7 @@ describe('sendUndoWithdrawnRateStateEmail error handling', () => {
 
         const template = await sendUndoWithdrawnRateStateEmail(
             rateWithoutRateCertificationName,
+            'HEALTH_PLAN',
             statePrograms,
             testEmailConfig()
         )
@@ -408,6 +415,7 @@ describe('sendUndoWithdrawnRateStateEmail error handling', () => {
 
         const template = await sendUndoWithdrawnRateStateEmail(
             rateWithoutRateCertificationName,
+            'HEALTH_PLAN',
             statePrograms,
             testEmailConfig()
         )
@@ -479,6 +487,7 @@ describe('sendUndoWithdrawnRateStateEmail error handling', () => {
 
         const template = await sendUndoWithdrawnRateStateEmail(
             rateWithoutContractRevisions,
+            'HEALTH_PLAN',
             statePrograms,
             testEmailConfig()
         )

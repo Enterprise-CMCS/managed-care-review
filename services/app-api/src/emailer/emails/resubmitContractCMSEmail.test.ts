@@ -8,6 +8,7 @@ import {
 import { resubmitContractCMSEmail } from './index'
 import type { ContractType } from '../../domain-models'
 import { packageName } from '@mc-review/submissions'
+import { ContractSubmissionTypeRecord } from '@mc-review/constants'
 
 describe('with rates', () => {
     const resubmitData = {
@@ -143,14 +144,14 @@ describe('with rates', () => {
         expect(template).toEqual(
             expect.objectContaining({
                 bodyText: expect.stringContaining(
-                    `http://localhost/submissions/${submission.id}`
+                    `http://localhost/submissions/${ContractSubmissionTypeRecord[submission.contractSubmissionType]}/${submission.id}`
                 ),
             })
         )
         expect(template).toEqual(
             expect.objectContaining({
                 bodyHTML: expect.stringContaining(
-                    `href="http://localhost/submissions/${submission.id}"`
+                    `href="http://localhost/submissions/${ContractSubmissionTypeRecord[submission.contractSubmissionType]}/${submission.id}"`
                 ),
             })
         )

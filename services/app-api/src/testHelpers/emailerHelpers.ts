@@ -166,6 +166,7 @@ const mockContractRev = (
             stateCode: 'MN',
             stateNumber: 3,
             id: '12345',
+            contractSubmissionType: 'HEALTH_PLAN',
         },
         id: 'test-abc-125',
         formData: {
@@ -386,6 +387,7 @@ const mockContract = (
 ): ContractType => {
     return {
         id: 'test-contract-123',
+        contractSubmissionType: 'HEALTH_PLAN',
         createdAt: new Date('01/01/2021'),
         updatedAt: new Date('02/01/2021'),
         status: 'SUBMITTED',
@@ -416,6 +418,7 @@ const mockContract = (
                         id: 'test-abc-123',
                         stateCode: 'MN',
                         stateNumber: 4,
+                        contractSubmissionType: 'HEALTH_PLAN',
                     },
                     submitInfo: {
                         updatedAt: new Date(),

@@ -6,6 +6,7 @@ import { useNavigate, useParams } from 'react-router'
 import { usePage } from '../../contexts/PageContext'
 import { useTealium } from '../../hooks'
 import {
+    ContractSubmissionType,
     useFetchContractQuery,
     useUndoWithdrawContractMutation,
 } from '../../gen/gqlClient'
@@ -38,7 +39,10 @@ const UndoSubmissionWithdrawSchema = Yup.object().shape({
 })
 
 export const UndoSubmissionWithdraw = (): React.ReactElement => {
-    const { id } = useParams() as { id: string }
+    const { id, contractSubmissionType } = useParams() as {
+        id: string
+        contractSubmissionType: ContractSubmissionType
+    }
     const { updateHeading } = usePage()
     const { logFormSubmitEvent } = useTealium()
     const navigate = useNavigate()
@@ -97,7 +101,9 @@ export const UndoSubmissionWithdraw = (): React.ReactElement => {
                     },
                 },
             })
-            navigate(`/submissions/${id}?showTempUndoWithdrawBanner=true`)
+            navigate(
+                `/submissions/${contractSubmissionType}/${id}?showTempUndoWithdrawBanner=true`
+            )
         } catch (err) {
             recordJSException(
                 `undoWithdrawSubmission: GraphQL error reported. Error message: ${err}`
@@ -115,13 +121,13 @@ export const UndoSubmissionWithdraw = (): React.ReactElement => {
                         text: 'Dashboard',
                     },
                     {
-                        link: `/submissions/${id}`,
+                        link: `/submissions/${contractSubmissionType}/${id}`,
                         text: contractName || '',
                     },
                     {
                         link: generatePath(
                             RoutesRecord.UNDO_SUBMISSION_WITHDRAW,
-                            { id }
+                            { id, contractSubmissionType }
                         ),
                         text: 'Undo submission withdraw',
                     },
@@ -164,9 +170,11 @@ export const UndoSubmissionWithdraw = (): React.ReactElement => {
                                     variant="outline"
                                     data-testid="page-actions-left-secondary"
                                     parent_component_type="page body"
-                                    link_url={`/submissions/${id}`}
+                                    link_url={`/submissions/${contractSubmissionType}/${id}`}
                                     onClick={() =>
-                                        navigate(`/submissions/${id}`)
+                                        navigate(
+                                            `/submissions/${contractSubmissionType}/${id}`
+                                        )
                                     }
                                 >
                                     Cancel
@@ -176,7 +184,7 @@ export const UndoSubmissionWithdraw = (): React.ReactElement => {
                                     variant="default"
                                     data-testid="page-actions-right-primary"
                                     parent_component_type="page body"
-                                    link_url={`/submissions/${id}`}
+                                    link_url={`/submissions/${contractSubmissionType}/${id}`}
                                     animationTimeout={1000}
                                     disabled={showFieldErrors(
                                         errors.undoSubmissionWithdrawReason

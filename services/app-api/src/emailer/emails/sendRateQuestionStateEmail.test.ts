@@ -195,9 +195,12 @@ describe('sendRateQuestionStateEmail', () => {
             responses: [],
         })
 
+    const contractSubmissionType = 'HEALTH_PLAN'
+
     it('to addresses list includes submitter emails', async () => {
         const template = await sendRateQuestionStateEmail(
             testRate,
+            contractSubmissionType,
             testEmailConfig(),
             currentQuestion()
         )
@@ -218,6 +221,7 @@ describe('sendRateQuestionStateEmail', () => {
     it('includes mmcratesetting in the ccAddress', async () => {
         const template = await sendRateQuestionStateEmail(
             testRate,
+            contractSubmissionType,
             testEmailConfig(),
             currentQuestion()
         )
@@ -237,6 +241,7 @@ describe('sendRateQuestionStateEmail', () => {
     it('to addresses list includes all state contacts on all contracts submitted with rate', async () => {
         const template = await sendRateQuestionStateEmail(
             testRate,
+            contractSubmissionType,
             testEmailConfig(),
             currentQuestion()
         )
@@ -263,6 +268,7 @@ describe('sendRateQuestionStateEmail', () => {
             'OACT_TO_STATE'
         const template = await sendRateQuestionStateEmail(
             rate,
+            contractSubmissionType,
             testEmailConfig(),
             currentQuestion()
         )
@@ -283,6 +289,7 @@ describe('sendRateQuestionStateEmail', () => {
     it('to addresses list does not include duplicate emails', async () => {
         const template = await sendRateQuestionStateEmail(
             testRate,
+            contractSubmissionType,
             testEmailConfig(),
             currentQuestion()
         )
@@ -302,6 +309,7 @@ describe('sendRateQuestionStateEmail', () => {
     it('subject line is correct and clearly states submission is complete', async () => {
         const template = await sendRateQuestionStateEmail(
             testRate,
+            contractSubmissionType,
             testEmailConfig(),
             currentQuestion()
         )
@@ -324,6 +332,7 @@ describe('sendRateQuestionStateEmail', () => {
     it('includes link to rate Q&A page', async () => {
         const template = await sendRateQuestionStateEmail(
             testRate,
+            contractSubmissionType,
             testEmailConfig(),
             currentQuestion()
         )
@@ -338,7 +347,7 @@ describe('sendRateQuestionStateEmail', () => {
                     'Open the submission in MC-Review to answer question'
                 ),
                 bodyHTML: expect.stringContaining(
-                    `http://localhost/submissions/parent-contract/rates/test-rate/question-and-answer`
+                    `http://localhost/submissions/health-plan/parent-contract/rates/test-rate/question-and-answer`
                 ),
             })
         )
@@ -346,6 +355,7 @@ describe('sendRateQuestionStateEmail', () => {
     it('includes expected data on the CMS analyst who sent the question', async () => {
         const template = await sendRateQuestionStateEmail(
             testRate,
+            contractSubmissionType,
             testEmailConfig(),
             currentQuestion()
         )
@@ -370,6 +380,7 @@ describe('sendRateQuestionStateEmail', () => {
     it('renders overall email for a new rate question as expected', async () => {
         const template = await sendRateQuestionStateEmail(
             testRate,
+            contractSubmissionType,
             testEmailConfig(),
             currentQuestion()
         )

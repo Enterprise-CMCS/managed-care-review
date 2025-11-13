@@ -16,6 +16,7 @@ import {
 } from '../attributeHelper'
 import { convertToIndexQuestionsPayload } from '../../postgres/questionResponse'
 import type { Context } from '../../handlers/apollo_gql'
+import { ContractSubmissionTypeRecord } from '@mc-review/constants'
 
 // this is probably a little delicate type-wise. But seems worth it not to be duplicating the same resolver in two places.
 function genericContractResolver<
@@ -94,7 +95,11 @@ function genericContractResolver<
             return dateFirstSubmitted
         },
         webURL(parent: ParentType) {
-            const urlPath = path.join('/submissions/', parent.id)
+            const urlPath = path.join(
+                '/submissions/',
+                ContractSubmissionTypeRecord[parent.contractSubmissionType],
+                parent.id
+            )
             const fullURL = new URL(urlPath, applicationEndpoint).href
             return fullURL
         },

@@ -17,11 +17,7 @@ import {
 } from '../QuestionsType'
 import { contractReviewActionSchema } from './contractReviewActionType'
 import { rateReviewActionSchema } from './rateReviewActionType'
-
-const contractSubmissionTypeSchema = z.union([
-    z.literal('HEALTH_PLAN'),
-    z.literal('EQRO'),
-])
+import { contractSubmissionTypeSchema } from './contractSubmissionType'
 
 // Contract represents the contract specific information in a submission package
 // All that data is contained in revisions, each revision represents the data in a single submission

@@ -54,12 +54,13 @@ describe('ContractDetails', () => {
                             contract: {
                                 ...mockContractPackageUnlockedWithUnlockedType(),
                                 id: '15',
+                                contractSubmissionType: 'HEALTH_PLAN',
                             },
                         }),
                     ],
                 },
                 routerProvider: {
-                    route: '/submissions/15/edit/contract-details',
+                    route: '/submissions/health-plan/15/edit/contract-details',
                 },
                 featureFlags: {
                     'hide-supporting-docs-page': true,
@@ -97,12 +98,13 @@ describe('ContractDetails', () => {
                                 contract: {
                                     ...draftContract,
                                     id: '15',
+                                    contractSubmissionType: 'HEALTH_PLAN',
                                 },
                             }),
                         ],
                     },
                     routerProvider: {
-                        route: '/submissions/15/edit/contract-details',
+                        route: '/submissions/health-plan/15/edit/contract-details',
                     },
                 }
             )
@@ -146,12 +148,13 @@ describe('ContractDetails', () => {
                                 contract: {
                                     ...mockContractPackageUnlockedWithUnlockedType(),
                                     id: '15',
+                                    contractSubmissionType: 'HEALTH_PLAN',
                                 },
                             }),
                         ],
                     },
                     routerProvider: {
-                        route: '/submissions/15/edit/contract-details',
+                        route: '/submissions/health-plan/15/edit/contract-details',
                     },
                     featureFlags: {
                         'hide-supporting-docs-page': true,
@@ -193,12 +196,13 @@ describe('ContractDetails', () => {
                                 contract: {
                                     ...mockContractPackageUnlockedWithUnlockedType(),
                                     id: '15',
+                                    contractSubmissionType: 'HEALTH_PLAN',
                                 },
                             }),
                         ],
                     },
                     routerProvider: {
-                        route: '/submissions/15/edit/contract-details',
+                        route: '/submissions/health-plan/15/edit/contract-details',
                     },
                 }
             )
@@ -244,12 +248,13 @@ describe('ContractDetails', () => {
                                 contract: {
                                     ...draftContract,
                                     id: '15',
+                                    contractSubmissionType: 'HEALTH_PLAN',
                                 },
                             }),
                         ],
                     },
                     routerProvider: {
-                        route: '/submissions/15/edit/contract-details',
+                        route: '/submissions/health-plan/15/edit/contract-details',
                     },
                 }
             )
@@ -290,12 +295,13 @@ describe('ContractDetails', () => {
                                 contract: {
                                     ...draftContract,
                                     id: '15',
+                                    contractSubmissionType: 'HEALTH_PLAN',
                                 },
                             }),
                         ],
                     },
                     routerProvider: {
-                        route: '/submissions/15/edit/contract-details',
+                        route: '/submissions/health-plan/15/edit/contract-details',
                     },
                 }
             )
@@ -335,12 +341,13 @@ describe('ContractDetails', () => {
                                 contract: {
                                     ...draftContract,
                                     id: '15',
+                                    contractSubmissionType: 'HEALTH_PLAN',
                                 },
                             }),
                         ],
                     },
                     routerProvider: {
-                        route: '/submissions/15/edit/contract-details',
+                        route: '/submissions/health-plan/15/edit/contract-details',
                     },
                     featureFlags: { dsnp: true },
                 }
@@ -390,12 +397,13 @@ describe('ContractDetails', () => {
                                 contract: {
                                     ...draftContract,
                                     id: '15',
+                                    contractSubmissionType: 'HEALTH_PLAN',
                                 },
                             }),
                         ],
                     },
                     routerProvider: {
-                        route: '/submissions/15/edit/contract-details',
+                        route: '/submissions/health-plan/15/edit/contract-details',
                     },
                     featureFlags: { dsnp: true },
                 }
@@ -455,12 +463,13 @@ describe('ContractDetails', () => {
                                 contract: {
                                     ...draftContract,
                                     id: '15',
+                                    contractSubmissionType: 'HEALTH_PLAN',
                                 },
                             }),
                         ],
                     },
                     routerProvider: {
-                        route: '/submissions/15/edit/contract-details',
+                        route: '/submissions/health-plan/15/edit/contract-details',
                     },
                 }
             )
@@ -536,12 +545,13 @@ describe('ContractDetails', () => {
                                 contract: {
                                     ...draftContract,
                                     id: '15',
+                                    contractSubmissionType: 'HEALTH_PLAN',
                                 },
                             }),
                         ],
                     },
                     routerProvider: {
-                        route: '/submissions/15/edit/contract-details',
+                        route: '/submissions/health-plan/15/edit/contract-details',
                     },
                 }
             )
@@ -590,12 +600,13 @@ describe('ContractDetails', () => {
                                 contract: {
                                     ...draftContract,
                                     id: '15',
+                                    contractSubmissionType: 'HEALTH_PLAN',
                                 },
                             }),
                         ],
                     },
                     routerProvider: {
-                        route: '/submissions/15/edit/contract-details',
+                        route: '/submissions/health-plan/15/edit/contract-details',
                     },
                 }
             )
@@ -663,12 +674,13 @@ describe('ContractDetails', () => {
                                 contract: {
                                     ...draftContract,
                                     id: '15',
+                                    contractSubmissionType: 'HEALTH_PLAN',
                                 },
                             }),
                         ],
                     },
                     routerProvider: {
-                        route: '/submissions/15/edit/contract-details',
+                        route: '/submissions/health-plan/15/edit/contract-details',
                     },
                     featureFlags: { dsnp: true },
                 }
@@ -705,12 +717,13 @@ describe('ContractDetails', () => {
                                 contract: {
                                     ...draftContract,
                                     id: '15',
+                                    contractSubmissionType: 'HEALTH_PLAN',
                                 },
                             }),
                         ],
                     },
                     routerProvider: {
-                        route: '/submissions/15/edit/contract-details',
+                        route: '/submissions/health-plan/15/edit/contract-details',
                     },
                     featureFlags: { dsnp: true },
                 }
@@ -767,12 +780,13 @@ describe('ContractDetails', () => {
                                 contract: {
                                     ...draftContract,
                                     id: '15',
+                                    contractSubmissionType: 'HEALTH_PLAN',
                                 },
                             }),
                         ],
                     },
                     routerProvider: {
-                        route: '/submissions/15/edit/contract-details',
+                        route: '/submissions/health-plan/15/edit/contract-details',
                     },
                 }
             )
@@ -846,12 +860,13 @@ describe('ContractDetails', () => {
                                 contract: {
                                     ...mockContractPackageUnlockedWithUnlockedType(),
                                     id: '15',
+                                    contractSubmissionType: 'HEALTH_PLAN',
                                 },
                             }),
                         ],
                     },
                     routerProvider: {
-                        route: '/submissions/15/edit/contract-details',
+                        route: '/submissions/health-plan/15/edit/contract-details',
                     },
                 }
             )
@@ -886,12 +901,13 @@ describe('ContractDetails', () => {
                                 contract: {
                                     ...mockContractPackageUnlockedWithUnlockedType(),
                                     id: '15',
+                                    contractSubmissionType: 'HEALTH_PLAN',
                                 },
                             }),
                         ],
                     },
                     routerProvider: {
-                        route: '/submissions/15/edit/contract-details',
+                        route: '/submissions/health-plan/15/edit/contract-details',
                     },
                 }
             )
@@ -934,12 +950,13 @@ describe('ContractDetails', () => {
                                 contract: {
                                     ...draftContract,
                                     id: '15',
+                                    contractSubmissionType: 'HEALTH_PLAN',
                                 },
                             }),
                         ],
                     },
                     routerProvider: {
-                        route: '/submissions/15/edit/contract-details',
+                        route: '/submissions/health-plan/15/edit/contract-details',
                     },
                 }
             )
@@ -978,12 +995,13 @@ describe('ContractDetails', () => {
                                 contract: {
                                     ...mockContractPackageUnlockedWithUnlockedType(),
                                     id: '15',
+                                    contractSubmissionType: 'HEALTH_PLAN',
                                 },
                             }),
                         ],
                     },
                     routerProvider: {
-                        route: '/submissions/15/edit/contract-details',
+                        route: '/submissions/health-plan/15/edit/contract-details',
                     },
                 }
             )
@@ -1032,12 +1050,13 @@ describe('ContractDetails', () => {
                                 contract: {
                                     ...draftContract,
                                     id: '15',
+                                    contractSubmissionType: 'HEALTH_PLAN',
                                 },
                             }),
                         ],
                     },
                     routerProvider: {
-                        route: '/submissions/15/edit/contract-details',
+                        route: '/submissions/health-plan/15/edit/contract-details',
                     },
                 }
             )
@@ -1085,12 +1104,13 @@ describe('ContractDetails', () => {
                                 contract: {
                                     ...draftContract,
                                     id: '15',
+                                    contractSubmissionType: 'HEALTH_PLAN',
                                 },
                             }),
                         ],
                     },
                     routerProvider: {
-                        route: '/submissions/15/edit/contract-details',
+                        route: '/submissions/health-plan/15/edit/contract-details',
                     },
                 }
             )
@@ -1146,12 +1166,13 @@ describe('ContractDetails', () => {
                                 contract: {
                                     ...mockContractPackageUnlockedWithUnlockedType(),
                                     id: '15',
+                                    contractSubmissionType: 'HEALTH_PLAN',
                                 },
                             }),
                         ],
                     },
                     routerProvider: {
-                        route: '/submissions/15/edit/contract-details',
+                        route: '/submissions/health-plan/15/edit/contract-details',
                     },
                 }
             )
@@ -1186,12 +1207,13 @@ describe('ContractDetails', () => {
                                 contract: {
                                     ...mockContractPackageUnlockedWithUnlockedType(),
                                     id: '15',
+                                    contractSubmissionType: 'HEALTH_PLAN',
                                 },
                             }),
                         ],
                     },
                     routerProvider: {
-                        route: '/submissions/15/edit/contract-details',
+                        route: '/submissions/health-plan/15/edit/contract-details',
                     },
                 }
             )
@@ -1228,12 +1250,13 @@ describe('ContractDetails', () => {
                                 contract: {
                                     ...mockContractPackageUnlockedWithUnlockedType(),
                                     id: '15',
+                                    contractSubmissionType: 'HEALTH_PLAN',
                                 },
                             }),
                         ],
                     },
                     routerProvider: {
-                        route: '/submissions/15/edit/contract-details',
+                        route: '/submissions/health-plan/15/edit/contract-details',
                     },
                 }
             )
@@ -1276,12 +1299,13 @@ describe('ContractDetails', () => {
                                 contract: {
                                     ...draftContract,
                                     id: '15',
+                                    contractSubmissionType: 'HEALTH_PLAN',
                                 },
                             }),
                         ],
                     },
                     routerProvider: {
-                        route: '/submissions/15/edit/contract-details',
+                        route: '/submissions/health-plan/15/edit/contract-details',
                     },
                 }
             )
@@ -1315,12 +1339,13 @@ describe('ContractDetails', () => {
                                 contract: {
                                     ...mockContractPackageUnlockedWithUnlockedType(),
                                     id: '15',
+                                    contractSubmissionType: 'HEALTH_PLAN',
                                 },
                             }),
                         ],
                     },
                     routerProvider: {
-                        route: '/submissions/15/edit/contract-details',
+                        route: '/submissions/health-plan/15/edit/contract-details',
                     },
                 }
             )
@@ -1368,12 +1393,13 @@ describe('ContractDetails', () => {
                                 contract: {
                                     ...mockContractPackageUnlockedWithUnlockedType(),
                                     id: '15',
+                                    contractSubmissionType: 'HEALTH_PLAN',
                                 },
                             }),
                         ],
                     },
                     routerProvider: {
-                        route: '/submissions/15/edit/contract-details',
+                        route: '/submissions/health-plan/15/edit/contract-details',
                     },
                 }
             )
@@ -1408,12 +1434,13 @@ describe('ContractDetails', () => {
                                 contract: {
                                     ...mockContractPackageUnlockedWithUnlockedType(),
                                     id: '15',
+                                    contractSubmissionType: 'HEALTH_PLAN',
                                 },
                             }),
                         ],
                     },
                     routerProvider: {
-                        route: '/submissions/15/edit/contract-details',
+                        route: '/submissions/health-plan/15/edit/contract-details',
                     },
                 }
             )
@@ -1450,12 +1477,13 @@ describe('ContractDetails', () => {
                                 contract: {
                                     ...mockContractPackageUnlockedWithUnlockedType(),
                                     id: '15',
+                                    contractSubmissionType: 'HEALTH_PLAN',
                                 },
                             }),
                         ],
                     },
                     routerProvider: {
-                        route: '/submissions/15/edit/contract-details',
+                        route: '/submissions/health-plan/15/edit/contract-details',
                     },
                 }
             )
@@ -1492,12 +1520,13 @@ describe('ContractDetails', () => {
                                 contract: {
                                     ...draftContract,
                                     id: '15',
+                                    contractSubmissionType: 'HEALTH_PLAN',
                                 },
                             }),
                         ],
                     },
                     routerProvider: {
-                        route: '/submissions/15/edit/contract-details',
+                        route: '/submissions/health-plan/15/edit/contract-details',
                     },
                 }
             )
@@ -1544,12 +1573,13 @@ describe('ContractDetails', () => {
                                 contract: {
                                     ...draftContract,
                                     id: '15',
+                                    contractSubmissionType: 'HEALTH_PLAN',
                                 },
                             }),
                         ],
                     },
                     routerProvider: {
-                        route: '/submissions/15/edit/contract-details',
+                        route: '/submissions/health-plan/15/edit/contract-details',
                     },
                     featureFlags: { '438-attestation': true },
                 }
@@ -1614,12 +1644,13 @@ describe('ContractDetails', () => {
                                 contract: {
                                     ...draftContract,
                                     id: '15',
+                                    contractSubmissionType: 'HEALTH_PLAN',
                                 },
                             }),
                         ],
                     },
                     routerProvider: {
-                        route: '/submissions/15/edit/contract-details',
+                        route: '/submissions/health-plan/15/edit/contract-details',
                     },
                     featureFlags: { '438-attestation': true },
                 }
@@ -1700,12 +1731,13 @@ describe('ContractDetails', () => {
                                 contract: {
                                     ...draftContract,
                                     id: '15',
+                                    contractSubmissionType: 'HEALTH_PLAN',
                                 },
                             }),
                         ],
                     },
                     routerProvider: {
-                        route: '/submissions/15/edit/contract-details',
+                        route: '/submissions/health-plan/15/edit/contract-details',
                     },
                     featureFlags: { '438-attestation': true },
                 }

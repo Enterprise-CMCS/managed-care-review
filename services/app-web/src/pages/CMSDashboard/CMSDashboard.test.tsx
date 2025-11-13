@@ -13,7 +13,10 @@ import {
 import { renderWithProviders } from '../../testHelpers/jestHelpers'
 import { CMSDashboard, RateReviewsDashboard, SubmissionsDashboard } from './'
 import { Navigate, Route, Routes } from 'react-router-dom'
-import { RoutesRecord } from '@mc-review/constants'
+import {
+    RoutesRecord,
+    ContractSubmissionTypeRecord,
+} from '@mc-review/constants'
 import { Contract } from '../../gen/gqlClient'
 
 // copy paste from AppRoutes - this is to allow texting of the react router Outlet
@@ -126,7 +129,7 @@ describe('CMSDashboard', () => {
                         const submissionLink = within(row).queryByRole('link')
                         expect(submissionLink).not.toHaveAttribute(
                             'href',
-                            `/submissions/${draft.id}`
+                            `/submissions/${ContractSubmissionTypeRecord[draft.contractSubmissionType]}/${draft.id}`
                         )
                     })
                 })

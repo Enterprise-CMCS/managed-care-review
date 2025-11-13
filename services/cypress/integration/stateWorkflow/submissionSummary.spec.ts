@@ -49,7 +49,7 @@ describe('State user can view submissions', () => {
         cy.location().then((fullUrl) => {
             const { pathname } = fullUrl
             const pathnameArray = pathname.split('/')
-            submissionId = pathnameArray[2]
+            submissionId = pathnameArray[3]
         })
 
         cy.findByRole('heading', { level: 2, name: /Review and submit/ })
@@ -112,7 +112,7 @@ describe('State user can view submissions', () => {
                 .findByTestId('submission-id')
                 .find('a')
                 .should('have.attr', 'href')
-                // draft submission URL is /submissions/${submission.id}/type
+                // draft submission URL is /submissions/${submission.contractSubmissionType}/${submission.id}/type
                 .and('include', 'type')
             cy.get('table')
                 .contains('span', 'Submitted')
@@ -122,7 +122,7 @@ describe('State user can view submissions', () => {
                 .find('a')
                 .should('have.attr', 'href')
                 .and('include', 'submissions')
-                // submitted submission URL is /submissions/${submission.id}
+                // submitted submission URL is /submissions/${submission.contractSubmissionType}/${submission.id}
                 .and('not.include', 'type')
             cy.get('table')
                 .contains('span', 'Draft')

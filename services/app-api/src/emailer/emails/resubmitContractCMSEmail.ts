@@ -52,7 +52,11 @@ export const resubmitContractCMSEmail = async (
         formData.submissionType === 'CONTRACT_AND_RATES' &&
         Boolean(contract.packageSubmissions[0].rateRevisions.length)
 
-    const packageURL = submissionSummaryURL(contract.id, config.baseUrl)
+    const packageURL = submissionSummaryURL(
+        contract.id,
+        contract.contractSubmissionType,
+        config.baseUrl
+    )
 
     const data = {
         packageName: packageName,
