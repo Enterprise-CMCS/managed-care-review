@@ -36,6 +36,7 @@ export {
     updateTestContractDraftRevision,
     createTestContract,
     fetchTestContractWithQuestions,
+    createAndUpdateTestEQROContract,
 } from './gqlContractHelpers'
 
 export {

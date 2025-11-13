@@ -136,6 +136,8 @@ model ContractRevisionTable {
   createdAt DateTime @default(now())
   updatedAt DateTime @default(now()) @updatedAt
 
+  documentZipPackage DocumentZipPackage[]
+
   submissionType                               SubmissionType
   submissionDescription                        String
   programIDs                                   String[]
@@ -171,7 +173,12 @@ model ContractRevisionTable {
   statutoryRegulatoryAttestation               Boolean?
   statutoryRegulatoryAttestationDescription    String?
 
-  documentZipPackage DocumentZipPackage[]
+  //EQRO submission fields only
+  eqroNewContractor                       Boolean?
+  eqroProvisionMcoNewOptionalActivity     Boolean?
+  eqroProvisionNewMcoEqrRelatedActivities Boolean?
+  eqroProvisionChipEqrRelatedActivities   Boolean?
+  eqroProvisionMcoEqrOrRelatedActivities  Boolean?
 }
 
 model RateRevisionTable {
