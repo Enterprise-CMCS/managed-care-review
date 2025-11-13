@@ -1361,6 +1361,18 @@ type ContractFormData {
     statutoryRegulatoryAttestation: Boolean
     "Description provided for if contract has statutory regulatory attestation"
     statutoryRegulatoryAttestationDescription: String
+
+#   EQRO submission fields only
+    "If contract has a new EQRO contractor"
+    eqroNewContractor: Boolean
+    "If new optional activities to be performed on MCOs"
+    eqroProvisionMcoNewOptionalActivity: Boolean
+    "If new MCO managed care program has EQR-related activities"
+    eqroProvisionNewMcoEqrRelatedActivities: Boolean
+    "If EQR-related activities are performed on the CHIP population"
+    eqroProvisionChipEqrRelatedActivities: Boolean
+    "EQR or EQR-related activities are performed on MCOs"
+    eqroProvisionMcoEqrOrRelatedActivities: Boolean
 }
 
 "Either new capitation rates (NEW) or updates to previously certified capitation rates (AMENDMENT)"
@@ -2301,6 +2313,18 @@ input ContractDraftRevisionFormDataInput {
     statutoryRegulatoryAttestation: Boolean
     "Description provided for if contract has statutory regulatory attestation"
     statutoryRegulatoryAttestationDescription: String
+
+#   EQRO submission fields only
+    "If contract has a new EQRO contractor"
+    eqroNewContractor: Boolean
+    "If new optional activities to be performed on MCOs"
+    eqroProvisionMcoNewOptionalActivity: Boolean
+    "If new MCO managed care program has EQR-related activities"
+    eqroProvisionNewMcoEqrRelatedActivities: Boolean
+    "If EQR-related activities are performed on the CHIP population"
+    eqroProvisionChipEqrRelatedActivities: Boolean
+    "EQR or EQR-related activities are performed on MCOs"
+    eqroProvisionMcoEqrOrRelatedActivities: Boolean
 }
 
 input RateFormDataInput {

@@ -21,6 +21,7 @@ describe('UndoSubmissionWithdraw', () => {
     it('renders without errors', async () => {
         const contract = mockContractPackageSubmitted({
             id: 'test-abc-123',
+            contractSubmissionType: 'HEALTH_PLAN',
         })
         renderWithProviders(
             <Routes>
@@ -49,7 +50,7 @@ describe('UndoSubmissionWithdraw', () => {
                     ],
                 },
                 routerProvider: {
-                    route: '/submission-reviews/test-abc-123/undo-withdraw-submission',
+                    route: '/submission-reviews/health-plan/test-abc-123/undo-withdraw-submission',
                 },
                 featureFlags: {
                     'undo-withdraw-submission': true,
@@ -76,6 +77,7 @@ describe('UndoSubmissionWithdraw', () => {
     it('renders generic API banner error on failed undo submission withdraw', async () => {
         const contract = mockContractPackageSubmitted({
             id: 'test-abc-123',
+            contractSubmissionType: 'HEALTH_PLAN',
         })
         const { user } = renderWithProviders(
             <Routes>
@@ -105,7 +107,7 @@ describe('UndoSubmissionWithdraw', () => {
                     ],
                 },
                 routerProvider: {
-                    route: '/submission-reviews/test-abc-123/undo-withdraw-submission',
+                    route: '/submission-reviews/health-plan/test-abc-123/undo-withdraw-submission',
                 },
                 featureFlags: {
                     'undo-withdraw-submission': true,
@@ -137,6 +139,7 @@ describe('UndoSubmissionWithdraw', () => {
     it('validates reason input field', async () => {
         const contract = mockContractPackageSubmitted({
             id: 'test-abc-123',
+            contractSubmissionType: 'HEALTH_PLAN',
         })
         const { user } = renderWithProviders(
             <Routes>
@@ -165,7 +168,7 @@ describe('UndoSubmissionWithdraw', () => {
                     ],
                 },
                 routerProvider: {
-                    route: '/submission-reviews/test-abc-123/undo-withdraw-submission',
+                    route: '/submission-reviews/health-plan/test-abc-123/undo-withdraw-submission',
                 },
                 featureFlags: {
                     'undo-withdraw-submission': true,
@@ -196,6 +199,7 @@ describe('UndoSubmissionWithdraw', () => {
         let testLocation: Location
         const contract = mockContractPackageSubmitted({
             id: 'test-abc-123',
+            contractSubmissionType: 'HEALTH_PLAN',
         })
         const withdrawnContract: Contract = {
             ...contract,
@@ -255,7 +259,7 @@ describe('UndoSubmissionWithdraw', () => {
                     ],
                 },
                 routerProvider: {
-                    route: '/submission-reviews/test-abc-123/undo-withdraw-submission',
+                    route: '/submission-reviews/health-plan/test-abc-123/undo-withdraw-submission',
                 },
                 featureFlags: {
                     'withdraw-submission': true,
@@ -283,7 +287,9 @@ describe('UndoSubmissionWithdraw', () => {
 
         await waitFor(() => {
             //Expect redirect
-            expect(testLocation.pathname).toBe(`/submissions/${contract.id}`)
+            expect(testLocation.pathname).toBe(
+                `/submissions/health-plan/${contract.id}`
+            )
             //Expect success banner
             expect(
                 screen.getByTestId('statusUpdatedBanner')

@@ -137,6 +137,21 @@ const genericContractFormDataSchema = z.object({
     statutoryRegulatoryAttestationDescription: preprocessNulls(
         z.string().optional()
     ),
+
+    //EQRO submission field only
+    eqroNewContractor: preprocessNulls(z.boolean().optional()),
+    eqroProvisionMcoNewOptionalActivity: preprocessNulls(
+        z.boolean().optional()
+    ),
+    eqroProvisionNewMcoEqrRelatedActivities: preprocessNulls(
+        z.boolean().optional()
+    ),
+    eqroProvisionChipEqrRelatedActivities: preprocessNulls(
+        z.boolean().optional()
+    ),
+    eqroProvisionMcoEqrOrRelatedActivities: preprocessNulls(
+        z.boolean().optional()
+    ),
 })
 
 // contractFormDataSchema is the normal contractFormData setup for Draft contracts. Most fields are optional and array fields can be empty.

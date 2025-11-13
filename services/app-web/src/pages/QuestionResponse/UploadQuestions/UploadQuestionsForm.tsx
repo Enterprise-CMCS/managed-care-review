@@ -31,6 +31,7 @@ type UploadQuestionsFormProps = {
     round: number
     division: Division
     id: string
+    contractSubmissionType: string
 }
 
 const UploadQuestionsForm = ({
@@ -41,6 +42,7 @@ const UploadQuestionsForm = ({
     round,
     division,
     id,
+    contractSubmissionType,
 }: UploadQuestionsFormProps) => {
     const [shouldValidate, setShouldValidate] = React.useState(false)
     const navigate = useNavigate()
@@ -75,7 +77,7 @@ const UploadQuestionsForm = ({
         }
     }
 
-    const baseQARedirectURL = `/${type === 'contract' ? 'submissions' : 'rates'}/${id}/question-and-answers`
+    const baseQARedirectURL = `/${type === 'contract' ? `submissions/${contractSubmissionType}` : 'rates'}/${id}/question-and-answers`
 
     return (
         <UswdsForm

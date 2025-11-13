@@ -31,7 +31,7 @@ describe('CMS user can view submission', () => {
         cy.location().then((fullUrl) => {
             const { pathname } = fullUrl
             const pathnameArray = pathname.split('/')
-            submissionId = pathnameArray[2]
+            submissionId = pathnameArray[3]
         })
 
         // submit package
@@ -132,7 +132,7 @@ describe('CMS user can view submission', () => {
         cy.location().then((fullUrl) => {
             const { pathname } = fullUrl
             const pathnameArray = pathname.split('/')
-            submissionId = pathnameArray[2]
+            submissionId = pathnameArray[3]
         })
 
         // submit package

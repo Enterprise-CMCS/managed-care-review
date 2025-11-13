@@ -58,12 +58,13 @@ describe('ContractQuestionResponse', () => {
                                 contract: {
                                     ...mockContractPackageSubmittedWithQuestions(),
                                     id: 'test-contract-id',
+                                    contractSubmissionType: 'HEALTH_PLAN',
                                 },
                             }),
                         ],
                     },
                     routerProvider: {
-                        route: '/submissions/test-contract-id/question-and-answers',
+                        route: '/submissions/health-plan/test-contract-id/question-and-answers',
                     },
                 }
             )
@@ -189,12 +190,13 @@ describe('ContractQuestionResponse', () => {
                                 contract: {
                                     ...mockContractPackageApprovedWithQuestions(),
                                     id: 'test-abc-123',
+                                    contractSubmissionType: 'HEALTH_PLAN',
                                 },
                             }),
                         ],
                     },
                     routerProvider: {
-                        route: '/submissions/test-abc-123/question-and-answers',
+                        route: '/submissions/health-plan/test-abc-123/question-and-answers',
                     },
                 }
             )
@@ -231,18 +233,20 @@ describe('ContractQuestionResponse', () => {
                             contract: {
                                 ...contract,
                                 id: '15',
+                                contractSubmissionType: 'HEALTH_PLAN',
                             },
                         }),
                         fetchContractWithQuestionsMockSuccess({
                             contract: {
                                 ...contract,
                                 id: '15',
+                                contractSubmissionType: 'HEALTH_PLAN',
                             },
                         }),
                     ],
                 },
                 routerProvider: {
-                    route: '/submissions/15/question-and-answers',
+                    route: '/submissions/health-plan/15/question-and-answers',
                 },
             })
 
@@ -264,18 +268,20 @@ describe('ContractQuestionResponse', () => {
                             contract: {
                                 ...draftContract,
                                 id: '15',
+                                contractSubmissionType: 'HEALTH_PLAN',
                             },
                         }),
                         fetchContractWithQuestionsMockSuccess({
                             contract: {
                                 ...draftContract,
                                 id: '15',
+                                contractSubmissionType: 'HEALTH_PLAN',
                             },
                         }),
                     ],
                 },
                 routerProvider: {
-                    route: '/submissions/15/question-and-answers',
+                    route: '/submissions/health-plan/15/question-and-answers',
                 },
             })
 
@@ -336,6 +342,7 @@ describe('ContractQuestionResponse', () => {
                                 ...mockContractPackageSubmittedWithQuestions(),
                                 id: 'test-contract-id',
                                 questions: indexContractQuestions,
+                                contractSubmissionType: 'HEALTH_PLAN',
                             },
                         }),
                         fetchContractWithQuestionsMockSuccess({
@@ -343,12 +350,13 @@ describe('ContractQuestionResponse', () => {
                                 ...mockContractPackageSubmittedWithQuestions(),
                                 id: 'test-contract-id',
                                 questions: indexContractQuestions,
+                                contractSubmissionType: 'HEALTH_PLAN',
                             },
                         }),
                     ],
                 },
                 routerProvider: {
-                    route: `/submissions/test-contract-id/question-and-answers`,
+                    route: `/submissions/health-plan/test-contract-id/question-and-answers`,
                 },
             })
 
@@ -377,18 +385,20 @@ describe('ContractQuestionResponse', () => {
                             contract: {
                                 ...mockContractPackageSubmittedWithQuestions(),
                                 id: 'test-contract-id',
+                                contractSubmissionType: 'HEALTH_PLAN',
                             },
                         }),
                         fetchContractWithQuestionsMockSuccess({
                             contract: {
                                 ...mockContractPackageSubmittedWithQuestions(),
                                 id: 'test-contract-id',
+                                contractSubmissionType: 'HEALTH_PLAN',
                             },
                         }),
                     ],
                 },
                 routerProvider: {
-                    route: `/submissions/test-contract-id/question-and-answers`,
+                    route: `/submissions/health-plan/test-contract-id/question-and-answers`,
                 },
             })
 
@@ -487,18 +497,20 @@ describe('ContractQuestionResponse', () => {
                             contract: {
                                 ...mockContractPackageApprovedWithQuestions(),
                                 id: 'test-abc-123',
+                                contractSubmissionType: 'HEALTH_PLAN',
                             },
                         }),
                         fetchContractWithQuestionsMockSuccess({
                             contract: {
                                 ...mockContractPackageApprovedWithQuestions(),
                                 id: 'test-abc-123',
+                                contractSubmissionType: 'HEALTH_PLAN',
                             },
                         }),
                     ],
                 },
                 routerProvider: {
-                    route: `/submissions/test-abc-123/question-and-answers`,
+                    route: `/submissions/health-plan/test-abc-123/question-and-answers`,
                 },
             })
 
@@ -536,18 +548,20 @@ describe('ContractQuestionResponse', () => {
                                 contract: {
                                     ...mockContractPackageSubmittedWithQuestions(),
                                     id: 'test-contract-id',
+                                    contractSubmissionType: 'HEALTH_PLAN',
                                 },
                             }),
                             fetchContractWithQuestionsMockSuccess({
                                 contract: {
                                     ...mockContractPackageSubmittedWithQuestions(),
                                     id: 'test-contract-id',
+                                    contractSubmissionType: 'HEALTH_PLAN',
                                 },
                             }),
                         ],
                     },
                     routerProvider: {
-                        route: `/submissions/test-contract-id/question-and-answers?submit=question`,
+                        route: `/submissions/health-plan/test-contract-id/question-and-answers?submit=question`,
                     },
                 }
             )
@@ -573,7 +587,7 @@ describe('ContractQuestionResponse', () => {
                     ],
                 },
                 routerProvider: {
-                    route: `/submissions/not-real/question-and-answers`,
+                    route: `/submissions/health-plan/not-real/question-and-answers`,
                 },
             })
 
@@ -595,7 +609,7 @@ describe('ContractQuestionResponse', () => {
                     ],
                 },
                 routerProvider: {
-                    route: `/submissions/${contract.id}/question-and-answers`,
+                    route: `/submissions/health-plan/${contract.id}/question-and-answers`,
                 },
             })
 
@@ -619,7 +633,7 @@ describe('ContractQuestionResponse', () => {
                     ],
                 },
                 routerProvider: {
-                    route: `/submissions/${contract.id}/question-and-answers`,
+                    route: `/submissions/health-plan/${contract.id}/question-and-answers`,
                 },
             })
 

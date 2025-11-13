@@ -27,10 +27,11 @@ import { Error404 } from '../../Errors/Error404Page'
 
 export const UploadContractResponse = () => {
     // router context
-    const { division, id, questionID } = useParams<{
+    const { division, id, questionID, contractSubmissionType } = useParams<{
         division: string
         id: string
         questionID: string
+        contractSubmissionType: string
     }>()
 
     const navigate = useNavigate()
@@ -117,7 +118,9 @@ export const UploadContractResponse = () => {
         if (createResult instanceof Error) {
             console.info(createResult.message)
         } else {
-            navigate(`/submissions/${id}/question-and-answers?submit=response`)
+            navigate(
+                `/submissions/${contractSubmissionType}/${id}/question-and-answers?submit=response`
+            )
         }
     }
     const question = extractQuestions(contract.questions).find(
@@ -137,7 +140,10 @@ export const UploadContractResponse = () => {
                         link: RoutesRecord.DASHBOARD_SUBMISSIONS,
                         text: 'Dashboard',
                     },
-                    { link: `/submissions/${id}`, text: contractName },
+                    {
+                        link: `/submissions/${contractSubmissionType}/${id}`,
+                        text: contractName,
+                    },
                     {
                         text: 'Upload response',
                         link: RoutesRecord.SUBMISSIONS_UPLOAD_CONTRACT_RESPONSE,

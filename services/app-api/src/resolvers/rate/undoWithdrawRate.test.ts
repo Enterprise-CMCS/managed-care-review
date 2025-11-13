@@ -87,7 +87,6 @@ describe('undoWithdrawRate', () => {
             stateServer,
             draftAWithExtraRate.id
         )
-
         const rateID = contractA.packageSubmissions[0].rateRevisions[0].rateID
         const formData =
             contractA.packageSubmissions[0].rateRevisions[0].formData

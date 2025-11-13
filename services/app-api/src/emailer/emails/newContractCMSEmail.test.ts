@@ -10,6 +10,7 @@ import {
 import { newContractCMSEmail } from './index'
 import type { ContractType, RateFormDataType } from '../../domain-models'
 import { packageName } from '@mc-review/submissions'
+import { ContractSubmissionTypeRecord } from '@mc-review/constants'
 
 test('to addresses list includes review team email addresses', async () => {
     const sub = mockContract()
@@ -209,6 +210,12 @@ test('includes expected data summary for a contract only submission', async () =
     if (template instanceof Error) {
         throw template
     }
+
+    expect(template).toEqual(
+        expect.objectContaining({
+            bodyText: expect.stringContaining('Contract type: Health plan'),
+        })
+    )
 
     expect(template).toEqual(
         expect.objectContaining({
@@ -682,7 +689,7 @@ test('includes link to submission', async () => {
     expect(template).toEqual(
         expect.objectContaining({
             bodyText: expect.stringContaining(
-                `http://localhost/submissions/${sub.id}`
+                `http://localhost/submissions/${ContractSubmissionTypeRecord[sub.contractSubmissionType]}/${sub.id}`
             ),
         })
     )

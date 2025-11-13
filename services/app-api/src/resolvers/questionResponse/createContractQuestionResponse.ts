@@ -163,6 +163,7 @@ export function createContractQuestionResponseResolver(
         const sendQuestionResponseCMSEmailResult =
             await emailer.sendQuestionResponseCMSEmail(
                 contract.revisions[0],
+                contract.contractSubmissionType,
                 statePrograms,
                 stateAnalystsEmails,
                 createResponseResult,
@@ -189,6 +190,7 @@ export function createContractQuestionResponseResolver(
         const sendQuestionResponseStateEmailResult =
             await emailer.sendQuestionResponseStateEmail(
                 contract.revisions[0],
+                contract.contractSubmissionType,
                 statePrograms,
                 submitterEmails,
                 createResponseResult,

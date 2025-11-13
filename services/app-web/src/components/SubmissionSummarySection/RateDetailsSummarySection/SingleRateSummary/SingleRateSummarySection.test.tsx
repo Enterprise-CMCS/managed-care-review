@@ -25,6 +25,7 @@ describe('SingleRateSummarySection', () => {
 
         renderWithProviders(
             <SingleRateSummarySection
+                contractSubmissionType="HEALTH_PLAN"
                 rate={rateData}
                 isSubmitted={true}
                 statePrograms={rateData.state.programs}
@@ -125,6 +126,7 @@ describe('SingleRateSummarySection', () => {
         renderWithProviders(
             <SingleRateSummarySection
                 rate={rateData}
+                contractSubmissionType="HEALTH_PLAN"
                 isSubmitted={true}
                 statePrograms={rateData.state.programs}
             />,
@@ -161,7 +163,7 @@ describe('SingleRateSummarySection', () => {
             })
         ).toHaveAttribute(
             'href',
-            `/submissions/${parentContractRev.contractID}`
+            `/submissions/health-plan/${parentContractRev.contractID}`
         )
     })
 
@@ -201,6 +203,7 @@ describe('SingleRateSummarySection', () => {
         renderWithProviders(
             <SingleRateSummarySection
                 rate={rateData}
+                contractSubmissionType="HEALTH_PLAN"
                 isSubmitted={true}
                 statePrograms={rateData.state.programs}
             />,
@@ -237,7 +240,7 @@ describe('SingleRateSummarySection', () => {
             })
         ).toHaveAttribute(
             'href',
-            `/submissions/${parentContractRev.contractID}`
+            `/submissions/health-plan/${parentContractRev.contractID}`
         )
     })
 
@@ -272,6 +275,7 @@ describe('SingleRateSummarySection', () => {
             renderWithProviders(
                 <SingleRateSummarySection
                     rate={rateData}
+                    contractSubmissionType="HEALTH_PLAN"
                     isSubmitted={false}
                     statePrograms={rateData.state.programs}
                 />,
@@ -314,6 +318,7 @@ describe('SingleRateSummarySection', () => {
             renderWithProviders(
                 <SingleRateSummarySection
                     rate={rateData}
+                    contractSubmissionType="HEALTH_PLAN"
                     isSubmitted={false}
                     statePrograms={rateData.state.programs}
                 />,
@@ -391,6 +396,7 @@ describe('SingleRateSummarySection', () => {
             renderWithProviders(
                 <SingleRateSummarySection
                     rate={rateData}
+                    contractSubmissionType="HEALTH_PLAN"
                     isSubmitted={false}
                     statePrograms={rateData.state.programs}
                 />,
@@ -417,6 +423,7 @@ describe('SingleRateSummarySection', () => {
             renderWithProviders(
                 <SingleRateSummarySection
                     rate={rateData}
+                    contractSubmissionType="HEALTH_PLAN"
                     isSubmitted={true}
                     statePrograms={rateData.state.programs}
                 />,

@@ -414,7 +414,11 @@ const parseEmailDataWithdrawSubmission = (
         findStatePrograms(contract.stateCode)
     )
 
-    const contractSummaryURL = submissionSummaryURL(contract.id, config.baseUrl)
+    const contractSummaryURL = submissionSummaryURL(
+        contract.id,
+        contract.contractSubmissionType,
+        config.baseUrl
+    )
 
     const updatedBy = latestStatusAction.updatedBy.email
     const updatedAt = formatCalendarDate(

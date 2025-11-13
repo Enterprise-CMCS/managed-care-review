@@ -16,6 +16,7 @@ import { LinkWithLogging } from '../TealiumLogging/Link'
 import { getUpdatedByDisplayName } from '@mc-review/helpers'
 import { useTealium } from '../../hooks'
 import { formatToPacificTime } from '@mc-review/dates'
+import { useParams } from 'react-router'
 
 type ChangeHistoryProps = {
     contract: Contract | UnlockedContract
@@ -28,6 +29,7 @@ type flatRevisions = UpdateInformation & {
 
 const buildChangeHistoryInfo = (
     r: flatRevisions,
+    contractSubmissionType: string,
     revisionHistory: flatRevisions[],
     contract: Contract | UnlockedContract
 ): { content: JSX.Element; title: string } => {
@@ -38,7 +40,6 @@ const buildChangeHistoryInfo = (
     // We want to know if this contract has multiple submissions. To have multiple submissions, there must be minimum
     // more than the initial contract revision.
     const hasSubsequentSubmissions = revisionHistory.length > 1
-
     let content = <></>
     let title = 'Submission'
     if (isInitialSubmission) {
@@ -49,7 +50,7 @@ const buildChangeHistoryInfo = (
                 <br />
                 {r.revisionVersion && hasSubsequentSubmissions && (
                     <LinkWithLogging
-                        href={`/submissions/${contract.id}/revisions/${r.revisionVersion}`}
+                        href={`/submissions/${contractSubmissionType}/${contract.id}/revisions/${r.revisionVersion}`}
                         data-testid={`revision-link-${r.revisionVersion}`}
                     >
                         View past submission version
@@ -78,7 +79,7 @@ const buildChangeHistoryInfo = (
                     r.kind === 'submit' &&
                     r.revisionVersion && (
                         <LinkWithLogging
-                            href={`/submissions/${contract.id}/revisions/${r.revisionVersion}`}
+                            href={`/submissions/${contractSubmissionType}/${contract.id}/revisions/${r.revisionVersion}`}
                             data-testid={`revision-link-${r.revisionVersion}`}
                         >
                             View past submission version
@@ -117,6 +118,7 @@ const buildChangeHistoryInfo = (
 export const ChangeHistory = ({
     contract,
 }: ChangeHistoryProps): React.ReactElement => {
+    const { contractSubmissionType } = useParams()
     const { logAccordionEvent } = useTealium()
     const flattenedRevisions = (): flatRevisions[] => {
         const result: flatRevisions[] = []
@@ -205,6 +207,7 @@ export const ChangeHistory = ({
     const revisedItems: AccordionItemProps[] = revisionHistory.map((r) => {
         const { content, title } = buildChangeHistoryInfo(
             r,
+            contractSubmissionType!,
             revisionHistory,
             contract
         )

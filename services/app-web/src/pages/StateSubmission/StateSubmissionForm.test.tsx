@@ -54,14 +54,19 @@ describe('StateSubmissionForm', () => {
                             }),
                         ],
                     },
-                    routerProvider: { route: '/submissions/15/edit/type' },
+                    routerProvider: {
+                        route: `/submissions/${contract.contractSubmissionType}/15/edit/type`,
+                    },
                     location: (location) => (testLocation = location),
                 }
             )
 
             await waitFor(() => {
                 expect(testLocation.pathname).toBe(
-                    generatePath(RoutesRecord.SUBMISSIONS_SUMMARY, { id: '15' })
+                    generatePath(RoutesRecord.SUBMISSIONS_SUMMARY, {
+                        id: '15',
+                        contractSubmissionType: 'HEALTH_PLAN',
+                    })
                 )
             })
         })
@@ -104,7 +109,9 @@ describe('StateSubmissionForm', () => {
                             }),
                         ],
                     },
-                    routerProvider: { route: '/submissions/15/edit/type' },
+                    routerProvider: {
+                        route: `/submissions/${mockDraft.contractSubmissionType}/15/edit/type`,
+                    },
                 }
             )
 
@@ -154,7 +161,7 @@ describe('StateSubmissionForm', () => {
                         ],
                     },
                     routerProvider: {
-                        route: '/submissions/12/edit/contract-details',
+                        route: `/submissions/${mockContract.contractSubmissionType}/12/edit/contract-details`,
                     },
                     featureFlags: {
                         'hide-supporting-docs-page': true,
@@ -201,7 +208,7 @@ describe('StateSubmissionForm', () => {
                         ],
                     },
                     routerProvider: {
-                        route: '/submissions/15/edit/review-and-submit',
+                        route: `/submissions/${mockContract.contractSubmissionType}/15/edit/review-and-submit`,
                     },
                 }
             )
@@ -260,7 +267,9 @@ describe('StateSubmissionForm', () => {
                             }),
                         ],
                     },
-                    routerProvider: { route: '/submissions/15/edit/type' },
+                    routerProvider: {
+                        route: `/submissions/${mockSubmission.contractSubmissionType}/15/edit/type`,
+                    },
                 }
             )
 
@@ -328,7 +337,9 @@ describe('StateSubmissionForm', () => {
                             }),
                         ],
                     },
-                    routerProvider: { route: '/submissions/15/edit/type' },
+                    routerProvider: {
+                        route: `/submissions/${mockSubmission.contractSubmissionType}/15/edit/type`,
+                    },
                 }
             )
             await waitFor(() =>
@@ -376,7 +387,9 @@ describe('StateSubmissionForm', () => {
                             }),
                         ],
                     },
-                    routerProvider: { route: '/submissions/15/edit/type' },
+                    routerProvider: {
+                        route: `/submissions/${mockSubmission.contractSubmissionType}/15/edit/type`,
+                    },
                 }
             )
 
@@ -411,7 +424,7 @@ describe('StateSubmissionForm', () => {
                         ],
                     },
                     routerProvider: {
-                        route: '/submissions/15/edit/contract-details',
+                        route: `/submissions/${mockSubmission.contractSubmissionType}/15/edit/contract-details`,
                     },
                 }
             )
@@ -454,7 +467,9 @@ describe('StateSubmissionForm', () => {
                             }),
                         ],
                     },
-                    routerProvider: { route: '/submissions/15/edit/type' },
+                    routerProvider: {
+                        route: `/submissions/${mockSubmission.contractSubmissionType}/15/edit/type`,
+                    },
                 }
             )
 
@@ -499,7 +514,9 @@ describe('StateSubmissionForm', () => {
                             }),
                         ],
                     },
-                    routerProvider: { route: '/submissions/404/edit/type' },
+                    routerProvider: {
+                        route: '/submissions/health-plan/404/edit/type',
+                    },
                 }
             )
 
@@ -561,7 +578,7 @@ describe('StateSubmissionForm', () => {
                         ],
                     },
                     routerProvider: {
-                        route: '/submissions/15/edit/contract-details',
+                        route: `/submissions/${mockSubmission.contractSubmissionType}/15/edit/contract-details`,
                     },
                     featureFlags: {
                         'hide-supporting-docs-page': true,
@@ -634,7 +651,7 @@ describe('StateSubmissionForm', () => {
                         ],
                     },
                     routerProvider: {
-                        route: '/submissions/12/edit/contract-details',
+                        route: `/submissions/${mockSubmission.contractSubmissionType}/12/edit/contract-details`,
                     },
                 }
             )

@@ -1,3 +1,5 @@
+import { ContractSubmissionTypeRecord } from "../../../utils/general-test-utils"
+
 describe.only('documents', () => {
     beforeEach(() => {
         cy.stubFeatureFlags()
@@ -11,10 +13,11 @@ describe.only('documents', () => {
             // Navigate to documents page
             cy.location().then((fullUrl) => {
                 const { pathname } = fullUrl
-                const draftSubmissionID = pathname.split('/')[2]
+                const draftSubmissionID = pathname.split('/')[3]
+                const draftContractSubType = pathname.split('/')[2]
 
                 cy.navigateFormByDirectLink(
-                    `/submissions/${draftSubmissionID}/edit/type`
+                    `/submissions/${ContractSubmissionTypeRecord[draftContractSubType]}/${draftSubmissionID}/edit/type`
                 )
                 cy.navigateContractForm('CONTINUE')
 

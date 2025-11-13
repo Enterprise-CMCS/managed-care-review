@@ -36,13 +36,15 @@ describe('SubmissionRevisionSummary', () => {
                                         mockContractPackageSubmittedWithRevisions(
                                             {
                                                 id: '15',
+                                                contractSubmissionType:
+                                                    'HEALTH_PLAN',
                                             }
                                         ),
                                 }),
                             ],
                         },
                         routerProvider: {
-                            route: '/submissions/15/revisions/2',
+                            route: '/submissions/health-plan/15/revisions/2',
                         },
                         featureFlags: {},
                     }
@@ -82,13 +84,15 @@ describe('SubmissionRevisionSummary', () => {
                                         mockContractPackageSubmittedWithRevisions(
                                             {
                                                 id: '15',
+                                                contractSubmissionType:
+                                                    'HEALTH_PLAN',
                                             }
                                         ),
                                 }),
                             ],
                         },
                         routerProvider: {
-                            route: '/submissions/15/revisions/2',
+                            route: '/submissions/health-plan/15/revisions/2',
                         },
                         featureFlags: {},
                     }
@@ -132,13 +136,15 @@ describe('SubmissionRevisionSummary', () => {
                                         mockContractPackageSubmittedWithRevisions(
                                             {
                                                 id: '15',
+                                                contractSubmissionType:
+                                                    'HEALTH_PLAN',
                                             }
                                         ),
                                 }),
                             ],
                         },
                         routerProvider: {
-                            route: '/submissions/15/revisions/2',
+                            route: '/submissions/health-plan/15/revisions/2',
                         },
                         featureFlags: {},
                     }
@@ -184,13 +190,15 @@ describe('SubmissionRevisionSummary', () => {
                                         mockContractPackageSubmittedWithRevisions(
                                             {
                                                 id: '15',
+                                                contractSubmissionType:
+                                                    'HEALTH_PLAN',
                                             }
                                         ),
                                 }),
                             ],
                         },
                         routerProvider: {
-                            route: '/submissions/15/revisions/1',
+                            route: '/submissions/health-plan/15/revisions/1',
                         },
                         featureFlags: {},
                     }
@@ -226,13 +234,15 @@ describe('SubmissionRevisionSummary', () => {
                                         mockContractPackageSubmittedWithRevisions(
                                             {
                                                 id: '15',
+                                                contractSubmissionType:
+                                                    'HEALTH_PLAN',
                                             }
                                         ),
                                 }),
                             ],
                         },
                         routerProvider: {
-                            route: '/submissions/15/revisions/3',
+                            route: '/submissions/health-plan/15/revisions/3',
                         },
                         featureFlags: {},
                     }
@@ -268,13 +278,15 @@ describe('SubmissionRevisionSummary', () => {
                                         mockContractPackageSubmittedWithRevisions(
                                             {
                                                 id: '15',
+                                                contractSubmissionType:
+                                                    'HEALTH_PLAN',
                                             }
                                         ),
                                 }),
                             ],
                         },
                         routerProvider: {
-                            route: '/submissions/15/revisions/4',
+                            route: '/submissions/health-plan/15/revisions/4',
                         },
                         featureFlags: {},
                     }
@@ -308,7 +320,7 @@ describe('SubmissionRevisionSummary', () => {
                             ],
                         },
                         routerProvider: {
-                            route: `/submissions/${mockContract.id}/revisions/1`,
+                            route: `/submissions/${mockContract.contractSubmissionType}/${mockContract.id}/revisions/1`,
                         },
                         featureFlags: {},
                     }

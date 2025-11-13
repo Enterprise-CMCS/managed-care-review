@@ -266,7 +266,7 @@ describe('sendWithdrawnRateStateEmail', () => {
         // expect View the submission link
         expect(template.bodyHTML).toEqual(
             expect.stringContaining(
-                '<a href="http://localhost/submissions/parent-contract">View the submission in MC-Review</a>'
+                '<a href="http://localhost/submissions/health-plan/parent-contract">View the submission in MC-Review</a>'
             )
         )
     })

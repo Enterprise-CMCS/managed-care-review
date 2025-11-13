@@ -112,6 +112,7 @@ export const validateAndParseWithdrawnRate = (
 
             const submissionURL = submissionSummaryURL(
                 contract.id,
+                contract.contractSubmissionType,
                 config.baseUrl
             )
 

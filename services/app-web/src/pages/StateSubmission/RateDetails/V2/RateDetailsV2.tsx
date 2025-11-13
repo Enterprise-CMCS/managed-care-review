@@ -140,7 +140,7 @@ const RateDetails = ({
 
     const newRateNameRef = React.useRef<HTMLElement | null>(null)
     const [newRateButtonRef, setNewRateButtonFocus] = useFocus() // This ref.current is always the same element
-    const { id } = useRouteParams()
+    const { id, contractSubmissionType } = useRouteParams()
 
     // API requests
     const {
@@ -306,7 +306,8 @@ const RateDetails = ({
                 if (options.redirectPath) {
                     navigate(
                         generatePath(RoutesRecord[options.redirectPath], {
-                            id: id,
+                            id,
+                            contractSubmissionType,
                         })
                     )
                 }
@@ -346,7 +347,10 @@ const RateDetails = ({
                 })
                 if (options.type !== 'SAVE_AS_DRAFT' && options.redirectPath) {
                     navigate(
-                        generatePath(RoutesRecord[options.redirectPath], { id })
+                        generatePath(RoutesRecord[options.redirectPath], {
+                            id,
+                            contractSubmissionType,
+                        })
                     )
                 }
                 setDraftSaved(true)
@@ -362,7 +366,10 @@ const RateDetails = ({
         } else {
             if (options.redirectPath) {
                 navigate(
-                    generatePath(RoutesRecord[options.redirectPath], { id })
+                    generatePath(RoutesRecord[options.redirectPath], {
+                        id,
+                        contractSubmissionType,
+                    })
                 )
             }
         }
@@ -776,7 +783,10 @@ const RateDetails = ({
                                             ? RoutesRecord.DASHBOARD_SUBMISSIONS
                                             : generatePath(
                                                   RoutesRecord.SUBMISSIONS_CONTRACT_DETAILS,
-                                                  { id }
+                                                  {
+                                                      id,
+                                                      contractSubmissionType,
+                                                  }
                                               )
                                     }
                                     saveAsDraftOnClickUrl={
@@ -785,7 +795,13 @@ const RateDetails = ({
                                     continueOnClickUrl={
                                         displayAsStandaloneRate
                                             ? RoutesRecord.DASHBOARD_SUBMISSIONS
-                                            : '/edit/contacts'
+                                            : generatePath(
+                                                  RoutesRecord.SUBMISSIONS_CONTACTS,
+                                                  {
+                                                      id,
+                                                      contractSubmissionType,
+                                                  }
+                                              )
                                     }
                                 />
                             </UswdsForm>

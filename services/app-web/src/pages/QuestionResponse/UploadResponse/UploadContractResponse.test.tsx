@@ -49,18 +49,20 @@ describe('UploadContractResponse', () => {
                             contract: {
                                 ...contract,
                                 id: '15',
+                                contractSubmissionType: 'HEALTH_PLAN',
                             },
                         }),
                         fetchContractWithQuestionsMockSuccess({
                             contract: {
                                 ...contract,
                                 id: '15',
+                                contractSubmissionType: 'HEALTH_PLAN',
                             },
                         }),
                     ],
                 },
                 routerProvider: {
-                    route: `/submissions/15/question-and-answers/${division}/${questionID}/upload-response`,
+                    route: `/submissions/health-plan/15/question-and-answers/${division}/${questionID}/upload-response`,
                 },
             }
         )
@@ -99,18 +101,20 @@ describe('UploadContractResponse', () => {
                             contract: {
                                 ...contract,
                                 id: '15',
+                                contractSubmissionType: 'HEALTH_PLAN',
                             },
                         }),
                         fetchContractWithQuestionsMockSuccess({
                             contract: {
                                 ...contract,
                                 id: '15',
+                                contractSubmissionType: 'HEALTH_PLAN',
                             },
                         }),
                     ],
                 },
                 routerProvider: {
-                    route: `/submissions/15/question-and-answers/dmco/${questionID}/upload-response`,
+                    route: `/submissions/health-plan/15/question-and-answers/dmco/${questionID}/upload-response`,
                 },
             }
         )
@@ -157,18 +161,20 @@ describe('UploadContractResponse', () => {
                             contract: {
                                 ...contract,
                                 id: '15',
+                                contractSubmissionType: 'HEALTH_PLAN',
                             },
                         }),
                         fetchContractWithQuestionsMockSuccess({
                             contract: {
                                 ...contract,
                                 id: '15',
+                                contractSubmissionType: 'HEALTH_PLAN',
                             },
                         }),
                     ],
                 },
                 routerProvider: {
-                    route: `/submissions/15/question-and-answers/dmco/${questionID}/upload-response`,
+                    route: `/submissions/health-plan/15/question-and-answers/dmco/${questionID}/upload-response`,
                 },
             }
         )
@@ -214,18 +220,20 @@ describe('UploadContractResponse', () => {
                             contract: {
                                 ...contract,
                                 id: '15',
+                                contractSubmissionType: 'HEALTH_PLAN',
                             },
                         }),
                         fetchContractWithQuestionsMockSuccess({
                             contract: {
                                 ...contract,
                                 id: '15',
+                                contractSubmissionType: 'HEALTH_PLAN',
                             },
                         }),
                     ],
                 },
                 routerProvider: {
-                    route: `/submissions/15/question-and-answers/dmco/${questionID}/upload-response`,
+                    route: `/submissions/health-plan/15/question-and-answers/dmco/${questionID}/upload-response`,
                 },
             }
         )
@@ -275,18 +283,20 @@ describe('UploadContractResponse', () => {
                             contract: {
                                 ...contract,
                                 id: '15',
+                                contractSubmissionType: 'HEALTH_PLAN',
                             },
                         }),
                         fetchContractWithQuestionsMockSuccess({
                             contract: {
                                 ...contract,
                                 id: '15',
+                                contractSubmissionType: 'HEALTH_PLAN',
                             },
                         }),
                     ],
                 },
                 routerProvider: {
-                    route: `/submissions/15/question-and-answers/dmco/${questionID}/upload-response`,
+                    route: `/submissions/health-plan/15/question-and-answers/dmco/${questionID}/upload-response`,
                 },
             }
         )
@@ -347,19 +357,21 @@ describe('UploadContractResponse', () => {
                             contract: {
                                 ...contract,
                                 id: '15',
+                                contractSubmissionType: 'HEALTH_PLAN',
                             },
                         }),
                         fetchContractWithQuestionsMockSuccess({
                             contract: {
                                 ...contract,
                                 id: '15',
+                                contractSubmissionType: 'HEALTH_PLAN',
                             },
                         }),
                         createContractQuestionResponseNetworkFailure(),
                     ],
                 },
                 routerProvider: {
-                    route: `/submissions/15/question-and-answers/dmco/${questionID}/upload-response`,
+                    route: `/submissions/health-plan/15/question-and-answers/dmco/${questionID}/upload-response`,
                 },
             }
         )
@@ -408,18 +420,20 @@ describe('UploadContractResponse', () => {
                                 contract: {
                                     ...contract,
                                     id: '15',
+                                    contractSubmissionType: 'HEALTH_PLAN',
                                 },
                             }),
                             fetchContractWithQuestionsMockSuccess({
                                 contract: {
                                     ...contract,
                                     id: '15',
+                                    contractSubmissionType: 'HEALTH_PLAN',
                                 },
                             }),
                         ],
                     },
                     routerProvider: {
-                        route: `/submissions/15/question-and-answers/${division}/${questionID}/upload-response`,
+                        route: `/submissions/health-plan/15/question-and-answers/${division}/${questionID}/upload-response`,
                     },
                 }
             )

@@ -4,6 +4,7 @@ import {
     mockMNState,
 } from '../../testHelpers/emailerHelpers'
 import { packageName } from '@mc-review/submissions'
+import { ContractSubmissionTypeRecord } from '@mc-review/constants'
 import { newContractStateEmail } from './index'
 import { formatEmailAddresses } from '../formatters'
 import type { ContractType, RateFormDataType } from '../../domain-models'
@@ -181,6 +182,52 @@ test('includes mcog, rate, and team email addresses', async () => {
     )
 })
 
+test('includes contract submission type', async () => {
+    const sub = mockContract()
+    const defaultStatePrograms = mockMNState().programs
+    const name = packageName(
+        sub.stateCode,
+        sub.stateNumber,
+        sub.packageSubmissions[0].contractRevision.formData.programIDs,
+        defaultStatePrograms
+    )
+
+    const template = await newContractStateEmail(
+        sub,
+        defaultSubmitters,
+        testEmailConfig(),
+        defaultStatePrograms
+    )
+
+    if (template instanceof Error) {
+        throw template
+    }
+
+    expect(template).toEqual(
+        expect.objectContaining({
+            bodyText: expect.stringContaining(`Contract type: Health plan`),
+        })
+    )
+    expect(template).toEqual(
+        expect.objectContaining({
+            subject: expect.stringContaining(`${name} was sent to CMS`),
+            bodyText: expect.stringContaining(
+                `please reach out to rates@example.com`
+            ),
+        })
+    )
+    expect(template).toEqual(
+        expect.objectContaining({
+            subject: expect.stringContaining(`${name} was sent to CMS`),
+            bodyText: expect.stringContaining(
+                `please reach out to ${formatEmailAddresses(
+                    testEmailConfig().helpDeskEmail
+                )}`
+            ),
+        })
+    )
+})
+
 test('includes link to submission', async () => {
     const sub = mockContract()
     sub.packageSubmissions[0].contractRevision.formData.contractType =
@@ -200,14 +247,14 @@ test('includes link to submission', async () => {
     expect(template).toEqual(
         expect.objectContaining({
             bodyText: expect.stringContaining(
-                `http://localhost/submissions/${sub.id}`
+                `http://localhost/submissions/${ContractSubmissionTypeRecord[sub.contractSubmissionType]}/${sub.id}`
             ),
         })
     )
     expect(template).toEqual(
         expect.objectContaining({
             bodyHTML: expect.stringContaining(
-                `href="http://localhost/submissions/${sub.id}"`
+                `href="http://localhost/submissions/${ContractSubmissionTypeRecord[sub.contractSubmissionType]}/${sub.id}"`
             ),
         })
     )

@@ -28,6 +28,7 @@ describe('SubmissionSummary', () => {
             it('renders submission unlocked banner for CMS user', async () => {
                 const contract = mockContractPackageUnlockedWithUnlockedType({
                     id: 'test-abc-123',
+                    contractSubmissionType: 'HEALTH_PLAN',
                 })
 
                 renderWithProviders(
@@ -55,7 +56,7 @@ describe('SubmissionSummary', () => {
                             ],
                         },
                         routerProvider: {
-                            route: '/submissions/test-abc-123',
+                            route: '/submissions/health-plan/test-abc-123',
                         },
                         featureFlags: {},
                     }
@@ -86,6 +87,7 @@ describe('SubmissionSummary', () => {
             it('pulls the right version of UNLOCKED data for CMS users', async () => {
                 const contract = mockContractPackageUnlockedWithUnlockedType({
                     id: 'test-abc-123',
+                    contractSubmissionType: 'HEALTH_PLAN',
                 })
 
                 renderWithProviders(
@@ -119,7 +121,7 @@ describe('SubmissionSummary', () => {
                             ],
                         },
                         routerProvider: {
-                            route: '/submissions/test-abc-123',
+                            route: '/submissions/health-plan/test-abc-123',
                         },
                         featureFlags: {},
                     }
@@ -144,6 +146,7 @@ describe('SubmissionSummary', () => {
             it('displays the legacy shared rates across submissions UI for CMS users when unlocked', async () => {
                 const contract = mockContractPackageUnlockedWithUnlockedType({
                     id: 'test-abc-123',
+                    contractSubmissionType: 'HEALTH_PLAN',
                 })
 
                 renderWithProviders(
@@ -171,7 +174,7 @@ describe('SubmissionSummary', () => {
                             ],
                         },
                         routerProvider: {
-                            route: '/submissions/test-abc-123',
+                            route: '/submissions/health-plan/test-abc-123',
                         },
                         featureFlags: {},
                     }
@@ -184,8 +187,10 @@ describe('SubmissionSummary', () => {
             })
 
             it('renders add mccrs-id link for CMS user', async () => {
-                const contract =
-                    mockContractPackageSubmittedWithQuestions('test-abc-123')
+                const contract = mockContractPackageSubmittedWithQuestions(
+                    'test-abc-123',
+                    { contractSubmissionType: 'HEALTH_PLAN' }
+                )
 
                 renderWithProviders(
                     <Routes>
@@ -215,7 +220,7 @@ describe('SubmissionSummary', () => {
                             ],
                         },
                         routerProvider: {
-                            route: '/submissions/test-abc-123',
+                            route: '/submissions/health-plan/test-abc-123',
                         },
                         featureFlags: {},
                     }
@@ -232,6 +237,7 @@ describe('SubmissionSummary', () => {
                     'test-abc-123',
                     {
                         mccrsID: '1234',
+                        contractSubmissionType: 'HEALTH_PLAN',
                     }
                 )
                 renderWithProviders(
@@ -268,7 +274,7 @@ describe('SubmissionSummary', () => {
                             ],
                         },
                         routerProvider: {
-                            route: '/submissions/test-abc-123',
+                            route: '/submissions/health-plan/test-abc-123',
                         },
                         featureFlags: {},
                     }
@@ -286,6 +292,7 @@ describe('SubmissionSummary', () => {
             it('renders document download warning banner', async () => {
                 const contract = mockContractPackageSubmitted({
                     id: 'test-abc-123',
+                    contractSubmissionType: 'HEALTH_PLAN',
                 })
                 contract.packageSubmissions[0].contractRevision.documentZipPackages =
                     undefined
@@ -314,7 +321,7 @@ describe('SubmissionSummary', () => {
                             ],
                         },
                         routerProvider: {
-                            route: '/submissions/test-abc-123',
+                            route: '/submissions/health-plan/test-abc-123',
                         },
                         featureFlags: {},
                     }
@@ -336,6 +343,7 @@ describe('SubmissionSummary', () => {
             it('renders back to dashboard link for CMS users', async () => {
                 const contract = mockContractPackageUnlockedWithUnlockedType({
                     id: 'test-abc-123',
+                    contractSubmissionType: 'HEALTH_PLAN',
                 })
 
                 renderWithProviders(
@@ -363,7 +371,7 @@ describe('SubmissionSummary', () => {
                             ],
                         },
                         routerProvider: {
-                            route: '/submissions/test-abc-123',
+                            route: '/submissions/health-plan/test-abc-123',
                         },
                         featureFlags: {},
                     }
@@ -377,8 +385,10 @@ describe('SubmissionSummary', () => {
             })
 
             it('renders the sidenav for CMS users', async () => {
-                const contract =
-                    mockContractPackageSubmittedWithQuestions('test-abc-123')
+                const contract = mockContractPackageSubmittedWithQuestions(
+                    'test-abc-123',
+                    { contractSubmissionType: 'HEALTH_PLAN' }
+                )
 
                 renderWithProviders(
                     <Routes>
@@ -408,7 +418,7 @@ describe('SubmissionSummary', () => {
                             ],
                         },
                         routerProvider: {
-                            route: '/submissions/test-abc-123',
+                            route: '/submissions/health-plan/test-abc-123',
                         },
                         featureFlags: {},
                     }
@@ -422,6 +432,7 @@ describe('SubmissionSummary', () => {
             it('renders incomplete submission UI on submitted submission', async () => {
                 const contract = mockContractPackageSubmitted({
                     id: 'test-abc-123',
+                    contractSubmissionType: 'HEALTH_PLAN',
                 })
                 contract.packageSubmissions[0].rateRevisions = []
 
@@ -450,7 +461,7 @@ describe('SubmissionSummary', () => {
                             ],
                         },
                         routerProvider: {
-                            route: '/submissions/test-abc-123',
+                            route: '/submissions/health-plan/test-abc-123',
                         },
                         featureFlags: {},
                     }
@@ -477,6 +488,7 @@ describe('SubmissionSummary', () => {
                     const contract =
                         mockContractPackageUnlockedWithUnlockedType({
                             id: 'test-abc-123',
+                            contractSubmissionType: 'HEALTH_PLAN',
                         })
 
                     contract.draftRevision!.formData.submissionDescription =
@@ -509,7 +521,7 @@ describe('SubmissionSummary', () => {
                                 ],
                             },
                             routerProvider: {
-                                route: '/submissions/test-abc-123',
+                                route: '/submissions/health-plan/test-abc-123',
                             },
                             featureFlags: {},
                         }
@@ -526,10 +538,12 @@ describe('SubmissionSummary', () => {
 
             describe('CMS user unlock submission', () => {
                 it('renders the unlock button', async () => {
-                    const contract =
-                        mockContractPackageSubmittedWithQuestions(
-                            'test-abc-123'
-                        )
+                    const contract = mockContractPackageSubmittedWithQuestions(
+                        'test-abc-123',
+                        {
+                            contractSubmissionType: 'HEALTH_PLAN',
+                        }
+                    )
 
                     renderWithProviders(
                         <Routes>
@@ -556,7 +570,7 @@ describe('SubmissionSummary', () => {
                                 ],
                             },
                             routerProvider: {
-                                route: '/submissions/test-abc-123',
+                                route: '/submissions/health-plan/test-abc-123',
                             },
                             featureFlags: {
                                 'undo-withdraw-submission': true,
@@ -587,6 +601,7 @@ describe('SubmissionSummary', () => {
                         mockContractPackageUnlockedWithUnlockedType({
                             id: 'test-abc-123',
                             initiallySubmittedAt: earlyMorningET.toDate(),
+                            contractSubmissionType: 'HEALTH_PLAN',
                         })
 
                     renderWithProviders(
@@ -614,7 +629,7 @@ describe('SubmissionSummary', () => {
                                 ],
                             },
                             routerProvider: {
-                                route: '/submissions/test-abc-123',
+                                route: '/submissions/health-plan/test-abc-123',
                             },
                             featureFlags: {
                                 'undo-withdraw-submission': true,
@@ -630,6 +645,7 @@ describe('SubmissionSummary', () => {
                 it('extracts the correct document dates from the submission and displays them in tables', async () => {
                     const contract = mockContractPackageSubmitted({
                         id: 'test-abc-123',
+                        contractSubmissionType: 'HEALTH_PLAN',
                     })
                     renderWithProviders(
                         <Routes>
@@ -656,7 +672,7 @@ describe('SubmissionSummary', () => {
                                 ],
                             },
                             routerProvider: {
-                                route: '/submissions/test-abc-123',
+                                route: '/submissions/health-plan/test-abc-123',
                             },
                             featureFlags: {
                                 'undo-withdraw-submission': true,
@@ -704,6 +720,7 @@ describe('SubmissionSummary', () => {
                     const contract =
                         mockContractPackageUnlockedWithUnlockedType({
                             id: 'test-abc-123',
+                            contractSubmissionType: 'HEALTH_PLAN',
                         })
 
                     renderWithProviders(
@@ -731,7 +748,7 @@ describe('SubmissionSummary', () => {
                                 ],
                             },
                             routerProvider: {
-                                route: '/submissions/test-abc-123',
+                                route: '/submissions/health-plan/test-abc-123',
                             },
                             featureFlags: {
                                 'undo-withdraw-submission': true,
@@ -774,13 +791,15 @@ describe('SubmissionSummary', () => {
                                             mockContractPackageUnlockedWithUnlockedType(
                                                 {
                                                     id: '15',
+                                                    contractSubmissionType:
+                                                        'HEALTH_PLAN',
                                                 }
                                             ),
                                     }),
                                 ],
                             },
                             routerProvider: {
-                                route: '/submissions/15',
+                                route: '/submissions/health-plan/15',
                             },
                             featureFlags: {
                                 'undo-withdraw-submission': true,
@@ -813,6 +832,7 @@ describe('SubmissionSummary', () => {
                     const contract =
                         mockContractPackageUnlockedWithUnlockedType({
                             id: 'test-abc-123',
+                            contractSubmissionType: 'HEALTH_PLAN',
                         })
                     contract.packageSubmissions[0].rateRevisions = []
 
@@ -841,7 +861,7 @@ describe('SubmissionSummary', () => {
                                 ],
                             },
                             routerProvider: {
-                                route: '/submissions/test-abc-123',
+                                route: '/submissions/health-plan/test-abc-123',
                             },
                             featureFlags: {
                                 'undo-withdraw-submission': true,
@@ -888,10 +908,12 @@ describe('SubmissionSummary', () => {
 
             describe('submission approval tests', () => {
                 it('renders released to state button', async () => {
-                    const contract =
-                        mockContractPackageSubmittedWithQuestions(
-                            'test-abc-123'
-                        )
+                    const contract = mockContractPackageSubmittedWithQuestions(
+                        'test-abc-123',
+                        {
+                            contractSubmissionType: 'HEALTH_PLAN',
+                        }
+                    )
                     renderWithProviders(
                         <Routes>
                             <Route element={<SubmissionSideNav />}>
@@ -917,7 +939,7 @@ describe('SubmissionSummary', () => {
                                 ],
                             },
                             routerProvider: {
-                                route: '/submissions/test-abc-123',
+                                route: '/submissions/health-plan/test-abc-123',
                             },
                             featureFlags: {
                                 'undo-withdraw-submission': true,
@@ -952,6 +974,7 @@ describe('SubmissionSummary', () => {
                     const unlockedContract =
                         mockContractPackageUnlockedWithUnlockedType({
                             id: 'test-abc-123',
+                            contractSubmissionType: 'HEALTH_PLAN',
                         })
                     renderWithProviders(
                         <Routes>
@@ -978,7 +1001,7 @@ describe('SubmissionSummary', () => {
                                 ],
                             },
                             routerProvider: {
-                                route: '/submissions/test-abc-123',
+                                route: '/submissions/health-plan/test-abc-123',
                             },
                             featureFlags: {
                                 'undo-withdraw-submission': true,
@@ -1016,10 +1039,12 @@ describe('SubmissionSummary', () => {
                 })
 
                 it('does not render released to state button for an approved submission', async () => {
-                    const contract =
-                        mockContractPackageSubmittedWithQuestions(
-                            'test-abc-123'
-                        )
+                    const contract = mockContractPackageSubmittedWithQuestions(
+                        'test-abc-123',
+                        {
+                            contractSubmissionType: 'HEALTH_PLAN',
+                        }
+                    )
                     contract.reviewStatus = 'APPROVED'
                     contract.consolidatedStatus = 'APPROVED'
                     renderWithProviders(
@@ -1047,7 +1072,7 @@ describe('SubmissionSummary', () => {
                                 ],
                             },
                             routerProvider: {
-                                route: '/submissions/test-abc-123',
+                                route: '/submissions/health-plan/test-abc-123',
                             },
                             featureFlags: {
                                 'undo-withdraw-submission': true,
@@ -1088,6 +1113,7 @@ describe('SubmissionSummary', () => {
                             status: 'RESUBMITTED',
                             reviewStatus: 'APPROVED',
                             consolidatedStatus: 'APPROVED',
+                            contractSubmissionType: 'HEALTH_PLAN',
                             reviewStatusActions: [
                                 {
                                     actionType: 'MARK_AS_APPROVED',
@@ -1129,7 +1155,7 @@ describe('SubmissionSummary', () => {
                                 ],
                             },
                             routerProvider: {
-                                route: '/submissions/test-abc-123',
+                                route: '/submissions/health-plan/test-abc-123',
                             },
                             featureFlags: {
                                 'undo-withdraw-submission': true,
@@ -1152,7 +1178,9 @@ describe('SubmissionSummary', () => {
                 })
 
                 it('does not render the unlock submission button for an approved contract', async () => {
-                    const contract = mockContractPackageApproved()
+                    const contract = mockContractPackageApproved({
+                        contractSubmissionType: 'HEALTH_PLAN',
+                    })
                     renderWithProviders(
                         <Routes>
                             <Route element={<SubmissionSideNav />}>
@@ -1178,7 +1206,7 @@ describe('SubmissionSummary', () => {
                                 ],
                             },
                             routerProvider: {
-                                route: '/submissions/test-abc-123',
+                                route: '/submissions/health-plan/test-abc-123',
                             },
                             featureFlags: {
                                 'undo-withdraw-submission': true,
@@ -1210,10 +1238,12 @@ describe('SubmissionSummary', () => {
 
             describe('withdrawn submission tests', () => {
                 it('renders withdrawn submission button', async () => {
-                    const contract =
-                        mockContractPackageSubmittedWithQuestions(
-                            'test-abc-123'
-                        )
+                    const contract = mockContractPackageSubmittedWithQuestions(
+                        'test-abc-123',
+                        {
+                            contractSubmissionType: 'HEALTH_PLAN',
+                        }
+                    )
                     renderWithProviders(
                         <Routes>
                             <Route element={<SubmissionSideNav />}>
@@ -1239,7 +1269,7 @@ describe('SubmissionSummary', () => {
                                 ],
                             },
                             routerProvider: {
-                                route: '/submissions/test-abc-123',
+                                route: '/submissions/health-plan/test-abc-123',
                             },
                             featureFlags: {
                                 'withdraw-submission': true,
@@ -1280,10 +1310,12 @@ describe('SubmissionSummary', () => {
                 })
 
                 it('render undo withdraw button for a withdrawn submission', async () => {
-                    const contract =
-                        mockContractPackageSubmittedWithQuestions(
-                            'test-abc-123'
-                        )
+                    const contract = mockContractPackageSubmittedWithQuestions(
+                        'test-abc-123',
+                        {
+                            contractSubmissionType: 'HEALTH_PLAN',
+                        }
+                    )
                     contract.reviewStatus = 'WITHDRAWN'
                     contract.consolidatedStatus = 'WITHDRAWN'
                     renderWithProviders(
@@ -1311,7 +1343,7 @@ describe('SubmissionSummary', () => {
                                 ],
                             },
                             routerProvider: {
-                                route: '/submissions/test-abc-123',
+                                route: '/submissions/health-plan/test-abc-123',
                             },
                             featureFlags: {
                                 'undo-withdraw-submission': true,
@@ -1351,10 +1383,12 @@ describe('SubmissionSummary', () => {
 
             describe('undo withdrawal submission tests', () => {
                 it('renders undo withdraw submission button', async () => {
-                    const contract =
-                        mockContractPackageSubmittedWithQuestions(
-                            'test-abc-123'
-                        )
+                    const contract = mockContractPackageSubmittedWithQuestions(
+                        'test-abc-123',
+                        {
+                            contractSubmissionType: 'HEALTH_PLAN',
+                        }
+                    )
                     contract.reviewStatus = 'WITHDRAWN'
                     contract.consolidatedStatus = 'WITHDRAWN'
                     renderWithProviders(
@@ -1382,7 +1416,7 @@ describe('SubmissionSummary', () => {
                                 ],
                             },
                             routerProvider: {
-                                route: '/submissions/test-abc-123',
+                                route: '/submissions/health-plan/test-abc-123',
                             },
                             featureFlags: {
                                 'withdraw-submission': true,
@@ -1409,10 +1443,12 @@ describe('SubmissionSummary', () => {
                 })
 
                 it('render withdraw and other action buttons for a submission thats withdraw has been undone', async () => {
-                    const contract =
-                        mockContractPackageSubmittedWithQuestions(
-                            'test-abc-123'
-                        )
+                    const contract = mockContractPackageSubmittedWithQuestions(
+                        'test-abc-123',
+                        {
+                            contractSubmissionType: 'HEALTH_PLAN',
+                        }
+                    )
                     contract.reviewStatus = 'UNDER_REVIEW'
                     contract.consolidatedStatus = 'RESUBMITTED'
                     renderWithProviders(
@@ -1440,7 +1476,7 @@ describe('SubmissionSummary', () => {
                                 ],
                             },
                             routerProvider: {
-                                route: '/submissions/test-abc-123',
+                                route: '/submissions/health-plan/test-abc-123',
                             },
                             featureFlags: {
                                 'withdraw-submission': true,
@@ -1495,6 +1531,7 @@ describe('SubmissionSummary', () => {
                     'test-abc-123',
                     {
                         status: 'RESUBMITTED',
+                        contractSubmissionType: 'HEALTH_PLAN',
                         reviewStatus: 'UNDER_REVIEW',
                         consolidatedStatus: 'RESUBMITTED',
                         reviewStatusActions: [
@@ -1550,7 +1587,7 @@ describe('SubmissionSummary', () => {
                             ],
                         },
                         routerProvider: {
-                            route: '/submissions/test-abc-123?showTempUndoWithdrawBanner=true',
+                            route: '/submissions/health-plan/test-abc-123?showTempUndoWithdrawBanner=true',
                         },
                         featureFlags: {
                             'undo-withdraw-submission': true,
@@ -1578,8 +1615,10 @@ describe('SubmissionSummary', () => {
 
     describe('STATE_USER SubmissionSummary tests', () => {
         it('renders without errors', async () => {
-            const contract =
-                mockContractPackageSubmittedWithQuestions('test-abc-123')
+            const contract = mockContractPackageSubmittedWithQuestions(
+                'test-abc-123',
+                { contractSubmissionType: 'HEALTH_PLAN' }
+            )
 
             renderWithProviders(
                 <Routes>
@@ -1605,7 +1644,7 @@ describe('SubmissionSummary', () => {
                         ],
                     },
                     routerProvider: {
-                        route: '/submissions/test-abc-123',
+                        route: '/submissions/health-plan/test-abc-123',
                     },
                     featureFlags: {},
                 }
@@ -1618,6 +1657,7 @@ describe('SubmissionSummary', () => {
         it('renders submission updated banner', async () => {
             const contract = mockContractPackageSubmitted({
                 status: 'RESUBMITTED',
+                contractSubmissionType: 'HEALTH_PLAN',
             })
 
             renderWithProviders(
@@ -1644,7 +1684,7 @@ describe('SubmissionSummary', () => {
                         ],
                     },
                     routerProvider: {
-                        route: '/submissions/test-abc-123',
+                        route: '/submissions/health-plan/test-abc-123',
                     },
                     featureFlags: {},
                 }
@@ -1670,8 +1710,10 @@ describe('SubmissionSummary', () => {
         })
 
         it('does not render an add mccrs-id link for state user', async () => {
-            const contract =
-                mockContractPackageSubmittedWithQuestions('test-abc-123')
+            const contract = mockContractPackageSubmittedWithQuestions(
+                'test-abc-123',
+                { contractSubmissionType: 'HEALTH_PLAN' }
+            )
 
             renderWithProviders(
                 <Routes>
@@ -1698,7 +1740,7 @@ describe('SubmissionSummary', () => {
                         ],
                     },
                     routerProvider: {
-                        route: '/submissions/test-abc-123',
+                        route: '/submissions/health-plan/test-abc-123',
                     },
                     featureFlags: {},
                 }
@@ -1714,6 +1756,7 @@ describe('SubmissionSummary', () => {
             let testLocation: Location
             const contract = mockContractPackageUnlockedWithUnlockedType({
                 id: 'test-abc-123',
+                contractSubmissionType: 'HEALTH_PLAN',
             })
 
             renderWithProviders(
@@ -1745,7 +1788,7 @@ describe('SubmissionSummary', () => {
                         ],
                     },
                     routerProvider: {
-                        route: '/submissions/test-abc-123',
+                        route: '/submissions/health-plan/test-abc-123',
                     },
                     featureFlags: {},
                     location: (location) => (testLocation = location),
@@ -1755,14 +1798,17 @@ describe('SubmissionSummary', () => {
                 expect(testLocation.pathname).toBe(
                     generatePath(RoutesRecord.SUBMISSIONS_REVIEW_SUBMIT, {
                         id: 'test-abc-123',
+                        contractSubmissionType: 'health-plan',
                     })
                 )
             })
         })
 
         it('renders back to dashboard link for state users', async () => {
-            const contract =
-                mockContractPackageSubmittedWithQuestions('test-abc-123')
+            const contract = mockContractPackageSubmittedWithQuestions(
+                'test-abc-123',
+                { contractSubmissionType: 'HEALTH_PLAN' }
+            )
 
             renderWithProviders(
                 <Routes>
@@ -1788,7 +1834,7 @@ describe('SubmissionSummary', () => {
                         ],
                     },
                     routerProvider: {
-                        route: '/submissions/test-abc-123',
+                        route: '/submissions/health-plan/test-abc-123',
                     },
                     featureFlags: {},
                 }
@@ -1807,8 +1853,10 @@ describe('SubmissionSummary', () => {
         })
 
         it('renders the sidenav for State users', async () => {
-            const contract =
-                mockContractPackageSubmittedWithQuestions('test-abc-123')
+            const contract = mockContractPackageSubmittedWithQuestions(
+                'test-abc-123',
+                { contractSubmissionType: 'HEALTH_PLAN' }
+            )
 
             renderWithProviders(
                 <Routes>
@@ -1835,7 +1883,7 @@ describe('SubmissionSummary', () => {
                         ],
                     },
                     routerProvider: {
-                        route: '/submissions/test-abc-123',
+                        route: '/submissions/health-plan/test-abc-123',
                     },
                     featureFlags: {},
                 }
@@ -1849,6 +1897,7 @@ describe('SubmissionSummary', () => {
         it('renders incomplete submission UI on submitted submission', async () => {
             const contract = mockContractPackageSubmitted({
                 id: 'test-abc-123',
+                contractSubmissionType: 'HEALTH_PLAN',
             })
             contract.packageSubmissions[0].rateRevisions = []
 
@@ -1877,7 +1926,7 @@ describe('SubmissionSummary', () => {
                         ],
                     },
                     routerProvider: {
-                        route: '/submissions/test-abc-123',
+                        route: '/submissions/health-plan/test-abc-123',
                     },
                     featureFlags: {},
                 }
@@ -1904,8 +1953,10 @@ describe('SubmissionSummary', () => {
         })
 
         it(`does not render released to state button`, async () => {
-            const contract =
-                mockContractPackageSubmittedWithQuestions('test-abc-123')
+            const contract = mockContractPackageSubmittedWithQuestions(
+                'test-abc-123',
+                { contractSubmissionType: 'HEALTH_PLAN' }
+            )
             renderWithProviders(
                 <Routes>
                     <Route element={<SubmissionSideNav />}>
@@ -1931,7 +1982,7 @@ describe('SubmissionSummary', () => {
                         ],
                     },
                     routerProvider: {
-                        route: '/submissions/test-abc-123',
+                        route: '/submissions/health-plan/test-abc-123',
                     },
                 }
             )
@@ -1957,6 +2008,7 @@ describe('SubmissionSummary', () => {
                 'test-abc-123',
                 {
                     status: 'RESUBMITTED',
+                    contractSubmissionType: 'HEALTH_PLAN',
                     reviewStatus: 'APPROVED',
                     consolidatedStatus: 'APPROVED',
                     reviewStatusActions: [
@@ -2001,7 +2053,7 @@ describe('SubmissionSummary', () => {
                         ],
                     },
                     routerProvider: {
-                        route: '/submissions/test-abc-123',
+                        route: '/submissions/health-plan/test-abc-123',
                     },
                 }
             )
@@ -2027,8 +2079,10 @@ describe('SubmissionSummary', () => {
         '$userRole submission tests',
         ({ mockUser }) => {
             it(`does not render released to state button`, async () => {
-                const contract =
-                    mockContractPackageSubmittedWithQuestions('test-abc-123')
+                const contract = mockContractPackageSubmittedWithQuestions(
+                    'test-abc-123',
+                    { contractSubmissionType: 'HEALTH_PLAN' }
+                )
                 renderWithProviders(
                     <Routes>
                         <Route element={<SubmissionSideNav />}>
@@ -2054,7 +2108,7 @@ describe('SubmissionSummary', () => {
                             ],
                         },
                         routerProvider: {
-                            route: '/submissions/test-abc-123',
+                            route: '/submissions/health-plan/test-abc-123',
                         },
                     }
                 )
@@ -2082,6 +2136,7 @@ describe('SubmissionSummary', () => {
                     'test-abc-123',
                     {
                         status: 'RESUBMITTED',
+                        contractSubmissionType: 'HEALTH_PLAN',
                         reviewStatus: 'APPROVED',
                         consolidatedStatus: 'APPROVED',
                         reviewStatusActions: [
@@ -2126,7 +2181,7 @@ describe('SubmissionSummary', () => {
                             ],
                         },
                         routerProvider: {
-                            route: '/submissions/test-abc-123',
+                            route: '/submissions/health-plan/test-abc-123',
                         },
                     }
                 )
@@ -2154,6 +2209,7 @@ describe('SubmissionSummary', () => {
             it('renders incomplete submission UI on submitted submission', async () => {
                 const contract = mockContractPackageSubmitted({
                     id: 'test-abc-123',
+                    contractSubmissionType: 'HEALTH_PLAN',
                 })
                 contract.packageSubmissions[0].rateRevisions = []
 
@@ -2182,7 +2238,7 @@ describe('SubmissionSummary', () => {
                             ],
                         },
                         routerProvider: {
-                            route: '/submissions/test-abc-123',
+                            route: '/submissions/health-plan/test-abc-123',
                         },
                         featureFlags: {},
                     }
@@ -2207,6 +2263,7 @@ describe('SubmissionSummary', () => {
             it('does not render incomplete submission UI on unlocked submission', async () => {
                 const contract = mockContractPackageUnlockedWithUnlockedType({
                     id: 'test-abc-123',
+                    contractSubmissionType: 'HEALTH_PLAN',
                 })
                 contract.packageSubmissions[0].rateRevisions = []
 
@@ -2235,7 +2292,7 @@ describe('SubmissionSummary', () => {
                             ],
                         },
                         routerProvider: {
-                            route: '/submissions/test-abc-123',
+                            route: '/submissions/health-plan/test-abc-123',
                         },
                         featureFlags: {},
                     }

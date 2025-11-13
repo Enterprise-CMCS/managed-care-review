@@ -1,3 +1,4 @@
+<b>Contract type</b>: <%= it.contractSubmissionType %><br />
 <b>Submission type</b>: <%= it.submissionType %><br />
 <b><%= it.contractDatesLabel %></b>: <%= it.contractDatesStart %> to <%= it.contractDatesEnd %><br />
 <% if (it.shouldIncludeRates) { %>

@@ -110,6 +110,7 @@ test('to addresses list includes submitter emails', async () => {
     const defaultStatePrograms = mockMNState().programs
     const template = await sendQuestionResponseStateEmail(
         sub,
+        'HEALTH_PLAN',
         testEmailConfig(),
         defaultSubmitters,
         defaultStatePrograms,
@@ -135,6 +136,7 @@ test('to addresses list includes all state contacts on submission', async () => 
     const defaultStatePrograms = mockMNState().programs
     const template = await sendQuestionResponseStateEmail(
         sub,
+        'HEALTH_PLAN',
         testEmailConfig(),
         defaultSubmitters,
         defaultStatePrograms,
@@ -178,6 +180,7 @@ test('to addresses list does not include duplicate state receiver emails on subm
     const defaultStatePrograms = mockMNState().programs
     const template = await sendQuestionResponseStateEmail(
         sub,
+        'HEALTH_PLAN',
         testEmailConfig(),
         defaultSubmitters,
         defaultStatePrograms,
@@ -208,6 +211,7 @@ test('subject line is correct and clearly states submission was successful', asy
 
     const template = await sendQuestionResponseStateEmail(
         sub,
+        'HEALTH_PLAN',
         testEmailConfig(),
         defaultSubmitters,
         defaultStatePrograms,
@@ -233,6 +237,7 @@ test('includes link to submission', async () => {
     const defaultStatePrograms = mockMNState().programs
     const template = await sendQuestionResponseStateEmail(
         sub,
+        'HEALTH_PLAN',
         testEmailConfig(),
         defaultSubmitters,
         defaultStatePrograms,
@@ -248,7 +253,7 @@ test('includes link to submission', async () => {
         expect.objectContaining({
             bodyText: expect.stringContaining('View response'),
             bodyHTML: expect.stringContaining(
-                `http://localhost/submissions/${sub.contract.id}/question-and-answer`
+                `http://localhost/submissions/health-plan/${sub.contract.id}/question-and-answer`
             ),
         })
     )
@@ -259,6 +264,7 @@ test('includes information about what to do next', async () => {
     const defaultStatePrograms = mockMNState().programs
     const template = await sendQuestionResponseStateEmail(
         sub,
+        'HEALTH_PLAN',
         testEmailConfig(),
         defaultSubmitters,
         defaultStatePrograms,
@@ -285,6 +291,7 @@ test('includes expected data', async () => {
 
     const template = await sendQuestionResponseStateEmail(
         sub,
+        'HEALTH_PLAN',
         testEmailConfig(),
         defaultSubmitters,
         defaultStatePrograms,
@@ -318,6 +325,7 @@ test('renders overall email for a new response as expected', async () => {
     const defaultStatePrograms = mockMNState().programs
     const result = await sendQuestionResponseStateEmail(
         sub,
+        'HEALTH_PLAN',
         testEmailConfig(),
         defaultSubmitters,
         defaultStatePrograms,

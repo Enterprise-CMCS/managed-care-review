@@ -18,6 +18,7 @@ import { assertAnError, assertAnErrorCode, must } from '../../testHelpers'
 import { testEmailConfig, testEmailer } from '../../testHelpers/emailerHelpers'
 import { CreateRateQuestionDocument } from '../../gen/gqlClient'
 import { withdrawTestRate } from '../../testHelpers/gqlRateHelpers'
+import { ContractSubmissionTypeRecord } from '@mc-review/constants'
 
 describe('createRateQuestion', () => {
     const cmsUser = testCMSUser()
@@ -330,7 +331,7 @@ describe('createRateQuestion', () => {
                     `CMS asked questions about ${rateRevision.formData.rateCertificationName}`
                 ),
                 bodyHTML: expect.stringContaining(
-                    `http://localhost/submissions/${submittedContractAndRate.id}/rates/${rateID}/question-and-answers`
+                    `http://localhost/submissions/${ContractSubmissionTypeRecord[submittedContractAndRate.contractSubmissionType]}/${submittedContractAndRate.id}/rates/${rateID}/question-and-answers`
                 ),
             })
         )

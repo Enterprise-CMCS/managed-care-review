@@ -246,6 +246,17 @@ async function unlockContractInsideTransaction(
                     titleRole: c.titleRole,
                 })),
             },
+
+            //EQRO submission fields only
+            eqroNewContractor: currentRev.eqroNewContractor,
+            eqroProvisionMcoNewOptionalActivity:
+                currentRev.eqroProvisionMcoNewOptionalActivity,
+            eqroProvisionNewMcoEqrRelatedActivities:
+                currentRev.eqroProvisionNewMcoEqrRelatedActivities,
+            eqroProvisionChipEqrRelatedActivities:
+                currentRev.eqroProvisionChipEqrRelatedActivities,
+            eqroProvisionMcoEqrOrRelatedActivities:
+                currentRev.eqroProvisionMcoEqrOrRelatedActivities,
         },
     })
 

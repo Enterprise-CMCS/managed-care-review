@@ -6,6 +6,6 @@ exports[`renders overall CMS email for a new state response as expected 1`] = `
 <b>Round:</b> 2<br />
 <b>Questions sent on:</b> 02/02/2024<br />
 <br />
-<a href="http://localhost/submissions/12345/question-and-answers">View submission Q&A</a>
+<a href="http://localhost/submissions/health-plan/12345/question-and-answers">View submission Q&A</a>
 "
 `;

@@ -23,7 +23,11 @@ import type {
 } from '../gen/gqlServer'
 import type { StateCodeType } from '@mc-review/submissions'
 import { addNewRateToTestContract } from './gqlRateHelpers'
-import type { ContractFormDataType, ContractType } from '../domain-models'
+import type {
+    ContractFormDataType,
+    ContractSubmissionType,
+    ContractType,
+} from '../domain-models'
 import { mockGqlContractDraftRevisionFormDataInput } from './gqlContractInputMocks'
 import type { GraphQLFormattedError } from 'graphql/index'
 import { extractGraphQLResponse } from './apolloV4ResponseHelper'
@@ -233,7 +237,8 @@ const fetchTestContractWithQuestions = async (
 const createTestContract = async (
     server: ApolloServer,
     stateCode?: StateCodeType,
-    formData?: Partial<ContractFormDataType>
+    formData?: Partial<ContractFormDataType>,
+    contractSubmissionType?: ContractSubmissionType
 ): Promise<Contract> => {
     const programs = stateCode
         ? [must(findStatePrograms(stateCode))[0]]
@@ -247,7 +252,7 @@ const createTestContract = async (
         submissionType: 'CONTRACT_ONLY',
         submissionDescription: 'A created submission',
         contractType: 'BASE',
-        contractSubmissionType: 'HEALTH_PLAN',
+        contractSubmissionType: contractSubmissionType ?? 'HEALTH_PLAN',
         ...formData,
     }
     const result = await executeGraphQLOperation(server, {
@@ -266,6 +271,84 @@ const createTestContract = async (
     }
 
     return result.data.createContract.contract
+}
+
+const createAndUpdateTestEQROContract = async (
+    server: ApolloServer,
+    stateCode?: StateCodeType,
+    contractFormDataOverrides?: Partial<ContractDraftRevisionFormDataInput>
+): Promise<Contract> => {
+    const draftContract = await createTestContract(
+        server,
+        stateCode,
+        undefined,
+        'EQRO'
+    )
+    const draftRevision = draftContract.draftRevision
+    const formData = draftRevision?.formData
+    if (!formData) {
+        throw new Error(
+            'Unexpected error: draft contract does not contain a draft revision.'
+        )
+    }
+
+    formData.submissionType = 'CONTRACT_ONLY' as const
+    formData.submissionDescription = 'A complete EQRO submission'
+    formData.stateContacts = [
+        {
+            name: 'test name',
+            titleRole: 'test title',
+            email: 'email@example.com',
+        },
+    ]
+    formData.contractType = 'BASE' as const
+    formData.contractDateStart = '2025-06-01'
+    formData.contractDateEnd = '2026-05-30'
+    formData.contractDocuments = [
+        {
+            name: 'contractDocument.pdf',
+            s3URL: 's3://bucketname/key/test1',
+            sha256: 'fakesha',
+            dateAdded: new Date('01/15/2024'),
+        },
+    ]
+    formData.managedCareEntities = ['MCO']
+    formData.populationCovered = 'MEDICAID' as const
+    formData.eqroNewContractor = true
+    formData.eqroProvisionChipEqrRelatedActivities = true
+    formData.eqroProvisionMcoEqrOrRelatedActivities = true
+    formData.eqroProvisionNewMcoEqrRelatedActivities = true
+    formData.eqroProvisionMcoNewOptionalActivity = true
+
+    //Remove these fields after we implement EQRO submission validations
+    formData.federalAuthorities = ['STATE_PLAN' as const]
+    formData.contractExecutionStatus = 'EXECUTED' as const
+    formData.modifiedRiskSharingStrategy = false
+    formData.modifiedIncentiveArrangements = false
+    formData.modifiedWitholdAgreements = false
+    formData.modifiedStateDirectedPayments = true
+    formData.modifiedPassThroughPayments = true
+    formData.modifiedPaymentsForMentalDiseaseInstitutions = true
+    formData.modifiedNonRiskPaymentArrangements = true
+    formData.modifiedBenefitsProvided = false
+    formData.modifiedGeoAreaServed = false
+    formData.modifiedMedicaidBeneficiaries = false
+    formData.modifiedMedicalLossRatioStandards = false
+    formData.modifiedOtherFinancialPaymentIncentive = false
+    formData.modifiedEnrollmentProcess = false
+    formData.modifiedGrevienceAndAppeal = false
+    formData.modifiedNetworkAdequacyStandards = false
+    formData.modifiedLengthOfContract = false
+
+    Object.assign(formData, contractFormDataOverrides)
+
+    await updateTestContractDraftRevision(
+        server,
+        draftContract.id,
+        draftRevision?.updatedAt,
+        formData
+    )
+    return await fetchTestContract(server, draftContract.id)
 }
 
 async function createAndUpdateTestContractWithRate(
@@ -601,4 +684,5 @@ export {
     undoWithdrawTestContract,
     contractHistoryToDescriptions,
     errorUndoWithdrawTestContract,
+    createAndUpdateTestEQROContract,
 }

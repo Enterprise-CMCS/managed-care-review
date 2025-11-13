@@ -119,6 +119,7 @@ const SubmissionsDashboard = (): React.ReactElement => {
                 submissionType:
                     SubmissionTypeRecord[displayRateFormData.submissionType],
                 stateName: sub.state.name,
+                contractSubmissionType: sub.contractSubmissionType,
             })
         })
 

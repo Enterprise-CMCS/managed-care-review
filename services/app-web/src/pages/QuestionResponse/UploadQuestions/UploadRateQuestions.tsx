@@ -23,10 +23,11 @@ export const UploadRateQuestions = () => {
     // router context
 
     const { updateHeading } = usePage()
-    const { id, division } = useParams<{
+    const { id, division, contractSubmissionType } = useParams<{
         division: string
         id: string
         rateID: string
+        contractSubmissionType: string
     }>()
     const navigate = useNavigate()
 
@@ -138,6 +139,7 @@ export const UploadRateQuestions = () => {
                 round={nextRoundNumber}
                 division={realDivision}
                 id={rate.id}
+                contractSubmissionType={contractSubmissionType!}
             />
         </div>
     )
