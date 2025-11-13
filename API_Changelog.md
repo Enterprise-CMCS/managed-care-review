@@ -1,6 +1,39 @@
 # Managed Care Review - API Changelog
 ## This document highlights API changes that have been introduced since May 2025
 
+### November 13, 2025
+#### Added
+- `EQRO` contract submission type fields to `ContractFormData` GraphQL type.
+    ```graphql
+        type ContractFormData {
+            ...existing fields,
+            "If contract has a new EQRO contractor"
+            eqroNewContractor: Boolean
+            "If new optional activities to be performed on MCOs"
+            eqroProvisionMcoNewOptionalActivity: Boolean
+            "If new MCO managed care program has EQR-related activities"
+            eqroProvisionNewMcoEqrRelatedActivities: Boolean
+            "If EQR-related activities are performed on the CHIP population"
+            eqroProvisionChipEqrRelatedActivities: Boolean
+            "EQR or EQR-related activities are performed on MCOs"
+            eqroProvisionMcoEqrOrRelatedActivities: Boolean
+        }
+    ```
+  - These new fields on the `ContractFormData` are `EQRO` contract submission form fields. They are questions asked for `EQRO` contract submissions only in the MC-Review state portal app.
+  - Affected endpoints:
+    - `fetchContract`
+    - `indexContracts`
+    - `fetchRate`
+    - `indexRates`
+
+### October 30, 2025
+#### Added
+- `contractSubmissionType` to the `Contract` and `Unlocked` contract GraphQL type.
+   - `contractSubmissionType` label the contract type of the submission. At this time there are two types a contract can be `HEALTH_PLAN` and `EQRO`.
+   - Affected endpoints:
+     - `fetchContract`
+     - `indexContracts`
+
 ### October 16, 2025
 #### Updated
 - **IndexContracts** endpoint updated to accept 2 optional parameters:
