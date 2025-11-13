@@ -4,7 +4,7 @@ describe('State user can view submissions', () => {
         cy.interceptGraphQL()
     })
 
-    it('and view a specific summary page from the dashboard', () => { //juan
+    it('and view a specific summary page from the dashboard', () => {
         cy.logInAsStateUser()
 
         // add a draft contract only submission

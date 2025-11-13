@@ -48,6 +48,7 @@ import {
     RouteT,
     STATE_SUBMISSION_FORM_ROUTES_WITHOUT_SUPPORTING_DOCS,
     STATE_SUBMISSION_FORM_ROUTES,
+    ContractSubmissionTypeRecord,
 } from '@mc-review/constants'
 import { FormContainer } from '../../../components'
 import { useCurrentRoute } from '../../../hooks'
@@ -219,7 +220,10 @@ export const SubmissionType = ({
                 navigate(
                     generatePath(RoutesRecord[options.redirectPath], {
                         id: draftSubmission.id,
-                        contractSubmissionType: 'health-plan', //TODO: this should be updated to use the actual value once the new eqro page is setup
+                        contractSubmissionType:
+                            ContractSubmissionTypeRecord[
+                                draftSubmission.contractSubmissionType
+                            ], //TODO: this should be updated to use the actual value once the new eqro page is setup
                     })
                 )
             }
