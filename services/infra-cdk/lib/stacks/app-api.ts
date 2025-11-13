@@ -304,6 +304,7 @@ export class AppApiStack extends BaseStack {
     ): BundlingOptions {
         return {
             format: OutputFormat.ESM,
+            banner: 'import { createRequire } from "module";import { fileURLToPath } from "url";import path from "path";const require = createRequire(import.meta.url);const __filename = fileURLToPath(import.meta.url);const __dirname = path.dirname(__filename);',
             commandHooks: {
                 beforeBundling(inputDir: string, outputDir: string): string[] {
                     return [
@@ -436,6 +437,7 @@ export class AppApiStack extends BaseStack {
             securityGroups: [lambdaSecurityGroup],
             bundling: {
                 format: OutputFormat.ESM,
+                banner: 'import { createRequire } from "module";import { fileURLToPath } from "url";import path from "path";const require = createRequire(import.meta.url);const __filename = fileURLToPath(import.meta.url);const __dirname = path.dirname(__filename);',
                 externalModules: ['prisma', '@prisma/client', '.prisma'],
                 ...this.createBundling(
                     'migrate',
@@ -535,6 +537,7 @@ export class AppApiStack extends BaseStack {
             // Custom bundling to handle .graphql files and other assets
             bundling: {
                 format: OutputFormat.ESM,
+                banner: 'import { createRequire } from "module";import { fileURLToPath } from "url";import path from "path";const require = createRequire(import.meta.url);const __filename = fileURLToPath(import.meta.url);const __dirname = path.dirname(__filename);',
                 minify: false,
                 sourceMap: true,
                 target: 'node20',
