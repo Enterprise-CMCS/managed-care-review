@@ -34,7 +34,7 @@ import {
     useFormikContext,
 } from 'formik'
 import { ActuaryContactFields } from '../Contacts'
-import { FormikRateForm, RateDetailFormConfig } from './V2/RateDetailsV2'
+import { FormikRateForm, RateDetailFormConfig } from './RateDetailsV2'
 import { useFocus } from '../../../../hooks'
 import { ContactSupportLink } from '../../../../components/ErrorAlert/ContactSupportLink'
 import { Contract } from '../../../../gen/gqlClient'

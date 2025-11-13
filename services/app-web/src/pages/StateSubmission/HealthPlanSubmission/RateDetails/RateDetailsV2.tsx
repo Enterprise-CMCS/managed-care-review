@@ -3,22 +3,22 @@ import { Fieldset, Form as UswdsForm } from '@trussworks/react-uswds'
 import { FieldArray, FieldArrayRenderProps, Formik, FormikErrors } from 'formik'
 import { generatePath, useNavigate } from 'react-router-dom'
 
-import styles from '../../StateSubmissionForm.module.scss'
+import styles from '../StateSubmissionForm.module.scss'
 import {
     ButtonWithLogging,
     DynamicStepIndicator,
     ErrorSummary,
     FormNotificationContainer,
     SectionCard,
-} from '../../../../../components'
-import { RateDetailsFormSchema } from '../RateDetailsSchema'
-import { PageActions } from '../../PageActions'
+} from '../../../../components'
+import { RateDetailsFormSchema } from './RateDetailsSchema'
+import { PageActions } from '../PageActions'
 
-import { useS3 } from '../../../../../contexts/S3Context'
+import { useS3 } from '../../../../contexts/S3Context'
 import {
     FileItemT,
     isLoadingOrHasFileErrors,
-} from '../../../../../components/FileUpload'
+} from '../../../../components/FileUpload'
 import {
     RouteT,
     RoutesRecord,
@@ -33,16 +33,16 @@ import {
     useFetchRateQuery,
     useSubmitRateMutation,
     useUpdateDraftContractRatesMutation,
-} from '../../../../../gen/gqlClient'
-import { SingleRateFormFields } from '../SingleRateFormFields'
-import { useFocus, useRouteParams } from '../../../../../hooks'
-import { useErrorSummary } from '../../../../../hooks/useErrorSummary'
-import { PageBannerAlerts } from '../../../PageBannerAlerts'
-import { useAuth } from '../../../../../contexts/AuthContext'
+} from '../../../../gen/gqlClient'
+import { SingleRateFormFields } from './SingleRateFormFields'
+import { useFocus, useRouteParams } from '../../../../hooks'
+import { useErrorSummary } from '../../../../hooks/useErrorSummary'
+import { PageBannerAlerts } from '../../PageBannerAlerts'
+import { useAuth } from '../../../../contexts/AuthContext'
 import {
     ErrorOrLoadingPage,
     handleAndReturnErrorState,
-} from '../../ErrorOrLoadingPage'
+} from '../ErrorOrLoadingPage'
 import { featureFlags } from '@mc-review/common-code'
 import { useLDClient } from 'launchdarkly-react-client-sdk'
 import { recordJSException } from '@mc-review/otel'
@@ -50,12 +50,12 @@ import {
     convertGQLRateToRateForm,
     convertRateFormToGQLRateFormData,
     generateUpdatedRates,
-} from '../rateDetailsHelpers'
-import { LinkYourRates } from '../../../../LinkYourRates/LinkYourRates'
-import { LinkedRateSummary } from '../LinkedRateSummary'
-import { usePage } from '../../../../../contexts/PageContext'
-import { InfoTag } from '../../../../../components/InfoTag/InfoTag'
-import { useFocusOnRender } from '../../../../../hooks/useFocusOnRender'
+} from './rateDetailsHelpers'
+import { LinkYourRates } from '../../../LinkYourRates/LinkYourRates'
+import { LinkedRateSummary } from './LinkedRateSummary'
+import { usePage } from '../../../../contexts/PageContext'
+import { InfoTag } from '../../../../components/InfoTag/InfoTag'
+import { useFocusOnRender } from '../../../../hooks/useFocusOnRender'
 import { ApolloError } from '@apollo/client'
 
 export type FormikRateForm = {
