@@ -28,7 +28,7 @@
 
 ### October 30, 2025
 #### Added
-- `contractSubmissionType` to the `Contract` and `Unlocked` contract GraphQL type.
+- `contractSubmissionType` to the `Contract` and `UnlockedContract` GraphQL type.
    - `contractSubmissionType` label the contract type of the submission. At this time there are two types a contract can be `HEALTH_PLAN` and `EQRO`.
    - Affected endpoints:
      - `fetchContract`
