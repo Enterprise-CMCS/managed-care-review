@@ -2,14 +2,8 @@ import fs from 'fs'
 import fse from 'fs-extra'
 import path from 'path'
 import { fileURLToPath } from 'url'
-import { createRequire } from 'module'
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
-const require = createRequire(import.meta.url)
-const {
-    generateGraphQLString,
-    generateContentsFromGraphqlString,
-} = require('@luckycatfactory/esbuild-graphql-loader')
 
 export default () => {
     return {
@@ -17,22 +11,11 @@ export default () => {
         bundle: true,
         exclude: ['prisma', '@prisma/client'],
         sourcemap: true,
+        loader: {
+            '.graphql': 'text',
+            '.gql': 'text',
+        },
         plugins: [
-            {
-                name: 'graphql-loader',
-                setup(build) {
-                    build.onLoad({ filter: /\.graphql$|\.gql$/ }, (args) =>
-                        generateGraphQLString(args.path).then(
-                            (graphqlString) => ({
-                                contents:
-                                    generateContentsFromGraphqlString(
-                                        graphqlString
-                                    ),
-                            })
-                        )
-                    )
-                },
-            },
             {
                 name: 'copy-and-replace-collector',
                 setup(build) {

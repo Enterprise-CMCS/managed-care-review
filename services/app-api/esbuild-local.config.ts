@@ -1,13 +1,6 @@
 // esbuild config for local development server
-import { createRequire } from 'module'
 import fse from 'fs-extra'
 import * as esbuild from 'esbuild'
-
-const require = createRequire(import.meta.url)
-const {
-    generateGraphQLString,
-    generateContentsFromGraphqlString,
-} = require('@luckycatfactory/esbuild-graphql-loader')
 
 esbuild
     .build({
@@ -27,22 +20,11 @@ esbuild
         banner: {
             js: "import { createRequire } from 'module';import { fileURLToPath } from 'url';import { dirname } from 'path';const require = createRequire(import.meta.url);const __filename = fileURLToPath(import.meta.url);const __dirname = dirname(__filename);",
         },
+        loader: {
+            '.graphql': 'text',
+            '.gql': 'text',
+        },
         plugins: [
-            {
-                name: 'graphql-loader',
-                setup(build) {
-                    build.onLoad({ filter: /\.graphql$|\.gql$/ }, (args) =>
-                        generateGraphQLString(args.path).then(
-                            (graphqlString) => ({
-                                contents:
-                                    generateContentsFromGraphqlString(
-                                        graphqlString
-                                    ),
-                            })
-                        )
-                    )
-                },
-            },
             {
                 name: 'copy-eta-templates',
                 setup(build) {
