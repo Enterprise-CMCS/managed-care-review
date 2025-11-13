@@ -2,7 +2,7 @@ import React from 'react'
 
 import { Fieldset, FormGroup, Label } from '@trussworks/react-uswds'
 
-import styles from '../StateSubmission/HealthPlanSubmission/StateSubmissionForm.module.scss'
+import styles from '../StateSubmission/StateSubmissionForm.module.scss'
 import { FieldRadio, PoliteErrorMessage } from '../../components'
 import { getIn, useFormikContext } from 'formik'
 import { LinkRateSelect } from './LinkRateSelect/LinkRateSelect'
@@ -18,7 +18,11 @@ export type LinkYourRatesProps = {
     fieldNamePrefix: string
     index: number
     shouldValidate: boolean
-    autofill: (rateForm: FormikRateForm, autofillLoading?: boolean, autofillError?: ApolloError) => void // used for multi-rates, when called will FieldArray replace the existing form fields with new data
+    autofill: (
+        rateForm: FormikRateForm,
+        autofillLoading?: boolean,
+        autofillError?: ApolloError
+    ) => void // used for multi-rates, when called will FieldArray replace the existing form fields with new data
     disableRadioBtns: boolean
 }
 

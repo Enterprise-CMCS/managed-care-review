@@ -10,7 +10,7 @@ import {
 import { v4 as uuidv4 } from 'uuid'
 import { generatePath, useNavigate } from 'react-router-dom'
 import { Formik, FormikErrors, getIn } from 'formik'
-import styles from '../StateSubmissionForm.module.scss'
+import styles from '../../StateSubmissionForm.module.scss'
 
 import {
     FileUpload,
@@ -36,7 +36,7 @@ import { PageActions } from '../PageActions'
 import {
     activeFormPages,
     type ContractFormPageProps,
-} from '../StateSubmissionForm'
+} from '../../submissionUtils'
 import {
     formatDocumentsForGQL,
     formatDocumentsForForm,

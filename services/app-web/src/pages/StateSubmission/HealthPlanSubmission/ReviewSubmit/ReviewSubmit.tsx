@@ -11,7 +11,10 @@ import { PageActionsContainer } from '../PageActions'
 import styles from './ReviewSubmit.module.scss'
 import { useRouteParams, useStatePrograms } from '../../../../hooks'
 import { useLDClient } from 'launchdarkly-react-client-sdk'
-import { UnlockSubmitModal, ModalOpenButton } from '../../../../components/Modal'
+import {
+    UnlockSubmitModal,
+    ModalOpenButton,
+} from '../../../../components/Modal'
 import {
     getVisibleLatestContractFormData,
     packageName,
@@ -29,7 +32,7 @@ import { Error404 } from '../../../Errors/Error404Page'
 import { GenericErrorPage } from '../../../Errors/GenericErrorPage'
 import { PageBannerAlerts } from '../../PageBannerAlerts'
 import { usePage } from '../../../../contexts/PageContext'
-import { activeFormPages } from '../StateSubmissionForm'
+import { activeFormPages } from '../../submissionUtils'
 import { featureFlags } from '@mc-review/common-code'
 
 export const ReviewSubmit = (): React.ReactElement => {

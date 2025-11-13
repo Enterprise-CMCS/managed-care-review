@@ -32,12 +32,12 @@ import {
     ContractSubmissionType,
 } from '../../../../gen/gqlClient'
 import { PageActions } from '../PageActions'
-import styles from '../StateSubmissionForm.module.scss'
+import styles from '../../StateSubmissionForm.module.scss'
 import { GenericApiErrorBanner, ProgramSelect } from '../../../../components'
 import {
     activeFormPages,
     type ContractFormPageProps,
-} from '../StateSubmissionForm'
+} from '../../submissionUtils'
 import {
     booleanAsYesNoFormValue,
     yesNoFormValueAsBoolean,

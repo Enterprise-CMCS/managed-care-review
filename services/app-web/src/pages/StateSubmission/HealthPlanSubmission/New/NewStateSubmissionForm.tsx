@@ -1,5 +1,5 @@
 import React from 'react'
-import stylesForm from '../StateSubmissionForm.module.scss'
+import stylesForm from '../../StateSubmissionForm.module.scss'
 import stylesSideNav from '../../../SubmissionSideNav/SubmissionSideNav.module.scss'
 import { FormContainer } from '../../../../components'
 import { SubmissionType } from '../SubmissionType'

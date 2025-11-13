@@ -17,13 +17,13 @@ import {
     fetchContractWithQuestionsMockSuccess,
 } from '@mc-review/mocks'
 // some spies will not work with indexed exports, so I refactored to import them directly from their files
-import { renderWithProviders } from '../../../testHelpers/jestHelpers'
+import { renderWithProviders } from '../../testHelpers/jestHelpers'
 
 import { StateSubmissionForm } from './StateSubmissionForm'
-import { testS3Client } from '../../../testHelpers/s3Helpers'
-import { getYesNoFieldValue } from '../../../testHelpers/fieldHelpers'
-import { SubmissionSideNav } from '../../SubmissionSideNav'
-import { GenericDocument } from '../../../gen/gqlClient'
+import { testS3Client } from '../../testHelpers/s3Helpers'
+import { getYesNoFieldValue } from '../../testHelpers/fieldHelpers'
+import { SubmissionSideNav } from '../SubmissionSideNav'
+import { GenericDocument } from '../../gen/gqlClient'
 
 describe('StateSubmissionForm', () => {
     describe('loads draft submission', () => {

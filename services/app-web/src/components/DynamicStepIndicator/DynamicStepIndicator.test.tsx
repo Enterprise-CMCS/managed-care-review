@@ -2,7 +2,7 @@ import { screen, render } from '@testing-library/react'
 import { DynamicStepIndicator } from './DynamicStepIndicator'
 
 import { STATE_SUBMISSION_FORM_ROUTES } from '@mc-review/constants'
-import { activeFormPages } from '../../pages/StateSubmission/HealthPlanSubmission/StateSubmissionForm'
+import { activeFormPages } from '../../pages/StateSubmission'
 import { mockContractFormData } from '@mc-review/mocks'
 
 describe('DynamicStepIndicator', () => {

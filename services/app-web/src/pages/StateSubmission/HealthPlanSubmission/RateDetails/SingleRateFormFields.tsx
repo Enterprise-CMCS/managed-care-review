@@ -17,7 +17,7 @@ import {
     ProgramSelect,
 } from '../../../../components'
 
-import styles from '../StateSubmissionForm.module.scss'
+import styles from '../../StateSubmissionForm.module.scss'
 import { isDateRangeEmpty } from '../../../../formHelpers'
 import { dayjs, formatUserInputDate } from '@mc-review/dates'
 import {

@@ -3,7 +3,7 @@ import { Fieldset, Form as UswdsForm } from '@trussworks/react-uswds'
 import { FieldArray, FieldArrayRenderProps, Formik, FormikErrors } from 'formik'
 import { generatePath, useNavigate } from 'react-router-dom'
 
-import styles from '../StateSubmissionForm.module.scss'
+import styles from '../../StateSubmissionForm.module.scss'
 import {
     ButtonWithLogging,
     DynamicStepIndicator,

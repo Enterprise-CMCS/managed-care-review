@@ -10,7 +10,7 @@ import {
 } from 'formik'
 import { generatePath, useNavigate } from 'react-router-dom'
 import { useLDClient } from 'launchdarkly-react-client-sdk'
-import styles from '../StateSubmissionForm.module.scss'
+import styles from '../../StateSubmissionForm.module.scss'
 import { recordJSException } from '@mc-review/otel'
 import {
     StateContact,
@@ -22,7 +22,7 @@ import { PageActions } from '../PageActions'
 import {
     activeFormPages,
     type ContractFormPageProps,
-} from '../StateSubmissionForm'
+} from '../../submissionUtils'
 import { RoutesRecord, RouteT } from '@mc-review/constants'
 import {
     ButtonWithLogging,
