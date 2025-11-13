@@ -19,7 +19,7 @@ import { getUserDivision } from '../QuestionResponseHelpers'
 import { CMSQuestionResponseTable } from '../QATable/CMSQuestionResponseTable'
 import { StateQuestionResponseTable } from '../QATable/StateQuestionResponseTable'
 import { ErrorOrLoadingPage } from '../../StateSubmission'
-import { handleAndReturnErrorState } from '../../StateSubmission/ErrorOrLoadingPage'
+import { handleAndReturnErrorState } from '../../StateSubmission/HealthPlanSubmission/ErrorOrLoadingPage'
 import { useAuth } from '../../../contexts/AuthContext'
 
 export const ContractQuestionResponse = () => {

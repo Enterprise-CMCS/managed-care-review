@@ -18,7 +18,7 @@ import {
     ACCEPTED_SUBMISSION_FILE_TYPES,
     FileItemT,
 } from '../../../components/FileUpload'
-import { PageActionsContainer } from '../../StateSubmission/PageActions'
+import { PageActionsContainer } from '../../StateSubmission/HealthPlanSubmission/PageActions'
 import { useErrorSummary } from '../../../hooks/useErrorSummary'
 import { Division } from '../../../gen/gqlClient'
 import { QAUploadFormSummary } from '../QAUploadFormSummary'

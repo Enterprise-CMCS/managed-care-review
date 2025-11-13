@@ -14,7 +14,7 @@ import { GenericErrorPage } from '../../Errors/GenericErrorPage'
 import { UploadResponseForm } from './UploadResponseForm'
 import { FileItemT } from '../../../components'
 import { ErrorOrLoadingPage } from '../../StateSubmission'
-import { handleAndReturnErrorState } from '../../StateSubmission/ErrorOrLoadingPage'
+import { handleAndReturnErrorState } from '../../StateSubmission/HealthPlanSubmission/ErrorOrLoadingPage'
 import {
     extractDocumentsFromQuestion,
     extractQuestions,

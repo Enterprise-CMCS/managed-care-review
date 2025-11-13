@@ -13,7 +13,7 @@ import {
     useFetchContractQuery,
 } from '../../gen/gqlClient'
 import { ErrorOrLoadingPage } from '../StateSubmission'
-import { handleAndReturnErrorState } from '../StateSubmission/ErrorOrLoadingPage'
+import { handleAndReturnErrorState } from '../StateSubmission/HealthPlanSubmission/ErrorOrLoadingPage'
 import { GenericErrorPage } from '../Errors/GenericErrorPage'
 import {
     ButtonGroup,
@@ -22,7 +22,7 @@ import {
     FormGroup,
     Label,
 } from '@trussworks/react-uswds'
-import { PageActionsContainer } from '../StateSubmission/PageActions'
+import { PageActionsContainer } from '../StateSubmission/HealthPlanSubmission/PageActions'
 import { Formik, FormikErrors } from 'formik'
 import { usePage } from '../../contexts/PageContext'
 import { recordJSException } from '@mc-review/otel'

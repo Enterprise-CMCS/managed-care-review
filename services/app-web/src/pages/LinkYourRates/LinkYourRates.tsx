@@ -2,7 +2,7 @@ import React from 'react'
 
 import { Fieldset, FormGroup, Label } from '@trussworks/react-uswds'
 
-import styles from '../StateSubmission/StateSubmissionForm.module.scss'
+import styles from '../StateSubmission/HealthPlanSubmission/StateSubmissionForm.module.scss'
 import { FieldRadio, PoliteErrorMessage } from '../../components'
 import { getIn, useFormikContext } from 'formik'
 import { LinkRateSelect } from './LinkRateSelect/LinkRateSelect'
@@ -10,7 +10,7 @@ import {
     FormikRateForm,
     RateDetailFormConfig,
     convertGQLRateToRateForm,
-} from '../StateSubmission/RateDetails'
+} from '../StateSubmission/HealthPlanSubmission/RateDetails'
 import { useS3 } from '../../contexts/S3Context'
 import { ApolloError } from '@apollo/client'
 

@@ -19,7 +19,7 @@ import {
 import { wrapApolloResult, handleApolloError } from '@mc-review/helpers'
 import { recordJSException } from '@mc-review/otel'
 import { ApolloError } from '@apollo/client'
-import type { InterimState } from '../pages/StateSubmission/ErrorOrLoadingPage'
+import type { InterimState } from '../pages/StateSubmission/HealthPlanSubmission/ErrorOrLoadingPage'
 
 type UseContractForm = {
     draftSubmission?: UnlockedContract

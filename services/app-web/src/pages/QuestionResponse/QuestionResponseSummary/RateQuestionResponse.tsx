@@ -17,7 +17,7 @@ import { RoutesRecord } from '@mc-review/constants'
 import {
     ErrorOrLoadingPage,
     handleAndReturnErrorState,
-} from '../../StateSubmission/ErrorOrLoadingPage'
+} from '../../StateSubmission/HealthPlanSubmission/ErrorOrLoadingPage'
 import { usePage } from '../../../contexts/PageContext'
 import { CMSQuestionResponseTable } from '../QATable/CMSQuestionResponseTable'
 import { StateQuestionResponseTable } from '../QATable/StateQuestionResponseTable'
