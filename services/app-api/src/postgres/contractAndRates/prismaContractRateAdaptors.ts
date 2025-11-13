@@ -308,6 +308,20 @@ function prismaUpdateContractFormDataFromDomain(
         statutoryRegulatoryAttestationDescription: nullify(
             contractFormData.statutoryRegulatoryAttestationDescription
         ),
+        //EQRO submission fields only
+        eqroNewContractor: nullify(contractFormData.eqroNewContractor),
+        eqroProvisionMcoNewOptionalActivity: nullify(
+            contractFormData.eqroProvisionMcoNewOptionalActivity
+        ),
+        eqroProvisionNewMcoEqrRelatedActivities: nullify(
+            contractFormData.eqroProvisionNewMcoEqrRelatedActivities
+        ),
+        eqroProvisionChipEqrRelatedActivities: nullify(
+            contractFormData.eqroProvisionChipEqrRelatedActivities
+        ),
+        eqroProvisionMcoEqrOrRelatedActivities: nullify(
+            contractFormData.eqroProvisionMcoEqrOrRelatedActivities
+        ),
     }
 }
 export {
