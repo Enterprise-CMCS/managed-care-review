@@ -1,5 +1,3 @@
-#import "../fragments/oauthUserFragment.graphql"
-
 mutation UpdateOauthClient($input: UpdateOauthClientInput!) {
     updateOauthClient(input: $input) {
         oauthClient {
