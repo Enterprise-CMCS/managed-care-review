@@ -223,7 +223,7 @@ export const SubmissionType = ({
                         contractSubmissionType:
                             ContractSubmissionTypeRecord[
                                 draftSubmission.contractSubmissionType
-                            ], //TODO: this should be updated to use the actual value once the new eqro page is setup
+                            ],
                     })
                 )
             }
