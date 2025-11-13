@@ -118,4 +118,4 @@ const generatePolicy = function (
     return response
 }
 
-module.exports = { main }
+export { main }

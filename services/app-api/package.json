@@ -2,6 +2,7 @@
     "name": "app-api",
     "private": "true",
     "version": "1.0.0",
+    "type": "module",
     "main": "handler.js",
     "license": "MIT",
     "scripts": {
@@ -13,7 +14,7 @@
         "generate": "pnpm prisma generate",
         "prisma:reset": "pnpm prisma migrate reset --force",
         "build": "tsc --noEmit",
-        "build:local": "node esbuild-local.config.js",
+        "build:local": "tsx esbuild-local.config.ts",
         "start:local": "node .local-build/local-server.js",
         "start": "pnpm serverless offline start --stage local --region us-east-1 --httpPort 3030 --host 127.0.0.1"
     },

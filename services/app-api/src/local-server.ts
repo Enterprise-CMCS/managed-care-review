@@ -11,15 +11,11 @@ import type {
     Context,
 } from 'aws-lambda'
 
-// Import handlers - mix of ESM and CommonJS
+// Import handlers - all ESM now
 import { gqlHandler } from './handlers/apollo_gql'
-import * as healthCheckModule from './handlers/health_check'
-import * as oauthTokenModule from './handlers/oauth_token'
-import * as otelProxyModule from './handlers/otel_proxy'
-
-const healthCheckHandler = (healthCheckModule as any).main
-const oauthTokenHandler = (oauthTokenModule as any).main
-const otelProxyHandler = (otelProxyModule as any).main
+import { main as healthCheckHandler } from './handlers/health_check'
+import { main as oauthTokenHandler } from './handlers/oauth_token'
+import { main as otelProxyHandler } from './handlers/otel_proxy'
 
 const app = express()
 const router = express.Router()
@@ -255,7 +251,9 @@ app.use((err: Error, req: Request, res: Response, next: NextFunction) => {
 // Start server
 const PORT = parseInt(process.env.PORT || '3030', 10)
 if (isNaN(PORT) || PORT < 1 || PORT > 65535) {
-    throw new Error(`Invalid PORT: ${PORT}. Must be an integer between 1 and 65535.`)
+    throw new Error(
+        `Invalid PORT: ${PORT}. Must be an integer between 1 and 65535.`
+    )
 }
 const HOST = process.env.HOST || '127.0.0.1'
 

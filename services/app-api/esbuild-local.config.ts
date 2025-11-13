@@ -1,11 +1,15 @@
 // esbuild config for local development server
-const fse = require('fs-extra');
+import { createRequire } from 'module'
+import fse from 'fs-extra'
+import * as esbuild from 'esbuild'
+
+const require = createRequire(import.meta.url)
 const {
     generateGraphQLString,
     generateContentsFromGraphqlString,
-} = require('@luckycatfactory/esbuild-graphql-loader');
+} = require('@luckycatfactory/esbuild-graphql-loader')
 
-require('esbuild')
+esbuild
     .build({
         entryPoints: ['src/local-server.ts'],
         bundle: true,
@@ -19,7 +23,10 @@ require('esbuild')
             'express',
         ],
         sourcemap: true,
-        format: 'cjs',
+        format: 'esm',
+        banner: {
+            js: "import { createRequire } from 'module';import { fileURLToPath } from 'url';import { dirname } from 'path';const require = createRequire(import.meta.url);const __filename = fileURLToPath(import.meta.url);const __dirname = dirname(__filename);",
+        },
         plugins: [
             {
                 name: 'graphql-loader',
@@ -33,7 +40,7 @@ require('esbuild')
                                     ),
                             })
                         )
-                    );
+                    )
                 },
             },
             {
@@ -41,11 +48,11 @@ require('esbuild')
                 setup(build) {
                     build.onStart(async () => {
                         try {
-                            await fse.ensureDir('.local-build/etaTemplates/');
+                            await fse.ensureDir('.local-build/etaTemplates/')
                         } catch (err) {
-                            console.error('Error making directory: ', err);
+                            console.error('Error making directory: ', err)
                         }
-                    });
+                    })
 
                     build.onEnd(async () => {
                         try {
@@ -53,20 +60,20 @@ require('esbuild')
                                 './src/emailer/etaTemplates',
                                 '.local-build/etaTemplates/',
                                 { overwrite: true }
-                            );
-                            console.log('Eta templates copied successfully');
+                            )
+                            console.log('Eta templates copied successfully') // eslint-disable-line no-console
                         } catch (err) {
-                            console.error('Error copying eta templates:', err);
+                            console.error('Error copying eta templates:', err)
                         }
-                    });
+                    })
                 },
             },
         ],
     })
     .then(() => {
-        console.log('✅ Local server built successfully');
+        console.log('✅ Local server built successfully') // eslint-disable-line no-console
     })
     .catch((error) => {
-        console.error('Build failed:', error);
-        process.exit(1);
-    });
+        console.error('Build failed:', error)
+        process.exit(1)
+    })

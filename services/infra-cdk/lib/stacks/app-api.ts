@@ -3,6 +3,7 @@ import { type Construct } from 'constructs'
 import {
     NodejsFunction,
     type NodejsFunctionProps,
+    OutputFormat,
 } from 'aws-cdk-lib/aws-lambda-nodejs'
 import {
     RestApi,
@@ -302,6 +303,7 @@ export class AppApiStack extends BaseStack {
         esbuildArgs?: Record<string, string>
     ): BundlingOptions {
         return {
+            format: OutputFormat.ESM,
             commandHooks: {
                 beforeBundling(inputDir: string, outputDir: string): string[] {
                     return [
@@ -433,6 +435,7 @@ export class AppApiStack extends BaseStack {
             },
             securityGroups: [lambdaSecurityGroup],
             bundling: {
+                format: OutputFormat.ESM,
                 externalModules: ['prisma', '@prisma/client', '.prisma'],
                 ...this.createBundling(
                     'migrate',
@@ -531,6 +534,7 @@ export class AppApiStack extends BaseStack {
             securityGroups: [lambdaSecurityGroup],
             // Custom bundling to handle .graphql files and other assets
             bundling: {
+                format: OutputFormat.ESM,
                 minify: false,
                 sourceMap: true,
                 target: 'node20',

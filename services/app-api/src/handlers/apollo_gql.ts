@@ -438,4 +438,4 @@ const gqlHandler: Handler = async (event, context, completion) => {
     return response
 }
 
-module.exports = { gqlHandler }
+export { gqlHandler }
