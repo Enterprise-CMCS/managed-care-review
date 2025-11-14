@@ -18,7 +18,7 @@ import {
 } from '../../../../gen/gqlClient'
 
 import { useFocus } from '../../../../hooks'
-import { PageActions } from '../PageActions'
+import { PageActions } from '../../PageActions'
 import {
     activeFormPages,
     type ContractFormPageProps,

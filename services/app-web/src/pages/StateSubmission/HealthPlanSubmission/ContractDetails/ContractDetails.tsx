@@ -32,7 +32,7 @@ import { formatUserInputDate } from '@mc-review/dates'
 import { useS3 } from '../../../../contexts/S3Context'
 
 import { ContractDetailsFormSchema } from './ContractDetailsSchema'
-import { PageActions } from '../PageActions'
+import { PageActions } from '../../PageActions'
 import {
     activeFormPages,
     type ContractFormPageProps,

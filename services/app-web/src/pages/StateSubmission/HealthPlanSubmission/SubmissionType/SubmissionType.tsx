@@ -31,7 +31,7 @@ import {
     PopulationCoveredType,
     ContractSubmissionType,
 } from '../../../../gen/gqlClient'
-import { PageActions } from '../PageActions'
+import { PageActions } from '../../PageActions'
 import styles from '../../StateSubmissionForm.module.scss'
 import { GenericApiErrorBanner, ProgramSelect } from '../../../../components'
 import {

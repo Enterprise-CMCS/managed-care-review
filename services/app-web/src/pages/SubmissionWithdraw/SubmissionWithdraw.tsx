@@ -17,7 +17,7 @@ import {
 } from '../../gen/gqlClient'
 import { Formik, FormikErrors } from 'formik'
 import { ButtonGroup, Form } from '@trussworks/react-uswds'
-import { PageActionsContainer } from '../StateSubmission/HealthPlanSubmission/PageActions'
+import { PageActionsContainer } from '../StateSubmission/PageActions'
 import * as Yup from 'yup'
 import { ErrorOrLoadingPage } from '../StateSubmission'
 import { handleAndReturnErrorState } from '../StateSubmission/ErrorOrLoadingPage'

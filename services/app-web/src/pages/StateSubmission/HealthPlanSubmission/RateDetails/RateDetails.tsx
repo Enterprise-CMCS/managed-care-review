@@ -12,7 +12,7 @@ import {
     SectionCard,
 } from '../../../../components'
 import { RateDetailsFormSchema } from './RateDetailsSchema'
-import { PageActions } from '../PageActions'
+import { PageActions } from '../../PageActions'
 
 import { useS3 } from '../../../../contexts/S3Context'
 import {

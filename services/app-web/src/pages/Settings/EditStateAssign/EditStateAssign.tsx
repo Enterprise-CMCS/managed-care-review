@@ -18,7 +18,7 @@ import {
     Loading,
     PoliteErrorMessage,
 } from '../../../components'
-import { PageActionsContainer } from '../../StateSubmission/HealthPlanSubmission/PageActions'
+import { PageActionsContainer } from '../../StateSubmission/PageActions'
 import { FormContainer } from '../../../components'
 import {
     StateAssignment,

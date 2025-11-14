@@ -6,8 +6,11 @@ export { EQROSubmissionForm } from './EQROSubmission/EQROSubmissionForm'
 export { PageBannerAlerts } from './PageBannerAlerts'
 export { ErrorOrLoadingPage } from './ErrorOrLoadingPage'
 
+export { PageActions, PageActionsContainer } from './PageActions'
+
 export {
     getRelativePathFromNestedRoute,
     activeFormPages,
 } from './submissionUtils'
+
 export type { ContractFormPageProps } from './submissionUtils'
