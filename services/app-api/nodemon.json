@@ -1,0 +1,7 @@
+{
+    "watch": ["src"],
+    "ext": "ts,js,graphql",
+    "ignore": [".local-build/**", "node_modules/**"],
+    "exec": "pnpm build:local && pnpm start:local",
+    "delay": "1000"
+}

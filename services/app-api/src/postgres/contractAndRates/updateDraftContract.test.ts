@@ -122,7 +122,7 @@ describe('updateDraftContractWithRates postgres', () => {
         const client = await sharedTestPrismaClient()
 
         const draftContractForm1 = mockInsertContractArgs({})
-        // eslint-disable-next-line @typescript-eslint/no-unused-vars
+
         const contract = must(
             await insertDraftContract(client, {
                 ...draftContractForm1,

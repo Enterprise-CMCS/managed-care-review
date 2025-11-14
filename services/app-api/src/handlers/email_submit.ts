@@ -45,4 +45,4 @@ const main: Handler = async (event) => {
     return sesResult
 }
 
-module.exports = { main }
+export { main }

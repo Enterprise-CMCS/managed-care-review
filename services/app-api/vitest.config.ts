@@ -1,19 +1,16 @@
 import { defineConfig } from 'vitest/config'
 import path from 'path'
-import {
-    generateGraphQLString,
-    generateContentsFromGraphqlString,
-} from '@luckycatfactory/esbuild-graphql-loader'
+import { readFileSync } from 'fs'
 
 export default defineConfig({
     plugins: [
         {
             name: 'graphql-loader',
-            async transform(code, id) {
+            transform(code, id) {
                 if (id.endsWith('.graphql') || id.endsWith('.gql')) {
-                    const graphqlString = await generateGraphQLString(id)
+                    const graphqlContent = readFileSync(id, 'utf-8')
                     return {
-                        code: generateContentsFromGraphqlString(graphqlString),
+                        code: `export default ${JSON.stringify(graphqlContent)}`,
                         map: null,
                     }
                 }
@@ -60,7 +57,10 @@ export default defineConfig({
                 __dirname,
                 '../../packages/helpers'
             ),
-            '@mc-review/submissions': path.resolve(__dirname, '../../packages/submissions'),
+            '@mc-review/submissions': path.resolve(
+                __dirname,
+                '../../packages/submissions'
+            ),
             '@mc-review/mocks': path.resolve(__dirname, '../../packages/mocks'),
             '@mc-review/otel': path.resolve(__dirname, '../../packages/otel'),
             '@mc-review/dates': path.resolve(__dirname, '../../packages/dates'),

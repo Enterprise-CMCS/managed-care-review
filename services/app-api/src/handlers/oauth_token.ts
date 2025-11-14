@@ -57,4 +57,4 @@ async function main(
     return oauth2Server.token(event)
 }
 
-module.exports = { main }
+export { main }

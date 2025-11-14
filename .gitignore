@@ -1,5 +1,6 @@
 .idea/
 .build
+.local-build
 .webpack
 .infra
 .dynamodb

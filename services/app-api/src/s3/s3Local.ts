@@ -16,13 +16,14 @@ export function newLocalS3Client(
 ): S3ClientT {
     const s3Client = new S3Client({
         forcePathStyle: true,
-        apiVersion: '2006-03-01',
         credentials: {
-            accessKeyId: 'S3RVER', // This specific key is required when working offline
-            secretAccessKey: 'S3RVER', // pragma: allowlist secret; pre-set by serverless-s3-offline
+            accessKeyId: 'test', // LocalStack accepts any credentials in local mode
+            secretAccessKey: 'test', // pragma: allowlist secret
         },
         endpoint: endpoint,
-        region: 'us-east', // This region cannot be undefined and any string here will work.
+        region: 'us-east-1',
+        // Disable SSL for local development with LocalStack
+        tls: false,
     })
 
     return {

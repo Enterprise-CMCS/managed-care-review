@@ -1,13 +1,13 @@
 #!/bin/bash
 set -e
-# This script queries serverless and searchs output for a specific Cloudformation output variable
-help='This script is run with the format  ./output.sh <target service name> <serverless output variable name> <stage name (optional, default dev)>'
+# This script queries CloudFormation outputs from CDK stacks
+help='This script is run with the format  ./output.sh <target service name> <output variable name> <stage name (optional, default dev)>'
 example='ex.  ./output.sh ui CloudFrontEndpointUrl'
 
 : "${1?ERROR: 'You must specify the target service.'
 $help
 $example}"
-: "${2?ERROR: "You must specify the variable you want to fetch from serverless' output"
+: "${2?ERROR: "You must specify the variable you want to fetch from the stack output"
 $help
 $example}"
 
@@ -19,4 +19,11 @@ if [ "$output" == "url" ]; then
   output="CloudFrontEndpointUrl"
 fi
 
-cd "$service" && npx serverless info --verbose --stage "$stage" | sed -n -e "s/^.*$output: //p" && cd ..
+# CDK stack naming pattern: ${service}-${stage}-cdk
+cdk_stack_name="${service}-${stage}-cdk"
+
+# Query CDK stack outputs using AWS CLI
+aws cloudformation describe-stacks \
+  --stack-name "$cdk_stack_name" \
+  --query "Stacks[0].Outputs[?OutputKey=='${cdk_stack_name}-${output}'].OutputValue" \
+  --output text

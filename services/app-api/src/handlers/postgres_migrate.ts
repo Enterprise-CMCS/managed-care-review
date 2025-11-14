@@ -160,4 +160,4 @@ function fmtMigrateError(error: string): APIGatewayProxyResultV2 {
     }
 }
 
-module.exports = { main }
+export { main }

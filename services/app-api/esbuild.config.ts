@@ -1,33 +1,21 @@
-const fs = require('fs');
-const fse = require('fs-extra');
-const path = require('path');
-const {
-    generateGraphQLString,
-    generateContentsFromGraphqlString,
-} = require('@luckycatfactory/esbuild-graphql-loader');
+import fs from 'fs'
+import fse from 'fs-extra'
+import path from 'path'
+import { fileURLToPath } from 'url'
 
-module.exports = () => {
+const __dirname = path.dirname(fileURLToPath(import.meta.url))
+
+export default () => {
     return {
         packager: 'pnpm',
         bundle: true,
         exclude: ['prisma', '@prisma/client'],
         sourcemap: true,
+        loader: {
+            '.graphql': 'text',
+            '.gql': 'text',
+        },
         plugins: [
-            {
-                name: 'graphql-loader',
-                setup(build) {
-                    build.onLoad({ filter: /\.graphql$|\.gql$/ }, (args) =>
-                        generateGraphQLString(args.path).then(
-                            (graphqlString) => ({
-                                contents:
-                                    generateContentsFromGraphqlString(
-                                        graphqlString
-                                    ),
-                            })
-                        )
-                    );
-                },
-            },
             {
                 name: 'copy-and-replace-collector',
                 setup(build) {
@@ -36,22 +24,22 @@ module.exports = () => {
                         fs.copyFileSync(
                             'collector.yml',
                             '.esbuild/.build/collector.yml'
-                        );
-                    });
+                        )
+                    })
 
                     // replace the license key
                     build.onEnd(() => {
                         const filePath = path.join(
                             __dirname,
                             '.esbuild/.build/collector.yml'
-                        );
-                        let contents = fs.readFileSync(filePath, 'utf8');
+                        )
+                        let contents = fs.readFileSync(filePath, 'utf8')
                         contents = contents.replace(
                             '$NR_LICENSE_KEY',
                             process.env.NR_LICENSE_KEY
-                        );
-                        fs.writeFileSync(filePath, contents);
-                    });
+                        )
+                        fs.writeFileSync(filePath, contents)
+                    })
                 },
             },
             {
@@ -61,11 +49,11 @@ module.exports = () => {
                         try {
                             await fse.ensureDir(
                                 '.esbuild/.build/src/handlers/etaTemplates/'
-                            );
+                            )
                         } catch (err) {
-                            console.error('Error making directory: ', err);
+                            console.error('Error making directory: ', err)
                         }
-                    });
+                    })
 
                     build.onEnd(async () => {
                         try {
@@ -73,12 +61,12 @@ module.exports = () => {
                                 './src/emailer/etaTemplates',
                                 '.esbuild/.build/src/handlers/etaTemplates/',
                                 { overwrite: true }
-                            );
-                            console.log('Eta templates copied successfully');
+                            )
+                            console.log('Eta templates copied successfully') // eslint-disable-line no-console
                         } catch (err) {
-                            console.error('Error copying eta templates:', err);
+                            console.error('Error copying eta templates:', err)
                         }
-                    });
+                    })
                 },
             },
             {
@@ -89,16 +77,16 @@ module.exports = () => {
                             const prismaPath = path.join(
                                 __dirname,
                                 '../../node_modules/prisma/libquery_engine-darwin-arm64.dylib.node'
-                            );
+                            )
                             const outDir = path.join(
                                 __dirname,
                                 '../../node_modules/@prisma/client/libquery_engine-darwin-arm64.dylib.node'
-                            );
-                            fs.copyFileSync(prismaPath, outDir);
+                            )
+                            fs.copyFileSync(prismaPath, outDir)
                         }
-                    });
+                    })
                 },
             },
         ],
-    };
-};
+    }
+}
