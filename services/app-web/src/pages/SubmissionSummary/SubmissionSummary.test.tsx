@@ -17,7 +17,7 @@ import { renderWithProviders } from '../../testHelpers'
 import { SubmissionSummary } from './SubmissionSummary'
 import { SubmissionSideNav } from '../SubmissionSideNav'
 import { mockContractPackageUnlockedWithUnlockedType } from '@mc-review/mocks'
-import { ReviewSubmit } from '../StateSubmission/ReviewSubmit'
+import { ReviewSubmit } from '../StateSubmission/HealthPlanSubmission/ReviewSubmit'
 import { generatePath, Location } from 'react-router-dom'
 import { dayjs } from '@mc-review/dates'
 

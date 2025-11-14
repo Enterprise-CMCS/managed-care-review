@@ -56,6 +56,7 @@
         "@apollo/client": "3.8.8",
         "@mc-review/common-code": "workspace:*",
         "@mc-review/submissions": "workspace:*",
+        "@mc-review/constants": "workspace:*",
         "cypress-file-upload": "^5.0.8",
         "cypress-pipe": "^2.0.1",
         "axios": "^1.13.1",

@@ -13,11 +13,11 @@ import { formatCalendarDate } from '@mc-review/dates'
 import {
     FormikRateForm,
     convertGQLRateToRateForm,
-} from '../../StateSubmission/RateDetails'
+} from '../../StateSubmission/HealthPlanSubmission/RateDetails'
 import { useS3 } from '../../../contexts/S3Context'
 import { useTealium } from '../../../hooks'
 import { useField } from 'formik'
-import { convertIndexRatesGQLRateToRateForm } from '../../StateSubmission/RateDetails/rateDetailsHelpers'
+import { convertIndexRatesGQLRateToRateForm } from '../../StateSubmission/HealthPlanSubmission/RateDetails/rateDetailsHelpers'
 import { AccessibleSelect } from '../../../components/Select'
 import { useState, useEffect } from 'react'
 import { ApolloError } from '@apollo/client'
