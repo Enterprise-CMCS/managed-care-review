@@ -24,7 +24,7 @@
     "author": "",
     "license": "ISC",
     "dependencies": {
-        "protobufjs": "^7.3.0",
+        "protobufjs": "^7.5.4",
         "uuid": "^13.0.0"
     },
     "devDependencies": {

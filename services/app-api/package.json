@@ -62,7 +62,7 @@
         "neverthrow": "^6.0.0",
         "path-to-regexp": "^8.3.0",
         "prisma": "5.22.0",
-        "protobufjs": "^7.3.0",
+        "protobufjs": "^7.5.4",
         "purify-ts": "^2.1.2",
         "url-parse": "^1.5.10",
         "uuid": "^13.0.0",
