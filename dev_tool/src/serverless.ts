@@ -8,28 +8,27 @@ type StageConnection =
     | 'UNKNOWN_ERROR'
 
 export function checkStageAccess(stage: string): StageConnection {
-    // Test to see if we can read info from serverless. This is likely to trip folks up who haven't
+    // Test to see if we can read info from CDK/CloudFormation. This is likely to trip folks up who haven't
     // configured their AWS keys correctly or if they have an invalid stage name.
-    const test = spawnSync('npx', ['serverless', 'info', '--stage', stage], {
-        cwd: 'services/ui-auth',
-    })
+    // Use cognito stack as a test since it's a core stack that should always exist
+    const cdkStackName = `cognito-${stage}-cdk`
+    const test = spawnSync(
+        'aws',
+        ['cloudformation', 'describe-stacks', '--stack-name', cdkStackName],
+        {}
+    )
     if (test.status != 0) {
-        const serverlessErrorOutput = test.stdout.toString('utf8')
+        const errorOutput = test.stderr.toString('utf8')
         if (
-            serverlessErrorOutput.includes(
+            errorOutput.includes(
                 'The security token included in the request is invalid'
-            )
+            ) ||
+            errorOutput.includes('Unable to locate credentials')
         ) {
             return 'AWS_TOKEN_ERROR'
         } else if (
-            serverlessErrorOutput.includes('Stack with id') &&
-            serverlessErrorOutput.includes('does not exist')
-        ) {
-            return 'STAGE_ERROR'
-        } else if (
-            serverlessErrorOutput.includes(
-                'Trying to request a non exported variable from CloudFormation'
-            )
+            errorOutput.includes('does not exist') ||
+            errorOutput.includes('ValidationError')
         ) {
             return 'STAGE_ERROR'
         } else {
