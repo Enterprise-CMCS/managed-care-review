@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { useEffect } from 'react'
 import { FormContainer } from '../../../../components'
 import { Form } from '@trussworks/react-uswds'
 import { PageActions } from '../../PageActions'
@@ -6,6 +6,7 @@ import { generatePath, useNavigate } from 'react-router-dom'
 import { RoutesRecord } from '@mc-review/constants'
 import { useRouteParams } from '../../../../hooks'
 import styles from '../../StateSubmissionForm.module.scss'
+import { usePage } from '../../../../contexts/PageContext'
 
 /**
  * This is a placeholder, the existing Contacts.tsx could be used instead of another component.
@@ -15,9 +16,32 @@ import styles from '../../StateSubmissionForm.module.scss'
 export const EQROContacts = (): React.ReactElement => {
     const { id, contractSubmissionType } = useRouteParams()
     const navigate = useNavigate()
+    const { updateActiveMainContent } = usePage()
+
+    const contractDetailsPath = generatePath(
+        RoutesRecord.SUBMISSIONS_CONTRACT_DETAILS,
+        {
+            id,
+            contractSubmissionType,
+        }
+    )
+    const reviewSubmitPath = generatePath(
+        RoutesRecord.SUBMISSIONS_REVIEW_SUBMIT,
+        {
+            id,
+            contractSubmissionType,
+        }
+    )
+
+    const activeMainContentId = 'contactsPageMainContent'
+
+    // Set the active main content to focus when click the Skip to main content button.
+    useEffect(() => {
+        updateActiveMainContent(activeMainContentId)
+    }, [activeMainContentId, updateActiveMainContent])
 
     return (
-        <div>
+        <div id={activeMainContentId}>
             <FormContainer id="Contacts">
                 <Form
                     className={styles.formContainer}
@@ -29,48 +53,18 @@ export const EQROContacts = (): React.ReactElement => {
                         <div>Contacts placeholder</div>
                     </fieldset>
                     <PageActions
-                        backOnClick={() =>
-                            navigate(
-                                generatePath(
-                                    RoutesRecord.SUBMISSIONS_CONTRACT_DETAILS,
-                                    {
-                                        id,
-                                        contractSubmissionType,
-                                    }
-                                )
-                            )
-                        }
+                        backOnClick={() => navigate(contractDetailsPath)}
                         continueOnClick={() => {
                             console.info(
                                 'Continue on click placeholder function'
                             )
-                            navigate(
-                                generatePath(
-                                    RoutesRecord.SUBMISSIONS_REVIEW_SUBMIT,
-                                    {
-                                        id,
-                                        contractSubmissionType,
-                                    }
-                                )
-                            )
+                            navigate(reviewSubmitPath)
                         }}
                         saveAsDraftOnClick={() =>
                             console.info('Save as draft function placeholder')
                         }
-                        backOnClickUrl={generatePath(
-                            RoutesRecord.SUBMISSIONS_CONTRACT_DETAILS,
-                            {
-                                id,
-                                contractSubmissionType,
-                            }
-                        )}
-                        continueOnClickUrl={generatePath(
-                            RoutesRecord.SUBMISSIONS_REVIEW_SUBMIT,
-                            {
-                                id,
-                                contractSubmissionType,
-                            }
-                        )}
+                        backOnClickUrl={contractDetailsPath}
+                        continueOnClickUrl={reviewSubmitPath}
                     />
                 </Form>
             </FormContainer>

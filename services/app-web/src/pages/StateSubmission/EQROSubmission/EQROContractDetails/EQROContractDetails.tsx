@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { useEffect } from 'react'
 import { FormContainer } from '../../../../components'
 import { Form } from '@trussworks/react-uswds'
 import { PageActions } from '../../PageActions'
@@ -6,10 +6,13 @@ import { useRouteParams } from '../../../../hooks'
 import { generatePath, useNavigate } from 'react-router-dom'
 import { RoutesRecord } from '@mc-review/constants'
 import styles from '../../StateSubmissionForm.module.scss'
+import { usePage } from '../../../../contexts/PageContext'
 
 export const EQROContractDetails = (): React.ReactElement => {
     const { id, contractSubmissionType } = useRouteParams()
     const navigate = useNavigate()
+    const { updateActiveMainContent } = usePage()
+
     const contactsPagePath = generatePath(RoutesRecord.SUBMISSIONS_CONTACTS, {
         id,
         contractSubmissionType,
@@ -19,8 +22,15 @@ export const EQROContractDetails = (): React.ReactElement => {
         contractSubmissionType,
     })
 
+    const activeMainContentId = 'contractDetailsPageMainContent'
+
+    // Set the active main content to focus when click the Skip to main content button.
+    useEffect(() => {
+        updateActiveMainContent(activeMainContentId)
+    }, [activeMainContentId, updateActiveMainContent])
+
     return (
-        <div>
+        <div id={activeMainContentId}>
             <FormContainer id="ContractDetails">
                 <Form
                     className={styles.formContainer}

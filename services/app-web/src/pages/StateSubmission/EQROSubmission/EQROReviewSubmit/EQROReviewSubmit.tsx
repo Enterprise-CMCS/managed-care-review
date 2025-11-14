@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { useEffect } from 'react'
 import { useRouteParams } from '../../../../hooks'
 import { generatePath, useNavigate } from 'react-router-dom'
 import { ActionButton, SectionCard } from '../../../../components'
@@ -6,17 +6,27 @@ import { Button, GridContainer } from '@trussworks/react-uswds'
 import { PageActionsContainer } from '../../PageActions'
 import { RoutesRecord } from '@mc-review/constants'
 import styles from './EQROReviewSubmit.module.scss'
+import { usePage } from '../../../../contexts/PageContext'
 
 export const EQROReviewSubmit = (): React.ReactElement => {
     const { id, contractSubmissionType } = useRouteParams()
     const navigate = useNavigate()
+    const { updateActiveMainContent } = usePage()
+
     const contactsPagePath = generatePath(RoutesRecord.SUBMISSIONS_CONTACTS, {
         id,
         contractSubmissionType,
     })
 
+    const activeMainContentId = 'reviewSubmitPageMainContent'
+
+    // Set the active main content to focus when click the Skip to main content button.
+    useEffect(() => {
+        updateActiveMainContent(activeMainContentId)
+    }, [activeMainContentId, updateActiveMainContent])
+
     return (
-        <div>
+        <div id={activeMainContentId}>
             <GridContainer className={styles.reviewSectionWrapper}>
                 <SectionCard>
                     <div>Review and submit placeholder</div>
