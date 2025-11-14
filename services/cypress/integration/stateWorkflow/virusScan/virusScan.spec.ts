@@ -16,8 +16,12 @@ describe.only('documents', () => {
                 const draftSubmissionID = pathname.split('/')[3]
                 const draftContractSubType = pathname.split('/')[2]
 
+                cy.log(pathname)
+                cy.log(draftSubmissionID)
+                cy.log(draftContractSubType)
+
                 cy.navigateFormByDirectLink(
-                    `/submissions/${ContractSubmissionTypeRecord[draftContractSubType]}/${draftSubmissionID}/edit/type`
+                    `/submissions/health-plan/${draftSubmissionID}/edit/type`
                 )
                 cy.navigateContractForm('CONTINUE')
 
