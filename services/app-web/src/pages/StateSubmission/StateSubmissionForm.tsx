@@ -8,7 +8,7 @@ import {
 } from '@mc-review/constants'
 import { SideNavOutletContextType } from '../SubmissionSideNav/SubmissionSideNav'
 import { useRouteParams } from '../../hooks'
-import { EQROSubmissionForm } from './EQROSubmission/EQROSubmissionForm'
+import { EQROSubmissionForm } from './EQROSubmission'
 import { featureFlags } from '@mc-review/common-code'
 import { useLDClient } from 'launchdarkly-react-client-sdk'
 import { HealthPlanSubmissionForm } from './HealthPlanSubmission/HealthPlanSubmissionForm'

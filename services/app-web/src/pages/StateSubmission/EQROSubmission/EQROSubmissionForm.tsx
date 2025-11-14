@@ -1,32 +1,43 @@
+import React from 'react'
 import { Routes, Route } from 'react-router-dom'
 import { getRelativePathFromNestedRoute } from '../submissionUtils'
+import { EQROSubmissionDetails } from './EQROSubmissionDetails'
+import { EQROContractDetails } from './EQROContractDetails'
+import { EQROContacts } from './EQROContacts/EQROContacts'
+import { EQROReviewSubmit } from './EQROReviewSubmit'
+import { Error404 } from '../../Errors/Error404Page'
+import formContainerStyles from '../../../components/FormContainer/FormContainer.module.scss'
 
 export const EQROSubmissionForm = (): React.ReactElement => {
     return (
-        <div>
+        <div
+            data-testid="eqro-submission-form-page"
+            className={formContainerStyles.formPage}
+        >
             <Routes>
                 <Route
                     path={getRelativePathFromNestedRoute('SUBMISSIONS_TYPE')}
-                    element={<h1>Submission details</h1>}
+                    element={<EQROSubmissionDetails />}
                 />
                 <Route
                     path={getRelativePathFromNestedRoute(
                         'SUBMISSIONS_CONTRACT_DETAILS'
                     )}
-                    element={<h1>Contract details</h1>}
+                    element={<EQROContractDetails />}
                 />
                 <Route
                     path={getRelativePathFromNestedRoute(
                         'SUBMISSIONS_CONTACTS'
                     )}
-                    element={<h1>State contacts</h1>}
+                    element={<EQROContacts />}
                 />
                 <Route
                     path={getRelativePathFromNestedRoute(
                         'SUBMISSIONS_REVIEW_SUBMIT'
                     )}
-                    element={<h1>Review and submit</h1>}
+                    element={<EQROReviewSubmit />}
                 />
+                <Route path="*" element={<Error404 />} />
             </Routes>
         </div>
     )
