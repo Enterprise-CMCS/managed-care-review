@@ -13,12 +13,7 @@ describe('rate details', () => {
             const pathnameArray = pathname.split('/')
             const draftSubmissionId = pathnameArray[3]
             const draftContractSubType = pathname.split('/')[2]
-            console.log('==========================')
-            console.log('==========================')
-            console.log('PATHNAME', pathname)
-            console.log('CONTRACT TYPE', draftContractSubType)
-            console.log('==========================')
-            console.log('==========================')
+
             cy.navigateFormByDirectLink(
                 `/submissions/${draftContractSubType}/${draftSubmissionId}/edit/rate-details`
             )
