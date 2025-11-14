@@ -120,7 +120,7 @@ const Contacts = ({
         }
     }, [focusNewContact, focusNewActuaryContact])
 
-    const activeMainContentId = 'submissionTypePageMainContent'
+    const activeMainContentId = 'contactsPageMainContent'
 
     // Set the active main content to focus when click the Skip to main content button.
     useEffect(() => {
@@ -145,22 +145,6 @@ const Contacts = ({
     const contactsInitialValues: ContactsFormValues = {
         stateContacts:
             stateContacts.length === 0 ? [emptyStateContact] : stateContacts,
-    }
-
-    // Handler for Contacts legends so that contacts show up as
-    // State contacts 1 instead of State contacts 0 for first contact
-    // and show (required) for only the first contact
-    // Also handles the difference between State Contacts and Actuary Contacts
-    const handleContactLegend = (index: number, contactText: string) => {
-        const count = index + 1
-
-        if (contactText === 'State') {
-            return `State contacts ${count}`
-        }
-
-        if (contactText === 'Actuary') {
-            return `Additional actuary contact ${index + 1}`
-        }
     }
 
     const handleFormSubmit = async (
@@ -313,10 +297,7 @@ const Contacts = ({
                                                                     key={index}
                                                                 >
                                                                     <Fieldset
-                                                                        legend={handleContactLegend(
-                                                                            index,
-                                                                            'State'
-                                                                        )}
+                                                                        legend={`State contacts ${index + 1}`}
                                                                     >
                                                                         <span
                                                                             className={
