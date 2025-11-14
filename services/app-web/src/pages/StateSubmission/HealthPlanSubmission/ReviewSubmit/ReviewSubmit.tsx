@@ -167,7 +167,9 @@ export const ReviewSubmit = (): React.ReactElement => {
                     <ActionButton
                         type="button"
                         variant="outline"
-                        link_url="../documents"
+                        link_url={
+                            hideSupportingDocs ? '../contacts' : '../documents'
+                        }
                         parent_component_type="page body"
                         onClick={() =>
                             navigate(
