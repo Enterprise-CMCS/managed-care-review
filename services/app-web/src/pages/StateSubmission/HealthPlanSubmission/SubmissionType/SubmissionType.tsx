@@ -113,7 +113,7 @@ export const SubmissionType = ({
     //Toggle isNewSubmission condition based on EQRO feature flag
     const isNewSubmission = showEqroSubmissions
         ? matchPath(
-              RoutesRecord.SUBMISSIONS_NEW_CONTRACT_FORM,
+              RoutesRecord.SUBMISSIONS_NEW_SUBMISSION_FORM,
               location.pathname
           )
         : location.pathname === '/submissions/new'

@@ -52,7 +52,7 @@ export const NewSubmission = () => {
 
     const onSubmit = (values: NewSubmissionFormValueType) => {
         navigate(
-            generatePath(RoutesRecord.SUBMISSIONS_NEW_CONTRACT_FORM, {
+            generatePath(RoutesRecord.SUBMISSIONS_NEW_SUBMISSION_FORM, {
                 contractSubmissionType: values.contractType,
             })
         )
@@ -155,7 +155,7 @@ export const NewSubmission = () => {
                                 link_url={
                                     values.contractType
                                         ? generatePath(
-                                              RoutesRecord.SUBMISSIONS_NEW_CONTRACT_FORM,
+                                              RoutesRecord.SUBMISSIONS_NEW_SUBMISSION_FORM,
                                               {
                                                   contractSubmissionType:
                                                       values.contractType,

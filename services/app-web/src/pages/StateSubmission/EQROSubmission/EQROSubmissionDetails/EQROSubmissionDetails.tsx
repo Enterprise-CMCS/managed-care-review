@@ -16,7 +16,7 @@ export const EQROSubmissionDetails = (): React.ReactElement => {
     const allPrograms = useStatePrograms()
 
     const isNewSubmission = matchPath(
-        RoutesRecord.SUBMISSIONS_NEW_CONTRACT_FORM,
+        RoutesRecord.SUBMISSIONS_NEW_SUBMISSION_FORM,
         location.pathname
     )
 

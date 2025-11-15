@@ -138,7 +138,7 @@ const StateUserRoutes = ({
                             element={<NewSubmission />}
                         />
                         <Route
-                            path={RoutesRecord.SUBMISSIONS_NEW_CONTRACT_FORM}
+                            path={RoutesRecord.SUBMISSIONS_NEW_SUBMISSION_FORM}
                             element={<NewSubmissionForm />}
                         />
                     </>

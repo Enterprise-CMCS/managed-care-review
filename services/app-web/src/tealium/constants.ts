@@ -27,7 +27,7 @@ const TEALIUM_CONTENT_TYPE_BY_ROUTE: Record<RouteT | 'UNKNOWN_ROUTE', string> =
         UNDO_RATE_WITHDRAW: 'form',
         SUBMISSIONS: 'form',
         SUBMISSIONS_NEW: 'form',
-        SUBMISSIONS_NEW_CONTRACT_FORM: 'form',
+        SUBMISSIONS_NEW_SUBMISSION_FORM: 'form',
         SUBMISSIONS_EDIT_TOP_LEVEL: 'form',
         SUBMISSIONS_TYPE: 'form',
         SUBMISSIONS_CONTRACT_DETAILS: 'form',

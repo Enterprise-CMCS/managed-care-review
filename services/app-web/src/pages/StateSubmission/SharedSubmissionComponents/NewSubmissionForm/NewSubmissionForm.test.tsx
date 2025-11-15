@@ -15,7 +15,7 @@ it('routes to new health plan url', async () => {
                 element={<NewSubmission />}
             />
             <Route
-                path={RoutesRecord.SUBMISSIONS_NEW_CONTRACT_FORM}
+                path={RoutesRecord.SUBMISSIONS_NEW_SUBMISSION_FORM}
                 element={<NewSubmissionForm />}
             />
         </Routes>,
@@ -44,7 +44,7 @@ it('routes to new health plan url', async () => {
 
     await waitFor(() => {
         expect(testLocation.pathname).toBe(
-            generatePath(RoutesRecord.SUBMISSIONS_NEW_CONTRACT_FORM, {
+            generatePath(RoutesRecord.SUBMISSIONS_NEW_SUBMISSION_FORM, {
                 contractSubmissionType: 'health-plan',
             })
         )
@@ -60,7 +60,7 @@ it('routes to new EQRO url', async () => {
                 element={<NewSubmission />}
             />
             <Route
-                path={RoutesRecord.SUBMISSIONS_NEW_CONTRACT_FORM}
+                path={RoutesRecord.SUBMISSIONS_NEW_SUBMISSION_FORM}
                 element={<NewSubmissionForm />}
             />
         </Routes>,
@@ -91,7 +91,7 @@ it('routes to new EQRO url', async () => {
 
     await waitFor(() => {
         expect(testLocation.pathname).toBe(
-            generatePath(RoutesRecord.SUBMISSIONS_NEW_CONTRACT_FORM, {
+            generatePath(RoutesRecord.SUBMISSIONS_NEW_SUBMISSION_FORM, {
                 contractSubmissionType: 'eqro',
             })
         )
@@ -106,7 +106,7 @@ it('renders inline errors', async () => {
                 element={<NewSubmission />}
             />
             <Route
-                path={RoutesRecord.SUBMISSIONS_NEW_CONTRACT_FORM}
+                path={RoutesRecord.SUBMISSIONS_NEW_SUBMISSION_FORM}
                 element={<NewSubmissionForm />}
             />
         </Routes>,
