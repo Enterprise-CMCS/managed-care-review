@@ -21,6 +21,7 @@ import {
     FormNotificationContainer,
     PoliteErrorMessage,
     ReactRouterLinkWithLogging,
+    PageActions,
 } from '../../../../components'
 import {
     PopulationCoveredRecord,
@@ -36,7 +37,6 @@ import {
     PopulationCoveredType,
     ContractSubmissionType,
 } from '../../../../gen/gqlClient'
-import { PageActions } from '../../SharedSubmissionComponents'
 import styles from '../../StateSubmissionForm.module.scss'
 import { GenericApiErrorBanner, ProgramSelect } from '../../../../components'
 import {

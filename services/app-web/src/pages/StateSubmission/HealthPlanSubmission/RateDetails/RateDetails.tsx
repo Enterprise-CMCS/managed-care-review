@@ -10,9 +10,9 @@ import {
     ErrorSummary,
     FormNotificationContainer,
     SectionCard,
+    PageActions,
 } from '../../../../components'
 import { RateDetailsFormSchema } from './RateDetailsSchema'
-import { PageActions } from '../../SharedSubmissionComponents/PageActions'
 
 import { useS3 } from '../../../../contexts/S3Context'
 import {

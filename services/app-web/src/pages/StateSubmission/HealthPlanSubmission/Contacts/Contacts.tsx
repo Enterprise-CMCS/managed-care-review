@@ -18,7 +18,6 @@ import {
 } from '../../../../gen/gqlClient'
 
 import { useFocus } from '../../../../hooks'
-import { PageActions } from '../../SharedSubmissionComponents/PageActions'
 import {
     activeFormPages,
     type ContractFormPageProps,
@@ -32,6 +31,7 @@ import {
     FormContainer,
     ErrorSummary,
     FieldTextInput,
+    PageActions,
 } from '../../../../components'
 import { useCurrentRoute, useRouteParams, useTealium } from '../../../../hooks'
 import { useContractForm } from '../../../../hooks/useContractForm'

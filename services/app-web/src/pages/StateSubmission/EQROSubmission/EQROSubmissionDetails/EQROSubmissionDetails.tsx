@@ -1,7 +1,6 @@
 import React, { FormEvent, useEffect } from 'react'
-import { FormContainer } from '../../../../components'
+import { FormContainer, PageActions } from '../../../../components'
 import { Form } from '@trussworks/react-uswds'
-import { PageActions } from '../../SharedSubmissionComponents'
 import { RoutesRecord } from '@mc-review/constants'
 import { generatePath, useNavigate, matchPath } from 'react-router-dom'
 import { useRouteParams, useStatePrograms } from '../../../../hooks'

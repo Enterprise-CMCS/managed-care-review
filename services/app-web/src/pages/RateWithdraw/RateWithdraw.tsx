@@ -5,15 +5,15 @@ import {
     Breadcrumbs,
     FieldTextarea,
     GenericApiErrorBanner,
+    PageActionsContainer,
 } from '../../components'
 import { RoutesRecord } from '@mc-review/constants'
 import { generatePath, useNavigate, useParams } from 'react-router-dom'
 import { useFetchRateQuery, useWithdrawRateMutation } from '../../gen/gqlClient'
 import { ErrorOrLoadingPage } from '../StateSubmission'
-import { handleAndReturnErrorState } from '../StateSubmission/SharedSubmissionComponents/ErrorOrLoadingPage'
+import { handleAndReturnErrorState } from '../StateSubmission/SharedSubmissionComponents'
 import { ButtonGroup, Form } from '@trussworks/react-uswds'
 import * as Yup from 'yup'
-import { PageActionsContainer } from '../StateSubmission/SharedSubmissionComponents/PageActions'
 import { Formik, FormikErrors } from 'formik'
 import { usePage } from '../../contexts/PageContext'
 import { GenericErrorPage } from '../Errors/GenericErrorPage'

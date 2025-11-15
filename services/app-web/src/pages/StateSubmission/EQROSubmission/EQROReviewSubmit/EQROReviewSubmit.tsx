@@ -1,9 +1,12 @@
 import React, { useEffect } from 'react'
 import { useRouteParams } from '../../../../hooks'
 import { generatePath, useNavigate } from 'react-router-dom'
-import { ActionButton, SectionCard } from '../../../../components'
+import {
+    ActionButton,
+    SectionCard,
+    PageActionsContainer,
+} from '../../../../components'
 import { Button, GridContainer } from '@trussworks/react-uswds'
-import { PageActionsContainer } from '../../SharedSubmissionComponents/PageActions'
 import { RoutesRecord } from '@mc-review/constants'
 import styles from './EQROReviewSubmit.module.scss'
 import { usePage } from '../../../../contexts/PageContext'

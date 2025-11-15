@@ -6,8 +6,8 @@ import {
     ActionButton,
     Loading,
     FormNotificationContainer,
+    PageActionsContainer,
 } from '../../../../components'
-import { PageActionsContainer } from '../../SharedSubmissionComponents/PageActions'
 import styles from './ReviewSubmit.module.scss'
 import { useRouteParams, useStatePrograms } from '../../../../hooks'
 import { useLDClient } from 'launchdarkly-react-client-sdk'
@@ -30,7 +30,7 @@ import { useFetchContractQuery } from '../../../../gen/gqlClient'
 import { ErrorForbiddenPage } from '../../../Errors/ErrorForbiddenPage'
 import { Error404 } from '../../../Errors/Error404Page'
 import { GenericErrorPage } from '../../../Errors/GenericErrorPage'
-import { PageBannerAlerts } from '../../SharedSubmissionComponents/PageBannerAlerts'
+import { PageBannerAlerts } from '../../SharedSubmissionComponents'
 import { usePage } from '../../../../contexts/PageContext'
 import { activeFormPages } from '../../submissionUtils'
 import { featureFlags } from '@mc-review/common-code'

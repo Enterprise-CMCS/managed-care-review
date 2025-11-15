@@ -5,6 +5,7 @@ import {
     Breadcrumbs,
     FieldTextarea,
     GenericApiErrorBanner,
+    PageActionsContainer,
 } from '../../components'
 import { RoutesRecord } from '@mc-review/constants'
 import { generatePath, useNavigate, useParams } from 'react-router-dom'
@@ -17,10 +18,9 @@ import {
 } from '../../gen/gqlClient'
 import { Formik, FormikErrors } from 'formik'
 import { ButtonGroup, Form } from '@trussworks/react-uswds'
-import { PageActionsContainer } from '../StateSubmission/SharedSubmissionComponents/PageActions'
 import * as Yup from 'yup'
 import { ErrorOrLoadingPage } from '../StateSubmission'
-import { handleAndReturnErrorState } from '../StateSubmission/SharedSubmissionComponents/ErrorOrLoadingPage'
+import { handleAndReturnErrorState } from '../StateSubmission/SharedSubmissionComponents'
 import { GenericErrorPage } from '../Errors/GenericErrorPage'
 import { SubmissionWithdrawWarningBanner } from '../../components/Banner/SubmissionWithdrawWarningBanner/SubmissionWithdrawWarningBanner'
 import { useTealium } from '../../hooks'

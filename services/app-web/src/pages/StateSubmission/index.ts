@@ -6,8 +6,6 @@ export { EQROSubmissionForm } from './EQROSubmission/EQROSubmissionForm'
 export {
     PageBannerAlerts,
     ErrorOrLoadingPage,
-    PageActionsContainer,
-    PageActions,
     NewSubmissionForm,
     NewSubmission,
 } from './SharedSubmissionComponents'
