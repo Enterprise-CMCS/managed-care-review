@@ -1,0 +1,171 @@
+import React, { useEffect } from 'react'
+import { RoutesRecord } from '@mc-review/constants'
+import { generatePath, useNavigate } from 'react-router-dom'
+import { usePage } from '../../../../contexts/PageContext'
+import { useRouteParams } from '../../../../hooks'
+import * as Yup from 'yup'
+import { Formik } from 'formik'
+import { Form, FormGroup, Fieldset } from '@trussworks/react-uswds'
+import {
+    ActionButton,
+    Breadcrumbs,
+    FieldRadioCard,
+} from '../../../../components'
+import { PageActionsContainer } from '../PageActions'
+import { NewStateSubmissionForm } from '../../HealthPlanSubmission/New'
+import { EQROSubmissionDetails } from '../../EQROSubmission'
+import { Error404 } from '../../../Errors/Error404Page'
+import styles from './NewSubmissionForm.module.scss'
+
+const newSubmissionFormSchema = Yup.object().shape({
+    contractType: Yup.string().required('You must select a contract type'),
+})
+
+export interface NewSubmissionFormValueType {
+    contractType?: 'health-plan' | 'eqro'
+}
+
+const initialNewSubmissionValues: NewSubmissionFormValueType = {
+    contractType: undefined,
+}
+
+export const NewSubmission = () => {
+    const { updateActiveMainContent } = usePage()
+    const navigate = useNavigate()
+
+    const activeMainContentId = 'newSubmissionMainContent'
+
+    // Set the active main content to focus when click the Skip to main content button.
+    useEffect(() => {
+        updateActiveMainContent(activeMainContentId)
+    }, [activeMainContentId, updateActiveMainContent])
+
+    const onSubmit = (values: NewSubmissionFormValueType) => {
+        console.info('submit placeholder')
+        navigate(
+            generatePath(RoutesRecord.SUBMISSIONS_NEW_CONTRACT_FORM, {
+                contractSubmissionType: values.contractType,
+            })
+        )
+    }
+
+    return (
+        <div
+            className={styles.contractTypeFormContainer}
+            id={activeMainContentId}
+        >
+            <Breadcrumbs
+                className="usa-breadcrumb--wrap"
+                items={[
+                    {
+                        link: RoutesRecord.DASHBOARD_SUBMISSIONS,
+                        text: 'Dashboard',
+                    },
+                    {
+                        text: 'New submission',
+                        link: RoutesRecord.SUBMISSIONS_NEW,
+                    },
+                ]}
+            />
+            <h1>New submission</h1>
+            <Formik
+                initialValues={initialNewSubmissionValues}
+                onSubmit={(values) => onSubmit(values)}
+                validationSchema={newSubmissionFormSchema}
+            >
+                {({ values, handleSubmit }) => (
+                    <Form
+                        id="newSubmissionForm"
+                        className={styles.formContainer}
+                        onSubmit={handleSubmit}
+                    >
+                        <fieldset className="usa-fieldset">
+                            <FormGroup>
+                                <Fieldset
+                                    role="radiogroup"
+                                    aria-required
+                                    className={styles.radioGroup}
+                                    legend="Contract type"
+                                >
+                                    <span
+                                        className={styles.requiredOptionalText}
+                                    >
+                                        Required
+                                    </span>
+                                    <FieldRadioCard
+                                        id="healthPlan"
+                                        name="contractType"
+                                        label="Health plan"
+                                        aria-required
+                                        value="health-plan"
+                                        list_position={1}
+                                        list_options={2}
+                                        parent_component_heading="Contract type"
+                                        radio_button_title="Health plan"
+                                        labelDescription="Submit Medicaid and CHIP managed care health plan base contracts, contract amendments, and rates."
+                                    />
+                                    <FieldRadioCard
+                                        id="eqro"
+                                        name="contractType"
+                                        label="External Quality Review Organization (EQRO)"
+                                        aria-required
+                                        value="eqro"
+                                        list_position={2}
+                                        list_options={2}
+                                        parent_component_heading="Contract type"
+                                        radio_button_title="External Quality Review Organization (EQRO)"
+                                        labelDescription="Submit base contracts and amendments to base contracts between your state and an EQRO."
+                                    />
+                                </Fieldset>
+                            </FormGroup>
+                        </fieldset>
+                        <PageActionsContainer>
+                            <ActionButton
+                                type="button"
+                                variant="outline"
+                                link_url={RoutesRecord.DASHBOARD_SUBMISSIONS}
+                                parent_component_type="page body"
+                                onClick={() =>
+                                    navigate(RoutesRecord.DASHBOARD_SUBMISSIONS)
+                                }
+                            >
+                                Cancel
+                            </ActionButton>
+                            <ActionButton
+                                type="submit"
+                                link_url={
+                                    values.contractType
+                                        ? generatePath(
+                                              RoutesRecord.SUBMISSIONS_NEW_CONTRACT_FORM,
+                                              {
+                                                  contractSubmissionType:
+                                                      values.contractType,
+                                              }
+                                          )
+                                        : RoutesRecord.SUBMISSIONS_NEW
+                                }
+                                parent_component_type="page body"
+                            >
+                                Start
+                            </ActionButton>
+                        </PageActionsContainer>
+                    </Form>
+                )}
+            </Formik>
+        </div>
+    )
+}
+
+export const NewSubmissionForm = (): React.ReactElement => {
+    const { contractSubmissionType } = useRouteParams()
+
+    if (contractSubmissionType === 'health-plan') {
+        return <NewStateSubmissionForm />
+    }
+
+    if (contractSubmissionType === 'eqro') {
+        return <EQROSubmissionDetails />
+    }
+
+    return <Error404 />
+}

@@ -1,0 +1,54 @@
+@use '../../../../styles/custom.scss' as custom;
+@use '../../../../styles/uswdsImports.scss' as uswds;
+
+.contractTypeFormContainer {
+    max-width: custom.$mcr-container-standard-width-fixed;
+    @include uswds.at-media('tablet') {
+        min-width: 20rem;
+        max-width: 40rem;
+        margin: 0 auto;
+    }
+
+    h1 {
+        font-weight: normal;
+    }
+}
+
+.requiredOptionalText {
+    display: block;
+    color: custom.$mcr-foundation-hint;
+}
+
+.radioGroup > *:not(:last-child) {
+    &[class^='usa-legend'] {
+        margin-bottom: 0;
+    }
+
+    margin-bottom: 0.5rem;
+}
+
+.formContainer {
+    > [class^='usa-fieldset'] {
+        padding: uswds.units(4);
+        margin-bottom: uswds.units(2);
+        margin-top: uswds.units(2);
+        background: custom.$mcr-foundation-white;
+        border: 1px solid custom.$mcr-gray-lighter;
+        @include uswds.u-radius('md');
+    }
+
+    div[class^='usa-form-group'] {
+        margin-top: 0;
+    }
+
+    &[class^='usa-form'] {
+        min-width: 100%;
+        max-width: 100%;
+
+        @include uswds.at-media('tablet') {
+            min-width: 20rem;
+            max-width: 40rem;
+            margin: 0 auto;
+        }
+    }
+}
