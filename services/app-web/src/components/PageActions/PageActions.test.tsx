@@ -1,7 +1,7 @@
 import { screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { PageActions } from './index'
-import { renderWithProviders } from '../../../testHelpers/jestHelpers'
+import { renderWithProviders } from '../../testHelpers/jestHelpers'
 import { fetchCurrentUserMock } from '@mc-review/mocks'
 
 describe('PageActions', () => {

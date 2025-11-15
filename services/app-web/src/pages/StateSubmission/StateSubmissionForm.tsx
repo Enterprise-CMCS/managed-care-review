@@ -1,17 +1,16 @@
 import React from 'react'
-
 import { useOutletContext, Navigate, generatePath } from 'react-router-dom'
-import { Error404 } from '../Errors/Error404Page'
 import {
     RoutesRecord,
     ContractSubmissionTypeRecord,
 } from '@mc-review/constants'
-import { SideNavOutletContextType } from '../SubmissionSideNav/SubmissionSideNav'
 import { useRouteParams } from '../../hooks'
-import { EQROSubmissionForm } from './EQROSubmission'
 import { featureFlags } from '@mc-review/common-code'
 import { useLDClient } from 'launchdarkly-react-client-sdk'
+import { SideNavOutletContextType } from '../SubmissionSideNav/SubmissionSideNav'
+import { EQROSubmissionForm } from './EQROSubmission'
 import { HealthPlanSubmissionForm } from './HealthPlanSubmission/HealthPlanSubmissionForm'
+import { Error404 } from '../Errors/Error404Page'
 
 // Can move this AppRoutes on future pass - leaving it here now to make diff clear
 export const StateSubmissionForm = (): React.ReactElement => {

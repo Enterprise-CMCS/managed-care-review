@@ -16,7 +16,7 @@ import { UploadQuestionsForm } from './UploadQuestionsForm'
 import { FileItemT } from '../../../components'
 import { getNextCMSRoundNumber } from '../QuestionResponseHelpers'
 import { ErrorOrLoadingPage } from '../../StateSubmission'
-import { handleAndReturnErrorState } from '../../StateSubmission/ErrorOrLoadingPage'
+import { handleAndReturnErrorState } from '../../StateSubmission/SharedSubmissionComponents/ErrorOrLoadingPage'
 import { isValidCmsDivison } from '../QuestionResponseHelpers/questionResponseHelpers'
 import { Error404 } from '../../Errors/Error404Page'
 

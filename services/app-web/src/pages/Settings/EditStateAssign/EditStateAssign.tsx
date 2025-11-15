@@ -17,9 +17,9 @@ import {
     GenericApiErrorBanner,
     Loading,
     PoliteErrorMessage,
+    PageActionsContainer,
+    FormContainer,
 } from '../../../components'
-import { PageActionsContainer } from '../../StateSubmission/PageActions'
-import { FormContainer } from '../../../components'
 import {
     StateAssignment,
     useFetchMcReviewSettingsQuery,

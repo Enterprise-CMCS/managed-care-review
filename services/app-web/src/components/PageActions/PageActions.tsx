@@ -2,7 +2,7 @@ import React from 'react'
 import { ButtonGroup } from '@trussworks/react-uswds'
 
 import { PageActionsContainer } from './PageActionsContainer'
-import { ActionButton } from '../../../components'
+import { ActionButton } from '../index'
 
 /*
    This is the main call to action element displayed at the bottom of form pages.

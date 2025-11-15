@@ -11,7 +11,7 @@ import { formatDocumentsForGQL } from '../../../../formHelpers/formatters'
 import {
     ErrorOrLoadingPage,
     handleAndReturnErrorState,
-} from '../../ErrorOrLoadingPage'
+} from '../../SharedSubmissionComponents/ErrorOrLoadingPage'
 import { ApolloError } from '@apollo/client'
 
 export const LinkedRateSummary = ({

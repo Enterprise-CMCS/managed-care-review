@@ -15,13 +15,13 @@ import {
     Breadcrumbs,
     FieldTextarea,
     GenericApiErrorBanner,
+    PageActionsContainer,
 } from '../../components'
 import { RoutesRecord } from '@mc-review/constants'
 import { ErrorOrLoadingPage } from '../StateSubmission'
-import { handleAndReturnErrorState } from '../StateSubmission/ErrorOrLoadingPage'
+import { handleAndReturnErrorState } from '../StateSubmission/SharedSubmissionComponents'
 import { GenericErrorPage } from '../Errors/GenericErrorPage'
 import { ButtonGroup, Form } from '@trussworks/react-uswds'
-import { PageActionsContainer } from '../StateSubmission/PageActions'
 import { recordJSException } from '@mc-review/otel'
 import { generatePath } from 'react-router-dom'
 

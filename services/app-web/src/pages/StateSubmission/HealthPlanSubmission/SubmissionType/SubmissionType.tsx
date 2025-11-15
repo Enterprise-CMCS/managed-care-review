@@ -6,7 +6,12 @@ import {
 } from '@trussworks/react-uswds'
 import { Formik, FormikErrors, FormikHelpers } from 'formik'
 import React, { useState, useEffect } from 'react'
-import { useNavigate, useLocation, generatePath } from 'react-router-dom'
+import {
+    useNavigate,
+    useLocation,
+    generatePath,
+    matchPath,
+} from 'react-router-dom'
 import {
     DynamicStepIndicator,
     ErrorSummary,
@@ -16,6 +21,7 @@ import {
     FormNotificationContainer,
     PoliteErrorMessage,
     ReactRouterLinkWithLogging,
+    PageActions,
 } from '../../../../components'
 import {
     PopulationCoveredRecord,
@@ -31,7 +37,6 @@ import {
     PopulationCoveredType,
     ContractSubmissionType,
 } from '../../../../gen/gqlClient'
-import { PageActions } from '../../PageActions'
 import styles from '../../StateSubmissionForm.module.scss'
 import { GenericApiErrorBanner, ProgramSelect } from '../../../../components'
 import {
@@ -52,10 +57,10 @@ import {
 } from '@mc-review/constants'
 import { FormContainer } from '../../../../components'
 import { useCurrentRoute } from '../../../../hooks'
-import { ErrorOrLoadingPage } from '../../ErrorOrLoadingPage'
+import { ErrorOrLoadingPage } from '../../SharedSubmissionComponents'
 import { useAuth } from '../../../../contexts/AuthContext'
 import { useRouteParams } from '../../../../hooks'
-import { PageBannerAlerts } from '../../PageBannerAlerts'
+import { PageBannerAlerts } from '../../SharedSubmissionComponents'
 import { useErrorSummary } from '../../../../hooks/useErrorSummary'
 import { useContractForm } from '../../../../hooks/useContractForm'
 import { useLDClient } from 'launchdarkly-react-client-sdk'
@@ -95,12 +100,23 @@ export const SubmissionType = ({
     const navigate = useNavigate()
     const location = useLocation()
     const ldClient = useLDClient()
-    const isNewSubmission = location.pathname === '/submissions/new'
     const { id, contractSubmissionType } = useRouteParams()
     const hideSupportingDocs = ldClient?.variation(
         featureFlags.HIDE_SUPPORTING_DOCS_PAGE.flag,
         featureFlags.HIDE_SUPPORTING_DOCS_PAGE.defaultValue
     )
+    const showEqroSubmissions: boolean = ldClient?.variation(
+        featureFlags.EQRO_SUBMISSIONS.flag,
+        featureFlags.EQRO_SUBMISSIONS.defaultValue
+    )
+
+    //Toggle isNewSubmission condition based on EQRO feature flag
+    const isNewSubmission = showEqroSubmissions
+        ? matchPath(
+              RoutesRecord.SUBMISSIONS_NEW_SUBMISSION_FORM,
+              location.pathname
+          )
+        : location.pathname === '/submissions/new'
 
     const {
         draftSubmission,
