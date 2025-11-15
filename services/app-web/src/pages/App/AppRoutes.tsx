@@ -23,7 +23,12 @@ import { Error404 } from '../Errors/Error404Page'
 import { Help } from '../Help/Help'
 import { Landing } from '../Landing/Landing'
 import { MccrsId } from '../MccrsId/MccrsId'
-import { NewStateSubmissionForm, StateSubmissionForm } from '../StateSubmission'
+import {
+    NewStateSubmissionForm,
+    StateSubmissionForm,
+    NewSubmission,
+    NewSubmissionForm,
+} from '../StateSubmission'
 import { SubmissionSummary } from '../SubmissionSummary'
 import { SubmissionRevisionSummary } from '../SubmissionRevisionSummary'
 import { useScrollToPageTop } from '../../hooks/useScrollToPageTop'
@@ -50,10 +55,10 @@ import { EditStateAssign } from '../Settings/EditStateAssign/EditStateAssign'
 import {
     UploadContractQuestions,
     UploadRateQuestions,
-} from '../QuestionResponse/UploadQuestions'
+} from '../QuestionResponse'
 import { RateSummarySideNav } from '../SubmissionSideNav/RateSummarySideNav'
-import { RateQuestionResponse } from '../QuestionResponse/QuestionResponseSummary/RateQuestionResponse'
-import { UploadRateResponse } from '../QuestionResponse/UploadResponse/UploadRateResponse'
+import { RateQuestionResponse } from '../QuestionResponse'
+import { UploadRateResponse } from '../QuestionResponse'
 import { ReleasedToState } from '../SubmissionReleasedToState/ReleasedToState'
 import { RateWithdraw } from '../RateWithdraw/RateWithdraw'
 import { UndoRateWithdraw } from '../UndoRateWithdraw/UndoRateWithdraw'
@@ -98,6 +103,10 @@ const StateUserRoutes = ({
         featureFlags.RATE_EDIT_UNLOCK.flag,
         featureFlags.RATE_EDIT_UNLOCK.defaultValue
     )
+    const showEqroSubmissions: boolean = ldClient?.variation(
+        featureFlags.EQRO_SUBMISSIONS.flag,
+        featureFlags.EQRO_SUBMISSIONS.defaultValue
+    )
 
     return (
         <AuthenticatedRouteWrapper>
@@ -122,10 +131,23 @@ const StateUserRoutes = ({
                     path={RoutesRecord.SUBMISSIONS}
                     element={<StateDashboard />}
                 />
-                <Route
-                    path={RoutesRecord.SUBMISSIONS_NEW}
-                    element={<NewStateSubmissionForm />}
-                />
+                {showEqroSubmissions ? (
+                    <>
+                        <Route
+                            path={RoutesRecord.SUBMISSIONS_NEW}
+                            element={<NewSubmission />}
+                        />
+                        <Route
+                            path={RoutesRecord.SUBMISSIONS_NEW_CONTRACT_FORM}
+                            element={<NewSubmissionForm />}
+                        />
+                    </>
+                ) : (
+                    <Route
+                        path={RoutesRecord.SUBMISSIONS_NEW}
+                        element={<NewStateSubmissionForm />}
+                    />
+                )}
                 {showRatePages && (
                     <>
                         <Route
