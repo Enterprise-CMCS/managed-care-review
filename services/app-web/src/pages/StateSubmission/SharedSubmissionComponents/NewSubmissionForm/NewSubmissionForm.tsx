@@ -1,16 +1,20 @@
 import React, { useEffect } from 'react'
-import { RoutesRecord } from '@mc-review/constants'
+import {
+    ContractSubmissionTypeRecord,
+    RoutesRecord,
+} from '@mc-review/constants'
 import { generatePath, useNavigate } from 'react-router-dom'
 import { usePage } from '../../../../contexts/PageContext'
 import { useRouteParams } from '../../../../hooks'
 import * as Yup from 'yup'
-import { Formik } from 'formik'
+import { Formik, FormikErrors } from 'formik'
 import { Form, FormGroup, Fieldset } from '@trussworks/react-uswds'
 import {
     ActionButton,
     Breadcrumbs,
     FieldRadioCard,
     PageActionsContainer,
+    PoliteErrorMessage,
 } from '../../../../components'
 import { NewStateSubmissionForm } from '../../HealthPlanSubmission/New'
 import { EQROSubmissionDetails } from '../../EQROSubmission'
@@ -25,6 +29,9 @@ export interface NewSubmissionFormValueType {
     contractType?: 'health-plan' | 'eqro'
 }
 
+type FormError =
+    FormikErrors<NewSubmissionFormValueType>[keyof FormikErrors<NewSubmissionFormValueType>]
+
 const initialNewSubmissionValues: NewSubmissionFormValueType = {
     contractType: undefined,
 }
@@ -32,7 +39,7 @@ const initialNewSubmissionValues: NewSubmissionFormValueType = {
 export const NewSubmission = () => {
     const { updateActiveMainContent } = usePage()
     const navigate = useNavigate()
-
+    const [shouldValidate, setShouldValidate] = React.useState(false)
     const activeMainContentId = 'newSubmissionMainContent'
 
     // Set the active main content to focus when click the Skip to main content button.
@@ -40,8 +47,10 @@ export const NewSubmission = () => {
         updateActiveMainContent(activeMainContentId)
     }, [activeMainContentId, updateActiveMainContent])
 
+    const showFieldErrors = (error?: FormError) =>
+        shouldValidate && Boolean(error)
+
     const onSubmit = (values: NewSubmissionFormValueType) => {
-        console.info('submit placeholder')
         navigate(
             generatePath(RoutesRecord.SUBMISSIONS_NEW_CONTRACT_FORM, {
                 contractSubmissionType: values.contractType,
@@ -73,14 +82,19 @@ export const NewSubmission = () => {
                 onSubmit={(values) => onSubmit(values)}
                 validationSchema={newSubmissionFormSchema}
             >
-                {({ values, handleSubmit }) => (
+                {({ errors, values, handleSubmit }) => (
                     <Form
                         id="newSubmissionForm"
                         className={styles.formContainer}
-                        onSubmit={handleSubmit}
+                        onSubmit={(e) => {
+                            setShouldValidate(true)
+                            return handleSubmit(e)
+                        }}
                     >
                         <fieldset className="usa-fieldset">
-                            <FormGroup>
+                            <FormGroup
+                                error={showFieldErrors(errors.contractType)}
+                            >
                                 <Fieldset
                                     role="radiogroup"
                                     aria-required
@@ -92,6 +106,11 @@ export const NewSubmission = () => {
                                     >
                                         Required
                                     </span>
+                                    {showFieldErrors(errors.contractType) && (
+                                        <PoliteErrorMessage formFieldLabel="Contract type">
+                                            {errors.contractType as string}
+                                        </PoliteErrorMessage>
+                                    )}
                                     <FieldRadioCard
                                         id="healthPlan"
                                         name="contractType"
@@ -156,14 +175,17 @@ export const NewSubmission = () => {
     )
 }
 
+// Routing to the correct new submission form component based on contract submission type
 export const NewSubmissionForm = (): React.ReactElement => {
     const { contractSubmissionType } = useRouteParams()
 
-    if (contractSubmissionType === 'health-plan') {
+    if (
+        contractSubmissionType === ContractSubmissionTypeRecord['HEALTH_PLAN']
+    ) {
         return <NewStateSubmissionForm />
     }
 
-    if (contractSubmissionType === 'eqro') {
+    if (contractSubmissionType === ContractSubmissionTypeRecord['EQRO']) {
         return <EQROSubmissionDetails />
     }
 
