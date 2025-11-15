@@ -1,7 +1,7 @@
 import React, { useEffect } from 'react'
 import { FormContainer } from '../../../../components'
 import { Form } from '@trussworks/react-uswds'
-import { PageActions } from '../../PageActions'
+import { PageActions } from '../../SharedSubmissionComponents/PageActions'
 import { generatePath, useNavigate } from 'react-router-dom'
 import { RoutesRecord } from '@mc-review/constants'
 import { useRouteParams } from '../../../../hooks'

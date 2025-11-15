@@ -18,7 +18,7 @@ import {
 } from '../../../../gen/gqlClient'
 
 import { useFocus } from '../../../../hooks'
-import { PageActions } from '../../PageActions'
+import { PageActions } from '../../SharedSubmissionComponents/PageActions'
 import {
     activeFormPages,
     type ContractFormPageProps,
@@ -36,8 +36,8 @@ import {
 import { useCurrentRoute, useRouteParams, useTealium } from '../../../../hooks'
 import { useContractForm } from '../../../../hooks/useContractForm'
 import { useAuth } from '../../../../contexts/AuthContext'
-import { ErrorOrLoadingPage } from '../../ErrorOrLoadingPage'
-import { PageBannerAlerts } from '../../PageBannerAlerts'
+import { ErrorOrLoadingPage } from '../../SharedSubmissionComponents/ErrorOrLoadingPage'
+import { PageBannerAlerts } from '../../SharedSubmissionComponents/PageBannerAlerts'
 import { useErrorSummary } from '../../../../hooks/useErrorSummary'
 import { featureFlags } from '@mc-review/common-code'
 import { useFocusOnRender } from '../../../../hooks/useFocusOnRender'

@@ -3,10 +3,14 @@ export { NewStateSubmissionForm } from './HealthPlanSubmission/New'
 
 export { EQROSubmissionForm } from './EQROSubmission/EQROSubmissionForm'
 
-export { PageBannerAlerts } from './PageBannerAlerts'
-export { ErrorOrLoadingPage } from './ErrorOrLoadingPage'
-
-export { PageActions, PageActionsContainer } from './PageActions'
+export {
+    PageBannerAlerts,
+    ErrorOrLoadingPage,
+    PageActionsContainer,
+    PageActions,
+    NewSubmissionForm,
+    NewSubmission,
+} from './SharedSubmissionComponents'
 
 export {
     getRelativePathFromNestedRoute,

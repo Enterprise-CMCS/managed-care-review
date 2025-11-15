@@ -32,7 +32,7 @@ import { formatUserInputDate } from '@mc-review/dates'
 import { useS3 } from '../../../../contexts/S3Context'
 
 import { ContractDetailsFormSchema } from './ContractDetailsSchema'
-import { PageActions } from '../../PageActions'
+import { PageActions } from '../../SharedSubmissionComponents/PageActions'
 import {
     activeFormPages,
     type ContractFormPageProps,
@@ -71,8 +71,8 @@ import {
 } from '../../../../components/Form/FieldYesNo'
 import { useCurrentRoute, useRouteParams } from '../../../../hooks'
 import { useAuth } from '../../../../contexts/AuthContext'
-import { ErrorOrLoadingPage } from '../../ErrorOrLoadingPage'
-import { PageBannerAlerts } from '../../PageBannerAlerts'
+import { ErrorOrLoadingPage } from '../../SharedSubmissionComponents/ErrorOrLoadingPage'
+import { PageBannerAlerts } from '../../SharedSubmissionComponents/PageBannerAlerts'
 import { useErrorSummary } from '../../../../hooks/useErrorSummary'
 import { useContractForm } from '../../../../hooks/useContractForm'
 import {
