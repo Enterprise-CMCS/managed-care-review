@@ -22,7 +22,7 @@ export type FieldRadioProps = {
     radio_button_title: string
     list_position: number
     list_options: number
-} & JSX.IntrinsicElements['input']
+} & React.ComponentProps<typeof Radio>
 
 export const FieldRadio = ({
     name,
