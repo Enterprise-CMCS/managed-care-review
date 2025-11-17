@@ -32,7 +32,6 @@ services:
       - EXTRA_CORS_ALLOWED_HEADERS=*
     volumes:
       - localstack_data:/var/lib/localstack
-      - "/var/run/docker.sock:/var/run/docker.sock"
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:4566/_localstack/health"]
       interval: 10s
