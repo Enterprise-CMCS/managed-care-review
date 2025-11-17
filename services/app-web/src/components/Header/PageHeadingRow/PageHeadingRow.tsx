@@ -21,6 +21,7 @@ import {
 
 const CMSUserRow = ({
     heading,
+    route,
 }: {
     user:
         | CmsUser
@@ -29,23 +30,83 @@ const CMSUserRow = ({
         | BusinessOwnerUser
         | CmsApproverUser
     heading?: string | React.ReactElement
+    route?: string
 }) => {
+    const hideSubID = route === 'DASHBOARD_SUBMISSIONS'
+
     return (
         <div className={styles.dashboardHeading}>
             <GridContainer>
-                <Grid row className="flex-align-center">
-                    <PageHeading>
-                        <span>CMS</span>
-                        {heading && (
-                            <span
-                                className="font-heading-lg text-light"
-                                data-testid="submission-name"
-                            >
-                                {heading}
-                            </span>
-                        )}
-                    </PageHeading>
-                </Grid>
+                {hideSubID ? (
+                    <Grid row className="flex-align-center">
+                        <PageHeading>
+                            <span>CMS</span>
+                            {heading && (
+                                <span
+                                    className="font-heading-lg text-light"
+                                    data-testid="submission-name"
+                                >
+                                    {heading}
+                                </span>
+                            )}
+                        </PageHeading>
+                    </Grid>
+                ) : (
+                    <Grid
+                        row
+                        className={`flex-align-center ${styles.cmsDashboardRow}`}
+                    >
+                        <PageHeading>
+                            <span className={styles.stateHeadingText}>CMS</span>
+
+                            {heading && (
+                                <span
+                                    className={styles['submission-id-line']}
+                                    data-testid="submission-name"
+                                >
+                                    <span
+                                        className={
+                                            styles['submission-id-line__label']
+                                        }
+                                    >
+                                        Submission ID
+                                    </span>
+                                    <span
+                                        className={
+                                            styles[
+                                                'submission-id-line__divider'
+                                            ]
+                                        }
+                                        aria-hidden="true"
+                                    >
+                                        |
+                                    </span>
+                                    <span
+                                        className={
+                                            styles['submission-id-line__value']
+                                        }
+                                    >
+                                        {heading}
+                                    </span>
+                                </span>
+                            )}
+                        </PageHeading>
+                        <div className={styles.contractTypeContainer}>
+                            <div
+                                className={styles.contractTypeDivider}
+                                aria-hidden="true"
+                            />
+                            <div className={styles.contractTypeText}>
+                                <span className={styles.contractTypeLabel}>
+                                    Contract type
+                                </span>
+                                <span className={styles.contractTypeValue}>
+                                    Health plan
+                                </span>
+                            </div>
+                        </div>
+                    </Grid>
+                )}
             </GridContainer>
         </div>
     )
@@ -54,33 +115,93 @@ const CMSUserRow = ({
 const StateUserRow = ({
     user,
     heading,
+    route,
 }: {
     user: StateUser
     heading?: string | React.ReactElement
+    route?: string
 }) => {
+    const hideSubID =
+        route === 'DASHBOARD_SUBMISSIONS' || route === 'SUBMISSIONS_NEW'
+
     return (
         <div className={styles.dashboardHeading}>
             <GridContainer>
-                <Grid row className="flex-align-center">
-                    <div>
-                        <StateIcon
-                            code={user.state.code as StateIconProps['code']}
-                        />
-                        <span>{user.state.name}&nbsp;</span>
-                    </div>
-                    <PageHeading>
-                        {/* Have to have state name here but screen reader only to make page heading announce as expected */}
-                        <span className="srOnly">{user.state.name}&nbsp;</span>
-                        {heading && (
-                            <span
-                                className="font-heading-lg text-light"
-                                data-testid="submission-name"
-                            >
-                                {heading}
+                {hideSubID ? (
+                    <Grid row className="flex-align-center">
+                        <div>
+                            <StateIcon
+                                code={user.state.code as StateIconProps['code']}
+                            />
+                            <span>{user.state.name}&nbsp;</span>
+                        </div>
+                        <PageHeading>
+                            <span className="srOnly">
+                                {user.state.name}&nbsp;
                             </span>
-                        )}
-                    </PageHeading>
-                </Grid>
+                            {heading && (
+                                <span
+                                    className="font-heading-lg text-light"
+                                    data-testid="submission-name"
+                                >
+                                    {heading}
+                                </span>
+                            )}
+                        </PageHeading>
+                    </Grid>
+                ) : (
+                    <Grid
+                        row
+                        className={`flex-align-center ${styles.stateDashboardRow}`}
+                    >
+                        <div>
+                            <StateIcon
+                                code={user.state.code as StateIconProps['code']}
+                            />
+                        </div>
+                        <PageHeading>
+                            <span className="srOnly">
+                                {user.state.name}&nbsp;
+                            </span>
+
+                            <span className={styles.stateHeadingText}>
+                                {user.state.name}&nbsp;
+                            </span>
+
+                            {heading && (
+                                <span
+                                    className={styles['submission-id-line']}
+                                    data-testid="submission-name"
+                                >
+                                    <span
+                                        className={
+                                            styles['submission-id-line__label']
+                                        }
+                                    >
+                                        Submission ID
+                                    </span>
+                                    <span
+                                        className={
+                                            styles[
+                                                'submission-id-line__divider'
+                                            ]
+                                        }
+                                        aria-hidden="true"
+                                    >
+                                        |
+                                    </span>
+                                    <span
+                                        className={
+                                            styles['submission-id-line__value']
+                                        }
+                                    >
+                                        {heading}
+                                    </span>
+                                </span>
+                            )}
+                        </PageHeading>
+                    </Grid>
+                )}
             </GridContainer>
         </div>
     )
@@ -133,9 +254,13 @@ export const PageHeadingRow = ({
         hasCMSUserPermissions(loggedInUser) ||
         hasAdminUserPermissions(loggedInUser)
     ) {
-        return <CMSUserRow user={loggedInUser} heading={heading} />
+        return (
+            <CMSUserRow user={loggedInUser} heading={heading} route={route} />
+        )
     } else if (loggedInUser.__typename === 'StateUser') {
-        return <StateUserRow user={loggedInUser} heading={heading} />
+        return (
+            <StateUserRow user={loggedInUser} heading={heading} route={route} />
+        )
     } else {
         return <h1>{`Programming Error: Unkown User Type: ${loggedInUser}`}</h1>
     }

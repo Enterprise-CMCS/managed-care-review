@@ -177,3 +177,87 @@
         min-height: 5rem; // this ensures we don't collapse page heading when no text present
     }
 }
+.stateDashboardRow,
+.cmsDashboardRow {
+    width: 100%;
+    justify-content: space-between; // <-- key line
+    align-items: center;
+
+    // make the PageHeading (h1) stack its children vertically
+    h1 {
+        display: flex;
+        flex-direction: column;
+        align-items: flex-start;
+    }
+}
+
+.stateHeadingText {
+    // inherits big, bold styles from .dashboardHeading
+    // optional minor tweak:
+    line-height: 1.2;
+}
+
+.submission-id-line {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    font-size: 0.95rem; // smaller than state name
+    font-weight: 400; // not bold
+    opacity: 0.9;
+    margin-top: 0.15rem; // space between state name and ID line
+
+    &__label {
+        font-weight: 400;
+    }
+
+    &__divider {
+        opacity: 0.7;
+    }
+
+    &__value {
+        font-weight: 400;
+    }
+}
+
+.contractTypeContainer {
+    margin-left: auto;
+    display: flex;
+    align-items: flex-start;
+    gap: 0.75rem;
+    font-size: 0.9rem;
+    font-weight: 400;
+    min-height: 1rem;
+}
+
+.dashboardHeading div.contractTypeContainer,
+.dashboardHeading div.contractTypeText,
+.dashboardHeading div.contractTypeDivider {
+    min-height: 2rem;
+}
+
+.contractTypeDivider {
+    width: 2px;
+    height: 2.5rem;
+    background-color: custom.$mcr-foundation-white;
+    opacity: 0.8;
+    position: relative;
+    left: 15px;
+}
+
+.contractTypeText {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    line-height: 1.2;
+}
+
+.contractTypeLabel {
+    font-size: 0.75rem;
+    font-weight: 400;
+    opacity: 0.85;
+}
+
+.contractTypeValue {
+    font-size: 1rem;
+    font-weight: bold;
+}
