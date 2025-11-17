@@ -20,22 +20,29 @@ export async function runS3Locally(runner: LabeledProcessRunner) {
 
     console.info('Creating S3 buckets in LocalStack...')
 
-    // Set AWS credentials for LocalStack (required by AWS CLI)
-    process.env.AWS_ACCESS_KEY_ID = 'test'
-    process.env.AWS_SECRET_ACCESS_KEY = 'test'
-
     // Create buckets using AWS CLI with LocalStack endpoint
+    // Pass credentials directly to avoid polluting global process.env
+    const localstackEnv = {
+        ...process.env,
+        AWS_ACCESS_KEY_ID: 'test',
+        AWS_SECRET_ACCESS_KEY: 'test',
+    }
+
     for (const bucket of buckets) {
         try {
-            commandMustSucceedSync('aws', [
-                's3',
-                'mb',
-                `s3://${bucket}`,
-                '--endpoint-url',
-                localstackEndpoint,
-                '--region',
-                'us-east-1',
-            ])
+            commandMustSucceedSync(
+                'aws',
+                [
+                    's3',
+                    'mb',
+                    `s3://${bucket}`,
+                    '--endpoint-url',
+                    localstackEndpoint,
+                    '--region',
+                    'us-east-1',
+                ],
+                { env: localstackEnv }
+            )
             console.info(`Created bucket: ${bucket}`)
         } catch (error) {
             // Failed to create bucket (may already exist, or another error occurred)
