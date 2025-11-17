@@ -240,7 +240,7 @@ app.use((req: Request, res: Response) => {
 })
 
 // Error handler
-app.use((err: Error, req: Request, res: Response, next: NextFunction) => {
+app.use((err: Error, req: Request, res: Response, _next: NextFunction) => {
     console.error('Server error:', err)
     res.status(500).json({
         error: 'Internal Server Error',
