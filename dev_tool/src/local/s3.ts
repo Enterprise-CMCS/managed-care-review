@@ -38,8 +38,8 @@ export async function runS3Locally(runner: LabeledProcessRunner) {
             ])
             console.info(`Created bucket: ${bucket}`)
         } catch (error) {
-            // Bucket might already exist, that's ok
-            console.info(`Bucket ${bucket} already exists: ${error}`)
+            // Failed to create bucket (may already exist, or another error occurred)
+            console.info(`Failed to create bucket "${bucket}" (it may already exist): ${error}`)
         }
     }
 
