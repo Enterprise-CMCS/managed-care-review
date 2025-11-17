@@ -980,6 +980,9 @@ importers:
       '@mc-review/common-code':
         specifier: workspace:*
         version: link:../../packages/common-code
+      '@mc-review/constants':
+        specifier: workspace:*
+        version: link:../../packages/constants
       '@mc-review/submissions':
         specifier: workspace:*
         version: link:../../packages/submissions
