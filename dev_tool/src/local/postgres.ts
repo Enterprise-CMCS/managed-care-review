@@ -18,12 +18,15 @@ export async function runPostgresLocally(runner: LabeledProcessRunner) {
 
     console.info('Starting Postgres via docker-compose...')
 
-    // Start postgres service from docker-compose
-    commandMustSucceedSync('docker', ['compose', 'up', '-d', 'postgres'])
-
-    // Wait for Postgres to be ready
+    // Start postgres service and wait for healthcheck to pass
     console.info('Waiting for Postgres to be ready...')
-    await new Promise((resolve) => setTimeout(resolve, 3000))
+    commandMustSucceedSync('docker', [
+        'compose',
+        'up',
+        '-d',
+        '--wait',
+        'postgres',
+    ])
 
     // reset the db, wiping it and running all the migrations files that exist
     // does not db push schema changes into the database

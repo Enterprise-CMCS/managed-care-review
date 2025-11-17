@@ -8,12 +8,15 @@ export async function runS3Locally(runner: LabeledProcessRunner) {
 
     console.info('Starting LocalStack (S3) via docker-compose...')
 
-    // Start LocalStack service from docker-compose
-    commandMustSucceedSync('docker', ['compose', 'up', '-d', 'localstack'])
-
-    // Wait for LocalStack to be ready
+    // Start LocalStack service and wait for healthcheck to pass
     console.info('Waiting for LocalStack to be ready...')
-    await new Promise((resolve) => setTimeout(resolve, 3000))
+    commandMustSucceedSync('docker', [
+        'compose',
+        'up',
+        '-d',
+        '--wait',
+        'localstack',
+    ])
 
     const buckets = ['local-uploads', 'local-qa']
     const localstackEndpoint = 'http://localhost:4566'
