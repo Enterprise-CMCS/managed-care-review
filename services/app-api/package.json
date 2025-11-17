@@ -73,7 +73,6 @@
         "zod": "^4.1.12"
     },
     "devDependencies": {
-        "@luckycatfactory/esbuild-graphql-loader": "^3.8.1",
         "@types/archiver": "^7.0.0",
         "@types/aws-lambda": "^8.10.152",
         "@types/eslint": "^9.6.1",

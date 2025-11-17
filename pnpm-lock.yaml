@@ -470,9 +470,6 @@ importers:
         specifier: ^4.1.12
         version: 4.1.12
     devDependencies:
-      '@luckycatfactory/esbuild-graphql-loader':
-        specifier: ^3.8.1
-        version: 3.8.1(esbuild@0.25.11)(graphql-tag@2.12.6(graphql@16.9.0))(graphql@16.9.0)
       '@types/archiver':
         specifier: ^7.0.0
         version: 7.0.0
@@ -20663,12 +20660,6 @@ snapshots:
       launchdarkly-eventsource: 2.2.0
     transitivePeerDependencies:
       - supports-color
-
-  '@luckycatfactory/esbuild-graphql-loader@3.8.1(esbuild@0.25.11)(graphql-tag@2.12.6(graphql@16.9.0))(graphql@16.9.0)':
-    dependencies:
-      esbuild: 0.25.11
-      graphql: 16.9.0
-      graphql-tag: 2.12.6(graphql@16.9.0)
 
   '@luckycatfactory/esbuild-graphql-loader@3.8.1(esbuild@0.25.8)(graphql-tag@2.12.6(graphql@16.9.0))(graphql@16.9.0)':
     dependencies:
