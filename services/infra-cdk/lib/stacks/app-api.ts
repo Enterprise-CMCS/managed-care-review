@@ -44,6 +44,10 @@ import type { BundlingOptions } from 'aws-cdk-lib/aws-lambda-nodejs'
  * App API stack - GraphQL API with Lambda functions and dedicated API Gateway
  */
 export class AppApiStack extends BaseStack {
+    // ESM banner for Lambda bundling - provides CommonJS compatibility shims
+    private static readonly ESM_BANNER =
+        'import { createRequire } from "module";import { fileURLToPath } from "url";import { dirname } from "path";const require = createRequire(import.meta.url);const __filename = fileURLToPath(import.meta.url);const __dirname = dirname(__filename);'
+
     // API Gateway
     public readonly apiGateway: RestApi
 
@@ -304,7 +308,7 @@ export class AppApiStack extends BaseStack {
     ): BundlingOptions {
         return {
             format: OutputFormat.ESM,
-            banner: 'import { createRequire } from "module";import { fileURLToPath } from "url";import { dirname } from "path";const require = createRequire(import.meta.url);const __filename = fileURLToPath(import.meta.url);const __dirname = dirname(__filename);',
+            banner: AppApiStack.ESM_BANNER,
             commandHooks: {
                 beforeBundling(inputDir: string, outputDir: string): string[] {
                     return [
@@ -437,7 +441,7 @@ export class AppApiStack extends BaseStack {
             securityGroups: [lambdaSecurityGroup],
             bundling: {
                 format: OutputFormat.ESM,
-                banner: 'import { createRequire } from "module";import { fileURLToPath } from "url";import { dirname } from "path";const require = createRequire(import.meta.url);const __filename = fileURLToPath(import.meta.url);const __dirname = dirname(__filename);',
+                banner: AppApiStack.ESM_BANNER,
                 externalModules: ['prisma', '@prisma/client', '.prisma'],
                 ...this.createBundling(
                     'migrate',
@@ -537,7 +541,7 @@ export class AppApiStack extends BaseStack {
             // Custom bundling to handle .graphql files and other assets
             bundling: {
                 format: OutputFormat.ESM,
-                banner: 'import { createRequire } from "module";import { fileURLToPath } from "url";import { dirname } from "path";const require = createRequire(import.meta.url);const __filename = fileURLToPath(import.meta.url);const __dirname = dirname(__filename);',
+                banner: AppApiStack.ESM_BANNER,
                 minify: false,
                 sourceMap: true,
                 target: 'node20',
