@@ -38,9 +38,15 @@ import { NavLinkWithLogging } from '../TealiumLogging/Link'
 import { useTealium } from '../../hooks'
 import useDeepCompareEffect from 'use-deep-compare-effect'
 import { getTealiumFiltersChanged } from '../../tealium/tealiumHelpers'
-import { titleCaseString, pluralize } from '@mc-review/common-code'
+import {
+    titleCaseString,
+    pluralize,
+    formatContractSubTypeForDisplay,
+    featureFlags,
+} from '@mc-review/common-code'
 import { formatCalendarDate } from '@mc-review/dates'
 import { RowCellElement } from '..'
+import { useLDClient } from 'launchdarkly-react-client-sdk'
 
 export type ContractInDashboardType = {
     id: string
@@ -215,6 +221,7 @@ export const ContractTable = ({
     user,
     showFilters = false,
 }: ContractTableProps): React.ReactElement => {
+    const ldClient = useLDClient()
     const tableConfig = {
         tableName: 'Submissions',
         rowIDName: 'submission',
@@ -228,6 +235,10 @@ export const ContractTable = ({
         filtersForAnalytics: '',
     })
     const { logFilterEvent } = useTealium()
+    const eqroSubmissions = ldClient?.variation(
+        featureFlags.EQRO_SUBMISSIONS.flag,
+        featureFlags.EQRO_SUBMISSIONS.defaultValue
+    )
     /* we store the last clicked element in a ref so that when the url is updated and the page rerenders
         we can focus that element.  this useEffect (with no dependency array) will run once on each render.
         Note that the React-y way to do this is to use forwardRef, but the clearFilters button is deeply nested
@@ -302,6 +313,17 @@ export const ContractTable = ({
                     dataTestID: 'submission-type',
                 },
                 filterFn: `arrIncludesSome`,
+            }),
+            columnHelper.accessor('contractSubmissionType', {
+                header: 'Contract type',
+                cell: (info) => (
+                    <span>
+                        {formatContractSubTypeForDisplay(info.getValue())}
+                    </span>
+                ),
+                meta: {
+                    dataTestID: `${tableConfig.rowIDName}-contractType`,
+                },
             }),
             columnHelper.accessor('programs', {
                 header: 'Programs',
@@ -380,6 +402,7 @@ export const ContractTable = ({
             columnVisibility: {
                 stateName: isNotStateUser,
                 submissionType: isNotStateUser,
+                contractSubmissionType: !isNotStateUser && eqroSubmissions,
             },
         },
         onColumnFiltersChange: setColumnFilters,

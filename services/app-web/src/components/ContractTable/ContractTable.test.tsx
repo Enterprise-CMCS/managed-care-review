@@ -250,6 +250,7 @@ describe('ContractTable for CMS User (with filters)', () => {
             />,
             {
                 apolloProvider: apolloProviderWithCMSUser(),
+                featureFlags: { 'eqro-submissions': true },
             }
         )
         const submissionsInTable = screen.getAllByTestId(`submission-id`)
@@ -261,6 +262,9 @@ describe('ContractTable for CMS User (with filters)', () => {
         expect(within(columnNames).getByText(/Programs/)).toBeTruthy()
         expect(within(columnNames).getByText(/Submission date/)).toBeTruthy()
         expect(within(columnNames).getByText(/Status/)).toBeTruthy()
+        expect(
+            within(columnNames).queryByText(/Contract type/)
+        ).not.toBeInTheDocument()
         expect(submissionsInTable).toHaveLength(5)
     })
 
@@ -942,12 +946,14 @@ describe('ContractTable state user tests', () => {
             <ContractTable tableData={submissions} user={mockStateUser()} />,
             {
                 apolloProvider: apolloProviderWithStateUser(),
+                featureFlags: { 'eqro-submissions': true },
             }
         )
         const submissionsInTable = screen.getAllByTestId(`submission-id`)
         const table = screen.getByRole('table')
         const [columnNames] = within(table).getAllByRole('rowgroup')
         expect(within(columnNames).getByText(/ID/)).toBeTruthy()
+        expect(within(columnNames).getByText(/Contract type/)).toBeTruthy()
         expect(within(columnNames).queryByText(/State/)).not.toBeInTheDocument()
         expect(
             within(columnNames).queryByText(/Submission type/)
