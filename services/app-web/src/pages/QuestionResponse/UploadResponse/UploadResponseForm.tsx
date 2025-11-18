@@ -12,13 +12,13 @@ import {
     ErrorSummary,
     FileUpload,
     GenericApiErrorBanner,
+    PageActionsContainer,
 } from '../../../components'
 import { useFileUpload } from '../../../hooks/useFileUpload'
 import {
     ACCEPTED_SUBMISSION_FILE_TYPES,
     FileItemT,
 } from '../../../components/FileUpload'
-import { PageActionsContainer } from '../../StateSubmission/PageActions'
 import { useErrorSummary } from '../../../hooks/useErrorSummary'
 import { Division } from '../../../gen/gqlClient'
 import { QAUploadFormSummary } from '../QAUploadFormSummary'

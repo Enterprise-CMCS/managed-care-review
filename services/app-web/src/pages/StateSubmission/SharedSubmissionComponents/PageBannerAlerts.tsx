@@ -2,9 +2,9 @@ import React from 'react'
 import {
     GenericApiErrorBanner,
     SubmissionUnlockedBanner,
-} from '../../components'
-import { UpdateInformation, User } from '../../gen/gqlClient'
-import { AccessibleAlertBanner } from '../../components/Banner/AccessibleAlertBanner/AccessibleAlertBanner'
+} from '../../../components'
+import { UpdateInformation, User } from '../../../gen/gqlClient'
+import { AccessibleAlertBanner } from '../../../components/Banner/AccessibleAlertBanner/AccessibleAlertBanner'
 
 const PageBannerAlerts = ({
     showPageErrorMessage,

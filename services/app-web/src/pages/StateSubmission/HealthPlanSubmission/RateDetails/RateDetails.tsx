@@ -10,9 +10,9 @@ import {
     ErrorSummary,
     FormNotificationContainer,
     SectionCard,
+    PageActions,
 } from '../../../../components'
 import { RateDetailsFormSchema } from './RateDetailsSchema'
-import { PageActions } from '../../PageActions'
 
 import { useS3 } from '../../../../contexts/S3Context'
 import {
@@ -37,12 +37,12 @@ import {
 import { SingleRateFormFields } from './SingleRateFormFields'
 import { useFocus, useRouteParams } from '../../../../hooks'
 import { useErrorSummary } from '../../../../hooks/useErrorSummary'
-import { PageBannerAlerts } from '../../PageBannerAlerts'
+import { PageBannerAlerts } from '../../SharedSubmissionComponents/PageBannerAlerts'
 import { useAuth } from '../../../../contexts/AuthContext'
 import {
     ErrorOrLoadingPage,
     handleAndReturnErrorState,
-} from '../../ErrorOrLoadingPage'
+} from '../../SharedSubmissionComponents/ErrorOrLoadingPage'
 import { featureFlags } from '@mc-review/common-code'
 import { useLDClient } from 'launchdarkly-react-client-sdk'
 import { recordJSException } from '@mc-review/otel'
