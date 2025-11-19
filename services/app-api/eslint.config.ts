@@ -5,8 +5,20 @@ import jest from 'eslint-plugin-jest'
 
 export default tseslint.config([
     {
+        ignores: [
+            'gen/*',
+            'src/gen/**',
+            '*.config.js',
+            '**/esbuild.config.js',
+            '.esbuild/**',
+            '.local-build/**',
+            'protoMigrations/gen/**',
+            '.serverless/**',
+            'coverage/**',
+        ],
+    },
+    {
         files: ['**/*.ts'],
-        ignores: ['gen/*', '*.config.js', '**/esbuild.config.js'],
         languageOptions: {
             parser: typescriptParser,
             parserOptions: {

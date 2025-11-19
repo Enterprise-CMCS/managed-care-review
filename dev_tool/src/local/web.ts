@@ -63,7 +63,7 @@ export async function runWebAgainstAWS(
     }
 
     console.info('Attempting to access stage:', stageName)
-    // Test to see if we can read info from serverless. This is likely to trip folks up who haven't
+    // Test to see if we can read info from CDK CloudFormation stacks. This is likely to trip folks up who haven't
     // configured their AWS keys correctly or if they have an invalid stage name.
     const serverlessConnection = checkStageAccess(stageName)
     switch (serverlessConnection) {
@@ -76,7 +76,7 @@ export async function runWebAgainstAWS(
             process.exit(1)
         }
         // don't need a break because we exit
-        // eslint-disable-next-line no-fallthrough
+
         case 'STAGE_ERROR': {
             console.info(
                 `Error: stack with id ${stageName} does not exist or is not done deploying\n`,
@@ -85,7 +85,7 @@ export async function runWebAgainstAWS(
             process.exit(1)
         }
         // don't need a break because we exit
-        // eslint-disable-next-line no-fallthrough
+
         case 'UNKNOWN_ERROR': {
             console.info(
                 'Unexpected Error attempting to read AWS Cloudformation.'
@@ -94,7 +94,7 @@ export async function runWebAgainstAWS(
         }
     }
 
-    // Now, we've confirmed we are configured to pull data out of serverless x cloudformation
+    // Now, we've confirmed we are configured to pull data out of CDK CloudFormation stacks
     console.info('Access confirmed. Fetching config vars')
     const { region, idPool, userPool, userPoolClient, userPoolDomain } =
         getWebAuthVars(stageName)

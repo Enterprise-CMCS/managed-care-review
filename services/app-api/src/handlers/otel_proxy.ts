@@ -30,4 +30,4 @@ const main: APIGatewayProxyHandler = async (event) => {
     }
 }
 
-module.exports = { main }
+export { main }

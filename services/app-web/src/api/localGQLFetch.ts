@@ -3,7 +3,7 @@ import { getLoggedInUser } from '../localAuth'
 import { fakeAmplifyFetch } from './fakeAmplifyFetch'
 
 // localGQLfetch calls Amplify fetch but puts the user in the cognito header for
-// serverless-offline to set
+// the local Express server to map into the Lambda event
 export async function localGQLFetch(
     uri: string,
     options: RequestInit
