@@ -201,7 +201,7 @@ function handler(event) {
 
         // Set application URL - use custom domain if configured, otherwise CloudFront URL
         this.applicationUrl = hasCustomDomain
-            ? `https://${cloudfrontDomainName}`
+            ? `https://${cloudfrontDomainName}/` // Trailing slash for custom domains
             : `https://${this.distribution.distributionDomainName}`
 
         // Create storybook S3 bucket
@@ -291,7 +291,7 @@ function handler(event) {
 
         // Set storybook URL - use custom domain if configured, otherwise CloudFront URL
         this.storybookUrl = hasCustomStorybookDomain
-            ? `https://${cloudfrontStorybookDomainName}`
+            ? `https://${cloudfrontStorybookDomainName}/` // Trailing slash for custom domains
             : `https://${this.storybookDistribution.distributionDomainName}`
 
         this.createOutputs()
