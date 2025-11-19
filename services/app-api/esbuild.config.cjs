@@ -12,6 +12,7 @@ module.exports = () => {
         bundle: true,
         exclude: ['prisma', '@prisma/client'],
         sourcemap: true,
+        format: 'cjs',
         plugins: [
             {
                 name: 'graphql-loader',
