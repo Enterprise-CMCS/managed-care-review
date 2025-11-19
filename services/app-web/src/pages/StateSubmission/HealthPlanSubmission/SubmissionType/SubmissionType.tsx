@@ -53,6 +53,7 @@ import {
     RouteT,
     STATE_SUBMISSION_FORM_ROUTES_WITHOUT_SUPPORTING_DOCS,
     STATE_SUBMISSION_FORM_ROUTES,
+    EQRO_SUBMISSION_FORM_ROUTES,
     ContractSubmissionTypeRecord,
 } from '@mc-review/constants'
 import { FormContainer } from '../../../../components'
@@ -83,8 +84,8 @@ type FormError =
     FormikErrors<SubmissionTypeFormValues>[keyof FormikErrors<SubmissionTypeFormValues>]
 
 export const SubmissionType = ({
-    showValidations = false,
-}: ContractFormPageProps): React.ReactElement => {
+                                   showValidations = false,
+                               }: ContractFormPageProps): React.ReactElement => {
     const { loggedInUser } = useAuth()
     const { currentRoute } = useCurrentRoute()
     const [shouldValidate, setShouldValidate] = useState(showValidations)
@@ -113,9 +114,9 @@ export const SubmissionType = ({
     //Toggle isNewSubmission condition based on EQRO feature flag
     const isNewSubmission = showEqroSubmissions
         ? matchPath(
-              RoutesRecord.SUBMISSIONS_NEW_SUBMISSION_FORM,
-              location.pathname
-          )
+            RoutesRecord.SUBMISSIONS_NEW_SUBMISSION_FORM,
+            location.pathname
+        )
         : location.pathname === '/submissions/new'
 
     const {
@@ -239,7 +240,7 @@ export const SubmissionType = ({
                         contractSubmissionType:
                             ContractSubmissionTypeRecord[
                                 draftSubmission.contractSubmissionType
-                            ],
+                                ],
                     })
                 )
             }
@@ -256,13 +257,13 @@ export const SubmissionType = ({
             const updatedDraftSubmissionFormData: ContractDraftRevisionFormDataInput =
                 {
                     contractExecutionStatus:
-                        draftSubmission.draftRevision.formData
-                            .contractExecutionStatus,
+                    draftSubmission.draftRevision.formData
+                        .contractExecutionStatus,
                     contractDateStart:
-                        draftSubmission.draftRevision.formData
-                            .contractDateStart,
+                    draftSubmission.draftRevision.formData
+                        .contractDateStart,
                     contractDateEnd:
-                        draftSubmission.draftRevision.formData.contractDateEnd,
+                    draftSubmission.draftRevision.formData.contractDateEnd,
                     contractType: values.contractType as ContractType,
                     submissionDescription: values.submissionDescription,
                     riskBasedContract: yesNoFormValueAsBoolean(
@@ -278,23 +279,23 @@ export const SubmissionType = ({
                         draftSubmission.draftRevision.formData
                             .supportingDocuments || [],
                     managedCareEntities:
-                        draftSubmission.draftRevision.formData
-                            .managedCareEntities,
+                    draftSubmission.draftRevision.formData
+                        .managedCareEntities,
                     federalAuthorities:
-                        draftSubmission.draftRevision.formData
-                            .federalAuthorities,
+                    draftSubmission.draftRevision.formData
+                        .federalAuthorities,
                     dsnpContract:
-                        draftSubmission.draftRevision.formData.dsnpContract,
+                    draftSubmission.draftRevision.formData.dsnpContract,
                     contractDocuments:
-                        draftSubmission.draftRevision.formData
-                            .contractDocuments,
+                    draftSubmission.draftRevision.formData
+                        .contractDocuments,
                     statutoryRegulatoryAttestation:
-                        draftSubmission.draftRevision.formData
-                            .statutoryRegulatoryAttestation,
+                    draftSubmission.draftRevision.formData
+                        .statutoryRegulatoryAttestation,
                     // If contract is in compliance, we set the description to undefined. This clears out previous non-compliance description
                     statutoryRegulatoryAttestationDescription:
-                        draftSubmission.draftRevision.formData
-                            .statutoryRegulatoryAttestationDescription,
+                    draftSubmission.draftRevision.formData
+                        .statutoryRegulatoryAttestationDescription,
                 }
 
             if (isContractWithProvisions(draftSubmission)) {
@@ -445,12 +446,13 @@ export const SubmissionType = ({
                     formPages={
                         draftSubmission
                             ? activeFormPages(
-                                  draftSubmission.draftRevision.formData,
-                                  hideSupportingDocs
-                              )
+                                draftSubmission.draftRevision.formData,
+                                hideSupportingDocs,
+                                draftSubmission.contractSubmissionType
+                            )
                             : hideSupportingDocs
-                              ? STATE_SUBMISSION_FORM_ROUTES_WITHOUT_SUPPORTING_DOCS
-                              : STATE_SUBMISSION_FORM_ROUTES
+                                ? STATE_SUBMISSION_FORM_ROUTES_WITHOUT_SUPPORTING_DOCS
+                                : STATE_SUBMISSION_FORM_ROUTES
                     }
                     currentFormPage={
                         draftSubmission ? currentRoute : 'SUBMISSIONS_TYPE'
@@ -475,13 +477,13 @@ export const SubmissionType = ({
                     validationSchema={SubmissionTypeFormSchema()}
                 >
                     {({
-                        values,
-                        errors,
-                        handleSubmit,
-                        isSubmitting,
-                        setSubmitting,
-                        setFieldValue,
-                    }) => {
+                          values,
+                          errors,
+                          handleSubmit,
+                          isSubmitting,
+                          setSubmitting,
+                          setFieldValue,
+                      }) => {
                         return (
                             <UswdsForm
                                 className={styles.formContainer}
@@ -541,7 +543,7 @@ export const SubmissionType = ({
                                                 label={
                                                     PopulationCoveredRecord[
                                                         'MEDICAID'
-                                                    ]
+                                                        ]
                                                 }
                                                 value={'MEDICAID'}
                                                 onClick={() =>
@@ -557,7 +559,7 @@ export const SubmissionType = ({
                                                 radio_button_title={
                                                     PopulationCoveredRecord[
                                                         'MEDICAID'
-                                                    ]
+                                                        ]
                                                 }
                                             />
                                             <FieldRadio
@@ -566,7 +568,7 @@ export const SubmissionType = ({
                                                 label={
                                                     PopulationCoveredRecord[
                                                         'MEDICAID_AND_CHIP'
-                                                    ]
+                                                        ]
                                                 }
                                                 value={'MEDICAID_AND_CHIP'}
                                                 onClick={() =>
@@ -582,7 +584,7 @@ export const SubmissionType = ({
                                                 radio_button_title={
                                                     PopulationCoveredRecord[
                                                         'MEDICAID_AND_CHIP'
-                                                    ]
+                                                        ]
                                                 }
                                             />
                                             <FieldRadio
@@ -591,7 +593,7 @@ export const SubmissionType = ({
                                                 label={
                                                     PopulationCoveredRecord[
                                                         'CHIP'
-                                                    ]
+                                                        ]
                                                 }
                                                 value={'CHIP'}
                                                 onClick={() =>
@@ -610,7 +612,7 @@ export const SubmissionType = ({
                                                 radio_button_title={
                                                     PopulationCoveredRecord[
                                                         'CHIP'
-                                                    ]
+                                                        ]
                                                 }
                                             />
                                             {hasPreviouslySubmittedRates && (
@@ -700,7 +702,7 @@ export const SubmissionType = ({
                                                 label={
                                                     SubmissionTypeRecord[
                                                         'CONTRACT_ONLY'
-                                                    ]
+                                                        ]
                                                 }
                                                 value={'CONTRACT_ONLY'}
                                                 list_position={1}
@@ -709,7 +711,7 @@ export const SubmissionType = ({
                                                 radio_button_title={
                                                     SubmissionTypeRecord[
                                                         'CONTRACT_ONLY'
-                                                    ]
+                                                        ]
                                                 }
                                             />
                                             <FieldRadio
@@ -718,7 +720,7 @@ export const SubmissionType = ({
                                                 label={
                                                     SubmissionTypeRecord[
                                                         'CONTRACT_AND_RATES'
-                                                    ]
+                                                        ]
                                                 }
                                                 value={'CONTRACT_AND_RATES'}
                                                 disabled={
@@ -731,7 +733,7 @@ export const SubmissionType = ({
                                                 radio_button_title={
                                                     SubmissionTypeRecord[
                                                         'CONTRACT_AND_RATES'
-                                                    ]
+                                                        ]
                                                 }
                                             />
                                             {hasPreviouslySubmittedRates && (
@@ -745,16 +747,16 @@ export const SubmissionType = ({
                                             )}
                                             {values.populationCovered ===
                                                 'CHIP' && (
-                                                <div
-                                                    role="note"
-                                                    aria-labelledby="submissionType"
-                                                    className="mcr-note padding-top-2"
-                                                >
-                                                    States are not required to
-                                                    submit rates with CHIP-only
-                                                    contracts.
-                                                </div>
-                                            )}
+                                                    <div
+                                                        role="note"
+                                                        aria-labelledby="submissionType"
+                                                        className="mcr-note padding-top-2"
+                                                    >
+                                                        States are not required to
+                                                        submit rates with CHIP-only
+                                                        contracts.
+                                                    </div>
+                                                )}
                                         </Fieldset>
                                     </FormGroup>
                                     <FormGroup

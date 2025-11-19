@@ -3,9 +3,10 @@ import {
     RouteT,
     RouteTWithUnknown,
     STATE_SUBMISSION_FORM_ROUTES,
+    EQRO_SUBMISSION_FORM_ROUTES,
 } from '@mc-review/constants'
 import { getRelativePath } from '../../routeHelpers'
-import { ContractFormData } from '../../gen/gqlClient'
+import { ContractFormData, ContractSubmissionType } from '../../gen/gqlClient'
 
 const getRelativePathFromNestedRoute = (formRouteType: RouteT): string =>
     getRelativePath({
@@ -15,7 +16,8 @@ const getRelativePathFromNestedRoute = (formRouteType: RouteT): string =>
 
 const activeFormPages = (
     draft: ContractFormData,
-    hideSupportingDocs?: boolean
+    hideSupportingDocs?: boolean,
+    contractSubmissionType?: ContractSubmissionType
 ): RouteTWithUnknown[] => {
     // If submission type is contract only, rate details is left out of the step indicator
     // If feature flag for hiding supporting docs is on, that documents page is left out of the
