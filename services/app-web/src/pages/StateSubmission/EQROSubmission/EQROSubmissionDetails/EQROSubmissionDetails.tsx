@@ -80,7 +80,11 @@ export const EQROSubmissionDetails = (): React.ReactElement => {
             <FormNotificationContainer>
                 <DynamicStepIndicator
                     formPages={EQRO_SUBMISSION_FORM_ROUTES}
-                    currentFormPage={currentRoute}
+                    currentFormPage={
+                        currentRoute === 'SUBMISSIONS_NEW_SUBMISSION_FORM'
+                            ? 'SUBMISSIONS_TYPE'  // ← Map new submission route to first step
+                            : currentRoute
+                    }
                     customPageTitles={{
                         SUBMISSIONS_TYPE: 'Submission details',
                     }}
