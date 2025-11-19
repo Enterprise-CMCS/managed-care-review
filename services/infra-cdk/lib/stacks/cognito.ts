@@ -21,7 +21,7 @@ import {
     Effect,
 } from 'aws-cdk-lib/aws-iam'
 import { StringParameter } from 'aws-cdk-lib/aws-ssm'
-import { CfnOutput } from 'aws-cdk-lib'
+import { CfnOutput, Fn } from 'aws-cdk-lib'
 
 /**
  * Cognito stack - User Pool and Identity Pool for authentication
@@ -38,6 +38,11 @@ export class CognitoStack extends BaseStack {
             ...props,
             description: 'Cognito authentication - User Pool and Identity Pool',
         })
+
+        // Import application endpoint URL from frontend-infra stack (matches serverless ui-auth dependency on ui)
+        const applicationEndpointUrl = Fn.importValue(
+            `frontend-infra-${props.stage}-cdk-CloudFrontEndpointUrl`
+        )
 
         // Get SSM parameters (matches serverless config)
         const oktaMetadataUrl = StringParameter.valueFromLookup(
@@ -131,12 +136,12 @@ export class CognitoStack extends BaseStack {
                     },
                     scopes: [OAuthScope.EMAIL, OAuthScope.OPENID],
                     callbackUrls: [
-                        'https://placeholder.domain.com/', // Will be updated with actual frontend URL
+                        applicationEndpointUrl, // Dynamic URL from frontend-infra stack
                         'http://localhost:3000/',
                         'http://localhost:3003/',
                     ],
                     logoutUrls: [
-                        'https://placeholder.domain.com/',
+                        applicationEndpointUrl, // Dynamic URL from frontend-infra stack
                         'http://localhost:3000/',
                         'http://localhost:3003/',
                     ],
