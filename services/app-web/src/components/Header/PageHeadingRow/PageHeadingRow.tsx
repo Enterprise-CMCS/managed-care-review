@@ -19,6 +19,32 @@ import {
     hasCMSUserPermissions,
 } from '@mc-review/helpers'
 
+const SharedSubHeadingRow = ({
+    heading,
+}: {
+    heading: string | React.ReactElement
+}) => {
+    return (
+        <span className={styles.submissionIdLine} data-testid="submission-name">
+            <span className={styles.submissionIdLineLabel}>Submission ID</span>
+            <span className={styles.submissionIdLineDivider} aria-hidden="true">
+                |
+            </span>
+            <span className={styles.submissionIdLineValue}>{heading}</span>
+        </span>
+    )
+}
+const EntityType = ({ entityType }: { entityType: 'EQRO' | 'Health plan' }) => {
+    return (
+        <div className={styles.entityTypeContainer}>
+            <div className={styles.entityTypeDivider} aria-hidden="true" />
+            <div className={styles.entityTypeText}>
+                <span className={styles.entityTypeLabel}>Entity type</span>
+                <span className={styles.entityTypeValue}>{entityType}</span>
+            </div>
+        </div>
+    )
+}
 const CMSUserRow = ({
     heading,
     route,
@@ -33,6 +59,7 @@ const CMSUserRow = ({
     route?: string
 }) => {
     const hideSubID = route === 'DASHBOARD_SUBMISSIONS'
+    const entityType = route?.includes('eqro') ? 'EQRO' : 'Health plan'
 
     return (
         <div className={styles.dashboardHeading}>
@@ -60,51 +87,10 @@ const CMSUserRow = ({
                             <span className={styles.stateHeadingText}>CMS</span>
 
                             {heading && (
-                                <span
-                                    className={styles['submission-id-line']}
-                                    data-testid="submission-name"
-                                >
-                                    <span
-                                        className={
-                                            styles['submission-id-line__label']
-                                        }
-                                    >
-                                        Submission ID
-                                    </span>
-                                    <span
-                                        className={
-                                            styles[
-                                                'submission-id-line__divider'
-                                            ]
-                                        }
-                                        aria-hidden="true"
-                                    >
-                                        |
-                                    </span>
-                                    <span
-                                        className={
-                                            styles['submission-id-line__value']
-                                        }
-                                    >
-                                        {heading}
-                                    </span>
-                                </span>
+                                <SharedSubHeadingRow heading={heading} />
                             )}
                         </PageHeading>
-                        <div className={styles.contractTypeContainer}>
-                            <div
-                                className={styles.contractTypeDivider}
-                                aria-hidden="true"
-                            />
-                            <div className={styles.contractTypeText}>
-                                <span className={styles.contractTypeLabel}>
-                                    Contract type
-                                </span>
-                                <span className={styles.contractTypeValue}>
-                                    Health plan
-                                </span>
-                            </div>
-                        </div>
+                        <EntityType entityType={entityType} />
                     </Grid>
                 )}
             </GridContainer>
@@ -123,6 +109,7 @@ const StateUserRow = ({
 }) => {
     const hideSubID =
         route === 'DASHBOARD_SUBMISSIONS' || route === 'SUBMISSIONS_NEW'
+    const entityType = route?.includes('EQRO') ? 'EQRO' : 'Health plan'
 
     return (
         <div className={styles.dashboardHeading}>
@@ -169,37 +156,10 @@ const StateUserRow = ({
                             </span>
 
                             {heading && (
-                                <span
-                                    className={styles['submission-id-line']}
-                                    data-testid="submission-name"
-                                >
-                                    <span
-                                        className={
-                                            styles['submission-id-line__label']
-                                        }
-                                    >
-                                        Submission ID
-                                    </span>
-                                    <span
-                                        className={
-                                            styles[
-                                                'submission-id-line__divider'
-                                            ]
-                                        }
-                                        aria-hidden="true"
-                                    >
-                                        |
-                                    </span>
-                                    <span
-                                        className={
-                                            styles['submission-id-line__value']
-                                        }
-                                    >
-                                        {heading}
-                                    </span>
-                                </span>
+                                <SharedSubHeadingRow heading={heading} />
                             )}
                         </PageHeading>
+                        <EntityType entityType={entityType} />
                     </Grid>
                 )}
             </GridContainer>

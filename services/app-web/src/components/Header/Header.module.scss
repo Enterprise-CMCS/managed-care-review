@@ -197,7 +197,7 @@
     line-height: 1.2;
 }
 
-.submission-id-line {
+.submissionIdLine {
     display: inline-flex;
     align-items: center;
     gap: 0.35rem;
@@ -205,21 +205,21 @@
     font-weight: 400; // not bold
     opacity: 0.9;
     margin-top: 0.15rem; // space between state name and ID line
-
-    &__label {
-        font-weight: 400;
-    }
-
-    &__divider {
-        opacity: 0.7;
-    }
-
-    &__value {
-        font-weight: 400;
-    }
 }
 
-.contractTypeContainer {
+.submissionIdlabel {
+    font-weight: 400;
+}
+
+.submissionIdDivider {
+    opacity: 0.7;
+}
+
+.submissionIdValue {
+    font-weight: 400;
+}
+
+.entityTypeContainer {
     margin-left: auto;
     display: flex;
     align-items: flex-start;
@@ -229,35 +229,37 @@
     min-height: 1rem;
 }
 
-.dashboardHeading div.contractTypeContainer,
-.dashboardHeading div.contractTypeText,
-.dashboardHeading div.contractTypeDivider {
+div div.entityTypeText {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    text-align: left;
+    line-height: 1.2;
+}
+
+.dashboardHeading div.entityTypeContainer,
+.dashboardHeading div.entityTypeText,
+.dashboardHeading div.entityTypeDivider {
     min-height: 2rem;
 }
 
-.contractTypeDivider {
-    width: 2px;
+.entityTypeDivider {
+    width: 3px;
     height: 2.5rem;
-    background-color: custom.$mcr-foundation-white;
+    background-color: custom.$mcr-periwinkle;
     opacity: 0.8;
     position: relative;
     left: 15px;
 }
 
-.contractTypeText {
-    display: flex;
-    flex-direction: column;
-    align-items: flex-start;
-    line-height: 1.2;
-}
-
-.contractTypeLabel {
+.entityTypeLabel {
     font-size: 0.75rem;
     font-weight: 400;
     opacity: 0.85;
+    margin-bottom: 0.15rem;
 }
 
-.contractTypeValue {
+.entityTypeValue {
     font-size: 1rem;
     font-weight: bold;
 }
