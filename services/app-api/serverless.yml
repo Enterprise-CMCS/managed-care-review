@@ -41,7 +41,7 @@ custom:
   reactAppS3DocumentUploadsBucket: ${env:VITE_APP_S3_DOCUMENTS_BUCKET, cf:uploads-${sls:stage}.DocumentUploadsBucketName}
   reactAppS3QABucket: ${env:VITE_APP_S3_QA_BUCKET, cf:uploads-${sls:stage}.QAUploadsBucketName}
   esbuild:
-    config: './esbuild.config.js'
+    config: './esbuild.config.cjs'
   serverlessTerminationProtection:
     stages:
       - dev
