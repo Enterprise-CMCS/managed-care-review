@@ -21,6 +21,10 @@ import {
 import { S3BucketOrigin } from 'aws-cdk-lib/aws-cloudfront-origins'
 import { CfnWebACL } from 'aws-cdk-lib/aws-wafv2'
 import { PolicyStatement, Effect } from 'aws-cdk-lib/aws-iam'
+import {
+    type ICertificate,
+    Certificate,
+} from 'aws-cdk-lib/aws-certificatemanager'
 import { CfnOutput } from 'aws-cdk-lib'
 import { ResourceNames } from '../config/shared'
 
@@ -44,6 +48,35 @@ export class FrontendInfraStack extends BaseStack {
             description:
                 'Frontend infrastructure - S3 buckets and CloudFront distributions for React app and Storybook',
         })
+
+        // Get optional custom domain configuration from environment (matches serverless ui config)
+        const cloudfrontCertArn = process.env.CLOUDFRONT_CERT_ARN
+        const cloudfrontDomainName = process.env.CLOUDFRONT_DOMAIN_NAME
+        const cloudfrontStorybookDomainName =
+            process.env.CLOUDFRONT_SB_DOMAIN_NAME
+
+        // Check if custom domain is configured (both cert and domain must be set)
+        const hasCustomDomain =
+            cloudfrontCertArn &&
+            cloudfrontCertArn !== '' &&
+            cloudfrontDomainName &&
+            cloudfrontDomainName !== ''
+
+        const hasCustomStorybookDomain =
+            cloudfrontCertArn &&
+            cloudfrontCertArn !== '' &&
+            cloudfrontStorybookDomainName &&
+            cloudfrontStorybookDomainName !== ''
+
+        // Import certificate if custom domain is configured
+        let certificate: ICertificate | undefined
+        if (hasCustomDomain || hasCustomStorybookDomain) {
+            certificate = Certificate.fromCertificateArn(
+                this,
+                'CloudFrontCertificate',
+                cloudfrontCertArn!
+            )
+        }
 
         // Create S3 bucket (matches serverless ui config)
         this.bucket = new Bucket(this, 'S3Bucket', {
@@ -127,6 +160,10 @@ function handler(event) {
             defaultRootObject: 'index.html',
             httpVersion: HttpVersion.HTTP2,
 
+            // Add custom domain aliases if configured (matches serverless ui config)
+            domainNames: hasCustomDomain ? [cloudfrontDomainName!] : undefined,
+            certificate: hasCustomDomain ? certificate : undefined,
+
             defaultBehavior: {
                 origin: S3BucketOrigin.withOriginAccessIdentity(this.bucket, {
                     originAccessIdentity: oai,
@@ -162,7 +199,10 @@ function handler(event) {
             logFilePrefix: `${this.stage}-ui-cloudfront-logs/`,
         })
 
-        this.applicationUrl = `https://${this.distribution.distributionDomainName}`
+        // Set application URL - use custom domain if configured, otherwise CloudFront URL (matches serverless output logic)
+        this.applicationUrl = hasCustomDomain
+            ? `https://${cloudfrontDomainName}`
+            : `https://${this.distribution.distributionDomainName}`
 
         // Create storybook S3 bucket (matches serverless storybook config)
         this.storybookBucket = new Bucket(this, 'StorybookS3Bucket', {
@@ -209,6 +249,12 @@ function handler(event) {
                 defaultRootObject: 'index.html',
                 httpVersion: HttpVersion.HTTP2,
 
+                // Add custom domain aliases if configured (matches serverless storybook config)
+                domainNames: hasCustomStorybookDomain
+                    ? [cloudfrontStorybookDomainName!]
+                    : undefined,
+                certificate: hasCustomStorybookDomain ? certificate : undefined,
+
                 defaultBehavior: {
                     origin: S3BucketOrigin.withOriginAccessIdentity(
                         this.storybookBucket,
@@ -243,7 +289,10 @@ function handler(event) {
             }
         )
 
-        this.storybookUrl = `https://${this.storybookDistribution.distributionDomainName}`
+        // Set storybook URL - use custom domain if configured, otherwise CloudFront URL (matches serverless output logic)
+        this.storybookUrl = hasCustomStorybookDomain
+            ? `https://${cloudfrontStorybookDomainName}`
+            : `https://${this.storybookDistribution.distributionDomainName}`
 
         this.createOutputs()
     }
