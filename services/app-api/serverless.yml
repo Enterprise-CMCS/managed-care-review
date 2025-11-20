@@ -29,7 +29,7 @@ custom:
   auroraV2Arn: ${env:CF_CONFIG_IGNORED_LOCALLY, cf:postgres-${sls:stage}.PostgresAuroraV2Arn }
   document_uploads_bucket_arn: ${env:CF_CONFIG_IGNORED_LOCALLY, cf:uploads-${sls:stage}.DocumentUploadsBucketArn}
   qa_uploads_bucket_arn: ${env:CF_CONFIG_IGNORED_LOCALLY, cf:uploads-${sls:stage}.QAUploadsBucketArn}
-  secretsManagerSecret: aurora_postgres_${sls:stage} #pragma: allowlist secret
+  secretsManagerSecret: aurora_postgres_${sls:stage}_cdk #pragma: allowlist secret
   reactAppAuthMode: ${env:VITE_APP_AUTH_MODE}
   apiAppOtelCollectorUrl: ${env:API_APP_OTEL_COLLECTOR_URL, ssm:/configuration/api_app_otel_collector_url}
   dbURL: ${env:DATABASE_URL}
