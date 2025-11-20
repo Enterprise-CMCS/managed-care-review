@@ -17,7 +17,7 @@ custom:
 
   # CDK CloudFront URL for callback URLs (temporary during migration)
   # Map Serverless stage name to CDK stage name (main -> dev)
-  cdk_stage_name: ${self:custom.cdkStageMapping.${sls:stage}, sls:stage}
+  cdk_stage_name: ${self:custom.cdkStageMapping.${sls:stage}, ${sls:stage}}
   cdkStageMapping:
     main: dev
     val: val
