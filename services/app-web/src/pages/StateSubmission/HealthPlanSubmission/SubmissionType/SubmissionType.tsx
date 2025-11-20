@@ -53,7 +53,6 @@ import {
     RouteT,
     STATE_SUBMISSION_FORM_ROUTES_WITHOUT_SUPPORTING_DOCS,
     STATE_SUBMISSION_FORM_ROUTES,
-    EQRO_SUBMISSION_FORM_ROUTES,
     ContractSubmissionTypeRecord,
 } from '@mc-review/constants'
 import { FormContainer } from '../../../../components'
@@ -447,8 +446,7 @@ export const SubmissionType = ({
                         draftSubmission
                             ? activeFormPages(
                                 draftSubmission.draftRevision.formData,
-                                hideSupportingDocs,
-                                draftSubmission.contractSubmissionType
+                                hideSupportingDocs
                             )
                             : hideSupportingDocs
                                 ? STATE_SUBMISSION_FORM_ROUTES_WITHOUT_SUPPORTING_DOCS
