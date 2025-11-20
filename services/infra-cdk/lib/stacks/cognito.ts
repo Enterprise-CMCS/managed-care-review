@@ -243,40 +243,89 @@ export class CognitoStack extends BaseStack {
     }
 
     private createOutputs(): void {
+        // TEMPORARY: For dev/val/prod, export Serverless Cognito IDs from SSM
+        // For review environments, use the new CDK Cognito resources
+        //
+        // This allows:
+        // - dev/val/prod: Continue using existing Serverless Cognito (with Okta configured)
+        // - review envs: Use new CDK Cognito with test users (isolated per PR)
+        //
+        // Migration plan:
+        // 1. Now: Dev/val/prod envs use Serverless Cognito, review envs use CDK Cognito
+        // 2. Later: Update Okta to point to new CDK Cognito endpoints
+        // 3. Later: Change all envs to use CDK Cognito (remove conditional logic)
+        // 4. Later: Delete Serverless Cognito resources
+
+        const isDevValProd = ['dev', 'val', 'prod'].includes(this.stage)
+
+        let userPoolId: string
+        let userPoolClientId: string
+        let identityPoolId: string
+        let userPoolDomain: string
+        let description: string
+
+        if (isDevValProd) {
+            // Dev/Val/Prod environments: Read from SSM (Serverless Cognito)
+            userPoolId = StringParameter.valueFromLookup(
+                this,
+                `/cognito/${this.stage}/user_pool_id`
+            )
+            userPoolClientId = StringParameter.valueFromLookup(
+                this,
+                `/cognito/${this.stage}/user_pool_client_id`
+            )
+            identityPoolId = StringParameter.valueFromLookup(
+                this,
+                `/cognito/${this.stage}/identity_pool_id`
+            )
+            userPoolDomain = StringParameter.valueFromLookup(
+                this,
+                `/cognito/${this.stage}/user_pool_domain`
+            )
+            description = 'from Serverless via SSM'
+        } else {
+            // Review environments: Use new CDK Cognito
+            userPoolId = this.userPool.userPoolId
+            userPoolClientId = this.userPoolClient.userPoolClientId
+            identityPoolId = this.identityPool.ref
+            userPoolDomain = `${this.userPoolDomain.domainName}.auth.${this.region}.amazoncognito.com`
+            description = 'from CDK Cognito'
+        }
+
         new CfnOutput(this, 'UserPoolId', {
-            value: this.userPool.userPoolId,
+            value: userPoolId,
             exportName: this.exportName('UserPoolId'),
-            description: 'Cognito User Pool ID',
+            description: `Cognito User Pool ID (${description})`,
         })
 
         new CfnOutput(this, 'UserPoolClientId', {
-            value: this.userPoolClient.userPoolClientId,
+            value: userPoolClientId,
             exportName: this.exportName('UserPoolClientId'),
-            description: 'Cognito User Pool Client ID',
+            description: `Cognito User Pool Client ID (${description})`,
         })
 
         new CfnOutput(this, 'UserPoolClientDomain', {
-            value: `${this.userPoolDomain.domainName}.auth.${this.region}.amazoncognito.com`,
+            value: userPoolDomain,
             exportName: this.exportName('UserPoolClientDomain'),
-            description: 'Cognito User Pool Domain',
+            description: `Cognito User Pool Domain (${description})`,
         })
 
         new CfnOutput(this, 'UserPoolSingleSignOnURL', {
-            value: `https://${this.userPoolDomain.domainName}.auth.${this.region}.amazoncognito.com/saml2/idpresponse`,
+            value: `https://${userPoolDomain}/saml2/idpresponse`,
             exportName: this.exportName('UserPoolSingleSignOnURL'),
-            description: 'Cognito SAML SSO URL',
+            description: `Cognito SAML SSO URL (${description})`,
         })
 
         new CfnOutput(this, 'AudienceRestrictionURI', {
-            value: `urn:amazon:cognito:sp:${this.userPool.userPoolId}`,
+            value: `urn:amazon:cognito:sp:${userPoolId}`,
             exportName: this.exportName('AudienceRestrictionURI'),
-            description: 'Cognito SAML Audience Restriction URI',
+            description: `Cognito SAML Audience Restriction URI (${description})`,
         })
 
         new CfnOutput(this, 'IdentityPoolId', {
-            value: this.identityPool.ref,
+            value: identityPoolId,
             exportName: this.exportName('IdentityPoolId'),
-            description: 'Cognito Identity Pool ID',
+            description: `Cognito Identity Pool ID (${description})`,
         })
 
         new CfnOutput(this, 'Region', {
