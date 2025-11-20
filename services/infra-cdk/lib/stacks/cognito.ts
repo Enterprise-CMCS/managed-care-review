@@ -289,6 +289,16 @@ export class CognitoStack extends BaseStack {
                 this,
                 `/cognito/${this.stage}/user_pool_domain`
             )
+
+            // Defensive: If SSM value is just the prefix, construct the full domain
+            if (
+                userPoolDomain &&
+                !userPoolDomain.includes('.auth.') &&
+                !userPoolDomain.endsWith('.amazoncognito.com')
+            ) {
+                userPoolDomain = `${userPoolDomain}.auth.${this.region}.amazoncognito.com`
+            }
+
             description = 'from Serverless via SSM'
         } else {
             // Review environments: Use new CDK Cognito
