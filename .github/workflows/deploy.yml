@@ -3,9 +3,9 @@ name: Deploy (Serverless - Legacy)
 on:
   # Serverless deployment disabled by default - use deploy-cdk.yml for new deployments
   # To enable serverless deployment for your branch, add it to the branches list below
-  push:
-    branches:
-      - "mt-fix-promote-cdk" # Add your branch name here if you need serverless deployment
+  # push:
+  #   branches:
+  #     - "your-branch-name-here" # Add your branch name here if you need serverless deployment
   workflow_dispatch:
 
 permissions:
