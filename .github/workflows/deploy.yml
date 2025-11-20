@@ -412,7 +412,7 @@ jobs:
           STAGE_NAME: ${{ needs.begin-deployment.outputs.stage-name }}
         run: |
           cd services
-          endpoint=$(./output.sh ui CloudFrontEndpointUrl $STAGE_NAME)
+          endpoint=$(./output-serverless.sh ui CloudFrontEndpointUrl $STAGE_NAME)
           echo $endpoint
           echo "app-endpoint=$endpoint" >> "$GITHUB_OUTPUT"
 
@@ -422,7 +422,7 @@ jobs:
           STAGE_NAME: ${{ needs.begin-deployment.outputs.stage-name }}
         run: |
           cd services
-          endpoint=$(./output.sh infra-api ApiGatewayRestApiUrl $STAGE_NAME)
+          endpoint=$(./output-serverless.sh infra-api ApiGatewayRestApiUrl $STAGE_NAME)
           echo "api-endpoint=$endpoint" >> "$GITHUB_OUTPUT"
 
       - name: get cognito user pool id
@@ -431,7 +431,7 @@ jobs:
           STAGE_NAME: ${{ needs.begin-deployment.outputs.stage-name }}
         run: |
           cd services
-          endpoint=$(./output.sh ui-auth UserPoolId $STAGE_NAME)
+          endpoint=$(./output-serverless.sh ui-auth UserPoolId $STAGE_NAME)
           echo "value=$endpoint" >> "$GITHUB_OUTPUT"
 
       - name: get cognito region
@@ -440,7 +440,7 @@ jobs:
           STAGE_NAME: ${{ needs.begin-deployment.outputs.stage-name }}
         run: |
           cd services
-          endpoint=$(./output.sh ui-auth Region $STAGE_NAME)
+          endpoint=$(./output-serverless.sh ui-auth Region $STAGE_NAME)
           echo "value=$endpoint" >> "$GITHUB_OUTPUT"
 
       - name: get cognito identity pool id
@@ -449,7 +449,7 @@ jobs:
           STAGE_NAME: ${{ needs.begin-deployment.outputs.stage-name }}
         run: |
           cd services
-          endpoint=$(./output.sh ui-auth IdentityPoolId $STAGE_NAME)
+          endpoint=$(./output-serverless.sh ui-auth IdentityPoolId $STAGE_NAME)
           echo "value=$endpoint" >> "$GITHUB_OUTPUT"
 
       - name: get cognito user pool web client id
@@ -458,7 +458,7 @@ jobs:
           STAGE_NAME: ${{ needs.begin-deployment.outputs.stage-name }}
         run: |
           cd services
-          endpoint=$(./output.sh ui-auth UserPoolClientId $STAGE_NAME)
+          endpoint=$(./output-serverless.sh ui-auth UserPoolClientId $STAGE_NAME)
           echo "value=$endpoint" >> "$GITHUB_OUTPUT"
 
       - name: get storybook endpoint
@@ -467,7 +467,7 @@ jobs:
           STAGE_NAME: ${{ needs.begin-deployment.outputs.stage-name }}
         run: |
           cd services
-          endpoint=$(./output.sh storybook CloudFrontEndpointUrl $STAGE_NAME)
+          endpoint=$(./output-serverless.sh storybook CloudFrontEndpointUrl $STAGE_NAME)
           echo $endpoint
           echo "storybook-endpoint=$endpoint" >> "$GITHUB_OUTPUT"
 
