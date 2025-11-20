@@ -160,17 +160,11 @@ export class CognitoStack extends BaseStack {
         // Add dependency to ensure identity provider is created first
         this.userPoolClient.node.addDependency(identityProvider)
 
-        // Create User Pool Domain
-        // Note: Domain prefix must be deterministic (can't use tokens like userPoolClientId)
-        // For review envs, truncate stage name if too long (max 63 chars for domain prefix)
-        const domainPrefix = `${this.stage}-login`
-            .substring(0, 63)
-            .toLowerCase()
-
+        // Create User Pool Domain (matches serverless pattern)
         this.userPoolDomain = new UserPoolDomain(this, 'UserPoolDomain', {
             userPool: this.userPool,
             cognitoDomain: {
-                domainPrefix: domainPrefix,
+                domainPrefix: `${this.stage}-login-${this.userPoolClient.userPoolClientId}`,
             },
         })
 
@@ -302,13 +296,10 @@ export class CognitoStack extends BaseStack {
             description = 'from Serverless via SSM'
         } else {
             // Review environments: Use new CDK Cognito
-            const domainPrefix = `${this.stage}-login`
-                .substring(0, 63)
-                .toLowerCase()
             userPoolId = this.userPool.userPoolId
             userPoolClientId = this.userPoolClient.userPoolClientId
             identityPoolId = this.identityPool.ref
-            userPoolDomain = `${domainPrefix}.auth.${this.region}.amazoncognito.com`
+            userPoolDomain = `${this.userPoolDomain.domainName}.auth.${this.region}.amazoncognito.com`
             description = 'from CDK Cognito'
         }
 
