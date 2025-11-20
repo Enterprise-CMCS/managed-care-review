@@ -25,7 +25,7 @@ const SharedSubHeadingRow = ({
     heading: string | React.ReactElement
 }) => {
     return (
-        <span className={styles.submissionIdLine} data-testid="submission-name">
+        <span className={styles.submissionIdLine} data-testid="submission-id">
             <span className={styles.submissionIdLineLabel}>Submission ID</span>
             <span className={styles.submissionIdLineDivider} aria-hidden="true">
                 |
@@ -36,7 +36,7 @@ const SharedSubHeadingRow = ({
 }
 const EntityType = ({ entityType }: { entityType: 'EQRO' | 'Health plan' }) => {
     return (
-        <div className={styles.entityTypeContainer}>
+        <div className={styles.entityTypeContainer} data-testid="entityType">
             <div className={styles.entityTypeDivider} aria-hidden="true" />
             <div className={styles.entityTypeText}>
                 <span className={styles.entityTypeLabel}>Entity type</span>
@@ -47,7 +47,7 @@ const EntityType = ({ entityType }: { entityType: 'EQRO' | 'Health plan' }) => {
 }
 const CMSUserRow = ({
     heading,
-    route,
+    pathname,
 }: {
     user:
         | CmsUser
@@ -56,11 +56,11 @@ const CMSUserRow = ({
         | BusinessOwnerUser
         | CmsApproverUser
     heading?: string | React.ReactElement
-    route?: string
+    pathname?: string
 }) => {
-    const hideSubID = route === 'DASHBOARD_SUBMISSIONS'
-    const entityType = route?.includes('eqro') ? 'EQRO' : 'Health plan'
-
+    const hideSubID =
+        pathname?.includes('dashboard') || pathname?.includes('new')
+    const entityType = pathname?.includes('eqro') ? 'EQRO' : 'Health plan'
     return (
         <div className={styles.dashboardHeading}>
             <GridContainer>
@@ -101,15 +101,15 @@ const CMSUserRow = ({
 const StateUserRow = ({
     user,
     heading,
-    route,
+    pathname,
 }: {
     user: StateUser
     heading?: string | React.ReactElement
-    route?: string
+    pathname?: string
 }) => {
     const hideSubID =
-        route === 'DASHBOARD_SUBMISSIONS' || route === 'SUBMISSIONS_NEW'
-    const entityType = route?.includes('EQRO') ? 'EQRO' : 'Health plan'
+        pathname?.includes('dashboard') || pathname?.includes('new')
+    const entityType = pathname?.includes('eqro') ? 'EQRO' : 'Health plan'
 
     return (
         <div className={styles.dashboardHeading}>
@@ -194,12 +194,14 @@ type PageHeadingProps = {
     loggedInUser?: User
     heading?: string | React.ReactElement
     route?: string
+    pathname?: string
 }
 
 export const PageHeadingRow = ({
     isLoading = false,
     heading,
     route,
+    pathname,
     loggedInUser,
 }: PageHeadingProps): React.ReactElement | null => {
     if (!loggedInUser) {
@@ -215,11 +217,19 @@ export const PageHeadingRow = ({
         hasAdminUserPermissions(loggedInUser)
     ) {
         return (
-            <CMSUserRow user={loggedInUser} heading={heading} route={route} />
+            <CMSUserRow
+                user={loggedInUser}
+                heading={heading}
+                pathname={pathname}
+            />
         )
     } else if (loggedInUser.__typename === 'StateUser') {
         return (
-            <StateUserRow user={loggedInUser} heading={heading} route={route} />
+            <StateUserRow
+                user={loggedInUser}
+                heading={heading}
+                pathname={pathname}
+            />
         )
     } else {
         return <h1>{`Programming Error: Unkown User Type: ${loggedInUser}`}</h1>
