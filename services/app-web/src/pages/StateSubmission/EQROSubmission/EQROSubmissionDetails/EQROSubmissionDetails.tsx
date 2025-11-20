@@ -82,7 +82,7 @@ export const EQROSubmissionDetails = (): React.ReactElement => {
                     formPages={EQRO_SUBMISSION_FORM_ROUTES}
                     currentFormPage={
                         currentRoute === 'SUBMISSIONS_NEW_SUBMISSION_FORM'
-                            ? 'SUBMISSIONS_TYPE'  // ← Map new submission route to first step
+                            ? 'SUBMISSIONS_TYPE'  // Map new submission route to first step
                             : currentRoute
                     }
                     customPageTitles={{
