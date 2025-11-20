@@ -6,6 +6,7 @@ import {
 } from '@mc-review/constants'
 import { getRelativePath } from '../../routeHelpers'
 import { ContractFormData } from '../../gen/gqlClient'
+import { FormikErrors } from 'formik'
 
 const getRelativePathFromNestedRoute = (formRouteType: RouteT): string =>
     getRelativePath({
@@ -33,10 +34,30 @@ const activeFormPages = (
     })
 }
 
+const renameKey = <T extends Object, K extends keyof T>(
+    oldObj: FormikErrors<T>,
+    oldKey: K,
+    newKey: string
+) => {
+    const updatedObj = Object.keys(oldObj).reduce(
+        (accumulator: any, currentKey) => {
+            const keyInOldObj = currentKey as K
+            if (keyInOldObj === oldKey) {
+                accumulator[newKey] = oldObj[keyInOldObj]
+            } else {
+                accumulator[keyInOldObj] = oldObj[keyInOldObj]
+            }
+            return accumulator
+        },
+        {}
+    )
+    return updatedObj
+}
+
 type ContractFormPageProps = {
     showValidations?: boolean
 }
 
 export type { ContractFormPageProps }
 
-export { getRelativePathFromNestedRoute, activeFormPages }
+export { getRelativePathFromNestedRoute, activeFormPages, renameKey }
