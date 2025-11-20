@@ -10,6 +10,7 @@ import { formatCalendarDate } from '@mc-review/dates'
 import {
     ActuaryContact,
     ContractRevision,
+    ContractSubmissionType,
     Program,
     Rate,
     RateFormData,
@@ -30,6 +31,7 @@ import { hasCMSUserPermissions } from '@mc-review/helpers'
 import { featureFlags } from '@mc-review/common-code'
 import { useLDClient } from 'launchdarkly-react-client-sdk'
 import { DocumentHeader } from '../../../DocumentHeader/DocumentHeader'
+import { ContractSubmissionTypeRecord } from '@mc-review/constants'
 
 const rateCapitationType = (formData: RateFormData) =>
     formData.rateCapitationType
@@ -73,7 +75,8 @@ const rateCertificationType = (formData: RateFormData) => {
 }
 
 const relatedSubmissions = (
-    contractRevisions: ContractRevision[]
+    contractRevisions: ContractRevision[],
+    contractSubmissionType: ContractSubmissionType
 ): React.ReactElement | null => {
     if (contractRevisions.length === 0) {
         return null
@@ -83,7 +86,7 @@ const relatedSubmissions = (
             {contractRevisions.map((contractRev) => (
                 <li key={contractRev.contractID}>
                     <NavLinkWithLogging
-                        to={`/submissions/${contractRev.contractID}`}
+                        to={`/submissions/${ContractSubmissionTypeRecord[contractSubmissionType]}/${contractRev.contractID}`}
                     >
                         {contractRev.contractName}
                     </NavLinkWithLogging>
@@ -95,10 +98,12 @@ const relatedSubmissions = (
 
 export const SingleRateSummarySection = ({
     rate,
+    contractSubmissionType,
     isSubmitted,
     statePrograms,
 }: {
     rate: Rate
+    contractSubmissionType: ContractSubmissionType
     isSubmitted: boolean
     statePrograms: Program[]
 }): React.ReactElement | null => {
@@ -350,7 +355,10 @@ export const SingleRateSummarySection = ({
                             label="Contract actions"
                             explainMissingData
                             explainMissingDataMsg="Missing contract action"
-                            children={relatedSubmissions(contractActions)}
+                            children={relatedSubmissions(
+                                contractActions,
+                                contractSubmissionType
+                            )}
                         />
                     </Grid>
                 </dl>

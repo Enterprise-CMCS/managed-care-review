@@ -1,7 +1,7 @@
 import React from 'react'
 import { RateFormDataInput } from '../../gen/gqlClient'
 
-import { RateDetails } from '../StateSubmission/RateDetails'
+import { RateDetails } from '../StateSubmission/HealthPlanSubmission/RateDetails'
 import { RouteT } from '@mc-review/constants'
 
 export type SubmitRateHandler = (

@@ -28,6 +28,7 @@ const ROUTES = [
     'UNDO_RATE_WITHDRAW',
     'SUBMISSIONS',
     'SUBMISSIONS_NEW',
+    'SUBMISSIONS_NEW_SUBMISSION_FORM',
     'SUBMISSIONS_TYPE',
     'SUBMISSIONS_EDIT_TOP_LEVEL',
     'SUBMISSIONS_CONTRACT_DETAILS',
@@ -51,6 +52,10 @@ const ROUTES = [
 ] as const // iterable union type
 type RouteT = (typeof ROUTES)[number]
 type RouteTWithUnknown = RouteT | 'UNKNOWN_ROUTE'
+const ContractSubmissionTypeRecord: Record<string, string> = {
+    HEALTH_PLAN: 'health-plan',
+    EQRO: 'eqro'
+}
 /*
     Every application url (excluding query parameters) is found in the RoutesRecord.
     These types ensure we use valid route throughout the application
@@ -86,29 +91,30 @@ const RoutesRecord: Record<RouteT, string> = {
         '/rates/:id/question-and-answers/:division/upload-questions',
     SUBMISSIONS: '/submissions',
     SUBMISSIONS_NEW: '/submissions/new',
-    SUBMISSIONS_EDIT_TOP_LEVEL: '/submissions/:id/edit/*',
-    SUBMISSIONS_TYPE: '/submissions/:id/edit/type',
-    SUBMISSIONS_CONTRACT_DETAILS: '/submissions/:id/edit/contract-details',
-    SUBMISSIONS_RATE_DETAILS: '/submissions/:id/edit/rate-details',
-    SUBMISSIONS_CONTACTS: '/submissions/:id/edit/contacts',
-    SUBMISSIONS_DOCUMENTS: '/submissions/:id/edit/documents',
-    SUBMISSIONS_REVIEW_SUBMIT: '/submissions/:id/edit/review-and-submit',
-    SUBMISSIONS_SUMMARY: '/submissions/:id',
-    SUBMISSIONS_MCCRSID: '/submissions/:id/mccrs-record-number',
-    SUBMISSIONS_REVISION: '/submissions/:id/revisions/:revisionVersion',
+    SUBMISSIONS_NEW_SUBMISSION_FORM: '/submissions/new/:contractSubmissionType',
+    SUBMISSIONS_EDIT_TOP_LEVEL: '/submissions/:contractSubmissionType/:id/edit/*',
+    SUBMISSIONS_TYPE: '/submissions/:contractSubmissionType/:id/edit/type',
+    SUBMISSIONS_CONTRACT_DETAILS: '/submissions/:contractSubmissionType/:id/edit/contract-details',
+    SUBMISSIONS_RATE_DETAILS: '/submissions/:contractSubmissionType/:id/edit/rate-details',
+    SUBMISSIONS_CONTACTS: '/submissions/:contractSubmissionType/:id/edit/contacts',
+    SUBMISSIONS_DOCUMENTS: '/submissions/:contractSubmissionType/:id/edit/documents',
+    SUBMISSIONS_REVIEW_SUBMIT: '/submissions/:contractSubmissionType/:id/edit/review-and-submit',
+    SUBMISSIONS_SUMMARY: '/submissions/:contractSubmissionType/:id',
+    SUBMISSIONS_MCCRSID: '/submissions/:contractSubmissionType/:id/mccrs-record-number',
+    SUBMISSIONS_REVISION: '/submissions/:contractSubmissionType/:id/revisions/:revisionVersion',
     SUBMISSIONS_CONTRACT_QUESTIONS_AND_ANSWERS:
-        '/submissions/:id/question-and-answers',
+        '/submissions/:contractSubmissionType/:id/question-and-answers',
     SUBMISSIONS_RATE_QUESTIONS_AND_ANSWERS:
-        '/submissions/:id/rates/:rateID/question-and-answers',
+        '/submissions/:contractSubmissionType/:id/rates/:rateID/question-and-answers',
     SUBMISSIONS_UPLOAD_CONTRACT_QUESTION:
-        '/submissions/:id/question-and-answers/:division/upload-questions',
+        '/submissions/:contractSubmissionType/:id/question-and-answers/:division/upload-questions',
     SUBMISSIONS_UPLOAD_CONTRACT_RESPONSE:
-        '/submissions/:id/question-and-answers/:division/:questionID/upload-response',
+        '/submissions/:contractSubmissionType/:id/question-and-answers/:division/:questionID/upload-response',
     SUBMISSIONS_UPLOAD_RATE_RESPONSE:
-        '/submissions/:id/rates/:rateID/question-and-answers/:division/:questionID/upload-response',
-    SUBMISSIONS_RELEASED_TO_STATE: '/submissions/:id/released-to-state',
-    SUBMISSION_WITHDRAW: '/submission-reviews/:id/withdraw-submission',
-    UNDO_SUBMISSION_WITHDRAW: '/submission-reviews/:id/undo-withdraw-submission',
+        '/submissions/:contractSubmissionType/:id/rates/:rateID/question-and-answers/:division/:questionID/upload-response',
+    SUBMISSIONS_RELEASED_TO_STATE: '/submissions/:contractSubmissionType/:id/released-to-state',
+    SUBMISSION_WITHDRAW: '/submission-reviews/:contractSubmissionType/:id/withdraw-submission',
+    UNDO_SUBMISSION_WITHDRAW: '/submission-reviews/:contractSubmissionType/:id/undo-withdraw-submission',
 }
 
 // Constants for releated descendant routes
@@ -206,6 +212,7 @@ const PageTitlesRecord: Record<RouteT | 'UNKNOWN_ROUTE', string> = {
     RATES_UPLOAD_QUESTION: 'Add rate questions',
     SUBMISSIONS: 'Submissions',
     SUBMISSIONS_NEW: 'New submission',
+    SUBMISSIONS_NEW_SUBMISSION_FORM: 'New submission',
     SUBMISSIONS_EDIT_TOP_LEVEL: 'Submissions',
     SUBMISSIONS_TYPE: 'Submission type',
     SUBMISSIONS_CONTRACT_DETAILS: 'Contract details',
@@ -249,6 +256,7 @@ const PageHeadingsRecord: Partial<Record<RouteTWithUnknown, string>> = {
 export {
     PageHeadingsRecord,
     PageTitlesRecord,
+    ContractSubmissionTypeRecord,
     RoutesRecord,
     ROUTES,
     SETTINGS_HIDE_SIDEBAR_ROUTES,

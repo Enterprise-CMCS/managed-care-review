@@ -19,6 +19,7 @@ import {
     mockGqlContractDraftRevisionFormDataInput,
     testS3Client,
 } from '../../testHelpers'
+import { ContractSubmissionTypeRecord } from '@mc-review/constants'
 
 describe('fetchContract', () => {
     const mockS3 = testS3Client()
@@ -298,7 +299,7 @@ describe('fetchContract', () => {
         const draftA0 = await createTestContract(stateServer)
         const AID = draftA0.id
 
-        const expectedURL = `https://localhost:3000/submissions/${AID}`
+        const expectedURL = `https://localhost:3000/submissions/${ContractSubmissionTypeRecord[draftA0.contractSubmissionType]}/${AID}`
 
         expect(draftA0.webURL).toBe(expectedURL)
     })

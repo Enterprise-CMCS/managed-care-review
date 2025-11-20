@@ -11,6 +11,6 @@ exports[`sendUndoWithdrawnSubmissionStateEmail > renders overall email for undo 
   <li>rate-name-321</li>
 </ul>
 <div>If you have any questions, please reach out to your CMS point of contact.</div><br />
-<a href="http://localhost/submissions/test-contract-123">View submission in MC-Review</a>
+<a href="http://localhost/submissions/health-plan/test-contract-123">View submission in MC-Review</a>
 "
 `;

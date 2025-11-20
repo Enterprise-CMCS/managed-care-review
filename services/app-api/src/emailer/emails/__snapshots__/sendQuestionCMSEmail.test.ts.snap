@@ -7,6 +7,6 @@ exports[`renders overall email for a new question as expected 1`] = `
 <b>Round:</b> 1<br />
 <b>Date:</b> 12/31/2023<br />
 <br />
-<a href="http://localhost/submissions/12345/question-and-answers">View submission Q&A</a>
+<a href="http://localhost/submissions/health-plan/12345/question-and-answers">View submission Q&A</a>
 "
 `;

@@ -1352,6 +1352,12 @@
                     "fullName": "PCCM",
                     "name": "PCCM",
                     "isRateProgram": false
+                },
+                {
+                    "id": "7ec1fb46-f1d4-4b08-9dfb-2f0fe9667a01",
+                    "fullName": "Apple Health Expansion Emergency Managed Care for Non-Citizen Adults",
+                    "name": "AHE-EMC",
+                    "isRateProgram": true
                 }
             ],
             "code": "WA"

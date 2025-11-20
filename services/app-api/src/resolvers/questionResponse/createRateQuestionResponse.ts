@@ -156,9 +156,22 @@ export function createRateQuestionResponseResolver(
             })
         }
 
+        const contractSubmissionType = rate.packageSubmissions
+            .flatMap((pkg) => pkg.contractRevisions)
+            .find((cr) => cr.contract.id === rate.parentContractID)
+            ?.contract.contractSubmissionType
+
+        if (!contractSubmissionType) {
+            const errMessage = `Issue creating question for rate. Message: Parent contract missing contract type. Parent contract ID: ${rate.parentContractID}`
+            logError('createRateQuestion', errMessage)
+            setErrorAttributesOnActiveSpan(errMessage, span)
+            throw createUserInputError(errMessage)
+        }
+
         const sendStateEmailResult =
             await emailer.sendRateQuestionResponseStateEmail(
                 rate,
+                contractSubmissionType,
                 questions,
                 createResponseResult
             )

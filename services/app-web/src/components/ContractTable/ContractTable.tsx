@@ -12,12 +12,20 @@ import {
 } from '@tanstack/react-table'
 import { useAtom } from 'jotai/react'
 import { atomWithHash } from 'jotai-location'
-import { ConsolidatedContractStatus, Program, User } from '../../gen/gqlClient'
+import {
+    ConsolidatedContractStatus,
+    ContractSubmissionType,
+    Program,
+    User,
+} from '../../gen/gqlClient'
 import styles from './ContractTable.module.scss'
 import { Table, Tag } from '@trussworks/react-uswds'
 import qs from 'qs'
 import { SubmissionStatusRecord } from '@mc-review/submissions'
-import { SubmissionReviewStatusRecord } from '@mc-review/constants'
+import {
+    ContractSubmissionTypeRecord,
+    SubmissionReviewStatusRecord,
+} from '@mc-review/constants'
 import {
     FilterAccordion,
     FilterSelect,
@@ -30,9 +38,15 @@ import { NavLinkWithLogging } from '../TealiumLogging/Link'
 import { useTealium } from '../../hooks'
 import useDeepCompareEffect from 'use-deep-compare-effect'
 import { getTealiumFiltersChanged } from '../../tealium/tealiumHelpers'
-import { titleCaseString, pluralize } from '@mc-review/common-code'
+import {
+    titleCaseString,
+    pluralize,
+    formatContractSubTypeForDisplay,
+    featureFlags,
+} from '@mc-review/common-code'
 import { formatCalendarDate } from '@mc-review/dates'
 import { RowCellElement } from '..'
+import { useLDClient } from 'launchdarkly-react-client-sdk'
 
 export type ContractInDashboardType = {
     id: string
@@ -41,6 +55,7 @@ export type ContractInDashboardType = {
     updatedAt: Date
     status: ConsolidatedContractStatus
     programs: Program[]
+    contractSubmissionType: ContractSubmissionType
     submissionType?: string
     stateName?: string
 }
@@ -55,16 +70,17 @@ export type ContractTableProps = {
 function submissionURL(
     id: ContractInDashboardType['id'],
     status: ContractInDashboardType['status'],
+    contractSubmissionType: ContractInDashboardType['contractSubmissionType'],
     isNotStateUser: boolean
 ): string {
     if (isNotStateUser) {
-        return `/submissions/${id}`
+        return `/submissions/${ContractSubmissionTypeRecord[contractSubmissionType]}/${id}`
     } else if (status === 'DRAFT') {
-        return `/submissions/${id}/edit/type`
+        return `/submissions/${ContractSubmissionTypeRecord[contractSubmissionType]}/${id}/edit/type`
     } else if (status === 'UNLOCKED') {
-        return `/submissions/${id}/edit/review-and-submit`
+        return `/submissions/${ContractSubmissionTypeRecord[contractSubmissionType]}/${id}/edit/review-and-submit`
     }
-    return `/submissions/${id}`
+    return `/submissions/${ContractSubmissionTypeRecord[contractSubmissionType]}/${id}`
 }
 
 const StatusTag = ({
@@ -205,6 +221,7 @@ export const ContractTable = ({
     user,
     showFilters = false,
 }: ContractTableProps): React.ReactElement => {
+    const ldClient = useLDClient()
     const tableConfig = {
         tableName: 'Submissions',
         rowIDName: 'submission',
@@ -218,6 +235,10 @@ export const ContractTable = ({
         filtersForAnalytics: '',
     })
     const { logFilterEvent } = useTealium()
+    const eqroSubmissions = ldClient?.variation(
+        featureFlags.EQRO_SUBMISSIONS.flag,
+        featureFlags.EQRO_SUBMISSIONS.defaultValue
+    )
     /* we store the last clicked element in a ref so that when the url is updated and the page rerenders
         we can focus that element.  this useEffect (with no dependency array) will run once on each render.
         Note that the React-y way to do this is to use forwardRef, but the clearFilters button is deeply nested
@@ -263,6 +284,7 @@ export const ContractTable = ({
                         to={submissionURL(
                             info.getValue().id,
                             info.getValue().status,
+                            info.getValue().contractSubmissionType,
                             isNotStateUser
                         )}
                         className={`${styles.ID}`}
@@ -291,6 +313,17 @@ export const ContractTable = ({
                     dataTestID: 'submission-type',
                 },
                 filterFn: `arrIncludesSome`,
+            }),
+            columnHelper.accessor('contractSubmissionType', {
+                header: 'Contract type',
+                cell: (info) => (
+                    <span>
+                        {formatContractSubTypeForDisplay(info.getValue())}
+                    </span>
+                ),
+                meta: {
+                    dataTestID: `${tableConfig.rowIDName}-contractType`,
+                },
             }),
             columnHelper.accessor('programs', {
                 header: 'Programs',
@@ -369,6 +402,7 @@ export const ContractTable = ({
             columnVisibility: {
                 stateName: isNotStateUser,
                 submissionType: isNotStateUser,
+                contractSubmissionType: !isNotStateUser && eqroSubmissions,
             },
         },
         onColumnFiltersChange: setColumnFilters,

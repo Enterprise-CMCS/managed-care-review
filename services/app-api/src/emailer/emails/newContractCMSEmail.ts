@@ -43,7 +43,11 @@ export const newContractCMSEmail = async (
         packagePrograms
     )
 
-    const packageURL = submissionSummaryURL(contract.id, config.baseUrl)
+    const packageURL = submissionSummaryURL(
+        contract.id,
+        contract.contractSubmissionType,
+        config.baseUrl
+    )
     const contractSubmissionType =
         contract.contractSubmissionType === 'HEALTH_PLAN'
             ? 'Health plan'

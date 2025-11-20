@@ -2,6 +2,7 @@ import { useEffect } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
 import styles from '../QuestionResponse.module.scss'
 import {
+    ContractSubmissionType,
     CreateContractQuestionInput,
     useCreateContractQuestionMutation,
     useFetchContractWithQuestionsQuery,
@@ -15,7 +16,7 @@ import { UploadQuestionsForm } from './UploadQuestionsForm'
 import { FileItemT } from '../../../components'
 import { getNextCMSRoundNumber } from '../QuestionResponseHelpers'
 import { ErrorOrLoadingPage } from '../../StateSubmission'
-import { handleAndReturnErrorState } from '../../StateSubmission/ErrorOrLoadingPage'
+import { handleAndReturnErrorState } from '../../StateSubmission/SharedSubmissionComponents/ErrorOrLoadingPage'
 import { isValidCmsDivison } from '../QuestionResponseHelpers/questionResponseHelpers'
 import { Error404 } from '../../Errors/Error404Page'
 
@@ -23,7 +24,11 @@ export const UploadContractQuestions = () => {
     // router context
 
     const { updateHeading } = usePage()
-    const { id, division } = useParams<{ division: string; id: string }>()
+    const { id, division, contractSubmissionType } = useParams<{
+        division: string
+        id: string
+        contractSubmissionType: ContractSubmissionType
+    }>()
     const navigate = useNavigate()
 
     const {
@@ -93,7 +98,9 @@ export const UploadContractQuestions = () => {
         if (createResult instanceof Error) {
             console.info(createResult.message)
         } else {
-            navigate(`/submissions/${id}/question-and-answers?submit=question`)
+            navigate(
+                `/submissions/${contractSubmissionType}/${id}/question-and-answers?submit=question`
+            )
         }
     }
 
@@ -122,7 +129,10 @@ export const UploadContractQuestions = () => {
                         link: RoutesRecord.DASHBOARD_SUBMISSIONS,
                         text: 'Dashboard',
                     },
-                    { link: `/submissions/${id}`, text: contractName },
+                    {
+                        link: `/submissions/${contractSubmissionType}/${id}`,
+                        text: contractName,
+                    },
                     {
                         text: 'Add questions',
                         link: RoutesRecord.SUBMISSIONS_UPLOAD_CONTRACT_QUESTION,
@@ -138,6 +148,7 @@ export const UploadContractQuestions = () => {
                 round={nextRoundNumber}
                 division={realDivision}
                 id={contract.id}
+                contractSubmissionType={contractSubmissionType!}
             />
         </div>
     )

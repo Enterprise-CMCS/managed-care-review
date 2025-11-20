@@ -9,6 +9,7 @@ import { User } from '../../gen/gqlClient'
 const submissions: ContractInDashboardType[] = [
     {
         id: '2f7f1274-3927-4367-bec6-870587a0f0c6',
+        contractSubmissionType: 'HEALTH_PLAN',
         name: 'MCR-MN-0063-PMAP',
         programs: [
             {
@@ -27,6 +28,7 @@ const submissions: ContractInDashboardType[] = [
     },
     {
         id: '576e5a1e-6ae6-4936-9ee4-7034cb2072dd',
+        contractSubmissionType: 'HEALTH_PLAN',
         name: 'MCR-MN-0071-PMAP',
         programs: [
             {
@@ -45,6 +47,7 @@ const submissions: ContractInDashboardType[] = [
     },
     {
         id: 'a6e5eb04-833f-4050-bab4-6ebe8d1a5e75',
+        contractSubmissionType: 'HEALTH_PLAN',
         name: 'MCR-OH-0069-PMAP',
         programs: [
             {
@@ -77,6 +80,7 @@ const submissions: ContractInDashboardType[] = [
     },
     {
         id: '74c3c976-45d8-49fe-ac76-6ae3147acd12',
+        contractSubmissionType: 'HEALTH_PLAN',
         name: 'MCR-PR-0065-PMAP',
         programs: [
             {
@@ -95,6 +99,7 @@ const submissions: ContractInDashboardType[] = [
     },
     {
         id: '99b1a676-45d8-49fe-ac76-6xv2537dax44',
+        contractSubmissionType: 'HEALTH_PLAN',
         name: 'MCR-PR-0099-PMAP',
         programs: [
             {
@@ -245,6 +250,7 @@ describe('ContractTable for CMS User (with filters)', () => {
             />,
             {
                 apolloProvider: apolloProviderWithCMSUser(),
+                featureFlags: { 'eqro-submissions': true },
             }
         )
         const submissionsInTable = screen.getAllByTestId(`submission-id`)
@@ -256,6 +262,9 @@ describe('ContractTable for CMS User (with filters)', () => {
         expect(within(columnNames).getByText(/Programs/)).toBeTruthy()
         expect(within(columnNames).getByText(/Submission date/)).toBeTruthy()
         expect(within(columnNames).getByText(/Status/)).toBeTruthy()
+        expect(
+            within(columnNames).queryByText(/Contract type/)
+        ).not.toBeInTheDocument()
         expect(submissionsInTable).toHaveLength(5)
     })
 
@@ -294,6 +303,7 @@ describe('ContractTable for CMS User (with filters)', () => {
             {
                 ...submissions[0],
                 id: 'unlocked-submission',
+                contractSubmissionType: 'HEALTH_PLAN',
                 updatedAt: new Date('12/05/2022'),
                 status: 'UNLOCKED',
             },
@@ -312,7 +322,7 @@ describe('ContractTable for CMS User (with filters)', () => {
         const rows = await screen.findAllByRole('row')
         expect(within(rows[1]).getByRole('link')).toHaveAttribute(
             'href',
-            `/submissions/unlocked-submission`
+            `/submissions/health-plan/unlocked-submission`
         )
     })
 
@@ -936,12 +946,14 @@ describe('ContractTable state user tests', () => {
             <ContractTable tableData={submissions} user={mockStateUser()} />,
             {
                 apolloProvider: apolloProviderWithStateUser(),
+                featureFlags: { 'eqro-submissions': true },
             }
         )
         const submissionsInTable = screen.getAllByTestId(`submission-id`)
         const table = screen.getByRole('table')
         const [columnNames] = within(table).getAllByRole('rowgroup')
         expect(within(columnNames).getByText(/ID/)).toBeTruthy()
+        expect(within(columnNames).getByText(/Contract type/)).toBeTruthy()
         expect(within(columnNames).queryByText(/State/)).not.toBeInTheDocument()
         expect(
             within(columnNames).queryByText(/Submission type/)
@@ -957,18 +969,21 @@ describe('ContractTable state user tests', () => {
             {
                 ...submissions[0],
                 id: 'unlocked-submission',
+                contractSubmissionType: 'HEALTH_PLAN',
                 updatedAt: new Date('12/05/2022'),
                 status: 'UNLOCKED',
             },
             {
                 ...submissions[1],
                 id: 'submitted-submission',
+                contractSubmissionType: 'HEALTH_PLAN',
                 updatedAt: new Date('12/04/2022'),
                 status: 'SUBMITTED',
             },
             {
                 ...submissions[2],
                 id: 'draft-submission',
+                contractSubmissionType: 'EQRO',
                 updatedAt: new Date('12/03/2022'),
                 status: 'DRAFT',
             },
@@ -989,15 +1004,15 @@ describe('ContractTable state user tests', () => {
             within(rows[row]).getByRole('link')
         expect(submissionLink(1)).toHaveAttribute(
             'href',
-            `/submissions/unlocked-submission/edit/review-and-submit`
+            `/submissions/health-plan/unlocked-submission/edit/review-and-submit`
         )
         expect(submissionLink(2)).toHaveAttribute(
             'href',
-            `/submissions/submitted-submission`
+            `/submissions/health-plan/submitted-submission`
         )
         expect(submissionLink(3)).toHaveAttribute(
             'href',
-            `/submissions/draft-submission/edit/type`
+            `/submissions/eqro/draft-submission/edit/type`
         )
     })
 })

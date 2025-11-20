@@ -3,7 +3,11 @@ import type {
     EmailData,
     StateAnalystsEmails,
 } from '../emailer'
-import type { ProgramType, RateType } from '../../domain-models'
+import type {
+    ContractSubmissionType,
+    ProgramType,
+    RateType,
+} from '../../domain-models'
 import {
     validateAndParseUnwithdrawnRate,
     type undoWithdrawnRateEtaData,
@@ -14,12 +18,14 @@ import { renderTemplate, stripHTMLFromTemplate } from '../templateHelpers'
 
 export const sendUndoWithdrawnRateCMSEmail = async (
     rate: RateType,
+    contractSubmissionType: ContractSubmissionType,
     statePrograms: ProgramType[],
     stateAnalystsEmails: StateAnalystsEmails,
     config: EmailConfiguration
 ): Promise<EmailData | Error> => {
     const undoWithdrawnRateData = validateAndParseUnwithdrawnRate(
         rate,
+        contractSubmissionType,
         statePrograms,
         config
     )

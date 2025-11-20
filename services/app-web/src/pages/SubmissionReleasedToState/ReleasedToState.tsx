@@ -5,6 +5,7 @@ import {
     Breadcrumbs,
     GenericApiErrorBanner,
     PoliteErrorMessage,
+    PageActionsContainer,
 } from '../../components'
 import { RoutesRecord } from '@mc-review/constants'
 import { useNavigate, useParams } from 'react-router-dom'
@@ -13,7 +14,7 @@ import {
     useFetchContractQuery,
 } from '../../gen/gqlClient'
 import { ErrorOrLoadingPage } from '../StateSubmission'
-import { handleAndReturnErrorState } from '../StateSubmission/ErrorOrLoadingPage'
+import { handleAndReturnErrorState } from '../StateSubmission/SharedSubmissionComponents'
 import { GenericErrorPage } from '../Errors/GenericErrorPage'
 import {
     ButtonGroup,
@@ -22,7 +23,6 @@ import {
     FormGroup,
     Label,
 } from '@trussworks/react-uswds'
-import { PageActionsContainer } from '../StateSubmission/PageActions'
 import { Formik, FormikErrors } from 'formik'
 import { usePage } from '../../contexts/PageContext'
 import { recordJSException } from '@mc-review/otel'
@@ -52,7 +52,10 @@ type FormError =
     FormikErrors<ReleasedToStateValues>[keyof FormikErrors<ReleasedToStateValues>]
 
 const ReleasedToState = () => {
-    const { id } = useParams<{ id: string }>()
+    const { id, contractSubmissionType } = useParams<{
+        id: string
+        contractSubmissionType: string
+    }>()
     const { updateHeading } = usePage()
     const { logFormSubmitEvent } = useTealium()
     const navigate = useNavigate()
@@ -123,7 +126,7 @@ const ReleasedToState = () => {
                     },
                 },
             })
-            navigate(`/submissions/${id}`)
+            navigate(`/submissions/${contractSubmissionType}/${id}`)
         } catch (err) {
             recordJSException(
                 `ReleasedToState: GraphQL error reported. Error message: Failed to create form data ${err}`
@@ -140,7 +143,10 @@ const ReleasedToState = () => {
                         link: RoutesRecord.DASHBOARD_SUBMISSIONS,
                         text: 'Dashboard',
                     },
-                    { link: `/submissions/${id}`, text: contractName },
+                    {
+                        link: `/submissions/${contractSubmissionType}/${id}`,
+                        text: contractName,
+                    },
                     {
                         text: 'Released to state',
                         link: RoutesRecord.SUBMISSIONS_RELEASED_TO_STATE,
@@ -220,9 +226,11 @@ const ReleasedToState = () => {
                                     variant="outline"
                                     data-testid="page-actions-left-secondary"
                                     parent_component_type="page body"
-                                    link_url={`/submissions/${id}`}
+                                    link_url={`/submissions/${contractSubmissionType}/${id}`}
                                     onClick={() =>
-                                        navigate(`/submissions/${id}`)
+                                        navigate(
+                                            `/submissions/${contractSubmissionType}/${id}`
+                                        )
                                     }
                                 >
                                     Cancel
@@ -235,7 +243,7 @@ const ReleasedToState = () => {
                                     )}
                                     data-testid="page-actions-right-primary"
                                     parent_component_type="page body"
-                                    link_url={`/submissions/${id}`}
+                                    link_url={`/submissions/${contractSubmissionType}/${id}`}
                                     animationTimeout={1000}
                                     loading={approveLoading}
                                 >

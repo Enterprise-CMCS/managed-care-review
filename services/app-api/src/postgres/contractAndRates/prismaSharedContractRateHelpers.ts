@@ -651,6 +651,17 @@ function contractFormDataToDomainModel(
         statutoryRegulatoryAttestationDescription:
             contractRevision.statutoryRegulatoryAttestationDescription ??
             undefined,
+        eqroNewContractor: contractRevision.eqroNewContractor ?? undefined,
+        eqroProvisionMcoNewOptionalActivity:
+            contractRevision.eqroProvisionMcoNewOptionalActivity ?? undefined,
+        eqroProvisionNewMcoEqrRelatedActivities:
+            contractRevision.eqroProvisionNewMcoEqrRelatedActivities ??
+            undefined,
+        eqroProvisionChipEqrRelatedActivities:
+            contractRevision.eqroProvisionChipEqrRelatedActivities ?? undefined,
+        eqroProvisionMcoEqrOrRelatedActivities:
+            contractRevision.eqroProvisionMcoEqrOrRelatedActivities ??
+            undefined,
     }
 }
 

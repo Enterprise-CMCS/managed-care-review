@@ -12,7 +12,7 @@ exports[`renders overall email for a new package with a rate amendment as expect
 <br />
 <b>Submission description</b>: A real submission<br />
 <br />
-<a href="http://localhost/submissions/test-contract-123">View submission</a>
+<a href="http://localhost/submissions/health-plan/test-contract-123">View submission</a>
 <br /><br />
 If you need to make any changes, please contact CMS.
 <br /><br />

@@ -5,10 +5,12 @@ import {
     Breadcrumbs,
     FieldTextarea,
     GenericApiErrorBanner,
+    PageActionsContainer,
 } from '../../components'
 import { RoutesRecord } from '@mc-review/constants'
 import { generatePath, useNavigate, useParams } from 'react-router-dom'
 import {
+    ContractSubmissionType,
     RateStripped,
     useFetchContractQuery,
     useIndexRatesStrippedWithRelatedContractsQuery,
@@ -16,10 +18,9 @@ import {
 } from '../../gen/gqlClient'
 import { Formik, FormikErrors } from 'formik'
 import { ButtonGroup, Form } from '@trussworks/react-uswds'
-import { PageActionsContainer } from '../StateSubmission/PageActions'
 import * as Yup from 'yup'
 import { ErrorOrLoadingPage } from '../StateSubmission'
-import { handleAndReturnErrorState } from '../StateSubmission/ErrorOrLoadingPage'
+import { handleAndReturnErrorState } from '../StateSubmission/SharedSubmissionComponents'
 import { GenericErrorPage } from '../Errors/GenericErrorPage'
 import { SubmissionWithdrawWarningBanner } from '../../components/Banner/SubmissionWithdrawWarningBanner/SubmissionWithdrawWarningBanner'
 import { useTealium } from '../../hooks'
@@ -89,7 +90,10 @@ export const shouldWarnOnWithdraw = (
 }
 
 export const SubmissionWithdraw = (): React.ReactElement => {
-    const { id } = useParams() as { id: string }
+    const { id, contractSubmissionType } = useParams() as {
+        id: string
+        contractSubmissionType: ContractSubmissionType
+    }
     const { updateHeading } = usePage()
     const { logFormSubmitEvent } = useTealium()
     const navigate = useNavigate()
@@ -199,7 +203,7 @@ export const SubmissionWithdraw = (): React.ReactElement => {
                     },
                 },
             })
-            navigate(`/submissions/${id}`)
+            navigate(`/submissions/${contractSubmissionType}/${id}`)
         } catch (err) {
             recordJSException(
                 `WithdrawContract: GraphQL error reported. Error message: Failed to create form data ${err}`
@@ -217,12 +221,13 @@ export const SubmissionWithdraw = (): React.ReactElement => {
                         text: 'Dashboard',
                     },
                     {
-                        link: `/submissions/${id}`,
+                        link: `/submissions/${contractSubmissionType}/${id}`,
                         text: contractName || '',
                     },
                     {
                         link: generatePath(RoutesRecord.SUBMISSION_WITHDRAW, {
                             id,
+                            contractSubmissionType,
                         }),
                         text: 'Withdraw submission',
                     },
@@ -270,9 +275,11 @@ export const SubmissionWithdraw = (): React.ReactElement => {
                                     variant="outline"
                                     data-testid="page-actions-left-secondary"
                                     parent_component_type="page-body"
-                                    link_url={`/submissions/${id}`}
+                                    link_url={`/submissions/${contractSubmissionType}/${id}`}
                                     onClick={() =>
-                                        navigate(`/submissions/${id}`)
+                                        navigate(
+                                            `/submissions/${contractSubmissionType}/${id}`
+                                        )
                                     }
                                 >
                                     Cancel
@@ -282,7 +289,7 @@ export const SubmissionWithdraw = (): React.ReactElement => {
                                     variant="default"
                                     data-testid="page-actions-right-primary"
                                     parent_component_type="page body"
-                                    link_url={`/submissions/${id}`}
+                                    link_url={`/submissions/${contractSubmissionType}/${id}`}
                                     animationTimeout={1000}
                                     disabled={showFieldErrors(
                                         errors.submissionWithdrawReason

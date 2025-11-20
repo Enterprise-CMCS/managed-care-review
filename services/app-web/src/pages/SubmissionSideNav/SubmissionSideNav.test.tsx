@@ -48,12 +48,13 @@ describe('SubmissionSideNav', () => {
                         contract: {
                             ...contract,
                             id: '15',
+                            contractSubmissionType: 'HEALTH_PLAN',
                         },
                     }),
                 ],
             },
             routerProvider: {
-                route: '/submissions/15',
+                route: '/submissions/health-plan/15',
             },
         })
 
@@ -80,7 +81,10 @@ describe('SubmissionSideNav', () => {
         // Expect submission summary link to be currently selected and highlighted
         expect(summaryLink).toHaveClass('usa-current')
         // Expect submission summary link to have correct href url
-        expect(summaryLink).toHaveAttribute('href', '/submissions/15')
+        expect(summaryLink).toHaveAttribute(
+            'href',
+            '/submissions/health-plan/15'
+        )
 
         // Expect Q&A link to exist within sidebar nav.
         expect(qaLink).toBeInTheDocument()
@@ -89,7 +93,7 @@ describe('SubmissionSideNav', () => {
         // Expect Q&A link to have correct href url
         expect(qaLink).toHaveAttribute(
             'href',
-            '/submissions/15/question-and-answers'
+            '/submissions/health-plan/15/question-and-answers'
         )
 
         const rate1Link = withinSideNav.queryByRole('link', {
@@ -148,12 +152,13 @@ describe('SubmissionSideNav', () => {
                         contract: {
                             ...contract,
                             id: '15',
+                            contractSubmissionType: 'HEALTH_PLAN',
                         },
                     }),
                 ],
             },
             routerProvider: {
-                route: '/submissions/15',
+                route: '/submissions/health-plan/15',
             },
         })
 
@@ -173,7 +178,10 @@ describe('SubmissionSideNav', () => {
         // Expect submission summary link to be currently selected and highlighted
         expect(summaryLink).toHaveClass('usa-current')
         // Expect submission summary link to have correct href url
-        expect(summaryLink).toHaveAttribute('href', '/submissions/15')
+        expect(summaryLink).toHaveAttribute(
+            'href',
+            '/submissions/health-plan/15'
+        )
 
         const qaLink = withinSideNav.getByRole('link', {
             name: /Contract questions/,
@@ -185,7 +193,7 @@ describe('SubmissionSideNav', () => {
         // Expect Q&A link to have correct href url
         expect(qaLink).toHaveAttribute(
             'href',
-            '/submissions/15/question-and-answers'
+            '/submissions/health-plan/15/question-and-answers'
         )
 
         const rate1Link = withinSideNav.getByRole('link', {
@@ -198,7 +206,7 @@ describe('SubmissionSideNav', () => {
         // Expect first rate link to have correct href url
         expect(rate1Link).toHaveAttribute(
             'href',
-            '/submissions/15/rates/123/question-and-answers'
+            '/submissions/health-plan/15/rates/123/question-and-answers'
         )
 
         const rate2Link = withinSideNav.getByRole('link', {
@@ -211,7 +219,7 @@ describe('SubmissionSideNav', () => {
         // Expect second rate link to have correct href url
         expect(rate2Link).toHaveAttribute(
             'href',
-            '/submissions/15/rates/second-rate/question-and-answers'
+            '/submissions/health-plan/15/rates/second-rate/question-and-answers'
         )
 
         const rate3Link = withinSideNav.getByRole('link', {
@@ -224,7 +232,7 @@ describe('SubmissionSideNav', () => {
         // Expect second rate link using depreciated rates to have correct href url
         expect(rate3Link).toHaveAttribute(
             'href',
-            '/submissions/15/rates/third-rate/question-and-answers'
+            '/submissions/health-plan/15/rates/third-rate/question-and-answers'
         )
 
         const rate4Link = withinSideNav.getByRole('link', {
@@ -237,7 +245,7 @@ describe('SubmissionSideNav', () => {
         // Expect fourth rate link falling back to UnknownProgram to have correct href url
         expect(rate4Link).toHaveAttribute(
             'href',
-            '/submissions/15/rates/fourth-rate/question-and-answers'
+            '/submissions/health-plan/15/rates/fourth-rate/question-and-answers'
         )
     })
 
@@ -245,6 +253,7 @@ describe('SubmissionSideNav', () => {
         let testLocation: Location
         const contract = mockContractPackageSubmittedWithQuestions()
         contract.id = '15'
+        contract.contractSubmissionType = 'HEALTH_PLAN'
 
         renderWithProviders(<CommonRoutes />, {
             apolloProvider: {
@@ -268,7 +277,7 @@ describe('SubmissionSideNav', () => {
                 ],
             },
             routerProvider: {
-                route: '/submissions/15',
+                route: '/submissions/health-plan/15',
             },
             location: (location) => (testLocation = location),
         })
@@ -302,7 +311,7 @@ describe('SubmissionSideNav', () => {
         await userEvent.click(qaLink)
         await waitFor(() => {
             expect(testLocation.pathname).toBe(
-                `/submissions/15/question-and-answers`
+                `/submissions/health-plan/15/question-and-answers`
             )
             expect(screen.queryByTestId('sidenav')).toBeInTheDocument()
             expect(
@@ -320,7 +329,7 @@ describe('SubmissionSideNav', () => {
         // Navigate back to Submission summary page by link.
         await userEvent.click(summaryLink)
         await waitFor(() => {
-            expect(testLocation.pathname).toBe(`/submissions/15`)
+            expect(testLocation.pathname).toBe(`/submissions/health-plan/15`)
             expect(screen.queryByTestId('sidenav')).toBeInTheDocument()
             expect(
                 screen.queryByRole('heading', { name: 'Contract details' })
@@ -353,12 +362,13 @@ describe('SubmissionSideNav', () => {
                         contract: {
                             ...contract,
                             id: '15',
+                            contractSubmissionType: 'HEALTH_PLAN',
                         },
                     }),
                 ],
             },
             routerProvider: {
-                route: '/submissions/15',
+                route: '/submissions/health-plan/15',
             },
         })
         expect(
@@ -379,12 +389,13 @@ describe('SubmissionSideNav', () => {
                         contract: {
                             ...contract,
                             id: '15',
+                            contractSubmissionType: 'HEALTH_PLAN',
                         },
                     }),
                 ],
             },
             routerProvider: {
-                route: '/submissions/15',
+                route: '/submissions/health-plan/15',
             },
         })
 
@@ -410,12 +421,13 @@ describe('SubmissionSideNav', () => {
                             contract: {
                                 ...contract,
                                 id: '15',
+                                contractSubmissionType: 'HEALTH_PLAN',
                             },
                         }),
                     ],
                 },
                 routerProvider: {
-                    route: '/submissions/15',
+                    route: '/submissions/health-plan/15',
                 },
             })
 
@@ -435,12 +447,13 @@ describe('SubmissionSideNav', () => {
                             contract: {
                                 ...contract,
                                 id: '15',
+                                contractSubmissionType: 'HEALTH_PLAN',
                             },
                         }),
                     ],
                 },
                 routerProvider: {
-                    route: '/submissions/15',
+                    route: '/submissions/health-plan/15',
                 },
             })
 
@@ -463,6 +476,7 @@ describe('SubmissionSideNav', () => {
                             contract: {
                                 ...contract,
                                 id: '15',
+                                contractSubmissionType: 'HEALTH_PLAN',
                             },
                         }),
                         fetchContractWithQuestionsMockFail({
@@ -474,7 +488,7 @@ describe('SubmissionSideNav', () => {
                         }),
                     ],
                 },
-                routerProvider: { route: '/submissions/404' },
+                routerProvider: { route: '/submissions/health-plan/404' },
             })
 
             const notFound = await screen.findByText('404 / Page not found')
@@ -493,12 +507,13 @@ describe('SubmissionSideNav', () => {
                             contract: {
                                 ...contract,
                                 id: '15',
+                                contractSubmissionType: 'HEALTH_PLAN',
                             },
                         }),
                     ],
                 },
                 routerProvider: {
-                    route: '/submissions/15/question-and-answers',
+                    route: '/submissions/health-plan/15/question-and-answers',
                 },
             })
 

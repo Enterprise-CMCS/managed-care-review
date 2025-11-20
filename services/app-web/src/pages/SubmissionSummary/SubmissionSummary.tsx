@@ -64,7 +64,7 @@ export const SubmissionSummary = (): React.ReactElement => {
         useState<boolean>(false)
     const [searchParams, setSearchParams] = useSearchParams()
     const { loggedInUser } = useAuth()
-    const { id } = useRouteParams()
+    const { id, contractSubmissionType } = useRouteParams()
     const hasCMSPermissions = hasCMSUserPermissions(loggedInUser)
     const isStateUser = loggedInUser?.role === 'STATE_USER'
     const isHelpDeskUser = loggedInUser?.role === 'HELPDESK_USER'
@@ -163,7 +163,10 @@ export const SubmissionSummary = (): React.ReactElement => {
         if (submissionStatus === 'DRAFT') {
             return (
                 <Navigate
-                    to={generatePath(RoutesRecord.SUBMISSIONS_TYPE, { id })}
+                    to={generatePath(RoutesRecord.SUBMISSIONS_TYPE, {
+                        id,
+                        contractSubmissionType,
+                    })}
                 />
             )
         } else {
@@ -171,6 +174,7 @@ export const SubmissionSummary = (): React.ReactElement => {
                 <Navigate
                     to={generatePath(RoutesRecord.SUBMISSIONS_REVIEW_SUBMIT, {
                         id,
+                        contractSubmissionType,
                     })}
                 />
             )
@@ -375,10 +379,10 @@ export const SubmissionSummary = (): React.ReactElement => {
                                         className="usa-button"
                                         onClick={() =>
                                             navigate(
-                                                `/submission-reviews/${contract.id}/withdraw-submission`
+                                                `/submission-reviews/${contractSubmissionType}/${contract.id}/withdraw-submission`
                                             )
                                         }
-                                        link_url={`/submission-reviews/${contract.id}/withdraw-submission`}
+                                        link_url={`/submission-reviews/${contractSubmissionType}/${contract.id}/withdraw-submission`}
                                     >
                                         Withdraw submission
                                     </ButtonWithLogging>
@@ -390,10 +394,10 @@ export const SubmissionSummary = (): React.ReactElement => {
                                         outline
                                         onClick={() =>
                                             navigate(
-                                                `/submission-reviews/${contract.id}/undo-withdraw-submission`
+                                                `/submission-reviews/${contractSubmissionType}/${contract.id}/undo-withdraw-submission`
                                             )
                                         }
-                                        link_url={`/submission-reviews/${contract.id}/undo-withdraw-submission`}
+                                        link_url={`/submission-reviews/${contractSubmissionType}/${contract.id}/undo-withdraw-submission`}
                                         style={{ width: '16rem' }}
                                     >
                                         Undo submission withdraw
@@ -420,7 +424,7 @@ export const SubmissionSummary = (): React.ReactElement => {
                                     </span>
                                 )}
                                 <LinkWithLogging
-                                    href={`/submissions/${contract.id}/mccrs-record-number`}
+                                    href={`/submissions/${contractSubmissionType}/${contract.id}/mccrs-record-number`}
                                     className={
                                         contract.mccrsID ? styles.editLink : ''
                                     }

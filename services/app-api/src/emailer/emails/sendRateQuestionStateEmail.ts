@@ -1,4 +1,8 @@
-import type { RateQuestionType, RateType } from '../../domain-models'
+import type {
+    ContractSubmissionType,
+    RateQuestionType,
+    RateType,
+} from '../../domain-models'
 import type { EmailConfiguration, EmailData } from '../emailer'
 import {
     getActuaryContactEmails,
@@ -13,6 +17,7 @@ import { rateQuestionResponseURL } from '../generateURLs'
 
 export const sendRateQuestionStateEmail = async (
     rate: RateType,
+    contractSubmissionType: ContractSubmissionType,
     config: EmailConfiguration,
     rateQuestion: RateQuestionType
 ): Promise<EmailData | Error> => {
@@ -44,6 +49,7 @@ export const sendRateQuestionStateEmail = async (
         questionResponseURL: rateQuestionResponseURL(
             parentContractID,
             rateQuestion.rateID,
+            contractSubmissionType,
             config.baseUrl
         ),
         cmsRequestorEmail: rateQuestion.addedBy.email,

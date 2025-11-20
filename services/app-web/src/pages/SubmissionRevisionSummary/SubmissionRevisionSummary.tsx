@@ -16,13 +16,13 @@ import { useFetchContractQuery } from '../../gen/gqlClient'
 import {
     ErrorOrLoadingPage,
     handleAndReturnErrorState,
-} from '../StateSubmission/ErrorOrLoadingPage'
+} from '../StateSubmission/SharedSubmissionComponents/ErrorOrLoadingPage'
 import { Error404 } from '../Errors/Error404Page'
 import { hasCMSUserPermissions } from '@mc-review/helpers'
 
 export const SubmissionRevisionSummary = (): React.ReactElement => {
     // Page level state
-    const { id, revisionVersion } = useParams()
+    const { id, revisionVersion, contractSubmissionType } = useParams()
     if (!id) {
         throw new Error(
             'PROGRAMMING ERROR: id param not set in state submission form.'
@@ -111,7 +111,9 @@ export const SubmissionRevisionSummary = (): React.ReactElement => {
                 data-testid="submission-summary"
                 className={styles.container}
             >
-                <PreviousSubmissionBanner link={`/submissions/${id}`} />
+                <PreviousSubmissionBanner
+                    link={`/submissions/${contractSubmissionType}/${id}`}
+                />
                 <SubmissionTypeSummarySection
                     contract={contract}
                     contractRev={revision}

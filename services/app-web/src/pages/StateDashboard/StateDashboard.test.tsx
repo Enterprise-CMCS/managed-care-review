@@ -130,17 +130,20 @@ describe('StateDashboard', () => {
         const link1 = within(rows[1]).getByRole('link')
         expect(link1).toHaveAttribute(
             'href',
-            '/submissions/test-abc-draft/edit/type'
+            '/submissions/health-plan/test-abc-draft/edit/type'
         )
 
         const link2 = within(rows[2]).getByRole('link')
         expect(link2).toHaveAttribute(
             'href',
-            '/submissions/test-abc-unlocked/edit/review-and-submit'
+            '/submissions/health-plan/test-abc-unlocked/edit/review-and-submit'
         )
 
         const link3 = within(rows[3]).getByRole('link')
-        expect(link3).toHaveAttribute('href', '/submissions/test-abc-submitted')
+        expect(link3).toHaveAttribute(
+            'href',
+            '/submissions/health-plan/test-abc-submitted'
+        )
     })
 
     it('displays the review status tag when it has been set', async () => {

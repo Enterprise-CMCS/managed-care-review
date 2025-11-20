@@ -11,10 +11,11 @@ describe.only('documents', () => {
             // Navigate to documents page
             cy.location().then((fullUrl) => {
                 const { pathname } = fullUrl
-                const draftSubmissionID = pathname.split('/')[2]
+                const draftSubmissionID = pathname.split('/')[3]
+                const draftContractSubType = pathname.split('/')[2]
 
                 cy.navigateFormByDirectLink(
-                    `/submissions/${draftSubmissionID}/edit/type`
+                    `/submissions/${draftContractSubType}/${draftSubmissionID}/edit/type`
                 )
                 cy.navigateContractForm('CONTINUE')
 

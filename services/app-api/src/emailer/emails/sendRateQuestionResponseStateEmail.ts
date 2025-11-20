@@ -1,7 +1,11 @@
 import { formatCalendarDate } from '@mc-review/dates'
 import { pruneDuplicateEmails } from '../formatters'
 import type { EmailConfiguration, EmailData } from '..'
-import type { RateQuestionType, RateType } from '../../domain-models'
+import type {
+    ContractSubmissionType,
+    RateQuestionType,
+    RateType,
+} from '../../domain-models'
 import {
     stripHTMLFromTemplate,
     renderTemplate,
@@ -14,6 +18,7 @@ import { rateQuestionResponseURL } from '../generateURLs'
 
 export const sendRateQuestionResponseStateEmail = async (
     rate: RateType,
+    contractSubmissionType: ContractSubmissionType,
     config: EmailConfiguration,
     questions: RateQuestionType[],
     currentQuestion: RateQuestionType
@@ -53,6 +58,7 @@ export const sendRateQuestionResponseStateEmail = async (
         questionResponseURL: rateQuestionResponseURL(
             parentContractID,
             currentQuestion.rateID,
+            contractSubmissionType,
             config.baseUrl
         ),
         cmsRequestorDivision: division,

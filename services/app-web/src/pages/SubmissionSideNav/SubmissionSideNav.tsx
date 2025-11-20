@@ -32,7 +32,7 @@ export type SideNavOutletContextType = {
 }
 
 export const SubmissionSideNav = () => {
-    const { id, rateID } = useParams()
+    const { contractSubmissionType, id, rateID } = useParams()
     if (!id) {
         throw new Error(
             'PROGRAMMING ERROR: id param not set in state submission form.'
@@ -163,7 +163,7 @@ export const SubmissionSideNav = () => {
                 .join(' ')
             return (
                 <NavLinkWithLogging
-                    to={`/submissions/${id}/rates/${rev.rateID}/question-and-answers`}
+                    to={`/submissions/${contractSubmissionType}/${id}/rates/${rev.rateID}/question-and-answers`}
                     className={isSelectedRateLink(rev.rateID)}
                     event_name="navigation_clicked"
                 >
@@ -214,8 +214,8 @@ export const SubmissionSideNav = () => {
                                     to={
                                         isStateUser &&
                                         submissionStatus === 'UNLOCKED'
-                                            ? `/submissions/${id}/edit/review-and-submit`
-                                            : `/submissions/${id}`
+                                            ? `/submissions/${contractSubmissionType}/${id}/edit/review-and-submit`
+                                            : `/submissions/${contractSubmissionType}/${id}`
                                     }
                                     className={isSelectedLink(
                                         isStateUser &&
@@ -231,7 +231,7 @@ export const SubmissionSideNav = () => {
                                         : 'Submission summary'}
                                 </NavLinkWithLogging>,
                                 <NavLinkWithLogging
-                                    to={`/submissions/${id}/question-and-answers`}
+                                    to={`/submissions/${contractSubmissionType}/${id}/question-and-answers`}
                                     className={isSelectedLink(
                                         'SUBMISSIONS_CONTRACT_QUESTIONS_AND_ANSWERS'
                                     )}

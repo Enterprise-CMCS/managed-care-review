@@ -23,6 +23,7 @@ describe('SubmissionWithdraw', () => {
     it('renders without errors', async () => {
         const contract = mockContractPackageSubmitted({
             id: 'test-abc-123',
+            contractSubmissionType: 'HEALTH_PLAN',
         })
         renderWithProviders(
             <Routes>
@@ -55,7 +56,7 @@ describe('SubmissionWithdraw', () => {
                     ],
                 },
                 routerProvider: {
-                    route: '/submission-reviews/test-abc-123/withdraw-submission',
+                    route: '/submission-reviews/health-plan/test-abc-123/withdraw-submission',
                 },
                 featureFlags: {
                     'withdraw-submission': true,
@@ -80,8 +81,10 @@ describe('SubmissionWithdraw', () => {
     })
 
     it('can withdraw a submission', async () => {
-        const contract =
-            mockContractPackageSubmittedWithQuestions('test-abc-123')
+        const contract = mockContractPackageSubmittedWithQuestions(
+            'test-abc-123',
+            { contractSubmissionType: 'HEALTH_PLAN' }
+        )
         const withdrawnContract: Contract = {
             ...contract,
             reviewStatus: 'WITHDRAWN',
@@ -141,7 +144,7 @@ describe('SubmissionWithdraw', () => {
                     ],
                 },
                 routerProvider: {
-                    route: '/submission-reviews/test-abc-123/withdraw-submission',
+                    route: '/submission-reviews/health-plan/test-abc-123/withdraw-submission',
                 },
                 featureFlags: {
                     'withdraw-submission': true,
@@ -180,6 +183,7 @@ describe('SubmissionWithdraw', () => {
     it('renders error banner on failed withdraw', async () => {
         const contract = mockContractPackageSubmitted({
             id: 'test-abc-123',
+            contractSubmissionType: 'HEALTH_PLAN',
         })
         const { user } = renderWithProviders(
             <Routes>
@@ -213,7 +217,7 @@ describe('SubmissionWithdraw', () => {
                     ],
                 },
                 routerProvider: {
-                    route: '/submission-reviews/test-abc-123/withdraw-submission',
+                    route: '/submission-reviews/health-plan/test-abc-123/withdraw-submission',
                 },
                 featureFlags: {
                     'withdraw-submission': true,
@@ -245,6 +249,7 @@ describe('SubmissionWithdraw', () => {
     it('displays an error message if no reason is provided', async () => {
         const contract = mockContractPackageSubmitted({
             id: 'test-abc-123',
+            contractSubmissionType: 'HEALTH_PLAN',
         })
         const { user } = renderWithProviders(
             <Routes>
@@ -277,7 +282,7 @@ describe('SubmissionWithdraw', () => {
                     ],
                 },
                 routerProvider: {
-                    route: '/submission-reviews/test-abc-123/withdraw-submission',
+                    route: '/submission-reviews/health-plan/test-abc-123/withdraw-submission',
                 },
                 featureFlags: {
                     'withdraw-submission': true,

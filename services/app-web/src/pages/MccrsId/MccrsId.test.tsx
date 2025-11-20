@@ -1,7 +1,10 @@
 import { screen, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { Route, Routes } from 'react-router'
-import { RoutesRecord } from '@mc-review/constants'
+import {
+    RoutesRecord,
+    ContractSubmissionTypeRecord,
+} from '@mc-review/constants'
 import {
     fetchCurrentUserMock,
     fetchContractMockSuccess,
@@ -40,7 +43,7 @@ describe('MCCRSID', () => {
                             ],
                         },
                         routerProvider: {
-                            route: '/submissions/15/mccrs-record-number',
+                            route: `/submissions/${ContractSubmissionTypeRecord[contract.contractSubmissionType]}/15/mccrs-record-number`,
                         },
                     }
                 )
@@ -74,7 +77,7 @@ describe('MCCRSID', () => {
                             ],
                         },
                         routerProvider: {
-                            route: '/submissions/15/mccrs-record-number',
+                            route: `/submissions/${ContractSubmissionTypeRecord[contract.contractSubmissionType]}/15/mccrs-record-number`,
                         },
                     }
                 )
@@ -103,7 +106,7 @@ describe('MCCRSID', () => {
                             ],
                         },
                         routerProvider: {
-                            route: '/submissions/15/mccrs-record-number',
+                            route: `/submissions/${ContractSubmissionTypeRecord[contract.contractSubmissionType]}/15/mccrs-record-number`,
                         },
                     }
                 )
@@ -147,7 +150,7 @@ describe('MCCRSID', () => {
                             ],
                         },
                         routerProvider: {
-                            route: '/submissions/15/mccrs-record-number',
+                            route: `/submissions/${ContractSubmissionTypeRecord[contract.contractSubmissionType]}/15/mccrs-record-number`,
                         },
                     }
                 )

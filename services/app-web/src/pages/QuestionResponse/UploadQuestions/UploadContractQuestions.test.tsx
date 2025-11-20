@@ -56,18 +56,20 @@ describe('UploadContractQuestions', () => {
                                     contract: {
                                         ...contract,
                                         id: '15',
+                                        contractSubmissionType: 'HEALTH_PLAN',
                                     },
                                 }),
                                 fetchContractWithQuestionsMockSuccess({
                                     contract: {
                                         ...contract,
                                         id: '15',
+                                        contractSubmissionType: 'HEALTH_PLAN',
                                     },
                                 }),
                             ],
                         },
                         routerProvider: {
-                            route: `/submissions/15/question-and-answers/${division}/upload-questions`,
+                            route: `/submissions/health-plan/15/question-and-answers/${division}/upload-questions`,
                         },
                     }
                 )
@@ -120,18 +122,20 @@ describe('UploadContractQuestions', () => {
                                     contract: {
                                         ...contract,
                                         id: '15',
+                                        contractSubmissionType: 'HEALTH_PLAN',
                                     },
                                 }),
                                 fetchContractWithQuestionsMockSuccess({
                                     contract: {
                                         ...contract,
                                         id: '15',
+                                        contractSubmissionType: 'HEALTH_PLAN',
                                     },
                                 }),
                             ],
                         },
                         routerProvider: {
-                            route: `/submissions/15/question-and-answers/dmco/upload-questions`,
+                            route: `/submissions/health-plan/15/question-and-answers/dmco/upload-questions`,
                         },
                     }
                 )
@@ -190,12 +194,14 @@ describe('UploadContractQuestions', () => {
                                     contract: {
                                         ...contract,
                                         id: '15',
+                                        contractSubmissionType: 'HEALTH_PLAN',
                                     },
                                 }),
                                 fetchContractWithQuestionsMockSuccess({
                                     contract: {
                                         ...contract,
                                         id: '15',
+                                        contractSubmissionType: 'HEALTH_PLAN',
                                     },
                                 }),
                                 createContractQuestionSuccess({
@@ -210,7 +216,7 @@ describe('UploadContractQuestions', () => {
                             ],
                         },
                         routerProvider: {
-                            route: `/submissions/15/question-and-answers/dmco/upload-questions`,
+                            route: `/submissions/health-plan/15/question-and-answers/dmco/upload-questions`,
                         },
                         location: (location) => (testLocation = location),
                     }
@@ -243,7 +249,7 @@ describe('UploadContractQuestions', () => {
 
                 await waitFor(() =>
                     expect(testLocation.pathname).toBe(
-                        `/submissions/15/question-and-answers`
+                        `/submissions/health-plan/15/question-and-answers`
                     )
                 )
             })
@@ -264,7 +270,7 @@ describe('UploadContractQuestions', () => {
                     </Routes>,
                     {
                         routerProvider: {
-                            route: `/submissions/15/question-and-answers/dmco/upload-questions`,
+                            route: `/submissions/health-plan/15/question-and-answers/dmco/upload-questions`,
                         },
                         apolloProvider: {
                             mocks: [
@@ -276,12 +282,14 @@ describe('UploadContractQuestions', () => {
                                     contract: {
                                         ...contract,
                                         id: '15',
+                                        contractSubmissionType: 'HEALTH_PLAN',
                                     },
                                 }),
                                 fetchContractWithQuestionsMockSuccess({
                                     contract: {
                                         ...contract,
                                         id: '15',
+                                        contractSubmissionType: 'HEALTH_PLAN',
                                     },
                                 }),
                             ],
@@ -309,7 +317,10 @@ describe('UploadContractQuestions', () => {
             })
 
             it('displays file upload alert if attempting to add question with all invalid files', async () => {
-                const contract = mockContractPackageSubmittedWithQuestions('15')
+                const contract = mockContractPackageSubmittedWithQuestions(
+                    '15',
+                    { contractSubmissionType: 'HEALTH_PLAN' }
+                )
                 const { user } = renderWithProviders(
                     <Routes>
                         <Route element={<SubmissionSideNav />}>
@@ -323,7 +334,7 @@ describe('UploadContractQuestions', () => {
                     </Routes>,
                     {
                         routerProvider: {
-                            route: `/submissions/15/question-and-answers/dmco/upload-questions`,
+                            route: `/submissions/health-plan/15/question-and-answers/dmco/upload-questions`,
                         },
                         apolloProvider: {
                             mocks: [
@@ -387,7 +398,7 @@ describe('UploadContractQuestions', () => {
                     </Routes>,
                     {
                         routerProvider: {
-                            route: `/submissions/15/question-and-answers/dmco/upload-questions`,
+                            route: `/submissions/health-plan/15/question-and-answers/dmco/upload-questions`,
                         },
                         apolloProvider: {
                             mocks: [
@@ -399,12 +410,14 @@ describe('UploadContractQuestions', () => {
                                     contract: {
                                         ...contract,
                                         id: '15',
+                                        contractSubmissionType: 'HEALTH_PLAN',
                                     },
                                 }),
                                 fetchContractWithQuestionsMockSuccess({
                                     contract: {
                                         ...contract,
                                         id: '15',
+                                        contractSubmissionType: 'HEALTH_PLAN',
                                     },
                                 }),
                             ],
@@ -469,7 +482,7 @@ describe('UploadContractQuestions', () => {
                     </Routes>,
                     {
                         routerProvider: {
-                            route: `/submissions/15/question-and-answers/dmco/upload-questions`,
+                            route: `/submissions/health-plan/15/question-and-answers/dmco/upload-questions`,
                         },
                         apolloProvider: {
                             mocks: [
@@ -481,12 +494,14 @@ describe('UploadContractQuestions', () => {
                                     contract: {
                                         ...contract,
                                         id: '15',
+                                        contractSubmissionType: 'HEALTH_PLAN',
                                     },
                                 }),
                                 fetchContractWithQuestionsMockSuccess({
                                     contract: {
                                         ...contract,
                                         id: '15',
+                                        contractSubmissionType: 'HEALTH_PLAN',
                                     },
                                 }),
                                 createContractQuestionNetworkFailure({
@@ -548,12 +563,14 @@ describe('UploadContractQuestions', () => {
                                         contract: {
                                             ...contract,
                                             id: '15',
+                                            contractSubmissionType:
+                                                'HEALTH_PLAN',
                                         },
                                     }),
                                 ],
                             },
                             routerProvider: {
-                                route: `/submissions/15/question-and-answers/dmco/upload-questions`,
+                                route: `/submissions/health-plan/15/question-and-answers/dmco/upload-questions`,
                             },
                         }
                     )
