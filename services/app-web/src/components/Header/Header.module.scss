@@ -177,13 +177,12 @@
         min-height: 5rem; // this ensures we don't collapse page heading when no text present
     }
 }
-.stateDashboardRow,
-.cmsDashboardRow {
+.stateRow,
+.cmsRow {
     width: 100%;
-    justify-content: space-between; // <-- key line
+    justify-content: space-between;
     align-items: center;
 
-    // make the PageHeading (h1) stack its children vertically
     h1 {
         display: flex;
         flex-direction: column;
@@ -192,8 +191,6 @@
 }
 
 .stateHeadingText {
-    // inherits big, bold styles from .dashboardHeading
-    // optional minor tweak:
     line-height: 1.2;
 }
 
@@ -201,10 +198,10 @@
     display: inline-flex;
     align-items: center;
     gap: 0.35rem;
-    font-size: 0.95rem; // smaller than state name
-    font-weight: 400; // not bold
+    font-size: 0.95rem;
+    font-weight: 400;
     opacity: 0.9;
-    margin-top: 0.15rem; // space between state name and ID line
+    margin-top: 0.15rem;
 }
 
 .submissionIdlabel {

@@ -20,9 +20,9 @@ import {
 } from '@mc-review/helpers'
 
 const SharedSubHeadingRow = ({
-    heading,
+    submissionID,
 }: {
-    heading: string | React.ReactElement
+    submissionID: string | React.ReactElement
 }) => {
     return (
         <span className={styles.submissionIdLine} data-testid="submission-id">
@@ -30,7 +30,7 @@ const SharedSubHeadingRow = ({
             <span className={styles.submissionIdLineDivider} aria-hidden="true">
                 |
             </span>
-            <span className={styles.submissionIdLineValue}>{heading}</span>
+            <span className={styles.submissionIdLineValue}>{submissionID}</span>
         </span>
     )
 }
@@ -79,15 +79,12 @@ const CMSUserRow = ({
                         </PageHeading>
                     </Grid>
                 ) : (
-                    <Grid
-                        row
-                        className={`flex-align-center ${styles.cmsDashboardRow}`}
-                    >
+                    <Grid row className={`flex-align-center ${styles.cmsRow}`}>
                         <PageHeading>
                             <span className={styles.stateHeadingText}>CMS</span>
 
                             {heading && (
-                                <SharedSubHeadingRow heading={heading} />
+                                <SharedSubHeadingRow submissionID={heading} />
                             )}
                         </PageHeading>
                         <EntityType entityType={entityType} />
@@ -139,7 +136,7 @@ const StateUserRow = ({
                 ) : (
                     <Grid
                         row
-                        className={`flex-align-center ${styles.stateDashboardRow}`}
+                        className={`flex-align-center ${styles.stateRow}`}
                     >
                         <div>
                             <StateIcon
@@ -156,7 +153,7 @@ const StateUserRow = ({
                             </span>
 
                             {heading && (
-                                <SharedSubHeadingRow heading={heading} />
+                                <SharedSubHeadingRow submissionID={heading} />
                             )}
                         </PageHeading>
                         <EntityType entityType={entityType} />
