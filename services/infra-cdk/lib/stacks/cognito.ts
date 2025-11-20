@@ -284,6 +284,7 @@ export class CognitoStack extends BaseStack {
                 this,
                 `/cognito/${this.stage}/identity_pool_id`
             )
+            // Note: SSM contains FULL domain (e.g., prefix.auth.region.amazoncognito.com), not just prefix
             userPoolDomain = StringParameter.valueFromLookup(
                 this,
                 `/cognito/${this.stage}/user_pool_domain`
