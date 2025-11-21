@@ -85,6 +85,7 @@ export function createContract(
             submissionDescription: input.submissionDescription,
             submissionType: input.submissionType,
             contractType: input.contractType,
+            managedCareEntities: input.managedCareEntities ?? undefined,
         }
 
         const contractResult = await store.insertDraftContract(insertArgs)

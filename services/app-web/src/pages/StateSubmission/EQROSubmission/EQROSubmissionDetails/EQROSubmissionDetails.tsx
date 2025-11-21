@@ -70,10 +70,9 @@ export const EQROSubmissionDetails = (): React.ReactElement => {
     const onSubmit = async (values: EQROSubmissionTypeFormValues) => {
         if (isNewSubmission) {
             const input: CreateContractInput = {
-                // TODO: populate with real values / update types
                 populationCovered: values.populationCovered!,
                 programIDs: values.programIDs,
-                // managedCareEntities: values.managedCareEntities,
+                managedCareEntities: values.managedCareEntities,
                 contractType: values.contractType!,
                 submissionDescription: values.submissionDescription,
                 submissionType: 'CONTRACT_ONLY',
@@ -137,7 +136,6 @@ export const EQROSubmissionDetails = (): React.ReactElement => {
             <FormContainer id="SubmissionDetails">
                 <Formik
                     initialValues={initialValues}
-                    // TODO: Enhance / cleanup?
                     onSubmit={(values) => onSubmit(values)}
                     validationSchema={EqroSubmissionSchema}
                 >
