@@ -17,7 +17,11 @@ import {
 } from '../attributeHelper'
 import type { MutationResolvers, State } from '../../gen/gqlServer'
 import { parseContract } from '../../domain-models/contractAndRates/dataValidatorHelpers'
-import type { UpdateInfoType, PackageStatusType } from '../../domain-models'
+import type {
+    UpdateInfoType,
+    PackageStatusType,
+    ContractType,
+} from '../../domain-models'
 import type { UpdateDraftContractRatesArgsType } from '../../postgres/contractAndRates/updateDraftContractRates'
 import type { StateCodeType } from '@mc-review/submissions'
 import type { Span } from '@opentelemetry/api'
@@ -54,6 +58,68 @@ const validateStatusAndUpdateInfo = (
         })
     }
 }
+
+const validateEQROSubmission = (contract: ContractType, span?: Span) => {
+    const formData = contract.draftRevision!.formData
+    const hasRates = contract.draftRates && contract.draftRates.length
+    const isNotContractOnly = formData.submissionType !== 'CONTRACT_ONLY'
+    const isBase = formData.contractType === 'BASE'
+    const includesMCO = formData.managedCareEntities.includes('MCO')
+    const isAmendment = formData.contractType === 'AMENDMENT'
+    const isChipCovered = formData.populationCovered === 'CHIP'
+    const isMedAndChipCovered =
+        formData.populationCovered === 'MEDICAID_AND_CHIP'
+
+    const throwError = (errMessage: string) => {
+        logError('submitContract', errMessage)
+        setErrorAttributesOnActiveSpan(errMessage, span)
+        throw createUserInputError(errMessage, 'contractID', contract.id)
+    }
+
+    //Throw an error early if the contract has rates or the wrong sub type
+    if (hasRates || isNotContractOnly) {
+        throwError(
+            `EQRO submissions must be contract only and not include any rates: ${contract.id}`
+        )
+    }
+
+    //A base contract type with MCO has multiple fields to verify so we set them up here
+    const requiredEQROFieldsForBaseMCO: Record<string, boolean | undefined> = {
+        eqroNewContractor: formData.eqroNewContractor,
+        eqroProvisionMcoNewOptionalActivity:
+            formData.eqroProvisionMcoNewOptionalActivity,
+        eqroProvisionNewMcoEqrRelatedActivities:
+            formData.eqroProvisionNewMcoEqrRelatedActivities,
+    }
+
+    //Field validations for different contract types
+    if (isBase && includesMCO && isMedAndChipCovered) {
+        for (const field in requiredEQROFieldsForBaseMCO) {
+            if (requiredEQROFieldsForBaseMCO[field] == null) {
+                throwError(
+                    `${field} can not be undefined for a base contract with MCO review: ${contract.id}`
+                )
+            }
+        }
+    } else if (
+        isAmendment &&
+        (isMedAndChipCovered || isChipCovered) &&
+        !includesMCO
+    ) {
+        if (formData.eqroProvisionChipEqrRelatedActivities == null) {
+            throwError(
+                `eqroProvisionChipEqrRelatedActivities can not be undefined for an amendment contract with chip populations included: ${contract.id}`
+            )
+        }
+    } else if (isAmendment && includesMCO) {
+        if (formData.eqroProvisionMcoEqrOrRelatedActivities == null) {
+            throwError(
+                `eqroProvisionMcoEqrOrRelatedActivities can not be undefined for an amendment contract that includes MCO: ${contract.id}`
+            )
+        }
+    }
+}
+
 export function submitContract(
     store: Store,
     emailer: Emailer,
@@ -157,11 +223,17 @@ export function submitContract(
             span,
             submittedReason || undefined
         )
+
         if (!contractWithHistory.draftRevision) {
             throw new Error(
                 'PROGRAMMING ERROR: Status should not be submittable without a draft revision'
             )
         }
+
+        if (contractWithHistory.contractSubmissionType === 'EQRO') {
+            validateEQROSubmission(contractWithHistory, span)
+        }
+
         const initialFormData = contractWithHistory.draftRevision.formData
         const contractRevisionID = contractWithHistory.draftRevision.id
         const draftRatesWithoutLinkedRates =
