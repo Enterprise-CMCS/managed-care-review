@@ -72,7 +72,9 @@ describe('State user can view submissions', () => {
             cy.url({ timeout: 10_000 }).should('contain', submissionId)
             cy.findByTestId('submission-summary').should('exist')
             cy.findByRole('heading', {
-                name: `Minnesota ${submissionName}`,
+                name: new RegExp(
+                    `Minnesota Submission ID | ${submissionName}`
+                ),
             }).should('exist')
             cy.findByText('Submitted').should('exist')
             cy.findByText('Rate details').should('exist')
