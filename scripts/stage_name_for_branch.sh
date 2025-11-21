@@ -51,10 +51,15 @@ branch_name=$(echo "$branch_name" | sed "s/---*/-/g")
 
 >&2 echo "dash $branch_name"
 
-# remove aws string from branch name
+# remove aws reserved words from branch name
+# "aws" - reserved in many AWS resource names
+# "cognito" - reserved in Cognito User Pool domain prefixes
+# "amazon" - reserved in many AWS contexts
 branch_name=${branch_name//aws/}
+branch_name=${branch_name//cognito/}
+branch_name=${branch_name//amazon/}
 
->&2 echo "aws $branch_name"
+>&2 echo "reserved words removed: $branch_name"
 
 # downcase everything
 branch_name=$(echo "$branch_name" | awk '{print tolower($0)}')
