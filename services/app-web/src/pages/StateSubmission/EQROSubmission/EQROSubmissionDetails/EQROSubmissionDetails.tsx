@@ -1,19 +1,21 @@
 import React, { useEffect, useState } from 'react'
 import {
+    DynamicStepIndicator,
     ErrorSummary,
     FieldCheckbox,
     FieldRadio,
     FieldTextarea,
     FormContainer,
+    FormNotificationContainer,
     PageActions,
     PoliteErrorMessage,
     ProgramSelect,
     ReactRouterLinkWithLogging,
 } from '../../../../components'
 import { Fieldset, Form, FormGroup, Label, Link } from '@trussworks/react-uswds'
-import { RoutesRecord } from '@mc-review/constants'
+import { RoutesRecord, EQRO_SUBMISSION_FORM_ROUTES } from '@mc-review/constants'
 import { generatePath, useNavigate, matchPath } from 'react-router-dom'
-import { useRouteParams } from '../../../../hooks'
+import { useRouteParams, useCurrentRoute } from '../../../../hooks'
 import styles from '../../StateSubmissionForm.module.scss'
 import { usePage } from '../../../../contexts/PageContext'
 import { useContractForm } from '../../../../hooks/useContractForm'
@@ -48,6 +50,7 @@ export const EQROSubmissionDetails = (): React.ReactElement => {
     const { id, contractSubmissionType } = useRouteParams()
     const navigate = useNavigate()
     const { updateActiveMainContent } = usePage()
+    const { currentRoute } = useCurrentRoute()
 
     const isNewSubmission = matchPath(
         RoutesRecord.SUBMISSIONS_NEW_SUBMISSION_FORM,
@@ -133,6 +136,19 @@ export const EQROSubmissionDetails = (): React.ReactElement => {
 
     return (
         <div id={activeMainContentId}>
+            <FormNotificationContainer>
+                <DynamicStepIndicator
+                    formPages={EQRO_SUBMISSION_FORM_ROUTES}
+                    currentFormPage={
+                        currentRoute === 'SUBMISSIONS_NEW_SUBMISSION_FORM'
+                            ? 'SUBMISSIONS_TYPE' // Map new submission route to first step
+                            : currentRoute
+                    }
+                    customPageTitles={{
+                        SUBMISSIONS_TYPE: 'Submission details',
+                    }}
+                />
+            </FormNotificationContainer>
             <FormContainer id="SubmissionDetails">
                 <Formik
                     initialValues={initialValues}
