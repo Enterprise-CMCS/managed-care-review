@@ -164,7 +164,10 @@ export class CognitoStack extends BaseStack {
         this.userPoolDomain = new UserPoolDomain(this, 'UserPoolDomain', {
             userPool: this.userPool,
             cognitoDomain: {
-                domainPrefix: `${this.stage}-login-${this.userPoolClient.userPoolClientId}`,
+                domainPrefix: Fn.join('', [
+                    `${this.stage}-login-`,
+                    this.userPoolClient.userPoolClientId,
+                ]),
             },
         })
 
