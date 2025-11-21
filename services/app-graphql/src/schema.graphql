@@ -519,6 +519,12 @@ input CreateContractInput {
     Options are: HEALTH_PLAN, EQRO
     """
     contractSubmissionType: ContractSubmissionType!
+    """
+    The type of organization the state is contracting with
+    in order to deliver managed care services
+    Options are MCO, PIHP, PAHP, and PCCM
+    """
+    managedCareEntities: [ManagedCareEntity!]
 }
 
 type CreateContractPayload {
