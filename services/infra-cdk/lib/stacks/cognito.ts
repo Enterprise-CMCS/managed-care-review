@@ -290,14 +290,7 @@ export class CognitoStack extends BaseStack {
                 `/cognito/${this.stage}/user_pool_domain`
             )
 
-            // Defensive: If SSM value is just the prefix, construct the full domain
-            if (
-                userPoolDomain &&
-                !userPoolDomain.includes('.auth.') &&
-                !userPoolDomain.endsWith('.amazoncognito.com')
-            ) {
-                userPoolDomain = `${userPoolDomain}.auth.${this.region}.amazoncognito.com`
-            }
+            // SSM should always contain the FULL domain (e.g., prefix.auth.region.amazoncognito.com)
 
             description = 'from Serverless via SSM'
         } else {
