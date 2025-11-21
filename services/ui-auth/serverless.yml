@@ -15,14 +15,18 @@ custom:
   api_gateway_rest_api_name: ${cf:infra-api-${sls:stage}.ApiGatewayRestApiId}
   application_endpoint_url: ${cf:ui-${sls:stage}.CloudFrontEndpointUrl}
 
-  # CDK CloudFront URL for callback URLs (temporary during migration)
+  # CDK resource references (temporary during migration)
   # Map Serverless stage name to CDK stage name (main -> dev)
+  # Note: Only main needs mapping (Serverless uses 'main', CDK uses 'dev')
+  # Review environments use the same stage name in both, so fallback to ${sls:stage} works
   cdk_stage_name: ${self:custom.cdkStageMapping.${sls:stage}, ${sls:stage}}
   cdkStageMapping:
     main: dev
     val: val
     prod: prod
   cdk_cloudfront_url: ${cf:frontend-infra-${self:custom.cdk_stage_name}-cdk.CloudFrontEndpointUrl}
+  # CDK API Gateway ID from SSM (while migrating)
+  cdk_api_gateway_rest_api_id: ${ssm:/cdk/${self:custom.cdk_stage_name}/api_gateway_rest_api_id}
 
   okta_metadata_url: ${ssm:/configuration/okta_metadata_url}
   sesSourceEmailAddress: ${ssm:/configuration/email/sourceAddress, "" }
@@ -199,6 +203,12 @@ resources:
                   Action:
                     - 'execute-api:Invoke'
                   Resource: !Sub arn:aws:execute-api:${AWS::Region}:${AWS::AccountId}:${self:custom.api_gateway_rest_api_name}/*
+
+                # Allow invoking CDK API Gateway (temporary during migration)
+                - Effect: 'Allow'
+                  Action:
+                    - 'execute-api:Invoke'
+                  Resource: !Sub arn:aws:execute-api:${AWS::Region}:${AWS::AccountId}:${self:custom.cdk_api_gateway_rest_api_id}/*
 
                 - Effect: 'Allow'
                   Action:
