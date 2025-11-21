@@ -25,7 +25,7 @@ valid values: `LOCAL`, `AWS_COGNITO`, `IDM`
 
 This tells the application how to perform authentication.
 
-`LOCAL` means to use local auth. Make no requests to cognito, there is custom auth UI in app-web to pick a user. app-web then sends the user as a JSON blob in a header that serverless-offline dumps into the context of our lambda's execution
+`LOCAL` means to use local auth. Make no requests to cognito, there is custom auth UI in app-web to pick a user. app-web then sends the user as a JSON blob in the `cognito-authentication-provider` header which the local Express server maps into the Lambda event context
 
 `AWS_COGNITO` means to use AWS Cognito User Pools for auth. There is UI for creating and logging in with cognito in app-web and app-api can fetch user information from those users using a cognito api as well.
 
@@ -43,11 +43,11 @@ This is the base URL that all requests are sent to from app-web
 
 Read by `app-api`
 
--   VITE_APP_COGNITO_REGION
--   VITE_APP_COGNITO_ID_POOL_ID
--   VITE_APP_COGNITO_USER_POOL_ID
--   VITE_APP_COGNITO_USER_POOL_CLIENT_ID
--   VITE_APP_COGNITO_USER_POOL_CLIENT_DOMAIN
+- VITE_APP_COGNITO_REGION
+- VITE_APP_COGNITO_ID_POOL_ID
+- VITE_APP_COGNITO_USER_POOL_ID
+- VITE_APP_COGNITO_USER_POOL_CLIENT_ID
+- VITE_APP_COGNITO_USER_POOL_CLIENT_DOMAIN
 
 These four env vars configure cognito auth from the browser. They are ignored if `VITE_APP_AUTH_MODE` is set to `LOCAL` and thus are only set in deployed environments.
 
@@ -93,15 +93,15 @@ For local development, `DATABASE_URL` is still used and must be set to a valid `
 
 Read by `app-web`
 
--   VITE_APP_S3_DOCUMENTS_BUCKET
+- VITE_APP_S3_DOCUMENTS_BUCKET
 
 The name of the bucket that documents are uploded to as part of the state submission form.
 
--   VITE_APP_S3_REGION
+- VITE_APP_S3_REGION
 
 The region in AWS where the bucket is located. Cannot be set if VITE_APP_S3_LOCAL_URL is set.
 
--   VITE_APP_S3_LOCAL_URL
+- VITE_APP_S3_LOCAL_URL
 
 The local URL where an s3 server is being run. Cannot be set if VITE_APP_S3_REGION is set.
 
@@ -195,13 +195,13 @@ Read by `app-web`
 
 There are vars per environment for dev/val/prod.
 
--   VITE_APP_NR_ACCOUNT_ID
--   VITE_APP_NR_AGENT_ID
+- VITE_APP_NR_ACCOUNT_ID
+- VITE_APP_NR_AGENT_ID
 
 These are the same in all environments.
 
--   VITE_APP_NR_LICENSE_KEY
--   VITE_APP_NR_TRUST_KEY
+- VITE_APP_NR_LICENSE_KEY
+- VITE_APP_NR_TRUST_KEY
 
 These env vars configure new relic for browser monitoring. They are interpolated into browser monitoring inline script. If we move towards integration via New Relic APM instead, these variables can be deleted.
 
@@ -210,19 +210,24 @@ These env vars configure new relic for browser monitoring. They are interpolated
 With our migration to CDK, configuration is managed through several mechanisms:
 
 ### CDK Context Variables
+
 - `stage`: The deployment stage (dev, val, prod)
 - Set via command line: `cdk deploy --context stage=dev`
 - Accessed in CDK code: `this.node.tryGetContext('stage')`
 
 ### Stage Configuration
+
 Centralized in `/services/infra-cdk/lib/config/stage-config.ts`:
+
 - Lambda settings (memory, timeout, architecture)
 - VPC configuration
 - Security settings
 - Monitoring configuration
 
 ### Environment Variables for Lambda Functions
+
 Managed by the Environment Factory pattern:
+
 - Base environment (stage, region, common settings)
 - Function-specific environment variables
 - Cross-stack references via CloudFormation outputs

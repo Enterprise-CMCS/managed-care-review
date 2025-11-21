@@ -22,6 +22,8 @@
         "vitest.config.ts",
         "eslint.config.ts",
         "jest.config.ts",
-        "setupTests.ts"
+        "setupTests.ts",
+        "esbuild.config.ts",
+        "esbuild-local.config.ts"
     ]
 }

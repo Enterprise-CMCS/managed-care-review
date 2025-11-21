@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-floating-promises */
 import LabeledProcessRunner from '../runner.js'
 import { compileGraphQLTypesWatchOnce } from './graphql.js'
 import { watchPackagesOnce } from './packages.js'
@@ -18,7 +17,7 @@ export async function installAPIDeps(runner: LabeledProcessRunner) {
     return installPrismaDeps(runner)
 }
 
-// runAPILocally uses the serverless-offline plugin to run the api lambdas locally
+// runAPILocally runs the API using our custom Express server (replaces serverless-offline)
 export async function runAPILocally(
     runner: LabeledProcessRunner,
     withProf = false
@@ -28,31 +27,29 @@ export async function runAPILocally(
 
     await installAPIDeps(runner)
 
+    // Build the local server first
+    await runner.runCommandAndOutput(
+        'build local server',
+        ['pnpm', 'build:local'],
+        'services/app-api'
+    )
+
     if (!withProf) {
+        // Run with nodemon for hot reload (watches src/, rebuilds with esbuild, restarts)
         await runner.runCommandAndOutput(
             'api',
-            ['pnpm', 'start'],
+            ['pnpm', 'exec', 'nodemon'],
             'services/app-api'
         )
     } else {
-        // this is a copy of the pnpm start command, we have to invoke node directly so it's possible this will get out of sync.
+        // Run with Node profiling enabled
         await runner.runCommandAndOutput(
             'api',
             [
                 'node',
                 '--prof',
                 '--enable-source-maps',
-                'node_modules/serverless/bin/serverless.js',
-                'offline',
-                'start',
-                '--stage',
-                'local',
-                '--region',
-                'us-east-1',
-                '--httpPort',
-                '3030',
-                '--host',
-                '127.0.0.1',
+                '.local-build/local-server.js',
             ],
             'services/app-api'
         )

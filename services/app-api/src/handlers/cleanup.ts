@@ -67,4 +67,4 @@ const main = async () => {
     }
 }
 
-module.exports = { main }
+export { main }

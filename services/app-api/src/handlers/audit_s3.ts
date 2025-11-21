@@ -271,4 +271,4 @@ async function fetchAssociatedData(
     return { results, errors }
 }
 
-module.exports = { main }
+export { main }
