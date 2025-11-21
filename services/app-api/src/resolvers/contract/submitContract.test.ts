@@ -1553,21 +1553,20 @@ describe('submitContract', () => {
                     assignedUserIDs
                 )
 
-                const draftWithWrongSubType =
-                    await createAndUpdateTestContractWithoutRates(
-                        server,
-                        undefined,
-                        { submissionType: 'CONTRACT_ONLY' }
-                    )
-                await submitTestContract(server, draftWithWrongSubType.id)
+                const draft1 = await createAndUpdateTestContractWithoutRates(
+                    server,
+                    undefined,
+                    { submissionType: 'CONTRACT_ONLY' }
+                )
+                await submitTestContract(server, draft1.id)
                 await unlockTestContract(
                     cmsServer,
-                    draftWithWrongSubType.id,
+                    draft1.id,
                     'unlock to resubmit'
                 )
                 const submit1 = await submitTestContract(
                     server,
-                    draftWithWrongSubType.id,
+                    draft1.id,
                     'resubmit'
                 )
 
