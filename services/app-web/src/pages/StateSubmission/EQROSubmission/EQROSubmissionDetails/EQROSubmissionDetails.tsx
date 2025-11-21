@@ -1,9 +1,9 @@
 import React, { FormEvent, useEffect } from 'react'
-import { FormContainer, PageActions } from '../../../../components'
+import { FormContainer, PageActions, DynamicStepIndicator, FormNotificationContainer } from '../../../../components'
 import { Form } from '@trussworks/react-uswds'
-import { RoutesRecord } from '@mc-review/constants'
+import { RoutesRecord, EQRO_SUBMISSION_FORM_ROUTES } from '@mc-review/constants'
 import { generatePath, useNavigate, matchPath } from 'react-router-dom'
-import { useRouteParams, useStatePrograms } from '../../../../hooks'
+import { useRouteParams, useStatePrograms, useCurrentRoute } from '../../../../hooks'
 import styles from '../../StateSubmissionForm.module.scss'
 import { usePage } from '../../../../contexts/PageContext'
 import { useContractForm } from '../../../../hooks/useContractForm'
@@ -14,6 +14,7 @@ export const EQROSubmissionDetails = (): React.ReactElement => {
     const navigate = useNavigate()
     const { updateActiveMainContent } = usePage()
     const allPrograms = useStatePrograms()
+    const { currentRoute } = useCurrentRoute()
 
     const isNewSubmission = matchPath(
         RoutesRecord.SUBMISSIONS_NEW_SUBMISSION_FORM,
@@ -76,6 +77,19 @@ export const EQROSubmissionDetails = (): React.ReactElement => {
 
     return (
         <div id={activeMainContentId}>
+            <FormNotificationContainer>
+                <DynamicStepIndicator
+                    formPages={EQRO_SUBMISSION_FORM_ROUTES}
+                    currentFormPage={
+                        currentRoute === 'SUBMISSIONS_NEW_SUBMISSION_FORM'
+                            ? 'SUBMISSIONS_TYPE'  // Map new submission route to first step
+                            : currentRoute
+                    }
+                    customPageTitles={{
+                        SUBMISSIONS_TYPE: 'Submission details',
+                    }}
+                />
+            </FormNotificationContainer>
             <FormContainer id="SubmissionDetails">
                 <Form
                     className={styles.formContainer}
