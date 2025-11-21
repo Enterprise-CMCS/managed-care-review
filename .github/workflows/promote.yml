@@ -5,6 +5,11 @@ on:
     branches:
       - 'main'
 
+# Prevent concurrent serverless deployments to main
+concurrency:
+  group: promote-serverless-main
+  cancel-in-progress: false
+
 jobs:
   unit-tests:
     name: test - unit tests
@@ -100,11 +105,6 @@ jobs:
           coverageLocations: |
             ${{github.workspace}}/services/app-api/coverage/lcov.info:lcov
             ${{github.workspace}}/services/app-web/coverage/lcov.info:lcov
-
-      - name: lock this branch to prevent concurrent builds
-        run: ./.github/github-lock.sh
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
   build-prisma-client-lambda-layer:
     name: build - postgres prisma layer
