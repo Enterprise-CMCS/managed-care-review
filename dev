@@ -28,11 +28,6 @@ if ! which pnpm > /dev/null ; then
 	exit 1
 fi
 
-# check serverless is installed globally.
-if ! which serverless > /dev/null ; then
-	echo "installing serverless globally"
-	pnpm install -g serverless@4.2.3
-fi
 # have to ensure that pnpm install is up to date.
 # we use .pnpm_install as a marker for the last time `pnpm install` was run. Rerun the command when pnpm-lock.yaml is updated
 if [ "pnpm-lock.yaml" -nt ".pnpm_install" ]; then

@@ -150,7 +150,7 @@ describe('unlockContract', () => {
     // This test does not simulate how creating/updating a rate currently works in our app and the contract revision history
     // will not match.
     // Skipping this for now, revisit during rate only feature work.
-    // eslint-disable-next-line jest/no-disabled-tests
+
     it.skip('Unlocks a rate without breaking connected submitted contract', async () => {
         const client = await sharedTestPrismaClient()
 
