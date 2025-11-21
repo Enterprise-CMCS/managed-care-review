@@ -6,7 +6,6 @@ import {
 } from '@mc-review/constants'
 import { getRelativePath } from '../../routeHelpers'
 import { ContractFormData } from '../../gen/gqlClient'
-import { FormikErrors } from 'formik'
 
 const getRelativePathFromNestedRoute = (formRouteType: RouteT): string =>
     getRelativePath({
@@ -34,18 +33,24 @@ const activeFormPages = (
     })
 }
 
+/**
+ * Generic function that takes in an object and renames a top level key while preserving order
+ * @param obj The object that needs to be modified
+ * @param oldKey The old key name
+ * @param newKey The replacement key name
+ */
 const renameKey = <T extends Object, K extends keyof T>(
-    oldObj: FormikErrors<T>,
+    obj: T,
     oldKey: K,
     newKey: string
 ) => {
-    const updatedObj = Object.keys(oldObj).reduce(
+    const updatedObj = Object.keys(obj).reduce(
         (accumulator: any, currentKey) => {
-            const keyInOldObj = currentKey as K
-            if (keyInOldObj === oldKey) {
-                accumulator[newKey] = oldObj[keyInOldObj]
+            const keyInObj = currentKey as K
+            if (keyInObj === oldKey) {
+                accumulator[newKey] = obj[keyInObj]
             } else {
-                accumulator[keyInOldObj] = oldObj[keyInOldObj]
+                accumulator[keyInObj] = obj[keyInObj]
             }
             return accumulator
         },
