@@ -171,6 +171,9 @@ export class CognitoStack extends BaseStack {
             },
         })
 
+        // Add explicit dependency to ensure client is created first (matches serverless Ref behavior)
+        this.userPoolDomain.node.addDependency(this.userPoolClient)
+
         // Create Identity Pool
         this.identityPool = new CfnIdentityPool(this, 'CognitoIdentityPool', {
             identityPoolName: `${this.stage}IdentityPool`,
