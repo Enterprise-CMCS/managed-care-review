@@ -200,10 +200,9 @@ function handler(event) {
         })
 
         // Set application URL - use custom domain if configured, otherwise CloudFront URL
-        // Trailing slash is required for Cognito OAuth callback URL matching
         this.applicationUrl = hasCustomDomain
-            ? `https://${cloudfrontDomainName}/`
-            : `https://${this.distribution.distributionDomainName}/`
+            ? `https://${cloudfrontDomainName}/` // Trailing slash for custom domains
+            : `https://${this.distribution.distributionDomainName}`
 
         // Create storybook S3 bucket
         this.storybookBucket = new Bucket(this, 'StorybookS3Bucket', {
