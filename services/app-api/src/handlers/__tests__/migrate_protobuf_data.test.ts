@@ -287,7 +287,3 @@ it('throws error on failed migration', async () => {
         )
     }
 })
-
-// it('errors and rolls back DB changes if data is not all migrated', async () => {
-//
-// })
