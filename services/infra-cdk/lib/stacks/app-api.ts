@@ -972,5 +972,11 @@ export class AppApiStack extends BaseStack {
             exportName: this.exportName('ApiGatewayUrl'),
             description: 'App API Gateway URL',
         })
+
+        new CfnOutput(this, 'ApiGatewayRestApiId', {
+            value: this.apiGateway.restApiId,
+            exportName: this.exportName('ApiGatewayRestApiId'),
+            description: 'App API Gateway REST API ID',
+        })
     }
 }
