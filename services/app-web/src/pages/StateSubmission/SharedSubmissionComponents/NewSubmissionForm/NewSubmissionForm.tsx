@@ -121,7 +121,7 @@ export const NewSubmission = () => {
                                         list_options={2}
                                         parent_component_heading="Contract type"
                                         radio_button_title="Health plan"
-                                        labelDescription="Submit Medicaid and CHIP managed care health plan base contracts, contract amendments, and rates."
+                                        labelDescription="Submit your Medicaid and CHIP managed care plans. This includes base contracts, amendments to base contracts, and rate certifications."
                                         tile
                                     />
                                     <FieldRadio
