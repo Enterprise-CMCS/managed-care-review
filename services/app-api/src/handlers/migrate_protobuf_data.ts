@@ -4,7 +4,6 @@
  */
 
 import type { Handler, APIGatewayProxyResultV2 } from 'aws-lambda'
-import { Prisma } from '@prisma/client'
 import { getPostgresURL } from './configuration'
 import { initTracer, recordException } from '../../../uploads/src/lib/otel'
 import { NewPrismaClient } from '../postgres'
@@ -69,7 +68,9 @@ const main: Handler = async (): Promise<APIGatewayProxyResultV2> => {
 
     try {
         console.info('Starting Protobuf to JSON migration')
-        const migrationResult = await runProtoMigration(prisma, stageName)
+        const migrationResult = await prisma.$transaction(
+            async (tx) => await runProtoMigration(tx, stageName)
+        )
 
         const result = {
             success: true,
@@ -213,7 +214,7 @@ const sanitizeDocument = ({ s3URL }: { s3URL: string }) => {
         const filename = parts[parts.length - 1]
 
         // Generate a fake bucket and key path
-        return `s3://'uploads-sanitized'/'xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx.pdf'/${filename}`
+        return `s3://uploads-sanitized/xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx.pdf/${filename}`
     }
 
     // Generate a new hash not using the file contents.
@@ -284,16 +285,23 @@ const sanitizeFromData = (
     }
 }
 
-export async function runProtoMigration(
+export const runProtoMigration = async (
     tx: PrismaTransactionType,
-    stageName: string
-): Promise<string> {
+    stageName?: string
+): Promise<string> => {
+    // get revision where formData has not been populated
     const hppRevisions = await tx.healthPlanRevisionTable.findMany({
         where: {
             formData: undefined,
         },
     })
 
+    // skip if no revisions were found
+    if (hppRevisions.length === 0) {
+        return 'Protobuf migration aborted: No revisions to migrate'
+    }
+
+    // Do the migration
     for (const revision of hppRevisions) {
         let decodedFormData = toDomain(revision.formDataProto)
 
@@ -303,7 +311,7 @@ export async function runProtoMigration(
             )
         }
 
-        const updateResult = await tx.healthPlanRevisionTable.update({
+        await tx.healthPlanRevisionTable.update({
             where: {
                 id: revision.id,
             },
@@ -315,35 +323,19 @@ export async function runProtoMigration(
                     stageName === 'val'
                         ? sanitizeFromData(decodedFormData)
                         : decodedFormData,
-                unlockedBy: revision.unlockedBy
-                    ? sanitizeEmail(revision.unlockedBy)
-                    : undefined,
-                submittedBy: revision.submittedBy
-                    ? sanitizeEmail(revision.submittedBy)
-                    : undefined,
+                unlockedBy:
+                    revision.unlockedBy && stageName === 'val'
+                        ? sanitizeEmail(revision.unlockedBy)
+                        : revision.unlockedBy,
+                submittedBy:
+                    revision.submittedBy && stageName === 'val'
+                        ? sanitizeEmail(revision.submittedBy)
+                        : revision.submittedBy,
             },
         })
-
-        if (updateResult instanceof Error) {
-            throw new Error(updateResult.message)
-        }
     }
 
-    const migratedData = await tx.healthPlanRevisionTable.findMany({
-        where: {
-            formData: {
-                not: Prisma.DbNull,
-            },
-        },
-    })
-
-    if (migratedData.length !== hppRevisions.length) {
-        throw new Error(
-            `Protobuf migration failed: ${migratedData.length}/${hppRevisions.length} revision(s) migrated.`
-        )
-    }
-
-    return `Protobuf migration successful: ${migratedData.length} of ${hppRevisions.length} revision(s) migrated`
+    return `Protobuf migration successful: ${hppRevisions.length} revision(s) migrated`
 }
 
 function fmtError(error: string): APIGatewayProxyResultV2 {
