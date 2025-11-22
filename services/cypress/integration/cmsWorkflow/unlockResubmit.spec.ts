@@ -109,7 +109,9 @@ describe('CMS user', () => {
                     name: /Review and submit/,
                 })
                 cy.findByRole('heading', {
-                    name: `Minnesota ${submissionName}`,
+                    name: new RegExp(
+                        `Minnesota Submission ID | ${submissionName}`
+                    ),
                 }).should('exist')
                 cy.findByTestId('unlockedBanner')
                     .should('exist')
@@ -328,7 +330,9 @@ describe('CMS user', () => {
                         name: /Review and submit/,
                     })
                     cy.findByRole('heading', {
-                        name: `Minnesota ${submissionName}`,
+                        name: new RegExp(
+                            `Minnesota Submission ID | ${submissionName}`
+                        ),
                     }).should('exist')
                     cy.findByTestId('unlockedBanner')
                         .should('exist')
