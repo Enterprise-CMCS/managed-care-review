@@ -50,6 +50,7 @@ model HealthPlanRevisionTable {
   createdAt       DateTime
   pkgID           String
   formDataProto   Bytes
+  formData        Json?
   submittedAt     DateTime?
   unlockedAt      DateTime?
   unlockedBy      String?
