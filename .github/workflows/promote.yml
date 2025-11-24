@@ -1,9 +1,11 @@
-name: Promote
+name: Promote (Serverless - DISABLED)
 
 on:
-  push:
-    branches:
-      - 'main'
+  # Serverless promotion DISABLED - DNS now points to CDK infrastructure
+  # push:
+  #   branches:
+  #     - 'main'
+  workflow_dispatch:
 
 # Prevent concurrent serverless deployments to main
 concurrency:
