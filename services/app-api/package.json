@@ -32,7 +32,7 @@
         "@apollo/server": "^5.0.0",
         "@as-integrations/aws-lambda": "^3.1.0",
         "@aws-sdk/client-cognito-identity-provider": "^3.936.0",
-        "@aws-sdk/client-rds": "^3.937.0",
+        "@aws-sdk/client-rds": "^3.938.0",
         "@aws-sdk/client-s3": "^3.937.0",
         "@aws-sdk/client-secrets-manager": "^3.936.0",
         "@aws-sdk/client-ses": "^3.936.0",

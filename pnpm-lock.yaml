@@ -39,8 +39,8 @@ importers:
         specifier: ^3.937.0
         version: 3.937.0
       '@aws-sdk/client-ec2':
-        specifier: ^3.937.0
-        version: 3.937.0
+        specifier: ^3.938.0
+        version: 3.938.0
       '@aws-sdk/client-secrets-manager':
         specifier: ^3.936.0
         version: 3.936.0
@@ -289,14 +289,14 @@ importers:
   scripts:
     dependencies:
       '@aws-sdk/client-cloudformation':
-        specifier: ^3.936.0
-        version: 3.936.0
+        specifier: ^3.938.0
+        version: 3.938.0
       '@aws-sdk/client-cognito-identity-provider':
         specifier: ^3.936.0
         version: 3.936.0
       '@aws-sdk/client-lambda':
-        specifier: ^3.936.0
-        version: 3.936.0
+        specifier: ^3.938.0
+        version: 3.938.0
       '@aws-sdk/client-s3':
         specifier: ^3.937.0
         version: 3.937.0
@@ -353,8 +353,8 @@ importers:
         specifier: ^3.936.0
         version: 3.936.0
       '@aws-sdk/client-rds':
-        specifier: ^3.937.0
-        version: 3.937.0
+        specifier: ^3.938.0
+        version: 3.938.0
       '@aws-sdk/client-s3':
         specifier: ^3.937.0
         version: 3.937.0
@@ -1166,8 +1166,8 @@ importers:
   services/postgres:
     dependencies:
       '@aws-sdk/client-cloudformation':
-        specifier: ^3.936.0
-        version: 3.936.0
+        specifier: ^3.938.0
+        version: 3.938.0
       '@aws-sdk/client-s3':
         specifier: ^3.937.0
         version: 3.937.0
@@ -1278,8 +1278,8 @@ importers:
   services/uploads:
     dependencies:
       '@aws-sdk/client-lambda':
-        specifier: ^3.936.0
-        version: 3.936.0
+        specifier: ^3.938.0
+        version: 3.938.0
       '@aws-sdk/client-s3':
         specifier: ^3.937.0
         version: 3.937.0
@@ -1701,8 +1701,8 @@ packages:
     resolution: {integrity: sha512-H3/Mov5fFFLCV/7Zd4ahkQe7uNpFjkY+c2KVkVLHmT/y2N5V+DXMFYlsHaQ8Bbh9b5xn0qpkqZDS/idockRRoQ==}
     engines: {node: '>=18.0.0'}
 
-  '@aws-sdk/client-cloudformation@3.936.0':
-    resolution: {integrity: sha512-4+b1LlMaCToy3RflETH6YPzqOa98ovbtjzCreSoMXTdcoiuZ/ZnunRtUeJ2TVXMRA+WVzaIc68Wes2ee75nq6Q==}
+  '@aws-sdk/client-cloudformation@3.938.0':
+    resolution: {integrity: sha512-UjJe3ncOaVaNywc+ScqbnwQX+tKnsHSPNHM42xk63hpokE6BkCkdHsodVzD+zYIFp9/brfnhQreL17gW2dJ0cg==}
     engines: {node: '>=18.0.0'}
 
   '@aws-sdk/client-cloudfront@3.937.0':
@@ -1725,8 +1725,8 @@ packages:
     resolution: {integrity: sha512-Y2ixlSTjjAp2HJhkUArtYqC/X+zG5Qqu3Bl+Ez22u4u4YnG8HsNFD6FE1axuWSdSa5AFtWTEt+Cz2Ghj/tDySA==}
     engines: {node: '>=10.0.0'}
 
-  '@aws-sdk/client-ec2@3.937.0':
-    resolution: {integrity: sha512-NBsmgFVU0hD5USAxF0NheRKQ28Q6sK+KAyJdwXlmns45gLanlri9os2MRo6mM3JjmtD5HSdnjzz0UdR8duwNhA==}
+  '@aws-sdk/client-ec2@3.938.0':
+    resolution: {integrity: sha512-Nz7d7sA9GCjyHhFuFGWdlklHeGQo8aRB6zEDg9X/VXENnDz0n4l0WYYnnQNSo78xaD5KWhbNOo5syEncGyQebA==}
     engines: {node: '>=18.0.0'}
 
   '@aws-sdk/client-firehose@3.6.1':
@@ -1737,8 +1737,8 @@ packages:
     resolution: {integrity: sha512-Ygo+92LxHeUZmiyhiHT+k7hIOhJd6S7ckCEVUsQs2rfwe9bAygUY/3cCoZSqgWy7exFRRKsjhzStcyV6i6jrVQ==}
     engines: {node: '>=10.0.0'}
 
-  '@aws-sdk/client-lambda@3.936.0':
-    resolution: {integrity: sha512-Qb8ypBPiQ9VemxzBbGhYacOP4mHMVFMc/L9tKjcNBRHaVcHmMAfwbRuGdnZUZWALneHcPfET5oESVzEPhN8CGA==}
+  '@aws-sdk/client-lambda@3.938.0':
+    resolution: {integrity: sha512-rPoKuJ5tVMDPftaDa1uFRmhsNKaPUNalg8wlecPIuERJ+FRTkAZfBaCLHuDiu6xVd0givifdmHkKP2DgRoDudA==}
     engines: {node: '>=18.0.0'}
 
   '@aws-sdk/client-lex-runtime-service@3.186.2':
@@ -1761,8 +1761,8 @@ packages:
     resolution: {integrity: sha512-y6fxVYndGS7z2KqHViPCqagBEOsZlxBUYUJZuD6WWTiQrI0Pwe5qG02oKJVaa5OmxE20QLf6bRBWj2rQpeF4IQ==}
     engines: {node: '>=10.0.0'}
 
-  '@aws-sdk/client-rds@3.937.0':
-    resolution: {integrity: sha512-9ctbPsiGawzuYCGpPMfvDP2IS0Ju/Tdb0LtV/FRqlbhjo8l4EEk8cPmxqkmJs6Bhl2sLackFHeIwmyH87bAGCA==}
+  '@aws-sdk/client-rds@3.938.0':
+    resolution: {integrity: sha512-K9nK9vLdVRBNZjWy8yUljBXrB+sJ37f3puvnsb8XnXcfRLb7YJixUwx/dUhhPWutj+Pez1nDtYgciKTDmquuqw==}
     engines: {node: '>=18.0.0'}
 
   '@aws-sdk/client-rekognition@3.6.1':
@@ -7645,8 +7645,8 @@ packages:
     resolution: {integrity: sha512-qsJ8/X+UypqxHXN75M7dF88jNK37dLBRW7LeUzCPz+TNs37G8cfWy9nWzS+LS//g600zrt2le9KuXt0rWfDz5Q==}
     hasBin: true
 
-  baseline-browser-mapping@2.8.30:
-    resolution: {integrity: sha512-aTUKW4ptQhS64+v2d6IkPzymEzzhw+G0bA1g3uBRV3+ntkH+svttKseW5IOR4Ed6NUVKqnY7qT3dKvzQ7io4AA==}
+  baseline-browser-mapping@2.8.31:
+    resolution: {integrity: sha512-a28v2eWrrRWPpJSzxc+mKwm0ZtVx/G8SepdQZDArnXYU/XS+IF6mp8aB/4E+hH1tyGCoDo3KlUCdlSxGDsRkAw==}
     hasBin: true
 
   basic-auth@2.0.1:
@@ -7712,8 +7712,8 @@ packages:
   bottleneck@2.19.5:
     resolution: {integrity: sha512-VHiNCbI1lKdl44tGrhNfU3lup0Tj/ZBMJB5/2ZbNXRCPuRCO7ed2mgcK4r17y+KB2EfuYuRaVlwNbAeaWGSpbw==}
 
-  bowser@2.12.1:
-    resolution: {integrity: sha512-z4rE2Gxh7tvshQ4hluIT7XcFrgLIQaw9X3A+kTTRdovCz5PMukm/0QC/BKSYPj3omF5Qfypn9O/c5kgpmvYUCw==}
+  bowser@2.13.0:
+    resolution: {integrity: sha512-yHAbSRuT6LTeKi6k2aS40csueHqgAsFEgmrOsfRyFpJnFv5O2hl9FYmWEUZ97gZ/dG17U4IQQcTx4YAFYPuWRQ==}
 
   boxen@7.1.1:
     resolution: {integrity: sha512-2hCgjEmP8YLWQ130n2FerGv7rYpfBmnmp9Uy2Le1vge6X3gZIfSmEzP5QTDElFxcvVcXlEn8Aq6MU/PZygIOog==}
@@ -8649,8 +8649,8 @@ packages:
   electron-to-chromium@1.5.234:
     resolution: {integrity: sha512-RXfEp2x+VRYn8jbKfQlRImzoJU01kyDvVPBmG39eU2iuRVhuS6vQNocB8J0/8GrIMLnPzgz4eW6WiRnJkTuNWg==}
 
-  electron-to-chromium@1.5.258:
-    resolution: {integrity: sha512-rHUggNV5jKQ0sSdWwlaRDkFc3/rRJIVnOSe9yR4zrR07m3ZxhP4N27Hlg8VeJGGYgFTxK5NqDmWI4DSH72vIJg==}
+  electron-to-chromium@1.5.259:
+    resolution: {integrity: sha512-I+oLXgpEJzD6Cwuwt1gYjxsDmu/S/Kd41mmLA3O+/uH2pFRO/DvOjUyGozL8j3KeLV6WyZ7ssPwELMsXCcsJAQ==}
 
   element-closest@2.0.2:
     resolution: {integrity: sha512-QCqAWP3kwj8Gz9UXncVXQGdrhnWxD8SQBSeZp5pOsyCcQ6RpL738L1/tfuwBiMi6F1fYkxqPnBrFBR4L+f49Cg==}
@@ -14853,7 +14853,7 @@ snapshots:
     transitivePeerDependencies:
       - aws-crt
 
-  '@aws-sdk/client-cloudformation@3.936.0':
+  '@aws-sdk/client-cloudformation@3.938.0':
     dependencies:
       '@aws-crypto/sha256-browser': 5.2.0
       '@aws-crypto/sha256-js': 5.2.0
@@ -15105,7 +15105,7 @@ snapshots:
     transitivePeerDependencies:
       - react-native
 
-  '@aws-sdk/client-ec2@3.937.0':
+  '@aws-sdk/client-ec2@3.938.0':
     dependencies:
       '@aws-crypto/sha256-browser': 5.2.0
       '@aws-crypto/sha256-js': 5.2.0
@@ -15227,7 +15227,7 @@ snapshots:
     transitivePeerDependencies:
       - react-native
 
-  '@aws-sdk/client-lambda@3.936.0':
+  '@aws-sdk/client-lambda@3.938.0':
     dependencies:
       '@aws-crypto/sha256-browser': 5.2.0
       '@aws-crypto/sha256-js': 5.2.0
@@ -15470,7 +15470,7 @@ snapshots:
     transitivePeerDependencies:
       - react-native
 
-  '@aws-sdk/client-rds@3.937.0':
+  '@aws-sdk/client-rds@3.938.0':
     dependencies:
       '@aws-crypto/sha256-browser': 5.2.0
       '@aws-crypto/sha256-js': 5.2.0
@@ -16976,7 +16976,7 @@ snapshots:
     dependencies:
       '@aws-sdk/property-provider': 3.186.0
       '@aws-sdk/types': 3.186.0
-      bowser: 2.12.1
+      bowser: 2.13.0
       tslib: 2.8.1
 
   '@aws-sdk/util-defaults-mode-node@3.186.0':
@@ -17036,20 +17036,20 @@ snapshots:
   '@aws-sdk/util-user-agent-browser@3.186.0':
     dependencies:
       '@aws-sdk/types': 3.186.0
-      bowser: 2.12.1
+      bowser: 2.13.0
       tslib: 2.8.1
 
   '@aws-sdk/util-user-agent-browser@3.6.1':
     dependencies:
       '@aws-sdk/types': 3.6.1
-      bowser: 2.12.1
+      bowser: 2.13.0
       tslib: 1.14.1
 
   '@aws-sdk/util-user-agent-browser@3.936.0':
     dependencies:
       '@aws-sdk/types': 3.936.0
       '@smithy/types': 4.9.0
-      bowser: 2.12.1
+      bowser: 2.13.0
       tslib: 2.8.1
 
   '@aws-sdk/util-user-agent-node@3.186.0':
@@ -23841,7 +23841,7 @@ snapshots:
 
   baseline-browser-mapping@2.8.15: {}
 
-  baseline-browser-mapping@2.8.30: {}
+  baseline-browser-mapping@2.8.31: {}
 
   basic-auth@2.0.1:
     dependencies:
@@ -23929,7 +23929,7 @@ snapshots:
 
   bottleneck@2.19.5: {}
 
-  bowser@2.12.1: {}
+  bowser@2.13.0: {}
 
   boxen@7.1.1:
     dependencies:
@@ -23965,9 +23965,9 @@ snapshots:
 
   browserslist@4.28.0:
     dependencies:
-      baseline-browser-mapping: 2.8.30
+      baseline-browser-mapping: 2.8.31
       caniuse-lite: 1.0.30001756
-      electron-to-chromium: 1.5.258
+      electron-to-chromium: 1.5.259
       node-releases: 2.0.27
       update-browserslist-db: 1.1.4(browserslist@4.28.0)
 
@@ -24925,7 +24925,7 @@ snapshots:
 
   electron-to-chromium@1.5.234: {}
 
-  electron-to-chromium@1.5.258: {}
+  electron-to-chromium@1.5.259: {}
 
   element-closest@2.0.2: {}
 
@@ -29792,7 +29792,7 @@ snapshots:
 
   serverless-offline@13.9.0(serverless@4.2.3):
     dependencies:
-      '@aws-sdk/client-lambda': 3.936.0
+      '@aws-sdk/client-lambda': 3.938.0
       '@hapi/boom': 10.0.1
       '@hapi/h2o2': 10.0.4
       '@hapi/hapi': 21.3.12
@@ -29823,7 +29823,7 @@ snapshots:
 
   serverless-offline@14.4.0(serverless@4.2.3):
     dependencies:
-      '@aws-sdk/client-lambda': 3.936.0
+      '@aws-sdk/client-lambda': 3.938.0
       '@hapi/boom': 10.0.1
       '@hapi/h2o2': 10.0.4
       '@hapi/hapi': 21.3.12
