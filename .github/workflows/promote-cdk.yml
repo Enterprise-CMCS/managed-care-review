@@ -28,7 +28,7 @@ jobs:
       deploy-id: ${{ steps.ghdeployment.outputs.deployment_id }}
     steps:
       - name: Check out repository
-        uses: actions/checkout@v5
+        uses: actions/checkout@v6
 
       - name: Check for secrets
         uses: ./.github/actions/check_secrets
@@ -56,7 +56,7 @@ jobs:
     runs-on: ubuntu-24.04
     steps:
       - name: Check out repository
-        uses: actions/checkout@v5
+        uses: actions/checkout@v6
 
       - name: Setup env
         uses: ./.github/actions/setup_env
@@ -117,7 +117,7 @@ jobs:
 
     steps:
       - name: Check out repository
-        uses: actions/checkout@v5
+        uses: actions/checkout@v6
 
       - name: Setup env
         uses: ./.github/actions/setup_env
@@ -163,7 +163,7 @@ jobs:
     runs-on: ubuntu-24.04
     steps:
       - name: Check out repository
-        uses: actions/checkout@v5
+        uses: actions/checkout@v6
 
       - name: Setup env
         uses: ./.github/actions/setup_env
@@ -210,7 +210,7 @@ jobs:
       name: dev
     steps:
       - name: Check out repository
-        uses: actions/checkout@v5
+        uses: actions/checkout@v6
 
       - name: Setup env
         uses: ./.github/actions/setup_env
@@ -256,7 +256,7 @@ jobs:
     environment: dev
     steps:
       - name: Check out repository
-        uses: actions/checkout@v5
+        uses: actions/checkout@v6
 
       - name: Setup env
         uses: ./.github/actions/setup_env
@@ -387,7 +387,7 @@ jobs:
     environment: dev
     steps:
       - name: Check out repository
-        uses: actions/checkout@v5
+        uses: actions/checkout@v6
 
       - name: Setup env
         uses: ./.github/actions/setup_env
@@ -472,7 +472,7 @@ jobs:
     environment: dev
     steps:
       - name: Check out repository
-        uses: actions/checkout@v5
+        uses: actions/checkout@v6
 
       - name: Setup env
         uses: ./.github/actions/setup_env
@@ -559,7 +559,7 @@ jobs:
     permissions:
       deployments: write
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v6
 
       - name: Update deployment status (failure)
         if: failure() && needs.begin-deployment.result == 'success'
@@ -589,7 +589,7 @@ jobs:
       name: val
     steps:
       - name: Check out repository
-        uses: actions/checkout@v5
+        uses: actions/checkout@v6
 
       - name: Setup env
         uses: ./.github/actions/setup_env
@@ -634,7 +634,7 @@ jobs:
     environment: val
     steps:
       - name: Check out repository
-        uses: actions/checkout@v5
+        uses: actions/checkout@v6
 
       - name: Setup env
         uses: ./.github/actions/setup_env
@@ -765,7 +765,7 @@ jobs:
     environment: val
     steps:
       - name: Check out repository
-        uses: actions/checkout@v5
+        uses: actions/checkout@v6
 
       - name: Setup env
         uses: ./.github/actions/setup_env
@@ -857,7 +857,7 @@ jobs:
     environment: val
     steps:
       - name: Check out repository
-        uses: actions/checkout@v5
+        uses: actions/checkout@v6
 
       - name: Setup env
         uses: ./.github/actions/setup_env
@@ -929,7 +929,7 @@ jobs:
     permissions:
       deployments: write
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v6
 
       - name: Update deployment status (failure)
         if: failure() && needs.begin-deployment.result == 'success'
@@ -959,7 +959,7 @@ jobs:
       name: prod
     steps:
       - name: Check out repository
-        uses: actions/checkout@v5
+        uses: actions/checkout@v6
 
       - name: Setup env
         uses: ./.github/actions/setup_env
@@ -1004,7 +1004,7 @@ jobs:
     environment: prod
     steps:
       - name: Check out repository
-        uses: actions/checkout@v5
+        uses: actions/checkout@v6
 
       - name: Setup env
         uses: ./.github/actions/setup_env
@@ -1135,7 +1135,7 @@ jobs:
     environment: prod
     steps:
       - name: Check out repository
-        uses: actions/checkout@v5
+        uses: actions/checkout@v6
 
       - name: Setup env
         uses: ./.github/actions/setup_env
@@ -1227,7 +1227,7 @@ jobs:
     environment: prod
     steps:
       - name: Check out repository
-        uses: actions/checkout@v5
+        uses: actions/checkout@v6
 
       - name: Setup env
         uses: ./.github/actions/setup_env
@@ -1304,7 +1304,7 @@ jobs:
     outputs:
       application-endpoint: ${{ steps.save-app-endpoint.outputs.app-endpoint }}
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v6
 
       - name: Get AWS credentials
         uses: ./.github/actions/get_aws_credentials
@@ -1344,7 +1344,7 @@ jobs:
       id-token: write
       contents: read
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v6
 
       - name: Generate unique ID for Cypress
         id: uuid
@@ -1420,7 +1420,7 @@ jobs:
     permissions:
       deployments: write
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v6
 
       - name: Update deployment status (failure)
         if: failure() && needs.begin-deployment.result == 'success'
