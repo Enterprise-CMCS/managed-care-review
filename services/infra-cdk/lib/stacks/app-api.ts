@@ -65,6 +65,9 @@ export class AppApiStack extends BaseStack {
     // Shared OTEL layer for all functions
     private readonly otelLayer: ILayerVersion
 
+    // Shared Prisma engine layer for database access (used by graphql and oauth-token functions)
+    private prismaEngineLayer!: LayerVersion
+
     constructor(scope: Construct, id: string, props: BaseStackProps) {
         super(scope, id, {
             ...props,
@@ -215,17 +218,13 @@ export class AppApiStack extends BaseStack {
             }
         )
 
-        this.oauthTokenFunction = this.createFunction(
-            'oauth-token',
-            'oauth_token',
-            'main',
-            {
-                timeout: Duration.seconds(30),
-                memorySize: 1024,
-                environment,
-                role: lambdaRole,
-                layers: [this.otelLayer],
-            }
+        // Create shared Prisma engine layer (used by graphql and oauth-token functions)
+        this.prismaEngineLayer = this.createPrismaEngineLayer()
+
+        // Create oauth-token function with VPC access for database connectivity
+        this.oauthTokenFunction = this.createOauthTokenFunction(
+            lambdaRole,
+            environment
         )
 
         this.cleanupFunction = this.createFunction(
@@ -359,6 +358,27 @@ export class AppApiStack extends BaseStack {
                 this.getOtelBundlingCommands(),
             ]),
             ...options,
+        })
+    }
+
+    /**
+     * Create shared Prisma engine layer for database access
+     * Used by both graphql and oauth-token functions
+     */
+    private createPrismaEngineLayer(): LayerVersion {
+        return new LayerVersion(this, 'PrismaEngineLayer', {
+            layerVersionName: `${ResourceNames.apiName('app-api', this.stage)}-prisma-engine`,
+            description: 'Prisma engine layer for app-api',
+            compatibleRuntimes: [Runtime.NODEJS_20_X],
+            compatibleArchitectures: [Architecture.X86_64],
+            code: Code.fromAsset(
+                path.join(
+                    __dirname,
+                    '..',
+                    '..',
+                    'lambda-layers-prisma-client-engine'
+                )
+            ),
         })
     }
 
@@ -497,21 +517,6 @@ export class AppApiStack extends BaseStack {
             process.env.SG_ID!
         )
 
-        const prismaEngineLayer = new LayerVersion(this, 'PrismaEngineLayer', {
-            layerVersionName: `${ResourceNames.apiName('app-api', this.stage)}-prisma-engine`,
-            description: 'Prisma engine layer for app-api',
-            compatibleRuntimes: [Runtime.NODEJS_20_X],
-            compatibleArchitectures: [Architecture.X86_64],
-            code: Code.fromAsset(
-                path.join(
-                    __dirname,
-                    '..',
-                    '..',
-                    'lambda-layers-prisma-client-engine'
-                )
-            ),
-        })
-
         // Create GraphQL function with all required configuration
         const graphqlFunction = new NodejsFunction(this, 'graphqlFunction', {
             functionName: `${ResourceNames.apiName('app-api', this.stage)}-graphql`,
@@ -532,7 +537,7 @@ export class AppApiStack extends BaseStack {
             memorySize: 1024,
             environment,
             role,
-            layers: [prismaEngineLayer, this.otelLayer],
+            layers: [this.prismaEngineLayer, this.otelLayer],
             vpc,
             vpcSubnets: {
                 subnetType: SubnetType.PRIVATE_WITH_EGRESS,
@@ -561,6 +566,69 @@ export class AppApiStack extends BaseStack {
         })
 
         return graphqlFunction
+    }
+
+    /**
+     * Create the OAuth token function with VPC and Prisma layer
+     * OAuth token endpoint needs database access to look up OAuth clients
+     */
+    private createOauthTokenFunction(
+        role: Role,
+        environment: Record<string, string>
+    ): NodejsFunction {
+        // Validate required environment variables for VPC configuration
+        const required = ['VPC_ID', 'SG_ID']
+        const missing = required.filter((envVar) => !process.env[envVar])
+        if (missing.length > 0) {
+            throw new Error(
+                `Missing required environment variables for OAuth token function: ${missing.join(', ')}`
+            )
+        }
+
+        // Import VPC and security group
+        const vpc = Vpc.fromLookup(this, 'OauthTokenVpc', {
+            vpcId: process.env.VPC_ID!,
+        })
+        const lambdaSecurityGroup = SecurityGroup.fromSecurityGroupId(
+            this,
+            'OauthTokenSecurityGroup',
+            process.env.SG_ID!
+        )
+
+        return new NodejsFunction(this, 'oauthTokenFunction', {
+            functionName: `${ResourceNames.apiName('app-api', this.stage)}-oauth-token`,
+            runtime: Runtime.NODEJS_20_X,
+            architecture: Architecture.X86_64,
+            handler: 'main',
+            entry: path.join(
+                __dirname,
+                '..',
+                '..',
+                '..',
+                'app-api',
+                'src',
+                'handlers',
+                'oauth_token.ts'
+            ),
+            timeout: Duration.seconds(30),
+            memorySize: 1024,
+            environment,
+            role,
+            layers: [this.prismaEngineLayer, this.otelLayer],
+            vpc,
+            vpcSubnets: {
+                subnetType: SubnetType.PRIVATE_WITH_EGRESS,
+            },
+            securityGroups: [lambdaSecurityGroup],
+            bundling: {
+                format: OutputFormat.ESM,
+                banner: AppApiStack.ESM_BANNER,
+                externalModules: ['prisma', '@prisma/client'],
+                ...this.createBundling('oauth_token', [
+                    this.getOtelBundlingCommands(),
+                ]),
+            },
+        })
     }
 
     private createLambdaRole(): Role {

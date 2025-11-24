@@ -311,7 +311,8 @@ function handler(event) {
         })
 
         new CfnOutput(this, 'CloudFrontEndpointUrl', {
-            value: this.applicationUrl,
+            // Always export the CloudFront domain (not custom domain) to maintain stable exports
+            value: `https://${this.distribution.distributionDomainName}`,
             exportName: this.exportName('CloudFrontEndpointUrl'),
             description: 'CloudFront URL for React app',
         })
@@ -330,7 +331,8 @@ function handler(event) {
         })
 
         new CfnOutput(this, 'StorybookCloudFrontEndpointUrl', {
-            value: this.storybookUrl,
+            // Always export the CloudFront domain (not custom domain) to maintain stable exports
+            value: `https://${this.storybookDistribution.distributionDomainName}`,
             exportName: this.exportName('StorybookCloudFrontEndpointUrl'),
             description: 'CloudFront URL for Storybook',
         })
