@@ -343,11 +343,9 @@ jobs:
         working-directory: services/infra-cdk
         env:
           STAGE_NAME: dev
-          # Temporarily deploy without custom domain to avoid conflict with Serverless CloudFront
-          # Will add these back after Serverless is decommissioned:
-          # CLOUDFRONT_CERT_ARN: ${{ secrets.DEV_CERTIFICATE_ARN }}
-          # CLOUDFRONT_DOMAIN_NAME: ${{ secrets.DEV_CLOUDFRONT_DOMAIN_NAME }}
-          # CLOUDFRONT_SB_DOMAIN_NAME: ${{ secrets.DEV_CLOUDFRONT_SB_DOMAIN_NAME }}
+          CLOUDFRONT_CERT_ARN: ${{ secrets.DEV_CERTIFICATE_ARN }}
+          CLOUDFRONT_DOMAIN_NAME: ${{ secrets.DEV_CLOUDFRONT_DOMAIN_NAME }}
+          CLOUDFRONT_SB_DOMAIN_NAME: ${{ secrets.DEV_CLOUDFRONT_SB_DOMAIN_NAME }}
         run: |
           echo "=== Deploying Frontend Infrastructure stack ==="
           pnpm cdk deploy frontend-infra-dev-cdk \
@@ -721,11 +719,9 @@ jobs:
         working-directory: services/infra-cdk
         env:
           STAGE_NAME: val
-          # Temporarily deploy without custom domain to avoid conflict with Serverless CloudFront
-          # Will add these back after Serverless is decommissioned:
-          # CLOUDFRONT_CERT_ARN: ${{ secrets.VAL_CERTIFICATE_ARN }}
-          # CLOUDFRONT_DOMAIN_NAME: ${{ secrets.VAL_CLOUDFRONT_DOMAIN_NAME }}
-          # CLOUDFRONT_SB_DOMAIN_NAME: ${{ secrets.VAL_CLOUDFRONT_SB_DOMAIN_NAME }}
+          CLOUDFRONT_CERT_ARN: ${{ secrets.VAL_CERTIFICATE_ARN }}
+          CLOUDFRONT_DOMAIN_NAME: ${{ secrets.VAL_CLOUDFRONT_DOMAIN_NAME }}
+          CLOUDFRONT_SB_DOMAIN_NAME: ${{ secrets.VAL_CLOUDFRONT_SB_DOMAIN_NAME }}
         run: |
           echo "=== Deploying Frontend Infrastructure stack ==="
           pnpm cdk deploy frontend-infra-val-cdk \
@@ -1091,11 +1087,9 @@ jobs:
         working-directory: services/infra-cdk
         env:
           STAGE_NAME: prod
-          # Temporarily deploy without custom domain to avoid conflict with Serverless CloudFront
-          # Will add these back after Serverless is decommissioned:
-          # CLOUDFRONT_CERT_ARN: ${{ secrets.PROD_CERTIFICATE_ARN }}
-          # CLOUDFRONT_DOMAIN_NAME: ${{ secrets.PROD_CLOUDFRONT_DOMAIN_NAME }}
-          # CLOUDFRONT_SB_DOMAIN_NAME: ${{ secrets.PROD_CLOUDFRONT_SB_DOMAIN_NAME }}
+          CLOUDFRONT_CERT_ARN: ${{ secrets.PROD_CERTIFICATE_ARN }}
+          CLOUDFRONT_DOMAIN_NAME: ${{ secrets.PROD_CLOUDFRONT_DOMAIN_NAME }}
+          CLOUDFRONT_SB_DOMAIN_NAME: ${{ secrets.PROD_CLOUDFRONT_SB_DOMAIN_NAME }}
         run: |
           echo "=== Deploying Frontend Infrastructure stack ==="
           pnpm cdk deploy frontend-infra-prod-cdk \
