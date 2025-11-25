@@ -153,7 +153,7 @@ export class AppApiStack extends BaseStack {
         // Create shared Prisma engine layer for functions that need database access
         this.prismaEngineLayer = new LayerVersion(this, 'PrismaEngineLayer', {
             layerVersionName: `${ResourceNames.apiName('app-api', this.stage)}-prisma-engine`,
-            description: 'Prisma engine layer for app-api runtime operations',
+            description: 'Prisma engine layer for app-api',
             compatibleRuntimes: [Runtime.NODEJS_20_X],
             compatibleArchitectures: [Architecture.X86_64],
             code: Code.fromAsset(
@@ -590,7 +590,7 @@ export class AppApiStack extends BaseStack {
         // Create OAuth token function with all required configuration
         const oauthTokenFunction = new NodejsFunction(
             this,
-            'oauthTokenFunction',
+            'oauth-tokenFunction',
             {
                 functionName: `${ResourceNames.apiName('app-api', this.stage)}-oauth-token`,
                 runtime: Runtime.NODEJS_20_X,
