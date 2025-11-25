@@ -65,9 +65,6 @@ export class AppApiStack extends BaseStack {
     // Shared OTEL layer for all functions
     private readonly otelLayer: ILayerVersion
 
-    // Shared Prisma engine layer for database access (used by graphql and oauth-token functions)
-    private prismaEngineLayer!: LayerVersion
-
     constructor(scope: Construct, id: string, props: BaseStackProps) {
         super(scope, id, {
             ...props,
@@ -218,9 +215,6 @@ export class AppApiStack extends BaseStack {
             }
         )
 
-        // Create shared Prisma engine layer (used by graphql and oauth-token functions)
-        this.prismaEngineLayer = this.createPrismaEngineLayer()
-
         // Create oauth-token function with VPC access for database connectivity
         this.oauthTokenFunction = this.createOauthTokenFunction(
             lambdaRole,
@@ -362,27 +356,6 @@ export class AppApiStack extends BaseStack {
     }
 
     /**
-     * Create shared Prisma engine layer for database access
-     * Used by both graphql and oauth-token functions
-     */
-    private createPrismaEngineLayer(): LayerVersion {
-        return new LayerVersion(this, 'PrismaEngineLayer', {
-            layerVersionName: `${ResourceNames.apiName('app-api', this.stage)}-prisma-engine`,
-            description: 'Prisma engine layer for app-api',
-            compatibleRuntimes: [Runtime.NODEJS_20_X],
-            compatibleArchitectures: [Architecture.X86_64],
-            code: Code.fromAsset(
-                path.join(
-                    __dirname,
-                    '..',
-                    '..',
-                    'lambda-layers-prisma-client-engine'
-                )
-            ),
-        })
-    }
-
-    /**
      * Create the migrate function with VPC, layers, and extended permissions
      */
     private createMigrateFunction(
@@ -517,6 +490,25 @@ export class AppApiStack extends BaseStack {
             process.env.SG_ID!
         )
 
+        const prismaEngineLayer = new LayerVersion(
+            this,
+            'GraphqlPrismaEngineLayer',
+            {
+                layerVersionName: `${ResourceNames.apiName('app-api', this.stage)}-prisma-engine-graphql`,
+                description: 'Prisma engine layer for GraphQL function',
+                compatibleRuntimes: [Runtime.NODEJS_20_X],
+                compatibleArchitectures: [Architecture.X86_64],
+                code: Code.fromAsset(
+                    path.join(
+                        __dirname,
+                        '..',
+                        '..',
+                        'lambda-layers-prisma-client-engine'
+                    )
+                ),
+            }
+        )
+
         // Create GraphQL function with all required configuration
         const graphqlFunction = new NodejsFunction(this, 'graphqlFunction', {
             functionName: `${ResourceNames.apiName('app-api', this.stage)}-graphql`,
@@ -537,7 +529,7 @@ export class AppApiStack extends BaseStack {
             memorySize: 1024,
             environment,
             role,
-            layers: [this.prismaEngineLayer, this.otelLayer],
+            layers: [prismaEngineLayer, this.otelLayer],
             vpc,
             vpcSubnets: {
                 subnetType: SubnetType.PRIVATE_WITH_EGRESS,
@@ -595,6 +587,25 @@ export class AppApiStack extends BaseStack {
             process.env.SG_ID!
         )
 
+        const prismaEngineLayer = new LayerVersion(
+            this,
+            'OauthPrismaEngineLayer',
+            {
+                layerVersionName: `${ResourceNames.apiName('app-api', this.stage)}-prisma-engine-oauth`,
+                description: 'Prisma engine layer for OAuth token function',
+                compatibleRuntimes: [Runtime.NODEJS_20_X],
+                compatibleArchitectures: [Architecture.X86_64],
+                code: Code.fromAsset(
+                    path.join(
+                        __dirname,
+                        '..',
+                        '..',
+                        'lambda-layers-prisma-client-engine'
+                    )
+                ),
+            }
+        )
+
         return new NodejsFunction(this, 'oauthTokenFunction', {
             functionName: `${ResourceNames.apiName('app-api', this.stage)}-oauth-token`,
             runtime: Runtime.NODEJS_20_X,
@@ -614,7 +625,7 @@ export class AppApiStack extends BaseStack {
             memorySize: 1024,
             environment,
             role,
-            layers: [this.prismaEngineLayer, this.otelLayer],
+            layers: [prismaEngineLayer, this.otelLayer],
             vpc,
             vpcSubnets: {
                 subnetType: SubnetType.PRIVATE_WITH_EGRESS,
