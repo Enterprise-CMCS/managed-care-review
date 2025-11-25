@@ -286,9 +286,10 @@ export class AppApiStack extends BaseStack {
     ) => string[] {
         return (outputDir: string, appApiPath: string) => [
             // Copy collector.yml for OTEL configuration
-            `cp ${appApiPath}/collector.yml ${outputDir}/collector.yml || echo "collector.yml not found at ${appApiPath}/collector.yml"`,
+            `cp "${appApiPath}/collector.yml" "${outputDir}/collector.yml" || echo "collector.yml not found at ${appApiPath}/collector.yml"`,
             // Replace license key placeholder with actual value (matches esbuild behavior)
-            `sed -i 's/\\$NR_LICENSE_KEY/${process.env.NR_LICENSE_KEY || ''}/g' "${outputDir}/collector.yml"`,
+            // Use sed that works on both macOS and Linux
+            `sed -i.bak 's/\\$NR_LICENSE_KEY/${process.env.NR_LICENSE_KEY || ''}/g' "${outputDir}/collector.yml" && rm -f "${outputDir}/collector.yml.bak"`,
         ]
     }
 
@@ -301,8 +302,8 @@ export class AppApiStack extends BaseStack {
     ) => string[] {
         return (outputDir: string, appApiPath: string) => [
             // Copy eta templates for email functionality to correct location
-            `mkdir -p ${outputDir}/etaTemplates || true`,
-            `cp -r ${appApiPath}/src/emailer/etaTemplates/* ${outputDir}/etaTemplates/ || echo "etaTemplates not found at ${appApiPath}/src/emailer/etaTemplates/"`,
+            `mkdir -p "${outputDir}/etaTemplates" || true`,
+            `cp -r "${appApiPath}/src/emailer/etaTemplates"/* "${outputDir}/etaTemplates/" || echo "etaTemplates not found at ${appApiPath}/src/emailer/etaTemplates/"`,
         ]
     }
 
@@ -331,9 +332,8 @@ export class AppApiStack extends BaseStack {
                     return []
                 },
                 afterBundling(inputDir: string, outputDir: string): string[] {
-                    const repoRoot =
-                        '/home/runner/work/managed-care-review/managed-care-review'
-                    const appApiPath = `${repoRoot}/services/app-api`
+                    // inputDir is the repo root (works in both CI and local)
+                    const appApiPath = `${inputDir}/services/app-api`
 
                     // Execute all bundling steps and flatten the results
                     return bundlingSteps.flatMap((step) =>
