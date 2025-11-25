@@ -490,20 +490,24 @@ export class AppApiStack extends BaseStack {
             process.env.SG_ID!
         )
 
-        const prismaEngineLayer = new LayerVersion(this, 'PrismaEngineLayer', {
-            layerVersionName: `${ResourceNames.apiName('app-api', this.stage)}-prisma-engine`,
-            description: 'Prisma engine layer for app-api',
-            compatibleRuntimes: [Runtime.NODEJS_20_X],
-            compatibleArchitectures: [Architecture.X86_64],
-            code: Code.fromAsset(
-                path.join(
-                    __dirname,
-                    '..',
-                    '..',
-                    'lambda-layers-prisma-client-engine'
-                )
-            ),
-        })
+        const prismaEngineLayer = new LayerVersion(
+            this,
+            'GraphqlPrismaEngineLayer',
+            {
+                layerVersionName: `${ResourceNames.apiName('app-api', this.stage)}-prisma-engine-graphql`,
+                description: 'Prisma engine layer for GraphQL function',
+                compatibleRuntimes: [Runtime.NODEJS_20_X],
+                compatibleArchitectures: [Architecture.X86_64],
+                code: Code.fromAsset(
+                    path.join(
+                        __dirname,
+                        '..',
+                        '..',
+                        'lambda-layers-prisma-client-engine'
+                    )
+                ),
+            }
+        )
 
         // Create GraphQL function with all required configuration
         const graphqlFunction = new NodejsFunction(this, 'graphqlFunction', {
@@ -583,20 +587,24 @@ export class AppApiStack extends BaseStack {
             process.env.SG_ID!
         )
 
-        const prismaEngineLayer = new LayerVersion(this, 'PrismaEngineLayer', {
-            layerVersionName: `${ResourceNames.apiName('app-api', this.stage)}-prisma-engine`,
-            description: 'Prisma engine layer for app-api',
-            compatibleRuntimes: [Runtime.NODEJS_20_X],
-            compatibleArchitectures: [Architecture.X86_64],
-            code: Code.fromAsset(
-                path.join(
-                    __dirname,
-                    '..',
-                    '..',
-                    'lambda-layers-prisma-client-engine'
-                )
-            ),
-        })
+        const prismaEngineLayer = new LayerVersion(
+            this,
+            'OauthPrismaEngineLayer',
+            {
+                layerVersionName: `${ResourceNames.apiName('app-api', this.stage)}-prisma-engine-oauth`,
+                description: 'Prisma engine layer for OAuth token function',
+                compatibleRuntimes: [Runtime.NODEJS_20_X],
+                compatibleArchitectures: [Architecture.X86_64],
+                code: Code.fromAsset(
+                    path.join(
+                        __dirname,
+                        '..',
+                        '..',
+                        'lambda-layers-prisma-client-engine'
+                    )
+                ),
+            }
+        )
 
         return new NodejsFunction(this, 'oauthTokenFunction', {
             functionName: `${ResourceNames.apiName('app-api', this.stage)}-oauth-token`,
