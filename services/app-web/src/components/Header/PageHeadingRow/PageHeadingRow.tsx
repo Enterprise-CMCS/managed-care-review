@@ -19,8 +19,35 @@ import {
     hasCMSUserPermissions,
 } from '@mc-review/helpers'
 
+const SharedSubHeadingRow = ({
+    submissionID,
+}: {
+    submissionID: string | React.ReactElement
+}) => {
+    return (
+        <span className={styles.submissionIdLine} data-testid="submission-id">
+            <span className={styles.submissionIdLineLabel}>Submission ID</span>
+            <span className={styles.submissionIdLineDivider} aria-hidden="true">
+                |
+            </span>
+            <span className={styles.submissionIdLineValue}>{submissionID}</span>
+        </span>
+    )
+}
+const EntityType = ({ entityType }: { entityType: 'EQRO' | 'Health plan' }) => {
+    return (
+        <div className={styles.entityTypeContainer} data-testid="entityType">
+            <div className={styles.entityTypeDivider} aria-hidden="true" />
+            <div className={styles.entityTypeText}>
+                <span className={styles.entityTypeLabel}>Entity type</span>
+                <span className={styles.entityTypeValue}>{entityType}</span>
+            </div>
+        </div>
+    )
+}
 const CMSUserRow = ({
     heading,
+    pathname,
 }: {
     user:
         | CmsUser
@@ -29,23 +56,40 @@ const CMSUserRow = ({
         | BusinessOwnerUser
         | CmsApproverUser
     heading?: string | React.ReactElement
+    pathname?: string
 }) => {
+    const hideSubID =
+        pathname?.includes('dashboard') || pathname?.includes('new')
+    const entityType = pathname?.includes('eqro') ? 'EQRO' : 'Health plan'
     return (
         <div className={styles.dashboardHeading}>
             <GridContainer>
-                <Grid row className="flex-align-center">
-                    <PageHeading>
-                        <span>CMS</span>
-                        {heading && (
-                            <span
-                                className="font-heading-lg text-light"
-                                data-testid="submission-name"
-                            >
-                                {heading}
-                            </span>
-                        )}
-                    </PageHeading>
-                </Grid>
+                {hideSubID ? (
+                    <Grid row className="flex-align-center">
+                        <PageHeading>
+                            <span>CMS</span>
+                            {heading && (
+                                <span
+                                    className="font-heading-lg text-light"
+                                    data-testid="submission-name"
+                                >
+                                    {heading}
+                                </span>
+                            )}
+                        </PageHeading>
+                    </Grid>
+                ) : (
+                    <Grid row className={`flex-align-center ${styles.cmsRow}`}>
+                        <PageHeading>
+                            <span className={styles.stateHeadingText}>CMS</span>
+
+                            {heading && (
+                                <SharedSubHeadingRow submissionID={heading} />
+                            )}
+                        </PageHeading>
+                        <EntityType entityType={entityType} />
+                    </Grid>
+                )}
             </GridContainer>
         </div>
     )
@@ -54,33 +98,67 @@ const CMSUserRow = ({
 const StateUserRow = ({
     user,
     heading,
+    pathname,
 }: {
     user: StateUser
     heading?: string | React.ReactElement
+    pathname?: string
 }) => {
+    const hideSubID =
+        pathname?.includes('dashboard') || pathname?.includes('new')
+    const entityType = pathname?.includes('eqro') ? 'EQRO' : 'Health plan'
+
     return (
         <div className={styles.dashboardHeading}>
             <GridContainer>
-                <Grid row className="flex-align-center">
-                    <div>
-                        <StateIcon
-                            code={user.state.code as StateIconProps['code']}
-                        />
-                        <span>{user.state.name}&nbsp;</span>
-                    </div>
-                    <PageHeading>
-                        {/* Have to have state name here but screen reader only to make page heading announce as expected */}
-                        <span className="srOnly">{user.state.name}&nbsp;</span>
-                        {heading && (
-                            <span
-                                className="font-heading-lg text-light"
-                                data-testid="submission-name"
-                            >
-                                {heading}
+                {hideSubID ? (
+                    <Grid row className="flex-align-center">
+                        <div>
+                            <StateIcon
+                                code={user.state.code as StateIconProps['code']}
+                            />
+                            <span>{user.state.name}&nbsp;</span>
+                        </div>
+                        <PageHeading>
+                            <span className="srOnly">
+                                {user.state.name}&nbsp;
                             </span>
-                        )}
-                    </PageHeading>
-                </Grid>
+                            {heading && (
+                                <span
+                                    className="font-heading-lg text-light"
+                                    data-testid="submission-name"
+                                >
+                                    {heading}
+                                </span>
+                            )}
+                        </PageHeading>
+                    </Grid>
+                ) : (
+                    <Grid
+                        row
+                        className={`flex-align-center ${styles.stateRow}`}
+                    >
+                        <div>
+                            <StateIcon
+                                code={user.state.code as StateIconProps['code']}
+                            />
+                        </div>
+                        <PageHeading>
+                            <span className="srOnly">
+                                {user.state.name}&nbsp;
+                            </span>
+
+                            <span className={styles.stateHeadingText}>
+                                {user.state.name}&nbsp;
+                            </span>
+
+                            {heading && (
+                                <SharedSubHeadingRow submissionID={heading} />
+                            )}
+                        </PageHeading>
+                        <EntityType entityType={entityType} />
+                    </Grid>
+                )}
             </GridContainer>
         </div>
     )
@@ -113,12 +191,14 @@ type PageHeadingProps = {
     loggedInUser?: User
     heading?: string | React.ReactElement
     route?: string
+    pathname?: string
 }
 
 export const PageHeadingRow = ({
     isLoading = false,
     heading,
     route,
+    pathname,
     loggedInUser,
 }: PageHeadingProps): React.ReactElement | null => {
     if (!loggedInUser) {
@@ -133,9 +213,21 @@ export const PageHeadingRow = ({
         hasCMSUserPermissions(loggedInUser) ||
         hasAdminUserPermissions(loggedInUser)
     ) {
-        return <CMSUserRow user={loggedInUser} heading={heading} />
+        return (
+            <CMSUserRow
+                user={loggedInUser}
+                heading={heading}
+                pathname={pathname}
+            />
+        )
     } else if (loggedInUser.__typename === 'StateUser') {
-        return <StateUserRow user={loggedInUser} heading={heading} />
+        return (
+            <StateUserRow
+                user={loggedInUser}
+                heading={heading}
+                pathname={pathname}
+            />
+        )
     } else {
         return <h1>{`Programming Error: Unkown User Type: ${loggedInUser}`}</h1>
     }
