@@ -122,10 +122,10 @@ jobs:
         working-directory: services/app-proto
         run: pnpm generate
 
-      # Generate Prisma Client and binary that can run in a lambda environment
+      # Generate Prisma Client
       - name: Prepare prisma client
         working-directory: services/app-api
-        run: PRISMA_CLI_BINARY_TARGETS=rhel-openssl-3.0.x pnpm prisma generate
+        run: pnpm prisma generate
 
       - name: Prepare "@prisma/client" lambda layer
         working-directory: services/app-api
