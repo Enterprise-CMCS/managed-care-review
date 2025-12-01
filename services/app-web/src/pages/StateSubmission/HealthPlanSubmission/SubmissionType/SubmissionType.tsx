@@ -41,6 +41,7 @@ import styles from '../../StateSubmissionForm.module.scss'
 import { GenericApiErrorBanner, ProgramSelect } from '../../../../components'
 import {
     activeFormPages,
+    renameKey,
     type ContractFormPageProps,
 } from '../../submissionUtils'
 import {
@@ -394,22 +395,6 @@ export const SubmissionType = ({
         }
     }
 
-    const generateErrorSummaryErrors = (
-        errors: FormikErrors<SubmissionTypeFormValues>
-    ) => {
-        const errorObject = {}
-        const formikErrors = { ...errors }
-
-        if (formikErrors.programIDs) {
-            Object.assign(errorObject, {
-                '#programIDs': formikErrors.programIDs,
-            })
-            delete formikErrors.programIDs
-        }
-
-        return { ...errorObject, ...formikErrors }
-    }
-
     // Checks if any of the child rates in this submission were ever submitted
     const hasPreviouslySubmittedRates = Boolean(
         draftSubmission?.draftRates.some(
@@ -503,8 +488,10 @@ export const SubmissionType = ({
 
                                     {shouldValidate && (
                                         <ErrorSummary
-                                            errors={generateErrorSummaryErrors(
-                                                errors
+                                            errors={renameKey(
+                                                errors,
+                                                'programIDs',
+                                                '#programIDs'
                                             )}
                                             headingRef={errorSummaryHeadingRef}
                                         />
