@@ -69,7 +69,7 @@ export class FrontendAppStack extends BaseStack {
             distribution: mainAppDistribution,
             distributionPaths: ['/*'],
             memoryLimit: 3008,
-            ephemeralStorageSize: Size.gibibytes(10),
+            ephemeralStorageSize: Size.gibibytes(2),
         })
 
         // Deploy storybook (matches app-web serverless s3Sync to storybook bucket)
@@ -79,7 +79,7 @@ export class FrontendAppStack extends BaseStack {
             distribution: storybookDistribution,
             distributionPaths: ['/*'],
             memoryLimit: 3008,
-            ephemeralStorageSize: Size.gibibytes(10),
+            ephemeralStorageSize: Size.gibibytes(2),
         })
     }
 }
