@@ -29,7 +29,6 @@ import {
     Runtime,
     LayerVersion,
     type ILayerVersion,
-    Code,
 } from 'aws-cdk-lib/aws-lambda'
 import { CfnWebACL, CfnWebACLAssociation } from 'aws-cdk-lib/aws-wafv2'
 import { SubnetType, SecurityGroup, Vpc } from 'aws-cdk-lib/aws-ec2'
@@ -64,8 +63,8 @@ export class AppApiStack extends BaseStack {
 
     // Shared OTEL layer for all functions
     private readonly otelLayer: ILayerVersion
-    // Shared Prisma engine layer for GraphQL and OAuth functions
-    private readonly prismaEngineLayer: ILayerVersion
+    // Prisma 7 with driver adapters - no longer needs lambda layers
+    // private readonly prismaEngineLayer: ILayerVersion
 
     constructor(scope: Construct, id: string, props: BaseStackProps) {
         super(scope, id, {
@@ -150,22 +149,6 @@ export class AppApiStack extends BaseStack {
             AWS_OTEL_LAYER_ARN
         )
 
-        // Create shared Prisma engine layer for functions that need database access
-        this.prismaEngineLayer = new LayerVersion(this, 'PrismaEngineLayer', {
-            layerVersionName: `${ResourceNames.apiName('app-api', this.stage)}-prisma-engine`,
-            description: 'Prisma engine layer for app-api',
-            compatibleRuntimes: [Runtime.NODEJS_20_X],
-            compatibleArchitectures: [Architecture.X86_64],
-            code: Code.fromAsset(
-                path.join(
-                    __dirname,
-                    '..',
-                    '..',
-                    'lambda-layers-prisma-client-engine'
-                )
-            ),
-        })
-
         // Create simple Lambda functions first (no VPC, layers, or complex dependencies)
         this.healthFunction = this.createFunction(
             'health',
@@ -197,7 +180,7 @@ export class AppApiStack extends BaseStack {
 
         this.otelFunction = new NodejsFunction(this, 'otelFunction', {
             functionName: `${ResourceNames.apiName('app-api', this.stage)}-otel`,
-            runtime: Runtime.NODEJS_20_X,
+            runtime: Runtime.NODEJS_24_X,
             architecture: Architecture.X86_64,
             handler: 'main',
             entry: path.join(
@@ -353,7 +336,7 @@ export class AppApiStack extends BaseStack {
     ): NodejsFunction {
         return new NodejsFunction(this, `${functionName}Function`, {
             functionName: `${ResourceNames.apiName('app-api', this.stage)}-${functionName}`,
-            runtime: Runtime.NODEJS_20_X,
+            runtime: Runtime.NODEJS_24_X,
             architecture: Architecture.X86_64,
             handler: handlerMethod,
             entry: path.join(
@@ -400,29 +383,30 @@ export class AppApiStack extends BaseStack {
             process.env.SG_ID!
         )
 
-        const prismaMigrationLayer = new LayerVersion(
-            this,
-            'PrismaMigrationLayer',
-            {
-                layerVersionName: `${ResourceNames.apiName('app-api', this.stage)}-prisma-migration`,
-                description: 'Prisma migration layer for app-api',
-                compatibleRuntimes: [Runtime.NODEJS_20_X],
-                compatibleArchitectures: [Architecture.X86_64],
-                code: Code.fromAsset(
-                    path.join(
-                        __dirname,
-                        '..',
-                        '..',
-                        'lambda-layers-prisma-client-migration'
-                    )
-                ),
-            }
-        )
+        // Prisma 7 with driver adapters - no longer needs lambda layers
+        // const prismaMigrationLayer = new LayerVersion(
+        //     this,
+        //     'PrismaMigrationLayer',
+        //     {
+        //         layerVersionName: `${ResourceNames.apiName('app-api', this.stage)}-prisma-migration`,
+        //         description: 'Prisma migration layer for app-api',
+        //         compatibleRuntimes: [Runtime.NODEJS_24_X],
+        //         compatibleArchitectures: [Architecture.X86_64],
+        //         code: Code.fromAsset(
+        //             path.join(
+        //                 __dirname,
+        //                 '..',
+        //                 '..',
+        //                 'lambda-layers-prisma-client-migration'
+        //             )
+        //         ),
+        //     }
+        // )
 
         // Create migrate function with all required configuration
         const migrateFunction = new NodejsFunction(this, 'migrateFunction', {
             functionName: `${ResourceNames.apiName('app-api', this.stage)}-migrate`,
-            runtime: Runtime.NODEJS_20_X,
+            runtime: Runtime.NODEJS_24_X,
             architecture: Architecture.X86_64,
             handler: 'main',
             entry: path.join(
@@ -444,7 +428,7 @@ export class AppApiStack extends BaseStack {
                 NODE_PATH: '/opt/nodejs/node_modules',
             },
             role,
-            layers: [prismaMigrationLayer, this.otelLayer],
+            layers: [this.otelLayer], // Removed prismaMigrationLayer for Prisma 7
             vpc,
             vpcSubnets: {
                 subnetType: SubnetType.PRIVATE_WITH_EGRESS,
@@ -511,7 +495,7 @@ export class AppApiStack extends BaseStack {
         // Create GraphQL function with all required configuration
         const graphqlFunction = new NodejsFunction(this, 'graphqlFunction', {
             functionName: `${ResourceNames.apiName('app-api', this.stage)}-graphql`,
-            runtime: Runtime.NODEJS_20_X,
+            runtime: Runtime.NODEJS_24_X,
             architecture: Architecture.X86_64,
             handler: 'gqlHandler',
             entry: path.join(
@@ -528,7 +512,7 @@ export class AppApiStack extends BaseStack {
             memorySize: 1024,
             environment,
             role,
-            layers: [this.prismaEngineLayer, this.otelLayer],
+            layers: [this.otelLayer], // Removed prismaEngineLayer for Prisma 7
             vpc,
             vpcSubnets: {
                 subnetType: SubnetType.PRIVATE_WITH_EGRESS,
@@ -593,7 +577,7 @@ export class AppApiStack extends BaseStack {
             'oauth-tokenFunction',
             {
                 functionName: `${ResourceNames.apiName('app-api', this.stage)}-oauth-token`,
-                runtime: Runtime.NODEJS_20_X,
+                runtime: Runtime.NODEJS_24_X,
                 architecture: Architecture.X86_64,
                 handler: 'main',
                 entry: path.join(
@@ -610,7 +594,7 @@ export class AppApiStack extends BaseStack {
                 memorySize: 1024,
                 environment,
                 role,
-                layers: [this.prismaEngineLayer, this.otelLayer],
+                layers: [this.otelLayer], // Removed prismaEngineLayer for Prisma 7
                 vpc,
                 vpcSubnets: {
                     subnetType: SubnetType.PRIVATE_WITH_EGRESS,

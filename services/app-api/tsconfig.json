@@ -24,6 +24,7 @@
         "jest.config.ts",
         "setupTests.ts",
         "esbuild.config.ts",
-        "esbuild-local.config.ts"
+        "esbuild-local.config.ts",
+        "prisma.config.ts"
     ]
 }

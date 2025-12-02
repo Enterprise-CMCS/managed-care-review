@@ -127,7 +127,7 @@ export class Postgres extends BaseStack {
      */
     private createJwtSecret(): ISecret {
         return new Secret(this, 'JwtSecret', {
-            secretName: `api-jwt-secret-${this.stage}-cdk`,
+            secretName: `api-jwt-secret-${this.stage}-cdk`, //pragma: allowlist secret
             description: 'JWT secret for API authentication',
             generateSecretString: {
                 secretStringTemplate: '{}',
@@ -146,7 +146,7 @@ export class Postgres extends BaseStack {
         // Create a placeholder secret with _cdk suffix to avoid serverless conflicts: aurora_postgres_{stage}_cdk
         // The Lambda will update this with the actual logical database connection info
         return new Secret(this, 'ReviewDatabaseSecret', {
-            secretName: `aurora_postgres_${this.stage}_cdk`,
+            secretName: `aurora_postgres_${this.stage}_cdk`, //pragma: allowlist secret
             description: `Logical database credentials for review environment ${this.stage}`,
             generateSecretString: {
                 secretStringTemplate: '{"username": "placeholder"}',
@@ -169,7 +169,7 @@ export class Postgres extends BaseStack {
                 functionName: `postgres-${this.stage}-dbManager-cdk`,
                 description:
                     'Manages logical databases in the CDK PostgreSQL Aurora cluster',
-                runtime: Runtime.NODEJS_20_X,
+                runtime: Runtime.NODEJS_24_X,
                 architecture: Architecture.X86_64,
                 handler: 'handler',
                 entry: join(
@@ -189,7 +189,7 @@ export class Postgres extends BaseStack {
                 },
                 securityGroups: [props.lambdaSecurityGroup],
                 environment: {
-                    SECRETS_MANAGER_ENDPOINT: `https://secretsmanager.${this.region}.amazonaws.com`,
+                    SECRETS_MANAGER_ENDPOINT: `https://secretsmanager.${this.region}.amazonaws.com`, //pragma: allowlist secret
                     DB_SECRET_ARN: this.databaseSecret.secretArn,
                     ...(this.cluster && {
                         DB_CLUSTER_ARN: this.cluster.clusterArn,
