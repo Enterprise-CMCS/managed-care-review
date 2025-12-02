@@ -249,6 +249,7 @@ const Contacts = ({
                                 className={styles.formContainer}
                                 id="ContactsForm"
                                 onSubmit={handleSubmit}
+                                noValidate
                             >
                                 <SectionCard>
                                     <fieldset className="usa-fieldset with-sections">
