@@ -32,7 +32,9 @@ describe('CMS user can view rate reviews', () => {
                         .click()
                     cy.url({ timeout: 10_000 }).should('contain', rate1.rateID)
                     cy.findByRole('heading', {
-                        name: `${rate1.formData.rateCertificationName}`,
+                        name: new RegExp(
+                            `Submission ID | ${rate1.formData.rateCertificationName}`
+                        ),
                     }).should('exist')
 
                     cy.findByRole('button', { name: 'Withdraw rate' }).click()
@@ -94,7 +96,9 @@ describe('CMS user can view rate reviews', () => {
                         .click()
                     cy.url({ timeout: 10_000 }).should('contain', rate1.rateID)
                     cy.findByRole('heading', {
-                        name: `${rate1.formData.rateCertificationName}`,
+                        name: new RegExp(
+                            `Submission ID | ${rate1.formData.rateCertificationName}`
+                        ),
                     }).should('exist')
                     cy.findByText('Rate certification type')
                         .should('exist')

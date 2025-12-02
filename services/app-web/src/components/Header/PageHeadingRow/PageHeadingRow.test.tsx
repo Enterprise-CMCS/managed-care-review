@@ -85,4 +85,60 @@ describe('Page Heading Row', () => {
             'Custom page heading'
         )
     })
+
+    it('displays EQRO entity type on EQRO submission page', () => {
+        renderWithProviders(
+            <PageHeadingRow
+                heading="Custom page heading"
+                loggedInUser={loggedInUser}
+                route="SUBMISSIONS_SUMMARY"
+                pathname="/submissions/eqro/1234"
+            />
+        )
+
+        expect(screen.getByTestId('entityType')).toHaveTextContent('EQRO')
+    })
+
+    it('displays Health plan entity type on hpp submission page', () => {
+        renderWithProviders(
+            <PageHeadingRow
+                heading="Custom page heading"
+                loggedInUser={loggedInUser}
+                route="SUBMISSIONS_SUMMARY"
+                pathname="/submissions/health-plan/1234"
+            />
+        )
+
+        expect(screen.getByTestId('entityType')).toHaveTextContent(
+            'Health plan'
+        )
+    })
+
+    it('does not display submission ID or entity type on dashboard', () => {
+        renderWithProviders(
+            <PageHeadingRow
+                heading="Custom page heading"
+                loggedInUser={loggedInUser}
+                route="DASHBOARD_SUBMISSIONS"
+                pathname="/submissions/dashboard"
+            />
+        )
+
+        expect(screen.queryByTestId('entityType')).not.toBeInTheDocument()
+        expect(screen.queryByTestId('submission-id')).not.toBeInTheDocument()
+    })
+
+    it('does not display submission ID or entity type on new submission page', () => {
+        renderWithProviders(
+            <PageHeadingRow
+                heading="Custom page heading"
+                loggedInUser={loggedInUser}
+                route="SUBMISSIONS_NEW"
+                pathname="/submissions/new"
+            />
+        )
+
+        expect(screen.queryByTestId('entityType')).not.toBeInTheDocument()
+        expect(screen.queryByTestId('submission-id')).not.toBeInTheDocument()
+    })
 })
