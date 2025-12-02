@@ -59,7 +59,10 @@ const validateStatusAndUpdateInfo = (
     }
 }
 
-const validateEQROSubmission = (contract: ContractType, span?: Span) => {
+const validateEQROSubmission = (
+    contract: ContractType,
+    span?: Span
+): GraphQLError | undefined => {
     const formData = contract.draftRevision!.formData
     const hasRates = contract.draftRates && contract.draftRates.length
     const isNotContractOnly = formData.submissionType !== 'CONTRACT_ONLY'
@@ -70,15 +73,15 @@ const validateEQROSubmission = (contract: ContractType, span?: Span) => {
     const isMedAndChipCovered =
         formData.populationCovered === 'MEDICAID_AND_CHIP'
 
-    const throwError = (errMessage: string) => {
+    const EQROValidationError = (errMessage: string) => {
         logError('submitContract', errMessage)
         setErrorAttributesOnActiveSpan(errMessage, span)
-        throw createUserInputError(errMessage, 'contractID', contract.id)
+        return createUserInputError(errMessage, 'contractID', contract.id)
     }
 
     //Throw an error early if the contract has rates or the wrong sub type
     if (hasRates || isNotContractOnly) {
-        throwError(
+        return EQROValidationError(
             `EQRO submissions must be contract only and not include any rates: ${contract.id}`
         )
     }
@@ -96,8 +99,8 @@ const validateEQROSubmission = (contract: ContractType, span?: Span) => {
     if (isBase && includesMCO && isMedAndChipCovered) {
         for (const field in requiredEQROFieldsForBaseMCO) {
             if (requiredEQROFieldsForBaseMCO[field] == null) {
-                throwError(
-                    `${field} can not be undefined for a base contract with MCO review: ${contract.id}`
+                return EQROValidationError(
+                    `${field} can not be undefined for a EQRO contract submission: ${contract.id}`
                 )
             }
         }
@@ -107,17 +110,19 @@ const validateEQROSubmission = (contract: ContractType, span?: Span) => {
         !includesMCO
     ) {
         if (formData.eqroProvisionChipEqrRelatedActivities == null) {
-            throwError(
+            return EQROValidationError(
                 `eqroProvisionChipEqrRelatedActivities can not be undefined for an amendment contract with chip populations included: ${contract.id}`
             )
         }
     } else if (isAmendment && includesMCO) {
         if (formData.eqroProvisionMcoEqrOrRelatedActivities == null) {
-            throwError(
+            return EQROValidationError(
                 `eqroProvisionMcoEqrOrRelatedActivities can not be undefined for an amendment contract that includes MCO: ${contract.id}`
             )
         }
     }
+
+    return
 }
 
 export function submitContract(
@@ -231,7 +236,11 @@ export function submitContract(
         }
 
         if (contractWithHistory.contractSubmissionType === 'EQRO') {
-            validateEQROSubmission(contractWithHistory, span)
+            const EQROError = validateEQROSubmission(contractWithHistory, span)
+
+            if (EQROError) {
+                throw EQROError
+            }
         }
 
         const initialFormData = contractWithHistory.draftRevision.formData

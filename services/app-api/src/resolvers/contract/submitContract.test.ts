@@ -2266,7 +2266,7 @@ describe('submitContract', () => {
             expect(missingNewContractorResponse.errors).toEqual([
                 expect.objectContaining({
                     message: expect.stringMatching(
-                        `eqroNewContractor can not be undefined for a base contract with MCO review: ${draftWithMissingNewContractor.id}`
+                        `eqroNewContractor can not be undefined for a EQRO contract submission: ${draftWithMissingNewContractor.id}`
                     ),
                     path: ['submitContract'],
                     extensions: expect.objectContaining({
@@ -2298,7 +2298,7 @@ describe('submitContract', () => {
             expect(missingMcoNewOptionalActivityResponse.errors).toEqual([
                 expect.objectContaining({
                     message: expect.stringMatching(
-                        `eqroProvisionMcoNewOptionalActivity can not be undefined for a base contract with MCO review: ${draftWithMissingMcoNewOptionalActivity.id}`
+                        `eqroProvisionMcoNewOptionalActivity can not be undefined for a EQRO contract submission: ${draftWithMissingMcoNewOptionalActivity.id}`
                     ),
                     path: ['submitContract'],
                     extensions: expect.objectContaining({
@@ -2333,7 +2333,7 @@ describe('submitContract', () => {
             expect(missingNewMcoEqrRelatedActivitiesResponse.errors).toEqual([
                 expect.objectContaining({
                     message: expect.stringMatching(
-                        `eqroProvisionNewMcoEqrRelatedActivities can not be undefined for a base contract with MCO review: ${draftWithMissingNewMcoEqrRelatedActivities.id}`
+                        `eqroProvisionNewMcoEqrRelatedActivities can not be undefined for a EQRO contract submission: ${draftWithMissingNewMcoEqrRelatedActivities.id}`
                     ),
                     path: ['submitContract'],
                     extensions: expect.objectContaining({
