@@ -623,6 +623,7 @@ export const ContractDetails = ({
                                     setFocusErrorSummaryHeading(true)
                                     handleSubmit(e)
                                 }}
+                                noValidate
                             >
                                 <fieldset className="usa-fieldset">
                                     <legend className="srOnly">
