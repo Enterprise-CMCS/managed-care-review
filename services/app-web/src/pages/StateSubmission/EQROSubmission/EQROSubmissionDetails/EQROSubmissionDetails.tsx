@@ -545,7 +545,7 @@ export const EQROSubmissionDetails = (): React.ReactElement => {
                                                 of your submission that
                                                 highlights any important changes
                                                 CMS reviewers will need to be
-                                                aware of
+                                                aware of.
                                             </span>
                                             <ReactRouterLinkWithLogging
                                                 variant="external"
