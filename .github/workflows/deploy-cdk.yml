@@ -3,8 +3,7 @@ name: Deploy Review Environment (CDK)
 on:
   push:
     branches:
-      - "*"
-      - "dependabot/**"
+      - "**"
       - "!main"
   workflow_dispatch:
 
