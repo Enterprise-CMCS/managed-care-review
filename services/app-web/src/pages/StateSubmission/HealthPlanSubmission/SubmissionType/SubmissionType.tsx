@@ -38,7 +38,7 @@ import {
     ContractSubmissionType,
 } from '../../../../gen/gqlClient'
 import styles from '../../StateSubmissionForm.module.scss'
-import { GenericApiErrorBanner, ProgramSelect } from '../../../../components'
+import { ProgramSelect } from '../../../../components'
 import {
     activeFormPages,
     renameKey,
@@ -84,8 +84,8 @@ type FormError =
     FormikErrors<SubmissionTypeFormValues>[keyof FormikErrors<SubmissionTypeFormValues>]
 
 export const SubmissionType = ({
-                                   showValidations = false,
-                               }: ContractFormPageProps): React.ReactElement => {
+    showValidations = false,
+}: ContractFormPageProps): React.ReactElement => {
     const { loggedInUser } = useAuth()
     const { currentRoute } = useCurrentRoute()
     const [shouldValidate, setShouldValidate] = useState(showValidations)
@@ -101,7 +101,7 @@ export const SubmissionType = ({
     const navigate = useNavigate()
     const location = useLocation()
     const ldClient = useLDClient()
-    const { id, contractSubmissionType } = useRouteParams()
+    const { id } = useRouteParams()
     const hideSupportingDocs = ldClient?.variation(
         featureFlags.HIDE_SUPPORTING_DOCS_PAGE.flag,
         featureFlags.HIDE_SUPPORTING_DOCS_PAGE.defaultValue
@@ -114,9 +114,9 @@ export const SubmissionType = ({
     //Toggle isNewSubmission condition based on EQRO feature flag
     const isNewSubmission = showEqroSubmissions
         ? matchPath(
-            RoutesRecord.SUBMISSIONS_NEW_SUBMISSION_FORM,
-            location.pathname
-        )
+              RoutesRecord.SUBMISSIONS_NEW_SUBMISSION_FORM,
+              location.pathname
+          )
         : location.pathname === '/submissions/new'
 
     const {
@@ -179,30 +179,6 @@ export const SubmissionType = ({
                 )
                 return
             }
-            if (
-                !(
-                    values.submissionType === 'CONTRACT_ONLY' ||
-                    values.submissionType === 'CONTRACT_AND_RATES'
-                )
-            ) {
-                console.info(
-                    'unexpected error, attempting to submit a submissionType of ',
-                    values.submissionType
-                )
-                return
-            }
-            if (
-                !(
-                    values.contractType === 'BASE' ||
-                    values.contractType === 'AMENDMENT'
-                )
-            ) {
-                console.info(
-                    'unexpected error, attempting to submit a contractType of ',
-                    values.contractType
-                )
-                return
-            }
 
             const input: CreateContractInput = {
                 populationCovered: values.populationCovered!,
@@ -216,16 +192,8 @@ export const SubmissionType = ({
                 contractSubmissionType: values.contractSubmissionType,
             }
 
-            if (!createDraft) {
-                console.info(
-                    'PROGRAMMING ERROR, SubmissionType for does have props needed to update a draft.'
-                )
-                return
-            }
-
             const draftSubmission = await createDraft(input)
             if (draftSubmission instanceof Error) {
-                setShowAPIErrorBanner(true)
                 setSubmitting(false) // unblock submit button to allow resubmit
                 console.info(
                     'Log: creating new submission failed with server error',
@@ -240,30 +208,28 @@ export const SubmissionType = ({
                         contractSubmissionType:
                             ContractSubmissionTypeRecord[
                                 draftSubmission.contractSubmissionType
-                                ],
+                            ],
                     })
                 )
             }
         } else {
             setSubmitting(true)
-            if (draftSubmission === undefined || !updateDraft) {
-                console.info(draftSubmission, updateDraft)
+            if (!draftSubmission) {
                 console.info(
-                    'ERROR, SubmissionType for does not have props needed to update a draft.'
+                    'Error updating draft submission. draftSubmission was undefined.'
                 )
+                setShowAPIErrorBanner(true)
                 return
             }
+            // remove out __typename name our response formData to retain existing formData from other pages.
+            // eslint-disable-next-line @typescript-eslint/no-unused-vars
+            const { __typename, ...formData } =
+                draftSubmission.draftRevision.formData
+
             // set new values
             const updatedDraftSubmissionFormData: ContractDraftRevisionFormDataInput =
                 {
-                    contractExecutionStatus:
-                    draftSubmission.draftRevision.formData
-                        .contractExecutionStatus,
-                    contractDateStart:
-                    draftSubmission.draftRevision.formData
-                        .contractDateStart,
-                    contractDateEnd:
-                    draftSubmission.draftRevision.formData.contractDateEnd,
+                    ...formData,
                     contractType: values.contractType as ContractType,
                     submissionDescription: values.submissionDescription,
                     riskBasedContract: yesNoFormValueAsBoolean(
@@ -272,68 +238,10 @@ export const SubmissionType = ({
                     populationCovered: values.populationCovered,
                     submissionType: values.submissionType as SubmissionTypeT,
                     programIDs: values.programIDs,
-                    stateContacts:
-                        draftSubmission.draftRevision.formData.stateContacts ||
-                        [],
-                    supportingDocuments:
-                        draftSubmission.draftRevision.formData
-                            .supportingDocuments || [],
-                    managedCareEntities:
-                    draftSubmission.draftRevision.formData
-                        .managedCareEntities,
-                    federalAuthorities:
-                    draftSubmission.draftRevision.formData
-                        .federalAuthorities,
-                    dsnpContract:
-                    draftSubmission.draftRevision.formData.dsnpContract,
-                    contractDocuments:
-                    draftSubmission.draftRevision.formData
-                        .contractDocuments,
-                    statutoryRegulatoryAttestation:
-                    draftSubmission.draftRevision.formData
-                        .statutoryRegulatoryAttestation,
-                    // If contract is in compliance, we set the description to undefined. This clears out previous non-compliance description
-                    statutoryRegulatoryAttestationDescription:
-                    draftSubmission.draftRevision.formData
-                        .statutoryRegulatoryAttestationDescription,
                 }
 
-            if (isContractWithProvisions(draftSubmission)) {
-                updatedDraftSubmissionFormData.inLieuServicesAndSettings =
-                    draftSubmission.draftRevision.formData.inLieuServicesAndSettings
-                updatedDraftSubmissionFormData.modifiedBenefitsProvided =
-                    draftSubmission.draftRevision.formData.modifiedBenefitsProvided
-                updatedDraftSubmissionFormData.modifiedGeoAreaServed =
-                    draftSubmission.draftRevision.formData.modifiedGeoAreaServed
-                updatedDraftSubmissionFormData.modifiedMedicaidBeneficiaries =
-                    draftSubmission.draftRevision.formData.modifiedMedicaidBeneficiaries
-                updatedDraftSubmissionFormData.modifiedRiskSharingStrategy =
-                    draftSubmission.draftRevision.formData.modifiedRiskSharingStrategy
-                updatedDraftSubmissionFormData.modifiedIncentiveArrangements =
-                    draftSubmission.draftRevision.formData.modifiedIncentiveArrangements
-                updatedDraftSubmissionFormData.modifiedWitholdAgreements =
-                    draftSubmission.draftRevision.formData.modifiedWitholdAgreements
-                updatedDraftSubmissionFormData.modifiedStateDirectedPayments =
-                    draftSubmission.draftRevision.formData.modifiedStateDirectedPayments
-                updatedDraftSubmissionFormData.modifiedPassThroughPayments =
-                    draftSubmission.draftRevision.formData.modifiedPassThroughPayments
-                updatedDraftSubmissionFormData.modifiedPaymentsForMentalDiseaseInstitutions =
-                    draftSubmission.draftRevision.formData.modifiedPaymentsForMentalDiseaseInstitutions
-                updatedDraftSubmissionFormData.modifiedMedicalLossRatioStandards =
-                    draftSubmission.draftRevision.formData.modifiedMedicalLossRatioStandards
-                updatedDraftSubmissionFormData.modifiedOtherFinancialPaymentIncentive =
-                    draftSubmission.draftRevision.formData.modifiedOtherFinancialPaymentIncentive
-                updatedDraftSubmissionFormData.modifiedEnrollmentProcess =
-                    draftSubmission.draftRevision.formData.modifiedEnrollmentProcess
-                updatedDraftSubmissionFormData.modifiedGrevienceAndAppeal =
-                    draftSubmission.draftRevision.formData.modifiedGrevienceAndAppeal
-                updatedDraftSubmissionFormData.modifiedNetworkAdequacyStandards =
-                    draftSubmission.draftRevision.formData.modifiedNetworkAdequacyStandards
-                updatedDraftSubmissionFormData.modifiedLengthOfContract =
-                    draftSubmission.draftRevision.formData.modifiedLengthOfContract
-                updatedDraftSubmissionFormData.modifiedNonRiskPaymentArrangements =
-                    draftSubmission.draftRevision.formData.modifiedNonRiskPaymentArrangements
-            } else {
+            //TODO: Move this to the API, it does nothing here.
+            if (!isContractWithProvisions(draftSubmission)) {
                 updatedDraftSubmissionFormData.inLieuServicesAndSettings =
                     undefined
                 updatedDraftSubmissionFormData.modifiedBenefitsProvided =
@@ -387,7 +295,7 @@ export const SubmissionType = ({
                     navigate(
                         generatePath(RoutesRecord[options.redirectPath], {
                             id: id,
-                            contractSubmissionType: contractSubmissionType,
+                            contractSubmissionType: 'health-plan',
                         })
                     )
                 }
@@ -430,12 +338,12 @@ export const SubmissionType = ({
                     formPages={
                         draftSubmission
                             ? activeFormPages(
-                                draftSubmission.draftRevision.formData,
-                                hideSupportingDocs
-                            )
+                                  draftSubmission.draftRevision.formData,
+                                  hideSupportingDocs
+                              )
                             : hideSupportingDocs
-                                ? STATE_SUBMISSION_FORM_ROUTES_WITHOUT_SUPPORTING_DOCS
-                                : STATE_SUBMISSION_FORM_ROUTES
+                              ? STATE_SUBMISSION_FORM_ROUTES_WITHOUT_SUPPORTING_DOCS
+                              : STATE_SUBMISSION_FORM_ROUTES
                     }
                     currentFormPage={
                         draftSubmission ? currentRoute : 'SUBMISSIONS_TYPE'
@@ -444,7 +352,9 @@ export const SubmissionType = ({
                 <PageBannerAlerts
                     loggedInUser={loggedInUser}
                     unlockedInfo={draftSubmission?.draftRevision.unlockInfo}
-                    showPageErrorMessage={showPageErrorMessage}
+                    showPageErrorMessage={
+                        showPageErrorMessage || showAPIErrorBanner
+                    }
                     draftSaved={draftSaved}
                 />
             </FormNotificationContainer>
@@ -460,13 +370,13 @@ export const SubmissionType = ({
                     validationSchema={SubmissionTypeFormSchema()}
                 >
                     {({
-                          values,
-                          errors,
-                          handleSubmit,
-                          isSubmitting,
-                          setSubmitting,
-                          setFieldValue,
-                      }) => {
+                        values,
+                        errors,
+                        handleSubmit,
+                        isSubmitting,
+                        setSubmitting,
+                        setFieldValue,
+                    }) => {
                         return (
                             <UswdsForm
                                 className={styles.formContainer}
@@ -482,9 +392,6 @@ export const SubmissionType = ({
                                     <legend className="srOnly">
                                         Submission type
                                     </legend>
-                                    {showAPIErrorBanner && (
-                                        <GenericApiErrorBanner />
-                                    )}
 
                                     {shouldValidate && (
                                         <ErrorSummary
@@ -528,7 +435,7 @@ export const SubmissionType = ({
                                                 label={
                                                     PopulationCoveredRecord[
                                                         'MEDICAID'
-                                                        ]
+                                                    ]
                                                 }
                                                 value={'MEDICAID'}
                                                 onClick={() =>
@@ -544,7 +451,7 @@ export const SubmissionType = ({
                                                 radio_button_title={
                                                     PopulationCoveredRecord[
                                                         'MEDICAID'
-                                                        ]
+                                                    ]
                                                 }
                                             />
                                             <FieldRadio
@@ -553,7 +460,7 @@ export const SubmissionType = ({
                                                 label={
                                                     PopulationCoveredRecord[
                                                         'MEDICAID_AND_CHIP'
-                                                        ]
+                                                    ]
                                                 }
                                                 value={'MEDICAID_AND_CHIP'}
                                                 onClick={() =>
@@ -569,7 +476,7 @@ export const SubmissionType = ({
                                                 radio_button_title={
                                                     PopulationCoveredRecord[
                                                         'MEDICAID_AND_CHIP'
-                                                        ]
+                                                    ]
                                                 }
                                             />
                                             <FieldRadio
@@ -578,7 +485,7 @@ export const SubmissionType = ({
                                                 label={
                                                     PopulationCoveredRecord[
                                                         'CHIP'
-                                                        ]
+                                                    ]
                                                 }
                                                 value={'CHIP'}
                                                 onClick={() =>
@@ -597,7 +504,7 @@ export const SubmissionType = ({
                                                 radio_button_title={
                                                     PopulationCoveredRecord[
                                                         'CHIP'
-                                                        ]
+                                                    ]
                                                 }
                                             />
                                             {hasPreviouslySubmittedRates && (
@@ -687,7 +594,7 @@ export const SubmissionType = ({
                                                 label={
                                                     SubmissionTypeRecord[
                                                         'CONTRACT_ONLY'
-                                                        ]
+                                                    ]
                                                 }
                                                 value={'CONTRACT_ONLY'}
                                                 list_position={1}
@@ -696,7 +603,7 @@ export const SubmissionType = ({
                                                 radio_button_title={
                                                     SubmissionTypeRecord[
                                                         'CONTRACT_ONLY'
-                                                        ]
+                                                    ]
                                                 }
                                             />
                                             <FieldRadio
@@ -705,7 +612,7 @@ export const SubmissionType = ({
                                                 label={
                                                     SubmissionTypeRecord[
                                                         'CONTRACT_AND_RATES'
-                                                        ]
+                                                    ]
                                                 }
                                                 value={'CONTRACT_AND_RATES'}
                                                 disabled={
@@ -718,7 +625,7 @@ export const SubmissionType = ({
                                                 radio_button_title={
                                                     SubmissionTypeRecord[
                                                         'CONTRACT_AND_RATES'
-                                                        ]
+                                                    ]
                                                 }
                                             />
                                             {hasPreviouslySubmittedRates && (
@@ -732,16 +639,16 @@ export const SubmissionType = ({
                                             )}
                                             {values.populationCovered ===
                                                 'CHIP' && (
-                                                    <div
-                                                        role="note"
-                                                        aria-labelledby="submissionType"
-                                                        className="mcr-note padding-top-2"
-                                                    >
-                                                        States are not required to
-                                                        submit rates with CHIP-only
-                                                        contracts.
-                                                    </div>
-                                                )}
+                                                <div
+                                                    role="note"
+                                                    aria-labelledby="submissionType"
+                                                    className="mcr-note padding-top-2"
+                                                >
+                                                    States are not required to
+                                                    submit rates with CHIP-only
+                                                    contracts.
+                                                </div>
+                                            )}
                                         </Fieldset>
                                     </FormGroup>
                                     <FormGroup
