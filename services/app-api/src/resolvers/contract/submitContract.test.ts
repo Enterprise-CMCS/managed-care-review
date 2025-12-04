@@ -2175,7 +2175,11 @@ describe('submitContract', () => {
             expect(
                 submittedFormData.contractDocuments[0].dateAdded
             ).toBeTruthy()
+            expect(
+                submittedFormData.supportingDocuments[0].dateAdded
+            ).toBeTruthy()
             submittedFormData.contractDocuments[0].dateAdded = null
+            submittedFormData.supportingDocuments[0].dateAdded = null
 
             expect(submittedFormData).toEqual({
                 ...draftFormData,
