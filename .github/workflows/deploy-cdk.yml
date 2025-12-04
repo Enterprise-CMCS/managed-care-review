@@ -917,7 +917,7 @@ jobs:
           path: ./coverage-cypress/*.json
 
   end-deployment:
-    needs: [begin-deployment, deploy-cdk-app, deploy-frontend-app, cypress]
+    needs: [begin-deployment, deploy-cdk-app, deploy-frontend-app, extract-endpoints, cypress]
     if: always() && needs.begin-deployment.result == 'success'
     name: End CDK Deployment
     runs-on: ubuntu-24.04
@@ -939,7 +939,7 @@ jobs:
         uses: chrnorm/deployment-status@v2
         with:
           token: "${{ github.token }}"
-          environment-url: ${{ needs.deploy-cdk-app.outputs.application-endpoint }}
+          environment-url: ${{ needs.extract-endpoints.outputs.application-endpoint }}
           state: "success"
           deployment-id: ${{ needs.begin-deployment.outputs.deploy-id }}
 
