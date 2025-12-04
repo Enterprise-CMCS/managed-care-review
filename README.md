@@ -32,6 +32,7 @@ For monorepo tooling we just rely on the workspace configuration of `pnpm`. If g
 To get the tools needed for local development, you can run:
 
 ```bash
+brew install pnpm direnv entr shellcheck protolint detect-secrets
 pnpm husky install
 ```
 
