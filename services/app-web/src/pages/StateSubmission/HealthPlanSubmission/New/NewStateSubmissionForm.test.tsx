@@ -1,7 +1,7 @@
 import { screen, waitFor, within } from '@testing-library/react'
 
 import { fetchCurrentUserMock, createContractMockFail } from '@mc-review/mocks'
-import { renderWithProviders } from '../../../../testHelpers/jestHelpers'
+import { renderWithProviders } from '../../../../testHelpers'
 import { NewStateSubmissionForm } from './NewStateSubmissionForm'
 import userEvent from '@testing-library/user-event'
 
@@ -74,7 +74,7 @@ describe('NewStateSubmissionForm', () => {
         await userEvent.click(continueButton)
 
         await waitFor(() => {
-            expect(screen.getAllByText('System error')).toHaveLength(2)
+            expect(screen.getAllByText('System error')).toHaveLength(1)
         })
     })
 })
