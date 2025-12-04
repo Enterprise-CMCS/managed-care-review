@@ -78,6 +78,13 @@ fragment submittableRevisionsFieldsFragment on SubmittableRevision {
             modifiedNonRiskPaymentArrangements
             statutoryRegulatoryAttestation
             statutoryRegulatoryAttestationDescription
+
+            #EQRO submission fields only
+            eqroNewContractor
+            eqroProvisionMcoNewOptionalActivity
+            eqroProvisionNewMcoEqrRelatedActivities
+            eqroProvisionChipEqrRelatedActivities
+            eqroProvisionMcoEqrOrRelatedActivities
         }
     }
     ... on RateRevision {
