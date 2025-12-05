@@ -1,4 +1,4 @@
-import { type Prisma, PrismaClient } from '../generated/prisma-client'
+import { PrismaClient } from '@mc-review/database'
 import { PrismaPg } from '@prisma/adapter-pg'
 import { Pool } from 'pg'
 
@@ -29,10 +29,12 @@ function createConnectionPool(connURL: string): Pool {
  * Overrides delete and create operations on `applicationSettings` and `emailSettings`
  * models to throw custom error messages.
  *
- * @param {Prisma.PrismaClientOptions} optionArgs - PrismaClient configuration options.
+ * @param optionArgs - PrismaClient configuration options with adapter
  * @returns {PrismaClient} A new PrismaClient instance with extended behavior.
  */
-function extendedPrismaClient(optionArgs: Prisma.PrismaClientOptions) {
+function extendedPrismaClient(
+    optionArgs: ConstructorParameters<typeof PrismaClient>[0]
+) {
     return new PrismaClient(optionArgs).$extends({
         query: {
             applicationSettings: {

@@ -1,0 +1,24 @@
+{
+    "name": "@mc-review/database",
+    "version": "1.0.0",
+    "main": "src/index.ts",
+    "types": "src/index.ts",
+    "scripts": {
+        "build": "echo 'Database package uses TypeScript source directly - no build needed'",
+        "generate": "prisma generate",
+        "migrate": "prisma migrate dev",
+        "studio": "prisma studio"
+    },
+    "license": "ISC",
+    "dependencies": {
+        "@prisma/client": "^7.0.0",
+        "@prisma/adapter-pg": "^7.0.0",
+        "pg": "^8.16.3"
+    },
+    "devDependencies": {
+        "@types/node": "^22.5.5",
+        "@types/pg": "^8.15.5",
+        "prisma": "7.0.0",
+        "typescript": "5.9.3"
+    }
+}

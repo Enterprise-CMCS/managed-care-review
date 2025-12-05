@@ -1,4 +1,4 @@
-import type { Prisma } from '@prisma/client'
+import type { Prisma } from '@mc-review/database'
 import type { ProgramType } from '../../domain-models'
 import type {
     ContractFormDataType,

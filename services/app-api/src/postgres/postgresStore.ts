@@ -4,7 +4,7 @@ import type {
     ContractRevisionTable,
     DocumentZipPackage,
     DocumentZipType,
-} from '@prisma/client'
+} from '@mc-review/database'
 import type { StateCodeType } from '@mc-review/submissions'
 import type {
     ProgramType,

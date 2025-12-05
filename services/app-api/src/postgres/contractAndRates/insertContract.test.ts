@@ -1,7 +1,7 @@
 import { sharedTestPrismaClient } from '../../testHelpers/storeHelpers'
 import { must, mockInsertContractArgs, getStateRecord } from '../../testHelpers'
 import { insertDraftContract } from './insertContract'
-import { PrismaClientKnownRequestError } from '@prisma/client/runtime/library'
+import { PrismaClientKnownRequestError } from '@mc-review/database'
 import type { StateCodeType } from '@mc-review/submissions'
 
 describe('insertContract', () => {

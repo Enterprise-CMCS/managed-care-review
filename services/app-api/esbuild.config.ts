@@ -9,7 +9,13 @@ export default () => {
     return {
         packager: 'pnpm',
         bundle: true,
-        exclude: ['prisma', '@prisma/client'],
+        exclude: [
+            'prisma',
+            '@prisma/client',
+            '@prisma/adapter-pg',
+            '@mc-review/database',
+            'pg',
+        ],
         sourcemap: true,
         loader: {
             '.graphql': 'text',

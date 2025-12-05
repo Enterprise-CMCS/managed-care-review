@@ -2,7 +2,7 @@ import type {
     DocumentZipType,
     DocumentZipPackage,
     PrismaClient,
-} from '@prisma/client'
+} from '@mc-review/database'
 import type { PrismaTransactionType } from '../prismaTypes'
 import { logError } from '../../logger'
 

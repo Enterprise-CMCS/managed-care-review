@@ -1,0 +1,8 @@
+# Generated Prisma Client
+generated/
+
+# Build output
+build/
+
+# Dependencies
+node_modules/

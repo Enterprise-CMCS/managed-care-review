@@ -6,8 +6,8 @@ import {
     must,
 } from '../../testHelpers'
 import { updateDraftRate } from './updateDraftRate'
-import { PrismaClientValidationError } from '@prisma/client/runtime/library'
-import type { RateType } from '@prisma/client'
+import { PrismaClientValidationError } from '@mc-review/database'
+import type { RateType } from '@mc-review/database'
 import type { RateFormEditableType } from '../../domain-models/contractAndRates'
 import { insertDraftContract } from './insertContract'
 

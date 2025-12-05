@@ -6,8 +6,8 @@ import {
     must,
 } from '../../testHelpers'
 import { updateDraftContract } from './updateDraftContract'
-import { PrismaClientValidationError } from '@prisma/client/runtime/library'
-import type { ContractType } from '@prisma/client'
+import { PrismaClientValidationError } from '@mc-review/database'
+import type { ContractType } from '@mc-review/database'
 import type {
     ContractFormDataType,
     ContractFormEditableType,

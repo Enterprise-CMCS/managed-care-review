@@ -1,4 +1,4 @@
-import { AuditAction } from '@prisma/client'
+import { AuditAction } from '@mc-review/database'
 import type { StateCodeType } from '@mc-review/submissions'
 import type { UserType } from '../../domain-models'
 import { NotFoundError, UserInputPostgresError } from '../postgresErrors'

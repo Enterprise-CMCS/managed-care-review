@@ -6,7 +6,7 @@ import type {
     QuestionResponseType,
     RateQuestionType,
 } from '../../domain-models'
-import type { Prisma } from '@prisma/client'
+import type { Prisma } from '@mc-review/database'
 
 const questionInclude = {
     documents: {

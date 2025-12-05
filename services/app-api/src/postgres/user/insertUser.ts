@@ -1,5 +1,5 @@
 import type { DivisionType, UserType } from '../../domain-models'
-import type { Role } from '@prisma/client'
+import type { Role } from '@mc-review/database'
 import { toDomainUser } from '../../domain-models'
 import type { ExtendedPrismaClient } from '../prismaClient'
 

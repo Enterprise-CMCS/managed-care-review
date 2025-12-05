@@ -7,8 +7,8 @@ import {
     mockInsertRateArgs,
 } from '../../testHelpers'
 import { updateDraftContractFormData } from './updateDraftContractWithRates'
-import { PrismaClientValidationError } from '@prisma/client/runtime/library'
-import type { ContractType } from '@prisma/client'
+import { PrismaClientValidationError } from '@mc-review/database'
+import type { ContractType } from '@mc-review/database'
 import type {
     ContractFormDataType,
     RateFormEditableType,
