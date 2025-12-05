@@ -22,7 +22,11 @@ import {
     activeFormPages,
     type ContractFormPageProps,
 } from '../../submissionUtils'
-import { RoutesRecord, RouteT } from '@mc-review/constants'
+import {
+    RoutesRecord,
+    RouteT,
+    EQRO_SUBMISSION_FORM_ROUTES,
+} from '@mc-review/constants'
 import {
     ButtonWithLogging,
     DynamicStepIndicator,
@@ -42,6 +46,7 @@ import { useErrorSummary } from '../../../../hooks/useErrorSummary'
 import { featureFlags } from '@mc-review/common-code'
 import { useFocusOnRender } from '../../../../hooks/useFocusOnRender'
 import { usePage } from '../../../../contexts/PageContext'
+import {generate} from "storybook/internal/babel";
 
 export interface ContactsFormValues {
     stateContacts: StateContact[]
@@ -71,8 +76,8 @@ const flattenErrors = (
 }
 
 const Contacts = ({
-    showValidations = false,
-}: ContractFormPageProps): React.ReactElement => {
+                      showValidations = false,
+                  }: ContractFormPageProps): React.ReactElement => {
     const [shouldValidate, setShouldValidate] = useState(showValidations)
     const [draftSaved, setDraftSaved] = useState(false)
     useFocusOnRender(draftSaved, '[data-testid="saveAsDraftSuccessBanner"]')
@@ -179,7 +184,14 @@ const Contacts = ({
             setDraftSaved(true)
             setSubmitting(false)
         } else {
-            if (hideSupportingDocs) {
+            if (draftSubmission.contractSubmissionType === 'EQRO') {
+                navigate(
+                    generatePath(RoutesRecord.SUBMISSIONS_REVIEW_SUBMIT, {
+                        id: id,
+                        contractSubmissionType,
+                    })
+                )
+            } else if (hideSupportingDocs) {
                 if (options.redirectPath) {
                     navigate(
                         generatePath(RoutesRecord[options.redirectPath], {
@@ -213,11 +225,22 @@ const Contacts = ({
         <>
             <FormNotificationContainer>
                 <DynamicStepIndicator
-                    formPages={activeFormPages(
-                        draftSubmission.draftRevision.formData,
-                        hideSupportingDocs
-                    )}
+                    formPages={
+                        draftSubmission.contractSubmissionType === 'EQRO'
+                            ? EQRO_SUBMISSION_FORM_ROUTES
+                            : activeFormPages(
+                                draftSubmission.draftRevision.formData,
+                                hideSupportingDocs
+                            )
+                    }
                     currentFormPage={currentRoute}
+                    customPageTitles={
+                        draftSubmission.contractSubmissionType === 'EQRO'
+                            ? {
+                                SUBMISSIONS_TYPE: 'Submission details'
+                            }
+                            :undefined
+                    }
                 />
                 <PageBannerAlerts
                     loggedInUser={loggedInUser}
@@ -238,17 +261,18 @@ const Contacts = ({
                     validationSchema={contactSchema}
                 >
                     {({
-                        values,
-                        errors,
-                        handleSubmit,
-                        isSubmitting,
-                        setSubmitting,
-                    }) => (
+                          values,
+                          errors,
+                          handleSubmit,
+                          isSubmitting,
+                          setSubmitting,
+                      }) => (
                         <>
                             <UswdsForm
                                 className={styles.formContainer}
                                 id="ContactsForm"
                                 onSubmit={handleSubmit}
+                                noValidate
                             >
                                 <SectionCard>
                                     <fieldset className="usa-fieldset with-sections">
@@ -274,9 +298,9 @@ const Contacts = ({
 
                                         <FieldArray name="stateContacts">
                                             {({
-                                                remove,
-                                                push,
-                                            }: FieldArrayRenderProps) => (
+                                                  remove,
+                                                  push,
+                                              }: FieldArrayRenderProps) => (
                                                 <div
                                                     className={
                                                         styles.stateContacts
@@ -284,7 +308,7 @@ const Contacts = ({
                                                     data-testid="state-contacts"
                                                 >
                                                     {values.stateContacts
-                                                        .length > 0 &&
+                                                            .length > 0 &&
                                                         values.stateContacts.map(
                                                             (
                                                                 _stateContact,
@@ -371,24 +395,24 @@ const Contacts = ({
 
                                                                         {index >
                                                                             0 && (
-                                                                            <ButtonWithLogging
-                                                                                type="button"
-                                                                                unstyled
-                                                                                parent_component_type="page body"
-                                                                                className={
-                                                                                    styles.removeContactBtn
-                                                                                }
-                                                                                onClick={() => {
-                                                                                    remove(
-                                                                                        index
-                                                                                    )
-                                                                                    setNewStateContactButtonFocus()
-                                                                                }}
-                                                                            >
-                                                                                Remove
-                                                                                contact
-                                                                            </ButtonWithLogging>
-                                                                        )}
+                                                                                <ButtonWithLogging
+                                                                                    type="button"
+                                                                                    unstyled
+                                                                                    parent_component_type="page body"
+                                                                                    className={
+                                                                                        styles.removeContactBtn
+                                                                                    }
+                                                                                    onClick={() => {
+                                                                                        remove(
+                                                                                            index
+                                                                                        )
+                                                                                        setNewStateContactButtonFocus()
+                                                                                    }}
+                                                                                >
+                                                                                    Remove
+                                                                                    contact
+                                                                                </ButtonWithLogging>
+                                                                            )}
                                                                     </Fieldset>
                                                                 </div>
                                                             )
@@ -437,51 +461,52 @@ const Contacts = ({
                                             }
                                         )
                                     }}
-                                    backOnClick={() =>
+                                    backOnClick={() => {
+                                        const previousPage =
+                                            draftSubmission.contractSubmissionType === 'EQRO' ||
+                                            draftSubmission.draftRevision.formData.submissionType === 'CONTRACT_ONLY'
+                                                ? RoutesRecord.SUBMISSIONS_CONTRACT_DETAILS
+                                                : RoutesRecord.SUBMISSIONS_RATE_DETAILS
+
                                         navigate(
-                                            draftSubmission.draftRevision
-                                                .formData.submissionType ===
-                                                'CONTRACT_ONLY'
-                                                ? generatePath(
-                                                      RoutesRecord.SUBMISSIONS_CONTRACT_DETAILS,
-                                                      {
-                                                          id,
-                                                          contractSubmissionType,
-                                                      }
-                                                  )
-                                                : generatePath(
-                                                      RoutesRecord.SUBMISSIONS_RATE_DETAILS,
-                                                      {
-                                                          id,
-                                                          contractSubmissionType,
-                                                      }
-                                                  )
+                                            generatePath(previousPage, {
+                                                id,
+                                                contractSubmissionType,
+                                            })
                                         )
-                                    }
+                                    }}
                                     continueOnClick={() => {
                                         setShouldValidate(true)
                                         setFocusErrorSummaryHeading(true)
                                     }}
                                     actionInProgress={isSubmitting}
                                     backOnClickUrl={
+                                        draftSubmission?.contractSubmissionType === 'EQRO' ||
                                         draftSubmission.draftRevision.formData
                                             .submissionType === 'CONTRACT_ONLY'
                                             ? generatePath(
-                                                  RoutesRecord.SUBMISSIONS_CONTRACT_DETAILS,
-                                                  {
-                                                      id,
-                                                      contractSubmissionType,
-                                                  }
-                                              )
+                                                RoutesRecord.SUBMISSIONS_CONTRACT_DETAILS,
+                                                {
+                                                    id,
+                                                    contractSubmissionType,
+                                                }
+                                            )
                                             : generatePath(
-                                                  RoutesRecord.SUBMISSIONS_RATE_DETAILS,
-                                                  {
-                                                      id,
-                                                      contractSubmissionType,
-                                                  }
-                                              )
+                                                RoutesRecord.SUBMISSIONS_RATE_DETAILS,
+                                                {
+                                                    id,
+                                                    contractSubmissionType,
+                                                }
+                                            )
                                     }
-                                    continueOnClickUrl="/edit/documents"
+                                    continueOnClickUrl={
+                                        draftSubmission?.contractSubmissionType === 'EQRO'
+                                            ? generatePath(RoutesRecord.SUBMISSIONS_REVIEW_SUBMIT, {
+                                                id,
+                                                contractSubmissionType,
+                                            })
+                                            :"/edit/documents"
+                                    }
                                 />
                             </UswdsForm>
                         </>
