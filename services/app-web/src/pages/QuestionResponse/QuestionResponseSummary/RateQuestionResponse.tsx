@@ -28,7 +28,8 @@ export const RateQuestionResponse = () => {
     const submitType = new URLSearchParams(location.search).get('submit')
     const { loggedInUser } = useAuth()
     const { pathname } = useLocation()
-    const { updateHeading, updateActiveMainContent } = usePage()
+    const { updateHeading, updateActiveMainContent, updateStateContent } =
+        usePage()
     const [rateName, setRateName] = useState<string | undefined>(undefined)
     const hasCMSPermissions = hasCMSUserPermissions(loggedInUser)
     let division: Division | undefined = undefined
@@ -63,6 +64,20 @@ export const RateQuestionResponse = () => {
     const rateCertificationName =
         rateRev?.formData.rateCertificationName ?? undefined
 
+    const stateName = rate?.state.name
+    const stateCode = rate?.state.code
+    // Set state info for the header
+    useEffect(() => {
+        if (stateCode || stateName) {
+            updateStateContent(stateCode, stateName)
+        } else {
+            updateStateContent(undefined, undefined)
+        }
+
+        return () => {
+            updateStateContent(undefined, undefined)
+        }
+    }, [stateCode, stateName, updateStateContent])
     // Handle loading and error states for fetching data while using cached data
     if (!data && loading) {
         return <ErrorOrLoadingPage state="LOADING" />

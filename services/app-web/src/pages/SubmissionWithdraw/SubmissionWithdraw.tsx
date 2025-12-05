@@ -94,7 +94,7 @@ export const SubmissionWithdraw = (): React.ReactElement => {
         id: string
         contractSubmissionType: ContractSubmissionType
     }
-    const { updateHeading } = usePage()
+    const { updateHeading, updateStateContent } = usePage()
     const { logFormSubmitEvent } = useTealium()
     const navigate = useNavigate()
     const [shouldValidate, setShouldValidate] = React.useState(false)
@@ -122,6 +122,8 @@ export const SubmissionWithdraw = (): React.ReactElement => {
         fetchPolicy: 'cache-and-network',
     })
     const contract = contractData?.fetchContract.contract
+    const stateCode = contract?.state.code
+    const stateName = contract?.state.name
     //Extracting rateIDs to query for parent contract data
     const rateIDs = contract
         ? contract.packageSubmissions[0].rateRevisions.map((rr) => rr.rateID)
@@ -134,6 +136,18 @@ export const SubmissionWithdraw = (): React.ReactElement => {
         updateHeading({ customHeading: contractName })
     }, [contractName, updateHeading])
 
+    // Set state info for the header
+    useEffect(() => {
+        if (stateCode || stateName) {
+            updateStateContent(stateCode, stateName)
+        } else {
+            updateStateContent(undefined, undefined)
+        }
+
+        return () => {
+            updateStateContent(undefined, undefined)
+        }
+    }, [stateCode, stateName, updateStateContent])
     //Fetching rates associated with above contract to determine whether or not they will be withdrawn (banner display)
     //This query will be skipped if rateIDs comes up empty
     const {

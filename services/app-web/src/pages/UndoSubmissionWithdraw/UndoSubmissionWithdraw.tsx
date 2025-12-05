@@ -43,7 +43,7 @@ export const UndoSubmissionWithdraw = (): React.ReactElement => {
         id: string
         contractSubmissionType: ContractSubmissionType
     }
-    const { updateHeading } = usePage()
+    const { updateHeading, updateStateContent } = usePage()
     const { logFormSubmitEvent } = useTealium()
     const navigate = useNavigate()
     const [shouldValidate, setShouldValidate] = useState(false)
@@ -70,11 +70,24 @@ export const UndoSubmissionWithdraw = (): React.ReactElement => {
     const contract = data?.fetchContract.contract
     const contractName =
         contract?.packageSubmissions[0].contractRevision.contractName
-
+    const stateCode = contract?.state.code
+    const stateName = contract?.state.name
     useEffect(() => {
         updateHeading({ customHeading: contractName })
     }, [contractName, updateHeading])
 
+    // Set state info for the header
+    useEffect(() => {
+        if (stateCode || stateName) {
+            updateStateContent(stateCode, stateName)
+        } else {
+            updateStateContent(undefined, undefined)
+        }
+
+        return () => {
+            updateStateContent(undefined, undefined)
+        }
+    }, [stateCode, stateName, updateStateContent])
     if (loading) {
         return <ErrorOrLoadingPage state="LOADING" />
     } else if (error) {

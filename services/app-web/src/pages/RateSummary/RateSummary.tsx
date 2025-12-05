@@ -37,7 +37,8 @@ import { ChildrenType } from '../../components/MultiColumnGrid/MultiColumnGrid'
 export const RateSummary = (): React.ReactElement => {
     // Page level state
     const { loggedInUser } = useAuth()
-    const { updateHeading, updateActiveMainContent } = usePage()
+    const { updateHeading, updateActiveMainContent, updateStateContent } =
+        usePage()
     const navigate = useNavigate()
     const [rateName, setRateName] = useState<string | undefined>(undefined)
     const [searchParams, setSearchParams] = useSearchParams()
@@ -97,13 +98,26 @@ export const RateSummary = (): React.ReactElement => {
         },
         fetchPolicy: 'cache-and-network',
     })
-
+    const stateCode = fetchContractData?.fetchContract.contract.state.code
+    const stateName = fetchContractData?.fetchContract.contract.state.name
     const activeMainContentId = 'rateSummaryPageMainContent'
     // Set the active main content to focus when click the Skip to main content button.
     useEffect(() => {
         updateActiveMainContent(activeMainContentId)
     }, [activeMainContentId, updateActiveMainContent])
 
+    // Set state info for the header
+    useEffect(() => {
+        if (stateCode || stateName) {
+            updateStateContent(stateCode, stateName)
+        } else {
+            updateStateContent(undefined, undefined)
+        }
+
+        return () => {
+            updateStateContent(undefined, undefined)
+        }
+    }, [stateCode, stateName, updateStateContent])
     // Handle loading and error states for fetching data while using cached data
     if (!data && loading) {
         return (

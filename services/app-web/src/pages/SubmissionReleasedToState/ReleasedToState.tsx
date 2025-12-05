@@ -56,7 +56,7 @@ const ReleasedToState = () => {
         id: string
         contractSubmissionType: string
     }>()
-    const { updateHeading } = usePage()
+    const { updateHeading, updateStateContent } = usePage()
     const { logFormSubmitEvent } = useTealium()
     const navigate = useNavigate()
     const [shouldValidate, setShouldValidate] = React.useState(false)
@@ -87,11 +87,26 @@ const ReleasedToState = () => {
         (contract?.packageSubmissions &&
             contract?.packageSubmissions[0].contractRevision.contractName) ||
         ''
+    const stateName = contract?.state.name
+    const stateCode = contract?.state.code
 
     // update heading
     useEffect(() => {
         updateHeading({ customHeading: `${contractName} Released to state` })
     }, [contractName, updateHeading])
+
+    // Set state info for the header
+    useEffect(() => {
+        if (stateCode || stateName) {
+            updateStateContent(stateCode, stateName)
+        } else {
+            updateStateContent(undefined, undefined)
+        }
+
+        return () => {
+            updateStateContent(undefined, undefined)
+        }
+    }, [stateCode, stateName, updateStateContent])
 
     if (fetchContractLoading) {
         return <ErrorOrLoadingPage state="LOADING" />
