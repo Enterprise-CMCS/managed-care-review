@@ -2239,191 +2239,457 @@ describe('submitContract', () => {
             ])
         })
 
-        it('returns an error if a base MCO submission does not include the required fields', async () => {
-            const stateServer = await constructTestPostgresServer({
-                s3Client: mockS3,
-            })
-
-            //Asserting errors for missing eqroNewContractor field - draft includes MCO by default
-            const draftWithMissingNewContractor =
-                await createAndUpdateTestEQROContract(stateServer, undefined, {
-                    populationCovered: 'MEDICAID_AND_CHIP',
-                    eqroNewContractor: null,
+        describe('BASE contract validation testing', () => {
+            it('returns an error if BASE contract with CHIP and MCO is missing required fields', async () => {
+                const stateServer = await constructTestPostgresServer({
+                    s3Client: mockS3,
                 })
-            const missingNewContractorResponse = await executeGraphQLOperation(
-                stateServer,
-                {
-                    query: SubmitContractDocument,
-                    variables: {
-                        input: {
-                            contractID: draftWithMissingNewContractor.id,
-                        },
+
+                const requiredFields = [
+                    {
+                        field: 'eqroNewContractor',
+                        errorMessage:
+                            'eqroNewContractor is required for BASE contracts with CHIP population & MCO entity',
                     },
+                    {
+                        field: 'eqroProvisionMcoNewOptionalActivity',
+                        errorMessage:
+                            'eqroProvisionMcoNewOptionalActivity is required for BASE contracts with CHIP population & MCO entity',
+                    },
+                    {
+                        field: 'eqroProvisionNewMcoEqrRelatedActivities',
+                        errorMessage:
+                            'eqroProvisionNewMcoEqrRelatedActivities is required for BASE contracts with CHIP population & MCO entity',
+                    },
+                    {
+                        field: 'eqroProvisionChipEqrRelatedActivities',
+                        errorMessage:
+                            'eqroProvisionChipEqrRelatedActivities is required for BASE contracts with CHIP population & MCO entity',
+                    },
+                ]
+
+                for (const { field, errorMessage } of requiredFields) {
+                    const draftWithMissingField =
+                        await createAndUpdateTestEQROContract(
+                            stateServer,
+                            undefined,
+                            {
+                                populationCovered: 'MEDICAID_AND_CHIP',
+                                [field]: null,
+                            }
+                        )
+
+                    const response = await executeGraphQLOperation(
+                        stateServer,
+                        {
+                            query: SubmitContractDocument,
+                            variables: {
+                                input: {
+                                    contractID: draftWithMissingField.id,
+                                },
+                            },
+                        }
+                    )
+
+                    expect(response.errors).toBeDefined()
+                    expect(response.errors).toEqual([
+                        expect.objectContaining({
+                            message: expect.stringMatching(
+                                `${errorMessage}: ${draftWithMissingField.id}`
+                            ),
+                            path: ['submitContract'],
+                            extensions: expect.objectContaining({
+                                argumentName: 'contractID',
+                                argumentValues: draftWithMissingField.id,
+                                code: 'BAD_USER_INPUT',
+                            }),
+                        }),
+                    ])
                 }
-            )
-
-            expect(missingNewContractorResponse.errors).toBeDefined()
-            expect(missingNewContractorResponse.errors).toEqual([
-                expect.objectContaining({
-                    message: expect.stringMatching(
-                        `eqroNewContractor can not be undefined for a EQRO contract submission: ${draftWithMissingNewContractor.id}`
-                    ),
-                    path: ['submitContract'],
-                    extensions: expect.objectContaining({
-                        argumentName: 'contractID',
-                        argumentValues: draftWithMissingNewContractor.id,
-                        code: 'BAD_USER_INPUT',
-                    }),
-                }),
-            ])
-
-            //Asserting errors for missing eqroProvisionMcoNewOptionalActivity field - draft includes MCO by default
-            const draftWithMissingMcoNewOptionalActivity =
-                await createAndUpdateTestEQROContract(stateServer, undefined, {
-                    populationCovered: 'MEDICAID_AND_CHIP',
-                    eqroProvisionMcoNewOptionalActivity: null,
-                })
-            const missingMcoNewOptionalActivityResponse =
-                await executeGraphQLOperation(stateServer, {
-                    query: SubmitContractDocument,
-                    variables: {
-                        input: {
-                            contractID:
-                                draftWithMissingMcoNewOptionalActivity.id,
-                        },
-                    },
-                })
-
-            expect(missingMcoNewOptionalActivityResponse.errors).toBeDefined()
-            expect(missingMcoNewOptionalActivityResponse.errors).toEqual([
-                expect.objectContaining({
-                    message: expect.stringMatching(
-                        `eqroProvisionMcoNewOptionalActivity can not be undefined for a EQRO contract submission: ${draftWithMissingMcoNewOptionalActivity.id}`
-                    ),
-                    path: ['submitContract'],
-                    extensions: expect.objectContaining({
-                        argumentName: 'contractID',
-                        argumentValues:
-                            draftWithMissingMcoNewOptionalActivity.id,
-                        code: 'BAD_USER_INPUT',
-                    }),
-                }),
-            ])
-
-            //Asserting errors for missing eqroProvisionNewMcoEqrRelatedActivities field - draft includes MCO by default
-            const draftWithMissingNewMcoEqrRelatedActivities =
-                await createAndUpdateTestEQROContract(stateServer, undefined, {
-                    populationCovered: 'MEDICAID_AND_CHIP',
-                    eqroProvisionNewMcoEqrRelatedActivities: null,
-                })
-            const missingNewMcoEqrRelatedActivitiesResponse =
-                await executeGraphQLOperation(stateServer, {
-                    query: SubmitContractDocument,
-                    variables: {
-                        input: {
-                            contractID:
-                                draftWithMissingNewMcoEqrRelatedActivities.id,
-                        },
-                    },
-                })
-
-            expect(
-                missingNewMcoEqrRelatedActivitiesResponse.errors
-            ).toBeDefined()
-            expect(missingNewMcoEqrRelatedActivitiesResponse.errors).toEqual([
-                expect.objectContaining({
-                    message: expect.stringMatching(
-                        `eqroProvisionNewMcoEqrRelatedActivities can not be undefined for a EQRO contract submission: ${draftWithMissingNewMcoEqrRelatedActivities.id}`
-                    ),
-                    path: ['submitContract'],
-                    extensions: expect.objectContaining({
-                        argumentName: 'contractID',
-                        argumentValues:
-                            draftWithMissingNewMcoEqrRelatedActivities.id,
-                        code: 'BAD_USER_INPUT',
-                    }),
-                }),
-            ])
-        })
-
-        it('returns an error if an amendment contract with CHIP coverage excluding MCO lacks the required fields', async () => {
-            const stateServer = await constructTestPostgresServer({
-                s3Client: mockS3,
             })
 
-            //Asserting errors for missing eqroProvisionChipEqrRelatedActivities field
-            const draftWithMissingChipEqrRelatedActivities =
-                await createAndUpdateTestEQROContract(stateServer, undefined, {
-                    contractType: 'AMENDMENT',
-                    populationCovered: 'MEDICAID_AND_CHIP',
-                    managedCareEntities: ['PAHP'],
-                    eqroProvisionChipEqrRelatedActivities: null,
+            it('returns an error if BASE contract with CHIP and NO MCO is missing required fields', async () => {
+                const stateServer = await constructTestPostgresServer({
+                    s3Client: mockS3,
                 })
-            const missingChipEqrRelatedActivitiesResponse =
-                await executeGraphQLOperation(stateServer, {
-                    query: SubmitContractDocument,
-                    variables: {
-                        input: {
-                            contractID:
-                                draftWithMissingChipEqrRelatedActivities.id,
+
+                const draftMissingEqroProvisionChipEqrRelatedActivities =
+                    await createAndUpdateTestEQROContract(
+                        stateServer,
+                        undefined,
+                        {
+                            populationCovered: 'CHIP',
+                            managedCareEntities: ['PAHP'],
+                            eqroProvisionChipEqrRelatedActivities: null,
+                        }
+                    )
+
+                const errorResponse = await executeGraphQLOperation(
+                    stateServer,
+                    {
+                        query: SubmitContractDocument,
+                        variables: {
+                            input: {
+                                contractID:
+                                    draftMissingEqroProvisionChipEqrRelatedActivities.id,
+                            },
                         },
-                    },
-                })
+                    }
+                )
 
-            expect(missingChipEqrRelatedActivitiesResponse.errors).toBeDefined()
-            expect(missingChipEqrRelatedActivitiesResponse.errors).toEqual([
-                expect.objectContaining({
-                    message: expect.stringMatching(
-                        `eqroProvisionChipEqrRelatedActivities can not be undefined for an amendment contract with chip populations included: ${draftWithMissingChipEqrRelatedActivities.id}`
-                    ),
-                    path: ['submitContract'],
-                    extensions: expect.objectContaining({
-                        argumentName: 'contractID',
-                        argumentValues:
-                            draftWithMissingChipEqrRelatedActivities.id,
-                        code: 'BAD_USER_INPUT',
+                expect(errorResponse.errors).toBeDefined()
+                expect(errorResponse.errors).toEqual([
+                    expect.objectContaining({
+                        message: expect.stringMatching(
+                            `eqroProvisionChipEqrRelatedActivities is required for BASE contracts with CHIP population & no MCO entity: ${draftMissingEqroProvisionChipEqrRelatedActivities.id}`
+                        ),
+                        path: ['submitContract'],
+                        extensions: expect.objectContaining({
+                            argumentName: 'contractID',
+                            argumentValues:
+                                draftMissingEqroProvisionChipEqrRelatedActivities.id,
+                            code: 'BAD_USER_INPUT',
+                        }),
                     }),
-                }),
-            ])
-        })
-
-        it('returns an error if an amendment contract which includes MCO lacks the required fields', async () => {
-            const stateServer = await constructTestPostgresServer({
-                s3Client: mockS3,
+                ])
             })
 
-            //Asserting errors for missing eqroProvisionChipEqrRelatedActivities field
-            const draftWithMissingMcoEqrOrRelatedActivities =
-                await createAndUpdateTestEQROContract(stateServer, undefined, {
-                    contractType: 'AMENDMENT',
-                    eqroProvisionMcoEqrOrRelatedActivities: null,
-                })
-            const missingChipEqrRelatedActivitiesResponse =
-                await executeGraphQLOperation(stateServer, {
-                    query: SubmitContractDocument,
-                    variables: {
-                        input: {
-                            contractID:
-                                draftWithMissingMcoEqrOrRelatedActivities.id,
-                        },
-                    },
+            it('returns an error if BASE contract with MEDICAID and MCO is missing required fields', async () => {
+                const stateServer = await constructTestPostgresServer({
+                    s3Client: mockS3,
                 })
 
-            expect(missingChipEqrRelatedActivitiesResponse.errors).toBeDefined()
-            expect(missingChipEqrRelatedActivitiesResponse.errors).toEqual([
-                expect.objectContaining({
-                    message: expect.stringMatching(
-                        `eqroProvisionMcoEqrOrRelatedActivities can not be undefined for an amendment contract that includes MCO: ${draftWithMissingMcoEqrOrRelatedActivities.id}`
-                    ),
-                    path: ['submitContract'],
-                    extensions: expect.objectContaining({
-                        argumentName: 'contractID',
-                        argumentValues:
-                            draftWithMissingMcoEqrOrRelatedActivities.id,
-                        code: 'BAD_USER_INPUT',
+                const requiredFields = [
+                    {
+                        field: 'eqroNewContractor',
+                        errorMessage:
+                            'eqroNewContractor is required for BASE contracts with MEDICAID population & MCO entity',
+                    },
+                    {
+                        field: 'eqroProvisionMcoNewOptionalActivity',
+                        errorMessage:
+                            'eqroProvisionMcoNewOptionalActivity is required for BASE contracts with MEDICAID population & MCO entity',
+                    },
+                    {
+                        field: 'eqroProvisionNewMcoEqrRelatedActivities',
+                        errorMessage:
+                            'eqroProvisionNewMcoEqrRelatedActivities is required for BASE contracts with MEDICAID population & MCO entity',
+                    },
+                ]
+
+                for (const { field, errorMessage } of requiredFields) {
+                    const draftWithMissingField =
+                        await createAndUpdateTestEQROContract(
+                            stateServer,
+                            undefined,
+                            {
+                                populationCovered: 'MEDICAID',
+                                [field]: null,
+                            }
+                        )
+
+                    const response = await executeGraphQLOperation(
+                        stateServer,
+                        {
+                            query: SubmitContractDocument,
+                            variables: {
+                                input: {
+                                    contractID: draftWithMissingField.id,
+                                },
+                            },
+                        }
+                    )
+
+                    expect(response.errors).toBeDefined()
+                    expect(response.errors).toEqual([
+                        expect.objectContaining({
+                            message: expect.stringMatching(
+                                `${errorMessage}: ${draftWithMissingField.id}`
+                            ),
+                            path: ['submitContract'],
+                            extensions: expect.objectContaining({
+                                argumentName: 'contractID',
+                                argumentValues: draftWithMissingField.id,
+                                code: 'BAD_USER_INPUT',
+                            }),
+                        }),
+                    ])
+                }
+            })
+        })
+
+        describe('AMENDMENT contract validation testing', () => {
+            it('returns an error if AMENDMENT contract with CHIP and MCO is missing required fields', async () => {
+                const stateServer = await constructTestPostgresServer({
+                    s3Client: mockS3,
+                })
+
+                const requiredFields = [
+                    {
+                        field: 'eqroProvisionMcoEqrOrRelatedActivities',
+                        errorMessage:
+                            'eqroProvisionMcoEqrOrRelatedActivities is required for AMENDMENT contracts with CHIP population & MCO entity',
+                    },
+                    {
+                        field: 'eqroProvisionChipEqrRelatedActivities',
+                        errorMessage:
+                            'eqroProvisionChipEqrRelatedActivities is required for AMENDMENT contracts with CHIP population & MCO entity',
+                    },
+                ]
+
+                for (const { field, errorMessage } of requiredFields) {
+                    const draftWithMissingField =
+                        await createAndUpdateTestEQROContract(
+                            stateServer,
+                            undefined,
+                            {
+                                contractType: 'AMENDMENT',
+                                populationCovered: 'MEDICAID_AND_CHIP',
+                                [field]: null,
+                            }
+                        )
+
+                    const response = await executeGraphQLOperation(
+                        stateServer,
+                        {
+                            query: SubmitContractDocument,
+                            variables: {
+                                input: {
+                                    contractID: draftWithMissingField.id,
+                                },
+                            },
+                        }
+                    )
+
+                    expect(response.errors).toBeDefined()
+                    expect(response.errors).toEqual([
+                        expect.objectContaining({
+                            message: expect.stringMatching(
+                                `${errorMessage}: ${draftWithMissingField.id}`
+                            ),
+                            path: ['submitContract'],
+                            extensions: expect.objectContaining({
+                                argumentName: 'contractID',
+                                argumentValues: draftWithMissingField.id,
+                                code: 'BAD_USER_INPUT',
+                            }),
+                        }),
+                    ])
+                }
+            })
+
+            it('returns an error if AMENDMENT contract with CHIP and MCO is missing required fields when eqroProvisionMcoEqrOrRelatedActivities is true', async () => {
+                const stateServer = await constructTestPostgresServer({
+                    s3Client: mockS3,
+                })
+
+                const requiredFields = [
+                    {
+                        field: 'eqroProvisionMcoNewOptionalActivity',
+                        errorMessage:
+                            'eqroProvisionMcoNewOptionalActivity is required for AMENDMENT contracts where eqroProvisionMcoEqrOrRelatedActivities is true',
+                    },
+                    {
+                        field: 'eqroProvisionNewMcoEqrRelatedActivities',
+                        errorMessage:
+                            'eqroProvisionNewMcoEqrRelatedActivities is required for AMENDMENT contracts where eqroProvisionMcoEqrOrRelatedActivities is true',
+                    },
+                ]
+
+                for (const { field, errorMessage } of requiredFields) {
+                    const draftWithMissingField =
+                        await createAndUpdateTestEQROContract(
+                            stateServer,
+                            undefined,
+                            {
+                                contractType: 'AMENDMENT',
+                                populationCovered: 'MEDICAID_AND_CHIP',
+                                eqroProvisionMcoEqrOrRelatedActivities: true,
+                                [field]: null,
+                            }
+                        )
+
+                    const response = await executeGraphQLOperation(
+                        stateServer,
+                        {
+                            query: SubmitContractDocument,
+                            variables: {
+                                input: {
+                                    contractID: draftWithMissingField.id,
+                                },
+                            },
+                        }
+                    )
+
+                    expect(response.errors).toBeDefined()
+                    expect(response.errors).toEqual([
+                        expect.objectContaining({
+                            message: expect.stringMatching(
+                                `${errorMessage}: ${draftWithMissingField.id}`
+                            ),
+                            path: ['submitContract'],
+                            extensions: expect.objectContaining({
+                                argumentName: 'contractID',
+                                argumentValues: draftWithMissingField.id,
+                                code: 'BAD_USER_INPUT',
+                            }),
+                        }),
+                    ])
+                }
+            })
+
+            it('returns an error if AMENDMENT contract with CHIP and no MCO is missing required fields', async () => {
+                const stateServer = await constructTestPostgresServer({
+                    s3Client: mockS3,
+                })
+
+                const draftMissingEqroProvisionChipEqrRelatedActivities =
+                    await createAndUpdateTestEQROContract(
+                        stateServer,
+                        undefined,
+                        {
+                            contractType: 'AMENDMENT',
+                            populationCovered: 'MEDICAID_AND_CHIP',
+                            managedCareEntities: ['PAHP'],
+                            eqroProvisionChipEqrRelatedActivities: null,
+                        }
+                    )
+
+                const errorResponse = await executeGraphQLOperation(
+                    stateServer,
+                    {
+                        query: SubmitContractDocument,
+                        variables: {
+                            input: {
+                                contractID:
+                                    draftMissingEqroProvisionChipEqrRelatedActivities.id,
+                            },
+                        },
+                    }
+                )
+
+                expect(errorResponse.errors).toBeDefined()
+                expect(errorResponse.errors).toEqual([
+                    expect.objectContaining({
+                        message: expect.stringMatching(
+                            `eqroProvisionChipEqrRelatedActivities is required for AMENDMENT contract with CHIP population & no MCO entity: ${draftMissingEqroProvisionChipEqrRelatedActivities.id}`
+                        ),
+                        path: ['submitContract'],
+                        extensions: expect.objectContaining({
+                            argumentName: 'contractID',
+                            argumentValues:
+                                draftMissingEqroProvisionChipEqrRelatedActivities.id,
+                            code: 'BAD_USER_INPUT',
+                        }),
                     }),
-                }),
-            ])
+                ])
+            })
+
+            it('returns an error if AMENDMENT contract with MEDICAID and MCO is missing required fields', async () => {
+                const stateServer = await constructTestPostgresServer({
+                    s3Client: mockS3,
+                })
+
+                const draftMissingEqroProvisionMcoEqrOrRelatedActivities =
+                    await createAndUpdateTestEQROContract(
+                        stateServer,
+                        undefined,
+                        {
+                            contractType: 'AMENDMENT',
+                            populationCovered: 'MEDICAID',
+                            eqroProvisionMcoEqrOrRelatedActivities: null,
+                        }
+                    )
+
+                const errorResponse = await executeGraphQLOperation(
+                    stateServer,
+                    {
+                        query: SubmitContractDocument,
+                        variables: {
+                            input: {
+                                contractID:
+                                    draftMissingEqroProvisionMcoEqrOrRelatedActivities.id,
+                            },
+                        },
+                    }
+                )
+
+                expect(errorResponse.errors).toBeDefined()
+                expect(errorResponse.errors).toEqual([
+                    expect.objectContaining({
+                        message: expect.stringMatching(
+                            `eqroProvisionMcoEqrOrRelatedActivities is required for AMENDMENT contracts with MEDICAID population & MCO entity: ${draftMissingEqroProvisionMcoEqrOrRelatedActivities.id}`
+                        ),
+                        path: ['submitContract'],
+                        extensions: expect.objectContaining({
+                            argumentName: 'contractID',
+                            argumentValues:
+                                draftMissingEqroProvisionMcoEqrOrRelatedActivities.id,
+                            code: 'BAD_USER_INPUT',
+                        }),
+                    }),
+                ])
+            })
+
+            it('returns an error if AMENDMENT contract with MEDICAID and MCO is missing required fields when eqroProvisionMcoEqrOrRelatedActivities is true', async () => {
+                const stateServer = await constructTestPostgresServer({
+                    s3Client: mockS3,
+                })
+
+                const requiredFields = [
+                    {
+                        field: 'eqroProvisionMcoNewOptionalActivity',
+                        errorMessage:
+                            'eqroProvisionMcoNewOptionalActivity is required for AMENDMENT contracts where eqroProvisionMcoEqrOrRelatedActivities is true',
+                    },
+                    {
+                        field: 'eqroProvisionNewMcoEqrRelatedActivities',
+                        errorMessage:
+                            'eqroProvisionNewMcoEqrRelatedActivities is required for AMENDMENT contracts where eqroProvisionMcoEqrOrRelatedActivities is true',
+                    },
+                ]
+
+                for (const { field, errorMessage } of requiredFields) {
+                    const draftWithMissingField =
+                        await createAndUpdateTestEQROContract(
+                            stateServer,
+                            undefined,
+                            {
+                                contractType: 'AMENDMENT',
+                                populationCovered: 'MEDICAID',
+                                eqroProvisionMcoEqrOrRelatedActivities: true,
+                                [field]: null,
+                            }
+                        )
+
+                    const response = await executeGraphQLOperation(
+                        stateServer,
+                        {
+                            query: SubmitContractDocument,
+                            variables: {
+                                input: {
+                                    contractID: draftWithMissingField.id,
+                                },
+                            },
+                        }
+                    )
+
+                    expect(response.errors).toBeDefined()
+                    expect(response.errors).toEqual([
+                        expect.objectContaining({
+                            message: expect.stringMatching(
+                                `${errorMessage}: ${draftWithMissingField.id}`
+                            ),
+                            path: ['submitContract'],
+                            extensions: expect.objectContaining({
+                                argumentName: 'contractID',
+                                argumentValues: draftWithMissingField.id,
+                                code: 'BAD_USER_INPUT',
+                            }),
+                        }),
+                    ])
+                }
+            })
         })
     })
 })

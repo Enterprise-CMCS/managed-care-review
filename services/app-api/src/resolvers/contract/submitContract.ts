@@ -92,13 +92,12 @@ const validateEQROSubmission = (
 
     const validateFields = (
         fields: Record<string, boolean | undefined>,
-        errorContext: string,
-        contractId: string
+        errorContext: string
     ): GraphQLError | undefined => {
         for (const field in fields) {
             if (fields[field] == null) {
                 return EQROValidationError(
-                    `${field} is required for ${errorContext}: ${contractId}`
+                    `${field} is required for ${errorContext}: ${contractID}`
                 )
             }
         }
@@ -117,8 +116,7 @@ const validateEQROSubmission = (
                     eqroProvisionChipEqrRelatedActivities:
                         formData.eqroProvisionChipEqrRelatedActivities,
                 },
-                'BASE contracts with CHIP population & MCO entity',
-                contractID
+                'BASE contracts with CHIP population & MCO entity'
             )
         }
 
@@ -128,8 +126,7 @@ const validateEQROSubmission = (
                     eqroProvisionChipEqrRelatedActivities:
                         formData.eqroProvisionChipEqrRelatedActivities,
                 },
-                'BASE contracts with CHIP population & no MCO entity',
-                contractID
+                'BASE contracts with CHIP population & no MCO entity'
             )
         }
 
@@ -142,8 +139,7 @@ const validateEQROSubmission = (
                     eqroProvisionNewMcoEqrRelatedActivities:
                         formData.eqroProvisionNewMcoEqrRelatedActivities,
                 },
-                'BASE contracts with Medicaid population & MCO entity',
-                contractID
+                'BASE contracts with MEDICAID population & MCO entity'
             )
         }
     }
@@ -157,8 +153,7 @@ const validateEQROSubmission = (
                     eqroProvisionChipEqrRelatedActivities:
                         formData.eqroProvisionChipEqrRelatedActivities,
                 },
-                'AMENDMENT contracts with CHIP population & MCO entity',
-                contractID
+                'AMENDMENT contracts with CHIP population & MCO entity'
             )
 
             if (initialRequiredFields) {
@@ -173,8 +168,7 @@ const validateEQROSubmission = (
                         eqroProvisionNewMcoEqrRelatedActivities:
                             formData.eqroProvisionNewMcoEqrRelatedActivities,
                     },
-                    'AMENDMENT contracts where eqroProvisionMcoEqrOrRelatedActivities is true',
-                    contractID
+                    'AMENDMENT contracts where eqroProvisionMcoEqrOrRelatedActivities is true'
                 )
             }
         }
@@ -185,8 +179,7 @@ const validateEQROSubmission = (
                     eqroProvisionChipEqrRelatedActivities:
                         formData.eqroProvisionChipEqrRelatedActivities,
                 },
-                'AMENDMENT contract with CHIP population & no MCO entity',
-                contractID
+                'AMENDMENT contract with CHIP population & no MCO entity'
             )
         }
 
@@ -196,8 +189,7 @@ const validateEQROSubmission = (
                     eqroProvisionMcoEqrOrRelatedActivities:
                         formData.eqroProvisionMcoEqrOrRelatedActivities,
                 },
-                'AMENDMENT contracts with MEDICAID population & MCO entity',
-                contractID
+                'AMENDMENT contracts with MEDICAID population & MCO entity'
             )
 
             if (initialRequiredFields) {
@@ -212,8 +204,7 @@ const validateEQROSubmission = (
                         eqroProvisionNewMcoEqrRelatedActivities:
                             formData.eqroProvisionNewMcoEqrRelatedActivities,
                     },
-                    'AMENDMENT contracts where eqroProvisionMcoEqrOrRelatedActivities is true',
-                    contractID
+                    'AMENDMENT contracts where eqroProvisionMcoEqrOrRelatedActivities is true'
                 )
             }
         }
