@@ -1,5 +1,6 @@
 @use '../../styles/custom.scss' as custom;
 @use '../../styles/uswdsImports.scss' as uswds;
+@use '../../styles/uswdsSettings.scss' as uswdsSettings;
 
 // This is to override all the styles in USWDS classes.
 @mixin override-uswds-nav {
@@ -167,7 +168,7 @@
         flex-wrap: wrap;
         align-items: center;
         font-size: 2rem;
-        line-height: 1.5;
+        line-height: 0.3;
         font-weight: bold;
         > span {
             padding: 0 1rem;
@@ -191,7 +192,8 @@
 }
 
 .stateHeadingText {
-    line-height: 1.2;
+    line-height: 34px;
+    font-size: 28px;
 }
 
 .submissionIdLine {
@@ -202,6 +204,10 @@
     font-weight: 400;
     opacity: 0.9;
     margin-top: 0.15rem;
+}
+
+.submissionIdLineDivider {
+    color: custom.$mcr-periwinkle;
 }
 
 .submissionIdlabel {
@@ -250,13 +256,14 @@ div div.contractTypeText {
 }
 
 .contractTypeLabel {
-    font-size: 0.75rem;
+    font-size: 14.5px;
+    line-height: 16px;
     font-weight: 400;
-    opacity: 0.85;
     margin-bottom: 0.15rem;
 }
 
 .contractTypeValue {
     font-size: 1rem;
     font-weight: bold;
+    line-height: 23px;
 }
