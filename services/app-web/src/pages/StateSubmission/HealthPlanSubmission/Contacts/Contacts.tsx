@@ -481,9 +481,8 @@ const Contacts = ({
                                     }}
                                     actionInProgress={isSubmitting}
                                     backOnClickUrl={
-                                        draftSubmission?.contractSubmissionType === 'EQRO' ||
-                                        draftSubmission.draftRevision.formData
-                                            .submissionType === 'CONTRACT_ONLY'
+                                        draftSubmission.contractSubmissionType === 'EQRO' ||
+                                        draftSubmission.draftRevision.formData.submissionType === 'CONTRACT_ONLY'
                                             ? generatePath(
                                                 RoutesRecord.SUBMISSIONS_CONTRACT_DETAILS,
                                                 {
