@@ -42,7 +42,7 @@ const AutomatedEmailsTable = () => {
                     <tr>
                         <td>{formatEmails(config?.data?.dmcoEmails)}</td>
                         <td>DMCO division emails</td>
-                        <td>None</td>
+                        <td>All emails (from CMS side and state side)</td>
                     </tr>
                     <tr>
                         <td>{formatEmails(config?.data?.dmcpReviewEmails)}</td>

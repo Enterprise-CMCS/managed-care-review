@@ -37,6 +37,7 @@ describe('generateCMSReviewerEmails', () => {
                 ...testEmailConfig().devReviewTeamEmails,
                 ...testStateAnalystsEmails,
                 ...testEmailConfig().dmcpSubmissionEmails,
+                ...testEmailConfig().dmcoEmails,
             ],
         },
         {
@@ -48,6 +49,7 @@ describe('generateCMSReviewerEmails', () => {
                 ...testEmailConfig().devReviewTeamEmails,
                 ...testStateAnalystsEmails,
                 ...testEmailConfig().dmcpSubmissionEmails,
+                ...testEmailConfig().dmcoEmails,
                 ...testEmailConfig().oactEmails,
             ],
         },
@@ -60,9 +62,11 @@ describe('generateCMSReviewerEmails', () => {
                             stateCode: 'MS',
                             stateNumber: 4,
                             id: 'test-contract-123',
+                            contractSubmissionType: 'HEALTH_PLAN',
                         },
                         formData: {
                             ...mockContractRev().formData,
+                            populationCovered: undefined,
                             programIDs: [
                                 '36c54daf-7611-4a15-8c3b-cdeb3fd7e25a',
                             ],
@@ -75,15 +79,22 @@ describe('generateCMSReviewerEmails', () => {
             testDescription:
                 'submission with CHIP program specified for contract certification',
             expectedResult: [
-                'devreview1@example.com',
-                'devreview2@example.com',
-                '"State Analyst 1" <StateAnalyst1@example.com>',
-                '"State Analyst 2" <StateAnalyst2@example.com>',
+                ...testEmailConfig().devReviewTeamEmails,
+                ...testStateAnalystsEmails,
+                ...testEmailConfig().dmcoEmails,
             ],
         },
         {
             submission: mockUnlockedContract({
                 stateCode: 'MS',
+                draftRevision: {
+                    ...mockContractRev({
+                        formData: {
+                            ...mockContractRev().formData,
+                            populationCovered: 'CHIP',
+                        },
+                    }),
+                },
                 draftRates: [
                     mockRate({
                         stateCode: 'MS',
@@ -127,24 +138,31 @@ describe('generateCMSReviewerEmails', () => {
             testDescription:
                 'submission with CHIP program specified for rate certification',
             expectedResult: [
-                'devreview1@example.com',
-                'devreview2@example.com',
-                '"State Analyst 1" <StateAnalyst1@example.com>',
-                '"State Analyst 2" <StateAnalyst2@example.com>',
+                ...testEmailConfig().devReviewTeamEmails,
+                ...testStateAnalystsEmails,
+                ...testEmailConfig().dmcoEmails,
             ],
         },
         {
             submission: mockUnlockedContract({
                 stateCode: 'PR',
+                draftRevision: {
+                    ...mockContractRev({
+                        contract: {
+                            ...mockUnlockedContract(),
+                            stateCode: 'PR',
+                        },
+                    }),
+                },
             }),
+
             emailConfig: testEmailConfig(),
             stateAnalystsEmails: testStateAnalystsEmails,
             testDescription: 'Puerto Rico submission',
             expectedResult: [
-                'devreview1@example.com',
-                'devreview2@example.com',
-                '"State Analyst 1" <StateAnalyst1@example.com>',
-                '"State Analyst 2" <StateAnalyst2@example.com>',
+                ...testEmailConfig().devReviewTeamEmails,
+                ...testStateAnalystsEmails,
+                ...testEmailConfig().dmcoEmails,
             ],
         },
         {
@@ -213,6 +231,7 @@ describe('handleAsCHIPSubmission', () => {
                                 stateCode: 'MS',
                                 stateNumber: 4,
                                 id: 'test-contract-123',
+                                contractSubmissionType: 'HEALTH_PLAN',
                             },
                             formData: {
                                 ...mockContractRev().formData,
@@ -241,6 +260,7 @@ describe('handleAsCHIPSubmission', () => {
                                 stateCode: 'AZ',
                                 stateNumber: 4,
                                 id: 'test-contract-123',
+                                contractSubmissionType: 'HEALTH_PLAN',
                             },
                             formData: {
                                 ...mockContractRev().formData,

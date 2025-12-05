@@ -31,6 +31,7 @@ describe('sendRateQuestionCMSEmail', () => {
     ]
 
     test('to addresses list only includes state analyst when a DMCO user submits a question', async () => {
+        // Dev and DMCO are considered defaults for all automated emails
         const template = await sendRateQuestionCMSEmail(
             rate,
             stateAnalysts,
@@ -49,6 +50,7 @@ describe('sendRateQuestionCMSEmail', () => {
                 toAddresses: expect.arrayContaining([
                     ...stateAnalysts,
                     ...testEmailConfig().devReviewTeamEmails,
+                    ...testEmailConfig().dmcoEmails,
                 ]),
             })
         )
@@ -82,7 +84,16 @@ describe('sendRateQuestionCMSEmail', () => {
                 toAddresses: expect.arrayContaining([
                     ...stateAnalysts,
                     ...testEmailConfig().devReviewTeamEmails,
+                    ...testEmailConfig().dmcoEmails,
                     ...testEmailConfig().oactEmails,
+                ]),
+            })
+        )
+
+        expect(template).toEqual(
+            expect.not.objectContaining({
+                toAddresses: expect.arrayContaining([
+                    ...testEmailConfig().dmcpReviewEmails,
                 ]),
             })
         )
@@ -106,7 +117,16 @@ describe('sendRateQuestionCMSEmail', () => {
                 toAddresses: expect.arrayContaining([
                     ...stateAnalysts,
                     ...testEmailConfig().devReviewTeamEmails,
+                    ...testEmailConfig().dmcoEmails,
                     ...testEmailConfig().dmcpReviewEmails,
+                ]),
+            })
+        )
+
+        expect(template).toEqual(
+            expect.not.objectContaining({
+                toAddresses: expect.arrayContaining([
+                    ...testEmailConfig().oactEmails,
                 ]),
             })
         )

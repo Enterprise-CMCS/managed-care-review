@@ -656,8 +656,10 @@ describe('undoWithdrawContract', () => {
                 ),
                 sourceEmail: emailConfig.emailSource,
                 toAddresses: expect.arrayContaining([
+                    ...testEmailConfig().devReviewTeamEmails,
                     ...testEmailConfig().dmcpSubmissionEmails,
                     ...testEmailConfig().oactEmails,
+                    ...testEmailConfig().dmcoEmails,
                 ]),
                 bodyHTML: expect.stringContaining(contractName),
             })

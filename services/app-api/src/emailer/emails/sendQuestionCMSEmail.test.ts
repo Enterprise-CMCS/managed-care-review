@@ -41,6 +41,7 @@ const questions: ContractQuestionType[] = [
 ]
 
 test('to addresses list only includes state analyst when a DMCO user submits a question', async () => {
+    // Dev and DMCO are considered defaults for all automated emails
     const sub = mockContractRev()
     const defaultStatePrograms = mockMNState().programs
 
@@ -68,7 +69,11 @@ test('to addresses list only includes state analyst when a DMCO user submits a q
 
     expect(template).toEqual(
         expect.objectContaining({
-            toAddresses: expect.arrayContaining([...stateAnalysts]),
+            toAddresses: expect.arrayContaining([
+                ...stateAnalysts,
+                ...testEmailConfig().devReviewTeamEmails,
+                ...testEmailConfig().dmcoEmails,
+            ]),
         })
     )
 })
@@ -104,7 +109,17 @@ test('to addresses list includes state analyst and OACT group emails when an OAC
         expect.objectContaining({
             toAddresses: expect.arrayContaining([
                 ...stateAnalysts,
+                ...testEmailConfig().devReviewTeamEmails,
+                ...testEmailConfig().dmcoEmails,
                 ...testEmailConfig().oactEmails,
+            ]),
+        })
+    )
+
+    expect(template).toEqual(
+        expect.not.objectContaining({
+            toAddresses: expect.arrayContaining([
+                ...testEmailConfig().dmcpReviewEmails,
             ]),
         })
     )
@@ -140,7 +155,17 @@ test('to addresses list includes state analyst and DMCP group emails when a DMCP
         expect.objectContaining({
             toAddresses: expect.arrayContaining([
                 ...stateAnalysts,
+                ...testEmailConfig().devReviewTeamEmails,
+                ...testEmailConfig().dmcoEmails,
                 ...testEmailConfig().dmcpReviewEmails,
+            ]),
+        })
+    )
+
+    expect(template).toEqual(
+        expect.not.objectContaining({
+            toAddresses: expect.arrayContaining([
+                ...testEmailConfig().oactEmails,
             ]),
         })
     )
