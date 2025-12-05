@@ -44,7 +44,6 @@ export type {
     RateFormDataType,
     DocumentType,
     RateFormEditableType,
-    ContractFormEditableType,
     StateContactType,
     ActuaryContactType,
     StrippedRateFormDataType,

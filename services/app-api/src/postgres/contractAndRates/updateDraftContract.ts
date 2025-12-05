@@ -1,12 +1,10 @@
 import { findContractWithHistory } from './findContractWithHistory'
 import { NotFoundError } from '../postgresErrors'
-import type {
-    ContractType,
-    ContractFormEditableType,
-} from '../../domain-models/contractAndRates'
+import type { ContractType } from '../../domain-models'
 import { prismaUpdateContractFormDataFromDomain } from './prismaContractRateAdaptors'
 import type { PrismaTransactionType } from '../prismaTypes'
 import type { ExtendedPrismaClient } from '../prismaClient'
+import type { UpdateDraftContractFormDataType } from '../../domain-models/contractAndRates/formDataTypes'
 
 async function updateDraftContractInsideTransaction(
     tx: PrismaTransactionType,
@@ -46,7 +44,7 @@ async function updateDraftContractInsideTransaction(
 
 type UpdateContractArgsType = {
     contractID: string
-    formData: ContractFormEditableType
+    formData: UpdateDraftContractFormDataType
 }
 
 // Update the given draft

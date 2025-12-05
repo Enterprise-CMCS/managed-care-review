@@ -1,18 +1,11 @@
 import { findContractWithHistory } from './findContractWithHistory'
 import { NotFoundError } from '../postgresErrors'
 
-import type {
-    ContractType,
-    ContractFormEditableType,
-} from '../../domain-models/contractAndRates'
+import type { ContractType } from '../../domain-models'
 import { prismaUpdateContractFormDataFromDomain } from './prismaContractRateAdaptors'
 import { includeFullRate } from './prismaFullContractRateHelpers'
 import type { ExtendedPrismaClient } from '../prismaClient'
-
-type UpdateContractArgsType = {
-    contractID: string
-    formData: ContractFormEditableType
-}
+import type { UpdateContractArgsType } from './updateDraftContract'
 
 // Update the given draft
 // * can change the set of draftRates
@@ -75,4 +68,3 @@ async function updateDraftContractFormData(
 }
 
 export { updateDraftContractFormData }
-export type { UpdateContractArgsType }

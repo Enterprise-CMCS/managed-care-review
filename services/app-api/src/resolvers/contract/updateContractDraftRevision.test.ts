@@ -438,5 +438,73 @@ describe(`Tests UpdateContractDraftRevision`, () => {
                 })
             )
         })
+        it('clears out not applicable EQRO fields', async () => {
+            const mockLDService = testLDService({ '438-attestation': true })
+            const server = await constructTestPostgresServer({
+                ldService: mockLDService,
+            })
+            const contract = await createAndUpdateTestEQROContract(server)
+
+            const formData = contract.draftRevision?.formData
+
+            expect(formData).toEqual(
+                expect.objectContaining({
+                    eqroNewContractor: true,
+                    eqroProvisionMcoNewOptionalActivity: true,
+                    eqroProvisionNewMcoEqrRelatedActivities: true,
+                    eqroProvisionChipEqrRelatedActivities: true,
+                    eqroProvisionMcoEqrOrRelatedActivities: true,
+                })
+            )
+
+            // Change a EQRO conditional question trigger field
+            const updatedContract = await updateTestContractDraftRevision(
+                server,
+                contract.id,
+                contract.draftRevision?.updatedAt,
+                mockGqlContractDraftRevisionFormDataInput(contract.stateCode, {
+                    ...formData,
+                    contractType: 'AMENDMENT',
+                })
+            )
+
+            const updatedFormData = updatedContract.draftRevision?.formData
+
+            // expect all conditional fields to null out
+            expect(updatedFormData).toEqual(
+                expect.objectContaining({
+                    eqroNewContractor: null,
+                    eqroProvisionMcoNewOptionalActivity: null,
+                    eqroProvisionNewMcoEqrRelatedActivities: null,
+                    eqroProvisionChipEqrRelatedActivities: null,
+                    eqroProvisionMcoEqrOrRelatedActivities: null,
+                })
+            )
+
+            // Update EQRO submission conditional fields
+            const updateEQROFields = await updateTestContractDraftRevision(
+                server,
+                contract.id,
+                updatedContract.draftRevision?.updatedAt,
+                mockGqlContractDraftRevisionFormDataInput(contract.stateCode, {
+                    ...updatedFormData,
+                    eqroNewContractor: true,
+                    eqroProvisionMcoNewOptionalActivity: false,
+                })
+            )
+
+            const updatedEQROFormData = updateEQROFields.draftRevision?.formData
+
+            // Expect updated EQRO fields to be retained
+            expect(updatedEQROFormData).toEqual(
+                expect.objectContaining({
+                    eqroNewContractor: true,
+                    eqroProvisionMcoNewOptionalActivity: false,
+                    eqroProvisionNewMcoEqrRelatedActivities: null,
+                    eqroProvisionChipEqrRelatedActivities: null,
+                    eqroProvisionMcoEqrOrRelatedActivities: null,
+                })
+            )
+        })
     })
 })

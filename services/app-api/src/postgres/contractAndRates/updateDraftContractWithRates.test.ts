@@ -12,12 +12,12 @@ import type { ContractType } from '@prisma/client'
 import type {
     ContractFormDataType,
     RateFormEditableType,
-    ContractFormEditableType,
 } from '../../domain-models/contractAndRates'
 import { v4 as uuidv4 } from 'uuid'
 import { insertDraftRate } from './insertRate'
 import { updateDraftContractRates } from './updateDraftContractRates'
 import { getDraftContractRateRevisions } from '../../domain-models'
+import type { UpdateDraftContractFormDataType } from '../../domain-models/contractAndRates/formDataTypes'
 
 describe('updateDraftContractWithRates postgres', () => {
     afterEach(() => {
@@ -53,7 +53,7 @@ describe('updateDraftContractWithRates postgres', () => {
         )
     })
 
-    function completeTestContract(): ContractFormEditableType {
+    function completeTestContract(): UpdateDraftContractFormDataType {
         return {
             programIDs: ['5904a736-4422-4b78-abef-f3df3d0ae21d'],
             populationCovered: 'MEDICAID' as const,
@@ -261,7 +261,7 @@ describe('updateDraftContractWithRates postgres', () => {
     it('updates linked documents as expected in multiple requests', async () => {
         const client = await sharedTestPrismaClient()
 
-        const draftContractForm1: ContractFormEditableType = {
+        const draftContractForm1: UpdateDraftContractFormDataType = {
             submissionDescription: 'draftData1',
             contractDocuments: [
                 {
@@ -279,7 +279,7 @@ describe('updateDraftContractWithRates postgres', () => {
             ],
         }
         // documents all replaced, additional supporting docs added
-        const draftContractForm2: ContractFormEditableType = {
+        const draftContractForm2: UpdateDraftContractFormDataType = {
             submissionDescription: 'draftData2',
             contractDocuments: [
                 {
@@ -303,7 +303,7 @@ describe('updateDraftContractWithRates postgres', () => {
         }
 
         // documents unchanged
-        const draftContractForm3: ContractFormEditableType = {
+        const draftContractForm3: UpdateDraftContractFormDataType = {
             submissionDescription: 'draftData3',
             contractDocuments: draftContractForm2.contractDocuments,
             supportingDocuments: draftContractForm1.supportingDocuments,
@@ -363,7 +363,7 @@ describe('updateDraftContractWithRates postgres', () => {
 
     it('updates linked contacts as expected in multiple requests', async () => {
         const client = await sharedTestPrismaClient()
-        const draftContractForm1: ContractFormEditableType = {
+        const draftContractForm1: UpdateDraftContractFormDataType = {
             submissionDescription: 'draftData1',
             stateContacts: [
                 {
@@ -374,7 +374,7 @@ describe('updateDraftContractWithRates postgres', () => {
             ],
         }
         // all contacts replaced
-        const draftContractForm2: ContractFormEditableType = {
+        const draftContractForm2: UpdateDraftContractFormDataType = {
             submissionDescription: 'draftData2',
             stateContacts: [
                 {
@@ -386,7 +386,7 @@ describe('updateDraftContractWithRates postgres', () => {
         }
 
         // contacts values unchanged
-        const draftContractForm3: ContractFormEditableType = {
+        const draftContractForm3: UpdateDraftContractFormDataType = {
             submissionDescription: 'draftData3',
             stateContacts: draftContractForm2.stateContacts,
         }

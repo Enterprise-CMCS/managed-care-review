@@ -1,6 +1,7 @@
 import {
     validateContractDraftRevisionInput,
     parseContract,
+    parseAndUpdateEqroFields,
 } from './dataValidatorHelpers'
 import {
     mockGqlContractDraftRevisionFormDataInput,
@@ -15,6 +16,10 @@ import {
     defaultFloridaProgram,
     defaultFloridaRateProgram,
 } from '../../testHelpers/gqlHelpers'
+import type {
+    ContractFormDataType,
+    UpdateDraftContractFormDataType,
+} from './formDataTypes'
 
 describe('validateContractDraftRevisionInput', () => {
     it('Validates input form data and removes statutoryRegulatoryAttestationDescription', async () => {
@@ -56,7 +61,6 @@ describe('validateContractDraftRevisionInput', () => {
 
         expect(validatedFormData).toEqual(expectedResult)
     })
-
     it('converts fields that are null to undefined', async () => {
         const prismaClient = await sharedTestPrismaClient()
         const postgresStore = NewPostgresStore(prismaClient)
@@ -363,7 +367,6 @@ describe('parseContract', () => {
 
         expect(parsedContract).toEqual(contract)
     })
-
     it('return error if invalid form data', async () => {
         const prismaClient = await sharedTestPrismaClient()
         const postgresStore = NewPostgresStore(prismaClient)
@@ -725,5 +728,280 @@ describe('parseContract', () => {
         expect(errMessages[0]).toContain(
             'dsnpContract is required when any of the following Federal Authorities are present: STATE_PLAN,WAIVER_1915B,WAIVER_1115,VOLUNTARY'
         )
+    })
+})
+
+describe('parseAndUpdateEqroFields', () => {
+    const ALL_EQRO_FIELDS = [
+        'eqroNewContractor',
+        'eqroProvisionMcoEqrOrRelatedActivities',
+        'eqroProvisionMcoNewOptionalActivity',
+        'eqroProvisionNewMcoEqrRelatedActivities',
+        'eqroProvisionChipEqrRelatedActivities',
+    ] as const
+
+    const defaultEqroValues = {
+        eqroNewContractor: true,
+        eqroProvisionMcoEqrOrRelatedActivities: true,
+        eqroProvisionMcoNewOptionalActivity: true,
+        eqroProvisionNewMcoEqrRelatedActivities: true,
+        eqroProvisionChipEqrRelatedActivities: true,
+    }
+
+    const baseCurrentFormData = (
+        overrides?: Partial<ContractFormDataType>
+    ): ContractFormDataType => ({
+        programIDs: ['program-1'],
+        submissionType: 'CONTRACT_ONLY',
+        submissionDescription: 'Test submission',
+        contractType: 'BASE',
+        populationCovered: 'MEDICAID',
+        riskBasedContract: false,
+        stateContacts: [],
+        supportingDocuments: [],
+        contractExecutionStatus: 'EXECUTED',
+        contractDocuments: [],
+        contractDateStart: new Date('2024-01-01'),
+        contractDateEnd: new Date('2024-12-31'),
+        managedCareEntities: ['MCO'],
+        federalAuthorities: [],
+        ...defaultEqroValues,
+        ...overrides,
+    })
+
+    const baseUpdateFormData = (
+        overrides?: Partial<UpdateDraftContractFormDataType>
+    ): UpdateDraftContractFormDataType => ({
+        contractType: 'BASE',
+        populationCovered: 'MEDICAID',
+        managedCareEntities: ['MCO'],
+        ...defaultEqroValues,
+        ...overrides,
+    })
+
+    describe('when triggering questions have not changed', () => {
+        it('returns form data unchanged', () => {
+            const currentFormData = baseCurrentFormData()
+            const updateFormData = baseUpdateFormData()
+
+            const result = parseAndUpdateEqroFields(
+                currentFormData,
+                updateFormData
+            )
+
+            ALL_EQRO_FIELDS.forEach((field) => {
+                expect(result[field]).toBe(true)
+            })
+        })
+    })
+
+    describe('when contract type changes', () => {
+        it('nullifies all EQRO fields', () => {
+            const currentFormData = baseCurrentFormData({
+                contractType: 'BASE',
+            })
+            const updateFormData = baseUpdateFormData({
+                contractType: 'AMENDMENT',
+            })
+
+            const result = parseAndUpdateEqroFields(
+                currentFormData,
+                updateFormData
+            )
+
+            ALL_EQRO_FIELDS.forEach((field) => {
+                expect(result[field]).toBeNull()
+            })
+        })
+    })
+
+    describe('when population covered changes', () => {
+        it('nullifies all EQRO fields when changing from MEDICAID to MEDICAID_AND_CHIP', () => {
+            const currentFormData = baseCurrentFormData({
+                populationCovered: 'MEDICAID',
+            })
+            const updateFormData = baseUpdateFormData({
+                populationCovered: 'MEDICAID_AND_CHIP',
+            })
+
+            const result = parseAndUpdateEqroFields(
+                currentFormData,
+                updateFormData
+            )
+
+            ALL_EQRO_FIELDS.forEach((field) => {
+                expect(result[field]).toBeNull()
+            })
+        })
+
+        it('nullifies all EQRO fields when changing from CHIP to MEDICAID', () => {
+            const currentFormData = baseCurrentFormData({
+                populationCovered: 'CHIP',
+            })
+            const updateFormData = baseUpdateFormData({
+                populationCovered: 'MEDICAID',
+            })
+
+            const result = parseAndUpdateEqroFields(
+                currentFormData,
+                updateFormData
+            )
+
+            ALL_EQRO_FIELDS.forEach((field) => {
+                expect(result[field]).toBeNull()
+            })
+        })
+
+        it('nullifies all EQRO fields when changing from MEDICAID_AND_CHIP to MEDICAID', () => {
+            const currentFormData = baseCurrentFormData({
+                populationCovered: 'MEDICAID_AND_CHIP',
+            })
+            const updateFormData = baseUpdateFormData({
+                populationCovered: 'MEDICAID',
+            })
+
+            const result = parseAndUpdateEqroFields(
+                currentFormData,
+                updateFormData
+            )
+
+            ALL_EQRO_FIELDS.forEach((field) => {
+                expect(result[field]).toBeNull()
+            })
+        })
+
+        it('does not nullify fields when changing from CHIP to MEDICAID_AND_CHIP', () => {
+            const currentFormData = baseCurrentFormData({
+                populationCovered: 'CHIP',
+            })
+            const updateFormData = baseUpdateFormData({
+                populationCovered: 'MEDICAID_AND_CHIP',
+            })
+
+            const result = parseAndUpdateEqroFields(
+                currentFormData,
+                updateFormData
+            )
+
+            ALL_EQRO_FIELDS.forEach((field) => {
+                expect(result[field]).toBe(true)
+            })
+        })
+
+        it('does not nullify fields when changing from MEDICAID_AND_CHIP to CHIP', () => {
+            const currentFormData = baseCurrentFormData({
+                populationCovered: 'MEDICAID_AND_CHIP',
+            })
+            const updateFormData = baseUpdateFormData({
+                populationCovered: 'CHIP',
+            })
+
+            const result = parseAndUpdateEqroFields(
+                currentFormData,
+                updateFormData
+            )
+
+            ALL_EQRO_FIELDS.forEach((field) => {
+                expect(result[field]).toBe(true)
+            })
+        })
+    })
+
+    describe('when managed care entities changes', () => {
+        it('nullifies all EQRO fields when MCO is added', () => {
+            const currentFormData = baseCurrentFormData({
+                managedCareEntities: ['PIHP'],
+            })
+            const updateFormData = baseUpdateFormData({
+                managedCareEntities: ['PIHP', 'MCO'],
+            })
+
+            const result = parseAndUpdateEqroFields(
+                currentFormData,
+                updateFormData
+            )
+
+            ALL_EQRO_FIELDS.forEach((field) => {
+                expect(result[field]).toBeNull()
+            })
+        })
+
+        it('nullifies all EQRO fields when MCO is removed', () => {
+            const currentFormData = baseCurrentFormData({
+                managedCareEntities: ['MCO'],
+            })
+            const updateFormData = baseUpdateFormData({
+                managedCareEntities: ['PIHP'],
+            })
+
+            const result = parseAndUpdateEqroFields(
+                currentFormData,
+                updateFormData
+            )
+
+            ALL_EQRO_FIELDS.forEach((field) => {
+                expect(result[field]).toBeNull()
+            })
+        })
+
+        it('nullifies all EQRO fields when entities are reordered with additions', () => {
+            const currentFormData = baseCurrentFormData({
+                managedCareEntities: ['MCO', 'PIHP'],
+            })
+            const updateFormData = baseUpdateFormData({
+                managedCareEntities: ['PIHP', 'MCO', 'PAHP'],
+            })
+
+            const result = parseAndUpdateEqroFields(
+                currentFormData,
+                updateFormData
+            )
+
+            ALL_EQRO_FIELDS.forEach((field) => {
+                expect(result[field]).toBeNull()
+            })
+        })
+
+        it('does not nullify fields when entities are only reordered', () => {
+            const currentFormData = baseCurrentFormData({
+                managedCareEntities: ['MCO', 'PIHP'],
+            })
+            const updateFormData = baseUpdateFormData({
+                managedCareEntities: ['PIHP', 'MCO'],
+            })
+
+            const result = parseAndUpdateEqroFields(
+                currentFormData,
+                updateFormData
+            )
+
+            ALL_EQRO_FIELDS.forEach((field) => {
+                expect(result[field]).toBe(true)
+            })
+        })
+    })
+
+    describe('when multiple triggering questions change', () => {
+        it('nullifies all EQRO fields', () => {
+            const currentFormData = baseCurrentFormData({
+                contractType: 'BASE',
+                populationCovered: 'MEDICAID',
+                managedCareEntities: ['MCO'],
+            })
+            const updateFormData = baseUpdateFormData({
+                contractType: 'AMENDMENT',
+                populationCovered: 'CHIP',
+                managedCareEntities: ['PIHP'],
+            })
+
+            const result = parseAndUpdateEqroFields(
+                currentFormData,
+                updateFormData
+            )
+
+            ALL_EQRO_FIELDS.forEach((field) => {
+                expect(result[field]).toBeNull()
+            })
+        })
     })
 })

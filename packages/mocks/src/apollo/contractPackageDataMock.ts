@@ -6,7 +6,8 @@ import {
     UnlockedContract,
     CmsUser,
     StateUser,
-    Rate, IndexContractQuestionsPayload,
+    Rate, IndexContractQuestionsPayload, ContractDraftRevisionFormDataInput,
+    GenericDocumentInput, StateContactInput,
 } from '../gen/gqlClient'
 import { s3DlUrl } from './documentDataMock'
 import { mockMNState } from './stateMock'
@@ -457,6 +458,7 @@ function mockContractPackageDraft(partial?: Partial<Contract>): Contract {
             createdAt: new Date('01/01/2023'),
             updatedAt: new Date('11/01/2023'),
             contractName: 'MCR-0005-alvhalfhdsalfee',
+            documentZipPackages: [],
             formData: mockContractFormData(partial?.draftRevision?.formData),
         },
 
@@ -2617,6 +2619,7 @@ function mockContractPackageUnlockedWithUnlockedType(
         ...partial,
     }
 }
+
 function mockContractFormData(
     partial?: Partial<ContractFormData>
 ): ContractFormData {
@@ -2650,6 +2653,7 @@ function mockContractFormData(
         ],
         stateContacts: [
             {
+                __typename: 'StateContact',
                 name: 'State Contact 1',
                 titleRole: 'Test State Contact 1',
                 email: 'actuarycontact1@test.com',
@@ -2692,7 +2696,106 @@ function mockContractFormData(
         statutoryRegulatoryAttestation: true,
         statutoryRegulatoryAttestationDescription:
             'everything meets regulatory attestation',
+        eqroNewContractor: null,
+        eqroProvisionMcoNewOptionalActivity: null,
+        eqroProvisionNewMcoEqrRelatedActivities: null,
+        eqroProvisionChipEqrRelatedActivities: null,
+        eqroProvisionMcoEqrOrRelatedActivities: null,
         ...partial,
+    }
+}
+
+function mockUpdateContractDraftRevisionInput(
+    partial?: Partial<ContractDraftRevisionFormDataInput>
+): ContractDraftRevisionFormDataInput {
+    const {
+        __typename, // strip out __typename. arguments could contain them, but input type errors when present
+        ...formData
+    } = partial ?? {} as any
+
+    const contractDocuments: GenericDocumentInput[] = partial?.contractDocuments ? partial?.contractDocuments.map(doc => ({
+        name: doc.name,
+        s3URL: doc.s3URL,
+        sha256: doc.sha256,
+        downloadURL: doc.downloadURL,
+    })) : [
+        {
+            s3URL: 's3://bucketname/one-two/one-two.png',
+            sha256: 'fakesha',
+            name: 'contract document',
+            downloadURL: s3DlUrl,
+        },
+    ]
+
+    const supportingDocuments: GenericDocumentInput[]  = partial?.supportingDocuments ? partial?.supportingDocuments.map(doc => ({
+        name: doc.name,
+        s3URL: doc.s3URL,
+        sha256: doc.sha256,
+        downloadURL: doc.downloadURL,
+    })) : [
+        {
+            s3URL: 's3://bucketname/key/contractsupporting1',
+            sha256: 'fakesha',
+            name: 'contractSupporting1',
+            downloadURL: s3DlUrl,
+        },
+        {
+            s3URL: 's3://bucketname/key/contractSupporting2',
+            sha256: 'fakesha',
+            name: 'contractSupporting2',
+            downloadURL: s3DlUrl,
+        },
+    ]
+
+    const stateContacts: StateContactInput[]  = partial?.stateContacts ? partial.stateContacts.map(contact => ({
+        name: contact.name,
+        titleRole: contact.titleRole,
+        email: contact.email,
+    })) : [
+        {
+            name: 'State Contact 1',
+            titleRole: 'Test State Contact 1',
+            email: 'actuarycontact1@test.com',
+        }
+    ]
+
+    return {
+        programIDs: ['abbdf9b0-c49e-4c4c-bb6f-040cb7b51cce'],
+        populationCovered: 'MEDICAID',
+        submissionType: 'CONTRACT_AND_RATES',
+        riskBasedContract: true,
+        dsnpContract: true,
+        submissionDescription: 'A real submission',
+        contractType: 'AMENDMENT',
+        contractExecutionStatus: 'EXECUTED',
+        contractDateStart: new Date('01/01/2023'),
+        contractDateEnd: new Date('12/31/2023'),
+        managedCareEntities: ['MCO'],
+        federalAuthorities: ['STATE_PLAN'],
+        inLieuServicesAndSettings: true,
+        modifiedBenefitsProvided: true,
+        modifiedGeoAreaServed: false,
+        modifiedMedicaidBeneficiaries: true,
+        modifiedRiskSharingStrategy: true,
+        modifiedIncentiveArrangements: false,
+        modifiedWitholdAgreements: false,
+        modifiedStateDirectedPayments: true,
+        modifiedPassThroughPayments: true,
+        modifiedPaymentsForMentalDiseaseInstitutions: false,
+        modifiedMedicalLossRatioStandards: true,
+        modifiedOtherFinancialPaymentIncentive: false,
+        modifiedEnrollmentProcess: true,
+        modifiedGrevienceAndAppeal: false,
+        modifiedNetworkAdequacyStandards: true,
+        modifiedLengthOfContract: false,
+        modifiedNonRiskPaymentArrangements: true,
+        statutoryRegulatoryAttestation: true,
+        statutoryRegulatoryAttestationDescription:
+            'everything meets regulatory attestation',
+        ...formData,
+        contractDocuments,
+        supportingDocuments,
+        stateContacts
     }
 }
 
@@ -2971,5 +3074,6 @@ export {
     mockContractPackageSubmittedWithQuestions,
     mockContractPackageApproved,
     mockContractPackageApprovedWithQuestions,
-    mockWithdrawnRates
+    mockWithdrawnRates,
+    mockUpdateContractDraftRevisionInput
 }
