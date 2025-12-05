@@ -1,6 +1,5 @@
 @use '../../styles/custom.scss' as custom;
 @use '../../styles/uswdsImports.scss' as uswds;
-@use '../../styles/uswdsSettings.scss' as uswdsSettings;
 
 // This is to override all the styles in USWDS classes.
 @mixin override-uswds-nav {

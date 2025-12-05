@@ -52,7 +52,7 @@ const SharedSubHeadingRow = ({
 const ContractType = ({
     contractType,
 }: {
-    contractType: 'EQRO' | 'Health plan'
+    contractType: ContractSubmissionType
 }) => {
     return (
         <div
@@ -86,7 +86,7 @@ const StateDisplay = ({
             <div>
                 <StateIcon code={stateCode as StateIconProps['code']} />
             </div>
-            <PageHeading>
+            <PageHeading data-testid="stateDisplay">
                 <span className="srOnly">{stateName}&nbsp;</span>
 
                 <span className={styles.stateHeadingText}>

@@ -112,7 +112,7 @@ const PageProvider: React.FC<
 
     /**
      * Pass the state info the the page header. This is used to
-     * render that state icon and name on the submission summary page
+     * render that state icon and name in the header
      * for CMS users
      * @param stateCode Takes string of the state code
      * @param stateName Takes string of the state name
