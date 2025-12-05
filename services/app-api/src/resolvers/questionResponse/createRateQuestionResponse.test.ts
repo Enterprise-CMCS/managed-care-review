@@ -225,6 +225,7 @@ describe('createRateQuestionResponse', () => {
         const cmsRecipientEmails = [
             ...assignedUserEmails,
             ...emailConfig.devReviewTeamEmails,
+            ...emailConfig.dmcoEmails,
             ...emailConfig.oactEmails,
         ]
 

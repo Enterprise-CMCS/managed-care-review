@@ -1502,6 +1502,7 @@ describe('submitContract', () => {
 
                 const cmsEmails = [
                     ...config.devReviewTeamEmails,
+                    ...config.dmcoEmails,
                     ...stateAnalystsEmails,
                 ]
 
@@ -1575,6 +1576,7 @@ describe('submitContract', () => {
 
                 const cmsEmails = [
                     ...config.devReviewTeamEmails,
+                    ...config.dmcoEmails,
                     ...stateAnalystsEmails,
                 ]
 
@@ -1639,6 +1641,7 @@ describe('submitContract', () => {
 
                 const cmsEmails = [
                     ...config.devReviewTeamEmails,
+                    ...config.dmcoEmails,
                     ...assignedUserEmails,
                 ]
 
@@ -1994,6 +1997,12 @@ describe('submitContract', () => {
                             ),
                             expect.stringContaining(
                                 'mc-review-qa+DMCPsubmissiondev2@truss.works'
+                            ),
+                            expect.stringContaining(
+                                'mc-review-qa+DMCO1@truss.works'
+                            ),
+                            expect.stringContaining(
+                                'mc-review-qa+DMCO2@truss.works'
                             ),
                         ]),
                     })
