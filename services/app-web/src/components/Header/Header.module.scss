@@ -176,6 +176,9 @@
     div {
         min-height: 5rem; // this ensures we don't collapse page heading when no text present
     }
+    h1 {
+        margin: 0;
+    }
 }
 .stateRow,
 .cmsRow {
@@ -198,15 +201,15 @@
 .submissionIdLine {
     display: inline-flex;
     align-items: center;
-    gap: 0.35rem;
+    margin-top: 8px;
     font-size: 0.95rem;
     font-weight: 400;
-    opacity: 0.9;
-    margin-top: 0.15rem;
 }
 
 .submissionIdLineDivider {
     color: custom.$mcr-periwinkle;
+    margin-left: 0.3rem;
+    margin-right: 0.3rem;
 }
 
 .submissionIdlabel {
