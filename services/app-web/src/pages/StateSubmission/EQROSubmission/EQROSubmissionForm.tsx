@@ -2,8 +2,8 @@ import React from 'react'
 import { Routes, Route } from 'react-router-dom'
 import { getRelativePathFromNestedRoute } from '../submissionUtils'
 import { EQROSubmissionDetails } from './EQROSubmissionDetails'
-import { EQROContractDetails } from './EQROContractDetails'
-import { EQROContacts } from './EQROContacts/EQROContacts'
+import { Contacts } from '../HealthPlanSubmission/Contacts'
+import { EQROContractDetails } from './EQROContractDetails/EQROContractDetails'
 import { EQROReviewSubmit } from './EQROReviewSubmit'
 import { Error404 } from '../../Errors/Error404Page'
 import formContainerStyles from '../../../components/FormContainer/FormContainer.module.scss'
@@ -29,7 +29,7 @@ export const EQROSubmissionForm = (): React.ReactElement => {
                     path={getRelativePathFromNestedRoute(
                         'SUBMISSIONS_CONTACTS'
                     )}
-                    element={<EQROContacts />}
+                    element={<Contacts />}
                 />
                 <Route
                     path={getRelativePathFromNestedRoute(
