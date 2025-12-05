@@ -96,7 +96,7 @@ describe('Page Heading Row', () => {
             />
         )
 
-        expect(screen.getByTestId('entityType')).toHaveTextContent('EQRO')
+        expect(screen.getByTestId('contractType')).toHaveTextContent('EQRO')
     })
 
     it('displays Health plan entity type on hpp submission page', () => {
@@ -109,7 +109,7 @@ describe('Page Heading Row', () => {
             />
         )
 
-        expect(screen.getByTestId('entityType')).toHaveTextContent(
+        expect(screen.getByTestId('contractType')).toHaveTextContent(
             'Health plan'
         )
     })
@@ -124,7 +124,7 @@ describe('Page Heading Row', () => {
             />
         )
 
-        expect(screen.queryByTestId('entityType')).not.toBeInTheDocument()
+        expect(screen.queryByTestId('contractType')).not.toBeInTheDocument()
         expect(screen.queryByTestId('submission-id')).not.toBeInTheDocument()
     })
 
@@ -138,7 +138,7 @@ describe('Page Heading Row', () => {
             />
         )
 
-        expect(screen.queryByTestId('entityType')).not.toBeInTheDocument()
+        expect(screen.queryByTestId('contractType')).not.toBeInTheDocument()
         expect(screen.queryByTestId('submission-id')).not.toBeInTheDocument()
     })
 })

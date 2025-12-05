@@ -216,7 +216,7 @@
     font-weight: 400;
 }
 
-.entityTypeContainer {
+.contractTypeContainer {
     margin-left: auto;
     display: flex;
     align-items: flex-start;
@@ -226,7 +226,7 @@
     min-height: 1rem;
 }
 
-div div.entityTypeText {
+div div.contractTypeText {
     display: flex;
     flex-direction: column;
     align-items: flex-start;
@@ -234,13 +234,13 @@ div div.entityTypeText {
     line-height: 1.2;
 }
 
-.dashboardHeading div.entityTypeContainer,
-.dashboardHeading div.entityTypeText,
-.dashboardHeading div.entityTypeDivider {
+.dashboardHeading div.contractTypeContainer,
+.dashboardHeading div.contractTypeText,
+.dashboardHeading div.contractTypeDivider {
     min-height: 2rem;
 }
 
-.entityTypeDivider {
+.contractTypeDivider {
     width: 3px;
     height: 2.5rem;
     background-color: custom.$mcr-periwinkle;
@@ -249,14 +249,14 @@ div div.entityTypeText {
     left: 15px;
 }
 
-.entityTypeLabel {
+.contractTypeLabel {
     font-size: 0.75rem;
     font-weight: 400;
     opacity: 0.85;
     margin-bottom: 0.15rem;
 }
 
-.entityTypeValue {
+.contractTypeValue {
     font-size: 1rem;
     font-weight: bold;
 }

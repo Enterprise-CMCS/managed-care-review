@@ -10,6 +10,8 @@ import { ModalRef } from '@trussworks/react-uswds'
 type PageContextType = {
     heading?: string | React.ReactElement
     activeMainContentId?: string
+    stateCode?: string
+    stateName?: string
     activeModalRef?: React.RefObject<ModalRef>
     updateHeading: ({
         customHeading,
@@ -22,6 +24,7 @@ type PageContextType = {
         updatedModalRef?: React.RefObject<ModalRef>
     }) => void
     updateActiveMainContent: (mainContentId: string) => void
+    updateStateContent: (stateCode?: string, stateName?: string) => void
 }
 
 const PageContext = React.createContext(null as unknown as PageContextType)
@@ -44,6 +47,12 @@ const PageProvider: React.FC<
     const [activeMainContentId, setActiveMainContent] = React.useState<
         string | undefined
     >(undefined)
+    const [stateCode, setStateCode] = React.useState<string | undefined>(
+        undefined
+    )
+    const [stateName, setStateName] = React.useState<string | undefined>(
+        undefined
+    )
 
     const { currentRoute: routeName } = useCurrentRoute()
 
@@ -101,6 +110,21 @@ const PageProvider: React.FC<
         setActiveMainContent(activeMainContent)
     }
 
+    /**
+     * Pass the state info the the page header. This is used to
+     * render that state icon and name on the submission summary page
+     * for CMS users
+     * @param stateCode Takes string of the state code
+     * @param stateName Takes string of the state name
+     */
+    const updateStateContent = (
+        stateCodeArg?: string,
+        stateNameArg?: string
+    ) => {
+        setStateCode(stateCodeArg)
+        setStateName(stateNameArg)
+    }
+
     return (
         <PageContext.Provider
             value={{
@@ -110,6 +134,9 @@ const PageProvider: React.FC<
                 activeModalRef: activeModal,
                 updateModalRef,
                 updateActiveMainContent,
+                updateStateContent,
+                stateCode,
+                stateName,
             }}
             children={children}
         />

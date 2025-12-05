@@ -23,7 +23,7 @@ import { Error404 } from '../../Errors/Error404Page'
 export const UploadContractQuestions = () => {
     // router context
 
-    const { updateHeading } = usePage()
+    const { updateHeading, updateStateContent } = usePage()
     const { id, division, contractSubmissionType } = useParams<{
         division: string
         id: string
@@ -51,10 +51,25 @@ export const UploadContractQuestions = () => {
         (contract?.packageSubmissions &&
             contract?.packageSubmissions[0].contractRevision.contractName) ||
         ''
+    const stateCode = contract?.state.code
+    const stateName = contract?.state.name
     // side effects
     useEffect(() => {
         updateHeading({ customHeading: `${contractName} Add questions` })
     }, [contractName, updateHeading])
+
+    // Set state info for the header
+    useEffect(() => {
+        if (stateCode || stateName) {
+            updateStateContent(stateCode, stateName)
+        } else {
+            updateStateContent(undefined, undefined)
+        }
+
+        return () => {
+            updateStateContent(undefined, undefined)
+        }
+    }, [stateCode, stateName, updateStateContent])
 
     if (fetchContractLoading) {
         return <ErrorOrLoadingPage state="LOADING" />
