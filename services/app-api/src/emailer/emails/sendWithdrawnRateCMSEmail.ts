@@ -172,6 +172,7 @@ export const sendWithdrawnRateCMSEmail = async (
         ...stateAnalystsEmails,
         ...config.dmcpSubmissionEmails,
         ...config.oactEmails,
+        ...config.dmcoEmails,
         ...config.devReviewTeamEmails,
     ])
 
