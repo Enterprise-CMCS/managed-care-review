@@ -464,7 +464,6 @@ const Contacts = ({
                                     }}
                                     backOnClick={() => {
                                         const previousPage =
-                                            draftSubmission.contractSubmissionType === 'EQRO' ||
                                             draftSubmission.draftRevision.formData.submissionType === 'CONTRACT_ONLY'
                                                 ? RoutesRecord.SUBMISSIONS_CONTRACT_DETAILS
                                                 : RoutesRecord.SUBMISSIONS_RATE_DETAILS
@@ -483,7 +482,6 @@ const Contacts = ({
                                     }}
                                     actionInProgress={isSubmitting}
                                     backOnClickUrl={
-                                        draftSubmission.contractSubmissionType === 'EQRO' ||
                                         draftSubmission.draftRevision.formData.submissionType === 'CONTRACT_ONLY'
                                             ? generatePath(
                                                 RoutesRecord.SUBMISSIONS_CONTRACT_DETAILS,
@@ -503,13 +501,10 @@ const Contacts = ({
                                             )
                                     }
                                     continueOnClickUrl={
-                                        draftSubmission?.contractSubmissionType === 'EQRO'
-                                            ? generatePath(RoutesRecord.SUBMISSIONS_REVIEW_SUBMIT, {
-                                                id,
-                                                contractSubmissionType:
-                                                    ContractSubmissionTypeRecord[draftSubmission.contractSubmissionType],
-                                            })
-                                            :"/edit/documents"
+                                        generatePath(RoutesRecord.SUBMISSIONS_REVIEW_SUBMIT, {
+                                            id,
+                                            contractSubmissionType,
+                                        })
                                     }
                                 />
                             </UswdsForm>
