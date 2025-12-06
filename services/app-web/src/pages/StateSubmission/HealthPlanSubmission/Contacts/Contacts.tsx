@@ -26,6 +26,7 @@ import {
     RoutesRecord,
     RouteT,
     EQRO_SUBMISSION_FORM_ROUTES,
+    ContractSubmissionTypeRecord,
 } from '@mc-review/constants'
 import {
     ButtonWithLogging,
@@ -187,7 +188,8 @@ const Contacts = ({
                 navigate(
                     generatePath(RoutesRecord.SUBMISSIONS_REVIEW_SUBMIT, {
                         id: id,
-                        contractSubmissionType,
+                        contractSubmissionType:
+                            ContractSubmissionTypeRecord[draftSubmission.contractSubmissionType],
                     })
                 )
             } else if (hideSupportingDocs) {
@@ -470,7 +472,8 @@ const Contacts = ({
                                         navigate(
                                             generatePath(previousPage, {
                                                 id,
-                                                contractSubmissionType,
+                                                contractSubmissionType:
+                                                    ContractSubmissionTypeRecord[draftSubmission.contractSubmissionType],
                                             })
                                         )
                                     }}
@@ -486,14 +489,16 @@ const Contacts = ({
                                                 RoutesRecord.SUBMISSIONS_CONTRACT_DETAILS,
                                                 {
                                                     id,
-                                                    contractSubmissionType,
+                                                    contractSubmissionType:
+                                                        ContractSubmissionTypeRecord[draftSubmission.contractSubmissionType],
                                                 }
                                             )
                                             : generatePath(
                                                 RoutesRecord.SUBMISSIONS_RATE_DETAILS,
                                                 {
                                                     id,
-                                                    contractSubmissionType,
+                                                    contractSubmissionType:
+                                                        ContractSubmissionTypeRecord[draftSubmission.contractSubmissionType],
                                                 }
                                             )
                                     }
@@ -501,7 +506,8 @@ const Contacts = ({
                                         draftSubmission?.contractSubmissionType === 'EQRO'
                                             ? generatePath(RoutesRecord.SUBMISSIONS_REVIEW_SUBMIT, {
                                                 id,
-                                                contractSubmissionType,
+                                                contractSubmissionType:
+                                                    ContractSubmissionTypeRecord[draftSubmission.contractSubmissionType],
                                             })
                                             :"/edit/documents"
                                     }
