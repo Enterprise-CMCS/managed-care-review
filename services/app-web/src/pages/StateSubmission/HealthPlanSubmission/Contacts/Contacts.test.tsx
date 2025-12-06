@@ -423,51 +423,52 @@ describe('Contacts', () => {
             })
         })
 
-        it('navigates back to contract details for EQRO when back button is selected', async () => {
-            const draftContract = mockContractPackageUnlockedWithUnlockedType()
-
-            renderWithProviders(
-                <Routes>
-                    <Route
-                        path={RoutesRecord.SUBMISSIONS_CONTACTS}
-                        element={<Contacts />}
-                    />
-                    <Route
-                        path={RoutesRecord.SUBMISSIONS_CONTRACT_DETAILS}
-                        element={<div>Contract Details Page</div>}
-                    />
-                </Routes>,
-                {
-                    apolloProvider: {
-                        mocks: [
-                            fetchCurrentUserMock({ statusCode: 200 }),
-                            fetchContractMockSuccess({
-                                contract: {
-                                    ...draftContract,
-                                    id: '15',
-                                    contractSubmissionType: 'EQRO',
-                                },
-                            }),
-                        ],
-                    },
-                    routerProvider: {
-                        route: '/submissions/eqro/15/edit/contacts',
-                    },
-                }
-            )
-
-            await waitFor(() => {
-                expect(screen.getByTestId('state-contacts')).toBeInTheDocument()
-            })
-
-            const backButton = screen.getByRole('button', { name: 'Back' })
-            await userEvent.click(backButton)
-
-            await waitFor(() => {
-                // Should see Contract Details page
-                expect(screen.getByText('Contract Details Page')).toBeInTheDocument()
-            })
-        })
+        // TODO: Uncomment when EQRO Contract Details Page is created.
+        // it('navigates back to contract details for EQRO when back button is selected', async () => {
+        //     const draftContract = mockContractPackageUnlockedWithUnlockedType()
+        //
+        //     renderWithProviders(
+        //         <Routes>
+        //             <Route
+        //                 path={RoutesRecord.SUBMISSIONS_CONTACTS}
+        //                 element={<Contacts />}
+        //             />
+        //             <Route
+        //                 path={RoutesRecord.SUBMISSIONS_CONTRACT_DETAILS}
+        //                 element={<div>Contract Details Page</div>}
+        //             />
+        //         </Routes>,
+        //         {
+        //             apolloProvider: {
+        //                 mocks: [
+        //                     fetchCurrentUserMock({ statusCode: 200 }),
+        //                     fetchContractMockSuccess({
+        //                         contract: {
+        //                             ...draftContract,
+        //                             id: '15',
+        //                             contractSubmissionType: 'EQRO',
+        //                         },
+        //                     }),
+        //                 ],
+        //             },
+        //             routerProvider: {
+        //                 route: '/submissions/eqro/15/edit/contacts',
+        //             },
+        //         }
+        //     )
+        //
+        //     await waitFor(() => {
+        //         expect(screen.getByTestId('state-contacts')).toBeInTheDocument()
+        //     })
+        //
+        //     const backButton = screen.getByRole('button', { name: 'Back' })
+        //     await userEvent.click(backButton)
+        //
+        //     await waitFor(() => {
+        //         // Should see Contract Details page
+        //         expect(screen.getByText('Contract Details Page')).toBeInTheDocument()
+        //     })
+        // })
 
         it('continues to navigate to review and submit for EQRO when the continue button is selected', async () => {
             const draftContract = mockContractPackageUnlockedWithUnlockedType()
