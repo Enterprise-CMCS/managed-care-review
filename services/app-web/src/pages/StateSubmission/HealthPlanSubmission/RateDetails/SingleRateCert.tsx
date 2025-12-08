@@ -34,7 +34,7 @@ import {
     getIn,
     useFormikContext,
 } from 'formik'
-import { ActuaryContactFields } from '../Contacts'
+import { ActuaryContactFields } from '../../SharedContactsPage'
 import { useFocus } from '../../../../hooks'
 import {
     ActuaryCommunication,

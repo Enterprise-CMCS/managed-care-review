@@ -10,18 +10,18 @@ import {
 } from 'formik'
 import { generatePath, useNavigate } from 'react-router-dom'
 import { useLDClient } from 'launchdarkly-react-client-sdk'
-import styles from '../../StateSubmissionForm.module.scss'
+import styles from '../StateSubmissionForm.module.scss'
 import { recordJSException } from '@mc-review/otel'
 import {
     StateContact,
     UpdateContractDraftRevisionInput,
-} from '../../../../gen/gqlClient'
+} from '../../../gen/gqlClient'
 
-import { useFocus } from '../../../../hooks'
+import { useFocus } from '../../../hooks'
 import {
     activeFormPages,
     type ContractFormPageProps,
-} from '../../submissionUtils'
+} from '../submissionUtils'
 import {
     RoutesRecord,
     RouteT,
@@ -37,16 +37,16 @@ import {
     ErrorSummary,
     FieldTextInput,
     PageActions,
-} from '../../../../components'
-import { useCurrentRoute, useRouteParams, useTealium } from '../../../../hooks'
-import { useContractForm } from '../../../../hooks/useContractForm'
-import { useAuth } from '../../../../contexts/AuthContext'
-import { ErrorOrLoadingPage } from '../../SharedSubmissionComponents/ErrorOrLoadingPage'
-import { PageBannerAlerts } from '../../SharedSubmissionComponents/PageBannerAlerts'
-import { useErrorSummary } from '../../../../hooks/useErrorSummary'
+} from '../../../components'
+import { useCurrentRoute, useRouteParams, useTealium } from '../../../hooks'
+import { useContractForm } from '../../../hooks/useContractForm'
+import { useAuth } from '../../../contexts/AuthContext'
+import { ErrorOrLoadingPage } from '../SharedSubmissionComponents/ErrorOrLoadingPage'
+import { PageBannerAlerts } from '../SharedSubmissionComponents/PageBannerAlerts'
+import { useErrorSummary } from '../../../hooks/useErrorSummary'
 import { featureFlags } from '@mc-review/common-code'
-import { useFocusOnRender } from '../../../../hooks/useFocusOnRender'
-import { usePage } from '../../../../contexts/PageContext'
+import { useFocusOnRender } from '../../../hooks/useFocusOnRender'
+import { usePage } from '../../../contexts/PageContext'
 
 export interface ContactsFormValues {
     stateContacts: StateContact[]

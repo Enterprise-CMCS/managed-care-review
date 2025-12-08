@@ -2,7 +2,7 @@ import { screen, waitFor } from '@testing-library/react'
 
 import { Route, Routes } from 'react-router-dom'
 import { RoutesRecord } from '@mc-review/constants'
-import { renderWithProviders } from '../../../../testHelpers/jestHelpers'
+import { renderWithProviders } from '../../../testHelpers/jestHelpers'
 import { Contacts } from './index'
 import userEvent from '@testing-library/user-event'
 import {
