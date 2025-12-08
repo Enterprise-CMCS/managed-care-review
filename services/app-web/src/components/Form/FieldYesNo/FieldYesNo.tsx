@@ -123,8 +123,9 @@ export const booleanAsYesNoFormValue = (
     return bool ? 'YES' : bool === false ? 'NO' : undefined
 }
 
-export const booleanAsYesNoUserValue = (bool?: boolean): FieldYesNoUserValue =>
-    bool ? 'Yes' : bool === false ? 'No' : undefined
+export const booleanAsYesNoUserValue = (
+    bool?: boolean | null
+): FieldYesNoUserValue => (bool ? 'Yes' : bool === false ? 'No' : undefined)
 
 export const yesNoFormValueAsBoolean = (
     maybeString: FieldYesNoFormValue | string
