@@ -28,6 +28,7 @@ type ModalTypes =
     | 'SUBMIT_CONTRACT'
     | 'RESUBMIT_CONTRACT'
     | 'UNLOCK_CONTRACT'
+    | 'SUBMIT_EQRO_CONTRACT'
 
 type UnlockSubmitModalProps = {
     submissionData: Rate | Contract
@@ -40,7 +41,7 @@ type UnlockSubmitModalProps = {
 type ModalValueType = {
     modalHeading?: string
     onSubmitText?: string
-    modalDescription?: string
+    modalDescription?: string | React.ReactElement
     inputHint?: string
     unlockSubmitModalInputValidation?: string
     errorHeading: string
@@ -100,6 +101,39 @@ const modalValueDictionary: Record<ModalTypes, ModalValueType> = {
         errorHeading: ERROR_MESSAGES.submit_error_heading,
         errorSuggestion: ERROR_MESSAGES.submit_error_suggestion,
     },
+    SUBMIT_EQRO_CONTRACT: {
+        modalHeading: 'Ready to submit?',
+        onSubmitText: 'Submit',
+        errorHeading: ERROR_MESSAGES.submit_error_heading,
+        errorSuggestion: ERROR_MESSAGES.submit_error_suggestion,
+        modalDescription: (
+            <>
+                <p>
+                    When you click submit, our system will decide if CMS will
+                    review your submission. The decision is based on the
+                    information you provide on this form.
+                </p>
+                <p style={{ marginBottom: 0 }}>
+                    {' '}
+                    We will send an email with the following information:
+                </p>
+                <ul style={{ marginTop: 0 }}>
+                    <li>
+                        <b>Confirmation of receipt</b>: Confirms that CMS has
+                        received your submission.
+                    </li>
+                    <li>
+                        <b>Review decision</b>: Whether CMS will review your
+                        submission.
+                    </li>
+                    <li>
+                        <b>What comes next</b>: What to expect based on the
+                        review decision
+                    </li>
+                </ul>
+            </>
+        ),
+    },
 } satisfies Record<ModalTypes, ModalValueType>
 
 export const UnlockSubmitModal = ({
@@ -145,9 +179,11 @@ export const UnlockSubmitModal = ({
             : submitContractLoading
 
     const isSubmitting = mutationLoading || formik.isSubmitting
-    const includesFormInput = !['SUBMIT_CONTRACT', 'SUBMIT_RATE'].includes(
-        modalType
-    )
+    const includesFormInput = ![
+        'SUBMIT_CONTRACT',
+        'SUBMIT_RATE',
+        'SUBMIT_EQRO_CONTRACT',
+    ].includes(modalType)
 
     const prevSubmitting = usePrevious(isSubmitting)
 
@@ -182,6 +218,7 @@ export const UnlockSubmitModal = ({
                 console.info('submit rate not implemented yet')
                 break
             case 'SUBMIT_CONTRACT':
+            case 'SUBMIT_EQRO_CONTRACT':
                 result = await submitMutationWrapper(
                     submitContract,
                     submissionData.id,
@@ -233,7 +270,11 @@ export const UnlockSubmitModal = ({
         } else {
             modalRef.current?.toggleModal(undefined, false)
             if (
-                ['RESUBMIT_CONTRACT', 'SUBMIT_CONTRACT'].includes(modalType) &&
+                [
+                    'RESUBMIT_CONTRACT',
+                    'SUBMIT_CONTRACT',
+                    'SUBMIT_EQRO_CONTRACT',
+                ].includes(modalType) &&
                 submissionName
             ) {
                 navigate(
@@ -317,8 +358,10 @@ export const UnlockSubmitModal = ({
                         />
                     </FormGroup>
                 </form>
-            ) : (
+            ) : typeof modalValues.modalDescription === 'string' ? (
                 <p>{modalValues.modalDescription}</p>
+            ) : (
+                modalValues.modalDescription
             )}
         </Modal>
     )
