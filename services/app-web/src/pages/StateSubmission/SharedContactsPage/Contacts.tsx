@@ -139,6 +139,8 @@ const Contacts = ({
     if (interimState || !draftSubmission || !updateDraft)
         return <ErrorOrLoadingPage state={interimState || 'GENERIC_ERROR'} />
 
+    const isEQROSubmission = draftSubmission.contractSubmissionType === 'EQRO'
+
     const stateContacts = draftSubmission.draftRevision.formData.stateContacts
 
     const emptyStateContact = {
@@ -184,7 +186,7 @@ const Contacts = ({
             setDraftSaved(true)
             setSubmitting(false)
         } else {
-            if (draftSubmission.contractSubmissionType === 'EQRO') {
+            if (isEQROSubmission) {
                 navigate(
                     generatePath(RoutesRecord.SUBMISSIONS_REVIEW_SUBMIT, {
                         id: id,
@@ -227,7 +229,7 @@ const Contacts = ({
             <FormNotificationContainer>
                 <DynamicStepIndicator
                     formPages={
-                        draftSubmission.contractSubmissionType === 'EQRO'
+                        isEQROSubmission
                             ? EQRO_SUBMISSION_FORM_ROUTES
                             : activeFormPages(
                                 draftSubmission.draftRevision.formData,
@@ -236,7 +238,7 @@ const Contacts = ({
                     }
                     currentFormPage={currentRoute}
                     customPageTitles={
-                        draftSubmission.contractSubmissionType === 'EQRO'
+                        isEQROSubmission
                             ? {
                                 SUBMISSIONS_TYPE: 'Submission details'
                             }
