@@ -6,59 +6,46 @@ import {
 } from '../../../gen/gqlClient'
 import { useParams } from 'react-router-dom'
 import { useLDClient } from 'launchdarkly-react-client-sdk'
-import { Grid } from '@trussworks/react-uswds'
-import { DataDetail, DataDetailCheckboxList } from '../../DataDetail'
 import { SectionHeader } from '../../SectionHeader'
 import { UploadedDocumentsTable } from '..'
 import { MultiColumnGrid } from '../../MultiColumnGrid'
-import {
-    booleanAsYesNoFormValue,
-    booleanAsYesNoUserValue,
-} from '../../Form/FieldYesNo'
 import { SectionCard } from '../../SectionCard'
 import { DocumentHeader } from '../../DocumentHeader/DocumentHeader'
 import { usePreviousSubmission } from '../../../hooks'
 import { useAuth } from '../../../contexts/AuthContext'
-import { formatCalendarDate } from '@mc-review/dates'
-import {
-    StatutoryRegulatoryAttestation,
-    StatutoryRegulatoryAttestationQuestion,
-} from '@mc-review/constants'
 import { featureFlags } from '@mc-review/common-code'
 import { hasCMSUserPermissions } from '@mc-review/helpers'
 import {
-    ContractExecutionStatusRecord,
-    FederalAuthorityRecord,
-    ManagedCareEntityRecord,
-    federalAuthorityKeysForCHIP,
-    CHIPFederalAuthority,
     getIndexFromRevisionVersion,
     getLastContractSubmission,
     getPackageSubmissionAtIndex,
     getVisibleLatestContractFormData,
-    sortModifiedProvisions,
-    isMissingProvisions,
-    getProvisionDictionary,
-    dsnpTriggers,
-    isBaseContract,
-    isCHIPOnly,
     isContractWithProvisions,
 } from '@mc-review/submissions'
 import styles from '../SubmissionSummarySection.module.scss'
+import {
+    ContractEffectiveDateSummary,
+    ContractExecutionSummary,
+    DsnpSummary,
+    FederalAuthoritySummary,
+    ManagedCareEntitySummary,
+    ModifiedProvisionSummary,
+    StatutoryRegulatoryAttestationSummary,
+    UnmodifiedProvisionSummary,
+} from '../SummarySectionFields'
+import { GenericErrorPage } from '../../../pages/Errors/GenericErrorPage'
 
 export type ContractDetailsSummarySectionProps = {
     contract: Contract | UnlockedContract
     contractRev?: ContractRevision
     editNavigateTo?: string
-    isCMSUser?: boolean
     isStateUser: boolean
-    submissionName: string
     onDocumentError?: (error: true) => void
     explainMissingData?: boolean
 }
 
 // Get the zip download URL from the pre-generated zip packages
-const getCurrentRevForZipLink = (
+export const getCurrentRevForZipLink = (
     contract: Contract | UnlockedContract,
     isCMSUser: boolean,
     contractRev: ContractRevision | undefined
@@ -80,7 +67,6 @@ export const ContractDetailsSummarySection = ({
     contract,
     contractRev,
     editNavigateTo, // this is the edit link for the section. When this prop exists, summary section is loaded in edit mode
-    submissionName,
     onDocumentError,
     explainMissingData,
 }: ContractDetailsSummarySectionProps): React.ReactElement => {
@@ -101,6 +87,9 @@ export const ContractDetailsSummarySection = ({
         contractOrRev,
         isEditing
     )
+
+    if (!contractFormData) return <GenericErrorPage />
+
     const contract438Attestation = ldClient?.variation(
         featureFlags.CONTRACT_438_ATTESTATION.flag,
         featureFlags.CONTRACT_438_ATTESTATION.defaultValue
@@ -110,10 +99,6 @@ export const ContractDetailsSummarySection = ({
         featureFlags.DSNP.defaultValue
     )
 
-    const attestationYesNo =
-        contractFormData?.statutoryRegulatoryAttestation != null &&
-        booleanAsYesNoFormValue(contractFormData.statutoryRegulatoryAttestation)
-
     const contractSupportingDocuments = contractFormData?.supportingDocuments
     const contractDocs = contractFormData?.contractDocuments
     const contractDocumentCount =
@@ -121,27 +106,7 @@ export const ContractDetailsSummarySection = ({
         contractDocs &&
         contractFormData.supportingDocuments.length +
             contractFormData.contractDocuments.length
-    const applicableFederalAuthorities = isCHIPOnly(contract)
-        ? contractFormData?.federalAuthorities.filter((authority) =>
-              federalAuthorityKeysForCHIP.includes(
-                  authority as CHIPFederalAuthority
-              )
-          )
-        : contractFormData?.federalAuthorities
-    const [modifiedProvisions, unmodifiedProvisions] =
-        sortModifiedProvisions(contract)
-    const provisionsAreInvalid = isMissingProvisions(contract) && isEditing
-    const dsnpNotProvided =
-        contractFormData?.dsnpContract === null ||
-        contractFormData?.dsnpContract === undefined
-    const dsnpIsRequired =
-        contractFormData?.federalAuthorities?.some((authority) =>
-            dsnpTriggers?.includes(authority)
-        ) && dsnpNotProvided
-    const dsnpUserValue =
-        contractFormData?.dsnpContract === null
-            ? undefined
-            : contractFormData?.dsnpContract
+
     const currentRevision = getCurrentRevForZipLink(
         contract,
         isCMSUser,
@@ -173,160 +138,50 @@ export const ContractDetailsSummarySection = ({
             />
             <dl>
                 {contract438Attestation && (
-                    <Grid row gap className={styles.singleColumnGrid}>
-                        <Grid
-                            tablet={{ col: 12 }}
-                            key="statutoryRegulatoryAttestation"
-                        >
-                            {attestationYesNo !== false &&
-                                attestationYesNo !== undefined && (
-                                    <DataDetail
-                                        id="statutoryRegulatoryAttestation"
-                                        label={
-                                            StatutoryRegulatoryAttestationQuestion
-                                        }
-                                        explainMissingData={explainMissingData}
-                                        children={
-                                            StatutoryRegulatoryAttestation[
-                                                attestationYesNo
-                                            ]
-                                        }
-                                    />
-                                )}
-                        </Grid>
-                        {attestationYesNo === 'NO' && (
-                            <Grid
-                                tablet={{ col: 12 }}
-                                key="statutoryRegulatoryAttestationDescription"
-                            >
-                                <DataDetail
-                                    id="statutoryRegulatoryAttestationDescription"
-                                    label="Non-compliance description"
-                                    explainMissingData={explainMissingData}
-                                    children={
-                                        contractFormData?.statutoryRegulatoryAttestationDescription
-                                    }
-                                />
-                            </Grid>
-                        )}
-                    </Grid>
+                    <StatutoryRegulatoryAttestationSummary
+                        contractFormData={contractFormData}
+                        explainMissingData={explainMissingData}
+                    />
                 )}
                 <MultiColumnGrid columns={2}>
-                    <DataDetail
-                        id="contractExecutionStatus"
-                        label="Contract status"
+                    <ContractExecutionSummary
+                        contractFormData={contractFormData}
                         explainMissingData={explainMissingData}
-                        children={
-                            contractFormData?.contractExecutionStatus
-                                ? ContractExecutionStatusRecord[
-                                      contractFormData?.contractExecutionStatus
-                                  ]
-                                : undefined
-                        }
                     />
-                    <DataDetail
-                        id="contractEffectiveDates"
-                        label={
-                            contractFormData?.contractType === 'AMENDMENT'
-                                ? 'Contract amendment effective dates'
-                                : 'Contract effective dates'
-                        }
+                    <ContractEffectiveDateSummary
+                        contractFormData={contractFormData}
                         explainMissingData={explainMissingData}
-                        children={
-                            contractFormData?.contractDateStart &&
-                            contractFormData?.contractDateEnd
-                                ? `${formatCalendarDate(
-                                      contractFormData?.contractDateStart,
-                                      'UTC'
-                                  )} to ${formatCalendarDate(
-                                      contractFormData?.contractDateEnd,
-                                      'UTC'
-                                  )}`
-                                : undefined
-                        }
                     />
-                    <DataDetail
-                        id="managedCareEntities"
-                        label="Managed care entities"
-                        children={
-                            contractFormData?.managedCareEntities && (
-                                <DataDetailCheckboxList
-                                    list={contractFormData?.managedCareEntities}
-                                    dict={ManagedCareEntityRecord}
-                                    // if showing error for missing data, then we do NOT display empty list
-                                    displayEmptyList={!explainMissingData}
-                                />
-                            )
-                        }
+                    <ManagedCareEntitySummary
+                        contractFormData={contractFormData}
+                        explainMissingData={explainMissingData}
                     />
-                    <DataDetail
-                        id="federalAuthorities"
-                        label="Active federal operating authority"
-                        children={
-                            applicableFederalAuthorities && (
-                                <DataDetailCheckboxList
-                                    list={applicableFederalAuthorities}
-                                    dict={FederalAuthorityRecord}
-                                    // if error for missing data, then we do NOT display empty list
-                                    displayEmptyList={!explainMissingData}
-                                />
-                            )
-                        }
+                    <FederalAuthoritySummary
+                        contractFormData={contractFormData}
+                        explainMissingData={explainMissingData}
                     />
                 </MultiColumnGrid>
                 {contractDsnp && (
                     <MultiColumnGrid columns={1}>
-                        <DataDetail
-                            id="dsnp"
-                            label="Is this contract associated with a Dual-Eligible Special Needs Plan (D-SNP) that covers Medicaid benefits?"
-                            explainMissingData={
-                                dsnpIsRequired && explainMissingData
-                            }
-                            children={booleanAsYesNoUserValue(dsnpUserValue)}
+                        <DsnpSummary
+                            contractFormData={contractFormData}
+                            explainMissingData={explainMissingData}
                         />
                     </MultiColumnGrid>
                 )}
                 {isContractWithProvisions(contract) && (
                     <MultiColumnGrid columns={2}>
-                        <DataDetail
-                            id="modifiedProvisions"
-                            label={
-                                isBaseContract(contract)
-                                    ? 'This contract action includes provisions related to the following'
-                                    : 'This contract action includes new or modified provisions related to the following'
-                            }
-                            explainMissingData={
-                                provisionsAreInvalid && explainMissingData
-                            }
-                        >
-                            {provisionsAreInvalid ? null : (
-                                <DataDetailCheckboxList
-                                    list={modifiedProvisions}
-                                    dict={getProvisionDictionary(contract)}
-                                    displayEmptyList
-                                />
-                            )}
-                        </DataDetail>
+                        <ModifiedProvisionSummary
+                            contract={contract}
+                            isEditing={isEditing}
+                            explainMissingData={explainMissingData}
+                        />
 
-                        <DataDetail
-                            id="unmodifiedProvisions"
-                            label={
-                                isBaseContract(contract)
-                                    ? 'This contract action does NOT include provisions related to the following'
-                                    : 'This contract action does NOT include new or modified provisions related to the following'
-                            }
-                            explainMissingData={
-                                provisionsAreInvalid && explainMissingData
-                            }
-                        >
-                            {provisionsAreInvalid ? null : (
-                                <DataDetailCheckboxList
-                                    list={unmodifiedProvisions}
-                                    dict={getProvisionDictionary(contract)}
-                                    displayEmptyList
-                                />
-                            )}
-                        </DataDetail>
+                        <UnmodifiedProvisionSummary
+                            contract={contract}
+                            isEditing={isEditing}
+                            explainMissingData={explainMissingData}
+                        />
                     </MultiColumnGrid>
                 )}
             </dl>

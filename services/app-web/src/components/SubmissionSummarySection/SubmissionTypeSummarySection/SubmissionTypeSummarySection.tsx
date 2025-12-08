@@ -1,30 +1,29 @@
 import { Grid } from '@trussworks/react-uswds'
 import {
-    DataDetail,
     MultiColumnGrid,
     SectionHeader,
     SectionCard,
 } from '../../../components'
-import {
-    SubmissionTypeRecord,
-    ContractTypeRecord,
-    PopulationCoveredRecord,
-    getVisibleLatestContractFormData,
-} from '@mc-review/submissions'
+import { getVisibleLatestContractFormData } from '@mc-review/submissions'
 import { GenericErrorPage } from '../../../pages/Errors/GenericErrorPage'
 import {
-    Program,
     Contract,
     UnlockedContract,
     ContractRevision,
 } from '../../../gen/gqlClient'
-import { booleanAsYesNoUserValue } from '../../Form/FieldYesNo'
 import styles from '../SubmissionSummarySection.module.scss'
-import { formatCalendarDate } from '@mc-review/dates'
+import {
+    ContractProgramsSummary,
+    ContractTypeSummary,
+    PopulationCoverageSummary,
+    RiskBasedContractSummary,
+    SubmissionDescriptionSummary,
+    SubmissionTypeSummary,
+    SubmittedAtSummary,
+} from '../SummarySectionFields'
 
 export type SubmissionTypeSummarySectionProps = {
     contract: Contract | UnlockedContract
-    statePrograms: Program[]
     contractRev?: ContractRevision
     editNavigateTo?: string
     headerChildComponent?: React.ReactElement
@@ -38,7 +37,6 @@ export type SubmissionTypeSummarySectionProps = {
 export const SubmissionTypeSummarySection = ({
     contract,
     contractRev,
-    statePrograms,
     editNavigateTo,
     subHeaderComponent,
     headerChildComponent,
@@ -52,11 +50,9 @@ export const SubmissionTypeSummarySection = ({
         contractOrRev,
         isStateUser
     )
+
     if (!contractFormData) return <GenericErrorPage />
 
-    const programNames = statePrograms
-        .filter((p) => contractFormData?.programIDs.includes(p.id))
-        .map((p) => p.name)
     const isSubmitted =
         contract.status === 'SUBMITTED' || contract.status === 'RESUBMITTED'
     const isUnlocked = contract.status === 'UNLOCKED'
@@ -79,79 +75,42 @@ export const SubmissionTypeSummarySection = ({
             <dl>
                 {initiallySubmittedAt &&
                     (isSubmitted || (!isStateUser && isUnlocked)) && (
-                        <MultiColumnGrid columns={2}>
-                            <DataDetail
-                                id="submitted"
-                                label="Submitted"
-                                children={
-                                    <span>
-                                        {formatCalendarDate(
-                                            initiallySubmittedAt,
-                                            'America/Los_Angeles'
-                                        )}
-                                    </span>
-                                }
-                            />
-                        </MultiColumnGrid>
+                        <SubmittedAtSummary
+                            initiallySubmittedAt={initiallySubmittedAt}
+                        />
                     )}
                 <MultiColumnGrid columns={2}>
-                    {(programNames?.length > 0 || !isSubmitted) && (
-                        <DataDetail
-                            id="program"
-                            label="Program(s)"
+                    {(contractFormData.programIDs.length > 0 ||
+                        !isSubmitted) && (
+                        <ContractProgramsSummary
+                            contractFormData={contractFormData}
                             explainMissingData={explainMissingData}
-                            children={programNames}
                         />
                     )}
                     {(contractFormData.submissionType || !isSubmitted) && (
-                        <DataDetail
-                            id="submissionType"
-                            label="Submission type"
+                        <SubmissionTypeSummary
+                            contractFormData={contractFormData}
                             explainMissingData={explainMissingData}
-                            children={
-                                SubmissionTypeRecord[
-                                    contractFormData.submissionType
-                                ]
-                            }
                         />
                     )}
                     {(contractFormData.contractType || !isSubmitted) && (
-                        <DataDetail
-                            id="contractType"
-                            label="Contract action type"
+                        <ContractTypeSummary
+                            contractFormData={contractFormData}
                             explainMissingData={explainMissingData}
-                            children={
-                                contractFormData.contractType
-                                    ? ContractTypeRecord[
-                                          contractFormData.contractType
-                                      ]
-                                    : ''
-                            }
                         />
                     )}
                     {(contractFormData.riskBasedContract !== null ||
                         (!isSubmitted &&
                             contractFormData.riskBasedContract !== null)) && (
-                        <DataDetail
-                            id="riskBasedContract"
-                            label="Is this a risk based contract"
+                        <RiskBasedContractSummary
+                            contractFormData={contractFormData}
                             explainMissingData={explainMissingData}
-                            children={booleanAsYesNoUserValue(
-                                contractFormData.riskBasedContract
-                            )}
                         />
                     )}
                     {(contractFormData.populationCovered || !isSubmitted) && (
-                        <DataDetail
-                            id="populationCoverage"
-                            label="Which populations does this contract action cover?"
+                        <PopulationCoverageSummary
+                            contractFormData={contractFormData}
                             explainMissingData={explainMissingData}
-                            children={
-                                contractFormData.populationCovered &&
-                                PopulationCoveredRecord[
-                                    contractFormData.populationCovered
-                                ]
-                            }
                         />
                     )}
                 </MultiColumnGrid>
@@ -160,13 +119,9 @@ export const SubmissionTypeSummarySection = ({
                     <Grid col={12}>
                         {(contractFormData.submissionDescription ||
                             !isSubmitted) && (
-                            <DataDetail
-                                id="submissionDescription"
-                                label="Submission description"
+                            <SubmissionDescriptionSummary
+                                contractFormData={contractFormData}
                                 explainMissingData={explainMissingData}
-                                children={
-                                    contractFormData.submissionDescription
-                                }
                             />
                         )}
                     </Grid>
