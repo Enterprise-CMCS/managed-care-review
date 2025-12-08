@@ -484,11 +484,11 @@ export const EQROModifiedProvisionSummary = ({
     contractFormData,
     explainMissingData,
 }: SummaryDetailProps) => {
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const {
         includedProvisions,
         excludedProvisions,
-        unansweredProvisions,
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
+        unansweredProvisions, // keep for future inline errors
         provisionDictionary,
     } = getEQROProvisionDictionary(contractFormData)
 
