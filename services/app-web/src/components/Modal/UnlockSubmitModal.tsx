@@ -20,6 +20,7 @@ import {
     unlockMutationWrapper,
 } from '@mc-review/helpers'
 import { useTealium } from '../../hooks'
+import { EQROModalDescription } from './ModalBodyContent/EQROModalDescription'
 
 type ModalTypes =
     | 'SUBMIT_RATE'
@@ -106,33 +107,7 @@ const modalValueDictionary: Record<ModalTypes, ModalValueType> = {
         onSubmitText: 'Submit',
         errorHeading: ERROR_MESSAGES.submit_error_heading,
         errorSuggestion: ERROR_MESSAGES.submit_error_suggestion,
-        modalDescription: (
-            <>
-                <p>
-                    When you click submit, our system will decide if CMS will
-                    review your submission. The decision is based on the
-                    information you provide on this form.
-                </p>
-                <p style={{ marginBottom: 0 }}>
-                    {' '}
-                    We will send an email with the following information:
-                </p>
-                <ul style={{ marginTop: 0 }}>
-                    <li>
-                        <b>Confirmation of receipt</b>: Confirms that CMS has
-                        received your submission.
-                    </li>
-                    <li>
-                        <b>Review decision</b>: Whether CMS will review your
-                        submission.
-                    </li>
-                    <li>
-                        <b>What comes next</b>: What to expect based on the
-                        review decision
-                    </li>
-                </ul>
-            </>
-        ),
+        modalDescription: EQROModalDescription(),
     },
 } satisfies Record<ModalTypes, ModalValueType>
 
