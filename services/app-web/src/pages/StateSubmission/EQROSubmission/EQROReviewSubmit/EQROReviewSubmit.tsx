@@ -1,35 +1,115 @@
-import React, { useEffect } from 'react'
+import React, { useEffect, useRef, useState } from 'react'
 import { useRouteParams, useCurrentRoute } from '../../../../hooks'
 import { generatePath, useNavigate } from 'react-router-dom'
 import {
     ActionButton,
-    SectionCard,
     PageActionsContainer,
     DynamicStepIndicator,
     FormNotificationContainer,
+    Loading,
 } from '../../../../components'
-import { Button, GridContainer } from '@trussworks/react-uswds'
-import { RoutesRecord, EQRO_SUBMISSION_FORM_ROUTES } from '@mc-review/constants'
+import { GridContainer, ModalRef } from '@trussworks/react-uswds'
+import {
+    RoutesRecord,
+    EQRO_SUBMISSION_FORM_ROUTES,
+    RouteT,
+} from '@mc-review/constants'
 import styles from './EQROReviewSubmit.module.scss'
 import { usePage } from '../../../../contexts/PageContext'
+import { useAuth } from '../../../../contexts/AuthContext'
+import { useFetchContractQuery } from '../../../../gen/gqlClient'
+import { ErrorForbiddenPage } from '../../../Errors/ErrorForbiddenPage'
+import { Error404 } from '../../../Errors/Error404Page'
+import { GenericErrorPage } from '../../../Errors/GenericErrorPage'
+import {
+    getVisibleLatestContractFormData,
+    packageName,
+} from '@mc-review/submissions'
+import { PageBannerAlerts } from '../../SharedSubmissionComponents'
+import { ContactsSummarySection } from '../../../../components/SubmissionSummarySection'
+import { EQROSubmissionTypeSummarySection } from '../../../../components/SubmissionSummarySection'
+import { EQROContractDetailsSummarySection } from '../../../../components/SubmissionSummarySection'
+import {
+    ModalOpenButton,
+    UnlockSubmitModal,
+} from '../../../../components/Modal'
 
 export const EQROReviewSubmit = (): React.ReactElement => {
-    const { id, contractSubmissionType } = useRouteParams()
+    const { id } = useRouteParams()
     const navigate = useNavigate()
-    const { updateActiveMainContent } = usePage()
+    const { updateHeading, updateActiveMainContent } = usePage()
     const { currentRoute } = useCurrentRoute()
+    const [isSubmitting, setIsSubmitting] = useState<boolean>(false)
+    const { loggedInUser } = useAuth()
+    const modalRef = useRef<ModalRef>(null)
 
-    const contactsPagePath = generatePath(RoutesRecord.SUBMISSIONS_CONTACTS, {
-        id,
-        contractSubmissionType,
+    const getPath = (route: RouteT) => {
+        return generatePath(RoutesRecord[route], {
+            id,
+            contractSubmissionType: 'eqro',
+        })
+    }
+
+    const { data, loading, error } = useFetchContractQuery({
+        variables: {
+            input: {
+                contractID: id ?? 'unknown contract',
+            },
+        },
+        fetchPolicy: 'network-only',
     })
 
+    const contract = data?.fetchContract.contract
     const activeMainContentId = 'reviewSubmitPageMainContent'
+
+    useEffect(() => {
+        updateHeading({
+            customHeading: contract?.draftRevision?.contractName,
+        })
+    }, [contract, updateHeading])
 
     // Set the active main content to focus when click the Skip to main content button.
     useEffect(() => {
         updateActiveMainContent(activeMainContentId)
     }, [activeMainContentId, updateActiveMainContent])
+
+    if (loading) {
+        return (
+            <GridContainer>
+                <Loading />
+            </GridContainer>
+        )
+    } else if (error || !contract) {
+        //error handling for a state user that tries to access rates for a different state
+        if (error?.graphQLErrors[0]?.extensions?.code === 'FORBIDDEN') {
+            return (
+                <ErrorForbiddenPage errorMsg={error.graphQLErrors[0].message} />
+            )
+        } else if (error?.graphQLErrors[0]?.extensions?.code === 'NOT_FOUND') {
+            return <Error404 />
+        } else {
+            return <GenericErrorPage />
+        }
+    }
+
+    const isStateUser = loggedInUser?.role === 'STATE_USER'
+    const contractFormData = getVisibleLatestContractFormData(
+        contract,
+        isStateUser
+    )
+
+    if (!contractFormData) return <GenericErrorPage />
+    const programIDs = contractFormData?.programIDs
+    const programs = contract.state.programs.filter((program) =>
+        programIDs?.includes(program.id)
+    )
+    const submissionName =
+        packageName(
+            contract.stateCode,
+            contract.stateNumber,
+            contractFormData.programIDs,
+            programs
+        ) || ''
 
     return (
         <div id={activeMainContentId}>
@@ -41,33 +121,59 @@ export const EQROReviewSubmit = (): React.ReactElement => {
                         SUBMISSIONS_TYPE: 'Submission details',
                     }}
                 />
+                <PageBannerAlerts
+                    loggedInUser={loggedInUser}
+                    unlockedInfo={contract.draftRevision?.unlockInfo}
+                    showPageErrorMessage={false}
+                />
             </FormNotificationContainer>
             <GridContainer className={styles.reviewSectionWrapper}>
-                <SectionCard>
-                    <div>Review and submit placeholder</div>
-                </SectionCard>
+                <EQROSubmissionTypeSummarySection
+                    contract={contract}
+                    isStateUser={isStateUser}
+                    editNavigateTo={getPath('SUBMISSIONS_TYPE')}
+                    explainMissingData
+                />
+                <EQROContractDetailsSummarySection
+                    contract={contract}
+                    editNavigateTo={getPath('SUBMISSIONS_CONTRACT_DETAILS')}
+                    explainMissingData
+                />
+                <ContactsSummarySection
+                    contract={contract}
+                    isStateUser={isStateUser}
+                    editNavigateTo={getPath('SUBMISSIONS_CONTACTS')}
+                />
 
                 <PageActionsContainer>
                     <ActionButton
                         type="button"
                         variant="outline"
-                        link_url="../contacts"
+                        link_url={getPath('SUBMISSIONS_CONTACTS')}
                         parent_component_type="page body"
-                        onClick={() => navigate(contactsPagePath)}
-                        disabled={false}
+                        onClick={() =>
+                            navigate(getPath('SUBMISSIONS_CONTACTS'))
+                        }
+                        disabled={isSubmitting}
                     >
                         Back
                     </ActionButton>
-                    <Button
-                        type="submit"
-                        onClick={() => {
-                            console.info('submit function placeholder')
-                            navigate(RoutesRecord.DASHBOARD_SUBMISSIONS)
-                        }}
+                    <ModalOpenButton
+                        modalRef={modalRef}
+                        className={styles.submitButton}
+                        id="form-submit"
                     >
                         Submit
-                    </Button>
+                    </ModalOpenButton>
                 </PageActionsContainer>
+
+                <UnlockSubmitModal
+                    submissionData={contract}
+                    submissionName={submissionName}
+                    modalType={'SUBMIT_EQRO_CONTRACT'}
+                    modalRef={modalRef}
+                    setIsSubmitting={setIsSubmitting}
+                />
             </GridContainer>
         </div>
     )
