@@ -1,8 +1,14 @@
 export { ContactsSummarySection } from './ContactsSummarySection'
-export { ContractDetailsSummarySection } from './ContractDetailsSummarySection'
+export {
+    ContractDetailsSummarySection,
+    EQROContractDetailsSummarySection,
+} from './ContractDetailsSummarySection'
 export {
     RateDetailsSummarySection,
     SingleRateSummarySection,
 } from './RateDetailsSummarySection'
-export { SubmissionTypeSummarySection } from './SubmissionTypeSummarySection'
+export {
+    SubmissionTypeSummarySection,
+    EQROSubmissionTypeSummarySection,
+} from './SubmissionTypeSummarySection'
 export { UploadedDocumentsTable } from './UploadedDocumentsTable'
