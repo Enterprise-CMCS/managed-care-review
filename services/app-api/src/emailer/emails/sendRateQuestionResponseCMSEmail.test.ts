@@ -242,7 +242,7 @@ describe('sendRateQuestionResponseCMSEmail', () => {
         expect(template).toEqual(
             expect.objectContaining({
                 bodyText: expect.stringContaining(
-                    'Submitted by: James Brown  james@example.com (james@example.com)'
+                    'Submitted by: James Brown james@example.com (james@example.com)'
                 ),
             })
         )

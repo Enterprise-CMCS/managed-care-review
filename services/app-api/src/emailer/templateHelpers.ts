@@ -281,7 +281,7 @@ const stripHTMLFromTemplate = (template: string) => {
 
     // remove P and A tags but preserve what's inside of them
     formatted = formatted.replace(/<p.*>/gi, '\n')
-    formatted = formatted.replace(/<a.*href="(.*?)".*>(.*?)<\/a>/gi, ' $2 ($1)')
+    formatted = formatted.replace(/<a.*href="(.*?)".*>(.*?)<\/a>/gi, '$2 ($1)')
     // everything else
     return formatted.replace(/(<([^>]+)>)/gi, '')
 }

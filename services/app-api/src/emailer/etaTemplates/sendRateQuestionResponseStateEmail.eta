@@ -13,8 +13,8 @@ Response to <%= it.cmsRequestorDivision %> rate questions was successfully submi
 <br />
 <b>If you need assistance or to make changes to your submission: </b><br />
 <ul>
-    <li>For assistance with programmatic, contractual, or operational issues, please reach out to <%= it.cmsReviewHelpEmailAddress%> and/or your CMS primary contact. </li>
-    <li>For assistance on policy and actuarial issues, please reach out to <%= it.cmsRateHelpEmailAddress %>.</li>
-    <li>For issues related to MC-Review or all other inquiries, please reach out to <%= it.helpDeskEmail %>.</li>
+    <li>For assistance with programmatic, contractual, or operational issues, please reach out to <a href="mailto:<%= it.cmsReviewHelpEmailAddress %>"><%= it.cmsReviewHelpEmailAddress %></a> and/or your CMS primary contact.</li>
+    <li>For assistance on policy and actuarial issues, please reach out to <a href="mailto:<%= it.cmsRateHelpEmailAddress %>"><%= it.cmsRateHelpEmailAddress %></a>.</li>
+    <li>For issues related to MC-Review or all other inquiries, please reach out to <a href="mailto:<%= it.helpDeskEmail %>"><%= it.helpDeskEmail %></a>.</li>
 </ul>
 
