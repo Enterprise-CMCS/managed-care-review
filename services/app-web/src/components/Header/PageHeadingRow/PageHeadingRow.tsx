@@ -105,6 +105,7 @@ const CMSUserRow = ({
     pathname,
     stateCode,
     stateName,
+    isLoading,
 }: {
     user:
         | CmsUser
@@ -116,37 +117,40 @@ const CMSUserRow = ({
     pathname?: string
     stateCode?: string
     stateName?: string
+    isLoading?: boolean
 }) => {
     const hideSubID = pathIncludesAny(pathname, hideSubIDRoutes.cms)
     const contractType = getContractTypeFromPath(pathname)
 
     return (
         <div className={styles.dashboardHeading}>
-            <GridContainer>
-                {hideSubID ? (
-                    <Grid row className="flex-align-center">
-                        <PageHeading>
-                            <span>CMS</span>
-                            {heading && (
-                                <span
-                                    className="font-heading-lg text-light"
-                                    data-testid="submission-name"
-                                >
-                                    {heading}
-                                </span>
-                            )}
-                        </PageHeading>
-                    </Grid>
-                ) : (
-                    <StateDisplay
-                        heading={heading}
-                        pathname={pathname}
-                        stateCode={stateCode}
-                        stateName={stateName}
-                        contractType={contractType}
-                    />
-                )}
-            </GridContainer>
+            {!isLoading && (
+                <GridContainer>
+                    {hideSubID ? (
+                        <Grid row className="flex-align-center">
+                            <PageHeading>
+                                <span>CMS</span>
+                                {heading && (
+                                    <span
+                                        className="font-heading-lg text-light"
+                                        data-testid="submission-name"
+                                    >
+                                        {heading}
+                                    </span>
+                                )}
+                            </PageHeading>
+                        </Grid>
+                    ) : (
+                        <StateDisplay
+                            heading={heading}
+                            pathname={pathname}
+                            stateCode={stateCode}
+                            stateName={stateName}
+                            contractType={contractType}
+                        />
+                    )}
+                </GridContainer>
+            )}
         </div>
     )
 }
@@ -265,6 +269,7 @@ export const PageHeadingRow = ({
                 heading={heading}
                 pathname={pathname}
                 stateName={stateName}
+                isLoading={isLoading && !stateCode}
                 stateCode={stateCode}
             />
         )

@@ -35,7 +35,7 @@ type FormError =
 
 export const RateWithdraw = () => {
     const { id } = useParams() as { id: string }
-    const { updateHeading } = usePage()
+    const { updateHeading, updateStateContent } = usePage()
     const navigate = useNavigate()
     const { logFormSubmitEvent } = useTealium()
     const [rateName, setRateName] = useState<string | undefined>(undefined)
@@ -62,6 +62,21 @@ export const RateWithdraw = () => {
     useEffect(() => {
         updateHeading({ customHeading: rateName })
     }, [rateName, updateHeading])
+
+    const stateCode = rate?.state.code
+    const stateName = rate?.state.name
+    // Set state info for the header
+    useEffect(() => {
+        if (stateCode || stateName) {
+            updateStateContent(stateCode, stateName)
+        } else {
+            updateStateContent(undefined, undefined)
+        }
+
+        return () => {
+            updateStateContent(undefined, undefined)
+        }
+    }, [stateCode, stateName, updateStateContent])
 
     if (loading) {
         return <ErrorOrLoadingPage state="LOADING" />

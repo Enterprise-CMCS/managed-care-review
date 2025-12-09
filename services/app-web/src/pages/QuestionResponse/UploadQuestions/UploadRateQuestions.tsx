@@ -22,7 +22,7 @@ import { Error404 } from '../../Errors/Error404Page'
 export const UploadRateQuestions = () => {
     // router context
 
-    const { updateHeading } = usePage()
+    const { updateHeading, updateStateContent } = usePage()
     const { id, division, contractSubmissionType } = useParams<{
         division: string
         id: string
@@ -57,6 +57,21 @@ export const UploadRateQuestions = () => {
     useEffect(() => {
         updateHeading({ customHeading: `${rateName} Add questions` })
     }, [rateName, updateHeading])
+
+    const stateName = rate?.state.name
+    const stateCode = rate?.state.code
+    // Set state info for the header
+    useEffect(() => {
+        if (stateCode || stateName) {
+            updateStateContent(stateCode, stateName)
+        } else {
+            updateStateContent(undefined, undefined)
+        }
+
+        return () => {
+            updateStateContent(undefined, undefined)
+        }
+    }, [stateCode, stateName, updateStateContent])
 
     // confirm division is valid
     const realDivision = division?.toUpperCase()
