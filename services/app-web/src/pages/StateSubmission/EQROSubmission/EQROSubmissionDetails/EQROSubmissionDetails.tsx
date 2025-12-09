@@ -13,17 +13,28 @@ import {
     ReactRouterLinkWithLogging,
 } from '../../../../components'
 import { Fieldset, Form, FormGroup, Label, Link } from '@trussworks/react-uswds'
-import { RoutesRecord, EQRO_SUBMISSION_FORM_ROUTES } from '@mc-review/constants'
-import { generatePath, useNavigate, matchPath } from 'react-router-dom'
+import {
+    RoutesRecord,
+    EQRO_SUBMISSION_FORM_ROUTES,
+    RouteT,
+} from '@mc-review/constants'
+import {
+    generatePath,
+    useNavigate,
+    matchPath,
+    useLocation,
+} from 'react-router-dom'
 import { useRouteParams, useCurrentRoute } from '../../../../hooks'
 import styles from '../../StateSubmissionForm.module.scss'
 import { usePage } from '../../../../contexts/PageContext'
 import { useContractForm } from '../../../../hooks/useContractForm'
 import {
+    ContractDraftRevisionFormDataInput,
     ContractType,
     CreateContractInput,
     ManagedCareEntity,
     PopulationCoveredType,
+    UpdateContractDraftRevisionInput,
 } from '../../../../gen/gqlClient'
 import { Formik, FormikErrors } from 'formik'
 import * as Yup from 'yup'
@@ -34,6 +45,13 @@ import {
 } from '@mc-review/submissions'
 import { ContactSupportLink } from '../../../../components/ErrorAlert/ContactSupportLink'
 import { renameKey } from '../../submissionUtils'
+import {
+    ErrorOrLoadingPage,
+    PageBannerAlerts,
+} from '../../SharedSubmissionComponents'
+import { Error404 } from '../../../Errors/Error404Page'
+import { useAuth } from '../../../../contexts/AuthContext'
+import { useFocusOnRender } from '../../../../hooks/useFocusOnRender'
 
 interface EQROSubmissionTypeFormValues {
     populationCovered?: PopulationCoveredType
@@ -47,17 +65,32 @@ type FormError =
     FormikErrors<EQROSubmissionTypeFormValues>[keyof FormikErrors<EQROSubmissionTypeFormValues>]
 
 export const EQROSubmissionDetails = (): React.ReactElement => {
-    const { id, contractSubmissionType } = useRouteParams()
+    const { id } = useRouteParams()
     const navigate = useNavigate()
+    const location = useLocation()
     const { updateActiveMainContent } = usePage()
     const { currentRoute } = useCurrentRoute()
+    const [draftSaved, setDraftSaved] = useState(false)
+    const { loggedInUser } = useAuth()
+    useFocusOnRender(draftSaved, '[data-testid="saveAsDraftSuccessBanner"]')
+    const { setFocusErrorSummaryHeading, errorSummaryHeadingRef } =
+        useErrorSummary()
+    const [showAPIErrorBanner, setShowAPIErrorBanner] = useState<
+        boolean | string
+    >(false) // string is a custom error message, defaults to generic message when true
 
     const isNewSubmission = matchPath(
         RoutesRecord.SUBMISSIONS_NEW_SUBMISSION_FORM,
         location.pathname
     )
 
-    const { createDraft } = useContractForm(id)
+    const {
+        createDraft,
+        draftSubmission,
+        updateDraft,
+        interimState,
+        showPageErrorMessage,
+    } = useContractForm(id)
 
     const [shouldValidate, setShouldValidate] = useState(false)
     const showFieldErrors = (error?: FormError) =>
@@ -70,7 +103,25 @@ export const EQROSubmissionDetails = (): React.ReactElement => {
         updateActiveMainContent(activeMainContentId)
     }, [activeMainContentId, updateActiveMainContent])
 
-    const onSubmit = async (values: EQROSubmissionTypeFormValues) => {
+    if (interimState) {
+        return <ErrorOrLoadingPage state={interimState} />
+    }
+
+    if (draftSubmission?.contractSubmissionType === 'HEALTH_PLAN') {
+        return <Error404 />
+    }
+
+    const handleFormSubmit = async (
+        values: EQROSubmissionTypeFormValues,
+        setSubmitting: (isSubmitting: boolean) => void, // formik setSubmitting
+        options: {
+            type: 'SAVE_AS_DRAFT' | 'CANCEL' | 'CONTINUE'
+            redirectPath?: RouteT
+        }
+    ) => {
+        if (options.type === 'SAVE_AS_DRAFT' && draftSaved) {
+            setDraftSaved(false)
+        }
         if (isNewSubmission) {
             const input: CreateContractInput = {
                 populationCovered: values.populationCovered!,
@@ -85,6 +136,7 @@ export const EQROSubmissionDetails = (): React.ReactElement => {
             const draftSubmission = await createDraft(input)
 
             if (draftSubmission instanceof Error) {
+                setSubmitting(false)
                 console.info(
                     'Log: creating new submission failed with server error',
                     draftSubmission
@@ -95,26 +147,71 @@ export const EQROSubmissionDetails = (): React.ReactElement => {
             navigate(
                 generatePath(RoutesRecord.SUBMISSIONS_CONTRACT_DETAILS, {
                     id: draftSubmission.id,
-                    contractSubmissionType,
+                    contractSubmissionType: 'eqro',
                 })
             )
         } else {
-            navigate(
-                generatePath(RoutesRecord.SUBMISSIONS_CONTRACT_DETAILS, {
-                    id: id,
-                    contractSubmissionType,
-                })
-            )
+            setSubmitting(true)
+            if (!draftSubmission) {
+                console.info(
+                    'Error updating draft submission. draftSubmission was undefined.'
+                )
+                setShowAPIErrorBanner(true)
+                return
+            }
+
+            // remove out __typename name our response formData to retain existing formData from other pages.
+            // eslint-disable-next-line @typescript-eslint/no-unused-vars
+            const { __typename, ...formData } =
+                draftSubmission.draftRevision.formData
+
+            const updatedDraftFormData: ContractDraftRevisionFormDataInput = {
+                ...formData,
+                populationCovered: values.populationCovered!,
+                programIDs: values.programIDs,
+                managedCareEntities: values.managedCareEntities,
+                contractType: values.contractType!,
+                submissionDescription: values.submissionDescription,
+            }
+
+            const updatedContractInput: UpdateContractDraftRevisionInput = {
+                formData: updatedDraftFormData,
+                contractID: draftSubmission.id,
+                lastSeenUpdatedAt: draftSubmission.draftRevision.updatedAt,
+            }
+
+            const updatedDraft = await updateDraft(updatedContractInput)
+            if (updatedDraft instanceof Error) {
+                setSubmitting(false)
+            } else if (options.type === 'SAVE_AS_DRAFT' && updatedDraft) {
+                setDraftSaved(true)
+                setSubmitting(false)
+                setShowAPIErrorBanner(false)
+            } else {
+                navigate(
+                    generatePath(RoutesRecord.SUBMISSIONS_CONTRACT_DETAILS, {
+                        id: id,
+                        contractSubmissionType: 'eqro',
+                    })
+                )
+            }
         }
     }
 
     const initialValues = {
-        populationCovered: undefined,
-        programIDs: [],
-        managedCareEntities: [],
-        contractType: undefined,
-        submissionDescription: '',
+        populationCovered:
+            draftSubmission?.draftRevision.formData.populationCovered ??
+            undefined,
+        programIDs: draftSubmission?.draftRevision?.formData.programIDs ?? [],
+        managedCareEntities:
+            draftSubmission?.draftRevision?.formData.managedCareEntities ?? [],
+        contractType:
+            draftSubmission?.draftRevision?.formData.contractType ?? undefined,
+        submissionDescription:
+            draftSubmission?.draftRevision?.formData.submissionDescription ??
+            '',
     }
+
     const EqroSubmissionSchema = Yup.object().shape({
         populationCovered: Yup.string().required(
             'You must select the population included in EQRO activities'
@@ -129,8 +226,6 @@ export const EQROSubmissionDetails = (): React.ReactElement => {
             'You must provide a description of any major changes or updates'
         ),
     })
-    const { setFocusErrorSummaryHeading, errorSummaryHeadingRef } =
-        useErrorSummary()
 
     const formHeading = 'EQRO Submission Details Form'
 
@@ -148,11 +243,24 @@ export const EQROSubmissionDetails = (): React.ReactElement => {
                         SUBMISSIONS_TYPE: 'Submission details',
                     }}
                 />
+                <PageBannerAlerts
+                    loggedInUser={loggedInUser}
+                    unlockedInfo={draftSubmission?.draftRevision.unlockInfo}
+                    showPageErrorMessage={
+                        showPageErrorMessage || showAPIErrorBanner
+                    }
+                    draftSaved={draftSaved}
+                />
             </FormNotificationContainer>
             <FormContainer id="SubmissionDetails">
                 <Formik
                     initialValues={initialValues}
-                    onSubmit={(values) => onSubmit(values)}
+                    onSubmit={(values, { setSubmitting }) =>
+                        handleFormSubmit(values, setSubmitting, {
+                            type: 'CONTINUE',
+                            redirectPath: 'SUBMISSIONS_CONTRACT_DETAILS',
+                        })
+                    }
                     validationSchema={EqroSubmissionSchema}
                 >
                     {({
@@ -161,7 +269,6 @@ export const EQROSubmissionDetails = (): React.ReactElement => {
                         handleSubmit,
                         isSubmitting,
                         setSubmitting,
-                        setFieldValue,
                     }) => (
                         <Form
                             className={styles.formContainer}
@@ -455,22 +562,26 @@ export const EQROSubmissionDetails = (): React.ReactElement => {
                                 />
                             </fieldset>
                             <PageActions
-                                pageVariant={'FIRST'}
+                                pageVariant={
+                                    isNewSubmission ? 'FIRST' : 'EDIT_FIRST'
+                                }
                                 backOnClick={() =>
                                     navigate(RoutesRecord.DASHBOARD_SUBMISSIONS)
                                 }
                                 continueOnClick={() => {
                                     setShouldValidate(true)
                                     setFocusErrorSummaryHeading(true)
-                                    console.info(
-                                        'Continue on click placeholder function'
+                                }}
+                                saveAsDraftOnClick={async () => {
+                                    await handleFormSubmit(
+                                        values,
+                                        setSubmitting,
+                                        {
+                                            type: 'SAVE_AS_DRAFT',
+                                        }
                                     )
                                 }}
-                                saveAsDraftOnClick={() =>
-                                    console.info(
-                                        'Save as draft function placeholder'
-                                    )
-                                }
+                                actionInProgress={isSubmitting}
                                 backOnClickUrl={
                                     RoutesRecord.DASHBOARD_SUBMISSIONS
                                 }
