@@ -5,54 +5,28 @@ import {
 } from './SummarySectionFields'
 import { ContractFormData } from '../../../gen/gqlClient'
 import { screen, waitFor, within } from '@testing-library/react'
-import { fetchCurrentUserMock } from '@mc-review/mocks'
+import { fetchCurrentUserMock, mockContractFormData } from '@mc-review/mocks'
 
-const mockFormData = (
+const mockEQROFormData = (
     overrides?: Partial<ContractFormData>
 ): ContractFormData => {
-    return {
-        programIDs: ['abbdf9b0-c49e-4c4c-bb6f-040cb7b51cce'],
+    return mockContractFormData({
         populationCovered: 'MEDICAID_AND_CHIP',
-        submissionType: 'CONTRACT_ONLY',
-        submissionDescription: 'Test',
-        stateContacts: [
-            {
-                name: 'test name',
-                email: 'test@example.com',
-                titleRole: 'title',
-            },
-        ],
-        supportingDocuments: [
-            {
-                s3URL: 's3://bucketname/key/contractsupporting1.pdf',
-                sha256: 'fakesha',
-                name: 'contractSupporting1.pdf',
-            },
-        ],
         contractType: 'BASE',
-        contractDocuments: [
-            {
-                s3URL: 's3://bucketname/key/contract.pdf',
-                sha256: 'fakesha',
-                name: 'contract.pdf',
-            },
-        ],
-        contractDateStart: '2024-05-04',
-        contractDateEnd: '2025-05-04',
+        submissionType: 'CONTRACT_ONLY',
         managedCareEntities: ['MCO'],
-        federalAuthorities: [],
         eqroNewContractor: true,
         eqroProvisionMcoNewOptionalActivity: true,
         eqroProvisionNewMcoEqrRelatedActivities: false,
         eqroProvisionChipEqrRelatedActivities: null,
         eqroProvisionMcoEqrOrRelatedActivities: null,
         ...overrides,
-    }
+    })
 }
 
 describe('EQROModifiedProvisionSummary', () => {
     it('renders section correctly', async () => {
-        const mockTestData: ContractFormData = mockFormData()
+        const mockTestData: ContractFormData = mockEQROFormData()
         renderWithProviders(
             <EQROModifiedProvisionSummary contractFormData={mockTestData} />,
             {
@@ -106,7 +80,7 @@ describe('EQROModifiedProvisionSummary', () => {
         ).toBeNull()
     })
     it('does not render EQRO provisions questions', async () => {
-        const mockTestData: ContractFormData = mockFormData({
+        const mockTestData: ContractFormData = mockEQROFormData({
             populationCovered: 'MEDICAID',
             managedCareEntities: ['PIHP'],
         })
@@ -136,7 +110,7 @@ describe('EQROModifiedProvisionSummary', () => {
 
 describe('NewEQROContractorSummary', () => {
     it('renders section correctly', async () => {
-        const mockTestData = mockFormData()
+        const mockTestData = mockEQROFormData()
         renderWithProviders(
             <NewEQROContractorSummary contractFormData={mockTestData} />,
             {
@@ -146,13 +120,17 @@ describe('NewEQROContractorSummary', () => {
             }
         )
 
+        await waitFor(() => {
+            expect(
+                screen.getByLabelText(
+                    'Is this contract with a new EQRO contractor'
+                )
+            ).toBeInTheDocument()
+        })
+
         const includeSection = screen.getByLabelText(
             'Is this contract with a new EQRO contractor'
         )
-
-        await waitFor(() => {
-            expect(includeSection).toBeInTheDocument()
-        })
 
         const withinInclude = within(includeSection)
 
@@ -161,7 +139,7 @@ describe('NewEQROContractorSummary', () => {
     })
     it('does not render field correctly', async () => {
         // Ony Base contract action type and MCO managed care entities will show this question.
-        const mockTestData = mockFormData({
+        const mockTestData = mockEQROFormData({
             contractType: 'AMENDMENT',
         })
 

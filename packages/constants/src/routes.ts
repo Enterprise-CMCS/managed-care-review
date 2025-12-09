@@ -52,10 +52,10 @@ const ROUTES = [
 ] as const // iterable union type
 type RouteT = (typeof ROUTES)[number]
 type RouteTWithUnknown = RouteT | 'UNKNOWN_ROUTE'
-const ContractSubmissionTypeRecord: Record<string, string> = {
+const ContractSubmissionTypeRecord = {
     HEALTH_PLAN: 'health-plan',
     EQRO: 'eqro'
-}
+} as const
 /*
     Every application url (excluding query parameters) is found in the RoutesRecord.
     These types ensure we use valid route throughout the application

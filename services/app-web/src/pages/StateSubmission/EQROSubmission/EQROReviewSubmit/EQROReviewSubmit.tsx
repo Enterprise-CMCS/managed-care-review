@@ -163,7 +163,7 @@ export const EQROReviewSubmit = (): React.ReactElement => {
                     <ModalOpenButton
                         modalRef={modalRef}
                         className={styles.submitButton}
-                        id="form-submit"
+                        id="eqro-review-submit-modal-open-button"
                     >
                         Submit
                     </ModalOpenButton>
