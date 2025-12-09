@@ -67,6 +67,7 @@ test.each([
             ...stateAnalysts,
             ...testEmailConfig().devReviewTeamEmails,
             ...testEmailConfig().oactEmails,
+            ...testEmailConfig().dmcoEmails,
         ],
         testDescription: 'OACT Q&A response email contains correct recipients',
     },
@@ -83,6 +84,7 @@ test.each([
             ...stateAnalysts,
             ...testEmailConfig().devReviewTeamEmails,
             ...testEmailConfig().dmcpReviewEmails,
+            ...testEmailConfig().dmcoEmails,
         ],
         testDescription: 'DMCP Q&A response email contains correct recipients',
     },
@@ -98,6 +100,7 @@ test.each([
         expectedResult: [
             ...stateAnalysts,
             ...testEmailConfig().devReviewTeamEmails,
+            ...testEmailConfig().dmcoEmails,
         ],
         testDescription: 'DMCO Q&A response email contains correct recipients',
     },

@@ -713,6 +713,7 @@ describe('unlockContract', () => {
             const cmsEmails = [
                 ...config.devReviewTeamEmails,
                 ...assignedUserEmails,
+                ...config.dmcoEmails,
                 ...config.oactEmails,
             ]
 
