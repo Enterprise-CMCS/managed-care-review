@@ -90,6 +90,8 @@ export const EQROReviewSubmit = (): React.ReactElement => {
         } else {
             return <GenericErrorPage />
         }
+    } else if (contract.contractSubmissionType !== 'EQRO') {
+        return <GenericErrorPage />
     }
 
     const isStateUser = loggedInUser?.role === 'STATE_USER'
