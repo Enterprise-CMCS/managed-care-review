@@ -119,8 +119,8 @@ const parseAndUpdateEqroFields = (
         normalizePopulation(updateFormData.populationCovered) !==
         normalizePopulation(currentFormData.populationCovered)
     const managedCareEntitiesChanged =
-        JSON.stringify(updateFormData.managedCareEntities?.slice().sort()) !==
-        JSON.stringify(currentFormData.managedCareEntities?.slice().sort())
+        updateFormData.managedCareEntities?.includes('MCO') !==
+        currentFormData.managedCareEntities?.includes('MCO')
 
     if (
         !contractTypeChanged &&

@@ -944,30 +944,12 @@ describe('parseAndUpdateEqroFields', () => {
             })
         })
 
-        it('nullifies all EQRO fields when entities are reordered with additions', () => {
-            const currentFormData = baseCurrentFormData({
-                managedCareEntities: ['MCO', 'PIHP'],
-            })
-            const updateFormData = baseUpdateFormData({
-                managedCareEntities: ['PIHP', 'MCO', 'PAHP'],
-            })
-
-            const result = parseAndUpdateEqroFields(
-                currentFormData,
-                updateFormData
-            )
-
-            ALL_EQRO_FIELDS.forEach((field) => {
-                expect(result[field]).toBeNull()
-            })
-        })
-
         it('does not nullify fields when entities are only reordered', () => {
             const currentFormData = baseCurrentFormData({
                 managedCareEntities: ['MCO', 'PIHP'],
             })
             const updateFormData = baseUpdateFormData({
-                managedCareEntities: ['PIHP', 'MCO'],
+                managedCareEntities: ['PIHP', 'MCO', 'PCCM'],
             })
 
             const result = parseAndUpdateEqroFields(

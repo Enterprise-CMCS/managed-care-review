@@ -177,14 +177,6 @@ export const SubmissionType = ({
             setDraftSaved(false)
         }
         if (isNewSubmission) {
-            if (!values.populationCovered) {
-                console.info(
-                    'unexpected error, attempting to submit without population covered',
-                    values.submissionType
-                )
-                return
-            }
-
             const input: CreateContractInput = {
                 populationCovered: values.populationCovered!,
                 programIDs: values.programIDs,

@@ -104,7 +104,7 @@ export const EQROSubmissionDetails = (): React.ReactElement => {
     }, [activeMainContentId, updateActiveMainContent])
 
     if (interimState) {
-        return <ErrorOrLoadingPage state={interimState || 'GENERIC_ERROR'} />
+        return <ErrorOrLoadingPage state={interimState} />
     }
 
     if (draftSubmission?.contractSubmissionType === 'HEALTH_PLAN') {
