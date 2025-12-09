@@ -26,7 +26,7 @@ export class CognitoStack extends BaseStack {
     public readonly userPool: IUserPool
     public readonly userPoolClient: IUserPoolClient
     public readonly userPoolDomain?: UserPoolDomain // Only created for review envs
-    public readonly identityPool: CfnIdentityPool
+    public readonly identityPool: CfnIdentityPool | { ref: string } // Full resource for review, ref-only for dev/val/prod
     public readonly authRole?: Role // Only created for review envs
 
     constructor(scope: Construct, id: string, props: BaseStackProps) {
@@ -68,10 +68,11 @@ export class CognitoStack extends BaseStack {
                 userPoolClientId
             )
 
-            // Identity Pool - create a minimal object that satisfies the interface
+            // Identity Pool - only need the ref (ID) for dev/val/prod
+            // The actual resource is managed outside CDK (created by Serverless)
             this.identityPool = {
                 ref: identityPoolId,
-            } as CfnIdentityPool
+            }
 
             // Auth role exists in AWS but we don't need to reference it here
             // It's managed outside of CDK (created by Serverless)
