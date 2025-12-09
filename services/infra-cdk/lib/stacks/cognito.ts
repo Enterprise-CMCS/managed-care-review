@@ -1,19 +1,15 @@
 import { BaseStack, type BaseStackProps } from '../constructs/base/base-stack'
 import { type Construct } from 'constructs'
 import {
-    UserPool,
-    UserPoolClient,
-    UserPoolDomain,
-    UserPoolIdentityProviderSaml,
     CfnIdentityPool,
     CfnIdentityPoolRoleAttachment,
-    UserPoolClientIdentityProvider,
     StringAttribute,
+    UserPool,
+    UserPoolDomain,
+    UserPoolClient,
     UserPoolEmail,
-    OAuthScope,
-    ProviderAttribute,
-    UserPoolIdentityProviderSamlMetadataType,
 } from 'aws-cdk-lib/aws-cognito'
+import type { IUserPool, IUserPoolClient } from 'aws-cdk-lib/aws-cognito'
 import {
     Role,
     WebIdentityPrincipal,
@@ -27,11 +23,11 @@ import { CfnOutput, Fn } from 'aws-cdk-lib'
  * Cognito stack - User Pool and Identity Pool for authentication
  */
 export class CognitoStack extends BaseStack {
-    public readonly userPool: UserPool
-    public readonly userPoolClient: UserPoolClient
+    public readonly userPool: IUserPool
+    public readonly userPoolClient: IUserPoolClient
     public readonly userPoolDomain: UserPoolDomain
     public readonly identityPool: CfnIdentityPool
-    public readonly authRole: Role
+    public readonly authRole?: Role // Only created for review envs, imported envs reference existing role
 
     constructor(scope: Construct, id: string, props: BaseStackProps) {
         super(scope, id, {
@@ -39,277 +35,230 @@ export class CognitoStack extends BaseStack {
             description: 'Cognito authentication - User Pool and Identity Pool',
         })
 
-        // Import application endpoint URL from frontend-infra stack (matches serverless ui-auth dependency on ui)
-        const applicationEndpointUrl = Fn.importValue(
-            `frontend-infra-${props.stage}-cdk-CloudFrontEndpointUrl`
-        )
+        const isDevValProd = ['dev', 'val', 'prod'].includes(this.stage)
 
-        // Get SSM parameters (matches serverless config)
-        const oktaMetadataUrl = StringParameter.valueFromLookup(
-            this,
-            '/configuration/okta_metadata_url'
-        )
+        if (isDevValProd) {
+            // Dev/Val/Prod: Import existing Cognito resources previously deployed by serverless
+            // These resources aren't managed by CDK and we reference them here
+            const userPoolId = StringParameter.valueFromLookup(
+                this,
+                `/cognito/${this.stage}/user_pool_id`
+            )
 
-        const sesSourceEmail = StringParameter.valueFromLookup(
-            this,
-            '/configuration/email/sourceAddress'
-        )
+            const userPoolClientId = StringParameter.valueFromLookup(
+                this,
+                `/cognito/${this.stage}/user_pool_client_id`
+            )
 
-        // Create Cognito User Pool (matches serverless ui-auth)
-        this.userPool = new UserPool(this, 'CognitoUserPool', {
-            userPoolName: `${this.stage}-user-pool`,
-            signInAliases: {
-                email: true,
-            },
-            autoVerify: {
-                email: true,
-            },
-            standardAttributes: {
-                givenName: {
-                    required: false,
-                    mutable: true,
-                },
-                familyName: {
-                    required: false,
-                    mutable: true,
-                },
-                phoneNumber: {
-                    required: false,
-                    mutable: true,
-                },
-            },
-            customAttributes: {
-                state_code: new StringAttribute({
-                    mutable: true,
-                }),
-                role: new StringAttribute({
-                    mutable: true,
-                }),
-            },
-            selfSignUpEnabled: false,
-            email:
-                sesSourceEmail !== 'dummy-value-for-'
-                    ? UserPoolEmail.withSES({
-                          sesRegion: this.region,
-                          fromEmail: sesSourceEmail,
-                          fromName: 'Managed Care Review',
-                      })
-                    : UserPoolEmail.withCognito(),
-        })
+            const identityPoolId = StringParameter.valueFromLookup(
+                this,
+                `/cognito/${this.stage}/identity_pool_id`
+            )
 
-        // Create SAML Identity Provider (Okta)
-        const identityProvider = new UserPoolIdentityProviderSaml(
-            this,
-            'CognitoUserPoolIdentityProvider',
-            {
-                userPool: this.userPool,
-                name: 'Okta',
-                metadata: {
-                    metadataType: UserPoolIdentityProviderSamlMetadataType.URL,
-                    metadataContent: oktaMetadataUrl,
+            // Import existing resources (read-only references)
+            this.userPool = UserPool.fromUserPoolId(
+                this,
+                'ImportedUserPool',
+                userPoolId
+            )
+
+            this.userPoolClient = UserPoolClient.fromUserPoolClientId(
+                this,
+                'ImportedUserPoolClient',
+                userPoolClientId
+            )
+
+            // Note: UserPoolDomain doesn't have a fromDomain method
+            // We don't actually need this as a resource, just the domain string for outputs
+            this.userPoolDomain = {} as UserPoolDomain
+
+            // Identity Pool - create a minimal object that satisfies the interface
+            this.identityPool = {
+                ref: identityPoolId,
+            } as CfnIdentityPool
+
+            // Auth role exists in AWS but we don't need to reference it here
+            // It's managed outside of CDK (created by Serverless)
+        } else {
+            // Review environments: Create simple Cognito for test users (no Okta SAML)
+            // Review environments use direct username/password authentication with test users
+
+            // Create Cognito User Pool
+            this.userPool = new UserPool(this, 'CognitoUserPool', {
+                userPoolName: `${this.stage}-user-pool`,
+                signInAliases: {
+                    email: true,
                 },
-                attributeMapping: {
-                    email: ProviderAttribute.other(
-                        'http://schemas.xmlsoap.org/ws/2005/05/identity/claims/emailaddress'
-                    ),
-                    custom: {
-                        'custom:state_code': ProviderAttribute.other('state'),
-                        'custom:role': ProviderAttribute.other('cmsRoles'),
+                autoVerify: {
+                    email: true,
+                },
+                standardAttributes: {
+                    givenName: {
+                        required: false,
+                        mutable: true,
                     },
-                    givenName: ProviderAttribute.other('firstName'),
-                    familyName: ProviderAttribute.other('lastName'),
-                },
-                idpSignout: true,
-            }
-        )
-
-        // Create User Pool Client (matches serverless config)
-        this.userPoolClient = new UserPoolClient(
-            this,
-            'CognitoUserPoolClient',
-            {
-                userPool: this.userPool,
-                userPoolClientName: `${this.stage}-user-pool-client`,
-                oAuth: {
-                    flows: {
-                        implicitCodeGrant: true,
+                    familyName: {
+                        required: false,
+                        mutable: true,
                     },
-                    scopes: [OAuthScope.EMAIL, OAuthScope.OPENID],
-                    callbackUrls: [
-                        applicationEndpointUrl, // Dynamic URL from frontend-infra stack
-                        'http://localhost:3000/',
-                        'http://localhost:3003/',
-                    ],
-                    logoutUrls: [
-                        applicationEndpointUrl, // Dynamic URL from frontend-infra stack
-                        'http://localhost:3000/',
-                        'http://localhost:3003/',
-                    ],
+                    phoneNumber: {
+                        required: false,
+                        mutable: true,
+                    },
                 },
-                authFlows: {
-                    adminUserPassword: true,
-                    userSrp: true,
+                customAttributes: {
+                    state_code: new StringAttribute({
+                        mutable: true,
+                    }),
+                    role: new StringAttribute({
+                        mutable: true,
+                    }),
                 },
-                generateSecret: false,
-                supportedIdentityProviders: [
-                    UserPoolClientIdentityProvider.custom('Okta'),
-                ],
-            }
-        )
+                selfSignUpEnabled: false,
+                // Use Cognito's default email (not SES) for review environments
+                email: UserPoolEmail.withCognito(),
+            })
 
-        // Add dependency to ensure identity provider is created first
-        this.userPoolClient.node.addDependency(identityProvider)
-
-        // Create User Pool Domain (matches serverless pattern)
-        this.userPoolDomain = new UserPoolDomain(this, 'UserPoolDomain', {
-            userPool: this.userPool,
-            cognitoDomain: {
-                domainPrefix: Fn.join('', [
-                    `${this.stage}-login-`,
-                    this.userPoolClient.userPoolClientId,
-                ]),
-            },
-        })
-
-        // Add explicit dependency to ensure client is created first (matches serverless Ref behavior)
-        this.userPoolDomain.node.addDependency(this.userPoolClient)
-
-        // Create Identity Pool
-        this.identityPool = new CfnIdentityPool(this, 'CognitoIdentityPool', {
-            identityPoolName: `${this.stage}IdentityPool`,
-            allowUnauthenticatedIdentities: false,
-            cognitoIdentityProviders: [
+            // Create User Pool Client with direct authentication (no OAuth/SAML)
+            this.userPoolClient = new UserPoolClient(
+                this,
+                'CognitoUserPoolClient',
                 {
-                    clientId: this.userPoolClient.userPoolClientId,
-                    providerName: this.userPool.userPoolProviderName,
-                },
-            ],
-        })
-
-        // Create authenticated role for Identity Pool (matches serverless config)
-        this.authRole = new Role(this, 'CognitoAuthRole', {
-            assumedBy: new WebIdentityPrincipal(
-                'cognito-identity.amazonaws.com',
-                {
-                    StringEquals: {
-                        'cognito-identity.amazonaws.com:aud':
-                            this.identityPool.ref,
+                    userPool: this.userPool,
+                    userPoolClientName: `${this.stage}-user-pool-client`,
+                    authFlows: {
+                        adminUserPassword: true, // Allow admin to create test users
+                        userPassword: true, // Username/password authentication
+                        userSrp: true, // Secure Remote Password protocol
                     },
-                    'ForAnyValue:StringLike': {
-                        'cognito-identity.amazonaws.com:amr': 'authenticated',
+                    generateSecret: false,
+                    // No OAuth or SAML - direct authentication only
+                }
+            )
+
+            // Create User Pool Domain
+            this.userPoolDomain = new UserPoolDomain(this, 'UserPoolDomain', {
+                userPool: this.userPool,
+                cognitoDomain: {
+                    domainPrefix: Fn.join('', [
+                        `${this.stage}-login-`,
+                        this.userPoolClient.userPoolClientId,
+                    ]),
+                },
+            })
+
+            // Add explicit dependency to ensure client is created first
+            this.userPoolDomain.node.addDependency(this.userPoolClient)
+
+            // Create Identity Pool
+            this.identityPool = new CfnIdentityPool(
+                this,
+                'CognitoIdentityPool',
+                {
+                    identityPoolName: `${this.stage}IdentityPool`,
+                    allowUnauthenticatedIdentities: false,
+                    cognitoIdentityProviders: [
+                        {
+                            clientId: this.userPoolClient.userPoolClientId,
+                            providerName: this.userPool.userPoolProviderName,
+                        },
+                    ],
+                }
+            )
+
+            // Create authenticated role for Identity Pool
+            this.authRole = new Role(this, 'CognitoAuthRole', {
+                assumedBy: new WebIdentityPrincipal(
+                    'cognito-identity.amazonaws.com',
+                    {
+                        StringEquals: {
+                            'cognito-identity.amazonaws.com:aud':
+                                this.identityPool.ref,
+                        },
+                        'ForAnyValue:StringLike': {
+                            'cognito-identity.amazonaws.com:amr':
+                                'authenticated',
+                        },
+                    }
+                ),
+            })
+
+            // Add policies to auth role
+            this.authRole.addToPolicy(
+                new PolicyStatement({
+                    effect: Effect.ALLOW,
+                    actions: [
+                        'mobileanalytics:PutEvents',
+                        'cognito-sync:*',
+                        'cognito-identity:*',
+                    ],
+                    resources: ['*'],
+                })
+            )
+
+            this.authRole.addToPolicy(
+                new PolicyStatement({
+                    effect: Effect.ALLOW,
+                    actions: ['execute-api:Invoke'],
+                    resources: [
+                        `arn:aws:execute-api:${this.region}:${this.account}:*/*`,
+                    ],
+                })
+            )
+
+            // S3 permissions for uploads
+            this.authRole.addToPolicy(
+                new PolicyStatement({
+                    effect: Effect.ALLOW,
+                    actions: ['s3:*'],
+                    resources: [
+                        'arn:aws:s3:::*/allusers/*',
+                        `arn:aws:s3:::*/private/\${cognito-identity.amazonaws.com:sub}/*`,
+                    ],
+                })
+            )
+
+            // Attach the authenticated role to the Identity Pool
+            new CfnIdentityPoolRoleAttachment(
+                this,
+                'IdentityPoolRoleAttachment',
+                {
+                    identityPoolId: this.identityPool.ref,
+                    roles: {
+                        authenticated: this.authRole.roleArn,
                     },
                 }
-            ),
-        })
-
-        // Add policies to auth role
-        this.authRole.addToPolicy(
-            new PolicyStatement({
-                effect: Effect.ALLOW,
-                actions: [
-                    'mobileanalytics:PutEvents',
-                    'cognito-sync:*',
-                    'cognito-identity:*',
-                ],
-                resources: ['*'],
-            })
-        )
-
-        this.authRole.addToPolicy(
-            new PolicyStatement({
-                effect: Effect.ALLOW,
-                actions: ['execute-api:Invoke'],
-                resources: [
-                    `arn:aws:execute-api:${this.region}:${this.account}:*/*`, // Will be constrained by actual API Gateway
-                ],
-            })
-        )
-
-        // S3 permissions for uploads (will be constrained by actual bucket ARNs)
-        this.authRole.addToPolicy(
-            new PolicyStatement({
-                effect: Effect.ALLOW,
-                actions: ['s3:*'],
-                resources: [
-                    'arn:aws:s3:::*/allusers/*',
-                    `arn:aws:s3:::*/private/\${cognito-identity.amazonaws.com:sub}/*`,
-                ],
-            })
-        )
-
-        // Attach the authenticated role to the Identity Pool
-        new CfnIdentityPoolRoleAttachment(this, 'IdentityPoolRoleAttachment', {
-            identityPoolId: this.identityPool.ref,
-            roles: {
-                authenticated: this.authRole.roleArn,
-            },
-        })
+            )
+        }
 
         this.createOutputs()
     }
 
     private createOutputs(): void {
-        // TEMPORARY: For dev/val/prod, export Serverless Cognito IDs from SSM
-        // For review environments, use the new CDK Cognito resources
-        //
-        // This allows:
-        // - dev/val/prod: Continue using existing Serverless Cognito (with Okta configured)
-        // - review envs: Use new CDK Cognito with test users (isolated per PR)
-        //
-        // Migration plan:
-        // 1. Now: Dev/val/prod envs use Serverless Cognito, review envs use CDK Cognito
-        // 2. Later: Update Okta to point to new CDK Cognito endpoints
-        // 3. Later: Change all envs to use CDK Cognito (remove conditional logic)
-        // 4. Later: Delete Serverless Cognito resources
+        // Export Cognito resource IDs for use by other stacks
+        // - dev/val/prod: References existing Serverless-deployed Cognito (imported via SSM)
+        // - review envs: References CDK-created Cognito resources
 
         const isDevValProd = ['dev', 'val', 'prod'].includes(this.stage)
+        const description = isDevValProd
+            ? 'from Serverless (imported)'
+            : 'from CDK'
 
-        let userPoolId: string
-        let userPoolClientId: string
-        let identityPoolId: string
-        let userPoolDomain: string
-        let description: string
-
-        if (isDevValProd) {
-            // Dev/Val/Prod environments: Read from SSM (Serverless Cognito)
-            userPoolId = StringParameter.valueFromLookup(
-                this,
-                `/cognito/${this.stage}/user_pool_id`
-            )
-            userPoolClientId = StringParameter.valueFromLookup(
-                this,
-                `/cognito/${this.stage}/user_pool_client_id`
-            )
-            identityPoolId = StringParameter.valueFromLookup(
-                this,
-                `/cognito/${this.stage}/identity_pool_id`
-            )
-            // Note: SSM contains FULL domain (e.g., prefix.auth.region.amazoncognito.com), not just prefix
-            userPoolDomain = StringParameter.valueFromLookup(
-                this,
-                `/cognito/${this.stage}/user_pool_domain`
-            )
-
-            // SSM should always contain the FULL domain (e.g., prefix.auth.region.amazoncognito.com)
-
-            description = 'from Serverless via SSM'
-        } else {
-            // Review environments: Use new CDK Cognito
-            userPoolId = this.userPool.userPoolId
-            userPoolClientId = this.userPoolClient.userPoolClientId
-            identityPoolId = this.identityPool.ref
-            userPoolDomain = `${this.userPoolDomain.domainName}.auth.${this.region}.amazoncognito.com`
-            description = 'from CDK Cognito'
-        }
+        const userPoolDomain = isDevValProd
+            ? StringParameter.valueFromLookup(
+                  this,
+                  `/cognito/${this.stage}/user_pool_domain`
+              )
+            : `${this.userPoolDomain.domainName}.auth.${this.region}.amazoncognito.com`
 
         new CfnOutput(this, 'UserPoolId', {
-            value: userPoolId,
+            value: this.userPool.userPoolId,
             exportName: this.exportName('UserPoolId'),
             description: `Cognito User Pool ID (${description})`,
         })
 
         new CfnOutput(this, 'UserPoolClientId', {
-            value: userPoolClientId,
+            value: this.userPoolClient.userPoolClientId,
             exportName: this.exportName('UserPoolClientId'),
             description: `Cognito User Pool Client ID (${description})`,
         })
@@ -327,13 +276,13 @@ export class CognitoStack extends BaseStack {
         })
 
         new CfnOutput(this, 'AudienceRestrictionURI', {
-            value: `urn:amazon:cognito:sp:${userPoolId}`,
+            value: `urn:amazon:cognito:sp:${this.userPool.userPoolId}`,
             exportName: this.exportName('AudienceRestrictionURI'),
             description: `Cognito SAML Audience Restriction URI (${description})`,
         })
 
         new CfnOutput(this, 'IdentityPoolId', {
-            value: identityPoolId,
+            value: this.identityPool.ref,
             exportName: this.exportName('IdentityPoolId'),
             description: `Cognito Identity Pool ID (${description})`,
         })
