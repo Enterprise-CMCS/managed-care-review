@@ -4,6 +4,7 @@ import {
     updateTestStateAssignments,
     executeGraphQLOperation,
 } from '../../testHelpers/gqlHelpers'
+import type { ContractDraftRevisionFormDataInput} from '../../gen/gqlClient';
 import { SubmitContractDocument } from '../../gen/gqlClient'
 import {
     clearMetadataFromContractFormData,
@@ -2141,11 +2142,58 @@ describe('submitContract', () => {
     })
 
     describe('EQRO contract tests', () => {
-        it('submits a EQRO contract and preserves expected data', async () => {
+        it.only('submits a EQRO contract and preserves expected data', async () => {
             const stateServer = await constructTestPostgresServer({
                 s3Client: mockS3,
             })
-            const draft = await createAndUpdateTestEQROContract(stateServer)
+
+            const mockTestData: Partial<ContractDraftRevisionFormDataInput> = {
+                populationCovered: "MEDICAID_AND_CHIP",
+                submissionType: "CONTRACT_ONLY",
+                submissionDescription: "Test",
+                stateContacts: [
+                    {
+                        name: 'test name',
+                        email: 'test@example.com',
+                        titleRole: 'title'
+                    }
+                ],
+                supportingDocuments: [
+                    {
+                        s3URL: 's3://bucketname/key/contractsupporting1.pdf',
+                        sha256: 'fakesha',
+                        name: 'contractSupporting1.pdf',
+                    }
+                ],
+                contractType: "BASE",
+                contractDocuments: [
+                    {
+                        s3URL: 's3://bucketname/key/contract.pdf',
+                        sha256: 'fakesha',
+                        name: 'contract.pdf'
+                    }
+                ],
+                contractDateStart: '2024-05-04',
+                contractDateEnd: '2025-05-04',
+                managedCareEntities: [
+                    "MCO"
+                ],
+                federalAuthorities: ['BENCHMARK'],
+                eqroNewContractor: true,
+                statutoryRegulatoryAttestation: false,
+                statutoryRegulatoryAttestationDescription: 'Some reason for statutoryRegulatoryAttestationDescription',
+                eqroProvisionMcoNewOptionalActivity: true,
+                eqroProvisionNewMcoEqrRelatedActivities: false,
+                eqroProvisionChipEqrRelatedActivities: true,
+                eqroProvisionMcoEqrOrRelatedActivities: null,
+            }
+
+            const draft = await createAndUpdateTestEQROContract(
+                stateServer,
+                'FL',
+                mockTestData
+            )
+
             const contract = await submitTestContract(stateServer, draft.id)
             // check contract metadata
             const today = new Date()

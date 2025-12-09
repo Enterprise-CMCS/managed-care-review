@@ -16,7 +16,7 @@ import {
     setSuccessAttributesOnActiveSpan,
 } from '../attributeHelper'
 import type { MutationResolvers, State } from '../../gen/gqlServer'
-import { parseContract } from '../../domain-models/contractAndRates/dataValidatorHelpers'
+import { parseContract, parseEQROContract } from '../../domain-models/contractAndRates/dataValidatorHelpers'
 import type {
     UpdateInfoType,
     PackageStatusType,
@@ -367,12 +367,24 @@ export function submitContract(
         const contractToParse = Object.assign({}, contractWithHistory)
 
         contractToParse.draftRates = draftRatesWithoutLinkedRates
-        const parsedContract = parseContract(
+
+        const isEQRO = contractWithHistory.contractSubmissionType === 'EQRO'
+
+        const parsedContract = isEQRO ?
+            parseEQROContract(
+                contractToParse,
+                contractWithHistory.stateCode,
+                store,
+                featureFlags,
+            )
+            :
+            parseContract(
             contractToParse,
             contractWithHistory.stateCode,
             store,
             featureFlags
         )
+
         if (parsedContract instanceof Error) {
             const errMessage = parsedContract.message
             logError('submitContract', errMessage)

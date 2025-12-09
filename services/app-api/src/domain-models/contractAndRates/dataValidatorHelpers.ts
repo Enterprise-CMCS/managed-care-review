@@ -9,7 +9,7 @@ import {
 } from './formDataTypes'
 import { z } from 'zod'
 import type { Store } from '../../postgres'
-import { submittableContractSchema } from './contractTypes'
+import { submittableContractSchema, submittableEQROContractSchema } from './contractTypes'
 import type { ContractType } from './contractTypes'
 
 const updateDraftContractFormDataSchema = contractFormDataSchema.extend({
@@ -216,4 +216,47 @@ const parseContract = (
     return parsedData.data
 }
 
-export { validateContractDraftRevisionInput, parseContract }
+const parseEQROContract = (
+    contract: ContractType,
+    stateCode: string,
+    store: Store,
+    featureFlags?: FeatureFlagSettings
+): ContractType | z.ZodError => {
+    // const contractParser = submittableEQROContractSchema.parse(contract)
+
+    // since validating programs requires looking in the DB, and once we move programs into the db that
+    // validation will be performed there instead. I'm just adding this check as a refinement instead of trying
+    // to make it part of the core zod parsing.
+    // const contractWithProgramsParser = contractParser.superRefine(
+    //     (contract, ctx) => {
+    //         const contractProgramsIDs = new Set(
+    //             contract.draftRevision.formData.programIDs
+    //         )
+    //         const allProgramIDs = contract.draftRates.reduce((acc, rate) => {
+    //             const rateFormData = rate.draftRevision.formData
+    //             const rateProgramIDs = rateFormData.rateProgramIDs.concat(
+    //                 rateFormData.deprecatedRateProgramIDs
+    //             )
+    //             return new Set([...acc, ...rateProgramIDs])
+    //         }, contractProgramsIDs)
+    //
+    //         const findResult = store.findPrograms(stateCode, [...allProgramIDs])
+    //         if (findResult instanceof Error) {
+    //             ctx.addIssue({
+    //                 code: 'custom',
+    //                 message: findResult.message,
+    //             })
+    //         }
+    //     }
+    // )
+
+    const parsedData = submittableEQROContractSchema.safeParse(contract)
+
+    if (parsedData.error) {
+        return parsedData.error
+    }
+
+    return parsedData.data
+}
+
+export { validateContractDraftRevisionInput, parseContract, parseEQROContract }

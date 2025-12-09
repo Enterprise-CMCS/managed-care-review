@@ -226,7 +226,81 @@ const contractFormDataSchema = genericContractFormDataSchema.extend({
     modifiedNonRiskPaymentArrangements: preprocessNulls(
         genericContractFormDataSchema.shape.modifiedNonRiskPaymentArrangements.optional()
     ),
+    federalAuthorities: genericContractFormDataSchema.shape.federalAuthorities.default([])
     // statutoryRegulatoryAttestation: genericContractFormDataSchema.shape.statutoryRegulatoryAttestation.optional(),
+})
+
+const eqroContractFormDataSchema = genericContractFormDataSchema.extend({
+    contractDateStart: preprocessNulls(
+        genericContractFormDataSchema.shape.contractDateStart.optional()
+    ),
+    contractDateEnd: preprocessNulls(
+        genericContractFormDataSchema.shape.contractDateEnd.optional()
+    ),
+    populationCovered: preprocessNulls(
+        genericContractFormDataSchema.shape.populationCovered.optional()
+    ),
+    riskBasedContract: preprocessNulls(
+        genericContractFormDataSchema.shape.riskBasedContract.optional()
+    ),
+    dsnpContract: preprocessNulls(
+        genericContractFormDataSchema.shape.dsnpContract.optional()
+    ),
+    contractExecutionStatus: preprocessNulls(
+        genericContractFormDataSchema.shape.contractExecutionStatus.optional()
+    ),
+    inLieuServicesAndSettings: preprocessNulls(
+        genericContractFormDataSchema.shape.inLieuServicesAndSettings.optional()
+    ),
+    modifiedBenefitsProvided: preprocessNulls(
+        genericContractFormDataSchema.shape.modifiedBenefitsProvided.optional()
+    ),
+    modifiedGeoAreaServed: preprocessNulls(
+        genericContractFormDataSchema.shape.modifiedGeoAreaServed.optional()
+    ),
+    modifiedMedicaidBeneficiaries: preprocessNulls(
+        genericContractFormDataSchema.shape.modifiedMedicaidBeneficiaries.optional()
+    ),
+    modifiedRiskSharingStrategy: preprocessNulls(
+        genericContractFormDataSchema.shape.modifiedRiskSharingStrategy.optional()
+    ),
+    modifiedIncentiveArrangements: preprocessNulls(
+        genericContractFormDataSchema.shape.modifiedIncentiveArrangements.optional()
+    ),
+    modifiedWitholdAgreements: preprocessNulls(
+        genericContractFormDataSchema.shape.modifiedWitholdAgreements.optional()
+    ),
+    modifiedStateDirectedPayments: preprocessNulls(
+        genericContractFormDataSchema.shape.modifiedStateDirectedPayments.optional()
+    ),
+    modifiedPassThroughPayments: preprocessNulls(
+        genericContractFormDataSchema.shape.modifiedPassThroughPayments.optional()
+    ),
+    modifiedPaymentsForMentalDiseaseInstitutions: preprocessNulls(
+        genericContractFormDataSchema.shape.modifiedPaymentsForMentalDiseaseInstitutions.optional()
+    ),
+    modifiedMedicalLossRatioStandards: preprocessNulls(
+        genericContractFormDataSchema.shape.modifiedMedicalLossRatioStandards.optional()
+    ),
+    modifiedOtherFinancialPaymentIncentive: preprocessNulls(
+        genericContractFormDataSchema.shape.modifiedOtherFinancialPaymentIncentive.optional()
+    ),
+    modifiedEnrollmentProcess: preprocessNulls(
+        genericContractFormDataSchema.shape.modifiedEnrollmentProcess.optional()
+    ),
+    modifiedGrevienceAndAppeal: preprocessNulls(
+        genericContractFormDataSchema.shape.modifiedGrevienceAndAppeal.optional()
+    ),
+    modifiedNetworkAdequacyStandards: preprocessNulls(
+        genericContractFormDataSchema.shape.modifiedNetworkAdequacyStandards.optional()
+    ),
+    modifiedLengthOfContract: preprocessNulls(
+        genericContractFormDataSchema.shape.modifiedLengthOfContract.optional()
+    ),
+    modifiedNonRiskPaymentArrangements: preprocessNulls(
+        genericContractFormDataSchema.shape.modifiedNonRiskPaymentArrangements.optional()
+    ),
+    federalAuthorities: genericContractFormDataSchema.shape.federalAuthorities.default([])
 })
 
 // submittedFormDataSchema is the schema used during submission validation. Most fields are required and most arrays are nonempty.
@@ -361,6 +435,7 @@ export {
     strippedRateFormDataSchema,
     contractTypeSchema,
     populationCoveredSchema,
+    eqroContractFormDataSchema
 }
 
 export type {

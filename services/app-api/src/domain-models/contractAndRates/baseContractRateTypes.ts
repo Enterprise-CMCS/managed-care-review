@@ -2,6 +2,7 @@ import { z } from 'zod'
 import {
     contractPackageSubmissionSchema,
     ratePackageSubmissionSchema,
+    eqroContractPackageSubmissionSchema,
 } from './packageSubmissions'
 import { contractRevisionSchema, rateRevisionSchema } from './revisionTypes'
 import {
@@ -18,6 +19,7 @@ import {
 import { contractReviewActionSchema } from './contractReviewActionType'
 import { rateReviewActionSchema } from './rateReviewActionType'
 import { contractSubmissionTypeSchema } from './contractSubmissionType'
+import { eqroContractRevisionSchema } from './revisionTypes'
 
 // Contract represents the contract specific information in a submission package
 // All that data is contained in revisions, each revision represents the data in a single submission
@@ -40,6 +42,28 @@ const contractWithoutDraftRatesSchema = z.object({
     revisions: z.array(contractRevisionSchema),
 
     packageSubmissions: z.array(contractPackageSubmissionSchema),
+
+    questions: indexContractQuestionsPayload.optional(),
+})
+
+const eqroContractDraftSchema = z.object({
+    id: z.string().uuid(),
+    createdAt: z.date(),
+    updatedAt: z.date(),
+    status: statusSchema,
+    reviewStatus: contractReviewStatusSchema,
+    consolidatedStatus: consolidatedContractStatusSchema,
+    stateCode: z.string(),
+    mccrsID: z.string().optional(),
+    stateNumber: z.number().min(1),
+    contractSubmissionType: contractSubmissionTypeSchema,
+    // If this contract is in a DRAFT or UNLOCKED status, there will be a draftRevision
+    draftRevision: eqroContractRevisionSchema.optional(),
+    reviewStatusActions: z.array(contractReviewActionSchema).optional(),
+    // All revisions are submitted and in reverse chronological order
+    revisions: z.array(eqroContractRevisionSchema),
+
+    packageSubmissions: z.array(eqroContractPackageSubmissionSchema),
 
     questions: indexContractQuestionsPayload.optional(),
 })
@@ -87,6 +111,7 @@ export {
     contractWithoutDraftRatesSchema,
     rateWithoutDraftContractsSchema,
     contractSubmissionTypeSchema,
+    eqroContractDraftSchema
 }
 
 export type {
