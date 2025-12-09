@@ -25,9 +25,9 @@ import { CfnOutput, Fn } from 'aws-cdk-lib'
 export class CognitoStack extends BaseStack {
     public readonly userPool: IUserPool
     public readonly userPoolClient: IUserPoolClient
-    public readonly userPoolDomain: UserPoolDomain
+    public readonly userPoolDomain?: UserPoolDomain // Only created for review envs
     public readonly identityPool: CfnIdentityPool
-    public readonly authRole?: Role // Only created for review envs, imported envs reference existing role
+    public readonly authRole?: Role // Only created for review envs
 
     constructor(scope: Construct, id: string, props: BaseStackProps) {
         super(scope, id, {
@@ -67,10 +67,6 @@ export class CognitoStack extends BaseStack {
                 'ImportedUserPoolClient',
                 userPoolClientId
             )
-
-            // Note: UserPoolDomain doesn't have a fromDomain method
-            // We don't actually need this as a resource, just the domain string for outputs
-            this.userPoolDomain = {} as UserPoolDomain
 
             // Identity Pool - create a minimal object that satisfies the interface
             this.identityPool = {
@@ -249,7 +245,7 @@ export class CognitoStack extends BaseStack {
                   this,
                   `/cognito/${this.stage}/user_pool_domain`
               )
-            : `${this.userPoolDomain.domainName}.auth.${this.region}.amazoncognito.com`
+            : `${this.userPoolDomain!.domainName}.auth.${this.region}.amazoncognito.com`
 
         new CfnOutput(this, 'UserPoolId', {
             value: this.userPool.userPoolId,
