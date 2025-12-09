@@ -430,6 +430,15 @@ export const NewEQROContractorSummary = ({
     explainMissingData,
     label,
 }: SummaryDetailProps) => {
+    // Base contract that includes MCO shows new EQRO contractor question.
+    const showField =
+        contractFormData.contractType === 'BASE' &&
+        contractFormData.managedCareEntities.includes('MCO')
+
+    if (!showField) {
+        return null
+    }
+
     return (
         <DataDetail
             id="newEQROContractor"
@@ -491,6 +500,15 @@ export const EQROModifiedProvisionSummary = ({
         unansweredProvisions, // keep for future inline errors
         provisionDictionary,
     } = getEQROProvisionDictionary(contractFormData)
+
+    // Population covered of Medicaid and no MCO in managed care entities do not have provision questions.
+    const hideProvisions =
+        contractFormData.populationCovered === 'MEDICAID' &&
+        !contractFormData.managedCareEntities.includes('MCO')
+
+    if (hideProvisions) {
+        return null
+    }
 
     return (
         <Grid row gap className={styles.singleColumnGrid}>
