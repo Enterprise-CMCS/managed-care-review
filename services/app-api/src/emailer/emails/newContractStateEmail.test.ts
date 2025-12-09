@@ -154,12 +154,11 @@ test('includes mcog, rate, and team email addresses', async () => {
         throw template
     }
 
-    // Note when anchor links are generated there is an extra space for this test
     expect(template).toEqual(
         expect.objectContaining({
             subject: expect.stringContaining(`${name} was sent to CMS`),
             bodyText: expect.stringContaining(
-                `please reach out to  mcog@example.com`
+                `please reach out to mcog@example.com`
             ),
         })
     )
@@ -167,7 +166,7 @@ test('includes mcog, rate, and team email addresses', async () => {
         expect.objectContaining({
             subject: expect.stringContaining(`${name} was sent to CMS`),
             bodyText: expect.stringContaining(
-                `please reach out to  rates@example.com`
+                `please reach out to rates@example.com`
             ),
         })
     )
@@ -175,7 +174,7 @@ test('includes mcog, rate, and team email addresses', async () => {
         expect.objectContaining({
             subject: expect.stringContaining(`${name} was sent to CMS`),
             bodyText: expect.stringContaining(
-                `please reach out to  ${formatEmailAddresses(
+                `please reach out to ${formatEmailAddresses(
                     testEmailConfig().helpDeskEmail
                 )}`
             ),
@@ -209,12 +208,11 @@ test('includes contract submission type', async () => {
             bodyText: expect.stringContaining(`Contract type: Health plan`),
         })
     )
-    // Note when anchor links are generated there is an extra space for this test
     expect(template).toEqual(
         expect.objectContaining({
             subject: expect.stringContaining(`${name} was sent to CMS`),
             bodyText: expect.stringContaining(
-                `please reach out to  rates@example.com`
+                `please reach out to rates@example.com`
             ),
         })
     )
@@ -222,7 +220,7 @@ test('includes contract submission type', async () => {
         expect.objectContaining({
             subject: expect.stringContaining(`${name} was sent to CMS`),
             bodyText: expect.stringContaining(
-                `please reach out to  ${formatEmailAddresses(
+                `please reach out to ${formatEmailAddresses(
                     testEmailConfig().helpDeskEmail
                 )}`
             ),
