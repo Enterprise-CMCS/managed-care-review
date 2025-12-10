@@ -272,8 +272,6 @@ export const UnlockSubmitModal = ({
             if (fieldElement) {
                 fieldElement.focus()
                 setFocusErrorsInModal(false)
-            } else {
-                console.info('Attempting to focus element that does not exist')
             }
         }
     }, [focusErrorsInModal, formik.errors])
