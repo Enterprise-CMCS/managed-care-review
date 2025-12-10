@@ -83,15 +83,19 @@ const StateDisplay = ({
 }) => {
     return (
         <Grid row className={`flex-align-center ${styles.stateRow}`}>
-            <div>
-                <StateIcon code={stateCode as StateIconProps['code']} />
-            </div>
+            {stateCode && (
+                <div>
+                    <StateIcon code={stateCode as StateIconProps['code']} />
+                </div>
+            )}
             <PageHeading data-testid="stateDisplay">
                 <span className="srOnly">{stateName}&nbsp;</span>
 
-                <span className={styles.stateHeadingText}>
-                    {stateName}&nbsp;
-                </span>
+                {stateName && (
+                    <span className={styles.stateHeadingText}>
+                        {stateName}&nbsp;
+                    </span>
+                )}
 
                 {heading && <SharedSubHeadingRow submissionID={heading} />}
             </PageHeading>
@@ -105,7 +109,6 @@ const CMSUserRow = ({
     pathname,
     stateCode,
     stateName,
-    isLoading,
 }: {
     user:
         | CmsUser
@@ -117,40 +120,37 @@ const CMSUserRow = ({
     pathname?: string
     stateCode?: string
     stateName?: string
-    isLoading?: boolean
 }) => {
     const hideSubID = pathIncludesAny(pathname, hideSubIDRoutes.cms)
     const contractType = getContractTypeFromPath(pathname)
 
     return (
         <div className={styles.dashboardHeading}>
-            {!isLoading && (
-                <GridContainer>
-                    {hideSubID ? (
-                        <Grid row className="flex-align-center">
-                            <PageHeading>
-                                <span>CMS</span>
-                                {heading && (
-                                    <span
-                                        className="font-heading-lg text-light"
-                                        data-testid="submission-name"
-                                    >
-                                        {heading}
-                                    </span>
-                                )}
-                            </PageHeading>
-                        </Grid>
-                    ) : (
-                        <StateDisplay
-                            heading={heading}
-                            pathname={pathname}
-                            stateCode={stateCode}
-                            stateName={stateName}
-                            contractType={contractType}
-                        />
-                    )}
-                </GridContainer>
-            )}
+            <GridContainer>
+                {hideSubID ? (
+                    <Grid row className="flex-align-center">
+                        <PageHeading>
+                            <span>CMS</span>
+                            {heading && (
+                                <span
+                                    className="font-heading-lg text-light"
+                                    data-testid="submission-name"
+                                >
+                                    {heading}
+                                </span>
+                            )}
+                        </PageHeading>
+                    </Grid>
+                ) : (
+                    <StateDisplay
+                        heading={heading}
+                        pathname={pathname}
+                        stateCode={stateCode}
+                        stateName={stateName}
+                        contractType={contractType}
+                    />
+                )}
+            </GridContainer>
         </div>
     )
 }
@@ -269,7 +269,6 @@ export const PageHeadingRow = ({
                 heading={heading}
                 pathname={pathname}
                 stateName={stateName}
-                isLoading={!stateCode || !stateName}
                 stateCode={stateCode}
             />
         )
