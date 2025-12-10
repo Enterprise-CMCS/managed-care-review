@@ -16,7 +16,10 @@ import {
     setSuccessAttributesOnActiveSpan,
 } from '../attributeHelper'
 import type { MutationResolvers, State } from '../../gen/gqlServer'
-import { parseContract, parseEQROContract } from '../../domain-models/contractAndRates/dataValidatorHelpers'
+import {
+    parseContract,
+    parseEQROContract,
+} from '../../domain-models/contractAndRates/dataValidatorHelpers'
 import type {
     UpdateInfoType,
     PackageStatusType,
@@ -62,7 +65,7 @@ const validateStatusAndUpdateInfo = (
 /*
  * Logic tree can be found here for the following function: https://miro.com/app/board/o9J_lS5oLDk=/?share_link_id=716810250281
  */
-const validateEQROSubmission = (
+export const validateEQROSubmission = (
     contract: ContractType,
     span?: Span
 ): GraphQLError | undefined => {
@@ -295,6 +298,8 @@ export function submitContract(
             })
         }
 
+        const isEQRO = contractWithHistory.contractSubmissionType === 'EQRO'
+
         // Validate user authorized to fetch state
         if (contractWithHistory.stateCode !== stateFromCurrentUser) {
             logError(
@@ -323,7 +328,7 @@ export function submitContract(
             )
         }
 
-        if (contractWithHistory.contractSubmissionType === 'EQRO') {
+        if (isEQRO) {
             const EQROError = validateEQROSubmission(contractWithHistory, span)
 
             if (EQROError) {
@@ -368,22 +373,18 @@ export function submitContract(
 
         contractToParse.draftRates = draftRatesWithoutLinkedRates
 
-        const isEQRO = contractWithHistory.contractSubmissionType === 'EQRO'
-
-        const parsedContract = isEQRO ?
-            parseEQROContract(
-                contractToParse,
-                contractWithHistory.stateCode,
-                store,
-                featureFlags,
-            )
-            :
-            parseContract(
-            contractToParse,
-            contractWithHistory.stateCode,
-            store,
-            featureFlags
-        )
+        const parsedContract = isEQRO
+            ? parseEQROContract(
+                  contractToParse,
+                  contractWithHistory.stateCode,
+                  store
+              )
+            : parseContract(
+                  contractToParse,
+                  contractWithHistory.stateCode,
+                  store,
+                  featureFlags
+              )
 
         if (parsedContract instanceof Error) {
             const errMessage = parsedContract.message

@@ -1,14 +1,19 @@
 import { z } from 'zod'
-import { contractRevisionSchema, rateRevisionSchema } from './revisionTypes'
+import {
+    contractRevisionSchema,
+    rateRevisionSchema,
+    eqroContractRevisionSchema,
+} from './revisionTypes'
 import { unlockedContractStatusSchema } from './statusType'
 import { pruneDuplicateEmails } from '../../emailer/formatters'
 import {
     contractWithoutDraftRatesSchema,
     rateWithoutDraftContractsSchema,
-    eqroContractDraftSchema
+    eqroContractDraftSchema,
 } from './baseContractRateTypes'
 import {
     submittableContractFormDataSchema,
+    submittableEQROContractFormDataSchema,
     submittableRateFormDataSchema,
 } from './formDataTypes'
 
@@ -66,8 +71,8 @@ const submittableContractSchema = contractSchema.extend({
 })
 
 const submittableEQROContractSchema = eqroContractSchema.extend({
-    draftRevision: contractRevisionSchema.extend({
-        formData: submittableContractFormDataSchema,
+    draftRevision: eqroContractRevisionSchema.extend({
+        formData: submittableEQROContractFormDataSchema,
     }),
     draftRates: z.array(
         rateWithoutDraftContractsSchema.extend({

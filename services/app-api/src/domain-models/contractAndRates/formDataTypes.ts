@@ -226,7 +226,8 @@ const contractFormDataSchema = genericContractFormDataSchema.extend({
     modifiedNonRiskPaymentArrangements: preprocessNulls(
         genericContractFormDataSchema.shape.modifiedNonRiskPaymentArrangements.optional()
     ),
-    federalAuthorities: genericContractFormDataSchema.shape.federalAuthorities.default([])
+    federalAuthorities:
+        genericContractFormDataSchema.shape.federalAuthorities.default([]),
     // statutoryRegulatoryAttestation: genericContractFormDataSchema.shape.statutoryRegulatoryAttestation.optional(),
 })
 
@@ -300,7 +301,8 @@ const eqroContractFormDataSchema = genericContractFormDataSchema.extend({
     modifiedNonRiskPaymentArrangements: preprocessNulls(
         genericContractFormDataSchema.shape.modifiedNonRiskPaymentArrangements.optional()
     ),
-    federalAuthorities: genericContractFormDataSchema.shape.federalAuthorities.default([])
+    federalAuthorities:
+        genericContractFormDataSchema.shape.federalAuthorities.default([]),
 })
 
 // submittedFormDataSchema is the schema used during submission validation. Most fields are required and most arrays are nonempty.
@@ -322,8 +324,63 @@ const submittableContractFormDataSchema = genericContractFormDataSchema
             formData.submissionType === 'CONTRACT_AND_RATES'
         ) {
             ctx.addIssue({
-                code: z.ZodIssueCode.custom,
+                code: 'custom',
                 message: 'cannot submit rates with CHIP only populationCovered',
+            })
+        }
+    })
+
+const submittableEQROContractFormDataSchema = genericContractFormDataSchema
+    .extend({
+        managedCareEntities:
+            genericContractFormDataSchema.shape.managedCareEntities.nonempty(),
+        stateContacts:
+            genericContractFormDataSchema.shape.stateContacts.nonempty(),
+        contractDocuments:
+            genericContractFormDataSchema.shape.contractDocuments.nonempty(),
+        submissionType: z.literal('CONTRACT_ONLY'),
+        // These fields are not required for EQRO submissions
+        federalAuthorities:
+            genericContractFormDataSchema.shape.federalAuthorities.default([]),
+        contractExecutionStatus: preprocessNulls(
+            genericContractFormDataSchema.shape.contractExecutionStatus.optional()
+        ),
+        riskBasedContract: preprocessNulls(
+            genericContractFormDataSchema.shape.riskBasedContract.optional()
+        ),
+        inLieuServicesAndSettings: preprocessNulls(z.boolean().optional()),
+        modifiedBenefitsProvided: preprocessNulls(z.boolean().optional()),
+        modifiedGeoAreaServed: preprocessNulls(z.boolean().optional()),
+        modifiedMedicaidBeneficiaries: preprocessNulls(z.boolean().optional()),
+        modifiedRiskSharingStrategy: preprocessNulls(z.boolean().optional()),
+        modifiedIncentiveArrangements: preprocessNulls(z.boolean().optional()),
+        modifiedWitholdAgreements: preprocessNulls(z.boolean().optional()),
+        modifiedStateDirectedPayments: preprocessNulls(z.boolean().optional()),
+        modifiedPassThroughPayments: preprocessNulls(z.boolean().optional()),
+        modifiedPaymentsForMentalDiseaseInstitutions: preprocessNulls(
+            z.boolean().optional()
+        ),
+        modifiedMedicalLossRatioStandards: preprocessNulls(
+            z.boolean().optional()
+        ),
+        modifiedOtherFinancialPaymentIncentive: preprocessNulls(
+            z.boolean().optional()
+        ),
+        modifiedEnrollmentProcess: preprocessNulls(z.boolean().optional()),
+        modifiedGrevienceAndAppeal: preprocessNulls(z.boolean().optional()),
+        modifiedNetworkAdequacyStandards: preprocessNulls(
+            z.boolean().optional()
+        ),
+        modifiedLengthOfContract: preprocessNulls(z.boolean().optional()),
+        modifiedNonRiskPaymentArrangements: preprocessNulls(
+            z.boolean().optional()
+        ),
+    })
+    .superRefine((formData, ctx) => {
+        if (formData.submissionType !== 'CONTRACT_ONLY') {
+            ctx.addIssue({
+                code: 'custom',
+                message: 'EQRO submissions must be CONTRACT_ONLY',
             })
         }
     })
@@ -427,6 +484,7 @@ type ActuaryContactType = z.infer<typeof actuaryContactSchema>
 
 export {
     submittableContractFormDataSchema,
+    submittableEQROContractFormDataSchema,
     submittableRateFormDataSchema,
     contractFormDataSchema,
     rateFormDataSchema,
@@ -435,7 +493,7 @@ export {
     strippedRateFormDataSchema,
     contractTypeSchema,
     populationCoveredSchema,
-    eqroContractFormDataSchema
+    eqroContractFormDataSchema,
 }
 
 export type {

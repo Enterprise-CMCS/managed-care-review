@@ -9,8 +9,12 @@ import {
 } from './formDataTypes'
 import { z } from 'zod'
 import type { Store } from '../../postgres'
-import { submittableContractSchema, submittableEQROContractSchema } from './contractTypes'
+import {
+    submittableContractSchema,
+    submittableEQROContractSchema,
+} from './contractTypes'
 import type { ContractType } from './contractTypes'
+import { validateEQROSubmission } from '../../resolvers/contract/submitContract'
 
 const updateDraftContractFormDataSchema = contractFormDataSchema.extend({
     contractType: preprocessNulls(contractTypeSchema.optional()),
@@ -219,38 +223,40 @@ const parseContract = (
 const parseEQROContract = (
     contract: ContractType,
     stateCode: string,
-    store: Store,
-    featureFlags?: FeatureFlagSettings
+    store: Store
 ): ContractType | z.ZodError => {
-    // const contractParser = submittableEQROContractSchema.parse(contract)
+    const eqroContractParser = submittableEQROContractSchema
+        .superRefine((contract, ctx) => {
+            const contractProgramsIDs = new Set(
+                contract.draftRevision.formData.programIDs
+            )
+            const allProgramIDs = contract.draftRates.reduce((acc, rate) => {
+                const rateFormData = rate.draftRevision.formData
+                const rateProgramIDs = rateFormData.rateProgramIDs.concat(
+                    rateFormData.deprecatedRateProgramIDs
+                )
+                return new Set([...acc, ...rateProgramIDs])
+            }, contractProgramsIDs)
 
-    // since validating programs requires looking in the DB, and once we move programs into the db that
-    // validation will be performed there instead. I'm just adding this check as a refinement instead of trying
-    // to make it part of the core zod parsing.
-    // const contractWithProgramsParser = contractParser.superRefine(
-    //     (contract, ctx) => {
-    //         const contractProgramsIDs = new Set(
-    //             contract.draftRevision.formData.programIDs
-    //         )
-    //         const allProgramIDs = contract.draftRates.reduce((acc, rate) => {
-    //             const rateFormData = rate.draftRevision.formData
-    //             const rateProgramIDs = rateFormData.rateProgramIDs.concat(
-    //                 rateFormData.deprecatedRateProgramIDs
-    //             )
-    //             return new Set([...acc, ...rateProgramIDs])
-    //         }, contractProgramsIDs)
-    //
-    //         const findResult = store.findPrograms(stateCode, [...allProgramIDs])
-    //         if (findResult instanceof Error) {
-    //             ctx.addIssue({
-    //                 code: 'custom',
-    //                 message: findResult.message,
-    //             })
-    //         }
-    //     }
-    // )
+            const findResult = store.findPrograms(stateCode, [...allProgramIDs])
+            if (findResult instanceof Error) {
+                ctx.addIssue({
+                    code: 'custom',
+                    message: findResult.message,
+                })
+            }
+        })
+        .superRefine((contract, ctx) => {
+            const validationError = validateEQROSubmission(contract)
+            if (validationError) {
+                ctx.addIssue({
+                    code: 'custom',
+                    message: validationError.message,
+                })
+            }
+        })
 
-    const parsedData = submittableEQROContractSchema.safeParse(contract)
+    const parsedData = eqroContractParser.safeParse(contract)
 
     if (parsedData.error) {
         return parsedData.error
