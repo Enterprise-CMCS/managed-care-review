@@ -53,6 +53,10 @@ export const SubmissionTypeSummarySection = ({
 
     if (!contractFormData) return <GenericErrorPage />
 
+    const programNames = contract.state.programs
+        .filter((p) => contractFormData?.programIDs.includes(p.id))
+        .map((p) => p.name)
+
     const isSubmitted =
         contract.status === 'SUBMITTED' || contract.status === 'RESUBMITTED'
     const isUnlocked = contract.status === 'UNLOCKED'
@@ -80,10 +84,9 @@ export const SubmissionTypeSummarySection = ({
                         />
                     )}
                 <MultiColumnGrid columns={2}>
-                    {(contractFormData.programIDs.length > 0 ||
-                        !isSubmitted) && (
+                    {(programNames.length > 0 || !isSubmitted) && (
                         <ContractProgramsSummary
-                            contractFormData={contractFormData}
+                            programNames={programNames}
                             explainMissingData={explainMissingData}
                         />
                     )}

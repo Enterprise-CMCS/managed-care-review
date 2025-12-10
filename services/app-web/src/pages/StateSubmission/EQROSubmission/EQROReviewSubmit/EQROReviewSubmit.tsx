@@ -133,6 +133,7 @@ export const EQROReviewSubmit = (): React.ReactElement => {
                 <EQROSubmissionTypeSummarySection
                     contract={contract}
                     isStateUser={isStateUser}
+                    submissionName={submissionName}
                     editNavigateTo={getPath('SUBMISSIONS_TYPE')}
                     explainMissingData
                 />
