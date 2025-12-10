@@ -194,9 +194,9 @@ export class CustomOAuth2Server {
             // Create a new request with the transformed body
             const request = new OAuthRequest({
                 body: transformedBody,
-                headers: event.headers,
+                headers: event.headers as Record<string, string>,
                 method: event.httpMethod,
-                query: event.queryStringParameters || {},
+                query: event.queryStringParameters as Record<string, string>,
             })
 
             // Custom is method to get content-type correctly.

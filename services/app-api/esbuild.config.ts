@@ -1,3 +1,4 @@
+import type { PluginBuild } from 'esbuild'
 import fs from 'fs'
 import fse from 'fs-extra'
 import path from 'path'
@@ -18,7 +19,7 @@ export default () => {
         plugins: [
             {
                 name: 'copy-and-replace-collector',
-                setup(build) {
+                setup(build: PluginBuild) {
                     // copy collector.yml to the build directory
                     build.onStart(() => {
                         fs.copyFileSync(
@@ -34,9 +35,11 @@ export default () => {
                             '.esbuild/.build/collector.yml'
                         )
                         let contents = fs.readFileSync(filePath, 'utf8')
+                        // Do we want a default value here or do we want to assert that NR_LICENSE_KEY always has a value
+                        // I don't think this solution is good, but this effectively mimics the existing behavior
                         contents = contents.replace(
                             '$NR_LICENSE_KEY',
-                            process.env.NR_LICENSE_KEY
+                            process.env.NR_LICENSE_KEY ?? 'undefined'
                         )
                         fs.writeFileSync(filePath, contents)
                     })
@@ -44,7 +47,7 @@ export default () => {
             },
             {
                 name: 'copy-eta-templates',
-                setup(build) {
+                setup(build: PluginBuild) {
                     build.onStart(async () => {
                         try {
                             await fse.ensureDir(
@@ -71,7 +74,7 @@ export default () => {
             },
             {
                 name: 'copy-prisma-engine-for-local-dev',
-                setup(build) {
+                setup(build: PluginBuild) {
                     build.onStart(() => {
                         if (process.env.REACT_APP_STAGE_NAME === 'local') {
                             const prismaPath = path.join(

@@ -1,9 +1,7 @@
-import { RateDetailsFormSchema } from "./RateDetailsSchema"
+import { RateDetailsFormSchema } from './RateDetailsSchema'
 
 describe('RateDetailsSchema', () => {
-
     it('checks child rates', async () => {
-
         const badRateRev = {
             rateForms: [
                 {
@@ -12,13 +10,15 @@ describe('RateDetailsSchema', () => {
                     rateDocuments: [],
                     supportingDocuments: [],
                     ratePreviouslySubmitted: 'NO',
-                }
-            ]
+                },
+            ],
         }
 
         try {
-            await RateDetailsFormSchema().validate(badRateRev, {abortEarly: false})
-        } catch (err) {
+            await RateDetailsFormSchema().validate(badRateRev, {
+                abortEarly: false,
+            })
+        } catch {
             return
         }
 
@@ -26,7 +26,6 @@ describe('RateDetailsSchema', () => {
     })
 
     it('checks unspecified rates', async () => {
-
         const badRateRev = {
             rateForms: [
                 {
@@ -34,13 +33,15 @@ describe('RateDetailsSchema', () => {
                     rateType: 'NEW',
                     rateDocuments: [],
                     supportingDocuments: [],
-                }
-            ]
+                },
+            ],
         }
 
         try {
-            await RateDetailsFormSchema().validate(badRateRev, {abortEarly: false})
-        } catch (err) {
+            await RateDetailsFormSchema().validate(badRateRev, {
+                abortEarly: false,
+            })
+        } catch {
             return
         }
 
@@ -48,7 +49,6 @@ describe('RateDetailsSchema', () => {
     })
 
     it('checks empty linked rates', async () => {
-
         const badRateRev = {
             rateForms: [
                 {
@@ -56,13 +56,15 @@ describe('RateDetailsSchema', () => {
                     rateType: 'NEW',
                     rateDocuments: [],
                     supportingDocuments: [],
-                }
-            ]
+                },
+            ],
         }
 
         try {
-            await RateDetailsFormSchema().validate(badRateRev, {abortEarly: false})
-        } catch (err) {
+            await RateDetailsFormSchema().validate(badRateRev, {
+                abortEarly: false,
+            })
+        } catch {
             return
         }
 
