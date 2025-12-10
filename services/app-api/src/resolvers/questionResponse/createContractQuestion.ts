@@ -10,7 +10,7 @@ import { NotFoundError, type Store } from '../../postgres'
 import { GraphQLError } from 'graphql'
 import { isValidCmsDivison } from '../../domain-models'
 import type { Emailer } from '../../emailer'
-import type { StateCodeType } from '../../testHelpers'
+import type { StateCodeType } from '@mc-review/submissions'
 import { canWrite } from '../../authorization/oauthAuthorization'
 
 export function createContractQuestionResolver(
