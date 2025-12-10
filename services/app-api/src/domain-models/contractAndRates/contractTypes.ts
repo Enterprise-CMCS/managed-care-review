@@ -42,12 +42,6 @@ const unlockedContractSchema = contractSchema.extend({
     draftRates: z.lazy(() => z.array(rateWithoutDraftContractsSchema)),
 })
 
-// const unlockEQROContractSchema = contractSchema.extend({
-//     status: unlockedContractStatusSchema,
-//     draftRevision: z.lazy(() => contractRevisionSchema),
-//     draftRates: z.lazy(() => z.array(rateWithoutDraftContractsSchema)),
-// })
-
 const draftContractSchema = contractSchema.extend({
     status: z.literal('DRAFT'),
     draftRevision: contractRevisionSchema,
