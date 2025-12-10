@@ -43,6 +43,7 @@ export function initMeter(serviceName: string) {
         })
     )
     const metricReader = new PeriodicExportingMetricReader({
+        // TODO: Changes need to be made here
         exporter: new OTLPMetricExporter(),
         exportIntervalMillis: 1000,
     })

@@ -53,6 +53,7 @@ export function contractRevisionResolver(
                     return []
                 }
 
+                // TODO: Changes need to be made here
                 return documentZipPackages
             } catch (error) {
                 const errorMessage =
