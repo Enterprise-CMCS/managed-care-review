@@ -37,13 +37,13 @@ If you need to make any changes, please contact CMS.
 <div>If you need assistance or to make changes to your submission:</div>
 <ul>
     <li>
-        For assistance with programmatic, contractual, or operational issues, please reach out to mcog@example.com and/or your CMS primary contact.
+        For assistance with programmatic, contractual, or operational issues, please reach out to <a href="mailto:mcog@example.com">mcog@example.com</a> and/or your CMS primary contact.
     </li>
     <li>
-        For assistance on policy and actuarial issues, please reach out to rates@example.com.
+        For assistance on policy and actuarial issues, please reach out to <a href="mailto:rates@example.com">rates@example.com</a>.
     </li>
     <li>
-        For issues related to MC-Review or all other inquiries, please reach out to MC_Review_HelpDesk@example.com.
+        For issues related to MC-Review or all other inquiries, please reach out to <a href="mailto:MC_Review_HelpDesk@example.com">MC_Review_HelpDesk@example.com</a>.
     </li>
 </ul>
 "

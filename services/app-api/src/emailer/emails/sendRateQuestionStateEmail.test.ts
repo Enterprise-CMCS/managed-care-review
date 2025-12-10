@@ -367,7 +367,7 @@ describe('sendRateQuestionStateEmail', () => {
         expect(template).toEqual(
             expect.objectContaining({
                 bodyText: expect.stringContaining(
-                    'Sent by: Prince Zuko (DMCO)  zuko@example.com (zuko@example.com)'
+                    'Sent by: Prince Zuko (DMCO) zuko@example.com (zuko@example.com)'
                 ),
             })
         )
@@ -392,7 +392,7 @@ describe('sendRateQuestionStateEmail', () => {
         expect(template).toEqual(
             expect.objectContaining({
                 bodyText: expect.stringContaining(
-                    'Sent by: Prince Zuko (DMCO)  zuko@example.com (zuko@example.com)'
+                    'Sent by: Prince Zuko (DMCO) zuko@example.com (zuko@example.com)'
                 ),
             })
         )

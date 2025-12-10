@@ -350,7 +350,7 @@ describe('with rates', () => {
         )
     })
 
-    test('to addresses list includes DMCP and OACT group emails for contract and rate package', async () => {
+    test('to addresses list includes DMCP, OACT, and DMCO group emails for contract and rate package', async () => {
         const sub = submission
         sub.packageSubmissions[0].contractRevision.formData.riskBasedContract =
             true
@@ -382,9 +382,8 @@ describe('with rates', () => {
             )
         })
 
-        // do not include dmco group emails - rely on state analysts instead
         testEmailConfig().dmcoEmails.forEach((emailAddress) => {
-            expect(template).not.toEqual(
+            expect(template).toEqual(
                 expect.objectContaining({
                     toAddresses: expect.arrayContaining([emailAddress]),
                 })
@@ -462,6 +461,7 @@ describe('with rates', () => {
         )
         const reviewerEmails = [
             ...testEmailConfig().devReviewTeamEmails,
+            ...testEmailConfig().dmcoEmails,
             ...testEmailConfig().oactEmails,
         ]
 
