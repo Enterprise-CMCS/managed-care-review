@@ -23,7 +23,6 @@ import {
     booleanAsYesNoFormValue,
     booleanAsYesNoUserValue,
 } from '../../Form/FieldYesNo'
-import { useStatePrograms } from '../../../hooks'
 import { formatCalendarDate } from '@mc-review/dates'
 import React from 'react'
 import styles from '../SubmissionSummarySection.module.scss'
@@ -126,20 +125,14 @@ export const SubmissionTypeSummary = ({
 }
 
 export const ContractProgramsSummary = ({
-    contractFormData,
+    programNames,
     explainMissingData,
     label,
-}: SummaryDetailProps) => {
-    const statePrograms = useStatePrograms()
-
-    const programNames = statePrograms
-        .filter((p) => contractFormData?.programIDs.includes(p.id))
-        .map((p) => p.name)
-
-    if (!programNames.length) {
-        return null
-    }
-
+}: {
+    programNames: string[]
+    explainMissingData?: boolean
+    label?: string
+}) => {
     return (
         <DataDetail
             id="program"

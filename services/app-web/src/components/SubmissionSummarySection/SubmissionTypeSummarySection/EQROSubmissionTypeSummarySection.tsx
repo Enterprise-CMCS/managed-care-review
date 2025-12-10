@@ -4,10 +4,7 @@ import {
     SectionHeader,
     SectionCard,
 } from '../../../components'
-import {
-    getVisibleLatestContractFormData,
-    packageName,
-} from '@mc-review/submissions'
+import { getVisibleLatestContractFormData } from '@mc-review/submissions'
 import { GenericErrorPage } from '../../../pages/Errors/GenericErrorPage'
 import {
     Contract,
@@ -23,7 +20,6 @@ import {
     SubmissionDescriptionSummary,
     SubmittedAtSummary,
 } from '../SummarySectionFields'
-import { useStatePrograms } from '../../../hooks'
 
 export type EQROSubmissionTypeSummarySection = {
     contract: Contract | UnlockedContract
@@ -32,6 +28,7 @@ export type EQROSubmissionTypeSummarySection = {
     headerChildComponent?: React.ReactElement
     subHeaderComponent?: React.ReactElement
     initiallySubmittedAt?: Date
+    submissionName: string
     isStateUser: boolean
     explainMissingData?: boolean
 }
@@ -43,11 +40,10 @@ export const EQROSubmissionTypeSummarySection = ({
     subHeaderComponent,
     headerChildComponent,
     initiallySubmittedAt,
+    submissionName,
     isStateUser,
     explainMissingData,
 }: EQROSubmissionTypeSummarySection): React.ReactElement => {
-    const statePrograms = useStatePrograms()
-
     const contractOrRev = contractRev ? contractRev : contract
     const contractFormData = getVisibleLatestContractFormData(
         contractOrRev,
@@ -55,17 +51,11 @@ export const EQROSubmissionTypeSummarySection = ({
     )
     if (!contractFormData) return <GenericErrorPage />
 
-    const programs = statePrograms.filter((program) =>
-        contractFormData?.programIDs?.includes(program.id)
-    )
+    const programs = contract.state.programs
 
-    const submissionName =
-        packageName(
-            contract.stateCode,
-            contract.stateNumber,
-            contractFormData.programIDs,
-            programs
-        ) || ''
+    const programNames = programs
+        .filter((p) => contractFormData?.programIDs.includes(p.id))
+        .map((p) => p.name)
 
     const isSubmitted =
         contract.status === 'SUBMITTED' || contract.status === 'RESUBMITTED'
@@ -101,10 +91,9 @@ export const EQROSubmissionTypeSummarySection = ({
                             label="Populations included in EQRO activities"
                         />
                     )}
-                    {(contractFormData.programIDs.length > 0 ||
-                        !isSubmitted) && (
+                    {(programNames.length > 0 || !isSubmitted) && (
                         <ContractProgramsSummary
-                            contractFormData={contractFormData}
+                            programNames={programNames}
                             explainMissingData={explainMissingData}
                             label="Programs reviewed by this EQRO"
                         />
