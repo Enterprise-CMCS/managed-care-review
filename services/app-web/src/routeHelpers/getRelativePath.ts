@@ -1,4 +1,10 @@
 import { isWildcardPath } from './'
+import {
+    ContractSubmissionTypeRecord,
+    RoutesRecord,
+    RouteT,
+} from '@mc-review/constants'
+import { ContractSubmissionType } from '../gen/gqlClient'
 /*
     Calculate the relative path string from a nested route pathname
 
@@ -24,4 +30,22 @@ const getRelativePath = ({
     }
 }
 
-export { getRelativePath }
+/**
+ * Generates a route path with the contractSubmissionType parameter replaced
+ * while preserving other dynamic segments (e.g., :id).
+ *
+ * @param route - The route key from RoutesRecord
+ * @param contractSubmissionType - The submission type to substitute into the path
+ * @returns The route path with contractSubmissionType replaced (e.g., '/submissions/health-plan/:id')
+ */
+const getSubmissionPath = (
+    route: RouteT,
+    contractSubmissionType: ContractSubmissionType
+) => {
+    return RoutesRecord[route].replace(
+        ':contractSubmissionType',
+        ContractSubmissionTypeRecord[contractSubmissionType]
+    )
+}
+
+export { getRelativePath, getSubmissionPath }
