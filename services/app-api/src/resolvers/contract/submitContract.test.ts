@@ -8,6 +8,7 @@ import { SubmitContractDocument } from '../../gen/gqlClient'
 import {
     clearMetadataFromContractFormData,
     createAndUpdateTestEQROContract,
+    mockGqlContractDraftRevisionFormDataInput,
     testS3Client,
 } from '../../testHelpers'
 
@@ -2384,24 +2385,53 @@ describe('submitContract', () => {
                         field: 'eqroProvisionMcoNewOptionalActivity',
                         errorMessage:
                             'eqroProvisionMcoNewOptionalActivity is required for BASE contracts with MEDICAID population & MCO entity',
+                        triggeringFields: {
+                            eqroNewContractor: true,
+                        },
                     },
                     {
                         field: 'eqroProvisionNewMcoEqrRelatedActivities',
                         errorMessage:
                             'eqroProvisionNewMcoEqrRelatedActivities is required for BASE contracts with MEDICAID population & MCO entity',
+                        triggeringFields: {
+                            eqroNewContractor: true,
+                            eqroProvisionMcoNewOptionalActivity: true,
+                        },
                     },
                 ]
 
-                for (const { field, errorMessage } of requiredFields) {
-                    const draftWithMissingField =
-                        await createAndUpdateTestEQROContract(
-                            stateServer,
-                            undefined,
+                for (const {
+                    field,
+                    errorMessage,
+                    triggeringFields,
+                } of requiredFields) {
+                    const draft = await createAndUpdateTestEQROContract(
+                        stateServer,
+                        undefined,
+                        {
+                            populationCovered: 'MEDICAID',
+                        }
+                    )
+
+                    const formData = draft.draftRevision?.formData
+                    await updateTestContractDraftRevision(
+                        stateServer,
+                        draft.id,
+                        draft.draftRevision?.updatedAt,
+                        mockGqlContractDraftRevisionFormDataInput(
+                            draft.stateCode,
                             {
-                                populationCovered: 'MEDICAID',
+                                ...formData,
+                                ...triggeringFields,
                                 [field]: null,
                             }
                         )
+                    )
+
+                    const draftWithMissingField = await fetchTestContract(
+                        stateServer,
+                        draft.id
+                    )
 
                     const response = await executeGraphQLOperation(
                         stateServer,
@@ -2444,25 +2474,53 @@ describe('submitContract', () => {
                         field: 'eqroProvisionMcoEqrOrRelatedActivities',
                         errorMessage:
                             'eqroProvisionMcoEqrOrRelatedActivities is required for AMENDMENT contracts with CHIP population & MCO entity',
+                        triggeringFields: {
+                            eqroProvisionMcoEqrOrRelatedActivities: true,
+                        },
                     },
                     {
                         field: 'eqroProvisionChipEqrRelatedActivities',
                         errorMessage:
                             'eqroProvisionChipEqrRelatedActivities is required for AMENDMENT contracts with CHIP population & MCO entity',
+                        triggeringFields: {
+                            eqroProvisionMcoEqrOrRelatedActivities: true,
+                        },
                     },
                 ]
 
-                for (const { field, errorMessage } of requiredFields) {
-                    const draftWithMissingField =
-                        await createAndUpdateTestEQROContract(
-                            stateServer,
-                            undefined,
+                for (const {
+                    field,
+                    errorMessage,
+                    triggeringFields,
+                } of requiredFields) {
+                    const draft = await createAndUpdateTestEQROContract(
+                        stateServer,
+                        undefined,
+                        {
+                            contractType: 'AMENDMENT',
+                            populationCovered: 'MEDICAID_AND_CHIP',
+                        }
+                    )
+
+                    const formData = draft.draftRevision?.formData
+                    await updateTestContractDraftRevision(
+                        stateServer,
+                        draft.id,
+                        draft.draftRevision?.updatedAt,
+                        mockGqlContractDraftRevisionFormDataInput(
+                            draft.stateCode,
                             {
-                                contractType: 'AMENDMENT',
-                                populationCovered: 'MEDICAID_AND_CHIP',
+                                ...formData,
+                                ...triggeringFields,
                                 [field]: null,
                             }
                         )
+                    )
+
+                    const draftWithMissingField = await fetchTestContract(
+                        stateServer,
+                        draft.id
+                    )
 
                     const response = await executeGraphQLOperation(
                         stateServer,
@@ -2503,26 +2561,56 @@ describe('submitContract', () => {
                         field: 'eqroProvisionMcoNewOptionalActivity',
                         errorMessage:
                             'eqroProvisionMcoNewOptionalActivity is required for AMENDMENT contracts where eqroProvisionMcoEqrOrRelatedActivities is true',
+                        triggeringFields: {
+                            eqroProvisionMcoEqrOrRelatedActivities: true,
+                            eqroProvisionChipEqrRelatedActivities: true,
+                        },
                     },
                     {
                         field: 'eqroProvisionNewMcoEqrRelatedActivities',
                         errorMessage:
                             'eqroProvisionNewMcoEqrRelatedActivities is required for AMENDMENT contracts where eqroProvisionMcoEqrOrRelatedActivities is true',
+                        triggeringFields: {
+                            eqroProvisionMcoEqrOrRelatedActivities: true,
+                            eqroProvisionChipEqrRelatedActivities: true,
+                            eqroProvisionMcoNewOptionalActivity: true,
+                        },
                     },
                 ]
 
-                for (const { field, errorMessage } of requiredFields) {
-                    const draftWithMissingField =
-                        await createAndUpdateTestEQROContract(
-                            stateServer,
-                            undefined,
+                for (const {
+                    field,
+                    errorMessage,
+                    triggeringFields,
+                } of requiredFields) {
+                    const draft = await createAndUpdateTestEQROContract(
+                        stateServer,
+                        undefined,
+                        {
+                            contractType: 'AMENDMENT',
+                            populationCovered: 'MEDICAID_AND_CHIP',
+                        }
+                    )
+
+                    const formData = draft.draftRevision?.formData
+                    await updateTestContractDraftRevision(
+                        stateServer,
+                        draft.id,
+                        draft.draftRevision?.updatedAt,
+                        mockGqlContractDraftRevisionFormDataInput(
+                            draft.stateCode,
                             {
-                                contractType: 'AMENDMENT',
-                                populationCovered: 'MEDICAID_AND_CHIP',
-                                eqroProvisionMcoEqrOrRelatedActivities: true,
+                                ...formData,
+                                ...triggeringFields,
                                 [field]: null,
                             }
                         )
+                    )
+
+                    const draftWithMissingField = await fetchTestContract(
+                        stateServer,
+                        draft.id
+                    )
 
                     const response = await executeGraphQLOperation(
                         stateServer,
@@ -2656,26 +2744,54 @@ describe('submitContract', () => {
                         field: 'eqroProvisionMcoNewOptionalActivity',
                         errorMessage:
                             'eqroProvisionMcoNewOptionalActivity is required for AMENDMENT contracts where eqroProvisionMcoEqrOrRelatedActivities is true',
+                        triggeringFields: {
+                            eqroProvisionMcoEqrOrRelatedActivities: true,
+                        },
                     },
                     {
                         field: 'eqroProvisionNewMcoEqrRelatedActivities',
                         errorMessage:
                             'eqroProvisionNewMcoEqrRelatedActivities is required for AMENDMENT contracts where eqroProvisionMcoEqrOrRelatedActivities is true',
+                        triggeringFields: {
+                            eqroProvisionMcoEqrOrRelatedActivities: true,
+                            eqroProvisionMcoNewOptionalActivity: true,
+                        },
                     },
                 ]
 
-                for (const { field, errorMessage } of requiredFields) {
-                    const draftWithMissingField =
-                        await createAndUpdateTestEQROContract(
-                            stateServer,
-                            undefined,
+                for (const {
+                    field,
+                    errorMessage,
+                    triggeringFields,
+                } of requiredFields) {
+                    const draft = await createAndUpdateTestEQROContract(
+                        stateServer,
+                        undefined,
+                        {
+                            contractType: 'AMENDMENT',
+                            populationCovered: 'MEDICAID',
+                        }
+                    )
+
+                    const formData = draft.draftRevision?.formData
+                    await updateTestContractDraftRevision(
+                        stateServer,
+                        draft.id,
+                        draft.draftRevision?.updatedAt,
+                        mockGqlContractDraftRevisionFormDataInput(
+                            draft.stateCode,
                             {
-                                contractType: 'AMENDMENT',
-                                populationCovered: 'MEDICAID',
-                                eqroProvisionMcoEqrOrRelatedActivities: true,
+                                ...formData,
+                                ...triggeringFields,
                                 [field]: null,
                             }
                         )
+                    )
+
+                    const draftWithMissingField = await fetchTestContract(
+                        stateServer,
+                        draft.id
+                    )
 
                     const response = await executeGraphQLOperation(
                         stateServer,
