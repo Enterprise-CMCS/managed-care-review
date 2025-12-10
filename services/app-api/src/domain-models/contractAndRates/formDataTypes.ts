@@ -472,12 +472,25 @@ const submittableRateFormDataSchema = genericRateFormDataSchema.extend({
         genericRateFormDataSchema.shape.certifyingActuaryContacts.nonempty(),
 })
 
+const updateDraftContractFormDataSchema = contractFormDataSchema.extend({
+    contractType: preprocessNulls(contractTypeSchema.optional()),
+    submissionDescription: preprocessNulls(z.string().optional()),
+    eqroNewContractor: z.boolean().optional().nullish(),
+    eqroProvisionMcoNewOptionalActivity: z.boolean().optional().nullish(),
+    eqroProvisionNewMcoEqrRelatedActivities: z.boolean().optional().nullish(),
+    eqroProvisionChipEqrRelatedActivities: z.boolean().optional().nullish(),
+    eqroProvisionMcoEqrOrRelatedActivities: z.boolean().optional().nullish(),
+})
+
+type UpdateDraftContractFormDataType = Partial<
+    z.infer<typeof updateDraftContractFormDataSchema>
+>
+
 type DocumentType = z.infer<typeof documentSchema>
 type ContractFormDataType = z.infer<typeof contractFormDataSchema>
 type RateFormDataType = z.infer<typeof rateFormDataSchema>
 type StrippedRateFormDataType = z.infer<typeof strippedRateFormDataSchema>
 
-type ContractFormEditableType = Partial<ContractFormDataType>
 type RateFormEditableType = Partial<RateFormDataType>
 type StateContactType = z.infer<typeof stateContactSchema>
 type ActuaryContactType = z.infer<typeof actuaryContactSchema>
@@ -494,6 +507,7 @@ export {
     contractTypeSchema,
     populationCoveredSchema,
     eqroContractFormDataSchema,
+    updateDraftContractFormDataSchema,
 }
 
 export type {
@@ -501,8 +515,8 @@ export type {
     RateFormDataType,
     DocumentType,
     RateFormEditableType,
-    ContractFormEditableType,
     StateContactType,
     ActuaryContactType,
     StrippedRateFormDataType,
+    UpdateDraftContractFormDataType,
 }

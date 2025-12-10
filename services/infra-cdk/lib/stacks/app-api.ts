@@ -64,6 +64,8 @@ export class AppApiStack extends BaseStack {
 
     // Shared OTEL layer for all functions
     private readonly otelLayer: ILayerVersion
+    // Shared Prisma engine layer for GraphQL and OAuth functions
+    private readonly prismaEngineLayer: ILayerVersion
 
     constructor(scope: Construct, id: string, props: BaseStackProps) {
         super(scope, id, {
@@ -148,6 +150,22 @@ export class AppApiStack extends BaseStack {
             AWS_OTEL_LAYER_ARN
         )
 
+        // Create shared Prisma engine layer for functions that need database access
+        this.prismaEngineLayer = new LayerVersion(this, 'PrismaEngineLayer', {
+            layerVersionName: `${ResourceNames.apiName('app-api', this.stage)}-prisma-engine`,
+            description: 'Prisma engine layer for app-api',
+            compatibleRuntimes: [Runtime.NODEJS_20_X],
+            compatibleArchitectures: [Architecture.X86_64],
+            code: Code.fromAsset(
+                path.join(
+                    __dirname,
+                    '..',
+                    '..',
+                    'lambda-layers-prisma-client-engine'
+                )
+            ),
+        })
+
         // Create simple Lambda functions first (no VPC, layers, or complex dependencies)
         this.healthFunction = this.createFunction(
             'health',
@@ -215,17 +233,10 @@ export class AppApiStack extends BaseStack {
             }
         )
 
-        this.oauthTokenFunction = this.createFunction(
-            'oauth-token',
-            'oauth_token',
-            'main',
-            {
-                timeout: Duration.seconds(30),
-                memorySize: 1024,
-                environment,
-                role: lambdaRole,
-                layers: [this.otelLayer],
-            }
+        // OAuth token function needs VPC and Prisma layer for database access
+        this.oauthTokenFunction = this.createOauthTokenFunction(
+            lambdaRole,
+            environment
         )
 
         this.cleanupFunction = this.createFunction(
@@ -275,9 +286,10 @@ export class AppApiStack extends BaseStack {
     ) => string[] {
         return (outputDir: string, appApiPath: string) => [
             // Copy collector.yml for OTEL configuration
-            `cp ${appApiPath}/collector.yml ${outputDir}/collector.yml || echo "collector.yml not found at ${appApiPath}/collector.yml"`,
+            `cp "${appApiPath}/collector.yml" "${outputDir}/collector.yml" || echo "collector.yml not found at ${appApiPath}/collector.yml"`,
             // Replace license key placeholder with actual value (matches esbuild behavior)
-            `sed -i 's/\\$NR_LICENSE_KEY/${process.env.NR_LICENSE_KEY || ''}/g' "${outputDir}/collector.yml"`,
+            // Use sed that works on both macOS and Linux
+            `sed -i.bak 's/\\$NR_LICENSE_KEY/${process.env.NR_LICENSE_KEY || ''}/g' "${outputDir}/collector.yml" && rm -f "${outputDir}/collector.yml.bak"`,
         ]
     }
 
@@ -290,8 +302,8 @@ export class AppApiStack extends BaseStack {
     ) => string[] {
         return (outputDir: string, appApiPath: string) => [
             // Copy eta templates for email functionality to correct location
-            `mkdir -p ${outputDir}/etaTemplates || true`,
-            `cp -r ${appApiPath}/src/emailer/etaTemplates/* ${outputDir}/etaTemplates/ || echo "etaTemplates not found at ${appApiPath}/src/emailer/etaTemplates/"`,
+            `mkdir -p "${outputDir}/etaTemplates" || true`,
+            `cp -r "${appApiPath}/src/emailer/etaTemplates"/* "${outputDir}/etaTemplates/" || echo "etaTemplates not found at ${appApiPath}/src/emailer/etaTemplates/"`,
         ]
     }
 
@@ -320,9 +332,8 @@ export class AppApiStack extends BaseStack {
                     return []
                 },
                 afterBundling(inputDir: string, outputDir: string): string[] {
-                    const repoRoot =
-                        '/home/runner/work/managed-care-review/managed-care-review'
-                    const appApiPath = `${repoRoot}/services/app-api`
+                    // inputDir is the repo root (works in both CI and local)
+                    const appApiPath = `${inputDir}/services/app-api`
 
                     // Execute all bundling steps and flatten the results
                     return bundlingSteps.flatMap((step) =>
@@ -497,21 +508,6 @@ export class AppApiStack extends BaseStack {
             process.env.SG_ID!
         )
 
-        const prismaEngineLayer = new LayerVersion(this, 'PrismaEngineLayer', {
-            layerVersionName: `${ResourceNames.apiName('app-api', this.stage)}-prisma-engine`,
-            description: 'Prisma engine layer for app-api',
-            compatibleRuntimes: [Runtime.NODEJS_20_X],
-            compatibleArchitectures: [Architecture.X86_64],
-            code: Code.fromAsset(
-                path.join(
-                    __dirname,
-                    '..',
-                    '..',
-                    'lambda-layers-prisma-client-engine'
-                )
-            ),
-        })
-
         // Create GraphQL function with all required configuration
         const graphqlFunction = new NodejsFunction(this, 'graphqlFunction', {
             functionName: `${ResourceNames.apiName('app-api', this.stage)}-graphql`,
@@ -532,7 +528,7 @@ export class AppApiStack extends BaseStack {
             memorySize: 1024,
             environment,
             role,
-            layers: [prismaEngineLayer, this.otelLayer],
+            layers: [this.prismaEngineLayer, this.otelLayer],
             vpc,
             vpcSubnets: {
                 subnetType: SubnetType.PRIVATE_WITH_EGRESS,
@@ -561,6 +557,77 @@ export class AppApiStack extends BaseStack {
         })
 
         return graphqlFunction
+    }
+
+    /**
+     * Create the OAuth token function with VPC and Prisma engine layer
+     * Matches serverless configuration for oauth_token function
+     */
+    private createOauthTokenFunction(
+        role: Role,
+        environment: Record<string, string>
+    ): NodejsFunction {
+        // Validate required environment variables for VPC configuration
+        const required = ['VPC_ID', 'SG_ID']
+        const missing = required.filter((envVar) => !process.env[envVar])
+        if (missing.length > 0) {
+            throw new Error(
+                `Missing required environment variables for OAuth token function: ${missing.join(', ')}`
+            )
+        }
+
+        // Import VPC and security group from environment variables (matches serverless pattern)
+        const vpc = Vpc.fromLookup(this, 'OauthVpc', {
+            vpcId: process.env.VPC_ID!,
+        })
+
+        const lambdaSecurityGroup = SecurityGroup.fromSecurityGroupId(
+            this,
+            'OauthSecurityGroup',
+            process.env.SG_ID!
+        )
+
+        // Create OAuth token function with all required configuration
+        const oauthTokenFunction = new NodejsFunction(
+            this,
+            'oauth-tokenFunction',
+            {
+                functionName: `${ResourceNames.apiName('app-api', this.stage)}-oauth-token`,
+                runtime: Runtime.NODEJS_20_X,
+                architecture: Architecture.X86_64,
+                handler: 'main',
+                entry: path.join(
+                    __dirname,
+                    '..',
+                    '..',
+                    '..',
+                    'app-api',
+                    'src',
+                    'handlers',
+                    'oauth_token.ts'
+                ),
+                timeout: Duration.seconds(30),
+                memorySize: 1024,
+                environment,
+                role,
+                layers: [this.prismaEngineLayer, this.otelLayer],
+                vpc,
+                vpcSubnets: {
+                    subnetType: SubnetType.PRIVATE_WITH_EGRESS,
+                },
+                securityGroups: [lambdaSecurityGroup],
+                bundling: {
+                    format: OutputFormat.ESM,
+                    banner: AppApiStack.ESM_BANNER,
+                    externalModules: ['prisma', '@prisma/client'],
+                    ...this.createBundling('oauth-token', [
+                        this.getOtelBundlingCommands(),
+                    ]),
+                },
+            }
+        )
+
+        return oauthTokenFunction
     }
 
     private createLambdaRole(): Role {

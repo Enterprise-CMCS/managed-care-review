@@ -151,6 +151,11 @@ const mockContractRevision = (
         inLieuServicesAndSettings: null,
         statutoryRegulatoryAttestation: null,
         statutoryRegulatoryAttestationDescription: null,
+        eqroNewContractor: null,
+        eqroProvisionChipEqrRelatedActivities: null,
+        eqroProvisionMcoNewOptionalActivity: null,
+        eqroProvisionMcoEqrOrRelatedActivities: null,
+        eqroProvisionNewMcoEqrRelatedActivities: null,
         ...revision,
     }
 }

@@ -66,9 +66,14 @@ S3_QA_BUCKET_NAME=$(get_stack_export "${UPLOADS_PREFIX}-QAUploadsBucketName" || 
 S3_DOCUMENTS_BUCKET_REGION=$COGNITO_REGION
 
 echo "Fetching frontend URL..."
-APPLICATION_ENDPOINT=$(get_stack_export "${FRONTEND_PREFIX}-CloudFrontEndpointUrl" || echo "")
+# Try new ApplicationUrl export first (includes custom domain if configured)
+APPLICATION_ENDPOINT=$(get_stack_export "${FRONTEND_PREFIX}-ApplicationUrl" || echo "")
+# Fallback to CloudFrontEndpointUrl for backwards compatibility
 if [ -z "$APPLICATION_ENDPOINT" ]; then
-  echo "ERROR: Could not find CloudFront endpoint export: ${FRONTEND_PREFIX}-CloudFrontEndpointUrl"
+  APPLICATION_ENDPOINT=$(get_stack_export "${FRONTEND_PREFIX}-CloudFrontEndpointUrl" || echo "")
+fi
+if [ -z "$APPLICATION_ENDPOINT" ]; then
+  echo "ERROR: Could not find application endpoint export: ${FRONTEND_PREFIX}-ApplicationUrl or ${FRONTEND_PREFIX}-CloudFrontEndpointUrl"
   echo "Make sure the frontend-infra CDK stack is deployed successfully."
   exit 1
 fi

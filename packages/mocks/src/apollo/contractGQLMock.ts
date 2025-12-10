@@ -24,6 +24,7 @@ import {
     mockContractPackageSubmittedWithQuestions,
     mockContractPackageSubmittedWithRevisions,
     mockContractPackageUnlockedWithUnlockedType,
+    mockUpdateContractDraftRevisionInput,
 } from './contractPackageDataMock'
 import {
     GRAPHQL_ERROR_CAUSE_MESSAGES,
@@ -312,11 +313,11 @@ const updateContractDraftRevisionMockSuccess = ({
     const contractInput = {
         contractID: contractData.id,
         lastSeenUpdatedAt: contractData.draftRevision?.updatedAt,
-        formData: contractData.draftRevision?.formData,
+        formData: mockUpdateContractDraftRevisionInput(contractData.draftRevision?.formData),
     }
     return {
         request: {
-            query: UpdateDraftContractRatesDocument,
+            query: UpdateContractDraftRevisionDocument,
             variables: { input: contractInput },
         },
         result: {

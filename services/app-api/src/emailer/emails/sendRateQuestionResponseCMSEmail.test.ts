@@ -31,6 +31,7 @@ describe('sendRateQuestionResponseCMSEmail', () => {
     ]
 
     test('to addresses list only includes state analyst when a state user submits a response to a DMCO question', async () => {
+        // Dev and DMCO are considered defaults for all automated emails
         const template = await sendRateQuestionResponseCMSEmail(
             rate,
             stateAnalysts,
@@ -48,6 +49,7 @@ describe('sendRateQuestionResponseCMSEmail', () => {
                 toAddresses: expect.arrayContaining([
                     ...stateAnalysts,
                     ...testEmailConfig().devReviewTeamEmails,
+                    ...testEmailConfig().dmcoEmails,
                 ]),
             })
         )
@@ -80,7 +82,16 @@ describe('sendRateQuestionResponseCMSEmail', () => {
                 toAddresses: expect.arrayContaining([
                     ...stateAnalysts,
                     ...testEmailConfig().devReviewTeamEmails,
+                    ...testEmailConfig().dmcoEmails,
                     ...testEmailConfig().oactEmails,
+                ]),
+            })
+        )
+
+        expect(template).toEqual(
+            expect.not.objectContaining({
+                toAddresses: expect.arrayContaining([
+                    ...testEmailConfig().dmcpReviewEmails,
                 ]),
             })
         )
@@ -104,7 +115,16 @@ describe('sendRateQuestionResponseCMSEmail', () => {
                 toAddresses: expect.arrayContaining([
                     ...stateAnalysts,
                     ...testEmailConfig().devReviewTeamEmails,
+                    ...testEmailConfig().dmcoEmails,
                     ...testEmailConfig().dmcpReviewEmails,
+                ]),
+            })
+        )
+
+        expect(template).toEqual(
+            expect.not.objectContaining({
+                toAddresses: expect.arrayContaining([
+                    ...testEmailConfig().oactEmails,
                 ]),
             })
         )
@@ -222,7 +242,7 @@ describe('sendRateQuestionResponseCMSEmail', () => {
         expect(template).toEqual(
             expect.objectContaining({
                 bodyText: expect.stringContaining(
-                    'Submitted by: James Brown  james@example.com (james@example.com)'
+                    'Submitted by: James Brown james@example.com (james@example.com)'
                 ),
             })
         )

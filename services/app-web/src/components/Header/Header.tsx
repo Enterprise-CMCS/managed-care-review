@@ -30,7 +30,7 @@ export const Header = ({
     ).href
     const { logout, loggedInUser, loginStatus } = useAuth()
     const { heading } = usePage()
-    const { currentRoute: route } = useCurrentRoute()
+    const { currentRoute: route, pathname } = useCurrentRoute()
 
     const handleLogout = async () => {
         await logout({ type: 'DEFAULT' })
@@ -63,6 +63,7 @@ export const Header = ({
             <PageHeadingRow
                 heading={route !== 'UNKNOWN_ROUTE' ? heading : undefined}
                 route={route}
+                pathname={pathname}
                 isLoading={loginStatus === 'LOADING'}
                 loggedInUser={loggedInUser}
             />

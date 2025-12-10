@@ -1,9 +1,16 @@
-name: Promote
+name: Promote (Serverless - DISABLED)
 
 on:
-  push:
-    branches:
-      - 'main'
+  # Serverless promotion DISABLED - DNS now points to CDK infrastructure
+  # push:
+  #   branches:
+  #     - 'main'
+  workflow_dispatch:
+
+# Prevent concurrent serverless deployments to main
+concurrency:
+  group: promote-serverless-main
+  cancel-in-progress: false
 
 jobs:
   unit-tests:
@@ -41,7 +48,7 @@ jobs:
 
     steps:
       - name: Check out repository
-        uses: actions/checkout@v5
+        uses: actions/checkout@v6
 
       - name: set app version
         id: app-version
@@ -101,17 +108,12 @@ jobs:
             ${{github.workspace}}/services/app-api/coverage/lcov.info:lcov
             ${{github.workspace}}/services/app-web/coverage/lcov.info:lcov
 
-      - name: lock this branch to prevent concurrent builds
-        run: ./.github/github-lock.sh
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
   build-prisma-client-lambda-layer:
     name: build - postgres prisma layer
     runs-on: ubuntu-24.04
     steps:
       - name: Check out repository
-        uses: actions/checkout@v5
+        uses: actions/checkout@v6
 
       - name: Setup env
         uses: ./.github/actions/setup_env
@@ -153,7 +155,7 @@ jobs:
     runs-on: ubuntu-24.04
     steps:
       - name: Check out repository
-        uses: actions/checkout@v5
+        uses: actions/checkout@v6
 
       - name: Setup env
         uses: ./.github/actions/setup_env
@@ -336,7 +338,7 @@ jobs:
     strategy:
       fail-fast: false
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v6
 
       - name: Generate unique ID for Cypress
         id: uuid

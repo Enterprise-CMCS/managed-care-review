@@ -124,7 +124,7 @@ const generateCMSReviewerEmailsForUnlockedContract = (
         )
     }
 
-    const { oactEmails, dmcpSubmissionEmails } = config
+    const { oactEmails, dmcpSubmissionEmails, dmcoEmails } = config
     let reviewers: string[] = []
 
     if (contractFormData.submissionType === 'CONTRACT_ONLY') {
@@ -133,6 +133,7 @@ const generateCMSReviewerEmailsForUnlockedContract = (
             ...config.devReviewTeamEmails,
             ...stateAnalystsEmails,
             ...dmcpSubmissionEmails,
+            ...dmcoEmails,
         ]
     } else if (contractFormData.submissionType === 'CONTRACT_AND_RATES') {
         //Contract and rate submissions reviewer emails.
@@ -140,6 +141,7 @@ const generateCMSReviewerEmailsForUnlockedContract = (
             ...config.devReviewTeamEmails,
             ...stateAnalystsEmails,
             ...dmcpSubmissionEmails,
+            ...dmcoEmails,
         ]
 
         if (contractFormData.riskBasedContract) {
@@ -187,7 +189,7 @@ const generateCMSReviewerEmailsForSubmittedContract = (
         )
     }
 
-    const { oactEmails, dmcpSubmissionEmails } = config
+    const { oactEmails, dmcpSubmissionEmails, dmcoEmails } = config
     let reviewers: string[] = []
 
     if (contractFormData.submissionType === 'CONTRACT_ONLY') {
@@ -196,6 +198,7 @@ const generateCMSReviewerEmailsForSubmittedContract = (
             ...config.devReviewTeamEmails,
             ...stateAnalystsEmails,
             ...dmcpSubmissionEmails,
+            ...dmcoEmails,
         ]
     } else if (contractFormData.submissionType === 'CONTRACT_AND_RATES') {
         //Contract and rate submissions reviewer emails.
@@ -203,6 +206,7 @@ const generateCMSReviewerEmailsForSubmittedContract = (
             ...config.devReviewTeamEmails,
             ...stateAnalystsEmails,
             ...dmcpSubmissionEmails,
+            ...dmcoEmails,
         ]
 
         if (contractFormData.riskBasedContract) {
@@ -277,7 +281,7 @@ const stripHTMLFromTemplate = (template: string) => {
 
     // remove P and A tags but preserve what's inside of them
     formatted = formatted.replace(/<p.*>/gi, '\n')
-    formatted = formatted.replace(/<a.*href="(.*?)".*>(.*?)<\/a>/gi, ' $2 ($1)')
+    formatted = formatted.replace(/<a.*href="(.*?)".*>(.*?)<\/a>/gi, '$2 ($1)')
     // everything else
     return formatted.replace(/(<([^>]+)>)/gi, '')
 }

@@ -5,6 +5,7 @@ import styles from './DynamicStepIndicator.module.scss'
 export type DynamicStepIndicatorProps = {
     formPages: RouteTWithUnknown[]
     currentFormPage: RouteTWithUnknown
+    customPageTitles?: Partial<Record<RouteTWithUnknown, string>>
 }
 
 type formStepStatusT = 'current' | 'complete' | undefined
@@ -12,6 +13,7 @@ type formStepStatusT = 'current' | 'complete' | undefined
 export const DynamicStepIndicator = ({
     formPages,
     currentFormPage,
+    customPageTitles,
 }: DynamicStepIndicatorProps): React.ReactElement | null => {
     if (
         currentFormPage === 'UNKNOWN_ROUTE' ||
@@ -42,7 +44,10 @@ export const DynamicStepIndicator = ({
             {formPagesWithStatus.map((formPage) => {
                 return (
                     <StepIndicatorStep
-                        label={PageTitlesRecord[formPage.name]}
+                        label={
+                            customPageTitles?.[formPage.name] ??
+                            PageTitlesRecord[formPage.name]
+                        }
                         status={formPage.status}
                         key={PageTitlesRecord[formPage.name]}
                     />

@@ -13,6 +13,7 @@ import type { LDService } from '../../launchDarkly/launchDarkly'
 import { GraphQLError } from 'graphql/index'
 import { validateContractDraftRevisionInput } from '../../domain-models/contractAndRates'
 import { canWrite } from '../../authorization/oauthAuthorization'
+import { parseAndUpdateEqroFields } from '../../domain-models/contractAndRates/dataValidatorHelpers'
 
 export function updateContractDraftRevision(
     store: Store,
@@ -105,13 +106,28 @@ export function updateContractDraftRevision(
             throw createUserInputError(errMessage)
         }
 
+        const isEQROsubmission =
+            contractWithHistory.contractSubmissionType === 'EQRO'
+
         // Using zod to validate and transform graphQL types into domain types.
-        const parsedFormData = validateContractDraftRevisionInput(
-            formData,
-            contractWithHistory.stateCode,
-            store,
-            featureFlags
-        )
+        let parsedFormData
+
+        // Validations based on submission type
+        if (isEQROsubmission) {
+            parsedFormData = validateContractDraftRevisionInput(
+                formData,
+                contractWithHistory.stateCode,
+                store,
+                featureFlags
+            )
+        } else {
+            parsedFormData = validateContractDraftRevisionInput(
+                formData,
+                contractWithHistory.stateCode,
+                store,
+                featureFlags
+            )
+        }
 
         if (parsedFormData instanceof Error) {
             const errMessage = parsedFormData.message
@@ -120,7 +136,12 @@ export function updateContractDraftRevision(
             throw createUserInputError(errMessage)
         }
 
-        const editableFormData = parsedFormData
+        const editableFormData = isEQROsubmission
+            ? parseAndUpdateEqroFields(
+                  contractWithHistory.draftRevision.formData,
+                  parsedFormData
+              )
+            : parsedFormData
 
         // Update contract draft revision
         const updateResult = await store.updateDraftContract({

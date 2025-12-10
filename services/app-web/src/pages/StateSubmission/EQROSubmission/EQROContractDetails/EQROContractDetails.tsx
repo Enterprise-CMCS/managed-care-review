@@ -1,9 +1,14 @@
 import React, { useEffect } from 'react'
-import { FormContainer, PageActions } from '../../../../components'
+import {
+    FormContainer,
+    PageActions,
+    DynamicStepIndicator,
+    FormNotificationContainer,
+} from '../../../../components'
 import { Form } from '@trussworks/react-uswds'
-import { useRouteParams } from '../../../../hooks'
+import { useRouteParams, useCurrentRoute } from '../../../../hooks'
 import { generatePath, useNavigate } from 'react-router-dom'
-import { RoutesRecord } from '@mc-review/constants'
+import { RoutesRecord, EQRO_SUBMISSION_FORM_ROUTES } from '@mc-review/constants'
 import styles from '../../StateSubmissionForm.module.scss'
 import { usePage } from '../../../../contexts/PageContext'
 
@@ -11,6 +16,7 @@ export const EQROContractDetails = (): React.ReactElement => {
     const { id, contractSubmissionType } = useRouteParams()
     const navigate = useNavigate()
     const { updateActiveMainContent } = usePage()
+    const { currentRoute } = useCurrentRoute()
 
     const contactsPagePath = generatePath(RoutesRecord.SUBMISSIONS_CONTACTS, {
         id,
@@ -30,6 +36,15 @@ export const EQROContractDetails = (): React.ReactElement => {
 
     return (
         <div id={activeMainContentId}>
+            <FormNotificationContainer>
+                <DynamicStepIndicator
+                    formPages={EQRO_SUBMISSION_FORM_ROUTES}
+                    currentFormPage={currentRoute}
+                    customPageTitles={{
+                        SUBMISSIONS_TYPE: 'Submission details',
+                    }}
+                />
+            </FormNotificationContainer>
             <FormContainer id="contractDetails">
                 <Form
                     className={styles.formContainer}

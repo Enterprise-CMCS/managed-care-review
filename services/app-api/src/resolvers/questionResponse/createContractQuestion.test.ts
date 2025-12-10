@@ -416,7 +416,11 @@ describe('createQuestion', () => {
 
         await updateTestStateAssignments(cmsServer, 'FL', assignedUserIDs)
 
-        const cmsEmails = [...config.devReviewTeamEmails, ...assignedUserEmails]
+        const cmsEmails = [
+            ...config.devReviewTeamEmails,
+            ...assignedUserEmails,
+            ...config.dmcoEmails,
+        ]
 
         // email subject line is correct for CMS email
         // email is sent to the state anaylsts since it
@@ -475,7 +479,11 @@ describe('createQuestion', () => {
 
         await updateTestStateAssignments(cmsServer, 'FL', assignedUserIDs)
 
-        const cmsEmails = [...config.devReviewTeamEmails, ...assignedUserEmails]
+        const cmsEmails = [
+            ...config.devReviewTeamEmails,
+            ...assignedUserEmails,
+            ...config.dmcoEmails,
+        ]
 
         // email subject line is correct for CMS email
         // email is sent to the state anaylsts since it

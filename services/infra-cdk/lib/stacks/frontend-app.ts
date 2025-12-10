@@ -3,7 +3,7 @@ import { type Construct } from 'constructs'
 import { BucketDeployment, Source } from 'aws-cdk-lib/aws-s3-deployment'
 import { Bucket } from 'aws-cdk-lib/aws-s3'
 import { Distribution } from 'aws-cdk-lib/aws-cloudfront'
-import { Fn } from 'aws-cdk-lib'
+import { Fn, Size } from 'aws-cdk-lib'
 
 /**
  * Frontend app stack - deploys built React app and Storybook to S3 buckets
@@ -68,6 +68,8 @@ export class FrontendAppStack extends BaseStack {
             destinationBucket: mainAppBucket,
             distribution: mainAppDistribution,
             distributionPaths: ['/*'],
+            memoryLimit: 3008,
+            ephemeralStorageSize: Size.gibibytes(2),
         })
 
         // Deploy storybook (matches app-web serverless s3Sync to storybook bucket)
@@ -76,6 +78,8 @@ export class FrontendAppStack extends BaseStack {
             destinationBucket: storybookBucket,
             distribution: storybookDistribution,
             distributionPaths: ['/*'],
+            memoryLimit: 3008,
+            ephemeralStorageSize: Size.gibibytes(2),
         })
     }
 }

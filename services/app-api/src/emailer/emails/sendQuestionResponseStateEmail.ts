@@ -1,6 +1,6 @@
 import { packageName as generatePackageName } from '@mc-review/submissions'
 import { formatCalendarDate } from '@mc-review/dates'
-import { pruneDuplicateEmails } from '../formatters'
+import { formatEmailAddresses, pruneDuplicateEmails } from '../formatters'
 import type { EmailConfiguration, EmailData } from '..'
 import type {
     ProgramType,
@@ -74,6 +74,13 @@ export const sendQuestionResponseStateEmail = async (
             'America/Los_Angeles'
         ),
         questionRound,
+        cmsReviewHelpEmailAddress: formatEmailAddresses(
+            config.cmsReviewHelpEmailAddress
+        ),
+        cmsRateHelpEmailAddress: formatEmailAddresses(
+            config.cmsRateHelpEmailAddress
+        ),
+        helpDeskEmail: formatEmailAddresses(config.helpDeskEmail),
     }
 
     const result = await renderTemplate<typeof data>(

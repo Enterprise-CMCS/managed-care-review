@@ -12,7 +12,7 @@ import type { ContractType, RateFormDataType } from '../../domain-models'
 import { packageName } from '@mc-review/submissions'
 import { ContractSubmissionTypeRecord } from '@mc-review/constants'
 
-test('to addresses list includes review team email addresses', async () => {
+test('to addresses list includes review team email addresses and DMCO', async () => {
     const sub = mockContract()
     const statePrograms = mockMNState().programs
     const template = await newContractCMSEmail(
@@ -33,9 +33,17 @@ test('to addresses list includes review team email addresses', async () => {
             })
         )
     })
+
+    testEmailConfig().dmcoEmails.forEach((emailAddress) => {
+        expect(template).toEqual(
+            expect.objectContaining({
+                toAddresses: expect.arrayContaining([emailAddress]),
+            })
+        )
+    })
 })
 
-test('to addresses list includes OACT and DMCP group emails for contract and rate package', async () => {
+test('to addresses list includes OACT, DMCP, and DMCO group emails for contract and rate package', async () => {
     const sub = mockContract()
     sub.packageSubmissions[0].contractRevision.formData.riskBasedContract = true
     const statePrograms = mockMNState().programs
@@ -66,9 +74,8 @@ test('to addresses list includes OACT and DMCP group emails for contract and rat
         )
     })
 
-    // do not include dmco group emails - rely on state analysts instead
     testEmailConfig().dmcoEmails.forEach((emailAddress) => {
-        expect(template).not.toEqual(
+        expect(template).toEqual(
             expect.objectContaining({
                 toAddresses: expect.arrayContaining([emailAddress]),
             })
@@ -712,6 +719,7 @@ test('includes state specific analyst on contract only submission', async () => 
 
     const reviewerEmails = [
         ...testEmailConfig().devReviewTeamEmails,
+        ...testEmailConfig().dmcoEmails,
         ...testStateAnalystEmails,
     ]
     reviewerEmails.forEach((emailAddress) => {
@@ -741,6 +749,7 @@ test('includes state specific analyst on contract and rate submission', async ()
 
     const reviewerEmails = [
         ...testEmailConfig().devReviewTeamEmails,
+        ...testEmailConfig().dmcoEmails,
         ...testEmailConfig().oactEmails,
         ...testStateAnalystEmails,
     ]
@@ -748,30 +757,6 @@ test('includes state specific analyst on contract and rate submission', async ()
         expect(template).toEqual(
             expect.objectContaining({
                 toAddresses: expect.arrayContaining([emailAddress]),
-            })
-        )
-    })
-})
-
-test('does not include state specific analyst on contract and rate submission', async () => {
-    const sub = mockContract()
-    const testStateAnalystEmails = testStateAnalystsEmails
-    const statePrograms = mockMNState().programs
-    const template = await newContractCMSEmail(
-        sub,
-        testEmailConfig(),
-        [],
-        statePrograms
-    )
-
-    if (template instanceof Error) {
-        throw template
-    }
-
-    testStateAnalystEmails.forEach((emailAddress) => {
-        expect(template).toEqual(
-            expect.objectContaining({
-                toAddresses: expect.not.arrayContaining([emailAddress]),
             })
         )
     })
@@ -795,6 +780,7 @@ test('includes oactEmails on contract and rate submission for a risked based con
 
     const reviewerEmails = [
         ...testEmailConfig().devReviewTeamEmails,
+        ...testEmailConfig().dmcoEmails,
         ...testEmailConfig().oactEmails,
     ]
     reviewerEmails.forEach((emailAddress) => {

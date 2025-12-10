@@ -311,9 +311,18 @@ function handler(event) {
         })
 
         new CfnOutput(this, 'CloudFrontEndpointUrl', {
-            value: this.applicationUrl,
+            // Always export the CloudFront domain (not custom domain) to maintain stable exports
+            value: `https://${this.distribution.distributionDomainName}`,
             exportName: this.exportName('CloudFrontEndpointUrl'),
             description: 'CloudFront URL for React app',
+        })
+
+        // Export application URL (custom domain if configured, otherwise CloudFront domain)
+        // This is used by get-cdk-config.sh to build the React app with the correct redirect URL
+        new CfnOutput(this, 'ApplicationUrl', {
+            value: this.applicationUrl,
+            exportName: this.exportName('ApplicationUrl'),
+            description: 'Application URL (custom domain or CloudFront)',
         })
 
         // Storybook outputs
@@ -330,7 +339,8 @@ function handler(event) {
         })
 
         new CfnOutput(this, 'StorybookCloudFrontEndpointUrl', {
-            value: this.storybookUrl,
+            // Always export the CloudFront domain (not custom domain) to maintain stable exports
+            value: `https://${this.storybookDistribution.distributionDomainName}`,
             exportName: this.exportName('StorybookCloudFrontEndpointUrl'),
             description: 'CloudFront URL for Storybook',
         })

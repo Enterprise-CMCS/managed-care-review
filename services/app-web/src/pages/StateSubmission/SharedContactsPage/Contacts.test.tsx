@@ -2,7 +2,7 @@ import { screen, waitFor } from '@testing-library/react'
 
 import { Route, Routes } from 'react-router-dom'
 import { RoutesRecord } from '@mc-review/constants'
-import { renderWithProviders } from '../../../../testHelpers/jestHelpers'
+import { renderWithProviders } from '../../../testHelpers/jestHelpers'
 import { Contacts } from './index'
 import userEvent from '@testing-library/user-event'
 import {
@@ -382,6 +382,156 @@ describe('Contacts', () => {
         await waitFor(() => {
             expect(screen.getByText(/State contacts 1/)).toBeInTheDocument()
             expect(screen.getByText('State contacts 2')).toBeInTheDocument()
+        })
+    })
+
+    describe('EQRO submissions', () => {
+        it('renders the contacts page for EQRO submissions', async () => {
+            const draftContract = mockContractPackageUnlockedWithUnlockedType()
+            renderWithProviders(
+                <Routes>
+                    <Route
+                        path={RoutesRecord.SUBMISSIONS_CONTACTS}
+                        element={<Contacts />}
+                    />
+                </Routes>,
+                {
+                    apolloProvider: {
+                        mocks: [
+                            fetchCurrentUserMock({ statusCode: 200 }),
+                            fetchContractMockSuccess({
+                                contract: {
+                                    ...draftContract,
+                                    id: '15',
+                                    contractSubmissionType: 'EQRO',
+                                },
+                            }),
+                        ],
+                    },
+                    routerProvider: {
+                        route: '/submissions/eqro/15/edit/contacts',
+                    },
+                }
+            )
+
+            await waitFor(() => {
+                expect(screen.getByTestId('state-contacts')).toBeInTheDocument()
+                expect(screen.getByText('State contacts 1')).toBeInTheDocument()
+                expect(screen.getByLabelText('Name')).toBeInTheDocument()
+                expect(screen.getByLabelText('Title/Role')).toBeInTheDocument()
+                expect(screen.getByLabelText('Email')).toBeInTheDocument()
+            })
+        })
+
+        // TODO: Uncomment when EQRO Contract Details Page is created.
+        // it('navigates back to contract details for EQRO when back button is selected', async () => {
+        //     const draftContract = mockContractPackageUnlockedWithUnlockedType()
+        //
+        //     renderWithProviders(
+        //         <Routes>
+        //             <Route
+        //                 path={RoutesRecord.SUBMISSIONS_CONTACTS}
+        //                 element={<Contacts />}
+        //             />
+        //             <Route
+        //                 path={RoutesRecord.SUBMISSIONS_CONTRACT_DETAILS}
+        //                 element={<div>Contract Details Page</div>}
+        //             />
+        //         </Routes>,
+        //         {
+        //             apolloProvider: {
+        //                 mocks: [
+        //                     fetchCurrentUserMock({ statusCode: 200 }),
+        //                     fetchContractMockSuccess({
+        //                         contract: {
+        //                             ...draftContract,
+        //                             id: '15',
+        //                             contractSubmissionType: 'EQRO',
+        //                         },
+        //                     }),
+        //                 ],
+        //             },
+        //             routerProvider: {
+        //                 route: '/submissions/eqro/15/edit/contacts',
+        //             },
+        //         }
+        //     )
+        //
+        //     await waitFor(() => {
+        //         expect(screen.getByTestId('state-contacts')).toBeInTheDocument()
+        //     })
+        //
+        //     const backButton = screen.getByRole('button', { name: 'Back' })
+        //     await userEvent.click(backButton)
+        //
+        //     await waitFor(() => {
+        //         // Should see Contract Details page
+        //         expect(screen.getByText('Contract Details Page')).toBeInTheDocument()
+        //     })
+        // })
+
+        it('continues to navigate to review and submit for EQRO when the continue button is selected', async () => {
+            const draftContract = mockContractPackageUnlockedWithUnlockedType()
+
+            renderWithProviders(
+                <Routes>
+                    <Route
+                        path={RoutesRecord.SUBMISSIONS_CONTACTS}
+                        element={<Contacts />}
+                    />
+                    <Route
+                        path={RoutesRecord.SUBMISSIONS_REVIEW_SUBMIT}
+                        element={<div>Review and Submit Page</div>}
+                    />
+                </Routes>,
+                {
+                    apolloProvider: {
+                        mocks: [
+                            fetchCurrentUserMock({ statusCode: 200 }),
+                            fetchContractMockSuccess({
+                                contract: {
+                                    ...draftContract,
+                                    id: '15',
+                                    contractSubmissionType: 'EQRO',
+                                },
+                            }),
+                        ],
+                    },
+                    routerProvider: {
+                        route: '/submissions/eqro/15/edit/contacts',
+                    },
+                }
+            )
+
+            await waitFor(() => {
+                expect(screen.getByTestId('state-contacts')).toBeInTheDocument()
+            })
+
+            // Fill out required fields for form validation to pass
+            const nameInput = screen.getByLabelText('Name')
+            const titleInput = screen.getByLabelText('Title/Role')
+            const emailInput = screen.getByLabelText('Email')
+
+            await userEvent.clear(nameInput)
+            await userEvent.type(nameInput, 'Test Name')
+
+            await userEvent.clear(titleInput)
+            await userEvent.type(titleInput, 'Test Title')
+
+            await userEvent.clear(emailInput)
+            await userEvent.type(emailInput, 'test@example.com')
+
+            const continueButton = screen.getByRole('button', {
+                name: 'Continue',
+            })
+            await userEvent.click(continueButton)
+
+            await waitFor(() => {
+                // Navigates to Review & Submit page in the EQRO flow
+                expect(
+                    screen.getByText('Review and submit')
+                ).toBeInTheDocument()
+            })
         })
     })
 })

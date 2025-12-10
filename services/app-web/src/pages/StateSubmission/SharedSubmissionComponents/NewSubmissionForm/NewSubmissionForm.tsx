@@ -12,7 +12,7 @@ import { Form, FormGroup, Fieldset } from '@trussworks/react-uswds'
 import {
     ActionButton,
     Breadcrumbs,
-    FieldRadioCard,
+    FieldRadio,
     PageActionsContainer,
     PoliteErrorMessage,
 } from '../../../../components'
@@ -111,7 +111,7 @@ export const NewSubmission = () => {
                                             {errors.contractType as string}
                                         </PoliteErrorMessage>
                                     )}
-                                    <FieldRadioCard
+                                    <FieldRadio
                                         id="healthPlan"
                                         name="contractType"
                                         label="Health plan"
@@ -121,9 +121,10 @@ export const NewSubmission = () => {
                                         list_options={2}
                                         parent_component_heading="Contract type"
                                         radio_button_title="Health plan"
-                                        labelDescription="Submit Medicaid and CHIP managed care health plan base contracts, contract amendments, and rates."
+                                        labelDescription="Submit your Medicaid and CHIP managed care plans. This includes base contracts, amendments to base contracts, and rate certifications."
+                                        tile
                                     />
-                                    <FieldRadioCard
+                                    <FieldRadio
                                         id="eqro"
                                         name="contractType"
                                         label="External Quality Review Organization (EQRO)"
@@ -134,6 +135,7 @@ export const NewSubmission = () => {
                                         parent_component_heading="Contract type"
                                         radio_button_title="External Quality Review Organization (EQRO)"
                                         labelDescription="Submit base contracts and amendments to base contracts between your state and an EQRO."
+                                        tile
                                     />
                                 </Fieldset>
                             </FormGroup>

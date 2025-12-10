@@ -38,9 +38,10 @@ import {
     ContractSubmissionType,
 } from '../../../../gen/gqlClient'
 import styles from '../../StateSubmissionForm.module.scss'
-import { GenericApiErrorBanner, ProgramSelect } from '../../../../components'
+import { ProgramSelect } from '../../../../components'
 import {
     activeFormPages,
+    renameKey,
     type ContractFormPageProps,
 } from '../../submissionUtils'
 import {
@@ -68,6 +69,7 @@ import { featureFlags } from '@mc-review/common-code'
 import { ContactSupportLink } from '../../../../components/ErrorAlert/ContactSupportLink'
 import { useFocusOnRender } from '../../../../hooks/useFocusOnRender'
 import { usePage } from '../../../../contexts/PageContext'
+import { Error404 } from '../../../Errors/Error404Page'
 
 export interface SubmissionTypeFormValues {
     populationCovered?: PopulationCoveredType
@@ -100,7 +102,7 @@ export const SubmissionType = ({
     const navigate = useNavigate()
     const location = useLocation()
     const ldClient = useLDClient()
-    const { id, contractSubmissionType } = useRouteParams()
+    const { id } = useRouteParams()
     const hideSupportingDocs = ldClient?.variation(
         featureFlags.HIDE_SUPPORTING_DOCS_PAGE.flag,
         featureFlags.HIDE_SUPPORTING_DOCS_PAGE.defaultValue
@@ -159,6 +161,10 @@ export const SubmissionType = ({
         return <ErrorOrLoadingPage state={interimState || 'GENERIC_ERROR'} />
     }
 
+    if (draftSubmission?.contractSubmissionType === 'EQRO') {
+        return <Error404 />
+    }
+
     const handleFormSubmit = async (
         values: SubmissionTypeFormValues,
         setSubmitting: (isSubmitting: boolean) => void, // formik setSubmitting
@@ -171,38 +177,6 @@ export const SubmissionType = ({
             setDraftSaved(false)
         }
         if (isNewSubmission) {
-            if (!values.populationCovered) {
-                console.info(
-                    'unexpected error, attempting to submit without population covered',
-                    values.submissionType
-                )
-                return
-            }
-            if (
-                !(
-                    values.submissionType === 'CONTRACT_ONLY' ||
-                    values.submissionType === 'CONTRACT_AND_RATES'
-                )
-            ) {
-                console.info(
-                    'unexpected error, attempting to submit a submissionType of ',
-                    values.submissionType
-                )
-                return
-            }
-            if (
-                !(
-                    values.contractType === 'BASE' ||
-                    values.contractType === 'AMENDMENT'
-                )
-            ) {
-                console.info(
-                    'unexpected error, attempting to submit a contractType of ',
-                    values.contractType
-                )
-                return
-            }
-
             const input: CreateContractInput = {
                 populationCovered: values.populationCovered!,
                 programIDs: values.programIDs,
@@ -215,16 +189,8 @@ export const SubmissionType = ({
                 contractSubmissionType: values.contractSubmissionType,
             }
 
-            if (!createDraft) {
-                console.info(
-                    'PROGRAMMING ERROR, SubmissionType for does have props needed to update a draft.'
-                )
-                return
-            }
-
             const draftSubmission = await createDraft(input)
             if (draftSubmission instanceof Error) {
-                setShowAPIErrorBanner(true)
                 setSubmitting(false) // unblock submit button to allow resubmit
                 console.info(
                     'Log: creating new submission failed with server error',
@@ -245,24 +211,22 @@ export const SubmissionType = ({
             }
         } else {
             setSubmitting(true)
-            if (draftSubmission === undefined || !updateDraft) {
-                console.info(draftSubmission, updateDraft)
+            if (!draftSubmission) {
                 console.info(
-                    'ERROR, SubmissionType for does not have props needed to update a draft.'
+                    'Error updating draft submission. draftSubmission was undefined.'
                 )
+                setShowAPIErrorBanner(true)
                 return
             }
+            // remove out __typename name our response formData to retain existing formData from other pages.
+            // eslint-disable-next-line @typescript-eslint/no-unused-vars
+            const { __typename, ...formData } =
+                draftSubmission.draftRevision.formData
+
             // set new values
             const updatedDraftSubmissionFormData: ContractDraftRevisionFormDataInput =
                 {
-                    contractExecutionStatus:
-                        draftSubmission.draftRevision.formData
-                            .contractExecutionStatus,
-                    contractDateStart:
-                        draftSubmission.draftRevision.formData
-                            .contractDateStart,
-                    contractDateEnd:
-                        draftSubmission.draftRevision.formData.contractDateEnd,
+                    ...formData,
                     contractType: values.contractType as ContractType,
                     submissionDescription: values.submissionDescription,
                     riskBasedContract: yesNoFormValueAsBoolean(
@@ -271,68 +235,10 @@ export const SubmissionType = ({
                     populationCovered: values.populationCovered,
                     submissionType: values.submissionType as SubmissionTypeT,
                     programIDs: values.programIDs,
-                    stateContacts:
-                        draftSubmission.draftRevision.formData.stateContacts ||
-                        [],
-                    supportingDocuments:
-                        draftSubmission.draftRevision.formData
-                            .supportingDocuments || [],
-                    managedCareEntities:
-                        draftSubmission.draftRevision.formData
-                            .managedCareEntities,
-                    federalAuthorities:
-                        draftSubmission.draftRevision.formData
-                            .federalAuthorities,
-                    dsnpContract:
-                        draftSubmission.draftRevision.formData.dsnpContract,
-                    contractDocuments:
-                        draftSubmission.draftRevision.formData
-                            .contractDocuments,
-                    statutoryRegulatoryAttestation:
-                        draftSubmission.draftRevision.formData
-                            .statutoryRegulatoryAttestation,
-                    // If contract is in compliance, we set the description to undefined. This clears out previous non-compliance description
-                    statutoryRegulatoryAttestationDescription:
-                        draftSubmission.draftRevision.formData
-                            .statutoryRegulatoryAttestationDescription,
                 }
 
-            if (isContractWithProvisions(draftSubmission)) {
-                updatedDraftSubmissionFormData.inLieuServicesAndSettings =
-                    draftSubmission.draftRevision.formData.inLieuServicesAndSettings
-                updatedDraftSubmissionFormData.modifiedBenefitsProvided =
-                    draftSubmission.draftRevision.formData.modifiedBenefitsProvided
-                updatedDraftSubmissionFormData.modifiedGeoAreaServed =
-                    draftSubmission.draftRevision.formData.modifiedGeoAreaServed
-                updatedDraftSubmissionFormData.modifiedMedicaidBeneficiaries =
-                    draftSubmission.draftRevision.formData.modifiedMedicaidBeneficiaries
-                updatedDraftSubmissionFormData.modifiedRiskSharingStrategy =
-                    draftSubmission.draftRevision.formData.modifiedRiskSharingStrategy
-                updatedDraftSubmissionFormData.modifiedIncentiveArrangements =
-                    draftSubmission.draftRevision.formData.modifiedIncentiveArrangements
-                updatedDraftSubmissionFormData.modifiedWitholdAgreements =
-                    draftSubmission.draftRevision.formData.modifiedWitholdAgreements
-                updatedDraftSubmissionFormData.modifiedStateDirectedPayments =
-                    draftSubmission.draftRevision.formData.modifiedStateDirectedPayments
-                updatedDraftSubmissionFormData.modifiedPassThroughPayments =
-                    draftSubmission.draftRevision.formData.modifiedPassThroughPayments
-                updatedDraftSubmissionFormData.modifiedPaymentsForMentalDiseaseInstitutions =
-                    draftSubmission.draftRevision.formData.modifiedPaymentsForMentalDiseaseInstitutions
-                updatedDraftSubmissionFormData.modifiedMedicalLossRatioStandards =
-                    draftSubmission.draftRevision.formData.modifiedMedicalLossRatioStandards
-                updatedDraftSubmissionFormData.modifiedOtherFinancialPaymentIncentive =
-                    draftSubmission.draftRevision.formData.modifiedOtherFinancialPaymentIncentive
-                updatedDraftSubmissionFormData.modifiedEnrollmentProcess =
-                    draftSubmission.draftRevision.formData.modifiedEnrollmentProcess
-                updatedDraftSubmissionFormData.modifiedGrevienceAndAppeal =
-                    draftSubmission.draftRevision.formData.modifiedGrevienceAndAppeal
-                updatedDraftSubmissionFormData.modifiedNetworkAdequacyStandards =
-                    draftSubmission.draftRevision.formData.modifiedNetworkAdequacyStandards
-                updatedDraftSubmissionFormData.modifiedLengthOfContract =
-                    draftSubmission.draftRevision.formData.modifiedLengthOfContract
-                updatedDraftSubmissionFormData.modifiedNonRiskPaymentArrangements =
-                    draftSubmission.draftRevision.formData.modifiedNonRiskPaymentArrangements
-            } else {
+            //TODO: Move this to the API, it does nothing here.
+            if (!isContractWithProvisions(draftSubmission)) {
                 updatedDraftSubmissionFormData.inLieuServicesAndSettings =
                     undefined
                 updatedDraftSubmissionFormData.modifiedBenefitsProvided =
@@ -386,28 +292,12 @@ export const SubmissionType = ({
                     navigate(
                         generatePath(RoutesRecord[options.redirectPath], {
                             id: id,
-                            contractSubmissionType: contractSubmissionType,
+                            contractSubmissionType: 'health-plan',
                         })
                     )
                 }
             }
         }
-    }
-
-    const generateErrorSummaryErrors = (
-        errors: FormikErrors<SubmissionTypeFormValues>
-    ) => {
-        const errorObject = {}
-        const formikErrors = { ...errors }
-
-        if (formikErrors.programIDs) {
-            Object.assign(errorObject, {
-                '#programIDs': formikErrors.programIDs,
-            })
-            delete formikErrors.programIDs
-        }
-
-        return { ...errorObject, ...formikErrors }
     }
 
     // Checks if any of the child rates in this submission were ever submitted
@@ -459,7 +349,9 @@ export const SubmissionType = ({
                 <PageBannerAlerts
                     loggedInUser={loggedInUser}
                     unlockedInfo={draftSubmission?.draftRevision.unlockInfo}
-                    showPageErrorMessage={showPageErrorMessage}
+                    showPageErrorMessage={
+                        showPageErrorMessage || showAPIErrorBanner
+                    }
                     draftSaved={draftSaved}
                 />
             </FormNotificationContainer>
@@ -497,14 +389,13 @@ export const SubmissionType = ({
                                     <legend className="srOnly">
                                         Submission type
                                     </legend>
-                                    {showAPIErrorBanner && (
-                                        <GenericApiErrorBanner />
-                                    )}
 
                                     {shouldValidate && (
                                         <ErrorSummary
-                                            errors={generateErrorSummaryErrors(
-                                                errors
+                                            errors={renameKey(
+                                                errors,
+                                                'programIDs',
+                                                '#programIDs'
                                             )}
                                             headingRef={errorSummaryHeadingRef}
                                         />
