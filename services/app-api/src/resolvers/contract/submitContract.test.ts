@@ -1502,6 +1502,7 @@ describe('submitContract', () => {
 
                 const cmsEmails = [
                     ...config.devReviewTeamEmails,
+                    ...config.dmcoEmails,
                     ...stateAnalystsEmails,
                 ]
 
@@ -1575,6 +1576,7 @@ describe('submitContract', () => {
 
                 const cmsEmails = [
                     ...config.devReviewTeamEmails,
+                    ...config.dmcoEmails,
                     ...stateAnalystsEmails,
                 ]
 
@@ -1639,6 +1641,7 @@ describe('submitContract', () => {
 
                 const cmsEmails = [
                     ...config.devReviewTeamEmails,
+                    ...config.dmcoEmails,
                     ...assignedUserEmails,
                 ]
 
@@ -1995,6 +1998,12 @@ describe('submitContract', () => {
                             expect.stringContaining(
                                 'mc-review-qa+DMCPsubmissiondev2@truss.works'
                             ),
+                            expect.stringContaining(
+                                'mc-review-qa+DMCO1@truss.works'
+                            ),
+                            expect.stringContaining(
+                                'mc-review-qa+DMCO2@truss.works'
+                            ),
                         ]),
                     })
                 )
@@ -2175,7 +2184,11 @@ describe('submitContract', () => {
             expect(
                 submittedFormData.contractDocuments[0].dateAdded
             ).toBeTruthy()
+            expect(
+                submittedFormData.supportingDocuments[0].dateAdded
+            ).toBeTruthy()
             submittedFormData.contractDocuments[0].dateAdded = null
+            submittedFormData.supportingDocuments[0].dateAdded = null
 
             expect(submittedFormData).toEqual({
                 ...draftFormData,

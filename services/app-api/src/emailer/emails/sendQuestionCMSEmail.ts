@@ -25,7 +25,11 @@ export const sendQuestionCMSEmail = async (
     questions: ContractQuestionType[]
 ): Promise<EmailData | Error> => {
     const newQuestion = questions[questions.length - 1]
-    let receiverEmails = [...stateAnalystsEmails, ...config.devReviewTeamEmails]
+    let receiverEmails = [
+        ...stateAnalystsEmails,
+        ...config.devReviewTeamEmails,
+        ...config.dmcoEmails,
+    ]
     if (newQuestion.addedBy.divisionAssignment === 'DMCP') {
         receiverEmails.push(...config.dmcpReviewEmails)
     } else if (

@@ -375,7 +375,11 @@ describe('createRateQuestion', () => {
 
         must(await createTestRateQuestion(cmsServer, rateID))
 
-        const cmsEmails = [...config.devReviewTeamEmails, ...assignedUserEmails]
+        const cmsEmails = [
+            ...config.devReviewTeamEmails,
+            ...config.dmcoEmails,
+            ...assignedUserEmails,
+        ]
 
         expect(mockEmailer.sendEmail).toHaveBeenNthCalledWith(
             2,

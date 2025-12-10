@@ -1,9 +1,7 @@
-import type {
-    ContractFormEditableType,
-    RateFormEditableType,
-} from '../../domain-models/contractAndRates'
+import type { RateFormEditableType } from '../../domain-models/contractAndRates'
 import type { GenericDocumentInput } from '../../gen/gqlServer'
 import { emptify, nullify } from '../prismaDomainAdaptors'
+import type { UpdateDraftContractFormDataType } from '../../domain-models/contractAndRates/formDataTypes'
 
 // ADD RETURN TYPES FROM PRISMA SEE "includes" "satifies"
 // contractTableFullPayload - contractTableCreateArgs / contract
@@ -138,7 +136,7 @@ function prismaUpdateRateFormDataFromDomain(
 
 // Contract helpers
 function prismaCreateContractFormDataFromDomain(
-    contractFormData: ContractFormEditableType
+    contractFormData: UpdateDraftContractFormDataType
 ) {
     const {
         submissionType,
@@ -218,7 +216,7 @@ function prismaCreateContractFormDataFromDomain(
     }
 }
 function prismaUpdateContractFormDataFromDomain(
-    contractFormData: ContractFormEditableType
+    contractFormData: UpdateDraftContractFormDataType
 ) {
     return {
         populationCovered: nullify(contractFormData.populationCovered),
