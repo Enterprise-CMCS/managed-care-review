@@ -269,7 +269,7 @@ export const PageHeadingRow = ({
                 heading={heading}
                 pathname={pathname}
                 stateName={stateName}
-                isLoading={isLoading && !stateCode}
+                isLoading={!stateCode || !stateName}
                 stateCode={stateCode}
             />
         )
@@ -282,6 +282,8 @@ export const PageHeadingRow = ({
             />
         )
     } else {
-        return <h1>{`Programming Error: Unkown User Type: ${loggedInUser}`}</h1>
+        return (
+            <h1>{`Programming Error: Unknown User Type: ${loggedInUser}`}</h1>
+        )
     }
 }
