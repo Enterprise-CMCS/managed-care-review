@@ -59,6 +59,7 @@ export class AppApiStack extends BaseStack {
     public readonly oauthTokenFunction: NodejsFunction
     public readonly cleanupFunction: NodejsFunction
     public readonly migrateFunction: NodejsFunction
+    public readonly regenerateZipsFunction: NodejsFunction
 
     public readonly graphqlFunction: NodejsFunction
 
@@ -254,6 +255,12 @@ export class AppApiStack extends BaseStack {
 
         // Create migrate function with VPC and layers
         this.migrateFunction = this.createMigrateFunction(
+            lambdaRole,
+            environment
+        )
+
+        // Create regenerate zips function with VPC and layers
+        this.regenerateZipsFunction = this.createRegenerateZipsFunction(
             lambdaRole,
             environment
         )
@@ -479,6 +486,77 @@ export class AppApiStack extends BaseStack {
         )
 
         return migrateFunction
+    }
+
+    /**
+     * Create the regenerate zips function with VPC and Prisma engine layer
+     * Used to regenerate missing zip files for submitted contracts/rates
+     */
+    private createRegenerateZipsFunction(
+        role: Role,
+        environment: Record<string, string>
+    ): NodejsFunction {
+        // Validate required environment variables for VPC configuration
+        const required = ['VPC_ID', 'SG_ID']
+        const missing = required.filter((envVar) => !process.env[envVar])
+        if (missing.length > 0) {
+            throw new Error(
+                `Missing required environment variables for regenerate zips function: ${missing.join(', ')}`
+            )
+        }
+
+        // Import VPC and security group from environment variables
+        const vpc = Vpc.fromLookup(this, 'RegenerateZipsVpc', {
+            vpcId: process.env.VPC_ID!,
+        })
+
+        const lambdaSecurityGroup = SecurityGroup.fromSecurityGroupId(
+            this,
+            'RegenerateZipsSecurityGroup',
+            process.env.SG_ID!
+        )
+
+        // Create regenerate zips function with all required configuration
+        const regenerateZipsFunction = new NodejsFunction(
+            this,
+            'regenerateZipsFunction',
+            {
+                functionName: `${ResourceNames.apiName('app-api', this.stage)}-regenerate-zips`,
+                runtime: Runtime.NODEJS_20_X,
+                architecture: Architecture.X86_64,
+                handler: 'main',
+                entry: path.join(
+                    __dirname,
+                    '..',
+                    '..',
+                    '..',
+                    'app-api',
+                    'src',
+                    'handlers',
+                    'regenerate_zips.ts'
+                ),
+                timeout: Duration.minutes(15), // Extended timeout for processing many zips
+                memorySize: 4096, // Higher memory for zip operations
+                environment,
+                role,
+                layers: [this.prismaEngineLayer, this.otelLayer],
+                vpc,
+                vpcSubnets: {
+                    subnetType: SubnetType.PRIVATE_WITH_EGRESS,
+                },
+                securityGroups: [lambdaSecurityGroup],
+                bundling: {
+                    format: OutputFormat.ESM,
+                    banner: AppApiStack.ESM_BANNER,
+                    externalModules: ['prisma', '@prisma/client'],
+                    ...this.createBundling('regenerate-zips', [
+                        this.getOtelBundlingCommands(),
+                    ]),
+                },
+            }
+        )
+
+        return regenerateZipsFunction
     }
 
     /**
@@ -1057,6 +1135,12 @@ export class AppApiStack extends BaseStack {
             value: this.graphqlFunction.functionName,
             exportName: this.exportName('GraphqlFunctionName'),
             description: 'GraphQL Lambda function name',
+        })
+
+        new CfnOutput(this, 'RegenerateZipsFunctionName', {
+            value: this.regenerateZipsFunction.functionName,
+            exportName: this.exportName('RegenerateZipsFunctionName'),
+            description: 'Regenerate zips Lambda function name',
         })
 
         new CfnOutput(this, 'ApiGatewayUrl', {
