@@ -36,16 +36,30 @@ const getRelativePath = ({
  *
  * @param route - The route key from RoutesRecord
  * @param contractSubmissionType - The submission type to substitute into the path
+ * @param [id] - The submission contract ID to substitute into the path
+ * @param [rateID] - The submission rate ID to substitute into the path
  * @returns The route path with contractSubmissionType replaced (e.g., '/submissions/health-plan/:id')
  */
 const getSubmissionPath = (
     route: RouteT,
-    contractSubmissionType: ContractSubmissionType
+    contractSubmissionType: ContractSubmissionType,
+    id?: string,
+    rateID?: string
 ) => {
-    return RoutesRecord[route].replace(
+    let pathWithParams = RoutesRecord[route].replace(
         ':contractSubmissionType',
         ContractSubmissionTypeRecord[contractSubmissionType]
     )
+
+    if (id) {
+        pathWithParams = pathWithParams.replace(':id', id)
+    }
+
+    if (rateID) {
+        pathWithParams = pathWithParams.replace(':rateID', rateID)
+    }
+
+    return pathWithParams
 }
 
 export { getRelativePath, getSubmissionPath }
