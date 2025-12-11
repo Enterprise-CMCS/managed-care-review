@@ -1,7 +1,7 @@
-import React, { useEffect, useMemo, useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import { usePage } from '../../../contexts/PageContext'
 import { GridContainer, Link } from '@trussworks/react-uswds'
-import { generatePath, Navigate } from 'react-router-dom'
+import { Navigate } from 'react-router-dom'
 import { useAuth } from '../../../contexts/AuthContext'
 import { useRouteParams } from '../../../hooks'
 import { hasCMSUserPermissions } from '@mc-review/helpers'
@@ -14,40 +14,24 @@ import {
 import { ErrorForbiddenPage } from '../../Errors/ErrorForbiddenPage'
 import { Error404 } from '../../Errors/Error404Page'
 import { GenericErrorPage } from '../../Errors/GenericErrorPage'
-import { RoutesRecord } from '@mc-review/constants'
-import {
-    getVisibleLatestContractFormData,
-    getVisibleLatestRateRevisions,
-} from '@mc-review/submissions'
-import { IncompleteSubmissionBanner } from '../../../components/Banner'
+import { getVisibleLatestContractFormData } from '@mc-review/submissions'
 import styles from '../SubmissionSummary.module.scss'
 import {
     ContactsSummarySection,
     EQROContractDetailsSummarySection,
     SubmissionTypeSummarySection,
 } from '../../../components/SubmissionSummarySection'
+import { getSubmissionPath } from '../../../routeHelpers'
 
 export const EQROSubmissionSummary = (): React.ReactElement => {
     // Page level state
     const { updateHeading, updateActiveMainContent } = usePage()
     const [documentError, setDocumentError] = useState(false)
     const { loggedInUser } = useAuth()
-    const { id, contractSubmissionType } = useRouteParams()
+    const { id } = useRouteParams()
     const hasCMSPermissions = hasCMSUserPermissions(loggedInUser)
     const isStateUser = loggedInUser?.role === 'STATE_USER'
     const isHelpDeskUser = loggedInUser?.role === 'HELPDESK_USER'
-
-    const incompleteMessage = useMemo(() => {
-        if (isStateUser) {
-            return 'You must contact your CMS point of contact and request an unlock to complete the submission.'
-        }
-
-        if (hasCMSPermissions) {
-            return 'You must unlock the submission so the state can add a rate certification.'
-        }
-
-        return 'CMS must unlock the submission so the state can add a rate certification.'
-    }, [isStateUser, hasCMSPermissions])
 
     // API requests
     const { data, loading, error } = useFetchContractWithQuestionsQuery({
@@ -103,24 +87,27 @@ export const EQROSubmissionSummary = (): React.ReactElement => {
     const isSubmitted =
         submissionStatus === 'SUBMITTED' || submissionStatus === 'RESUBMITTED'
     const statePrograms = contract.state.programs
+    const contractSubmissionType = contract.contractSubmissionType
 
     if (!isSubmitted && isStateUser) {
         if (submissionStatus === 'DRAFT') {
             return (
                 <Navigate
-                    to={generatePath(RoutesRecord.SUBMISSIONS_TYPE, {
-                        id,
+                    to={getSubmissionPath(
+                        'SUBMISSIONS_TYPE',
                         contractSubmissionType,
-                    })}
+                        contract.id
+                    )}
                 />
             )
         } else {
             return (
                 <Navigate
-                    to={generatePath(RoutesRecord.SUBMISSIONS_REVIEW_SUBMIT, {
-                        id,
+                    to={getSubmissionPath(
+                        'SUBMISSIONS_REVIEW_SUBMIT',
                         contractSubmissionType,
-                    })}
+                        contract.id
+                    )}
                 />
             )
         }
@@ -142,17 +129,6 @@ export const EQROSubmissionSummary = (): React.ReactElement => {
         return <GenericErrorPage />
     }
 
-    const isContractActionAndRateCertification =
-        contractFormData?.submissionType === 'CONTRACT_AND_RATES'
-
-    const rateRevisions = getVisibleLatestRateRevisions(contract, false) || []
-
-    // Show incomplete submission banner if rates are missing
-    const showIncompleteRateError =
-        isSubmitted &&
-        isContractActionAndRateCertification &&
-        rateRevisions.length === 0
-
     const handleDocumentDownloadError = (error: boolean) => {
         if (!documentError) {
             setDocumentError(error)
@@ -170,10 +146,6 @@ export const EQROSubmissionSummary = (): React.ReactElement => {
                 data-testid="submission-summary"
                 className={styles.container}
             >
-                {showIncompleteRateError && (
-                    <IncompleteSubmissionBanner message={incompleteMessage} />
-                )}
-
                 {documentError && (
                     <DocumentWarningBanner className={styles.banner} />
                 )}
@@ -194,7 +166,11 @@ export const EQROSubmissionSummary = (): React.ReactElement => {
                                     </span>
                                 )}
                                 <LinkWithLogging
-                                    href={`/submissions/${contractSubmissionType}/${contract.id}/mccrs-record-number`}
+                                    href={getSubmissionPath(
+                                        'SUBMISSIONS_MCCRSID',
+                                        contractSubmissionType,
+                                        contract.id
+                                    )}
                                     className={
                                         contract.mccrsID ? styles.editLink : ''
                                     }
