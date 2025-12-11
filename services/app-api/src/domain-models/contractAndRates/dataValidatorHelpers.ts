@@ -15,11 +15,6 @@ import {
     submittableEQROContractSchema,
 } from './contractTypes'
 import type { ContractType } from './contractTypes'
-import type { GraphQLError } from 'graphql'
-import { createUserInputError } from '../../resolvers/errorUtils'
-import { setErrorAttributesOnActiveSpan } from '../../resolvers/attributeHelper'
-import { logError } from '../../logger'
-import type { Span } from '@opentelemetry/api'
 
 const validateStatutoryRegulatoryAttestation = (
     formData: ContractDraftRevisionFormDataInput,
@@ -293,13 +288,14 @@ const parseContract = (
     return parsedData.data
 }
 
-/*
- * Logic tree can be found here for the following function: https://miro.com/app/board/o9J_lS5oLDk=/?share_link_id=716810250281
+/**
+ * Validation function for EQRO submission specific required data based on conditional
+ * triggers. Logic tree: https://miro.com/app/board/o9J_lS5oLDk=/?share_link_id=716810250281
+ *
+ * @param contract - Contract data for the submission.
+ * @returns Error on failed validations and undefined on successful validations.
  */
-export const validateEQROSubmission = (
-    contract: ContractType,
-    span?: Span
-): GraphQLError | undefined => {
+const validateEQROdata = (contract: ContractType): Error | undefined => {
     const formData = contract.draftRevision!.formData
     const hasRates = contract.draftRates && contract.draftRates.length
     const isNotContractOnly = formData.submissionType !== 'CONTRACT_ONLY'
@@ -311,15 +307,9 @@ export const validateEQROSubmission = (
         formData.populationCovered === 'MEDICAID_AND_CHIP'
     const contractID = contract.id
 
-    const EQROValidationError = (errMessage: string) => {
-        logError('submitContract', errMessage)
-        setErrorAttributesOnActiveSpan(errMessage, span)
-        return createUserInputError(errMessage, 'contractID', contract.id)
-    }
-
     //Return an error early if the contract has rates or the wrong sub type
     if (hasRates || isNotContractOnly) {
-        return EQROValidationError(
+        return new Error(
             `EQRO submissions must be contract only and not include any rates: ${contract.id}`
         )
     }
@@ -327,10 +317,10 @@ export const validateEQROSubmission = (
     const validateFields = (
         fields: Record<string, boolean | undefined>,
         errorContext: string
-    ): GraphQLError | undefined => {
+    ): Error | undefined => {
         for (const field in fields) {
             if (fields[field] == null) {
-                return EQROValidationError(
+                return new Error(
                     `${field} is required for ${errorContext}: ${contractID}`
                 )
             }
@@ -475,7 +465,7 @@ const parseEQROContract = (
             }
 
             //Validating EQRO fields
-            const validationError = validateEQROSubmission(contract)
+            const validationError = validateEQROdata(contract)
             if (validationError) {
                 ctx.addIssue({
                     code: 'custom',
@@ -500,4 +490,5 @@ export {
     parseEQROContract,
     parseAndUpdateEqroFields,
     validateEQROContractDraftRevisionInput,
+    validateEQROdata,
 }
