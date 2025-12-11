@@ -13,12 +13,6 @@
         "build:dev": "tsc",
         "prettier": "npx prettier -u --write \"**/*.+(ts|tsx|json)\""
     },
-    "lint-staged": {
-        "**/*.{js,ts}": [
-            "eslint --fix --max-warnings=0",
-            "prettier --write src/**/*.ts{,x}"
-        ]
-    },
     "dependencies": {
         "@aws-sdk/client-cloudfront": "^3.947.0",
         "@aws-sdk/client-ec2": "^3.947.0",
