@@ -12,9 +12,13 @@
  *     --payload '{"contractRevisionID":"abc-123"}' response.json
  */
 
-import { NewPostgresStore } from '../postgres'
+import { NewPostgresStore, type Store } from '../postgres'
 import { getPostgresURL } from './configuration'
-import { documentZipService, generateDocumentZip } from '../zip/generateZip'
+import {
+    documentZipService,
+    generateDocumentZip,
+    type DocumentZipService,
+} from '../zip/generateZip'
 import type { ContractRevisionType, RateRevisionType } from '../domain-models'
 import type { Handler } from 'aws-lambda'
 import { NewPrismaClient } from '../postgres/prismaClient'
@@ -192,7 +196,7 @@ export const main: Handler = async (
 }
 
 async function findContractRevisionsMissingZips(
-    store: ReturnType<typeof NewPostgresStore>,
+    store: Store,
     limit: number
 ): Promise<Array<{ id: string }>> {
     // Find all submitted contracts
@@ -262,7 +266,7 @@ async function findContractRevisionsMissingZips(
 }
 
 async function findRateRevisionsMissingZips(
-    store: ReturnType<typeof NewPostgresStore>,
+    store: Store,
     limit: number
 ): Promise<Array<{ id: string }>> {
     // Find all submitted rates
@@ -326,8 +330,8 @@ async function findRateRevisionsMissingZips(
 }
 
 async function regenerateContractZip(
-    store: ReturnType<typeof NewPostgresStore>,
-    zipService: ReturnType<typeof documentZipService>,
+    store: Store,
+    zipService: DocumentZipService,
     contractRevisionID: string,
     dryRun: boolean
 ): Promise<{ success: boolean; error?: string }> {
@@ -404,8 +408,8 @@ async function regenerateContractZip(
 }
 
 async function regenerateRateZip(
-    store: ReturnType<typeof NewPostgresStore>,
-    zipService: ReturnType<typeof documentZipService>,
+    store: Store,
+    zipService: DocumentZipService,
     rateRevisionID: string,
     dryRun: boolean
 ): Promise<{ success: boolean; error?: string }> {
