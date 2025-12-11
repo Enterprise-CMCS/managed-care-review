@@ -77,8 +77,8 @@ const StateDisplay = ({
     heading?: string | React.ReactElement
     pathname?: string
     route?: string
-    stateCode?: string
-    stateName?: string
+    stateCode: string
+    stateName: string
     contractType: ContractSubmissionType
 }) => {
     return (
@@ -123,11 +123,21 @@ const CMSUserRow = ({
 }) => {
     const hideSubID = pathIncludesAny(pathname, hideSubIDRoutes.cms)
     const contractType = getContractTypeFromPath(pathname)
+    const canShowStateDisplay =
+        !hideSubID && stateCode !== undefined && stateName !== undefined
 
     return (
         <div className={styles.dashboardHeading}>
             <GridContainer>
-                {hideSubID ? (
+                {canShowStateDisplay ? (
+                    <StateDisplay
+                        heading={heading}
+                        pathname={pathname}
+                        stateCode={stateCode}
+                        stateName={stateName}
+                        contractType={contractType}
+                    />
+                ) : (
                     <Grid row className="flex-align-center">
                         <PageHeading>
                             <span>CMS</span>
@@ -141,14 +151,6 @@ const CMSUserRow = ({
                             )}
                         </PageHeading>
                     </Grid>
-                ) : (
-                    <StateDisplay
-                        heading={heading}
-                        pathname={pathname}
-                        stateCode={stateCode}
-                        stateName={stateName}
-                        contractType={contractType}
-                    />
                 )}
             </GridContainer>
         </div>
