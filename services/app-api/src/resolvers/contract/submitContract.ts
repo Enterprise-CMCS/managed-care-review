@@ -16,7 +16,10 @@ import {
     setSuccessAttributesOnActiveSpan,
 } from '../attributeHelper'
 import type { MutationResolvers, State } from '../../gen/gqlServer'
-import { parseContract } from '../../domain-models/contractAndRates/dataValidatorHelpers'
+import {
+    parseContract,
+    parseEQROContract,
+} from '../../domain-models/contractAndRates/dataValidatorHelpers'
 import type { UpdateInfoType, PackageStatusType } from '../../domain-models'
 import type { UpdateDraftContractRatesArgsType } from '../../postgres/contractAndRates/updateDraftContractRates'
 import type { StateCodeType } from '@mc-review/submissions'
@@ -54,6 +57,7 @@ const validateStatusAndUpdateInfo = (
         })
     }
 }
+
 export function submitContract(
     store: Store,
     emailer: Emailer,
@@ -136,6 +140,8 @@ export function submitContract(
             })
         }
 
+        const isEQRO = contractWithHistory.contractSubmissionType === 'EQRO'
+
         // Validate user authorized to fetch state
         if (contractWithHistory.stateCode !== stateFromCurrentUser) {
             logError(
@@ -157,11 +163,13 @@ export function submitContract(
             span,
             submittedReason || undefined
         )
+
         if (!contractWithHistory.draftRevision) {
             throw new Error(
                 'PROGRAMMING ERROR: Status should not be submittable without a draft revision'
             )
         }
+
         const initialFormData = contractWithHistory.draftRevision.formData
         const contractRevisionID = contractWithHistory.draftRevision.id
         const draftRatesWithoutLinkedRates =
@@ -198,17 +206,29 @@ export function submitContract(
         const contractToParse = Object.assign({}, contractWithHistory)
 
         contractToParse.draftRates = draftRatesWithoutLinkedRates
-        const parsedContract = parseContract(
-            contractToParse,
-            contractWithHistory.stateCode,
-            store,
-            featureFlags
-        )
+
+        const parsedContract = isEQRO
+            ? parseEQROContract(
+                  contractToParse,
+                  contractWithHistory.stateCode,
+                  store
+              )
+            : parseContract(
+                  contractToParse,
+                  contractWithHistory.stateCode,
+                  store,
+                  featureFlags
+              )
+
         if (parsedContract instanceof Error) {
             const errMessage = parsedContract.message
             logError('submitContract', errMessage)
             setErrorAttributesOnActiveSpan(errMessage, span)
-            throw createUserInputError(errMessage)
+            throw createUserInputError(
+                errMessage,
+                'contractID',
+                contractWithHistory.id
+            )
         }
         // add all rates (including any linked rates) back in
         parsedContract.draftRates = contractWithHistory.draftRates

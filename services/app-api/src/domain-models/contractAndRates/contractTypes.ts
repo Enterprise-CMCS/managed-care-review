@@ -1,17 +1,32 @@
 import { z } from 'zod'
-import { contractRevisionSchema, rateRevisionSchema } from './revisionTypes'
+import {
+    contractRevisionSchema,
+    rateRevisionSchema,
+    eqroContractRevisionSchema,
+} from './revisionTypes'
 import { unlockedContractStatusSchema } from './statusType'
 import { pruneDuplicateEmails } from '../../emailer/formatters'
 import {
     contractWithoutDraftRatesSchema,
     rateWithoutDraftContractsSchema,
+    eqroContractDraftSchema,
 } from './baseContractRateTypes'
 import {
     submittableContractFormDataSchema,
+    submittableEQROContractFormDataSchema,
     submittableRateFormDataSchema,
 } from './formDataTypes'
 
 const contractSchema = contractWithoutDraftRatesSchema.extend({
+    withdrawnRates: z.lazy(() =>
+        z.array(rateWithoutDraftContractsSchema).optional()
+    ),
+    draftRates: z.lazy(() =>
+        z.array(rateWithoutDraftContractsSchema).optional()
+    ),
+})
+
+const eqroContractSchema = eqroContractDraftSchema.extend({
     withdrawnRates: z.lazy(() =>
         z.array(rateWithoutDraftContractsSchema).optional()
     ),
@@ -49,6 +64,19 @@ const submittableContractSchema = contractSchema.extend({
     ),
 })
 
+const submittableEQROContractSchema = eqroContractSchema.extend({
+    draftRevision: eqroContractRevisionSchema.extend({
+        formData: submittableEQROContractFormDataSchema,
+    }),
+    draftRates: z.array(
+        rateWithoutDraftContractsSchema.extend({
+            draftRevision: rateRevisionSchema.extend({
+                formData: submittableRateFormDataSchema,
+            }),
+        })
+    ),
+})
+
 type ContractType = z.infer<typeof contractSchema>
 type UnlockedContractType = z.infer<typeof unlockedContractSchema>
 type DraftContractType = z.infer<typeof draftContractSchema>
@@ -69,6 +97,7 @@ export {
     draftContractSchema,
     submittableContractSchema,
     contractSchema,
+    submittableEQROContractSchema,
     contractSubmitters,
 }
 
