@@ -83,23 +83,25 @@ const StateDisplay = ({
 }) => {
     return (
         <Grid row className={`flex-align-center ${styles.stateRow}`}>
-            {stateCode && (
-                <div>
-                    <StateIcon code={stateCode as StateIconProps['code']} />
-                </div>
+            {stateCode && stateName && (
+                <>
+                    <div>
+                        <StateIcon code={stateCode as StateIconProps['code']} />
+                    </div>
+                    <PageHeading data-testid="stateDisplay">
+                        <span className="srOnly">{stateName}&nbsp;</span>
+
+                        <span className={styles.stateHeadingText}>
+                            {stateName}&nbsp;
+                        </span>
+
+                        {heading && (
+                            <SharedSubHeadingRow submissionID={heading} />
+                        )}
+                    </PageHeading>
+                    <ContractType contractType={contractType} />
+                </>
             )}
-            <PageHeading data-testid="stateDisplay">
-                <span className="srOnly">{stateName}&nbsp;</span>
-
-                {stateName && (
-                    <span className={styles.stateHeadingText}>
-                        {stateName}&nbsp;
-                    </span>
-                )}
-
-                {heading && <SharedSubHeadingRow submissionID={heading} />}
-            </PageHeading>
-            <ContractType contractType={contractType} />
         </Grid>
     )
 }
