@@ -3,7 +3,11 @@ import {
     ContractFormData,
     UnlockedContract,
 } from '../../../gen/gqlClient'
-import { DataDetail, DataDetailCheckboxList } from '../../DataDetail'
+import {
+    DataDetail,
+    DataDetailCheckboxList,
+    DataDetailMissingField,
+} from '../../DataDetail'
 import {
     CHIPFederalAuthority,
     ContractExecutionStatusRecord,
@@ -18,6 +22,7 @@ import {
     PopulationCoveredRecord,
     sortModifiedProvisions,
     SubmissionTypeRecord,
+    validateEQROdata,
 } from '@mc-review/submissions'
 import {
     booleanAsYesNoFormValue,
@@ -483,16 +488,17 @@ const getEQROProvisionDictionary = (contractFormData: ContractFormData) => {
 }
 
 export const EQROModifiedProvisionSummary = ({
+    contractID,
     contractFormData,
     explainMissingData,
-}: SummaryDetailProps) => {
-    const {
-        includedProvisions,
-        excludedProvisions,
-        // eslint-disable-next-line @typescript-eslint/no-unused-vars
-        unansweredProvisions, // keep for future inline errors
-        provisionDictionary,
-    } = getEQROProvisionDictionary(contractFormData)
+}: { contractID: string } & SummaryDetailProps) => {
+    const isValidEQROProvisions =
+        validateEQROdata(contractID, contractFormData) instanceof Error
+            ? false
+            : true
+
+    const { includedProvisions, excludedProvisions, provisionDictionary } =
+        getEQROProvisionDictionary(contractFormData)
 
     // Population covered of Medicaid and no MCO in managed care entities do not have provision questions.
     const hideProvisions =
@@ -510,22 +516,30 @@ export const EQROModifiedProvisionSummary = ({
                 label="This contract action includes new or modified provisions related to the following"
                 explainMissingData={explainMissingData}
             >
-                <DataDetailCheckboxList
-                    list={includedProvisions}
-                    dict={provisionDictionary}
-                    displayEmptyList
-                />
+                {isValidEQROProvisions ? (
+                    <DataDetailCheckboxList
+                        list={includedProvisions}
+                        dict={provisionDictionary}
+                        displayEmptyList
+                    />
+                ) : (
+                    <DataDetailMissingField />
+                )}
             </DataDetail>
             <DataDetail
                 id="excludesProvisions"
                 label="This contract action does NOT include new or modified provisions related to the following"
                 explainMissingData={explainMissingData}
             >
-                <DataDetailCheckboxList
-                    list={excludedProvisions}
-                    dict={provisionDictionary}
-                    displayEmptyList
-                />
+                {isValidEQROProvisions ? (
+                    <DataDetailCheckboxList
+                        list={excludedProvisions}
+                        dict={provisionDictionary}
+                        displayEmptyList
+                    />
+                ) : (
+                    <DataDetailMissingField />
+                )}
             </DataDetail>
         </Grid>
     )
