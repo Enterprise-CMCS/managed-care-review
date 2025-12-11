@@ -92,7 +92,9 @@ export const LinkRateSelect = ({
                 autofill(linkedRateForm, fetchRateLoading, fetchRateError)
             }
         }
-    }, [selectedRateData, autofill, getKey, fetchRateLoading, fetchRateError])
+        // TODO: MCR-5797 — We haven't fixed this because this causes loop
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [selectedRateData])
 
     const rates = data?.indexRatesStripped.edges.map((e) => e.node) || []
     // Sort rates by latest submission in desc order and remove withdrawn
