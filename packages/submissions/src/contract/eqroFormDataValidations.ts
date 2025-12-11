@@ -20,7 +20,7 @@ export const validateEQROdata = (
         formData.populationCovered === 'MEDICAID_AND_CHIP'
 
     const validateFields = (
-        fields: Record<string, boolean | undefined>,
+        fields: Record<string, boolean | undefined | null>,
         errorContext: string
     ): Error | undefined => {
         for (const field in fields) {
@@ -37,13 +37,13 @@ export const validateEQROdata = (
         if (isChipCovered && includesMCO) {
             return validateFields(
                 {
-                    eqroNewContractor: formData.eqroNewContractor ?? undefined,
+                    eqroNewContractor: formData.eqroNewContractor,
                     eqroProvisionMcoNewOptionalActivity:
-                        formData.eqroProvisionMcoNewOptionalActivity ?? undefined,
+                        formData.eqroProvisionMcoNewOptionalActivity,
                     eqroProvisionNewMcoEqrRelatedActivities:
-                        formData.eqroProvisionNewMcoEqrRelatedActivities ?? undefined,
+                        formData.eqroProvisionNewMcoEqrRelatedActivities,
                     eqroProvisionChipEqrRelatedActivities:
-                        formData.eqroProvisionChipEqrRelatedActivities ?? undefined,
+                        formData.eqroProvisionChipEqrRelatedActivities,
                 },
                 'BASE contracts with CHIP population & MCO entity'
             )
@@ -53,7 +53,7 @@ export const validateEQROdata = (
             return validateFields(
                 {
                     eqroProvisionChipEqrRelatedActivities:
-                        formData.eqroProvisionChipEqrRelatedActivities ?? undefined,
+                        formData.eqroProvisionChipEqrRelatedActivities,
                 },
                 'BASE contracts with CHIP population & no MCO entity'
             )
@@ -62,11 +62,11 @@ export const validateEQROdata = (
         if (!isChipCovered && includesMCO) {
             return validateFields(
                 {
-                    eqroNewContractor: formData.eqroNewContractor ?? undefined,
+                    eqroNewContractor: formData.eqroNewContractor,
                     eqroProvisionMcoNewOptionalActivity:
-                        formData.eqroProvisionMcoNewOptionalActivity ?? undefined,
+                        formData.eqroProvisionMcoNewOptionalActivity,
                     eqroProvisionNewMcoEqrRelatedActivities:
-                        formData.eqroProvisionNewMcoEqrRelatedActivities ?? undefined,
+                        formData.eqroProvisionNewMcoEqrRelatedActivities,
                 },
                 'BASE contracts with MEDICAID population & MCO entity'
             )
@@ -78,9 +78,9 @@ export const validateEQROdata = (
             const initialRequiredFields = validateFields(
                 {
                     eqroProvisionMcoEqrOrRelatedActivities:
-                        formData.eqroProvisionMcoEqrOrRelatedActivities  ?? undefined,
+                        formData.eqroProvisionMcoEqrOrRelatedActivities,
                     eqroProvisionChipEqrRelatedActivities:
-                        formData.eqroProvisionChipEqrRelatedActivities  ?? undefined,
+                        formData.eqroProvisionChipEqrRelatedActivities,
                 },
                 'AMENDMENT contracts with CHIP population & MCO entity'
             )
@@ -93,9 +93,9 @@ export const validateEQROdata = (
                 return validateFields(
                     {
                         eqroProvisionMcoNewOptionalActivity:
-                            formData.eqroProvisionMcoNewOptionalActivity  ?? undefined,
+                            formData.eqroProvisionMcoNewOptionalActivity,
                         eqroProvisionNewMcoEqrRelatedActivities:
-                            formData.eqroProvisionNewMcoEqrRelatedActivities  ?? undefined,
+                            formData.eqroProvisionNewMcoEqrRelatedActivities,
                     },
                     'AMENDMENT contracts where eqroProvisionMcoEqrOrRelatedActivities is true'
                 )
@@ -106,7 +106,7 @@ export const validateEQROdata = (
             return validateFields(
                 {
                     eqroProvisionChipEqrRelatedActivities:
-                        formData.eqroProvisionChipEqrRelatedActivities  ?? undefined,
+                        formData.eqroProvisionChipEqrRelatedActivities,
                 },
                 'AMENDMENT contract with CHIP population & no MCO entity'
             )
@@ -116,7 +116,7 @@ export const validateEQROdata = (
             const initialRequiredFields = validateFields(
                 {
                     eqroProvisionMcoEqrOrRelatedActivities:
-                        formData.eqroProvisionMcoEqrOrRelatedActivities  ?? undefined,
+                        formData.eqroProvisionMcoEqrOrRelatedActivities,
                 },
                 'AMENDMENT contracts with MEDICAID population & MCO entity'
             )
@@ -129,9 +129,9 @@ export const validateEQROdata = (
                 return validateFields(
                     {
                         eqroProvisionMcoNewOptionalActivity:
-                            formData.eqroProvisionMcoNewOptionalActivity ?? undefined,
+                            formData.eqroProvisionMcoNewOptionalActivity,
                         eqroProvisionNewMcoEqrRelatedActivities:
-                            formData.eqroProvisionNewMcoEqrRelatedActivities  ?? undefined,
+                            formData.eqroProvisionNewMcoEqrRelatedActivities,
                     },
                     'AMENDMENT contracts where eqroProvisionMcoEqrOrRelatedActivities is true'
                 )
