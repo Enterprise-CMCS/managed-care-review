@@ -2,6 +2,7 @@ import {
     validateContractDraftRevisionInput,
     parseContract,
     parseAndUpdateEqroFields,
+    parseEQROContract,
 } from './dataValidatorHelpers'
 import {
     mockGqlContractDraftRevisionFormDataInput,
@@ -985,5 +986,405 @@ describe('parseAndUpdateEqroFields', () => {
                 expect(result[field]).toBeNull()
             })
         })
+    })
+})
+
+describe('parseEQROContract', () => {
+    const createValidEQROContract = (): ContractType => {
+        return {
+            status: 'DRAFT',
+            createdAt: new Date(),
+            updatedAt: new Date(),
+            id: '28b00852-00e3-467c-9311-519e60d43283',
+            stateCode: 'FL',
+            stateNumber: 5,
+            contractSubmissionType: 'EQRO',
+            reviewStatus: 'UNDER_REVIEW',
+            consolidatedStatus: 'DRAFT',
+            mccrsID: undefined,
+            revisions: [],
+            draftRevision: {
+                id: 'e5bccaa3-d91c-499a-9f2f-c6ce8dbf8a5f',
+                submitInfo: undefined,
+                unlockInfo: undefined,
+                contract: {
+                    id: '88a54ccd-a36d-494d-a386-8ecf8b7438e6',
+                    stateCode: 'FL',
+                    stateNumber: 4,
+                    contractSubmissionType: 'EQRO',
+                },
+                createdAt: new Date(11 / 27 / 2023),
+                updatedAt: new Date(11 / 27 / 2023),
+                formData: {
+                    programIDs: [defaultFloridaProgram().id],
+                    populationCovered: 'MEDICAID',
+                    submissionType: 'CONTRACT_ONLY',
+                    submissionDescription: 'A real EQRO submission',
+                    supportingDocuments: [
+                        {
+                            s3URL: 's3://bucketname/key/contractsupporting1',
+                            sha256: 'fakesha',
+                            name: 'contractSupporting1',
+                            dateAdded: new Date('01/15/2024'),
+                            downloadURL: s3DlUrl,
+                        },
+                    ],
+                    stateContacts: [
+                        {
+                            name: 'Someone',
+                            email: 'someone@example.com',
+                            titleRole: 'sometitle',
+                        },
+                    ],
+                    contractType: 'BASE',
+                    contractDocuments: [
+                        {
+                            s3URL: 's3://bucketname/key/contractdoc1',
+                            sha256: 'fakesha',
+                            name: 'contractDoc1',
+                            dateAdded: new Date('01/15/2024'),
+                            downloadURL: s3DlUrl,
+                        },
+                    ],
+                    contractDateStart: new Date('2025-01-01'),
+                    contractDateEnd: new Date('2026-01-01'),
+                    managedCareEntities: ['MCO'],
+                    federalAuthorities: [],
+                    // EQRO-specific fields for BASE + MEDICAID + MCO
+                    eqroNewContractor: true,
+                    eqroProvisionMcoNewOptionalActivity: true,
+                    eqroProvisionNewMcoEqrRelatedActivities: true,
+                },
+            },
+            draftRates: [],
+            packageSubmissions: [],
+        }
+    }
+
+    it('should succeed if valid EQRO contract', async () => {
+        const prismaClient = await sharedTestPrismaClient()
+        const postgresStore = NewPostgresStore(prismaClient)
+        const stateCode = 'FL'
+        const contract = createValidEQROContract()
+
+        const parsedContract = parseEQROContract(
+            contract,
+            stateCode,
+            postgresStore
+        )
+
+        expect(parsedContract).toEqual(contract)
+    })
+
+    it('should return an error if EQRO contract has rates', async () => {
+        const prismaClient = await sharedTestPrismaClient()
+        const postgresStore = NewPostgresStore(prismaClient)
+        const stateCode = 'FL'
+        const contract = createValidEQROContract()
+
+        // Add a rate to the contract (should fail)
+        contract.draftRates = [
+            {
+                id: '6ab1b4c0-f9d2-4567-958a-3123e98328eb',
+                createdAt: new Date(),
+                updatedAt: new Date(),
+                status: 'DRAFT',
+                reviewStatus: 'UNDER_REVIEW',
+                consolidatedStatus: 'DRAFT',
+                stateCode: 'FL',
+                stateNumber: 5,
+                parentContractID: contract.id,
+                packageSubmissions: [],
+                draftRevision: {
+                    id: '6c7862a2-f3a1-4171-9fdd-6a8c9c2dd24b',
+                    rateID: '6ab1b4c0-f9d2-4567-958a-3123e98328eb',
+                    createdAt: new Date(),
+                    updatedAt: new Date(),
+                    submitInfo: undefined,
+                    unlockInfo: undefined,
+                    formData: {
+                        rateType: 'NEW',
+                        rateCapitationType: 'RATE_CELL',
+                        rateCertificationName: 'fake-name',
+                        rateMedicaidPopulations: ['MEDICAID_ONLY'],
+                        rateDocuments: [
+                            {
+                                s3URL: 's3://bucketname/key/ratedoc',
+                                sha256: 'fakesha',
+                                name: 'rateDoc',
+                            },
+                        ],
+                        supportingDocuments: [],
+                        rateDateStart: new Date('2025-01-01'),
+                        rateDateEnd: new Date('2026-01-01'),
+                        rateDateCertified: new Date(),
+                        rateProgramIDs: [defaultFloridaRateProgram().id],
+                        deprecatedRateProgramIDs: [],
+                        certifyingActuaryContacts: [
+                            {
+                                actuarialFirm: 'DELOITTE',
+                                name: 'Actuary Contact',
+                                titleRole: 'Test Actuary',
+                                email: 'actuary@test.com',
+                            },
+                        ],
+                        addtlActuaryContacts: [],
+                        actuaryCommunicationPreference: 'OACT_TO_ACTUARY',
+                        packagesWithSharedRateCerts: [],
+                    },
+                },
+                revisions: [],
+            },
+        ]
+
+        const parsedContract = parseEQROContract(
+            contract,
+            stateCode,
+            postgresStore
+        )
+
+        if (!(parsedContract instanceof Error)) {
+            throw new Error('Expected parseEQROContract to return an error')
+        }
+
+        const errMessages = parsedContract.issues.map((err) => err.message)
+        expect(errMessages[0]).toContain(
+            'EQRO submissions must be contract only and not include any rates'
+        )
+    })
+
+    it('should return an error if submissionType is not CONTRACT_ONLY', async () => {
+        const prismaClient = await sharedTestPrismaClient()
+        const postgresStore = NewPostgresStore(prismaClient)
+        const stateCode = 'FL'
+        const contract = createValidEQROContract()
+
+        // Change submission type (should fail schema validation)
+        contract.draftRevision!.formData.submissionType = 'CONTRACT_AND_RATES'
+
+        const parsedContract = parseEQROContract(
+            contract,
+            stateCode,
+            postgresStore
+        )
+
+        if (!(parsedContract instanceof Error)) {
+            throw new Error('Expected parseEQROContract to return an error')
+        }
+
+        const errMessages = parsedContract.issues.map((err) => err.message)
+        expect(errMessages[0]).toContain(
+            'Invalid input: expected "CONTRACT_ONLY"'
+        )
+    })
+
+    it('should return an error if BASE + MEDICAID + MCO missing required EQRO fields', async () => {
+        const prismaClient = await sharedTestPrismaClient()
+        const postgresStore = NewPostgresStore(prismaClient)
+        const stateCode = 'FL'
+        const contract = createValidEQROContract()
+
+        // Remove required EQRO fields
+        contract.draftRevision!.formData.eqroNewContractor = undefined
+        contract.draftRevision!.formData.eqroProvisionMcoNewOptionalActivity =
+            undefined
+        contract.draftRevision!.formData.eqroProvisionNewMcoEqrRelatedActivities =
+            undefined
+
+        const parsedContract = parseEQROContract(
+            contract,
+            stateCode,
+            postgresStore
+        )
+
+        if (!(parsedContract instanceof Error)) {
+            throw new Error('Expected parseEQROContract to return an error')
+        }
+
+        const errMessages = parsedContract.issues.map((err) => err.message)
+        expect(errMessages[0]).toContain(
+            'is required for BASE contracts with MEDICAID population & MCO entity'
+        )
+    })
+
+    it('should return an error if BASE + CHIP + MCO missing required EQRO fields', async () => {
+        const prismaClient = await sharedTestPrismaClient()
+        const postgresStore = NewPostgresStore(prismaClient)
+        const stateCode = 'FL'
+        const contract = createValidEQROContract()
+
+        // Change to CHIP population
+        contract.draftRevision!.formData.populationCovered = 'CHIP'
+        // CHIP + MCO requires all these fields
+        contract.draftRevision!.formData.eqroNewContractor = undefined
+        contract.draftRevision!.formData.eqroProvisionMcoNewOptionalActivity =
+            undefined
+        contract.draftRevision!.formData.eqroProvisionNewMcoEqrRelatedActivities =
+            undefined
+        contract.draftRevision!.formData.eqroProvisionChipEqrRelatedActivities =
+            undefined
+
+        const parsedContract = parseEQROContract(
+            contract,
+            stateCode,
+            postgresStore
+        )
+
+        if (!(parsedContract instanceof Error)) {
+            throw new Error('Expected parseEQROContract to return an error')
+        }
+
+        const errMessages = parsedContract.issues.map((err) => err.message)
+        expect(errMessages[0]).toContain(
+            'BASE contracts with CHIP population & MCO entity'
+        )
+    })
+
+    it('should return an error if BASE + CHIP + no MCO missing required EQRO fields', async () => {
+        const prismaClient = await sharedTestPrismaClient()
+        const postgresStore = NewPostgresStore(prismaClient)
+        const stateCode = 'FL'
+        const contract = createValidEQROContract()
+
+        // Change to CHIP population and remove MCO
+        contract.draftRevision!.formData.populationCovered = 'CHIP'
+        contract.draftRevision!.formData.managedCareEntities = ['PIHP']
+        contract.draftRevision!.formData.eqroProvisionChipEqrRelatedActivities =
+            undefined
+
+        const parsedContract = parseEQROContract(
+            contract,
+            stateCode,
+            postgresStore
+        )
+
+        if (!(parsedContract instanceof Error)) {
+            throw new Error('Expected parseEQROContract to return an error')
+        }
+
+        const errMessages = parsedContract.issues.map((err) => err.message)
+        expect(errMessages[0]).toContain(
+            'eqroProvisionChipEqrRelatedActivities is required for BASE contracts with CHIP population & no MCO entity'
+        )
+    })
+
+    it('should return an error if AMENDMENT + CHIP + MCO missing required EQRO fields', async () => {
+        const prismaClient = await sharedTestPrismaClient()
+        const postgresStore = NewPostgresStore(prismaClient)
+        const stateCode = 'FL'
+        const contract = createValidEQROContract()
+
+        // Change to AMENDMENT with CHIP + MCO
+        contract.draftRevision!.formData.contractType = 'AMENDMENT'
+        contract.draftRevision!.formData.populationCovered = 'MEDICAID_AND_CHIP'
+        contract.draftRevision!.formData.eqroProvisionMcoEqrOrRelatedActivities =
+            undefined
+        contract.draftRevision!.formData.eqroProvisionChipEqrRelatedActivities =
+            undefined
+
+        const parsedContract = parseEQROContract(
+            contract,
+            stateCode,
+            postgresStore
+        )
+
+        if (!(parsedContract instanceof Error)) {
+            throw new Error('Expected parseEQROContract to return an error')
+        }
+
+        const errMessages = parsedContract.issues.map((err) => err.message)
+        expect(errMessages[0]).toContain(
+            'AMENDMENT contracts with CHIP population & MCO entity'
+        )
+    })
+
+    it('should return an error if AMENDMENT + conditional fields missing', async () => {
+        const prismaClient = await sharedTestPrismaClient()
+        const postgresStore = NewPostgresStore(prismaClient)
+        const stateCode = 'FL'
+        const contract = createValidEQROContract()
+
+        // AMENDMENT with MEDICAID + MCO
+        contract.draftRevision!.formData.contractType = 'AMENDMENT'
+        contract.draftRevision!.formData.populationCovered = 'MEDICAID'
+        // When eqroProvisionMcoEqrOrRelatedActivities is true, additional fields are required
+        contract.draftRevision!.formData.eqroProvisionMcoEqrOrRelatedActivities =
+            true
+        contract.draftRevision!.formData.eqroProvisionMcoNewOptionalActivity =
+            undefined
+        contract.draftRevision!.formData.eqroProvisionNewMcoEqrRelatedActivities =
+            undefined
+
+        const parsedContract = parseEQROContract(
+            contract,
+            stateCode,
+            postgresStore
+        )
+
+        if (!(parsedContract instanceof Error)) {
+            throw new Error('Expected parseEQROContract to return an error')
+        }
+
+        const errMessages = parsedContract.issues.map((err) => err.message)
+        expect(errMessages[0]).toContain(
+            'eqroProvisionMcoNewOptionalActivity is required for AMENDMENT contracts where eqroProvisionMcoEqrOrRelatedActivities is true'
+        )
+    })
+
+    it('should return an error if invalid program IDs', async () => {
+        const prismaClient = await sharedTestPrismaClient()
+        const postgresStore = NewPostgresStore(prismaClient)
+        const stateCode = 'FL'
+        const contract = createValidEQROContract()
+
+        // Add invalid program ID
+        contract.draftRevision!.formData.programIDs = [
+            'fake-program-id',
+            'another-fake-id',
+        ]
+
+        const parsedContract = parseEQROContract(
+            contract,
+            stateCode,
+            postgresStore
+        )
+
+        if (!(parsedContract instanceof Error)) {
+            throw new Error('Expected parseEQROContract to return an error')
+        }
+
+        const errMessages = parsedContract.issues.map((err) => err.message)
+        expect(errMessages[0]).toContain(
+            'Program(s) in [fake-program-id,another-fake-id] are not valid FL programs'
+        )
+    })
+
+    it('should succeed with optional fields omitted', async () => {
+        const prismaClient = await sharedTestPrismaClient()
+        const postgresStore = NewPostgresStore(prismaClient)
+        const stateCode = 'FL'
+        const contract = createValidEQROContract()
+
+        // Ensure optional fields are not set
+        contract.draftRevision!.formData.federalAuthorities = []
+        contract.draftRevision!.formData.riskBasedContract = undefined
+        contract.draftRevision!.formData.contractExecutionStatus = undefined
+        contract.draftRevision!.formData.modifiedBenefitsProvided = undefined
+        contract.draftRevision!.formData.modifiedGeoAreaServed = undefined
+        contract.draftRevision!.formData.modifiedRiskSharingStrategy = undefined
+
+        const parsedContract = parseEQROContract(
+            contract,
+            stateCode,
+            postgresStore
+        )
+
+        if (parsedContract instanceof Error) {
+            throw new Error(
+                `Expected parseEQROContract to succeed but got error: ${parsedContract.message}`
+            )
+        }
+
+        expect(parsedContract).toEqual(contract)
     })
 })
