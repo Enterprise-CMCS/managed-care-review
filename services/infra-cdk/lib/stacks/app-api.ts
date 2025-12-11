@@ -727,6 +727,31 @@ export class AppApiStack extends BaseStack {
             })
         )
 
+        // TEMPORARY: Grant access to old serverless buckets for legacy document access
+        // TODO: Remove after database migration updates all s3URL references to new bucket
+        const legacyDocumentsBucket = `arn:aws:s3:::uploads-${this.stage}-uploads-${this.account}`
+        const legacyQABucket = `arn:aws:s3:::uploads-${this.stage}-qa-${this.account}`
+
+        role.addToPolicy(
+            new PolicyStatement({
+                effect: Effect.ALLOW,
+                actions: ['s3:*'],
+                resources: [
+                    `${legacyDocumentsBucket}/allusers/*`,
+                    `${legacyQABucket}/allusers/*`,
+                    `${legacyDocumentsBucket}/zips/*`,
+                ],
+            })
+        )
+
+        role.addToPolicy(
+            new PolicyStatement({
+                effect: Effect.ALLOW,
+                actions: ['s3:ListBucket', 's3:GetBucketLocation'],
+                resources: [legacyDocumentsBucket, legacyQABucket],
+            })
+        )
+
         // SSM permissions
         role.addToPolicy(
             new PolicyStatement({
