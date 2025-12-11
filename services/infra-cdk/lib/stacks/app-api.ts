@@ -788,7 +788,7 @@ export class AppApiStack extends BaseStack {
         role.addToPolicy(
             new PolicyStatement({
                 effect: Effect.ALLOW,
-                actions: ['s3:*'],
+                actions: ['s3:GetObject', 's3:PutObject', 's3:DeleteObject'],
                 resources: [
                     `${documentUploadsBucketArn}/allusers/*`,
                     `${qaUploadsBucketArn}/allusers/*`,
@@ -813,7 +813,7 @@ export class AppApiStack extends BaseStack {
         role.addToPolicy(
             new PolicyStatement({
                 effect: Effect.ALLOW,
-                actions: ['s3:*'],
+                actions: ['s3:GetObject', 's3:PutObject', 's3:DeleteObject'],
                 resources: [
                     `${legacyDocumentsBucket}/allusers/*`,
                     `${legacyQABucket}/allusers/*`,
