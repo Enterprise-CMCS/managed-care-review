@@ -29,18 +29,12 @@ import { GenericErrorPage } from '../Errors/GenericErrorPage'
 import styles from './SubmissionSummary.module.scss'
 import { ChangeHistory } from '../../components/ChangeHistory'
 import { ModalOpenButton, UnlockSubmitModal } from '../../components/Modal'
-import { RoutesRecord } from '@mc-review/constants'
 import { useRouteParams } from '../../hooks'
 import {
     getVisibleLatestContractFormData,
     getVisibleLatestRateRevisions,
 } from '@mc-review/submissions'
-import {
-    generatePath,
-    Navigate,
-    useNavigate,
-    useSearchParams,
-} from 'react-router-dom'
+import { Navigate, useNavigate, useSearchParams } from 'react-router-dom'
 import { hasCMSUserPermissions } from '@mc-review/helpers'
 import { useLDClient } from 'launchdarkly-react-client-sdk'
 import { featureFlags } from '@mc-review/common-code'
@@ -50,6 +44,7 @@ import {
     SubmissionWithdrawnBanner,
     StatusUpdatedBanner,
 } from '../../components/Banner'
+import { getSubmissionPath } from '../../routeHelpers'
 
 export const SubmissionSummary = (): React.ReactElement => {
     // Page level state
@@ -60,7 +55,7 @@ export const SubmissionSummary = (): React.ReactElement => {
         useState<boolean>(false)
     const [searchParams, setSearchParams] = useSearchParams()
     const { loggedInUser } = useAuth()
-    const { id, contractSubmissionType } = useRouteParams()
+    const { id } = useRouteParams()
     const hasCMSPermissions = hasCMSUserPermissions(loggedInUser)
     const isStateUser = loggedInUser?.role === 'STATE_USER'
     const isHelpDeskUser = loggedInUser?.role === 'HELPDESK_USER'
@@ -151,6 +146,8 @@ export const SubmissionSummary = (): React.ReactElement => {
 
     const submissionStatus = contract.status
     const consolidatedStatus = contract.consolidatedStatus
+    const contractSubmissionType = contract.contractSubmissionType
+
     const isSubmitted =
         submissionStatus === 'SUBMITTED' || submissionStatus === 'RESUBMITTED'
     const statePrograms = contract.state.programs
@@ -159,19 +156,21 @@ export const SubmissionSummary = (): React.ReactElement => {
         if (submissionStatus === 'DRAFT') {
             return (
                 <Navigate
-                    to={generatePath(RoutesRecord.SUBMISSIONS_TYPE, {
-                        id,
+                    to={getSubmissionPath(
+                        'SUBMISSIONS_TYPE',
                         contractSubmissionType,
-                    })}
+                        contract.id
+                    )}
                 />
             )
         } else {
             return (
                 <Navigate
-                    to={generatePath(RoutesRecord.SUBMISSIONS_REVIEW_SUBMIT, {
-                        id,
+                    to={getSubmissionPath(
+                        'SUBMISSIONS_REVIEW_SUBMIT',
                         contractSubmissionType,
-                    })}
+                        contract.id
+                    )}
                 />
             )
         }
@@ -375,10 +374,18 @@ export const SubmissionSummary = (): React.ReactElement => {
                                         className="usa-button"
                                         onClick={() =>
                                             navigate(
-                                                `/submission-reviews/${contractSubmissionType}/${contract.id}/withdraw-submission`
+                                                getSubmissionPath(
+                                                    'SUBMISSION_WITHDRAW',
+                                                    contractSubmissionType,
+                                                    contract.id
+                                                )
                                             )
                                         }
-                                        link_url={`/submission-reviews/${contractSubmissionType}/${contract.id}/withdraw-submission`}
+                                        link_url={getSubmissionPath(
+                                            'SUBMISSION_WITHDRAW',
+                                            contractSubmissionType,
+                                            contract.id
+                                        )}
                                     >
                                         Withdraw submission
                                     </ButtonWithLogging>
@@ -390,10 +397,18 @@ export const SubmissionSummary = (): React.ReactElement => {
                                         outline
                                         onClick={() =>
                                             navigate(
-                                                `/submission-reviews/${contractSubmissionType}/${contract.id}/undo-withdraw-submission`
+                                                getSubmissionPath(
+                                                    'UNDO_SUBMISSION_WITHDRAW',
+                                                    contractSubmissionType,
+                                                    contract.id
+                                                )
                                             )
                                         }
-                                        link_url={`/submission-reviews/${contractSubmissionType}/${contract.id}/undo-withdraw-submission`}
+                                        link_url={getSubmissionPath(
+                                            'UNDO_SUBMISSION_WITHDRAW',
+                                            contractSubmissionType,
+                                            contract.id
+                                        )}
                                         style={{ width: '16rem' }}
                                     >
                                         Undo submission withdraw
@@ -420,7 +435,11 @@ export const SubmissionSummary = (): React.ReactElement => {
                                     </span>
                                 )}
                                 <LinkWithLogging
-                                    href={`/submissions/${contractSubmissionType}/${contract.id}/mccrs-record-number`}
+                                    href={getSubmissionPath(
+                                        'SUBMISSIONS_MCCRSID',
+                                        contractSubmissionType,
+                                        contract.id
+                                    )}
                                     className={
                                         contract.mccrsID ? styles.editLink : ''
                                     }
