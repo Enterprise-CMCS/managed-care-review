@@ -7,6 +7,7 @@ export * from './healthPlanFormDataValidtions'
 export * from './FederalAuthorities'
 export * from './ModifiedProvisions'
 export * from './contractHelpers'
+export * from './eqroFormDataValidations'
 
 export type {
     FederalAuthority,
