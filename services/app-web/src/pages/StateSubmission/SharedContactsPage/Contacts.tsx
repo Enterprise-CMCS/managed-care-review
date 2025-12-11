@@ -18,10 +18,7 @@ import {
 } from '../../../gen/gqlClient'
 
 import { useFocus } from '../../../hooks'
-import {
-    activeFormPages,
-    type ContractFormPageProps,
-} from '../submissionUtils'
+import { activeFormPages, type ContractFormPageProps } from '../submissionUtils'
 import {
     RoutesRecord,
     RouteT,
@@ -76,8 +73,8 @@ const flattenErrors = (
 }
 
 const Contacts = ({
-                      showValidations = false,
-                  }: ContractFormPageProps): React.ReactElement => {
+    showValidations = false,
+}: ContractFormPageProps): React.ReactElement => {
     const [shouldValidate, setShouldValidate] = useState(showValidations)
     const [draftSaved, setDraftSaved] = useState(false)
     useFocusOnRender(draftSaved, '[data-testid="saveAsDraftSuccessBanner"]')
@@ -191,7 +188,9 @@ const Contacts = ({
                     generatePath(RoutesRecord.SUBMISSIONS_REVIEW_SUBMIT, {
                         id: id,
                         contractSubmissionType:
-                            ContractSubmissionTypeRecord[draftSubmission.contractSubmissionType],
+                            ContractSubmissionTypeRecord[
+                                draftSubmission.contractSubmissionType
+                            ],
                     })
                 )
             } else if (hideSupportingDocs) {
@@ -232,17 +231,17 @@ const Contacts = ({
                         isEQROSubmission
                             ? EQRO_SUBMISSION_FORM_ROUTES
                             : activeFormPages(
-                                draftSubmission.draftRevision.formData,
-                                hideSupportingDocs
-                            )
+                                  draftSubmission.draftRevision.formData,
+                                  hideSupportingDocs
+                              )
                     }
                     currentFormPage={currentRoute}
                     customPageTitles={
                         isEQROSubmission
                             ? {
-                                SUBMISSIONS_TYPE: 'Submission details'
-                            }
-                            :undefined
+                                  SUBMISSIONS_TYPE: 'Submission details',
+                              }
+                            : undefined
                     }
                 />
                 <PageBannerAlerts
@@ -264,12 +263,12 @@ const Contacts = ({
                     validationSchema={contactSchema}
                 >
                     {({
-                          values,
-                          errors,
-                          handleSubmit,
-                          isSubmitting,
-                          setSubmitting,
-                      }) => (
+                        values,
+                        errors,
+                        handleSubmit,
+                        isSubmitting,
+                        setSubmitting,
+                    }) => (
                         <>
                             <UswdsForm
                                 className={styles.formContainer}
@@ -301,9 +300,9 @@ const Contacts = ({
 
                                         <FieldArray name="stateContacts">
                                             {({
-                                                  remove,
-                                                  push,
-                                              }: FieldArrayRenderProps) => (
+                                                remove,
+                                                push,
+                                            }: FieldArrayRenderProps) => (
                                                 <div
                                                     className={
                                                         styles.stateContacts
@@ -311,7 +310,7 @@ const Contacts = ({
                                                     data-testid="state-contacts"
                                                 >
                                                     {values.stateContacts
-                                                            .length > 0 &&
+                                                        .length > 0 &&
                                                         values.stateContacts.map(
                                                             (
                                                                 _stateContact,
@@ -398,24 +397,24 @@ const Contacts = ({
 
                                                                         {index >
                                                                             0 && (
-                                                                                <ButtonWithLogging
-                                                                                    type="button"
-                                                                                    unstyled
-                                                                                    parent_component_type="page body"
-                                                                                    className={
-                                                                                        styles.removeContactBtn
-                                                                                    }
-                                                                                    onClick={() => {
-                                                                                        remove(
-                                                                                            index
-                                                                                        )
-                                                                                        setNewStateContactButtonFocus()
-                                                                                    }}
-                                                                                >
-                                                                                    Remove
-                                                                                    contact
-                                                                                </ButtonWithLogging>
-                                                                            )}
+                                                                            <ButtonWithLogging
+                                                                                type="button"
+                                                                                unstyled
+                                                                                parent_component_type="page body"
+                                                                                className={
+                                                                                    styles.removeContactBtn
+                                                                                }
+                                                                                onClick={() => {
+                                                                                    remove(
+                                                                                        index
+                                                                                    )
+                                                                                    setNewStateContactButtonFocus()
+                                                                                }}
+                                                                            >
+                                                                                Remove
+                                                                                contact
+                                                                            </ButtonWithLogging>
+                                                                        )}
                                                                     </Fieldset>
                                                                 </div>
                                                             )
@@ -466,7 +465,9 @@ const Contacts = ({
                                     }}
                                     backOnClick={() => {
                                         const previousPage =
-                                            draftSubmission.draftRevision.formData.submissionType === 'CONTRACT_ONLY'
+                                            draftSubmission.draftRevision
+                                                .formData.submissionType ===
+                                            'CONTRACT_ONLY'
                                                 ? RoutesRecord.SUBMISSIONS_CONTRACT_DETAILS
                                                 : RoutesRecord.SUBMISSIONS_RATE_DETAILS
 
@@ -474,7 +475,10 @@ const Contacts = ({
                                             generatePath(previousPage, {
                                                 id,
                                                 contractSubmissionType:
-                                                    ContractSubmissionTypeRecord[draftSubmission.contractSubmissionType],
+                                                    ContractSubmissionTypeRecord[
+                                                        draftSubmission
+                                                            .contractSubmissionType
+                                                    ],
                                             })
                                         )
                                     }}
@@ -484,30 +488,38 @@ const Contacts = ({
                                     }}
                                     actionInProgress={isSubmitting}
                                     backOnClickUrl={
-                                        draftSubmission.draftRevision.formData.submissionType === 'CONTRACT_ONLY'
+                                        draftSubmission.draftRevision.formData
+                                            .submissionType === 'CONTRACT_ONLY'
                                             ? generatePath(
-                                                RoutesRecord.SUBMISSIONS_CONTRACT_DETAILS,
-                                                {
-                                                    id,
-                                                    contractSubmissionType:
-                                                        ContractSubmissionTypeRecord[draftSubmission.contractSubmissionType],
-                                                }
-                                            )
+                                                  RoutesRecord.SUBMISSIONS_CONTRACT_DETAILS,
+                                                  {
+                                                      id,
+                                                      contractSubmissionType:
+                                                          ContractSubmissionTypeRecord[
+                                                              draftSubmission
+                                                                  .contractSubmissionType
+                                                          ],
+                                                  }
+                                              )
                                             : generatePath(
-                                                RoutesRecord.SUBMISSIONS_RATE_DETAILS,
-                                                {
-                                                    id,
-                                                    contractSubmissionType:
-                                                        ContractSubmissionTypeRecord[draftSubmission.contractSubmissionType],
-                                                }
-                                            )
+                                                  RoutesRecord.SUBMISSIONS_RATE_DETAILS,
+                                                  {
+                                                      id,
+                                                      contractSubmissionType:
+                                                          ContractSubmissionTypeRecord[
+                                                              draftSubmission
+                                                                  .contractSubmissionType
+                                                          ],
+                                                  }
+                                              )
                                     }
-                                    continueOnClickUrl={
-                                        generatePath(RoutesRecord.SUBMISSIONS_REVIEW_SUBMIT, {
+                                    continueOnClickUrl={generatePath(
+                                        RoutesRecord.SUBMISSIONS_REVIEW_SUBMIT,
+                                        {
                                             id,
                                             contractSubmissionType,
-                                        })
-                                    }
+                                        }
+                                    )}
                                 />
                             </UswdsForm>
                         </>

@@ -10,7 +10,10 @@ import {
 } from './formDataTypes'
 import { z } from 'zod'
 import type { Store } from '../../postgres'
-import { submittableContractSchema } from './contractTypes'
+import {
+    submittableContractSchema,
+    submittableEQROContractSchema,
+} from './contractTypes'
 import type { ContractType } from './contractTypes'
 
 const validateStatutoryRegulatoryAttestation = (
@@ -285,9 +288,207 @@ const parseContract = (
     return parsedData.data
 }
 
+/**
+ * Validation function for EQRO submission specific required data based on conditional
+ * triggers. Logic tree: https://miro.com/app/board/o9J_lS5oLDk=/?share_link_id=716810250281
+ *
+ * @param contract - Contract data for the submission.
+ * @returns Error on failed validations and undefined on successful validations.
+ */
+const validateEQROdata = (contract: ContractType): Error | undefined => {
+    const formData = contract.draftRevision!.formData
+    const hasRates = contract.draftRates && contract.draftRates.length
+    const isNotContractOnly = formData.submissionType !== 'CONTRACT_ONLY'
+    const isBase = formData.contractType === 'BASE'
+    const includesMCO = formData.managedCareEntities.includes('MCO')
+    const isAmendment = formData.contractType === 'AMENDMENT'
+    const isChipCovered =
+        formData.populationCovered === 'CHIP' ||
+        formData.populationCovered === 'MEDICAID_AND_CHIP'
+    const contractID = contract.id
+
+    //Return an error early if the contract has rates or the wrong sub type
+    if (hasRates || isNotContractOnly) {
+        return new Error(
+            `EQRO submissions must be contract only and not include any rates: ${contract.id}`
+        )
+    }
+
+    const validateFields = (
+        fields: Record<string, boolean | undefined>,
+        errorContext: string
+    ): Error | undefined => {
+        for (const field in fields) {
+            if (fields[field] == null) {
+                return new Error(
+                    `${field} is required for ${errorContext}: ${contractID}`
+                )
+            }
+        }
+    }
+
+    //Field validations for different contract types
+    if (isBase) {
+        if (isChipCovered && includesMCO) {
+            return validateFields(
+                {
+                    eqroNewContractor: formData.eqroNewContractor,
+                    eqroProvisionMcoNewOptionalActivity:
+                        formData.eqroProvisionMcoNewOptionalActivity,
+                    eqroProvisionNewMcoEqrRelatedActivities:
+                        formData.eqroProvisionNewMcoEqrRelatedActivities,
+                    eqroProvisionChipEqrRelatedActivities:
+                        formData.eqroProvisionChipEqrRelatedActivities,
+                },
+                'BASE contracts with CHIP population & MCO entity'
+            )
+        }
+
+        if (isChipCovered && !includesMCO) {
+            return validateFields(
+                {
+                    eqroProvisionChipEqrRelatedActivities:
+                        formData.eqroProvisionChipEqrRelatedActivities,
+                },
+                'BASE contracts with CHIP population & no MCO entity'
+            )
+        }
+
+        if (!isChipCovered && includesMCO) {
+            return validateFields(
+                {
+                    eqroNewContractor: formData.eqroNewContractor,
+                    eqroProvisionMcoNewOptionalActivity:
+                        formData.eqroProvisionMcoNewOptionalActivity,
+                    eqroProvisionNewMcoEqrRelatedActivities:
+                        formData.eqroProvisionNewMcoEqrRelatedActivities,
+                },
+                'BASE contracts with MEDICAID population & MCO entity'
+            )
+        }
+    }
+
+    if (isAmendment) {
+        if (isChipCovered && includesMCO) {
+            const initialRequiredFields = validateFields(
+                {
+                    eqroProvisionMcoEqrOrRelatedActivities:
+                        formData.eqroProvisionMcoEqrOrRelatedActivities,
+                    eqroProvisionChipEqrRelatedActivities:
+                        formData.eqroProvisionChipEqrRelatedActivities,
+                },
+                'AMENDMENT contracts with CHIP population & MCO entity'
+            )
+
+            if (initialRequiredFields) {
+                return initialRequiredFields
+            }
+
+            if (formData.eqroProvisionMcoEqrOrRelatedActivities === true) {
+                return validateFields(
+                    {
+                        eqroProvisionMcoNewOptionalActivity:
+                            formData.eqroProvisionMcoNewOptionalActivity,
+                        eqroProvisionNewMcoEqrRelatedActivities:
+                            formData.eqroProvisionNewMcoEqrRelatedActivities,
+                    },
+                    'AMENDMENT contracts where eqroProvisionMcoEqrOrRelatedActivities is true'
+                )
+            }
+        }
+
+        if (isChipCovered && !includesMCO) {
+            return validateFields(
+                {
+                    eqroProvisionChipEqrRelatedActivities:
+                        formData.eqroProvisionChipEqrRelatedActivities,
+                },
+                'AMENDMENT contract with CHIP population & no MCO entity'
+            )
+        }
+
+        if (!isChipCovered && includesMCO) {
+            const initialRequiredFields = validateFields(
+                {
+                    eqroProvisionMcoEqrOrRelatedActivities:
+                        formData.eqroProvisionMcoEqrOrRelatedActivities,
+                },
+                'AMENDMENT contracts with MEDICAID population & MCO entity'
+            )
+
+            if (initialRequiredFields) {
+                return initialRequiredFields
+            }
+
+            if (formData.eqroProvisionMcoEqrOrRelatedActivities === true) {
+                return validateFields(
+                    {
+                        eqroProvisionMcoNewOptionalActivity:
+                            formData.eqroProvisionMcoNewOptionalActivity,
+                        eqroProvisionNewMcoEqrRelatedActivities:
+                            formData.eqroProvisionNewMcoEqrRelatedActivities,
+                    },
+                    'AMENDMENT contracts where eqroProvisionMcoEqrOrRelatedActivities is true'
+                )
+            }
+        }
+    }
+
+    return
+}
+
+const parseEQROContract = (
+    contract: ContractType,
+    stateCode: string,
+    store: Store
+): ContractType | z.ZodError => {
+    const eqroContractParser = submittableEQROContractSchema.superRefine(
+        (contract, ctx) => {
+            //Validating programs
+            const contractProgramsIDs = new Set(
+                contract.draftRevision.formData.programIDs
+            )
+            const allProgramIDs = contract.draftRates.reduce((acc, rate) => {
+                const rateFormData = rate.draftRevision.formData
+                const rateProgramIDs = rateFormData.rateProgramIDs.concat(
+                    rateFormData.deprecatedRateProgramIDs
+                )
+                return new Set([...acc, ...rateProgramIDs])
+            }, contractProgramsIDs)
+
+            const findResult = store.findPrograms(stateCode, [...allProgramIDs])
+            if (findResult instanceof Error) {
+                ctx.addIssue({
+                    code: 'custom',
+                    message: findResult.message,
+                })
+            }
+
+            //Validating EQRO fields
+            const validationError = validateEQROdata(contract)
+            if (validationError) {
+                ctx.addIssue({
+                    code: 'custom',
+                    message: validationError.message,
+                })
+            }
+        }
+    )
+
+    const parsedData = eqroContractParser.safeParse(contract)
+
+    if (parsedData.error) {
+        return parsedData.error
+    }
+
+    return parsedData.data
+}
+
 export {
     validateContractDraftRevisionInput,
     parseContract,
+    parseEQROContract,
     parseAndUpdateEqroFields,
     validateEQROContractDraftRevisionInput,
+    validateEQROdata,
 }
