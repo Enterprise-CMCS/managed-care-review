@@ -2242,14 +2242,10 @@ describe('submitContract', () => {
             expect(response.errors).toBeDefined()
             expect(response.errors).toEqual([
                 expect.objectContaining({
-                    message: expect.stringMatching(
-                        `EQRO submissions must be contract only and not include any rates: ${draftWithWrongSubType.id}`
-                    ),
-                    path: ['submitContract'],
+                    message: expect.stringContaining('Invalid input: expected'),
                     extensions: expect.objectContaining({
-                        argumentName: 'contractID',
-                        argumentValues: draftWithWrongSubType.id,
                         code: 'BAD_USER_INPUT',
+                        argumentName: 'contractID',
                     }),
                 }),
             ])

@@ -20,11 +20,7 @@ import {
     parseContract,
     parseEQROContract,
 } from '../../domain-models/contractAndRates/dataValidatorHelpers'
-import type {
-    UpdateInfoType,
-    PackageStatusType,
-    ContractType,
-} from '../../domain-models'
+import type { UpdateInfoType, PackageStatusType } from '../../domain-models'
 import type { UpdateDraftContractRatesArgsType } from '../../postgres/contractAndRates/updateDraftContractRates'
 import type { StateCodeType } from '@mc-review/submissions'
 import type { Span } from '@opentelemetry/api'
@@ -60,160 +56,6 @@ const validateStatusAndUpdateInfo = (
             },
         })
     }
-}
-
-/*
- * Logic tree can be found here for the following function: https://miro.com/app/board/o9J_lS5oLDk=/?share_link_id=716810250281
- */
-export const validateEQROSubmission = (
-    contract: ContractType,
-    span?: Span
-): GraphQLError | undefined => {
-    const formData = contract.draftRevision!.formData
-    const hasRates = contract.draftRates && contract.draftRates.length
-    const isNotContractOnly = formData.submissionType !== 'CONTRACT_ONLY'
-    const isBase = formData.contractType === 'BASE'
-    const includesMCO = formData.managedCareEntities.includes('MCO')
-    const isAmendment = formData.contractType === 'AMENDMENT'
-    const isChipCovered =
-        formData.populationCovered === 'CHIP' ||
-        formData.populationCovered === 'MEDICAID_AND_CHIP'
-    const contractID = contract.id
-
-    const EQROValidationError = (errMessage: string) => {
-        logError('submitContract', errMessage)
-        setErrorAttributesOnActiveSpan(errMessage, span)
-        return createUserInputError(errMessage, 'contractID', contract.id)
-    }
-
-    //Return an error early if the contract has rates or the wrong sub type
-    if (hasRates || isNotContractOnly) {
-        return EQROValidationError(
-            `EQRO submissions must be contract only and not include any rates: ${contract.id}`
-        )
-    }
-
-    const validateFields = (
-        fields: Record<string, boolean | undefined>,
-        errorContext: string
-    ): GraphQLError | undefined => {
-        for (const field in fields) {
-            if (fields[field] == null) {
-                return EQROValidationError(
-                    `${field} is required for ${errorContext}: ${contractID}`
-                )
-            }
-        }
-    }
-
-    //Field validations for different contract types
-    if (isBase) {
-        if (isChipCovered && includesMCO) {
-            return validateFields(
-                {
-                    eqroNewContractor: formData.eqroNewContractor,
-                    eqroProvisionMcoNewOptionalActivity:
-                        formData.eqroProvisionMcoNewOptionalActivity,
-                    eqroProvisionNewMcoEqrRelatedActivities:
-                        formData.eqroProvisionNewMcoEqrRelatedActivities,
-                    eqroProvisionChipEqrRelatedActivities:
-                        formData.eqroProvisionChipEqrRelatedActivities,
-                },
-                'BASE contracts with CHIP population & MCO entity'
-            )
-        }
-
-        if (isChipCovered && !includesMCO) {
-            return validateFields(
-                {
-                    eqroProvisionChipEqrRelatedActivities:
-                        formData.eqroProvisionChipEqrRelatedActivities,
-                },
-                'BASE contracts with CHIP population & no MCO entity'
-            )
-        }
-
-        if (!isChipCovered && includesMCO) {
-            return validateFields(
-                {
-                    eqroNewContractor: formData.eqroNewContractor,
-                    eqroProvisionMcoNewOptionalActivity:
-                        formData.eqroProvisionMcoNewOptionalActivity,
-                    eqroProvisionNewMcoEqrRelatedActivities:
-                        formData.eqroProvisionNewMcoEqrRelatedActivities,
-                },
-                'BASE contracts with MEDICAID population & MCO entity'
-            )
-        }
-    }
-
-    if (isAmendment) {
-        if (isChipCovered && includesMCO) {
-            const initialRequiredFields = validateFields(
-                {
-                    eqroProvisionMcoEqrOrRelatedActivities:
-                        formData.eqroProvisionMcoEqrOrRelatedActivities,
-                    eqroProvisionChipEqrRelatedActivities:
-                        formData.eqroProvisionChipEqrRelatedActivities,
-                },
-                'AMENDMENT contracts with CHIP population & MCO entity'
-            )
-
-            if (initialRequiredFields) {
-                return initialRequiredFields
-            }
-
-            if (formData.eqroProvisionMcoEqrOrRelatedActivities === true) {
-                return validateFields(
-                    {
-                        eqroProvisionMcoNewOptionalActivity:
-                            formData.eqroProvisionMcoNewOptionalActivity,
-                        eqroProvisionNewMcoEqrRelatedActivities:
-                            formData.eqroProvisionNewMcoEqrRelatedActivities,
-                    },
-                    'AMENDMENT contracts where eqroProvisionMcoEqrOrRelatedActivities is true'
-                )
-            }
-        }
-
-        if (isChipCovered && !includesMCO) {
-            return validateFields(
-                {
-                    eqroProvisionChipEqrRelatedActivities:
-                        formData.eqroProvisionChipEqrRelatedActivities,
-                },
-                'AMENDMENT contract with CHIP population & no MCO entity'
-            )
-        }
-
-        if (!isChipCovered && includesMCO) {
-            const initialRequiredFields = validateFields(
-                {
-                    eqroProvisionMcoEqrOrRelatedActivities:
-                        formData.eqroProvisionMcoEqrOrRelatedActivities,
-                },
-                'AMENDMENT contracts with MEDICAID population & MCO entity'
-            )
-
-            if (initialRequiredFields) {
-                return initialRequiredFields
-            }
-
-            if (formData.eqroProvisionMcoEqrOrRelatedActivities === true) {
-                return validateFields(
-                    {
-                        eqroProvisionMcoNewOptionalActivity:
-                            formData.eqroProvisionMcoNewOptionalActivity,
-                        eqroProvisionNewMcoEqrRelatedActivities:
-                            formData.eqroProvisionNewMcoEqrRelatedActivities,
-                    },
-                    'AMENDMENT contracts where eqroProvisionMcoEqrOrRelatedActivities is true'
-                )
-            }
-        }
-    }
-
-    return
 }
 
 export function submitContract(
@@ -328,14 +170,6 @@ export function submitContract(
             )
         }
 
-        if (isEQRO) {
-            const EQROError = validateEQROSubmission(contractWithHistory, span)
-
-            if (EQROError) {
-                throw EQROError
-            }
-        }
-
         const initialFormData = contractWithHistory.draftRevision.formData
         const contractRevisionID = contractWithHistory.draftRevision.id
         const draftRatesWithoutLinkedRates =
@@ -390,7 +224,11 @@ export function submitContract(
             const errMessage = parsedContract.message
             logError('submitContract', errMessage)
             setErrorAttributesOnActiveSpan(errMessage, span)
-            throw createUserInputError(errMessage)
+            throw createUserInputError(
+                errMessage,
+                'contractID',
+                contractWithHistory.id
+            )
         }
         // add all rates (including any linked rates) back in
         parsedContract.draftRates = contractWithHistory.draftRates
