@@ -80,7 +80,7 @@
         "cypress": "^13.13.2",
         "axe-core": "^4.10.3",
         "cypress-axe": "^1.7.0",
-        "danger": "^13.0.4",
+        "danger": "^13.0.5",
         "husky": "^9.1.7",
         "lint-staged": "^16.2.3",
         "prettier": "^3.5.3"
