@@ -194,4 +194,33 @@ describe('Page Heading Row', () => {
         )
         expect(screen.queryByTestId('stateDisplay')).not.toBeInTheDocument()
     })
+    it('does not display state information for CMS user when stateCode is undefined', () => {
+        renderWithProviders(
+            <PageHeadingRow
+                heading="Custom page heading"
+                loggedInUser={loggedInCMSUser}
+                route="SUBMISSIONS_SUMMARY"
+                pathname="/submissions/eqro/1234"
+                stateName="Ohio"
+            />
+        )
+
+        expect(screen.queryByTestId('stateDisplay')).not.toBeInTheDocument()
+        expect(screen.getByRole('heading')).toHaveTextContent('CMS')
+    })
+
+    it('does not display state information for CMS user when stateName is undefined', () => {
+        renderWithProviders(
+            <PageHeadingRow
+                heading="Custom page heading"
+                loggedInUser={loggedInCMSUser}
+                route="SUBMISSIONS_SUMMARY"
+                pathname="/submissions/eqro/1234"
+                stateCode="OH"
+            />
+        )
+
+        expect(screen.queryByTestId('stateDisplay')).not.toBeInTheDocument()
+        expect(screen.getByRole('heading')).toHaveTextContent('CMS')
+    })
 })
