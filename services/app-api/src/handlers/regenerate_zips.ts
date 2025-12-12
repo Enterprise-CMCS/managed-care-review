@@ -12,16 +12,20 @@
  *     --payload '{"contractRevisionID":"abc-123"}' response.json
  */
 
-import { NewPostgresStore, type Store } from '../postgres'
+import { NewPostgresStore } from '../postgres'
 import { getPostgresURL } from './configuration'
 import {
     documentZipService,
     generateDocumentZip,
     type DocumentZipService,
 } from '../zip/generateZip'
-import type { ContractRevisionType, RateRevisionType } from '../domain-models'
 import type { Handler } from 'aws-lambda'
-import { NewPrismaClient } from '../postgres/prismaClient'
+import {
+    NewPrismaClient,
+    type ExtendedPrismaClient,
+} from '../postgres/prismaClient'
+import { contractRevisionToDomainModel } from '../postgres/contractAndRates/parseContractWithHistory'
+import { rateRevisionToDomainModel } from '../postgres/contractAndRates/parseRateWithHistory'
 
 export type RegenerateZipsEvent = {
     contractRevisionID?: string // Optional: regenerate for specific contract revision
@@ -60,7 +64,14 @@ export const main: Handler = async (
     const dbConnectionURL: string = dbConnResult
 
     // Initialize Prisma client and store
-    const prismaClient = NewPrismaClient(dbConnectionURL)
+    const prismaClientResult = await NewPrismaClient(dbConnectionURL)
+    if (prismaClientResult instanceof Error) {
+        throw new Error(
+            `Init Error: failed to create Prisma client: ${prismaClientResult}`
+        )
+    }
+
+    const prismaClient = prismaClientResult
     const postgresStore = NewPostgresStore(prismaClient)
     const zipService = documentZipService(postgresStore, generateDocumentZip)
 
@@ -87,7 +98,7 @@ export const main: Handler = async (
                 `Regenerating zip for contract revision: ${event.contractRevisionID}`
             )
             const result = await regenerateContractZip(
-                postgresStore,
+                prismaClient,
                 zipService,
                 event.contractRevisionID,
                 dryRun
@@ -106,7 +117,7 @@ export const main: Handler = async (
                 `Regenerating zip for rate revision: ${event.rateRevisionID}`
             )
             const result = await regenerateRateZip(
-                postgresStore,
+                prismaClient,
                 zipService,
                 event.rateRevisionID,
                 dryRun
@@ -123,7 +134,7 @@ export const main: Handler = async (
         // Otherwise, find all missing zips and regenerate them
         console.info('Finding contract revisions missing zips...')
         const missingContractZips = await findContractRevisionsMissingZips(
-            postgresStore,
+            prismaClient,
             limit
         )
         console.info(
@@ -138,7 +149,7 @@ export const main: Handler = async (
         } else {
             for (const contractRev of missingContractZips) {
                 const result = await regenerateContractZip(
-                    postgresStore,
+                    prismaClient,
                     zipService,
                     contractRev.id,
                     false
@@ -154,7 +165,7 @@ export const main: Handler = async (
 
         console.info('Finding rate revisions missing zips...')
         const missingRateZips = await findRateRevisionsMissingZips(
-            postgresStore,
+            prismaClient,
             limit
         )
         console.info(
@@ -169,7 +180,7 @@ export const main: Handler = async (
         } else {
             for (const rateRev of missingRateZips) {
                 const result = await regenerateRateZip(
-                    postgresStore,
+                    prismaClient,
                     zipService,
                     rateRev.id,
                     false
@@ -192,145 +203,85 @@ export const main: Handler = async (
         response.success = false
         response.errors.push(errorMessage)
         return response
+    } finally {
+        // Always disconnect Prisma client to prevent connection leaks in Lambda
+        await prismaClient.$disconnect()
     }
 }
 
 async function findContractRevisionsMissingZips(
-    store: Store,
+    prismaClient: ExtendedPrismaClient,
     limit: number
 ): Promise<Array<{ id: string }>> {
-    // Find all submitted contracts
-    const allContractsResult =
-        await store.findAllContractsWithHistoryBySubmitInfo()
-    if (allContractsResult instanceof Error) {
-        throw new Error(
-            `Failed to find contracts: ${allContractsResult.message}`
-        )
-    }
+    // Query directly for contract revisions that are submitted, have documents, but no zips
+    const revisionsWithoutZips =
+        await prismaClient.contractRevisionTable.findMany({
+            where: {
+                submitInfo: {
+                    isNot: null, // Only submitted revisions
+                },
+                OR: [
+                    {
+                        contractDocuments: {
+                            some: {}, // Has at least one contract document
+                        },
+                    },
+                    {
+                        supportingDocuments: {
+                            some: {}, // Has at least one supporting document
+                        },
+                    },
+                ],
+                documentZipPackages: {
+                    none: {}, // No zip packages exist
+                },
+            },
+            select: {
+                id: true,
+            },
+            take: limit,
+        })
 
-    const missingZips: Array<{ id: string }> = []
-
-    for (const item of allContractsResult) {
-        // Each item is { contractID: string, contract: ContractType | Error }
-        if (item.contract instanceof Error) {
-            console.warn(
-                'Error loading contract, skipping:',
-                item.contract.message
-            )
-            continue
-        }
-
-        const contract = item.contract
-
-        // Check each submission for missing zips
-        for (const submission of contract.packageSubmissions) {
-            const revision = submission.contractRevision
-
-            // Skip if no documents
-            const hasDocuments =
-                (revision.formData.contractDocuments &&
-                    revision.formData.contractDocuments.length > 0) ||
-                (revision.formData.supportingDocuments &&
-                    revision.formData.supportingDocuments.length > 0)
-
-            if (!hasDocuments) {
-                continue
-            }
-
-            // Check if zip exists
-            const zipsResult =
-                await store.findDocumentZipPackagesByContractRevision(
-                    revision.id,
-                    'CONTRACT_DOCUMENTS'
-                )
-
-            if (zipsResult instanceof Error) {
-                console.warn(
-                    `Error checking zips for ${revision.id}, skipping:`,
-                    zipsResult.message
-                )
-                continue
-            }
-
-            if (zipsResult.length === 0) {
-                missingZips.push({ id: revision.id })
-
-                if (missingZips.length >= limit) {
-                    return missingZips
-                }
-            }
-        }
-    }
-
-    return missingZips
+    return revisionsWithoutZips
 }
 
 async function findRateRevisionsMissingZips(
-    store: Store,
+    prismaClient: ExtendedPrismaClient,
     limit: number
 ): Promise<Array<{ id: string }>> {
-    // Find all submitted rates
-    const allRatesResult = await store.findAllRatesWithHistoryBySubmitInfo()
-    if (allRatesResult instanceof Error) {
-        throw new Error(`Failed to find rates: ${allRatesResult.message}`)
-    }
+    // Query directly for rate revisions that are submitted, have documents, but no zips
+    const revisionsWithoutZips = await prismaClient.rateRevisionTable.findMany({
+        where: {
+            submitInfo: {
+                isNot: null, // Only submitted revisions
+            },
+            OR: [
+                {
+                    rateDocuments: {
+                        some: {}, // Has at least one rate document
+                    },
+                },
+                {
+                    supportingDocuments: {
+                        some: {}, // Has at least one supporting document
+                    },
+                },
+            ],
+            documentZipPackages: {
+                none: {}, // No zip packages exist
+            },
+        },
+        select: {
+            id: true,
+        },
+        take: limit,
+    })
 
-    const missingZips: Array<{ id: string }> = []
-
-    for (const item of allRatesResult) {
-        // Each item is { rateID: string, rate: RateType | Error }
-        if (item.rate instanceof Error) {
-            console.warn('Error loading rate, skipping:', item.rate.message)
-            continue
-        }
-
-        const rate = item.rate
-
-        // Check each submission for missing zips
-        for (const submission of rate.packageSubmissions) {
-            const revision = submission.rateRevision
-
-            // Skip if no documents
-            const hasDocuments =
-                (revision.formData.rateDocuments &&
-                    revision.formData.rateDocuments.length > 0) ||
-                (revision.formData.supportingDocuments &&
-                    revision.formData.supportingDocuments.length > 0)
-
-            if (!hasDocuments) {
-                continue
-            }
-
-            // Check if zip exists
-            const zipsResult =
-                await store.findDocumentZipPackagesByRateRevision(
-                    revision.id,
-                    'RATE_DOCUMENTS'
-                )
-
-            if (zipsResult instanceof Error) {
-                console.warn(
-                    `Error checking zips for ${revision.id}, skipping:`,
-                    zipsResult.message
-                )
-                continue
-            }
-
-            if (zipsResult.length === 0) {
-                missingZips.push({ id: revision.id })
-
-                if (missingZips.length >= limit) {
-                    return missingZips
-                }
-            }
-        }
-    }
-
-    return missingZips
+    return revisionsWithoutZips
 }
 
 async function regenerateContractZip(
-    store: Store,
+    prismaClient: ExtendedPrismaClient,
     zipService: DocumentZipService,
     contractRevisionID: string,
     dryRun: boolean
@@ -343,34 +294,31 @@ async function regenerateContractZip(
             return { success: true }
         }
 
-        // Fetch the contract with its revision
-        const contractResult =
-            await store.findContractWithHistory(contractRevisionID)
-        if (contractResult instanceof Error) {
+        // Query the contract revision directly with its documents
+        const revision = await prismaClient.contractRevisionTable.findFirst({
+            where: {
+                id: contractRevisionID,
+                submitInfo: {
+                    isNot: null,
+                },
+            },
+            include: {
+                contractDocuments: true,
+                supportingDocuments: true,
+            },
+        })
+
+        if (!revision) {
             return {
                 success: false,
-                error: `Failed to find contract: ${contractResult.message}`,
-            }
-        }
-
-        const contract = contractResult
-        const revision =
-            contract.draftRevision ??
-            contract.packageSubmissions[0]?.contractRevision
-
-        if (!revision || revision.id !== contractRevisionID) {
-            return {
-                success: false,
-                error: `Could not find revision ${contractRevisionID} in contract ${contract.id}`,
+                error: `Contract revision ${contractRevisionID} not found or not submitted`,
             }
         }
 
         // Check if it has documents
         const hasDocuments =
-            (revision.formData.contractDocuments &&
-                revision.formData.contractDocuments.length > 0) ||
-            (revision.formData.supportingDocuments &&
-                revision.formData.supportingDocuments.length > 0)
+            revision.contractDocuments.length > 0 ||
+            revision.supportingDocuments.length > 0
 
         if (!hasDocuments) {
             console.info(
@@ -382,9 +330,19 @@ async function regenerateContractZip(
         console.info(
             `Regenerating zip for contract revision ${contractRevisionID}...`
         )
-        const zipResult = await zipService.generateContractDocumentsZip(
-            revision as ContractRevisionType
-        )
+
+        // Convert Prisma revision to domain model
+        const domainRevision = contractRevisionToDomainModel(revision)
+
+        if (domainRevision instanceof Error) {
+            return {
+                success: false,
+                error: `Failed to parse revision: ${domainRevision.message}`,
+            }
+        }
+
+        const zipResult =
+            await zipService.generateContractDocumentsZip(domainRevision)
 
         if (zipResult instanceof Error) {
             return {
@@ -408,7 +366,7 @@ async function regenerateContractZip(
 }
 
 async function regenerateRateZip(
-    store: Store,
+    prismaClient: ExtendedPrismaClient,
     zipService: DocumentZipService,
     rateRevisionID: string,
     dryRun: boolean
@@ -421,32 +379,31 @@ async function regenerateRateZip(
             return { success: true }
         }
 
-        // Fetch the rate with its revision
-        const rateResult = await store.findRateWithHistory(rateRevisionID)
-        if (rateResult instanceof Error) {
+        // Query the rate revision directly with its documents
+        const revision = await prismaClient.rateRevisionTable.findFirst({
+            where: {
+                id: rateRevisionID,
+                submitInfo: {
+                    isNot: null,
+                },
+            },
+            include: {
+                rateDocuments: true,
+                supportingDocuments: true,
+            },
+        })
+
+        if (!revision) {
             return {
                 success: false,
-                error: `Failed to find rate: ${rateResult.message}`,
-            }
-        }
-
-        const rate = rateResult
-        const revision =
-            rate.draftRevision ?? rate.packageSubmissions[0]?.rateRevision
-
-        if (!revision || revision.id !== rateRevisionID) {
-            return {
-                success: false,
-                error: `Could not find revision ${rateRevisionID} in rate ${rate.id}`,
+                error: `Rate revision ${rateRevisionID} not found or not submitted`,
             }
         }
 
         // Check if it has documents
         const hasDocuments =
-            (revision.formData.rateDocuments &&
-                revision.formData.rateDocuments.length > 0) ||
-            (revision.formData.supportingDocuments &&
-                revision.formData.supportingDocuments.length > 0)
+            revision.rateDocuments.length > 0 ||
+            revision.supportingDocuments.length > 0
 
         if (!hasDocuments) {
             console.info(
@@ -456,9 +413,19 @@ async function regenerateRateZip(
         }
 
         console.info(`Regenerating zip for rate revision ${rateRevisionID}...`)
-        const zipResult = await zipService.generateRateDocumentsZip(
-            revision as RateRevisionType
-        )
+
+        // Convert Prisma revision to domain model
+        const domainRevision = rateRevisionToDomainModel(revision)
+
+        if (domainRevision instanceof Error) {
+            return {
+                success: false,
+                error: `Failed to parse revision: ${domainRevision.message}`,
+            }
+        }
+
+        const zipResult =
+            await zipService.generateRateDocumentsZip(domainRevision)
 
         if (zipResult instanceof Error) {
             return {
