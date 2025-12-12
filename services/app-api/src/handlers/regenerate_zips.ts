@@ -148,7 +148,7 @@ export const main: Handler = async (
         let remainingLimit = limit
 
         for (const contractRev of missingContractZips) {
-            if (!dryRun && remainingLimit <= 0) {
+            if (remainingLimit <= 0) {
                 console.info(
                     `Reached limit of ${limit} total zips, stopping contract processing`
                 )
@@ -163,9 +163,7 @@ export const main: Handler = async (
             )
             if (result.success) {
                 response.contractsProcessed++
-                if (!dryRun) {
-                    remainingLimit--
-                }
+                remainingLimit--
             } else {
                 response.contractsFailed++
                 response.errors.push(result.error!)
@@ -182,7 +180,7 @@ export const main: Handler = async (
         )
 
         for (const rateRev of missingRateZips) {
-            if (!dryRun && remainingLimit <= 0) {
+            if (remainingLimit <= 0) {
                 console.info(
                     `Reached limit of ${limit} total zips, stopping rate processing`
                 )
@@ -197,9 +195,7 @@ export const main: Handler = async (
             )
             if (result.success) {
                 response.ratesProcessed++
-                if (!dryRun) {
-                    remainingLimit--
-                }
+                remainingLimit--
             } else {
                 response.ratesFailed++
                 response.errors.push(result.error!)
