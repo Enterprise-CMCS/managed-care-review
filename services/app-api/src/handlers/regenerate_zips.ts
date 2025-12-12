@@ -147,33 +147,28 @@ export const main: Handler = async (
 
         let remainingLimit = limit
 
-        if (dryRun) {
-            console.info(
-                '[DRY RUN] Would regenerate zips for these contract revisions:',
-                missingContractZips.map((c) => c.id)
-            )
-        } else {
-            for (const contractRev of missingContractZips) {
-                if (remainingLimit <= 0) {
-                    console.info(
-                        `Reached limit of ${limit} total zips, stopping contract processing`
-                    )
-                    break
-                }
-
-                const result = await regenerateContractZip(
-                    prismaClient,
-                    zipService,
-                    contractRev.id,
-                    false
+        for (const contractRev of missingContractZips) {
+            if (!dryRun && remainingLimit <= 0) {
+                console.info(
+                    `Reached limit of ${limit} total zips, stopping contract processing`
                 )
-                if (result.success) {
-                    response.contractsProcessed++
+                break
+            }
+
+            const result = await regenerateContractZip(
+                prismaClient,
+                zipService,
+                contractRev.id,
+                dryRun
+            )
+            if (result.success) {
+                response.contractsProcessed++
+                if (!dryRun) {
                     remainingLimit--
-                } else {
-                    response.contractsFailed++
-                    response.errors.push(result.error!)
                 }
+            } else {
+                response.contractsFailed++
+                response.errors.push(result.error!)
             }
         }
 
@@ -186,33 +181,28 @@ export const main: Handler = async (
             `Found ${missingRateZips.length} rate revisions missing zips`
         )
 
-        if (dryRun) {
-            console.info(
-                '[DRY RUN] Would regenerate zips for these rate revisions:',
-                missingRateZips.map((r) => r.id)
-            )
-        } else {
-            for (const rateRev of missingRateZips) {
-                if (remainingLimit <= 0) {
-                    console.info(
-                        `Reached limit of ${limit} total zips, stopping rate processing`
-                    )
-                    break
-                }
-
-                const result = await regenerateRateZip(
-                    prismaClient,
-                    zipService,
-                    rateRev.id,
-                    false
+        for (const rateRev of missingRateZips) {
+            if (!dryRun && remainingLimit <= 0) {
+                console.info(
+                    `Reached limit of ${limit} total zips, stopping rate processing`
                 )
-                if (result.success) {
-                    response.ratesProcessed++
+                break
+            }
+
+            const result = await regenerateRateZip(
+                prismaClient,
+                zipService,
+                rateRev.id,
+                dryRun
+            )
+            if (result.success) {
+                response.ratesProcessed++
+                if (!dryRun) {
                     remainingLimit--
-                } else {
-                    response.ratesFailed++
-                    response.errors.push(result.error!)
                 }
+            } else {
+                response.ratesFailed++
+                response.errors.push(result.error!)
             }
         }
 
