@@ -1148,9 +1148,7 @@ describe('parseEQROContract', () => {
         }
 
         const errMessages = parsedContract.issues.map((err) => err.message)
-        expect(errMessages[0]).toContain(
-            'EQRO submissions must be contract only and not include any rates'
-        )
+        expect(errMessages[0]).toContain('EQRO submission cannot contain rates')
     })
 
     it('should return an error if submissionType is not CONTRACT_ONLY', async () => {

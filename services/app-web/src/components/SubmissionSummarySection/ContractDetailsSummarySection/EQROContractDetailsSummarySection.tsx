@@ -111,6 +111,7 @@ export const EQROContractDetailsSummarySection = ({
                     />
                 </MultiColumnGrid>
                 <EQROModifiedProvisionSummary
+                    contractID={contract.id}
                     contractFormData={contractFormData}
                     explainMissingData={explainMissingData}
                 />

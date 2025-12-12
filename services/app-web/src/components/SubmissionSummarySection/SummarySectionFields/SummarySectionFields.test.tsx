@@ -26,9 +26,19 @@ const mockEQROFormData = (
 
 describe('EQROModifiedProvisionSummary', () => {
     it('renders section correctly', async () => {
-        const mockTestData: ContractFormData = mockEQROFormData()
+        const mockTestData: ContractFormData = mockEQROFormData({
+            contractType: 'AMENDMENT',
+            populationCovered: 'MEDICAID_AND_CHIP',
+            eqroProvisionMcoNewOptionalActivity: true,
+            eqroProvisionNewMcoEqrRelatedActivities: false,
+            eqroProvisionChipEqrRelatedActivities: true,
+            eqroProvisionMcoEqrOrRelatedActivities: true,
+        })
         renderWithProviders(
-            <EQROModifiedProvisionSummary contractFormData={mockTestData} />,
+            <EQROModifiedProvisionSummary
+                contractID={'test-123'}
+                contractFormData={mockTestData}
+            />,
             {
                 apolloProvider: {
                     mocks: [fetchCurrentUserMock({ statusCode: 200 })],
@@ -54,6 +64,16 @@ describe('EQROModifiedProvisionSummary', () => {
         //expect included provisions
         expect(
             withinInclude.getByText(
+                'EQR or EQR-related activities performed on MCOs'
+            )
+        ).toBeInTheDocument()
+        expect(
+            withinInclude.getByText(
+                'EQR-related activities performed on the CHIP population'
+            )
+        ).toBeInTheDocument()
+        expect(
+            withinInclude.getByText(
                 'New optional activities to be performed on MCOs in accordance with 42 CFR § 438.358(c)'
             )
         ).toBeInTheDocument()
@@ -64,20 +84,6 @@ describe('EQROModifiedProvisionSummary', () => {
                 'EQR-related activities for a new MCO managed care program'
             )
         ).toBeInTheDocument()
-
-        // expect provisions to not be shown
-        expect(
-            screen.queryByText(
-                'EQR-related activities performed on the CHIP population'
-            )
-        ).toBeNull()
-
-        // expect provisions to not be shown
-        expect(
-            screen.queryByText(
-                'EQR or EQR-related activities performed on MCOs'
-            )
-        ).toBeNull()
     })
     it('does not render EQRO provisions questions', async () => {
         const mockTestData: ContractFormData = mockEQROFormData({
@@ -85,7 +91,10 @@ describe('EQROModifiedProvisionSummary', () => {
             managedCareEntities: ['PIHP'],
         })
         renderWithProviders(
-            <EQROModifiedProvisionSummary contractFormData={mockTestData} />,
+            <EQROModifiedProvisionSummary
+                contractID={'test-123'}
+                contractFormData={mockTestData}
+            />,
             {
                 apolloProvider: {
                     mocks: [fetchCurrentUserMock({ statusCode: 200 })],
@@ -104,6 +113,34 @@ describe('EQROModifiedProvisionSummary', () => {
                     'This contract action does NOT include new or modified provisions related to the following'
                 )
             ).toBeNull()
+        })
+    })
+    it('renders missing information inline errors', async () => {
+        const mockTestData: ContractFormData = mockEQROFormData({
+            populationCovered: 'MEDICAID_AND_CHIP',
+            managedCareEntities: ['MCO'],
+            eqroNewContractor: null,
+            eqroProvisionMcoNewOptionalActivity: true,
+            eqroProvisionNewMcoEqrRelatedActivities: null,
+            eqroProvisionChipEqrRelatedActivities: true,
+            eqroProvisionMcoEqrOrRelatedActivities: true,
+        })
+        renderWithProviders(
+            <EQROModifiedProvisionSummary
+                contractID={'test-123'}
+                contractFormData={mockTestData}
+            />,
+            {
+                apolloProvider: {
+                    mocks: [fetchCurrentUserMock({ statusCode: 200 })],
+                },
+            }
+        )
+
+        await waitFor(() => {
+            expect(
+                screen.queryAllByText('You must provide this information.')
+            ).toHaveLength(2)
         })
     })
 })
