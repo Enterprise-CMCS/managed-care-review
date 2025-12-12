@@ -299,15 +299,10 @@ const parseEQROContract = (
             const contractProgramsIDs = new Set(
                 contract.draftRevision.formData.programIDs
             )
-            const allProgramIDs = contract.draftRates.reduce((acc, rate) => {
-                const rateFormData = rate.draftRevision.formData
-                const rateProgramIDs = rateFormData.rateProgramIDs.concat(
-                    rateFormData.deprecatedRateProgramIDs
-                )
-                return new Set([...acc, ...rateProgramIDs])
-            }, contractProgramsIDs)
 
-            const findResult = store.findPrograms(stateCode, [...allProgramIDs])
+            const findResult = store.findPrograms(stateCode, [
+                ...contractProgramsIDs,
+            ])
             if (findResult instanceof Error) {
                 ctx.addIssue({
                     code: 'custom',
@@ -328,6 +323,7 @@ const parseEQROContract = (
                 contract.id,
                 contract.draftRevision.formData
             )
+
             if (validationError) {
                 ctx.addIssue({
                     code: 'custom',
