@@ -240,28 +240,38 @@ const eqroContractFormDataSchema = genericContractFormDataSchema.extend({
     ),
     // Fields not applicable to EQRO submissions
     // following values should be undefined for a EQRO contract
-    riskBasedContract: z.undefined().optional(),
-    dsnpContract: z.undefined().optional(),
-    contractExecutionStatus: z.undefined().optional(),
-    inLieuServicesAndSettings: z.undefined().optional(),
-    modifiedBenefitsProvided: z.undefined().optional(),
-    modifiedGeoAreaServed: z.undefined().optional(),
-    modifiedMedicaidBeneficiaries: z.undefined().optional(),
-    modifiedRiskSharingStrategy: z.undefined().optional(),
-    modifiedIncentiveArrangements: z.undefined().optional(),
-    modifiedWitholdAgreements: z.undefined().optional(),
-    modifiedStateDirectedPayments: z.undefined().optional(),
-    modifiedPassThroughPayments: z.undefined().optional(),
-    modifiedPaymentsForMentalDiseaseInstitutions: z.undefined().optional(),
-    modifiedMedicalLossRatioStandards: z.undefined().optional(),
-    modifiedOtherFinancialPaymentIncentive: z.undefined().optional(),
-    modifiedEnrollmentProcess: z.undefined().optional(),
-    modifiedGrevienceAndAppeal: z.undefined().optional(),
-    modifiedNetworkAdequacyStandards: z.undefined().optional(),
-    modifiedLengthOfContract: z.undefined().optional(),
-    modifiedNonRiskPaymentArrangements: z.undefined().optional(),
-    statutoryRegulatoryAttestation: z.undefined().optional(),
-    statutoryRegulatoryAttestationDescription: z.undefined().optional(),
+    riskBasedContract: preprocessNulls(z.undefined().optional()),
+    dsnpContract: preprocessNulls(z.undefined().optional()),
+    contractExecutionStatus: preprocessNulls(z.undefined().optional()),
+    inLieuServicesAndSettings: preprocessNulls(z.undefined().optional()),
+    modifiedBenefitsProvided: preprocessNulls(z.undefined().optional()),
+    modifiedGeoAreaServed: preprocessNulls(z.undefined().optional()),
+    modifiedMedicaidBeneficiaries: preprocessNulls(z.undefined().optional()),
+    modifiedRiskSharingStrategy: preprocessNulls(z.undefined().optional()),
+    modifiedIncentiveArrangements: preprocessNulls(z.undefined().optional()),
+    modifiedWitholdAgreements: preprocessNulls(z.undefined().optional()),
+    modifiedStateDirectedPayments: preprocessNulls(z.undefined().optional()),
+    modifiedPassThroughPayments: preprocessNulls(z.undefined().optional()),
+    modifiedPaymentsForMentalDiseaseInstitutions: preprocessNulls(
+        z.undefined().optional()
+    ),
+    modifiedMedicalLossRatioStandards: preprocessNulls(
+        z.undefined().optional()
+    ),
+    modifiedOtherFinancialPaymentIncentive: preprocessNulls(
+        z.undefined().optional()
+    ),
+    modifiedEnrollmentProcess: preprocessNulls(z.undefined().optional()),
+    modifiedGrevienceAndAppeal: preprocessNulls(z.undefined().optional()),
+    modifiedNetworkAdequacyStandards: preprocessNulls(z.undefined().optional()),
+    modifiedLengthOfContract: preprocessNulls(z.undefined().optional()),
+    modifiedNonRiskPaymentArrangements: preprocessNulls(
+        z.undefined().optional()
+    ),
+    statutoryRegulatoryAttestation: preprocessNulls(z.undefined().optional()),
+    statutoryRegulatoryAttestationDescription: preprocessNulls(
+        z.undefined().optional()
+    ),
     // should always be an empty array to match GQL types
     federalAuthorities:
         genericContractFormDataSchema.shape.federalAuthorities.default([]),
