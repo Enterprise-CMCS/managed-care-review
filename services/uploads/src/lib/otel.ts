@@ -1,7 +1,7 @@
 import opentelemetry from '@opentelemetry/api'
 import { NodeTracerProvider } from '@opentelemetry/sdk-trace-node'
 import { SemanticResourceAttributes } from '@opentelemetry/semantic-conventions'
-import { Resource } from '@opentelemetry/resources'
+import { resourceFromAttributes } from '@opentelemetry/resources'
 import { BatchSpanProcessor } from '@opentelemetry/sdk-trace-base'
 import { AWSXRayIdGenerator } from '@opentelemetry/id-generator-aws-xray'
 import { OTLPTraceExporter } from '@opentelemetry/exporter-trace-otlp-http'
@@ -15,11 +15,9 @@ import {
 export function initTracer(serviceName: string, otelCollectorURL: string) {
     console.info('-----Setting OTEL instrumentation-----')
 
-    const resource = Resource.default().merge(
-        new Resource({
-            [SemanticResourceAttributes.SERVICE_NAME]: serviceName,
-        })
-    )
+    const resource = resourceFromAttributes({
+        [SemanticResourceAttributes.SERVICE_NAME]: serviceName,
+    })
 
     const exporter = new OTLPTraceExporter({
         url: otelCollectorURL,
@@ -28,31 +26,28 @@ export function initTracer(serviceName: string, otelCollectorURL: string) {
     const provider = new NodeTracerProvider({
         idGenerator: new AWSXRayIdGenerator(),
         resource: resource,
+        spanProcessors: [new BatchSpanProcessor(exporter)],
     })
-
-    provider.addSpanProcessor(new BatchSpanProcessor(exporter))
 
     // Initialize the OpenTelemetry APIs to use the NodeTracerProvider bindings
     provider.register()
 }
 
 export function initMeter(serviceName: string) {
-    const resource = Resource.default().merge(
-        new Resource({
-            [SemanticResourceAttributes.SERVICE_NAME]: serviceName,
-        })
-    )
+    const resource = resourceFromAttributes({
+        [SemanticResourceAttributes.SERVICE_NAME]: serviceName,
+    })
+
     const metricReader = new PeriodicExportingMetricReader({
-        // TODO: Changes need to be made here
         exporter: new OTLPMetricExporter(),
         exportIntervalMillis: 1000,
     })
 
     const provider = new MeterProvider({
         resource: resource,
+        readers: [metricReader],
     })
 
-    provider.addMetricReader(metricReader)
     opentelemetry.metrics.setGlobalMeterProvider(provider)
 }
 
