@@ -145,6 +145,8 @@ export const main: Handler = async (
             `Found ${missingContractZips.length} contract revisions missing zips`
         )
 
+        let remainingLimit = limit
+
         if (dryRun) {
             console.info(
                 '[DRY RUN] Would regenerate zips for these contract revisions:',
@@ -152,6 +154,13 @@ export const main: Handler = async (
             )
         } else {
             for (const contractRev of missingContractZips) {
+                if (remainingLimit <= 0) {
+                    console.info(
+                        `Reached limit of ${limit} total zips, stopping contract processing`
+                    )
+                    break
+                }
+
                 const result = await regenerateContractZip(
                     prismaClient,
                     zipService,
@@ -160,6 +169,7 @@ export const main: Handler = async (
                 )
                 if (result.success) {
                     response.contractsProcessed++
+                    remainingLimit--
                 } else {
                     response.contractsFailed++
                     response.errors.push(result.error!)
@@ -170,7 +180,7 @@ export const main: Handler = async (
         console.info('Finding rate revisions missing zips...')
         const missingRateZips = await findRateRevisionsMissingZips(
             prismaClient,
-            limit
+            remainingLimit
         )
         console.info(
             `Found ${missingRateZips.length} rate revisions missing zips`
@@ -183,6 +193,13 @@ export const main: Handler = async (
             )
         } else {
             for (const rateRev of missingRateZips) {
+                if (remainingLimit <= 0) {
+                    console.info(
+                        `Reached limit of ${limit} total zips, stopping rate processing`
+                    )
+                    break
+                }
+
                 const result = await regenerateRateZip(
                     prismaClient,
                     zipService,
@@ -191,6 +208,7 @@ export const main: Handler = async (
                 )
                 if (result.success) {
                     response.ratesProcessed++
+                    remainingLimit--
                 } else {
                     response.ratesFailed++
                     response.errors.push(result.error!)
