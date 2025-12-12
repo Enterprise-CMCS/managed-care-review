@@ -235,15 +235,16 @@ async function findContractRevisionsMissingZips(
                 submitInfoID: {
                     not: null, // Only submitted revisions
                 },
+                // Has at least one contract document OR at least one supporting document
                 OR: [
                     {
                         contractDocuments: {
-                            some: {}, // Has at least one contract document
+                            some: {},
                         },
                     },
                     {
                         supportingDocuments: {
-                            some: {}, // Has at least one supporting document
+                            some: {},
                         },
                     },
                 ],
