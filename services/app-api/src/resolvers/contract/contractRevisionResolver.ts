@@ -52,7 +52,6 @@ export function contractRevisionResolver(
                     setErrorAttributesOnActiveSpan(errMessage, span)
                     return []
                 }
-
                 return documentZipPackages
             } catch (error) {
                 const errorMessage =

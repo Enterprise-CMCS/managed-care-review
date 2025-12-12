@@ -1,5 +1,6 @@
 import { URL } from 'url'
 import { compile } from 'path-to-regexp'
+import type { ContractSubmissionTypeRecordKeys } from '@mc-review/constants'
 import {
     RoutesRecord,
     ContractSubmissionTypeRecord,
@@ -27,7 +28,7 @@ function generateUrl(
 // all of react-router into our bundle.
 function reviewAndSubmitURL(
     id: string,
-    contractSubmissionType: string,
+    contractSubmissionType: ContractSubmissionTypeRecordKeys,
     base: string
 ): string {
     const pattern = RoutesRecord.SUBMISSIONS_REVIEW_SUBMIT
@@ -44,7 +45,7 @@ function reviewAndSubmitURL(
 // all of react-router into our bundle.
 function submissionSummaryURL(
     id: string,
-    contractSubmissionType: string,
+    contractSubmissionType: ContractSubmissionTypeRecordKeys,
     base: string
 ): string {
     const pattern = RoutesRecord.SUBMISSIONS_SUMMARY
@@ -58,7 +59,7 @@ function submissionSummaryURL(
 
 function submissionQuestionResponseURL(
     id: string,
-    contractSubmissionType: string,
+    contractSubmissionType: ContractSubmissionTypeRecordKeys,
     base: string
 ): string {
     const pattern = RoutesRecord.SUBMISSIONS_CONTRACT_QUESTIONS_AND_ANSWERS
@@ -78,7 +79,7 @@ function rateSummaryURL(id: string, base: string): string {
 function rateQuestionResponseURL(
     id: string,
     rateID: string,
-    contractSubmissionType: string,
+    contractSubmissionType: ContractSubmissionTypeRecordKeys,
     base: string
 ): string {
     const pattern = RoutesRecord.SUBMISSIONS_RATE_QUESTIONS_AND_ANSWERS

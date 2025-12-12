@@ -1,6 +1,7 @@
 import type { Store } from '../../postgres'
 import type { MutationResolvers } from '../../gen/gqlServer'
 import type { Emailer } from '../../emailer'
+import type { StateCodeType } from '@mc-review/submissions'
 import {
     setErrorAttributesOnActiveSpan,
     setResolverDetailsOnActiveSpan,
@@ -11,7 +12,6 @@ import { logError, logSuccess } from '../../logger'
 import { createForbiddenError, createUserInputError } from '../errorUtils'
 import { NotFoundError } from '../../postgres/postgresErrors'
 import { GraphQLError } from 'graphql/index'
-import type { StateCodeType } from '../../testHelpers'
 import { canWrite } from '../../authorization/oauthAuthorization'
 
 export function undoWithdrawRate(

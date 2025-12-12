@@ -3,7 +3,7 @@ import type {
     StateType,
     ProgramArgType,
     StatePrograms,
-} from '../healthPlanFormDataType'
+} from '@mc-review/submissions'
 
 const typedStatePrograms: StatePrograms = statePrograms
 

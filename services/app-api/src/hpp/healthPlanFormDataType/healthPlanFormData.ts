@@ -11,7 +11,7 @@ import {
 import { formatRateNameDate } from '@mc-review/dates'
 import type { LockedHealthPlanFormDataType } from './LockedHealthPlanFormDataType'
 import type { HealthPlanFormDataType } from './HealthPlanFormDataType'
-import type { ProgramArgType } from './index'
+import type { ProgramArgType } from '@mc-review/submissions'
 
 // TODO: Refactor into multiple files and add unit tests to these functions
 

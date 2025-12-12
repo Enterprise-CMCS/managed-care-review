@@ -1,5 +1,9 @@
 import { z } from 'zod'
-import { contractRevisionSchema, rateRevisionSchema, eqroContractRevisionSchema } from './revisionTypes'
+import {
+    contractRevisionSchema,
+    rateRevisionSchema,
+    eqroContractRevisionSchema,
+} from './revisionTypes'
 import { updateInfoSchema } from './updateInfoType'
 
 const contractPackageSubmissionSchema = z.object({
@@ -66,7 +70,7 @@ export {
     contractPackageSubmissionWithCauseSchema,
     ratePackageSubmissionWithCauseSchema,
     ratePackageSubmissionSchema,
-    eqroContractPackageSubmissionSchema
+    eqroContractPackageSubmissionSchema,
 }
 
 export type {

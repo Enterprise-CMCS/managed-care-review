@@ -111,7 +111,7 @@ export {
     contractWithoutDraftRatesSchema,
     rateWithoutDraftContractsSchema,
     contractSubmissionTypeSchema,
-    eqroContractDraftSchema
+    eqroContractDraftSchema,
 }
 
 export type {

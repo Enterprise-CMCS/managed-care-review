@@ -56,6 +56,7 @@ const ContractSubmissionTypeRecord = {
     HEALTH_PLAN: 'health-plan',
     EQRO: 'eqro'
 } as const
+type ContractSubmissionTypeRecordKeys = keyof typeof ContractSubmissionTypeRecord
 /*
     Every application url (excluding query parameters) is found in the RoutesRecord.
     These types ensure we use valid route throughout the application
@@ -277,4 +278,4 @@ export {
     QUESTION_RESPONSE_FORM_ROUTES
 }
 
-export type { RouteT, RouteTWithUnknown }
+export type { ContractSubmissionTypeRecordKeys, RouteT, RouteTWithUnknown }

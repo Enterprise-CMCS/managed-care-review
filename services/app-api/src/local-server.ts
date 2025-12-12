@@ -176,15 +176,7 @@ router.get('/health_check', async (req: Request, res: Response) => {
 // OAuth token
 router.post('/oauth/token', async (req: Request, res: Response) => {
     const event = toLambdaEvent(req)
-    const context = createContext()
-    await handleLambdaResponse(
-        res,
-        oauthTokenHandler(
-            event,
-            context,
-            () => {}
-        ) as Promise<APIGatewayProxyResult>
-    )
+    await handleLambdaResponse(res, oauthTokenHandler(event))
 })
 
 // OTEL proxy
