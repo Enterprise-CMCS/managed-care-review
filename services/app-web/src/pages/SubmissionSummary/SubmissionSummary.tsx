@@ -15,8 +15,9 @@ import {
     NavLinkWithLogging,
     SectionCard,
     ButtonWithLogging,
+    MultiColumnGrid,
+    Loading,
 } from '../../components'
-import { Loading } from '../../components'
 import { usePage } from '../../contexts/PageContext'
 import {
     UpdateInformation,
@@ -49,11 +50,6 @@ import {
     SubmissionWithdrawnBanner,
     StatusUpdatedBanner,
 } from '../../components/Banner'
-import { MultiColumnGrid } from '../../components/MultiColumnGrid/MultiColumnGrid'
-
-export interface SubmissionSummaryFormValues {
-    dateApprovalReleasedToState: string
-}
 
 export const SubmissionSummary = (): React.ReactElement => {
     // Page level state
@@ -437,7 +433,6 @@ export const SubmissionSummary = (): React.ReactElement => {
                     }
                     contract={contract}
                     submissionName={name}
-                    statePrograms={statePrograms}
                     initiallySubmittedAt={contract.initiallySubmittedAt}
                     isStateUser={isStateUser}
                     explainMissingData={explainMissingData}
@@ -445,9 +440,7 @@ export const SubmissionSummary = (): React.ReactElement => {
 
                 <ContractDetailsSummarySection
                     contract={contract}
-                    isCMSUser={hasCMSPermissions}
                     isStateUser={isStateUser}
-                    submissionName={name}
                     onDocumentError={handleDocumentDownloadError}
                     explainMissingData={explainMissingData}
                 />
@@ -479,10 +472,4 @@ export const SubmissionSummary = (): React.ReactElement => {
             </GridContainer>
         </div>
     )
-}
-
-export type SectionHeaderProps = {
-    header: string
-    submissionName?: boolean
-    href: string
 }

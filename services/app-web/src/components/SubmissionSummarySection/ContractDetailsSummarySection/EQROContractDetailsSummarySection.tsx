@@ -5,7 +5,6 @@ import {
     UnlockedContract,
 } from '../../../gen/gqlClient'
 import { useParams } from 'react-router-dom'
-import { useLDClient } from 'launchdarkly-react-client-sdk'
 import { SectionHeader } from '../../SectionHeader'
 import { UploadedDocumentsTable } from '..'
 import { MultiColumnGrid } from '../../MultiColumnGrid'
@@ -13,66 +12,39 @@ import { SectionCard } from '../../SectionCard'
 import { DocumentHeader } from '../../DocumentHeader/DocumentHeader'
 import { usePreviousSubmission } from '../../../hooks'
 import { useAuth } from '../../../contexts/AuthContext'
-import { featureFlags } from '@mc-review/common-code'
 import { hasCMSUserPermissions } from '@mc-review/helpers'
 import {
     getIndexFromRevisionVersion,
     getLastContractSubmission,
     getPackageSubmissionAtIndex,
     getVisibleLatestContractFormData,
-    isContractWithProvisions,
 } from '@mc-review/submissions'
 import styles from '../SubmissionSummarySection.module.scss'
 import {
     ContractEffectiveDateSummary,
-    ContractExecutionSummary,
-    DsnpSummary,
-    FederalAuthoritySummary,
-    ManagedCareEntitySummary,
-    ModifiedProvisionSummary,
-    StatutoryRegulatoryAttestationSummary,
-    UnmodifiedProvisionSummary,
+    EQROModifiedProvisionSummary,
+    NewEQROContractorSummary,
 } from '../SummarySectionFields'
 import { GenericErrorPage } from '../../../pages/Errors/GenericErrorPage'
+import { getCurrentRevForZipLink } from './ContractDetailsSummarySection'
 
-export type ContractDetailsSummarySectionProps = {
+export type EQROContractDetailsSummarySection = {
     contract: Contract | UnlockedContract
     contractRev?: ContractRevision
     editNavigateTo?: string
-    isStateUser: boolean
     onDocumentError?: (error: true) => void
     explainMissingData?: boolean
 }
 
-// Get the zip download URL from the pre-generated zip packages
-export const getCurrentRevForZipLink = (
-    contract: Contract | UnlockedContract,
-    isCMSUser: boolean,
-    contractRev: ContractRevision | undefined
-): ContractRevision | undefined => {
-    const status = contract.status
-    switch (true) {
-        case !!contractRev:
-            return contractRev
-        case isCMSUser && status === 'UNLOCKED':
-            return contract.packageSubmissions[0]?.contractRevision
-        case !!contract.draftRevision:
-            return contract.draftRevision
-        default:
-            return contract.packageSubmissions[0]?.contractRevision
-    }
-}
-
-export const ContractDetailsSummarySection = ({
+export const EQROContractDetailsSummarySection = ({
     contract,
     contractRev,
     editNavigateTo, // this is the edit link for the section. When this prop exists, summary section is loaded in edit mode
     onDocumentError,
     explainMissingData,
-}: ContractDetailsSummarySectionProps): React.ReactElement => {
+}: EQROContractDetailsSummarySection): React.ReactElement => {
     // Checks if submission is a previous submission
     const isPreviousSubmission = usePreviousSubmission()
-    const ldClient = useLDClient()
     const { loggedInUser } = useAuth()
     const { revisionVersion } = useParams()
     const isCMSUser = hasCMSUserPermissions(loggedInUser)
@@ -89,15 +61,6 @@ export const ContractDetailsSummarySection = ({
     )
 
     if (!contractFormData) return <GenericErrorPage />
-
-    const contract438Attestation = ldClient?.variation(
-        featureFlags.CONTRACT_438_ATTESTATION.flag,
-        featureFlags.CONTRACT_438_ATTESTATION.defaultValue
-    )
-    const contractDsnp = ldClient?.variation(
-        featureFlags.DSNP.flag,
-        featureFlags.DSNP.defaultValue
-    )
 
     const contractSupportingDocuments = contractFormData?.supportingDocuments
     const contractDocs = contractFormData?.contractDocuments
@@ -137,53 +100,21 @@ export const ContractDetailsSummarySection = ({
                 fontSize="38px"
             />
             <dl>
-                {contract438Attestation && (
-                    <StatutoryRegulatoryAttestationSummary
-                        contractFormData={contractFormData}
-                        explainMissingData={explainMissingData}
-                    />
-                )}
                 <MultiColumnGrid columns={2}>
-                    <ContractExecutionSummary
-                        contractFormData={contractFormData}
-                        explainMissingData={explainMissingData}
-                    />
                     <ContractEffectiveDateSummary
                         contractFormData={contractFormData}
                         explainMissingData={explainMissingData}
                     />
-                    <ManagedCareEntitySummary
-                        contractFormData={contractFormData}
-                        explainMissingData={explainMissingData}
-                    />
-                    <FederalAuthoritySummary
+                    <NewEQROContractorSummary
                         contractFormData={contractFormData}
                         explainMissingData={explainMissingData}
                     />
                 </MultiColumnGrid>
-                {contractDsnp && (
-                    <MultiColumnGrid columns={1}>
-                        <DsnpSummary
-                            contractFormData={contractFormData}
-                            explainMissingData={explainMissingData}
-                        />
-                    </MultiColumnGrid>
-                )}
-                {isContractWithProvisions(contract) && (
-                    <MultiColumnGrid columns={2}>
-                        <ModifiedProvisionSummary
-                            contract={contract}
-                            isEditing={isEditing}
-                            explainMissingData={explainMissingData}
-                        />
-
-                        <UnmodifiedProvisionSummary
-                            contract={contract}
-                            isEditing={isEditing}
-                            explainMissingData={explainMissingData}
-                        />
-                    </MultiColumnGrid>
-                )}
+                <EQROModifiedProvisionSummary
+                    contractID={contract.id}
+                    contractFormData={contractFormData}
+                    explainMissingData={explainMissingData}
+                />
             </dl>
             <DocumentHeader
                 type={'CONTRACT'}

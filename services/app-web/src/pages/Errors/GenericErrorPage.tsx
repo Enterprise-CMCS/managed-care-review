@@ -1,6 +1,5 @@
 import React from 'react'
 import styles from './Errors.module.scss'
-
 import { PageHeading } from '../../components'
 import { GridContainer } from '@trussworks/react-uswds'
 import { ContactSupportLink } from '../../components/ErrorAlert/ContactSupportLink'

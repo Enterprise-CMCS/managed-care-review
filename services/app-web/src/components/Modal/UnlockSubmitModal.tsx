@@ -20,6 +20,7 @@ import {
     unlockMutationWrapper,
 } from '@mc-review/helpers'
 import { useTealium } from '../../hooks'
+import { EQROModalDescription } from './ModalBodyContent/EQROModalDescription'
 
 type ModalTypes =
     | 'SUBMIT_RATE'
@@ -28,6 +29,7 @@ type ModalTypes =
     | 'SUBMIT_CONTRACT'
     | 'RESUBMIT_CONTRACT'
     | 'UNLOCK_CONTRACT'
+    | 'SUBMIT_EQRO_CONTRACT'
 
 type UnlockSubmitModalProps = {
     submissionData: Rate | Contract
@@ -40,7 +42,7 @@ type UnlockSubmitModalProps = {
 type ModalValueType = {
     modalHeading?: string
     onSubmitText?: string
-    modalDescription?: string
+    modalDescription?: string | React.ReactElement
     inputHint?: string
     unlockSubmitModalInputValidation?: string
     errorHeading: string
@@ -100,6 +102,13 @@ const modalValueDictionary: Record<ModalTypes, ModalValueType> = {
         errorHeading: ERROR_MESSAGES.submit_error_heading,
         errorSuggestion: ERROR_MESSAGES.submit_error_suggestion,
     },
+    SUBMIT_EQRO_CONTRACT: {
+        modalHeading: 'Ready to submit?',
+        onSubmitText: 'Submit',
+        errorHeading: ERROR_MESSAGES.submit_error_heading,
+        errorSuggestion: ERROR_MESSAGES.submit_error_suggestion,
+        modalDescription: EQROModalDescription(),
+    },
 } satisfies Record<ModalTypes, ModalValueType>
 
 export const UnlockSubmitModal = ({
@@ -145,9 +154,11 @@ export const UnlockSubmitModal = ({
             : submitContractLoading
 
     const isSubmitting = mutationLoading || formik.isSubmitting
-    const includesFormInput = !['SUBMIT_CONTRACT', 'SUBMIT_RATE'].includes(
-        modalType
-    )
+    const includesFormInput = ![
+        'SUBMIT_CONTRACT',
+        'SUBMIT_RATE',
+        'SUBMIT_EQRO_CONTRACT',
+    ].includes(modalType)
 
     const prevSubmitting = usePrevious(isSubmitting)
 
@@ -182,6 +193,7 @@ export const UnlockSubmitModal = ({
                 console.info('submit rate not implemented yet')
                 break
             case 'SUBMIT_CONTRACT':
+            case 'SUBMIT_EQRO_CONTRACT':
                 result = await submitMutationWrapper(
                     submitContract,
                     submissionData.id,
@@ -233,7 +245,11 @@ export const UnlockSubmitModal = ({
         } else {
             modalRef.current?.toggleModal(undefined, false)
             if (
-                ['RESUBMIT_CONTRACT', 'SUBMIT_CONTRACT'].includes(modalType) &&
+                [
+                    'RESUBMIT_CONTRACT',
+                    'SUBMIT_CONTRACT',
+                    'SUBMIT_EQRO_CONTRACT',
+                ].includes(modalType) &&
                 submissionName
             ) {
                 navigate(
@@ -256,8 +272,6 @@ export const UnlockSubmitModal = ({
             if (fieldElement) {
                 fieldElement.focus()
                 setFocusErrorsInModal(false)
-            } else {
-                console.info('Attempting to focus element that does not exist')
             }
         }
     }, [focusErrorsInModal, formik.errors])
@@ -317,8 +331,10 @@ export const UnlockSubmitModal = ({
                         />
                     </FormGroup>
                 </form>
-            ) : (
+            ) : typeof modalValues.modalDescription === 'string' ? (
                 <p>{modalValues.modalDescription}</p>
+            ) : (
+                modalValues.modalDescription
             )}
         </Modal>
     )
