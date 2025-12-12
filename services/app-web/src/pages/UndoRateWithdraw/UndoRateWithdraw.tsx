@@ -38,7 +38,7 @@ type FormError =
 
 export const UndoRateWithdraw = () => {
     const { id } = useParams() as { id: string }
-    const { updateHeading } = usePage()
+    const { updateHeading, updateStateContent } = usePage()
     const { logFormSubmitEvent } = useTealium()
     const navigate = useNavigate()
     const [shouldValidate, setShouldValidate] = React.useState(false)
@@ -63,6 +63,20 @@ export const UndoRateWithdraw = () => {
     })
 
     const rate = data?.fetchRate.rate
+    const stateCode = rate?.state.code
+    const stateName = rate?.state.name
+    // Set state info for the header
+    useEffect(() => {
+        if (stateCode || stateName) {
+            updateStateContent(stateCode, stateName)
+        } else {
+            updateStateContent(undefined, undefined)
+        }
+
+        return () => {
+            updateStateContent(undefined, undefined)
+        }
+    }, [stateCode, stateName, updateStateContent])
 
     useEffect(() => {
         updateHeading({ customHeading: rateName })

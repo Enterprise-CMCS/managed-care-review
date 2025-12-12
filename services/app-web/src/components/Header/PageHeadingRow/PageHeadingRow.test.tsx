@@ -1,10 +1,10 @@
 import { screen } from '@testing-library/react'
-import { StateUser } from '../../../gen/gqlClient'
+import { CmsUser, StateUser } from '../../../gen/gqlClient'
 import { renderWithProviders } from '../../../testHelpers/jestHelpers'
 import { PageHeadingRow } from './PageHeadingRow'
 
 describe('Page Heading Row', () => {
-    const loggedInUser: StateUser = {
+    const loggedInStateUser: StateUser = {
         __typename: 'StateUser' as const,
         state: {
             name: 'Minnesota',
@@ -42,6 +42,24 @@ describe('Page Heading Row', () => {
         role: 'State User',
         email: 'bob@dmas.mn.gov',
     }
+
+    const loggedInCMSUser: CmsUser = {
+        __typename: 'CMSUser' as const,
+        id: 'foo-id',
+        givenName: 'Bob',
+        familyName: 'Dumas',
+        role: 'CMS_USER',
+        email: 'bob@dmas.mn.gov',
+        divisionAssignment: 'DMCO',
+        stateAssignments: [
+            {
+                code: 'OH',
+                name: 'Ohio',
+                programs: [],
+            },
+        ],
+    }
+
     it('renders without errors and with the managed care header on the landing page', () => {
         renderWithProviders(<PageHeadingRow route="ROOT" />)
         expect(screen.getByRole('heading')).toBeInTheDocument()
@@ -70,11 +88,11 @@ describe('Page Heading Row', () => {
         )
     })
 
-    it('displays custom heading for page when loggedInUser exists', () => {
+    it('displays custom heading for page when loggedInStateUser exists', () => {
         renderWithProviders(
             <PageHeadingRow
                 heading="Custom page heading"
-                loggedInUser={loggedInUser}
+                loggedInUser={loggedInStateUser}
                 route="ROOT"
             />
         )
@@ -86,59 +104,123 @@ describe('Page Heading Row', () => {
         )
     })
 
-    it('displays EQRO entity type on EQRO submission page', () => {
+    it('displays EQRO contract type on EQRO submission page', () => {
         renderWithProviders(
             <PageHeadingRow
                 heading="Custom page heading"
-                loggedInUser={loggedInUser}
+                loggedInUser={loggedInStateUser}
                 route="SUBMISSIONS_SUMMARY"
                 pathname="/submissions/eqro/1234"
             />
         )
 
-        expect(screen.getByTestId('entityType')).toHaveTextContent('EQRO')
+        expect(screen.getByTestId('contractType')).toHaveTextContent('EQRO')
     })
 
-    it('displays Health plan entity type on hpp submission page', () => {
+    it('displays Health plan contract type on hpp submission page', () => {
         renderWithProviders(
             <PageHeadingRow
                 heading="Custom page heading"
-                loggedInUser={loggedInUser}
+                loggedInUser={loggedInStateUser}
                 route="SUBMISSIONS_SUMMARY"
                 pathname="/submissions/health-plan/1234"
             />
         )
 
-        expect(screen.getByTestId('entityType')).toHaveTextContent(
+        expect(screen.getByTestId('contractType')).toHaveTextContent(
             'Health plan'
         )
     })
 
-    it('does not display submission ID or entity type on dashboard', () => {
+    it('does not display submission ID or contract type on dashboard', () => {
         renderWithProviders(
             <PageHeadingRow
                 heading="Custom page heading"
-                loggedInUser={loggedInUser}
+                loggedInUser={loggedInStateUser}
                 route="DASHBOARD_SUBMISSIONS"
                 pathname="/submissions/dashboard"
             />
         )
 
-        expect(screen.queryByTestId('entityType')).not.toBeInTheDocument()
+        expect(screen.queryByTestId('contractType')).not.toBeInTheDocument()
         expect(screen.queryByTestId('submission-id')).not.toBeInTheDocument()
     })
 
-    it('does not display submission ID or entity type on new submission page', () => {
+    it('does not display submission ID or contract type on new submission page', () => {
         renderWithProviders(
             <PageHeadingRow
                 heading="Custom page heading"
-                loggedInUser={loggedInUser}
+                loggedInUser={loggedInStateUser}
                 route="SUBMISSIONS_NEW"
                 pathname="/submissions/new"
             />
         )
 
-        expect(screen.queryByTestId('entityType')).not.toBeInTheDocument()
+        expect(screen.queryByTestId('contractType')).not.toBeInTheDocument()
         expect(screen.queryByTestId('submission-id')).not.toBeInTheDocument()
+    })
+    it('displays state information for CMS user on submission summary', () => {
+        renderWithProviders(
+            <PageHeadingRow
+                heading="Custom page heading"
+                loggedInUser={loggedInCMSUser}
+                route="SUBMISSIONS_SUMMARY"
+                pathname="/submissions/eqro/1234"
+                stateCode="OH"
+                stateName="Ohio"
+            />
+        )
+        expect(screen.getByTestId('stateDisplay')).toHaveTextContent('Ohio')
+    })
+    it('does not display state information for CMS user on the dashboard', () => {
+        renderWithProviders(
+            <PageHeadingRow
+                heading="Custom page heading"
+                loggedInUser={loggedInCMSUser}
+                route="SUBMISSIONS_SUMMARY"
+                pathname="/dashboard"
+            />
+        )
+        expect(screen.queryByTestId('stateDisplay')).not.toBeInTheDocument()
+    })
+    it('does not display state information for CMS user on the settings page', () => {
+        renderWithProviders(
+            <PageHeadingRow
+                heading="Custom page heading"
+                loggedInUser={loggedInCMSUser}
+                route="SUBMISSIONS_SUMMARY"
+                pathname="/mc-review-settings"
+            />
+        )
+        expect(screen.queryByTestId('stateDisplay')).not.toBeInTheDocument()
+    })
+    it('does not display state information for CMS user when stateCode is undefined', () => {
+        renderWithProviders(
+            <PageHeadingRow
+                heading="Custom page heading"
+                loggedInUser={loggedInCMSUser}
+                route="SUBMISSIONS_SUMMARY"
+                pathname="/submissions/eqro/1234"
+                stateName="Ohio"
+            />
+        )
+
+        expect(screen.queryByTestId('stateDisplay')).not.toBeInTheDocument()
+        expect(screen.getByRole('heading')).toHaveTextContent('CMS')
+    })
+
+    it('does not display state information for CMS user when stateName is undefined', () => {
+        renderWithProviders(
+            <PageHeadingRow
+                heading="Custom page heading"
+                loggedInUser={loggedInCMSUser}
+                route="SUBMISSIONS_SUMMARY"
+                pathname="/submissions/eqro/1234"
+                stateCode="OH"
+            />
+        )
+
+        expect(screen.queryByTestId('stateDisplay')).not.toBeInTheDocument()
+        expect(screen.getByRole('heading')).toHaveTextContent('CMS')
     })
 })

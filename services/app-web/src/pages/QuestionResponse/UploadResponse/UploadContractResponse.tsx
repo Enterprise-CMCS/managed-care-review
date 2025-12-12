@@ -35,7 +35,7 @@ export const UploadContractResponse = () => {
     }>()
 
     const navigate = useNavigate()
-    const { updateHeading } = usePage()
+    const { updateHeading, updateStateContent } = usePage()
     const { loggedInUser } = useAuth()
     // api
     const {
@@ -64,6 +64,20 @@ export const UploadContractResponse = () => {
         updateHeading({ customHeading: `${contractName} Add response` })
     }, [contractName, updateHeading])
 
+    const stateName = contract?.state.name
+    const stateCode = contract?.state.code
+    // Set state info for the header
+    useEffect(() => {
+        if (stateCode || stateName) {
+            updateStateContent(stateCode, stateName)
+        } else {
+            updateStateContent(undefined, undefined)
+        }
+
+        return () => {
+            updateStateContent(undefined, undefined)
+        }
+    }, [stateCode, stateName, updateStateContent])
     // confirm division is valid
     const realDivision = division?.toUpperCase()
 

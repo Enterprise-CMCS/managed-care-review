@@ -29,7 +29,7 @@ export const Header = ({
         import.meta.url
     ).href
     const { logout, loggedInUser, loginStatus } = useAuth()
-    const { heading } = usePage()
+    const { heading, stateCode, stateName } = usePage()
     const { currentRoute: route, pathname } = useCurrentRoute()
 
     const handleLogout = async () => {
@@ -63,6 +63,8 @@ export const Header = ({
             <PageHeadingRow
                 heading={route !== 'UNKNOWN_ROUTE' ? heading : undefined}
                 route={route}
+                stateCode={stateCode}
+                stateName={stateName}
                 pathname={pathname}
                 isLoading={loginStatus === 'LOADING'}
                 loggedInUser={loggedInUser}
