@@ -35,8 +35,6 @@ export default () => {
                             '.esbuild/.build/collector.yml'
                         )
                         let contents = fs.readFileSync(filePath, 'utf8')
-                        // Do we want a default value here or do we want to assert that NR_LICENSE_KEY always has a value
-                        // I don't think this solution is good, but this effectively mimics the existing behavior
                         contents = contents.replace(
                             '$NR_LICENSE_KEY',
                             process.env.NR_LICENSE_KEY ?? 'undefined'

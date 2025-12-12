@@ -176,7 +176,6 @@ router.get('/health_check', async (req: Request, res: Response) => {
 // OAuth token
 router.post('/oauth/token', async (req: Request, res: Response) => {
     const event = toLambdaEvent(req)
-    // What is the expected behavior here / is there a better way to do this?
     await handleLambdaResponse(res, oauthTokenHandler(event))
 })
 
