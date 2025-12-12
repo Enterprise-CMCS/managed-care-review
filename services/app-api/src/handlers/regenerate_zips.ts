@@ -26,6 +26,10 @@ import {
 } from '../postgres/prismaClient'
 import { contractRevisionToDomainModel } from '../postgres/contractAndRates/parseContractWithHistory'
 import { rateRevisionToDomainModel } from '../postgres/contractAndRates/parseRateWithHistory'
+import {
+    includeContractFormData,
+    includeRateFormData,
+} from '../postgres/contractAndRates/prismaSharedContractRateHelpers'
 
 export type RegenerateZipsEvent = {
     contractRevisionID?: string // Optional: regenerate for specific contract revision
@@ -217,8 +221,8 @@ async function findContractRevisionsMissingZips(
     const revisionsWithoutZips =
         await prismaClient.contractRevisionTable.findMany({
             where: {
-                submitInfo: {
-                    isNot: null, // Only submitted revisions
+                submitInfoID: {
+                    not: null, // Only submitted revisions
                 },
                 OR: [
                     {
@@ -252,8 +256,8 @@ async function findRateRevisionsMissingZips(
     // Query directly for rate revisions that are submitted, have documents, but no zips
     const revisionsWithoutZips = await prismaClient.rateRevisionTable.findMany({
         where: {
-            submitInfo: {
-                isNot: null, // Only submitted revisions
+            submitInfoID: {
+                not: null, // Only submitted revisions
             },
             OR: [
                 {
@@ -294,18 +298,15 @@ async function regenerateContractZip(
             return { success: true }
         }
 
-        // Query the contract revision directly with its documents
+        // Query the contract revision directly with all form data
         const revision = await prismaClient.contractRevisionTable.findFirst({
             where: {
                 id: contractRevisionID,
-                submitInfo: {
-                    isNot: null,
+                submitInfoID: {
+                    not: null,
                 },
             },
-            include: {
-                contractDocuments: true,
-                supportingDocuments: true,
-            },
+            include: includeContractFormData,
         })
 
         if (!revision) {
@@ -379,18 +380,15 @@ async function regenerateRateZip(
             return { success: true }
         }
 
-        // Query the rate revision directly with its documents
+        // Query the rate revision directly with all form data
         const revision = await prismaClient.rateRevisionTable.findFirst({
             where: {
                 id: rateRevisionID,
-                submitInfo: {
-                    isNot: null,
+                submitInfoID: {
+                    not: null,
                 },
             },
-            include: {
-                rateDocuments: true,
-                supportingDocuments: true,
-            },
+            include: includeRateFormData,
         })
 
         if (!revision) {
