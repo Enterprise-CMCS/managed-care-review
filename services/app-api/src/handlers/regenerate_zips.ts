@@ -96,6 +96,13 @@ export const main: Handler = async (
     }
 
     try {
+        // Validate that both IDs are not provided at the same time
+        if (event.contractRevisionID && event.rateRevisionID) {
+            throw new Error(
+                'Cannot specify both contractRevisionID and rateRevisionID in the same request. Please make separate requests for each.'
+            )
+        }
+
         // If specific IDs provided, only process those
         if (event.contractRevisionID) {
             console.info(
