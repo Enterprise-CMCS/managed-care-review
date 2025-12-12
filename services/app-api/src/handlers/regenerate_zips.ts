@@ -240,7 +240,7 @@ async function findContractRevisionsMissingZips(
                         },
                     },
                 ],
-                documentZipPackages: {
+                documentZipPackage: {
                     none: {}, // No zip packages exist
                 },
             },
@@ -275,7 +275,7 @@ async function findRateRevisionsMissingZips(
                     },
                 },
             ],
-            documentZipPackages: {
+            documentZipPackage: {
                 none: {}, // No zip packages exist
             },
         },
