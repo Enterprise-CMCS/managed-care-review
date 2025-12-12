@@ -12,11 +12,10 @@ import {
     ContractRevision,
 } from '../../gen/gqlClient'
 import styles from './ChangeHistory.module.scss'
-import { LinkWithLogging } from '../TealiumLogging/Link'
+import { LinkWithLogging } from '../TealiumLogging'
 import { getUpdatedByDisplayName } from '@mc-review/helpers'
 import { useTealium } from '../../hooks'
 import { formatToPacificTime } from '@mc-review/dates'
-import { useParams } from 'react-router'
 
 type ChangeHistoryProps = {
     contract: Contract | UnlockedContract
@@ -118,7 +117,6 @@ const buildChangeHistoryInfo = (
 export const ChangeHistory = ({
     contract,
 }: ChangeHistoryProps): React.ReactElement => {
-    const { contractSubmissionType } = useParams()
     const { logAccordionEvent } = useTealium()
     const flattenedRevisions = (): flatRevisions[] => {
         const result: flatRevisions[] = []
@@ -207,7 +205,7 @@ export const ChangeHistory = ({
     const revisedItems: AccordionItemProps[] = revisionHistory.map((r) => {
         const { content, title } = buildChangeHistoryInfo(
             r,
-            contractSubmissionType!,
+            contract.contractSubmissionType,
             revisionHistory,
             contract
         )
