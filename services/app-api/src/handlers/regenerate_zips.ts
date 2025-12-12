@@ -271,15 +271,16 @@ async function findRateRevisionsMissingZips(
             submitInfoID: {
                 not: null, // Only submitted revisions
             },
+            // Has at least one contract document OR at least one supporting document
             OR: [
                 {
                     rateDocuments: {
-                        some: {}, // Has at least one rate document
+                        some: {},
                     },
                 },
                 {
                     supportingDocuments: {
-                        some: {}, // Has at least one supporting document
+                        some: {},
                     },
                 },
             ],
