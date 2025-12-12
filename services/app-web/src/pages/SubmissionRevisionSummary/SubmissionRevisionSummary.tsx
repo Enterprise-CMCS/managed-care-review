@@ -18,7 +18,6 @@ import {
     handleAndReturnErrorState,
 } from '../StateSubmission/SharedSubmissionComponents/ErrorOrLoadingPage'
 import { Error404 } from '../Errors/Error404Page'
-import { hasCMSUserPermissions } from '@mc-review/helpers'
 
 export const SubmissionRevisionSummary = (): React.ReactElement => {
     // Page level state
@@ -32,7 +31,6 @@ export const SubmissionRevisionSummary = (): React.ReactElement => {
     const { loggedInUser } = useAuth()
 
     const isStateUser = loggedInUser?.role === 'STATE_USER'
-    const hasCMSPermissions = hasCMSUserPermissions(loggedInUser)
 
     const {
         data: fetchContractData,
@@ -117,7 +115,6 @@ export const SubmissionRevisionSummary = (): React.ReactElement => {
                 <SubmissionTypeSummarySection
                     contract={contract}
                     contractRev={revision}
-                    statePrograms={statePrograms}
                     isStateUser={isStateUser}
                     submissionName={name}
                     initiallySubmittedAt={contract.initiallySubmittedAt}
@@ -135,8 +132,6 @@ export const SubmissionRevisionSummary = (): React.ReactElement => {
 
                 <ContractDetailsSummarySection
                     contract={contract}
-                    submissionName={name}
-                    isCMSUser={hasCMSPermissions}
                     isStateUser={isStateUser}
                     contractRev={revision}
                 />

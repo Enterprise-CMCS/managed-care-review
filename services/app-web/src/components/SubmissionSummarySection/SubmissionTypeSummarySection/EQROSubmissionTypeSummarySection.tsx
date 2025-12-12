@@ -15,14 +15,13 @@ import styles from '../SubmissionSummarySection.module.scss'
 import {
     ContractProgramsSummary,
     ContractTypeSummary,
+    ManagedCareEntitySummary,
     PopulationCoverageSummary,
-    RiskBasedContractSummary,
     SubmissionDescriptionSummary,
-    SubmissionTypeSummary,
     SubmittedAtSummary,
 } from '../SummarySectionFields'
 
-export type SubmissionTypeSummarySectionProps = {
+export type EQROSubmissionTypeSummarySection = {
     contract: Contract | UnlockedContract
     contractRev?: ContractRevision
     editNavigateTo?: string
@@ -34,7 +33,7 @@ export type SubmissionTypeSummarySectionProps = {
     explainMissingData?: boolean
 }
 
-export const SubmissionTypeSummarySection = ({
+export const EQROSubmissionTypeSummarySection = ({
     contract,
     contractRev,
     editNavigateTo,
@@ -44,16 +43,17 @@ export const SubmissionTypeSummarySection = ({
     submissionName,
     isStateUser,
     explainMissingData,
-}: SubmissionTypeSummarySectionProps): React.ReactElement => {
+}: EQROSubmissionTypeSummarySection): React.ReactElement => {
     const contractOrRev = contractRev ? contractRev : contract
     const contractFormData = getVisibleLatestContractFormData(
         contractOrRev,
         isStateUser
     )
-
     if (!contractFormData) return <GenericErrorPage />
 
-    const programNames = contract.state.programs
+    const programs = contract.state.programs
+
+    const programNames = programs
         .filter((p) => contractFormData?.programIDs.includes(p.id))
         .map((p) => p.name)
 
@@ -84,34 +84,26 @@ export const SubmissionTypeSummarySection = ({
                         />
                     )}
                 <MultiColumnGrid columns={2}>
+                    {(contractFormData.populationCovered || !isSubmitted) && (
+                        <PopulationCoverageSummary
+                            contractFormData={contractFormData}
+                            explainMissingData={explainMissingData}
+                            label="Populations included in EQRO activities"
+                        />
+                    )}
                     {(programNames.length > 0 || !isSubmitted) && (
                         <ContractProgramsSummary
                             programNames={programNames}
                             explainMissingData={explainMissingData}
+                            label="Programs reviewed by this EQRO"
                         />
                     )}
-                    {(contractFormData.submissionType || !isSubmitted) && (
-                        <SubmissionTypeSummary
-                            contractFormData={contractFormData}
-                            explainMissingData={explainMissingData}
-                        />
-                    )}
+                    <ManagedCareEntitySummary
+                        contractFormData={contractFormData}
+                        explainMissingData={explainMissingData}
+                    />
                     {(contractFormData.contractType || !isSubmitted) && (
                         <ContractTypeSummary
-                            contractFormData={contractFormData}
-                            explainMissingData={explainMissingData}
-                        />
-                    )}
-                    {(contractFormData.riskBasedContract !== null ||
-                        (!isSubmitted &&
-                            contractFormData.riskBasedContract !== null)) && (
-                        <RiskBasedContractSummary
-                            contractFormData={contractFormData}
-                            explainMissingData={explainMissingData}
-                        />
-                    )}
-                    {(contractFormData.populationCovered || !isSubmitted) && (
-                        <PopulationCoverageSummary
                             contractFormData={contractFormData}
                             explainMissingData={explainMissingData}
                         />
