@@ -2,6 +2,7 @@ import { dsnpTriggers, validateEQROdata } from '@mc-review/submissions'
 import type { FeatureFlagSettings } from '@mc-review/common-code'
 import type { ContractDraftRevisionFormDataInput } from '../../gen/gqlServer'
 import type { ContractFormDataType } from './formDataTypes'
+import { eqroContractFormDataSchema } from './formDataTypes'
 import {
     preprocessNulls,
     populationCoveredSchema,
@@ -146,11 +147,10 @@ const parseAndUpdateEqroFields = (
 const validateEQROContractDraftRevisionInput = (
     formData: ContractDraftRevisionFormDataInput,
     stateCode: string,
-    store: Store,
-    featureFlags?: FeatureFlagSettings
-): UpdateDraftContractFormDataType | Error => {
+    store: Store
+): UpdateDraftContractFormDataType | z.ZodError => {
     // Validate against schema
-    const { data, error } = updateDraftContractFormDataSchema
+    const { data, error } = eqroContractFormDataSchema
         .extend({
             programIDs: validateProgramIDs(stateCode, store),
         })
@@ -158,12 +158,6 @@ const validateEQROContractDraftRevisionInput = (
 
     if (error) {
         return error
-    }
-
-    if (!data) {
-        return new Error(
-            'Error: validateEQROContractDraftRevisionInput returned no data'
-        )
     }
 
     return data
@@ -299,15 +293,10 @@ const parseEQROContract = (
             const contractProgramsIDs = new Set(
                 contract.draftRevision.formData.programIDs
             )
-            const allProgramIDs = contract.draftRates.reduce((acc, rate) => {
-                const rateFormData = rate.draftRevision.formData
-                const rateProgramIDs = rateFormData.rateProgramIDs.concat(
-                    rateFormData.deprecatedRateProgramIDs
-                )
-                return new Set([...acc, ...rateProgramIDs])
-            }, contractProgramsIDs)
 
-            const findResult = store.findPrograms(stateCode, [...allProgramIDs])
+            const findResult = store.findPrograms(stateCode, [
+                ...contractProgramsIDs,
+            ])
             if (findResult instanceof Error) {
                 ctx.addIssue({
                     code: 'custom',
@@ -328,6 +317,7 @@ const parseEQROContract = (
                 contract.id,
                 contract.draftRevision.formData
             )
+
             if (validationError) {
                 ctx.addIssue({
                     code: 'custom',

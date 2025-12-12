@@ -238,69 +238,41 @@ const eqroContractFormDataSchema = genericContractFormDataSchema.extend({
     contractDateEnd: preprocessNulls(
         genericContractFormDataSchema.shape.contractDateEnd.optional()
     ),
-    populationCovered: preprocessNulls(
-        genericContractFormDataSchema.shape.populationCovered.optional()
-    ),
-    riskBasedContract: preprocessNulls(
-        genericContractFormDataSchema.shape.riskBasedContract.optional()
-    ),
-    dsnpContract: preprocessNulls(
-        genericContractFormDataSchema.shape.dsnpContract.optional()
-    ),
-    contractExecutionStatus: preprocessNulls(
-        genericContractFormDataSchema.shape.contractExecutionStatus.optional()
-    ),
-    inLieuServicesAndSettings: preprocessNulls(
-        genericContractFormDataSchema.shape.inLieuServicesAndSettings.optional()
-    ),
-    modifiedBenefitsProvided: preprocessNulls(
-        genericContractFormDataSchema.shape.modifiedBenefitsProvided.optional()
-    ),
-    modifiedGeoAreaServed: preprocessNulls(
-        genericContractFormDataSchema.shape.modifiedGeoAreaServed.optional()
-    ),
-    modifiedMedicaidBeneficiaries: preprocessNulls(
-        genericContractFormDataSchema.shape.modifiedMedicaidBeneficiaries.optional()
-    ),
-    modifiedRiskSharingStrategy: preprocessNulls(
-        genericContractFormDataSchema.shape.modifiedRiskSharingStrategy.optional()
-    ),
-    modifiedIncentiveArrangements: preprocessNulls(
-        genericContractFormDataSchema.shape.modifiedIncentiveArrangements.optional()
-    ),
-    modifiedWitholdAgreements: preprocessNulls(
-        genericContractFormDataSchema.shape.modifiedWitholdAgreements.optional()
-    ),
-    modifiedStateDirectedPayments: preprocessNulls(
-        genericContractFormDataSchema.shape.modifiedStateDirectedPayments.optional()
-    ),
-    modifiedPassThroughPayments: preprocessNulls(
-        genericContractFormDataSchema.shape.modifiedPassThroughPayments.optional()
-    ),
+    // Fields not applicable to EQRO submissions
+    // following values should be undefined for a EQRO contract
+    riskBasedContract: preprocessNulls(z.undefined().optional()),
+    dsnpContract: preprocessNulls(z.undefined().optional()),
+    contractExecutionStatus: preprocessNulls(z.undefined().optional()),
+    inLieuServicesAndSettings: preprocessNulls(z.undefined().optional()),
+    modifiedBenefitsProvided: preprocessNulls(z.undefined().optional()),
+    modifiedGeoAreaServed: preprocessNulls(z.undefined().optional()),
+    modifiedMedicaidBeneficiaries: preprocessNulls(z.undefined().optional()),
+    modifiedRiskSharingStrategy: preprocessNulls(z.undefined().optional()),
+    modifiedIncentiveArrangements: preprocessNulls(z.undefined().optional()),
+    modifiedWitholdAgreements: preprocessNulls(z.undefined().optional()),
+    modifiedStateDirectedPayments: preprocessNulls(z.undefined().optional()),
+    modifiedPassThroughPayments: preprocessNulls(z.undefined().optional()),
     modifiedPaymentsForMentalDiseaseInstitutions: preprocessNulls(
-        genericContractFormDataSchema.shape.modifiedPaymentsForMentalDiseaseInstitutions.optional()
+        z.undefined().optional()
     ),
     modifiedMedicalLossRatioStandards: preprocessNulls(
-        genericContractFormDataSchema.shape.modifiedMedicalLossRatioStandards.optional()
+        z.undefined().optional()
     ),
     modifiedOtherFinancialPaymentIncentive: preprocessNulls(
-        genericContractFormDataSchema.shape.modifiedOtherFinancialPaymentIncentive.optional()
+        z.undefined().optional()
     ),
-    modifiedEnrollmentProcess: preprocessNulls(
-        genericContractFormDataSchema.shape.modifiedEnrollmentProcess.optional()
-    ),
-    modifiedGrevienceAndAppeal: preprocessNulls(
-        genericContractFormDataSchema.shape.modifiedGrevienceAndAppeal.optional()
-    ),
-    modifiedNetworkAdequacyStandards: preprocessNulls(
-        genericContractFormDataSchema.shape.modifiedNetworkAdequacyStandards.optional()
-    ),
-    modifiedLengthOfContract: preprocessNulls(
-        genericContractFormDataSchema.shape.modifiedLengthOfContract.optional()
-    ),
+    modifiedEnrollmentProcess: preprocessNulls(z.undefined().optional()),
+    modifiedGrevienceAndAppeal: preprocessNulls(z.undefined().optional()),
+    modifiedNetworkAdequacyStandards: preprocessNulls(z.undefined().optional()),
+    modifiedLengthOfContract: preprocessNulls(z.undefined().optional()),
     modifiedNonRiskPaymentArrangements: preprocessNulls(
-        genericContractFormDataSchema.shape.modifiedNonRiskPaymentArrangements.optional()
+        z.undefined().optional()
     ),
+    statutoryRegulatoryAttestation: preprocessNulls(z.undefined().optional()),
+    statutoryRegulatoryAttestationDescription: preprocessNulls(
+        z.undefined().optional()
+    ),
+    // should always be an empty array to match GQL types
     federalAuthorities:
         genericContractFormDataSchema.shape.federalAuthorities.default([]),
 })
@@ -330,8 +302,13 @@ const submittableContractFormDataSchema = genericContractFormDataSchema
         }
     })
 
-const submittableEQROContractFormDataSchema = genericContractFormDataSchema
-    .extend({
+const submittableEQROContractFormDataSchema = eqroContractFormDataSchema.extend(
+    {
+        contractDateStart:
+            genericContractFormDataSchema.shape.contractDateStart,
+        contractDateEnd: genericContractFormDataSchema.shape.contractDateEnd,
+        populationCovered:
+            genericContractFormDataSchema.shape.populationCovered,
         managedCareEntities:
             genericContractFormDataSchema.shape.managedCareEntities.nonempty(),
         stateContacts:
@@ -339,51 +316,9 @@ const submittableEQROContractFormDataSchema = genericContractFormDataSchema
         contractDocuments:
             genericContractFormDataSchema.shape.contractDocuments.nonempty(),
         submissionType: z.literal('CONTRACT_ONLY'),
-        // These fields are not required for EQRO submissions
-        federalAuthorities:
-            genericContractFormDataSchema.shape.federalAuthorities.default([]),
-        contractExecutionStatus: preprocessNulls(
-            genericContractFormDataSchema.shape.contractExecutionStatus.optional()
-        ),
-        riskBasedContract: preprocessNulls(
-            genericContractFormDataSchema.shape.riskBasedContract.optional()
-        ),
-        inLieuServicesAndSettings: preprocessNulls(z.boolean().optional()),
-        modifiedBenefitsProvided: preprocessNulls(z.boolean().optional()),
-        modifiedGeoAreaServed: preprocessNulls(z.boolean().optional()),
-        modifiedMedicaidBeneficiaries: preprocessNulls(z.boolean().optional()),
-        modifiedRiskSharingStrategy: preprocessNulls(z.boolean().optional()),
-        modifiedIncentiveArrangements: preprocessNulls(z.boolean().optional()),
-        modifiedWitholdAgreements: preprocessNulls(z.boolean().optional()),
-        modifiedStateDirectedPayments: preprocessNulls(z.boolean().optional()),
-        modifiedPassThroughPayments: preprocessNulls(z.boolean().optional()),
-        modifiedPaymentsForMentalDiseaseInstitutions: preprocessNulls(
-            z.boolean().optional()
-        ),
-        modifiedMedicalLossRatioStandards: preprocessNulls(
-            z.boolean().optional()
-        ),
-        modifiedOtherFinancialPaymentIncentive: preprocessNulls(
-            z.boolean().optional()
-        ),
-        modifiedEnrollmentProcess: preprocessNulls(z.boolean().optional()),
-        modifiedGrevienceAndAppeal: preprocessNulls(z.boolean().optional()),
-        modifiedNetworkAdequacyStandards: preprocessNulls(
-            z.boolean().optional()
-        ),
-        modifiedLengthOfContract: preprocessNulls(z.boolean().optional()),
-        modifiedNonRiskPaymentArrangements: preprocessNulls(
-            z.boolean().optional()
-        ),
-    })
-    .superRefine((formData, ctx) => {
-        if (formData.submissionType !== 'CONTRACT_ONLY') {
-            ctx.addIssue({
-                code: 'custom',
-                message: 'EQRO submissions must be CONTRACT_ONLY',
-            })
-        }
-    })
+    }
+)
+
 const genericRateFormDataSchema = z.object({
     id: z.string().optional(), // 10.4.23 eng pairing - we discussed future reactor that would delete this from the rate revision form data schema all together.
     rateID: z.string().optional(), // 10.4.23 eng pairing - we discussed future refactor to move this up to rate revision schema.

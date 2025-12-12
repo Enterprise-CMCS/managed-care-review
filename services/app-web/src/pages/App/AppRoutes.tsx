@@ -5,7 +5,7 @@ import { useLDClient } from 'launchdarkly-react-client-sdk'
 import { idmRedirectURL } from '../../pages/Auth/cognitoAuth'
 import { assertNever, AuthModeType } from '@mc-review/common-code'
 import { PageTitlesRecord, RoutesRecord, RouteT } from '@mc-review/constants'
-import { getRouteName } from '../../routeHelpers'
+import { getRouteName, getSubmissionPath } from '../../routeHelpers'
 import { useAuth } from '../../contexts/AuthContext'
 import { usePage } from '../../contexts/PageContext'
 import { useTitle } from '../../hooks/useTitle'
@@ -29,7 +29,7 @@ import {
     NewSubmission,
     NewSubmissionForm,
 } from '../StateSubmission'
-import { SubmissionSummary } from '../SubmissionSummary'
+import { EQROSubmissionSummary, SubmissionSummary } from '../SubmissionSummary'
 import { SubmissionRevisionSummary } from '../SubmissionRevisionSummary'
 import { useScrollToPageTop } from '../../hooks/useScrollToPageTop'
 import { featureFlags } from '@mc-review/common-code'
@@ -173,9 +173,21 @@ const StateUserRoutes = ({
                     />
 
                     <Route
-                        path={RoutesRecord.SUBMISSIONS_SUMMARY}
+                        path={getSubmissionPath(
+                            'SUBMISSIONS_SUMMARY',
+                            'HEALTH_PLAN'
+                        )}
                         element={<SubmissionSummary />}
                     />
+                    {showEqroSubmissions && (
+                        <Route
+                            path={getSubmissionPath(
+                                'SUBMISSIONS_SUMMARY',
+                                'EQRO'
+                            )}
+                            element={<EQROSubmissionSummary />}
+                        />
+                    )}
                     <Route
                         path={RoutesRecord.SUBMISSIONS_EDIT_TOP_LEVEL}
                         element={<StateSubmissionForm />}
@@ -232,6 +244,10 @@ const CMSUserRoutes = ({
         featureFlags.UNDO_WITHDRAW_SUBMISSION.flag,
         featureFlags.UNDO_WITHDRAW_SUBMISSION.defaultValue
     )
+    const showEqroSubmissions: boolean = ldClient?.variation(
+        featureFlags.EQRO_SUBMISSIONS.flag,
+        featureFlags.EQRO_SUBMISSIONS.defaultValue
+    )
 
     const isAdminUser = loggedInUser.__typename === 'AdminUser'
 
@@ -273,9 +289,21 @@ const CMSUserRoutes = ({
                         element={<UploadContractQuestions />}
                     />
                     <Route
-                        path={RoutesRecord.SUBMISSIONS_SUMMARY}
+                        path={getSubmissionPath(
+                            'SUBMISSIONS_SUMMARY',
+                            'HEALTH_PLAN'
+                        )}
                         element={<SubmissionSummary />}
                     />
+                    {showEqroSubmissions && (
+                        <Route
+                            path={getSubmissionPath(
+                                'SUBMISSIONS_SUMMARY',
+                                'EQRO'
+                            )}
+                            element={<EQROSubmissionSummary />}
+                        />
+                    )}
                 </Route>
 
                 <Route element={<RateSummarySideNav />}>

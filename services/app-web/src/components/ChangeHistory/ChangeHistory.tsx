@@ -10,13 +10,14 @@ import {
     ContractReviewStatusActions,
     ContractPackageSubmission,
     ContractRevision,
+    ContractSubmissionType,
 } from '../../gen/gqlClient'
 import styles from './ChangeHistory.module.scss'
-import { LinkWithLogging } from '../TealiumLogging/Link'
+import { LinkWithLogging } from '../TealiumLogging'
 import { getUpdatedByDisplayName } from '@mc-review/helpers'
 import { useTealium } from '../../hooks'
 import { formatToPacificTime } from '@mc-review/dates'
-import { useParams } from 'react-router'
+import { ContractSubmissionTypeRecord } from '@mc-review/constants'
 
 type ChangeHistoryProps = {
     contract: Contract | UnlockedContract
@@ -27,9 +28,23 @@ type flatRevisions = UpdateInformation & {
     revisionVersion: string | undefined
 }
 
+const getPreviousSubmissionLink = ({
+    contractSubmissionType,
+    contractID,
+    revisionVersion,
+}: {
+    contractSubmissionType: ContractSubmissionType
+    contractID: string
+    revisionVersion: string
+}) => {
+    const contractSubTypeParam =
+        ContractSubmissionTypeRecord[contractSubmissionType]
+    return `/submissions/${contractSubTypeParam}/${contractID}/revisions/${revisionVersion}`
+}
+
 const buildChangeHistoryInfo = (
     r: flatRevisions,
-    contractSubmissionType: string,
+    contractSubmissionType: ContractSubmissionType,
     revisionHistory: flatRevisions[],
     contract: Contract | UnlockedContract
 ): { content: JSX.Element; title: string } => {
@@ -50,7 +65,11 @@ const buildChangeHistoryInfo = (
                 <br />
                 {r.revisionVersion && hasSubsequentSubmissions && (
                     <LinkWithLogging
-                        href={`/submissions/${contractSubmissionType}/${contract.id}/revisions/${r.revisionVersion}`}
+                        href={getPreviousSubmissionLink({
+                            contractSubmissionType,
+                            contractID: contract.id,
+                            revisionVersion: r.revisionVersion,
+                        })}
                         data-testid={`revision-link-${r.revisionVersion}`}
                     >
                         View past submission version
@@ -79,7 +98,11 @@ const buildChangeHistoryInfo = (
                     r.kind === 'submit' &&
                     r.revisionVersion && (
                         <LinkWithLogging
-                            href={`/submissions/${contractSubmissionType}/${contract.id}/revisions/${r.revisionVersion}`}
+                            href={getPreviousSubmissionLink({
+                                contractSubmissionType,
+                                contractID: contract.id,
+                                revisionVersion: r.revisionVersion,
+                            })}
                             data-testid={`revision-link-${r.revisionVersion}`}
                         >
                             View past submission version
@@ -118,7 +141,6 @@ const buildChangeHistoryInfo = (
 export const ChangeHistory = ({
     contract,
 }: ChangeHistoryProps): React.ReactElement => {
-    const { contractSubmissionType } = useParams()
     const { logAccordionEvent } = useTealium()
     const flattenedRevisions = (): flatRevisions[] => {
         const result: flatRevisions[] = []
@@ -207,7 +229,7 @@ export const ChangeHistory = ({
     const revisedItems: AccordionItemProps[] = revisionHistory.map((r) => {
         const { content, title } = buildChangeHistoryInfo(
             r,
-            contractSubmissionType!,
+            contract.contractSubmissionType,
             revisionHistory,
             contract
         )

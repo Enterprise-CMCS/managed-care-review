@@ -287,6 +287,7 @@ const createAndUpdateTestEQROContract = async (
             contractType: 'BASE',
             managedCareEntities: ['MCO'],
             populationCovered: 'MEDICAID_AND_CHIP',
+            riskBasedContract: false,
         },
         'EQRO'
     )
@@ -303,22 +304,45 @@ const createAndUpdateTestEQROContract = async (
         server,
         draftContract.id,
         draftRevision?.updatedAt,
-        mockGqlContractDraftRevisionFormDataInput(draftContract.stateCode, {
+        {
             // Keep EQRO conditional question trigger fields the same, complete all other fields.
+            // Update conditional EQRO conditional fields these combination
+            // of booleans for EQRO fields does not reflect real world only for testing.
+            ...mockGqlContractDraftRevisionFormDataInput(),
             submissionType: 'CONTRACT_ONLY',
             submissionDescription: 'A complete EQRO submission',
             contractType: 'BASE',
             managedCareEntities: ['MCO'],
             populationCovered: 'MEDICAID_AND_CHIP',
-            // Update conditional EQRO conditional fields these combination
-            // of booleans for EQRO fields does not reflect real world only for testing.
             eqroNewContractor: true,
             eqroProvisionChipEqrRelatedActivities: true,
             eqroProvisionMcoEqrOrRelatedActivities: true,
             eqroProvisionNewMcoEqrRelatedActivities: true,
             eqroProvisionMcoNewOptionalActivity: true,
+            riskBasedContract: undefined,
+            dsnpContract: undefined,
+            contractExecutionStatus: undefined,
+            inLieuServicesAndSettings: undefined,
+            modifiedBenefitsProvided: undefined,
+            modifiedGeoAreaServed: undefined,
+            modifiedMedicaidBeneficiaries: undefined,
+            modifiedRiskSharingStrategy: undefined,
+            modifiedIncentiveArrangements: undefined,
+            modifiedWitholdAgreements: undefined,
+            modifiedStateDirectedPayments: undefined,
+            modifiedPassThroughPayments: undefined,
+            modifiedPaymentsForMentalDiseaseInstitutions: undefined,
+            modifiedMedicalLossRatioStandards: undefined,
+            modifiedOtherFinancialPaymentIncentive: undefined,
+            modifiedEnrollmentProcess: undefined,
+            modifiedGrevienceAndAppeal: undefined,
+            modifiedNetworkAdequacyStandards: undefined,
+            modifiedLengthOfContract: undefined,
+            modifiedNonRiskPaymentArrangements: undefined,
+            statutoryRegulatoryAttestation: undefined,
+            statutoryRegulatoryAttestationDescription: undefined,
             ...contractFormDataOverrides,
-        })
+        }
     )
 
     return await fetchTestContract(server, draftContract.id)
@@ -504,11 +528,10 @@ const updateTestContractDraftRevision = async (
         )
     }
 
-    const updatedFormData =
-        formData ||
-        mockGqlContractDraftRevisionFormDataInput(
-            draftContract.stateCode as StateCodeType
-        )
+    const updatedFormData = mockGqlContractDraftRevisionFormDataInput(
+        draftContract.stateCode as StateCodeType,
+        formData
+    )
 
     const updateResult = await executeGraphQLOperation(server, {
         query: UpdateContractDraftRevisionDocument,

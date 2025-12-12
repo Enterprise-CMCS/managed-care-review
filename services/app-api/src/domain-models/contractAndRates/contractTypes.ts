@@ -68,13 +68,6 @@ const submittableEQROContractSchema = eqroContractSchema.extend({
     draftRevision: eqroContractRevisionSchema.extend({
         formData: submittableEQROContractFormDataSchema,
     }),
-    draftRates: z.array(
-        rateWithoutDraftContractsSchema.extend({
-            draftRevision: rateRevisionSchema.extend({
-                formData: submittableRateFormDataSchema,
-            }),
-        })
-    ),
 })
 
 type ContractType = z.infer<typeof contractSchema>

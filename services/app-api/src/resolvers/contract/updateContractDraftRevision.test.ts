@@ -506,5 +506,41 @@ describe(`Tests UpdateContractDraftRevision`, () => {
                 })
             )
         })
+        it('returns an error if EQRO update data is invalid', async () => {
+            const mockLDService = testLDService({ '438-attestation': true })
+            const server = await constructTestPostgresServer({
+                ldService: mockLDService,
+            })
+            const contract = await createAndUpdateTestEQROContract(server)
+
+            const formData = contract.draftRevision?.formData
+
+            // Update the draft to have complete data for submission.
+            const updateResult = await executeGraphQLOperation(server, {
+                query: UpdateContractDraftRevisionDocument,
+                variables: {
+                    input: {
+                        contractID: contract.id,
+                        lastSeenUpdatedAt: contract.draftRevision?.updatedAt,
+                        formData: mockGqlContractDraftRevisionFormDataInput(
+                            contract.stateCode,
+                            {
+                                ...formData,
+                                riskBasedContract: true,
+                            }
+                        ),
+                    },
+                },
+            })
+
+            // Expect errors to be defined and be riskBasedContract error
+            expect(updateResult.errors).toBeDefined
+            expect(updateResult.errors?.[0].message).toContain(
+                'riskBasedContract'
+            )
+            expect(updateResult.errors?.[0].message).toContain(
+                'Invalid input: expected undefined, received boolean'
+            )
+        })
     })
 })

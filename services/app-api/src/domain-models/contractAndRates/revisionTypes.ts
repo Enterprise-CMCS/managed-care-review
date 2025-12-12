@@ -1,11 +1,12 @@
 import { z } from 'zod'
 import { updateInfoSchema } from './updateInfoType'
 import {
-    contractFormDataSchema, eqroContractFormDataSchema,
+    contractFormDataSchema,
+    eqroContractFormDataSchema,
     rateFormDataSchema,
     strippedRateFormDataSchema,
 } from './formDataTypes'
-import { contractSubmissionTypeSchema,  } from './contractSubmissionType'
+import { contractSubmissionTypeSchema } from './contractSubmissionType'
 
 const contractRevisionSchema = z.object({
     id: z.string().uuid(),
@@ -28,7 +29,7 @@ const eqroContractRevisionSchema = z.object({
         id: z.string().uuid(),
         stateCode: z.string(),
         stateNumber: z.number().min(1),
-        contractSubmissionType: contractSubmissionTypeSchema,
+        contractSubmissionType: z.literal('EQRO'),
     }),
     submitInfo: updateInfoSchema.optional(),
     unlockInfo: updateInfoSchema.optional(),
@@ -65,7 +66,7 @@ export {
     contractRevisionSchema,
     rateRevisionSchema,
     strippedRateRevisionSchema,
-    eqroContractRevisionSchema
+    eqroContractRevisionSchema,
 }
 
 export type { ContractRevisionType, RateRevisionType, StrippedRateRevisionType }

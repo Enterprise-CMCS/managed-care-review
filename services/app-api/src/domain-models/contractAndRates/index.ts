@@ -67,4 +67,7 @@ export type {
     ContractSubmissionType,
 } from './baseContractRateTypes'
 
-export { validateContractDraftRevisionInput } from './dataValidatorHelpers'
+export {
+    validateContractDraftRevisionInput,
+    validateEQROContractDraftRevisionInput,
+} from './dataValidatorHelpers'
