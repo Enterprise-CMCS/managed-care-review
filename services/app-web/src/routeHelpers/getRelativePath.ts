@@ -31,7 +31,7 @@ const getRelativePath = ({
 }
 
 /**
- * Generates a route path with the contractSubmissionType parameter replaced
+ * Generates a submission route path with passed arguments replacing url parameters
  * while preserving other dynamic segments (e.g., :id).
  *
  * @param route - The route key from RoutesRecord
