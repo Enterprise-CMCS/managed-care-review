@@ -521,12 +521,16 @@ describe('Contacts', () => {
             await userEvent.clear(emailInput)
             await userEvent.type(emailInput, 'test@example.com')
 
-            const continueButton = screen.getByRole('button', { name: 'Continue' })
+            const continueButton = screen.getByRole('button', {
+                name: 'Continue',
+            })
             await userEvent.click(continueButton)
 
             await waitFor(() => {
                 // Navigates to Review & Submit page in the EQRO flow
-                expect(screen.getByText('Review and submit')).toBeInTheDocument()
+                expect(
+                    screen.getByText('Review and submit')
+                ).toBeInTheDocument()
             })
         })
     })
