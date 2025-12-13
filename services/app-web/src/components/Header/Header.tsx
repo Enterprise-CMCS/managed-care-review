@@ -45,7 +45,7 @@ export const Header = ({
                         <NavLink className={styles.bannerLogo} to="/">
                             <Logo
                                 src={onemacLogo}
-                                alt="One Mac"
+                                alt="One Mac logo"
                                 className={styles.logoImg}
                             />
                             <span>Managed Care Review</span>
