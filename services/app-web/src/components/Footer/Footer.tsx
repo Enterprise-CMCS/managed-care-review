@@ -28,7 +28,10 @@ export const Footer = (): React.ReactElement => {
                             />
                         </div>
                         <span className={styles.federalLogos}>
-                            <HHSIcon />
+                            <HHSIcon
+                                role="img"
+                                aria-label="Department of Health & Human Services logo"
+                            />
                             <span>
                                 A federal government website managed and paid
                                 for by the U.S. Centers for Medicare and
