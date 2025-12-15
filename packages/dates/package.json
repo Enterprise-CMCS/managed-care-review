@@ -4,7 +4,10 @@
     "description": "",
     "main": "build/index.js",
     "scripts": {
-        "build": "tsc"
+        "build": "tsc",
+        "test": "vitest --watch",
+        "test:once": "vitest --ci",
+        "test:coverage": "vitest --coverage"
     },
     "dependencies": {
         "dayjs": "^1.11.19",
@@ -13,6 +16,8 @@
     "devDependencies": {
         "@types/jest": "^29.5.6",
         "@types/node": "^24.9.1",
-        "@types/url-parse": "^1.4.3"
+        "@types/url-parse": "^1.4.3",
+        "@vitest/coverage-v8": "^3.0.4",
+        "vitest": "^3.0.4"
     }
 }

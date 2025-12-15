@@ -136,6 +136,12 @@ importers:
       '@types/url-parse':
         specifier: ^1.4.3
         version: 1.4.11
+      '@vitest/coverage-v8':
+        specifier: ^3.0.4
+        version: 3.2.4(vitest@3.2.4)
+      vitest:
+        specifier: ^3.0.4
+        version: 3.2.4(@types/node@24.9.1)(@vitest/ui@3.2.4)(jiti@2.6.1)(jsdom@27.0.0(postcss@8.5.6))(sass@1.77.2)(terser@5.44.1)(tsx@4.21.0)(yaml@2.8.2)
 
   packages/constants:
     dependencies:
@@ -164,6 +170,12 @@ importers:
       '@types/url-parse':
         specifier: ^1.4.3
         version: 1.4.11
+      '@vitest/coverage-v8':
+        specifier: ^3.0.4
+        version: 3.2.4(vitest@3.2.4)
+      vitest:
+        specifier: ^3.0.4
+        version: 3.2.4(@types/node@24.9.1)(@vitest/ui@3.2.4)(jiti@2.6.1)(jsdom@27.0.0(postcss@8.5.6))(sass@1.77.2)(terser@5.44.1)(tsx@4.21.0)(yaml@2.8.2)
 
   packages/helpers:
     dependencies:
@@ -198,6 +210,12 @@ importers:
       '@types/url-parse':
         specifier: ^1.4.3
         version: 1.4.11
+      '@vitest/coverage-v8':
+        specifier: ^3.0.4
+        version: 3.2.4(vitest@3.2.4)
+      vitest:
+        specifier: ^3.0.4
+        version: 3.2.4(@types/node@24.9.1)(@vitest/ui@3.2.4)(jiti@2.6.1)(jsdom@27.0.0(postcss@8.5.6))(sass@1.77.2)(terser@5.44.1)(tsx@4.21.0)(yaml@2.8.2)
 
   packages/mocks:
     dependencies:
@@ -23234,7 +23252,7 @@ snapshots:
       std-env: 3.9.0
       test-exclude: 7.0.1
       tinyrainbow: 2.0.0
-      vitest: 3.2.4(@types/node@24.9.1)(@vitest/ui@3.2.4)(jiti@2.6.1)(jsdom@27.0.0(postcss@8.5.6))(sass@1.77.2)(terser@5.44.1)(tsx@4.20.4)(yaml@2.8.2)
+      vitest: 3.2.4(@types/node@24.9.1)(@vitest/ui@3.2.4)(jiti@2.6.1)(jsdom@27.0.0(postcss@8.5.6))(sass@1.77.2)(terser@5.44.1)(tsx@4.21.0)(yaml@2.8.2)
     transitivePeerDependencies:
       - supports-color
 
@@ -23303,7 +23321,7 @@ snapshots:
       sirv: 3.0.2
       tinyglobby: 0.2.15
       tinyrainbow: 2.0.0
-      vitest: 3.2.4(@types/node@24.9.1)(@vitest/ui@3.2.4)(jiti@2.6.1)(jsdom@27.0.0(postcss@8.5.6))(sass@1.77.2)(terser@5.44.1)(tsx@4.20.4)(yaml@2.8.2)
+      vitest: 3.2.4(@types/node@24.9.1)(@vitest/ui@3.2.4)(jiti@2.6.1)(jsdom@27.0.0(postcss@8.5.6))(sass@1.77.2)(terser@5.44.1)(tsx@4.21.0)(yaml@2.8.2)
     optional: true
 
   '@vitest/ui@4.0.15(vitest@3.2.4)':
