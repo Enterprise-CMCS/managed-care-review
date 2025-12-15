@@ -27,7 +27,8 @@ export const ContractQuestionResponse = () => {
     const location = useLocation()
     const submitType = new URLSearchParams(location.search).get('submit')
     let division: Division | undefined = undefined
-    const { updateHeading, updateActiveMainContent } = usePage()
+    const { updateHeading, updateActiveMainContent, updateStateContent } =
+        usePage()
     const { loggedInUser } = useAuth()
     const hasCMSPermissions = hasCMSUserPermissions(loggedInUser)
 
@@ -44,6 +45,8 @@ export const ContractQuestionResponse = () => {
     const contractRev = contract?.packageSubmissions?.[0]?.contractRevision
     const contractName = contractRev?.contractName ?? undefined
     const activeMainContentId = 'contractQuestionResponseMainContent'
+    const stateCode = contract?.state.code
+    const stateName = contract?.state.name
 
     useEffect(() => {
         updateHeading({ customHeading: contractName })
@@ -53,6 +56,19 @@ export const ContractQuestionResponse = () => {
     useEffect(() => {
         updateActiveMainContent(activeMainContentId)
     }, [activeMainContentId, updateActiveMainContent])
+
+    // Set state info for the header
+    useEffect(() => {
+        if (stateCode || stateName) {
+            updateStateContent(stateCode, stateName)
+        } else {
+            updateStateContent(undefined, undefined)
+        }
+
+        return () => {
+            updateStateContent(undefined, undefined)
+        }
+    }, [stateCode, stateName, updateStateContent])
 
     // Handle loading and error states for fetching data while using cached data
     if (!data && loading) {

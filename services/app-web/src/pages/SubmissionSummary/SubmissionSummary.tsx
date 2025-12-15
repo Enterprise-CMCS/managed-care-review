@@ -53,7 +53,8 @@ import {
 
 export const SubmissionSummary = (): React.ReactElement => {
     // Page level state
-    const { updateHeading, updateActiveMainContent } = usePage()
+    const { updateHeading, updateActiveMainContent, updateStateContent } =
+        usePage()
     const modalRef = useRef<ModalRef>(null)
     const [documentError, setDocumentError] = useState(false)
     const [showTempUndoWithdrawBanner, setShowTempUndoWithdrawBanner] =
@@ -105,7 +106,8 @@ export const SubmissionSummary = (): React.ReactElement => {
             ? contract.packageSubmissions[0].contractRevision.contractName
             : ''
     const activeMainContentId = 'submissionSummaryPageMainContent'
-
+    const stateCode = contract?.state.code
+    const stateName = contract?.state.name
     useEffect(() => {
         if (searchParams.get('showTempUndoWithdrawBanner') === 'true') {
             setShowTempUndoWithdrawBanner(true)
@@ -122,6 +124,19 @@ export const SubmissionSummary = (): React.ReactElement => {
             customHeading: name,
         })
     }, [name, updateHeading])
+
+    // Set state info for the header
+    useEffect(() => {
+        if (stateCode || stateName) {
+            updateStateContent(stateCode, stateName)
+        } else {
+            updateStateContent(undefined, undefined)
+        }
+
+        return () => {
+            updateStateContent(undefined, undefined)
+        }
+    }, [stateCode, stateName, updateStateContent])
 
     // Set the active main content to focus when click the Skip to main content button.
     useEffect(() => {

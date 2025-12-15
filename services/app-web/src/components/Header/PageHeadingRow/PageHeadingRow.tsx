@@ -7,17 +7,32 @@ import { PageHeading } from '../../../components/PageHeading'
 import { StateIcon, StateIconProps } from '../StateIcon/StateIcon'
 import {
     User,
-    StateUser,
     CmsUser,
     AdminUser,
     HelpdeskUser,
     BusinessOwnerUser,
     CmsApproverUser,
+    StateUser,
 } from '../../../gen/gqlClient'
 import {
     hasAdminUserPermissions,
     hasCMSUserPermissions,
 } from '@mc-review/helpers'
+
+type ContractSubmissionType = 'EQRO' | 'Health plan'
+const hideSubIDRoutes = {
+    cms: ['dashboard', 'mc-review-settings'],
+    state: ['dashboard', 'new'],
+}
+
+const pathIncludesAny = (
+    pathname: string | undefined,
+    fragments: readonly string[]
+): boolean =>
+    !!pathname && fragments.some((fragment) => pathname.includes(fragment))
+
+const getContractTypeFromPath = (pathname?: string): ContractSubmissionType =>
+    pathname?.includes('eqro') ? 'EQRO' : 'Health plan'
 
 const SharedSubHeadingRow = ({
     submissionID,
@@ -34,20 +49,68 @@ const SharedSubHeadingRow = ({
         </span>
     )
 }
-const EntityType = ({ entityType }: { entityType: 'EQRO' | 'Health plan' }) => {
+const ContractType = ({
+    contractType,
+}: {
+    contractType: ContractSubmissionType
+}) => {
     return (
-        <div className={styles.entityTypeContainer} data-testid="entityType">
-            <div className={styles.entityTypeDivider} aria-hidden="true" />
-            <div className={styles.entityTypeText}>
-                <span className={styles.entityTypeLabel}>Entity type</span>
-                <span className={styles.entityTypeValue}>{entityType}</span>
+        <div
+            className={styles.contractTypeContainer}
+            data-testid="contractType"
+        >
+            <div className={styles.contractTypeDivider} aria-hidden="true" />
+            <div className={styles.contractTypeText}>
+                <span className={styles.contractTypeLabel}>Contract type</span>
+                <span className={styles.contractTypeValue}>{contractType}</span>
             </div>
         </div>
     )
 }
+
+const StateDisplay = ({
+    heading,
+    stateCode,
+    stateName,
+    contractType,
+}: {
+    heading?: string | React.ReactElement
+    pathname?: string
+    route?: string
+    stateCode: string
+    stateName: string
+    contractType: ContractSubmissionType
+}) => {
+    return (
+        <Grid row className={`flex-align-center ${styles.stateRow}`}>
+            {stateCode && stateName && (
+                <>
+                    <div>
+                        <StateIcon code={stateCode as StateIconProps['code']} />
+                    </div>
+                    <PageHeading data-testid="stateDisplay">
+                        <span className="srOnly">{stateName}&nbsp;</span>
+
+                        <span className={styles.stateHeadingText}>
+                            {stateName}&nbsp;
+                        </span>
+
+                        {heading && (
+                            <SharedSubHeadingRow submissionID={heading} />
+                        )}
+                    </PageHeading>
+                    <ContractType contractType={contractType} />
+                </>
+            )}
+        </Grid>
+    )
+}
+
 const CMSUserRow = ({
     heading,
     pathname,
+    stateCode,
+    stateName,
 }: {
     user:
         | CmsUser
@@ -57,14 +120,26 @@ const CMSUserRow = ({
         | CmsApproverUser
     heading?: string | React.ReactElement
     pathname?: string
+    stateCode?: string
+    stateName?: string
 }) => {
-    const hideSubID =
-        pathname?.includes('dashboard') || pathname?.includes('new')
-    const entityType = pathname?.includes('eqro') ? 'EQRO' : 'Health plan'
+    const hideSubID = pathIncludesAny(pathname, hideSubIDRoutes.cms)
+    const contractType = getContractTypeFromPath(pathname)
+    const canShowStateDisplay =
+        !hideSubID && stateCode !== undefined && stateName !== undefined
+
     return (
         <div className={styles.dashboardHeading}>
             <GridContainer>
-                {hideSubID ? (
+                {canShowStateDisplay ? (
+                    <StateDisplay
+                        heading={heading}
+                        pathname={pathname}
+                        stateCode={stateCode}
+                        stateName={stateName}
+                        contractType={contractType}
+                    />
+                ) : (
                     <Grid row className="flex-align-center">
                         <PageHeading>
                             <span>CMS</span>
@@ -77,17 +152,6 @@ const CMSUserRow = ({
                                 </span>
                             )}
                         </PageHeading>
-                    </Grid>
-                ) : (
-                    <Grid row className={`flex-align-center ${styles.cmsRow}`}>
-                        <PageHeading>
-                            <span className={styles.stateHeadingText}>CMS</span>
-
-                            {heading && (
-                                <SharedSubHeadingRow submissionID={heading} />
-                            )}
-                        </PageHeading>
-                        <EntityType entityType={entityType} />
                     </Grid>
                 )}
             </GridContainer>
@@ -104,10 +168,8 @@ const StateUserRow = ({
     heading?: string | React.ReactElement
     pathname?: string
 }) => {
-    const hideSubID =
-        pathname?.includes('dashboard') || pathname?.includes('new')
-    const entityType = pathname?.includes('eqro') ? 'EQRO' : 'Health plan'
-
+    const hideSubID = pathIncludesAny(pathname, hideSubIDRoutes.state)
+    const contractType = getContractTypeFromPath(pathname)
     return (
         <div className={styles.dashboardHeading}>
             <GridContainer>
@@ -138,25 +200,13 @@ const StateUserRow = ({
                         row
                         className={`flex-align-center ${styles.stateRow}`}
                     >
-                        <div>
-                            <StateIcon
-                                code={user.state.code as StateIconProps['code']}
-                            />
-                        </div>
-                        <PageHeading>
-                            <span className="srOnly">
-                                {user.state.name}&nbsp;
-                            </span>
-
-                            <span className={styles.stateHeadingText}>
-                                {user.state.name}&nbsp;
-                            </span>
-
-                            {heading && (
-                                <SharedSubHeadingRow submissionID={heading} />
-                            )}
-                        </PageHeading>
-                        <EntityType entityType={entityType} />
+                        <StateDisplay
+                            heading={heading}
+                            pathname={pathname}
+                            stateCode={user.state.code}
+                            stateName={user.state.name}
+                            contractType={contractType}
+                        />
                     </Grid>
                 )}
             </GridContainer>
@@ -192,11 +242,15 @@ type PageHeadingProps = {
     heading?: string | React.ReactElement
     route?: string
     pathname?: string
+    stateCode?: string
+    stateName?: string
 }
 
 export const PageHeadingRow = ({
     isLoading = false,
     heading,
+    stateCode,
+    stateName,
     route,
     pathname,
     loggedInUser,
@@ -218,17 +272,21 @@ export const PageHeadingRow = ({
                 user={loggedInUser}
                 heading={heading}
                 pathname={pathname}
+                stateName={stateName}
+                stateCode={stateCode}
             />
         )
     } else if (loggedInUser.__typename === 'StateUser') {
         return (
             <StateUserRow
-                user={loggedInUser}
                 heading={heading}
                 pathname={pathname}
+                user={loggedInUser}
             />
         )
     } else {
-        return <h1>{`Programming Error: Unkown User Type: ${loggedInUser}`}</h1>
+        return (
+            <h1>{`Programming Error: Unknown User Type: ${loggedInUser}`}</h1>
+        )
     }
 }
