@@ -1,3 +1,4 @@
+import type { PluginBuild } from 'esbuild'
 import fs from 'fs'
 import fse from 'fs-extra'
 import path from 'path'
@@ -18,7 +19,7 @@ export default () => {
         plugins: [
             {
                 name: 'copy-and-replace-collector',
-                setup(build) {
+                setup(build: PluginBuild) {
                     // copy collector.yml to the build directory
                     build.onStart(() => {
                         fs.copyFileSync(
@@ -36,7 +37,7 @@ export default () => {
                         let contents = fs.readFileSync(filePath, 'utf8')
                         contents = contents.replace(
                             '$NR_LICENSE_KEY',
-                            process.env.NR_LICENSE_KEY
+                            process.env.NR_LICENSE_KEY ?? 'undefined'
                         )
                         fs.writeFileSync(filePath, contents)
                     })
@@ -44,7 +45,7 @@ export default () => {
             },
             {
                 name: 'copy-eta-templates',
-                setup(build) {
+                setup(build: PluginBuild) {
                     build.onStart(async () => {
                         try {
                             await fse.ensureDir(
@@ -71,7 +72,7 @@ export default () => {
             },
             {
                 name: 'copy-prisma-engine-for-local-dev',
-                setup(build) {
+                setup(build: PluginBuild) {
                     build.onStart(() => {
                         if (process.env.REACT_APP_STAGE_NAME === 'local') {
                             const prismaPath = path.join(

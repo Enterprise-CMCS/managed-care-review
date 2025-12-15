@@ -1,5 +1,5 @@
 import type { ContractType } from '../../domain-models'
-import type { RateForDisplay } from './withdrawContract'
+import type { RateForDisplayType } from '../../emailer/templateHelpers'
 import type { PrismaTransactionType } from '../prismaTypes'
 import type { ExtendedPrismaClient } from '../prismaClient'
 import { unlockContractInsideTransaction } from './unlockContract'
@@ -14,7 +14,7 @@ export type UndoWithdrawContractArgsType = {
 
 export type UndoWithdrawContractReturnType = {
     contract: ContractType
-    ratesForDisplay: RateForDisplay[]
+    ratesForDisplay: RateForDisplayType[]
 }
 
 /**
@@ -84,7 +84,7 @@ const undoWithdrawContractInsideTransaction = async (
     }
 
     // Go through all the draft rates and find the child rate ID's and rate cert names
-    const ratesForDisplay: RateForDisplay[] = []
+    const ratesForDisplay: RateForDisplayType[] = []
     unlockedContract.draftRates.forEach((dr) => {
         if (dr.parentContractID === contract.id) {
             const rateCertificationName =

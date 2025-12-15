@@ -10,7 +10,7 @@ import { logError } from '../../logger'
 import { createForbiddenError, createUserInputError } from '../errorUtils'
 import { GraphQLError } from 'graphql/index'
 import type { Emailer } from '../../emailer'
-import type { StateCodeType } from '../../testHelpers'
+import type { StateCodeType } from '@mc-review/submissions'
 import { canWrite } from '../../authorization/oauthAuthorization'
 import type { DocumentZipService } from '../../zip/generateZip'
 

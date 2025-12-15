@@ -7,7 +7,11 @@ import {
     createFilter,
 } from 'react-select'
 import styles from '../../../components/Select/Select.module.scss'
-import { IndexRatesInput, useFetchRateQuery, useIndexRatesStrippedQuery } from '../../../gen/gqlClient'
+import {
+    IndexRatesInput,
+    useFetchRateQuery,
+    useIndexRatesStrippedQuery,
+} from '../../../gen/gqlClient'
 import { programNames } from '@mc-review/submissions'
 import { formatCalendarDate } from '@mc-review/dates'
 import {
@@ -38,7 +42,11 @@ export type LinkRateSelectPropType = {
     name: string
     initialValue: string | undefined
     alreadySelected?: string[] // used for multi-rate, array of rate IDs helps ensure we can't select rates already selected elsewhere on page
-    autofill?: (rateForm: FormikRateForm, autofillLoading?: boolean, autofillError?: ApolloError | undefined) => void // used for multi-rates, when called will FieldArray replace the existing form fields with new data
+    autofill?: (
+        rateForm: FormikRateForm,
+        autofillLoading?: boolean,
+        autofillError?: ApolloError | undefined
+    ) => void // used for multi-rates, when called will FieldArray replace the existing form fields with new data
     label?: string
     stateCode?: string //used to limit rates by state
 }
@@ -53,42 +61,53 @@ export const LinkRateSelect = ({
     ...selectProps
 }: LinkRateSelectPropType & Props<LinkRateOptionType, false>) => {
     const input: IndexRatesInput = { stateCode }
-    const [selectedRateId, setSelectedRateID] = useState<string | null>(null);
+    const [selectedRateId, setSelectedRateID] = useState<string | null>(null)
 
-    
     const { data, loading, error } = useIndexRatesStrippedQuery({
         variables: { input },
     })
-    const { data: selectedRateData, loading: fetchRateLoading, error: fetchRateError } = useFetchRateQuery({
-        variables: { input: {
-            rateID: selectedRateId ?? ''
-        } },
+    const {
+        data: selectedRateData,
+        loading: fetchRateLoading,
+        error: fetchRateError,
+    } = useFetchRateQuery({
+        variables: {
+            input: {
+                rateID: selectedRateId ?? '',
+            },
+        },
         skip: !selectedRateId,
-      });
+    })
     const { getKey } = useS3()
     const { logDropdownSelectionEvent } = useTealium()
     const [_field, _meta, helpers] = useField({ name }) // useField only relevant for non-autofill implementations
 
     useEffect(() => {
         if (selectedRateData?.fetchRate?.rate) {
-          const linkedRate = selectedRateData.fetchRate.rate;
-          if (autofill){
+            const linkedRate = selectedRateData.fetchRate.rate
+            if (autofill) {
                 const linkedRateForm: FormikRateForm =
                     convertIndexRatesGQLRateToRateForm(getKey, linkedRate)
                 linkedRateForm.ratePreviouslySubmitted = 'YES'
                 autofill(linkedRateForm, fetchRateLoading, fetchRateError)
-          }
+            }
         }
-      }, [selectedRateData]);
-    
+        // TODO: MCR-5797 — We haven't fixed this because this causes loop
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [selectedRateData])
+
     const rates = data?.indexRatesStripped.edges.map((e) => e.node) || []
     // Sort rates by latest submission in desc order and remove withdrawn
     // Do not display withdrawn rates as an option of a linked rate to select
     const updatedRates = rates
         .sort(
             (a, b) =>
-                new Date(b.latestSubmittedRevision.submitInfo?.updatedAt).getTime() -
-                new Date(a.latestSubmittedRevision.submitInfo?.updatedAt).getTime()
+                new Date(
+                    b.latestSubmittedRevision.submitInfo?.updatedAt
+                ).getTime() -
+                new Date(
+                    a.latestSubmittedRevision.submitInfo?.updatedAt
+                ).getTime()
         )
         .filter((rate) => rate.consolidatedStatus !== 'WITHDRAWN')
 
@@ -162,9 +181,9 @@ export const LinkRateSelect = ({
 
             if (autofill) {
                 const linkedRateID = newValue.value
-                // This will trigger the fetchRate call 
+                // This will trigger the fetchRate call
                 // for the newly selected linkedRate
-                setSelectedRateID(linkedRateID);
+                setSelectedRateID(linkedRateID)
             } else {
                 // this path is used for replace/withdraw redundant rates
                 // we are not autofilling form data, we are just returning the IDs of the rate selected
@@ -180,7 +199,6 @@ export const LinkRateSelect = ({
                 // put already selected fields back in place
                 emptyRateForm.ratePreviouslySubmitted = 'YES'
                 autofill(emptyRateForm)
-
             } else {
                 // this path is used for replace/withdraw redundant rates
                 // we are not autofilling form data, we are just returning the IDs of the rate selected
