@@ -43,11 +43,3 @@ export type { LockedHealthPlanFormDataType } from './LockedHealthPlanFormDataTyp
 export * from './healthPlanFormData'
 
 export type { HealthPlanFormDataType } from './HealthPlanFormDataType'
-
-export * from './StateCodeType'
-export type {
-    StateCodeType,
-    ProgramArgType,
-    StateType,
-    StatePrograms,
-} from './StateCodeType'

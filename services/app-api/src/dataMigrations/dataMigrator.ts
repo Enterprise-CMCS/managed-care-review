@@ -42,7 +42,9 @@ export function newDBMigrator(dbConnString: string): MigratorType {
                 try {
                     await prismaClient.$transaction(
                         async (tx) => {
-                            const res = await migration.module.migrate(tx)
+                            const res = await migration.module.migrate(
+                                tx as PrismaTransactionType
+                            )
 
                             if (!(res instanceof Error)) {
                                 await tx.protoMigrationsTable.create({

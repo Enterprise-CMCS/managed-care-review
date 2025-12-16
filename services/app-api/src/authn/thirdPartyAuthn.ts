@@ -30,7 +30,7 @@ export async function userFromThirdPartyAuthorizer(
         }
 
         return ok(auroraUser)
-    } catch (e) {
+    } catch {
         const err = new Error('ERROR: failed to look up user in postgres')
 
         recordException(err, serviceName, 'lookupUser')

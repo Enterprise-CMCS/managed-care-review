@@ -1,11 +1,12 @@
 import { z } from 'zod'
 import { updateInfoSchema } from './updateInfoType'
 import {
-    contractFormDataSchema, eqroContractFormDataSchema,
+    contractFormDataSchema,
+    eqroContractFormDataSchema,
     rateFormDataSchema,
     strippedRateFormDataSchema,
 } from './formDataTypes'
-import { contractSubmissionTypeSchema,  } from './contractSubmissionType'
+import { contractSubmissionTypeSchema } from './contractSubmissionType'
 
 const contractRevisionSchema = z.object({
     id: z.string().uuid(),
@@ -65,7 +66,7 @@ export {
     contractRevisionSchema,
     rateRevisionSchema,
     strippedRateRevisionSchema,
-    eqroContractRevisionSchema
+    eqroContractRevisionSchema,
 }
 
 export type { ContractRevisionType, RateRevisionType, StrippedRateRevisionType }

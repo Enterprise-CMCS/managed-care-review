@@ -27,7 +27,7 @@ export function parseAuthProvider(
         const userPoolUserId = parts[parts.length - 1]
 
         return ok({ userId: userPoolUserId, poolId: userPoolId })
-    } catch (e) {
+    } catch {
         return err(new Error('authProvider doesnt have enough parts'))
     }
 }
