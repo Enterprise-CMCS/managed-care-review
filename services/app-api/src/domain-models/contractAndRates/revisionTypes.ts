@@ -29,7 +29,7 @@ const eqroContractRevisionSchema = z.object({
         id: z.string().uuid(),
         stateCode: z.string(),
         stateNumber: z.number().min(1),
-        contractSubmissionType: contractSubmissionTypeSchema,
+        contractSubmissionType: z.literal('EQRO'),
     }),
     submitInfo: updateInfoSchema.optional(),
     unlockInfo: updateInfoSchema.optional(),

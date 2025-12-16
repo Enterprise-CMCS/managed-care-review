@@ -11,7 +11,10 @@ import {
 } from '../attributeHelper'
 import type { LDService } from '../../launchDarkly/launchDarkly'
 import { GraphQLError } from 'graphql/index'
-import { validateContractDraftRevisionInput } from '../../domain-models/contractAndRates'
+import {
+    validateContractDraftRevisionInput,
+    validateEQROContractDraftRevisionInput,
+} from '../../domain-models/contractAndRates'
 import { canWrite } from '../../authorization/oauthAuthorization'
 import { parseAndUpdateEqroFields } from '../../domain-models/contractAndRates/dataValidatorHelpers'
 
@@ -110,24 +113,18 @@ export function updateContractDraftRevision(
             contractWithHistory.contractSubmissionType === 'EQRO'
 
         // Using zod to validate and transform graphQL types into domain types.
-        let parsedFormData
-
-        // Validations based on submission type
-        if (isEQROsubmission) {
-            parsedFormData = validateContractDraftRevisionInput(
-                formData,
-                contractWithHistory.stateCode,
-                store,
-                featureFlags
-            )
-        } else {
-            parsedFormData = validateContractDraftRevisionInput(
-                formData,
-                contractWithHistory.stateCode,
-                store,
-                featureFlags
-            )
-        }
+        const parsedFormData = isEQROsubmission
+            ? validateEQROContractDraftRevisionInput(
+                  formData,
+                  contractWithHistory.stateCode,
+                  store
+              )
+            : validateContractDraftRevisionInput(
+                  formData,
+                  contractWithHistory.stateCode,
+                  store,
+                  featureFlags
+              )
 
         if (parsedFormData instanceof Error) {
             const errMessage = parsedFormData.message
@@ -136,6 +133,7 @@ export function updateContractDraftRevision(
             throw createUserInputError(errMessage)
         }
 
+        // Parse EQRO fields
         const editableFormData = isEQROsubmission
             ? parseAndUpdateEqroFields(
                   contractWithHistory.draftRevision.formData,

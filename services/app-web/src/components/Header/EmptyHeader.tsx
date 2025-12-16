@@ -24,7 +24,7 @@ export const EmptyHeader = ({
                         <div className={styles.bannerLogo}>
                             <Logo
                                 src={onemacLogo}
-                                alt="One Mac"
+                                alt="One Mac logo"
                                 className={styles.logoImg}
                             />
                             <span>Managed Care Review</span>
