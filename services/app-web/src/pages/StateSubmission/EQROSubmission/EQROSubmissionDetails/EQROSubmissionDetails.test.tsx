@@ -4,7 +4,6 @@ import {
     fetchContractMockSuccess,
     fetchCurrentUserMock,
     mockContractPackageDraft,
-    mockContractPackageUnlockedWithUnlockedType,
     updateContractDraftRevisionMockSuccess,
 } from '@mc-review/mocks'
 import { userEvent } from '@testing-library/user-event'
@@ -12,8 +11,6 @@ import { screen, waitFor } from '@testing-library/react'
 import { EQROSubmissionDetails } from './EQROSubmissionDetails'
 import { generatePath, Location, Route, Routes } from 'react-router-dom'
 import { RoutesRecord } from '@mc-review/constants'
-import { selectYesNoRadio } from '../../../../testHelpers/jestHelpers'
-
 
 it('displays correct submission detail form fields', async () => {
     let testLocation: Location
