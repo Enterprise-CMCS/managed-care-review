@@ -1,4 +1,7 @@
-import { dsnpTriggers, validateEQROdata } from '@mc-review/submissions'
+import {
+    dsnpTriggers,
+    eqroValidationAndReviewDetermination,
+} from '@mc-review/submissions'
 import type { FeatureFlagSettings } from '@mc-review/common-code'
 import type { ContractDraftRevisionFormDataInput } from '../../gen/gqlServer'
 import type { ContractFormDataType } from './formDataTypes'
@@ -313,12 +316,12 @@ const parseEQROContract = (
             }
 
             //Validating EQRO fields
-            const validationError = validateEQROdata(
+            const validationError = eqroValidationAndReviewDetermination(
                 contract.id,
                 contract.draftRevision.formData
             )
 
-            if (validationError) {
+            if (validationError instanceof Error) {
                 ctx.addIssue({
                     code: 'custom',
                     message: validationError.message,
@@ -342,5 +345,4 @@ export {
     parseEQROContract,
     parseAndUpdateEqroFields,
     validateEQROContractDraftRevisionInput,
-    validateEQROdata,
 }

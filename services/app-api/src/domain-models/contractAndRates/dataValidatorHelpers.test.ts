@@ -9,7 +9,10 @@ import {
     mockGqlContractDraftRevisionFormDataInput,
     must,
 } from '../../testHelpers'
-import type { ContractDraftRevisionFormDataInput } from '../../gen/gqlServer'
+import type {
+    ContractDraftRevisionFormDataInput,
+    ContractFormData,
+} from '../../gen/gqlClient'
 import { sharedTestPrismaClient } from '../../testHelpers/storeHelpers'
 import { NewPostgresStore } from '../../postgres'
 import type { ContractType } from './contractTypes'
@@ -19,7 +22,7 @@ import {
     defaultFloridaRateProgram,
 } from '../../testHelpers/gqlHelpers'
 import type { ContractFormDataType } from './formDataTypes'
-import { describe } from 'vitest'
+import { eqroValidationAndReviewDetermination } from '@mc-review/submissions'
 
 describe('Health plan parsing and validation', () => {
     describe('validateContractDraftRevisionInput', () => {
@@ -1434,4 +1437,207 @@ describe('EQRO parsing and validation', () => {
             expect(parsedContract).toEqual(contract)
         })
     })
+})
+
+describe('eqroValidationAndReviewDetermination', () => {
+    const defaultFormData = (
+        overrides?: Partial<ContractFormData>
+    ): ContractFormData => ({
+        programIDs: ['abbdf9b0-c49e-4c4c-bb6f-040cb7b51cce'], //MN state program
+        populationCovered: 'MEDICAID_AND_CHIP',
+        submissionType: 'CONTRACT_ONLY',
+        submissionDescription: 'Test',
+        stateContacts: [
+            {
+                name: 'test name',
+                email: 'test@example.com',
+                titleRole: 'title',
+            },
+        ],
+        supportingDocuments: [
+            {
+                s3URL: 's3://bucketname/key/contractsupporting1.pdf',
+                sha256: 'fakesha',
+                name: 'contractSupporting1.pdf',
+            },
+        ],
+        contractType: 'BASE',
+        contractDocuments: [
+            {
+                s3URL: 's3://bucketname/key/contract.pdf',
+                sha256: 'fakesha',
+                name: 'contract.pdf',
+            },
+        ],
+        contractDateStart: '2024-05-04',
+        contractDateEnd: '2025-05-04',
+        managedCareEntities: ['MCO'],
+        federalAuthorities: [],
+        eqroNewContractor: true,
+        eqroProvisionMcoNewOptionalActivity: true,
+        eqroProvisionNewMcoEqrRelatedActivities: false,
+        eqroProvisionChipEqrRelatedActivities: null,
+        eqroProvisionMcoEqrOrRelatedActivities: null,
+        ...overrides,
+    })
+
+    const eqroBaseContractTestData: {
+        formData: ContractFormData
+        testDescription: string
+        expectedResult: boolean
+    }[] = [
+        {
+            formData: {
+                ...defaultFormData(),
+                contractType: 'BASE',
+                populationCovered: 'MEDICAID_AND_CHIP',
+                managedCareEntities: ['MCO'],
+                eqroNewContractor: true,
+                eqroProvisionMcoNewOptionalActivity: true,
+                eqroProvisionNewMcoEqrRelatedActivities: true,
+                eqroProvisionChipEqrRelatedActivities: false,
+            },
+            expectedResult: true,
+            testDescription:
+                'Subject to review when three of three review questions answered yes.',
+        },
+        {
+            formData: {
+                ...defaultFormData(),
+                contractType: 'BASE',
+                populationCovered: 'MEDICAID',
+                managedCareEntities: ['MCO'],
+                eqroNewContractor: false,
+                eqroProvisionMcoNewOptionalActivity: false,
+                eqroProvisionNewMcoEqrRelatedActivities: true,
+            },
+            expectedResult: true,
+            testDescription:
+                'Subject to review when one of three review questions answered yes.',
+        },
+        {
+            formData: {
+                ...defaultFormData(),
+                contractType: 'BASE',
+                populationCovered: 'CHIP',
+                managedCareEntities: ['MCO'],
+                eqroNewContractor: false,
+                eqroProvisionMcoNewOptionalActivity: false,
+                eqroProvisionNewMcoEqrRelatedActivities: false,
+                eqroProvisionChipEqrRelatedActivities: true,
+            },
+            expectedResult: false,
+            testDescription:
+                'Not subject to review when none of the review questions are answered yes.',
+        },
+        {
+            formData: {
+                ...defaultFormData(),
+                contractType: 'BASE',
+                populationCovered: 'CHIP',
+                managedCareEntities: ['PAHP'],
+                eqroProvisionChipEqrRelatedActivities: true,
+            },
+            expectedResult: false,
+            testDescription:
+                'Not subject to review when none of the review questions are applicable.',
+        },
+    ]
+
+    it.each(eqroBaseContractTestData)(
+        'Base contract $testDescription',
+        ({ formData, expectedResult }) => {
+            expect(
+                eqroValidationAndReviewDetermination('test-id', formData)
+            ).toBe(expectedResult)
+        }
+    )
+
+    const eqroAmendmentContractTestData: {
+        formData: ContractFormData
+        testDescription: string
+        expectedResult: boolean
+    }[] = [
+        {
+            formData: {
+                ...defaultFormData(),
+                contractType: 'AMENDMENT',
+                populationCovered: 'MEDICAID_AND_CHIP',
+                managedCareEntities: ['MCO'],
+                eqroProvisionMcoEqrOrRelatedActivities: true,
+                eqroProvisionMcoNewOptionalActivity: true,
+                eqroProvisionNewMcoEqrRelatedActivities: true,
+                eqroProvisionChipEqrRelatedActivities: false,
+            },
+            expectedResult: true,
+            testDescription:
+                'Subject to review when both review questions are answered yes.',
+        },
+        {
+            formData: {
+                ...defaultFormData(),
+                contractType: 'AMENDMENT',
+                populationCovered: 'MEDICAID',
+                managedCareEntities: ['MCO'],
+                eqroProvisionMcoEqrOrRelatedActivities: true,
+                eqroProvisionMcoNewOptionalActivity: true,
+                eqroProvisionNewMcoEqrRelatedActivities: false,
+                eqroProvisionChipEqrRelatedActivities: false,
+            },
+            expectedResult: true,
+            testDescription:
+                'Subject to review when one of two review questions are answered yes.',
+        },
+        {
+            formData: {
+                ...defaultFormData(),
+                contractType: 'AMENDMENT',
+                populationCovered: 'MEDICAID_AND_CHIP',
+                managedCareEntities: ['MCO'],
+                eqroProvisionMcoEqrOrRelatedActivities: false,
+                eqroProvisionMcoNewOptionalActivity: null,
+                eqroProvisionNewMcoEqrRelatedActivities: null,
+                eqroProvisionChipEqrRelatedActivities: false,
+            },
+            expectedResult: false,
+            testDescription:
+                'Not subject to review when triggering question is answered no.',
+        },
+        {
+            formData: {
+                ...defaultFormData(),
+                contractType: 'AMENDMENT',
+                populationCovered: 'MEDICAID_AND_CHIP',
+                managedCareEntities: ['MCO'],
+                eqroProvisionMcoEqrOrRelatedActivities: true,
+                eqroProvisionMcoNewOptionalActivity: false,
+                eqroProvisionNewMcoEqrRelatedActivities: false,
+                eqroProvisionChipEqrRelatedActivities: false,
+            },
+            expectedResult: false,
+            testDescription:
+                'Not subject to review when none of review questions are answered yes',
+        },
+        {
+            formData: {
+                ...defaultFormData(),
+                contractType: 'AMENDMENT',
+                populationCovered: 'MEDICAID_AND_CHIP',
+                managedCareEntities: ['PAHP'],
+                eqroProvisionChipEqrRelatedActivities: false,
+            },
+            expectedResult: false,
+            testDescription:
+                'Not subject to review when review questions are not applicable',
+        },
+    ]
+
+    it.each(eqroAmendmentContractTestData)(
+        'Amendment contract $testDescription',
+        ({ formData, expectedResult }) => {
+            expect(
+                eqroValidationAndReviewDetermination('test-id', formData)
+            ).toBe(expectedResult)
+        }
+    )
 })
