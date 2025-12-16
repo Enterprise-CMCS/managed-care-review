@@ -1,6 +1,7 @@
 {
     "name": "@mc-review/common-code",
     "version": "1.0.0",
+    "type": "module",
     "description": "",
     "main": "build/index.js",
     "scripts": {

@@ -1,6 +1,7 @@
 {
     "name": "@mc-review/helpers",
     "version": "1.0.0",
+    "type": "module",
     "main": "build/index.js",
     "scripts": {
         "build": "tsc",
