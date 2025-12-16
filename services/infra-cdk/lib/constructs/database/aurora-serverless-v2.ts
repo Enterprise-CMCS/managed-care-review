@@ -9,7 +9,11 @@ import {
 } from 'aws-cdk-lib/aws-rds'
 import type { IVpc, SubnetSelection, ISecurityGroup } from 'aws-cdk-lib/aws-ec2'
 import type { IGrantable, Grant } from 'aws-cdk-lib/aws-iam'
-import { Secret, type ISecret } from 'aws-cdk-lib/aws-secretsmanager'
+import {
+    Secret,
+    type ISecret,
+    HostedRotation,
+} from 'aws-cdk-lib/aws-secretsmanager'
 import { Duration, RemovalPolicy, Stack } from 'aws-cdk-lib'
 import type { DatabaseConfig } from '../../config/environments'
 import { ResourceNames } from '../../config/shared'
@@ -124,6 +128,12 @@ export class AuroraServerlessV2 extends Construct {
         // Store endpoints
         this.clusterEndpoint = this.cluster.clusterEndpoint
         this.clusterReadEndpoint = this.cluster.clusterReadEndpoint
+
+        // Enable automatic secret rotation every 30 days using AWS-managed Lambda
+        this.secret.addRotationSchedule('RotationSchedule', {
+            hostedRotation: HostedRotation.postgreSqlSingleUser(),
+            automaticallyAfter: Duration.days(30),
+        })
     }
 
     /**
