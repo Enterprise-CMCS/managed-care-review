@@ -56,7 +56,7 @@ const eqroContractDraftSchema = z.object({
     stateCode: z.string(),
     mccrsID: z.string().optional(),
     stateNumber: z.number().min(1),
-    contractSubmissionType: contractSubmissionTypeSchema,
+    contractSubmissionType: z.literal('EQRO'),
     // If this contract is in a DRAFT or UNLOCKED status, there will be a draftRevision
     draftRevision: eqroContractRevisionSchema.optional(),
     reviewStatusActions: z.array(contractReviewActionSchema).optional(),

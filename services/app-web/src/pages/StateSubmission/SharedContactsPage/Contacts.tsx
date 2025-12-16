@@ -8,7 +8,7 @@ import {
     getIn,
     FieldArrayRenderProps,
 } from 'formik'
-import { generatePath, useNavigate } from 'react-router-dom'
+import { useNavigate } from 'react-router-dom'
 import { useLDClient } from 'launchdarkly-react-client-sdk'
 import styles from '../StateSubmissionForm.module.scss'
 import { recordJSException } from '@mc-review/otel'
@@ -19,12 +19,7 @@ import {
 
 import { useFocus } from '../../../hooks'
 import { activeFormPages, type ContractFormPageProps } from '../submissionUtils'
-import {
-    RoutesRecord,
-    RouteT,
-    EQRO_SUBMISSION_FORM_ROUTES,
-    ContractSubmissionTypeRecord,
-} from '@mc-review/constants'
+import { RouteT, EQRO_SUBMISSION_FORM_ROUTES } from '@mc-review/constants'
 import {
     ButtonWithLogging,
     DynamicStepIndicator,
@@ -38,12 +33,13 @@ import {
 import { useCurrentRoute, useRouteParams, useTealium } from '../../../hooks'
 import { useContractForm } from '../../../hooks/useContractForm'
 import { useAuth } from '../../../contexts/AuthContext'
-import { ErrorOrLoadingPage } from '../SharedSubmissionComponents/ErrorOrLoadingPage'
-import { PageBannerAlerts } from '../SharedSubmissionComponents/PageBannerAlerts'
+import { ErrorOrLoadingPage } from '../SharedSubmissionComponents'
+import { PageBannerAlerts } from '../SharedSubmissionComponents'
 import { useErrorSummary } from '../../../hooks/useErrorSummary'
 import { featureFlags } from '@mc-review/common-code'
 import { useFocusOnRender } from '../../../hooks/useFocusOnRender'
 import { usePage } from '../../../contexts/PageContext'
+import { getSubmissionPath } from '../../../routeHelpers'
 
 export interface ContactsFormValues {
     stateContacts: StateContact[]
@@ -87,7 +83,7 @@ const Contacts = ({
 
     const { loggedInUser } = useAuth()
     const { currentRoute } = useCurrentRoute()
-    const { id, contractSubmissionType } = useRouteParams()
+    const { id } = useRouteParams()
     const { updateActiveMainContent } = usePage()
     const { draftSubmission, interimState, updateDraft, showPageErrorMessage } =
         useContractForm(id)
@@ -137,8 +133,8 @@ const Contacts = ({
         return <ErrorOrLoadingPage state={interimState || 'GENERIC_ERROR'} />
 
     const isEQROSubmission = draftSubmission.contractSubmissionType === 'EQRO'
-
     const stateContacts = draftSubmission.draftRevision.formData.stateContacts
+    const contractSubmissionType = draftSubmission.contractSubmissionType
 
     const emptyStateContact = {
         name: '',
@@ -185,25 +181,30 @@ const Contacts = ({
         } else {
             if (isEQROSubmission) {
                 navigate(
-                    generatePath(RoutesRecord.SUBMISSIONS_REVIEW_SUBMIT, {
-                        id: id,
-                        contractSubmissionType:
-                            ContractSubmissionTypeRecord[
-                                draftSubmission.contractSubmissionType
-                            ],
-                    })
+                    getSubmissionPath(
+                        'SUBMISSIONS_REVIEW_SUBMIT',
+                        contractSubmissionType,
+                        id
+                    )
                 )
             } else if (hideSupportingDocs) {
                 if (options.redirectPath) {
                     navigate(
-                        generatePath(RoutesRecord[options.redirectPath], {
-                            id: id,
+                        getSubmissionPath(
+                            options.redirectPath,
                             contractSubmissionType,
-                        })
+                            id
+                        )
                     )
                 }
             } else {
-                navigate(`../documents`)
+                navigate(
+                    getSubmissionPath(
+                        'SUBMISSIONS_DOCUMENTS',
+                        contractSubmissionType,
+                        id
+                    )
+                )
             }
         }
     }
@@ -468,18 +469,15 @@ const Contacts = ({
                                             draftSubmission.draftRevision
                                                 .formData.submissionType ===
                                             'CONTRACT_ONLY'
-                                                ? RoutesRecord.SUBMISSIONS_CONTRACT_DETAILS
-                                                : RoutesRecord.SUBMISSIONS_RATE_DETAILS
+                                                ? 'SUBMISSIONS_CONTRACT_DETAILS'
+                                                : 'SUBMISSIONS_RATE_DETAILS'
 
                                         navigate(
-                                            generatePath(previousPage, {
-                                                id,
-                                                contractSubmissionType:
-                                                    ContractSubmissionTypeRecord[
-                                                        draftSubmission
-                                                            .contractSubmissionType
-                                                    ],
-                                            })
+                                            getSubmissionPath(
+                                                previousPage,
+                                                contractSubmissionType,
+                                                id
+                                            )
                                         )
                                     }}
                                     continueOnClick={() => {
@@ -490,35 +488,21 @@ const Contacts = ({
                                     backOnClickUrl={
                                         draftSubmission.draftRevision.formData
                                             .submissionType === 'CONTRACT_ONLY'
-                                            ? generatePath(
-                                                  RoutesRecord.SUBMISSIONS_CONTRACT_DETAILS,
-                                                  {
-                                                      id,
-                                                      contractSubmissionType:
-                                                          ContractSubmissionTypeRecord[
-                                                              draftSubmission
-                                                                  .contractSubmissionType
-                                                          ],
-                                                  }
+                                            ? getSubmissionPath(
+                                                  'SUBMISSIONS_CONTRACT_DETAILS',
+                                                  contractSubmissionType,
+                                                  id
                                               )
-                                            : generatePath(
-                                                  RoutesRecord.SUBMISSIONS_RATE_DETAILS,
-                                                  {
-                                                      id,
-                                                      contractSubmissionType:
-                                                          ContractSubmissionTypeRecord[
-                                                              draftSubmission
-                                                                  .contractSubmissionType
-                                                          ],
-                                                  }
+                                            : getSubmissionPath(
+                                                  'SUBMISSIONS_RATE_DETAILS',
+                                                  contractSubmissionType,
+                                                  id
                                               )
                                     }
-                                    continueOnClickUrl={generatePath(
-                                        RoutesRecord.SUBMISSIONS_REVIEW_SUBMIT,
-                                        {
-                                            id,
-                                            contractSubmissionType,
-                                        }
+                                    continueOnClickUrl={getSubmissionPath(
+                                        'SUBMISSIONS_REVIEW_SUBMIT',
+                                        contractSubmissionType,
+                                        id
                                     )}
                                 />
                             </UswdsForm>
