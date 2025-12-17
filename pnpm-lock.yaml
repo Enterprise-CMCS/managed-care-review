@@ -1003,8 +1003,8 @@ importers:
         version: 16.9.0
     devDependencies:
       '@bahmutov/cypress-esbuild-preprocessor':
-        specifier: ^2.2.7
-        version: 2.2.7(esbuild@0.27.1)
+        specifier: ^2.2.8
+        version: 2.2.8(esbuild@0.27.1)
       '@cypress-audit/pa11y':
         specifier: ^1.3.0
         version: 1.4.2(encoding@0.1.13)
@@ -3361,8 +3361,8 @@ packages:
     resolution: {integrity: sha512-qQ5m48eI/MFLQ5PxQj4PFaprjyCTLI37ElWMmNs0K8Lk3dVeOdNpB3ks8jc7yM5CDmVC73eMVk/trk3fgmrUpA==}
     engines: {node: '>=6.9.0'}
 
-  '@bahmutov/cypress-esbuild-preprocessor@2.2.7':
-    resolution: {integrity: sha512-n5kYNQ830Tics+04/pRR/IdJsCoc2xf4iO7emI2ofGIWGuDkE4ewIJt1jYJ+FfN41I2B7jTWQRvU274T4NloTQ==}
+  '@bahmutov/cypress-esbuild-preprocessor@2.2.8':
+    resolution: {integrity: sha512-pN90es4T1DYcQbBuDEpa7yotC/VhE+BgfHIEGpS0uxibTIqt7g4ZITQZbTFcaQATZh3QmPIMMkeZyBE7PWf1LA==}
     peerDependencies:
       esbuild: '>=0.17.0'
 
@@ -7720,8 +7720,8 @@ packages:
     resolution: {integrity: sha512-qsJ8/X+UypqxHXN75M7dF88jNK37dLBRW7LeUzCPz+TNs37G8cfWy9nWzS+LS//g600zrt2le9KuXt0rWfDz5Q==}
     hasBin: true
 
-  baseline-browser-mapping@2.9.7:
-    resolution: {integrity: sha512-k9xFKplee6KIio3IDbwj+uaCLpqzOwakOgmqzPezM0sFJlFKcg30vk2wOiAJtkTSfx0SSQDSe8q+mWA/fSH5Zg==}
+  baseline-browser-mapping@2.9.8:
+    resolution: {integrity: sha512-Y1fOuNDowLfgKOypdc9SPABfoWXuZHBOyCS4cD52IeZBhr4Md6CLLs6atcxVrzRmQ06E7hSlm5bHHApPKR/byA==}
     hasBin: true
 
   basic-auth@2.0.1:
@@ -13775,8 +13775,8 @@ packages:
     peerDependencies:
       browserslist: '>= 4.21.0'
 
-  update-browserslist-db@1.2.2:
-    resolution: {integrity: sha512-E85pfNzMQ9jpKkA7+TJAi4TJN+tBCuWh5rUcS/sv6cFi+1q9LYDwDI5dpUL0u/73EElyQ8d3TEaeW4sPedBqYA==}
+  update-browserslist-db@1.2.3:
+    resolution: {integrity: sha512-Js0m9cx+qOgDxo0eMiFGEueWztz+d4+M3rGlmKPT+T4IS/jP4ylw3Nwpu6cpTTP8R1MAC1kF4VbdLt3ARf209w==}
     hasBin: true
     peerDependencies:
       browserslist: '>= 4.21.0'
@@ -18470,7 +18470,7 @@ snapshots:
       '@babel/helper-string-parser': 7.27.1
       '@babel/helper-validator-identifier': 7.28.5
 
-  '@bahmutov/cypress-esbuild-preprocessor@2.2.7(esbuild@0.27.1)':
+  '@bahmutov/cypress-esbuild-preprocessor@2.2.8(esbuild@0.27.1)':
     dependencies:
       debug: 4.4.3(supports-color@8.1.1)
       esbuild: 0.27.1
@@ -24181,7 +24181,7 @@ snapshots:
 
   baseline-browser-mapping@2.8.15: {}
 
-  baseline-browser-mapping@2.9.7: {}
+  baseline-browser-mapping@2.9.8: {}
 
   basic-auth@2.0.1:
     dependencies:
@@ -24305,11 +24305,11 @@ snapshots:
 
   browserslist@4.28.1:
     dependencies:
-      baseline-browser-mapping: 2.9.7
+      baseline-browser-mapping: 2.9.8
       caniuse-lite: 1.0.30001760
       electron-to-chromium: 1.5.267
       node-releases: 2.0.27
-      update-browserslist-db: 1.2.2(browserslist@4.28.1)
+      update-browserslist-db: 1.2.3(browserslist@4.28.1)
 
   bs-logger@0.2.6:
     dependencies:
@@ -31615,7 +31615,7 @@ snapshots:
       escalade: 3.2.0
       picocolors: 1.1.1
 
-  update-browserslist-db@1.2.2(browserslist@4.28.1):
+  update-browserslist-db@1.2.3(browserslist@4.28.1):
     dependencies:
       browserslist: 4.28.1
       escalade: 3.2.0
