@@ -37,6 +37,7 @@ import type {
 } from '../domain-models'
 import { SESServiceException } from '@aws-sdk/client-ses'
 import type { RateForDisplayType } from './templateHelpers'
+import { newEQROContractCMSEmail } from './emails/newEQROContractCMSEmail'
 
 // See more discussion of configuration in docs/Configuration.md
 type EmailConfiguration = {
@@ -87,6 +88,10 @@ type Emailer = {
     sendCMSNewContract: (
         contract: ContractType,
         stateAnalystsEmails: StateAnalystsEmails,
+        statePrograms: ProgramType[]
+    ) => Promise<void | Error>
+    sendCMSNewEQROContract: (
+        contract: ContractType,
         statePrograms: ProgramType[]
     ) => Promise<void | Error>
     sendStateNewContract: (
@@ -210,13 +215,36 @@ type Emailer = {
         stateAnalystsEmails: StateAnalystsEmails
     ) => Promise<void | Error>
 }
-const localEmailerLogger = (emailData: EmailData) =>
-    console.info(`
-        EMAIL SENT
-        ${'(¯`·.¸¸.·´¯`·.¸¸.·´¯·.¸¸.·´¯`·.¸¸.·´¯`·.¸¸.·´¯`·.¸¸.·´)'}
-        ${JSON.stringify(getSESEmailParams(emailData))}
-        ${'(¯`·.¸¸.·´¯`·.¸¸.·´¯·.¸¸.·´¯`·.¸¸.·´¯`·.¸¸.·´¯`·.¸¸.·´)'}
-    `)
+const localEmailerLogger = (emailData: EmailData) => {
+    const params = getSESEmailParams(emailData)
+    const { Destination, Message, Source } = params
+
+    const emailBody = Message?.Body?.Text?.Data ?? 'No email body content found'
+    const subject = Message?.Subject?.Data ?? 'No email subject content found'
+    const to = Destination?.ToAddresses?.length ? Destination?.ToAddresses : []
+    const cc = Destination?.CcAddresses?.length ? Destination?.CcAddresses : []
+    const bcc = Destination?.BccAddresses?.length
+        ? Destination?.BccAddresses
+        : []
+
+    // Clean up the body text - collapse multiple newlines and trim whitespace
+    const cleanBody = emailBody
+        .replace(/\n{3,}/g, '\n\n') // Replace 3+ newlines with just 2
+        .replace(/^\s+|\s+$/g, '') // Trim leading/trailing whitespace
+        .replace(/\n\s+\n/g, '\n\n') // Remove lines that are just whitespace
+
+    console.info('')
+    console.info('(¯`·.¸¸.·´¯`·.¸¸.·´¯·📧 EMAIL SENT·´¯`·.¸¸.·´¯`·.¸¸.·´)')
+    console.info(`From: ${Source}`)
+    console.info(`To: ${to.join(', ')}`)
+    console.info(`Cc: ${cc.join(', ')}`)
+    console.info(`Bcc: ${bcc.join(', ')}`)
+    console.info(`Subject: ${subject}`)
+    console.info('────────────────────────────────────────────────────────────')
+    console.info(cleanBody)
+    console.info('(¯`·.¸¸.·´¯`·.¸¸.·´¯·.¸¸.·´¯`·.¸¸.·´¯`·.¸¸.·´¯`·.¸¸.·´)')
+    console.info('')
+}
 
 function emailer(
     config: EmailConfiguration,
@@ -234,6 +262,18 @@ function emailer(
                 contract,
                 config,
                 stateAnalystsEmails,
+                statePrograms
+            )
+            if (emailData instanceof Error) {
+                return emailData
+            } else {
+                return await this.sendEmail(emailData)
+            }
+        },
+        sendCMSNewEQROContract: async function (contract, statePrograms) {
+            const emailData = await newEQROContractCMSEmail(
+                contract,
+                config,
                 statePrograms
             )
             if (emailData instanceof Error) {
