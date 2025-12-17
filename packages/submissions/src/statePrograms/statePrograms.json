@@ -650,6 +650,12 @@
                     "fullName": "Managed Care Health Plan Comprehensive Health Care Program",
                     "name": "MCHP",
                     "isRateProgram": false
+                },
+                {
+                    "id": "52cea86a-e2f0-4f93-abea-2e3b99dc6b78",
+                    "fullName": "MI Coordinated Health",
+                    "name": "MICH",
+                    "isRateProgram": false
                 }
             ],
             "code": "MI"

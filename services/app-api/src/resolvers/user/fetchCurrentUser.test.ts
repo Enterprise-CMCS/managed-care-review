@@ -54,6 +54,6 @@ describe('currentUser', () => {
         expect(res.data?.fetchCurrentUser.email).toBe('james@example.com')
         expect(res.data?.fetchCurrentUser.state.code).toBe('MI')
         expect(res.data?.fetchCurrentUser.state.name).toBe('Michigan')
-        expect(res.data?.fetchCurrentUser.state.programs).toHaveLength(6)
+        expect(res.data?.fetchCurrentUser.state.programs).toHaveLength(7)
     })
 })
