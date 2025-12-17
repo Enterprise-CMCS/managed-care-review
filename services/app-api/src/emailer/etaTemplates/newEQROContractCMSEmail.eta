@@ -1,0 +1,16 @@
+Submission <%= it.packageName %> <%= it.subjectToReview %>.
+<br /><br />
+<b>Contract type</b>: <%= it.contractSubmissionType %><br />
+<b>Contract action type</b>: <%= it.contractActionType %><br />
+<b><%= it.contractDatesLabel %></b>: <%= it.contractDatesStart %> to <%= it.contractDatesEnd %><br />
+<br />
+<b>Managed care entities reviewed by this EQRO</b>: <%= it.managedCareEntities %><br />
+<% if (it.eqroNewContractor) { %><b>Is this contract with a new EQRO contractor?</b>: <%= it.eqroNewContractor %><br /> <% } %>
+<% if (it.eqroProvisionMcoEqrOrRelatedActivities) { %><b>EQR or EQR-related activities preformed on MCOs?</b>: <%= it.eqroProvisionMcoEqrOrRelatedActivities %><br /> <% } %>
+<% if (it.eqroProvisionMcoNewOptionalActivity) { %><b>New optional activities to be performed on MCOs</b>: <%= it.eqroProvisionMcoNewOptionalActivity %><br /> <% } %>
+<% if (it.eqroProvisionNewMcoEqrRelatedActivities) { %><b>EQR-related activities for a new MCO managed care program</b>: <%= it.eqroProvisionNewMcoEqrRelatedActivities %><br /> <% } %>
+<% if (it.eqroProvisionChipEqrRelatedActivities) { %><b>EQR-related activities performed on the CHIP population</b>: <%= it.eqroProvisionChipEqrRelatedActivities %><br /> <% } %>
+<br />
+<b>Submission description</b>: <%= it.submissionDescription %><br />
+<br />
+<a href="<%= it.submissionURL%>">View submission</a>
