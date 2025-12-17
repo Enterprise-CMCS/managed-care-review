@@ -18,10 +18,11 @@ import {
     handleAndReturnErrorState,
 } from '../StateSubmission/SharedSubmissionComponents/ErrorOrLoadingPage'
 import { Error404 } from '../Errors/Error404Page'
+import { getSubmissionPath } from '../../routeHelpers'
 
 export const SubmissionRevisionSummary = (): React.ReactElement => {
     // Page level state
-    const { id, revisionVersion, contractSubmissionType } = useParams()
+    const { id, revisionVersion } = useParams()
     if (!id) {
         throw new Error(
             'PROGRAMMING ERROR: id param not set in state submission form.'
@@ -110,7 +111,11 @@ export const SubmissionRevisionSummary = (): React.ReactElement => {
                 className={styles.container}
             >
                 <PreviousSubmissionBanner
-                    link={`/submissions/${contractSubmissionType}/${id}`}
+                    link={getSubmissionPath(
+                        'SUBMISSIONS_SUMMARY',
+                        contract.contractSubmissionType,
+                        contract.id
+                    )}
                 />
                 <SubmissionTypeSummarySection
                     contract={contract}

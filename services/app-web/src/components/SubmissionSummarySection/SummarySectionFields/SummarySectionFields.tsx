@@ -22,7 +22,7 @@ import {
     PopulationCoveredRecord,
     sortModifiedProvisions,
     SubmissionTypeRecord,
-    validateEQROdata,
+    eqroValidationAndReviewDetermination,
 } from '@mc-review/submissions'
 import {
     booleanAsYesNoFormValue,
@@ -492,10 +492,12 @@ export const EQROModifiedProvisionSummary = ({
     contractFormData,
     explainMissingData,
 }: { contractID: string } & SummaryDetailProps) => {
-    const isValidEQROProvisions =
-        validateEQROdata(contractID, contractFormData) instanceof Error
-            ? false
-            : true
+    const isValidEQROProvisions = !(
+        eqroValidationAndReviewDetermination(
+            contractID,
+            contractFormData
+        ) instanceof Error
+    )
 
     const { includedProvisions, excludedProvisions, provisionDictionary } =
         getEQROProvisionDictionary(contractFormData)
