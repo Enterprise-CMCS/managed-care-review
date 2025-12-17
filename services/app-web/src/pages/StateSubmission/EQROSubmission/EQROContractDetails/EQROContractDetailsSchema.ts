@@ -17,7 +17,7 @@ export const EQROContractDetailsFormSchema = (
         const managedCareEntities = draftSubmission?.draftRevision?.formData?.managedCareEntities ?? []
         const hasMCO = managedCareEntities.includes("MCO")
 
-        // Validation rules based on your form logic:
+        // Validation rules based on the form logic:
         // - eqroNewContractor: required if base contract AND MCO
         // - eqroProvisionMcoEqrOrRelatedActivities: required if NOT base contract AND MCO
         // - eqroProvisionMcoNewOptionalActivity: required if (base contract AND MCO) OR (amendment AND MCO AND answered YES to EQR activities)

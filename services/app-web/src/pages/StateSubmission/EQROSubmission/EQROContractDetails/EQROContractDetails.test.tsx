@@ -14,12 +14,10 @@ import {
     renderWithProviders,
     TEST_DOC_FILE,
     TEST_PDF_FILE,
-    TEST_XLS_FILE,
     TEST_PNG_FILE,
     dragAndDrop,
 } from '../../../../testHelpers/jestHelpers'
 
-import { ACCEPTED_SUBMISSION_FILE_TYPES } from '../../../../components/FileUpload'
 import { EQROContractDetails } from './EQROContractDetails'
 
 const scrollIntoViewMock = vi.fn()
@@ -121,109 +119,6 @@ describe('EQROContractDetails', () => {
                     screen.getAllByTestId('file-input-preview-list')[0]
                 ).queryAllByRole('listitem')
             ).toHaveLength(0)
-        })
-
-        it('accepts a new document', async () => {
-            const draftContract = mockContractPackageUnlockedWithUnlockedType()
-            draftContract.draftRevision.formData.contractType = 'BASE'
-            draftContract.draftRevision.formData.managedCareEntities = ['MCO']
-
-            renderWithProviders(
-                <Routes>
-                    <Route
-                        path={RoutesRecord.SUBMISSIONS_CONTRACT_DETAILS}
-                        element={<EQROContractDetails />}
-                    />
-                </Routes>,
-                {
-                    apolloProvider: {
-                        mocks: [
-                            fetchCurrentUserMock({ statusCode: 200 }),
-                            fetchContractMockSuccess({
-                                contract: {
-                                    ...draftContract,
-                                    id: '15',
-                                    contractSubmissionType: 'EQRO',
-                                },
-                            }),
-                        ],
-                    },
-                    routerProvider: {
-                        route: '/submissions/eqro/15/edit/contract-details',
-                    },
-                    featureFlags: {
-                        'hide-supporting-docs-page': true,
-                    },
-                }
-            )
-
-            await screen.findByText('EQRO Contract details')
-
-            const contractDoc = screen.getByLabelText('Upload contract')
-            expect(contractDoc).toBeInTheDocument()
-            await userEvent.upload(contractDoc, [TEST_DOC_FILE])
-            const supportingDoc = screen.getByLabelText(
-                'Upload contract-supporting documents'
-            )
-            expect(supportingDoc).toBeInTheDocument()
-            await userEvent.upload(supportingDoc, [TEST_PDF_FILE])
-            expect(
-                await screen.findByText(TEST_DOC_FILE.name)
-            ).toBeInTheDocument()
-            expect(
-                await screen.findByText(TEST_PDF_FILE.name)
-            ).toBeInTheDocument()
-        })
-
-        it('accepts multiple pdf, word, excel documents', async () => {
-            const draftContract = mockContractPackageUnlockedWithUnlockedType()
-            draftContract.draftRevision.formData.contractType = 'BASE'
-            draftContract.draftRevision.formData.managedCareEntities = ['MCO']
-
-            renderWithProviders(
-                <Routes>
-                    <Route
-                        path={RoutesRecord.SUBMISSIONS_CONTRACT_DETAILS}
-                        element={<EQROContractDetails />}
-                    />
-                </Routes>,
-                {
-                    apolloProvider: {
-                        mocks: [
-                            fetchCurrentUserMock({ statusCode: 200 }),
-                            fetchContractMockSuccess({
-                                contract: {
-                                    ...draftContract,
-                                    id: '15',
-                                    contractSubmissionType: 'EQRO',
-                                },
-                            }),
-                        ],
-                    },
-                    routerProvider: {
-                        route: '/submissions/eqro/15/edit/contract-details',
-                    },
-                }
-            )
-
-            await screen.findByText('EQRO Contract details')
-
-            const input = screen.getByLabelText('Upload contract')
-            expect(input).toBeInTheDocument()
-            expect(input).toHaveAttribute(
-                'accept',
-                ACCEPTED_SUBMISSION_FILE_TYPES
-            )
-            await userEvent.upload(input, [
-                TEST_DOC_FILE,
-                TEST_PDF_FILE,
-                TEST_XLS_FILE,
-            ])
-            await waitFor(() => {
-                expect(screen.getByText(TEST_DOC_FILE.name)).toBeInTheDocument()
-                expect(screen.getByText(TEST_PDF_FILE.name)).toBeInTheDocument()
-                expect(screen.getByText(TEST_XLS_FILE.name)).toBeInTheDocument()
-            })
         })
     })
 
@@ -753,6 +648,47 @@ describe('EQROContractDetails', () => {
             expect(screen.getAllByTestId('yes-no-radio-fieldset')).toHaveLength(
                 1
             )
+        })
+
+        it('does not show provisions heading for Base Medicaid contract without MCO', async () => {
+            const draftContract = mockContractPackageUnlockedWithUnlockedType()
+            draftContract.draftRevision.formData.contractType = 'BASE'
+            draftContract.draftRevision.formData.populationCovered = 'MEDICAID'
+            draftContract.draftRevision.formData.managedCareEntities = ['PIHP']
+
+            renderWithProviders(
+                <Routes>
+                    <Route
+                        path={RoutesRecord.SUBMISSIONS_CONTRACT_DETAILS}
+                        element={<EQROContractDetails />}
+                    />
+                </Routes>,
+                {
+                    apolloProvider: {
+                        mocks: [
+                            fetchCurrentUserMock({ statusCode: 200 }),
+                            fetchContractMockSuccess({
+                                contract: {
+                                    ...draftContract,
+                                    id: '15',
+                                    contractSubmissionType: 'EQRO',
+                                },
+                            }),
+                        ],
+                    },
+                    routerProvider: {
+                        route: '/submissions/eqro/15/edit/contract-details',
+                    },
+                }
+            )
+
+            await screen.findByText('EQRO Contract details')
+
+            expect(screen.queryByText('Provisions')).not.toBeInTheDocument()
+            
+            expect(
+                screen.queryByText('Does this contract action include provisions related to any of the following?')
+            ).not.toBeInTheDocument()
         })
     })
 

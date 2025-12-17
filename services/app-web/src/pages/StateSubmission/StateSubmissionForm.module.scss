@@ -147,6 +147,19 @@
     color: custom.$mcr-foundation-hint;
 }
 
+.provisionsHeader {
+    display: block;
+    color: custom.$mcr-foundation-hint;
+    font-size:larger;
+    margin-bottom: 0pt;
+}
+
+.provisionsHeaderText {
+    display: block;
+    color: custom.$mcr-foundation-hint;
+    margin-top: 0pt;
+}
+
 .guidanceTextBlockNoPadding {
     display: flex;
     flex-direction: column;
