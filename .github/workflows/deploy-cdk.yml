@@ -227,6 +227,32 @@ jobs:
           name: api-test-coverage
           path: ./services/app-api/coverage/coverage-final.json
 
+  packages-unit-tests:
+    name: test - packages unit tests
+    runs-on: ubuntu-24.04
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v6
+
+      - name: Setup env
+        uses: ./.github/actions/setup_env
+
+      - name: Generate Code
+        run: pnpm -r generate
+
+      - name: Build packages
+        shell: bash
+        run: pnpm build:packages
+
+      - name: Packages Unit Tests
+        id: packages-unit-tests
+        env:
+          NODE_OPTIONS: --max_old_space_size=6000
+        run: |
+          set -e
+          pnpm --filter "./packages/**" test:coverage
+          exit $?
+
   build-lambda-layers:
     name: build - lambda layers
     runs-on: ubuntu-24.04
@@ -428,6 +454,7 @@ jobs:
         deploy-cdk-app,
         web-unit-tests,
         api-unit-tests,
+        packages-unit-tests,
       ]
     if: |
       always() &&
@@ -435,6 +462,7 @@ jobs:
       needs.deploy-cdk-app.result == 'success' &&
       needs.web-unit-tests.result == 'success' &&
       needs.api-unit-tests.result == 'success' &&
+      needs.packages-unit-tests.result == 'success' &&
       needs.begin-deployment.result == 'success'
     name: deploy - Frontend app with built assets
     runs-on: ubuntu-24.04
@@ -513,6 +541,7 @@ jobs:
         build-lambda-layers,
         web-unit-tests,
         api-unit-tests,
+        packages-unit-tests,
       ]
     if: |
       always() &&
@@ -520,6 +549,7 @@ jobs:
       needs.build-lambda-layers.result == 'success' &&
       needs.web-unit-tests.result == 'success' &&
       needs.api-unit-tests.result == 'success' &&
+      needs.packages-unit-tests.result == 'success' &&
       needs.begin-deployment.result == 'success'
     name: deploy - CDK application stacks
     runs-on: ubuntu-24.04

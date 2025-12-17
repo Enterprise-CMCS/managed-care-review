@@ -158,6 +158,32 @@ jobs:
           name: api-test-coverage
           path: ./services/app-api/coverage/coverage-final.json
 
+  packages-unit-tests:
+    name: test - packages unit tests
+    runs-on: ubuntu-24.04
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v6
+
+      - name: Setup env
+        uses: ./.github/actions/setup_env
+
+      - name: Generate Code
+        run: pnpm -r generate
+
+      - name: Build packages
+        shell: bash
+        run: pnpm build:packages
+
+      - name: Packages Unit Tests
+        id: packages-unit-tests
+        env:
+          NODE_OPTIONS: --max_old_space_size=6000
+        run: |
+          set -e
+          pnpm --filter "./packages/**" test:coverage
+          exit $?
+
   build-lambda-layers:
     name: build - lambda layers
     runs-on: ubuntu-24.04
@@ -372,6 +398,7 @@ jobs:
         deploy-cdk-app-dev,
         web-unit-tests,
         api-unit-tests,
+        packages-unit-tests,
       ]
     if: |
       always() &&
@@ -379,6 +406,7 @@ jobs:
       needs.deploy-cdk-app-dev.result == 'success' &&
       needs.web-unit-tests.result == 'success' &&
       needs.api-unit-tests.result == 'success' &&
+      needs.packages-unit-tests.result == 'success' &&
       needs.begin-deployment.result == 'success'
     name: deploy - Frontend app with built assets (dev)
     runs-on: ubuntu-24.04
@@ -457,6 +485,7 @@ jobs:
         build-lambda-layers,
         web-unit-tests,
         api-unit-tests,
+        packages-unit-tests,
       ]
     if: |
       always() &&
@@ -464,6 +493,7 @@ jobs:
       needs.build-lambda-layers.result == 'success' &&
       needs.web-unit-tests.result == 'success' &&
       needs.api-unit-tests.result == 'success' &&
+      needs.packages-unit-tests.result == 'success' &&
       needs.begin-deployment.result == 'success'
     name: deploy - CDK application stacks (dev)
     runs-on: ubuntu-24.04
@@ -748,6 +778,7 @@ jobs:
         build-lambda-layers,
         web-unit-tests,
         api-unit-tests,
+        packages-unit-tests,
       ]
     if: |
       always() &&
@@ -755,6 +786,7 @@ jobs:
       needs.build-lambda-layers.result == 'success' &&
       needs.web-unit-tests.result == 'success' &&
       needs.api-unit-tests.result == 'success' &&
+      needs.packages-unit-tests.result == 'success' &&
       needs.begin-deployment.result == 'success'
     name: deploy - CDK application stacks (val)
     runs-on: ubuntu-24.04
@@ -840,6 +872,7 @@ jobs:
         deploy-cdk-app-val,
         web-unit-tests,
         api-unit-tests,
+        packages-unit-tests,
       ]
     if: |
       always() &&
@@ -847,6 +880,7 @@ jobs:
       needs.deploy-cdk-app-val.result == 'success' &&
       needs.web-unit-tests.result == 'success' &&
       needs.api-unit-tests.result == 'success' &&
+      needs.packages-unit-tests.result == 'success' &&
       needs.begin-deployment.result == 'success'
     name: deploy - Frontend app with built assets (val)
     runs-on: ubuntu-24.04
@@ -1116,6 +1150,7 @@ jobs:
         build-lambda-layers,
         web-unit-tests,
         api-unit-tests,
+        packages-unit-tests,
       ]
     if: |
       always() &&
@@ -1123,6 +1158,7 @@ jobs:
       needs.build-lambda-layers.result == 'success' &&
       needs.web-unit-tests.result == 'success' &&
       needs.api-unit-tests.result == 'success' &&
+      needs.packages-unit-tests.result == 'success' &&
       needs.begin-deployment.result == 'success'
     name: deploy - CDK application stacks (prod)
     runs-on: ubuntu-24.04
@@ -1208,6 +1244,7 @@ jobs:
         deploy-cdk-app-prod,
         web-unit-tests,
         api-unit-tests,
+        packages-unit-tests,
       ]
     if: |
       always() &&
@@ -1215,6 +1252,7 @@ jobs:
       needs.deploy-cdk-app-prod.result == 'success' &&
       needs.web-unit-tests.result == 'success' &&
       needs.api-unit-tests.result == 'success' &&
+      needs.packages-unit-tests.result == 'success' &&
       needs.begin-deployment.result == 'success'
     name: deploy - Frontend app with built assets (prod)
     runs-on: ubuntu-24.04
