@@ -112,13 +112,13 @@ jobs:
         run: pnpm build:packages
 
       - name: upload app web gen directory
-        uses: actions/upload-artifact@v5
+        uses: actions/upload-artifact@v6
         with:
           name: app-web-gen deploy ${{ inputs.stage_name }}
           path: ./services/app-web/src/gen
 
       - name: upload cypress gen directory
-        uses: actions/upload-artifact@v5
+        uses: actions/upload-artifact@v6
         with:
           name: cypress-gen deploy ${{ inputs.stage_name }}
           path: ./services/cypress/gen
