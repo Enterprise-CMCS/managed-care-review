@@ -159,7 +159,7 @@ export const EQROContractDetails = ({
         draftSubmission.draftRevision.formData.populationCovered ?? ''
     const includesChip: boolean =
         populationCovered === 'MEDICAID_AND_CHIP' ||
-        populationCovered === 'CHIP_ONLY'
+        populationCovered === 'CHIP'
 
     const isMCO: boolean =
         draftSubmission.draftRevision.formData.managedCareEntities.includes(
@@ -311,6 +311,7 @@ export const EQROContractDetails = ({
             setDraftSaved(false)
         }
 
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
         const { __typename, ...formData } =
             draftSubmission.draftRevision.formData
 
@@ -446,7 +447,6 @@ export const EQROContractDetails = ({
                             <>
                                 <UswdsForm
                                     className={styles.formContainer}
-                                    //onSubmit={() => console.info('submit placeholder')}
                                     onSubmit={(e) => {
                                         setShouldValidate(true)
                                         setFocusErrorSummaryHeading(true)
@@ -787,183 +787,180 @@ export const EQROContractDetails = ({
                                         )}
 
                                         {!hideProvisionsHeader && (
-                                            <FormGroup>
-                                                <p
-                                                    className={
-                                                        styles.provisionsHeader
-                                                    }
-                                                >
-                                                    Provisions
-                                                </p>
-                                                <p
-                                                    className={
-                                                        styles.provisionsHeaderText
-                                                    }
-                                                >
-                                                    Does this contract action
-                                                    include provisions related
-                                                    to any of the following?
-                                                </p>
-                                            </FormGroup>
-                                        )}
-
-                                        {!isBaseContract && isMCO && (
-                                            <FormGroup
-                                                error={Boolean(
-                                                    showFieldErrors(
-                                                        'eqroProvisionMcoEqrOrRelatedActivities',
-                                                        errors
-                                                    )
-                                                )}
+                                            <Fieldset
+                                                legend={
+                                                    <>
+                                                        <span className={styles.provisionsHeader}>
+                                                            Provisions
+                                                        </span>
+                                                        <span className={styles.provisionsHeaderText}>
+                                                            Does this contract action include new or modified provisions related to any of the following?
+                                                        </span>
+                                                    </>
+                                                }
                                             >
-                                                <Fieldset
-                                                    aria-required
-                                                    id="eqroProvisionMcoEqrOrRelatedActivities"
-                                                    legend="EQR or EQR-related activities performed on MCOs"
-                                                >
-                                                    <span
-                                                        className={
-                                                            styles.requiredOptionalText
-                                                        }
-                                                    >
-                                                        Required
-                                                    </span>
-                                                    <FieldYesNo
-                                                        id="eqroProvisionMcoEqrOrRelatedActivities"
-                                                        name="eqroProvisionMcoEqrOrRelatedActivities"
-                                                        label="EQR or EQR-related activities performed on MCOs"
-                                                        showError={Boolean(
+                                                {!isBaseContract && isMCO && (
+                                                    <FormGroup
+                                                        error={Boolean(
                                                             showFieldErrors(
                                                                 'eqroProvisionMcoEqrOrRelatedActivities',
                                                                 errors
                                                             )
                                                         )}
-                                                        legendStyle="srOnly"
-                                                    />
-                                                </Fieldset>
-                                            </FormGroup>
-                                        )}
-
-                                        {((!isBaseContract &&
-                                            isMCO &&
-                                            values.eqroProvisionMcoEqrOrRelatedActivities ===
-                                                'YES') ||
-                                            (isBaseContract && isMCO)) && (
-                                            <FormGroup
-                                                error={Boolean(
-                                                    showFieldErrors(
-                                                        'eqroProvisionMcoNewOptionalActivity',
-                                                        errors
-                                                    )
-                                                )}
-                                            >
-                                                <Fieldset
-                                                    aria-required
-                                                    id="eqroProvisionMcoNewOptionalActivity"
-                                                    legend="New optional activities to be performed on MCO in accordance with 42 CFR $ 438.358(c)"
-                                                >
-                                                    <span
-                                                        className={
-                                                            styles.requiredOptionalText
-                                                        }
                                                     >
-                                                        Required
-                                                    </span>
-                                                    <FieldYesNo
-                                                        id="eqroProvisionMcoNewOptionalActivity"
-                                                        name="eqroProvisionMcoNewOptionalActivity"
-                                                        label="New optional activities to be performed on MCO in accordance with 42 CFR $ 438.358(c)"
-                                                        showError={Boolean(
+                                                        <Fieldset
+                                                            aria-required
+                                                            id="eqroProvisionMcoEqrOrRelatedActivities"
+                                                            legend="EQR or EQR-related activities performed on MCOs"
+                                                        >
+                                                            <span
+                                                                className={
+                                                                    styles.requiredOptionalText
+                                                                }
+                                                            >
+                                                                Required
+                                                            </span>
+                                                            <FieldYesNo
+                                                                id="eqroProvisionMcoEqrOrRelatedActivities"
+                                                                name="eqroProvisionMcoEqrOrRelatedActivities"
+                                                                label="EQR or EQR-related activities performed on MCOs"
+                                                                showError={Boolean(
+                                                                    showFieldErrors(
+                                                                        'eqroProvisionMcoEqrOrRelatedActivities',
+                                                                        errors
+                                                                    )
+                                                                )}
+                                                                legendStyle="srOnly"
+                                                            />
+                                                        </Fieldset>
+                                                    </FormGroup>
+                                                )}
+
+                                                {((!isBaseContract &&
+                                                    isMCO &&
+                                                    values.eqroProvisionMcoEqrOrRelatedActivities ===
+                                                        'YES') ||
+                                                    (isBaseContract && isMCO)) && (
+                                                    <FormGroup
+                                                        error={Boolean(
                                                             showFieldErrors(
                                                                 'eqroProvisionMcoNewOptionalActivity',
                                                                 errors
                                                             )
                                                         )}
-                                                        legendStyle="srOnly"
-                                                    />
-                                                </Fieldset>
-                                            </FormGroup>
-                                        )}
-                                        {((!isBaseContract &&
-                                            isMCO &&
-                                            values.eqroProvisionMcoEqrOrRelatedActivities ===
-                                                'YES') ||
-                                            (isBaseContract && isMCO)) && (
-                                            <FormGroup
-                                                error={Boolean(
-                                                    showFieldErrors(
-                                                        'eqroProvisionNewMcoEqrRelatedActivities',
-                                                        errors
-                                                    )
-                                                )}
-                                            >
-                                                <Fieldset
-                                                    aria-required
-                                                    id="eqroProvisionNewMcoEqrRelatedActivities"
-                                                    legend="EQR-related activities for a new MCO managed care program"
-                                                >
-                                                    <span
-                                                        className={
-                                                            styles.requiredOptionalText
-                                                        }
                                                     >
-                                                        Required
-                                                    </span>
-                                                    <FieldYesNo
-                                                        id="eqroProvisionNewMcoEqrRelatedActivities"
-                                                        name="eqroProvisionNewMcoEqrRelatedActivities"
-                                                        label="EQR-related activities for a new MCO managed care program"
-                                                        showError={Boolean(
+                                                        <Fieldset
+                                                            aria-required
+                                                            id="eqroProvisionMcoNewOptionalActivity"
+                                                            legend="New optional activities to be performed on MCO in accordance with 42 CFR $ 438.358(c)"
+                                                        >
+                                                            <span
+                                                                className={
+                                                                    styles.requiredOptionalText
+                                                                }
+                                                            >
+                                                                Required
+                                                            </span>
+                                                            <FieldYesNo
+                                                                id="eqroProvisionMcoNewOptionalActivity"
+                                                                name="eqroProvisionMcoNewOptionalActivity"
+                                                                label="New optional activities to be performed on MCO in accordance with 42 CFR $ 438.358(c)"
+                                                                showError={Boolean(
+                                                                    showFieldErrors(
+                                                                        'eqroProvisionMcoNewOptionalActivity',
+                                                                        errors
+                                                                    )
+                                                                )}
+                                                                legendStyle="srOnly"
+                                                            />
+                                                        </Fieldset>
+                                                    </FormGroup>
+                                                )}
+
+                                                {((!isBaseContract &&
+                                                    isMCO &&
+                                                    values.eqroProvisionMcoEqrOrRelatedActivities ===
+                                                        'YES') ||
+                                                    (isBaseContract && isMCO)) && (
+                                                    <FormGroup
+                                                        error={Boolean(
                                                             showFieldErrors(
                                                                 'eqroProvisionNewMcoEqrRelatedActivities',
                                                                 errors
                                                             )
                                                         )}
-                                                        legendStyle="srOnly"
-                                                    />
-                                                </Fieldset>
-                                            </FormGroup>
-                                        )}
-                                        {includesChip && (
-                                            <FormGroup
-                                                error={Boolean(
-                                                    showFieldErrors(
-                                                        'eqroProvisionChipEqrRelatedActivities',
-                                                        errors
-                                                    )
-                                                )}
-                                            >
-                                                <Fieldset
-                                                    aria-required
-                                                    id="eqroProvisionChipEqrRelatedActivities"
-                                                    legend="EQR-related activities performed on the CHIP population"
-                                                >
-                                                    <span
-                                                        className={
-                                                            styles.requiredOptionalText
-                                                        }
                                                     >
-                                                        Required
-                                                    </span>
-                                                    <FieldYesNo
-                                                        id="eqroProvisionChipEqrRelatedActivities"
-                                                        name="eqroProvisionChipEqrRelatedActivities"
-                                                        label="EQR-related activities performed on the CHIP population"
-                                                        showError={Boolean(
+                                                        <Fieldset
+                                                            aria-required
+                                                            id="eqroProvisionNewMcoEqrRelatedActivities"
+                                                            legend="EQR-related activities for a new MCO managed care program"
+                                                        >
+                                                            <span
+                                                                className={
+                                                                    styles.requiredOptionalText
+                                                                }
+                                                            >
+                                                                Required
+                                                            </span>
+                                                            <FieldYesNo
+                                                                id="eqroProvisionNewMcoEqrRelatedActivities"
+                                                                name="eqroProvisionNewMcoEqrRelatedActivities"
+                                                                label="EQR-related activities for a new MCO managed care program"
+                                                                showError={Boolean(
+                                                                    showFieldErrors(
+                                                                        'eqroProvisionNewMcoEqrRelatedActivities',
+                                                                        errors
+                                                                    )
+                                                                )}
+                                                                legendStyle="srOnly"
+                                                            />
+                                                        </Fieldset>
+                                                    </FormGroup>
+                                                )}
+
+                                                {includesChip && (
+                                                    <FormGroup
+                                                        error={Boolean(
                                                             showFieldErrors(
                                                                 'eqroProvisionChipEqrRelatedActivities',
                                                                 errors
                                                             )
                                                         )}
-                                                        legendStyle="srOnly"
-                                                    />
-                                                </Fieldset>
-                                            </FormGroup>
+                                                    >
+                                                        <Fieldset
+                                                            aria-required
+                                                            id="eqroProvisionChipEqrRelatedActivities"
+                                                            legend="EQR-related activities performed on the CHIP population"
+                                                        >
+                                                            <span
+                                                                className={
+                                                                    styles.requiredOptionalText
+                                                                }
+                                                            >
+                                                                Required
+                                                            </span>
+                                                            <FieldYesNo
+                                                                id="eqroProvisionChipEqrRelatedActivities"
+                                                                name="eqroProvisionChipEqrRelatedActivities"
+                                                                label="EQR-related activities performed on the CHIP population"
+                                                                showError={Boolean(
+                                                                    showFieldErrors(
+                                                                        'eqroProvisionChipEqrRelatedActivities',
+                                                                        errors
+                                                                    )
+                                                                )}
+                                                                legendStyle="srOnly"
+                                                            />
+                                                        </Fieldset>
+                                                    </FormGroup>
+                                                )}
+                                            </Fieldset>
                                         )}
                                     </fieldset>
 
                                     <PageActions
                                         backOnClick={async () => {
+                                            setSubmitting(true)
                                             // Save data before going back
                                             await handleFormSubmit(
                                                 values,
