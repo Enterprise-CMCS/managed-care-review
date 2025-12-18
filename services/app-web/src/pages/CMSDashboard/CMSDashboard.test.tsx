@@ -10,7 +10,7 @@ import {
     mockContractPackageSubmitted,
     mockContractPackageApproved,
 } from '@mc-review/mocks'
-import { renderWithProviders } from '../../testHelpers/jestHelpers'
+import { renderWithProviders } from '../../testHelpers'
 import { CMSDashboard, RateReviewsDashboard, SubmissionsDashboard } from './'
 import { Navigate, Route, Routes } from 'react-router-dom'
 import {
@@ -159,6 +159,36 @@ describe('CMSDashboard', () => {
                     expect(submissionType).toHaveTextContent(
                         'Contract action only'
                     )
+                })
+
+                it('displays contract type as expected for current revision that is submitted/resubmitted', async () => {
+                    const submitted = mockContractPackageSubmitted()
+                    submitted.id = '123-4'
+                    submitted.contractSubmissionType = 'EQRO'
+                    submitted.packageSubmissions[0].contractRevision.formData.submissionType =
+                        'CONTRACT_ONLY'
+                    const submissions = [submitted]
+                    renderWithProviders(<CMSDashboardNestedRoutes />, {
+                        apolloProvider: {
+                            mocks: [
+                                fetchCurrentUserMock({
+                                    statusCode: 200,
+                                    user: mockUser(),
+                                }),
+                                indexContractsMockSuccess(submissions),
+                            ],
+                        },
+                        routerProvider: { route: '/dashboard/submissions' },
+                        featureFlags: {
+                            'eqro-submissions': true,
+                        },
+                    })
+                    await screen.findByRole('heading', { name: 'Submissions' })
+                    const row = await screen.findByTestId(`row-${submitted.id}`)
+                    const submissionType = within(row).getByTestId(
+                        'submission-contractType'
+                    )
+                    expect(submissionType).toHaveTextContent('EQRO')
                 })
 
                 it('displays each contract status tag as expected for current revision that is submitted/resubmitted/approved', async () => {
