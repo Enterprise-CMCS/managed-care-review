@@ -1,7 +1,7 @@
 // Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
 exports[`newEqroContractStateEmail > renders email for new EQRO contract NOT subject to review as expected 1`] = `
-"<h3>Based on the state's responses, MCR-MN-0004-SNBC is not subject to CMS review and approval.</h3>
+"Based on the state's responses, MCR-MN-0004-SNBC is not subject to CMS review and approval.
 <br />
 <b>Contract type</b>: External Quality Review Organization (EQRO)<br />
 <b>Contract action type</b>: Amendment to base contract<br />
@@ -13,13 +13,11 @@ exports[`newEqroContractStateEmail > renders email for new EQRO contract NOT sub
 <a href="http://localhost/submissions/eqro/test-contract-123">View submission</a><br />
 <br />
 Although the state's responses indicate this submission is not subject to CMS review and approval, all contracts with EQROs must:
-<br />
 <ul>
   <li>Be submitted to CMS. This includes base contracts, amendments to base contracts, and extensions.</li>
   <li>Meet competence and independence requirements specified at 42 CFR 438.354 to qualify for Federal Financial Participation (FFP).</li>
   <li>Require the mandatory review activities specified at 42 CFR 438.358 for MCOs, PIHPs, and PAHPs.</li>
 </ul>
-<br />
 <p style="margin-bottom: 0;">If you need assistance or have any questions:</p>
 <ul>
   <li>For assistance with programmatic, contractual, or operational issues, please reach out to <a href="mailto:MCGDMCOactions@cms.hhs.gov">MCGDMCOactions@cms.hhs.gov</a> and/or your CMS primary contact.</li>
@@ -29,7 +27,7 @@ Although the state's responses indicate this submission is not subject to CMS re
 `;
 
 exports[`newEqroContractStateEmail > renders email for new EQRO contract subject to review as expected 1`] = `
-"<h3>Based on the state's responses, MCR-MN-0004-SNBC is subject to CMS review and approval.</h3>
+"Based on the state's responses, MCR-MN-0004-SNBC is subject to CMS review and approval.
 <br />
 <b>Contract type</b>: External Quality Review Organization (EQRO)<br />
 <b>Contract action type</b>: Amendment to base contract<br />
@@ -41,13 +39,12 @@ exports[`newEqroContractStateEmail > renders email for new EQRO contract subject
 <a href="http://localhost/submissions/eqro/test-contract-123">View submission</a><br />
 <br />
 <p style="margin-bottom: 0;">What comes next:</p>
-<ol>
+<ol style="font-weight: bold;">
   <li><b>Check for completeness</b>: CMS will review all documentation submitted to ensure all required materials were received, and the state submission history is complete.</li>
   <li><b>CMS review</b>: Your submission will be reviewed by CMS for adherence to federal regulations.</li>
   <li><b>Questions</b>: You may receive questions via email from CMS as they conduct their review.</li>
   <li><b>Determination</b>: Once all questions have been addressed, CMS will contact you with their final determination.</li>
 </ol>
-<br />
 <p style="margin-bottom: 0;">If you need assistance or have any questions:</p>
 <ul>
   <li>For assistance with programmatic, contractual, or operational issues, please reach out to <a href="mailto:MCGDMCOactions@cms.hhs.gov">MCGDMCOactions@cms.hhs.gov</a> and/or your CMS primary contact.</li>
