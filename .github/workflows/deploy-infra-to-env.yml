@@ -128,12 +128,12 @@ jobs:
           stage-name: ${{ inputs.stage_name }}
           changed-services: ${{ inputs.changed_services }}
 
-      - uses: actions/download-artifact@v6
+      - uses: actions/download-artifact@v7
         with:
           name: lambda-layers-postgres-tools
           path: ./services/postgres/lambda-layers-postgres-tools
 
-      - uses: actions/download-artifact@v6
+      - uses: actions/download-artifact@v7
         with:
           name: lambda-layers-prisma-client-engine
           path: ./services/postgres/lambda-layers-prisma-client-engine
@@ -143,7 +143,7 @@ jobs:
           tar -C ./services/postgres/lambda-layers-prisma-client-engine -xf ./services/postgres/lambda-layers-prisma-client-engine/nodejs.tar.gz
           rm -rf ./services/postgres/lambda-layers-prisma-client-engine/nodejs.tar.gz
 
-      - uses: actions/download-artifact@v6
+      - uses: actions/download-artifact@v7
         with:
           name: lambda-layers-prisma-client-migration
           path: ./services/postgres/lambda-layers-prisma-client-migration
@@ -266,7 +266,7 @@ jobs:
           stage-name: ${{ inputs.stage_name }}
           changed-services: ${{ inputs.changed_services }}
 
-      - uses: actions/download-artifact@v6
+      - uses: actions/download-artifact@v7
         with:
           name: lambda-layers-clamav
           path: ./services/uploads/lambda-layers-clamav
