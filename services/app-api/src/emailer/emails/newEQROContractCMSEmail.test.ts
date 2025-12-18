@@ -57,7 +57,9 @@ it('does not include DMCO inbox on EQRO submissions not subject to review', asyn
         )
     }
 
-    expect(result.subject).toContain('is not subject to CMS review')
+    expect(result.subject).toContain(
+        'is not subject to CMS review and approval'
+    )
     expect(result.toAddresses).toEqual(emailConfig.devReviewTeamEmails)
 })
 

@@ -125,7 +125,7 @@ export const newEQROContractCMSEmail = async (
     } else {
         const subjectReviewText = isSubjectToReview
             ? 'is subject to CMS review and approval'
-            : 'is not subject to CMS review'
+            : 'is not subject to CMS review and approval'
 
         return {
             toAddresses: reviewerEmails,
