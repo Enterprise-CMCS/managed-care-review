@@ -473,11 +473,17 @@ export function submitContract(
                 stateAnalystsEmails,
                 statePrograms
             )
-            stateContractEmailResult = await emailer.sendStateNewContract(
-                submitContractResult,
-                submitterEmails,
-                statePrograms
-            )
+            stateContractEmailResult = isEQRO
+                ? await emailer.sendStateNewEQROContract(
+                      submitContractResult,
+                      submitterEmails,
+                      statePrograms
+                  )
+                : await emailer.sendStateNewContract(
+                      submitContractResult,
+                      submitterEmails,
+                      statePrograms
+                  )
         }
 
         if (
