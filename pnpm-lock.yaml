@@ -332,8 +332,8 @@ importers:
         specifier: ^8.0.4
         version: 8.0.4
       '@octokit/openapi-types':
-        specifier: ^25.1.0
-        version: 25.1.0
+        specifier: ^27.0.0
+        version: 27.0.0
       csv-parser:
         specifier: ^3.2.0
         version: 3.2.0
