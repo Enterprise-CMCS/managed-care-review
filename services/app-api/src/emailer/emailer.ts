@@ -227,12 +227,6 @@ const localEmailerLogger = (emailData: EmailData) => {
         ? Destination?.BccAddresses
         : []
 
-    // Clean up the body text - collapse multiple newlines and trim whitespace
-    const cleanBody = emailBody
-        .replace(/\n{3,}/g, '\n\n') // Replace 3+ newlines with just 2
-        .replace(/^\s+|\s+$/g, '') // Trim leading/trailing whitespace
-        .replace(/\n\s+\n/g, '\n\n') // Remove lines that are just whitespace
-
     console.info('')
     console.info('(¯`·.¸¸.·´¯`·.¸¸.·´¯·📧 EMAIL SENT·´¯`·.¸¸.·´¯`·.¸¸.·´)')
     console.info(`From: ${Source}`)
@@ -241,7 +235,7 @@ const localEmailerLogger = (emailData: EmailData) => {
     console.info(`Bcc: ${bcc.join(', ')}`)
     console.info(`Subject: ${subject}`)
     console.info('────────────────────────────────────────────────────────────')
-    console.info(cleanBody)
+    console.info(emailBody)
     console.info('(¯`·.¸¸.·´¯`·.¸¸.·´¯·.¸¸.·´¯`·.¸¸.·´¯`·.¸¸.·´¯`·.¸¸.·´)')
     console.info('')
 }
