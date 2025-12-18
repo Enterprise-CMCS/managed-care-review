@@ -573,8 +573,8 @@ const mockEQROContract = (
     return {
         id: 'test-contract-123',
         contractSubmissionType: 'EQRO',
-        createdAt: new Date('01/01/2021'),
-        updatedAt: new Date('02/01/2021'),
+        createdAt: new Date('2021-01-01'),
+        updatedAt: new Date('2021-02-01'),
         status: 'SUBMITTED',
         reviewStatus: 'UNDER_REVIEW',
         consolidatedStatus: 'SUBMITTED',
@@ -584,7 +584,7 @@ const mockEQROContract = (
         packageSubmissions: [
             {
                 submitInfo: {
-                    updatedAt: new Date('01/01/2023'),
+                    updatedAt: new Date('2023-01-01'),
                     updatedBy: {
                         email: 'example@example.com',
                         role: 'STATE_USER',
@@ -595,8 +595,8 @@ const mockEQROContract = (
                 },
                 submittedRevisions: [],
                 contractRevision: {
-                    createdAt: new Date('01/01/2024'),
-                    updatedAt: new Date('01/01/2025'),
+                    createdAt: new Date('2024-01-01'),
+                    updatedAt: new Date('2025-01-01'),
                     id: '123',
                     contract: {
                         id: 'test-abc-123',
@@ -625,14 +625,14 @@ const mockEQROContract = (
                                 s3URL: 's3://bucketname/key/contractsupporting1',
                                 sha256: 'fakesha',
                                 name: 'contractSupporting1',
-                                dateAdded: new Date('01/15/2024'),
+                                dateAdded: new Date('2024-01-15'),
                                 downloadURL: s3DlUrl,
                             },
                             {
                                 s3URL: 's3://bucketname/key/contractSupporting2',
                                 sha256: 'fakesha',
                                 name: 'contractSupporting2',
-                                dateAdded: new Date('01/13/2024'),
+                                dateAdded: new Date('2024-01-13'),
                                 downloadURL: s3DlUrl,
                             },
                         ],
@@ -649,12 +649,12 @@ const mockEQROContract = (
                                 s3URL: 's3://bucketname/key/contract',
                                 sha256: 'fakesha',
                                 name: 'contract',
-                                dateAdded: new Date('01/01/2024'),
+                                dateAdded: new Date('2024-01-01'),
                                 downloadURL: s3DlUrl,
                             },
                         ],
-                        contractDateStart: new Date(),
-                        contractDateEnd: new Date(),
+                        contractDateStart: new Date('2024-01-01'),
+                        contractDateEnd: new Date('2025-01-01'),
                         managedCareEntities: ['MCO', 'PCCM'],
                         federalAuthorities: [],
                         eqroNewContractor: undefined,
