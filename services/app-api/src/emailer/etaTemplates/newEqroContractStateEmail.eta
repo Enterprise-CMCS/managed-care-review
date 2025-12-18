@@ -1,5 +1,5 @@
-Based on the state's responses, <%= it.contractName %> is <%= it.subjectToReview ? 'subject' : 'not subject' %> to CMS review and approval.
-<br />
+<div style="font-size: 22px;">Based on the state's responses, <%= it.contractName %> is <%= it.subjectToReview ? 'subject' : 'not subject' %> to CMS review and approval.<div>
+<br /><br />
 <b>Contract type</b>: <%= it.contractType %><br />
 <b>Contract action type</b>: <%= it.actionType %><br />
 <b>Contract amendment effective dates</b>: <%= it.amendmentDateStart %> to <%= it.amendmentDateEnd %><br />
@@ -10,7 +10,7 @@ Based on the state's responses, <%= it.contractName %> is <%= it.subjectToReview
 <a href="<%= it.submissionURL%>">View submission</a><br />
 <br />
 <% if (it.subjectToReview) { %>
-<p style="margin-bottom: 0;">What comes next:</p>
+<div>What comes next:</div>
 <ol style="font-weight: bold;">
   <li><b>Check for completeness</b>: CMS will review all documentation submitted to ensure all required materials were received, and the state submission history is complete.</li>
   <li><b>CMS review</b>: Your submission will be reviewed by CMS for adherence to federal regulations.</li>
@@ -18,7 +18,7 @@ Based on the state's responses, <%= it.contractName %> is <%= it.subjectToReview
   <li><b>Determination</b>: Once all questions have been addressed, CMS will contact you with their final determination.</li>
 </ol>
 <% } else { %>
-Although the state's responses indicate this submission is not subject to CMS review and approval, all contracts with EQROs must:
+<div>Although the state's responses indicate this submission is not subject to CMS review and approval, all contracts with EQROs must:</div>
 <ul>
   <li>Be submitted to CMS. This includes base contracts, amendments to base contracts, and extensions.</li>
   <li>Meet competence and independence requirements specified at 42 CFR 438.354 to qualify for Federal Financial Participation (FFP).</li>
