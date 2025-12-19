@@ -1,7 +1,7 @@
 // Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
 exports[`renders overall email for a new EQRO contract submission 1`] = `
-"Submission MCR-MN-0004-SNBC is subject to CMS review.
+"<div style="font-size: 22px">Submission MCR-MN-0004-SNBC is subject to CMS review.</div>
 <br /><br />
 <b>Contract type</b>: External Quality Review Organization (EQRO)<br />
 <b>Contract action type</b>: Amendment to base contract<br />

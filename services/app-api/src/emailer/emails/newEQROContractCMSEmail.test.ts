@@ -24,9 +24,7 @@ it('includes DMCO inbox on EQRO submissions subject to review', async () => {
 
     expect(result).toEqual(
         expect.objectContaining({
-            subject: expect.stringContaining(
-                'is subject to CMS review and approval'
-            ),
+            subject: expect.stringContaining('is subject to CMS review'),
             toAddresses: expect.arrayContaining(emailConfig.dmcoEmails),
         })
     )
@@ -57,9 +55,7 @@ it('does not include DMCO inbox on EQRO submissions not subject to review', asyn
         )
     }
 
-    expect(result.subject).toContain(
-        'is not subject to CMS review and approval'
-    )
+    expect(result.subject).toContain('is not subject to CMS review')
     expect(result.toAddresses).toEqual(emailConfig.devReviewTeamEmails)
 })
 

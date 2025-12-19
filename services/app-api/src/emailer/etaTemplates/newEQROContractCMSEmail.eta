@@ -1,4 +1,4 @@
-Submission <%= it.packageName %> <%= it.subjectToReview %>.
+<div style="font-size: 22px">Submission <%= it.packageName %> <%= it.subjectToReview %>.</div>
 <br /><br />
 <b>Contract type</b>: <%= it.contractSubmissionType %><br />
 <b>Contract action type</b>: <%= it.contractActionType %><br />
