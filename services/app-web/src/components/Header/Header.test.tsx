@@ -81,6 +81,7 @@ describe('Header', () => {
 
         it('displays heading with users state', async () => {
             renderWithProviders(<Header authMode={'AWS_COGNITO'} />, {
+                routerProvider: { route: '/dashboard/submissions' },
                 apolloProvider: {
                     mocks: [fetchCurrentUserMock({ statusCode: 200 })],
                 },
