@@ -75,10 +75,7 @@ export const newEqroContractStateEmail = async (
     const etaData: newEQROContractStateEmail = {
         contractName: pkgName,
         contractType: 'External Quality Review Organization (EQRO)',
-        actionType:
-            formData.contractType === 'BASE'
-                ? 'Base contract'
-                : 'Amendment to base contract',
+        actionType: formData.contractType,
         amendmentDateStart: formatCalendarDate(
             formData.contractDateStart,
             'America/Los_Angeles'

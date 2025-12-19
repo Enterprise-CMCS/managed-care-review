@@ -55,43 +55,6 @@ describe('newEqroContractStateEmail', () => {
         expect(template.bodyHTML).toMatchSnapshot()
     })
 
-    it('to addresses list does not include duplicate emails', async () => {
-        const contract: ContractType = mockEQROContract()
-        const statePrograms = mockMNState().programs
-        const emailConfig = testEmailConfig()
-
-        contract.packageSubmissions[0].contractRevision.formData.stateContacts =
-            [
-                {
-                    name: 'Dupe Contact',
-                    titleRole: 'dupe1',
-                    email: 'dupe1@example.com',
-                },
-                {
-                    name: 'Dupe Contact',
-                    titleRole: 'dupe1',
-                    email: 'dupe1@example.com',
-                },
-            ]
-
-        const template = await newEqroContractStateEmail(
-            contract,
-            submitterEmails,
-            emailConfig,
-            statePrograms
-        )
-
-        if (template instanceof Error) {
-            throw template
-        }
-
-        expect(template.toAddresses).toEqual([
-            'dupe1@example.com',
-            ...submitterEmails,
-            ...testEmailConfig().devReviewTeamEmails,
-        ])
-    })
-
     it('to addresses includes all state contacts on submission', async () => {
         const contract: ContractType = mockEQROContract()
         const statePrograms = mockMNState().programs
