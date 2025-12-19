@@ -1096,8 +1096,8 @@ importers:
         specifier: 2.92.1
         version: 2.92.1(@aws-solutions-constructs/core@2.86.0(aws-cdk-lib@2.219.0(constructs@10.4.2))(constructs@10.4.2))(aws-cdk-lib@2.219.0(constructs@10.4.2))(constructs@10.4.2)
       '@aws-solutions-constructs/aws-s3-lambda':
-        specifier: 2.92.1
-        version: 2.92.1(@aws-solutions-constructs/core@2.86.0(aws-cdk-lib@2.219.0(constructs@10.4.2))(constructs@10.4.2))(aws-cdk-lib@2.219.0(constructs@10.4.2))(constructs@10.4.2)
+        specifier: 2.96.0
+        version: 2.96.0(@aws-solutions-constructs/core@2.86.0(aws-cdk-lib@2.219.0(constructs@10.4.2))(constructs@10.4.2))(aws-cdk-lib@2.219.0(constructs@10.4.2))(constructs@10.4.2)
       '@aws-solutions-constructs/aws-wafwebacl-apigateway':
         specifier: 2.94.0
         version: 2.94.0(@aws-solutions-constructs/core@2.86.0(aws-cdk-lib@2.219.0(constructs@10.4.2))(constructs@10.4.2))(aws-cdk-lib@2.219.0(constructs@10.4.2))(constructs@10.4.2)
@@ -2492,11 +2492,11 @@ packages:
       aws-cdk-lib: ^2.212.0
       constructs: ^10.0.0
 
-  '@aws-solutions-constructs/aws-s3-lambda@2.92.1':
-    resolution: {integrity: sha512-bfhgpQ+R1iIJEdltlrYBrV6f2YnOk+4p7LfQRp7YH3GMEIBzX5gw1gUW7bI3eZlcj5kJfzBZInrFxHS9MKU9hg==}
+  '@aws-solutions-constructs/aws-s3-lambda@2.96.0':
+    resolution: {integrity: sha512-EKiX3ZgCyzNFDRzxmM7VM0t2y/GE6jgfxWO3ojn2kRYWbrv12zHf3yVRsmXb4n7IJNbTj/LEzIkkbAgzgX1a1Q==}
     peerDependencies:
-      '@aws-solutions-constructs/core': 2.92.1
-      aws-cdk-lib: ^2.212.0
+      '@aws-solutions-constructs/core': 2.96.0
+      aws-cdk-lib: ^2.223.0
       constructs: ^10.0.0
 
   '@aws-solutions-constructs/aws-wafwebacl-apigateway@2.94.0':
@@ -7725,8 +7725,8 @@ packages:
     resolution: {integrity: sha512-qsJ8/X+UypqxHXN75M7dF88jNK37dLBRW7LeUzCPz+TNs37G8cfWy9nWzS+LS//g600zrt2le9KuXt0rWfDz5Q==}
     hasBin: true
 
-  baseline-browser-mapping@2.9.9:
-    resolution: {integrity: sha512-V8fbOCSeOFvlDj7LLChUcqbZrdKD9RU/VR260piF1790vT0mfLSwGc/Qzxv3IqiTukOpNtItePa0HBpMAj7MDg==}
+  baseline-browser-mapping@2.9.10:
+    resolution: {integrity: sha512-2VIKvDx8Z1a9rTB2eCkdPE5nSe28XnA+qivGnWHoB40hMMt/h1hSz0960Zqsn6ZyxWXUie0EBdElKv8may20AA==}
     hasBin: true
 
   basic-auth@2.0.1:
@@ -9396,8 +9396,8 @@ packages:
     resolution: {integrity: sha512-MLqjFn72Dvndqrkjy280HaIs4AV9Z6nxVRmNPO3TjbYcipg4hR7QX7tEYZYsVvaaZWZPGe6Mithluk2aPGlDOw==}
     engines: {node: '>=0.4.0'}
 
-  flow-parser@0.294.0:
-    resolution: {integrity: sha512-GoJ2WUPvW3y6dyRc2y51EHdk8I9/omFe5c2F8XaCFrQKqrMX9E6Xl+NvlROh1+dSdNB0qiSG4N0Jr0JR15vAng==}
+  flow-parser@0.295.0:
+    resolution: {integrity: sha512-M4GVdl9SIKQEGULoEh/PO5K1REnXvHT6XOEthuKMUDWsLCi576mOWo3Xe8BfKdy2e2aMaW5rKGfMDlMDOA9RqA==}
     engines: {node: '>=0.4.0'}
 
   fn.name@1.1.0:
@@ -17304,7 +17304,7 @@ snapshots:
       aws-cdk-lib: 2.219.0(constructs@10.4.2)
       constructs: 10.4.2
 
-  '@aws-solutions-constructs/aws-s3-lambda@2.92.1(@aws-solutions-constructs/core@2.86.0(aws-cdk-lib@2.219.0(constructs@10.4.2))(constructs@10.4.2))(aws-cdk-lib@2.219.0(constructs@10.4.2))(constructs@10.4.2)':
+  '@aws-solutions-constructs/aws-s3-lambda@2.96.0(@aws-solutions-constructs/core@2.86.0(aws-cdk-lib@2.219.0(constructs@10.4.2))(constructs@10.4.2))(aws-cdk-lib@2.219.0(constructs@10.4.2))(constructs@10.4.2)':
     dependencies:
       '@aws-solutions-constructs/core': 2.86.0(aws-cdk-lib@2.219.0(constructs@10.4.2))(constructs@10.4.2)
       aws-cdk-lib: 2.219.0(constructs@10.4.2)
@@ -24182,7 +24182,7 @@ snapshots:
 
   baseline-browser-mapping@2.8.15: {}
 
-  baseline-browser-mapping@2.9.9: {}
+  baseline-browser-mapping@2.9.10: {}
 
   basic-auth@2.0.1:
     dependencies:
@@ -24306,7 +24306,7 @@ snapshots:
 
   browserslist@4.28.1:
     dependencies:
-      baseline-browser-mapping: 2.9.9
+      baseline-browser-mapping: 2.9.10
       caniuse-lite: 1.0.30001760
       electron-to-chromium: 1.5.267
       node-releases: 2.0.27
@@ -26371,7 +26371,7 @@ snapshots:
 
   flow-parser@0.291.0: {}
 
-  flow-parser@0.294.0: {}
+  flow-parser@0.295.0: {}
 
   fn.name@1.1.0: {}
 
@@ -27809,7 +27809,7 @@ snapshots:
       '@babel/register': 7.28.3(@babel/core@7.28.5)
       babel-core: 7.0.0-bridge.0(@babel/core@7.28.5)
       chalk: 4.1.2
-      flow-parser: 0.294.0
+      flow-parser: 0.295.0
       graceful-fs: 4.2.11
       micromatch: 4.0.8
       neo-async: 2.6.2
