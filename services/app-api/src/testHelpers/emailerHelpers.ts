@@ -567,6 +567,110 @@ const mockContract = (
     }
 }
 
+const mockEQROContract = (
+    contractPartial?: Partial<ContractType>
+): ContractType => {
+    return {
+        id: 'test-contract-123',
+        contractSubmissionType: 'EQRO',
+        createdAt: new Date('2021-01-01'),
+        updatedAt: new Date('2021-02-01'),
+        status: 'SUBMITTED',
+        reviewStatus: 'UNDER_REVIEW',
+        consolidatedStatus: 'SUBMITTED',
+        stateCode: 'MN',
+        stateNumber: 4,
+        revisions: [],
+        packageSubmissions: [
+            {
+                submitInfo: {
+                    updatedAt: new Date('2023-01-01'),
+                    updatedBy: {
+                        email: 'example@example.com',
+                        role: 'STATE_USER',
+                        givenName: 'John',
+                        familyName: 'Vila',
+                    },
+                    updatedReason: 'contract submit',
+                },
+                submittedRevisions: [],
+                contractRevision: {
+                    createdAt: new Date('2024-01-01'),
+                    updatedAt: new Date('2025-01-01'),
+                    id: '123',
+                    contract: {
+                        id: 'test-abc-123',
+                        stateCode: 'MN',
+                        stateNumber: 4,
+                        contractSubmissionType: 'EQRO',
+                    },
+                    submitInfo: {
+                        updatedAt: new Date(),
+                        updatedBy: {
+                            email: 'example@example.com',
+                            role: 'STATE_USER',
+                            givenName: 'John',
+                            familyName: 'Vila',
+                        },
+                        updatedReason: 'contract submit',
+                    },
+                    unlockInfo: undefined,
+                    formData: {
+                        programIDs: ['abbdf9b0-c49e-4c4c-bb6f-040cb7b51cce'],
+                        populationCovered: 'MEDICAID',
+                        submissionType: 'CONTRACT_ONLY',
+                        submissionDescription: 'A EQRO submission',
+                        supportingDocuments: [
+                            {
+                                s3URL: 's3://bucketname/key/contractsupporting1',
+                                sha256: 'fakesha',
+                                name: 'contractSupporting1',
+                                dateAdded: new Date('2024-01-15'),
+                                downloadURL: s3DlUrl,
+                            },
+                            {
+                                s3URL: 's3://bucketname/key/contractSupporting2',
+                                sha256: 'fakesha',
+                                name: 'contractSupporting2',
+                                dateAdded: new Date('2024-01-13'),
+                                downloadURL: s3DlUrl,
+                            },
+                        ],
+                        stateContacts: [
+                            {
+                                name: 'contract-state-contact',
+                                titleRole: 'state contact',
+                                email: 'contract-state-contact@example.com',
+                            },
+                        ],
+                        contractType: 'AMENDMENT',
+                        contractDocuments: [
+                            {
+                                s3URL: 's3://bucketname/key/contract',
+                                sha256: 'fakesha',
+                                name: 'contract',
+                                dateAdded: new Date('2024-01-01'),
+                                downloadURL: s3DlUrl,
+                            },
+                        ],
+                        contractDateStart: new Date('2024-01-01'),
+                        contractDateEnd: new Date('2025-01-01'),
+                        managedCareEntities: ['MCO', 'PCCM'],
+                        federalAuthorities: [],
+                        eqroNewContractor: undefined,
+                        eqroProvisionMcoEqrOrRelatedActivities: true,
+                        eqroProvisionMcoNewOptionalActivity: true,
+                        eqroProvisionNewMcoEqrRelatedActivities: false,
+                        eqroProvisionChipEqrRelatedActivities: undefined,
+                    },
+                },
+                rateRevisions: [],
+            },
+        ],
+        ...contractPartial,
+    }
+}
+
 const mockCommonQuestionAndResponses = <
     T extends
         | (Partial<ContractQuestionType> & { contractID: string })
@@ -661,4 +765,5 @@ export {
     mockRate,
     testEmailerFromDatabase,
     mockRateRevision,
+    mockEQROContract,
 }

@@ -2249,5 +2249,40 @@ describe('submitContract', () => {
                 }),
             ])
         })
+
+        it('send EQRO submission CMS email on successful submit', async () => {
+            const config = testEmailConfig()
+            const mockEmailer = testEmailer(config)
+            const server = await constructTestPostgresServer({
+                emailer: mockEmailer,
+            })
+
+            const draftContract = await createAndUpdateTestEQROContract(server)
+
+            const submitResult = await submitTestContract(
+                server,
+                draftContract.id
+            )
+
+            const contractName =
+                submitResult?.packageSubmissions[0].contractRevision
+                    .contractName
+
+            const cmsEmails = [
+                ...config.devReviewTeamEmails,
+                ...config.dmcoEmails,
+            ]
+
+            // email subject line is correct for CMS email
+            expect(mockEmailer.sendEmail).toHaveBeenCalledWith(
+                expect.objectContaining({
+                    subject: expect.stringContaining(
+                        `Submission ${contractName} is subject to CMS review`
+                    ),
+                    sourceEmail: config.emailSource,
+                    toAddresses: expect.arrayContaining(Array.from(cmsEmails)),
+                })
+            )
+        })
     })
 })
