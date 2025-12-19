@@ -25,7 +25,7 @@ export const DataDetailCheckboxList = ({
 
     if (listToDisplay.length === 0)
         return displayEmptyList ? (
-            <span className={'usa-hint'}>—</span>
+            <span className={'usa-hint'}>—</span> //em dash
         ) : (
             <DataDetailMissingField />
         )
