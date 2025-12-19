@@ -24,7 +24,7 @@ describe('Header', () => {
                 name: /One Mac/i,
             })
             expect(logoLink).toBeVisible()
-            expect(logoLink).toHaveAttribute('href', '/')
+            expect(logoLink).toHaveAttribute('href', '/dashboard/submissions')
             expect(logoLink).toContainElement(logoImage)
         })
 
@@ -75,7 +75,7 @@ describe('Header', () => {
                 name: /One Mac/i,
             })
             expect(logoLink).toBeVisible()
-            expect(logoLink).toHaveAttribute('href', '/')
+            expect(logoLink).toHaveAttribute('href', '/dashboard/submissions')
             expect(logoLink).toContainElement(logoImage)
         })
 
