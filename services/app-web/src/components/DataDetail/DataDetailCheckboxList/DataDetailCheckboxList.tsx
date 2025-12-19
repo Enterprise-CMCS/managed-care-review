@@ -24,7 +24,11 @@ export const DataDetailCheckboxList = ({
         : userFriendlyList
 
     if (listToDisplay.length === 0)
-        return displayEmptyList ? null : <DataDetailMissingField />
+        return displayEmptyList ? (
+            <span className={'usa-hint'}>—</span> //em dash
+        ) : (
+            <DataDetailMissingField />
+        )
 
     return (
         <ul>
