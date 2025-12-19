@@ -5,7 +5,7 @@ exports[`newEqroContractStateEmail > renders email for new EQRO contract NOT sub
 <br /><br />
 <b>Contract type</b>: External Quality Review Organization (EQRO)<br />
 <b>Contract action type</b>: Amendment to base contract<br />
-<b>Contract amendment effective dates</b>: 12/31/2023 to 12/31/2024<br />
+<b>Contract effective dates</b>: 12/31/2023 to 12/31/2024<br />
 <b>Managed care entities reviewed by this EQRO</b>: Managed Care Organization (MCO), Primary Care Case Management Entity (PCCM Entity)<br />
 <br />
 <b>Submission description</b>: A EQRO submission<br />
@@ -31,7 +31,7 @@ exports[`newEqroContractStateEmail > renders email for new EQRO contract subject
 <br /><br />
 <b>Contract type</b>: External Quality Review Organization (EQRO)<br />
 <b>Contract action type</b>: Amendment to base contract<br />
-<b>Contract amendment effective dates</b>: 12/31/2023 to 12/31/2024<br />
+<b>Contract effective dates</b>: 12/31/2023 to 12/31/2024<br />
 <b>Managed care entities reviewed by this EQRO</b>: Managed Care Organization (MCO), Primary Care Case Management Entity (PCCM Entity)<br />
 <br />
 <b>Submission description</b>: A EQRO submission<br />
