@@ -73,12 +73,14 @@ export const newEQROContractCMSEmail = async (
         eqroProvisionChipEqrRelatedActivities,
     } = contractFormData
 
+    const subjectToReviewText = isSubjectToReview
+        ? 'is subject to CMS review'
+        : 'is not subject to CMS review'
+
     const data = {
         stateCode: contract.stateCode,
         packageName: packageName,
-        subjectToReview: isSubjectToReview
-            ? 'is subject to CMS review'
-            : 'is not subject to CMS review',
+        subjectToReview: subjectToReviewText,
         contractSubmissionType: 'External Quality Review Organization (EQRO)',
         contractActionType:
             contractFormData.contractType === 'BASE'
@@ -123,17 +125,13 @@ export const newEQROContractCMSEmail = async (
     if (result instanceof Error) {
         return result
     } else {
-        const subjectReviewText = isSubjectToReview
-            ? 'is subject to CMS review and approval'
-            : 'is not subject to CMS review and approval'
-
         return {
             toAddresses: reviewerEmails,
             replyToAddresses: [],
             sourceEmail: config.emailSource,
             subject: `${
                 isTestEnvironment ? `[${config.stage}] ` : ''
-            }Submission ${packageName} ${subjectReviewText}`,
+            }Submission ${packageName} ${subjectToReviewText}`,
             bodyText: stripHTMLFromTemplate(result),
             bodyHTML: result,
         }
