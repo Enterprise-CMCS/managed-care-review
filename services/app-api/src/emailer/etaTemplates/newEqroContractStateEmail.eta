@@ -1,4 +1,4 @@
-<span style="font-size: 22px;">Based on the state's responses, <%= it.contractName %> is <%= it.subjectToReview ? 'subject' : 'not subject' %> to CMS review and approval.<div><br />
+<h3 style="font-size: 22px; font-weight: 400; line-height: normal"">Based on the state's responses, <%= it.contractName %> is <%= it.subjectToReview ? 'subject' : 'not subject' %> to CMS review and approval.<div>
 
 <b>Contract type</b>: <%= it.contractType %><br />
 <b>Contract action type</b>: <%= it.actionType === 'BASE' ? 'Base contract' : 'Amendment to base contract' %><br />
@@ -11,22 +11,22 @@
 <br /><br />
 <% if (it.subjectToReview) { %>
 <span style="margin-bottom: 0; padding-bottom: 0;">What comes next:</span>
-<ol style="list-style: none; padding-left: 0; margin-left: 0;">
+<ol style="list-style: none; padding-left: 0; margin-left: 0; margin-top: 0;">
   <li><b>1. Check for completeness</b>: CMS will review all documentation submitted to ensure all required materials were received, and the state submission history is complete.</li>
   <li><b>2. CMS review</b>: Your submission will be reviewed by CMS for adherence to federal regulations.</li>
   <li><b>3. Questions</b>: You may receive questions via email from CMS as they conduct their review.</li>
   <li><b>4. Determination</b>: Once all questions have been addressed, CMS will contact you with their final determination.</li>
 </ol>
 <% } else { %>
-<span style="margin-bottom: 0; padding-bottom: 0;">Although the state's responses indicate this submission is not subject to CMS review and approval, all contracts with EQROs must:</span>
-<ul>
+<span style="margin-bottom: 0; padding-bottom: 0; margin-top: 0;">Although the state's responses indicate this submission is not subject to CMS review and approval, all contracts with EQROs must:</span>
+<ul style="list-style: none; padding-left: 0; margin-left: 0; margin-top: 0;>
   <li>Be submitted to CMS. This includes base contracts, amendments to base contracts, and extensions.</li>
   <li>Meet competence and independence requirements specified at 42 CFR 438.354 to qualify for Federal Financial Participation (FFP).</li>
   <li>Require the mandatory review activities specified at 42 CFR 438.358 for MCOs, PIHPs, and PAHPs.</li>
 </ul>
 <% } %>
 <span style="margin-bottom: 0; padding-bottom: 0;">If you need assistance or have any questions:</span>
-<ul>
+<ul style="list-style: none; padding-left: 0; margin-left: 0; margin-top: 0;>
   <li>For assistance with programmatic, contractual, or operational issues, please reach out to <a href="mailto:MCGDMCOactions@cms.hhs.gov">MCGDMCOactions@cms.hhs.gov</a> and/or your CMS primary contact.</li>
   <li>For issues related to MC-Review or all other inquiries, please reach out to <a href="mailto:MC_Review_HelpDesk@cms.hhs.gov">MC_Review_HelpDesk@cms.hhs.gov.</a></li>
 </ul>
