@@ -468,22 +468,29 @@ export function submitContract(
                 statePrograms
             )
         } else if (status === 'SUBMITTED') {
-            cmsContractEmailResult = await emailer.sendCMSNewContract(
-                submitContractResult,
-                stateAnalystsEmails,
-                statePrograms
-            )
+            cmsContractEmailResult = isEQRO
+                ? await emailer.sendCMSNewEQROContract(
+                      submitContractResult,
+                      statePrograms
+                  )
+                : await emailer.sendCMSNewContract(
+                      submitContractResult,
+                      stateAnalystsEmails,
+                      statePrograms
+                  )
             stateContractEmailResult = isEQRO
-                ? await emailer.sendStateNewEQROContract(
-                      submitContractResult,
-                      submitterEmails,
-                      statePrograms
-                  )
-                : await emailer.sendStateNewContract(
-                      submitContractResult,
-                      submitterEmails,
-                      statePrograms
-                  )
+                ? 'place holder for EQRO emails'
+                : isEQRO
+                  ? await emailer.sendStateNewEQROContract(
+                        submitContractResult,
+                        submitterEmails,
+                        statePrograms
+                    )
+                  : await emailer.sendStateNewContract(
+                        submitContractResult,
+                        submitterEmails,
+                        statePrograms
+                    )
         }
 
         if (

@@ -447,6 +447,10 @@ const parseEmailDataWithdrawSubmission = (
     }
 }
 
+type FieldYesNoUserValue = 'Yes' | 'No' | undefined // Use for user facing display
+const booleanAsYesNoUserValue = (bool?: boolean | null): FieldYesNoUserValue =>
+    bool ? 'Yes' : bool === false ? 'No' : undefined
+
 export {
     stripHTMLFromTemplate,
     handleAsCHIPSubmissionForContract,
@@ -462,4 +466,5 @@ export {
     getRateSubmitterEmails,
     getRateStateContactEmails,
     parseEmailDataWithdrawSubmission,
+    booleanAsYesNoUserValue,
 }

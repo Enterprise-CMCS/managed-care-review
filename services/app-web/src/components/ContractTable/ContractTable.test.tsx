@@ -258,13 +258,11 @@ describe('ContractTable for CMS User (with filters)', () => {
         const [columnNames] = within(table).getAllByRole('rowgroup')
         expect(within(columnNames).getByText(/ID/)).toBeTruthy()
         expect(within(columnNames).getByText(/State/)).toBeTruthy()
+        expect(within(columnNames).getByText(/Contract type/)).toBeTruthy()
         expect(within(columnNames).getByText(/Submission type/)).toBeTruthy()
         expect(within(columnNames).getByText(/Programs/)).toBeTruthy()
         expect(within(columnNames).getByText(/Submission date/)).toBeTruthy()
         expect(within(columnNames).getByText(/Status/)).toBeTruthy()
-        expect(
-            within(columnNames).queryByText(/Contract type/)
-        ).not.toBeInTheDocument()
         expect(submissionsInTable).toHaveLength(5)
     })
 

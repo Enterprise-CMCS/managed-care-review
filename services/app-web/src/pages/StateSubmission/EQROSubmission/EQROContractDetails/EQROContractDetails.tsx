@@ -19,42 +19,27 @@ import {
     DateRangePicker,
 } from '@trussworks/react-uswds'
 import { v4 as uuidv4 } from 'uuid'
-
-import { generatePath, useNavigate } from 'react-router-dom'
+import { useNavigate } from 'react-router-dom'
 import { Formik, FormikErrors, getIn } from 'formik'
 import styles from '../../StateSubmissionForm.module.scss'
-
 import { formatForForm, isDateRangeEmpty } from '../../../../formHelpers'
 import { formatUserInputDate } from '@mc-review/dates'
 import { useS3 } from '../../../../contexts/S3Context'
-
 import { EQROContractDetailsFormSchema } from './EQROContractDetailsSchema'
-
 import { type ContractFormPageProps } from '../../submissionUtils'
-
 import {
     formatDocumentsForGQL,
     formatDocumentsForForm,
     formatFormDateForGQL,
 } from '../../../../formHelpers/formatters'
-
 import { ACCEPTED_SUBMISSION_FILE_TYPES } from '../../../../components/FileUpload'
-
 import { isContractAmendment } from '@mc-review/submissions'
-
 import { useRouteParams, useCurrentRoute } from '../../../../hooks'
-
-import {
-    RoutesRecord,
-    EQRO_SUBMISSION_FORM_ROUTES,
-    RouteT,
-} from '@mc-review/constants'
-
+import { EQRO_SUBMISSION_FORM_ROUTES, RouteT } from '@mc-review/constants'
 import {
     booleanAsYesNoFormValue,
     yesNoFormValueAsBoolean,
 } from '../../../../components/Form/FieldYesNo'
-
 import { useAuth } from '../../../../contexts/AuthContext'
 import { ErrorOrLoadingPage } from '../../SharedSubmissionComponents'
 import { PageBannerAlerts } from '../../SharedSubmissionComponents'
@@ -65,8 +50,8 @@ import {
     ContractDraftRevisionFormDataInput,
 } from '../../../../gen/gqlClient'
 import { useFocusOnRender } from '../../../../hooks/useFocusOnRender'
-
 import { usePage } from '../../../../contexts/PageContext'
+import { getSubmissionPath } from '../../../../routeHelpers'
 
 function formattedDatePlusOneDay(initialValue: string): string {
     const dayjsValue = dayjs(initialValue)
@@ -119,7 +104,7 @@ export const EQROContractDetails = ({
     const [shouldValidate, setShouldValidate] = useState(showValidations)
     const [draftSaved, setDraftSaved] = useState(false)
     useFocusOnRender(draftSaved, '[data-testid="saveAsDraftSuccessBanner"]')
-    const { id, contractSubmissionType } = useRouteParams()
+    const { id } = useRouteParams()
     const navigate = useNavigate()
     const { setFocusErrorSummaryHeading, errorSummaryHeadingRef } =
         useErrorSummary()
@@ -128,15 +113,6 @@ export const EQROContractDetails = ({
     const { currentRoute } = useCurrentRoute()
     const { draftSubmission, interimState, updateDraft, showPageErrorMessage } =
         useContractForm(id)
-
-    const contactsPagePath = generatePath(RoutesRecord.SUBMISSIONS_CONTACTS, {
-        id,
-        contractSubmissionType,
-    })
-    const submissionDetailsPath = generatePath(RoutesRecord.SUBMISSIONS_TYPE, {
-        id,
-        contractSubmissionType,
-    })
 
     const activeMainContentId = 'contractDetailsPageMainContent'
 
@@ -165,6 +141,19 @@ export const EQROContractDetails = ({
         draftSubmission.draftRevision.formData.managedCareEntities.includes(
             'MCO'
         )
+
+    const contractSubmissionType = draftSubmission.contractSubmissionType
+
+    const contactsPagePath = getSubmissionPath(
+        'SUBMISSIONS_CONTACTS',
+        contractSubmissionType,
+        id
+    )
+    const submissionDetailsPath = getSubmissionPath(
+        'SUBMISSIONS_TYPE',
+        contractSubmissionType,
+        id
+    )
 
     const hideProvisionsHeader = !isMCO && !includesChip
 
@@ -328,14 +317,10 @@ export const EQROContractDetails = ({
                     formatDocumentsForGQL(values.supportingDocuments) || [],
             }
 
-        if (
-            draftSubmission === undefined ||
-            !updateDraft ||
-            !draftSubmission.draftRevision
-        ) {
-            console.info(draftSubmission, updateDraft)
+        if (!draftSubmission.draftRevision) {
+            console.info(draftSubmission)
             console.info(
-                'ERROR, SubmissionType for does not have props needed to update a draft.'
+                'ERROR, Draft submission does not have a draft revision needed for an update.'
             )
             return
         }
@@ -373,10 +358,11 @@ export const EQROContractDetails = ({
         } else {
             if (options.redirectPath) {
                 navigate(
-                    generatePath(RoutesRecord[options.redirectPath], {
-                        id,
+                    getSubmissionPath(
+                        options.redirectPath,
                         contractSubmissionType,
-                    })
+                        id
+                    )
                 )
             }
         }
@@ -790,11 +776,24 @@ export const EQROContractDetails = ({
                                             <Fieldset
                                                 legend={
                                                     <>
-                                                        <span className={styles.provisionsHeader}>
+                                                        <span
+                                                            className={
+                                                                styles.provisionsHeader
+                                                            }
+                                                        >
                                                             Provisions
                                                         </span>
-                                                        <span className={styles.provisionsHeaderText}>
-                                                            Does this contract action include new or modified provisions related to any of the following?
+                                                        <span
+                                                            className={
+                                                                styles.provisionsHeaderText
+                                                            }
+                                                        >
+                                                            Does this contract
+                                                            action include new
+                                                            or modified
+                                                            provisions related
+                                                            to any of the
+                                                            following?
                                                         </span>
                                                     </>
                                                 }
@@ -840,7 +839,8 @@ export const EQROContractDetails = ({
                                                     isMCO &&
                                                     values.eqroProvisionMcoEqrOrRelatedActivities ===
                                                         'YES') ||
-                                                    (isBaseContract && isMCO)) && (
+                                                    (isBaseContract &&
+                                                        isMCO)) && (
                                                     <FormGroup
                                                         error={Boolean(
                                                             showFieldErrors(
@@ -881,7 +881,8 @@ export const EQROContractDetails = ({
                                                     isMCO &&
                                                     values.eqroProvisionMcoEqrOrRelatedActivities ===
                                                         'YES') ||
-                                                    (isBaseContract && isMCO)) && (
+                                                    (isBaseContract &&
+                                                        isMCO)) && (
                                                     <FormGroup
                                                         error={Boolean(
                                                             showFieldErrors(

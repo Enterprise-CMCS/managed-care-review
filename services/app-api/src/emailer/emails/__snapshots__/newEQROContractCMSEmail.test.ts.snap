@@ -1,0 +1,15 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`renders overall email for a new EQRO contract submission 1`] = `
+"<h3 style="font-size: 22px; font-weight: 400; line-height: normal">Submission MCR-MN-0004-SNBC is subject to CMS review.</h3>
+<b>Contract type</b>: External Quality Review Organization (EQRO)<br />
+<b>Contract action type</b>: Amendment to base contract<br />
+<b>Amendment effective dates</b>: 01/01/2024 to 01/01/2025<br />
+<br />
+<b>Managed care entities reviewed by this EQRO</b>: Managed Care Organization (MCO), Primary Care Case Management Entity (PCCM Entity)<br />
+<b>EQR or EQR-related activities preformed on MCOs?</b>: Yes<br /> <b>New optional activities to be performed on MCOs</b>: Yes<br /> <b>EQR-related activities for a new MCO managed care program</b>: No<br /> <br />
+<b>Submission description</b>: A EQRO submission<br />
+<br />
+<a href="http://localhost/submissions/eqro/test-contract-123">View submission</a>
+"
+`;
