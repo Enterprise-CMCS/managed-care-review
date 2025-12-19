@@ -1,5 +1,4 @@
-<div style="font-size: 22px">Submission <%= it.packageName %> <%= it.subjectToReview %>.</div>
-<br /><br />
+<h3 style="font-size: 22px; font-weight: 400; line-height: normal">Submission <%= it.packageName %> <%= it.subjectToReview %>.</h3>
 <b>Contract type</b>: <%= it.contractSubmissionType %><br />
 <b>Contract action type</b>: <%= it.contractActionType %><br />
 <b><%= it.contractDatesLabel %></b>: <%= it.contractDatesStart %> to <%= it.contractDatesEnd %><br />
