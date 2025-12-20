@@ -13,13 +13,13 @@ exports[`newEqroContractStateEmail > renders email for new EQRO contract NOT sub
 <a href="http://localhost/submissions/eqro/test-contract-123">View submission</a>
 <br /><br />
 <span style="margin-bottom: 0; padding-bottom: 0;">Although the state's responses indicate this submission is not subject to CMS review and approval, all contracts with EQROs must:</span>
-<ul style="margin-left: 0; margin-top: 0;">
+<ul style="margin-left: 0; padding-left: 1; margin-top: 0;">
   <li>Be submitted to CMS. This includes base contracts, amendments to base contracts, and extensions.</li>
   <li>Meet competence and independence requirements specified at 42 CFR 438.354 to qualify for Federal Financial Participation (FFP).</li>
   <li>Require the mandatory review activities specified at 42 CFR 438.358 for MCOs, PIHPs, and PAHPs.</li>
 </ul>
 <span style="margin-bottom: 0; padding-bottom: 0;">If you need assistance or have any questions:</span>
-<ul style="margin-left: 0; margin-top: 0;">
+<ul style="margin-left: 0; padding-left: 1; margin-top: 0;">
   <li>For assistance with programmatic, contractual, or operational issues, please reach out to <a href="mailto:MCGDMCOactions@cms.hhs.gov">MCGDMCOactions@cms.hhs.gov</a> and/or your CMS primary contact.</li>
   <li>For issues related to MC-Review or all other inquiries, please reach out to <a href="mailto:MC_Review_HelpDesk@cms.hhs.gov">MC_Review_HelpDesk@cms.hhs.gov.</a></li>
 </ul>
@@ -46,7 +46,7 @@ exports[`newEqroContractStateEmail > renders email for new EQRO contract subject
   <li><b>4. Determination</b>: Once all questions have been addressed, CMS will contact you with their final determination.</li>
 </ol>
 <span style="margin-bottom: 0; padding-bottom: 0;">If you need assistance or have any questions:</span>
-<ul style="margin-left: 0; margin-top: 0;">
+<ul style="margin-left: 0; padding-left: 1; margin-top: 0;">
   <li>For assistance with programmatic, contractual, or operational issues, please reach out to <a href="mailto:MCGDMCOactions@cms.hhs.gov">MCGDMCOactions@cms.hhs.gov</a> and/or your CMS primary contact.</li>
   <li>For issues related to MC-Review or all other inquiries, please reach out to <a href="mailto:MC_Review_HelpDesk@cms.hhs.gov">MC_Review_HelpDesk@cms.hhs.gov.</a></li>
 </ul>
