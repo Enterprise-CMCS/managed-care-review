@@ -877,7 +877,7 @@ export class AppApiStack extends BaseStack {
             `${uploadsStackName}-QAUploadsBucketName`
         )
         const applicationEndpoint = Fn.importValue(
-            `${frontendStackName}-CloudFrontEndpointUrl`
+            `${frontendStackName}-ApplicationUrl`
         )
 
         // Get values from environment variables with SSM/Secrets Manager fallbacks
