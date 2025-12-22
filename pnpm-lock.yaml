@@ -1096,8 +1096,8 @@ importers:
         specifier: 2.92.1
         version: 2.92.1(@aws-solutions-constructs/core@2.86.0(aws-cdk-lib@2.219.0(constructs@10.4.2))(constructs@10.4.2))(aws-cdk-lib@2.219.0(constructs@10.4.2))(constructs@10.4.2)
       '@aws-solutions-constructs/aws-s3-lambda':
-        specifier: 2.92.1
-        version: 2.92.1(@aws-solutions-constructs/core@2.86.0(aws-cdk-lib@2.219.0(constructs@10.4.2))(constructs@10.4.2))(aws-cdk-lib@2.219.0(constructs@10.4.2))(constructs@10.4.2)
+        specifier: 2.96.0
+        version: 2.96.0(@aws-solutions-constructs/core@2.86.0(aws-cdk-lib@2.219.0(constructs@10.4.2))(constructs@10.4.2))(aws-cdk-lib@2.219.0(constructs@10.4.2))(constructs@10.4.2)
       '@aws-solutions-constructs/aws-wafwebacl-apigateway':
         specifier: 2.94.0
         version: 2.94.0(@aws-solutions-constructs/core@2.86.0(aws-cdk-lib@2.219.0(constructs@10.4.2))(constructs@10.4.2))(aws-cdk-lib@2.219.0(constructs@10.4.2))(constructs@10.4.2)
@@ -2492,11 +2492,11 @@ packages:
       aws-cdk-lib: ^2.212.0
       constructs: ^10.0.0
 
-  '@aws-solutions-constructs/aws-s3-lambda@2.92.1':
-    resolution: {integrity: sha512-bfhgpQ+R1iIJEdltlrYBrV6f2YnOk+4p7LfQRp7YH3GMEIBzX5gw1gUW7bI3eZlcj5kJfzBZInrFxHS9MKU9hg==}
+  '@aws-solutions-constructs/aws-s3-lambda@2.96.0':
+    resolution: {integrity: sha512-EKiX3ZgCyzNFDRzxmM7VM0t2y/GE6jgfxWO3ojn2kRYWbrv12zHf3yVRsmXb4n7IJNbTj/LEzIkkbAgzgX1a1Q==}
     peerDependencies:
-      '@aws-solutions-constructs/core': 2.92.1
-      aws-cdk-lib: ^2.212.0
+      '@aws-solutions-constructs/core': 2.96.0
+      aws-cdk-lib: ^2.223.0
       constructs: ^10.0.0
 
   '@aws-solutions-constructs/aws-wafwebacl-apigateway@2.94.0':
@@ -17461,7 +17461,7 @@ snapshots:
       aws-cdk-lib: 2.219.0(constructs@10.4.2)
       constructs: 10.4.2
 
-  '@aws-solutions-constructs/aws-s3-lambda@2.92.1(@aws-solutions-constructs/core@2.86.0(aws-cdk-lib@2.219.0(constructs@10.4.2))(constructs@10.4.2))(aws-cdk-lib@2.219.0(constructs@10.4.2))(constructs@10.4.2)':
+  '@aws-solutions-constructs/aws-s3-lambda@2.96.0(@aws-solutions-constructs/core@2.86.0(aws-cdk-lib@2.219.0(constructs@10.4.2))(constructs@10.4.2))(aws-cdk-lib@2.219.0(constructs@10.4.2))(constructs@10.4.2)':
     dependencies:
       '@aws-solutions-constructs/core': 2.86.0(aws-cdk-lib@2.219.0(constructs@10.4.2))(constructs@10.4.2)
       aws-cdk-lib: 2.219.0(constructs@10.4.2)
