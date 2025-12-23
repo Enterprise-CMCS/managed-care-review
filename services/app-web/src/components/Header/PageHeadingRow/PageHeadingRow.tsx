@@ -31,8 +31,21 @@ const pathIncludesAny = (
 ): boolean =>
     !!pathname && fragments.some((fragment) => pathname.includes(fragment))
 
-const getContractTypeFromPath = (pathname?: string): ContractSubmissionType =>
-    pathname?.includes('eqro') ? 'EQRO' : 'Health plan'
+const getContractTypeFromPath = (
+    pathname?: string
+): ContractSubmissionType | undefined => {
+    if (
+        pathIncludesAny(pathname, hideSubIDRoutes.state) ||
+        pathIncludesAny(pathname, hideSubIDRoutes.cms)
+    ) {
+        return undefined
+    }
+    if (pathname?.includes('eqro')) {
+        return 'EQRO'
+    } else {
+        return 'Health plan'
+    }
+}
 
 const SharedSubHeadingRow = ({
     submissionID,
@@ -75,15 +88,14 @@ const StateDisplay = ({
     contractType,
 }: {
     heading?: string | React.ReactElement
-    pathname?: string
     route?: string
     stateCode: string
     stateName: string
-    contractType: ContractSubmissionType
+    contractType: ContractSubmissionType | undefined
 }) => {
     return (
         <Grid row className={`flex-align-center ${styles.stateRow}`}>
-            {stateCode && stateName && (
+            {stateCode && stateName && heading && (
                 <>
                     <div>
                         <StateIcon code={stateCode as StateIconProps['code']} />
@@ -99,7 +111,9 @@ const StateDisplay = ({
                             <SharedSubHeadingRow submissionID={heading} />
                         )}
                     </PageHeading>
-                    <ContractType contractType={contractType} />
+                    {contractType && (
+                        <ContractType contractType={contractType} />
+                    )}
                 </>
             )}
         </Grid>
@@ -131,10 +145,9 @@ const CMSUserRow = ({
     return (
         <div className={styles.dashboardHeading}>
             <GridContainer>
-                {canShowStateDisplay ? (
+                {canShowStateDisplay && contractType ? (
                     <StateDisplay
                         heading={heading}
-                        pathname={pathname}
                         stateCode={stateCode}
                         stateName={stateName}
                         contractType={contractType}
@@ -170,10 +183,23 @@ const StateUserRow = ({
 }) => {
     const hideSubID = pathIncludesAny(pathname, hideSubIDRoutes.state)
     const contractType = getContractTypeFromPath(pathname)
+
     return (
         <div className={styles.dashboardHeading}>
             <GridContainer>
-                {hideSubID ? (
+                {!hideSubID && contractType ? (
+                    <Grid
+                        row
+                        className={`flex-align-center ${styles.stateRow}`}
+                    >
+                        <StateDisplay
+                            heading={heading}
+                            stateCode={user.state.code}
+                            stateName={user.state.name}
+                            contractType={contractType}
+                        />
+                    </Grid>
+                ) : (
                     <Grid row className="flex-align-center">
                         <div>
                             <StateIcon
@@ -194,19 +220,6 @@ const StateUserRow = ({
                                 </span>
                             )}
                         </PageHeading>
-                    </Grid>
-                ) : (
-                    <Grid
-                        row
-                        className={`flex-align-center ${styles.stateRow}`}
-                    >
-                        <StateDisplay
-                            heading={heading}
-                            pathname={pathname}
-                            stateCode={user.state.code}
-                            stateName={user.state.name}
-                            contractType={contractType}
-                        />
                     </Grid>
                 )}
             </GridContainer>

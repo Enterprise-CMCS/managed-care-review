@@ -9,6 +9,7 @@ import { Logo } from '../Logo'
 import styles from './Header.module.scss'
 import { PageHeadingRow } from './PageHeadingRow/PageHeadingRow'
 import { UserLoginInfo } from './UserLoginInfo/UserLoginInfo'
+import { RoutesRecord } from '@mc-review/constants'
 
 export type HeaderProps = {
     authMode: AuthModeType
@@ -42,7 +43,10 @@ export const Header = ({
             <div className={styles.banner}>
                 <GridContainer>
                     <Grid row className="flex-justify flex-align-center">
-                        <NavLink className={styles.bannerLogo} to="/">
+                        <NavLink
+                            className={styles.bannerLogo}
+                            to={RoutesRecord.DASHBOARD_SUBMISSIONS}
+                        >
                             <Logo
                                 src={onemacLogo}
                                 alt="One Mac logo"

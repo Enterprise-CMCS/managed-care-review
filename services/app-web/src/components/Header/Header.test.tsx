@@ -24,7 +24,7 @@ describe('Header', () => {
                 name: /One Mac/i,
             })
             expect(logoLink).toBeVisible()
-            expect(logoLink).toHaveAttribute('href', '/')
+            expect(logoLink).toHaveAttribute('href', '/dashboard/submissions')
             expect(logoLink).toContainElement(logoImage)
         })
 
@@ -75,12 +75,13 @@ describe('Header', () => {
                 name: /One Mac/i,
             })
             expect(logoLink).toBeVisible()
-            expect(logoLink).toHaveAttribute('href', '/')
+            expect(logoLink).toHaveAttribute('href', '/dashboard/submissions')
             expect(logoLink).toContainElement(logoImage)
         })
 
         it('displays heading with users state', async () => {
             renderWithProviders(<Header authMode={'AWS_COGNITO'} />, {
+                routerProvider: { route: '/dashboard/submissions' },
                 apolloProvider: {
                     mocks: [fetchCurrentUserMock({ statusCode: 200 })],
                 },
