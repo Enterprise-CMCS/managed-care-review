@@ -5,7 +5,6 @@ import {
     type IVpc,
     SecurityGroup,
     Vpc,
-    Peer,
     Port,
 } from 'aws-cdk-lib/aws-ec2'
 import { CfnOutput } from 'aws-cdk-lib'
@@ -96,7 +95,7 @@ export class Network extends BaseStack {
             securityGroupName: `mcr-application-sg-${this.stage}`,
             description:
                 'MCR application security group - replaces default VPC SG',
-            allowAllOutbound: false,
+            allowAllOutbound: true, // Allow all outbound traffic (AWS APIs, internet, etc.)
         })
 
         // INGRESS RULES
@@ -107,22 +106,6 @@ export class Network extends BaseStack {
             appSg,
             Port.allTraffic(),
             'Allow all traffic from same security group'
-        )
-
-        // EGRESS RULES
-
-        // Egress 1: PostgreSQL to itself
-        appSg.addEgressRule(
-            appSg,
-            Port.tcp(5432),
-            'PostgreSQL to same security group'
-        )
-
-        // Egress 2: All traffic to internet
-        appSg.addEgressRule(
-            Peer.anyIpv4(),
-            Port.allTraffic(),
-            'Allow all outbound traffic'
         )
 
         return appSg
