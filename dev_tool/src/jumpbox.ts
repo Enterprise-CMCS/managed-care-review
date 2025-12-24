@@ -321,9 +321,20 @@ async function runPgDumpViaDocker(
         }
 
         // Clean up SSM session
-        console.info('Closing SSM tunnel...')
-        ssmProcess.kill()
-        await new Promise((resolve) => setTimeout(resolve, 1000))
+        // Check if process is still running before attempting to kill
+        if (ssmProcess.exitCode === null && !ssmProcess.killed) {
+            console.info('Closing SSM tunnel...')
+            try {
+                ssmProcess.kill()
+                // Wait a moment for graceful shutdown
+                await new Promise((resolve) => setTimeout(resolve, 1000))
+            } catch (err) {
+                console.warn(
+                    'Warning: Failed to kill SSM process:',
+                    err instanceof Error ? err.message : String(err)
+                )
+            }
+        }
     }
 }
 
