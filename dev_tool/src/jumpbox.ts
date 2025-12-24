@@ -144,8 +144,9 @@ async function ensureBastionIsRunning(
     return startedInstance
 }
 
-// Check if Docker is available
+// Check if Docker is available and running
 function checkDockerAvailable(): void {
+    // First check if Docker CLI is installed
     try {
         execSync('docker --version', { stdio: 'ignore' })
     } catch {
@@ -163,6 +164,19 @@ function checkDockerAvailable(): void {
         console.error(
             '\nAfter installing Docker, restart your terminal and try again.'
         )
+        process.exit(1)
+    }
+
+    // Check if Docker daemon is running
+    try {
+        execSync('docker ps', { stdio: 'ignore' })
+    } catch {
+        console.error(
+            '\n❌ Docker is installed but the Docker daemon is not running.'
+        )
+        console.error('\nPlease start Docker Desktop and try again.')
+        console.error('  Mac/Windows: Open Docker Desktop application')
+        console.error('  Linux: Run `sudo systemctl start docker`')
         process.exit(1)
     }
 }
