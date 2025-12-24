@@ -7,8 +7,8 @@ import {
 } from './aws.js'
 import { retry } from './retry.js'
 import { Instance } from '@aws-sdk/client-ec2'
-import { execSync, spawn } from 'child_process'
-import { writeFileSync } from 'fs'
+import { execSync, spawn, spawnSync } from 'child_process'
+import { writeFileSync, unlinkSync, existsSync } from 'fs'
 
 function stageForEnv(env: string): string {
     // CDK uses consistent naming: dev, val, prod
@@ -253,15 +253,28 @@ async function runPgDumpViaDocker(
 
         console.info('This may take a few minutes for large databases...')
 
-        execSync(`docker ${dockerArgs.join(' ')}`, {
+        const result = spawnSync('docker', dockerArgs, {
             stdio: 'inherit',
         })
 
-        // Clean up .pgpass file
+        if (result.error) {
+            throw result.error
+        }
+
+        if (result.status !== 0) {
+            throw new Error(
+                `Docker command failed with exit code ${result.status}`
+            )
+        }
+
+        // Clean up .pgpass file using fs API instead of shell command
         try {
-            execSync(`rm -f ${pgpassFile}`, { stdio: 'ignore' })
+            if (existsSync(pgpassFile)) {
+                unlinkSync(pgpassFile)
+            }
         } catch {
             // Ignore cleanup errors
+            console.warn('Warning: Failed to clean up temporary .pgpass file')
         }
 
         console.info(`✓ Database dump saved to: ${dumpFileName}`)
