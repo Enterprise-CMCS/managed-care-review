@@ -12,6 +12,9 @@ import {
     TokenAuthorizer,
     AuthorizationType,
     ResponseType,
+    MethodLoggingLevel,
+    CfnAccount,
+    LogGroupLogDestination,
 } from 'aws-cdk-lib/aws-apigateway'
 import {
     PolicyStatement,
@@ -23,6 +26,7 @@ import {
 import { CfnOutput, Duration, Fn } from 'aws-cdk-lib'
 import { StringParameter } from 'aws-cdk-lib/aws-ssm'
 import { Secret } from 'aws-cdk-lib/aws-secretsmanager'
+import { LogGroup } from 'aws-cdk-lib/aws-logs'
 import { ResourceNames } from '../config/shared'
 import {
     Architecture,
@@ -75,12 +79,43 @@ export class AppApiStack extends BaseStack {
                 'App API - GraphQL Lambda functions and API Gateway integration',
         })
 
+        // Create CloudWatch Log Group for API Gateway execution logs
+        const apiGatewayLogGroup = new LogGroup(this, 'ApiGatewayLogGroup', {
+            logGroupName: `/aws/apigateway/${ResourceNames.apiName('app-api', this.stage)}-gateway`,
+            retention: this.stageConfig.monitoring.logRetentionDays,
+        })
+
+        // Create IAM role for API Gateway to write to CloudWatch Logs
+        const apiGatewayCloudWatchRole = new Role(
+            this,
+            'ApiGatewayCloudWatchRole',
+            {
+                assumedBy: new ServicePrincipal('apigateway.amazonaws.com'),
+                managedPolicies: [
+                    ManagedPolicy.fromAwsManagedPolicyName(
+                        'service-role/AmazonAPIGatewayPushToCloudWatchLogs'
+                    ),
+                ],
+            }
+        )
+
+        // Configure API Gateway account to use CloudWatch role (regional setting)
+        new CfnAccount(this, 'ApiGatewayAccount', {
+            cloudWatchRoleArn: apiGatewayCloudWatchRole.roleArn,
+        })
+
         // Create dedicated API Gateway for app-api
         this.apiGateway = new RestApi(this, 'AppApiGateway', {
             restApiName: `${ResourceNames.apiName('app-api', this.stage)}-gateway`,
             description: 'API Gateway for app-api Lambda functions',
             deployOptions: {
                 stageName: this.stage,
+                loggingLevel: MethodLoggingLevel.INFO,
+                dataTraceEnabled: false,
+                metricsEnabled: true,
+                accessLogDestination: new LogGroupLogDestination(
+                    apiGatewayLogGroup
+                ),
             },
             defaultCorsPreflightOptions: {
                 allowOrigins: ['*'],
