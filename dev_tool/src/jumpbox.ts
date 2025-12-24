@@ -230,6 +230,8 @@ async function runPgDumpViaDocker(
     console.info('Waiting for tunnel to establish...')
     await new Promise((resolve) => setTimeout(resolve, 5000))
 
+    const pgpassFile = '.pgpass.tmp'
+
     try {
         console.info('Running pg_dump via Docker with PostgreSQL 16 client...')
 
@@ -239,7 +241,6 @@ async function runPgDumpViaDocker(
 
         // Create a temporary .pgpass file for authentication
         const pgpassContent = `${dbHost}:${localPort}:${dbSecrets.dbname}:${dbSecrets.user}:${dbSecrets.password}\n`
-        const pgpassFile = '.pgpass.tmp'
         writeFileSync(pgpassFile, pgpassContent, { mode: 0o600 })
 
         const dockerArgs = [
@@ -281,7 +282,9 @@ async function runPgDumpViaDocker(
             )
         }
 
-        // Clean up .pgpass file using fs API instead of shell command
+        console.info(`✓ Database dump saved to: ${dumpFileName}`)
+    } finally {
+        // Clean up .pgpass file
         try {
             if (existsSync(pgpassFile)) {
                 unlinkSync(pgpassFile)
@@ -291,8 +294,6 @@ async function runPgDumpViaDocker(
             console.warn('Warning: Failed to clean up temporary .pgpass file')
         }
 
-        console.info(`✓ Database dump saved to: ${dumpFileName}`)
-    } finally {
         // Clean up SSM session
         console.info('Closing SSM tunnel...')
         ssmProcess.kill()
