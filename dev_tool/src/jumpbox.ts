@@ -226,6 +226,19 @@ async function runPgDumpViaDocker(
         }
     )
 
+    // Handle SSM process errors
+    let ssmError: Error | undefined
+    ssmProcess.on('error', (err) => {
+        ssmError = err
+        console.error('SSM process error:', err.message)
+    })
+
+    // Also capture stderr for debugging
+    let ssmStderr = ''
+    ssmProcess.stderr?.on('data', (data) => {
+        ssmStderr += data.toString()
+    })
+
     // Wait for the tunnel to be established
     console.info('Waiting for tunnel to establish...')
     await new Promise((resolve) => setTimeout(resolve, 5000))
@@ -233,6 +246,19 @@ async function runPgDumpViaDocker(
     const pgpassFile = '.pgpass.tmp'
 
     try {
+        // Check if SSM process failed to start
+        if (ssmError) {
+            const errorMsg = ssmStderr
+                ? `Failed to start SSM session: ${ssmError.message}\n${ssmStderr}`
+                : `Failed to start SSM session: ${ssmError.message}`
+            throw new Error(errorMsg)
+        }
+
+        // Check if SSM session encountered errors during startup
+        if (ssmStderr.includes('error') || ssmStderr.includes('failed')) {
+            console.warn('SSM session may have issues:', ssmStderr.trim())
+        }
+
         console.info('Running pg_dump via Docker with PostgreSQL 16 client...')
 
         // Determine platform for Docker networking
