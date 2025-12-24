@@ -36,6 +36,7 @@ import { join } from 'path'
 export interface PostgresProps extends BaseStackProps {
     vpc: IVpc
     lambdaSecurityGroup: ISecurityGroup
+    applicationSecurityGroup?: ISecurityGroup
 }
 
 /**
@@ -81,6 +82,9 @@ export class Postgres extends BaseStack {
                     subnetType: SubnetType.PRIVATE_WITH_EGRESS,
                 },
                 securityGroup: props.lambdaSecurityGroup,
+                additionalSecurityGroups: props.applicationSecurityGroup
+                    ? [props.applicationSecurityGroup]
+                    : [],
                 databaseConfig: this.stageConfig.database,
             })
 
@@ -110,6 +114,13 @@ export class Postgres extends BaseStack {
     private createSecretsManagerVpcEndpoint(
         props: PostgresProps
     ): InterfaceVpcEndpoint {
+        const securityGroups = [
+            props.lambdaSecurityGroup,
+            ...(props.applicationSecurityGroup
+                ? [props.applicationSecurityGroup]
+                : []),
+        ]
+
         return new InterfaceVpcEndpoint(this, 'SecretsManagerVPCEndpoint', {
             vpc: props.vpc,
             service: new InterfaceVpcEndpointService(
@@ -118,7 +129,7 @@ export class Postgres extends BaseStack {
             subnets: {
                 subnetType: SubnetType.PRIVATE_WITH_EGRESS,
             },
-            securityGroups: [props.lambdaSecurityGroup],
+            securityGroups,
         })
     }
 
@@ -161,6 +172,13 @@ export class Postgres extends BaseStack {
      * Create logical database manager Lambda function
      */
     private createLogicalDbManagerLambda(props: PostgresProps): NodejsFunction {
+        const securityGroups = [
+            props.lambdaSecurityGroup,
+            ...(props.applicationSecurityGroup
+                ? [props.applicationSecurityGroup]
+                : []),
+        ]
+
         // Use NodejsFunction to bundle the TypeScript code from postgres service
         const dbManagerFunction = new NodejsFunction(
             this,
@@ -187,7 +205,7 @@ export class Postgres extends BaseStack {
                 vpcSubnets: {
                     subnetType: SubnetType.PRIVATE_WITH_EGRESS,
                 },
-                securityGroups: [props.lambdaSecurityGroup],
+                securityGroups,
                 environment: {
                     SECRETS_MANAGER_ENDPOINT: `https://secretsmanager.${this.region}.amazonaws.com`,
                     DB_SECRET_ARN: this.databaseSecret.secretArn,
@@ -288,6 +306,10 @@ export class Postgres extends BaseStack {
         )
 
         // Create the bastion instance
+        // Note: Use application SG if available, otherwise use default SG
+        const bastionSecurityGroup =
+            props.applicationSecurityGroup || props.lambdaSecurityGroup
+
         const bastion = new Instance(this, 'BastionHost', {
             instanceType: InstanceType.of(InstanceClass.T3, InstanceSize.MICRO),
             machineImage: MachineImage.latestAmazonLinux2023({
@@ -297,7 +319,7 @@ export class Postgres extends BaseStack {
             vpcSubnets: {
                 subnetType: SubnetType.PRIVATE_WITH_EGRESS,
             },
-            securityGroup: props.lambdaSecurityGroup,
+            securityGroup: bastionSecurityGroup,
             role: bastionRole,
             userData,
             blockDevices: [

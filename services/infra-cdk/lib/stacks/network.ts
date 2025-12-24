@@ -5,6 +5,8 @@ import {
     type IVpc,
     SecurityGroup,
     Vpc,
+    Peer,
+    Port,
 } from 'aws-cdk-lib/aws-ec2'
 import { CfnOutput } from 'aws-cdk-lib'
 
@@ -23,6 +25,7 @@ export interface NetworkProps extends BaseStackProps {
 export class Network extends BaseStack {
     public readonly vpc: IVpc
     public readonly lambdaSecurityGroup: ISecurityGroup
+    public readonly applicationSecurityGroup: ISecurityGroup
 
     constructor(scope: Construct, id: string, props: NetworkProps) {
         super(scope, id, {
@@ -36,6 +39,7 @@ export class Network extends BaseStack {
         // Initialize resources directly in constructor (standard CDK pattern)
         this.vpc = this.importVpc()
         this.lambdaSecurityGroup = this.importSecurityGroup()
+        this.applicationSecurityGroup = this.createApplicationSecurityGroup()
 
         // Create outputs for other stacks to reference
         this.createOutputs()
@@ -84,6 +88,47 @@ export class Network extends BaseStack {
     }
 
     /**
+     * Create application security group to replace default VPC security group
+     */
+    private createApplicationSecurityGroup(): ISecurityGroup {
+        const appSg = new SecurityGroup(this, 'ApplicationSecurityGroup', {
+            vpc: this.vpc,
+            securityGroupName: `mcr-application-sg-${this.stage}`,
+            description:
+                'MCR application security group - replaces default VPC SG',
+            allowAllOutbound: false,
+        })
+
+        // INGRESS RULES
+
+        // Rule 1: All traffic from itself (self-referencing)
+        // This allows resources in the same SG to communicate (Lambda → RDS, etc.)
+        appSg.addIngressRule(
+            appSg,
+            Port.allTraffic(),
+            'Allow all traffic from same security group'
+        )
+
+        // EGRESS RULES
+
+        // Egress 1: PostgreSQL to itself
+        appSg.addEgressRule(
+            appSg,
+            Port.tcp(5432),
+            'PostgreSQL to same security group'
+        )
+
+        // Egress 2: All traffic to internet
+        appSg.addEgressRule(
+            Peer.anyIpv4(),
+            Port.allTraffic(),
+            'Allow all outbound traffic'
+        )
+
+        return appSg
+    }
+
+    /**
      * Get private subnet IDs from environment variables
      * Same pattern as serverless privateSubnets array
      */
@@ -120,6 +165,12 @@ export class Network extends BaseStack {
             value: this.lambdaSecurityGroup.securityGroupId,
             exportName: this.exportName('LambdaSecurityGroupId'),
             description: 'Security Group ID for Lambda functions',
+        })
+
+        new CfnOutput(this, 'ApplicationSecurityGroupId', {
+            value: this.applicationSecurityGroup.securityGroupId,
+            exportName: this.exportName('ApplicationSecurityGroupId'),
+            description: 'Application Security Group ID',
         })
 
         // Export subnet IDs for Lambda functions
