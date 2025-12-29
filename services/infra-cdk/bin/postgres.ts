@@ -1,9 +1,9 @@
 import { AppConfigLoader } from '../lib/config/app'
+import { Network } from '../lib/stacks/network'
 import { Postgres } from '../lib/stacks/postgres'
 import { getEnvironment, getCdkEnvironment } from '../lib/config/environments'
 import { ResourceNames } from '../lib/config/shared'
-import { App, DefaultStackSynthesizer, Tags, Fn } from 'aws-cdk-lib'
-import { Vpc, SecurityGroup } from 'aws-cdk-lib/aws-ec2'
+import { App, DefaultStackSynthesizer, Tags } from 'aws-cdk-lib'
 
 // Simplified version - using default synthesizer with mcreview qualifier
 function main(): void {
@@ -25,32 +25,20 @@ function main(): void {
         const config = getEnvironment(appConfig.stage)
         const env = getCdkEnvironment(appConfig.stage)
 
-        // Network stack name for importing exports
-        const networkStackName = ResourceNames.stackName(
-            'network',
-            appConfig.stage
-        )
-
-        // Import VPC from environment (same as Network stack does)
-        const vpc = Vpc.fromLookup(app, 'ImportedVpc', {
-            vpcId: process.env.VPC_ID!,
-        })
-
-        // Import security groups from Network stack CloudFormation exports
-        const lambdaSecurityGroup = SecurityGroup.fromSecurityGroupId(
+        // Create Network stack (needed for VPC and SG references)
+        const network = new Network(
             app,
-            'ImportedLambdaSG',
-            Fn.importValue(`${networkStackName}-LambdaSecurityGroupId`)
-        )
-
-        const applicationSecurityGroup = SecurityGroup.fromSecurityGroupId(
-            app,
-            'ImportedApplicationSG',
-            Fn.importValue(`${networkStackName}-ApplicationSecurityGroupId`)
+            ResourceNames.stackName('network', appConfig.stage),
+            {
+                env,
+                stage: appConfig.stage,
+                stageConfig: config,
+                serviceName: 'network',
+            }
         )
 
         // Create Postgres stack
-        new Postgres(
+        const postgres = new Postgres(
             app,
             ResourceNames.stackName('postgres', appConfig.stage),
             {
@@ -58,11 +46,14 @@ function main(): void {
                 stage: appConfig.stage,
                 stageConfig: config,
                 serviceName: 'postgres',
-                vpc,
-                lambdaSecurityGroup,
-                applicationSecurityGroup,
+                vpc: network.vpc,
+                lambdaSecurityGroup: network.lambdaSecurityGroup,
+                applicationSecurityGroup: network.applicationSecurityGroup,
             }
         )
+
+        // Set dependency
+        postgres.addDependency(network)
 
         // Keep permissions boundary if still required by CMS
 
