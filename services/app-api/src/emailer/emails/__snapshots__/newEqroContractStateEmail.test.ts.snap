@@ -1,7 +1,7 @@
 // Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
 exports[`newEqroContractStateEmail > renders email for new EQRO contract NOT subject to review as expected 1`] = `
-"<h3 style="font-size: 22px; font-weight: 400; line-height: normal"">Based on the state's responses, MCR-MN-0004-SNBC is not subject to CMS review and approval.<div><br />
+"<h3 style="font-size: 22px; font-weight: 400; line-height: normal"">Based on the state's responses, MCR-MN-0004-SNBC is not subject to CMS review and approval.</h3>
 
 <b>Contract type</b>: External Quality Review Organization (EQRO)<br />
 <b>Contract action type</b>: Amendment to base contract<br />
@@ -27,7 +27,7 @@ exports[`newEqroContractStateEmail > renders email for new EQRO contract NOT sub
 `;
 
 exports[`newEqroContractStateEmail > renders email for new EQRO contract subject to review as expected 1`] = `
-"<h3 style="font-size: 22px; font-weight: 400; line-height: normal"">Based on the state's responses, MCR-MN-0004-SNBC is subject to CMS review and approval.<div><br />
+"<h3 style="font-size: 22px; font-weight: 400; line-height: normal"">Based on the state's responses, MCR-MN-0004-SNBC is subject to CMS review and approval.</h3>
 
 <b>Contract type</b>: External Quality Review Organization (EQRO)<br />
 <b>Contract action type</b>: Amendment to base contract<br />
