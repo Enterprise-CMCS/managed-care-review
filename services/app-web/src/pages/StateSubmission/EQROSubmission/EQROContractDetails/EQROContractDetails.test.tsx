@@ -280,7 +280,7 @@ describe('EQROContractDetails', () => {
 
             await screen.findByText('EQRO Contract details')
 
-            // Base contracts should not show the parent EQR activities question
+            // Base contracts should not show the eqroProvisionMcoEqrOrRelatedActivities question
             expect(
                 screen.queryByRole('group', {
                     name: 'EQR or EQR-related activities performed on MCOs',
@@ -472,7 +472,7 @@ describe('EQROContractDetails', () => {
                 })
             ).toBeInTheDocument()
 
-            // Parent question should NOT be visible for base contracts
+            // eqroProvisionMcoEqrOrRelatedActivities question should NOT be visible for base contracts
             expect(
                 screen.queryByRole('group', {
                     name: 'EQR or EQR-related activities performed on MCOs',
@@ -608,7 +608,7 @@ describe('EQROContractDetails', () => {
             )
         })
 
-        it('counts correct number of EQRO provision questions for amendment with MCO', async () => {
+        it('counts correct number of EQRO provision questions for Amendment with MCO', async () => {
             const draftContract = mockContractPackageUnlockedWithUnlockedType()
             draftContract.draftRevision.formData.contractType = 'AMENDMENT'
             draftContract.draftRevision.formData.populationCovered = 'MEDICAID'
@@ -644,7 +644,7 @@ describe('EQROContractDetails', () => {
 
             await screen.findByText('EQRO Contract details')
 
-            // Amendment with MCO and NO selected should show only 1 question: eqroProvisionMcoEqrOrRelatedActivities
+            // Amendment with MCO and NO selected for eqroProvisionMcoEqrOrRelatedActivities should show only 1 question
             expect(screen.getAllByTestId('yes-no-radio-fieldset')).toHaveLength(
                 1
             )
@@ -692,7 +692,8 @@ describe('EQROContractDetails', () => {
         })
     })
 
-    describe('EQRO provision questions - validation', () => {
+    describe('EQRO provisions questions - validation', () => {
+
         it('shows 4 validation errors for Base contract with MCO and MEDICAID_AND_CHIP', async () => {
             const draftContract = mockContractPackageUnlockedWithUnlockedType()
             draftContract.draftRevision.formData.contractType = 'BASE'
@@ -700,18 +701,11 @@ describe('EQROContractDetails', () => {
                 'MEDICAID_AND_CHIP'
             draftContract.draftRevision.formData.managedCareEntities = ['MCO']
             draftContract.draftRevision.formData.contractDateStart = new Date(
-                '2024-01-01'
+                '2027-01-01'
             )
             draftContract.draftRevision.formData.contractDateEnd = new Date(
-                '2024-12-31'
+                '2027-12-31'
             )
-            draftContract.draftRevision.formData.eqroNewContractor = undefined
-            draftContract.draftRevision.formData.eqroProvisionMcoNewOptionalActivity =
-                undefined
-            draftContract.draftRevision.formData.eqroProvisionNewMcoEqrRelatedActivities =
-                undefined
-            draftContract.draftRevision.formData.eqroProvisionChipEqrRelatedActivities =
-                undefined
 
             renderWithProviders(
                 <Routes>
@@ -749,10 +743,11 @@ describe('EQROContractDetails', () => {
 
             await waitFor(() => {
                 const errors = screen.getAllByText('You must select yes or no')
-                // Base contract with MCO and CHIP should have 4 required fields
-                expect(errors.length).toBeGreaterThanOrEqual(4)
+                // Base contract with MCO and CHIP should have 4 required Y/N fields
+                expect(errors.length).toBe(8) // 4 errors displayed twice - on the top and at the control level
             })
         })
+
         it('shows 3 validation errors for Base contract with MCO and MEDICAID', async () => {
             const draftContract = mockContractPackageUnlockedWithUnlockedType()
             draftContract.draftRevision.formData.contractType = 'BASE'
@@ -760,18 +755,11 @@ describe('EQROContractDetails', () => {
                 'MEDICAID'
             draftContract.draftRevision.formData.managedCareEntities = ['MCO']
             draftContract.draftRevision.formData.contractDateStart = new Date(
-                '2024-01-01'
+                '2027-01-01'
             )
             draftContract.draftRevision.formData.contractDateEnd = new Date(
-                '2024-12-31'
+                '2027-12-31'
             )
-            draftContract.draftRevision.formData.eqroNewContractor = undefined
-            draftContract.draftRevision.formData.eqroProvisionMcoNewOptionalActivity =
-                undefined
-            draftContract.draftRevision.formData.eqroProvisionNewMcoEqrRelatedActivities =
-                undefined
-            draftContract.draftRevision.formData.eqroProvisionChipEqrRelatedActivities =
-                undefined
 
             renderWithProviders(
                 <Routes>
@@ -810,9 +798,10 @@ describe('EQROContractDetails', () => {
             await waitFor(() => {
                 const errors = screen.getAllByText('You must select yes or no')
                 // Base contract with MCO and MEDICAID should have 3 required fields
-                expect(errors.length).toBeGreaterThanOrEqual(3)
+                expect(errors.length).toBe(6) // 3 errors displayed twice - on the top and at the control level
             })
         })
+
         it('shows 1 validation error for Base contract with no MCO and CHIP', async () => {
             const draftContract = mockContractPackageUnlockedWithUnlockedType()
             draftContract.draftRevision.formData.contractType = 'BASE'
@@ -820,18 +809,11 @@ describe('EQROContractDetails', () => {
                 'CHIP'
             draftContract.draftRevision.formData.managedCareEntities = ['PIHP']
             draftContract.draftRevision.formData.contractDateStart = new Date(
-                '2024-01-01'
+                '2027-01-01'
             )
             draftContract.draftRevision.formData.contractDateEnd = new Date(
-                '2024-12-31'
+                '2027-12-31'
             )
-            draftContract.draftRevision.formData.eqroNewContractor = undefined
-            draftContract.draftRevision.formData.eqroProvisionMcoNewOptionalActivity =
-                undefined
-            draftContract.draftRevision.formData.eqroProvisionNewMcoEqrRelatedActivities =
-                undefined
-            draftContract.draftRevision.formData.eqroProvisionChipEqrRelatedActivities =
-                undefined
 
             renderWithProviders(
                 <Routes>
@@ -869,10 +851,11 @@ describe('EQROContractDetails', () => {
 
             await waitFor(() => {
                 const errors = screen.getAllByText('You must select yes or no')
-                // Base contract with no MCO and CHIP should have 1 required fields
-                expect(errors.length).toBeGreaterThanOrEqual(1)
+                // Base contract with CHIP and no MCO should have 1 required fields
+                expect(errors.length).toBeGreaterThanOrEqual(2) // 1 error displayed twice - on the top and at the control level
             })
         })
+
         it('shows 1 validation error for Amendment with MCO and MEDICAID', async () => {
             const draftContract = mockContractPackageUnlockedWithUnlockedType()
             draftContract.draftRevision.formData.contractType = 'AMENDMENT'
@@ -880,19 +863,11 @@ describe('EQROContractDetails', () => {
                 'MEDICAID'
             draftContract.draftRevision.formData.managedCareEntities = ['MCO']
             draftContract.draftRevision.formData.contractDateStart = new Date(
-                '2024-01-01'
+                '2027-01-01'
             )
             draftContract.draftRevision.formData.contractDateEnd = new Date(
-                '2024-12-31'
+                '2027-12-31'
             )
-            draftContract.draftRevision.formData.eqroNewContractor = undefined
-            draftContract.draftRevision.formData.eqroProvisionMcoNewOptionalActivity =
-                undefined
-            draftContract.draftRevision.formData.eqroProvisionNewMcoEqrRelatedActivities =
-                undefined
-            draftContract.draftRevision.formData.eqroProvisionChipEqrRelatedActivities =
-                undefined
-
             renderWithProviders(
                 <Routes>
                     <Route
@@ -930,9 +905,73 @@ describe('EQROContractDetails', () => {
             await waitFor(() => {
                 const errors = screen.getAllByText('You must select yes or no')
                 // Amendment with MCO and MEDICAID should have 1 required fields
-                expect(errors.length).toBeGreaterThanOrEqual(1)
+                expect(errors.length).toBe(2) //1 error displayed twice - on the top and at the control level
             })
         })
+
+        it('shows 2 validation errors for Amendment with MCO and MEDICAID, when eqroProvisionMcoEqrOrRelatedActivities is answered YES', async () => {
+            const draftContract = mockContractPackageUnlockedWithUnlockedType()
+            draftContract.draftRevision.formData.contractType = 'AMENDMENT'
+            draftContract.draftRevision.formData.populationCovered =
+                'MEDICAID'
+            draftContract.draftRevision.formData.managedCareEntities = ['MCO']
+            draftContract.draftRevision.formData.contractDateStart = new Date(
+                '2027-01-01'
+            )
+            draftContract.draftRevision.formData.contractDateEnd = new Date(
+                '2027-12-31'
+            )
+
+            renderWithProviders(
+                <Routes>
+                    <Route
+                        path={RoutesRecord.SUBMISSIONS_CONTRACT_DETAILS}
+                        element={<EQROContractDetails />}
+                    />
+                </Routes>,
+                {
+                    apolloProvider: {
+                        mocks: [
+                            fetchCurrentUserMock({ statusCode: 200 }),
+                            fetchContractMockSuccess({
+                                contract: {
+                                    ...draftContract,
+                                    id: '15',
+                                    contractSubmissionType: 'EQRO',
+                                },
+                            }),
+                        ],
+                    },
+                    routerProvider: {
+                        route: '/submissions/eqro/15/edit/contract-details',
+                    },
+                }
+            )
+
+            await screen.findByText('EQRO Contract details')
+
+            // Select YES for the eqroProvisionMcoEqrOrRelatedActivities question
+            const eqrActivitiesFieldset = screen.getByRole('group', {
+                name: 'EQR or EQR-related activities performed on MCOs',
+            })
+            const yesRadio = within(eqrActivitiesFieldset).getByRole('radio', {
+                name: 'Yes',
+            })
+            await userEvent.click(yesRadio)
+            
+            const continueButton = screen.getByRole('button', {
+                name: 'Continue',
+            })
+
+            await userEvent.click(continueButton)
+
+            await waitFor(() => {
+                const errors = screen.getAllByText('You must select yes or no')
+                // Amendment with MCO and MEDICAID should have 2 additional required fields when eqroProvisionMcoEqrOrRelatedActivities is answered YES
+                expect(errors.length).toBe(4) //2 errors each displayed twice: at the top and on the control level
+            })
+        })
+
         it('shows 2 validation errors for Amendment with MCO and MEDICAID_AND_CHIP', async () => {
             const draftContract = mockContractPackageUnlockedWithUnlockedType()
             draftContract.draftRevision.formData.contractType = 'AMENDMENT'
@@ -945,13 +984,6 @@ describe('EQROContractDetails', () => {
             draftContract.draftRevision.formData.contractDateEnd = new Date(
                 '2024-12-31'
             )
-            draftContract.draftRevision.formData.eqroNewContractor = undefined
-            draftContract.draftRevision.formData.eqroProvisionMcoNewOptionalActivity =
-                undefined
-            draftContract.draftRevision.formData.eqroProvisionNewMcoEqrRelatedActivities =
-                undefined
-            draftContract.draftRevision.formData.eqroProvisionChipEqrRelatedActivities =
-                undefined
 
             renderWithProviders(
                 <Routes>
@@ -989,29 +1021,150 @@ describe('EQROContractDetails', () => {
 
             await waitFor(() => {
                 const errors = screen.getAllByText('You must select yes or no')
-                // Amendment with MCO and MEDICAID_AND_CHIP should have 1 required fields
-                expect(errors.length).toBeGreaterThanOrEqual(1)
+                // Amendment with MCO and MEDICAID_AND_CHIP should have 2 required fields
+                expect(errors.length).toBe(4) //2 errors each displayed twice: at the top and on the control level
             })
         })
-        it('shows 2 validation errors for Amendment with no MCO and CHIP', async () => {
+
+        it('shows 3 validation errors for Amendment with MCO and MEDICAID_AND_CHIP  when eqroProvisionMcoEqrOrRelatedActivities is answered YES', async () => {
+            const draftContract = mockContractPackageUnlockedWithUnlockedType()
+            draftContract.draftRevision.formData.contractType = 'AMENDMENT'
+            draftContract.draftRevision.formData.populationCovered =
+                'MEDICAID_AND_CHIP'
+            draftContract.draftRevision.formData.managedCareEntities = ['MCO']
+            draftContract.draftRevision.formData.contractDateStart = new Date(
+                '2027-01-01'
+            )
+            draftContract.draftRevision.formData.contractDateEnd = new Date(
+                '2027-12-31'
+            )
+
+            renderWithProviders(
+                <Routes>
+                    <Route
+                        path={RoutesRecord.SUBMISSIONS_CONTRACT_DETAILS}
+                        element={<EQROContractDetails />}
+                    />
+                </Routes>,
+                {
+                    apolloProvider: {
+                        mocks: [
+                            fetchCurrentUserMock({ statusCode: 200 }),
+                            fetchContractMockSuccess({
+                                contract: {
+                                    ...draftContract,
+                                    id: '15',
+                                    contractSubmissionType: 'EQRO',
+                                },
+                            }),
+                        ],
+                    },
+                    routerProvider: {
+                        route: '/submissions/eqro/15/edit/contract-details',
+                    },
+                }
+            )
+
+            await screen.findByText('EQRO Contract details')
+
+            // Select YES for the eqroProvisionMcoEqrOrRelatedActivities question
+            const eqrActivitiesFieldset = screen.getByRole('group', {
+                name: 'EQR or EQR-related activities performed on MCOs',
+            })
+            const yesRadio = within(eqrActivitiesFieldset).getByRole('radio', {
+                name: 'Yes',
+            })
+            await userEvent.click(yesRadio)
+            
+            const continueButton = screen.getByRole('button', {
+                name: 'Continue',
+            })
+
+            await userEvent.click(continueButton)
+
+            await waitFor(() => {
+                const errors = screen.getAllByText('You must select yes or no')
+                // Amendment with MCO and MEDICAID_AND_CHIP should have 2 additional required fields when eqroProvisionMcoEqrOrRelatedActivities is answered YES
+                expect(errors.length).toBe(6) //one of the two 'base' questions is answered YES, one is not answered, plus two additional questions. Total of 3 errors each displayed twice
+            })
+        })
+
+        it('shows 1 validation error for Amendment with MCO and MEDICAID_AND_CHIP  when eqroProvisionChipForRelatedActivities is answered YES', async () => {
+            const draftContract = mockContractPackageUnlockedWithUnlockedType()
+            draftContract.draftRevision.formData.contractType = 'AMENDMENT'
+            draftContract.draftRevision.formData.populationCovered =
+                'MEDICAID_AND_CHIP'
+            draftContract.draftRevision.formData.managedCareEntities = ['MCO']
+            draftContract.draftRevision.formData.contractDateStart = new Date(
+                '2027-01-01'
+            )
+            draftContract.draftRevision.formData.contractDateEnd = new Date(
+                '2027-12-31'
+            )
+
+            renderWithProviders(
+                <Routes>
+                    <Route
+                        path={RoutesRecord.SUBMISSIONS_CONTRACT_DETAILS}
+                        element={<EQROContractDetails />}
+                    />
+                </Routes>,
+                {
+                    apolloProvider: {
+                        mocks: [
+                            fetchCurrentUserMock({ statusCode: 200 }),
+                            fetchContractMockSuccess({
+                                contract: {
+                                    ...draftContract,
+                                    id: '15',
+                                    contractSubmissionType: 'EQRO',
+                                },
+                            }),
+                        ],
+                    },
+                    routerProvider: {
+                        route: '/submissions/eqro/15/edit/contract-details',
+                    },
+                }
+            )
+
+            await screen.findByText('EQRO Contract details')
+
+            //Select YES for the eqroProvisionChipEqrRelatedActivities question
+            const eqrActivitiesFieldset = screen.getByRole('group', {
+                name: 'EQR-related activities performed on the CHIP population',
+            })
+            const yesRadio = within(eqrActivitiesFieldset).getByRole('radio', {
+                name: 'Yes',
+            })
+
+            await userEvent.click(yesRadio)
+
+            const continueButton = screen.getByRole('button', {
+                name: 'Continue',
+            })
+
+            await userEvent.click(continueButton)
+
+            await waitFor(() => {
+                const errors = screen.getAllByText('You must select yes or no')
+                // Amendment with MCO and MEDICAID_AND_CHIP should not have 2 additional required fields when eqroProvisionChipEqrRelatedActivities is answered YES
+                expect(errors.length).toBe(2) //1 error displayed twice: at the top and on the control level
+            })
+        })
+
+        it('shows 1 validation error for Amendment with CHIP and no MCO', async () => {
             const draftContract = mockContractPackageUnlockedWithUnlockedType()
             draftContract.draftRevision.formData.contractType = 'AMENDMENT'
             draftContract.draftRevision.formData.populationCovered =
                 'CHIP'
             draftContract.draftRevision.formData.managedCareEntities = ['PIHP']
             draftContract.draftRevision.formData.contractDateStart = new Date(
-                '2024-01-01'
+                '2027-01-01'
             )
             draftContract.draftRevision.formData.contractDateEnd = new Date(
-                '2024-12-31'
+                '2027-12-31'
             )
-            draftContract.draftRevision.formData.eqroNewContractor = undefined
-            draftContract.draftRevision.formData.eqroProvisionMcoNewOptionalActivity =
-                undefined
-            draftContract.draftRevision.formData.eqroProvisionNewMcoEqrRelatedActivities =
-                undefined
-            draftContract.draftRevision.formData.eqroProvisionChipEqrRelatedActivities =
-                undefined
 
             renderWithProviders(
                 <Routes>
@@ -1049,8 +1202,8 @@ describe('EQROContractDetails', () => {
 
             await waitFor(() => {
                 const errors = screen.getAllByText('You must select yes or no')
-                // Amendment with no MCO and CHIP should have 1 required fields
-                expect(errors.length).toBeGreaterThanOrEqual(1)
+                // Amendment with no MCO and CHIP should have 1 required field
+                expect(errors.length).toBe(2) //1 error displayed twice: at the top and on the control level
             })
         })
     })
