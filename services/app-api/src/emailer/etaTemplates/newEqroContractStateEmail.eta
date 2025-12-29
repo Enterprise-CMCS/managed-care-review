@@ -1,4 +1,4 @@
-<h3 style="font-size: 22px; font-weight: 400; line-height: normal"">Based on the state's responses, <%= it.contractName %> is <%= it.subjectToReview ? 'subject' : 'not subject' %> to CMS review and approval.<div><br />
+<h3 style="font-size: 22px; font-weight: 400; line-height: normal"">Based on the state's responses, <%= it.contractName %> is <%= it.subjectToReview ? 'subject' : 'not subject' %> to CMS review and approval.</h3>
 
 <b>Contract type</b>: <%= it.contractType %><br />
 <b>Contract action type</b>: <%= it.actionType === 'BASE' ? 'Base contract' : 'Amendment to base contract' %><br />
