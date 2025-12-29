@@ -4,6 +4,7 @@ import {
     getSESEmailParams,
     newContractCMSEmail,
     newContractStateEmail,
+    newEqroContractStateEmail,
     unlockContractCMSEmail,
     unlockContractStateEmail,
     resubmitContractStateEmail,
@@ -95,6 +96,11 @@ type Emailer = {
         statePrograms: ProgramType[]
     ) => Promise<void | Error>
     sendStateNewContract: (
+        contract: ContractType,
+        submitterEmails: string[],
+        statePrograms: ProgramType[]
+    ) => Promise<void | Error>
+    sendStateNewEQROContract: (
         contract: ContractType,
         submitterEmails: string[],
         statePrograms: ProgramType[]
@@ -282,6 +288,23 @@ function emailer(
             statePrograms
         ) {
             const emailData = await newContractStateEmail(
+                contract,
+                submitterEmails,
+                config,
+                statePrograms
+            )
+            if (emailData instanceof Error) {
+                return emailData
+            } else {
+                return await this.sendEmail(emailData)
+            }
+        },
+        sendStateNewEQROContract: async function (
+            contract,
+            submitterEmails,
+            statePrograms
+        ) {
+            const emailData = await newEqroContractStateEmail(
                 contract,
                 submitterEmails,
                 config,
