@@ -15,6 +15,8 @@ import {
     AmazonLinuxCpuType,
     BlockDeviceVolume,
     EbsDeviceVolumeType,
+    Vpc,
+    SecurityGroup,
 } from 'aws-cdk-lib/aws-ec2'
 import type { IDatabaseCluster } from 'aws-cdk-lib/aws-rds'
 import type { ISecret } from 'aws-cdk-lib/aws-secretsmanager'
@@ -34,9 +36,7 @@ import { isReviewEnvironment } from '../config/environments'
 import { join } from 'path'
 
 export interface PostgresProps extends BaseStackProps {
-    vpc: IVpc
-    lambdaSecurityGroup: ISecurityGroup
-    applicationSecurityGroup?: ISecurityGroup
+    // VPC and security groups are imported from Network stack exports
 }
 
 /**
@@ -54,6 +54,10 @@ export class Postgres extends BaseStack {
     public readonly vpcEndpoint: InterfaceVpcEndpoint
     public readonly bastionHost?: Instance
 
+    private readonly vpc: IVpc
+    private readonly lambdaSecurityGroup: ISecurityGroup
+    private readonly applicationSecurityGroup: ISecurityGroup
+
     constructor(scope: Construct, id: string, props: PostgresProps) {
         super(scope, id, {
             ...props,
@@ -61,10 +65,28 @@ export class Postgres extends BaseStack {
                 'Postgres stack for Managed Care Review - CDK Aurora database and logical DB management',
         })
 
+        // Import VPC from environment
+        this.vpc = Vpc.fromLookup(this, 'ImportedVpc', {
+            vpcId: process.env.VPC_ID!,
+        })
+
+        // Import security groups from Network stack CloudFormation exports
+        const networkStackName = `network-${this.stage}-cdk`
+        this.lambdaSecurityGroup = SecurityGroup.fromSecurityGroupId(
+            this,
+            'ImportedLambdaSG',
+            Fn.importValue(`${networkStackName}-LambdaSecurityGroupId`)
+        )
+        this.applicationSecurityGroup = SecurityGroup.fromSecurityGroupId(
+            this,
+            'ImportedApplicationSG',
+            Fn.importValue(`${networkStackName}-ApplicationSecurityGroupId`)
+        )
+
         const isReview = isReviewEnvironment(this.stage)
 
         // Create VPC endpoint for Secrets Manager (needed by Lambda functions)
-        this.vpcEndpoint = this.createSecretsManagerVpcEndpoint(props)
+        this.vpcEndpoint = this.createSecretsManagerVpcEndpoint()
 
         // Create JWT secret for API authentication
         this.jwtSecret = this.createJwtSecret()
@@ -77,14 +99,12 @@ export class Postgres extends BaseStack {
             const auroraCluster = new AuroraServerlessV2(this, 'Aurora', {
                 databaseName,
                 stage: this.stage,
-                vpc: props.vpc,
+                vpc: this.vpc,
                 vpcSubnets: {
                     subnetType: SubnetType.PRIVATE_WITH_EGRESS,
                 },
-                securityGroup: props.lambdaSecurityGroup,
-                additionalSecurityGroups: props.applicationSecurityGroup
-                    ? [props.applicationSecurityGroup]
-                    : [],
+                securityGroup: this.lambdaSecurityGroup,
+                additionalSecurityGroups: [this.applicationSecurityGroup],
                 databaseConfig: this.stageConfig.database,
             })
 
@@ -93,7 +113,7 @@ export class Postgres extends BaseStack {
 
             // Create optional bastion host for database access
             if (this.stageConfig.features.enablePostgresVm) {
-                this.bastionHost = this.createBastionHost(props)
+                this.bastionHost = this.createBastionHost()
             }
         } else {
             // Review environments use shared CDK dev Aurora via logical databases
@@ -102,7 +122,7 @@ export class Postgres extends BaseStack {
         }
 
         // Create the logical database manager Lambda
-        this.logicalDbManagerFunction = this.createLogicalDbManagerLambda(props)
+        this.logicalDbManagerFunction = this.createLogicalDbManagerLambda()
 
         // Create outputs
         this.createOutputs()
@@ -111,18 +131,14 @@ export class Postgres extends BaseStack {
     /**
      * Create VPC endpoint for Secrets Manager (required by Lambda functions)
      */
-    private createSecretsManagerVpcEndpoint(
-        props: PostgresProps
-    ): InterfaceVpcEndpoint {
+    private createSecretsManagerVpcEndpoint(): InterfaceVpcEndpoint {
         const securityGroups = [
-            props.lambdaSecurityGroup,
-            ...(props.applicationSecurityGroup
-                ? [props.applicationSecurityGroup]
-                : []),
+            this.lambdaSecurityGroup,
+            this.applicationSecurityGroup,
         ]
 
         return new InterfaceVpcEndpoint(this, 'SecretsManagerVPCEndpoint', {
-            vpc: props.vpc,
+            vpc: this.vpc,
             service: new InterfaceVpcEndpointService(
                 `com.amazonaws.${this.region}.secretsmanager`
             ),
@@ -171,12 +187,10 @@ export class Postgres extends BaseStack {
     /**
      * Create logical database manager Lambda function
      */
-    private createLogicalDbManagerLambda(props: PostgresProps): NodejsFunction {
+    private createLogicalDbManagerLambda(): NodejsFunction {
         const securityGroups = [
-            props.lambdaSecurityGroup,
-            ...(props.applicationSecurityGroup
-                ? [props.applicationSecurityGroup]
-                : []),
+            this.lambdaSecurityGroup,
+            this.applicationSecurityGroup,
         ]
 
         // Use NodejsFunction to bundle the TypeScript code from postgres service
@@ -201,7 +215,7 @@ export class Postgres extends BaseStack {
                 ),
                 timeout: Duration.seconds(60),
                 memorySize: this.stageConfig.lambda.memorySize,
-                vpc: props.vpc,
+                vpc: this.vpc,
                 vpcSubnets: {
                     subnetType: SubnetType.PRIVATE_WITH_EGRESS,
                 },
@@ -248,7 +262,7 @@ export class Postgres extends BaseStack {
      * Create bastion host for database access via SSM Session Manager
      * Uses gp3 volumes and includes PostgreSQL client tools
      */
-    private createBastionHost(props: PostgresProps): Instance {
+    private createBastionHost(): Instance {
         // Create IAM role for bastion with SSM access
         const bastionRole = new Role(this, 'BastionRole', {
             assumedBy: new ServicePrincipal('ec2.amazonaws.com'),
@@ -305,21 +319,17 @@ export class Postgres extends BaseStack {
             'echo "Bastion host setup complete. Use \'connect-db\' to access the database."'
         )
 
-        // Create the bastion instance
-        // Note: Use application SG if available, otherwise use default SG
-        const bastionSecurityGroup =
-            props.applicationSecurityGroup || props.lambdaSecurityGroup
-
+        // Create the bastion instance using application SG
         const bastion = new Instance(this, 'BastionHost', {
             instanceType: InstanceType.of(InstanceClass.T3, InstanceSize.MICRO),
             machineImage: MachineImage.latestAmazonLinux2023({
                 cpuType: AmazonLinuxCpuType.X86_64,
             }),
-            vpc: props.vpc,
+            vpc: this.vpc,
             vpcSubnets: {
                 subnetType: SubnetType.PRIVATE_WITH_EGRESS,
             },
-            securityGroup: bastionSecurityGroup,
+            securityGroup: this.applicationSecurityGroup,
             role: bastionRole,
             userData,
             blockDevices: [

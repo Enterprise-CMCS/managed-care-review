@@ -32,7 +32,7 @@ import {
     Code,
 } from 'aws-cdk-lib/aws-lambda'
 import { CfnWebACL, CfnWebACLAssociation } from 'aws-cdk-lib/aws-wafv2'
-import { SubnetType } from 'aws-cdk-lib/aws-ec2'
+import { SubnetType, Vpc, SecurityGroup } from 'aws-cdk-lib/aws-ec2'
 import { Rule, Schedule } from 'aws-cdk-lib/aws-events'
 import { LambdaFunction } from 'aws-cdk-lib/aws-events-targets'
 import { AWS_OTEL_LAYER_ARN } from './lambda-layers'
@@ -42,9 +42,7 @@ import type { BundlingOptions } from 'aws-cdk-lib/aws-lambda-nodejs'
 import type { IVpc, ISecurityGroup } from 'aws-cdk-lib/aws-ec2'
 
 export interface AppApiStackProps extends BaseStackProps {
-    vpc: IVpc
-    lambdaSecurityGroup: ISecurityGroup
-    applicationSecurityGroup?: ISecurityGroup // Optional during transition
+    // VPC and security groups are imported from Network stack exports
 }
 
 /**
@@ -78,7 +76,7 @@ export class AppApiStack extends BaseStack {
     // Network resources from Network stack
     private readonly vpc: IVpc
     private readonly lambdaSecurityGroup: ISecurityGroup
-    private readonly applicationSecurityGroup?: ISecurityGroup
+    private readonly applicationSecurityGroup: ISecurityGroup
 
     constructor(scope: Construct, id: string, props: AppApiStackProps) {
         super(scope, id, {
@@ -87,10 +85,23 @@ export class AppApiStack extends BaseStack {
                 'App API - GraphQL Lambda functions and API Gateway integration',
         })
 
-        // Store network resources from props
-        this.vpc = props.vpc
-        this.lambdaSecurityGroup = props.lambdaSecurityGroup
-        this.applicationSecurityGroup = props.applicationSecurityGroup
+        // Import VPC from environment
+        this.vpc = Vpc.fromLookup(this, 'ImportedVpc', {
+            vpcId: process.env.VPC_ID!,
+        })
+
+        // Import security groups from Network stack CloudFormation exports
+        const networkStackName = `network-${this.stage}-cdk`
+        this.lambdaSecurityGroup = SecurityGroup.fromSecurityGroupId(
+            this,
+            'ImportedLambdaSG',
+            Fn.importValue(`${networkStackName}-LambdaSecurityGroupId`)
+        )
+        this.applicationSecurityGroup = SecurityGroup.fromSecurityGroupId(
+            this,
+            'ImportedApplicationSG',
+            Fn.importValue(`${networkStackName}-ApplicationSecurityGroupId`)
+        )
 
         // Create dedicated API Gateway for app-api
         this.apiGateway = new RestApi(this, 'AppApiGateway', {

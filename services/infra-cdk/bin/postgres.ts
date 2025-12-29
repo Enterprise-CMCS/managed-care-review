@@ -1,5 +1,4 @@
 import { AppConfigLoader } from '../lib/config/app'
-import { Network } from '../lib/stacks/network'
 import { Postgres } from '../lib/stacks/postgres'
 import { getEnvironment, getCdkEnvironment } from '../lib/config/environments'
 import { ResourceNames } from '../lib/config/shared'
@@ -25,20 +24,8 @@ function main(): void {
         const config = getEnvironment(appConfig.stage)
         const env = getCdkEnvironment(appConfig.stage)
 
-        // Create Network stack (needed for VPC and SG references)
-        const network = new Network(
-            app,
-            ResourceNames.stackName('network', appConfig.stage),
-            {
-                env,
-                stage: appConfig.stage,
-                stageConfig: config,
-                serviceName: 'network',
-            }
-        )
-
         // Create Postgres stack
-        const postgres = new Postgres(
+        new Postgres(
             app,
             ResourceNames.stackName('postgres', appConfig.stage),
             {
@@ -46,14 +33,8 @@ function main(): void {
                 stage: appConfig.stage,
                 stageConfig: config,
                 serviceName: 'postgres',
-                vpc: network.vpc,
-                lambdaSecurityGroup: network.lambdaSecurityGroup,
-                applicationSecurityGroup: network.applicationSecurityGroup,
             }
         )
-
-        // Set dependency
-        postgres.addDependency(network)
 
         // Keep permissions boundary if still required by CMS
 
