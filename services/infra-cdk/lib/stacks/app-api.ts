@@ -99,7 +99,13 @@ export class AppApiStack extends BaseStack {
             }
         )
 
-        // Configure API Gateway account to use CloudWatch role (regional setting)
+        // Configure API Gateway account to use CloudWatch role.
+        // NOTE: aws-apigateway.CfnAccount is an account/region-wide singleton.
+        // This stack is intended to own the API Gateway CloudWatch Logs role
+        // configuration for the entire AWS account in this region. If additional
+        // API Gateways are created in other stacks in the same account/region,
+        // they must NOT create their own CfnAccount resources and should instead
+        // rely on this shared configuration or coordinate changes explicitly.
         new CfnAccount(this, 'ApiGatewayAccount', {
             cloudWatchRoleArn: apiGatewayCloudWatchRole.roleArn,
         })
