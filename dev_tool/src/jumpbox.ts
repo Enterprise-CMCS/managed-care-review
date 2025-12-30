@@ -319,31 +319,44 @@ async function runPgDumpViaDocker(
         }
     })
 
+    // Check if SSM process failed to start before attempting tunnel establishment
+    if (ssmError) {
+        const errorMsg = ssmStderr
+            ? `Failed to start SSM session: ${ssmError.message}\n${ssmStderr}`
+            : `Failed to start SSM session: ${ssmError.message}`
+        throw new Error(errorMsg)
+    }
+
     // Wait for the tunnel to be established with proper health check
     console.info('Waiting for tunnel to establish...')
     const tunnelReady = await retry(async () => {
         return new Promise<boolean>((resolve) => {
             const socket = createConnection(localPort, 'localhost')
+
+            const timeout = setTimeout(() => {
+                socket.removeAllListeners()
+                socket.destroy()
+                resolve(false)
+            }, 1000)
+
             socket.on('connect', () => {
+                clearTimeout(timeout)
+                socket.removeAllListeners()
                 socket.destroy()
                 resolve(true)
             })
             socket.on('error', () => {
+                clearTimeout(timeout)
                 process.stdout.write('.')
-                resolve(false)
-            })
-            setTimeout(() => {
+                socket.removeAllListeners()
                 socket.destroy()
                 resolve(false)
-            }, 1000)
+            })
         })
     }, 30 * 1000) // 30 second timeout for tunnel
 
     if (tunnelReady instanceof Error) {
         console.error('\nFailed to establish SSM tunnel to database')
-        if (ssmError) {
-            console.error('SSM process error:', ssmError.message)
-        }
         if (ssmStderr) {
             console.error('SSM stderr:', ssmStderr)
         }
@@ -358,14 +371,6 @@ async function runPgDumpViaDocker(
     console.info('\nTunnel established')
 
     try {
-        // Check if SSM process failed to start
-        if (ssmError) {
-            const errorMsg = ssmStderr
-                ? `Failed to start SSM session: ${ssmError.message}\n${ssmStderr}`
-                : `Failed to start SSM session: ${ssmError.message}`
-            throw new Error(errorMsg)
-        }
-
         console.info('Running pg_dump via Docker with PostgreSQL 16 client...')
 
         // Determine platform for Docker networking

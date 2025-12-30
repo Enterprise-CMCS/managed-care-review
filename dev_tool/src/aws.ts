@@ -150,7 +150,7 @@ async function describeInstance(
         const instance = allInstances[0]
         return instance
     } catch (err) {
-        return err
+        return err instanceof Error ? err : new Error(String(err))
     }
 }
 
