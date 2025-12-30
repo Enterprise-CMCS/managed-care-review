@@ -15,6 +15,7 @@ import {
     MethodLoggingLevel,
     CfnAccount,
     LogGroupLogDestination,
+    AccessLogFormat,
 } from 'aws-cdk-lib/aws-apigateway'
 import {
     PolicyStatement,
@@ -79,7 +80,10 @@ export class AppApiStack extends BaseStack {
                 'App API - GraphQL Lambda functions and API Gateway integration',
         })
 
-        // Create CloudWatch Log Group for API Gateway execution logs
+        // Create CloudWatch Log Group for API Gateway access logs
+        // Note: API Gateway has two log types:
+        // 1. Execution logs (loggingLevel) - API Gateway's internal execution, auto-created by AWS
+        // 2. Access logs (accessLogDestination) - Who accessed the API, configured below
         const apiGatewayLogGroup = new LogGroup(this, 'ApiGatewayLogGroup', {
             logGroupName: `/aws/apigateway/${ResourceNames.apiName('app-api', this.stage)}-gateway`,
             retention: this.stageConfig.monitoring.logRetentionDays,
@@ -122,6 +126,17 @@ export class AppApiStack extends BaseStack {
                 accessLogDestination: new LogGroupLogDestination(
                     apiGatewayLogGroup
                 ),
+                accessLogFormat: AccessLogFormat.jsonWithStandardFields({
+                    caller: true,
+                    httpMethod: true,
+                    ip: true,
+                    protocol: true,
+                    requestTime: true,
+                    resourcePath: true,
+                    responseLength: true,
+                    status: true,
+                    user: true,
+                }),
             },
             defaultCorsPreflightOptions: {
                 allowOrigins: ['*'],
