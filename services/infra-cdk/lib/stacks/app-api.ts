@@ -418,9 +418,7 @@ export class AppApiStack extends BaseStack {
         // Build security groups array - use both during transition
         const securityGroups = [
             this.lambdaSecurityGroup,
-            ...(this.applicationSecurityGroup
-                ? [this.applicationSecurityGroup]
-                : []),
+            this.applicationSecurityGroup,
         ]
 
         const prismaMigrationLayer = new LayerVersion(
@@ -515,9 +513,7 @@ export class AppApiStack extends BaseStack {
         // Build security groups array - use both during transition
         const securityGroups = [
             this.lambdaSecurityGroup,
-            ...(this.applicationSecurityGroup
-                ? [this.applicationSecurityGroup]
-                : []),
+            this.applicationSecurityGroup,
         ]
 
         // Create regenerate zips function with all required configuration
@@ -573,9 +569,7 @@ export class AppApiStack extends BaseStack {
         // Build security groups array - use both during transition
         const securityGroups = [
             this.lambdaSecurityGroup,
-            ...(this.applicationSecurityGroup
-                ? [this.applicationSecurityGroup]
-                : []),
+            this.applicationSecurityGroup,
         ]
 
         // Create GraphQL function with all required configuration
@@ -640,9 +634,7 @@ export class AppApiStack extends BaseStack {
         // Build security groups array - use both during transition
         const securityGroups = [
             this.lambdaSecurityGroup,
-            ...(this.applicationSecurityGroup
-                ? [this.applicationSecurityGroup]
-                : []),
+            this.applicationSecurityGroup,
         ]
 
         // Create OAuth token function with all required configuration
