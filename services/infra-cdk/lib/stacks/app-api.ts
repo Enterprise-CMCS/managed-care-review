@@ -136,6 +136,10 @@ export class AppApiStack extends BaseStack {
                     responseLength: true,
                     status: true,
                     user: true,
+                    requestId: true,
+                    integrationLatency: true,
+                    responseLatency: true,
+                    userAgent: true,
                 }),
             },
             defaultCorsPreflightOptions: {
