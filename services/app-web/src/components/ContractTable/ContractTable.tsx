@@ -40,6 +40,7 @@ import {
     pluralize,
     formatContractSubTypeForDisplay,
     featureFlags,
+    stateNameToCode,
 } from '@mc-review/common-code'
 import { formatCalendarDate } from '@mc-review/dates'
 import { RowCellElement } from '..'
@@ -305,7 +306,13 @@ export const ContractTable = ({
             columnHelper.accessor('stateName', {
                 id: 'stateName',
                 header: 'State',
-                cell: (info) => <span>{info.getValue()}</span>,
+                cell: (info) => (
+                    <span>
+                        {eqroSubmissions
+                            ? stateNameToCode(info.getValue())
+                            : info.getValue()}
+                    </span>
+                ),
                 meta: {
                     dataTestID: `${tableConfig.rowIDName}-stateName`,
                 },
@@ -390,7 +397,7 @@ export const ContractTable = ({
                 filterFn: `arrIncludesSome`,
             }),
         ],
-        [isNotStateUser, tableConfig.rowIDName]
+        [eqroSubmissions, isNotStateUser, tableConfig.rowIDName]
     )
 
     const reactTable = useReactTable({
