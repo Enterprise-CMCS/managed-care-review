@@ -36,7 +36,7 @@ import { isReviewEnvironment } from '../config/environments'
 import { join } from 'path'
 
 export interface PostgresProps extends BaseStackProps {
-    // VPC and security groups are imported from Network stack exports
+    // VPC is imported from environment (VPC_ID), security groups from Network stack exports
 }
 
 /**
