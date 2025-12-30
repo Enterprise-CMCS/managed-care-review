@@ -1,5 +1,6 @@
 export { newContractCMSEmail } from './newContractCMSEmail'
 export { newContractStateEmail } from './newContractStateEmail'
+export { newEqroContractStateEmail } from './newEqroContractStateEmail'
 export { unlockContractCMSEmail } from './unlockContractCMSEmail'
 export { unlockContractStateEmail } from './unlockContractStateEmail'
 export { resubmitContractCMSEmail } from './resubmitContractCMSEmail'

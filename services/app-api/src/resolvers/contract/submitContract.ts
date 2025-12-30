@@ -479,7 +479,11 @@ export function submitContract(
                       statePrograms
                   )
             stateContractEmailResult = isEQRO
-                ? 'place holder for EQRO emails'
+                ? await emailer.sendStateNewEQROContract(
+                      submitContractResult,
+                      submitterEmails,
+                      statePrograms
+                  )
                 : await emailer.sendStateNewContract(
                       submitContractResult,
                       submitterEmails,

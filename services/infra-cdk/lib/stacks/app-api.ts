@@ -12,6 +12,10 @@ import {
     TokenAuthorizer,
     AuthorizationType,
     ResponseType,
+    MethodLoggingLevel,
+    CfnAccount,
+    LogGroupLogDestination,
+    AccessLogFormat,
 } from 'aws-cdk-lib/aws-apigateway'
 import {
     PolicyStatement,
@@ -23,6 +27,7 @@ import {
 import { CfnOutput, Duration, Fn } from 'aws-cdk-lib'
 import { StringParameter } from 'aws-cdk-lib/aws-ssm'
 import { Secret } from 'aws-cdk-lib/aws-secretsmanager'
+import { LogGroup } from 'aws-cdk-lib/aws-logs'
 import { ResourceNames } from '../config/shared'
 import {
     Architecture,
@@ -103,12 +108,63 @@ export class AppApiStack extends BaseStack {
             Fn.importValue(`${networkStackName}-ApplicationSecurityGroupId`)
         )
 
+        // Create CloudWatch Log Group for API Gateway access logs
+        // Note: API Gateway has two log types:
+        // 1. Execution logs (loggingLevel) - API Gateway's internal execution, auto-created by AWS
+        // 2. Access logs (accessLogDestination) - Who accessed the API, configured below
+        const apiGatewayLogGroup = new LogGroup(this, 'ApiGatewayLogGroup', {
+            logGroupName: `/aws/apigateway/${ResourceNames.apiName('app-api', this.stage)}-gateway`,
+            retention: this.stageConfig.monitoring.logRetentionDays,
+        })
+
+        // Create IAM role for API Gateway to write to CloudWatch Logs
+        const apiGatewayCloudWatchRole = new Role(
+            this,
+            'ApiGatewayCloudWatchRole',
+            {
+                assumedBy: new ServicePrincipal('apigateway.amazonaws.com'),
+                managedPolicies: [
+                    ManagedPolicy.fromAwsManagedPolicyName(
+                        'service-role/AmazonAPIGatewayPushToCloudWatchLogs'
+                    ),
+                ],
+            }
+        )
+
+        // Configure API Gateway account to use CloudWatch role.
+        // NOTE: aws-apigateway.CfnAccount is an account/region-wide singleton.
+        // This stack is intended to own the API Gateway CloudWatch Logs role
+        // configuration for the entire AWS account in this region. If additional
+        // API Gateways are created in other stacks in the same account/region,
+        // they must NOT create their own CfnAccount resources and should instead
+        // rely on this shared configuration or coordinate changes explicitly.
+        new CfnAccount(this, 'ApiGatewayAccount', {
+            cloudWatchRoleArn: apiGatewayCloudWatchRole.roleArn,
+        })
+
         // Create dedicated API Gateway for app-api
         this.apiGateway = new RestApi(this, 'AppApiGateway', {
             restApiName: `${ResourceNames.apiName('app-api', this.stage)}-gateway`,
             description: 'API Gateway for app-api Lambda functions',
             deployOptions: {
                 stageName: this.stage,
+                loggingLevel: MethodLoggingLevel.INFO,
+                dataTraceEnabled: false,
+                metricsEnabled: true,
+                accessLogDestination: new LogGroupLogDestination(
+                    apiGatewayLogGroup
+                ),
+                accessLogFormat: AccessLogFormat.jsonWithStandardFields({
+                    caller: true,
+                    httpMethod: true,
+                    ip: true,
+                    protocol: true,
+                    requestTime: true,
+                    resourcePath: true,
+                    responseLength: true,
+                    status: true,
+                    user: true,
+                }),
             },
             defaultCorsPreflightOptions: {
                 allowOrigins: ['*'],
