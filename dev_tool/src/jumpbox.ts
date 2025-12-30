@@ -8,7 +8,7 @@ import {
 import { retry } from './retry.js'
 import { Instance } from '@aws-sdk/client-ec2'
 import { execSync, spawn, spawnSync } from 'child_process'
-import { writeFileSync, unlinkSync, existsSync } from 'fs'
+import { createConnection } from 'net'
 
 function stageForEnv(env: string): string {
     // CDK uses consistent naming: dev, val, prod
@@ -16,8 +16,8 @@ function stageForEnv(env: string): string {
     return env
 }
 
-// waitForJumpboxToReachState repeatedly checks the ec2 instance to be in the given state or times out
-async function waitForJumpboxToReachState(
+// waitForBastionToReachState repeatedly checks the ec2 instance to be in the given state or times out
+async function waitForBastionToReachState(
     instanceID: string,
     instanceStateCode: number
 ): Promise<undefined | Error> {
@@ -107,7 +107,7 @@ async function ensureBastionIsRunning(
     if (bastionState !== 80) {
         console.info('Bastion is not stopped yet. waiting to start it')
         // wait for it to be stopped
-        const stopped = await waitForJumpboxToReachState(bastionID, 80) // 80 is stopped
+        const stopped = await waitForBastionToReachState(bastionID, 80) // 80 is stopped
         if (stopped instanceof Error) {
             return stopped
         }
@@ -121,7 +121,7 @@ async function ensureBastionIsRunning(
         return startResult
     }
 
-    const started = await waitForJumpboxToReachState(bastionID, 16) // 16 is running
+    const started = await waitForBastionToReachState(bastionID, 16) // 16 is running
     if (started instanceof Error) {
         return started
     }
@@ -181,11 +181,75 @@ function checkDockerAvailable(): void {
     }
 }
 
-// Wait for SSM agent to be ready
+// Wait for SSM agent to be ready with proper health checks
 async function waitForSSMAgent(instanceID: string): Promise<void> {
     console.info('Waiting for SSM agent to be ready...')
-    await new Promise((resolve) => setTimeout(resolve, 10000)) // Wait 10 seconds for SSM agent
-    console.info('SSM agent should be ready')
+    let lastError: string | undefined
+    let lastStatus: string | undefined
+
+    const ssmReadyResult = await retry(async () => {
+        try {
+            // Check if the instance is registered and reachable via SSM
+            const result = execSync(
+                `aws ssm describe-instance-information --region us-east-1 --filters Key=InstanceIds,Values=${instanceID} --query "InstanceInformationList[0].PingStatus" --output text`,
+                { stdio: 'pipe', encoding: 'utf-8' }
+            )
+            const status = result.trim()
+            lastStatus = status
+
+            // PingStatus should be "Online" when ready
+            if (status === 'Online') {
+                return true
+            }
+            // If we got a response but it's not Online, show what we got
+            if (status && status !== 'None') {
+                process.stdout.write(`[${status}]`)
+            } else {
+                process.stdout.write('.')
+            }
+            return false
+        } catch (err) {
+            // Capture error details for debugging
+            if (err instanceof Error) {
+                lastError = err.message
+            } else if (typeof err === 'object' && err !== null) {
+                // execSync errors include stderr in the error object
+                const execError = err as { stderr?: Buffer; message?: string }
+                lastError =
+                    execError.stderr?.toString() ||
+                    execError.message ||
+                    String(err)
+            }
+            // SSM agent not ready yet; retry until timeout
+            process.stdout.write('.')
+            return false
+        }
+    }, 120 * 1000) // 120 second timeout - SSM agent can take time to register after instance starts
+
+    if (ssmReadyResult instanceof Error) {
+        console.error(
+            '\nError: SSM agent did not become ready in time. The instance may need more time to start up and register with SSM.'
+        )
+        if (lastStatus) {
+            console.error(`Last status received: ${lastStatus}`)
+        }
+        if (lastError) {
+            console.error(`Last error: ${lastError}`)
+        }
+        console.error(`Instance ID: ${instanceID}`)
+        console.error('\nTroubleshooting:')
+        console.error(
+            '  1. Check if the instance has the SSM agent installed and running'
+        )
+        console.error(
+            '  2. Check if the instance has the AmazonSSMManagedInstanceCore IAM policy'
+        )
+        console.error(
+            `  3. Run: aws ssm describe-instance-information --region us-east-1 --filters Key=InstanceIds,Values=${instanceID}`
+        )
+        throw ssmReadyResult
+    }
+    console.info('\nSSM agent is ready')
 }
 
 // Run pg_dump locally via Docker through SSM port forwarding tunnel
@@ -210,6 +274,8 @@ async function runPgDumpViaDocker(
         [
             'ssm',
             'start-session',
+            '--region',
+            'us-east-1',
             '--target',
             instanceID,
             '--document-name',
@@ -233,17 +299,63 @@ async function runPgDumpViaDocker(
         console.error('SSM process error:', err.message)
     })
 
-    // Also capture stderr for debugging
+    // Also capture stdout and stderr for debugging
+    let ssmStdout = ''
     let ssmStderr = ''
+    ssmProcess.stdout?.on('data', (data) => {
+        ssmStdout += data.toString()
+    })
     ssmProcess.stderr?.on('data', (data) => {
         ssmStderr += data.toString()
     })
 
-    // Wait for the tunnel to be established
-    console.info('Waiting for tunnel to establish...')
-    await new Promise((resolve) => setTimeout(resolve, 5000))
+    // Monitor process exit
+    ssmProcess.on('exit', (code, signal) => {
+        if (code !== null && code !== 0) {
+            console.error(`\nSSM process exited with code ${code}`)
+            if (ssmStderr) {
+                console.error('stderr:', ssmStderr)
+            }
+        }
+    })
 
-    const pgpassFile = '.pgpass.tmp'
+    // Wait for the tunnel to be established with proper health check
+    console.info('Waiting for tunnel to establish...')
+    const tunnelReady = await retry(async () => {
+        return new Promise<boolean>((resolve) => {
+            const socket = createConnection(localPort, 'localhost')
+            socket.on('connect', () => {
+                socket.destroy()
+                resolve(true)
+            })
+            socket.on('error', () => {
+                process.stdout.write('.')
+                resolve(false)
+            })
+            setTimeout(() => {
+                socket.destroy()
+                resolve(false)
+            }, 1000)
+        })
+    }, 30 * 1000) // 30 second timeout for tunnel
+
+    if (tunnelReady instanceof Error) {
+        console.error('\nFailed to establish SSM tunnel to database')
+        if (ssmError) {
+            console.error('SSM process error:', ssmError.message)
+        }
+        if (ssmStderr) {
+            console.error('SSM stderr:', ssmStderr)
+        }
+        if (ssmStdout) {
+            console.error('SSM stdout:', ssmStdout)
+        }
+        if (ssmProcess.exitCode !== null) {
+            console.error('SSM process exit code:', ssmProcess.exitCode)
+        }
+        throw new Error('Failed to establish SSM tunnel to database')
+    }
+    console.info('\nTunnel established')
 
     try {
         // Check if SSM process failed to start
@@ -254,29 +366,21 @@ async function runPgDumpViaDocker(
             throw new Error(errorMsg)
         }
 
-        // Check if SSM session encountered errors during startup
-        if (ssmStderr.includes('error') || ssmStderr.includes('failed')) {
-            console.warn('SSM session may have issues:', ssmStderr.trim())
-        }
-
         console.info('Running pg_dump via Docker with PostgreSQL 16 client...')
 
         // Determine platform for Docker networking
         const isLinux = process.platform === 'linux'
         const dbHost = isLinux ? 'localhost' : 'host.docker.internal'
 
-        // Create a temporary .pgpass file for authentication
-        const pgpassContent = `${dbHost}:${localPort}:${dbSecrets.dbname}:${dbSecrets.user}:${dbSecrets.password}\n`
-        writeFileSync(pgpassFile, pgpassContent, { mode: 0o600 })
-
+        // Use PGPASSWORD environment variable instead of .pgpass file for better security
         const dockerArgs = [
             'run',
             '--rm',
             '-v',
             `${process.cwd()}:/dump`,
-            '-v',
-            `${process.cwd()}/${pgpassFile}:/root/.pgpass:ro`,
             ...(isLinux ? ['--network', 'host'] : []),
+            '-e',
+            `PGPASSWORD=${dbSecrets.password}`,
             'postgres:16-alpine',
             'pg_dump',
             '-Fc',
@@ -310,16 +414,6 @@ async function runPgDumpViaDocker(
 
         console.info(`✓ Database dump saved to: ${dumpFileName}`)
     } finally {
-        // Clean up .pgpass file
-        try {
-            if (existsSync(pgpassFile)) {
-                unlinkSync(pgpassFile)
-            }
-        } catch {
-            // Ignore cleanup errors
-            console.warn('Warning: Failed to clean up temporary .pgpass file')
-        }
-
         // Clean up SSM session
         // Check if process is still running before attempting to kill
         if (ssmProcess.exitCode === null && !ssmProcess.killed) {
@@ -338,11 +432,7 @@ async function runPgDumpViaDocker(
     }
 }
 
-async function cloneDBLocally(
-    envName: string,
-    _sshKeyPath: string, // Deprecated - kept for backwards compatibility
-    stopAfter = true
-) {
+async function cloneDBLocally(envName: string, stopAfter = true) {
     // Check Docker is available first
     checkDockerAvailable()
 
