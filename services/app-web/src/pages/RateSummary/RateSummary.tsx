@@ -17,7 +17,7 @@ import {
 import styles from '../SubmissionSummary/SubmissionSummary.module.scss'
 import { GenericErrorPage } from '../Errors/GenericErrorPage'
 import { ERROR_MESSAGES, RoutesRecord } from '@mc-review/constants'
-import { SingleRateSummarySection } from '../../components/SubmissionSummarySection/RateDetailsSummarySection/SingleRateSummary/SingleRateSummarySection'
+import { SingleRateSummarySection } from '../../components/SubmissionSummarySection'
 import { useAuth } from '../../contexts/AuthContext'
 import { ErrorForbiddenPage } from '../Errors/ErrorForbiddenPage'
 import { Error404 } from '../Errors/Error404Page'
@@ -33,6 +33,7 @@ import { recordJSException } from '@mc-review/otel'
 import { handleApolloErrorsAndAddUserFacingMessages } from '@mc-review/helpers'
 import { StatusUpdatedBanner } from '../../components/Banner'
 import { ChildrenType } from '../../components/MultiColumnGrid/MultiColumnGrid'
+import { getSubmissionPath } from '../../routeHelpers'
 
 export const RateSummary = (): React.ReactElement => {
     // Page level state
@@ -268,10 +269,18 @@ export const RateSummary = (): React.ReactElement => {
                 key="unlock-rate-button"
                 onClick={() => {
                     navigate(
-                        `/submissions/${contract.contractSubmissionType}/${parentContractSubmissionID}`
+                        getSubmissionPath(
+                            'SUBMISSIONS_SUMMARY',
+                            contract?.contractSubmissionType,
+                            parentContractSubmissionID
+                        )
                     )
                 }}
-                link_url={`/submissions/${contract.contractSubmissionType}/${parentContractSubmissionID}`}
+                link_url={getSubmissionPath(
+                    'SUBMISSIONS_SUMMARY',
+                    contract?.contractSubmissionType,
+                    parentContractSubmissionID
+                )}
             >
                 Unlock rate
             </UnlockRateButton>
@@ -384,10 +393,4 @@ export const RateSummary = (): React.ReactElement => {
             </GridContainer>
         </div>
     )
-}
-
-export type SectionHeaderProps = {
-    header: string
-    submissionName?: boolean
-    href: string
 }
