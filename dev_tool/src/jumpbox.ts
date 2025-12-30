@@ -377,7 +377,7 @@ async function runPgDumpViaDocker(
         const isLinux = process.platform === 'linux'
         const dbHost = isLinux ? 'localhost' : 'host.docker.internal'
 
-        // Use PGPASSWORD environment variable instead of .pgpass file for better security
+        // Use PGPASSWORD environment variable instead of a .pgpass file for simplicity in this Docker setup (not necessarily more secure)
         const dockerArgs = [
             'run',
             '--rm',
