@@ -42,7 +42,7 @@ import type { BundlingOptions } from 'aws-cdk-lib/aws-lambda-nodejs'
 import type { IVpc, ISecurityGroup } from 'aws-cdk-lib/aws-ec2'
 
 export interface AppApiStackProps extends BaseStackProps {
-    // VPC and security groups are imported from Network stack exports
+    // VPC imported from environment (Vpc.fromLookup), security groups from Network stack exports
 }
 
 /**
