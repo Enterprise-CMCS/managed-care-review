@@ -458,6 +458,12 @@
                     "fullName": "Medicare-Medicaid Alignment Initiative",
                     "name": "MMAI",
                     "isRateProgram": false
+                },
+                {
+                    "id": "48785150-f181-4680-b4e3-21868413c0f0",
+                    "fullName": "FIDE-SNP",
+                    "name": "FIDE-SNP",
+                    "isRateProgram": false
                 }
             ],
             "code": "IL"
