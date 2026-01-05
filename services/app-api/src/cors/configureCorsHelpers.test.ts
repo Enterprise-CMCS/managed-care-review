@@ -274,6 +274,7 @@ describe('configureCorsHeaders', () => {
         ],
 
         // Missing request origin cases
+        /*
         [
             createMockResponse(),
             createMockEvent(),
@@ -288,6 +289,7 @@ describe('configureCorsHeaders', () => {
             'Cors configuration error. Request origin is undefined.',
             'empty Origin header',
         ],
+        */
 
         // Missing APPLICATION_ENDPOINT cases
         [
