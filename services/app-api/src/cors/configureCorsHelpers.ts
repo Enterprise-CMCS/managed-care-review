@@ -28,10 +28,10 @@ export const configureCorsHeaders = (
     if (response && typeof response === 'object' && 'headers' in response) {
         const requestOrigin = event.headers?.origin || event.headers?.Origin
 
+        // If there's no origin, it's a server-side request.
+        // Skip CORS and allow the request to proceed.
         if (!requestOrigin) {
-            return Error(
-                'Cors configuration error. Request origin is undefined.'
-            )
+            return
         }
 
         if (!process.env.APPLICATION_ENDPOINT) {
