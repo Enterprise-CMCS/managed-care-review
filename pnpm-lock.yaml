@@ -106,8 +106,8 @@ importers:
   packages/common-code:
     dependencies:
       '@apollo/client':
-        specifier: 3.8.8
-        version: 3.8.8(graphql-ws@5.16.2(graphql@16.9.0))(graphql@16.9.0)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(subscriptions-transport-ws@0.11.0(graphql@16.9.0))
+        specifier: 3.14.0
+        version: 3.14.0(@types/react@18.3.3)(graphql-ws@6.0.6(graphql@16.9.0)(ws@8.18.3))(graphql@16.9.0)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(subscriptions-transport-ws@0.11.0(graphql@16.9.0))
       '@mc-review/constants':
         specifier: workspace:*
         version: link:../constants
@@ -143,8 +143,8 @@ importers:
   packages/constants:
     dependencies:
       '@apollo/client':
-        specifier: 3.8.8
-        version: 3.8.8(graphql-ws@5.16.2(graphql@16.9.0))(graphql@16.9.0)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(subscriptions-transport-ws@0.11.0(graphql@16.9.0))
+        specifier: 3.14.0
+        version: 3.14.0(@types/react@18.3.3)(graphql-ws@6.0.6(graphql@16.9.0)(ws@8.18.3))(graphql@16.9.0)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(subscriptions-transport-ws@0.11.0(graphql@16.9.0))
       typescript:
         specifier: 5.9.3
         version: 5.9.3
@@ -174,8 +174,8 @@ importers:
   packages/helpers:
     dependencies:
       '@apollo/client':
-        specifier: 3.8.8
-        version: 3.8.8(graphql-ws@5.16.2(graphql@16.9.0))(graphql@16.9.0)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(subscriptions-transport-ws@0.11.0(graphql@16.9.0))
+        specifier: 3.14.0
+        version: 3.14.0(@types/react@18.3.3)(graphql-ws@6.0.6(graphql@16.9.0)(ws@8.18.3))(graphql@16.9.0)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(subscriptions-transport-ws@0.11.0(graphql@16.9.0))
       '@mc-review/constants':
         specifier: workspace:*
         version: link:../constants
@@ -211,8 +211,8 @@ importers:
   packages/mocks:
     dependencies:
       '@apollo/client':
-        specifier: 3.8.8
-        version: 3.8.8(graphql-ws@5.16.2(graphql@16.9.0))(graphql@16.9.0)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(subscriptions-transport-ws@0.11.0(graphql@16.9.0))
+        specifier: 3.14.0
+        version: 3.14.0(@types/react@18.3.3)(graphql-ws@6.0.6(graphql@16.9.0)(ws@8.18.3))(graphql@16.9.0)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(subscriptions-transport-ws@0.11.0(graphql@16.9.0))
       '@mc-review/dates':
         specifier: workspace:*
         version: link:../dates
@@ -267,8 +267,8 @@ importers:
   packages/submissions:
     dependencies:
       '@apollo/client':
-        specifier: 3.8.8
-        version: 3.8.8(graphql-ws@5.16.2(graphql@16.9.0))(graphql@16.9.0)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(subscriptions-transport-ws@0.11.0(graphql@16.9.0))
+        specifier: 3.14.0
+        version: 3.14.0(@types/react@18.3.3)(graphql-ws@6.0.6(graphql@16.9.0)(ws@8.18.3))(graphql@16.9.0)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(subscriptions-transport-ws@0.11.0(graphql@16.9.0))
       '@mc-review/dates':
         specifier: workspace:*
         version: link:../dates
@@ -350,8 +350,8 @@ importers:
   services/app-api:
     dependencies:
       '@apollo/client':
-        specifier: 3.8.8
-        version: 3.8.8(graphql-ws@5.16.2(graphql@16.9.0))(graphql@16.9.0)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(subscriptions-transport-ws@0.11.0(graphql@16.9.0))
+        specifier: 3.14.0
+        version: 3.14.0(@types/react@18.3.3)(graphql-ws@6.0.6(graphql@16.9.0)(ws@8.18.3))(graphql@16.9.0)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(subscriptions-transport-ws@0.11.0(graphql@16.9.0))
       '@apollo/server':
         specifier: ^5.0.0
         version: 5.0.0(graphql@16.9.0)
@@ -629,8 +629,8 @@ importers:
   services/app-web:
     dependencies:
       '@apollo/client':
-        specifier: 3.8.8
-        version: 3.8.8(graphql-ws@5.16.2(graphql@16.9.0))(graphql@16.9.0)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(subscriptions-transport-ws@0.11.0(graphql@16.9.0))
+        specifier: 3.14.0
+        version: 3.14.0(@types/react@18.3.3)(graphql-ws@6.0.6(graphql@16.9.0)(ws@8.18.3))(graphql@16.9.0)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(subscriptions-transport-ws@0.11.0(graphql@16.9.0))
       '@apollo/explorer':
         specifier: ^3.7.3
         version: 3.7.3(graphql@16.9.0)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(use-deep-compare-effect@1.8.1(react@18.3.1))
@@ -972,8 +972,8 @@ importers:
   services/cypress:
     dependencies:
       '@apollo/client':
-        specifier: 3.8.8
-        version: 3.8.8(graphql-ws@5.16.2(graphql@16.9.0))(graphql@16.9.0)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(subscriptions-transport-ws@0.11.0(graphql@16.9.0))
+        specifier: 3.14.0
+        version: 3.14.0(@types/react@18.3.3)(graphql-ws@6.0.6(graphql@16.9.0)(ws@8.18.3))(graphql@16.9.0)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(subscriptions-transport-ws@0.11.0(graphql@16.9.0))
       '@aws-crypto/sha256-js':
         specifier: ^5.2.0
         version: 5.2.0
@@ -1428,13 +1428,13 @@ packages:
     peerDependencies:
       graphql: 14.x || 15.x || 16.x
 
-  '@apollo/client@3.8.8':
-    resolution: {integrity: sha512-omjd9ryGDkadZrKW6l5ktUAdS4SNaFOccYQ4ZST0HLW83y8kQaSZOCTNlpkoBUK8cv6qP8+AxOKwLm2ho8qQ+Q==}
+  '@apollo/client@3.14.0':
+    resolution: {integrity: sha512-0YQKKRIxiMlIou+SekQqdCo0ZTHxOcES+K8vKB53cIDpwABNR0P0yRzPgsbgcj3zRJniD93S/ontsnZsCLZrxQ==}
     peerDependencies:
-      graphql: ^14.0.0 || ^15.0.0 || ^16.0.0
-      graphql-ws: ^5.5.5
-      react: ^16.8.0 || ^17.0.0 || ^18.0.0
-      react-dom: ^16.8.0 || ^17.0.0 || ^18.0.0
+      graphql: ^15.0.0 || ^16.0.0
+      graphql-ws: ^5.5.5 || ^6.0.3
+      react: ^16.8.0 || ^17.0.0 || ^18.0.0 || >=19.0.0-rc
+      react-dom: ^16.8.0 || ^17.0.0 || ^18.0.0 || >=19.0.0-rc
       subscriptions-transport-ws: ^0.9.0 || ^0.11.0
     peerDependenciesMeta:
       graphql-ws:
@@ -7366,16 +7366,12 @@ packages:
     resolution: {integrity: sha512-bXuaUNLVVkD20wcGBWRyo7j9N3TxePEWFZj2Y+r9OoUzfqmavM84+mFykRicNsBqatba5JLay1t48wxaXaWnlA==}
     engines: {node: '>=8'}
 
-  '@wry/context@0.7.0':
-    resolution: {integrity: sha512-LcDAiYWRtwAoSOArfk7cuYvFXytxfVrdX7yxoUmK7pPITLk5jYh2F8knCwS7LjgYL8u1eidPlKKV6Ikqq0ODqQ==}
+  '@wry/context@0.7.4':
+    resolution: {integrity: sha512-jmT7Sb4ZQWI5iyu3lobQxICu2nC/vbUhP0vIdd6tHC9PTfenmRmuIFqktc6GH9cgi+ZHnsLWPvfSvc4DrYmKiQ==}
     engines: {node: '>=8'}
 
   '@wry/equality@0.5.7':
     resolution: {integrity: sha512-BRFORjsTuQv5gxcXsuDXx6oGRhuVsEGwZy6LOzRRfgu+eSfxbhUQ9L9YtSEIuIjY/o7g3iWFjrc5eSY1GXP2Dw==}
-    engines: {node: '>=8'}
-
-  '@wry/trie@0.4.3':
-    resolution: {integrity: sha512-I6bHwH0fSf6RqQcnnXLJKhkSXG45MFral3GxPaY4uAl0LYDZM+YDVDAiU9bYwjTuysy1S0IeecWtmq1SZA3M1w==}
     engines: {node: '>=8'}
 
   '@wry/trie@0.5.0':
@@ -11730,8 +11726,8 @@ packages:
     resolution: {integrity: sha512-7x81NCL719oNbsq/3mh+hVrAWmFuEYUqrq/Iw3kUzH8ReypT9QQ0BLoJS7/G9k6N81XjW4qHWtjWwe/9eLy1EQ==}
     engines: {node: '>=12'}
 
-  optimism@0.18.0:
-    resolution: {integrity: sha512-tGn8+REwLRNFnb9WmcY5IfpOqeX2kpaYJ1s6Ae3mn12AeydLkR3j+jSCmVQFoXqU8D41PAJ1RG1rCRNWmNZVmQ==}
+  optimism@0.18.1:
+    resolution: {integrity: sha512-mLXNwWPa9dgFyDqkNi54sjDyNJ9/fTI6WGBLgnXku1vdKY/jovHfZT5r+aiVeFFLOz+foPNOm5YJ4mqgld2GBQ==}
 
   optionator@0.8.3:
     resolution: {integrity: sha512-+IW9pACdk3XWmmTXG8m3upGUJst5XRGzxMRjXzAuJ1XnIFNvfhjjIuYkDvysnPQ7qzqVzLt78BCruntqRhWQbA==}
@@ -12490,6 +12486,17 @@ packages:
     resolution: {integrity: sha512-NZQZdC5wOE/H3UT28fVGL+ikOZcEzfMGk/c3iN9UGxzWHMa1op7274oyiUVrAG4B2EuFhus8SvkaYnhvW92p9Q==}
     hasBin: true
 
+  rehackt@0.1.0:
+    resolution: {integrity: sha512-7kRDOuLHB87D/JESKxQoRwv4DzbIdwkAGQ7p6QKGdVlY1IZheUnVhlk/4UZlNUVxdAXpyxikE3URsG067ybVzw==}
+    peerDependencies:
+      '@types/react': '*'
+      react: '*'
+    peerDependenciesMeta:
+      '@types/react':
+        optional: true
+      react:
+        optional: true
+
   relay-runtime@12.0.0:
     resolution: {integrity: sha512-QU6JKr1tMsry22DXNy9Whsq5rmvwr3LSZiiWV/9+DFpuTWvp+WFhobWMc8TC4OjKFfNhEZy7mOiqUAn5atQtug==}
 
@@ -12568,10 +12575,6 @@ packages:
   resolve@2.0.0-next.5:
     resolution: {integrity: sha512-U7WjGVG9sH8tvjW5SmGbQuui75FiyjAX72HX15DwBBwF9dNiQZRQAg9nnPhYy+TUnE0+VcrttuvNI8oSxZcocA==}
     hasBin: true
-
-  response-iterator@0.2.6:
-    resolution: {integrity: sha512-pVzEEzrsg23Sh053rmDUvLSkGXluZio0qu8VT6ukrYuvtjVfCbDZH9d6PGXb8HZfzdNZt8feXv/jvUzlhRgLnw==}
-    engines: {node: '>=0.8'}
 
   restore-cursor@3.1.0:
     resolution: {integrity: sha512-l+sSefzHpj5qimhFSE5a8nufZYAM3sBSVMAPtYkmC+4EH2anSGaEMXSD0izRQbu9nfyQ9y5JrVmp7E8oZrUjvA==}
@@ -14532,26 +14535,29 @@ snapshots:
     dependencies:
       graphql: 16.9.0
 
-  '@apollo/client@3.8.8(graphql-ws@5.16.2(graphql@16.9.0))(graphql@16.9.0)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(subscriptions-transport-ws@0.11.0(graphql@16.9.0))':
+  '@apollo/client@3.14.0(@types/react@18.3.3)(graphql-ws@6.0.6(graphql@16.9.0)(ws@8.18.3))(graphql@16.9.0)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(subscriptions-transport-ws@0.11.0(graphql@16.9.0))':
     dependencies:
       '@graphql-typed-document-node/core': 3.2.0(graphql@16.9.0)
+      '@wry/caches': 1.0.1
       '@wry/equality': 0.5.7
       '@wry/trie': 0.5.0
       graphql: 16.9.0
       graphql-tag: 2.12.6(graphql@16.9.0)
       hoist-non-react-statics: 3.3.2
-      optimism: 0.18.0
+      optimism: 0.18.1
       prop-types: 15.8.1
-      response-iterator: 0.2.6
+      rehackt: 0.1.0(@types/react@18.3.3)(react@18.3.1)
       symbol-observable: 4.0.0
       ts-invariant: 0.10.3
       tslib: 2.8.1
       zen-observable-ts: 1.2.5
     optionalDependencies:
-      graphql-ws: 5.16.2(graphql@16.9.0)
+      graphql-ws: 6.0.6(graphql@16.9.0)(ws@8.18.3)
       react: 18.3.1
       react-dom: 18.3.1(react@18.3.1)
       subscriptions-transport-ws: 0.11.0(graphql@16.9.0)
+    transitivePeerDependencies:
+      - '@types/react'
 
   '@apollo/explorer@3.7.3(graphql@16.9.0)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(use-deep-compare-effect@1.8.1(react@18.3.1))':
     dependencies:
@@ -23750,15 +23756,11 @@ snapshots:
     dependencies:
       tslib: 2.8.1
 
-  '@wry/context@0.7.0':
+  '@wry/context@0.7.4':
     dependencies:
       tslib: 2.8.1
 
   '@wry/equality@0.5.7':
-    dependencies:
-      tslib: 2.8.1
-
-  '@wry/trie@0.4.3':
     dependencies:
       tslib: 2.8.1
 
@@ -29285,11 +29287,11 @@ snapshots:
       is-docker: 2.2.1
       is-wsl: 2.2.0
 
-  optimism@0.18.0:
+  optimism@0.18.1:
     dependencies:
       '@wry/caches': 1.0.1
-      '@wry/context': 0.7.0
-      '@wry/trie': 0.4.3
+      '@wry/context': 0.7.4
+      '@wry/trie': 0.5.0
       tslib: 2.8.1
 
   optionator@0.8.3:
@@ -30172,6 +30174,11 @@ snapshots:
     dependencies:
       jsesc: 3.1.0
 
+  rehackt@0.1.0(@types/react@18.3.3)(react@18.3.1):
+    optionalDependencies:
+      '@types/react': 18.3.3
+      react: 18.3.1
+
   relay-runtime@12.0.0(encoding@0.1.13):
     dependencies:
       '@babel/runtime': 7.28.4
@@ -30248,8 +30255,6 @@ snapshots:
       is-core-module: 2.16.1
       path-parse: 1.0.7
       supports-preserve-symlinks-flag: 1.0.0
-
-  response-iterator@0.2.6: {}
 
   restore-cursor@3.1.0:
     dependencies:

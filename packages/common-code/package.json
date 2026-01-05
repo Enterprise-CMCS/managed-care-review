@@ -11,7 +11,7 @@
         "test:coverage": "vitest --coverage"
     },
     "dependencies": {
-        "@apollo/client": "3.8.8",
+        "@apollo/client": "3.14.0",
         "@mc-review/constants": "workspace:*",
         "@mc-review/helpers": "workspace:*",
         "@mc-review/submissions": "workspace:*",

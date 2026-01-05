@@ -6,7 +6,7 @@
         "build": "tsc"
     },
     "dependencies": {
-        "@apollo/client": "3.8.8",
+        "@apollo/client": "3.14.0",
         "@mc-review/dates": "workspace:*",
         "@mc-review/submissions": "workspace:*",
         "dayjs": "^1.11.19",
