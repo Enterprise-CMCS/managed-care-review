@@ -536,6 +536,7 @@ export class AppApiStack extends BaseStack {
                     'rds:CreateDBClusterSnapshot',
                     'rds:DescribeDBClusterSnapshots',
                     'rds:DescribeDBClusters',
+                    'rds:AddTagsToResource',
                 ],
                 resources: ['*'],
             })
@@ -906,6 +907,7 @@ export class AppApiStack extends BaseStack {
                     'rds:CopyDBSnapshot',
                     'rds:DescribeDBClusterSnapshots',
                     'rds:DeleteDBClusterSnapshot',
+                    'rds:AddTagsToResource',
                 ],
                 resources: ['*'],
             })
