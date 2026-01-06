@@ -29,7 +29,12 @@ import {
     FilterOptionType,
     FilterDateRange,
 } from '../../../components/FilterAccordion'
-import { pluralize, titleCaseString } from '@mc-review/common-code'
+import {
+    pluralize,
+    titleCaseString,
+    featureFlags,
+    stateNameToStateCode,
+} from '@mc-review/common-code'
 import { MultiColumnGrid } from '../../../components'
 import { FilterDateRangeRef } from '../../../components/FilterAccordion/FilterDateRange/FilterDateRange'
 import { NavLinkWithLogging } from '../../../components'
@@ -40,6 +45,7 @@ import { formatCalendarDate } from '@mc-review/dates'
 import { InfoTag, TagProps } from '../../../components/InfoTag/InfoTag'
 import { ConsolidatedRateStatusRecord } from '@mc-review/constants'
 import { RowCellElement } from '../../../components'
+import { useLDClient } from 'launchdarkly-react-client-sdk'
 
 type RatingPeriodFilterType = [string, string] | []
 
@@ -227,6 +233,7 @@ export const RateReviewsTable = ({
     tableData,
     isAdminUser = false,
 }: RateTableProps): React.ReactElement => {
+    const ldClient = useLDClient()
     const lastClickedElement = useRef<string | null>(null)
     const filterDateRangeRef = useRef<FilterDateRangeRef>(null)
     const [columnFilters, setColumnFilters] = useAtom(columnHash)
@@ -237,6 +244,10 @@ export const RateReviewsTable = ({
         filtersForAnalytics: '',
     })
     const { logFilterEvent } = useTealium()
+    const eqroSubmissions = ldClient?.variation(
+        featureFlags.EQRO_SUBMISSIONS.flag,
+        featureFlags.EQRO_SUBMISSIONS.defaultValue
+    )
 
     const tableConfig: TableVariantConfig = {
         tableName: 'Rate Reviews',
@@ -298,7 +309,13 @@ export const RateReviewsTable = ({
             columnHelper.accessor('stateName', {
                 id: 'stateName',
                 header: 'State',
-                cell: (info) => <span>{info.getValue()}</span>,
+                cell: (info) => (
+                    <span>
+                        {eqroSubmissions
+                            ? stateNameToStateCode(info.getValue())
+                            : info.getValue()}
+                    </span>
+                ),
                 meta: {
                     dataTestID: `${tableConfig.rowIDName}-stateName`,
                 },
@@ -382,7 +399,7 @@ export const RateReviewsTable = ({
                 filterFn: `arrIncludesSome`,
             }),
         ],
-        [tableConfig.rowIDName]
+        [eqroSubmissions, tableConfig.rowIDName]
     )
 
     const reactTable = useReactTable({
