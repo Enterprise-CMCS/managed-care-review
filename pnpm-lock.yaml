@@ -362,8 +362,8 @@ importers:
         specifier: ^3.962.0
         version: 3.962.0
       '@aws-sdk/client-rds':
-        specifier: ^3.962.0
-        version: 3.962.0
+        specifier: ^3.963.0
+        version: 3.963.0
       '@aws-sdk/client-s3':
         specifier: ^3.962.0
         version: 3.962.0
@@ -1770,8 +1770,8 @@ packages:
     resolution: {integrity: sha512-y6fxVYndGS7z2KqHViPCqagBEOsZlxBUYUJZuD6WWTiQrI0Pwe5qG02oKJVaa5OmxE20QLf6bRBWj2rQpeF4IQ==}
     engines: {node: '>=10.0.0'}
 
-  '@aws-sdk/client-rds@3.962.0':
-    resolution: {integrity: sha512-5TxKOJtbe1wVeLVyxD2Ny47yXXSXk/JpfcIznGeVeYJdboqENPIj71nDi9QHV3IgsTtRGgHXPAISKsuwzlb2ng==}
+  '@aws-sdk/client-rds@3.963.0':
+    resolution: {integrity: sha512-n3rAGry05noVv80RoHhQpl5b+kYMSfMlWgIYuCTJFkBW9ge/zQwGX9Xy7jxopbcJLSdbrmotilH3VlihDqAggg==}
     engines: {node: '>=18.0.0'}
 
   '@aws-sdk/client-rekognition@3.6.1':
@@ -15754,7 +15754,7 @@ snapshots:
     transitivePeerDependencies:
       - react-native
 
-  '@aws-sdk/client-rds@3.962.0':
+  '@aws-sdk/client-rds@3.963.0':
     dependencies:
       '@aws-crypto/sha256-browser': 5.2.0
       '@aws-crypto/sha256-js': 5.2.0
