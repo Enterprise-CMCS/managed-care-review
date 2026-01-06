@@ -40,7 +40,7 @@ import {
     pluralize,
     formatContractSubTypeForDisplay,
     featureFlags,
-    stateNameToCode,
+    stateNameToStateCode,
 } from '@mc-review/common-code'
 import { formatCalendarDate } from '@mc-review/dates'
 import { RowCellElement } from '..'
@@ -309,7 +309,7 @@ export const ContractTable = ({
                 cell: (info) => (
                     <span>
                         {eqroSubmissions
-                            ? stateNameToCode(info.getValue())
+                            ? stateNameToStateCode(info.getValue())
                             : info.getValue()}
                     </span>
                 ),

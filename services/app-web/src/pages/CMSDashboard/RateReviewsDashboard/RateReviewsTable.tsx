@@ -33,7 +33,7 @@ import {
     pluralize,
     titleCaseString,
     featureFlags,
-    stateNameToCode,
+    stateNameToStateCode,
 } from '@mc-review/common-code'
 import { MultiColumnGrid } from '../../../components'
 import { FilterDateRangeRef } from '../../../components/FilterAccordion/FilterDateRange/FilterDateRange'
@@ -312,7 +312,7 @@ export const RateReviewsTable = ({
                 cell: (info) => (
                     <span>
                         {eqroSubmissions
-                            ? stateNameToCode(info.getValue())
+                            ? stateNameToStateCode(info.getValue())
                             : info.getValue()}
                     </span>
                 ),

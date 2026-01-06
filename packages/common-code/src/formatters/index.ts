@@ -1,6 +1,6 @@
 import { pluralize } from './pluralizer'
 import { titleCaseString } from './titleCase'
 import { formatContractSubTypeForDisplay } from './formatContractSubTypeForDisplay'
-import { stateNameToCode } from './stateNameToCode'
+import { stateNameToStateCode } from './stateNameToStateCode'
 
-export { pluralize, titleCaseString, formatContractSubTypeForDisplay, stateNameToCode }
+export { pluralize, titleCaseString, formatContractSubTypeForDisplay, stateNameToStateCode }
