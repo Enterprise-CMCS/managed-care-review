@@ -16,7 +16,7 @@
         "eslint": "^9.34.0",
         "eslint-config-prettier": "^10.1.8",
         "eslint-plugin-prettier": "^5.5.4",
-        "fs-extra": "^11.2.0",
+        "fs-extra": "^11.3.3",
         "jiti": "^2.6.1",
         "serverless-esbuild": "^1.55.1",
         "serverless": "4.2.3",
