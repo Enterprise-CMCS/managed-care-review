@@ -130,17 +130,27 @@ async function describeInstance(
     try {
         const instances = await ec2.send(describeInstances)
 
-        if (
-            instances.Reservations?.length !== 1 ||
-            instances.Reservations[0].Instances?.length !== 1
-        ) {
-            return new Error('Did not find one and only one instance')
+        // Count total instances across all reservations
+        const allInstances =
+            instances.Reservations?.flatMap((r) => r.Instances || []) || []
+
+        if (allInstances.length === 0) {
+            return new Error('No instances found matching the filters')
         }
 
-        const instance = instances.Reservations[0].Instances[0]
+        if (allInstances.length > 1) {
+            const instanceInfo = allInstances
+                .map((i) => `${i.InstanceId} (${i.State?.Name})`)
+                .join(', ')
+            return new Error(
+                `Found ${allInstances.length} instances matching the filters: ${instanceInfo}`
+            )
+        }
+
+        const instance = allInstances[0]
         return instance
     } catch (err) {
-        return err
+        return err instanceof Error ? err : new Error(String(err))
     }
 }
 
@@ -183,7 +193,8 @@ interface DBConnection {
 
 async function getSecretsForRDS(stage: string): Promise<DBConnection | Error> {
     const client = new SecretsManagerClient({ region: 'us-east-1' })
-    const SMName = `aurora_postgres_${stage}`
+    // CDK secrets use hyphens: aurora-postgres-{stage}-cdk
+    const SMName = `aurora-postgres-${stage}-cdk`
 
     const list = new ListSecretsCommand({
         Filters: [
