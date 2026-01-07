@@ -1,4 +1,4 @@
-import React, { useEffect, useLayoutEffect, useRef, useState } from 'react'
+import React, { useEffect, useRef, useState } from 'react'
 import { useRouteParams, useCurrentRoute } from '../../../../hooks'
 import { generatePath, useNavigate } from 'react-router-dom'
 import {
@@ -37,7 +37,7 @@ import {
 export const EQROReviewSubmit = (): React.ReactElement => {
     const { id } = useRouteParams()
     const navigate = useNavigate()
-    const { updateHeading, updateActiveMainContent } = usePage()
+    const { updateActiveMainContent } = usePage()
     const { currentRoute } = useCurrentRoute()
     const [isSubmitting, setIsSubmitting] = useState<boolean>(false)
     const { loggedInUser } = useAuth()
@@ -61,12 +61,6 @@ export const EQROReviewSubmit = (): React.ReactElement => {
 
     const contract = data?.fetchContract.contract
     const activeMainContentId = 'reviewSubmitPageMainContent'
-
-    useLayoutEffect(() => {
-        updateHeading({
-            customHeading: contract?.draftRevision?.contractName,
-        })
-    }, [contract, updateHeading])
 
     // Set the active main content to focus when click the Skip to main content button.
     useEffect(() => {
