@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react'
+import React, { useState, useLayoutEffect } from 'react'
 import {
     Form as UswdsForm,
     ButtonGroup,
@@ -79,7 +79,7 @@ export const MccrsId = (): React.ReactElement => {
         contractType: contract?.contractSubmissionType,
     })
 
-    useEffect(() => {
+    useLayoutEffect(() => {
         updateHeading({ customHeading: stateHeader })
     }, [stateHeader, updateHeading])
 

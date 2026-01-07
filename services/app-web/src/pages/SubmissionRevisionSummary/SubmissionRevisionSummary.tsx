@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react'
+import React, { useLayoutEffect } from 'react'
 import { GridContainer } from '@trussworks/react-uswds'
 import { useParams } from 'react-router-dom'
 import { useAuth } from '../../contexts/AuthContext'
@@ -73,7 +73,7 @@ export const SubmissionRevisionSummary = (): React.ReactElement => {
         contractType: contract?.contractSubmissionType,
     })
 
-    useEffect(() => {
+    useLayoutEffect(() => {
         updateHeading({ customHeading: stateHeader })
     }, [stateHeader, updateHeading])
 

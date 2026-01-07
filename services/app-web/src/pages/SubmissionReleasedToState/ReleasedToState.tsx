@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react'
+import React, { useLayoutEffect } from 'react'
 import styles from './ReleasedToState.module.scss'
 import {
     ActionButton,
@@ -95,7 +95,7 @@ const ReleasedToState = () => {
     })
 
     // update heading
-    useEffect(() => {
+    useLayoutEffect(() => {
         updateHeading({ customHeading: stateHeader })
     }, [stateHeader, updateHeading])
 

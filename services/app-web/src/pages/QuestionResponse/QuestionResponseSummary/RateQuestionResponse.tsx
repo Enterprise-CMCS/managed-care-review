@@ -1,4 +1,4 @@
-import { useEffect } from 'react'
+import { useEffect, useLayoutEffect } from 'react'
 import styles from '../QuestionResponse.module.scss'
 import {
     CmsUser,
@@ -58,7 +58,7 @@ export const RateQuestionResponse = () => {
         stateName: rate?.state.name,
     })
 
-    useEffect(() => {
+    useLayoutEffect(() => {
         updateHeading({ customHeading: stateHeader })
     }, [stateHeader, updateHeading])
 

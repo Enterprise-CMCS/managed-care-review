@@ -1,4 +1,4 @@
-import { useEffect } from 'react'
+import { useEffect, useLayoutEffect } from 'react'
 import { GridContainer } from '@trussworks/react-uswds'
 import styles from '../QuestionResponse.module.scss'
 
@@ -52,7 +52,7 @@ export const ContractQuestionResponse = () => {
         contractType: contract?.contractSubmissionType,
     })
 
-    useEffect(() => {
+    useLayoutEffect(() => {
         updateHeading({ customHeading: stateHeader })
     }, [stateHeader, updateHeading])
 

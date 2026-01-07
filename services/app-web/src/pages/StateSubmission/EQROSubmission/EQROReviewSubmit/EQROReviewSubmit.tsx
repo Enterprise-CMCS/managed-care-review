@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from 'react'
+import React, { useEffect, useLayoutEffect, useRef, useState } from 'react'
 import { useRouteParams, useCurrentRoute } from '../../../../hooks'
 import { generatePath, useNavigate } from 'react-router-dom'
 import {
@@ -62,7 +62,7 @@ export const EQROReviewSubmit = (): React.ReactElement => {
     const contract = data?.fetchContract.contract
     const activeMainContentId = 'reviewSubmitPageMainContent'
 
-    useEffect(() => {
+    useLayoutEffect(() => {
         updateHeading({
             customHeading: contract?.draftRevision?.contractName,
         })

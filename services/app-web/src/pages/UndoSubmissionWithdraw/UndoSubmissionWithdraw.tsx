@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react'
+import React, { useLayoutEffect, useState } from 'react'
 import styles from './UndoSubmissionWithdraw.module.scss'
 import * as Yup from 'yup'
 import { Formik, FormikErrors } from 'formik'
@@ -77,7 +77,7 @@ export const UndoSubmissionWithdraw = (): React.ReactElement => {
         contractType: contract?.contractSubmissionType,
     })
 
-    useEffect(() => {
+    useLayoutEffect(() => {
         updateHeading({ customHeading: stateHeader })
     }, [stateHeader, updateHeading])
 

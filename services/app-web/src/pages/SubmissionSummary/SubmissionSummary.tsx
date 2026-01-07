@@ -1,5 +1,11 @@
 import { GridContainer, Link, ModalRef, Grid } from '@trussworks/react-uswds'
-import React, { useEffect, useMemo, useRef, useState } from 'react'
+import React, {
+    useEffect,
+    useLayoutEffect,
+    useMemo,
+    useRef,
+    useState,
+} from 'react'
 import { useAuth } from '../../contexts/AuthContext'
 import {
     ContractDetailsSummarySection,
@@ -119,7 +125,7 @@ export const SubmissionSummary = (): React.ReactElement => {
     }, [searchParams, setSearchParams])
 
     // Setting app wide variables
-    useEffect(() => {
+    useLayoutEffect(() => {
         updateHeading({ customHeading: stateHeader })
     }, [stateHeader, updateHeading])
 

@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react'
+import React, { useLayoutEffect } from 'react'
 import { useOutletContext, Navigate, generatePath } from 'react-router-dom'
 import {
     RoutesRecord,
@@ -32,7 +32,7 @@ export const StateSubmissionForm = (): React.ReactElement => {
         contractType: contract?.contractSubmissionType,
     })
 
-    useEffect(() => {
+    useLayoutEffect(() => {
         updateHeading({ customHeading: stateHeader })
     }, [stateHeader, updateHeading])
 

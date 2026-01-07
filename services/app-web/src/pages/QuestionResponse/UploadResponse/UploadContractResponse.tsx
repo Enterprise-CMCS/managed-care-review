@@ -1,4 +1,4 @@
-import { useEffect } from 'react'
+import { useLayoutEffect } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
 import {
     CreateQuestionResponseInput,
@@ -68,7 +68,7 @@ export const UploadContractResponse = () => {
     })
 
     // side effects
-    useEffect(() => {
+    useLayoutEffect(() => {
         updateHeading({ customHeading: stateHeader })
     }, [stateHeader, updateHeading])
 

@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react'
+import React, { useLayoutEffect } from 'react'
 import styles from './SubmissionWithdraw.module.scss'
 import {
     ActionButton,
@@ -135,7 +135,7 @@ export const SubmissionWithdraw = (): React.ReactElement => {
         contractType: contract?.contractSubmissionType,
     })
 
-    useEffect(() => {
+    useLayoutEffect(() => {
         updateHeading({ customHeading: stateHeader })
     }, [stateHeader, updateHeading])
 

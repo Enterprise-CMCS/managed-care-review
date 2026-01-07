@@ -1,5 +1,5 @@
 import { Grid, GridContainer, Icon } from '@trussworks/react-uswds'
-import React, { useEffect, useState } from 'react'
+import React, { useEffect, useLayoutEffect, useState } from 'react'
 import { useNavigate, useParams, useSearchParams } from 'react-router-dom'
 import {
     ButtonWithLogging,
@@ -108,7 +108,7 @@ export const RateSummary = (): React.ReactElement => {
         stateName: fetchContractData?.fetchContract.contract.state.name,
     })
 
-    useEffect(() => {
+    useLayoutEffect(() => {
         updateHeading({ customHeading: stateHeader })
     }, [updateHeading, stateHeader])
 

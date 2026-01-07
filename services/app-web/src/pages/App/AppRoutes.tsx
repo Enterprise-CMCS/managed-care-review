@@ -1,4 +1,4 @@
-import React, { Fragment, useEffect, useState } from 'react'
+import React, { Fragment, useEffect, useLayoutEffect, useState } from 'react'
 import { useLocation, Navigate } from 'react-router'
 import { Route, Routes } from 'react-router-dom'
 import { useLDClient } from 'launchdarkly-react-client-sdk'
@@ -520,7 +520,7 @@ export const AppRoutes = ({
 
     useTitle(title)
     useScrollToPageTop()
-    useEffect(() => {
+    useLayoutEffect(() => {
         updateHeading({})
     }, [pathname, updateHeading])
 

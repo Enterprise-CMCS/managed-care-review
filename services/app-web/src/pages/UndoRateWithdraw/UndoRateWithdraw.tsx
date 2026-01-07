@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react'
+import React, { useLayoutEffect } from 'react'
 import styles from './UndoRateWithdraw.module.scss'
 import {
     ActionButton,
@@ -72,7 +72,7 @@ export const UndoRateWithdraw = () => {
         stateName: rate?.state.name,
     })
 
-    useEffect(() => {
+    useLayoutEffect(() => {
         updateHeading({ customHeading: stateHeader })
     }, [stateHeader, updateHeading])
 

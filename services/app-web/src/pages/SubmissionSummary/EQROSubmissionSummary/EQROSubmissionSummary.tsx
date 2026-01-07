@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react'
+import React, { useEffect, useLayoutEffect, useState } from 'react'
 import { usePage } from '../../../contexts/PageContext'
 import { GridContainer, Link } from '@trussworks/react-uswds'
 import { Navigate } from 'react-router-dom'
@@ -57,7 +57,7 @@ export const EQROSubmissionSummary = (): React.ReactElement => {
     })
 
     // Setting app wide variables
-    useEffect(() => {
+    useLayoutEffect(() => {
         updateHeading({ customHeading: stateHeader })
     }, [stateHeader, updateHeading])
 
