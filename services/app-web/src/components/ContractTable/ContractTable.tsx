@@ -160,6 +160,17 @@ const submissionStatusOptions = [
     },
 ]
 
+const contractTypeOptions = [
+    {
+        label: 'EQRO',
+        value: 'EQRO',
+    },
+    {
+        label: 'Health plan',
+        value: 'HEALTH_PLAN',
+    },
+]
+
 /* To keep the memoization from being refreshed every time, this needs to be
     created outside the render function */
 const columnHelper = createColumnHelper<ContractInDashboardType>()
@@ -319,6 +330,7 @@ export const ContractTable = ({
                 filterFn: `arrIncludesSome`,
             }),
             columnHelper.accessor('contractSubmissionType', {
+                id: 'contractSubmissionType',
                 header: 'Contract type',
                 cell: (info) => (
                     <span>
@@ -328,6 +340,7 @@ export const ContractTable = ({
                 meta: {
                     dataTestID: `${tableConfig.rowIDName}-contractType`,
                 },
+                filterFn: `arrIncludesSome`,
             }),
             columnHelper.accessor('submissionType', {
                 id: 'submissionType',
@@ -435,6 +448,9 @@ export const ContractTable = ({
     ) as Column<ContractInDashboardType>
     const statusColumn = reactTable.getColumn(
         'status'
+    ) as Column<ContractInDashboardType>
+    const contractTypeColumn = reactTable.getColumn(
+        'contractSubmissionType'
     ) as Column<ContractInDashboardType>
 
     // Filter options based on table data instead of static list of options.
@@ -585,16 +601,16 @@ export const ContractTable = ({
                                 <FilterSelect
                                     value={getSelectedFiltersFromUrl(
                                         columnFilters,
-                                        'submissionType'
+                                        'contractSubmissionType'
                                     )}
-                                    name="submissionType"
-                                    label="Submission type"
-                                    filterOptions={submissionTypeOptions}
+                                    name="contractType"
+                                    label="Contract type"
+                                    filterOptions={contractTypeOptions}
                                     onChange={(selectedOptions) =>
                                         updateFilters(
-                                            submissionTypeColumn,
+                                            contractTypeColumn,
                                             selectedOptions,
-                                            'submissionType'
+                                            'contractType'
                                         )
                                     }
                                 />
@@ -616,6 +632,22 @@ export const ContractTable = ({
                                         )
                                     }
                                 />
+                                <FilterSelect
+                                    value={getSelectedFiltersFromUrl(
+                                        columnFilters,
+                                        'submissionType'
+                                    )}
+                                    name="submissionType"
+                                    label="Submission type"
+                                    filterOptions={submissionTypeOptions}
+                                    onChange={(selectedOptions) =>
+                                        updateFilters(
+                                            submissionTypeColumn,
+                                            selectedOptions,
+                                            'submissionType'
+                                        )
+                                    }
+                                />                               
                             </MultiColumnGrid>
                         </FilterAccordion>
                     )}
