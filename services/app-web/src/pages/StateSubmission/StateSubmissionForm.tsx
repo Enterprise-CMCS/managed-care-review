@@ -13,7 +13,6 @@ import { HealthPlanSubmissionForm } from './HealthPlanSubmission/HealthPlanSubmi
 import { Error404 } from '../Errors/Error404Page'
 import { usePage } from '../../contexts/PageContext'
 
-// Can move this AppRoutes on future pass - leaving it here now to make diff clear
 export const StateSubmissionForm = (): React.ReactElement => {
     const { contractSubmissionType } = useRouteParams()
     const { updateHeading } = usePage()
@@ -22,9 +21,7 @@ export const StateSubmissionForm = (): React.ReactElement => {
         featureFlags.EQRO_SUBMISSIONS.flag,
         featureFlags.EQRO_SUBMISSIONS.defaultValue
     )
-
     const { contract } = useOutletContext<SideNavOutletContextType>()
-
     const stateHeader = useMemoizedStateHeader({
         subHeaderText: contract?.draftRevision?.contractName,
         stateCode: contract?.state.code,

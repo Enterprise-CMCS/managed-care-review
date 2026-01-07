@@ -13,13 +13,10 @@ export type ContractSubmissionDisplayType = 'EQRO' | 'Health plan' | undefined
 
 const getSubHeaderTitle = (route?: RouteTWithUnknown): string | undefined => {
     if (route) {
-        // if (pathname?.includes('/rates/')) return 'Rate name'
         if (RATE_PAGE_HEADING_ROUTES.includes(route)) return 'Rate name'
-        // if (pathname?.includes('submission')) return 'Submission ID'
         if (SUBMISSION_PAGE_HEADING_ROUTES.includes(route))
             return 'Submission ID'
     }
-
     return undefined
 }
 
