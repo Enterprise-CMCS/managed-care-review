@@ -1,10 +1,8 @@
 import React, { useState, useEffect } from 'react'
-import dayjs from 'dayjs'
 import {
     FileUpload,
     FileItemT,
     ErrorSummary,
-    PoliteErrorMessage,
     FieldYesNo,
     DynamicStepIndicator,
     LinkWithLogging,
@@ -22,11 +20,15 @@ import { v4 as uuidv4 } from 'uuid'
 import { useNavigate } from 'react-router-dom'
 import { Formik, FormikErrors, getIn } from 'formik'
 import styles from '../../StateSubmissionForm.module.scss'
-import { formatForForm, isDateRangeEmpty } from '../../../../formHelpers'
+import { formatForForm } from '../../../../formHelpers'
 import { formatUserInputDate } from '@mc-review/dates'
 import { useS3 } from '../../../../contexts/S3Context'
 import { EQROContractDetailsFormSchema } from './EQROContractDetailsSchema'
-import { type ContractFormPageProps } from '../../submissionUtils'
+import {
+    type ContractFormPageProps,
+    formattedDateMinusOneDay,
+    formattedDatePlusOneDay,
+} from '../../submissionUtils'
 import {
     formatDocumentsForGQL,
     formatDocumentsForForm,
@@ -41,8 +43,11 @@ import {
     yesNoFormValueAsBoolean,
 } from '../../../../components/Form/FieldYesNo'
 import { useAuth } from '../../../../contexts/AuthContext'
-import { ErrorOrLoadingPage } from '../../SharedSubmissionComponents'
-import { PageBannerAlerts } from '../../SharedSubmissionComponents'
+import {
+    PageBannerAlerts,
+    ContractDatesErrorMessage,
+    ErrorOrLoadingPage,
+} from '../../SharedSubmissionComponents'
 import { useErrorSummary } from '../../../../hooks/useErrorSummary'
 import { useContractForm } from '../../../../hooks/useContractForm'
 import {
@@ -52,36 +57,6 @@ import {
 import { useFocusOnRender } from '../../../../hooks/useFocusOnRender'
 import { usePage } from '../../../../contexts/PageContext'
 import { getSubmissionPath } from '../../../../routeHelpers'
-
-function formattedDatePlusOneDay(initialValue: string): string {
-    const dayjsValue = dayjs(initialValue)
-    return initialValue && dayjsValue.isValid()
-        ? dayjsValue.add(1, 'day').format('YYYY-MM-DD')
-        : initialValue // preserve undefined to show validations later
-}
-
-function formattedDateMinusOneDay(initialValue: string): string {
-    const dayjsValue = dayjs(initialValue)
-    return initialValue && dayjsValue.isValid()
-        ? dayjsValue.subtract(1, 'day').format('YYYY-MM-DD')
-        : initialValue // preserve undefined to show validations later
-}
-
-const ContractDatesErrorMessage = ({
-    values,
-    validationErrorMessage,
-    formFieldLabel,
-}: {
-    values: ContractDetailsFormValues
-    validationErrorMessage: string
-    formFieldLabel: string
-}): React.ReactElement => (
-    <PoliteErrorMessage formFieldLabel={formFieldLabel}>
-        {isDateRangeEmpty(values.contractDateStart, values.contractDateEnd)
-            ? 'You must provide a start and an end date'
-            : validationErrorMessage}
-    </PoliteErrorMessage>
-)
 
 export type ContractDetailsFormValues = {
     contractDocuments: FileItemT[]
@@ -660,7 +635,12 @@ export const EQROContractDetails = ({
                                                         )
                                                 ) && (
                                                     <ContractDatesErrorMessage
-                                                        values={values}
+                                                        contractDateStart={
+                                                            values.contractDateStart
+                                                        }
+                                                        contractDateEnd={
+                                                            values.contractDateEnd
+                                                        }
                                                         validationErrorMessage={
                                                             errors.contractDateStart ||
                                                             errors.contractDateEnd ||

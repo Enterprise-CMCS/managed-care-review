@@ -1,5 +1,4 @@
 import React, { useState, useEffect } from 'react'
-import dayjs from 'dayjs'
 import {
     Form as UswdsForm,
     FormGroup,
@@ -28,13 +27,15 @@ import {
     FormContainer,
     PageActions,
 } from '../../../../components'
-import { formatForForm, isDateRangeEmpty } from '../../../../formHelpers'
+import { formatForForm } from '../../../../formHelpers'
 import { formatUserInputDate } from '@mc-review/dates'
 import { useS3 } from '../../../../contexts/S3Context'
 
 import { ContractDetailsFormSchema } from './ContractDetailsSchema'
 import {
     activeFormPages,
+    formattedDatePlusOneDay,
+    formattedDateMinusOneDay,
     type ContractFormPageProps,
 } from '../../submissionUtils'
 import {
@@ -71,8 +72,11 @@ import {
 } from '../../../../components/Form/FieldYesNo'
 import { useCurrentRoute, useRouteParams } from '../../../../hooks'
 import { useAuth } from '../../../../contexts/AuthContext'
-import { ErrorOrLoadingPage } from '../../SharedSubmissionComponents'
-import { PageBannerAlerts } from '../../SharedSubmissionComponents'
+import {
+    PageBannerAlerts,
+    ErrorOrLoadingPage,
+    ContractDatesErrorMessage,
+} from '../../SharedSubmissionComponents'
 import { useErrorSummary } from '../../../../hooks/useErrorSummary'
 import { useContractForm } from '../../../../hooks/useContractForm'
 import {
@@ -84,36 +88,6 @@ import {
 } from '../../../../gen/gqlClient'
 import { useFocusOnRender } from '../../../../hooks/useFocusOnRender'
 import { usePage } from '../../../../contexts/PageContext'
-
-function formattedDatePlusOneDay(initialValue: string): string {
-    const dayjsValue = dayjs(initialValue)
-    return initialValue && dayjsValue.isValid()
-        ? dayjsValue.add(1, 'day').format('YYYY-MM-DD')
-        : initialValue // preserve undefined to show validations later
-}
-
-function formattedDateMinusOneDay(initialValue: string): string {
-    const dayjsValue = dayjs(initialValue)
-    return initialValue && dayjsValue.isValid()
-        ? dayjsValue.subtract(1, 'day').format('YYYY-MM-DD')
-        : initialValue // preserve undefined to show validations later
-}
-
-const ContractDatesErrorMessage = ({
-    values,
-    validationErrorMessage,
-    formFieldLabel,
-}: {
-    values: ContractDetailsFormValues
-    validationErrorMessage: string
-    formFieldLabel: string
-}): React.ReactElement => (
-    <PoliteErrorMessage formFieldLabel={formFieldLabel}>
-        {isDateRangeEmpty(values.contractDateStart, values.contractDateEnd)
-            ? 'You must provide a start and an end date'
-            : validationErrorMessage}
-    </PoliteErrorMessage>
-)
 
 export type ContractDetailsFormValues = {
     contractDocuments: FileItemT[]
@@ -1049,7 +1023,12 @@ export const ContractDetails = ({
                                                             )
                                                     ) && (
                                                         <ContractDatesErrorMessage
-                                                            values={values}
+                                                            contractDateStart={
+                                                                values.contractDateStart
+                                                            }
+                                                            contractDateEnd={
+                                                                values.contractDateEnd
+                                                            }
                                                             validationErrorMessage={
                                                                 errors.contractDateStart ||
                                                                 errors.contractDateEnd ||
