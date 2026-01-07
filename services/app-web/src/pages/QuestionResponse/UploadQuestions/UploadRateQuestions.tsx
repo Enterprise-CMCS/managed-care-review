@@ -7,22 +7,21 @@ import {
     useFetchRateWithQuestionsQuery,
 } from '../../../gen/gqlClient'
 import { usePage } from '../../../contexts/PageContext'
-import { Breadcrumbs } from '../../../components/Breadcrumbs/Breadcrumbs'
+import { Breadcrumbs } from '../../../components'
 import { createRateQuestionWrapper } from '@mc-review/helpers'
 import { RoutesRecord } from '@mc-review/constants'
 import { UploadQuestionsForm } from './UploadQuestionsForm'
 import { FileItemT } from '../../../components'
 import { ErrorOrLoadingPage } from '../../StateSubmission'
-import { handleAndReturnErrorState } from '../../StateSubmission/SharedSubmissionComponents/ErrorOrLoadingPage'
+import { handleAndReturnErrorState } from '../../StateSubmission/SharedSubmissionComponents'
 import { GenericErrorPage } from '../../Errors/GenericErrorPage'
 import { getNextCMSRoundNumber } from '../QuestionResponseHelpers'
 import { isValidCmsDivison } from '../QuestionResponseHelpers/questionResponseHelpers'
 import { Error404 } from '../../Errors/Error404Page'
+import { useMemoizedStateHeader } from '../../../hooks'
 
 export const UploadRateQuestions = () => {
-    // router context
-
-    const { updateHeading, updateStateContent } = usePage()
+    const { updateHeading } = usePage()
     const { id, division, contractSubmissionType } = useParams<{
         division: string
         id: string
@@ -53,25 +52,17 @@ export const UploadRateQuestions = () => {
             rate?.packageSubmissions[0].rateRevision.formData
                 .rateCertificationName) ||
         ''
+    const stateHeader = useMemoizedStateHeader({
+        subHeaderText:
+            rate?.revisions[0].formData.rateCertificationName ?? undefined,
+        stateCode: rate?.state.code,
+        stateName: rate?.state.name,
+    })
+
     // side effects
     useEffect(() => {
-        updateHeading({ customHeading: `${rateName} Add questions` })
-    }, [rateName, updateHeading])
-
-    const stateName = rate?.state.name
-    const stateCode = rate?.state.code
-    // Set state info for the header
-    useEffect(() => {
-        if (stateCode || stateName) {
-            updateStateContent(stateCode, stateName)
-        } else {
-            updateStateContent(undefined, undefined)
-        }
-
-        return () => {
-            updateStateContent(undefined, undefined)
-        }
-    }, [stateCode, stateName, updateStateContent])
+        updateHeading({ customHeading: stateHeader })
+    }, [stateHeader, updateHeading])
 
     // confirm division is valid
     const realDivision = division?.toUpperCase()

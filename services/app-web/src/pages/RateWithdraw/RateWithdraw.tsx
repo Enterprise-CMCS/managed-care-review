@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react'
+import React, { useEffect } from 'react'
 import styles from './RateWithdraw.module.scss'
 import {
     ActionButton,
@@ -17,7 +17,7 @@ import * as Yup from 'yup'
 import { Formik, FormikErrors } from 'formik'
 import { usePage } from '../../contexts/PageContext'
 import { GenericErrorPage } from '../Errors/GenericErrorPage'
-import { useTealium } from '../../hooks'
+import { useMemoizedStateHeader, useTealium } from '../../hooks'
 import { recordJSException } from '@mc-review/otel'
 
 type RateWithdrawValues = {
@@ -35,10 +35,9 @@ type FormError =
 
 export const RateWithdraw = () => {
     const { id } = useParams() as { id: string }
-    const { updateHeading, updateStateContent } = usePage()
+    const { updateHeading } = usePage()
     const navigate = useNavigate()
     const { logFormSubmitEvent } = useTealium()
-    const [rateName, setRateName] = useState<string | undefined>(undefined)
     const [shouldValidate, setShouldValidate] = React.useState(false)
     const [withdrawRate, { error: withdrawError, loading: withdrawLoading }] =
         useWithdrawRateMutation()
@@ -58,25 +57,19 @@ export const RateWithdraw = () => {
     })
 
     const rate = data?.fetchRate.rate
+    const rateCertificationName =
+        rate?.packageSubmissions?.[0]?.rateRevision.formData
+            .rateCertificationName ?? undefined
+
+    const stateHeader = useMemoizedStateHeader({
+        subHeaderText: rateCertificationName,
+        stateCode: rate?.state.code,
+        stateName: rate?.state.name,
+    })
 
     useEffect(() => {
-        updateHeading({ customHeading: rateName })
-    }, [rateName, updateHeading])
-
-    const stateCode = rate?.state.code
-    const stateName = rate?.state.name
-    // Set state info for the header
-    useEffect(() => {
-        if (stateCode || stateName) {
-            updateStateContent(stateCode, stateName)
-        } else {
-            updateStateContent(undefined, undefined)
-        }
-
-        return () => {
-            updateStateContent(undefined, undefined)
-        }
-    }, [stateCode, stateName, updateStateContent])
+        updateHeading({ customHeading: stateHeader })
+    }, [stateHeader, updateHeading])
 
     if (loading) {
         return <ErrorOrLoadingPage state="LOADING" />
@@ -84,13 +77,6 @@ export const RateWithdraw = () => {
         return <ErrorOrLoadingPage state={handleAndReturnErrorState(error)} />
     } else if (!rate || !rate.packageSubmissions) {
         return <GenericErrorPage />
-    }
-    const rateRev = rate?.packageSubmissions?.[0]?.rateRevision
-    const rateCertificationName =
-        rateRev?.formData.rateCertificationName ?? undefined
-
-    if (rateCertificationName && rateName !== rateCertificationName) {
-        setRateName(rateCertificationName)
     }
 
     const withdrawRateAction = async (values: RateWithdrawValues) => {

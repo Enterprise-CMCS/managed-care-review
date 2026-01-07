@@ -7,7 +7,7 @@ import {
 } from '../../../gen/gqlClient'
 import styles from '../QuestionResponse.module.scss'
 import { usePage } from '../../../contexts/PageContext'
-import { Breadcrumbs } from '../../../components/Breadcrumbs/Breadcrumbs'
+import { Breadcrumbs } from '../../../components'
 import { createContractResponseWrapper } from '@mc-review/helpers'
 import { RoutesRecord } from '@mc-review/constants'
 import { GenericErrorPage } from '../../Errors/GenericErrorPage'
@@ -20,10 +20,11 @@ import {
     isValidCmsDivison,
 } from '../QuestionResponseHelpers/questionResponseHelpers'
 import { ErrorOrLoadingPage } from '../../StateSubmission'
-import { handleAndReturnErrorState } from '../../StateSubmission/SharedSubmissionComponents/ErrorOrLoadingPage'
+import { handleAndReturnErrorState } from '../../StateSubmission/SharedSubmissionComponents'
 import { QuestionDisplayTable } from '../QATable/QuestionDisplayTable'
 import { useAuth } from '../../../contexts/AuthContext'
 import { Error404 } from '../../Errors/Error404Page'
+import { useMemoizedStateHeader } from '../../../hooks'
 
 export const UploadContractResponse = () => {
     // router context
@@ -35,7 +36,7 @@ export const UploadContractResponse = () => {
     }>()
 
     const navigate = useNavigate()
-    const { updateHeading, updateStateContent } = usePage()
+    const { updateHeading } = usePage()
     const { loggedInUser } = useAuth()
     // api
     const {
@@ -59,25 +60,18 @@ export const UploadContractResponse = () => {
             contract?.packageSubmissions?.length > 0 &&
             contract?.packageSubmissions[0].contractRevision.contractName) ||
         ''
+    const stateHeader = useMemoizedStateHeader({
+        subHeaderText: contractName,
+        stateCode: contract?.state.code,
+        stateName: contract?.state.name,
+        contractType: contract?.contractSubmissionType,
+    })
+
     // side effects
     useEffect(() => {
-        updateHeading({ customHeading: `${contractName} Add response` })
-    }, [contractName, updateHeading])
+        updateHeading({ customHeading: stateHeader })
+    }, [stateHeader, updateHeading])
 
-    const stateName = contract?.state.name
-    const stateCode = contract?.state.code
-    // Set state info for the header
-    useEffect(() => {
-        if (stateCode || stateName) {
-            updateStateContent(stateCode, stateName)
-        } else {
-            updateStateContent(undefined, undefined)
-        }
-
-        return () => {
-            updateStateContent(undefined, undefined)
-        }
-    }, [stateCode, stateName, updateStateContent])
     // confirm division is valid
     const realDivision = division?.toUpperCase()
 

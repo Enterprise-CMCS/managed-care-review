@@ -29,7 +29,7 @@ import { GenericErrorPage } from '../Errors/GenericErrorPage'
 import styles from './SubmissionSummary.module.scss'
 import { ChangeHistory } from '../../components/ChangeHistory'
 import { ModalOpenButton, UnlockSubmitModal } from '../../components/Modal'
-import { useRouteParams } from '../../hooks'
+import { useMemoizedStateHeader, useRouteParams } from '../../hooks'
 import {
     getVisibleLatestContractFormData,
     getVisibleLatestRateRevisions,
@@ -48,8 +48,7 @@ import { getSubmissionPath } from '../../routeHelpers'
 
 export const SubmissionSummary = (): React.ReactElement => {
     // Page level state
-    const { updateHeading, updateActiveMainContent, updateStateContent } =
-        usePage()
+    const { updateHeading, updateActiveMainContent } = usePage()
     const modalRef = useRef<ModalRef>(null)
     const [documentError, setDocumentError] = useState(false)
     const [showTempUndoWithdrawBanner, setShowTempUndoWithdrawBanner] =
@@ -101,8 +100,14 @@ export const SubmissionSummary = (): React.ReactElement => {
             ? contract.packageSubmissions[0].contractRevision.contractName
             : ''
     const activeMainContentId = 'submissionSummaryPageMainContent'
-    const stateCode = contract?.state.code
-    const stateName = contract?.state.name
+
+    const stateHeader = useMemoizedStateHeader({
+        subHeaderText: name,
+        stateCode: contract?.state.code,
+        stateName: contract?.state.name,
+        contractType: contract?.contractSubmissionType,
+    })
+
     useEffect(() => {
         if (searchParams.get('showTempUndoWithdrawBanner') === 'true') {
             setShowTempUndoWithdrawBanner(true)
@@ -115,23 +120,8 @@ export const SubmissionSummary = (): React.ReactElement => {
 
     // Setting app wide variables
     useEffect(() => {
-        updateHeading({
-            customHeading: name,
-        })
-    }, [name, updateHeading])
-
-    // Set state info for the header
-    useEffect(() => {
-        if (stateCode || stateName) {
-            updateStateContent(stateCode, stateName)
-        } else {
-            updateStateContent(undefined, undefined)
-        }
-
-        return () => {
-            updateStateContent(undefined, undefined)
-        }
-    }, [stateCode, stateName, updateStateContent])
+        updateHeading({ customHeading: stateHeader })
+    }, [stateHeader, updateHeading])
 
     // Set the active main content to focus when click the Skip to main content button.
     useEffect(() => {

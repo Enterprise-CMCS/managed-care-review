@@ -5,16 +5,18 @@ import {
     GridContainer,
 } from '@trussworks/react-uswds'
 import { Formik, FormikErrors } from 'formik'
-import { FieldTextInput } from '../../components/Form'
 import { MccrsIdFormSchema } from './MccrsIdSchema'
 import { recordJSException } from '@mc-review/otel'
 import { useNavigate, useParams } from 'react-router-dom'
-import { GenericApiErrorBanner } from '../../components/Banner/GenericApiErrorBanner/GenericApiErrorBanner'
-import { ActionButton } from '../../components/ActionButton'
 import { usePage } from '../../contexts/PageContext'
-import { Loading } from '../../components'
+import {
+    Loading,
+    GenericApiErrorBanner,
+    ActionButton,
+    FieldTextInput,
+    Breadcrumbs,
+} from '../../components'
 import { useAuth } from '../../contexts/AuthContext'
-import { Breadcrumbs } from '../../components/Breadcrumbs/Breadcrumbs'
 import { RoutesRecord } from '@mc-review/constants'
 import { GenericErrorPage } from '../Errors/GenericErrorPage'
 import { Error404 } from '../Errors/Error404Page'
@@ -25,6 +27,7 @@ import {
     Contract,
 } from '../../gen/gqlClient'
 import styles from './MccrsId.module.scss'
+import { useMemoizedStateHeader } from '../../hooks'
 
 export interface MccrsIdFormValues {
     mccrsId: number | undefined
@@ -69,12 +72,16 @@ export const MccrsId = (): React.ReactElement => {
         contract && contract?.packageSubmissions.length > 0
             ? contract.packageSubmissions[0].contractRevision.contractName
             : ''
+    const stateHeader = useMemoizedStateHeader({
+        subHeaderText: contractName,
+        stateCode: contract?.state.code,
+        stateName: contract?.state.name,
+        contractType: contract?.contractSubmissionType,
+    })
 
     useEffect(() => {
-        updateHeading({
-            customHeading: contractName,
-        })
-    }, [contractName, updateHeading])
+        updateHeading({ customHeading: stateHeader })
+    }, [stateHeader, updateHeading])
 
     // Handle loading and error states for fetching data while using cached data
     if (!fetchContractData && fetchContractLoading) {

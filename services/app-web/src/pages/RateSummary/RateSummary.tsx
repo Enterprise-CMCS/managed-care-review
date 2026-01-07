@@ -34,14 +34,13 @@ import { handleApolloErrorsAndAddUserFacingMessages } from '@mc-review/helpers'
 import { StatusUpdatedBanner } from '../../components/Banner'
 import { ChildrenType } from '../../components/MultiColumnGrid/MultiColumnGrid'
 import { getSubmissionPath } from '../../routeHelpers'
+import { useMemoizedStateHeader } from '../../hooks'
 
 export const RateSummary = (): React.ReactElement => {
     // Page level state
     const { loggedInUser } = useAuth()
-    const { updateHeading, updateActiveMainContent, updateStateContent } =
-        usePage()
+    const { updateHeading, updateActiveMainContent } = usePage()
     const navigate = useNavigate()
-    const [rateName, setRateName] = useState<string | undefined>(undefined)
     const [searchParams, setSearchParams] = useSearchParams()
     const [showUndoWithdrawBanner, setUndowWithdrawBanner] =
         useState<boolean>(false)
@@ -58,10 +57,6 @@ export const RateSummary = (): React.ReactElement => {
             setSearchParams(searchParams, { replace: true })
         }
     }, [searchParams, setSearchParams])
-
-    useEffect(() => {
-        updateHeading({ customHeading: rateName })
-    }, [rateName, updateHeading])
 
     const isStateUser = loggedInUser?.role === 'STATE_USER'
     const isCMSUser = hasCMSUserPermissions(loggedInUser)
@@ -99,26 +94,24 @@ export const RateSummary = (): React.ReactElement => {
         },
         fetchPolicy: 'cache-and-network',
     })
-    const stateCode = fetchContractData?.fetchContract.contract.state.code
-    const stateName = fetchContractData?.fetchContract.contract.state.name
     const activeMainContentId = 'rateSummaryPageMainContent'
+
     // Set the active main content to focus when click the Skip to main content button.
     useEffect(() => {
         updateActiveMainContent(activeMainContentId)
     }, [activeMainContentId, updateActiveMainContent])
 
-    // Set state info for the header
-    useEffect(() => {
-        if (stateCode || stateName) {
-            updateStateContent(stateCode, stateName)
-        } else {
-            updateStateContent(undefined, undefined)
-        }
+    const stateHeader = useMemoizedStateHeader({
+        subHeaderText:
+            rate?.revisions[0].formData.rateCertificationName ?? undefined,
+        stateCode: fetchContractData?.fetchContract.contract.state.code,
+        stateName: fetchContractData?.fetchContract.contract.state.name,
+    })
 
-        return () => {
-            updateStateContent(undefined, undefined)
-        }
-    }, [stateCode, stateName, updateStateContent])
+    useEffect(() => {
+        updateHeading({ customHeading: stateHeader })
+    }, [updateHeading, stateHeader])
+
     // Handle loading and error states for fetching data while using cached data
     if (!data && loading) {
         return (
@@ -140,8 +133,6 @@ export const RateSummary = (): React.ReactElement => {
         return <GenericErrorPage />
     }
 
-    const currentRateRev = rate.revisions[0]
-
     // Redirecting a state user to the edit page if rate is unlocked
     if (
         data &&
@@ -149,13 +140,6 @@ export const RateSummary = (): React.ReactElement => {
         rate.status === 'UNLOCKED'
     ) {
         navigate(`/rates/${id}/edit`)
-    }
-
-    if (
-        rateName !== currentRateRev.formData.rateCertificationName &&
-        currentRateRev.formData.rateCertificationName
-    ) {
-        setRateName(currentRateRev.formData.rateCertificationName)
     }
 
     const contract = fetchContractData?.fetchContract.contract

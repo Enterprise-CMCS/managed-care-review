@@ -19,6 +19,7 @@ import {
 } from '../StateSubmission/SharedSubmissionComponents/ErrorOrLoadingPage'
 import { Error404 } from '../Errors/Error404Page'
 import { getSubmissionPath } from '../../routeHelpers'
+import { useMemoizedStateHeader } from '../../hooks'
 
 export const SubmissionRevisionSummary = (): React.ReactElement => {
     // Page level state
@@ -65,14 +66,16 @@ export const SubmissionRevisionSummary = (): React.ReactElement => {
             : undefined
     const name = targetPreviousSubmission?.contractRevision.contractName
 
+    const stateHeader = useMemoizedStateHeader({
+        subHeaderText: name,
+        stateCode: contract?.state.code,
+        stateName: contract?.state.name,
+        contractType: contract?.contractSubmissionType,
+    })
+
     useEffect(() => {
-        // make sure you do not update the page heading until we are sure the name for that previous submission exists
-        if (name) {
-            updateHeading({
-                customHeading: name,
-            })
-        }
-    }, [name, updateHeading])
+        updateHeading({ customHeading: stateHeader })
+    }, [stateHeader, updateHeading])
 
     // Display any full page interim state resulting from the initial fetch API requests
     if (fetchContractLoading) {

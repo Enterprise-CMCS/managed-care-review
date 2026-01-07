@@ -1,20 +1,22 @@
-import React from 'react'
+import React, { useEffect } from 'react'
 import { useOutletContext, Navigate, generatePath } from 'react-router-dom'
 import {
     RoutesRecord,
     ContractSubmissionTypeRecord,
 } from '@mc-review/constants'
-import { useRouteParams } from '../../hooks'
+import { useMemoizedStateHeader, useRouteParams } from '../../hooks'
 import { featureFlags } from '@mc-review/common-code'
 import { useLDClient } from 'launchdarkly-react-client-sdk'
 import { SideNavOutletContextType } from '../SubmissionSideNav/SubmissionSideNav'
 import { EQROSubmissionForm } from './EQROSubmission'
 import { HealthPlanSubmissionForm } from './HealthPlanSubmission/HealthPlanSubmissionForm'
 import { Error404 } from '../Errors/Error404Page'
+import { usePage } from '../../contexts/PageContext'
 
 // Can move this AppRoutes on future pass - leaving it here now to make diff clear
 export const StateSubmissionForm = (): React.ReactElement => {
     const { contractSubmissionType } = useRouteParams()
+    const { updateHeading } = usePage()
     const ldClient = useLDClient()
     const showEqroSubmissions: boolean = ldClient?.variation(
         featureFlags.EQRO_SUBMISSIONS.flag,
@@ -22,6 +24,17 @@ export const StateSubmissionForm = (): React.ReactElement => {
     )
 
     const { contract } = useOutletContext<SideNavOutletContextType>()
+
+    const stateHeader = useMemoizedStateHeader({
+        subHeaderText: contract?.draftRevision?.contractName,
+        stateCode: contract?.state.code,
+        stateName: contract?.state.name,
+        contractType: contract?.contractSubmissionType,
+    })
+
+    useEffect(() => {
+        updateHeading({ customHeading: stateHeader })
+    }, [stateHeader, updateHeading])
 
     if (contract.status === 'RESUBMITTED' || contract.status === 'SUBMITTED') {
         return (

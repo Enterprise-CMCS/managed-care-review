@@ -26,7 +26,7 @@ import {
 import { Formik, FormikErrors } from 'formik'
 import { usePage } from '../../contexts/PageContext'
 import { recordJSException } from '@mc-review/otel'
-import { useTealium } from '../../hooks'
+import { useMemoizedStateHeader, useTealium } from '../../hooks'
 import * as Yup from 'yup'
 import { formatUserInputDate } from '@mc-review/dates'
 import { validateDateFormat } from '../../formHelpers'
@@ -56,7 +56,7 @@ const ReleasedToState = () => {
         id: string
         contractSubmissionType: string
     }>()
-    const { updateHeading, updateStateContent } = usePage()
+    const { updateHeading } = usePage()
     const { logFormSubmitEvent } = useTealium()
     const navigate = useNavigate()
     const [shouldValidate, setShouldValidate] = React.useState(false)
@@ -87,26 +87,17 @@ const ReleasedToState = () => {
         (contract?.packageSubmissions &&
             contract?.packageSubmissions[0].contractRevision.contractName) ||
         ''
-    const stateName = contract?.state.name
-    const stateCode = contract?.state.code
+    const stateHeader = useMemoizedStateHeader({
+        subHeaderText: contractName,
+        stateCode: contract?.state.code,
+        stateName: contract?.state.name,
+        contractType: contract?.contractSubmissionType,
+    })
 
     // update heading
     useEffect(() => {
-        updateHeading({ customHeading: `${contractName} Released to state` })
-    }, [contractName, updateHeading])
-
-    // Set state info for the header
-    useEffect(() => {
-        if (stateCode || stateName) {
-            updateStateContent(stateCode, stateName)
-        } else {
-            updateStateContent(undefined, undefined)
-        }
-
-        return () => {
-            updateStateContent(undefined, undefined)
-        }
-    }, [stateCode, stateName, updateStateContent])
+        updateHeading({ customHeading: stateHeader })
+    }, [stateHeader, updateHeading])
 
     if (fetchContractLoading) {
         return <ErrorOrLoadingPage state="LOADING" />

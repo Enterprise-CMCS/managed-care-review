@@ -3,7 +3,7 @@ import { usePage } from '../../../contexts/PageContext'
 import { GridContainer, Link } from '@trussworks/react-uswds'
 import { Navigate } from 'react-router-dom'
 import { useAuth } from '../../../contexts/AuthContext'
-import { useRouteParams } from '../../../hooks'
+import { useMemoizedStateHeader, useRouteParams } from '../../../hooks'
 import { hasCMSUserPermissions } from '@mc-review/helpers'
 import { useFetchContractWithQuestionsQuery } from '../../../gen/gqlClient'
 import {
@@ -49,13 +49,17 @@ export const EQROSubmissionSummary = (): React.ReactElement => {
             ? contract.packageSubmissions[0].contractRevision.contractName
             : ''
     const activeMainContentId = 'submissionSummaryPageMainContent'
+    const stateHeader = useMemoizedStateHeader({
+        subHeaderText: name,
+        stateCode: contract?.state.code,
+        stateName: contract?.state.name,
+        contractType: contract?.contractSubmissionType,
+    })
 
     // Setting app wide variables
     useEffect(() => {
-        updateHeading({
-            customHeading: name,
-        })
-    }, [name, updateHeading])
+        updateHeading({ customHeading: stateHeader })
+    }, [stateHeader, updateHeading])
 
     // Set the active main content to focus when click the Skip to main content button.
     useEffect(() => {
