@@ -249,7 +249,7 @@ it('opens submit modal', async () => {
     expect(screen.getByText('Ready to submit?')).toBeInTheDocument()
     expect(
         screen.getByText(
-            'When you click submit, our system will decide if CMS will review your submission. The decision is based on the information you provide on this form.'
+            'When you click submit, your responses determine whether this submission is subject to formal CMS review and approval.'
         )
     ).toBeInTheDocument()
 })
