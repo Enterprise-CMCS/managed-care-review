@@ -36,7 +36,6 @@ import { useTealium } from '../../hooks'
 import useDeepCompareEffect from 'use-deep-compare-effect'
 import { getTealiumFiltersChanged } from '../../tealium/tealiumHelpers'
 import {
-    titleCaseString,
     pluralize,
     formatContractSubTypeForDisplay,
     featureFlags,
@@ -217,7 +216,7 @@ const getSelectedFiltersFromUrl = (
         .filter((item) => item.id === id)
         .map((item) => ({
             value: item.value,
-            label: titleCaseString(item.value),
+            label: stateNameToStateCode(item.value),
         }))
     return filterValues as FilterOptionType[]
 }
@@ -444,7 +443,7 @@ export const ContractTable = ({
         .sort()
         .map((state) => ({
             value: state,
-            label: state,
+            label: stateNameToStateCode(state),
         }))
 
     const filterLength = columnFilters.flatMap((filter) => filter.value).length
