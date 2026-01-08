@@ -33,7 +33,7 @@
         "@opentelemetry/sdk-trace-node": "^2.2.0",
         "@opentelemetry/semantic-conventions": "^1.38.0",
         "aws-lambda": "^1.0.7",
-        "file-type": "^19.5.0",
+        "file-type": "^21.3.0",
         "mime-types": "^3.0.1"
     },
     "devDependencies": {
