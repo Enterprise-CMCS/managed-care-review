@@ -2,11 +2,11 @@ import React from 'react'
 
 export const EQROModalDescription = (
     <>
-        <p>
+        <p style={{ marginBottom: '12px' }}>
             When you click submit, your responses determine whether this
             submission is subject to formal CMS review and approval.
         </p>
-        <p style={{ marginBottom: 0 }}>
+        <p style={{ marginBottom: 0, marginTop: 0 }}>
             {' '}
             We will send an email with the following information:
         </p>
