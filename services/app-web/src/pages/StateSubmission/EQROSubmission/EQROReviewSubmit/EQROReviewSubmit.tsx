@@ -124,6 +124,11 @@ export const EQROReviewSubmit = (): React.ReactElement => {
                 />
             </FormNotificationContainer>
             <GridContainer className={styles.reviewSectionWrapper}>
+                <div role="note" className={styles.reviewInfoDisclaimer}>
+                    The information you provide on this form determines whether
+                    this submission is subject to formal CMS review and
+                    approval.
+                </div>
                 <EQROSubmissionTypeSummarySection
                     contract={contract}
                     isStateUser={isStateUser}
