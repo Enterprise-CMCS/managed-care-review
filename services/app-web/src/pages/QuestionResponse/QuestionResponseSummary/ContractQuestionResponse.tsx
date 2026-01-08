@@ -1,4 +1,4 @@
-import { useEffect } from 'react'
+import { useEffect, useLayoutEffect } from 'react'
 import { GridContainer } from '@trussworks/react-uswds'
 import styles from '../QuestionResponse.module.scss'
 
@@ -19,16 +19,16 @@ import { getUserDivision } from '../QuestionResponseHelpers'
 import { CMSQuestionResponseTable } from '../QATable/CMSQuestionResponseTable'
 import { StateQuestionResponseTable } from '../QATable/StateQuestionResponseTable'
 import { ErrorOrLoadingPage } from '../../StateSubmission'
-import { handleAndReturnErrorState } from '../../StateSubmission/SharedSubmissionComponents/ErrorOrLoadingPage'
+import { handleAndReturnErrorState } from '../../StateSubmission/SharedSubmissionComponents'
 import { useAuth } from '../../../contexts/AuthContext'
+import { useMemoizedStateHeader } from '../../../hooks'
 
 export const ContractQuestionResponse = () => {
     const { id } = useParams() as { id: string }
     const location = useLocation()
     const submitType = new URLSearchParams(location.search).get('submit')
     let division: Division | undefined = undefined
-    const { updateHeading, updateActiveMainContent, updateStateContent } =
-        usePage()
+    const { updateHeading, updateActiveMainContent } = usePage()
     const { loggedInUser } = useAuth()
     const hasCMSPermissions = hasCMSUserPermissions(loggedInUser)
 
@@ -45,30 +45,21 @@ export const ContractQuestionResponse = () => {
     const contractRev = contract?.packageSubmissions?.[0]?.contractRevision
     const contractName = contractRev?.contractName ?? undefined
     const activeMainContentId = 'contractQuestionResponseMainContent'
-    const stateCode = contract?.state.code
-    const stateName = contract?.state.name
+    const stateHeader = useMemoizedStateHeader({
+        subHeaderText: contractName,
+        stateCode: contract?.state.code,
+        stateName: contract?.state.name,
+        contractType: contract?.contractSubmissionType,
+    })
 
-    useEffect(() => {
-        updateHeading({ customHeading: contractName })
-    }, [contractName, updateHeading])
+    useLayoutEffect(() => {
+        updateHeading({ customHeading: stateHeader })
+    }, [stateHeader, updateHeading])
 
     // Set the active main content to focus when click the Skip to main content button.
     useEffect(() => {
         updateActiveMainContent(activeMainContentId)
     }, [activeMainContentId, updateActiveMainContent])
-
-    // Set state info for the header
-    useEffect(() => {
-        if (stateCode || stateName) {
-            updateStateContent(stateCode, stateName)
-        } else {
-            updateStateContent(undefined, undefined)
-        }
-
-        return () => {
-            updateStateContent(undefined, undefined)
-        }
-    }, [stateCode, stateName, updateStateContent])
 
     // Handle loading and error states for fetching data while using cached data
     if (!data && loading) {

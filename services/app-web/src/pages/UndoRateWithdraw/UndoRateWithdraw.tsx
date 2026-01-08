@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react'
+import React, { useLayoutEffect } from 'react'
 import styles from './UndoRateWithdraw.module.scss'
 import {
     ActionButton,
@@ -20,7 +20,7 @@ import { usePage } from '../../contexts/PageContext'
 import { GenericErrorPage } from '../Errors/GenericErrorPage'
 import { Formik, FormikErrors } from 'formik'
 import * as Yup from 'yup'
-import { useTealium } from '../../hooks'
+import { useMemoizedStateHeader, useTealium } from '../../hooks'
 import { recordJSException } from '@mc-review/otel'
 
 type UndoRateWithdrawValues = {
@@ -38,11 +38,10 @@ type FormError =
 
 export const UndoRateWithdraw = () => {
     const { id } = useParams() as { id: string }
-    const { updateHeading, updateStateContent } = usePage()
+    const { updateHeading } = usePage()
     const { logFormSubmitEvent } = useTealium()
     const navigate = useNavigate()
     const [shouldValidate, setShouldValidate] = React.useState(false)
-    const [rateName, setRateName] = useState<string | undefined>(undefined)
     const showFieldErrors = (error?: FormError): boolean =>
         shouldValidate && Boolean(error)
     const [
@@ -63,24 +62,19 @@ export const UndoRateWithdraw = () => {
     })
 
     const rate = data?.fetchRate.rate
-    const stateCode = rate?.state.code
-    const stateName = rate?.state.name
-    // Set state info for the header
-    useEffect(() => {
-        if (stateCode || stateName) {
-            updateStateContent(stateCode, stateName)
-        } else {
-            updateStateContent(undefined, undefined)
-        }
+    const rateCertificationName =
+        rate?.packageSubmissions?.[0]?.rateRevision?.formData
+            .rateCertificationName ?? undefined
+    const stateHeader = useMemoizedStateHeader({
+        subHeaderText:
+            rate?.revisions[0].formData.rateCertificationName ?? undefined,
+        stateCode: rate?.state.code,
+        stateName: rate?.state.name,
+    })
 
-        return () => {
-            updateStateContent(undefined, undefined)
-        }
-    }, [stateCode, stateName, updateStateContent])
-
-    useEffect(() => {
-        updateHeading({ customHeading: rateName })
-    }, [rateName, updateHeading])
+    useLayoutEffect(() => {
+        updateHeading({ customHeading: stateHeader })
+    }, [stateHeader, updateHeading])
 
     if (loading) {
         return <ErrorOrLoadingPage state="LOADING" />
@@ -88,13 +82,6 @@ export const UndoRateWithdraw = () => {
         return <ErrorOrLoadingPage state={handleAndReturnErrorState(error)} />
     } else if (!rate || !rate.packageSubmissions) {
         return <GenericErrorPage />
-    }
-    const rateRev = rate?.packageSubmissions?.[0]?.rateRevision
-    const rateCertificationName =
-        rateRev?.formData.rateCertificationName ?? undefined
-
-    if (rateCertificationName && rateName !== rateCertificationName) {
-        setRateName(rateCertificationName)
     }
 
     const undoWithdrawRateAction = async (values: UndoRateWithdrawValues) => {

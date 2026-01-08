@@ -2,7 +2,7 @@ import { Grid, GridContainer } from '@trussworks/react-uswds'
 import React from 'react'
 import { NavLink } from 'react-router-dom'
 import { AuthModeType } from '@mc-review/common-code'
-import { useCurrentRoute } from '../../hooks/useCurrentRoute'
+import { useCurrentRoute } from '../../hooks'
 import { useAuth } from '../../contexts/AuthContext'
 import { usePage } from '../../contexts/PageContext'
 import { Logo } from '../Logo'
@@ -29,8 +29,8 @@ export const Header = ({
         import.meta.url
     ).href
     const { logout, loggedInUser, loginStatus } = useAuth()
-    const { heading, stateCode, stateName } = usePage()
-    const { currentRoute: route, pathname } = useCurrentRoute()
+    const { heading } = usePage()
+    const { currentRoute: route } = useCurrentRoute()
 
     const handleLogout = async () => {
         await logout({ type: 'DEFAULT' })
@@ -63,9 +63,6 @@ export const Header = ({
             <PageHeadingRow
                 heading={route !== 'UNKNOWN_ROUTE' ? heading : undefined}
                 route={route}
-                stateCode={stateCode}
-                stateName={stateName}
-                pathname={pathname}
                 isLoading={loginStatus === 'LOADING'}
                 loggedInUser={loggedInUser}
             />

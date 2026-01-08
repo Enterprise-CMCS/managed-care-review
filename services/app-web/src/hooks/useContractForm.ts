@@ -1,5 +1,4 @@
-import { useState, useEffect } from 'react'
-import { usePage } from '../contexts/PageContext'
+import { useState } from 'react'
 import {
     CreateContractInput,
     useFetchContractQuery,
@@ -19,7 +18,7 @@ import {
 import { wrapApolloResult, handleApolloError } from '@mc-review/helpers'
 import { recordJSException } from '@mc-review/otel'
 import { ApolloError } from '@apollo/client'
-import type { InterimState } from '../pages/StateSubmission/SharedSubmissionComponents/ErrorOrLoadingPage'
+import type { InterimState } from '../pages/StateSubmission/SharedSubmissionComponents'
 
 type UseContractForm = {
     draftSubmission?: UnlockedContract
@@ -63,14 +62,6 @@ const useContractForm = (contractID?: string): UseContractForm => {
     const [showPageErrorMessage, setShowPageErrorMessage] = useState<
         boolean | string
     >(false) // string is a custom error message, defaults to generic of true
-    const { updateHeading } = usePage()
-    const [pkgNameForHeading, setPkgNameForHeading] = useState<
-        string | undefined
-    >(undefined)
-
-    useEffect(() => {
-        updateHeading({ customHeading: pkgNameForHeading })
-    }, [pkgNameForHeading, updateHeading])
 
     const [createFormData, { client }] = useCreateContractMutation()
 
@@ -270,11 +261,6 @@ const useContractForm = (contractID?: string): UseContractForm => {
                 showPageErrorMessage,
             }
         }
-        const submissionName = contract.draftRevision?.contractName
-        if (pkgNameForHeading !== submissionName) {
-            setPkgNameForHeading(submissionName)
-        }
-
         const rates: Rate[] = []
         const packageSubmissions: ContractPackageSubmission[] = []
         const unlockedContract: UnlockedContract = {
