@@ -10,6 +10,24 @@ Cypress.Commands.add('startNewContractOnlySubmissionWithBaseContract', () => {
     cy.findByRole('heading', { level: 2, name: /Contract details/ })
 })
 
+Cypress.Commands.add('startNewEQROSubmission', () => {
+    cy.findByTestId('state-dashboard-page').should('exist')
+    cy.findByRole('link', { name: 'Start new submission' }).click()
+
+    // Select EQRO submission
+    cy.findByTestId('new-submission-form').should('exist')
+    cy.findByText(/External Quality Review Organization/).click()
+    cy.findByRole('button', { name: 'Start'}).click()
+
+    cy.findByRole('heading', { level: 2, name: /Submission details/ })
+
+    cy.fillOutEQROSubmissionDetails()
+
+    cy.navigateContractForm('CONTINUE')
+
+    cy.findByRole('heading', { level: 2, name: /Contract details/ })
+})
+
 Cypress.Commands.add('startNewContractOnlySubmissionWithBaseContractV2', () => {
     // Must be on '/submissions/new'
     cy.findByTestId('state-dashboard-page').should('exist')
@@ -66,6 +84,23 @@ Cypress.Commands.add('fillOutContractActionOnlyWithBaseContract', () => {
         cy.findByRole('textbox', { name: 'Submission description' }).clear().type(
             'description of contract only submission'
         )
+})
+
+Cypress.Commands.add('fillOutEQROSubmissionDetails', () => {
+    cy.get('label[for="medicaid"]').click()
+    cy.findByRole('combobox', {
+        name: 'Programs reviewed by this EQRO (required)',
+        timeout: 2_000,
+    }).click({
+        force: true,
+    })
+    cy.findByText('PMAP').click()
+    cy.findByLabelText('Managed Care Organization (MCO)').check({ force: true })
+    cy.findByText('Base contract').click()
+
+    cy.findByRole('textbox', { name: 'Submission description' })
+        .clear()
+        .type('description of EQRO submission')
 })
 
 Cypress.Commands.add('fillOutContractActionOnlyWithAmendment', () => {
@@ -194,6 +229,52 @@ Cypress.Commands.add('fillOutBaseContractDetails', () => {
             cy.findByText('Yes').click()
         })
 
+    cy.verifyDocumentsHaveNoErrors()
+    cy.waitForDocumentsToLoad()
+    cy.findAllByTestId('errorMessage').should('have.length', 0)
+})
+
+Cypress.Commands.add('fillOutEQROContractDetails', () => {
+    cy.findAllByLabelText('Start date', { timeout: 2000 })
+        .parents()
+        .findByTestId('date-picker-external-input')
+        .type('04/01/2024')
+        .blur()
+    cy.findAllByLabelText('End date')
+        .parents()
+        .findByTestId('date-picker-external-input')
+        .type('03/31/2025')
+        .blur()
+
+    cy.findAllByText(/Is this contract with a new EQRO contractor?/)
+        .first()
+        .parent()
+        .within(() => {
+            cy.findByText('Yes').click()
+        })
+
+    cy.findAllByText(
+        'New optional activities to be performed on MCO in accordance with 42 CFR $ 438.358(c)'
+    )
+        .first()
+        .parent()
+        .within(() => {
+            cy.findByText('Yes').click()
+        })
+
+    cy.findAllByText(
+        'EQR-related activities for a new MCO managed care program'
+    )
+        .first()
+        .parent()
+        .within(() => {
+            cy.findByText('Yes').click()
+        })
+
+    cy.findAllByTestId('file-input-input').should('have.length', 2)
+    cy.findAllByTestId('file-input-input').each((fileInput) =>
+        cy.wrap(fileInput).attachFile('documents/trussel-guide.pdf')
+    )
     cy.verifyDocumentsHaveNoErrors()
     cy.waitForDocumentsToLoad()
     cy.findAllByTestId('errorMessage').should('have.length', 0)
@@ -552,22 +633,21 @@ Cypress.Commands.add(
             name: 'Submit',
         }).safeClick()
 
-            cy.findAllByTestId('modalWindow')
-            .eq(1)
-            .should('exist')
-            .within(() => {
-                if (resubmission) {
-                    cy.get('#unlockSubmitModalInput').type(
-                        summary || 'Resubmission summary'
-                    )
-                    cy.findByTestId('resubmit_contract-modal-submit').click()
-                } else {
-                    cy.findByTestId('submit_contract-modal-submit').click()
-                }
-            })
+        cy.findAllByTestId('modalWindow')
+        .eq(1)
+        .should('exist')
+        .within(() => {
+            if (resubmission) {
+                cy.get('#unlockSubmitModalInput').type(
+                    summary || 'Resubmission summary'
+                )
+                cy.findByTestId(/_contract-modal-submit/).click()
+            } else {
+                cy.findByTestId(/_contract-modal-submit/).click()
+            }
+        })
 
-            cy.wait('@submitContractMutation', { timeout: 50_000 })
-
+        cy.wait('@submitContractMutation', { timeout: 50_000 })
 
         if (success) {
             cy.findByTestId('state-dashboard-page').should('exist')
