@@ -30,12 +30,7 @@ import './accessibilityCommands'
 import { Contract, Division} from '../gen/gqlClient'
 import { CMSUserType, StateUserType } from '../utils/apollo-test-utils'
 import { CMSUserLoginNames } from './loginCommands'
-
-type FormButtonKey =
-    | 'CONTINUE_FROM_START_NEW'
-    | 'CONTINUE'
-    | 'SAVE_DRAFT'
-    | 'BACK'
+import { FormButtonKey } from './navigateCommands'
 
 declare global {
     namespace Cypress {
@@ -76,6 +71,11 @@ declare global {
                 summary?: string
             }): void
 
+            // EQRO submission form commands
+            startNewEQROSubmission(): void
+            fillOutEQROSubmissionDetails(): void
+            fillOutEQROContractDetails(): void
+
             // submission review commands
             unlockSubmission(unlockReason?: string): void
 
@@ -103,7 +103,7 @@ declare global {
             interceptFeatureFlags(toggleFlags?: FeatureFlagSettings): void
             getFeatureFlagStore(
                 featureFlag?: FeatureFlagLDConstant[]
-            ): Promise<FeatureFlagSettings>
+            ): Chainable<FeatureFlagSettings>
 
             // User settings commands
             assignDivisionToCMSUser({

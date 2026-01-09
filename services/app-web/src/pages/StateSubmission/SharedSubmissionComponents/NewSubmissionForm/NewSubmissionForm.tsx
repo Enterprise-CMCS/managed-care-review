@@ -86,6 +86,8 @@ export const NewSubmission = () => {
                     <Form
                         id="newSubmissionForm"
                         className={styles.formContainer}
+                        aria-label="New Submission Form"
+                        data-testid="new-submission-form"
                         onSubmit={(e) => {
                             setShouldValidate(true)
                             return handleSubmit(e)
@@ -116,6 +118,7 @@ export const NewSubmission = () => {
                                         name="contractType"
                                         label="Health plan"
                                         aria-required
+                                        data-testid="health-plan"
                                         value="health-plan"
                                         list_position={1}
                                         list_options={2}
@@ -128,6 +131,7 @@ export const NewSubmission = () => {
                                         id="eqro"
                                         name="contractType"
                                         label="External Quality Review Organization (EQRO)"
+                                        data-testid="eqro"
                                         aria-required
                                         value="eqro"
                                         list_position={2}
