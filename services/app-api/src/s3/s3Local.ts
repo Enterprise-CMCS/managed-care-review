@@ -98,6 +98,19 @@ export function newLocalS3Client(
             })
             return signedUrl
         },
+        getUploadURL: async (
+            key: string,
+            bucket: string,
+            contentType: string,
+            expiresIn: number
+        ): Promise<string> => {
+            const command = new PutObjectCommand({
+                Bucket: bucket,
+                Key: key,
+                ContentType: contentType,
+            })
+            return getSignedUrl(s3Client, command, { expiresIn })
+        },
         getZipURL: async (
             s3key: string,
             bucket: BucketShortName

@@ -487,6 +487,8 @@ type Mutation {
     deleteOauthClient(input: DeleteOauthClientInput!): DeleteOauthClientPayload!
 
     updateOauthClient(input: UpdateOauthClientInput!): UpdateOauthClientPayload!
+
+    generateUploadURL(input: GenerateUploadURLInput!): GenerateUploadURLPayload!
 }
 
 input CreateContractInput {
@@ -2530,7 +2532,22 @@ type UpdateOauthClientPayload {
     oauthClient: OauthClient!
 }
 
+input GenerateUploadURLInput {
+    fileName: String!
+    contentType: String!
+}
+
+type GenerateUploadURLPayload {
+    uploadURL: String!
+    s3Key: String!
+    bucket: String!
+    expiresIn: Int!
+}
+
 enum ContractSubmissionType {
     HEALTH_PLAN
     EQRO
 }
+
+
+
