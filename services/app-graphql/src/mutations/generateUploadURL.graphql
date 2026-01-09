@@ -1,0 +1,8 @@
+mutation generateUploadURL($input: GenerateUploadURLInput!) {
+    generateUploadURL(input: $input) {
+        uploadURL
+        s3Key
+        bucket
+        expiresIn
+    }
+}
