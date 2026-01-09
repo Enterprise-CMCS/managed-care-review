@@ -1,3 +1,5 @@
+import { stateUser } from '../../utils/apollo-test-utils'
+
 describe('CMS user can view submission', () => {
     beforeEach(() => {
         cy.stubFeatureFlags()
@@ -97,6 +99,23 @@ describe('CMS user can view submission', () => {
             // Double check we do not show any missing field text. This UI is not used for submitted packages
            cy.findByText(/You must provide this information/).should('not.exist')
 
+        })
+    })
+
+    it.only('and navigate to a specific EQRO submission from the submission dashboard', () => {
+        cy.interceptFeatureFlags({
+            'eqro-submissions': true,
+        })
+
+        cy.apiCreateAndSubmitEQROSubmission(stateUser()).then(contract => {
+            const latestSubmission = contract.packageSubmissions[0]
+            const contractName = latestSubmission.contractRevision.contractName
+
+            cy.logInAsCMSUser()
+
+            cy.findByRole('link', { name: contractName}).should('exist').click()
+
+            //TODO: Add assertions for review determination once that is added.
         })
     })
 

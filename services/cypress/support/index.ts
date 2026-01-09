@@ -118,10 +118,10 @@ declare global {
             apiCreateAndSubmitContractOnlySubmission(
                 stateUser: StateUserType
             ): Cypress.Chainable<Contract>
-            apiCreateAndSubmitContractWithRates(
+            apiCreateAndSubmitEQROSubmission(
                 stateUser: StateUserType
             ): Cypress.Chainable<Contract>
-            apiCreateAndSubmitBaseContract(
+            apiCreateAndSubmitContractWithRates(
                 stateUser: StateUserType
             ): Cypress.Chainable<Contract>
             apiAssignDivisionToCMSUser(
