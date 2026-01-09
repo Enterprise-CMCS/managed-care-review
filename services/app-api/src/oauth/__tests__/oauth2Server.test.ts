@@ -354,7 +354,7 @@ describe('CustomOAuth2Server', () => {
             const response = JSON.parse(result.body)
             expect(response).toHaveProperty('access_token')
             expect(response).toHaveProperty('token_type', 'Bearer')
-            expect(response).toHaveProperty('expires_in', 7776000)
+            expect(response).toHaveProperty('expires_in', 1800)
         })
     })
 })
