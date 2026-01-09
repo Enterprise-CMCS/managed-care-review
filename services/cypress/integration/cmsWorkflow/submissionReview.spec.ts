@@ -102,7 +102,7 @@ describe('CMS user can view submission', () => {
         })
     })
 
-    it.only('and navigate to a specific EQRO submission from the submission dashboard', () => {
+    it('and navigate to a specific EQRO submission from the submission dashboard', () => {
         cy.interceptFeatureFlags({
             'eqro-submissions': true,
         })
@@ -114,6 +114,10 @@ describe('CMS user can view submission', () => {
             cy.logInAsCMSUser()
 
             cy.findByRole('link', { name: contractName}).should('exist').click()
+
+            cy.wait('@fetchContractWithQuestionsQuery', { timeout: 20_000 })
+
+            cy.findByRole('heading', { name: contractName, level: 2 })
 
             //TODO: Add assertions for review determination once that is added.
         })
