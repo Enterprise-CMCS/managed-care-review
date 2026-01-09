@@ -297,8 +297,10 @@ model ContractDocument {
   createdAt          DateTime              @default(now())
   updatedAt          DateTime              @default(now()) @updatedAt
   position           Int                   @default(-1)
-  name               String
-  s3URL              String
+  name               String // Original filename from user upload
+  s3URL              String // DEPRECATED: Use s3BucketName + s3Key instead
+  s3BucketName       String? // S3 bucket name (e.g., "uploads-documents-prod-bucket-cdk")
+  s3Key              String? // S3 object key (e.g., "allusers/uuid.pdf")
   sha256             String
   dateAdded          DateTime?
   contractRevisionID String
@@ -310,8 +312,10 @@ model ContractSupportingDocument {
   createdAt          DateTime              @default(now())
   updatedAt          DateTime              @default(now()) @updatedAt
   position           Int                   @default(-1)
-  name               String
-  s3URL              String
+  name               String // Original filename from user upload
+  s3URL              String // DEPRECATED: Use s3BucketName + s3Key instead
+  s3BucketName       String? // S3 bucket name (e.g., "uploads-documents-prod-bucket-cdk")
+  s3Key              String? // S3 object key (e.g., "allusers/uuid.pdf")
   sha256             String
   dateAdded          DateTime?
   contractRevisionID String
@@ -323,8 +327,10 @@ model RateDocument {
   createdAt      DateTime          @default(now())
   updatedAt      DateTime          @default(now()) @updatedAt
   position       Int               @default(-1)
-  name           String
-  s3URL          String
+  name           String // Original filename from user upload
+  s3URL          String // DEPRECATED: Use s3BucketName + s3Key instead
+  s3BucketName   String? // S3 bucket name (e.g., "uploads-documents-prod-bucket-cdk")
+  s3Key          String? // S3 object key (e.g., "allusers/uuid.pdf")
   sha256         String
   dateAdded      DateTime?
   rateRevisionID String
@@ -336,8 +342,10 @@ model RateSupportingDocument {
   createdAt      DateTime          @default(now())
   updatedAt      DateTime          @default(now()) @updatedAt
   position       Int               @default(-1)
-  name           String
-  s3URL          String
+  name           String // Original filename from user upload
+  s3URL          String // DEPRECATED: Use s3BucketName + s3Key instead
+  s3BucketName   String? // S3 bucket name (e.g., "uploads-documents-prod-bucket-cdk")
+  s3Key          String? // S3 object key (e.g., "allusers/uuid.pdf")
   sha256         String
   dateAdded      DateTime?
   rateRevisionID String
