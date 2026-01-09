@@ -37,13 +37,18 @@ import {
     Code,
 } from 'aws-cdk-lib/aws-lambda'
 import { CfnWebACL, CfnWebACLAssociation } from 'aws-cdk-lib/aws-wafv2'
-import { SubnetType, SecurityGroup, Vpc } from 'aws-cdk-lib/aws-ec2'
+import { SubnetType, Vpc, SecurityGroup } from 'aws-cdk-lib/aws-ec2'
 import { Rule, Schedule } from 'aws-cdk-lib/aws-events'
 import { LambdaFunction } from 'aws-cdk-lib/aws-events-targets'
 import { AWS_OTEL_LAYER_ARN } from './lambda-layers'
 import { ApiEndpoint } from '../constructs/api/api-endpoint'
 import path from 'path'
 import type { BundlingOptions } from 'aws-cdk-lib/aws-lambda-nodejs'
+import type { IVpc, ISecurityGroup } from 'aws-cdk-lib/aws-ec2'
+
+export interface AppApiStackProps extends BaseStackProps {
+    // VPC imported from environment (Vpc.fromLookup), security groups from Network stack exports
+}
 
 /**
  * App API stack - GraphQL API with Lambda functions and dedicated API Gateway
@@ -73,12 +78,35 @@ export class AppApiStack extends BaseStack {
     // Shared Prisma engine layer for GraphQL and OAuth functions
     private readonly prismaEngineLayer: ILayerVersion
 
-    constructor(scope: Construct, id: string, props: BaseStackProps) {
+    // Network resources from Network stack
+    private readonly vpc: IVpc
+    private readonly lambdaSecurityGroup: ISecurityGroup
+    private readonly applicationSecurityGroup: ISecurityGroup
+
+    constructor(scope: Construct, id: string, props: AppApiStackProps) {
         super(scope, id, {
             ...props,
             description:
                 'App API - GraphQL Lambda functions and API Gateway integration',
         })
+
+        // Import VPC from environment
+        this.vpc = Vpc.fromLookup(this, 'ImportedVpc', {
+            vpcId: process.env.VPC_ID!,
+        })
+
+        // Import security groups from Network stack CloudFormation exports
+        const networkStackName = `network-${this.stage}-cdk`
+        this.lambdaSecurityGroup = SecurityGroup.fromSecurityGroupId(
+            this,
+            'ImportedLambdaSG',
+            Fn.importValue(`${networkStackName}-LambdaSecurityGroupId`)
+        )
+        this.applicationSecurityGroup = SecurityGroup.fromSecurityGroupId(
+            this,
+            'ImportedApplicationSG',
+            Fn.importValue(`${networkStackName}-ApplicationSecurityGroupId`)
+        )
 
         // Create CloudWatch Log Group for API Gateway access logs
         // Note: API Gateway has two log types:
@@ -443,25 +471,11 @@ export class AppApiStack extends BaseStack {
         role: Role,
         environment: Record<string, string>
     ): NodejsFunction {
-        // Validate required environment variables for VPC configuration
-        const required = ['VPC_ID', 'SG_ID']
-        const missing = required.filter((envVar) => !process.env[envVar])
-        if (missing.length > 0) {
-            throw new Error(
-                `Missing required environment variables for migrate function: ${missing.join(', ')}`
-            )
-        }
-
-        // Import VPC and security group from environment variables (matches serverless pattern)
-        const vpc = Vpc.fromLookup(this, 'ImportedVpc', {
-            vpcId: process.env.VPC_ID!,
-        })
-
-        const lambdaSecurityGroup = SecurityGroup.fromSecurityGroupId(
-            this,
-            'ImportedSecurityGroup',
-            process.env.SG_ID!
-        )
+        // Build security groups array - use both during transition
+        const securityGroups = [
+            this.lambdaSecurityGroup,
+            this.applicationSecurityGroup,
+        ]
 
         const prismaMigrationLayer = new LayerVersion(
             this,
@@ -508,11 +522,11 @@ export class AppApiStack extends BaseStack {
             },
             role,
             layers: [prismaMigrationLayer, this.otelLayer],
-            vpc,
+            vpc: this.vpc,
             vpcSubnets: {
                 subnetType: SubnetType.PRIVATE_WITH_EGRESS,
             },
-            securityGroups: [lambdaSecurityGroup],
+            securityGroups,
             bundling: {
                 format: OutputFormat.ESM,
                 banner: AppApiStack.ESM_BANNER,
@@ -553,25 +567,11 @@ export class AppApiStack extends BaseStack {
         role: Role,
         environment: Record<string, string>
     ): NodejsFunction {
-        // Validate required environment variables for VPC configuration
-        const required = ['VPC_ID', 'SG_ID']
-        const missing = required.filter((envVar) => !process.env[envVar])
-        if (missing.length > 0) {
-            throw new Error(
-                `Missing required environment variables for regenerate zips function: ${missing.join(', ')}`
-            )
-        }
-
-        // Import VPC and security group from environment variables
-        const vpc = Vpc.fromLookup(this, 'RegenerateZipsVpc', {
-            vpcId: process.env.VPC_ID!,
-        })
-
-        const lambdaSecurityGroup = SecurityGroup.fromSecurityGroupId(
-            this,
-            'RegenerateZipsSecurityGroup',
-            process.env.SG_ID!
-        )
+        // Build security groups array - use both during transition
+        const securityGroups = [
+            this.lambdaSecurityGroup,
+            this.applicationSecurityGroup,
+        ]
 
         // Create regenerate zips function with all required configuration
         const regenerateZipsFunction = new NodejsFunction(
@@ -597,11 +597,11 @@ export class AppApiStack extends BaseStack {
                 environment,
                 role,
                 layers: [this.prismaEngineLayer, this.otelLayer],
-                vpc,
+                vpc: this.vpc,
                 vpcSubnets: {
                     subnetType: SubnetType.PRIVATE_WITH_EGRESS,
                 },
-                securityGroups: [lambdaSecurityGroup],
+                securityGroups,
                 bundling: {
                     format: OutputFormat.ESM,
                     banner: AppApiStack.ESM_BANNER,
@@ -623,25 +623,11 @@ export class AppApiStack extends BaseStack {
         role: Role,
         environment: Record<string, string>
     ): NodejsFunction {
-        // Validate required environment variables for VPC configuration
-        const required = ['VPC_ID', 'SG_ID']
-        const missing = required.filter((envVar) => !process.env[envVar])
-        if (missing.length > 0) {
-            throw new Error(
-                `Missing required environment variables for GraphQL function: ${missing.join(', ')}`
-            )
-        }
-
-        // Import VPC and security group from environment variables (matches serverless pattern)
-        const vpc = Vpc.fromLookup(this, 'GraphqlVpc', {
-            vpcId: process.env.VPC_ID!,
-        })
-
-        const lambdaSecurityGroup = SecurityGroup.fromSecurityGroupId(
-            this,
-            'GraphqlSecurityGroup',
-            process.env.SG_ID!
-        )
+        // Build security groups array - use both during transition
+        const securityGroups = [
+            this.lambdaSecurityGroup,
+            this.applicationSecurityGroup,
+        ]
 
         // Create GraphQL function with all required configuration
         const graphqlFunction = new NodejsFunction(this, 'graphqlFunction', {
@@ -664,11 +650,11 @@ export class AppApiStack extends BaseStack {
             environment,
             role,
             layers: [this.prismaEngineLayer, this.otelLayer],
-            vpc,
+            vpc: this.vpc,
             vpcSubnets: {
                 subnetType: SubnetType.PRIVATE_WITH_EGRESS,
             },
-            securityGroups: [lambdaSecurityGroup],
+            securityGroups,
             // Custom bundling to handle .graphql files and other assets
             bundling: {
                 format: OutputFormat.ESM,
@@ -702,25 +688,11 @@ export class AppApiStack extends BaseStack {
         role: Role,
         environment: Record<string, string>
     ): NodejsFunction {
-        // Validate required environment variables for VPC configuration
-        const required = ['VPC_ID', 'SG_ID']
-        const missing = required.filter((envVar) => !process.env[envVar])
-        if (missing.length > 0) {
-            throw new Error(
-                `Missing required environment variables for OAuth token function: ${missing.join(', ')}`
-            )
-        }
-
-        // Import VPC and security group from environment variables (matches serverless pattern)
-        const vpc = Vpc.fromLookup(this, 'OauthVpc', {
-            vpcId: process.env.VPC_ID!,
-        })
-
-        const lambdaSecurityGroup = SecurityGroup.fromSecurityGroupId(
-            this,
-            'OauthSecurityGroup',
-            process.env.SG_ID!
-        )
+        // Build security groups array - use both during transition
+        const securityGroups = [
+            this.lambdaSecurityGroup,
+            this.applicationSecurityGroup,
+        ]
 
         // Create OAuth token function with all required configuration
         const oauthTokenFunction = new NodejsFunction(
@@ -746,11 +718,11 @@ export class AppApiStack extends BaseStack {
                 environment,
                 role,
                 layers: [this.prismaEngineLayer, this.otelLayer],
-                vpc,
+                vpc: this.vpc,
                 vpcSubnets: {
                     subnetType: SubnetType.PRIVATE_WITH_EGRESS,
                 },
-                securityGroups: [lambdaSecurityGroup],
+                securityGroups,
                 bundling: {
                     format: OutputFormat.ESM,
                     banner: AppApiStack.ESM_BANNER,
