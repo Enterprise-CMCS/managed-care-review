@@ -61,7 +61,7 @@ export function generateUploadURLResolver(
             })
         }
 
-        const s3Key = `uploads/${uuidv4()}-${fileName}` //what format do we need to use for the key?
+        const s3Key = `allusers/${uuidv4()}-${fileName}` //what format do we need to use for the key?
         const bucketName = 'QUESTION_ANSWER_DOCS'
 
         const uploadURL = await s3Client.getUploadURL(
