@@ -70,6 +70,7 @@ export class AppApiStack extends BaseStack {
     public readonly cleanupFunction: NodejsFunction
     public readonly migrateFunction: NodejsFunction
     public readonly regenerateZipsFunction: NodejsFunction
+    public readonly migrateS3UrlsFunction: NodejsFunction
 
     public readonly graphqlFunction: NodejsFunction
 
@@ -349,6 +350,12 @@ export class AppApiStack extends BaseStack {
             environment
         )
 
+        // Create migrate S3 URLs function with VPC and layers
+        this.migrateS3UrlsFunction = this.createMigrateS3UrlsFunction(
+            lambdaRole,
+            environment
+        )
+
         // Create GraphQL function with VPC and layers
         this.graphqlFunction = this.createGraphqlFunction(
             lambdaRole,
@@ -614,6 +621,77 @@ export class AppApiStack extends BaseStack {
         )
 
         return regenerateZipsFunction
+    }
+
+    /**
+     * Create the migrate S3 URLs function with VPC and Prisma engine layer
+     * Used to migrate malformed s3URL fields to separate s3BucketName and s3Key columns
+     */
+    private createMigrateS3UrlsFunction(
+        role: Role,
+        environment: Record<string, string>
+    ): NodejsFunction {
+        // Validate required environment variables for VPC configuration
+        const required = ['VPC_ID', 'SG_ID']
+        const missing = required.filter((envVar) => !process.env[envVar])
+        if (missing.length > 0) {
+            throw new Error(
+                `Missing required environment variables for migrate S3 URLs function: ${missing.join(', ')}`
+            )
+        }
+
+        // Import VPC and security group from environment variables
+        const vpc = Vpc.fromLookup(this, 'MigrateS3UrlsVpc', {
+            vpcId: process.env.VPC_ID!,
+        })
+
+        const lambdaSecurityGroup = SecurityGroup.fromSecurityGroupId(
+            this,
+            'MigrateS3UrlsSecurityGroup',
+            process.env.SG_ID!
+        )
+
+        // Create migrate S3 URLs function with all required configuration
+        const migrateS3UrlsFunction = new NodejsFunction(
+            this,
+            'migrateS3UrlsFunction',
+            {
+                functionName: `${ResourceNames.apiName('app-api', this.stage)}-migrate-s3-urls`,
+                runtime: Runtime.NODEJS_20_X,
+                architecture: Architecture.X86_64,
+                handler: 'main',
+                entry: path.join(
+                    __dirname,
+                    '..',
+                    '..',
+                    '..',
+                    'app-api',
+                    'src',
+                    'handlers',
+                    'migrate_s3_urls.ts'
+                ),
+                timeout: Duration.minutes(15), // Extended timeout for processing many documents
+                memorySize: 1024,
+                environment,
+                role,
+                layers: [this.prismaEngineLayer, this.otelLayer],
+                vpc,
+                vpcSubnets: {
+                    subnetType: SubnetType.PRIVATE_WITH_EGRESS,
+                },
+                securityGroups: [lambdaSecurityGroup],
+                bundling: {
+                    format: OutputFormat.ESM,
+                    banner: AppApiStack.ESM_BANNER,
+                    externalModules: ['prisma', '@prisma/client'],
+                    ...this.createBundling('migrate-s3-urls', [
+                        this.getOtelBundlingCommands(),
+                    ]),
+                },
+            }
+        )
+
+        return migrateS3UrlsFunction
     }
 
     /**
@@ -1171,6 +1249,12 @@ export class AppApiStack extends BaseStack {
             value: this.regenerateZipsFunction.functionName,
             exportName: this.exportName('RegenerateZipsFunctionName'),
             description: 'Regenerate zips Lambda function name',
+        })
+
+        new CfnOutput(this, 'MigrateS3UrlsFunctionName', {
+            value: this.migrateS3UrlsFunction.functionName,
+            exportName: this.exportName('MigrateS3UrlsFunctionName'),
+            description: 'Migrate S3 URLs Lambda function name',
         })
 
         new CfnOutput(this, 'ApiGatewayUrl', {
