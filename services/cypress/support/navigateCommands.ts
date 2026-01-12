@@ -1,4 +1,4 @@
-type FormButtonKey =
+export type FormButtonKey =
     | 'CONTINUE_FROM_START_NEW'
     | 'CONTINUE'
     | 'SAVE_DRAFT'
@@ -14,7 +14,7 @@ const buttonsWithLabels: FormButtons = {
 // navigate helper for v2 forms
 Cypress.Commands.add(
     'navigateContractRatesForm',
-    (buttonKey: FormButtonKey, waitForLoad = true) => {
+    (buttonKey: FormButtonKey, waitForLoad: boolean = true) => {
         cy.findByRole('button', {
             name: buttonsWithLabels[buttonKey],
         }).should('not.have.attr', 'aria-disabled')
@@ -29,7 +29,6 @@ Cypress.Commands.add(
             cy.get('[data-testid="saveAsDraftSuccessBanner"]').should('exist')
         } else if (buttonKey === 'CONTINUE_FROM_START_NEW') {
             if (waitForLoad) {
-                // cy.wait('@createContractMutation', { timeout: 50_000 })
                 cy.wait('@fetchContractQuery', { timeout: 20_000 })
             }
             cy.findByTestId('state-submission-form-page').should('exist')
@@ -48,7 +47,8 @@ Cypress.Commands.add(
 // navigate helper for v2 forms
 Cypress.Commands.add(
     'navigateContractForm',
-    (buttonKey: FormButtonKey, waitForLoad = true) => {
+    (buttonKey: FormButtonKey, waitForLoad: boolean = true) => {
+
         cy.findByRole('button', {
             name: buttonsWithLabels[buttonKey],
         }).should('not.have.attr', 'aria-disabled')
@@ -72,16 +72,16 @@ Cypress.Commands.add(
                 cy.findAllByTestId('errorMessage').should('have.length', 0)
                 // cy.wait('@updateContractDraftRevisionMutation', { timeout: 50_000})
             }
-            cy.findByTestId('state-submission-form-page').should('exist')
+            cy.findByTestId(/-submission-form-page/).should('exist')
         } else {
-            cy.findByTestId('state-submission-form-page').should('exist')
+            cy.findByTestId(/-submission-form-page/).should('exist')
         }
     }
 )
 
 Cypress.Commands.add(
     'navigateFormByDirectLink',
-    (url: string, waitForLoad = true) => {
+    (url: string, waitForLoad: boolean = true) => {
         cy.visit(url)
         if (waitForLoad) {
             cy.wait('@fetchContractWithQuestionsQuery', { timeout: 50_000 })

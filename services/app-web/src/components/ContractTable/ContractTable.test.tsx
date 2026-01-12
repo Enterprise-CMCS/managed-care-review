@@ -407,6 +407,7 @@ describe('ContractTable for CMS User (with filters)', () => {
             />,
             {
                 apolloProvider: apolloProviderWithCMSUser(),
+                featureFlags: { 'eqro-submissions': true },
             }
         )
 
@@ -433,26 +434,18 @@ describe('ContractTable for CMS User (with filters)', () => {
 
         await waitFor(async () => {
             //Expected options are present
-            expect(
-                within(comboboxOptions).getByText('Ohio')
-            ).toBeInTheDocument()
-            expect(
-                within(comboboxOptions).getByText('Florida')
-            ).toBeInTheDocument()
-            expect(
-                within(comboboxOptions).getByText('Minnesota')
-            ).toBeInTheDocument()
-            expect(
-                within(comboboxOptions).getByText('Puerto Rico')
-            ).toBeInTheDocument()
+            expect(within(comboboxOptions).getByText('OH')).toBeInTheDocument()
+            expect(within(comboboxOptions).getByText('FL')).toBeInTheDocument()
+            expect(within(comboboxOptions).getByText('MN')).toBeInTheDocument()
+            expect(within(comboboxOptions).getByText('PR')).toBeInTheDocument()
             //Select option Ohio
-            await selectEvent.select(comboboxOptions, 'Ohio')
+            await selectEvent.select(comboboxOptions, 'OH')
         })
 
         //Expect only Ohio to show on table
         const rows = await screen.findAllByRole('row')
         expect(rows).toHaveLength(2)
-        expect(rows[1]).toHaveTextContent('Ohio') // row[0] is the header
+        expect(rows[1]).toHaveTextContent('OH') // row[0] is the header
         expect(
             screen.getByText('Displaying 1 of 5 submissions')
         ).toBeInTheDocument()
@@ -488,6 +481,7 @@ describe('ContractTable for CMS User (with filters)', () => {
             />,
             {
                 apolloProvider: apolloProviderWithCMSUser(),
+                featureFlags: { 'eqro-submissions': true },
             }
         )
 
@@ -517,11 +511,9 @@ describe('ContractTable for CMS User (with filters)', () => {
         const stateOptions = screen.getByTestId('state-filter-options')
         expect(stateOptions).toBeInTheDocument()
         await waitFor(async () => {
-            expect(within(stateOptions).getByText('Ohio')).toBeInTheDocument()
-            expect(
-                within(stateOptions).getByText('Minnesota')
-            ).toBeInTheDocument()
-            await selectEvent.select(stateOptions, 'Minnesota')
+            expect(within(stateOptions).getByText('OH')).toBeInTheDocument()
+            expect(within(stateOptions).getByText('MN')).toBeInTheDocument()
+            await selectEvent.select(stateOptions, 'MN')
         })
 
         //Open submission type combobox and select 'Contract action and rate certification' option
@@ -548,7 +540,7 @@ describe('ContractTable for CMS User (with filters)', () => {
         //Expect only 1 submission filtered from 3 to show on table
         const rows = await screen.findAllByRole('row')
         expect(rows).toHaveLength(2)
-        expect(rows[1]).toHaveTextContent('Minnesota') // row[0] is the header
+        expect(rows[1]).toHaveTextContent('MN') // row[0] is the header
         expect(rows[1]).toHaveTextContent(
             'Contract action and rate certification'
         )
@@ -569,6 +561,7 @@ describe('ContractTable for CMS User (with filters)', () => {
             />,
             {
                 apolloProvider: apolloProviderWithCMSUser(),
+                featureFlags: { 'eqro-submissions': true },
             }
         )
 
@@ -611,7 +604,7 @@ describe('ContractTable for CMS User (with filters)', () => {
         //Expect Texas,o to show on table
         const rows = await screen.findAllByRole('row')
         expect(rows).toHaveLength(2)
-        expect(rows[1]).toHaveTextContent('Texas') // row[0] is the header
+        expect(rows[1]).toHaveTextContent('TX') // row[0] is the header
         expect(
             screen.getByText('Displaying 1 of 5 submissions')
         ).toBeInTheDocument()
@@ -629,8 +622,8 @@ describe('ContractTable for CMS User (with filters)', () => {
         //Expect Minnesota and Texas to show on table
         const rowsAgain = await screen.findAllByRole('row')
         expect(rowsAgain).toHaveLength(3)
-        expect(rowsAgain[1]).toHaveTextContent('Texas')
-        expect(rowsAgain[2]).toHaveTextContent('Minnesota')
+        expect(rowsAgain[1]).toHaveTextContent('TX')
+        expect(rowsAgain[2]).toHaveTextContent('MN')
         expect(
             screen.getByText('Displaying 2 of 5 submissions')
         ).toBeInTheDocument()
@@ -648,11 +641,11 @@ describe('ContractTable for CMS User (with filters)', () => {
         //Expect Minnesota and Texas to show on table
         const rowsAgainAgain = await screen.findAllByRole('row')
         expect(rowsAgainAgain).toHaveLength(6)
-        expect(rowsAgainAgain[1]).toHaveTextContent('Florida')
-        expect(rowsAgainAgain[2]).toHaveTextContent('Ohio')
-        expect(rowsAgainAgain[3]).toHaveTextContent('Puerto Rico')
-        expect(rowsAgainAgain[4]).toHaveTextContent('Texas')
-        expect(rowsAgainAgain[5]).toHaveTextContent('Minnesota')
+        expect(rowsAgainAgain[1]).toHaveTextContent('FL')
+        expect(rowsAgainAgain[2]).toHaveTextContent('OH')
+        expect(rowsAgainAgain[3]).toHaveTextContent('PR')
+        expect(rowsAgainAgain[4]).toHaveTextContent('TX')
+        expect(rowsAgainAgain[5]).toHaveTextContent('MN')
         expect(
             screen.getByText('Displaying 5 of 5 submissions')
         ).toBeInTheDocument()
@@ -688,6 +681,7 @@ describe('ContractTable for CMS User (with filters)', () => {
             />,
             {
                 apolloProvider: apolloProviderWithCMSUser(),
+                featureFlags: { 'eqro-submissions': true },
             }
         )
 
@@ -710,7 +704,7 @@ describe('ContractTable for CMS User (with filters)', () => {
         selectEvent.openMenu(stateCombobox)
         const stateOptions = screen.getByTestId('state-filter-options')
         await waitFor(async () => {
-            await selectEvent.select(stateOptions, 'Minnesota')
+            await selectEvent.select(stateOptions, 'MN')
         })
 
         //Open submission type combobox and select Contract action and rate certification option
@@ -755,6 +749,7 @@ describe('ContractTable for CMS User (with filters)', () => {
             />,
             {
                 apolloProvider: apolloProviderWithCMSUser(),
+                featureFlags: { 'eqro-submissions': true },
             }
         )
 
@@ -781,11 +776,9 @@ describe('ContractTable for CMS User (with filters)', () => {
 
         await waitFor(async () => {
             //Expected options are present
-            expect(
-                within(comboboxOptions).getByText('Florida')
-            ).toBeInTheDocument()
+            expect(within(comboboxOptions).getByText('FL')).toBeInTheDocument()
             //Select option Ohio
-            await selectEvent.select(comboboxOptions, 'Florida')
+            await selectEvent.select(comboboxOptions, 'FL')
         })
 
         const submissionTypeFilter = screen.getByTestId('submissionType-filter')
@@ -848,6 +841,7 @@ describe('ContractTable for CMS User (with filters)', () => {
             />,
             {
                 apolloProvider: apolloProviderWithCMSUser(),
+                featureFlags: { 'eqro-submissions': true },
             }
         )
 
@@ -880,11 +874,9 @@ describe('ContractTable for CMS User (with filters)', () => {
         const stateOptionOne = screen.getByTestId('state-filter-options')
         expect(stateOptionOne).toBeInTheDocument()
         await waitFor(async () => {
-            expect(within(stateOptionOne).getByText('Ohio')).toBeInTheDocument()
-            expect(
-                within(stateOptionOne).getByText('Minnesota')
-            ).toBeInTheDocument()
-            await selectEvent.select(stateOptionOne, 'Minnesota')
+            expect(within(stateOptionOne).getByText('OH')).toBeInTheDocument()
+            expect(within(stateOptionOne).getByText('MN')).toBeInTheDocument()
+            await selectEvent.select(stateOptionOne, 'MN')
         })
 
         //Expect 1 filter applied
@@ -895,8 +887,8 @@ describe('ContractTable for CMS User (with filters)', () => {
         const stateOptionTwo = screen.getByTestId('state-filter-options')
         expect(stateOptionTwo).toBeInTheDocument()
         await waitFor(async () => {
-            expect(within(stateOptionTwo).getByText('Ohio')).toBeInTheDocument()
-            await selectEvent.select(stateOptionTwo, 'Ohio')
+            expect(within(stateOptionTwo).getByText('OH')).toBeInTheDocument()
+            await selectEvent.select(stateOptionTwo, 'OH')
         })
 
         //Expect 2 filter applied

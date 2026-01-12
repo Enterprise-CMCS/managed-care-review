@@ -74,13 +74,10 @@ const PageProvider: React.FC<
             customHeading?: string | React.ReactElement
         }) => {
             const defaultHeading = PageHeadingsRecord[routeName]
-                ? PageHeadingsRecord[routeName]
-                : undefined
-
-            if (!defaultHeading && !customHeading) return
-
-            const heading = customHeading ? customHeading : defaultHeading
-
+            // Using loose equality (==) to check for null/undefined only,
+            // allowing empty strings to pass through as valid headings
+            if (defaultHeading == null && customHeading == null) return
+            const heading = customHeading ?? defaultHeading
             setHeading(heading)
         },
         [routeName]
