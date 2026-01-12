@@ -39,7 +39,7 @@ export function generateUploadURLResolver(
         const expiresIn = 300 //300 is 5 mins, default (900) is 15 mins, I figured 5 should be sufficient ? 
 
         if (!fileName) {
-            const fileNameErr = 'file name is empty' //any specific format we want to put these error messages in?
+            const fileNameErr = 'file name cannot be blank' //any specific format we want to put these error messages in?
             logError('generateUploadURL', fileNameErr)
             setErrorAttributesOnActiveSpan(fileNameErr, span)
             throw new GraphQLError(fileNameErr, {
@@ -50,7 +50,7 @@ export function generateUploadURLResolver(
             })
         }
         if (!contentType) {
-            const contentTypeErr = 'content type is empty'
+            const contentTypeErr = 'content type cannot be blank'
             logError('generateUploadURL', contentTypeErr)
             setErrorAttributesOnActiveSpan(contentTypeErr, span)
             throw new GraphQLError(contentTypeErr, {
