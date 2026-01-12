@@ -229,6 +229,75 @@ it('displays validation messages', async () => {
     })
 })
 
+it('shows validation error when submission description exceeds 1500 characters and clears when characters are removed', async () => {
+    let testLocation: Location
+    renderWithProviders(
+        <Routes>
+            <Route
+                element={<EQROSubmissionDetails />}
+                path={RoutesRecord.SUBMISSIONS_NEW_SUBMISSION_FORM}
+            />
+        </Routes>,
+        {
+            apolloProvider: {
+                mocks: [
+                    fetchCurrentUserMock({ statusCode: 200 }),
+                    fetchCurrentUserMock({ statusCode: 200 }),
+                ],
+            },
+            routerProvider: { route: '/submissions/new/eqro' },
+            location: (location) => (testLocation = location),
+        }
+    )
+
+    await waitFor(() => {
+        expect(testLocation.pathname).toBe(
+            generatePath(RoutesRecord.SUBMISSIONS_NEW_SUBMISSION_FORM, {
+                contractSubmissionType: 'eqro',
+            })
+        )
+    })
+
+    const textarea = screen.getByRole('textbox', {
+        name: 'Submission description',
+    })
+
+    // Text that exceeds limit to trigger error
+    const tooLongText = 'a'.repeat(1501)
+    await userEvent.click(textarea)
+    await userEvent.paste(tooLongText)
+
+    // Click Continue to trigger validation
+    await userEvent.click(
+        screen.getByRole('button', {
+            name: 'Continue',
+        })
+    )
+
+    // Expect error in summary and above text area
+    await waitFor(() => {
+        expect(
+            screen.queryAllByText(
+                'The submission description must be 1500 characters or less.'
+            )
+        ).toHaveLength(2)
+        expect(textarea).toHaveClass('usa-input--error')
+    })
+
+    // Reduce text to not exceed threshhold
+    await userEvent.click(textarea)
+    await userEvent.keyboard('{Backspace}')
+
+    // Expect error to disappear
+    await waitFor(() => {
+        expect(
+            screen.queryByText(
+                'The submission description must be 1500 characters or less.'
+            )
+        ).not.toBeInTheDocument()
+    })
+})
+
 it('displays generic error banner when creating EQRO submission fails', async () => {
     let testLocation: Location
     renderWithProviders(

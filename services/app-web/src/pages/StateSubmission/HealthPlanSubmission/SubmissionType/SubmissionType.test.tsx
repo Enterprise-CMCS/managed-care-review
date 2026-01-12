@@ -809,5 +809,52 @@ describe('SubmissionType', () => {
                 ).toHaveLength(2)
             })
         })
+
+        it('shows validation error when submission description exceeds 1500 characters and clears when characters are removed', async () => {
+            renderWithProviders(<SubmissionType />, {
+                apolloProvider: {
+                    mocks: [fetchCurrentUserMock({ statusCode: 200 })],
+                },
+            })
+
+            const textarea = screen.getByRole('textbox', {
+                name: 'Submission description',
+            })
+
+            // Text that exceeds limit to trigger error
+            const tooLongText = 'a'.repeat(1501)
+            await userEvent.click(textarea)
+            await userEvent.paste(tooLongText)
+
+            // Click Continue to trigger validation
+            await userEvent.click(
+                screen.getByRole('button', {
+                    name: 'Continue',
+                })
+            )
+
+            // Expect error in summary and above text area
+            await waitFor(() => {
+                expect(
+                    screen.queryAllByText(
+                        'The submission description must be 1500 characters or less.'
+                    )
+                ).toHaveLength(2)
+                expect(textarea).toHaveClass('usa-input--error')
+            })
+
+            // Reduce text to not exceed threshhold
+            await userEvent.click(textarea)
+            await userEvent.keyboard('{Backspace}')
+
+            // Expect error to disappear
+            await waitFor(() => {
+                expect(
+                    screen.queryByText(
+                        'The submission description must be 1500 characters or less.'
+                    )
+                ).not.toBeInTheDocument()
+            })
+        })
     })
 })
