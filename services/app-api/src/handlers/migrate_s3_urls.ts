@@ -5,12 +5,13 @@
  * malformed s3URL values. The s3URL format is: s3://bucket/uuid.ext/filename.ext
  * We extract the uuid.ext part and create proper S3 references.
  *
- * Usage:
- *   aws lambda invoke --function-name app-api-{stage}-migrate-s3-urls response.json
+ * Usage (REQUIRED: specify targetBucket):
+ *   aws lambda invoke --function-name app-api-{stage}-migrate-s3-urls \
+ *     --payload '{"targetBucket":"uploads-documents-{stage}-bucket-cdk"}' response.json
  *
  * With options:
  *   aws lambda invoke --function-name app-api-{stage}-migrate-s3-urls \
- *     --payload '{"limit":100,"dryRun":true}' response.json
+ *     --payload '{"targetBucket":"uploads-documents-dev-bucket-cdk","limit":100,"dryRun":true}' response.json
  */
 
 import type { Handler } from 'aws-lambda'
@@ -18,9 +19,9 @@ import { NewPrismaClient } from '../postgres/prismaClient'
 import { getPostgresURL } from './configuration'
 
 export type MigrateS3UrlsEvent = {
+    targetBucket: string // REQUIRED: Target S3 bucket name (e.g., "uploads-documents-dev-bucket-cdk")
     limit?: number // Optional: limit number of documents to migrate per table (default: all)
     dryRun?: boolean // Optional: just count, don't actually migrate (default: false)
-    targetBucket?: string // Optional: override target bucket (default: uploads-documents-prod-bucket-cdk)
 }
 
 export type MigrateS3UrlsResponse = {
@@ -44,6 +45,31 @@ export type MigrateS3UrlsResponse = {
             skipped: number
         }
         rateSupportingDocuments: {
+            processed: number
+            failed: number
+            skipped: number
+        }
+        contractQuestionDocuments: {
+            processed: number
+            failed: number
+            skipped: number
+        }
+        contractQuestionResponseDocuments: {
+            processed: number
+            failed: number
+            skipped: number
+        }
+        rateQuestionDocuments: {
+            processed: number
+            failed: number
+            skipped: number
+        }
+        rateQuestionResponseDocuments: {
+            processed: number
+            failed: number
+            skipped: number
+        }
+        documentZipPackages: {
             processed: number
             failed: number
             skipped: number
@@ -85,12 +111,17 @@ function extractS3KeyFromMalformedUrl(s3URL: string): string | Error {
 }
 
 export const main: Handler = async (
-    event: MigrateS3UrlsEvent = {}
+    event: MigrateS3UrlsEvent
 ): Promise<MigrateS3UrlsResponse> => {
     const dryRun = event.dryRun ?? false
     const limit = event.limit
-    const targetBucket =
-        event.targetBucket ?? 'uploads-documents-prod-bucket-cdk'
+    const targetBucket = event.targetBucket
+
+    if (!targetBucket) {
+        throw new Error(
+            'targetBucket is required. Please specify the target S3 bucket name to run this migration on.'
+        )
+    }
 
     console.info('Starting s3URL migration', {
         dryRun,
@@ -137,6 +168,19 @@ export const main: Handler = async (
             },
             rateDocuments: { processed: 0, failed: 0, skipped: 0 },
             rateSupportingDocuments: { processed: 0, failed: 0, skipped: 0 },
+            contractQuestionDocuments: { processed: 0, failed: 0, skipped: 0 },
+            contractQuestionResponseDocuments: {
+                processed: 0,
+                failed: 0,
+                skipped: 0,
+            },
+            rateQuestionDocuments: { processed: 0, failed: 0, skipped: 0 },
+            rateQuestionResponseDocuments: {
+                processed: 0,
+                failed: 0,
+                skipped: 0,
+            },
+            documentZipPackages: { processed: 0, failed: 0, skipped: 0 },
         },
         errors: [],
     }
@@ -207,6 +251,87 @@ export const main: Handler = async (
             )
         }
 
+        // Migrate ContractQuestionDocument
+        console.info('Migrating ContractQuestionDocument...')
+        const contractQuestionDocsResult = await migrateDocumentTable(
+            prismaClient,
+            'contractQuestionDocument',
+            targetBucket,
+            limit,
+            dryRun
+        )
+        response.results.contractQuestionDocuments = contractQuestionDocsResult
+        if (contractQuestionDocsResult.failed > 0) {
+            response.errors.push(
+                `ContractQuestionDocument: ${contractQuestionDocsResult.failed} failures`
+            )
+        }
+
+        // Migrate ContractQuestionResponseDocument
+        console.info('Migrating ContractQuestionResponseDocument...')
+        const contractQuestionResponseDocsResult = await migrateDocumentTable(
+            prismaClient,
+            'contractQuestionResponseDocument',
+            targetBucket,
+            limit,
+            dryRun
+        )
+        response.results.contractQuestionResponseDocuments =
+            contractQuestionResponseDocsResult
+        if (contractQuestionResponseDocsResult.failed > 0) {
+            response.errors.push(
+                `ContractQuestionResponseDocument: ${contractQuestionResponseDocsResult.failed} failures`
+            )
+        }
+
+        // Migrate RateQuestionDocument
+        console.info('Migrating RateQuestionDocument...')
+        const rateQuestionDocsResult = await migrateDocumentTable(
+            prismaClient,
+            'rateQuestionDocument',
+            targetBucket,
+            limit,
+            dryRun
+        )
+        response.results.rateQuestionDocuments = rateQuestionDocsResult
+        if (rateQuestionDocsResult.failed > 0) {
+            response.errors.push(
+                `RateQuestionDocument: ${rateQuestionDocsResult.failed} failures`
+            )
+        }
+
+        // Migrate RateQuestionResponseDocument
+        console.info('Migrating RateQuestionResponseDocument...')
+        const rateQuestionResponseDocsResult = await migrateDocumentTable(
+            prismaClient,
+            'rateQuestionResponseDocument',
+            targetBucket,
+            limit,
+            dryRun
+        )
+        response.results.rateQuestionResponseDocuments =
+            rateQuestionResponseDocsResult
+        if (rateQuestionResponseDocsResult.failed > 0) {
+            response.errors.push(
+                `RateQuestionResponseDocument: ${rateQuestionResponseDocsResult.failed} failures`
+            )
+        }
+
+        // Migrate DocumentZipPackage
+        console.info('Migrating DocumentZipPackage...')
+        const documentZipPackagesResult = await migrateZipTable(
+            prismaClient,
+            targetBucket,
+            limit,
+            dryRun
+        )
+        response.results.documentZipPackages = documentZipPackagesResult
+        if (documentZipPackagesResult.failed > 0) {
+            response.errors.push(
+                `DocumentZipPackage: ${documentZipPackagesResult.failed} failures`
+            )
+        }
+
         console.info('Migration complete', response)
         return response
     } catch (error) {
@@ -227,7 +352,11 @@ async function migrateDocumentTable(
         | 'contractDocument'
         | 'contractSupportingDocument'
         | 'rateDocument'
-        | 'rateSupportingDocument',
+        | 'rateSupportingDocument'
+        | 'contractQuestionDocument'
+        | 'contractQuestionResponseDocument'
+        | 'rateQuestionDocument'
+        | 'rateQuestionResponseDocument',
     targetBucket: string,
     limit: number | undefined,
     dryRun: boolean
@@ -299,5 +428,96 @@ async function migrateDocumentTable(
     }
 
     console.info(`${tableName} migration complete:`, result)
+    return result
+}
+
+/**
+ * Migrate DocumentZipPackage table - zip files are stored in zips/ folder
+ * Input: s3://uploads-prod-uploads-123/uuid.zip
+ * Output: s3Key = zips/uuid.zip
+ */
+async function migrateZipTable(
+    prismaClient: any,
+    targetBucket: string,
+    limit: number | undefined,
+    dryRun: boolean
+): Promise<{ processed: number; failed: number; skipped: number }> {
+    const result = { processed: 0, failed: 0, skipped: 0 }
+
+    // Find all zips that need migration (s3BucketName is null)
+    const zips = await prismaClient.documentZipPackage.findMany({
+        where: {
+            s3BucketName: null,
+        },
+        select: {
+            id: true,
+            s3URL: true,
+        },
+        take: limit,
+    })
+
+    console.info(
+        `Found ${zips.length} zip packages to migrate in DocumentZipPackage`
+    )
+
+    for (const zip of zips) {
+        try {
+            // Extract the zip filename from s3URL
+            // s3URL format: s3://bucket-name/uuid.zip
+            const parts = zip.s3URL.split('/')
+            if (parts.length < 4) {
+                console.error(
+                    `Invalid s3URL format for DocumentZipPackage ${zip.id}: ${zip.s3URL}`
+                )
+                result.failed++
+                continue
+            }
+
+            const zipFilename = parts[3] // uuid.zip
+            if (!zipFilename) {
+                console.error(
+                    `Could not extract zip filename from s3URL for DocumentZipPackage ${zip.id}: ${zip.s3URL}`
+                )
+                result.failed++
+                continue
+            }
+
+            const s3Key = `zips/${zipFilename}`
+
+            if (dryRun) {
+                console.info(
+                    `[DRY RUN] Would update DocumentZipPackage ${zip.id}: s3BucketName="${targetBucket}", s3Key="${s3Key}"`
+                )
+                result.processed++
+                continue
+            }
+
+            // Update the zip package with new fields
+            await prismaClient.documentZipPackage.update({
+                where: { id: zip.id },
+                data: {
+                    s3BucketName: targetBucket,
+                    s3Key: s3Key,
+                },
+            })
+
+            result.processed++
+
+            if (result.processed % 100 === 0) {
+                console.info(
+                    `Progress: ${result.processed}/${zips.length} zips migrated in DocumentZipPackage`
+                )
+            }
+        } catch (error) {
+            const errorMessage =
+                error instanceof Error ? error.message : String(error)
+            console.error(
+                `Failed to migrate DocumentZipPackage ${zip.id}: ${errorMessage}`
+            )
+            result.failed++
+        }
+    }
+
+    console.info('DocumentZipPackage migration complete:', result)
     return result
 }
