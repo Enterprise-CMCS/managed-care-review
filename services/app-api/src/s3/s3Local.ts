@@ -105,7 +105,7 @@ export function newLocalS3Client(
             expiresIn: number
         ): Promise<string> => {
             const command = new PutObjectCommand({
-                Bucket: bucket,
+                Bucket: bucketConfig[bucket],
                 Key: key,
                 ContentType: contentType,
             })

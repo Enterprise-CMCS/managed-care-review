@@ -9,9 +9,9 @@ import { canWrite } from '../../authorization/oauthAuthorization'
 import { logError, logSuccess } from '../../logger'
 import type { Store } from '../../postgres'
 import type { S3ClientT } from '../../s3'
-import { createUserInputError } from '../errorUtils'
 import { v4 as uuidv4 } from 'uuid'
 import { Context } from '../../handlers/apollo_gql'
+import type { BucketShortName } from '../../s3'
 
 export function generateUploadURLResolver(
     store: Store,
@@ -36,10 +36,10 @@ export function generateUploadURLResolver(
         }
 
         const { fileName, contentType } = input
-        const expiresIn = 300 //300 is 5 mins, default (900) is 15 mins
+        const expiresIn = 300 //300 is 5 mins, default (900) is 15 mins, I figured 5 should be sufficient ? 
 
         if (!fileName) {
-            const fileNameErr = 'file name is empty'
+            const fileNameErr = 'file name is empty' //any specific format we want to put these error messages in?
             logError('generateUploadURL', fileNameErr)
             setErrorAttributesOnActiveSpan(fileNameErr, span)
             throw new GraphQLError(fileNameErr, {
@@ -61,8 +61,8 @@ export function generateUploadURLResolver(
             })
         }
 
-        const s3Key = `allusers/${uuidv4()}-${fileName}` //what format do we need to use for the key?
-        const bucketName = 'QUESTION_ANSWER_DOCS'
+        const s3Key = `${uuidv4()}-${fileName}` //does this work for the key format? 
+        const bucketName: BucketShortName = 'QUESTION_ANSWER_DOCS'
 
         const uploadURL = await s3Client.getUploadURL(
             s3Key,

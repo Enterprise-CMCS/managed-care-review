@@ -61,8 +61,8 @@ export function newDeployedS3Client(
             expiresIn: number
         ): Promise<string> => {
             const command = new PutObjectCommand({
-                Bucket: bucket,
-                Key: key,
+                Bucket: bucketConfig[bucket],
+                Key: `allusers/${key}`,
                 ContentType: contentType,
             })
             return getSignedUrl(s3Client, command, { expiresIn })
