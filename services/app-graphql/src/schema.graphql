@@ -2541,7 +2541,7 @@ type GenerateUploadURLPayload {
     uploadURL: String!
     s3Key: String!
     bucket: String!
-    expiresIn: Int!
+    expiresIn: Int
 }
 
 enum ContractSubmissionType {

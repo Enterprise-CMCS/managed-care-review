@@ -16,7 +16,7 @@ export type S3ClientT = {
     ) => Promise<string>
     getUploadURL: (
         key: string,
-        bucket: string,
+        bucket: BucketShortName,
         contentType: string,
         expiresIn: number
     ) => Promise<string>

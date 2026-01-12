@@ -56,7 +56,7 @@ export function newDeployedS3Client(
         },
         getUploadURL: async (
             key: string,
-            bucket: string,
+            bucket: BucketShortName,
             contentType: string,
             expiresIn: number
         ): Promise<string> => {

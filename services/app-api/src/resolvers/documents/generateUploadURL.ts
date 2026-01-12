@@ -39,15 +39,30 @@ export function generateUploadURLResolver(
         const expiresIn = 300 //300 is 5 mins, default (900) is 15 mins
 
         if (!fileName) {
-            //throw error
+            const fileNameErr = 'file name is empty'
+            logError('generateUploadURL', fileNameErr)
+            setErrorAttributesOnActiveSpan(fileNameErr, span)
+            throw new GraphQLError(fileNameErr, {
+                extensions: {
+                    code: 'INTERNAL_SERVER_ERROR',
+                    cause: 'BAD_USER_INPUT',
+                },
+            })
         }
         if (!contentType) {
-            //throw error
+            const contentTypeErr = 'content type is empty'
+            logError('generateUploadURL', contentTypeErr)
+            setErrorAttributesOnActiveSpan(contentTypeErr, span)
+            throw new GraphQLError(contentTypeErr, {
+                extensions: {
+                    code: 'INTERNAL_SERVER_ERROR',
+                    cause: 'BAD_USER_INPUT',
+                },
+            })
         }
 
-        const s3Key = `uploads/${uuidv4()}-${fileName}`
-        // const s3Key = s3Client.getKey(fileName) //which is correct way to get the key?
-        const bucketName = 'HEALTH_PLAN_DOCS' //we need the document bucket name!!
+        const s3Key = `uploads/${uuidv4()}-${fileName}` //what format do we need to use for the key?
+        const bucketName = 'QUESTION_ANSWER_DOCS'
 
         const uploadURL = await s3Client.getUploadURL(
             s3Key,
@@ -74,6 +89,7 @@ export function generateUploadURLResolver(
             uploadURL,
             s3Key,
             bucket: bucketName,
+            expiresIn
         }
     }
 }
