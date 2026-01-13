@@ -48,7 +48,7 @@ const tableData: ContractInDashboardType[] = [
     },
     {
         id: '74c3c976-45d8-49fe-ac76-6ae3147acd12',
-        contractSubmissionType: 'HEALTH_PLAN',
+        contractSubmissionType: 'EQRO',
         name: 'MCR-PR-0065-PMAP',
         programs: [
             {
@@ -67,7 +67,7 @@ const tableData: ContractInDashboardType[] = [
     },
     {
         id: '2f7f1274-3927-4367-bec6-870587a0f0c6',
-        contractSubmissionType: 'HEALTH_PLAN',
+        contractSubmissionType: 'EQRO',
         name: 'MCR-MN-0063-PMAP',
         programs: [
             {
@@ -126,6 +126,33 @@ export const WithFilters = Template.bind({})
 WithFilters.decorators = [(StoryFn) => ProvidersDecorator(StoryFn, {})]
 WithFilters.args = {
     tableData,
+    user: mockCMSUser,
+    showFilters: true,
+}
+
+// Mix of EQRO and Health Plan submissions
+export const MixedContractTypes = Template.bind({})
+MixedContractTypes.decorators = [(StoryFn) => ProvidersDecorator(StoryFn, {})]
+MixedContractTypes.args = {
+    tableData,
+    user: mockCMSUser,
+    showFilters: true,
+}
+
+// Only EQRO submissions
+export const OnlyEQRO = Template.bind({})
+OnlyEQRO.decorators = [(StoryFn) => ProvidersDecorator(StoryFn, {})]
+OnlyEQRO.args = {
+    tableData: tableData.filter(item => item.contractSubmissionType === 'EQRO'),
+    user: mockCMSUser,
+    showFilters: true,
+}
+
+// Only Health Plan submissions
+export const OnlyHealthPlan = Template.bind({})
+OnlyHealthPlan.decorators = [(StoryFn) => ProvidersDecorator(StoryFn, {})]
+OnlyHealthPlan.args = {
+    tableData: tableData.filter(item => item.contractSubmissionType === 'HEALTH_PLAN'),
     user: mockCMSUser,
     showFilters: true,
 }

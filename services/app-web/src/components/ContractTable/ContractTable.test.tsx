@@ -47,8 +47,8 @@ const submissions: ContractInDashboardType[] = [
     },
     {
         id: 'a6e5eb04-833f-4050-bab4-6ebe8d1a5e75',
-        contractSubmissionType: 'HEALTH_PLAN',
-        name: 'MCR-OH-0069-PMAP',
+        contractSubmissionType: 'EQRO',
+        name: 'MCR-OH-0069-EQRO',
         programs: [
             {
                 __typename: 'Program',
@@ -80,8 +80,8 @@ const submissions: ContractInDashboardType[] = [
     },
     {
         id: '74c3c976-45d8-49fe-ac76-6ae3147acd12',
-        contractSubmissionType: 'HEALTH_PLAN',
-        name: 'MCR-PR-0065-PMAP',
+        contractSubmissionType: 'EQRO',
+        name: 'MCR-PR-0065-EQRO',
         programs: [
             {
                 __typename: 'Program',
@@ -456,6 +456,175 @@ describe('ContractTable for CMS User (with filters)', () => {
         expect(
             screen.getByText('Displaying 1 of 5 submissions')
         ).toBeInTheDocument()
+    })
+
+    it('can filter table by contract type', async () => {
+        renderWithProviders(
+            <ContractTable
+                tableData={submissions}
+                user={mockCMSUser()}
+                showFilters
+            />,
+            {
+                apolloProvider: apolloProviderWithCMSUser(),
+                featureFlags: { 'eqro-submissions': true },
+            }
+        )
+
+        const contractTypeFilter = screen.getByTestId('contractType-filter')
+        const accordionButton = screen.getByTestId(
+            'accordionButton_filterAccordionItems'
+        )
+        await waitFor(async () => {
+            //Expect filter accordion and contract type filter to exist
+            expect(screen.queryByTestId('accordion')).toBeInTheDocument()
+            //Expand filter accordion
+            await userEvent.click(accordionButton)
+        })
+
+        //contract type filter
+        const contractTypeCombobox =
+            within(contractTypeFilter).getByRole('combobox')
+        expect(contractTypeCombobox).toBeInTheDocument()
+
+        //Open combobox
+        selectEvent.openMenu(contractTypeCombobox)
+        //Expect combobox options to exist
+        const comboboxOptions = screen.getByTestId('contractType-filter-options')
+        expect(comboboxOptions).toBeInTheDocument()
+
+        await waitFor(async () => {
+            //Expected options are present
+            expect(within(comboboxOptions).getByText('EQRO')).toBeInTheDocument()
+            expect(
+                within(comboboxOptions).getByText('Health plan')
+            ).toBeInTheDocument()
+            //Select option EQRO
+            await selectEvent.select(comboboxOptions, 'EQRO')
+        })
+
+        //Expect only EQRO submissions to show on table (2 EQRO + 1 header = 3 rows)
+        const rows = await screen.findAllByRole('row')
+        expect(rows).toHaveLength(3)
+        expect(rows[1]).toHaveTextContent('EQRO') // row[0] is the header
+        expect(rows[2]).toHaveTextContent('EQRO')
+        expect(
+            screen.getByText('Displaying 2 of 5 submissions')
+        ).toBeInTheDocument()
+    })
+
+    it('can filter by contract type and state', async () => {
+        renderWithProviders(
+            <ContractTable
+                tableData={submissions}
+                user={mockCMSUser()}
+                showFilters
+            />,
+            {
+                apolloProvider: apolloProviderWithCMSUser(),
+                featureFlags: { 'eqro-submissions': true },
+            }
+        )
+
+        const stateFilter = screen.getByTestId('state-filter')
+        const contractTypeFilter = screen.getByTestId('contractType-filter')
+        const accordionButton = screen.getByTestId(
+            'accordionButton_filterAccordionItems'
+        )
+        await waitFor(async () => {
+            //Expand filter accordion
+            await userEvent.click(accordionButton)
+        })
+
+        //Look for contract type filter
+        const contractTypeCombobox =
+            within(contractTypeFilter).getByRole('combobox')
+        expect(contractTypeCombobox).toBeInTheDocument()
+
+        //Look for state filter
+        const stateCombobox = within(stateFilter).getByRole('combobox')
+        expect(stateCombobox).toBeInTheDocument()
+
+        //Open contract type combobox and select EQRO option
+        selectEvent.openMenu(contractTypeCombobox)
+        const contractTypeOptions = screen.getByTestId(
+            'contractType-filter-options'
+        )
+        expect(contractTypeOptions).toBeInTheDocument()
+        await waitFor(async () => {
+            await selectEvent.select(contractTypeOptions, 'EQRO')
+        })
+
+        //Open state combobox and select Ohio option
+        selectEvent.openMenu(stateCombobox)
+        const stateOptions = screen.getByTestId('state-filter-options')
+        expect(stateOptions).toBeInTheDocument()
+        await waitFor(async () => {
+            expect(within(stateOptions).getByText('Ohio')).toBeInTheDocument()
+            await selectEvent.select(stateOptions, 'Ohio')
+        })
+
+        //Expect only 1 EQRO submission from Ohio (1 data + 1 header = 2 rows)
+        const rows = await screen.findAllByRole('row')
+        expect(rows).toHaveLength(2)
+        expect(rows[1]).toHaveTextContent('OH')
+        expect(rows[1]).toHaveTextContent('EQRO')
+        expect(
+            screen.getByText('Displaying 1 of 5 submissions')
+        ).toBeInTheDocument()
+        expect(global.window.location.href).toContain(
+            'contractSubmissionType%3DEQRO'
+        )
+        expect(global.window.location.href).toContain('stateName%3DOhio')
+    })
+
+    it('can filter by multiple contract types', async () => {
+        renderWithProviders(
+            <ContractTable
+                tableData={submissions}
+                user={mockCMSUser()}
+                showFilters
+            />,
+            {
+                apolloProvider: apolloProviderWithCMSUser(),
+                featureFlags: { 'eqro-submissions': true },
+            }
+        )
+
+        const contractTypeFilter = screen.getByTestId('contractType-filter')
+        const accordionButton = screen.getByTestId(
+            'accordionButton_filterAccordionItems'
+        )
+        await waitFor(async () => {
+            //Expand filter accordion
+            await userEvent.click(accordionButton)
+        })
+
+        //Look for contract type filter
+        const contractTypeCombobox =
+            within(contractTypeFilter).getByRole('combobox')
+
+        //Open contract type combobox and select EQRO
+        selectEvent.openMenu(contractTypeCombobox)
+        let contractTypeOptions = screen.getByTestId('contractType-filter-options')
+        await waitFor(async () => {
+            await selectEvent.select(contractTypeOptions, 'EQRO')
+        })
+
+        //Open again and select Health plan
+        selectEvent.openMenu(contractTypeCombobox)
+        contractTypeOptions = screen.getByTestId('contractType-filter-options')
+        await waitFor(async () => {
+            await selectEvent.select(contractTypeOptions, 'Health plan')
+        })
+
+        //Expect all 5 submissions to show (5 data + 1 header = 6 rows)
+        const rows = await screen.findAllByRole('row')
+        expect(rows).toHaveLength(6)
+        expect(
+            screen.getByText('Displaying 5 of 5 submissions')
+        ).toBeInTheDocument()
+        expect(screen.getByText('2 filters applied')).toBeInTheDocument()
     })
 
     it('can filter by state and submission type', async () => {
