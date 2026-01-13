@@ -488,6 +488,18 @@ type Mutation {
 
     updateOauthClient(input: UpdateOauthClientInput!): UpdateOauthClientPayload!
 
+    """
+    generateUploadURL will create a valid, presigned s3 upload URL for the given file name and content type
+
+    Errors:
+    - ForbiddenError:
+    - A non CMS/CMS Approver user called this
+    - UserInputError:
+    - File name was not provided
+    - Content type was not provided
+    - INTERNAL_SERVER_ERROR
+    - DB_ERROR
+    """
     generateUploadURL(input: GenerateUploadURLInput!): GenerateUploadURLPayload!
 }
 
