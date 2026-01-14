@@ -8,7 +8,7 @@
         "typecheck": "tsc --noEmit"
     },
     "devDependencies": {
-        "@aws-sdk/types": "^3.965.0",
+        "@aws-sdk/types": "^3.968.0",
         "@types/eslint": "^9.6.1",
         "@types/pg": "^8.16.0",
         "@typescript-eslint/eslint-plugin": "^8.52.0",
@@ -26,9 +26,9 @@
         "typescript": "5.9.3"
     },
     "dependencies": {
-        "@aws-sdk/client-cloudformation": "^3.966.0",
-        "@aws-sdk/client-secrets-manager": "^3.966.0",
-        "@aws-sdk/client-s3": "^3.966.0",
+        "@aws-sdk/client-cloudformation": "^3.968.0",
+        "@aws-sdk/client-secrets-manager": "^3.968.0",
+        "@aws-sdk/client-s3": "^3.968.0",
         "pg": "^8.16.3",
         "@prisma/client": "^5.21.1",
         "prisma": "5.22.0"
