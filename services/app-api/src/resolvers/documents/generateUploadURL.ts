@@ -12,6 +12,8 @@ import type { S3ClientT } from '../../s3'
 import { v4 as uuidv4 } from 'uuid'
 import { Context } from '../../handlers/apollo_gql'
 import type { BucketShortName } from '../../s3'
+import { UPLOAD_FILE_TYPE_TO_MIME } from './uploadFileTypeMap'
+import { UploadFileType } from '../../gen/gqlServer'
 
 export function generateUploadURLResolver(
     store: Store,
@@ -35,11 +37,11 @@ export function generateUploadURLResolver(
             })
         }
 
-        const { fileName, contentType } = input
-        const expiresIn = 300 //300 is 5 mins, default (900) is 15 mins, I figured 5 should be sufficient ? 
+        const { fileName, fileType } = input        
+        const expiresIn = 300 //300 is 5 mins, default (900) is 15 mins
 
         if (!fileName) {
-            const fileNameErr = 'file name cannot be blank' //any specific format we want to put these error messages in?
+            const fileNameErr = 'file name cannot be blank'
             logError('generateUploadURL', fileNameErr)
             setErrorAttributesOnActiveSpan(fileNameErr, span)
             throw new GraphQLError(fileNameErr, {
@@ -49,11 +51,17 @@ export function generateUploadURLResolver(
                 },
             })
         }
-        if (!contentType) {
-            const contentTypeErr = 'content type cannot be blank'
-            logError('generateUploadURL', contentTypeErr)
-            setErrorAttributesOnActiveSpan(contentTypeErr, span)
-            throw new GraphQLError(contentTypeErr, {
+        
+        // fileType is guarunteed to be a valid UploadFileType enum by GraphQL, no additional validations needed here
+        const contentType = UPLOAD_FILE_TYPE_TO_MIME[fileType as keyof typeof UPLOAD_FILE_TYPE_TO_MIME]       
+
+        const extension = fileName.split('.').pop()?.toUpperCase()
+
+        if (extension !== fileType) {
+            const extenErr = `File extension ".${extension}" does not match fileType "${fileType}"`
+            logError('generateUploadURL', extenErr)
+            setErrorAttributesOnActiveSpan(extenErr, span)
+            throw new GraphQLError(extenErr, {
                 extensions: {
                     code: 'INTERNAL_SERVER_ERROR',
                     cause: 'BAD_USER_INPUT',

@@ -2546,7 +2546,7 @@ type UpdateOauthClientPayload {
 
 input GenerateUploadURLInput {
     fileName: String!
-    contentType: String!
+    fileType: UploadFileType!
 }
 
 type GenerateUploadURLPayload {
@@ -2554,6 +2554,16 @@ type GenerateUploadURLPayload {
     s3Key: String!
     bucket: String!
     expiresIn: Int
+}
+
+enum UploadFileType {
+    PDF
+    DOC
+    DOCX
+    XLS
+    XLSX
+    XLSM
+    CSV
 }
 
 enum ContractSubmissionType {

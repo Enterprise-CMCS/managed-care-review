@@ -22,14 +22,13 @@ describe(`generateUploadURLResolver`, () => {
             variables: {
                 input: {
                     fileName: 'test-doc.docx',
-                    contentType:
-                        'application/application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+                    fileType: 'DOCX',
                 },
             },
         })
 
-        const payload = result.data?.generateUploadURL
-        
+        expect(result.errors).toBeUndefined()
+        const payload = result.data?.generateUploadURL        
         expect(payload?.uploadURL).toContain('test-doc.docx')
         expect(payload?.expiresIn).toBeDefined()
     })
@@ -40,12 +39,12 @@ describe(`generateUploadURLResolver`, () => {
             variables: {
                 input: {
                     fileName: 'test-sheet.xlsx',
-                    contentType:
-                        'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+                    fileType: 'XLSX',
                 },
             },
         })
 
+        expect(result.errors).toBeUndefined()
         const payload = result.data?.generateUploadURL
         expect(payload).toBeDefined()
         expect(payload?.uploadURL).toContain('test-sheet.xlsx')
@@ -58,7 +57,7 @@ describe(`generateUploadURLResolver`, () => {
             variables: {
                 input: {
                     fileName: '',
-                    contentType: 'application/pdf',
+                    fileType: 'PDF',
                 },
             },
         })
@@ -67,18 +66,18 @@ describe(`generateUploadURLResolver`, () => {
         expect(result.errors?.[0].message).toMatch('file name cannot be blank')
     })
 
-    it('throws an error when content type is missing', async () => {
+    it('throws an error when fileType does not match file extension', async () => {
         const result = await executeGraphQLOperation(server, {
             query: GenerateUploadUrlDocument,
             variables: {
                 input: {
-                    fileName: 'test.pdf',
-                    contentType: '',
+                    fileName: 'test.doc',
+                    fileType: 'PDF',
                 },
             },
         })
 
         expect(result.errors).toBeDefined()
-        expect(result.errors?.[0].message).toMatch('content type cannot be blank')
+        expect(result.errors?.[0].message).toMatch('File extension ".DOC" does not match fileType "PDF"')
     })
 })
