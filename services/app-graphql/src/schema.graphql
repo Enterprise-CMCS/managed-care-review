@@ -487,6 +487,21 @@ type Mutation {
     deleteOauthClient(input: DeleteOauthClientInput!): DeleteOauthClientPayload!
 
     updateOauthClient(input: UpdateOauthClientInput!): UpdateOauthClientPayload!
+
+    """
+    generateUploadURL will create a valid, presigned s3 upload URL for the given file name and content type
+
+    Errors:
+    - ForbiddenError:
+    - A non CMS/CMS Approver user called this
+    - UserInputError:
+    - File name was not provided
+    - Content type was invalid
+    - Content type does not match file type
+    - INTERNAL_SERVER_ERROR
+    - DB_ERROR
+    """
+    generateUploadURL(input: GenerateUploadURLInput!): GenerateUploadURLPayload!
 }
 
 input CreateContractInput {
@@ -2530,7 +2545,32 @@ type UpdateOauthClientPayload {
     oauthClient: OauthClient!
 }
 
+input GenerateUploadURLInput {
+    fileName: String!
+    fileType: UploadFileType!
+}
+
+type GenerateUploadURLPayload {
+    uploadURL: String!
+    s3Key: String!
+    bucket: String!
+    expiresIn: Int
+}
+
+enum UploadFileType {
+    PDF
+    DOC
+    DOCX
+    XLS
+    XLSX
+    XLSM
+    CSV
+}
+
 enum ContractSubmissionType {
     HEALTH_PLAN
     EQRO
 }
+
+
+

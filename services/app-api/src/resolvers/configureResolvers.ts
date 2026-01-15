@@ -63,6 +63,7 @@ import {
 } from './oauthClient'
 import type { DocumentZipService } from '../zip/generateZip'
 import { fetchDocumentResolver } from './documents/fetchDocument'
+import { generateUploadURLResolver } from './documents/generateUploadURL'
 
 export function configureResolvers(
     store: Store,
@@ -134,6 +135,8 @@ export function configureResolvers(
             createOauthClient: createOauthClientResolver(store),
             deleteOauthClient: deleteOauthClientResolver(store),
             updateOauthClient: updateOauthClientResolver(store),
+            generateUploadURL: generateUploadURLResolver(store, s3Client)
+
         },
         User: {
             // resolveType is required to differentiate Unions
