@@ -496,7 +496,8 @@ type Mutation {
     - A non CMS/CMS Approver user called this
     - UserInputError:
     - File name was not provided
-    - Content type was not provided
+    - Content type was invalid
+    - Content type does not match file type
     - INTERNAL_SERVER_ERROR
     - DB_ERROR
     """
