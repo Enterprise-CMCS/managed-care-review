@@ -1,10 +1,10 @@
-import React, { useEffect, useState } from 'react'
+import React, { useLayoutEffect, useState } from 'react'
 import styles from './UndoSubmissionWithdraw.module.scss'
 import * as Yup from 'yup'
 import { Formik, FormikErrors } from 'formik'
 import { useNavigate, useParams } from 'react-router'
 import { usePage } from '../../contexts/PageContext'
-import { useTealium } from '../../hooks'
+import { useMemoizedStateHeader, useTealium } from '../../hooks'
 import {
     ContractSubmissionType,
     useFetchContractQuery,
@@ -43,7 +43,7 @@ export const UndoSubmissionWithdraw = (): React.ReactElement => {
         id: string
         contractSubmissionType: ContractSubmissionType
     }
-    const { updateHeading, updateStateContent } = usePage()
+    const { updateHeading } = usePage()
     const { logFormSubmitEvent } = useTealium()
     const navigate = useNavigate()
     const [shouldValidate, setShouldValidate] = useState(false)
@@ -70,24 +70,17 @@ export const UndoSubmissionWithdraw = (): React.ReactElement => {
     const contract = data?.fetchContract.contract
     const contractName =
         contract?.packageSubmissions[0].contractRevision.contractName
-    const stateCode = contract?.state.code
-    const stateName = contract?.state.name
-    useEffect(() => {
-        updateHeading({ customHeading: contractName })
-    }, [contractName, updateHeading])
+    const stateHeader = useMemoizedStateHeader({
+        subHeaderText: contractName,
+        stateCode: contract?.state.code,
+        stateName: contract?.state.name,
+        contractType: contract?.contractSubmissionType,
+    })
 
-    // Set state info for the header
-    useEffect(() => {
-        if (stateCode || stateName) {
-            updateStateContent(stateCode, stateName)
-        } else {
-            updateStateContent(undefined, undefined)
-        }
+    useLayoutEffect(() => {
+        updateHeading({ customHeading: stateHeader })
+    }, [stateHeader, updateHeading])
 
-        return () => {
-            updateStateContent(undefined, undefined)
-        }
-    }, [stateCode, stateName, updateStateContent])
     if (loading) {
         return <ErrorOrLoadingPage state="LOADING" />
     } else if (error) {

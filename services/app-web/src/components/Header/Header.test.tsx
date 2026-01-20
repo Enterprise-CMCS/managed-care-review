@@ -1,6 +1,6 @@
 import { screen, waitFor } from '@testing-library/react'
 import * as CognitoAuthApi from '../../pages/Auth/cognitoAuth'
-import { renderWithProviders } from '../../testHelpers/jestHelpers'
+import { renderWithProviders } from '../../testHelpers'
 import {
     fetchCurrentUserMock,
     iterableAdminUsersMockData,
@@ -10,26 +10,43 @@ import { Header } from './Header'
 
 describe('Header', () => {
     it('renders without errors', async () => {
-        renderWithProviders(<Header authMode={'AWS_COGNITO'} />)
+        renderWithProviders(<Header authMode={'AWS_COGNITO'} />, {
+            apolloProvider: {
+                mocks: [fetchCurrentUserMock({ statusCode: 200 })],
+            },
+        })
 
-        expect(screen.getByRole('banner')).toBeInTheDocument()
-        expect(screen.getByRole('heading')).toBeInTheDocument()
+        await waitFor(() => {
+            expect(screen.getByRole('banner')).toBeInTheDocument()
+            expect(screen.getByRole('heading')).toBeInTheDocument()
+        })
     })
 
     describe('when logged out', () => {
         it('displays Medicaid logo image link that redirects to /', async () => {
-            renderWithProviders(<Header authMode={'AWS_COGNITO'} />)
+            renderWithProviders(<Header authMode={'AWS_COGNITO'} />, {
+                apolloProvider: {
+                    mocks: [fetchCurrentUserMock({ statusCode: 200 })],
+                },
+            })
             const logoImage = screen.getByRole('img')
             const logoLink = screen.getByRole('link', {
                 name: /One Mac/i,
             })
-            expect(logoLink).toBeVisible()
-            expect(logoLink).toHaveAttribute('href', '/')
-            expect(logoLink).toContainElement(logoImage)
+
+            await waitFor(() => {
+                expect(logoLink).toBeVisible()
+                expect(logoLink).toHaveAttribute('href', '/')
+                expect(logoLink).toContainElement(logoImage)
+            })
         })
 
         it('displays Medicaid and CHIP Managed Care Reporting heading', async () => {
-            renderWithProviders(<Header authMode={'AWS_COGNITO'} />)
+            renderWithProviders(<Header authMode={'AWS_COGNITO'} />, {
+                apolloProvider: {
+                    mocks: [fetchCurrentUserMock({ statusCode: 403 })],
+                },
+            })
 
             await waitFor(() => {
                 expect(screen.getByRole('heading')).toHaveTextContent(
@@ -39,7 +56,11 @@ describe('Header', () => {
         })
 
         it('displays signin link when logged out', async () => {
-            renderWithProviders(<Header authMode={'AWS_COGNITO'} />)
+            renderWithProviders(<Header authMode={'AWS_COGNITO'} />, {
+                apolloProvider: {
+                    mocks: [fetchCurrentUserMock({ statusCode: 403 })],
+                },
+            })
             await waitFor(() => {
                 const signInButton = screen.getByRole('link', {
                     name: /Sign In/i,
@@ -51,7 +72,12 @@ describe('Header', () => {
 
         it('redirects when signin Link is clicked', async () => {
             const { user } = renderWithProviders(
-                <Header authMode={'AWS_COGNITO'} />
+                <Header authMode={'AWS_COGNITO'} />,
+                {
+                    apolloProvider: {
+                        mocks: [fetchCurrentUserMock({ statusCode: 403 })],
+                    },
+                }
             )
             await waitFor(() => {
                 const signInButton = screen.getByRole('link', {
@@ -64,7 +90,7 @@ describe('Header', () => {
     })
 
     describe('when logged in', () => {
-        it('displays Medicaid logo image link that redirects to /', () => {
+        it('displays Medicaid logo image link that redirects to /', async () => {
             renderWithProviders(<Header authMode={'AWS_COGNITO'} />, {
                 apolloProvider: {
                     mocks: [fetchCurrentUserMock({ statusCode: 200 })],
@@ -74,9 +100,11 @@ describe('Header', () => {
             const logoLink = screen.getByRole('link', {
                 name: /One Mac/i,
             })
-            expect(logoLink).toBeVisible()
-            expect(logoLink).toHaveAttribute('href', '/')
-            expect(logoLink).toContainElement(logoImage)
+            await waitFor(() => {
+                expect(logoLink).toBeVisible()
+                expect(logoLink).toHaveAttribute('href', '/')
+                expect(logoLink).toContainElement(logoImage)
+            })
         })
 
         it('displays heading with users state', async () => {

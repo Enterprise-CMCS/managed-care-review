@@ -41,7 +41,7 @@ export const ReviewSubmit = (): React.ReactElement => {
     const modalRef = useRef<ModalRef>(null)
     const statePrograms = useStatePrograms()
     const { loggedInUser } = useAuth()
-    const { updateHeading, updateActiveMainContent } = usePage()
+    const { updateActiveMainContent } = usePage()
     const { id } = useRouteParams()
     const [isSubmitting, setIsSubmitting] = useState<boolean>(false)
     const ldClient = useLDClient()
@@ -69,12 +69,6 @@ export const ReviewSubmit = (): React.ReactElement => {
 
     const contract = data?.fetchContract.contract
     const activeMainContentId = 'reviewSubmitMainContent'
-
-    useEffect(() => {
-        updateHeading({
-            customHeading: contract?.draftRevision?.contractName,
-        })
-    }, [contract, updateHeading])
 
     // Set the active main content to focus when click the Skip to main content button.
     useEffect(() => {

@@ -6,6 +6,7 @@ import {
 } from '@mc-review/constants'
 import { getRelativePath } from '../../routeHelpers'
 import { ContractFormData } from '../../gen/gqlClient'
+import dayjs from 'dayjs'
 
 const getRelativePathFromNestedRoute = (formRouteType: RouteT): string =>
     getRelativePath({
@@ -63,6 +64,26 @@ type ContractFormPageProps = {
     showValidations?: boolean
 }
 
+function formattedDatePlusOneDay(initialValue: string): string {
+    const dayjsValue = dayjs(initialValue)
+    return initialValue && dayjsValue.isValid()
+        ? dayjsValue.add(1, 'day').format('YYYY-MM-DD')
+        : initialValue // preserve undefined to show validations later
+}
+
+function formattedDateMinusOneDay(initialValue: string): string {
+    const dayjsValue = dayjs(initialValue)
+    return initialValue && dayjsValue.isValid()
+        ? dayjsValue.subtract(1, 'day').format('YYYY-MM-DD')
+        : initialValue // preserve undefined to show validations later
+}
+
 export type { ContractFormPageProps }
 
-export { getRelativePathFromNestedRoute, activeFormPages, renameKey }
+export {
+    getRelativePathFromNestedRoute,
+    activeFormPages,
+    renameKey,
+    formattedDatePlusOneDay,
+    formattedDateMinusOneDay,
+}

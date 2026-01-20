@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useLayoutEffect } from 'react'
 import styles from '../QuestionResponse.module.scss'
 import {
     CmsUser,
@@ -21,6 +21,7 @@ import {
 import { usePage } from '../../../contexts/PageContext'
 import { CMSQuestionResponseTable } from '../QATable/CMSQuestionResponseTable'
 import { StateQuestionResponseTable } from '../QATable/StateQuestionResponseTable'
+import { useMemoizedStateHeader } from '../../../hooks'
 
 export const RateQuestionResponse = () => {
     const { id } = useParams() as { id: string }
@@ -28,9 +29,7 @@ export const RateQuestionResponse = () => {
     const submitType = new URLSearchParams(location.search).get('submit')
     const { loggedInUser } = useAuth()
     const { pathname } = useLocation()
-    const { updateHeading, updateActiveMainContent, updateStateContent } =
-        usePage()
-    const [rateName, setRateName] = useState<string | undefined>(undefined)
+    const { updateHeading, updateActiveMainContent } = usePage()
     const hasCMSPermissions = hasCMSUserPermissions(loggedInUser)
     let division: Division | undefined = undefined
 
@@ -49,35 +48,25 @@ export const RateQuestionResponse = () => {
     })
 
     const activeMainContentId = 'rateQuestionResponseMainContent'
+    const rate = data?.fetchRate.rate
+    const rateRev = rate?.packageSubmissions?.[0]?.rateRevision
+    const stateHeader = useMemoizedStateHeader({
+        subHeaderText:
+            data?.fetchRate.rate?.revisions[0].formData.rateCertificationName ??
+            undefined,
+        stateCode: rate?.state.code,
+        stateName: rate?.state.name,
+    })
 
-    useEffect(() => {
-        updateHeading({ customHeading: rateName })
-    }, [rateName, updateHeading])
+    useLayoutEffect(() => {
+        updateHeading({ customHeading: stateHeader })
+    }, [stateHeader, updateHeading])
 
     // Set the active main content to focus when click the Skip to main content button.
     useEffect(() => {
         updateActiveMainContent(activeMainContentId)
     }, [activeMainContentId, updateActiveMainContent])
 
-    const rate = data?.fetchRate.rate
-    const rateRev = rate?.packageSubmissions?.[0]?.rateRevision
-    const rateCertificationName =
-        rateRev?.formData.rateCertificationName ?? undefined
-
-    const stateName = rate?.state.name
-    const stateCode = rate?.state.code
-    // Set state info for the header
-    useEffect(() => {
-        if (stateCode || stateName) {
-            updateStateContent(stateCode, stateName)
-        } else {
-            updateStateContent(undefined, undefined)
-        }
-
-        return () => {
-            updateStateContent(undefined, undefined)
-        }
-    }, [stateCode, stateName, updateStateContent])
     // Handle loading and error states for fetching data while using cached data
     if (!data && loading) {
         return <ErrorOrLoadingPage state="LOADING" />
@@ -90,10 +79,6 @@ export const RateQuestionResponse = () => {
         !rate.questions
     ) {
         return <GenericErrorPage />
-    }
-
-    if (rateCertificationName && rateName !== rateCertificationName) {
-        setRateName(rateCertificationName)
     }
 
     if (hasCMSPermissions) {

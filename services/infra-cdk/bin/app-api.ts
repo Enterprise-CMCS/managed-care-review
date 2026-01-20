@@ -23,6 +23,7 @@ function main(): void {
         const config = getEnvironment(appConfig.stage)
         const env = getCdkEnvironment(appConfig.stage)
 
+        // Create App API stack
         new AppApiStack(
             app,
             ResourceNames.stackName('app-api', appConfig.stage),

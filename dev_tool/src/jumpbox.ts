@@ -1,29 +1,23 @@
 import {
-    addSSHAllowlistRuleToGroup,
     checkAWSAccess,
     describeInstance,
-    describeSecurityGroup,
     getSecretsForRDS,
     startInstance,
     stopInstance,
 } from './aws.js'
-import { NodeSSH } from 'node-ssh'
-import os from 'node:os'
 import { retry } from './retry.js'
-import { fileExists, httpsRequest } from './nodeWrappers.js'
 import { Instance } from '@aws-sdk/client-ec2'
-import { readFileSync } from 'fs'
-import prompts from 'prompts'
+import { execSync, spawn, spawnSync } from 'child_process'
+import { createConnection } from 'net'
 
 function stageForEnv(env: string): string {
-    if (env === 'dev') {
-        return 'main'
-    }
+    // CDK uses consistent naming: dev, val, prod
+    // Old serverless used "main" for dev, but CDK uses "dev"
     return env
 }
 
-// waitForJumpboxToReachState repeatedly checks the ec2 instance to be in the given state or times out
-async function waitForJumpboxToReachState(
+// waitForBastionToReachState repeatedly checks the ec2 instance to be in the given state or times out
+async function waitForBastionToReachState(
     instanceID: string,
     instanceStateCode: number
 ): Promise<undefined | Error> {
@@ -65,13 +59,25 @@ async function waitForJumpboxToReachState(
     return undefined
 }
 
-// ensureJumpboxIsRunning gets the jumpbox Instance and if it's not running it starts it
-async function ensureJumpboxIsRunning(): Promise<Instance | Error> {
+// ensureBastionIsRunning gets the bastion Instance and if it's not running it starts it
+// Now looks for CDK-managed bastion instead of old serverless jumpbox
+async function ensureBastionIsRunning(
+    stage: string
+): Promise<Instance | Error> {
     const instance = await describeInstance({
         Filters: [
             {
-                Name: 'tag:mcr-vmuse',
-                Values: ['jumpbox'],
+                Name: 'tag:Name',
+                Values: [`postgres-${stage}-bastion`],
+            },
+            {
+                Name: 'tag:ManagedBy',
+                Values: ['CDK'],
+            },
+            {
+                // Only find instances that aren't terminated or terminating
+                Name: 'instance-state-name',
+                Values: ['pending', 'running', 'stopping', 'stopped'],
             },
         ],
     })
@@ -79,359 +85,426 @@ async function ensureJumpboxIsRunning(): Promise<Instance | Error> {
         return instance
     }
 
-    const jumpboxStartInstance = instance
+    const bastionInstance = instance
 
-    const jumpboxStartID = jumpboxStartInstance.InstanceId
-    const jumpboxStartState = jumpboxStartInstance.State?.Code
+    const bastionID = bastionInstance.InstanceId
+    const bastionState = bastionInstance.State?.Code
 
-    if (!jumpboxStartID || jumpboxStartState === undefined) {
+    if (!bastionID || bastionState === undefined) {
         return new Error(
-            `AWS didn't return info we needed. id: ${jumpboxStartID} state: ${jumpboxStartState}`
+            `AWS didn't return info we needed. id: ${bastionID} state: ${bastionState}`
         )
     }
 
-    if (jumpboxStartState === 16) {
+    if (bastionState === 16) {
         // running state code
-        console.info('Jumpbox is running')
-        return jumpboxStartInstance
+        console.info('Bastion is running')
+        return bastionInstance
     }
 
-    console.info('Jumpbox is not running', jumpboxStartInstance.State?.Name)
+    console.info('Bastion is not running', bastionInstance.State?.Name)
 
-    if (jumpboxStartState !== 80) {
-        console.info('Jumpbox is not stopped yet. waiting to start it')
+    if (bastionState !== 80) {
+        console.info('Bastion is not stopped yet. waiting to start it')
         // wait for it to be stopped
-        const stopped = await waitForJumpboxToReachState(jumpboxStartID, 80) // 80 is stopped
+        const stopped = await waitForBastionToReachState(bastionID, 80) // 80 is stopped
         if (stopped instanceof Error) {
             return stopped
         }
-        console.info('Jumpbox Stopped')
+        console.info('Bastion Stopped')
     }
 
-    console.info('Starting Jumpbox')
+    console.info('Starting Bastion')
     // issue the start command
-    const startResult = await startInstance(jumpboxStartID)
+    const startResult = await startInstance(bastionID)
     if (startResult instanceof Error) {
         return startResult
     }
 
-    const started = await waitForJumpboxToReachState(jumpboxStartID, 16) // 16 is running
+    const started = await waitForBastionToReachState(bastionID, 16) // 16 is running
     if (started instanceof Error) {
         return started
     }
 
-    console.info('Jumpbox Started')
+    console.info('Bastion Started')
 
     const startedInstance = await describeInstance({
         Filters: [
             {
                 Name: 'instance-id',
-                Values: [jumpboxStartID],
+                Values: [bastionID],
             },
         ],
     })
     if (startedInstance instanceof Error) {
-        console.error('error fetching restarted jumpbox', startedInstance)
+        console.error('error fetching restarted bastion', startedInstance)
         return startedInstance
     }
 
     return startedInstance
 }
 
-async function ensureAllowlistIP(
-    instance: Instance
-): Promise<undefined | Error> {
-    // get my IP address
-    const myIPAddress = await httpsRequest('https://api4.ipify.org')
-    if (myIPAddress instanceof Error) {
-        return myIPAddress
-    }
-
-    // find the security group we care about for this
-    const securityGroupID = instance.SecurityGroups?.find((sg) =>
-        sg.GroupName?.includes('PostgresVm')
-    )
-    if (!securityGroupID || securityGroupID.GroupId === undefined) {
-        return new Error('No security groups on the instance to update')
-    }
-
-    // get the right rule, check if my IP is in it
-    const securityGroup = await describeSecurityGroup(securityGroupID.GroupId)
-    if (securityGroup instanceof Error) {
-        return securityGroup
-    }
-
-    const port22Rules = securityGroup.IpPermissions?.find(
-        (perm) => perm.FromPort === 22
-    )
-    if (!port22Rules) {
-        return new Error(
-            'Security Group does not have port 22 on it, this will probably need to be fixed by hand, contact @mcrd'
-        )
-    }
-
-    const myRule = port22Rules.IpRanges?.find((range) =>
-        range.CidrIp?.startsWith(myIPAddress)
-    )
-    if (myRule) {
-        // if our IP is already allowlisted, we're good.
-        console.info('Already Allowlisted')
-        return undefined
-    }
-
-    // in this case, now we need to add our IP address.
-    console.info('Allowlisting', myIPAddress)
-
-    const result = await addSSHAllowlistRuleToGroup(
-        securityGroupID.GroupId,
-        myIPAddress
-    )
-    if (result instanceof Error) {
-        return result
-    }
-
-    return undefined
-}
-
-async function promptPassword(prompt: string): Promise<string> {
-    const response = await prompts({
-        type: 'password',
-        name: 'password',
-        message: prompt,
-    })
-
-    return response.password
-}
-
-// Attempt SSH connection, prompting for password if needed
-async function attemptSSHConnection(
-    host: string,
-    username: string,
-    privateKeyPath: string
-): Promise<NodeSSH> {
-    const ssh = new NodeSSH()
-
+// Check if Docker is available and running
+function checkDockerAvailable(): void {
+    // First check if Docker CLI is installed
     try {
-        // Read the private key file
-        const privateKey = readFileSync(privateKeyPath, 'utf8')
-        const keyPassword = await promptPassword('Enter SSH key password:')
-
-        await ssh.connect({
-            host,
-            username,
-            privateKey,
-            passphrase: keyPassword,
-        })
-    } catch (err) {
-        if (err instanceof Error) {
-            throw new Error(`SSH connection failed: ${err.message}`)
-        }
-        throw err
-    }
-
-    return ssh
-}
-
-async function cloneDBLocally(
-    envName: string,
-    sshKeyPath: string,
-    stopAfter = true
-) {
-    // check that the ssh key exists
-    // node doesn't support ~ expansion natively, so we do it here.
-    if (sshKeyPath.startsWith('~/')) {
-        sshKeyPath = sshKeyPath.replace(/^~(?=$|\/|\\)/, os.homedir())
-    }
-
-    const sshKeyExists = fileExists(sshKeyPath)
-    if (sshKeyExists instanceof Error) {
-        console.error('failed to check if the ssh key exists', sshKeyExists)
-        process.exit(2)
-    }
-    if (!sshKeyExists) {
+        execSync('docker --version', { stdio: 'ignore' })
+    } catch {
+        console.error('\n❌ Docker is required but not found on your system.')
+        console.error('\nPlease install Docker Desktop:')
         console.error(
-            'The provided SSH key does not appear to exist: ',
-            sshKeyPath
+            '  Mac: https://docs.docker.com/desktop/install/mac-install/'
         )
         console.error(
-            'use the --ssh-key option to specify your ssh key for the jumpbox'
+            '  Windows: https://docs.docker.com/desktop/install/windows-install/'
+        )
+        console.error(
+            '  Linux: https://docs.docker.com/desktop/install/linux-install/'
+        )
+        console.error(
+            '\nAfter installing Docker, restart your terminal and try again.'
         )
         process.exit(1)
     }
+
+    // Check if Docker daemon is running
+    try {
+        execSync('docker ps', { stdio: 'ignore' })
+    } catch {
+        console.error(
+            '\n❌ Docker is installed but the Docker daemon is not running.'
+        )
+        console.error('\nPlease start Docker Desktop and try again.')
+        console.error('  Mac/Windows: Open Docker Desktop application')
+        console.error('  Linux: Run `sudo systemctl start docker`')
+        process.exit(1)
+    }
+}
+
+// Wait for SSM agent to be ready with proper health checks
+async function waitForSSMAgent(instanceID: string): Promise<void> {
+    console.info('Waiting for SSM agent to be ready...')
+    let lastError: string | undefined
+    let lastStatus: string | undefined
+
+    const ssmReadyResult = await retry(async () => {
+        try {
+            // Check if the instance is registered and reachable via SSM
+            const result = execSync(
+                `aws ssm describe-instance-information --region us-east-1 --filters Key=InstanceIds,Values=${instanceID} --query "InstanceInformationList[0].PingStatus" --output text`,
+                { stdio: 'pipe', encoding: 'utf-8' }
+            )
+            const status = result.trim()
+            lastStatus = status
+
+            // PingStatus should be "Online" when ready
+            if (status === 'Online') {
+                return true
+            }
+            // If we got a response but it's not Online, show what we got
+            if (status && status !== 'None') {
+                process.stdout.write(`[${status}]`)
+            } else {
+                process.stdout.write('.')
+            }
+            return false
+        } catch (err) {
+            // Capture error details for debugging
+            if (err instanceof Error) {
+                lastError = err.message
+            } else if (typeof err === 'object' && err !== null) {
+                // execSync errors include stderr in the error object
+                const execError = err as { stderr?: Buffer; message?: string }
+                lastError =
+                    execError.stderr?.toString() ||
+                    execError.message ||
+                    String(err)
+            }
+            // SSM agent not ready yet; retry until timeout
+            process.stdout.write('.')
+            return false
+        }
+    }, 120 * 1000) // 120 second timeout - SSM agent can take time to register after instance starts
+
+    if (ssmReadyResult instanceof Error) {
+        console.error(
+            '\nError: SSM agent did not become ready in time. The instance may need more time to start up and register with SSM.'
+        )
+        if (lastStatus) {
+            console.error(`Last status received: ${lastStatus}`)
+        }
+        if (lastError) {
+            console.error(`Last error: ${lastError}`)
+        }
+        console.error(`Instance ID: ${instanceID}`)
+        console.error('\nTroubleshooting:')
+        console.error(
+            '  1. Check if the instance has the SSM agent installed and running'
+        )
+        console.error(
+            '  2. Check if the instance has the AmazonSSMManagedInstanceCore IAM policy'
+        )
+        console.error(
+            `  3. Run: aws ssm describe-instance-information --region us-east-1 --filters Key=InstanceIds,Values=${instanceID}`
+        )
+        throw ssmReadyResult
+    }
+    console.info('\nSSM agent is ready')
+}
+
+// Run pg_dump locally via Docker through SSM port forwarding tunnel
+async function runPgDumpViaDocker(
+    instanceID: string,
+    dbSecrets: {
+        host: string
+        user: string
+        port: number
+        dbname: string
+        password: string
+    },
+    dumpFileName: string
+): Promise<void> {
+    const localPort = 5433 // Use a local port that's unlikely to conflict
+
+    console.info('Setting up SSM port forwarding tunnel to database...')
+
+    // Start SSM port forwarding session in the background
+    const ssmProcess = spawn(
+        'aws',
+        [
+            'ssm',
+            'start-session',
+            '--region',
+            'us-east-1',
+            '--target',
+            instanceID,
+            '--document-name',
+            'AWS-StartPortForwardingSessionToRemoteHost',
+            '--parameters',
+            JSON.stringify({
+                host: [dbSecrets.host],
+                portNumber: [dbSecrets.port.toString()],
+                localPortNumber: [localPort.toString()],
+            }),
+        ],
+        {
+            stdio: ['ignore', 'pipe', 'pipe'],
+        }
+    )
+
+    // Handle SSM process errors
+    let ssmError: Error | undefined
+    ssmProcess.on('error', (err) => {
+        ssmError = err
+        console.error('SSM process error:', err.message)
+    })
+
+    // Also capture stdout and stderr for debugging
+    let ssmStdout = ''
+    let ssmStderr = ''
+    ssmProcess.stdout?.on('data', (data) => {
+        ssmStdout += data.toString()
+    })
+    ssmProcess.stderr?.on('data', (data) => {
+        ssmStderr += data.toString()
+    })
+
+    // Monitor process exit
+    ssmProcess.on('exit', (code, signal) => {
+        if (code !== null && code !== 0) {
+            console.error(`\nSSM process exited with code ${code}`)
+            if (ssmStderr) {
+                console.error('stderr:', ssmStderr)
+            }
+        }
+    })
+
+    // Check if SSM process failed to start before attempting tunnel establishment
+    if (ssmError) {
+        const errorMsg = ssmStderr
+            ? `Failed to start SSM session: ${ssmError.message}\n${ssmStderr}`
+            : `Failed to start SSM session: ${ssmError.message}`
+        throw new Error(errorMsg)
+    }
+
+    // Wait for the tunnel to be established with proper health check
+    console.info('Waiting for tunnel to establish...')
+    const tunnelReady = await retry(async () => {
+        return new Promise<boolean>((resolve) => {
+            const socket = createConnection(localPort, 'localhost')
+
+            const timeout = setTimeout(() => {
+                socket.removeAllListeners()
+                socket.destroy()
+                resolve(false)
+            }, 1000)
+
+            socket.on('connect', () => {
+                clearTimeout(timeout)
+                socket.removeAllListeners()
+                socket.destroy()
+                resolve(true)
+            })
+            socket.on('error', () => {
+                clearTimeout(timeout)
+                process.stdout.write('.')
+                socket.removeAllListeners()
+                socket.destroy()
+                resolve(false)
+            })
+        })
+    }, 30 * 1000) // 30 second timeout for tunnel
+
+    if (tunnelReady instanceof Error) {
+        console.error('\nFailed to establish SSM tunnel to database')
+        if (ssmStderr) {
+            console.error('SSM stderr:', ssmStderr)
+        }
+        if (ssmStdout) {
+            console.error('SSM stdout:', ssmStdout)
+        }
+        if (ssmProcess.exitCode !== null) {
+            console.error('SSM process exit code:', ssmProcess.exitCode)
+        }
+        throw new Error('Failed to establish SSM tunnel to database')
+    }
+    console.info('\nTunnel established')
+
+    try {
+        console.info('Running pg_dump via Docker with PostgreSQL 16 client...')
+
+        // Determine platform for Docker networking
+        const isLinux = process.platform === 'linux'
+        const dbHost = isLinux ? 'localhost' : 'host.docker.internal'
+
+        // Use PGPASSWORD environment variable instead of a .pgpass file for simplicity in this Docker setup (not necessarily more secure)
+        const dockerArgs = [
+            'run',
+            '--rm',
+            '-v',
+            `${process.cwd()}:/dump`,
+            ...(isLinux ? ['--network', 'host'] : []),
+            '-e',
+            `PGPASSWORD=${dbSecrets.password}`,
+            'postgres:16-alpine',
+            'pg_dump',
+            '-Fc',
+            '-h',
+            dbHost,
+            '-p',
+            localPort.toString(),
+            '-U',
+            dbSecrets.user,
+            '-d',
+            dbSecrets.dbname,
+            '-f',
+            `/dump/${dumpFileName}`,
+        ]
+
+        console.info('This may take a few minutes for large databases...')
+
+        const result = spawnSync('docker', dockerArgs, {
+            stdio: 'inherit',
+        })
+
+        if (result.error) {
+            throw result.error
+        }
+
+        if (result.status !== 0) {
+            throw new Error(
+                `Docker command failed with exit code ${result.status}`
+            )
+        }
+
+        console.info(`✓ Database dump saved to: ${dumpFileName}`)
+    } finally {
+        // Clean up SSM session
+        // Check if process is still running before attempting to kill
+        if (ssmProcess.exitCode === null && !ssmProcess.killed) {
+            console.info('Closing SSM tunnel...')
+            try {
+                ssmProcess.kill()
+                // Wait a moment for graceful shutdown
+                await new Promise((resolve) => setTimeout(resolve, 1000))
+            } catch (err) {
+                console.warn(
+                    'Warning: Failed to kill SSM process:',
+                    err instanceof Error ? err.message : String(err)
+                )
+            }
+        }
+    }
+}
+
+async function cloneDBLocally(envName: string, stopAfter = true) {
+    // Check Docker is available first
+    checkDockerAvailable()
 
     const check = await checkAWSAccess(envName)
     if (check instanceof Error) {
         process.exit(1)
     }
 
-    // Figure out if Jumpbox is running
-    const instance = await ensureJumpboxIsRunning()
+    const stage = stageForEnv(envName)
+
+    // Figure out if bastion is running
+    const instance = await ensureBastionIsRunning(stage)
     if (instance instanceof Error) {
-        console.error('Error getting jumpbox running', instance)
+        console.error('Error getting bastion running', instance)
         process.exit(1)
     }
 
-    const allowlist = await ensureAllowlistIP(instance)
-    if (allowlist instanceof Error) {
-        console.error('Error setting IP allowlist', allowlist)
-        process.exit(1)
-    }
+    const bastionInstance = instance
+    const bastionInstanceID = bastionInstance.InstanceId
 
-    const jumpboxInstance = instance
-
-    const jumpboxIP = jumpboxInstance.PublicIpAddress
-    const jumpboxInstanceID = jumpboxInstance.InstanceId
-
-    if (!jumpboxIP || !jumpboxInstanceID) {
+    if (!bastionInstanceID) {
         console.error(
             'EC2 didnt return required information',
-            jumpboxIP,
-            jumpboxInstanceID
+            bastionInstanceID
         )
         process.exit(1)
     }
 
+    // Wait for SSM agent to be ready
+    await waitForSSMAgent(bastionInstanceID)
+
     // Get the secrets for the DB.
-    const dbSecrets = await getSecretsForRDS(stageForEnv(envName))
+    const dbSecrets = await getSecretsForRDS(stage)
     if (dbSecrets instanceof Error) {
         console.error('error fetching secrets', dbSecrets)
         process.exit(1)
     }
 
     try {
-        // start an SSH connection
-        console.info('Connecting to ', jumpboxIP)
-
-        // Hold the SSH connection outside the retry loop
-        let connection: NodeSSH | undefined
-
-        // Only retry for connection refused, handle password prompt separately
-        let needsPassword = false
-        let lastError: Error | undefined
-
-        // If the jumpbox just started we often have the connection refused for ~10 seconds until it's really up.
-        await retry(async () => {
-            try {
-                // If we previously determined it needs a password, don't retry without one
-                if (needsPassword) {
-                    return lastError as Error
-                }
-
-                connection = await attemptSSHConnection(
-                    jumpboxIP,
-                    'ubuntu',
-                    sshKeyPath
-                )
-                console.info('Connected')
-                return true
-            } catch (err) {
-                if (err instanceof Error) {
-                    lastError = err
-                    if (err.message.includes('ECONNREFUSED')) {
-                        process.stdout.write('.')
-                        return false
-                    }
-                    if (
-                        err.message.includes(
-                            'Encrypted OpenSSH private key detected'
-                        )
-                    ) {
-                        needsPassword = true
-                        // Don't retry for password issues
-                        return err
-                    }
-                    // Log the full error for debugging
-                    console.error('Connection attempt failed:', err.message)
-                }
-                return err as Error
-            }
-        }, 60 * 1000)
-
-        // If we need a password, try one more time with password prompt
-        if (needsPassword && !connection) {
-            try {
-                const keyPassword = await promptPassword(
-                    'Enter SSH key password: '
-                )
-                // Read the private key file
-                const privateKey = readFileSync(sshKeyPath, 'utf8')
-
-                const ssh = new NodeSSH()
-                await ssh.connect({
-                    host: jumpboxIP,
-                    username: 'ubuntu',
-                    privateKey,
-                    passphrase: keyPassword,
-                })
-                connection = ssh
-                console.info('Connected with password')
-            } catch (err) {
-                console.error('Failed to connect with password:', err)
-                throw new Error(
-                    'Failed to establish SSH connection with password'
-                )
-            }
-        }
-
-        if (!connection) {
-            throw new Error('Failed to establish SSH connection')
-        }
-
-        const ssh = connection
-
-        // create the filename for this db dump
+        // Create the filename for this db dump
         const now = new Date()
         const timeStamp = `${now.getFullYear()}${(now.getMonth() + 1)
             .toString()
-            .padStart(
-                2,
-                '0'
-            )}${now.getDate()}${now.getHours()}${now.getMinutes()}${now.getSeconds()}`
-        const thereDumpFileName = `dbdump-${envName}-${timeStamp}.sqlfc`
+            .padStart(2, '0')}${now.getDate().toString().padStart(2, '0')}${now
+            .getHours()
+            .toString()
+            .padStart(2, '0')}${now
+            .getMinutes()
+            .toString()
+            .padStart(2, '0')}${now.getSeconds().toString().padStart(2, '0')}`
+        const dumpFileName = `dbdump-${envName}-${timeStamp}.sqlfc`
 
-        console.info('dumping db on the server')
-        // `pg_dump -Fc -h $hostname -p $port -U $username -d $dbname > [prod]-[date].sqlfc`
-        const pgDumpArgs = [
-            '-Fc',
-            '-h',
-            dbSecrets.host,
-            '-p',
-            dbSecrets.port.toString(),
-            '-U',
-            dbSecrets.user,
-            '-d',
-            dbSecrets.dbname,
-            '-f',
-            thereDumpFileName,
-        ]
-        const result = await ssh.exec('pg_dump', pgDumpArgs, {
-            stdin: dbSecrets.password, // pg_dump asks for the password on stdin so we pass it here
-            stream: 'both', // This triggers a result response type, undocumented trash.
-        })
-        if (result.code !== 0) {
-            console.error('PG Dump Failed on server.')
-            console.error(result.stderr)
-            process.exit(1)
-        }
-
-        await ssh.getFile(thereDumpFileName, thereDumpFileName)
-        console.info('copied db locally: ', thereDumpFileName)
-
-        // remove the file on the server
-        await ssh.exec('rm', [thereDumpFileName])
+        // Run pg_dump locally via Docker through SSM port forwarding
+        await runPgDumpViaDocker(bastionInstanceID, dbSecrets, dumpFileName)
     } catch (err) {
-        console.error('ssh failed out', err)
+        console.error('Database dump failed', err)
         process.exit(1)
     }
 
-    // stop jumpbox
+    // Stop bastion
     if (stopAfter) {
-        const stopRes = await stopInstance(jumpboxInstanceID)
+        const stopRes = await stopInstance(bastionInstanceID)
         if (stopRes instanceof Error) {
             console.error('Stopping instance failed', stopRes)
             process.exit(1)
         }
-        console.info('Stopped jumpbox')
+        console.info('Stopped bastion')
     }
 
     process.exit(0)

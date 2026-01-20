@@ -37,12 +37,12 @@ import {
 import { SingleRateFormFields } from './SingleRateFormFields'
 import { useFocus, useRouteParams } from '../../../../hooks'
 import { useErrorSummary } from '../../../../hooks/useErrorSummary'
-import { PageBannerAlerts } from '../../SharedSubmissionComponents/PageBannerAlerts'
 import { useAuth } from '../../../../contexts/AuthContext'
 import {
     ErrorOrLoadingPage,
     handleAndReturnErrorState,
-} from '../../SharedSubmissionComponents/ErrorOrLoadingPage'
+    PageBannerAlerts,
+} from '../../SharedSubmissionComponents'
 import { featureFlags } from '@mc-review/common-code'
 import { useLDClient } from 'launchdarkly-react-client-sdk'
 import { recordJSException } from '@mc-review/otel'
@@ -100,7 +100,7 @@ const RateDetails = ({
     const displayAsStandaloneRate = type === 'SINGLE'
     const { loggedInUser } = useAuth()
     const ldClient = useLDClient()
-    const { updateHeading, updateActiveMainContent } = usePage()
+    const { updateActiveMainContent } = usePage()
 
     const useEditUnlockRate = ldClient?.variation(
         featureFlags.RATE_EDIT_UNLOCK.flag,
@@ -191,14 +191,7 @@ const RateDetails = ({
             }
             return acc
         }, [] as RateRevision[]) ?? []
-
-    const pageHeading = displayAsStandaloneRate
-        ? fetchRateData?.fetchRate.rate.draftRevision?.formData
-              .rateCertificationName
-        : contract?.draftRevision?.contractName
     const activeMainContentId = 'rateQuestionResponseMainContent'
-
-    if (pageHeading) updateHeading({ customHeading: pageHeading })
 
     // Set the active main content to focus when click the Skip to main content button.
     useEffect(() => {

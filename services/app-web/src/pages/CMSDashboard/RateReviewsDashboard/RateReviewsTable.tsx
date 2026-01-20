@@ -31,7 +31,6 @@ import {
 } from '../../../components/FilterAccordion'
 import {
     pluralize,
-    titleCaseString,
     featureFlags,
     stateNameToStateCode,
 } from '@mc-review/common-code'
@@ -180,7 +179,7 @@ const getSelectedFiltersFromColumnState = (
         .filter((item) => item.id === id)
         .map((item) => ({
             value: item.value,
-            label: titleCaseString(item.value),
+            label: stateNameToStateCode(item.value),
         }))
 
     return filterValues as FilterOptionType[]
@@ -450,7 +449,7 @@ export const RateReviewsTable = ({
         .sort()
         .map((state) => ({
             value: state,
-            label: state,
+            label: stateNameToStateCode(state),
         }))
 
     const filterLength = columnFilters.flatMap((filter) => filter.value).length

@@ -107,7 +107,7 @@ const modalValueDictionary: Record<ModalTypes, ModalValueType> = {
         onSubmitText: 'Submit',
         errorHeading: ERROR_MESSAGES.submit_error_heading,
         errorSuggestion: ERROR_MESSAGES.submit_error_suggestion,
-        modalDescription: EQROModalDescription(),
+        modalDescription: EQROModalDescription,
     },
 } satisfies Record<ModalTypes, ModalValueType>
 

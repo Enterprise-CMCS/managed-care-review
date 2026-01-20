@@ -1,5 +1,10 @@
 import { matchPath, PathMatch } from 'react-router'
-import { RouteT, RoutesRecord, ROUTES } from '@mc-review/constants'
+import {
+    RouteT,
+    RoutesRecord,
+    ROUTES,
+    RouteTWithUnknown,
+} from '@mc-review/constants'
 import { isWildcardPath } from './isWildcardPath'
 /* 
     Calculate the route name for a path (often from the current location). Relies on react-router matchPath. 
@@ -10,7 +15,7 @@ import { isWildcardPath } from './isWildcardPath'
 type RouteMap = { route: RouteT; pathMatch: PathMatch<string> | null }
 type RouteMapList = RouteMap[]
 
-const getRouteName = (pathname: string): RouteT | 'UNKNOWN_ROUTE' => {
+const getRouteName = (pathname: string): RouteTWithUnknown => {
     const matchingRoutes: RouteMapList = []
 
     ROUTES.forEach((route) => {
