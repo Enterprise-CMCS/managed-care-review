@@ -222,9 +222,14 @@ export const EQROSubmissionDetails = (): React.ReactElement => {
             'You must select at least one entity'
         ),
         contractType: Yup.string().required('You must choose a contract type'),
-        submissionDescription: Yup.string().required(
-            'You must provide a description of any major changes or updates'
-        ),
+        submissionDescription: Yup.string()
+            .required(
+                'You must provide a description of any major changes or updates'
+            )
+            .max(
+                1500,
+                'The submission description must be 1500 characters or less.'
+            ),
     })
 
     const formHeading = 'EQRO Submission Details Form'

@@ -17,9 +17,14 @@ const SubmissionTypeFormSchema = (_flags: FeatureFlagSettings = {}) =>
         ),
         contractType: Yup.string().required('You must choose a contract type'),
         riskBasedContract: Yup.string().required('You must select yes or no'),
-        submissionDescription: Yup.string().required(
-            'You must provide a description of any major changes or updates'
-        ),
+        submissionDescription: Yup.string()
+            .required(
+                'You must provide a description of any major changes or updates'
+            )
+            .max(
+                1500,
+                'The submission description must be 1500 characters or less.'
+            ),
     })
 
 export { SubmissionTypeFormSchema }
