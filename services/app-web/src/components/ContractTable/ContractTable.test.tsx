@@ -656,8 +656,6 @@ describe('ContractTable for CMS User (with filters)', () => {
             }
         )
 
-        const stateFilter = screen.getByTestId('state-filter')
-        const submissionTypeFilter = screen.getByTestId('submissionType-filter')
         const accordionButton = screen.getByTestId(
             'accordionButton_filterAccordionItems'
         )
@@ -667,6 +665,9 @@ describe('ContractTable for CMS User (with filters)', () => {
             //Expand filter accordion
             await userEvent.click(accordionButton)
         })
+
+        const stateFilter = screen.getByTestId('state-filter')
+        const submissionTypeFilter = screen.getByTestId('submissionType-filter')
 
         //Look for state filter
         const stateCombobox = within(stateFilter).getByRole('combobox')
@@ -856,8 +857,6 @@ describe('ContractTable for CMS User (with filters)', () => {
             }
         )
 
-        const stateFilter = screen.getByTestId('state-filter')
-        const submissionTypeFilter = screen.getByTestId('submissionType-filter')
         const accordionButton = screen.getByTestId(
             'accordionButton_filterAccordionItems'
         )
@@ -865,6 +864,9 @@ describe('ContractTable for CMS User (with filters)', () => {
             //Expand filter accordion
             await userEvent.click(accordionButton)
         })
+
+        const stateFilter = screen.getByTestId('state-filter')
+        const submissionTypeFilter = screen.getByTestId('submissionType-filter')
 
         // Get filter comboboxes
         const stateCombobox = within(stateFilter).getByRole('combobox')
@@ -1016,8 +1018,8 @@ describe('ContractTable for CMS User (with filters)', () => {
             }
         )
 
-        const stateFilter = screen.getByTestId('state-filter')
-        const submissionTypeFilter = screen.getByTestId('submissionType-filter')
+        // const stateFilter = screen.getByTestId('state-filter')
+        // const submissionTypeFilter = screen.getByTestId('submissionType-filter')
         const accordionButton = screen.getByTestId(
             'accordionButton_filterAccordionItems'
         )
@@ -1030,6 +1032,9 @@ describe('ContractTable for CMS User (with filters)', () => {
 
         //Expect no filters applied yet
         expect(screen.getByText('Filters')).toBeInTheDocument()
+
+        const stateFilter = screen.getByTestId('state-filter')
+        const submissionTypeFilter = screen.getByTestId('submissionType-filter')
 
         //Look for state filter
         const stateCombobox = within(stateFilter).getByRole('combobox')
