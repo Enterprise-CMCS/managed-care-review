@@ -610,7 +610,7 @@ export const ContractTable = ({
                                         )
                                     }
                                 />
-                                {eqroSubmissions && (
+                                {eqroSubmissions ? (
                                     <FilterSelect
                                         value={getSelectedFiltersFromUrl(
                                             columnFilters,
@@ -624,6 +624,23 @@ export const ContractTable = ({
                                                 contractTypeColumn,
                                                 selectedOptions,
                                                 'contractType'
+                                            )
+                                        }
+                                    />
+                                ) : (
+                                    <FilterSelect
+                                        value={getSelectedFiltersFromUrl(
+                                            columnFilters,
+                                            'submissionType'
+                                        )}
+                                        name="submissionType"
+                                        label="Submission type"
+                                        filterOptions={submissionTypeOptions}
+                                        onChange={(selectedOptions) =>
+                                            updateFilters(
+                                                submissionTypeColumn,
+                                                selectedOptions,
+                                                'submissionType'
                                             )
                                         }
                                     />
@@ -646,22 +663,24 @@ export const ContractTable = ({
                                         )
                                     }
                                 />
-                                <FilterSelect
-                                    value={getSelectedFiltersFromUrl(
-                                        columnFilters,
-                                        'submissionType'
-                                    )}
-                                    name="submissionType"
-                                    label="Submission type"
-                                    filterOptions={submissionTypeOptions}
-                                    onChange={(selectedOptions) =>
-                                        updateFilters(
-                                            submissionTypeColumn,
-                                            selectedOptions,
+                                {eqroSubmissions && (
+                                    <FilterSelect
+                                        value={getSelectedFiltersFromUrl(
+                                            columnFilters,
                                             'submissionType'
-                                        )
-                                    }
-                                />
+                                        )}
+                                        name="submissionType"
+                                        label="Submission type"
+                                        filterOptions={submissionTypeOptions}
+                                        onChange={(selectedOptions) =>
+                                            updateFilters(
+                                                submissionTypeColumn,
+                                                selectedOptions,
+                                                'submissionType'
+                                            )
+                                        }
+                                    />
+                                )}
                             </MultiColumnGrid>
                         </FilterAccordion>
                     )}
