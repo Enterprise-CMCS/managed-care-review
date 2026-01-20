@@ -226,10 +226,23 @@ const getSelectedFiltersFromUrl = (
     })
     const filterValues = valuesFromUrl
         .filter((item) => item.id === id)
-        .map((item) => ({
-            value: item.value,
-            label: titleCaseString(item.value),
-        }))
+        .map((item) => {
+            //special treatement for "Health plan" and "EQRO"
+            if (id === 'contractSubmissionType') {
+                const option = contractTypeOptions.find(
+                    (opt) => opt.value === item.value
+                )
+                return {
+                    value: item.value,
+                    label: option?.label || item.value,
+                }
+            }
+            //upper case for the rest
+            return {
+                value: item.value,
+                label: titleCaseString(item.value),
+            }
+        })
     return filterValues as FilterOptionType[]
 }
 
@@ -598,22 +611,24 @@ export const ContractTable = ({
                                         )
                                     }
                                 />
-                                <FilterSelect
-                                    value={getSelectedFiltersFromUrl(
-                                        columnFilters,
-                                        'contractSubmissionType'
-                                    )}
-                                    name="contractType"
-                                    label="Contract type"
-                                    filterOptions={contractTypeOptions}
-                                    onChange={(selectedOptions) =>
-                                        updateFilters(
-                                            contractTypeColumn,
-                                            selectedOptions,
-                                            'contractType'
-                                        )
-                                    }
-                                />
+                                {eqroSubmissions && (
+                                    <FilterSelect
+                                        value={getSelectedFiltersFromUrl(
+                                            columnFilters,
+                                            'contractSubmissionType'
+                                        )}
+                                        name="contractType"
+                                        label="Contract type"
+                                        filterOptions={contractTypeOptions}
+                                        onChange={(selectedOptions) =>
+                                            updateFilters(
+                                                contractTypeColumn,
+                                                selectedOptions,
+                                                'contractType'
+                                            )
+                                        }
+                                    />
+                                )}
                             </MultiColumnGrid>
                             <MultiColumnGrid columns={2}>
                                 <FilterSelect
@@ -647,7 +662,7 @@ export const ContractTable = ({
                                             'submissionType'
                                         )
                                     }
-                                />                               
+                                />
                             </MultiColumnGrid>
                         </FilterAccordion>
                     )}
