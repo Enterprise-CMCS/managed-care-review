@@ -464,25 +464,25 @@ describe('ContractTable for CMS User (with filters)', () => {
             }
         )
 
-        const contractTypeFilter = screen.getByTestId('contractType-filter')
         const accordionButton = screen.getByTestId(
             'accordionButton_filterAccordionItems'
         )
+        
         await waitFor(async () => {
-            //Expect filter accordion and contract type filter to exist
+            //Expect filter accordion to exist
             expect(screen.queryByTestId('accordion')).toBeInTheDocument()
             //Expand filter accordion
             await userEvent.click(accordionButton)
         })
 
-        //contract type filter
+        const contractTypeFilter = screen.getByTestId('contractType-filter')
+
         const contractTypeCombobox =
             within(contractTypeFilter).getByRole('combobox')
         expect(contractTypeCombobox).toBeInTheDocument()
 
-        //Open combobox
         selectEvent.openMenu(contractTypeCombobox)
-        //Expect combobox options to exist
+
         const comboboxOptions = screen.getByTestId('contractType-filter-options')
         expect(comboboxOptions).toBeInTheDocument()
 
@@ -519,8 +519,6 @@ describe('ContractTable for CMS User (with filters)', () => {
             }
         )
 
-        const stateFilter = screen.getByTestId('state-filter')
-        const contractTypeFilter = screen.getByTestId('contractType-filter')
         const accordionButton = screen.getByTestId(
             'accordionButton_filterAccordionItems'
         )
@@ -528,6 +526,10 @@ describe('ContractTable for CMS User (with filters)', () => {
             //Expand filter accordion
             await userEvent.click(accordionButton)
         })
+
+        const stateFilter = screen.getByTestId('state-filter')
+
+        const contractTypeFilter = screen.getByTestId('contractType-filter')
 
         //Look for contract type filter
         const contractTypeCombobox =
@@ -553,8 +555,8 @@ describe('ContractTable for CMS User (with filters)', () => {
         const stateOptions = screen.getByTestId('state-filter-options')
         expect(stateOptions).toBeInTheDocument()
         await waitFor(async () => {
-            expect(within(stateOptions).getByText('Ohio')).toBeInTheDocument()
-            await selectEvent.select(stateOptions, 'Ohio')
+            expect(within(stateOptions).getByText('OH')).toBeInTheDocument()
+            await selectEvent.select(stateOptions, 'OH')
         })
 
         //Expect only 1 EQRO submission from Ohio (1 data + 1 header = 2 rows)
@@ -584,7 +586,6 @@ describe('ContractTable for CMS User (with filters)', () => {
             }
         )
 
-        const contractTypeFilter = screen.getByTestId('contractType-filter')
         const accordionButton = screen.getByTestId(
             'accordionButton_filterAccordionItems'
         )
@@ -593,7 +594,8 @@ describe('ContractTable for CMS User (with filters)', () => {
             await userEvent.click(accordionButton)
         })
 
-        //Look for contract type filter
+        const contractTypeFilter = screen.getByTestId('contractType-filter')
+   
         const contractTypeCombobox =
             within(contractTypeFilter).getByRole('combobox')
 
