@@ -226,23 +226,10 @@ const getSelectedFiltersFromUrl = (
     })
     const filterValues = valuesFromUrl
         .filter((item) => item.id === id)
-        .map((item) => {
-            //special treatement for "Health plan" and "EQRO"
-            if (id === 'contractSubmissionType') {
-                const option = contractTypeOptions.find(
-                    (opt) => opt.value === item.value
-                )
-                return {
-                    value: item.value,
-                    label: option?.label || item.value,
-                }
-            }
-            //upper case for the rest
-            return {
-                value: item.value,
-                label: titleCaseString(item.value),
-            }
-        })
+        .map((item) => ({
+            value: item.value,
+            label: titleCaseString(item.value),
+        }))
     return filterValues as FilterOptionType[]
 }
 
