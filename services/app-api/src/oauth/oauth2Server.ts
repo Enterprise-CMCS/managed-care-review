@@ -16,7 +16,7 @@ import {
 import { newJWTLib } from '../jwt'
 import type { APIGatewayProxyEvent, APIGatewayProxyResult } from 'aws-lambda'
 
-const JWT_EXPIRATION_SECONDS = 60 * 60 * 24 * 90 // 90 days
+const JWT_EXPIRATION_SECONDS = 60 * 30 // 30 minutes
 
 export class CustomOAuth2Server {
     private oauth2Server: InstanceType<typeof OAuth2Server>
