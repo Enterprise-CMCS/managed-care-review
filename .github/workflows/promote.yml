@@ -73,7 +73,7 @@ jobs:
         working-directory: packages/database
         run: |
           pnpm generate
-          npx prisma migrate reset --force --schema=./prisma/schema.prisma
+          npx prisma migrate reset --force --config ../../prisma.config.ts
 
       - name: Build packages
         shell: bash
