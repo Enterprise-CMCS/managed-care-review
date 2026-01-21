@@ -12,6 +12,38 @@ const mockGqlContractDraftRevisionFormDataInput = (
         : [defaultFloridaProgram()]
     const programIDs = programs.map((program) => program.id)
 
+    const contractDocs = formDataInput?.contractDocuments
+        ? formDataInput.contractDocuments.map((doc) => ({
+              name: doc.name,
+              s3URL: doc.s3URL,
+              sha256: doc.s3URL,
+              dateAdded: doc.dateAdded ? doc.dateAdded : undefined,
+          }))
+        : [
+              {
+                  name: 'contractDocument1.pdf',
+                  s3URL: 's3://bucketname/key/contractDocument1.pdf',
+                  sha256: 'needs-to-be-there',
+                  dateAdded: new Date('01/02/2024'),
+              },
+          ]
+
+    const supportingDocs = formDataInput?.supportingDocuments
+        ? formDataInput.supportingDocuments.map((doc) => ({
+              name: doc.name,
+              s3URL: doc.s3URL,
+              sha256: doc.s3URL,
+              dateAdded: doc.dateAdded ? doc.dateAdded : undefined,
+          }))
+        : [
+              {
+                  name: 'supportingDocument11.pdf',
+                  s3URL: 's3://bucketname/key/supportingDocument11.pdf',
+                  sha256: 'needs-to-be-there',
+                  dateAdded: new Date('01/02/2024'),
+              },
+          ]
+
     return {
         programIDs: [programIDs[0]],
         populationCovered: 'MEDICAID',
@@ -23,22 +55,6 @@ const mockGqlContractDraftRevisionFormDataInput = (
                 name: 'statecontact',
                 titleRole: 'thestatestofcontacts',
                 email: 'statemcstate@examepl.com',
-            },
-        ],
-        contractDocuments: [
-            {
-                name: 'contractDocument1.pdf',
-                s3URL: 's3://bucketname/key/contractDocument1.pdf',
-                sha256: 'needs-to-be-there',
-                dateAdded: new Date('01/02/2024'),
-            },
-        ],
-        supportingDocuments: [
-            {
-                name: 'supportingDocument11.pdf',
-                s3URL: 's3://bucketname/key/supportingDocument11.pdf',
-                sha256: 'needs-to-be-there',
-                dateAdded: new Date('01/02/2024'),
             },
         ],
         contractType: 'BASE',
@@ -68,6 +84,8 @@ const mockGqlContractDraftRevisionFormDataInput = (
         statutoryRegulatoryAttestationDescription:
             'Hi, I should be gone after update.',
         ...formDataInput,
+        contractDocuments: contractDocs,
+        supportingDocuments: supportingDocs,
     }
 }
 

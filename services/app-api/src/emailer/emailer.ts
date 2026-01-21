@@ -4,6 +4,7 @@ import {
     getSESEmailParams,
     newContractCMSEmail,
     newContractStateEmail,
+    newEqroContractStateEmail,
     unlockContractCMSEmail,
     unlockContractStateEmail,
     resubmitContractStateEmail,
@@ -37,6 +38,7 @@ import type {
 } from '../domain-models'
 import { SESServiceException } from '@aws-sdk/client-ses'
 import type { RateForDisplayType } from './templateHelpers'
+import { newEQROContractCMSEmail } from './emails/newEQROContractCMSEmail'
 
 // See more discussion of configuration in docs/Configuration.md
 type EmailConfiguration = {
@@ -89,7 +91,16 @@ type Emailer = {
         stateAnalystsEmails: StateAnalystsEmails,
         statePrograms: ProgramType[]
     ) => Promise<void | Error>
+    sendCMSNewEQROContract: (
+        contract: ContractType,
+        statePrograms: ProgramType[]
+    ) => Promise<void | Error>
     sendStateNewContract: (
+        contract: ContractType,
+        submitterEmails: string[],
+        statePrograms: ProgramType[]
+    ) => Promise<void | Error>
+    sendStateNewEQROContract: (
         contract: ContractType,
         submitterEmails: string[],
         statePrograms: ProgramType[]
@@ -210,13 +221,30 @@ type Emailer = {
         stateAnalystsEmails: StateAnalystsEmails
     ) => Promise<void | Error>
 }
-const localEmailerLogger = (emailData: EmailData) =>
-    console.info(`
-        EMAIL SENT
-        ${'(¯`·.¸¸.·´¯`·.¸¸.·´¯·.¸¸.·´¯`·.¸¸.·´¯`·.¸¸.·´¯`·.¸¸.·´)'}
-        ${JSON.stringify(getSESEmailParams(emailData))}
-        ${'(¯`·.¸¸.·´¯`·.¸¸.·´¯·.¸¸.·´¯`·.¸¸.·´¯`·.¸¸.·´¯`·.¸¸.·´)'}
-    `)
+const localEmailerLogger = (emailData: EmailData) => {
+    const params = getSESEmailParams(emailData)
+    const { Destination, Message, Source } = params
+
+    const emailBody = Message?.Body?.Text?.Data ?? 'No email body content found'
+    const subject = Message?.Subject?.Data ?? 'No email subject content found'
+    const to = Destination?.ToAddresses?.length ? Destination?.ToAddresses : []
+    const cc = Destination?.CcAddresses?.length ? Destination?.CcAddresses : []
+    const bcc = Destination?.BccAddresses?.length
+        ? Destination?.BccAddresses
+        : []
+
+    console.info('')
+    console.info('(¯`·.¸¸.·´¯`·.¸¸.·´¯·📧 EMAIL SENT·´¯`·.¸¸.·´¯`·.¸¸.·´)')
+    console.info(`From: ${Source}`)
+    console.info(`To: ${to.join(', ')}`)
+    console.info(`Cc: ${cc.join(', ')}`)
+    console.info(`Bcc: ${bcc.join(', ')}`)
+    console.info(`Subject: ${subject}`)
+    console.info('────────────────────────────────────────────────────────────')
+    console.info(emailBody)
+    console.info('(¯`·.¸¸.·´¯`·.¸¸.·´¯·.¸¸.·´¯`·.¸¸.·´¯`·.¸¸.·´¯`·.¸¸.·´)')
+    console.info('')
+}
 
 function emailer(
     config: EmailConfiguration,
@@ -242,12 +270,41 @@ function emailer(
                 return await this.sendEmail(emailData)
             }
         },
+        sendCMSNewEQROContract: async function (contract, statePrograms) {
+            const emailData = await newEQROContractCMSEmail(
+                contract,
+                config,
+                statePrograms
+            )
+            if (emailData instanceof Error) {
+                return emailData
+            } else {
+                return await this.sendEmail(emailData)
+            }
+        },
         sendStateNewContract: async function (
             contract,
             submitterEmails,
             statePrograms
         ) {
             const emailData = await newContractStateEmail(
+                contract,
+                submitterEmails,
+                config,
+                statePrograms
+            )
+            if (emailData instanceof Error) {
+                return emailData
+            } else {
+                return await this.sendEmail(emailData)
+            }
+        },
+        sendStateNewEQROContract: async function (
+            contract,
+            submitterEmails,
+            statePrograms
+        ) {
+            const emailData = await newEqroContractStateEmail(
                 contract,
                 submitterEmails,
                 config,

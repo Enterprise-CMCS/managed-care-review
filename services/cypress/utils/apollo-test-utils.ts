@@ -84,6 +84,41 @@ const contractFormData = (
     ...overrides,
 })
 
+const eqroFromData = (
+    overrides?: Partial<ContractFormData>
+): ContractFormData => ({
+    programIDs: [minnesotaStatePrograms[0].id],
+    populationCovered: 'MEDICAID',
+    submissionType: 'CONTRACT_ONLY',
+    submissionDescription: 'Test EQRO submission',
+    stateContacts: [
+        {
+            name: 'Name',
+            titleRole: 'Title',
+            email: 'example@example.com',
+        },
+    ],
+    supportingDocuments: [],
+    contractType: 'BASE',
+    contractDocuments: [
+        {
+            name: 'Contract Cert.pdf',
+            s3URL: 's3://local-uploads/1684382956834-Contract Cert.pdf/Contract Cert.pdf',
+            sha256: 'abc123',
+        },
+    ],
+    contractDateStart: '2023-05-01',
+    contractDateEnd: '2024-05-31',
+    managedCareEntities: ['MCO'],
+    federalAuthorities: [],
+    eqroNewContractor: true,
+    eqroProvisionMcoNewOptionalActivity: true,
+    eqroProvisionNewMcoEqrRelatedActivities: false,
+    eqroProvisionChipEqrRelatedActivities: null,
+    eqroProvisionMcoEqrOrRelatedActivities: null,
+    ...overrides,
+})
+
 const rateFormData = (
     data?: Partial<RateFormDataInput>
 ): RateFormDataInput => ({
@@ -522,5 +557,6 @@ export {
     stateUser,
     rateFormData,
     contractFormData,
+    eqroFromData,
     minnesotaStatePrograms
 }

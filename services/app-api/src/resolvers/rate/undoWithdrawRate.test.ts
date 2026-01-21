@@ -593,7 +593,9 @@ describe('undoWithdrawRate', () => {
                 ),
                 sourceEmail: emailConfig.emailSource,
                 toAddresses: expect.arrayContaining([
+                    ...testEmailConfig().devReviewTeamEmails,
                     ...testEmailConfig().dmcpSubmissionEmails,
+                    ...testEmailConfig().dmcoEmails,
                     ...testEmailConfig().oactEmails,
                 ]),
                 bodyHTML: expect.stringContaining(unwithdrawnRateName),

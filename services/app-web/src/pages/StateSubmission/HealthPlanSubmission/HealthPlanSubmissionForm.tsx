@@ -5,7 +5,7 @@ import { getRelativePathFromNestedRoute } from '../submissionUtils'
 import { SubmissionType } from './SubmissionType'
 import { ContractDetails } from './ContractDetails'
 import { RateDetails } from './RateDetails'
-import { Contacts } from './Contacts'
+import { Contacts } from '../SharedContactsPage'
 import { ReviewSubmit } from './ReviewSubmit'
 import { Error404 } from '../../Errors/Error404Page'
 

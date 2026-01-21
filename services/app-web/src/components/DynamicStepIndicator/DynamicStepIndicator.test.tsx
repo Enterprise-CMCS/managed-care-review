@@ -1,7 +1,10 @@
 import { screen, render } from '@testing-library/react'
 import { DynamicStepIndicator } from './DynamicStepIndicator'
 
-import { STATE_SUBMISSION_FORM_ROUTES, EQRO_SUBMISSION_FORM_ROUTES } from '@mc-review/constants'
+import {
+    STATE_SUBMISSION_FORM_ROUTES,
+    EQRO_SUBMISSION_FORM_ROUTES,
+} from '@mc-review/constants'
 import { activeFormPages } from '../../pages/StateSubmission'
 import { mockContractFormData } from '@mc-review/mocks'
 
@@ -88,9 +91,12 @@ describe('DynamicStepIndicator', () => {
                 />
             )
 
-            const submissionDetailsLabels = screen.getAllByText('Submission details')
+            const submissionDetailsLabels =
+                screen.getAllByText('Submission details')
             expect(submissionDetailsLabels).toHaveLength(2)
-            expect(screen.queryByText('Submission type')).not.toBeInTheDocument()
+            expect(
+                screen.queryByText('Submission type')
+            ).not.toBeInTheDocument()
         })
 
         it('uses default title when custom title is not provided', () => {
@@ -103,7 +109,9 @@ describe('DynamicStepIndicator', () => {
 
             const submissionTypeLabels = screen.getAllByText('Submission type')
             expect(submissionTypeLabels).toHaveLength(2)
-            expect(screen.queryByText('Submission details')).not.toBeInTheDocument()
+            expect(
+                screen.queryByText('Submission details')
+            ).not.toBeInTheDocument()
         })
 
         it('does not render rate details step for EQRO submissions', () => {
@@ -131,7 +139,9 @@ describe('DynamicStepIndicator', () => {
                 />
             )
 
-            expect(screen.queryByText('Supporting documents')).not.toBeInTheDocument()
+            expect(
+                screen.queryByText('Supporting documents')
+            ).not.toBeInTheDocument()
         })
 
         it('renders all EQRO steps with correct labels', () => {
@@ -144,7 +154,8 @@ describe('DynamicStepIndicator', () => {
                     }}
                 />
             )
-            const contractDetailsLabels = screen.getAllByText('Contract details')
+            const contractDetailsLabels =
+                screen.getAllByText('Contract details')
             // Check that the current page gets displayed twice: Within step indicator and heading
             expect(contractDetailsLabels).toHaveLength(2)
             // Check that the other pages appear once: Listed in the step indicator
@@ -167,8 +178,12 @@ describe('DynamicStepIndicator', () => {
             const steps = screen.getAllByRole('listitem')
 
             // First two steps are complete
-            expect(steps[0]).toHaveClass('usa-step-indicator__segment--complete')
-            expect(steps[1]).toHaveClass('usa-step-indicator__segment--complete')
+            expect(steps[0]).toHaveClass(
+                'usa-step-indicator__segment--complete'
+            )
+            expect(steps[1]).toHaveClass(
+                'usa-step-indicator__segment--complete'
+            )
 
             // Third step (Contacts) are current
             expect(steps[2]).toHaveClass('usa-step-indicator__segment--current')
@@ -192,7 +207,8 @@ describe('DynamicStepIndicator', () => {
                     }}
                 />
             )
-            const submissionDetailsLabels = screen.getAllByText('Submission details')
+            const submissionDetailsLabels =
+                screen.getAllByText('Submission details')
             expect(submissionDetailsLabels).toHaveLength(2)
             expect(screen.getByText('Contacts')).toBeInTheDocument()
         })

@@ -22,10 +22,7 @@ import styles from './ContractTable.module.scss'
 import { Table, Tag } from '@trussworks/react-uswds'
 import qs from 'qs'
 import { SubmissionStatusRecord } from '@mc-review/submissions'
-import {
-    ContractSubmissionTypeRecord,
-    SubmissionReviewStatusRecord,
-} from '@mc-review/constants'
+import { SubmissionReviewStatusRecord } from '@mc-review/constants'
 import {
     FilterAccordion,
     FilterSelect,
@@ -34,19 +31,20 @@ import {
 } from '../FilterAccordion'
 import { InfoTag, TagProps } from '../InfoTag/InfoTag'
 import { MultiColumnGrid } from '../MultiColumnGrid'
-import { NavLinkWithLogging } from '../TealiumLogging/Link'
+import { NavLinkWithLogging } from '../TealiumLogging'
 import { useTealium } from '../../hooks'
 import useDeepCompareEffect from 'use-deep-compare-effect'
 import { getTealiumFiltersChanged } from '../../tealium/tealiumHelpers'
 import {
-    titleCaseString,
     pluralize,
     formatContractSubTypeForDisplay,
     featureFlags,
+    stateNameToStateCode,
 } from '@mc-review/common-code'
 import { formatCalendarDate } from '@mc-review/dates'
 import { RowCellElement } from '..'
 import { useLDClient } from 'launchdarkly-react-client-sdk'
+import { getSubmissionPath } from '../../routeHelpers'
 
 export type ContractInDashboardType = {
     id: string
@@ -74,13 +72,21 @@ function submissionURL(
     isNotStateUser: boolean
 ): string {
     if (isNotStateUser) {
-        return `/submissions/${ContractSubmissionTypeRecord[contractSubmissionType]}/${id}`
+        return getSubmissionPath(
+            'SUBMISSIONS_SUMMARY',
+            contractSubmissionType,
+            id
+        )
     } else if (status === 'DRAFT') {
-        return `/submissions/${ContractSubmissionTypeRecord[contractSubmissionType]}/${id}/edit/type`
+        return getSubmissionPath('SUBMISSIONS_TYPE', contractSubmissionType, id)
     } else if (status === 'UNLOCKED') {
-        return `/submissions/${ContractSubmissionTypeRecord[contractSubmissionType]}/${id}/edit/review-and-submit`
+        return getSubmissionPath(
+            'SUBMISSIONS_REVIEW_SUBMIT',
+            contractSubmissionType,
+            id
+        )
     }
-    return `/submissions/${ContractSubmissionTypeRecord[contractSubmissionType]}/${id}`
+    return getSubmissionPath('SUBMISSIONS_SUMMARY', contractSubmissionType, id)
 }
 
 const StatusTag = ({
@@ -210,7 +216,7 @@ const getSelectedFiltersFromUrl = (
         .filter((item) => item.id === id)
         .map((item) => ({
             value: item.value,
-            label: titleCaseString(item.value),
+            label: stateNameToStateCode(item.value),
         }))
     return filterValues as FilterOptionType[]
 }
@@ -299,18 +305,15 @@ export const ContractTable = ({
             columnHelper.accessor('stateName', {
                 id: 'stateName',
                 header: 'State',
-                cell: (info) => <span>{info.getValue()}</span>,
+                cell: (info) => (
+                    <span>
+                        {eqroSubmissions
+                            ? stateNameToStateCode(info.getValue())
+                            : info.getValue()}
+                    </span>
+                ),
                 meta: {
                     dataTestID: `${tableConfig.rowIDName}-stateName`,
-                },
-                filterFn: `arrIncludesSome`,
-            }),
-            columnHelper.accessor('submissionType', {
-                id: 'submissionType',
-                header: 'Submission type',
-                cell: (info) => <span>{info.getValue()}</span>,
-                meta: {
-                    dataTestID: 'submission-type',
                 },
                 filterFn: `arrIncludesSome`,
             }),
@@ -324,6 +327,15 @@ export const ContractTable = ({
                 meta: {
                     dataTestID: `${tableConfig.rowIDName}-contractType`,
                 },
+            }),
+            columnHelper.accessor('submissionType', {
+                id: 'submissionType',
+                header: 'Submission type',
+                cell: (info) => <span>{info.getValue()}</span>,
+                meta: {
+                    dataTestID: 'submission-type',
+                },
+                filterFn: `arrIncludesSome`,
             }),
             columnHelper.accessor('programs', {
                 header: 'Programs',
@@ -384,7 +396,7 @@ export const ContractTable = ({
                 filterFn: `arrIncludesSome`,
             }),
         ],
-        [isNotStateUser, tableConfig.rowIDName]
+        [eqroSubmissions, isNotStateUser, tableConfig.rowIDName]
     )
 
     const reactTable = useReactTable({
@@ -402,7 +414,7 @@ export const ContractTable = ({
             columnVisibility: {
                 stateName: isNotStateUser,
                 submissionType: isNotStateUser,
-                contractSubmissionType: !isNotStateUser && eqroSubmissions,
+                contractSubmissionType: eqroSubmissions,
             },
         },
         onColumnFiltersChange: setColumnFilters,
@@ -431,7 +443,7 @@ export const ContractTable = ({
         .sort()
         .map((state) => ({
             value: state,
-            label: state,
+            label: stateNameToStateCode(state),
         }))
 
     const filterLength = columnFilters.flatMap((filter) => filter.value).length

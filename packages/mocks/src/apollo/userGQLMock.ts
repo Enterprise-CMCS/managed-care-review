@@ -13,10 +13,7 @@ import {
     BusinessOwnerUser,
     IndexUsersPayload,
     UpdateStateAssignmentsByStateMutation,
-    UpdateStateAssignmentsByStatePayload,
-    CmsUsersUnion,
     UpdateStateAssignmentsByStateDocument,
-    User,
     UpdateStateAssignmentsByStateMutationVariables,
 } from '../gen/gqlClient'
 

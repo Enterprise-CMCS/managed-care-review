@@ -147,6 +147,23 @@
     color: custom.$mcr-foundation-hint;
 }
 
+.provisionsHeader {
+    display: block;
+    font-weight: normal;
+    font-size: 1.4rem;
+    margin-bottom: 4pt;
+    margin-top: 26px;
+    padding-top: 24px;
+    border-top: 1px solid custom.$mcr-gray-lighter;
+}
+
+.provisionsHeaderText {
+    display: block;
+    margin-top: 0pt;
+    font-weight: normal;
+    font-size: 1.01rem;
+}
+
 .guidanceTextBlockNoPadding {
     display: flex;
     flex-direction: column;

@@ -297,7 +297,7 @@ test('includes expected data on the CMS analyst who sent the question', async ()
     expect(template).toEqual(
         expect.objectContaining({
             bodyText: expect.stringContaining(
-                'Sent by: Ronald McDonald (DMCO)  cms@email.com (cms@email.com)'
+                'Sent by: Ronald McDonald (DMCO) cms@email.com (cms@email.com)'
             ),
         })
     )

@@ -83,6 +83,7 @@ describe('sendRateQuestionStateEmail', () => {
                             id: 'parent-contract',
                             stateCode: 'FL',
                             stateNumber: 1,
+                            contractSubmissionType: 'HEALTH_PLAN',
                         },
                         submitInfo: {
                             updatedAt: new Date('2024-04-12'),
@@ -131,6 +132,7 @@ describe('sendRateQuestionStateEmail', () => {
                             id: 'second-contract',
                             stateCode: 'FL',
                             stateNumber: 1,
+                            contractSubmissionType: 'HEALTH_PLAN',
                         },
                         submitInfo: {
                             updatedAt: new Date('2024-04-12'),
@@ -367,7 +369,7 @@ describe('sendRateQuestionStateEmail', () => {
         expect(template).toEqual(
             expect.objectContaining({
                 bodyText: expect.stringContaining(
-                    'Sent by: Prince Zuko (DMCO)  zuko@example.com (zuko@example.com)'
+                    'Sent by: Prince Zuko (DMCO) zuko@example.com (zuko@example.com)'
                 ),
             })
         )
@@ -392,7 +394,7 @@ describe('sendRateQuestionStateEmail', () => {
         expect(template).toEqual(
             expect.objectContaining({
                 bodyText: expect.stringContaining(
-                    'Sent by: Prince Zuko (DMCO)  zuko@example.com (zuko@example.com)'
+                    'Sent by: Prince Zuko (DMCO) zuko@example.com (zuko@example.com)'
                 ),
             })
         )

@@ -1,70 +1,21 @@
 import React from 'react'
 import { GridContainer, Grid } from '@trussworks/react-uswds'
-
 import styles from '../Header.module.scss'
-
-import { PageHeading } from '../../../components/PageHeading'
+import { PageHeading } from '../../PageHeading'
 import { StateIcon, StateIconProps } from '../StateIcon/StateIcon'
-import {
-    User,
-    StateUser,
-    CmsUser,
-    AdminUser,
-    HelpdeskUser,
-    BusinessOwnerUser,
-    CmsApproverUser,
-} from '../../../gen/gqlClient'
+import { User, StateUser } from '../../../gen/gqlClient'
 import {
     hasAdminUserPermissions,
     hasCMSUserPermissions,
 } from '@mc-review/helpers'
 
-const SharedSubHeadingRow = ({
-    submissionID,
-}: {
-    submissionID: string | React.ReactElement
-}) => {
-    return (
-        <span className={styles.submissionIdLine} data-testid="submission-id">
-            <span className={styles.submissionIdLineLabel}>Submission ID</span>
-            <span className={styles.submissionIdLineDivider} aria-hidden="true">
-                |
-            </span>
-            <span className={styles.submissionIdLineValue}>{submissionID}</span>
-        </span>
-    )
-}
-const EntityType = ({ entityType }: { entityType: 'EQRO' | 'Health plan' }) => {
-    return (
-        <div className={styles.entityTypeContainer} data-testid="entityType">
-            <div className={styles.entityTypeDivider} aria-hidden="true" />
-            <div className={styles.entityTypeText}>
-                <span className={styles.entityTypeLabel}>Entity type</span>
-                <span className={styles.entityTypeValue}>{entityType}</span>
-            </div>
-        </div>
-    )
-}
-const CMSUserRow = ({
-    heading,
-    pathname,
-}: {
-    user:
-        | CmsUser
-        | AdminUser
-        | HelpdeskUser
-        | BusinessOwnerUser
-        | CmsApproverUser
-    heading?: string | React.ReactElement
-    pathname?: string
-}) => {
-    const hideSubID =
-        pathname?.includes('dashboard') || pathname?.includes('new')
-    const entityType = pathname?.includes('eqro') ? 'EQRO' : 'Health plan'
+const CMSUserRow = ({ heading }: { heading?: string | React.ReactElement }) => {
     return (
         <div className={styles.dashboardHeading}>
             <GridContainer>
-                {hideSubID ? (
+                {typeof heading === 'object' ? (
+                    heading
+                ) : (
                     <Grid row className="flex-align-center">
                         <PageHeading>
                             <span>CMS</span>
@@ -78,17 +29,6 @@ const CMSUserRow = ({
                             )}
                         </PageHeading>
                     </Grid>
-                ) : (
-                    <Grid row className={`flex-align-center ${styles.cmsRow}`}>
-                        <PageHeading>
-                            <span className={styles.stateHeadingText}>CMS</span>
-
-                            {heading && (
-                                <SharedSubHeadingRow submissionID={heading} />
-                            )}
-                        </PageHeading>
-                        <EntityType entityType={entityType} />
-                    </Grid>
                 )}
             </GridContainer>
         </div>
@@ -98,20 +38,16 @@ const CMSUserRow = ({
 const StateUserRow = ({
     user,
     heading,
-    pathname,
 }: {
     user: StateUser
     heading?: string | React.ReactElement
-    pathname?: string
 }) => {
-    const hideSubID =
-        pathname?.includes('dashboard') || pathname?.includes('new')
-    const entityType = pathname?.includes('eqro') ? 'EQRO' : 'Health plan'
-
     return (
         <div className={styles.dashboardHeading}>
             <GridContainer>
-                {hideSubID ? (
+                {typeof heading === 'object' ? (
+                    heading
+                ) : (
                     <Grid row className="flex-align-center">
                         <div>
                             <StateIcon
@@ -132,31 +68,6 @@ const StateUserRow = ({
                                 </span>
                             )}
                         </PageHeading>
-                    </Grid>
-                ) : (
-                    <Grid
-                        row
-                        className={`flex-align-center ${styles.stateRow}`}
-                    >
-                        <div>
-                            <StateIcon
-                                code={user.state.code as StateIconProps['code']}
-                            />
-                        </div>
-                        <PageHeading>
-                            <span className="srOnly">
-                                {user.state.name}&nbsp;
-                            </span>
-
-                            <span className={styles.stateHeadingText}>
-                                {user.state.name}&nbsp;
-                            </span>
-
-                            {heading && (
-                                <SharedSubHeadingRow submissionID={heading} />
-                            )}
-                        </PageHeading>
-                        <EntityType entityType={entityType} />
                     </Grid>
                 )}
             </GridContainer>
@@ -191,14 +102,12 @@ type PageHeadingProps = {
     loggedInUser?: User
     heading?: string | React.ReactElement
     route?: string
-    pathname?: string
 }
 
 export const PageHeadingRow = ({
     isLoading = false,
     heading,
     route,
-    pathname,
     loggedInUser,
 }: PageHeadingProps): React.ReactElement | null => {
     if (!loggedInUser) {
@@ -213,22 +122,12 @@ export const PageHeadingRow = ({
         hasCMSUserPermissions(loggedInUser) ||
         hasAdminUserPermissions(loggedInUser)
     ) {
-        return (
-            <CMSUserRow
-                user={loggedInUser}
-                heading={heading}
-                pathname={pathname}
-            />
-        )
+        return <CMSUserRow heading={heading} />
     } else if (loggedInUser.__typename === 'StateUser') {
-        return (
-            <StateUserRow
-                user={loggedInUser}
-                heading={heading}
-                pathname={pathname}
-            />
-        )
+        return <StateUserRow heading={heading} user={loggedInUser} />
     } else {
-        return <h1>{`Programming Error: Unkown User Type: ${loggedInUser}`}</h1>
+        return (
+            <h1>{`Programming Error: Unknown User Type: ${loggedInUser}`}</h1>
+        )
     }
 }

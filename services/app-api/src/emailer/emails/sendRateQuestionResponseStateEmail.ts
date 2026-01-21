@@ -1,5 +1,5 @@
 import { formatCalendarDate } from '@mc-review/dates'
-import { pruneDuplicateEmails } from '../formatters'
+import { formatEmailAddresses, pruneDuplicateEmails } from '../formatters'
 import type { EmailConfiguration, EmailData } from '..'
 import type {
     ContractSubmissionType,
@@ -66,6 +66,13 @@ export const sendRateQuestionResponseStateEmail = async (
             currentQuestion.createdAt,
             'America/Los_Angeles'
         ),
+        cmsReviewHelpEmailAddress: formatEmailAddresses(
+            config.cmsReviewHelpEmailAddress
+        ),
+        cmsRateHelpEmailAddress: formatEmailAddresses(
+            config.cmsRateHelpEmailAddress
+        ),
+        helpDeskEmail: formatEmailAddresses(config.helpDeskEmail),
     }
 
     const result = await renderTemplate<typeof data>(

@@ -107,7 +107,7 @@ export const Landing = (): React.ReactElement => {
                                 </li>
                                 <li>
                                     <LinkWithLogging
-                                        aria-label="Document definitions and requirements"
+                                        aria-label="Required supporting documents"
                                         href={'/help#key-documents'}
                                     >
                                         Required supporting documents

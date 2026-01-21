@@ -1,4 +1,4 @@
-import { useEffect } from 'react'
+import { useLayoutEffect } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
 import styles from '../QuestionResponse.module.scss'
 import {
@@ -8,7 +8,7 @@ import {
     useFetchContractWithQuestionsQuery,
 } from '../../../gen/gqlClient'
 import { usePage } from '../../../contexts/PageContext'
-import { Breadcrumbs } from '../../../components/Breadcrumbs/Breadcrumbs'
+import { Breadcrumbs } from '../../../components'
 import { createContractQuestionWrapper } from '@mc-review/helpers'
 import { RoutesRecord } from '@mc-review/constants'
 import { GenericErrorPage } from '../../Errors/GenericErrorPage'
@@ -16,13 +16,12 @@ import { UploadQuestionsForm } from './UploadQuestionsForm'
 import { FileItemT } from '../../../components'
 import { getNextCMSRoundNumber } from '../QuestionResponseHelpers'
 import { ErrorOrLoadingPage } from '../../StateSubmission'
-import { handleAndReturnErrorState } from '../../StateSubmission/SharedSubmissionComponents/ErrorOrLoadingPage'
+import { handleAndReturnErrorState } from '../../StateSubmission/SharedSubmissionComponents'
 import { isValidCmsDivison } from '../QuestionResponseHelpers/questionResponseHelpers'
 import { Error404 } from '../../Errors/Error404Page'
+import { useMemoizedStateHeader } from '../../../hooks'
 
 export const UploadContractQuestions = () => {
-    // router context
-
     const { updateHeading } = usePage()
     const { id, division, contractSubmissionType } = useParams<{
         division: string
@@ -51,10 +50,17 @@ export const UploadContractQuestions = () => {
         (contract?.packageSubmissions &&
             contract?.packageSubmissions[0].contractRevision.contractName) ||
         ''
+    const stateHeader = useMemoizedStateHeader({
+        subHeaderText: contractName,
+        stateCode: contract?.state.code,
+        stateName: contract?.state.name,
+        contractType: contract?.contractSubmissionType,
+    })
+
     // side effects
-    useEffect(() => {
-        updateHeading({ customHeading: `${contractName} Add questions` })
-    }, [contractName, updateHeading])
+    useLayoutEffect(() => {
+        updateHeading({ customHeading: stateHeader })
+    }, [stateHeader, updateHeading])
 
     if (fetchContractLoading) {
         return <ErrorOrLoadingPage state="LOADING" />

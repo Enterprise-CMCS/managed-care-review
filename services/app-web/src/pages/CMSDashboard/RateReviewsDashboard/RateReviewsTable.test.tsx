@@ -162,6 +162,9 @@ describe('RateReviewsTable', () => {
                                 }),
                             ],
                         },
+                        featureFlags: {
+                            'eqro-submissions': true,
+                        },
                     }
                 )
 
@@ -199,22 +202,22 @@ describe('RateReviewsTable', () => {
                 await waitFor(async () => {
                     //Expected options are present
                     expect(
-                        within(comboboxOptions).getByText('Ohio')
+                        within(comboboxOptions).getByText('OH')
                     ).toBeInTheDocument()
                     expect(
-                        within(comboboxOptions).getByText('Florida')
+                        within(comboboxOptions).getByText('FL')
                     ).toBeInTheDocument()
                     expect(
-                        within(comboboxOptions).getByText('Minnesota')
+                        within(comboboxOptions).getByText('MN')
                     ).toBeInTheDocument()
                     //Select option Ohio
-                    await selectEvent.select(comboboxOptions, 'Ohio')
+                    await selectEvent.select(comboboxOptions, 'OH')
                 })
 
                 //Expect only Ohio to show on table
                 const rows = await screen.findAllByRole('row')
-                expect(rows).toHaveLength(2)
-                expect(rows[1]).toHaveTextContent('Ohio') // row[0] is the header
+                expect(rows).toHaveLength(2) // 1 header + 1 data row
+                expect(rows[1]).toHaveTextContent('OH') // row[0] is the header
                 expect(
                     screen.getByText('Displaying 1 of 3 rate reviews')
                 ).toBeInTheDocument()

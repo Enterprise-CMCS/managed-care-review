@@ -47,7 +47,7 @@ export function ConfirmSignUp({
                     showError(
                         'The code you submitted was expired, we just sent another one to you.'
                     )
-                } catch (err) {
+                } catch {
                     console.info('Error in sending confirmation code')
                 }
             } else {

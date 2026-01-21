@@ -1502,6 +1502,7 @@ describe('submitContract', () => {
 
                 const cmsEmails = [
                     ...config.devReviewTeamEmails,
+                    ...config.dmcoEmails,
                     ...stateAnalystsEmails,
                 ]
 
@@ -1575,6 +1576,7 @@ describe('submitContract', () => {
 
                 const cmsEmails = [
                     ...config.devReviewTeamEmails,
+                    ...config.dmcoEmails,
                     ...stateAnalystsEmails,
                 ]
 
@@ -1639,6 +1641,7 @@ describe('submitContract', () => {
 
                 const cmsEmails = [
                     ...config.devReviewTeamEmails,
+                    ...config.dmcoEmails,
                     ...assignedUserEmails,
                 ]
 
@@ -1995,6 +1998,12 @@ describe('submitContract', () => {
                             expect.stringContaining(
                                 'mc-review-qa+DMCPsubmissiondev2@truss.works'
                             ),
+                            expect.stringContaining(
+                                'mc-review-qa+DMCO1@truss.works'
+                            ),
+                            expect.stringContaining(
+                                'mc-review-qa+DMCO2@truss.works'
+                            ),
                         ]),
                     })
                 )
@@ -2145,7 +2154,9 @@ describe('submitContract', () => {
             const stateServer = await constructTestPostgresServer({
                 s3Client: mockS3,
             })
+
             const draft = await createAndUpdateTestEQROContract(stateServer)
+
             const contract = await submitTestContract(stateServer, draft.id)
             // check contract metadata
             const today = new Date()
@@ -2175,7 +2186,11 @@ describe('submitContract', () => {
             expect(
                 submittedFormData.contractDocuments[0].dateAdded
             ).toBeTruthy()
+            expect(
+                submittedFormData.supportingDocuments[0].dateAdded
+            ).toBeTruthy()
             submittedFormData.contractDocuments[0].dateAdded = null
+            submittedFormData.supportingDocuments[0].dateAdded = null
 
             expect(submittedFormData).toEqual({
                 ...draftFormData,
@@ -2201,6 +2216,73 @@ describe('submitContract', () => {
                 eqroProvisionChipEqrRelatedActivities: true,
                 eqroProvisionMcoEqrOrRelatedActivities: true,
             })
+        })
+
+        it('returns an error if EQRO submission submissionType is not CONTRACT_ONLY', async () => {
+            const stateServer = await constructTestPostgresServer({
+                s3Client: mockS3,
+            })
+            const draftWithWrongSubType = await createAndUpdateTestEQROContract(
+                stateServer,
+                undefined,
+                {
+                    submissionType: 'CONTRACT_AND_RATES',
+                }
+            )
+            const response = await executeGraphQLOperation(stateServer, {
+                query: SubmitContractDocument,
+                variables: {
+                    input: {
+                        contractID: draftWithWrongSubType.id,
+                    },
+                },
+            })
+
+            expect(response.errors).toBeDefined()
+            expect(response.errors).toEqual([
+                expect.objectContaining({
+                    message: expect.stringContaining('Invalid input: expected'),
+                    extensions: expect.objectContaining({
+                        code: 'BAD_USER_INPUT',
+                        argumentName: 'contractID',
+                    }),
+                }),
+            ])
+        })
+
+        it('send EQRO submission CMS email on successful submit', async () => {
+            const config = testEmailConfig()
+            const mockEmailer = testEmailer(config)
+            const server = await constructTestPostgresServer({
+                emailer: mockEmailer,
+            })
+
+            const draftContract = await createAndUpdateTestEQROContract(server)
+
+            const submitResult = await submitTestContract(
+                server,
+                draftContract.id
+            )
+
+            const contractName =
+                submitResult?.packageSubmissions[0].contractRevision
+                    .contractName
+
+            const cmsEmails = [
+                ...config.devReviewTeamEmails,
+                ...config.dmcoEmails,
+            ]
+
+            // email subject line is correct for CMS email
+            expect(mockEmailer.sendEmail).toHaveBeenCalledWith(
+                expect.objectContaining({
+                    subject: expect.stringContaining(
+                        `Submission ${contractName} is subject to CMS review`
+                    ),
+                    sourceEmail: config.emailSource,
+                    toAddresses: expect.arrayContaining(Array.from(cmsEmails)),
+                })
+            )
         })
     })
 })

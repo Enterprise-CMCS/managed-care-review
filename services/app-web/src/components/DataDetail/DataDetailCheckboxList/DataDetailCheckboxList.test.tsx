@@ -54,7 +54,7 @@ describe('DataDetailCheckboxList', () => {
             screen.getByText(/You must provide this information/)
         ).toBeInTheDocument()
     })
-    it('renders null when displayEmptyList and list is empty', () => {
+    it('renders em dash when displayEmptyList and list is empty', () => {
         const ValuesLookup: Record<string, string> = {
             THIS: 'this',
             THAT: 'that',
@@ -69,6 +69,6 @@ describe('DataDetailCheckboxList', () => {
                 />
             </div>
         )
-        expect(screen.getByTestId('container')).toBeEmptyDOMElement()
+        expect(screen.getByText('—')).toBeInTheDocument()
     })
 })

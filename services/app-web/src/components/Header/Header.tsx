@@ -2,7 +2,7 @@ import { Grid, GridContainer } from '@trussworks/react-uswds'
 import React from 'react'
 import { NavLink } from 'react-router-dom'
 import { AuthModeType } from '@mc-review/common-code'
-import { useCurrentRoute } from '../../hooks/useCurrentRoute'
+import { useCurrentRoute } from '../../hooks'
 import { useAuth } from '../../contexts/AuthContext'
 import { usePage } from '../../contexts/PageContext'
 import { Logo } from '../Logo'
@@ -30,7 +30,7 @@ export const Header = ({
     ).href
     const { logout, loggedInUser, loginStatus } = useAuth()
     const { heading } = usePage()
-    const { currentRoute: route, pathname } = useCurrentRoute()
+    const { currentRoute: route } = useCurrentRoute()
 
     const handleLogout = async () => {
         await logout({ type: 'DEFAULT' })
@@ -45,7 +45,7 @@ export const Header = ({
                         <NavLink className={styles.bannerLogo} to="/">
                             <Logo
                                 src={onemacLogo}
-                                alt="One Mac"
+                                alt="One Mac logo"
                                 className={styles.logoImg}
                             />
                             <span>Managed Care Review</span>
@@ -63,7 +63,6 @@ export const Header = ({
             <PageHeadingRow
                 heading={route !== 'UNKNOWN_ROUTE' ? heading : undefined}
                 route={route}
-                pathname={pathname}
                 isLoading={loginStatus === 'LOADING'}
                 loggedInUser={loggedInUser}
             />

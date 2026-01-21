@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react'
+import React, { useLayoutEffect } from 'react'
 import styles from './SubmissionWithdraw.module.scss'
 import {
     ActionButton,
@@ -23,7 +23,7 @@ import { ErrorOrLoadingPage } from '../StateSubmission'
 import { handleAndReturnErrorState } from '../StateSubmission/SharedSubmissionComponents'
 import { GenericErrorPage } from '../Errors/GenericErrorPage'
 import { SubmissionWithdrawWarningBanner } from '../../components/Banner/SubmissionWithdrawWarningBanner/SubmissionWithdrawWarningBanner'
-import { useTealium } from '../../hooks'
+import { useMemoizedStateHeader, useTealium } from '../../hooks'
 import { recordJSException } from '@mc-review/otel'
 import { usePage } from '../../contexts/PageContext'
 
@@ -126,13 +126,18 @@ export const SubmissionWithdraw = (): React.ReactElement => {
     const rateIDs = contract
         ? contract.packageSubmissions[0].rateRevisions.map((rr) => rr.rateID)
         : []
-
     const contractName =
         contract?.packageSubmissions[0].contractRevision.contractName
+    const stateHeader = useMemoizedStateHeader({
+        subHeaderText: contractName,
+        stateCode: contract?.state.code,
+        stateName: contract?.state.name,
+        contractType: contract?.contractSubmissionType,
+    })
 
-    useEffect(() => {
-        updateHeading({ customHeading: contractName })
-    }, [contractName, updateHeading])
+    useLayoutEffect(() => {
+        updateHeading({ customHeading: stateHeader })
+    }, [stateHeader, updateHeading])
 
     //Fetching rates associated with above contract to determine whether or not they will be withdrawn (banner display)
     //This query will be skipped if rateIDs comes up empty

@@ -7,7 +7,7 @@ import {
     RoutesRecord,
     STATE_SUBMISSION_FORM_ROUTES,
 } from '@mc-review/constants'
-import { getRouteName } from '../../routeHelpers'
+import { getRouteName, getSubmissionPath } from '../../routeHelpers'
 import {
     ContractFormData,
     ContractPackageSubmission,
@@ -32,7 +32,7 @@ export type SideNavOutletContextType = {
 }
 
 export const SubmissionSideNav = () => {
-    const { contractSubmissionType, id, rateID } = useParams()
+    const { id, rateID } = useParams()
     if (!id) {
         throw new Error(
             'PROGRAMMING ERROR: id param not set in state submission form.'
@@ -92,6 +92,7 @@ export const SubmissionSideNav = () => {
     }
 
     const submissionStatus = contract.status
+    const contractSubmissionType = contract.contractSubmissionType
 
     //The sideNav should not be visible to a state user if the submission is a draft that has never been submitted
     const showSidebar =
@@ -139,7 +140,31 @@ export const SubmissionSideNav = () => {
         isEditable
     )
 
+    const generateContractQuestion = () => {
+        if (contractSubmissionType === 'EQRO') return null
+        return (
+            <NavLinkWithLogging
+                to={getSubmissionPath(
+                    'SUBMISSIONS_CONTRACT_QUESTIONS_AND_ANSWERS',
+                    contractSubmissionType,
+                    contract.id
+                )}
+                className={isSelectedLink(
+                    'SUBMISSIONS_CONTRACT_QUESTIONS_AND_ANSWERS'
+                )}
+                event_name="navigation_clicked"
+            >
+                Contract questions
+            </NavLinkWithLogging>
+        )
+    }
+
     const generateRateLinks = () => {
+        // EQRO submission do not have rates
+        if (!isStateUser || contractSubmissionType === 'EQRO') {
+            return []
+        }
+
         const rateRevision = contract.packageSubmissions[0].rateRevisions
         const programs = contract.state.programs
 
@@ -161,9 +186,15 @@ export const SubmissionSideNav = () => {
                         'Unknown Program'
                 )
                 .join(' ')
+
             return (
                 <NavLinkWithLogging
-                    to={`/submissions/${contractSubmissionType}/${id}/rates/${rev.rateID}/question-and-answers`}
+                    to={getSubmissionPath(
+                        'SUBMISSIONS_RATE_QUESTIONS_AND_ANSWERS',
+                        contractSubmissionType,
+                        contract.id,
+                        rev.rateID
+                    )}
                     className={isSelectedRateLink(rev.rateID)}
                     event_name="navigation_clicked"
                 >
@@ -214,8 +245,16 @@ export const SubmissionSideNav = () => {
                                     to={
                                         isStateUser &&
                                         submissionStatus === 'UNLOCKED'
-                                            ? `/submissions/${contractSubmissionType}/${id}/edit/review-and-submit`
-                                            : `/submissions/${contractSubmissionType}/${id}`
+                                            ? getSubmissionPath(
+                                                  'SUBMISSIONS_REVIEW_SUBMIT',
+                                                  contractSubmissionType,
+                                                  contract.id
+                                              )
+                                            : getSubmissionPath(
+                                                  'SUBMISSIONS_SUMMARY',
+                                                  contractSubmissionType,
+                                                  contract.id
+                                              )
                                     }
                                     className={isSelectedLink(
                                         isStateUser &&
@@ -230,16 +269,8 @@ export const SubmissionSideNav = () => {
                                         ? 'Submission'
                                         : 'Submission summary'}
                                 </NavLinkWithLogging>,
-                                <NavLinkWithLogging
-                                    to={`/submissions/${contractSubmissionType}/${id}/question-and-answers`}
-                                    className={isSelectedLink(
-                                        'SUBMISSIONS_CONTRACT_QUESTIONS_AND_ANSWERS'
-                                    )}
-                                    event_name="navigation_clicked"
-                                >
-                                    Contract questions
-                                </NavLinkWithLogging>,
-                                ...(isStateUser ? generateRateLinks() : []),
+                                generateContractQuestion(),
+                                ...generateRateLinks(),
                             ]}
                         />
                     </div>

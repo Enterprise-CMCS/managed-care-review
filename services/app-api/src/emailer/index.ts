@@ -3,6 +3,7 @@ export { newLocalEmailer, newSESEmailer, emailer } from './emailer'
 export {
     newContractCMSEmail,
     newContractStateEmail,
+    newEqroContractStateEmail,
     unlockContractCMSEmail,
     unlockContractStateEmail,
     resubmitContractStateEmail,

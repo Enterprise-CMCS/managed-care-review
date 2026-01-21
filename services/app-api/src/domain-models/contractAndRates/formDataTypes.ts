@@ -226,7 +226,55 @@ const contractFormDataSchema = genericContractFormDataSchema.extend({
     modifiedNonRiskPaymentArrangements: preprocessNulls(
         genericContractFormDataSchema.shape.modifiedNonRiskPaymentArrangements.optional()
     ),
+    federalAuthorities:
+        genericContractFormDataSchema.shape.federalAuthorities.default([]),
     // statutoryRegulatoryAttestation: genericContractFormDataSchema.shape.statutoryRegulatoryAttestation.optional(),
+})
+
+const eqroContractFormDataSchema = genericContractFormDataSchema.extend({
+    contractDateStart: preprocessNulls(
+        genericContractFormDataSchema.shape.contractDateStart.optional()
+    ),
+    contractDateEnd: preprocessNulls(
+        genericContractFormDataSchema.shape.contractDateEnd.optional()
+    ),
+    // Fields not applicable to EQRO submissions
+    // following values should be undefined for a EQRO contract
+    riskBasedContract: preprocessNulls(z.undefined().optional()),
+    dsnpContract: preprocessNulls(z.undefined().optional()),
+    contractExecutionStatus: preprocessNulls(z.undefined().optional()),
+    inLieuServicesAndSettings: preprocessNulls(z.undefined().optional()),
+    modifiedBenefitsProvided: preprocessNulls(z.undefined().optional()),
+    modifiedGeoAreaServed: preprocessNulls(z.undefined().optional()),
+    modifiedMedicaidBeneficiaries: preprocessNulls(z.undefined().optional()),
+    modifiedRiskSharingStrategy: preprocessNulls(z.undefined().optional()),
+    modifiedIncentiveArrangements: preprocessNulls(z.undefined().optional()),
+    modifiedWitholdAgreements: preprocessNulls(z.undefined().optional()),
+    modifiedStateDirectedPayments: preprocessNulls(z.undefined().optional()),
+    modifiedPassThroughPayments: preprocessNulls(z.undefined().optional()),
+    modifiedPaymentsForMentalDiseaseInstitutions: preprocessNulls(
+        z.undefined().optional()
+    ),
+    modifiedMedicalLossRatioStandards: preprocessNulls(
+        z.undefined().optional()
+    ),
+    modifiedOtherFinancialPaymentIncentive: preprocessNulls(
+        z.undefined().optional()
+    ),
+    modifiedEnrollmentProcess: preprocessNulls(z.undefined().optional()),
+    modifiedGrevienceAndAppeal: preprocessNulls(z.undefined().optional()),
+    modifiedNetworkAdequacyStandards: preprocessNulls(z.undefined().optional()),
+    modifiedLengthOfContract: preprocessNulls(z.undefined().optional()),
+    modifiedNonRiskPaymentArrangements: preprocessNulls(
+        z.undefined().optional()
+    ),
+    statutoryRegulatoryAttestation: preprocessNulls(z.undefined().optional()),
+    statutoryRegulatoryAttestationDescription: preprocessNulls(
+        z.undefined().optional()
+    ),
+    // should always be an empty array to match GQL types
+    federalAuthorities:
+        genericContractFormDataSchema.shape.federalAuthorities.default([]),
 })
 
 // submittedFormDataSchema is the schema used during submission validation. Most fields are required and most arrays are nonempty.
@@ -248,11 +296,29 @@ const submittableContractFormDataSchema = genericContractFormDataSchema
             formData.submissionType === 'CONTRACT_AND_RATES'
         ) {
             ctx.addIssue({
-                code: z.ZodIssueCode.custom,
+                code: 'custom',
                 message: 'cannot submit rates with CHIP only populationCovered',
             })
         }
     })
+
+const submittableEQROContractFormDataSchema = eqroContractFormDataSchema.extend(
+    {
+        contractDateStart:
+            genericContractFormDataSchema.shape.contractDateStart,
+        contractDateEnd: genericContractFormDataSchema.shape.contractDateEnd,
+        populationCovered:
+            genericContractFormDataSchema.shape.populationCovered,
+        managedCareEntities:
+            genericContractFormDataSchema.shape.managedCareEntities.nonempty(),
+        stateContacts:
+            genericContractFormDataSchema.shape.stateContacts.nonempty(),
+        contractDocuments:
+            genericContractFormDataSchema.shape.contractDocuments.nonempty(),
+        submissionType: z.literal('CONTRACT_ONLY'),
+    }
+)
+
 const genericRateFormDataSchema = z.object({
     id: z.string().optional(), // 10.4.23 eng pairing - we discussed future reactor that would delete this from the rate revision form data schema all together.
     rateID: z.string().optional(), // 10.4.23 eng pairing - we discussed future refactor to move this up to rate revision schema.
@@ -341,18 +407,32 @@ const submittableRateFormDataSchema = genericRateFormDataSchema.extend({
         genericRateFormDataSchema.shape.certifyingActuaryContacts.nonempty(),
 })
 
+const updateDraftContractFormDataSchema = contractFormDataSchema.extend({
+    contractType: preprocessNulls(contractTypeSchema.optional()),
+    submissionDescription: preprocessNulls(z.string().optional()),
+    eqroNewContractor: z.boolean().optional().nullish(),
+    eqroProvisionMcoNewOptionalActivity: z.boolean().optional().nullish(),
+    eqroProvisionNewMcoEqrRelatedActivities: z.boolean().optional().nullish(),
+    eqroProvisionChipEqrRelatedActivities: z.boolean().optional().nullish(),
+    eqroProvisionMcoEqrOrRelatedActivities: z.boolean().optional().nullish(),
+})
+
+type UpdateDraftContractFormDataType = Partial<
+    z.infer<typeof updateDraftContractFormDataSchema>
+>
+
 type DocumentType = z.infer<typeof documentSchema>
 type ContractFormDataType = z.infer<typeof contractFormDataSchema>
 type RateFormDataType = z.infer<typeof rateFormDataSchema>
 type StrippedRateFormDataType = z.infer<typeof strippedRateFormDataSchema>
 
-type ContractFormEditableType = Partial<ContractFormDataType>
 type RateFormEditableType = Partial<RateFormDataType>
 type StateContactType = z.infer<typeof stateContactSchema>
 type ActuaryContactType = z.infer<typeof actuaryContactSchema>
 
 export {
     submittableContractFormDataSchema,
+    submittableEQROContractFormDataSchema,
     submittableRateFormDataSchema,
     contractFormDataSchema,
     rateFormDataSchema,
@@ -361,6 +441,8 @@ export {
     strippedRateFormDataSchema,
     contractTypeSchema,
     populationCoveredSchema,
+    eqroContractFormDataSchema,
+    updateDraftContractFormDataSchema,
 }
 
 export type {
@@ -368,8 +450,8 @@ export type {
     RateFormDataType,
     DocumentType,
     RateFormEditableType,
-    ContractFormEditableType,
     StateContactType,
     ActuaryContactType,
     StrippedRateFormDataType,
+    UpdateDraftContractFormDataType,
 }

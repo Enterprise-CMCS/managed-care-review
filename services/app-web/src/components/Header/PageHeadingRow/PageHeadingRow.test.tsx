@@ -1,10 +1,12 @@
-import { screen } from '@testing-library/react'
-import { StateUser } from '../../../gen/gqlClient'
-import { renderWithProviders } from '../../../testHelpers/jestHelpers'
+import { screen, waitFor } from '@testing-library/react'
+import { CmsUser, StateUser } from '../../../gen/gqlClient'
+import { renderWithProviders } from '../../../testHelpers'
 import { PageHeadingRow } from './PageHeadingRow'
+import { StateHeading } from './StateHeading'
+import { fetchCurrentUserMock } from '@mc-review/mocks'
 
 describe('Page Heading Row', () => {
-    const loggedInUser: StateUser = {
+    const loggedInStateUser: StateUser = {
         __typename: 'StateUser' as const,
         state: {
             name: 'Minnesota',
@@ -42,103 +44,296 @@ describe('Page Heading Row', () => {
         role: 'State User',
         email: 'bob@dmas.mn.gov',
     }
-    it('renders without errors and with the managed care header on the landing page', () => {
-        renderWithProviders(<PageHeadingRow route="ROOT" />)
-        expect(screen.getByRole('heading')).toBeInTheDocument()
+
+    const loggedInCMSUser: CmsUser = {
+        __typename: 'CMSUser' as const,
+        id: 'foo-id',
+        givenName: 'Bob',
+        familyName: 'Dumas',
+        role: 'CMS_USER',
+        email: 'bob@dmas.mn.gov',
+        divisionAssignment: 'DMCO',
+        stateAssignments: [
+            {
+                code: 'OH',
+                name: 'Ohio',
+                programs: [],
+            },
+        ],
+    }
+
+    it('renders without errors and with the managed care header on the landing page', async () => {
+        renderWithProviders(<PageHeadingRow route="ROOT" />, {
+            apolloProvider: {
+                mocks: [fetchCurrentUserMock({ statusCode: 200 })],
+            },
+        })
+        await waitFor(() => {
+            expect(screen.getByRole('heading')).toBeInTheDocument()
+        })
     })
 
-    it('renders without errors and without the managed care header on the help page page', () => {
-        renderWithProviders(<PageHeadingRow route="HELP" />)
-        expect(screen.queryByRole('heading')).not.toBeInTheDocument()
+    it('renders without errors and without the managed care header on the help page page', async () => {
+        renderWithProviders(<PageHeadingRow route="HELP" />, {
+            apolloProvider: {
+                mocks: [fetchCurrentUserMock({ statusCode: 200 })],
+            },
+        })
+        await waitFor(() => {
+            expect(screen.queryByRole('heading')).not.toBeInTheDocument()
+        })
     })
 
     it('does not display heading text when isLoading', async () => {
-        renderWithProviders(<PageHeadingRow isLoading route="ROOT" />)
+        renderWithProviders(<PageHeadingRow isLoading route="ROOT" />, {
+            apolloProvider: {
+                mocks: [fetchCurrentUserMock({ statusCode: 200 })],
+            },
+        })
 
-        expect(screen.getByRole('heading')).toBeInTheDocument()
-        expect(screen.getByRole('heading')).not.toHaveTextContent(
-            'Medicaid and CHIP Managed Care Reporting and Review System'
-        )
+        await waitFor(() => {
+            expect(screen.getByRole('heading')).toBeInTheDocument()
+            expect(screen.getByRole('heading')).not.toHaveTextContent(
+                'Medicaid and CHIP Managed Care Reporting and Review System'
+            )
+        })
     })
 
-    it('displays Medicaid and CHIP Managed Care Reporting heading when logged out', () => {
+    it('displays Medicaid and CHIP Managed Care Reporting heading when logged out', async () => {
         renderWithProviders(
-            <PageHeadingRow heading="Custom page heading" route="ROOT" />
+            <PageHeadingRow heading="Custom page heading" route="ROOT" />,
+            {
+                apolloProvider: {
+                    mocks: [fetchCurrentUserMock({ statusCode: 200 })],
+                },
+            }
         )
-        expect(screen.getByRole('heading')).toHaveTextContent(
-            'Medicaid and CHIP Managed Care Reporting and Review System'
-        )
+        await waitFor(() => {
+            expect(screen.getByRole('heading')).toHaveTextContent(
+                'Medicaid and CHIP Managed Care Reporting and Review System'
+            )
+        })
     })
 
-    it('displays custom heading for page when loggedInUser exists', () => {
+    it('displays custom heading for page when loggedInStateUser exists', async () => {
         renderWithProviders(
             <PageHeadingRow
                 heading="Custom page heading"
-                loggedInUser={loggedInUser}
+                loggedInUser={loggedInStateUser}
                 route="ROOT"
-            />
+            />,
+            {
+                apolloProvider: {
+                    mocks: [fetchCurrentUserMock({ statusCode: 200 })],
+                },
+            }
         )
-        expect(screen.getByRole('heading')).not.toHaveTextContent(
-            'Medicaid and CHIP Managed Care Reporting and Review System'
-        )
-        expect(screen.getByRole('heading')).toHaveTextContent(
-            'Custom page heading'
-        )
+        await waitFor(() => {
+            expect(screen.getByRole('heading')).not.toHaveTextContent(
+                'Medicaid and CHIP Managed Care Reporting and Review System'
+            )
+            expect(screen.getByRole('heading')).toHaveTextContent(
+                'Custom page heading'
+            )
+        })
     })
 
-    it('displays EQRO entity type on EQRO submission page', () => {
+    it('displays EQRO contract type on EQRO submission page', async () => {
         renderWithProviders(
             <PageHeadingRow
-                heading="Custom page heading"
-                loggedInUser={loggedInUser}
+                heading={
+                    <StateHeading
+                        subHeaderText="Some-id"
+                        stateCode="OH"
+                        stateName="Ohio"
+                        contractType="EQRO"
+                        route="SUBMISSIONS_SUMMARY"
+                    />
+                }
+                loggedInUser={loggedInStateUser}
                 route="SUBMISSIONS_SUMMARY"
-                pathname="/submissions/eqro/1234"
-            />
+            />,
+            {
+                apolloProvider: {
+                    mocks: [fetchCurrentUserMock({ statusCode: 200 })],
+                },
+            }
         )
 
-        expect(screen.getByTestId('entityType')).toHaveTextContent('EQRO')
+        await waitFor(() => {
+            expect(screen.getByTestId('contractType')).toHaveTextContent('EQRO')
+        })
     })
 
-    it('displays Health plan entity type on hpp submission page', () => {
+    it('displays Health plan contract type on hpp submission page', async () => {
         renderWithProviders(
             <PageHeadingRow
-                heading="Custom page heading"
-                loggedInUser={loggedInUser}
+                heading={
+                    <StateHeading
+                        subHeaderText="Some-id"
+                        stateCode="OH"
+                        stateName="Ohio"
+                        contractType="Health plan"
+                        route="SUBMISSIONS_SUMMARY"
+                    />
+                }
+                loggedInUser={loggedInStateUser}
                 route="SUBMISSIONS_SUMMARY"
-                pathname="/submissions/health-plan/1234"
-            />
+            />,
+            {
+                apolloProvider: {
+                    mocks: [fetchCurrentUserMock({ statusCode: 200 })],
+                },
+            }
         )
 
-        expect(screen.getByTestId('entityType')).toHaveTextContent(
-            'Health plan'
-        )
+        await waitFor(() => {
+            expect(screen.getByTestId('contractType')).toHaveTextContent(
+                'Health plan'
+            )
+        })
     })
 
-    it('does not display submission ID or entity type on dashboard', () => {
+    it('does not display submission ID or contract type on dashboard', async () => {
         renderWithProviders(
             <PageHeadingRow
                 heading="Custom page heading"
-                loggedInUser={loggedInUser}
+                loggedInUser={loggedInStateUser}
                 route="DASHBOARD_SUBMISSIONS"
-                pathname="/submissions/dashboard"
-            />
+            />,
+            {
+                apolloProvider: {
+                    mocks: [fetchCurrentUserMock({ statusCode: 200 })],
+                },
+            }
         )
 
-        expect(screen.queryByTestId('entityType')).not.toBeInTheDocument()
-        expect(screen.queryByTestId('submission-id')).not.toBeInTheDocument()
+        await waitFor(() => {
+            expect(screen.queryByTestId('contractType')).not.toBeInTheDocument()
+            expect(
+                screen.queryByTestId('submission-id')
+            ).not.toBeInTheDocument()
+        })
     })
 
-    it('does not display submission ID or entity type on new submission page', () => {
+    it('does not display submission ID or contract type on new submission page', async () => {
         renderWithProviders(
             <PageHeadingRow
                 heading="Custom page heading"
-                loggedInUser={loggedInUser}
+                loggedInUser={loggedInStateUser}
                 route="SUBMISSIONS_NEW"
-                pathname="/submissions/new"
-            />
+            />,
+            {
+                apolloProvider: {
+                    mocks: [fetchCurrentUserMock({ statusCode: 200 })],
+                },
+            }
         )
 
-        expect(screen.queryByTestId('entityType')).not.toBeInTheDocument()
-        expect(screen.queryByTestId('submission-id')).not.toBeInTheDocument()
+        await waitFor(() => {
+            expect(screen.queryByTestId('contractType')).not.toBeInTheDocument()
+            expect(
+                screen.queryByTestId('submission-id')
+            ).not.toBeInTheDocument()
+        })
+    })
+    it('displays state information for CMS user on submission summary', async () => {
+        renderWithProviders(
+            <PageHeadingRow
+                heading={
+                    <StateHeading
+                        subHeaderText="Some-id"
+                        stateCode="OH"
+                        stateName="Ohio"
+                        contractType="Health plan"
+                        route="SUBMISSIONS_SUMMARY"
+                    />
+                }
+                loggedInUser={loggedInCMSUser}
+                route="SUBMISSIONS_SUMMARY"
+            />,
+            {
+                apolloProvider: {
+                    mocks: [fetchCurrentUserMock({ statusCode: 200 })],
+                },
+            }
+        )
+
+        await waitFor(() => {
+            expect(screen.getByTestId('stateDisplay')).toHaveTextContent('Ohio')
+        })
+    })
+    it('does not display state information for CMS user on the dashboard', async () => {
+        renderWithProviders(
+            <PageHeadingRow
+                heading="Custom page heading"
+                loggedInUser={loggedInCMSUser}
+                route="SUBMISSIONS_SUMMARY"
+            />,
+            {
+                apolloProvider: {
+                    mocks: [fetchCurrentUserMock({ statusCode: 200 })],
+                },
+            }
+        )
+        await waitFor(() => {
+            expect(screen.queryByTestId('stateDisplay')).not.toBeInTheDocument()
+        })
+    })
+    it('does not display state information for CMS user on the settings page', async () => {
+        renderWithProviders(
+            <PageHeadingRow
+                heading="Custom page heading"
+                loggedInUser={loggedInCMSUser}
+                route="SUBMISSIONS_SUMMARY"
+            />,
+            {
+                apolloProvider: {
+                    mocks: [fetchCurrentUserMock({ statusCode: 200 })],
+                },
+            }
+        )
+        await waitFor(() => {
+            expect(screen.queryByTestId('stateDisplay')).not.toBeInTheDocument()
+        })
+    })
+    it('does not display state information for CMS user when stateCode is undefined', async () => {
+        renderWithProviders(
+            <PageHeadingRow
+                heading="Custom page heading"
+                loggedInUser={loggedInCMSUser}
+                route="SUBMISSIONS_SUMMARY"
+            />,
+            {
+                apolloProvider: {
+                    mocks: [fetchCurrentUserMock({ statusCode: 200 })],
+                },
+            }
+        )
+
+        await waitFor(() => {
+            expect(screen.queryByTestId('stateDisplay')).not.toBeInTheDocument()
+            expect(screen.getByRole('heading')).toHaveTextContent('CMS')
+        })
+    })
+
+    it('does not display state information for CMS user when stateName is undefined', async () => {
+        renderWithProviders(
+            <PageHeadingRow
+                heading="Custom page heading"
+                loggedInUser={loggedInCMSUser}
+                route="SUBMISSIONS_SUMMARY"
+            />,
+            {
+                apolloProvider: {
+                    mocks: [fetchCurrentUserMock({ statusCode: 200 })],
+                },
+            }
+        )
+
+        await waitFor(() => {
+            expect(screen.queryByTestId('stateDisplay')).not.toBeInTheDocument()
+            expect(screen.getByRole('heading')).toHaveTextContent('CMS')
+        })
     })
 })

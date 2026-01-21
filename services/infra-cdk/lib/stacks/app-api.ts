@@ -12,6 +12,10 @@ import {
     TokenAuthorizer,
     AuthorizationType,
     ResponseType,
+    MethodLoggingLevel,
+    CfnAccount,
+    LogGroupLogDestination,
+    AccessLogFormat,
 } from 'aws-cdk-lib/aws-apigateway'
 import {
     PolicyStatement,
@@ -23,6 +27,7 @@ import {
 import { CfnOutput, Duration, Fn } from 'aws-cdk-lib'
 import { StringParameter } from 'aws-cdk-lib/aws-ssm'
 import { Secret } from 'aws-cdk-lib/aws-secretsmanager'
+import { LogGroup } from 'aws-cdk-lib/aws-logs'
 import { ResourceNames } from '../config/shared'
 import {
     Architecture,
@@ -31,13 +36,18 @@ import {
     type ILayerVersion,
 } from 'aws-cdk-lib/aws-lambda'
 import { CfnWebACL, CfnWebACLAssociation } from 'aws-cdk-lib/aws-wafv2'
-import { SubnetType, SecurityGroup, Vpc } from 'aws-cdk-lib/aws-ec2'
+import { SubnetType, Vpc, SecurityGroup } from 'aws-cdk-lib/aws-ec2'
 import { Rule, Schedule } from 'aws-cdk-lib/aws-events'
 import { LambdaFunction } from 'aws-cdk-lib/aws-events-targets'
 import { AWS_OTEL_LAYER_ARN } from './lambda-layers'
 import { ApiEndpoint } from '../constructs/api/api-endpoint'
 import path from 'path'
 import type { BundlingOptions } from 'aws-cdk-lib/aws-lambda-nodejs'
+import type { IVpc, ISecurityGroup } from 'aws-cdk-lib/aws-ec2'
+
+export interface AppApiStackProps extends BaseStackProps {
+    // VPC imported from environment (Vpc.fromLookup), security groups from Network stack exports
+}
 
 /**
  * App API stack - GraphQL API with Lambda functions and dedicated API Gateway
@@ -58,6 +68,7 @@ export class AppApiStack extends BaseStack {
     public readonly oauthTokenFunction: NodejsFunction
     public readonly cleanupFunction: NodejsFunction
     public readonly migrateFunction: NodejsFunction
+    public readonly regenerateZipsFunction: NodejsFunction
 
     public readonly graphqlFunction: NodejsFunction
 
@@ -66,11 +77,68 @@ export class AppApiStack extends BaseStack {
     // Prisma 7 with driver adapters - no longer needs lambda layers
     // private readonly prismaEngineLayer: ILayerVersion
 
-    constructor(scope: Construct, id: string, props: BaseStackProps) {
+    // Network resources from Network stack
+    private readonly vpc: IVpc
+    private readonly lambdaSecurityGroup: ISecurityGroup
+    private readonly applicationSecurityGroup: ISecurityGroup
+
+    constructor(scope: Construct, id: string, props: AppApiStackProps) {
         super(scope, id, {
             ...props,
             description:
                 'App API - GraphQL Lambda functions and API Gateway integration',
+        })
+
+        // Import VPC from environment
+        this.vpc = Vpc.fromLookup(this, 'ImportedVpc', {
+            vpcId: process.env.VPC_ID!,
+        })
+
+        // Import security groups from Network stack CloudFormation exports
+        const networkStackName = `network-${this.stage}-cdk`
+        this.lambdaSecurityGroup = SecurityGroup.fromSecurityGroupId(
+            this,
+            'ImportedLambdaSG',
+            Fn.importValue(`${networkStackName}-LambdaSecurityGroupId`)
+        )
+        this.applicationSecurityGroup = SecurityGroup.fromSecurityGroupId(
+            this,
+            'ImportedApplicationSG',
+            Fn.importValue(`${networkStackName}-ApplicationSecurityGroupId`)
+        )
+
+        // Create CloudWatch Log Group for API Gateway access logs
+        // Note: API Gateway has two log types:
+        // 1. Execution logs (loggingLevel) - API Gateway's internal execution, auto-created by AWS
+        // 2. Access logs (accessLogDestination) - Who accessed the API, configured below
+        const apiGatewayLogGroup = new LogGroup(this, 'ApiGatewayLogGroup', {
+            logGroupName: `/aws/apigateway/${ResourceNames.apiName('app-api', this.stage)}-gateway`,
+            retention: this.stageConfig.monitoring.logRetentionDays,
+        })
+
+        // Create IAM role for API Gateway to write to CloudWatch Logs
+        const apiGatewayCloudWatchRole = new Role(
+            this,
+            'ApiGatewayCloudWatchRole',
+            {
+                assumedBy: new ServicePrincipal('apigateway.amazonaws.com'),
+                managedPolicies: [
+                    ManagedPolicy.fromAwsManagedPolicyName(
+                        'service-role/AmazonAPIGatewayPushToCloudWatchLogs'
+                    ),
+                ],
+            }
+        )
+
+        // Configure API Gateway account to use CloudWatch role.
+        // NOTE: aws-apigateway.CfnAccount is an account/region-wide singleton.
+        // This stack is intended to own the API Gateway CloudWatch Logs role
+        // configuration for the entire AWS account in this region. If additional
+        // API Gateways are created in other stacks in the same account/region,
+        // they must NOT create their own CfnAccount resources and should instead
+        // rely on this shared configuration or coordinate changes explicitly.
+        new CfnAccount(this, 'ApiGatewayAccount', {
+            cloudWatchRoleArn: apiGatewayCloudWatchRole.roleArn,
         })
 
         // Create dedicated API Gateway for app-api
@@ -79,6 +147,23 @@ export class AppApiStack extends BaseStack {
             description: 'API Gateway for app-api Lambda functions',
             deployOptions: {
                 stageName: this.stage,
+                loggingLevel: MethodLoggingLevel.INFO,
+                dataTraceEnabled: false,
+                metricsEnabled: true,
+                accessLogDestination: new LogGroupLogDestination(
+                    apiGatewayLogGroup
+                ),
+                accessLogFormat: AccessLogFormat.jsonWithStandardFields({
+                    caller: true,
+                    httpMethod: true,
+                    ip: true,
+                    protocol: true,
+                    requestTime: true,
+                    resourcePath: true,
+                    responseLength: true,
+                    status: true,
+                    user: true,
+                }),
             },
             defaultCorsPreflightOptions: {
                 allowOrigins: ['*'],
@@ -241,6 +326,12 @@ export class AppApiStack extends BaseStack {
             environment
         )
 
+        // Create regenerate zips function with VPC and layers
+        this.regenerateZipsFunction = this.createRegenerateZipsFunction(
+            lambdaRole,
+            environment
+        )
+
         // Create GraphQL function with VPC and layers
         this.graphqlFunction = this.createGraphqlFunction(
             lambdaRole,
@@ -363,25 +454,11 @@ export class AppApiStack extends BaseStack {
         role: Role,
         environment: Record<string, string>
     ): NodejsFunction {
-        // Validate required environment variables for VPC configuration
-        const required = ['VPC_ID', 'SG_ID']
-        const missing = required.filter((envVar) => !process.env[envVar])
-        if (missing.length > 0) {
-            throw new Error(
-                `Missing required environment variables for migrate function: ${missing.join(', ')}`
-            )
-        }
-
-        // Import VPC and security group from environment variables (matches serverless pattern)
-        const vpc = Vpc.fromLookup(this, 'ImportedVpc', {
-            vpcId: process.env.VPC_ID!,
-        })
-
-        const lambdaSecurityGroup = SecurityGroup.fromSecurityGroupId(
-            this,
-            'ImportedSecurityGroup',
-            process.env.SG_ID!
-        )
+        // Build security groups array - use both during transition
+        const securityGroups = [
+            this.lambdaSecurityGroup,
+            this.applicationSecurityGroup,
+        ]
 
         // Prisma 7 with driver adapters - no longer needs lambda layers
         // const prismaMigrationLayer = new LayerVersion(
@@ -433,7 +510,7 @@ export class AppApiStack extends BaseStack {
             vpcSubnets: {
                 subnetType: SubnetType.PRIVATE_WITH_EGRESS,
             },
-            securityGroups: [lambdaSecurityGroup],
+            securityGroups,
             bundling: {
                 format: OutputFormat.ESM,
                 banner: AppApiStack.ESM_BANNER,
@@ -457,6 +534,7 @@ export class AppApiStack extends BaseStack {
                     'rds:CreateDBClusterSnapshot',
                     'rds:DescribeDBClusterSnapshots',
                     'rds:DescribeDBClusters',
+                    'rds:AddTagsToResource',
                 ],
                 resources: ['*'],
             })
@@ -466,31 +544,74 @@ export class AppApiStack extends BaseStack {
     }
 
     /**
+     * Create the regenerate zips function with VPC and Prisma engine layer
+     * Used to regenerate missing zip files for submitted contracts/rates
+     */
+    private createRegenerateZipsFunction(
+        role: Role,
+        environment: Record<string, string>
+    ): NodejsFunction {
+        // Build security groups array - use both during transition
+        const securityGroups = [
+            this.lambdaSecurityGroup,
+            this.applicationSecurityGroup,
+        ]
+
+        // Create regenerate zips function with all required configuration
+        const regenerateZipsFunction = new NodejsFunction(
+            this,
+            'regenerateZipsFunction',
+            {
+                functionName: `${ResourceNames.apiName('app-api', this.stage)}-regenerate-zips`,
+                runtime: Runtime.NODEJS_20_X,
+                architecture: Architecture.X86_64,
+                handler: 'main',
+                entry: path.join(
+                    __dirname,
+                    '..',
+                    '..',
+                    '..',
+                    'app-api',
+                    'src',
+                    'handlers',
+                    'regenerate_zips.ts'
+                ),
+                timeout: Duration.minutes(15), // Extended timeout for processing many zips
+                memorySize: 4096, // Higher memory for zip operations
+                environment,
+                role,
+                layers: [this.prismaEngineLayer, this.otelLayer],
+                vpc: this.vpc,
+                vpcSubnets: {
+                    subnetType: SubnetType.PRIVATE_WITH_EGRESS,
+                },
+                securityGroups,
+                bundling: {
+                    format: OutputFormat.ESM,
+                    banner: AppApiStack.ESM_BANNER,
+                    externalModules: ['prisma', '@prisma/client'],
+                    ...this.createBundling('regenerate-zips', [
+                        this.getOtelBundlingCommands(),
+                    ]),
+                },
+            }
+        )
+
+        return regenerateZipsFunction
+    }
+
+    /**
      * Create the GraphQL function with VPC, layers, and extended timeout
      */
     private createGraphqlFunction(
         role: Role,
         environment: Record<string, string>
     ): NodejsFunction {
-        // Validate required environment variables for VPC configuration
-        const required = ['VPC_ID', 'SG_ID']
-        const missing = required.filter((envVar) => !process.env[envVar])
-        if (missing.length > 0) {
-            throw new Error(
-                `Missing required environment variables for GraphQL function: ${missing.join(', ')}`
-            )
-        }
-
-        // Import VPC and security group from environment variables (matches serverless pattern)
-        const vpc = Vpc.fromLookup(this, 'GraphqlVpc', {
-            vpcId: process.env.VPC_ID!,
-        })
-
-        const lambdaSecurityGroup = SecurityGroup.fromSecurityGroupId(
-            this,
-            'GraphqlSecurityGroup',
-            process.env.SG_ID!
-        )
+        // Build security groups array - use both during transition
+        const securityGroups = [
+            this.lambdaSecurityGroup,
+            this.applicationSecurityGroup,
+        ]
 
         // Create GraphQL function with all required configuration
         const graphqlFunction = new NodejsFunction(this, 'graphqlFunction', {
@@ -517,7 +638,7 @@ export class AppApiStack extends BaseStack {
             vpcSubnets: {
                 subnetType: SubnetType.PRIVATE_WITH_EGRESS,
             },
-            securityGroups: [lambdaSecurityGroup],
+            securityGroups,
             // Custom bundling to handle .graphql files and other assets
             bundling: {
                 format: OutputFormat.ESM,
@@ -551,25 +672,11 @@ export class AppApiStack extends BaseStack {
         role: Role,
         environment: Record<string, string>
     ): NodejsFunction {
-        // Validate required environment variables for VPC configuration
-        const required = ['VPC_ID', 'SG_ID']
-        const missing = required.filter((envVar) => !process.env[envVar])
-        if (missing.length > 0) {
-            throw new Error(
-                `Missing required environment variables for OAuth token function: ${missing.join(', ')}`
-            )
-        }
-
-        // Import VPC and security group from environment variables (matches serverless pattern)
-        const vpc = Vpc.fromLookup(this, 'OauthVpc', {
-            vpcId: process.env.VPC_ID!,
-        })
-
-        const lambdaSecurityGroup = SecurityGroup.fromSecurityGroupId(
-            this,
-            'OauthSecurityGroup',
-            process.env.SG_ID!
-        )
+        // Build security groups array - use both during transition
+        const securityGroups = [
+            this.lambdaSecurityGroup,
+            this.applicationSecurityGroup,
+        ]
 
         // Create OAuth token function with all required configuration
         const oauthTokenFunction = new NodejsFunction(
@@ -599,7 +706,7 @@ export class AppApiStack extends BaseStack {
                 vpcSubnets: {
                     subnetType: SubnetType.PRIVATE_WITH_EGRESS,
                 },
-                securityGroups: [lambdaSecurityGroup],
+                securityGroups,
                 bundling: {
                     format: OutputFormat.ESM,
                     banner: AppApiStack.ESM_BANNER,
@@ -711,6 +818,31 @@ export class AppApiStack extends BaseStack {
             })
         )
 
+        // TEMPORARY: Grant access to old serverless buckets for legacy document access
+        // TODO: Remove after database migration updates all s3URL references to new bucket
+        const legacyDocumentsBucket = `arn:aws:s3:::uploads-${this.stage}-uploads-${this.account}`
+        const legacyQABucket = `arn:aws:s3:::uploads-${this.stage}-qa-${this.account}`
+
+        role.addToPolicy(
+            new PolicyStatement({
+                effect: Effect.ALLOW,
+                actions: ['s3:*'],
+                resources: [
+                    `${legacyDocumentsBucket}/allusers/*`,
+                    `${legacyQABucket}/allusers/*`,
+                    `${legacyDocumentsBucket}/zips/*`,
+                ],
+            })
+        )
+
+        role.addToPolicy(
+            new PolicyStatement({
+                effect: Effect.ALLOW,
+                actions: ['s3:ListBucket', 's3:GetBucketLocation'],
+                resources: [legacyDocumentsBucket, legacyQABucket],
+            })
+        )
+
         // SSM permissions
         role.addToPolicy(
             new PolicyStatement({
@@ -731,6 +863,7 @@ export class AppApiStack extends BaseStack {
                     'rds:CopyDBSnapshot',
                     'rds:DescribeDBClusterSnapshots',
                     'rds:DeleteDBClusterSnapshot',
+                    'rds:AddTagsToResource',
                 ],
                 resources: ['*'],
             })
@@ -758,7 +891,7 @@ export class AppApiStack extends BaseStack {
             `${uploadsStackName}-QAUploadsBucketName`
         )
         const applicationEndpoint = Fn.importValue(
-            `${frontendStackName}-CloudFrontEndpointUrl`
+            `${frontendStackName}-ApplicationUrl`
         )
 
         // Get values from environment variables with SSM/Secrets Manager fallbacks
@@ -1016,6 +1149,12 @@ export class AppApiStack extends BaseStack {
             value: this.graphqlFunction.functionName,
             exportName: this.exportName('GraphqlFunctionName'),
             description: 'GraphQL Lambda function name',
+        })
+
+        new CfnOutput(this, 'RegenerateZipsFunctionName', {
+            value: this.regenerateZipsFunction.functionName,
+            exportName: this.exportName('RegenerateZipsFunctionName'),
+            description: 'Regenerate zips Lambda function name',
         })
 
         new CfnOutput(this, 'ApiGatewayUrl', {

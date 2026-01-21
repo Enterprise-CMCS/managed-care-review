@@ -1,10 +1,10 @@
-import React, { useEffect, useState } from 'react'
+import React, { useLayoutEffect, useState } from 'react'
 import styles from './UndoSubmissionWithdraw.module.scss'
 import * as Yup from 'yup'
 import { Formik, FormikErrors } from 'formik'
 import { useNavigate, useParams } from 'react-router'
 import { usePage } from '../../contexts/PageContext'
-import { useTealium } from '../../hooks'
+import { useMemoizedStateHeader, useTealium } from '../../hooks'
 import {
     ContractSubmissionType,
     useFetchContractQuery,
@@ -70,10 +70,16 @@ export const UndoSubmissionWithdraw = (): React.ReactElement => {
     const contract = data?.fetchContract.contract
     const contractName =
         contract?.packageSubmissions[0].contractRevision.contractName
+    const stateHeader = useMemoizedStateHeader({
+        subHeaderText: contractName,
+        stateCode: contract?.state.code,
+        stateName: contract?.state.name,
+        contractType: contract?.contractSubmissionType,
+    })
 
-    useEffect(() => {
-        updateHeading({ customHeading: contractName })
-    }, [contractName, updateHeading])
+    useLayoutEffect(() => {
+        updateHeading({ customHeading: stateHeader })
+    }, [stateHeader, updateHeading])
 
     if (loading) {
         return <ErrorOrLoadingPage state="LOADING" />

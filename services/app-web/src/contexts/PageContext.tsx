@@ -2,6 +2,7 @@ import * as React from 'react'
 import { PageHeadingsRecord } from '@mc-review/constants'
 import { useCurrentRoute } from '../hooks'
 import { ModalRef } from '@trussworks/react-uswds'
+import { useCallback } from 'react'
 
 /*
     Use sparingly.
@@ -11,16 +12,35 @@ type PageContextType = {
     heading?: string | React.ReactElement
     activeMainContentId?: string
     activeModalRef?: React.RefObject<ModalRef>
+    /**
+     * Set headings in priority order
+     *    1. If there is a custom heading, use that (relevant for heading related to the api loaded resource, such as the submission name)
+     *    2. Otherwise, use default static headings for the current location when defined.
+     * @param customHeading - Heading text used
+     */
     updateHeading: ({
         customHeading,
     }: {
         customHeading?: string | React.ReactElement
     }) => void
+    /**
+     *  Set a ref pointing to currently visible modal
+     *  - is reset in child components when new modal open or back to undefined when existing modal is closed
+     *  - help ensure only one modal open at a time
+     *  - used in AuthenticatedRouteWrapper to close open modals when session timeout hit
+     * @param updatedModalRef
+     */
     updateModalRef: ({
         updatedModalRef,
     }: {
         updatedModalRef?: React.RefObject<ModalRef>
     }) => void
+    /**
+     * Set the current pages main content element, this allows the skip main content link to bypass side nav.
+     * This is needed for accessibility requirements see https://webaim.org/techniques/skipnav/.
+     *
+     * @param mainContentId Takes string of the id. If string does not start with #, hook will prepend the id with one.
+     */
     updateActiveMainContent: (mainContentId: string) => void
 }
 
@@ -47,35 +67,22 @@ const PageProvider: React.FC<
 
     const { currentRoute: routeName } = useCurrentRoute()
 
-    /**
-     * Set headings in priority order
-     *    1. If there is a custom heading, use that (relevant for heading related to the api loaded resource, such as the submission name)
-     *    2. Otherwise, use default static headings for the current location when defined.
-     * @param customHeading
-     */
-    const updateHeading = ({
-        customHeading,
-    }: {
-        customHeading?: string | React.ReactElement
-    }) => {
-        const defaultHeading = PageHeadingsRecord[routeName]
-            ? PageHeadingsRecord[routeName]
-            : undefined
+    const updateHeading = useCallback(
+        ({
+            customHeading,
+        }: {
+            customHeading?: string | React.ReactElement
+        }) => {
+            const defaultHeading = PageHeadingsRecord[routeName]
+            // Using loose equality (==) to check for null/undefined only,
+            // allowing empty strings to pass through as valid headings
+            if (defaultHeading == null && customHeading == null) return
+            const heading = customHeading ?? defaultHeading
+            setHeading(heading)
+        },
+        [routeName]
+    )
 
-        if (!defaultHeading && !customHeading) return
-
-        setHeading((_prev) => {
-            return customHeading ? customHeading : defaultHeading
-        })
-    }
-
-    /**
-     *  Set a ref pointing to currently visible modal
-     *  - is reset in child components when new modal open or back to undefined when existing modal is closed
-     *  - help ensure only one modal open at a time
-     *  - used in AuthenticatedRouteWrapper to close open modals when session timeout hit
-     * @param updatedModalRef
-     */
     const updateModalRef = ({
         updatedModalRef,
     }: {
@@ -84,12 +91,6 @@ const PageProvider: React.FC<
         setActiveModal(updatedModalRef)
     }
 
-    /**
-     * Set the current pages main content element, this allows the skip main content link to bypass side nav.
-     * This is needed for accessibility requirements see https://webaim.org/techniques/skipnav/.
-     *
-     * @param mainContentId Takes string of the id. If string does not start with #, hook will prepend the id with one.
-     */
     const updateActiveMainContent = (mainContentId: string) => {
         let activeMainContent = mainContentId
 

@@ -512,45 +512,43 @@ async function main() {
                 )
             }
         )
-        .command('jumpbox', 'run commands on a jumpbox', (yargs) => {
-            return yargs
-                .command(
-                    'clone <env>',
-                    'copy the database in the given aws environment locally',
-                    (yargs) => {
-                        return yargs
-                            .positional('env', {
-                                describe:
-                                    'the environment to clone from. You must have AWS credentials configured for this environment.',
-                                demandOption: true,
-                                type: 'string',
-                                choices: ['dev', 'val', 'prod'],
-                            })
-                            .option('stop-after', {
-                                type: 'boolean',
-                                default: true,
-                            })
-                            .option('ssh-key', {
-                                type: 'string',
-                                default: '~/.ssh/id_rsa',
-                            })
-                            .example([
-                                [
-                                    '$0 jumpbox clone dev',
-                                    'clone the db from the dev AWS environment to your local machine',
-                                ],
-                            ])
-                    },
-                    async (args) => {
-                        await cloneDBLocally(
-                            args.env,
-                            args.sshKey,
-                            args.stopAfter
-                        )
-                    }
-                )
-                .demandCommand(1, 'you must pick a subcommand for jumpbox')
-        })
+        .command(
+            'jumpbox',
+            'run commands on the database bastion via SSM (no SSH required)',
+            (yargs) => {
+                return yargs
+                    .command(
+                        'clone <env>',
+                        'copy the database in the given aws environment locally via SSM tunnel',
+                        (yargs) => {
+                            return yargs
+                                .positional('env', {
+                                    describe:
+                                        'the environment to clone from. You must have AWS credentials configured for this environment.',
+                                    demandOption: true,
+                                    type: 'string',
+                                    choices: ['dev', 'val', 'prod'],
+                                })
+                                .option('stop-after', {
+                                    type: 'boolean',
+                                    default: true,
+                                    describe:
+                                        'automatically stop the bastion after the database dump completes',
+                                })
+                                .example([
+                                    [
+                                        '$0 jumpbox clone dev',
+                                        'clone the db from the dev AWS environment to your local machine',
+                                    ],
+                                ])
+                        },
+                        async (args) => {
+                            await cloneDBLocally(args.env, args.stopAfter)
+                        }
+                    )
+                    .demandCommand(1, 'you must pick a subcommand for jumpbox')
+            }
+        )
         .command(
             'prisma',
             'run the prisma command in app-api. all arguments after -- will be passed directly into the prisma command.',

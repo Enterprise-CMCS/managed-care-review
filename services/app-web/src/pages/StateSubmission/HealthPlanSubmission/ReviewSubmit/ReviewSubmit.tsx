@@ -1,6 +1,6 @@
 import { GridContainer, ModalRef } from '@trussworks/react-uswds'
 import React, { useRef, useState, useEffect } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { generatePath, useNavigate } from 'react-router-dom'
 import {
     DynamicStepIndicator,
     ActionButton,
@@ -34,13 +34,14 @@ import { PageBannerAlerts } from '../../SharedSubmissionComponents'
 import { usePage } from '../../../../contexts/PageContext'
 import { activeFormPages } from '../../submissionUtils'
 import { featureFlags } from '@mc-review/common-code'
+import { RoutesRecord, RouteT } from '@mc-review/constants'
 
 export const ReviewSubmit = (): React.ReactElement => {
     const navigate = useNavigate()
     const modalRef = useRef<ModalRef>(null)
     const statePrograms = useStatePrograms()
     const { loggedInUser } = useAuth()
-    const { updateHeading, updateActiveMainContent } = usePage()
+    const { updateActiveMainContent } = usePage()
     const { id } = useRouteParams()
     const [isSubmitting, setIsSubmitting] = useState<boolean>(false)
     const ldClient = useLDClient()
@@ -49,6 +50,13 @@ export const ReviewSubmit = (): React.ReactElement => {
         featureFlags.HIDE_SUPPORTING_DOCS_PAGE.flag,
         featureFlags.HIDE_SUPPORTING_DOCS_PAGE.defaultValue
     )
+
+    const getPath = (route: RouteT) => {
+        return generatePath(RoutesRecord[route], {
+            id,
+            contractSubmissionType: 'health-plan',
+        })
+    }
 
     const { data, loading, error } = useFetchContractQuery({
         variables: {
@@ -61,12 +69,6 @@ export const ReviewSubmit = (): React.ReactElement => {
 
     const contract = data?.fetchContract.contract
     const activeMainContentId = 'reviewSubmitMainContent'
-
-    useEffect(() => {
-        updateHeading({
-            customHeading: contract?.draftRevision?.contractName,
-        })
-    }, [contract, updateHeading])
 
     // Set the active main content to focus when click the Skip to main content button.
     useEffect(() => {
@@ -133,23 +135,21 @@ export const ReviewSubmit = (): React.ReactElement => {
                 <SubmissionTypeSummarySection
                     contract={contract}
                     submissionName={submissionName}
-                    editNavigateTo="../type"
-                    statePrograms={statePrograms}
+                    editNavigateTo={getPath('SUBMISSIONS_TYPE')}
                     isStateUser={isStateUser}
                     explainMissingData
                 />
                 <ContractDetailsSummarySection
                     contract={contract}
                     isStateUser={isStateUser}
-                    editNavigateTo="../contract-details"
-                    submissionName={submissionName}
+                    editNavigateTo={getPath('SUBMISSIONS_CONTRACT_DETAILS')}
                     explainMissingData
                 />
 
                 {isContractActionAndRateCertification && (
                     <RateDetailsSummarySection
                         contract={contract}
-                        editNavigateTo="../rate-details"
+                        editNavigateTo={getPath('SUBMISSIONS_RATE_DETAILS')}
                         submissionName={submissionName}
                         statePrograms={statePrograms}
                         explainMissingData
@@ -159,7 +159,7 @@ export const ReviewSubmit = (): React.ReactElement => {
                 <ContactsSummarySection
                     contract={contract}
                     isStateUser={isStateUser}
-                    editNavigateTo="../contacts"
+                    editNavigateTo={getPath('SUBMISSIONS_CONTACTS')}
                     explainMissingData
                 />
 
@@ -167,16 +167,10 @@ export const ReviewSubmit = (): React.ReactElement => {
                     <ActionButton
                         type="button"
                         variant="outline"
-                        link_url={
-                            hideSupportingDocs ? '../contacts' : '../documents'
-                        }
+                        link_url={getPath('SUBMISSIONS_CONTACTS')}
                         parent_component_type="page body"
                         onClick={() =>
-                            navigate(
-                                hideSupportingDocs
-                                    ? '../contacts'
-                                    : '../documents'
-                            )
+                            navigate(getPath('SUBMISSIONS_CONTACTS'))
                         }
                         disabled={isSubmitting}
                     >

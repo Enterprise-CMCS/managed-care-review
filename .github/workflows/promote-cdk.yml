@@ -81,19 +81,19 @@ jobs:
           exit $?
 
       - name: upload app web gen directory
-        uses: actions/upload-artifact@v5
+        uses: actions/upload-artifact@v6
         with:
           name: app-web-gen
           path: ./services/app-web/src/gen
 
       - name: upload cypress gen directory
-        uses: actions/upload-artifact@v5
+        uses: actions/upload-artifact@v6
         with:
           name: cypress-gen
           path: ./services/cypress/gen
 
       - name: upload unit test coverage
-        uses: actions/upload-artifact@v5
+        uses: actions/upload-artifact@v6
         with:
           name: unit-test-coverage
           path: ./services/app-web/coverage/coverage-final.json
@@ -153,10 +153,36 @@ jobs:
           exit $?
 
       - name: upload api test coverage
-        uses: actions/upload-artifact@v5
+        uses: actions/upload-artifact@v6
         with:
           name: api-test-coverage
           path: ./services/app-api/coverage/coverage-final.json
+
+  packages-unit-tests:
+    name: test - packages unit tests
+    runs-on: ubuntu-24.04
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v6
+
+      - name: Setup env
+        uses: ./.github/actions/setup_env
+
+      - name: Generate Code
+        run: pnpm -r generate
+
+      - name: Build packages
+        shell: bash
+        run: pnpm build:packages
+
+      - name: Packages Unit Tests
+        id: packages-unit-tests
+        env:
+          NODE_OPTIONS: --max_old_space_size=6000
+        run: |
+          set -e
+          pnpm --filter "./packages/**" test:coverage
+          exit $?
 
   build-lambda-layers:
     name: build - lambda layers
@@ -181,12 +207,12 @@ jobs:
         working-directory: services/app-api
         run: ./scripts/prepare-prisma-layer.sh
 
-      - uses: actions/upload-artifact@v5
+      - uses: actions/upload-artifact@v6
         with:
           name: lambda-layers-prisma-client-migration
           path: ./services/app-api/lambda-layers-prisma-client-migration
 
-      - uses: actions/upload-artifact@v5
+      - uses: actions/upload-artifact@v6
         with:
           name: lambda-layers-prisma-client-engine
           path: ./services/app-api/lambda-layers-prisma-client-engine
@@ -195,7 +221,7 @@ jobs:
         working-directory: services/postgres
         run: ./build-postgres-lambda-layer.sh
 
-      - uses: actions/upload-artifact@v5
+      - uses: actions/upload-artifact@v6
         with:
           name: lambda-layers-postgres-tools
           path: ./services/postgres/lambda-layers-postgres-tools
@@ -370,6 +396,7 @@ jobs:
         deploy-cdk-app-dev,
         web-unit-tests,
         api-unit-tests,
+        packages-unit-tests,
       ]
     if: |
       always() &&
@@ -377,6 +404,7 @@ jobs:
       needs.deploy-cdk-app-dev.result == 'success' &&
       needs.web-unit-tests.result == 'success' &&
       needs.api-unit-tests.result == 'success' &&
+      needs.packages-unit-tests.result == 'success' &&
       needs.begin-deployment.result == 'success'
     name: deploy - Frontend app with built assets (dev)
     runs-on: ubuntu-24.04
@@ -455,6 +483,7 @@ jobs:
         build-lambda-layers,
         web-unit-tests,
         api-unit-tests,
+        packages-unit-tests,
       ]
     if: |
       always() &&
@@ -462,6 +491,7 @@ jobs:
       needs.build-lambda-layers.result == 'success' &&
       needs.web-unit-tests.result == 'success' &&
       needs.api-unit-tests.result == 'success' &&
+      needs.packages-unit-tests.result == 'success' &&
       needs.begin-deployment.result == 'success'
     name: deploy - CDK application stacks (dev)
     runs-on: ubuntu-24.04
@@ -489,7 +519,7 @@ jobs:
           use-cdk-role: "true"
 
       - name: Download Prisma layers
-        uses: actions/download-artifact@v6
+        uses: actions/download-artifact@v7
         with:
           name: lambda-layers-prisma-client-migration
           path: ./services/infra-cdk/lambda-layers-prisma-client-migration
@@ -503,7 +533,7 @@ jobs:
           ls -la
 
       - name: Download Prisma engine layers
-        uses: actions/download-artifact@v6
+        uses: actions/download-artifact@v7
         with:
           name: lambda-layers-prisma-client-engine
           path: ./services/infra-cdk/lambda-layers-prisma-client-engine
@@ -746,6 +776,7 @@ jobs:
         build-lambda-layers,
         web-unit-tests,
         api-unit-tests,
+        packages-unit-tests,
       ]
     if: |
       always() &&
@@ -753,6 +784,7 @@ jobs:
       needs.build-lambda-layers.result == 'success' &&
       needs.web-unit-tests.result == 'success' &&
       needs.api-unit-tests.result == 'success' &&
+      needs.packages-unit-tests.result == 'success' &&
       needs.begin-deployment.result == 'success'
     name: deploy - CDK application stacks (val)
     runs-on: ubuntu-24.04
@@ -780,7 +812,7 @@ jobs:
           use-cdk-role: "true"
 
       - name: Download Prisma layers
-        uses: actions/download-artifact@v6
+        uses: actions/download-artifact@v7
         with:
           name: lambda-layers-prisma-client-migration
           path: ./services/infra-cdk/lambda-layers-prisma-client-migration
@@ -794,7 +826,7 @@ jobs:
           ls -la
 
       - name: Download Prisma engine layers
-        uses: actions/download-artifact@v6
+        uses: actions/download-artifact@v7
         with:
           name: lambda-layers-prisma-client-engine
           path: ./services/infra-cdk/lambda-layers-prisma-client-engine
@@ -838,6 +870,7 @@ jobs:
         deploy-cdk-app-val,
         web-unit-tests,
         api-unit-tests,
+        packages-unit-tests,
       ]
     if: |
       always() &&
@@ -845,6 +878,7 @@ jobs:
       needs.deploy-cdk-app-val.result == 'success' &&
       needs.web-unit-tests.result == 'success' &&
       needs.api-unit-tests.result == 'success' &&
+      needs.packages-unit-tests.result == 'success' &&
       needs.begin-deployment.result == 'success'
     name: deploy - Frontend app with built assets (val)
     runs-on: ubuntu-24.04
@@ -1114,6 +1148,7 @@ jobs:
         build-lambda-layers,
         web-unit-tests,
         api-unit-tests,
+        packages-unit-tests,
       ]
     if: |
       always() &&
@@ -1121,6 +1156,7 @@ jobs:
       needs.build-lambda-layers.result == 'success' &&
       needs.web-unit-tests.result == 'success' &&
       needs.api-unit-tests.result == 'success' &&
+      needs.packages-unit-tests.result == 'success' &&
       needs.begin-deployment.result == 'success'
     name: deploy - CDK application stacks (prod)
     runs-on: ubuntu-24.04
@@ -1148,7 +1184,7 @@ jobs:
           use-cdk-role: "true"
 
       - name: Download Prisma layers
-        uses: actions/download-artifact@v6
+        uses: actions/download-artifact@v7
         with:
           name: lambda-layers-prisma-client-migration
           path: ./services/infra-cdk/lambda-layers-prisma-client-migration
@@ -1162,7 +1198,7 @@ jobs:
           ls -la
 
       - name: Download Prisma engine layers
-        uses: actions/download-artifact@v6
+        uses: actions/download-artifact@v7
         with:
           name: lambda-layers-prisma-client-engine
           path: ./services/infra-cdk/lambda-layers-prisma-client-engine
@@ -1206,6 +1242,7 @@ jobs:
         deploy-cdk-app-prod,
         web-unit-tests,
         api-unit-tests,
+        packages-unit-tests,
       ]
     if: |
       always() &&
@@ -1213,6 +1250,7 @@ jobs:
       needs.deploy-cdk-app-prod.result == 'success' &&
       needs.web-unit-tests.result == 'success' &&
       needs.api-unit-tests.result == 'success' &&
+      needs.packages-unit-tests.result == 'success' &&
       needs.begin-deployment.result == 'success'
     name: deploy - Frontend app with built assets (prod)
     runs-on: ubuntu-24.04
@@ -1345,12 +1383,12 @@ jobs:
       - name: Setup env
         uses: ./.github/actions/setup_env
 
-      - uses: actions/download-artifact@v6
+      - uses: actions/download-artifact@v7
         with:
           name: app-web-gen
           path: ./services/app-web/src/gen
 
-      - uses: actions/download-artifact@v6
+      - uses: actions/download-artifact@v7
         with:
           name: cypress-gen
           path: ./services/cypress/gen
@@ -1385,14 +1423,14 @@ jobs:
           CYPRESS_VIDEOS_FOLDER: services/cypress/videos
 
       - name: Upload cypress video
-        uses: actions/upload-artifact@v5
+        uses: actions/upload-artifact@v6
         if: failure() && steps.cypress.outcome == 'failure'
         with:
           name: cypress-videos-prod
           path: services/cypress/videos
 
       - name: Upload cypress screenshots
-        uses: actions/upload-artifact@v5
+        uses: actions/upload-artifact@v6
         if: failure() && steps.cypress.outcome == 'failure'
         with:
           name: cypress-screenshots-prod

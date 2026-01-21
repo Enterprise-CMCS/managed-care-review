@@ -4,6 +4,7 @@
         "module": "ESNext",
         "lib": ["ESNext", "DOM"],
         "target": "ESNext",
+        "types": ["vitest/globals"],
         "moduleResolution": "bundler",
         "baseUrl": "/",
         "declaration": true,

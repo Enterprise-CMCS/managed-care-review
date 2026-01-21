@@ -315,7 +315,7 @@ describe('unlockPackageCMSEmail', () => {
             })
         )
     })
-    test('to addresses list includes DMCP and OACT emails for contract and rate package', async () => {
+    test('to addresses list includes DMCP, OACT, and DMCO emails for contract and rate package', async () => {
         const sub = mockUnlockedContract()
         sub.draftRevision.formData.riskBasedContract = true
         const template = await unlockContractCMSEmail(
@@ -346,9 +346,8 @@ describe('unlockPackageCMSEmail', () => {
             )
         })
 
-        // do not include dmco group emails - rely on state analysts instead
         testEmailConfig().dmcoEmails.forEach((emailAddress) => {
-            expect(template).not.toEqual(
+            expect(template).toEqual(
                 expect.objectContaining({
                     toAddresses: expect.arrayContaining([emailAddress]),
                 })
@@ -424,6 +423,7 @@ describe('unlockPackageCMSEmail', () => {
 
         const reviewerEmails = [
             ...testEmailConfig().devReviewTeamEmails,
+            ...testEmailConfig().dmcoEmails,
             ...testEmailConfig().oactEmails,
         ]
 

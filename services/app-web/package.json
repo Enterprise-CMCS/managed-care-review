@@ -18,16 +18,6 @@
         "prettier": "npx prettier -u --write \"**/*.+(ts|tsx|json)\"",
         "cy:run": "NODE_V8_COVERAGE=./coverage-cypress cypress run"
     },
-    "lint-staged": {
-        "**/*.{js,jsx,ts,tsx}": [
-            "eslint --fix --max-warnings=0",
-            "prettier --write"
-        ],
-        "**/*.scss": [
-            "pnpm lint:style",
-            "prettier --write"
-        ]
-    },
     "jest": {
         "coveragePathIgnorePatterns": [
             "/*.stories.tsx",
@@ -77,8 +67,7 @@
     "dependencies": {
         "@apollo/client": "3.8.8",
         "@apollo/explorer": "^3.7.3",
-        "@cypress/code-coverage": "^3.14.5",
-        "@cypress/instrument-cra": "^1.4.0",
+        "@cypress/code-coverage": "^3.14.7",
         "@mc-review/common-code": "workspace:*",
         "@mc-review/constants": "workspace:*",
         "@mc-review/dates": "workspace:*",
@@ -91,7 +80,7 @@
         "@opentelemetry/context-zone": "^1.27.0",
         "@opentelemetry/exporter-trace-otlp-http": "^0.45.1",
         "@opentelemetry/id-generator-aws-xray": "^2.0.3",
-        "@opentelemetry/instrumentation": "^0.208.0",
+        "@opentelemetry/instrumentation": "^0.209.0",
         "@opentelemetry/instrumentation-fetch": "^0.45.1",
         "@opentelemetry/propagator-aws-xray": "^1.26.2",
         "@opentelemetry/resources": "^1.30.1",
@@ -112,7 +101,7 @@
         "launchdarkly-react-client-sdk": "^3.9.0",
         "path-browserify": "^1.0.1",
         "protobufjs": "^7.3.0",
-        "qs": "^6.14.0",
+        "qs": "^6.14.1",
         "react": "^18.2.0",
         "react-dom": "^18.2.0",
         "react-error-boundary": "^6.0.0",
@@ -130,9 +119,9 @@
         "yup": "^0.32.9"
     },
     "devDependencies": {
-        "@aws-sdk/client-amplify": "^3.936.0",
-        "@aws-sdk/client-s3": "^3.937.0",
-        "@aws-sdk/s3-request-presigner": "^3.937.0",
+        "@aws-sdk/client-amplify": "^3.968.0",
+        "@aws-sdk/client-s3": "^3.968.0",
+        "@aws-sdk/s3-request-presigner": "^3.968.0",
         "@chromatic-com/storybook": "^4.1.2",
         "@peculiar/webcrypto": "^1.5.0",
         "@storybook/addon-a11y": "^9.1.15",
@@ -147,7 +136,7 @@
         "@testing-library/react": "^16.3.0",
         "@testing-library/user-event": "^14.4.3",
         "@types/eslint": "^9.6.1",
-        "@types/eslint-plugin-jsx-a11y": "^6.10.0",
+        "@types/eslint-plugin-jsx-a11y": "^6.10.1",
         "@types/jest": "^29.5.14",
         "@types/node": "^24.9.1",
         "@types/path-browserify": "^1.0.3",
@@ -157,16 +146,16 @@
         "@types/react-router": "^5.1.20",
         "@types/react-test-renderer": "^18.0.0",
         "@types/uuid": "^11.0.0",
-        "@typescript-eslint/eslint-plugin": "^8.39.1",
+        "@typescript-eslint/eslint-plugin": "^8.52.0",
         "@typescript-eslint/parser": "^8.29.1",
         "@vitest/coverage-v8": "^3.2.4",
-        "@vitest/ui": "^3.2.4",
+        "@vitest/ui": "^4.0.15",
         "classnames": "^2.2.6",
-        "cypress": "^13.13.2",
+        "cypress": "^15.8.2",
         "eslint": "^9.34.0",
         "eslint-config-prettier": "^10.1.8",
         "eslint-plugin-import": "^2.32.0",
-        "eslint-plugin-jest": "^29.0.1",
+        "eslint-plugin-jest": "^29.2.1",
         "eslint-plugin-jsx-a11y": "^6.10.2",
         "eslint-plugin-prettier": "^5.5.4",
         "eslint-plugin-react": "^7.37.5",

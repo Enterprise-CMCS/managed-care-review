@@ -82,6 +82,7 @@ describe('sendRateQuestionResponseStateEmail', () => {
                             id: 'parent-contract',
                             stateCode: 'FL',
                             stateNumber: 1,
+                            contractSubmissionType: 'HEALTH_PLAN',
                         },
                         submitInfo: {
                             updatedAt: new Date('2024-04-12'),
@@ -130,6 +131,7 @@ describe('sendRateQuestionResponseStateEmail', () => {
                             id: 'second-contract',
                             stateCode: 'FL',
                             stateNumber: 1,
+                            contractSubmissionType: 'HEALTH_PLAN',
                         },
                         submitInfo: {
                             updatedAt: new Date('2024-04-12'),

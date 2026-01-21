@@ -1,5 +1,5 @@
 export type { InsertContractArgsType } from './insertContract'
-export type { UpdateContractArgsType } from './updateDraftContractWithRates'
+export type { UpdateContractArgsType } from './updateDraftContract'
 export type { ContractOrErrorArrayType } from './findAllContractsWithHistoryByState'
 export type { RateOrErrorArrayType } from './findAllRatesWithHistoryBySubmitInfo'
 export type { ApproveContractArgsType } from './approveContract'

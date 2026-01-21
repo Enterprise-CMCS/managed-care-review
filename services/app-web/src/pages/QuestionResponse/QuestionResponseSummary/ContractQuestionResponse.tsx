@@ -1,4 +1,4 @@
-import { useEffect } from 'react'
+import { useEffect, useLayoutEffect } from 'react'
 import { GridContainer } from '@trussworks/react-uswds'
 import styles from '../QuestionResponse.module.scss'
 
@@ -19,8 +19,9 @@ import { getUserDivision } from '../QuestionResponseHelpers'
 import { CMSQuestionResponseTable } from '../QATable/CMSQuestionResponseTable'
 import { StateQuestionResponseTable } from '../QATable/StateQuestionResponseTable'
 import { ErrorOrLoadingPage } from '../../StateSubmission'
-import { handleAndReturnErrorState } from '../../StateSubmission/SharedSubmissionComponents/ErrorOrLoadingPage'
+import { handleAndReturnErrorState } from '../../StateSubmission/SharedSubmissionComponents'
 import { useAuth } from '../../../contexts/AuthContext'
+import { useMemoizedStateHeader } from '../../../hooks'
 
 export const ContractQuestionResponse = () => {
     const { id } = useParams() as { id: string }
@@ -44,10 +45,16 @@ export const ContractQuestionResponse = () => {
     const contractRev = contract?.packageSubmissions?.[0]?.contractRevision
     const contractName = contractRev?.contractName ?? undefined
     const activeMainContentId = 'contractQuestionResponseMainContent'
+    const stateHeader = useMemoizedStateHeader({
+        subHeaderText: contractName,
+        stateCode: contract?.state.code,
+        stateName: contract?.state.name,
+        contractType: contract?.contractSubmissionType,
+    })
 
-    useEffect(() => {
-        updateHeading({ customHeading: contractName })
-    }, [contractName, updateHeading])
+    useLayoutEffect(() => {
+        updateHeading({ customHeading: stateHeader })
+    }, [stateHeader, updateHeading])
 
     // Set the active main content to focus when click the Skip to main content button.
     useEffect(() => {

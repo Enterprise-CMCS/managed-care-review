@@ -8,21 +8,18 @@ import {
     getIn,
     FieldArrayRenderProps,
 } from 'formik'
-import { generatePath, useNavigate } from 'react-router-dom'
+import { useNavigate } from 'react-router-dom'
 import { useLDClient } from 'launchdarkly-react-client-sdk'
-import styles from '../../StateSubmissionForm.module.scss'
+import styles from '../StateSubmissionForm.module.scss'
 import { recordJSException } from '@mc-review/otel'
 import {
     StateContact,
     UpdateContractDraftRevisionInput,
-} from '../../../../gen/gqlClient'
+} from '../../../gen/gqlClient'
 
-import { useFocus } from '../../../../hooks'
-import {
-    activeFormPages,
-    type ContractFormPageProps,
-} from '../../submissionUtils'
-import { RoutesRecord, RouteT } from '@mc-review/constants'
+import { useFocus } from '../../../hooks'
+import { activeFormPages, type ContractFormPageProps } from '../submissionUtils'
+import { RouteT, EQRO_SUBMISSION_FORM_ROUTES } from '@mc-review/constants'
 import {
     ButtonWithLogging,
     DynamicStepIndicator,
@@ -32,16 +29,17 @@ import {
     ErrorSummary,
     FieldTextInput,
     PageActions,
-} from '../../../../components'
-import { useCurrentRoute, useRouteParams, useTealium } from '../../../../hooks'
-import { useContractForm } from '../../../../hooks/useContractForm'
-import { useAuth } from '../../../../contexts/AuthContext'
-import { ErrorOrLoadingPage } from '../../SharedSubmissionComponents/ErrorOrLoadingPage'
-import { PageBannerAlerts } from '../../SharedSubmissionComponents/PageBannerAlerts'
-import { useErrorSummary } from '../../../../hooks/useErrorSummary'
+} from '../../../components'
+import { useCurrentRoute, useRouteParams, useTealium } from '../../../hooks'
+import { useContractForm } from '../../../hooks/useContractForm'
+import { useAuth } from '../../../contexts/AuthContext'
+import { ErrorOrLoadingPage } from '../SharedSubmissionComponents'
+import { PageBannerAlerts } from '../SharedSubmissionComponents'
+import { useErrorSummary } from '../../../hooks/useErrorSummary'
 import { featureFlags } from '@mc-review/common-code'
-import { useFocusOnRender } from '../../../../hooks/useFocusOnRender'
-import { usePage } from '../../../../contexts/PageContext'
+import { useFocusOnRender } from '../../../hooks/useFocusOnRender'
+import { usePage } from '../../../contexts/PageContext'
+import { getSubmissionPath } from '../../../routeHelpers'
 
 export interface ContactsFormValues {
     stateContacts: StateContact[]
@@ -85,7 +83,7 @@ const Contacts = ({
 
     const { loggedInUser } = useAuth()
     const { currentRoute } = useCurrentRoute()
-    const { id, contractSubmissionType } = useRouteParams()
+    const { id } = useRouteParams()
     const { updateActiveMainContent } = usePage()
     const { draftSubmission, interimState, updateDraft, showPageErrorMessage } =
         useContractForm(id)
@@ -134,7 +132,9 @@ const Contacts = ({
     if (interimState || !draftSubmission || !updateDraft)
         return <ErrorOrLoadingPage state={interimState || 'GENERIC_ERROR'} />
 
+    const isEQROSubmission = draftSubmission.contractSubmissionType === 'EQRO'
     const stateContacts = draftSubmission.draftRevision.formData.stateContacts
+    const contractSubmissionType = draftSubmission.contractSubmissionType
 
     const emptyStateContact = {
         name: '',
@@ -179,17 +179,32 @@ const Contacts = ({
             setDraftSaved(true)
             setSubmitting(false)
         } else {
-            if (hideSupportingDocs) {
+            if (isEQROSubmission) {
+                navigate(
+                    getSubmissionPath(
+                        'SUBMISSIONS_REVIEW_SUBMIT',
+                        contractSubmissionType,
+                        id
+                    )
+                )
+            } else if (hideSupportingDocs) {
                 if (options.redirectPath) {
                     navigate(
-                        generatePath(RoutesRecord[options.redirectPath], {
-                            id: id,
+                        getSubmissionPath(
+                            options.redirectPath,
                             contractSubmissionType,
-                        })
+                            id
+                        )
                     )
                 }
             } else {
-                navigate(`../documents`)
+                navigate(
+                    getSubmissionPath(
+                        'SUBMISSIONS_DOCUMENTS',
+                        contractSubmissionType,
+                        id
+                    )
+                )
             }
         }
     }
@@ -213,11 +228,22 @@ const Contacts = ({
         <>
             <FormNotificationContainer>
                 <DynamicStepIndicator
-                    formPages={activeFormPages(
-                        draftSubmission.draftRevision.formData,
-                        hideSupportingDocs
-                    )}
+                    formPages={
+                        isEQROSubmission
+                            ? EQRO_SUBMISSION_FORM_ROUTES
+                            : activeFormPages(
+                                  draftSubmission.draftRevision.formData,
+                                  hideSupportingDocs
+                              )
+                    }
                     currentFormPage={currentRoute}
+                    customPageTitles={
+                        isEQROSubmission
+                            ? {
+                                  SUBMISSIONS_TYPE: 'Submission details',
+                              }
+                            : undefined
+                    }
                 />
                 <PageBannerAlerts
                     loggedInUser={loggedInUser}
@@ -249,6 +275,7 @@ const Contacts = ({
                                 className={styles.formContainer}
                                 id="ContactsForm"
                                 onSubmit={handleSubmit}
+                                noValidate
                             >
                                 <SectionCard>
                                     <fieldset className="usa-fieldset with-sections">
@@ -437,27 +464,22 @@ const Contacts = ({
                                             }
                                         )
                                     }}
-                                    backOnClick={() =>
-                                        navigate(
+                                    backOnClick={() => {
+                                        const previousPage =
                                             draftSubmission.draftRevision
                                                 .formData.submissionType ===
-                                                'CONTRACT_ONLY'
-                                                ? generatePath(
-                                                      RoutesRecord.SUBMISSIONS_CONTRACT_DETAILS,
-                                                      {
-                                                          id,
-                                                          contractSubmissionType,
-                                                      }
-                                                  )
-                                                : generatePath(
-                                                      RoutesRecord.SUBMISSIONS_RATE_DETAILS,
-                                                      {
-                                                          id,
-                                                          contractSubmissionType,
-                                                      }
-                                                  )
+                                            'CONTRACT_ONLY'
+                                                ? 'SUBMISSIONS_CONTRACT_DETAILS'
+                                                : 'SUBMISSIONS_RATE_DETAILS'
+
+                                        navigate(
+                                            getSubmissionPath(
+                                                previousPage,
+                                                contractSubmissionType,
+                                                id
+                                            )
                                         )
-                                    }
+                                    }}
                                     continueOnClick={() => {
                                         setShouldValidate(true)
                                         setFocusErrorSummaryHeading(true)
@@ -466,22 +488,22 @@ const Contacts = ({
                                     backOnClickUrl={
                                         draftSubmission.draftRevision.formData
                                             .submissionType === 'CONTRACT_ONLY'
-                                            ? generatePath(
-                                                  RoutesRecord.SUBMISSIONS_CONTRACT_DETAILS,
-                                                  {
-                                                      id,
-                                                      contractSubmissionType,
-                                                  }
+                                            ? getSubmissionPath(
+                                                  'SUBMISSIONS_CONTRACT_DETAILS',
+                                                  contractSubmissionType,
+                                                  id
                                               )
-                                            : generatePath(
-                                                  RoutesRecord.SUBMISSIONS_RATE_DETAILS,
-                                                  {
-                                                      id,
-                                                      contractSubmissionType,
-                                                  }
+                                            : getSubmissionPath(
+                                                  'SUBMISSIONS_RATE_DETAILS',
+                                                  contractSubmissionType,
+                                                  id
                                               )
                                     }
-                                    continueOnClickUrl="/edit/documents"
+                                    continueOnClickUrl={getSubmissionPath(
+                                        'SUBMISSIONS_REVIEW_SUBMIT',
+                                        contractSubmissionType,
+                                        id
+                                    )}
                                 />
                             </UswdsForm>
                         </>

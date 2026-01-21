@@ -21,27 +21,7 @@
    curl --location 'https://<DEPLOYMENT_API_DOMAIN>/v1/graphql/external' \
    --header 'Content-Type: application/json' \
    --header 'Authorization: Bearer <YOUR_ACCESS_TOKEN>' \
-   --data-raw '{
-      "query": "query FetchContract {
-         fetchContract(input: { contractID: \"5b301a2b-b778-4b1a-81ca-6269e5325429\" }) {
-            contract {
-               id
-               createdAt
-               updatedAt
-               status
-               reviewStatus
-               consolidatedStatus
-               initiallySubmittedAt
-               lastUpdatedForDisplay
-               stateCode
-               stateNumber
-               mccrsID
-               webURL
-               dateContractDocsExecuted
-            }
-         }
-      }"
-   }'
+   --data-raw '{"query": "query FetchContract { fetchContract(input: { contractID: \"<VALID_CONTRACT_ID>\" }) { contract { id createdAt updatedAt status reviewStatus consolidatedStatus initiallySubmittedAt lastUpdatedForDisplay stateCode stateNumber mccrsID webURL dateContractDocsExecuted } } }"}'
    ```
 
 4. **Token expiration:**  

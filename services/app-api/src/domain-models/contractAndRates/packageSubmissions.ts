@@ -1,5 +1,9 @@
 import { z } from 'zod'
-import { contractRevisionSchema, rateRevisionSchema } from './revisionTypes'
+import {
+    contractRevisionSchema,
+    rateRevisionSchema,
+    eqroContractRevisionSchema,
+} from './revisionTypes'
 import { updateInfoSchema } from './updateInfoType'
 
 const contractPackageSubmissionSchema = z.object({
@@ -8,6 +12,15 @@ const contractPackageSubmissionSchema = z.object({
         z.union([contractRevisionSchema, rateRevisionSchema])
     ),
     contractRevision: contractRevisionSchema,
+    rateRevisions: z.array(rateRevisionSchema),
+})
+
+const eqroContractPackageSubmissionSchema = z.object({
+    submitInfo: updateInfoSchema,
+    submittedRevisions: z.array(
+        z.union([eqroContractRevisionSchema, rateRevisionSchema])
+    ),
+    contractRevision: eqroContractRevisionSchema,
     rateRevisions: z.array(rateRevisionSchema),
 })
 
@@ -57,6 +70,7 @@ export {
     contractPackageSubmissionWithCauseSchema,
     ratePackageSubmissionWithCauseSchema,
     ratePackageSubmissionSchema,
+    eqroContractPackageSubmissionSchema,
 }
 
 export type {

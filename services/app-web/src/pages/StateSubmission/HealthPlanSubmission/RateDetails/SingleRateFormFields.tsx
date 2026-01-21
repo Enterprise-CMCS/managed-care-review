@@ -33,7 +33,7 @@ import {
     getIn,
     useFormikContext,
 } from 'formik'
-import { ActuaryContactFields } from '../Contacts'
+import { ActuaryContactFields } from '../../SharedContactsPage'
 import { FormikRateForm, RateDetailFormConfig } from './RateDetails'
 import { useFocus } from '../../../../hooks'
 import { ContactSupportLink } from '../../../../components/ErrorAlert/ContactSupportLink'

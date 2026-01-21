@@ -1,4 +1,4 @@
-import { useEffect } from 'react'
+import { useLayoutEffect } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
 import {
     CreateQuestionResponseInput,
@@ -7,14 +7,14 @@ import {
 } from '../../../gen/gqlClient'
 import { usePage } from '../../../contexts/PageContext'
 import styles from '../QuestionResponse.module.scss'
-import { Breadcrumbs } from '../../../components/Breadcrumbs/Breadcrumbs'
+import { Breadcrumbs } from '../../../components'
 import { createRateQuestionResponseWrapper } from '@mc-review/helpers'
 import { RoutesRecord } from '@mc-review/constants'
 import { GenericErrorPage } from '../../Errors/GenericErrorPage'
 import { UploadResponseForm } from './UploadResponseForm'
 import { FileItemT } from '../../../components'
 import { ErrorOrLoadingPage } from '../../StateSubmission'
-import { handleAndReturnErrorState } from '../../StateSubmission/SharedSubmissionComponents/ErrorOrLoadingPage'
+import { handleAndReturnErrorState } from '../../StateSubmission/SharedSubmissionComponents'
 import {
     extractDocumentsFromQuestion,
     extractQuestions,
@@ -24,6 +24,7 @@ import {
 import { QuestionDisplayTable } from '../QATable/QuestionDisplayTable'
 import { useAuth } from '../../../contexts/AuthContext'
 import { Error404 } from '../../Errors/Error404Page'
+import { useMemoizedStateHeader } from '../../../hooks'
 
 export const UploadRateResponse = () => {
     // router context
@@ -69,11 +70,17 @@ export const UploadRateResponse = () => {
                 (contractRev) => contractRev.contractID == parentContractID
             )?.contractName) ||
         undefined
+    const stateHeader = useMemoizedStateHeader({
+        subHeaderText:
+            rate?.revisions[0].formData.rateCertificationName ?? undefined,
+        stateCode: rate?.state.code,
+        stateName: rate?.state.name,
+    })
 
     // side effects
-    useEffect(() => {
-        updateHeading({ customHeading: `${rateName} Upload response` })
-    }, [rateName, updateHeading])
+    useLayoutEffect(() => {
+        updateHeading({ customHeading: stateHeader })
+    }, [stateHeader, updateHeading])
 
     if (fetchRateLoading) {
         return <ErrorOrLoadingPage state="LOADING" />

@@ -1,25 +1,24 @@
-import { dsnpTriggers } from '@mc-review/submissions'
+import {
+    dsnpTriggers,
+    eqroValidationAndReviewDetermination,
+} from '@mc-review/submissions'
 import type { FeatureFlagSettings } from '@mc-review/common-code'
 import type { ContractDraftRevisionFormDataInput } from '../../gen/gqlServer'
+import type { ContractFormDataType } from './formDataTypes'
+import { eqroContractFormDataSchema } from './formDataTypes'
 import {
-    contractFormDataSchema,
     preprocessNulls,
-    contractTypeSchema,
     populationCoveredSchema,
+    updateDraftContractFormDataSchema,
+    type UpdateDraftContractFormDataType,
 } from './formDataTypes'
 import { z } from 'zod'
 import type { Store } from '../../postgres'
-import { submittableContractSchema } from './contractTypes'
+import {
+    submittableContractSchema,
+    submittableEQROContractSchema,
+} from './contractTypes'
 import type { ContractType } from './contractTypes'
-
-const updateDraftContractFormDataSchema = contractFormDataSchema.extend({
-    contractType: preprocessNulls(contractTypeSchema.optional()),
-    submissionDescription: preprocessNulls(z.string().optional()),
-})
-
-type UpdateDraftContractFormDataType = z.infer<
-    typeof updateDraftContractFormDataSchema
->
 
 const validateStatutoryRegulatoryAttestation = (
     formData: ContractDraftRevisionFormDataInput,
@@ -95,6 +94,76 @@ const validateContractDraftRevisionInput = (
     }
 
     return parsedData.data
+}
+
+/**
+ * Clears all conditional EQRO question responses when any of the triggering
+ * questions (contract type, population covered, or managed care entities) have changed.
+ *
+ * This ensures users must re-answer EQRO questions when their upstream selections change,
+ * since different combinations of triggering questions display different EQRO questions.
+ *
+ * @param currentFormData - The existing form data from the database
+ * @param updateFormData - The incoming form data with user updates
+ * @returns The updated form data with EQRO fields nullified if triggering questions changed
+ */
+const parseAndUpdateEqroFields = (
+    currentFormData: ContractFormDataType,
+    updateFormData: UpdateDraftContractFormDataType
+) => {
+    const mutatableFormData = { ...updateFormData }
+
+    // Normalize CHIP and MEDICAID_AND_CHIP switching from one to the other results in no changes in conditional questions.
+    const normalizePopulation = (population: string | undefined | null) =>
+        population === 'CHIP' || population === 'MEDICAID_AND_CHIP'
+            ? 'CHIP_RELATED'
+            : population
+
+    // Check if any EQRO triggering questions have changed
+    const contractTypeChanged =
+        updateFormData.contractType !== currentFormData.contractType
+    const populationChanged =
+        normalizePopulation(updateFormData.populationCovered) !==
+        normalizePopulation(currentFormData.populationCovered)
+    const managedCareEntitiesChanged =
+        updateFormData.managedCareEntities?.includes('MCO') !==
+        currentFormData.managedCareEntities?.includes('MCO')
+
+    if (
+        !contractTypeChanged &&
+        !populationChanged &&
+        !managedCareEntitiesChanged
+    ) {
+        return mutatableFormData
+    }
+
+    // Clear all conditional EQRO questions if contract type, population, or managed care entities changed
+    mutatableFormData.eqroNewContractor = null
+    mutatableFormData.eqroProvisionChipEqrRelatedActivities = null
+    mutatableFormData.eqroProvisionMcoEqrOrRelatedActivities = null
+    mutatableFormData.eqroProvisionMcoNewOptionalActivity = null
+    mutatableFormData.eqroProvisionNewMcoEqrRelatedActivities = null
+
+    return mutatableFormData
+}
+
+const validateEQROContractDraftRevisionInput = (
+    formData: ContractDraftRevisionFormDataInput,
+    stateCode: string,
+    store: Store
+): UpdateDraftContractFormDataType | z.ZodError => {
+    // Validate against schema
+    const { data, error } = eqroContractFormDataSchema
+        .extend({
+            programIDs: validateProgramIDs(stateCode, store),
+        })
+        .safeParse(formData)
+
+    if (error) {
+        return error
+    }
+
+    return data
 }
 
 const refineForFeatureFlags = (featureFlags?: FeatureFlagSettings) => {
@@ -216,4 +285,64 @@ const parseContract = (
     return parsedData.data
 }
 
-export { validateContractDraftRevisionInput, parseContract }
+const parseEQROContract = (
+    contract: ContractType,
+    stateCode: string,
+    store: Store
+): ContractType | z.ZodError => {
+    const eqroContractParser = submittableEQROContractSchema.superRefine(
+        (contract, ctx) => {
+            //Validating programs
+            const contractProgramsIDs = new Set(
+                contract.draftRevision.formData.programIDs
+            )
+
+            const findResult = store.findPrograms(stateCode, [
+                ...contractProgramsIDs,
+            ])
+            if (findResult instanceof Error) {
+                ctx.addIssue({
+                    code: 'custom',
+                    message: findResult.message,
+                })
+            }
+
+            const hasRates = contract.draftRates && contract.draftRates.length
+            if (hasRates) {
+                ctx.addIssue({
+                    code: 'custom',
+                    message: 'EQRO submission cannot contain rates',
+                })
+            }
+
+            //Validating EQRO fields
+            const validationError = eqroValidationAndReviewDetermination(
+                contract.id,
+                contract.draftRevision.formData
+            )
+
+            if (validationError instanceof Error) {
+                ctx.addIssue({
+                    code: 'custom',
+                    message: validationError.message,
+                })
+            }
+        }
+    )
+
+    const parsedData = eqroContractParser.safeParse(contract)
+
+    if (parsedData.error) {
+        return parsedData.error
+    }
+
+    return parsedData.data
+}
+
+export {
+    validateContractDraftRevisionInput,
+    parseContract,
+    parseEQROContract,
+    parseAndUpdateEqroFields,
+    validateEQROContractDraftRevisionInput,
+}

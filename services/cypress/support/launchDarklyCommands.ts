@@ -106,7 +106,7 @@ Cypress.Commands.add('stubFeatureFlags', () => {
 Cypress.Commands.add(
     'getFeatureFlagStore',
     (featureFlags?: FeatureFlagLDConstant[]) => {
-        cy.readFile('fixtures/stores/featureFlagStore.json').then(
+        return cy.readFile('fixtures/stores/featureFlagStore.json').then(
             (
                 store: Record<FeatureFlagLDConstant, { value: FlagValue }>
             ): FeatureFlagSettings => {

@@ -25,7 +25,6 @@ WithAction.decorators = [(StoryFn) => ProvidersDecorator(StoryFn, {})]
 WithAction.args = {
     contract: mockContractPackageDraft(),
     //TODO: Use better mock program data
-    statePrograms: [],
     editNavigateTo: 'submission-type',
 }
 
@@ -34,5 +33,4 @@ WithoutAction.decorators = [(StoryFn) => ProvidersDecorator(StoryFn, {})]
 
 WithoutAction.args = {
     contract: mockContractPackageDraft(),
-    statePrograms: [],
 }

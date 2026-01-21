@@ -1,4 +1,4 @@
-describe('state user in state submission form', () => {
+describe('state user in health plan submission form', () => {
     beforeEach(() => {
         cy.stubFeatureFlags()
         cy.interceptGraphQL()

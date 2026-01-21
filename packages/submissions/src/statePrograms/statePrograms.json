@@ -458,6 +458,12 @@
                     "fullName": "Medicare-Medicaid Alignment Initiative",
                     "name": "MMAI",
                     "isRateProgram": false
+                },
+                {
+                    "id": "48785150-f181-4680-b4e3-21868413c0f0",
+                    "fullName": "FIDE-SNP",
+                    "name": "FIDE-SNP",
+                    "isRateProgram": false
                 }
             ],
             "code": "IL"
@@ -578,6 +584,12 @@
                     "fullName": "Managed Behavioral Health Program",
                     "name": "MBHP",
                     "isRateProgram": false
+                },
+                {
+                    "id": "6d248b7c-41f1-4dcc-a5f9-e12e519276b3",
+                    "fullName": "One Care",
+                    "name": "One Care",
+                    "isRateProgram": false
                 }
             ],
             "code": "MA"
@@ -649,6 +661,12 @@
                     "id": "f1194072-b554-4247-8ba7-6d29ccf5d27b",
                     "fullName": "Managed Care Health Plan Comprehensive Health Care Program",
                     "name": "MCHP",
+                    "isRateProgram": false
+                },
+                {
+                    "id": "52cea86a-e2f0-4f93-abea-2e3b99dc6b78",
+                    "fullName": "MI Coordinated Health",
+                    "name": "MICH",
                     "isRateProgram": false
                 }
             ],

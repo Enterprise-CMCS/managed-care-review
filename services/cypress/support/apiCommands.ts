@@ -18,7 +18,7 @@ import {
     newSubmissionInput,
     rateFormData,
     contractFormData,
-    minnesotaStatePrograms,
+    minnesotaStatePrograms, CMSUserType, eqroFromData,
 } from '../utils/apollo-test-utils'
 import { ApolloClient, DocumentNode, NormalizedCacheObject } from '@apollo/client'
 
@@ -49,6 +49,54 @@ const createAndSubmitContractOnlyPackage = async (
         variables: {
             input: updateContractDraftRevisionInput
         }
+    })
+
+    const submission = await apolloClient.mutate({
+        mutation: SubmitContractDocument,
+        variables: {
+            input: {
+                contractID: draftContract.id,
+            },
+        },
+    })
+
+    return submission.data.submitContract.contract
+}
+
+const createAndSubmitEQROContract = async (
+    apolloClient: ApolloClient<NormalizedCacheObject>
+): Promise<Contract> => {
+    const newContract = await apolloClient.mutate({
+        mutation: CreateContractDocument,
+        variables: {
+            input: newSubmissionInput({
+                populationCovered: 'MEDICAID',
+                programIDs: [minnesotaStatePrograms[0].id],
+                managedCareEntities: ['MCO'],
+                submissionType: 'CONTRACT_ONLY',
+                riskBasedContract: false,
+                submissionDescription: 'Test EQRO submission',
+                contractType: 'BASE',
+                contractSubmissionType: 'EQRO',
+            }),
+        },
+    })
+
+    const draftContract = newContract.data.createContract.contract
+    const draftRevision = draftContract.draftRevision
+    const updateFormData = eqroFromData()
+
+    const updateContractDraftRevisionInput: UpdateContractDraftRevisionInput = {
+        contractID: draftContract.id,
+        lastSeenUpdatedAt: draftRevision.updatedAt,
+        formData: updateFormData,
+    }
+
+    await apolloClient.mutate({
+        mutation: UpdateContractDraftRevisionDocument,
+        variables: {
+            input: updateContractDraftRevisionInput,
+        },
     })
 
     const submission = await apolloClient.mutate({
@@ -197,6 +245,20 @@ Cypress.Commands.add(
 )
 
 Cypress.Commands.add(
+    'apiCreateAndSubmitEQROSubmission',
+    (stateUser): Cypress.Chainable<Contract> =>
+        cy
+            .task<DocumentNode>('readGraphQLSchema')
+            .then({ timeout: 30000 }, (schema) =>
+                apolloClientWrapper(
+                    schema,
+                    stateUser,
+                    createAndSubmitEQROContract
+                )
+            )
+)
+
+Cypress.Commands.add(
     'apiCreateAndSubmitContractWithRates',
     (stateUser): Cypress.Chainable<Contract> =>
         cy.task<DocumentNode>('readGraphQLSchema').then({ timeout: 30000 },(schema) =>
@@ -209,20 +271,8 @@ Cypress.Commands.add(
 )
 
 Cypress.Commands.add(
-    'apiCreateAndSubmitBaseContract',
-    (stateUser): Cypress.Chainable<Contract> =>
-        cy.task<DocumentNode>('readGraphQLSchema').then({ timeout: 30000 },(schema) =>
-            apolloClientWrapper(
-                schema,
-                stateUser,
-                createAndSubmitContractOnlyPackage
-            )
-        )
-)
-
-Cypress.Commands.add(
     'apiAssignDivisionToCMSUser',
-    (cmsUser, division): Cypress.Chainable<void> =>
+    (cmsUser: CMSUserType, division: Division): Cypress.Chainable<void> =>
         cy.task<DocumentNode>('readGraphQLSchema').then( { timeout: 30000 },(schema) =>
             cy.wrap(apolloClientWrapper(schema, cmsUser, seedUserIntoDB), { timeout: 30000 } ).then(() =>
                 apolloClientWrapper(schema, adminUser(), (apolloClient) =>

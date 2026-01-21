@@ -1,5 +1,6 @@
 {
   "name": "managed-care-review",
+  "version": "",
   "description": "",
   "longDescription": "Managed Care Review is a CMS application for accepting Managed Care contract and rate submissions from states. It uses a serverless microservices architecture deployed as AWS Lambdas with React frontend and GraphQL API",
   "status": "Production",
@@ -15,13 +16,16 @@
   },
   "organization": "Centers for Medicare & Medicaid Services",
   "repositoryURL": "https://github.com/Enterprise-CMCS/managed-care-review",
-  "projectURL": "https://mc-review.onemac.cms.gov/",
   "repositoryHost": "github.com/Enterprise-CMCS",
   "repositoryVisibility": "public",
+  "homepageURL": "",
+  "downloadURL": "",
+  "disclaimerURL": "",
+  "disclaimerText": "",
   "vcs": "git",
-  "laborHours": 20024,
+  "laborHours": 20526,
   "reuseFrequency": {
-    "forks": 3,
+    "forks": 6,
     "clones": 0
   },
   "platforms": [
@@ -35,19 +39,25 @@
   "softwareType": "standalone/web",
   "languages": [
     "TypeScript",
+    "JavaScript",
     "SCSS",
     "PLpgSQL",
     "Shell",
-    "JavaScript",
     "HTML",
     "Dockerfile"
   ],
   "maintenance": "contract",
-  "contractNumber": "75FCMC25CJ005",
+  "contractNumber": [
+    "75FCMC25CJ005"
+  ],
+  "SBOM": "https://github.com/Enterprise-CMCS/managed-care-review/network/dependencies",
+  "relatedCode": [],
+  "reusedCode": [],
+  "partners": [],
   "date": {
     "created": "2020-07-27T19:02:24Z",
-    "lastModified": "2025-09-30T20:45:46Z",
-    "metaDataLastUpdated": "2025-10-01T00:11:56.405Z"
+    "lastModified": "2025-11-25T18:25:13Z",
+    "metadataLastUpdated": "2025-12-01T00:13:09.773Z"
   },
   "tags": [
     "CMS",
@@ -62,9 +72,8 @@
     "email": "mc-review-team@truss.works",
     "name": ""
   },
-  "feedbackMechanisms": [
-    "https://github.com/Enterprise-CMCS/managed-care-review/issues"
-  ],
+  "feedbackMechanism": "https://github.com/Enterprise-CMCS/managed-care-review/issues",
+  "AIUseCaseID": "0",
   "localisation": false,
   "repositoryType": "application",
   "userInput": true,
@@ -74,16 +83,11 @@
     "MC-Review"
   ],
   "systems": [],
-  "upstream": "https://github.com/Enterprise-CMCS/managed-care-review/network/dependencies",
   "subsetInHealthcare": [
     "Medicaid"
   ],
   "userType": [
     "Government"
   ],
-  "maturityModelTier": 2,
-  "disclaimers": {
-    "text": "This project is in the public domain within the United States, and copyright and related rights in the work worldwide are waived through the CC0 1.0 Universal public domain dedication.",
-    "mediumName": "GitHub"
-  }
+  "maturityModelTier": 2
 }

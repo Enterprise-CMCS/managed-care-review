@@ -35,7 +35,7 @@ import { extractGraphQLResponse } from './apolloV4ResponseHelper'
 const createAndSubmitTestContract = async (
     server: ApolloServer,
     stateCode?: StateCodeType,
-    formData?: Partial<ContractFormDataType>
+    formData?: Partial<ContractDraftRevisionFormDataInput>
 ): Promise<Contract> => {
     const contract = await createAndUpdateTestContractWithoutRates(
         server,
@@ -281,73 +281,70 @@ const createAndUpdateTestEQROContract = async (
     const draftContract = await createTestContract(
         server,
         stateCode,
-        undefined,
+        {
+            submissionType: 'CONTRACT_ONLY',
+            submissionDescription: 'A complete EQRO submission',
+            contractType: 'BASE',
+            managedCareEntities: ['MCO'],
+            populationCovered: 'MEDICAID_AND_CHIP',
+            riskBasedContract: false,
+        },
         'EQRO'
     )
     const draftRevision = draftContract.draftRevision
     const formData = draftRevision?.formData
+
     if (!formData) {
         throw new Error(
             'Unexpected error: draft contract does not contain a draft revision.'
         )
     }
 
-    formData.submissionType = 'CONTRACT_ONLY' as const
-    formData.submissionDescription = 'A complete EQRO submission'
-    formData.stateContacts = [
-        {
-            name: 'test name',
-            titleRole: 'test title',
-            email: 'email@example.com',
-        },
-    ]
-    formData.contractType = 'BASE' as const
-    formData.contractDateStart = '2025-06-01'
-    formData.contractDateEnd = '2026-05-30'
-    formData.contractDocuments = [
-        {
-            name: 'contractDocument.pdf',
-            s3URL: 's3://bucketname/key/test1',
-            sha256: 'fakesha',
-            dateAdded: new Date('01/15/2024'),
-        },
-    ]
-    formData.managedCareEntities = ['MCO']
-    formData.populationCovered = 'MEDICAID' as const
-    formData.eqroNewContractor = true
-    formData.eqroProvisionChipEqrRelatedActivities = true
-    formData.eqroProvisionMcoEqrOrRelatedActivities = true
-    formData.eqroProvisionNewMcoEqrRelatedActivities = true
-    formData.eqroProvisionMcoNewOptionalActivity = true
-
-    //Remove these fields after we implement EQRO submission validations
-    formData.federalAuthorities = ['STATE_PLAN' as const]
-    formData.contractExecutionStatus = 'EXECUTED' as const
-    formData.modifiedRiskSharingStrategy = false
-    formData.modifiedIncentiveArrangements = false
-    formData.modifiedWitholdAgreements = false
-    formData.modifiedStateDirectedPayments = true
-    formData.modifiedPassThroughPayments = true
-    formData.modifiedPaymentsForMentalDiseaseInstitutions = true
-    formData.modifiedNonRiskPaymentArrangements = true
-    formData.modifiedBenefitsProvided = false
-    formData.modifiedGeoAreaServed = false
-    formData.modifiedMedicaidBeneficiaries = false
-    formData.modifiedMedicalLossRatioStandards = false
-    formData.modifiedOtherFinancialPaymentIncentive = false
-    formData.modifiedEnrollmentProcess = false
-    formData.modifiedGrevienceAndAppeal = false
-    formData.modifiedNetworkAdequacyStandards = false
-    formData.modifiedLengthOfContract = false
-
-    Object.assign(formData, contractFormDataOverrides)
-
     await updateTestContractDraftRevision(
         server,
         draftContract.id,
         draftRevision?.updatedAt,
-        formData
+        {
+            // Keep EQRO conditional question trigger fields the same, complete all other fields.
+            // Update conditional EQRO conditional fields these combination
+            // of booleans for EQRO fields does not reflect real world only for testing.
+            ...mockGqlContractDraftRevisionFormDataInput(),
+            submissionType: 'CONTRACT_ONLY',
+            submissionDescription: 'A complete EQRO submission',
+            contractType: 'BASE',
+            managedCareEntities: ['MCO'],
+            populationCovered: 'MEDICAID_AND_CHIP',
+            eqroNewContractor: true,
+            eqroProvisionChipEqrRelatedActivities: true,
+            eqroProvisionMcoEqrOrRelatedActivities: true,
+            eqroProvisionNewMcoEqrRelatedActivities: true,
+            eqroProvisionMcoNewOptionalActivity: true,
+            riskBasedContract: undefined,
+            dsnpContract: undefined,
+            contractExecutionStatus: undefined,
+            inLieuServicesAndSettings: undefined,
+            modifiedBenefitsProvided: undefined,
+            modifiedGeoAreaServed: undefined,
+            modifiedMedicaidBeneficiaries: undefined,
+            modifiedRiskSharingStrategy: undefined,
+            modifiedIncentiveArrangements: undefined,
+            modifiedWitholdAgreements: undefined,
+            modifiedStateDirectedPayments: undefined,
+            modifiedPassThroughPayments: undefined,
+            modifiedPaymentsForMentalDiseaseInstitutions: undefined,
+            modifiedMedicalLossRatioStandards: undefined,
+            modifiedOtherFinancialPaymentIncentive: undefined,
+            modifiedEnrollmentProcess: undefined,
+            modifiedGrevienceAndAppeal: undefined,
+            modifiedNetworkAdequacyStandards: undefined,
+            modifiedLengthOfContract: undefined,
+            modifiedNonRiskPaymentArrangements: undefined,
+            statutoryRegulatoryAttestation: undefined,
+            statutoryRegulatoryAttestationDescription: undefined,
+            ...contractFormDataOverrides,
+        }
     )
+
     return await fetchTestContract(server, draftContract.id)
 }
 
@@ -531,11 +528,10 @@ const updateTestContractDraftRevision = async (
         )
     }
 
-    const updatedFormData =
-        formData ||
-        mockGqlContractDraftRevisionFormDataInput(
-            draftContract.stateCode as StateCodeType
-        )
+    const updatedFormData = mockGqlContractDraftRevisionFormDataInput(
+        draftContract.stateCode as StateCodeType,
+        formData
+    )
 
     const updateResult = await executeGraphQLOperation(server, {
         query: UpdateContractDraftRevisionDocument,

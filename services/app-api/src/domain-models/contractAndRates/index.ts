@@ -44,11 +44,12 @@ export type {
     RateFormDataType,
     DocumentType,
     RateFormEditableType,
-    ContractFormEditableType,
     StateContactType,
     ActuaryContactType,
     StrippedRateFormDataType,
 } from './formDataTypes'
+
+export type { UpdateDraftContractFormDataType } from './formDataTypes'
 
 export type {
     ContractRevisionType,
@@ -68,4 +69,7 @@ export type {
     ContractSubmissionType,
 } from './baseContractRateTypes'
 
-export { validateContractDraftRevisionInput } from './dataValidatorHelpers'
+export {
+    validateContractDraftRevisionInput,
+    validateEQROContractDraftRevisionInput,
+} from './dataValidatorHelpers'
