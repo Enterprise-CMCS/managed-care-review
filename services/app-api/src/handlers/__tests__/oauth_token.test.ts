@@ -58,7 +58,7 @@ vi.mock('../../oauth/oauth2Server', () => ({
                     body: JSON.stringify({
                         access_token: 'mock.jwt.token',
                         token_type: 'Bearer',
-                        expires_in: 7776000,
+                        expires_in: 1800,
                     }),
                 }
             }),
@@ -162,7 +162,7 @@ describe('OAuth Token Handler', () => {
         expect(JSON.parse(result.body)).toEqual({
             access_token: 'mock.jwt.token',
             token_type: 'Bearer',
-            expires_in: 7776000,
+            expires_in: 1800,
         })
     })
 })

@@ -33,7 +33,7 @@ To get the tools needed for local development, you can run:
 
 ```bash
 brew install pnpm direnv entr shellcheck protolint detect-secrets
-pnpm husky install
+pnpm install husky
 ```
 
 We use [direnv](https://direnv.net/) to automatically set required environment variables when you enter this directory or its children. This will be used when running the application locally, or when using tools like the `aws` or `serverless` CLIs locally.
