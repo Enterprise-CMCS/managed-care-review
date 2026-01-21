@@ -72,7 +72,7 @@ jobs:
           DATABASE_URL: postgresql://postgres:shhhsecret@localhost:5432/postgres?schema=public&connection_limit=5 #pragma: allowlist secret
         run: |
           pnpm --filter @mc-review/database generate
-          npx prisma migrate reset --force
+          pnpm --filter @mc-review/database exec prisma migrate reset --force
 
       - name: Build packages
         shell: bash
