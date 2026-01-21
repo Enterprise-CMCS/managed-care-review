@@ -199,9 +199,8 @@ jobs:
           NODE_OPTIONS: --max_old_space_size=6000
           VITE_APP_AUTH_MODE: AWS_COGNITO
           DATABASE_URL: postgresql://postgres:shhhsecret@localhost:5432/postgres?schema=public&connection_limit=5 #pragma: allowlist secret
-        working-directory: packages/database
         run: |
-          pnpm generate
+          pnpm --filter @mc-review/database generate
           npx prisma migrate reset --force
 
       - name: Build packages
