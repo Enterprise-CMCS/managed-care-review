@@ -30,6 +30,7 @@ const fetchOauthClientsMockSuccess = (): MockedResponse<FetchOauthClientsQuery> 
                   "client_credentials",
                   "refresh_token"
               ],
+              scopes: [],
               description: "description placeholder test",
               user: {
                   id: "user5",
@@ -84,8 +85,8 @@ const createOauthClientMockSuccess = ({
         request: {
             query: CreateOauthClientDocument,
             variables: {
-                input
-            }
+                input,
+            },
         },
         result: {
             data: {
@@ -95,16 +96,17 @@ const createOauthClientMockSuccess = ({
                         __typename: 'OauthClient',
                         id: uuidv4(),
                         clientId: `oauth-client-${uuidv4()}`,
-                        clientSecret: `shhhhsecret`,
+                        clientSecret: `shhhhsecret`, //pragma: allowlist secret
                         grants: ['client_credentials'],
+                        scopes: [],
                         description: input.description ?? null,
                         createdAt: new Date(),
                         updatedAt: new Date(),
-                        user: user
-                    }
-                }
-            }
-        }
+                        user: user,
+                    },
+                },
+            },
+        },
     }
 }
 
