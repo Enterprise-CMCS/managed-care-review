@@ -29,7 +29,7 @@ describe(`generateUploadURLResolver`, () => {
 
         expect(result.errors).toBeUndefined()
         const payload = result.data?.generateUploadURL        
-        expect(payload?.uploadURL).toContain('test-doc.docx')
+        expect(payload?.uploadURL).toContain('DOCX')
         expect(payload?.expiresIn).toBeDefined()
     })
     
@@ -43,11 +43,11 @@ describe(`generateUploadURLResolver`, () => {
                 },
             },
         })
-
+     
         expect(result.errors).toBeUndefined()
         const payload = result.data?.generateUploadURL
         expect(payload).toBeDefined()
-        expect(payload?.uploadURL).toContain('test-sheet.xlsx')
+        expect(payload?.uploadURL).toContain('XLSX')
         expect(payload?.expiresIn).toBeDefined()        
     })
 
