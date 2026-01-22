@@ -55,6 +55,8 @@ const ContractSubmissionTypeRecord = {
     EQRO: 'eqro'
 } as const
 type ContractSubmissionTypeRecordKeys = keyof typeof ContractSubmissionTypeRecord
+type ContractSubmissionTypeParams =
+    (typeof ContractSubmissionTypeRecord)[keyof typeof ContractSubmissionTypeRecord]
 /*
     Every application url (excluding query parameters) is found in the RoutesRecord.
     These types ensure we use valid route throughout the application
@@ -282,7 +284,7 @@ const PageHeadingsRecord: Partial<Record<RouteTWithUnknown, string>> = {
     ROOT: 'Submissions dashboard',
     DASHBOARD_SUBMISSIONS: 'Submissions dashboard',
     DASHBOARD_RATES: 'Rate reviews dashboard',
-    SUBMISSIONS_NEW: 'New submission',
+    SUBMISSIONS_NEW: '',
     SUBMISSIONS_NEW_SUBMISSION_FORM: '',
     MCR_SETTINGS: PageTitlesRecord.MCR_SETTINGS,
     STATE_ASSIGNMENTS: PageTitlesRecord.MCR_SETTINGS,
@@ -309,4 +311,9 @@ export {
     RATE_PAGE_HEADING_ROUTES,
 }
 
-export type { ContractSubmissionTypeRecordKeys, RouteT, RouteTWithUnknown }
+export type {
+    ContractSubmissionTypeRecordKeys,
+    RouteT,
+    RouteTWithUnknown,
+    ContractSubmissionTypeParams,
+}

@@ -1,11 +1,15 @@
 import React, { useEffect } from 'react'
 import {
+    ContractSubmissionTypeParams,
     ContractSubmissionTypeRecord,
     RoutesRecord,
 } from '@mc-review/constants'
 import { generatePath, useNavigate } from 'react-router-dom'
 import { usePage } from '../../../../contexts/PageContext'
-import { useRouteParams } from '../../../../hooks'
+import {
+    useMemoizedNewSubmissionHeader,
+    useRouteParams,
+} from '../../../../hooks'
 import * as Yup from 'yup'
 import { Formik, FormikErrors } from 'formik'
 import { Form, FormGroup, Fieldset } from '@trussworks/react-uswds'
@@ -26,7 +30,7 @@ const newSubmissionFormSchema = Yup.object().shape({
 })
 
 export interface NewSubmissionFormValueType {
-    contractType?: 'health-plan' | 'eqro'
+    contractType?: ContractSubmissionTypeParams
 }
 
 type FormError =
@@ -184,6 +188,15 @@ export const NewSubmission = () => {
 // Routing to the correct new submission form component based on contract submission type
 export const NewSubmissionForm = (): React.ReactElement => {
     const { contractSubmissionType } = useRouteParams()
+    const { updateHeading } = usePage()
+
+    const heading = useMemoizedNewSubmissionHeader({
+        contractType: contractSubmissionType,
+    })
+
+    useEffect(() => {
+        updateHeading({ customHeading: heading })
+    }, [heading, updateHeading])
 
     if (
         contractSubmissionType === ContractSubmissionTypeRecord['HEALTH_PLAN']
