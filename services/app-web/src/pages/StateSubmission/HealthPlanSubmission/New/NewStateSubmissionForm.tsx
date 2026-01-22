@@ -1,4 +1,4 @@
-import React, { useLayoutEffect } from 'react'
+import React, { useEffect } from 'react'
 import stylesForm from '../../StateSubmissionForm.module.scss'
 import stylesSideNav from '../../../SubmissionSideNav/SubmissionSideNav.module.scss'
 import { FormContainer } from '../../../../components'
@@ -22,7 +22,7 @@ export const NewStateSubmissionForm = (): React.ReactElement => {
         featureFlags.EQRO_SUBMISSIONS.defaultValue
     )
 
-    useLayoutEffect(() => {
+    useEffect(() => {
         if (!showEqroSubmissions) {
             // Show header text when EQRO flag is off
             updateHeading({ customHeading: 'New submission' })
