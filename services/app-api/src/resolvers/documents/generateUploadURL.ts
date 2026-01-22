@@ -57,9 +57,9 @@ export function generateUploadURLResolver(
                 fileType as keyof typeof UPLOAD_FILE_TYPE_TO_MIME
             ]
 
-        const extension = fileName.split('.').pop()?.toUpperCase()
+        const extension = fileName.split('.').pop()?.toLowerCase()
 
-        if (extension !== fileType) {
+        if (extension !== fileType.toLowerCase()) {
             const extenErr = `File extension ".${extension}" does not match fileType "${fileType}"`
             logError('generateUploadURL', extenErr)
             setErrorAttributesOnActiveSpan(extenErr, span)
@@ -71,7 +71,7 @@ export function generateUploadURLResolver(
             })
         }
 
-        const s3Key = `${uuidv4()}-.${extension}`
+        const s3Key = `${uuidv4()}.${extension}`
         const bucketName: BucketShortName = 'QUESTION_ANSWER_DOCS'
 
         const uploadURL = await s3Client.getUploadURL(

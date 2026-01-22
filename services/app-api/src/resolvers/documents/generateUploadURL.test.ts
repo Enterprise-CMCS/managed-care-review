@@ -29,7 +29,7 @@ describe(`generateUploadURLResolver`, () => {
 
         expect(result.errors).toBeUndefined()
         const payload = result.data?.generateUploadURL        
-        expect(payload?.uploadURL).toContain('.DOCX')
+        expect(payload?.uploadURL).toContain('.docx')
         expect(payload?.expiresIn).toBeDefined()
     })
     
@@ -47,7 +47,7 @@ describe(`generateUploadURLResolver`, () => {
         expect(result.errors).toBeUndefined()
         const payload = result.data?.generateUploadURL
         expect(payload).toBeDefined()
-        expect(payload?.uploadURL).toContain('.XLSX')
+        expect(payload?.uploadURL).toContain('.xlsx')
         expect(payload?.expiresIn).toBeDefined()
     })
 
@@ -78,6 +78,6 @@ describe(`generateUploadURLResolver`, () => {
         })
 
         expect(result.errors).toBeDefined()
-        expect(result.errors?.[0].message).toMatch('File extension ".DOC" does not match fileType "PDF"')
+        expect(result.errors?.[0].message).toMatch('File extension ".doc" does not match fileType "PDF"')
     })
 })
