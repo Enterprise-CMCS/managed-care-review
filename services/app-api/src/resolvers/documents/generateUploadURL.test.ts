@@ -29,7 +29,7 @@ describe(`generateUploadURLResolver`, () => {
 
         expect(result.errors).toBeUndefined()
         const payload = result.data?.generateUploadURL        
-        expect(payload?.uploadURL).toContain('DOCX')
+        expect(payload?.uploadURL).toContain('.DOCX')
         expect(payload?.expiresIn).toBeDefined()
     })
     
@@ -47,8 +47,8 @@ describe(`generateUploadURLResolver`, () => {
         expect(result.errors).toBeUndefined()
         const payload = result.data?.generateUploadURL
         expect(payload).toBeDefined()
-        expect(payload?.uploadURL).toContain('XLSX')
-        expect(payload?.expiresIn).toBeDefined()        
+        expect(payload?.uploadURL).toContain('.XLSX')
+        expect(payload?.expiresIn).toBeDefined()
     })
 
     it('throws an error when file name is missing', async () => {
