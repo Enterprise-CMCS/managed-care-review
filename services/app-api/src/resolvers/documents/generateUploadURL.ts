@@ -13,7 +13,6 @@ import { v4 as uuidv4 } from 'uuid'
 import { Context } from '../../handlers/apollo_gql'
 import type { BucketShortName } from '../../s3'
 import { UPLOAD_FILE_TYPE_TO_MIME } from './uploadFileTypeMap'
-import { UploadFileType } from '../../gen/gqlServer'
 
 export function generateUploadURLResolver(
     store: Store,
@@ -37,7 +36,7 @@ export function generateUploadURLResolver(
             })
         }
 
-        const { fileName, fileType } = input        
+        const { fileName, fileType } = input
         const expiresIn = 300 //300 is 5 mins, default (900) is 15 mins
 
         if (!fileName) {
@@ -51,9 +50,12 @@ export function generateUploadURLResolver(
                 },
             })
         }
-        
-        // fileType is guarunteed to be a valid UploadFileType enum by GraphQL, no additional validations needed here
-        const contentType = UPLOAD_FILE_TYPE_TO_MIME[fileType as keyof typeof UPLOAD_FILE_TYPE_TO_MIME]       
+
+        // fileType is guaranteed to be a valid UploadFileType enum by GraphQL, no additional validations needed here
+        const contentType =
+            UPLOAD_FILE_TYPE_TO_MIME[
+                fileType as keyof typeof UPLOAD_FILE_TYPE_TO_MIME
+            ]
 
         const extension = fileName.split('.').pop()?.toUpperCase()
 
@@ -69,7 +71,7 @@ export function generateUploadURLResolver(
             })
         }
 
-        const s3Key = `${uuidv4()}-${fileName}` //does this work for the key format? 
+        const s3Key = `${uuidv4()}-${fileName}` //does this work for the key format?
         const bucketName: BucketShortName = 'QUESTION_ANSWER_DOCS'
 
         const uploadURL = await s3Client.getUploadURL(
@@ -97,7 +99,7 @@ export function generateUploadURLResolver(
             uploadURL,
             s3Key,
             bucket: bucketName,
-            expiresIn
+            expiresIn,
         }
     }
 }

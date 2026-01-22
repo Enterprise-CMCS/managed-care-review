@@ -135,7 +135,7 @@ export function configureResolvers(
             createOauthClient: createOauthClientResolver(store),
             deleteOauthClient: deleteOauthClientResolver(store),
             updateOauthClient: updateOauthClientResolver(store),
-            generateUploadURL: generateUploadURLResolver(store, s3Client)
+            generateUploadURL: generateUploadURLResolver(store, s3Client),
 
         },
         User: {
