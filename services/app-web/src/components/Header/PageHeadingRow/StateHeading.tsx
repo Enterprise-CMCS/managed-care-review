@@ -8,6 +8,7 @@ import {
     RouteTWithUnknown,
     SUBMISSION_PAGE_HEADING_ROUTES,
 } from '@mc-review/constants'
+import { StateUser } from '../../../gen/gqlClient'
 
 export type ContractSubmissionDisplayType = 'EQRO' | 'Health plan' | undefined
 
@@ -18,6 +19,25 @@ const getSubHeaderTitle = (route?: RouteTWithUnknown): string | undefined => {
             return 'Submission ID'
     }
     return undefined
+}
+
+const ContractTypeHeaderSection = ({
+    contractType,
+}: {
+    contractType: ContractSubmissionDisplayType
+}) => {
+    return (
+        <div
+            className={styles.contractTypeContainer}
+            data-testid="contractType"
+        >
+            <div className={styles.contractTypeDivider} aria-hidden="true" />
+            <div className={styles.contractTypeText}>
+                <span className={styles.contractTypeLabel}>Contract type</span>
+                <span className={styles.contractTypeValue}>{contractType}</span>
+            </div>
+        </div>
+    )
 }
 
 export const StateHeading = ({
@@ -66,23 +86,39 @@ export const StateHeading = ({
                         )}
                     </PageHeading>
                     {contractType && (
-                        <div
-                            className={styles.contractTypeContainer}
-                            data-testid="contractType"
-                        >
-                            <div
-                                className={styles.contractTypeDivider}
-                                aria-hidden="true"
-                            />
-                            <div className={styles.contractTypeText}>
-                                <span className={styles.contractTypeLabel}>
-                                    Contract type
-                                </span>
-                                <span className={styles.contractTypeValue}>
-                                    {contractType}
-                                </span>
-                            </div>
-                        </div>
+                        <ContractTypeHeaderSection
+                            contractType={contractType}
+                        />
+                    )}
+                </>
+            )}
+        </Grid>
+    )
+}
+
+export const NewSubmissionStateHeading = ({
+    stateUser,
+    contractType,
+}: {
+    stateUser?: StateUser
+    contractType?: ContractSubmissionDisplayType
+}) => {
+    return (
+        <Grid row className={`flex-align-center ${styles.stateRow}`}>
+            {stateUser && (
+                <>
+                    <div>
+                        <StateIcon
+                            code={
+                                stateUser.state.code as StateIconProps['code']
+                            }
+                        />
+                        <span>{stateUser.state.name}&nbsp;</span>
+                    </div>
+                    {contractType && (
+                        <ContractTypeHeaderSection
+                            contractType={contractType}
+                        />
                     )}
                 </>
             )}

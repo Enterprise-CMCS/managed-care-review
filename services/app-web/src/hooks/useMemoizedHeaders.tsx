@@ -1,14 +1,26 @@
 import { useMemo } from 'react'
-import { StateHeading } from '../components/Header'
+import { StateHeading, NewSubmissionStateHeading } from '../components/Header'
 import type { ContractSubmissionDisplayType } from '../components/Header'
-import { ContractSubmissionType } from '../gen/gqlClient'
+import { ContractSubmissionType, StateUser } from '../gen/gqlClient'
 import { useCurrentRoute } from './useCurrentRoute'
+import { useAuth } from '../contexts/AuthContext'
+import { ContractSubmissionTypeParams } from '@mc-review/constants'
 
 interface UseStateHeaderDisplayProps {
     subHeaderText?: string
     stateCode?: string
     stateName?: string
-    contractType?: ContractSubmissionType | 'eqro' | 'health-plan'
+    contractType?: ContractSubmissionType | ContractSubmissionTypeParams
+}
+
+const parseContractType = (
+    contractType: UseStateHeaderDisplayProps['contractType']
+): ContractSubmissionDisplayType => {
+    if (contractType === 'EQRO' || contractType === 'eqro') return 'EQRO'
+    if (contractType === 'HEALTH_PLAN' || contractType === 'health-plan')
+        return 'Health plan'
+
+    return undefined
 }
 
 /**
@@ -26,16 +38,7 @@ export const useMemoizedStateHeader = ({
     contractType,
 }: UseStateHeaderDisplayProps) => {
     const { currentRoute: route } = useCurrentRoute()
-
-    let contractSubmissionType: ContractSubmissionDisplayType = undefined
-
-    if (contractType === 'EQRO' || contractSubmissionType === 'eqro') {
-        contractSubmissionType = 'EQRO'
-    }
-
-    if (contractType === 'HEALTH_PLAN' || contractType === 'health-plan') {
-        contractSubmissionType = 'Health plan'
-    }
+    const contractSubmissionType = parseContractType(contractType)
 
     return useMemo(
         () => (
@@ -48,5 +51,27 @@ export const useMemoizedStateHeader = ({
             />
         ),
         [subHeaderText, route, stateCode, stateName, contractSubmissionType]
+    )
+}
+
+/**
+ * A hook to memoize new submission page header react component for updateHeading() function.
+ *
+ * @param contractType - Contract submission type, supplied only for contracts.
+ */
+export const useMemoizedNewSubmissionHeader = ({
+    contractType,
+}: UseStateHeaderDisplayProps) => {
+    const { loggedInUser } = useAuth()
+    const contractSubmissionType = parseContractType(contractType)
+
+    return useMemo(
+        () => (
+            <NewSubmissionStateHeading
+                stateUser={loggedInUser as StateUser}
+                contractType={contractSubmissionType}
+            />
+        ),
+        [loggedInUser, contractSubmissionType]
     )
 }
