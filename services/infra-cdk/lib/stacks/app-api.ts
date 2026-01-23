@@ -70,7 +70,7 @@ export class AppApiStack extends BaseStack {
     public readonly cleanupFunction: NodejsFunction
     public readonly migrateFunction: NodejsFunction
     public readonly regenerateZipsFunction: NodejsFunction
-
+    public readonly migratePotobufDataFunction: NodejsFunction
     public readonly graphqlFunction: NodejsFunction
 
     // Shared OTEL layer for all functions
@@ -222,12 +222,6 @@ export class AppApiStack extends BaseStack {
             },
         })
 
-        // Create Lambda execution role
-        const lambdaRole = this.createLambdaRole()
-
-        // Get environment variables
-        const environment = this.getLambdaEnvironment()
-
         // Create OTEL layer for all functions (matches serverless provider-level default)
         this.otelLayer = LayerVersion.fromLayerVersionArn(
             this,
@@ -250,6 +244,14 @@ export class AppApiStack extends BaseStack {
                 )
             ),
         })
+
+        // Populate common lambda parameters into variables to be used during function creation
+        const securityGroups = [
+            this.lambdaSecurityGroup,
+            this.applicationSecurityGroup,
+        ]
+        const role = this.createLambdaRole()
+        const environment = this.getLambdaEnvironment()
 
         // Create simple Lambda functions first (no VPC, layers, or complex dependencies)
         this.healthFunction = this.createFunction(
@@ -334,6 +336,34 @@ export class AppApiStack extends BaseStack {
                 environment,
                 role: lambdaRole,
                 layers: [this.otelLayer],
+            }
+        )
+
+        // Create the migrate protobuf function with VPC and layers
+        this.migratePotobufDataFunction = this.createFunction(
+            'migrate-protobuf-data',
+            'migrate_protobuf_data',
+            'main',
+            {
+                timeout: Duration.minutes(30),
+                environment: {
+                    ...environment,
+                    CONNECT_TIMEOUT: '60',
+                    NODE_PATH: '/opt/nodejs/node_modules',
+                },
+                role,
+                layers: [this.prismaEngineLayer, this.otelLayer],
+                vpc: this.vpc,
+                vpcSubnets: {
+                    subnetType: SubnetType.PRIVATE_WITH_EGRESS,
+                },
+                securityGroups,
+                bundling: {
+                    externalModules: ['prisma', '@prisma/client'],
+                    ...this.createBundling('migrate-protobuf-data', [
+                        this.getOtelBundlingCommands(),
+                    ]),
+                },
             }
         )
 
