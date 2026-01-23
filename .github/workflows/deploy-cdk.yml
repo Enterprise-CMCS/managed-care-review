@@ -993,33 +993,38 @@ jobs:
           [ -f "./api-test-coverage/coverage-final.json" ] && cp ./api-test-coverage/coverage-final.json ./reports/from-api.json
           [ -f "./unit-test-coverage/coverage-final.json" ] && cp ./unit-test-coverage/coverage-final.json ./reports/from-unit-test.json
 
-          # Merge all packages coverage files into one
+          # Copy all packages coverage files
           if [ -d "./packages-test-coverage" ]; then
-            echo "Merging packages coverage reports"
-            find ./packages-test-coverage -name 'coverage-final.json' -exec cat {} \; > ./reports/from-packages-temp.json 2>/dev/null || echo "{}" > ./reports/from-packages-temp.json
-            # Use c8 to properly merge the package coverage files
-            npx c8 report --reporter=json -o ./reports $(find ./packages-test-coverage -name 'coverage-final.json')
-            [ -f "./reports/coverage.json" ] && mv ./reports/coverage.json ./reports/from-packages.json
+            echo "Copying packages coverage reports"
+            find ./packages-test-coverage -name 'coverage-final.json' | while read file; do
+              base=$(basename $(dirname $(dirname $file)))
+              cp "$file" "./reports/from-packages-${base}.json"
+            done
           fi
 
           echo "Copied all files"
 
-          echo "DEBUG"
-          echo "c8 version:"
-          npx c8 --version
-
           echo "Contents of reports directory:"
-          ls -R ./reports
+          ls -la ./reports
 
-          echo "Contents of coverage-all directory:"
-          ls -R ./coverage-all
+          echo "Merge all Istanbul format reports (web, api, packages) using nyc"
+          npx nyc merge ./reports ./coverage-all/merged-coverage.json
 
-          echo "Merge all reports into one and generate all report formats"
-          npx c8 report --reporter=json --reporter=lcov --reporter=text --reporter=json-summary -o ./coverage-all \
-            ./reports/from-api.json \
-            ./reports/from-cypress/coverage-final.json \
-            ./reports/from-unit-test.json \
-            ./reports/from-packages.json 2>&1 | tee coverage-text-output.txt
+          echo "Merge cypress V8 coverage"
+          if [ -f "./reports/from-cypress/coverage-final.json" ]; then
+            # Cypress uses Istanbul format after c8 conversion, so include it in nyc merge
+            echo "Cypress coverage found and already in Istanbul format"
+          fi
+
+          echo "Generate all report formats from merged coverage"
+          npx nyc report \
+            --reporter=lcov \
+            --reporter=text \
+            --reporter=json \
+            --reporter=json-summary \
+            --report-dir ./coverage-all \
+            --temp-dir ./coverage-all \
+            --nycrc-path /dev/null 2>&1 | tee coverage-text-output.txt
 
           cd coverage-all
           echo "Coverage reports merged and final report generated"
