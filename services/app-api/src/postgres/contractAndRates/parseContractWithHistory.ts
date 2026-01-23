@@ -1,10 +1,7 @@
-import type {
-    ContractType,
-    ContractRevisionType,
-} from '../../domain-models/contractAndRates'
+import type { ContractType, ContractRevisionType } from '../../domain-models'
 import { contractSchema } from '../../domain-models/contractAndRates'
 import type { ContractWithoutDraftRatesType } from '../../domain-models/contractAndRates/baseContractRateTypes'
-import type { ContractPackageSubmissionType } from '../../domain-models/contractAndRates/packageSubmissions'
+import type { ContractPackageSubmissionType } from '../../domain-models'
 import { rateWithoutDraftContractsToDomainModel } from './parseRateWithHistory'
 import type { ContractRevisionTableWithFormData } from './prismaSharedContractRateHelpers'
 import { getConsolidatedContractStatus } from './prismaSharedContractRateHelpers'

@@ -522,6 +522,7 @@ enum ContractActionType {
   UNDER_REVIEW
   MARK_AS_APPROVED
   WITHDRAW
+  NOT_SUBJECT_TO_REVIEW
 }
 
 enum RateActionType {

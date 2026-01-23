@@ -6,6 +6,7 @@ const contractReviewActionTypeSchema = z.union([
     z.literal('UNDER_REVIEW'),
     z.literal('MARK_AS_APPROVED'),
     z.literal('WITHDRAW'),
+    z.literal('NOT_SUBJECT_TO_REVIEW'),
 ])
 
 const contractReviewActionSchema = z.object({
