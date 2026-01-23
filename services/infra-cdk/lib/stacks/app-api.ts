@@ -345,9 +345,30 @@ export class AppApiStack extends BaseStack {
         )
 
         // OAuth token function needs VPC and Prisma layer for database access
-        this.oauthTokenFunction = this.createOauthTokenFunction(
-            lambdaRole,
-            environment
+        this.oauthTokenFunction = this.createFunction(
+            'oauth-token',
+            'oauth_token',
+            'main',
+            {
+                timeout: Duration.seconds(30),
+                memorySize: 1024,
+                environment,
+                role,
+                layers: [this.prismaEngineLayer, this.otelLayer],
+                vpc: this.vpc,
+                vpcSubnets: {
+                    subnetType: SubnetType.PRIVATE_WITH_EGRESS,
+                },
+                securityGroups,
+                bundling: {
+                    format: OutputFormat.ESM,
+                    banner: AppApiStack.ESM_BANNER,
+                    externalModules: ['prisma', '@prisma/client'],
+                    ...this.createBundling('oauth-token', [
+                        this.getOtelBundlingCommands(),
+                    ]),
+                },
+            }
         )
 
         this.cleanupFunction = this.createFunction(
@@ -665,63 +686,6 @@ export class AppApiStack extends BaseStack {
         })
 
         return graphqlFunction
-    }
-
-    /**
-     * Create the OAuth token function with VPC and Prisma engine layer
-     * Matches serverless configuration for oauth_token function
-     */
-    private createOauthTokenFunction(
-        role: Role,
-        environment: Record<string, string>
-    ): NodejsFunction {
-        // Build security groups array - use both during transition
-        const securityGroups = [
-            this.lambdaSecurityGroup,
-            this.applicationSecurityGroup,
-        ]
-
-        // Create OAuth token function with all required configuration
-        const oauthTokenFunction = new NodejsFunction(
-            this,
-            'oauth-tokenFunction',
-            {
-                functionName: `${ResourceNames.apiName('app-api', this.stage)}-oauth-token`,
-                runtime: Runtime.NODEJS_20_X,
-                architecture: Architecture.X86_64,
-                handler: 'main',
-                entry: path.join(
-                    __dirname,
-                    '..',
-                    '..',
-                    '..',
-                    'app-api',
-                    'src',
-                    'handlers',
-                    'oauth_token.ts'
-                ),
-                timeout: Duration.seconds(30),
-                memorySize: 1024,
-                environment,
-                role,
-                layers: [this.prismaEngineLayer, this.otelLayer],
-                vpc: this.vpc,
-                vpcSubnets: {
-                    subnetType: SubnetType.PRIVATE_WITH_EGRESS,
-                },
-                securityGroups,
-                bundling: {
-                    format: OutputFormat.ESM,
-                    banner: AppApiStack.ESM_BANNER,
-                    externalModules: ['prisma', '@prisma/client'],
-                    ...this.createBundling('oauth-token', [
-                        this.getOtelBundlingCommands(),
-                    ]),
-                },
-            }
-        )
-
-        return oauthTokenFunction
     }
 
     private createLambdaRole(): Role {
