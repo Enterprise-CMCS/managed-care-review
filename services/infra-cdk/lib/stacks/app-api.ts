@@ -679,7 +679,7 @@ export class AppApiStack extends BaseStack {
                 vpcSubnets: {
                     subnetType: SubnetType.PRIVATE_WITH_EGRESS,
                 },
-                securityGroups: [lambdaSecurityGroup],
+                securityGroups: [lambdaSecurityGroup, this.applicationSecurityGroup],
                 bundling: {
                     format: OutputFormat.ESM,
                     banner: AppApiStack.ESM_BANNER,
