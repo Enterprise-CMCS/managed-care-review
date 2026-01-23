@@ -429,9 +429,30 @@ export class AppApiStack extends BaseStack {
         )
 
         // Create regenerate zips function with VPC and layers
-        this.regenerateZipsFunction = this.createRegenerateZipsFunction(
-            lambdaRole,
-            environment
+        this.regenerateZipsFunction = this.createFunction(
+            'regenerate-zips',
+            'regenerate_zips',
+            'main',
+            {
+                timeout: Duration.minutes(15), // Extended timeout for processing many zips
+                memorySize: 4096, // Higher memory for zip operations
+                environment,
+                role,
+                layers: [this.prismaEngineLayer, this.otelLayer],
+                vpc: this.vpc,
+                vpcSubnets: {
+                    subnetType: SubnetType.PRIVATE_WITH_EGRESS,
+                },
+                securityGroups,
+                bundling: {
+                    format: OutputFormat.ESM,
+                    banner: AppApiStack.ESM_BANNER,
+                    externalModules: ['prisma', '@prisma/client'],
+                    ...this.createBundling('regenerate-zips', [
+                        this.getOtelBundlingCommands(),
+                    ]),
+                },
+            }
         )
 
         /**
@@ -580,63 +601,6 @@ export class AppApiStack extends BaseStack {
             ]),
             ...options,
         })
-    }
-
-    /**
-     * Create the regenerate zips function with VPC and Prisma engine layer
-     * Used to regenerate missing zip files for submitted contracts/rates
-     */
-    private createRegenerateZipsFunction(
-        role: Role,
-        environment: Record<string, string>
-    ): NodejsFunction {
-        // Build security groups array - use both during transition
-        const securityGroups = [
-            this.lambdaSecurityGroup,
-            this.applicationSecurityGroup,
-        ]
-
-        // Create regenerate zips function with all required configuration
-        const regenerateZipsFunction = new NodejsFunction(
-            this,
-            'regenerateZipsFunction',
-            {
-                functionName: `${ResourceNames.apiName('app-api', this.stage)}-regenerate-zips`,
-                runtime: Runtime.NODEJS_20_X,
-                architecture: Architecture.X86_64,
-                handler: 'main',
-                entry: path.join(
-                    __dirname,
-                    '..',
-                    '..',
-                    '..',
-                    'app-api',
-                    'src',
-                    'handlers',
-                    'regenerate_zips.ts'
-                ),
-                timeout: Duration.minutes(15), // Extended timeout for processing many zips
-                memorySize: 4096, // Higher memory for zip operations
-                environment,
-                role,
-                layers: [this.prismaEngineLayer, this.otelLayer],
-                vpc: this.vpc,
-                vpcSubnets: {
-                    subnetType: SubnetType.PRIVATE_WITH_EGRESS,
-                },
-                securityGroups,
-                bundling: {
-                    format: OutputFormat.ESM,
-                    banner: AppApiStack.ESM_BANNER,
-                    externalModules: ['prisma', '@prisma/client'],
-                    ...this.createBundling('regenerate-zips', [
-                        this.getOtelBundlingCommands(),
-                    ]),
-                },
-            }
-        )
-
-        return regenerateZipsFunction
     }
 
     /**
