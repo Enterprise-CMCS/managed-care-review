@@ -75,6 +75,8 @@ export class AppApiStack extends BaseStack {
     public readonly migratePotobufDataFunction: NodejsFunction
     public readonly graphqlFunction: NodejsFunction
 
+    // Shared Prisma migration layer for functions that need database migration
+    private readonly prismaMigrationLayer: ILayerVersion
     // Shared OTEL layer for all functions
     private readonly otelLayer: ILayerVersion
     // Shared Prisma engine layer for GraphQL and OAuth functions
@@ -231,6 +233,26 @@ export class AppApiStack extends BaseStack {
             AWS_OTEL_LAYER_ARN
         )
 
+        // Create shared Prisma migration layer for functions that need database migration
+        this.prismaMigrationLayer = new LayerVersion(
+            this,
+            'PrismaMigrationLayer',
+            {
+                layerVersionName: `${ResourceNames.apiName('app-api', this.stage)}-prisma-migration`,
+                description: 'Prisma migration layer for app-api',
+                compatibleRuntimes: [Runtime.NODEJS_20_X],
+                compatibleArchitectures: [Architecture.X86_64],
+                code: Code.fromAsset(
+                    path.join(
+                        __dirname,
+                        '..',
+                        '..',
+                        'lambda-layers-prisma-client-migration'
+                    )
+                ),
+            }
+        )
+
         // Create shared Prisma engine layer for functions that need database access
         this.prismaEngineLayer = new LayerVersion(this, 'PrismaEngineLayer', {
             layerVersionName: `${ResourceNames.apiName('app-api', this.stage)}-prisma-engine`,
@@ -370,9 +392,40 @@ export class AppApiStack extends BaseStack {
         )
 
         // Create migrate function with VPC and layers
-        this.migrateFunction = this.createMigrateFunction(
-            lambdaRole,
-            environment
+        this.migrateFunction = this.createFunction(
+            'migrate',
+            'postgres_migrate',
+            'main',
+            {
+                timeout: Duration.seconds(60), // Extended timeout for DB operations
+                memorySize: 1024,
+                environment: {
+                    ...environment,
+                    SCHEMA_PATH: '/opt/nodejs/prisma/schema.prisma',
+                    CONNECT_TIMEOUT: '60',
+                    NODE_PATH: '/opt/nodejs/node_modules',
+                },
+                role,
+                layers: [this.prismaMigrationLayer, this.otelLayer],
+                vpc: this.vpc,
+                vpcSubnets: {
+                    subnetType: SubnetType.PRIVATE_WITH_EGRESS,
+                },
+                securityGroups,
+                bundling: {
+                    format: OutputFormat.ESM,
+                    banner: AppApiStack.ESM_BANNER,
+                    externalModules: ['prisma', '@prisma/client', '.prisma'],
+                    ...this.createBundling(
+                        'migrate',
+                        [this.getOtelBundlingCommands()],
+                        {
+                            '--loader:.graphql': 'text',
+                            '--loader:.gql': 'text',
+                        }
+                    ),
+                },
+            }
         )
 
         // Create regenerate zips function with VPC and layers
@@ -527,101 +580,6 @@ export class AppApiStack extends BaseStack {
             ]),
             ...options,
         })
-    }
-
-    /**
-     * Create the migrate function with VPC, layers, and extended permissions
-     */
-    private createMigrateFunction(
-        role: Role,
-        environment: Record<string, string>
-    ): NodejsFunction {
-        // Build security groups array - use both during transition
-        const securityGroups = [
-            this.lambdaSecurityGroup,
-            this.applicationSecurityGroup,
-        ]
-
-        const prismaMigrationLayer = new LayerVersion(
-            this,
-            'PrismaMigrationLayer',
-            {
-                layerVersionName: `${ResourceNames.apiName('app-api', this.stage)}-prisma-migration`,
-                description: 'Prisma migration layer for app-api',
-                compatibleRuntimes: [Runtime.NODEJS_20_X],
-                compatibleArchitectures: [Architecture.X86_64],
-                code: Code.fromAsset(
-                    path.join(
-                        __dirname,
-                        '..',
-                        '..',
-                        'lambda-layers-prisma-client-migration'
-                    )
-                ),
-            }
-        )
-
-        // Create migrate function with all required configuration
-        const migrateFunction = new NodejsFunction(this, 'migrateFunction', {
-            functionName: `${ResourceNames.apiName('app-api', this.stage)}-migrate`,
-            runtime: Runtime.NODEJS_20_X,
-            architecture: Architecture.X86_64,
-            handler: 'main',
-            entry: path.join(
-                __dirname,
-                '..',
-                '..',
-                '..',
-                'app-api',
-                'src',
-                'handlers',
-                'postgres_migrate.ts'
-            ),
-            timeout: Duration.seconds(60), // Extended timeout for DB operations
-            memorySize: 1024,
-            environment: {
-                ...environment,
-                SCHEMA_PATH: '/opt/nodejs/prisma/schema.prisma',
-                CONNECT_TIMEOUT: '60',
-                NODE_PATH: '/opt/nodejs/node_modules',
-            },
-            role,
-            layers: [prismaMigrationLayer, this.otelLayer],
-            vpc: this.vpc,
-            vpcSubnets: {
-                subnetType: SubnetType.PRIVATE_WITH_EGRESS,
-            },
-            securityGroups,
-            bundling: {
-                format: OutputFormat.ESM,
-                banner: AppApiStack.ESM_BANNER,
-                externalModules: ['prisma', '@prisma/client', '.prisma'],
-                ...this.createBundling(
-                    'migrate',
-                    [this.getOtelBundlingCommands()],
-                    {
-                        '--loader:.graphql': 'text',
-                        '--loader:.gql': 'text',
-                    }
-                ),
-            },
-        })
-
-        // Grant additional RDS permissions for snapshot creation
-        role.addToPolicy(
-            new PolicyStatement({
-                effect: Effect.ALLOW,
-                actions: [
-                    'rds:CreateDBClusterSnapshot',
-                    'rds:DescribeDBClusterSnapshots',
-                    'rds:DescribeDBClusters',
-                    'rds:AddTagsToResource',
-                ],
-                resources: ['*'],
-            })
-        )
-
-        return migrateFunction
     }
 
     /**
