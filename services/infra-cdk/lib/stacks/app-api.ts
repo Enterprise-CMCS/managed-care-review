@@ -510,9 +510,42 @@ export class AppApiStack extends BaseStack {
         )
 
         // Create GraphQL function with VPC and layers
-        this.graphqlFunction = this.createGraphqlFunction(
-            lambdaRole,
-            environment
+        this.graphqlFunction = this.createFunction(
+            'graphql',
+            'apollo_gql',
+            'gqlHandler',
+            {
+                timeout: Duration.seconds(30), // Extended timeout for GraphQL operations
+                memorySize: 1024,
+                environment,
+                role,
+                layers: [this.prismaEngineLayer, this.otelLayer],
+                vpc: this.vpc,
+                vpcSubnets: {
+                    subnetType: SubnetType.PRIVATE_WITH_EGRESS,
+                },
+                securityGroups,
+                // Custom bundling to handle .graphql files and other assets
+                bundling: {
+                    format: OutputFormat.ESM,
+                    banner: AppApiStack.ESM_BANNER,
+                    minify: false,
+                    sourceMap: true,
+                    target: 'node20',
+                    externalModules: ['prisma', '@prisma/client'],
+                    ...this.createBundling(
+                        'graphql',
+                        [
+                            this.getOtelBundlingCommands(),
+                            this.getEtaTemplatesBundlingCommands(),
+                        ],
+                        {
+                            '--loader:.graphql': 'text',
+                            '--loader:.gql': 'text',
+                        }
+                    ),
+                },
+            }
         )
 
         // Create API Gateway resources and methods first
@@ -622,70 +655,6 @@ export class AppApiStack extends BaseStack {
             ]),
             ...options,
         })
-    }
-
-    /**
-     * Create the GraphQL function with VPC, layers, and extended timeout
-     */
-    private createGraphqlFunction(
-        role: Role,
-        environment: Record<string, string>
-    ): NodejsFunction {
-        // Build security groups array - use both during transition
-        const securityGroups = [
-            this.lambdaSecurityGroup,
-            this.applicationSecurityGroup,
-        ]
-
-        // Create GraphQL function with all required configuration
-        const graphqlFunction = new NodejsFunction(this, 'graphqlFunction', {
-            functionName: `${ResourceNames.apiName('app-api', this.stage)}-graphql`,
-            runtime: Runtime.NODEJS_20_X,
-            architecture: Architecture.X86_64,
-            handler: 'gqlHandler',
-            entry: path.join(
-                __dirname,
-                '..',
-                '..',
-                '..',
-                'app-api',
-                'src',
-                'handlers',
-                'apollo_gql.ts'
-            ),
-            timeout: Duration.seconds(30), // Extended timeout for GraphQL operations
-            memorySize: 1024,
-            environment,
-            role,
-            layers: [this.prismaEngineLayer, this.otelLayer],
-            vpc: this.vpc,
-            vpcSubnets: {
-                subnetType: SubnetType.PRIVATE_WITH_EGRESS,
-            },
-            securityGroups,
-            // Custom bundling to handle .graphql files and other assets
-            bundling: {
-                format: OutputFormat.ESM,
-                banner: AppApiStack.ESM_BANNER,
-                minify: false,
-                sourceMap: true,
-                target: 'node20',
-                externalModules: ['prisma', '@prisma/client'],
-                ...this.createBundling(
-                    'graphql',
-                    [
-                        this.getOtelBundlingCommands(),
-                        this.getEtaTemplatesBundlingCommands(),
-                    ],
-                    {
-                        '--loader:.graphql': 'text',
-                        '--loader:.gql': 'text',
-                    }
-                ),
-            },
-        })
-
-        return graphqlFunction
     }
 
     private createLambdaRole(): Role {
