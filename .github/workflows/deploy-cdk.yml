@@ -962,6 +962,9 @@ jobs:
       - name: Setup env
         uses: ./.github/actions/setup_env
 
+      - name: Install nyc for coverage merging
+        run: pnpm add -g nyc
+
       - uses: actions/download-artifact@v7
 
       - name: Create combined test coverage report
@@ -1007,24 +1010,16 @@ jobs:
           echo "Contents of reports directory:"
           ls -la ./reports
 
-          echo "Merge all Istanbul format reports (web, api, packages) using nyc"
-          npx nyc merge ./reports ./coverage-all/merged-coverage.json
-
-          echo "Merge cypress V8 coverage"
-          if [ -f "./reports/from-cypress/coverage-final.json" ]; then
-            # Cypress uses Istanbul format after c8 conversion, so include it in nyc merge
-            echo "Cypress coverage found and already in Istanbul format"
-          fi
+          echo "Merge all Istanbul format reports (web, api, packages, cypress) using nyc"
+          nyc merge ./reports ./coverage-all/coverage-final.json
 
           echo "Generate all report formats from merged coverage"
-          npx nyc report \
+          nyc report \
             --reporter=lcov \
             --reporter=text \
-            --reporter=json \
             --reporter=json-summary \
             --report-dir ./coverage-all \
-            --temp-dir ./coverage-all \
-            --nycrc-path /dev/null 2>&1 | tee coverage-text-output.txt
+            --temp-dir ./coverage-all 2>&1 | tee coverage-text-output.txt
 
           cd coverage-all
           echo "Coverage reports merged and final report generated"
