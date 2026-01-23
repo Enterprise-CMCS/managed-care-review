@@ -1014,15 +1014,12 @@ jobs:
           echo "Contents of coverage-all directory:"
           ls -R ./coverage-all
 
-          echo "Merge all reports into one"
-          npx c8 report --reporter=json -o ./coverage-all \
+          echo "Merge all reports into one and generate all report formats"
+          npx c8 report --reporter=json --reporter=lcov --reporter=text --reporter=json-summary -o ./coverage-all \
             ./reports/from-api.json \
             ./reports/from-cypress/coverage-final.json \
             ./reports/from-unit-test.json \
-            ./reports/from-packages.json
-
-          echo "Generate the html report from the combined coverage report"
-          npx c8 report -r lcov -r text -r json-summary --report-dir coverage-all -i ./coverage-all/coverage.json > coverage-text-output.txt
+            ./reports/from-packages.json 2>&1 | tee coverage-text-output.txt
 
           cd coverage-all
           echo "Coverage reports merged and final report generated"
