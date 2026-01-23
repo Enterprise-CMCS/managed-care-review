@@ -177,10 +177,24 @@ const getSelectedFiltersFromColumnState = (
 
     const filterValues = valuesFromUrl
         .filter((item) => item.id === id)
-        .map((item) => ({
-            value: item.value,
-            label: stateNameToStateCode(item.value),
-        }))
+        // Special formatting for selected filters
+        .map((item) => {
+            if (id === 'stateName') {
+                return {
+                    value: item.value,
+                    label: stateNameToStateCode(item.value),
+                }
+            }
+
+            if (id === 'status') {
+                return (
+                    rateStatusOptions.find((opt) => opt.value === item.value) ||
+                    item
+                )
+            }
+
+            return item
+        })
 
     return filterValues as FilterOptionType[]
 }
