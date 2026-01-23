@@ -129,7 +129,7 @@ export class AppApiStack extends BaseStack {
                 assumedBy: new ServicePrincipal('apigateway.amazonaws.com'),
                 managedPolicies: [
                     ManagedPolicy.fromAwsManagedPolicyName(
-                        'service-role/AmazonAPIGatewayPushToCloudWatchLogs'
+                        'service-role/AmazonAPIGatewayPushToCloudWatchLogs' // pragma: allowlist secret
                     ),
                 ],
             }
