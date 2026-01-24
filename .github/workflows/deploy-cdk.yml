@@ -1039,6 +1039,11 @@ jobs:
             --exclude '**/test/**' \
             --exclude '**/tests/**' \
             --exclude '**/__tests__/**' \
+            --exclude '**/gen/**' \
+            --exclude '**/generated/**' \
+            --exclude '**/*.generated.*' \
+            --exclude '**/gqlClient.tsx' \
+            --exclude '**/gqlClient.ts' \
             2>&1 | tee coverage-text-output.txt
 
           cd coverage-all
