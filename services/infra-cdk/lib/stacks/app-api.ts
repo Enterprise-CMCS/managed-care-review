@@ -286,7 +286,7 @@ export class AppApiStack extends BaseStack {
                 timeout: Duration.seconds(30),
                 memorySize: 1024,
                 environment,
-                role: lambdaRole,
+                role,
                 layers: [this.otelLayer],
             }
         )
@@ -299,7 +299,7 @@ export class AppApiStack extends BaseStack {
                 timeout: Duration.seconds(30),
                 memorySize: 1024,
                 environment,
-                role: lambdaRole,
+                role,
                 layers: [this.otelLayer],
             }
         )
@@ -324,7 +324,7 @@ export class AppApiStack extends BaseStack {
             timeout: Duration.seconds(30),
             memorySize: 1024,
             environment,
-            role: lambdaRole,
+            role,
             layers: [this.otelLayer],
             bundling: this.createBundling('otel', [
                 this.getOtelBundlingCommands(),
@@ -339,7 +339,7 @@ export class AppApiStack extends BaseStack {
                 timeout: Duration.seconds(30),
                 memorySize: 1024,
                 environment,
-                role: lambdaRole,
+                role,
                 layers: [this.otelLayer],
             }
         )
@@ -379,7 +379,7 @@ export class AppApiStack extends BaseStack {
                 timeout: Duration.seconds(30),
                 memorySize: 1024,
                 environment,
-                role: lambdaRole,
+                role,
                 layers: [this.otelLayer],
             }
         )
