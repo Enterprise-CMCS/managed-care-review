@@ -390,7 +390,7 @@ export class AppApiStack extends BaseStack {
             'migrate_protobuf_data',
             'main',
             {
-                timeout: Duration.minutes(30),
+                timeout: Duration.minutes(15),
                 environment: {
                     ...environment,
                     CONNECT_TIMEOUT: '60',
