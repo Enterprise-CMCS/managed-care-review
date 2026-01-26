@@ -886,7 +886,7 @@ jobs:
 
       - name: Cypress -- Chrome
         id: cypress
-        uses: cypress-io/github-action@v6
+        uses: cypress-io/github-action@v7
         with:
           config: baseUrl=${{ needs.extract-endpoints.outputs.application-endpoint }}
           record: true
