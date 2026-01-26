@@ -9,6 +9,7 @@ mutation UpdateOauthClient($input: UpdateOauthClientInput!) {
                 ...oauthUserFragment
             }
             grants
+            scopes
             createdAt
             updatedAt
         }
