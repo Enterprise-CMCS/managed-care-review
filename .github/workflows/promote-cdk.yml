@@ -1404,7 +1404,7 @@ jobs:
 
       - name: Cypress smoke test on Prod -- Chrome
         id: cypress
-        uses: cypress-io/github-action@v6
+        uses: cypress-io/github-action@v7
         with:
           config: baseUrl=${{ needs.extract-endpoints-prod.outputs.application-endpoint }}
           spec: services/cypress/integration/promoteWorkflow/promote.spec.ts

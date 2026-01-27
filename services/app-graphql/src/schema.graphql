@@ -2510,6 +2510,7 @@ type OauthClient {
     createdAt: DateTime!
     updatedAt: DateTime!
     user: CMSUsersUnion!
+    scopes: [OAuthScope!]!
 }
 
 input CreateOauthClientInput {
@@ -2575,5 +2576,6 @@ enum ContractSubmissionType {
     EQRO
 }
 
-
-
+enum OAuthScope {
+    CMS_SUBMISSION_ACTIONS
+}

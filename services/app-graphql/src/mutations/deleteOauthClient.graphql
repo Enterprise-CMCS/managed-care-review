@@ -8,6 +8,7 @@ mutation deleteOauthClient($input: DeleteOauthClientInput!) {
       clientSecret
       grants
       description
+      scopes
       user {
         ...oauthUserFragment
       }
