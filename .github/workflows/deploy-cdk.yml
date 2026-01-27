@@ -253,6 +253,12 @@ jobs:
           pnpm --filter "./packages/**" test:coverage
           exit $?
 
+      - name: upload packages test coverage
+        uses: actions/upload-artifact@v6
+        with:
+          name: packages-test-coverage
+          path: ./packages/**/coverage/coverage-final.json
+
   build-lambda-layers:
     name: build - lambda layers
     runs-on: ubuntu-24.04
@@ -925,6 +931,7 @@ jobs:
         with:
           name: cypress-screenshots-cdk-${{ matrix.containers}}
           path: services/cypress/screenshots
+          if-no-files-found: ignore
 
       - name: Upload cypress video
         uses: actions/upload-artifact@v6
@@ -932,18 +939,132 @@ jobs:
         with:
           name: cypress-videos-cdk-${{ matrix.containers}}
           path: services/cypress/videos
+          if-no-files-found: ignore
 
       - name: upload partial cypress coverage
         uses: actions/upload-artifact@v6
         with:
           name: partial-cypress-coverage-cdk-${{ matrix.containers}}
           path: ./coverage-cypress/*.info
+          if-no-files-found: ignore
 
       - name: upload partial cypress coverage json
         uses: actions/upload-artifact@v6
         with:
           name: cypress-json-coverage-cdk-${{ matrix.containers}}
           path: ./coverage-cypress/*.json
+          if-no-files-found: ignore
+
+  coverage:
+    name: combined-test-coverage
+    needs: [begin-deployment, web-unit-tests, api-unit-tests, packages-unit-tests, cypress]
+    if: always() && needs.begin-deployment.result == 'success'
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v6
+
+      - name: Setup env
+        uses: ./.github/actions/setup_env
+
+      - name: Install nyc for coverage merging
+        run: pnpm add -g nyc
+
+      - uses: actions/download-artifact@v7
+
+      - name: Create combined test coverage report
+        run: |
+          echo "Combining all coverage reports"
+          echo "Prepare the folders to hold the reports"
+          mkdir -p reports/from-cypress/tmp reports/tmp cypress_temp coverage-all/tmp
+
+          echo "Listing current folder"
+          ls
+
+          echo "Copy the separate cypress reports from parallel runs to one folder"
+          for dir in cypress-json-coverage-cdk-*; do
+            if [[ $dir =~ cypress-json-coverage-cdk-([0-9]+) ]]; then
+              num=${BASH_REMATCH[1]}
+              mkdir -p "./cypress_temp/$num"
+              cp "$dir"/*.json "./cypress_temp/$num/"
+            fi
+          done
+
+          echo "Merge the collected cypress reports into one report"
+          npx c8 report -r lcov -r json -o ./reports/from-cypress --src ./services/app-web/src $(find ./cypress_temp -name '*.json')
+
+          echo "Temp merge done"
+          ls ./cypress_temp
+          ls ./reports/from-cypress
+
+          echo "Copy the web, api, and packages coverage reports to the reports folder"
+          [ -f "./api-test-coverage/coverage-final.json" ] && cp ./api-test-coverage/coverage-final.json ./reports/from-api.json
+          [ -f "./unit-test-coverage/coverage-final.json" ] && cp ./unit-test-coverage/coverage-final.json ./reports/from-unit-test.json
+
+          # Copy all packages coverage files
+          if [ -d "./packages-test-coverage" ]; then
+            echo "Copying packages coverage reports"
+            find ./packages-test-coverage -name 'coverage-final.json' | while read file; do
+              base=$(basename $(dirname $(dirname $file)))
+              cp "$file" "./reports/from-packages-${base}.json"
+            done
+          fi
+
+          echo "Copied all files"
+
+          echo "Contents of reports directory:"
+          ls -la ./reports
+
+          echo "Merge all Istanbul format reports (web, api, packages, cypress) using nyc"
+          nyc merge ./reports ./coverage-all/coverage-final.json
+
+          echo "Generate all report formats from merged coverage"
+          nyc report \
+            --reporter=lcov \
+            --reporter=text \
+            --reporter=json-summary \
+            --report-dir ./coverage-all \
+            --temp-dir ./coverage-all \
+            --exclude '**/*.config.ts' \
+            --exclude '**/*.config.js' \
+            --exclude '**/eslint.config.*' \
+            --exclude '**/vitest.config.*' \
+            --exclude '**/vite.config.*' \
+            --exclude '**/jest.config.*' \
+            --exclude '**/webpack.config.*' \
+            --exclude '**/esbuild.config.*' \
+            --exclude '**/setupTests.ts' \
+            --exclude '**/*.test.ts' \
+            --exclude '**/*.test.tsx' \
+            --exclude '**/*.spec.ts' \
+            --exclude '**/test/**' \
+            --exclude '**/tests/**' \
+            --exclude '**/__tests__/**' \
+            --exclude '**/gen/**' \
+            --exclude '**/generated/**' \
+            --exclude '**/*.generated.*' \
+            --exclude '**/gqlClient.tsx' \
+            --exclude '**/gqlClient.ts' \
+            2>&1 | tee coverage-text-output.txt
+
+          cd coverage-all
+          echo "Coverage reports merged and final report generated"
+          ls -R
+
+      - name: Upload combined test coverage
+        uses: actions/upload-artifact@v6
+        with:
+          name: combined-test-coverage
+          path: ./coverage-all/
+
+      - name: Display coverage summary in job output
+        run: |
+          echo "## 📊 Test Coverage Summary" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo '```' >> $GITHUB_STEP_SUMMARY
+          cat coverage-text-output.txt >> $GITHUB_STEP_SUMMARY
+          echo '```' >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "📦 Download the \`combined-test-coverage\` artifact for detailed HTML reports." >> $GITHUB_STEP_SUMMARY
 
   end-deployment:
     needs: [begin-deployment, deploy-cdk-app, deploy-frontend-app, extract-endpoints, cypress]
