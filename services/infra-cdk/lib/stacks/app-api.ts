@@ -391,10 +391,10 @@ export class AppApiStack extends BaseStack {
             'main',
             {
                 timeout: Duration.minutes(15),
+                memorySize: 1024,
                 environment: {
                     ...environment,
                     CONNECT_TIMEOUT: '60',
-                    NODE_PATH: '/opt/nodejs/node_modules',
                 },
                 role,
                 layers: [this.prismaEngineLayer, this.otelLayer],
