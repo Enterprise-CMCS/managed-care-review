@@ -66,6 +66,7 @@ describe('OAuthClient Store', () => {
 
         expect(retrievedClient).not.toBeNull()
         expect(retrievedClient?.clientId).toBe(createdClient.clientId)
+        expect(retrievedClient?.scopes).toStrictEqual([])
     })
 
     it('retrieves an OAuth client by client ID', async () => {
@@ -80,6 +81,7 @@ describe('OAuthClient Store', () => {
 
         expect(retrievedClient).not.toBeNull()
         expect(retrievedClient?.id).toBe(createdClient.id)
+        expect(retrievedClient?.scopes).toStrictEqual([])
     })
 
     it('verifies client credentials', async () => {

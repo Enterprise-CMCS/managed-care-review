@@ -52,6 +52,7 @@ const buildChangeHistoryInfo = (
     const isSubsequentSubmissionOrUnlock =
         r.kind === 'submit' || r.kind === 'unlock'
     const isApprovalAction = r.kind === 'approve'
+    const isWithdrawAction = r.kind === 'withdraw'
     // We want to know if this contract has multiple submissions. To have multiple submissions, there must be minimum
     // more than the initial contract revision.
     const hasSubsequentSubmissions = revisionHistory.length > 1
@@ -110,13 +111,13 @@ const buildChangeHistoryInfo = (
                     )}
             </div>
         )
-    } else if (isApprovalAction) {
+    } else if (isApprovalAction || isWithdrawAction) {
         title = 'Status Update'
         content = (
             <div data-testid={`change-history-record`}>
                 <div>
                     <span className={styles.tag}>{`Status: `}</span>
-                    <span>Approved</span>
+                    <span>{isWithdrawAction ? 'Withdrawn' : 'Approved'}</span>
                 </div>
                 <div>
                     <span className={styles.tag}>Updated by:</span>
@@ -206,7 +207,11 @@ export const ChangeHistory = ({
                     }
                 }
                 if (r?.__typename === 'ContractReviewStatusActions') {
-                    const actionKind: flatRevisions['kind'] = 'approve'
+                    let actionKind: flatRevisions['kind'] = 'approve'
+
+                    if (r.actionType === 'WITHDRAW') {
+                        actionKind = 'withdraw'
+                    }
 
                     const newAction: flatRevisions = {} as flatRevisions
                     newAction.updatedAt = r.updatedAt

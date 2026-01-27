@@ -164,6 +164,12 @@
                     "fullName": "Behavioral Health Administration Integration",
                     "name": "BHAI",
                     "isRateProgram": false
+                },
+                {
+                    "id": "12998b77-10f4-48da-820d-fcce08a0d16f",
+                    "fullName": "SCAN (Senior Care Action Network)",
+                    "name": "SCAN",
+                    "isRateProgram": false
                 }
             ],
             "code": "CA"
@@ -223,6 +229,12 @@
                     "id": "678c8416-1dbd-45e5-b721-35ebe90f0499",
                     "fullName": "Child and Adolescent Supplemental Security Income Program",
                     "name": "CASSIP",
+                    "isRateProgram": false
+                },
+                {
+                    "id": "2a7b4b19-8aae-4397-b009-1f98e50d09e3",
+                    "fullName": "DC Dual Choice D-SNP",
+                    "name": "DC Dual Choice",
                     "isRateProgram": false
                 }
             ],
