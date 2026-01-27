@@ -1,6 +1,5 @@
 # Managed Care Review ![Build & Deploy](https://github.com/Enterprise-CMCS/managed-care-review/actions/workflows/promote.yml/badge.svg?branch=main)
 
-<a href="https://codeclimate.com/github/Enterprise-CMCS/managed-care-review/maintainability"><img src="https://api.codeclimate.com/v1/badges/9ec6eca87429a4572f67/maintainability" /></a><a href="https://codeclimate.com/github/Enterprise-CMCS/managed-care-review/test_coverage"><img src="https://api.codeclimate.com/v1/badges/9ec6eca87429a4572f67/test_coverage" /></a>
 [![CodeQL](https://github.com/Enterprise-CMCS/managed-care-review/actions/workflows/codeql.yml/badge.svg?branch=main)](https://github.com/Enterprise-CMCS/managed-care-review/actions/workflows/codeql.yml)
 
 Managed Care Review is an application that accepts Managed Care contract and rate submissions from states and packages them for review by CMS. It uses a Serverless architecture (services deployed as AWS Lambdas) with React and Node as client/server and GraphQL as the api protocol. The codebase is a TypeScript monorepo. An [architectural diagram](.images/architecture.svg) is also available.
