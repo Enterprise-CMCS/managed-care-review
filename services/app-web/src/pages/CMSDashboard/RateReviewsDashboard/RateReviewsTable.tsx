@@ -179,13 +179,6 @@ const getSelectedFiltersFromColumnState = (
         .filter((item) => item.id === id)
         // Special formatting for selected filters
         .map((item) => {
-            if (id === 'stateName') {
-                return {
-                    value: item.value,
-                    label: stateNameToStateCode(item.value),
-                }
-            }
-
             if (id === 'status') {
                 return (
                     rateStatusOptions.find((opt) => opt.value === item.value) ||
@@ -463,7 +456,7 @@ export const RateReviewsTable = ({
         .sort()
         .map((state) => ({
             value: state,
-            label: stateNameToStateCode(state),
+            label: state,
         }))
 
     const filterLength = columnFilters.flatMap((filter) => filter.value).length

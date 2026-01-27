@@ -235,13 +235,6 @@ const getSelectedFiltersFromUrl = (
                 )
             }
 
-            if (id === 'stateName') {
-                return {
-                    value: item.value,
-                    label: stateNameToStateCode(item.value),
-                }
-            }
-
             if (id === 'status') {
                 return (
                     submissionStatusOptions.find(
@@ -482,7 +475,7 @@ export const ContractTable = ({
         .sort()
         .map((state) => ({
             value: state,
-            label: stateNameToStateCode(state),
+            label: state,
         }))
 
     const filterLength = columnFilters.flatMap((filter) => filter.value).length
