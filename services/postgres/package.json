@@ -8,7 +8,7 @@
         "typecheck": "tsc --noEmit"
     },
     "devDependencies": {
-        "@aws-sdk/types": "^3.973.0",
+        "@aws-sdk/types": "^3.973.1",
         "@types/eslint": "^9.6.1",
         "@types/pg": "^8.16.0",
         "@typescript-eslint/eslint-plugin": "^8.52.0",
