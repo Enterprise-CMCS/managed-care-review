@@ -202,16 +202,16 @@ describe('RateReviewsTable', () => {
                 await waitFor(async () => {
                     //Expected options are present
                     expect(
-                        within(comboboxOptions).getByText('OH')
+                        within(comboboxOptions).getByText('Ohio')
                     ).toBeInTheDocument()
                     expect(
-                        within(comboboxOptions).getByText('FL')
+                        within(comboboxOptions).getByText('Florida')
                     ).toBeInTheDocument()
                     expect(
-                        within(comboboxOptions).getByText('MN')
+                        within(comboboxOptions).getByText('Minnesota')
                     ).toBeInTheDocument()
                     //Select option Ohio
-                    await selectEvent.select(comboboxOptions, 'OH')
+                    await selectEvent.select(comboboxOptions, 'Ohio')
                 })
 
                 //Expect only Ohio to show on table

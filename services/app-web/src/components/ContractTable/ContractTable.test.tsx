@@ -434,12 +434,20 @@ describe('ContractTable for CMS User (with filters)', () => {
 
         await waitFor(async () => {
             //Expected options are present
-            expect(within(comboboxOptions).getByText('OH')).toBeInTheDocument()
-            expect(within(comboboxOptions).getByText('FL')).toBeInTheDocument()
-            expect(within(comboboxOptions).getByText('MN')).toBeInTheDocument()
-            expect(within(comboboxOptions).getByText('PR')).toBeInTheDocument()
+            expect(
+                within(comboboxOptions).getByText('Ohio')
+            ).toBeInTheDocument()
+            expect(
+                within(comboboxOptions).getByText('Florida')
+            ).toBeInTheDocument()
+            expect(
+                within(comboboxOptions).getByText('Minnesota')
+            ).toBeInTheDocument()
+            expect(
+                within(comboboxOptions).getByText('Puerto Rico')
+            ).toBeInTheDocument()
             //Select option Ohio
-            await selectEvent.select(comboboxOptions, 'OH')
+            await selectEvent.select(comboboxOptions, 'Ohio')
         })
 
         //Expect only Ohio to show on table
@@ -467,7 +475,7 @@ describe('ContractTable for CMS User (with filters)', () => {
         const accordionButton = screen.getByTestId(
             'accordionButton_filterAccordionItems'
         )
-        
+
         await waitFor(async () => {
             //Expect filter accordion to exist
             expect(screen.queryByTestId('accordion')).toBeInTheDocument()
@@ -483,12 +491,16 @@ describe('ContractTable for CMS User (with filters)', () => {
 
         selectEvent.openMenu(contractTypeCombobox)
 
-        const comboboxOptions = screen.getByTestId('contractType-filter-options')
+        const comboboxOptions = screen.getByTestId(
+            'contractType-filter-options'
+        )
         expect(comboboxOptions).toBeInTheDocument()
 
         await waitFor(async () => {
             //Expected options are present
-            expect(within(comboboxOptions).getByText('EQRO')).toBeInTheDocument()
+            expect(
+                within(comboboxOptions).getByText('EQRO')
+            ).toBeInTheDocument()
             expect(
                 within(comboboxOptions).getByText('Health plan')
             ).toBeInTheDocument()
@@ -555,8 +567,8 @@ describe('ContractTable for CMS User (with filters)', () => {
         const stateOptions = screen.getByTestId('state-filter-options')
         expect(stateOptions).toBeInTheDocument()
         await waitFor(async () => {
-            expect(within(stateOptions).getByText('OH')).toBeInTheDocument()
-            await selectEvent.select(stateOptions, 'OH')
+            expect(within(stateOptions).getByText('Ohio')).toBeInTheDocument()
+            await selectEvent.select(stateOptions, 'Ohio')
         })
 
         //Expect only 1 EQRO submission from Ohio (1 data + 1 header = 2 rows)
@@ -595,13 +607,15 @@ describe('ContractTable for CMS User (with filters)', () => {
         })
 
         const contractTypeFilter = screen.getByTestId('contractType-filter')
-   
+
         const contractTypeCombobox =
             within(contractTypeFilter).getByRole('combobox')
 
         //Open contract type combobox and select EQRO
         selectEvent.openMenu(contractTypeCombobox)
-        let contractTypeOptions = screen.getByTestId('contractType-filter-options')
+        let contractTypeOptions = screen.getByTestId(
+            'contractType-filter-options'
+        )
         await waitFor(async () => {
             await selectEvent.select(contractTypeOptions, 'EQRO')
         })
@@ -683,9 +697,11 @@ describe('ContractTable for CMS User (with filters)', () => {
         const stateOptions = screen.getByTestId('state-filter-options')
         expect(stateOptions).toBeInTheDocument()
         await waitFor(async () => {
-            expect(within(stateOptions).getByText('OH')).toBeInTheDocument()
-            expect(within(stateOptions).getByText('MN')).toBeInTheDocument()
-            await selectEvent.select(stateOptions, 'MN')
+            expect(within(stateOptions).getByText('Ohio')).toBeInTheDocument()
+            expect(
+                within(stateOptions).getByText('Minnesota')
+            ).toBeInTheDocument()
+            await selectEvent.select(stateOptions, 'Minnesota')
         })
 
         //Open submission type combobox and select 'Contract action and rate certification' option
@@ -877,7 +893,7 @@ describe('ContractTable for CMS User (with filters)', () => {
         selectEvent.openMenu(stateCombobox)
         const stateOptions = screen.getByTestId('state-filter-options')
         await waitFor(async () => {
-            await selectEvent.select(stateOptions, 'MN')
+            await selectEvent.select(stateOptions, 'Minnesota')
         })
 
         //Open submission type combobox and select Contract action and rate certification option
@@ -949,9 +965,11 @@ describe('ContractTable for CMS User (with filters)', () => {
 
         await waitFor(async () => {
             //Expected options are present
-            expect(within(comboboxOptions).getByText('FL')).toBeInTheDocument()
+            expect(
+                within(comboboxOptions).getByText('Florida')
+            ).toBeInTheDocument()
             //Select option Ohio
-            await selectEvent.select(comboboxOptions, 'FL')
+            await selectEvent.select(comboboxOptions, 'Florida')
         })
 
         const submissionTypeFilter = screen.getByTestId('submissionType-filter')
@@ -1050,9 +1068,11 @@ describe('ContractTable for CMS User (with filters)', () => {
         const stateOptionOne = screen.getByTestId('state-filter-options')
         expect(stateOptionOne).toBeInTheDocument()
         await waitFor(async () => {
-            expect(within(stateOptionOne).getByText('OH')).toBeInTheDocument()
-            expect(within(stateOptionOne).getByText('MN')).toBeInTheDocument()
-            await selectEvent.select(stateOptionOne, 'MN')
+            expect(within(stateOptionOne).getByText('Ohio')).toBeInTheDocument()
+            expect(
+                within(stateOptionOne).getByText('Minnesota')
+            ).toBeInTheDocument()
+            await selectEvent.select(stateOptionOne, 'Minnesota')
         })
 
         //Expect 1 filter applied
@@ -1063,8 +1083,8 @@ describe('ContractTable for CMS User (with filters)', () => {
         const stateOptionTwo = screen.getByTestId('state-filter-options')
         expect(stateOptionTwo).toBeInTheDocument()
         await waitFor(async () => {
-            expect(within(stateOptionTwo).getByText('OH')).toBeInTheDocument()
-            await selectEvent.select(stateOptionTwo, 'OH')
+            expect(within(stateOptionTwo).getByText('Ohio')).toBeInTheDocument()
+            await selectEvent.select(stateOptionTwo, 'Ohio')
         })
 
         //Expect 2 filter applied
