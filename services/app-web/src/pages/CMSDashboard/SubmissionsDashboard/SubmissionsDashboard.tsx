@@ -77,9 +77,23 @@ const SubmissionsDashboard = (): React.ReactElement => {
             if (sub.status === 'UNLOCKED') {
                 // Errors - data handling
 
+                const draftRevision = sub.draftRevision!
+ 
+                if (
+                    draftRevision?.submitInfo?.updatedAt === undefined &&
+                    draftRevision?.unlockInfo?.updatedAt === undefined
+                ) {
+                    recordJSException(
+                        `indexContractsQuery: Error finding submit and unlock dates of an unlocked submission. ID: ${sub.id}`
+                    )
+                }
+
+                //last updated date, including the date submission was unlocked
                 lastUpdated = mostRecentDate([
                     currentRevision?.submitInfo?.updatedAt,
                     currentRevision?.unlockInfo?.updatedAt,
+                    draftRevision?.submitInfo?.updatedAt,
+                    draftRevision?.unlockInfo?.updatedAt,
                     subReviewActions?.updatedAt,
                 ])
             }
