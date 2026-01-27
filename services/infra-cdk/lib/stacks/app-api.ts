@@ -631,25 +631,11 @@ export class AppApiStack extends BaseStack {
         role: Role,
         environment: Record<string, string>
     ): NodejsFunction {
-        // Validate required environment variables for VPC configuration
-        const required = ['VPC_ID', 'SG_ID']
-        const missing = required.filter((envVar) => !process.env[envVar])
-        if (missing.length > 0) {
-            throw new Error(
-                `Missing required environment variables for migrate S3 URLs function: ${missing.join(', ')}`
-            )
-        }
-
-        // Import VPC and security group from environment variables
-        const vpc = Vpc.fromLookup(this, 'MigrateS3UrlsVpc', {
-            vpcId: process.env.VPC_ID!,
-        })
-
-        const lambdaSecurityGroup = SecurityGroup.fromSecurityGroupId(
-            this,
-            'MigrateS3UrlsSecurityGroup',
-            process.env.SG_ID!
-        )
+        // Build security groups array - use both during transition
+        const securityGroups = [
+            this.lambdaSecurityGroup,
+            this.applicationSecurityGroup,
+        ]
 
         // Create migrate S3 URLs function with all required configuration
         const migrateS3UrlsFunction = new NodejsFunction(
@@ -675,11 +661,11 @@ export class AppApiStack extends BaseStack {
                 environment,
                 role,
                 layers: [this.prismaEngineLayer, this.otelLayer],
-                vpc,
+                vpc: this.vpc,
                 vpcSubnets: {
                     subnetType: SubnetType.PRIVATE_WITH_EGRESS,
                 },
-                securityGroups: [lambdaSecurityGroup, this.applicationSecurityGroup],
+                securityGroups,
                 bundling: {
                     format: OutputFormat.ESM,
                     banner: AppApiStack.ESM_BANNER,

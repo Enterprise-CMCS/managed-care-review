@@ -32,47 +32,38 @@ export type MigrateS3UrlsResponse = {
         contractDocuments: {
             processed: number
             failed: number
-            skipped: number
         }
         contractSupportingDocuments: {
             processed: number
             failed: number
-            skipped: number
         }
         rateDocuments: {
             processed: number
             failed: number
-            skipped: number
         }
         rateSupportingDocuments: {
             processed: number
             failed: number
-            skipped: number
         }
         contractQuestionDocuments: {
             processed: number
             failed: number
-            skipped: number
         }
         contractQuestionResponseDocuments: {
             processed: number
             failed: number
-            skipped: number
         }
         rateQuestionDocuments: {
             processed: number
             failed: number
-            skipped: number
         }
         rateQuestionResponseDocuments: {
             processed: number
             failed: number
-            skipped: number
         }
         documentZipPackages: {
             processed: number
             failed: number
-            skipped: number
         }
     }
     errors: string[]
@@ -160,27 +151,24 @@ export const main: Handler = async (
         dryRun,
         targetBucket,
         results: {
-            contractDocuments: { processed: 0, failed: 0, skipped: 0 },
+            contractDocuments: { processed: 0, failed: 0 },
             contractSupportingDocuments: {
                 processed: 0,
                 failed: 0,
-                skipped: 0,
             },
-            rateDocuments: { processed: 0, failed: 0, skipped: 0 },
-            rateSupportingDocuments: { processed: 0, failed: 0, skipped: 0 },
-            contractQuestionDocuments: { processed: 0, failed: 0, skipped: 0 },
+            rateDocuments: { processed: 0, failed: 0 },
+            rateSupportingDocuments: { processed: 0, failed: 0 },
+            contractQuestionDocuments: { processed: 0, failed: 0 },
             contractQuestionResponseDocuments: {
                 processed: 0,
                 failed: 0,
-                skipped: 0,
             },
-            rateQuestionDocuments: { processed: 0, failed: 0, skipped: 0 },
+            rateQuestionDocuments: { processed: 0, failed: 0 },
             rateQuestionResponseDocuments: {
                 processed: 0,
                 failed: 0,
-                skipped: 0,
             },
-            documentZipPackages: { processed: 0, failed: 0, skipped: 0 },
+            documentZipPackages: { processed: 0, failed: 0 },
         },
         errors: [],
     }
@@ -360,8 +348,8 @@ async function migrateDocumentTable(
     targetBucket: string,
     limit: number | undefined,
     dryRun: boolean
-): Promise<{ processed: number; failed: number; skipped: number }> {
-    const result = { processed: 0, failed: 0, skipped: 0 }
+): Promise<{ processed: number; failed: number }> {
+    const result = { processed: 0, failed: 0 }
 
     // Find all documents that need migration (s3BucketName is null)
     const documents = await prismaClient[tableName].findMany({
@@ -441,8 +429,8 @@ async function migrateZipTable(
     targetBucket: string,
     limit: number | undefined,
     dryRun: boolean
-): Promise<{ processed: number; failed: number; skipped: number }> {
-    const result = { processed: 0, failed: 0, skipped: 0 }
+): Promise<{ processed: number; failed: number }> {
+    const result = { processed: 0, failed: 0 }
 
     // Find all zips that need migration (s3BucketName is null)
     const zips = await prismaClient.documentZipPackage.findMany({
