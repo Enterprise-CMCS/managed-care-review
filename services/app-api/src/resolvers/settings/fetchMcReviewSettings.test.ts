@@ -265,4 +265,29 @@ describe('fetchMcReviewSettings', () => {
             emailSettings.helpDeskEmail[0]
         )
     })
+
+    it('errors when called by an oauth client', async () => {
+        const prismaClient = await sharedTestPrismaClient()
+        const postgresStore = NewPostgresStore(prismaClient)
+
+        const server = await constructTestPostgresServer({
+            store: postgresStore,
+            context: {
+                user: testStateUser(),
+                oauthClient: {
+                    clientId: 'test-client',
+                    grants: ['client_credentials'],
+                    isOAuthClient: true,
+                },
+            },
+        })
+
+        const mcReviewSettings = await executeGraphQLOperation(server, {
+            query: FetchMcReviewSettingsDocument,
+        })
+
+        expect(assertAnError(mcReviewSettings).message).toContain(
+            'oauth clients cannot access admin functions'
+        )
+    })
 })
