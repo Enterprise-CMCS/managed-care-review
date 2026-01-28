@@ -390,11 +390,12 @@ export class AppApiStack extends BaseStack {
             'migrate_protobuf_data',
             'main',
             {
-                timeout: Duration.minutes(15),
-                memorySize: 1024,
+                timeout: Duration.minutes(5),
+                memorySize: 512,
                 environment: {
                     ...environment,
                     CONNECT_TIMEOUT: '60',
+                    STAGE_NAME: this.stage,
                 },
                 role,
                 layers: [this.prismaEngineLayer, this.otelLayer],
@@ -1073,6 +1074,12 @@ export class AppApiStack extends BaseStack {
             value: this.cleanupFunction.functionName,
             exportName: this.exportName('CleanupFunctionName'),
             description: 'Cleanup Lambda function name',
+        })
+
+        new CfnOutput(this, 'ProtobufMigrationFunctionName', {
+            value: this.migratePotobufDataFunction.functionName,
+            exportName: this.exportName('MigrateProtobufDataFunctionName'),
+            description: 'Probuf data migrate Lambda function name',
         })
 
         new CfnOutput(this, 'MigrateFunctionName', {
