@@ -48,7 +48,7 @@ export const main: APIGatewayTokenAuthorizerHandler = async (
                 isOAuthClient: 'true',
             })
         } else {
-            console.info('OAuth token validation failed')
+            console.error('OAuth token validation failed')
             return generatePolicy(undefined, event)
         }
     } catch (err) {

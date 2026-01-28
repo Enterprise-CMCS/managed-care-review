@@ -310,7 +310,7 @@ async function initializeGQLHandler(): Promise<Handler> {
 
     // Hard coding this for now, next job is to run this config to this app.
     const jwtLib = newJWTLib({
-        issuer: `mcreview-oauth-${stageName}`,
+        issuer: 'mcreview-oauth',
         signingKey: Buffer.from(jwtSecret, 'hex'),
         expirationDurationS: 90 * 24 * 60 * 60, // 90 days
     })
