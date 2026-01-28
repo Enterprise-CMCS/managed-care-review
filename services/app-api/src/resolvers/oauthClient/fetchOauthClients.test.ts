@@ -12,6 +12,8 @@ import {
     FetchOauthClientsDocument,
 } from '../../gen/gqlClient'
 import { sharedTestPrismaClient } from '../../testHelpers/storeHelpers'
+import { NewPostgresStore } from '../../postgres'
+import { assertAnError } from '../../testHelpers'
 
 describe('fetchOauthClients', () => {
     it('fetches all OAuth clients as ADMIN', async () => {
@@ -250,5 +252,55 @@ describe('fetchOauthClients', () => {
             query: FetchOauthClientsDocument,
         })
         expect(res.errors?.[0].message).toMatch(/db fail/i)
+    })
+
+    it('errors when called by a state user and an oauth client', async () => {
+        const prismaClient = await sharedTestPrismaClient()
+        const postgresStore = NewPostgresStore(prismaClient)
+
+        const server = await constructTestPostgresServer({
+            store: postgresStore,
+            context: {
+                user: testStateUser(),
+                oauthClient: {
+                    clientId: 'test-client',
+                    grants: ['client_credentials'],
+                    isOAuthClient: true,
+                },
+            },            
+        })
+
+        const fetchOauthClients = await executeGraphQLOperation(server, {
+            query: FetchOauthClientsDocument,
+        })
+
+        expect(assertAnError(fetchOauthClients).message).toContain(
+            'oauth clients cannot access admin functions'
+        )
+    })
+
+    it('errors when called by an admin user and an oauth client', async () => {
+        const prismaClient = await sharedTestPrismaClient()
+        const postgresStore = NewPostgresStore(prismaClient)
+
+        const server = await constructTestPostgresServer({
+            store: postgresStore, 
+            context: {
+                user: testAdminUser(),
+                oauthClient: {
+                    clientId: 'test-client',
+                    grants: ['client_credentials'],
+                    isOAuthClient: true,
+                },
+            },
+        })
+
+        const fetchOauthClients = await executeGraphQLOperation(server, {
+            query: FetchOauthClientsDocument,
+        })
+
+        expect(assertAnError(fetchOauthClients).message).toContain(
+            'oauth clients cannot access admin functions'
+        )
     })
 })

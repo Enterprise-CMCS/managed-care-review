@@ -17,6 +17,14 @@ export function fetchOauthClientsResolver(
         const span = tracer?.startSpan('fetchOauthClients', {}, ctx)
         setResolverDetailsOnActiveSpan('fetchOauthClients', user, span)
 
+        // MCR-5894 block off admin apis from oauth
+        if (context.oauthClient && context.oauthClient.isOAuthClient === true) {
+            const oauthErr = 'oauth clients cannot access admin functions'
+            logError('fetchOauthClients', oauthErr)
+            setErrorAttributesOnActiveSpan(oauthErr, span)
+            throw createForbiddenError(oauthErr)
+        }
+
         if (!user || user.role !== 'ADMIN_USER') {
             const msg = 'User not authorized to fetch OAuth clients'
             logError('fetchOauthClients', msg)
