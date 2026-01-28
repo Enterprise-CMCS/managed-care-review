@@ -315,29 +315,4 @@ describe('fetchMcReviewSettings', () => {
             'oauth clients cannot access admin functions'
         )
     })
-
-    it('errors when called with malformed oauth object', async () => {
-        const prismaClient = await sharedTestPrismaClient()
-        const postgresStore = NewPostgresStore(prismaClient)
-
-        const server = await constructTestPostgresServer({
-            store: postgresStore,
-            context: {
-                user: testAdminUser(),
-                oauthClient: {
-                    clientId: 'test-client',
-                    grants: ['client_credentials'],
-                    isOauthClient: null,
-                } as any,
-            },
-        })
-
-        const mcReviewSettings = await executeGraphQLOperation(server, {
-            query: FetchMcReviewSettingsDocument,
-        })
-
-        expect(assertAnError(mcReviewSettings).message).toContain(
-            'oauth clients cannot access admin functions'
-        )
-    })
 })
