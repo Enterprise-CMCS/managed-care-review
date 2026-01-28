@@ -19,7 +19,7 @@ async function main(
         }
     }
 
-    if (!process.env.JWT_SECRET) {
+    if (!process.env.OAUTH_JWT_SECRET) {
         return {
             statusCode: 500,
             headers: {
@@ -51,7 +51,10 @@ async function main(
     }
 
     // Initialize OAuth2 server
-    const oauth2Server = new CustomOAuth2Server(db, process.env.JWT_SECRET)
+    const oauth2Server = new CustomOAuth2Server(
+        db,
+        process.env.OAUTH_JWT_SECRET
+    )
 
     // Handle token request
     return oauth2Server.token(event)

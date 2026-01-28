@@ -43,7 +43,6 @@ vi.mock('../../oauth/oauth2Server', () => ({
 
                 if (body.client_secret === 'wrong-secret') {
                     // pragma: allowlist secret
-
                     return {
                         statusCode: 401,
                         body: JSON.stringify({
@@ -71,7 +70,7 @@ describe('OAuth Token Handler', () => {
     beforeEach(async () => {
         mockPrisma = await sharedTestPrismaClient()
         vi.mocked(configurePostgres).mockResolvedValue(mockPrisma)
-        process.env.JWT_SECRET = 'test-secret' // pragma: allowlist secret
+        process.env.OAUTH_JWT_SECRET = 'test-secret' // pragma: allowlist secret
         process.env.DATABASE_URL = 'test-db-url'
         process.env.SECRETS_MANAGER_SECRET = 'test-secret' // pragma: allowlist secret
     })
@@ -89,7 +88,7 @@ describe('OAuth Token Handler', () => {
     })
 
     it('should return 500 if JWT secret is missing', async () => {
-        delete process.env.JWT_SECRET
+        delete process.env.OAUTH_JWT_SECRET
 
         const result = await main({} as APIGatewayProxyEvent)
 
