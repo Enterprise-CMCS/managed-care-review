@@ -254,7 +254,7 @@ describe('fetchOauthClients', () => {
         expect(res.errors?.[0].message).toMatch(/db fail/i)
     })
 
-    it('errors when called by an oauth client', async () => {
+    it('errors when called by a state user and an oauth client', async () => {
         const prismaClient = await sharedTestPrismaClient()
         const postgresStore = NewPostgresStore(prismaClient)
 
@@ -268,6 +268,56 @@ describe('fetchOauthClients', () => {
                     isOAuthClient: true,
                 },
             },            
+        })
+
+        const fetchOauthClients = await executeGraphQLOperation(server, {
+            query: FetchOauthClientsDocument,
+        })
+
+        expect(assertAnError(fetchOauthClients).message).toContain(
+            'oauth clients cannot access admin functions'
+        )
+    })
+
+    it('errors when called by an admin user and an oauth client', async () => {
+        const prismaClient = await sharedTestPrismaClient()
+        const postgresStore = NewPostgresStore(prismaClient)
+
+        const server = await constructTestPostgresServer({
+            store: postgresStore, 
+            context: {
+                user: testAdminUser(),
+                oauthClient: {
+                    clientId: 'test-client',
+                    grants: ['client_credentials'],
+                    isOAuthClient: true,
+                },
+            },
+        })
+
+        const fetchOauthClients = await executeGraphQLOperation(server, {
+            query: FetchOauthClientsDocument,
+        })
+
+        expect(assertAnError(fetchOauthClients).message).toContain(
+            'oauth clients cannot access admin functions'
+        )
+    })
+
+    it('errors when called with malformed oauth object', async () => {
+        const prismaClient = await sharedTestPrismaClient()
+        const postgresStore = NewPostgresStore(prismaClient)
+
+        const server = await constructTestPostgresServer({
+            store: postgresStore,
+            context: {
+                user: testAdminUser(),
+                oauthClient: {
+                    clientId: 'test-client',
+                    grants: ['client_credentials'],
+                    isOauthClient: null
+                } as any,
+            },
         })
 
         const fetchOauthClients = await executeGraphQLOperation(server, {

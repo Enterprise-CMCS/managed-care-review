@@ -23,7 +23,7 @@ export function fetchMcReviewSettings(
         logSuccess('fetchMcReviewSettings')
 
         // MCR-5894 block off admin apis from oauth
-        if (context.oauthClient?.isOAuthClient) {
+        if (context.oauthClient && context.oauthClient.isOAuthClient !== false) {
             const oauthErr = 'oauth clients cannot access admin functions'
             logError('fetchMcReviewSettings', oauthErr)
             setErrorAttributesOnActiveSpan(oauthErr, span)
