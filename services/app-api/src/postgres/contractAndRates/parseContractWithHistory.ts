@@ -111,12 +111,14 @@ function contractWithHistoryToDomainModelWithoutRates(
             actionType: action.actionType,
             contractID: action.contractID,
             updatedAt: action.updatedAt,
-            updatedBy: {
-                email: action.updatedBy.email,
-                familyName: action.updatedBy.familyName,
-                givenName: action.updatedBy.givenName,
-                role: action.updatedBy.role,
-            },
+            updatedBy: action.updatedBy
+                ? {
+                      email: action.updatedBy.email,
+                      familyName: action.updatedBy.familyName,
+                      givenName: action.updatedBy.givenName,
+                      role: action.updatedBy.role,
+                  }
+                : undefined,
             updatedReason: action.updatedReason ?? undefined,
         }
         reviewStatusActions.push(contractAction)

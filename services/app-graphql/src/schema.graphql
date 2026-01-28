@@ -1030,7 +1030,7 @@ type ContractReviewStatusActions {
     "the datetime when the update occurred"
     updatedAt: DateTime!
     "the user who performed the update"
-    updatedBy: UpdatedBy!
+    updatedBy: UpdatedBy
     "the reason provided by the user when performing the update"
     updatedReason: String
     "the type of review action performed on the contract: APPROVED, WITHDRAWN"
