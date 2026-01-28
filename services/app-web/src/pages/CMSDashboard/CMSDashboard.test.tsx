@@ -241,24 +241,30 @@ describe('CMSDashboard', () => {
                     expect(tag3).toHaveTextContent('Approved')
                 })
 
-                it('displays name, type, programs and last update based on previously submitted revision for UNLOCKED package', async () => {
+                it('displays name, type, programs and last update based on the last submitted revision for UNLOCKED package, not draft changes', async () => {
                     const mockMN = mockMNState() // this is the state used in apolloMocks
                     const unlocked: Contract = {
                         ...mockContractPackageUnlockedWithUnlockedType(),
                         __typename: 'Contract',
                     }
-                    // Set new data on the unlocked form. This would be a state users update and the CMS user should not see this data.
-                    unlocked.draftRevision!.formData.submissionType =
+                    // Set new data on the latest submitted form. This would be a state users update and the CMS user should not see draft data.
+                    unlocked.packageSubmissions[0].contractRevision.formData.submissionType =
                         'CONTRACT_AND_RATES'
-                    unlocked.draftRevision!.formData.programIDs = [
+
+                    unlocked.packageSubmissions[0].contractRevision.formData.programIDs = [
                         mockMN.programs[0].id,
                         mockMN.programs[1].id,
                         mockMN.programs[2].id,
                     ]
-                    unlocked.draftRevision!.updatedAt = new Date('2022-01-15')
-                    unlocked.draftRevision!.unlockInfo!.updatedAt = new Date(
-                        '2100-01-22'
-                    )
+                    unlocked.packageSubmissions[0].contractRevision.updatedAt = new Date('2022-01-15')
+                    //copy unlockInfo from draftRevision and populate the date
+                    unlocked.packageSubmissions[0].contractRevision.unlockInfo = {
+                        ...unlocked.draftRevision!.unlockInfo!,
+                        updatedAt: new Date('2100-01-22')
+                    }
+                    //set different data on draft revision to make sure we don't show draft values     
+                    unlocked.draftRevision!.formData.submissionType = 'CONTRACT_ONLY'
+                    unlocked.draftRevision!.formData.programIDs = [mockMN.programs[0].id] 
 
                     unlocked.id = 'test-state-edit-in-progress-unlocked'
 
