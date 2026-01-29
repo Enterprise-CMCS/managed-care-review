@@ -166,6 +166,10 @@ function getConsolidatedContractStatus(
     // if the reviewStatus hasn't been changed (i.e it's still set as UNDER_REVIEW).
     // However, if reviewStatus has been changed then reviewStatus takes precedence for the consolidatedStatus
     if (reviewStatus !== 'UNDER_REVIEW') {
+        // UNLOCKED takes precedence over NOT_SUBJECT_TO_REVIEW.
+        if (status === 'UNLOCKED' && reviewStatus === 'NOT_SUBJECT_TO_REVIEW') {
+            return status
+        }
         return reviewStatus
     } else {
         return status
