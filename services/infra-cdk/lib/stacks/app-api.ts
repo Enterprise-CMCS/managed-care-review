@@ -278,7 +278,7 @@ export class AppApiStack extends BaseStack {
         const environment = this.getLambdaEnvironment()
 
         // Create simple Lambda functions first (no VPC, layers, or complex dependencies)
-        this.healthFunction = this.createFunction(
+        this.healthFunction = this.createLambdaFunction(
             'health',
             'health_check',
             'main',
@@ -291,7 +291,7 @@ export class AppApiStack extends BaseStack {
             }
         )
 
-        this.emailSubmitFunction = this.createFunction(
+        this.emailSubmitFunction = this.createLambdaFunction(
             'email-submit',
             'email_submit',
             'main',
@@ -331,7 +331,7 @@ export class AppApiStack extends BaseStack {
             ]),
         })
 
-        this.thirdPartyApiAuthorizerFunction = this.createFunction(
+        this.thirdPartyApiAuthorizerFunction = this.createLambdaFunction(
             'third-party-api-authorizer',
             'third_party_API_authorizer',
             'main',
@@ -345,7 +345,7 @@ export class AppApiStack extends BaseStack {
         )
 
         // OAuth token function needs VPC and Prisma layer for database access
-        this.oauthTokenFunction = this.createFunction(
+        this.oauthTokenFunction = this.createLambdaFunction(
             'oauth-token',
             'oauth_token',
             'main',
@@ -371,7 +371,7 @@ export class AppApiStack extends BaseStack {
             }
         )
 
-        this.cleanupFunction = this.createFunction(
+        this.cleanupFunction = this.createLambdaFunction(
             'cleanup',
             'cleanup',
             'main',
@@ -385,7 +385,7 @@ export class AppApiStack extends BaseStack {
         )
 
         // Create the migrate protobuf function with VPC and layers
-        this.migrateProtobufDataFunction = this.createFunction(
+        this.migrateProtobufDataFunction = this.createLambdaFunction(
             'migrate-protobuf-data',
             'migrate_protobuf_data',
             'main',
@@ -414,7 +414,7 @@ export class AppApiStack extends BaseStack {
         )
 
         // Create migrate function with VPC and layers
-        this.migrateFunction = this.createFunction(
+        this.migrateFunction = this.createLambdaFunction(
             'migrate',
             'postgres_migrate',
             'main',
@@ -451,7 +451,7 @@ export class AppApiStack extends BaseStack {
         )
 
         // Create regenerate zips function with VPC and layers
-        this.regenerateZipsFunction = this.createFunction(
+        this.regenerateZipsFunction = this.createLambdaFunction(
             'regenerate-zips',
             'regenerate_zips',
             'main',
@@ -481,7 +481,7 @@ export class AppApiStack extends BaseStack {
          * Create the migrate S3 URLs function with VPC and Prisma engine layer
          * Used to migrate malformed s3URL fields to separate s3BucketName and s3Key columns
          */
-        this.migrateS3UrlsFunction = this.createFunction(
+        this.migrateS3UrlsFunction = this.createLambdaFunction(
             'migrateS3Urls',
             'migrate_s3_urls',
             'main',
@@ -511,7 +511,7 @@ export class AppApiStack extends BaseStack {
         )
 
         // Create GraphQL function with VPC and layers
-        this.graphqlFunction = this.createFunction(
+        this.graphqlFunction = this.createLambdaFunction(
             'graphql',
             'apollo_gql',
             'gqlHandler',
@@ -630,7 +630,7 @@ export class AppApiStack extends BaseStack {
         }
     }
 
-    private createFunction(
+    private createLambdaFunction(
         functionName: string,
         handlerFile: string,
         handlerMethod: string,
