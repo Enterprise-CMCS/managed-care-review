@@ -16,6 +16,7 @@ import { gqlHandler } from './handlers/apollo_gql'
 import { main as healthCheckHandler } from './handlers/health_check'
 import { main as oauthTokenHandler } from './handlers/oauth_token'
 import { main as otelProxyHandler } from './handlers/otel_proxy'
+import { main as thirdPartyAuthorizer } from './handlers/third_party_API_authorizer'
 
 const app = express()
 const router = express.Router()
@@ -55,6 +56,21 @@ function toLambdaEvent(req: Request): APIGatewayProxyEvent {
     const cognitoAuthProvider =
         headers['cognito-authentication-provider'] || null
 
+    // Determine body format based on content-type
+    let body: string | null = null
+    if (req.method !== 'GET' && req.body) {
+        const contentType =
+            headers['content-type'] || headers['Content-Type'] || ''
+        if (contentType.includes('application/x-www-form-urlencoded')) {
+            // Convert parsed object back to URL-encoded string for Lambda
+            body = new URLSearchParams(
+                req.body as Record<string, string>
+            ).toString()
+        } else {
+            body = JSON.stringify(req.body)
+        }
+    }
+
     return {
         httpMethod: req.method,
         path: req.path,
@@ -64,7 +80,7 @@ function toLambdaEvent(req: Request): APIGatewayProxyEvent {
         multiValueQueryStringParameters: null,
         pathParameters: req.params || null,
         stageVariables: null,
-        body: req.method === 'GET' ? null : JSON.stringify(req.body),
+        body,
         isBase64Encoded: false,
         requestContext: {
             accountId: 'local',
@@ -203,10 +219,52 @@ router.all('/graphql', async (req: Request, res: Response) => {
     )
 })
 
-// External GraphQL endpoints
+// External GraphQL endpoints - simulates API Gateway with third_party_API_authorizer
+// This mimics how API Gateway handles TOKEN authorizers in production
 router.all('/v1/graphql/external', async (req: Request, res: Response) => {
     const event = toLambdaEvent(req)
     const context = createContext()
+
+    // API Gateway returns 401 if no Authorization header is present for TOKEN authorizers
+    const authHeader = req.headers.authorization
+    if (!authHeader) {
+        return res.status(401).json({ message: 'Unauthorized' })
+    }
+
+    try {
+        // Build authorizer event matching API Gateway's TOKEN authorizer format
+        const authorizerEvent = {
+            authorizationToken: authHeader,
+            methodArn: `arn:aws:execute-api:us-east-1:000000000000:local/local/${req.method}${req.path}`,
+            type: 'TOKEN' as const,
+        }
+
+        const authResult = await thirdPartyAuthorizer(
+            authorizerEvent,
+            createContext(),
+            () => {}
+        )
+
+        // API Gateway checks the policy - if Effect is Deny or principalId is empty, return 403
+        const policyEffect = authResult?.policyDocument?.Statement?.[0]?.Effect
+        if (!authResult || !authResult.principalId || policyEffect === 'Deny') {
+            return res.status(403).json({ message: 'Forbidden' })
+        }
+
+        // Populate authorizer context exactly as API Gateway does
+        // API Gateway flattens the authorizer response into requestContext.authorizer
+        // All values become strings (API Gateway stringifies context values)
+        event.requestContext.authorizer = {
+            principalId: authResult.principalId,
+            integrationLatency: 0,
+            ...(authResult.context || {}),
+        }
+    } catch (error) {
+        // API Gateway returns 401 for authorizer exceptions
+        console.error('Authorization error:', error)
+        return res.status(401).json({ message: 'Unauthorized' })
+    }
+
     await handleLambdaResponse(
         res,
         gqlHandler(event, context, () => {}) as Promise<APIGatewayProxyResult>
