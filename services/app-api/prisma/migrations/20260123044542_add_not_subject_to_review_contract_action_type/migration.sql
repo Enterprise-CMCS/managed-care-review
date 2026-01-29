@@ -1,0 +1,5 @@
+BEGIN;
+-- AlterEnum
+ALTER TYPE "ContractActionType" ADD VALUE 'NOT_SUBJECT_TO_REVIEW';
+
+COMMIT;

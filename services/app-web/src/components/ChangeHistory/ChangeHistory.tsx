@@ -23,9 +23,10 @@ type ChangeHistoryProps = {
     contract: Contract | UnlockedContract
 }
 
-type flatRevisions = UpdateInformation & {
+type flatRevisions = Omit<UpdateInformation, 'updatedBy'> & {
     kind: 'submit' | 'unlock' | 'approve' | 'withdraw'
     revisionVersion: string | undefined
+    updatedBy?: UpdateInformation['updatedBy']
 }
 
 const getPreviousSubmissionLink = ({
@@ -215,7 +216,7 @@ export const ChangeHistory = ({
 
                     const newAction: flatRevisions = {} as flatRevisions
                     newAction.updatedAt = r.updatedAt
-                    newAction.updatedBy = r.updatedBy
+                    newAction.updatedBy = r.updatedBy ?? undefined
                     newAction.kind = actionKind
                     result.push(newAction)
                 }

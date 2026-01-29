@@ -949,6 +949,7 @@ enum ContractReviewStatus {
     UNDER_REVIEW
     APPROVED
     WITHDRAWN
+    NOT_SUBJECT_TO_REVIEW
 }
 
 """
@@ -970,6 +971,7 @@ enum ConsolidatedContractStatus {
     RESUBMITTED
     APPROVED
     WITHDRAWN
+    NOT_SUBJECT_TO_REVIEW
 }
 
 """
@@ -993,6 +995,7 @@ enum ContractActionType {
     UNDER_REVIEW
     MARK_AS_APPROVED
     WITHDRAW
+    NOT_SUBJECT_TO_REVIEW
 }
 
 enum RateActionType {
@@ -1027,7 +1030,7 @@ type ContractReviewStatusActions {
     "the datetime when the update occurred"
     updatedAt: DateTime!
     "the user who performed the update"
-    updatedBy: UpdatedBy!
+    updatedBy: UpdatedBy
     "the reason provided by the user when performing the update"
     updatedReason: String
     "the type of review action performed on the contract: APPROVED, WITHDRAWN"

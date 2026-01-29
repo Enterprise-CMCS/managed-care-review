@@ -424,6 +424,12 @@ const parseEmailDataWithdrawSubmission = (
         config.baseUrl
     )
 
+    if (!latestStatusAction.updatedBy) {
+        return new Error(
+            `${validReviewAction} review status action did not contain user.`
+        )
+    }
+
     const updatedBy = latestStatusAction.updatedBy.email
     const updatedAt = formatCalendarDate(
         latestStatusAction.updatedAt,

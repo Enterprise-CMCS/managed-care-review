@@ -4,6 +4,7 @@ import type { UpdateInfoType, ContractType } from '../../domain-models'
 import type { PrismaTransactionType } from '../prismaTypes'
 import { submitContractAndOrRates } from './submitContractAndOrRates'
 import type { ExtendedPrismaClient } from '../prismaClient'
+import { eqroValidationAndReviewDetermination } from '@mc-review/submissions'
 
 async function submitContractInsideTransaction(
     tx: PrismaTransactionType,
@@ -78,6 +79,66 @@ async function submitContractInsideTransaction(
     return await findContractWithHistory(tx, contractID)
 }
 
+async function eqroContractReviewDeterminationAction(
+    tx: PrismaTransactionType,
+    contract: ContractType
+): Promise<ContractType | Error> {
+    if (contract.contractSubmissionType !== 'EQRO') {
+        return new Error('Cannot determine review on non-EQRO contracts')
+    }
+
+    const canDetermineReview =
+        ['SUBMITTED', 'RESUBMITTED'].includes(contract.status) &&
+        !['APPROVED', 'WITHDRAWN'].includes(contract.reviewStatus)
+
+    if (!canDetermineReview) {
+        return new Error(
+            `Cannot determine review on contract with status ${contract.consolidatedStatus}`
+        )
+    }
+
+    const latestSubmission = contract.packageSubmissions[0]
+    if (!latestSubmission) {
+        return new Error(
+            'Cannot determine review: contract has no submitted revision'
+        )
+    }
+
+    const reviewDetermination = eqroValidationAndReviewDetermination(
+        contract.id,
+        latestSubmission.contractRevision.formData
+    )
+
+    if (reviewDetermination instanceof Error) {
+        return reviewDetermination
+    }
+
+    if (reviewDetermination) {
+        await tx.contractActionTable.create({
+            data: {
+                updatedByID: undefined,
+                actionType: 'UNDER_REVIEW',
+                contractID: contract.id,
+            },
+        })
+    } else {
+        await tx.contractActionTable.create({
+            data: {
+                updatedByID: undefined,
+                actionType: 'NOT_SUBJECT_TO_REVIEW',
+                contractID: contract.id,
+            },
+        })
+    }
+
+    const updatedContract = await findContractWithHistory(tx, contract.id)
+    if (updatedContract instanceof Error) {
+        throw contract
+    }
+
+    return updatedContract
+}
+
 type SubmitContractArgsType = {
     contractID: string // revision ID
     submittedByUserID: string
@@ -94,16 +155,31 @@ async function submitContract(
 
     try {
         return await client.$transaction(async (tx) => {
-            const result = submitContractInsideTransaction(tx, {
+            const result = await submitContractInsideTransaction(tx, {
                 contractID,
                 submittedByUserID,
                 submittedReason,
             })
+
             if (result instanceof Error) {
                 // if we get an error here, we need to throw it to kill the transaction.
                 // then we catch it and return it as normal.
                 throw result
             }
+
+            // If EQRO submission insert review status action for review determination.
+            if (result.contractSubmissionType === 'EQRO') {
+                const eqroReviewUpdate =
+                    await eqroContractReviewDeterminationAction(tx, result)
+
+                if (eqroReviewUpdate instanceof Error) {
+                    throw eqroReviewUpdate
+                }
+
+                //return updated contract with review action.
+                return eqroReviewUpdate
+            }
+
             return result
         })
     } catch (err) {
@@ -112,6 +188,10 @@ async function submitContract(
     }
 }
 
-export { submitContract, submitContractInsideTransaction }
+export {
+    submitContract,
+    submitContractInsideTransaction,
+    eqroContractReviewDeterminationAction,
+}
 
 export type { SubmitContractArgsType }

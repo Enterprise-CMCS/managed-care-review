@@ -37,3 +37,8 @@
     @include uswds.u-bg('blue-cool-5v');
     color: custom.$mcr-foundation-ink;
 }
+
+.base-dark {
+    @include uswds.u-bg('base-dark');
+    color: custom.$mcr-foundation-white;
+}

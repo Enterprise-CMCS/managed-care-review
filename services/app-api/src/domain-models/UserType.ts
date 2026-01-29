@@ -20,7 +20,7 @@ const userRolesSchema = z.enum([
 ])
 
 const baseUserSchema = z.object({
-    id: z.string().uuid(),
+    id: z.uuid(),
     role: userRolesSchema,
     email: z.string(),
     givenName: z.string(),
