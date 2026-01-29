@@ -70,6 +70,7 @@ export class AppApiStack extends BaseStack {
     public readonly cleanupFunction: NodejsFunction
     public readonly migrateFunction: NodejsFunction
     public readonly regenerateZipsFunction: NodejsFunction
+    public readonly migrateS3UrlsFunction: NodejsFunction
 
     public readonly graphqlFunction: NodejsFunction
 
@@ -347,6 +348,39 @@ export class AppApiStack extends BaseStack {
         this.regenerateZipsFunction = this.createRegenerateZipsFunction(
             lambdaRole,
             environment
+        )
+
+        /**
+         * Create the migrate S3 URLs function with VPC and Prisma engine layer
+         * Used to migrate malformed s3URL fields to separate s3BucketName and s3Key columns
+         */
+        this.migrateS3UrlsFunction = this.createFunction(
+            'migrateS3Urls',
+            'migrate_s3_urls',
+            'main',
+            {
+                timeout: Duration.minutes(15), // Extended timeout for processing many documents
+                memorySize: 1024,
+                environment,
+                role: lambdaRole,
+                layers: [this.prismaEngineLayer, this.otelLayer],
+                vpc: this.vpc,
+                vpcSubnets: {
+                    subnetType: SubnetType.PRIVATE_WITH_EGRESS,
+                },
+                securityGroups: [
+                    this.lambdaSecurityGroup,
+                    this.applicationSecurityGroup,
+                ],
+                bundling: {
+                    format: OutputFormat.ESM,
+                    banner: AppApiStack.ESM_BANNER,
+                    externalModules: ['prisma', '@prisma/client'],
+                    ...this.createBundling('migrate-s3-urls', [
+                        this.getOtelBundlingCommands(),
+                    ]),
+                },
+            }
         )
 
         // Create GraphQL function with VPC and layers
@@ -1171,6 +1205,12 @@ export class AppApiStack extends BaseStack {
             value: this.regenerateZipsFunction.functionName,
             exportName: this.exportName('RegenerateZipsFunctionName'),
             description: 'Regenerate zips Lambda function name',
+        })
+
+        new CfnOutput(this, 'MigrateS3UrlsFunctionName', {
+            value: this.migrateS3UrlsFunction.functionName,
+            exportName: this.exportName('MigrateS3UrlsFunctionName'),
+            description: 'Migrate S3 URLs Lambda function name',
         })
 
         new CfnOutput(this, 'ApiGatewayUrl', {
