@@ -72,7 +72,7 @@ export class AppApiStack extends BaseStack {
     public readonly regenerateZipsFunction: NodejsFunction
     public readonly migrateS3UrlsFunction: NodejsFunction
 
-    public readonly migratePotobufDataFunction: NodejsFunction
+    public readonly migrateProtobufDataFunction: NodejsFunction
     public readonly graphqlFunction: NodejsFunction
 
     // Shared Prisma migration layer for functions that need database migration
@@ -385,7 +385,7 @@ export class AppApiStack extends BaseStack {
         )
 
         // Create the migrate protobuf function with VPC and layers
-        this.migratePotobufDataFunction = this.createFunction(
+        this.migrateProtobufDataFunction = this.createFunction(
             'migrate-protobuf-data',
             'migrate_protobuf_data',
             'main',
@@ -1077,9 +1077,9 @@ export class AppApiStack extends BaseStack {
         })
 
         new CfnOutput(this, 'ProtobufMigrationFunctionName', {
-            value: this.migratePotobufDataFunction.functionName,
+            value: this.migrateProtobufDataFunction.functionName,
             exportName: this.exportName('MigrateProtobufDataFunctionName'),
-            description: 'Probuf data migrate Lambda function name',
+            description: 'Protobuf data migration Lambda function name',
         })
 
         new CfnOutput(this, 'MigrateFunctionName', {
