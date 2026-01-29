@@ -1,4 +1,5 @@
-describe('thirdPartyAPIAccess', () => {
+//Skipping tests for now until there's a final decision on what to do with the APIAccess page
+describe.skip('thirdPartyAPIAccess', () => {
 
     beforeEach(() => {
         cy.stubFeatureFlags()

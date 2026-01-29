@@ -19,12 +19,6 @@ if (jwtSecret === undefined || jwtSecret === '') {
     )
 }
 
-const jwtLib = newJWTLib({
-    issuer: `mcreview-${stageName}`,
-    signingKey: Buffer.from(jwtSecret, 'hex'),
-    expirationDurationS: 90 * 24 * 60 * 60, // 90 days
-})
-
 const oauthJwtLib = newJWTLib({
     issuer: 'mcreview-oauth',
     signingKey: Buffer.from(jwtSecret, 'hex'),
@@ -37,7 +31,6 @@ export const main: APIGatewayTokenAuthorizerHandler = async (
     const authToken = event.authorizationToken.replace('Bearer ', '')
 
     try {
-        // Try to validate as OAuth token first
         const oauthResult = oauthJwtLib.validateOAuthToken(authToken)
 
         if (!(oauthResult instanceof Error)) {
@@ -54,24 +47,10 @@ export const main: APIGatewayTokenAuthorizerHandler = async (
                 grants: oauthResult.grants.join(','),
                 isOAuthClient: 'true',
             })
-        }
-
-        // If not an OAuth token, try standard token
-        const userId = jwtLib.userIDFromToken(authToken)
-        if (userId instanceof Error) {
-            console.error('Invalid auth token')
-
+        } else {
+            console.error('OAuth token validation failed')
             return generatePolicy(undefined, event)
         }
-
-        console.info({
-            message: 'third_party_API_authorizer succeeded with standard token',
-            operation: 'third_party_API_authorizer',
-            status: 'SUCCESS',
-            userId,
-        })
-
-        return generatePolicy(userId, event)
     } catch (err) {
         console.error(
             'unexpected exception attempting to validate authorization',

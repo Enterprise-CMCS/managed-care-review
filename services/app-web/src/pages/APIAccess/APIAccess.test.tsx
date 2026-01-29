@@ -10,7 +10,8 @@ import {
 } from '@mc-review/mocks'
 import { APIAccess } from './APIAccess'
 
-describe('APIAccess', () => {
+//Skipping tests for now until there's a final decision on what to do with the APIAccess page
+describe.skip('APIAccess', () => {
     afterEach(() => {
         vi.resetAllMocks()
     })

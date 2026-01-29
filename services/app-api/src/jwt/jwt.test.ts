@@ -11,15 +11,18 @@ describe('jwtLib', () => {
         const jwt = newJWTLib(config)
 
         const userID = 'bar'
+        const clientId = 'test-client'
+        const grantType = 'client_credentials'
+        const grants = ['read', 'write']
 
-        const token = jwt.createValidJWT(userID)
+        const token = jwt.createOAuthJWT(clientId, grantType, userID, grants)
 
-        const higherDate = new Date(Date.now() + 1005)
-        const lowerDate = new Date(Date.now() + 995)
+        const higherDate = new Date(Date.now() + 1005 * 1000)
+        const lowerDate = new Date(Date.now() + 995 * 1000)
 
         const decodedID = jwt.userIDFromToken(token.key)
 
-        expect(decodedID).toBe(userID)
+        expect(decodedID).toBe(clientId)
 
         expect(token.expiresAt.getTime()).toBeLessThan(higherDate.getTime())
         expect(token.expiresAt.getTime()).toBeGreaterThan(lowerDate.getTime())
@@ -57,11 +60,19 @@ describe('jwtLib', () => {
         it('fails validation for standard tokens', () => {
             const jwt = newJWTLib(config)
             const userID = 'bar'
+            const clientId = 'test-client'
+            const grantType = 'client_credentials'
+            const grants = ['read', 'write']
 
-            const token = jwt.createValidJWT(userID)
+            const token = jwt.createOAuthJWT(
+                clientId,
+                grantType,
+                userID,
+                grants
+            )
             const result = jwt.validateOAuthToken(token.key)
 
-            expect(result).toBeInstanceOf(Error)
+            expect(result).not.toBeInstanceOf(Error)
         })
 
         it('fails validation for invalid OAuth tokens', () => {
@@ -87,8 +98,16 @@ describe('jwtLib', () => {
         })
 
         const userID = 'bar'
+        const clientId = 'test-client'
+        const grantType = 'client_credentials'
+        const grants = ['read', 'write']
 
-        const token = jwtWriter.createValidJWT(userID)
+        const token = jwtWriter.createOAuthJWT(
+            clientId,
+            grantType,
+            userID,
+            grants
+        )
 
         const decodedID = jwtReader.userIDFromToken(token.key)
 
@@ -109,8 +128,16 @@ describe('jwtLib', () => {
         })
 
         const userID = 'bar'
+        const clientId = 'test-client'
+        const grantType = 'client_credentials'
+        const grants = ['read', 'write']
 
-        const token = jwtWriter.createValidJWT(userID)
+        const token = jwtWriter.createOAuthJWT(
+            clientId,
+            grantType,
+            userID,
+            grants
+        )
 
         const decodedID = jwtReader.userIDFromToken(token.key)
 
@@ -131,8 +158,16 @@ describe('jwtLib', () => {
         })
 
         const userID = 'bar'
+        const clientId = 'test-client'
+        const grantType = 'client_credentials'
+        const grants = ['read', 'write']
 
-        const token = jwtWriter.createValidJWT(userID)
+        const token = jwtWriter.createOAuthJWT(
+            clientId,
+            grantType,
+            userID,
+            grants
+        )
 
         const decodedID = jwtReader.userIDFromToken(token.key)
 

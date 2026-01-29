@@ -12,7 +12,8 @@ import { ApolloError } from '@apollo/client'
 import { GenericErrorPage } from '../Errors/GenericErrorPage'
 import styles from './APIAccess.module.scss'
 import { ButtonWithLogging, LinkWithLogging } from '../../components'
-
+//Disabling the buttons on this page temporarily, please read this for context:
+//https://www.notion.so/mc-review/Remove-old-JWT-Auth-method-for-third-party-API-requests-2f24f9e180fa80e79b9eefeb5f62b156?source=copy_link#2f44f9e180fa8047ae7cfa6542de09d8
 function APIAccess(): React.ReactElement {
     const apiURL = import.meta.env.VITE_APP_API_URL
 
@@ -76,6 +77,7 @@ curl -s ${thirdPartyAPIURL} -X POST \\
                             type="button"
                             parent_component_heading="page body"
                             onClick={callAPIKeyMutation}
+                            disabled
                         >
                             Generate API Key
                         </ButtonWithLogging>
@@ -93,6 +95,7 @@ curl -s ${thirdPartyAPIURL} -X POST \\
                                 type="button"
                                 parent_component_heading="page body"
                                 onClick={callAPIKeyMutation}
+                                disabled
                             >
                                 Generate API Key
                             </ButtonWithLogging>
@@ -100,6 +103,7 @@ curl -s ${thirdPartyAPIURL} -X POST \\
                                 type="button"
                                 parent_component_heading="page body"
                                 onClick={copyKeyToClipboard}
+                                disabled
                             >
                                 Copy key to clipboard
                             </ButtonWithLogging>

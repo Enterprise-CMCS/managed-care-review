@@ -28,7 +28,6 @@ import { fetchRateResolver } from './rate/fetchRate'
 import { updateContract } from './contract/updateContract'
 import { indexContractsResolver } from './contract/indexContracts'
 import { unlockContractResolver } from './contract/unlockContract'
-import { createAPIKeyResolver } from './APIKey'
 import { unlockRate } from './rate/unlockRate'
 import { submitRate } from './rate'
 import { updateDraftContractRates } from './contract/updateDraftContractRates'
@@ -128,7 +127,6 @@ export function configureResolvers(
                 store,
                 emailer
             ),
-            createAPIKey: createAPIKeyResolver(jwt),
             unlockRate: unlockRate(store),
             submitRate: submitRate(store, launchDarkly, documentZip),
             updateEmailSettings: updateEmailSettings(store),
@@ -136,7 +134,6 @@ export function configureResolvers(
             deleteOauthClient: deleteOauthClientResolver(store),
             updateOauthClient: updateOauthClientResolver(store),
             generateUploadURL: generateUploadURLResolver(store, s3Client),
-
         },
         User: {
             // resolveType is required to differentiate Unions
