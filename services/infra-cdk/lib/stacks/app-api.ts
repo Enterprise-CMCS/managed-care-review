@@ -452,7 +452,7 @@ export class AppApiStack extends BaseStack {
 
         // Create regenerate zips function with VPC and layers
         this.regenerateZipsFunction = this.createLambdaFunction(
-            'regenerate-zips',
+            'regenerateZips',
             'regenerate_zips',
             'main',
             {
