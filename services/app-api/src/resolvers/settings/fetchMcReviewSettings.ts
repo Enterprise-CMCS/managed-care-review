@@ -22,6 +22,14 @@ export function fetchMcReviewSettings(
         setSuccessAttributesOnActiveSpan(span)
         logSuccess('fetchMcReviewSettings')
 
+        // MCR-5894 block off this api from oauth
+        if (context.oauthClient && context.oauthClient.isOAuthClient === true) {
+            const oauthErr = 'oauth clients cannot access this functionality'
+            logError('fetchMcReviewSettings', oauthErr)
+            setErrorAttributesOnActiveSpan(oauthErr, span)
+            throw createForbiddenError(oauthErr)            
+        }
+
         if (!hasCMSPermissions(user) && !hasAdminPermissions(user)) {
             const msg = 'user not authorized to fetch mc review settings'
             logError('fetchMcReviewSettings', msg)
