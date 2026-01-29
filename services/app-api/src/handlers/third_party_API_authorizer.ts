@@ -7,7 +7,7 @@ import type {
 import { newJWTLib } from '../jwt'
 
 const stageName = process.env.stage
-const jwtSecret = process.env.OAUTH_JWT_SECRET
+const jwtSecret = process.env.JWT_SECRET
 
 if (stageName === undefined) {
     throw new Error('Configuration Error: stage is required')
@@ -15,7 +15,7 @@ if (stageName === undefined) {
 
 if (jwtSecret === undefined || jwtSecret === '') {
     throw new Error(
-        'Configuration Error: OAUTH_JWT_SECRET is required to run app-api.'
+        'Configuration Error: JWT_SECRET is required to run app-api.'
     )
 }
 
