@@ -1,6 +1,18 @@
 # Managed Care Review - API Changelog
 ## This document highlights API changes that have been introduced since May 2025
 
+### January 29, 2026
+
+#### Added
+- New submission status of `NOT_SUBJECT_TO_REVIEW`. For EQRO submissions that do not require CMS review.
+   - `NOT_SUBJECT_TO_REVIEW` to the enum `ContractReviewStatus` in GraphQL.
+   - `NOT_SUBJECT_TO_REVIEW` to the enum `ConsolidatedContractStatus` in GraphQL.
+   - `NOT_SUBJECT_TO_REVIEW` to the enum `ContractActionType` in GraphQL.
+
+#### Updated
+- `ContractReviewStatusActions` GraphQL type.
+   - `updatedBy` field is now optional.
+
 ### November 13, 2025
 #### Added
 - `EQRO` contract submission type fields to `ContractFormData` GraphQL type.
