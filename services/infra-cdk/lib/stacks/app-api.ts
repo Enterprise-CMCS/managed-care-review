@@ -355,7 +355,7 @@ export class AppApiStack extends BaseStack {
          * Used to migrate malformed s3URL fields to separate s3BucketName and s3Key columns
          */
         this.migrateS3UrlsFunction = this.createFunction(
-            'migrate-s3-urls',
+            'migrateS3Urls',
             'migrate_s3_urls',
             'main',
             {
