@@ -287,7 +287,7 @@ describe('fetchMcReviewSettings', () => {
         })
 
         expect(assertAnError(mcReviewSettings).message).toContain(
-            'oauth clients cannot access admin functions'
+            'oauth clients cannot access this functionality'
         )
     })
 
@@ -312,7 +312,7 @@ describe('fetchMcReviewSettings', () => {
         })
 
         expect(assertAnError(mcReviewSettings).message).toContain(
-            'oauth clients cannot access admin functions'
+            'oauth clients cannot access this functionality'
         )
     })
 })

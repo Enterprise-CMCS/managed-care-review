@@ -22,9 +22,9 @@ export function fetchMcReviewSettings(
         setSuccessAttributesOnActiveSpan(span)
         logSuccess('fetchMcReviewSettings')
 
-        // MCR-5894 block off admin apis from oauth
+        // MCR-5894 block off this api from oauth
         if (context.oauthClient && context.oauthClient.isOAuthClient === true) {
-            const oauthErr = 'oauth clients cannot access admin functions'
+            const oauthErr = 'oauth clients cannot access this functionality'
             logError('fetchMcReviewSettings', oauthErr)
             setErrorAttributesOnActiveSpan(oauthErr, span)
             throw createForbiddenError(oauthErr)            
