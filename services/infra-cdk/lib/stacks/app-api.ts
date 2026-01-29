@@ -489,7 +489,7 @@ export class AppApiStack extends BaseStack {
                 timeout: Duration.minutes(15), // Extended timeout for processing many documents
                 memorySize: 1024,
                 environment,
-                role: lambdaRole,
+                role,
                 layers: [this.prismaEngineLayer, this.otelLayer],
                 vpc: this.vpc,
                 vpcSubnets: {
