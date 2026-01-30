@@ -20,7 +20,6 @@ import {
     updateStateAssignment,
 } from './user'
 import type { LDService } from '../launchDarkly/launchDarkly'
-import type { JWTLib } from '../jwt'
 import { indexRatesResolver } from './rate'
 import { rateResolver } from './rate'
 import { genericDocumentResolver } from './shared/genericDocumentResolver'
@@ -68,7 +67,6 @@ export function configureResolvers(
     store: Store,
     emailer: Emailer,
     launchDarkly: LDService,
-    jwt: JWTLib,
     s3Client: S3ClientT,
     applicationEndpoint: string,
     documentZip: DocumentZipService

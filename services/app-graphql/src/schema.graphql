@@ -333,11 +333,6 @@ type Mutation {
     ): CreateRateQuestionResponsePayload!
 
     """
-    createAPIKey creates a valid API key for the logged in user, valid for 90 days
-    """
-    createAPIKey: CreateAPIKeyPayload!
-
-    """
     unlockRate returns a submitted package to the state for additional edits.
 
     This can only be called by a CMSUser.
@@ -811,11 +806,6 @@ input UpdateContractInput {
 
 type UpdateContractPayload {
     contract: Contract!
-}
-
-type CreateAPIKeyPayload {
-    key: String!
-    expiresAt: DateTime!
 }
 
 "Date is a CalendarDate representing a day without time information"

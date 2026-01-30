@@ -1,4 +1,3 @@
-import type { APIKeyType } from '../domain-models'
 import { curry } from 'purify-ts/Function'
 import { sign, verify } from 'jsonwebtoken'
 
@@ -6,6 +5,11 @@ interface JWTConfig {
     issuer: string
     signingKey: Buffer
     expirationDurationS: number
+}
+
+interface APIKeyType {
+    key: string
+    expiresAt: Date
 }
 
 interface OAuthTokenPayload {
