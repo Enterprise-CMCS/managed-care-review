@@ -42,6 +42,7 @@ import {
 } from '../zip'
 import { configureCorsHeaders } from '../cors/configureCorsHelpers'
 import { logError } from '../logger'
+import { OAuthClient, OAuthScope } from '@prisma/client'
 
 let ldClient: LDClient
 let s3Client: S3ClientT
@@ -56,6 +57,7 @@ export interface Context {
         clientId: string
         grants: string[]
         isOAuthClient: boolean
+        scopes: string[]
     }
 }
 
@@ -103,6 +105,8 @@ function contextForRequestForFetcher(
                 const store = NewPostgresStore(pgResult)
                 const principalId = event.requestContext.authorizer?.principalId
                 const authorizerContext = event.requestContext.authorizer
+                const delegatedUser: string | null = event.headers?.['x-acting-as-user'] ?? null
+                let allScopes: string[] = []
 
                 // Extract OAuth context if present
                 const isOAuthClient =
@@ -117,7 +121,8 @@ function contextForRequestForFetcher(
                     // principalId is now always the user ID for both OAuth and regular tokens
                     userResult = await userFromThirdPartyAuthorizer(
                         store,
-                        principalId
+                        principalId,
+                        delegatedUser 
                     )
                 }
 
@@ -131,12 +136,34 @@ function contextForRequestForFetcher(
                         ctx: ctx,
                     }
 
+                    //get scopes if it's for delegated user
+                    if (delegatedUser) {
+                        const clientOauth = await store.getOAuthClientByClientId(oauthClientId)
+
+                        if (clientOauth instanceof Error) {
+                            throw new Error('User not found')
+                        }
+                        const user = clientOauth?.user
+                        if (!user) throw new Error('User not found')
+                        
+                        //this took FOREVER, does it look correct? If there's a simpler way, please let me know
+                        allScopes = [
+                            ...new Set(
+                                ((user.oauthClients ?? []) as { scopes: OAuthScope[] }[])
+                                    .flatMap((oauth) =>
+                                        (oauth.scopes ?? []).map((s: OAuthScope) => s.toString()))
+                            )
+                        ] as string[];                                                
+                    }
+                    
+
                     // Add OAuth client info if present
                     if (isOAuthClient && oauthClientId) {
                         context.oauthClient = {
                             clientId: oauthClientId,
                             grants: oauthGrants,
                             isOAuthClient: true,
+                            scopes: allScopes, //if not delegated user will be []
                         }
                     }
 
