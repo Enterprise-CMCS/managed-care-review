@@ -269,7 +269,7 @@ export const SubmissionSummary = (): React.ReactElement => {
         undoWithdrawAction && undoWithdrawSubmissionFlag && isStateUser
 
     const renderStatusAlerts = () => {
-        if (showApprovalBanner) {
+        if (showApprovalBanner && latestContractAction.updatedBy) {
             return (
                 <SubmissionApprovedBanner
                     updatedBy={latestContractAction.updatedBy}
@@ -285,7 +285,7 @@ export const SubmissionSummary = (): React.ReactElement => {
             return <StatusUpdatedBanner />
         }
 
-        if (showWithdrawnBanner) {
+        if (showWithdrawnBanner && latestContractAction.updatedBy) {
             return (
                 <SubmissionWithdrawnBanner
                     className={styles.banner}
