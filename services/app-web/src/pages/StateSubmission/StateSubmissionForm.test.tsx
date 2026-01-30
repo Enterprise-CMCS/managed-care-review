@@ -1,5 +1,11 @@
 import { screen, waitFor } from '@testing-library/react'
-import { generatePath, Location, Route, Routes } from 'react-router-dom'
+import {
+    generatePath,
+    Location,
+    Route,
+    Routes,
+    NavigateFunction,
+} from 'react-router-dom'
 import userEvent from '@testing-library/user-event'
 import {
     ContractSubmissionTypeRecord,
@@ -176,6 +182,115 @@ describe('StateSubmissionForm', () => {
                 screen.getByLabelText('Upload contract-supporting documents')
             ).toBeInTheDocument()
             expect(screen.getAllByTestId('file-input')).toHaveLength(2)
+        })
+
+        it('renders 404 page when using wrong url parameter for contract type', async () => {
+            let testNavigate: NavigateFunction
+            let testLocation: Location
+
+            const mockContract = mockContractPackageDraft()
+            renderWithProviders(
+                <Routes>
+                    <Route element={<SubmissionSideNav />}>
+                        <Route
+                            path={RoutesRecord.SUBMISSIONS_EDIT_TOP_LEVEL}
+                            element={<StateSubmissionForm />}
+                        />
+                    </Route>
+                </Routes>,
+                {
+                    apolloProvider: {
+                        mocks: [
+                            fetchCurrentUserMock({ statusCode: 200 }),
+                            fetchContractWithQuestionsMockSuccess({
+                                contract: {
+                                    ...mockContract,
+                                    id: '12',
+                                },
+                            }),
+                            fetchContractMockSuccess({
+                                contract: {
+                                    ...mockContract,
+                                    id: '12',
+                                },
+                            }),
+                        ],
+                    },
+                    routerProvider: {
+                        route: `/submissions/health-plan/12/edit/type`,
+                    },
+                    featureFlags: {
+                        'hide-supporting-docs-page': true,
+                    },
+                    navigate: (nav) => (testNavigate = nav),
+                    location: (location) => (testLocation = location),
+                }
+            )
+
+            // sanity check for valid url
+            await waitFor(() => {
+                expect(
+                    screen.getByText(
+                        'Which populations does this contract action cover?'
+                    )
+                ).toBeInTheDocument()
+            })
+
+            //check submission details page
+            await waitFor(() => {
+                testNavigate('/submissions/eqro/12/edit/type')
+            })
+
+            await waitFor(() => {
+                expect(testLocation.pathname).toBe(
+                    '/submissions/eqro/12/edit/type'
+                )
+                expect(
+                    screen.getByText('404 / Page not found')
+                ).toBeInTheDocument()
+            })
+
+            //check contract details page
+            await waitFor(() => {
+                testNavigate('/submissions/eqro/12/edit/contract-details')
+            })
+
+            await waitFor(() => {
+                expect(testLocation.pathname).toBe(
+                    '/submissions/eqro/12/edit/contract-details'
+                )
+                expect(
+                    screen.getByText('404 / Page not found')
+                ).toBeInTheDocument()
+            })
+
+            //check contacts page
+            await waitFor(() => {
+                testNavigate('/submissions/eqro/12/edit/contacts')
+            })
+
+            await waitFor(() => {
+                expect(testLocation.pathname).toBe(
+                    '/submissions/eqro/12/edit/contacts'
+                )
+                expect(
+                    screen.getByText('404 / Page not found')
+                ).toBeInTheDocument()
+            })
+
+            //check review and submit page
+            await waitFor(() => {
+                testNavigate('/submissions/eqro/12/edit/review-and-submit')
+            })
+
+            await waitFor(() => {
+                expect(testLocation.pathname).toBe(
+                    '/submissions/eqro/12/edit/review-and-submit'
+                )
+                expect(
+                    screen.getByText('404 / Page not found')
+                ).toBeInTheDocument()
+            })
         })
     })
 

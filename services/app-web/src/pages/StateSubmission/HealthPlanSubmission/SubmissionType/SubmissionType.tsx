@@ -69,7 +69,6 @@ import { featureFlags } from '@mc-review/common-code'
 import { ContactSupportLink } from '../../../../components/ErrorAlert/ContactSupportLink'
 import { useFocusOnRender } from '../../../../hooks/useFocusOnRender'
 import { usePage } from '../../../../contexts/PageContext'
-import { Error404 } from '../../../Errors/Error404Page'
 
 export interface SubmissionTypeFormValues {
     populationCovered?: PopulationCoveredType
@@ -159,10 +158,6 @@ export const SubmissionType = ({
 
     if (interimState) {
         return <ErrorOrLoadingPage state={interimState || 'GENERIC_ERROR'} />
-    }
-
-    if (draftSubmission?.contractSubmissionType === 'EQRO') {
-        return <Error404 />
     }
 
     const handleFormSubmit = async (

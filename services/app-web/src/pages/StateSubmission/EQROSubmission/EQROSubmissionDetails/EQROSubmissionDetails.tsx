@@ -49,7 +49,6 @@ import {
     ErrorOrLoadingPage,
     PageBannerAlerts,
 } from '../../SharedSubmissionComponents'
-import { Error404 } from '../../../Errors/Error404Page'
 import { useAuth } from '../../../../contexts/AuthContext'
 import { useFocusOnRender } from '../../../../hooks/useFocusOnRender'
 
@@ -105,10 +104,6 @@ export const EQROSubmissionDetails = (): React.ReactElement => {
 
     if (interimState) {
         return <ErrorOrLoadingPage state={interimState} />
-    }
-
-    if (draftSubmission?.contractSubmissionType === 'HEALTH_PLAN') {
-        return <Error404 />
     }
 
     const handleFormSubmit = async (
