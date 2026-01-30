@@ -456,6 +456,7 @@ export class AppApiStack extends BaseStack {
             'regenerate_zips',
             'main',
             {
+                functionName: `${ResourceNames.apiName('app-api', this.stage)}-regenerate-zips`,
                 timeout: Duration.minutes(15), // Extended timeout for processing many zips
                 memorySize: 4096, // Higher memory for zip operations
                 environment,
