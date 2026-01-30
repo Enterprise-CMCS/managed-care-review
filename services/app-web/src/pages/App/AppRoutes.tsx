@@ -43,7 +43,6 @@ import {
 import { GraphQLExplorer } from '../GraphQLExplorer/GraphQLExplorer'
 import { RateSummary } from '../RateSummary'
 import { RateEdit } from '../RateEdit/RateEdit'
-import { APIAccess } from '../APIAccess/APIAccess'
 import {
     StateAssignmentTable,
     AutomatedEmailsTable,
@@ -214,7 +213,6 @@ const StateUserRoutes = ({
                         element={<GraphQLExplorer />}
                     />
                 )}
-                <Route path={RoutesRecord.API_ACCESS} element={<APIAccess />} />
                 <Route path="*" element={<Error404 />} />
             </Routes>
         </AuthenticatedRouteWrapper>
@@ -420,7 +418,6 @@ const CMSUserRoutes = ({
                     // one and just redirecting.
                     element={<Navigate to="/mc-review-settings" />}
                 />
-                <Route path={RoutesRecord.API_ACCESS} element={<APIAccess />} />
                 {UniversalRoutes}
                 <Route path="*" element={<Error404 />} />
             </Routes>

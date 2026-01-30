@@ -3,12 +3,6 @@ import { newJWTLib } from '../../jwt'
 import type { APIGatewayTokenAuthorizerEvent, Context } from 'aws-lambda'
 
 describe('third_party_API_authorizer', () => {
-    const config = {
-        issuer: 'mcreview-test',
-        signingKey: Buffer.from('123abc', 'hex'),
-        expirationDurationS: 1000,
-    }
-
     const oauthConfig = {
         issuer: 'mcreview-oauth',
         signingKey: Buffer.from('123abc', 'hex'),
@@ -36,25 +30,6 @@ describe('third_party_API_authorizer', () => {
         fail: () => {},
         succeed: () => {},
     }
-
-    it('allows access with valid standard token', async () => {
-        const jwt = newJWTLib(config)
-        const userID = 'test-user'
-        const token = jwt.createValidJWT(userID)
-
-        const result = await main(
-            {
-                ...event,
-                authorizationToken: `Bearer ${token.key}`,
-            },
-            context,
-            () => {}
-        )
-
-        expect(result).toBeDefined()
-        expect(result!.policyDocument.Statement[0].Effect).toBe('Allow')
-        expect(result!.principalId).toBe(userID)
-    })
 
     it('allows access with valid OAuth token', async () => {
         const jwt = newJWTLib(oauthConfig)
