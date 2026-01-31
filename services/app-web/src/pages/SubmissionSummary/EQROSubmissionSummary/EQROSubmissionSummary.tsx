@@ -22,13 +22,14 @@ import {
     SubmissionTypeSummarySection,
 } from '../../../components/SubmissionSummarySection'
 import { getSubmissionPath } from '../../../routeHelpers'
+import { ContractSubmissionTypeRecord } from '@mc-review/constants'
 
 export const EQROSubmissionSummary = (): React.ReactElement => {
     // Page level state
     const { updateHeading, updateActiveMainContent } = usePage()
     const [documentError, setDocumentError] = useState(false)
     const { loggedInUser } = useAuth()
-    const { id } = useRouteParams()
+    const { id, contractSubmissionType } = useRouteParams()
     const hasCMSPermissions = hasCMSUserPermissions(loggedInUser)
     const isStateUser = loggedInUser?.role === 'STATE_USER'
     const isHelpDeskUser = loggedInUser?.role === 'HELPDESK_USER'
@@ -91,7 +92,7 @@ export const EQROSubmissionSummary = (): React.ReactElement => {
     const isSubmitted =
         submissionStatus === 'SUBMITTED' || submissionStatus === 'RESUBMITTED'
     const statePrograms = contract.state.programs
-    const contractSubmissionType = contract.contractSubmissionType
+    const submissionType = contract.contractSubmissionType
 
     if (!isSubmitted && isStateUser) {
         if (submissionStatus === 'DRAFT') {
@@ -99,7 +100,7 @@ export const EQROSubmissionSummary = (): React.ReactElement => {
                 <Navigate
                     to={getSubmissionPath(
                         'SUBMISSIONS_TYPE',
-                        contractSubmissionType,
+                        submissionType,
                         contract.id
                     )}
                 />
@@ -109,7 +110,7 @@ export const EQROSubmissionSummary = (): React.ReactElement => {
                 <Navigate
                     to={getSubmissionPath(
                         'SUBMISSIONS_REVIEW_SUBMIT',
-                        contractSubmissionType,
+                        submissionType,
                         contract.id
                     )}
                 />
@@ -144,6 +145,12 @@ export const EQROSubmissionSummary = (): React.ReactElement => {
         : 'Add MC-CRS record number'
     const explainMissingData = (isHelpDeskUser || isStateUser) && !isSubmitted
 
+    if (
+        ContractSubmissionTypeRecord[submissionType] !== contractSubmissionType
+    ) {
+        return <Error404 />
+    }
+
     return (
         <div className={styles.background} id={activeMainContentId}>
             <GridContainer
@@ -172,7 +179,7 @@ export const EQROSubmissionSummary = (): React.ReactElement => {
                                 <LinkWithLogging
                                     href={getSubmissionPath(
                                         'SUBMISSIONS_MCCRSID',
-                                        contractSubmissionType,
+                                        submissionType,
                                         contract.id
                                     )}
                                     className={

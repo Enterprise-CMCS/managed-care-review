@@ -51,6 +51,7 @@ import {
     StatusUpdatedBanner,
 } from '../../components/Banner'
 import { getSubmissionPath } from '../../routeHelpers'
+import { ContractSubmissionTypeRecord } from '@mc-review/constants'
 
 export const SubmissionSummary = (): React.ReactElement => {
     // Page level state
@@ -61,7 +62,7 @@ export const SubmissionSummary = (): React.ReactElement => {
         useState<boolean>(false)
     const [searchParams, setSearchParams] = useSearchParams()
     const { loggedInUser } = useAuth()
-    const { id } = useRouteParams()
+    const { id, contractSubmissionType } = useRouteParams()
     const hasCMSPermissions = hasCMSUserPermissions(loggedInUser)
     const isStateUser = loggedInUser?.role === 'STATE_USER'
     const isHelpDeskUser = loggedInUser?.role === 'HELPDESK_USER'
@@ -157,7 +158,7 @@ export const SubmissionSummary = (): React.ReactElement => {
 
     const submissionStatus = contract.status
     const consolidatedStatus = contract.consolidatedStatus
-    const contractSubmissionType = contract.contractSubmissionType
+    const submissionType = contract.contractSubmissionType
 
     const isSubmitted =
         submissionStatus === 'SUBMITTED' || submissionStatus === 'RESUBMITTED'
@@ -169,7 +170,7 @@ export const SubmissionSummary = (): React.ReactElement => {
                 <Navigate
                     to={getSubmissionPath(
                         'SUBMISSIONS_TYPE',
-                        contractSubmissionType,
+                        submissionType,
                         contract.id
                     )}
                 />
@@ -179,7 +180,7 @@ export const SubmissionSummary = (): React.ReactElement => {
                 <Navigate
                     to={getSubmissionPath(
                         'SUBMISSIONS_REVIEW_SUBMIT',
-                        contractSubmissionType,
+                        submissionType,
                         contract.id
                     )}
                 />
@@ -328,6 +329,12 @@ export const SubmissionSummary = (): React.ReactElement => {
         }
     }
 
+    if (
+        ContractSubmissionTypeRecord[submissionType] !== contractSubmissionType
+    ) {
+        return <Error404 />
+    }
+
     return (
         <div className={styles.background} id={activeMainContentId}>
             <GridContainer
@@ -387,14 +394,14 @@ export const SubmissionSummary = (): React.ReactElement => {
                                             navigate(
                                                 getSubmissionPath(
                                                     'SUBMISSION_WITHDRAW',
-                                                    contractSubmissionType,
+                                                    submissionType,
                                                     contract.id
                                                 )
                                             )
                                         }
                                         link_url={getSubmissionPath(
                                             'SUBMISSION_WITHDRAW',
-                                            contractSubmissionType,
+                                            submissionType,
                                             contract.id
                                         )}
                                     >
@@ -410,14 +417,14 @@ export const SubmissionSummary = (): React.ReactElement => {
                                             navigate(
                                                 getSubmissionPath(
                                                     'UNDO_SUBMISSION_WITHDRAW',
-                                                    contractSubmissionType,
+                                                    submissionType,
                                                     contract.id
                                                 )
                                             )
                                         }
                                         link_url={getSubmissionPath(
                                             'UNDO_SUBMISSION_WITHDRAW',
-                                            contractSubmissionType,
+                                            submissionType,
                                             contract.id
                                         )}
                                         style={{ width: '16rem' }}
@@ -448,7 +455,7 @@ export const SubmissionSummary = (): React.ReactElement => {
                                 <LinkWithLogging
                                     href={getSubmissionPath(
                                         'SUBMISSIONS_MCCRSID',
-                                        contractSubmissionType,
+                                        submissionType,
                                         contract.id
                                     )}
                                     className={

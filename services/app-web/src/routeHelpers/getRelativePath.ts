@@ -42,14 +42,18 @@ const getRelativePath = ({
  */
 const getSubmissionPath = (
     route: RouteT,
-    contractSubmissionType: ContractSubmissionType,
+    contractSubmissionType?: ContractSubmissionType,
     id?: string,
     rateID?: string
 ) => {
-    let pathWithParams = RoutesRecord[route].replace(
-        ':contractSubmissionType',
-        ContractSubmissionTypeRecord[contractSubmissionType]
-    )
+    let pathWithParams = RoutesRecord[route]
+
+    if (contractSubmissionType) {
+        pathWithParams = pathWithParams.replace(
+            ':contractSubmissionType',
+            ContractSubmissionTypeRecord[contractSubmissionType]
+        )
+    }
 
     if (id) {
         pathWithParams = pathWithParams.replace(':id', id)

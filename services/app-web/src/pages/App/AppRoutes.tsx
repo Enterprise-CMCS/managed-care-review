@@ -172,18 +172,12 @@ const StateUserRoutes = ({
                     />
 
                     <Route
-                        path={getSubmissionPath(
-                            'SUBMISSIONS_SUMMARY',
-                            'HEALTH_PLAN'
-                        )}
+                        path={getSubmissionPath('SUBMISSIONS_SUMMARY')}
                         element={<SubmissionSummary />}
                     />
                     {showEqroSubmissions && (
                         <Route
-                            path={getSubmissionPath(
-                                'SUBMISSIONS_SUMMARY',
-                                'EQRO'
-                            )}
+                            path={getSubmissionPath('SUBMISSIONS_SUMMARY')}
                             element={<EQROSubmissionSummary />}
                         />
                     )}
@@ -287,18 +281,12 @@ const CMSUserRoutes = ({
                         element={<UploadContractQuestions />}
                     />
                     <Route
-                        path={getSubmissionPath(
-                            'SUBMISSIONS_SUMMARY',
-                            'HEALTH_PLAN'
-                        )}
+                        path={getSubmissionPath('SUBMISSIONS_SUMMARY')}
                         element={<SubmissionSummary />}
                     />
                     {showEqroSubmissions && (
                         <Route
-                            path={getSubmissionPath(
-                                'SUBMISSIONS_SUMMARY',
-                                'EQRO'
-                            )}
+                            path={getSubmissionPath('SUBMISSIONS_SUMMARY')}
                             element={<EQROSubmissionSummary />}
                         />
                     )}
