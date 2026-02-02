@@ -6,8 +6,7 @@ import { initTracer, recordException } from '../../../uploads/src/lib/otel'
 export async function userFromThirdPartyAuthorizer(
     store: Store,
     userId: string,
-    delegatedUserId: string | null,
-    clientId: string
+    delegatedUserId: string | null
 ) {
     // setup otel tracing
     const otelCollectorURL = process.env.API_APP_OTEL_COLLECTOR_URL
@@ -39,16 +38,6 @@ export async function userFromThirdPartyAuthorizer(
             ) {
                 return err(delegatedUser)
             }
-
-            //grab the scopes from the clientId's oauth and return on the user
-             const clientOauth = await store.getOAuthClientByClientId(clientId)
-                                    
-            if (clientOauth instanceof Error) {
-                return err(clientOauth)
-            }      
-            
-            let allScopes = clientOauth?.scopes ?? []
-            delegatedUser.scopes = allScopes
                    
             return ok(delegatedUser)
         } else {

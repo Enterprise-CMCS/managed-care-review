@@ -41,7 +41,6 @@ import {
 } from '../zip'
 import { configureCorsHeaders } from '../cors/configureCorsHelpers'
 import { logError } from '../logger'
-import { OAuthClient, OAuthScope } from '@prisma/client'
 
 let ldClient: LDClient
 let s3Client: S3ClientT
@@ -112,6 +111,7 @@ function contextForRequestForFetcher(
                     authorizerContext?.isOAuthClient === 'true'
                 const oauthClientId = authorizerContext?.clientId
                 const oauthGrants = authorizerContext?.grants?.split(',') || []
+                let allScopes: string[] = []
 
                 let userResult
                 if (authProvider && !fromThirdPartyAuthorizer) {
@@ -121,8 +121,7 @@ function contextForRequestForFetcher(
                     userResult = await userFromThirdPartyAuthorizer(
                         store,
                         principalId,
-                        delegatedUser,
-                        oauthClientId
+                        delegatedUser
                     )
                 }
 
@@ -136,13 +135,24 @@ function contextForRequestForFetcher(
                         ctx: ctx,
                     }
 
+                    //if a delegated user has come in, fetch the clientId's oauth to get scopes
+                    if (delegatedUser) {
+                        const clientOauth = await store.getOAuthClientByClientId(oauthClientId)
+
+                        if (clientOauth instanceof Error) {
+                            throw new Error(`Log: failed to get oauth with client id`)                            
+                        }
+
+                        allScopes = clientOauth?.scopes ?? []
+                    }
+
                     // Add OAuth client info if present
                     if (isOAuthClient && oauthClientId) {
                         context.oauthClient = {
                             clientId: oauthClientId,
                             grants: oauthGrants,
                             isOAuthClient: true,
-                            scopes: userResult?.value.scopes,
+                            scopes: allScopes,
                             isDelegatedUser: delegatedUser ? true : false
                         }
                     }
