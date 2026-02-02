@@ -6,7 +6,8 @@ import { initTracer, recordException } from '../../../uploads/src/lib/otel'
 export async function userFromThirdPartyAuthorizer(
     store: Store,
     userId: string,
-    delegatedUserId: string|null,
+    delegatedUserId: string | null,
+    clientId: string
 ) {
     // setup otel tracing
     const otelCollectorURL = process.env.API_APP_OTEL_COLLECTOR_URL
@@ -19,17 +20,7 @@ export async function userFromThirdPartyAuthorizer(
     const serviceName = 'third-party-authorizer'
     initTracer(serviceName, otelCollectorURL)
 
-    try {
-        // Lookup user from postgres - validates the user making the api
-        const auroraUser = await lookupUserAurora(store, userId)
-        if (auroraUser instanceof Error) {
-            return err(auroraUser)
-        }
-
-        if (auroraUser === undefined) {
-            return err(auroraUser)
-        }
-
+    try {    
         // if delegatedUser is non-null, validate this user and return as context
         if (delegatedUserId) {
             const delegatedUser = await lookupUserAurora(store, delegatedUserId)
@@ -49,10 +40,30 @@ export async function userFromThirdPartyAuthorizer(
                 return err(delegatedUser)
             }
 
+            //grab the scopes from the clientId's oauth and return on the user
+             const clientOauth = await store.getOAuthClientByClientId(clientId)
+                                    
+            if (clientOauth instanceof Error) {
+                return err(clientOauth)
+            }      
+            
+            let allScopes = clientOauth?.scopes ?? []
+            delegatedUser.scopes = allScopes
+                   
             return ok(delegatedUser)
-        }
+        } else {
+            // Lookup user from postgres - validates for non-delegated user 
+            const auroraUser = await lookupUserAurora(store, userId)
+            if (auroraUser instanceof Error) {
+                return err(auroraUser)
+            }
 
-        return ok(auroraUser)
+            if (auroraUser === undefined) {
+                return err(auroraUser)
+            }
+            return ok(auroraUser)
+        }
+        
     } catch {
         const err = new Error('ERROR: failed to look up user in postgres')
 

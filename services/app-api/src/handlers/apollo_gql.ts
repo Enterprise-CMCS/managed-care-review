@@ -58,6 +58,7 @@ export interface Context {
         grants: string[]
         isOAuthClient: boolean
         scopes: string[]
+        isDelegatedUser: boolean
     }
 }
 
@@ -106,7 +107,6 @@ function contextForRequestForFetcher(
                 const principalId = event.requestContext.authorizer?.principalId
                 const authorizerContext = event.requestContext.authorizer
                 const delegatedUser: string | null = event.headers?.['x-acting-as-user'] ?? null
-                let allScopes: string[] = []
 
                 // Extract OAuth context if present
                 const isOAuthClient =
@@ -122,7 +122,8 @@ function contextForRequestForFetcher(
                     userResult = await userFromThirdPartyAuthorizer(
                         store,
                         principalId,
-                        delegatedUser 
+                        delegatedUser,
+                        oauthClientId
                     )
                 }
 
@@ -136,34 +137,14 @@ function contextForRequestForFetcher(
                         ctx: ctx,
                     }
 
-                    //get scopes if it's for delegated user
-                    if (delegatedUser) {
-                        const clientOauth = await store.getOAuthClientByClientId(oauthClientId)
-
-                        if (clientOauth instanceof Error) {
-                            throw new Error('User not found')
-                        }
-                        const user = clientOauth?.user
-                        if (!user) throw new Error('User not found')
-                        
-                        //this took FOREVER, does it look correct? If there's a simpler way, please let me know
-                        allScopes = [
-                            ...new Set(
-                                ((user.oauthClients ?? []) as { scopes: OAuthScope[] }[])
-                                    .flatMap((oauth) =>
-                                        (oauth.scopes ?? []).map((s: OAuthScope) => s.toString()))
-                            )
-                        ] as string[];                                                
-                    }
-                    
-
                     // Add OAuth client info if present
                     if (isOAuthClient && oauthClientId) {
                         context.oauthClient = {
                             clientId: oauthClientId,
                             grants: oauthGrants,
                             isOAuthClient: true,
-                            scopes: allScopes, //if not delegated user will be []
+                            scopes: userResult?.value.scopes,
+                            isDelegatedUser: delegatedUser ? true : false
                         }
                     }
 
