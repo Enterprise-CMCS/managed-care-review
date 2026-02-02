@@ -718,7 +718,7 @@ async function connectToPostgres(envName: string, stopAfter = true) {
 
     if (!bastionInstanceID) {
         console.error(
-            'EC2 didnt return required information',
+            "EC2 didn't return required information",
             bastionInstanceID
         )
         process.exit(1)
