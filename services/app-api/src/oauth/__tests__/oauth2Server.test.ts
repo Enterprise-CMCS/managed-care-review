@@ -81,10 +81,9 @@ vi.mock('@node-oauth/oauth2-server', () => {
                 throw new InvalidRequestError('Missing client credentials')
             }
 
-            if (request.body.client_secret === 'invalid') {
+            if (request.body.client_secret === 'invalid')
                 // pragma: allowlist secret
                 throw new InvalidClientError('Invalid client credentials')
-            }
 
             return {
                 grantType: 'client_credentials',
@@ -301,7 +300,7 @@ describe('CustomOAuth2Server', () => {
             const event = {
                 body: JSON.stringify({
                     grant_type: 'client_credentials',
-                    client_id: 'valid',
+                    client_id: 'valid', // pragma: allowlist secret
                     client_secret: 'valid', // pragma: allowlist secret
                 }),
                 headers: {
@@ -355,6 +354,148 @@ describe('CustomOAuth2Server', () => {
             expect(response).toHaveProperty('access_token')
             expect(response).toHaveProperty('token_type', 'Bearer')
             expect(response).toHaveProperty('expires_in', 1800)
+        })
+
+        it.only('Can make a delegated request', async () => {
+            // create two CMS users
+            // log in as Admin
+            // create OAuth client for CMS user 1
+            const clientID = 'replaceMe' // pragma: allowlist secret
+            const clientSecret = 'replaceMe' // pragma: allowlist secret
+            // store CMS user 2 id in a variable
+
+            const response = await fetch(
+                'http://localhost:3030/local/oauth/token',
+                {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded',
+                    },
+                    body: new URLSearchParams({
+                        grant_type: 'client_credentials',
+                        client_id: clientID,
+                        client_secret: clientSecret,
+                    }).toString(),
+                }
+            )
+
+            expect(response.ok).toBe(true)
+            const data = await response.json()
+
+            expect(data).toHaveProperty('access_token')
+            expect(data).toHaveProperty('token_type', 'Bearer')
+            expect(data).toHaveProperty('expires_in', 1800)
+
+            const token = data.access_token
+
+            if (!token) throw new Error('Unexpected error: No token')
+
+            // Make GraphQL request with Bearer token
+            const graphqlResponse = await fetch(
+                'http://localhost:3030/local/v1/graphql/external',
+                {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        Authorization: `Bearer ${token}`,
+                        //TODO: Replace `user6` with CMS user 2 id store in variables.
+                        'X-Acting-As-User': 'user6',
+                    },
+                    body: JSON.stringify({
+                        query: `query StateUser {
+                        fetchCurrentUser {
+                            ... on StateUser {
+                                id
+                                role
+                                email
+                                givenName
+                                familyName
+                                state {
+                                    code
+                                    name
+                                    programs {
+                                        id
+                                        name
+                                        fullName
+                                        isRateProgram
+                                    }
+                                }
+                            }
+                            ... on CMSUser {
+                                id
+                                role
+                                email
+                                givenName
+                                familyName
+                                stateAssignments {
+                                    code
+                                    name
+                                    programs {
+                                        id
+                                        name
+                                        fullName
+                                        isRateProgram
+                                    }
+                                }
+                                divisionAssignment
+                            }
+                            ... on AdminUser {
+                                id
+                                role
+                                email
+                                givenName
+                                familyName
+                            }
+                            ... on HelpdeskUser {
+                                id
+                                role
+                                email
+                                givenName
+                                familyName
+                            }
+                            ... on BusinessOwnerUser {
+                                id
+                                role
+                                email
+                                givenName
+                                familyName
+                            }
+                            ... on CMSApproverUser {
+                                id
+                                role
+                                email
+                                givenName
+                                familyName
+                                stateAssignments {
+                                    code
+                                    name
+                                    programs {
+                                        id
+                                        name
+                                        fullName
+                                        isRateProgram
+                                    }
+                                }
+                                divisionAssignment
+                            }
+                        }
+                    }`,
+                    }),
+                }
+            )
+
+            console.info('GraphQL response status:', graphqlResponse.status)
+            const graphqlData = await graphqlResponse.json()
+            console.info(
+                'GraphQL response:',
+                JSON.stringify(graphqlData, null, 2)
+            )
+
+            expect(graphqlResponse.ok).toBe(true)
+            expect(graphqlData).toHaveProperty('data')
+            expect(graphqlData.data).toHaveProperty('fetchCurrentUser')
+
+            // validate that fetchCurrentUser response is returning the delegated CMS user (CMS user 2)
         })
     })
 })
