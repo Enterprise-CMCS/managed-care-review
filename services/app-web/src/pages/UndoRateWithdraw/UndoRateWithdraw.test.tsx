@@ -10,14 +10,13 @@ import {
     undoWithdrawRateMockFailure,
 } from '@mc-review/mocks'
 import { renderWithProviders } from '../../testHelpers'
-import { Routes, Route } from 'react-router'
 import { RateSummarySideNav } from '../SubmissionSideNav/RateSummarySideNav'
 import { RoutesRecord } from '@mc-review/constants'
 import { RateSummary } from '../RateSummary'
 import { UndoRateWithdraw } from './UndoRateWithdraw'
 import { screen, waitFor } from '@testing-library/react'
 import { Rate } from '../../gen/gqlClient'
-import { Location } from 'react-router-dom'
+import { Location, Routes, Route } from 'react-router-dom'
 
 describe('UndoRateWithdraw', () => {
     it('can undo rate withdraw', async () => {

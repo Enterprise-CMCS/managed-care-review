@@ -1,5 +1,4 @@
 import { screen, waitFor, within } from '@testing-library/react'
-import { Route, Routes } from 'react-router'
 import { RoutesRecord } from '@mc-review/constants'
 import {
     fetchCurrentUserMock,
@@ -18,7 +17,7 @@ import { SubmissionSummary } from './SubmissionSummary'
 import { SubmissionSideNav } from '../SubmissionSideNav'
 import { mockContractPackageUnlockedWithUnlockedType } from '@mc-review/mocks'
 import { ReviewSubmit } from '../StateSubmission/HealthPlanSubmission/ReviewSubmit'
-import { generatePath, Location } from 'react-router-dom'
+import { generatePath, Location, Route, Routes } from 'react-router-dom'
 import { dayjs } from '@mc-review/dates'
 
 describe('SubmissionSummary', () => {
