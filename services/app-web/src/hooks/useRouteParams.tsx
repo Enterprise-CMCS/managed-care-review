@@ -12,10 +12,11 @@ import {
 type UseRouteParams = {
     id?: string // Add any dynamic params to this list - should match :param usage in RoutesRecord dictionary
     contractSubmissionType?: ContractSubmissionTypeParams
+    rateID?: string
 }
 
 const useRouteParams = (): UseRouteParams => {
-    const { id, contractSubmissionType } = useParams<UseRouteParams>()
+    const { id, contractSubmissionType, rateID } = useParams<UseRouteParams>()
     const { currentRoute } = useCurrentRoute()
     if (!id) {
         if (STATE_SUBMISSION_FORM_ROUTES.includes(currentRoute)) {
@@ -31,7 +32,14 @@ const useRouteParams = (): UseRouteParams => {
             recordJSException(errorMessage)
         }
     }
-    return { id, contractSubmissionType }
+    if (!rateID) {
+        if (STATE_SUBMISSION_FORM_ROUTES.includes(currentRoute)) {
+            const errorMessage =
+                'Unexpected Error: useRouteParams = rateID param not set.'
+            recordJSException(errorMessage)
+        }
+    }
+    return { id, contractSubmissionType, rateID }
 }
 
 export { useRouteParams }
