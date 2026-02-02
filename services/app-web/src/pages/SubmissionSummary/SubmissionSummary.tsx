@@ -264,7 +264,7 @@ export const SubmissionSummary = (): React.ReactElement => {
         latestContractAction
     const undoWithdrawAction =
         latestContractAction?.actionType === 'UNDER_REVIEW' &&
-        contract.reviewStatusActions?.[1].actionType === 'WITHDRAW'
+        contract.reviewStatusActions?.[1]?.actionType === 'WITHDRAW'
     const showPermUndoWithdrawBanner =
         undoWithdrawAction && undoWithdrawSubmissionFlag && isStateUser
 
