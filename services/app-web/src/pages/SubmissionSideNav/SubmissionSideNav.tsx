@@ -1,6 +1,6 @@
 import { SideNav, GridContainer, Icon } from '@trussworks/react-uswds'
 import styles from './SubmissionSideNav.module.scss'
-import { useLocation, Outlet } from 'react-router-dom'
+import { useLocation, Outlet, useParams } from 'react-router-dom'
 import { useAuth } from '../../contexts/AuthContext'
 import {
     ContractSubmissionTypeRecord,
@@ -23,7 +23,6 @@ import { GenericErrorPage } from '../Errors/GenericErrorPage'
 import { Error404 } from '../Errors/Error404Page'
 import { Contract, User } from '../../gen/gqlClient'
 import { isUnlockedOrDraft, shouldUseFormPageStyles } from './helpers'
-import { useRouteParams } from '../../hooks'
 import React from 'react'
 
 export type SideNavOutletContextType = {
@@ -39,7 +38,7 @@ export const SubmissionSideNav = () => {
         id,
         rateID,
         contractSubmissionType: contractTypeParam,
-    } = useRouteParams()
+    } = useParams()
     if (!id) {
         throw new Error(
             'PROGRAMMING ERROR: id param not set in state submission form.'
