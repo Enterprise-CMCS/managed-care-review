@@ -1,4 +1,4 @@
-import { Route, Routes } from 'react-router'
+import { Route, Routes } from 'react-router-dom'
 import { waitFor, screen } from '@testing-library/react'
 import { renderWithProviders } from '../../testHelpers'
 import { SubmissionSideNav } from '../SubmissionSideNav'

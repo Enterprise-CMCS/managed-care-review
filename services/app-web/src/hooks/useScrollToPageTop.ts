@@ -1,5 +1,5 @@
 import { useLayoutEffect } from 'react'
-import { useLocation } from 'react-router'
+import { useLocation } from 'react-router-dom'
 
 // Scroll to top of page on load, used on every page change
 export const useScrollToPageTop = (): void => {

@@ -6,7 +6,7 @@ import {
     mockContractPackageSubmittedWithQuestions,
     mockValidCMSUser,
 } from '@mc-review/mocks'
-import { Route, Routes } from 'react-router'
+import { Route, Routes } from 'react-router-dom'
 import { SubmissionSideNav } from '../SubmissionSideNav'
 import { RoutesRecord } from '@mc-review/constants'
 import { SubmissionSummary } from '../SubmissionSummary'

@@ -1,4 +1,3 @@
-import { Route, Routes } from 'react-router'
 import {
     fetchContractMockSuccess,
     fetchContractWithQuestionsMockSuccess,
@@ -15,7 +14,7 @@ import { SubmissionSummary } from '../SubmissionSummary'
 import { UndoSubmissionWithdraw } from './UndoSubmissionWithdraw'
 import { waitFor, screen } from '@testing-library/react'
 import { Contract } from '../../gen/gqlClient'
-import { Location, NavigateFunction } from 'react-router-dom'
+import { Location, NavigateFunction, Route, Routes } from 'react-router-dom'
 
 describe('UndoSubmissionWithdraw', () => {
     it('renders without errors', async () => {

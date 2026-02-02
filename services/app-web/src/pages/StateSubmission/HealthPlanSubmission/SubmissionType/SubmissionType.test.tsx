@@ -9,8 +9,7 @@ import {
 } from '@mc-review/mocks'
 import { renderWithProviders } from '../../../../testHelpers'
 import { SubmissionType } from './index'
-import { Routes } from 'react-router'
-import { Route } from 'react-router-dom'
+import { Route, Routes } from 'react-router-dom'
 import { RoutesRecord } from '@mc-review/constants'
 
 describe('SubmissionType', () => {

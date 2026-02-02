@@ -1,4 +1,4 @@
-import { matchPath, PathMatch } from 'react-router'
+import { matchPath, PathMatch } from 'react-router-dom'
 import {
     RouteT,
     RoutesRecord,

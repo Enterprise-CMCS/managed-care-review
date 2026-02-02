@@ -1,6 +1,6 @@
 import { screen, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
-import { Route, Routes } from 'react-router'
+import { Route, Routes } from 'react-router-dom'
 import {
     RoutesRecord,
     ContractSubmissionTypeRecord,
@@ -11,7 +11,7 @@ import {
     mockContractPackageSubmitted,
     iterableCmsUsersMockData,
 } from '@mc-review/mocks'
-import { renderWithProviders } from '../../testHelpers/jestHelpers'
+import { renderWithProviders } from '../../testHelpers'
 import { MccrsId } from './MccrsId'
 import { Location, NavigateFunction } from 'react-router-dom'
 

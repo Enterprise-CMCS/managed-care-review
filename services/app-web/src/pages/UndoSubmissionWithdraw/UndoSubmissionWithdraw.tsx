@@ -2,7 +2,6 @@ import React, { useLayoutEffect, useState } from 'react'
 import styles from './UndoSubmissionWithdraw.module.scss'
 import * as Yup from 'yup'
 import { Formik, FormikErrors } from 'formik'
-import { useNavigate } from 'react-router'
 import { usePage } from '../../contexts/PageContext'
 import { useMemoizedStateHeader, useRouteParams, useTealium } from '../../hooks'
 import {
@@ -25,7 +24,7 @@ import { handleAndReturnErrorState } from '../StateSubmission/SharedSubmissionCo
 import { GenericErrorPage } from '../Errors/GenericErrorPage'
 import { ButtonGroup, Form } from '@trussworks/react-uswds'
 import { recordJSException } from '@mc-review/otel'
-import { generatePath } from 'react-router-dom'
+import { generatePath, useNavigate } from 'react-router-dom'
 import { Error404 } from '../Errors/Error404Page'
 
 type UndoSubmissionWithdrawValues = {
