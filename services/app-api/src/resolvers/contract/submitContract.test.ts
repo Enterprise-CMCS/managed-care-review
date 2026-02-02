@@ -8,6 +8,7 @@ import { SubmitContractDocument } from '../../gen/gqlClient'
 import {
     clearMetadataFromContractFormData,
     createAndUpdateTestEQROContract,
+    mockGqlContractDraftRevisionFormDataInput,
     testS3Client,
 } from '../../testHelpers'
 
@@ -2155,7 +2156,17 @@ describe('submitContract', () => {
                 s3Client: mockS3,
             })
 
-            const draft = await createAndUpdateTestEQROContract(stateServer)
+            const draft = await createAndUpdateTestEQROContract(
+                stateServer,
+                undefined,
+                {
+                    eqroNewContractor: true,
+                    eqroProvisionMcoNewOptionalActivity: true,
+                    eqroProvisionNewMcoEqrRelatedActivities: true,
+                    eqroProvisionChipEqrRelatedActivities: true,
+                    eqroProvisionMcoEqrOrRelatedActivities: null,
+                }
+            )
 
             const contract = await submitTestContract(stateServer, draft.id)
             // check contract metadata
@@ -2214,8 +2225,82 @@ describe('submitContract', () => {
                 eqroProvisionMcoNewOptionalActivity: true,
                 eqroProvisionNewMcoEqrRelatedActivities: true,
                 eqroProvisionChipEqrRelatedActivities: true,
-                eqroProvisionMcoEqrOrRelatedActivities: true,
+                eqroProvisionMcoEqrOrRelatedActivities: null,
             })
+
+            //expect subject to review to not have review action.
+            const latestAction = contract.reviewStatusActions?.[0]
+
+            expect(latestAction?.actionType).toBe('UNDER_REVIEW')
+        })
+
+        it('submits a EQRO and records review determination action', async () => {
+            const stateServer = await constructTestPostgresServer({
+                s3Client: mockS3,
+            })
+            const cmsServer = await constructTestPostgresServer({
+                s3Client: mockS3,
+                context: {
+                    user: testCMSUser(),
+                },
+            })
+
+            const draft = await createAndUpdateTestEQROContract(
+                stateServer,
+                undefined,
+                {
+                    eqroNewContractor: false,
+                    eqroProvisionMcoNewOptionalActivity: false,
+                    eqroProvisionNewMcoEqrRelatedActivities: false,
+                    eqroProvisionChipEqrRelatedActivities: false,
+                    eqroProvisionMcoEqrOrRelatedActivities: null,
+                }
+            )
+
+            const contract = await submitTestContract(stateServer, draft.id)
+
+            //expect review decision
+            expect(contract.consolidatedStatus).toBe('NOT_SUBJECT_TO_REVIEW')
+
+            const latestAction = contract.reviewStatusActions?.[0]
+
+            expect(latestAction).toBeDefined()
+            expect(latestAction?.actionType).toBe('NOT_SUBJECT_TO_REVIEW')
+
+            // let's unlock and resubmit with the same data
+            const unlockedContract = await unlockTestContract(
+                cmsServer,
+                contract.id,
+                'unlock EQRO submission'
+            )
+
+            expect(unlockedContract.consolidatedStatus).toBe('UNLOCKED')
+
+            // Update to make this subject to review
+            await updateTestContractDraftRevision(
+                stateServer,
+                unlockedContract.id,
+                unlockedContract.draftRevision?.updatedAt,
+                mockGqlContractDraftRevisionFormDataInput(
+                    unlockedContract.stateCode,
+                    {
+                        ...unlockedContract.draftRevision.formData,
+                        eqroNewContractor: true,
+                        eqroProvisionMcoNewOptionalActivity: true,
+                        eqroProvisionNewMcoEqrRelatedActivities: true,
+                        eqroProvisionChipEqrRelatedActivities: true,
+                        eqroProvisionMcoEqrOrRelatedActivities: true,
+                    }
+                )
+            )
+
+            const resubmittedContract = await submitTestContract(
+                stateServer,
+                unlockedContract.id,
+                'resubmit EQRO submission'
+            )
+
+            expect(resubmittedContract.consolidatedStatus).toBe('RESUBMITTED')
         })
 
         it('returns an error if EQRO submission submissionType is not CONTRACT_ONLY', async () => {

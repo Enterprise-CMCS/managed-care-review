@@ -1,5 +1,11 @@
 import { MockedProviderProps, MockedProvider } from '@apollo/client/testing'
-import { Location, MemoryRouter, useLocation } from 'react-router-dom'
+import {
+    Location,
+    MemoryRouter,
+    useLocation,
+    useNavigate,
+    NavigateFunction,
+} from 'react-router-dom'
 import {
     fireEvent,
     render,
@@ -74,6 +80,7 @@ const renderWithProviders = (
         s3Provider?: S3ClientT // used to pass AWS S3 related state via  S3Context
         tealiumProvider?: TealiumClientType
         location?: (location: Location) => Location // used to pass a location url for react-router
+        navigate?: (navigate: NavigateFunction) => void // used to expose navigate function for react-router
         featureFlags?: FeatureFlagSettings
     }
 ) => {
@@ -84,6 +91,7 @@ const renderWithProviders = (
         s3Provider = undefined,
         tealiumProvider = undefined,
         location = undefined,
+        navigate = undefined,
         featureFlags = undefined,
     } = options || {}
     const { route } = routerProvider
@@ -122,6 +130,11 @@ const renderWithProviders = (
                                     {location && (
                                         <WithLocation setLocation={location} />
                                     )}
+                                    {navigate && (
+                                        <WithNavigation
+                                            setNavigate={navigate}
+                                        />
+                                    )}
                                     <PageProvider>
                                         <TealiumProvider client={tealiumClient}>
                                             {ui}
@@ -148,6 +161,16 @@ const WithLocation = ({
 }): null => {
     const location = useLocation()
     setLocation(location)
+    return null
+}
+
+const WithNavigation = ({
+    setNavigate,
+}: {
+    setNavigate: (navigate: NavigateFunction) => void
+}): null => {
+    const navigate = useNavigate()
+    setNavigate(navigate)
     return null
 }
 

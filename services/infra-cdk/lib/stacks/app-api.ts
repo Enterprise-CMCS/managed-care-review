@@ -70,9 +70,13 @@ export class AppApiStack extends BaseStack {
     public readonly cleanupFunction: NodejsFunction
     public readonly migrateFunction: NodejsFunction
     public readonly regenerateZipsFunction: NodejsFunction
+    public readonly migrateS3UrlsFunction: NodejsFunction
 
+    public readonly migrateProtobufDataFunction: NodejsFunction
     public readonly graphqlFunction: NodejsFunction
 
+    // Shared Prisma migration layer for functions that need database migration
+    private readonly prismaMigrationLayer: ILayerVersion
     // Shared OTEL layer for all functions
     private readonly otelLayer: ILayerVersion
     // Shared Prisma engine layer for GraphQL and OAuth functions
@@ -125,7 +129,7 @@ export class AppApiStack extends BaseStack {
                 assumedBy: new ServicePrincipal('apigateway.amazonaws.com'),
                 managedPolicies: [
                     ManagedPolicy.fromAwsManagedPolicyName(
-                        'service-role/AmazonAPIGatewayPushToCloudWatchLogs'
+                        'service-role/AmazonAPIGatewayPushToCloudWatchLogs' // pragma: allowlist secret
                     ),
                 ],
             }
@@ -222,17 +226,31 @@ export class AppApiStack extends BaseStack {
             },
         })
 
-        // Create Lambda execution role
-        const lambdaRole = this.createLambdaRole()
-
-        // Get environment variables
-        const environment = this.getLambdaEnvironment()
-
         // Create OTEL layer for all functions (matches serverless provider-level default)
         this.otelLayer = LayerVersion.fromLayerVersionArn(
             this,
             'OtelLayer',
             AWS_OTEL_LAYER_ARN
+        )
+
+        // Create shared Prisma migration layer for functions that need database migration
+        this.prismaMigrationLayer = new LayerVersion(
+            this,
+            'PrismaMigrationLayer',
+            {
+                layerVersionName: `${ResourceNames.apiName('app-api', this.stage)}-prisma-migration`,
+                description: 'Prisma migration layer for app-api',
+                compatibleRuntimes: [Runtime.NODEJS_20_X],
+                compatibleArchitectures: [Architecture.X86_64],
+                code: Code.fromAsset(
+                    path.join(
+                        __dirname,
+                        '..',
+                        '..',
+                        'lambda-layers-prisma-client-migration'
+                    )
+                ),
+            }
         )
 
         // Create shared Prisma engine layer for functions that need database access
@@ -251,8 +269,16 @@ export class AppApiStack extends BaseStack {
             ),
         })
 
+        // Populate common lambda parameters into variables to be used during function creation
+        const securityGroups = [
+            this.lambdaSecurityGroup,
+            this.applicationSecurityGroup,
+        ]
+        const role = this.createLambdaRole()
+        const environment = this.getLambdaEnvironment()
+
         // Create simple Lambda functions first (no VPC, layers, or complex dependencies)
-        this.healthFunction = this.createFunction(
+        this.healthFunction = this.createLambdaFunction(
             'health',
             'health_check',
             'main',
@@ -260,12 +286,12 @@ export class AppApiStack extends BaseStack {
                 timeout: Duration.seconds(30),
                 memorySize: 1024,
                 environment,
-                role: lambdaRole,
+                role,
                 layers: [this.otelLayer],
             }
         )
 
-        this.emailSubmitFunction = this.createFunction(
+        this.emailSubmitFunction = this.createLambdaFunction(
             'email-submit',
             'email_submit',
             'main',
@@ -273,7 +299,7 @@ export class AppApiStack extends BaseStack {
                 timeout: Duration.seconds(30),
                 memorySize: 1024,
                 environment,
-                role: lambdaRole,
+                role,
                 layers: [this.otelLayer],
             }
         )
@@ -298,14 +324,14 @@ export class AppApiStack extends BaseStack {
             timeout: Duration.seconds(30),
             memorySize: 1024,
             environment,
-            role: lambdaRole,
+            role,
             layers: [this.otelLayer],
             bundling: this.createBundling('otel', [
                 this.getOtelBundlingCommands(),
             ]),
         })
 
-        this.thirdPartyApiAuthorizerFunction = this.createFunction(
+        this.thirdPartyApiAuthorizerFunction = this.createLambdaFunction(
             'third-party-api-authorizer',
             'third_party_API_authorizer',
             'main',
@@ -313,18 +339,39 @@ export class AppApiStack extends BaseStack {
                 timeout: Duration.seconds(30),
                 memorySize: 1024,
                 environment,
-                role: lambdaRole,
+                role,
                 layers: [this.otelLayer],
             }
         )
 
         // OAuth token function needs VPC and Prisma layer for database access
-        this.oauthTokenFunction = this.createOauthTokenFunction(
-            lambdaRole,
-            environment
+        this.oauthTokenFunction = this.createLambdaFunction(
+            'oauth-token',
+            'oauth_token',
+            'main',
+            {
+                timeout: Duration.seconds(30),
+                memorySize: 1024,
+                environment,
+                role,
+                layers: [this.prismaEngineLayer, this.otelLayer],
+                vpc: this.vpc,
+                vpcSubnets: {
+                    subnetType: SubnetType.PRIVATE_WITH_EGRESS,
+                },
+                securityGroups,
+                bundling: {
+                    format: OutputFormat.ESM,
+                    banner: AppApiStack.ESM_BANNER,
+                    externalModules: ['prisma', '@prisma/client'],
+                    ...this.createBundling('oauth-token', [
+                        this.getOtelBundlingCommands(),
+                    ]),
+                },
+            }
         )
 
-        this.cleanupFunction = this.createFunction(
+        this.cleanupFunction = this.createLambdaFunction(
             'cleanup',
             'cleanup',
             'main',
@@ -332,27 +379,175 @@ export class AppApiStack extends BaseStack {
                 timeout: Duration.seconds(30),
                 memorySize: 1024,
                 environment,
-                role: lambdaRole,
+                role,
                 layers: [this.otelLayer],
             }
         )
 
+        // Create the migrate protobuf function with VPC and layers
+        this.migrateProtobufDataFunction = this.createLambdaFunction(
+            'migrate-protobuf-data',
+            'migrate_protobuf_data',
+            'main',
+            {
+                timeout: Duration.minutes(5),
+                memorySize: 512,
+                environment: {
+                    ...environment,
+                    CONNECT_TIMEOUT: '60',
+                    STAGE_NAME: this.stage,
+                },
+                role,
+                layers: [this.prismaEngineLayer, this.otelLayer],
+                vpc: this.vpc,
+                vpcSubnets: {
+                    subnetType: SubnetType.PRIVATE_WITH_EGRESS,
+                },
+                securityGroups,
+                bundling: {
+                    externalModules: ['prisma', '@prisma/client'],
+                    ...this.createBundling('migrate-protobuf-data', [
+                        this.getOtelBundlingCommands(),
+                    ]),
+                },
+            }
+        )
+
         // Create migrate function with VPC and layers
-        this.migrateFunction = this.createMigrateFunction(
-            lambdaRole,
-            environment
+        this.migrateFunction = this.createLambdaFunction(
+            'migrate',
+            'postgres_migrate',
+            'main',
+            {
+                timeout: Duration.seconds(60), // Extended timeout for DB operations
+                memorySize: 1024,
+                environment: {
+                    ...environment,
+                    SCHEMA_PATH: '/opt/nodejs/prisma/schema.prisma',
+                    CONNECT_TIMEOUT: '60',
+                    NODE_PATH: '/opt/nodejs/node_modules',
+                },
+                role,
+                layers: [this.prismaMigrationLayer, this.otelLayer],
+                vpc: this.vpc,
+                vpcSubnets: {
+                    subnetType: SubnetType.PRIVATE_WITH_EGRESS,
+                },
+                securityGroups,
+                bundling: {
+                    format: OutputFormat.ESM,
+                    banner: AppApiStack.ESM_BANNER,
+                    externalModules: ['prisma', '@prisma/client', '.prisma'],
+                    ...this.createBundling(
+                        'migrate',
+                        [this.getOtelBundlingCommands()],
+                        {
+                            '--loader:.graphql': 'text',
+                            '--loader:.gql': 'text',
+                        }
+                    ),
+                },
+            }
         )
 
         // Create regenerate zips function with VPC and layers
-        this.regenerateZipsFunction = this.createRegenerateZipsFunction(
-            lambdaRole,
-            environment
+        this.regenerateZipsFunction = this.createLambdaFunction(
+            'regenerateZips',
+            'regenerate_zips',
+            'main',
+            {
+                functionName: `${ResourceNames.apiName('app-api', this.stage)}-regenerate-zips`,
+                timeout: Duration.minutes(15), // Extended timeout for processing many zips
+                memorySize: 4096, // Higher memory for zip operations
+                environment,
+                role,
+                layers: [this.prismaEngineLayer, this.otelLayer],
+                vpc: this.vpc,
+                vpcSubnets: {
+                    subnetType: SubnetType.PRIVATE_WITH_EGRESS,
+                },
+                securityGroups,
+                bundling: {
+                    format: OutputFormat.ESM,
+                    banner: AppApiStack.ESM_BANNER,
+                    externalModules: ['prisma', '@prisma/client'],
+                    ...this.createBundling('regenerate-zips', [
+                        this.getOtelBundlingCommands(),
+                    ]),
+                },
+            }
+        )
+
+        /**
+         * Create the migrate S3 URLs function with VPC and Prisma engine layer
+         * Used to migrate malformed s3URL fields to separate s3BucketName and s3Key columns
+         */
+        this.migrateS3UrlsFunction = this.createLambdaFunction(
+            'migrateS3Urls',
+            'migrate_s3_urls',
+            'main',
+            {
+                timeout: Duration.minutes(15), // Extended timeout for processing many documents
+                memorySize: 1024,
+                environment,
+                role,
+                layers: [this.prismaEngineLayer, this.otelLayer],
+                vpc: this.vpc,
+                vpcSubnets: {
+                    subnetType: SubnetType.PRIVATE_WITH_EGRESS,
+                },
+                securityGroups: [
+                    this.lambdaSecurityGroup,
+                    this.applicationSecurityGroup,
+                ],
+                bundling: {
+                    format: OutputFormat.ESM,
+                    banner: AppApiStack.ESM_BANNER,
+                    externalModules: ['prisma', '@prisma/client'],
+                    ...this.createBundling('migrate-s3-urls', [
+                        this.getOtelBundlingCommands(),
+                    ]),
+                },
+            }
         )
 
         // Create GraphQL function with VPC and layers
-        this.graphqlFunction = this.createGraphqlFunction(
-            lambdaRole,
-            environment
+        this.graphqlFunction = this.createLambdaFunction(
+            'graphql',
+            'apollo_gql',
+            'gqlHandler',
+            {
+                timeout: Duration.seconds(30), // Extended timeout for GraphQL operations
+                memorySize: 1024,
+                environment,
+                role,
+                layers: [this.prismaEngineLayer, this.otelLayer],
+                vpc: this.vpc,
+                vpcSubnets: {
+                    subnetType: SubnetType.PRIVATE_WITH_EGRESS,
+                },
+                securityGroups,
+                // Custom bundling to handle .graphql files and other assets
+                bundling: {
+                    format: OutputFormat.ESM,
+                    banner: AppApiStack.ESM_BANNER,
+                    minify: false,
+                    sourceMap: true,
+                    target: 'node20',
+                    externalModules: ['prisma', '@prisma/client'],
+                    ...this.createBundling(
+                        'graphql',
+                        [
+                            this.getOtelBundlingCommands(),
+                            this.getEtaTemplatesBundlingCommands(),
+                        ],
+                        {
+                            '--loader:.graphql': 'text',
+                            '--loader:.gql': 'text',
+                        }
+                    ),
+                },
+            }
         )
 
         // Create API Gateway resources and methods first
@@ -436,7 +631,7 @@ export class AppApiStack extends BaseStack {
         }
     }
 
-    private createFunction(
+    private createLambdaFunction(
         functionName: string,
         handlerFile: string,
         handlerMethod: string,
@@ -462,279 +657,6 @@ export class AppApiStack extends BaseStack {
             ]),
             ...options,
         })
-    }
-
-    /**
-     * Create the migrate function with VPC, layers, and extended permissions
-     */
-    private createMigrateFunction(
-        role: Role,
-        environment: Record<string, string>
-    ): NodejsFunction {
-        // Build security groups array - use both during transition
-        const securityGroups = [
-            this.lambdaSecurityGroup,
-            this.applicationSecurityGroup,
-        ]
-
-        const prismaMigrationLayer = new LayerVersion(
-            this,
-            'PrismaMigrationLayer',
-            {
-                layerVersionName: `${ResourceNames.apiName('app-api', this.stage)}-prisma-migration`,
-                description: 'Prisma migration layer for app-api',
-                compatibleRuntimes: [Runtime.NODEJS_20_X],
-                compatibleArchitectures: [Architecture.X86_64],
-                code: Code.fromAsset(
-                    path.join(
-                        __dirname,
-                        '..',
-                        '..',
-                        'lambda-layers-prisma-client-migration'
-                    )
-                ),
-            }
-        )
-
-        // Create migrate function with all required configuration
-        const migrateFunction = new NodejsFunction(this, 'migrateFunction', {
-            functionName: `${ResourceNames.apiName('app-api', this.stage)}-migrate`,
-            runtime: Runtime.NODEJS_20_X,
-            architecture: Architecture.X86_64,
-            handler: 'main',
-            entry: path.join(
-                __dirname,
-                '..',
-                '..',
-                '..',
-                'app-api',
-                'src',
-                'handlers',
-                'postgres_migrate.ts'
-            ),
-            timeout: Duration.seconds(60), // Extended timeout for DB operations
-            memorySize: 1024,
-            environment: {
-                ...environment,
-                SCHEMA_PATH: '/opt/nodejs/prisma/schema.prisma',
-                CONNECT_TIMEOUT: '60',
-                NODE_PATH: '/opt/nodejs/node_modules',
-            },
-            role,
-            layers: [prismaMigrationLayer, this.otelLayer],
-            vpc: this.vpc,
-            vpcSubnets: {
-                subnetType: SubnetType.PRIVATE_WITH_EGRESS,
-            },
-            securityGroups,
-            bundling: {
-                format: OutputFormat.ESM,
-                banner: AppApiStack.ESM_BANNER,
-                externalModules: ['prisma', '@prisma/client', '.prisma'],
-                ...this.createBundling(
-                    'migrate',
-                    [this.getOtelBundlingCommands()],
-                    {
-                        '--loader:.graphql': 'text',
-                        '--loader:.gql': 'text',
-                    }
-                ),
-            },
-        })
-
-        // Grant additional RDS permissions for snapshot creation
-        role.addToPolicy(
-            new PolicyStatement({
-                effect: Effect.ALLOW,
-                actions: [
-                    'rds:CreateDBClusterSnapshot',
-                    'rds:DescribeDBClusterSnapshots',
-                    'rds:DescribeDBClusters',
-                    'rds:AddTagsToResource',
-                ],
-                resources: ['*'],
-            })
-        )
-
-        return migrateFunction
-    }
-
-    /**
-     * Create the regenerate zips function with VPC and Prisma engine layer
-     * Used to regenerate missing zip files for submitted contracts/rates
-     */
-    private createRegenerateZipsFunction(
-        role: Role,
-        environment: Record<string, string>
-    ): NodejsFunction {
-        // Build security groups array - use both during transition
-        const securityGroups = [
-            this.lambdaSecurityGroup,
-            this.applicationSecurityGroup,
-        ]
-
-        // Create regenerate zips function with all required configuration
-        const regenerateZipsFunction = new NodejsFunction(
-            this,
-            'regenerateZipsFunction',
-            {
-                functionName: `${ResourceNames.apiName('app-api', this.stage)}-regenerate-zips`,
-                runtime: Runtime.NODEJS_20_X,
-                architecture: Architecture.X86_64,
-                handler: 'main',
-                entry: path.join(
-                    __dirname,
-                    '..',
-                    '..',
-                    '..',
-                    'app-api',
-                    'src',
-                    'handlers',
-                    'regenerate_zips.ts'
-                ),
-                timeout: Duration.minutes(15), // Extended timeout for processing many zips
-                memorySize: 4096, // Higher memory for zip operations
-                environment,
-                role,
-                layers: [this.prismaEngineLayer, this.otelLayer],
-                vpc: this.vpc,
-                vpcSubnets: {
-                    subnetType: SubnetType.PRIVATE_WITH_EGRESS,
-                },
-                securityGroups,
-                bundling: {
-                    format: OutputFormat.ESM,
-                    banner: AppApiStack.ESM_BANNER,
-                    externalModules: ['prisma', '@prisma/client'],
-                    ...this.createBundling('regenerate-zips', [
-                        this.getOtelBundlingCommands(),
-                    ]),
-                },
-            }
-        )
-
-        return regenerateZipsFunction
-    }
-
-    /**
-     * Create the GraphQL function with VPC, layers, and extended timeout
-     */
-    private createGraphqlFunction(
-        role: Role,
-        environment: Record<string, string>
-    ): NodejsFunction {
-        // Build security groups array - use both during transition
-        const securityGroups = [
-            this.lambdaSecurityGroup,
-            this.applicationSecurityGroup,
-        ]
-
-        // Create GraphQL function with all required configuration
-        const graphqlFunction = new NodejsFunction(this, 'graphqlFunction', {
-            functionName: `${ResourceNames.apiName('app-api', this.stage)}-graphql`,
-            runtime: Runtime.NODEJS_20_X,
-            architecture: Architecture.X86_64,
-            handler: 'gqlHandler',
-            entry: path.join(
-                __dirname,
-                '..',
-                '..',
-                '..',
-                'app-api',
-                'src',
-                'handlers',
-                'apollo_gql.ts'
-            ),
-            timeout: Duration.seconds(30), // Extended timeout for GraphQL operations
-            memorySize: 1024,
-            environment,
-            role,
-            layers: [this.prismaEngineLayer, this.otelLayer],
-            vpc: this.vpc,
-            vpcSubnets: {
-                subnetType: SubnetType.PRIVATE_WITH_EGRESS,
-            },
-            securityGroups,
-            // Custom bundling to handle .graphql files and other assets
-            bundling: {
-                format: OutputFormat.ESM,
-                banner: AppApiStack.ESM_BANNER,
-                minify: false,
-                sourceMap: true,
-                target: 'node20',
-                externalModules: ['prisma', '@prisma/client'],
-                ...this.createBundling(
-                    'graphql',
-                    [
-                        this.getOtelBundlingCommands(),
-                        this.getEtaTemplatesBundlingCommands(),
-                    ],
-                    {
-                        '--loader:.graphql': 'text',
-                        '--loader:.gql': 'text',
-                    }
-                ),
-            },
-        })
-
-        return graphqlFunction
-    }
-
-    /**
-     * Create the OAuth token function with VPC and Prisma engine layer
-     * Matches serverless configuration for oauth_token function
-     */
-    private createOauthTokenFunction(
-        role: Role,
-        environment: Record<string, string>
-    ): NodejsFunction {
-        // Build security groups array - use both during transition
-        const securityGroups = [
-            this.lambdaSecurityGroup,
-            this.applicationSecurityGroup,
-        ]
-
-        // Create OAuth token function with all required configuration
-        const oauthTokenFunction = new NodejsFunction(
-            this,
-            'oauth-tokenFunction',
-            {
-                functionName: `${ResourceNames.apiName('app-api', this.stage)}-oauth-token`,
-                runtime: Runtime.NODEJS_20_X,
-                architecture: Architecture.X86_64,
-                handler: 'main',
-                entry: path.join(
-                    __dirname,
-                    '..',
-                    '..',
-                    '..',
-                    'app-api',
-                    'src',
-                    'handlers',
-                    'oauth_token.ts'
-                ),
-                timeout: Duration.seconds(30),
-                memorySize: 1024,
-                environment,
-                role,
-                layers: [this.prismaEngineLayer, this.otelLayer],
-                vpc: this.vpc,
-                vpcSubnets: {
-                    subnetType: SubnetType.PRIVATE_WITH_EGRESS,
-                },
-                securityGroups,
-                bundling: {
-                    format: OutputFormat.ESM,
-                    banner: AppApiStack.ESM_BANNER,
-                    externalModules: ['prisma', '@prisma/client'],
-                    ...this.createBundling('oauth-token', [
-                        this.getOtelBundlingCommands(),
-                    ]),
-                },
-            }
-        )
-
-        return oauthTokenFunction
     }
 
     private createLambdaRole(): Role {
@@ -1155,6 +1077,12 @@ export class AppApiStack extends BaseStack {
             description: 'Cleanup Lambda function name',
         })
 
+        new CfnOutput(this, 'ProtobufMigrationFunctionName', {
+            value: this.migrateProtobufDataFunction.functionName,
+            exportName: this.exportName('MigrateProtobufDataFunctionName'),
+            description: 'Protobuf data migration Lambda function name',
+        })
+
         new CfnOutput(this, 'MigrateFunctionName', {
             value: this.migrateFunction.functionName,
             exportName: this.exportName('MigrateFunctionName'),
@@ -1171,6 +1099,12 @@ export class AppApiStack extends BaseStack {
             value: this.regenerateZipsFunction.functionName,
             exportName: this.exportName('RegenerateZipsFunctionName'),
             description: 'Regenerate zips Lambda function name',
+        })
+
+        new CfnOutput(this, 'MigrateS3UrlsFunctionName', {
+            value: this.migrateS3UrlsFunction.functionName,
+            exportName: this.exportName('MigrateS3UrlsFunctionName'),
+            description: 'Migrate S3 URLs Lambda function name',
         })
 
         new CfnOutput(this, 'ApiGatewayUrl', {

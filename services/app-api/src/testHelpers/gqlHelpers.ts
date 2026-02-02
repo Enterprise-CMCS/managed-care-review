@@ -34,7 +34,6 @@ import type { LDService } from '../launchDarkly/launchDarkly'
 import { insertUserToLocalAurora } from '../authn'
 import { testStateUser } from './userHelpers'
 import { must } from './assertionHelpers'
-import { newJWTLib, type JWTLib } from '../jwt'
 import { testS3Client } from './s3Helpers'
 import type { S3ClientT } from '../s3'
 import { configureEmailer } from '../handlers/configuration'
@@ -75,7 +74,6 @@ const constructTestPostgresServer = async (opts?: {
     store?: Partial<Store>
     emailParameterStore?: EmailParameterStore // to be deleted when we remove parameter store, just rely on postgres
     ldService?: LDService
-    jwt?: JWTLib
     s3Client?: S3ClientT
     documentZip?: DocumentZipService
 }): Promise<ApolloServer> => {
@@ -87,13 +85,6 @@ const constructTestPostgresServer = async (opts?: {
         ...NewPostgresStore(prismaClient),
         ...opts?.store,
     }
-    const jwt =
-        opts?.jwt ||
-        newJWTLib({
-            issuer: 'mcreviewtest',
-            signingKey: Buffer.from('123af', 'hex'),
-            expirationDurationS: 1000,
-        })
 
     const localDocumentZip =
         opts?.documentZip ??
@@ -129,7 +120,6 @@ const constructTestPostgresServer = async (opts?: {
         postgresStore,
         emailer,
         ldService,
-        jwt,
         s3,
         'https://localhost:3000',
         localDocumentZip

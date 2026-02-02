@@ -1,10 +1,7 @@
-import type {
-    ContractType,
-    ContractRevisionType,
-} from '../../domain-models/contractAndRates'
+import type { ContractType, ContractRevisionType } from '../../domain-models'
 import { contractSchema } from '../../domain-models/contractAndRates'
 import type { ContractWithoutDraftRatesType } from '../../domain-models/contractAndRates/baseContractRateTypes'
-import type { ContractPackageSubmissionType } from '../../domain-models/contractAndRates/packageSubmissions'
+import type { ContractPackageSubmissionType } from '../../domain-models'
 import { rateWithoutDraftContractsToDomainModel } from './parseRateWithHistory'
 import type { ContractRevisionTableWithFormData } from './prismaSharedContractRateHelpers'
 import { getConsolidatedContractStatus } from './prismaSharedContractRateHelpers'
@@ -114,12 +111,14 @@ function contractWithHistoryToDomainModelWithoutRates(
             actionType: action.actionType,
             contractID: action.contractID,
             updatedAt: action.updatedAt,
-            updatedBy: {
-                email: action.updatedBy.email,
-                familyName: action.updatedBy.familyName,
-                givenName: action.updatedBy.givenName,
-                role: action.updatedBy.role,
-            },
+            updatedBy: action.updatedBy
+                ? {
+                      email: action.updatedBy.email,
+                      familyName: action.updatedBy.familyName,
+                      givenName: action.updatedBy.givenName,
+                      role: action.updatedBy.role,
+                  }
+                : undefined,
             updatedReason: action.updatedReason ?? undefined,
         }
         reviewStatusActions.push(contractAction)

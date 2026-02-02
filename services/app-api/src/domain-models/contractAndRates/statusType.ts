@@ -11,6 +11,7 @@ const contractReviewStatusSchema = z.union([
     z.literal('UNDER_REVIEW'),
     z.literal('APPROVED'),
     z.literal('WITHDRAWN'),
+    z.literal('NOT_SUBJECT_TO_REVIEW'),
 ])
 
 const rateReviewStatusSchema = z.union([
@@ -22,6 +23,7 @@ const consolidatedContractStatusSchema = z.union([
     ...statusSchema.options,
     z.literal('APPROVED'),
     z.literal('WITHDRAWN'),
+    z.literal('NOT_SUBJECT_TO_REVIEW'),
 ])
 
 const consolidatedRateStatusSchema = z.union([
