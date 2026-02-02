@@ -278,6 +278,8 @@ describe('fetchMcReviewSettings', () => {
                     clientId: 'test-client',
                     grants: ['client_credentials'],
                     isOAuthClient: true,
+                    scopes: [],
+                    isDelegatedUser: false,
                 },
             },
         })
@@ -303,6 +305,8 @@ describe('fetchMcReviewSettings', () => {
                     clientId: 'test-client',
                     grants: ['client_credentials'],
                     isOAuthClient: true,
+                    scopes: [],
+                    isDelegatedUser: false,
                 },
             },
         })

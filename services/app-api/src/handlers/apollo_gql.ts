@@ -104,14 +104,14 @@ function contextForRequestForFetcher(
                 const store = NewPostgresStore(pgResult)
                 const principalId = event.requestContext.authorizer?.principalId
                 const authorizerContext = event.requestContext.authorizer
-                const delegatedUser: string | null = event.headers?.['x-acting-as-user'] ?? null
+                const delegatedUser: string | null =
+                    event.headers?.['x-acting-as-user'] ?? null
 
                 // Extract OAuth context if present
                 const isOAuthClient =
                     authorizerContext?.isOAuthClient === 'true'
                 const oauthClientId = authorizerContext?.clientId
                 const oauthGrants = authorizerContext?.grants?.split(',') || []
-                let allScopes: string[] = []
 
                 let userResult
                 if (authProvider && !fromThirdPartyAuthorizer) {
@@ -128,6 +128,7 @@ function contextForRequestForFetcher(
                 if (userResult === undefined) {
                     throw new Error(`Log: userResult must be supplied`)
                 }
+
                 if (!userResult.isErr()) {
                     const context: Context = {
                         user: userResult.value,
@@ -135,33 +136,33 @@ function contextForRequestForFetcher(
                         ctx: ctx,
                     }
 
-                    //if a delegated user has come in, fetch the clientId's oauth to get scopes
-                    if (delegatedUser) {
-                        const clientOauth = await store.getOAuthClientByClientId(oauthClientId)
+                    const clientOauth =
+                        await store.getOAuthClientByClientId(oauthClientId)
 
-                        if (clientOauth instanceof Error) {
-                            throw new Error(`Log: failed to get oauth with client id`)                            
-                        }
-
-                        allScopes = clientOauth?.scopes ?? []
+                    if (clientOauth instanceof Error) {
+                        throw new Error(
+                            `Log: failed to get oauth with client id`
+                        )
                     }
 
-                    // Add OAuth client info if present
+                    if (!clientOauth) {
+                        throw new Error('Log: OAuth client not found')
+                    }
+
                     if (isOAuthClient && oauthClientId) {
+                        // Add OAuth client info if present
                         context.oauthClient = {
                             clientId: oauthClientId,
                             grants: oauthGrants,
                             isOAuthClient: true,
-                            scopes: allScopes,
-                            isDelegatedUser: delegatedUser ? true : false
+                            scopes: clientOauth.scopes,
+                            isDelegatedUser: delegatedUser ? true : false,
                         }
                     }
 
                     return context
                 } else {
-                    throw new Error(
-                        `Log: failed to fetch user: ${userResult.error}`
-                    )
+                    throw new Error(`failed to fetch user: ${userResult.error}`)
                 }
             } catch (err) {
                 console.error('Error attempting to fetch user: ', err)

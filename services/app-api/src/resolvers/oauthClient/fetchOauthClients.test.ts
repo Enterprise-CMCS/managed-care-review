@@ -266,8 +266,10 @@ describe('fetchOauthClients', () => {
                     clientId: 'test-client',
                     grants: ['client_credentials'],
                     isOAuthClient: true,
+                    scopes: [],
+                    isDelegatedUser: false,
                 },
-            },            
+            },
         })
 
         const fetchOauthClients = await executeGraphQLOperation(server, {
@@ -284,13 +286,15 @@ describe('fetchOauthClients', () => {
         const postgresStore = NewPostgresStore(prismaClient)
 
         const server = await constructTestPostgresServer({
-            store: postgresStore, 
+            store: postgresStore,
             context: {
                 user: testAdminUser(),
                 oauthClient: {
                     clientId: 'test-client',
                     grants: ['client_credentials'],
                     isOAuthClient: true,
+                    scopes: [],
+                    isDelegatedUser: false,
                 },
             },
         })

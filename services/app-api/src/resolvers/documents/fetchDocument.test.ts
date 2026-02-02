@@ -141,6 +141,8 @@ describe('fetchDocument', () => {
                     clientId: 'test-oauth-client',
                     grants: ['some_other_grant'],
                     isOAuthClient: true,
+                    scopes: [],
+                    isDelegatedUser: false,
                 },
             },
             s3Client: mockS3,

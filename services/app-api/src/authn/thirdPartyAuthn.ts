@@ -19,16 +19,16 @@ export async function userFromThirdPartyAuthorizer(
     const serviceName = 'third-party-authorizer'
     initTracer(serviceName, otelCollectorURL)
 
-    try {    
+    try {
         // if delegatedUser is non-null, validate this user and return as context
         if (delegatedUserId) {
             const delegatedUser = await lookupUserAurora(store, delegatedUserId)
-            
+
             if (delegatedUser instanceof Error) {
                 return err(delegatedUser)
             }
             if (delegatedUser === undefined) {
-                return err(delegatedUser)
+                return err('user not found')
             }
 
             //validate the delegated user is a CMS or CMS Approver role
@@ -36,12 +36,12 @@ export async function userFromThirdPartyAuthorizer(
                 delegatedUser.role !== 'CMS_USER' &&
                 delegatedUser.role !== 'CMS_APPROVER_USER'
             ) {
-                return err(delegatedUser)
+                return err(`User not authorized. Role: ${delegatedUser.role}`)
             }
-                   
+
             return ok(delegatedUser)
         } else {
-            // Lookup user from postgres - validates for non-delegated user 
+            // Lookup user from postgres - validates for non-delegated user
             const auroraUser = await lookupUserAurora(store, userId)
             if (auroraUser instanceof Error) {
                 return err(auroraUser)
@@ -52,7 +52,6 @@ export async function userFromThirdPartyAuthorizer(
             }
             return ok(auroraUser)
         }
-        
     } catch {
         const err = new Error('ERROR: failed to look up user in postgres')
 
