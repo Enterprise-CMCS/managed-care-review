@@ -350,8 +350,6 @@ export const EQROSubmissionSummary = (): React.ReactElement => {
                     explainMissingData={explainMissingData}
                 />
 
-                <ChangeHistory contract={contract} />
-
                 <UnlockSubmitModal
                     modalRef={modalRef}
                     modalType="UNLOCK_CONTRACT"
