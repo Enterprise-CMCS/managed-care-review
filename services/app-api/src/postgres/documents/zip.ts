@@ -10,6 +10,8 @@ import { logError } from '../../logger'
 export type CreateDocumentZipPackageArgsType = {
     s3URL: string
     sha256: string
+    s3BucketName: string
+    s3Key: string
     contractRevisionID?: string
     rateRevisionID?: string
     documentType: DocumentZipType
@@ -23,12 +25,19 @@ export type FindDocumentZipPackagesByRevisionArgsType = {
 
 /**
  * Creates a document zip package record
+ * Expects s3BucketName and s3Key to be provided by caller (parsed at API boundary)
  */
 export async function createDocumentZipPackage(
     client: PrismaClient | PrismaTransactionType,
     args: CreateDocumentZipPackageArgsType
 ): Promise<DocumentZipPackage | Error> {
     try {
+        if (!args.s3BucketName || !args.s3Key) {
+            return new Error(
+                'createDocumentZipPackage requires s3BucketName and s3Key to be provided'
+            )
+        }
+
         return await client.documentZipPackage.create({
             data: args,
         })

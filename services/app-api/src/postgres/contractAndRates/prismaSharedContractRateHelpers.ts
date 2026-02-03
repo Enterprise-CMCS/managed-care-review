@@ -477,12 +477,16 @@ function rateFormDataToDomainModel(
             ? rateRevision.rateDocuments.map((doc) => ({
                   ...doc,
                   dateAdded: doc.dateAdded ?? undefined,
+                  s3BucketName: doc.s3BucketName ?? undefined,
+                  s3Key: doc.s3Key ?? undefined,
               }))
             : [],
         supportingDocuments: rateRevision.supportingDocuments
             ? rateRevision.supportingDocuments.map((doc) => ({
                   ...doc,
                   dateAdded: doc.dateAdded ?? undefined,
+                  s3BucketName: doc.s3BucketName ?? undefined,
+                  s3Key: doc.s3Key ?? undefined,
               }))
             : [],
         rateDateStart: rateRevision.rateDateStart ?? undefined,
@@ -603,6 +607,8 @@ function contractFormDataToDomainModel(
             ? contractRevision.supportingDocuments.map((doc) => ({
                   ...doc,
                   dateAdded: doc.dateAdded ?? undefined,
+                  s3BucketName: doc.s3BucketName ?? undefined,
+                  s3Key: doc.s3Key ?? undefined,
               }))
             : [],
         contractExecutionStatus:
@@ -611,6 +617,8 @@ function contractFormDataToDomainModel(
             ? contractRevision.contractDocuments.map((doc) => ({
                   ...doc,
                   dateAdded: doc.dateAdded ?? undefined,
+                  s3BucketName: doc.s3BucketName ?? undefined,
+                  s3Key: doc.s3Key ?? undefined,
               }))
             : [],
         contractDateStart: contractRevision.contractDateStart ?? undefined,

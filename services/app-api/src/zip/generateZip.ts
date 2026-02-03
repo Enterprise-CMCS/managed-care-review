@@ -559,10 +559,30 @@ export function documentZipService(
                     return zipResult
                 }
 
+                // Parse bucket and key from generated s3URL
+                const bucket = extractBucketName(zipResult.s3URL)
+                const key = extractS3Key(zipResult.s3URL)
+
+                if (bucket instanceof Error || key instanceof Error) {
+                    const err = new Error(
+                        `Failed to parse generated zip s3URL: ${zipResult.s3URL}`
+                    )
+                    logError('generateRateDocumentsZip', err)
+                    if (span) {
+                        setErrorAttributesOnActiveSpan(
+                            'failed to parse zip s3URL',
+                            span
+                        )
+                    }
+                    return err
+                }
+
                 // Store zip information in database
                 const createResult = await store.createDocumentZipPackage({
                     s3URL: zipResult.s3URL,
                     sha256: zipResult.sha256,
+                    s3BucketName: bucket,
+                    s3Key: key,
                     rateRevisionID,
                     documentType: 'RATE_DOCUMENTS',
                 })
@@ -636,10 +656,30 @@ export function documentZipService(
                     return zipResult
                 }
 
+                // Parse bucket and key from generated s3URL
+                const bucket = extractBucketName(zipResult.s3URL)
+                const key = extractS3Key(zipResult.s3URL)
+
+                if (bucket instanceof Error || key instanceof Error) {
+                    const err = new Error(
+                        `Failed to parse generated zip s3URL: ${zipResult.s3URL}`
+                    )
+                    logError('generateContractDocumentsZip', err)
+                    if (span) {
+                        setErrorAttributesOnActiveSpan(
+                            'failed to parse zip s3URL',
+                            span
+                        )
+                    }
+                    return err
+                }
+
                 // Store zip information in database
                 const createResult = await store.createDocumentZipPackage({
                     s3URL: zipResult.s3URL,
                     sha256: zipResult.sha256,
+                    s3BucketName: bucket,
+                    s3Key: key,
                     contractRevisionID,
                     documentType: 'CONTRACT_DOCUMENTS',
                 })

@@ -11,6 +11,7 @@ import { GraphQLError } from 'graphql/index'
 import type { Emailer } from '../../emailer'
 import type { StateCodeType } from '@mc-review/submissions'
 import { canWrite } from '../../authorization/oauthAuthorization'
+import { parseAndValidateDocuments } from '../documentHelpers'
 
 export function createRateQuestionResolver(
     store: Store,
@@ -90,14 +91,17 @@ export function createRateQuestionResolver(
             throw createUserInputError(errMessage)
         }
 
+        // Parse and validate document s3URLs
+        const docs = parseAndValidateDocuments(
+            input.documents.map((d) => ({
+                name: d.name,
+                s3URL: d.s3URL,
+            }))
+        )
+
         const inputFormatted = {
             ...input,
-            documents: input.documents.map((doc) => {
-                return {
-                    name: doc.name,
-                    s3URL: doc.s3URL,
-                }
-            }),
+            documents: docs,
         }
 
         const questionResult = await store.insertRateQuestion(

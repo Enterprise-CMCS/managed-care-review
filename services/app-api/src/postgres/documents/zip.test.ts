@@ -101,6 +101,8 @@ describe('Document Zip Package Database Functions', () => {
             const zipData: CreateDocumentZipPackageArgsType = {
                 s3URL: 's3://test-bucket/zips/contracts/123/contract-documents.zip',
                 sha256: 'abc123def456',
+                s3BucketName: 'test-bucket',
+                s3Key: 'zips/contracts/123/contract-documents.zip',
                 contractRevisionID: submittedRevision.id,
                 documentType: 'CONTRACT_DOCUMENTS' as DocumentZipType,
             }
@@ -146,6 +148,8 @@ describe('Document Zip Package Database Functions', () => {
             const zipData: CreateDocumentZipPackageArgsType = {
                 s3URL: 's3://test-bucket/zips/rates/456/rate-documents.zip',
                 sha256: 'def456ghi789',
+                s3BucketName: 'test-bucket',
+                s3Key: 'zips/rates/456/rate-documents.zip',
                 rateRevisionID: submittedRevision.id,
                 documentType: 'RATE_DOCUMENTS' as DocumentZipType,
             }
@@ -170,10 +174,12 @@ describe('Document Zip Package Database Functions', () => {
         it('successfully creates zip package with minimal required fields', async () => {
             const client = await sharedTestPrismaClient()
 
-            // All fields are actually optional except s3URL, sha256, and documentType
+            // All fields are actually optional except s3URL, sha256, bucket/key, and documentType
             const minimalZipData = {
                 s3URL: 's3://test-bucket/minimal.zip',
                 sha256: 'abc123def456',
+                s3BucketName: 'test-bucket',
+                s3Key: 'minimal.zip',
                 documentType: 'CONTRACT_DOCUMENTS' as DocumentZipType,
                 // Both contractRevisionID and rateRevisionID are optional
             }
@@ -204,6 +210,8 @@ describe('Document Zip Package Database Functions', () => {
             const zipData: CreateDocumentZipPackageArgsType = {
                 s3URL: 's3://test-bucket/test.zip',
                 sha256: 'abc123',
+                s3BucketName: 'test-bucket',
+                s3Key: 'test.zip',
                 contractRevisionID: 'non-existent-id',
                 documentType: 'CONTRACT_DOCUMENTS' as DocumentZipType,
             }
@@ -252,6 +260,8 @@ describe('Document Zip Package Database Functions', () => {
             const zipData1: CreateDocumentZipPackageArgsType = {
                 s3URL: 's3://bucket/zip1.zip',
                 sha256: 'hash1',
+                s3BucketName: 'bucket',
+                s3Key: 'zip1.zip',
                 contractRevisionID: submittedRevision.id,
                 documentType: 'CONTRACT_DOCUMENTS' as DocumentZipType,
             }
@@ -259,6 +269,8 @@ describe('Document Zip Package Database Functions', () => {
             const zipData2: CreateDocumentZipPackageArgsType = {
                 s3URL: 's3://bucket/zip2.zip',
                 sha256: 'hash2',
+                s3BucketName: 'bucket',
+                s3Key: 'zip2.zip',
                 contractRevisionID: submittedRevision.id,
                 documentType: 'CONTRACT_DOCUMENTS' as DocumentZipType,
             }
@@ -311,6 +323,8 @@ describe('Document Zip Package Database Functions', () => {
             await createDocumentZipPackage(client, {
                 s3URL: 's3://bucket/contract.zip',
                 sha256: 'hash1',
+                s3BucketName: 'bucket',
+                s3Key: 'contract.zip',
                 contractRevisionID: submittedRevision.id,
                 documentType: 'CONTRACT_DOCUMENTS' as DocumentZipType,
             })
@@ -406,6 +420,8 @@ describe('Document Zip Package Database Functions', () => {
             const zipData: CreateDocumentZipPackageArgsType = {
                 s3URL: 's3://bucket/rate.zip',
                 sha256: 'rate-hash',
+                s3BucketName: 'bucket',
+                s3Key: 'rate.zip',
                 rateRevisionID: submittedRevision.id,
                 documentType: 'RATE_DOCUMENTS' as DocumentZipType,
             }
@@ -448,6 +464,8 @@ describe('Document Zip Package Database Functions', () => {
             await createDocumentZipPackage(client, {
                 s3URL: 's3://bucket/rate.zip',
                 sha256: 'hash',
+                s3BucketName: 'bucket',
+                s3Key: 'rate.zip',
                 rateRevisionID: submittedRevision.id,
                 documentType: 'RATE_DOCUMENTS' as DocumentZipType,
             })
@@ -548,6 +566,8 @@ describe('Document Zip Package Database Functions', () => {
             await createDocumentZipPackage(client, {
                 s3URL: 's3://bucket/contract.zip',
                 sha256: 'contract-hash',
+                s3BucketName: 'bucket',
+                s3Key: 'contract.zip',
                 contractRevisionID: contractRevision.id,
                 documentType: 'CONTRACT_DOCUMENTS' as DocumentZipType,
             })
@@ -555,6 +575,8 @@ describe('Document Zip Package Database Functions', () => {
             await createDocumentZipPackage(client, {
                 s3URL: 's3://bucket/rate.zip',
                 sha256: 'rate-hash',
+                s3BucketName: 'bucket',
+                s3Key: 'rate.zip',
                 rateRevisionID: rateRevision.id,
                 documentType: 'RATE_DOCUMENTS' as DocumentZipType,
             })
