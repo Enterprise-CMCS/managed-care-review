@@ -362,7 +362,7 @@ describe('CustomOAuth2Server', () => {
             expect(response).toHaveProperty('expires_in', 1800)
         })
 
-        it.only('Can make a delegated request', async () => {
+        it('Can make a delegated request', async () => {
             const client = await sharedTestPrismaClient()
 
             // create two CMS users
