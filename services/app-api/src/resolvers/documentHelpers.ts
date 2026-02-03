@@ -46,8 +46,18 @@ export function parseAndValidateDocuments(
     documents: DocumentInput[]
 ): ParsedDocument[] {
     return documents.map((doc, index) => {
-        const bucket = parseBucketName(doc.s3URL)
-        const key = parseKey(doc.s3URL)
+        let bucket: string | Error
+        let key: string | Error
+
+        // parseBucketName throws instead of returning Error - need to catch it
+        try {
+            bucket = parseBucketName(doc.s3URL)
+        } catch (err) {
+            bucket = err instanceof Error ? err : new Error(String(err))
+        }
+
+        // parseKey returns Error
+        key = parseKey(doc.s3URL)
 
         if (bucket instanceof Error) {
             throw createUserInputError(
