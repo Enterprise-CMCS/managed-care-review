@@ -1,6 +1,5 @@
 import { screen, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
-import { Route, Routes } from 'react-router'
 import {
     RoutesRecord,
     ContractSubmissionTypeRecord,
@@ -13,7 +12,7 @@ import {
 } from '@mc-review/mocks'
 import { renderWithProviders } from '../../testHelpers/jestHelpers'
 import { MccrsId } from './MccrsId'
-import { Location, NavigateFunction } from 'react-router-dom'
+import { Location, NavigateFunction, Route, Routes } from 'react-router-dom'
 
 describe('MCCRSID', () => {
     afterEach(() => {
