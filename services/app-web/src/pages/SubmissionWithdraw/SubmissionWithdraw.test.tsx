@@ -1,4 +1,3 @@
-import { Route, Routes } from 'react-router'
 import { waitFor, screen } from '@testing-library/react'
 import { renderWithProviders } from '../../testHelpers'
 import { SubmissionSideNav } from '../SubmissionSideNav'
@@ -18,7 +17,7 @@ import {
 } from '@mc-review/mocks'
 import { RateStripped } from '../../gen/gqlClient'
 import { Contract } from '../../gen/gqlClient'
-import { Location, NavigateFunction } from 'react-router-dom'
+import { Location, NavigateFunction, Route, Routes } from 'react-router-dom'
 
 describe('SubmissionWithdraw', () => {
     it('renders without errors', async () => {

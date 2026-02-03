@@ -10,9 +10,9 @@ import {
     mockRateSubmittedWithQuestions,
     withdrawRateMockSuccess,
 } from '@mc-review/mocks'
-import { Route, Routes } from 'react-router'
+import { Route, Routes } from 'react-router-dom'
 import { RoutesRecord } from '@mc-review/constants'
-import { RateSummary } from '../SubmissionSummary'
+import { RateSummary } from '../RateSummary'
 import { RateWithdraw } from './RateWithdraw'
 import { waitFor, screen } from '@testing-library/react'
 import { RateSummarySideNav } from '../SubmissionSideNav/RateSummarySideNav'
