@@ -41,9 +41,8 @@ vi.mock('../../oauth/oauth2Server', () => ({
                     }
                 }
 
+                // pragma: allowlist nextline secret
                 if (body.client_secret === 'wrong-secret') {
-                    // pragma: allowlist secret
-
                     return {
                         statusCode: 401,
                         body: JSON.stringify({

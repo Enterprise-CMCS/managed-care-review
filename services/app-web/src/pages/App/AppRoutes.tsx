@@ -1,11 +1,10 @@
 import React, { Fragment, useEffect, useLayoutEffect, useState } from 'react'
-import { useLocation, Navigate } from 'react-router'
-import { Route, Routes } from 'react-router-dom'
+import { Route, Routes, useLocation, Navigate } from 'react-router-dom'
 import { useLDClient } from 'launchdarkly-react-client-sdk'
 import { idmRedirectURL } from '../../pages/Auth/cognitoAuth'
 import { assertNever, AuthModeType } from '@mc-review/common-code'
 import { PageTitlesRecord, RoutesRecord, RouteT } from '@mc-review/constants'
-import { getRouteName, getSubmissionPath } from '../../routeHelpers'
+import { getRouteName } from '../../routeHelpers'
 import { useAuth } from '../../contexts/AuthContext'
 import { usePage } from '../../contexts/PageContext'
 import { useTitle } from '../../hooks/useTitle'
@@ -43,7 +42,6 @@ import {
 import { GraphQLExplorer } from '../GraphQLExplorer/GraphQLExplorer'
 import { RateSummary } from '../RateSummary'
 import { RateEdit } from '../RateEdit/RateEdit'
-import { APIAccess } from '../APIAccess/APIAccess'
 import {
     StateAssignmentTable,
     AutomatedEmailsTable,
@@ -173,18 +171,12 @@ const StateUserRoutes = ({
                     />
 
                     <Route
-                        path={getSubmissionPath(
-                            'SUBMISSIONS_SUMMARY',
-                            'HEALTH_PLAN'
-                        )}
+                        path={RoutesRecord.SUBMISSIONS_SUMMARY}
                         element={<SubmissionSummary />}
                     />
                     {showEqroSubmissions && (
                         <Route
-                            path={getSubmissionPath(
-                                'SUBMISSIONS_SUMMARY',
-                                'EQRO'
-                            )}
+                            path={RoutesRecord.SUBMISSIONS_SUMMARY}
                             element={<EQROSubmissionSummary />}
                         />
                     )}
@@ -214,7 +206,6 @@ const StateUserRoutes = ({
                         element={<GraphQLExplorer />}
                     />
                 )}
-                <Route path={RoutesRecord.API_ACCESS} element={<APIAccess />} />
                 <Route path="*" element={<Error404 />} />
             </Routes>
         </AuthenticatedRouteWrapper>
@@ -289,18 +280,12 @@ const CMSUserRoutes = ({
                         element={<UploadContractQuestions />}
                     />
                     <Route
-                        path={getSubmissionPath(
-                            'SUBMISSIONS_SUMMARY',
-                            'HEALTH_PLAN'
-                        )}
+                        path={RoutesRecord.SUBMISSIONS_SUMMARY}
                         element={<SubmissionSummary />}
                     />
                     {showEqroSubmissions && (
                         <Route
-                            path={getSubmissionPath(
-                                'SUBMISSIONS_SUMMARY',
-                                'EQRO'
-                            )}
+                            path={RoutesRecord.SUBMISSIONS_SUMMARY}
                             element={<EQROSubmissionSummary />}
                         />
                     )}
@@ -420,7 +405,6 @@ const CMSUserRoutes = ({
                     // one and just redirecting.
                     element={<Navigate to="/mc-review-settings" />}
                 />
-                <Route path={RoutesRecord.API_ACCESS} element={<APIAccess />} />
                 {UniversalRoutes}
                 <Route path="*" element={<Error404 />} />
             </Routes>

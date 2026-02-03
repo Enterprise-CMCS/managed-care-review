@@ -1,4 +1,4 @@
-import { Route, Routes } from 'react-router'
+import { Route, Routes } from 'react-router-dom'
 import { RoutesRecord } from '@mc-review/constants'
 import { Settings } from '../Settings'
 import { Error404 } from '../../Errors/Error404Page'

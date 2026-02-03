@@ -7,7 +7,7 @@ import {
 import { Formik, FormikErrors } from 'formik'
 import { MccrsIdFormSchema } from './MccrsIdSchema'
 import { recordJSException } from '@mc-review/otel'
-import { useNavigate, useParams } from 'react-router-dom'
+import { useNavigate } from 'react-router-dom'
 import { usePage } from '../../contexts/PageContext'
 import {
     Loading,
@@ -17,7 +17,10 @@ import {
     Breadcrumbs,
 } from '../../components'
 import { useAuth } from '../../contexts/AuthContext'
-import { RoutesRecord } from '@mc-review/constants'
+import {
+    ContractSubmissionTypeRecord,
+    RoutesRecord,
+} from '@mc-review/constants'
 import { GenericErrorPage } from '../Errors/GenericErrorPage'
 import { Error404 } from '../Errors/Error404Page'
 import { ErrorForbiddenPage } from '../Errors/ErrorForbiddenPage'
@@ -27,7 +30,7 @@ import {
     Contract,
 } from '../../gen/gqlClient'
 import styles from './MccrsId.module.scss'
-import { useMemoizedStateHeader } from '../../hooks'
+import { useMemoizedStateHeader, useRouteParams } from '../../hooks'
 
 export interface MccrsIdFormValues {
     mccrsId: number | undefined
@@ -37,7 +40,7 @@ type FormError =
 
 export const MccrsId = (): React.ReactElement => {
     const [shouldValidate, setShouldValidate] = React.useState(true)
-    const { id, contractSubmissionType } = useParams()
+    const { id, contractSubmissionType } = useRouteParams()
     if (!id) {
         throw new Error(
             'PROGRAMMING ERROR: id param not set in state submission form.'
@@ -111,6 +114,13 @@ export const MccrsId = (): React.ReactElement => {
         }
     } else if (!contract || !loggedInUser) {
         return <GenericErrorPage />
+    }
+
+    if (
+        ContractSubmissionTypeRecord[contract.contractSubmissionType] !==
+        contractSubmissionType
+    ) {
+        return <Error404 />
     }
 
     const submitInfo = contract.packageSubmissions[0].submitInfo

@@ -1,6 +1,5 @@
 import { screen, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
-import { Route, Routes } from 'react-router'
 import {
     RoutesRecord,
     ContractSubmissionTypeRecord,
@@ -13,6 +12,7 @@ import {
 } from '@mc-review/mocks'
 import { renderWithProviders } from '../../testHelpers/jestHelpers'
 import { MccrsId } from './MccrsId'
+import { Location, NavigateFunction, Route, Routes } from 'react-router-dom'
 
 describe('MCCRSID', () => {
     afterEach(() => {
@@ -56,6 +56,64 @@ describe('MCCRSID', () => {
                 expect(
                     screen.getByRole('button', { name: 'Save MC-CRS number' })
                 ).not.toHaveAttribute('aria-disabled')
+            })
+
+            it('renders 404 page on wrong contract type url parameter', async () => {
+                let testNavigate: NavigateFunction
+                let testLocation: Location
+
+                renderWithProviders(
+                    <Routes>
+                        <Route
+                            path={RoutesRecord.SUBMISSIONS_MCCRSID}
+                            element={<MccrsId />}
+                        />
+                    </Routes>,
+                    {
+                        apolloProvider: {
+                            mocks: [
+                                fetchCurrentUserMock({
+                                    user: mockUser(),
+                                    statusCode: 200,
+                                }),
+                                fetchContractMockSuccess({ contract }),
+                            ],
+                        },
+                        routerProvider: {
+                            route: '/submissions/health-plan/15/mccrs-record-number',
+                        },
+                        navigate: (nav) => (testNavigate = nav),
+                        location: (location) => (testLocation = location),
+                    }
+                )
+
+                await waitFor(() => {
+                    testNavigate(
+                        '/submissions/health-plan/15/mccrs-record-number'
+                    )
+                })
+
+                await waitFor(() => {
+                    expect(
+                        screen.getByRole('heading', {
+                            name: /MC-CRS record number/,
+                            level: 3,
+                        })
+                    ).toBeInTheDocument()
+                })
+
+                await waitFor(() => {
+                    testNavigate('/submissions/eqro/15/mccrs-record-number')
+                })
+
+                await waitFor(() => {
+                    expect(testLocation.pathname).toBe(
+                        '/submissions/eqro/15/mccrs-record-number'
+                    )
+                    expect(
+                        screen.getByText('404 / Page not found')
+                    ).toBeInTheDocument()
+                })
             })
 
             it('displays the text field for mccrs id', async () => {

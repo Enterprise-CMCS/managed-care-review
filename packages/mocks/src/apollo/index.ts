@@ -8,8 +8,6 @@ export * from './stateMock'
 export * from './updateUserMock'
 export * from './rateGQLMocks'
 
-export * from './apiKeyGQLMocks'
-
 // NEW APIS
 export * from './contractPackageDataMock'
 export * from './rateDataMock'

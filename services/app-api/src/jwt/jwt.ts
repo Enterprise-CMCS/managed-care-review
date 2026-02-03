@@ -1,4 +1,3 @@
-import type { APIKeyType } from '../domain-models'
 import { curry } from 'purify-ts/Function'
 import { sign, verify } from 'jsonwebtoken'
 
@@ -6,6 +5,11 @@ interface JWTConfig {
     issuer: string
     signingKey: Buffer
     expirationDurationS: number
+}
+
+interface APIKeyType {
+    key: string
+    expiresAt: Date
 }
 
 interface OAuthTokenPayload {
@@ -16,20 +20,6 @@ interface OAuthTokenPayload {
     grants: string[]
     iat: number
     exp: number
-}
-
-function createValidJWT(config: JWTConfig, userID: string): APIKeyType {
-    const token = sign({}, config.signingKey, {
-        subject: userID,
-        issuer: config.issuer,
-        expiresIn: config.expirationDurationS,
-        algorithm: 'HS256', // pin the default algo
-    })
-
-    return {
-        key: token,
-        expiresAt: new Date(Date.now() + config.expirationDurationS),
-    }
 }
 
 function createOAuthJWT(
@@ -112,7 +102,6 @@ function validateOAuthToken(
 }
 
 export interface JWTLib {
-    createValidJWT(userID: string): APIKeyType
     createOAuthJWT(
         clientId: string,
         grantType: string,
@@ -132,7 +121,6 @@ export interface JWTLib {
 
 export function newJWTLib(config: JWTConfig): JWTLib {
     return {
-        createValidJWT: curry(createValidJWT)(config),
         createOAuthJWT: curry(createOAuthJWT)(config),
         userIDFromToken: curry(userIDFromToken)(config),
         validateOAuthToken: curry(validateOAuthToken)(config),

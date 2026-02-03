@@ -30,7 +30,6 @@ import type { LDService } from '../launchDarkly/launchDarkly'
 import { ldService, offlineLDService } from '../launchDarkly/launchDarkly'
 import type { LDClient } from '@launchdarkly/node-server-sdk'
 import * as ld from '@launchdarkly/node-server-sdk'
-import { newJWTLib } from '../jwt'
 import { ApolloServerPluginLandingPageDisabled } from '@apollo/server/plugin/disabled'
 import { ApolloServerPluginLandingPageLocalDefault } from '@apollo/server/plugin/landingPage/default'
 import { newDeployedS3Client, newLocalS3Client } from '../s3'
@@ -212,7 +211,6 @@ async function initializeGQLHandler(): Promise<Handler> {
     const otelCollectorUrl = process.env.API_APP_OTEL_COLLECTOR_URL
     const parameterStoreMode = process.env.PARAMETER_STORE_MODE
     const ldSDKKey = process.env.LD_SDK_KEY
-    const jwtSecret = process.env.JWT_SECRET
     const s3DocumentsBucket = process.env.VITE_APP_S3_DOCUMENTS_BUCKET
     const s3QABucket = process.env.VITE_APP_S3_QA_BUCKET
     const region = process.env.REGION
@@ -248,12 +246,6 @@ async function initializeGQLHandler(): Promise<Handler> {
     if (ldSDKKey === undefined || ldSDKKey === '') {
         throw new Error(
             'Configuration Error: LD_SDK_KEY is required to run app-api.'
-        )
-    }
-
-    if (jwtSecret === undefined || jwtSecret === '') {
-        throw new Error(
-            'Configuration Error: JWT_SECRET is required to run app-api.'
         )
     }
 
@@ -307,13 +299,6 @@ async function initializeGQLHandler(): Promise<Handler> {
         plugins = [ApolloServerPluginLandingPageLocalDefault({ embed: true })]
         introspectionAllowed = true
     }
-
-    // Hard coding this for now, next job is to run this config to this app.
-    const jwtLib = newJWTLib({
-        issuer: `mcreview-${stageName}`,
-        signingKey: Buffer.from(jwtSecret, 'hex'),
-        expirationDurationS: 90 * 24 * 60 * 60, // 90 days
-    })
 
     //Configure email parameter store.
     const emailParameterStore =
@@ -370,7 +355,6 @@ async function initializeGQLHandler(): Promise<Handler> {
         store,
         emailer,
         launchDarkly,
-        jwtLib,
         s3Client,
         applicationEndpoint,
         documentZip
