@@ -81,8 +81,8 @@ vi.mock('@node-oauth/oauth2-server', () => {
                 throw new InvalidRequestError('Missing client credentials')
             }
 
+            // pragma: allowlist nextline secret
             if (request.body.client_secret === 'invalid') {
-                // pragma: allowlist secret
                 throw new InvalidClientError('Invalid client credentials')
             }
 
