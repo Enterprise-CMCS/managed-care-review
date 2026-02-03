@@ -3,6 +3,11 @@ import { CustomOAuth2Server } from '../oauth2Server'
 import type { ExtendedPrismaClient } from '../../postgres/prismaClient'
 import type { APIGatewayProxyEvent } from 'aws-lambda'
 import type { Client, Token, User } from '@node-oauth/oauth2-server'
+import { sharedTestPrismaClient } from '../../testHelpers/storeHelpers'
+import { v4 as uuidv4 } from 'uuid'
+import { testAdminUser } from '../../testHelpers/userHelpers'
+import { constructTestPostgresServer, executeGraphQLOperation } from '../../testHelpers/gqlHelpers'
+import { CreateOauthClientDocument } from '../../gen/gqlClient'
 
 // Mock OAuth2 server
 vi.mock('@node-oauth/oauth2-server', () => {
@@ -357,13 +362,67 @@ describe('CustomOAuth2Server', () => {
         })
 
         it.only('Can make a delegated request', async () => {
-            // create two CMS users
-            // log in as Admin
-            // create OAuth client for CMS user 1
-            const clientID = 'replaceMe' // pragma: allowlist secret
-            const clientSecret = 'replaceMe' // pragma: allowlist secret
-            // store CMS user 2 id in a variable
+            const client = await sharedTestPrismaClient()
 
+            // create two CMS users
+            const msUser = await client.user.create({
+                data: {
+                    id: uuidv4(),
+                    givenName: 'Anne',
+                    familyName: 'Smith',
+                    email: 'testemail@example.com',
+                    role: 'CMS_APPROVER_USER',
+                },
+            })
+            const delegatedUser = await client.user.create({
+                data: {
+                    id: uuidv4(),
+                    givenName: 'Tom',
+                    familyName: 'Smith',
+                    email: 'testemail@example.com',
+                    role: 'CMS_USER',
+                },
+            })
+            // create admin user to create the oauth
+            const adminUser = testAdminUser()
+
+            const server = await constructTestPostgresServer({
+                context: { user: adminUser },
+            })
+
+            const res = await executeGraphQLOperation(server, {
+                query: CreateOauthClientDocument,
+                variables: {
+                    input: {
+                        description: 'test client',
+                        grants: ['client_credentials'],
+                        userID: msUser.id,
+                    },
+                },
+            })
+
+            expect(res.data).toBeDefined()
+            const oauthClient = res.data?.createOauthClient.oauthClient
+            expect(oauthClient).toHaveProperty('clientId')
+            expect(oauthClient).toHaveProperty('clientSecret')
+
+            const clientID = oauthClient.clientId // pragma: allowlist secret
+            const clientSecret = oauthClient.clientSecret // pragma: allowlist secret
+
+            if (!clientID || !clientSecret) throw new Error('Unexpected error: no client id/secret')
+            
+            const updateClient = await client.oAuthClient.update({
+                where: {
+                    clientId: clientID                    
+                }, 
+                data: {
+                    scopes: ['CMS_SUBMISSION_ACTIONS']
+                }
+            })
+
+            // Delegated User Id will be in the response
+            const delegatedUserId = delegatedUser.id
+            
             const response = await fetch(
                 'http://localhost:3030/local/oauth/token',
                 {
@@ -381,7 +440,6 @@ describe('CustomOAuth2Server', () => {
 
             expect(response.ok).toBe(true)
             const data = await response.json()
-
             expect(data).toHaveProperty('access_token')
             expect(data).toHaveProperty('token_type', 'Bearer')
             expect(data).toHaveProperty('expires_in', 1800)
@@ -398,8 +456,7 @@ describe('CustomOAuth2Server', () => {
                     headers: {
                         'Content-Type': 'application/json',
                         Authorization: `Bearer ${token}`,
-                        //TODO: Replace `user6` with CMS user 2 id store in variables.
-                        'X-Acting-As-User': 'user6',
+                        'X-Acting-As-User': `${delegatedUserId}`                        
                     },
                     body: JSON.stringify({
                         query: `query StateUser {
@@ -494,8 +551,21 @@ describe('CustomOAuth2Server', () => {
             expect(graphqlResponse.ok).toBe(true)
             expect(graphqlData).toHaveProperty('data')
             expect(graphqlData.data).toHaveProperty('fetchCurrentUser')
-
-            // validate that fetchCurrentUser response is returning the delegated CMS user (CMS user 2)
+            expect(graphqlData.data.fetchCurrentUser.id).toEqual(
+                delegatedUser.id
+            )
+            // clear out the users we created
+            const x2 = await client.user.delete({
+                where: {
+                    id: msUser.id
+                }
+            }) 
+            const y2 = await client.user.delete({
+                where: {
+                    id: delegatedUser.id,
+                },
+            }) 
+            const y3 = await client.oAuthClient.deleteMany()
         })
     })
 })
