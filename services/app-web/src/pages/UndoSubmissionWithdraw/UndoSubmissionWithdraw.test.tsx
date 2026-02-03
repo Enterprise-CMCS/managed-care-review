@@ -15,7 +15,7 @@ import { SubmissionSummary } from '../SubmissionSummary'
 import { UndoSubmissionWithdraw } from './UndoSubmissionWithdraw'
 import { waitFor, screen } from '@testing-library/react'
 import { Contract } from '../../gen/gqlClient'
-import { Location } from 'react-router-dom'
+import { Location, NavigateFunction } from 'react-router-dom'
 
 describe('UndoSubmissionWithdraw', () => {
     it('renders without errors', async () => {
@@ -71,6 +71,82 @@ describe('UndoSubmissionWithdraw', () => {
             expect(
                 screen.getByRole('button', { name: 'Undo withdraw' })
             ).toBeInTheDocument()
+        })
+    })
+
+    it('renders 404 page on wrong contract type url parameter', async () => {
+        let testNavigate: NavigateFunction
+        let testLocation: Location
+
+        const contract = mockContractPackageSubmitted({
+            id: 'test-abc-123',
+            contractSubmissionType: 'HEALTH_PLAN',
+        })
+
+        renderWithProviders(
+            <Routes>
+                <Route element={<SubmissionSideNav />}>
+                    <Route
+                        path={RoutesRecord.SUBMISSIONS_SUMMARY}
+                        element={<SubmissionSummary />}
+                    />
+                    <Route
+                        path={RoutesRecord.UNDO_SUBMISSION_WITHDRAW}
+                        element={<UndoSubmissionWithdraw />}
+                    />
+                </Route>
+            </Routes>,
+            {
+                apolloProvider: {
+                    mocks: [
+                        fetchCurrentUserMock({
+                            user: mockValidCMSUser(),
+                            statusCode: 200,
+                        }),
+                        fetchContractWithQuestionsMockSuccess({
+                            contract,
+                        }),
+                        fetchContractMockSuccess({ contract }),
+                    ],
+                },
+                routerProvider: {
+                    route: '/submission-reviews/health-plan/test-abc-123/undo-withdraw-submission',
+                },
+                featureFlags: {
+                    'undo-withdraw-submission': true,
+                },
+                navigate: (nav) => (testNavigate = nav),
+                location: (location) => (testLocation = location),
+            }
+        )
+
+        // expect 404 page with wrong param
+        await waitFor(() => {
+            testNavigate(
+                '/submission-reviews/health-plan/test-abc-123/undo-withdraw-submission'
+            )
+        })
+
+        await waitFor(() => {
+            expect(
+                screen.getByRole('heading', {
+                    name: /Undo submission withdraw/,
+                    level: 2,
+                })
+            ).toBeInTheDocument()
+        })
+
+        await waitFor(() => {
+            testNavigate(
+                '/submission-reviews/eqro/test-abc-123/undo-withdraw-submission'
+            )
+        })
+
+        await waitFor(() => {
+            expect(testLocation.pathname).toBe(
+                '/submission-reviews/eqro/test-abc-123/undo-withdraw-submission'
+            )
+            expect(screen.getByText('404 / Page not found')).toBeInTheDocument()
         })
     })
 

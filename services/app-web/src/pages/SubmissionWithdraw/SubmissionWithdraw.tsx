@@ -7,10 +7,12 @@ import {
     GenericApiErrorBanner,
     PageActionsContainer,
 } from '../../components'
-import { RoutesRecord } from '@mc-review/constants'
-import { generatePath, useNavigate, useParams } from 'react-router-dom'
 import {
-    ContractSubmissionType,
+    ContractSubmissionTypeRecord,
+    RoutesRecord,
+} from '@mc-review/constants'
+import { generatePath, useNavigate } from 'react-router-dom'
+import {
     RateStripped,
     useFetchContractQuery,
     useIndexRatesStrippedWithRelatedContractsQuery,
@@ -23,9 +25,10 @@ import { ErrorOrLoadingPage } from '../StateSubmission'
 import { handleAndReturnErrorState } from '../StateSubmission/SharedSubmissionComponents'
 import { GenericErrorPage } from '../Errors/GenericErrorPage'
 import { SubmissionWithdrawWarningBanner } from '../../components/Banner/SubmissionWithdrawWarningBanner/SubmissionWithdrawWarningBanner'
-import { useMemoizedStateHeader, useTealium } from '../../hooks'
+import { useMemoizedStateHeader, useRouteParams, useTealium } from '../../hooks'
 import { recordJSException } from '@mc-review/otel'
 import { usePage } from '../../contexts/PageContext'
+import { Error404 } from '../Errors/Error404Page'
 
 type SubmissionWithdrawValues = {
     submissionWithdrawReason: string
@@ -90,9 +93,11 @@ export const shouldWarnOnWithdraw = (
 }
 
 export const SubmissionWithdraw = (): React.ReactElement => {
-    const { id, contractSubmissionType } = useParams() as {
-        id: string
-        contractSubmissionType: ContractSubmissionType
+    const { id, contractSubmissionType } = useRouteParams()
+    if (!id) {
+        throw new Error(
+            'PROGRAMMING ERROR: id param not set in submission withdraw form.'
+        )
     }
     const { updateHeading } = usePage()
     const { logFormSubmitEvent } = useTealium()
@@ -172,6 +177,13 @@ export const SubmissionWithdraw = (): React.ReactElement => {
         (!ratesData || !ratesData.indexRatesStripped.edges)
     ) {
         return <GenericErrorPage />
+    }
+
+    if (
+        ContractSubmissionTypeRecord[contract.contractSubmissionType] !==
+        contractSubmissionType
+    ) {
+        return <Error404 />
     }
 
     //These rates will be displayed in the warning banner

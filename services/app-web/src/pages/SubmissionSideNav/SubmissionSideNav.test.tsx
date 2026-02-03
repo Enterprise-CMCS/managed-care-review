@@ -1,9 +1,15 @@
 import { screen, waitFor, within } from '@testing-library/react'
-import { Location, Route, Routes } from 'react-router-dom'
+import { Location, NavigateFunction, Route, Routes } from 'react-router-dom'
 import userEvent from '@testing-library/user-event'
 import { SubmissionSideNav } from './SubmissionSideNav'
-import { SubmissionSummary } from '../SubmissionSummary'
-import { ContractQuestionResponse } from '../QuestionResponse'
+import { EQROSubmissionSummary, SubmissionSummary } from '../SubmissionSummary'
+import {
+    ContractQuestionResponse,
+    RateQuestionResponse,
+    UploadContractQuestions,
+    UploadContractResponse,
+    UploadRateResponse,
+} from '../QuestionResponse'
 import { renderWithProviders } from '../../testHelpers'
 import { RoutesRecord } from '@mc-review/constants'
 import {
@@ -16,8 +22,10 @@ import {
     fetchContractWithQuestionsMockFail,
     mockContractPackageDraft,
     mockValidStateUser,
+    fetchRateWithQuestionsMockSuccess,
 } from '@mc-review/mocks'
 import { RateRevision } from '../../gen/gqlClient'
+import React from 'react'
 
 const CommonRoutes = () => (
     <Routes>
@@ -43,6 +51,13 @@ describe('SubmissionSideNav', () => {
                     fetchCurrentUserMock({
                         user: mockValidCMSUser(),
                         statusCode: 200,
+                    }),
+                    fetchContractWithQuestionsMockSuccess({
+                        contract: {
+                            ...contract,
+                            id: '15',
+                            contractSubmissionType: 'HEALTH_PLAN',
+                        },
                     }),
                     fetchContractWithQuestionsMockSuccess({
                         contract: {
@@ -101,6 +116,370 @@ describe('SubmissionSideNav', () => {
         })
         // Expect no Q&A rate link to be on the page. CMS users only see this on rate summary page.
         expect(rate1Link).toBeNull()
+    })
+
+    it('renders 404 page when using wrong url parameter for contract type as CMS User', async () => {
+        let testNavigate: NavigateFunction
+        let testLocation: Location
+
+        const contract = mockContractPackageSubmitted()
+        renderWithProviders(
+            <Routes>
+                <Route element={<SubmissionSideNav />}>
+                    <Route
+                        path={
+                            RoutesRecord.SUBMISSIONS_CONTRACT_QUESTIONS_AND_ANSWERS
+                        }
+                        element={<ContractQuestionResponse />}
+                    />
+                    <Route
+                        path={RoutesRecord.SUBMISSIONS_UPLOAD_CONTRACT_QUESTION}
+                        element={<UploadContractQuestions />}
+                    />
+                    <Route
+                        path={RoutesRecord.SUBMISSIONS_SUMMARY}
+                        element={<SubmissionSummary />}
+                    />
+                    <Route
+                        path={RoutesRecord.SUBMISSIONS_SUMMARY}
+                        element={<EQROSubmissionSummary />}
+                    />
+                </Route>
+            </Routes>,
+            {
+                apolloProvider: {
+                    mocks: [
+                        fetchCurrentUserMock({
+                            user: mockValidCMSUser(),
+                            statusCode: 200,
+                        }),
+                        fetchContractWithQuestionsMockSuccess({
+                            contract: {
+                                ...contract,
+                                id: '15',
+                                contractSubmissionType: 'HEALTH_PLAN',
+                            },
+                        }),
+                        fetchContractWithQuestionsMockSuccess({
+                            contract: {
+                                ...contract,
+                                id: '15',
+                                contractSubmissionType: 'HEALTH_PLAN',
+                            },
+                        }),
+                        fetchContractWithQuestionsMockSuccess({
+                            contract: {
+                                ...contract,
+                                id: '15',
+                                contractSubmissionType: 'HEALTH_PLAN',
+                            },
+                        }),
+                        fetchContractWithQuestionsMockSuccess({
+                            contract: {
+                                ...contract,
+                                id: '15',
+                                contractSubmissionType: 'HEALTH_PLAN',
+                            },
+                        }),
+                    ],
+                },
+                routerProvider: {
+                    route: '/submissions/health-plan/15',
+                },
+                navigate: (nav) => (testNavigate = nav),
+                location: (location) => (testLocation = location),
+            }
+        )
+
+        // validate correct param renders summary page
+        await waitFor(() => {
+            expect(
+                screen.getByText(
+                    contract.packageSubmissions[0].contractRevision.contractName
+                )
+            ).toBeInTheDocument()
+        })
+
+        // expect Summary page 404 with wrong param
+        await waitFor(() => {
+            testNavigate('/submissions/eqro/15')
+        })
+
+        await waitFor(() => {
+            expect(testLocation.pathname).toBe('/submissions/eqro/15')
+            expect(screen.getByText('404 / Page not found')).toBeInTheDocument()
+        })
+
+        // expect Q&A tab 404 with wrong param
+        await waitFor(() => {
+            testNavigate('/submissions/health-plan/15/question-and-answers')
+        })
+
+        await waitFor(() => {
+            expect(
+                screen.getByRole('link', { name: /Add questions/ })
+            ).toBeInTheDocument()
+        })
+
+        await waitFor(() => {
+            testNavigate('/submissions/eqro/15/question-and-answers')
+        })
+
+        await waitFor(() => {
+            expect(testLocation.pathname).toBe(
+                '/submissions/eqro/15/question-and-answers'
+            )
+            expect(screen.getByText('404 / Page not found')).toBeInTheDocument()
+        })
+
+        // expect Create question 404 with wrong param
+        await waitFor(() => {
+            testNavigate(
+                '/submissions/health-plan/15/question-and-answers/dmco/upload-questions'
+            )
+        })
+
+        await waitFor(() => {
+            expect(
+                screen.getByRole('heading', { name: /Add questions/, level: 2 })
+            ).toBeInTheDocument()
+        })
+
+        await waitFor(() => {
+            testNavigate(
+                '/submissions/eqro/15/question-and-answers/dmco/upload-questions'
+            )
+        })
+
+        await waitFor(() => {
+            expect(testLocation.pathname).toBe(
+                '/submissions/eqro/15/question-and-answers/dmco/upload-questions'
+            )
+            expect(screen.getByText('404 / Page not found')).toBeInTheDocument()
+        })
+    })
+
+    it('renders 404 page when using wrong url parameter for contract type as State User', async () => {
+        let testNavigate: NavigateFunction
+        let testLocation: Location
+
+        const contract = mockContractPackageSubmitted()
+        const rate = contract.packageSubmissions[0].rateRevisions[0]
+
+        renderWithProviders(
+            <Routes>
+                <Route element={<SubmissionSideNav />}>
+                    <Route
+                        path={
+                            RoutesRecord.SUBMISSIONS_CONTRACT_QUESTIONS_AND_ANSWERS
+                        }
+                        element={<ContractQuestionResponse />}
+                    />
+                    <Route
+                        element={<UploadContractResponse />}
+                        path={RoutesRecord.SUBMISSIONS_UPLOAD_CONTRACT_RESPONSE}
+                    />
+                    <Route
+                        path={RoutesRecord.SUBMISSIONS_SUMMARY}
+                        element={<SubmissionSummary />}
+                    />
+                    <Route
+                        path={RoutesRecord.SUBMISSIONS_SUMMARY}
+                        element={<EQROSubmissionSummary />}
+                    />
+                    <Route
+                        path={
+                            RoutesRecord.SUBMISSIONS_RATE_QUESTIONS_AND_ANSWERS
+                        }
+                        element={<RateQuestionResponse />}
+                    />
+                    <Route
+                        path={RoutesRecord.SUBMISSIONS_UPLOAD_RATE_RESPONSE}
+                        element={<UploadRateResponse />}
+                    />
+                </Route>
+            </Routes>,
+            {
+                apolloProvider: {
+                    mocks: [
+                        fetchCurrentUserMock({
+                            user: mockValidStateUser(),
+                            statusCode: 200,
+                        }),
+                        fetchContractWithQuestionsMockSuccess({
+                            contract: {
+                                ...contract,
+                                id: '15',
+                                contractSubmissionType: 'HEALTH_PLAN',
+                            },
+                        }),
+                        fetchContractWithQuestionsMockSuccess({
+                            contract: {
+                                ...contract,
+                                id: '15',
+                                contractSubmissionType: 'HEALTH_PLAN',
+                            },
+                        }),
+                        fetchContractWithQuestionsMockSuccess({
+                            contract: {
+                                ...contract,
+                                id: '15',
+                                contractSubmissionType: 'HEALTH_PLAN',
+                            },
+                        }),
+                        fetchContractWithQuestionsMockSuccess({
+                            contract: {
+                                ...contract,
+                                id: '15',
+                                contractSubmissionType: 'HEALTH_PLAN',
+                            },
+                        }),
+                        fetchRateWithQuestionsMockSuccess({
+                            rate: {
+                                id: rate.rateID,
+                            },
+                            rateRev: rate,
+                        }),
+                        fetchRateWithQuestionsMockSuccess({
+                            rate: {
+                                id: rate.rateID,
+                            },
+                            rateRev: rate,
+                        }),
+                    ],
+                },
+                routerProvider: {
+                    route: '/submissions/health-plan/15',
+                },
+                navigate: (nav) => (testNavigate = nav),
+                location: (location) => (testLocation = location),
+            }
+        )
+
+        // validate correct param renders summary page
+        await waitFor(() => {
+            expect(
+                screen.getByText(
+                    contract.packageSubmissions[0].contractRevision.contractName
+                )
+            ).toBeInTheDocument()
+        })
+
+        // expect Summary page 404 with wrong param
+        await waitFor(() => {
+            testNavigate('/submissions/eqro/15')
+        })
+
+        await waitFor(() => {
+            expect(testLocation.pathname).toBe('/submissions/eqro/15')
+            expect(screen.getByText('404 / Page not found')).toBeInTheDocument()
+        })
+
+        // expect Q&A tab 404 with wrong param
+        await waitFor(() => {
+            testNavigate('/submissions/health-plan/15/question-and-answers')
+        })
+
+        await waitFor(() => {
+            expect(
+                screen.getAllByRole('link', { name: /Upload response/ })
+            ).toHaveLength(5)
+        })
+
+        await waitFor(() => {
+            testNavigate('/submissions/eqro/15/question-and-answers')
+        })
+
+        await waitFor(() => {
+            expect(testLocation.pathname).toBe(
+                '/submissions/eqro/15/question-and-answers'
+            )
+            expect(screen.getByText('404 / Page not found')).toBeInTheDocument()
+        })
+
+        // expect Create question response 404 with wrong param
+        await waitFor(() => {
+            testNavigate(
+                '/submissions/health-plan/15/question-and-answers/dmco/15/upload-response'
+            )
+        })
+
+        await waitFor(() => {
+            expect(
+                screen.getByRole('heading', {
+                    name: /Upload response/,
+                    level: 2,
+                })
+            ).toBeInTheDocument()
+        })
+
+        await waitFor(() => {
+            testNavigate(
+                '/submissions/eqro/15/question-and-answers/dmco/15/upload-response'
+            )
+        })
+
+        await waitFor(() => {
+            expect(testLocation.pathname).toBe(
+                '/submissions/eqro/15/question-and-answers/dmco/15/upload-response'
+            )
+            expect(screen.getByText('404 / Page not found')).toBeInTheDocument()
+        })
+
+        // expect Rate Q&A tab 404 with wrong param
+        await waitFor(() => {
+            testNavigate(
+                `/submissions/health-plan/15/rates/${rate.rateID}/question-and-answers`
+            )
+        })
+
+        await waitFor(() => {
+            expect(
+                screen.getAllByRole('link', { name: /Upload response/ })
+            ).toHaveLength(5)
+        })
+
+        await waitFor(() => {
+            testNavigate(
+                `/submissions/eqro/15/rates/${rate.rateID}/question-and-answers`
+            )
+        })
+
+        await waitFor(() => {
+            expect(testLocation.pathname).toBe(
+                `/submissions/eqro/15/rates/${rate.rateID}/question-and-answers`
+            )
+            expect(screen.getByText('404 / Page not found')).toBeInTheDocument()
+        })
+
+        // expect Create rate question response 404 with wrong param
+        await waitFor(() => {
+            testNavigate(
+                `/submissions/health-plan/15/rates/${rate.rateID}/question-and-answers/dmco/dmco-question-2-id/upload-response`
+            )
+        })
+
+        await waitFor(() => {
+            expect(
+                screen.getByRole('heading', {
+                    name: /Upload response/,
+                    level: 2,
+                })
+            ).toBeInTheDocument()
+        })
+
+        await waitFor(() => {
+            testNavigate(
+                `/submissions/eqro/15/rates/${rate.rateID}/question-and-answers/dmco/dmco-question-2-id/upload-response`
+            )
+        })
+
+        await waitFor(() => {
+            expect(testLocation.pathname).toBe(
+                `/submissions/eqro/15/rates/${rate.rateID}/question-and-answers/dmco/dmco-question-2-id/upload-response`
+            )
+            expect(screen.getByText('404 / Page not found')).toBeInTheDocument()
+        })
     })
 
     it('loads sidebar nav with expected links for state user', async () => {

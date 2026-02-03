@@ -18,6 +18,7 @@ import {
 } from '@mc-review/mocks'
 import { RateStripped } from '../../gen/gqlClient'
 import { Contract } from '../../gen/gqlClient'
+import { Location, NavigateFunction } from 'react-router-dom'
 
 describe('SubmissionWithdraw', () => {
     it('renders without errors', async () => {
@@ -77,6 +78,85 @@ describe('SubmissionWithdraw', () => {
             expect(
                 screen.getByRole('button', { name: 'Withdraw submission' })
             ).toBeInTheDocument()
+        })
+    })
+
+    it('renders 404 page on wrong contract type url parameter', async () => {
+        let testNavigate: NavigateFunction
+        let testLocation: Location
+
+        const contract = mockContractPackageSubmitted({
+            id: 'test-abc-123',
+            contractSubmissionType: 'HEALTH_PLAN',
+        })
+        renderWithProviders(
+            <Routes>
+                <Route element={<SubmissionSideNav />}>
+                    <Route
+                        path={RoutesRecord.SUBMISSIONS_SUMMARY}
+                        element={<SubmissionSummary />}
+                    />
+                    <Route
+                        path={RoutesRecord.SUBMISSION_WITHDRAW}
+                        element={<SubmissionWithdraw />}
+                    />
+                </Route>
+            </Routes>,
+            {
+                apolloProvider: {
+                    mocks: [
+                        fetchCurrentUserMock({
+                            user: mockValidCMSUser(),
+                            statusCode: 200,
+                        }),
+                        fetchContractWithQuestionsMockSuccess({
+                            contract,
+                        }),
+                        fetchContractMockSuccess({ contract }),
+                        indexRatesStrippedWithRelatedContractsMockSuccess(
+                            undefined,
+                            ['123']
+                        ),
+                    ],
+                },
+                routerProvider: {
+                    route: '/submission-reviews/health-plan/test-abc-123/withdraw-submission',
+                },
+                featureFlags: {
+                    'withdraw-submission': true,
+                },
+                navigate: (nav) => (testNavigate = nav),
+                location: (location) => (testLocation = location),
+            }
+        )
+
+        // expect Withdraw page 404 with wrong param
+        await waitFor(() => {
+            testNavigate(
+                '/submission-reviews/health-plan/test-abc-123/withdraw-submission'
+            )
+        })
+
+        await waitFor(() => {
+            expect(
+                screen.getByRole('heading', {
+                    name: /Withdraw submission/,
+                    level: 2,
+                })
+            ).toBeInTheDocument()
+        })
+
+        await waitFor(() => {
+            testNavigate(
+                '/submission-reviews/eqro/test-abc-123/withdraw-submission'
+            )
+        })
+
+        await waitFor(() => {
+            expect(testLocation.pathname).toBe(
+                '/submission-reviews/eqro/test-abc-123/withdraw-submission'
+            )
+            expect(screen.getByText('404 / Page not found')).toBeInTheDocument()
         })
     })
 

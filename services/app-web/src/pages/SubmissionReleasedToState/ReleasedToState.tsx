@@ -7,8 +7,11 @@ import {
     PoliteErrorMessage,
     PageActionsContainer,
 } from '../../components'
-import { RoutesRecord } from '@mc-review/constants'
-import { useNavigate, useParams } from 'react-router-dom'
+import {
+    ContractSubmissionTypeRecord,
+    RoutesRecord,
+} from '@mc-review/constants'
+import { useNavigate } from 'react-router-dom'
 import {
     useApproveContractMutation,
     useFetchContractQuery,
@@ -26,10 +29,11 @@ import {
 import { Formik, FormikErrors } from 'formik'
 import { usePage } from '../../contexts/PageContext'
 import { recordJSException } from '@mc-review/otel'
-import { useMemoizedStateHeader, useTealium } from '../../hooks'
+import { useMemoizedStateHeader, useRouteParams, useTealium } from '../../hooks'
 import * as Yup from 'yup'
 import { formatUserInputDate } from '@mc-review/dates'
 import { validateDateFormat } from '../../formHelpers'
+import { Error404 } from '../Errors/Error404Page'
 
 type ReleasedToStateValues = {
     dateApprovalReleasedToState: string
@@ -52,10 +56,7 @@ type FormError =
     FormikErrors<ReleasedToStateValues>[keyof FormikErrors<ReleasedToStateValues>]
 
 const ReleasedToState = () => {
-    const { id, contractSubmissionType } = useParams<{
-        id: string
-        contractSubmissionType: string
-    }>()
+    const { id, contractSubmissionType } = useRouteParams()
     const { updateHeading } = usePage()
     const { logFormSubmitEvent } = useTealium()
     const navigate = useNavigate()
@@ -113,6 +114,13 @@ const ReleasedToState = () => {
 
     if (!contract || contract.status === 'DRAFT') {
         return <GenericErrorPage />
+    }
+
+    if (
+        ContractSubmissionTypeRecord[contract.contractSubmissionType] !==
+        contractSubmissionType
+    ) {
+        return <Error404 />
     }
 
     const approveContractAction = async (values: ReleasedToStateValues) => {

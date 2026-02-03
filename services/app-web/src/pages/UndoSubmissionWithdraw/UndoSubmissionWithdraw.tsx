@@ -2,11 +2,10 @@ import React, { useLayoutEffect, useState } from 'react'
 import styles from './UndoSubmissionWithdraw.module.scss'
 import * as Yup from 'yup'
 import { Formik, FormikErrors } from 'formik'
-import { useNavigate, useParams } from 'react-router'
+import { useNavigate } from 'react-router'
 import { usePage } from '../../contexts/PageContext'
-import { useMemoizedStateHeader, useTealium } from '../../hooks'
+import { useMemoizedStateHeader, useRouteParams, useTealium } from '../../hooks'
 import {
-    ContractSubmissionType,
     useFetchContractQuery,
     useUndoWithdrawContractMutation,
 } from '../../gen/gqlClient'
@@ -17,13 +16,17 @@ import {
     GenericApiErrorBanner,
     PageActionsContainer,
 } from '../../components'
-import { RoutesRecord } from '@mc-review/constants'
+import {
+    ContractSubmissionTypeRecord,
+    RoutesRecord,
+} from '@mc-review/constants'
 import { ErrorOrLoadingPage } from '../StateSubmission'
 import { handleAndReturnErrorState } from '../StateSubmission/SharedSubmissionComponents'
 import { GenericErrorPage } from '../Errors/GenericErrorPage'
 import { ButtonGroup, Form } from '@trussworks/react-uswds'
 import { recordJSException } from '@mc-review/otel'
 import { generatePath } from 'react-router-dom'
+import { Error404 } from '../Errors/Error404Page'
 
 type UndoSubmissionWithdrawValues = {
     undoSubmissionWithdrawReason: string
@@ -39,9 +42,11 @@ const UndoSubmissionWithdrawSchema = Yup.object().shape({
 })
 
 export const UndoSubmissionWithdraw = (): React.ReactElement => {
-    const { id, contractSubmissionType } = useParams() as {
-        id: string
-        contractSubmissionType: ContractSubmissionType
+    const { id, contractSubmissionType } = useRouteParams()
+    if (!id) {
+        throw new Error(
+            'PROGRAMMING ERROR: id param not set in submission withdraw form.'
+        )
     }
     const { updateHeading } = usePage()
     const { logFormSubmitEvent } = useTealium()
@@ -87,6 +92,13 @@ export const UndoSubmissionWithdraw = (): React.ReactElement => {
         return <ErrorOrLoadingPage state={handleAndReturnErrorState(error!)} />
     } else if (!contract) {
         return <GenericErrorPage />
+    }
+
+    if (
+        ContractSubmissionTypeRecord[contract.contractSubmissionType] !==
+        contractSubmissionType
+    ) {
+        return <Error404 />
     }
 
     const undoWithdrawSubmissionAction = async (
