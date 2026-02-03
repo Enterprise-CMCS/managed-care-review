@@ -1,5 +1,12 @@
 import { dirname, join } from 'path'
+import { createRequire } from 'module'
 import { StorybookConfig } from '@storybook/react-vite'
+
+const require = createRequire(import.meta.url)
+
+function getAbsolutePath(value: string): string {
+    return dirname(require.resolve(join(value, 'package.json')))
+}
 
 const config: StorybookConfig = {
     stories: ['../src/**/*.stories.@(ts|tsx)'],
@@ -29,7 +36,3 @@ const config: StorybookConfig = {
 }
 
 export default config
-
-function getAbsolutePath(value: string): any {
-    return dirname(require.resolve(join(value, 'package.json')))
-}
