@@ -325,7 +325,10 @@ export const RateReviewsTable = ({
                 meta: {
                     dataTestID: `${tableConfig.rowIDName}-stateName`,
                 },
-                filterFn: `arrIncludesSome`,
+                filterFn: (row, columnId, filterValue: string[]) => {
+                    const cellValue = row.getValue(columnId) as string
+                    return filterValue.includes(cellValue)
+                },
             }),
             columnHelper.accessor('rateNumber', {
                 id: 'rateNumber',
