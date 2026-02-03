@@ -44,13 +44,6 @@ export const StateSubmissionForm = (): React.ReactElement => {
         )
     }
 
-    if (
-        ContractSubmissionTypeRecord[contract.contractSubmissionType] !==
-        contractSubmissionType
-    ) {
-        return <Error404 />
-    }
-
     if (contractSubmissionType === ContractSubmissionTypeRecord['EQRO']) {
         return showEqroSubmissions ? <EQROSubmissionForm /> : <Error404 />
     }

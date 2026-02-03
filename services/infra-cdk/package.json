@@ -39,12 +39,12 @@
         "typescript-eslint": "^8.37.0"
     },
     "dependencies": {
-        "@aws-sdk/client-secrets-manager": "^3.978.0",
+        "@aws-sdk/client-secrets-manager": "^3.981.0",
         "@aws-solutions-constructs/aws-apigateway-lambda": "2.94.0",
         "@aws-solutions-constructs/aws-cloudfront-s3": "2.94.0",
         "@aws-solutions-constructs/aws-cognito-apigateway-lambda": "2.92.1",
         "@aws-solutions-constructs/aws-eventbridge-lambda": "2.92.1",
-        "@aws-solutions-constructs/aws-lambda-secretsmanager": "2.92.1",
+        "@aws-solutions-constructs/aws-lambda-secretsmanager": "2.98.0",
         "@aws-solutions-constructs/aws-s3-lambda": "2.96.0",
         "@aws-solutions-constructs/aws-wafwebacl-apigateway": "2.94.0",
         "aws-cdk-lib": "2.219.0",

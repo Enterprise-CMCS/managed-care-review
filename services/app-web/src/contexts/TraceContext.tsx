@@ -236,10 +236,7 @@ export function MockTraceProvider({ children }: { children: React.ReactNode }) {
         []
     )
 
-    // Initialize the global tracing context once when the provider mounts
-    React.useEffect(() => {
-        setGlobalTracingContext(mockValue)
-    }, [mockValue]) // Empty dependency array since mockValue is stable
+    setGlobalTracingContext(mockValue)
 
     return (
         <TraceContext.Provider value={mockValue}>
