@@ -55,6 +55,7 @@ vi.mock('@node-oauth/oauth2-server', () => {
     }
 
     interface OAuth2ServerModel {
+        // pragma: allowlist nextline secret
         getClient: (clientId: string, clientSecret: string) => Promise<Client>
         validateScope: (
             user: User,
@@ -92,7 +93,7 @@ vi.mock('@node-oauth/oauth2-server', () => {
                     id: request.body.client_id,
                     grants: ['client_credentials'],
                 } as Client,
-                accessToken: 'mock.access.token',
+                accessToken: 'mock.access.token', // pragma: allowlist secret
                 user: { id: 'system' } as User,
             } as Token
         }
