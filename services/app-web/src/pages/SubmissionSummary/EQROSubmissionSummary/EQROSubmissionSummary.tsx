@@ -1,16 +1,26 @@
-import React, { useEffect, useLayoutEffect, useState } from 'react'
+import React, { useEffect, useLayoutEffect, useRef, useState } from 'react'
 import { usePage } from '../../../contexts/PageContext'
-import { GridContainer, Link } from '@trussworks/react-uswds'
-import { Navigate } from 'react-router-dom'
+import { GridContainer, 
+    Link, 
+    Grid, 
+    ModalRef 
+} from '@trussworks/react-uswds'
+import { Navigate, useNavigate } from 'react-router-dom'
 import { useAuth } from '../../../contexts/AuthContext'
 import { useMemoizedStateHeader, useRouteParams } from '../../../hooks'
 import { hasCMSUserPermissions } from '@mc-review/helpers'
-import { useFetchContractWithQuestionsQuery } from '../../../gen/gqlClient'
+import { useFetchContractWithQuestionsQuery, UpdateInformation, } from '../../../gen/gqlClient'
 import {
     DocumentWarningBanner,
     LinkWithLogging,
     Loading,
+    SectionCard,
+    ButtonWithLogging,
+    MultiColumnGrid,
+    NavLinkWithLogging,
 } from '../../../components'
+import { SubmissionUnlockedBanner } from '../../../components/Banner'
+import { ModalOpenButton, UnlockSubmitModal } from '../../../components/Modal'
 import { ErrorForbiddenPage } from '../../Errors/ErrorForbiddenPage'
 import { Error404 } from '../../Errors/Error404Page'
 import { GenericErrorPage } from '../../Errors/GenericErrorPage'
@@ -21,7 +31,10 @@ import {
     EQROContractDetailsSummarySection,
     SubmissionTypeSummarySection,
 } from '../../../components/SubmissionSummarySection'
+import { ChangeHistory } from '../../../components/ChangeHistory'
 import { getSubmissionPath } from '../../../routeHelpers'
+import { useLDClient } from 'launchdarkly-react-client-sdk'
+import { featureFlags } from '@mc-review/common-code'
 
 export const EQROSubmissionSummary = (): React.ReactElement => {
     // Page level state
@@ -33,6 +46,18 @@ export const EQROSubmissionSummary = (): React.ReactElement => {
     const isStateUser = loggedInUser?.role === 'STATE_USER'
     const isHelpDeskUser = loggedInUser?.role === 'HELPDESK_USER'
 
+    const modalRef = useRef<ModalRef>(null)
+    const navigate = useNavigate()
+    const ldClient = useLDClient()
+
+    const withdrawSubmissionFlag = ldClient?.variation(
+        featureFlags.WITHDRAW_SUBMISSION.flag,
+        featureFlags.WITHDRAW_SUBMISSION.defaultValue
+    )
+    const undoWithdrawSubmissionFlag = ldClient?.variation(
+        featureFlags.UNDO_WITHDRAW_SUBMISSION.flag,
+        featureFlags.UNDO_WITHDRAW_SUBMISSION.defaultValue
+    )
     // API requests
     const { data, loading, error } = useFetchContractWithQuestionsQuery({
         variables: {
@@ -92,6 +117,7 @@ export const EQROSubmissionSummary = (): React.ReactElement => {
         submissionStatus === 'SUBMITTED' || submissionStatus === 'RESUBMITTED'
     const statePrograms = contract.state.programs
     const contractSubmissionType = contract.contractSubmissionType
+    const consolidatedStatus = contract.consolidatedStatus
 
     if (!isSubmitted && isStateUser) {
         if (submissionStatus === 'DRAFT') {
@@ -115,6 +141,33 @@ export const EQROSubmissionSummary = (): React.ReactElement => {
                 />
             )
         }
+    }
+
+    const showApprovalBtn =
+        hasCMSPermissions &&
+        ['SUBMITTED', 'RESUBMITTED'].includes(consolidatedStatus)
+    const showUnlockBtn =
+        hasCMSPermissions &&
+        ['SUBMITTED', 'RESUBMITTED'].includes(consolidatedStatus)
+    const showWithdrawBtn =
+        hasCMSPermissions &&
+        withdrawSubmissionFlag &&
+        ['SUBMITTED', 'RESUBMITTED'].includes(consolidatedStatus)
+    const showUndoWithdrawBtn =
+        hasCMSPermissions &&
+        undoWithdrawSubmissionFlag &&
+        consolidatedStatus === 'WITHDRAWN'
+    const showNoActionsMsg =
+        !showApprovalBtn && !showUnlockBtn && !showWithdrawBtn   
+
+    // Get the correct update info depending on the submission status
+    let updateInfo: UpdateInformation | undefined = undefined
+    if (submissionStatus === 'UNLOCKED' || submissionStatus === 'RESUBMITTED') {
+        updateInfo =
+            (submissionStatus === 'UNLOCKED'
+                ? contract.draftRevision?.unlockInfo
+                : contract.packageSubmissions[0].contractRevision.submitInfo) ||
+            undefined
     }
 
     const contractFormData = getVisibleLatestContractFormData(
@@ -154,6 +207,99 @@ export const EQROSubmissionSummary = (): React.ReactElement => {
                     <DocumentWarningBanner className={styles.banner} />
                 )}
 
+                {submissionStatus === 'UNLOCKED' && updateInfo && (
+                    <SubmissionUnlockedBanner
+                        className={styles.banner}
+                        loggedInUser={loggedInUser}
+                        unlockedInfo={updateInfo}
+                    />
+                )}
+
+                {hasCMSPermissions && (
+                    <SectionCard className={styles.actionsSection}>
+                        <h3>Actions</h3>
+                        {showNoActionsMsg ? (
+                            <Grid>
+                                No action can be taken on this submission in its
+                                current status.
+                            </Grid>
+                        ) : (
+                            <MultiColumnGrid columns={3}>
+                                {showUnlockBtn && (
+                                    <ModalOpenButton
+                                        modalRef={modalRef}
+                                        disabled={
+                                            ['DRAFT', 'UNLOCKED'].includes(
+                                                contract.status
+                                            ) ||
+                                            contract.reviewStatus === 'APPROVED'
+                                        }
+                                        className={styles.submitButton}
+                                        id="form-submit"
+                                    >
+                                        Unlock submission
+                                    </ModalOpenButton>
+                                )}
+                                {showApprovalBtn && (
+                                    <NavLinkWithLogging
+                                        className="usa-button bg-green"
+                                        variant="unstyled"
+                                        to={'./released-to-state'}
+                                    >
+                                        Released to state
+                                    </NavLinkWithLogging>
+                                )}
+                                {showWithdrawBtn && (
+                                    <ButtonWithLogging
+                                        type="button"
+                                        outline
+                                        className="usa-button"
+                                        onClick={() =>
+                                            navigate(
+                                                getSubmissionPath(
+                                                    'SUBMISSION_WITHDRAW',
+                                                    contractSubmissionType,
+                                                    contract.id
+                                                )
+                                            )
+                                        }
+                                        link_url={getSubmissionPath(
+                                            'SUBMISSION_WITHDRAW',
+                                            contractSubmissionType,
+                                            contract.id
+                                        )}
+                                    >
+                                        Withdraw submission
+                                    </ButtonWithLogging>
+                                )}
+                                {showUndoWithdrawBtn && (
+                                    <ButtonWithLogging
+                                        className="usa-button usa-button--outline"
+                                        type="button"
+                                        outline
+                                        onClick={() =>
+                                            navigate(
+                                                getSubmissionPath(
+                                                    'UNDO_SUBMISSION_WITHDRAW',
+                                                    contractSubmissionType,
+                                                    contract.id
+                                                )
+                                            )
+                                        }
+                                        link_url={getSubmissionPath(
+                                            'UNDO_SUBMISSION_WITHDRAW',
+                                            contractSubmissionType,
+                                            contract.id
+                                        )}
+                                        style={{ width: '16rem' }}
+                                    >
+                                        Undo submission withdraw
+                                    </ButtonWithLogging>
+                                )}
+                            </MultiColumnGrid>
+                        )}
+                    </SectionCard>
+                )}
                 <SubmissionTypeSummarySection
                     subHeaderComponent={
                         hasCMSPermissions ? (
@@ -202,6 +348,14 @@ export const EQROSubmissionSummary = (): React.ReactElement => {
                     contract={contract}
                     isStateUser={isStateUser}
                     explainMissingData={explainMissingData}
+                />
+
+                <ChangeHistory contract={contract} />
+
+                <UnlockSubmitModal
+                    modalRef={modalRef}
+                    modalType="UNLOCK_CONTRACT"
+                    submissionData={contract}
                 />
             </GridContainer>
         </div>
