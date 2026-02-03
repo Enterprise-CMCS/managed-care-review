@@ -1,5 +1,5 @@
 import React, { useEffect } from 'react'
-import { useLocation } from 'react-router'
+import { useLocation } from 'react-router-dom'
 import { GridContainer, Table } from '@trussworks/react-uswds'
 import styles from './Help.module.scss'
 import { useAuth } from '../../contexts/AuthContext'

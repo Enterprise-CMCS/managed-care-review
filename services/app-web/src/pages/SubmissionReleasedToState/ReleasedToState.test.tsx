@@ -6,7 +6,6 @@ import {
     mockContractPackageSubmittedWithQuestions,
     mockValidCMSUser,
 } from '@mc-review/mocks'
-import { Route, Routes } from 'react-router'
 import { SubmissionSideNav } from '../SubmissionSideNav'
 import { RoutesRecord } from '@mc-review/constants'
 import { SubmissionSummary } from '../SubmissionSummary'
@@ -18,7 +17,7 @@ import {
 import { Contract } from '../../gen/gqlClient'
 import { waitFor, screen } from '@testing-library/react'
 import { formatUserInputDate } from '@mc-review/dates'
-import { Location, NavigateFunction } from 'react-router-dom'
+import { Location, NavigateFunction, Route, Routes } from 'react-router-dom'
 
 describe('ReleasedToState', () => {
     it('can submit to mark submission as released to state', async () => {
