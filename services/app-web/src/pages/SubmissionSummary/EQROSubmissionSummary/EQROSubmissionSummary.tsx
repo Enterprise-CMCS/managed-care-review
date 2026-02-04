@@ -5,7 +5,7 @@ import { GridContainer,
     Grid, 
     ModalRef 
 } from '@trussworks/react-uswds'
-import { Navigate, useNavigate } from 'react-router-dom'
+import { Navigate } from 'react-router-dom'
 import { useAuth } from '../../../contexts/AuthContext'
 import { useMemoizedStateHeader, useRouteParams } from '../../../hooks'
 import { hasCMSUserPermissions } from '@mc-review/helpers'
@@ -15,9 +15,7 @@ import {
     LinkWithLogging,
     Loading,
     SectionCard,
-    ButtonWithLogging,
     MultiColumnGrid,
-    NavLinkWithLogging,
 } from '../../../components'
 import { SubmissionUnlockedBanner } from '../../../components/Banner'
 import { ModalOpenButton, UnlockSubmitModal } from '../../../components/Modal'
@@ -31,10 +29,7 @@ import {
     EQROContractDetailsSummarySection,
     SubmissionTypeSummarySection,
 } from '../../../components/SubmissionSummarySection'
-import { ChangeHistory } from '../../../components/ChangeHistory'
 import { getSubmissionPath } from '../../../routeHelpers'
-import { useLDClient } from 'launchdarkly-react-client-sdk'
-import { featureFlags } from '@mc-review/common-code'
 
 export const EQROSubmissionSummary = (): React.ReactElement => {
     // Page level state
@@ -47,17 +42,7 @@ export const EQROSubmissionSummary = (): React.ReactElement => {
     const isHelpDeskUser = loggedInUser?.role === 'HELPDESK_USER'
 
     const modalRef = useRef<ModalRef>(null)
-    const navigate = useNavigate()
-    const ldClient = useLDClient()
 
-    const withdrawSubmissionFlag = ldClient?.variation(
-        featureFlags.WITHDRAW_SUBMISSION.flag,
-        featureFlags.WITHDRAW_SUBMISSION.defaultValue
-    )
-    const undoWithdrawSubmissionFlag = ldClient?.variation(
-        featureFlags.UNDO_WITHDRAW_SUBMISSION.flag,
-        featureFlags.UNDO_WITHDRAW_SUBMISSION.defaultValue
-    )
     // API requests
     const { data, loading, error } = useFetchContractWithQuestionsQuery({
         variables: {
@@ -145,20 +130,12 @@ export const EQROSubmissionSummary = (): React.ReactElement => {
 
     const showApprovalBtn =
         hasCMSPermissions &&
-        ['SUBMITTED', 'RESUBMITTED'].includes(consolidatedStatus)
+        ['SUBMITTED', 'RESUBMITTED','NOT_SUBJECT_TO_REVIEW'].includes(consolidatedStatus)
     const showUnlockBtn =
         hasCMSPermissions &&
         ['SUBMITTED', 'RESUBMITTED'].includes(consolidatedStatus)
-    const showWithdrawBtn =
-        hasCMSPermissions &&
-        withdrawSubmissionFlag &&
-        ['SUBMITTED', 'RESUBMITTED'].includes(consolidatedStatus)
-    const showUndoWithdrawBtn =
-        hasCMSPermissions &&
-        undoWithdrawSubmissionFlag &&
-        consolidatedStatus === 'WITHDRAWN'
     const showNoActionsMsg =
-        !showApprovalBtn && !showUnlockBtn && !showWithdrawBtn   
+        !showApprovalBtn && !showUnlockBtn 
 
     // Get the correct update info depending on the submission status
     let updateInfo: UpdateInformation | undefined = undefined
@@ -239,62 +216,6 @@ export const EQROSubmissionSummary = (): React.ReactElement => {
                                     >
                                         Unlock submission
                                     </ModalOpenButton>
-                                )}
-                                {showApprovalBtn && (
-                                    <NavLinkWithLogging
-                                        className="usa-button bg-green"
-                                        variant="unstyled"
-                                        to={'./released-to-state'}
-                                    >
-                                        Released to state
-                                    </NavLinkWithLogging>
-                                )}
-                                {showWithdrawBtn && (
-                                    <ButtonWithLogging
-                                        type="button"
-                                        outline
-                                        className="usa-button"
-                                        onClick={() =>
-                                            navigate(
-                                                getSubmissionPath(
-                                                    'SUBMISSION_WITHDRAW',
-                                                    contractSubmissionType,
-                                                    contract.id
-                                                )
-                                            )
-                                        }
-                                        link_url={getSubmissionPath(
-                                            'SUBMISSION_WITHDRAW',
-                                            contractSubmissionType,
-                                            contract.id
-                                        )}
-                                    >
-                                        Withdraw submission
-                                    </ButtonWithLogging>
-                                )}
-                                {showUndoWithdrawBtn && (
-                                    <ButtonWithLogging
-                                        className="usa-button usa-button--outline"
-                                        type="button"
-                                        outline
-                                        onClick={() =>
-                                            navigate(
-                                                getSubmissionPath(
-                                                    'UNDO_SUBMISSION_WITHDRAW',
-                                                    contractSubmissionType,
-                                                    contract.id
-                                                )
-                                            )
-                                        }
-                                        link_url={getSubmissionPath(
-                                            'UNDO_SUBMISSION_WITHDRAW',
-                                            contractSubmissionType,
-                                            contract.id
-                                        )}
-                                        style={{ width: '16rem' }}
-                                    >
-                                        Undo submission withdraw
-                                    </ButtonWithLogging>
                                 )}
                             </MultiColumnGrid>
                         )}
