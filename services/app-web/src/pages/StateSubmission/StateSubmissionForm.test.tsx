@@ -63,7 +63,7 @@ describe('StateSubmissionForm', () => {
                         ],
                     },
                     routerProvider: {
-                        route: `/submissions/${contract.contractSubmissionType}/15/edit/type`,
+                        route: `/submissions/${ContractSubmissionTypeRecord[contract.contractSubmissionType]}/15/edit/type`,
                     },
                     location: (location) => (testLocation = location),
                 }

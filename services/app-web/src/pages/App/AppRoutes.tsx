@@ -1,11 +1,10 @@
 import React, { Fragment, useEffect, useLayoutEffect, useState } from 'react'
-import { useLocation, Navigate } from 'react-router'
-import { Route, Routes } from 'react-router-dom'
+import { Route, Routes, useLocation, Navigate } from 'react-router-dom'
 import { useLDClient } from 'launchdarkly-react-client-sdk'
 import { idmRedirectURL } from '../../pages/Auth/cognitoAuth'
 import { assertNever, AuthModeType } from '@mc-review/common-code'
 import { PageTitlesRecord, RoutesRecord, RouteT } from '@mc-review/constants'
-import { getRouteName, getSubmissionPath } from '../../routeHelpers'
+import { getRouteName } from '../../routeHelpers'
 import { useAuth } from '../../contexts/AuthContext'
 import { usePage } from '../../contexts/PageContext'
 import { useTitle } from '../../hooks/useTitle'
@@ -29,7 +28,7 @@ import {
     NewSubmission,
     NewSubmissionForm,
 } from '../StateSubmission'
-import { EQROSubmissionSummary, SubmissionSummary } from '../SubmissionSummary'
+import { SubmissionSummaryRoutes } from '../SubmissionSummary'
 import { SubmissionRevisionSummary } from '../SubmissionRevisionSummary'
 import { useScrollToPageTop } from '../../hooks/useScrollToPageTop'
 import { featureFlags } from '@mc-review/common-code'
@@ -172,21 +171,13 @@ const StateUserRoutes = ({
                     />
 
                     <Route
-                        path={getSubmissionPath(
-                            'SUBMISSIONS_SUMMARY',
-                            'HEALTH_PLAN'
-                        )}
-                        element={<SubmissionSummary />}
+                        path={RoutesRecord.SUBMISSIONS_SUMMARY}
+                        element={
+                            <SubmissionSummaryRoutes
+                                showEqroSubmissions={showEqroSubmissions}
+                            />
+                        }
                     />
-                    {showEqroSubmissions && (
-                        <Route
-                            path={getSubmissionPath(
-                                'SUBMISSIONS_SUMMARY',
-                                'EQRO'
-                            )}
-                            element={<EQROSubmissionSummary />}
-                        />
-                    )}
                     <Route
                         path={RoutesRecord.SUBMISSIONS_EDIT_TOP_LEVEL}
                         element={<StateSubmissionForm />}
@@ -287,21 +278,13 @@ const CMSUserRoutes = ({
                         element={<UploadContractQuestions />}
                     />
                     <Route
-                        path={getSubmissionPath(
-                            'SUBMISSIONS_SUMMARY',
-                            'HEALTH_PLAN'
-                        )}
-                        element={<SubmissionSummary />}
+                        path={RoutesRecord.SUBMISSIONS_SUMMARY}
+                        element={
+                            <SubmissionSummaryRoutes
+                                showEqroSubmissions={showEqroSubmissions}
+                            />
+                        }
                     />
-                    {showEqroSubmissions && (
-                        <Route
-                            path={getSubmissionPath(
-                                'SUBMISSIONS_SUMMARY',
-                                'EQRO'
-                            )}
-                            element={<EQROSubmissionSummary />}
-                        />
-                    )}
                 </Route>
 
                 <Route element={<RateSummarySideNav />}>

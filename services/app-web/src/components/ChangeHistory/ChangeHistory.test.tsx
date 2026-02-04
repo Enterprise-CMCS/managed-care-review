@@ -19,7 +19,7 @@ import {
     ContractSubmissionTypeRecord,
     RoutesRecord,
 } from '@mc-review/constants'
-import { Route, Routes } from 'react-router'
+import { Route, Routes } from 'react-router-dom'
 
 describe('Change History', () => {
     it('can render history for initial submission', () => {

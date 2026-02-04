@@ -1,5 +1,5 @@
 import { screen, waitFor, within } from '@testing-library/react'
-import { Route, Routes } from 'react-router'
+import { Route, Routes } from 'react-router-dom'
 import { RoutesRecord } from '@mc-review/constants'
 import {
     fetchCurrentUserMock,

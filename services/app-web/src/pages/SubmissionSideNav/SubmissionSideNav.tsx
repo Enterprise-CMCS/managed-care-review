@@ -1,8 +1,9 @@
 import { SideNav, GridContainer, Icon } from '@trussworks/react-uswds'
 import styles from './SubmissionSideNav.module.scss'
-import { useParams, useLocation, Outlet } from 'react-router-dom'
+import { useLocation, Outlet, useParams } from 'react-router-dom'
 import { useAuth } from '../../contexts/AuthContext'
 import {
+    ContractSubmissionTypeRecord,
     QUESTION_RESPONSE_SHOW_SIDEBAR_ROUTES,
     RoutesRecord,
     STATE_SUBMISSION_FORM_ROUTES,
@@ -22,6 +23,7 @@ import { GenericErrorPage } from '../Errors/GenericErrorPage'
 import { Error404 } from '../Errors/Error404Page'
 import { Contract, User } from '../../gen/gqlClient'
 import { isUnlockedOrDraft, shouldUseFormPageStyles } from './helpers'
+import React from 'react'
 
 export type SideNavOutletContextType = {
     contract: Contract
@@ -32,7 +34,11 @@ export type SideNavOutletContextType = {
 }
 
 export const SubmissionSideNav = () => {
-    const { id, rateID } = useParams()
+    const {
+        id,
+        rateID,
+        contractSubmissionType: contractTypeParam,
+    } = useParams()
     if (!id) {
         throw new Error(
             'PROGRAMMING ERROR: id param not set in state submission form.'
@@ -93,6 +99,13 @@ export const SubmissionSideNav = () => {
 
     const submissionStatus = contract.status
     const contractSubmissionType = contract.contractSubmissionType
+
+    if (
+        ContractSubmissionTypeRecord[contractSubmissionType] !==
+        contractTypeParam
+    ) {
+        return <Error404 />
+    }
 
     //The sideNav should not be visible to a state user if the submission is a draft that has never been submitted
     const showSidebar =
