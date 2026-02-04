@@ -252,20 +252,14 @@ async function waitForSSMAgent(instanceID: string): Promise<void> {
     console.info('\nSSM agent is ready')
 }
 
-// Run pg_dump locally via Docker through SSM port forwarding tunnel
-async function runPgDumpViaDocker(
+// Establish SSM port forwarding tunnel to the database
+// Returns the SSM process which must be cleaned up by the caller
+async function establishSSMTunnel(
     instanceID: string,
-    dbSecrets: {
-        host: string
-        user: string
-        port: number
-        dbname: string
-        password: string
-    },
-    dumpFileName: string
-): Promise<void> {
-    const localPort = 5433 // Use a local port that's unlikely to conflict
-
+    host: string,
+    port: number,
+    localPort: number
+): Promise<ReturnType<typeof spawn>> {
     console.info('Setting up SSM port forwarding tunnel to database...')
 
     // Start SSM port forwarding session in the background
@@ -282,8 +276,8 @@ async function runPgDumpViaDocker(
             'AWS-StartPortForwardingSessionToRemoteHost',
             '--parameters',
             JSON.stringify({
-                host: [dbSecrets.host],
-                portNumber: [dbSecrets.port.toString()],
+                host: [host],
+                portNumber: [port.toString()],
                 localPortNumber: [localPort.toString()],
             }),
         ],
@@ -370,6 +364,31 @@ async function runPgDumpViaDocker(
     }
     console.info('\nTunnel established')
 
+    return ssmProcess
+}
+
+// Run pg_dump locally via Docker through SSM port forwarding tunnel
+async function runPgDumpViaDocker(
+    instanceID: string,
+    dbSecrets: {
+        host: string
+        user: string
+        port: number
+        dbname: string
+        password: string
+    },
+    dumpFileName: string
+): Promise<void> {
+    const localPort = 5433 // Use a local port that's unlikely to conflict
+
+    // Establish the SSM tunnel
+    const ssmProcess = await establishSSMTunnel(
+        instanceID,
+        dbSecrets.host,
+        dbSecrets.port,
+        localPort
+    )
+
     try {
         console.info('Running pg_dump via Docker with PostgreSQL 16 client...')
 
@@ -377,7 +396,6 @@ async function runPgDumpViaDocker(
         const isLinux = process.platform === 'linux'
         const dbHost = isLinux ? 'localhost' : 'host.docker.internal'
 
-        // Use PGPASSWORD environment variable instead of a .pgpass file for simplicity in this Docker setup (not necessarily more secure)
         const dockerArgs = [
             'run',
             '--rm',
@@ -510,4 +528,153 @@ async function cloneDBLocally(envName: string, stopAfter = true) {
     process.exit(0)
 }
 
-export { cloneDBLocally }
+// Run psql interactively via Docker through SSM port forwarding tunnel
+async function runPsqlViaDocker(
+    instanceID: string,
+    dbSecrets: {
+        host: string
+        user: string
+        port: number
+        dbname: string
+        password: string
+    }
+): Promise<void> {
+    const localPort = 5433 // Use a local port that's unlikely to conflict
+
+    // Establish the SSM tunnel
+    const ssmProcess = await establishSSMTunnel(
+        instanceID,
+        dbSecrets.host,
+        dbSecrets.port,
+        localPort
+    )
+
+    try {
+        console.info(
+            'Starting interactive PostgreSQL session via Docker with PostgreSQL 16 client...'
+        )
+        console.info(
+            `Connecting to database: ${dbSecrets.dbname} as user: ${dbSecrets.user}`
+        )
+        console.info('Type \\q or press Ctrl+D to exit the session\n')
+
+        // Determine platform for Docker networking
+        const isLinux = process.platform === 'linux'
+        const dbHost = isLinux ? 'localhost' : 'host.docker.internal'
+
+        // Use PGPASSWORD environment variable and run psql interactively
+        const dockerArgs = [
+            'run',
+            '--rm',
+            '-it', // Interactive terminal
+            ...(isLinux ? ['--network', 'host'] : []),
+            '-e',
+            `PGPASSWORD=${dbSecrets.password}`,
+            'postgres:16-alpine',
+            'psql',
+            '-h',
+            dbHost,
+            '-p',
+            localPort.toString(),
+            '-U',
+            dbSecrets.user,
+            '-d',
+            dbSecrets.dbname,
+        ]
+
+        const result = spawnSync('docker', dockerArgs, {
+            stdio: 'inherit',
+        })
+
+        if (result.error) {
+            throw result.error
+        }
+
+        if (result.status !== 0 && result.status !== null) {
+            // status null means killed by signal (e.g., Ctrl+C), which is normal
+            throw new Error(
+                `Docker command failed with exit code ${result.status}`
+            )
+        }
+
+        console.info('\nPostgreSQL session ended')
+    } finally {
+        // Clean up SSM session
+        // Check if process is still running before attempting to kill
+        if (ssmProcess.exitCode === null && !ssmProcess.killed) {
+            console.info('Closing SSM tunnel...')
+            try {
+                ssmProcess.kill()
+                // Wait a moment for graceful shutdown
+                await new Promise((resolve) => setTimeout(resolve, 1000))
+            } catch (err) {
+                console.warn(
+                    'Warning: Failed to kill SSM process:',
+                    err instanceof Error ? err.message : String(err)
+                )
+            }
+        }
+    }
+}
+
+async function connectToPostgres(envName: string, stopAfter = true) {
+    // Check Docker is available first
+    checkDockerAvailable()
+
+    const check = await checkAWSAccess(envName)
+    if (check instanceof Error) {
+        process.exit(1)
+    }
+
+    const stage = stageForEnv(envName)
+
+    // Figure out if bastion is running
+    const instance = await ensureBastionIsRunning(stage)
+    if (instance instanceof Error) {
+        console.error('Error getting bastion running', instance)
+        process.exit(1)
+    }
+
+    const bastionInstance = instance
+    const bastionInstanceID = bastionInstance.InstanceId
+
+    if (!bastionInstanceID) {
+        console.error(
+            "EC2 didn't return required information",
+            bastionInstanceID
+        )
+        process.exit(1)
+    }
+
+    // Wait for SSM agent to be ready
+    await waitForSSMAgent(bastionInstanceID)
+
+    // Get the secrets for the DB.
+    const dbSecrets = await getSecretsForRDS(stage)
+    if (dbSecrets instanceof Error) {
+        console.error('error fetching secrets', dbSecrets)
+        process.exit(1)
+    }
+
+    try {
+        // Run psql interactively via Docker through SSM port forwarding
+        await runPsqlViaDocker(bastionInstanceID, dbSecrets)
+    } catch (err) {
+        console.error('PostgreSQL connection failed', err)
+        process.exit(1)
+    }
+
+    // Stop bastion
+    if (stopAfter) {
+        const stopRes = await stopInstance(bastionInstanceID)
+        if (stopRes instanceof Error) {
+            console.error('Stopping instance failed', stopRes)
+            process.exit(1)
+        }
+        console.info('Stopped bastion')
+    }
+
+    process.exit(0)
+}
+
+export { cloneDBLocally, connectToPostgres }

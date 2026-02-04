@@ -1,7 +1,7 @@
 import { spawn } from 'child_process'
 import yargs from 'yargs'
 import { parseRunFlags } from './flags.js'
-import { cloneDBLocally } from './jumpbox.js'
+import { cloneDBLocally, connectToPostgres } from './jumpbox.js'
 import {
     compileGraphQLTypesOnce,
     compileProto,
@@ -544,6 +544,39 @@ async function main() {
                         },
                         async (args) => {
                             await cloneDBLocally(args.env, args.stopAfter)
+                        }
+                    )
+                    .command(
+                        'connect-pg <env>',
+                        'open an interactive PostgreSQL session to the database in the given aws environment via SSM tunnel',
+                        (yargs) => {
+                            return yargs
+                                .positional('env', {
+                                    describe:
+                                        'the environment to connect to. You must have AWS credentials configured for this environment.',
+                                    demandOption: true,
+                                    type: 'string',
+                                    choices: ['dev', 'val', 'prod'],
+                                })
+                                .option('stop-after', {
+                                    type: 'boolean',
+                                    default: true,
+                                    describe:
+                                        'automatically stop the bastion after the PostgreSQL session ends',
+                                })
+                                .example([
+                                    [
+                                        '$0 jumpbox connect-pg dev',
+                                        'open an interactive psql session to the dev database',
+                                    ],
+                                    [
+                                        '$0 jumpbox connect-pg val --no-stop-after',
+                                        'connect to val database and leave the bastion running',
+                                    ],
+                                ])
+                        },
+                        async (args) => {
+                            await connectToPostgres(args.env, args.stopAfter)
                         }
                     )
                     .demandCommand(1, 'you must pick a subcommand for jumpbox')
