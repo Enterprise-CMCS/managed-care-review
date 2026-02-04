@@ -1,4 +1,10 @@
 import { adminUser } from '../../utils/apollo-test-utils'
+import {
+    FetchCurrentUserDocument,
+    FetchCurrentUserQuery,
+    UnlockContractDocument,
+    UnlockContractMutation,
+} from '../../gen/gqlClient'
 
 describe('thirdPartyAPIAccess', () => {
     beforeEach(() => {
@@ -36,8 +42,7 @@ describe('thirdPartyAPIAccess', () => {
         })
     })
 
-    // Skipping as making requests with custom header 'X-Acting-As-User' does not work.
-    it.skip('can make delegated API request', () => {
+    it('can make delegated API request', () => {
         const url = Cypress.env('API_URL')
         const api_url = url + '/v1/graphql/external'
         const token_url = url + '/oauth/token'
@@ -53,111 +58,35 @@ describe('thirdPartyAPIAccess', () => {
         cy.apiCreateOAuthClient(adminUser(), 'ZUKO', 'AZULA').then(
             (response) => {
                 const { client, delegatedUser } = response
-                cy.log('OAuth client ID: ' + client.clientId)
-                cy.log('Delegated user ID: ' + delegatedUser.id)
-                console.log(
-                    'Full apiCreateOAuthClient response:',
-                    JSON.stringify(response, null, 2)
-                )
+                cy.apiRequestOAuthToken(client).then((token) => {
+                    //Make a delegated request using window.fetch with credentials omit
+                    //to avoid cy.request sending session cookies that interfere with OAuth delegation.
+                    cy.thirdPartyApiRequest<FetchCurrentUserQuery>({
+                        token,
+                        document: FetchCurrentUserDocument,
+                        delegatedUserId: delegatedUser.id,
+                    }).then((result) => {
+                        const user = result.data?.fetchCurrentUser
 
-                //TODO: These requests do not work. We need to create custom API command to fetch and return responses
-                cy.window()
-                    .then((win) =>
-                        win
-                            .fetch(token_url, {
-                                method: 'POST',
-                                credentials: 'omit',
-                                headers: {
-                                    'Content-Type':
-                                        'application/x-www-form-urlencoded',
-                                },
-                                body: new URLSearchParams({
-                                    grant_type: 'client_credentials',
-                                    client_id: client.clientId,
-                                    client_secret: client.clientSecret,
-                                }).toString(),
-                            })
-                            .then((fetchRes) =>
-                                fetchRes.json().then((body) => ({
-                                    status: fetchRes.status,
-                                    body,
-                                }))
-                            )
-                    )
-                    .then((res) => {
-                        expect(res.status).to.equal(200) // okay
-
-                        const token = res.body.access_token
-
-                        expect(token).to.exist
-
-                        //Make a delegated request using window.fetch with credentials omit
-                        //to avoid cy.request sending session cookies that interfere with OAuth delegation.
-                        cy.window()
-                            .then((win) =>
-                                win
-                                    .fetch(api_url, {
-                                        method: 'POST',
-                                        credentials: 'omit',
-                                        headers: {
-                                            'Content-Type': 'application/json',
-                                            Authorization: `Bearer ${token}`,
-                                            'X-Acting-As-User': `${delegatedUser.id}`,
-                                        },
-                                        body: JSON.stringify({
-                                            query: `query FetchCurrentUser {
-                              fetchCurrentUser {
-                                ... on CMSUser {
-                                  id
-                                  role
-                                  email
-                                  givenName
-                                  familyName
-                                  divisionAssignment
-                                }
-                                ... on CMSApproverUser {
-                                  id
-                                  role
-                                  email
-                                  givenName
-                                  familyName
-                                  divisionAssignment
-                                }
-                              }
-                            }`,
-                                        }),
-                                    })
-                                    .then((fetchRes) =>
-                                        fetchRes.json().then((body) => ({
-                                            status: fetchRes.status,
-                                            body,
-                                        }))
-                                    )
-                            )
-                            .then((res) => {
-                                cy.log(
-                                    'Delegated request status: ' + res.status
-                                )
-                                cy.log(
-                                    'Delegated request body: ' +
-                                        JSON.stringify(res.body)
-                                )
-                                cy.log(
-                                    'Delegated request headers sent - X-Acting-As-User: ' +
-                                        delegatedUser.id
-                                )
-                                console.log(
-                                    'Full delegated response:',
-                                    JSON.stringify(res.body, null, 2)
-                                )
-                                expect(res.status).to.equal(200) // okay
-
-                                const user = res.body.data.fetchCurrentUser
-
-                                // validate fetchCurrentUser returns the delegated user info.
-                                expect(user.id).to.equal(delegatedUser.id)
-                            })
+                        expect(user.id).to.equal(delegatedUser.id)
                     })
+
+                    cy.thirdPartyApiRequest<UnlockContractMutation>({
+                        token,
+                        document: UnlockContractDocument,
+                        variables: {
+                            input: {
+                                contractID:
+                                    'abbde720-64d4-458c-aa26-be678b6d3328',
+                                unlockedReason: 'Delegated mutation',
+                            },
+                        },
+                        delegatedUserId: delegatedUser.id,
+                    }).then((result) => {
+                        const error = result.errors?.[0]
+                        expect(error?.message).to.equal('OAuth client does not have write permissions')
+                    })
+                })
             }
         )
     })
