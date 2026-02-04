@@ -15,6 +15,7 @@ import { z } from 'zod'
 import type { UpdateDraftContractRatesArgsType } from '../../postgres/contractAndRates/updateDraftContractRates'
 import { generateRateCertificationName } from '../rate/generateRateCertificationName'
 import { canWrite } from '../../authorization/oauthAuthorization'
+import { parseAndValidateDocuments } from '../documentHelpers'
 
 // Zod schemas to parse the updatedRates param since the types are not fully defined in GQL
 // CREATE / UPDATE / LINK
@@ -70,7 +71,51 @@ function updateDraftContractRates(
         }
 
         const { contractID, updatedRates, lastSeenUpdatedAt } = input
-        const parsedRatesResult = updatedRatesSchema.safeParse(updatedRates)
+
+        // Parse and validate documents for each rate that has formData
+        const updatedRatesWithValidatedDocs = updatedRates.map((rateUpdate) => {
+            // Only CREATE and UPDATE operations have formData
+            if (rateUpdate.type === 'LINK' || !rateUpdate.formData) {
+                return rateUpdate
+            }
+
+            const formData = rateUpdate.formData
+
+            // Validate documents if present
+            const validatedRateDocuments = formData.rateDocuments
+                ? parseAndValidateDocuments(
+                      formData.rateDocuments.map((d) => ({
+                          name: d.name,
+                          s3URL: d.s3URL,
+                          sha256: d.sha256,
+                      }))
+                  )
+                : undefined
+
+            const validatedSupportingDocuments = formData.supportingDocuments
+                ? parseAndValidateDocuments(
+                      formData.supportingDocuments.map((d) => ({
+                          name: d.name,
+                          s3URL: d.s3URL,
+                          sha256: d.sha256,
+                      }))
+                  )
+                : undefined
+
+            // Return rate update with validated documents
+            return {
+                ...rateUpdate,
+                formData: {
+                    ...formData,
+                    rateDocuments: validatedRateDocuments,
+                    supportingDocuments: validatedSupportingDocuments,
+                },
+            }
+        })
+
+        const parsedRatesResult = updatedRatesSchema.safeParse(
+            updatedRatesWithValidatedDocs
+        )
 
         if (!parsedRatesResult.success) {
             const errMsg = `updatedRates not correctly formatted: ${parsedRatesResult.error}`

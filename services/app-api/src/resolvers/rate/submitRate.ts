@@ -13,6 +13,7 @@ import { generateRateCertificationName } from './generateRateCertificationName'
 import { findStatePrograms } from '@mc-review/submissions'
 import { canWrite } from '../../authorization/oauthAuthorization'
 import type { DocumentZipService } from '../../zip/generateZip'
+import { parseAndValidateDocuments } from '../documentHelpers'
 
 /*
     Submit rate will change a draft revision to submitted and generate a rate name if one is missing
@@ -111,6 +112,32 @@ export function submitRate(
             statePrograms
         )
 
+        // Parse and validate documents if formData is provided
+        let validatedRateDocuments
+        let validatedSupportingDocuments
+
+        if (formData) {
+            if (formData.rateDocuments) {
+                validatedRateDocuments = parseAndValidateDocuments(
+                    formData.rateDocuments.map((d) => ({
+                        name: d.name,
+                        s3URL: d.s3URL,
+                        sha256: d.sha256,
+                    }))
+                )
+            }
+
+            if (formData.supportingDocuments) {
+                validatedSupportingDocuments = parseAndValidateDocuments(
+                    formData.supportingDocuments.map((d) => ({
+                        name: d.name,
+                        s3URL: d.s3URL,
+                        sha256: d.sha256,
+                    }))
+                )
+            }
+        }
+
         // combine existing db draft data with any form data added on submit
         // call submit rate handler
         const submittedRate = await store.submitRate({
@@ -122,25 +149,25 @@ export function submitRate(
                       rateType: formData.rateType ?? undefined,
                       rateCapitationType:
                           formData.rateCapitationType ?? undefined,
-                      rateDocuments: formData.rateDocuments
-                          ? formData.rateDocuments.map((doc) => {
+                      rateDocuments: validatedRateDocuments
+                          ? validatedRateDocuments.map((doc) => {
                                 return {
                                     name: doc.name,
-                                    sha256: doc.sha256,
+                                    sha256: doc.sha256!, // sha256 is required in GenericDocumentInput
                                     s3URL: doc.s3URL,
-                                    downloadURL: doc.downloadURL ?? undefined,
-                                    dateAdded: doc.dateAdded ?? undefined,
+                                    s3BucketName: doc.s3BucketName,
+                                    s3Key: doc.s3Key,
                                 }
                             })
                           : [],
-                      supportingDocuments: formData.supportingDocuments
-                          ? formData.rateDocuments.map((doc) => {
+                      supportingDocuments: validatedSupportingDocuments
+                          ? validatedSupportingDocuments.map((doc) => {
                                 return {
                                     name: doc.name,
-                                    sha256: doc.sha256,
+                                    sha256: doc.sha256!, // sha256 is required in GenericDocumentInput
                                     s3URL: doc.s3URL,
-                                    downloadURL: doc.downloadURL ?? undefined,
-                                    dateAdded: doc.dateAdded ?? undefined,
+                                    s3BucketName: doc.s3BucketName,
+                                    s3Key: doc.s3Key,
                                 }
                             })
                           : [],
