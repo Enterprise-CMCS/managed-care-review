@@ -28,7 +28,7 @@ import {
     NewSubmission,
     NewSubmissionForm,
 } from '../StateSubmission'
-import { EQROSubmissionSummary, SubmissionSummary } from '../SubmissionSummary'
+import { SubmissionSummaryRoutes } from '../SubmissionSummary'
 import { SubmissionRevisionSummary } from '../SubmissionRevisionSummary'
 import { useScrollToPageTop } from '../../hooks/useScrollToPageTop'
 import { featureFlags } from '@mc-review/common-code'
@@ -172,14 +172,12 @@ const StateUserRoutes = ({
 
                     <Route
                         path={RoutesRecord.SUBMISSIONS_SUMMARY}
-                        element={<SubmissionSummary />}
+                        element={
+                            <SubmissionSummaryRoutes
+                                showEqroSubmissions={showEqroSubmissions}
+                            />
+                        }
                     />
-                    {showEqroSubmissions && (
-                        <Route
-                            path={RoutesRecord.SUBMISSIONS_SUMMARY}
-                            element={<EQROSubmissionSummary />}
-                        />
-                    )}
                     <Route
                         path={RoutesRecord.SUBMISSIONS_EDIT_TOP_LEVEL}
                         element={<StateSubmissionForm />}
@@ -281,14 +279,12 @@ const CMSUserRoutes = ({
                     />
                     <Route
                         path={RoutesRecord.SUBMISSIONS_SUMMARY}
-                        element={<SubmissionSummary />}
+                        element={
+                            <SubmissionSummaryRoutes
+                                showEqroSubmissions={showEqroSubmissions}
+                            />
+                        }
                     />
-                    {showEqroSubmissions && (
-                        <Route
-                            path={RoutesRecord.SUBMISSIONS_SUMMARY}
-                            element={<EQROSubmissionSummary />}
-                        />
-                    )}
                 </Route>
 
                 <Route element={<RateSummarySideNav />}>
