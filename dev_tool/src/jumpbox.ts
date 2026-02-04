@@ -252,20 +252,14 @@ async function waitForSSMAgent(instanceID: string): Promise<void> {
     console.info('\nSSM agent is ready')
 }
 
-// Run pg_dump locally via Docker through SSM port forwarding tunnel
-async function runPgDumpViaDocker(
+// Establish SSM port forwarding tunnel to the database
+// Returns the SSM process which must be cleaned up by the caller
+async function establishSSMTunnel(
     instanceID: string,
-    dbSecrets: {
-        host: string
-        user: string
-        port: number
-        dbname: string
-        password: string
-    },
-    dumpFileName: string
-): Promise<void> {
-    const localPort = 5433 // Use a local port that's unlikely to conflict
-
+    host: string,
+    port: number,
+    localPort: number
+): Promise<ReturnType<typeof spawn>> {
     console.info('Setting up SSM port forwarding tunnel to database...')
 
     // Start SSM port forwarding session in the background
@@ -282,8 +276,8 @@ async function runPgDumpViaDocker(
             'AWS-StartPortForwardingSessionToRemoteHost',
             '--parameters',
             JSON.stringify({
-                host: [dbSecrets.host],
-                portNumber: [dbSecrets.port.toString()],
+                host: [host],
+                portNumber: [port.toString()],
                 localPortNumber: [localPort.toString()],
             }),
         ],
@@ -370,6 +364,31 @@ async function runPgDumpViaDocker(
     }
     console.info('\nTunnel established')
 
+    return ssmProcess
+}
+
+// Run pg_dump locally via Docker through SSM port forwarding tunnel
+async function runPgDumpViaDocker(
+    instanceID: string,
+    dbSecrets: {
+        host: string
+        user: string
+        port: number
+        dbname: string
+        password: string
+    },
+    dumpFileName: string
+): Promise<void> {
+    const localPort = 5433 // Use a local port that's unlikely to conflict
+
+    // Establish the SSM tunnel
+    const ssmProcess = await establishSSMTunnel(
+        instanceID,
+        dbSecrets.host,
+        dbSecrets.port,
+        localPort
+    )
+
     try {
         console.info('Running pg_dump via Docker with PostgreSQL 16 client...')
 
@@ -377,7 +396,6 @@ async function runPgDumpViaDocker(
         const isLinux = process.platform === 'linux'
         const dbHost = isLinux ? 'localhost' : 'host.docker.internal'
 
-        // Use PGPASSWORD environment variable instead of a .pgpass file for simplicity in this Docker setup (not necessarily more secure)
         const dockerArgs = [
             'run',
             '--rm',
@@ -523,109 +541,13 @@ async function runPsqlViaDocker(
 ): Promise<void> {
     const localPort = 5433 // Use a local port that's unlikely to conflict
 
-    console.info('Setting up SSM port forwarding tunnel to database...')
-
-    // Start SSM port forwarding session in the background
-    const ssmProcess = spawn(
-        'aws',
-        [
-            'ssm',
-            'start-session',
-            '--region',
-            'us-east-1',
-            '--target',
-            instanceID,
-            '--document-name',
-            'AWS-StartPortForwardingSessionToRemoteHost',
-            '--parameters',
-            JSON.stringify({
-                host: [dbSecrets.host],
-                portNumber: [dbSecrets.port.toString()],
-                localPortNumber: [localPort.toString()],
-            }),
-        ],
-        {
-            stdio: ['ignore', 'pipe', 'pipe'],
-        }
+    // Establish the SSM tunnel
+    const ssmProcess = await establishSSMTunnel(
+        instanceID,
+        dbSecrets.host,
+        dbSecrets.port,
+        localPort
     )
-
-    // Handle SSM process errors
-    let ssmError: Error | undefined
-    ssmProcess.on('error', (err) => {
-        ssmError = err
-        console.error('SSM process error:', err.message)
-    })
-
-    // Also capture stdout and stderr for debugging
-    let ssmStdout = ''
-    let ssmStderr = ''
-    ssmProcess.stdout?.on('data', (data) => {
-        ssmStdout += data.toString()
-    })
-    ssmProcess.stderr?.on('data', (data) => {
-        ssmStderr += data.toString()
-    })
-
-    // Monitor process exit
-    ssmProcess.on('exit', (code, signal) => {
-        if (code !== null && code !== 0) {
-            console.error(`\nSSM process exited with code ${code}`)
-            if (ssmStderr) {
-                console.error('stderr:', ssmStderr)
-            }
-        }
-    })
-
-    // Check if SSM process failed to start before attempting tunnel establishment
-    if (ssmError) {
-        const errorMsg = ssmStderr
-            ? `Failed to start SSM session: ${ssmError.message}\n${ssmStderr}`
-            : `Failed to start SSM session: ${ssmError.message}`
-        throw new Error(errorMsg)
-    }
-
-    // Wait for the tunnel to be established with proper health check
-    console.info('Waiting for tunnel to establish...')
-    const tunnelReady = await retry(async () => {
-        return new Promise<boolean>((resolve) => {
-            const socket = createConnection(localPort, 'localhost')
-
-            const timeout = setTimeout(() => {
-                socket.removeAllListeners()
-                socket.destroy()
-                resolve(false)
-            }, 1000)
-
-            socket.on('connect', () => {
-                clearTimeout(timeout)
-                socket.removeAllListeners()
-                socket.destroy()
-                resolve(true)
-            })
-            socket.on('error', () => {
-                clearTimeout(timeout)
-                process.stdout.write('.')
-                socket.removeAllListeners()
-                socket.destroy()
-                resolve(false)
-            })
-        })
-    }, 30 * 1000) // 30 second timeout for tunnel
-
-    if (tunnelReady instanceof Error) {
-        console.error('\nFailed to establish SSM tunnel to database')
-        if (ssmStderr) {
-            console.error('SSM stderr:', ssmStderr)
-        }
-        if (ssmStdout) {
-            console.error('SSM stdout:', ssmStdout)
-        }
-        if (ssmProcess.exitCode !== null) {
-            console.error('SSM process exit code:', ssmProcess.exitCode)
-        }
-        throw new Error('Failed to establish SSM tunnel to database')
-    }
-    console.info('\nTunnel established')
 
     try {
         console.info(
