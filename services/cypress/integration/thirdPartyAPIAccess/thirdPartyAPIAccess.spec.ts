@@ -54,7 +54,8 @@ describe('thirdPartyAPIAccess', () => {
             const { client, delegatedUser } = response
 
             // clear out session storage, otherwise cy.request will merge browser auth with our custom auth.
-            cy.clearLocalStorage().then(() => {
+            cy.clearAllLocalStorage().then(() => {
+                cy.clearAllCookies()
                 cy.request({
                     method: 'post',
                     url: token_url,
@@ -85,25 +86,25 @@ describe('thirdPartyAPIAccess', () => {
                         },
                         body: JSON.stringify({
                             query: `query FetchCurrentUser {
-                              fetchCurrentUser {
-                                ... on CMSUser {
-                                  id
-                                  role
-                                  email
-                                  givenName
-                                  familyName
-                                  divisionAssignment
-                                }
-                                ... on CMSApproverUser {
-                                  id
-                                  role
-                                  email
-                                  givenName
-                                  familyName
-                                  divisionAssignment
-                                }
-                              }
-                            }`,
+                          fetchCurrentUser {
+                            ... on CMSUser {
+                              id
+                              role
+                              email
+                              givenName
+                              familyName
+                              divisionAssignment
+                            }
+                            ... on CMSApproverUser {
+                              id
+                              role
+                              email
+                              givenName
+                              familyName
+                              divisionAssignment
+                            }
+                          }
+                        }`,
                         }),
                         failOnStatusCode: false,
                     }).then((res) => {
@@ -111,7 +112,7 @@ describe('thirdPartyAPIAccess', () => {
 
                         const user = res.body.data.fetchCurrentUser
 
-                        // validate fetchCurrentUser returns the delgated user info.
+                        // validate fetchCurrentUser returns the delegated user info.
                         expect(user.id).to.equal(delegatedUser.id)
                     })
                 })
