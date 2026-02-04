@@ -22,6 +22,7 @@ import {
     minnesotaStatePrograms, CMSUserType, eqroFromData, AdminUserType,
 } from '../utils/apollo-test-utils'
 import { ApolloClient, DocumentNode, NormalizedCacheObject } from '@apollo/client'
+import { GraphQLError, print } from 'graphql'
 import { CMSUserLoginNames, userLoginData } from './loginCommands'
 
 export type ApiCreateOAuthClientResponseType = {
@@ -339,6 +340,75 @@ const createOAuthClient = async (
     }
 }
 
+const requestOAuthToken = async (
+    oauthClient: OauthClient
+): Promise<string> => {
+    const url = Cypress.env('API_URL')
+    const tokenUrl = `${url}/oauth/token`
+
+    const response = await fetch(tokenUrl, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/x-www-form-urlencoded',
+        },
+        body: new URLSearchParams({
+            grant_type: 'client_credentials',
+            client_id: oauthClient.clientId,
+            client_secret: oauthClient.clientSecret,
+        }).toString(),
+    })
+
+    if (!response.ok) {
+        throw new Error(
+            `OAuth token request failed with status ${response.status}: ${await response.text()}`
+        )
+    }
+
+    const body = await response.json()
+    const token = body.access_token
+
+    if (!token) {
+        throw new Error('OAuth token response did not contain an access_token')
+    }
+
+    return token
+}
+
+export type ThirdPartyApiRequestInput = {
+    token: string
+    document: DocumentNode
+    delegatedUserId?: string
+    variables?: Record<string, unknown>
+}
+
+const delegatedApiRequest = async <TData>(
+    input: ThirdPartyApiRequestInput
+): Promise<{ status: number; data: TData; errors?: GraphQLError[] }> => {
+    const url = Cypress.env('API_URL')
+    const apiUrl = `${url}/v1/graphql/external`
+
+    const headers: Record<string, string> = {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${input.token}`,
+    }
+
+    if (input.delegatedUserId) {
+        headers['X-Acting-As-User'] = input.delegatedUserId
+    }
+
+    const response = await fetch(apiUrl, {
+        method: 'POST',
+        headers,
+        body: JSON.stringify({
+            query: print(input.document),
+            variables: input.variables,
+        }),
+    })
+
+    const body = await response.json()
+    return { status: response.status, data: body.data, errors: body.errors }
+}
+
 Cypress.Commands.add(
     'apiCreateAndSubmitContractOnlySubmission',
     (stateUser): Cypress.Chainable<Contract> =>
@@ -420,4 +490,23 @@ Cypress.Commands.add(
                     )
                 )
             )
+)
+
+// Command to request a OAuth token
+Cypress.Commands.add(
+    'apiRequestOAuthToken',
+    (oauthClient: OauthClient): Cypress.Chainable<string> =>
+        cy.wrap(requestOAuthToken(oauthClient), { timeout: 30000 })
+)
+
+// Command for third party API requests using any query, mutation and delegated user request.
+Cypress.Commands.add(
+    'thirdPartyApiRequest',
+    (
+        input: ThirdPartyApiRequestInput
+    ): Cypress.Chainable<{ status: number; data: unknown }> =>
+        cy.wrap(
+            delegatedApiRequest(input),
+            { timeout: 30000 }
+        )
 )
