@@ -271,8 +271,6 @@ const createOAuthClient = async (
         (edge) => edge.node
     )
 
-    console.log(indexUsers)
-
     const apiUser = indexUsers.find(
         (user) => user?.email === userLoginData[oauthClientUser].email
     )

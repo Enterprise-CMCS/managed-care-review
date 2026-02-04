@@ -54,7 +54,7 @@ describe('thirdPartyAPIAccess', () => {
             const { client, delegatedUser } = response
 
             // clear out session storage, otherwise cy.request will merge browser auth with our custom auth.
-            cy.clearAllSessionStorage().then(() => {
+            cy.clearLocalStorage().then(() => {
                 cy.request({
                     method: 'post',
                     url: token_url,
