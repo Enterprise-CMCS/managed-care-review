@@ -52,6 +52,12 @@ describe('thirdPartyAPIAccess', () => {
         // Create the OAuth client using ZUKO
         cy.apiCreateOAuthClient(adminUser(), 'ZUKO', 'AZULA').then((response) => {
             const { client, delegatedUser } = response
+            cy.log('OAuth client ID: ' + client.clientId)
+            cy.log('Delegated user ID: ' + delegatedUser.id)
+            console.log(
+                'Full apiCreateOAuthClient response:',
+                JSON.stringify(response, null, 2)
+            )
 
             // clear out session storage, otherwise cy.request will merge browser auth with our custom auth.
             cy.clearAllLocalStorage().then(() => {
@@ -75,17 +81,18 @@ describe('thirdPartyAPIAccess', () => {
 
                     expect(token).to.exist
 
-                    //Make a delegated request
-                    cy.request({
-                        method: 'post',
-                        url: api_url,
-                        headers: {
-                            'Content-Type': 'application/json',
-                            Authorization: `Bearer ${token}`,
-                            'X-Acting-As-User': `${delegatedUser.id}`,
-                        },
-                        body: JSON.stringify({
-                            query: `query FetchCurrentUser {
+                    cy.clearAllCookies().then(() => {
+                        //Make a delegated request
+                        cy.request({
+                            method: 'post',
+                            url: api_url,
+                            headers: {
+                                'Content-Type': 'application/json',
+                                Authorization: `Bearer ${token}`,
+                                'X-Acting-As-User': `${delegatedUser.id}`,
+                            },
+                            body: JSON.stringify({
+                                query: `query FetchCurrentUser {
                           fetchCurrentUser {
                             ... on CMSUser {
                               id
@@ -105,15 +112,29 @@ describe('thirdPartyAPIAccess', () => {
                             }
                           }
                         }`,
-                        }),
-                        failOnStatusCode: false,
-                    }).then((res) => {
-                        expect(res.status).to.equal(200) // okay
+                            }),
+                            failOnStatusCode: false,
+                        }).then((res) => {
+                            cy.log('Delegated request status: ' + res.status)
+                            cy.log(
+                                'Delegated request body: ' +
+                                    JSON.stringify(res.body)
+                            )
+                            cy.log(
+                                'Delegated request headers sent - X-Acting-As-User: ' +
+                                    delegatedUser.id
+                            )
+                            console.log(
+                                'Full delegated response:',
+                                JSON.stringify(res.body, null, 2)
+                            )
+                            expect(res.status).to.equal(200) // okay
 
-                        const user = res.body.data.fetchCurrentUser
+                            const user = res.body.data.fetchCurrentUser
 
-                        // validate fetchCurrentUser returns the delegated user info.
-                        expect(user.id).to.equal(delegatedUser.id)
+                            // validate fetchCurrentUser returns the delegated user info.
+                            expect(user.id).to.equal(delegatedUser.id)
+                        })
                     })
                 })
             })
