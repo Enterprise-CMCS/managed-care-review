@@ -10,7 +10,7 @@ import {
     SubmitContractDocument,
     CreateContractDocument,
     UpdateContractDraftRevisionDocument,
-    UpdateContractDraftRevisionInput, CmsUsersUnion, Division,
+    UpdateContractDraftRevisionInput, CmsUsersUnion, Division, OauthClient, CreateOauthClientDocument,
 } from '../gen/gqlClient'
 import {
     apolloClientWrapper,
@@ -18,7 +18,7 @@ import {
     newSubmissionInput,
     rateFormData,
     contractFormData,
-    minnesotaStatePrograms, CMSUserType, eqroFromData,
+    minnesotaStatePrograms, CMSUserType, eqroFromData, StateUserType, AdminUserType,
 } from '../utils/apollo-test-utils'
 import { ApolloClient, DocumentNode, NormalizedCacheObject } from '@apollo/client'
 
@@ -225,11 +225,52 @@ const assignCmsDivision = async (
 
 const seedUserIntoDB = async (
     apolloClient: ApolloClient<NormalizedCacheObject>
-): Promise<void> => {
+): Promise<User> => {
     // To seed, we just need to perform a graphql query and the api will add the user to the db
-    await apolloClient.query({
+    const user = await apolloClient.query({
         query: FetchCurrentUserDocument,
     })
+
+    if (user.errors) {
+        throw new Error(
+            `Error: Could not seed user into DB: ${JSON.stringify(user.errors)}`
+        )
+    }
+
+    if (!user.data.fetchCurrentUser) {
+        throw new Error('Error: Seeding user into DB did not return user data in response.')
+    }
+
+    return user.data.fetchCurrentUser
+}
+
+const createOAuthClient = async (
+    apolloClient: ApolloClient<NormalizedCacheObject>,
+    oauthClientUser: CMSUserType
+): Promise<OauthClient> => {
+    const oauthClient = await apolloClient.mutate({
+        mutation: CreateOauthClientDocument,
+        variables: {
+            input: {
+                description: 'Cypress integration test',
+                userID: oauthClientUser.id,
+            }
+        },
+    })
+
+    if (oauthClient.errors) {
+        throw new Error(
+            `Error: Could not create OAuth client for user: ${JSON.stringify(oauthClient.errors)}`
+        )
+    }
+
+    if (!oauthClient.data.createOauthClient.oauthClient) {
+        throw new Error(
+            `Error: Creating new OAuth client returned with no data or errors.`
+        )
+    }
+
+    return oauthClient.data.createOauthClient.oauthClient
 }
 
 Cypress.Commands.add(
@@ -280,4 +321,21 @@ Cypress.Commands.add(
                 )
             )
         )
+)
+
+Cypress.Commands.add(
+    'apiCreateOAuthClient',
+    (
+        adminUser: AdminUserType,
+        oauthClientUser: CMSUserType
+    ): Cypress.Chainable<OauthClient> =>
+        cy
+            .task<DocumentNode>('readGraphQLSchema')
+            .then({ timeout: 30000 }, (schema) =>
+                apolloClientWrapper(
+                    schema,
+                    adminUser,
+                    (apolloClient) => createOAuthClient(apolloClient, oauthClientUser)
+                )
+            )
 )
