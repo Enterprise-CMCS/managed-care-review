@@ -61,6 +61,33 @@ module.exports = defineConfig({
                     )
                     return gql(`${gqlSchema}`)
                 },
+                fetchInNode({ url, method, headers, body }) {
+                    const http = require(new URL(url).protocol === 'https:' ? 'https' : 'http')
+
+                    return new Promise((resolve, reject) => {
+                        const req = http.request(url, {
+                            method: method || 'GET',
+                            headers: headers || {},
+                        }, (res) => {
+                            let data = ''
+                            res.on('data', (chunk) => { data += chunk })
+                            res.on('end', () => {
+                                let parsed
+                                try {
+                                    parsed = JSON.parse(data)
+                                } catch {
+                                    parsed = data
+                                }
+                                resolve({ status: res.statusCode, body: parsed })
+                            })
+                        })
+                        req.on('error', reject)
+                        if (body) {
+                            req.write(body)
+                        }
+                        req.end()
+                    })
+                },
                 log(message) {
                     console.log(message)
 
@@ -71,6 +98,7 @@ module.exports = defineConfig({
 
                     return null
                 },
+
             })
             return newConfig
         },
