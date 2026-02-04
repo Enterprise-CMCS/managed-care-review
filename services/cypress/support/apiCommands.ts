@@ -340,13 +340,14 @@ const createOAuthClient = async (
     }
 }
 
-const requestOAuthToken = async (
+const requestOAuthToken = (
     oauthClient: OauthClient
-): Promise<string> => {
+): Cypress.Chainable<string> => {
     const url = Cypress.env('API_URL')
     const tokenUrl = `${url}/oauth/token`
 
-    const response = await fetch(tokenUrl, {
+    return cy.task<{ status: number; body: any }>('fetchInNode', {
+        url: tokenUrl,
         method: 'POST',
         headers: {
             'Content-Type': 'application/x-www-form-urlencoded',
@@ -356,22 +357,21 @@ const requestOAuthToken = async (
             client_id: oauthClient.clientId,
             client_secret: oauthClient.clientSecret,
         }).toString(),
+    }).then((response) => {
+        if (response.status < 200 || response.status >= 300) {
+            throw new Error(
+                `OAuth token request failed with status ${response.status}: ${JSON.stringify(response.body)}`
+            )
+        }
+
+        const token = response.body.access_token
+
+        if (!token) {
+            throw new Error('OAuth token response did not contain an access_token')
+        }
+
+        return token
     })
-
-    if (!response.ok) {
-        throw new Error(
-            `OAuth token request failed with status ${response.status}: ${await response.text()}`
-        )
-    }
-
-    const body = await response.json()
-    const token = body.access_token
-
-    if (!token) {
-        throw new Error('OAuth token response did not contain an access_token')
-    }
-
-    return token
 }
 
 export type ThirdPartyApiRequestInput = {
@@ -381,9 +381,9 @@ export type ThirdPartyApiRequestInput = {
     variables?: Record<string, unknown>
 }
 
-const delegatedApiRequest = async <TData>(
+const thirdPartyApiRequest = <TData>(
     input: ThirdPartyApiRequestInput
-): Promise<{ status: number; data: TData; errors?: GraphQLError[] }> => {
+): Cypress.Chainable<{ status: number; data: TData; errors?: GraphQLError[] }> => {
     const url = Cypress.env('API_URL')
     const apiUrl = `${url}/v1/graphql/external`
 
@@ -396,17 +396,17 @@ const delegatedApiRequest = async <TData>(
         headers['X-Acting-As-User'] = input.delegatedUserId
     }
 
-    const response = await fetch(apiUrl, {
+    return cy.task<{ status: number; body: any }>('fetchInNode', {
+        url: apiUrl,
         method: 'POST',
         headers,
         body: JSON.stringify({
             query: print(input.document),
             variables: input.variables,
         }),
+    }).then((response): { status: number; data: TData; errors?: GraphQLError[] } => {
+        return { status: response.status, data: response.body.data, errors: response.body.errors }
     })
-
-    const body = await response.json()
-    return { status: response.status, data: body.data, errors: body.errors }
 }
 
 Cypress.Commands.add(
@@ -496,7 +496,7 @@ Cypress.Commands.add(
 Cypress.Commands.add(
     'apiRequestOAuthToken',
     (oauthClient: OauthClient): Cypress.Chainable<string> =>
-        cy.wrap(requestOAuthToken(oauthClient), { timeout: 30000 })
+        requestOAuthToken(oauthClient)
 )
 
 // Command for third party API requests using any query, mutation and delegated user request.
@@ -505,8 +505,5 @@ Cypress.Commands.add(
     (
         input: ThirdPartyApiRequestInput
     ): Cypress.Chainable<{ status: number; data: unknown }> =>
-        cy.wrap(
-            delegatedApiRequest(input),
-            { timeout: 30000 }
-        )
+        thirdPartyApiRequest(input)
 )

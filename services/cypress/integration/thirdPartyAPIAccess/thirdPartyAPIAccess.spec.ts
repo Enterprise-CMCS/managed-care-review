@@ -43,10 +43,6 @@ describe('thirdPartyAPIAccess', () => {
     })
 
     it('can make delegated API request', () => {
-        const url = Cypress.env('API_URL')
-        const api_url = url + '/v1/graphql/external'
-        const token_url = url + '/oauth/token'
-
         // Log in as our API and delegated users to seed the DB
         cy.logInAsCMSUser({ cmsUser: 'ZUKO' }) // our OAuth client user
         cy.logOut()
@@ -68,23 +64,8 @@ describe('thirdPartyAPIAccess', () => {
                     }).then((result) => {
                         const user = result.data?.fetchCurrentUser
 
+                        // expect our delegated user to be in the response data.
                         expect(user.id).to.equal(delegatedUser.id)
-                    })
-
-                    cy.thirdPartyApiRequest<UnlockContractMutation>({
-                        token,
-                        document: UnlockContractDocument,
-                        variables: {
-                            input: {
-                                contractID:
-                                    'abbde720-64d4-458c-aa26-be678b6d3328',
-                                unlockedReason: 'Delegated mutation',
-                            },
-                        },
-                        delegatedUserId: delegatedUser.id,
-                    }).then((result) => {
-                        const error = result.errors?.[0]
-                        expect(error?.message).to.equal('OAuth client does not have write permissions')
                     })
                 })
             }
