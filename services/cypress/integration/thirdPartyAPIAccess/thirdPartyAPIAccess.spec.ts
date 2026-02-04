@@ -59,12 +59,12 @@ describe('thirdPartyAPIAccess', () => {
                 JSON.stringify(response, null, 2)
             )
 
-            // clear out session storage, otherwise cy.request will merge browser auth with our custom auth.
-            cy.clearAllLocalStorage().then(() => {
-                cy.clearAllCookies()
-                cy.request({
-                    method: 'post',
-                    url: token_url,
+            // Use window.fetch with credentials: 'omit' for both token and delegated requests
+            // to avoid Cypress sending session cookies that interfere with OAuth flows.
+            cy.window().then((win) =>
+                win.fetch(token_url, {
+                    method: 'POST',
+                    credentials: 'omit',
                     headers: {
                         'Content-Type': 'application/x-www-form-urlencoded',
                     },
@@ -73,69 +73,78 @@ describe('thirdPartyAPIAccess', () => {
                         client_id: client.clientId,
                         client_secret: client.clientSecret,
                     }).toString(),
-                    failOnStatusCode: false,
-                }).then((res) => {
+                }).then((fetchRes) =>
+                    fetchRes.json().then((body) => ({
+                        status: fetchRes.status,
+                        body,
+                    }))
+                )
+            ).then((res) => {
+                expect(res.status).to.equal(200) // okay
+
+                const token = res.body.access_token
+
+                expect(token).to.exist
+
+                //Make a delegated request using window.fetch with credentials omit
+                //to avoid cy.request sending session cookies that interfere with OAuth delegation.
+                cy.window().then((win) =>
+                    win.fetch(api_url, {
+                        method: 'POST',
+                        credentials: 'omit',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            Authorization: `Bearer ${token}`,
+                            'X-Acting-As-User': `${delegatedUser.id}`,
+                        },
+                        body: JSON.stringify({
+                            query: `query FetchCurrentUser {
+                              fetchCurrentUser {
+                                ... on CMSUser {
+                                  id
+                                  role
+                                  email
+                                  givenName
+                                  familyName
+                                  divisionAssignment
+                                }
+                                ... on CMSApproverUser {
+                                  id
+                                  role
+                                  email
+                                  givenName
+                                  familyName
+                                  divisionAssignment
+                                }
+                              }
+                            }`,
+                        }),
+                    }).then((fetchRes) =>
+                        fetchRes.json().then((body) => ({
+                            status: fetchRes.status,
+                            body,
+                        }))
+                    )
+                ).then((res) => {
+                    cy.log('Delegated request status: ' + res.status)
+                    cy.log(
+                        'Delegated request body: ' +
+                            JSON.stringify(res.body)
+                    )
+                    cy.log(
+                        'Delegated request headers sent - X-Acting-As-User: ' +
+                            delegatedUser.id
+                    )
+                    console.log(
+                        'Full delegated response:',
+                        JSON.stringify(res.body, null, 2)
+                    )
                     expect(res.status).to.equal(200) // okay
 
-                    const token = res.body.access_token
+                    const user = res.body.data.fetchCurrentUser
 
-                    expect(token).to.exist
-
-                    cy.clearAllCookies().then(() => {
-                        //Make a delegated request
-                        cy.request({
-                            method: 'post',
-                            url: api_url,
-                            headers: {
-                                'Content-Type': 'application/json',
-                                Authorization: `Bearer ${token}`,
-                                'X-Acting-As-User': `${delegatedUser.id}`,
-                            },
-                            body: JSON.stringify({
-                                query: `query FetchCurrentUser {
-                          fetchCurrentUser {
-                            ... on CMSUser {
-                              id
-                              role
-                              email
-                              givenName
-                              familyName
-                              divisionAssignment
-                            }
-                            ... on CMSApproverUser {
-                              id
-                              role
-                              email
-                              givenName
-                              familyName
-                              divisionAssignment
-                            }
-                          }
-                        }`,
-                            }),
-                            failOnStatusCode: false,
-                        }).then((res) => {
-                            cy.log('Delegated request status: ' + res.status)
-                            cy.log(
-                                'Delegated request body: ' +
-                                    JSON.stringify(res.body)
-                            )
-                            cy.log(
-                                'Delegated request headers sent - X-Acting-As-User: ' +
-                                    delegatedUser.id
-                            )
-                            console.log(
-                                'Full delegated response:',
-                                JSON.stringify(res.body, null, 2)
-                            )
-                            expect(res.status).to.equal(200) // okay
-
-                            const user = res.body.data.fetchCurrentUser
-
-                            // validate fetchCurrentUser returns the delegated user info.
-                            expect(user.id).to.equal(delegatedUser.id)
-                        })
-                    })
+                    // validate fetchCurrentUser returns the delegated user info.
+                    expect(user.id).to.equal(delegatedUser.id)
                 })
             })
         })
