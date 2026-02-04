@@ -1,4 +1,4 @@
-import { adminUser, cmsUser } from '../../utils/apollo-test-utils'
+import { adminUser } from '../../utils/apollo-test-utils'
 
 describe('thirdPartyAPIAccess', () => {
     beforeEach(() => {
@@ -50,7 +50,9 @@ describe('thirdPartyAPIAccess', () => {
         cy.logOut()
 
         // Create the OAuth client using ZUKO
-        cy.apiCreateOAuthClient(adminUser(), cmsUser()).then((oauthClient) => {
+        cy.apiCreateOAuthClient(adminUser(), 'ZUKO', 'AZULA').then((response) => {
+            const { client, delegatedUser } = response
+
             // clear out session storage, otherwise cy.request will merge browser auth with our custom auth.
             cy.clearAllSessionStorage().then(() => {
                 cy.request({
@@ -61,8 +63,8 @@ describe('thirdPartyAPIAccess', () => {
                     },
                     body: new URLSearchParams({
                         grant_type: 'client_credentials',
-                        client_id: oauthClient.clientId,
-                        client_secret: oauthClient.clientSecret,
+                        client_id: client.clientId,
+                        client_secret: client.clientSecret,
                     }).toString(),
                     failOnStatusCode: false,
                 }).then((res) => {
@@ -79,38 +81,38 @@ describe('thirdPartyAPIAccess', () => {
                         headers: {
                             'Content-Type': 'application/json',
                             Authorization: `Bearer ${token}`,
-                            'X-Acting-As-User': `user6`, //user6 is Azula. User ids are predefined
+                            'X-Acting-As-User': `${delegatedUser.id}`,
                         },
                         body: JSON.stringify({
                             query: `query FetchCurrentUser {
-                          fetchCurrentUser {
-                            ... on CMSUser {
-                              id
-                              role
-                              email
-                              givenName
-                              familyName
-                              divisionAssignment
-                            }
-                          }
-                        }`,
+                              fetchCurrentUser {
+                                ... on CMSUser {
+                                  id
+                                  role
+                                  email
+                                  givenName
+                                  familyName
+                                  divisionAssignment
+                                }
+                                ... on CMSApproverUser {
+                                  id
+                                  role
+                                  email
+                                  givenName
+                                  familyName
+                                  divisionAssignment
+                                }
+                              }
+                            }`,
                         }),
                         failOnStatusCode: false,
                     }).then((res) => {
-                        console.log('RESPONSE')
-                        console.log(res)
                         expect(res.status).to.equal(200) // okay
 
                         const user = res.body.data.fetchCurrentUser
 
                         // validate fetchCurrentUser returns the delgated user info.
-                        expect(user).to.contain({
-                            id: 'user6',
-                            email: 'izumi@example.com',
-                            givenName: 'Izumi',
-                            familyName: 'Hotman',
-                            role: 'CMS_USER',
-                        })
+                        expect(user.id).to.equal(delegatedUser.id)
                     })
                 })
             })

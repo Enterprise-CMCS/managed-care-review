@@ -27,10 +27,11 @@ import {
 } from '@mc-review/common-code'
 import './apiCommands'
 import './accessibilityCommands'
-import { Contract, Division, OauthClient, User } from '../gen/gqlClient'
+import { Contract, Division } from '../gen/gqlClient'
 import { AdminUserType, CMSUserType, StateUserType } from '../utils/apollo-test-utils'
 import { CMSUserLoginNames } from './loginCommands'
 import { FormButtonKey } from './navigateCommands'
+import { ApiCreateOAuthClientResponseType } from './apiCommands'
 
 declare global {
     namespace Cypress {
@@ -133,8 +134,9 @@ declare global {
             ): Cypress.Chainable<Contract>
             apiCreateOAuthClient(
                 adminUser: AdminUserType,
-                oauthClientUser: CMSUserType
-            ): Cypress.Chainable<OauthClient>
+                oauthClientUser: CMSUserLoginNames,
+                delegatedUser?: CMSUserLoginNames
+            ): Cypress.Chainable<ApiCreateOAuthClientResponseType>
 
             // GraphQL intercept commands
             interceptGraphQL(): void

@@ -1,5 +1,6 @@
 import {
     IndexUsersDocument,
+    IndexUsersQuery,
     UserEdge,
     User,
     UpdateDivisionAssignmentDocument,
@@ -18,9 +19,16 @@ import {
     newSubmissionInput,
     rateFormData,
     contractFormData,
-    minnesotaStatePrograms, CMSUserType, eqroFromData, StateUserType, AdminUserType,
+    minnesotaStatePrograms, CMSUserType, eqroFromData, AdminUserType,
 } from '../utils/apollo-test-utils'
 import { ApolloClient, DocumentNode, NormalizedCacheObject } from '@apollo/client'
+import { CMSUserLoginNames, userLoginData } from './loginCommands'
+
+export type ApiCreateOAuthClientResponseType = {
+    client: OauthClient
+    clientUser: CmsUsersUnion
+    delegatedUser: CmsUsersUnion
+}
 
 const createAndSubmitContractOnlyPackage = async (
     apolloClient: ApolloClient<NormalizedCacheObject>
@@ -223,7 +231,7 @@ const assignCmsDivision = async (
     })
 }
 
-const seedUserIntoDB = async (
+const fetchUser = async (
     apolloClient: ApolloClient<NormalizedCacheObject>
 ): Promise<User> => {
     // To seed, we just need to perform a graphql query and the api will add the user to the db
@@ -246,31 +254,91 @@ const seedUserIntoDB = async (
 
 const createOAuthClient = async (
     apolloClient: ApolloClient<NormalizedCacheObject>,
-    oauthClientUser: CMSUserType
-): Promise<OauthClient> => {
-    const oauthClient = await apolloClient.mutate({
+    oauthClientUser: CMSUserLoginNames,
+    delegatedUser?: CMSUserLoginNames
+): Promise<ApiCreateOAuthClientResponseType> => {
+    const indexUsersRes = await apolloClient.query<IndexUsersQuery>({
+        query: IndexUsersDocument,
+    })
+
+    if (indexUsersRes.errors) {
+        throw new Error(
+            `Error: Could not retrieve index users to for createOAuthClient. ${JSON.stringify(indexUsersRes.errors)}`
+        )
+    }
+
+    const indexUsers = indexUsersRes.data.indexUsers.edges.map(
+        (edge) => edge.node
+    )
+
+    console.log(indexUsers)
+
+    const apiUser = indexUsers.find(
+        (user) => user?.email === userLoginData[oauthClientUser].email
+    )
+
+    if (!apiUser) {
+        throw new Error(
+            `Could not find oauthClientUser ${oauthClientUser}, from DB. Try logging it with the user before calling createOAuthClient command.`
+        )
+    }
+
+    if (apiUser.role !== 'CMS_USER' && apiUser.role !== 'CMS_APPROVER_USER') {
+        throw new Error(
+            'User for OAuth client creation from DB was not a CMS_USER or CMS_APPROVER_USER'
+        )
+    }
+
+    const apiDelegatedUser = delegatedUser && indexUsers.find(
+        (user) => user?.email === userLoginData[delegatedUser].email
+    )
+
+    if (delegatedUser && !apiDelegatedUser) {
+        throw new Error(
+            `Could not find delegatedUser, ${delegatedUser}, from DB. Try logging it with the user before calling createOAuthClient command.`
+        )
+    }
+
+    if (
+        delegatedUser &&
+        apiDelegatedUser &&
+        apiDelegatedUser.role !== 'CMS_USER' &&
+        apiDelegatedUser.role !== 'CMS_APPROVER_USER'
+    ) {
+        throw new Error(
+            'Delegated user from DB was not a CMS_USER or CMS_APPROVER_USER'
+        )
+    }
+
+    const oauthClientResponse = await apolloClient.mutate({
         mutation: CreateOauthClientDocument,
         variables: {
             input: {
                 description: 'Cypress integration test',
-                userID: oauthClientUser.id,
-            }
+                userID: apiUser.id,
+            },
         },
     })
 
-    if (oauthClient.errors) {
+    if (oauthClientResponse.errors) {
         throw new Error(
-            `Error: Could not create OAuth client for user: ${JSON.stringify(oauthClient.errors)}`
+            `Error: Could not create OAuth client for user: ${JSON.stringify(oauthClientResponse.errors)}`
         )
     }
 
-    if (!oauthClient.data.createOauthClient.oauthClient) {
+    const oauthClient = oauthClientResponse.data.createOauthClient.oauthClient
+
+    if (!oauthClient) {
         throw new Error(
             `Error: Creating new OAuth client returned with no data or errors.`
         )
     }
 
-    return oauthClient.data.createOauthClient.oauthClient
+    return {
+        client: oauthClient,
+        clientUser: apiUser as CmsUsersUnion,
+        delegatedUser: apiDelegatedUser as CmsUsersUnion
+    }
 }
 
 Cypress.Commands.add(
@@ -314,28 +382,44 @@ Cypress.Commands.add(
 Cypress.Commands.add(
     'apiAssignDivisionToCMSUser',
     (cmsUser: CMSUserType, division: Division): Cypress.Chainable<void> =>
-        cy.task<DocumentNode>('readGraphQLSchema').then( { timeout: 30000 },(schema) =>
-            cy.wrap(apolloClientWrapper(schema, cmsUser, seedUserIntoDB), { timeout: 30000 } ).then(() =>
-                apolloClientWrapper(schema, adminUser(), (apolloClient) =>
-                    assignCmsDivision(apolloClient, cmsUser, division)
-                )
+        cy
+            .task<DocumentNode>('readGraphQLSchema')
+            .then({ timeout: 30000 }, (schema) =>
+                cy
+                    .wrap(apolloClientWrapper(schema, cmsUser, fetchUser), {
+                        timeout: 30000,
+                    })
+                    .then(() =>
+                        apolloClientWrapper(
+                            schema,
+                            adminUser(),
+                            (apolloClient) =>
+                                assignCmsDivision(
+                                    apolloClient,
+                                    cmsUser,
+                                    division
+                                )
+                        )
+                    )
             )
-        )
 )
 
 Cypress.Commands.add(
     'apiCreateOAuthClient',
     (
         adminUser: AdminUserType,
-        oauthClientUser: CMSUserType
-    ): Cypress.Chainable<OauthClient> =>
+        oauthClientUser: CMSUserLoginNames,
+        delegatedUser?: CMSUserLoginNames
+    ): Cypress.Chainable<ApiCreateOAuthClientResponseType> =>
         cy
             .task<DocumentNode>('readGraphQLSchema')
             .then({ timeout: 30000 }, (schema) =>
-                apolloClientWrapper(
-                    schema,
-                    adminUser,
-                    (apolloClient) => createOAuthClient(apolloClient, oauthClientUser)
+                apolloClientWrapper(schema, adminUser, (apolloClient) =>
+                    createOAuthClient(
+                        apolloClient,
+                        oauthClientUser,
+                        delegatedUser
+                    )
                 )
             )
 )
