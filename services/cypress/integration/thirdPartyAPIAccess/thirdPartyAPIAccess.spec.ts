@@ -1,14 +1,13 @@
-//Skipping tests for now until there's a final decision on what to do with the APIAccess page
-describe.skip('thirdPartyAPIAccess', () => {
+import { adminUser, cmsUser } from '../../utils/apollo-test-utils'
 
+describe('thirdPartyAPIAccess', () => {
     beforeEach(() => {
         cy.stubFeatureFlags()
         cy.interceptGraphQL()
     })
 
-
-    it('gets an error back without authentication', () => {
-        
+    //Skipping tests for now until there's a final decision on what to do with the APIAccess page
+    it.skip('gets an error back without authentication', () => {
         // get the API URL!
         const url = Cypress.env('API_URL')
         const api_url = url + '/v1/graphql/external'
@@ -16,17 +15,15 @@ describe.skip('thirdPartyAPIAccess', () => {
         cy.request({
             url: api_url,
             headers: {
-                'Authorization': 'Bearer foobar'
+                Authorization: 'Bearer foobar',
             },
             failOnStatusCode: false,
-        }).then(res => {
+        }).then((res) => {
             expect(res.status).to.equal(403) // unauthenticated??
         })
-
     })
-
-    it('gets an error back without no auth header sent', () => {
-        
+    //Skipping tests for now until there's a final decision on what to do with the APIAccess page
+    it.skip('gets an error back without no auth header sent', () => {
         // get the API URL!
         const url = Cypress.env('API_URL')
         const api_url = url + '/v1/graphql/external'
@@ -34,46 +31,89 @@ describe.skip('thirdPartyAPIAccess', () => {
         cy.request({
             url: api_url,
             failOnStatusCode: false,
-        }).then(res => {
+        }).then((res) => {
             expect(res.status).to.equal(401) // unauthenticated
         })
     })
 
-    it('works with a valid key', () => {
-    
-        // get the API URL!
+    // OAuth API request with a delegated user test
+    it('can make delegated API request', () => {
         const url = Cypress.env('API_URL')
         const api_url = url + '/v1/graphql/external'
+        const token_url = url + '/oauth/token'
 
-        // sign in and get to the api key url
-        cy.logInAsCMSUser()
+        // Log in as our API and delegated users to seed the DB
+        cy.logInAsCMSUser({ cmsUser: 'ZUKO' }) // our OAuth client user
+        cy.logOut()
 
-        cy.visit('/dev/api-access')
+        cy.logInAsCMSUser({ cmsUser: 'AZULA' }) // our delegated user
+        cy.logOut()
 
-        cy.findByRole('button', {
-            name: "Generate API Key",
-        }).click()
+        // Create the OAuth client using ZUKO
+        cy.apiCreateOAuthClient(adminUser(), cmsUser()).then((oauthClient) => {
+            // clear out session storage, otherwise cy.request will merge browser auth with our custom auth.
+            cy.clearAllSessionStorage().then(() => {
+                cy.request({
+                    method: 'post',
+                    url: token_url,
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded',
+                    },
+                    body: new URLSearchParams({
+                        grant_type: 'client_credentials',
+                        client_id: oauthClient.clientId,
+                        client_secret: oauthClient.clientSecret,
+                    }).toString(),
+                    failOnStatusCode: false,
+                }).then((res) => {
+                    expect(res.status).to.equal(200) // okay
 
+                    const token = res.body.access_token
 
-        cy.get("[aria-label='API Key Text']").then((codeBlock) => {
+                    expect(token).to.exist
 
-            const apiKey = codeBlock.text().trim()
-            const bearer = `Bearer ${apiKey}`
+                    //Make a delegated request
+                    cy.request({
+                        method: 'post',
+                        url: api_url,
+                        headers: {
+                            'Content-Type': 'application/json',
+                            Authorization: `Bearer ${token}`,
+                            'X-Acting-As-User': `user6`, //user6 is Azula. User ids are predefined
+                        },
+                        body: JSON.stringify({
+                            query: `query FetchCurrentUser {
+                          fetchCurrentUser {
+                            ... on CMSUser {
+                              id
+                              role
+                              email
+                              givenName
+                              familyName
+                              divisionAssignment
+                            }
+                          }
+                        }`,
+                        }),
+                        failOnStatusCode: false,
+                    }).then((res) => {
+                        console.log('RESPONSE')
+                        console.log(res)
+                        expect(res.status).to.equal(200) // okay
 
-            cy.request({
-                method: 'post',
-                url: api_url,
-                headers: {
-                    'Content-Type': 'application/json',
-                    Authorization: bearer,
-                },
-                body: '{"query":"query IndexRates { indexRates { totalCount edges { node {  id } } } }"}',
-                failOnStatusCode: false,
-            }).then(res => {
-                expect(res.status).to.equal(200) // okay 
+                        const user = res.body.data.fetchCurrentUser
+
+                        // validate fetchCurrentUser returns the delgated user info.
+                        expect(user).to.contain({
+                            id: 'user6',
+                            email: 'izumi@example.com',
+                            givenName: 'Izumi',
+                            familyName: 'Hotman',
+                            role: 'CMS_USER',
+                        })
+                    })
+                })
             })
-
-        })        
+        })
     })
-
 })
