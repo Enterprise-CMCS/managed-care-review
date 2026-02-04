@@ -86,92 +86,86 @@ function contextForRequestForFetcher(
             '/v1/graphql/external'
         )
 
-        if (authProvider || fromThirdPartyAuthorizer) {
-            try {
-                const dbURL = process.env.DATABASE_URL ?? ''
-                const secretsManagerSecret =
-                    process.env.SECRETS_MANAGER_SECRET ?? ''
+        if (!authProvider && !fromThirdPartyAuthorizer) {
+            throw new Error('Log: no AuthProvider from an internal API user.')
+        }
 
-                const pgResult = await configurePostgres(
-                    dbURL,
-                    secretsManagerSecret
-                )
-                if (pgResult instanceof Error) {
-                    console.error("Init Error: Postgres couldn't be configured")
-                    throw pgResult
-                }
+        const dbURL = process.env.DATABASE_URL ?? ''
+        const secretsManagerSecret = process.env.SECRETS_MANAGER_SECRET ?? ''
+        const pgResult = await configurePostgres(dbURL, secretsManagerSecret)
 
-                const store = NewPostgresStore(pgResult)
-                const principalId = event.requestContext.authorizer?.principalId
-                const authorizerContext = event.requestContext.authorizer
-                const delegatedUser: string | null =
-                    event.headers?.['x-acting-as-user'] ?? null
+        if (pgResult instanceof Error) {
+            console.error("Init Error: Postgres couldn't be configured")
+            throw pgResult
+        }
 
-                // Extract OAuth context if present
-                const isOAuthClient =
-                    authorizerContext?.isOAuthClient === 'true'
-                const oauthClientId = authorizerContext?.clientId
-                const oauthGrants = authorizerContext?.grants?.split(',') || []
+        const store = NewPostgresStore(pgResult)
 
-                let userResult
-                if (authProvider && !fromThirdPartyAuthorizer) {
-                    userResult = await userFetcher(authProvider, store)
-                } else if (fromThirdPartyAuthorizer && principalId) {
-                    // principalId is now always the user ID for both OAuth and regular tokens
-                    userResult = await userFromThirdPartyAuthorizer(
-                        store,
-                        principalId,
-                        delegatedUser
-                    )
-                }
+        if (fromThirdPartyAuthorizer) {
+            const principalId = event.requestContext.authorizer?.principalId
+            const authorizerContext = event.requestContext.authorizer
+            const delegatedUser: string | null =
+                event.headers?.['x-acting-as-user'] ?? null
 
-                if (userResult === undefined) {
-                    throw new Error(`Log: userResult must be supplied`)
-                }
+            // Extract OAuth context if present
+            const oauthClientId = authorizerContext?.clientId
+            const oauthGrants = authorizerContext?.grants?.split(',') || []
 
-                if (!userResult.isErr()) {
-                    const context: Context = {
-                        user: userResult.value,
-                        tracer: tracer,
-                        ctx: ctx,
-                    }
+            const userResult = await userFromThirdPartyAuthorizer(
+                store,
+                principalId,
+                delegatedUser
+            )
 
-                    const clientOauth =
-                        await store.getOAuthClientByClientId(oauthClientId)
+            const clientOauth =
+                await store.getOAuthClientByClientId(oauthClientId)
 
-                    if (clientOauth instanceof Error) {
-                        throw new Error(
-                            `Log: failed to get oauth with client id`
-                        )
-                    }
+            if (clientOauth instanceof Error) {
+                throw new Error(`Log: failed to get oauth with client id`)
+            }
 
-                    if (!clientOauth) {
-                        throw new Error('Log: OAuth client not found')
-                    }
+            if (!clientOauth) {
+                throw new Error('Log: OAuth client not found')
+            }
 
-                    if (isOAuthClient && oauthClientId) {
-                        // Add OAuth client info if present
-                        context.oauthClient = {
-                            clientId: oauthClientId,
-                            grants: oauthGrants,
-                            isOAuthClient: true,
-                            scopes: clientOauth.scopes,
-                            isDelegatedUser: delegatedUser ? true : false,
-                        }
-                    }
+            if (userResult instanceof Error) {
+                throw new Error(userResult.message)
+            }
 
-                    return context
-                } else {
-                    throw new Error(`failed to fetch user: ${userResult.error}`)
-                }
-            } catch (err) {
-                console.error('Error attempting to fetch user: ', err)
-                throw new Error(
-                    `Log: placing user in gql context failed, ${err}`
-                )
+            if (userResult === undefined) {
+                throw new Error(`User not found.`)
+            }
+
+            return {
+                user: userResult,
+                tracer: tracer,
+                ctx: ctx,
+                oauthClient: {
+                    clientId: oauthClientId,
+                    grants: oauthGrants,
+                    isOAuthClient: true,
+                    scopes: clientOauth.scopes.map((scope) => scope),
+                    isDelegatedUser: !!delegatedUser,
+                },
             }
         } else {
-            throw new Error('Log: no AuthProvider from an internal API user.')
+            const userResult = await userFetcher(authProvider!, store)
+
+            if (userResult === undefined) {
+                throw new Error(`User not found.`)
+            }
+
+            if (userResult.isErr()) {
+                throw new Error('Error fetching user.')
+            }
+
+            const context: Context = {
+                user: userResult.value,
+                tracer: tracer,
+                ctx: ctx,
+            }
+
+            return context
         }
     }
 }

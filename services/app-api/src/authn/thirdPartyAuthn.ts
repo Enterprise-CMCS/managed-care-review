@@ -1,13 +1,13 @@
-import { ok, err } from 'neverthrow'
 import type { Store } from '../postgres'
 import { lookupUserAurora } from './cognitoAuthn'
 import { initTracer, recordException } from '../../../uploads/src/lib/otel'
+import type { UserType } from '../domain-models'
 
 export async function userFromThirdPartyAuthorizer(
     store: Store,
     userId: string,
     delegatedUserId: string | null
-) {
+): Promise<UserType | Error> {
     // setup otel tracing
     const otelCollectorURL = process.env.API_APP_OTEL_COLLECTOR_URL
     if (!otelCollectorURL || otelCollectorURL === '') {
@@ -25,10 +25,14 @@ export async function userFromThirdPartyAuthorizer(
             const delegatedUser = await lookupUserAurora(store, delegatedUserId)
 
             if (delegatedUser instanceof Error) {
-                return err(delegatedUser)
+                return new Error(
+                    `Fetch delegated user error. ${delegatedUser.message}`
+                )
             }
             if (delegatedUser === undefined) {
-                return err('user not found')
+                return new Error(
+                    'Fetch delegated user error. Delegated user not found in db.'
+                )
             }
 
             //validate the delegated user is a CMS or CMS Approver role
@@ -36,21 +40,23 @@ export async function userFromThirdPartyAuthorizer(
                 delegatedUser.role !== 'CMS_USER' &&
                 delegatedUser.role !== 'CMS_APPROVER_USER'
             ) {
-                return err(`User not authorized. Role: ${delegatedUser.role}`)
+                return new Error(
+                    `Fetch delegated user error. Delegated user not authorized. Role: ${delegatedUser.role}`
+                )
             }
 
-            return ok(delegatedUser)
+            return delegatedUser
         } else {
             // Lookup user from postgres - validates for non-delegated user
             const auroraUser = await lookupUserAurora(store, userId)
             if (auroraUser instanceof Error) {
-                return err(auroraUser)
+                return new Error(auroraUser.message)
             }
 
             if (auroraUser === undefined) {
-                return err(auroraUser)
+                return new Error('User not found in db.')
             }
-            return ok(auroraUser)
+            return auroraUser
         }
     } catch {
         const err = new Error('ERROR: failed to look up user in postgres')
