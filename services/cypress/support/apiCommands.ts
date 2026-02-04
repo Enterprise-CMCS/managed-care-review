@@ -393,7 +393,7 @@ const thirdPartyApiRequest = <TData>(
     }
 
     if (input.delegatedUserId) {
-        headers['X-Acting-As-User'] = input.delegatedUserId
+        headers['x-acting-as-user'] = input.delegatedUserId
     }
 
     return cy.task<{ status: number; body: any }>('fetchInNode', {
