@@ -27,8 +27,6 @@ import {
 } from '@mc-review/common-code'
 import './apiCommands'
 import './accessibilityCommands'
-import { DocumentNode } from '@apollo/client'
-import { GraphQLError } from 'graphql'
 import { Contract, Division, OauthClient } from '../gen/gqlClient'
 import { AdminUserType, CMSUserType, StateUserType } from '../utils/apollo-test-utils'
 import { CMSUserLoginNames } from './loginCommands'

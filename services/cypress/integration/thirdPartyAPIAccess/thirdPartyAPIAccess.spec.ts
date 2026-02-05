@@ -2,8 +2,6 @@ import { adminUser } from '../../utils/apollo-test-utils'
 import {
     FetchCurrentUserDocument,
     FetchCurrentUserQuery,
-    UnlockContractDocument,
-    UnlockContractMutation,
 } from '../../gen/gqlClient'
 
 describe('thirdPartyAPIAccess', () => {
@@ -55,8 +53,7 @@ describe('thirdPartyAPIAccess', () => {
             (response) => {
                 const { client, delegatedUser } = response
                 cy.apiRequestOAuthToken(client).then((token) => {
-                    //Make a delegated request using window.fetch with credentials omit
-                    //to avoid cy.request sending session cookies that interfere with OAuth delegation.
+                    //Make a delegated request
                     cy.thirdPartyApiRequest<FetchCurrentUserQuery>({
                         token,
                         document: FetchCurrentUserDocument,
