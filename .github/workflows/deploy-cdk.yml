@@ -704,6 +704,7 @@ jobs:
     outputs:
       application-endpoint: ${{ steps.save-app-endpoint.outputs.app-endpoint }}
       api-endpoint: ${{ steps.save-api-endpoint.outputs.api-endpoint }}
+      storybook-endpoint: ${{ steps.save-storybook-endpoint.outputs.storybook-endpoint }}
       cognito-user-pool-id: ${{ steps.save-cognito-user-pool-id.outputs.value }}
       cognito-region: ${{ steps.save-cognito-region.outputs.value }}
       cognito-identity-pool-id: ${{ steps.save-cognito-identity-pool-id.outputs.value }}
@@ -734,6 +735,22 @@ jobs:
 
           echo "Application endpoint: $endpoint"
           echo "app-endpoint=$endpoint" >> "$GITHUB_OUTPUT"
+
+      - name: get storybook endpoint
+        id: save-storybook-endpoint
+        env:
+          STAGE_NAME: ${{ needs.begin-deployment.outputs.stage-name }}
+        run: |
+          echo "=== Extracting storybook endpoint from CDK outputs ==="                                                                    
+          endpoint=$(aws cloudformation list-exports --query "Exports[?Name=='frontend-infra-${STAGE_NAME}-cdk-StorybookCloudFrontEndpointUrl'].Value" --output text)
+      
+          if [ "$endpoint" = "None" ] || [ -z "$endpoint" ]; then
+          echo "Error: Could not find storybook endpoint from CDK outputs"
+          exit 1
+          fi
+
+          echo "Storybook endpoint: $endpoint"
+          echo "storybook-endpoint=$endpoint" >> "$GITHUB_OUTPUT"
 
       - name: get api endpoint
         id: save-api-endpoint
