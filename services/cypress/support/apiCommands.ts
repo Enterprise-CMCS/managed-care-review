@@ -1,5 +1,6 @@
 import {
     IndexUsersDocument,
+    IndexUsersQuery,
     UserEdge,
     User,
     UpdateDivisionAssignmentDocument,
@@ -10,7 +11,7 @@ import {
     SubmitContractDocument,
     CreateContractDocument,
     UpdateContractDraftRevisionDocument,
-    UpdateContractDraftRevisionInput, CmsUsersUnion, Division,
+    UpdateContractDraftRevisionInput, CmsUsersUnion, Division, OauthClient, CreateOauthClientDocument,
 } from '../gen/gqlClient'
 import {
     apolloClientWrapper,
@@ -18,9 +19,17 @@ import {
     newSubmissionInput,
     rateFormData,
     contractFormData,
-    minnesotaStatePrograms, CMSUserType, eqroFromData,
+    minnesotaStatePrograms, CMSUserType, eqroFromData, AdminUserType,
 } from '../utils/apollo-test-utils'
 import { ApolloClient, DocumentNode, NormalizedCacheObject } from '@apollo/client'
+import { GraphQLError, print } from 'graphql'
+import { CMSUserLoginNames, userLoginData } from './loginCommands'
+
+export type ApiCreateOAuthClientResponseType = {
+    client: OauthClient
+    clientUser: CmsUsersUnion
+    delegatedUser: CmsUsersUnion
+}
 
 const createAndSubmitContractOnlyPackage = async (
     apolloClient: ApolloClient<NormalizedCacheObject>
@@ -223,12 +232,188 @@ const assignCmsDivision = async (
     })
 }
 
-const seedUserIntoDB = async (
+const fetchUser = async (
     apolloClient: ApolloClient<NormalizedCacheObject>
-): Promise<void> => {
+): Promise<User> => {
     // To seed, we just need to perform a graphql query and the api will add the user to the db
-    await apolloClient.query({
+    const user = await apolloClient.query({
         query: FetchCurrentUserDocument,
+    })
+
+    if (user.errors) {
+        throw new Error(
+            `Error: Could not seed user into DB: ${JSON.stringify(user.errors)}`
+        )
+    }
+
+    if (!user.data.fetchCurrentUser) {
+        throw new Error('Error: Seeding user into DB did not return user data in response.')
+    }
+
+    return user.data.fetchCurrentUser
+}
+
+const createOAuthClient = async (
+    apolloClient: ApolloClient<NormalizedCacheObject>,
+    oauthClientUser: CMSUserLoginNames,
+    delegatedUser?: CMSUserLoginNames
+): Promise<ApiCreateOAuthClientResponseType> => {
+    const indexUsersRes = await apolloClient.query<IndexUsersQuery>({
+        query: IndexUsersDocument,
+    })
+
+    if (indexUsersRes.errors) {
+        throw new Error(
+            `Error: Could not retrieve index users to for createOAuthClient. ${JSON.stringify(indexUsersRes.errors)}`
+        )
+    }
+
+    const indexUsers = indexUsersRes.data.indexUsers.edges.map(
+        (edge) => edge.node
+    )
+
+    const apiUser = indexUsers.find(
+        (user) => user?.email === userLoginData[oauthClientUser].email
+    )
+
+    if (!apiUser) {
+        throw new Error(
+            `Could not find oauthClientUser ${oauthClientUser}, from DB. Try logging it with the user before calling createOAuthClient command.`
+        )
+    }
+
+    if (apiUser.role !== 'CMS_USER' && apiUser.role !== 'CMS_APPROVER_USER') {
+        throw new Error(
+            'User for OAuth client creation from DB was not a CMS_USER or CMS_APPROVER_USER'
+        )
+    }
+
+    const apiDelegatedUser = delegatedUser && indexUsers.find(
+        (user) => user?.email === userLoginData[delegatedUser].email
+    )
+
+    if (delegatedUser && !apiDelegatedUser) {
+        throw new Error(
+            `Could not find delegatedUser, ${delegatedUser}, from DB. Try logging it with the user before calling createOAuthClient command.`
+        )
+    }
+
+    if (
+        delegatedUser &&
+        apiDelegatedUser &&
+        apiDelegatedUser.role !== 'CMS_USER' &&
+        apiDelegatedUser.role !== 'CMS_APPROVER_USER'
+    ) {
+        throw new Error(
+            'Delegated user from DB was not a CMS_USER or CMS_APPROVER_USER'
+        )
+    }
+
+    const oauthClientResponse = await apolloClient.mutate({
+        mutation: CreateOauthClientDocument,
+        variables: {
+            input: {
+                description: 'Cypress integration test',
+                userID: apiUser.id,
+            },
+        },
+    })
+
+    if (oauthClientResponse.errors) {
+        throw new Error(
+            `Error: Could not create OAuth client for user: ${JSON.stringify(oauthClientResponse.errors)}`
+        )
+    }
+
+    const oauthClient = oauthClientResponse.data.createOauthClient.oauthClient
+
+    if (!oauthClient) {
+        throw new Error(
+            `Error: Creating new OAuth client returned with no data or errors.`
+        )
+    }
+
+    return {
+        client: oauthClient,
+        clientUser: apiUser as CmsUsersUnion,
+        delegatedUser: apiDelegatedUser as CmsUsersUnion
+    }
+}
+
+const requestOAuthToken = (
+    oauthClient: OauthClient
+): Cypress.Chainable<string> => {
+    const url = Cypress.env('API_URL')
+    const tokenUrl = `${url}/oauth/token`
+
+    return cy.request({
+        url: tokenUrl,
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/x-www-form-urlencoded',
+        },
+        body: new URLSearchParams({
+            grant_type: 'client_credentials',
+            client_id: oauthClient.clientId,
+            client_secret: oauthClient.clientSecret,
+        }).toString(),
+        failOnStatusCode: false,
+    }).then((response) => {
+        if (response.status < 200 || response.status >= 300) {
+            throw new Error(
+                `OAuth token request failed with status ${response.status}: ${JSON.stringify(response.body)}`
+            )
+        }
+
+        const token = response.body.access_token
+
+        if (!token) {
+            throw new Error('OAuth token response did not contain an access_token')
+        }
+
+        return token
+    })
+}
+
+export type ThirdPartyApiRequestInput = {
+    token: string
+    document: DocumentNode
+    delegatedUserId?: string
+    variables?: Record<string, unknown>
+}
+
+export type ThirdPartyApiRequestOutput<TData = unknown> = {
+    status: number
+    data: TData
+    errors?: GraphQLError[]
+}
+
+const thirdPartyApiRequest = <TData>(
+    input: ThirdPartyApiRequestInput
+): Cypress.Chainable<ThirdPartyApiRequestOutput<TData>> => {
+    const url = Cypress.env('API_URL')
+    const apiUrl = `${url}/v1/graphql/external`
+
+    const headers: Record<string, string> = {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${input.token}`,
+    }
+
+    if (input.delegatedUserId) {
+        headers['x-acting-as-user'] = input.delegatedUserId
+    }
+
+    return cy.request({
+        url: apiUrl,
+        method: 'POST',
+        headers,
+        body: {
+            query: print(input.document),
+            variables: input.variables,
+        },
+        failOnStatusCode: false,
+    }).then((response): ThirdPartyApiRequestOutput<TData> => {
+        return { status: response.status, data: response.body.data, errors: response.body.errors }
     })
 }
 
@@ -273,11 +458,60 @@ Cypress.Commands.add(
 Cypress.Commands.add(
     'apiAssignDivisionToCMSUser',
     (cmsUser: CMSUserType, division: Division): Cypress.Chainable<void> =>
-        cy.task<DocumentNode>('readGraphQLSchema').then( { timeout: 30000 },(schema) =>
-            cy.wrap(apolloClientWrapper(schema, cmsUser, seedUserIntoDB), { timeout: 30000 } ).then(() =>
-                apolloClientWrapper(schema, adminUser(), (apolloClient) =>
-                    assignCmsDivision(apolloClient, cmsUser, division)
+        cy
+            .task<DocumentNode>('readGraphQLSchema')
+            .then({ timeout: 30000 }, (schema) =>
+                cy
+                    .wrap(apolloClientWrapper(schema, cmsUser, fetchUser), {
+                        timeout: 30000,
+                    })
+                    .then(() =>
+                        apolloClientWrapper(
+                            schema,
+                            adminUser(),
+                            (apolloClient) =>
+                                assignCmsDivision(
+                                    apolloClient,
+                                    cmsUser,
+                                    division
+                                )
+                        )
+                    )
+            )
+)
+
+Cypress.Commands.add(
+    'apiCreateOAuthClient',
+    (
+        adminUser: AdminUserType,
+        oauthClientUser: CMSUserLoginNames,
+        delegatedUser?: CMSUserLoginNames
+    ): Cypress.Chainable<ApiCreateOAuthClientResponseType> =>
+        cy
+            .task<DocumentNode>('readGraphQLSchema')
+            .then({ timeout: 30000 }, (schema) =>
+                apolloClientWrapper(schema, adminUser, (apolloClient) =>
+                    createOAuthClient(
+                        apolloClient,
+                        oauthClientUser,
+                        delegatedUser
+                    )
                 )
             )
-        )
+)
+
+// Command to request a OAuth token
+Cypress.Commands.add(
+    'apiRequestOAuthToken',
+    (oauthClient: OauthClient): Cypress.Chainable<string> =>
+        requestOAuthToken(oauthClient)
+)
+
+// Command for third party API requests using any query, mutation and delegated user request.
+Cypress.Commands.add(
+    'thirdPartyApiRequest',
+    (
+        input: ThirdPartyApiRequestInput
+    ): Cypress.Chainable<ThirdPartyApiRequestOutput> =>
+        thirdPartyApiRequest(input)
 )
