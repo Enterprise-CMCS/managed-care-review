@@ -128,14 +128,11 @@ export const EQROSubmissionSummary = (): React.ReactElement => {
         }
     }
 
-    const showApprovalBtn =
-        hasCMSPermissions &&
-        ['SUBMITTED', 'RESUBMITTED','NOT_SUBJECT_TO_REVIEW'].includes(consolidatedStatus)
     const showUnlockBtn =
         hasCMSPermissions &&
-        ['SUBMITTED', 'RESUBMITTED'].includes(consolidatedStatus)
+        ['SUBMITTED', 'RESUBMITTED','NOT_SUBJECT_TO_REVIEW'].includes(consolidatedStatus)
     const showNoActionsMsg =
-        !showApprovalBtn && !showUnlockBtn 
+        !showUnlockBtn 
 
     // Get the correct update info depending on the submission status
     let updateInfo: UpdateInformation | undefined = undefined
