@@ -2,7 +2,10 @@ import { screen, waitFor, within } from '@testing-library/react'
 import { Location, NavigateFunction, Route, Routes } from 'react-router-dom'
 import userEvent from '@testing-library/user-event'
 import { SubmissionSideNav } from './SubmissionSideNav'
-import { EQROSubmissionSummary, SubmissionSummary } from '../SubmissionSummary'
+import {
+    SubmissionSummary,
+    SubmissionSummaryRoutes,
+} from '../SubmissionSummary'
 import {
     ContractQuestionResponse,
     RateQuestionResponse,
@@ -138,11 +141,11 @@ describe('SubmissionSideNav', () => {
                     />
                     <Route
                         path={RoutesRecord.SUBMISSIONS_SUMMARY}
-                        element={<SubmissionSummary />}
-                    />
-                    <Route
-                        path={RoutesRecord.SUBMISSIONS_SUMMARY}
-                        element={<EQROSubmissionSummary />}
+                        element={
+                            <SubmissionSummaryRoutes
+                                showEqroSubmissions={true}
+                            />
+                        }
                     />
                 </Route>
             </Routes>,
@@ -281,11 +284,11 @@ describe('SubmissionSideNav', () => {
                     />
                     <Route
                         path={RoutesRecord.SUBMISSIONS_SUMMARY}
-                        element={<SubmissionSummary />}
-                    />
-                    <Route
-                        path={RoutesRecord.SUBMISSIONS_SUMMARY}
-                        element={<EQROSubmissionSummary />}
+                        element={
+                            <SubmissionSummaryRoutes
+                                showEqroSubmissions={true}
+                            />
+                        }
                     />
                     <Route
                         path={
