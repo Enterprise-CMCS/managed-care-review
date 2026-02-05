@@ -346,7 +346,7 @@ const requestOAuthToken = (
     const url = Cypress.env('API_URL')
     const tokenUrl = `${url}/oauth/token`
 
-    return cy.task<{ status: number; body: any }>('fetchInNode', {
+    return cy.request({
         url: tokenUrl,
         method: 'POST',
         headers: {
@@ -357,6 +357,7 @@ const requestOAuthToken = (
             client_id: oauthClient.clientId,
             client_secret: oauthClient.clientSecret,
         }).toString(),
+        failOnStatusCode: false,
     }).then((response) => {
         if (response.status < 200 || response.status >= 300) {
             throw new Error(
@@ -381,9 +382,15 @@ export type ThirdPartyApiRequestInput = {
     variables?: Record<string, unknown>
 }
 
+export type ThirdPartyApiRequestOutput<TData = unknown> = {
+    status: number
+    data: TData
+    errors?: GraphQLError[]
+}
+
 const thirdPartyApiRequest = <TData>(
     input: ThirdPartyApiRequestInput
-): Cypress.Chainable<{ status: number; data: TData; errors?: GraphQLError[] }> => {
+): Cypress.Chainable<ThirdPartyApiRequestOutput<TData>> => {
     const url = Cypress.env('API_URL')
     const apiUrl = `${url}/v1/graphql/external`
 
@@ -396,15 +403,16 @@ const thirdPartyApiRequest = <TData>(
         headers['x-acting-as-user'] = input.delegatedUserId
     }
 
-    return cy.task<{ status: number; body: any }>('fetchInNode', {
+    return cy.request({
         url: apiUrl,
         method: 'POST',
         headers,
-        body: JSON.stringify({
+        body: {
             query: print(input.document),
             variables: input.variables,
-        }),
-    }).then((response): { status: number; data: TData; errors?: GraphQLError[] } => {
+        },
+        failOnStatusCode: false,
+    }).then((response): ThirdPartyApiRequestOutput<TData> => {
         return { status: response.status, data: response.body.data, errors: response.body.errors }
     })
 }
@@ -504,6 +512,6 @@ Cypress.Commands.add(
     'thirdPartyApiRequest',
     (
         input: ThirdPartyApiRequestInput
-    ): Cypress.Chainable<{ status: number; data: unknown }> =>
+    ): Cypress.Chainable<ThirdPartyApiRequestOutput> =>
         thirdPartyApiRequest(input)
 )

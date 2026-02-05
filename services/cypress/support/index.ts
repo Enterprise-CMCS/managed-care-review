@@ -33,7 +33,7 @@ import { Contract, Division, OauthClient } from '../gen/gqlClient'
 import { AdminUserType, CMSUserType, StateUserType } from '../utils/apollo-test-utils'
 import { CMSUserLoginNames } from './loginCommands'
 import { FormButtonKey } from './navigateCommands'
-import { ApiCreateOAuthClientResponseType, ThirdPartyApiRequestInput } from './apiCommands'
+import { ApiCreateOAuthClientResponseType, ThirdPartyApiRequestInput, ThirdPartyApiRequestOutput } from './apiCommands'
 
 declare global {
     namespace Cypress {
@@ -144,11 +144,7 @@ declare global {
             ): Cypress.Chainable<string>
             thirdPartyApiRequest<TData = unknown>(
                 input: ThirdPartyApiRequestInput
-            ): Cypress.Chainable<{
-                status: number
-                data: TData
-                errors?: GraphQLError[]
-            }>
+            ): Cypress.Chainable<ThirdPartyApiRequestOutput<TData>>
 
             // GraphQL intercept commands
             interceptGraphQL(): void
