@@ -251,6 +251,15 @@ const getSelectedFiltersFromUrl = (
     return filterValues as FilterOptionType[]
 }
 
+export const stateFilterFn = (
+    row: any,
+    columnId: string,
+    filterValue: string[]
+): boolean => {
+    const cellValue = row.getValue(columnId) as string
+    return filterValue.includes(cellValue)
+}
+
 export const ContractTable = ({
     caption,
     tableData,
@@ -345,10 +354,7 @@ export const ContractTable = ({
                 meta: {
                     dataTestID: `${tableConfig.rowIDName}-stateName`,
                 },
-                filterFn: (row, columnId, filterValue: string[]) => {
-                    const cellValue = row.getValue(columnId) as string
-                    return filterValue.includes(cellValue)
-                },
+                filterFn: stateFilterFn,
             }),
             columnHelper.accessor('contractSubmissionType', {
                 id: 'contractSubmissionType',

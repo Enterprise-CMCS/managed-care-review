@@ -45,6 +45,7 @@ import { InfoTag, TagProps } from '../../../components/InfoTag/InfoTag'
 import { ConsolidatedRateStatusRecord } from '@mc-review/constants'
 import { RowCellElement } from '../../../components'
 import { useLDClient } from 'launchdarkly-react-client-sdk'
+import { stateFilterFn } from '../../../components/ContractTable/ContractTable'
 
 type RatingPeriodFilterType = [string, string] | []
 
@@ -325,10 +326,7 @@ export const RateReviewsTable = ({
                 meta: {
                     dataTestID: `${tableConfig.rowIDName}-stateName`,
                 },
-                filterFn: (row, columnId, filterValue: string[]) => {
-                    const cellValue = row.getValue(columnId) as string
-                    return filterValue.includes(cellValue)
-                },
+                filterFn: stateFilterFn,
             }),
             columnHelper.accessor('rateNumber', {
                 id: 'rateNumber',
