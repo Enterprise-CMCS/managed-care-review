@@ -119,7 +119,6 @@ export const Landing = (): React.ReactElement => {
                             <h3>Not accepted by MC-Review at this time:</h3>
                             <ul className={styles.detailsList}>
                                 <li>State directed preprints</li>
-                                <li>Rate-only submissions</li>
                                 <li>
                                     Contracts without Medicaid-covered benefits
                                 </li>
