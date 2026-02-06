@@ -1,5 +1,3 @@
-import type { Result } from 'neverthrow'
-import { ok, err } from 'neverthrow'
 import { parseAuthProvider, userTypeFromAttributes } from './cognitoAuthn'
 import type { UserType } from '../domain-models'
 
@@ -8,25 +6,22 @@ describe('cognitoAuthn', () => {
         it('parses valid and invalid strings', () => {
             type authProviderTest = {
                 provider: string
-                expectedResult: Result<
-                    { userId: string; poolId: string },
-                    Error
-                >
+                expectedResult: { userId: string; poolId: string } | Error
             }
 
             const tests: authProviderTest[] = [
                 {
                     provider:
                         'cognito-idp.us-east-1.amazonaws.com/us-east-1_9uqvrgbHM,cognito-idp.us-east-1.amazonaws.com/us-east-1_9uqvrgbHM:CognitoSignIn:09882a37-fbeb-423d-a989-da7f43fdb252',
-                    expectedResult: ok({
+                    expectedResult: {
                         userId: '09882a37-fbeb-423d-a989-da7f43fdb252',
                         poolId: 'us-east-1_9uqvrgbHM',
-                    }),
+                    },
                 },
                 {
                     provider: 'foo',
-                    expectedResult: err(
-                        new Error('authProvider doesnt have enough parts')
+                    expectedResult: new Error(
+                        'authProvider doesnt have enough parts'
                     ),
                 },
             ]
@@ -43,7 +38,7 @@ describe('cognitoAuthn', () => {
         it('parses SAML attributes as expected', () => {
             type samlAttrTest = {
                 attributes: { [name: string]: string }
-                expectedResult: Result<UserType, Error>
+                expectedResult: UserType | Error
             }
 
             const testID = 'foobar'
@@ -57,14 +52,14 @@ describe('cognitoAuthn', () => {
                         family_name: 'Person',
                         email: 'gp@example.com',
                     },
-                    expectedResult: ok({
+                    expectedResult: {
                         id: testID,
                         role: 'STATE_USER',
                         email: 'gp@example.com',
                         stateCode: 'VA',
                         givenName: 'Generic',
                         familyName: 'Person',
-                    }),
+                    },
                 },
                 {
                     attributes: {
@@ -73,14 +68,14 @@ describe('cognitoAuthn', () => {
                         family_name: 'Person',
                         email: 'gp@example.com',
                     },
-                    expectedResult: ok({
+                    expectedResult: {
                         id: testID,
                         role: 'CMS_USER',
                         email: 'gp@example.com',
                         familyName: 'Person',
                         givenName: 'Generic',
                         stateAssignments: [],
-                    }),
+                    },
                 },
                 {
                     attributes: {
@@ -89,14 +84,14 @@ describe('cognitoAuthn', () => {
                         family_name: 'Person',
                         email: 'gp@example.com',
                     },
-                    expectedResult: ok({
+                    expectedResult: {
                         id: testID,
                         role: 'CMS_APPROVER_USER',
                         email: 'gp@example.com',
                         familyName: 'Person',
                         givenName: 'Generic',
                         stateAssignments: [],
-                    }),
+                    },
                 },
                 {
                     attributes: {
@@ -105,14 +100,13 @@ describe('cognitoAuthn', () => {
                         family_name: 'Person',
                         email: 'gp@example.com',
                     },
-                    expectedResult: ok({
+                    expectedResult: {
                         id: testID,
                         role: 'ADMIN_USER',
                         email: 'gp@example.com',
                         familyName: 'Person',
                         givenName: 'Generic',
-                        stateAssignments: [],
-                    }),
+                    },
                 },
                 {
                     attributes: {
@@ -121,14 +115,13 @@ describe('cognitoAuthn', () => {
                         family_name: 'Person',
                         email: 'gp@example.com',
                     },
-                    expectedResult: ok({
+                    expectedResult: {
                         id: testID,
                         role: 'HELPDESK_USER',
                         email: 'gp@example.com',
                         familyName: 'Person',
                         givenName: 'Generic',
-                        stateAssignments: [],
-                    }),
+                    },
                 },
                 {
                     attributes: {
@@ -137,14 +130,13 @@ describe('cognitoAuthn', () => {
                         family_name: 'Person',
                         email: 'gp@example.com',
                     },
-                    expectedResult: ok({
+                    expectedResult: {
                         id: testID,
                         role: 'BUSINESSOWNER_USER',
                         email: 'gp@example.com',
                         familyName: 'Person',
                         givenName: 'Generic',
-                        stateAssignments: [],
-                    }),
+                    },
                 },
                 {
                     attributes: {
@@ -155,14 +147,14 @@ describe('cognitoAuthn', () => {
                         family_name: 'Person',
                         email: 'gp@example.com',
                     },
-                    expectedResult: ok({
+                    expectedResult: {
                         id: testID,
                         role: 'STATE_USER',
                         email: 'gp@example.com',
                         stateCode: 'FL',
                         givenName: 'Generic',
                         familyName: 'Person',
-                    }),
+                    },
                 },
                 {
                     attributes: {
@@ -172,14 +164,14 @@ describe('cognitoAuthn', () => {
                         family_name: 'Person',
                         email: 'gp@example.com',
                     },
-                    expectedResult: ok({
+                    expectedResult: {
                         id: testID,
                         role: 'STATE_USER',
                         email: 'gp@example.com',
                         stateCode: 'FL',
                         givenName: 'Generic',
                         familyName: 'Person',
-                    }),
+                    },
                 },
                 {
                     attributes: {
@@ -190,18 +182,14 @@ describe('cognitoAuthn', () => {
                         family_name: 'Person',
                         email: 'gp@example.com',
                     },
-                    expectedResult: err(
-                        new Error(
-                            'Unsupported user role:  SOME_OPE User,neid-lame-user,smacfi-enduser,twoell-mmc-user,wefoi-mmc-ab-auth-user,POSS_ENDUSER,strongweak-user,ma-user'
-                        )
+                    expectedResult: new Error(
+                        'Unsupported user role:  SOME_OPE User,neid-lame-user,smacfi-enduser,twoell-mmc-user,wefoi-mmc-ab-auth-user,POSS_ENDUSER,strongweak-user,ma-user'
                     ),
                 },
                 {
                     attributes: { foo: 'bar' },
-                    expectedResult: err(
-                        new Error(
-                            'User does not have all the required attributes: {"foo":"bar"}'
-                        )
+                    expectedResult: new Error(
+                        'User does not have all the required attributes: {"foo":"bar"}'
                     ),
                 },
             ]

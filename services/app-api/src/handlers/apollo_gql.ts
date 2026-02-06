@@ -155,12 +155,12 @@ function contextForRequestForFetcher(
                 throw new Error(`User not found.`)
             }
 
-            if (userResult.isErr()) {
-                throw new Error('Error fetching user.')
+            if (userResult instanceof Error) {
+                throw new Error(`Error fetching user: ${userResult.message}`)
             }
 
             const context: Context = {
-                user: userResult.value,
+                user: userResult,
                 tracer: tracer,
                 ctx: ctx,
             }
