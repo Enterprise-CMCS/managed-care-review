@@ -10,7 +10,7 @@ import { logError, logSuccess } from '../../logger'
 import type { Store } from '../../postgres'
 import type { S3ClientT } from '../../s3'
 import { v4 as uuidv4 } from 'uuid'
-import { Context } from '../../handlers/apollo_gql'
+import type { Context } from '../../handlers/apollo_gql'
 import type { BucketShortName } from '../../s3'
 import { UPLOAD_FILE_TYPE_TO_MIME } from './uploadFileTypeMap'
 

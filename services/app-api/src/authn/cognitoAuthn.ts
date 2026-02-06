@@ -1,5 +1,3 @@
-import type { Result } from 'neverthrow'
-import { ok, err } from 'neverthrow'
 import type { UserType as CognitoUserType } from '@aws-sdk/client-cognito-identity-provider'
 import {
     CognitoIdentityProviderClient,
@@ -13,7 +11,7 @@ import { isValidCmsDivison } from '../domain-models'
 
 export function parseAuthProvider(
     authProvider: string
-): Result<{ userId: string; poolId: string }, Error> {
+): { userId: string; poolId: string } | Error {
     // Cognito authentication provider looks like:
     // cognito-idp.us-east-1.amazonaws.com/us-east-1_xxxxxxxxx,cognito-idp.us-east-1.amazonaws.com/us-east-1_aaaaaaaaa:CognitoSignIn:qqqqqqqq-1111-2222-3333-rrrrrrrrrrrr
     // Where us-east-1_aaaaaaaaa is the User Pool id
@@ -26,9 +24,9 @@ export function parseAuthProvider(
         const userPoolId = userPoolIdParts[userPoolIdParts.length - 1]
         const userPoolUserId = parts[parts.length - 1]
 
-        return ok({ userId: userPoolUserId, poolId: userPoolId })
+        return { userId: userPoolUserId, poolId: userPoolId }
     } catch {
-        return err(new Error('authProvider doesnt have enough parts'))
+        return new Error('authProvider doesnt have enough parts')
     }
 }
 
@@ -92,7 +90,7 @@ export function userTypeFromAttributes(
     attributes: {
         [key: string]: string
     }
-): Result<UserType, Error> {
+): UserType | Error {
     // check for all the shared attrs here
     if (
         !(
@@ -102,11 +100,9 @@ export function userTypeFromAttributes(
             'family_name' in attributes
         )
     ) {
-        return err(
-            new Error(
-                'User does not have all the required attributes: ' +
-                    JSON.stringify(attributes)
-            )
+        return new Error(
+            'User does not have all the required attributes: ' +
+                JSON.stringify(attributes)
         )
     }
 
@@ -118,25 +114,23 @@ export function userTypeFromAttributes(
     // but as of September 2021, it shouldn't be possible for someone to have more than one MC Review role
     if (roles.includes(STATE_ROLE_ATTRIBUTE)) {
         if (!('custom:state_code' in attributes)) {
-            return err(
-                new Error(
-                    'State User does not have all the required attributes: ' +
-                        JSON.stringify(attributes)
-                )
+            return new Error(
+                'State User does not have all the required attributes: ' +
+                    JSON.stringify(attributes)
             )
         }
-        return ok({
+        return {
             id,
             role: 'STATE_USER',
             email: attributes.email,
             stateCode: attributes['custom:state_code'],
             givenName: attributes.given_name,
             familyName: attributes.family_name,
-        })
+        }
     }
 
     if (roles.includes(CMS_ROLE_ATTRIBUTE)) {
-        return ok({
+        return {
             id,
             role: 'CMS_USER',
             email: attributes.email,
@@ -146,11 +140,11 @@ export function userTypeFromAttributes(
             divisionAssignment: isValidCmsDivison(attributes.division)
                 ? attributes.division
                 : undefined,
-        })
+        }
     }
 
     if (roles.includes(CMS_APPROVER_ROLE_ATTRIBUTE)) {
-        return ok({
+        return {
             id,
             role: 'CMS_APPROVER_USER',
             email: attributes.email,
@@ -160,56 +154,53 @@ export function userTypeFromAttributes(
             divisionAssignment: isValidCmsDivison(attributes.division)
                 ? attributes.division
                 : undefined,
-        })
+        }
     }
 
     if (roles.includes(ADMIN_ROLE_ATTRIBUTE)) {
-        return ok({
+        return {
             id,
             role: 'ADMIN_USER',
             email: attributes.email,
             givenName: attributes.given_name,
             familyName: attributes.family_name,
-            stateAssignments: [],
-        })
+        }
     }
 
     if (roles.includes(HELPDESK_ROLE_ATTRIBUTE)) {
-        return ok({
+        return {
             id,
             role: 'HELPDESK_USER',
             email: attributes.email,
             givenName: attributes.given_name,
             familyName: attributes.family_name,
-            stateAssignments: [],
-        })
+        }
     }
 
     if (roles.includes(BUSINESSOWNER_ROLE_ATTRIBUTE)) {
-        return ok({
+        return {
             id,
             role: 'BUSINESSOWNER_USER',
             email: attributes.email,
             givenName: attributes.given_name,
             familyName: attributes.family_name,
-            stateAssignments: [],
-        })
+        }
     }
 
-    return err(new Error('Unsupported user role:  ' + roleAttribute))
+    return new Error('Unsupported user role:  ' + roleAttribute)
 }
 
 // userFromCognitoAuthProvider hits the Cognito API to get the information in the authProvider
 export async function userFromCognitoAuthProvider(
     authProvider: string,
     store?: Store
-): Promise<Result<UserType, Error>> {
+): Promise<UserType | Error> {
     const parseResult = parseAuthProvider(authProvider)
-    if (parseResult.isErr()) {
-        return err(parseResult.error)
+    if (parseResult instanceof Error) {
+        return parseResult
     }
 
-    const userInfo = parseResult.value
+    const userInfo = parseResult
     // if no store is given, we just get user from Cognito
     if (store === undefined) {
         return lookupUserCognito(userInfo.userId, userInfo.poolId)
@@ -220,7 +211,7 @@ export async function userFromCognitoAuthProvider(
     const startRequest = performance.now()
     const auroraUser = await lookupUserAurora(store, userInfo.userId)
     if (auroraUser instanceof Error) {
-        return err(auroraUser)
+        return auroraUser
     }
     const endRequest = performance.now()
     console.info('User lookup in postgres takes ms:', endRequest - startRequest)
@@ -231,11 +222,11 @@ export async function userFromCognitoAuthProvider(
             userInfo.userId,
             userInfo.poolId
         )
-        if (cognitoUserResult.isErr()) {
-            return err(cognitoUserResult.error)
+        if (cognitoUserResult instanceof Error) {
+            return cognitoUserResult
         }
 
-        const cognitoUser = cognitoUserResult.value
+        const cognitoUser = cognitoUserResult
 
         // create the user and store it in aurora
         const userToInsert: InsertUserArgsType = {
@@ -256,22 +247,22 @@ export async function userFromCognitoAuthProvider(
             console.error(`Could not insert user: ${JSON.stringify(result)}`)
             return cognitoUserResult
         }
-        return ok(result)
+        return result
     }
 
     // we return the user we got from aurora
-    return ok(auroraUser)
+    return auroraUser
 }
 
 async function lookupUserCognito(
     userId: string,
     poolId: string
-): Promise<Result<UserType, Error>> {
+): Promise<UserType | Error> {
     const fetchResult = await fetchUserFromCognito(userId, poolId)
 
     // this is asserting that this is an error object, probably a better way to do that.
     if ('name' in fetchResult) {
-        return err(fetchResult)
+        return fetchResult
     }
 
     const currentUser: CognitoUserType = fetchResult
