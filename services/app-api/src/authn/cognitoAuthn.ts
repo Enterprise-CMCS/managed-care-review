@@ -260,8 +260,7 @@ async function lookupUserCognito(
 ): Promise<UserType | Error> {
     const fetchResult = await fetchUserFromCognito(userId, poolId)
 
-    // this is asserting that this is an error object, probably a better way to do that.
-    if ('name' in fetchResult) {
+    if (fetchResult instanceof Error) {
         return fetchResult
     }
 
