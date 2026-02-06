@@ -156,7 +156,7 @@ function contextForRequestForFetcher(
             }
 
             if (userResult instanceof Error) {
-                throw new Error('Error fetching user.')
+                throw new Error(`Error fetching user: ${userResult.message}`)
             }
 
             const context: Context = {

@@ -22,7 +22,7 @@ export async function userFromLocalAuthProvider(
         return auroraUser
     } catch (e) {
         console.error('ERROR: failed to parse local user from authProvider')
-        return e
+        return e instanceof Error ? e : new Error(String(e))
     }
 }
 

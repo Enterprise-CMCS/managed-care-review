@@ -51,30 +51,35 @@ async function fetchUserFromCognito(
     userID: string,
     poolID: string
 ): Promise<CognitoUserType | Error> {
-    const cognitoClient = new CognitoIdentityProviderClient({})
+    try {
+        const cognitoClient = new CognitoIdentityProviderClient({})
 
-    const subFilter = `sub = "${userID}"`
+        const subFilter = `sub = "${userID}"`
 
-    // let's see what we've got
-    const startRequest = performance.now()
-    const commandListUsers = new ListUsersCommand({
-        UserPoolId: poolID,
-        Filter: subFilter,
-    })
-    const listUsersResponse = await cognitoClient.send(commandListUsers)
-    const endRequest = performance.now()
-    console.info('listUsers takes ms:', endRequest - startRequest)
+        // let's see what we've got
+        const startRequest = performance.now()
+        const commandListUsers = new ListUsersCommand({
+            UserPoolId: poolID,
+            Filter: subFilter,
+        })
+        const listUsersResponse = await cognitoClient.send(commandListUsers)
+        const endRequest = performance.now()
+        console.info('listUsers takes ms:', endRequest - startRequest)
 
-    if (
-        listUsersResponse.Users === undefined ||
-        listUsersResponse.Users.length !== 1
-    ) {
-        // logerror
-        return new Error('No user found with this sub')
+        if (
+            listUsersResponse.Users === undefined ||
+            listUsersResponse.Users.length !== 1
+        ) {
+            return new Error('No user found with this sub')
+        }
+
+        const currentUser = listUsersResponse.Users[0]
+        return currentUser
+    } catch (e) {
+        return e instanceof Error
+            ? e
+            : new Error(`Failed to fetch user from Cognito: ${String(e)}`)
     }
-
-    const currentUser = listUsersResponse.Users[0]
-    return currentUser
 }
 
 // these are the strings sent for the "role" by IDM.
@@ -195,63 +200,76 @@ export async function userFromCognitoAuthProvider(
     authProvider: string,
     store?: Store
 ): Promise<UserType | Error> {
-    const parseResult = parseAuthProvider(authProvider)
-    if (parseResult instanceof Error) {
-        return parseResult
-    }
+    try {
+        const parseResult = parseAuthProvider(authProvider)
+        if (parseResult instanceof Error) {
+            return parseResult
+        }
 
-    const userInfo = parseResult
-    // if no store is given, we just get user from Cognito
-    if (store === undefined) {
-        return lookupUserCognito(userInfo.userId, userInfo.poolId)
-    }
+        const userInfo = parseResult
+        // if no store is given, we just get user from Cognito
+        if (store === undefined) {
+            return lookupUserCognito(userInfo.userId, userInfo.poolId)
+        }
 
-    // look up the user in PG. If we don't have it here, then we need to
-    // fetch it from Cognito.
-    const startRequest = performance.now()
-    const auroraUser = await lookupUserAurora(store, userInfo.userId)
-    if (auroraUser instanceof Error) {
-        return auroraUser
-    }
-    const endRequest = performance.now()
-    console.info('User lookup in postgres takes ms:', endRequest - startRequest)
-
-    // if there is no user returned, lookup in cognito and save to postgres
-    if (auroraUser === undefined) {
-        const cognitoUserResult = await lookupUserCognito(
-            userInfo.userId,
-            userInfo.poolId
+        // look up the user in PG. If we don't have it here, then we need to
+        // fetch it from Cognito.
+        const startRequest = performance.now()
+        const auroraUser = await lookupUserAurora(store, userInfo.userId)
+        if (auroraUser instanceof Error) {
+            return auroraUser
+        }
+        const endRequest = performance.now()
+        console.info(
+            'User lookup in postgres takes ms:',
+            endRequest - startRequest
         )
-        if (cognitoUserResult instanceof Error) {
-            return cognitoUserResult
+
+        // if there is no user returned, lookup in cognito and save to postgres
+        if (auroraUser === undefined) {
+            const cognitoUserResult = await lookupUserCognito(
+                userInfo.userId,
+                userInfo.poolId
+            )
+            if (cognitoUserResult instanceof Error) {
+                return cognitoUserResult
+            }
+
+            const cognitoUser = cognitoUserResult
+
+            // create the user and store it in aurora
+            const userToInsert: InsertUserArgsType = {
+                userID: userInfo.userId,
+                role: cognitoUser.role,
+                givenName: cognitoUser.givenName,
+                familyName: cognitoUser.familyName,
+                email: cognitoUser.email,
+            }
+
+            // if it is a state user, insert the state they are from
+            if (cognitoUser.role === 'STATE_USER') {
+                userToInsert.stateCode = cognitoUser.stateCode
+            }
+
+            const result = await store.insertUser(userToInsert)
+            if (result instanceof Error) {
+                console.error(
+                    `Could not insert user: ${JSON.stringify(result)}`
+                )
+                return cognitoUserResult
+            }
+            return result
         }
 
-        const cognitoUser = cognitoUserResult
-
-        // create the user and store it in aurora
-        const userToInsert: InsertUserArgsType = {
-            userID: userInfo.userId,
-            role: cognitoUser.role,
-            givenName: cognitoUser.givenName,
-            familyName: cognitoUser.familyName,
-            email: cognitoUser.email,
-        }
-
-        // if it is a state user, insert the state they are from
-        if (cognitoUser.role === 'STATE_USER') {
-            userToInsert.stateCode = cognitoUser.stateCode
-        }
-
-        const result = await store.insertUser(userToInsert)
-        if (result instanceof Error) {
-            console.error(`Could not insert user: ${JSON.stringify(result)}`)
-            return cognitoUserResult
-        }
-        return result
+        // we return the user we got from aurora
+        return auroraUser
+    } catch (e) {
+        return e instanceof Error
+            ? e
+            : new Error(
+                  `Unexpected error in userFromCognitoAuthProvider: ${String(e)}`
+              )
     }
-
-    // we return the user we got from aurora
-    return auroraUser
 }
 
 async function lookupUserCognito(
