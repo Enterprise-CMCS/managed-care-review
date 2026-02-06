@@ -59,10 +59,12 @@ const submissionTypeSchema = z.union([
 const documentSchema = z.object({
     id: z.string().optional(),
     name: z.string(),
-    s3URL: z.string(),
+    s3URL: z.string(), // deprecated
     sha256: z.string(),
     dateAdded: z.date().optional(), //  date added to the first submission to CMS
     downloadURL: z.string().optional(),
+    s3BucketName: z.string().optional(),
+    s3Key: z.string().optional(),
 })
 
 const managedCareEntitiesSchema = z.union([

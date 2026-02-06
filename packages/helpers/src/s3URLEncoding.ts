@@ -25,4 +25,36 @@ const parseKey = (maybeS3URL: string): string | Error => {
     return url.pathname.split('/')[1]
 }
 
-export { parseBucketName, parseKey }
+/**
+ * Get S3 bucket name from a document object
+ * Prefers the new s3BucketName field, falls back to parsing s3URL if not available
+ */
+const getS3Bucket = (doc: {
+    s3BucketName?: string | null
+    s3URL: string
+}): string | Error => {
+    // Prefer new field if available
+    if (doc.s3BucketName) {
+        return doc.s3BucketName
+    }
+    // Fall back to parsing the old s3URL format
+    return parseBucketName(doc.s3URL)
+}
+
+/**
+ * Get S3 key from a document object
+ * Prefers the new s3Key field, falls back to parsing s3URL if not available
+ */
+const getS3Key = (doc: {
+    s3Key?: string | null
+    s3URL: string
+}): string | Error => {
+    // Prefer new field if available
+    if (doc.s3Key) {
+        return doc.s3Key
+    }
+    // Fall back to parsing the old s3URL format
+    return parseKey(doc.s3URL)
+}
+
+export { parseBucketName, parseKey, getS3Bucket, getS3Key }

@@ -11,6 +11,7 @@ import { createForbiddenError, createUserInputError } from '../errorUtils'
 import type { Emailer } from '../../emailer'
 import type { StateCodeType } from '@mc-review/submissions'
 import { canWrite } from '../../authorization/oauthAuthorization'
+import { parseAndValidateDocuments } from '../documentHelpers'
 
 export function createRateQuestionResponseResolver(
     store: Store,
@@ -47,13 +48,13 @@ export function createRateQuestionResponseResolver(
             setErrorAttributesOnActiveSpan(msg, span)
             throw createUserInputError(msg)
         }
-        const docs = input.documents.map((doc) => {
-            return {
-                name: doc.name,
-                s3URL: doc.s3URL,
-                downloadURL: doc.downloadURL ?? undefined,
-            }
-        })
+        // Parse and validate document s3URLs
+        const docs = parseAndValidateDocuments(
+            input.documents.map((d) => ({
+                name: d.name,
+                s3URL: d.s3URL,
+            }))
+        )
         const inputFormatted = {
             ...input,
             documents: docs,

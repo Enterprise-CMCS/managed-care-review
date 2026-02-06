@@ -6,6 +6,8 @@ const document = z.object({
     id: z.uuid(),
     name: z.string(),
     s3URL: z.string(),
+    s3BucketName: z.string().optional(),
+    s3Key: z.string().optional(),
     downloadURL: z.string().optional(),
 })
 

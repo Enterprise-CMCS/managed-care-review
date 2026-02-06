@@ -12,6 +12,7 @@ import { isValidCmsDivison } from '../../domain-models'
 import type { Emailer } from '../../emailer'
 import { canWrite } from '../../authorization/oauthAuthorization'
 import type { StateCodeType } from '@mc-review/submissions'
+import { parseAndValidateDocuments } from '../documentHelpers'
 
 export function createContractQuestionResolver(
     store: Store,
@@ -121,12 +122,14 @@ export function createContractQuestionResolver(
             setErrorAttributesOnActiveSpan(errMessage, span)
             throw new Error(errMessage)
         }
-        const docs = input.documents.map((doc) => {
-            return {
-                name: doc.name,
-                s3URL: doc.s3URL,
-            }
-        })
+        // Parse and validate document s3URLs at API boundary
+        const docs = parseAndValidateDocuments(
+            input.documents.map((d) => ({
+                name: d.name,
+                s3URL: d.s3URL,
+            }))
+        )
+
         const inputFormatted = {
             ...input,
             documents: docs,

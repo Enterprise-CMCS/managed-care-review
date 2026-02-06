@@ -17,6 +17,7 @@ import {
 } from '../../domain-models/contractAndRates'
 import { canWrite } from '../../authorization/oauthAuthorization'
 import { parseAndUpdateEqroFields } from '../../domain-models/contractAndRates/dataValidatorHelpers'
+import { parseAndValidateDocuments } from '../documentHelpers'
 
 export function updateContractDraftRevision(
     store: Store,
@@ -112,15 +113,46 @@ export function updateContractDraftRevision(
         const isEQROsubmission =
             contractWithHistory.contractSubmissionType === 'EQRO'
 
+        // Parse and validate documents
+        const validatedContractDocuments = parseAndValidateDocuments(
+            formData.contractDocuments?.map((d) => ({
+                name: d.name,
+                s3URL: d.s3URL,
+                sha256: d.sha256,
+            })) || []
+        )
+
+        const validatedSupportingDocuments = parseAndValidateDocuments(
+            formData.supportingDocuments?.map((d) => ({
+                name: d.name,
+                s3URL: d.s3URL,
+                sha256: d.sha256,
+            })) || []
+        )
+
+        // Create formData with validated documents
+        // Note: sha256 is required in GenericDocumentInput, so we assert it's present
+        const formDataWithValidatedDocs = {
+            ...formData,
+            contractDocuments: validatedContractDocuments.map((doc) => ({
+                ...doc,
+                sha256: doc.sha256!,
+            })),
+            supportingDocuments: validatedSupportingDocuments.map((doc) => ({
+                ...doc,
+                sha256: doc.sha256!,
+            })),
+        }
+
         // Using zod to validate and transform graphQL types into domain types.
         const parsedFormData = isEQROsubmission
             ? validateEQROContractDraftRevisionInput(
-                  formData,
+                  formDataWithValidatedDocs,
                   contractWithHistory.stateCode,
                   store
               )
             : validateContractDraftRevisionInput(
-                  formData,
+                  formDataWithValidatedDocs,
                   contractWithHistory.stateCode,
                   store,
                   featureFlags
