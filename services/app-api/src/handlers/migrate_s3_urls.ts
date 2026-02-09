@@ -105,10 +105,10 @@ function extractS3KeyFromMalformedUrl(s3URL: string): string | Error {
 }
 
 export const main: Handler = async (
-    event: MigrateS3UrlsEvent
+    event: MigrateS3UrlsEvent = {}
 ): Promise<MigrateS3UrlsResponse> => {
-    const dryRun = event.dryRun ?? false
-    const limit = event.limit
+    const dryRun = event?.dryRun ?? false
+    const limit = event?.limit
 
     // Get bucket names from environment variables
     const documentsBucket = process.env.VITE_APP_S3_DOCUMENTS_BUCKET
@@ -435,8 +435,8 @@ async function migrateDocumentTable(
 
 /**
  * Migrate DocumentZipPackage table - zip files are stored in zips/ folder
- * Input: s3://uploads-prod-uploads-123/uuid.zip
- * Output: s3Key = zips/uuid.zip
+ * Input: s3://bucket/zips/contracts/uuid/contract-documents.zip
+ * Output: s3Key = zips/contracts/uuid/contract-documents.zip
  */
 async function migrateZipTable(
     prismaClient: any,
@@ -464,8 +464,9 @@ async function migrateZipTable(
 
     for (const zip of zips) {
         try {
-            // Extract the zip filename from s3URL
-            // s3URL format: s3://bucket-name/uuid.zip
+            // Extract the full S3 key from s3URL
+            // s3URL format: s3://bucket-name/zips/contracts/uuid/file.zip
+            // We want everything after the bucket: zips/contracts/uuid/file.zip
             const parts = zip.s3URL.split('/')
             if (parts.length < 4) {
                 console.error(
@@ -475,16 +476,20 @@ async function migrateZipTable(
                 continue
             }
 
-            const zipFilename = parts[3] // uuid.zip
-            if (!zipFilename) {
+            // parts[0] = 's3:'
+            // parts[1] = ''
+            // parts[2] = bucket name
+            // parts[3+] = the key path
+            const keyParts = parts.slice(3) // Everything after bucket
+            const s3Key = keyParts.join('/')
+
+            if (!s3Key || !s3Key.startsWith('zips/')) {
                 console.error(
-                    `Could not extract zip filename from s3URL for DocumentZipPackage ${zip.id}: ${zip.s3URL}`
+                    `Expected zip s3URL to have path starting with 'zips/', got: ${s3Key} for DocumentZipPackage ${zip.id}: ${zip.s3URL}`
                 )
                 result.failed++
                 continue
             }
-
-            const s3Key = `zips/${zipFilename}`
 
             if (dryRun) {
                 console.info(
