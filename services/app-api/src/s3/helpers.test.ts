@@ -68,7 +68,7 @@ describe('S3 URL parsing helpers', () => {
         describe('zip packages', () => {
             test('extracts full path from contract zip URL', () => {
                 const result = parseKey(
-                    's3://uploads-prod-uploads-701789472057/zips/contracts/1d2537c1-fead-4845-ade8-bf8c3c210675/contract-documents.zip'
+                    's3://uploads-prod-uploads-bucket/zips/contracts/1d2537c1-fead-4845-ade8-bf8c3c210675/contract-documents.zip'
                 )
                 expect(result).toBe(
                     'zips/contracts/1d2537c1-fead-4845-ade8-bf8c3c210675/contract-documents.zip'
@@ -109,7 +109,7 @@ describe('S3 URL parsing helpers', () => {
             test('handles production zip URL format that was failing', () => {
                 // This is the exact URL format that broke production
                 const prodZipUrl =
-                    's3://uploads-prod-uploads-701789472057/zips/contracts/1d2537c1-fead-4845-ade8-bf8c3c210675/contract-documents.zip'
+                    's3://uploads-prod-uploads-bucket/zips/contracts/1d2537c1-fead-4845-ade8-bf8c3c210675/contract-documents.zip'
                 const result = parseKey(prodZipUrl)
                 expect(result).toBe(
                     'zips/contracts/1d2537c1-fead-4845-ade8-bf8c3c210675/contract-documents.zip'
@@ -202,7 +202,7 @@ describe('S3 URL parsing helpers', () => {
             test('falls back to parsing zip s3URL and returns full path', () => {
                 const zip = {
                     s3Key: null,
-                    s3URL: 's3://uploads-prod-uploads-701789472057/zips/contracts/1d2537c1-fead-4845-ade8-bf8c3c210675/contract-documents.zip',
+                    s3URL: 's3://uploads-prod-uploads-bucket/zips/contracts/1d2537c1-fead-4845-ade8-bf8c3c210675/contract-documents.zip',
                 }
                 const result = getS3Key(zip)
                 expect(result).toBe(
