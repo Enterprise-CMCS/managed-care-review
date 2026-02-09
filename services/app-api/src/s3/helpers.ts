@@ -6,11 +6,10 @@ const isValidS3URLFormat = (url: {
     slashes: boolean
     pathname: string
 }): boolean => {
-    return (
-        url.protocol === 's3:' &&
-        url.slashes === true &&
-        url.pathname.split('/').length === 3
-    )
+    // Regular docs: /uuid.ext/filename.ext has 3 segments
+    // Zip packages: /zips/contracts/uuid/file.zip has 5+ segments
+    const pathSegments = url.pathname.split('/').length
+    return url.protocol === 's3:' && url.slashes === true && pathSegments >= 3
 }
 
 const parseBucketName = (maybeS3URL: string): string | Error => {
@@ -24,6 +23,17 @@ const parseKey = (maybeS3URL: string): string | Error => {
     const url = new Url(maybeS3URL)
     if (!isValidS3URLFormat(url))
         return new Error(`Not valid S3URL for parsekey: ${maybeS3URL}`)
+
+    // For zip packages, the key is the full path after the bucket
+    // s3://bucket/zips/contracts/uuid/file.zip -> zips/contracts/uuid/file.zip
+    if (url.pathname.startsWith('/zips/')) {
+        // Remove leading slash and return full path
+        return url.pathname.substring(1)
+    }
+
+    // For regular documents, extract just the UUID segment
+    // s3://bucket/uuid.ext/filename.ext -> uuid.ext
+    // (Note: actual S3 key will have allusers/ prefix added elsewhere)
     return url.pathname.split('/')[1]
 }
 
