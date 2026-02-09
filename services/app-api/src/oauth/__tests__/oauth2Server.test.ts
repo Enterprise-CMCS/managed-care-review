@@ -301,7 +301,7 @@ describe('CustomOAuth2Server', () => {
             const event = {
                 body: JSON.stringify({
                     grant_type: 'client_credentials',
-                    client_id: 'valid',
+                    client_id: 'valid', // pragma: allowlist secret
                     client_secret: 'valid', // pragma: allowlist secret
                 }),
                 headers: {

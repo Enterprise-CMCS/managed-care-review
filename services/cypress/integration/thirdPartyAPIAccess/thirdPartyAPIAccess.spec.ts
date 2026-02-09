@@ -1,14 +1,17 @@
-//Skipping tests for now until there's a final decision on what to do with the APIAccess page
-describe.skip('thirdPartyAPIAccess', () => {
+import { adminUser } from '../../utils/apollo-test-utils'
+import {
+    FetchCurrentUserDocument,
+    FetchCurrentUserQuery,
+} from '../../gen/gqlClient'
 
+describe('thirdPartyAPIAccess', () => {
     beforeEach(() => {
         cy.stubFeatureFlags()
         cy.interceptGraphQL()
     })
 
-
-    it('gets an error back without authentication', () => {
-        
+    //Skipping tests for now until there's a final decision on what to do with the APIAccess page
+    it.skip('gets an error back without authentication', () => {
         // get the API URL!
         const url = Cypress.env('API_URL')
         const api_url = url + '/v1/graphql/external'
@@ -16,17 +19,15 @@ describe.skip('thirdPartyAPIAccess', () => {
         cy.request({
             url: api_url,
             headers: {
-                'Authorization': 'Bearer foobar'
+                Authorization: 'Bearer foobar',
             },
             failOnStatusCode: false,
-        }).then(res => {
+        }).then((res) => {
             expect(res.status).to.equal(403) // unauthenticated??
         })
-
     })
-
-    it('gets an error back without no auth header sent', () => {
-        
+    //Skipping tests for now until there's a final decision on what to do with the APIAccess page
+    it.skip('gets an error back without no auth header sent', () => {
         // get the API URL!
         const url = Cypress.env('API_URL')
         const api_url = url + '/v1/graphql/external'
@@ -34,46 +35,37 @@ describe.skip('thirdPartyAPIAccess', () => {
         cy.request({
             url: api_url,
             failOnStatusCode: false,
-        }).then(res => {
+        }).then((res) => {
             expect(res.status).to.equal(401) // unauthenticated
         })
     })
 
-    it('works with a valid key', () => {
-    
-        // get the API URL!
-        const url = Cypress.env('API_URL')
-        const api_url = url + '/v1/graphql/external'
+    it('can make delegated API request', () => {
+        // Log in as our API and delegated users to seed the DB
+        cy.logInAsCMSUser({ cmsUser: 'ZUKO' }) // our OAuth client user
+        cy.logOut()
 
-        // sign in and get to the api key url
-        cy.logInAsCMSUser()
+        cy.logInAsCMSUser({ cmsUser: 'AZULA' }) // our delegated user
+        cy.logOut()
 
-        cy.visit('/dev/api-access')
+        // Create the OAuth client using ZUKO
+        cy.apiCreateOAuthClient(adminUser(), 'ZUKO', 'AZULA').then(
+            (response) => {
+                const { client, delegatedUser } = response
+                cy.apiRequestOAuthToken(client).then((token) => {
+                    //Make a delegated request
+                    cy.thirdPartyApiRequest<FetchCurrentUserQuery>({
+                        token,
+                        document: FetchCurrentUserDocument,
+                        delegatedUserId: delegatedUser.id,
+                    }).then((result) => {
+                        const user = result.data?.fetchCurrentUser
 
-        cy.findByRole('button', {
-            name: "Generate API Key",
-        }).click()
-
-
-        cy.get("[aria-label='API Key Text']").then((codeBlock) => {
-
-            const apiKey = codeBlock.text().trim()
-            const bearer = `Bearer ${apiKey}`
-
-            cy.request({
-                method: 'post',
-                url: api_url,
-                headers: {
-                    'Content-Type': 'application/json',
-                    Authorization: bearer,
-                },
-                body: '{"query":"query IndexRates { indexRates { totalCount edges { node {  id } } } }"}',
-                failOnStatusCode: false,
-            }).then(res => {
-                expect(res.status).to.equal(200) // okay 
-            })
-
-        })        
+                        // expect our delegated user to be in the response data.
+                        expect(user.id).to.equal(delegatedUser.id)
+                    })
+                })
+            }
+        )
     })
-
 })

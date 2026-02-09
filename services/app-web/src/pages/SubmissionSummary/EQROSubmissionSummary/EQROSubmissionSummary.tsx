@@ -1,16 +1,24 @@
-import React, { useEffect, useLayoutEffect, useState } from 'react'
+import React, { useEffect, useLayoutEffect, useRef, useState } from 'react'
 import { usePage } from '../../../contexts/PageContext'
-import { GridContainer, Link } from '@trussworks/react-uswds'
+import { GridContainer, 
+    Link, 
+    Grid, 
+    ModalRef 
+} from '@trussworks/react-uswds'
 import { Navigate } from 'react-router-dom'
 import { useAuth } from '../../../contexts/AuthContext'
 import { useMemoizedStateHeader, useRouteParams } from '../../../hooks'
 import { hasCMSUserPermissions } from '@mc-review/helpers'
-import { useFetchContractWithQuestionsQuery } from '../../../gen/gqlClient'
+import { useFetchContractWithQuestionsQuery, UpdateInformation, } from '../../../gen/gqlClient'
 import {
     DocumentWarningBanner,
     LinkWithLogging,
     Loading,
+    SectionCard,
+    MultiColumnGrid,
 } from '../../../components'
+import { SubmissionUnlockedBanner } from '../../../components/Banner'
+import { ModalOpenButton, UnlockSubmitModal } from '../../../components/Modal'
 import { ErrorForbiddenPage } from '../../Errors/ErrorForbiddenPage'
 import { Error404 } from '../../Errors/Error404Page'
 import { GenericErrorPage } from '../../Errors/GenericErrorPage'
@@ -32,6 +40,8 @@ export const EQROSubmissionSummary = (): React.ReactElement => {
     const hasCMSPermissions = hasCMSUserPermissions(loggedInUser)
     const isStateUser = loggedInUser?.role === 'STATE_USER'
     const isHelpDeskUser = loggedInUser?.role === 'HELPDESK_USER'
+
+    const modalRef = useRef<ModalRef>(null)
 
     // API requests
     const { data, loading, error } = useFetchContractWithQuestionsQuery({
@@ -92,6 +102,7 @@ export const EQROSubmissionSummary = (): React.ReactElement => {
         submissionStatus === 'SUBMITTED' || submissionStatus === 'RESUBMITTED'
     const statePrograms = contract.state.programs
     const contractSubmissionType = contract.contractSubmissionType
+    const consolidatedStatus = contract.consolidatedStatus
 
     if (!isSubmitted && isStateUser) {
         if (submissionStatus === 'DRAFT') {
@@ -115,6 +126,22 @@ export const EQROSubmissionSummary = (): React.ReactElement => {
                 />
             )
         }
+    }
+
+    const showUnlockBtn =
+        hasCMSPermissions &&
+        ['SUBMITTED', 'RESUBMITTED','NOT_SUBJECT_TO_REVIEW'].includes(consolidatedStatus)
+    const showNoActionsMsg =
+        !showUnlockBtn 
+
+    // Get the correct update info depending on the submission status
+    let updateInfo: UpdateInformation | undefined = undefined
+    if (submissionStatus === 'UNLOCKED' || submissionStatus === 'RESUBMITTED') {
+        updateInfo =
+            (submissionStatus === 'UNLOCKED'
+                ? contract.draftRevision?.unlockInfo
+                : contract.packageSubmissions[0].contractRevision.submitInfo) ||
+            undefined
     }
 
     const contractFormData = getVisibleLatestContractFormData(
@@ -154,6 +181,43 @@ export const EQROSubmissionSummary = (): React.ReactElement => {
                     <DocumentWarningBanner className={styles.banner} />
                 )}
 
+                {submissionStatus === 'UNLOCKED' && updateInfo && (
+                    <SubmissionUnlockedBanner
+                        className={styles.banner}
+                        loggedInUser={loggedInUser}
+                        unlockedInfo={updateInfo}
+                    />
+                )}
+
+                {hasCMSPermissions && (
+                    <SectionCard className={styles.actionsSection}>
+                        <h3>Actions</h3>
+                        {showNoActionsMsg ? (
+                            <Grid>
+                                No action can be taken on this submission in its
+                                current status.
+                            </Grid>
+                        ) : (
+                            <MultiColumnGrid columns={3}>
+                                {showUnlockBtn && (
+                                    <ModalOpenButton
+                                        modalRef={modalRef}
+                                        disabled={
+                                            ['DRAFT', 'UNLOCKED'].includes(
+                                                contract.status
+                                            ) ||
+                                            contract.reviewStatus === 'APPROVED'
+                                        }
+                                        className={styles.submitButton}
+                                        id="form-submit"
+                                    >
+                                        Unlock submission
+                                    </ModalOpenButton>
+                                )}
+                            </MultiColumnGrid>
+                        )}
+                    </SectionCard>
+                )}
                 <SubmissionTypeSummarySection
                     subHeaderComponent={
                         hasCMSPermissions ? (
@@ -202,6 +266,12 @@ export const EQROSubmissionSummary = (): React.ReactElement => {
                     contract={contract}
                     isStateUser={isStateUser}
                     explainMissingData={explainMissingData}
+                />
+
+                <UnlockSubmitModal
+                    modalRef={modalRef}
+                    modalType="UNLOCK_CONTRACT"
+                    submissionData={contract}
                 />
             </GridContainer>
         </div>

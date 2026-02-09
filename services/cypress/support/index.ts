@@ -27,10 +27,11 @@ import {
 } from '@mc-review/common-code'
 import './apiCommands'
 import './accessibilityCommands'
-import { Contract, Division} from '../gen/gqlClient'
-import { CMSUserType, StateUserType } from '../utils/apollo-test-utils'
+import { Contract, Division, OauthClient } from '../gen/gqlClient'
+import { AdminUserType, CMSUserType, StateUserType } from '../utils/apollo-test-utils'
 import { CMSUserLoginNames } from './loginCommands'
 import { FormButtonKey } from './navigateCommands'
+import { ApiCreateOAuthClientResponseType, ThirdPartyApiRequestInput, ThirdPartyApiRequestOutput } from './apiCommands'
 
 declare global {
     namespace Cypress {
@@ -131,6 +132,17 @@ declare global {
             apiCreateAndSubmitContractWithRates(
                 stateUser: StateUserType
             ): Cypress.Chainable<Contract>
+            apiCreateOAuthClient(
+                adminUser: AdminUserType,
+                oauthClientUser: CMSUserLoginNames,
+                delegatedUser?: CMSUserLoginNames
+            ): Cypress.Chainable<ApiCreateOAuthClientResponseType>
+            apiRequestOAuthToken(
+                oauthClient: OauthClient
+            ): Cypress.Chainable<string>
+            thirdPartyApiRequest<TData = unknown>(
+                input: ThirdPartyApiRequestInput
+            ): Cypress.Chainable<ThirdPartyApiRequestOutput<TData>>
 
             // GraphQL intercept commands
             interceptGraphQL(): void

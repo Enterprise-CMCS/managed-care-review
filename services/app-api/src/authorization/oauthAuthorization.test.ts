@@ -37,6 +37,8 @@ describe('OAuth Authorization', () => {
                     clientId: 'test-client',
                     grants: ['client_credentials'],
                     isOAuthClient: true,
+                    scopes: [],
+                    isDelegatedUser: false,
                 },
             }
 
@@ -58,6 +60,8 @@ describe('OAuth Authorization', () => {
                     clientId: 'test-client',
                     grants: ['some_other_grant'],
                     isOAuthClient: true,
+                    scopes: [],
+                    isDelegatedUser: false,
                 },
             }
 
@@ -73,6 +77,8 @@ describe('OAuth Authorization', () => {
                     clientId: 'test-client',
                     grants: ['client_credentials'],
                     isOAuthClient: true,
+                    scopes: [],
+                    isDelegatedUser: false,
                 },
             }
 
@@ -96,6 +102,8 @@ describe('OAuth Authorization', () => {
                     clientId: 'test-client',
                     grants: ['client_credentials'],
                     isOAuthClient: true,
+                    scopes: [],
+                    isDelegatedUser: false,
                 },
             }
 
@@ -119,6 +127,8 @@ describe('OAuth Authorization', () => {
                     clientId: 'test-client',
                     grants: ['client_credentials'],
                     isOAuthClient: true,
+                    scopes: [],
+                    isDelegatedUser: false,
                 },
             }
 
