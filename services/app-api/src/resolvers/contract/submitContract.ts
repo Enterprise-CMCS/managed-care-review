@@ -332,6 +332,8 @@ export function submitContract(
                             name: doc.name,
                             s3URL: doc.s3URL,
                             sha256: doc.sha256,
+                            s3BucketName: doc.s3BucketName,
+                            s3Key: doc.s3Key,
                         }
                     }
                 ),
@@ -341,6 +343,8 @@ export function submitContract(
                             name: doc.name,
                             s3URL: doc.s3URL,
                             sha256: doc.sha256,
+                            s3BucketName: doc.s3BucketName,
+                            s3Key: doc.s3Key,
                         }
                     }
                 ),

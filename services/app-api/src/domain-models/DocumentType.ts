@@ -6,6 +6,8 @@ const baseDocumentSchema = z.object({
     updatedAt: z.date(),
     name: z.string(),
     s3URL: z.string(),
+    s3BucketName: z.string().nullable().optional(),
+    s3Key: z.string().nullable().optional(),
 })
 
 const sharedDocumentSchema = z.object({
@@ -14,6 +16,8 @@ const sharedDocumentSchema = z.object({
     s3URL: z.string(),
     sha256: z.string().optional(),
     downloadURL: z.string().optional(),
+    s3BucketName: z.string().nullable().optional(),
+    s3Key: z.string().nullable().optional(),
 })
 
 const contractDocumentSchema = baseDocumentSchema.extend({
