@@ -91,7 +91,7 @@
         "@vitejs/plugin-react": "^5.0.4",
         "amazon-cognito-identity-js": "^6.3.12",
         "aws-amplify": "^5.0.10",
-        "axios": "^1.13.4",
+        "axios": "^1.13.5",
         "dayjs": "^1.11.19",
         "formik": "^2.4.6",
         "graphql": "^16.9.0",

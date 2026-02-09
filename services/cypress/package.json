@@ -58,7 +58,7 @@
         "@mc-review/constants": "workspace:*",
         "cypress-file-upload": "^5.0.8",
         "cypress-pipe": "^2.0.1",
-        "axios": "^1.13.4",
+        "axios": "^1.13.5",
         "graphql": "^16.9.0",
         "@aws-sdk/signature-v4": "^3.374.0",
         "@aws-sdk/client-cognito-identity-provider": "^3.985.0",
