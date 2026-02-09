@@ -39,7 +39,7 @@ jobs:
 
       - name: Configure AWS credentials
         id: aws_creds_step
-        uses: aws-actions/configure-aws-credentials@v5
+        uses: aws-actions/configure-aws-credentials@v6
         with:
           aws-region: ${{ secrets.AWS_DEFAULT_REGION }}
           role-to-assume: ${{ secrets.AWS_OIDC_ROLE_TO_ASSUME }}
@@ -92,7 +92,7 @@ jobs:
       ERROR_MESSAGE: ${{ needs.sync.outputs.error_message }}
     steps:
       - name: Configure AWS credentials
-        uses: aws-actions/configure-aws-credentials@v5
+        uses: aws-actions/configure-aws-credentials@v6
         with:
           aws-region: ${{ secrets.AWS_DEFAULT_REGION }}
           role-to-assume: ${{ secrets.AWS_OIDC_ROLE_TO_ASSUME }}
