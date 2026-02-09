@@ -18,11 +18,11 @@
         ]
     },
     "dependencies": {
-        "@aws-sdk/client-lambda": "^3.984.0",
-        "@aws-sdk/client-secrets-manager": "^3.984.0",
-        "@aws-sdk/client-cloudformation": "^3.984.0",
-        "@aws-sdk/client-cognito-identity-provider": "^3.984.0",
-        "@aws-sdk/client-s3": "^3.984.0",
+        "@aws-sdk/client-lambda": "^3.985.0",
+        "@aws-sdk/client-secrets-manager": "^3.985.0",
+        "@aws-sdk/client-cloudformation": "^3.985.0",
+        "@aws-sdk/client-cognito-identity-provider": "^3.985.0",
+        "@aws-sdk/client-s3": "^3.985.0",
         "@types/papaparse": "^5.3.16",
         "@types/uuid": "^11.0.0",
         "octokit": "^5.0.5",
