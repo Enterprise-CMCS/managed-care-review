@@ -1,5 +1,3 @@
-import type { Result } from 'neverthrow'
-import { ok, err } from 'neverthrow'
 import type { UserType } from '../domain-models/index'
 import type { Store, InsertUserArgsType } from '../postgres'
 import { lookupUserAurora } from './cognitoAuthn'
@@ -7,24 +5,24 @@ import { lookupUserAurora } from './cognitoAuthn'
 export async function userFromLocalAuthProvider(
     authProvider: string,
     store?: Store
-): Promise<Result<UserType, Error>> {
+): Promise<UserType | Error> {
     try {
         const localUser: UserType = JSON.parse(authProvider)
 
         if (store === undefined) {
-            return ok(localUser)
+            return localUser
         }
 
         const auroraUser = await insertUserToLocalAurora(store, localUser)
 
         if (auroraUser instanceof Error) {
-            return err(auroraUser)
+            return auroraUser
         }
 
-        return ok(auroraUser)
+        return auroraUser
     } catch (e) {
         console.error('ERROR: failed to parse local user from authProvider')
-        return err(e)
+        return e instanceof Error ? e : new Error(String(e))
     }
 }
 

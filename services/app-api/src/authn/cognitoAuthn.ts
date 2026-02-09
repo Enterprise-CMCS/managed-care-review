@@ -1,5 +1,3 @@
-import type { Result } from 'neverthrow'
-import { ok, err } from 'neverthrow'
 import type { UserType as CognitoUserType } from '@aws-sdk/client-cognito-identity-provider'
 import {
     CognitoIdentityProviderClient,
@@ -13,7 +11,7 @@ import { isValidCmsDivison } from '../domain-models'
 
 export function parseAuthProvider(
     authProvider: string
-): Result<{ userId: string; poolId: string }, Error> {
+): { userId: string; poolId: string } | Error {
     // Cognito authentication provider looks like:
     // cognito-idp.us-east-1.amazonaws.com/us-east-1_xxxxxxxxx,cognito-idp.us-east-1.amazonaws.com/us-east-1_aaaaaaaaa:CognitoSignIn:qqqqqqqq-1111-2222-3333-rrrrrrrrrrrr
     // Where us-east-1_aaaaaaaaa is the User Pool id
@@ -26,9 +24,9 @@ export function parseAuthProvider(
         const userPoolId = userPoolIdParts[userPoolIdParts.length - 1]
         const userPoolUserId = parts[parts.length - 1]
 
-        return ok({ userId: userPoolUserId, poolId: userPoolId })
+        return { userId: userPoolUserId, poolId: userPoolId }
     } catch {
-        return err(new Error('authProvider doesnt have enough parts'))
+        return new Error('authProvider doesnt have enough parts')
     }
 }
 
@@ -53,30 +51,35 @@ async function fetchUserFromCognito(
     userID: string,
     poolID: string
 ): Promise<CognitoUserType | Error> {
-    const cognitoClient = new CognitoIdentityProviderClient({})
+    try {
+        const cognitoClient = new CognitoIdentityProviderClient({})
 
-    const subFilter = `sub = "${userID}"`
+        const subFilter = `sub = "${userID}"`
 
-    // let's see what we've got
-    const startRequest = performance.now()
-    const commandListUsers = new ListUsersCommand({
-        UserPoolId: poolID,
-        Filter: subFilter,
-    })
-    const listUsersResponse = await cognitoClient.send(commandListUsers)
-    const endRequest = performance.now()
-    console.info('listUsers takes ms:', endRequest - startRequest)
+        // let's see what we've got
+        const startRequest = performance.now()
+        const commandListUsers = new ListUsersCommand({
+            UserPoolId: poolID,
+            Filter: subFilter,
+        })
+        const listUsersResponse = await cognitoClient.send(commandListUsers)
+        const endRequest = performance.now()
+        console.info('listUsers takes ms:', endRequest - startRequest)
 
-    if (
-        listUsersResponse.Users === undefined ||
-        listUsersResponse.Users.length !== 1
-    ) {
-        // logerror
-        return new Error('No user found with this sub')
+        if (
+            listUsersResponse.Users === undefined ||
+            listUsersResponse.Users.length !== 1
+        ) {
+            return new Error('No user found with this sub')
+        }
+
+        const currentUser = listUsersResponse.Users[0]
+        return currentUser
+    } catch (e) {
+        return e instanceof Error
+            ? e
+            : new Error(`Failed to fetch user from Cognito: ${String(e)}`)
     }
-
-    const currentUser = listUsersResponse.Users[0]
-    return currentUser
 }
 
 // these are the strings sent for the "role" by IDM.
@@ -92,7 +95,7 @@ export function userTypeFromAttributes(
     attributes: {
         [key: string]: string
     }
-): Result<UserType, Error> {
+): UserType | Error {
     // check for all the shared attrs here
     if (
         !(
@@ -102,11 +105,9 @@ export function userTypeFromAttributes(
             'family_name' in attributes
         )
     ) {
-        return err(
-            new Error(
-                'User does not have all the required attributes: ' +
-                    JSON.stringify(attributes)
-            )
+        return new Error(
+            'User does not have all the required attributes: ' +
+                JSON.stringify(attributes)
         )
     }
 
@@ -118,25 +119,23 @@ export function userTypeFromAttributes(
     // but as of September 2021, it shouldn't be possible for someone to have more than one MC Review role
     if (roles.includes(STATE_ROLE_ATTRIBUTE)) {
         if (!('custom:state_code' in attributes)) {
-            return err(
-                new Error(
-                    'State User does not have all the required attributes: ' +
-                        JSON.stringify(attributes)
-                )
+            return new Error(
+                'State User does not have all the required attributes: ' +
+                    JSON.stringify(attributes)
             )
         }
-        return ok({
+        return {
             id,
             role: 'STATE_USER',
             email: attributes.email,
             stateCode: attributes['custom:state_code'],
             givenName: attributes.given_name,
             familyName: attributes.family_name,
-        })
+        }
     }
 
     if (roles.includes(CMS_ROLE_ATTRIBUTE)) {
-        return ok({
+        return {
             id,
             role: 'CMS_USER',
             email: attributes.email,
@@ -146,11 +145,11 @@ export function userTypeFromAttributes(
             divisionAssignment: isValidCmsDivison(attributes.division)
                 ? attributes.division
                 : undefined,
-        })
+        }
     }
 
     if (roles.includes(CMS_APPROVER_ROLE_ATTRIBUTE)) {
-        return ok({
+        return {
             id,
             role: 'CMS_APPROVER_USER',
             email: attributes.email,
@@ -160,118 +159,127 @@ export function userTypeFromAttributes(
             divisionAssignment: isValidCmsDivison(attributes.division)
                 ? attributes.division
                 : undefined,
-        })
+        }
     }
 
     if (roles.includes(ADMIN_ROLE_ATTRIBUTE)) {
-        return ok({
+        return {
             id,
             role: 'ADMIN_USER',
             email: attributes.email,
             givenName: attributes.given_name,
             familyName: attributes.family_name,
-            stateAssignments: [],
-        })
+        }
     }
 
     if (roles.includes(HELPDESK_ROLE_ATTRIBUTE)) {
-        return ok({
+        return {
             id,
             role: 'HELPDESK_USER',
             email: attributes.email,
             givenName: attributes.given_name,
             familyName: attributes.family_name,
-            stateAssignments: [],
-        })
+        }
     }
 
     if (roles.includes(BUSINESSOWNER_ROLE_ATTRIBUTE)) {
-        return ok({
+        return {
             id,
             role: 'BUSINESSOWNER_USER',
             email: attributes.email,
             givenName: attributes.given_name,
             familyName: attributes.family_name,
-            stateAssignments: [],
-        })
+        }
     }
 
-    return err(new Error('Unsupported user role:  ' + roleAttribute))
+    return new Error('Unsupported user role:  ' + roleAttribute)
 }
 
 // userFromCognitoAuthProvider hits the Cognito API to get the information in the authProvider
 export async function userFromCognitoAuthProvider(
     authProvider: string,
     store?: Store
-): Promise<Result<UserType, Error>> {
-    const parseResult = parseAuthProvider(authProvider)
-    if (parseResult.isErr()) {
-        return err(parseResult.error)
-    }
+): Promise<UserType | Error> {
+    try {
+        const parseResult = parseAuthProvider(authProvider)
+        if (parseResult instanceof Error) {
+            return parseResult
+        }
 
-    const userInfo = parseResult.value
-    // if no store is given, we just get user from Cognito
-    if (store === undefined) {
-        return lookupUserCognito(userInfo.userId, userInfo.poolId)
-    }
+        const userInfo = parseResult
+        // if no store is given, we just get user from Cognito
+        if (store === undefined) {
+            return lookupUserCognito(userInfo.userId, userInfo.poolId)
+        }
 
-    // look up the user in PG. If we don't have it here, then we need to
-    // fetch it from Cognito.
-    const startRequest = performance.now()
-    const auroraUser = await lookupUserAurora(store, userInfo.userId)
-    if (auroraUser instanceof Error) {
-        return err(auroraUser)
-    }
-    const endRequest = performance.now()
-    console.info('User lookup in postgres takes ms:', endRequest - startRequest)
-
-    // if there is no user returned, lookup in cognito and save to postgres
-    if (auroraUser === undefined) {
-        const cognitoUserResult = await lookupUserCognito(
-            userInfo.userId,
-            userInfo.poolId
+        // look up the user in PG. If we don't have it here, then we need to
+        // fetch it from Cognito.
+        const startRequest = performance.now()
+        const auroraUser = await lookupUserAurora(store, userInfo.userId)
+        if (auroraUser instanceof Error) {
+            return auroraUser
+        }
+        const endRequest = performance.now()
+        console.info(
+            'User lookup in postgres takes ms:',
+            endRequest - startRequest
         )
-        if (cognitoUserResult.isErr()) {
-            return err(cognitoUserResult.error)
+
+        // if there is no user returned, lookup in cognito and save to postgres
+        if (auroraUser === undefined) {
+            const cognitoUserResult = await lookupUserCognito(
+                userInfo.userId,
+                userInfo.poolId
+            )
+            if (cognitoUserResult instanceof Error) {
+                return cognitoUserResult
+            }
+
+            const cognitoUser = cognitoUserResult
+
+            // create the user and store it in aurora
+            const userToInsert: InsertUserArgsType = {
+                userID: userInfo.userId,
+                role: cognitoUser.role,
+                givenName: cognitoUser.givenName,
+                familyName: cognitoUser.familyName,
+                email: cognitoUser.email,
+            }
+
+            // if it is a state user, insert the state they are from
+            if (cognitoUser.role === 'STATE_USER') {
+                userToInsert.stateCode = cognitoUser.stateCode
+            }
+
+            const result = await store.insertUser(userToInsert)
+            if (result instanceof Error) {
+                console.error(
+                    `Could not insert user: ${JSON.stringify(result)}`
+                )
+                return cognitoUserResult
+            }
+            return result
         }
 
-        const cognitoUser = cognitoUserResult.value
-
-        // create the user and store it in aurora
-        const userToInsert: InsertUserArgsType = {
-            userID: userInfo.userId,
-            role: cognitoUser.role,
-            givenName: cognitoUser.givenName,
-            familyName: cognitoUser.familyName,
-            email: cognitoUser.email,
-        }
-
-        // if it is a state user, insert the state they are from
-        if (cognitoUser.role === 'STATE_USER') {
-            userToInsert.stateCode = cognitoUser.stateCode
-        }
-
-        const result = await store.insertUser(userToInsert)
-        if (result instanceof Error) {
-            console.error(`Could not insert user: ${JSON.stringify(result)}`)
-            return cognitoUserResult
-        }
-        return ok(result)
+        // we return the user we got from aurora
+        return auroraUser
+    } catch (e) {
+        return e instanceof Error
+            ? e
+            : new Error(
+                  `Unexpected error in userFromCognitoAuthProvider: ${String(e)}`
+              )
     }
-
-    // we return the user we got from aurora
-    return ok(auroraUser)
 }
 
 async function lookupUserCognito(
     userId: string,
     poolId: string
-): Promise<Result<UserType, Error>> {
+): Promise<UserType | Error> {
     const fetchResult = await fetchUserFromCognito(userId, poolId)
 
-    // this is asserting that this is an error object, probably a better way to do that.
-    if ('name' in fetchResult) {
-        return err(fetchResult)
+    if (fetchResult instanceof Error) {
+        return fetchResult
     }
 
     const currentUser: CognitoUserType = fetchResult
