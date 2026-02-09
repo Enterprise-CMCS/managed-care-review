@@ -18,7 +18,7 @@ export function isOAuthClientScopes(context: Context): boolean {
     return !!(
         context.oauthClient?.isOAuthClient &&
         context.oauthClient?.isDelegatedUser && //do we want to include isDelegatedUser in the logic or no?
-        context.oauthClient?.scopes.includes(OAuthScope.CMS_SUBMISSION_ACTIONS)
+        context.oauthClient?.scopes?.includes(OAuthScope.CMS_SUBMISSION_ACTIONS)
     )
 }
 
