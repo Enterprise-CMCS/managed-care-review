@@ -6,10 +6,20 @@ const isValidS3URLFormat = (url: {
     slashes: boolean
     pathname: string
 }): boolean => {
-    // Regular docs: /uuid.ext/filename.ext has 3 segments
-    // Zip packages: /zips/contracts/uuid/file.zip has 5+ segments
+    if (url.protocol !== 's3:' || url.slashes !== true) {
+        return false
+    }
+
     const pathSegments = url.pathname.split('/').length
-    return url.protocol === 's3:' && url.slashes === true && pathSegments >= 3
+
+    // Zip packages: /zips/contracts/uuid/file.zip (5+ segments)
+    // or /zips/rates/uuid/file.zip (5+ segments)
+    if (url.pathname.startsWith('/zips/')) {
+        return pathSegments >= 5
+    }
+
+    // Regular docs: /uuid.ext/filename.ext (exactly 3 segments)
+    return pathSegments === 3
 }
 
 const parseBucketName = (maybeS3URL: string): string | Error => {
@@ -34,7 +44,13 @@ const parseKey = (maybeS3URL: string): string | Error => {
     // For regular documents, extract just the UUID segment
     // s3://bucket/uuid.ext/filename.ext -> uuid.ext
     // (Note: actual S3 key will have allusers/ prefix added elsewhere)
-    return url.pathname.split('/')[1]
+    const segments = url.pathname.split('/')
+    if (segments.length !== 3) {
+        return new Error(
+            `Unexpected s3URL format for regular document (expected 3 path segments, got ${segments.length}): ${maybeS3URL}`
+        )
+    }
+    return segments[1]
 }
 
 /**
