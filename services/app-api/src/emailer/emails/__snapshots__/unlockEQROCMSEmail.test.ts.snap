@@ -1,0 +1,12 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`unlockEQROCMSEmail > renders CMS email for unlocked EQRO contract as expected 1`] = `
+"Submission MCR-MN-0004-SNBC was unlocked<br />
+<br />
+<b>Unlocked by:</b> leslie@example.com<br />
+<b>Unlocked on:</b> 12/31/2021<br />
+<b>Reason for unlock:</b> Hello, friend.<br />
+<br />
+<a href="http://localhost/submissions/eqro/test-contract-123">View submission</a>
+"
+`;

@@ -1,59 +1,53 @@
 import { packageName as generatePackageName } from '@mc-review/submissions'
 import type {
-    ContractType,
+    UnlockedContractType,
     ProgramType,
     UpdateInfoType,
 } from '../../domain-models'
-import type { EmailConfiguration, EmailData } from '../emailer'
-import { pruneDuplicateEmails } from '../formatters'
+import type {
+    EmailConfiguration,
+    EmailData,
+    StateAnalystsEmails,
+} from '../emailer'
 import {
     findContractPrograms,
+    generateCMSReviewerEmailsForUnlockedContract,
     renderTemplate,
     stripHTMLFromTemplate,
 } from '../templateHelpers'
 import { formatCalendarDate } from '@mc-review/dates'
 import { submissionSummaryURL } from '../generateURLs'
+import type { unlockEQROEmail } from './unlockEQROStateEmail'
 
-export type unlockEQROEmail = {
-    pkgName: string
-    unlockedBy: string
-    unlockedOn: string
-    unlockReason: string
-    submissionURL: string
-    cmsEmail: boolean
-}
-
-export const unlockEQROStateEmail = async (
-    contract: ContractType,
+export const unlockEQROCMSEmail = async (
+    contract: UnlockedContractType,
     updateInfo: UpdateInfoType,
     config: EmailConfiguration,
-    statePrograms: ProgramType[],
-    submitterEmails: string[]
+    stateAnalystsEmails: StateAnalystsEmails,
+    statePrograms: ProgramType[]
 ): Promise<EmailData | Error> => {
     const isTestEnvironment = config.stage !== 'prod'
-    const stateContactEmails: string[] = []
     const contractRev = contract.packageSubmissions[0].contractRevision
 
-    const formData = contractRev.formData
-    formData.stateContacts.forEach((contact) => {
-        if (contact.email) stateContactEmails.push(contact.email)
-    })
+    const reviewerEmails = generateCMSReviewerEmailsForUnlockedContract(
+        config,
+        contract,
+        stateAnalystsEmails
+    )
+
+    if (reviewerEmails instanceof Error) {
+        return reviewerEmails
+    }
 
     const pkgPrograms = findContractPrograms(contractRev, statePrograms)
     if (pkgPrograms instanceof Error) {
         return pkgPrograms
     }
 
-    const toAddresses = pruneDuplicateEmails([
-        ...stateContactEmails,
-        ...submitterEmails,
-        ...config.devReviewTeamEmails,
-    ])
-
     const pkgName = generatePackageName(
         contract.stateCode,
         contract.stateNumber,
-        formData.programIDs,
+        contractRev.formData.programIDs,
         pkgPrograms
     )
 
@@ -84,7 +78,7 @@ export const unlockEQROStateEmail = async (
         return template
     } else {
         return {
-            toAddresses: toAddresses,
+            toAddresses: reviewerEmails,
             replyToAddresses: [],
             sourceEmail: config.emailSource,
             subject: `${isTestEnvironment ? `[${config.stage}] ` : ''}${pkgName} was unlocked`,

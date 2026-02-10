@@ -4,4 +4,8 @@ Submission <%= it.pkgName %> was unlocked<br />
 <b>Unlocked on:</b> <%= it.unlockedOn %><br />
 <b>Reason for unlock:</b> <%= it.unlockReason %><br />
 <br />
+<% if (it.cmsEmail) { %>
+You will receive another notification when the state resubmits.
+<% } else { %>
 <a href="<%= it.submissionURL%>">View submission</a>
+<% } %>

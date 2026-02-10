@@ -7,6 +7,7 @@ export {
     unlockContractCMSEmail,
     unlockContractStateEmail,
     unlockEQROStateEmail,
+    unlockEQROCMSEmail,
     resubmitContractStateEmail,
     resubmitContractCMSEmail,
     sendQuestionStateEmail,
