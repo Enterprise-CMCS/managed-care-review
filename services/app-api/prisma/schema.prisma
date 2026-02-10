@@ -437,27 +437,27 @@ model ContractQuestion {
 }
 
 model ContractQuestionDocument {
-  id         String           @id @default(uuid())
-  createdAt  DateTime         @default(now())
-  updatedAt  DateTime         @default(now()) @updatedAt
-  name       String           // Original filename from user upload
-  s3URL      String           // DEPRECATED: Use s3BucketName + s3Key instead
-  s3BucketName String?        // S3 bucket name (e.g., "uploads-documents-prod-bucket-cdk")
-  s3Key        String?        // S3 object key (e.g., "allusers/uuid.pdf")
-  questionID String
-  question   ContractQuestion @relation(fields: [questionID], references: [id])
+  id           String           @id @default(uuid())
+  createdAt    DateTime         @default(now())
+  updatedAt    DateTime         @default(now()) @updatedAt
+  name         String // Original filename from user upload
+  s3URL        String // DEPRECATED: Use s3BucketName + s3Key instead
+  s3BucketName String? // S3 bucket name
+  s3Key        String? // S3 object key (e.g., "allusers/uuid.pdf")
+  questionID   String
+  question     ContractQuestion @relation(fields: [questionID], references: [id])
 }
 
 model ContractQuestionResponseDocument {
-  id         String                   @id @default(uuid())
-  createdAt  DateTime                 @default(now())
-  updatedAt  DateTime                 @updatedAt
-  response   ContractQuestionResponse @relation(fields: [responseID], references: [id])
-  responseID String
-  name       String           // Original filename from user upload
-  s3URL      String           // DEPRECATED: Use s3BucketName + s3Key instead
-  s3BucketName String?        // S3 bucket name (e.g., "uploads-documents-prod-bucket-cdk")
-  s3Key        String?        // S3 object key (e.g., "allusers/uuid.pdf")
+  id           String                   @id @default(uuid())
+  createdAt    DateTime                 @default(now())
+  updatedAt    DateTime                 @updatedAt
+  response     ContractQuestionResponse @relation(fields: [responseID], references: [id])
+  responseID   String
+  name         String // Original filename from user upload
+  s3URL        String // DEPRECATED: Use s3BucketName + s3Key instead
+  s3BucketName String? // S3 bucket name
+  s3Key        String? // S3 object key (e.g., "allusers/uuid.pdf")
 }
 
 model ContractQuestionResponse {
@@ -496,27 +496,27 @@ model RateQuestionResponse {
 }
 
 model RateQuestionDocument {
-  id         String       @id @default(uuid())
-  createdAt  DateTime     @default(now())
-  updatedAt  DateTime     @default(now()) @updatedAt
-  name       String           // Original filename from user upload
-  s3URL      String           // DEPRECATED: Use s3BucketName + s3Key instead
-  s3BucketName String?        // S3 bucket name (e.g., "uploads-documents-prod-bucket-cdk")
-  s3Key        String?        // S3 object key (e.g., "allusers/uuid.pdf")
-  questionID String
-  question   RateQuestion @relation(fields: [questionID], references: [id])
+  id           String       @id @default(uuid())
+  createdAt    DateTime     @default(now())
+  updatedAt    DateTime     @default(now()) @updatedAt
+  name         String // Original filename from user upload
+  s3URL        String // DEPRECATED: Use s3BucketName + s3Key instead
+  s3BucketName String? // S3 bucket name
+  s3Key        String? // S3 object key (e.g., "allusers/uuid.pdf")
+  questionID   String
+  question     RateQuestion @relation(fields: [questionID], references: [id])
 }
 
 model RateQuestionResponseDocument {
-  id         String               @id @default(uuid())
-  createdAt  DateTime             @default(now())
-  updatedAt  DateTime             @updatedAt
-  name       String           // Original filename from user upload
-  s3URL      String           // DEPRECATED: Use s3BucketName + s3Key instead
-  s3BucketName String?        // S3 bucket name (e.g., "uploads-documents-prod-bucket-cdk")
-  s3Key        String?        // S3 object key (e.g., "allusers/uuid.pdf")
-  responseID String
-  response   RateQuestionResponse @relation(fields: [responseID], references: [id])
+  id           String               @id @default(uuid())
+  createdAt    DateTime             @default(now())
+  updatedAt    DateTime             @updatedAt
+  name         String // Original filename from user upload
+  s3URL        String // DEPRECATED: Use s3BucketName + s3Key instead
+  s3BucketName String? // S3 bucket name
+  s3Key        String? // S3 object key (e.g., "allusers/uuid.pdf")
+  responseID   String
+  response     RateQuestionResponse @relation(fields: [responseID], references: [id])
 }
 
 enum Division {
@@ -634,13 +634,13 @@ model OAuthClient {
 }
 
 model DocumentZipPackage {
-  id        String   @id @default(uuid())
-  createdAt DateTime @default(now())
-  updatedAt DateTime @default(now()) @updatedAt
-  s3URL     String           // DEPRECATED: Use s3BucketName + s3Key instead
-  s3BucketName String?        // S3 bucket name (e.g., "uploads-documents-prod-bucket-cdk")
-  s3Key        String?        // S3 object key (e.g., "zips/uuid.zip")
-  sha256    String
+  id           String   @id @default(uuid())
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @default(now()) @updatedAt
+  s3URL        String // DEPRECATED: Use s3BucketName + s3Key instead
+  s3BucketName String? // S3 bucket name (e.g., "uploads-documents-prod-bucket-cdk")
+  s3Key        String? // S3 object key (e.g., "zips/uuid.zip")
+  sha256       String
 
   contractRevisionID String?
   contractRevision   ContractRevisionTable? @relation(fields: [contractRevisionID], references: [id])

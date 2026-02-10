@@ -5,13 +5,16 @@
  * malformed s3URL values. The s3URL format is: s3://bucket/uuid.ext/filename.ext
  * We extract the uuid.ext part and create proper S3 references.
  *
- * Usage (REQUIRED: specify targetBucket):
- *   aws lambda invoke --function-name app-api-{stage}-migrate-s3-urls \
- *     --payload '{"targetBucket":"uploads-documents-{stage}-bucket-cdk"}' response.json
+ * Buckets are determined from environment variables:
+ * - VITE_APP_S3_DOCUMENTS_BUCKET: for contract/rate documents and zips
+ * - VITE_APP_S3_QA_BUCKET: for question/response documents
+ *
+ * Usage:
+ *   aws lambda invoke --function-name app-api-{stage}-migrate-s3-urls response.json
  *
  * With options:
  *   aws lambda invoke --function-name app-api-{stage}-migrate-s3-urls \
- *     --payload '{"targetBucket":"uploads-documents-dev-bucket-cdk","limit":100,"dryRun":true}' response.json
+ *     --payload '{"limit":100,"dryRun":true}' response.json
  */
 
 import type { Handler } from 'aws-lambda'
@@ -19,7 +22,6 @@ import { NewPrismaClient } from '../postgres/prismaClient'
 import { getPostgresURL } from './configuration'
 
 export type MigrateS3UrlsEvent = {
-    targetBucket: string // REQUIRED: Target S3 bucket name (e.g., "uploads-documents-dev-bucket-cdk")
     limit?: number // Optional: limit number of documents to migrate per table (default: all)
     dryRun?: boolean // Optional: just count, don't actually migrate (default: false)
 }
@@ -27,7 +29,8 @@ export type MigrateS3UrlsEvent = {
 export type MigrateS3UrlsResponse = {
     success: boolean
     dryRun: boolean
-    targetBucket: string
+    documentsBucket: string
+    qaBucket: string
     results: {
         contractDocuments: {
             processed: number
@@ -102,22 +105,32 @@ function extractS3KeyFromMalformedUrl(s3URL: string): string | Error {
 }
 
 export const main: Handler = async (
-    event: MigrateS3UrlsEvent
+    event: MigrateS3UrlsEvent = {}
 ): Promise<MigrateS3UrlsResponse> => {
-    const dryRun = event.dryRun ?? false
-    const limit = event.limit
-    const targetBucket = event.targetBucket
+    const dryRun = event?.dryRun ?? false
+    const limit = event?.limit
 
-    if (!targetBucket) {
+    // Get bucket names from environment variables
+    const documentsBucket = process.env.VITE_APP_S3_DOCUMENTS_BUCKET
+    const qaBucket = process.env.VITE_APP_S3_QA_BUCKET
+
+    if (!documentsBucket) {
         throw new Error(
-            'targetBucket is required. Please specify the target S3 bucket name to run this migration on.'
+            'VITE_APP_S3_DOCUMENTS_BUCKET environment variable is required'
+        )
+    }
+
+    if (!qaBucket) {
+        throw new Error(
+            'VITE_APP_S3_QA_BUCKET environment variable is required'
         )
     }
 
     console.info('Starting s3URL migration', {
         dryRun,
         limit,
-        targetBucket,
+        documentsBucket,
+        qaBucket,
     })
 
     // Get configuration from environment variables
@@ -149,7 +162,8 @@ export const main: Handler = async (
     const response: MigrateS3UrlsResponse = {
         success: true,
         dryRun,
-        targetBucket,
+        documentsBucket,
+        qaBucket,
         results: {
             contractDocuments: { processed: 0, failed: 0 },
             contractSupportingDocuments: {
@@ -174,12 +188,12 @@ export const main: Handler = async (
     }
 
     try {
-        // Migrate ContractDocument
+        // Migrate ContractDocument (uses DOCUMENTS bucket)
         console.info('Migrating ContractDocument...')
         const contractDocsResult = await migrateDocumentTable(
             prismaClient,
             'contractDocument',
-            targetBucket,
+            documentsBucket,
             limit,
             dryRun
         )
@@ -190,12 +204,12 @@ export const main: Handler = async (
             )
         }
 
-        // Migrate ContractSupportingDocument
+        // Migrate ContractSupportingDocument (uses DOCUMENTS bucket)
         console.info('Migrating ContractSupportingDocument...')
         const contractSupportingDocsResult = await migrateDocumentTable(
             prismaClient,
             'contractSupportingDocument',
-            targetBucket,
+            documentsBucket,
             limit,
             dryRun
         )
@@ -207,12 +221,12 @@ export const main: Handler = async (
             )
         }
 
-        // Migrate RateDocument
+        // Migrate RateDocument (uses DOCUMENTS bucket)
         console.info('Migrating RateDocument...')
         const rateDocsResult = await migrateDocumentTable(
             prismaClient,
             'rateDocument',
-            targetBucket,
+            documentsBucket,
             limit,
             dryRun
         )
@@ -223,12 +237,12 @@ export const main: Handler = async (
             )
         }
 
-        // Migrate RateSupportingDocument
+        // Migrate RateSupportingDocument (uses DOCUMENTS bucket)
         console.info('Migrating RateSupportingDocument...')
         const rateSupportingDocsResult = await migrateDocumentTable(
             prismaClient,
             'rateSupportingDocument',
-            targetBucket,
+            documentsBucket,
             limit,
             dryRun
         )
@@ -239,12 +253,12 @@ export const main: Handler = async (
             )
         }
 
-        // Migrate ContractQuestionDocument
+        // Migrate ContractQuestionDocument (uses QA bucket)
         console.info('Migrating ContractQuestionDocument...')
         const contractQuestionDocsResult = await migrateDocumentTable(
             prismaClient,
             'contractQuestionDocument',
-            targetBucket,
+            qaBucket,
             limit,
             dryRun
         )
@@ -255,12 +269,12 @@ export const main: Handler = async (
             )
         }
 
-        // Migrate ContractQuestionResponseDocument
+        // Migrate ContractQuestionResponseDocument (uses QA bucket)
         console.info('Migrating ContractQuestionResponseDocument...')
         const contractQuestionResponseDocsResult = await migrateDocumentTable(
             prismaClient,
             'contractQuestionResponseDocument',
-            targetBucket,
+            qaBucket,
             limit,
             dryRun
         )
@@ -272,12 +286,12 @@ export const main: Handler = async (
             )
         }
 
-        // Migrate RateQuestionDocument
+        // Migrate RateQuestionDocument (uses QA bucket)
         console.info('Migrating RateQuestionDocument...')
         const rateQuestionDocsResult = await migrateDocumentTable(
             prismaClient,
             'rateQuestionDocument',
-            targetBucket,
+            qaBucket,
             limit,
             dryRun
         )
@@ -288,12 +302,12 @@ export const main: Handler = async (
             )
         }
 
-        // Migrate RateQuestionResponseDocument
+        // Migrate RateQuestionResponseDocument (uses QA bucket)
         console.info('Migrating RateQuestionResponseDocument...')
         const rateQuestionResponseDocsResult = await migrateDocumentTable(
             prismaClient,
             'rateQuestionResponseDocument',
-            targetBucket,
+            qaBucket,
             limit,
             dryRun
         )
@@ -305,11 +319,11 @@ export const main: Handler = async (
             )
         }
 
-        // Migrate DocumentZipPackage
+        // Migrate DocumentZipPackage (uses DOCUMENTS bucket)
         console.info('Migrating DocumentZipPackage...')
         const documentZipPackagesResult = await migrateZipTable(
             prismaClient,
-            targetBucket,
+            documentsBucket,
             limit,
             dryRun
         )
@@ -421,8 +435,8 @@ async function migrateDocumentTable(
 
 /**
  * Migrate DocumentZipPackage table - zip files are stored in zips/ folder
- * Input: s3://uploads-prod-uploads-123/uuid.zip
- * Output: s3Key = zips/uuid.zip
+ * Input: s3://bucket/zips/contracts/uuid/contract-documents.zip
+ * Output: s3Key = zips/contracts/uuid/contract-documents.zip
  */
 async function migrateZipTable(
     prismaClient: any,
@@ -450,8 +464,9 @@ async function migrateZipTable(
 
     for (const zip of zips) {
         try {
-            // Extract the zip filename from s3URL
-            // s3URL format: s3://bucket-name/uuid.zip
+            // Extract the full S3 key from s3URL
+            // s3URL format: s3://bucket-name/zips/contracts/uuid/file.zip
+            // We want everything after the bucket: zips/contracts/uuid/file.zip
             const parts = zip.s3URL.split('/')
             if (parts.length < 4) {
                 console.error(
@@ -461,16 +476,20 @@ async function migrateZipTable(
                 continue
             }
 
-            const zipFilename = parts[3] // uuid.zip
-            if (!zipFilename) {
+            // parts[0] = 's3:'
+            // parts[1] = ''
+            // parts[2] = bucket name
+            // parts[3+] = the key path
+            const keyParts = parts.slice(3) // Everything after bucket
+            const s3Key = keyParts.join('/')
+
+            if (!s3Key || !s3Key.startsWith('zips/')) {
                 console.error(
-                    `Could not extract zip filename from s3URL for DocumentZipPackage ${zip.id}: ${zip.s3URL}`
+                    `Expected zip s3URL to have path starting with 'zips/', got: ${s3Key} for DocumentZipPackage ${zip.id}: ${zip.s3URL}`
                 )
                 result.failed++
                 continue
             }
-
-            const s3Key = `zips/${zipFilename}`
 
             if (dryRun) {
                 console.info(
