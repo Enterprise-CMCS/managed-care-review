@@ -1,7 +1,7 @@
 import { packageName as generatePackageName } from '@mc-review/submissions'
 import type {
-    ContractType,
     ProgramType,
+    UnlockedContractType,
     UpdateInfoType,
 } from '../../domain-models'
 import type { EmailConfiguration, EmailData } from '../emailer'
@@ -23,7 +23,7 @@ type unlockEQROStateEmail = {
 }
 
 export const unlockEQROStateEmail = async (
-    contract: ContractType,
+    contract: UnlockedContractType,
     updateInfo: UpdateInfoType,
     config: EmailConfiguration,
     statePrograms: ProgramType[],
