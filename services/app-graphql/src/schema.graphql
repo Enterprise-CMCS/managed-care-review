@@ -70,14 +70,14 @@ type Query {
     """
     fetchContract(input: FetchContractInput!): FetchContractPayload!
 
-"""
+    """
     fetchDocument returns a single document
     given a documentID
     Optional parameters include:
     - expiresIn: represents in seconds the expiration date for the downloadURL
     Must be between 1-604,800 seconds. If not suppliede it defaults to expiring in 3600 seconds (1 hour)
     - documentType: represent the type of document to retrieve. Supplying this field gives a performance boost
-    Values can be one of: 
+    Values can be one of:
         - CONTRACT_DOC
         - CONTRACT_SUPPORTING_DOC
         - RATE_DOC
@@ -169,7 +169,7 @@ type Mutation {
     updateDraftContractRates(
         input: UpdateDraftContractRatesInput!
     ): UpdateDraftContractRatesPayload!
-    
+
     """
     unlockHealthContract returns a submitted package to the state for additional
     edits.
@@ -599,16 +599,16 @@ type IndexContractsPayload {
 
 input IndexContractsInput {
     """
-        An array of statuses to exclude in the filtered results. 
-        Valid statuses exclude:
-            DRAFT
-            SUBMITTED
-            UNLOCKED
-            RESUBMITTED
-            APPROVED
-            WITHDRAWN
+    An array of statuses to exclude in the filtered results.
+    Valid statuses exclude:
+        DRAFT
+        SUBMITTED
+        UNLOCKED
+        RESUBMITTED
+        APPROVED
+        WITHDRAWN
     """
-    statusesToExclude: [ConsolidatedContractStatus] 
+    statusesToExclude: [ConsolidatedContractStatus]
     "In seconds, return submissions that have been updated in this timeframe"
     updatedWithin: Int
 }
@@ -1190,6 +1190,10 @@ type GenericDocument {
     downloadURL: String
     "The first date this document was added to submitted package - if still an initial draft, this date is last updated, otherwise it is the submitInfo lastUpdated"
     dateAdded: DateTime
+    "S3 bucket name where the document is stored"
+    s3BucketName: String
+    "S3 key (path within bucket) for the document"
+    s3Key: String
 }
 
 """
@@ -1277,7 +1281,7 @@ type ContractFormData {
     non-risk based contracts do not have
     """
     riskBasedContract: Boolean
-      """
+    """
     Whether or not this contract is associated with a Dual-Eligible Special Needs Plan (D-SNP)
     that covers Medicaid benefits
     """
@@ -1376,7 +1380,7 @@ type ContractFormData {
     "Description provided for if contract has statutory regulatory attestation"
     statutoryRegulatoryAttestationDescription: String
 
-#   EQRO submission fields only
+    #   EQRO submission fields only
     "If contract has a new EQRO contractor"
     eqroNewContractor: Boolean
     "If new optional activities to be performed on MCOs"
@@ -1400,9 +1404,9 @@ Covers the possible Medicaid populations associated with a rate cert
 This field only relates to rates associated with D-SNP contracts
 """
 enum RateMedicaidPopulations {
-  MEDICARE_MEDICAID_WITH_DSNP
-  MEDICAID_ONLY
-  MEDICARE_MEDICAID_WITHOUT_DSNP
+    MEDICARE_MEDICAID_WITH_DSNP
+    MEDICAID_ONLY
+    MEDICARE_MEDICAID_WITHOUT_DSNP
 }
 
 """
@@ -2157,7 +2161,7 @@ input FetchDocumentInput {
     documentID: ID!
     """
     documentType indicates which of the document tables to query
-    can be one of: 
+    can be one of:
     - CONTRACT_DOC
     - CONTRACT_SUPPORTING_DOC
     - RATE_DOC
@@ -2328,7 +2332,7 @@ input ContractDraftRevisionFormDataInput {
     "Description provided for if contract has statutory regulatory attestation"
     statutoryRegulatoryAttestationDescription: String
 
-#   EQRO submission fields only
+    #   EQRO submission fields only
     "If contract has a new EQRO contractor"
     eqroNewContractor: Boolean
     "If new optional activities to be performed on MCOs"
@@ -2455,6 +2459,16 @@ type DocumentZipPackage {
     SHA256 hash of the zip file for validation
     """
     sha256: String!
+
+    """
+    S3 bucket name where the zip is stored
+    """
+    s3BucketName: String
+
+    """
+    S3 key (path within bucket) for the zip file
+    """
+    s3Key: String
 
     """
     Type of documents contained in this zip package

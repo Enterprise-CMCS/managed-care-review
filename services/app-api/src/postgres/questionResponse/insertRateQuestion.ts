@@ -18,6 +18,8 @@ export async function insertRateQuestion(
     const documents = questionInput.documents.map((document) => ({
         name: document.name,
         s3URL: document.s3URL,
+        s3BucketName: document.s3BucketName,
+        s3Key: document.s3Key,
     }))
 
     try {

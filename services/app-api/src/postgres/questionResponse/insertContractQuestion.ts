@@ -15,9 +15,12 @@ export async function insertContractQuestion(
     questionInput: CreateContractQuestionInput,
     user: CMSUsersUnionType
 ): Promise<ContractQuestionType | Error> {
+    // Documents should already have s3BucketName and s3Key from resolver validation
     const documents = questionInput.documents.map((document) => ({
         name: document.name,
         s3URL: document.s3URL,
+        s3BucketName: document.s3BucketName,
+        s3Key: document.s3Key,
     }))
 
     try {

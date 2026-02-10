@@ -9,7 +9,7 @@ import {
 import { canRead } from '../../authorization/oauthAuthorization'
 import { logError, logSuccess } from '../../logger'
 import type { S3ClientT } from '../../s3'
-import { parseKey, parseBucketName } from '../../s3'
+import { getS3Key } from '../../s3'
 import type { SharedDocument } from '../../domain-models/DocumentType'
 import { createUserInputError } from '../errorUtils'
 
@@ -67,15 +67,12 @@ export function fetchDocumentResolver(
         if (context.oauthClient?.isOAuthClient) {
             logSuccess('fetchDocument')
         }
-        const s3URL = fetchedDocument.s3URL ?? ''
-        const key = parseKey(s3URL)
-        const bucket = parseBucketName(s3URL)
 
-        if (key instanceof Error || bucket instanceof Error) {
-            const errMsg = `S3 needs to be provided a valid key and bucket. Invalid for docID: ${input.documentID}`
+        const key = getS3Key(fetchedDocument)
+        if (key instanceof Error) {
+            const errMsg = `Document missing valid s3Key. Invalid for docID: ${input.documentID}: ${key.message}`
             console.error(errMsg)
-            const err = new Error(errMsg)
-            throw err
+            throw new Error(errMsg)
         }
         const expiresIn =
             input.expiresIn === undefined || input.expiresIn === null
