@@ -1,6 +1,6 @@
 // Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
-exports[`unlockEQROStateEmail > renders email for new EQRO contract subject to review as expected 1`] = `
+exports[`unlockEQROStateEmail > renders State email for unlocked EQRO contract as expected 1`] = `
 "Submission MCR-MN-0004-SNBC was unlocked<br />
 <br />
 <b>Unlocked by:</b> josh@example.com<br />
