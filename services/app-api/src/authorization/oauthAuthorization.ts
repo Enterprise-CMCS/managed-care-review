@@ -57,12 +57,18 @@ export function canWrite(context: Context): boolean {
  */
 export function oauthCanWrite(context: Context): boolean {
     // OAuth clients can only write if scopes is populated
-    if (context.oauthClient?.isOAuthClient) { 
-        return isOAuthClientScopes(context)
-    }
-
+    if (context.oauthClient?.isOAuthClient) {
+        if (context.oauthClient?.isDelegatedUser &&
+            context.oauthClient?.scopes?.includes(OAuthScope.CMS_SUBMISSION_ACTIONS)) {
+            return true
+        } else {
+            return false
+        }
+    }        
+    
     // Regular authenticated users can write (subject to role-specific restrictions in resolvers)
     return true
+
 }
 
 /**

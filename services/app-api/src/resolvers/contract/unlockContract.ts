@@ -13,7 +13,7 @@ import {
     setSuccessAttributesOnActiveSpan,
 } from '../attributeHelper'
 import { GraphQLError } from 'graphql'
-import { canWrite } from '../../authorization/oauthAuthorization'
+import { oauthCanWrite } from '../../authorization/oauthAuthorization'
 import type { StateCodeType } from '@mc-review/submissions'
 
 export function unlockContractResolver(
@@ -28,7 +28,7 @@ export function unlockContractResolver(
         const { unlockedReason, contractID } = input
         span?.setAttribute('mcreview.package_id', contractID)
 
-        if (!canWrite(context)) {
+        if (!oauthCanWrite(context)) {
             const errMessage = `OAuth client does not have write permissions`
             logError('unlockContract', errMessage)
             setErrorAttributesOnActiveSpan(errMessage, span)

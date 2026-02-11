@@ -12,7 +12,7 @@ import { GraphQLError } from 'graphql/index'
 import { hasCMSPermissions } from '../../domain-models'
 import type { StateCodeType } from '@mc-review/submissions'
 import type { Emailer } from '../../emailer'
-import { canWrite } from '../../authorization/oauthAuthorization'
+import { oauthCanWrite } from '../../authorization/oauthAuthorization'
 import type { DocumentZipService } from '../../zip/generateZip'
 
 export function undoWithdrawContract(
@@ -29,7 +29,7 @@ export function undoWithdrawContract(
         span?.setAttribute('mcreview.package_id', contractID)
 
         // Check OAuth client read permissions
-        if (!canWrite(context)) {
+        if (!oauthCanWrite(context)) {
             const errMessage = `OAuth client does not have write permissions`
             logError('undoWithdrawContract', errMessage)
             setErrorAttributesOnActiveSpan(errMessage, span)

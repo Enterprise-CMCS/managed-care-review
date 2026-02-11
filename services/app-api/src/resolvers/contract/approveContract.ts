@@ -10,7 +10,7 @@ import {
 } from '../attributeHelper'
 import { GraphQLError } from 'graphql'
 import { hasCMSPermissions } from '../../domain-models/user'
-import { canWrite } from '../../authorization/oauthAuthorization'
+import { oauthCanWrite } from '../../authorization/oauthAuthorization'
 
 export function approveContract(
     store: Store
@@ -21,7 +21,7 @@ export function approveContract(
         setResolverDetailsOnActiveSpan('approveContract', user, span)
 
         // Check OAuth client read permissions
-        if (!canWrite(context)) {
+        if (!oauthCanWrite(context)) {
             const errMessage = `OAuth client does not have write permissions`
             logError('approveContract', errMessage)
             setErrorAttributesOnActiveSpan(errMessage, span)
