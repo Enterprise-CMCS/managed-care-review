@@ -22,7 +22,7 @@ describe('unlockEQROStateEmail', () => {
     const defaultSubmitters = ['test1@example.com', 'test2@example.com']
     const emailConfig = testEmailConfig()
 
-    it('renders email for new EQRO contract subject to review as expected', async () => {
+    it('renders State email for unlocked EQRO contract as expected', async () => {
         const eqroSub = mockUnlockedContract({
             contractSubmissionType: 'EQRO',
         })
