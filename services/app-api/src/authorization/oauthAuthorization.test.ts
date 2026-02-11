@@ -6,7 +6,7 @@ import {
     canRead,
     canWrite,
     getAuthContextInfo,
-    oauthCanWrite,
+    canOauthWrite,
 } from './oauthAuthorization'
 
 // Mock users for testing
@@ -172,7 +172,7 @@ describe('OAuth Authorization', () => {
                 },
             }
 
-            expect(oauthCanWrite(context)).toBe(true)
+            expect(canOauthWrite(context)).toBe(true)
         })
 
         it('allows writing for regular users', () => {
@@ -180,7 +180,7 @@ describe('OAuth Authorization', () => {
                 user: mockStateUser,
             }
 
-            expect(oauthCanWrite(context)).toBe(true)
+            expect(canOauthWrite(context)).toBe(true)
         })
 
         it('denies writing for an OAuth client without scopes', () => {
@@ -195,7 +195,7 @@ describe('OAuth Authorization', () => {
                 },
             }
 
-            expect(oauthCanWrite(context)).toBe(false)
+            expect(canOauthWrite(context)).toBe(false)
         })
     })
 })

@@ -10,7 +10,7 @@ import { NotFoundError, type Store } from '../../postgres'
 import { GraphQLError } from 'graphql'
 import { isValidCmsDivison } from '../../domain-models'
 import type { Emailer } from '../../emailer'
-import { oauthCanWrite } from '../../authorization/oauthAuthorization'
+import { canOauthWrite } from '../../authorization/oauthAuthorization'
 import type { StateCodeType } from '@mc-review/submissions'
 import { parseAndValidateDocuments } from '../documentHelpers'
 
@@ -23,7 +23,7 @@ export function createContractQuestionResolver(
         const span = tracer?.startSpan('createContractQuestion', {}, ctx)
 
         // Check OAuth client read permissions
-        if (!oauthCanWrite(context)) {
+        if (!canOauthWrite(context)) {
             const errMessage = `OAuth client does not have write permissions`
             logError('createContractQuestion', errMessage)
             setErrorAttributesOnActiveSpan(errMessage, span)

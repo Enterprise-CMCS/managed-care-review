@@ -55,20 +55,23 @@ export function canWrite(context: Context): boolean {
  * While majority of endpoints will not support OAuth write requests (canWrite),
  * specific endpoints will allow if the OAuth client has been validated for delegated user
  */
-export function oauthCanWrite(context: Context): boolean {
+export function canOauthWrite(context: Context): boolean {
     // OAuth clients can only write if scopes is populated
     if (context.oauthClient?.isOAuthClient) {
-        if (context.oauthClient?.isDelegatedUser &&
-            context.oauthClient?.scopes?.includes(OAuthScope.CMS_SUBMISSION_ACTIONS)) {
+        if (
+            context.oauthClient?.isDelegatedUser &&
+            context.oauthClient?.scopes?.includes(
+                OAuthScope.CMS_SUBMISSION_ACTIONS
+            )
+        ) {
             return true
         } else {
             return false
         }
-    }        
-    
+    }
+
     // Regular authenticated users can write (subject to role-specific restrictions in resolvers)
     return true
-
 }
 
 /**
