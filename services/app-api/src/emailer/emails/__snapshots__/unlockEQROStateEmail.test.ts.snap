@@ -7,5 +7,6 @@ exports[`unlockEQROStateEmail > renders email for new EQRO contract subject to r
 <b>Unlocked on:</b> 01/31/2022<br />
 <b>Reason for unlock:</b> Fixing mistake<br />
 <br />
-<a href="http://localhost/submissions/eqro/test-contract-123">View submission</a>"
+<a href="http://localhost/submissions/eqro/test-contract-123">View submission</a>
+"
 `;
