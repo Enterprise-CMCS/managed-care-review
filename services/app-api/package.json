@@ -49,7 +49,7 @@
         "@opentelemetry/semantic-conventions": "^1.30.0",
         "@prisma/client": "^5.21.1",
         "archiver": "^7.0.1",
-        "axios": "^1.13.4",
+        "axios": "^1.13.5",
         "eta": "^2.0.0",
         "express": "^4.18.2",
         "graphql": "^16.9.0",
