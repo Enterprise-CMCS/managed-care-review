@@ -60,10 +60,14 @@ describe('State user can view submissions', () => {
         // View submission summary
         cy.location().then((loc) => {
             expect(loc.search).to.match(/.*justSubmitted=*/)
-            const submissionName = loc.search.split('=').pop()
-            if (submissionName === undefined) {
+            //const submissionName = loc.search.split('=').pop()
+            const urlParams = new URLSearchParams(loc.search)
+            const submissionName = urlParams.get('justSubmitted')
+
+            if (submissionName === null || submissionName === undefined) {
                 throw new Error('No submission name found' + loc.search)
             }
+            
             cy.findByText(`${submissionName} was sent to CMS`).should('exist')
             cy.get('table')
                 .findByRole('link', { name: submissionName })
