@@ -159,7 +159,7 @@ describe('OAuth Authorization', () => {
         })
     })
 
-    describe('oauthCanWrite', () => {
+    describe('canOauthWrite', () => {
         it('allows writing for OAuth client with scopes', () => {
             const context: Context = {
                 user: mockCMSUser,

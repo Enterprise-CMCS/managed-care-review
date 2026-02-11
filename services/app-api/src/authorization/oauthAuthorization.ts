@@ -12,17 +12,6 @@ export function isOAuthClientCredentials(context: Context): boolean {
 }
 
 /**
- * Checks if the context represents an OAuth client with scopes
- */
-export function isOAuthClientScopes(context: Context): boolean {
-    return !!(
-        context.oauthClient?.isOAuthClient &&
-        context.oauthClient?.isDelegatedUser && //do we want to include isDelegatedUser in the logic or no?
-        context.oauthClient?.scopes?.includes(OAuthScope.CMS_SUBMISSION_ACTIONS)
-    )
-}
-
-/**
  * Checks if the current context can read data
  * OAuth clients must have client_credentials grant to read
  */
