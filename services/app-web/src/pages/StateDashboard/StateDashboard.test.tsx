@@ -52,6 +52,41 @@ describe('StateDashboard', () => {
         })
     })
 
+    it('displays texts "sent to CMS", "you can view your review decision", and link "view submission summary" if submission type is EQRO', async () => {
+        renderWithProviders(<StateDashboard />, {
+            apolloProvider: {
+                mocks: [
+                    fetchCurrentUserMock({ statusCode: 200 }),
+                    indexContractsMockSuccess(),
+                ],
+            },
+            routerProvider: {
+                route: '/dashboard/submissions?justSubmitted=MCR-MN-0001-SNBC&isEQRO=true&submissionId=ba46c7ec-7d07-477f-ad24-feef608b08aa',
+            },
+        })
+
+        await waitFor(() => {
+            expect(
+                screen.getByText(/MCR-MN-0001-SNBC was sent to CMS/)
+            ).toBeInTheDocument()
+
+            expect(
+                screen.getByText(
+                    /You can view your review decision on the submission summary/
+                )
+            ).toBeInTheDocument()
+
+            const link = screen.getByRole('link', {
+                name: /View submission summary/i,
+            })
+            expect(link).toBeInTheDocument()
+            expect(link).toHaveAttribute(
+                'href',
+                '/submissions/eqro/ba46c7ec-7d07-477f-ad24-feef608b08aa'
+            )
+        })
+    })
+
     it('displays submissions table', async () => {
         const mockUser = {
             __typename: 'StateUser' as const,

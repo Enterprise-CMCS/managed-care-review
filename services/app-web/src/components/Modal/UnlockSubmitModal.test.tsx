@@ -97,9 +97,10 @@ describe('UnlockSubmitModal', () => {
             await waitFor(() =>
                 expect(testLocation.pathname).toBe(`/dashboard/submissions`)
             )
+
             await waitFor(() =>
                 expect(testLocation.search).toBe(
-                    `?justSubmitted=Test-Submission`
+                    `?justSubmitted=Test-Submission&isEQRO=false&submissionId=${mockContractPackageDraft().id}`
                 )
             )
         })
@@ -627,15 +628,18 @@ describe('UnlockSubmitModal', () => {
             await waitFor(() =>
                 expect(screen.getByRole('dialog')).toHaveClass('is-hidden')
             )
+
             await waitFor(() =>
                 expect(mockSetIsSubmitting).toHaveBeenCalledTimes(2)
             )
+
             await waitFor(() =>
                 expect(testLocation.pathname).toBe(`/dashboard/submissions`)
             )
+
             await waitFor(() =>
                 expect(testLocation.search).toBe(
-                    '?justSubmitted=Test-Submission'
+                    `?justSubmitted=Test-Submission&isEQRO=false&submissionId=${mockContractPackageDraft().id}`
                 )
             )
         })

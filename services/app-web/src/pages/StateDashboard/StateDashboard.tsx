@@ -114,6 +114,12 @@ export const StateDashboard = (): React.ReactElement => {
         location.search
     ).get('justSubmitted')
 
+    const submissionId = new URLSearchParams(location.search).get(
+        'submissionId'
+    )
+
+    const isEQRO = new URLSearchParams(location.search).get('isEQRO') === 'true'
+
     return (
         <>
             <div data-testid={DASHBOARD_ATTRIBUTE} className={styles.wrapper}>
@@ -123,6 +129,8 @@ export const StateDashboard = (): React.ReactElement => {
                             {justSubmittedSubmissionName && (
                                 <SubmissionSuccessMessage
                                     submissionName={justSubmittedSubmissionName}
+                                    submissionId={submissionId || undefined}
+                                    isEQRO={isEQRO}
                                 />
                             )}
 
