@@ -434,8 +434,8 @@ importers:
         specifier: ^1.30.0
         version: 1.30.0
       '@prisma/client':
-        specifier: ^5.21.1
-        version: 5.22.0(prisma@5.22.0)
+        specifier: ^7.3.0
+        version: 7.3.0(prisma@5.22.0)(typescript@5.9.3)
       archiver:
         specifier: ^7.0.1
         version: 7.0.1
@@ -1172,8 +1172,8 @@ importers:
         specifier: ^3.985.0
         version: 3.985.0
       '@prisma/client':
-        specifier: ^5.21.1
-        version: 5.22.0(prisma@5.22.0)
+        specifier: ^7.3.0
+        version: 7.3.0(prisma@5.22.0)(typescript@5.9.3)
       pg:
         specifier: ^8.16.3
         version: 8.16.3
@@ -6118,13 +6118,19 @@ packages:
   '@polka/url@1.0.0-next.29':
     resolution: {integrity: sha512-wwQAWhWSuHaag8c4q/KN/vCoeOJYshAIvMQwD4GpSb3OiZklFfvAgmj0VCBBImRpuF/aFgIRzllXlVX93Jevww==}
 
-  '@prisma/client@5.22.0':
-    resolution: {integrity: sha512-M0SVXfyHnQREBKxCgyo7sffrKttwE6R8PMq330MIUF0pTwjUhLbW84pFDlf06B27XyCR++VtjugEnIHdr07SVA==}
-    engines: {node: '>=16.13'}
+  '@prisma/client-runtime-utils@7.3.0':
+    resolution: {integrity: sha512-dG/ceD9c+tnXATPk8G+USxxYM9E6UdMTnQeQ+1SZUDxTz7SgQcfxEqafqIQHcjdlcNK/pvmmLfSwAs3s2gYwUw==}
+
+  '@prisma/client@7.3.0':
+    resolution: {integrity: sha512-FXBIxirqQfdC6b6HnNgxGmU7ydCPEPk7maHMOduJJfnTP+MuOGa15X4omjR/zpPUUpm8ef/mEFQjJudOGkXFcQ==}
+    engines: {node: ^20.19 || ^22.12 || >=24.0}
     peerDependencies:
       prisma: '*'
+      typescript: '>=5.4.0'
     peerDependenciesMeta:
       prisma:
+        optional: true
+      typescript:
         optional: true
 
   '@prisma/debug@5.22.0':
@@ -9725,6 +9731,10 @@ packages:
 
   flow-parser@0.299.0:
     resolution: {integrity: sha512-phGMRoNt6SNglPHGRbCyWm9/pxfe6t/t4++EIYPaBGWT6e0lphLBgUMrvpL62NbRo9R549o3oqrbKHq82kANCw==}
+    engines: {node: '>=0.4.0'}
+
+  flow-parser@0.300.0:
+    resolution: {integrity: sha512-yh8DF8KpF2Ik3ECP7g92lEU0DyO+5ZQicoHs7rhZ5lfU50UGOSEfD5kMZX3hB8BTqTHRCnOCCDxt+EMKLlUoTQ==}
     engines: {node: '>=0.4.0'}
 
   fn.name@1.1.0:
@@ -21861,9 +21871,14 @@ snapshots:
 
   '@polka/url@1.0.0-next.29': {}
 
-  '@prisma/client@5.22.0(prisma@5.22.0)':
+  '@prisma/client-runtime-utils@7.3.0': {}
+
+  '@prisma/client@7.3.0(prisma@5.22.0)(typescript@5.9.3)':
+    dependencies:
+      '@prisma/client-runtime-utils': 7.3.0
     optionalDependencies:
       prisma: 5.22.0
+      typescript: 5.9.3
 
   '@prisma/debug@5.22.0': {}
 
@@ -26880,6 +26895,8 @@ snapshots:
 
   flow-parser@0.299.0: {}
 
+  flow-parser@0.300.0: {}
+
   fn.name@1.1.0: {}
 
   follow-redirects@1.15.11: {}
@@ -28264,7 +28281,7 @@ snapshots:
       '@babel/register': 7.28.6(@babel/core@7.29.0)
       babel-core: 7.0.0-bridge.0(@babel/core@7.29.0)
       chalk: 4.1.2
-      flow-parser: 0.299.0
+      flow-parser: 0.300.0
       graceful-fs: 4.2.11
       micromatch: 4.0.8
       neo-async: 2.6.2
