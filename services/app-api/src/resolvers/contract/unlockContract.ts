@@ -141,71 +141,46 @@ export function unlockContractResolver(
             updatedReason: unlockedReason,
         }
 
-        if (unlockContractResult.contractSubmissionType === 'HEALTH_PLAN') {
-            const unlockContractCMSEmailResult =
-                await emailer.sendUnlockContractCMSEmail(
-                    unlockContractResult,
-                    updateInfo,
-                    stateAnalystsEmails,
-                    statePrograms
-                )
+        const unlockContractCMSEmailResult =
+            await emailer.sendUnlockContractCMSEmail(
+                unlockContractResult,
+                updateInfo,
+                stateAnalystsEmails,
+                statePrograms
+            )
 
-            const unlockContractStateEmailResult =
-                await emailer.sendUnlockContractStateEmail(
-                    unlockContractResult,
-                    updateInfo,
-                    statePrograms,
-                    submitterEmails
-                )
+        const unlockContractStateEmailResult =
+            await emailer.sendUnlockContractStateEmail(
+                unlockContractResult,
+                updateInfo,
+                statePrograms,
+                submitterEmails
+            )
 
-            if (
-                unlockContractCMSEmailResult instanceof Error ||
-                unlockContractStateEmailResult instanceof Error
-            ) {
-                if (unlockContractCMSEmailResult instanceof Error) {
-                    logError(
-                        'unlockContractCMSEmail - CMS email failed',
-                        unlockContractCMSEmailResult
-                    )
-                    setErrorAttributesOnActiveSpan('CMS email failed', span)
-                }
-                if (unlockContractStateEmailResult instanceof Error) {
-                    logError(
-                        'unlockContractStateEmail - state email failed',
-                        unlockContractStateEmailResult
-                    )
-                    setErrorAttributesOnActiveSpan('state email failed', span)
-                }
-                throw new GraphQLError('Email failed.', {
-                    extensions: {
-                        code: 'INTERNAL_SERVER_ERROR',
-                        cause: 'EMAIL_ERROR',
-                    },
-                })
-            }
-        } else {
-            const unlockEQROStateEmailResult =
-                await emailer.sendUnlockEQROStateEmail(
-                    unlockContractResult,
-                    updateInfo,
-                    statePrograms,
-                    submitterEmails
-                )
-
-            if (unlockEQROStateEmailResult instanceof Error) {
+        if (
+            unlockContractCMSEmailResult instanceof Error ||
+            unlockContractStateEmailResult instanceof Error
+        ) {
+            if (unlockContractCMSEmailResult instanceof Error) {
                 logError(
-                    'unlockEQROStateEmail - state email failed',
-                    unlockEQROStateEmailResult
+                    'unlockContractCMSEmail - CMS email failed',
+                    unlockContractCMSEmailResult
+                )
+                setErrorAttributesOnActiveSpan('CMS email failed', span)
+            }
+            if (unlockContractStateEmailResult instanceof Error) {
+                logError(
+                    'unlockContractStateEmail - state email failed',
+                    unlockContractStateEmailResult
                 )
                 setErrorAttributesOnActiveSpan('state email failed', span)
-
-                throw new GraphQLError('Email failed.', {
-                    extensions: {
-                        code: 'INTERNAL_SERVER_ERROR',
-                        cause: 'EMAIL_ERROR',
-                    },
-                })
             }
+            throw new GraphQLError('Email failed.', {
+                extensions: {
+                    code: 'INTERNAL_SERVER_ERROR',
+                    cause: 'EMAIL_ERROR',
+                },
+            })
         }
 
         logSuccess('unlockContract')

@@ -13,3 +13,30 @@ exports[`renders overall email as expected 1`] = `
 <a href="http://localhost/submissions/health-plan/12345/edit/review-and-submit">Open the submission in MC-Review to make edits.</a>
 "
 `;
+
+exports[`unlockEQROStateEmail > renders State email for unlocked EQRO contract as expected 1`] = `
+"Submission MCR-MN-0004-SNBC was unlocked by CMS<br />
+<br />
+<b>Unlocked by:</b> josh@example.com<br />
+<b>Unlocked on:</b> 01/31/2022<br />
+<b>Reason for unlock:</b> Adding rate certification.<br />
+<br />
+<b>You must revise the submission before CMS can continue reviewing it.<br />
+<br />
+<a href="http://localhost/submissions/eqro/12345/edit/review-and-submit">Open the submission in MC-Review to make edits.</a>
+"
+`;
+
+exports[`unlockHealthPlanStateEmail > renders overall email as expected 1`] = `
+"Submission MCR-MN-0004-SNBC was unlocked by CMS<br />
+<br />
+<b>Unlocked by:</b> josh@example.com<br />
+<b>Unlocked on:</b> 01/31/2022<br />
+<b>Reason for unlock:</b> Adding rate certification.<br />
+<b>Rate name</b>: Rate Cert Name<br />
+<br />
+<b>You must revise the submission before CMS can continue reviewing it.<br />
+<br />
+<a href="http://localhost/submissions/health-plan/12345/edit/review-and-submit">Open the submission in MC-Review to make edits.</a>
+"
+`;

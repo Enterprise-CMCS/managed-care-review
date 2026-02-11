@@ -31,7 +31,7 @@ export const unlockEQROStateEmail = async (
 ): Promise<EmailData | Error> => {
     const isTestEnvironment = config.stage !== 'prod'
     const stateContactEmails: string[] = []
-    const contractRev = contract.packageSubmissions[0].contractRevision
+    const contractRev = contract.draftRevision
 
     const formData = contractRev.formData
     formData.stateContacts.forEach((contact) => {

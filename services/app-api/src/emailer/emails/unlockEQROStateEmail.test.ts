@@ -6,7 +6,7 @@ import {
 import { unlockEQROStateEmail } from './index'
 import { packageName } from '@mc-review/submissions'
 
-describe('unlockEQROStateEmail', () => {
+describe.skip('unlockEQROStateEmail', () => {
     const unlockData = {
         updatedBy: {
             email: 'josh@example.com',

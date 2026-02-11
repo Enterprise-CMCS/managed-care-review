@@ -14,6 +14,24 @@ import type {
 import { reviewAndSubmitURL } from '../generateURLs'
 import { pruneDuplicateEmails } from '../formatters'
 
+type unlockHealthPlanEmail = {
+    packageName: string
+    unlockedBy: string
+    unlockedOn: string
+    unlockedReason: string
+    shouldIncludeRates: boolean
+    rateInfos: { rateName: string | undefined }[]
+    submissionURL: string
+}
+
+type unlockEQROEmail = {
+    packageName: string
+    unlockedBy: string
+    unlockedOn: string
+    unlockedReason: string
+    submissionURL: string
+}
+
 export const unlockContractStateEmail = async (
     contract: UnlockedContractType,
     updateInfo: UpdateInfoType,
@@ -63,28 +81,53 @@ export const unlockContractStateEmail = async (
         config.baseUrl
     )
 
-    const data = {
-        packageName,
-        unlockedBy: updateInfo.updatedBy.email,
-        unlockedOn: formatCalendarDate(
-            updateInfo.updatedAt,
-            'America/Los_Angeles'
-        ),
-        unlockedReason: updateInfo.updatedReason,
-        shouldIncludeRates:
-            contractFormData.submissionType === 'CONTRACT_AND_RATES',
-        rateInfos: rateRevs.map((rate) => ({
-            rateName: rate.formData.rateCertificationName,
-        })),
-        submissionURL: contractURL,
+    //Both EQRO and health plans use the same eta template but diff data, we can handle that here.
+    let emailTemplate
+    if (contract.contractSubmissionType === 'HEALTH_PLAN') {
+        const healthPlanEtaData: unlockHealthPlanEmail = {
+            packageName,
+            unlockedBy: updateInfo.updatedBy.email,
+            unlockedOn: formatCalendarDate(
+                updateInfo.updatedAt,
+                'America/Los_Angeles'
+            ),
+            unlockedReason: updateInfo.updatedReason,
+            shouldIncludeRates:
+                contractFormData.submissionType === 'CONTRACT_AND_RATES',
+            rateInfos: rateRevs.map((rate) => ({
+                rateName: rate.formData.rateCertificationName,
+            })),
+            submissionURL: contractURL,
+        }
+
+        const healthPlanTemplate = await renderTemplate<unlockHealthPlanEmail>(
+            'unlockContractStateEmail',
+            healthPlanEtaData
+        )
+
+        emailTemplate = healthPlanTemplate
+    } else {
+        const eqroEtaData: unlockEQROEmail = {
+            packageName,
+            unlockedBy: updateInfo.updatedBy.email,
+            unlockedOn: formatCalendarDate(
+                updateInfo.updatedAt,
+                'America/Los_Angeles'
+            ),
+            unlockedReason: updateInfo.updatedReason,
+            submissionURL: contractURL,
+        }
+
+        const eqroTemplate = await renderTemplate<unlockEQROEmail>(
+            'unlockContractStateEmail',
+            eqroEtaData
+        )
+
+        emailTemplate = eqroTemplate
     }
 
-    const result = await renderTemplate<typeof data>(
-        'unlockContractStateEmail',
-        data
-    )
-    if (result instanceof Error) {
-        return result
+    if (emailTemplate instanceof Error) {
+        return emailTemplate
     } else {
         return {
             toAddresses: receiverEmails,
@@ -93,8 +136,8 @@ export const unlockContractStateEmail = async (
             subject: `${
                 isTestEnvironment ? `[${config.stage}] ` : ''
             }${packageName} was unlocked by CMS`,
-            bodyText: stripHTMLFromTemplate(result),
-            bodyHTML: result,
+            bodyText: stripHTMLFromTemplate(emailTemplate),
+            bodyHTML: emailTemplate,
         }
     }
 }
