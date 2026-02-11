@@ -15,10 +15,10 @@ import { formatCalendarDate } from '@mc-review/dates'
 import { submissionSummaryURL } from '../generateURLs'
 
 type unlockEQROStateEmail = {
-    pkgName: string
+    packageName: string
     unlockedBy: string
     unlockedOn: string
-    unlockReason: string
+    unlockedReason: string
     submissionURL: string
 }
 
@@ -63,18 +63,18 @@ export const unlockEQROStateEmail = async (
     )
 
     const etaData: unlockEQROStateEmail = {
-        pkgName: pkgName,
+        packageName: pkgName,
         unlockedBy: updateInfo.updatedBy.email,
         unlockedOn: formatCalendarDate(
             updateInfo.updatedAt,
             'America/Los_Angeles'
         ),
-        unlockReason: updateInfo.updatedReason,
+        unlockedReason: updateInfo.updatedReason,
         submissionURL: submissionURL,
     }
 
     const template = await renderTemplate<unlockEQROStateEmail>(
-        'unlockEQROStateEmail',
+        'unlockContractStateEmail',
         etaData
     )
 
@@ -85,7 +85,7 @@ export const unlockEQROStateEmail = async (
             toAddresses: toAddresses,
             replyToAddresses: [],
             sourceEmail: config.emailSource,
-            subject: `${isTestEnvironment ? `[${config.stage}] ` : ''}${pkgName} was unlocked`,
+            subject: `${isTestEnvironment ? `[${config.stage}] ` : ''}${pkgName} was unlocked by CMS`,
             bodyText: stripHTMLFromTemplate(template),
             bodyHTML: template,
         }

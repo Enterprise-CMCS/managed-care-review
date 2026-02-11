@@ -1,7 +1,0 @@
-Submission <%= it.pkgName %> was unlocked<br />
-<br />
-<b>Unlocked by:</b> <%= it.unlockedBy %><br />
-<b>Unlocked on:</b> <%= it.unlockedOn %><br />
-<b>Reason for unlock:</b> <%= it.unlockReason %><br />
-<br />
-<a href="<%= it.submissionURL%>">View submission</a>
