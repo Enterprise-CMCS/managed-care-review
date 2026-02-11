@@ -1,20 +1,21 @@
 import React from 'react'
 import { Alert } from '@trussworks/react-uswds'
 import { NavLinkWithLogging } from '../../components'
-
+import { ContractSubmissionType } from '../../gen/gqlClient'
 import styles from './StateDashboard.module.scss'
 
 export function SubmissionSuccessMessage({
     submissionName,
     submissionId,
-    isEQRO = false,
+    contractType,
 }: {
     submissionName: string
     submissionId?: string
-    isEQRO?: boolean
+    contractType?: ContractSubmissionType | null
 }): React.ReactElement {
     const heading = submissionName + ' was sent to CMS'
-
+    const isEQRO = contractType === 'EQRO'
+    
     return (
         <div className={styles.alertContainer}>
             <Alert

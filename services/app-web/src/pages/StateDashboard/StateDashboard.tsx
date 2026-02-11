@@ -115,10 +115,10 @@ export const StateDashboard = (): React.ReactElement => {
     ).get('justSubmitted')
 
     const submissionId = new URLSearchParams(location.search).get(
-        'submissionId'
+        'id'
     )
 
-    const isEQRO = new URLSearchParams(location.search).get('isEQRO') === 'true'
+    const contractType = new URLSearchParams(location.search).get('contractType')
 
     return (
         <>
@@ -130,7 +130,7 @@ export const StateDashboard = (): React.ReactElement => {
                                 <SubmissionSuccessMessage
                                     submissionName={justSubmittedSubmissionName}
                                     submissionId={submissionId || undefined}
-                                    isEQRO={isEQRO}
+                                    contractType={contractType}
                                 />
                             )}
 

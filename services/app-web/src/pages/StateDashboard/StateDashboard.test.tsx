@@ -61,7 +61,7 @@ describe('StateDashboard', () => {
                 ],
             },
             routerProvider: {
-                route: '/dashboard/submissions?justSubmitted=MCR-MN-0001-SNBC&isEQRO=true&submissionId=ba46c7ec-7d07-477f-ad24-feef608b08aa',
+                route: '/dashboard/submissions?justSubmitted=MCR-MN-0001-SNBC&contractType=EQRO&id=ba46c7ec-7d07-477f-ad24-feef608b08aa',
             },
         })
 

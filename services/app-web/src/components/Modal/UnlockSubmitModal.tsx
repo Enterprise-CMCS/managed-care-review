@@ -250,10 +250,11 @@ export const UnlockSubmitModal = ({
                     'SUBMIT_CONTRACT',
                     'SUBMIT_EQRO_CONTRACT',
                 ].includes(modalType) &&
-                submissionName
+                submissionName &&
+                submissionData.__typename === 'Contract'
             ) {
                 navigate(
-                    `/dashboard/submissions?justSubmitted=${submissionName}&isEQRO=${modalType === 'SUBMIT_EQRO_CONTRACT'}&submissionId=${submissionData.id}`
+                    `/dashboard/submissions?justSubmitted=${submissionName}&contractType=${submissionData.contractSubmissionType}&id=${submissionData.id}`
                 )
             } else {
                 await client.refetchQueries({

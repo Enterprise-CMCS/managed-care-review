@@ -100,7 +100,7 @@ describe('UnlockSubmitModal', () => {
 
             await waitFor(() =>
                 expect(testLocation.search).toBe(
-                    `?justSubmitted=Test-Submission&isEQRO=false&submissionId=${mockContractPackageDraft().id}`
+                    `?justSubmitted=Test-Submission&contractType=EQRO&id=${mockContractPackageDraft().id}`
                 )
             )
         })
@@ -639,7 +639,7 @@ describe('UnlockSubmitModal', () => {
 
             await waitFor(() =>
                 expect(testLocation.search).toBe(
-                    `?justSubmitted=Test-Submission&isEQRO=false&submissionId=${mockContractPackageDraft().id}`
+                    `?justSubmitted=Test-Submission&contractType=EQRO&id=${mockContractPackageDraft().id}`
                 )
             )
         })
