@@ -3,6 +3,7 @@ import { Alert } from '@trussworks/react-uswds'
 import { NavLinkWithLogging } from '../../components'
 import { ContractSubmissionType } from '../../gen/gqlClient'
 import styles from './StateDashboard.module.scss'
+import { getSubmissionPath } from '../../routeHelpers'
 
 export function SubmissionSuccessMessage({
     submissionName,
@@ -14,7 +15,18 @@ export function SubmissionSuccessMessage({
     contractType?: ContractSubmissionType
 }): React.ReactElement {
     const heading = submissionName + ' was sent to CMS'
-    const isEQRO = contractType === 'EQRO'
+    
+    const getAlertMessage = () => {
+        if (contractType === 'EQRO') {
+            return 'You can view your review decision on the submission summary.'
+        }
+        if (contractType === 'HEALTH_PLAN') {
+            return 'To make edits, ask your DMCO lead analyst to unlock your submission.'
+        }
+        return null
+    }
+
+    const alertMessage = getAlertMessage()
 
     return (
         <div className={styles.alertContainer}>
@@ -24,14 +36,17 @@ export function SubmissionSuccessMessage({
                 heading={heading}
                 validation={true}
             >
-                {isEQRO && (
+                {alertMessage && contractType &&(
                     <>
                         <p className={styles.alertText}>
-                            You can view your review decision on the submission
-                            summary.
+                            {alertMessage}
                         </p>
                         <NavLinkWithLogging
-                            to={`/submissions/eqro/${submissionId}`}
+                            to={getSubmissionPath(
+                                'SUBMISSIONS_SUMMARY',
+                                contractType,
+                                submissionId
+                            )}
                         >
                             View submission summary
                         </NavLinkWithLogging>
