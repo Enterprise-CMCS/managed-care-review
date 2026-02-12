@@ -14,6 +14,22 @@ import {
 } from '../templateHelpers'
 import type { EmailData, EmailConfiguration, StateAnalystsEmails } from '../'
 
+type unlockHealthPlanEmail = {
+    packageName: string
+    unlockedBy: string
+    unlockedOn: string
+    unlockedReason: string
+    shouldIncludeRates: boolean
+    rateInfos: { rateName: string | undefined }[]
+}
+
+type unlockEQROEmail = {
+    packageName: string
+    unlockedBy: string
+    unlockedOn: string
+    unlockedReason: string
+}
+
 export const unlockContractCMSEmail = async (
     contract: UnlockedContractType,
     updateInfo: UpdateInfoType,
@@ -54,27 +70,51 @@ export const unlockContractCMSEmail = async (
         packagePrograms
     )
 
-    const data = {
-        packageName,
-        unlockedBy: updateInfo.updatedBy.email,
-        unlockedOn: formatCalendarDate(
-            updateInfo.updatedAt,
-            'America/Los_Angeles'
-        ),
-        unlockedReason: updateInfo.updatedReason,
-        shouldIncludeRates:
-            contractRev.formData.submissionType === 'CONTRACT_AND_RATES',
-        rateInfos: rateRevs.map((rate) => ({
-            rateName: rate.formData.rateCertificationName,
-        })),
+    //Both EQRO and health plans use the same eta template but diff data, we can handle that here.
+    let emailTemplate
+    if (contract.contractSubmissionType === 'HEALTH_PLAN') {
+        const healthPlanEtaData: unlockHealthPlanEmail = {
+            packageName,
+            unlockedBy: updateInfo.updatedBy.email,
+            unlockedOn: formatCalendarDate(
+                updateInfo.updatedAt,
+                'America/Los_Angeles'
+            ),
+            unlockedReason: updateInfo.updatedReason,
+            shouldIncludeRates:
+                contractRev.formData.submissionType === 'CONTRACT_AND_RATES',
+            rateInfos: rateRevs.map((rate) => ({
+                rateName: rate.formData.rateCertificationName,
+            })),
+        }
+
+        const healthPlanTemplate = await renderTemplate<unlockHealthPlanEmail>(
+            'unlockContractCMSEmail',
+            healthPlanEtaData
+        )
+
+        emailTemplate = healthPlanTemplate
+    } else {
+        const eqroEtaData: unlockEQROEmail = {
+            packageName,
+            unlockedBy: updateInfo.updatedBy.email,
+            unlockedOn: formatCalendarDate(
+                updateInfo.updatedAt,
+                'America/Los_Angeles'
+            ),
+            unlockedReason: updateInfo.updatedReason,
+        }
+
+        const eqroTemplate = await renderTemplate<unlockEQROEmail>(
+            'unlockContractCMSEmail',
+            eqroEtaData
+        )
+
+        emailTemplate = eqroTemplate
     }
 
-    const result = await renderTemplate<typeof data>(
-        'unlockContractCMSEmail',
-        data
-    )
-    if (result instanceof Error) {
-        return result
+    if (emailTemplate instanceof Error) {
+        return emailTemplate
     } else {
         return {
             toAddresses: reviewerEmails,
@@ -83,8 +123,8 @@ export const unlockContractCMSEmail = async (
             subject: `${
                 isTestEnvironment ? `[${config.stage}] ` : ''
             }${packageName} was unlocked`,
-            bodyText: stripHTMLFromTemplate(result),
-            bodyHTML: result,
+            bodyText: stripHTMLFromTemplate(emailTemplate),
+            bodyHTML: emailTemplate,
         }
     }
 }
