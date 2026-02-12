@@ -25,6 +25,7 @@ export const unlockContractCMSEmail = async (
     statePrograms: ProgramType[]
 ): Promise<EmailData | Error> => {
     const isTestEnvironment = config.stage !== 'prod'
+    const isHealthPlan = contract.contractSubmissionType === 'HEALTH_PLAN'
     const contractRev = contract.draftRevision
     const rateRevs = contract.draftRates.map((rate) => {
         if (rate.draftRevision) {
@@ -34,11 +35,14 @@ export const unlockContractCMSEmail = async (
         }
     })
 
-    const reviewerEmails = generateCMSReviewerEmailsForUnlockedContract(
-        config,
-        contract,
-        stateAnalystsEmails
-    )
+    const { dmcoEmails, devReviewTeamEmails } = config
+    const reviewerEmails = isHealthPlan
+        ? generateCMSReviewerEmailsForUnlockedContract(
+              config,
+              contract,
+              stateAnalystsEmails
+          )
+        : [...devReviewTeamEmails, ...dmcoEmails]
 
     if (reviewerEmails instanceof Error) {
         return reviewerEmails
@@ -59,7 +63,7 @@ export const unlockContractCMSEmail = async (
 
     //Both EQRO and health plans use the same eta template but diff data, we can handle that here.
     let emailTemplate
-    if (contract.contractSubmissionType === 'HEALTH_PLAN') {
+    if (isHealthPlan) {
         const healthPlanEtaData: unlockHealthPlanEmail = {
             packageName,
             unlockedBy: updateInfo.updatedBy.email,
