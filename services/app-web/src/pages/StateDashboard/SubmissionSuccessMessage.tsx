@@ -11,11 +11,11 @@ export function SubmissionSuccessMessage({
 }: {
     submissionName: string
     submissionId?: string
-    contractType?: ContractSubmissionType | null
+    contractType?: ContractSubmissionType
 }): React.ReactElement {
     const heading = submissionName + ' was sent to CMS'
     const isEQRO = contractType === 'EQRO'
-    
+
     return (
         <div className={styles.alertContainer}>
             <Alert
