@@ -14,22 +14,22 @@ import type {
 import { reviewAndSubmitURL } from '../generateURLs'
 import { pruneDuplicateEmails } from '../formatters'
 
-type unlockHealthPlanEmail = {
+export type unlockHealthPlanEmail = {
     packageName: string
     unlockedBy: string
     unlockedOn: string
     unlockedReason: string
     shouldIncludeRates: boolean
     rateInfos: { rateName: string | undefined }[]
-    submissionURL: string
+    submissionURL?: string
 }
 
-type unlockEQROEmail = {
+export type unlockEQROEmail = {
     packageName: string
     unlockedBy: string
     unlockedOn: string
     unlockedReason: string
-    submissionURL: string
+    submissionURL?: string
 }
 
 export const unlockContractStateEmail = async (

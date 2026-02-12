@@ -5,7 +5,6 @@ import type {
     UpdateInfoType,
 } from '../../domain-models'
 import { packageName as generatePackageName } from '@mc-review/submissions'
-
 import {
     stripHTMLFromTemplate,
     renderTemplate,
@@ -13,22 +12,10 @@ import {
     generateCMSReviewerEmailsForUnlockedContract,
 } from '../templateHelpers'
 import type { EmailData, EmailConfiguration, StateAnalystsEmails } from '../'
-
-type unlockHealthPlanEmail = {
-    packageName: string
-    unlockedBy: string
-    unlockedOn: string
-    unlockedReason: string
-    shouldIncludeRates: boolean
-    rateInfos: { rateName: string | undefined }[]
-}
-
-type unlockEQROEmail = {
-    packageName: string
-    unlockedBy: string
-    unlockedOn: string
-    unlockedReason: string
-}
+import type {
+    unlockHealthPlanEmail,
+    unlockEQROEmail,
+} from './unlockContractStateEmail'
 
 export const unlockContractCMSEmail = async (
     contract: UnlockedContractType,
