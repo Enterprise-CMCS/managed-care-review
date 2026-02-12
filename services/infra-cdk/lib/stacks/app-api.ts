@@ -112,39 +112,38 @@ export class AppApiStack extends BaseStack {
             Fn.importValue(`${networkStackName}-ApplicationSecurityGroupId`)
         )
 
-        // Create CloudWatch Log Group for API Gateway access logs
-        // Note: API Gateway has two log types:
-        // 1. Execution logs (loggingLevel) - API Gateway's internal execution, auto-created by AWS
-        // 2. Access logs (accessLogDestination) - Who accessed the API, configured below
-        const apiGatewayLogGroup = new LogGroup(this, 'ApiGatewayLogGroup', {
-            logGroupName: `/aws/apigateway/${ResourceNames.apiName('app-api', this.stage)}-gateway`,
-            retention: this.stageConfig.monitoring.logRetentionDays,
-        })
+        // Review environments skip CfnAccount (AWS::ApiGateway::Account) and CloudWatch
+        // logging entirely. CfnAccount is an account/region-wide singleton — creating it
+        // per review environment causes ResourceExistenceCheck failures on first-time stack
+        // creation when the new IAM role doesn't exist yet. Dev/val/prod stacks own this
+        // setting in their respective accounts and are unaffected.
+        const isReview = this.stageConfig.environment === 'review'
 
-        // Create IAM role for API Gateway to write to CloudWatch Logs
-        const apiGatewayCloudWatchRole = new Role(
-            this,
-            'ApiGatewayCloudWatchRole',
-            {
-                assumedBy: new ServicePrincipal('apigateway.amazonaws.com'),
-                managedPolicies: [
-                    ManagedPolicy.fromAwsManagedPolicyName(
-                        'service-role/AmazonAPIGatewayPushToCloudWatchLogs' // pragma: allowlist secret
-                    ),
-                ],
-            }
-        )
+        let apiGatewayLogGroup: LogGroup | undefined
+        if (!isReview) {
+            // Create CloudWatch Log Group for API Gateway access logs
+            apiGatewayLogGroup = new LogGroup(this, 'ApiGatewayLogGroup', {
+                logGroupName: `/aws/apigateway/${ResourceNames.apiName('app-api', this.stage)}-gateway`,
+                retention: this.stageConfig.monitoring.logRetentionDays,
+            })
 
-        // Configure API Gateway account to use CloudWatch role.
-        // NOTE: aws-apigateway.CfnAccount is an account/region-wide singleton.
-        // This stack is intended to own the API Gateway CloudWatch Logs role
-        // configuration for the entire AWS account in this region. If additional
-        // API Gateways are created in other stacks in the same account/region,
-        // they must NOT create their own CfnAccount resources and should instead
-        // rely on this shared configuration or coordinate changes explicitly.
-        new CfnAccount(this, 'ApiGatewayAccount', {
-            cloudWatchRoleArn: apiGatewayCloudWatchRole.roleArn,
-        })
+            const apiGatewayCloudWatchRole = new Role(
+                this,
+                'ApiGatewayCloudWatchRole',
+                {
+                    assumedBy: new ServicePrincipal('apigateway.amazonaws.com'),
+                    managedPolicies: [
+                        ManagedPolicy.fromAwsManagedPolicyName(
+                            'service-role/AmazonAPIGatewayPushToCloudWatchLogs' // pragma: allowlist secret
+                        ),
+                    ],
+                }
+            )
+
+            new CfnAccount(this, 'ApiGatewayAccount', {
+                cloudWatchRoleArn: apiGatewayCloudWatchRole.roleArn,
+            })
+        }
 
         // Create dedicated API Gateway for app-api
         this.apiGateway = new RestApi(this, 'AppApiGateway', {
@@ -152,22 +151,24 @@ export class AppApiStack extends BaseStack {
             description: 'API Gateway for app-api Lambda functions',
             deployOptions: {
                 stageName: this.stage,
-                loggingLevel: MethodLoggingLevel.INFO,
                 dataTraceEnabled: false,
                 metricsEnabled: true,
-                accessLogDestination: new LogGroupLogDestination(
-                    apiGatewayLogGroup
-                ),
-                accessLogFormat: AccessLogFormat.jsonWithStandardFields({
-                    caller: true,
-                    httpMethod: true,
-                    ip: true,
-                    protocol: true,
-                    requestTime: true,
-                    resourcePath: true,
-                    responseLength: true,
-                    status: true,
-                    user: true,
+                ...(!isReview && {
+                    loggingLevel: MethodLoggingLevel.INFO,
+                    accessLogDestination: new LogGroupLogDestination(
+                        apiGatewayLogGroup!
+                    ),
+                    accessLogFormat: AccessLogFormat.jsonWithStandardFields({
+                        caller: true,
+                        httpMethod: true,
+                        ip: true,
+                        protocol: true,
+                        requestTime: true,
+                        resourcePath: true,
+                        responseLength: true,
+                        status: true,
+                        user: true,
+                    }),
                 }),
             },
             defaultCorsPreflightOptions: {
