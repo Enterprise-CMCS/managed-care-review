@@ -11,7 +11,7 @@ import { createForbiddenError, createUserInputError } from '../errorUtils'
 import { GraphQLError } from 'graphql/index'
 import type { Emailer } from '../../emailer'
 import type { StateCodeType } from '@mc-review/submissions'
-import { canWrite } from '../../authorization/oauthAuthorization'
+import { canOauthWrite } from '../../authorization/oauthAuthorization'
 import type { DocumentZipService } from '../../zip/generateZip'
 
 export function withdrawContract(
@@ -25,7 +25,7 @@ export function withdrawContract(
         setResolverDetailsOnActiveSpan('withdrawContract', user, span)
 
         // Check OAuth client read permissions
-        if (!canWrite(context)) {
+        if (!canOauthWrite(context)) {
             const errMessage = `OAuth client does not have write permissions`
             logError('withdrawContract', errMessage)
             setErrorAttributesOnActiveSpan(errMessage, span)

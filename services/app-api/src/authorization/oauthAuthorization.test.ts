@@ -6,6 +6,7 @@ import {
     canRead,
     canWrite,
     getAuthContextInfo,
+    canOauthWrite,
 } from './oauthAuthorization'
 
 // Mock users for testing
@@ -155,6 +156,46 @@ describe('OAuth Authorization', () => {
                 userRole: 'CMS_USER',
                 grants: undefined,
             })
+        })
+    })
+
+    describe('canOauthWrite', () => {
+        it('allows writing for OAuth client with scopes', () => {
+            const context: Context = {
+                user: mockCMSUser,
+                oauthClient: {
+                    clientId: 'test-client',
+                    grants: ['client_credentials'],
+                    isOAuthClient: true,
+                    scopes: ['CMS_SUBMISSION_ACTIONS'],
+                    isDelegatedUser: true,
+                },
+            }
+
+            expect(canOauthWrite(context)).toBe(true)
+        })
+
+        it('allows writing for regular users', () => {
+            const context: Context = {
+                user: mockStateUser,
+            }
+
+            expect(canOauthWrite(context)).toBe(true)
+        })
+
+        it('denies writing for an OAuth client without scopes', () => {
+            const context: Context = {
+                user: mockCMSUser,
+                oauthClient: {
+                    clientId: 'test-client',
+                    grants: ['client_credentials'],
+                    isOAuthClient: true,
+                    scopes: [],
+                    isDelegatedUser: true,
+                },
+            }
+
+            expect(canOauthWrite(context)).toBe(false)
         })
     })
 })
