@@ -43,8 +43,11 @@ describe('CMS user can view submission', () => {
         // store submission name for later
         cy.location().then((loc) => {
             expect(loc.search).to.match(/.*justSubmitted=*/)
-            const submissionName = loc.search.split('=').pop()
-            if (submissionName === undefined) {
+            
+            const urlParams = new URLSearchParams(loc.search)
+            const submissionName = urlParams.get('justSubmitted')
+
+            if (submissionName === undefined || submissionName === null) {
                 throw new Error('No submission name found' + loc.search)
             }
 
@@ -165,8 +168,11 @@ describe('CMS user can view submission', () => {
         // store submission name for later
         cy.location().then((loc) => {
             expect(loc.search).to.match(/.*justSubmitted=*/)
-            const submissionName = loc.search.split('=').pop()
-            if (submissionName === undefined) {
+            
+            const urlParams = new URLSearchParams(loc.search)
+            const submissionName = urlParams.get('justSubmitted')
+
+            if (submissionName === undefined || submissionName === null) {
                 throw new Error('No submission name found' + loc.search)
             }
 
