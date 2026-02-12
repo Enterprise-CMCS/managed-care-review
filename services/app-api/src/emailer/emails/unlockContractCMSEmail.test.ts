@@ -800,7 +800,7 @@ describe('unlockEQROCMSEmail', () => {
         expect(template.bodyHTML).toMatchSnapshot()
     })
 
-    it('includes submitter emails as expected', async () => {
+    it('includes reviewer emails as expected', async () => {
         const eqroSub = mockUnlockedContract({
             contractSubmissionType: 'EQRO',
         })
@@ -819,7 +819,7 @@ describe('unlockEQROCMSEmail', () => {
 
         expect(template).toEqual(
             expect.objectContaining({
-                toAddresses: expect.arrayContaining(testStateAnalystEmails),
+                toAddresses: expect.arrayContaining(emailConfig.dmcoEmails),
             })
         )
     })
