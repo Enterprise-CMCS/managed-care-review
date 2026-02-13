@@ -743,8 +743,8 @@ importers:
         specifier: ^18.2.0
         version: 18.3.1(react@18.3.1)
       react-error-boundary:
-        specifier: ^6.0.0
-        version: 6.0.0(react@18.3.1)
+        specifier: ^6.1.0
+        version: 6.1.0(react@18.3.1)
       react-idle-timer:
         specifier: ^5.7.2
         version: 5.7.2(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
@@ -12383,10 +12383,10 @@ packages:
     peerDependencies:
       react: ^18.3.1
 
-  react-error-boundary@6.0.0:
-    resolution: {integrity: sha512-gdlJjD7NWr0IfkPlaREN2d9uUZUlksrfOx7SX62VRerwXbMY6ftGCIZua1VG1aXFNOimhISsTq+Owp725b9SiA==}
+  react-error-boundary@6.1.0:
+    resolution: {integrity: sha512-02k9WQ/mUhdbXir0tC1NiMesGzRPaCsJEWU/4bcFrbY1YMZOtHShtZP6zw0SJrBWA/31H0KT9/FgdL8+sPKgHA==}
     peerDependencies:
-      react: '>=16.13.1'
+      react: ^18.0.0 || ^19.0.0
 
   react-fast-compare@2.0.4:
     resolution: {integrity: sha512-suNP+J1VU1MWFKcyt7RtjiSWUjvidmQSlqu+eHslq+342xCbGTYmC0mEhPCOHxlW0CywylOC1u2DFAT+bv4dBw==}
@@ -29901,9 +29901,8 @@ snapshots:
       react: 18.3.1
       scheduler: 0.23.2
 
-  react-error-boundary@6.0.0(react@18.3.1):
+  react-error-boundary@6.1.0(react@18.3.1):
     dependencies:
-      '@babel/runtime': 7.27.6
       react: 18.3.1
 
   react-fast-compare@2.0.4: {}
