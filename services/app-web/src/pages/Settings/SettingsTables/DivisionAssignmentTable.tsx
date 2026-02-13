@@ -165,11 +165,15 @@ function CMSUserTableWithData({
                 {table.getHeaderGroups().map((headerGroup) => (
                     <tr key={headerGroup.id}>
                         {headerGroup.headers.map((header) => (
-                            <th key={header.id} id={
-                                header.column.id === 'divisionAssignment'
-                                    ? 'division-header'
-                                    : undefined
-                            }>
+                            <th
+                                key={header.id}
+                                scope="col"
+                                id={
+                                    header.column.id === 'divisionAssignment'
+                                        ? 'division-header'
+                                        : undefined
+                                }
+                            >
                                 {header.isPlaceholder
                                     ? null
                                     : flexRender(
