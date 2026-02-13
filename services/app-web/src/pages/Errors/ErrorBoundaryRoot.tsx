@@ -13,13 +13,15 @@ import styles from '../App/AppBody.module.scss'
 function ErrorBoundaryRoot({
     error,
 }: {
-    error: Error
+    error: unknown
     resetErrorBoundary?: () => void
 }): React.ReactElement {
     useEffect(() => {
         const logError = async () => {
+            const errorMessage =
+                error instanceof Error ? error.message : String(error)
             recordJSException(
-                `Crash in ErrorBoundaryRoot. Error message: ${error}`
+                `Crash in ErrorBoundaryRoot. Error message: ${errorMessage}`
             )
         }
         logError().catch((err) => {
