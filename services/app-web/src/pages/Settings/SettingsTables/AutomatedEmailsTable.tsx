@@ -33,19 +33,23 @@ const AutomatedEmailsTable = () => {
                 <caption className="srOnly">Automated emails</caption>
                 <thead>
                     <tr>
-                        <th>Inbox</th>
-                        <th>Type</th>
-                        <th>Description</th>
+                        <th scope="col">Inbox</th>
+                        <th scope="col">Type</th>
+                        <th scope="col">Description</th>
                     </tr>
                 </thead>
                 <tbody>
                     <tr>
-                        <td>{formatEmails(config?.data?.dmcoEmails)}</td>
+                        <th scope="row">
+                            {formatEmails(config?.data?.dmcoEmails)}
+                        </th>
                         <td>DMCO division emails</td>
                         <td>All emails (from CMS side and state side)</td>
                     </tr>
                     <tr>
-                        <td>{formatEmails(config?.data?.dmcpReviewEmails)}</td>
+                        <th scope="row">
+                            {formatEmails(config?.data?.dmcpReviewEmails)}
+                        </th>
                         <td>DMCP division emails used for reviews</td>
                         <td>
                             All submissions; excluding CHIP programs and PR
@@ -53,9 +57,9 @@ const AutomatedEmailsTable = () => {
                         </td>
                     </tr>
                     <tr>
-                        <td>
+                        <th scope="row">
                             {formatEmails(config?.data?.dmcpSubmissionEmails)}
-                        </td>
+                        </th>
                         <td>DMCP division emails used for submissions</td>
                         <td>
                             All submissions; excluding CHIP programs and PR
@@ -63,7 +67,9 @@ const AutomatedEmailsTable = () => {
                         </td>
                     </tr>
                     <tr>
-                        <td>{formatEmails(config?.data?.oactEmails)}</td>
+                        <th scope="row">
+                            {formatEmails(config?.data?.oactEmails)}
+                        </th>
                         <td>OACT division emails</td>
                         <td>
                             Contract and rate submissions; excluding CHIP
@@ -71,9 +77,9 @@ const AutomatedEmailsTable = () => {
                         </td>
                     </tr>
                     <tr>
-                        <td>
+                        <th scope="row">
                             {formatEmails(config?.data?.devReviewTeamEmails)}
-                        </td>
+                        </th>
                         <td>Dev team emails</td>
                         <td>All emails (from CMS side and state side)</td>
                     </tr>
