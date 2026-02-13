@@ -36,24 +36,28 @@ const SupportEmailsTable = () => {
                 <caption className="srOnly">Support emails</caption>
                 <thead>
                     <tr>
-                        <th>Inbox</th>
-                        <th>Type</th>
-                        <th>Description</th>
+                        <th scope="col">Inbox</th>
+                        <th scope="col">Type</th>
+                        <th scope="col">Description</th>
                     </tr>
                 </thead>
                 <tbody>
                     <tr>
-                        <td>{config?.data?.helpDeskEmail}</td>
+                        <th scope="row">{config?.data?.helpDeskEmail}</th>
                         <td>Help desk email</td>
                         <td>For general MC-Review application support</td>
                     </tr>
                     <tr>
-                        <td>{config?.data?.cmsReviewHelpEmailAddress}</td>
+                        <th scope="row">
+                            {config?.data?.cmsReviewHelpEmailAddress}
+                        </th>
                         <td>Contract help email</td>
                         <td>For contract-related support</td>
                     </tr>
                     <tr>
-                        <td>{config?.data?.cmsRateHelpEmailAddress}</td>
+                        <th scope="row">
+                            {config?.data?.cmsRateHelpEmailAddress}
+                        </th>
                         <td>Rate help email</td>
                         <td>For rate-related support</td>
                     </tr>
