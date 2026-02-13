@@ -79,7 +79,7 @@ describe('Error boundary tests', () => {
         // This verifies that the react-error-boundary component correctly passed in the thrown error it caught.
         await waitFor(() => {
             expect(tracingHelper.recordJSException).toHaveBeenCalledWith(
-                'Crash in ErrorBoundaryRoot. Error message: Error: react-error-boundary caught the error'
+                'Crash in ErrorBoundaryRoot. Error message: react-error-boundary caught the error'
             )
         })
     })
