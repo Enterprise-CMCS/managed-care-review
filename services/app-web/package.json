@@ -80,7 +80,7 @@
         "@opentelemetry/context-zone": "^1.27.0",
         "@opentelemetry/exporter-trace-otlp-http": "^0.45.1",
         "@opentelemetry/id-generator-aws-xray": "^2.0.3",
-        "@opentelemetry/instrumentation": "^0.211.0",
+        "@opentelemetry/instrumentation": "^0.212.0",
         "@opentelemetry/instrumentation-fetch": "^0.45.1",
         "@opentelemetry/propagator-aws-xray": "^1.26.2",
         "@opentelemetry/resources": "^1.30.1",
