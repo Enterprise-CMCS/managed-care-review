@@ -1,4 +1,4 @@
-import { CfnOutput, Duration } from 'aws-cdk-lib'
+import { CfnOutput, Duration, RemovalPolicy } from 'aws-cdk-lib'
 import type { Construct } from 'constructs'
 import {
     Role,
@@ -52,12 +52,28 @@ export class GitHubOidcServiceRoleStack extends BaseStack {
 
         // Official stages create the OIDC provider (one per AWS account).
         // Review branch stacks reference the provider owned by the dev stack.
+        //
+        // RETAIN policy prevents accidental deletion if this stack is ever torn down,
+        // since all other stacks in the account (review branches, etc.) depend on it.
+        //
+        // If bootstrapping an account where a provider already exists from another source
+        // (e.g. an old Serverless stack), import it first:
+        //   cdk import github-oidc-dev-cdk --app 'pnpm tsx bin/oidc.ts' --context stage=dev
+        // then select GitHubOidcProvider and provide the existing provider ARN when prompted.
         const oidcProvider = isOfficialStage
-            ? new OpenIdConnectProvider(this, 'GitHubOidcProvider', {
-                  url: 'https://token.actions.githubusercontent.com',
-                  clientIds: ['sts.amazonaws.com'],
-                  thumbprints: GITHUB_THUMBPRINTS,
-              })
+            ? (() => {
+                  const provider = new OpenIdConnectProvider(
+                      this,
+                      'GitHubOidcProvider',
+                      {
+                          url: 'https://token.actions.githubusercontent.com',
+                          clientIds: ['sts.amazonaws.com'],
+                          thumbprints: GITHUB_THUMBPRINTS,
+                      }
+                  )
+                  provider.applyRemovalPolicy(RemovalPolicy.RETAIN)
+                  return provider
+              })()
             : OpenIdConnectProvider.fromOpenIdConnectProviderArn(
                   this,
                   'GitHubOidcProvider',
