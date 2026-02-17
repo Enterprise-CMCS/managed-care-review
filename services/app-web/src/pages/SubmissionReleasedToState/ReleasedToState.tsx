@@ -1,4 +1,4 @@
-import React, { useLayoutEffect } from 'react'
+import React, { useEffect, useLayoutEffect } from 'react'
 import styles from './ReleasedToState.module.scss'
 import {
     ActionButton,
@@ -57,7 +57,7 @@ type FormError =
 
 const ReleasedToState = () => {
     const { id, contractSubmissionType } = useRouteParams()
-    const { updateHeading } = usePage()
+    const { updateHeading, updateActiveMainContent } = usePage()
     const { logFormSubmitEvent } = useTealium()
     const navigate = useNavigate()
     const [shouldValidate, setShouldValidate] = React.useState(false)
@@ -99,6 +99,13 @@ const ReleasedToState = () => {
     useLayoutEffect(() => {
         updateHeading({ customHeading: stateHeader })
     }, [stateHeader, updateHeading])
+
+    const activeMainContentId = 'releasedToStatePageMainContent'
+
+    // Set the active main content to focus when click the Skip to main content button.
+    useEffect(() => {
+        updateActiveMainContent(activeMainContentId)
+    }, [activeMainContentId, updateActiveMainContent])
 
     if (fetchContractLoading) {
         return <ErrorOrLoadingPage state="LOADING" />
@@ -149,7 +156,7 @@ const ReleasedToState = () => {
     }
 
     return (
-        <div className={styles.uploadFormContainer}>
+        <div id={activeMainContentId} className={styles.uploadFormContainer}>
             <Breadcrumbs
                 className="usa-breadcrumb--wrap"
                 items={[

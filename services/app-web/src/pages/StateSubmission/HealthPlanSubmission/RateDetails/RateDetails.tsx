@@ -191,7 +191,7 @@ const RateDetails = ({
             }
             return acc
         }, [] as RateRevision[]) ?? []
-    const activeMainContentId = 'rateQuestionResponseMainContent'
+    const activeMainContentId = 'rateDetailsMainContent'
 
     // Set the active main content to focus when click the Skip to main content button.
     useEffect(() => {
@@ -466,7 +466,7 @@ const RateDetails = ({
     }
 
     return (
-        <>
+        <div id={activeMainContentId}>
             <FormNotificationContainer>
                 {!displayAsStandaloneRate && (
                     <DynamicStepIndicator
@@ -802,7 +802,7 @@ const RateDetails = ({
                     )
                 }}
             </Formik>
-        </>
+        </div>
     )
 }
 export { RateDetails }

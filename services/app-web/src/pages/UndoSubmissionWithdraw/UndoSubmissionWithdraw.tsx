@@ -1,4 +1,4 @@
-import React, { useLayoutEffect, useState } from 'react'
+import React, { useEffect, useLayoutEffect, useState } from 'react'
 import styles from './UndoSubmissionWithdraw.module.scss'
 import * as Yup from 'yup'
 import { Formik, FormikErrors } from 'formik'
@@ -47,7 +47,7 @@ export const UndoSubmissionWithdraw = (): React.ReactElement => {
             'PROGRAMMING ERROR: id param not set in submission withdraw form.'
         )
     }
-    const { updateHeading } = usePage()
+    const { updateHeading, updateActiveMainContent } = usePage()    
     const { logFormSubmitEvent } = useTealium()
     const navigate = useNavigate()
     const [shouldValidate, setShouldValidate] = useState(false)
@@ -84,6 +84,13 @@ export const UndoSubmissionWithdraw = (): React.ReactElement => {
     useLayoutEffect(() => {
         updateHeading({ customHeading: stateHeader })
     }, [stateHeader, updateHeading])
+
+    const activeMainContentId = 'contractDetailsPageMainContent'
+
+    // Set the active main content to focus when click the Skip to main content button.
+    useEffect(() => {
+        updateActiveMainContent(activeMainContentId)
+    }, [activeMainContentId, updateActiveMainContent])    
 
     if (loading) {
         return <ErrorOrLoadingPage state="LOADING" />
@@ -129,7 +136,10 @@ export const UndoSubmissionWithdraw = (): React.ReactElement => {
     }
 
     return (
-        <div className={styles.undoSubmissionWithdrawContainer}>
+        <div
+            id={activeMainContentId}
+            className={styles.undoSubmissionWithdrawContainer}
+        >
             <Breadcrumbs
                 className="usa-breadcrumb--wrap"
                 items={[

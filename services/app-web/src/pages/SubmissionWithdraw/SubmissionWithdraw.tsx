@@ -1,4 +1,4 @@
-import React, { useLayoutEffect } from 'react'
+import React, { useEffect, useLayoutEffect } from 'react'
 import styles from './SubmissionWithdraw.module.scss'
 import {
     ActionButton,
@@ -99,7 +99,7 @@ export const SubmissionWithdraw = (): React.ReactElement => {
             'PROGRAMMING ERROR: id param not set in submission withdraw form.'
         )
     }
-    const { updateHeading } = usePage()
+    const { updateHeading, updateActiveMainContent } = usePage()    
     const { logFormSubmitEvent } = useTealium()
     const navigate = useNavigate()
     const [shouldValidate, setShouldValidate] = React.useState(false)
@@ -143,6 +143,13 @@ export const SubmissionWithdraw = (): React.ReactElement => {
     useLayoutEffect(() => {
         updateHeading({ customHeading: stateHeader })
     }, [stateHeader, updateHeading])
+
+    const activeMainContentId = 'submissionWithdrawPageMainContent'
+
+    // Set the active main content to focus when click the Skip to main content button.
+    useEffect(() => {
+        updateActiveMainContent(activeMainContentId)
+    }, [activeMainContentId, updateActiveMainContent])
 
     //Fetching rates associated with above contract to determine whether or not they will be withdrawn (banner display)
     //This query will be skipped if rateIDs comes up empty
@@ -229,7 +236,10 @@ export const SubmissionWithdraw = (): React.ReactElement => {
     }
 
     return (
-        <div className={styles.submissionWithdrawContainer}>
+        <div
+            id={activeMainContentId}
+            className={styles.submissionWithdrawContainer}
+        >
             <Breadcrumbs
                 className="use-breadcrumb--wrap"
                 items={[

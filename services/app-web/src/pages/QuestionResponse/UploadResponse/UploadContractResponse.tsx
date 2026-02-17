@@ -1,4 +1,4 @@
-import { useLayoutEffect } from 'react'
+import { useEffect, useLayoutEffect } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
 import {
     CreateQuestionResponseInput,
@@ -25,6 +25,7 @@ import { QuestionDisplayTable } from '../QATable/QuestionDisplayTable'
 import { useAuth } from '../../../contexts/AuthContext'
 import { Error404 } from '../../Errors/Error404Page'
 import { useMemoizedStateHeader } from '../../../hooks'
+import { aC } from 'vitest/dist/chunks/reporters.d.BFLkQcL6.js'
 
 export const UploadContractResponse = () => {
     // router context
@@ -36,7 +37,7 @@ export const UploadContractResponse = () => {
     }>()
 
     const navigate = useNavigate()
-    const { updateHeading } = usePage()
+    const { updateHeading, updateActiveMainContent } = usePage()
     const { loggedInUser } = useAuth()
     // api
     const {
@@ -71,6 +72,13 @@ export const UploadContractResponse = () => {
     useLayoutEffect(() => {
         updateHeading({ customHeading: stateHeader })
     }, [stateHeader, updateHeading])
+
+    const activeMainContentId = 'contractResponsePageMainContent'
+
+    // Set the active main content to focus when click the Skip to main content button.
+    useEffect(() => {
+        updateActiveMainContent(activeMainContentId)
+    }, [activeMainContentId, updateActiveMainContent])
 
     // confirm division is valid
     const realDivision = division?.toUpperCase()
@@ -140,7 +148,7 @@ export const UploadContractResponse = () => {
         questionID
     )
     return (
-        <div className={styles.uploadFormContainer}>
+        <div id={activeMainContentId} className={styles.uploadFormContainer}>
             <Breadcrumbs
                 className="usa-breadcrumb--wrap"
                 items={[

@@ -1,4 +1,4 @@
-import { useLayoutEffect } from 'react'
+import { useEffect, useLayoutEffect } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
 import {
     CreateQuestionResponseInput,
@@ -38,7 +38,7 @@ export const UploadRateResponse = () => {
         }>()
 
     const navigate = useNavigate()
-    const { updateHeading } = usePage()
+    const { updateHeading, updateActiveMainContent } = usePage()
     const { loggedInUser } = useAuth()
 
     // api
@@ -81,6 +81,13 @@ export const UploadRateResponse = () => {
     useLayoutEffect(() => {
         updateHeading({ customHeading: stateHeader })
     }, [stateHeader, updateHeading])
+
+    const activeMainContentId = 'rateResponsePageMainContent'
+
+    // Set the active main content to focus when click the Skip to main content button.
+    useEffect(() => {
+        updateActiveMainContent(activeMainContentId)
+    }, [activeMainContentId, updateActiveMainContent])
 
     if (fetchRateLoading) {
         return <ErrorOrLoadingPage state="LOADING" />
@@ -147,7 +154,7 @@ export const UploadRateResponse = () => {
     )
 
     return (
-        <div className={styles.uploadFormContainer}>
+        <div id={activeMainContentId} className={styles.uploadFormContainer}>
             <Breadcrumbs
                 className="usa-breadcrumb--wrap"
                 items={[
