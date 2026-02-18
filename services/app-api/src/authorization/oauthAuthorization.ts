@@ -1,3 +1,4 @@
+import { OAuthScope } from '@prisma/client'
 import type { Context } from '../handlers/apollo_gql'
 
 /**
@@ -35,6 +36,30 @@ export function canWrite(context: Context): boolean {
     }
 
     // Regular users can write (subject to role-specific restrictions in resolvers)
+    return true
+}
+
+/**
+ * Checks if the current context is an OAuth client with write permissions
+ * While majority of endpoints will not support OAuth write requests (canWrite),
+ * specific endpoints will allow if the OAuth client has been validated for delegated user
+ */
+export function canOauthWrite(context: Context): boolean {
+    // OAuth clients can only write if scopes is populated
+    if (context.oauthClient?.isOAuthClient) {
+        if (
+            context.oauthClient?.isDelegatedUser &&
+            context.oauthClient?.scopes?.includes(
+                OAuthScope.CMS_SUBMISSION_ACTIONS
+            )
+        ) {
+            return true
+        } else {
+            return false
+        }
+    }
+
+    // Regular authenticated users can write (subject to role-specific restrictions in resolvers)
     return true
 }
 

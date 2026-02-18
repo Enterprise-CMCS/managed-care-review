@@ -22,9 +22,10 @@ const unlockData = {
 
 const testStateAnalystEmails = testStateAnalystsEmails
 const defaultStatePrograms = mockMNState().programs
+const emailConfig = testEmailConfig()
 
 describe('unlockPackageCMSEmail', () => {
-    test('subject line is correct and clearly states submission is unlocked', async () => {
+    it('subject line is correct and clearly states submission is unlocked', async () => {
         const sub = mockUnlockedContract()
 
         const name = packageName(
@@ -36,7 +37,7 @@ describe('unlockPackageCMSEmail', () => {
         const template = await unlockContractCMSEmail(
             sub,
             unlockData,
-            testEmailConfig(),
+            emailConfig,
             testStateAnalystEmails,
             defaultStatePrograms
         )
@@ -51,13 +52,13 @@ describe('unlockPackageCMSEmail', () => {
             })
         )
     })
-    test('includes expected data summary for a contract and rates submission unlock CMS email', async () => {
+    it('includes expected data summary for a contract and rates submission unlock CMS email', async () => {
         const sub = mockUnlockedContract()
 
         const template = await unlockContractCMSEmail(
             sub,
             unlockData,
-            testEmailConfig(),
+            emailConfig,
             testStateAnalystEmails,
             defaultStatePrograms
         )
@@ -95,7 +96,7 @@ describe('unlockPackageCMSEmail', () => {
             })
         )
     })
-    test('includes expected data summary for a multi-rate contract and rates submission unlock CMS email', async () => {
+    it('includes expected data summary for a multi-rate contract and rates submission unlock CMS email', async () => {
         const sub = mockUnlockedContract(undefined, [
             {
                 id: 'rate-123',
@@ -257,7 +258,7 @@ describe('unlockPackageCMSEmail', () => {
         const template = await unlockContractCMSEmail(
             sub,
             unlockData,
-            testEmailConfig(),
+            emailConfig,
             testStateAnalystEmails,
             defaultStatePrograms
         )
@@ -315,13 +316,13 @@ describe('unlockPackageCMSEmail', () => {
             })
         )
     })
-    test('to addresses list includes DMCP, OACT, and DMCO emails for contract and rate package', async () => {
+    it('to addresses list includes DMCP, OACT, and DMCO emails for contract and rate package', async () => {
         const sub = mockUnlockedContract()
         sub.draftRevision.formData.riskBasedContract = true
         const template = await unlockContractCMSEmail(
             sub,
             unlockData,
-            testEmailConfig(),
+            emailConfig,
             testStateAnalystEmails,
             defaultStatePrograms
         )
@@ -330,7 +331,7 @@ describe('unlockPackageCMSEmail', () => {
             throw template
         }
 
-        testEmailConfig().oactEmails.forEach((emailAddress) => {
+        emailConfig.oactEmails.forEach((emailAddress) => {
             expect(template).toEqual(
                 expect.objectContaining({
                     toAddresses: expect.arrayContaining([emailAddress]),
@@ -338,7 +339,7 @@ describe('unlockPackageCMSEmail', () => {
             )
         })
 
-        testEmailConfig().dmcpSubmissionEmails.forEach((emailAddress) => {
+        emailConfig.dmcpSubmissionEmails.forEach((emailAddress) => {
             expect(template).toEqual(
                 expect.objectContaining({
                     toAddresses: expect.arrayContaining([emailAddress]),
@@ -346,7 +347,7 @@ describe('unlockPackageCMSEmail', () => {
             )
         })
 
-        testEmailConfig().dmcoEmails.forEach((emailAddress) => {
+        emailConfig.dmcoEmails.forEach((emailAddress) => {
             expect(template).toEqual(
                 expect.objectContaining({
                     toAddresses: expect.arrayContaining([emailAddress]),
@@ -355,13 +356,13 @@ describe('unlockPackageCMSEmail', () => {
         })
     })
 
-    test('to addresses list does not include help addresses', async () => {
+    it('to addresses list does not include help addresses', async () => {
         const sub = mockUnlockedContract()
 
         const template = await unlockContractCMSEmail(
             sub,
             unlockData,
-            testEmailConfig(),
+            emailConfig,
             testStateAnalystEmails,
             defaultStatePrograms
         )
@@ -373,7 +374,7 @@ describe('unlockPackageCMSEmail', () => {
         expect(template).toEqual(
             expect.objectContaining({
                 toAddresses: expect.not.arrayContaining([
-                    testEmailConfig().cmsRateHelpEmailAddress,
+                    emailConfig.cmsRateHelpEmailAddress,
                 ]),
             })
         )
@@ -381,19 +382,19 @@ describe('unlockPackageCMSEmail', () => {
         expect(template).toEqual(
             expect.objectContaining({
                 toAddresses: expect.not.arrayContaining([
-                    testEmailConfig().cmsReviewHelpEmailAddress,
+                    emailConfig.cmsReviewHelpEmailAddress,
                 ]),
             })
         )
     })
 
-    test('includes state specific analysts emails on contract and rate submission unlock', async () => {
+    it('includes state specific analysts emails on contract and rate submission unlock', async () => {
         const sub = mockUnlockedContract()
 
         const template = await unlockContractCMSEmail(
             sub,
             unlockData,
-            testEmailConfig(),
+            emailConfig,
             testStateAnalystEmails,
             defaultStatePrograms
         )
@@ -410,21 +411,21 @@ describe('unlockPackageCMSEmail', () => {
             )
         })
     })
-    test('includes correct toAddresses in contract and rate submission unlock', async () => {
+    it('includes correct toAddresses in contract and rate submission unlock', async () => {
         const sub = mockUnlockedContract()
         sub.draftRevision.formData.riskBasedContract = true
         const template = await unlockContractCMSEmail(
             sub,
             unlockData,
-            testEmailConfig(),
+            emailConfig,
             testStateAnalystEmails,
             defaultStatePrograms
         )
 
         const reviewerEmails = [
-            ...testEmailConfig().devReviewTeamEmails,
-            ...testEmailConfig().dmcoEmails,
-            ...testEmailConfig().oactEmails,
+            ...emailConfig.devReviewTeamEmails,
+            ...emailConfig.dmcoEmails,
+            ...emailConfig.oactEmails,
         ]
 
         if (template instanceof Error) {
@@ -442,25 +443,25 @@ describe('unlockPackageCMSEmail', () => {
         expect(template).toEqual(
             expect.objectContaining({
                 toAddresses: expect.not.arrayContaining([
-                    ...testEmailConfig().cmsRateHelpEmailAddress,
+                    ...emailConfig.cmsRateHelpEmailAddress,
                 ]),
             })
         )
         expect(template).toEqual(
             expect.objectContaining({
                 toAddresses: expect.not.arrayContaining([
-                    ...testEmailConfig().cmsReviewHelpEmailAddress,
+                    ...emailConfig.cmsReviewHelpEmailAddress,
                 ]),
             })
         )
     })
-    test('includes state specific analysts emails on contract only submission unlock', async () => {
+    it('includes state specific analysts emails on contract only submission unlock', async () => {
         const sub = mockUnlockedContract()
 
         const template = await unlockContractCMSEmail(
             sub,
             unlockData,
-            testEmailConfig(),
+            emailConfig,
             testStateAnalystEmails,
             defaultStatePrograms
         )
@@ -477,7 +478,7 @@ describe('unlockPackageCMSEmail', () => {
             )
         })
     })
-    test('does not include oactEmails on contract only submission unlock', async () => {
+    it('does not include oactEmails on contract only submission unlock', async () => {
         const mockedContract = mockContractRev()
         const mockedDraftRevision = mockContractRev({
             formData: {
@@ -496,7 +497,7 @@ describe('unlockPackageCMSEmail', () => {
         const template = await unlockContractCMSEmail(
             sub,
             unlockData,
-            testEmailConfig(),
+            emailConfig,
             [],
             defaultStatePrograms
         )
@@ -505,7 +506,7 @@ describe('unlockPackageCMSEmail', () => {
             throw template
         }
 
-        const ratesReviewerEmails = [...testEmailConfig().oactEmails]
+        const ratesReviewerEmails = [...emailConfig.oactEmails]
         ratesReviewerEmails.forEach((emailAddress) => {
             expect(template).toEqual(
                 expect.objectContaining({
@@ -514,13 +515,13 @@ describe('unlockPackageCMSEmail', () => {
             )
         })
     })
-    test('does not include oactEmails on non risked based submission unlock', async () => {
+    it('does not include oactEmails on non risked based submission unlock', async () => {
         const sub = mockUnlockedContract()
 
         const template = await unlockContractCMSEmail(
             sub,
             unlockData,
-            testEmailConfig(),
+            emailConfig,
             [],
             defaultStatePrograms
         )
@@ -529,7 +530,7 @@ describe('unlockPackageCMSEmail', () => {
             throw template
         }
 
-        const ratesReviewerEmails = [...testEmailConfig().oactEmails]
+        const ratesReviewerEmails = [...emailConfig.oactEmails]
         ratesReviewerEmails.forEach((emailAddress) => {
             expect(template).toEqual(
                 expect.objectContaining({
@@ -538,13 +539,13 @@ describe('unlockPackageCMSEmail', () => {
             )
         })
     })
-    test('does not include state analysts emails on contract only submission unlock when none passed in', async () => {
+    it('does not include state analysts emails on contract only submission unlock when none passed in', async () => {
         const sub = mockUnlockedContract()
 
         const template = await unlockContractCMSEmail(
             sub,
             unlockData,
-            testEmailConfig(),
+            emailConfig,
             [],
             defaultStatePrograms
         )
@@ -561,7 +562,7 @@ describe('unlockPackageCMSEmail', () => {
             )
         })
     })
-    test('CHIP contract only unlock email does include state specific analysts emails', async () => {
+    it('CHIP contract only unlock email does include state specific analysts emails', async () => {
         const mockedContract = mockContractRev()
         const mockedDraftRevision = mockContractRev({
             formData: {
@@ -584,7 +585,7 @@ describe('unlockPackageCMSEmail', () => {
         const template = await unlockContractCMSEmail(
             sub,
             unlockData,
-            testEmailConfig(),
+            emailConfig,
             testStateAnalystEmails,
             msStatePrograms
         )
@@ -601,7 +602,7 @@ describe('unlockPackageCMSEmail', () => {
             )
         })
     })
-    test('CHIP contract only unlock email does not include oactEmails or state specific analysts emails', async () => {
+    it('CHIP contract only unlock email does not include oactEmails or state specific analysts emails', async () => {
         const mockedContract = mockContractRev()
         const mockedDraftRevision = mockContractRev({
             formData: {
@@ -624,11 +625,11 @@ describe('unlockPackageCMSEmail', () => {
         const template = await unlockContractCMSEmail(
             sub,
             unlockData,
-            testEmailConfig(),
+            emailConfig,
             [],
             msStatePrograms
         )
-        const excludedEmails = [...testEmailConfig().oactEmails]
+        const excludedEmails = [...emailConfig.oactEmails]
 
         if (template instanceof Error) {
             throw template
@@ -649,7 +650,7 @@ describe('unlockPackageCMSEmail', () => {
             )
         })
     })
-    test('CHIP contract and rate unlock email does include state specific analysts emails', async () => {
+    it('CHIP contract and rate unlock email does include state specific analysts emails', async () => {
         const mockedContract = mockContractRev()
         const mockedDraftRevision = mockContractRev({
             formData: {
@@ -672,7 +673,7 @@ describe('unlockPackageCMSEmail', () => {
         const template = await unlockContractCMSEmail(
             sub,
             unlockData,
-            testEmailConfig(),
+            emailConfig,
             testStateAnalystEmails,
             msStatePrograms
         )
@@ -689,7 +690,7 @@ describe('unlockPackageCMSEmail', () => {
             )
         })
     })
-    test('CHIP contract and rate unlock email does not include oactEmails or state specific analysts emails', async () => {
+    it('CHIP contract and rate unlock email does not include oactEmails or state specific analysts emails', async () => {
         const mockedContract = mockContractRev()
         const mockedDraftRevision = mockContractRev({
             formData: {
@@ -712,11 +713,11 @@ describe('unlockPackageCMSEmail', () => {
         const template = await unlockContractCMSEmail(
             sub,
             unlockData,
-            testEmailConfig(),
+            emailConfig,
             [],
             msStatePrograms
         )
-        const excludedEmails = [...testEmailConfig().oactEmails]
+        const excludedEmails = [...emailConfig.oactEmails]
 
         if (template instanceof Error) {
             throw template
@@ -737,13 +738,13 @@ describe('unlockPackageCMSEmail', () => {
             )
         })
     })
-    test('does not include rate name on contract only submission unlock', async () => {
+    it('does not include rate name on contract only submission unlock', async () => {
         const sub = mockUnlockedContract()
 
         const template = await unlockContractCMSEmail(
             sub,
             unlockData,
-            testEmailConfig(),
+            emailConfig,
             [],
             defaultStatePrograms
         )
@@ -759,13 +760,13 @@ describe('unlockPackageCMSEmail', () => {
         )
     })
 
-    test('renders overall email as expected', async () => {
+    it('renders overall email as expected', async () => {
         const sub = mockUnlockedContract()
 
         const template = await unlockContractCMSEmail(
             sub,
             unlockData,
-            testEmailConfig(),
+            emailConfig,
             [],
             defaultStatePrograms
         )
@@ -775,5 +776,82 @@ describe('unlockPackageCMSEmail', () => {
         }
 
         expect(template.bodyHTML).toMatchSnapshot()
+    })
+})
+
+describe('unlockEQROCMSEmail', () => {
+    it('renders CMS email for unlocked EQRO contract as expected', async () => {
+        const eqroSub = mockUnlockedContract({
+            contractSubmissionType: 'EQRO',
+        })
+
+        const template = await unlockContractCMSEmail(
+            eqroSub,
+            unlockData,
+            emailConfig,
+            testStateAnalystEmails,
+            defaultStatePrograms
+        )
+
+        if (template instanceof Error) {
+            throw template
+        }
+
+        expect(template.bodyHTML).toMatchSnapshot()
+    })
+
+    it('includes reviewer emails as expected', async () => {
+        const eqroSub = mockUnlockedContract({
+            contractSubmissionType: 'EQRO',
+        })
+
+        const template = await unlockContractCMSEmail(
+            eqroSub,
+            unlockData,
+            emailConfig,
+            testStateAnalystEmails,
+            defaultStatePrograms
+        )
+
+        if (template instanceof Error) {
+            throw template
+        }
+
+        expect(template).toEqual(
+            expect.objectContaining({
+                toAddresses: expect.arrayContaining(emailConfig.dmcoEmails),
+            })
+        )
+    })
+
+    it('subject line is correct and clearly states submission is unlocked', async () => {
+        const eqroSub = mockUnlockedContract({
+            contractSubmissionType: 'EQRO',
+        })
+
+        const subName = packageName(
+            eqroSub.stateCode,
+            eqroSub.stateNumber,
+            eqroSub.draftRevision.formData.programIDs,
+            defaultStatePrograms
+        )
+
+        const template = await unlockContractCMSEmail(
+            eqroSub,
+            unlockData,
+            emailConfig,
+            testStateAnalystEmails,
+            defaultStatePrograms
+        )
+
+        if (template instanceof Error) {
+            throw template
+        }
+
+        expect(template).toEqual(
+            expect.objectContaining({
+                subject: expect.stringContaining(`${subName} was unlocked`),
+            })
+        )
     })
 })

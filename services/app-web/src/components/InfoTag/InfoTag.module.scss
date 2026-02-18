@@ -29,7 +29,7 @@
 }
 
 .cyan {
-    @include uswds.u-bg('cyan-40v');
+    @include uswds.u-bg('cyan-20');
     color: custom.$mcr-foundation-ink;
 }
 
