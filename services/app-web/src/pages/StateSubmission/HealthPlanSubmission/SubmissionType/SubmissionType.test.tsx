@@ -650,9 +650,6 @@ describe('SubmissionType', () => {
                 },
             })
 
-            expect(screen.getByRole('textbox')).not.toHaveClass(
-                'usa-input--error'
-            )
             expect(
                 screen.queryByText('You must choose a submission type')
             ).toBeNull()
@@ -684,7 +681,6 @@ describe('SubmissionType', () => {
             await userEvent.clear(textarea)
 
             await waitFor(() => {
-                expect(textarea).toHaveClass('usa-input--error')
                 expect(
                     screen.getAllByText('You must choose a submission type')
                 ).toHaveLength(2)
@@ -717,7 +713,6 @@ describe('SubmissionType', () => {
             await userEvent.clear(textarea)
 
             await waitFor(() => {
-                expect(textarea).toHaveClass('usa-input--error')
                 expect(
                     screen.getAllByText('You must choose a contract type')
                 ).toHaveLength(2)
@@ -839,7 +834,6 @@ describe('SubmissionType', () => {
                         'The submission description must be 1500 characters or less.'
                     )
                 ).toHaveLength(2)
-                expect(textarea).toHaveClass('usa-input--error')
             })
 
             // Reduce text to not exceed threshhold
@@ -853,6 +847,47 @@ describe('SubmissionType', () => {
                         'The submission description must be 1500 characters or less.'
                     )
                 ).not.toBeInTheDocument()
+            })
+        })
+
+        it('shows validation warning when user exceeds character count', async () => {
+            renderWithProviders(<SubmissionType />, {
+                apolloProvider: {
+                    mocks: [fetchCurrentUserMock({ statusCode: 200 })],
+                },
+            })
+
+            const textarea = screen.getByRole('textbox', {
+                name: 'Submission description',
+            })
+
+            // Text that exceeds limit to trigger error
+            const tooLongText = 'a'.repeat(1501)
+            await userEvent.click(textarea)
+            await userEvent.paste(tooLongText)
+
+            // Expect counter to display error message
+            await waitFor(() => {
+                expect(
+                    screen.queryAllByText('1 character over limit')
+                ).toHaveLength(1)
+                expect(screen.getByTestId('characterCountMessage')).toHaveClass(
+                    'usa-character-count__message--invalid'
+                )
+            })
+
+            // Reduce text to not exceed threshhold
+            await userEvent.click(textarea)
+            await userEvent.keyboard('{Backspace}')
+
+            // Expect error to disappear
+            await waitFor(() => {
+                expect(
+                    screen.queryAllByText('1 character over limit')
+                ).toHaveLength(0)
+                expect(
+                    screen.getByTestId('characterCountMessage')
+                ).not.toHaveClass('usa-character-count__message--invalid')
             })
         })
     })

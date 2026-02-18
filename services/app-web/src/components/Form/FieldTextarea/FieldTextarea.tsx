@@ -78,6 +78,7 @@ export const FieldTextarea = ({
                 maxLength={1500}
                 isTextArea
                 rows={2}
+                {...inputProps}
             />
         </FormGroup>
     )
