@@ -37,7 +37,8 @@ jobs:
         with:
           region: ${{ vars.AWS_DEFAULT_REGION }}
           account-id: ${{ secrets.DEV_AWS_ACCOUNT_ID }}
-          stage-name: main
+          stage-name: dev
+          use-cdk-role: "true"
 
       - name: Destroy CDK stacks
         run: node ./scripts/destroy-cdk.js ${{ env.stage_name }}

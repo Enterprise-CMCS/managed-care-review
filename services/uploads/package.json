@@ -51,7 +51,6 @@
         "jiti": "^2.6.1",
         "lint-staged": "^16.2.3",
         "serverless": "4.2.3",
-        "serverless-esbuild": "^1.55.1",
         "serverless-iam-helper": "https://github.com/Enterprise-CMCS/serverless-iam-helper.git",
         "serverless-offline": "^14.4.0",
         "serverless-s3-bucket-helper": "https://github.com/Enterprise-CMCS/serverless-s3-bucket-helper",

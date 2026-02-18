@@ -165,11 +165,15 @@ function CMSUserTableWithData({
                 {table.getHeaderGroups().map((headerGroup) => (
                     <tr key={headerGroup.id}>
                         {headerGroup.headers.map((header) => (
-                            <th key={header.id} id={
-                                header.column.id === 'divisionAssignment'
-                                    ? 'division-header'
-                                    : undefined
-                            }>
+                            <th
+                                key={header.id}
+                                scope="col"
+                                id={
+                                    header.column.id === 'divisionAssignment'
+                                        ? 'division-header'
+                                        : undefined
+                                }
+                            >
                                 {header.isPlaceholder
                                     ? null
                                     : flexRender(
@@ -184,14 +188,19 @@ function CMSUserTableWithData({
             <tbody>
                 {table.getRowModel().rows.map((row) => (
                     <tr key={row.id}>
-                        {row.getVisibleCells().map((cell) => (
-                            <td key={cell.id}>
-                                {flexRender(
-                                    cell.column.columnDef.cell,
-                                    cell.getContext()
-                                )}
-                            </td>
-                        ))}
+                        {row.getVisibleCells().map((cell) => {
+                            const cellContent = flexRender(
+                                cell.column.columnDef.cell,
+                                cell.getContext()
+                            )
+                            return cell.column.id === 'familyName' ? (
+                                <th key={cell.id} scope="row">
+                                    {cellContent}
+                                </th>
+                            ) : (
+                                <td key={cell.id}>{cellContent}</td>
+                            )
+                        })}
                     </tr>
                 ))}
             </tbody>

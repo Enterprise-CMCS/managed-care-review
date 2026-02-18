@@ -88,14 +88,13 @@
         "prettier": "^3.5.3",
         "serverless": "4.2.3",
         "serverless-associate-waf": "^1.2.1",
-        "serverless-esbuild": "^1.55.1",
         "serverless-iam-helper": "https://github.com/Enterprise-CMCS/serverless-iam-helper",
         "serverless-offline": "^14.4.0",
         "serverless-s3-bucket-helper": "https://github.com/Enterprise-CMCS/serverless-s3-bucket-helper",
         "serverless-stack-termination-protection": "^2.0.2",
         "tsx": "^4.21.0",
         "typescript": "5.9.3",
-        "typescript-eslint": "^8.41.0",
+        "typescript-eslint": "^8.56.0",
         "vitest": "^3.2.4"
     }
 }
