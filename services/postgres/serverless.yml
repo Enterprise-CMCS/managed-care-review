@@ -6,7 +6,6 @@ build:
   esbuild: false
 
 plugins:
-  - serverless-esbuild
   - serverless-stack-termination-protection
   - serverless-s3-bucket-helper
   - serverless-iam-helper

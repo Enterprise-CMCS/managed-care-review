@@ -18,7 +18,6 @@
         "eslint-plugin-prettier": "^5.5.4",
         "fs-extra": "^11.3.3",
         "jiti": "^2.6.1",
-        "serverless-esbuild": "^1.57.0",
         "serverless": "4.2.3",
         "serverless-iam-helper": "https://github.com/Enterprise-CMCS/serverless-iam-helper",
         "serverless-s3-bucket-helper": "https://github.com/Enterprise-CMCS/serverless-s3-bucket-helper",
