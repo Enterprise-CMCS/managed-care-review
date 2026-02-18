@@ -532,9 +532,16 @@ export const EQROSubmissionDetails = (): React.ReactElement => {
                                     name="submissionDescription"
                                     aria-required
                                     aria-describedby="submissionDescriptionHelp"
-                                    showError={showFieldErrors(
-                                        errors.submissionDescription
-                                    )}
+                                    showError={
+                                        showFieldErrors(
+                                            errors.submissionDescription
+                                        ) ||
+                                        (values.submissionDescription.length >
+                                            1500 &&
+                                            Boolean(
+                                                errors.submissionDescription
+                                            ))
+                                    } //NOTE: This helps trigger the error highlight when the user actively types past the character limit
                                     hint={
                                         <>
                                             <span

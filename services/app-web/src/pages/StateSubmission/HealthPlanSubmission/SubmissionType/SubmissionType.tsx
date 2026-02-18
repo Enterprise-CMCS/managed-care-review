@@ -715,9 +715,16 @@ export const SubmissionType = ({
                                         name="submissionDescription"
                                         aria-required
                                         aria-describedby="submissionDescriptionHelp"
-                                        showError={showFieldErrors(
-                                            errors.submissionDescription
-                                        )}
+                                        showError={
+                                            showFieldErrors(
+                                                errors.submissionDescription
+                                            ) ||
+                                            (values.submissionDescription
+                                                .length > 1500 &&
+                                                Boolean(
+                                                    errors.submissionDescription
+                                                ))
+                                        }
                                         hint={
                                             <>
                                                 <span

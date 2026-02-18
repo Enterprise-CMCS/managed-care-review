@@ -1,6 +1,6 @@
 import React from 'react'
 import { useField } from 'formik'
-import { Label, Textarea, FormGroup } from '@trussworks/react-uswds'
+import { Label, FormGroup, CharacterCount } from '@trussworks/react-uswds'
 import { PoliteErrorMessage } from '../..'
 import styles from './FieldTextarea.module.scss'
 
@@ -44,6 +44,7 @@ export const FieldTextarea = ({
     ) => {
         if (!e) return
         e.currentTarget.value = field.value.trim()
+        e.target.setCustomValidity('') //Keep this to remove the floating tool tip built into CharacterCount
         if (onBlur) onBlur(e)
     }
 
@@ -53,7 +54,7 @@ export const FieldTextarea = ({
             <span className={styles.requiredOptionalText}>
                 {isRequired ? 'Required' : 'Optional'}
             </span>
-            {showError && (
+            {showError && meta.touched && (
                 <PoliteErrorMessage formFieldLabel={label}>
                     {meta.error}
                 </PoliteErrorMessage>
@@ -67,14 +68,16 @@ export const FieldTextarea = ({
                     {hint}
                 </p>
             )}
-            <Textarea
-                {...field}
-                {...inputProps}
+            <CharacterCount
                 id={id}
-                aria-describedby={hint ? `${id}-hint` : undefined}
                 name={name}
-                error={showError}
+                defaultValue={field.value}
+                onChange={field.onChange}
+                aria-describedby={hint ? `${id}-hint` : undefined}
                 onBlur={customOnBlur}
+                maxLength={1500}
+                isTextArea
+                rows={2}
             />
         </FormGroup>
     )
