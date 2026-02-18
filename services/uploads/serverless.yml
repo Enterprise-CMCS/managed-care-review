@@ -9,7 +9,6 @@ build:
   esbuild: false
 
 plugins:
-  - serverless-esbuild
   - serverless-stack-termination-protection
   - serverless-iam-helper
   - serverless-s3-local
@@ -18,8 +17,7 @@ plugins:
 # The `provider` block defines where your service will be deployed
 provider:
   name: aws
-  runtime: nodejs20.x
-  region: us-east-1
+  runtime: nodejs20.  region: us-east-1
   iam:
     role:
       path: ${self:custom.iamPath}
