@@ -161,7 +161,7 @@
         "eslint-plugin-react-hooks": "^7.0.0",
         "jest-launchdarkly-mock": "^2.1.0",
         "jiti": "^2.6.1",
-        "lint-staged": "^16.2.3",
+        "lint-staged": "^16.2.7",
         "prettier": "^3.5.3",
         "react-select-event": "^5.5.0",
         "react-test-renderer": "^18.2.0",

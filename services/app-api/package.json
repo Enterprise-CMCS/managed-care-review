@@ -83,7 +83,7 @@
         "fs-extra": "^11.3.3",
         "jest": "^30.2.0",
         "jiti": "^2.6.1",
-        "lint-staged": "^16.2.3",
+        "lint-staged": "^16.2.7",
         "nodemon": "^3.1.11",
         "prettier": "^3.5.3",
         "serverless": "4.2.3",
