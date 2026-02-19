@@ -1,4 +1,4 @@
-import React, { useLayoutEffect } from 'react'
+import React, { useEffect, useLayoutEffect } from 'react'
 import styles from './RateWithdraw.module.scss'
 import {
     ActionButton,
@@ -35,7 +35,7 @@ type FormError =
 
 export const RateWithdraw = () => {
     const { id } = useParams() as { id: string }
-    const { updateHeading } = usePage()
+    const { updateHeading, updateActiveMainContent } = usePage()
     const navigate = useNavigate()
     const { logFormSubmitEvent } = useTealium()
     const [shouldValidate, setShouldValidate] = React.useState(false)
@@ -70,6 +70,11 @@ export const RateWithdraw = () => {
     useLayoutEffect(() => {
         updateHeading({ customHeading: stateHeader })
     }, [stateHeader, updateHeading])
+
+    // Set the active main content to focus when click the Skip to main content button.
+    useEffect(() => {
+        updateActiveMainContent('RateWithdrawForm')
+    }, [updateActiveMainContent])
 
     if (loading) {
         return <ErrorOrLoadingPage state="LOADING" />
