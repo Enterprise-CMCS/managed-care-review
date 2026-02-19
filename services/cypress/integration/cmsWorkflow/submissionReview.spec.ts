@@ -95,6 +95,19 @@ describe('CMS user can view submission', () => {
             cy.url({ timeout: 10_000 }).should('contain', submissionId)
             cy.wait('@fetchContractQuery', { timeout: 20_000 })
             cy.findByTestId('submission-summary').should('exist')
+            // ensure download link text is present
+            cy.contains('a', /download contract documents \(2 files\)/i)
+                .should('be.visible')
+                .and('have.attr', 'href')
+                .then((href) => {
+                    expect(href).to.match(/\/zips\/contracts\/[^/]+\/[^/]+\.zip(\?|$)/)
+                })
+            cy.contains('a', /download rate documents \(2 files\)/i)
+                .should('be.visible')
+                .and('have.attr', 'href')
+                .then((href) => {
+                    expect(href).to.match(/\/zips\/rates\/[^/]+\/[^/]+\.zip(\?|$)/)
+                })
 
             // No document dates or other fields are undefined
             cy.findByText('N/A').should('not.exist')
@@ -121,6 +134,13 @@ describe('CMS user can view submission', () => {
             cy.wait('@fetchContractWithQuestionsQuery', { timeout: 20_000 })
 
             cy.findByRole('heading', { name: contractName, level: 2 })
+            // ensure download link text is present
+            cy.contains('a', /download contract documents \(1 file\)/i)
+            .should('be.visible')
+            .and('have.attr', 'href')
+            .then((href) => {
+                expect(href).to.match(/\/zips\/contracts\/[^/]+\/[^/]+\.zip(\?|$)/)
+            })
 
             //TODO: Add assertions for review determination once that is added.
         })
