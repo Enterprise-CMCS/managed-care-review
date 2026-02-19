@@ -113,4 +113,18 @@ describe('FieldTextarea component', () => {
         )
         expect(screen.getByDisplayValue('default value')).toBeInTheDocument()
     })
+
+    it('display character counter when prop is provided', () => {
+        render(
+            <FieldTextarea
+                id="input1"
+                label="default label"
+                name="input1"
+                showError={false}
+                value="default value"
+                showCharacterCount={true}
+            />
+        )
+        expect(screen.getByTestId('characterCountMessage')).toBeInTheDocument()
+    })
 })

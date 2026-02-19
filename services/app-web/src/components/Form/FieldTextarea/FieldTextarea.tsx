@@ -1,6 +1,11 @@
 import React from 'react'
 import { useField } from 'formik'
-import { Label, FormGroup, CharacterCount } from '@trussworks/react-uswds'
+import {
+    Label,
+    FormGroup,
+    CharacterCount,
+    Textarea,
+} from '@trussworks/react-uswds'
 import { PoliteErrorMessage } from '../..'
 import styles from './FieldTextarea.module.scss'
 
@@ -22,6 +27,7 @@ export type TextAreaProps = {
     error?: string
     showError: boolean
     name: string
+    showCharacterCount?: boolean
 } & JSX.IntrinsicElements['textarea']
 
 export const FieldTextarea = ({
@@ -32,6 +38,7 @@ export const FieldTextarea = ({
     showError,
     name,
     onBlur,
+    showCharacterCount = false,
     ...inputProps
 }: TextAreaProps): React.ReactElement => {
     const [field, meta] = useField({ name })
@@ -44,7 +51,9 @@ export const FieldTextarea = ({
     ) => {
         if (!e) return
         e.currentTarget.value = field.value.trim()
-        e.target.setCustomValidity('') //Keep this to remove the floating tool tip built into CharacterCount
+        if (showCharacterCount) {
+            e.target.setCustomValidity('') //Keep this to remove the floating tool tip built into CharacterCount
+        }
         if (onBlur) onBlur(e)
     }
 
@@ -68,18 +77,30 @@ export const FieldTextarea = ({
                     {hint}
                 </p>
             )}
-            <CharacterCount
-                id={id}
-                name={name}
-                defaultValue={field.value}
-                onChange={field.onChange}
-                aria-describedby={hint ? `${id}-hint` : undefined}
-                onBlur={customOnBlur}
-                maxLength={1500}
-                isTextArea
-                rows={2}
-                {...inputProps}
-            />
+            {showCharacterCount ? (
+                <CharacterCount
+                    id={id}
+                    name={name}
+                    defaultValue={field.value}
+                    onChange={field.onChange}
+                    aria-describedby={hint ? `${id}-hint` : undefined}
+                    onBlur={customOnBlur}
+                    maxLength={1500}
+                    isTextArea
+                    rows={2}
+                    {...inputProps}
+                />
+            ) : (
+                <Textarea
+                    {...field}
+                    {...inputProps}
+                    id={id}
+                    aria-describedby={hint ? `${id}-hint` : undefined}
+                    name={name}
+                    error={showError}
+                    onBlur={customOnBlur}
+                />
+            )}
         </FormGroup>
     )
 }

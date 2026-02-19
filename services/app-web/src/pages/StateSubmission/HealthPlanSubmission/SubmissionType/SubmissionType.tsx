@@ -710,6 +710,7 @@ export const SubmissionType = ({
                                         />
                                     </FormGroup>
                                     <FieldTextarea
+                                        showCharacterCount={true}
                                         label="Submission description"
                                         id="submissionDescription"
                                         name="submissionDescription"

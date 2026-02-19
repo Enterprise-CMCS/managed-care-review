@@ -527,6 +527,7 @@ export const EQROSubmissionDetails = (): React.ReactElement => {
                                     </Fieldset>
                                 </FormGroup>
                                 <FieldTextarea
+                                    showCharacterCount={true}
                                     label="Submission description"
                                     id="submissionDescription"
                                     name="submissionDescription"
