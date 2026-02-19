@@ -1,4 +1,4 @@
-import opentelemetry, { type Tracer } from '@opentelemetry/api'
+import opentelemetry, { type Tracer, SpanStatusCode } from '@opentelemetry/api'
 import { trace } from '@opentelemetry/api'
 import { Resource } from '@opentelemetry/resources'
 import { OTLPTraceExporter } from '@opentelemetry/exporter-trace-otlp-http'
@@ -38,8 +38,17 @@ export function recordException(
 ) {
     const tracer = opentelemetry.trace.getTracer(serviceName)
     const span = tracer.startSpan(spanName)
-    span.recordException(error)
-    console.error(error)
+
+    try {
+        span.recordException(error)
+        span.setStatus({
+            code: SpanStatusCode.ERROR,
+            message: typeof error === 'string' ? error : error.message,
+        })
+        console.error(error)
+    } finally {
+        span.end()
+    }
 }
 
 export function createTracer(serviceName: string): Tracer {
