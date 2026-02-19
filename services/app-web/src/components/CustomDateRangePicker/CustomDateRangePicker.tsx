@@ -207,6 +207,7 @@ export const CustomDateRangePicker = (
                         onChange={startDatePickerOnChange}
                         maxDate={getMaxStartDate()}
                         inputRef={startInputRef}
+                        validationStatus={startDateError ? 'error' : undefined}
                     />
                 </div>
             </FormGroup>
@@ -258,6 +259,7 @@ export const CustomDateRangePicker = (
                         onChange={endDatePickerOnChange}
                         minDate={getMinEndDate()}
                         inputRef={endInputRef}
+                        validationStatus={endDateError ? 'error' : undefined}
                     />
                 </div>
             </FormGroup>

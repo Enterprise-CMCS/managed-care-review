@@ -591,193 +591,164 @@ export const EQROContractDetails = ({
                                             />
                                         </FormGroup>
 
-                                        <FormGroup
-                                            error={
-                                                Boolean(
-                                                    showFieldErrors(
-                                                        'contractDateStart',
-                                                        errors
-                                                    )
-                                                ) ||
-                                                Boolean(
-                                                    showFieldErrors(
-                                                        'contractDateEnd',
-                                                        errors
-                                                    )
+                                        <Fieldset
+                                            aria-required
+                                            legend={
+                                                isContractAmendment(
+                                                    draftSubmission
                                                 )
+                                                    ? 'Amendment effective dates'
+                                                    : 'Contract effective dates'
                                             }
                                         >
-                                            <Fieldset
-                                                aria-required
-                                                legend={
-                                                    isContractAmendment(
-                                                        draftSubmission
-                                                    )
-                                                        ? 'Amendment effective dates'
-                                                        : 'Contract effective dates'
+                                            <span
+                                                className={
+                                                    styles.requiredOptionalText
                                                 }
                                             >
-                                                <span
-                                                    className={
-                                                        styles.requiredOptionalText
-                                                    }
-                                                >
-                                                    Required
-                                                </span>
+                                                Required
+                                            </span>
 
-                                                <LinkWithLogging
-                                                    aria-label="Effective date guidance (opens in new window)"
-                                                    href={
-                                                        '/help#effective-date-guidance'
-                                                    }
-                                                    variant="external"
-                                                    target="_blank"
-                                                >
-                                                    Effective date guidance
-                                                </LinkWithLogging>
-                                                <CustomDateRangePicker
-                                                    className={
-                                                        styles.dateRangePicker
-                                                    }
-                                                    startDateHint="mm/dd/yyyy"
-                                                    startDateLabel="Start date"
-                                                    startDateError={showFieldErrors(
-                                                        'contractDateStart',
-                                                        errors
-                                                    )}
-                                                    startInputRef={
-                                                        startDateInputRef
-                                                    }
-                                                    onStartDateBlur={() => {
-                                                        setTimeout(() => {
-                                                            const raw =
-                                                                startDateInputRef
-                                                                    .current
-                                                                    ?.value ??
+                                            <LinkWithLogging
+                                                aria-label="Effective date guidance (opens in new window)"
+                                                href={
+                                                    '/help#effective-date-guidance'
+                                                }
+                                                variant="external"
+                                                target="_blank"
+                                            >
+                                                Effective date guidance
+                                            </LinkWithLogging>
+                                            <CustomDateRangePicker
+                                                className={
+                                                    styles.dateRangePicker
+                                                }
+                                                startDateHint="mm/dd/yyyy"
+                                                startDateLabel="Start date"
+                                                startDateError={showFieldErrors(
+                                                    'contractDateStart',
+                                                    errors
+                                                )}
+                                                startInputRef={
+                                                    startDateInputRef
+                                                }
+                                                onStartDateBlur={() => {
+                                                    setTimeout(() => {
+                                                        const raw =
+                                                            startDateInputRef
+                                                                .current
+                                                                ?.value ?? ''
+                                                        if (
+                                                            raw &&
+                                                            !isCompleteDate(raw)
+                                                        ) {
+                                                            void setFieldError(
+                                                                'contractDateStart',
+                                                                'The start date must be in MM/DD/YYYY format, like 01/01/2030'
+                                                            )
+                                                        }
+                                                    }, 100)
+                                                }}
+                                                startDatePickerProps={{
+                                                    id: 'contractDateStart',
+                                                    name: 'contractDateStart',
+                                                    'aria-required': true,
+                                                    disabled: false,
+                                                    defaultValue:
+                                                        values.contractDateStart,
+                                                    maxDate:
+                                                        formattedDateMinusOneDay(
+                                                            values.contractDateEnd
+                                                        ),
+                                                    onChange: (val) => {
+                                                        if (!val) {
+                                                            // Field was cleared
+                                                            void setFieldValue(
+                                                                'contractDateStart',
                                                                 ''
-                                                            if (
-                                                                raw &&
-                                                                !isCompleteDate(
-                                                                    raw
-                                                                )
-                                                            ) {
-                                                                void setFieldError(
-                                                                    'contractDateStart',
-                                                                    'The start date must be in MM/DD/YYYY format, like 01/01/2030'
-                                                                )
-                                                            }
-                                                        }, 100)
-                                                    }}
-                                                    startDatePickerProps={{
-                                                        id: 'contractDateStart',
-                                                        name: 'contractDateStart',
-                                                        'aria-required': true,
-                                                        disabled: false,
-                                                        defaultValue:
-                                                            values.contractDateStart,
-                                                        maxDate:
-                                                            formattedDateMinusOneDay(
-                                                                values.contractDateEnd
-                                                            ),
-                                                        onChange: (val) => {
-                                                            if (!val) {
-                                                                // Field was cleared
-                                                                void setFieldValue(
-                                                                    'contractDateStart',
-                                                                    ''
-                                                                )
-                                                            } else if (
-                                                                isCompleteDate(
+                                                            )
+                                                        } else if (
+                                                            isCompleteDate(val)
+                                                        ) {
+                                                            // Valid complete date - let it through normally
+                                                            void setFieldValue(
+                                                                'contractDateStart',
+                                                                formatUserInputDate(
                                                                     val
                                                                 )
-                                                            ) {
-                                                                // Valid complete date - let it through normally
-                                                                void setFieldValue(
-                                                                    'contractDateStart',
-                                                                    formatUserInputDate(
-                                                                        val
-                                                                    )
-                                                                )
-                                                            } else {
-                                                                // Incomplete date - set an invalid marker so Yup rejects it
-                                                                void setFieldValue(
-                                                                    'contractDateStart',
-                                                                    'INVALID'
-                                                                )
-                                                            }
-                                                        },
-                                                    }}
-                                                    endDateHint="mm/dd/yyyy"
-                                                    endDateLabel="End date"
-                                                    endDateError={showFieldErrors(
-                                                        'contractDateEnd',
-                                                        errors
-                                                    )}
-                                                    endInputRef={
-                                                        endDateInputRef
-                                                    }
-                                                    onEndDateBlur={() => {
-                                                        setTimeout(() => {
-                                                            const raw =
-                                                                endDateInputRef
-                                                                    .current
-                                                                    ?.value ??
+                                                            )
+                                                        } else {
+                                                            // Incomplete date - set an invalid marker so Yup rejects it
+                                                            void setFieldValue(
+                                                                'contractDateStart',
+                                                                'INVALID'
+                                                            )
+                                                        }
+                                                    },
+                                                }}
+                                                endDateHint="mm/dd/yyyy"
+                                                endDateLabel="End date"
+                                                endDateError={showFieldErrors(
+                                                    'contractDateEnd',
+                                                    errors
+                                                )}
+                                                endInputRef={endDateInputRef}
+                                                onEndDateBlur={() => {
+                                                    setTimeout(() => {
+                                                        const raw =
+                                                            endDateInputRef
+                                                                .current
+                                                                ?.value ?? ''
+                                                        if (
+                                                            raw &&
+                                                            !isCompleteDate(raw)
+                                                        ) {
+                                                            void setFieldError(
+                                                                'contractDateEnd',
+                                                                'The end date must be in MM/DD/YYYY format, like 01/01/2030'
+                                                            )
+                                                        }
+                                                    }, 100)
+                                                }}
+                                                endDatePickerProps={{
+                                                    disabled: false,
+                                                    id: 'contractDateEnd',
+                                                    name: 'contractDateEnd',
+                                                    'aria-required': true,
+                                                    defaultValue:
+                                                        values.contractDateEnd,
+                                                    minDate:
+                                                        formattedDatePlusOneDay(
+                                                            values.contractDateStart
+                                                        ),
+                                                    onChange: (val) => {
+                                                        if (!val) {
+                                                            // Field was cleared
+                                                            void setFieldValue(
+                                                                'contractDateEnd',
                                                                 ''
-                                                            if (
-                                                                raw &&
-                                                                !isCompleteDate(
-                                                                    raw
-                                                                )
-                                                            ) {
-                                                                void setFieldError(
-                                                                    'contractDateEnd',
-                                                                    'The end date must be in MM/DD/YYYY format, like 01/01/2030'
-                                                                )
-                                                            }
-                                                        }, 100)
-                                                    }}
-                                                    endDatePickerProps={{
-                                                        disabled: false,
-                                                        id: 'contractDateEnd',
-                                                        name: 'contractDateEnd',
-                                                        'aria-required': true,
-                                                        defaultValue:
-                                                            values.contractDateEnd,
-                                                        minDate:
-                                                            formattedDatePlusOneDay(
-                                                                values.contractDateStart
-                                                            ),
-                                                        onChange: (val) => {
-                                                            if (!val) {
-                                                                // Field was cleared
-                                                                void setFieldValue(
-                                                                    'contractDateEnd',
-                                                                    ''
-                                                                )
-                                                            } else if (
-                                                                isCompleteDate(
+                                                            )
+                                                        } else if (
+                                                            isCompleteDate(val)
+                                                        ) {
+                                                            // Valid complete date - let it through normally
+                                                            void setFieldValue(
+                                                                'contractDateEnd',
+                                                                formatUserInputDate(
                                                                     val
                                                                 )
-                                                            ) {
-                                                                // Valid complete date - let it through normally
-                                                                void setFieldValue(
-                                                                    'contractDateEnd',
-                                                                    formatUserInputDate(
-                                                                        val
-                                                                    )
-                                                                )
-                                                            } else {
-                                                                // Incomplete date - set an invalid marker so Yup rejects it
-                                                                void setFieldValue(
-                                                                    'contractDateEnd',
-                                                                    'INVALID'
-                                                                )
-                                                            }
-                                                        },
-                                                    }}
-                                                />
-                                            </Fieldset>
-                                        </FormGroup>
+                                                            )
+                                                        } else {
+                                                            // Incomplete date - set an invalid marker so Yup rejects it
+                                                            void setFieldValue(
+                                                                'contractDateEnd',
+                                                                'INVALID'
+                                                            )
+                                                        }
+                                                    },
+                                                }}
+                                            />
+                                        </Fieldset>
 
                                         {isBaseContract && isMCO && (
                                             <FormGroup
