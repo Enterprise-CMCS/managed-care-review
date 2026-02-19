@@ -78,6 +78,11 @@ function formattedDateMinusOneDay(initialValue: string): string {
         : initialValue // preserve undefined to show validations later
 }
 
+const isCompleteDate = (val: string): boolean => {
+    // Date entry has to match MM/DD/YYYY with a 4-digit year
+    return /^\d{1,2}\/\d{1,2}\/\d{4}$/.test(val.trim())
+}
+
 export type { ContractFormPageProps }
 
 export {
@@ -86,4 +91,5 @@ export {
     renameKey,
     formattedDatePlusOneDay,
     formattedDateMinusOneDay,
+    isCompleteDate,
 }
