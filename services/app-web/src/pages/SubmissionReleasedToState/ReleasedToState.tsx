@@ -100,12 +100,10 @@ const ReleasedToState = () => {
         updateHeading({ customHeading: stateHeader })
     }, [stateHeader, updateHeading])
 
-    const activeMainContentId = 'releasedToStatePageMainContent'
-
     // Set the active main content to focus when click the Skip to main content button.
     useEffect(() => {
-        updateActiveMainContent(activeMainContentId)
-    }, [activeMainContentId, updateActiveMainContent])
+        updateActiveMainContent('ReleasedToStateForm')
+    }, [updateActiveMainContent])
 
     if (fetchContractLoading) {
         return <ErrorOrLoadingPage state="LOADING" />
@@ -156,7 +154,7 @@ const ReleasedToState = () => {
     }
 
     return (
-        <div id={activeMainContentId} className={styles.uploadFormContainer}>
+        <div className={styles.uploadFormContainer}>
             <Breadcrumbs
                 className="usa-breadcrumb--wrap"
                 items={[

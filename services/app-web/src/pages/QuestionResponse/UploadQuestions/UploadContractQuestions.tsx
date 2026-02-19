@@ -62,12 +62,10 @@ export const UploadContractQuestions = () => {
         updateHeading({ customHeading: stateHeader })
     }, [stateHeader, updateHeading])
 
-    const activeMainContentId = 'contractQuestionPageMainContent'
-
     // Set the active main content to focus when click the Skip to main content button.
     useEffect(() => {
-        updateActiveMainContent(activeMainContentId)
-    }, [activeMainContentId, updateActiveMainContent])
+        updateActiveMainContent('contractAddQuestionsForm')
+    }, [updateActiveMainContent])
 
     if (fetchContractLoading) {
         return <ErrorOrLoadingPage state="LOADING" />
@@ -134,7 +132,7 @@ export const UploadContractQuestions = () => {
     )
 
     return (
-        <div id={activeMainContentId} className={styles.uploadFormContainer}>
+        <div className={styles.uploadFormContainer}>
             <Breadcrumbs
                 className="usa-breadcrumb--wrap"
                 items={[

@@ -73,12 +73,10 @@ export const UploadContractResponse = () => {
         updateHeading({ customHeading: stateHeader })
     }, [stateHeader, updateHeading])
 
-    const activeMainContentId = 'contractResponsePageMainContent'
-
     // Set the active main content to focus when click the Skip to main content button.
     useEffect(() => {
-        updateActiveMainContent(activeMainContentId)
-    }, [activeMainContentId, updateActiveMainContent])
+        updateActiveMainContent('contractAddQuestionsResponseForm')
+    }, [updateActiveMainContent])
 
     // confirm division is valid
     const realDivision = division?.toUpperCase()
@@ -148,7 +146,7 @@ export const UploadContractResponse = () => {
         questionID
     )
     return (
-        <div id={activeMainContentId} className={styles.uploadFormContainer}>
+        <div className={styles.uploadFormContainer}>
             <Breadcrumbs
                 className="usa-breadcrumb--wrap"
                 items={[

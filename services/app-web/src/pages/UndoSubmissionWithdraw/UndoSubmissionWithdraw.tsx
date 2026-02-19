@@ -85,12 +85,10 @@ export const UndoSubmissionWithdraw = (): React.ReactElement => {
         updateHeading({ customHeading: stateHeader })
     }, [stateHeader, updateHeading])
 
-    const activeMainContentId = 'contractDetailsPageMainContent'
-
     // Set the active main content to focus when click the Skip to main content button.
     useEffect(() => {
-        updateActiveMainContent(activeMainContentId)
-    }, [activeMainContentId, updateActiveMainContent])    
+        updateActiveMainContent('undoSubmissionWithdrawForm')
+    }, [updateActiveMainContent])    
 
     if (loading) {
         return <ErrorOrLoadingPage state="LOADING" />
@@ -136,10 +134,7 @@ export const UndoSubmissionWithdraw = (): React.ReactElement => {
     }
 
     return (
-        <div
-            id={activeMainContentId}
-            className={styles.undoSubmissionWithdrawContainer}
-        >
+        <div className={styles.undoSubmissionWithdrawContainer}>
             <Breadcrumbs
                 className="usa-breadcrumb--wrap"
                 items={[

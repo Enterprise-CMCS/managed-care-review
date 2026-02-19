@@ -144,12 +144,10 @@ export const SubmissionWithdraw = (): React.ReactElement => {
         updateHeading({ customHeading: stateHeader })
     }, [stateHeader, updateHeading])
 
-    const activeMainContentId = 'submissionWithdrawPageMainContent'
-
     // Set the active main content to focus when click the Skip to main content button.
     useEffect(() => {
-        updateActiveMainContent(activeMainContentId)
-    }, [activeMainContentId, updateActiveMainContent])
+        updateActiveMainContent('SubmissionWithdrawForm')
+    }, [updateActiveMainContent])
 
     //Fetching rates associated with above contract to determine whether or not they will be withdrawn (banner display)
     //This query will be skipped if rateIDs comes up empty
@@ -236,10 +234,7 @@ export const SubmissionWithdraw = (): React.ReactElement => {
     }
 
     return (
-        <div
-            id={activeMainContentId}
-            className={styles.submissionWithdrawContainer}
-        >
+        <div className={styles.submissionWithdrawContainer}>
             <Breadcrumbs
                 className="use-breadcrumb--wrap"
                 items={[
