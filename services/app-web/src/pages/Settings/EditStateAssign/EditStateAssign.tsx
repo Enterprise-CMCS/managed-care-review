@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { useEffect } from 'react'
 import {
     ButtonGroup,
     FormGroup,
@@ -40,6 +40,7 @@ import styles from './EditStateAssign.module.scss'
 import * as Yup from 'yup'
 import { recordJSException } from '@mc-review/otel'
 import { MCReviewSettingsContextType } from '../Settings'
+import { usePage } from '../../../contexts/PageContext'
 
 const EditStateAssignmentSchema = Yup.object().shape({
     dmcoAssignmentsByID: Yup.array().min(
@@ -65,6 +66,12 @@ export const EditStateAssign = (): React.ReactElement => {
     const settingsContext = useOutletContext<MCReviewSettingsContextType>()
     const setLastUpdated = settingsContext?.stateAnalysts.setLastUpdated
     const navigate = useNavigate()
+    const { updateActiveMainContent } = usePage()
+
+    // Set the active main content to focus when click the Skip to main content button.
+    useEffect(() => {
+        updateActiveMainContent('EditStateAssignForm')
+    }, [updateActiveMainContent])
 
     const {
         loading: loadingMcReviewSettings,

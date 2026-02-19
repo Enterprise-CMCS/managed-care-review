@@ -98,9 +98,10 @@ jobs:
         with:
           region: ${{ vars.AWS_DEFAULT_REGION }}
           account-id: ${{ secrets.DEV_AWS_ACCOUNT_ID }}
-          # Use main OIDC role since branch-specific role doesn't exist yet
-          stage-name: main
+          # Use dev CDK role for bootstrapping since branch-specific role doesn't exist yet
+          stage-name: dev
           changed-services: "github-oidc"
+          use-cdk-role: "true"
 
       - name: deploy github-oidc with CDK
         id: deploy-github-oidc-cdk

@@ -1,4 +1,4 @@
-import React, { useState, useLayoutEffect } from 'react'
+import React, { useState, useLayoutEffect, useEffect } from 'react'
 import {
     Form as UswdsForm,
     ButtonGroup,
@@ -51,7 +51,7 @@ export const MccrsId = (): React.ReactElement => {
     const navigate = useNavigate()
 
     // page context
-    const { updateHeading } = usePage()
+    const { updateHeading, updateActiveMainContent } = usePage()
 
     const [showPageErrorMessage, setShowPageErrorMessage] = useState<
         boolean | string
@@ -85,6 +85,11 @@ export const MccrsId = (): React.ReactElement => {
     useLayoutEffect(() => {
         updateHeading({ customHeading: stateHeader })
     }, [stateHeader, updateHeading])
+ 
+     // Set the active main content to focus when click the Skip to main content button.
+     useEffect(() => {
+         updateActiveMainContent('MCCRSIDForm')
+     }, [updateActiveMainContent])   
 
     // Handle loading and error states for fetching data while using cached data
     if (!fetchContractData && fetchContractLoading) {
