@@ -261,7 +261,8 @@ const RateDetails = ({
         setShowAPIErrorBanner(false)
         const dsnpPopulated =
             contract?.draftRevision?.formData?.dsnpContract != null &&
-            contract?.draftRevision?.formData?.dsnpContract != undefined
+            contract?.draftRevision?.formData?.dsnpContract != undefined &&
+            contract?.draftRevision?.formData?.dsnpContract === true
         if (options.type === 'SAVE_AS_DRAFT' && draftSaved) {
             setDraftSaved(false)
         }
