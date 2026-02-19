@@ -248,14 +248,15 @@ jobs:
         shell: bash
         run: pnpm build:packages
 
-      - name: Get AWS credentials (bootstrap with main OIDC role)
+      - name: Get AWS credentials (bootstrap with dev CDK OIDC role)
         uses: ./.github/actions/get_aws_credentials
         with:
           region: ${{ vars.AWS_DEFAULT_REGION }}
           account-id: ${{ secrets.DEV_AWS_ACCOUNT_ID }}
-          # Use main OIDC role for bootstrapping since dev-specific role doesn't exist yet
-          stage-name: main
+          # Use dev CDK role for bootstrapping - this role is persistent across deployments
+          stage-name: dev
           changed-services: "github-oidc"
+          use-cdk-role: "true"
 
       - name: deploy github-oidc with CDK
         id: deploy-github-oidc-cdk
@@ -636,6 +637,7 @@ jobs:
           account-id: ${{ secrets.VAL_AWS_ACCOUNT_ID }}
           stage-name: val
           changed-services: "github-oidc"
+          use-cdk-role: "true"
 
       - name: deploy github-oidc with CDK
         id: deploy-github-oidc-cdk
@@ -1008,6 +1010,7 @@ jobs:
           account-id: ${{ secrets.PROD_AWS_ACCOUNT_ID }}
           stage-name: prod
           changed-services: "github-oidc"
+          use-cdk-role: "true"
 
       - name: deploy github-oidc with CDK
         id: deploy-github-oidc-cdk
