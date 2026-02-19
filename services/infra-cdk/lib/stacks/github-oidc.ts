@@ -6,6 +6,7 @@ import {
     ManagedPolicy,
     PolicyStatement,
     Effect,
+    OpenIdConnectProvider,
 } from 'aws-cdk-lib/aws-iam'
 import { BaseStack, type BaseStackProps } from '../constructs/base'
 
@@ -13,15 +14,24 @@ import { BaseStack, type BaseStackProps } from '../constructs/base'
 const PERMISSION_BOUNDARY_ARN = (accountId: string) =>
     `arn:aws:iam::${accountId}:policy/cms-cloud-admin/ct-ado-poweruser-permissions-boundary-policy`
 
+// Official stages own the OIDC provider in their respective AWS account.
+// Review branch stacks reference the provider created by the dev stack.
+const OFFICIAL_STAGES = ['dev', 'val', 'prod']
+
+// GitHub thumbprints from https://github.blog/changelog/2022-01-13-github-actions-update-on-oidc-based-deployments-to-aws/
+const GITHUB_THUMBPRINTS = [
+    '6938fd4d98bab03faadb97b34396831e3780aea1',
+    '1c58a3a8518e8759bf075b76b750d4f2df264fcd',
+]
+
 export interface GitHubOidcServiceRoleStackProps extends BaseStackProps {}
 
 /**
- * Stack for creating GitHub Actions OIDC service role for a specific stage
+ * Stack for creating GitHub Actions OIDC service role for a specific stage.
  *
- * This creates only the stage-specific service role, not the OIDC provider.
- * The OIDC provider already exists and is shared across all stages.
- *
- * Mirrors the behavior of services/github-oidc/serverless.yml but using CDK.
+ * For official stages (dev, val, prod), this also creates the IAM OIDC Identity
+ * Provider - one per AWS account. Review branch stacks reference the existing
+ * provider created by the dev stage stack in the same account.
  */
 export class GitHubOidcServiceRoleStack extends BaseStack {
     public readonly serviceRole: Role
@@ -38,8 +48,23 @@ export class GitHubOidcServiceRoleStack extends BaseStack {
                 `GitHub OIDC service role for ${props.stage} stage`,
         })
 
-        // Reference the existing OIDC provider (created 2 years ago)
-        const existingOidcProviderArn = `arn:aws:iam::${this.account}:oidc-provider/token.actions.githubusercontent.com`
+        const isOfficialStage = OFFICIAL_STAGES.includes(this.stage)
+
+        // Official stages create the OIDC provider (one per AWS account).
+        // Review branch stacks reference the provider owned by the dev stack.
+        const oidcProvider = isOfficialStage
+            ? new OpenIdConnectProvider(this, 'GitHubOidcProvider', {
+                  url: 'https://token.actions.githubusercontent.com',
+                  clientIds: ['sts.amazonaws.com'],
+                  thumbprints: GITHUB_THUMBPRINTS,
+              })
+            : OpenIdConnectProvider.fromOpenIdConnectProviderArn(
+                  this,
+                  'GitHubOidcProvider',
+                  `arn:aws:iam::${this.account}:oidc-provider/token.actions.githubusercontent.com`
+              )
+
+        const oidcProviderArn = oidcProvider.openIdConnectProviderArn
 
         // Determine subject claim based on stage (matching Serverless logic)
         const subjectClaim = ['val', 'prod'].includes(this.stage)
@@ -49,7 +74,7 @@ export class GitHubOidcServiceRoleStack extends BaseStack {
         // Create the stage-specific service role (CDK version to avoid Serverless conflict)
         this.serviceRole = new Role(this, 'GitHubActionsServiceRole', {
             roleName: `github-oidc-cdk-${this.stage}-ServiceRole`,
-            assumedBy: new WebIdentityPrincipal(existingOidcProviderArn, {
+            assumedBy: new WebIdentityPrincipal(oidcProviderArn, {
                 StringEquals: {
                     'token.actions.githubusercontent.com:sub': subjectClaim,
                     'token.actions.githubusercontent.com:aud':
