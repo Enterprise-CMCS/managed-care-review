@@ -297,65 +297,6 @@ it('shows validation error when submission description exceeds 1500 characters a
     })
 })
 
-it('shows validation warning when user exceeds character count', async () => {
-    let testLocation: Location
-    renderWithProviders(
-        <Routes>
-            <Route
-                element={<EQROSubmissionDetails />}
-                path={RoutesRecord.SUBMISSIONS_NEW_SUBMISSION_FORM}
-            />
-        </Routes>,
-        {
-            apolloProvider: {
-                mocks: [
-                    fetchCurrentUserMock({ statusCode: 200 }),
-                    fetchCurrentUserMock({ statusCode: 200 }),
-                ],
-            },
-            routerProvider: { route: '/submissions/new/eqro' },
-            location: (location) => (testLocation = location),
-        }
-    )
-
-    await waitFor(() => {
-        expect(testLocation.pathname).toBe(
-            generatePath(RoutesRecord.SUBMISSIONS_NEW_SUBMISSION_FORM, {
-                contractSubmissionType: 'eqro',
-            })
-        )
-    })
-
-    const textarea = screen.getByRole('textbox', {
-        name: 'Submission description',
-    })
-
-    // Text that exceeds limit to trigger error
-    const tooLongText = 'a'.repeat(1501)
-    await userEvent.click(textarea)
-    await userEvent.paste(tooLongText)
-
-    // Expect counter to display error message
-    await waitFor(() => {
-        expect(screen.queryAllByText('1 character over limit')).toHaveLength(1)
-        expect(screen.getByTestId('characterCountMessage')).toHaveClass(
-            'usa-character-count__message--invalid'
-        )
-    })
-
-    // Reduce text to not exceed threshhold
-    await userEvent.click(textarea)
-    await userEvent.keyboard('{Backspace}')
-
-    // Expect error to disappear
-    await waitFor(() => {
-        expect(screen.queryAllByText('1 character over limit')).toHaveLength(0)
-        expect(screen.getByTestId('characterCountMessage')).not.toHaveClass(
-            'usa-character-count__message--invalid'
-        )
-    })
-})
-
 it('displays generic error banner when creating EQRO submission fails', async () => {
     let testLocation: Location
     renderWithProviders(

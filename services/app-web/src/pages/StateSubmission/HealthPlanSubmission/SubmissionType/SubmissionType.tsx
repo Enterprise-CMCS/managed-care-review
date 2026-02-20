@@ -16,7 +16,7 @@ import {
     DynamicStepIndicator,
     ErrorSummary,
     FieldRadio,
-    FieldTextarea,
+    FieldCharacterCount,
     FieldYesNo,
     FormNotificationContainer,
     PoliteErrorMessage,
@@ -709,23 +709,15 @@ export const SubmissionType = ({
                                             )}
                                         />
                                     </FormGroup>
-                                    <FieldTextarea
-                                        showCharacterCount={true}
+                                    <FieldCharacterCount
                                         label="Submission description"
                                         id="submissionDescription"
                                         name="submissionDescription"
                                         aria-required
                                         aria-describedby="submissionDescriptionHelp"
-                                        showError={
-                                            showFieldErrors(
-                                                errors.submissionDescription
-                                            ) ||
-                                            (values.submissionDescription
-                                                .length > 1500 &&
-                                                Boolean(
-                                                    errors.submissionDescription
-                                                ))
-                                        }
+                                        showError={showFieldErrors(
+                                            errors.submissionDescription
+                                        )}
                                         hint={
                                             <>
                                                 <span

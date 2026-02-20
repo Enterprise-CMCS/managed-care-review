@@ -4,7 +4,7 @@ import {
     ErrorSummary,
     FieldCheckbox,
     FieldRadio,
-    FieldTextarea,
+    FieldCharacterCount,
     FormContainer,
     FormNotificationContainer,
     PageActions,
@@ -526,23 +526,15 @@ export const EQROSubmissionDetails = (): React.ReactElement => {
                                         />
                                     </Fieldset>
                                 </FormGroup>
-                                <FieldTextarea
-                                    showCharacterCount={true}
+                                <FieldCharacterCount
                                     label="Submission description"
                                     id="submissionDescription"
                                     name="submissionDescription"
                                     aria-required
                                     aria-describedby="submissionDescriptionHelp"
-                                    showError={
-                                        showFieldErrors(
-                                            errors.submissionDescription
-                                        ) ||
-                                        (values.submissionDescription.length >
-                                            1500 &&
-                                            Boolean(
-                                                errors.submissionDescription
-                                            ))
-                                    } //NOTE: This helps trigger the error highlight when the user actively types past the character limit
+                                    showError={showFieldErrors(
+                                        errors.submissionDescription
+                                    )}
                                     hint={
                                         <>
                                             <span

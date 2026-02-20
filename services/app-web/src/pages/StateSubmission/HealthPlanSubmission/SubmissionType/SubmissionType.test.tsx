@@ -849,46 +849,5 @@ describe('SubmissionType', () => {
                 ).not.toBeInTheDocument()
             })
         })
-
-        it('shows validation warning when user exceeds character count', async () => {
-            renderWithProviders(<SubmissionType />, {
-                apolloProvider: {
-                    mocks: [fetchCurrentUserMock({ statusCode: 200 })],
-                },
-            })
-
-            const textarea = screen.getByRole('textbox', {
-                name: 'Submission description',
-            })
-
-            // Text that exceeds limit to trigger error
-            const tooLongText = 'a'.repeat(1501)
-            await userEvent.click(textarea)
-            await userEvent.paste(tooLongText)
-
-            // Expect counter to display error message
-            await waitFor(() => {
-                expect(
-                    screen.queryAllByText('1 character over limit')
-                ).toHaveLength(1)
-                expect(screen.getByTestId('characterCountMessage')).toHaveClass(
-                    'usa-character-count__message--invalid'
-                )
-            })
-
-            // Reduce text to not exceed threshhold
-            await userEvent.click(textarea)
-            await userEvent.keyboard('{Backspace}')
-
-            // Expect error to disappear
-            await waitFor(() => {
-                expect(
-                    screen.queryAllByText('1 character over limit')
-                ).toHaveLength(0)
-                expect(
-                    screen.getByTestId('characterCountMessage')
-                ).not.toHaveClass('usa-character-count__message--invalid')
-            })
-        })
     })
 })
