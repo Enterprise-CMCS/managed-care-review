@@ -207,6 +207,22 @@ export function submitContract(
 
         contractToParse.draftRates = draftRatesWithoutLinkedRates
 
+        // MCR-5970 if user changes DSNP, ensure rate medicaidPopulations is cleared out
+        const isDsnp = contractWithHistory.draftRevision.formData.dsnpContract
+
+        // Clear medicaidPopulations from rates if dsnpContract is false
+        if (
+            !isDsnp &&
+            draftRatesWithoutLinkedRates &&
+            draftRatesWithoutLinkedRates.length > 0
+        ) {
+            draftRatesWithoutLinkedRates.forEach((rate) => {
+                if (rate.draftRevision?.formData) {
+                    rate.draftRevision.formData.rateMedicaidPopulations = []
+                }
+            })
+        }
+
         const parsedContract = isEQRO
             ? parseEQROContract(
                   contractToParse,
