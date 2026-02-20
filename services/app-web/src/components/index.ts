@@ -17,6 +17,7 @@ export {
     FieldDropdown,
     FieldRadio,
     FieldTextarea,
+    FieldCharacterCount,
     FieldTextInput,
     FieldPreserveScrollPosition,
     FieldYesNo,
