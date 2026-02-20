@@ -260,50 +260,6 @@ jobs:
           name: packages-test-coverage
           path: ./packages/**/coverage/coverage-final.json
 
-  build-lambda-layers:
-    name: build - lambda layers
-    runs-on: ubuntu-24.04
-    steps:
-      - name: Check out repository
-        uses: actions/checkout@v6
-
-      - name: Setup env
-        uses: ./.github/actions/setup_env
-
-      - name: Generate protos
-        working-directory: services/app-proto
-        run: pnpm generate
-
-      # Generate Prisma Client and binary that can run in a lambda environment
-      - name: Prepare prisma client
-        working-directory: services/app-api
-        env:
-          PRISMA_CLI_BINARY_TARGETS: rhel-openssl-3.0.x
-        run: pnpm prisma generate
-
-      - name: Prepare "@prisma/client" lambda layer
-        working-directory: services/app-api
-        run: ./scripts/prepare-prisma-layer.sh
-
-      - uses: actions/upload-artifact@v6
-        with:
-          name: lambda-layers-prisma-client-migration
-          path: ./services/app-api/lambda-layers-prisma-client-migration
-
-      - uses: actions/upload-artifact@v6
-        with:
-          name: lambda-layers-prisma-client-engine
-          path: ./services/app-api/lambda-layers-prisma-client-engine
-
-      - name: Prepare postgres tools lambda layer
-        working-directory: services/postgres
-        run: ./build-postgres-lambda-layer.sh
-
-      - uses: actions/upload-artifact@v6
-        with:
-          name: lambda-layers-postgres-tools
-          path: ./services/postgres/lambda-layers-postgres-tools
-
   deploy-cdk-infrastructure:
     needs: [begin-deployment, deploy-github-oidc]
     name: deploy - CDK infrastructure stacks
@@ -545,7 +501,6 @@ jobs:
       [
         begin-deployment,
         deploy-cdk-infrastructure,
-        build-lambda-layers,
         web-unit-tests,
         api-unit-tests,
         packages-unit-tests,
@@ -553,7 +508,6 @@ jobs:
     if: |
       always() &&
       needs.deploy-cdk-infrastructure.result == 'success' &&
-      needs.build-lambda-layers.result == 'success' &&
       needs.web-unit-tests.result == 'success' &&
       needs.api-unit-tests.result == 'success' &&
       needs.packages-unit-tests.result == 'success' &&

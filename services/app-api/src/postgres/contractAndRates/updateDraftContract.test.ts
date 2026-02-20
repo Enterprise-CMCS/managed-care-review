@@ -6,7 +6,7 @@ import {
     must,
 } from '../../testHelpers'
 import { updateDraftContract } from './updateDraftContract'
-import { PrismaClientValidationError } from '@prisma/client/runtime/library'
+import { Prisma } from '@prisma/client'
 import type { ContractType } from '@prisma/client'
 import type { ContractFormDataType } from '../../domain-models'
 import type { UpdateDraftContractFormDataType } from '../../domain-models/contractAndRates/formDataTypes'
@@ -348,7 +348,7 @@ describe('updateDraftContractWithRates postgres', () => {
         })
 
         // Expect a prisma error
-        expect(updatedRate).toBeInstanceOf(PrismaClientValidationError)
+        expect(updatedRate).toBeInstanceOf(Prisma.PrismaClientValidationError)
     })
 
     it('returns an error when invalid contract ID provided', async () => {
