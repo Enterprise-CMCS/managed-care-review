@@ -94,11 +94,14 @@ export function newDeployedS3Client(
             bucket: BucketShortName,
             expiresIn?: number
         ): Promise<string> => {
-            // uploads from app-web are prepended with '/allusers'
-            // hardcode the 'allusers' into the key so that the path matches
+            // If the key already contains a path (migrated docs store full path like 'allusers/uuid.pdf'),
+            // use it as-is. Otherwise, prepend 'allusers/' for backwards compatibility with
+            // old docs that fall back to parseKey() which returns just the UUID part.
+            const fullKey = s3key.includes('/') ? s3key : `allusers/${s3key}`
+
             const command = new GetObjectCommand({
                 Bucket: bucketConfig[bucket],
-                Key: `allusers/${s3key}`,
+                Key: fullKey,
             })
 
             // Create the presigned URL.
