@@ -125,15 +125,13 @@ jobs:
       - name: Generate code
         run: pnpm -r generate
 
-      - name: Generate Prisma
+      - name: Reset test database
         env:
           NODE_OPTIONS: --max_old_space_size=6000
           VITE_APP_AUTH_MODE: IDM
           DATABASE_URL: postgresql://postgres:shhhsecret@localhost:5432/postgres?schema=public&connection_limit=5 #pragma: allowlist secret
         working-directory: services/app-api
-        run: |
-          pnpm generate
-          npx prisma migrate reset --force
+        run: npx prisma migrate reset --force --config ../../prisma.config.ts
 
       - name: Build packages
         shell: bash
