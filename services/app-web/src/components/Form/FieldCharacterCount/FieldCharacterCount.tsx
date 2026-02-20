@@ -1,30 +1,11 @@
 import React from 'react'
 import { useField } from 'formik'
-import { Label, FormGroup, Textarea } from '@trussworks/react-uswds'
+import { Label, FormGroup, CharacterCount } from '@trussworks/react-uswds'
 import { PoliteErrorMessage } from '../..'
-import styles from './FieldTextarea.module.scss'
+import type { TextAreaProps } from '../FieldTextarea/FieldTextarea'
+import styles from '../FieldTextarea/FieldTextarea.module.scss'
 
-/**
- * This component renders a ReactUSWDS TextArea component inside of a FormGroup,
- * with a Label and ErrorMessage.
- *
- * It relies on the Formik useField hook to work, so it must ALWAYS be rendered
- * inside of a Formik form context.
- *
- * If you want to use these components outside a Formik form, you can use the
- * ReactUSWDS components directly.
- */
-
-export type TextAreaProps = {
-    label: string
-    id: string
-    hint?: React.ReactNode
-    error?: string
-    showError: boolean
-    name: string
-} & JSX.IntrinsicElements['textarea']
-
-export const FieldTextarea = ({
+export const FieldCharacterCount = ({
     label,
     id,
     hint,
@@ -36,6 +17,8 @@ export const FieldTextarea = ({
 }: TextAreaProps): React.ReactElement => {
     const [field, meta] = useField({ name })
     const isRequired = inputProps['aria-required']
+    const isOverLimit = (field.value?.length ?? 0) > 1500
+    const showErrorBorder = showError || isOverLimit
 
     // Latch into onBlur to do any input cleaning
     // Initial use case is to trim away trailing whitespace in email addresses
@@ -44,16 +27,17 @@ export const FieldTextarea = ({
     ) => {
         if (!e) return
         e.currentTarget.value = field.value.trim()
+        e.target.setCustomValidity('') //Keep this to remove the floating tool tip built into CharacterCount
         if (onBlur) onBlur(e)
     }
 
     return (
-        <FormGroup error={showError}>
+        <FormGroup error={showErrorBorder}>
             <Label htmlFor={id}>{label}</Label>
             <span className={styles.requiredOptionalText}>
                 {isRequired ? 'Required' : 'Optional'}
             </span>
-            {showError && (
+            {showError && meta.touched && (
                 <PoliteErrorMessage formFieldLabel={label}>
                     {meta.error}
                 </PoliteErrorMessage>
@@ -67,14 +51,18 @@ export const FieldTextarea = ({
                     {hint}
                 </p>
             )}
-            <Textarea
-                {...field}
-                {...inputProps}
+            <CharacterCount
                 id={id}
-                aria-describedby={hint ? `${id}-hint` : undefined}
                 name={name}
-                error={showError}
+                defaultValue={field.value}
+                onChange={field.onChange}
+                aria-describedby={hint ? `${id}-hint` : undefined}
                 onBlur={customOnBlur}
+                maxLength={1500}
+                isTextArea
+                rows={2}
+                error={showErrorBorder}
+                {...inputProps}
             />
         </FormGroup>
     )
