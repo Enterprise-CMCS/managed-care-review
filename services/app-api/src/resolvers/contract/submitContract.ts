@@ -341,17 +341,26 @@ export function submitContract(
                 parsedContract.draftRates &&
                 parsedContract.draftRates.length > 0
             ) {
+                const updateRates: UpdateDraftContractRatesArgsType['rateUpdates']['update'] =
+                    []
+                const linkRates: UpdateDraftContractRatesArgsType['rateUpdates']['link'] =
+                    []
                 for (
                     let idx = 0;
                     idx < parsedContract.draftRates.length;
                     idx++
                 ) {
                     const draftRate = parsedContract.draftRates[idx]
+
+                    if (draftRate.parentContractID !== parsedContract.id) {
+                        // keep linked rates
+                        linkRates.push({
+                            rateID: draftRate.id,
+                            ratePosition: idx + 1,
+                        })
+                    }
                     if (draftRate.parentContractID === parsedContract.id) {
                         // update if it's a child rate
-                        const updateRates: UpdateDraftContractRatesArgsType['rateUpdates']['update'] =
-                            []
-
                         updateRates.push({
                             rateID: draftRate.id,
                             formData: {
@@ -359,27 +368,32 @@ export function submitContract(
                             },
                             ratePosition: idx + 1,
                         })
-
-                        const rateUpdates: UpdateDraftContractRatesArgsType = {
-                            contractID: parsedContract.id,
-                            rateUpdates: {
-                                create: [],
-                                update: [...updateRates],
-                                link: [],
-                                unlink: [],
-                                delete: [],
-                            },
-                        }
-
-                        const rateUpdateResult = await store.updateDraftContractRates(rateUpdates)
-                          if (rateUpdateResult instanceof Error) {
-                              const errMessage = 'Error while attempting to update rates on a child rate where dsnp is false'
-                              logError('submitContract', errMessage)
-                              setErrorAttributesOnActiveSpan(errMessage, span)
-                              throw new Error(errMessage)
-                          }
                     }
                 }
+
+                const rateUpdates: UpdateDraftContractRatesArgsType = {
+                    contractID: parsedContract.id,
+                    rateUpdates: {
+                        create: [],
+                        update: [...updateRates],
+                        link: [
+                            ...linkRates.sort(
+                                (a, b) => a.ratePosition - b.ratePosition
+                            ),
+                        ],
+                        unlink: [],
+                        delete: [],
+                    },
+                }
+
+                const rateUpdateResult =
+                    await store.updateDraftContractRates(rateUpdates)
+                if (rateUpdateResult instanceof Error) {
+                    const errMessage = `${rateUpdateResult.message} :: Error while attempting to update rates on a child rate where dsnp is false`
+                    logError('submitContract', errMessage)
+                    setErrorAttributesOnActiveSpan(errMessage, span)
+                    throw new Error(errMessage)
+                }                
             }
         }
 
