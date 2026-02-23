@@ -213,10 +213,10 @@ export function submitContract(
         // Clear medicaidPopulations from rates if dsnpContract is false
         if (
             !isDsnp &&
-            draftRatesWithoutLinkedRates &&
-            draftRatesWithoutLinkedRates.length > 0
+            contractToParse.draftRates &&
+            contractToParse.draftRates.length > 0
         ) {
-            draftRatesWithoutLinkedRates.forEach((rate) => {
+            contractToParse.draftRates.forEach((rate) => {
                 if (rate.draftRevision?.formData) {
                     rate.draftRevision.formData.rateMedicaidPopulations = []
                 }
@@ -331,6 +331,53 @@ export function submitContract(
                             'rateID',
                             draftRate.id
                         )
+                    }
+                }
+            }
+
+            //Ensure the rate is updated if dsnp is now false
+            if (
+                !isDsnp &&
+                parsedContract.draftRates &&
+                parsedContract.draftRates.length > 0
+            ) {
+                for (
+                    let idx = 0;
+                    idx < parsedContract.draftRates.length;
+                    idx++
+                ) {
+                    const draftRate = parsedContract.draftRates[idx]
+                    if (draftRate.parentContractID === parsedContract.id) {
+                        // update if it's a child rate
+                        const updateRates: UpdateDraftContractRatesArgsType['rateUpdates']['update'] =
+                            []
+
+                        updateRates.push({
+                            rateID: draftRate.id,
+                            formData: {
+                                ...draftRate.draftRevision?.formData,
+                            },
+                            ratePosition: idx + 1,
+                        })
+
+                        const rateUpdates: UpdateDraftContractRatesArgsType = {
+                            contractID: parsedContract.id,
+                            rateUpdates: {
+                                create: [],
+                                update: [...updateRates],
+                                link: [],
+                                unlink: [],
+                                delete: [],
+                            },
+                        }
+
+                        const rateUpdateResult = await store.updateDraftContractRates(rateUpdates)
+                          if (rateUpdateResult instanceof Error) {
+                              const errMessage = 'Error while attempting to update rates on a child rate where dsnp is false'
+                              logError('submitContract', errMessage)
+                              setErrorAttributesOnActiveSpan(errMessage, span)
+                              throw new Error(errMessage)
+                          }
                     }
                 }
             }
