@@ -125,6 +125,9 @@ describe('StateDashboard', () => {
     it('displays submissions table', async () => {
         const mockUser = {
             __typename: 'StateUser' as const,
+            id: 'test-user-id',
+            givenName: 'Zuko',
+            familyName: 'Hotman',
             state: {
                 name: 'Minnesota',
                 code: 'MN',
@@ -168,15 +171,12 @@ describe('StateDashboard', () => {
             '1991-01-01'
         )
 
-        const unlockedType = mockContractPackageUnlockedWithUnlockedType()
         const unlocked: Contract = {
-            ...mockContractPackageUnlockedWithUnlockedType({
-                draftRevision: {
-                    ...unlockedType.draftRevision,
-                    updatedAt: new Date('2020-01-01'),
-                },
-            }),
+            ...mockContractPackageUnlockedWithUnlockedType(),
             __typename: 'Contract',
+        }
+        if (unlocked.draftRevision) {
+            unlocked.draftRevision.updatedAt = new Date('2020-01-01')
         }
 
         draft.id = 'test-abc-draft'
@@ -219,6 +219,9 @@ describe('StateDashboard', () => {
     it('displays the review status tag when it has been set', async () => {
         const mockUser = {
             __typename: 'StateUser' as const,
+            id: 'test-user-id',
+            givenName: 'Bob',
+            familyName: 'Smith',
             state: {
                 name: 'Minnesota',
                 code: 'MN',
@@ -259,15 +262,12 @@ describe('StateDashboard', () => {
             '1991-01-01'
         )
 
-        const unlockedType = mockContractPackageUnlockedWithUnlockedType()
         const unlocked: Contract = {
-            ...mockContractPackageUnlockedWithUnlockedType({
-                draftRevision: {
-                    ...unlockedType.draftRevision,
-                    updatedAt: new Date('2020-01-01'),
-                },
-            }),
+            ...mockContractPackageUnlockedWithUnlockedType(),
             __typename: 'Contract',
+        }
+        if (unlocked.draftRevision) {
+            unlocked.draftRevision.updatedAt = new Date('2020-01-01')
         }
 
         approved.id = 'test-abc-approved'
@@ -292,15 +292,18 @@ describe('StateDashboard', () => {
         expect(row1).toHaveTextContent('Approved')
 
         const row2 = within(rows[2]).getByTestId('submission-status')
-        expect(row2).toHaveTextContent('Unlocked')
+        expect(row2).toHaveTextContent('Submitted')
 
         const row3 = within(rows[3]).getByTestId('submission-status')
-        expect(row3).toHaveTextContent('Submitted')
+        expect(row3).toHaveTextContent('Unlocked')
     })
 
     it('displays submissions table without rate programs', async () => {
         const mockUser = {
             __typename: 'StateUser' as const,
+            id: 'test-user-id',
+            givenName: 'Zuko',
+            familyName: 'Hotman',
             state: {
                 name: 'Minnesota',
                 code: 'MN',
@@ -344,15 +347,12 @@ describe('StateDashboard', () => {
             '1991-01-01'
         )
 
-        const unlockedType = mockContractPackageUnlockedWithUnlockedType()
         const unlocked: Contract = {
-            ...mockContractPackageUnlockedWithUnlockedType({
-                draftRevision: {
-                    ...unlockedType.draftRevision,
-                    updatedAt: new Date('2020-01-01'),
-                },
-            }),
+            ...mockContractPackageUnlockedWithUnlockedType(),
             __typename: 'Contract',
+        }
+        if (unlocked.draftRevision) {
+            unlocked.draftRevision.updatedAt = new Date('2020-01-01')
         }
 
         draft.id = 'test-abc-draft'

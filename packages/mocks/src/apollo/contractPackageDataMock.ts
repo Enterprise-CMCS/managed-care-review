@@ -449,6 +449,8 @@ function mockContractPackageDraft(partial?: Partial<Contract>): Contract {
         createdAt: new Date('01/01/24'),
         updatedAt: new Date(),
         lastUpdatedForDisplay: new Date(),
+        dateContractDocsExecuted: null,
+        reviewStatusActions: [],
         id: partial?.id ?? 'test-abc-123',
         stateCode: 'MN',
         state: mockMNState(),
