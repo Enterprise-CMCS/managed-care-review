@@ -1,4 +1,6 @@
 import { type Prisma, PrismaClient } from '@prisma/client'
+import { PrismaPg } from '@prisma/adapter-pg'
+import pg from 'pg'
 
 const errorMessages = {
     delete: 'Deletion of records is not allowed',
@@ -14,7 +16,7 @@ const errorMessages = {
  * @param {Prisma.PrismaClientOptions} optionArgs - PrismaClient configuration options.
  * @returns {PrismaClient} A new PrismaClient instance with extended behavior.
  */
-function extendedPrismaClient(optionArgs: Prisma.PrismaClientOptions) {
+function extendedPrismaClient(optionArgs?: Prisma.PrismaClientOptions) {
     return new PrismaClient(optionArgs).$extends({
         query: {
             applicationSettings: {
@@ -63,12 +65,11 @@ async function NewPrismaClient(
     connURL: string
 ): Promise<ExtendedPrismaClient | Error> {
     try {
+        const pool = new pg.Pool({ connectionString: connURL })
+        const adapter = new PrismaPg(pool)
+
         const prismaClient = extendedPrismaClient({
-            datasources: {
-                db: {
-                    url: connURL,
-                },
-            },
+            adapter,
         })
 
         return prismaClient
