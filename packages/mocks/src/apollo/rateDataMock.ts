@@ -46,6 +46,7 @@ const rateRevisionDataMock = (data?: Partial<RateRevision>): RateRevision => {
         formData: {
             rateType: 'AMENDMENT',
             rateCapitationType: 'RATE_CELL',
+            rateMedicaidPopulations: [],
             rateDocuments: [
                 {
                     id: 'rate-document.pdf',
