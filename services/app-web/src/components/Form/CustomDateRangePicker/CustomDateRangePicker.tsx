@@ -11,6 +11,9 @@ import {
 } from '../../FilterAccordion/FilterDateRange/_DatePicker/utils'
 import { FormGroup, Label } from '@trussworks/react-uswds/'
 
+// this custom component is re-implementation of DateRangePicker from react-uswds library
+// it allows displaying separate error messages for each DateTimePicker to improve UX and accessibility 
+
 export type CustomDateRangePickerProps = {
     startDateLabel?: string
     startDateHint?: string
