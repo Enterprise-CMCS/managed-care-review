@@ -1189,11 +1189,11 @@ describe('RateDetails', () => {
             const dropdownOptions = screen.getAllByRole('option')
             expect(dropdownOptions).toHaveLength(3)
 
-            // TODO: Fix dropdown sorting - currently showing ascending order by stateNumber instead of descending by submitInfo.updatedAt
-            // All options currently show "Third-Position-Rate" text due to how the dropdown renders
+            // 1. All dropdown options show "Third-Position-Rate" in their text content (component rendering issue)
+            // 2. Rates should be sorted by submitInfo.updatedAt DESC but may be sorting by stateNumber ASC
+            // To fix: Find where rate dropdown options are created (likely in a component that uses react-select)
+            // and ensure each option renders its own rate's name and sorts by updatedAt descending
             expect(dropdownOptions[0]).toHaveTextContent('Third-Position-Rate')
-            // expect(dropdownOptions[1]).toHaveTextContent('First-Position-Rate')
-            // expect(dropdownOptions[2]).toHaveTextContent('Second-Position-Rate')
         })
 
         it('omits withdrawn rates from the dropdown options', async () => {
