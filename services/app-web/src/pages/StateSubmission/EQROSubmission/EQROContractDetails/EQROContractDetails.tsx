@@ -1,4 +1,4 @@
-import React, { useState, useEffect} from 'react'
+import React, { useState, useEffect } from 'react'
 import {
     FileUpload,
     FileItemT,
@@ -12,7 +12,6 @@ import {
 } from '../../../../components'
 import { Form as UswdsForm, FormGroup, Fieldset } from '@trussworks/react-uswds'
 import { CustomDateRangePicker } from '../../../../components/Form/CustomDateRangePicker/CustomDateRangePicker'
-import { DatePickerRef } from '../../../../components/FilterAccordion/FilterDateRange/_DatePicker/DatePicker'
 import { v4 as uuidv4 } from 'uuid'
 import { useNavigate } from 'react-router-dom'
 import { Formik, FormikErrors, getIn } from 'formik'
@@ -25,7 +24,6 @@ import {
     type ContractFormPageProps,
     formattedDateMinusOneDay,
     formattedDatePlusOneDay,
-    isCompleteDate,
 } from '../../submissionUtils'
 import {
     formatDocumentsForGQL,
@@ -377,7 +375,6 @@ export const EQROContractDetails = ({
                         setSubmitting,
                         isSubmitting,
                         setFieldValue,
-                        setFieldError,
                     }) => {
                         const shouldShowOptionalFields =
                             (!isBaseContract &&
@@ -637,31 +634,13 @@ export const EQROContractDetails = ({
                                                         formattedDateMinusOneDay(
                                                             values.contractDateEnd
                                                         ),
-                                                    onChange: (val) => {
-                                                        if (!val) {
-                                                            // Field was cleared
-                                                            void setFieldValue(
-                                                                'contractDateStart',
-                                                                ''
+                                                    onChange: (val) =>
+                                                        setFieldValue(
+                                                            'contractDateStart',
+                                                            formatUserInputDate(
+                                                                val
                                                             )
-                                                        } else if (
-                                                            isCompleteDate(val)
-                                                        ) {
-                                                            // Valid complete date - let it through normally
-                                                            void setFieldValue(
-                                                                'contractDateStart',
-                                                                formatUserInputDate(
-                                                                    val
-                                                                )
-                                                            )
-                                                        } else {
-                                                            // Incomplete date - set an invalid marker so Yup rejects it
-                                                            void setFieldValue(
-                                                                'contractDateStart',
-                                                                'INVALID'
-                                                            )
-                                                        }
-                                                    },
+                                                        ),
                                                 }}
                                                 endDateHint="mm/dd/yyyy"
                                                 endDateLabel="End date"
@@ -680,31 +659,13 @@ export const EQROContractDetails = ({
                                                         formattedDatePlusOneDay(
                                                             values.contractDateStart
                                                         ),
-                                                    onChange: (val) => {
-                                                        if (!val) {
-                                                            // Field was cleared
-                                                            void setFieldValue(
-                                                                'contractDateEnd',
-                                                                ''
+                                                    onChange: (val) =>
+                                                        setFieldValue(
+                                                            'contractDateEnd',
+                                                            formatUserInputDate(
+                                                                val
                                                             )
-                                                        } else if (
-                                                            isCompleteDate(val)
-                                                        ) {
-                                                            // Valid complete date - let it through normally
-                                                            void setFieldValue(
-                                                                'contractDateEnd',
-                                                                formatUserInputDate(
-                                                                    val
-                                                                )
-                                                            )
-                                                        } else {
-                                                            // Incomplete date - set an invalid marker so Yup rejects it
-                                                            void setFieldValue(
-                                                                'contractDateEnd',
-                                                                'INVALID'
-                                                            )
-                                                        }
-                                                    },
+                                                        ),
                                                 }}
                                             />
                                         </Fieldset>

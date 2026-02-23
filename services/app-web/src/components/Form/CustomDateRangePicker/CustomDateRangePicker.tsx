@@ -10,9 +10,13 @@ import {
     parseDateString,
 } from '../../FilterAccordion/FilterDateRange/_DatePicker/utils'
 import { FormGroup, Label } from '@trussworks/react-uswds/'
+import { PoliteErrorMessage } from '../../PoliteErrorMessage'
 
-// this custom component is re-implementation of DateRangePicker from react-uswds library
-// it allows displaying separate error messages for each DateTimePicker to improve UX and accessibility 
+/*
+* this component recreates DateRangePicker from @trussworks/react-uswds
+* with modificaton to allow separate validation and error messages for each DateTimePicker to improve UX and accessibility
+* modified version of the @trussworks/react-uswds DatePicker component is used, located in ../../FilterAccordion/FilterDateRange/_DatePicker.
+*/
 
 export type CustomDateRangePickerProps = {
     startDateLabel?: string
@@ -168,12 +172,11 @@ export const CustomDateRangePicker = (
                         </div>
                     )}
                     {startDateError && (
-                        <div
-                            className="usa-error-message"
-                            id={startDatePickerErrorId}
+                        <PoliteErrorMessage
+                            formFieldLabel={`${startDateLabel}`}
                         >
                             {startDateError}
-                        </div>
+                        </PoliteErrorMessage>
                     )}
                     <DatePicker
                         className={startDatePickerClasses}
@@ -213,12 +216,9 @@ export const CustomDateRangePicker = (
                         </div>
                     )}
                     {endDateError && (
-                        <div
-                            className="usa-error-message"
-                            id={endDatePickerErrorId}
-                        >
+                        <PoliteErrorMessage formFieldLabel={`${endDateLabel}`}>
                             {endDateError}
-                        </div>
+                        </PoliteErrorMessage>
                     )}
                     <DatePicker
                         className={endDatePickerClasses}
