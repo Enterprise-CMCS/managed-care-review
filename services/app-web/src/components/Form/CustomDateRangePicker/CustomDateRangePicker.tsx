@@ -1,15 +1,14 @@
 import classnames from 'classnames'
 import React, { useState, type JSX } from 'react'
-import { DEFAULT_EXTERNAL_DATE_FORMAT } from '../FilterAccordion/FilterDateRange/_DatePicker/constants'
+import { DEFAULT_EXTERNAL_DATE_FORMAT } from '../../FilterAccordion/FilterDateRange/_DatePicker/constants'
 import {
     DatePicker,
     DatePickerProps,
-    DatePickerRef,
-} from '../FilterAccordion/FilterDateRange/_DatePicker/DatePicker'
+} from '../../FilterAccordion/FilterDateRange/_DatePicker/DatePicker'
 import {
     formatDate,
     parseDateString,
-} from '../FilterAccordion/FilterDateRange/_DatePicker/utils'
+} from '../../FilterAccordion/FilterDateRange/_DatePicker/utils'
 import { FormGroup, Label } from '@trussworks/react-uswds/'
 
 export type CustomDateRangePickerProps = {
@@ -22,10 +21,6 @@ export type CustomDateRangePickerProps = {
     className?: string
     startDateError?: string
     endDateError?: string
-    startInputRef?: React.Ref<DatePickerRef>
-    endInputRef?: React.Ref<DatePickerRef>
-    onStartDateBlur?: () => void
-    onEndDateBlur?: () => void
 }
 
 export const CustomDateRangePicker = (
@@ -41,10 +36,6 @@ export const CustomDateRangePicker = (
         className,
         startDateError,
         endDateError,
-        startInputRef,
-        endInputRef,
-        onStartDateBlur,
-        onEndDateBlur,
     } = props
 
     const [startDateInternalValue, setStartDateInternalValue] = useState<
@@ -159,15 +150,7 @@ export const CustomDateRangePicker = (
     return (
         <div className={classes} data-testid="date-range-picker">
             <FormGroup error={Boolean(startDateError)}>
-                <div
-                    onBlur={(e) => {
-                        if (
-                            !e.currentTarget.contains(e.relatedTarget as Node)
-                        ) {
-                            onStartDateBlur?.()
-                        }
-                    }}
-                >
+                <div>
                     {startDateLabel && (
                         <Label
                             id={startDatePickerLabelId}
@@ -206,22 +189,13 @@ export const CustomDateRangePicker = (
                         }
                         onChange={startDatePickerOnChange}
                         maxDate={getMaxStartDate()}
-                        inputRef={startInputRef}
                         validationStatus={startDateError ? 'error' : undefined}
                     />
                 </div>
             </FormGroup>
 
             <FormGroup error={Boolean(endDateError)}>
-                <div
-                    onBlur={(e) => {
-                        if (
-                            !e.currentTarget.contains(e.relatedTarget as Node)
-                        ) {
-                            onEndDateBlur?.()
-                        }
-                    }}
-                >
+                <div>
                     {endDateLabel && (
                         <Label
                             id={endDatePickerLabelId}
@@ -258,7 +232,6 @@ export const CustomDateRangePicker = (
                         }
                         onChange={endDatePickerOnChange}
                         minDate={getMinEndDate()}
-                        inputRef={endInputRef}
                         validationStatus={endDateError ? 'error' : undefined}
                     />
                 </div>

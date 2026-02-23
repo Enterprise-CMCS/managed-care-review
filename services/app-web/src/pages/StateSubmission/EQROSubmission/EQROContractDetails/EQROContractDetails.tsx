@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react'
+import React, { useState, useEffect} from 'react'
 import {
     FileUpload,
     FileItemT,
@@ -11,7 +11,7 @@ import {
     PageActions,
 } from '../../../../components'
 import { Form as UswdsForm, FormGroup, Fieldset } from '@trussworks/react-uswds'
-import { CustomDateRangePicker } from '../../../../components/CustomDateRangePicker/CustomDateRangePicker'
+import { CustomDateRangePicker } from '../../../../components/Form/CustomDateRangePicker/CustomDateRangePicker'
 import { DatePickerRef } from '../../../../components/FilterAccordion/FilterDateRange/_DatePicker/DatePicker'
 import { v4 as uuidv4 } from 'uuid'
 import { useNavigate } from 'react-router-dom'
@@ -85,9 +85,6 @@ export const EQROContractDetails = ({
     const { currentRoute } = useCurrentRoute()
     const { draftSubmission, interimState, updateDraft, showPageErrorMessage } =
         useContractForm(id)
-
-    const startDateInputRef = useRef<DatePickerRef>(null)
-    const endDateInputRef = useRef<DatePickerRef>(null)
 
     const activeMainContentId = 'contractDetailsPageMainContent'
 
@@ -629,26 +626,6 @@ export const EQROContractDetails = ({
                                                     'contractDateStart',
                                                     errors
                                                 )}
-                                                startInputRef={
-                                                    startDateInputRef
-                                                }
-                                                onStartDateBlur={() => {
-                                                    setTimeout(() => {
-                                                        const raw =
-                                                            startDateInputRef
-                                                                .current
-                                                                ?.value ?? ''
-                                                        if (
-                                                            raw &&
-                                                            !isCompleteDate(raw)
-                                                        ) {
-                                                            void setFieldError(
-                                                                'contractDateStart',
-                                                                'The start date must be in MM/DD/YYYY format, like 01/01/2030'
-                                                            )
-                                                        }
-                                                    }, 100)
-                                                }}
                                                 startDatePickerProps={{
                                                     id: 'contractDateStart',
                                                     name: 'contractDateStart',
@@ -692,24 +669,6 @@ export const EQROContractDetails = ({
                                                     'contractDateEnd',
                                                     errors
                                                 )}
-                                                endInputRef={endDateInputRef}
-                                                onEndDateBlur={() => {
-                                                    setTimeout(() => {
-                                                        const raw =
-                                                            endDateInputRef
-                                                                .current
-                                                                ?.value ?? ''
-                                                        if (
-                                                            raw &&
-                                                            !isCompleteDate(raw)
-                                                        ) {
-                                                            void setFieldError(
-                                                                'contractDateEnd',
-                                                                'The end date must be in MM/DD/YYYY format, like 01/01/2030'
-                                                            )
-                                                        }
-                                                    }, 100)
-                                                }}
                                                 endDatePickerProps={{
                                                     disabled: false,
                                                     id: 'contractDateEnd',
