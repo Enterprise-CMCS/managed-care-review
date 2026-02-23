@@ -2,7 +2,10 @@ import { GridContainer } from '@trussworks/react-uswds'
 import React, { useEffect } from 'react'
 import { useLocation } from 'react-router-dom'
 import { useAuth } from '../../contexts/AuthContext'
-import { ContractSubmissionType, useIndexContractsForDashboardQuery } from '../../gen/gqlClient'
+import {
+    ContractSubmissionType,
+    useIndexContractsForDashboardQuery,
+} from '../../gen/gqlClient'
 import styles from './StateDashboard.module.scss'
 import { SubmissionSuccessMessage } from './SubmissionSuccessMessage'
 import { handleApolloError, isLikelyUserAuthError } from '@mc-review/helpers'
@@ -123,11 +126,11 @@ export const StateDashboard = (): React.ReactElement => {
         location.search
     ).get('justSubmitted')
 
-    const submissionId = new URLSearchParams(location.search).get(
-        'id'
-    )
+    const submissionId = new URLSearchParams(location.search).get('id')
 
-    const contractType = new URLSearchParams(location.search).get('contractType') as ContractSubmissionType | null
+    const contractType = new URLSearchParams(location.search).get(
+        'contractType'
+    ) as ContractSubmissionType | null
 
     return (
         <>

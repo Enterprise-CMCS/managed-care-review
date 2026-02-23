@@ -87,7 +87,7 @@ describe('StateDashboard', () => {
         })
     })
 
-        it('displays texts "sent to CMS", "you can view your review decision", and link "view submission summary" if submission type is HEALTH_PLAN', async () => {
+    it('displays texts "sent to CMS", "you can view your review decision", and link "view submission summary" if submission type is HEALTH_PLAN', async () => {
         renderWithProviders(<StateDashboard />, {
             apolloProvider: {
                 mocks: [

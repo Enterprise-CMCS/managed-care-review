@@ -5,7 +5,7 @@
 
 import type { Handler, APIGatewayProxyResultV2 } from 'aws-lambda'
 import { getPostgresURL } from './configuration'
-import { initTracer, recordException } from '../../../uploads/src/lib/otel'
+import { initTracer, recordException } from '../otel/otel_handler'
 import { NewPrismaClient } from '../postgres'
 import type {
     LockedHealthPlanFormDataType,

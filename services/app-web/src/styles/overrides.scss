@@ -29,7 +29,7 @@ html {
     font-weight: bold;
 }
 
-.usa-hint {
+.usa-hint:not(.usa-character-count__message--invalid) {
     color: $mcr-foundation-hint;
 }
 
