@@ -225,7 +225,7 @@ const Contacts = ({
     })
 
     return (
-        <>
+        <div id={activeMainContentId}>
             <FormNotificationContainer>
                 <DynamicStepIndicator
                     formPages={
@@ -510,7 +510,7 @@ const Contacts = ({
                     )}
                 </Formik>
             </FormContainer>
-        </>
+        </div>
     )
 }
 export { Contacts }

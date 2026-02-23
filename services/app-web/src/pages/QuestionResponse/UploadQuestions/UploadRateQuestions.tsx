@@ -1,4 +1,4 @@
-import { useLayoutEffect } from 'react'
+import { useEffect, useLayoutEffect } from 'react'
 import styles from '../QuestionResponse.module.scss'
 import { useNavigate, useParams } from 'react-router-dom'
 import {
@@ -21,7 +21,7 @@ import { Error404 } from '../../Errors/Error404Page'
 import { useMemoizedStateHeader } from '../../../hooks'
 
 export const UploadRateQuestions = () => {
-    const { updateHeading } = usePage()
+    const { updateHeading, updateActiveMainContent } = usePage()
     const { id, division, contractSubmissionType } = useParams<{
         division: string
         id: string
@@ -63,6 +63,11 @@ export const UploadRateQuestions = () => {
     useLayoutEffect(() => {
         updateHeading({ customHeading: stateHeader })
     }, [stateHeader, updateHeading])
+
+    // Set the active main content to focus when click the Skip to main content button.
+    useEffect(() => {
+        updateActiveMainContent('rateAddQuestionsForm')
+    }, [updateActiveMainContent])
 
     // confirm division is valid
     const realDivision = division?.toUpperCase()

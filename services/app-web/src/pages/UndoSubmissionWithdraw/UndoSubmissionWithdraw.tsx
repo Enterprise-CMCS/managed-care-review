@@ -1,4 +1,4 @@
-import React, { useLayoutEffect, useState } from 'react'
+import React, { useEffect, useLayoutEffect, useState } from 'react'
 import styles from './UndoSubmissionWithdraw.module.scss'
 import * as Yup from 'yup'
 import { Formik, FormikErrors } from 'formik'
@@ -47,7 +47,7 @@ export const UndoSubmissionWithdraw = (): React.ReactElement => {
             'PROGRAMMING ERROR: id param not set in submission withdraw form.'
         )
     }
-    const { updateHeading } = usePage()
+    const { updateHeading, updateActiveMainContent } = usePage()    
     const { logFormSubmitEvent } = useTealium()
     const navigate = useNavigate()
     const [shouldValidate, setShouldValidate] = useState(false)
@@ -84,6 +84,11 @@ export const UndoSubmissionWithdraw = (): React.ReactElement => {
     useLayoutEffect(() => {
         updateHeading({ customHeading: stateHeader })
     }, [stateHeader, updateHeading])
+
+    // Set the active main content to focus when click the Skip to main content button.
+    useEffect(() => {
+        updateActiveMainContent('undoSubmissionWithdrawForm')
+    }, [updateActiveMainContent])    
 
     if (loading) {
         return <ErrorOrLoadingPage state="LOADING" />

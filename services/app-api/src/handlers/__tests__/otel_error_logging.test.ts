@@ -1,7 +1,7 @@
 import { ApolloServer } from '@apollo/server'
 import { gql } from '@apollo/client'
 import { createTracer } from '../../otel/otel_handler'
-import { recordException } from '../../../../uploads/src/lib/otel'
+import { recordException } from '../../otel/otel_handler'
 import { GraphQLError } from 'graphql'
 import { vi } from 'vitest'
 import { executeGraphQLOperation } from '../../testHelpers/gqlHelpers'
@@ -183,7 +183,7 @@ describe('OTEL Error Logging', () => {
 
         it('verifies that our error handling is independent of Apollo reporting plugins', () => {
             // Our current error handling methods:
-            // 1. recordException() - uploads/src/lib/otel.ts
+            // 1. recordException() - otel/otel_handler.ts
             // 2. setErrorAttributesOnActiveSpan() - resolvers/attributeHelper.ts
             //
             // Both use span.recordException() which is OpenTelemetry standard
