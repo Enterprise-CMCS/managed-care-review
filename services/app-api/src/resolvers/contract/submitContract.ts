@@ -345,31 +345,26 @@ export function submitContract(
                     []
                 const linkRates: UpdateDraftContractRatesArgsType['rateUpdates']['link'] =
                     []
-                for (
-                    let idx = 0;
-                    idx < parsedContract.draftRates.length;
-                    idx++
-                ) {
-                    const draftRate = parsedContract.draftRates[idx]
 
-                    if (draftRate.parentContractID !== parsedContract.id) {
+                parsedContract.draftRates.forEach((rate, idx) => {
+                    if (rate.parentContractID !== parsedContract.id) {
                         // keep linked rates
                         linkRates.push({
-                            rateID: draftRate.id,
+                            rateID: rate.id,
                             ratePosition: idx + 1,
                         })
                     }
-                    if (draftRate.parentContractID === parsedContract.id) {
+                    if (rate.parentContractID === parsedContract.id) {
                         // update if it's a child rate
                         updateRates.push({
-                            rateID: draftRate.id,
+                            rateID: rate.id,
                             formData: {
-                                ...draftRate.draftRevision?.formData,
+                                ...rate.draftRevision?.formData,
                             },
                             ratePosition: idx + 1,
                         })
                     }
-                }
+                })
 
                 const rateUpdates: UpdateDraftContractRatesArgsType = {
                     contractID: parsedContract.id,
@@ -389,11 +384,16 @@ export function submitContract(
                 const rateUpdateResult =
                     await store.updateDraftContractRates(rateUpdates)
                 if (rateUpdateResult instanceof Error) {
-                    const errMessage = `${rateUpdateResult.message} :: Error while attempting to update rates on a child rate where dsnp is false`
+                    const errMessage = `Failed to update rates on a child rate when dsnp false with ID: ${parsedContract.id}; ${rateUpdateResult.message}`
                     logError('submitContract', errMessage)
                     setErrorAttributesOnActiveSpan(errMessage, span)
-                    throw new Error(errMessage)
-                }                
+                    throw new GraphQLError(errMessage, {
+                        extensions: {
+                            code: 'INTERNAL_SERVER_ERROR',
+                            cause: 'DB_ERROR',
+                        },
+                    })
+                }
             }
         }
 
