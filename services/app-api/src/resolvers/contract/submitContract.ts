@@ -332,7 +332,7 @@ export function submitContract(
                     []
                 const linkRates: UpdateDraftContractRatesArgsType['rateUpdates']['link'] =
                     []
-            
+
                 parsedContract.draftRates.forEach((rate, idx) => {
                     if (rate.parentContractID !== parsedContract.id) {
                         // keep linked rates
@@ -344,7 +344,8 @@ export function submitContract(
                     if (rate.parentContractID === parsedContract.id) {
                         // update if it's a child rate and clear off rateMedicaidPopulations
                         if (rate.draftRevision?.formData) {
-                            rate.draftRevision.formData.rateMedicaidPopulations = []
+                            rate.draftRevision.formData.rateMedicaidPopulations =
+                                []
                         }
                         updateRates.push({
                             rateID: rate.id,
