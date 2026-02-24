@@ -2266,6 +2266,16 @@ function mockContractPackageUnlockedWithUnlockedType(
             createdAt: new Date(),
             updatedAt: new Date(),
             contractName: 'MCR-MN-0005-SNBC',
+            documentZipPackages: [
+                {
+                    id: 'zip-package-draft-123',
+                    s3URL: 's3://bucket-name/zips/contracts/key/contract-documents.zip',
+                    sha256: 'sha-draft-123',
+                    documentType: 'CONTRACT_DOCUMENTS',
+                    createdAt: new Date('01/15/2024'),
+                    downloadUrl: s3DlUrl,
+                },
+            ],
             formData: {
                 __typename: 'ContractFormData',
                 programIDs: ['abbdf9b0-c49e-4c4c-bb6f-040cb7b51cce'],
@@ -2652,6 +2662,7 @@ function mockContractPackageUnlockedWithUnlockedType(
                         },
                         createdAt: new Date('01/01/2023'),
                         updatedAt: new Date('01/01/2023'),
+                        unlockInfo: null,
                         documentZipPackages: [
                             {
                                 id: 'zip-package-789',
@@ -2730,8 +2741,10 @@ function mockContractPackageUnlockedWithUnlockedType(
                             actuaryCommunicationPreference: 'OACT_TO_ACTUARY',
                             packagesWithSharedRateCerts: [
                                 {
+                                    __typename: 'PackageWithSameRate',
                                     packageName: 'testABC1',
                                     packageId: 'test-abc-1',
+                                    packageStatus: 'DRAFT',
                                 },
                             ],
                         },
