@@ -37,7 +37,6 @@ custom:
   # because the secret is in JSON in secret manager, we have to pass it into jwtSecret when not running locally
   jwtSecretJSON: ${env:CF_CONFIG_IGNORED_LOCALLY, ssm:/aws/reference/secretsmanager/api_jwt_secret_${sls:stage}}
   jwtSecret: ${env:JWT_SECRET, self:custom.jwtSecretJSON.jwtsigningkey}
-  mcreviewOauthIssuer: ${env:MCREVIEW_OAUTH_ISSUER, ssm:/configuration/mcreview_oauth_issuer}
   reactAppS3DocumentUploadsBucket: ${env:VITE_APP_S3_DOCUMENTS_BUCKET, cf:uploads-${sls:stage}.DocumentUploadsBucketName}
   reactAppS3QABucket: ${env:VITE_APP_S3_QA_BUCKET, cf:uploads-${sls:stage}.QAUploadsBucketName}
   esbuild:
@@ -146,7 +145,6 @@ provider:
     OPENTELEMETRY_COLLECTOR_CONFIG_FILE: /var/task/collector.yml
     LD_SDK_KEY: ${self:custom.ldSDKKey}
     JWT_SECRET: ${self:custom.jwtSecret}
-    MCREVIEW_OAUTH_ISSUER: ${self:custom.mcreviewOauthIssuer}
     VITE_APP_S3_QA_BUCKET: ${self:custom.reactAppS3QABucket}
     VITE_APP_S3_DOCUMENTS_BUCKET: ${self:custom.reactAppS3DocumentUploadsBucket}
     INTERNAL_ALLOWED_ORIGINS: ${self:custom.internalAllowedOrigins, ''}
