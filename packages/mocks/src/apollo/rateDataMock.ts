@@ -8,7 +8,7 @@ import {
     RateRevision,
     StateUser,
     UpdateInformation,
-    RateStripped
+    RateStripped,
 } from '../gen/gqlClient'
 import { s3DlUrl } from './documentDataMock'
 import { mockMNState } from './stateMock'
@@ -24,14 +24,16 @@ const rateRevisionDataMock = (data?: Partial<RateRevision>): RateRevision => {
         createdAt: '2023-10-16T19:01:21.389Z',
         updatedAt: '2023-10-16T19:02:26.767Z',
         unlockInfo: null,
-        documentZipPackages: [{
-            id: "zip-package-321",
-            s3URL: "s3://bucket-name/zips/rates/key/rate-documents.zip",
-            sha256: "sha123",
-            documentType: "RATE_DOCUMENTS",
-            createdAt: new Date('01/15/2024'),
-            downloadUrl: s3DlUrl
-        }],
+        documentZipPackages: [
+            {
+                id: 'zip-package-321',
+                s3URL: 's3://bucket-name/zips/rates/key/rate-documents.zip',
+                sha256: 'sha123',
+                documentType: 'RATE_DOCUMENTS',
+                createdAt: new Date('01/15/2024'),
+                downloadUrl: s3DlUrl,
+            },
+        ],
         submitInfo: {
             __typename: 'UpdateInformation',
             updatedAt: '2023-10-16T19:02:26.766Z',
@@ -238,18 +240,18 @@ const strippedRateDataMock = (
             __typename: 'RateRevisionStripped',
             formData: {
                 ...fullRate.revisions[0].formData,
-                __typename: 'RateFormDataStripped'
-            }
+                __typename: 'RateFormDataStripped',
+            },
         },
         latestSubmittedRevision: {
             ...fullRate.revisions[0],
             __typename: 'RateRevisionStripped',
             formData: {
                 ...fullRate.revisions[0].formData,
-                __typename: 'RateFormDataStripped'
-            }
+                __typename: 'RateFormDataStripped',
+            },
         },
-        __typename: 'RateStripped'
+        __typename: 'RateStripped',
     }
 
     return strippedRate
@@ -318,13 +320,15 @@ function submittedLinkedRatesScenarioMock(): {
 
     const c1: Contract = {
         __typename: 'Contract',
-        initiallySubmittedAt: undefined,
+        initiallySubmittedAt: new Date(2024, 1, 1),
         status: 'SUBMITTED',
         consolidatedStatus: 'SUBMITTED',
         reviewStatus: 'UNDER_REVIEW',
+        reviewStatusActions: [],
         createdAt: new Date(2024, 1, 1),
         updatedAt: new Date(),
         lastUpdatedForDisplay: new Date(),
+        dateContractDocsExecuted: null,
         webURL: 'https://testmcreview.example/submission/c-01',
         id: 'c-01',
         stateCode: 'MN',
@@ -337,13 +341,15 @@ function submittedLinkedRatesScenarioMock(): {
 
     const c2: Contract = {
         __typename: 'Contract',
-        initiallySubmittedAt: undefined,
+        initiallySubmittedAt: new Date(2024, 1, 1),
         status: 'SUBMITTED',
         consolidatedStatus: 'SUBMITTED',
         reviewStatus: 'UNDER_REVIEW',
+        reviewStatusActions: [],
         createdAt: new Date(2024, 1, 1),
         updatedAt: new Date(),
         lastUpdatedForDisplay: new Date(),
+        dateContractDocsExecuted: null,
         webURL: 'https://testmcreview.example/submission/c-02',
         id: 'c-02',
         stateCode: 'MN',
@@ -808,7 +814,7 @@ function mockRateSubmittedWithQuestions(
                 ],
             },
         },
-        ...rate
+        ...rate,
     }
 }
 
@@ -820,5 +826,5 @@ export {
     rateUnlockedWithHistoryMock,
     submittedLinkedRatesScenarioMock,
     mockRateSubmittedWithQuestions,
-    strippedRateDataMock
+    strippedRateDataMock,
 }
