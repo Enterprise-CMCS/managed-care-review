@@ -2319,6 +2319,11 @@ function mockContractPackageUnlockedWithUnlockedType(
                 statutoryRegulatoryAttestation: true,
                 statutoryRegulatoryAttestationDescription:
                     'everything meets regulatory attestation',
+                eqroNewContractor: null,
+                eqroProvisionMcoNewOptionalActivity: null,
+                eqroProvisionNewMcoEqrRelatedActivities: null,
+                eqroProvisionChipEqrRelatedActivities: null,
+                eqroProvisionMcoEqrOrRelatedActivities: null,
             },
         },
 
@@ -2338,6 +2343,7 @@ function mockContractPackageUnlockedWithUnlockedType(
                 state: mockMNState(),
                 stateNumber: 5,
                 parentContractID: contractID,
+                initiallySubmittedAt: new Date('2023-10-16'),
                 draftRevision: {
                     __typename: 'RateRevision',
                     id: 'unlocked-rr-123',
@@ -2355,10 +2361,33 @@ function mockContractPackageUnlockedWithUnlockedType(
                         },
                         updatedReason: 'unlocked for a test',
                     },
+                    submitInfo: {
+                        __typename: 'UpdateInformation',
+                        updatedAt: new Date('2023-10-16T19:02:26.766Z'),
+                        updatedBy: {
+                            email: 'aang@example.com',
+                            role: 'STATE_USER',
+                            familyName: 'Airman',
+                            givenName: 'Aang',
+                        },
+                        updatedReason: 'Initial submission',
+                    },
+                    documentZipPackages: [
+                        {
+                            id: 'zip-package-321',
+                            s3URL: 's3://bucket-name/zips/rates/key/rate-documents.zip',
+                            sha256: 'sha123',
+                            documentType: 'RATE_DOCUMENTS',
+                            createdAt: new Date('01/15/2024'),
+                            downloadUrl: s3DlUrl,
+                        },
+                    ],
                     formData: {
                         __typename: 'RateFormData',
                         rateType: 'AMENDMENT',
                         rateCapitationType: 'RATE_CELL',
+                        rateCertificationName: 'rate cert',
+                        rateMedicaidPopulations: [],
                         rateDocuments: [
                             {
                                 __typename: 'GenericDocument',
@@ -2387,6 +2416,9 @@ function mockContractPackageUnlockedWithUnlockedType(
                         ],
                         certifyingActuaryContacts: [
                             {
+                                __typename: 'ActuaryContact',
+                                id: null,
+                                actuarialFirmOther: null,
                                 actuarialFirm: 'DELOITTE',
                                 name: 'Actuary Contact 1',
                                 titleRole: 'Test Actuary Contact 1',
@@ -2395,6 +2427,9 @@ function mockContractPackageUnlockedWithUnlockedType(
                         ],
                         addtlActuaryContacts: [
                             {
+                                __typename: 'ActuaryContact',
+                                id: null,
+                                actuarialFirmOther: null,
                                 actuarialFirm: 'DELOITTE',
                                 name: 'Actuary Contact 1',
                                 titleRole: 'Test Actuary Contact 1',
@@ -2430,6 +2465,16 @@ function mockContractPackageUnlockedWithUnlockedType(
                         createdAt: new Date('01/01/2024'),
                         updatedAt: '2023-01-01T16:54:39.173Z',
                         contractID,
+                        documentZipPackages: [
+                            {
+                                id: 'zip-package-123',
+                                s3URL: 's3://bucket-name/zips/contracts/key/contract-documents.zip',
+                                sha256: 'sha123',
+                                documentType: 'CONTRACT_DOCUMENTS',
+                                createdAt: new Date('01/15/2024'),
+                                downloadUrl: s3DlUrl,
+                            },
+                        ],
                         submitInfo: {
                             __typename: 'UpdateInformation',
                             updatedAt: '2023-01-01T16:54:39.173Z',
@@ -2492,6 +2537,11 @@ function mockContractPackageUnlockedWithUnlockedType(
                             statutoryRegulatoryAttestation: true,
                             statutoryRegulatoryAttestationDescription:
                                 'everything meets regulatory attestation',
+                            eqroNewContractor: null,
+                            eqroProvisionMcoNewOptionalActivity: null,
+                            eqroProvisionNewMcoEqrRelatedActivities: null,
+                            eqroProvisionChipEqrRelatedActivities: null,
+                            eqroProvisionMcoEqrOrRelatedActivities: null,
                         },
                     },
                 ],
@@ -2501,6 +2551,16 @@ function mockContractPackageUnlockedWithUnlockedType(
                     contractName: 'MCR-MN-0005-SNBC',
                     createdAt: new Date('01/01/2024'),
                     updatedAt: '2024-01-01T18:54:39.173Z',
+                    documentZipPackages: [
+                        {
+                            id: 'zip-package-456',
+                            s3URL: 's3://bucket-name/zips/contracts/key/contract-documents.zip',
+                            sha256: 'sha456',
+                            documentType: 'CONTRACT_DOCUMENTS',
+                            createdAt: new Date('01/15/2024'),
+                            downloadUrl: s3DlUrl,
+                        },
+                    ],
                     submitInfo: {
                         __typename: 'UpdateInformation',
                         updatedAt: '2024-01-01T18:54:39.173Z',
@@ -2561,6 +2621,11 @@ function mockContractPackageUnlockedWithUnlockedType(
                         statutoryRegulatoryAttestation: true,
                         statutoryRegulatoryAttestationDescription:
                             'everything meets regulatory attestation',
+                        eqroNewContractor: null,
+                        eqroProvisionMcoNewOptionalActivity: null,
+                        eqroProvisionNewMcoEqrRelatedActivities: null,
+                        eqroProvisionChipEqrRelatedActivities: null,
+                        eqroProvisionMcoEqrOrRelatedActivities: null,
                     },
                 },
                 rateRevisions: [
@@ -2583,9 +2648,20 @@ function mockContractPackageUnlockedWithUnlockedType(
                             state: mockMNState(),
                             stateNumber: 5,
                             parentContractID: contractID,
+                            initiallySubmittedAt: new Date('2023-10-16'),
                         },
                         createdAt: new Date('01/01/2023'),
                         updatedAt: new Date('01/01/2023'),
+                        documentZipPackages: [
+                            {
+                                id: 'zip-package-789',
+                                s3URL: 's3://bucket-name/zips/rates/key/rate-documents.zip',
+                                sha256: 'sha789',
+                                documentType: 'RATE_DOCUMENTS',
+                                createdAt: new Date('01/15/2024'),
+                                downloadUrl: s3DlUrl,
+                            },
+                        ],
                         submitInfo: {
                             __typename: 'UpdateInformation',
                             updatedAt: new Date('01/01/2024'),
@@ -2601,6 +2677,8 @@ function mockContractPackageUnlockedWithUnlockedType(
                             __typename: 'RateFormData',
                             rateType: 'AMENDMENT',
                             rateCapitationType: 'RATE_CELL',
+                            rateCertificationName: 'rate cert',
+                            rateMedicaidPopulations: [],
                             rateDocuments: [
                                 {
                                     __typename: 'GenericDocument',
@@ -2629,6 +2707,9 @@ function mockContractPackageUnlockedWithUnlockedType(
                             ],
                             certifyingActuaryContacts: [
                                 {
+                                    __typename: 'ActuaryContact',
+                                    id: null,
+                                    actuarialFirmOther: null,
                                     actuarialFirm: 'DELOITTE',
                                     name: 'Actuary Contact 1',
                                     titleRole: 'Test Actuary Contact 1',
@@ -2637,6 +2718,9 @@ function mockContractPackageUnlockedWithUnlockedType(
                             ],
                             addtlActuaryContacts: [
                                 {
+                                    __typename: 'ActuaryContact',
+                                    id: null,
+                                    actuarialFirmOther: null,
                                     actuarialFirm: 'DELOITTE',
                                     name: 'Actuary Contact 1',
                                     titleRole: 'Test Actuary Contact 1',
