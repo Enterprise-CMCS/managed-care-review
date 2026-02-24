@@ -3,13 +3,13 @@ import {
     Form as UswdsForm,
     FormGroup,
     Fieldset,
-    DateRangePicker,
     Link,
 } from '@trussworks/react-uswds'
 import { v4 as uuidv4 } from 'uuid'
 import { generatePath, useNavigate } from 'react-router-dom'
 import { Formik, FormikErrors, getIn } from 'formik'
 import styles from '../../StateSubmissionForm.module.scss'
+import { CustomDateRangePicker } from '../../../../components/Form/CustomDateRangePicker/CustomDateRangePicker'
 
 import {
     FileUpload,
@@ -75,7 +75,6 @@ import { useAuth } from '../../../../contexts/AuthContext'
 import {
     PageBannerAlerts,
     ErrorOrLoadingPage,
-    ContractDatesErrorMessage,
 } from '../../SharedSubmissionComponents'
 import { useErrorSummary } from '../../../../hooks/useErrorSummary'
 import { useContractForm } from '../../../../hooks/useContractForm'
@@ -1010,39 +1009,6 @@ export const ContractDetails = ({
                                                     >
                                                         Required
                                                     </span>
-                                                    {Boolean(
-                                                        showFieldErrors(
-                                                            'contractDateStart',
-                                                            errors
-                                                        ) ||
-                                                            Boolean(
-                                                                showFieldErrors(
-                                                                    'contractDateEnd',
-                                                                    errors
-                                                                )
-                                                            )
-                                                    ) && (
-                                                        <ContractDatesErrorMessage
-                                                            contractDateStart={
-                                                                values.contractDateStart
-                                                            }
-                                                            contractDateEnd={
-                                                                values.contractDateEnd
-                                                            }
-                                                            validationErrorMessage={
-                                                                errors.contractDateStart ||
-                                                                errors.contractDateEnd ||
-                                                                'Invalid date'
-                                                            }
-                                                            formFieldLabel={
-                                                                isContractAmendment(
-                                                                    draftSubmission
-                                                                )
-                                                                    ? 'Amendment effective dates'
-                                                                    : 'Contract effective dates'
-                                                            }
-                                                        />
-                                                    )}
                                                     <LinkWithLogging
                                                         aria-label="Effective date guidance (opens in new window)"
                                                         href={
@@ -1053,12 +1019,16 @@ export const ContractDetails = ({
                                                     >
                                                         Effective date guidance
                                                     </LinkWithLogging>
-                                                    <DateRangePicker
+                                                    <CustomDateRangePicker
                                                         className={
                                                             styles.dateRangePicker
                                                         }
                                                         startDateHint="mm/dd/yyyy"
                                                         startDateLabel="Start date"
+                                                        startDateError={showFieldErrors(
+                                                            'contractDateStart',
+                                                            errors
+                                                        )}
                                                         startDatePickerProps={{
                                                             id: 'contractDateStart',
                                                             name: 'contractDateStart',
@@ -1081,6 +1051,10 @@ export const ContractDetails = ({
                                                         }}
                                                         endDateHint="mm/dd/yyyy"
                                                         endDateLabel="End date"
+                                                        endDateError={showFieldErrors(
+                                                            'contractDateEnd',
+                                                            errors
+                                                        )}
                                                         endDatePickerProps={{
                                                             disabled: false,
                                                             id: 'contractDateEnd',
