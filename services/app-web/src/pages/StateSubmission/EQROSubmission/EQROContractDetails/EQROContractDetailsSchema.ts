@@ -73,12 +73,12 @@ export const EQROContractDetailsFormSchema = (
         contractDateStart: Yup.date()
             // @ts-ignore-next-line
             .validateDateFormat('YYYY-MM-DD', true)
-            .typeError('The start date must be in MM/DD/YYYY format')
+            .typeError('The start date must be in MM/DD/YYYY format, like 01/01/2030')
             .defined('You must enter a start date'),
         contractDateEnd: Yup.date()
             // @ts-ignore-next-line
             .validateDateFormat('YYYY-MM-DD', true)
-            .typeError('The end date must be in MM/DD/YYYY format')
+            .typeError('The end date must be in MM/DD/YYYY format, like 01/01/2030')
             .defined('You must enter an end date')
             .when(
                 // ContractDateEnd must be at minimum the day after Start

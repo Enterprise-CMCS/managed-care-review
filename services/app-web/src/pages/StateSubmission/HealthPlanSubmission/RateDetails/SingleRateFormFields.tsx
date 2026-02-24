@@ -1,11 +1,6 @@
 import React, { useEffect, useState, useRef } from 'react'
-import {
-    DatePicker,
-    DateRangePicker,
-    Fieldset,
-    FormGroup,
-    Label,
-} from '@trussworks/react-uswds'
+import { DatePicker, Fieldset, FormGroup, Label } from '@trussworks/react-uswds'
+import { CustomDateRangePicker } from '../../../../components/Form/CustomDateRangePicker/CustomDateRangePicker'
 import classnames from 'classnames'
 import {
     ButtonWithLogging,
@@ -18,7 +13,6 @@ import {
 } from '../../../../components'
 
 import styles from '../../StateSubmissionForm.module.scss'
-import { isDateRangeEmpty } from '../../../../formHelpers'
 import { dayjs, formatUserInputDate } from '@mc-review/dates'
 import {
     ACCEPTED_RATE_SUPPORTING_DOCS_FILE_TYPES,
@@ -62,38 +56,6 @@ type SingleRateFormFieldsProps = {
     fieldNamePrefix: string // formik field name prefix - used for looking up values and errors in Formik FieldArray
     contract?: Contract
     autofill?: (rateForm: FormikRateForm) => void // used for multi-rates, when called will FieldArray replace the existing form fields with new data
-}
-
-const RateDatesErrorMessage = ({
-    startDate,
-    endDate,
-    startDateError,
-    endDateError,
-    shouldValidate,
-    formFieldLabel,
-}: {
-    shouldValidate: boolean
-    startDate?: string
-    endDate?: string
-    startDateError?: string // yup validation message
-    endDateError?: string // yup validation message
-    formFieldLabel: string
-}): React.ReactElement => {
-    const hasError = shouldValidate && (startDateError || endDateError)
-
-    // Error messages have hierarchy
-    // preference to show message for totally empty date, then errors for start date, then for end date
-    const validationErrorMessage = hasError
-        ? isDateRangeEmpty(startDate, endDate)
-            ? 'You must provide a start and an end date'
-            : (startDateError ?? endDateError)
-        : null
-
-    return (
-        <PoliteErrorMessage formFieldLabel={formFieldLabel}>
-            {validationErrorMessage}
-        </PoliteErrorMessage>
-    )
 }
 
 const emptyActuaryContact = {
@@ -454,25 +416,14 @@ export const SingleRateFormFields = ({
                             <span className={styles.requiredOptionalText}>
                                 Required
                             </span>
-                            <RateDatesErrorMessage
-                                startDate={rateForm.rateDateStart}
-                                endDate={rateForm.rateDateEnd}
-                                startDateError={showFieldErrors(
-                                    'rateDateStart'
-                                )}
-                                endDateError={showFieldErrors('rateDateEnd')}
-                                shouldValidate={shouldValidate}
-                                formFieldLabel={
-                                    isRateTypeAmendment(rateForm)
-                                        ? 'Rating period of original rate certification'
-                                        : 'Rating period'
-                                }
-                            />
 
-                            <DateRangePicker
+                            <CustomDateRangePicker
                                 className={styles.dateRangePicker}
                                 startDateHint="mm/dd/yyyy"
                                 startDateLabel="Start date"
+                                startDateError={showFieldErrors(
+                                    'rateDateStart'
+                                )}
                                 startDatePickerProps={{
                                     disabled: false,
                                     id: `${fieldNamePrefix}.rateDateStart`,
@@ -487,6 +438,7 @@ export const SingleRateFormFields = ({
                                 }}
                                 endDateHint="mm/dd/yyyy"
                                 endDateLabel="End date"
+                                endDateError={showFieldErrors('rateDateEnd')}
                                 endDatePickerProps={{
                                     disabled: false,
                                     id: `${fieldNamePrefix}.rateDateEnd`,
@@ -520,23 +472,14 @@ export const SingleRateFormFields = ({
                                     >
                                         Required
                                     </span>
-                                    <RateDatesErrorMessage
-                                        startDate={rateForm.effectiveDateStart}
-                                        endDate={rateForm.effectiveDateEnd}
-                                        startDateError={showFieldErrors(
-                                            'effectiveDateStart'
-                                        )}
-                                        endDateError={showFieldErrors(
-                                            'effectiveDateEnd'
-                                        )}
-                                        shouldValidate={shouldValidate}
-                                        formFieldLabel="Effective dates of rate amendment"
-                                    />
 
-                                    <DateRangePicker
+                                    <CustomDateRangePicker
                                         className={styles.dateRangePicker}
                                         startDateHint="mm/dd/yyyy"
                                         startDateLabel="Start date"
+                                        startDateError={showFieldErrors(
+                                            'effectiveDateStart'
+                                        )}
                                         startDatePickerProps={{
                                             disabled: false,
                                             id: `${fieldNamePrefix}.effectiveDateStart`,
@@ -552,6 +495,9 @@ export const SingleRateFormFields = ({
                                         }}
                                         endDateHint="mm/dd/yyyy"
                                         endDateLabel="End date"
+                                        endDateError={showFieldErrors(
+                                            'effectiveDateEnd'
+                                        )}
                                         endDatePickerProps={{
                                             disabled: false,
                                             id: `${fieldNamePrefix}.effectiveDateEnd`,
