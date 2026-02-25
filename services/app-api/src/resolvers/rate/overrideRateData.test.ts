@@ -38,7 +38,7 @@ describe('overrideRateData', () => {
         const originalInitiallySubmittedAt = initialRate.initiallySubmittedAt
 
         // Override initiallySubmittedAt
-        const overrideDate = '2020-01-01T00:00:00.000Z'
+        const overrideDate = new Date('2020-01-01')
         const afterOverride = await overrideTestRateDataMock(
             adminServer,
             rateID,
@@ -52,7 +52,7 @@ describe('overrideRateData', () => {
             expect.objectContaining({
                 description: 'Override initiallySubmittedAt for testing',
                 overrides: expect.objectContaining({
-                    initiallySubmittedAt: new Date(overrideDate),
+                    initiallySubmittedAt: overrideDate,
                 }),
                 updatedBy: expect.objectContaining({
                     ...adminUser,
@@ -62,9 +62,7 @@ describe('overrideRateData', () => {
 
         // Assert fetched rate reflects the overridden value
         const overriddenRate = await fetchTestRateById(cmsServer, rateID)
-        expect(overriddenRate.initiallySubmittedAt).toStrictEqual(
-            new Date(overrideDate)
-        )
+        expect(overriddenRate.initiallySubmittedAt).toStrictEqual(overrideDate)
 
         // Clear the override by passing null
         const afterClear = await overrideTestRateDataMock(
@@ -90,7 +88,7 @@ describe('overrideRateData', () => {
         expect(afterClear.rateOverrides?.[1]).toEqual(
             expect.objectContaining({
                 description: 'Override initiallySubmittedAt for testing',
-                overrides: { initiallySubmittedAt: new Date(overrideDate) },
+                overrides: { initiallySubmittedAt: overrideDate },
                 updatedBy: expect.objectContaining({
                     ...adminUser,
                 }),
@@ -100,7 +98,7 @@ describe('overrideRateData', () => {
         // Assert fetched rate reverts to the original initiallySubmittedAt
         const restoredRate = await fetchTestRateById(cmsServer, rateID)
         expect(restoredRate.initiallySubmittedAt).toStrictEqual(
-            new Date(originalInitiallySubmittedAt)
+            originalInitiallySubmittedAt
         )
     })
 
@@ -125,7 +123,7 @@ describe('overrideRateData', () => {
 
         // Attempt to override initiallySubmittedAt to a future date
         const futureDate = '2050-12-31T00:00:00.000Z'
-        const result = await executeGraphQLOperation(adminServer, {
+        const errorResult = await executeGraphQLOperation(adminServer, {
             query: OverrideRateDataDocument,
             variables: {
                 input: {
@@ -137,10 +135,10 @@ describe('overrideRateData', () => {
         })
 
         // Assert the mutation returned an error
-        expect(result.errors).toBeDefined()
-        expect(result.errors).toHaveLength(1)
-        expect(result.errors?.[0].message).toContain(
-            'initiallySubmittedAt cannot be today or in the future'
+        expect(errorResult.errors).toBeDefined()
+        expect(errorResult.errors).toHaveLength(1)
+        expect(errorResult.errors?.[0].message).toContain(
+            'initiallySubmittedAt cannot be in the future.'
         )
 
         // Assert fetched rate still has the original initiallySubmittedAt
@@ -148,6 +146,25 @@ describe('overrideRateData', () => {
         expect(unchangedRate.initiallySubmittedAt).toStrictEqual(
             initialRate.initiallySubmittedAt
         )
+
+        // Assert todays date is a valid override
+        const todaysDate = new Date()
+        const result = await executeGraphQLOperation(adminServer, {
+            query: OverrideRateDataDocument,
+            variables: {
+                input: {
+                    rateID,
+                    description:
+                        "Override initiallySubmittedAt to today's date",
+                    data: { initiallySubmittedAt: todaysDate },
+                },
+            },
+        })
+
+        expect(result.errors).toBeUndefined()
+
+        const changedRate = await fetchTestRateById(cmsServer, rateID)
+        expect(changedRate.initiallySubmittedAt).toStrictEqual(todaysDate)
     })
 
     it('denies non-admin users from overriding rate data', async () => {

@@ -507,6 +507,7 @@ type Mutation {
     - UserInputError:
         - Rate not found
         - Invalid meta data override
+            - initiallySubmittedAt override date cannot be in the future
         - A rate is not in the correct submission status: SUBMITTED or RESUBMITTED
         - A rate is not in the correct review status: UNDER_REVIEW
     - INTERNAL_SERVER_ERROR

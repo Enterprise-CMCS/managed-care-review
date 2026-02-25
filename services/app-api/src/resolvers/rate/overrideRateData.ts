@@ -27,11 +27,11 @@ const parseRateOverrides = (
                 )
                 overrideInitialSubmitDate.setHours(0, 0, 0, 0)
 
-                if (overrideInitialSubmitDate >= currentDate) {
+                if (overrideInitialSubmitDate > currentDate) {
                     ctx.addIssue({
                         code: 'custom',
                         message:
-                            'initiallySubmittedAt cannot be today or in the future',
+                            'initiallySubmittedAt cannot be in the future.',
                     })
                 }
             }

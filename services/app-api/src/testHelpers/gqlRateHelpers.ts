@@ -576,7 +576,7 @@ const overrideTestRateDataMock = async (
     server: ApolloServer,
     rateID: string,
     description: string,
-    data: { initiallySubmittedAt?: string | null }
+    data: { initiallySubmittedAt?: Date | null }
 ): Promise<Rate> => {
     const result = await executeGraphQLOperation(server, {
         query: OverrideRateDataDocument,
