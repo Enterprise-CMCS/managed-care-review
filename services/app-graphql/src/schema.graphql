@@ -497,6 +497,22 @@ type Mutation {
     - DB_ERROR
     """
     generateUploadURL(input: GenerateUploadURLInput!): GenerateUploadURLPayload!
+
+    """
+    overrideRateData will override rate meta data
+
+    Errors:
+    - ForbiddenError:
+        - A non Admin user called this
+    - UserInputError:
+        - Rate not found
+        - Invalid meta data override
+        - A rate is not in the correct submission status: SUBMITTED or RESUBMITTED
+        - A rate is not in the correct review status: UNDER_REVIEW
+    - INTERNAL_SERVER_ERROR
+        - DB_ERROR
+    """
+    overrideRateData(input: OverrideRateDataInput!): OverrideRateDataPayload!
 }
 
 input CreateContractInput {
@@ -1808,6 +1824,14 @@ type Rate {
     , unlocked, or resubmitted. The array is in descending order by createdAt.
     """
     questions: IndexRateQuestionsPayload
+    """
+    Rate metadata that are set by Admin users to override existing metadata on a rate. Overrides are in descending
+    order by createdAt, where the latest override takes precedence and represents the current active metadata to be
+    used. All previous overrides serve as a historical record of past changes and are retained for audit purposes only.
+    - rateOverrides.initiallySubmittedAt: overrides the system calculated initiallySubmittedAt. If set in overrides the
+    rate.initiallySubmittedAt will already be set to the override date.
+    """
+    rateOverrides: [RateOverrideType]
 }
 """
 RateStripped is a stripped down version of a Rate, removing many relational fields to provide a faster query.
@@ -2563,6 +2587,35 @@ type GenerateUploadURLPayload {
     s3Key: String!
     bucket: String!
     expiresIn: Int
+}
+
+type RateOverrideDataType {
+    initiallySubmittedAt: DateTime
+}
+
+type RateOverrideType {
+    id: String!
+    createdAt: DateTime!
+    updatedBy: AdminUser
+    description: String!
+    overrides: RateOverrideDataType!
+}
+
+input OverrideRateDataInputFragment {
+    initiallySubmittedAt: DateTime
+}
+
+input OverrideRateDataInput {
+    rateID: String!
+    description: String!
+    data: OverrideRateDataInputFragment!
+}
+
+type OverrideRateDataPayload {
+    """
+    A rate that include contract and rate revisions
+    """
+    rate: Rate!
 }
 
 enum UploadFileType {

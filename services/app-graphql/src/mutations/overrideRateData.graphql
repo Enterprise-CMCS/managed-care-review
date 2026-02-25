@@ -1,0 +1,30 @@
+mutation overrideRateData($input: OverrideRateDataInput!) {
+    overrideRateData(input: $input) {
+        rate {
+            ...rateFieldsFragment
+
+            draftRevision {
+                ...rateRevisionFragment
+            }
+
+            revisions {
+                ...rateRevisionFragment
+            }
+
+            withdrawnFromContracts {
+                ...contractFieldsFragment,
+                packageSubmissions {
+                    ...packageSubmissionsFragment
+                }
+            }
+
+            packageSubmissions {
+                ...ratePackageSubmissionsFragment
+            }
+
+            rateOverrides {
+                ...rateOverridesFragment
+            }
+        }
+    }
+}
