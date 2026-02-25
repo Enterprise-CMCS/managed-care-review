@@ -8,6 +8,7 @@ import {
     fetchCurrentUserMock,
     fetchContractMockSuccess,
     mockContractPackageUnlockedWithUnlockedType,
+    s3DlUrl,
 } from '@mc-review/mocks'
 
 import {
@@ -685,15 +686,16 @@ describe('EQROContractDetails', () => {
             await screen.findByText('EQRO Contract details')
 
             expect(screen.queryByText('Provisions')).not.toBeInTheDocument()
-            
+
             expect(
-                screen.queryByText('Does this contract action include provisions related to any of the following?')
+                screen.queryByText(
+                    'Does this contract action include provisions related to any of the following?'
+                )
             ).not.toBeInTheDocument()
         })
     })
 
     describe('EQRO provisions questions - validation', () => {
-
         it('shows 4 validation errors for Base contract with MCO and MEDICAID_AND_CHIP', async () => {
             const draftContract = mockContractPackageUnlockedWithUnlockedType()
             draftContract.draftRevision.formData.contractType = 'BASE'
@@ -751,8 +753,7 @@ describe('EQROContractDetails', () => {
         it('shows 3 validation errors for Base contract with MCO and MEDICAID', async () => {
             const draftContract = mockContractPackageUnlockedWithUnlockedType()
             draftContract.draftRevision.formData.contractType = 'BASE'
-            draftContract.draftRevision.formData.populationCovered =
-                'MEDICAID'
+            draftContract.draftRevision.formData.populationCovered = 'MEDICAID'
             draftContract.draftRevision.formData.managedCareEntities = ['MCO']
             draftContract.draftRevision.formData.contractDateStart = new Date(
                 '2027-01-01'
@@ -805,8 +806,7 @@ describe('EQROContractDetails', () => {
         it('shows 1 validation error for Base contract with no MCO and CHIP', async () => {
             const draftContract = mockContractPackageUnlockedWithUnlockedType()
             draftContract.draftRevision.formData.contractType = 'BASE'
-            draftContract.draftRevision.formData.populationCovered =
-                'CHIP'
+            draftContract.draftRevision.formData.populationCovered = 'CHIP'
             draftContract.draftRevision.formData.managedCareEntities = ['PIHP']
             draftContract.draftRevision.formData.contractDateStart = new Date(
                 '2027-01-01'
@@ -859,8 +859,7 @@ describe('EQROContractDetails', () => {
         it('shows 1 validation error for Amendment with MCO and MEDICAID', async () => {
             const draftContract = mockContractPackageUnlockedWithUnlockedType()
             draftContract.draftRevision.formData.contractType = 'AMENDMENT'
-            draftContract.draftRevision.formData.populationCovered =
-                'MEDICAID'
+            draftContract.draftRevision.formData.populationCovered = 'MEDICAID'
             draftContract.draftRevision.formData.managedCareEntities = ['MCO']
             draftContract.draftRevision.formData.contractDateStart = new Date(
                 '2027-01-01'
@@ -912,8 +911,7 @@ describe('EQROContractDetails', () => {
         it('shows 2 validation errors for Amendment with MCO and MEDICAID, when eqroProvisionMcoEqrOrRelatedActivities is answered YES', async () => {
             const draftContract = mockContractPackageUnlockedWithUnlockedType()
             draftContract.draftRevision.formData.contractType = 'AMENDMENT'
-            draftContract.draftRevision.formData.populationCovered =
-                'MEDICAID'
+            draftContract.draftRevision.formData.populationCovered = 'MEDICAID'
             draftContract.draftRevision.formData.managedCareEntities = ['MCO']
             draftContract.draftRevision.formData.contractDateStart = new Date(
                 '2027-01-01'
@@ -958,7 +956,7 @@ describe('EQROContractDetails', () => {
                 name: 'Yes',
             })
             await userEvent.click(yesRadio)
-            
+
             const continueButton = screen.getByRole('button', {
                 name: 'Continue',
             })
@@ -1075,7 +1073,7 @@ describe('EQROContractDetails', () => {
                 name: 'Yes',
             })
             await userEvent.click(yesRadio)
-            
+
             const continueButton = screen.getByRole('button', {
                 name: 'Continue',
             })
@@ -1156,8 +1154,7 @@ describe('EQROContractDetails', () => {
         it('shows 1 validation error for Amendment with CHIP and no MCO', async () => {
             const draftContract = mockContractPackageUnlockedWithUnlockedType()
             draftContract.draftRevision.formData.contractType = 'AMENDMENT'
-            draftContract.draftRevision.formData.populationCovered =
-                'CHIP'
+            draftContract.draftRevision.formData.populationCovered = 'CHIP'
             draftContract.draftRevision.formData.managedCareEntities = ['PIHP']
             draftContract.draftRevision.formData.contractDateStart = new Date(
                 '2027-01-01'
@@ -1674,9 +1671,13 @@ describe('EQROContractDetails', () => {
             const draftContract = mockContractPackageUnlockedWithUnlockedType()
             draftContract.draftRevision.formData.contractDocuments = [
                 {
+                    __typename: 'GenericDocument',
+                    id: 'test-doc-1',
                     name: 'aasdf3423af',
                     sha256: 'fakesha',
                     s3URL: 's3://bucketname/key/fileName',
+                    dateAdded: new Date(),
+                    downloadURL: s3DlUrl,
                 },
             ]
             draftContract.draftRevision.formData.contractType = 'BASE'

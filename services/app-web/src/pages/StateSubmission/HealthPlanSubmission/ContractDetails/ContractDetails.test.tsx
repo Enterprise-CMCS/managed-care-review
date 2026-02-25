@@ -8,6 +8,7 @@ import {
     fetchCurrentUserMock,
     fetchContractMockSuccess,
     mockContractPackageUnlockedWithUnlockedType,
+    s3DlUrl,
 } from '@mc-review/mocks'
 
 import {
@@ -1278,9 +1279,13 @@ describe('ContractDetails', () => {
             const draftContract = mockContractPackageUnlockedWithUnlockedType()
             draftContract.draftRevision.formData.contractDocuments = [
                 {
+                    __typename: 'GenericDocument',
+                    id: 'test-doc-1',
                     name: 'aasdf3423af',
                     sha256: 'fakesha',
                     s3URL: 's3://bucketname/key/fileName',
+                    dateAdded: new Date(),
+                    downloadURL: s3DlUrl,
                 },
             ]
 

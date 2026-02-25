@@ -11,7 +11,7 @@ import {
     ContractSubmissionTypeRecord,
     RoutesRecord,
 } from '@mc-review/constants'
-import { fetchCurrentUserMock } from '@mc-review/mocks'
+import { fetchCurrentUserMock, s3DlUrl } from '@mc-review/mocks'
 import {
     mockContractPackageSubmitted,
     mockValidCMSUser,
@@ -409,9 +409,13 @@ describe('StateSubmissionForm', () => {
         it('works even if other sections of the form have been filled out', async () => {
             const mockDocs: GenericDocument[] = [
                 {
+                    __typename: 'GenericDocument',
+                    id: 'somedoc-id',
                     name: 'somedoc.pdf',
                     s3URL: 's3://bucketName/key/somedoc.pdf',
                     sha256: 'fakesha',
+                    dateAdded: new Date(),
+                    downloadURL: s3DlUrl,
                 },
             ]
             const mockSubmission = mockContractPackageDraft()
@@ -650,19 +654,31 @@ describe('StateSubmissionForm', () => {
 
             const docs: GenericDocument[] = [
                 {
+                    __typename: 'GenericDocument',
+                    id: 'doc-1',
                     s3URL: 's3://bucketname/one-two/one-two.png',
                     sha256: 'fakesha',
                     name: 'one two',
+                    dateAdded: new Date(),
+                    downloadURL: s3DlUrl,
                 },
                 {
+                    __typename: 'GenericDocument',
+                    id: 'doc-2',
                     s3URL: 's3://bucketname/two-one/two-one.png',
                     sha256: 'fakesha',
                     name: 'two one',
+                    dateAdded: new Date(),
+                    downloadURL: s3DlUrl,
                 },
                 {
+                    __typename: 'GenericDocument',
+                    id: 'doc-3',
                     s3URL: 's3://bucketname/three-one/three-one.png',
                     sha256: 'fakesha',
                     name: 'three one',
+                    dateAdded: new Date(),
+                    downloadURL: s3DlUrl,
                 },
             ]
 

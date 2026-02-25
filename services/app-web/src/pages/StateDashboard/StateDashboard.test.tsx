@@ -166,10 +166,13 @@ describe('StateDashboard', () => {
         const draft = mockContractPackageDraft()
 
         draft.draftRevision!.updatedAt = new Date('2100-01-01')
+        draft.updatedAt = new Date('2100-01-01')
+
         const submitted = mockContractPackageSubmitted()
         submitted.packageSubmissions[0].contractRevision.updatedAt = new Date(
             '1991-01-01'
         )
+        submitted.updatedAt = new Date('1991-01-01')
 
         const unlocked: Contract = {
             ...mockContractPackageUnlockedWithUnlockedType(),
@@ -178,12 +181,14 @@ describe('StateDashboard', () => {
         if (unlocked.draftRevision) {
             unlocked.draftRevision.updatedAt = new Date('2020-01-01')
         }
+        unlocked.updatedAt = new Date('2020-01-01')
 
         draft.id = 'test-abc-draft'
         submitted.id = 'test-abc-submitted'
         unlocked.id = 'test-abc-unlocked'
 
-        const submissions = [draft, submitted, unlocked]
+        // Submissions should be sorted by updatedAt descending: 2100, 2020, 1991
+        const submissions = [draft, unlocked, submitted]
 
         renderWithProviders(<StateDashboard />, {
             apolloProvider: {
@@ -257,10 +262,13 @@ describe('StateDashboard', () => {
         }
 
         const approved = mockContractPackageApproved()
+        approved.updatedAt = new Date('2100-01-01')
+
         const submitted = mockContractPackageSubmitted()
         submitted.packageSubmissions[0].contractRevision.updatedAt = new Date(
             '1991-01-01'
         )
+        submitted.updatedAt = new Date('1991-01-01')
 
         const unlocked: Contract = {
             ...mockContractPackageUnlockedWithUnlockedType(),
@@ -269,12 +277,14 @@ describe('StateDashboard', () => {
         if (unlocked.draftRevision) {
             unlocked.draftRevision.updatedAt = new Date('2020-01-01')
         }
+        unlocked.updatedAt = new Date('2020-01-01')
 
         approved.id = 'test-abc-approved'
         submitted.id = 'test-abc-submitted'
         unlocked.id = 'test-abc-unlocked'
 
-        const submissions = [approved, submitted, unlocked]
+        // Submissions should be sorted by updatedAt descending: 2100, 2020, 1991
+        const submissions = [approved, unlocked, submitted]
 
         renderWithProviders(<StateDashboard />, {
             apolloProvider: {

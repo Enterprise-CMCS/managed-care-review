@@ -17,6 +17,20 @@ import { mockMNState } from './stateMock'
 
 import { mockValidCMSUser, mockValidUser } from './userGQLMock'
 
+// Type-safe overrides for mock functions
+// Allows overriding any Contract field, but nested objects must be complete (not Partial)
+// This prevents accidentally passing incomplete nested objects
+type ContractOverrides = Omit<
+    Contract,
+    'draftRevision' | 'draftRates' | 'packageSubmissions' | 'withdrawnRates'
+> & {
+    // For nested objects, only allow complete objects or null/undefined - no Partial
+    draftRevision?: ContractRevision | null
+    draftRates?: Rate[] | null
+    packageSubmissions?: Contract['packageSubmissions']
+    withdrawnRates?: Contract['withdrawnRates']
+}
+
 function mockEmptyContractQuestions(): IndexContractQuestionsPayload {
     return {
         DMCOQuestions: {
@@ -328,7 +342,13 @@ function mockContractRevision(
             statutoryRegulatoryAttestation: true,
             statutoryRegulatoryAttestationDescription:
                 'everything meets regulatory attestation',
+            eqroNewContractor: null,
+            eqroProvisionMcoNewOptionalActivity: null,
+            eqroProvisionNewMcoEqrRelatedActivities: null,
+            eqroProvisionChipEqrRelatedActivities: null,
+            eqroProvisionMcoEqrOrRelatedActivities: null,
         },
+        documentZipPackages: [],
         ...partial,
     }
 }
@@ -369,6 +389,7 @@ function mockRateRevision(
             rateType: 'AMENDMENT',
             rateCapitationType: 'RATE_CELL',
             rateCertificationName: 'fooname',
+            rateMedicaidPopulations: [],
             rateDocuments: [
                 {
                     __typename: 'GenericDocument',
@@ -412,6 +433,7 @@ function mockRateRevision(
             ],
             certifyingActuaryContacts: [
                 {
+                    __typename: 'ActuaryContact',
                     id: null,
                     actuarialFirmOther: null,
                     actuarialFirm: 'DELOITTE',
@@ -422,6 +444,7 @@ function mockRateRevision(
             ],
             addtlActuaryContacts: [
                 {
+                    __typename: 'ActuaryContact',
                     id: null,
                     actuarialFirmOther: null,
                     actuarialFirm: 'DELOITTE',
@@ -433,12 +456,15 @@ function mockRateRevision(
             actuaryCommunicationPreference: 'OACT_TO_ACTUARY',
             packagesWithSharedRateCerts: [],
         },
+        documentZipPackages: [],
         ...partial,
     }
 }
 
 // Assemble versions of Contract data (with or without rates) for jest testing. Intended for use with related GQL Moc file.
-function mockContractPackageDraft(partial?: Partial<Contract>): Contract {
+function mockContractPackageDraft(
+    partial?: Partial<ContractOverrides>
+): Contract {
     return {
         __typename: 'Contract',
         initiallySubmittedAt: null,
@@ -496,6 +522,8 @@ function mockContractPackageDraft(partial?: Partial<Contract>): Contract {
                         __typename: 'RateFormData',
                         rateType: 'AMENDMENT',
                         rateCapitationType: 'RATE_CELL',
+                        rateCertificationName: 'rate cert name',
+                        rateMedicaidPopulations: [],
                         rateDocuments: [
                             {
                                 __typename: 'GenericDocument',
@@ -573,7 +601,7 @@ function mockContractPackageDraft(partial?: Partial<Contract>): Contract {
 // Assemble versions of Contract data (with or without rates) for jest testing. Intended for use with related GQL Moc file.
 function mockContractPackageSubmittedWithQuestions(
     contractId?: string,
-    partial?: Partial<Contract>
+    partial?: Partial<ContractOverrides>
 ): Contract {
     const contractID = contractId || 'test-abc-123'
     return {
@@ -701,9 +729,11 @@ function mockContractPackageSubmittedWithQuestions(
                         createdAt: new Date('01/01/2023'),
                         updatedAt: new Date('01/01/2023'),
                         formData: {
+                            __typename: 'RateFormData',
                             rateCertificationName: 'rate cert',
                             rateType: 'AMENDMENT',
                             rateCapitationType: 'RATE_CELL',
+                            rateMedicaidPopulations: [],
                             rateDocuments: [
                                 {
                                     __typename: 'GenericDocument',
@@ -749,7 +779,10 @@ function mockContractPackageSubmittedWithQuestions(
                             deprecatedRateProgramIDs: [],
                             certifyingActuaryContacts: [
                                 {
+                                    __typename: 'ActuaryContact',
+                                    id: 'actuary-1',
                                     actuarialFirm: 'DELOITTE',
+                                    actuarialFirmOther: null,
                                     name: 'Actuary Contact 1',
                                     titleRole: 'Test Actuary Contact 1',
                                     email: 'actuarycontact1@test.com',
@@ -757,7 +790,10 @@ function mockContractPackageSubmittedWithQuestions(
                             ],
                             addtlActuaryContacts: [
                                 {
+                                    __typename: 'ActuaryContact',
+                                    id: 'actuary-2',
                                     actuarialFirm: 'DELOITTE',
+                                    actuarialFirmOther: null,
                                     name: 'Actuary Contact 1',
                                     titleRole: 'Test Actuary Contact 1',
                                     email: 'actuarycontact1@test.com',
@@ -775,7 +811,7 @@ function mockContractPackageSubmittedWithQuestions(
     }
 }
 function mockContractWithLinkedRateDraft(
-    partial?: Partial<Contract>
+    partial?: Partial<ContractOverrides>
 ): Contract {
     return {
         __typename: 'Contract',
@@ -786,6 +822,8 @@ function mockContractWithLinkedRateDraft(
         createdAt: new Date(),
         updatedAt: new Date(),
         lastUpdatedForDisplay: new Date(),
+        dateContractDocsExecuted: null,
+        reviewStatusActions: [],
         id: 'test-abc-123',
         webURL: 'https://testmcreview.example/submissions/test-abc-123',
         stateCode: 'MN',
@@ -802,23 +840,18 @@ function mockContractWithLinkedRateDraft(
             createdAt: new Date('01/01/2023'),
             updatedAt: new Date('11/01/2023'),
             contractName: 'MCR-0005-alvhalfhdsalfss',
-            formData: {
-                programIDs: ['abbdf9b0-c49e-4c4c-bb6f-040cb7b51cce'],
-                populationCovered: 'MEDICAID',
-                submissionType: 'CONTRACT_AND_RATES',
-                riskBasedContract: true,
-                dsnpContract: true,
+            documentZipPackages: [],
+            formData: mockContractFormData({
                 submissionDescription: 'A real submission',
                 supportingDocuments: [],
                 stateContacts: [
                     {
+                        __typename: 'StateContact',
                         name: 'State Contact 1',
                         titleRole: 'Test State Contact 1',
                         email: 'actuarycontact1@test.com',
                     },
                 ],
-                contractType: 'AMENDMENT',
-                contractExecutionStatus: 'EXECUTED',
                 contractDocuments: [
                     {
                         __typename: 'GenericDocument',
@@ -830,31 +863,7 @@ function mockContractWithLinkedRateDraft(
                         downloadURL: s3DlUrl,
                     },
                 ],
-                contractDateStart: new Date('01/01/2023'),
-                contractDateEnd: new Date('12/31/2023'),
-                managedCareEntities: ['MCO'],
-                federalAuthorities: ['STATE_PLAN'],
-                inLieuServicesAndSettings: true,
-                modifiedBenefitsProvided: true,
-                modifiedGeoAreaServed: false,
-                modifiedMedicaidBeneficiaries: true,
-                modifiedRiskSharingStrategy: true,
-                modifiedIncentiveArrangements: false,
-                modifiedWitholdAgreements: false,
-                modifiedStateDirectedPayments: true,
-                modifiedPassThroughPayments: true,
-                modifiedPaymentsForMentalDiseaseInstitutions: false,
-                modifiedMedicalLossRatioStandards: true,
-                modifiedOtherFinancialPaymentIncentive: false,
-                modifiedEnrollmentProcess: true,
-                modifiedGrevienceAndAppeal: false,
-                modifiedNetworkAdequacyStandards: true,
-                modifiedLengthOfContract: false,
-                modifiedNonRiskPaymentArrangements: true,
-                statutoryRegulatoryAttestation: true,
-                statutoryRegulatoryAttestationDescription:
-                    'everything meets regulatory attestation',
-            },
+            }),
         },
 
         draftRates: [
@@ -904,6 +913,8 @@ function mockContractWithLinkedRateDraft(
                         __typename: 'RateFormData',
                         rateType: 'AMENDMENT',
                         rateCapitationType: 'RATE_CELL',
+                        rateCertificationName: 'rate cert name',
+                        rateMedicaidPopulations: [],
                         rateDocuments: [
                             {
                                 __typename: 'GenericDocument',
@@ -930,7 +941,10 @@ function mockContractWithLinkedRateDraft(
                         deprecatedRateProgramIDs: [],
                         certifyingActuaryContacts: [
                             {
+                                __typename: 'ActuaryContact',
+                                id: 'actuary-contact-1',
                                 actuarialFirm: 'DELOITTE',
+                                actuarialFirmOther: null,
                                 name: 'Actuary Contact 1',
                                 titleRole: 'Test Actuary Contact 1',
                                 email: 'actuarycontact1@test.com',
@@ -938,7 +952,10 @@ function mockContractWithLinkedRateDraft(
                         ],
                         addtlActuaryContacts: [
                             {
+                                __typename: 'ActuaryContact',
+                                id: 'actuary-contact-2',
                                 actuarialFirm: 'DELOITTE',
+                                actuarialFirmOther: null,
                                 name: 'Actuary Contact 1',
                                 titleRole: 'Test Actuary Contact 1',
                                 email: 'additionalactuarycontact1@test.com',
@@ -947,6 +964,7 @@ function mockContractWithLinkedRateDraft(
                         actuaryCommunicationPreference: 'OACT_TO_ACTUARY',
                         packagesWithSharedRateCerts: [],
                     },
+                    documentZipPackages: [],
                 },
                 revisions: [
                     {
@@ -957,10 +975,13 @@ function mockContractWithLinkedRateDraft(
                         updatedAt: new Date(),
                         submitInfo: null,
                         unlockInfo: null,
+                        documentZipPackages: [],
                         formData: {
                             __typename: 'RateFormData',
                             rateType: 'AMENDMENT',
                             rateCapitationType: 'RATE_CELL',
+                            rateCertificationName: 'rate cert name',
+                            rateMedicaidPopulations: [],
                             rateDocuments: [
                                 {
                                     __typename: 'GenericDocument',
@@ -987,7 +1008,10 @@ function mockContractWithLinkedRateDraft(
                             deprecatedRateProgramIDs: [],
                             certifyingActuaryContacts: [
                                 {
+                                    __typename: 'ActuaryContact',
+                                    id: 'actuary-contact-1',
                                     actuarialFirm: 'DELOITTE',
+                                    actuarialFirmOther: null,
                                     name: 'Actuary Contact 1',
                                     titleRole: 'Test Actuary Contact 1',
                                     email: 'actuarycontact1@test.com',
@@ -995,7 +1019,10 @@ function mockContractWithLinkedRateDraft(
                             ],
                             addtlActuaryContacts: [
                                 {
+                                    __typename: 'ActuaryContact',
+                                    id: 'actuary-contact-2',
                                     actuarialFirm: 'DELOITTE',
+                                    actuarialFirmOther: null,
                                     name: 'Actuary Contact 1',
                                     titleRole: 'Test Actuary Contact 1',
                                     email: 'additionalactuarycontact1@test.com',
@@ -1015,7 +1042,7 @@ function mockContractWithLinkedRateDraft(
 }
 
 function mockContractWithLinkedRateSubmitted(
-    partial?: Partial<Contract>
+    partial?: Partial<ContractOverrides>
 ): Contract {
     const contractID = partial?.id ?? 'test-abc-123'
     return {
@@ -1165,7 +1192,10 @@ function mockContractWithLinkedRateSubmitted(
                             deprecatedRateProgramIDs: [],
                             certifyingActuaryContacts: [
                                 {
+                                    __typename: 'ActuaryContact',
+                                    id: 'actuary-contact-1',
                                     actuarialFirm: 'DELOITTE',
+                                    actuarialFirmOther: null,
                                     name: 'Actuary Contact 1',
                                     titleRole: 'Test Actuary Contact 1',
                                     email: 'actuarycontact1@test.com',
@@ -1191,7 +1221,9 @@ function mockContractWithLinkedRateSubmitted(
     }
 }
 
-function mockContractPackageSubmitted(partial?: Partial<Contract>): Contract {
+function mockContractPackageSubmitted(
+    partial?: Partial<ContractOverrides>
+): Contract {
     const contractID = partial?.id ?? 'test-abc-123'
     return {
         status: 'SUBMITTED',
@@ -1362,6 +1394,7 @@ function mockContractPackageSubmitted(partial?: Partial<Contract>): Contract {
                             rateCertificationName: 'rate cert',
                             rateType: 'AMENDMENT',
                             rateCapitationType: 'RATE_CELL',
+                            rateMedicaidPopulations: [],
                             rateDocuments: [
                                 {
                                     __typename: 'GenericDocument',
@@ -1438,7 +1471,7 @@ function mockContractPackageSubmitted(partial?: Partial<Contract>): Contract {
 }
 
 function mockContractPackageApproved(
-    partial?: Partial<Contract>,
+    partial?: Partial<ContractOverrides>,
     contractId?: string
 ): Contract {
     const contractID = contractId || 'test-abc-123'
@@ -1594,6 +1627,7 @@ function mockContractPackageApproved(
                             rateCertificationName: 'rate cert',
                             rateType: 'AMENDMENT',
                             rateCapitationType: 'RATE_CELL',
+                            rateMedicaidPopulations: [],
                             rateDocuments: [
                                 {
                                     __typename: 'GenericDocument',
@@ -1639,7 +1673,10 @@ function mockContractPackageApproved(
                             deprecatedRateProgramIDs: [],
                             certifyingActuaryContacts: [
                                 {
+                                    __typename: 'ActuaryContact',
+                                    id: 'actuary-contact-1',
                                     actuarialFirm: 'DELOITTE',
+                                    actuarialFirmOther: null,
                                     name: 'Actuary Contact 1',
                                     titleRole: 'Test Actuary Contact 1',
                                     email: 'actuarycontact1@test.com',
@@ -1647,7 +1684,10 @@ function mockContractPackageApproved(
                             ],
                             addtlActuaryContacts: [
                                 {
+                                    __typename: 'ActuaryContact',
+                                    id: 'actuary-contact-1',
                                     actuarialFirm: 'DELOITTE',
+                                    actuarialFirmOther: null,
                                     name: 'Actuary Contact 1',
                                     titleRole: 'Test Actuary Contact 1',
                                     email: 'actuarycontact1@test.com',
@@ -1666,7 +1706,7 @@ function mockContractPackageApproved(
 }
 
 function mockContractPackageApprovedWithQuestions(
-    partial?: Partial<Contract>,
+    partial?: Partial<ContractOverrides>,
     contractId?: string
 ): Contract {
     const contractID = contractId || 'test-abc-123'
@@ -1679,7 +1719,7 @@ function mockContractPackageApprovedWithQuestions(
 }
 
 function mockContractPackageSubmittedWithRevisions(
-    partial?: Partial<Contract>
+    partial?: Partial<ContractOverrides>
 ): Contract {
     const contractID = partial?.id || 'test-abc-123'
     return {
@@ -2237,9 +2277,9 @@ function mockContractPackageUnlockedWithUnlockedType(
         reviewStatus: 'UNDER_REVIEW',
         consolidatedStatus: 'UNLOCKED',
         __typename: 'UnlockedContract',
-        createdAt: '2023-01-01T16:54:39.173Z',
-        updatedAt: '2024-12-01T16:54:39.173Z',
-        lastUpdatedForDisplay: '2024-12-01T16:54:39.173Z',
+        createdAt: new Date('2023-01-01T16:54:39.173Z'),
+        updatedAt: new Date('2024-12-01T16:54:39.173Z'),
+        lastUpdatedForDisplay: new Date('2024-12-01T16:54:39.173Z'),
         initiallySubmittedAt: new Date('2023-01-01'),
         id: contractID,
         webURL: 'https://testmcreview.example/submissions/test-abc-123',
@@ -2256,7 +2296,7 @@ function mockContractPackageUnlockedWithUnlockedType(
             submitInfo: null,
             unlockInfo: {
                 __typename: 'UpdateInformation',
-                updatedAt: '2023-01-05T16:54:39.173Z',
+                updatedAt: new Date('2023-01-05T16:54:39.173Z'),
                 updatedBy: {
                     email: 'cms@example.com',
                     role: 'STATE_USER',

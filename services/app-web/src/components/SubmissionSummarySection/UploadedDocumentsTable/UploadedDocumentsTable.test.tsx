@@ -5,6 +5,7 @@ import {
     fetchCurrentUserMock,
     mockValidCMSUser,
     mockValidStateUser,
+    s3DlUrl,
 } from '@mc-review/mocks'
 import type { GenericDocument } from '../../../gen/gqlClient'
 
@@ -101,22 +102,31 @@ describe('UploadedDocumentsTable', () => {
     it('renders date added as expected for CMS user viewing submission', async () => {
         const testDocuments: GenericDocument[] = [
             {
+                __typename: 'GenericDocument',
+                id: 'test-doc-1',
                 s3URL: 's3://foo/bar/test-1',
                 name: 'supporting docs test 1',
                 sha256: 'fakesha',
                 dateAdded: new Date('03/25/2022'),
+                downloadURL: s3DlUrl,
             },
             {
+                __typename: 'GenericDocument',
+                id: 'test-doc-2',
                 s3URL: 's3://foo/bar/test-2',
                 name: 'supporting docs test 2',
                 sha256: 'fakesha1',
                 dateAdded: new Date('03/26/2022'),
+                downloadURL: s3DlUrl,
             },
             {
+                __typename: 'GenericDocument',
+                id: 'test-doc-3',
                 s3URL: 's3://foo/bar/test-3',
                 name: 'supporting docs test 3',
                 sha256: 'fakesha2',
                 dateAdded: new Date('03/27/2022'),
+                downloadURL: s3DlUrl,
             },
         ]
         renderWithProviders(
@@ -153,22 +163,31 @@ describe('UploadedDocumentsTable', () => {
     it('renders date added for State user viewing submission', async () => {
         const testDocuments: GenericDocument[] = [
             {
+                __typename: 'GenericDocument',
+                id: 'test-doc-1',
                 s3URL: 's3://foo/bar/test-1',
                 name: 'supporting docs test 1',
                 sha256: 'fakesha',
                 dateAdded: new Date('03/25/2022'),
+                downloadURL: s3DlUrl,
             },
             {
+                __typename: 'GenericDocument',
+                id: 'test-doc-2',
                 s3URL: 's3://foo/bar/test-2',
                 name: 'supporting docs test 2',
                 sha256: 'fakesha1',
                 dateAdded: new Date('03/26/2022'),
+                downloadURL: s3DlUrl,
             },
             {
+                __typename: 'GenericDocument',
+                id: 'test-doc-3',
                 s3URL: 's3://foo/bar/test-3',
                 name: 'supporting docs test 3',
                 sha256: 'fakesha2',
                 dateAdded: new Date('03/27/2022'),
+                downloadURL: s3DlUrl,
             },
         ]
         renderWithProviders(
@@ -205,22 +224,31 @@ describe('UploadedDocumentsTable', () => {
     it('does not render a date added when supplied a new draft submissions)', async () => {
         const testDocuments: GenericDocument[] = [
             {
+                __typename: 'GenericDocument',
+                id: 'test-doc-1',
                 s3URL: 's3://foo/bar/test-1',
                 name: 'supporting docs test 1',
                 sha256: 'fakesha',
                 dateAdded: new Date(),
+                downloadURL: s3DlUrl,
             },
             {
+                __typename: 'GenericDocument',
+                id: 'test-doc-2',
                 s3URL: 's3://foo/bar/test-2',
                 name: 'supporting docs test 2',
                 sha256: 'fakesha1',
                 dateAdded: new Date(),
+                downloadURL: s3DlUrl,
             },
             {
+                __typename: 'GenericDocument',
+                id: 'test-doc-3',
                 s3URL: 's3://foo/bar/test-3',
                 name: 'supporting docs test 3',
                 sha256: 'fakesha2',
                 dateAdded: new Date(),
+                downloadURL: s3DlUrl,
             },
         ]
 
