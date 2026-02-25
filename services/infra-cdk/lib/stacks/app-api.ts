@@ -871,6 +871,13 @@ export class AppApiStack extends BaseStack {
                 '/configuration/mcreview_oauth_issuer'
             )
 
+        const oktaOauthIssuer =
+            process.env.OKTA_OAUTH_ISSUER ||
+            StringParameter.valueForStringParameter(
+                this,
+                '/configuration/okta_oauth_issuer'
+            )
+
         // JWT Secret from Secrets Manager - reference secret created by postgres stack
         const jwtSecretName = Fn.importValue(
             `${postgresStackName}-JwtSecretName`
@@ -899,6 +906,7 @@ export class AppApiStack extends BaseStack {
             LD_SDK_KEY: ldSdkKey,
             JWT_SECRET: jwtSecret,
             MCREVIEW_OAUTH_ISSUER: mcreviewOauthIssuer,
+            OKTA_OAUTH_ISSUER: oktaOauthIssuer,
             VITE_APP_S3_QA_BUCKET: qaUploadsBucketName,
             VITE_APP_S3_DOCUMENTS_BUCKET: documentUploadsBucketName,
             VITE_APP_S3_REGION: this.region,
