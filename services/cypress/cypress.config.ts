@@ -51,7 +51,7 @@ module.exports = defineConfig({
             newConfig.env.AWS_ACCESS_KEY_ID = process.env.AWS_ACCESS_KEY_ID
             newConfig.env.AWS_SECRET_ACCESS_KEY = process.env.AWS_SECRET_ACCESS_KEY
             newConfig.env.AWS_SESSION_TOKEN = process.env.AWS_SESSION_TOKEN
-
+            newConfig.env.VITE_APP_S3_QA_BUCKET = process.env.VITE_APP_S3_QA_BUCKET
             // Reads graphql schema and converts it to gql for apollo client.
             on('task', {
                 readGraphQLSchema() {
