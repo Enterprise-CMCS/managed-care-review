@@ -56,7 +56,12 @@ function genericContractResolver<
                     parent.packageSubmissions[
                         parent.packageSubmissions.length - 1
                     ]
-                return firstSubmission.submitInfo.updatedAt
+                // Use override date if exists.
+                return (
+                    parent.contractOverrides?.[0]?.overrides
+                        .initiallySubmittedAt ||
+                    firstSubmission.submitInfo.updatedAt
+                )
             }
 
             return null
@@ -100,8 +105,7 @@ function genericContractResolver<
                 ContractSubmissionTypeRecord[parent.contractSubmissionType],
                 parent.id
             )
-            const fullURL = new URL(urlPath, applicationEndpoint).href
-            return fullURL
+            return new URL(urlPath, applicationEndpoint).href
         },
         packageSubmissions(parent: ParentType) {
             const gqlSubs: ContractPackageSubmissionWithCauseType[] = []
