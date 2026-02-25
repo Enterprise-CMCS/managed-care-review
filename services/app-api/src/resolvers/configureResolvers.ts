@@ -20,15 +20,24 @@ import {
     updateStateAssignment,
 } from './user'
 import type { LDService } from '../launchDarkly/launchDarkly'
-import { indexRatesResolver } from './rate'
-import { rateResolver } from './rate'
+import {
+    rateResolver,
+    rateStrippedResolver,
+    rateRevisionResolver,
+    rateFormDataResolver,
+    indexRatesResolver,
+    indexRatesStripped,
+    fetchRateResolver,
+    submitRate,
+    unlockRate,
+    withdrawRate,
+    undoWithdrawRate,
+    overrideRateData,
+} from './rate'
 import { genericDocumentResolver } from './shared/genericDocumentResolver'
-import { fetchRateResolver } from './rate/fetchRate'
 import { updateContract } from './contract/updateContract'
 import { indexContractsResolver } from './contract/indexContracts'
 import { unlockContractResolver } from './contract/unlockContract'
-import { unlockRate } from './rate/unlockRate'
-import { submitRate } from './rate'
 import { updateDraftContractRates } from './contract/updateDraftContractRates'
 import {
     contractResolver,
@@ -37,19 +46,13 @@ import {
 import { contractRevisionResolver } from './contract/contractRevisionResolver'
 import { fetchContractResolver } from './contract/fetchContract'
 import { submitContract } from './contract/submitContract'
-import { rateRevisionResolver } from './rate/rateRevisionResolver'
 import type { S3ClientT } from '../s3'
 import { createContract } from './contract/createContract'
 import { updateContractDraftRevision } from './contract/updateContractDraftRevision'
 import { approveContract } from './contract/approveContract'
 import { fetchMcReviewSettings } from './settings'
 import { updateStateAssignmentsByState } from './user/updateStateAssignmentsByState'
-import { rateFormDataResolver } from './rate/rateFormDataResolver'
-import { withdrawRate } from './rate/withdrawRate'
 import { updateEmailSettings } from './settings/updateEmailSettings'
-import { undoWithdrawRate } from './rate/undoWithdrawRate'
-import { rateStrippedResolver } from './rate/rateResolver'
-import { indexRatesStripped } from './rate/indexRatesStripped'
 import { withdrawContract } from './contract/withdrawContract'
 import { undoWithdrawContract } from './contract/undoWithdrawContract'
 import { documentZipPackageResolver } from './documents'
@@ -132,6 +135,7 @@ export function configureResolvers(
             deleteOauthClient: deleteOauthClientResolver(store),
             updateOauthClient: updateOauthClientResolver(store),
             generateUploadURL: generateUploadURLResolver(store, s3Client),
+            overrideRateData: overrideRateData(store),
         },
         User: {
             // resolveType is required to differentiate Unions
