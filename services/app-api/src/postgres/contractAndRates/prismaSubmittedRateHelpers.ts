@@ -69,6 +69,11 @@ const includeRateWithoutDraftContracts = {
             updatedAt: 'asc',
         },
     },
+    rateOverrides: {
+        include: {
+            updatedBy: true,
+        },
+    },
 } satisfies Prisma.RateTableInclude
 
 const includeSubmissionPackageContractRevision = {
@@ -124,6 +129,11 @@ const includeStrippedRateWithoutDraftContracts = {
         },
         orderBy: {
             updatedAt: 'asc',
+        },
+    },
+    rateOverrides: {
+        include: {
+            updatedBy: true,
         },
     },
 } satisfies Prisma.RateTableInclude

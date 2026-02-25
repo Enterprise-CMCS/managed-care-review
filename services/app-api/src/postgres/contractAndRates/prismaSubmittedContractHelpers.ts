@@ -59,6 +59,11 @@ const includeContractWithoutDraftRates = {
             updatedAt: 'asc',
         },
     },
+    contractOverrides: {
+        include: {
+            updatedBy: true,
+        },
+    },
 } satisfies Prisma.ContractTableInclude
 
 type ContractTableWithoutDraftRates = Prisma.ContractTableGetPayload<{
