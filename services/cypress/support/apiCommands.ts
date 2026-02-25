@@ -117,7 +117,7 @@ const createAndSubmitEQROContract = async (
         body: new Blob(['trussel-guide.pdf'], { type: 'application/pdf' }),
       })
       if (!res.ok) {
-        throw new Error(`Upload failed: ${uploadResp.status}`)
+        throw new Error(`Upload failed: ${res.status}`)
       }
     updateFormData.contractDocuments = [
         {
