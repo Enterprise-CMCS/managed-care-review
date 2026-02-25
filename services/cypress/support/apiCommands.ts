@@ -121,8 +121,8 @@ const createAndSubmitEQROContract = async (
         throw new Error(`Upload failed: ${res.status}`)
       }
 
-    cy.log('bucket from resolver', uploadResult.bucket)
-    cy.log('bucket from Cypress', Cypress.env('VITE_APP_S3_DOCUMENTS_BUCKET'))
+    console.log('bucket from resolver', uploadResult.bucket)
+    console.log('bucket from Cypress', Cypress.env('VITE_APP_S3_DOCUMENTS_BUCKET'))
     updateFormData.contractDocuments = [
         {
             name: 'trussel-guide.pdf',
