@@ -933,6 +933,8 @@ jobs:
           AWS_ACCESS_KEY_ID: ${{ steps.creds.outputs.aws-access-key-id }}
           AWS_SECRET_ACCESS_KEY: ${{ steps.creds.outputs.aws-secret-access-key }}
           AWS_SESSION_TOKEN: ${{ steps.creds.outputs.aws-session-token }}
+          VITE_APP_S3_DOCUMENTS_BUCKET: ${{ secrets.VITE_APP_S3_DOCUMENTS_BUCKET }}
+          VITE_APP_S3_QA_BUCKET: ${{ secrets.VITE_APP_S3_QA_BUCKET }}
           # Overwrites folder directories in cypress config because in CI we run from root
           CYPRESS_SUPPORT_FILE: services/cypress/support/index.ts
           CYPRESS_FIXTURES_FOLDER: services/cypress/fixtures
