@@ -2594,7 +2594,7 @@ type RateOverrideDataType {
 }
 
 type RateOverrideType {
-    id: String!
+    id: ID!
     createdAt: DateTime!
     updatedBy: AdminUser
     description: String!
@@ -2606,7 +2606,7 @@ input OverrideRateDataInputFragment {
 }
 
 input OverrideRateDataInput {
-    rateID: String!
+    rateID: ID!
     description: String!
     data: OverrideRateDataInputFragment!
 }
