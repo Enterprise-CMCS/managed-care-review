@@ -109,13 +109,16 @@ const createAndSubmitEQROContract = async (
     const uploadResult = contractDocumentURL.data!.generateUploadURL
 
     const s3URL = `s3://${uploadResult.bucket}/${uploadResult.s3Key}/trussel-guide.pdf`
-    await fetch(uploadResult.uploadURL, {
+    const res = await fetch(uploadResult.uploadURL, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/pdf',
         },
         body: new Blob(['trussel-guide.pdf'], { type: 'application/pdf' }),
       })
+      if (!res.ok) {
+        throw new Error(`Upload failed: ${uploadResp.status}`)
+      }
     updateFormData.contractDocuments = [
         {
             name: 'trussel-guide.pdf',
