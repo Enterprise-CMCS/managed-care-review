@@ -76,7 +76,7 @@ const createAndSubmitContractOnlyPackage = async (
 const createAndSubmitEQROContract = async (
     apolloClient: ApolloClient<NormalizedCacheObject>
 ): Promise<Contract> => {
-    const s3Bucket = Cypress.env('VITE_APP_S3_QA_BUCKET')  
+    const s3Bucket = Cypress.env('VITE_APP_S3_DOCUMENTS_BUCKET')  
     const newContract = await apolloClient.mutate({
         mutation: CreateContractDocument,
         variables: {
