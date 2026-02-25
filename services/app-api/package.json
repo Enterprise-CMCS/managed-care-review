@@ -49,7 +49,7 @@
         "@prisma/client": "^5.21.1",
         "archiver": "^7.0.1",
         "axios": "^1.13.5",
-        "eta": "^2.0.0",
+        "eta": "^4.5.1",
         "express": "^4.18.2",
         "graphql": "^16.12.0",
         "graphql-scalars": "^1.25.0",
