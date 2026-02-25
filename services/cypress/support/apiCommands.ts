@@ -24,6 +24,7 @@ import {
 import { ApolloClient, DocumentNode, NormalizedCacheObject } from '@apollo/client'
 import { GraphQLError, print } from 'graphql'
 import { CMSUserLoginNames, userLoginData } from './loginCommands'
+import { GenerateUploadUrlDocument } from '@mc-review/constants/build/gen/gqlClient'
 
 export type ApiCreateOAuthClientResponseType = {
     client: OauthClient
@@ -94,6 +95,34 @@ const createAndSubmitEQROContract = async (
     const draftContract = newContract.data.createContract.contract
     const draftRevision = draftContract.draftRevision
     const updateFormData = eqroFromData()
+
+    const contractDocumentURL = await apolloClient.mutate({
+        mutation: GenerateUploadUrlDocument,
+        variables: {
+            input: {
+                fileName: 'trussel-guide.pdf',
+                fileType: 'PDF'
+            },
+        },
+    })
+
+    const uploadResult = contractDocumentURL.data!.generateUploadURL
+
+    const s3URL = `s3://${uploadResult.bucket}/${uploadResult.s3Key}/trussel-guide.pdf`
+    await fetch(uploadResult.uploadURL, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/pdf',
+        },
+        body: new Blob(['trussel-guide.pdf'], { type: 'application/pdf' }),
+      })
+    updateFormData.contractDocuments = [
+        {
+            name: 'trussel-guide.pdf',
+            s3URL,
+            sha256: 'abc123',
+        },
+    ]
 
     const updateContractDraftRevisionInput: UpdateContractDraftRevisionInput = {
         contractID: draftContract.id,
