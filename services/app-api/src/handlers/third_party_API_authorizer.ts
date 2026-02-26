@@ -36,34 +36,39 @@ export const main: APIGatewayTokenAuthorizerHandler = async (
     event
 ): Promise<APIGatewayAuthorizerResult> => {
     const authToken = event.authorizationToken.replace('Bearer ', '')
+    const denyToken = () => generatePolicy(undefined, event)
 
     try {
         const oauthResult = oauthJwtLib.validateOAuthToken(authToken)
 
-        if (!(oauthResult instanceof Error)) {
-            console.info({
-                message:
-                    'third_party_API_authorizer succeeded with OAuth token',
-                operation: 'third_party_API_authorizer',
-                status: 'SUCCESS',
-                clientId: oauthResult.clientId,
-            })
-
-            return generatePolicy(oauthResult.userId, event, {
-                clientId: oauthResult.clientId,
-                grants: oauthResult.grants.join(','),
-                isOAuthClient: 'true',
-            })
-        } else {
+        if (oauthResult instanceof Error) {
             console.error('OAuth token validation failed')
-            return generatePolicy(undefined, event)
+            return denyToken()
         }
+
+        if (oauthResult.issuer !== oauthIssuer) {
+            console.error('Token issuer is invalid')
+            return denyToken()
+        }
+
+        console.info({
+            message: 'third_party_API_authorizer succeeded with OAuth token',
+            operation: 'third_party_API_authorizer',
+            status: 'SUCCESS',
+            clientId: oauthResult.clientId,
+        })
+
+        return generatePolicy(oauthResult.userId, event, {
+            clientId: oauthResult.clientId,
+            issuer: oauthResult.issuer,
+            grants: oauthResult.grants.join(','),
+        })
     } catch (err) {
         console.error(
             'unexpected exception attempting to validate authorization',
             err
         )
-        return generatePolicy(undefined, event)
+        return denyToken()
     }
 }
 
@@ -72,7 +77,7 @@ export const main: APIGatewayTokenAuthorizerHandler = async (
  * @param userId - The user ID from the JWT token (undefined for invalid tokens)
  * @param event - The API Gateway authorizer event
  * @param context - Optional context object containing OAuth client information.
- *                  When present, includes: clientId, grants, and isOAuthClient flag.
+ *                  When present, includes: clientId, grants, and issuer flag.
  *                  This context is passed through to the GraphQL resolver for authorization.
  *                  If missing, the request is treated as a regular user request.
  */
