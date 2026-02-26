@@ -20,7 +20,9 @@ const userRolesSchema = z.enum([
 ])
 
 const baseUserSchema = z.object({
-    id: z.uuid(),
+    // Our DB does not generate the user.id, they are not guaranteed to be UUIDs
+    // so set this to a string.
+    id: z.string(),
     role: userRolesSchema,
     email: z.string(),
     givenName: z.string(),

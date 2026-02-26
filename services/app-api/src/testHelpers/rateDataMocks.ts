@@ -46,6 +46,7 @@ const mockDraftRate = (
             rate?.stateCode as StateCodeType
         ) as RateRevisionTableWithContracts,
     ],
+    rateOverrides: [],
     ...rate,
 })
 
