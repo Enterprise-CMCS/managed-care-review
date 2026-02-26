@@ -584,7 +584,7 @@ jobs:
           use-cdk-role: "true"
 
       - name: Download Prisma layers
-        uses: actions/download-artifact@v7
+        uses: actions/download-artifact@v8
         with:
           name: lambda-layers-prisma-client-migration
           path: ./services/infra-cdk/lambda-layers-prisma-client-migration
@@ -598,7 +598,7 @@ jobs:
           ls -la
 
       - name: Download Prisma engine layers
-        uses: actions/download-artifact@v7
+        uses: actions/download-artifact@v8
         with:
           name: lambda-layers-prisma-client-engine
           path: ./services/infra-cdk/lambda-layers-prisma-client-engine
@@ -891,12 +891,12 @@ jobs:
           stage-name: ${{ needs.begin-deployment.outputs.stage-name }}
           use-cdk-role: "true"
 
-      - uses: actions/download-artifact@v7
+      - uses: actions/download-artifact@v8
         with:
           name: app-web-gen
           path: ./services/app-web/src/gen
 
-      - uses: actions/download-artifact@v7
+      - uses: actions/download-artifact@v8
         with:
           name: cypress-gen
           path: ./services/cypress/gen
@@ -987,7 +987,7 @@ jobs:
       - name: Install nyc for coverage merging
         run: pnpm add -g nyc
 
-      - uses: actions/download-artifact@v7
+      - uses: actions/download-artifact@v8
 
       - name: Create combined test coverage report
         run: |
