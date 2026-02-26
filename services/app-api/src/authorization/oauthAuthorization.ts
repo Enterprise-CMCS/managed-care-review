@@ -2,12 +2,18 @@ import { OAuthScope } from '@prisma/client'
 import type { Context } from '../handlers/apollo_gql'
 
 /**
+ * context.oauthClient:
+ * Only exists for OAuth-authenticated requests.
+ * Undefined for non-OAuth requests.
+ */
+
+/**
  * Checks if the context represents an OAuth client with client_credentials grant
  */
 export function isOAuthClientCredentials(context: Context): boolean {
     return !!(
-        context.oauthClient?.isOAuthClient &&
-        context.oauthClient?.grants.includes('client_credentials')
+        context.oauthClient &&
+        context.oauthClient.grants.includes('client_credentials')
     )
 }
 
@@ -17,7 +23,7 @@ export function isOAuthClientCredentials(context: Context): boolean {
  */
 export function canRead(context: Context): boolean {
     // If this is an OAuth client, check if it has client_credentials
-    if (context.oauthClient?.isOAuthClient) {
+    if (context.oauthClient) {
         return isOAuthClientCredentials(context)
     }
 
@@ -31,7 +37,7 @@ export function canRead(context: Context): boolean {
  */
 export function canWrite(context: Context): boolean {
     // OAuth clients cannot write
-    if (context.oauthClient?.isOAuthClient) {
+    if (context.oauthClient) {
         return false
     }
 
@@ -46,7 +52,7 @@ export function canWrite(context: Context): boolean {
  */
 export function canOauthWrite(context: Context): boolean {
     // OAuth clients can only write if scopes is populated
-    if (context.oauthClient?.isOAuthClient) {
+    if (context.oauthClient) {
         if (
             context.oauthClient?.isDelegatedUser &&
             context.oauthClient?.scopes?.includes(
@@ -76,7 +82,7 @@ export function getAuthContextInfo(context: Context): {
     const { user, oauthClient } = context
 
     return {
-        isOAuthClient: !!oauthClient?.isOAuthClient,
+        isOAuthClient: !!oauthClient,
         clientId: oauthClient?.clientId,
         userId: user.id,
         userRole: user.role,
