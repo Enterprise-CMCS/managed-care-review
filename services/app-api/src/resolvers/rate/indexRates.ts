@@ -63,7 +63,7 @@ export function indexRatesResolver(store: Store): QueryResolvers['indexRates'] {
         }
 
         // Log OAuth client access for audit trail
-        if (context.oauthClient?.isOAuthClient) {
+        if (context.oauthClient) {
             logSuccess('indexRates')
         }
 

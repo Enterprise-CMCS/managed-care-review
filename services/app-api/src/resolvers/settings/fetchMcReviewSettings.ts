@@ -23,11 +23,11 @@ export function fetchMcReviewSettings(
         logSuccess('fetchMcReviewSettings')
 
         // MCR-5894 block off this api from oauth
-        if (context.oauthClient && context.oauthClient.isOAuthClient === true) {
+        if (context.oauthClient) {
             const oauthErr = 'oauth clients cannot access this functionality'
             logError('fetchMcReviewSettings', oauthErr)
             setErrorAttributesOnActiveSpan(oauthErr, span)
-            throw createForbiddenError(oauthErr)            
+            throw createForbiddenError(oauthErr)
         }
 
         if (!hasCMSPermissions(user) && !hasAdminPermissions(user)) {

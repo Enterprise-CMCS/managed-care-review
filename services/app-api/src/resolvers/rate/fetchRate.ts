@@ -56,7 +56,7 @@ export function fetchRateResolver(store: Store): QueryResolvers['fetchRate'] {
         }
 
         // Log OAuth client access for audit trail
-        if (context.oauthClient?.isOAuthClient) {
+        if (context.oauthClient) {
             logSuccess('fetchRate')
         }
 

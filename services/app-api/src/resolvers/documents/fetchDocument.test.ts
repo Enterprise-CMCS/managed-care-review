@@ -140,7 +140,7 @@ describe('fetchDocument', () => {
                 oauthClient: {
                     clientId: 'test-oauth-client',
                     grants: ['some_other_grant'],
-                    isOAuthClient: true,
+                    issuer: 'mcreview-test',
                     scopes: [],
                     isDelegatedUser: false,
                 },

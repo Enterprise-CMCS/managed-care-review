@@ -66,7 +66,7 @@ export function fetchContractResolver(
         }
 
         // Log OAuth client access for audit trail
-        if (context.oauthClient?.isOAuthClient) {
+        if (context.oauthClient) {
             logSuccess('fetchContract')
         }
 
