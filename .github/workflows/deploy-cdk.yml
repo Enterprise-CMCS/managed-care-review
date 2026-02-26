@@ -523,6 +523,7 @@ jobs:
           echo "Using VITE_APP_API_URL: $VITE_APP_API_URL"
           echo "Using VITE_APP_COGNITO_USER_POOL_ID: $VITE_APP_COGNITO_USER_POOL_ID"
           echo "Using VITE_APP_S3_DOCUMENTS_BUCKET: $VITE_APP_S3_DOCUMENTS_BUCKET"
+          echo "Using VITE_APP_S3_QA_BUCKET: $VITE_APP_S3_QA_BUCKET"
           echo "Using VITE_APP_AUTH_MODE: $VITE_APP_AUTH_MODE"
 
           # Build with all environment variables available
@@ -753,6 +754,30 @@ jobs:
           echo "Storybook endpoint: $endpoint"
           echo "storybook-endpoint=$endpoint" >> "$GITHUB_OUTPUT"
 
+      - name: Get S3 bucket names from CloudFormation outputs
+        id: s3-buckets
+        env:
+          STAGE_NAME: ${{ needs.begin-deployment.outputs.stage-name }}
+        run: |
+          STACK_NAME="uploads-${STAGE_NAME}-cdk"
+          echo "Fetching S3 bucket names from CloudFormation stack: $STACK_NAME"
+
+          DOCS_BUCKET=$(aws cloudformation describe-stacks \
+            --stack-name "$STACK_NAME" \
+            --query "Stacks[0].Outputs[?OutputKey=='DocumentUploadsBucketName'].OutputValue" \
+            --output text)
+
+          QA_BUCKET=$(aws cloudformation describe-stacks \
+            --stack-name "$STACK_NAME" \
+            --query "Stacks[0].Outputs[?OutputKey=='QAUploadsBucketName'].OutputValue" \
+            --output text)
+
+          echo "Documents bucket: $DOCS_BUCKET"
+          echo "QA bucket: $QA_BUCKET"
+
+          echo "documents_bucket=$DOCS_BUCKET" >> $GITHUB_OUTPUT
+          echo "qa_bucket=$QA_BUCKET" >> $GITHUB_OUTPUT
+
       - name: get api endpoint
         id: save-api-endpoint
         env:
@@ -933,8 +958,8 @@ jobs:
           AWS_ACCESS_KEY_ID: ${{ steps.creds.outputs.aws-access-key-id }}
           AWS_SECRET_ACCESS_KEY: ${{ steps.creds.outputs.aws-secret-access-key }}
           AWS_SESSION_TOKEN: ${{ steps.creds.outputs.aws-session-token }}
-          VITE_APP_S3_DOCUMENTS_BUCKET: ${{ secrets.VITE_APP_S3_DOCUMENTS_BUCKET }}
-          VITE_APP_S3_QA_BUCKET: ${{ secrets.VITE_APP_S3_QA_BUCKET }}
+          VITE_APP_S3_DOCUMENTS_BUCKET: ${{ steps.s3-buckets.outputs.documents_bucket }}
+    VITE_APP_S3_QA_BUCKET: ${{ steps.s3-buckets.outputs.qa_bucket }}
           # Overwrites folder directories in cypress config because in CI we run from root
           CYPRESS_SUPPORT_FILE: services/cypress/support/index.ts
           CYPRESS_FIXTURES_FOLDER: services/cypress/fixtures
