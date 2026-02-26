@@ -2,7 +2,7 @@ import { newJWTLib } from './jwt'
 
 describe('jwtLib', () => {
     const config = {
-        issuer: 'mctest',
+        issuer: 'mcreview-test',
         signingKey: Buffer.from('123af', 'hex'),
         expirationDurationS: 1000,
     }
@@ -32,6 +32,7 @@ describe('jwtLib', () => {
         it('creates and validates OAuth tokens', () => {
             const jwt = newJWTLib(config)
             const clientId = 'test-client'
+            const issuer = 'mcreview-test'
             const grantType = 'client_credentials'
             const userId = 'test-user-id'
             const grants = ['read', 'write']
@@ -47,11 +48,13 @@ describe('jwtLib', () => {
             expect(result).not.toBeInstanceOf(Error)
             const validatedToken = result as {
                 clientId: string
+                issuer: string
                 grantType: string
                 userId: string
                 grants: string[]
             }
             expect(validatedToken.clientId).toBe(clientId)
+            expect(validatedToken.issuer).toBe(issuer)
             expect(validatedToken.grantType).toBe(grantType)
             expect(validatedToken.userId).toBe(userId)
             expect(validatedToken.grants).toEqual(grants)
