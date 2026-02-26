@@ -76,7 +76,7 @@ const createAndSubmitContractOnlyPackage = async (
 const createAndSubmitEQROContract = async (
     apolloClient: ApolloClient<NormalizedCacheObject>
 ): Promise<Contract> => {
-    const s3Bucket = Cypress.env('VITE_APP_S3_DOCUMENTS_BUCKET')  
+    const s3Bucket = Cypress.env('VITE_APP_S3_QA_BUCKET')  
     const newContract = await apolloClient.mutate({
         mutation: CreateContractDocument,
         variables: {
@@ -122,7 +122,8 @@ const createAndSubmitEQROContract = async (
       }
 
     console.log('bucket from resolver', uploadResult.bucket)
-    console.log('bucket from Cypress', Cypress.env('VITE_APP_S3_DOCUMENTS_BUCKET'))
+    console.log('document bucket from Cypress', Cypress.env('VITE_APP_S3_DOCUMENTS_BUCKET'))
+    console.log('qa bucket from Cypress', Cypress.env('VITE_APP_S3_QA_BUCKET'))
     updateFormData.contractDocuments = [
         {
             name: 'trussel-guide.pdf',
