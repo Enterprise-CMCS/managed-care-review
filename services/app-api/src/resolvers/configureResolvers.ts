@@ -32,7 +32,6 @@ import {
     unlockRate,
     withdrawRate,
     undoWithdrawRate,
-    overrideRateData,
 } from './rate'
 import { genericDocumentResolver } from './shared/genericDocumentResolver'
 import { updateContract } from './contract/updateContract'
@@ -135,7 +134,6 @@ export function configureResolvers(
             deleteOauthClient: deleteOauthClientResolver(store),
             updateOauthClient: updateOauthClientResolver(store),
             generateUploadURL: generateUploadURLResolver(store, s3Client),
-            overrideRateData: overrideRateData(store),
         },
         User: {
             // resolveType is required to differentiate Unions
