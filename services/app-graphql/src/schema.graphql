@@ -1765,7 +1765,7 @@ type Rate {
     Options are DRAFT, SUBMITTED, RESUBMITTED, UNLOCKED, WITHDRAWN
     """
     consolidatedStatus: ConsolidatedRateStatus!
-    "The initial date this rate was submitted at. Is not changed by unlock or resubmission."
+    "The initial date this rate was submitted at. Is not changed by unlock or resubmission, but can be changed by rateOverrides."
     initiallySubmittedAt: DateTime
     "The state code (e.g. CA or TN) for the submitting state"
     stateCode: String!
@@ -1841,7 +1841,7 @@ type RateStripped {
     Options are DRAFT, SUBMITTED, RESUBMITTED UNLOCKED, UNDER_REVIEW, WITHDRAWN
     """
     consolidatedStatus: ConsolidatedRateStatus!
-    "The initial date this rate was submitted at. Is not changed by unlock or resubmission."
+    "The initial date this rate was submitted at. Is not changed by unlock or resubmission, but can be changed by rateOverrides."
     initiallySubmittedAt: DateTime
     "The state code (e.g. CA or TN) for the submitting state"
     stateCode: String!
