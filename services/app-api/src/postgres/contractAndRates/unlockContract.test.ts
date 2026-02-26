@@ -411,4 +411,209 @@ describe('unlockContract', () => {
             })
         ).toBeInstanceOf(Error)
     })
+
+    it('preserves s3BucketName and s3Key when unlocking contract and rate', async () => {
+        const client = await sharedTestPrismaClient()
+
+        const stateUser = await client.user.create({
+            data: {
+                id: uuidv4(),
+                givenName: 'Aang',
+                familyName: 'Avatar',
+                email: 'aang@example.com',
+                role: 'STATE_USER',
+                stateCode: 'NM',
+            },
+        })
+
+        const cmsUser = await client.user.create({
+            data: {
+                id: uuidv4(),
+                givenName: 'Zuko',
+                familyName: 'Hotman',
+                email: 'zuko@example.com',
+                role: 'CMS_USER',
+            },
+        })
+
+        // Create a contract with documents that have s3BucketName and s3Key
+        const contract = must(
+            await insertDraftContract(client, mockInsertContractArgs({}))
+        )
+
+        // Update contract with documents including s3BucketName and s3Key
+        must(
+            await updateDraftContractFormData(client, {
+                contractID: contract.id,
+                formData: {
+                    submissionType: 'CONTRACT_AND_RATES',
+                    submissionDescription: 'Test submission',
+                    contractType: 'BASE',
+                    programIDs: ['PMAP'],
+                    populationCovered: 'MEDICAID',
+                    riskBasedContract: false,
+                    contractDocuments: [
+                        {
+                            name: 'contract.pdf',
+                            s3URL: 's3://test-bucket/abc123.pdf/contract.pdf',
+                            sha256: 'fakesha256contract',
+                            s3BucketName: 'test-bucket',
+                            s3Key: 'allusers/abc123.pdf',
+                        },
+                    ],
+                    supportingDocuments: [
+                        {
+                            name: 'supporting.pdf',
+                            s3URL: 's3://test-bucket/def456.pdf/supporting.pdf',
+                            sha256: 'fakesha256supporting',
+                            s3BucketName: 'test-bucket',
+                            s3Key: 'allusers/def456.pdf',
+                        },
+                    ],
+                },
+            })
+        )
+
+        // Create and update rate with documents
+        const rate = must(
+            await insertDraftRate(client, contract.id, {
+                stateCode: 'MN',
+                rateCertificationName: 'Test Rate',
+            })
+        )
+
+        must(
+            await updateDraftRate(client, {
+                rateID: rate.id,
+                contractIDs: [contract.id],
+                formData: {
+                    rateType: 'NEW',
+                    rateCapitationType: 'RATE_CELL',
+                    rateDateStart: new Date('2025-01-01'),
+                    rateDateEnd: new Date('2025-12-31'),
+                    rateDateCertified: new Date('2024-12-01'),
+                    rateDocuments: [
+                        {
+                            name: 'rate.pdf',
+                            s3URL: 's3://test-bucket/ghi789.pdf/rate.pdf',
+                            sha256: 'fakesha256rate',
+                            s3BucketName: 'test-bucket',
+                            s3Key: 'allusers/ghi789.pdf',
+                        },
+                    ],
+                    supportingDocuments: [
+                        {
+                            name: 'rate-supporting.pdf',
+                            s3URL: 's3://test-bucket/jkl012.pdf/rate-supporting.pdf',
+                            sha256: 'fakesha256ratesupporting',
+                            s3BucketName: 'test-bucket',
+                            s3Key: 'allusers/jkl012.pdf',
+                        },
+                    ],
+                },
+            })
+        )
+
+        // Submit contract with rate
+        const submittedContract = must(
+            await submitContract(client, {
+                contractID: contract.id,
+                submittedByUserID: stateUser.id,
+                submittedReason: 'Initial submission',
+            })
+        )
+
+        // Verify submitted documents have the fields
+        const submittedRev =
+            submittedContract.packageSubmissions[0].contractRevision
+        expect(submittedRev.formData.contractDocuments[0].s3BucketName).toBe(
+            'test-bucket'
+        )
+        expect(submittedRev.formData.contractDocuments[0].s3Key).toBe(
+            'allusers/abc123.pdf'
+        )
+        expect(submittedRev.formData.supportingDocuments[0].s3BucketName).toBe(
+            'test-bucket'
+        )
+        expect(submittedRev.formData.supportingDocuments[0].s3Key).toBe(
+            'allusers/def456.pdf'
+        )
+
+        const submittedRateRev =
+            submittedContract.packageSubmissions[0].rateRevisions[0]
+        if (
+            !submittedRateRev.formData.rateDocuments ||
+            !submittedRateRev.formData.supportingDocuments
+        ) {
+            throw new Error('Submitted rate missing documents')
+        }
+        expect(submittedRateRev.formData.rateDocuments[0].s3BucketName).toBe(
+            'test-bucket'
+        )
+        expect(submittedRateRev.formData.rateDocuments[0].s3Key).toBe(
+            'allusers/ghi789.pdf'
+        )
+        expect(
+            submittedRateRev.formData.supportingDocuments[0].s3BucketName
+        ).toBe('test-bucket')
+        expect(submittedRateRev.formData.supportingDocuments[0].s3Key).toBe(
+            'allusers/jkl012.pdf'
+        )
+
+        // Unlock contract (which also unlocks child rate)
+        const unlockedContract = must(
+            await unlockContract(client, {
+                contractID: contract.id,
+                unlockedByUserID: cmsUser.id,
+                unlockReason: 'Test unlock',
+            })
+        )
+
+        // Verify unlocked contract documents preserve s3BucketName and s3Key
+        const unlockedRev = unlockedContract.draftRevision
+        if (!unlockedRev) {
+            throw new Error('Unlocked contract missing draft revision')
+        }
+
+        expect(unlockedRev.formData.contractDocuments[0].s3BucketName).toBe(
+            'test-bucket'
+        )
+        expect(unlockedRev.formData.contractDocuments[0].s3Key).toBe(
+            'allusers/abc123.pdf'
+        )
+        expect(unlockedRev.formData.supportingDocuments[0].s3BucketName).toBe(
+            'test-bucket'
+        )
+        expect(unlockedRev.formData.supportingDocuments[0].s3Key).toBe(
+            'allusers/def456.pdf'
+        )
+
+        // Verify unlocked rate documents preserve s3BucketName and s3Key
+        const unlockedRate = unlockedContract.draftRates?.find(
+            (r) => r.id === rate.id
+        )
+        if (!unlockedRate?.draftRevision) {
+            throw new Error('Unlocked rate missing draft revision')
+        }
+        if (
+            !unlockedRate.draftRevision.formData.rateDocuments ||
+            !unlockedRate.draftRevision.formData.supportingDocuments
+        ) {
+            throw new Error('Unlocked rate missing documents')
+        }
+
+        expect(
+            unlockedRate.draftRevision.formData.rateDocuments[0].s3BucketName
+        ).toBe('test-bucket')
+        expect(unlockedRate.draftRevision.formData.rateDocuments[0].s3Key).toBe(
+            'allusers/ghi789.pdf'
+        )
+        expect(
+            unlockedRate.draftRevision.formData.supportingDocuments[0]
+                .s3BucketName
+        ).toBe('test-bucket')
+        expect(
+            unlockedRate.draftRevision.formData.supportingDocuments[0].s3Key
+        ).toBe('allusers/jkl012.pdf')
+    })
 })
