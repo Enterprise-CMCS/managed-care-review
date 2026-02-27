@@ -897,7 +897,7 @@ jobs:
           if ! command -v aws >/dev/null 2>&1; then
             echo "Installing AWS CLI (user space)..."
             cd /tmp
-            curl -sS "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip"
+            wget -q "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -O "awscliv2.zip"
             unzip -q awscliv2.zip
             ./aws/install -i ~/.local/aws-cli -b ~/.local/bin
             echo "$HOME/.local/bin" >> $GITHUB_PATH
