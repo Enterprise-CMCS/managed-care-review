@@ -42,10 +42,39 @@ function formatRateNameDate(date: Date | undefined): string {
 }
 
 function formatUserInputDate(initialValue?: string): string | undefined {
-    const dayjsValue = dayjs(initialValue)
-    return initialValue && dayjsValue.isValid()
-        ? dayjs(initialValue).format('YYYY-MM-DD')
-        : initialValue // preserve undefined to show validations later
+    if (!initialValue) return initialValue
+    /*
+    checks if DatePicker input is valid: either 'M/D/YYYY' or 'MM/DD/YYYY' format
+    and formats valid ipnut to 'YYYY-MM-DD' for data processing
+    returns invalid input unchanged to be handled by validation code
+    */
+
+    // input has 1 or 2 digits for month/day)
+    const completeFormatRegex = /^\d{1,2}\/\d{1,2}\/\d{4}$/
+    if (!completeFormatRegex.test(initialValue)) {
+        return initialValue
+    }
+
+    // all parts of the date exist
+    const parts = initialValue.split('/')
+    if (parts.length !== 3 || !parts[0] || !parts[1] || !parts[2]) {
+        return initialValue
+    }
+
+    // year is exactly 4 digits
+    if (parts[2].length !== 4) {
+        return initialValue
+    }
+
+    // it is a valid date in short format, return formatted to YYYY-MM-DD
+    const dayjsShortValue = dayjs(initialValue, 'M/D/YYYY', true)
+    if (dayjsShortValue.isValid()) {
+        return dayjsShortValue.format('YYYY-MM-DD')
+    }
+
+    // it is a valid date in long format, return formatted to YYYY-MM-DD
+    const dayjsLongValue = dayjs(initialValue, 'MM/DD/YYYY', true)
+    return dayjsLongValue.format('YYYY-MM-DD')
 }
 
 export {
