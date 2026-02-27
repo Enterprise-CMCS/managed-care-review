@@ -12,17 +12,19 @@ export const EQROContractDetailsFormSchema = (
     // Helper function to determine if EQRO provision fields are required
     const eqroProvisionValidation = (fieldName: string) => {
         // Get contract type and managed care entities from draft
-        const contractType = draftSubmission?.draftRevision?.formData?.contractType ?? ''
-        const isBase = contractType.includes("BASE")
-        const managedCareEntities = draftSubmission?.draftRevision?.formData?.managedCareEntities ?? []
-        const hasMCO = managedCareEntities.includes("MCO")
+        const contractType =
+            draftSubmission?.draftRevision?.formData?.contractType ?? ''
+        const isBase = contractType.includes('BASE')
+        const managedCareEntities =
+            draftSubmission?.draftRevision?.formData?.managedCareEntities ?? []
+        const hasMCO = managedCareEntities.includes('MCO')
 
         // Validation rules based on the form logic:
         // - eqroNewContractor: required if base contract AND MCO
         // - eqroProvisionMcoEqrOrRelatedActivities: required if NOT base contract AND MCO
         // - eqroProvisionMcoNewOptionalActivity: required if (base contract AND MCO) OR (amendment AND MCO AND answered YES to EQR activities)
         // - eqroProvisionNewMcoEqrRelatedActivities: same as above
-        
+
         if (fieldName === 'eqroNewContractor') {
             return isBase && hasMCO
                 ? Yup.string().defined('You must select yes or no')
@@ -35,19 +37,22 @@ export const EQROContractDetailsFormSchema = (
                 : Yup.string().notRequired()
         }
 
-        if (fieldName === 'eqroProvisionMcoNewOptionalActivity' || 
-            fieldName === 'eqroProvisionNewMcoEqrRelatedActivities') {
+        if (
+            fieldName === 'eqroProvisionMcoNewOptionalActivity' ||
+            fieldName === 'eqroProvisionNewMcoEqrRelatedActivities'
+        ) {
             // These are shown when:
             // 1. Base contract with MCO, OR
             // 2. Amendment with MCO and answered YES to eqroProvisionMcoEqrOrRelatedActivities
-            
+
             // For validation, we use conditional validation based on the parent question
             return Yup.string().when('eqroProvisionMcoEqrOrRelatedActivities', {
                 is: (eqroProvisionAnswer: string) => {
                     // Required if base contract with MCO
                     if (isBase && hasMCO) return true
                     // Required if amendment with MCO and answered YES
-                    if (!isBase && hasMCO && eqroProvisionAnswer === 'YES') return true
+                    if (!isBase && hasMCO && eqroProvisionAnswer === 'YES')
+                        return true
                     return false
                 },
                 then: (schema) => schema.defined('You must select yes or no'),
@@ -56,8 +61,10 @@ export const EQROContractDetailsFormSchema = (
         }
 
         if (fieldName === 'eqroProvisionChipEqrRelatedActivities') {
-            const populationCovered = draftSubmission?.draftRevision?.formData?.populationCovered ?? ''
-            const isChip = populationCovered.includes("CHIP")
+            const populationCovered =
+                draftSubmission?.draftRevision?.formData?.populationCovered ??
+                ''
+            const isChip = populationCovered.includes('CHIP')
             return isChip
                 ? Yup.string().defined('You must select yes or no')
                 : Yup.string().notRequired()
@@ -73,12 +80,16 @@ export const EQROContractDetailsFormSchema = (
         contractDateStart: Yup.date()
             // @ts-ignore-next-line
             .validateDateFormat('YYYY-MM-DD', true)
-            .typeError('The start date must be in MM/DD/YYYY format')
+            .typeError(
+                'The start date must be in MM/DD/YYYY format, like 01/01/2030'
+            )
             .defined('You must enter a start date'),
         contractDateEnd: Yup.date()
             // @ts-ignore-next-line
             .validateDateFormat('YYYY-MM-DD', true)
-            .typeError('The end date must be in MM/DD/YYYY format')
+            .typeError(
+                'The end date must be in MM/DD/YYYY format, like 01/01/2030'
+            )
             .defined('You must enter an end date')
             .when(
                 // ContractDateEnd must be at minimum the day after Start
@@ -94,9 +105,17 @@ export const EQROContractDetailsFormSchema = (
                 }
             ),
         eqroNewContractor: eqroProvisionValidation('eqroNewContractor'),
-        eqroProvisionMcoEqrOrRelatedActivities: eqroProvisionValidation('eqroProvisionMcoEqrOrRelatedActivities'),
-        eqroProvisionMcoNewOptionalActivity: eqroProvisionValidation('eqroProvisionMcoNewOptionalActivity'),
-        eqroProvisionNewMcoEqrRelatedActivities: eqroProvisionValidation('eqroProvisionNewMcoEqrRelatedActivities'),
-        eqroProvisionChipEqrRelatedActivities: eqroProvisionValidation('eqroProvisionChipEqrRelatedActivities'),
+        eqroProvisionMcoEqrOrRelatedActivities: eqroProvisionValidation(
+            'eqroProvisionMcoEqrOrRelatedActivities'
+        ),
+        eqroProvisionMcoNewOptionalActivity: eqroProvisionValidation(
+            'eqroProvisionMcoNewOptionalActivity'
+        ),
+        eqroProvisionNewMcoEqrRelatedActivities: eqroProvisionValidation(
+            'eqroProvisionNewMcoEqrRelatedActivities'
+        ),
+        eqroProvisionChipEqrRelatedActivities: eqroProvisionValidation(
+            'eqroProvisionChipEqrRelatedActivities'
+        ),
     })
 }

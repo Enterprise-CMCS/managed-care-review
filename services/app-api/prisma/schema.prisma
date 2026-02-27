@@ -77,6 +77,24 @@ model ContractTable {
 
   revisions           ContractRevisionTable[]
   sharedRateRevisions RateRevisionTable[]     @relation(name: "SharedRateRevisions")
+
+  contractOverrides ContractOverrides[]
+}
+
+// Record of contract meta data overrides
+model ContractOverrides {
+  id String @id @default(uuid())
+
+  //overides meta data
+  createdAt   DateTime      @default(now())
+  updatedByID String?
+  updatedBy   User?         @relation(fields: [updatedByID], references: [id])
+  contract    ContractTable @relation(fields: [contractID], references: [id])
+  contractID  String
+  description String
+
+  //overrides
+  initiallySubmittedAt DateTime?
 }
 
 model RateTable {
@@ -95,6 +113,24 @@ model RateTable {
   draftContracts      DraftRateJoinTable[]
 
   revisions RateRevisionTable[]
+
+  rateOverrides RateOverrides[]
+}
+
+// Record of rate meta data overrides
+model RateOverrides {
+  id String @id @default(uuid())
+
+  //overides meta data
+  createdAt   DateTime  @default(now())
+  updatedByID String?
+  updatedBy   User?     @relation(fields: [updatedByID], references: [id])
+  rate        RateTable @relation(fields: [rateID], references: [id])
+  rateID      String
+  description String
+
+  //overrides
+  initiallySubmittedAt DateTime?
 }
 
 // DraftRateJoinTable links a draft contract to a set of rates, draft or submitted.
@@ -407,6 +443,8 @@ model User {
   contractReviewStatusActions ContractActionTable[]
   RateActionTable             RateActionTable[]
   oauthClients                OAuthClient[]
+  rateOverrides               RateOverrides[]
+  contractOverrides           ContractOverrides[]
 }
 
 model UserAudit {

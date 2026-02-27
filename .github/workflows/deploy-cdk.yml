@@ -151,19 +151,19 @@ jobs:
           exit $?
 
       - name: upload app web gen directory
-        uses: actions/upload-artifact@v6
+        uses: actions/upload-artifact@v7
         with:
           name: app-web-gen
           path: ./services/app-web/src/gen
 
       - name: upload cypress gen directory
-        uses: actions/upload-artifact@v6
+        uses: actions/upload-artifact@v7
         with:
           name: cypress-gen
           path: ./services/cypress/gen
 
       - name: upload unit test coverage
-        uses: actions/upload-artifact@v6
+        uses: actions/upload-artifact@v7
         with:
           name: unit-test-coverage
           path: ./services/app-web/coverage/coverage-final.json
@@ -221,7 +221,7 @@ jobs:
           exit $?
 
       - name: upload api test coverage
-        uses: actions/upload-artifact@v6
+        uses: actions/upload-artifact@v7
         with:
           name: api-test-coverage
           path: ./services/app-api/coverage/coverage-final.json
@@ -253,7 +253,7 @@ jobs:
           exit $?
 
       - name: upload packages test coverage
-        uses: actions/upload-artifact@v6
+        uses: actions/upload-artifact@v7
         with:
           name: packages-test-coverage
           path: ./packages/**/coverage/coverage-final.json
@@ -536,7 +536,7 @@ jobs:
           use-cdk-role: "true"
 
       - name: Download Prisma layers
-        uses: actions/download-artifact@v7
+        uses: actions/download-artifact@v8
         with:
           name: lambda-layers-prisma-client-migration
           path: ./services/infra-cdk/lambda-layers-prisma-client-migration
@@ -550,7 +550,7 @@ jobs:
           ls -la
 
       - name: Download Prisma engine layers
-        uses: actions/download-artifact@v7
+        uses: actions/download-artifact@v8
         with:
           name: lambda-layers-prisma-client-engine
           path: ./services/infra-cdk/lambda-layers-prisma-client-engine
@@ -696,7 +696,7 @@ jobs:
         run: |
           echo "=== Extracting storybook endpoint from CDK outputs ==="                                                                    
           endpoint=$(aws cloudformation list-exports --query "Exports[?Name=='frontend-infra-${STAGE_NAME}-cdk-StorybookCloudFrontEndpointUrl'].Value" --output text)
-      
+
           if [ "$endpoint" = "None" ] || [ -z "$endpoint" ]; then
           echo "Error: Could not find storybook endpoint from CDK outputs"
           exit 1
@@ -843,12 +843,12 @@ jobs:
           stage-name: ${{ needs.begin-deployment.outputs.stage-name }}
           use-cdk-role: "true"
 
-      - uses: actions/download-artifact@v7
+      - uses: actions/download-artifact@v8
         with:
           name: app-web-gen
           path: ./services/app-web/src/gen
 
-      - uses: actions/download-artifact@v7
+      - uses: actions/download-artifact@v8
         with:
           name: cypress-gen
           path: ./services/cypress/gen
@@ -896,7 +896,7 @@ jobs:
           NODE_V8_COVERAGE: ./coverage-cypress
 
       - name: Upload cypress screenshots
-        uses: actions/upload-artifact@v6
+        uses: actions/upload-artifact@v7
         if: failure() && steps.cypress.outcome == 'failure'
         with:
           name: cypress-screenshots-cdk-${{ matrix.containers}}
@@ -904,7 +904,7 @@ jobs:
           if-no-files-found: ignore
 
       - name: Upload cypress video
-        uses: actions/upload-artifact@v6
+        uses: actions/upload-artifact@v7
         if: always() && steps.cypress.outcome != 'skipped'
         with:
           name: cypress-videos-cdk-${{ matrix.containers}}
@@ -912,14 +912,14 @@ jobs:
           if-no-files-found: ignore
 
       - name: upload partial cypress coverage
-        uses: actions/upload-artifact@v6
+        uses: actions/upload-artifact@v7
         with:
           name: partial-cypress-coverage-cdk-${{ matrix.containers}}
           path: ./coverage-cypress/*.info
           if-no-files-found: ignore
 
       - name: upload partial cypress coverage json
-        uses: actions/upload-artifact@v6
+        uses: actions/upload-artifact@v7
         with:
           name: cypress-json-coverage-cdk-${{ matrix.containers}}
           path: ./coverage-cypress/*.json
@@ -927,7 +927,14 @@ jobs:
 
   coverage:
     name: combined-test-coverage
-    needs: [begin-deployment, web-unit-tests, api-unit-tests, packages-unit-tests, cypress]
+    needs:
+      [
+        begin-deployment,
+        web-unit-tests,
+        api-unit-tests,
+        packages-unit-tests,
+        cypress,
+      ]
     if: always() && needs.begin-deployment.result == 'success'
     runs-on: ubuntu-24.04
     steps:
@@ -939,7 +946,7 @@ jobs:
       - name: Install nyc for coverage merging
         run: pnpm add -g nyc
 
-      - uses: actions/download-artifact@v7
+      - uses: actions/download-artifact@v8
 
       - name: Create combined test coverage report
         run: |
@@ -1021,7 +1028,7 @@ jobs:
           ls -R
 
       - name: Upload combined test coverage
-        uses: actions/upload-artifact@v6
+        uses: actions/upload-artifact@v7
         with:
           name: combined-test-coverage
           path: ./coverage-all/
@@ -1037,7 +1044,14 @@ jobs:
           echo "📦 Download the \`combined-test-coverage\` artifact for detailed HTML reports." >> $GITHUB_STEP_SUMMARY
 
   end-deployment:
-    needs: [begin-deployment, deploy-cdk-app, deploy-frontend-app, extract-endpoints, cypress]
+    needs:
+      [
+        begin-deployment,
+        deploy-cdk-app,
+        deploy-frontend-app,
+        extract-endpoints,
+        cypress,
+      ]
     if: always() && needs.begin-deployment.result == 'success'
     name: End CDK Deployment
     runs-on: ubuntu-24.04

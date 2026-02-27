@@ -61,8 +61,8 @@
         "axios": "^1.13.5",
         "graphql": "^16.12.0",
         "@aws-sdk/signature-v4": "^3.374.0",
-        "@aws-sdk/client-cognito-identity-provider": "^3.994.0",
-        "@aws-sdk/client-cognito-identity": "^3.994.0",
+        "@aws-sdk/client-cognito-identity-provider": "^3.999.0",
+        "@aws-sdk/client-cognito-identity": "^3.999.0",
         "@aws-sdk/protocol-http": "^3.374.0",
         "@aws-crypto/sha256-js": "^5.2.0"
     }

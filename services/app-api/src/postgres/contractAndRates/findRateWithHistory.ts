@@ -1,5 +1,5 @@
 import type { PrismaTransactionType } from '../prismaTypes'
-import type { RateType } from '../../domain-models/contractAndRates'
+import type { RateType } from '../../domain-models'
 import { NotFoundError } from '../postgresErrors'
 import { includeFullRate } from './prismaFullContractRateHelpers'
 import { parseRateWithHistory } from './parseRateWithHistory'

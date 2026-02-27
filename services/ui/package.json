@@ -8,9 +8,5 @@
     "author": "",
     "license": "CC0-1.0",
     "dependencies": {},
-    "devDependencies": {
-        "serverless": "4.2.3",
-        "serverless-s3-bucket-helper": "https://github.com/Enterprise-CMCS/serverless-s3-bucket-helper",
-        "serverless-stack-termination-protection": "^2.0.2"
-    }
+    "devDependencies": {}
 }

@@ -207,6 +207,9 @@ export function submitContract(
 
         contractToParse.draftRates = draftRatesWithoutLinkedRates
 
+        // MCR-5970 if user changes DSNP, ensure rate medicaidPopulations is cleared out
+        const isDsnp = contractWithHistory.draftRevision.formData.dsnpContract
+
         const parsedContract = isEQRO
             ? parseEQROContract(
                   contractToParse,
@@ -316,6 +319,71 @@ export function submitContract(
                             draftRate.id
                         )
                     }
+                }
+            }
+
+            //Ensure the rate is updated if dsnp is now false
+            if (
+                !isDsnp &&
+                parsedContract.draftRates &&
+                parsedContract.draftRates.length > 0
+            ) {
+                const updateRates: UpdateDraftContractRatesArgsType['rateUpdates']['update'] =
+                    []
+                const linkRates: UpdateDraftContractRatesArgsType['rateUpdates']['link'] =
+                    []
+
+                parsedContract.draftRates.forEach((rate, idx) => {
+                    if (rate.parentContractID !== parsedContract.id) {
+                        // keep linked rates
+                        linkRates.push({
+                            rateID: rate.id,
+                            ratePosition: idx + 1,
+                        })
+                    }
+                    if (rate.parentContractID === parsedContract.id) {
+                        // update if it's a child rate and clear off rateMedicaidPopulations
+                        if (rate.draftRevision?.formData) {
+                            rate.draftRevision.formData.rateMedicaidPopulations =
+                                []
+                        }
+                        updateRates.push({
+                            rateID: rate.id,
+                            formData: {
+                                ...rate.draftRevision?.formData,
+                            },
+                            ratePosition: idx + 1,
+                        })
+                    }
+                })
+
+                const rateUpdates: UpdateDraftContractRatesArgsType = {
+                    contractID: parsedContract.id,
+                    rateUpdates: {
+                        create: [],
+                        update: [...updateRates],
+                        link: [
+                            ...linkRates.sort(
+                                (a, b) => a.ratePosition - b.ratePosition
+                            ),
+                        ],
+                        unlink: [],
+                        delete: [],
+                    },
+                }
+
+                const rateUpdateResult =
+                    await store.updateDraftContractRates(rateUpdates)
+                if (rateUpdateResult instanceof Error) {
+                    const errMessage = `Failed to update rates on a child rate when dsnp false with ID: ${parsedContract.id}; ${rateUpdateResult.message}`
+                    logError('submitContract', errMessage)
+                    setErrorAttributesOnActiveSpan(errMessage, span)
+                    throw new GraphQLError(errMessage, {
+                        extensions: {
+                            code: 'INTERNAL_SERVER_ERROR',
+                            cause: 'DB_ERROR',
+                        },
+                    })
                 }
             }
         }

@@ -1,0 +1,11 @@
+fragment rateOverridesFragment on RateOverrideType {
+    id
+    createdAt
+    updatedBy {
+        ...adminUserFragment
+    }
+    description
+    overrides {
+        initiallySubmittedAt
+    }
+}

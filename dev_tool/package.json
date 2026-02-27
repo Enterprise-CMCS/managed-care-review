@@ -14,9 +14,9 @@
         "prettier": "npx prettier -u --write \"**/*.+(ts|tsx|json)\""
     },
     "dependencies": {
-        "@aws-sdk/client-cloudfront": "^3.994.0",
-        "@aws-sdk/client-ec2": "^3.994.0",
-        "@aws-sdk/client-secrets-manager": "^3.994.0",
+        "@aws-sdk/client-cloudfront": "^3.999.0",
+        "@aws-sdk/client-ec2": "^3.999.0",
+        "@aws-sdk/client-secrets-manager": "^3.999.0",
         "axios": "^1.13.5",
         "node-ssh": "^13.2.1",
         "prompts": "^2.4.2",
@@ -24,7 +24,7 @@
     },
     "devDependencies": {
         "@types/eslint": "^9.6.1",
-        "@types/node": "^24.9.1",
+        "@types/node": "^25.3.2",
         "@types/prompts": "^2.4.9",
         "@types/ssh2": "^1.15.5",
         "@types/yargs": "^17.0.33",

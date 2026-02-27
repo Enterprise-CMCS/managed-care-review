@@ -16,7 +16,7 @@
     },
     "devDependencies": {
         "@types/jest": "^30.0.0",
-        "@types/node": "^24.9.1",
+        "@types/node": "^25.3.2",
         "buffer": "^6.0.3",
         "protobufjs": "^7.3.0"
     },

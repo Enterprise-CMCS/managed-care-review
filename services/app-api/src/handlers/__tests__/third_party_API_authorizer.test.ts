@@ -4,7 +4,7 @@ import type { APIGatewayTokenAuthorizerEvent, Context } from 'aws-lambda'
 
 describe('third_party_API_authorizer', () => {
     const oauthConfig = {
-        issuer: 'mcreview-oauth',
+        issuer: process.env.MCREVIEW_OAUTH_ISSUER ?? 'test-issuer',
         signingKey: Buffer.from('123abc', 'hex'),
         expirationDurationS: 3600,
     }
