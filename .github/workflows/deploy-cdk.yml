@@ -883,6 +883,16 @@ jobs:
       - name: Setup env
         uses: ./.github/actions/setup_env
 
+      - name: Install AWS CLI (container)
+        run: |
+          if ! command -v aws >/dev/null 2>&1; then
+            echo "Installing AWS CLI in container..."
+            apt-get update
+            apt-get install -y awscli
+          fi
+
+          aws --version
+
       - name: Get AWS credentials
         id: "creds"
         uses: ./.github/actions/get_aws_credentials
