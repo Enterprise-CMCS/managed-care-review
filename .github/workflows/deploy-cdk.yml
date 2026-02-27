@@ -883,12 +883,14 @@ jobs:
       - name: Setup env
         uses: ./.github/actions/setup_env
 
-      - name: Install AWS CLI 
+      - name: Install AWS CLI (container)
         run: |
-          curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o awscliv2.zip
-          unzip -q awscliv2.zip
-          ./aws/install --bin-dir $HOME/bin --install-dir $HOME/aws-cli --update
-          echo "$HOME/bin" >> $GITHUB_PATH
+          if ! command -v aws >/dev/null 2>&1; then
+            echo "Installing AWS CLI in container..."
+            apt-get update
+            apt-get install -y awscli
+          fi
+
           aws --version
 
       - name: Get AWS credentials
