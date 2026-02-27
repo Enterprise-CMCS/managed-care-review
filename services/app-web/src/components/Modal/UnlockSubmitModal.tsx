@@ -20,11 +20,15 @@ import {
     unlockMutationWrapper,
 } from '@mc-review/helpers'
 import { useTealium } from '../../hooks'
-import { EQROModalDescription } from './ModalBodyContent/EQROModalDescription'
+import {
+    EQROModalDescription,
+    EQROResubmitModalDescription,
+} from './ModalBodyContent'
 
 type ModalTypes =
     | 'SUBMIT_RATE'
     | 'RESUBMIT_RATE'
+    | 'RESUBMIT_EQRO_CONTRACT'
     | 'UNLOCK_RATE'
     | 'SUBMIT_CONTRACT'
     | 'RESUBMIT_CONTRACT'
@@ -69,6 +73,13 @@ const modalValueDictionary: Record<ModalTypes, ModalValueType> = {
         unlockSubmitModalInputValidation:
             'You must provide a summary of changes',
         errorHeading: ERROR_MESSAGES.resubmit_error_heading,
+    },
+    RESUBMIT_EQRO_CONTRACT: {
+        modalHeading: 'Summarize changes',
+        onSubmitText: 'Resubmit',
+        errorHeading: ERROR_MESSAGES.submit_error_heading,
+        errorSuggestion: ERROR_MESSAGES.submit_error_suggestion,
+        modalDescription: EQROResubmitModalDescription,
     },
     UNLOCK_RATE: {
         modalHeading: 'Reason for unlocking rate',
@@ -207,6 +218,13 @@ export const UnlockSubmitModal = ({
                     unlockSubmitModalInput
                 )
                 break
+            case 'RESUBMIT_EQRO_CONTRACT':
+                result = await submitMutationWrapper(
+                    submitContract,
+                    submissionData.id,
+                    unlockSubmitModalInput
+                )
+                break
             case 'UNLOCK_CONTRACT':
                 if (unlockSubmitModalInput) {
                     result = await unlockMutationWrapper(
@@ -247,6 +265,7 @@ export const UnlockSubmitModal = ({
             if (
                 [
                     'RESUBMIT_CONTRACT',
+                    'RESUBMIT_EQRO_CONTRACT',
                     'SUBMIT_CONTRACT',
                     'SUBMIT_EQRO_CONTRACT',
                 ].includes(modalType) &&
