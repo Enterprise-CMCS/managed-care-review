@@ -19,7 +19,7 @@
     "devDependencies": {
         "@luckycatfactory/esbuild-graphql-loader": "^3.8.1",
         "@types/jest": "^30.0.0",
-        "@types/node": "24.9.1",
+        "@types/node": "25.3.2",
         "@typescript-eslint/eslint-plugin": "^8.52.0",
         "@typescript-eslint/parser": "^8.29.1",
         "aws-cdk": "2.1023.0",

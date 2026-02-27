@@ -15,7 +15,7 @@
         "typescript": "5.9.3"
     },
     "devDependencies": {
-        "@types/node": "^24.9.1",
+        "@types/node": "^25.3.2",
         "@types/url-parse": "^1.4.3",
         "@vitest/coverage-v8": "^3.0.4",
         "vitest": "^3.0.4"
