@@ -24,6 +24,7 @@ import {
 import { ApolloClient, DocumentNode, NormalizedCacheObject } from '@apollo/client'
 import { GraphQLError, print } from 'graphql'
 import { CMSUserLoginNames, userLoginData } from './loginCommands'
+import { GenerateUploadUrlDocument } from '@mc-review/constants/build/gen/gqlClient'
 
 export type ApiCreateOAuthClientResponseType = {
     client: OauthClient
@@ -75,6 +76,7 @@ const createAndSubmitContractOnlyPackage = async (
 const createAndSubmitEQROContract = async (
     apolloClient: ApolloClient<NormalizedCacheObject>
 ): Promise<Contract> => {
+    const s3Bucket = Cypress.env('VITE_APP_S3_QA_BUCKET')  
     const newContract = await apolloClient.mutate({
         mutation: CreateContractDocument,
         variables: {
@@ -94,6 +96,41 @@ const createAndSubmitEQROContract = async (
     const draftContract = newContract.data.createContract.contract
     const draftRevision = draftContract.draftRevision
     const updateFormData = eqroFromData()
+
+    const contractDocumentURL = await apolloClient.mutate({
+        mutation: GenerateUploadUrlDocument,
+        variables: {
+            input: {
+                fileName: 'trussel-guide.pdf',
+                fileType: 'PDF'
+            },
+        },
+    })
+
+    const uploadResult = contractDocumentURL.data!.generateUploadURL
+
+    const s3URL = `s3://${s3Bucket}/${uploadResult.s3Key}/trussel-guide.pdf`
+    const res = await fetch(uploadResult.uploadURL, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/pdf',
+        },
+        body: new Blob(['trussel-guide.pdf'], { type: 'application/pdf' }),
+      })
+      if (!res.ok) {
+        throw new Error(`Upload failed: ${res.status}`)
+      }
+
+    console.log('bucket from resolver', uploadResult.bucket)
+    console.log('document bucket from Cypress', Cypress.env('VITE_APP_S3_DOCUMENTS_BUCKET'))
+    console.log('qa bucket from Cypress', Cypress.env('VITE_APP_S3_QA_BUCKET'))
+    updateFormData.contractDocuments = [
+        {
+            name: 'trussel-guide.pdf',
+            s3URL,
+            sha256: 'abc123',
+        },
+    ]
 
     const updateContractDraftRevisionInput: UpdateContractDraftRevisionInput = {
         contractID: draftContract.id,

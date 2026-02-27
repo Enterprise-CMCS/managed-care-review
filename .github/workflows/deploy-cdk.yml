@@ -523,6 +523,7 @@ jobs:
           echo "Using VITE_APP_API_URL: $VITE_APP_API_URL"
           echo "Using VITE_APP_COGNITO_USER_POOL_ID: $VITE_APP_COGNITO_USER_POOL_ID"
           echo "Using VITE_APP_S3_DOCUMENTS_BUCKET: $VITE_APP_S3_DOCUMENTS_BUCKET"
+          echo "Using VITE_APP_S3_QA_BUCKET: $VITE_APP_S3_QA_BUCKET"
           echo "Using VITE_APP_AUTH_MODE: $VITE_APP_AUTH_MODE"
 
           # Build with all environment variables available
@@ -882,6 +883,8 @@ jobs:
       - name: Setup env
         uses: ./.github/actions/setup_env
 
+      
+
       - name: Get AWS credentials
         id: "creds"
         uses: ./.github/actions/get_aws_credentials
@@ -890,6 +893,34 @@ jobs:
           account-id: ${{ secrets.DEV_AWS_ACCOUNT_ID }}
           stage-name: ${{ needs.begin-deployment.outputs.stage-name }}
           use-cdk-role: "true"
+      
+      - name: Install AWS CLI (container)
+        run: |
+          if ! command -v aws >/dev/null 2>&1; then
+            echo "Installing AWS CLI in container..."
+            sudo apt-get update
+            sudo apt-get install -y awscli
+          fi
+
+          aws --version
+
+      - name: Get CDK configuration (S3 buckets)
+        id: cdk-config
+        env:
+          STAGE_NAME: ${{ needs.begin-deployment.outputs.stage-name }}
+          VITE_APP_AUTH_MODE: ${{ secrets.VITE_APP_AUTH_MODE }}
+        run: |
+          ./scripts/get-cdk-config.sh ${STAGE_NAME}
+
+          # Source the generated config file
+          source "/tmp/cdk-config-${STAGE_NAME}.env"
+
+          # Export bucket names to GitHub outputs
+          echo "documents_bucket=$VITE_APP_S3_DOCUMENTS_BUCKET" >> $GITHUB_OUTPUT
+          echo "qa_bucket=$VITE_APP_S3_QA_BUCKET" >> $GITHUB_OUTPUT
+
+          echo "Documents bucket: $VITE_APP_S3_DOCUMENTS_BUCKET"
+          echo "QA bucket: $VITE_APP_S3_QA_BUCKET"
 
       - uses: actions/download-artifact@v8
         with:
@@ -933,6 +964,8 @@ jobs:
           AWS_ACCESS_KEY_ID: ${{ steps.creds.outputs.aws-access-key-id }}
           AWS_SECRET_ACCESS_KEY: ${{ steps.creds.outputs.aws-secret-access-key }}
           AWS_SESSION_TOKEN: ${{ steps.creds.outputs.aws-session-token }}
+          VITE_APP_S3_DOCUMENTS_BUCKET: ${{ steps.cdk-config.outputs.documents_bucket }}
+          VITE_APP_S3_QA_BUCKET: ${{ steps.cdk-config.outputs.qa_bucket }}
           # Overwrites folder directories in cypress config because in CI we run from root
           CYPRESS_SUPPORT_FILE: services/cypress/support/index.ts
           CYPRESS_FIXTURES_FOLDER: services/cypress/fixtures
