@@ -5,7 +5,9 @@ import {
     BucketEncryption,
     BlockPublicAccess,
     ObjectOwnership,
+    type IBucket,
 } from 'aws-cdk-lib/aws-s3'
+import { RemovalPolicy, Duration } from 'aws-cdk-lib'
 import {
     Distribution,
     OriginAccessIdentity,
@@ -42,6 +44,9 @@ export class FrontendInfraStack extends BaseStack {
     public readonly storybookDistribution: Distribution
     public readonly storybookUrl: string
 
+    // Access logs bucket (only for val/prod)
+    public readonly accessLogsBucket?: IBucket
+
     constructor(scope: Construct, id: string, props: BaseStackProps) {
         super(scope, id, {
             ...props,
@@ -76,6 +81,12 @@ export class FrontendInfraStack extends BaseStack {
                 'CloudFrontCertificate',
                 cloudfrontCertArn!
             )
+        }
+
+        // Create dedicated access logs bucket for val/prod environments
+        // Review and dev environments don't need access logs
+        if (this.stage === 'val' || this.stage === 'prod') {
+            this.accessLogsBucket = this.createAccessLogsBucket()
         }
 
         // Create S3 bucket
@@ -193,10 +204,12 @@ function handler(event) {
             // Security: Enforce TLS 1.2 as minimum protocol version (Security Hub compliance)
             minimumProtocolVersion: SecurityPolicyProtocol.TLS_V1_2_2021,
 
-            // Logging to same bucket
-            enableLogging: true,
-            logBucket: this.bucket,
-            logFilePrefix: `${this.stage}-ui-cloudfront-logs/`,
+            // CloudFront access logs - only enabled for val/prod, logged to dedicated bucket
+            enableLogging: this.accessLogsBucket ? true : false,
+            logBucket: this.accessLogsBucket,
+            logFilePrefix: this.accessLogsBucket
+                ? `${this.stage}-ui-cloudfront-logs/`
+                : undefined,
         })
 
         // Set application URL - use custom domain if configured, otherwise CloudFront URL
@@ -282,10 +295,12 @@ function handler(event) {
                 // Security: Enforce TLS 1.2 as minimum protocol version (Security Hub compliance)
                 minimumProtocolVersion: SecurityPolicyProtocol.TLS_V1_2_2021,
 
-                // Logging to same bucket
-                enableLogging: true,
-                logBucket: this.storybookBucket,
-                logFilePrefix: `${this.stage}-storybook-cloudfront-logs/`,
+                // CloudFront access logs - only enabled for val/prod, logged to dedicated bucket
+                enableLogging: this.accessLogsBucket ? true : false,
+                logBucket: this.accessLogsBucket,
+                logFilePrefix: this.accessLogsBucket
+                    ? `${this.stage}-storybook-cloudfront-logs/`
+                    : undefined,
             }
         )
 
@@ -295,6 +310,41 @@ function handler(event) {
             : `https://${this.storybookDistribution.distributionDomainName}`
 
         this.createOutputs()
+    }
+
+    /**
+     * Create a dedicated S3 bucket for CloudFront access logs
+     * Only used for val/prod environments
+     */
+    private createAccessLogsBucket(): Bucket {
+        const logRetentionDays = this.stage === 'prod' ? 180 : 90
+
+        return new Bucket(this, 'AccessLogsBucket', {
+            bucketName: ResourceNames.resourceName(
+                'cloudfront-logs',
+                'bucket',
+                this.stage
+            ),
+            // CloudFront requires BUCKET_OWNER_PREFERRED for access logs
+            objectOwnership: ObjectOwnership.BUCKET_OWNER_PREFERRED,
+            encryption: BucketEncryption.S3_MANAGED,
+            blockPublicAccess: BlockPublicAccess.BLOCK_ALL,
+            enforceSSL: true,
+            // Retain logs bucket for val/prod - never auto-delete
+            removalPolicy: RemovalPolicy.RETAIN,
+            autoDeleteObjects: false,
+            versioned: false, // No need to version logs
+            lifecycleRules: [
+                {
+                    id: 'expire-old-logs',
+                    expiration: Duration.days(logRetentionDays),
+                },
+                {
+                    id: 'delete-incomplete-multipart-uploads',
+                    abortIncompleteMultipartUploadAfter: Duration.days(7),
+                },
+            ],
+        })
     }
 
     private createOutputs(): void {

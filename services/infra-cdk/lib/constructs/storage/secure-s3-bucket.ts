@@ -78,9 +78,11 @@ export class SecureS3Bucket extends Construct {
             intelligentTieringConfigurations:
                 props.intelligentTieringConfigurations,
             inventories: props.inventories,
+            // Only set access logs if a target bucket is explicitly provided
             serverAccessLogsBucket: props.serverAccessLogsBucket,
-            serverAccessLogsPrefix:
-                props.serverAccessLogsPrefix || `${props.bucketName}/`,
+            serverAccessLogsPrefix: props.serverAccessLogsBucket
+                ? props.serverAccessLogsPrefix || `${props.bucketName}/`
+                : undefined,
         })
 
         // Add bucket policy to enforce SSL
