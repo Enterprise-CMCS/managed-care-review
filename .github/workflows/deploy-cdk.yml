@@ -754,30 +754,6 @@ jobs:
           echo "Storybook endpoint: $endpoint"
           echo "storybook-endpoint=$endpoint" >> "$GITHUB_OUTPUT"
 
-      - name: Get S3 bucket names from CloudFormation outputs
-        id: s3-buckets
-        env:
-          STAGE_NAME: ${{ needs.begin-deployment.outputs.stage-name }}
-        run: |
-          STACK_NAME="uploads-${STAGE_NAME}-cdk"
-          echo "Fetching S3 bucket names from CloudFormation stack: $STACK_NAME"
-
-          DOCS_BUCKET=$(aws cloudformation describe-stacks \
-            --stack-name "$STACK_NAME" \
-            --query "Stacks[0].Outputs[?OutputKey=='DocumentUploadsBucketName'].OutputValue" \
-            --output text)
-
-          QA_BUCKET=$(aws cloudformation describe-stacks \
-            --stack-name "$STACK_NAME" \
-            --query "Stacks[0].Outputs[?OutputKey=='QAUploadsBucketName'].OutputValue" \
-            --output text)
-
-          echo "Documents bucket: $DOCS_BUCKET"
-          echo "QA bucket: $QA_BUCKET"
-
-          echo "documents_bucket=$DOCS_BUCKET" >> $GITHUB_OUTPUT
-          echo "qa_bucket=$QA_BUCKET" >> $GITHUB_OUTPUT
-
       - name: get api endpoint
         id: save-api-endpoint
         env:
@@ -915,6 +891,30 @@ jobs:
           account-id: ${{ secrets.DEV_AWS_ACCOUNT_ID }}
           stage-name: ${{ needs.begin-deployment.outputs.stage-name }}
           use-cdk-role: "true"
+      
+      - name: Get S3 bucket names from CloudFormation outputs
+        id: s3-buckets
+        env:
+          STAGE_NAME: ${{ needs.begin-deployment.outputs.stage-name }}
+        run: |
+          STACK_NAME="uploads-${STAGE_NAME}-cdk"
+          echo "Fetching S3 bucket names from CloudFormation stack: $STACK_NAME"
+
+          DOCS_BUCKET=$(aws cloudformation describe-stacks \
+            --stack-name "$STACK_NAME" \
+            --query "Stacks[0].Outputs[?OutputKey=='DocumentUploadsBucketName'].OutputValue" \
+            --output text)
+
+          QA_BUCKET=$(aws cloudformation describe-stacks \
+            --stack-name "$STACK_NAME" \
+            --query "Stacks[0].Outputs[?OutputKey=='QAUploadsBucketName'].OutputValue" \
+            --output text)
+
+          echo "Documents bucket: $DOCS_BUCKET"
+          echo "QA bucket: $QA_BUCKET"
+
+          echo "documents_bucket=$DOCS_BUCKET" >> $GITHUB_OUTPUT
+          echo "qa_bucket=$QA_BUCKET" >> $GITHUB_OUTPUT
 
       - uses: actions/download-artifact@v7
         with:
