@@ -174,7 +174,7 @@ export const EQROReviewSubmit = (): React.ReactElement => {
                     submissionName={submissionName}
                     modalType={
                         contract.status === 'UNLOCKED'
-                            ? 'RESUBMIT_CONTRACT'
+                            ? 'RESUBMIT_EQRO_CONTRACT'
                             : 'SUBMIT_EQRO_CONTRACT'
                     }
                     modalRef={modalRef}
