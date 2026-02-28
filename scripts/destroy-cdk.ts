@@ -13,6 +13,11 @@ import {
 } from '@aws-sdk/client-s3'
 import { LambdaClient, InvokeCommand } from '@aws-sdk/client-lambda'
 import {
+    CloudFrontClient,
+    ListInvalidationsCommand,
+    GetInvalidationCommand,
+} from '@aws-sdk/client-cloudfront'
+import {
     SecretsManagerClient,
     DescribeSecretCommand,
 } from '@aws-sdk/client-secrets-manager'
@@ -49,6 +54,7 @@ const stage = process.argv[2]
 const cf = new CloudFormationClient(AWSConfig)
 const s3 = new S3Client(AWSConfig)
 const lambda = new LambdaClient(AWSConfig)
+const cloudfront = new CloudFrontClient(AWSConfig)
 const secretsManager = new SecretsManagerClient(AWSConfig)
 
 async function main() {
@@ -91,6 +97,15 @@ async function main() {
         // Step 3: Destroy stacks in order
         for (const stack of stacksToDestroy) {
             console.info(`Destroying CDK stack: ${stack}`)
+
+            // Wait for CloudFront invalidations to complete
+            const cloudFrontOutput =
+                await waitForCloudFrontInvalidationsInStack(stack)
+            if (cloudFrontOutput instanceof Error) {
+                console.info(
+                    `Could not wait for CloudFront invalidations in ${stack}: ${cloudFrontOutput.message}`
+                )
+            }
 
             // Clear S3 buckets in the stack
             const clearBucketOutput = await clearS3BucketsInStack(stack)
@@ -220,6 +235,136 @@ async function getCdkStacksFromStage(stageName: string): Promise<string[]> {
     }
 
     return stacksToDestroy
+}
+
+/**
+ * Wait for all CloudFront invalidations in a stack to complete
+ */
+async function waitForCloudFrontInvalidationsInStack(
+    stackName: string
+): Promise<void | Error> {
+    const distributions = await getDistributionsInStack(stackName)
+
+    if (distributions instanceof Error) {
+        return new Error(
+            `Could not get distributions in stack ${stackName}: ${distributions.message}`
+        )
+    }
+
+    if (distributions.length === 0) {
+        console.info(`No CloudFront distributions found in stack ${stackName}`)
+        return
+    }
+
+    console.info(
+        `Found ${distributions.length} CloudFront distribution(s) in stack ${stackName}`
+    )
+
+    for (const distribution of distributions) {
+        const distributionId = distribution.PhysicalResourceId
+        if (!distributionId) continue
+
+        const result = await waitForDistributionInvalidations(
+            distributionId,
+            cloudfront
+        )
+        if (result instanceof Error) {
+            return result
+        }
+    }
+
+    console.info(`All CloudFront invalidations complete for stack ${stackName}`)
+}
+
+/**
+ * Wait for all in-progress invalidations on a CloudFront distribution to complete
+ */
+export async function waitForDistributionInvalidations(
+    distributionId: string,
+    cloudfrontClient: CloudFrontClient
+): Promise<void | Error> {
+    console.info(
+        `Checking invalidations for CloudFront distribution: ${distributionId}`
+    )
+
+    try {
+        // List all invalidations for the distribution
+        const listCommand = new ListInvalidationsCommand({
+            DistributionId: distributionId,
+        })
+        const response = await cloudfrontClient.send(listCommand)
+
+        const inProgressInvalidations =
+            response.InvalidationList?.Items?.filter(
+                (item) => item.Status === 'InProgress'
+            ) ?? []
+
+        if (inProgressInvalidations.length === 0) {
+            console.info(
+                `No in-progress invalidations for distribution ${distributionId}`
+            )
+            return
+        }
+
+        console.info(
+            `Found ${inProgressInvalidations.length} in-progress invalidation(s) for ${distributionId}`
+        )
+
+        // Wait for each in-progress invalidation to complete
+        for (const invalidation of inProgressInvalidations) {
+            if (!invalidation.Id) continue
+
+            console.info(
+                `Waiting for invalidation ${invalidation.Id} to complete...`
+            )
+
+            // Poll until invalidation is complete
+            let status = 'InProgress'
+            while (status === 'InProgress') {
+                await new Promise((resolve) => setTimeout(resolve, 5000)) // Wait 5 seconds between checks
+
+                const getCommand = new GetInvalidationCommand({
+                    DistributionId: distributionId,
+                    Id: invalidation.Id,
+                })
+                const result = await cloudfrontClient.send(getCommand)
+                status = result.Invalidation?.Status ?? 'Completed'
+
+                console.info(
+                    `Invalidation ${invalidation.Id} status: ${status}`
+                )
+            }
+
+            console.info(`Invalidation ${invalidation.Id} completed`)
+        }
+    } catch (err: any) {
+        return new Error(`Could not wait for invalidations: ${err.message}`)
+    }
+}
+
+/**
+ * Get all CloudFront distributions in a CloudFormation stack
+ */
+async function getDistributionsInStack(
+    stackName: string
+): Promise<any[] | Error> {
+    try {
+        const command = new DescribeStackResourcesCommand({
+            StackName: stackName,
+        })
+        const stack = await cf.send(command)
+
+        if (stack.StackResources === undefined) {
+            return new Error('Could not find stack resources')
+        }
+
+        return stack.StackResources.filter(
+            (resource) =>
+                resource.ResourceType === 'AWS::CloudFront::Distribution'
+        )
+    } catch (err: any) {
+        return new Error(`Could not get stack resources: ${err.message}`)
+    }
 }
 
 /**
