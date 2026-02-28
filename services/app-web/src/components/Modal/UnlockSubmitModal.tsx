@@ -47,7 +47,7 @@ type ModalValueType = {
     modalHeading?: string
     onSubmitText?: string
     modalDescription?: string | React.ReactElement
-    inputHint?: string
+    inputHint?: string | React.ReactElement
     unlockSubmitModalInputValidation?: string
     errorHeading: string
     errorSuggestion?: string
@@ -79,7 +79,11 @@ const modalValueDictionary: Record<ModalTypes, ModalValueType> = {
         onSubmitText: 'Resubmit',
         errorHeading: ERROR_MESSAGES.submit_error_heading,
         errorSuggestion: ERROR_MESSAGES.submit_error_suggestion,
-        modalDescription: EQROResubmitModalDescription,
+        modalDescription:
+            "When you resubmit, your submission will be sent to CMS for review and you won't be able to make further changes.",
+        inputHint: EQROResubmitModalDescription,
+        unlockSubmitModalInputValidation:
+            'You must provide a summary of changes',
     },
     UNLOCK_RATE: {
         modalHeading: 'Reason for unlocking rate',
