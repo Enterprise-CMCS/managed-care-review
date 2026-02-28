@@ -101,11 +101,6 @@ export function indexContractsResolver(
             throw createForbiddenError(errMessage)
         }
 
-        // Log OAuth client access for audit trail
-        if (context.oauthClient) {
-            logSuccess('indexContracts')
-        }
-
         // Authorization check (same for both OAuth clients and regular users)
         if (isStateUser(user)) {
             const contractsWithHistory =
@@ -132,7 +127,11 @@ export function indexContractsResolver(
                     },
                 })
             }
-            logSuccess('indexContracts')
+            logSuccess(
+                context.oauthClient
+                    ? 'indexContracts - oauthClient'
+                    : 'indexContracts'
+            )
             setSuccessAttributesOnActiveSpan(span)
             const parsedContracts = parseContracts(contractsWithHistory, span)
             return formatContracts(parsedContracts)
@@ -165,7 +164,11 @@ export function indexContractsResolver(
                     },
                 })
             }
-            logSuccess('indexContracts')
+            logSuccess(
+                context.oauthClient
+                    ? 'indexContracts - oauthClient'
+                    : 'indexContracts'
+            )
             setSuccessAttributesOnActiveSpan(span)
             let contracts: any = contractsWithHistory
 

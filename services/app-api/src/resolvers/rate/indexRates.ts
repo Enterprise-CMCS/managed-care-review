@@ -62,11 +62,6 @@ export function indexRatesResolver(store: Store): QueryResolvers['indexRates'] {
             throw createForbiddenError(errMessage)
         }
 
-        // Log OAuth client access for audit trail
-        if (context.oauthClient) {
-            logSuccess('indexRates')
-        }
-
         // Authorization check (same for both OAuth clients and regular users)
         const adminPermissions = hasAdminPermissions(user)
         const cmsUser = hasCMSPermissions(user)
@@ -136,6 +131,9 @@ export function indexRatesResolver(store: Store): QueryResolvers['indexRates'] {
                     })
                 })
             }
+            logSuccess(
+                context.oauthClient ? 'indexRates - oauthClient' : 'indexRates'
+            )
             setSuccessAttributesOnActiveSpan(span)
             return { totalCount: edges.length, edges }
         } else {

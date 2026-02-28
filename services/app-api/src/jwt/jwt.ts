@@ -14,7 +14,7 @@ interface APIKeyType {
 
 interface OAuthTokenPayload {
     sub: string
-    issuer: string
+    iss: string
     client_id: string
     grant_type: string
     user_id: string
@@ -25,9 +25,9 @@ interface OAuthTokenPayload {
 
 interface OauthTokenValidation {
     clientId: string
-    issuer: string
+    iss: string
     grantType: string
-    userId: string
+    user_id: string
     grants: string[]
 }
 
@@ -40,7 +40,7 @@ function createOAuthJWT(
 ): APIKeyType {
     const payload: OAuthTokenPayload = {
         sub: clientId,
-        issuer: config.issuer,
+        iss: config.issuer,
         client_id: clientId,
         grant_type: grantType,
         user_id: userId,
@@ -50,7 +50,6 @@ function createOAuthJWT(
     }
 
     const token = sign(payload, config.signingKey, {
-        issuer: config.issuer,
         algorithm: 'HS256',
     })
 
@@ -90,7 +89,7 @@ function validateOAuthToken(
 
         if (
             !decoded.client_id ||
-            !decoded.issuer ||
+            !decoded.iss ||
             !decoded.grant_type ||
             !decoded.user_id ||
             !decoded.grants
@@ -100,9 +99,9 @@ function validateOAuthToken(
 
         return {
             clientId: decoded.client_id,
-            issuer: decoded.issuer,
+            iss: decoded.iss,
             grantType: decoded.grant_type,
-            userId: decoded.user_id,
+            user_id: decoded.user_id,
             grants: decoded.grants,
         }
     } catch (err) {
@@ -122,9 +121,9 @@ export interface JWTLib {
     validateOAuthToken(token: string):
         | {
               clientId: string
-              issuer: string
+              iss: string
               grantType: string
-              userId: string
+              user_id: string
               grants: string[]
           }
         | Error

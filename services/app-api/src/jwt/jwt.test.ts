@@ -48,15 +48,15 @@ describe('jwtLib', () => {
             expect(result).not.toBeInstanceOf(Error)
             const validatedToken = result as {
                 clientId: string
-                issuer: string
+                iss: string
                 grantType: string
-                userId: string
+                user_id: string
                 grants: string[]
             }
             expect(validatedToken.clientId).toBe(clientId)
-            expect(validatedToken.issuer).toBe(issuer)
+            expect(validatedToken.iss).toBe(issuer)
             expect(validatedToken.grantType).toBe(grantType)
-            expect(validatedToken.userId).toBe(userId)
+            expect(validatedToken.user_id).toBe(userId)
             expect(validatedToken.grants).toEqual(grants)
         })
 

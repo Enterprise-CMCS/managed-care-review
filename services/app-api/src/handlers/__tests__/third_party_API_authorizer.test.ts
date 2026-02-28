@@ -56,7 +56,7 @@ describe('third_party_API_authorizer', () => {
         expect(result!.context).toEqual({
             clientId: clientId,
             grants: 'read',
-            issuer: 'mcreview-test',
+            iss: 'mcreview-test',
         })
     })
 

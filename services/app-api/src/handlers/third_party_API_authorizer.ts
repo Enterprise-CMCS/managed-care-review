@@ -4,6 +4,7 @@ import type {
     PolicyDocument,
     APIGatewayTokenAuthorizerHandler,
 } from 'aws-lambda'
+import { decode } from 'jsonwebtoken'
 import { newJWTLib } from '../jwt'
 
 const stageName = process.env.stage
@@ -32,6 +33,50 @@ const oauthJwtLib = newJWTLib({
     expirationDurationS: 90 * 24 * 60 * 60, // 90 days
 })
 
+type ValidatedTokenData = {
+    clientId: string
+    iss: string
+    user_id: string
+    grants: string[]
+}
+
+function validateMcReviewToken(token: string): ValidatedTokenData | Error {
+    const result = oauthJwtLib.validateOAuthToken(token)
+    if (result instanceof Error) {
+        return new Error(
+            `mcreview-oauth token validation failed: ${result.message}`
+        )
+    }
+    return result
+}
+
+// TODO [MCR-5961]: add in validateOktaToken(token: string): ValidatedTokenData | Error in validateToken()
+function validateToken(token: string): ValidatedTokenData | Error {
+    const decodedToken = decode(token)
+
+    if (!decodedToken) {
+        return new Error('Unable to decode token')
+    }
+
+    if (typeof decodedToken === 'string') {
+        return new Error(
+            'Unexpected token format: payload is a string not a JSON object'
+        )
+    }
+
+    if (!decodedToken.iss) {
+        return new Error('Decoded token is missing iss')
+    }
+
+    const { iss } = decodedToken
+
+    if (iss === oauthIssuer) {
+        return validateMcReviewToken(token)
+    }
+
+    return new Error(`Unknown token issuer: ${iss}`)
+}
+
 export const main: APIGatewayTokenAuthorizerHandler = async (
     event
 ): Promise<APIGatewayAuthorizerResult> => {
@@ -39,29 +84,24 @@ export const main: APIGatewayTokenAuthorizerHandler = async (
     const denyToken = () => generatePolicy(undefined, event)
 
     try {
-        const oauthResult = oauthJwtLib.validateOAuthToken(authToken)
+        const validatedToken = validateToken(authToken)
 
-        if (oauthResult instanceof Error) {
-            console.error('OAuth token validation failed')
-            return denyToken()
-        }
-
-        if (oauthResult.issuer !== oauthIssuer) {
-            console.error('Token issuer is invalid')
+        if (validatedToken instanceof Error) {
+            console.error('Token validation failed', validatedToken.message)
             return denyToken()
         }
 
         console.info({
-            message: 'third_party_API_authorizer succeeded with OAuth token',
+            message: `third_party_API_authorizer succeeded with OAuth token: ${validatedToken.iss}`,
             operation: 'third_party_API_authorizer',
             status: 'SUCCESS',
-            clientId: oauthResult.clientId,
+            clientId: validatedToken.clientId,
         })
 
-        return generatePolicy(oauthResult.userId, event, {
-            clientId: oauthResult.clientId,
-            issuer: oauthResult.issuer,
-            grants: oauthResult.grants.join(','),
+        return generatePolicy(validatedToken.user_id, event, {
+            clientId: validatedToken.clientId,
+            iss: validatedToken.iss,
+            grants: validatedToken.grants.join(','),
         })
     } catch (err) {
         console.error(

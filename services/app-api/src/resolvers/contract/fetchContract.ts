@@ -65,11 +65,6 @@ export function fetchContractResolver(
             })
         }
 
-        // Log OAuth client access for audit trail
-        if (context.oauthClient) {
-            logSuccess('fetchContract')
-        }
-
         // Authorization check (same for both OAuth clients and regular users)
         if (isStateUser(user)) {
             if (user.stateCode !== contractWithHistory.stateCode) {
@@ -100,7 +95,11 @@ export function fetchContractResolver(
             })
         }
 
-        logSuccess('fetchContract')
+        logSuccess(
+            context.oauthClient
+                ? 'fetchContract - oauthClient'
+                : 'fetchContract'
+        )
         setSuccessAttributesOnActiveSpan(span)
         return { contract: contractWithHistory }
     }

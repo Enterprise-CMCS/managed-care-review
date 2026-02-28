@@ -63,11 +63,6 @@ export function fetchDocumentResolver(
             })
         }
 
-        // Log OAuth client access for audit trail
-        if (context.oauthClient) {
-            logSuccess('fetchDocument')
-        }
-
         const key = getS3Key(fetchedDocument)
         if (key instanceof Error) {
             const errMsg = `Document missing valid s3Key. Invalid for docID: ${input.documentID}: ${key.message}`
@@ -105,6 +100,11 @@ export function fetchDocumentResolver(
             downloadURL: url,
         }
 
+        logSuccess(
+            context.oauthClient
+                ? 'fetchDocument - oauthClient'
+                : 'fetchDocument'
+        )
         setSuccessAttributesOnActiveSpan(span)
         return { document: doc }
     }
