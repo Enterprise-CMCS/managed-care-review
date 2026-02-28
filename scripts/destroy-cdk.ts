@@ -54,6 +54,7 @@ const secretsManager = new SecretsManagerClient(AWSConfig)
 async function main() {
     if (!stage) {
         console.error('Usage: node destroy-cdk.js <stage-name>')
+        console.error('  <stage-name>  Stage name to destroy')
         process.exit(1)
     }
 
@@ -126,7 +127,7 @@ async function deleteLogicalDatabase(stageName: string): Promise<void> {
 
     try {
         // Get the dev database secret ARN
-        const devSecretName = 'aurora-postgres-dev-cdk'
+        const devSecretName = 'aurora-postgres-dev-cdk' // pragma: allowlist secret
         const describeSecretCommand = new DescribeSecretCommand({
             SecretId: devSecretName,
         })
@@ -196,6 +197,7 @@ async function getCdkStacksFromStage(stageName: string): Promise<string[]> {
                 StackName: stackName,
             })
             const stacks = await cf.send(commandDescribeStacks)
+            console.log(`Found ${stacks.Stacks?.length} stacks.`)
 
             if (stacks.Stacks === undefined || stacks.Stacks.length === 0) {
                 console.info(`Stack ${stackName} was not found. Skipping.`)
