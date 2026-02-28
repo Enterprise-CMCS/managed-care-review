@@ -4,6 +4,7 @@ import type {
     PolicyDocument,
     APIGatewayTokenAuthorizerHandler,
 } from 'aws-lambda'
+import { decode } from 'jsonwebtoken'
 import { newJWTLib } from '../jwt'
 
 const stageName = process.env.stage
@@ -32,38 +33,82 @@ const oauthJwtLib = newJWTLib({
     expirationDurationS: 90 * 24 * 60 * 60, // 90 days
 })
 
+type ValidatedTokenData = {
+    clientId: string
+    iss: string
+    user_id: string
+    grants: string[]
+}
+
+function validateMcReviewToken(token: string): ValidatedTokenData | Error {
+    const result = oauthJwtLib.validateOAuthToken(token)
+    if (result instanceof Error) {
+        return new Error(
+            `mcreview-oauth token validation failed: ${result.message}`
+        )
+    }
+    return result
+}
+
+// TODO [MCR-5961]: add in validateOktaToken(token: string): ValidatedTokenData | Error in validateToken()
+function validateToken(token: string): ValidatedTokenData | Error {
+    const decodedToken = decode(token)
+
+    if (!decodedToken) {
+        return new Error('Unable to decode token')
+    }
+
+    if (typeof decodedToken === 'string') {
+        return new Error(
+            'Unexpected token format: payload is a string not a JSON object'
+        )
+    }
+
+    if (!decodedToken.iss) {
+        return new Error('Decoded token is missing iss')
+    }
+
+    const { iss } = decodedToken
+
+    if (iss === oauthIssuer) {
+        return validateMcReviewToken(token)
+    }
+
+    return new Error(`Unknown token issuer: ${iss}`)
+}
+
 export const main: APIGatewayTokenAuthorizerHandler = async (
     event
 ): Promise<APIGatewayAuthorizerResult> => {
     const authToken = event.authorizationToken.replace('Bearer ', '')
+    const denyToken = () => generatePolicy(undefined, event)
 
     try {
-        const oauthResult = oauthJwtLib.validateOAuthToken(authToken)
+        const validatedToken = validateToken(authToken)
 
-        if (!(oauthResult instanceof Error)) {
-            console.info({
-                message:
-                    'third_party_API_authorizer succeeded with OAuth token',
-                operation: 'third_party_API_authorizer',
-                status: 'SUCCESS',
-                clientId: oauthResult.clientId,
-            })
-
-            return generatePolicy(oauthResult.userId, event, {
-                clientId: oauthResult.clientId,
-                grants: oauthResult.grants.join(','),
-                isOAuthClient: 'true',
-            })
-        } else {
-            console.error('OAuth token validation failed')
-            return generatePolicy(undefined, event)
+        if (validatedToken instanceof Error) {
+            console.error('Token validation failed', validatedToken.message)
+            return denyToken()
         }
+
+        console.info({
+            message: `third_party_API_authorizer succeeded with OAuth token: ${validatedToken.iss}`,
+            operation: 'third_party_API_authorizer',
+            status: 'SUCCESS',
+            clientId: validatedToken.clientId,
+        })
+
+        return generatePolicy(validatedToken.user_id, event, {
+            clientId: validatedToken.clientId,
+            iss: validatedToken.iss,
+            grants: validatedToken.grants.join(','),
+        })
     } catch (err) {
         console.error(
             'unexpected exception attempting to validate authorization',
             err
         )
-        return generatePolicy(undefined, event)
+        return denyToken()
     }
 }
 
@@ -72,7 +117,7 @@ export const main: APIGatewayTokenAuthorizerHandler = async (
  * @param userId - The user ID from the JWT token (undefined for invalid tokens)
  * @param event - The API Gateway authorizer event
  * @param context - Optional context object containing OAuth client information.
- *                  When present, includes: clientId, grants, and isOAuthClient flag.
+ *                  When present, includes: clientId, grants, and issuer flag.
  *                  This context is passed through to the GraphQL resolver for authorization.
  *                  If missing, the request is treated as a regular user request.
  */

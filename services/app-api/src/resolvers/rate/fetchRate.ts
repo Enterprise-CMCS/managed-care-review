@@ -55,11 +55,6 @@ export function fetchRateResolver(store: Store): QueryResolvers['fetchRate'] {
             })
         }
 
-        // Log OAuth client access for audit trail
-        if (context.oauthClient?.isOAuthClient) {
-            logSuccess('fetchRate')
-        }
-
         // Authorization check (same for both OAuth clients and regular users)
         if (isStateUser(user)) {
             if (user.stateCode !== rateWithHistory.stateCode) {
@@ -78,6 +73,9 @@ export function fetchRateResolver(store: Store): QueryResolvers['fetchRate'] {
             throw createForbiddenError(errMessage)
         }
 
+        logSuccess(
+            context.oauthClient ? 'fetchRate - oauthClient' : 'fetchRate'
+        )
         setSuccessAttributesOnActiveSpan(span)
         return { rate: rateWithHistory }
     }

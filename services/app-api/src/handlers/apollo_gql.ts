@@ -52,8 +52,8 @@ export interface Context {
     ctx?: OTELContext
     oauthClient?: {
         clientId: string
+        issuer: string
         grants: string[]
-        isOAuthClient: boolean
         scopes: string[]
         isDelegatedUser: boolean
     }
@@ -108,6 +108,7 @@ function contextForRequestForFetcher(
 
             // Extract OAuth context if present
             const oauthClientId = authorizerContext?.clientId
+            const tokenIssuer = authorizerContext?.issuer
             const oauthGrants = authorizerContext?.grants?.split(',') || []
 
             const userResult = await userFromThirdPartyAuthorizer(
@@ -141,8 +142,8 @@ function contextForRequestForFetcher(
                 ctx: ctx,
                 oauthClient: {
                     clientId: oauthClientId,
+                    issuer: tokenIssuer,
                     grants: oauthGrants,
-                    isOAuthClient: true,
                     scopes: clientOauth.scopes.map((scope) => scope),
                     isDelegatedUser: !!delegatedUser,
                 },

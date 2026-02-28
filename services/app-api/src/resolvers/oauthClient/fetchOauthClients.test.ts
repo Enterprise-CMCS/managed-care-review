@@ -265,7 +265,7 @@ describe('fetchOauthClients', () => {
                 oauthClient: {
                     clientId: 'test-client',
                     grants: ['client_credentials'],
-                    isOAuthClient: true,
+                    issuer: 'mcreview-test',
                     scopes: [],
                     isDelegatedUser: false,
                 },
@@ -292,7 +292,7 @@ describe('fetchOauthClients', () => {
                 oauthClient: {
                     clientId: 'test-client',
                     grants: ['client_credentials'],
-                    isOAuthClient: true,
+                    issuer: 'mcreview-test',
                     scopes: [],
                     isDelegatedUser: false,
                 },

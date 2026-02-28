@@ -277,7 +277,7 @@ describe('fetchMcReviewSettings', () => {
                 oauthClient: {
                     clientId: 'test-client',
                     grants: ['client_credentials'],
-                    isOAuthClient: true,
+                    issuer: 'mcreview-test',
                     scopes: [],
                     isDelegatedUser: false,
                 },
@@ -304,7 +304,7 @@ describe('fetchMcReviewSettings', () => {
                 oauthClient: {
                     clientId: 'test-client',
                     grants: ['client_credentials'],
-                    isOAuthClient: true,
+                    issuer: 'mcreview-test',
                     scopes: [],
                     isDelegatedUser: false,
                 },
