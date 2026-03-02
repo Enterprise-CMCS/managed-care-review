@@ -513,31 +513,65 @@ async function turnOffVersioningOnBucket(bucket: any): Promise<void | Error> {
 async function getVersionedFilesInBucket(
     bucket: any
 ): Promise<Array<{ Key: string; VersionId: string }> | Error> {
-    const bucketParams = {
-        Bucket: bucket.PhysicalResourceId ?? '',
+    const bucketName = bucket.PhysicalResourceId ?? ''
+
+    console.info(`Listing versions for bucket: ${bucketName}`)
+
+    if (!bucketName) {
+        console.error(
+            `Bucket name is empty. Bucket object: ${JSON.stringify(bucket, null, 2)}`
+        )
+        return new Error('Bucket name is empty')
     }
 
+    const allKeys: Array<{ Key: string; VersionId: string }> = []
+    let keyMarker: string | undefined
+    let versionIdMarker: string | undefined
+    let pageCount = 0
+
     try {
-        const commandListObjectVersions = new ListObjectVersionsCommand(
-            bucketParams
+        // Paginate through all versions
+        do {
+            pageCount++
+            const commandListObjectVersions = new ListObjectVersionsCommand({
+                Bucket: bucketName,
+                KeyMarker: keyMarker,
+                VersionIdMarker: versionIdMarker,
+            })
+            const objectVersions = await s3.send(commandListObjectVersions)
+
+            const versionKeys =
+                objectVersions.Versions?.map((c) => ({
+                    Key: c.Key ?? '',
+                    VersionId: c.VersionId ?? '',
+                })) ?? []
+
+            const deleteMarkerKeys =
+                objectVersions.DeleteMarkers?.map((c) => ({
+                    Key: c.Key ?? '',
+                    VersionId: c.VersionId ?? '',
+                })) ?? []
+
+            allKeys.push(...versionKeys, ...deleteMarkerKeys)
+
+            // Set markers for next page
+            keyMarker = objectVersions.NextKeyMarker
+            versionIdMarker = objectVersions.NextVersionIdMarker
+
+            process.stdout.write(
+                `\r  Fetching keys... page ${pageCount}, ${allKeys.length} keys collected so far`
+            )
+        } while (keyMarker)
+
+        process.stdout.write('\n')
+        console.info(
+            `Found ${allKeys.length} object(s) across ${pageCount} page(s) in bucket ${bucketName}`
         )
-        const objectVersions = await s3.send(commandListObjectVersions)
-
-        const versionKeys =
-            objectVersions.Versions?.map((c) => ({
-                Key: c.Key ?? '',
-                VersionId: c.VersionId ?? '',
-            })) ?? []
-
-        const deleteMarkerKeys =
-            objectVersions.DeleteMarkers?.map((c) => ({
-                Key: c.Key ?? '',
-                VersionId: c.VersionId ?? '',
-            })) ?? []
-
-        return [...versionKeys, ...deleteMarkerKeys]
+        return allKeys
     } catch (err: any) {
-        return new Error(`Could not list object versions: ${err.message}`)
+        return new Error(
+            `Could not list object versions in ${bucketName}: ${err.message}`
+        )
     }
 }
 
