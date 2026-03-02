@@ -10,6 +10,7 @@ import {
     ListObjectVersionsCommand,
     DeleteObjectsCommand,
     PutBucketVersioningCommand,
+    PutBucketLoggingCommand,
 } from '@aws-sdk/client-s3'
 import { LambdaClient, InvokeCommand } from '@aws-sdk/client-lambda'
 import {
@@ -438,6 +439,25 @@ async function getBucketsInStack(stackName: string): Promise<any[] | Error> {
         )
     } catch (err: any) {
         return new Error(`Could not get stack resources: ${err.message}`)
+    }
+}
+
+/**
+ * Disable access logging on an S3 bucket
+ */
+async function disableS3AccessLogging(bucket: any): Promise<void | Error> {
+    console.info(
+        `Disabling access logging on bucket: ${bucket.PhysicalResourceId}`
+    )
+
+    try {
+        const command = new PutBucketLoggingCommand({
+            Bucket: bucket.PhysicalResourceId ?? '',
+            BucketLoggingStatus: {},
+        })
+        await s3.send(command)
+    } catch (err: any) {
+        return new Error(`Could not disable access logging: ${err.message}`)
     }
 }
 
