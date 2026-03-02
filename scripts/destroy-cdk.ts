@@ -3,6 +3,8 @@ import {
     DeleteStackCommand,
     DescribeStacksCommand,
     DescribeStackResourcesCommand,
+    DeleteStackCommandInput,
+    StackResource,
     waitUntilStackDeleteComplete,
 } from '@aws-sdk/client-cloudformation'
 import {
@@ -11,6 +13,7 @@ import {
     DeleteObjectsCommand,
     PutBucketVersioningCommand,
     PutBucketLoggingCommand,
+    ObjectIdentifier,
 } from '@aws-sdk/client-s3'
 import { LambdaClient, InvokeCommand } from '@aws-sdk/client-lambda'
 import {
@@ -356,7 +359,7 @@ export async function waitForDistributionInvalidations(
  */
 async function getDistributionsInStack(
     stackName: string
-): Promise<any[] | Error> {
+): Promise<StackResource[] | Error> {
     try {
         const command = new DescribeStackResourcesCommand({
             StackName: stackName,
@@ -434,12 +437,9 @@ export async function emptyS3Bucket(bucketName: string): Promise<void | Error> {
         return new Error('Bucket name cannot be empty')
     }
     console.info(`Emptying S3 bucket: ${bucketName}`)
-
-    const bucket = { PhysicalResourceId: bucketName }
-
     try {
         // Disable access logging
-        const loggingResult = await disableS3AccessLogging(bucket)
+        const loggingResult = await disableS3AccessLogging(bucketName)
         if (loggingResult instanceof Error) {
             console.warn(
                 `Could not disable access logging on ${bucketName}: ${loggingResult.message}`
@@ -447,7 +447,7 @@ export async function emptyS3Bucket(bucketName: string): Promise<void | Error> {
         }
 
         // Turn off versioning
-        const versionResult = await turnOffVersioningOnBucket(bucket)
+        const versionResult = await turnOffVersioningOnBucket(bucketName)
         if (versionResult instanceof Error) {
             console.warn(
                 `Could not turn off versioning on ${bucketName}: ${versionResult.message}`
@@ -455,12 +455,13 @@ export async function emptyS3Bucket(bucketName: string): Promise<void | Error> {
         }
 
         // Get and delete all versioned objects
-        const keys = await getVersionedFilesInBucket(bucket)
+        const keys: ObjectIdentifier[] | Error =
+            await getVersionedFilesInBucket(bucketName)
         if (keys instanceof Error) {
             return keys
         }
 
-        const deleteResult = await deleteKeysFromS3Bucket(bucket, keys)
+        const deleteResult = await deleteKeysFromS3Bucket(bucketName, keys)
         if (deleteResult instanceof Error) {
             return deleteResult
         }
@@ -474,7 +475,9 @@ export async function emptyS3Bucket(bucketName: string): Promise<void | Error> {
 /**
  * Get all S3 buckets in a CloudFormation stack
  */
-async function getBucketsInStack(stackName: string): Promise<any[] | Error> {
+async function getBucketsInStack(
+    stackName: string
+): Promise<StackResource[] | Error> {
     try {
         const commandDescribeStackResources = new DescribeStackResourcesCommand(
             {
@@ -498,14 +501,14 @@ async function getBucketsInStack(stackName: string): Promise<any[] | Error> {
 /**
  * Disable access logging on an S3 bucket
  */
-async function disableS3AccessLogging(bucket: any): Promise<void | Error> {
-    console.info(
-        `Disabling access logging on bucket: ${bucket.PhysicalResourceId}`
-    )
+async function disableS3AccessLogging(
+    bucketName: string
+): Promise<void | Error> {
+    console.info(`Disabling access logging on bucket: ${bucketName}`)
 
     try {
         const command = new PutBucketLoggingCommand({
-            Bucket: bucket.PhysicalResourceId ?? '',
+            Bucket: bucketName ?? '',
             BucketLoggingStatus: {},
         })
         await s3.send(command)
@@ -517,13 +520,13 @@ async function disableS3AccessLogging(bucket: any): Promise<void | Error> {
 /**
  * Turn off versioning on an S3 bucket
  */
-async function turnOffVersioningOnBucket(bucket: any): Promise<void | Error> {
-    console.info(
-        `Turning off bucket versioning on bucket: ${bucket.PhysicalResourceId}`
-    )
+async function turnOffVersioningOnBucket(
+    bucketName: string
+): Promise<void | Error> {
+    console.info(`Turning off bucket versioning on bucket: ${bucketName}`)
 
     const versionParams = {
-        Bucket: bucket.PhysicalResourceId ?? '',
+        Bucket: bucketName ?? '',
         VersioningConfiguration: { Status: 'Suspended' as const },
     }
 
@@ -541,20 +544,9 @@ async function turnOffVersioningOnBucket(bucket: any): Promise<void | Error> {
  * Get all versioned files and delete markers from an S3 bucket
  */
 async function getVersionedFilesInBucket(
-    bucket: any
-): Promise<Array<{ Key: string; VersionId: string }> | Error> {
-    const bucketName = bucket.PhysicalResourceId ?? ''
-
-    console.info(`Listing versions for bucket: ${bucketName}`)
-
-    if (!bucketName) {
-        console.error(
-            `Bucket name is empty. Bucket object: ${JSON.stringify(bucket, null, 2)}`
-        )
-        return new Error('Bucket name is empty')
-    }
-
-    const allKeys: Array<{ Key: string; VersionId: string }> = []
+    bucketName: string
+): Promise<ObjectIdentifier[] | Error> {
+    const allKeys: ObjectIdentifier[] = []
     let keyMarker: string | undefined
     let versionIdMarker: string | undefined
     let pageCount = 0
@@ -609,11 +601,11 @@ async function getVersionedFilesInBucket(
  * Delete keys from an S3 bucket (handles batching for 1000 key limit)
  */
 async function deleteKeysFromS3Bucket(
-    bucket: any,
-    keys: Array<{ Key: string; VersionId: string }>
+    bucketName: string,
+    keys: ObjectIdentifier[]
 ): Promise<void | Error> {
     if (keys.length === 0) {
-        console.info(`No keys to delete in bucket ${bucket.PhysicalResourceId}`)
+        console.info(`No keys to delete in bucket ${bucketName}`)
         return
     }
 
@@ -643,7 +635,7 @@ async function deleteKeysFromS3Bucket(
                     setTimeout(resolve, j * delayBetweenBatches)
                 )
                 const commandDeleteObjects = new DeleteObjectsCommand({
-                    Bucket: bucket.PhysicalResourceId ?? '',
+                    Bucket: bucketName ?? '',
                     Delete: { Objects: batch },
                 })
                 try {
@@ -707,7 +699,7 @@ export async function deleteStack(
 
         // Delete the stack - optionally use a specific role if provided via env var
         // Otherwise let CloudFormation use the caller's credentials
-        const deleteParams: any = {
+        const deleteParams: DeleteStackCommandInput = {
             StackName: stackName,
             RetainResources: retainResources,
         }
