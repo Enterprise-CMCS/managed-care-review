@@ -320,7 +320,16 @@ export async function waitForDistributionInvalidations(
 
             // Poll until invalidation is complete
             let status = 'InProgress'
+            const startTime = Date.now()
+            const timeoutMs = 30 * 60 * 1000 // 30 minutes
+
             while (status === 'InProgress') {
+                const elapsed = Date.now() - startTime
+                if (elapsed > timeoutMs) {
+                    throw new Error(
+                        `Timeout: Invalidation still in progress after 30 minutes`
+                    )
+                }
                 await new Promise((resolve) => setTimeout(resolve, 5000)) // Wait 5 seconds between checks
 
                 const getCommand = new GetInvalidationCommand({
