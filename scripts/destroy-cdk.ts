@@ -593,27 +593,61 @@ async function deleteKeysFromS3Bucket(
         (v, i) => keys.slice(i * 999, i * 999 + 999)
     )
 
-    const emptyBucketOutput = await Promise.all(
-        keysArray.map(async (k) => {
-            const commandDeleteObjects = new DeleteObjectsCommand({
-                Bucket: bucket.PhysicalResourceId ?? '',
-                Delete: {
-                    Objects: k,
-                },
-            })
-
-            try {
-                await s3.send(commandDeleteObjects)
-            } catch (err: any) {
-                return new Error(`Could not delete keys: ${err.message}`)
-            }
-        })
+    const concurrency = 5
+    const delayBetweenBatches = 50 // ms between launching each batch to avoid bursting
+    console.info(
+        `Deleting ${keys.length} keys in ${keysArray.length} batches (concurrency: ${concurrency})`
     )
 
-    const errors = emptyBucketOutput.filter((output) => output instanceof Error)
+    const errors: Error[] = []
+    let deletedCount = 0
+
+    // Process batches in parallel with a concurrency limit
+    for (let i = 0; i < keysArray.length; i += concurrency) {
+        const window = keysArray.slice(i, i + concurrency)
+
+        const results = await Promise.all(
+            window.map(async (batch, j) => {
+                // Stagger launches within the window to avoid request bursts
+                await new Promise((resolve) =>
+                    setTimeout(resolve, j * delayBetweenBatches)
+                )
+                const commandDeleteObjects = new DeleteObjectsCommand({
+                    Bucket: bucket.PhysicalResourceId ?? '',
+                    Delete: { Objects: batch },
+                })
+                try {
+                    await s3.send(commandDeleteObjects)
+                    return { count: batch.length, error: null }
+                } catch (err: any) {
+                    return {
+                        count: 0,
+                        error: new Error(
+                            `Batch ${i + j + 1} failed: ${err.message}`
+                        ),
+                    }
+                }
+            })
+        )
+
+        for (const result of results) {
+            if (result.error) {
+                errors.push(result.error)
+            } else {
+                deletedCount += result.count
+            }
+        }
+
+        process.stdout.write(
+            `\r  Deleting keys... ${Math.min(i + concurrency, keysArray.length)}/${keysArray.length} batches done, ${deletedCount}/${keys.length} keys deleted`
+        )
+    }
+
+    process.stdout.write('\n')
+
     if (errors.length > 0) {
         return new Error(
-            `Encountered errors while deleting keys: ${errors.map((e: any) => e.message).join(', ')}`
+            `Encountered errors while deleting keys: ${errors.map((e) => e.message).join(', ')}`
         )
     }
 }
