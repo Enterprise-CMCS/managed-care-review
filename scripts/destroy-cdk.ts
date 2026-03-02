@@ -655,7 +655,10 @@ async function deleteKeysFromS3Bucket(
 /**
  * Delete a CloudFormation stack and wait for completion
  */
-async function deleteStack(stackName: string): Promise<void | Error> {
+export async function deleteStack(
+    stackName: string,
+    retainResources?: string[]
+): Promise<void | Error> {
     try {
         // Check if stack exists
         const commandDescribeStacks = new DescribeStacksCommand({
@@ -673,13 +676,18 @@ async function deleteStack(stackName: string): Promise<void | Error> {
         // Otherwise let CloudFormation use the caller's credentials
         const deleteParams: any = {
             StackName: stackName,
+            RetainResources: retainResources,
         }
 
         if (process.env.CDK_CLEANUP_ROLE_ARN) {
-            console.info(`Using role for deletion: ${process.env.CDK_CLEANUP_ROLE_ARN}`)
+            console.info(
+                `Using role for deletion: ${process.env.CDK_CLEANUP_ROLE_ARN}`
+            )
             deleteParams.RoleARN = process.env.CDK_CLEANUP_ROLE_ARN
         } else {
-            console.info(`Deleting stack using caller credentials (no role override)`)
+            console.info(
+                `Deleting stack using caller credentials (no role override)`
+            )
         }
 
         const commandDeleteStack = new DeleteStackCommand(deleteParams)
