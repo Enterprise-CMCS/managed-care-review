@@ -213,7 +213,7 @@ async function getCdkStacksFromStage(stageName: string): Promise<string[]> {
                 StackName: stackName,
             })
             const stacks = await cf.send(commandDescribeStacks)
-            console.log(`Found ${stacks.Stacks?.length} stacks.`)
+            console.info(`Found ${stacks.Stacks?.length} stacks.`)
 
             if (stacks.Stacks === undefined || stacks.Stacks.length === 0) {
                 console.info(`Stack ${stackName} was not found. Skipping.`)
