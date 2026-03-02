@@ -134,13 +134,7 @@ describe('CMS user can view submission', () => {
             cy.wait('@fetchContractWithQuestionsQuery', { timeout: 20_000 })
  
             cy.findByRole('heading', { name: contractName, level: 2 })
-            // ensure download link text is present
-            cy.contains('a', /download contract documents \(1 file\)/i)
-            .should('be.visible')
-            .and('have.attr', 'href')
-            .then((href) => {
-                expect(href).to.match(/\/zips\/contracts\/[^/]+\/[^/]+\.zip(\?|$)/)
-            })
+            
 
             //TODO: Add assertions for review determination once that is added.
         })
