@@ -11,7 +11,7 @@ import {
     emptyS3Bucket,
     deleteStack,
     waitForDistributionInvalidations,
-} from './destroy-cdk'
+} from './destroy-cdk.js'
 
 const AWSConfig = {
     region: 'us-east-1',
@@ -30,7 +30,6 @@ const protectedStages = [
 
 const cloudformationClient = new CloudFormationClient(AWSConfig)
 const s3Client = new S3Client(AWSConfig)
-const cloudfrontClient = new CloudFrontClient(AWSConfig)
 
 const clearBucketMode = process.argv[2] === '--cleanup-bucket'
 const clearBucketName = clearBucketMode ? process.argv[3] : undefined
@@ -218,8 +217,7 @@ async function handleDeleteFailedStack(
                 `    Waiting for CloudFront invalidations to complete: ${resource.physicalId}`
             )
             const waitResult = await waitForDistributionInvalidations(
-                resource.physicalId,
-                cloudfrontClient
+                resource.physicalId
             )
             if (waitResult instanceof Error) {
                 console.error(
