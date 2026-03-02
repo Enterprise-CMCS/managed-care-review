@@ -6,7 +6,7 @@ import {
     startServerAndCreateLambdaHandler,
     handlers,
 } from '@as-integrations/aws-lambda'
-import { initTracer, recordException } from '../../../uploads/src/lib/otel'
+import { initTracer, recordException, createTracer } from '../otel/otel_handler'
 import type { APIGatewayProxyEvent, Handler } from 'aws-lambda'
 
 import typeDefs from '../../../app-graphql/src/schema.graphql'
@@ -21,7 +21,6 @@ import {
 import { NewPostgresStore } from '../postgres'
 import { configureResolvers } from '../resolvers'
 import { configurePostgres, configureEmailer } from './configuration'
-import { createTracer } from '../otel/otel_handler'
 import {
     newAWSEmailParameterStore,
     newLocalEmailParameterStore,

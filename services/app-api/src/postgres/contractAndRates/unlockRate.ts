@@ -117,6 +117,8 @@ async function unlockRateInDB(
                     name: d.name,
                     s3URL: d.s3URL,
                     sha256: d.sha256,
+                    s3BucketName: d.s3BucketName,
+                    s3Key: d.s3Key,
                 })),
             },
             supportingDocuments: {
@@ -125,6 +127,8 @@ async function unlockRateInDB(
                     name: d.name,
                     s3URL: d.s3URL,
                     sha256: d.sha256,
+                    s3BucketName: d.s3BucketName,
+                    s3Key: d.s3Key,
                 })),
             },
             certifyingActuaryContacts: {

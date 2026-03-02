@@ -1,6 +1,6 @@
 import type { Store } from '../postgres'
 import { lookupUserAurora } from './cognitoAuthn'
-import { initTracer, recordException } from '../../../uploads/src/lib/otel'
+import { initTracer, recordException } from '../otel/otel_handler'
 import type { UserType } from '../domain-models'
 
 export async function userFromThirdPartyAuthorizer(

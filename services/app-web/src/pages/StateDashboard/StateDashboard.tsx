@@ -1,8 +1,11 @@
 import { GridContainer } from '@trussworks/react-uswds'
-import React from 'react'
+import React, { useEffect } from 'react'
 import { useLocation } from 'react-router-dom'
 import { useAuth } from '../../contexts/AuthContext'
-import { ContractSubmissionType, useIndexContractsForDashboardQuery } from '../../gen/gqlClient'
+import {
+    ContractSubmissionType,
+    useIndexContractsForDashboardQuery,
+} from '../../gen/gqlClient'
 import styles from './StateDashboard.module.scss'
 import { SubmissionSuccessMessage } from './SubmissionSuccessMessage'
 import { handleApolloError, isLikelyUserAuthError } from '@mc-review/helpers'
@@ -15,6 +18,7 @@ import {
     NavLinkWithLogging,
 } from '../../components'
 import { GenericErrorPage } from '../Errors/GenericErrorPage'
+import { usePage } from '../../contexts/PageContext'
 
 /**
  * We only pull a subset of data out of the submission and revisions for display in Dashboard
@@ -24,11 +28,19 @@ const DASHBOARD_ATTRIBUTE = 'state-dashboard-page'
 export const StateDashboard = (): React.ReactElement => {
     const { loggedInUser } = useAuth()
     const location = useLocation()
+    const { updateActiveMainContent } = usePage()
 
     const { loading, data, error } = useIndexContractsForDashboardQuery({
         fetchPolicy: 'cache-and-network',
         pollInterval: 300000,
     })
+
+    const activeMainContentId = DASHBOARD_ATTRIBUTE
+
+    // Set the active main content to focus when click the Skip to main content button.
+    useEffect(() => {
+        updateActiveMainContent(activeMainContentId)
+    }, [activeMainContentId, updateActiveMainContent])    
 
     if (!data && loading) {
         return <Loading />
@@ -114,15 +126,15 @@ export const StateDashboard = (): React.ReactElement => {
         location.search
     ).get('justSubmitted')
 
-    const submissionId = new URLSearchParams(location.search).get(
-        'id'
-    )
+    const submissionId = new URLSearchParams(location.search).get('id')
 
-    const contractType = new URLSearchParams(location.search).get('contractType') as ContractSubmissionType | null
+    const contractType = new URLSearchParams(location.search).get(
+        'contractType'
+    ) as ContractSubmissionType | null
 
     return (
         <>
-            <div data-testid={DASHBOARD_ATTRIBUTE} className={styles.wrapper}>
+            <div id={DASHBOARD_ATTRIBUTE} data-testid={DASHBOARD_ATTRIBUTE} className={styles.wrapper}>
                 <GridContainer className={styles.container}>
                     {programs.length ? (
                         <section className={styles.panel}>

@@ -2,7 +2,7 @@ import type { Handler, APIGatewayProxyResultV2 } from 'aws-lambda'
 import { RDSClient, CreateDBClusterSnapshotCommand } from '@aws-sdk/client-rds'
 import { spawnSync } from 'child_process'
 import { getDBClusterID, getPostgresURL } from './configuration'
-import { initTracer, recordException } from '../../../uploads/src/lib/otel'
+import { initTracer, recordException } from '../otel/otel_handler'
 import { migrate, newDBMigrator } from '../dataMigrations/dataMigrator'
 
 const main: Handler = async (): Promise<APIGatewayProxyResultV2> => {

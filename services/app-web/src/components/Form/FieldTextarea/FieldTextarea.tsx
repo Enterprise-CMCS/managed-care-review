@@ -1,6 +1,6 @@
 import React from 'react'
 import { useField } from 'formik'
-import { Label, Textarea, FormGroup } from '@trussworks/react-uswds'
+import { Label, FormGroup, Textarea } from '@trussworks/react-uswds'
 import { PoliteErrorMessage } from '../..'
 import styles from './FieldTextarea.module.scss'
 

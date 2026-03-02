@@ -8,6 +8,7 @@ import { newJWTLib } from '../jwt'
 
 const stageName = process.env.stage
 const jwtSecret = process.env.JWT_SECRET
+const oauthIssuer = process.env.MCREVIEW_OAUTH_ISSUER
 
 if (stageName === undefined) {
     throw new Error('Configuration Error: stage is required')
@@ -19,8 +20,14 @@ if (jwtSecret === undefined || jwtSecret === '') {
     )
 }
 
+if (oauthIssuer === undefined || oauthIssuer === '') {
+    throw new Error(
+        'Configuration Error: MCREVIEW_OAUTH_ISSUER is required to run app-api.'
+    )
+}
+
 const oauthJwtLib = newJWTLib({
-    issuer: 'mcreview-oauth',
+    issuer: oauthIssuer,
     signingKey: Buffer.from(jwtSecret, 'hex'),
     expirationDurationS: 90 * 24 * 60 * 60, // 90 days
 })

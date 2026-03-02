@@ -650,9 +650,6 @@ describe('SubmissionType', () => {
                 },
             })
 
-            expect(screen.getByRole('textbox')).not.toHaveClass(
-                'usa-input--error'
-            )
             expect(
                 screen.queryByText('You must choose a submission type')
             ).toBeNull()
@@ -684,7 +681,6 @@ describe('SubmissionType', () => {
             await userEvent.clear(textarea)
 
             await waitFor(() => {
-                expect(textarea).toHaveClass('usa-input--error')
                 expect(
                     screen.getAllByText('You must choose a submission type')
                 ).toHaveLength(2)
@@ -717,7 +713,6 @@ describe('SubmissionType', () => {
             await userEvent.clear(textarea)
 
             await waitFor(() => {
-                expect(textarea).toHaveClass('usa-input--error')
                 expect(
                     screen.getAllByText('You must choose a contract type')
                 ).toHaveLength(2)
@@ -839,7 +834,6 @@ describe('SubmissionType', () => {
                         'The submission description must be 1500 characters or less.'
                     )
                 ).toHaveLength(2)
-                expect(textarea).toHaveClass('usa-input--error')
             })
 
             // Reduce text to not exceed threshhold

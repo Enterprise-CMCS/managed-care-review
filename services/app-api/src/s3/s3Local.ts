@@ -88,9 +88,17 @@ export function newLocalS3Client(
             bucket: BucketShortName,
             expiresIn?: number
         ): Promise<string> => {
+            // If the key already has a known path prefix (migrated docs store full path),
+            // use it as-is. Otherwise, prepend 'allusers/' for backwards compatibility with
+            // old docs that fall back to parseKey() which returns just the UUID part.
+            const fullKey =
+                s3key.startsWith('allusers/') || s3key.startsWith('zips/')
+                    ? s3key
+                    : `allusers/${s3key}`
+
             const command = new GetObjectCommand({
                 Bucket: bucketConfig[bucket],
-                Key: s3key,
+                Key: fullKey,
             })
             // Create the presigned URL.
             const signedUrl = await getSignedUrl(s3Client, command, {
@@ -106,7 +114,7 @@ export function newLocalS3Client(
         ): Promise<string> => {
             const command = new PutObjectCommand({
                 Bucket: bucketConfig[bucket],
-                Key: key,
+                Key: `allusers/${key}`,
                 ContentType: contentType,
             })
             return getSignedUrl(s3Client, command, { expiresIn })

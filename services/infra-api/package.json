@@ -7,11 +7,5 @@
     "scripts": {},
     "author": "",
     "license": "CC0-1.0",
-    "devDependencies": {
-        "@enterprise-cmcs/serverless-waf-plugin": "^1.4.0",
-        "serverless": "4.2.3",
-        "serverless-iam-helper": "https://github.com/Enterprise-CMCS/serverless-iam-helper",
-        "serverless-s3-bucket-helper": "https://github.com/Enterprise-CMCS/serverless-s3-bucket-helper",
-        "serverless-stack-termination-protection": "^2.0.2"
-    }
+    "devDependencies": {}
 }

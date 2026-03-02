@@ -16,7 +16,7 @@ import {
     DynamicStepIndicator,
     ErrorSummary,
     FieldRadio,
-    FieldTextarea,
+    FieldCharacterCount,
     FieldYesNo,
     FormNotificationContainer,
     PoliteErrorMessage,
@@ -709,7 +709,7 @@ export const SubmissionType = ({
                                             )}
                                         />
                                     </FormGroup>
-                                    <FieldTextarea
+                                    <FieldCharacterCount
                                         label="Submission description"
                                         id="submissionDescription"
                                         name="submissionDescription"

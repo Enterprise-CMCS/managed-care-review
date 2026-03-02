@@ -20,7 +20,11 @@ import { logError } from '../../logger'
 // This method relies on revisions always being presented in most-recent-first order
 function initialSubmitDate(rate: RateType): Date | undefined {
     const firstSubmittedRev = rate.revisions[rate.revisions.length - 1]
-    return firstSubmittedRev?.submitInfo?.updatedAt
+    // Use override date if exists
+    return (
+        rate.rateOverrides?.[0]?.overrides.initiallySubmittedAt ||
+        firstSubmittedRev?.submitInfo?.updatedAt
+    )
 }
 
 export function rateResolver(
@@ -33,8 +37,7 @@ export function rateResolver(
         },
         webURL(parent) {
             const urlPath = path.join('/rates/', parent.id)
-            const fullURL = new URL(urlPath, applicationEndpoint).href
-            return fullURL
+            return new URL(urlPath, applicationEndpoint).href
         },
         state(parent) {
             const packageState = parent.stateCode
@@ -162,8 +165,7 @@ export function rateStrippedResolver(
     return {
         webURL(parent) {
             const urlPath = path.join('/rates/', parent.id)
-            const fullURL = new URL(urlPath, applicationEndpoint).href
-            return fullURL
+            return new URL(urlPath, applicationEndpoint).href
         },
         state(parent) {
             const packageState = parent.stateCode

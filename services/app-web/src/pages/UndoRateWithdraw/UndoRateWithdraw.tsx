@@ -1,4 +1,4 @@
-import React, { useLayoutEffect } from 'react'
+import React, { useEffect, useLayoutEffect } from 'react'
 import styles from './UndoRateWithdraw.module.scss'
 import {
     ActionButton,
@@ -38,7 +38,7 @@ type FormError =
 
 export const UndoRateWithdraw = () => {
     const { id } = useParams() as { id: string }
-    const { updateHeading } = usePage()
+    const { updateHeading, updateActiveMainContent } = usePage()
     const { logFormSubmitEvent } = useTealium()
     const navigate = useNavigate()
     const [shouldValidate, setShouldValidate] = React.useState(false)
@@ -75,6 +75,11 @@ export const UndoRateWithdraw = () => {
     useLayoutEffect(() => {
         updateHeading({ customHeading: stateHeader })
     }, [stateHeader, updateHeading])
+
+     // Set the active main content to focus when click the Skip to main content button.
+     useEffect(() => {
+         updateActiveMainContent('UndoRateWithdrawForm')
+     }, [updateActiveMainContent])   
 
     if (loading) {
         return <ErrorOrLoadingPage state="LOADING" />

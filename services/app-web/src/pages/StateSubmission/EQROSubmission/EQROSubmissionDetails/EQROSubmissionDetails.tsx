@@ -4,7 +4,7 @@ import {
     ErrorSummary,
     FieldCheckbox,
     FieldRadio,
-    FieldTextarea,
+    FieldCharacterCount,
     FormContainer,
     FormNotificationContainer,
     PageActions,
@@ -526,7 +526,7 @@ export const EQROSubmissionDetails = (): React.ReactElement => {
                                         />
                                     </Fieldset>
                                 </FormGroup>
-                                <FieldTextarea
+                                <FieldCharacterCount
                                     label="Submission description"
                                     id="submissionDescription"
                                     name="submissionDescription"

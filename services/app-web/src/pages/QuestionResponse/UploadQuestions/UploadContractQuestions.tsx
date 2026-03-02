@@ -1,4 +1,4 @@
-import { useLayoutEffect } from 'react'
+import { useEffect, useLayoutEffect } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
 import styles from '../QuestionResponse.module.scss'
 import {
@@ -22,7 +22,7 @@ import { Error404 } from '../../Errors/Error404Page'
 import { useMemoizedStateHeader } from '../../../hooks'
 
 export const UploadContractQuestions = () => {
-    const { updateHeading } = usePage()
+    const { updateHeading, updateActiveMainContent } = usePage()
     const { id, division, contractSubmissionType } = useParams<{
         division: string
         id: string
@@ -61,6 +61,11 @@ export const UploadContractQuestions = () => {
     useLayoutEffect(() => {
         updateHeading({ customHeading: stateHeader })
     }, [stateHeader, updateHeading])
+
+    // Set the active main content to focus when click the Skip to main content button.
+    useEffect(() => {
+        updateActiveMainContent('contractAddQuestionsForm')
+    }, [updateActiveMainContent])
 
     if (fetchContractLoading) {
         return <ErrorOrLoadingPage state="LOADING" />

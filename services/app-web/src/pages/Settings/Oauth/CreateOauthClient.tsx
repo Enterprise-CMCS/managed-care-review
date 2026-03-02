@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { useEffect } from 'react'
 import {
     ButtonGroup,
     FormGroup,
@@ -32,6 +32,7 @@ import styles from './CreateOauthClient.module.scss'
 import * as Yup from 'yup'
 import { recordJSException } from '@mc-review/otel'
 import { MCReviewSettingsContextType } from '../Settings'
+import { usePage } from '../../../contexts/PageContext'
 
 const CreateOauthClientSchema = Yup.object().shape({
     cmsUser: Yup.object().shape({
@@ -59,6 +60,7 @@ export const CreateOauthClient = (): React.ReactElement => {
     const setNewOauthClient = settingsContext?.oauthClients.setNewOauthClient
     const [shouldValidate, setShouldValidate] = React.useState(false)
     const navigate = useNavigate()
+    const { updateActiveMainContent } = usePage()
 
     const { result: indexUsersResult } = wrapApolloResult(
         useIndexUsersQuery({
@@ -70,6 +72,11 @@ export const CreateOauthClient = (): React.ReactElement => {
         createOauthClient,
         { loading: createClientLoading, error: createClientError },
     ] = useCreateOauthClientMutation()
+
+    // Set the active main content to focus when click the Skip to main content button.
+    useEffect(() => {
+        updateActiveMainContent('createOauthForm')
+    }, [updateActiveMainContent])     
 
     const showFieldErrors = (error?: FormError) =>
         shouldValidate && Boolean(error)
@@ -161,6 +168,7 @@ export const CreateOauthClient = (): React.ReactElement => {
                         {createClientError && <GenericApiErrorBanner />}
                         <UswdsForm
                             data-testid="createOAuthClientForm"
+                            id="createOauthForm"
                             onSubmit={(e) => {
                                 setShouldValidate(true)
                                 return handleSubmit(e)

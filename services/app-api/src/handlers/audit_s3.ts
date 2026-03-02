@@ -1,5 +1,5 @@
 import type { APIGatewayProxyResultV2, Handler } from 'aws-lambda'
-import { initTracer, recordException } from '../../../uploads/src/lib/otel'
+import { initTracer, recordException } from '../otel/otel_handler'
 import { configurePostgres } from './configuration'
 import { NewPostgresStore, NotFoundError } from '../postgres'
 import type { Store } from '../postgres'

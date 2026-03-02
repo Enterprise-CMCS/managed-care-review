@@ -44,12 +44,11 @@ export const NewSubmission = () => {
     const { updateActiveMainContent } = usePage()
     const navigate = useNavigate()
     const [shouldValidate, setShouldValidate] = React.useState(false)
-    const activeMainContentId = 'newSubmissionMainContent'
 
     // Set the active main content to focus when click the Skip to main content button.
     useEffect(() => {
-        updateActiveMainContent(activeMainContentId)
-    }, [activeMainContentId, updateActiveMainContent])
+        updateActiveMainContent('newSubmissionForm')
+    }, [updateActiveMainContent])
 
     const showFieldErrors = (error?: FormError) =>
         shouldValidate && Boolean(error)
@@ -63,10 +62,7 @@ export const NewSubmission = () => {
     }
 
     return (
-        <div
-            className={styles.contractTypeFormContainer}
-            id={activeMainContentId}
-        >
+        <div className={styles.contractTypeFormContainer}>
             <Breadcrumbs
                 className="usa-breadcrumb--wrap"
                 items={[

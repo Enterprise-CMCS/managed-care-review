@@ -32,6 +32,19 @@ async function main(
         }
     }
 
+    if (!process.env.MCREVIEW_OAUTH_ISSUER) {
+        return {
+            statusCode: 500,
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                error: 'server_error',
+                error_description: 'OAuth issuer configuration missing',
+            }),
+        }
+    }
+
     // Configure database
     const db = await configurePostgres(
         process.env.DATABASE_URL,
@@ -51,7 +64,11 @@ async function main(
     }
 
     // Initialize OAuth2 server
-    const oauth2Server = new CustomOAuth2Server(db, process.env.JWT_SECRET)
+    const oauth2Server = new CustomOAuth2Server(
+        db,
+        process.env.JWT_SECRET,
+        process.env.MCREVIEW_OAUTH_ISSUER
+    )
 
     // Handle token request
     return oauth2Server.token(event)

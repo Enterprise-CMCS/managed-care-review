@@ -1,21 +1,30 @@
 import { GridContainer } from '@trussworks/react-uswds'
-import React from 'react'
+import React, { useEffect } from 'react'
 
 import styles from '../StateDashboard/StateDashboard.module.scss'
 
 import { Tabs, TabPanel } from '../../components'
 import { Outlet, useLocation } from 'react-router-dom'
 import { RoutesRecord } from '@mc-review/constants'
+import { usePage } from '../../contexts/PageContext'
 
 const CMSDashboard = (): React.ReactElement => {
     const { pathname } = useLocation()
+    const { updateActiveMainContent } = usePage()    
     const loadOnRateReviews = pathname === RoutesRecord.DASHBOARD_RATES
     const TAB_NAMES = {
         RATES: 'Rate reviews',
         SUBMISSIONS: 'Submissions',
     }
+
+    const activeMainContentId = 'cmsDashboardMainContent'
+
+    // Set the active main content to focus when click the Skip to main content button.
+    useEffect(() => {
+        updateActiveMainContent(activeMainContentId)
+    }, [activeMainContentId, updateActiveMainContent])
     return (
-        <div data-testid="cms-dashboard-page" className={styles.wrapper}>
+        <div id={activeMainContentId} data-testid="cms-dashboard-page" className={styles.wrapper}>
             <GridContainer className={styles.container}>
                 <section className={styles.panel}>
                     <div className={styles.panelHeader}>

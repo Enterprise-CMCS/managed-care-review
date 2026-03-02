@@ -281,7 +281,6 @@ it('shows validation error when submission description exceeds 1500 characters a
                 'The submission description must be 1500 characters or less.'
             )
         ).toHaveLength(2)
-        expect(textarea).toHaveClass('usa-input--error')
     })
 
     // Reduce text to not exceed threshhold

@@ -15,7 +15,7 @@ export function SubmissionSuccessMessage({
     contractType?: ContractSubmissionType
 }): React.ReactElement {
     const heading = submissionName + ' was sent to CMS'
-    
+
     const getAlertMessage = () => {
         if (contractType === 'EQRO') {
             return 'You can view your review decision on the submission summary.'
@@ -36,11 +36,9 @@ export function SubmissionSuccessMessage({
                 heading={heading}
                 validation={true}
             >
-                {alertMessage && contractType &&(
+                {alertMessage && contractType && (
                     <>
-                        <p className={styles.alertText}>
-                            {alertMessage}
-                        </p>
+                        <p className={styles.alertText}>{alertMessage}</p>
                         <NavLinkWithLogging
                             to={getSubmissionPath(
                                 'SUBMISSIONS_SUMMARY',

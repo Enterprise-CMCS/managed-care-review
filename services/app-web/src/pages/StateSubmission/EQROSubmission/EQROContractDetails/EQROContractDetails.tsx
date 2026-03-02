@@ -10,12 +10,8 @@ import {
     FormContainer,
     PageActions,
 } from '../../../../components'
-import {
-    Form as UswdsForm,
-    FormGroup,
-    Fieldset,
-    DateRangePicker,
-} from '@trussworks/react-uswds'
+import { Form as UswdsForm, FormGroup, Fieldset } from '@trussworks/react-uswds'
+import { CustomDateRangePicker } from '../../../../components/Form/CustomDateRangePicker/CustomDateRangePicker'
 import { v4 as uuidv4 } from 'uuid'
 import { useNavigate } from 'react-router-dom'
 import { Formik, FormikErrors, getIn } from 'formik'
@@ -45,7 +41,6 @@ import {
 import { useAuth } from '../../../../contexts/AuthContext'
 import {
     PageBannerAlerts,
-    ContractDatesErrorMessage,
     ErrorOrLoadingPage,
 } from '../../SharedSubmissionComponents'
 import { useErrorSummary } from '../../../../hooks/useErrorSummary'
@@ -342,6 +337,7 @@ export const EQROContractDetails = ({
             }
         }
     }
+
     return (
         <div id={activeMainContentId}>
             <FormNotificationContainer>
@@ -589,131 +585,90 @@ export const EQROContractDetails = ({
                                             />
                                         </FormGroup>
 
-                                        <FormGroup
-                                            error={
-                                                Boolean(
-                                                    showFieldErrors(
-                                                        'contractDateStart',
-                                                        errors
-                                                    )
-                                                ) ||
-                                                Boolean(
-                                                    showFieldErrors(
-                                                        'contractDateEnd',
-                                                        errors
-                                                    )
+                                        <Fieldset
+                                            aria-required
+                                            legend={
+                                                isContractAmendment(
+                                                    draftSubmission
                                                 )
+                                                    ? 'Amendment effective dates'
+                                                    : 'Contract effective dates'
                                             }
                                         >
-                                            <Fieldset
-                                                aria-required
-                                                legend={
-                                                    isContractAmendment(
-                                                        draftSubmission
-                                                    )
-                                                        ? 'Amendment effective dates'
-                                                        : 'Contract effective dates'
+                                            <span
+                                                className={
+                                                    styles.requiredOptionalText
                                                 }
                                             >
-                                                <span
-                                                    className={
-                                                        styles.requiredOptionalText
-                                                    }
-                                                >
-                                                    Required
-                                                </span>
-                                                {Boolean(
-                                                    showFieldErrors(
-                                                        'contractDateStart',
-                                                        errors
-                                                    ) ||
-                                                        Boolean(
-                                                            showFieldErrors(
-                                                                'contractDateEnd',
-                                                                errors
-                                                            )
-                                                        )
-                                                ) && (
-                                                    <ContractDatesErrorMessage
-                                                        contractDateStart={
-                                                            values.contractDateStart
-                                                        }
-                                                        contractDateEnd={
-                                                            values.contractDateEnd
-                                                        }
-                                                        validationErrorMessage={
-                                                            errors.contractDateStart ||
-                                                            errors.contractDateEnd ||
-                                                            'Invalid date'
-                                                        }
-                                                        formFieldLabel={
-                                                            isContractAmendment(
-                                                                draftSubmission
-                                                            )
-                                                                ? 'Amendment effective dates'
-                                                                : 'Contract effective dates'
-                                                        }
-                                                    />
+                                                Required
+                                            </span>
+
+                                            <LinkWithLogging
+                                                aria-label="Effective date guidance (opens in new window)"
+                                                href={
+                                                    '/help#effective-date-guidance'
+                                                }
+                                                variant="external"
+                                                target="_blank"
+                                            >
+                                                Effective date guidance
+                                            </LinkWithLogging>
+                                            <CustomDateRangePicker
+                                                className={
+                                                    styles.dateRangePicker
+                                                }
+                                                startDateHint="mm/dd/yyyy"
+                                                startDateLabel="Start date"
+                                                startDateError={showFieldErrors(
+                                                    'contractDateStart',
+                                                    errors
                                                 )}
-                                                <LinkWithLogging
-                                                    aria-label="Effective date guidance (opens in new window)"
-                                                    href={
-                                                        '/help#effective-date-guidance'
-                                                    }
-                                                    variant="external"
-                                                    target="_blank"
-                                                >
-                                                    Effective date guidance
-                                                </LinkWithLogging>
-                                                <DateRangePicker
-                                                    className={
-                                                        styles.dateRangePicker
-                                                    }
-                                                    startDateHint="mm/dd/yyyy"
-                                                    startDateLabel="Start date"
-                                                    startDatePickerProps={{
-                                                        id: 'contractDateStart',
-                                                        name: 'contractDateStart',
-                                                        'aria-required': true,
-                                                        disabled: false,
-                                                        defaultValue:
-                                                            values.contractDateStart,
-                                                        maxDate:
-                                                            formattedDateMinusOneDay(
-                                                                values.contractDateEnd
-                                                            ),
-                                                        onChange: (val) =>
-                                                            setFieldValue(
-                                                                'contractDateStart',
-                                                                formatUserInputDate(
-                                                                    val
-                                                                )
-                                                            ),
-                                                    }}
-                                                    endDateHint="mm/dd/yyyy"
-                                                    endDateLabel="End date"
-                                                    endDatePickerProps={{
-                                                        disabled: false,
-                                                        id: 'contractDateEnd',
-                                                        name: 'contractDateEnd',
-                                                        'aria-required': true,
-                                                        defaultValue:
-                                                            values.contractDateEnd,
-                                                        minDate:
-                                                            formattedDatePlusOneDay(
-                                                                values.contractDateStart
-                                                            ),
-                                                        onChange: (val) =>
-                                                            setFieldValue(
-                                                                'contractDateEnd',
-                                                                formatUserInputDate(
-                                                                    val
-                                                                )
-                                                            ),
-                                                    }}
-                                                />
-                                            </Fieldset>
-                                        </FormGroup>
+                                                startDatePickerProps={{
+                                                    id: 'contractDateStart',
+                                                    name: 'contractDateStart',
+                                                    'aria-required': true,
+                                                    disabled: false,
+                                                    defaultValue:
+                                                        values.contractDateStart,
+                                                    maxDate:
+                                                        formattedDateMinusOneDay(
+                                                            values.contractDateEnd
+                                                        ),
+                                                    onChange: (val) =>
+                                                        setFieldValue(
+                                                            'contractDateStart',
+                                                            formatUserInputDate(
+                                                                val
+                                                            )
+                                                        ),
+                                                }}
+                                                endDateHint="mm/dd/yyyy"
+                                                endDateLabel="End date"
+                                                endDateError={showFieldErrors(
+                                                    'contractDateEnd',
+                                                    errors
+                                                )}
+                                                endDatePickerProps={{
+                                                    disabled: false,
+                                                    id: 'contractDateEnd',
+                                                    name: 'contractDateEnd',
+                                                    'aria-required': true,
+                                                    defaultValue:
+                                                        values.contractDateEnd,
+                                                    minDate:
+                                                        formattedDatePlusOneDay(
+                                                            values.contractDateStart
+                                                        ),
+                                                    onChange: (val) =>
+                                                        setFieldValue(
+                                                            'contractDateEnd',
+                                                            formatUserInputDate(
+                                                                val
+                                                            )
+                                                        ),
+                                                }}
+                                            />
+                                        </Fieldset>
 
                                         {isBaseContract && isMCO && (
                                             <FormGroup
