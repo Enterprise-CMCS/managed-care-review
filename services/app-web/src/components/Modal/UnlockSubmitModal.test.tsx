@@ -441,7 +441,7 @@ describe('UnlockSubmitModal', () => {
     })
 
     describe('resubmit unlocked submission modal', () => {
-        it('displays correct modal when submitting unlocked submission', async () => {
+        it('displays correct modal when re-submitting unlocked health plan submission', async () => {
             const modalRef = createRef<ModalRef>()
             const handleOpen = () =>
                 modalRef.current?.toggleModal(undefined, true)
@@ -474,6 +474,42 @@ describe('UnlockSubmitModal', () => {
             ).toBeInTheDocument()
             expect(
                 screen.getByTestId('resubmit_contract-modal-submit')
+            ).toHaveTextContent('Resubmit')
+        })
+        it('displays correct modal when re-submitting unlocked EQRO submission', async () => {
+            const modalRef = createRef<ModalRef>()
+            const handleOpen = () =>
+                modalRef.current?.toggleModal(undefined, true)
+            renderWithProviders(
+                <UnlockSubmitModal
+                    submissionData={mockContractPackageDraft({
+                        contractSubmissionType: 'EQRO',
+                    })}
+                    submissionName="Test-Submission"
+                    modalType="RESUBMIT_EQRO_CONTRACT"
+                    modalRef={modalRef}
+                    setIsSubmitting={mockSetIsSubmitting}
+                />
+            )
+            await waitFor(() => handleOpen())
+            const dialog = screen.getByRole('dialog')
+            await waitFor(() => expect(dialog).toHaveClass('is-visible'))
+
+            expect(screen.getByText('Summarize changes')).toBeInTheDocument()
+            expect(
+                screen.getByText(
+                    "When you resubmit, your submission will be sent to CMS for review and you won't be able to make further changes."
+                )
+            ).toBeInTheDocument()
+            expect(screen.getByText('Summary of changes')).toBeInTheDocument()
+            expect(
+                screen.getByText('Include all changes made to this submission')
+            ).toBeInTheDocument()
+            expect(
+                screen.getByTestId('unlockSubmitModalInput')
+            ).toBeInTheDocument()
+            expect(
+                screen.getByTestId('resubmit_eqro_contract-modal-submit')
             ).toHaveTextContent('Resubmit')
         })
         it('displays form validation error when submitting without an submission summary', async () => {
@@ -538,7 +574,6 @@ describe('UnlockSubmitModal', () => {
                 expect(textbox).toHaveFocus()
             })
         })
-
         it('displays modal alert banner error if resubmit api request fails', async () => {
             const modalRef = createRef<ModalRef>()
             const handleOpen = () =>
@@ -580,7 +615,6 @@ describe('UnlockSubmitModal', () => {
                 ).toBeInTheDocument()
             })
         })
-
         it('redirects if submission succeeds on unlocked contract', async () => {
             let testLocation: Location
             const modalRef = createRef<ModalRef>()
