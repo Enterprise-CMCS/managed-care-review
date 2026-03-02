@@ -37,7 +37,7 @@ describe('OAuth Authorization', () => {
                 oauthClient: {
                     clientId: 'test-client',
                     grants: ['client_credentials'],
-                    issuer: 'mcreview-test',
+                    iss: 'mcreview-test',
                     scopes: [],
                     isDelegatedUser: false,
                 },
@@ -60,7 +60,7 @@ describe('OAuth Authorization', () => {
                 oauthClient: {
                     clientId: 'test-client',
                     grants: ['some_other_grant'],
-                    issuer: 'mcreview-test',
+                    iss: 'mcreview-test',
                     scopes: [],
                     isDelegatedUser: false,
                 },
@@ -77,7 +77,7 @@ describe('OAuth Authorization', () => {
                 oauthClient: {
                     clientId: 'test-client',
                     grants: ['client_credentials'],
-                    issuer: 'mcreview-test',
+                    iss: 'mcreview-test',
                     scopes: [],
                     isDelegatedUser: false,
                 },
@@ -102,7 +102,7 @@ describe('OAuth Authorization', () => {
                 oauthClient: {
                     clientId: 'test-client',
                     grants: ['client_credentials'],
-                    issuer: 'mcreview-test',
+                    iss: 'mcreview-test',
                     scopes: [],
                     isDelegatedUser: false,
                 },
@@ -127,7 +127,7 @@ describe('OAuth Authorization', () => {
                 oauthClient: {
                     clientId: 'test-client',
                     grants: ['client_credentials'],
-                    issuer: 'mcreview-test',
+                    iss: 'mcreview-test',
                     scopes: [],
                     isDelegatedUser: false,
                 },
@@ -166,7 +166,7 @@ describe('OAuth Authorization', () => {
                 oauthClient: {
                     clientId: 'test-client',
                     grants: ['client_credentials'],
-                    issuer: 'mcreview-test',
+                    iss: 'mcreview-test',
                     scopes: ['CMS_SUBMISSION_ACTIONS'],
                     isDelegatedUser: true,
                 },
@@ -189,7 +189,7 @@ describe('OAuth Authorization', () => {
                 oauthClient: {
                     clientId: 'test-client',
                     grants: ['client_credentials'],
-                    issuer: 'mcreview-test',
+                    iss: 'mcreview-test',
                     scopes: [],
                     isDelegatedUser: true,
                 },
@@ -206,7 +206,7 @@ describe('OAuth Authorization', () => {
                 oauthClient: {
                     clientId: 'test-client',
                     grants: ['client_credentials'],
-                    issuer: 'mcreview-test',
+                    iss: 'mcreview-test',
                     scopes: ['CMS_SUBMISSION_ACTIONS'],
                     isDelegatedUser: true,
                 },

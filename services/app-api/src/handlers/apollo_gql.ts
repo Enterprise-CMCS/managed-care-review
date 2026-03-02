@@ -52,7 +52,7 @@ export interface Context {
     ctx?: OTELContext
     oauthClient?: {
         clientId: string
-        issuer: string
+        iss: string
         grants: string[]
         scopes: string[]
         isDelegatedUser: boolean
@@ -142,7 +142,7 @@ function contextForRequestForFetcher(
                 ctx: ctx,
                 oauthClient: {
                     clientId: oauthClientId,
-                    issuer: tokenIssuer,
+                    iss: tokenIssuer,
                     grants: oauthGrants,
                     scopes: clientOauth.scopes.map((scope) => scope),
                     isDelegatedUser: !!delegatedUser,

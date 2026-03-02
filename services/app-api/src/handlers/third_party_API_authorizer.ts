@@ -9,7 +9,7 @@ import { newJWTLib } from '../jwt'
 
 const stageName = process.env.stage
 const jwtSecret = process.env.JWT_SECRET
-const oauthIssuer = process.env.MCREVIEW_OAUTH_ISSUER
+const mcreviewOauthIssuer = process.env.MCREVIEW_OAUTH_ISSUER
 
 if (stageName === undefined) {
     throw new Error('Configuration Error: stage is required')
@@ -21,14 +21,14 @@ if (jwtSecret === undefined || jwtSecret === '') {
     )
 }
 
-if (oauthIssuer === undefined || oauthIssuer === '') {
+if (mcreviewOauthIssuer === undefined || mcreviewOauthIssuer === '') {
     throw new Error(
         'Configuration Error: MCREVIEW_OAUTH_ISSUER is required to run app-api.'
     )
 }
 
 const oauthJwtLib = newJWTLib({
-    issuer: oauthIssuer,
+    issuer: mcreviewOauthIssuer,
     signingKey: Buffer.from(jwtSecret, 'hex'),
     expirationDurationS: 90 * 24 * 60 * 60, // 90 days
 })
@@ -70,7 +70,7 @@ function validateToken(token: string): ValidatedTokenData | Error {
 
     const { iss } = decodedToken
 
-    if (iss === oauthIssuer) {
+    if (iss === mcreviewOauthIssuer) {
         return validateMcReviewToken(token)
     }
 
