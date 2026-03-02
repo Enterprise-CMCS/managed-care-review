@@ -151,19 +151,19 @@ jobs:
           exit $?
 
       - name: upload app web gen directory
-        uses: actions/upload-artifact@v6
+        uses: actions/upload-artifact@v7
         with:
           name: app-web-gen
           path: ./services/app-web/src/gen
 
       - name: upload cypress gen directory
-        uses: actions/upload-artifact@v6
+        uses: actions/upload-artifact@v7
         with:
           name: cypress-gen
           path: ./services/cypress/gen
 
       - name: upload unit test coverage
-        uses: actions/upload-artifact@v6
+        uses: actions/upload-artifact@v7
         with:
           name: unit-test-coverage
           path: ./services/app-web/coverage/coverage-final.json
@@ -223,7 +223,7 @@ jobs:
           exit $?
 
       - name: upload api test coverage
-        uses: actions/upload-artifact@v6
+        uses: actions/upload-artifact@v7
         with:
           name: api-test-coverage
           path: ./services/app-api/coverage/coverage-final.json
@@ -255,7 +255,7 @@ jobs:
           exit $?
 
       - name: upload packages test coverage
-        uses: actions/upload-artifact@v6
+        uses: actions/upload-artifact@v7
         with:
           name: packages-test-coverage
           path: ./packages/**/coverage/coverage-final.json
@@ -285,12 +285,12 @@ jobs:
         working-directory: services/app-api
         run: ./scripts/prepare-prisma-layer.sh
 
-      - uses: actions/upload-artifact@v6
+      - uses: actions/upload-artifact@v7
         with:
           name: lambda-layers-prisma-client-migration
           path: ./services/app-api/lambda-layers-prisma-client-migration
 
-      - uses: actions/upload-artifact@v6
+      - uses: actions/upload-artifact@v7
         with:
           name: lambda-layers-prisma-client-engine
           path: ./services/app-api/lambda-layers-prisma-client-engine
@@ -299,7 +299,7 @@ jobs:
         working-directory: services/postgres
         run: ./build-postgres-lambda-layer.sh
 
-      - uses: actions/upload-artifact@v6
+      - uses: actions/upload-artifact@v7
         with:
           name: lambda-layers-postgres-tools
           path: ./services/postgres/lambda-layers-postgres-tools
@@ -523,7 +523,6 @@ jobs:
           echo "Using VITE_APP_API_URL: $VITE_APP_API_URL"
           echo "Using VITE_APP_COGNITO_USER_POOL_ID: $VITE_APP_COGNITO_USER_POOL_ID"
           echo "Using VITE_APP_S3_DOCUMENTS_BUCKET: $VITE_APP_S3_DOCUMENTS_BUCKET"
-          echo "Using VITE_APP_S3_QA_BUCKET: $VITE_APP_S3_QA_BUCKET"
           echo "Using VITE_APP_AUTH_MODE: $VITE_APP_AUTH_MODE"
 
           # Build with all environment variables available
@@ -585,7 +584,7 @@ jobs:
           use-cdk-role: "true"
 
       - name: Download Prisma layers
-        uses: actions/download-artifact@v7
+        uses: actions/download-artifact@v8
         with:
           name: lambda-layers-prisma-client-migration
           path: ./services/infra-cdk/lambda-layers-prisma-client-migration
@@ -599,7 +598,7 @@ jobs:
           ls -la
 
       - name: Download Prisma engine layers
-        uses: actions/download-artifact@v7
+        uses: actions/download-artifact@v8
         with:
           name: lambda-layers-prisma-client-engine
           path: ./services/infra-cdk/lambda-layers-prisma-client-engine
@@ -745,7 +744,7 @@ jobs:
         run: |
           echo "=== Extracting storybook endpoint from CDK outputs ==="                                                                    
           endpoint=$(aws cloudformation list-exports --query "Exports[?Name=='frontend-infra-${STAGE_NAME}-cdk-StorybookCloudFrontEndpointUrl'].Value" --output text)
-
+      
           if [ "$endpoint" = "None" ] || [ -z "$endpoint" ]; then
           echo "Error: Could not find storybook endpoint from CDK outputs"
           exit 1
@@ -892,44 +891,12 @@ jobs:
           stage-name: ${{ needs.begin-deployment.outputs.stage-name }}
           use-cdk-role: "true"
 
-      - name: Install AWS CLI (container)
-        run: |
-          if ! command -v aws >/dev/null 2>&1; then
-            echo "Installing AWS CLI (user space)..."
-            cd /tmp
-            wget -q "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -O "awscliv2.zip"
-            unzip -q awscliv2.zip
-            ./aws/install -i ~/.local/aws-cli -b ~/.local/bin
-            echo "$HOME/.local/bin" >> $GITHUB_PATH
-          fi
-
-          export PATH=$PATH:$HOME/.local/bin
-          aws --version
-
-      - name: Get CDK configuration (S3 buckets)
-        id: cdk-config
-        env:
-          STAGE_NAME: ${{ needs.begin-deployment.outputs.stage-name }}
-          VITE_APP_AUTH_MODE: ${{ secrets.VITE_APP_AUTH_MODE }}
-        run: |
-          ./scripts/get-cdk-config.sh ${STAGE_NAME}
-
-          # Source the generated config file
-          source "/tmp/cdk-config-${STAGE_NAME}.env"
-
-          # Export bucket names to GitHub outputs
-          echo "documents_bucket=$VITE_APP_S3_DOCUMENTS_BUCKET" >> $GITHUB_OUTPUT
-          echo "qa_bucket=$VITE_APP_S3_QA_BUCKET" >> $GITHUB_OUTPUT
-
-          echo "Documents bucket: $VITE_APP_S3_DOCUMENTS_BUCKET"
-          echo "QA bucket: $VITE_APP_S3_QA_BUCKET"
-
-      - uses: actions/download-artifact@v7
+      - uses: actions/download-artifact@v8
         with:
           name: app-web-gen
           path: ./services/app-web/src/gen
 
-      - uses: actions/download-artifact@v7
+      - uses: actions/download-artifact@v8
         with:
           name: cypress-gen
           path: ./services/cypress/gen
@@ -966,8 +933,6 @@ jobs:
           AWS_ACCESS_KEY_ID: ${{ steps.creds.outputs.aws-access-key-id }}
           AWS_SECRET_ACCESS_KEY: ${{ steps.creds.outputs.aws-secret-access-key }}
           AWS_SESSION_TOKEN: ${{ steps.creds.outputs.aws-session-token }}
-          VITE_APP_S3_DOCUMENTS_BUCKET: ${{ steps.cdk-config.outputs.documents_bucket }}
-          VITE_APP_S3_QA_BUCKET: ${{ steps.cdk-config.outputs.qa_bucket }}
           # Overwrites folder directories in cypress config because in CI we run from root
           CYPRESS_SUPPORT_FILE: services/cypress/support/index.ts
           CYPRESS_FIXTURES_FOLDER: services/cypress/fixtures
@@ -979,7 +944,7 @@ jobs:
           NODE_V8_COVERAGE: ./coverage-cypress
 
       - name: Upload cypress screenshots
-        uses: actions/upload-artifact@v6
+        uses: actions/upload-artifact@v7
         if: failure() && steps.cypress.outcome == 'failure'
         with:
           name: cypress-screenshots-cdk-${{ matrix.containers}}
@@ -987,7 +952,7 @@ jobs:
           if-no-files-found: ignore
 
       - name: Upload cypress video
-        uses: actions/upload-artifact@v6
+        uses: actions/upload-artifact@v7
         if: always() && steps.cypress.outcome != 'skipped'
         with:
           name: cypress-videos-cdk-${{ matrix.containers}}
@@ -995,14 +960,14 @@ jobs:
           if-no-files-found: ignore
 
       - name: upload partial cypress coverage
-        uses: actions/upload-artifact@v6
+        uses: actions/upload-artifact@v7
         with:
           name: partial-cypress-coverage-cdk-${{ matrix.containers}}
           path: ./coverage-cypress/*.info
           if-no-files-found: ignore
 
       - name: upload partial cypress coverage json
-        uses: actions/upload-artifact@v6
+        uses: actions/upload-artifact@v7
         with:
           name: cypress-json-coverage-cdk-${{ matrix.containers}}
           path: ./coverage-cypress/*.json
@@ -1010,14 +975,7 @@ jobs:
 
   coverage:
     name: combined-test-coverage
-    needs:
-      [
-        begin-deployment,
-        web-unit-tests,
-        api-unit-tests,
-        packages-unit-tests,
-        cypress,
-      ]
+    needs: [begin-deployment, web-unit-tests, api-unit-tests, packages-unit-tests, cypress]
     if: always() && needs.begin-deployment.result == 'success'
     runs-on: ubuntu-24.04
     steps:
@@ -1029,7 +987,7 @@ jobs:
       - name: Install nyc for coverage merging
         run: pnpm add -g nyc
 
-      - uses: actions/download-artifact@v7
+      - uses: actions/download-artifact@v8
 
       - name: Create combined test coverage report
         run: |
@@ -1111,7 +1069,7 @@ jobs:
           ls -R
 
       - name: Upload combined test coverage
-        uses: actions/upload-artifact@v6
+        uses: actions/upload-artifact@v7
         with:
           name: combined-test-coverage
           path: ./coverage-all/
@@ -1127,14 +1085,7 @@ jobs:
           echo "📦 Download the \`combined-test-coverage\` artifact for detailed HTML reports." >> $GITHUB_STEP_SUMMARY
 
   end-deployment:
-    needs:
-      [
-        begin-deployment,
-        deploy-cdk-app,
-        deploy-frontend-app,
-        extract-endpoints,
-        cypress,
-      ]
+    needs: [begin-deployment, deploy-cdk-app, deploy-frontend-app, extract-endpoints, cypress]
     if: always() && needs.begin-deployment.result == 'success'
     name: End CDK Deployment
     runs-on: ubuntu-24.04
@@ -1164,3 +1115,4 @@ jobs:
         uses: ./.github/actions/clean_up_deployments
         with:
           environment: review-apps-cdk
+          
