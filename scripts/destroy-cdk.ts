@@ -265,10 +265,7 @@ async function waitForCloudFrontInvalidationsInStack(
         const distributionId = distribution.PhysicalResourceId
         if (!distributionId) continue
 
-        const result = await waitForDistributionInvalidations(
-            distributionId,
-            cloudfront
-        )
+        const result = await waitForDistributionInvalidations(distributionId)
         if (result instanceof Error) {
             return result
         }
@@ -281,8 +278,7 @@ async function waitForCloudFrontInvalidationsInStack(
  * Wait for all in-progress invalidations on a CloudFront distribution to complete
  */
 export async function waitForDistributionInvalidations(
-    distributionId: string,
-    cloudfrontClient: CloudFrontClient
+    distributionId: string
 ): Promise<void | Error> {
     console.info(
         `Checking invalidations for CloudFront distribution: ${distributionId}`
@@ -293,7 +289,7 @@ export async function waitForDistributionInvalidations(
         const listCommand = new ListInvalidationsCommand({
             DistributionId: distributionId,
         })
-        const response = await cloudfrontClient.send(listCommand)
+        const response = await cloudfront.send(listCommand)
 
         const inProgressInvalidations =
             response.InvalidationList?.Items?.filter(
@@ -328,7 +324,7 @@ export async function waitForDistributionInvalidations(
                     DistributionId: distributionId,
                     Id: invalidation.Id,
                 })
-                const result = await cloudfrontClient.send(getCommand)
+                const result = await cloudfront.send(getCommand)
                 status = result.Invalidation?.Status ?? 'Completed'
 
                 console.info(
