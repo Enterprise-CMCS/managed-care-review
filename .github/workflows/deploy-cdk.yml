@@ -1115,4 +1115,3 @@ jobs:
         uses: ./.github/actions/clean_up_deployments
         with:
           environment: review-apps-cdk
-          
