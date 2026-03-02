@@ -387,26 +387,7 @@ async function clearS3BucketsInStack(stackName: string): Promise<void | Error> {
 
     const clearBucketOutput = await Promise.all(
         buckets.map(async (bucket) => {
-            try {
-                // Turn off versioning on the bucket
-                const versionResponse = await turnOffVersioningOnBucket(bucket)
-                if (versionResponse instanceof Error) {
-                    return versionResponse
-                }
-
-                // Get all versioned files in the bucket
-                console.info(`Clearing bucket: ${bucket.PhysicalResourceId}`)
-                const keys = await getVersionedFilesInBucket(bucket)
-                if (keys instanceof Error) {
-                    return keys
-                }
-
-                return await deleteKeysFromS3Bucket(bucket, keys)
-            } catch (err: any) {
-                return new Error(
-                    `Error clearing bucket ${bucket.PhysicalResourceId}: ${err.message}`
-                )
-            }
+            return await emptyS3Bucket(bucket.PhysicalResourceId)
         })
     )
 
@@ -415,6 +396,48 @@ async function clearS3BucketsInStack(stackName: string): Promise<void | Error> {
         return new Error(
             `Encountered errors while clearing buckets: ${errors.map((e: any) => e.message).join(', ')}`
         )
+    }
+}
+
+/**
+ * Empty an S3 bucket by deleting all objects and versions
+ */
+export async function emptyS3Bucket(bucketName: string): Promise<void | Error> {
+    console.info(`Emptying S3 bucket: ${bucketName}`)
+
+    const bucket = { PhysicalResourceId: bucketName }
+
+    try {
+        // Disable access logging
+        const loggingResult = await disableS3AccessLogging(bucket)
+        if (loggingResult instanceof Error) {
+            console.warn(
+                `Could not disable access logging on ${bucketName}: ${loggingResult.message}`
+            )
+        }
+
+        // Turn off versioning
+        const versionResult = await turnOffVersioningOnBucket(bucket)
+        if (versionResult instanceof Error) {
+            console.warn(
+                `Could not turn off versioning on ${bucketName}: ${versionResult.message}`
+            )
+        }
+
+        // Get and delete all versioned objects
+        const keys = await getVersionedFilesInBucket(bucket)
+        if (keys instanceof Error) {
+            return keys
+        }
+
+        const deleteResult = await deleteKeysFromS3Bucket(bucket, keys)
+        if (deleteResult instanceof Error) {
+            return deleteResult
+        }
+
+        console.info(`Successfully emptied bucket: ${bucketName}`)
+    } catch (err: any) {
+        return new Error(`Error emptying bucket ${bucketName}: ${err.message}`)
     }
 }
 
