@@ -320,7 +320,6 @@ export const DatePicker = ({
                 data-testid="date-picker-internal-input"
                 className="usa-input usa-sr-only usa-date-picker__internal-input"
                 type="text"
-                aria-hidden={true}
                 tabIndex={-1}
                 required={false}
                 disabled={false}
