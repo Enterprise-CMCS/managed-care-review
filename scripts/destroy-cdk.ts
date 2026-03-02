@@ -280,6 +280,9 @@ async function waitForCloudFrontInvalidationsInStack(
 export async function waitForDistributionInvalidations(
     distributionId: string
 ): Promise<void | Error> {
+    if (!distributionId || distributionId === '') {
+        return new Error('Distribution ID cannot be empty')
+    }
     console.info(
         `Checking invalidations for CloudFront distribution: ${distributionId}`
     )
@@ -399,6 +402,9 @@ async function clearS3BucketsInStack(stackName: string): Promise<void | Error> {
  * Empty an S3 bucket by deleting all objects and versions
  */
 export async function emptyS3Bucket(bucketName: string): Promise<void | Error> {
+    if (!bucketName || bucketName === '') {
+        return new Error('Bucket name cannot be empty')
+    }
     console.info(`Emptying S3 bucket: ${bucketName}`)
 
     const bucket = { PhysicalResourceId: bucketName }
@@ -655,6 +661,9 @@ export async function deleteStack(
     stackName: string,
     retainResources?: string[]
 ): Promise<void | Error> {
+    if (!stackName || stackName === '') {
+        return new Error('Stack name cannot be empty')
+    }
     try {
         // Check if stack exists
         const commandDescribeStacks = new DescribeStacksCommand({
