@@ -717,5 +717,7 @@ export async function deleteStack(
     }
 }
 
-// Run the script
-main()
+// Only run when executed directly, not when imported
+if (import.meta.url === `file://${process.argv[1]}`) {
+    main()
+}
