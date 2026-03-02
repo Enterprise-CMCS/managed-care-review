@@ -1,4 +1,4 @@
-import { generateDocumentZip, extractS3Key } from './generateZip'
+import { generateDocumentZip } from './generateZip'
 import { Readable } from 'stream'
 import * as fs from 'fs'
 import * as crypto from 'crypto'
@@ -122,46 +122,21 @@ describe('generateDocumentZip', () => {
         )
     })
 
-    describe('extractS3Key', () => {
-        it('extracts key from s3:// URL format', () => {
-            const result = extractS3Key('s3://my-bucket/path/to/file.pdf')
-            expect(result).toBe('path/to/file.pdf')
-        })
-
-        it('extracts key from https S3 URL format', () => {
-            const result = extractS3Key(
-                'https://my-bucket.s3.amazonaws.com/path/to/file.pdf'
-            )
-            expect(result).toBe('path/to/file.pdf')
-        })
-
-        it('handles nested path correctly', () => {
-            const result = extractS3Key(
-                's3://bucket/contracts/123/documents/file.pdf'
-            )
-            expect(result).toBe('contracts/123/documents/file.pdf')
-        })
-
-        it('returns error for invalid URL format', () => {
-            const result = extractS3Key('invalid-url')
-            expect(result).toBeInstanceOf(Error)
-            expect((result as Error).message).toContain(
-                'Unsupported S3 URL format'
-            )
-        })
-    })
-
     describe('successful zip generation', () => {
         const mockDocuments = [
             {
                 s3URL: 's3://test-bucket/contract-doc1.pdf',
                 name: 'Contract Document 1.pdf',
                 sha256: 'abc123',
+                s3BucketName: 'test-bucket',
+                s3Key: 'contract-doc1.pdf',
             },
             {
                 s3URL: 's3://test-bucket/contract-doc2.pdf',
                 name: 'Contract Document 2.pdf',
                 sha256: 'def456',
+                s3BucketName: 'test-bucket',
+                s3Key: 'contract-doc2.pdf',
             },
         ]
 
@@ -192,12 +167,19 @@ describe('generateDocumentZip', () => {
             )
 
             expect(result).not.toBeInstanceOf(Error)
-            const successResult = result as { s3URL: string; sha256: string }
+            const successResult = result as {
+                s3URL: string
+                sha256: string
+                s3BucketName: string
+                s3Key: string
+            }
             expect(successResult.s3URL).toBe(
                 's3://test-bucket/zips/contract-123/documents.zip'
             )
             expect(successResult.sha256).toBeTruthy()
             expect(typeof successResult.sha256).toBe('string')
+            expect(successResult.s3BucketName).toBe('test-bucket')
+            expect(successResult.s3Key).toBe('zips/contract-123/documents.zip')
         })
     })
 

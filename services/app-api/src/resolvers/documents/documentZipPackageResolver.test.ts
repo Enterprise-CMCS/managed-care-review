@@ -29,6 +29,8 @@ describe('DocumentZipPackage resolver', () => {
         mockGenerateDocumentZip.mockResolvedValue({
             s3URL: 's3://test-bucket/zips/contract-documents.zip',
             sha256: 'mock-contract-sha256-hash',
+            s3BucketName: 'test-bucket',
+            s3Key: 'zips/contract-documents.zip',
         })
     })
 

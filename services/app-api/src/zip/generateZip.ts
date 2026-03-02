@@ -27,51 +27,14 @@ const s3Client = new S3Client({
 // Maximum total size for document zip packages (1.5GB)
 const MAX_ZIP_SIZE_BYTES = 1536 * 1024 * 1024
 
-/**
- * Extracts bucket name from S3 URL
- */
-function extractBucketName(s3URL: string): string | Error {
-    try {
-        if (s3URL.startsWith('s3://')) {
-            // Format: s3://bucket-name/key
-            return s3URL.split('/')[2]
-        } else if (s3URL.includes('.s3.amazonaws.com')) {
-            // Format: https://bucket-name.s3.amazonaws.com/key
-            const urlParts = new URL(s3URL)
-            return urlParts.hostname.split('.')[0]
-        }
-        return new Error(`Unsupported S3 URL format: ${s3URL}`)
-    } catch (error: unknown) {
-        const errorMessage =
-            error instanceof Error ? error.message : String(error)
-        return new Error(`Failed to extract bucket name: ${errorMessage}`)
-    }
-}
-
-/**
- * Extracts key from S3 URL
- */
-export function extractS3Key(s3URL: string): string | Error {
-    try {
-        if (s3URL.startsWith('s3://')) {
-            // Format: s3://bucket-name/key
-            const parts = s3URL.split('/')
-            return parts.slice(3).join('/')
-        } else if (s3URL.includes('.s3.amazonaws.com')) {
-            // Format: https://bucket-name.s3.amazonaws.com/key
-            const urlParts = new URL(s3URL)
-            return urlParts.pathname.substring(1) // Remove leading slash
-        }
-        return new Error(`Unsupported S3 URL format: ${s3URL}`)
-    } catch (error: unknown) {
-        const errorMessage =
-            error instanceof Error ? error.message : String(error)
-        return new Error(`Failed to extract S3 key: ${errorMessage}`)
-    }
-}
-
 export type GenerateDocumentZipFunctionType = (
-    documents: Array<{ s3URL: string; name: string; sha256?: string }>,
+    documents: Array<{
+        s3URL: string
+        name: string
+        sha256?: string
+        s3BucketName?: string
+        s3Key?: string
+    }>,
     outputPath: string,
     options?: Partial<{
         batchSize: number
@@ -79,7 +42,10 @@ export type GenerateDocumentZipFunctionType = (
         baseTimeout: number
         timeoutPerMB: number
     }>
-) => Promise<{ s3URL: string; sha256: string } | Error>
+) => Promise<
+    | { s3URL: string; sha256: string; s3BucketName: string; s3Key: string }
+    | Error
+>
 
 /**
  * Generates a zip file containing the provided documents and uploads it to S3
@@ -122,29 +88,28 @@ export const generateDocumentZip: GenerateDocumentZipFunctionType = async (
     const zipPath = path.join(tempDir, 'output.zip')
 
     try {
-        // Extract bucket information from first document
-        const firstDocUrl = documents[0].s3URL
-        const bucketResult = extractBucketName(firstDocUrl)
-
-        if (bucketResult instanceof Error) {
-            return bucketResult
+        // Get bucket from first document - all documents must have s3BucketName
+        const bucket = documents[0].s3BucketName
+        if (!bucket) {
+            return new Error(
+                'Document missing s3BucketName field - migration may not have completed'
+            )
         }
-        const bucket = bucketResult
+        console.info(`Using s3BucketName from document: ${bucket}`)
 
         // Prepare document keys for download
         const documentKeys = []
         for (const doc of documents) {
-            // NOTE: for some reason we don't store the actual s3 URL, we store some
-            // weird s3URL concatenated with the original filename. We have to drop the
-            // last /original.pdf off of the url to get the real s3URL[].
-            const urlParts = doc.s3URL.split('/')
-            const realS3URL = urlParts.slice(0, -1).join('/')
-            const keyResult = extractS3Key(realS3URL)
-            if (keyResult instanceof Error) {
-                return keyResult
+            // All documents must have s3Key
+            const key = doc.s3Key
+            if (!key) {
+                return new Error(
+                    `Document ${doc.name} missing s3Key field - migration may not have completed`
+                )
             }
+
             documentKeys.push({
-                key: keyResult,
+                key,
                 name: doc.name,
             })
         }
@@ -166,7 +131,7 @@ export const generateDocumentZip: GenerateDocumentZipFunctionType = async (
                 const downloadResult = await downloadFile(
                     s3Client,
                     bucket,
-                    'allusers/' + docInfo.key,
+                    docInfo.key,
                     tempDir,
                     timeout
                 )
@@ -247,6 +212,8 @@ export const generateDocumentZip: GenerateDocumentZipFunctionType = async (
         return {
             s3URL: `s3://${bucket}/${outputKey}`,
             sha256: hashResult,
+            s3BucketName: bucket,
+            s3Key: outputKey,
         }
     } catch (error) {
         logError('generateDocumentZip', error)
@@ -299,6 +266,8 @@ export const localGenerateDocumentZip: GenerateDocumentZipFunctionType = async (
     return {
         s3URL,
         sha256,
+        s3BucketName: bucket,
+        s3Key: outputPath,
     }
 }
 
@@ -559,30 +528,12 @@ export function documentZipService(
                     return zipResult
                 }
 
-                // Parse bucket and key from generated s3URL
-                const bucket = extractBucketName(zipResult.s3URL)
-                const key = extractS3Key(zipResult.s3URL)
-
-                if (bucket instanceof Error || key instanceof Error) {
-                    const err = new Error(
-                        `Failed to parse generated zip s3URL: ${zipResult.s3URL}`
-                    )
-                    logError('generateRateDocumentsZip', err)
-                    if (span) {
-                        setErrorAttributesOnActiveSpan(
-                            'failed to parse zip s3URL',
-                            span
-                        )
-                    }
-                    return err
-                }
-
                 // Store zip information in database
                 const createResult = await store.createDocumentZipPackage({
                     s3URL: zipResult.s3URL,
                     sha256: zipResult.sha256,
-                    s3BucketName: bucket,
-                    s3Key: key,
+                    s3BucketName: zipResult.s3BucketName,
+                    s3Key: zipResult.s3Key,
                     rateRevisionID,
                     documentType: 'RATE_DOCUMENTS',
                 })
@@ -656,30 +607,12 @@ export function documentZipService(
                     return zipResult
                 }
 
-                // Parse bucket and key from generated s3URL
-                const bucket = extractBucketName(zipResult.s3URL)
-                const key = extractS3Key(zipResult.s3URL)
-
-                if (bucket instanceof Error || key instanceof Error) {
-                    const err = new Error(
-                        `Failed to parse generated zip s3URL: ${zipResult.s3URL}`
-                    )
-                    logError('generateContractDocumentsZip', err)
-                    if (span) {
-                        setErrorAttributesOnActiveSpan(
-                            'failed to parse zip s3URL',
-                            span
-                        )
-                    }
-                    return err
-                }
-
                 // Store zip information in database
                 const createResult = await store.createDocumentZipPackage({
                     s3URL: zipResult.s3URL,
                     sha256: zipResult.sha256,
-                    s3BucketName: bucket,
-                    s3Key: key,
+                    s3BucketName: zipResult.s3BucketName,
+                    s3Key: zipResult.s3Key,
                     contractRevisionID,
                     documentType: 'CONTRACT_DOCUMENTS',
                 })
