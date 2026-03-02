@@ -1,9 +1,12 @@
 import * as Yup from 'yup'
 import dayjs from 'dayjs'
 import { UnlockedContract } from '../../../../gen/gqlClient'
-import { validateFileItemsList, validateDateStringFormat } from '../../../../formHelpers'
+import {
+    validateFileItemsList,
+    validateDateFormat,
+} from '../../../../formHelpers'
 
-Yup.addMethod(Yup.string, 'validateDateStringFormat', validateDateStringFormat)
+Yup.addMethod(Yup.date, 'validateDateFormat', validateDateFormat)
 
 export const EQROContractDetailsFormSchema = (
     draftSubmission: UnlockedContract
@@ -76,49 +79,32 @@ export const EQROContractDetailsFormSchema = (
     return Yup.object().shape({
         contractDocuments: validateFileItemsList({ required: true }),
         supportingDocuments: validateFileItemsList({ required: false }),
-        contractDateStart: Yup.string()
-            .required('You must enter a start date')
 
-            .validateDateStringFormat(
+        contractDateStart: Yup.date()
+            // @ts-ignore-next-line
+            .validateDateFormat('YYYY-MM-DD', true)
+            .typeError(
                 'The start date must be in MM/DD/YYYY format, like 01/01/2030'
-            ),
-        contractDateEnd: Yup.string()
-            .required('You must enter an end date')
-            
-            .validateDateStringFormat(
+            )
+            .defined('You must enter a start date'),
+        contractDateEnd: Yup.date()
+            // @ts-ignore-next-line
+            .validateDateFormat('YYYY-MM-DD', true)
+            .typeError(
                 'The end date must be in MM/DD/YYYY format, like 01/01/2030'
             )
+            .defined('You must enter an end date')
             .when(
+                // ContractDateEnd must be at minimum the day after Start
                 'contractDateStart',
-                (
-                    contractDateStart: string | undefined,
-                    schema: Yup.StringSchema
-                ) => {
-                    if (!contractDateStart) return schema
-
-                    let startDate = dayjs(contractDateStart, 'YYYY-MM-DD', true)
-                    if (!startDate.isValid()) {
-                        startDate = dayjs(contractDateStart, 'M/D/YYYY', true)
-                    }
-
+                (contractDateStart: Date, schema: Yup.DateSchema) => {
+                    const startDate = dayjs(contractDateStart)
                     if (startDate.isValid()) {
-                        return schema.test(
-                            'end-after-start',
-                            'The end date must come after the start date',
-                            function (value: string | undefined) {
-                                if (!value) return true
-
-                                let endDate = dayjs(value, 'YYYY-MM-DD', true)
-                                if (!endDate.isValid()) {
-                                    endDate = dayjs(value, 'M/D/YYYY', true)
-                                }
-
-                                if (!endDate.isValid()) return true
-                                return endDate.isAfter(startDate)
-                            }
+                        return schema.min(
+                            startDate.add(1, 'day'),
+                            'The end date must come after the start date'
                         )
                     }
-                    return schema
                 }
             ),
         eqroNewContractor: eqroProvisionValidation('eqroNewContractor'),

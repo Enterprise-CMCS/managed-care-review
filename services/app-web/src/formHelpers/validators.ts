@@ -24,65 +24,18 @@ function validateDateFormat(
     parseStrict: boolean
 ): Yup.DateSchema<Date | undefined, Record<string, any>, Date | undefined> {
     return this.transform(function (value, originalValue) {
+        //catch incomplete date entries from user.
+        if (
+            typeof originalValue === 'string' &&
+            !isValidDateString(originalValue)
+        ) {
+            return new Date('') // force 'Invalid Date'
+        }
+        //here partial date entry like '5/5/' transforms into valid date
         if (this.isType(value)) return value
+
         value = dayjs(originalValue, formats, parseStrict)
         return value.isValid() ? value.toDate() : new Date('') // force return 'Invalid Date'
-    })
-}
-
-/*
-    custom Yup metod to catch incomplete date entries lile '5/5/'
-*/
-function validateDateStringFormat(
-    this: Yup.StringSchema<
-        string | undefined,
-        Record<string, any>,
-        string | undefined
-    >,
-    errorMessage: string = 'Date must be in MM/DD/YYYY format'
-): Yup.StringSchema<
-    string | undefined,
-    Record<string, any>,
-    string | undefined
-> {
-    return this.test('is-valid-date-format', errorMessage, function (value) {
-        if (!value) return false
-
-        // accept both MM/DD/YYYY (user input) and YYYY-MM-DD (already transformed)
-        const userFormatRegex = /^\d{1,2}\/\d{1,2}\/\d{4}$/
-        const internalFormatRegex = /^\d{4}-\d{2}-\d{2}$/
-
-        // if already transformed to YYYY-MM-DD format, validate it
-        if (internalFormatRegex.test(value)) {
-            const parsed = dayjs(value, 'YYYY-MM-DD', true)
-            return parsed.isValid()
-        }
-
-        // check MM/DD/YYYY format
-        if (!userFormatRegex.test(value)) return false
-
-        // check if has MM DD and YYYY parts
-        const parts = value.split('/')
-        if (parts.length !== 3 || !parts[0] || !parts[1] || !parts[2]) {
-            return false
-        }
-        if (parts[2].length !== 4) return false
-
-        // parse with flexible format (accepts both 1/1/2025 and 01/01/2025)
-        const parsed = dayjs(value, 'M/D/YYYY', true)
-        if (!parsed.isValid()) return false
-
-        // verify the parsed date matches the input (catches invalid dates like 2/30)
-        const [month, day, year] = parts.map((p) => parseInt(p, 10))
-        if (
-            parsed.month() !== month - 1 ||
-            parsed.date() !== day ||
-            parsed.year() !== year
-        ) {
-            return false
-        }
-
-        return true
     })
 }
 
@@ -151,10 +104,34 @@ const validateFileItemsListSingleUpload = ({
         )
 }
 
+//checks user's date entry for completenes and date logic compliance
+function isValidDateString(value: string): boolean {
+    if (!value) return false
+
+    // already in internal YYYY-MM-DD format
+    if (/^\d{4}-\d{2}-\d{2}$/.test(value)) {
+        return dayjs(value, 'YYYY-MM-DD', true).isValid()
+    }
+
+    // must match MM/DD/YYYY or M/D/YYYY user input format
+    if (!/^\d{1,2}\/\d{1,2}\/\d{4}$/.test(value)) return false
+
+    // strict parse and cross-check to catch impossible dates like 2/30 or 14/15
+    const parsed = dayjs(value, 'M/D/YYYY', true)
+    if (!parsed.isValid()) return false
+
+    const [month, day, year] = value.split('/').map((p) => parseInt(p, 10))
+    return (
+        parsed.month() === month - 1 &&
+        parsed.date() === day &&
+        parsed.year() === year
+    )
+}
+
 export {
     isDateRangeEmpty,
+    isValidDateString,
     validateDateFormat,
-    validateDateStringFormat,
     validateDateRange12Months,
     validateFileItemsList,
     validateFileItemsListSingleUpload,
