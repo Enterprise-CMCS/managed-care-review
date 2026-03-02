@@ -51,9 +51,12 @@ export function canWrite(context: Context): boolean {
  * specific endpoints will allow if the OAuth client has been validated for delegated user
  */
 export function canOauthWrite(context: Context): boolean {
+    const stageName = process.env.stage
     // OAuth clients can only write if scopes is populated
+    // and we are temporarily restricting them from writing in prod
     if (context.oauthClient) {
         if (
+            stageName !== 'prod' &&
             context.oauthClient?.isDelegatedUser &&
             context.oauthClient?.scopes?.includes(
                 OAuthScope.CMS_SUBMISSION_ACTIONS
