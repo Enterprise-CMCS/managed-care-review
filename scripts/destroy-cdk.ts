@@ -393,16 +393,35 @@ async function clearS3BucketsInStack(stackName: string): Promise<void | Error> {
         return
     }
 
-    const clearBucketOutput = await Promise.all(
+    const clearBucketOutput = await Promise.allSettled(
         buckets.map(async (bucket) => {
+            if (!bucket.PhysicalResourceId) {
+                return new Error(
+                    `Bucket ${bucket.LogicalResourceId} has no PhysicalResourceId`
+                )
+            }
             return await emptyS3Bucket(bucket.PhysicalResourceId)
         })
     )
 
-    const errors = clearBucketOutput.filter((output) => output instanceof Error)
+    const errors: Error[] = []
+    clearBucketOutput.forEach((result, index) => {
+        if (result.status === 'rejected') {
+            errors.push(
+                result.reason instanceof Error
+                    ? result.reason
+                    : new Error(
+                          `Unknown error while clearing bucket: ${result.reason}`
+                      )
+            )
+        } else if (result.value instanceof Error) {
+            errors.push(result.value)
+        }
+    })
+
     if (errors.length > 0) {
         return new Error(
-            `Encountered errors while clearing buckets: ${errors.map((e: any) => e.message).join(', ')}`
+            `Encountered errors while clearing buckets: ${errors.map((e: Error) => e.message).join(', ')}`
         )
     }
 }
