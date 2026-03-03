@@ -5,7 +5,6 @@ import {
     isOAuthClientCredentials,
     canRead,
     canWrite,
-    getAuthContextInfo,
     canOauthWrite,
 } from './oauthAuthorization'
 
@@ -37,7 +36,7 @@ describe('OAuth Authorization', () => {
                 oauthClient: {
                     clientId: 'test-client',
                     grants: ['client_credentials'],
-                    isOAuthClient: true,
+                    iss: 'mcreview-test',
                     scopes: [],
                     isDelegatedUser: false,
                 },
@@ -60,7 +59,7 @@ describe('OAuth Authorization', () => {
                 oauthClient: {
                     clientId: 'test-client',
                     grants: ['some_other_grant'],
-                    isOAuthClient: true,
+                    iss: 'mcreview-test',
                     scopes: [],
                     isDelegatedUser: false,
                 },
@@ -77,7 +76,7 @@ describe('OAuth Authorization', () => {
                 oauthClient: {
                     clientId: 'test-client',
                     grants: ['client_credentials'],
-                    isOAuthClient: true,
+                    iss: 'mcreview-test',
                     scopes: [],
                     isDelegatedUser: false,
                 },
@@ -102,7 +101,7 @@ describe('OAuth Authorization', () => {
                 oauthClient: {
                     clientId: 'test-client',
                     grants: ['client_credentials'],
-                    isOAuthClient: true,
+                    iss: 'mcreview-test',
                     scopes: [],
                     isDelegatedUser: false,
                 },
@@ -120,45 +119,6 @@ describe('OAuth Authorization', () => {
         })
     })
 
-    describe('getAuthContextInfo', () => {
-        it('returns OAuth client info when present', () => {
-            const context: Context = {
-                user: mockStateUser,
-                oauthClient: {
-                    clientId: 'test-client',
-                    grants: ['client_credentials'],
-                    isOAuthClient: true,
-                    scopes: [],
-                    isDelegatedUser: false,
-                },
-            }
-
-            const info = getAuthContextInfo(context)
-            expect(info).toEqual({
-                isOAuthClient: true,
-                clientId: 'test-client',
-                userId: 'state-user-1',
-                userRole: 'STATE_USER',
-                grants: ['client_credentials'],
-            })
-        })
-
-        it('returns user info only for regular users', () => {
-            const context: Context = {
-                user: mockCMSUser,
-            }
-
-            const info = getAuthContextInfo(context)
-            expect(info).toEqual({
-                isOAuthClient: false,
-                clientId: undefined,
-                userId: 'cms-user-1',
-                userRole: 'CMS_USER',
-                grants: undefined,
-            })
-        })
-    })
-
     describe('canOauthWrite', () => {
         it('allows writing for OAuth client with scopes', () => {
             const context: Context = {
@@ -166,7 +126,7 @@ describe('OAuth Authorization', () => {
                 oauthClient: {
                     clientId: 'test-client',
                     grants: ['client_credentials'],
-                    isOAuthClient: true,
+                    iss: 'mcreview-test',
                     scopes: ['CMS_SUBMISSION_ACTIONS'],
                     isDelegatedUser: true,
                 },
@@ -189,8 +149,25 @@ describe('OAuth Authorization', () => {
                 oauthClient: {
                     clientId: 'test-client',
                     grants: ['client_credentials'],
-                    isOAuthClient: true,
+                    iss: 'mcreview-test',
                     scopes: [],
+                    isDelegatedUser: true,
+                },
+            }
+
+            expect(canOauthWrite(context)).toBe(false)
+        })
+
+        it('denies writing for OAuth client when stage is prod', () => {
+            process.env.stage = 'prod'
+
+            const context: Context = {
+                user: mockCMSUser,
+                oauthClient: {
+                    clientId: 'test-client',
+                    grants: ['client_credentials'],
+                    iss: 'mcreview-test',
+                    scopes: ['CMS_SUBMISSION_ACTIONS'],
                     isDelegatedUser: true,
                 },
             }
