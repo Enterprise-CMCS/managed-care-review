@@ -365,15 +365,28 @@ async function migrateDocumentTable(
 ): Promise<{ processed: number; failed: number }> {
     const result = { processed: 0, failed: 0 }
 
-    // Find all documents that need migration (s3BucketName is null)
+    // Find all documents that need migration:
+    // 1. s3BucketName is null (old unmigrated docs)
+    // 2. s3Key doesn't start with 'allusers/' or 'zips/' (incorrectly migrated docs)
     const documents = await prismaClient[tableName].findMany({
         where: {
-            s3BucketName: null,
+            OR: [
+                { s3BucketName: null },
+                {
+                    AND: [
+                        { s3Key: { not: null } },
+                        { s3Key: { not: { startsWith: 'allusers/' } } },
+                        { s3Key: { not: { startsWith: 'zips/' } } },
+                    ],
+                },
+            ],
         },
         select: {
             id: true,
             s3URL: true,
             name: true,
+            s3BucketName: true,
+            s3Key: true,
         },
         take: limit,
     })
@@ -396,8 +409,11 @@ async function migrateDocumentTable(
             }
 
             if (dryRun) {
+                const action = doc.s3BucketName
+                    ? `fix s3Key: "${doc.s3Key}" -> "${s3Key}"`
+                    : `migrate: s3BucketName="${targetBucket}", s3Key="${s3Key}"`
                 console.info(
-                    `[DRY RUN] Would update ${tableName} ${doc.id}: s3BucketName="${targetBucket}", s3Key="${s3Key}"`
+                    `[DRY RUN] Would update ${tableName} ${doc.id} (${doc.name}): ${action}`
                 )
                 result.processed++
                 continue

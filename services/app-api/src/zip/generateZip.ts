@@ -100,7 +100,7 @@ export const generateDocumentZip: GenerateDocumentZipFunctionType = async (
         // Prepare document keys for download
         const documentKeys = []
         for (const doc of documents) {
-            // All documents must have s3Key
+            // All documents must have s3Key with full path
             const key = doc.s3Key
             if (!key) {
                 return new Error(
