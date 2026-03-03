@@ -40,7 +40,7 @@
     },
     "devDependencies": {
         "@bahmutov/cypress-esbuild-preprocessor": "^2.2.8",
-        "@cypress/code-coverage": "^3.14.7",
+        "@cypress/code-coverage": "^4.0.1",
         "@testing-library/cypress": "^10.1.0",
         "axe-core": "^4.10.3",
         "buffer": "^6.0.3",
