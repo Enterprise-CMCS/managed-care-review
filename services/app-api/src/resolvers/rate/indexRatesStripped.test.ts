@@ -158,13 +158,20 @@ describe('indexRatesStripped', () => {
 
         expect(matchedTestRates).toHaveLength(2)
 
+        const rate1FromIndex = matchedTestRates.find(
+            (rate) => rate.id === submit1ID
+        )
+        const rate2FromIndex = matchedTestRates.find(
+            (rate) => rate.id === submit2ID
+        )
+
+        if (!rate1FromIndex || !rate2FromIndex) {
+            throw new Error('Unexpected error: Rate revision not found')
+        }
+
         // Expect related contracts to have 1 contract, the parent contract
-        expect(matchedTestRates[0].initiallySubmittedAt).toStrictEqual(
-            newRateDate1
-        )
-        expect(matchedTestRates[1].initiallySubmittedAt).toStrictEqual(
-            newRateDate2
-        )
+        expect(rate1FromIndex.initiallySubmittedAt).toStrictEqual(newRateDate1)
+        expect(rate2FromIndex.initiallySubmittedAt).toStrictEqual(newRateDate2)
     })
 
     it('does not return rates still in initial draft', async () => {
