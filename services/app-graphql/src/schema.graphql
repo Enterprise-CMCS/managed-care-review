@@ -1765,7 +1765,7 @@ type Rate {
     Options are DRAFT, SUBMITTED, RESUBMITTED, UNLOCKED, WITHDRAWN
     """
     consolidatedStatus: ConsolidatedRateStatus!
-    "The initial date this rate was submitted at. Is not changed by unlock or resubmission."
+    "The initial date this rate was submitted at. Is not changed by unlock or resubmission, but can be changed by rateOverrides."
     initiallySubmittedAt: DateTime
     "The state code (e.g. CA or TN) for the submitting state"
     stateCode: String!
@@ -1808,6 +1808,14 @@ type Rate {
     , unlocked, or resubmitted. The array is in descending order by createdAt.
     """
     questions: IndexRateQuestionsPayload
+    """
+    Rate metadata that are set by Admin users to override existing metadata on a rate. Overrides are in descending
+    order by createdAt, where the latest override takes precedence and represents the current active metadata to be
+    used. All previous overrides serve as a historical record of past changes and are retained for audit purposes only.
+    - rateOverrides.initiallySubmittedAt: overrides the system calculated initiallySubmittedAt. When set it overrides
+        the original rate.initiallySubmittedAt.
+    """
+    rateOverrides: [RateOverrideType]
 }
 """
 RateStripped is a stripped down version of a Rate, removing many relational fields to provide a faster query.
@@ -1833,7 +1841,7 @@ type RateStripped {
     Options are DRAFT, SUBMITTED, RESUBMITTED UNLOCKED, UNDER_REVIEW, WITHDRAWN
     """
     consolidatedStatus: ConsolidatedRateStatus!
-    "The initial date this rate was submitted at. Is not changed by unlock or resubmission."
+    "The initial date this rate was submitted at. Is not changed by unlock or resubmission, but can be changed by rateOverrides."
     initiallySubmittedAt: DateTime
     "The state code (e.g. CA or TN) for the submitting state"
     stateCode: String!
@@ -2563,6 +2571,18 @@ type GenerateUploadURLPayload {
     s3Key: String!
     bucket: String!
     expiresIn: Int
+}
+
+type RateOverrideDataType {
+    initiallySubmittedAt: DateTime
+}
+
+type RateOverrideType {
+    id: ID!
+    createdAt: DateTime!
+    updatedBy: AdminUser
+    description: String!
+    overrides: RateOverrideDataType!
 }
 
 enum UploadFileType {

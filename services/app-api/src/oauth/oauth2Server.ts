@@ -23,10 +23,14 @@ export class CustomOAuth2Server {
     private prisma: ExtendedPrismaClient
     private jwtLib: ReturnType<typeof newJWTLib>
 
-    constructor(prisma: ExtendedPrismaClient, jwtSecret: string) {
+    constructor(
+        prisma: ExtendedPrismaClient,
+        jwtSecret: string,
+        oauthIssuer: string
+    ) {
         this.prisma = prisma
         this.jwtLib = newJWTLib({
-            issuer: 'mcreview-oauth',
+            issuer: oauthIssuer,
             signingKey: Buffer.from(jwtSecret, 'hex'),
             expirationDurationS: JWT_EXPIRATION_SECONDS,
         })

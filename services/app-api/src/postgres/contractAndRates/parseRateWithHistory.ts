@@ -34,6 +34,7 @@ import type {
     RateTableFullPayload,
     RateTableStrippedPayload,
 } from './prismaFullContractRateHelpers'
+import type { RateDataOverrideType } from '../../domain-models/contractAndRates/contractRateOverrideTypes'
 
 function parseRateWithHistory(
     rate: RateTableFullPayload,
@@ -80,6 +81,31 @@ function rateRevisionToDomainModel(
         unlockInfo: convertUpdateInfoToDomainModel(revision.unlockInfo),
         formData,
     }
+}
+
+function rateOverridesToDomainModel(
+    rateOverrides: RateTableWithoutDraftContractsPayload['rateOverrides']
+): RateDataOverrideType[] {
+    return rateOverrides
+        .map((override) => ({
+            id: override.id,
+            createdAt: override.createdAt ?? undefined,
+            updatedBy: override.updatedBy
+                ? {
+                      id: override.updatedBy.id,
+                      role: override.updatedBy.role,
+                      email: override.updatedBy.email,
+                      givenName: override.updatedBy.givenName,
+                      familyName: override.updatedBy.familyName,
+                  }
+                : undefined,
+            description: override.description,
+            overrides: {
+                initiallySubmittedAt:
+                    override.initiallySubmittedAt ?? undefined,
+            },
+        }))
+        .sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime())
 }
 
 // rateWithoutDraftContractsToDomainModel constructs a history for this particular contract including changes to all of its
@@ -190,6 +216,7 @@ function rateWithoutDraftContractsToDomainModel(
         revisions: submittedRevisions.reverse(),
         packageSubmissions: packageSubmissions.reverse(),
         reviewStatusActions: rate.reviewStatusActions.reverse(),
+        rateOverrides: rateOverridesToDomainModel(rate.rateOverrides),
     }
 }
 
@@ -329,14 +356,19 @@ function strippedRateWithoutDraftContractsToDomainModel(
 
     const submittedRevisionsDescending = submittedRevisions.reverse()
 
+    const latestOverride = rateOverridesToDomainModel(rate.rateOverrides)[0]
+
+    // Use override or calculate initial rate submission.
+    const initiallySubmittedAt =
+        latestOverride?.overrides.initiallySubmittedAt ||
+        submittedRevisionsDescending[submittedRevisionsDescending.length - 1]
+            .submitInfo?.updatedAt
+
     return {
         id: rate.id,
         createdAt: rate.createdAt,
         updatedAt: rate.updatedAt,
-        initiallySubmittedAt:
-            submittedRevisionsDescending[
-                submittedRevisionsDescending.length - 1
-            ].submitInfo?.updatedAt,
+        initiallySubmittedAt,
         status,
         reviewStatus,
         consolidatedStatus,

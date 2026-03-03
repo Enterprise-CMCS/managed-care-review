@@ -113,6 +113,7 @@ describe('CustomOAuth2Server', () => {
     let oauth2Server: CustomOAuth2Server
     let mockPrisma: ExtendedPrismaClient
     const mockJwtSecret = 'test-secret' // pragma: allowlist secret
+    const mockOauthIssuer = 'mcreview-oauth'
 
     beforeEach(() => {
         mockPrisma = {
@@ -121,7 +122,11 @@ describe('CustomOAuth2Server', () => {
             },
         } as unknown as ExtendedPrismaClient
 
-        oauth2Server = new CustomOAuth2Server(mockPrisma, mockJwtSecret)
+        oauth2Server = new CustomOAuth2Server(
+            mockPrisma,
+            mockJwtSecret,
+            mockOauthIssuer
+        )
     })
 
     describe('token', () => {

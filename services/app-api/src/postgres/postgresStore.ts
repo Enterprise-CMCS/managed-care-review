@@ -91,6 +91,10 @@ import {
     undoWithdrawRate,
     type UndoWithdrawRateArgsType,
 } from './contractAndRates/undoWithdrawRate'
+import {
+    overrideRateData,
+    type OverrideRateDataArgsType,
+} from './contractAndRates/overrideRateData'
 import type {
     FindAllRatesStrippedType,
     StrippedRateOrErrorArrayType,
@@ -226,6 +230,9 @@ type Store = {
     withdrawRate: (args: WithdrawRateArgsType) => Promise<RateType | Error>
     undoWithdrawRate: (
         args: UndoWithdrawRateArgsType
+    ) => Promise<RateType | Error>
+    overrideRateData: (
+        args: OverrideRateDataArgsType
     ) => Promise<RateType | Error>
 
     /** Q&A functions **/
@@ -368,6 +375,7 @@ function NewPostgresStore(client: ExtendedPrismaClient): Store {
         unlockRate: (args) => unlockRate(client, args),
         withdrawRate: (args) => withdrawRate(client, args),
         undoWithdrawRate: (args) => undoWithdrawRate(client, args),
+        overrideRateData: (args) => overrideRateData(client, args),
 
         /** Q&A functions **/
         insertContractQuestion: (questionInput, user) =>

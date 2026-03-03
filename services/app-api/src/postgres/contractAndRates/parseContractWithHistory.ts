@@ -19,6 +19,7 @@ import {
 import type { ContractTableWithoutDraftRates } from './prismaSubmittedContractHelpers'
 import type { ContractTableFullPayload } from './prismaFullContractRateHelpers'
 import type { ContractReviewActionType } from '../../domain-models/contractAndRates/contractReviewActionType'
+import type { ContractDataOverrideType } from '../../domain-models/contractAndRates/contractRateOverrideTypes'
 
 // This function might be generally useful later on. It takes an array of objects
 // that can be errors and either returns the first error, or returns the list but with
@@ -88,6 +89,31 @@ function contractRevisionToDomainModel(
 
         formData: contractFormDataToDomainModel(revision),
     }
+}
+
+function contractOverridesToDomainModel(
+    contractOverrides: ContractTableWithoutDraftRates['contractOverrides']
+): ContractDataOverrideType[] {
+    return contractOverrides
+        .map((override) => ({
+            id: override.id,
+            createdAt: override.createdAt,
+            updatedBy: override.updatedBy
+                ? {
+                      id: override.updatedBy.id,
+                      role: override.updatedBy.role,
+                      email: override.updatedBy.email,
+                      givenName: override.updatedBy.givenName,
+                      familyName: override.updatedBy.familyName,
+                  }
+                : undefined,
+            description: override.description,
+            overrides: {
+                initiallySubmittedAt:
+                    override.initiallySubmittedAt ?? undefined,
+            },
+        }))
+        .sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime())
 }
 
 // contractWithHistoryToDomainModelWithoutRates constructs a history for this particular contract including changes to all of its
@@ -206,6 +232,9 @@ function contractWithHistoryToDomainModelWithoutRates(
         draftRevision,
         revisions: submittedRevisions.reverse(),
         packageSubmissions: packageSubmissions.reverse(),
+        contractOverrides: contractOverridesToDomainModel(
+            contract.contractOverrides
+        ),
     }
 }
 

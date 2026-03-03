@@ -162,6 +162,9 @@ function mockStoreThatErrors(): Store {
         undoWithdrawRate: async (_ID) => {
             return genericError
         },
+        overrideRateData: async (_args) => {
+            return genericError
+        },
         findEmailSettings: async () => {
             return genericError
         },
