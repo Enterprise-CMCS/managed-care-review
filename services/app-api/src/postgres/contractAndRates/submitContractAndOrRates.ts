@@ -211,22 +211,25 @@ async function submitContractAndOrRates(
         const supportingDocumentOverrides =
             rev.revisionOverrides?.[0]?.supportingDocuments ?? []
 
-        let overrideDocs = [
+        const overrideDocs = [
             ...rateDocumentOverrides,
             ...supportingDocumentOverrides,
         ]
 
         allRevDocs.forEach((doc) => {
             const hashKey = `${rev.rateID}-${doc.sha256}`
+            // set date to current documents dateAdded
             let dateAdded: Date | null | undefined = doc.dateAdded
             const docOverride = overrideDocs.find(
                 (overrideDoc) => overrideDoc.documentID === doc.id
             )
 
+            // Use override dateAdded if it exists
             if (docOverride?.dateAdded) {
                 dateAdded = docOverride.dateAdded
             }
 
+            // If both do not exist, use the revision submitted at date.
             if (!dateAdded) {
                 dateAdded = rev.submitInfo?.updatedAt
             }

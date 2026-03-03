@@ -153,11 +153,22 @@ describe('indexRates', () => {
 
                 expect(matchedTestRates).toHaveLength(2)
 
+                const rate1FromIndex = matchedTestRates.find(
+                    (rate) => rate.id === submit1ID
+                )
+                const rate2FromIndex = matchedTestRates.find(
+                    (rate) => rate.id === submit2ID
+                )
+
+                if (!rate1FromIndex || !rate2FromIndex) {
+                    throw new Error('Unexpected error: Test rates not found')
+                }
+
                 // Expect related contracts to have 1 contract, the parent contract
-                expect(matchedTestRates[0].initiallySubmittedAt).toStrictEqual(
+                expect(rate1FromIndex.initiallySubmittedAt).toStrictEqual(
                     newRateDate1
                 )
-                expect(matchedTestRates[1].initiallySubmittedAt).toStrictEqual(
+                expect(rate2FromIndex.initiallySubmittedAt).toStrictEqual(
                     newRateDate2
                 )
             })
