@@ -71,24 +71,3 @@ export function canOauthWrite(context: Context): boolean {
     // Regular authenticated users can write (subject to role-specific restrictions in resolvers)
     return true
 }
-
-/**
- * Gets information about the current authorization context for logging/auditing
- */
-export function getAuthContextInfo(context: Context): {
-    isOAuthClient: boolean
-    clientId?: string
-    userId: string
-    userRole: string
-    grants?: string[]
-} {
-    const { user, oauthClient } = context
-
-    return {
-        isOAuthClient: !!oauthClient,
-        clientId: oauthClient?.clientId,
-        userId: user.id,
-        userRole: user.role,
-        grants: oauthClient?.grants,
-    }
-}

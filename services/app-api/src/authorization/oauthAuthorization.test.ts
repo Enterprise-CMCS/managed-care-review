@@ -5,7 +5,6 @@ import {
     isOAuthClientCredentials,
     canRead,
     canWrite,
-    getAuthContextInfo,
     canOauthWrite,
 } from './oauthAuthorization'
 
@@ -117,45 +116,6 @@ describe('OAuth Authorization', () => {
             }
 
             expect(canWrite(context)).toBe(true)
-        })
-    })
-
-    describe('getAuthContextInfo', () => {
-        it('returns OAuth client info when present', () => {
-            const context: Context = {
-                user: mockStateUser,
-                oauthClient: {
-                    clientId: 'test-client',
-                    grants: ['client_credentials'],
-                    iss: 'mcreview-test',
-                    scopes: [],
-                    isDelegatedUser: false,
-                },
-            }
-
-            const info = getAuthContextInfo(context)
-            expect(info).toEqual({
-                isOAuthClient: true,
-                clientId: 'test-client',
-                userId: 'state-user-1',
-                userRole: 'STATE_USER',
-                grants: ['client_credentials'],
-            })
-        })
-
-        it('returns user info only for regular users', () => {
-            const context: Context = {
-                user: mockCMSUser,
-            }
-
-            const info = getAuthContextInfo(context)
-            expect(info).toEqual({
-                isOAuthClient: false,
-                clientId: undefined,
-                userId: 'cms-user-1',
-                userRole: 'CMS_USER',
-                grants: undefined,
-            })
         })
     })
 

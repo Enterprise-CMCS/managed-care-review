@@ -11,10 +11,7 @@ import {
     hasCMSPermissions,
     hasAdminPermissions,
 } from '../../domain-models'
-import {
-    canRead,
-    getAuthContextInfo,
-} from '../../authorization/oauthAuthorization'
+import { canRead } from '../../authorization/oauthAuthorization'
 import { logError, logSuccess } from '../../logger'
 
 export function fetchContractResolver(
@@ -68,8 +65,8 @@ export function fetchContractResolver(
         // Authorization check (same for both OAuth clients and regular users)
         if (isStateUser(user)) {
             if (user.stateCode !== contractWithHistory.stateCode) {
-                const authInfo = getAuthContextInfo(context)
-                const errMessage = authInfo.isOAuthClient
+                const authInfo = !!context.oauthClient
+                const errMessage = authInfo
                     ? `OAuth client not allowed to access contract from ${contractWithHistory.stateCode}`
                     : `User from state ${user.stateCode} not allowed to access contract from ${contractWithHistory.stateCode}`
                 logError('fetchContract', errMessage)

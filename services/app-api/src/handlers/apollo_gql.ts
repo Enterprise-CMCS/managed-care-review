@@ -108,7 +108,7 @@ function contextForRequestForFetcher(
 
             // Extract OAuth context if present
             const oauthClientId = authorizerContext?.clientId
-            const tokenIssuer = authorizerContext?.issuer
+            const tokenIssuer = authorizerContext?.iss
             const oauthGrants = authorizerContext?.grants?.split(',') || []
 
             const userResult = await userFromThirdPartyAuthorizer(

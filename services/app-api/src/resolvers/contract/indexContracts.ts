@@ -17,10 +17,7 @@ import {
 } from '../attributeHelper'
 import { GraphQLError } from 'graphql/index'
 import type { ContractOrErrorArrayType } from '../../postgres/contractAndRates/findAllContractsWithHistoryByState'
-import {
-    canRead,
-    getAuthContextInfo,
-} from '../../authorization/oauthAuthorization'
+import { canRead } from '../../authorization/oauthAuthorization'
 import { getLastUpdatedForDisplay } from '../helpers'
 import type { ConsolidatedContractStatus } from '../../gen/gqlClient'
 
@@ -183,8 +180,8 @@ export function indexContractsResolver(
                 cleanedStatuses
             )
         } else {
-            const authInfo = getAuthContextInfo(context)
-            const errMsg = authInfo.isOAuthClient
+            const authInfo = !!context.oauthClient
+            const errMsg = authInfo
                 ? `OAuth client not authorized to fetch contract data`
                 : 'user not authorized to fetch state data'
             logError('indexContracts', errMsg)
