@@ -7,6 +7,7 @@ import {
 import type { RateEdge, Rate } from '../../gen/gqlServer'
 import {
     iterableCmsUsersMockData,
+    testAdminUser,
     testStateUser,
 } from '../../testHelpers/userHelpers'
 import {
@@ -14,6 +15,8 @@ import {
     createAndUpdateTestContractWithRate,
 } from '../../testHelpers/gqlContractHelpers'
 import { testS3Client } from '../../testHelpers'
+import { sharedTestPrismaClient } from '../../testHelpers/storeHelpers'
+import { NewPostgresStore } from '../../postgres'
 
 describe('indexRates', () => {
     describe.each(iterableCmsUsersMockData)(
@@ -66,6 +69,97 @@ describe('indexRates', () => {
                     })
 
                 expect(matchedTestRates).toHaveLength(2)
+            })
+
+            it('returns rate reviews list with overridden initial submit date', async () => {
+                const prismaClient = await sharedTestPrismaClient()
+                const store = NewPostgresStore(prismaClient)
+                const cmsUser = mockUser()
+                const adminUser = testAdminUser()
+
+                await prismaClient.user.create({
+                    data: {
+                        id: adminUser.id,
+                        givenName: adminUser.givenName,
+                        familyName: adminUser.familyName,
+                        email: adminUser.email,
+                        role: adminUser.role,
+                    },
+                })
+
+                const stateServer = await constructTestPostgresServer({
+                    ldService,
+                    s3Client: mockS3,
+                })
+                const cmsServer = await constructTestPostgresServer({
+                    context: {
+                        user: cmsUser,
+                    },
+                    ldService,
+                    s3Client: mockS3,
+                })
+
+                const contract1 =
+                    await createAndSubmitTestContractWithRate(stateServer)
+                const contract2 =
+                    await createAndSubmitTestContractWithRate(stateServer)
+
+                const submit1ID =
+                    contract1.packageSubmissions[0].rateRevisions[0].rateID
+                const submit2ID =
+                    contract2.packageSubmissions[0].rateRevisions[0].rateID
+
+                const newRateDate1 = new Date('2025-05-05')
+
+                // add overrides to rate
+                await store.overrideRateData({
+                    rateID: submit1ID,
+                    updatedByID: adminUser.id,
+                    description: 'Add overrides',
+                    overrides: {
+                        initiallySubmittedAt: newRateDate1,
+                        revisionOverride: undefined,
+                    },
+                })
+
+                const newRateDate2 = new Date('2024-05-05')
+
+                // add overrides to rate
+                await store.overrideRateData({
+                    rateID: submit2ID,
+                    updatedByID: adminUser.id,
+                    description: 'Add overrides',
+                    overrides: {
+                        initiallySubmittedAt: newRateDate2,
+                        revisionOverride: undefined,
+                    },
+                })
+
+                // index rates
+                const result = await executeGraphQLOperation(cmsServer, {
+                    query: IndexRatesDocument,
+                })
+
+                expect(result.data).toBeDefined()
+                const ratesIndex = result.data?.indexRates
+                const testRateIDs = [submit1ID, submit2ID]
+
+                expect(result.errors).toBeUndefined()
+                const matchedTestRates: Rate[] = ratesIndex.edges
+                    .map((edge: RateEdge) => edge.node)
+                    .filter((test: Rate) => {
+                        return testRateIDs.includes(test.id)
+                    })
+
+                expect(matchedTestRates).toHaveLength(2)
+
+                // Expect related contracts to have 1 contract, the parent contract
+                expect(matchedTestRates[0].initiallySubmittedAt).toStrictEqual(
+                    newRateDate1
+                )
+                expect(matchedTestRates[1].initiallySubmittedAt).toStrictEqual(
+                    newRateDate2
+                )
             })
 
             it('does not return rates still in initial draft', async () => {
