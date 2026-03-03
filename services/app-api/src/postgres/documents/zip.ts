@@ -1,9 +1,5 @@
-import type {
-    DocumentZipType,
-    DocumentZipPackage,
-    PrismaClient,
-} from '@prisma/client'
-import type { PrismaTransactionType } from '../prismaTypes'
+import type { DocumentZipType, DocumentZipPackage } from '@prisma/client'
+import type { ExtendedPrismaClient } from '../prismaClient'
 import { logError } from '../../logger'
 
 // Define types for function arguments
@@ -28,7 +24,7 @@ export type FindDocumentZipPackagesByRevisionArgsType = {
  * Expects s3BucketName and s3Key to be provided by caller (parsed at API boundary)
  */
 export async function createDocumentZipPackage(
-    client: PrismaClient | PrismaTransactionType,
+    client: ExtendedPrismaClient,
     args: CreateDocumentZipPackageArgsType
 ): Promise<DocumentZipPackage | Error> {
     try {
@@ -53,7 +49,7 @@ export async function createDocumentZipPackage(
  * Finds document zip packages for a contract revision
  */
 export async function findDocumentZipPackagesByContractRevision(
-    client: PrismaClient | PrismaTransactionType,
+    client: ExtendedPrismaClient,
     contractRevisionID: string,
     documentType?: DocumentZipType
 ): Promise<DocumentZipPackage[] | Error> {
@@ -82,7 +78,7 @@ export async function findDocumentZipPackagesByContractRevision(
  * Finds document zip packages for a rate revision
  */
 export async function findDocumentZipPackagesByRateRevision(
-    client: PrismaClient | PrismaTransactionType,
+    client: ExtendedPrismaClient,
     rateRevisionID: string,
     documentType?: DocumentZipType
 ): Promise<DocumentZipPackage[] | Error> {
