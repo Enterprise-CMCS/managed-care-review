@@ -5,5 +5,4 @@ export {
     validateDateRange12Months,
     validateFileItemsList,
     validateFileItemsListSingleUpload,
-    isValidDateString,
 } from './validators'
