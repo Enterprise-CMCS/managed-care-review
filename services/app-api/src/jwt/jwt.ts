@@ -14,12 +14,21 @@ interface APIKeyType {
 
 interface OAuthTokenPayload {
     sub: string
+    iss: string
     client_id: string
     grant_type: string
     user_id: string
     grants: string[]
     iat: number
     exp: number
+}
+
+interface OauthTokenValidation {
+    clientId: string
+    iss: string
+    grantType: string
+    user_id: string
+    grants: string[]
 }
 
 function createOAuthJWT(
@@ -31,6 +40,7 @@ function createOAuthJWT(
 ): APIKeyType {
     const payload: OAuthTokenPayload = {
         sub: clientId,
+        iss: config.issuer,
         client_id: clientId,
         grant_type: grantType,
         user_id: userId,
@@ -40,7 +50,6 @@ function createOAuthJWT(
     }
 
     const token = sign(payload, config.signingKey, {
-        issuer: config.issuer,
         algorithm: 'HS256',
     })
 
@@ -71,9 +80,7 @@ function userIDFromToken(config: JWTConfig, token: string): string | Error {
 function validateOAuthToken(
     config: JWTConfig,
     token: string
-):
-    | { clientId: string; grantType: string; userId: string; grants: string[] }
-    | Error {
+): OauthTokenValidation | Error {
     try {
         const decoded = verify(token, config.signingKey, {
             issuer: config.issuer,
@@ -82,6 +89,7 @@ function validateOAuthToken(
 
         if (
             !decoded.client_id ||
+            !decoded.iss ||
             !decoded.grant_type ||
             !decoded.user_id ||
             !decoded.grants
@@ -91,8 +99,9 @@ function validateOAuthToken(
 
         return {
             clientId: decoded.client_id,
+            iss: decoded.iss,
             grantType: decoded.grant_type,
-            userId: decoded.user_id,
+            user_id: decoded.user_id,
             grants: decoded.grants,
         }
     } catch (err) {
@@ -112,8 +121,9 @@ export interface JWTLib {
     validateOAuthToken(token: string):
         | {
               clientId: string
+              iss: string
               grantType: string
-              userId: string
+              user_id: string
               grants: string[]
           }
         | Error

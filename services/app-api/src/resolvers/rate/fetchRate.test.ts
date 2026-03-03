@@ -804,7 +804,7 @@ describe('fetchRate', () => {
                 oauthClient: {
                     clientId: 'test-oauth-client',
                     grants: ['client_credentials'],
-                    isOAuthClient: true,
+                    iss: 'mcreview-test',
                     scopes: [],
                     isDelegatedUser: false,
                 },
@@ -849,7 +849,7 @@ describe('fetchRate', () => {
                 oauthClient: {
                     clientId: 'test-oauth-client',
                     grants: ['some_other_grant'],
-                    isOAuthClient: true,
+                    iss: 'mcreview-test',
                     scopes: [],
                     isDelegatedUser: false,
                 },

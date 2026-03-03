@@ -17,10 +17,7 @@ import type { RateOrErrorArrayType } from '../../postgres/contractAndRates'
 import { logError, logSuccess } from '../../logger'
 import { GraphQLError } from 'graphql'
 import type { RateType } from '../../domain-models/contractAndRates'
-import {
-    canRead,
-    getAuthContextInfo,
-} from '../../authorization/oauthAuthorization'
+import { canRead } from '../../authorization/oauthAuthorization'
 
 const validateAndReturnRates = (
     results: RateOrErrorArrayType,
@@ -60,11 +57,6 @@ export function indexRatesResolver(store: Store): QueryResolvers['indexRates'] {
             logError('indexRates', errMessage)
             setErrorAttributesOnActiveSpan(errMessage, span)
             throw createForbiddenError(errMessage)
-        }
-
-        // Log OAuth client access for audit trail
-        if (context.oauthClient?.isOAuthClient) {
-            logSuccess('indexRates')
         }
 
         // Authorization check (same for both OAuth clients and regular users)
@@ -136,11 +128,14 @@ export function indexRatesResolver(store: Store): QueryResolvers['indexRates'] {
                     })
                 })
             }
+            logSuccess(
+                context.oauthClient ? 'indexRates - oauthClient' : 'indexRates'
+            )
             setSuccessAttributesOnActiveSpan(span)
             return { totalCount: edges.length, edges }
         } else {
-            const authInfo = getAuthContextInfo(context)
-            const errMsg = authInfo.isOAuthClient
+            const authInfo = !!context.oauthClient
+            const errMsg = authInfo
                 ? `OAuth client not authorized to fetch rate reviews data`
                 : 'user not authorized to fetch rate reviews data'
             setErrorAttributesOnActiveSpan(errMsg, span)

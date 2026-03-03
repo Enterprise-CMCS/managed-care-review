@@ -17,10 +17,7 @@ import {
 } from '../attributeHelper'
 import { GraphQLError } from 'graphql/index'
 import type { ContractOrErrorArrayType } from '../../postgres/contractAndRates'
-import {
-    canRead,
-    getAuthContextInfo,
-} from '../../authorization/oauthAuthorization'
+import { canRead } from '../../authorization/oauthAuthorization'
 import { getLastUpdatedForDisplay } from '../helpers'
 import type { ConsolidatedContractStatus } from '../../gen/gqlClient'
 
@@ -101,11 +98,6 @@ export function indexContractsResolver(
             throw createForbiddenError(errMessage)
         }
 
-        // Log OAuth client access for audit trail
-        if (context.oauthClient?.isOAuthClient) {
-            logSuccess('indexContracts')
-        }
-
         // Authorization check (same for both OAuth clients and regular users)
         if (isStateUser(user)) {
             const contractsWithHistory =
@@ -132,7 +124,11 @@ export function indexContractsResolver(
                     },
                 })
             }
-            logSuccess('indexContracts')
+            logSuccess(
+                context.oauthClient
+                    ? 'indexContracts - oauthClient'
+                    : 'indexContracts'
+            )
             setSuccessAttributesOnActiveSpan(span)
             const parsedContracts = parseContracts(contractsWithHistory, span)
             return formatContracts(parsedContracts)
@@ -165,7 +161,11 @@ export function indexContractsResolver(
                     },
                 })
             }
-            logSuccess('indexContracts')
+            logSuccess(
+                context.oauthClient
+                    ? 'indexContracts - oauthClient'
+                    : 'indexContracts'
+            )
             setSuccessAttributesOnActiveSpan(span)
             let contracts: any = contractsWithHistory
 
@@ -180,8 +180,8 @@ export function indexContractsResolver(
                 cleanedStatuses
             )
         } else {
-            const authInfo = getAuthContextInfo(context)
-            const errMsg = authInfo.isOAuthClient
+            const authInfo = !!context.oauthClient
+            const errMsg = authInfo
                 ? `OAuth client not authorized to fetch contract data`
                 : 'user not authorized to fetch state data'
             logError('indexContracts', errMsg)

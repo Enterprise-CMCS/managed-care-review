@@ -13,10 +13,10 @@ import { FormGroup, Label } from '@trussworks/react-uswds/'
 import { PoliteErrorMessage } from '../../PoliteErrorMessage'
 
 /*
-* this component recreates DateRangePicker from @trussworks/react-uswds
-* with modificaton to allow separate validation and error messages for each DateTimePicker to improve UX and accessibility
-* modified version of the @trussworks/react-uswds DatePicker component is used, located in ../../FilterAccordion/FilterDateRange/_DatePicker.
-*/
+ * this component recreates DateRangePicker from @trussworks/react-uswds
+ * with modificaton to allow separate validation and error messages for each DateTimePicker to improve UX and accessibility
+ * modified version of the @trussworks/react-uswds DatePicker component is used, located in ../../FilterAccordion/FilterDateRange/_DatePicker.
+ */
 
 export type CustomDateRangePickerProps = {
     startDateLabel?: string
@@ -173,6 +173,7 @@ export const CustomDateRangePicker = (
                     )}
                     {startDateError && (
                         <PoliteErrorMessage
+                            id={startDatePickerErrorId}
                             formFieldLabel={`${startDateLabel}`}
                         >
                             {startDateError}
@@ -216,7 +217,10 @@ export const CustomDateRangePicker = (
                         </div>
                     )}
                     {endDateError && (
-                        <PoliteErrorMessage formFieldLabel={`${endDateLabel}`}>
+                        <PoliteErrorMessage
+                            id={endDatePickerErrorId}
+                            formFieldLabel={`${endDateLabel}`}
+                        >
                             {endDateError}
                         </PoliteErrorMessage>
                     )}

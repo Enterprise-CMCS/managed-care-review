@@ -14,10 +14,7 @@ import {
 } from '../../domain-models'
 import { logError, logSuccess } from '../../logger'
 import { createForbiddenError } from '../errorUtils'
-import {
-    canRead,
-    getAuthContextInfo,
-} from '../../authorization/oauthAuthorization'
+import { canRead } from '../../authorization/oauthAuthorization'
 
 export function fetchRateResolver(store: Store): QueryResolvers['fetchRate'] {
     return async (_parent, { input }, context) => {
@@ -55,16 +52,11 @@ export function fetchRateResolver(store: Store): QueryResolvers['fetchRate'] {
             })
         }
 
-        // Log OAuth client access for audit trail
-        if (context.oauthClient?.isOAuthClient) {
-            logSuccess('fetchRate')
-        }
-
         // Authorization check (same for both OAuth clients and regular users)
         if (isStateUser(user)) {
             if (user.stateCode !== rateWithHistory.stateCode) {
-                const authInfo = getAuthContextInfo(context)
-                const errMessage = authInfo.isOAuthClient
+                const authInfo = !!context.oauthClient
+                const errMessage = authInfo
                     ? `OAuth client not authorized to fetch rate data from ${rateWithHistory.stateCode}`
                     : 'State users are not authorized to fetch rate data from a different state.'
                 logError('fetchRate', errMessage)
@@ -78,6 +70,9 @@ export function fetchRateResolver(store: Store): QueryResolvers['fetchRate'] {
             throw createForbiddenError(errMessage)
         }
 
+        logSuccess(
+            context.oauthClient ? 'fetchRate - oauthClient' : 'fetchRate'
+        )
         setSuccessAttributesOnActiveSpan(span)
         return { rate: rateWithHistory }
     }

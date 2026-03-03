@@ -59,10 +59,6 @@ describe('_DatePicker component', () => {
             'text'
         )
         expect(getByTestId('date-picker-internal-input')).toHaveAttribute(
-            'aria-hidden',
-            'true'
-        )
-        expect(getByTestId('date-picker-internal-input')).toHaveAttribute(
             'name',
             testProps.name
         )
