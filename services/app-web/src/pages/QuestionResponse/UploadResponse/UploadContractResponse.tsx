@@ -25,7 +25,6 @@ import { QuestionDisplayTable } from '../QATable/QuestionDisplayTable'
 import { useAuth } from '../../../contexts/AuthContext'
 import { Error404 } from '../../Errors/Error404Page'
 import { useMemoizedStateHeader } from '../../../hooks'
-import { aC } from 'vitest/dist/chunks/reporters.d.BFLkQcL6.js'
 
 export const UploadContractResponse = () => {
     // router context
