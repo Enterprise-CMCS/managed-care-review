@@ -146,6 +146,7 @@ const mockRateRevision = (
             },
         ],
         contractsWithSharedRateRevision: [],
+        revisionOverrides: [],
         ...revision,
     }
 }
