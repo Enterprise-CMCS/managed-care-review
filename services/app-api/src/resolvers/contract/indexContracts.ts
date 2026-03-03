@@ -16,7 +16,7 @@ import {
     setSuccessAttributesOnActiveSpan,
 } from '../attributeHelper'
 import { GraphQLError } from 'graphql/index'
-import type { ContractOrErrorArrayType } from '../../postgres/contractAndRates/findAllContractsWithHistoryByState'
+import type { ContractOrErrorArrayType } from '../../postgres/contractAndRates'
 import {
     canRead,
     getAuthContextInfo,
