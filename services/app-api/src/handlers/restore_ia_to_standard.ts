@@ -140,7 +140,7 @@ export const main: Handler = async (
     } catch (error) {
         const errorMessage =
             error instanceof Error ? error.message : String(error)
-        console.error('Glacier restoration failed:', errorMessage)
+        console.error('IA to STANDARD restoration failed:', errorMessage)
         throw error
     }
 }
