@@ -1,5 +1,3 @@
- 
- 
 import { dayjs } from '@mc-review/dates'
 import * as Yup from 'yup'
 import {
@@ -8,6 +6,7 @@ import {
     hasNoLoadingFiles,
     hasNoMoreThanOneFile,
 } from '../components/FileUpload'
+import { isValidDateString } from '../../../../packages/dates/src/calendarDate'
 
 /*
     validateDateFormat is a custom Yup method
@@ -26,7 +25,16 @@ function validateDateFormat(
     parseStrict: boolean
 ): Yup.DateSchema<Date | undefined, Record<string, any>, Date | undefined> {
     return this.transform(function (value, originalValue) {
+        //catch incomplete date entries from user.
+        if (
+            typeof originalValue === 'string' &&
+            !isValidDateString(originalValue)
+        ) {
+            return new Date('') // force 'Invalid Date'
+        }
+        //here partial date entry like '5/5/' transforms into valid date
         if (this.isType(value)) return value
+
         value = dayjs(originalValue, formats, parseStrict)
         return value.isValid() ? value.toDate() : new Date('') // force return 'Invalid Date'
     })
