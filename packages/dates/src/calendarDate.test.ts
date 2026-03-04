@@ -1,4 +1,4 @@
-import { isValidDateString } from "./calendarDate"
+import { isValidDateString } from './calendarDate'
 
 // testing function isValidDateString
 // returns true only if user enters date in '01/01/2026' or '1/1/2026' formats
@@ -11,95 +11,63 @@ describe('isValidDateString', () => {
         })
     })
 
-    describe('internal format YYYY-MM-DD ', () => {
-        it('returns true for valid internal format', () => {
-            expect(isValidDateString('2026-08-09')).toBe(true)
-        })
-        it('returns false for impossible date in internal format. Month 13', () => {
-            expect(isValidDateString('2026-13-01')).toBe(false) 
-        })
-        it('returns false for impossible date in internal format. Feb 29, non-leap year', () => {
-            expect(isValidDateString('2026-02-29')).toBe(false)
+    describe('internal format YYYY-MM-DD', () => {
+        it.each([
+            [true, '2026-08-09', 'valid internal format'],
+            [false, '2026-13-01', 'impossible date - month 13'],
+            [false, '2026-02-29','impossible date - Feb 29 non-leap year'],
+        ])('returns %s for %s: %s', (expected, value, description) => {
+            expect(isValidDateString(value as string)).toBe(expected)
         })
     })
 
     describe('user input MM/DD/YYYY or M/D/YYYY format', () => {
-        it('returns true for valid date with leading zeros', () => {
-            expect(isValidDateString('05/05/2026')).toBe(true)
-        })
-        it('returns true for valid date without leading zeros', () => {
-            expect(isValidDateString('5/5/2026')).toBe(true)
+        it.each([
+            [true, '05/05/2026', 'valid date with leading zeros'],
+            [true, '5/5/2026', 'valid date without leading zeros'],
+        ])('returns %s for %s: %s', (expected, value, description) => {
+            expect(isValidDateString(value as string)).toBe(expected)
         })
     })
 
     describe('partial and malformed entries', () => {
-        it('returns false for missing year with leading zeros', () => {
-            expect(isValidDateString('05/05')).toBe(false)
-        })
-        it('returns false for missing year without leading zeros', () => {
-            expect(isValidDateString('5/5')).toBe(false)
-        })
-        it('returns false for trailing slash with leading zeros', () => {
-            expect(isValidDateString('05/05/')).toBe(false)
-        })
-        it('returns false for trailing slash without leading zeros', () => {
-            expect(isValidDateString('5/5/')).toBe(false)
-        })
-        it('returns false for partial year with leading zeros', () => {
-            expect(isValidDateString('05/05/20')).toBe(false)
-        })
-        it('returns false for partial year without leading zeros', () => {
-            expect(isValidDateString('5/5/20')).toBe(false)
-        })
-        it('returns false for missing day with leading zeros', () => {
-            expect(isValidDateString('05//2026')).toBe(false)
-        })
-        it('returns false for missing day without leading zeros', () => {
-            expect(isValidDateString('5//2026')).toBe(false)
-        })
-        it('returns false for missing month with leading zeros', () => {
-            expect(isValidDateString('/5/2026')).toBe(false)
-        })
-        it('returns false for missing month with leading zeros', () => {
-            expect(isValidDateString('/05/2026')).toBe(false)
-        })
-        it('returns false for wrong separator without leading zeros', () => {
-            expect(isValidDateString('05-05-2026')).toBe(false)
-        })
-        it('returns false for wrong separator without leading zeros', () => {
-            expect(isValidDateString('5-5-2026')).toBe(false)
-        })
-        it('returns false for text input', () => {
-            expect(isValidDateString('abra-kadabra')).toBe(false)
+        it.each([
+            [false, '05/05', 'missing year with leading zeros'],
+            [false, '5/5', 'missing year without leading zeros'],
+            [false, '05/05/', 'trailing slash with leading zeros'],
+            [false, '5/5/', 'trailing slash without leading zeros'],
+            [false, '05/05/20', 'partial year with leading zeros'],
+            [false, '5/5/20', 'partial year without leading zeros'],
+            [false, '05//2026', 'missing day with leading zeros'],
+            [false, '5//2026', 'missing day without leading zeros'],
+            [false, '/05/2026', 'missing month with leading zeros'],
+            [false, '/5/2026', 'missing month without leading zeros'],
+            [false, '05-05-2026', 'wrong separator with leading zeros'],
+            [false, '5-5-2026', 'wrong separator without leading zeros'],
+            [false, 'abra-kadabra', 'text input'],
+        ])('returns %s for %s: %s', (expected, value, description) => {
+            expect(isValidDateString(value as string)).toBe(expected)
         })
     })
 
     describe('leap year', () => {
-        it('returns true for leap year Feb 29', () => {
-            expect(isValidDateString('2/29/2024')).toBe(true) 
-        })
-        it('returns false for non-leap year Feb 29', () => {
-            expect(isValidDateString('2/29/2026')).toBe(false)
+        it.each([
+            [true, '2/29/2024', 'Feb 29 on leap year'],
+            [false, '2/29/2026', 'Feb 29 on non-leap year'],
+        ])('returns %s for %s: %s', (expected, value, description) => {
+            expect(isValidDateString(value as string)).toBe(expected)
         })
     })
 
     describe('impossible dates', () => {
-        it('returns false for month 13', () => {
-            expect(isValidDateString('13/01/2026')).toBe(false)
-        })
-        it('returns false for day 32', () => {
-            expect(isValidDateString('1/32/2026')).toBe(false)
-        })
-        it('returns false for September 31', () => {
-            expect(isValidDateString('9/31/2026')).toBe(false)
-        })
-        it('returns false for day 0', () => {
-            expect(isValidDateString('1/0/2026')).toBe(false)
-        })
-        it('returns false for month 0', () => {
-            expect(isValidDateString('0/1/2026')).toBe(false)
+        it.each([
+            [false, '13/01/2026', 'month 13'],
+            [false, '1/32/2026', 'day 32'],
+            [false, '9/31/2026', 'September 31'],
+            [false, '1/0/2026', 'day 0'],
+            [false, '0/1/2026', 'month 0'],
+        ])('returns %s for %s: %s', (expected, value, description) => {
+            expect(isValidDateString(value as string)).toBe(expected)
         })
     })
-
-
 })
