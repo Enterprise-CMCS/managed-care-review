@@ -3,11 +3,11 @@
  *
  * IMPORTANT LIMITATIONS:
  * - Works for: STANDARD_IA, ONEZONE_IA, INTELLIGENT_TIERING
- * - Does NOT work for: GLACIER, DEEP_ARCHIVE (will fail with InvalidObjectState)
+ * - Does NOT work for: GLACIER, DEEP_ARCHIVE (skipped - cannot restore without S3 Batch Operations)
  *
- * For Glacier files, use AWS S3 Batch Operations to restore first, then run this.
  * This script will scan all files, report what storage classes are found, and
- * successfully restore only IA files. Glacier files will be logged as failures.
+ * successfully restore only IA files. Glacier files are counted but skipped.
+ * For Glacier files, use AWS S3 Batch Operations to restore them first.
  *
  * Usage:
  *   aws lambda invoke --function-name app-api-{stage}-restore-ia-to-standard response.json
