@@ -71,8 +71,7 @@ export class SecureS3Bucket extends Construct {
             autoDeleteObjects:
                 props.autoDeleteObjects ?? props.stage !== 'prod',
             lifecycleRules:
-                props.lifecycleRules ??
-                this.getDefaultLifecycleRules(props.stage),
+                props.lifecycleRules ?? this.getDefaultLifecycleRules(),
             cors: props.cors,
             intelligentTieringConfigurations:
                 props.intelligentTieringConfigurations,
@@ -92,11 +91,11 @@ export class SecureS3Bucket extends Construct {
     }
 
     /**
-     * Get default lifecycle rules based on stage
+     * Get default lifecycle rules
+     * Cleanup failed multipart uploads only - no expiration or transitions
+     * All stages behave the same
      */
-    private getDefaultLifecycleRules(stage: string): LifecycleRule[] {
-        // cleanup failed multipart uploads
-        // Dev, val, and prod all behave the same
+    private getDefaultLifecycleRules(): LifecycleRule[] {
         return [
             {
                 id: 'delete-incomplete-multipart-uploads',

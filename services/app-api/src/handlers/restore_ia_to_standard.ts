@@ -1,18 +1,23 @@
 /**
- * Lambda handler to restore files from Glacier back to S3 Standard storage
+ * Lambda handler to restore Infrequent Access files to S3 Standard storage
  *
- * This script identifies all files in S3 buckets that have been moved to Glacier
- * storage class (or Infrequent Access) and restores them to Standard storage.
+ * IMPORTANT LIMITATIONS:
+ * - Works for: STANDARD_IA, ONEZONE_IA, INTELLIGENT_TIERING
+ * - Does NOT work for: GLACIER, DEEP_ARCHIVE (will fail with InvalidObjectState)
+ *
+ * For Glacier files, use AWS S3 Batch Operations to restore first, then run this.
+ * This script will scan all files, report what storage classes are found, and
+ * successfully restore only IA files. Glacier files will be logged as failures.
  *
  * Usage:
- *   aws lambda invoke --function-name app-api-{stage}-restore-glacier-files response.json
+ *   aws lambda invoke --function-name app-api-{stage}-restore-ia-to-standard response.json
  *
  * With options:
- *   aws lambda invoke --function-name app-api-{stage}-restore-glacier-files \
+ *   aws lambda invoke --function-name app-api-{stage}-restore-ia-to-standard \
  *     --payload '{"dryRun":true}' response.json
  *
  * Or to process specific bucket:
- *   aws lambda invoke --function-name app-api-{stage}-restore-glacier-files \
+ *   aws lambda invoke --function-name app-api-{stage}-restore-ia-to-standard \
  *     --payload '{"bucket":"uploads-prod-uploads-documents-123456789","dryRun":false}' response.json
  */
 
@@ -158,11 +163,18 @@ async function processBucket(
 
         // Paginate through all objects in the bucket
         do {
+            // Stop if we've hit maxKeys limit
+            if (maxKeys && totalProcessed >= maxKeys) {
+                console.info(`Reached maxKeys limit of ${maxKeys}`)
+                break
+            }
+
+            const remainingKeys = maxKeys ? maxKeys - totalProcessed : undefined
             const listCommand: ListObjectsV2Command = new ListObjectsV2Command({
                 Bucket: bucket,
                 ContinuationToken: continuationToken,
-                MaxKeys: maxKeys
-                    ? Math.min(1000, maxKeys - totalProcessed)
+                MaxKeys: remainingKeys
+                    ? Math.min(1000, Math.max(1, remainingKeys))
                     : 1000,
             })
 
@@ -242,12 +254,6 @@ async function processBucket(
             }
 
             continuationToken = listResponse.NextContinuationToken
-
-            // Stop if we've hit maxKeys limit
-            if (maxKeys && totalProcessed >= maxKeys) {
-                console.info(`Reached maxKeys limit of ${maxKeys}`)
-                break
-            }
         } while (continuationToken)
 
         console.info(`Bucket ${bucket} processing complete:`, result)
@@ -262,7 +268,9 @@ async function processBucket(
 }
 
 /**
- * Restore a single object from Glacier/IA to Standard storage
+ * Change storage class to STANDARD for Infrequent Access files
+ * NOTE: This will FAIL for Glacier/Deep Archive files with InvalidObjectState
+ * Glacier files must be restored first using S3 Batch Operations
  */
 async function restoreToStandard(
     bucket: string,
@@ -270,10 +278,13 @@ async function restoreToStandard(
 ): Promise<true | Error> {
     try {
         // Copy object to itself with STANDARD storage class
+        // This works for IA files but fails for Glacier (needs restore first)
+        // URL encode the key but preserve forward slashes
+        const encodedKey = encodeURIComponent(key).replace(/%2F/g, '/')
         const copyCommand = new CopyObjectCommand({
             Bucket: bucket,
             Key: key,
-            CopySource: `${bucket}/${key}`,
+            CopySource: `${bucket}/${encodedKey}`,
             StorageClass: 'STANDARD',
             MetadataDirective: 'COPY', // Preserve existing metadata
             TaggingDirective: 'COPY', // Preserve existing tags
