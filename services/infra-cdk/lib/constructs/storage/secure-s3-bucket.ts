@@ -8,7 +8,6 @@ import {
     type IntelligentTieringConfiguration,
     type Inventory,
     type LifecycleRule,
-    StorageClass,
 } from 'aws-cdk-lib/aws-s3'
 import {
     type AddToResourcePolicyResult,
@@ -72,8 +71,7 @@ export class SecureS3Bucket extends Construct {
             autoDeleteObjects:
                 props.autoDeleteObjects ?? props.stage !== 'prod',
             lifecycleRules:
-                props.lifecycleRules ??
-                this.getDefaultLifecycleRules(props.stage),
+                props.lifecycleRules ?? this.getDefaultLifecycleRules(),
             cors: props.cors,
             intelligentTieringConfigurations:
                 props.intelligentTieringConfigurations,
@@ -93,51 +91,17 @@ export class SecureS3Bucket extends Construct {
     }
 
     /**
-     * Get default lifecycle rules based on stage
+     * Get default lifecycle rules
+     * Cleanup failed multipart uploads only - no expiration or transitions
+     * All stages behave the same
      */
-    private getDefaultLifecycleRules(stage: string): LifecycleRule[] {
-        const rules: LifecycleRule[] = [
+    private getDefaultLifecycleRules(): LifecycleRule[] {
+        return [
             {
                 id: 'delete-incomplete-multipart-uploads',
                 abortIncompleteMultipartUploadAfter: Duration.days(7),
             },
         ]
-
-        // Add transition rules for non-dev environments
-        if (stage !== 'dev') {
-            rules.push({
-                id: 'transition-to-ia',
-                transitions: [
-                    {
-                        storageClass: StorageClass.INFREQUENT_ACCESS,
-                        transitionAfter: Duration.days(30),
-                    },
-                ],
-            })
-
-            // Add Glacier transition for production
-            if (stage === 'prod') {
-                rules.push({
-                    id: 'transition-to-glacier',
-                    transitions: [
-                        {
-                            storageClass: StorageClass.GLACIER,
-                            transitionAfter: Duration.days(90),
-                        },
-                    ],
-                })
-            }
-        }
-
-        // Add expiration for dev environment
-        if (stage === 'dev') {
-            rules.push({
-                id: 'expire-old-objects',
-                expiration: Duration.days(30),
-            })
-        }
-
-        return rules
     }
 
     /**
