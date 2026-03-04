@@ -71,6 +71,7 @@ export class AppApiStack extends BaseStack {
     public readonly migrateFunction: NodejsFunction
     public readonly regenerateZipsFunction: NodejsFunction
     public readonly migrateS3UrlsFunction: NodejsFunction
+    public readonly restoreGlacierFilesFunction: NodejsFunction
 
     public readonly migrateProtobufDataFunction: NodejsFunction
     public readonly graphqlFunction: NodejsFunction
@@ -512,6 +513,51 @@ export class AppApiStack extends BaseStack {
                     ]),
                 },
             }
+        )
+
+        /**
+         * Create the restore Glacier files function
+         * Used to restore files from Glacier storage back to S3 Standard
+         */
+        this.restoreGlacierFilesFunction = this.createLambdaFunction(
+            'restoreGlacierFiles',
+            'restore_glacier_files',
+            'main',
+            {
+                timeout: Duration.minutes(15), // Extended timeout for processing many files
+                memorySize: 1024,
+                environment,
+                role,
+                layers: [this.otelLayer],
+                bundling: {
+                    format: OutputFormat.ESM,
+                    banner: AppApiStack.ESM_BANNER,
+                    ...this.createBundling('restore-glacier-files', [
+                        this.getOtelBundlingCommands(),
+                    ]),
+                },
+            }
+        )
+
+        // Grant S3 permissions to restore Glacier files
+        this.restoreGlacierFilesFunction.addToRolePolicy(
+            new PolicyStatement({
+                effect: Effect.ALLOW,
+                actions: [
+                    's3:ListBucket',
+                    's3:GetObject',
+                    's3:PutObject',
+                    's3:CopyObject',
+                    's3:RestoreObject',
+                    's3:GetObjectAttributes',
+                ],
+                resources: [
+                    `arn:aws:s3:::${environment.VITE_APP_S3_DOCUMENTS_BUCKET}`,
+                    `arn:aws:s3:::${environment.VITE_APP_S3_DOCUMENTS_BUCKET}/*`,
+                    `arn:aws:s3:::${environment.VITE_APP_S3_QA_BUCKET}`,
+                    `arn:aws:s3:::${environment.VITE_APP_S3_QA_BUCKET}/*`,
+                ],
+            })
         )
 
         // Create GraphQL function with VPC and layers
