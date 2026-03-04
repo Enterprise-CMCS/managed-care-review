@@ -21,6 +21,10 @@ query fetchRate($input: FetchRateInput!) {
             packageSubmissions {
                 ...ratePackageSubmissionsFragment
             }
+
+            rateOverrides {
+                ...rateOverridesFragment
+            }
         }
     }
 }

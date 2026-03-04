@@ -12,6 +12,7 @@ import {
 } from '../../testHelpers/gqlHelpers'
 import {
     createDBUsersWithFullData,
+    testAdminUser,
     testCMSApproverUser,
     testCMSUser,
 } from '../../testHelpers/userHelpers'
@@ -33,8 +34,9 @@ import {
     submitTestContract,
     unlockTestContract,
 } from '../../testHelpers/gqlContractHelpers'
-import { testS3Client } from '../../../../app-api/src/testHelpers/s3Helpers'
+import { testS3Client } from '../../testHelpers'
 import { dayjs } from '@mc-review/dates'
+import { NewPostgresStore } from '../../postgres'
 
 describe('fetchRate', () => {
     const ldService = testLDService({
@@ -870,5 +872,144 @@ describe('fetchRate', () => {
         expect(fetchResult.errors?.[0].message).toBe(
             'OAuth client does not have read permissions'
         )
+    })
+
+    it('returns rate data with overrides', async () => {
+        const prismaClient = await sharedTestPrismaClient()
+        const store = NewPostgresStore(prismaClient)
+        const cmsUser = testCMSUser()
+        const adminUser = testAdminUser()
+        const stateServer = await constructTestPostgresServer({
+            ldService,
+            s3Client: mockS3,
+        })
+
+        const cmsServer = await constructTestPostgresServer({
+            context: {
+                user: cmsUser,
+            },
+        })
+
+        const adminServer = await constructTestPostgresServer({
+            context: {
+                user: adminUser,
+            },
+        })
+
+        const contractAndRate =
+            await createAndSubmitTestContractWithRate(stateServer)
+
+        const rateID =
+            contractAndRate.packageSubmissions[0].rateRevisions[0].rateID
+
+        if (!rateID) {
+            throw new Error(
+                'Unexpected error: Rate was not found in contract and rate submission'
+            )
+        }
+
+        const originalRate = await fetchTestRateById(adminServer, rateID)
+        const revision = originalRate.packageSubmissions?.[0]?.rateRevision
+
+        if (!revision) {
+            throw new Error(
+                'Unexpected error: Rate revision was not found in rate.'
+            )
+        }
+
+        const rateDocuments = revision.formData.rateDocuments
+        const supportingDocuments = revision.formData.supportingDocuments
+
+        const newDate = new Date('2025-05-05')
+
+        // add overrides to rate
+        await store.overrideRateData({
+            rateID,
+            updatedByID: adminUser.id,
+            description: 'Add overrides',
+            overrides: {
+                initiallySubmittedAt: newDate,
+                revisionOverride: {
+                    rateDocuments: rateDocuments.map((doc) => ({
+                        documentID: doc.id!,
+                        dateAdded: newDate,
+                    })),
+                    supportingDocuments: supportingDocuments.map((doc) => ({
+                        documentID: doc.id!,
+                        dateAdded: newDate,
+                    })),
+                },
+            },
+        })
+
+        const overriddenRate = await fetchTestRateById(cmsServer, rateID)
+
+        // Expect initiallySubmittedAt to have override date.
+        expect(overriddenRate.initiallySubmittedAt).toStrictEqual(newDate)
+
+        // Expect rate documents to have override dateAdded
+        expect(
+            overriddenRate.packageSubmissions?.[0]?.rateRevision.formData
+                .rateDocuments
+        ).toEqual(
+            expect.arrayContaining(
+                rateDocuments.map((doc) =>
+                    expect.objectContaining({
+                        id: doc.id,
+                        dateAdded: newDate,
+                    })
+                )
+            )
+        )
+
+        // Expect supporting documents to have override dateAdded
+        expect(
+            overriddenRate.packageSubmissions?.[0]?.rateRevision.formData
+                .supportingDocuments
+        ).toEqual(
+            expect.arrayContaining(
+                supportingDocuments.map((doc) =>
+                    expect.objectContaining({
+                        id: doc.id,
+                        dateAdded: newDate,
+                    })
+                )
+            )
+        )
+
+        await store.overrideRateData({
+            rateID,
+            updatedByID: adminUser.id,
+            description: 'Remove overrides',
+            overrides: {
+                initiallySubmittedAt: null,
+                revisionOverride: {
+                    rateDocuments: rateDocuments.map((doc) => ({
+                        documentID: doc.id!,
+                    })),
+                    supportingDocuments: supportingDocuments.map((doc) => ({
+                        documentID: doc.id!,
+                    })),
+                },
+            },
+        })
+
+        const revertedRate = await fetchTestRateById(cmsServer, rateID)
+
+        expect(revertedRate.initiallySubmittedAt).toStrictEqual(
+            originalRate.initiallySubmittedAt
+        )
+
+        // Expect rate documents to have override dateAdded
+        expect(
+            revertedRate.packageSubmissions?.[0]?.rateRevision.formData
+                .rateDocuments
+        ).toEqual(expect.arrayContaining(rateDocuments))
+
+        // Expect supporting documents to have override dateAdded
+        expect(
+            revertedRate.packageSubmissions?.[0]?.rateRevision.formData
+                .supportingDocuments
+        ).toEqual(expect.arrayContaining(supportingDocuments))
     })
 })

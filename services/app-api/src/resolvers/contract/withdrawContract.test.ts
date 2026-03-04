@@ -1,4 +1,8 @@
-import { testCMSUser, testStateUser } from '../../testHelpers/userHelpers'
+import {
+    testAdminUser,
+    testCMSUser,
+    testStateUser,
+} from '../../testHelpers/userHelpers'
 import {
     constructTestPostgresServer,
     defaultFloridaProgram,
@@ -12,6 +16,7 @@ import {
     unlockTestContract,
     withdrawTestContract,
     contractHistoryToDescriptions,
+    undoWithdrawTestContract,
 } from '../../testHelpers/gqlContractHelpers'
 import { fetchTestRateById, must } from '../../testHelpers'
 import type { RateFormDataInput, RateStrippedEdge } from '../../gen/gqlClient'
@@ -24,6 +29,8 @@ import {
     fetchTestIndexRatesStripped,
 } from '../../testHelpers/gqlRateHelpers'
 import { testEmailConfig, testEmailer } from '../../testHelpers/emailerHelpers'
+import { sharedTestPrismaClient } from '../../testHelpers/storeHelpers'
+import { NewPostgresStore } from '../../postgres'
 
 const testRateFormInputData = (): RateFormDataInput => ({
     rateType: 'AMENDMENT',
@@ -100,7 +107,7 @@ describe('withdrawContract', () => {
         )
     })
 
-    it('cant withdraw contract and rate submission', async () => {
+    it('can withdraw contract and rate submission', async () => {
         const stateServer = await constructTestPostgresServer({
             context: {
                 user: stateUser,
@@ -1046,6 +1053,172 @@ describe('withdrawContract', () => {
                 ]),
                 bodyHTML: expect.stringContaining(contractName),
             })
+        )
+    })
+
+    it('can withdraw and undo withdraw contract and rate submission with rate overrides', async () => {
+        const prismaClient = await sharedTestPrismaClient()
+        const store = NewPostgresStore(prismaClient)
+        const adminUser = testAdminUser()
+
+        await prismaClient.user.create({
+            data: {
+                id: adminUser.id,
+                givenName: adminUser.givenName,
+                familyName: adminUser.familyName,
+                email: adminUser.email,
+                role: adminUser.role,
+            },
+        })
+
+        const stateServer = await constructTestPostgresServer({
+            context: {
+                user: stateUser,
+            },
+        })
+
+        const cmsServer = await constructTestPostgresServer({
+            context: {
+                user: cmsUser,
+            },
+        })
+
+        const draftContract =
+            await createAndUpdateTestContractWithRate(stateServer)
+
+        const contract = await submitTestContract(stateServer, draftContract.id)
+
+        const rateID = contract.packageSubmissions[0].rateRevisions[0].rateID
+
+        must(await unlockTestContract(cmsServer, contract.id, 'unlock'))
+        must(await submitTestContract(stateServer, contract.id, 'resubmit'))
+
+        const newDate = new Date('2025-05-05')
+
+        const rate = await fetchTestRateById(cmsServer, rateID)
+
+        const rateARevision = rate.packageSubmissions?.[0]?.rateRevision
+
+        if (!rateARevision) {
+            throw new Error('Unexpected error, expecting rate to exist')
+        }
+
+        const rateDocuments = rateARevision.formData.rateDocuments
+        const supportingDocuments = rateARevision.formData.supportingDocuments
+
+        // add overrides to rate
+        await store.overrideRateData({
+            rateID: rateID,
+            updatedByID: adminUser.id,
+            description: 'Add overrides',
+            overrides: {
+                initiallySubmittedAt: newDate,
+                revisionOverride: {
+                    rateDocuments: rateDocuments.map((doc) => ({
+                        documentID: doc.id!,
+                        dateAdded: newDate,
+                    })),
+                    supportingDocuments: supportingDocuments.map((doc) => ({
+                        documentID: doc.id!,
+                        dateAdded: newDate,
+                    })),
+                },
+            },
+        })
+
+        const withdrawnContract = await withdrawTestContract(
+            cmsServer,
+            contract.id,
+            'withdraw submission'
+        )
+
+        const withdrawnRate = await fetchTestRateById(cmsServer, rateID)
+
+        const contractHistory =
+            await contractHistoryToDescriptions(withdrawnContract)
+
+        expect(withdrawnContract.consolidatedStatus).toBe('WITHDRAWN')
+        expect(withdrawnRate.consolidatedStatus).toBe('WITHDRAWN')
+        expect(contractHistory).toStrictEqual(
+            expect.arrayContaining([
+                'Initial submission',
+                `Withdraw submission. withdraw submission`,
+                `CMS withdrew the submission from review. withdraw submission`,
+            ])
+        )
+
+        // expect overrides to still be applied
+        expect(withdrawnRate.initiallySubmittedAt).toStrictEqual(newDate)
+        // Expect rate documents to have override dateAdded
+        expect(
+            withdrawnRate.packageSubmissions?.[0]?.rateRevision.formData
+                .rateDocuments
+        ).toEqual(
+            expect.arrayContaining(
+                rateDocuments.map((doc) =>
+                    expect.objectContaining({
+                        sha256: doc.sha256,
+                        dateAdded: newDate,
+                    })
+                )
+            )
+        )
+
+        // Expect supporting documents to have override dateAdded
+        expect(
+            withdrawnRate.packageSubmissions?.[0]?.rateRevision.formData
+                .supportingDocuments
+        ).toEqual(
+            expect.arrayContaining(
+                supportingDocuments.map((doc) =>
+                    expect.objectContaining({
+                        sha256: doc.sha256,
+                        dateAdded: newDate,
+                    })
+                )
+            )
+        )
+
+        const unwithdrawnContract = await undoWithdrawTestContract(
+            cmsServer,
+            contract.id,
+            'Undo withdraw and varify overrides'
+        )
+        const unwithdrawnRate = await fetchTestRateById(cmsServer, rateID)
+
+        expect(unwithdrawnContract.consolidatedStatus).toBe('RESUBMITTED')
+        expect(unwithdrawnRate.consolidatedStatus).toBe('RESUBMITTED')
+
+        // expect overrides to still be applied
+        expect(unwithdrawnRate.initiallySubmittedAt).toStrictEqual(newDate)
+        // Expect rate documents to have override dateAdded
+        expect(
+            unwithdrawnRate.packageSubmissions?.[0]?.rateRevision.formData
+                .rateDocuments
+        ).toEqual(
+            expect.arrayContaining(
+                rateDocuments.map((doc) =>
+                    expect.objectContaining({
+                        sha256: doc.sha256,
+                        dateAdded: newDate,
+                    })
+                )
+            )
+        )
+
+        // Expect supporting documents to have override dateAdded
+        expect(
+            unwithdrawnRate.packageSubmissions?.[0]?.rateRevision.formData
+                .supportingDocuments
+        ).toEqual(
+            expect.arrayContaining(
+                supportingDocuments.map((doc) =>
+                    expect.objectContaining({
+                        sha256: doc.sha256,
+                        dateAdded: newDate,
+                    })
+                )
+            )
         )
     })
 })

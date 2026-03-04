@@ -180,6 +180,19 @@ async function submitContractAndOrRates(
                     position: 'asc',
                 },
             },
+            revisionOverrides: {
+                // Get overrides for revision to apply to submitted revision.
+                orderBy: {
+                    createdAt: 'desc',
+                },
+                select: {
+                    id: true,
+                    createdAt: true,
+                    rateRevisionID: true,
+                    rateDocuments: true,
+                    supportingDocuments: true,
+                },
+            },
         },
         orderBy: {
             createdAt: 'asc', // Need in asc order so dateAdded is set to when this doc was first submitted.
@@ -191,16 +204,52 @@ async function submitContractAndOrRates(
     const prevRateDocs: { [key: string]: Date | undefined } = {}
     for (const rev of previousSubmissions) {
         const allRevDocs = [...rev.rateDocuments, ...rev.supportingDocuments]
+
+        //Gather all rate document overrides
+        const rateDocumentOverrides =
+            rev.revisionOverrides?.[0]?.rateDocuments ?? []
+        const supportingDocumentOverrides =
+            rev.revisionOverrides?.[0]?.supportingDocuments ?? []
+
+        const overrideDocs = [
+            ...rateDocumentOverrides,
+            ...supportingDocumentOverrides,
+        ]
+
         allRevDocs.forEach((doc) => {
             const hashKey = `${rev.rateID}-${doc.sha256}`
+            // set date to current documents dateAdded
+            let dateAdded: Date | null | undefined = doc.dateAdded
+            const docOverride = overrideDocs.find(
+                (overrideDoc) => overrideDoc.documentID === doc.id
+            )
+
+            // Use override dateAdded if it exists
+            if (docOverride?.dateAdded) {
+                dateAdded = docOverride.dateAdded
+            }
+
+            // If both do not exist, use the revision submitted at date.
+            if (!dateAdded) {
+                dateAdded = rev.submitInfo?.updatedAt
+            }
+
+            if (!dateAdded) {
+                return new Error(
+                    `error attempting to set rate documents date added. A previous submission document has no date added or submitted date. Rate: ${rev.rateID} Revision: ${rev.id}`
+                )
+            }
+
+            // If no previous date, then use the date we parsed out
             if (!prevRateDocs[hashKey]) {
-                if (!doc.dateAdded && !rev.submitInfo?.updatedAt) {
-                    return new Error(
-                        `error attempting to set rate documents date added. A previous submission document has no date added or submitted date. Rate: ${rev.rateID} Revision: ${rev.id}`
-                    )
+                prevRateDocs[hashKey] = dateAdded
+            } else {
+                // If there is a previous date, then override it if parsed dateAdded is earlier
+                // Revision are in ascending order, but overrides can be earlier so we need to
+                // check which on is earlier.
+                if (prevRateDocs[hashKey]?.getTime() > dateAdded.getTime()) {
+                    prevRateDocs[hashKey] = dateAdded
                 }
-                prevRateDocs[hashKey] =
-                    doc.dateAdded ?? rev.submitInfo?.updatedAt
             }
         })
     }
