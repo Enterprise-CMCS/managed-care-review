@@ -122,7 +122,7 @@ model RateTable {
 model RateOverrides {
   id String @id @default(uuid())
 
-  //overides meta data
+  //overrides metadata
   createdAt   DateTime  @default(now())
   updatedByID String?
   updatedBy   User?     @relation(fields: [updatedByID], references: [id])
@@ -130,8 +130,29 @@ model RateOverrides {
   rateID      String
   description String
 
-  //overrides
+  // Rate meta data
   initiallySubmittedAt DateTime?
+
+  // Optional 1-to-1 revision override
+  revisionOverride RateRevisionOverrides?
+}
+
+// Record of rate revision document overrides (1-to-1 child of RateOverrides)
+model RateRevisionOverrides {
+  id String @id @default(uuid())
+
+  // rate revision override metadata
+  createdAt      DateTime      @default(now())
+  rateOverrideID String        @unique
+  rateOverride   RateOverrides @relation(fields: [rateOverrideID], references: [id], onDelete: Cascade)
+
+  // Which revision these overrides apply to
+  rateRevisionID String
+  rateRevision   RateRevisionTable @relation(fields: [rateRevisionID], references: [id])
+
+  // Revision meta data overrides
+  rateDocuments       RateDocumentOverride[]
+  supportingDocuments RateSupportingDocumentOverride[]
 }
 
 // DraftRateJoinTable links a draft contract to a set of rates, draft or submitted.
@@ -252,6 +273,8 @@ model RateRevisionTable {
   contractsWithSharedRateRevision ContractTable[]           @relation(name: "SharedRateRevisions")
 
   documentZipPackage DocumentZipPackage[]
+
+  revisionOverrides RateRevisionOverrides[]
 }
 
 model ContractActionTable {
@@ -359,10 +382,10 @@ model ContractSupportingDocument {
 }
 
 model RateDocument {
-  id             String            @id @default(uuid())
-  createdAt      DateTime          @default(now())
-  updatedAt      DateTime          @default(now()) @updatedAt
-  position       Int               @default(-1)
+  id             String                 @id @default(uuid())
+  createdAt      DateTime               @default(now())
+  updatedAt      DateTime               @default(now()) @updatedAt
+  position       Int                    @default(-1)
   name           String // Original filename from user upload
   s3URL          String // DEPRECATED: Use s3BucketName + s3Key instead
   s3BucketName   String? // S3 bucket name (e.g., "uploads-documents-prod-bucket-cdk")
@@ -370,14 +393,15 @@ model RateDocument {
   sha256         String
   dateAdded      DateTime?
   rateRevisionID String
-  rateRevision   RateRevisionTable @relation(fields: [rateRevisionID], references: [id], onDelete: Cascade)
+  rateRevision   RateRevisionTable      @relation(fields: [rateRevisionID], references: [id], onDelete: Cascade)
+  overrides      RateDocumentOverride[]
 }
 
 model RateSupportingDocument {
-  id             String            @id @default(uuid())
-  createdAt      DateTime          @default(now())
-  updatedAt      DateTime          @default(now()) @updatedAt
-  position       Int               @default(-1)
+  id             String                           @id @default(uuid())
+  createdAt      DateTime                         @default(now())
+  updatedAt      DateTime                         @default(now()) @updatedAt
+  position       Int                              @default(-1)
   name           String // Original filename from user upload
   s3URL          String // DEPRECATED: Use s3BucketName + s3Key instead
   s3BucketName   String? // S3 bucket name (e.g., "uploads-documents-prod-bucket-cdk")
@@ -385,7 +409,8 @@ model RateSupportingDocument {
   sha256         String
   dateAdded      DateTime?
   rateRevisionID String
-  rateRevision   RateRevisionTable @relation(fields: [rateRevisionID], references: [id], onDelete: Cascade)
+  rateRevision   RateRevisionTable                @relation(fields: [rateRevisionID], references: [id], onDelete: Cascade)
+  overrides      RateSupportingDocumentOverride[]
 }
 
 model StateContact {
@@ -701,4 +726,28 @@ enum ContractSubmissionType {
 
 enum OAuthScope {
   CMS_SUBMISSION_ACTIONS
+}
+
+model RateDocumentOverride {
+  id                     String                @id @default(uuid())
+  createdAt              DateTime              @default(now())
+  rateRevisionOverrideID String
+  rateRevisionOverride   RateRevisionOverrides @relation(fields: [rateRevisionOverrideID], references: [id], onDelete: Cascade)
+  documentID             String
+  document               RateDocument          @relation(fields: [documentID], references: [id])
+
+  // Meta data
+  dateAdded DateTime?
+}
+
+model RateSupportingDocumentOverride {
+  id                     String                 @id @default(uuid())
+  createdAt              DateTime               @default(now())
+  rateRevisionOverrideID String
+  rateRevisionOverride   RateRevisionOverrides  @relation(fields: [rateRevisionOverrideID], references: [id], onDelete: Cascade)
+  documentID             String
+  document               RateSupportingDocument @relation(fields: [documentID], references: [id])
+
+  // Meta data
+  dateAdded DateTime?
 }

@@ -1,4 +1,8 @@
-import type { Prisma } from '@prisma/client'
+import type {
+    Prisma,
+    RateDocument,
+    RateSupportingDocument,
+} from '@prisma/client'
 import type { ProgramType } from '../../domain-models'
 import type {
     ContractFormDataType,
@@ -7,6 +11,7 @@ import type {
     PackageStatusType,
     UpdateInfoType,
     ConsolidatedContractStatusType,
+    DocumentType,
 } from '../../domain-models/contractAndRates'
 import { findStatePrograms } from '../state'
 import { packageName } from '@mc-review/submissions'
@@ -27,6 +32,7 @@ import type {
     RateRevisionTableWithRelatedSubmissionContracts,
     SubmissionPackageContractRevisionData,
     RateTableWithRelatedContractsPayload,
+    RateRevisionOverridesTablePayload,
 } from './prismaSubmittedRateHelpers'
 import type { ConsolidatedRateStatusType } from '../../domain-models/contractAndRates/statusType'
 import type { RelatedContractStripped } from '../../gen/gqlClient'
@@ -419,6 +425,18 @@ const includeRateFormData = {
             },
         },
     },
+    revisionOverrides: {
+        orderBy: {
+            createdAt: 'desc',
+        },
+        select: {
+            id: true,
+            createdAt: true,
+            rateRevisionID: true,
+            rateDocuments: true,
+            supportingDocuments: true,
+        },
+    },
 } satisfies Prisma.RateRevisionTableInclude
 
 const includeStrippedRateFormData = {
@@ -434,6 +452,38 @@ type StrippedRateRevisionTableWithFormData =
     Prisma.RateRevisionTableGetPayload<{
         include: typeof includeStrippedRateFormData
     }>
+
+// Function to take in original document and look for override dateAdded
+// returns original doc data and applies override to dateAdded.
+const documentDataToDomainModel = (
+    originalDoc: RateDocument | RateSupportingDocument,
+    revisionOverrides?: RateRevisionOverridesTablePayload
+): DocumentType => {
+    let dateAdded = originalDoc.dateAdded
+
+    // Override document data
+    if (revisionOverrides) {
+        const overrideDocs = [
+            ...revisionOverrides.rateDocuments,
+            ...revisionOverrides.supportingDocuments,
+        ]
+
+        const overrideDoc =
+            overrideDocs &&
+            overrideDocs.find((doc) => doc.documentID === originalDoc.id)
+
+        if (overrideDoc?.dateAdded) {
+            dateAdded = overrideDoc.dateAdded
+        }
+    }
+
+    return {
+        ...originalDoc,
+        dateAdded: dateAdded ?? undefined,
+        s3BucketName: originalDoc.s3BucketName ?? undefined,
+        s3Key: originalDoc.s3Key ?? undefined,
+    }
+}
 
 function rateFormDataToDomainModel(
     rateRevision: RateRevisionTableWithFormData
@@ -468,26 +518,28 @@ function rateFormDataToDomainModel(
         })
     }
 
+    // Get any rate overrides to override rate revision data.
+    const latestOverride = rateRevision.revisionOverrides?.[0]
+
+    const revisionOverrides =
+        latestOverride && latestOverride.rateRevisionID === rateRevision.id
+            ? latestOverride
+            : undefined
+
     return {
         id: rateRevision.rateID,
         rateID: rateRevision.rateID,
         rateType: rateRevision.rateType ?? undefined,
         rateCapitationType: rateRevision.rateCapitationType ?? undefined,
         rateDocuments: rateRevision.rateDocuments
-            ? rateRevision.rateDocuments.map((doc) => ({
-                  ...doc,
-                  dateAdded: doc.dateAdded ?? undefined,
-                  s3BucketName: doc.s3BucketName ?? undefined,
-                  s3Key: doc.s3Key ?? undefined,
-              }))
+            ? rateRevision.rateDocuments.map((doc) =>
+                  documentDataToDomainModel(doc, revisionOverrides)
+              )
             : [],
         supportingDocuments: rateRevision.supportingDocuments
-            ? rateRevision.supportingDocuments.map((doc) => ({
-                  ...doc,
-                  dateAdded: doc.dateAdded ?? undefined,
-                  s3BucketName: doc.s3BucketName ?? undefined,
-                  s3Key: doc.s3Key ?? undefined,
-              }))
+            ? rateRevision.supportingDocuments.map((doc) =>
+                  documentDataToDomainModel(doc, revisionOverrides)
+              )
             : [],
         rateDateStart: rateRevision.rateDateStart ?? undefined,
         rateDateEnd: rateRevision.rateDateEnd ?? undefined,

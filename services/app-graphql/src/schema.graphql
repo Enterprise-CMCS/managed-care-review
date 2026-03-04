@@ -2573,8 +2573,23 @@ type GenerateUploadURLPayload {
     expiresIn: Int
 }
 
+type GenericDocumentOverrideType {
+    id: ID!
+    documentID: String!
+    dateAdded: DateTime
+}
+
+type RateRevisionOverrideDataType {
+    id: ID!
+    createdAt: DateTime!
+    rateRevisionID: String!
+    rateDocuments: [GenericDocumentOverrideType]
+    supportingDocuments: [GenericDocumentOverrideType]
+}
+
 type RateOverrideDataType {
     initiallySubmittedAt: DateTime
+    revisionOverride: RateRevisionOverrideDataType
 }
 
 type RateOverrideType {
