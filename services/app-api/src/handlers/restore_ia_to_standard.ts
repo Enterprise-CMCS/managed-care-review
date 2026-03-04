@@ -29,7 +29,7 @@ import {
     CopyObjectCommand,
 } from '@aws-sdk/client-s3'
 
-export type RestoreGlacierFilesEvent = {
+export type RestoreIAToStandardEvent = {
     bucket?: string // Optional: specific bucket to process (default: process both buckets)
     dryRun?: boolean // Optional: just report, don't actually restore (default: true for safety)
     maxKeys?: number // Optional: max objects to process per bucket (default: all)
@@ -38,22 +38,24 @@ export type RestoreGlacierFilesEvent = {
 export type BucketRestoreResult = {
     bucket: string
     scanned: number
-    glacierFiles: number
+    glacierFiles: number // Counted but skipped (cannot restore without S3 Batch Operations)
     infrequentAccessFiles: number
     restored: number
+    skipped: number // Glacier files skipped
     failed: number
     errors: string[]
 }
 
-export type RestoreGlacierFilesResponse = {
+export type RestoreIAToStandardResponse = {
     success: boolean
     dryRun: boolean
     results: BucketRestoreResult[]
     summary: {
         totalScanned: number
-        totalGlacierFiles: number
+        totalGlacierFiles: number // For reporting only - these are skipped
         totalInfrequentAccessFiles: number
         totalRestored: number
+        totalSkipped: number
         totalFailed: number
     }
 }
@@ -64,8 +66,8 @@ const s3Client = new S3Client({})
  * Main handler function
  */
 export const main: Handler = async (
-    event: RestoreGlacierFilesEvent = {}
-): Promise<RestoreGlacierFilesResponse> => {
+    event: RestoreIAToStandardEvent = {}
+): Promise<RestoreIAToStandardResponse> => {
     const dryRun = event?.dryRun ?? true // Default to dry run for safety
     const maxKeys = event?.maxKeys
 
@@ -85,7 +87,7 @@ export const main: Handler = async (
         )
     }
 
-    console.info('Starting Glacier file restoration', {
+    console.info('Starting IA to Standard storage restoration', {
         dryRun,
         maxKeys,
         documentsBucket,
@@ -120,10 +122,14 @@ export const main: Handler = async (
                 0
             ),
             totalRestored: results.reduce((sum, r) => sum + r.restored, 0),
+            totalSkipped: results.reduce((sum, r) => sum + r.skipped, 0),
             totalFailed: results.reduce((sum, r) => sum + r.failed, 0),
         }
 
-        console.info('Glacier restoration complete', { summary, results })
+        console.info('IA to Standard restoration complete', {
+            summary,
+            results,
+        })
 
         return {
             success: true,
@@ -153,6 +159,7 @@ async function processBucket(
         glacierFiles: 0,
         infrequentAccessFiles: 0,
         restored: 0,
+        skipped: 0,
         failed: 0,
         errors: [],
     }
@@ -200,24 +207,15 @@ async function processBucket(
                     storageClass === 'GLACIER' ||
                     storageClass === 'DEEP_ARCHIVE'
                 ) {
+                    // Count Glacier files but skip them - they cannot be restored without S3 Batch Operations
                     result.glacierFiles++
-                    console.info(
-                        `Found Glacier file: ${obj.Key} (${storageClass})`
-                    )
+                    result.skipped++
 
-                    if (!dryRun) {
-                        const restored = await restoreToStandard(
-                            bucket,
-                            obj.Key
+                    // Only log first 10 Glacier files to reduce CloudWatch costs
+                    if (result.glacierFiles <= 10) {
+                        console.info(
+                            `Skipping Glacier file (cannot restore): ${obj.Key} (${storageClass})`
                         )
-                        if (restored instanceof Error) {
-                            result.failed++
-                            result.errors.push(
-                                `${obj.Key}: ${restored.message}`
-                            )
-                        } else {
-                            result.restored++
-                        }
                     }
                 } else if (
                     storageClass === 'STANDARD_IA' ||
@@ -225,9 +223,13 @@ async function processBucket(
                     storageClass === 'INTELLIGENT_TIERING'
                 ) {
                     result.infrequentAccessFiles++
-                    console.info(
-                        `Found Infrequent Access file: ${obj.Key} (${storageClass})`
-                    )
+
+                    // Only log every 100th IA file to reduce CloudWatch costs
+                    if (result.infrequentAccessFiles % 100 === 0) {
+                        console.info(
+                            `Found IA file ${result.infrequentAccessFiles}: ${obj.Key} (${storageClass})`
+                        )
+                    }
 
                     if (!dryRun) {
                         const restored = await restoreToStandard(
@@ -248,7 +250,7 @@ async function processBucket(
                 // Log progress every 1000 files
                 if (result.scanned % 1000 === 0) {
                     console.info(
-                        `Progress: ${result.scanned} files scanned, ${result.glacierFiles} in Glacier, ${result.infrequentAccessFiles} in IA, ${result.restored} restored`
+                        `Progress: ${result.scanned} files scanned, ${result.glacierFiles} Glacier (skipped), ${result.infrequentAccessFiles} IA, ${result.restored} restored`
                     )
                 }
             }
