@@ -56,7 +56,7 @@ const SingleRateCertSchema = (
                         .validateDateFormat('YYYY-MM-DD', true)
                         .defined('You must enter a start date')
                         .typeError(
-                            'The start date must be in MM/DD/YYYY format'
+                            'The start date must be in MM/DD/YYYY format, like 01/01/2030'
                         )
                 )
             }
@@ -69,7 +69,7 @@ const SingleRateCertSchema = (
                         // @ts-ignore-next-line
                         .validateDateFormat('YYYY-MM-DD', true)
                         .defined('You must enter an end date')
-                        .typeError('The end date must be in MM/DD/YYYY format')
+                        .typeError('The end date must be in MM/DD/YYYY format, like 01/01/2030')
                         .when(
                             // RateDateEnd must be at minimum the day after Start
                             'rateDateStart',
@@ -114,7 +114,7 @@ const SingleRateCertSchema = (
                 // @ts-ignore-next-line
                 .validateDateFormat('YYYY-MM-DD', true)
                 .defined('You must enter a start date')
-                .typeError('The start date must be in MM/DD/YYYY format'),
+                .typeError('The start date must be in MM/DD/YYYY format, like 01/01/2030'),
         }),
         effectiveDateEnd: Yup.date().when('rateType', {
             is: 'AMENDMENT',
@@ -124,7 +124,7 @@ const SingleRateCertSchema = (
                 // @ts-ignore-next-line
                 .validateDateFormat('YYYY-MM-DD', true)
                 .defined('You must enter an end date')
-                .typeError('The end date must be in MM/DD/YYYY format')
+                .typeError('The end date must be in MM/DD/YYYY format, like 01/01/2030')
                 .min(
                     Yup.ref('effectiveDateStart'),
                     'The end date must come after the start date'
