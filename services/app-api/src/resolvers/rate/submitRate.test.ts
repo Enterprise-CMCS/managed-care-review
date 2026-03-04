@@ -4,7 +4,11 @@ import {
     constructTestPostgresServer,
     executeGraphQLOperation,
 } from '../../testHelpers/gqlHelpers'
-import { testStateUser, testCMSUser } from '../../testHelpers/userHelpers'
+import {
+    testStateUser,
+    testCMSUser,
+    testAdminUser,
+} from '../../testHelpers/userHelpers'
 import {
     SubmitRateDocument,
     FetchRateDocument,
@@ -36,6 +40,7 @@ import {
 } from '../../testHelpers/gqlContractHelpers'
 import { submitRate } from '../../postgres/contractAndRates'
 import { sharedTestPrismaClient } from '../../testHelpers/storeHelpers'
+import { NewPostgresStore } from '../../postgres'
 
 describe('submitRate', () => {
     const ldService = testLDService({
@@ -257,7 +262,6 @@ describe('submitRate', () => {
             clearMetadataFromRateFormData(draftFormData)
         )
     })
-
     it('returns the latest linked contracts', async () => {
         const stateServer = await constructTestPostgresServer({
             ldService,
@@ -376,7 +380,6 @@ describe('submitRate', () => {
 
         expect(postSubmitC.packageSubmissions).toHaveLength(2)
     })
-
     it('can unlock and submit rate independent of contract status', async () => {
         const stateUser = testStateUser()
         const cmsUser = testCMSUser()
@@ -560,7 +563,6 @@ describe('submitRate', () => {
             `Not authorized to edit and submit a rate independently, the feature is disabled`
         )
     })
-
     it('is a rate that returns packageSubmissions', async () => {
         const client = await sharedTestPrismaClient()
 
@@ -652,6 +654,189 @@ describe('submitRate', () => {
         expect(subs[2].cause).toBe('RATE_SUBMISSION')
         expect(subs[2].submittedRevisions.map((r) => r.id)).toContain(
             subs[2].rateRevision.id
+        )
+    })
+    it('resubmit applies rate overrides to latest rate data', async () => {
+        const prismaClient = await sharedTestPrismaClient()
+        const store = NewPostgresStore(prismaClient)
+        const cmsUser = testCMSUser()
+        const adminUser = testAdminUser()
+        const stateServer = await constructTestPostgresServer({
+            ldService,
+            s3Client: mockS3,
+        })
+
+        const cmsServer = await constructTestPostgresServer({
+            context: {
+                user: cmsUser,
+            },
+        })
+
+        const adminServer = await constructTestPostgresServer({
+            context: {
+                user: adminUser,
+            },
+        })
+
+        const contractAndRate =
+            await createAndSubmitTestContractWithRate(stateServer)
+
+        const rateID =
+            contractAndRate.packageSubmissions[0].rateRevisions[0].rateID
+
+        if (!rateID) {
+            throw new Error(
+                'Unexpected error: Rate was not found in contract and rate submission'
+            )
+        }
+
+        const originalRate = await fetchTestRateById(adminServer, rateID)
+        const revision = originalRate.packageSubmissions?.[0]?.rateRevision
+
+        if (!revision) {
+            throw new Error(
+                'Unexpected error: Rate revision was not found in rate.'
+            )
+        }
+
+        const rateDocuments = revision.formData.rateDocuments
+        const supportingDocuments = revision.formData.supportingDocuments
+
+        const newDate = new Date('2025-05-05')
+
+        // add overrides to rate
+        await store.overrideRateData({
+            rateID,
+            updatedByID: adminUser.id,
+            description: 'Add overrides',
+            overrides: {
+                initiallySubmittedAt: newDate,
+                revisionOverride: {
+                    rateDocuments: rateDocuments.map((doc) => ({
+                        documentID: doc.id!,
+                        dateAdded: newDate,
+                    })),
+                    supportingDocuments: supportingDocuments.map((doc) => ({
+                        documentID: doc.id!,
+                        dateAdded: newDate,
+                    })),
+                },
+            },
+        })
+
+        const overriddenRate = await fetchTestRateById(cmsServer, rateID)
+
+        // Expect initiallySubmittedAt to have override date.
+        expect(overriddenRate.initiallySubmittedAt).toStrictEqual(newDate)
+
+        // Expect rate documents to have override dateAdded
+        expect(
+            overriddenRate.packageSubmissions?.[0]?.rateRevision.formData
+                .rateDocuments
+        ).toEqual(
+            expect.arrayContaining(
+                rateDocuments.map((doc) =>
+                    expect.objectContaining({
+                        id: doc.id,
+                        dateAdded: newDate,
+                    })
+                )
+            )
+        )
+
+        // Expect supporting documents to have override dateAdded
+        expect(
+            overriddenRate.packageSubmissions?.[0]?.rateRevision.formData
+                .supportingDocuments
+        ).toEqual(
+            expect.arrayContaining(
+                supportingDocuments.map((doc) =>
+                    expect.objectContaining({
+                        id: doc.id,
+                        dateAdded: newDate,
+                    })
+                )
+            )
+        )
+
+        // unlock the submission
+        await unlockTestContract(
+            cmsServer,
+            contractAndRate.id,
+            'Unlock rate with overrides'
+        )
+
+        const unlockedRate = await fetchTestRateById(stateServer, rateID)
+
+        expect(unlockedRate.consolidatedStatus).toBe('UNLOCKED')
+
+        await submitTestContract(
+            stateServer,
+            contractAndRate.id,
+            'Resubmit without changes'
+        )
+
+        const resubmittedRate = await fetchTestRateById(stateServer, rateID)
+
+        expect(resubmittedRate.consolidatedStatus).toBe('RESUBMITTED')
+
+        const resubmittedRevision =
+            resubmittedRate.packageSubmissions?.[0]?.rateRevision
+
+        if (!resubmittedRevision) {
+            throw new Error(
+                'Unexpected error: No revision found on submitted rate'
+            )
+        }
+
+        // Expect supporting documents to have override dateAdded
+        expect(resubmittedRevision.formData.supportingDocuments).toEqual(
+            expect.arrayContaining(
+                supportingDocuments.map((doc) =>
+                    expect.objectContaining({
+                        sha256: doc.sha256,
+                        dateAdded: newDate,
+                    })
+                )
+            )
+        )
+
+        // Assert that further resubmit still retains that new dateAdded
+        await unlockTestContract(
+            cmsServer,
+            contractAndRate.id,
+            'Unlock rate to verify overrides stick to further resubmits'
+        )
+
+        await submitTestContract(
+            stateServer,
+            contractAndRate.id,
+            'Resubmit to verify further resubmits still retain that dateAdded'
+        )
+
+        const resubmitRateAgain = await fetchTestRateById(stateServer, rateID)
+        const resubmittedRevisionAgain =
+            resubmitRateAgain.packageSubmissions?.[0]?.rateRevision
+
+        if (!resubmittedRevisionAgain) {
+            throw new Error(
+                'Unexpected error: No revision found on submitted rate'
+            )
+        }
+
+        // Expect initiallySubmittedAt to have override date.
+        expect(resubmitRateAgain.initiallySubmittedAt).toStrictEqual(newDate)
+
+        // Expect supporting documents to have override dateAdded
+        expect(resubmittedRevisionAgain.formData.supportingDocuments).toEqual(
+            expect.arrayContaining(
+                supportingDocuments.map((doc) =>
+                    expect.objectContaining({
+                        sha256: doc.sha256,
+                        dateAdded: newDate,
+                    })
+                )
+            )
         )
     })
 })

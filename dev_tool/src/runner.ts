@@ -20,8 +20,7 @@ export default class LabeledProcessRunner {
     private formattedPrefix(prefix: string): string {
         let color: string
 
-        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-        if (prefix! in this.prefixColors) {
+        if (prefix in this.prefixColors) {
             color = this.prefixColors[prefix]
         } else {
             const frontColor = this.colors.shift()

@@ -1,5 +1,6 @@
 import {
     iterableNonCMSUsersMockData,
+    testAdminUser,
     testCMSUser,
     testStateUser,
 } from '../../testHelpers/userHelpers'
@@ -20,6 +21,7 @@ import {
 import {
     addNewRateToTestContract,
     fetchTestRateById,
+    undoWithdrawTestRate,
     withdrawTestRate,
 } from '../../testHelpers/gqlRateHelpers'
 import {
@@ -37,6 +39,7 @@ import { expect } from 'vitest'
 import { testEmailConfig, testEmailer } from '../../testHelpers/emailerHelpers'
 import { packageName } from '@mc-review/submissions'
 import { must } from '../../testHelpers'
+import { NewPostgresStore } from '../../postgres'
 
 const testRateFormInputData = (): RateFormDataInput => ({
     rateType: 'AMENDMENT',
@@ -1222,6 +1225,194 @@ describe('withdrawRate', () => {
             expect.objectContaining({
                 bodyHTML: expect.stringContaining(contractBName),
             })
+        )
+    })
+
+    it('withdraw rate retains rate overrides', async () => {
+        const prismaClient = await sharedTestPrismaClient()
+        const store = NewPostgresStore(prismaClient)
+        const cmsUser = testCMSUser()
+        const adminUser = testAdminUser()
+        const stateServer = await constructTestPostgresServer()
+
+        const cmsServer = await constructTestPostgresServer({
+            context: {
+                user: cmsUser,
+            },
+        })
+
+        const adminServer = await constructTestPostgresServer({
+            context: {
+                user: adminUser,
+            },
+        })
+
+        const contractAndRate =
+            await createAndSubmitTestContractWithRate(stateServer)
+
+        const rateID =
+            contractAndRate.packageSubmissions[0].rateRevisions[0].rateID
+
+        if (!rateID) {
+            throw new Error(
+                'Unexpected error: Rate was not found in contract and rate submission'
+            )
+        }
+
+        const originalRate = await fetchTestRateById(adminServer, rateID)
+        const revision = originalRate.packageSubmissions?.[0]?.rateRevision
+
+        if (!revision) {
+            throw new Error(
+                'Unexpected error: Rate revision was not found in rate.'
+            )
+        }
+
+        const rateDocuments = revision.formData.rateDocuments
+        const supportingDocuments = revision.formData.supportingDocuments
+
+        const newDate = new Date('2025-05-05')
+
+        // add overrides to rate
+        await store.overrideRateData({
+            rateID,
+            updatedByID: adminUser.id,
+            description: 'Add overrides',
+            overrides: {
+                initiallySubmittedAt: newDate,
+                revisionOverride: {
+                    rateDocuments: rateDocuments.map((doc) => ({
+                        documentID: doc.id!,
+                        dateAdded: newDate,
+                    })),
+                    supportingDocuments: supportingDocuments.map((doc) => ({
+                        documentID: doc.id!,
+                        dateAdded: newDate,
+                    })),
+                },
+            },
+        })
+
+        const overriddenRate = await fetchTestRateById(cmsServer, rateID)
+
+        // Expect initiallySubmittedAt to have override date.
+        expect(overriddenRate.initiallySubmittedAt).toStrictEqual(newDate)
+
+        // Expect rate documents to have override dateAdded
+        expect(
+            overriddenRate.packageSubmissions?.[0]?.rateRevision.formData
+                .rateDocuments
+        ).toEqual(
+            expect.arrayContaining(
+                rateDocuments.map((doc) =>
+                    expect.objectContaining({
+                        id: doc.id,
+                        dateAdded: newDate,
+                    })
+                )
+            )
+        )
+
+        // Expect supporting documents to have override dateAdded
+        expect(
+            overriddenRate.packageSubmissions?.[0]?.rateRevision.formData
+                .supportingDocuments
+        ).toEqual(
+            expect.arrayContaining(
+                supportingDocuments.map((doc) =>
+                    expect.objectContaining({
+                        id: doc.id,
+                        dateAdded: newDate,
+                    })
+                )
+            )
+        )
+
+        await withdrawTestRate(
+            cmsServer,
+            rateID,
+            'Withdraw rate to verify overrides are retained'
+        )
+
+        const withdrawnRate = await fetchTestRateById(cmsServer, rateID)
+
+        expect(withdrawnRate.consolidatedStatus).toBe('WITHDRAWN')
+
+        // Expect initiallySubmittedAt to have override date.
+        expect(withdrawnRate.initiallySubmittedAt).toStrictEqual(newDate)
+
+        // Expect rate documents to have override dateAdded
+        expect(
+            withdrawnRate.packageSubmissions?.[0]?.rateRevision.formData
+                .rateDocuments
+        ).toEqual(
+            expect.arrayContaining(
+                rateDocuments.map((doc) =>
+                    expect.objectContaining({
+                        sha256: doc.sha256,
+                        dateAdded: newDate,
+                    })
+                )
+            )
+        )
+
+        // Expect supporting documents to have override dateAdded
+        expect(
+            withdrawnRate.packageSubmissions?.[0]?.rateRevision.formData
+                .supportingDocuments
+        ).toEqual(
+            expect.arrayContaining(
+                supportingDocuments.map((doc) =>
+                    expect.objectContaining({
+                        sha256: doc.sha256,
+                        dateAdded: newDate,
+                    })
+                )
+            )
+        )
+
+        // Assert Undo withdraw rate still retains rate overrides.
+        await undoWithdrawTestRate(
+            cmsServer,
+            rateID,
+            'Undo withdraw rate and verify the overrides still apply'
+        )
+
+        const unwithdrawnRate = await fetchTestRateById(cmsServer, rateID)
+
+        expect(unwithdrawnRate.consolidatedStatus).toBe('RESUBMITTED')
+
+        // Expect initiallySubmittedAt to have override date.
+        expect(unwithdrawnRate.initiallySubmittedAt).toStrictEqual(newDate)
+
+        // Expect rate documents to have override dateAdded
+        expect(
+            unwithdrawnRate.packageSubmissions?.[0]?.rateRevision.formData
+                .rateDocuments
+        ).toEqual(
+            expect.arrayContaining(
+                rateDocuments.map((doc) =>
+                    expect.objectContaining({
+                        sha256: doc.sha256,
+                        dateAdded: newDate,
+                    })
+                )
+            )
+        )
+
+        // Expect supporting documents to have override dateAdded
+        expect(
+            unwithdrawnRate.packageSubmissions?.[0]?.rateRevision.formData
+                .supportingDocuments
+        ).toEqual(
+            expect.arrayContaining(
+                supportingDocuments.map((doc) =>
+                    expect.objectContaining({
+                        sha256: doc.sha256,
+                        dateAdded: newDate,
+                    })
+                )
+            )
         )
     })
 })

@@ -9,13 +9,19 @@ import {
     executeGraphQLOperation,
 } from '../../testHelpers/gqlHelpers'
 import type { RateEdge, Rate } from '../../gen/gqlServer'
-import { testCMSUser, testStateUser } from '../../testHelpers/userHelpers'
+import {
+    testAdminUser,
+    testCMSUser,
+    testStateUser,
+} from '../../testHelpers/userHelpers'
 import {
     createAndSubmitTestContractWithRate,
     submitTestContract,
     createAndUpdateTestContractWithRate,
 } from '../../testHelpers/gqlContractHelpers'
 import { testS3Client } from '../../testHelpers'
+import { sharedTestPrismaClient } from '../../testHelpers/storeHelpers'
+import { NewPostgresStore } from '../../postgres'
 
 describe('indexRatesStripped', () => {
     const ldService = testLDService({
@@ -69,6 +75,103 @@ describe('indexRatesStripped', () => {
         // Expect related contracts to have 1 contract, the parent contract
         expect(matchedTestRates[0].relatedContracts).toHaveLength(1)
         expect(matchedTestRates[1].relatedContracts).toHaveLength(1)
+    })
+
+    it('returns stripped rates with overridden initial submit date', async () => {
+        const prismaClient = await sharedTestPrismaClient()
+        const store = NewPostgresStore(prismaClient)
+        const adminUser = testAdminUser()
+
+        await prismaClient.user.create({
+            data: {
+                id: adminUser.id,
+                givenName: adminUser.givenName,
+                familyName: adminUser.familyName,
+                email: adminUser.email,
+                role: adminUser.role,
+            },
+        })
+
+        const stateServer = await constructTestPostgresServer({
+            ldService,
+        })
+        const cmsServer = await constructTestPostgresServer({
+            context: {
+                user: testCMSUser(),
+            },
+        })
+
+        const contract1 = await createAndSubmitTestContractWithRate(stateServer)
+        const contract2 = await createAndSubmitTestContractWithRate(stateServer)
+
+        const submit1ID =
+            contract1.packageSubmissions[0].rateRevisions[0].rateID
+        const submit2ID =
+            contract2.packageSubmissions[0].rateRevisions[0].rateID
+
+        const newRateDate1 = new Date('2025-05-05')
+
+        // add overrides to rate
+        await store.overrideRateData({
+            rateID: submit1ID,
+            updatedByID: adminUser.id,
+            description: 'Add overrides',
+            overrides: {
+                initiallySubmittedAt: newRateDate1,
+                revisionOverride: undefined,
+            },
+        })
+
+        const newRateDate2 = new Date('2024-05-05')
+
+        // add overrides to rate
+        await store.overrideRateData({
+            rateID: submit2ID,
+            updatedByID: adminUser.id,
+            description: 'Add overrides',
+            overrides: {
+                initiallySubmittedAt: newRateDate2,
+                revisionOverride: undefined,
+            },
+        })
+
+        // index rates
+        const result = await executeGraphQLOperation(cmsServer, {
+            query: IndexRatesStrippedWithRelatedContractsDocument,
+            variables: {
+                input: {
+                    rateIDs: [submit1ID, submit2ID],
+                },
+            },
+        })
+
+        expect(result.data).toBeDefined()
+        const ratesIndex = result.data?.indexRatesStripped
+        const testRateIDs = [submit1ID, submit2ID]
+
+        expect(result.errors).toBeUndefined()
+        const matchedTestRates: RateStripped[] = ratesIndex.edges
+            .map((edge: RateStrippedEdge) => edge.node)
+            .filter((test: Rate) => {
+                return testRateIDs.includes(test.id)
+            })
+
+        expect(matchedTestRates).toHaveLength(2)
+
+        const rate1FromIndex = matchedTestRates.find(
+            (rate) => rate.id === submit1ID
+        )
+        const rate2FromIndex = matchedTestRates.find(
+            (rate) => rate.id === submit2ID
+        )
+
+        if (!rate1FromIndex || !rate2FromIndex) {
+            throw new Error('Unexpected error: Rate revision not found')
+        }
+
+        // Expect related contracts to have 1 contract, the parent contract
+        expect(rate1FromIndex.initiallySubmittedAt).toStrictEqual(newRateDate1)
+        expect(rate2FromIndex.initiallySubmittedAt).toStrictEqual(newRateDate2)
     })
 
     it('does not return rates still in initial draft', async () => {

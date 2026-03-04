@@ -84,27 +84,55 @@ function rateRevisionToDomainModel(
 }
 
 function rateOverridesToDomainModel(
-    rateOverrides: RateTableWithoutDraftContractsPayload['rateOverrides']
+    rateOverrides:
+        | RateTableWithoutDraftContractsPayload['rateOverrides']
+        | RateTableWithoutDraftContractsStrippedPayload['rateOverrides']
 ): RateDataOverrideType[] {
     return rateOverrides
-        .map((override) => ({
-            id: override.id,
-            createdAt: override.createdAt ?? undefined,
-            updatedBy: override.updatedBy
-                ? {
-                      id: override.updatedBy.id,
-                      role: override.updatedBy.role,
-                      email: override.updatedBy.email,
-                      givenName: override.updatedBy.givenName,
-                      familyName: override.updatedBy.familyName,
-                  }
-                : undefined,
-            description: override.description,
-            overrides: {
-                initiallySubmittedAt:
-                    override.initiallySubmittedAt ?? undefined,
-            },
-        }))
+        .map((override) => {
+            const revisionOverride =
+                'revisionOverride' in override
+                    ? override.revisionOverride
+                    : undefined
+            return {
+                id: override.id,
+                createdAt: override.createdAt ?? undefined,
+                updatedBy: override.updatedBy
+                    ? {
+                          id: override.updatedBy.id,
+                          role: override.updatedBy.role,
+                          email: override.updatedBy.email,
+                          givenName: override.updatedBy.givenName,
+                          familyName: override.updatedBy.familyName,
+                      }
+                    : undefined,
+                description: override.description,
+                overrides: {
+                    initiallySubmittedAt:
+                        override.initiallySubmittedAt ?? undefined,
+                    revisionOverride: revisionOverride
+                        ? {
+                              id: revisionOverride.id,
+                              createdAt: revisionOverride.createdAt,
+                              rateRevisionID: revisionOverride.rateRevisionID,
+                              rateDocuments: revisionOverride.rateDocuments.map(
+                                  (doc) => ({
+                                      ...doc,
+                                      dateAdded: doc.dateAdded ?? undefined,
+                                  })
+                              ),
+                              supportingDocumentOverrideSchema:
+                                  revisionOverride.supportingDocuments.map(
+                                      (doc) => ({
+                                          ...doc,
+                                          dateAdded: doc.dateAdded ?? undefined,
+                                      })
+                                  ),
+                          }
+                        : undefined,
+                },
+            }
+        })
         .sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime())
 }
 
