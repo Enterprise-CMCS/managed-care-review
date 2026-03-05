@@ -24,7 +24,6 @@ infra-cdk/
 │   ├── cognito.ts
 │   ├── frontend-app.ts
 │   ├── frontend-infra.ts
-│   ├── lambda-layers.ts
 │   ├── network.ts
 │   ├── oidc.ts
 │   ├── postgres.ts
