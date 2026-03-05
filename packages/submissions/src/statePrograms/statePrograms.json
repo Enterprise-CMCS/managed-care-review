@@ -1,6 +1,18 @@
 {
     "states": [
         {
+            "name": "Alaska",
+            "programs": [
+                {
+                    "id": "90b09c62-381d-4327-921c-b19483e250be",
+                    "fullName": "MC Review Test Program Plus",
+                    "name": "TPPLUS",
+                    "isRateProgram": false
+                }
+            ],
+            "code": "AK"
+        },
+        {
             "name": "Alabama",
             "programs": [
                 {

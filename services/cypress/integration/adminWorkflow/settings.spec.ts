@@ -85,7 +85,7 @@ describe('Admin user can view application level settings', () => {
         cy.findByText(`Azula Hotman was assigned to this state`)
 
         // Check to AL assignments have been saved.
-        cy.findAllByRole('row').should('exist').eq(1).within(row => {
+        cy.findAllByRole('row').should('exist').eq(2).within(row => {
             cy.findByText('AL')
             cy.findByText(/Azula Hotman/)
             cy.findByText(/Zuko Hotman/)
@@ -110,7 +110,7 @@ describe('Admin user can view application level settings', () => {
         cy.findByText(`Azula Hotman was removed`)
 
         // Check to AL assignments have been saved.
-        cy.findAllByRole('row').should('exist').eq(1).within(() => {
+        cy.findAllByRole('row').should('exist').eq(2).within(() => {
             cy.findByText('AL')
             cy.findByText('Zuko Hotman')
         })
