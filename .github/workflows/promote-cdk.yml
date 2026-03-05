@@ -473,34 +473,6 @@ jobs:
           stage-name: dev
           use-cdk-role: "true"
 
-      - name: Download Prisma layers
-        uses: actions/download-artifact@v8
-        with:
-          name: lambda-layers-prisma-client-migration
-          path: ./services/infra-cdk/lambda-layers-prisma-client-migration
-
-      - name: Extract Prisma migration layer
-        working-directory: ./services/infra-cdk/lambda-layers-prisma-client-migration
-        run: |
-          echo "=== Extracting Prisma migration layer ==="
-          tar -xzf nodejs.tar.gz
-          rm nodejs.tar.gz
-          ls -la
-
-      - name: Download Prisma engine layers
-        uses: actions/download-artifact@v8
-        with:
-          name: lambda-layers-prisma-client-engine
-          path: ./services/infra-cdk/lambda-layers-prisma-client-engine
-
-      - name: Extract Prisma engine layer
-        working-directory: ./services/infra-cdk/lambda-layers-prisma-client-engine
-        run: |
-          echo "=== Extracting Prisma engine layer ==="
-          tar -xzf nodejs.tar.gz
-          rm nodejs.tar.gz
-          ls -la
-
       - name: Deploy AppApi stack
         working-directory: services/infra-cdk
         env:
@@ -764,34 +736,6 @@ jobs:
           account-id: ${{ secrets.VAL_AWS_ACCOUNT_ID }}
           stage-name: val
           use-cdk-role: "true"
-
-      - name: Download Prisma layers
-        uses: actions/download-artifact@v8
-        with:
-          name: lambda-layers-prisma-client-migration
-          path: ./services/infra-cdk/lambda-layers-prisma-client-migration
-
-      - name: Extract Prisma migration layer
-        working-directory: ./services/infra-cdk/lambda-layers-prisma-client-migration
-        run: |
-          echo "=== Extracting Prisma migration layer ==="
-          tar -xzf nodejs.tar.gz
-          rm nodejs.tar.gz
-          ls -la
-
-      - name: Download Prisma engine layers
-        uses: actions/download-artifact@v8
-        with:
-          name: lambda-layers-prisma-client-engine
-          path: ./services/infra-cdk/lambda-layers-prisma-client-engine
-
-      - name: Extract Prisma engine layer
-        working-directory: ./services/infra-cdk/lambda-layers-prisma-client-engine
-        run: |
-          echo "=== Extracting Prisma engine layer ==="
-          tar -xzf nodejs.tar.gz
-          rm nodejs.tar.gz
-          ls -la
 
       - name: Deploy AppApi stack
         working-directory: services/infra-cdk
@@ -1135,34 +1079,6 @@ jobs:
           account-id: ${{ secrets.PROD_AWS_ACCOUNT_ID }}
           stage-name: prod
           use-cdk-role: "true"
-
-      - name: Download Prisma layers
-        uses: actions/download-artifact@v8
-        with:
-          name: lambda-layers-prisma-client-migration
-          path: ./services/infra-cdk/lambda-layers-prisma-client-migration
-
-      - name: Extract Prisma migration layer
-        working-directory: ./services/infra-cdk/lambda-layers-prisma-client-migration
-        run: |
-          echo "=== Extracting Prisma migration layer ==="
-          tar -xzf nodejs.tar.gz
-          rm nodejs.tar.gz
-          ls -la
-
-      - name: Download Prisma engine layers
-        uses: actions/download-artifact@v8
-        with:
-          name: lambda-layers-prisma-client-engine
-          path: ./services/infra-cdk/lambda-layers-prisma-client-engine
-
-      - name: Extract Prisma engine layer
-        working-directory: ./services/infra-cdk/lambda-layers-prisma-client-engine
-        run: |
-          echo "=== Extracting Prisma engine layer ==="
-          tar -xzf nodejs.tar.gz
-          rm nodejs.tar.gz
-          ls -la
 
       - name: Deploy AppApi stack
         working-directory: services/infra-cdk
