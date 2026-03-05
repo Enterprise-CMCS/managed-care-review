@@ -8,7 +8,7 @@ describe('parseAndValidateDocuments', () => {
             {
                 name: 'test-document.pdf',
                 s3URL: 's3://my-bucket/abc-123-uuid/test-document.pdf',
-                sha256: 'abc123def456',
+                sha256: 'abc123def456', //pragma: allowlist secret
             },
         ])
 
@@ -18,7 +18,7 @@ describe('parseAndValidateDocuments', () => {
             s3URL: 's3://my-bucket/abc-123-uuid/test-document.pdf',
             s3BucketName: 'my-bucket',
             s3Key: 'abc-123-uuid',
-            sha256: 'abc123def456',
+            sha256: 'abc123def456', //pragma: allowlist secret
         })
     })
 
@@ -31,7 +31,7 @@ describe('parseAndValidateDocuments', () => {
             {
                 name: 'rate-cert.pdf',
                 s3URL: 's3://bucket-2/key-2/rate-cert.pdf',
-                sha256: 'xyz789',
+                sha256: 'xyz789', //pragma: allowlist secret
             },
         ])
 
@@ -43,7 +43,7 @@ describe('parseAndValidateDocuments', () => {
         expect(docs[1]).toMatchObject({
             s3BucketName: 'bucket-2',
             s3Key: 'key-2',
-            sha256: 'xyz789',
+            sha256: 'xyz789', //pragma: allowlist secret
         })
     })
 
@@ -70,7 +70,7 @@ describe('parseAndValidateDocuments', () => {
                 {
                     name: 'invalid-doc.pdf',
                     s3URL: 'http://bucket/key/file.pdf',
-                    sha256: 'abc123',
+                    sha256: 'abc123', //pragma: allowlist secret
                 },
             ])
         ).toThrow(GraphQLError)
@@ -82,7 +82,7 @@ describe('parseAndValidateDocuments', () => {
                 {
                     name: 'malformed-doc.pdf',
                     s3URL: 's3://bucket-only',
-                    sha256: 'abc123',
+                    sha256: 'abc123', //pragma: allowlist secret
                 },
             ])
         ).toThrow(GraphQLError)
@@ -131,7 +131,7 @@ describe('parseAndValidateDocuments', () => {
             {
                 name: 'Contract Amendment.pdf',
                 s3URL: 's3://bucketname/key/Contract Amendment.pdf',
-                sha256: 'e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855',
+                sha256: 'e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855', //pragma: allowlist secret
             },
         ])
 
