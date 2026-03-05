@@ -121,6 +121,7 @@ export class Uploads extends BaseStack {
     /**
      * Add file type restrictions matching serverless bucket policies
      * Exception: RestoreIAToStandardRole can bypass this to restore IA files
+     * Uses STS assumed-role ARN pattern since Lambda uses assumed roles at runtime
      */
     private addFileTypeRestrictions(bucket: IBucket): void {
         bucket.addToResourcePolicy(
@@ -144,7 +145,7 @@ export class Uploads extends BaseStack {
                 ],
                 conditions: {
                     ArnNotLike: {
-                        'aws:PrincipalArn': `arn:aws:iam::${this.account}:role/app-api-${this.stage}-cdk-RestoreIAToStandardRole*`,
+                        'aws:PrincipalArn': `arn:aws:sts::${this.account}:assumed-role/app-api-${this.stage}-cdk-RestoreIAToStandardRole*/*`,
                     },
                 },
             })
@@ -200,6 +201,7 @@ export class Uploads extends BaseStack {
      * Add virus scan download blocking policies
      * Blocks downloads of files that don't have GuardDutyMalwareScanStatus=NO_THREATS_FOUND
      * Exception: RestoreIAToStandardRole can bypass this to restore IA files
+     * Uses STS assumed-role ARN pattern since Lambda uses assumed roles at runtime
      */
     private addVirusScanDownloadBlockingPolicies(
         uploadsBucket: IBucket,
@@ -219,7 +221,7 @@ export class Uploads extends BaseStack {
                             'NO_THREATS_FOUND',
                     },
                     ArnNotLike: {
-                        'aws:PrincipalArn': `arn:aws:iam::*:role/app-api-${this.stage}-cdk-RestoreIAToStandardRole*`,
+                        'aws:PrincipalArn': `arn:aws:sts::${this.account}:assumed-role/app-api-${this.stage}-cdk-RestoreIAToStandardRole*/*`,
                     },
                 },
             })
@@ -239,7 +241,7 @@ export class Uploads extends BaseStack {
                             'NO_THREATS_FOUND',
                     },
                     ArnNotLike: {
-                        'aws:PrincipalArn': `arn:aws:iam::*:role/app-api-${this.stage}-cdk-RestoreIAToStandardRole*`,
+                        'aws:PrincipalArn': `arn:aws:sts::${this.account}:assumed-role/app-api-${this.stage}-cdk-RestoreIAToStandardRole*/*`,
                     },
                 },
             })
@@ -250,6 +252,7 @@ export class Uploads extends BaseStack {
      * Allow RestoreIAToStandardRole to access buckets
      * This explicit Allow is needed because bucket has explicit Allow statements for other roles
      * Uses AccountPrincipal to avoid S3 Block Public Access blocking the policy
+     * Uses STS assumed-role ARN pattern since Lambda uses assumed roles at runtime
      */
     private allowRestoreIAToStandardRole(
         uploadsBucket: IBucket,
@@ -257,7 +260,8 @@ export class Uploads extends BaseStack {
     ): void {
         // Use Stack.of(this).account to get the AWS account ID
         const accountId = this.account
-        const roleArnPattern = `arn:aws:iam::${accountId}:role/app-api-${this.stage}-cdk-RestoreIAToStandardRole*`
+        // Lambda uses STS assumed-role ARN at runtime, not IAM role ARN
+        const roleArnPattern = `arn:aws:sts::${accountId}:assumed-role/app-api-${this.stage}-cdk-RestoreIAToStandardRole*/*`
 
         // Allow restore role access to documents bucket
         uploadsBucket.addToResourcePolicy(
