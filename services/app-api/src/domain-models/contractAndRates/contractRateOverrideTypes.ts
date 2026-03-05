@@ -29,7 +29,7 @@ const rateRevisionOverrideDataFragmentSchema = z.object({
     rateDocuments: preprocessNulls(
         z.array(genericDocumentOverrideSchema).optional()
     ),
-    supportingDocumentOverrideSchema: preprocessNulls(
+    supportingDocuments: preprocessNulls(
         z.array(genericDocumentOverrideSchema).optional()
     ),
 })
