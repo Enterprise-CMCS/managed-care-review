@@ -31,7 +31,7 @@ async function findAllContractsWithHistoryBySubmitInfo(
         }
 
         if (process.env.VITE_APP_STAGE_NAME === 'prod') {
-            whereClause.stateCode = { not: 'AS' }
+            whereClause.stateCode = { not: 'AS' } // exclude test state as per ADR 019
         }
         const contracts = await client.contractTable.findMany({
             where: whereClause,
