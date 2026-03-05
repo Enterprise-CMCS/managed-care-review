@@ -26,11 +26,15 @@ async function findAllContractsWithHistoryBySubmitInfo(
     skipFindingLatest: boolean = false
 ): Promise<ContractOrErrorArrayType | NotFoundError | Error> {
     try {
+        const whereClause: any = {
+            revisions: { some: { submitInfoID: { not: null } } },
+        }
+
+        if (process.env.VITE_APP_STAGE_NAME === 'prod') {
+            whereClause.stateCode = { not: 'AS' }
+        }
         const contracts = await client.contractTable.findMany({
-            where: {
-                revisions: { some: { submitInfoID: { not: null } } },
-                stateCode: { not: 'AS' }, // exclude test state as per ADR 019
-            },
+            where: whereClause,
             include: includeFullContract,
         })
 
