@@ -119,6 +119,15 @@ export class Uploads extends BaseStack {
     }
 
     /**
+     * Get the ARN pattern for the RestoreIAToStandardRole Lambda execution
+     * Lambda uses STS assumed-role ARN at runtime, not IAM role ARN
+     * Pattern: arn:aws:sts::{account}:assumed-role/{roleName}/{sessionName}
+     */
+    private getRestoreIAToStandardRoleArnPattern(): string {
+        return `arn:aws:sts::${this.account}:assumed-role/app-api-${this.stage}-cdk-RestoreIAToStandardRole*/*`
+    }
+
+    /**
      * Add file type restrictions matching serverless bucket policies
      * Exception: RestoreIAToStandardRole can bypass this to restore IA files
      * Uses STS assumed-role ARN pattern since Lambda uses assumed roles at runtime
@@ -145,7 +154,8 @@ export class Uploads extends BaseStack {
                 ],
                 conditions: {
                     ArnNotLike: {
-                        'aws:PrincipalArn': `arn:aws:sts::${this.account}:assumed-role/app-api-${this.stage}-cdk-RestoreIAToStandardRole*/*`,
+                        'aws:PrincipalArn':
+                            this.getRestoreIAToStandardRoleArnPattern(),
                     },
                 },
             })
@@ -221,7 +231,8 @@ export class Uploads extends BaseStack {
                             'NO_THREATS_FOUND',
                     },
                     ArnNotLike: {
-                        'aws:PrincipalArn': `arn:aws:sts::${this.account}:assumed-role/app-api-${this.stage}-cdk-RestoreIAToStandardRole*/*`,
+                        'aws:PrincipalArn':
+                            this.getRestoreIAToStandardRoleArnPattern(),
                     },
                 },
             })
@@ -241,7 +252,8 @@ export class Uploads extends BaseStack {
                             'NO_THREATS_FOUND',
                     },
                     ArnNotLike: {
-                        'aws:PrincipalArn': `arn:aws:sts::${this.account}:assumed-role/app-api-${this.stage}-cdk-RestoreIAToStandardRole*/*`,
+                        'aws:PrincipalArn':
+                            this.getRestoreIAToStandardRoleArnPattern(),
                     },
                 },
             })
@@ -252,28 +264,23 @@ export class Uploads extends BaseStack {
      * Allow RestoreIAToStandardRole to access buckets
      * This explicit Allow is needed because bucket has explicit Allow statements for other roles
      * Uses AccountPrincipal to avoid S3 Block Public Access blocking the policy
-     * Uses STS assumed-role ARN pattern since Lambda uses assumed roles at runtime
+     * Separates bucket-level and object-level permissions for proper granularity
      */
     private allowRestoreIAToStandardRole(
         uploadsBucket: IBucket,
         qaBucket: IBucket
     ): void {
-        // Use Stack.of(this).account to get the AWS account ID
         const accountId = this.account
-        // Lambda uses STS assumed-role ARN at runtime, not IAM role ARN
-        const roleArnPattern = `arn:aws:sts::${accountId}:assumed-role/app-api-${this.stage}-cdk-RestoreIAToStandardRole*/*`
+        const roleArnPattern = this.getRestoreIAToStandardRoleArnPattern()
 
-        // Allow restore role access to documents bucket
+        // Allow restore role bucket-level access to documents bucket
         uploadsBucket.addToResourcePolicy(
             new PolicyStatement({
-                sid: 'AllowRestoreIAToStandardRole',
+                sid: 'AllowRestoreIAToStandardRoleBucketAccess',
                 effect: Effect.ALLOW,
                 principals: [new AccountPrincipal(accountId)],
-                actions: ['s3:GetObject', 's3:PutObject', 's3:ListBucket'],
-                resources: [
-                    uploadsBucket.bucketArn,
-                    `${uploadsBucket.bucketArn}/*`,
-                ],
+                actions: ['s3:ListBucket'],
+                resources: [uploadsBucket.bucketArn],
                 conditions: {
                     ArnLike: {
                         'aws:PrincipalArn': roleArnPattern,
@@ -282,14 +289,46 @@ export class Uploads extends BaseStack {
             })
         )
 
-        // Allow restore role access to QA bucket
-        qaBucket.addToResourcePolicy(
+        // Allow restore role object-level access to documents bucket
+        uploadsBucket.addToResourcePolicy(
             new PolicyStatement({
-                sid: 'AllowRestoreIAToStandardRole',
+                sid: 'AllowRestoreIAToStandardRoleObjectAccess',
                 effect: Effect.ALLOW,
                 principals: [new AccountPrincipal(accountId)],
-                actions: ['s3:GetObject', 's3:PutObject', 's3:ListBucket'],
-                resources: [qaBucket.bucketArn, `${qaBucket.bucketArn}/*`],
+                actions: ['s3:GetObject', 's3:PutObject'],
+                resources: [`${uploadsBucket.bucketArn}/*`],
+                conditions: {
+                    ArnLike: {
+                        'aws:PrincipalArn': roleArnPattern,
+                    },
+                },
+            })
+        )
+
+        // Allow restore role bucket-level access to QA bucket
+        qaBucket.addToResourcePolicy(
+            new PolicyStatement({
+                sid: 'AllowRestoreIAToStandardRoleBucketAccess',
+                effect: Effect.ALLOW,
+                principals: [new AccountPrincipal(accountId)],
+                actions: ['s3:ListBucket'],
+                resources: [qaBucket.bucketArn],
+                conditions: {
+                    ArnLike: {
+                        'aws:PrincipalArn': roleArnPattern,
+                    },
+                },
+            })
+        )
+
+        // Allow restore role object-level access to QA bucket
+        qaBucket.addToResourcePolicy(
+            new PolicyStatement({
+                sid: 'AllowRestoreIAToStandardRoleObjectAccess',
+                effect: Effect.ALLOW,
+                principals: [new AccountPrincipal(accountId)],
+                actions: ['s3:GetObject', 's3:PutObject'],
+                resources: [`${qaBucket.bucketArn}/*`],
                 conditions: {
                     ArnLike: {
                         'aws:PrincipalArn': roleArnPattern,
