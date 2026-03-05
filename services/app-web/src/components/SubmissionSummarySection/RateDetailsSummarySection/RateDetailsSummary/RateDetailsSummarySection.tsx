@@ -67,6 +67,7 @@ type PackageNamesLookupType = {
 
 export const RateDetailsSummarySection = ({
     contract,
+    contractRev,
     rateRevisions,
     editNavigateTo,
     submissionName,
@@ -246,10 +247,10 @@ export const RateDetailsSummarySection = ({
                           (rateFormData.rateMedicaidPopulations ??
                               []) as string[]
                       const contractIsDsnp =
-                          contract.packageSubmissions[0]?.contractRevision
-                              ?.formData?.dsnpContract === true ||
-                          contract.draftRevision?.formData?.dsnpContract ===
-                              true
+                          (contractRev?.formData?.dsnpContract ??
+                              contract.draftRevision?.formData?.dsnpContract ??
+                              contract.packageSubmissions[0]?.contractRevision
+                                  ?.formData?.dsnpContract) === true
                       const rateDocumentCount =
                           rateFormData.supportingDocuments &&
                           rateFormData.rateDocuments &&
