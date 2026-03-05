@@ -551,7 +551,8 @@ export class AppApiStack extends BaseStack {
                 actions: [
                     's3:GetObject',
                     's3:PutObject',
-                    's3:GetObjectAttributes',
+                    's3:GetObjectTagging',
+                    's3:PutObjectTagging',
                 ],
                 resources: [
                     `arn:aws:s3:::${environment.VITE_APP_S3_DOCUMENTS_BUCKET}/*`,
