@@ -568,7 +568,7 @@ describe('RateDetails', () => {
                 const rateCertsAfterAddAnother = rateCertifications(screen)
                 expect(rateCertsAfterAddAnother).toHaveLength(1)
             })
-        }, 20000)
+        })
 
         it('does not render remove certification button for non-draft rates', async () => {
             renderWithProviders(
