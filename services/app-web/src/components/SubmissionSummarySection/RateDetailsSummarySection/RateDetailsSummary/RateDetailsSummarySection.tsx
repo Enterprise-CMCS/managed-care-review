@@ -246,10 +246,9 @@ export const RateDetailsSummarySection = ({
                           (rateFormData.rateMedicaidPopulations ??
                               []) as string[]
                       const contractIsDsnp =
-                          contract.packageSubmissions[0]?.contractRevision
-                              ?.formData?.dsnpContract === true ||
-                          contract.draftRevision?.formData?.dsnpContract ===
-                              true
+                          (contract.draftRevision?.formData?.dsnpContract ??
+                              contract.packageSubmissions[0]?.contractRevision
+                                  ?.formData?.dsnpContract) === true
                       const rateDocumentCount =
                           rateFormData.supportingDocuments &&
                           rateFormData.rateDocuments &&
