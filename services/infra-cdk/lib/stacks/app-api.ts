@@ -384,9 +384,7 @@ export class AppApiStack extends BaseStack {
                 memorySize: 1024,
                 environment: {
                     ...environment,
-                    SCHEMA_PATH: '/opt/nodejs/prisma/schema.prisma',
                     CONNECT_TIMEOUT: '60',
-                    NODE_PATH: '/opt/nodejs/node_modules',
                 },
                 role,
                 layers: [this.otelLayer],
@@ -400,7 +398,10 @@ export class AppApiStack extends BaseStack {
                     banner: AppApiStack.ESM_BANNER,
                     ...this.createBundling(
                         'migrate',
-                        [this.getOtelBundlingCommands()],
+                        [
+                            this.getOtelBundlingCommands(),
+                            this.getPrismaBundlingCommands(),
+                        ],
                         {
                             '--loader:.graphql': 'text',
                             '--loader:.gql': 'text',
@@ -556,7 +557,7 @@ export class AppApiStack extends BaseStack {
                     banner: AppApiStack.ESM_BANNER,
                     minify: false,
                     sourceMap: true,
-                    target: 'node20',
+                    target: 'node24',
                     ...this.createBundling(
                         'graphql',
                         [
@@ -616,6 +617,25 @@ export class AppApiStack extends BaseStack {
     }
 
     /**
+     * Get Prisma bundling commands for migrate function
+     * Copies Prisma schema and migrations directory
+     */
+    private getPrismaBundlingCommands(): (
+        outputDir: string,
+        appApiPath: string
+    ) => string[] {
+        return (outputDir: string, appApiPath: string) => [
+            // Copy Prisma schema and migrations
+            `mkdir -p "${outputDir}/prisma" || true`,
+            `cp "${appApiPath}/prisma/schema.prisma" "${outputDir}/prisma/schema.prisma" || echo "Prisma schema not found"`,
+            `cp -r "${appApiPath}/prisma/migrations" "${outputDir}/prisma/migrations" || echo "Prisma migrations not found"`,
+            // Copy data migrations (these are TypeScript files that will be bundled but need to be in expected location)
+            `mkdir -p "${outputDir}/dataMigrations" || true`,
+            `cp -r "${appApiPath}/src/dataMigrations/migrations" "${outputDir}/dataMigrations/" || echo "Data migrations not found"`,
+        ]
+    }
+
+    /**
      * Create generic bundling configuration that can compose different bundling steps
      */
     private createBundling(
@@ -629,6 +649,9 @@ export class AppApiStack extends BaseStack {
         return {
             format: OutputFormat.ESM,
             banner: AppApiStack.ESM_BANNER,
+            // Bundle Prisma client (no longer using lambda layers)
+            // Note: AWS SDK v3 is included in Node.js 18+ Lambda runtimes
+            nodeModules: ['@prisma/client'],
             commandHooks: {
                 beforeBundling(inputDir: string, outputDir: string): string[] {
                     return [

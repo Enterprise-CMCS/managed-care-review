@@ -54,18 +54,14 @@ const main: Handler = async (): Promise<APIGatewayProxyResultV2> => {
     // run the schema migration. this will add any new tables or fields from schema.prisma to postgres
     try {
         // Aurora can have long cold starts, so we extend connection timeout on migrates
-        const schemaPath =
-            process.env.SCHEMA_PATH ?? '/opt/nodejs/prisma/schema.prisma'
+        // With Prisma 7, schema and migrations are bundled directly with the Lambda
+        const schemaPath = process.env.SCHEMA_PATH ?? './prisma/schema.prisma'
         const prismaResult = spawnSync(
-            `${process.execPath}`,
-            [
-                '/opt/nodejs/node_modules/prisma/build/index.js',
-                'migrate',
-                'deploy',
-                `--schema=${schemaPath}`,
-            ],
+            'npx',
+            ['prisma', 'migrate', 'deploy', `--schema=${schemaPath}`],
             {
                 env: {
+                    ...process.env,
                     DATABASE_URL:
                         dbConnectionURL + `&connect_timeout=${connectTimeout}`,
                 },
@@ -121,7 +117,7 @@ const main: Handler = async (): Promise<APIGatewayProxyResultV2> => {
     }
 
     // Run the prisma dataMigrations.
-    // these are compiled in app-api so we can call them directly
+    // With Prisma 7, data migrations are bundled directly with the Lambda
 
     const dataMigratorDBURL =
         dbConnectionURL + `&connect_timeout=${connectTimeout}`
@@ -130,7 +126,7 @@ const main: Handler = async (): Promise<APIGatewayProxyResultV2> => {
 
     const migrationResult = await migrate(
         dataMigrator,
-        '/opt/nodejs/dataMigrations/migrations/'
+        './dataMigrations/migrations/'
     )
     if (migrationResult instanceof Error) {
         const errMsg = `Could not migrate the database protobufs: ${migrationResult}`
