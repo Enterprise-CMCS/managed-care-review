@@ -34,7 +34,6 @@ import {
     Runtime,
     LayerVersion,
     type ILayerVersion,
-    Code,
 } from 'aws-cdk-lib/aws-lambda'
 import { CfnWebACL, CfnWebACLAssociation } from 'aws-cdk-lib/aws-wafv2'
 import { SubnetType, Vpc, SecurityGroup } from 'aws-cdk-lib/aws-ec2'
@@ -76,12 +75,8 @@ export class AppApiStack extends BaseStack {
     public readonly migrateProtobufDataFunction: NodejsFunction
     public readonly graphqlFunction: NodejsFunction
 
-    // Shared Prisma migration layer for functions that need database migration
-    private readonly prismaMigrationLayer: ILayerVersion
     // Shared OTEL layer for all functions
     private readonly otelLayer: ILayerVersion
-    // Shared Prisma engine layer for GraphQL and OAuth functions
-    private readonly prismaEngineLayer: ILayerVersion
 
     // Network resources from Network stack
     private readonly vpc: IVpc
@@ -237,42 +232,6 @@ export class AppApiStack extends BaseStack {
             AWS_OTEL_LAYER_ARN
         )
 
-        // Create shared Prisma migration layer for functions that need database migration
-        this.prismaMigrationLayer = new LayerVersion(
-            this,
-            'PrismaMigrationLayer',
-            {
-                layerVersionName: `${ResourceNames.apiName('app-api', this.stage)}-prisma-migration`,
-                description: 'Prisma migration layer for app-api',
-                compatibleRuntimes: [Runtime.NODEJS_20_X],
-                compatibleArchitectures: [Architecture.X86_64],
-                code: Code.fromAsset(
-                    path.join(
-                        __dirname,
-                        '..',
-                        '..',
-                        'lambda-layers-prisma-client-migration'
-                    )
-                ),
-            }
-        )
-
-        // Create shared Prisma engine layer for functions that need database access
-        this.prismaEngineLayer = new LayerVersion(this, 'PrismaEngineLayer', {
-            layerVersionName: `${ResourceNames.apiName('app-api', this.stage)}-prisma-engine`,
-            description: 'Prisma engine layer for app-api',
-            compatibleRuntimes: [Runtime.NODEJS_20_X],
-            compatibleArchitectures: [Architecture.X86_64],
-            code: Code.fromAsset(
-                path.join(
-                    __dirname,
-                    '..',
-                    '..',
-                    'lambda-layers-prisma-client-engine'
-                )
-            ),
-        })
-
         // Populate common lambda parameters into variables to be used during function creation
         const securityGroups = [
             this.lambdaSecurityGroup,
@@ -312,7 +271,7 @@ export class AppApiStack extends BaseStack {
 
         this.otelFunction = new NodejsFunction(this, 'otelFunction', {
             functionName: `${ResourceNames.apiName('app-api', this.stage)}-otel`,
-            runtime: Runtime.NODEJS_20_X,
+            runtime: Runtime.NODEJS_24_X,
             architecture: Architecture.X86_64,
             handler: 'main',
             entry: path.join(
@@ -358,7 +317,7 @@ export class AppApiStack extends BaseStack {
                 memorySize: 1024,
                 environment,
                 role,
-                layers: [this.prismaEngineLayer, this.otelLayer],
+                layers: [this.otelLayer],
                 vpc: this.vpc,
                 vpcSubnets: {
                     subnetType: SubnetType.PRIVATE_WITH_EGRESS,
@@ -402,7 +361,7 @@ export class AppApiStack extends BaseStack {
                     STAGE_NAME: this.stage,
                 },
                 role,
-                layers: [this.prismaEngineLayer, this.otelLayer],
+                layers: [this.otelLayer],
                 vpc: this.vpc,
                 vpcSubnets: {
                     subnetType: SubnetType.PRIVATE_WITH_EGRESS,
@@ -432,7 +391,7 @@ export class AppApiStack extends BaseStack {
                     NODE_PATH: '/opt/nodejs/node_modules',
                 },
                 role,
-                layers: [this.prismaMigrationLayer, this.otelLayer],
+                layers: [this.otelLayer],
                 vpc: this.vpc,
                 vpcSubnets: {
                     subnetType: SubnetType.PRIVATE_WITH_EGRESS,
@@ -465,7 +424,7 @@ export class AppApiStack extends BaseStack {
                 memorySize: 4096, // Higher memory for zip operations
                 environment,
                 role,
-                layers: [this.prismaEngineLayer, this.otelLayer],
+                layers: [this.otelLayer],
                 vpc: this.vpc,
                 vpcSubnets: {
                     subnetType: SubnetType.PRIVATE_WITH_EGRESS,
@@ -495,7 +454,7 @@ export class AppApiStack extends BaseStack {
                 memorySize: 1024,
                 environment,
                 role,
-                layers: [this.prismaEngineLayer, this.otelLayer],
+                layers: [this.otelLayer],
                 vpc: this.vpc,
                 vpcSubnets: {
                     subnetType: SubnetType.PRIVATE_WITH_EGRESS,
@@ -590,7 +549,7 @@ export class AppApiStack extends BaseStack {
                 memorySize: 1024,
                 environment,
                 role,
-                layers: [this.prismaEngineLayer, this.otelLayer],
+                layers: [this.otelLayer],
                 vpc: this.vpc,
                 vpcSubnets: {
                     subnetType: SubnetType.PRIVATE_WITH_EGRESS,
@@ -708,7 +667,7 @@ export class AppApiStack extends BaseStack {
     ): NodejsFunction {
         return new NodejsFunction(this, `${functionName}Function`, {
             functionName: `${ResourceNames.apiName('app-api', this.stage)}-${functionName}`,
-            runtime: Runtime.NODEJS_20_X,
+            runtime: Runtime.NODEJS_24_X,
             architecture: Architecture.X86_64,
             handler: handlerMethod,
             entry: path.join(

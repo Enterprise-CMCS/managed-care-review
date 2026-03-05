@@ -6,6 +6,7 @@
         "target": "ESNext",
         "moduleResolution": "bundler",
         "baseUrl": "/",
+        "outDir": "./dist",
         "experimentalDecorators": true,
         "emitDecoratorMetadata": true,
         "preserveConstEnums": true,

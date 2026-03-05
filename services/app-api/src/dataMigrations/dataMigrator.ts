@@ -1,4 +1,6 @@
 import { PrismaClient } from '@prisma/client'
+import { PrismaPg } from '@prisma/adapter-pg'
+import pg from 'pg'
 import type { PrismaTransactionType } from '../postgres/prismaTypes'
 import { migrate as migrate1 } from './migrations/20231026123042_test_migrator_works'
 // Deprecated do not use
@@ -18,12 +20,11 @@ export interface MigratorType {
 }
 
 export function newDBMigrator(dbConnString: string): MigratorType {
+    const pool = new pg.Pool({ connectionString: dbConnString })
+    const adapter = new PrismaPg(pool)
+
     const prismaClient = new PrismaClient({
-        datasources: {
-            db: {
-                url: dbConnString,
-            },
-        },
+        adapter,
     })
 
     return {

@@ -7,7 +7,7 @@ import {
     mockInsertRateArgs,
 } from '../../testHelpers'
 import { updateDraftContractFormData } from './updateDraftContractWithRates'
-import { PrismaClientValidationError } from '@prisma/client/runtime/library'
+import { Prisma } from '@prisma/client'
 import type { ContractType } from '@prisma/client'
 import type {
     ContractFormDataType,
@@ -450,7 +450,7 @@ describe('updateDraftContractWithRates postgres', () => {
         })
 
         // Expect a prisma error
-        expect(updatedRate).toBeInstanceOf(PrismaClientValidationError)
+        expect(updatedRate).toBeInstanceOf(Prisma.PrismaClientValidationError)
     })
 
     it('returns an error when invalid contract ID provided', async () => {

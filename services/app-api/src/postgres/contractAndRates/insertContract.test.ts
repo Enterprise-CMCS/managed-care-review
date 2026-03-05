@@ -1,7 +1,7 @@
 import { sharedTestPrismaClient } from '../../testHelpers/storeHelpers'
 import { must, mockInsertContractArgs, getStateRecord } from '../../testHelpers'
 import { insertDraftContract } from './insertContract'
-import { PrismaClientKnownRequestError } from '@prisma/client/runtime/library'
+import { Prisma } from '@prisma/client'
 import type { StateCodeType } from '@mc-review/submissions'
 
 describe('insertContract', () => {
@@ -130,7 +130,9 @@ describe('insertContract', () => {
         )
 
         // Expect a prisma error
-        expect(draftContract).toBeInstanceOf(PrismaClientKnownRequestError)
+        expect(draftContract).toBeInstanceOf(
+            Prisma.PrismaClientKnownRequestError
+        )
         expect(console.error).toHaveBeenCalled()
     })
 })

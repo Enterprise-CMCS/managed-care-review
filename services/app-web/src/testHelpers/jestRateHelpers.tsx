@@ -66,25 +66,8 @@ const fillOutIndexRate = async (screen: Screen, index: number) => {
         )
         .click()
 
-    // check that now we can see dates, since that is triggered after selecting type
-    await waitFor(() => {
-        expect(
-            withinTargetRateCert.queryByText('Start date')
-        ).toBeInTheDocument()
-        expect(withinTargetRateCert.queryByText('End date')).toBeInTheDocument()
-        expect(
-            withinTargetRateCert.queryByText('Date certified')
-        ).toBeInTheDocument()
-        expect(
-            withinTargetRateCert.queryAllByText('Name')[0]
-        ).toBeInTheDocument()
-        expect(
-            withinTargetRateCert.queryAllByText('Title/Role')[0]
-        ).toBeInTheDocument()
-        expect(
-            withinTargetRateCert.queryAllByText('Email')[0]
-        ).toBeInTheDocument()
-    })
+    // wait for date fields to appear, since they are triggered after selecting type
+    await withinTargetRateCert.findByText('Start date')
 
     const startDateInputs = withinTargetRateCert.getAllByLabelText('Start date')
     const endDateInputs = withinTargetRateCert.getAllByLabelText('End date')
@@ -93,20 +76,27 @@ const fillOutIndexRate = async (screen: Screen, index: number) => {
         end: { elements: endDateInputs, date: '12/31/2022' },
     })
 
-    withinTargetRateCert.getAllByLabelText('Date certified')[0].focus()
-    await userEvent.paste('12/01/2021')
+    const dateCertified =
+        withinTargetRateCert.getAllByLabelText('Date certified')[0]
+    fireEvent.change(dateCertified, { target: { value: '12/01/2021' } })
 
     // fill out actuary contact
-    withinTargetRateCert.getAllByLabelText('Name')[0].focus()
-    await userEvent.paste(`Actuary Contact Person ${index}`)
+    const nameInput = withinTargetRateCert.getAllByLabelText('Name')[0]
+    fireEvent.change(nameInput, {
+        target: { value: `Actuary Contact Person ${index}` },
+    })
 
-    withinTargetRateCert.getAllByLabelText('Title/Role')[0].focus()
-    await userEvent.paste(`Actuary Contact Title ${index}`)
+    const titleInput = withinTargetRateCert.getAllByLabelText('Title/Role')[0]
+    fireEvent.change(titleInput, {
+        target: { value: `Actuary Contact Title ${index}` },
+    })
 
-    withinTargetRateCert.getAllByLabelText('Email')[0].focus()
-    await userEvent.paste(`actuarycontact${index}@test.com`)
+    const emailInput = withinTargetRateCert.getAllByLabelText('Email')[0]
+    fireEvent.change(emailInput, {
+        target: { value: `actuarycontact${index}@test.com` },
+    })
 
-    await userEvent.click(withinTargetRateCert.getAllByLabelText('Mercer')[0])
+    fireEvent.click(withinTargetRateCert.getAllByLabelText('Mercer')[0])
 }
 
 const rateCertifications = (screen: Screen) => {

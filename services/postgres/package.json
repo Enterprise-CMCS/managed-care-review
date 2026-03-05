@@ -18,7 +18,8 @@
         "eslint-plugin-prettier": "^5.5.4",
         "fs-extra": "^11.3.3",
         "jiti": "^2.6.1",
-        "typescript": "5.9.3"
+        "typescript": "5.9.3",
+        "typescript-eslint": "^8.56.0"
     },
     "dependencies": {
         "@aws-sdk/client-cloudformation": "^3.1001.0",
