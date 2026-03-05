@@ -64,6 +64,7 @@ import { SubmissionWithdraw } from '../SubmissionWithdraw/SubmissionWithdraw'
 import { UndoSubmissionWithdraw } from '../UndoSubmissionWithdraw/UndoSubmissionWithdraw'
 import { CreateOauthClient } from '../Settings/Oauth/CreateOauthClient'
 import { User } from '../../gen/gqlClient'
+import { AddLocalUser } from '../../localAuth/AddLocalUser'
 
 function componentForAuthMode(
     authMode: AuthModeType
@@ -422,6 +423,12 @@ const UnauthenticatedRoutes = ({
             {/* no /auth page for IDM auth, we just have the login redirect link */}
             {authComponent && (
                 <Route path={RoutesRecord.AUTH} element={authComponent} />
+            )}
+            {authMode === 'LOCAL' && (
+                <Route
+                    path={'/add-new-local-user'}
+                    element={<AddLocalUser />}
+                />
             )}
             <Route path="*" element={<Landing />} />
         </Routes>
