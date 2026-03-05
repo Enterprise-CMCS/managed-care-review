@@ -7,6 +7,7 @@ import {
     Effect,
     AnyPrincipal,
     ServicePrincipal,
+    AccountPrincipal,
 } from 'aws-cdk-lib/aws-iam'
 import { CfnOutput } from 'aws-cdk-lib'
 
@@ -248,19 +249,22 @@ export class Uploads extends BaseStack {
     /**
      * Allow RestoreIAToStandardRole to access buckets
      * This explicit Allow is needed because bucket has explicit Allow statements for other roles
+     * Uses AccountPrincipal to avoid S3 Block Public Access blocking the policy
      */
     private allowRestoreIAToStandardRole(
         uploadsBucket: IBucket,
         qaBucket: IBucket
     ): void {
-        const roleArn = `arn:aws:iam::*:role/app-api-${this.stage}-cdk-RestoreIAToStandardRole*`
+        // Use Stack.of(this).account to get the AWS account ID
+        const accountId = this.account
+        const roleArnPattern = `arn:aws:iam::${accountId}:role/app-api-${this.stage}-cdk-RestoreIAToStandardRole*`
 
         // Allow restore role access to documents bucket
         uploadsBucket.addToResourcePolicy(
             new PolicyStatement({
                 sid: 'AllowRestoreIAToStandardRole',
                 effect: Effect.ALLOW,
-                principals: [new AnyPrincipal()],
+                principals: [new AccountPrincipal(accountId)],
                 actions: ['s3:GetObject', 's3:PutObject', 's3:ListBucket'],
                 resources: [
                     uploadsBucket.bucketArn,
@@ -268,7 +272,7 @@ export class Uploads extends BaseStack {
                 ],
                 conditions: {
                     ArnLike: {
-                        'aws:PrincipalArn': roleArn,
+                        'aws:PrincipalArn': roleArnPattern,
                     },
                 },
             })
@@ -279,12 +283,12 @@ export class Uploads extends BaseStack {
             new PolicyStatement({
                 sid: 'AllowRestoreIAToStandardRole',
                 effect: Effect.ALLOW,
-                principals: [new AnyPrincipal()],
+                principals: [new AccountPrincipal(accountId)],
                 actions: ['s3:GetObject', 's3:PutObject', 's3:ListBucket'],
                 resources: [qaBucket.bucketArn, `${qaBucket.bucketArn}/*`],
                 conditions: {
                     ArnLike: {
-                        'aws:PrincipalArn': roleArn,
+                        'aws:PrincipalArn': roleArnPattern,
                     },
                 },
             })
