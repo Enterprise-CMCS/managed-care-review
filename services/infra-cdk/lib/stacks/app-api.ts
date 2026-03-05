@@ -289,9 +289,12 @@ export class AppApiStack extends BaseStack {
             environment,
             role,
             layers: [this.otelLayer],
-            bundling: this.createBundling('otel', [
-                this.getOtelBundlingCommands(),
-            ]),
+            bundling: this.createBundling(
+                'otel',
+                [this.getOtelBundlingCommands()],
+                undefined,
+                false
+            ),
         })
 
         this.thirdPartyApiAuthorizerFunction = this.createLambdaFunction(
@@ -326,9 +329,12 @@ export class AppApiStack extends BaseStack {
                 bundling: {
                     format: OutputFormat.ESM,
                     banner: AppApiStack.ESM_BANNER,
-                    ...this.createBundling('oauth-token', [
-                        this.getOtelBundlingCommands(),
-                    ]),
+                    ...this.createBundling(
+                        'oauth-token',
+                        [this.getOtelBundlingCommands()],
+                        undefined,
+                        true
+                    ),
                 },
             }
         )
@@ -367,9 +373,12 @@ export class AppApiStack extends BaseStack {
                 },
                 securityGroups,
                 bundling: {
-                    ...this.createBundling('migrate-protobuf-data', [
-                        this.getOtelBundlingCommands(),
-                    ]),
+                    ...this.createBundling(
+                        'migrate-protobuf-data',
+                        [this.getOtelBundlingCommands()],
+                        undefined,
+                        true
+                    ),
                 },
             }
         )
@@ -405,7 +414,8 @@ export class AppApiStack extends BaseStack {
                         {
                             '--loader:.graphql': 'text',
                             '--loader:.gql': 'text',
-                        }
+                        },
+                        true
                     ),
                 },
             }
@@ -431,9 +441,12 @@ export class AppApiStack extends BaseStack {
                 bundling: {
                     format: OutputFormat.ESM,
                     banner: AppApiStack.ESM_BANNER,
-                    ...this.createBundling('regenerate-zips', [
-                        this.getOtelBundlingCommands(),
-                    ]),
+                    ...this.createBundling(
+                        'regenerate-zips',
+                        [this.getOtelBundlingCommands()],
+                        undefined,
+                        true
+                    ),
                 },
             }
         )
@@ -463,9 +476,12 @@ export class AppApiStack extends BaseStack {
                 bundling: {
                     format: OutputFormat.ESM,
                     banner: AppApiStack.ESM_BANNER,
-                    ...this.createBundling('migrate-s3-urls', [
-                        this.getOtelBundlingCommands(),
-                    ]),
+                    ...this.createBundling(
+                        'migrate-s3-urls',
+                        [this.getOtelBundlingCommands()],
+                        undefined,
+                        true
+                    ),
                 },
             }
         )
@@ -528,9 +544,12 @@ export class AppApiStack extends BaseStack {
                 bundling: {
                     format: OutputFormat.ESM,
                     banner: AppApiStack.ESM_BANNER,
-                    ...this.createBundling('restore-ia-to-standard', [
-                        this.getOtelBundlingCommands(),
-                    ]),
+                    ...this.createBundling(
+                        'restore-ia-to-standard',
+                        [this.getOtelBundlingCommands()],
+                        undefined,
+                        false
+                    ),
                 },
             }
         )
@@ -567,7 +586,8 @@ export class AppApiStack extends BaseStack {
                         {
                             '--loader:.graphql': 'text',
                             '--loader:.gql': 'text',
-                        }
+                        },
+                        true
                     ),
                 },
             }
@@ -644,14 +664,18 @@ export class AppApiStack extends BaseStack {
             outputDir: string,
             appApiPath: string
         ) => string[])[] = [],
-        esbuildArgs?: Record<string, string>
+        esbuildArgs?: Record<string, string>,
+        includePrisma: boolean = false
     ): BundlingOptions {
         return {
             format: OutputFormat.ESM,
             banner: AppApiStack.ESM_BANNER,
-            // Bundle Prisma client (no longer using lambda layers)
+            // Bundle Prisma client only for functions that need it (to avoid hitting Lambda size limits)
+            // Prisma 7 uses WASM engine (~1.6MB) instead of binary (~14MB+)
             // Note: AWS SDK v3 is included in Node.js 18+ Lambda runtimes
-            nodeModules: ['@prisma/client'],
+            ...(includePrisma && {
+                nodeModules: ['@prisma/client', '@prisma/adapter-pg'],
+            }),
             commandHooks: {
                 beforeBundling(inputDir: string, outputDir: string): string[] {
                     return [
@@ -697,9 +721,12 @@ export class AppApiStack extends BaseStack {
                 'handlers',
                 `${handlerFile}.ts`
             ),
-            bundling: this.createBundling(functionName, [
-                this.getOtelBundlingCommands(),
-            ]),
+            bundling: this.createBundling(
+                functionName,
+                [this.getOtelBundlingCommands()],
+                undefined,
+                false
+            ),
             ...options,
         })
     }
