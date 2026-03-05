@@ -144,7 +144,7 @@ export class Uploads extends BaseStack {
                 ],
                 conditions: {
                     ArnNotLike: {
-                        'aws:PrincipalArn': `arn:aws:iam::*:role/app-api-${this.stage}-cdk-RestoreIAToStandardRole*`,
+                        'aws:PrincipalArn': `arn:aws:iam::${this.account}:role/app-api-${this.stage}-cdk-RestoreIAToStandardRole*`,
                     },
                 },
             })
