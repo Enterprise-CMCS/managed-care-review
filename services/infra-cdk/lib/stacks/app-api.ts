@@ -326,7 +326,6 @@ export class AppApiStack extends BaseStack {
                 bundling: {
                     format: OutputFormat.ESM,
                     banner: AppApiStack.ESM_BANNER,
-                    externalModules: ['prisma', '@prisma/client'],
                     ...this.createBundling('oauth-token', [
                         this.getOtelBundlingCommands(),
                     ]),
@@ -368,7 +367,6 @@ export class AppApiStack extends BaseStack {
                 },
                 securityGroups,
                 bundling: {
-                    externalModules: ['prisma', '@prisma/client'],
                     ...this.createBundling('migrate-protobuf-data', [
                         this.getOtelBundlingCommands(),
                     ]),
@@ -400,7 +398,6 @@ export class AppApiStack extends BaseStack {
                 bundling: {
                     format: OutputFormat.ESM,
                     banner: AppApiStack.ESM_BANNER,
-                    externalModules: ['prisma', '@prisma/client', '.prisma'],
                     ...this.createBundling(
                         'migrate',
                         [this.getOtelBundlingCommands()],
@@ -433,7 +430,6 @@ export class AppApiStack extends BaseStack {
                 bundling: {
                     format: OutputFormat.ESM,
                     banner: AppApiStack.ESM_BANNER,
-                    externalModules: ['prisma', '@prisma/client'],
                     ...this.createBundling('regenerate-zips', [
                         this.getOtelBundlingCommands(),
                     ]),
@@ -466,7 +462,6 @@ export class AppApiStack extends BaseStack {
                 bundling: {
                     format: OutputFormat.ESM,
                     banner: AppApiStack.ESM_BANNER,
-                    externalModules: ['prisma', '@prisma/client'],
                     ...this.createBundling('migrate-s3-urls', [
                         this.getOtelBundlingCommands(),
                     ]),
@@ -562,7 +557,6 @@ export class AppApiStack extends BaseStack {
                     minify: false,
                     sourceMap: true,
                     target: 'node20',
-                    externalModules: ['prisma', '@prisma/client'],
                     ...this.createBundling(
                         'graphql',
                         [
