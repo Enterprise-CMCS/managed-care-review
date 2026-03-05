@@ -21,7 +21,10 @@ export const testS3Client: () => S3ClientT = () => {
         getURL: async (s3key: string): Promise<string> => {
             return `https://fakes3.com/${s3key}?sekret=deadbeef`
         },
-        getUploadURL: async (s3key: string, fileName: string): Promise<string> => {
+        getUploadURL: async (
+            s3key: string,
+            fileName: string
+        ): Promise<string> => {
             return `s3://fake-bucket/${s3key}/${fileName}`
         },
         getZipURL: async (s3key: string): Promise<string> => {
@@ -29,12 +32,21 @@ export const testS3Client: () => S3ClientT = () => {
         },
         generateDocumentZip: async (
             documents,
-            outputPath,
-            options
-        ): Promise<{ s3URL: string; sha256: string } | Error> => {
+            outputPath
+        ): Promise<
+            | {
+                  s3URL: string
+                  sha256: string
+                  s3BucketName: string
+                  s3Key: string
+              }
+            | Error
+        > => {
             return {
                 s3URL: `s3://fake-bucket/${outputPath}`,
                 sha256: 'fake sha',
+                s3BucketName: 'fake-bucket',
+                s3Key: outputPath,
             }
         },
     }

@@ -75,11 +75,18 @@ export function parseAndValidateDocuments(
             )
         }
 
+        // Normalize key to always include full path (allusers/ prefix for regular docs)
+        // parseKey returns just UUID for regular docs, but we want to store the full S3 key
+        const fullKey =
+            key.startsWith('allusers/') || key.startsWith('zips/')
+                ? key
+                : `allusers/${key}`
+
         return {
             name: doc.name,
             s3URL: doc.s3URL,
             s3BucketName: bucket,
-            s3Key: key,
+            s3Key: fullKey,
             sha256: doc.sha256,
         }
     })
@@ -110,9 +117,15 @@ export function addBucketKeyToDocument<T extends TestDocumentInput>(
         throw new Error(`Failed to parse key: ${key.message}`)
     }
 
+    // Normalize key to always include full path (allusers/ prefix for regular docs)
+    const fullKey =
+        key.startsWith('allusers/') || key.startsWith('zips/')
+            ? key
+            : `allusers/${key}`
+
     return {
         ...doc,
         s3BucketName: bucket,
-        s3Key: key,
+        s3Key: fullKey,
     }
 }

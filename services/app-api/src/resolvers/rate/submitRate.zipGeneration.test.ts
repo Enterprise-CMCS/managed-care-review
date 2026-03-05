@@ -26,6 +26,8 @@ describe('Rate Submission Zip Generation - Rate-Specific Scenarios', () => {
         mockGenerateDocumentZip.mockResolvedValue({
             s3URL: 's3://test-bucket/zips/rates/test-rate-id/rate-documents.zip',
             sha256: 'mock-rate-sha256-hash',
+            s3BucketName: 'test-bucket',
+            s3Key: 'zips/rates/test-rate-id/rate-documents.zip',
         })
     })
 
@@ -67,6 +69,8 @@ describe('Rate Submission Zip Generation - Rate-Specific Scenarios', () => {
             mockGenerateDocumentZip.mockResolvedValue({
                 s3URL: 's3://test-bucket/zips/rates/standalone/rate-documents.zip',
                 sha256: 'standalone-rate-hash',
+                s3BucketName: 'test-bucket',
+                s3Key: 'zips/rates/standalone/rate-documents.zip',
             })
 
             // Now resubmit the rate standalone
