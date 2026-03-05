@@ -18,7 +18,7 @@ export function fetchOauthClientsResolver(
         setResolverDetailsOnActiveSpan('fetchOauthClients', user, span)
 
         // MCR-5894 block off admin apis from oauth
-        if (context.oauthClient && context.oauthClient.isOAuthClient === true) {
+        if (context.oauthClient) {
             const oauthErr = 'oauth clients cannot access admin functions'
             logError('fetchOauthClients', oauthErr)
             setErrorAttributesOnActiveSpan(oauthErr, span)

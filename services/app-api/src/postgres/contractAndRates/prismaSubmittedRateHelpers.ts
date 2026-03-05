@@ -17,6 +17,30 @@ const includeLatestSubmittedRateRev = {
     },
 } satisfies Prisma.RateTableInclude
 
+const selectRateRevisionOverrides = {
+    id: true,
+    createdAt: true,
+    rateRevisionID: true,
+    rateDocuments: {
+        select: {
+            id: true,
+            documentID: true,
+            dateAdded: true,
+        },
+    },
+    supportingDocuments: {
+        select: {
+            id: true,
+            documentID: true,
+            dateAdded: true,
+        },
+    },
+} satisfies Prisma.RateRevisionOverridesSelect
+
+const includeRateOverrides = {
+    updatedBy: true,
+} satisfies Prisma.RateOverridesInclude
+
 // includeRateWithoutDraftContracts is the prisma includes block for a complete Rate
 const includeRateWithoutDraftContracts = {
     revisions: {
@@ -70,8 +94,14 @@ const includeRateWithoutDraftContracts = {
         },
     },
     rateOverrides: {
+        orderBy: {
+            createdAt: 'desc',
+        },
         include: {
-            updatedBy: true,
+            ...includeRateOverrides,
+            revisionOverride: {
+                select: selectRateRevisionOverrides,
+            },
         },
     },
 } satisfies Prisma.RateTableInclude
@@ -132,8 +162,11 @@ const includeStrippedRateWithoutDraftContracts = {
         },
     },
     rateOverrides: {
+        orderBy: {
+            createdAt: 'desc',
+        },
         include: {
-            updatedBy: true,
+            ...includeRateOverrides,
         },
     },
 } satisfies Prisma.RateTableInclude
@@ -231,6 +264,11 @@ type RateRevisionTableWithRelatedSubmissionContracts =
         include: typeof includeRateRevisionWithRelatedSubmissionContracts
     }>
 
+type RateRevisionOverridesTablePayload =
+    Prisma.RateRevisionOverridesGetPayload<{
+        select: typeof selectRateRevisionOverrides
+    }>
+
 export {
     includeRateWithoutDraftContracts,
     includeLatestSubmittedRateRev,
@@ -238,6 +276,8 @@ export {
     includeRateRelatedContracts,
     includeRateRevisionWithRelatedSubmissionContracts,
     includeSubmissionPackageContractRevision,
+    selectRateRevisionOverrides,
+    includeRateOverrides,
 }
 
 export type {
@@ -248,4 +288,5 @@ export type {
     RateTableWithRelatedContractsPayload,
     RateRevisionTableWithRelatedSubmissionContracts,
     SubmissionPackageContractRevisionData,
+    RateRevisionOverridesTablePayload,
 }

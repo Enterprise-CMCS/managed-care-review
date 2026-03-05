@@ -57,7 +57,7 @@ describe('createRateQuestionResponse', () => {
                                 name: 'Test Question Response',
                                 s3URL: 's3://bucketname/key/test1',
                                 downloadURL:
-                                    'https://fakes3.com/key?sekret=deadbeef',
+                                    'https://fakes3.com/allusers/key?sekret=deadbeef',
                             },
                         ],
                     }),

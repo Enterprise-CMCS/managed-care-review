@@ -17,7 +17,7 @@ describe('parseAndValidateDocuments', () => {
             name: 'test-document.pdf',
             s3URL: 's3://my-bucket/abc-123-uuid/test-document.pdf',
             s3BucketName: 'my-bucket',
-            s3Key: 'abc-123-uuid',
+            s3Key: 'allusers/abc-123-uuid',
             sha256: 'abc123def456', //pragma: allowlist secret
         })
     })
@@ -38,11 +38,11 @@ describe('parseAndValidateDocuments', () => {
         expect(docs).toHaveLength(2)
         expect(docs[0]).toMatchObject({
             s3BucketName: 'bucket-1',
-            s3Key: 'key-1',
+            s3Key: 'allusers/key-1',
         })
         expect(docs[1]).toMatchObject({
             s3BucketName: 'bucket-2',
-            s3Key: 'key-2',
+            s3Key: 'allusers/key-2',
             sha256: 'xyz789', //pragma: allowlist secret
         })
     })
@@ -59,7 +59,7 @@ describe('parseAndValidateDocuments', () => {
             name: 'test.pdf',
             s3URL: 's3://my-bucket/my-key/test.pdf',
             s3BucketName: 'my-bucket',
-            s3Key: 'my-key',
+            s3Key: 'allusers/my-key',
             sha256: undefined,
         })
     })
@@ -137,7 +137,7 @@ describe('parseAndValidateDocuments', () => {
 
         expect(docs[0]).toMatchObject({
             s3BucketName: 'bucketname',
-            s3Key: 'key',
+            s3Key: 'allusers/key',
         })
     })
 

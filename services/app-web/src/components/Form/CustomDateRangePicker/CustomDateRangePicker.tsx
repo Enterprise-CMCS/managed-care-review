@@ -173,6 +173,7 @@ export const CustomDateRangePicker = (
                     )}
                     {startDateError && (
                         <PoliteErrorMessage
+                            id={startDatePickerErrorId}
                             formFieldLabel={`${startDateLabel}`}
                         >
                             {startDateError}
@@ -216,7 +217,10 @@ export const CustomDateRangePicker = (
                         </div>
                     )}
                     {endDateError && (
-                        <PoliteErrorMessage formFieldLabel={`${endDateLabel}`}>
+                        <PoliteErrorMessage
+                            id={endDatePickerErrorId}
+                            formFieldLabel={`${endDateLabel}`}
+                        >
                             {endDateError}
                         </PoliteErrorMessage>
                     )}

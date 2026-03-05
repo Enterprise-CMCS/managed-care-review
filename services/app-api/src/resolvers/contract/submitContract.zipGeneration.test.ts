@@ -28,6 +28,8 @@ describe('Contract Submission Zip Generation Integration', () => {
         mockGenerateDocumentZip.mockResolvedValue({
             s3URL: 's3://bucketname/zips/test.zip',
             sha256: 'mock-sha256-hash',
+            s3BucketName: 'bucketname',
+            s3Key: 'zips/test.zip',
         })
     })
 

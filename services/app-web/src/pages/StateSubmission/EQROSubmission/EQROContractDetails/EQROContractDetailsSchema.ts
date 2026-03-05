@@ -1,8 +1,10 @@
 import * as Yup from 'yup'
 import dayjs from 'dayjs'
-import { validateDateFormat } from '../../../../formHelpers'
 import { UnlockedContract } from '../../../../gen/gqlClient'
-import { validateFileItemsList } from '../../../../formHelpers'
+import {
+    validateFileItemsList,
+    validateDateFormat,
+} from '../../../../formHelpers'
 
 Yup.addMethod(Yup.date, 'validateDateFormat', validateDateFormat)
 
@@ -77,6 +79,7 @@ export const EQROContractDetailsFormSchema = (
     return Yup.object().shape({
         contractDocuments: validateFileItemsList({ required: true }),
         supportingDocuments: validateFileItemsList({ required: false }),
+
         contractDateStart: Yup.date()
             // @ts-ignore-next-line
             .validateDateFormat('YYYY-MM-DD', true)
