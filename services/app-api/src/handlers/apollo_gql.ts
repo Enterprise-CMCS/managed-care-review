@@ -398,7 +398,7 @@ async function initializeGQLHandler(): Promise<Handler> {
 
 const handlerPromise = initializeGQLHandler()
 
-const gqlHandler: Handler = async (event, context, completion) => {
+const gqlHandler: Handler = async (event, context) => {
     // Once initialized, future awaits will return immediately
     const initializedHandler = await handlerPromise
     const otelCollectorUrl = process.env.API_APP_OTEL_COLLECTOR_URL
@@ -412,7 +412,7 @@ const gqlHandler: Handler = async (event, context, completion) => {
 
     initTracer(serviceName, otelCollectorUrl)
 
-    const response = await initializedHandler(event, context, completion)
+    const response = await initializedHandler(event, context, () => {})
     const payloadSize = Buffer.from(event.body).length
 
     if (payloadSize > 5.5 * 1024 * 1024) {
