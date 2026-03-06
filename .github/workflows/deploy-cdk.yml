@@ -195,6 +195,9 @@ jobs:
       - name: Generate code
         run: pnpm -r generate
 
+      - name: Generate Prisma client (app-api)
+        run: pnpm --filter app-api generate
+
       - name: Reset test database
         env:
           NODE_OPTIONS: --max_old_space_size=6000
