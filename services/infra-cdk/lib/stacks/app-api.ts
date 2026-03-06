@@ -331,7 +331,10 @@ export class AppApiStack extends BaseStack {
                     banner: AppApiStack.ESM_BANNER,
                     ...this.createBundling(
                         'oauth-token',
-                        [this.getOtelBundlingCommands()],
+                        [
+                            this.getOtelBundlingCommands(),
+                            this.getPrismaCleanupCommands(),
+                        ],
                         undefined,
                         true
                     ),
@@ -375,7 +378,10 @@ export class AppApiStack extends BaseStack {
                 bundling: {
                     ...this.createBundling(
                         'migrate-protobuf-data',
-                        [this.getOtelBundlingCommands()],
+                        [
+                            this.getOtelBundlingCommands(),
+                            this.getPrismaCleanupCommands(),
+                        ],
                         undefined,
                         true
                     ),
@@ -410,6 +416,7 @@ export class AppApiStack extends BaseStack {
                         [
                             this.getOtelBundlingCommands(),
                             this.getPrismaBundlingCommands(),
+                            this.getPrismaCleanupCommands(),
                         ],
                         {
                             '--loader:.graphql': 'text',
@@ -443,7 +450,10 @@ export class AppApiStack extends BaseStack {
                     banner: AppApiStack.ESM_BANNER,
                     ...this.createBundling(
                         'regenerate-zips',
-                        [this.getOtelBundlingCommands()],
+                        [
+                            this.getOtelBundlingCommands(),
+                            this.getPrismaCleanupCommands(),
+                        ],
                         undefined,
                         true
                     ),
@@ -478,7 +488,10 @@ export class AppApiStack extends BaseStack {
                     banner: AppApiStack.ESM_BANNER,
                     ...this.createBundling(
                         'migrate-s3-urls',
-                        [this.getOtelBundlingCommands()],
+                        [
+                            this.getOtelBundlingCommands(),
+                            this.getPrismaCleanupCommands(),
+                        ],
                         undefined,
                         true
                     ),
@@ -582,6 +595,7 @@ export class AppApiStack extends BaseStack {
                         [
                             this.getOtelBundlingCommands(),
                             this.getEtaTemplatesBundlingCommands(),
+                            this.getPrismaCleanupCommands(),
                         ],
                         {
                             '--loader:.graphql': 'text',
@@ -637,6 +651,22 @@ export class AppApiStack extends BaseStack {
     }
 
     /**
+     * Cleanup unnecessary Prisma WASM engines
+     * Prisma 7 includes WASM for all databases (~60MB), we only need PostgreSQL (~5MB)
+     */
+    private getPrismaCleanupCommands(): (
+        outputDir: string,
+        appApiPath: string
+    ) => string[] {
+        return (outputDir: string) => [
+            // Remove WASM files for databases we don't use (MySQL, SQLite, SQL Server, CockroachDB)
+            // Keep only PostgreSQL WASM files
+            `find "${outputDir}" -type f \\( -name "*mysql*.wasm*" -o -name "*sqlite*.wasm*" -o -name "*sqlserver*.wasm*" -o -name "*cockroachdb*.wasm*" \\) -delete || true`,
+            `echo "Cleaned up non-PostgreSQL WASM engines"`,
+        ]
+    }
+
+    /**
      * Get Prisma bundling commands for migrate function
      * Copies Prisma schema and migrations directory
      */
@@ -670,8 +700,8 @@ export class AppApiStack extends BaseStack {
         return {
             format: OutputFormat.ESM,
             banner: AppApiStack.ESM_BANNER,
-            // Bundle Prisma client only for functions that need it (to avoid hitting Lambda size limits)
-            // Prisma 7 uses WASM engine (~1.6MB) instead of binary (~14MB+)
+            // Bundle Prisma client only for functions that need it
+            // Use nodeModules to include WASM files, then clean up non-PostgreSQL engines
             // Note: AWS SDK v3 is included in Node.js 18+ Lambda runtimes
             ...(includePrisma && {
                 nodeModules: ['@prisma/client', '@prisma/adapter-pg'],
