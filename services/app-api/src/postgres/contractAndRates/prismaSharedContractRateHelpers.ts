@@ -2,7 +2,7 @@ import type {
     Prisma,
     RateDocument,
     RateSupportingDocument,
-} from '@prisma/client'
+} from '../../generated/client'
 import type { ProgramType } from '../../domain-models'
 import type {
     ContractFormDataType,

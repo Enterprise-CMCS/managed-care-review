@@ -1,4 +1,4 @@
-import type { State } from '@prisma/client'
+import type { State } from '../generated/client'
 import { must } from './assertionHelpers'
 import type { ExtendedPrismaClient } from '../postgres/prismaClient'
 

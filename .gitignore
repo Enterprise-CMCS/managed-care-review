@@ -65,3 +65,4 @@ services/uploads/src/avLayer/build/*.zip
 tests/cypress/fixtures/stores/featureFlagStore.json
 
 packages/*/build
+services/app-api/src/generated/

@@ -6,8 +6,8 @@ import {
     must,
 } from '../../testHelpers'
 import { updateDraftContract } from './updateDraftContract'
-import { Prisma } from '@prisma/client'
-import type { ContractType } from '@prisma/client'
+import { Prisma } from '../../generated/client'
+import type { ContractType } from '../../generated/client'
 import type { ContractFormDataType } from '../../domain-models'
 import type { UpdateDraftContractFormDataType } from '../../domain-models/contractAndRates/formDataTypes'
 

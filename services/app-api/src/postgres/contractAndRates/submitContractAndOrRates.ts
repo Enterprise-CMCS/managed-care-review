@@ -3,7 +3,7 @@ import type {
     Prisma,
     ContractRevisionTable,
     RateRevisionTable,
-} from '@prisma/client'
+} from '../../generated/client'
 
 const includeContractRevWithOnlyDocs = {
     submitInfo: true,

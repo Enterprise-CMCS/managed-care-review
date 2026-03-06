@@ -6,8 +6,8 @@ import {
     must,
 } from '../../testHelpers'
 import { updateDraftRate } from './updateDraftRate'
-import { Prisma } from '@prisma/client'
-import type { RateType } from '@prisma/client'
+import { Prisma } from '../../generated/client'
+import type { RateType } from '../../generated/client'
 import type { RateFormEditableType } from '../../domain-models/contractAndRates'
 import { insertDraftContract } from './insertContract'
 

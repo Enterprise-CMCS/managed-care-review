@@ -1,9 +1,7 @@
 import type { Handler, APIGatewayProxyResultV2 } from 'aws-lambda'
-import { RDSClient, CreateDBClusterSnapshotCommand } from '@aws-sdk/client-rds'
 import { spawnSync } from 'child_process'
-import { getDBClusterID, getPostgresURL } from './configuration'
+import { getPostgresURL } from './configuration'
 import { initTracer, recordException } from '../otel/otel_handler'
-import { migrate, newDBMigrator } from '../dataMigrations/dataMigrator'
 
 const main: Handler = async (): Promise<APIGatewayProxyResultV2> => {
     // setup otel tracing
@@ -83,54 +81,6 @@ const main: Handler = async (): Promise<APIGatewayProxyResultV2> => {
     } catch (err) {
         const errMsg = `Could not migrate the prisma database schema: ${err}`
         recordException(errMsg, serviceName, 'prisma migrate deploy')
-        return fmtMigrateError(errMsg)
-    }
-
-    // take a snapshot of the DB before running data migration.
-    // don't take a snapshot if we're in a PR branch
-    if (['dev', 'val', 'prod', 'main'].includes(stage)) {
-        const dbClusterId = await getDBClusterID(secretsManagerSecret)
-        if (dbClusterId instanceof Error) {
-            const errMsg = `Init Error: failed to get db cluster ID: ${dbClusterId}`
-            recordException(errMsg, serviceName, 'getDBClusterID')
-            return fmtMigrateError(errMsg)
-        }
-
-        const snapshotID = stage + '-' + Date.now()
-        const params = {
-            DBClusterIdentifier: dbClusterId,
-            DBClusterSnapshotIdentifier: snapshotID,
-        }
-        try {
-            const rds = new RDSClient({ apiVersion: '2014-10-31' })
-            const command = new CreateDBClusterSnapshotCommand(params)
-            await rds.send(command)
-        } catch (err) {
-            const errMsg = `Could not take RDS snapshot before migrating: ${err}`
-            recordException(
-                errMsg,
-                serviceName,
-                'CreateDBClusterSnapshotCommand'
-            )
-            return fmtMigrateError(errMsg)
-        }
-    }
-
-    // Run the prisma dataMigrations.
-    // With Prisma 7, data migrations are bundled directly with the Lambda
-
-    const dataMigratorDBURL =
-        dbConnectionURL + `&connect_timeout=${connectTimeout}`
-
-    const dataMigrator = newDBMigrator(dataMigratorDBURL)
-
-    const migrationResult = await migrate(
-        dataMigrator,
-        './dataMigrations/migrations/'
-    )
-    if (migrationResult instanceof Error) {
-        const errMsg = `Could not migrate the database protobufs: ${migrationResult}`
-        recordException(errMsg, serviceName, 'migrate protos db')
         return fmtMigrateError(errMsg)
     }
 

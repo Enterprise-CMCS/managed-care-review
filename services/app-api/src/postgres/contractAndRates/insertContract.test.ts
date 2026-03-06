@@ -1,7 +1,7 @@
 import { sharedTestPrismaClient } from '../../testHelpers/storeHelpers'
 import { must, mockInsertContractArgs, getStateRecord } from '../../testHelpers'
 import { insertDraftContract } from './insertContract'
-import { Prisma } from '@prisma/client'
+import { Prisma } from '../../generated/client'
 import type { StateCodeType } from '@mc-review/submissions'
 
 describe('insertContract', () => {

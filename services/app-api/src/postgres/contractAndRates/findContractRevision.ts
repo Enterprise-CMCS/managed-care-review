@@ -1,6 +1,6 @@
 import type { PrismaTransactionType } from '../prismaTypes'
 import { NotFoundError } from '../postgresErrors'
-import type { ContractRevisionTable } from '@prisma/client'
+import type { ContractRevisionTable } from '../../generated/client'
 
 async function findContractRevision(
     client: PrismaTransactionType,

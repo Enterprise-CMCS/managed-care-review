@@ -1,4 +1,4 @@
-import { type Prisma, PrismaClient } from '@prisma/client'
+import { PrismaClient } from '../generated/client'
 import { PrismaPg } from '@prisma/adapter-pg'
 import pg from 'pg'
 
@@ -16,7 +16,7 @@ const errorMessages = {
  * @param {Prisma.PrismaClientOptions} optionArgs - PrismaClient configuration options.
  * @returns {PrismaClient} A new PrismaClient instance with extended behavior.
  */
-function extendedPrismaClient(optionArgs?: Prisma.PrismaClientOptions) {
+function extendedPrismaClient(optionArgs: { adapter: PrismaPg }) {
     return new PrismaClient(optionArgs).$extends({
         query: {
             applicationSettings: {

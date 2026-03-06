@@ -1,4 +1,7 @@
-import type { DocumentZipType, DocumentZipPackage } from '@prisma/client'
+import type {
+    DocumentZipType,
+    DocumentZipPackage,
+} from '../../generated/client'
 import type { ExtendedPrismaClient } from '../prismaClient'
 import { logError } from '../../logger'
 
