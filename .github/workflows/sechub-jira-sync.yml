@@ -3,7 +3,7 @@ name: Security Sync
 on:
   workflow_dispatch: # for testing and manual runs
   schedule:
-    - cron: "25 1 * * *" # daily at 8:25 PM EST
+    - cron: '25 1 * * *' # daily at 8:25 PM EST
 permissions:
   id-token: write
   contents: read
@@ -15,7 +15,7 @@ jobs:
     strategy:
       max-parallel: 1
       matrix:
-        environment: ["prod"]  # add more like "val","master" later if needed
+        environment: ['prod'] # add more like "val","master" later if needed
       fail-fast: false
     environment:
       name: ${{ matrix.environment }}
@@ -48,15 +48,15 @@ jobs:
         id: sync_step
         uses: Enterprise-CMCS/mac-fc-security-hub-visibility@v2.2
         with:
-          jira-host: ${{ secrets.JIRA_HOST }}
+          jira-base-uri: ${{ secrets.JIRA_HOST }}
           jira-token: ${{ secrets.ENT_JIRA_TOKEN }}
           jira-username: ${{ secrets.JIRA_USERNAME }}
           jira-project-key: MCR
           jira-ignore-statuses: Done, Closed, Canceled
           aws-severities: CRITICAL, HIGH, MEDIUM
           jira-custom-fields: '{"customfield_10104":32589,"customfield_10100":"MCR-2480"}' # Sprint, Epic
-          jira-labels-config: "[{\"labelField\":\"ProductName\",\"labelPrefix\":\"product\",\"labelDelimiter\":\":\"},{\"labelField\":\"severity\"},{\"labelField\":\"accountId\",\"labelDelimiter\":\":\",\"labelPrefix\":\"account\"},{\"labelField\":\"region\"},{\"labelField\":\"accountAlias\"}, {\"labelField\":\"identify\"},{\"labelField\":\"CVE\",\"labelPrefix\":\"\",\"labelDelimiter\":\"\"}]"
-          jira-assignee: "TZCT"
+          jira-labels-config: '[{"labelField":"ProductName","labelPrefix":"product","labelDelimiter":":"},{"labelField":"severity"},{"labelField":"accountId","labelDelimiter":":","labelPrefix":"account"},{"labelField":"region"},{"labelField":"accountAlias"}, {"labelField":"identify"},{"labelField":"CVE","labelPrefix":"","labelDelimiter":""}]'
+          jira-assignee: 'TZCT'
           include-all-products: 'true'
           jira-consolidate-tickets: true
 
