@@ -679,6 +679,11 @@ export class AppApiStack extends BaseStack {
             `mkdir -p "${outputDir}/prisma" || true`,
             `cp "${appApiPath}/prisma/schema.prisma" "${outputDir}/prisma/schema.prisma" || echo "Prisma schema not found"`,
             `cp -r "${appApiPath}/prisma/migrations" "${outputDir}/prisma/migrations" || echo "Prisma migrations not found"`,
+            // Copy Prisma CLI runtime so migrate Lambda can run without npx/npm network access
+            `mkdir -p "${outputDir}/node_modules" || true`,
+            `cp -RL "${appApiPath}/node_modules/prisma" "${outputDir}/node_modules/prisma" || echo "Prisma CLI package not found"`,
+            `cp -RL "${appApiPath}/node_modules/@prisma" "${outputDir}/node_modules/@prisma" || echo "@prisma packages not found"`,
+            `cp -RL "${appApiPath}/node_modules/.prisma" "${outputDir}/node_modules/.prisma" || echo ".prisma engines not found"`,
             // Copy data migrations (these are TypeScript files that will be bundled but need to be in expected location)
             `mkdir -p "${outputDir}/dataMigrations" || true`,
             `cp -r "${appApiPath}/src/dataMigrations/migrations" "${outputDir}/dataMigrations/" || echo "Data migrations not found"`,

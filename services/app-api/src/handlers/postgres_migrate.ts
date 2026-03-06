@@ -54,14 +54,23 @@ const main: Handler = async (): Promise<APIGatewayProxyResultV2> => {
         // Aurora can have long cold starts, so we extend connection timeout on migrates
         // With Prisma 7, schema and migrations are bundled directly with the Lambda
         const schemaPath = process.env.SCHEMA_PATH ?? './prisma/schema.prisma'
+        const prismaCliPath =
+            process.env.PRISMA_CLI_PATH ??
+            './node_modules/prisma/build/index.js'
         const prismaResult = spawnSync(
-            'npx',
-            ['prisma', 'migrate', 'deploy', `--schema=${schemaPath}`],
+            process.execPath,
+            [prismaCliPath, 'migrate', 'deploy', `--schema=${schemaPath}`],
             {
+                cwd: process.cwd(),
                 env: {
                     ...process.env,
                     DATABASE_URL:
                         dbConnectionURL + `&connect_timeout=${connectTimeout}`,
+                    // Ensure npm/prisma never tries to use an unwritable home dir in Lambda.
+                    HOME: process.env.HOME ?? '/tmp',
+                    NPM_CONFIG_CACHE:
+                        process.env.NPM_CONFIG_CACHE ?? '/tmp/.npm',
+                    PRISMA_HIDE_UPDATE_MESSAGE: 'true',
                 },
             }
         )
