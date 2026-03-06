@@ -996,7 +996,7 @@ export class AppApiStack extends BaseStack {
             EMAILER_MODE: emailerMode,
             PARAMETER_STORE_MODE: parameterStoreMode,
             APPLICATION_ENDPOINT: applicationEndpoint,
-            AWS_LAMBDA_EXEC_WRAPPER: '/opt/otel-handler',
+            AWS_LAMBDA_EXEC_WRAPPER: '/opt/otel-instrument',
             OPENTELEMETRY_COLLECTOR_CONFIG_FILE: '/var/task/collector.yml',
             LD_SDK_KEY: ldSdkKey,
             JWT_SECRET: jwtSecret,

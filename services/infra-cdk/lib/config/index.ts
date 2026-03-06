@@ -46,7 +46,7 @@ export function getLambdaEnvironment(
 // OTEL environment helper (minimal version)
 export function getOtelEnvironment(stage: string): Record<string, string> {
     return {
-        AWS_LAMBDA_EXEC_WRAPPER: '/opt/otel-handler',
+        AWS_LAMBDA_EXEC_WRAPPER: '/opt/otel-instrument',
         OTEL_SERVICE_NAME: `mcr-${stage}`,
         OTEL_PROPAGATORS: 'tracecontext,baggage,xray',
         OPENTELEMETRY_COLLECTOR_CONFIG_FILE: '/var/task/collector.yml',
