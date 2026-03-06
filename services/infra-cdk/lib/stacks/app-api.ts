@@ -55,7 +55,7 @@ export interface AppApiStackProps extends BaseStackProps {
 export class AppApiStack extends BaseStack {
     // ESM banner for Lambda bundling - provides CommonJS compatibility shims
     private static readonly ESM_BANNER =
-        'import { createRequire } from "module";import { fileURLToPath } from "url";import { dirname } from "path";const require = createRequire(import.meta.url);const __filename = fileURLToPath(import.meta.url);const __dirname = dirname(__filename);'
+        'import { createRequire as __createRequire } from "module";import { fileURLToPath as __fileURLToPath } from "url";import { dirname as __dirnameFn } from "path";const require = __createRequire(import.meta.url);const __filename = __fileURLToPath(import.meta.url);const __dirname = __dirnameFn(__filename);'
 
     // API Gateway
     public readonly apiGateway: RestApi
