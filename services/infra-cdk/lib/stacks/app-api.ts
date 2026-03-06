@@ -700,12 +700,8 @@ export class AppApiStack extends BaseStack {
         return {
             format: OutputFormat.ESM,
             banner: AppApiStack.ESM_BANNER,
-            // Bundle Prisma client only for functions that need it
-            // Use nodeModules to include WASM files, then clean up non-PostgreSQL engines
+            // Let esbuild bundle Prisma - it should tree-shake and include WASM files automatically
             // Note: AWS SDK v3 is included in Node.js 18+ Lambda runtimes
-            ...(includePrisma && {
-                nodeModules: ['@prisma/client', '@prisma/adapter-pg'],
-            }),
             commandHooks: {
                 beforeBundling(inputDir: string, outputDir: string): string[] {
                     return [
