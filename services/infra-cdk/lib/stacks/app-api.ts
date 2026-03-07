@@ -681,16 +681,8 @@ export class AppApiStack extends BaseStack {
             `cp -r "${appApiPath}/prisma/migrations" "${outputDir}/prisma/migrations" || echo "Prisma migrations not found"`,
             // Copy Prisma CLI runtime from pnpm-resolved package tree so all CLI deps are present.
             `mkdir -p "${outputDir}/node_modules" || true`,
-            `PRISMA_PM_DIR="$(dirname "$(readlink -f "${appApiPath}/node_modules/prisma")")" && cp -RL "\${PRISMA_PM_DIR}/prisma" "${outputDir}/node_modules/prisma" || echo "Prisma CLI package not found"`,
-            `PRISMA_PM_DIR="$(dirname "$(readlink -f "${appApiPath}/node_modules/prisma")")" && cp -RL "\${PRISMA_PM_DIR}/@prisma" "${outputDir}/node_modules/@prisma" || echo "@prisma packages not found"`,
-            // Copy transitive deps that pnpm stores in separate store entries.
-            // The @prisma/* copy above only gets direct deps of the prisma CLI;
-            // these lines resolve deeper transitive deps needed by prisma migrate deploy.
-            `PRISMA_PM_DIR="$(dirname "$(readlink -f "${appApiPath}/node_modules/prisma")")" && ENGINES_REAL="$(readlink -f "\${PRISMA_PM_DIR}/@prisma/engines")" && ENGINES_SIBLINGS="$(dirname "\${ENGINES_REAL}")" && if [ -d "\${ENGINES_SIBLINGS}" ]; then for pkg in "\${ENGINES_SIBLINGS}"/*; do pkgname="$(basename "\$pkg")"; if [ ! -d "${outputDir}/node_modules/@prisma/\$pkgname" ]; then cp -RL "\$pkg" "${outputDir}/node_modules/@prisma/\$pkgname"; fi; done; fi || true`,
-            `PRISMA_PM_DIR="$(dirname "$(readlink -f "${appApiPath}/node_modules/prisma")")" && DEV_STORE="$(dirname "$(readlink -f "\${PRISMA_PM_DIR}/@prisma/dev")")/.." && cp -RL "\${DEV_STORE}/valibot" "${outputDir}/node_modules/valibot" || true`,
-            `PRISMA_PM_DIR="$(dirname "$(readlink -f "${appApiPath}/node_modules/prisma")")" && cp -RL "\${PRISMA_PM_DIR}/mysql2" "${outputDir}/node_modules/mysql2" || true`,
-            `PRISMA_PM_DIR="$(dirname "$(readlink -f "${appApiPath}/node_modules/prisma")")" && cp -RL "\${PRISMA_PM_DIR}/postgres" "${outputDir}/node_modules/postgres" || true`,
-            `PRISMA_PM_DIR="$(dirname "$(readlink -f "${appApiPath}/node_modules/prisma")")" && cp -RL "\${PRISMA_PM_DIR}/typescript" "${outputDir}/node_modules/typescript" || true`,
+            `PRISMA_PM_DIR="$(dirname "$(readlink -f "${appApiPath}/node_modules/prisma")")" && cp -RL "\${PRISMA_PM_DIR}/"* "${outputDir}/node_modules/" || echo "Prisma package tree not found"`,
+            `PRISMA_PM_DIR="$(dirname "$(readlink -f "${appApiPath}/node_modules/prisma")")" && PRISMA_DEV_PM_DIR="$(dirname "$(dirname "$(readlink -f "\${PRISMA_PM_DIR}/@prisma/dev")")")" && cp -RL "\${PRISMA_DEV_PM_DIR}/"* "${outputDir}/node_modules/" || echo "Prisma dev dependency tree not found"`,
             // Copy data migrations (these are TypeScript files that will be bundled but need to be in expected location)
             `mkdir -p "${outputDir}/dataMigrations" || true`,
             `cp -r "${appApiPath}/src/dataMigrations/migrations" "${outputDir}/dataMigrations/" || echo "Data migrations not found"`,
