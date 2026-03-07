@@ -683,8 +683,11 @@ export class AppApiStack extends BaseStack {
             `mkdir -p "${outputDir}/node_modules" || true`,
             `PRISMA_PM_DIR="$(dirname "$(readlink -f "${appApiPath}/node_modules/prisma")")" && cp -RL "\${PRISMA_PM_DIR}/prisma" "${outputDir}/node_modules/prisma" || echo "Prisma CLI package not found"`,
             `PRISMA_PM_DIR="$(dirname "$(readlink -f "${appApiPath}/node_modules/prisma")")" && cp -RL "\${PRISMA_PM_DIR}/@prisma" "${outputDir}/node_modules/@prisma" || echo "@prisma packages not found"`,
-            // Also copy transitive @prisma deps from @prisma/engines (pnpm stores these separately)
+            // Copy transitive deps that pnpm stores in separate store entries.
+            // The @prisma/* copy above only gets direct deps of the prisma CLI;
+            // these lines resolve deeper transitive deps needed by prisma migrate deploy.
             `PRISMA_PM_DIR="$(dirname "$(readlink -f "${appApiPath}/node_modules/prisma")")" && ENGINES_REAL="$(readlink -f "\${PRISMA_PM_DIR}/@prisma/engines")" && ENGINES_SIBLINGS="$(dirname "\${ENGINES_REAL}")" && if [ -d "\${ENGINES_SIBLINGS}" ]; then for pkg in "\${ENGINES_SIBLINGS}"/*; do pkgname="$(basename "\$pkg")"; if [ ! -d "${outputDir}/node_modules/@prisma/\$pkgname" ]; then cp -RL "\$pkg" "${outputDir}/node_modules/@prisma/\$pkgname"; fi; done; fi || true`,
+            `PRISMA_PM_DIR="$(dirname "$(readlink -f "${appApiPath}/node_modules/prisma")")" && DEV_STORE="$(dirname "$(readlink -f "\${PRISMA_PM_DIR}/@prisma/dev")")/.." && cp -RL "\${DEV_STORE}/valibot" "${outputDir}/node_modules/valibot" || true`,
             `PRISMA_PM_DIR="$(dirname "$(readlink -f "${appApiPath}/node_modules/prisma")")" && cp -RL "\${PRISMA_PM_DIR}/mysql2" "${outputDir}/node_modules/mysql2" || true`,
             `PRISMA_PM_DIR="$(dirname "$(readlink -f "${appApiPath}/node_modules/prisma")")" && cp -RL "\${PRISMA_PM_DIR}/postgres" "${outputDir}/node_modules/postgres" || true`,
             `PRISMA_PM_DIR="$(dirname "$(readlink -f "${appApiPath}/node_modules/prisma")")" && cp -RL "\${PRISMA_PM_DIR}/typescript" "${outputDir}/node_modules/typescript" || true`,
