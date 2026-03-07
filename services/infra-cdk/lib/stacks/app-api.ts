@@ -679,11 +679,13 @@ export class AppApiStack extends BaseStack {
             `mkdir -p "${outputDir}/prisma" || true`,
             `cp "${appApiPath}/prisma/schema.prisma" "${outputDir}/prisma/schema.prisma" || echo "Prisma schema not found"`,
             `cp -r "${appApiPath}/prisma/migrations" "${outputDir}/prisma/migrations" || echo "Prisma migrations not found"`,
-            // Copy Prisma CLI runtime so migrate Lambda can run without npx/npm network access
+            // Copy Prisma CLI runtime from pnpm-resolved package tree so all CLI deps are present.
             `mkdir -p "${outputDir}/node_modules" || true`,
-            `cp -RL "${appApiPath}/node_modules/prisma" "${outputDir}/node_modules/prisma" || echo "Prisma CLI package not found"`,
-            `cp -RL "${appApiPath}/node_modules/@prisma" "${outputDir}/node_modules/@prisma" || echo "@prisma packages not found"`,
-            `cp -RL "${appApiPath}/node_modules/.prisma" "${outputDir}/node_modules/.prisma" || echo ".prisma engines not found"`,
+            `PRISMA_PM_DIR="$(dirname "$(readlink -f "${appApiPath}/node_modules/prisma")")" && cp -RL "\${PRISMA_PM_DIR}/prisma" "${outputDir}/node_modules/prisma" || echo "Prisma CLI package not found"`,
+            `PRISMA_PM_DIR="$(dirname "$(readlink -f "${appApiPath}/node_modules/prisma")")" && cp -RL "\${PRISMA_PM_DIR}/@prisma" "${outputDir}/node_modules/@prisma" || echo "@prisma packages not found"`,
+            `PRISMA_PM_DIR="$(dirname "$(readlink -f "${appApiPath}/node_modules/prisma")")" && cp -RL "\${PRISMA_PM_DIR}/mysql2" "${outputDir}/node_modules/mysql2" || true`,
+            `PRISMA_PM_DIR="$(dirname "$(readlink -f "${appApiPath}/node_modules/prisma")")" && cp -RL "\${PRISMA_PM_DIR}/postgres" "${outputDir}/node_modules/postgres" || true`,
+            `PRISMA_PM_DIR="$(dirname "$(readlink -f "${appApiPath}/node_modules/prisma")")" && cp -RL "\${PRISMA_PM_DIR}/typescript" "${outputDir}/node_modules/typescript" || true`,
             // Copy data migrations (these are TypeScript files that will be bundled but need to be in expected location)
             `mkdir -p "${outputDir}/dataMigrations" || true`,
             `cp -r "${appApiPath}/src/dataMigrations/migrations" "${outputDir}/dataMigrations/" || echo "Data migrations not found"`,
