@@ -667,8 +667,12 @@ export class AppApiStack extends BaseStack {
     }
 
     /**
-     * Get Prisma bundling commands for migrate function
-     * Copies Prisma schema and migrations directory
+     * Get Prisma bundling commands for migrate function.
+     * Installs the Prisma CLI via npm (not copied from pnpm store) because pnpm's
+     * isolated dependency structure causes version conflicts when flattened into a
+     * single node_modules (e.g. signal-exit@3 vs signal-exit@4).
+     * npm install resolves these conflicts with proper nested node_modules.
+     * Unnecessary packages are removed afterward to keep the bundle under 250MB.
      */
     private getPrismaBundlingCommands(): (
         outputDir: string,
@@ -679,13 +683,17 @@ export class AppApiStack extends BaseStack {
             `mkdir -p "${outputDir}/prisma" || true`,
             `cp "${appApiPath}/prisma/schema.prisma" "${outputDir}/prisma/schema.prisma" || echo "Prisma schema not found"`,
             `cp -r "${appApiPath}/prisma/migrations" "${outputDir}/prisma/migrations" || echo "Prisma migrations not found"`,
-            // Copy Prisma CLI runtime from pnpm-resolved package tree so all CLI deps are present.
-            `mkdir -p "${outputDir}/node_modules" || true`,
-            `PRISMA_PM_DIR="$(dirname "$(readlink -f "${appApiPath}/node_modules/prisma")")" && cp -RL "\${PRISMA_PM_DIR}/"* "${outputDir}/node_modules/" || echo "Prisma package tree not found"`,
-            `PRISMA_PM_DIR="$(dirname "$(readlink -f "${appApiPath}/node_modules/prisma")")" && PRISMA_DEV_PM_DIR="$(dirname "$(dirname "$(readlink -f "\${PRISMA_PM_DIR}/@prisma/dev")")")" && cp -RL "\${PRISMA_DEV_PM_DIR}/"* "${outputDir}/node_modules/" || echo "Prisma dev dependency tree not found"`,
-            // Copy data migrations (these are TypeScript files that will be bundled but need to be in expected location)
+            // Install Prisma CLI with npm using the exact version from the lockfile
+            `PRISMA_VER=$(node -p "require('${appApiPath}/node_modules/prisma/package.json').version") && echo "Installing prisma@\${PRISMA_VER}" && cd "${outputDir}" && npm install "prisma@\${PRISMA_VER}" --save-exact --ignore-scripts 2>&1 | tail -5`,
+            // Remove packages not needed for `prisma migrate deploy`
+            `rm -rf "${outputDir}/node_modules/@prisma/studio-core" "${outputDir}/node_modules/@prisma/client" "${outputDir}/node_modules/typescript" "${outputDir}/node_modules/react" "${outputDir}/node_modules/react-dom"`,
+            // Remove npm artifacts
+            `rm -f "${outputDir}/package.json" "${outputDir}/package-lock.json"`,
+            // Copy data migrations
             `mkdir -p "${outputDir}/dataMigrations" || true`,
             `cp -r "${appApiPath}/src/dataMigrations/migrations" "${outputDir}/dataMigrations/" || echo "Data migrations not found"`,
+            // Report final bundle size
+            `echo "Migrate function bundle size:" && du -sh "${outputDir}"`,
         ]
     }
 
