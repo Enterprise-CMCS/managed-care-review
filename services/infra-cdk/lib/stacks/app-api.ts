@@ -684,7 +684,7 @@ export class AppApiStack extends BaseStack {
             `cp "${appApiPath}/prisma/schema.prisma" "${outputDir}/prisma/schema.prisma" || echo "Prisma schema not found"`,
             `cp -r "${appApiPath}/prisma/migrations" "${outputDir}/prisma/migrations" || echo "Prisma migrations not found"`,
             // Install Prisma CLI with npm using the exact version from the lockfile
-            `PRISMA_VER=$(node -p "require('${appApiPath}/node_modules/prisma/package.json').version") && echo "Installing prisma@\${PRISMA_VER}" && cd "${outputDir}" && npm install "prisma@\${PRISMA_VER}" --save-exact --ignore-scripts 2>&1 | tail -5`,
+            `PRISMA_VER=$(node -p "require('${appApiPath}/node_modules/prisma/package.json').version") && echo "Installing prisma@\${PRISMA_VER}" && cd "${outputDir}" && npm install "prisma@\${PRISMA_VER}" --save-exact --ignore-scripts --loglevel=error`,
             // Remove packages not needed for `prisma migrate deploy`
             `rm -rf "${outputDir}/node_modules/@prisma/studio-core" "${outputDir}/node_modules/@prisma/client" "${outputDir}/node_modules/typescript" "${outputDir}/node_modules/react" "${outputDir}/node_modules/react-dom"`,
             // Remove npm artifacts
