@@ -1,16 +1,20 @@
-Submission <%= it.pkgName %> <%= it.emailHeader %><br />
-This determination is based on your updated submission responses.<br />
-<br />
+<span style="font-size: 22px; font-weight: 400; line-height: normal">Submission <%= it.pkgName %> <%= it.emailHeader %></span><br />
+<% if (it.reviewDeterminationChanged) { %>
+  This determination is based on your updated submission responses.<br />
+  <br />
+<% } %>
+<% if (!it.reviewDeterminationChanged) { %>
+  <br />
+<% } %>
 <b>Submitted by:</b> <%= it.submittedBy %><br />
 <b>Updated on:</b> <%= it.updatedOn %><br />
 <b>Review decision:</b> <%= it.subjectToReview ? 'Subject' : 'Not subject' %> to formal review and approval<br />
 <br />
-<b>Summary of changes:</b> <%= it.changeSummary %>
+<b>Summary of changes:</b> <%= it.changeSummary %><br />
 <br />
-<a href="<%= it.submissionURL %>">View submission</a>
+<a href="<%= it.submissionURL %>">View submission</a><br />
 <br />
 <% if (it.reviewDeterminationChanged) { %>
   <%~ it.subjectToReview ? includeFile('./whatComesNextSummary', it) : includeFile('./eqroReminderSummary', it) %>
 <% } %>
-<br />
 If you need to make further changes, contact <a href="mailto:MCGDMCOactions@cms.hhs.gov">MCGDMCOactions@cms.hhs.gov</a>.
