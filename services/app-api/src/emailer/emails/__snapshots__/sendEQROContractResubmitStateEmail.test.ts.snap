@@ -1,0 +1,72 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`sendEQROContractResubmitStateEmail > should render email for EQRO resubmit when changed from not subject to review to subject to review 1`] = `
+"Submission MCR-MN-0004-SNBC is now subject to review<br />
+This determination is based on your updated submission responses.<br />
+<br />
+<b>Submitted by:</b> house@example.com<br />
+<b>Updated on:</b> 03/08/2026<br />
+<b>Review decision:</b> Subject to formal review and approval<br />
+<br />
+<b>Summary of changes:</b> Updated info<br />
+<a href="http://localhost/submissions/eqro/test-contract-123">View submission</a>
+<br />
+  <div>What comes next:</div>
+<ol>
+    <li>
+        <strong>Check for completeness:</strong> CMS will review all documentation submitted to ensure all required materials were received.
+    </li>
+    <li>
+        <strong>CMS review:</strong> Your submission will be reviewed by CMS for adherence to federal regulations.
+    </li>
+    <li>
+        <strong>Questions:</strong> You may receive questions via email from CMS as they conduct their review.
+    </li>
+    <li>
+        <strong>Decision:</strong> Once all questions have been addressed, CMS will contact you with a final determination.
+
+    </li>
+</ol><br />
+If you need to make further changes, contact <a href="mailto:MCGDMCOactions@cms.hhs.gov">MCGDMCOactions@cms.hhs.gov</a>."
+`;
+
+exports[`sendEQROContractResubmitStateEmail > should render email for EQRO resubmit when changed from subject to review to not subject to review 1`] = `
+"Submission MCR-MN-0004-SNBC is no longer subject to review<br />
+This determination is based on your updated submission responses.<br />
+<br />
+<b>Submitted by:</b> house@example.com<br />
+<b>Updated on:</b> 03/08/2026<br />
+<b>Review decision:</b> Not subject to formal review and approval<br />
+<br />
+<b>Summary of changes:</b> Updated info<br />
+<a href="http://localhost/submissions/eqro/test-contract-123">View submission</a>
+<br />
+  <div>As a reminder, all contracts with EQROs must:</div>
+<ul>
+    <li>
+        Be submitted to CMS. This includes base contracts, amendments to base contracts, and extensions.
+    </li>
+    <li>
+        Meet competence and independence requirements specified at 42 CFR 438.354 to qualify for Federal Financial Participation (FFP).
+    </li>
+    <li>
+        Require the mandatory review activities specified at 42 CFR 438.358 for MCOs, PIHPs, and PAHPs.
+    </li>
+</ul><br />
+If you need to make further changes, contact <a href="mailto:MCGDMCOactions@cms.hhs.gov">MCGDMCOactions@cms.hhs.gov</a>."
+`;
+
+exports[`sendEQROContractResubmitStateEmail > should render email for EQRO resubmit with no change in review determination 1`] = `
+"Submission MCR-MN-0004-SNBC was resubmitted<br />
+This determination is based on your updated submission responses.<br />
+<br />
+<b>Submitted by:</b> house@example.com<br />
+<b>Updated on:</b> 03/08/2026<br />
+<b>Review decision:</b> Subject to formal review and approval<br />
+<br />
+<b>Summary of changes:</b> Updated info<br />
+<a href="http://localhost/submissions/eqro/test-contract-123">View submission</a>
+<br />
+<br />
+If you need to make further changes, contact <a href="mailto:MCGDMCOactions@cms.hhs.gov">MCGDMCOactions@cms.hhs.gov</a>."
+`;

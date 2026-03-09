@@ -121,7 +121,7 @@ export const sendEQROContractResubmitStateEmail = async (
     }
 
     const template = await renderTemplate<resubmitEQROTemplateData>(
-        'newEqroContractStateEmail',
+        'sendEQROContractResubmitStateEmail',
         etaData
     )
 
