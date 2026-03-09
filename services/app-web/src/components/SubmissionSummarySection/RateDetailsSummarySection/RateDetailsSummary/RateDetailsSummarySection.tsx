@@ -40,6 +40,7 @@ import {
 } from '../../../DataDetail'
 import { SectionHeader } from '../../../SectionHeader'
 import styles from '../../SubmissionSummarySection.module.scss'
+import { NavLinkWithLogging } from '../../../../components/TealiumLogging'
 
 export type RateDetailsSummarySectionProps = {
     contract: Contract | UnlockedContract
@@ -283,7 +284,17 @@ export const RateDetailsSummarySection = ({
                                       aria-label={`Rate ID: ${rateFormData.rateCertificationName}`}
                                       className={styles.rateName}
                                   >
-                                      {rateFormData.rateCertificationName}
+                                      {!isStateUser ? (
+                                          <NavLinkWithLogging
+                                              to={`/rates/${rateRev.rateID}`}
+                                          >
+                                              {
+                                                  rateFormData.rateCertificationName
+                                              }
+                                          </NavLinkWithLogging>
+                                      ) : (
+                                          rateFormData.rateCertificationName
+                                      )}
                                   </h3>
                               </div>
                               <dl>
