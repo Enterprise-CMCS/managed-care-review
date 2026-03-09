@@ -668,7 +668,7 @@ export class AppApiStack extends BaseStack {
 
     /**
      * Get Prisma bundling commands for migrate function
-     * Copies Prisma schema, migrations, and all Prisma packages from pnpm store
+     * Copies Prisma schema, migrations, and all Prisma packages with their transitive dependencies
      */
     private getPrismaBundlingCommands(): (
         outputDir: string,
@@ -681,33 +681,23 @@ export class AppApiStack extends BaseStack {
             `cp -r "${appApiPath}/prisma/migrations" "${outputDir}/prisma/migrations" || echo "Prisma migrations not found"`,
 
             // Create node_modules structure
-            `mkdir -p "${outputDir}/node_modules/@prisma" || true`,
+            `mkdir -p "${outputDir}/node_modules" || true`,
 
-            // Copy the prisma CLI package itself
-            `PRISMA_REAL_PATH="$(readlink -f "${appApiPath}/node_modules/prisma")" && cp -RL "\${PRISMA_REAL_PATH}" "${outputDir}/node_modules/prisma" || echo "Prisma CLI not found"`,
-
-            // Find and copy ALL @prisma/* packages from the pnpm store
-            // This ensures all nested dependencies like @prisma/debug, @prisma/engines, etc. are included
+            // Copy ALL dependencies from each @prisma/* package in pnpm store (includes transitive deps)
             `PNPM_STORE="${appApiPath}/../../node_modules/.pnpm" && ` +
                 `for pkg_dir in "\${PNPM_STORE}"/@prisma+*/; do ` +
-                `if [ -d "\${pkg_dir}" ]; then ` +
-                `pkg_name=\$(basename "\${pkg_dir}" | sed 's/@prisma+//' | sed 's/@.*//') && ` +
-                `if [ -d "\${pkg_dir}node_modules/@prisma/\${pkg_name}" ]; then ` +
-                `cp -RL "\${pkg_dir}node_modules/@prisma/\${pkg_name}" "${outputDir}/node_modules/@prisma/" 2>/dev/null || true; ` +
+                `if [ -d "\${pkg_dir}node_modules" ]; then ` +
+                `cp -RL "\${pkg_dir}node_modules/"* "${outputDir}/node_modules/" 2>/dev/null || true; ` +
                 `fi; ` +
-                `fi; ` +
-                `done && echo "Copied all @prisma packages from pnpm store"`,
+                `done && echo "Copied all @prisma packages and their dependencies"`,
 
-            // Also copy the prisma@* package directories (the CLI itself with dependencies)
+            // Copy ALL dependencies from each prisma@* package in pnpm store (the CLI and its deps)
             `PNPM_STORE="${appApiPath}/../../node_modules/.pnpm" && ` +
                 `for pkg_dir in "\${PNPM_STORE}"/prisma@*/; do ` +
-                `if [ -d "\${pkg_dir}node_modules/prisma" ]; then ` +
-                `cp -RL "\${pkg_dir}node_modules/prisma" "${outputDir}/node_modules/" 2>/dev/null || true; ` +
+                `if [ -d "\${pkg_dir}node_modules" ]; then ` +
+                `cp -RL "\${pkg_dir}node_modules/"* "${outputDir}/node_modules/" 2>/dev/null || true; ` +
                 `fi; ` +
-                `if [ -d "\${pkg_dir}node_modules/@prisma" ]; then ` +
-                `cp -RL "\${pkg_dir}node_modules/@prisma/"* "${outputDir}/node_modules/@prisma/" 2>/dev/null || true; ` +
-                `fi; ` +
-                `done && echo "Copied prisma CLI dependencies"`,
+                `done && echo "Copied prisma CLI and all dependencies"`,
 
             // Copy data migrations (these are TypeScript files that will be bundled but need to be in expected location)
             `mkdir -p "${outputDir}/dataMigrations" || true`,
