@@ -15,7 +15,7 @@ import {
     stripHTMLFromTemplate,
 } from '../templateHelpers'
 import { submissionSummaryURL } from '../generateURLs'
-import { formatCalendarDate } from 'Users/juanruiz/managed-care-review/packages/dates/build'
+import { formatCalendarDate } from '@mc-review/dates'
 
 type resubmitEQROTemplateData = {
     pkgName: string
