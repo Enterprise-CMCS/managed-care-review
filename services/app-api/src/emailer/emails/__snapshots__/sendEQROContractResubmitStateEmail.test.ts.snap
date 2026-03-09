@@ -1,15 +1,16 @@
 // Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
 exports[`sendEQROContractResubmitStateEmail > should render email for EQRO resubmit when changed from not subject to review to subject to review 1`] = `
-"Submission MCR-MN-0004-SNBC is now subject to review<br />
-This determination is based on your updated submission responses.<br />
-<br />
+"<span style="font-size: 22px; font-weight: 400; line-height: normal">Submission MCR-MN-0004-SNBC is now subject to review</span><br />
+  This determination is based on your updated submission responses.<br />
+  <br />
 <b>Submitted by:</b> house@example.com<br />
 <b>Updated on:</b> 03/08/2026<br />
 <b>Review decision:</b> Subject to formal review and approval<br />
 <br />
 <b>Summary of changes:</b> Updated info<br />
-<a href="http://localhost/submissions/eqro/test-contract-123">View submission</a>
+<br />
+<a href="http://localhost/submissions/eqro/test-contract-123">View submission</a><br />
 <br />
   <div>What comes next:</div>
 <ol>
@@ -26,22 +27,22 @@ This determination is based on your updated submission responses.<br />
         <strong>Decision:</strong> Once all questions have been addressed, CMS will contact you with a final determination.
 
     </li>
-</ol><br />
-If you need to make further changes, contact <a href="mailto:MCGDMCOactions@cms.hhs.gov">MCGDMCOactions@cms.hhs.gov</a>."
+</ol>If you need to make further changes, contact <a href="mailto:MCGDMCOactions@cms.hhs.gov">MCGDMCOactions@cms.hhs.gov</a>."
 `;
 
 exports[`sendEQROContractResubmitStateEmail > should render email for EQRO resubmit when changed from subject to review to not subject to review 1`] = `
-"Submission MCR-MN-0004-SNBC is no longer subject to review<br />
-This determination is based on your updated submission responses.<br />
-<br />
+"<span style="font-size: 22px; font-weight: 400; line-height: normal">Submission MCR-MN-0004-SNBC is no longer subject to review</span><br />
+  This determination is based on your updated submission responses.<br />
+  <br />
 <b>Submitted by:</b> house@example.com<br />
 <b>Updated on:</b> 03/08/2026<br />
 <b>Review decision:</b> Not subject to formal review and approval<br />
 <br />
 <b>Summary of changes:</b> Updated info<br />
-<a href="http://localhost/submissions/eqro/test-contract-123">View submission</a>
 <br />
-  <div>As a reminder, all contracts with EQROs must:</div>
+<a href="http://localhost/submissions/eqro/test-contract-123">View submission</a><br />
+<br />
+  <b>As a reminder, all contracts with EQROs must:</b>
 <ul>
     <li>
         Be submitted to CMS. This includes base contracts, amendments to base contracts, and extensions.
@@ -52,21 +53,19 @@ This determination is based on your updated submission responses.<br />
     <li>
         Require the mandatory review activities specified at 42 CFR 438.358 for MCOs, PIHPs, and PAHPs.
     </li>
-</ul><br />
-If you need to make further changes, contact <a href="mailto:MCGDMCOactions@cms.hhs.gov">MCGDMCOactions@cms.hhs.gov</a>."
+</ul>If you need to make further changes, contact <a href="mailto:MCGDMCOactions@cms.hhs.gov">MCGDMCOactions@cms.hhs.gov</a>."
 `;
 
 exports[`sendEQROContractResubmitStateEmail > should render email for EQRO resubmit with no change in review determination 1`] = `
-"Submission MCR-MN-0004-SNBC was resubmitted<br />
-This determination is based on your updated submission responses.<br />
-<br />
+"<span style="font-size: 22px; font-weight: 400; line-height: normal">Submission MCR-MN-0004-SNBC was resubmitted</span><br />
+  <br />
 <b>Submitted by:</b> house@example.com<br />
 <b>Updated on:</b> 03/08/2026<br />
 <b>Review decision:</b> Subject to formal review and approval<br />
 <br />
 <b>Summary of changes:</b> Updated info<br />
-<a href="http://localhost/submissions/eqro/test-contract-123">View submission</a>
 <br />
+<a href="http://localhost/submissions/eqro/test-contract-123">View submission</a><br />
 <br />
 If you need to make further changes, contact <a href="mailto:MCGDMCOactions@cms.hhs.gov">MCGDMCOactions@cms.hhs.gov</a>."
 `;
