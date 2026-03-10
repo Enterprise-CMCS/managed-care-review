@@ -700,6 +700,15 @@ export class AppApiStack extends BaseStack {
                 `fi; ` +
                 `done && echo "Copied prisma CLI and all dependencies"`,
 
+            // Copy transitive deps not captured by the @prisma+* / prisma@* globs
+            // zeptomatch (dep of @prisma/dev) needs graphmatch + grammex (~88K total)
+            `PNPM_STORE="${appApiPath}/../../node_modules/.pnpm" && ` +
+                `for pkg_dir in "\${PNPM_STORE}"/zeptomatch@*/; do ` +
+                `if [ -d "\${pkg_dir}node_modules" ]; then ` +
+                `cp -RLn "\${pkg_dir}node_modules/"* "${outputDir}/node_modules/" 2>/dev/null || true; ` +
+                `fi; ` +
+                `done && echo "Copied zeptomatch transitive deps (graphmatch, grammex)"`,
+
             // Remove packages not needed for migrations to reduce bundle size
             // Studio and its React dependencies are not needed
             `rm -rf "${outputDir}/node_modules/@prisma/studio-core" 2>/dev/null || true`,
