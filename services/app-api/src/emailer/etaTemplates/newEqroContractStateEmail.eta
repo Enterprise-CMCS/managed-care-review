@@ -10,13 +10,7 @@
 <a href="<%= it.submissionURL%>">View submission</a>
 <br /><br />
 <% if (it.subjectToReview) { %>
-<span style="margin-bottom: 0; padding-bottom: 0;">What comes next:</span>
-<ol style="list-style: none; padding-left: 0; margin-left: 0; margin-top: 0;">
-  <li><b>1. Check for completeness</b>: CMS will review all documentation submitted to ensure all required materials were received, and the state submission history is complete.</li>
-  <li><b>2. CMS review</b>: Your submission will be reviewed by CMS for adherence to federal regulations.</li>
-  <li><b>3. Questions</b>: You may receive questions via email from CMS as they conduct their review.</li>
-  <li><b>4. Determination</b>: Once all questions have been addressed, CMS will contact you with their final determination.</li>
-</ol>
+<%~ includeFile('./whatComesNextSummary', it)%>
 <% } else { %>
 <span style="margin-bottom: 0; padding-bottom: 0;">Although the state's responses indicate this submission is not subject to CMS review and approval, all contracts with EQROs must:</span>
 <ul style="margin-left: 0; margin-top: 0;">

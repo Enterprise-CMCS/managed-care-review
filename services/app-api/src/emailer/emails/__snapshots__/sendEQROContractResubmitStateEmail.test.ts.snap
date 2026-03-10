@@ -13,20 +13,11 @@ exports[`sendEQROContractResubmitStateEmail > should render email for EQRO resub
 <a href="http://localhost/submissions/eqro/test-contract-123">View submission</a><br />
 <br />
   <div>What comes next:</div>
-<ol>
-    <li>
-        <strong>Check for completeness:</strong> CMS will review all documentation submitted to ensure all required materials were received.
-    </li>
-    <li>
-        <strong>CMS review:</strong> Your submission will be reviewed by CMS for adherence to federal regulations.
-    </li>
-    <li>
-        <strong>Questions:</strong> You may receive questions via email from CMS as they conduct their review.
-    </li>
-    <li>
-        <strong>Decision:</strong> Once all questions have been addressed, CMS will contact you with a final determination.
-
-    </li>
+<ol style="margin-top: 0;">
+  <li><strong>Check for completeness</strong>: CMS will review all documentation submitted to ensure all required materials were received, and the state submission history is complete.</li>
+  <li><strong>CMS review</strong>: Your submission will be reviewed by CMS for adherence to federal regulations.</li>
+  <li><strong>Questions</strong>: You may receive questions via email from CMS as they conduct their review.</li>
+  <li><strong>Determination</strong>: Once all questions have been addressed, CMS will contact you with their final determination.</li>
 </ol>If you need to make further changes, contact <a href="mailto:MCGDMCOactions@cms.hhs.gov">MCGDMCOactions@cms.hhs.gov</a>."
 `;
 
@@ -43,7 +34,7 @@ exports[`sendEQROContractResubmitStateEmail > should render email for EQRO resub
 <a href="http://localhost/submissions/eqro/test-contract-123">View submission</a><br />
 <br />
   <b>As a reminder, all contracts with EQROs must:</b>
-<ul>
+<ul style="margin-top: 0;">
     <li>
         Be submitted to CMS. This includes base contracts, amendments to base contracts, and extensions.
     </li>
