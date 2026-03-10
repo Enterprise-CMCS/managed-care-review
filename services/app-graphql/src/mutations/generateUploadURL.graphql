@@ -4,5 +4,6 @@ mutation generateUploadURL($input: GenerateUploadURLInput!) {
         s3Key
         bucket
         expiresIn
+        s3URL
     }
 }

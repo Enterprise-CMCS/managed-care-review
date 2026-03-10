@@ -30,7 +30,6 @@ describe(`generateUploadURLResolver`, () => {
 
         expect(result.errors).toBeUndefined()
         const payload = result.data?.generateUploadURL        
-        console.log(JSON.stringify(payload, null, 2))
         expect(payload?.uploadURL).toContain('.docx')
         expect(payload?.expiresIn).toBeDefined()
         expect(payload?.s3URL).toBeDefined()

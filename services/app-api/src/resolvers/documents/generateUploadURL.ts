@@ -79,6 +79,8 @@ export function generateUploadURLResolver(
             expiresIn
         )
 
+        const s3URL = uploadURL
+
         if (s3Client instanceof Error) {
             logError('generateUploadURL', s3Client.message)
             setErrorAttributesOnActiveSpan(s3Client.message, span)
@@ -86,20 +88,6 @@ export function generateUploadURLResolver(
                 extensions: {
                     code: 'INTERNAL_SERVER_ERROR',
                     cause: 'S3_ERROR',
-                },
-            })
-        }
-
-        //generate the s3URL for the response
-        const s3URL = await s3Client.getS3URL(s3Key, fileName, bucketName)
-
-        if (s3Client instanceof Error) {
-            logError('generateUploadUrl', s3Client.message)
-            setErrorAttributesOnActiveSpan(s3Client.message, span)
-            throw new GraphQLError(s3Client.message, {
-                extensions: {
-                    code: 'INTERNAL_SERVER_ERROR',
-                    cause: 'S3_ERROR'
                 },
             })
         }

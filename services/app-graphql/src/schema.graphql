@@ -2572,7 +2572,7 @@ type GenerateUploadURLPayload {
     s3Key: String!
     bucket: String!
     expiresIn: Int
-    s3Url: String!
+    s3URL: String!
 }
 
 type GenericDocumentOverrideType {
