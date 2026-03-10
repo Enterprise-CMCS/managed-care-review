@@ -26,6 +26,7 @@ type resubmitEQROTemplateData = {
     reviewDeterminationChanged: boolean
     changeSummary: string
     submissionURL: string
+    MCGDMCOContactEmail: string
 }
 
 export const sendEQROContractResubmitStateEmail = async (
@@ -78,7 +79,7 @@ export const sendEQROContractResubmitStateEmail = async (
 
     //Checking whether or not review determination has changed since last submission
     const previousFormData =
-        contract.packageSubmissions[1]?.contractRevision?.formData
+        contract.packageSubmissions[1].contractRevision.formData
     const previousSubjectToReview = eqroValidationAndReviewDetermination(
         contract.id,
         previousFormData
@@ -118,6 +119,7 @@ export const sendEQROContractResubmitStateEmail = async (
         reviewDeterminationChanged: reviewDeterminationChanged,
         changeSummary: updateInfo.updatedReason,
         submissionURL: submissionURL,
+        MCGDMCOContactEmail: 'MCGDMCOactions@cms.hhs.gov',
     }
 
     const template = await renderTemplate<resubmitEQROTemplateData>(

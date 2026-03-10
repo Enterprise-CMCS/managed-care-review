@@ -17,4 +17,4 @@
 <% if (it.reviewDeterminationChanged) { %>
   <%~ it.subjectToReview ? includeFile('./whatComesNextSummary', it) : includeFile('./eqroReminderSummary', it) %>
 <% } %>
-If you need to make further changes, contact <a href="mailto:MCGDMCOactions@cms.hhs.gov">MCGDMCOactions@cms.hhs.gov</a>.
+If you need to make further changes, contact <a href="mailto:<%= it.MCGDMCOContactEmail %>"><%= it.MCGDMCOContactEmail %></a>.
