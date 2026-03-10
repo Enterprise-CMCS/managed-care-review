@@ -669,6 +669,7 @@ export class AppApiStack extends BaseStack {
     /**
      * Get Prisma bundling commands for migrate function
      * Copies Prisma schema, migrations, and all Prisma packages with their transitive dependencies
+     * Then removes packages not needed for migrations to stay under Lambda size limits
      */
     private getPrismaBundlingCommands(): (
         outputDir: string,
@@ -698,6 +699,33 @@ export class AppApiStack extends BaseStack {
                 `cp -RL "\${pkg_dir}node_modules/"* "${outputDir}/node_modules/" 2>/dev/null || true; ` +
                 `fi; ` +
                 `done && echo "Copied prisma CLI and all dependencies"`,
+
+            // Remove packages not needed for migrations to reduce bundle size
+            // Studio and its React dependencies are not needed
+            `rm -rf "${outputDir}/node_modules/@prisma/studio-core" 2>/dev/null || true`,
+            `rm -rf "${outputDir}/node_modules/react" 2>/dev/null || true`,
+            `rm -rf "${outputDir}/node_modules/react-dom" 2>/dev/null || true`,
+            // Client packages not needed for running migrations
+            `rm -rf "${outputDir}/node_modules/@prisma/client" 2>/dev/null || true`,
+            `rm -rf "${outputDir}/node_modules/@prisma/adapter-pg" 2>/dev/null || true`,
+            `rm -rf "${outputDir}/node_modules/@prisma/client-runtime-utils" 2>/dev/null || true`,
+            `rm -rf "${outputDir}/node_modules/@prisma/query-plan-executor" 2>/dev/null || true`,
+            `rm -rf "${outputDir}/node_modules/@prisma/driver-adapter-utils" 2>/dev/null || true`,
+            // TypeScript types and compiler not needed at runtime
+            `rm -rf "${outputDir}/node_modules/@types" 2>/dev/null || true`,
+            `rm -rf "${outputDir}/node_modules/typescript" 2>/dev/null || true`,
+            // Platform-specific packages not needed in Lambda
+            `rm -rf "${outputDir}/node_modules/fsevents" 2>/dev/null || true`,
+            // Database drivers we don't use for migrations
+            `rm -rf "${outputDir}/node_modules/mysql2" 2>/dev/null || true`,
+            `rm -rf "${outputDir}/node_modules/pg" 2>/dev/null || true`,
+            `rm -rf "${outputDir}/node_modules/postgres" 2>/dev/null || true`,
+            `rm -rf "${outputDir}/node_modules/postgres-array" 2>/dev/null || true`,
+            `echo "Removed packages not needed for migrations"`,
+
+            // Remove source maps and documentation files not needed at runtime
+            `find "${outputDir}" -name "*.map" -delete 2>/dev/null || true`,
+            `find "${outputDir}/node_modules" \\( -name "README*" -o -name "CHANGELOG*" \\) -delete 2>/dev/null || true`,
 
             // Copy data migrations (these are TypeScript files that will be bundled but need to be in expected location)
             `mkdir -p "${outputDir}/dataMigrations" || true`,
