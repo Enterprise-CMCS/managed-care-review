@@ -1,8 +1,8 @@
-// import tseslint from 'typescript-eslint'
+import tseslint from 'typescript-eslint'
 import typescript from '@typescript-eslint/eslint-plugin'
 import typescriptParser from '@typescript-eslint/parser'
 
-export default [
+export default tseslint.config([
     {
         files: ['**/*.ts'],
         ignores: ['*.config.js', '**/esbuild.config.js'],
@@ -72,4 +72,4 @@ export default [
             ],
         },
     },
-]
+])
