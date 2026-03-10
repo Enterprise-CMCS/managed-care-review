@@ -227,6 +227,23 @@ export const RateDetailsSummarySection = ({
         return 'CMS must unlock the submission so the state can add a rate certification.'
     }
 
+    const rateCertificationNameHeader = (
+        rateId: string,
+        rateCertificationName: string | null | undefined
+    ): React.ReactElement | string => {
+        const nameDisplay = rateCertificationName ?? ''
+
+        if (!isStateUser) {
+            return (
+                <NavLinkWithLogging to={`/rates/${rateId}`}>
+                    {nameDisplay}
+                </NavLinkWithLogging>
+            )
+        }
+
+        return nameDisplay
+    }
+
     return (
         <SectionCard id="rateDetails" className={styles.summarySection}>
             <SectionHeader
@@ -284,15 +301,8 @@ export const RateDetailsSummarySection = ({
                                       aria-label={`Rate ID: ${rateFormData.rateCertificationName}`}
                                       className={styles.rateName}
                                   >
-                                      {!isStateUser ? (
-                                          <NavLinkWithLogging
-                                              to={`/rates/${rateRev.rateID}`}
-                                          >
-                                              {
-                                                  rateFormData.rateCertificationName
-                                              }
-                                          </NavLinkWithLogging>
-                                      ) : (
+                                      {rateCertificationNameHeader(
+                                          rateRev.rateID,
                                           rateFormData.rateCertificationName
                                       )}
                                   </h3>
@@ -567,13 +577,8 @@ export const RateDetailsSummarySection = ({
                         >
                             <InfoTag color="gray-medium">WITHDRAWN</InfoTag>{' '}
                             <br />
-                            {!isStateUser ? (
-                                <NavLinkWithLogging
-                                    to={`/rates/${rateRev.rateID}`}
-                                >
-                                    {rateRev.formData.rateCertificationName}
-                                </NavLinkWithLogging>
-                            ) : (
+                            {rateCertificationNameHeader(
+                                rateRev.rateID,
                                 rateRev.formData.rateCertificationName
                             )}
                         </h3>
