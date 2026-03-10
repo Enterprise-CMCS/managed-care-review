@@ -566,7 +566,16 @@ export const RateDetailsSummarySection = ({
                             className={styles.rateName}
                         >
                             <InfoTag color="gray-medium">WITHDRAWN</InfoTag>{' '}
-                            {rateRev.formData.rateCertificationName}
+                            <br />
+                            {!isStateUser ? (
+                                <NavLinkWithLogging
+                                    to={`/rates/${rateRev.rateID}`}
+                                >
+                                    {rateRev.formData.rateCertificationName}
+                                </NavLinkWithLogging>
+                            ) : (
+                                rateRev.formData.rateCertificationName
+                            )}
                         </h3>
                     </SectionCard>
                 ))}
