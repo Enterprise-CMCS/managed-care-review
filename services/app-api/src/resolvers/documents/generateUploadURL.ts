@@ -5,13 +5,12 @@ import {
     setResolverDetailsOnActiveSpan,
     setSuccessAttributesOnActiveSpan,
 } from '../attributeHelper'
-import { canWrite } from '../../authorization/oauthAuthorization'
+import { canOauthWrite } from '../../authorization/oauthAuthorization'
 import { logError, logSuccess } from '../../logger'
 import type { Store } from '../../postgres'
 import type { S3ClientT } from '../../s3'
 import { v4 as uuidv4 } from 'uuid'
 import type { Context } from '../../handlers/apollo_gql'
-import type { BucketShortName } from '../../s3'
 import { UPLOAD_FILE_TYPE_TO_MIME } from './uploadFileTypeMap'
 
 export function generateUploadURLResolver(
@@ -24,7 +23,7 @@ export function generateUploadURLResolver(
         setResolverDetailsOnActiveSpan('generateUploadURL', user, span)
 
         // Check OAuth client write permissions
-        if (!canWrite(context)) {
+        if (!canOauthWrite(context)) {
             const errMessage = `OAuth client does not have write permissions`
             logError('generateUploadURL', errMessage)
             setErrorAttributesOnActiveSpan(errMessage, span)
@@ -36,7 +35,7 @@ export function generateUploadURLResolver(
             })
         }
 
-        const { fileName, fileType } = input
+        const { fileName, fileType, bucketName } = input
         const expiresIn = 300 //300 is 5 mins, default (900) is 15 mins
 
         if (!fileName) {
@@ -71,8 +70,7 @@ export function generateUploadURLResolver(
             })
         }
 
-        const s3Key = `${uuidv4()}.${extension}`
-        const bucketName: BucketShortName = 'QUESTION_ANSWER_DOCS'
+        const s3Key = `${uuidv4()}.${extension}`        
 
         const uploadURL = await s3Client.getUploadURL(
             s3Key,
@@ -92,6 +90,20 @@ export function generateUploadURLResolver(
             })
         }
 
+        //generate the s3URL for the response
+        const s3URL = await s3Client.getS3URL(s3Key, fileName, bucketName)
+
+        if (s3Client instanceof Error) {
+            logError('generateUploadUrl', s3Client.message)
+            setErrorAttributesOnActiveSpan(s3Client.message, span)
+            throw new GraphQLError(s3Client.message, {
+                extensions: {
+                    code: 'INTERNAL_SERVER_ERROR',
+                    cause: 'S3_ERROR'
+                },
+            })
+        }
+
         logSuccess('generateUploadURL')
         setSuccessAttributesOnActiveSpan(span)
 
@@ -100,6 +112,7 @@ export function generateUploadURLResolver(
             s3Key,
             bucket: bucketName,
             expiresIn,
+            s3URL
         }
     }
 }

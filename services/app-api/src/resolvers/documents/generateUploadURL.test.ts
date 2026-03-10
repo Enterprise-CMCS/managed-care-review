@@ -23,14 +23,17 @@ describe(`generateUploadURLResolver`, () => {
                 input: {
                     fileName: 'test-doc.docx',
                     fileType: 'DOCX',
+                    bucketName: 'QUESTION_ANSWER_DOCS',
                 },
             },
-        })
+        })        
 
         expect(result.errors).toBeUndefined()
         const payload = result.data?.generateUploadURL        
+        console.log(JSON.stringify(payload, null, 2))
         expect(payload?.uploadURL).toContain('.docx')
         expect(payload?.expiresIn).toBeDefined()
+        expect(payload?.s3URL).toBeDefined()
     })
     
     it('returns a valid presigned URL for a spreadsheet', async() => {
@@ -40,6 +43,7 @@ describe(`generateUploadURLResolver`, () => {
                 input: {
                     fileName: 'test-sheet.xlsx',
                     fileType: 'XLSX',
+                    bucketName: 'QUESTION_ANSWER_DOCS',
                 },
             },
         })
@@ -49,6 +53,7 @@ describe(`generateUploadURLResolver`, () => {
         expect(payload).toBeDefined()
         expect(payload?.uploadURL).toContain('.xlsx')
         expect(payload?.expiresIn).toBeDefined()
+        expect(payload?.s3URL).toBeDefined()
     })
 
     it('throws an error when file name is missing', async () => {
@@ -58,6 +63,7 @@ describe(`generateUploadURLResolver`, () => {
                 input: {
                     fileName: '',
                     fileType: 'PDF',
+                    bucketName: 'QUESTION_ANSWER_DOCS',
                 },
             },
         })
@@ -73,6 +79,7 @@ describe(`generateUploadURLResolver`, () => {
                 input: {
                     fileName: 'test.doc',
                     fileType: 'PDF',
+                    bucketName: 'QUESTION_ANSWER_DOCS',
                 },
             },
         })

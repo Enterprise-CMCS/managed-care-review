@@ -2564,6 +2564,7 @@ type UpdateOauthClientPayload {
 input GenerateUploadURLInput {
     fileName: String!
     fileType: UploadFileType!
+    bucketName: UploadBucketName!
 }
 
 type GenerateUploadURLPayload {
@@ -2571,6 +2572,7 @@ type GenerateUploadURLPayload {
     s3Key: String!
     bucket: String!
     expiresIn: Int
+    s3Url: String!
 }
 
 type GenericDocumentOverrideType {
@@ -2617,4 +2619,9 @@ enum ContractSubmissionType {
 
 enum OAuthScope {
     CMS_SUBMISSION_ACTIONS
+}
+
+enum UploadBucketName {
+    HEALTH_PLAN_DOCS,
+    QUESTION_ANSWER_DOCS
 }
