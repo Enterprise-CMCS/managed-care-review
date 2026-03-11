@@ -70,7 +70,7 @@ export function generateUploadURLResolver(
             })
         }
 
-        const s3Key = `${uuidv4()}.${extension}`        
+        const s3Key = `${uuidv4()}.${extension}`
 
         const uploadURL = await s3Client.getUploadURL(
             s3Key,
@@ -78,8 +78,6 @@ export function generateUploadURLResolver(
             contentType,
             expiresIn
         )
-
-        const s3URL = uploadURL
 
         if (s3Client instanceof Error) {
             logError('generateUploadURL', s3Client.message)
@@ -92,6 +90,8 @@ export function generateUploadURLResolver(
             })
         }
 
+        const s3URL = await s3Client.getS3URL(s3Key, fileName, bucketName)
+
         logSuccess('generateUploadURL')
         setSuccessAttributesOnActiveSpan(span)
 
@@ -100,7 +100,7 @@ export function generateUploadURLResolver(
             s3Key,
             bucket: bucketName,
             expiresIn,
-            s3URL
+            s3URL,
         }
     }
 }
