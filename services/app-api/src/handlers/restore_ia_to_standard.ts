@@ -3,11 +3,14 @@
  *
  * IMPORTANT LIMITATIONS:
  * - Works for: STANDARD_IA, ONEZONE_IA, INTELLIGENT_TIERING
- * - Does NOT work for: GLACIER, DEEP_ARCHIVE (skipped - cannot restore without S3 Batch Operations)
+ * - Works for: GLACIER, DEEP_ARCHIVE only if the object has already been restored
+ *   (i.e. a RestoreObject request was made and completed: ongoing-request="false")
+ * - Skips: GLACIER, DEEP_ARCHIVE objects that have NOT been restored yet
  *
  * This script will scan all files, report what storage classes are found, and
- * successfully restore only IA files. Glacier files are counted but skipped.
- * For Glacier files, use AWS S3 Batch Operations to restore them first.
+ * successfully restore IA files and any Glacier files that have an active restore.
+ * Glacier files without a completed restore are counted but skipped.
+ * To restore Glacier files first, use S3 Batch Operations or aws s3api restore-object.
  *
  * Usage:
  *   aws lambda invoke --function-name app-api-{stage}-restore-ia-to-standard response.json
@@ -27,6 +30,7 @@ import {
     ListObjectsV2Command,
     type ListObjectsV2CommandOutput,
     CopyObjectCommand,
+    HeadObjectCommand,
 } from '@aws-sdk/client-s3'
 
 export type RestoreIAToStandardEvent = {
@@ -207,15 +211,39 @@ async function processBucket(
                     storageClass === 'GLACIER' ||
                     storageClass === 'DEEP_ARCHIVE'
                 ) {
-                    // Count Glacier files but skip them - they cannot be restored without S3 Batch Operations
                     result.glacierFiles++
-                    result.skipped++
 
-                    // Only log first 10 Glacier files to reduce CloudWatch costs
-                    if (result.glacierFiles <= 10) {
-                        console.info(
-                            `Skipping Glacier file (cannot restore): ${obj.Key} (${storageClass})`
-                        )
+                    const restored = await isGlacierRestored(bucket, obj.Key)
+
+                    if (!restored) {
+                        // Restore not requested or still in progress - skip
+                        result.skipped++
+                        if (result.glacierFiles <= 10) {
+                            console.info(
+                                `Skipping Glacier file (not restored): ${obj.Key} (${storageClass})`
+                            )
+                        }
+                    } else {
+                        // Restore is complete - safe to copy to STANDARD
+                        if (result.glacierFiles <= 10) {
+                            console.info(
+                                `Found restored Glacier file: ${obj.Key} (${storageClass})`
+                            )
+                        }
+                        if (!dryRun) {
+                            const copyResult = await restoreToStandard(
+                                bucket,
+                                obj.Key
+                            )
+                            if (copyResult instanceof Error) {
+                                result.failed++
+                                result.errors.push(
+                                    `${obj.Key}: ${copyResult.message}`
+                                )
+                            } else {
+                                result.restored++
+                            }
+                        }
                     }
                 } else if (
                     storageClass === 'STANDARD_IA' ||
@@ -270,9 +298,37 @@ async function processBucket(
 }
 
 /**
+ * Check if a Glacier/Deep Archive object has a completed restore.
+ * Returns true only when ongoing-request="false" (restore finished).
+ * Returns false if no restore was requested or restore is still in progress.
+ */
+async function isGlacierRestored(
+    bucket: string,
+    key: string
+): Promise<boolean> {
+    try {
+        const headCommand = new HeadObjectCommand({ Bucket: bucket, Key: key })
+        const response = await s3Client.send(headCommand)
+        // Restore header is only present if a restore was requested
+        // ongoing-request="false" means the restore completed
+        return (
+            typeof response.Restore === 'string' &&
+            response.Restore.includes('ongoing-request="false"')
+        )
+    } catch (error) {
+        const errorMessage =
+            error instanceof Error ? error.message : String(error)
+        console.error(
+            `Failed to check restore status for ${key}: ${errorMessage}`
+        )
+        return false
+    }
+}
+
+/**
  * Change storage class to STANDARD for Infrequent Access files
  * NOTE: This will FAIL for Glacier/Deep Archive files with InvalidObjectState
- * Glacier files must be restored first using S3 Batch Operations
+ * Glacier files must be restored first (check isGlacierRestored before calling)
  */
 async function restoreToStandard(
     bucket: string,
