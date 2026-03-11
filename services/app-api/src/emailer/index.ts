@@ -9,6 +9,7 @@ export {
     resubmitContractStateEmail,
     resubmitContractCMSEmail,
     sendEQROContractResubmitStateEmail,
+    sendEQROContractResubmitCMSEmail,
     sendQuestionStateEmail,
     sendQuestionCMSEmail,
     sendQuestionResponseCMSEmail,

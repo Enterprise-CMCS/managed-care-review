@@ -1,81 +1,50 @@
 import {
-    eqroValidationAndReviewDetermination,
     eqroReviewDeterminationChanged,
+    eqroValidationAndReviewDetermination,
     packageName as generatePackageName,
+    ManagedCareEntityRecord,
 } from '@mc-review/submissions'
 import type {
     ContractType,
     ProgramType,
     UpdateInfoType,
 } from '../../domain-models'
-import type { EmailConfiguration, EmailData } from '../emailer'
-import { pruneDuplicateEmails } from '../formatters'
+import type {
+    EmailConfiguration,
+    EmailData,
+    StateAnalystsEmails,
+} from '../emailer'
 import {
+    booleanAsYesNoUserValue,
     findContractPrograms,
+    generateCMSReviewerEmailsForSubmittedContract,
     renderTemplate,
     stripHTMLFromTemplate,
 } from '../templateHelpers'
 import { submissionSummaryURL } from '../generateURLs'
 import { formatCalendarDate } from '@mc-review/dates'
+import type { resubmitEQROTemplateData } from './sendEQROContractResubmitStateEmail'
+import { resubmitEQROHeader } from './sendEQROContractResubmitStateEmail'
 
-export type resubmitEQROTemplateData = {
-    pkgName: string
-    emailHeader: string
-    submittedBy: string
-    updatedOn: string //mm/dd/yy
-    subjectToReview: boolean
-    reviewDeterminationChanged: boolean
-    changeSummary: string
-    submissionURL: string
-    MCGDMCOContactEmail?: string
-    managedCareEntities?: string | undefined
-    eqroNewContractor?: string | undefined
-    eqroProvisionMcoEqrOrRelatedActivities?: string | undefined
-    eqroProvisionMcoNewOptionalActivity?: string | undefined
-    eqroProvisionNewMcoEqrRelatedActivities?: string | undefined
-    eqroProvisionChipEqrRelatedActivities?: string | undefined
-}
-
-/*
- * emailHeader logic:
- * Not subject to review ➔ Subject to review:  ‘is now subject to review’
- * Subject to review ➔ Not subject to review:  ‘is no longer subject to review’
- * No change: ‘was resubmitted’
- */
-export const resubmitEQROHeader = (
-    reviewDeterminationChanged: boolean,
-    subjectToReview: boolean
-): string => {
-    const emailHeader = reviewDeterminationChanged
-        ? subjectToReview
-            ? 'is now subject to review'
-            : 'is no longer subject to review'
-        : 'was resubmitted'
-
-    return emailHeader
-}
-
-export const sendEQROContractResubmitStateEmail = async (
+export const sendEQROContractResubmitCMSEmail = async (
     contract: ContractType,
-    submitterEmails: string[],
     updateInfo: UpdateInfoType,
     config: EmailConfiguration,
+    stateAnalystsEmails: StateAnalystsEmails,
     statePrograms: ProgramType[]
 ): Promise<EmailData | Error> => {
     const isTestEnvironment = config.stage !== 'prod'
     const contractRev = contract.packageSubmissions[0].contractRevision
     const formData = contractRev.formData
-    const stateContactEmails: string[] = []
+    const reviewerEmails = generateCMSReviewerEmailsForSubmittedContract(
+        config,
+        contract,
+        stateAnalystsEmails
+    )
 
-    formData.stateContacts.forEach((contact) => {
-        if (contact.email) stateContactEmails.push(contact.email)
-    })
-
-    const toAddresses = pruneDuplicateEmails([
-        ...stateContactEmails,
-        ...submitterEmails,
-        ...config.devReviewTeamEmails,
-    ])
+    if (reviewerEmails instanceof Error) {
+        return reviewerEmails
+    }
 
     const pkgPrograms = findContractPrograms(contractRev, statePrograms)
     if (pkgPrograms instanceof Error) {
@@ -112,6 +81,14 @@ export const sendEQROContractResubmitStateEmail = async (
         return reviewDeterminationChanged
     }
 
+    const {
+        eqroNewContractor,
+        eqroProvisionMcoEqrOrRelatedActivities,
+        eqroProvisionMcoNewOptionalActivity,
+        eqroProvisionNewMcoEqrRelatedActivities,
+        eqroProvisionChipEqrRelatedActivities,
+    } = formData
+
     const emailHeader = resubmitEQROHeader(
         reviewDeterminationChanged,
         subjectToReview
@@ -133,11 +110,26 @@ export const sendEQROContractResubmitStateEmail = async (
         reviewDeterminationChanged: reviewDeterminationChanged,
         changeSummary: updateInfo.updatedReason,
         submissionURL: submissionURL,
-        MCGDMCOContactEmail: 'MCGDMCOactions@cms.hhs.gov',
+        managedCareEntities: formData.managedCareEntities
+            .map((entity) => ManagedCareEntityRecord[entity])
+            .join(', '),
+        eqroNewContractor: booleanAsYesNoUserValue(eqroNewContractor),
+        eqroProvisionMcoEqrOrRelatedActivities: booleanAsYesNoUserValue(
+            eqroProvisionMcoEqrOrRelatedActivities
+        ),
+        eqroProvisionMcoNewOptionalActivity: booleanAsYesNoUserValue(
+            eqroProvisionMcoNewOptionalActivity
+        ),
+        eqroProvisionNewMcoEqrRelatedActivities: booleanAsYesNoUserValue(
+            eqroProvisionNewMcoEqrRelatedActivities
+        ),
+        eqroProvisionChipEqrRelatedActivities: booleanAsYesNoUserValue(
+            eqroProvisionChipEqrRelatedActivities
+        ),
     }
 
     const template = await renderTemplate<resubmitEQROTemplateData>(
-        'sendEQROContractResubmitStateEmail',
+        'sendEQROContractResubmitCMSEmail',
         etaData
     )
 
@@ -145,7 +137,7 @@ export const sendEQROContractResubmitStateEmail = async (
         return template
     } else {
         return {
-            toAddresses: toAddresses,
+            toAddresses: reviewerEmails,
             replyToAddresses: [],
             sourceEmail: config.emailSource,
             subject: `${
