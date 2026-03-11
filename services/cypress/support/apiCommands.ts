@@ -12,6 +12,7 @@ import {
     CreateContractDocument,
     UpdateContractDraftRevisionDocument,
     UpdateContractDraftRevisionInput, CmsUsersUnion, Division, OauthClient, CreateOauthClientDocument,
+    GenerateUploadUrlDocument,
 } from '../gen/gqlClient'
 import {
     apolloClientWrapper,
@@ -24,6 +25,7 @@ import {
 import { ApolloClient, DocumentNode, NormalizedCacheObject } from '@apollo/client'
 import { GraphQLError, print } from 'graphql'
 import { CMSUserLoginNames, userLoginData } from './loginCommands'
+import { calculateSHA256 } from '@mc-review/common-code'
 
 export type ApiCreateOAuthClientResponseType = {
     client: OauthClient
@@ -72,9 +74,73 @@ const createAndSubmitContractOnlyPackage = async (
     return submission.data.submitContract.contract
 }
 
+type FixtureDocuments = Record<string, string>
+
 const createAndSubmitEQROContract = async (
-    apolloClient: ApolloClient<NormalizedCacheObject>
+    apolloClient: ApolloClient<NormalizedCacheObject>,
+    documents: FixtureDocuments
 ): Promise<Contract> => {
+  try {
+    // Make sure we can upload file before creating contract, this prevents
+    // a bunch of draft contracts if the file upload failed.
+    const uploadContractFileUrl = await apolloClient.mutate({
+        mutation: GenerateUploadUrlDocument,
+        variables: {
+            input: {
+                fileName: 'trussel-guide.pdf',
+                fileType: 'PDF',
+                bucketName: 'HEALTH_PLAN_DOCS',
+            },
+        },
+        errorPolicy: 'all',
+    })
+
+    if (
+        uploadContractFileUrl.errors ||
+        !uploadContractFileUrl.data?.generateUploadURL
+    ) {
+        const errorMsg = `generating upload url failed: ${JSON.stringify(uploadContractFileUrl.errors)}`
+        throw new Error(errorMsg)
+    }
+
+    const { uploadURL, s3URL } = uploadContractFileUrl.data.generateUploadURL
+
+    const fileBytes = Uint8Array.from(
+        atob(documents['trussel-guide.pdf']),
+        (c) => c.charCodeAt(0)
+    )
+
+    await fetch(uploadURL, {
+        method: 'PUT',
+        headers: {
+            'Content-Type': 'application/pdf',
+        },
+        body: fileBytes,
+    }).then((res) => {
+        if (!res.ok) {
+            throw new Error(
+                `failed to upload file: ${res.status} ${res.statusText}`
+            )
+        }
+    })
+
+    const file = new File([fileBytes], 'trussel-guide.pdf', {
+        type: 'application/pdf',
+    })
+    const sha256 = await calculateSHA256(file)
+
+    if (!sha256) {
+        throw new Error(
+            'failed to generate SHA256 from file'
+        )
+    }
+
+    const contractDoc = {
+        name: 'trussel-guide.pdf',
+        s3URL: s3URL,
+        sha256: sha256,
+    }
+
     const newContract = await apolloClient.mutate({
         mutation: CreateContractDocument,
         variables: {
@@ -93,7 +159,9 @@ const createAndSubmitEQROContract = async (
 
     const draftContract = newContract.data.createContract.contract
     const draftRevision = draftContract.draftRevision
-    const updateFormData = eqroFromData()
+    const updateFormData = eqroFromData({
+        contractDocuments: [contractDoc],
+    })
 
     const updateContractDraftRevisionInput: UpdateContractDraftRevisionInput = {
         contractID: draftContract.id,
@@ -118,6 +186,10 @@ const createAndSubmitEQROContract = async (
     })
 
     return submission.data.submitContract.contract
+  } catch (error) {
+    const errorMsg = error instanceof Error ? error.message : String(error)
+    throw new Error(`createAndSubmitEQROContract failed: ${errorMsg}`)
+  }
 }
 
 const createAndSubmitContractWithRates = async (
@@ -435,11 +507,19 @@ Cypress.Commands.add(
         cy
             .task<DocumentNode>('readGraphQLSchema')
             .then({ timeout: 30000 }, (schema) =>
-                apolloClientWrapper(
-                    schema,
-                    stateUser,
-                    createAndSubmitEQROContract
-                )
+                cy
+                    .task<Record<string, string>>('readFixtureDocuments')
+                    .then((documents) =>
+                        apolloClientWrapper(
+                            schema,
+                            stateUser,
+                            (apolloClient) =>
+                                createAndSubmitEQROContract(
+                                    apolloClient,
+                                    documents
+                                )
+                        )
+                    )
             )
 )
 

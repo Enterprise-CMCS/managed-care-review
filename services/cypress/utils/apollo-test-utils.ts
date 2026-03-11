@@ -540,13 +540,16 @@ const apolloClientWrapper = async <T>(
         await AuthAPI.signIn(authUser.email, Cypress.env('TEST_USERS_PASS'))
     }
 
-    const result = await callback(apolloClient)
-
-    if (!isLocalAuth) {
-        await AuthAPI.signOut()
+    try {
+        const result = await callback(apolloClient)
+        if (!isLocalAuth) {
+            await AuthAPI.signOut()
+        }
+        return result
+    } catch (error) {
+        const errorMsg = error instanceof Error ? error.message : String(error)
+        throw new Error(errorMsg)
     }
-
-    return result
 }
 
 export {
