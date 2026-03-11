@@ -218,18 +218,17 @@ async function processBucket(
                     if (!restored) {
                         // Restore not requested or still in progress - skip
                         result.skipped++
-                        if (result.glacierFiles <= 10) {
-                            console.info(
-                                `Skipping Glacier file (not restored): ${obj.Key} (${storageClass})`
-                            )
-                        }
+                        console.info(
+                            `Skipping Glacier file (not restored): ${obj.Key} (${storageClass})`
+                        )
                     } else {
-                        // Restore is complete - safe to copy to STANDARD
-                        if (result.glacierFiles <= 10) {
+                        // Only log every 10th restored Glacier file to reduce CloudWatch costs
+                        if (result.glacierFiles % 10 === 0) {
                             console.info(
                                 `Found restored Glacier file: ${obj.Key} (${storageClass})`
                             )
                         }
+                        // Restore is complete - safe to copy to STANDARD
                         if (!dryRun) {
                             const copyResult = await restoreToStandard(
                                 bucket,
