@@ -26,7 +26,7 @@ type resubmitEQROTemplateData = {
     reviewDeterminationChanged: boolean
     changeSummary: string
     submissionURL: string
-    MCGDMCOContactEmail: string[]
+    MCGDMCOContactEmail: string
 }
 
 export const sendEQROContractResubmitStateEmail = async (
@@ -119,7 +119,7 @@ export const sendEQROContractResubmitStateEmail = async (
         reviewDeterminationChanged: reviewDeterminationChanged,
         changeSummary: updateInfo.updatedReason,
         submissionURL: submissionURL,
-        MCGDMCOContactEmail: config.dmcoEmails,
+        MCGDMCOContactEmail: 'MCGDMCOactions@cms.hhs.gov',
     }
 
     const template = await renderTemplate<resubmitEQROTemplateData>(
