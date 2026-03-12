@@ -18,7 +18,7 @@ exports[`sendEQROContractResubmitStateEmail > should render email for EQRO resub
   <li><strong>CMS review</strong>: Your submission will be reviewed by CMS for adherence to federal regulations.</li>
   <li><strong>Questions</strong>: You may receive questions via email from CMS as they conduct their review.</li>
   <li><strong>Determination</strong>: Once all questions have been addressed, CMS will contact you with their final determination.</li>
-</ol>If you need to make further changes, contact <a href="mailto:overallreview@example.com">overallreview@example.com</a>."
+</ol>If you need to make further changes, contact <a href="mailto:MCGDMCOactions@cms.hhs.gov">MCGDMCOactions@cms.hhs.gov</a>."
 `;
 
 exports[`sendEQROContractResubmitStateEmail > should render email for EQRO resubmit when changed from subject to review to not subject to review 1`] = `
@@ -44,7 +44,7 @@ exports[`sendEQROContractResubmitStateEmail > should render email for EQRO resub
     <li>
         Require the mandatory review activities specified at 42 CFR 438.358 for MCOs, PIHPs, and PAHPs.
     </li>
-</ul>If you need to make further changes, contact <a href="mailto:overallreview@example.com">overallreview@example.com</a>."
+</ul>If you need to make further changes, contact <a href="mailto:MCGDMCOactions@cms.hhs.gov">MCGDMCOactions@cms.hhs.gov</a>."
 `;
 
 exports[`sendEQROContractResubmitStateEmail > should render email for EQRO resubmit with no change in review determination 1`] = `
@@ -58,5 +58,5 @@ exports[`sendEQROContractResubmitStateEmail > should render email for EQRO resub
 <br />
 <a href="http://localhost/submissions/eqro/test-contract-123">View submission</a><br />
 <br />
-If you need to make further changes, contact <a href="mailto:overallreview@example.com">overallreview@example.com</a>."
+If you need to make further changes, contact <a href="mailto:MCGDMCOactions@cms.hhs.gov">MCGDMCOactions@cms.hhs.gov</a>."
 `;

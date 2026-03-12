@@ -20,8 +20,8 @@ exports[`newEqroContractStateEmail > renders email for new EQRO contract NOT sub
 </ul>
 <span style="margin-bottom: 0; padding-bottom: 0;">If you need assistance or have any questions:</span>
 <ul style="margin-left: 0; margin-top: 0;">
-  <li>For assistance with programmatic, contractual, or operational issues, please reach out to <a href="mailto:overallreview@example.com">overallreview@example.com</a> and/or your CMS primary contact.</li>
-  <li>For issues related to MC-Review or all other inquiries, please reach out to <a href="mailto:&quot;MC-Review Help Desk&quot; &lt;MC_Review_HelpDesk@example.com&gt;">&quot;MC-Review Help Desk&quot; &lt;MC_Review_HelpDesk@example.com&gt;.</a></li>
+  <li>For assistance with programmatic, contractual, or operational issues, please reach out to <a href="mailto:MCGDMCOactions@cms.hhs.gov">MCGDMCOactions@cms.hhs.gov</a> and/or your CMS primary contact.</li>
+  <li>For issues related to MC-Review or all other inquiries, please reach out to <a href="mailto:MC_Review_HelpDesk@cms.hhs.gov">MC_Review_HelpDesk@cms.hhs.gov.</a></li>
 </ul>
 "
 `;
@@ -46,8 +46,8 @@ exports[`newEqroContractStateEmail > renders email for new EQRO contract subject
   <li><strong>Determination</strong>: Once all questions have been addressed, CMS will contact you with their final determination.</li>
 </ol><span style="margin-bottom: 0; padding-bottom: 0;">If you need assistance or have any questions:</span>
 <ul style="margin-left: 0; margin-top: 0;">
-  <li>For assistance with programmatic, contractual, or operational issues, please reach out to <a href="mailto:overallreview@example.com">overallreview@example.com</a> and/or your CMS primary contact.</li>
-  <li>For issues related to MC-Review or all other inquiries, please reach out to <a href="mailto:&quot;MC-Review Help Desk&quot; &lt;MC_Review_HelpDesk@example.com&gt;">&quot;MC-Review Help Desk&quot; &lt;MC_Review_HelpDesk@example.com&gt;.</a></li>
+  <li>For assistance with programmatic, contractual, or operational issues, please reach out to <a href="mailto:MCGDMCOactions@cms.hhs.gov">MCGDMCOactions@cms.hhs.gov</a> and/or your CMS primary contact.</li>
+  <li>For issues related to MC-Review or all other inquiries, please reach out to <a href="mailto:MC_Review_HelpDesk@cms.hhs.gov">MC_Review_HelpDesk@cms.hhs.gov.</a></li>
 </ul>
 "
 `;
