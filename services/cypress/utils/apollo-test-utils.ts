@@ -132,14 +132,7 @@ const rateFormData = (
             downloadURL: s3DlUrl,
         },
     ],
-    supportingDocuments: [
-        {
-            name: 'rate1SupportingDocument1.pdf',
-            s3URL: 's3://local-uploads/1684382956834-rate1SupportingDocument1.pdf/rate1SupportingDocument1.pdf',
-            sha256: 'fakesha2',
-            downloadURL: s3DlUrl,
-        },
-    ],
+    supportingDocuments: [],
     rateDateStart: '2025-05-01',
     rateDateEnd: '2026-04-30',
     rateDateCertified: '2025-03-15',
