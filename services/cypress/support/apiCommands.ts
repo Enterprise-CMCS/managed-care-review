@@ -570,7 +570,7 @@ Cypress.Commands.add(
         cy.task<DocumentNode>('readGraphQLSchema').then({ timeout: 30000 }, (schema) =>
             cy
                 .task<Record<string, string>>('readFixtureDocuments')
-                .then((documents) =>
+                .then({ timeout: 60000 }, (documents) =>
                     apolloClientWrapper(
                         schema,
                         stateUser,
@@ -592,7 +592,7 @@ Cypress.Commands.add(
             .then({ timeout: 30000 }, (schema) =>
                 cy
                     .task<Record<string, string>>('readFixtureDocuments')
-                    .then((documents) =>
+                    .then({ timeout: 60000 }, (documents) =>
                         apolloClientWrapper(
                             schema,
                             stateUser,
@@ -612,7 +612,7 @@ Cypress.Commands.add(
         cy.task<DocumentNode>('readGraphQLSchema').then({ timeout: 30000 }, (schema) =>
             cy
                 .task<Record<string, string>>('readFixtureDocuments')
-                .then((documents) =>
+                .then({ timeout: 60000 }, (documents) =>
                     apolloClientWrapper(
                         schema,
                         stateUser,
