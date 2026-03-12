@@ -272,6 +272,7 @@ export const SubmissionSummary = (): React.ReactElement => {
         if (showApprovalBanner && latestContractAction.updatedBy) {
             return (
                 <SubmissionApprovedBanner
+                    className={styles.banner}
                     updatedBy={latestContractAction.updatedBy}
                     updatedAt={latestContractAction.updatedAt}
                     dateReleasedToState={
@@ -282,7 +283,7 @@ export const SubmissionSummary = (): React.ReactElement => {
         }
 
         if (showTempUndoWithdrawBanner) {
-            return <StatusUpdatedBanner />
+            return <StatusUpdatedBanner className={styles.banner} />
         }
 
         if (showWithdrawnBanner && latestContractAction.updatedBy) {
@@ -300,7 +301,7 @@ export const SubmissionSummary = (): React.ReactElement => {
         }
 
         if (showPermUndoWithdrawBanner) {
-            return <StatusUpdatedBanner />
+            return <StatusUpdatedBanner className={styles.banner} />
         }
 
         if (submissionStatus === 'UNLOCKED' && updateInfo) {
