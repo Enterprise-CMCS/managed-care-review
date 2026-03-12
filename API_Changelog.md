@@ -1,8 +1,21 @@
 # Managed Care Review - API Changelog
 ## This document highlights API changes that have been introduced since May 2025
 
-### January 29, 2026
+### March 12, 2026
+#### Added
+- New endpoint `generateUploadURL` added to the API
+    - Parameters
+        - `fileName`: required String, the full name of the file including extension
+        - `fileType`: required enum, corresponds to the file's extension, possible values: `[PDF, DOC, DOCX, XLS, XLSX, XLSM, CSV]`
+        - `bucketName`: required enum, corresponds to the bucket the file should be uploaded to, possible values: `[HEALTH_PLAN_DOCS, QUESTION_ANSWER_DOCS]`
+    - Returns 
+        - bucket: String
+        - expiresIn: Int
+        - s3Key: String
+        - s3URL: String
+        - uploadURL: String
 
+### January 29, 2026
 #### Added
 - New submission status of `NOT_SUBJECT_TO_REVIEW`. For EQRO submissions that do not require CMS review.
    - `NOT_SUBJECT_TO_REVIEW` to the enum `ContractReviewStatus` in GraphQL.
@@ -105,3 +118,4 @@
 ### May 2, 2025
 #### Deleted
 - `withdrawAndReplaceRedundantRate` endpoint deleted. It was an Admin only action that was used to address bookkeeping errors with rates
+
