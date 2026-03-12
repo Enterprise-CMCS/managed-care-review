@@ -528,13 +528,13 @@ export function submitContract(
 
         if (status === 'RESUBMITTED') {
             cmsContractEmailResult = isEQRO
-                ? await emailer.sendResubmittedCMSEmail(
+                ? await emailer.sendResubmittedEQROCMSEmail(
                       submitContractResult,
                       updateInfo,
                       stateAnalystsEmails,
                       statePrograms
                   )
-                : await emailer.sendResubmittedEQROCMSEmail(
+                : await emailer.sendResubmittedCMSEmail(
                       submitContractResult,
                       updateInfo,
                       stateAnalystsEmails,
