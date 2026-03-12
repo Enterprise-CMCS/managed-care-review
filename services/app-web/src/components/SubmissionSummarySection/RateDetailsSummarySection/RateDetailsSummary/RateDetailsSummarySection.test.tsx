@@ -1284,6 +1284,61 @@ describe('RateDetailsSummarySection', () => {
         ).toBeInTheDocument()
     })
 
+    it('renders rate certification name as a clickable link for CMS users', async () => {
+        const contract = mockContractPackageSubmitted()
+        const rateRevision = contract.packageSubmissions[0].rateRevisions[0]
+        rateRevision.formData.rateCertificationName =
+            'MCR-MN-SNBC-20260505-20270505-CERTIFICATION-20240808'
+
+        renderWithProviders(
+            <RateDetailsSummarySection
+                contract={contract}
+                submissionName="MCR-MN-0001-SNBC"
+                statePrograms={statePrograms}
+            />,
+            {
+                apolloProvider: apolloProviderCMSUser,
+            }
+        )
+
+        const link = await screen.findByRole('link', {
+            name: 'MCR-MN-SNBC-20260505-20270505-CERTIFICATION-20240808',
+        })
+        expect(link).toBeInTheDocument()
+        expect(link).toHaveAttribute('href', `/rates/${rateRevision.rateID}`)
+    })
+
+    it('renders rate certification name as plain text for state users', async () => {
+        const contract = mockContractPackageSubmitted()
+        const rateRevision = contract.packageSubmissions[0].rateRevisions[0]
+        rateRevision.formData.rateCertificationName =
+            'MCR-MN-SNBC-20260505-20270505-CERTIFICATION-20240808'
+
+        renderWithProviders(
+            <RateDetailsSummarySection
+                contract={contract}
+                submissionName="MCR-MN-0001-SNBC"
+                statePrograms={statePrograms}
+            />,
+            {
+                apolloProvider: apolloProviderStateUser,
+            }
+        )
+
+        await waitFor(() => {
+            expect(
+                screen.getByText(
+                    'MCR-MN-SNBC-20260505-20270505-CERTIFICATION-20240808'
+                )
+            ).toBeInTheDocument()
+            expect(
+                screen.queryByRole('link', {
+                    name: 'MCR-MN-SNBC-20260505-20270505-CERTIFICATION-20240808',
+                })
+            ).not.toBeInTheDocument()
+        })
+    })
+
     describe('Document zip package download link', () => {
         it('renders zip package link for a SUBMITTED submission as a CMS user', async () => {
             renderWithProviders(

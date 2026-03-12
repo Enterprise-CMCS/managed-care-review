@@ -40,6 +40,7 @@ import {
 } from '../../../DataDetail'
 import { SectionHeader } from '../../../SectionHeader'
 import styles from '../../SubmissionSummarySection.module.scss'
+import { NavLinkWithLogging } from '../../../../components/TealiumLogging'
 
 export type RateDetailsSummarySectionProps = {
     contract: Contract | UnlockedContract
@@ -226,6 +227,23 @@ export const RateDetailsSummarySection = ({
         return 'CMS must unlock the submission so the state can add a rate certification.'
     }
 
+    const rateCertificationNameHeader = (
+        rateId: string,
+        rateCertificationName: string | null | undefined
+    ): React.ReactElement | string => {
+        const nameDisplay = rateCertificationName ?? ''
+
+        if (!isStateUser) {
+            return (
+                <NavLinkWithLogging to={`/rates/${rateId}`}>
+                    {nameDisplay}
+                </NavLinkWithLogging>
+            )
+        }
+
+        return nameDisplay
+    }
+
     return (
         <SectionCard id="rateDetails" className={styles.summarySection}>
             <SectionHeader
@@ -283,7 +301,10 @@ export const RateDetailsSummarySection = ({
                                       aria-label={`Rate ID: ${rateFormData.rateCertificationName}`}
                                       className={styles.rateName}
                                   >
-                                      {rateFormData.rateCertificationName}
+                                      {rateCertificationNameHeader(
+                                          rateRev.rateID,
+                                          rateFormData.rateCertificationName
+                                      )}
                                   </h3>
                               </div>
                               <dl>
@@ -555,7 +576,11 @@ export const RateDetailsSummarySection = ({
                             className={styles.rateName}
                         >
                             <InfoTag color="gray-medium">WITHDRAWN</InfoTag>{' '}
-                            {rateRev.formData.rateCertificationName}
+                            <br />
+                            {rateCertificationNameHeader(
+                                rateRev.rateID,
+                                rateRev.formData.rateCertificationName
+                            )}
                         </h3>
                     </SectionCard>
                 ))}
