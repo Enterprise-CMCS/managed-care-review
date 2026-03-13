@@ -23,7 +23,7 @@ import {
 } from '../templateHelpers'
 import { submissionSummaryURL } from '../generateURLs'
 import { formatCalendarDate } from '@mc-review/dates'
-import type { resubmitEQROTemplateData } from './sendEQROContractResubmitStateEmail'
+import type { ResubmitEQROTemplateData } from './sendEQROContractResubmitStateEmail'
 import { resubmitEQROHeader } from './sendEQROContractResubmitStateEmail'
 
 export const sendEQROContractResubmitCMSEmail = async (
@@ -98,7 +98,7 @@ export const sendEQROContractResubmitCMSEmail = async (
         ? 'review decision update'
         : 'was resubmitted'
 
-    const etaData: resubmitEQROTemplateData = {
+    const etaData: ResubmitEQROTemplateData = {
         pkgName: pkgName,
         emailHeader: emailHeader,
         submittedBy: updateInfo.updatedBy.email,
@@ -128,7 +128,7 @@ export const sendEQROContractResubmitCMSEmail = async (
         ),
     }
 
-    const template = await renderTemplate<resubmitEQROTemplateData>(
+    const template = await renderTemplate<ResubmitEQROTemplateData>(
         'sendEQROContractResubmitCMSEmail',
         etaData
     )

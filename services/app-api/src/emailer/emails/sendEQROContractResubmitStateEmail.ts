@@ -18,7 +18,7 @@ import {
 import { submissionSummaryURL } from '../generateURLs'
 import { formatCalendarDate } from '@mc-review/dates'
 
-export type resubmitEQROTemplateData = {
+export type ResubmitEQROTemplateData = {
     pkgName: string
     emailHeader: string
     submittedBy: string
@@ -121,7 +121,7 @@ export const sendEQROContractResubmitStateEmail = async (
         ? 'review decision update'
         : 'was resubmitted'
 
-    const etaData: resubmitEQROTemplateData = {
+    const etaData: ResubmitEQROTemplateData = {
         pkgName: pkgName,
         emailHeader: emailHeader,
         submittedBy: updateInfo.updatedBy.email,
@@ -136,7 +136,7 @@ export const sendEQROContractResubmitStateEmail = async (
         MCGDMCOContactEmail: 'MCGDMCOactions@cms.hhs.gov',
     }
 
-    const template = await renderTemplate<resubmitEQROTemplateData>(
+    const template = await renderTemplate<ResubmitEQROTemplateData>(
         'sendEQROContractResubmitStateEmail',
         etaData
     )
