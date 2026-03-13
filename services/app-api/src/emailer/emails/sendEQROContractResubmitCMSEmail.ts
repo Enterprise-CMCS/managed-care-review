@@ -17,7 +17,6 @@ import type {
 import {
     booleanAsYesNoUserValue,
     findContractPrograms,
-    generateCMSReviewerEmailsForSubmittedContract,
     renderTemplate,
     stripHTMLFromTemplate,
 } from '../templateHelpers'
@@ -36,11 +35,10 @@ export const sendEQROContractResubmitCMSEmail = async (
     const isTestEnvironment = config.stage !== 'prod'
     const contractRev = contract.packageSubmissions[0].contractRevision
     const formData = contractRev.formData
-    const reviewerEmails = generateCMSReviewerEmailsForSubmittedContract(
-        config,
-        contract,
-        stateAnalystsEmails
-    )
+
+    const { dmcoEmails, devReviewTeamEmails } = config
+
+    const reviewerEmails = [...devReviewTeamEmails, ...dmcoEmails]
 
     if (reviewerEmails instanceof Error) {
         return reviewerEmails
