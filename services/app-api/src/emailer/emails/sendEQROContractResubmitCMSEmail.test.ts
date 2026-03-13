@@ -35,7 +35,6 @@ describe('sendEQROContractResubmitCMSEmail', () => {
             contract,
             updateInfo,
             emailConfig,
-            stateAnalystsEmails,
             statePrograms
         )
 
@@ -75,7 +74,6 @@ describe('sendEQROContractResubmitCMSEmail', () => {
             contract,
             updateInfo,
             emailConfig,
-            stateAnalystsEmails,
             statePrograms
         )
 
@@ -118,7 +116,6 @@ describe('sendEQROContractResubmitCMSEmail', () => {
             contract,
             updateInfo,
             emailConfig,
-            stateAnalystsEmails,
             statePrograms
         )
 
@@ -134,7 +131,7 @@ describe('sendEQROContractResubmitCMSEmail', () => {
         expect(template.bodyHTML).toMatchSnapshot()
     })
 
-    it('should include state analysts emails in toAddresses', async () => {
+    it('should include DMCO emails in toAddresses', async () => {
         const baseSubmission = mockEQROContract()
         const contract: ContractType = mockEQROContract({
             packageSubmissions: [
@@ -149,7 +146,6 @@ describe('sendEQROContractResubmitCMSEmail', () => {
             contract,
             updateInfo,
             emailConfig,
-            stateAnalystsEmails,
             statePrograms
         )
 
@@ -160,7 +156,7 @@ describe('sendEQROContractResubmitCMSEmail', () => {
         stateAnalystsEmails.forEach((email) => {
             expect(template).toEqual(
                 expect.objectContaining({
-                    toAddresses: expect.arrayContaining([email]),
+                    toAddresses: expect.arrayContaining(emailConfig.dmcoEmails),
                 })
             )
         })
@@ -181,7 +177,6 @@ describe('sendEQROContractResubmitCMSEmail', () => {
             contract,
             updateInfo,
             emailConfig,
-            stateAnalystsEmails,
             statePrograms
         )
 

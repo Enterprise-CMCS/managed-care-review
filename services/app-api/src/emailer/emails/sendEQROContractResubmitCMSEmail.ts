@@ -9,11 +9,7 @@ import type {
     ProgramType,
     UpdateInfoType,
 } from '../../domain-models'
-import type {
-    EmailConfiguration,
-    EmailData,
-    StateAnalystsEmails,
-} from '../emailer'
+import type { EmailConfiguration, EmailData } from '../emailer'
 import {
     booleanAsYesNoUserValue,
     findContractPrograms,
@@ -29,7 +25,6 @@ export const sendEQROContractResubmitCMSEmail = async (
     contract: ContractType,
     updateInfo: UpdateInfoType,
     config: EmailConfiguration,
-    stateAnalystsEmails: StateAnalystsEmails,
     statePrograms: ProgramType[]
 ): Promise<EmailData | Error> => {
     const isTestEnvironment = config.stage !== 'prod'

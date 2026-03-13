@@ -140,7 +140,6 @@ type Emailer = {
     sendResubmittedEQROCMSEmail: (
         contract: ContractType,
         updateInfo: UpdateInfoType,
-        stateAnalystsEmails: StateAnalystsEmails,
         statePrograms: ProgramType[]
     ) => Promise<void | Error>
     sendQuestionsStateEmail: (
@@ -409,14 +408,12 @@ function emailer(
         sendResubmittedEQROCMSEmail: async function (
             contract,
             updateInfo,
-            stateAnalystsEmails,
             statePrograms
         ) {
             const emailData = await sendEQROContractResubmitCMSEmail(
                 contract,
                 updateInfo,
                 config,
-                stateAnalystsEmails,
                 statePrograms
             )
             if (emailData instanceof Error) {

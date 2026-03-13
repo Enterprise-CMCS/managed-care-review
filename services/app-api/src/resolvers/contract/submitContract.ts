@@ -531,7 +531,6 @@ export function submitContract(
                 ? await emailer.sendResubmittedEQROCMSEmail(
                       submitContractResult,
                       updateInfo,
-                      stateAnalystsEmails,
                       statePrograms
                   )
                 : await emailer.sendResubmittedCMSEmail(
