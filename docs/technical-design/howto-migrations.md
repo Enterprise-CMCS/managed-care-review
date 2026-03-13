@@ -14,8 +14,10 @@ Data migrations change existing records in the database. Here are steps to prepa
     - Developers may have to verify that the change worked multiple timesas migration through different environments.
 
 1. Prepare for manual testing in lower environments.
-    - Build a PR review app off `main` to start out to get Cypress running.
-    - Prepare local environment by [dumping VAL database](#how-to-dump-val-data-for-local-testing) and relying on that for local runs.
+    - Build a PR review app off `main` to start out so we get Cypress running.
+      - The cypress runs will create data before migrations to validate the migration.
+    - Prepare local environment by [dumping a deployment database](howto-access-deployment-database.md#cloning-deployment-database-to-local-machine) and relying on that for local runs.
+      - The val deployment has the most similar data to prod.
 
 ### Prisma schema migrations
 
@@ -25,14 +27,4 @@ When you're happy with your schema.prisma, use [`./dev prisma -- migrate dev`](h
 
 If you are going to need to modify the migration that prisma generates you can use `./dev prisma -- migrate dev --create-only`. That will generate the migration file but not actually apply it to the database. `./dev prisma -- migrate dev` will apply it.
 
-Whenever you run `./dev postgres` we start a new postgres docker container and run `prisma migrate reset --force` to clean it out and run all of our checked in migrations there. After that you should be ready to develop.
-
-## How to dump deployed data for local testing
-
-1. Connect to Aurora Postgres via AWS Jump Box. [Instructions](../../services/postgres/README.md#access-to-aurora-postgres-via-aws-jump-box)
-
-2. Use `./dev jumpbox clone [environment]` to clone the environment database to your local machine. This command will log into the jumpbox, dump the db into a file in the format `dbdump-[environment]-[date].sqlfc`, and copy that file locally.
-
-2. Load that db dump into your local running postgres instance.
-   - Copy the dump file to the `mc-postgress` docker container by running the command `docker cp dbdump-[env]-[date].sqlfc mc-postgres:/` from where the file is located.
-   - Then run the command `docker exec -it mc-postgres pg_restore -h localhost -p 5432 -U postgres -d postgres --clean dbdump-[env]-[date].sqlfc`. You will be promoted to enter in local db password `shhhsecret`. You will see print out errors but the database has spun up successfully.
+Whenever you run `./dev local --postgres` we start a new postgres docker container and run `prisma migrate reset --force` to clean it out and run all of our checked in migrations there. After that you should be ready to develop.
