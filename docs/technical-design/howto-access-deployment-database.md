@@ -2,7 +2,7 @@
 ## Background
 Each of our deployment environments spin up separate postgres databases. Sometimes we need to be able to access the deployed databases in order to copy down data for local debugging or testing. We also need to be able to access the databases to apply SQL migrations to fix issues in the data. This doc will go over how to access a deployment database using the dev_tool.
 
-## Required tools for accessing prod
+## Required tools for accessing deployed databases
 - VPN access via Zscalar and Cloud access via CloudTamer
   - To get access to VPN and Could access follow these [docs](https://docs.google.com/document/d/1OqHWKMm_FkZ_sVh9yG6EZ9aCo_IObpI_rBx9Os7s8m8/edit#heading=h.c0b1q58olc28).
 - `awscli` package
