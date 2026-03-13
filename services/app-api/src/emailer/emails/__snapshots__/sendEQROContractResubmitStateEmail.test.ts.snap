@@ -4,12 +4,11 @@ exports[`sendEQROContractResubmitStateEmail > should render email for EQRO resub
 "<span style="font-size: 22px; font-weight: 400; line-height: normal">Submission MCR-MN-0004-SNBC is now subject to review</span><br />
   This determination is based on your updated submission responses.<br />
   <br />
-<b>Submitted by:</b> house@example.com<br />
+<b>Submitted by:</b> <a href="mailto:house@example.com">house@example.com</a><br /> 
 <b>Updated on:</b> 03/08/2026<br />
-<b>Review decision:</b> Subject to formal review and approval<br />
+<b>New review decision:</b> Subject to formal review and approval<br />
 <br />
-<b>Summary of changes:</b> Updated info<br />
-<br />
+<b>Summary of changes:</b> Updated info<br /><br />
 <a href="http://localhost/submissions/eqro/test-contract-123">View submission</a><br />
 <br />
   <div>What comes next:</div>
@@ -25,12 +24,11 @@ exports[`sendEQROContractResubmitStateEmail > should render email for EQRO resub
 "<span style="font-size: 22px; font-weight: 400; line-height: normal">Submission MCR-MN-0004-SNBC is no longer subject to review</span><br />
   This determination is based on your updated submission responses.<br />
   <br />
-<b>Submitted by:</b> house@example.com<br />
+<b>Submitted by:</b> <a href="mailto:house@example.com">house@example.com</a><br /> 
 <b>Updated on:</b> 03/08/2026<br />
-<b>Review decision:</b> Not subject to formal review and approval<br />
+<b>New review decision:</b> Not subject to formal review and approval<br />
 <br />
-<b>Summary of changes:</b> Updated info<br />
-<br />
+<b>Summary of changes:</b> Updated info<br /><br />
 <a href="http://localhost/submissions/eqro/test-contract-123">View submission</a><br />
 <br />
   <b>As a reminder, all contracts with EQROs must:</b>
@@ -50,12 +48,11 @@ exports[`sendEQROContractResubmitStateEmail > should render email for EQRO resub
 exports[`sendEQROContractResubmitStateEmail > should render email for EQRO resubmit with no change in review determination 1`] = `
 "<span style="font-size: 22px; font-weight: 400; line-height: normal">Submission MCR-MN-0004-SNBC was resubmitted</span><br />
   <br />
-<b>Submitted by:</b> house@example.com<br />
+<b>Submitted by:</b> <a href="mailto:house@example.com">house@example.com</a><br /> 
 <b>Updated on:</b> 03/08/2026<br />
 <b>Review decision:</b> Subject to formal review and approval<br />
 <br />
-<b>Summary of changes:</b> Updated info<br />
-<br />
+<b>Summary of changes:</b> Updated info<br /><br />
 <a href="http://localhost/submissions/eqro/test-contract-123">View submission</a><br />
 <br />
 If you need to make further changes, contact <a href="mailto:MCGDMCOactions@cms.hhs.gov">MCGDMCOactions@cms.hhs.gov</a>."

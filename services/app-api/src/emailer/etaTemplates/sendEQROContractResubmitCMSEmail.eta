@@ -1,0 +1,10 @@
+<span style="font-size: 22px; font-weight: 400; line-height: normal"><%= it.pkgName %> <%= it.emailHeader %></span><br />
+<%= it.reviewDeterminationChanged ? "This determination is based on the state's updated submission responses." : "Based on the state's updated responses, the review decision remains unchanged." %><br />
+<br />
+<%~ includeFile('./reusableTemplates/EQRO/eqroResubmitDataTemplate', it) %>
+<br />
+<% if (it.reviewDeterminationChanged && it.subjectToReview) { %>
+  <%~ includeFile('./reusableTemplates/EQRO/eqroProvisionsTemplate', it) %>
+  <br />
+<% } %>
+<a href="<%= it.submissionURL %>">View submission</a><br />

@@ -10,6 +10,7 @@ import {
     resubmitContractStateEmail,
     resubmitContractCMSEmail,
     sendEQROContractResubmitStateEmail,
+    sendEQROContractResubmitCMSEmail,
     sendQuestionStateEmail,
     sendQuestionCMSEmail,
     sendQuestionResponseCMSEmail,
@@ -134,6 +135,11 @@ type Emailer = {
         contract: ContractType,
         updateInfo: UpdateInfoType,
         submitterEmails: string[],
+        statePrograms: ProgramType[]
+    ) => Promise<void | Error>
+    sendResubmittedEQROCMSEmail: (
+        contract: ContractType,
+        updateInfo: UpdateInfoType,
         statePrograms: ProgramType[]
     ) => Promise<void | Error>
     sendQuestionsStateEmail: (
@@ -391,6 +397,23 @@ function emailer(
                 updateInfo,
                 config,
                 stateAnalystsEmails,
+                statePrograms
+            )
+            if (emailData instanceof Error) {
+                return emailData
+            } else {
+                return await this.sendEmail(emailData)
+            }
+        },
+        sendResubmittedEQROCMSEmail: async function (
+            contract,
+            updateInfo,
+            statePrograms
+        ) {
+            const emailData = await sendEQROContractResubmitCMSEmail(
+                contract,
+                updateInfo,
+                config,
                 statePrograms
             )
             if (emailData instanceof Error) {

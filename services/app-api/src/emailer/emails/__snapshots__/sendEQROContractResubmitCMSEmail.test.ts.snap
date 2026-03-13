@@ -1,0 +1,42 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`sendEQROContractResubmitCMSEmail > should render email for EQRO resubmit when changed from not subject to review to subject to review 1`] = `
+"<span style="font-size: 22px; font-weight: 400; line-height: normal">MCR-MN-0004-SNBC is now subject to review</span><br />
+This determination is based on the state&#39;s updated submission responses.<br />
+<br />
+<b>Submitted by:</b> <a href="mailto:house@example.com">house@example.com</a><br /> 
+<b>Updated on:</b> 03/08/2026<br />
+<b>New review decision:</b> Subject to formal review and approval<br />
+<br />
+<b>Summary of changes:</b> Updated info<br /><br />
+  <b>Managed care entities reviewed by this EQRO</b>: Managed Care Organization (MCO), Primary Care Case Management Entity (PCCM Entity)<br />
+<b>EQR or EQR-related activities preformed on MCOs?</b>: Yes<br /> <b>New optional activities to be performed on MCOs</b>: Yes<br /> <b>EQR-related activities for a new MCO managed care program</b>: No<br />   <br />
+<a href="http://localhost/submissions/eqro/test-contract-123">View submission</a><br />
+"
+`;
+
+exports[`sendEQROContractResubmitCMSEmail > should render email for EQRO resubmit when changed from subject to review to not subject to review 1`] = `
+"<span style="font-size: 22px; font-weight: 400; line-height: normal">MCR-MN-0004-SNBC is no longer subject to review</span><br />
+This determination is based on the state&#39;s updated submission responses.<br />
+<br />
+<b>Submitted by:</b> <a href="mailto:house@example.com">house@example.com</a><br /> 
+<b>Updated on:</b> 03/08/2026<br />
+<b>New review decision:</b> Not subject to formal review and approval<br />
+<br />
+<b>Summary of changes:</b> Updated info<br /><br />
+<a href="http://localhost/submissions/eqro/test-contract-123">View submission</a><br />
+"
+`;
+
+exports[`sendEQROContractResubmitCMSEmail > should render email for EQRO resubmit with no change in review determination 1`] = `
+"<span style="font-size: 22px; font-weight: 400; line-height: normal">MCR-MN-0004-SNBC was resubmitted</span><br />
+Based on the state&#39;s updated responses, the review decision remains unchanged.<br />
+<br />
+<b>Submitted by:</b> <a href="mailto:house@example.com">house@example.com</a><br /> 
+<b>Updated on:</b> 03/08/2026<br />
+<b>Review decision:</b> Subject to formal review and approval<br />
+<br />
+<b>Summary of changes:</b> Updated info<br /><br />
+<a href="http://localhost/submissions/eqro/test-contract-123">View submission</a><br />
+"
+`;
