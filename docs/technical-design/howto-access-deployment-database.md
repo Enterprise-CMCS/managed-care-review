@@ -47,7 +47,7 @@ We can also the dev_tool command `./dev jumpbox connect-pg <env>` to get direct 
 ### Accessing review deployment logical databases
 Our pull requests spin up a review deployment for each PR. These deployments also use the postgres database in `dev` but create a logical database for the review deployment to use. This mean to access each review deployments database you can to do an additional connection command to it.
 
-- If not already connected to the `dev` deployment database, runt he command `./dev jumpbox connect-pg <env>`.
+- If not already connected to the `dev` deployment database, run he command `./dev jumpbox connect-pg dev`.
 - Once connected, list out all the logical databases by running the SQL code `SELECT datname FROM pg_database WHERE datistemplate = false;`
 - Find the review app name you want to connect to and run the command `\c <Logical DB name>`.
 - If successful, you can now run SQL commands and it will be isolated to that logical database.
