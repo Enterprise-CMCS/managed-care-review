@@ -22,7 +22,7 @@
         "@types/node": "25.3.2",
         "@typescript-eslint/eslint-plugin": "^8.56.1",
         "@typescript-eslint/parser": "^8.29.1",
-        "aws-cdk": "2.1023.0",
+        "aws-cdk": "2.1107.0",
         "esbuild": "^0.25.5",
         "eslint": "^9.31.0",
         "eslint-plugin-jest": "^29.2.1",
@@ -47,7 +47,7 @@
         "@aws-solutions-constructs/aws-lambda-secretsmanager": "2.98.0",
         "@aws-solutions-constructs/aws-s3-lambda": "2.100.1",
         "@aws-solutions-constructs/aws-wafwebacl-apigateway": "2.99.0",
-        "aws-cdk-lib": "2.237.1",
+        "aws-cdk-lib": "2.243.0",
         "constructs": "^10.5.1",
         "source-map-support": "^0.5.21"
     },
