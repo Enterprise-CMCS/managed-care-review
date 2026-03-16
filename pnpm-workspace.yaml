@@ -1,6 +1,5 @@
 packages:
     - 'services/**'
-    - '!services/local-launch-darkly'
     - 'packages/**'
     - 'dev_tool'
     - 'scripts'

@@ -14,13 +14,6 @@ function isChromeWindowOpen(url: string): boolean {
 }
 
 export async function runLaunchDarklyLocally(runner: LabeledProcessRunner) {
-    // Install dependencies (excluded from workspace, so install separately)
-    await runner.runCommandAndOutput(
-        'ld install',
-        ['pnpm', 'install'],
-        'services/local-launch-darkly'
-    )
-
     // Build the React client
     await runner.runCommandAndOutput(
         'build launch-darkly',

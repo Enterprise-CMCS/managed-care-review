@@ -10,7 +10,7 @@
     },
     "dependencies": {
         "@launchdarkly/node-server-sdk": "9.10.2",
-        "@mc-review/common-code": "file:../../packages/common-code",
+        "@mc-review/common-code": "workspace:*",
         "express": "^4.21.0",
         "react": "^18.2.0",
         "react-dom": "^18.2.0",

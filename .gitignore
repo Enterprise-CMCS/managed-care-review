@@ -66,4 +66,3 @@ packages/*/build
 services/app-api/src/generated/
 
 services/local-launch-darkly/dist
-services/local-launch-darkly/node_modules
