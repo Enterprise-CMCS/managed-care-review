@@ -52,14 +52,14 @@ const main: Handler = async (): Promise<APIGatewayProxyResultV2> => {
     // run the schema migration. this will add any new tables or fields from schema.prisma to postgres
     try {
         // Aurora can have long cold starts, so we extend connection timeout on migrates
-        // With Prisma 7, schema and migrations are bundled directly with the Lambda
-        const schemaPath = process.env.SCHEMA_PATH ?? './prisma/schema.prisma'
+        const configPath =
+            process.env.PRISMA_CONFIG_PATH ?? './prisma.config.ts'
         const prismaCliPath =
             process.env.PRISMA_CLI_PATH ??
             './node_modules/prisma/build/index.js'
         const prismaResult = spawnSync(
             process.execPath,
-            [prismaCliPath, 'migrate', 'deploy', `--schema=${schemaPath}`],
+            [prismaCliPath, 'migrate', 'deploy', `--config=${configPath}`],
             {
                 cwd: process.cwd(),
                 env: {

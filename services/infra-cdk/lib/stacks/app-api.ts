@@ -670,27 +670,31 @@ export class AppApiStack extends BaseStack {
     /**
      * Get Prisma schema and migrations bundling commands for migrate function
      *
-     * Prisma 7 Note: We only copy schema/migrations directories. The Prisma CLI and
-     * all its dependencies are bundled by esbuild automatically. No manual package
-     * copying needed - Prisma 7's WASM engines are JavaScript modules that esbuild handles.
+     * We copy the config and recreate the directory structure it expects
      */
     private getPrismaSchemaAndMigrationsBundlingCommands(): (
         outputDir: string,
         appApiPath: string
     ) => string[] {
         return (outputDir: string, appApiPath: string) => [
-            // Copy Prisma schema for migrate deploy command
-            `mkdir -p "${outputDir}/prisma" || true`,
-            `cp "${appApiPath}/prisma/schema.prisma" "${outputDir}/prisma/schema.prisma" || echo "Prisma schema not found"`,
+            // Copy the root prisma.config.ts (it has paths like './services/app-api/prisma/...')
+            `cp "${appApiPath}/../../prisma.config.ts" "${outputDir}/prisma.config.ts" || echo "prisma.config.ts not found"`,
 
-            // Copy migrations directory for migrate deploy
-            `cp -r "${appApiPath}/prisma/migrations" "${outputDir}/prisma/migrations" || echo "Prisma migrations not found"`,
+            // Recreate the directory structure that the config expects
+            // Config has: schema: './services/app-api/prisma/schema.prisma'
+            `mkdir -p "${outputDir}/services/app-api/prisma" || true`,
+
+            // Copy schema to match config's path
+            `cp "${appApiPath}/prisma/schema.prisma" "${outputDir}/services/app-api/prisma/schema.prisma" || echo "Prisma schema not found"`,
+
+            // Copy migrations directory to match config's path
+            `cp -r "${appApiPath}/prisma/migrations" "${outputDir}/services/app-api/prisma/migrations" || echo "Prisma migrations not found"`,
 
             // Copy data migrations (TypeScript files that will be bundled separately)
             `mkdir -p "${outputDir}/dataMigrations" || true`,
             `cp -r "${appApiPath}/src/dataMigrations/migrations" "${outputDir}/dataMigrations/" || echo "Data migrations not found"`,
 
-            `echo "Copied Prisma schema and migrations for migrate function"`,
+            `echo "Copied Prisma config, schema, and migrations using repo structure"`,
         ]
     }
 
