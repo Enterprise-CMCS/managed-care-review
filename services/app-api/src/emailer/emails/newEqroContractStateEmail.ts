@@ -24,6 +24,8 @@ type newEQROContractStateEmail = {
     submissionDescription: string
     submissionURL: string
     subjectToReview: boolean
+    MCGDMCOContactEmail: string
+    CMSContactEmail: string
 }
 
 export const newEqroContractStateEmail = async (
@@ -90,6 +92,8 @@ export const newEqroContractStateEmail = async (
         submissionDescription: formData.submissionDescription,
         submissionURL: submissionURL,
         subjectToReview: subjectToReview,
+        MCGDMCOContactEmail: 'MCGDMCOactions@cms.hhs.gov',
+        CMSContactEmail: 'MC_Review_HelpDesk@cms.hhs.gov',
     }
 
     const template = await renderTemplate<newEQROContractStateEmail>(

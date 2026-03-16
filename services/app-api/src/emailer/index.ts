@@ -8,6 +8,7 @@ export {
     unlockContractStateEmail,
     resubmitContractStateEmail,
     resubmitContractCMSEmail,
+    sendEQROContractResubmitStateEmail,
     sendQuestionStateEmail,
     sendQuestionCMSEmail,
     sendQuestionResponseCMSEmail,

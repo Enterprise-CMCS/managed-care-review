@@ -61,6 +61,16 @@ module.exports = defineConfig({
                     )
                     return gql(`${gqlSchema}`)
                 },
+                readFixtureDocuments() {
+                    const docsDir = path.resolve(__dirname, './fixtures/documents')
+                    const files = fs.readdirSync(docsDir)
+                    const documents = {}
+                    for (const file of files) {
+                        const content = fs.readFileSync(path.join(docsDir, file))
+                        documents[file] = content.toString('base64')
+                    }
+                    return documents
+                },
                 log(message) {
                     console.log(message)
 
