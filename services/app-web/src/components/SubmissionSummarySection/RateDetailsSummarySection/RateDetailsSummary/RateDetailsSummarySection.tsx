@@ -40,6 +40,7 @@ import {
 } from '../../../DataDetail'
 import { SectionHeader } from '../../../SectionHeader'
 import styles from '../../SubmissionSummarySection.module.scss'
+import { NavLinkWithLogging } from '../../../../components/TealiumLogging'
 
 export type RateDetailsSummarySectionProps = {
     contract: Contract | UnlockedContract
@@ -67,6 +68,7 @@ type PackageNamesLookupType = {
 
 export const RateDetailsSummarySection = ({
     contract,
+    contractRev,
     rateRevisions,
     editNavigateTo,
     submissionName,
@@ -225,6 +227,23 @@ export const RateDetailsSummarySection = ({
         return 'CMS must unlock the submission so the state can add a rate certification.'
     }
 
+    const rateCertificationNameHeader = (
+        rateId: string,
+        rateCertificationName: string | null | undefined
+    ): React.ReactElement | string => {
+        const nameDisplay = rateCertificationName ?? ''
+
+        if (!isStateUser) {
+            return (
+                <NavLinkWithLogging to={`/rates/${rateId}`}>
+                    {nameDisplay}
+                </NavLinkWithLogging>
+            )
+        }
+
+        return nameDisplay
+    }
+
     return (
         <SectionCard id="rateDetails" className={styles.summarySection}>
             <SectionHeader
@@ -246,10 +265,10 @@ export const RateDetailsSummarySection = ({
                           (rateFormData.rateMedicaidPopulations ??
                               []) as string[]
                       const contractIsDsnp =
-                          contract.packageSubmissions[0]?.contractRevision
-                              ?.formData?.dsnpContract === true ||
-                          contract.draftRevision?.formData?.dsnpContract ===
-                              true
+                          (contractRev?.formData?.dsnpContract ??
+                              contract.draftRevision?.formData?.dsnpContract ??
+                              contract.packageSubmissions[0]?.contractRevision
+                                  ?.formData?.dsnpContract) === true
                       const rateDocumentCount =
                           rateFormData.supportingDocuments &&
                           rateFormData.rateDocuments &&
@@ -282,7 +301,10 @@ export const RateDetailsSummarySection = ({
                                       aria-label={`Rate ID: ${rateFormData.rateCertificationName}`}
                                       className={styles.rateName}
                                   >
-                                      {rateFormData.rateCertificationName}
+                                      {rateCertificationNameHeader(
+                                          rateRev.rateID,
+                                          rateFormData.rateCertificationName
+                                      )}
                                   </h3>
                               </div>
                               <dl>
@@ -546,15 +568,19 @@ export const RateDetailsSummarySection = ({
             {withdrawnRateRevisions.length > 0 &&
                 withdrawnRateRevisions.map((rateRev) => (
                     <SectionCard
+                        className={styles.summarySection}
                         id={`withdrawn-rate-${rateRev.id}`}
                         key={rateRev.id}
                     >
                         <h3
                             aria-label={`Rate ID: ${rateRev.formData.rateCertificationName}`}
-                            className={styles.rateName}
+                            className={styles.rateNameWithdrawn}
                         >
-                            <InfoTag color="gray-medium">WITHDRAWN</InfoTag>{' '}
-                            {rateRev.formData.rateCertificationName}
+                            <InfoTag color="gray">WITHDRAWN</InfoTag> <br />
+                            {rateCertificationNameHeader(
+                                rateRev.rateID,
+                                rateRev.formData.rateCertificationName
+                            )}
                         </h3>
                     </SectionCard>
                 ))}

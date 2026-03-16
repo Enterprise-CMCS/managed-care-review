@@ -107,6 +107,16 @@
     line-height: 2rem;
 }
 
+.rateNameWithdrawn {
+    display: block;
+    font-weight: 400;
+    font-size: 28px;
+    margin: 0;
+    padding-top: uswds.units(1);
+    padding-bottom: uswds.units(2);
+    line-height: 2rem;
+}
+
 .replaceRateWrapper {
     display: flex;
     justify-content: space-between;

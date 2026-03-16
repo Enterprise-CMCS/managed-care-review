@@ -121,7 +121,7 @@ function rateOverridesToDomainModel(
                                       dateAdded: doc.dateAdded ?? undefined,
                                   })
                               ),
-                              supportingDocumentOverrideSchema:
+                              supportingDocument:
                                   revisionOverride.supportingDocuments.map(
                                       (doc) => ({
                                           ...doc,

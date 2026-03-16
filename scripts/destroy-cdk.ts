@@ -3,6 +3,8 @@ import {
     DeleteStackCommand,
     DescribeStacksCommand,
     DescribeStackResourcesCommand,
+    DeleteStackCommandInput,
+    StackResource,
     waitUntilStackDeleteComplete,
 } from '@aws-sdk/client-cloudformation'
 import {
@@ -10,8 +12,15 @@ import {
     ListObjectVersionsCommand,
     DeleteObjectsCommand,
     PutBucketVersioningCommand,
+    PutBucketLoggingCommand,
+    ObjectIdentifier,
 } from '@aws-sdk/client-s3'
 import { LambdaClient, InvokeCommand } from '@aws-sdk/client-lambda'
+import {
+    CloudFrontClient,
+    ListInvalidationsCommand,
+    GetInvalidationCommand,
+} from '@aws-sdk/client-cloudfront'
 import {
     SecretsManagerClient,
     DescribeSecretCommand,
@@ -49,11 +58,13 @@ const stage = process.argv[2]
 const cf = new CloudFormationClient(AWSConfig)
 const s3 = new S3Client(AWSConfig)
 const lambda = new LambdaClient(AWSConfig)
+const cloudfront = new CloudFrontClient(AWSConfig)
 const secretsManager = new SecretsManagerClient(AWSConfig)
 
 async function main() {
     if (!stage) {
         console.error('Usage: node destroy-cdk.js <stage-name>')
+        console.error('  <stage-name>  Stage name to destroy')
         process.exit(1)
     }
 
@@ -91,6 +102,15 @@ async function main() {
         for (const stack of stacksToDestroy) {
             console.info(`Destroying CDK stack: ${stack}`)
 
+            // Wait for CloudFront invalidations to complete
+            const cloudFrontOutput =
+                await waitForCloudFrontInvalidationsInStack(stack)
+            if (cloudFrontOutput instanceof Error) {
+                console.info(
+                    `Could not wait for CloudFront invalidations in ${stack}: ${cloudFrontOutput.message}`
+                )
+            }
+
             // Clear S3 buckets in the stack
             const clearBucketOutput = await clearS3BucketsInStack(stack)
             if (clearBucketOutput instanceof Error) {
@@ -126,7 +146,7 @@ async function deleteLogicalDatabase(stageName: string): Promise<void> {
 
     try {
         // Get the dev database secret ARN
-        const devSecretName = 'aurora-postgres-dev-cdk'
+        const devSecretName = 'aurora-postgres-dev-cdk' // pragma: allowlist secret
         const describeSecretCommand = new DescribeSecretCommand({
             SecretId: devSecretName,
         })
@@ -196,6 +216,7 @@ async function getCdkStacksFromStage(stageName: string): Promise<string[]> {
                 StackName: stackName,
             })
             const stacks = await cf.send(commandDescribeStacks)
+            console.info(`Found ${stacks.Stacks?.length} stacks.`)
 
             if (stacks.Stacks === undefined || stacks.Stacks.length === 0) {
                 console.info(`Stack ${stackName} was not found. Skipping.`)
@@ -221,6 +242,144 @@ async function getCdkStacksFromStage(stageName: string): Promise<string[]> {
 }
 
 /**
+ * Wait for all CloudFront invalidations in a stack to complete
+ */
+async function waitForCloudFrontInvalidationsInStack(
+    stackName: string
+): Promise<void | Error> {
+    const distributions = await getDistributionsInStack(stackName)
+
+    if (distributions instanceof Error) {
+        return new Error(
+            `Could not get distributions in stack ${stackName}: ${distributions.message}`
+        )
+    }
+
+    if (distributions.length === 0) {
+        console.info(`No CloudFront distributions found in stack ${stackName}`)
+        return
+    }
+
+    console.info(
+        `Found ${distributions.length} CloudFront distribution(s) in stack ${stackName}`
+    )
+
+    for (const distribution of distributions) {
+        const distributionId = distribution.PhysicalResourceId
+        if (!distributionId) continue
+
+        const result = await waitForDistributionInvalidations(distributionId)
+        if (result instanceof Error) {
+            return result
+        }
+    }
+
+    console.info(`All CloudFront invalidations complete for stack ${stackName}`)
+}
+
+/**
+ * Wait for all in-progress invalidations on a CloudFront distribution to complete
+ */
+export async function waitForDistributionInvalidations(
+    distributionId: string
+): Promise<void | Error> {
+    if (!distributionId || distributionId === '') {
+        return new Error('Distribution ID cannot be empty')
+    }
+    console.info(
+        `Checking invalidations for CloudFront distribution: ${distributionId}`
+    )
+
+    try {
+        // List all invalidations for the distribution
+        const listCommand = new ListInvalidationsCommand({
+            DistributionId: distributionId,
+        })
+        const response = await cloudfront.send(listCommand)
+
+        const inProgressInvalidations =
+            response.InvalidationList?.Items?.filter(
+                (item) => item.Status === 'InProgress'
+            ) ?? []
+
+        if (inProgressInvalidations.length === 0) {
+            console.info(
+                `No in-progress invalidations for distribution ${distributionId}`
+            )
+            return
+        }
+
+        console.info(
+            `Found ${inProgressInvalidations.length} in-progress invalidation(s) for ${distributionId}`
+        )
+
+        // Wait for each in-progress invalidation to complete
+        for (const invalidation of inProgressInvalidations) {
+            if (!invalidation.Id) continue
+
+            console.info(
+                `Waiting for invalidation ${invalidation.Id} to complete...`
+            )
+
+            // Poll until invalidation is complete
+            let status = 'InProgress'
+            const startTime = Date.now()
+            const timeoutMs = 30 * 60 * 1000 // 30 minutes
+
+            while (status === 'InProgress') {
+                const elapsed = Date.now() - startTime
+                if (elapsed > timeoutMs) {
+                    throw new Error(
+                        `Timeout: Invalidation still in progress after 30 minutes`
+                    )
+                }
+                await new Promise((resolve) => setTimeout(resolve, 5000)) // Wait 5 seconds between checks
+
+                const getCommand = new GetInvalidationCommand({
+                    DistributionId: distributionId,
+                    Id: invalidation.Id,
+                })
+                const result = await cloudfront.send(getCommand)
+                status = result.Invalidation?.Status ?? 'Completed'
+
+                console.info(
+                    `Invalidation ${invalidation.Id} status: ${status}`
+                )
+            }
+
+            console.info(`Invalidation ${invalidation.Id} completed`)
+        }
+    } catch (err: any) {
+        return new Error(`Could not wait for invalidations: ${err.message}`)
+    }
+}
+
+/**
+ * Get all CloudFront distributions in a CloudFormation stack
+ */
+async function getDistributionsInStack(
+    stackName: string
+): Promise<StackResource[] | Error> {
+    try {
+        const command = new DescribeStackResourcesCommand({
+            StackName: stackName,
+        })
+        const stack = await cf.send(command)
+
+        if (stack.StackResources === undefined) {
+            return new Error('Could not find stack resources')
+        }
+
+        return stack.StackResources.filter(
+            (resource) =>
+                resource.ResourceType === 'AWS::CloudFront::Distribution'
+        )
+    } catch (err: any) {
+        return new Error(`Could not get stack resources: ${err.message}`)
+    }
+}
+
+/**
  * Clear all S3 buckets in a CloudFormation stack
  */
 async function clearS3BucketsInStack(stackName: string): Promise<void | Error> {
@@ -237,43 +396,88 @@ async function clearS3BucketsInStack(stackName: string): Promise<void | Error> {
         return
     }
 
-    const clearBucketOutput = await Promise.all(
+    const clearBucketOutput = await Promise.allSettled(
         buckets.map(async (bucket) => {
-            try {
-                // Turn off versioning on the bucket
-                const versionResponse = await turnOffVersioningOnBucket(bucket)
-                if (versionResponse instanceof Error) {
-                    return versionResponse
-                }
-
-                // Get all versioned files in the bucket
-                console.info(`Clearing bucket: ${bucket.PhysicalResourceId}`)
-                const keys = await getVersionedFilesInBucket(bucket)
-                if (keys instanceof Error) {
-                    return keys
-                }
-
-                return await deleteKeysFromS3Bucket(bucket, keys)
-            } catch (err: any) {
+            if (!bucket.PhysicalResourceId) {
                 return new Error(
-                    `Error clearing bucket ${bucket.PhysicalResourceId}: ${err.message}`
+                    `Bucket ${bucket.LogicalResourceId} has no PhysicalResourceId`
                 )
             }
+            return await emptyS3Bucket(bucket.PhysicalResourceId)
         })
     )
 
-    const errors = clearBucketOutput.filter((output) => output instanceof Error)
+    const errors: Error[] = []
+    clearBucketOutput.forEach((result, index) => {
+        if (result.status === 'rejected') {
+            errors.push(
+                result.reason instanceof Error
+                    ? result.reason
+                    : new Error(
+                          `Unknown error while clearing bucket: ${result.reason}`
+                      )
+            )
+        } else if (result.value instanceof Error) {
+            errors.push(result.value)
+        }
+    })
+
     if (errors.length > 0) {
         return new Error(
-            `Encountered errors while clearing buckets: ${errors.map((e: any) => e.message).join(', ')}`
+            `Encountered errors while clearing buckets: ${errors.map((e: Error) => e.message).join(', ')}`
         )
+    }
+}
+
+/**
+ * Empty an S3 bucket by deleting all objects and versions
+ */
+export async function emptyS3Bucket(bucketName: string): Promise<void | Error> {
+    if (!bucketName || bucketName === '') {
+        return new Error('Bucket name cannot be empty')
+    }
+    console.info(`Emptying S3 bucket: ${bucketName}`)
+    try {
+        // Disable access logging
+        const loggingResult = await disableS3AccessLogging(bucketName)
+        if (loggingResult instanceof Error) {
+            console.warn(
+                `Could not disable access logging on ${bucketName}: ${loggingResult.message}`
+            )
+        }
+
+        // Turn off versioning
+        const versionResult = await turnOffVersioningOnBucket(bucketName)
+        if (versionResult instanceof Error) {
+            console.warn(
+                `Could not turn off versioning on ${bucketName}: ${versionResult.message}`
+            )
+        }
+
+        // Get and delete all versioned objects
+        const keys: ObjectIdentifier[] | Error =
+            await getVersionedFilesInBucket(bucketName)
+        if (keys instanceof Error) {
+            return keys
+        }
+
+        const deleteResult = await deleteKeysFromS3Bucket(bucketName, keys)
+        if (deleteResult instanceof Error) {
+            return deleteResult
+        }
+
+        console.info(`Successfully emptied bucket: ${bucketName}`)
+    } catch (err: any) {
+        return new Error(`Error emptying bucket ${bucketName}: ${err.message}`)
     }
 }
 
 /**
  * Get all S3 buckets in a CloudFormation stack
  */
-async function getBucketsInStack(stackName: string): Promise<any[] | Error> {
+async function getBucketsInStack(
+    stackName: string
+): Promise<StackResource[] | Error> {
     try {
         const commandDescribeStackResources = new DescribeStackResourcesCommand(
             {
@@ -295,15 +499,34 @@ async function getBucketsInStack(stackName: string): Promise<any[] | Error> {
 }
 
 /**
+ * Disable access logging on an S3 bucket
+ */
+async function disableS3AccessLogging(
+    bucketName: string
+): Promise<void | Error> {
+    console.info(`Disabling access logging on bucket: ${bucketName}`)
+
+    try {
+        const command = new PutBucketLoggingCommand({
+            Bucket: bucketName ?? '',
+            BucketLoggingStatus: {},
+        })
+        await s3.send(command)
+    } catch (err: any) {
+        return new Error(`Could not disable access logging: ${err.message}`)
+    }
+}
+
+/**
  * Turn off versioning on an S3 bucket
  */
-async function turnOffVersioningOnBucket(bucket: any): Promise<void | Error> {
-    console.info(
-        `Turning off bucket versioning on bucket: ${bucket.PhysicalResourceId}`
-    )
+async function turnOffVersioningOnBucket(
+    bucketName: string
+): Promise<void | Error> {
+    console.info(`Turning off bucket versioning on bucket: ${bucketName}`)
 
     const versionParams = {
-        Bucket: bucket.PhysicalResourceId ?? '',
+        Bucket: bucketName ?? '',
         VersioningConfiguration: { Status: 'Suspended' as const },
     }
 
@@ -321,33 +544,56 @@ async function turnOffVersioningOnBucket(bucket: any): Promise<void | Error> {
  * Get all versioned files and delete markers from an S3 bucket
  */
 async function getVersionedFilesInBucket(
-    bucket: any
-): Promise<Array<{ Key: string; VersionId: string }> | Error> {
-    const bucketParams = {
-        Bucket: bucket.PhysicalResourceId ?? '',
-    }
+    bucketName: string
+): Promise<ObjectIdentifier[] | Error> {
+    const allKeys: ObjectIdentifier[] = []
+    let keyMarker: string | undefined
+    let versionIdMarker: string | undefined
+    let pageCount = 0
 
     try {
-        const commandListObjectVersions = new ListObjectVersionsCommand(
-            bucketParams
+        // Paginate through all versions
+        do {
+            pageCount++
+            const commandListObjectVersions = new ListObjectVersionsCommand({
+                Bucket: bucketName,
+                KeyMarker: keyMarker,
+                VersionIdMarker: versionIdMarker,
+            })
+            const objectVersions = await s3.send(commandListObjectVersions)
+
+            const versionKeys =
+                objectVersions.Versions?.map((c) => ({
+                    Key: c.Key ?? '',
+                    VersionId: c.VersionId ?? '',
+                })) ?? []
+
+            const deleteMarkerKeys =
+                objectVersions.DeleteMarkers?.map((c) => ({
+                    Key: c.Key ?? '',
+                    VersionId: c.VersionId ?? '',
+                })) ?? []
+
+            allKeys.push(...versionKeys, ...deleteMarkerKeys)
+
+            // Set markers for next page
+            keyMarker = objectVersions.NextKeyMarker
+            versionIdMarker = objectVersions.NextVersionIdMarker
+
+            process.stdout.write(
+                `\r  Fetching keys... page ${pageCount}, ${allKeys.length} keys collected so far`
+            )
+        } while (keyMarker)
+
+        process.stdout.write('\n')
+        console.info(
+            `Found ${allKeys.length} object(s) across ${pageCount} page(s) in bucket ${bucketName}`
         )
-        const objectVersions = await s3.send(commandListObjectVersions)
-
-        const versionKeys =
-            objectVersions.Versions?.map((c) => ({
-                Key: c.Key ?? '',
-                VersionId: c.VersionId ?? '',
-            })) ?? []
-
-        const deleteMarkerKeys =
-            objectVersions.DeleteMarkers?.map((c) => ({
-                Key: c.Key ?? '',
-                VersionId: c.VersionId ?? '',
-            })) ?? []
-
-        return [...versionKeys, ...deleteMarkerKeys]
+        return allKeys
     } catch (err: any) {
-        return new Error(`Could not list object versions: ${err.message}`)
+        return new Error(
+            `Could not list object versions in ${bucketName}: ${err.message}`
+        )
     }
 }
 
@@ -355,11 +601,11 @@ async function getVersionedFilesInBucket(
  * Delete keys from an S3 bucket (handles batching for 1000 key limit)
  */
 async function deleteKeysFromS3Bucket(
-    bucket: any,
-    keys: Array<{ Key: string; VersionId: string }>
+    bucketName: string,
+    keys: ObjectIdentifier[]
 ): Promise<void | Error> {
     if (keys.length === 0) {
-        console.info(`No keys to delete in bucket ${bucket.PhysicalResourceId}`)
+        console.info(`No keys to delete in bucket ${bucketName}`)
         return
     }
 
@@ -369,27 +615,61 @@ async function deleteKeysFromS3Bucket(
         (v, i) => keys.slice(i * 999, i * 999 + 999)
     )
 
-    const emptyBucketOutput = await Promise.all(
-        keysArray.map(async (k) => {
-            const commandDeleteObjects = new DeleteObjectsCommand({
-                Bucket: bucket.PhysicalResourceId ?? '',
-                Delete: {
-                    Objects: k,
-                },
-            })
-
-            try {
-                await s3.send(commandDeleteObjects)
-            } catch (err: any) {
-                return new Error(`Could not delete keys: ${err.message}`)
-            }
-        })
+    const concurrency = 5
+    const delayBetweenBatches = 50 // ms between launching each batch to avoid bursting
+    console.info(
+        `Deleting ${keys.length} keys in ${keysArray.length} batches (concurrency: ${concurrency})`
     )
 
-    const errors = emptyBucketOutput.filter((output) => output instanceof Error)
+    const errors: Error[] = []
+    let deletedCount = 0
+
+    // Process batches in parallel with a concurrency limit
+    for (let i = 0; i < keysArray.length; i += concurrency) {
+        const window = keysArray.slice(i, i + concurrency)
+
+        const results = await Promise.all(
+            window.map(async (batch, j) => {
+                // Stagger launches within the window to avoid request bursts
+                await new Promise((resolve) =>
+                    setTimeout(resolve, j * delayBetweenBatches)
+                )
+                const commandDeleteObjects = new DeleteObjectsCommand({
+                    Bucket: bucketName ?? '',
+                    Delete: { Objects: batch },
+                })
+                try {
+                    await s3.send(commandDeleteObjects)
+                    return { count: batch.length, error: null }
+                } catch (err: any) {
+                    return {
+                        count: 0,
+                        error: new Error(
+                            `Batch ${i + j + 1} failed: ${err.message}`
+                        ),
+                    }
+                }
+            })
+        )
+
+        for (const result of results) {
+            if (result.error) {
+                errors.push(result.error)
+            } else {
+                deletedCount += result.count
+            }
+        }
+
+        process.stdout.write(
+            `\r  Deleting keys... ${Math.min(i + concurrency, keysArray.length)}/${keysArray.length} batches done, ${deletedCount}/${keys.length} keys deleted`
+        )
+    }
+
+    process.stdout.write('\n')
+
     if (errors.length > 0) {
         return new Error(
-            `Encountered errors while deleting keys: ${errors.map((e: any) => e.message).join(', ')}`
+            `Encountered errors while deleting keys: ${errors.map((e) => e.message).join(', ')}`
         )
     }
 }
@@ -397,7 +677,13 @@ async function deleteKeysFromS3Bucket(
 /**
  * Delete a CloudFormation stack and wait for completion
  */
-async function deleteStack(stackName: string): Promise<void | Error> {
+export async function deleteStack(
+    stackName: string,
+    retainResources?: string[]
+): Promise<void | Error> {
+    if (!stackName || stackName === '') {
+        return new Error('Stack name cannot be empty')
+    }
     try {
         // Check if stack exists
         const commandDescribeStacks = new DescribeStacksCommand({
@@ -413,15 +699,20 @@ async function deleteStack(stackName: string): Promise<void | Error> {
 
         // Delete the stack - optionally use a specific role if provided via env var
         // Otherwise let CloudFormation use the caller's credentials
-        const deleteParams: any = {
+        const deleteParams: DeleteStackCommandInput = {
             StackName: stackName,
+            RetainResources: retainResources,
         }
 
         if (process.env.CDK_CLEANUP_ROLE_ARN) {
-            console.info(`Using role for deletion: ${process.env.CDK_CLEANUP_ROLE_ARN}`)
+            console.info(
+                `Using role for deletion: ${process.env.CDK_CLEANUP_ROLE_ARN}`
+            )
             deleteParams.RoleARN = process.env.CDK_CLEANUP_ROLE_ARN
         } else {
-            console.info(`Deleting stack using caller credentials (no role override)`)
+            console.info(
+                `Deleting stack using caller credentials (no role override)`
+            )
         }
 
         const commandDeleteStack = new DeleteStackCommand(deleteParams)
@@ -451,5 +742,7 @@ async function deleteStack(stackName: string): Promise<void | Error> {
     }
 }
 
-// Run the script
-main()
+// Only run when executed directly, not when imported
+if (import.meta.url === `file://${process.argv[1]}`) {
+    main()
+}

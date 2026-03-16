@@ -24,7 +24,7 @@ type FieldSelectType = {
     label: string
     optionDescriptionSingular?: string
     error?: boolean
-} & SelectProps<FieldSelectOptionType, true>
+} & SelectProps<FieldSelectOptionType, boolean>
 
 /**
  * This component renders the react-select combobox with a generic types wrapper
@@ -56,7 +56,7 @@ const FieldSelect = ({
     }
 
     const handleOnChangeWithLogging = async (
-        newValue: OnChangeValue<FieldSelectOptionType, true>,
+        newValue: OnChangeValue<FieldSelectOptionType, boolean>,
         actionMeta: ActionMeta<FieldSelectOptionType>
     ) => {
         const action = actionMeta.action

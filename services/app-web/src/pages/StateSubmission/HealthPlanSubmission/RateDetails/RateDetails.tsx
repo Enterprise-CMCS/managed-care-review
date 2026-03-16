@@ -701,6 +701,9 @@ const RateDetails = ({
                                                     withdrawnRateRevisions.map(
                                                         (rateRev) => (
                                                             <SectionCard
+                                                                className={
+                                                                    styles.summarySection
+                                                                }
                                                                 id={`withdrawn-rate-${rateRev.id}`}
                                                                 key={rateRev.id}
                                                             >
@@ -710,7 +713,7 @@ const RateDetails = ({
                                                                         styles.rateName
                                                                     }
                                                                 >
-                                                                    <InfoTag color="gray-medium">
+                                                                    <InfoTag color="gray">
                                                                         WITHDRAWN
                                                                     </InfoTag>{' '}
                                                                     {

@@ -7,6 +7,7 @@ import {
     Effect,
     AnyPrincipal,
     ServicePrincipal,
+    AccountPrincipal,
 } from 'aws-cdk-lib/aws-iam'
 import { CfnOutput } from 'aws-cdk-lib'
 
@@ -102,6 +103,12 @@ export class Uploads extends BaseStack {
             qaBucketInstance
         )
 
+        // Allow restore IA to standard Lambda access
+        this.allowRestoreIAToStandardRole(
+            uploadsBucketInstance,
+            qaBucketInstance
+        )
+
         // Create outputs
         this.createOutputs(uploadsBucketInstance, qaBucketInstance)
 
@@ -112,7 +119,18 @@ export class Uploads extends BaseStack {
     }
 
     /**
+     * Get the ARN pattern for the RestoreIAToStandardRole Lambda execution
+     * Lambda uses STS assumed-role ARN at runtime, not IAM role ARN
+     * Pattern: arn:aws:sts::{account}:assumed-role/{roleName}/{sessionName}
+     */
+    private getRestoreIAToStandardRoleArnPattern(): string {
+        return `arn:aws:sts::${this.account}:assumed-role/app-api-${this.stage}-cdk-RestoreIAToStandardRole*/*`
+    }
+
+    /**
      * Add file type restrictions matching serverless bucket policies
+     * Exception: RestoreIAToStandardRole can bypass this to restore IA files
+     * Uses STS assumed-role ARN pattern since Lambda uses assumed roles at runtime
      */
     private addFileTypeRestrictions(bucket: IBucket): void {
         bucket.addToResourcePolicy(
@@ -134,6 +152,12 @@ export class Uploads extends BaseStack {
                     `${bucket.bucketArn}/*.xltm`,
                     `${bucket.bucketArn}/*.xlam`,
                 ],
+                conditions: {
+                    ArnNotLike: {
+                        'aws:PrincipalArn':
+                            this.getRestoreIAToStandardRoleArnPattern(),
+                    },
+                },
             })
         )
     }
@@ -186,12 +210,14 @@ export class Uploads extends BaseStack {
     /**
      * Add virus scan download blocking policies
      * Blocks downloads of files that don't have GuardDutyMalwareScanStatus=NO_THREATS_FOUND
+     * Exception: RestoreIAToStandardRole can bypass this to restore IA files
+     * Uses STS assumed-role ARN pattern since Lambda uses assumed roles at runtime
      */
     private addVirusScanDownloadBlockingPolicies(
         uploadsBucket: IBucket,
         qaBucket: IBucket
     ): void {
-        // Add deny policy to uploads bucket
+        // Add deny policy to uploads bucket with exception for restore role
         uploadsBucket.addToResourcePolicy(
             new PolicyStatement({
                 sid: 'DenyInfectedFileAccess',
@@ -204,11 +230,15 @@ export class Uploads extends BaseStack {
                         's3:ExistingObjectTag/GuardDutyMalwareScanStatus':
                             'NO_THREATS_FOUND',
                     },
+                    ArnNotLike: {
+                        'aws:PrincipalArn':
+                            this.getRestoreIAToStandardRoleArnPattern(),
+                    },
                 },
             })
         )
 
-        // Add deny policy to QA bucket
+        // Add deny policy to QA bucket with exception for restore role
         qaBucket.addToResourcePolicy(
             new PolicyStatement({
                 sid: 'DenyInfectedFileAccess',
@@ -220,6 +250,88 @@ export class Uploads extends BaseStack {
                     StringNotEquals: {
                         's3:ExistingObjectTag/GuardDutyMalwareScanStatus':
                             'NO_THREATS_FOUND',
+                    },
+                    ArnNotLike: {
+                        'aws:PrincipalArn':
+                            this.getRestoreIAToStandardRoleArnPattern(),
+                    },
+                },
+            })
+        )
+    }
+
+    /**
+     * Allow RestoreIAToStandardRole to access buckets
+     * This explicit Allow is needed because bucket has explicit Allow statements for other roles
+     * Uses AccountPrincipal to avoid S3 Block Public Access blocking the policy
+     * Separates bucket-level and object-level permissions for proper granularity
+     */
+    private allowRestoreIAToStandardRole(
+        uploadsBucket: IBucket,
+        qaBucket: IBucket
+    ): void {
+        const accountId = this.account
+        const roleArnPattern = this.getRestoreIAToStandardRoleArnPattern()
+
+        // Allow restore role bucket-level access to documents bucket
+        uploadsBucket.addToResourcePolicy(
+            new PolicyStatement({
+                sid: 'AllowRestoreIAToStandardRoleBucketAccess',
+                effect: Effect.ALLOW,
+                principals: [new AccountPrincipal(accountId)],
+                actions: ['s3:ListBucket'],
+                resources: [uploadsBucket.bucketArn],
+                conditions: {
+                    ArnLike: {
+                        'aws:PrincipalArn': roleArnPattern,
+                    },
+                },
+            })
+        )
+
+        // Allow restore role object-level access to documents bucket
+        uploadsBucket.addToResourcePolicy(
+            new PolicyStatement({
+                sid: 'AllowRestoreIAToStandardRoleObjectAccess',
+                effect: Effect.ALLOW,
+                principals: [new AccountPrincipal(accountId)],
+                actions: ['s3:GetObject', 's3:PutObject'],
+                resources: [`${uploadsBucket.bucketArn}/*`],
+                conditions: {
+                    ArnLike: {
+                        'aws:PrincipalArn': roleArnPattern,
+                    },
+                },
+            })
+        )
+
+        // Allow restore role bucket-level access to QA bucket
+        qaBucket.addToResourcePolicy(
+            new PolicyStatement({
+                sid: 'AllowRestoreIAToStandardRoleBucketAccess',
+                effect: Effect.ALLOW,
+                principals: [new AccountPrincipal(accountId)],
+                actions: ['s3:ListBucket'],
+                resources: [qaBucket.bucketArn],
+                conditions: {
+                    ArnLike: {
+                        'aws:PrincipalArn': roleArnPattern,
+                    },
+                },
+            })
+        )
+
+        // Allow restore role object-level access to QA bucket
+        qaBucket.addToResourcePolicy(
+            new PolicyStatement({
+                sid: 'AllowRestoreIAToStandardRoleObjectAccess',
+                effect: Effect.ALLOW,
+                principals: [new AccountPrincipal(accountId)],
+                actions: ['s3:GetObject', 's3:PutObject'],
+                resources: [`${qaBucket.bucketArn}/*`],
+                conditions: {
+                    ArnLike: {
+                        'aws:PrincipalArn': roleArnPattern,
                     },
                 },
             })

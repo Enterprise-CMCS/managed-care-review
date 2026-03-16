@@ -527,18 +527,31 @@ export function submitContract(
         let stateContractEmailResult
 
         if (status === 'RESUBMITTED') {
-            cmsContractEmailResult = await emailer.sendResubmittedCMSEmail(
-                submitContractResult,
-                updateInfo,
-                stateAnalystsEmails,
-                statePrograms
-            )
-            stateContractEmailResult = await emailer.sendResubmittedStateEmail(
-                submitContractResult,
-                updateInfo,
-                submitterEmails,
-                statePrograms
-            )
+            cmsContractEmailResult = isEQRO
+                ? await emailer.sendResubmittedEQROCMSEmail(
+                      submitContractResult,
+                      updateInfo,
+                      statePrograms
+                  )
+                : await emailer.sendResubmittedCMSEmail(
+                      submitContractResult,
+                      updateInfo,
+                      stateAnalystsEmails,
+                      statePrograms
+                  )
+            stateContractEmailResult = isEQRO
+                ? await emailer.sendResubmittedEQROStateEmail(
+                      submitContractResult,
+                      updateInfo,
+                      submitterEmails,
+                      statePrograms
+                  )
+                : await emailer.sendResubmittedStateEmail(
+                      submitContractResult,
+                      updateInfo,
+                      submitterEmails,
+                      statePrograms
+                  )
         } else if (status === 'SUBMITTED') {
             cmsContractEmailResult = isEQRO
                 ? await emailer.sendCMSNewEQROContract(

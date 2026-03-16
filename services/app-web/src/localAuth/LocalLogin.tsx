@@ -7,6 +7,7 @@ import {
     CardBody,
     CardFooter,
     GridContainer,
+    Button,
 } from '@trussworks/react-uswds'
 import { useNavigate } from 'react-router-dom'
 import { RoutesRecord } from '@mc-review/constants'
@@ -22,10 +23,11 @@ import rokuAvatar from '../assets/images/roku.png'
 import izumiAvatar from '../assets/images/izumi.jpg'
 import shiAvatar from '../assets/images/shi-tong.png'
 import azulaAvatar from '../assets/images/azula.png'
+import blueSpirit from '../assets/images/blue-spirit.png'
 
 import { useAuth } from '../contexts/AuthContext'
 import { LocalUserType } from './LocalUserType'
-import { ButtonWithLogging, ErrorAlertSignIn } from '../components'
+import { ErrorAlertSignIn } from '../components'
 import { recordJSException } from '@mc-review/otel'
 
 const localUsers: LocalUserType[] = [
@@ -122,6 +124,11 @@ export function LocalLogin(): React.ReactElement {
     const navigate = useNavigate()
     const { checkAuth, loginStatus } = useAuth()
 
+    const customUsers: LocalUserType[] = JSON.parse(
+        localStorage.getItem('custom-local-users') || '[]'
+    )
+    const allUsers = [...localUsers, ...customUsers]
+
     async function login(user: LocalUserType) {
         loginLocalUser(user)
         const result = await checkAuth()
@@ -141,49 +148,74 @@ export function LocalLogin(): React.ReactElement {
             <div>Login as one of our hard coded users:</div>
             {showFormAlert && <ErrorAlertSignIn />}
             <CardGroup>
-                {localUsers.map((user) => {
-                    const fromString = {
-                        CMS_APPROVER_USER: 'CMS (Approver)',
-                        ADMIN_USER: 'CMS (Admin)',
-                        BUSINESSOWNER_USER: 'CMS (Business Owner)',
-                        HELPDESK_USER: 'CMS (Helpdesk)',
-                        CMS_USER: 'CMS',
-                        STATE_USER:
-                            user.role === 'STATE_USER'
-                                ? user.stateCode
-                                : 'Unknown',
-                    }
+                <>
+                    {allUsers.map((user) => {
+                        const fromString = {
+                            CMS_APPROVER_USER: 'CMS (Approver)',
+                            ADMIN_USER: 'CMS (Admin)',
+                            BUSINESSOWNER_USER: 'CMS (Business Owner)',
+                            HELPDESK_USER: 'CMS (Helpdesk)',
+                            CMS_USER: 'CMS',
+                            STATE_USER:
+                                user.role === 'STATE_USER'
+                                    ? user.stateCode
+                                    : 'Unknown',
+                        }
 
-                    return (
-                        <Card key={user.email} className={styles.userCard}>
-                            <CardMedia>
-                                <img
-                                    src={userAvatars[user.email]}
-                                    alt={user.givenName}
-                                />
-                            </CardMedia>
-                            <CardHeader>
-                                <h2 className="usa-card__heading">
-                                    {user.givenName}
-                                </h2>
-                            </CardHeader>
-                            <CardBody>
-                                <p>From {fromString[user.role]}</p>
-                            </CardBody>
-                            <CardFooter>
-                                <ButtonWithLogging
-                                    data-testid={`${user.givenName}Button`}
-                                    type="submit"
-                                    disabled={loginStatus === 'LOADING'}
-                                    parent_component_type="card"
-                                    onClick={() => login(user)}
-                                >
-                                    Login
-                                </ButtonWithLogging>
-                            </CardFooter>
-                        </Card>
-                    )
-                })}
+                        return (
+                            <Card key={user.email} className={styles.userCard}>
+                                <CardMedia className={styles.cardMedia}>
+                                    <img
+                                        src={
+                                            userAvatars[user.email] ||
+                                            blueSpirit
+                                        }
+                                        alt={user.givenName}
+                                    />
+                                </CardMedia>
+                                <CardHeader>
+                                    <h2 className="usa-card__heading">
+                                        {user.givenName}
+                                    </h2>
+                                </CardHeader>
+                                <CardBody>
+                                    <p>From {fromString[user.role]}</p>
+                                </CardBody>
+                                <CardFooter>
+                                    <Button
+                                        data-testid={`${user.givenName}Button`}
+                                        type="submit"
+                                        disabled={loginStatus === 'LOADING'}
+                                        onClick={() => login(user)}
+                                    >
+                                        Login
+                                    </Button>
+                                </CardFooter>
+                            </Card>
+                        )
+                    })}
+                    <Card className={styles.newUserCard}>
+                        <CardMedia className={styles.cardMedia}>
+                            <div className={styles.addUserIcon}>
+                                <span>+</span>
+                            </div>
+                        </CardMedia>
+                        <CardHeader>
+                            <h2 className="usa-card__heading">Add user</h2>
+                        </CardHeader>
+                        <CardBody>
+                            <p>Add a new user for testing</p>
+                        </CardBody>
+                        <CardFooter>
+                            <Button
+                                type="button"
+                                onClick={() => navigate('/add-new-local-user')}
+                            >
+                                Add user
+                            </Button>
+                        </CardFooter>
+                    </Card>
+                </>
             </CardGroup>
         </GridContainer>
     )

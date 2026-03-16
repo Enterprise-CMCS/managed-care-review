@@ -4,3 +4,50 @@
 .userCard {
     width: 200px;
 }
+
+.newUserCard {
+    width: 200px;
+    background: none;
+    border: none;
+    padding: 0;
+}
+
+.cardMedia {
+    height: 180px;
+    overflow: hidden;
+}
+
+.addUserIcon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 180px;
+    background-color: white;
+
+    span {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: 6rem;
+        height: 6rem;
+        border-radius: 50%;
+        background-color: custom.$mcr-gray-lightest;
+        font-size: 4rem;
+        line-height: 1;
+        font-weight: 300;
+    }
+}
+
+.maxWidthContainer {
+    max-width: 640px;
+
+    ul {
+        list-style-type: none;
+        margin: 0;
+        padding: 0;
+    }
+}
+
+.formContainer {
+    @include custom.form-fields;
+}
