@@ -567,15 +567,16 @@ export const RateDetailsSummarySection = ({
                   )}
             {withdrawnRateRevisions.length > 0 &&
                 withdrawnRateRevisions.map((rateRev) => (
-                    <SectionCard
-                        id={`withdrawn-rate-${rateRev.id}`}
-                        key={rateRev.id}
-                    >
+                        <SectionCard
+                            className={styles.summarySection}
+                            id={`withdrawn-rate-${rateRev.id}`}
+                            key={rateRev.id}
+                        >
                         <h3
                             aria-label={`Rate ID: ${rateRev.formData.rateCertificationName}`}
-                            className={styles.rateName}
+                            className={styles.rateNameWithdrawn}
                         >
-                            <InfoTag color="gray-medium">WITHDRAWN</InfoTag>{' '}
+                            <InfoTag color="gray">WITHDRAWN</InfoTag>{' '}
                             <br />
                             {rateCertificationNameHeader(
                                 rateRev.rateID,
