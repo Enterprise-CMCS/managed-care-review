@@ -1,7 +1,8 @@
 import type { Handler, APIGatewayProxyResultV2 } from 'aws-lambda'
 import { spawnSync } from 'child_process'
-import { getPostgresURL } from './configuration'
+import { getPostgresURL, getDBClusterID } from './configuration'
 import { initTracer, recordException } from '../otel/otel_handler'
+import { RDSClient, CreateDBClusterSnapshotCommand } from '@aws-sdk/client-rds'
 
 const main: Handler = async (): Promise<APIGatewayProxyResultV2> => {
     // setup otel tracing
@@ -48,6 +49,39 @@ const main: Handler = async (): Promise<APIGatewayProxyResultV2> => {
     }
 
     const dbConnectionURL: string = dbConnResult
+
+    // take a snapshot of the DB before running data migration.
+    // don't take a snapshot if we're in a PR branch
+    if (['dev', 'val', 'prod', 'main'].includes(stage)) {
+        const dbClusterId = await getDBClusterID(secretsManagerSecret)
+        if (dbClusterId instanceof Error) {
+            const errMsg = `Init Error: failed to get db cluster ID: ${dbClusterId}`
+            recordException(errMsg, serviceName, 'getDBClusterID')
+            return fmtMigrateError(errMsg)
+        }
+
+        const snapshotID = stage + '-' + Date.now()
+        const params = {
+            DBClusterIdentifier: dbClusterId,
+            DBClusterSnapshotIdentifier: snapshotID,
+        }
+        try {
+            const rds = new RDSClient({ apiVersion: '2014-10-31' })
+            const command = new CreateDBClusterSnapshotCommand(params)
+            await rds.send(command)
+            console.info(
+                `Successfully created DB snapshot: ${snapshotID} for cluster: ${dbClusterId}`
+            )
+        } catch (err) {
+            const errMsg = `Could not take RDS snapshot before migrating: ${err}`
+            recordException(
+                errMsg,
+                serviceName,
+                'CreateDBClusterSnapshotCommand'
+            )
+            return fmtMigrateError(errMsg)
+        }
+    }
 
     // run the schema migration. this will add any new tables or fields from schema.prisma to postgres
     try {
