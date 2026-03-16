@@ -230,3 +230,27 @@ export const eqroValidationAndReviewDetermination = (
 
     return reviewRequired
 }
+
+/**
+ * Determines whether the EQRO review determination has changed since the previous submission.
+ *
+ * @param contractID - ContractID for the submission.
+ * @param currentSubjectToReview - The review determination for the current submission.
+ * @param previousFormData - The form data from the previous submission.
+ * @returns {false} - If the determination has not changed.
+ * @returns {true} - If the review determination has changed.
+ * @returns {Error} - If the previous form data fails validation.
+ */
+export const eqroReviewDeterminationChanged = (
+    contractID: string,
+    currentSubjectToReview: boolean,
+    previousFormData: ContractFormData
+): Error | boolean => {
+    const previousSubjectToReview = eqroValidationAndReviewDetermination(
+        contractID,
+        previousFormData
+    )
+    if (previousSubjectToReview instanceof Error) return previousSubjectToReview
+
+    return previousSubjectToReview !== currentSubjectToReview
+}
