@@ -49,6 +49,7 @@ import type { S3ClientT } from '../s3'
 import { createContract } from './contract/createContract'
 import { updateContractDraftRevision } from './contract/updateContractDraftRevision'
 import { approveContract } from './contract/approveContract'
+import { reverseApproveContract } from './contract/reverseApproveContract'
 import { fetchMcReviewSettings } from './settings'
 import { updateStateAssignmentsByState } from './user/updateStateAssignmentsByState'
 import { updateEmailSettings } from './settings/updateEmailSettings'
@@ -105,6 +106,7 @@ export function configureResolvers(
             ),
             updateDraftContractRates: updateDraftContractRates(store),
             approveContract: approveContract(store),
+            reverseApproveContract: reverseApproveContract(store),
             withdrawContract: withdrawContract(store, emailer, documentZip),
             undoWithdrawContract: undoWithdrawContract(
                 store,
