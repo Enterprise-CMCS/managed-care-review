@@ -89,14 +89,6 @@ const featureFlags = {
         flag: 'site-under-maintenance-banner',
         defaultValue: 'OFF',
     },
-    /**
-     * Used in testing to simulate errors in fetching flag value.
-     * This flag does not exist in LaunchDarkly dashboard so fetching this will return the defaultValue.
-     */
-    TEST_ERROR_FETCHING_FLAG: {
-        flag: 'test-error-fetching-flag',
-        defaultValue: undefined,
-    },
 } as const
 
 /**
