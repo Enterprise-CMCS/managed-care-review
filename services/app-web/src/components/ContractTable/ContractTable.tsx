@@ -125,7 +125,11 @@ const StatusTag = ({
           ? SubmissionReviewStatusRecord[status]
           : SubmissionStatusRecord[status]
 
-    return (
+    return isNotSubjectToReview && notStateUser ? (
+        <span className={styles.notSubjectToReviewTag} >
+            {statusText}
+        </span>
+    ) : (
         <InfoTag color={color} emphasize={emphasize}>
             {statusText}
         </InfoTag>
@@ -159,6 +163,10 @@ const submissionStatusOptions = [
     {
         label: 'Withdrawn',
         value: 'WITHDRAWN',
+    },
+    {
+        label: 'Not subject to review',
+        value: 'NOT_SUBJECT_TO_REVIEW',
     },
 ]
 
