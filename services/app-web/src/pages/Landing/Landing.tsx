@@ -89,7 +89,9 @@ export const Landing = (): React.ReactElement => {
                                 Submit your managed care health plans to CMS for
                                 review
                             </h2>
-                            <h4>MC-Review accepts</h4>
+                            <h4 className="margin-bottom-0">
+                                MC-Review accepts
+                            </h4>
 
                             <ol className={styles.detailsList}>
                                 <li>
@@ -139,7 +141,9 @@ export const Landing = (): React.ReactElement => {
                                 </li>
                             </ol>
 
-                            <h4>Not accepted by MC-Review at this time</h4>
+                            <h4 className="margin-bottom-0">
+                                Not accepted by MC-Review at this time
+                            </h4>
                             <ol className={styles.detailsList}>
                                 <li>
                                     Some Medicaid and CHIP managed care health
