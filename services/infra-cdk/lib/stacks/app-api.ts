@@ -289,12 +289,9 @@ export class AppApiStack extends BaseStack {
             environment,
             role,
             layers: [this.otelLayer],
-            bundling: this.createBundling(
-                'otel',
-                [this.getOtelBundlingCommands()],
-                undefined,
-                false
-            ),
+            bundling: this.createBundling('otel', [
+                this.getOtelBundlingCommands(),
+            ]),
         })
 
         this.thirdPartyApiAuthorizerFunction = this.createLambdaFunction(
@@ -329,15 +326,10 @@ export class AppApiStack extends BaseStack {
                 bundling: {
                     format: OutputFormat.ESM,
                     banner: AppApiStack.ESM_BANNER,
-                    ...this.createBundling(
-                        'oauth-token',
-                        [
-                            this.getOtelBundlingCommands(),
-                            this.getPrismaCleanupCommands(),
-                        ],
-                        undefined,
-                        true
-                    ),
+                    ...this.createBundling('oauth-token', [
+                        this.getOtelBundlingCommands(),
+                        this.getPrismaCleanupCommands(),
+                    ]),
                 },
             }
         )
@@ -376,15 +368,10 @@ export class AppApiStack extends BaseStack {
                 },
                 securityGroups,
                 bundling: {
-                    ...this.createBundling(
-                        'migrate-protobuf-data',
-                        [
-                            this.getOtelBundlingCommands(),
-                            this.getPrismaCleanupCommands(),
-                        ],
-                        undefined,
-                        true
-                    ),
+                    ...this.createBundling('migrate-protobuf-data', [
+                        this.getOtelBundlingCommands(),
+                        this.getPrismaCleanupCommands(),
+                    ]),
                 },
             }
         )
@@ -415,14 +402,13 @@ export class AppApiStack extends BaseStack {
                         'migrate',
                         [
                             this.getOtelBundlingCommands(),
-                            this.getPrismaBundlingCommands(),
+                            this.getPrismaSchemaAndMigrationsBundlingCommands(),
                             this.getPrismaCleanupCommands(),
                         ],
                         {
                             '--loader:.graphql': 'text',
                             '--loader:.gql': 'text',
-                        },
-                        true
+                        }
                     ),
                 },
             }
@@ -448,15 +434,10 @@ export class AppApiStack extends BaseStack {
                 bundling: {
                     format: OutputFormat.ESM,
                     banner: AppApiStack.ESM_BANNER,
-                    ...this.createBundling(
-                        'regenerate-zips',
-                        [
-                            this.getOtelBundlingCommands(),
-                            this.getPrismaCleanupCommands(),
-                        ],
-                        undefined,
-                        true
-                    ),
+                    ...this.createBundling('regenerate-zips', [
+                        this.getOtelBundlingCommands(),
+                        this.getPrismaCleanupCommands(),
+                    ]),
                 },
             }
         )
@@ -486,15 +467,10 @@ export class AppApiStack extends BaseStack {
                 bundling: {
                     format: OutputFormat.ESM,
                     banner: AppApiStack.ESM_BANNER,
-                    ...this.createBundling(
-                        'migrate-s3-urls',
-                        [
-                            this.getOtelBundlingCommands(),
-                            this.getPrismaCleanupCommands(),
-                        ],
-                        undefined,
-                        true
-                    ),
+                    ...this.createBundling('migrate-s3-urls', [
+                        this.getOtelBundlingCommands(),
+                        this.getPrismaCleanupCommands(),
+                    ]),
                 },
             }
         )
@@ -557,12 +533,9 @@ export class AppApiStack extends BaseStack {
                 bundling: {
                     format: OutputFormat.ESM,
                     banner: AppApiStack.ESM_BANNER,
-                    ...this.createBundling(
-                        'restore-ia-to-standard',
-                        [this.getOtelBundlingCommands()],
-                        undefined,
-                        false
-                    ),
+                    ...this.createBundling('restore-ia-to-standard', [
+                        this.getOtelBundlingCommands(),
+                    ]),
                 },
             }
         )
@@ -600,8 +573,7 @@ export class AppApiStack extends BaseStack {
                         {
                             '--loader:.graphql': 'text',
                             '--loader:.gql': 'text',
-                        },
-                        true
+                        }
                     ),
                 },
             }
@@ -667,30 +639,37 @@ export class AppApiStack extends BaseStack {
     }
 
     /**
-     * Get Prisma bundling commands for migrate function
-     * Copies Prisma schema and migrations directory
+     * Get Prisma schema and migrations bundling commands for migrate function
+     *
+     * Prisma 7 Note: We only copy schema/migrations directories. The Prisma CLI and
+     * all its dependencies are bundled by esbuild automatically. No manual package
+     * copying needed - Prisma 7's WASM engines are JavaScript modules that esbuild handles.
      */
-    private getPrismaBundlingCommands(): (
+    private getPrismaSchemaAndMigrationsBundlingCommands(): (
         outputDir: string,
         appApiPath: string
     ) => string[] {
         return (outputDir: string, appApiPath: string) => [
-            // Copy Prisma schema and migrations
+            // Copy Prisma schema for migrate deploy command
             `mkdir -p "${outputDir}/prisma" || true`,
             `cp "${appApiPath}/prisma/schema.prisma" "${outputDir}/prisma/schema.prisma" || echo "Prisma schema not found"`,
+
+            // Copy migrations directory for migrate deploy
             `cp -r "${appApiPath}/prisma/migrations" "${outputDir}/prisma/migrations" || echo "Prisma migrations not found"`,
-            // Copy Prisma CLI runtime from pnpm-resolved package tree so all CLI deps are present.
-            `mkdir -p "${outputDir}/node_modules" || true`,
-            `PRISMA_PM_DIR="$(dirname "$(readlink -f "${appApiPath}/node_modules/prisma")")" && cp -RL "\${PRISMA_PM_DIR}/"* "${outputDir}/node_modules/" || echo "Prisma package tree not found"`,
-            `PRISMA_PM_DIR="$(dirname "$(readlink -f "${appApiPath}/node_modules/prisma")")" && PRISMA_DEV_PM_DIR="$(dirname "$(dirname "$(readlink -f "\${PRISMA_PM_DIR}/@prisma/dev")")")" && cp -RL "\${PRISMA_DEV_PM_DIR}/"* "${outputDir}/node_modules/" || echo "Prisma dev dependency tree not found"`,
-            // Copy data migrations (these are TypeScript files that will be bundled but need to be in expected location)
+
+            // Copy data migrations (TypeScript files that will be bundled separately)
             `mkdir -p "${outputDir}/dataMigrations" || true`,
             `cp -r "${appApiPath}/src/dataMigrations/migrations" "${outputDir}/dataMigrations/" || echo "Data migrations not found"`,
+
+            `echo "Copied Prisma schema and migrations for migrate function"`,
         ]
     }
 
     /**
      * Create generic bundling configuration that can compose different bundling steps
+     *
+     * Prisma 7 Note: No special handling needed. esbuild bundles Prisma packages naturally
+     * because the WASM engines are now JavaScript modules, not external binaries.
      */
     private createBundling(
         functionName: string,
@@ -698,18 +677,18 @@ export class AppApiStack extends BaseStack {
             outputDir: string,
             appApiPath: string
         ) => string[])[] = [],
-        esbuildArgs?: Record<string, string>,
-        includePrisma: boolean = false
+        esbuildArgs?: Record<string, string>
     ): BundlingOptions {
         return {
             format: OutputFormat.ESM,
             banner: AppApiStack.ESM_BANNER,
-            // Let esbuild bundle Prisma - it should tree-shake and include WASM files automatically
-            // Note: AWS SDK v3 is included in Node.js 18+ Lambda runtimes
+            // Let esbuild bundle everything including Prisma
+            // Prisma 7 WASM engines (~1.6 MB) are bundled automatically
+            // AWS SDK v3 is included in Node.js 20+ Lambda runtimes
             commandHooks: {
                 beforeBundling(inputDir: string, outputDir: string): string[] {
                     return [
-                        `echo "CDK ${functionName} inputDir: ${inputDir}"`,
+                        `echo "CDK bundling ${functionName} - inputDir: ${inputDir}"`,
                         `find ${inputDir} -name "collector.yml" 2>/dev/null || true`,
                     ]
                 },
@@ -751,12 +730,9 @@ export class AppApiStack extends BaseStack {
                 'handlers',
                 `${handlerFile}.ts`
             ),
-            bundling: this.createBundling(
-                functionName,
-                [this.getOtelBundlingCommands()],
-                undefined,
-                false
-            ),
+            bundling: this.createBundling(functionName, [
+                this.getOtelBundlingCommands(),
+            ]),
             ...options,
         })
     }
