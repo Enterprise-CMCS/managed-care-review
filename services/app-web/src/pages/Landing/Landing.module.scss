@@ -18,6 +18,10 @@ $details-text-line-height: 1.5;
                 padding: uswds.units(1);
                 line-height: $details-text-line-height;
             }
+            ul {
+                list-style-type: disc;
+                padding-left: uswds.units(3);
+            }
         }
         .detailsSteps {
             padding: uswds.units(4);
