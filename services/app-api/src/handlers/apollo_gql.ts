@@ -26,7 +26,11 @@ import {
     newLocalEmailParameterStore,
 } from '../parameterStore'
 import type { LDService } from '../launchDarkly/launchDarkly'
-import { ldService, offlineLDService } from '../launchDarkly/launchDarkly'
+import {
+    ldService,
+    offlineLDService,
+    localLDService,
+} from '../launchDarkly/launchDarkly'
 import type { LDClient } from '@launchdarkly/node-server-sdk'
 import * as ld from '@launchdarkly/node-server-sdk'
 import { ApolloServerPluginLandingPageDisabled } from '@apollo/server/plugin/disabled'
@@ -293,24 +297,33 @@ async function initializeGQLHandler(): Promise<Handler> {
     const store = NewPostgresStore(pgResult)
 
     // Configure LaunchDarkly
-    const ldOptions: ld.LDOptions = {
-        streamUri: 'https://stream.launchdarkly.us',
-        baseUri: 'https://app.launchdarkly.us',
-        eventsUri: 'https://events.launchdarkly.us',
-    }
-    ldClient = ld.init(ldSDKKey, ldOptions)
     let launchDarkly: LDService
 
-    // Wait for initialization. On initialization failure default to offlineLDService and close ldClient.
-    try {
-        await ldClient.waitForInitialization({ timeout: 10 })
-        launchDarkly = ldService(ldClient)
-    } catch (err) {
-        console.error(
-            `LaunchDarkly Error: ${err.message} Falling back to LaunchDarkly offline service.`
-        )
-        ldClient.close()
-        launchDarkly = offlineLDService()
+    if (authMode === 'LOCAL') {
+        // Configure for local LD service if configured. Visit the UI using http://localhost:3031/
+        const launchDarklyLocalHost = process.env.LOCAL_LD_SERVICE_URL
+        launchDarkly = launchDarklyLocalHost
+            ? localLDService(launchDarklyLocalHost)
+            : offlineLDService()
+    } else {
+        const ldOptions: ld.LDOptions = {
+            streamUri: 'https://stream.launchdarkly.us',
+            baseUri: 'https://app.launchdarkly.us',
+            eventsUri: 'https://events.launchdarkly.us',
+        }
+        ldClient = ld.init(ldSDKKey, ldOptions)
+
+        // Wait for initialization. On initialization failure default to offlineLDService and close ldClient.
+        try {
+            await ldClient.waitForInitialization({ timeout: 10 })
+            launchDarkly = ldService(ldClient)
+        } catch (err) {
+            console.error(
+                `LaunchDarkly Error: ${err.message} Falling back to LaunchDarkly offline service.`
+            )
+            ldClient.close()
+            launchDarkly = offlineLDService()
+        }
     }
 
     // Configure Apollo sandbox plugin
@@ -362,7 +375,7 @@ async function initializeGQLHandler(): Promise<Handler> {
     const documentZip = documentZipService(store, generateDocZip)
 
     // Print out all the variables we've been configured with. Leave sensitive ones out, please.
-    console.info('Running With Config: ', {
+    const config = {
         authMode,
         stageName,
         dbURL,
@@ -371,7 +384,15 @@ async function initializeGQLHandler(): Promise<Handler> {
         emailerMode,
         otelCollectorUrl,
         parameterStoreMode,
-    })
+    }
+
+    if (authMode === 'LOCAL') {
+        Object.assign(config, {
+            localLDServiceUrl: process.env.LOCAL_LD_SERVICE_URL,
+        })
+    }
+
+    console.info('Running With Config: ', config)
 
     // Resolvers are defined and tested in the resolvers package
     const resolvers = configureResolvers(
