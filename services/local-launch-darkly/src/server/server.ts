@@ -2,6 +2,7 @@ import express from 'express'
 import { join } from 'path'
 import * as flagStore from './flagStore.js'
 import type { Response } from 'express'
+import rateLimit from 'express-rate-limit'
 
 const sseClients = new Set<Response>()
 const ldStreamClients = new Set<Response>()
@@ -154,7 +155,11 @@ app.get('/sdk/latest-all', (_req, res) => {
 
 const distDir = join(import.meta.dirname, '..', '..', 'dist')
 app.use(express.static(distDir))
-app.get('*', (_req, res) => {
+const indexRateLimiter = rateLimit({
+    windowMs: 15 * 60 * 1000, // 15 minutes
+    max: 100, // limit each IP to 100 index requests per windowMs
+})
+app.get('*', indexRateLimiter, (_req, res) => {
     res.sendFile(join(distDir, 'index.html'))
 })
 
