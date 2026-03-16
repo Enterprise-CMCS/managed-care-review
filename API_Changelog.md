@@ -1,6 +1,20 @@
 # Managed Care Review - API Changelog
 ## This document highlights API changes that have been introduced since May 2025
 
+### March 16, 2026
+#### Added
+- New mutation `reverseApproveContract` added to the API
+    - Reverses a previously approved contract. CMS users only.
+    - Parameters (via `ReverseApproveContractInput`)
+        - `contractID`: required ID, the ID of the contract to reverse approval for
+        - `updatedReason`: required String, the reason for reversing the approval
+    - Returns `ReverseApproveContractPayload`
+        - `contract`: Contract
+    - Errors
+        - `ForbiddenError`: A non-CMS user called this
+        - `UserInputError`: The contract is not in an approved status, or the latest review action is not `MARK_AS_APPROVED`
+        - `INTERNAL_SERVER_ERROR`: DB_ERROR — a contract cannot be found by id
+
 ### March 12, 2026
 #### Added
 - New endpoint `generateUploadURL` added to the API
