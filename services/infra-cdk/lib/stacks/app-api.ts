@@ -376,7 +376,27 @@ export class AppApiStack extends BaseStack {
             }
         )
 
-        // Create migrate function with VPC and layers
+        /**
+         * Create migrate function with special Prisma CLI handling
+         *
+         * TWO-TIER PRISMA BUNDLING STRATEGY:
+         *
+         * 1. Runtime functions (GraphQL, OAuth, etc.):
+         *    - Import Prisma Client as code: `import { PrismaClient } from '../generated/client'`
+         *    - esbuild bundles @prisma/client into handler code (~1.6 MB with WASM)
+         *    - No node_modules needed ✅
+         *
+         * 2. Migrate function (this one):
+         *    - Spawns Prisma CLI: `spawnSync(node, ['./node_modules/prisma/build/index.js', 'migrate', 'deploy'])`
+         *    - Needs actual `prisma` package at node_modules/prisma/build/index.js
+         *    - Uses nodeModules: ['prisma'] to copy CLI package instead of bundling it
+         *    - Prisma 7 CLI is ~5-8 MB (much smaller than v5's ~40 MB with Rust binaries) ✅
+         *
+         * Size implications:
+         * - Other functions: ~8-12 MB (bundled Prisma Client + app code)
+         * - Migrate function: ~10-15 MB (bundled handler + prisma CLI in node_modules + schema/migrations)
+         * - Well within Lambda limits (250 MB unzipped, 50 MB zipped)
+         */
         this.migrateFunction = this.createLambdaFunction(
             'migrate',
             'postgres_migrate',
@@ -398,6 +418,8 @@ export class AppApiStack extends BaseStack {
                 bundling: {
                     format: OutputFormat.ESM,
                     banner: AppApiStack.ESM_BANNER,
+                    // CRITICAL: Keep prisma CLI as node module (not bundled) so it can be executed via spawnSync
+                    nodeModules: ['prisma'],
                     ...this.createBundling(
                         'migrate',
                         [
@@ -625,6 +647,10 @@ export class AppApiStack extends BaseStack {
     /**
      * Cleanup unnecessary Prisma WASM engines
      * Prisma 7 includes WASM for all databases (~60MB), we only need PostgreSQL (~5MB)
+     *
+     * This cleanup applies to:
+     * - Bundled Prisma Client code (GraphQL, OAuth, etc.)
+     * - node_modules/prisma for migrate lambda
      */
     private getPrismaCleanupCommands(): (
         outputDir: string,
@@ -633,8 +659,11 @@ export class AppApiStack extends BaseStack {
         return (outputDir: string) => [
             // Remove WASM files for databases we don't use (MySQL, SQLite, SQL Server, CockroachDB)
             // Keep only PostgreSQL WASM files
+            // This searches both bundled code and node_modules
             `find "${outputDir}" -type f \\( -name "*mysql*.wasm*" -o -name "*sqlite*.wasm*" -o -name "*sqlserver*.wasm*" -o -name "*cockroachdb*.wasm*" \\) -delete || true`,
-            `echo "Cleaned up non-PostgreSQL WASM engines"`,
+            `echo "Cleaned up non-PostgreSQL WASM engines from ${outputDir}"`,
+            // Log the size of node_modules if it exists (for migrate lambda)
+            `if [ -d "${outputDir}/node_modules" ]; then du -sh "${outputDir}/node_modules" | sed 's/^/node_modules size: /'; fi || true`,
         ]
     }
 
