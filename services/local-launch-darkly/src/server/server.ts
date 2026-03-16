@@ -176,10 +176,12 @@ const server = app.listen(PORT, HOST, () => {
     console.info(`Loaded ${Object.keys(flagStore.getAll()).length} flags`)
 })
 
-// Shut down cleanly on SIGTERM so nodemon restarts don't leave zombie processes
-process.on('SIGTERM', () => {
-    console.info('SIGTERM received, closing server...')
+// Shut down cleanly so restarts don't leave zombie processes
+function shutdown() {
     for (const res of sseClients) res.end()
     for (const res of ldStreamClients) res.end()
     server.close(() => process.exit(0))
-})
+}
+
+process.on('SIGTERM', shutdown)
+process.on('SIGINT', shutdown)
