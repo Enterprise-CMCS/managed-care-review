@@ -50,8 +50,8 @@ const main: Handler = async (): Promise<APIGatewayProxyResultV2> => {
 
     const dbConnectionURL: string = dbConnResult
 
-    // take a snapshot of the DB before running data migration.
-    // don't take a snapshot if we're in a PR branch
+    // Take a snapshot of the DB before applying Prisma schema migrations (prisma migrate deploy).
+    // Don't take snapshots for PR branches (temporary review environments).
     if (['dev', 'val', 'prod', 'main'].includes(stage)) {
         const dbClusterId = await getDBClusterID(secretsManagerSecret)
         if (dbClusterId instanceof Error) {

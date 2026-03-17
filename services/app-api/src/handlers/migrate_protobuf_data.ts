@@ -92,9 +92,9 @@ const main: Handler = async (): Promise<APIGatewayProxyResultV2> => {
         recordException(errMsg, serviceName, 'migration')
         console.error(errMsg)
         return fmtError(errMsg)
-    } finally {
-        await prisma.$disconnect()
     }
+    // NOTE: Don't call $disconnect() - we use a singleton pattern to reuse connections
+    // across warm Lambda invocations. AWS cleans up when the container terminates.
 }
 
 const FIRST_NAMES = [

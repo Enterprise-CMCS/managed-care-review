@@ -13,8 +13,9 @@ const errorMessages = {
  * Overrides delete and create operations on `applicationSettings` and `emailSettings`
  * models to throw custom error messages.
  *
- * @param {Prisma.PrismaClientOptions} optionArgs - PrismaClient configuration options.
- * @returns {PrismaClient} A new PrismaClient instance with extended behavior.
+ * @param optionArgs - Prisma adapter configuration with PrismaPg adapter
+ * @param optionArgs.adapter - PrismaPg adapter instance with pg.Pool
+ * @returns Extended PrismaClient instance with custom query behaviors
  */
 function extendedPrismaClient(optionArgs: { adapter: PrismaPg }) {
     return new PrismaClient(optionArgs).$extends({
@@ -114,17 +115,17 @@ async function NewPrismaClient(
 
 /**
  * Disconnects and clears all cached Prisma clients
+ * Primarily used in tests to ensure clean state between test runs
  */
 async function disconnectAllPrismaClients(): Promise<void> {
     console.info(
         `Disconnecting ${prismaClientCache.size} cached Prisma client(s)`
     )
-    for (const [url, client] of prismaClientCache.entries()) {
+    for (const client of prismaClientCache.values()) {
         try {
             await client.$disconnect()
-            console.info(
-                `Disconnected Prisma client for: ${url.substring(0, 20)}...`
-            )
+            // Avoid logging connection URL that may contain credentials
+            console.info('Disconnected Prisma client')
         } catch (err) {
             console.error('Error disconnecting Prisma client:', err)
         }

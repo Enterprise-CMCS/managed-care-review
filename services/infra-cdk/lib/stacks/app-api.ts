@@ -672,7 +672,8 @@ export class AppApiStack extends BaseStack {
     /**
      * Get Prisma schema and migrations bundling commands for migrate function
      *
-     * We copy the config and recreate the directory structure it expects
+     * Copies the repo's prisma.config.ts and recreates the directory structure it expects.
+     * Only includes schema migrations - protobuf data migrations have been removed.
      */
     private getPrismaSchemaAndMigrationsBundlingCommands(): (
         outputDir: string,
@@ -691,10 +692,6 @@ export class AppApiStack extends BaseStack {
 
             // Copy migrations directory to match config's path
             `cp -r "${appApiPath}/prisma/migrations" "${outputDir}/services/app-api/prisma/migrations" || echo "Prisma migrations not found"`,
-
-            // Copy data migrations (TypeScript files that will be bundled separately)
-            `mkdir -p "${outputDir}/dataMigrations" || true`,
-            `cp -r "${appApiPath}/src/dataMigrations/migrations" "${outputDir}/dataMigrations/" || echo "Data migrations not found"`,
 
             `echo "Copied Prisma config, schema, and migrations using repo structure"`,
         ]
