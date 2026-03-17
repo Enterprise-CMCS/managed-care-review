@@ -89,52 +89,80 @@ export const Landing = (): React.ReactElement => {
                                 Submit your managed care health plans to CMS for
                                 review
                             </h2>
-                            <p className="line-height-sans-4 measure-6">
-                                You can use MC-Review to submit Medicaid and
-                                CHIP managed care health plan contracts and
-                                rates to CMS. This portal accepts:
-                            </p>
-                            <ul className={styles.detailsList}>
-                                <li>
-                                    Base contracts and amendments to base
-                                    contracts
-                                </li>
-                                <li>Rate certifications and rate amendments</li>
-                                <li>
-                                    Contracts related to Dual Eligible Special
-                                    Needs Plans (D-SNPs) with Medicaid-covered
-                                    benefits
-                                </li>
-                                <li>
-                                    <LinkWithLogging
-                                        aria-label="Required supporting documents"
-                                        href={'/help#key-documents'}
-                                    >
-                                        Required supporting documents
-                                    </LinkWithLogging>{' '}
-                                    related to the above
-                                </li>
-                            </ul>
+                            <h4 className="margin-bottom-0">
+                                MC-Review accepts
+                            </h4>
 
-                            <h3>Not accepted by MC-Review at this time:</h3>
-                            <ul className={styles.detailsList}>
-                                <li>State directed preprints</li>
+                            <ol className={styles.detailsList}>
                                 <li>
-                                    Contracts without Medicaid-covered benefits
+                                    Medicaid and CHIP managed care health plan
+                                    submissions, including
+                                    <ul>
+                                        <li>
+                                            Base contracts and amendments to
+                                            base contracts
+                                        </li>
+                                        <li>
+                                            Rate certifications and rate
+                                            amendments
+                                        </li>
+                                        <li>
+                                            Contracts related to Dual Eligible
+                                            Special Needs Plans (D-SNPs) with
+                                            Medicaid-covered benefits
+                                        </li>
+                                        <li>
+                                            <LinkWithLogging
+                                                aria-label="Required supporting documents"
+                                                href={'/help#key-documents'}
+                                            >
+                                                Required supporting documents
+                                            </LinkWithLogging>
+                                        </li>
+                                    </ul>
                                 </li>
                                 <li>
-                                    Some submissions related to programs for
-                                    dual-eligible beneficiaries, such as
-                                    Programs of All-Inclusive Care for the
-                                    Elderly (PACE), and dual demonstration
-                                    contracts
+                                    External Quality Review Organization (EQRO)
+                                    submissions, including
+                                    <ul>
+                                        <li>
+                                            Base contracts and amendments to
+                                            base contracts
+                                        </li>
+                                        <li>
+                                            <LinkWithLogging
+                                                aria-label="Required supporting documents"
+                                                href={'/help#key-documents'}
+                                            >
+                                                Supporting documents
+                                            </LinkWithLogging>
+                                        </li>
+                                    </ul>
                                 </li>
+                            </ol>
+
+                            <h4 className="margin-bottom-0">
+                                Not accepted by MC-Review at this time
+                            </h4>
+                            <ol className={styles.detailsList}>
                                 <li>
-                                    Non-health plan submissions such as External
-                                    Quality Review Organization (EQRO) or
-                                    enrollment broker
+                                    Some Medicaid and CHIP managed care health
+                                    plan submissions, including
+                                    <ul>
+                                        <li>
+                                            Contracts without Medicaid-covered
+                                            benefits
+                                        </li>
+                                        <li>
+                                            Programs of All-Inclusive Care for
+                                            the Elderly (PACE), and dual
+                                            demonstration contracts
+                                        </li>
+                                    </ul>
                                 </li>
-                            </ul>
+                                <li>Enrollment Broker (EB) submissions</li>
+                                <li>State Directed Preprints (SDP)</li>
+                            </ol>
                         </Grid>
                     </Grid>
                 </GridContainer>
