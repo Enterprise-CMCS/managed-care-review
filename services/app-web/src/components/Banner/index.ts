@@ -2,6 +2,7 @@ export { SubmissionUnlockedBanner } from './SubmissionUnlockedBanner/SubmissionU
 export { PreviousSubmissionBanner } from './PreviousSubmissionBanner/PreviousSubmissionBanner'
 export { SubmissionUpdatedBanner } from './SubmissionUpdatedBanner/SubmissionUpdatedBanner'
 export { SubmissionWithdrawnBanner } from './SubmissionWithdrawnBanner/SubmissionWithdrawnBanner'
+export { EqroReviewDeterminationBanners } from './EQROSummaryBanner/eqroSummaryBanners'
 export { StatusUpdatedBanner } from './StatusUpdatedBanner/StatusUpdatedBanner'
 export { GenericApiErrorBanner } from './GenericApiErrorBanner/GenericApiErrorBanner'
 export { QuestionResponseSubmitBanner } from './QuestionResponseSubmitBanner'
