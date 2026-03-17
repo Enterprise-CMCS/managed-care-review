@@ -71,7 +71,7 @@ const fillOutIndexRate = async (screen: Screen, index: number) => {
 
     const startDateInputs = withinTargetRateCert.getAllByLabelText('Start date')
     const endDateInputs = withinTargetRateCert.getAllByLabelText('End date')
-    await updateDateRange({
+    updateDateRange({
         start: { elements: startDateInputs, date: '01/01/2022' },
         end: { elements: endDateInputs, date: '12/31/2022' },
     })

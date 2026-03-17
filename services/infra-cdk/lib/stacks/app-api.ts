@@ -658,7 +658,7 @@ export class AppApiStack extends BaseStack {
         outputDir: string,
         appApiPath: string
     ) => string[] {
-        return (outputDir: string) => [
+        return (outputDir: string, _appApiPath: string) => [
             // Remove WASM files for databases we don't use (MySQL, SQLite, SQL Server, CockroachDB)
             // Keep only PostgreSQL WASM files
             // This searches both bundled code and node_modules
@@ -680,20 +680,22 @@ export class AppApiStack extends BaseStack {
         appApiPath: string
     ) => string[] {
         return (outputDir: string, appApiPath: string) => [
-            // Copy the root prisma.config.ts (it has paths like './services/app-api/prisma/...')
-            `cp "${appApiPath}/../../prisma.config.ts" "${outputDir}/prisma.config.ts" || echo "prisma.config.ts not found"`,
+            // Validate required files exist before copying
+            `test -f "${appApiPath}/../../prisma.config.ts" || { echo "ERROR: prisma.config.ts not found"; exit 1; }`,
+            `test -f "${appApiPath}/prisma/schema.prisma" || { echo "ERROR: schema.prisma not found"; exit 1; }`,
+            `test -d "${appApiPath}/prisma/migrations" || { echo "ERROR: migrations directory not found"; exit 1; }`,
 
-            // Recreate the directory structure that the config expects
-            // Config has: schema: './services/app-api/prisma/schema.prisma'
-            `mkdir -p "${outputDir}/services/app-api/prisma" || true`,
+            // Create directory structure
+            `mkdir -p "${outputDir}/services/app-api/prisma"`,
 
-            // Copy schema to match config's path
-            `cp "${appApiPath}/prisma/schema.prisma" "${outputDir}/services/app-api/prisma/schema.prisma" || echo "Prisma schema not found"`,
+            // Copy Prisma config from repo root
+            `cp "${appApiPath}/../../prisma.config.ts" "${outputDir}/prisma.config.ts"`,
 
-            // Copy migrations directory to match config's path
-            `cp -r "${appApiPath}/prisma/migrations" "${outputDir}/services/app-api/prisma/migrations" || echo "Prisma migrations not found"`,
+            // Copy schema and migrations to match config's expected paths
+            `cp "${appApiPath}/prisma/schema.prisma" "${outputDir}/services/app-api/prisma/schema.prisma"`,
+            `cp -r "${appApiPath}/prisma/migrations" "${outputDir}/services/app-api/prisma/migrations"`,
 
-            `echo "Copied Prisma config, schema, and migrations using repo structure"`,
+            `echo "Successfully copied Prisma config, schema, and migrations"`,
         ]
     }
 

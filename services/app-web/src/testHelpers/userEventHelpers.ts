@@ -6,7 +6,7 @@ type UpdateDateRangeType = {
     start: { elements: HTMLElement[]; date: string }
     end: { elements: HTMLElement[]; date: string }
 }
-const updateDateRange = async ({ start, end }: UpdateDateRangeType) => {
+const updateDateRange = ({ start, end }: UpdateDateRangeType) => {
     const { elements: startElements, date: startDate } = start
     const { elements: endElements, date: endDate } = end
 
