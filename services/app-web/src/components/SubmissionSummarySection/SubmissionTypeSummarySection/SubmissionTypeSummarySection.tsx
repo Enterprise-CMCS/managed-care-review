@@ -60,22 +60,31 @@ export const SubmissionTypeSummarySection = ({
     const isSubmitted =
         contract.status === 'SUBMITTED' || contract.status === 'RESUBMITTED'
     const isUnlocked = contract.status === 'UNLOCKED'
+    const isEQRO = contract.contractSubmissionType === 'EQRO'
 
     return (
         <SectionCard
             id="submissionTypeSection"
             className={styles.summarySection}
         >
-            <SectionHeader
-                header={submissionName}
-                subHeaderComponent={subHeaderComponent}
-                editNavigateTo={editNavigateTo}
-                headerId={'submissionName'}
-                hideBorderTop
-                fontSize="38px"
-            >
-                {headerChildComponent && headerChildComponent}
-            </SectionHeader>
+            {!isEQRO ? (
+                <SectionHeader
+                    header={submissionName}
+                    subHeaderComponent={subHeaderComponent}
+                    editNavigateTo={editNavigateTo}
+                    headerId={'submissionName'}
+                    hideBorderTop
+                    fontSize="38px"
+                >
+                    {headerChildComponent && headerChildComponent}
+                </SectionHeader>
+            ) : (
+                <SectionHeader
+                    header="Submission details"
+                    hideBorderTop
+                    fontSize="36px"
+                />
+            )}
             <dl>
                 {initiallySubmittedAt &&
                     (isSubmitted || (!isStateUser && isUnlocked)) && (
