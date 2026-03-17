@@ -59,15 +59,8 @@
 }
 
 .notSubjectToReviewTag {
-    background-color: custom.$mcr-foundation-hint;
-    color: white;
     display: inline-block;
     text-align: center;
-    padding: 2px 8px;
-    border-radius: 2px;
-    font-size: 0.85rem;
-    font-weight: bold;
     line-height: 1.4;
     width: 7rem;
-    text-transform: uppercase;
 }
