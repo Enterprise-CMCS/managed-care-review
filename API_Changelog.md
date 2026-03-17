@@ -11,7 +11,7 @@
     - Returns `ReverseApproveContractPayload`
         - `contract`: Contract
     - Errors
-        - `ForbiddenError`: A non-CMS user called this
+        - `ForbiddenError`: A non-CMS or non-Admin user called this
         - `UserInputError`: The contract is not in an approved status, or the latest review action is not `MARK_AS_APPROVED`
         - `INTERNAL_SERVER_ERROR`: DB_ERROR — a contract cannot be found by id
 
