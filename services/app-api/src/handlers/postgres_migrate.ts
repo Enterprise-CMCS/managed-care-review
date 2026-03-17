@@ -108,16 +108,10 @@ const main: Handler = async (): Promise<APIGatewayProxyResultV2> => {
                 },
             }
         )
-        console.info(
-            'stderror',
-            prismaResult.stderr && prismaResult.stderr.toString()
-        )
-        console.info(
-            'stdout',
-            prismaResult.stdout && prismaResult.stdout.toString()
-        )
+        console.info('stderr', prismaResult.stderr?.toString() ?? 'no stderr')
+        console.info('stdout', prismaResult.stdout?.toString() ?? 'no stdout')
         if (prismaResult.status !== 0) {
-            const errMsg = `Could not run prisma migrate deploy: ${prismaResult.stderr.toString()}`
+            const errMsg = `Could not run prisma migrate deploy: ${prismaResult.stderr?.toString() ?? prismaResult.error?.message ?? 'unknown error'}`
             recordException(errMsg, serviceName, 'prisma migrate deploy')
             return fmtMigrateError(errMsg)
         }
