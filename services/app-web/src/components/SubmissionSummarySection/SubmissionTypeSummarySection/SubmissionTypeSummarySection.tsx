@@ -4,7 +4,10 @@ import {
     SectionHeader,
     SectionCard,
 } from '../../../components'
-import { getVisibleLatestContractFormData } from '@mc-review/submissions'
+import {
+    eqroValidationAndReviewDetermination,
+    getVisibleLatestContractFormData,
+} from '@mc-review/submissions'
 import { GenericErrorPage } from '../../../pages/Errors/GenericErrorPage'
 import {
     Contract,
@@ -16,6 +19,7 @@ import {
     ContractProgramsSummary,
     ContractTypeSummary,
     PopulationCoverageSummary,
+    ReviewDecision,
     RiskBasedContractSummary,
     SubmissionDescriptionSummary,
     SubmissionTypeSummary,
@@ -61,6 +65,12 @@ export const SubmissionTypeSummarySection = ({
         contract.status === 'SUBMITTED' || contract.status === 'RESUBMITTED'
     const isUnlocked = contract.status === 'UNLOCKED'
     const isEQRO = contract.contractSubmissionType === 'EQRO'
+    const isSubjectToReview =
+        isEQRO &&
+        eqroValidationAndReviewDetermination(
+            contract.id,
+            contract.packageSubmissions[0].contractRevision.formData
+        ) === true
 
     return (
         <SectionCard
@@ -86,6 +96,9 @@ export const SubmissionTypeSummarySection = ({
                 />
             )}
             <dl>
+                {isEQRO && (
+                    <ReviewDecision subjectToReview={isSubjectToReview} />
+                )}
                 {initiallySubmittedAt &&
                     (isSubmitted || (!isStateUser && isUnlocked)) && (
                         <SubmittedAtSummary

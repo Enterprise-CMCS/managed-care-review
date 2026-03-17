@@ -209,6 +209,7 @@ export const EQROSubmissionSummary = (): React.ReactElement => {
             </InfoTag>
         )
     }
+
     return (
         <div className={styles.background} id={activeMainContentId}>
             <GridContainer
@@ -227,7 +228,6 @@ export const EQROSubmissionSummary = (): React.ReactElement => {
                     />
                 )}
 
-                {/* WORK GOES HERE */}
                 {isEQRO && (
                     <>
                         <StatusTag
@@ -236,7 +236,7 @@ export const EQROSubmissionSummary = (): React.ReactElement => {
                         />
                         <h1 className={styles.eqroSummaryNameHeader}>{name}</h1>
                         <EqroSummaryBanner
-                            className={styles.banner}
+                            className={styles.eqroBanner}
                             subjectToReview={isSubjectToReview}
                             stateUser={isStateUser}
                         />
