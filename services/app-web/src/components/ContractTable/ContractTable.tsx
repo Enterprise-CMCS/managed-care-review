@@ -125,12 +125,16 @@ const StatusTag = ({
           ? SubmissionReviewStatusRecord[status]
           : SubmissionStatusRecord[status]
 
-    return isNotSubjectToReview && notStateUser ? (
-        <span className={styles.notSubjectToReviewTag} >
-            {statusText}
-        </span>
-    ) : (
-        <InfoTag color={color} emphasize={emphasize}>
+    return (
+        <InfoTag
+            color={color}
+            emphasize={emphasize}
+            className={
+                isNotSubjectToReview && notStateUser
+                    ? styles.notSubjectToReviewTag
+                    : undefined
+            }
+        >
             {statusText}
         </InfoTag>
     )
