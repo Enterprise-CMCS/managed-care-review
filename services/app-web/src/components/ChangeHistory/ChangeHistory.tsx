@@ -24,7 +24,12 @@ type ChangeHistoryProps = {
 }
 
 type flatRevisions = Omit<UpdateInformation, 'updatedBy'> & {
-    kind: 'submit' | 'unlock' | 'approve' | 'withdraw'
+    kind:
+        | 'submit'
+        | 'unlock'
+        | 'review_update_approve'
+        | 'review_update_withdraw'
+        | 'review_update_submitted'
     revisionVersion: string | undefined
     updatedBy?: UpdateInformation['updatedBy']
 }
@@ -52,8 +57,10 @@ const buildChangeHistoryInfo = (
     const isInitialSubmission = r.updatedReason === 'Initial submission'
     const isSubsequentSubmissionOrUnlock =
         r.kind === 'submit' || r.kind === 'unlock'
-    const isApprovalAction = r.kind === 'approve'
-    const isWithdrawAction = r.kind === 'withdraw'
+    const isReviewUpdate =
+        r.kind === 'review_update_submitted' ||
+        r.kind === 'review_update_withdraw' ||
+        r.kind === 'review_update_approve'
     // We want to know if this contract has multiple submissions. To have multiple submissions, there must be minimum
     // more than the initial contract revision.
     const hasSubsequentSubmissions = revisionHistory.length > 1
@@ -112,13 +119,19 @@ const buildChangeHistoryInfo = (
                     )}
             </div>
         )
-    } else if (isApprovalAction || isWithdrawAction) {
+    } else if (isReviewUpdate) {
         title = 'Status Update'
+        const status = () => {
+            if (r.kind === 'review_update_submitted') return 'Submitted'
+            if (r.kind === 'review_update_approve') return 'Approved'
+            if (r.kind === 'review_update_withdraw') return 'Withdrawn'
+            return 'Unknown status'
+        }
         content = (
             <div data-testid={`change-history-record`}>
                 <div>
                     <span className={styles.tag}>{`Status: `}</span>
-                    <span>{isWithdrawAction ? 'Withdrawn' : 'Approved'}</span>
+                    <span>{status()}</span>
                 </div>
                 <div>
                     <span className={styles.tag}>Updated by:</span>
@@ -208,10 +221,15 @@ export const ChangeHistory = ({
                     }
                 }
                 if (r?.__typename === 'ContractReviewStatusActions') {
-                    let actionKind: flatRevisions['kind'] = 'approve'
+                    let actionKind: flatRevisions['kind'] =
+                        'review_update_submitted'
 
                     if (r.actionType === 'WITHDRAW') {
-                        actionKind = 'withdraw'
+                        actionKind = 'review_update_withdraw'
+                    }
+
+                    if (r.actionType === 'MARK_AS_APPROVED') {
+                        actionKind = 'review_update_approve'
                     }
 
                     const newAction: flatRevisions = {} as flatRevisions
