@@ -1,9 +1,14 @@
 import { render, screen } from '@testing-library/react'
-import { EqroSummaryBanner } from './eqroSummaryBanner'
+import { EqroReviewDeterminationBanners } from './eqroSummaryBanners'
 
-describe('EqroSummaryBanner', () => {
+describe('EqroSummaryBanners', () => {
     it('renders subject to review banner for state user', () => {
-        render(<EqroSummaryBanner subjectToReview={true} stateUser={true} />)
+        render(
+            <EqroReviewDeterminationBanners
+                subjectToReview={true}
+                stateUser={true}
+            />
+        )
 
         expect(screen.getByText('Subject to review')).toBeInTheDocument()
         expect(
@@ -15,7 +20,12 @@ describe('EqroSummaryBanner', () => {
     })
 
     it('renders not subject to review banner for state user', () => {
-        render(<EqroSummaryBanner subjectToReview={false} stateUser={true} />)
+        render(
+            <EqroReviewDeterminationBanners
+                subjectToReview={false}
+                stateUser={true}
+            />
+        )
 
         expect(screen.getByText('Not subject to review')).toBeInTheDocument()
         expect(
@@ -29,7 +39,12 @@ describe('EqroSummaryBanner', () => {
     })
 
     it('renders subject to review banner for CMS user', () => {
-        render(<EqroSummaryBanner subjectToReview={true} stateUser={false} />)
+        render(
+            <EqroReviewDeterminationBanners
+                subjectToReview={true}
+                stateUser={false}
+            />
+        )
 
         expect(screen.getByText('Subject to review')).toBeInTheDocument()
         expect(
@@ -44,7 +59,12 @@ describe('EqroSummaryBanner', () => {
     })
 
     it('renders not subject to review banner for CMS user', () => {
-        render(<EqroSummaryBanner subjectToReview={false} stateUser={false} />)
+        render(
+            <EqroReviewDeterminationBanners
+                subjectToReview={false}
+                stateUser={false}
+            />
+        )
 
         expect(screen.getByText('Not subject to review')).toBeInTheDocument()
         expect(

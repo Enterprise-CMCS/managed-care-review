@@ -4,10 +4,7 @@ import {
     SectionHeader,
     SectionCard,
 } from '../../../components'
-import {
-    eqroValidationAndReviewDetermination,
-    getVisibleLatestContractFormData,
-} from '@mc-review/submissions'
+import { getVisibleLatestContractFormData } from '@mc-review/submissions'
 import { GenericErrorPage } from '../../../pages/Errors/GenericErrorPage'
 import {
     Contract,
@@ -19,7 +16,6 @@ import {
     ContractProgramsSummary,
     ContractTypeSummary,
     PopulationCoverageSummary,
-    ReviewDecision,
     RiskBasedContractSummary,
     SubmissionDescriptionSummary,
     SubmissionTypeSummary,
@@ -64,41 +60,23 @@ export const SubmissionTypeSummarySection = ({
     const isSubmitted =
         contract.status === 'SUBMITTED' || contract.status === 'RESUBMITTED'
     const isUnlocked = contract.status === 'UNLOCKED'
-    const isEQRO = contract.contractSubmissionType === 'EQRO'
-    const isSubjectToReview =
-        isEQRO &&
-        eqroValidationAndReviewDetermination(
-            contract.id,
-            contract.packageSubmissions[0].contractRevision.formData
-        ) === true
 
     return (
         <SectionCard
             id="submissionTypeSection"
             className={styles.summarySection}
         >
-            {!isEQRO ? (
-                <SectionHeader
-                    header={submissionName}
-                    subHeaderComponent={subHeaderComponent}
-                    editNavigateTo={editNavigateTo}
-                    headerId={'submissionName'}
-                    hideBorderTop
-                    fontSize="38px"
-                >
-                    {headerChildComponent && headerChildComponent}
-                </SectionHeader>
-            ) : (
-                <SectionHeader
-                    header="Submission details"
-                    hideBorderTop
-                    fontSize="36px"
-                />
-            )}
+            <SectionHeader
+                header={submissionName}
+                subHeaderComponent={subHeaderComponent}
+                editNavigateTo={editNavigateTo}
+                headerId={'submissionName'}
+                hideBorderTop
+                fontSize="38px"
+            >
+                {headerChildComponent && headerChildComponent}
+            </SectionHeader>
             <dl>
-                {isEQRO && (
-                    <ReviewDecision subjectToReview={isSubjectToReview} />
-                )}
                 {initiallySubmittedAt &&
                     (isSubmitted || (!isStateUser && isUnlocked)) && (
                         <SubmittedAtSummary

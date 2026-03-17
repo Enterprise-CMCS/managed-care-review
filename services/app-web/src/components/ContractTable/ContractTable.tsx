@@ -89,7 +89,7 @@ function submissionURL(
     return getSubmissionPath('SUBMISSIONS_SUMMARY', contractSubmissionType, id)
 }
 
-const StatusTag = ({
+export const StatusTag = ({
     status,
     notStateUser,
 }: {

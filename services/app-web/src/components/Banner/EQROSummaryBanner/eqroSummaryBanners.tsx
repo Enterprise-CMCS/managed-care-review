@@ -1,8 +1,10 @@
 import React from 'react'
 import styles from '../Banner.module.scss'
 import { AccessibleAlertBanner } from '../AccessibleAlertBanner/AccessibleAlertBanner'
+import { ExpandableText } from '../../ExpandableText'
 
-interface EqroSummaryBannerProps extends React.HTMLAttributes<HTMLDivElement> {
+interface EqroSummaryBannerProps {
+    className?: string
     subjectToReview: boolean
     stateUser: boolean
 }
@@ -86,7 +88,7 @@ const CMSReviewBanner = ({
     )
 }
 
-export const EqroSummaryBanner = ({
+export const EqroReviewDeterminationBanners = ({
     className,
     subjectToReview,
     stateUser,
@@ -102,15 +104,17 @@ export const EqroSummaryBanner = ({
             data-testid="eqroSummaryBanner"
             className={className}
         >
-            {stateUser ? (
-                subjectToReview ? (
-                    <StateSubjectToReviewText />
+            <ExpandableText>
+                {stateUser ? (
+                    subjectToReview ? (
+                        <StateSubjectToReviewText />
+                    ) : (
+                        <StateNotSubjectToReviewText />
+                    )
                 ) : (
-                    <StateNotSubjectToReviewText />
-                )
-            ) : (
-                <CMSReviewBanner subjectToReview={subjectToReview} />
-            )}
+                    <CMSReviewBanner subjectToReview={subjectToReview} />
+                )}
+            </ExpandableText>
         </AccessibleAlertBanner>
     )
 }
