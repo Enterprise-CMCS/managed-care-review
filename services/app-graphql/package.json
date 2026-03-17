@@ -16,7 +16,7 @@
         "@graphql-codegen/typescript": "^5.0.8",
         "@graphql-codegen/typescript-operations": "^4.2.1",
         "@graphql-codegen/typescript-react-apollo": "^4.4.0",
-        "@graphql-codegen/typescript-resolvers": "^5.1.6",
+        "@graphql-codegen/typescript-resolvers": "^5.1.7",
         "graphql": "^16.13.1"
     },
     "dependencies": {
