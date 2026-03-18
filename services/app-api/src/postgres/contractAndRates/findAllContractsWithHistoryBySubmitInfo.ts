@@ -30,7 +30,7 @@ async function findAllContractsWithHistoryBySubmitInfo(
             revisions: { some: { submitInfoID: { not: null } } },
         }
 
-        if (process.env.VITE_APP_STAGE_NAME === 'prod') {
+        if (process.env.stage === 'prod') {
             whereClause.stateCode = { not: 'AS' } // exclude test state as per ADR 019
         }
         const contracts = await client.contractTable.findMany({
