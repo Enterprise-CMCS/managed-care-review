@@ -74,10 +74,7 @@ export default defineConfig(() => ({
         outDir: './build',
         sourcemap: true,
     },
-    optimizeDeps: {
-        include: ['protobufjs/minimal', 'buffer'],
-    },
-    resolve: {
+resolve: {
         alias: {
             '~uswds': path.resolve(__dirname, './node_modules/uswds'),
             '@mc-review/common-code': path.resolve(
