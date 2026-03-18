@@ -424,6 +424,21 @@ type Mutation {
     approveContract(input: ApproveContractInput!): ApproveContractPayload
 
     """
+    reverseApproveContract is a CMS and Admin user only action to reverse a contract approval
+
+    Errors:
+    - ForbiddenError:
+        - A non CMS or non Admin user called this
+    - UserInputError:
+        - A contract is not in the correct consolidated status: APPROVED
+        - The latest review action is not MARK_AS_APPROVED
+    - INTERNAL_SERVER_ERROR
+        - DB_ERROR
+            - A contract cannot be found by id
+    """
+    reverseApproveContract(input: ReverseApproveContractInput!): ReverseApproveContractPayload
+
+    """
     withdrawRate is CMS user only action to withdraw a rate from review
 
     Errors:
@@ -550,6 +565,17 @@ input ApproveContractInput {
     contractID: ID!
     "Manually entered date for when the approval was released to the state"
     dateApprovalReleasedToState: Date!
+}
+
+type ReverseApproveContractPayload {
+    contract: Contract!
+}
+
+input ReverseApproveContractInput {
+    "The ID of the contract to reverse approval for"
+    contractID: ID!
+    "The reason for reversing the approval"
+    updatedReason: String!
 }
 
 type WithdrawRatePayload {

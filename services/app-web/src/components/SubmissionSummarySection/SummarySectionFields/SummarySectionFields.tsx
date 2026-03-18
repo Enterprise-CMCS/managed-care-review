@@ -148,6 +148,26 @@ export const ContractProgramsSummary = ({
     )
 }
 
+export const ReviewDecision = ({
+    subjectToReview,
+    label,
+}: {
+    subjectToReview: boolean
+    label?: string
+}) => {
+    return (
+        <DataDetail
+            id="reviewDecision"
+            label={label ?? 'Review decision'}
+            children={
+                subjectToReview
+                    ? 'Subject to formal review and approval'
+                    : 'Not subject to formal review and approval'
+            }
+        />
+    )
+}
+
 export const SubmittedAtSummary = ({
     initiallySubmittedAt,
     label,

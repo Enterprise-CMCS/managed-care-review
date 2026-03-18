@@ -62,7 +62,7 @@ runs:
     - name: Configure AWS credentials
       id: configure-aws-credentials
       if: ${{ inputs.dry-run != 'true' }}
-      uses: aws-actions/configure-aws-credentials@v4
+      uses: aws-actions/configure-aws-credentials@v6
       with:
         aws-region: ${{ inputs.region }}
         role-to-assume: ${{ steps.format-oidc-role-arn.outputs.arn }}

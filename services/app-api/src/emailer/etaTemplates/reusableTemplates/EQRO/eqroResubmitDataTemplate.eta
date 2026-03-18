@@ -1,0 +1,5 @@
+<b>Submitted by:</b> <a href="mailto:<%= it.submittedBy %>"><%= it.submittedBy %></a><br /> 
+<b>Updated on:</b> <%= it.updatedOn %><br />
+<b><%= it.reviewDeterminationChanged ? 'New review' : 'Review' %> decision:</b> <%= it.subjectToReview ? 'Subject' : 'Not subject' %> to formal review and approval<br />
+<br />
+<b>Summary of changes:</b> <%= it.changeSummary %><br />

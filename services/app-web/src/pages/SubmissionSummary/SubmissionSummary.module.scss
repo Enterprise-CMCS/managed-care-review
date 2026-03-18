@@ -44,7 +44,7 @@
 }
 
 .banner {
-    margin: uswds.units(2) auto;
+    margin: uswds.units(3) auto uswds.units(4) auto;
 }
 
 .backLinkContainer {
@@ -62,4 +62,10 @@
 
 .contractDetailsSection {
     padding-top: 16px;
+}
+
+.eqroSummaryNameHeader {
+    font-size: 40px;
+    margin-bottom: 24px;
+    margin-top: 16px;
 }

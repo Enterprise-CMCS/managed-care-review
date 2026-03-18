@@ -1,15 +1,14 @@
 import React, { useEffect, useLayoutEffect, useRef, useState } from 'react'
 import { usePage } from '../../../contexts/PageContext'
-import { GridContainer, 
-    Link, 
-    Grid, 
-    ModalRef 
-} from '@trussworks/react-uswds'
+import { GridContainer, Link, Grid, ModalRef } from '@trussworks/react-uswds'
 import { Navigate } from 'react-router-dom'
 import { useAuth } from '../../../contexts/AuthContext'
 import { useMemoizedStateHeader, useRouteParams } from '../../../hooks'
 import { hasCMSUserPermissions } from '@mc-review/helpers'
-import { useFetchContractWithQuestionsQuery, UpdateInformation, } from '../../../gen/gqlClient'
+import {
+    useFetchContractWithQuestionsQuery,
+    UpdateInformation,
+} from '../../../gen/gqlClient'
 import {
     DocumentWarningBanner,
     LinkWithLogging,
@@ -17,7 +16,10 @@ import {
     SectionCard,
     MultiColumnGrid,
 } from '../../../components'
-import { SubmissionUnlockedBanner } from '../../../components/Banner'
+import {
+    EqroReviewDeterminationBanners,
+    SubmissionUnlockedBanner,
+} from '../../../components/Banner'
 import { ModalOpenButton, UnlockSubmitModal } from '../../../components/Modal'
 import { ErrorForbiddenPage } from '../../Errors/ErrorForbiddenPage'
 import { Error404 } from '../../Errors/Error404Page'
@@ -27,9 +29,10 @@ import styles from '../SubmissionSummary.module.scss'
 import {
     ContactsSummarySection,
     EQROContractDetailsSummarySection,
-    SubmissionTypeSummarySection,
+    EQROSubmissionTypeSummarySection,
 } from '../../../components/SubmissionSummarySection'
 import { getSubmissionPath } from '../../../routeHelpers'
+import { StatusTag } from '../../../components/ContractTable/ContractTable'
 
 export const EQROSubmissionSummary = (): React.ReactElement => {
     // Page level state
@@ -103,6 +106,8 @@ export const EQROSubmissionSummary = (): React.ReactElement => {
     const statePrograms = contract.state.programs
     const contractSubmissionType = contract.contractSubmissionType
     const consolidatedStatus = contract.consolidatedStatus
+    const isSubjectToReview = consolidatedStatus !== `NOT_SUBJECT_TO_REVIEW`
+    const isUnlocked = submissionStatus === 'UNLOCKED'
 
     if (!isSubmitted && isStateUser) {
         if (submissionStatus === 'DRAFT') {
@@ -130,15 +135,16 @@ export const EQROSubmissionSummary = (): React.ReactElement => {
 
     const showUnlockBtn =
         hasCMSPermissions &&
-        ['SUBMITTED', 'RESUBMITTED','NOT_SUBJECT_TO_REVIEW'].includes(consolidatedStatus)
-    const showNoActionsMsg =
-        !showUnlockBtn 
+        ['SUBMITTED', 'RESUBMITTED', 'NOT_SUBJECT_TO_REVIEW'].includes(
+            consolidatedStatus
+        )
+    const showNoActionsMsg = !showUnlockBtn
 
     // Get the correct update info depending on the submission status
     let updateInfo: UpdateInformation | undefined = undefined
-    if (submissionStatus === 'UNLOCKED' || submissionStatus === 'RESUBMITTED') {
+    if (isUnlocked || submissionStatus === 'RESUBMITTED') {
         updateInfo =
-            (submissionStatus === 'UNLOCKED'
+            (isUnlocked
                 ? contract.draftRevision?.unlockInfo
                 : contract.packageSubmissions[0].contractRevision.submitInfo) ||
             undefined
@@ -177,15 +183,30 @@ export const EQROSubmissionSummary = (): React.ReactElement => {
                 data-testid="submission-summary"
                 className={styles.container}
             >
+                <StatusTag
+                    status={consolidatedStatus}
+                    notStateUser={isStateUser}
+                />
+
+                <h1 className={styles.eqroSummaryNameHeader}>{name}</h1>
+
                 {documentError && (
                     <DocumentWarningBanner className={styles.banner} />
                 )}
 
-                {submissionStatus === 'UNLOCKED' && updateInfo && (
+                {isUnlocked && updateInfo && (
                     <SubmissionUnlockedBanner
                         className={styles.banner}
                         loggedInUser={loggedInUser}
                         unlockedInfo={updateInfo}
+                    />
+                )}
+
+                {!isUnlocked && (
+                    <EqroReviewDeterminationBanners
+                        className={styles.banner}
+                        subjectToReview={isSubjectToReview}
+                        stateUser={isStateUser}
                     />
                 )}
 
@@ -218,7 +239,8 @@ export const EQROSubmissionSummary = (): React.ReactElement => {
                         )}
                     </SectionCard>
                 )}
-                <SubmissionTypeSummarySection
+
+                <EQROSubmissionTypeSummarySection
                     subHeaderComponent={
                         hasCMSPermissions ? (
                             <div className={styles.subHeader}>
