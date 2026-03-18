@@ -56,8 +56,6 @@ services/app-api/lambda-layers-prisma-client-query
 services/app-api/lambda-layers-prisma-client-engine
 services/app-api/healthPlanFormDataMigrations
 
-services/app-proto/build
-
 services/postgres/dist
 
 services/uploads/src/avLayer/build/lambda_layer

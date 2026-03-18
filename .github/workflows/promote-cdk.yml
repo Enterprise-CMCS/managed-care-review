@@ -194,10 +194,6 @@ jobs:
       - name: Setup env
         uses: ./.github/actions/setup_env
 
-      - name: Generate protos
-        working-directory: services/app-proto
-        run: pnpm generate
-
       # Generate Prisma Client and binary that can run in a lambda environment
       - name: Prepare prisma client
         working-directory: services/app-api

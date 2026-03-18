@@ -64,10 +64,6 @@ function preparePrismaLayer() {
     rsync -av prisma/ lambda-layers-prisma-client-migration/nodejs/prisma
     rsync -av prisma/ lambda-layers-prisma-client-engine/nodejs/prisma
 
-    echo "Copy proto migration files to layer..."
-    rsync -av ../app-proto/gen/ lambda-layers-prisma-client-migration/nodejs/gen
-    rsync -av node_modules/uuid/ lambda-layers-prisma-client-migration/nodejs/node_modules/uuid
-
     echo "Copy data migration files to layer..."
     rsync -av ../app-api/build/src/dataMigrations lambda-layers-prisma-client-migration/nodejs/dataMigrations
 
