@@ -398,7 +398,7 @@ async function initializeGQLHandler(): Promise<Handler> {
 
 const handlerPromise = initializeGQLHandler()
 
-const gqlHandler: Handler = async (event, context, callback) => {
+const gqlHandler: Handler = async (event, context) => {
     // Once initialized, future awaits will return immediately
     const initializedHandler = await handlerPromise
     const otelCollectorUrl = process.env.API_APP_OTEL_COLLECTOR_URL
@@ -412,8 +412,8 @@ const gqlHandler: Handler = async (event, context, callback) => {
 
     initTracer(serviceName, otelCollectorUrl)
 
-    // Forward the callback to the Apollo handler for proper Lambda completion
-    const response = await initializedHandler(event, context, callback)
+    // Call handler async-style (Node.js 24 pattern) - callback param unused
+    const response = await initializedHandler(event, context, () => {})
     const payloadSize = Buffer.from(event.body).length
 
     if (payloadSize > 5.5 * 1024 * 1024) {
