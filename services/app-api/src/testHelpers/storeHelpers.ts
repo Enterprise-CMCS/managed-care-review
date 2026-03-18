@@ -150,6 +150,9 @@ function mockStoreThatErrors(): Store {
         approveContract: async (_ID) => {
             return genericError
         },
+        reverseApproveContract: async (_ID) => {
+            return genericError
+        },
         withdrawContract: async (_ID) => {
             return genericError
         },
