@@ -73,7 +73,6 @@ export class AppApiStack extends BaseStack {
     public readonly migrateS3UrlsFunction: NodejsFunction
     public readonly restoreIAToStandardFunction: NodejsFunction
 
-    public readonly migrateProtobufDataFunction: NodejsFunction
     public readonly graphqlFunction: NodejsFunction
 
     // Shared Prisma migration layer for functions that need database migration
@@ -385,35 +384,6 @@ export class AppApiStack extends BaseStack {
                 environment,
                 role,
                 layers: [this.otelLayer],
-            }
-        )
-
-        // Create the migrate protobuf function with VPC and layers
-        this.migrateProtobufDataFunction = this.createLambdaFunction(
-            'migrate-protobuf-data',
-            'migrate_protobuf_data',
-            'main',
-            {
-                timeout: Duration.minutes(5),
-                memorySize: 512,
-                environment: {
-                    ...environment,
-                    CONNECT_TIMEOUT: '60',
-                    STAGE_NAME: this.stage,
-                },
-                role,
-                layers: [this.prismaEngineLayer, this.otelLayer],
-                vpc: this.vpc,
-                vpcSubnets: {
-                    subnetType: SubnetType.PRIVATE_WITH_EGRESS,
-                },
-                securityGroups,
-                bundling: {
-                    externalModules: ['prisma', '@prisma/client'],
-                    ...this.createBundling('migrate-protobuf-data', [
-                        this.getOtelBundlingCommands(),
-                    ]),
-                },
             }
         )
 
@@ -1162,12 +1132,6 @@ export class AppApiStack extends BaseStack {
             value: this.cleanupFunction.functionName,
             exportName: this.exportName('CleanupFunctionName'),
             description: 'Cleanup Lambda function name',
-        })
-
-        new CfnOutput(this, 'ProtobufMigrationFunctionName', {
-            value: this.migrateProtobufDataFunction.functionName,
-            exportName: this.exportName('MigrateProtobufDataFunctionName'),
-            description: 'Protobuf data migration Lambda function name',
         })
 
         new CfnOutput(this, 'MigrateFunctionName', {
