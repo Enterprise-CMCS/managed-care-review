@@ -133,7 +133,7 @@ describe('CMS user can view submission', () => {
 
             cy.wait('@fetchContractWithQuestionsQuery', { timeout: 20_000 })
  
-            cy.findByRole('heading', { name: contractName, level: 2 })
+            cy.findByRole('heading', { name: contractName, level: 1 })
             
 
             //TODO: Add assertions for review determination once that is added.

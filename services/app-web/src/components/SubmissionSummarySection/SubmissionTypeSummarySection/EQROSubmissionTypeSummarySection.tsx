@@ -17,6 +17,7 @@ import {
     ContractTypeSummary,
     ManagedCareEntitySummary,
     PopulationCoverageSummary,
+    ReviewDecision,
     SubmissionDescriptionSummary,
     SubmittedAtSummary,
 } from '../SummarySectionFields'
@@ -36,11 +37,7 @@ export type EQROSubmissionTypeSummarySection = {
 export const EQROSubmissionTypeSummarySection = ({
     contract,
     contractRev,
-    editNavigateTo,
-    subHeaderComponent,
-    headerChildComponent,
     initiallySubmittedAt,
-    submissionName,
     isStateUser,
     explainMissingData,
 }: EQROSubmissionTypeSummarySection): React.ReactElement => {
@@ -60,6 +57,8 @@ export const EQROSubmissionTypeSummarySection = ({
     const isSubmitted =
         contract.status === 'SUBMITTED' || contract.status === 'RESUBMITTED'
     const isUnlocked = contract.status === 'UNLOCKED'
+    const subjectToReview =
+        contract.consolidatedStatus !== 'NOT_SUBJECT_TO_REVIEW'
 
     return (
         <SectionCard
@@ -67,16 +66,12 @@ export const EQROSubmissionTypeSummarySection = ({
             className={styles.summarySection}
         >
             <SectionHeader
-                header={submissionName}
-                subHeaderComponent={subHeaderComponent}
-                editNavigateTo={editNavigateTo}
-                headerId={'submissionName'}
+                header="Submission details"
                 hideBorderTop
-                fontSize="38px"
-            >
-                {headerChildComponent && headerChildComponent}
-            </SectionHeader>
+                fontSize="36px"
+            />
             <dl>
+                <ReviewDecision subjectToReview={subjectToReview} />
                 {initiallySubmittedAt &&
                     (isSubmitted || (!isStateUser && isUnlocked)) && (
                         <SubmittedAtSummary

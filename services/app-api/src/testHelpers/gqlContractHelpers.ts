@@ -7,6 +7,7 @@ import {
     CreateContractDocument,
     FetchContractWithQuestionsDocument,
     ApproveContractDocument,
+    ReverseApproveContractDocument,
     WithdrawContractDocument,
     UndoWithdrawContractDocument,
 } from '../gen/gqlClient'
@@ -206,6 +207,33 @@ async function approveTestContract(
     }
 
     return result.data.approveContract.contract
+}
+
+async function reverseApproveTestContract(
+    server: ApolloServer,
+    contractID: string,
+    updatedReason?: string
+): Promise<Contract> {
+    const input = {
+        contractID,
+        updatedReason: updatedReason || 'Reversing approval',
+    }
+    const result = await executeGraphQLOperation(server, {
+        query: ReverseApproveContractDocument,
+        variables: { input },
+    })
+
+    if (result.errors) {
+        throw new Error(
+            `reverseApproveTestContract mutation failed with errors ${JSON.stringify(result.errors)}`
+        )
+    }
+
+    if (!result.data.reverseApproveContract.contract) {
+        throw new Error('reverseApproveTestContract returned nothing')
+    }
+
+    return result.data.reverseApproveContract.contract
 }
 
 const fetchTestContractWithQuestions = async (
@@ -664,6 +692,7 @@ export {
     unlockTestContract,
     createAndSubmitTestContract,
     approveTestContract,
+    reverseApproveTestContract,
     fetchTestContract,
     fetchTestContractWithQuestions,
     createAndUpdateTestContractWithoutRates,
