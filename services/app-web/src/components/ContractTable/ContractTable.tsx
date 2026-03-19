@@ -130,7 +130,7 @@ export const StatusTag = ({
             color={color}
             emphasize={emphasize}
             className={
-                isNotSubjectToReview && notStateUser
+                isNotSubjectToReview
                     ? styles.notSubjectToReviewTag
                     : undefined
             }
