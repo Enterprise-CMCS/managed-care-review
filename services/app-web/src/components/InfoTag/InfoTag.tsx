@@ -18,6 +18,7 @@ export type TagProps = {
         | 'gray'
         | 'gray-medium'
         | 'base-dark'
+        | 'base-darker'
     emphasize?: boolean
 } & ComponentProps<typeof USWDSTag>
 
@@ -38,6 +39,7 @@ export const InfoTag = ({
             [styles['gray']]: color === 'gray',
             [styles['gray-medium']]: color === 'gray-medium',
             [styles['base-dark']]: color === 'base-dark',
+            [styles['base-darker']]: color === 'base-darker',
         },
         emphasize ? styles['emphasize'] : undefined,
         className

@@ -105,7 +105,7 @@ export const StatusTag = ({
     const isUnlocked = status === 'UNLOCKED'
     const isDraft = status === 'DRAFT'
     if (isNotSubjectToReview) {
-        color = 'gray-medium'
+        color = 'base-darker'
     } else if (isSubmittedStatus) {
         color = notStateUser ? 'gold' : 'gray'
         emphasize = notStateUser
