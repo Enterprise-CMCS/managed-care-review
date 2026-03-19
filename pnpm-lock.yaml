@@ -449,8 +449,8 @@ importers:
         specifier: ^1.13.6
         version: 1.13.6
       eta:
-        specifier: ^2.0.0
-        version: 2.0.1
+        specifier: ^2.2.0
+        version: 2.2.0
       express:
         specifier: ^4.18.2
         version: 4.21.2
@@ -8709,8 +8709,8 @@ packages:
     resolution: {integrity: sha512-kVscqXk4OCp68SZ0dkgEKVi6/8ij300KBWTJq32P/dYeWTSwK41WyTxalN1eRmA5Z9UU/LX9D7FWSmV9SAYx6g==}
     engines: {node: '>=0.10.0'}
 
-  eta@2.0.1:
-    resolution: {integrity: sha512-46E2qDPDm7QA+usjffUWz9KfXsxVZclPOuKsXs4ZWZdI/X1wpDF7AO424pt7fdYohCzWsIkXAhNGXSlwo5naAg==}
+  eta@2.2.0:
+    resolution: {integrity: sha512-UVQ72Rqjy/ZKQalzV5dCCJP80GrmPrMxh6NlNf+erV6ObL0ZFkhCstWRawS85z3smdr3d2wXPsZEY7rDPfGd2g==}
     engines: {node: '>=6.0.0'}
 
   etag@1.8.1:
@@ -24111,7 +24111,7 @@ snapshots:
 
   esutils@2.0.3: {}
 
-  eta@2.0.1: {}
+  eta@2.2.0: {}
 
   etag@1.8.1: {}
 
