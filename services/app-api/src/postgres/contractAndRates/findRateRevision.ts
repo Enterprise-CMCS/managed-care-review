@@ -1,6 +1,6 @@
 import type { PrismaTransactionType } from '../prismaTypes'
 import { NotFoundError } from '../postgresErrors'
-import type { RateRevisionTable } from '@prisma/client'
+import type { RateRevisionTable } from '../../generated/client'
 
 async function findRateRevision(
     client: PrismaTransactionType,

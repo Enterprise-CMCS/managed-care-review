@@ -125,15 +125,13 @@ jobs:
       - name: Generate code
         run: pnpm -r generate
 
-      - name: Generate Prisma
+      - name: Reset test database
         env:
           NODE_OPTIONS: --max_old_space_size=6000
           VITE_APP_AUTH_MODE: IDM
           DATABASE_URL: postgresql://postgres:shhhsecret@localhost:5432/postgres?schema=public&connection_limit=5 #pragma: allowlist secret
         working-directory: services/app-api
-        run: |
-          pnpm generate
-          npx prisma migrate reset --force
+        run: npx prisma migrate reset --force --config ../../prisma.config.ts
 
       - name: Build packages
         shell: bash
@@ -183,46 +181,6 @@ jobs:
           set -e
           pnpm --filter "./packages/**" test:coverage
           exit $?
-
-  build-lambda-layers:
-    name: build - lambda layers
-    runs-on: ubuntu-24.04
-    steps:
-      - name: Check out repository
-        uses: actions/checkout@v6
-
-      - name: Setup env
-        uses: ./.github/actions/setup_env
-
-      # Generate Prisma Client and binary that can run in a lambda environment
-      - name: Prepare prisma client
-        working-directory: services/app-api
-        env:
-          PRISMA_CLI_BINARY_TARGETS: rhel-openssl-3.0.x
-        run: pnpm prisma generate
-
-      - name: Prepare "@prisma/client" lambda layer
-        working-directory: services/app-api
-        run: ./scripts/prepare-prisma-layer.sh
-
-      - uses: actions/upload-artifact@v7
-        with:
-          name: lambda-layers-prisma-client-migration
-          path: ./services/app-api/lambda-layers-prisma-client-migration
-
-      - uses: actions/upload-artifact@v7
-        with:
-          name: lambda-layers-prisma-client-engine
-          path: ./services/app-api/lambda-layers-prisma-client-engine
-
-      - name: Prepare postgres tools lambda layer
-        working-directory: services/postgres
-        run: ./build-postgres-lambda-layer.sh
-
-      - uses: actions/upload-artifact@v7
-        with:
-          name: lambda-layers-postgres-tools
-          path: ./services/postgres/lambda-layers-postgres-tools
 
   deploy-github-oidc-dev:
     needs: [begin-deployment]
@@ -479,7 +437,6 @@ jobs:
       [
         begin-deployment,
         deploy-cdk-infrastructure-dev,
-        build-lambda-layers,
         web-unit-tests,
         api-unit-tests,
         packages-unit-tests,
@@ -487,7 +444,6 @@ jobs:
     if: |
       always() &&
       needs.deploy-cdk-infrastructure-dev.result == 'success' &&
-      needs.build-lambda-layers.result == 'success' &&
       needs.web-unit-tests.result == 'success' &&
       needs.api-unit-tests.result == 'success' &&
       needs.packages-unit-tests.result == 'success' &&
@@ -516,34 +472,6 @@ jobs:
           account-id: ${{ secrets.DEV_AWS_ACCOUNT_ID }}
           stage-name: dev
           use-cdk-role: "true"
-
-      - name: Download Prisma layers
-        uses: actions/download-artifact@v8
-        with:
-          name: lambda-layers-prisma-client-migration
-          path: ./services/infra-cdk/lambda-layers-prisma-client-migration
-
-      - name: Extract Prisma migration layer
-        working-directory: ./services/infra-cdk/lambda-layers-prisma-client-migration
-        run: |
-          echo "=== Extracting Prisma migration layer ==="
-          tar -xzf nodejs.tar.gz
-          rm nodejs.tar.gz
-          ls -la
-
-      - name: Download Prisma engine layers
-        uses: actions/download-artifact@v8
-        with:
-          name: lambda-layers-prisma-client-engine
-          path: ./services/infra-cdk/lambda-layers-prisma-client-engine
-
-      - name: Extract Prisma engine layer
-        working-directory: ./services/infra-cdk/lambda-layers-prisma-client-engine
-        run: |
-          echo "=== Extracting Prisma engine layer ==="
-          tar -xzf nodejs.tar.gz
-          rm nodejs.tar.gz
-          ls -la
 
       - name: Deploy AppApi stack
         working-directory: services/infra-cdk
@@ -773,7 +701,6 @@ jobs:
       [
         begin-deployment,
         deploy-cdk-infrastructure-val,
-        build-lambda-layers,
         web-unit-tests,
         api-unit-tests,
         packages-unit-tests,
@@ -781,7 +708,6 @@ jobs:
     if: |
       always() &&
       needs.deploy-cdk-infrastructure-val.result == 'success' &&
-      needs.build-lambda-layers.result == 'success' &&
       needs.web-unit-tests.result == 'success' &&
       needs.api-unit-tests.result == 'success' &&
       needs.packages-unit-tests.result == 'success' &&
@@ -810,34 +736,6 @@ jobs:
           account-id: ${{ secrets.VAL_AWS_ACCOUNT_ID }}
           stage-name: val
           use-cdk-role: "true"
-
-      - name: Download Prisma layers
-        uses: actions/download-artifact@v8
-        with:
-          name: lambda-layers-prisma-client-migration
-          path: ./services/infra-cdk/lambda-layers-prisma-client-migration
-
-      - name: Extract Prisma migration layer
-        working-directory: ./services/infra-cdk/lambda-layers-prisma-client-migration
-        run: |
-          echo "=== Extracting Prisma migration layer ==="
-          tar -xzf nodejs.tar.gz
-          rm nodejs.tar.gz
-          ls -la
-
-      - name: Download Prisma engine layers
-        uses: actions/download-artifact@v8
-        with:
-          name: lambda-layers-prisma-client-engine
-          path: ./services/infra-cdk/lambda-layers-prisma-client-engine
-
-      - name: Extract Prisma engine layer
-        working-directory: ./services/infra-cdk/lambda-layers-prisma-client-engine
-        run: |
-          echo "=== Extracting Prisma engine layer ==="
-          tar -xzf nodejs.tar.gz
-          rm nodejs.tar.gz
-          ls -la
 
       - name: Deploy AppApi stack
         working-directory: services/infra-cdk
@@ -1146,7 +1044,6 @@ jobs:
       [
         begin-deployment,
         deploy-cdk-infrastructure-prod,
-        build-lambda-layers,
         web-unit-tests,
         api-unit-tests,
         packages-unit-tests,
@@ -1154,7 +1051,6 @@ jobs:
     if: |
       always() &&
       needs.deploy-cdk-infrastructure-prod.result == 'success' &&
-      needs.build-lambda-layers.result == 'success' &&
       needs.web-unit-tests.result == 'success' &&
       needs.api-unit-tests.result == 'success' &&
       needs.packages-unit-tests.result == 'success' &&
@@ -1183,34 +1079,6 @@ jobs:
           account-id: ${{ secrets.PROD_AWS_ACCOUNT_ID }}
           stage-name: prod
           use-cdk-role: "true"
-
-      - name: Download Prisma layers
-        uses: actions/download-artifact@v8
-        with:
-          name: lambda-layers-prisma-client-migration
-          path: ./services/infra-cdk/lambda-layers-prisma-client-migration
-
-      - name: Extract Prisma migration layer
-        working-directory: ./services/infra-cdk/lambda-layers-prisma-client-migration
-        run: |
-          echo "=== Extracting Prisma migration layer ==="
-          tar -xzf nodejs.tar.gz
-          rm nodejs.tar.gz
-          ls -la
-
-      - name: Download Prisma engine layers
-        uses: actions/download-artifact@v8
-        with:
-          name: lambda-layers-prisma-client-engine
-          path: ./services/infra-cdk/lambda-layers-prisma-client-engine
-
-      - name: Extract Prisma engine layer
-        working-directory: ./services/infra-cdk/lambda-layers-prisma-client-engine
-        run: |
-          echo "=== Extracting Prisma engine layer ==="
-          tar -xzf nodejs.tar.gz
-          rm nodejs.tar.gz
-          ls -la
 
       - name: Deploy AppApi stack
         working-directory: services/infra-cdk

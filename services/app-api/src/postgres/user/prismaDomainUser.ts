@@ -1,4 +1,4 @@
-import type { User, State } from '@prisma/client'
+import type { User, State } from '../../generated/client'
 import type { UserType } from '../../domain-models'
 
 // We are storing all the possible values for any of the user types in the same

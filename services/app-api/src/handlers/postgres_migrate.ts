@@ -1,9 +1,8 @@
 import type { Handler, APIGatewayProxyResultV2 } from 'aws-lambda'
-import { RDSClient, CreateDBClusterSnapshotCommand } from '@aws-sdk/client-rds'
 import { spawnSync } from 'child_process'
-import { getDBClusterID, getPostgresURL } from './configuration'
+import { getPostgresURL, getDBClusterID } from './configuration'
 import { initTracer, recordException } from '../otel/otel_handler'
-import { migrate, newDBMigrator } from '../dataMigrations/dataMigrator'
+import { RDSClient, CreateDBClusterSnapshotCommand } from '@aws-sdk/client-rds'
 
 const main: Handler = async (): Promise<APIGatewayProxyResultV2> => {
     // setup otel tracing
@@ -51,47 +50,8 @@ const main: Handler = async (): Promise<APIGatewayProxyResultV2> => {
 
     const dbConnectionURL: string = dbConnResult
 
-    // run the schema migration. this will add any new tables or fields from schema.prisma to postgres
-    try {
-        // Aurora can have long cold starts, so we extend connection timeout on migrates
-        const schemaPath =
-            process.env.SCHEMA_PATH ?? '/opt/nodejs/prisma/schema.prisma'
-        const prismaResult = spawnSync(
-            `${process.execPath}`,
-            [
-                '/opt/nodejs/node_modules/prisma/build/index.js',
-                'migrate',
-                'deploy',
-                `--schema=${schemaPath}`,
-            ],
-            {
-                env: {
-                    DATABASE_URL:
-                        dbConnectionURL + `&connect_timeout=${connectTimeout}`,
-                },
-            }
-        )
-        console.info(
-            'stderror',
-            prismaResult.stderr && prismaResult.stderr.toString()
-        )
-        console.info(
-            'stdout',
-            prismaResult.stdout && prismaResult.stdout.toString()
-        )
-        if (prismaResult.status !== 0) {
-            const errMsg = `Could not run prisma migrate deploy: ${prismaResult.stderr.toString()}`
-            recordException(errMsg, serviceName, 'prisma migrate deploy')
-            return fmtMigrateError(errMsg)
-        }
-    } catch (err) {
-        const errMsg = `Could not migrate the prisma database schema: ${err}`
-        recordException(errMsg, serviceName, 'prisma migrate deploy')
-        return fmtMigrateError(errMsg)
-    }
-
-    // take a snapshot of the DB before running data migration.
-    // don't take a snapshot if we're in a PR branch
+    // Take a snapshot of the DB before applying Prisma schema migrations (prisma migrate deploy).
+    // Don't take snapshots for PR branches (temporary review environments).
     if (['dev', 'val', 'prod', 'main'].includes(stage)) {
         const dbClusterId = await getDBClusterID(secretsManagerSecret)
         if (dbClusterId instanceof Error) {
@@ -109,6 +69,9 @@ const main: Handler = async (): Promise<APIGatewayProxyResultV2> => {
             const rds = new RDSClient({ apiVersion: '2014-10-31' })
             const command = new CreateDBClusterSnapshotCommand(params)
             await rds.send(command)
+            console.info(
+                `Successfully created DB snapshot: ${snapshotID} for cluster: ${dbClusterId}`
+            )
         } catch (err) {
             const errMsg = `Could not take RDS snapshot before migrating: ${err}`
             recordException(
@@ -120,21 +83,41 @@ const main: Handler = async (): Promise<APIGatewayProxyResultV2> => {
         }
     }
 
-    // Run the prisma dataMigrations.
-    // these are compiled in app-api so we can call them directly
-
-    const dataMigratorDBURL =
-        dbConnectionURL + `&connect_timeout=${connectTimeout}`
-
-    const dataMigrator = newDBMigrator(dataMigratorDBURL)
-
-    const migrationResult = await migrate(
-        dataMigrator,
-        '/opt/nodejs/dataMigrations/migrations/'
-    )
-    if (migrationResult instanceof Error) {
-        const errMsg = `Could not migrate the database protobufs: ${migrationResult}`
-        recordException(errMsg, serviceName, 'migrate protos db')
+    // run the schema migration. this will add any new tables or fields from schema.prisma to postgres
+    try {
+        // Aurora can have long cold starts, so we extend connection timeout on migrates
+        const configPath =
+            process.env.PRISMA_CONFIG_PATH ?? './prisma.config.ts'
+        const prismaCliPath =
+            process.env.PRISMA_CLI_PATH ??
+            './node_modules/prisma/build/index.js'
+        const prismaResult = spawnSync(
+            process.execPath,
+            [prismaCliPath, 'migrate', 'deploy', `--config=${configPath}`],
+            {
+                cwd: process.cwd(),
+                env: {
+                    ...process.env,
+                    DATABASE_URL:
+                        dbConnectionURL + `&connect_timeout=${connectTimeout}`,
+                    // Ensure npm/prisma never tries to use an unwritable home dir in Lambda.
+                    HOME: process.env.HOME ?? '/tmp',
+                    NPM_CONFIG_CACHE:
+                        process.env.NPM_CONFIG_CACHE ?? '/tmp/.npm',
+                    PRISMA_HIDE_UPDATE_MESSAGE: 'true',
+                },
+            }
+        )
+        console.info('stderr', prismaResult.stderr?.toString() ?? 'no stderr')
+        console.info('stdout', prismaResult.stdout?.toString() ?? 'no stdout')
+        if (prismaResult.status !== 0) {
+            const errMsg = `Could not run prisma migrate deploy: ${prismaResult.stderr?.toString() ?? prismaResult.error?.message ?? 'unknown error'}`
+            recordException(errMsg, serviceName, 'prisma migrate deploy')
+            return fmtMigrateError(errMsg)
+        }
+    } catch (err) {
+        const errMsg = `Could not migrate the prisma database schema: ${err}`
+        recordException(errMsg, serviceName, 'prisma migrate deploy')
         return fmtMigrateError(errMsg)
     }
 

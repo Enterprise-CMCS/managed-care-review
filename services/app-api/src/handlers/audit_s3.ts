@@ -6,7 +6,10 @@ import type { Store } from '../postgres'
 import { HeadObjectCommand, S3Client } from '@aws-sdk/client-s3'
 import type { S3ServiceException } from '@aws-sdk/client-s3'
 import type { AuditDocument } from '../domain-models'
-import type { ContractRevisionTable, RateRevisionTable } from '@prisma/client'
+import type {
+    ContractRevisionTable,
+    RateRevisionTable,
+} from '../generated/client'
 
 const main: Handler = async (): Promise<APIGatewayProxyResultV2> => {
     // setup otel tracing

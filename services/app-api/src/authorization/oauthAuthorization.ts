@@ -1,4 +1,4 @@
-import { OAuthScope } from '@prisma/client'
+import { OAuthScope } from '../generated/client'
 import type { Context } from '../handlers/apollo_gql'
 
 /**

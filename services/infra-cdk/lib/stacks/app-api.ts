@@ -34,13 +34,12 @@ import {
     Runtime,
     LayerVersion,
     type ILayerVersion,
-    Code,
 } from 'aws-cdk-lib/aws-lambda'
 import { CfnWebACL, CfnWebACLAssociation } from 'aws-cdk-lib/aws-wafv2'
 import { SubnetType, Vpc, SecurityGroup } from 'aws-cdk-lib/aws-ec2'
 import { Rule, Schedule } from 'aws-cdk-lib/aws-events'
 import { LambdaFunction } from 'aws-cdk-lib/aws-events-targets'
-import { AWS_OTEL_LAYER_ARN } from './lambda-layers'
+import { AWS_OTEL_LAYER_ARN } from './constants'
 import { ApiEndpoint } from '../constructs/api/api-endpoint'
 import path from 'path'
 import type { BundlingOptions } from 'aws-cdk-lib/aws-lambda-nodejs'
@@ -56,7 +55,7 @@ export interface AppApiStackProps extends BaseStackProps {
 export class AppApiStack extends BaseStack {
     // ESM banner for Lambda bundling - provides CommonJS compatibility shims
     private static readonly ESM_BANNER =
-        'import { createRequire } from "module";import { fileURLToPath } from "url";import { dirname } from "path";const require = createRequire(import.meta.url);const __filename = fileURLToPath(import.meta.url);const __dirname = dirname(__filename);'
+        'import { createRequire as __createRequire } from "module";import { fileURLToPath as __fileURLToPath } from "url";import { dirname as __dirnameFn } from "path";const require = __createRequire(import.meta.url);const __filename = __fileURLToPath(import.meta.url);const __dirname = __dirnameFn(__filename);'
 
     // API Gateway
     public readonly apiGateway: RestApi
@@ -75,12 +74,8 @@ export class AppApiStack extends BaseStack {
 
     public readonly graphqlFunction: NodejsFunction
 
-    // Shared Prisma migration layer for functions that need database migration
-    private readonly prismaMigrationLayer: ILayerVersion
     // Shared OTEL layer for all functions
     private readonly otelLayer: ILayerVersion
-    // Shared Prisma engine layer for GraphQL and OAuth functions
-    private readonly prismaEngineLayer: ILayerVersion
 
     // Network resources from Network stack
     private readonly vpc: IVpc
@@ -236,42 +231,6 @@ export class AppApiStack extends BaseStack {
             AWS_OTEL_LAYER_ARN
         )
 
-        // Create shared Prisma migration layer for functions that need database migration
-        this.prismaMigrationLayer = new LayerVersion(
-            this,
-            'PrismaMigrationLayer',
-            {
-                layerVersionName: `${ResourceNames.apiName('app-api', this.stage)}-prisma-migration`,
-                description: 'Prisma migration layer for app-api',
-                compatibleRuntimes: [Runtime.NODEJS_20_X],
-                compatibleArchitectures: [Architecture.X86_64],
-                code: Code.fromAsset(
-                    path.join(
-                        __dirname,
-                        '..',
-                        '..',
-                        'lambda-layers-prisma-client-migration'
-                    )
-                ),
-            }
-        )
-
-        // Create shared Prisma engine layer for functions that need database access
-        this.prismaEngineLayer = new LayerVersion(this, 'PrismaEngineLayer', {
-            layerVersionName: `${ResourceNames.apiName('app-api', this.stage)}-prisma-engine`,
-            description: 'Prisma engine layer for app-api',
-            compatibleRuntimes: [Runtime.NODEJS_20_X],
-            compatibleArchitectures: [Architecture.X86_64],
-            code: Code.fromAsset(
-                path.join(
-                    __dirname,
-                    '..',
-                    '..',
-                    'lambda-layers-prisma-client-engine'
-                )
-            ),
-        })
-
         // Populate common lambda parameters into variables to be used during function creation
         const securityGroups = [
             this.lambdaSecurityGroup,
@@ -311,7 +270,7 @@ export class AppApiStack extends BaseStack {
 
         this.otelFunction = new NodejsFunction(this, 'otelFunction', {
             functionName: `${ResourceNames.apiName('app-api', this.stage)}-otel`,
-            runtime: Runtime.NODEJS_20_X,
+            runtime: Runtime.NODEJS_24_X,
             architecture: Architecture.X86_64,
             handler: 'main',
             entry: path.join(
@@ -357,7 +316,7 @@ export class AppApiStack extends BaseStack {
                 memorySize: 1024,
                 environment,
                 role,
-                layers: [this.prismaEngineLayer, this.otelLayer],
+                layers: [this.otelLayer],
                 vpc: this.vpc,
                 vpcSubnets: {
                     subnetType: SubnetType.PRIVATE_WITH_EGRESS,
@@ -366,9 +325,9 @@ export class AppApiStack extends BaseStack {
                 bundling: {
                     format: OutputFormat.ESM,
                     banner: AppApiStack.ESM_BANNER,
-                    externalModules: ['prisma', '@prisma/client'],
                     ...this.createBundling('oauth-token', [
                         this.getOtelBundlingCommands(),
+                        this.getPrismaCleanupCommands(),
                     ]),
                 },
             }
@@ -387,7 +346,27 @@ export class AppApiStack extends BaseStack {
             }
         )
 
-        // Create migrate function with VPC and layers
+        /**
+         * Create migrate function with special Prisma CLI handling
+         *
+         * TWO-TIER PRISMA BUNDLING STRATEGY:
+         *
+         * 1. Runtime functions (GraphQL, OAuth, etc.):
+         *    - Import Prisma Client as code: `import { PrismaClient } from '../generated/client'`
+         *    - esbuild bundles @prisma/client into handler code (~1.6 MB with WASM)
+         *    - No node_modules needed ✅
+         *
+         * 2. Migrate function (this one):
+         *    - Spawns Prisma CLI: `spawnSync(node, ['./node_modules/prisma/build/index.js', 'migrate', 'deploy'])`
+         *    - Needs actual `prisma` package at node_modules/prisma/build/index.js
+         *    - Uses nodeModules: ['prisma'] to copy CLI package instead of bundling it
+         *    - Prisma 7 CLI is ~5-8 MB (much smaller than v5's ~40 MB with Rust binaries) ✅
+         *
+         * Size implications:
+         * - Other functions: ~8-12 MB (bundled Prisma Client + app code)
+         * - Migrate function: ~10-15 MB (bundled handler + prisma CLI in node_modules + schema/migrations)
+         * - Well within Lambda limits (250 MB unzipped, 50 MB zipped)
+         */
         this.migrateFunction = this.createLambdaFunction(
             'migrate',
             'postgres_migrate',
@@ -397,12 +376,10 @@ export class AppApiStack extends BaseStack {
                 memorySize: 1024,
                 environment: {
                     ...environment,
-                    SCHEMA_PATH: '/opt/nodejs/prisma/schema.prisma',
                     CONNECT_TIMEOUT: '60',
-                    NODE_PATH: '/opt/nodejs/node_modules',
                 },
                 role,
-                layers: [this.prismaMigrationLayer, this.otelLayer],
+                layers: [this.otelLayer],
                 vpc: this.vpc,
                 vpcSubnets: {
                     subnetType: SubnetType.PRIVATE_WITH_EGRESS,
@@ -411,10 +388,15 @@ export class AppApiStack extends BaseStack {
                 bundling: {
                     format: OutputFormat.ESM,
                     banner: AppApiStack.ESM_BANNER,
-                    externalModules: ['prisma', '@prisma/client', '.prisma'],
+                    // CRITICAL: Keep prisma CLI as node module (not bundled) so it can be executed via spawnSync
+                    nodeModules: ['prisma'],
                     ...this.createBundling(
                         'migrate',
-                        [this.getOtelBundlingCommands()],
+                        [
+                            this.getOtelBundlingCommands(),
+                            this.getPrismaSchemaAndMigrationsBundlingCommands(),
+                            this.getPrismaCleanupCommands(),
+                        ],
                         {
                             '--loader:.graphql': 'text',
                             '--loader:.gql': 'text',
@@ -435,7 +417,7 @@ export class AppApiStack extends BaseStack {
                 memorySize: 4096, // Higher memory for zip operations
                 environment,
                 role,
-                layers: [this.prismaEngineLayer, this.otelLayer],
+                layers: [this.otelLayer],
                 vpc: this.vpc,
                 vpcSubnets: {
                     subnetType: SubnetType.PRIVATE_WITH_EGRESS,
@@ -444,9 +426,9 @@ export class AppApiStack extends BaseStack {
                 bundling: {
                     format: OutputFormat.ESM,
                     banner: AppApiStack.ESM_BANNER,
-                    externalModules: ['prisma', '@prisma/client'],
                     ...this.createBundling('regenerate-zips', [
                         this.getOtelBundlingCommands(),
+                        this.getPrismaCleanupCommands(),
                     ]),
                 },
             }
@@ -465,7 +447,7 @@ export class AppApiStack extends BaseStack {
                 memorySize: 1024,
                 environment,
                 role,
-                layers: [this.prismaEngineLayer, this.otelLayer],
+                layers: [this.otelLayer],
                 vpc: this.vpc,
                 vpcSubnets: {
                     subnetType: SubnetType.PRIVATE_WITH_EGRESS,
@@ -477,9 +459,9 @@ export class AppApiStack extends BaseStack {
                 bundling: {
                     format: OutputFormat.ESM,
                     banner: AppApiStack.ESM_BANNER,
-                    externalModules: ['prisma', '@prisma/client'],
                     ...this.createBundling('migrate-s3-urls', [
                         this.getOtelBundlingCommands(),
+                        this.getPrismaCleanupCommands(),
                     ]),
                 },
             }
@@ -562,7 +544,7 @@ export class AppApiStack extends BaseStack {
                 memorySize: 1024,
                 environment,
                 role,
-                layers: [this.prismaEngineLayer, this.otelLayer],
+                layers: [this.otelLayer],
                 vpc: this.vpc,
                 vpcSubnets: {
                     subnetType: SubnetType.PRIVATE_WITH_EGRESS,
@@ -574,13 +556,13 @@ export class AppApiStack extends BaseStack {
                     banner: AppApiStack.ESM_BANNER,
                     minify: false,
                     sourceMap: true,
-                    target: 'node20',
-                    externalModules: ['prisma', '@prisma/client'],
+                    target: 'node24',
                     ...this.createBundling(
                         'graphql',
                         [
                             this.getOtelBundlingCommands(),
                             this.getEtaTemplatesBundlingCommands(),
+                            this.getPrismaCleanupCommands(),
                         ],
                         {
                             '--loader:.graphql': 'text',
@@ -635,7 +617,63 @@ export class AppApiStack extends BaseStack {
     }
 
     /**
+     * Cleanup unnecessary Prisma WASM engines
+     * Prisma 7 includes WASM for all databases (~60MB), we only need PostgreSQL (~5MB)
+     *
+     * This cleanup applies to:
+     * - Bundled Prisma Client code (GraphQL, OAuth, etc.)
+     * - node_modules/prisma for migrate lambda
+     */
+    private getPrismaCleanupCommands(): (
+        outputDir: string,
+        appApiPath: string
+    ) => string[] {
+        return (outputDir: string, _appApiPath: string) => [
+            // Remove WASM files for databases we don't use (MySQL, SQLite, SQL Server, CockroachDB)
+            // Keep only PostgreSQL WASM files
+            // This searches both bundled code and node_modules
+            `find "${outputDir}" -type f \\( -name "*mysql*.wasm*" -o -name "*sqlite*.wasm*" -o -name "*sqlserver*.wasm*" -o -name "*cockroachdb*.wasm*" \\) -delete || true`,
+            `echo "Cleaned up non-PostgreSQL WASM engines from ${outputDir}"`,
+            // Log the size of node_modules if it exists (for migrate lambda)
+            `if [ -d "${outputDir}/node_modules" ]; then du -sh "${outputDir}/node_modules" | sed 's/^/node_modules size: /'; fi || true`,
+        ]
+    }
+
+    /**
+     * Get Prisma schema and migrations bundling commands for migrate function
+     *
+     * Copies the repo's prisma.config.ts and recreates the directory structure it expects.
+     * Only includes schema migrations - protobuf data migrations have been removed.
+     */
+    private getPrismaSchemaAndMigrationsBundlingCommands(): (
+        outputDir: string,
+        appApiPath: string
+    ) => string[] {
+        return (outputDir: string, appApiPath: string) => [
+            // Validate required files exist before copying
+            `test -f "${appApiPath}/../../prisma.config.ts" || { echo "ERROR: prisma.config.ts not found"; exit 1; }`,
+            `test -f "${appApiPath}/prisma/schema.prisma" || { echo "ERROR: schema.prisma not found"; exit 1; }`,
+            `test -d "${appApiPath}/prisma/migrations" || { echo "ERROR: migrations directory not found"; exit 1; }`,
+
+            // Create directory structure
+            `mkdir -p "${outputDir}/services/app-api/prisma"`,
+
+            // Copy Prisma config from repo root
+            `cp "${appApiPath}/../../prisma.config.ts" "${outputDir}/prisma.config.ts"`,
+
+            // Copy schema and migrations to match config's expected paths
+            `cp "${appApiPath}/prisma/schema.prisma" "${outputDir}/services/app-api/prisma/schema.prisma"`,
+            `cp -r "${appApiPath}/prisma/migrations" "${outputDir}/services/app-api/prisma/migrations"`,
+
+            `echo "Successfully copied Prisma config, schema, and migrations"`,
+        ]
+    }
+
+    /**
      * Create generic bundling configuration that can compose different bundling steps
+     *
+     * Prisma 7 Note: No special handling needed. esbuild bundles Prisma packages naturally
+     * because the WASM engines are now JavaScript modules, not external binaries.
      */
     private createBundling(
         functionName: string,
@@ -648,10 +686,13 @@ export class AppApiStack extends BaseStack {
         return {
             format: OutputFormat.ESM,
             banner: AppApiStack.ESM_BANNER,
+            // Let esbuild bundle everything including Prisma
+            // Prisma 7 WASM engines (~1.6 MB) are bundled automatically
+            // AWS SDK v3 is included in Node.js 20+ Lambda runtimes
             commandHooks: {
                 beforeBundling(inputDir: string, outputDir: string): string[] {
                     return [
-                        `echo "CDK ${functionName} inputDir: ${inputDir}"`,
+                        `echo "CDK bundling ${functionName} - inputDir: ${inputDir}"`,
                         `find ${inputDir} -name "collector.yml" 2>/dev/null || true`,
                     ]
                 },
@@ -680,7 +721,7 @@ export class AppApiStack extends BaseStack {
     ): NodejsFunction {
         return new NodejsFunction(this, `${functionName}Function`, {
             functionName: `${ResourceNames.apiName('app-api', this.stage)}-${functionName}`,
-            runtime: Runtime.NODEJS_20_X,
+            runtime: Runtime.NODEJS_24_X,
             architecture: Architecture.X86_64,
             handler: handlerMethod,
             entry: path.join(
@@ -939,7 +980,6 @@ export class AppApiStack extends BaseStack {
             EMAILER_MODE: emailerMode,
             PARAMETER_STORE_MODE: parameterStoreMode,
             APPLICATION_ENDPOINT: applicationEndpoint,
-            AWS_LAMBDA_EXEC_WRAPPER: '/opt/otel-handler',
             OPENTELEMETRY_COLLECTOR_CONFIG_FILE: '/var/task/collector.yml',
             LD_SDK_KEY: ldSdkKey,
             JWT_SECRET: jwtSecret,
