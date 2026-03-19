@@ -1,7 +1,10 @@
-import { GenerateUploadUrlDocument } from "../../gen/gqlClient"
-import { testS3Client } from "../../testHelpers"
-import { constructTestPostgresServer, executeGraphQLOperation } from "../../testHelpers/gqlHelpers"
-import { testCMSUser } from "../../testHelpers/userHelpers"
+import { GenerateUploadUrlDocument } from '../../gen/gqlClient'
+import { testS3Client } from '../../testHelpers'
+import {
+    constructTestPostgresServer,
+    executeGraphQLOperation,
+} from '../../testHelpers/gqlHelpers'
+import { testCMSUser } from '../../testHelpers/userHelpers'
 
 describe(`generateUploadURLResolver`, () => {
     const user = testCMSUser()
@@ -16,7 +19,7 @@ describe(`generateUploadURLResolver`, () => {
         })
     })
 
-    it('returns a valid presigned URL for a Word doc', async () => {      
+    it('returns a valid presigned URL for a Word doc', async () => {
         const result = await executeGraphQLOperation(server, {
             query: GenerateUploadUrlDocument,
             variables: {
@@ -26,16 +29,16 @@ describe(`generateUploadURLResolver`, () => {
                     bucketName: 'QUESTION_ANSWER_DOCS',
                 },
             },
-        })        
+        })
 
         expect(result.errors).toBeUndefined()
-        const payload = result.data?.generateUploadURL        
+        const payload = result.data?.generateUploadURL
         expect(payload?.uploadURL).toContain('.docx')
         expect(payload?.expiresIn).toBeDefined()
         expect(payload?.s3URL).toBeDefined()
     })
-    
-    it('returns a valid presigned URL for a spreadsheet', async() => {
+
+    it('returns a valid presigned URL for a spreadsheet', async () => {
         const result = await executeGraphQLOperation(server, {
             query: GenerateUploadUrlDocument,
             variables: {
@@ -46,7 +49,7 @@ describe(`generateUploadURLResolver`, () => {
                 },
             },
         })
-     
+
         expect(result.errors).toBeUndefined()
         const payload = result.data?.generateUploadURL
         expect(payload).toBeDefined()
@@ -84,6 +87,8 @@ describe(`generateUploadURLResolver`, () => {
         })
 
         expect(result.errors).toBeDefined()
-        expect(result.errors?.[0].message).toMatch('File extension ".doc" does not match fileType "PDF"')
+        expect(result.errors?.[0].message).toMatch(
+            'File extension ".doc" does not match fileType "PDF"'
+        )
     })
 })

@@ -3,7 +3,7 @@ export type { InsertUserArgsType } from './user'
 export type { InsertContractArgsType } from './contractAndRates/insertContract'
 export type { Store } from './postgresStore'
 export { NewPostgresStore } from './postgresStore'
-export { NewPrismaClient } from './prismaClient'
+export { NewPrismaClient, disconnectAllPrismaClients } from './prismaClient'
 export {
     NotFoundError,
     UserInputPostgresError,

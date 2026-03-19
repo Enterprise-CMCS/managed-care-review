@@ -1,6 +1,6 @@
 import type { StateCodeType } from '@mc-review/submissions'
-import type { Division } from '@prisma/client'
-import { AuditAction } from '@prisma/client'
+import type { Division } from '../../generated/client'
+import { AuditAction } from '../../generated/client'
 import type { CMSUsersUnionType } from '../../domain-models'
 import { domainUserFromPrismaUser } from './prismaDomainUser'
 import { NotFoundError, UserInputPostgresError } from '../postgresErrors'

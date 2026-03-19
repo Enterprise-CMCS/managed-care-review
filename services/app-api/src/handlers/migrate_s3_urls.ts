@@ -343,9 +343,9 @@ export const main: Handler = async (
         response.success = false
         response.errors.push(errorMessage)
         return response
-    } finally {
-        await prismaClient.$disconnect()
     }
+    // NOTE: Don't call $disconnect() - we use a singleton pattern to reuse connections
+    // across warm Lambda invocations. AWS cleans up when the container terminates.
 }
 
 async function migrateDocumentTable(

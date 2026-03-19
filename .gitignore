@@ -50,10 +50,6 @@ services/uploads/local_buckets
 .envrc.local
 lambda_response.json
 
-services/app-api/lambda-layers-prisma-client
-services/app-api/lambda-layers-prisma-client-migration
-services/app-api/lambda-layers-prisma-client-query
-services/app-api/lambda-layers-prisma-client-engine
 services/app-api/healthPlanFormDataMigrations
 
 services/app-proto/build
@@ -69,3 +65,4 @@ services/uploads/src/avLayer/build/*.zip
 tests/cypress/fixtures/stores/featureFlagStore.json
 
 packages/*/build
+services/app-api/src/generated/

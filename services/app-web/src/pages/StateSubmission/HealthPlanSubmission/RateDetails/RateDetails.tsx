@@ -701,7 +701,9 @@ const RateDetails = ({
                                                     withdrawnRateRevisions.map(
                                                         (rateRev) => (
                                                             <SectionCard
-                                                                className={styles.summarySection}
+                                                                className={
+                                                                    styles.summarySection
+                                                                }
                                                                 id={`withdrawn-rate-${rateRev.id}`}
                                                                 key={rateRev.id}
                                                             >

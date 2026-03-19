@@ -8,7 +8,7 @@ import type {
     CMSApproverUserType,
     UserRoles,
 } from './UserType'
-import type { User as PrismaUser } from '@prisma/client'
+import type { User as PrismaUser } from '../generated/client'
 
 function isUser(user: unknown): user is UserType {
     if (user && typeof user === 'object') {

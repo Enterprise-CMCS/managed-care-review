@@ -66,7 +66,9 @@ it('migrate protobuf data and updates db', async () => {
 
             // validate our test data correctly saved formDataProto
             expect(
-                insertedSubmission.revisions[0].formDataProto.toString('base64')
+                Buffer.from(
+                    insertedSubmission.revisions[0].formDataProto
+                ).toString('base64')
             ).toEqual(testSubmission.revisions[0].formDataProto)
 
             // run the migration
@@ -149,7 +151,9 @@ it('migrate protobuf data and updates db and sanitizes data on val', async () =>
 
             // validate our test data correctly saved formDataProto
             expect(
-                insertedSubmission.revisions[0].formDataProto.toString('base64')
+                Buffer.from(
+                    insertedSubmission.revisions[0].formDataProto
+                ).toString('base64')
             ).toEqual(testSubmission.revisions[0].formDataProto)
 
             // run the migration

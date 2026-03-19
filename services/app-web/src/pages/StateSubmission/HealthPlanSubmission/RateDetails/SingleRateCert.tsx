@@ -1,10 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react'
-import {
-    DatePicker,
-    Fieldset,
-    FormGroup,
-    Label,
-} from '@trussworks/react-uswds'
+import { DatePicker, Fieldset, FormGroup, Label } from '@trussworks/react-uswds'
 import classnames from 'classnames'
 import {
     ButtonWithLogging,
@@ -405,7 +400,7 @@ export const SingleRateCert = ({
                                     startDateLabel="Start date"
                                     startDateError={showFieldErrors(
                                         'rateDateStart'
-                                    )} 
+                                    )}
                                     startDatePickerProps={{
                                         disabled: false,
                                         id: `${fieldNamePrefix}.rateDateStart`,

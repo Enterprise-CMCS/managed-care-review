@@ -6,8 +6,8 @@ import {
     must,
 } from '../../testHelpers'
 import { updateDraftRate } from './updateDraftRate'
-import { PrismaClientValidationError } from '@prisma/client/runtime/library'
-import type { RateType } from '@prisma/client'
+import { Prisma } from '../../generated/client'
+import type { RateType } from '../../generated/client'
 import type { RateFormEditableType } from '../../domain-models/contractAndRates'
 import { insertDraftContract } from './insertContract'
 
@@ -304,7 +304,7 @@ describe('updateDraftRate', () => {
         })
 
         // Expect a prisma error
-        expect(updatedRate).toBeInstanceOf(PrismaClientValidationError)
+        expect(updatedRate).toBeInstanceOf(Prisma.PrismaClientValidationError)
     })
 
     it('returns an error when invalid rate ID provided', async () => {

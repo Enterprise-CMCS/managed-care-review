@@ -1,5 +1,5 @@
 import type { ExtendedPrismaClient } from '../prismaClient'
-import type { Prisma } from '@prisma/client'
+import type { Prisma } from '../../generated/client'
 import type { UserType } from '../../domain-models'
 import { v4 as uuidv4 } from 'uuid'
 import { randomBytes } from 'crypto'

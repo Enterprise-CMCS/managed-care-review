@@ -14,9 +14,12 @@ import {
     mockInsertRateArgs,
 } from '../../testHelpers'
 import { v4 as uuidv4 } from 'uuid'
-import type { DocumentZipType, DocumentZipPackage } from '@prisma/client'
+import type {
+    DocumentZipType,
+    DocumentZipPackage,
+} from '../../generated/client'
 import type { ExtendedPrismaClient } from '../prismaClient'
-import type { User } from '@prisma/client'
+import type { User } from '../../generated/client'
 
 describe('Document Zip Package Database Functions', () => {
     // Helper function to create a submitted rate revision (through contract submission)
