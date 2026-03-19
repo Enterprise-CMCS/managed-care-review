@@ -100,7 +100,7 @@ describe('Document Zip Package Database Functions', () => {
 
             const zipData: CreateDocumentZipPackageArgsType = {
                 s3URL: 's3://test-bucket/zips/contracts/123/contract-documents.zip',
-                sha256: 'abc123def456',
+                sha256: 'abc123def456', // pragma: allowlist secret
                 s3BucketName: 'test-bucket',
                 s3Key: 'zips/contracts/123/contract-documents.zip',
                 contractRevisionID: submittedRevision.id,
@@ -177,7 +177,7 @@ describe('Document Zip Package Database Functions', () => {
             // All fields are actually optional except s3URL, sha256, bucket/key, and documentType
             const minimalZipData = {
                 s3URL: 's3://test-bucket/minimal.zip',
-                sha256: 'abc123def456',
+                sha256: 'abc123def456', // pragma: allowlist secret
                 s3BucketName: 'test-bucket',
                 s3Key: 'minimal.zip',
                 documentType: 'CONTRACT_DOCUMENTS' as DocumentZipType,
@@ -209,7 +209,7 @@ describe('Document Zip Package Database Functions', () => {
 
             const zipData: CreateDocumentZipPackageArgsType = {
                 s3URL: 's3://test-bucket/test.zip',
-                sha256: 'abc123',
+                sha256: 'abc123', // pragma: allowlist secret
                 s3BucketName: 'test-bucket',
                 s3Key: 'test.zip',
                 contractRevisionID: 'non-existent-id',
@@ -259,7 +259,7 @@ describe('Document Zip Package Database Functions', () => {
             // Create multiple zip packages
             const zipData1: CreateDocumentZipPackageArgsType = {
                 s3URL: 's3://bucket/zip1.zip',
-                sha256: 'hash1',
+                sha256: 'hash1', // pragma: allowlist secret
                 s3BucketName: 'bucket',
                 s3Key: 'zip1.zip',
                 contractRevisionID: submittedRevision.id,
@@ -268,7 +268,7 @@ describe('Document Zip Package Database Functions', () => {
 
             const zipData2: CreateDocumentZipPackageArgsType = {
                 s3URL: 's3://bucket/zip2.zip',
-                sha256: 'hash2',
+                sha256: 'hash2', // pragma: allowlist secret
                 s3BucketName: 'bucket',
                 s3Key: 'zip2.zip',
                 contractRevisionID: submittedRevision.id,
@@ -322,7 +322,7 @@ describe('Document Zip Package Database Functions', () => {
             // Create zip package
             await createDocumentZipPackage(client, {
                 s3URL: 's3://bucket/contract.zip',
-                sha256: 'hash1',
+                sha256: 'hash1', // pragma: allowlist secret
                 s3BucketName: 'bucket',
                 s3Key: 'contract.zip',
                 contractRevisionID: submittedRevision.id,
@@ -419,7 +419,7 @@ describe('Document Zip Package Database Functions', () => {
 
             const zipData: CreateDocumentZipPackageArgsType = {
                 s3URL: 's3://bucket/rate.zip',
-                sha256: 'rate-hash',
+                sha256: 'rate-hash', // pragma: allowlist secret
                 s3BucketName: 'bucket',
                 s3Key: 'rate.zip',
                 rateRevisionID: submittedRevision.id,
@@ -463,7 +463,7 @@ describe('Document Zip Package Database Functions', () => {
 
             await createDocumentZipPackage(client, {
                 s3URL: 's3://bucket/rate.zip',
-                sha256: 'hash',
+                sha256: 'hash', // pragma: allowlist secret
                 s3BucketName: 'bucket',
                 s3Key: 'rate.zip',
                 rateRevisionID: submittedRevision.id,
@@ -565,7 +565,7 @@ describe('Document Zip Package Database Functions', () => {
             // Create zip packages for both
             await createDocumentZipPackage(client, {
                 s3URL: 's3://bucket/contract.zip',
-                sha256: 'contract-hash',
+                sha256: 'contract-hash', // pragma: allowlist secret
                 s3BucketName: 'bucket',
                 s3Key: 'contract.zip',
                 contractRevisionID: contractRevision.id,
@@ -574,7 +574,7 @@ describe('Document Zip Package Database Functions', () => {
 
             await createDocumentZipPackage(client, {
                 s3URL: 's3://bucket/rate.zip',
-                sha256: 'rate-hash',
+                sha256: 'rate-hash', // pragma: allowlist secret
                 s3BucketName: 'bucket',
                 s3Key: 'rate.zip',
                 rateRevisionID: rateRevision.id,
