@@ -141,12 +141,12 @@ function contextForRequestForFetcher(
                 iss: tokenIssuer,
                 grants: oauthGrants,
                 scopes: clientOauth.scopes.map((scope) => scope),
-                ['x-acting-as-user']: delegatedUser,
                 isDelegatedUser: !!delegatedUser,
             }
 
             console.info({
                 message: 'OAuth client context',
+                ['x-acting-as-user']: delegatedUser,
                 ...oauthClient,
             })
 
