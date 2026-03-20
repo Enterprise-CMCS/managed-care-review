@@ -104,7 +104,9 @@ function contextForRequestForFetcher(
             const principalId = event.requestContext.authorizer?.principalId
             const authorizerContext = event.requestContext.authorizer
             const delegatedUser: string | null =
-                event.headers?.['x-acting-as-user'] ?? null
+                event.headers?.['x-acting-as-user'] ??
+                event.headers?.['X-Acting-As-User'] ??
+                null
 
             // Extract OAuth context if present
             const oauthClientId = authorizerContext?.clientId
