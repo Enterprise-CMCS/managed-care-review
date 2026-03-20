@@ -42,3 +42,8 @@
     @include uswds.u-bg('base-dark');
     color: custom.$mcr-foundation-white;
 }
+
+.base-darker {
+    @include uswds.u-bg('base-darker');
+    color: custom.$mcr-foundation-white;
+}
