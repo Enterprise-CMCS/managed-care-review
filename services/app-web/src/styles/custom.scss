@@ -127,6 +127,57 @@ $mcr-single-page-width: 40rem; // based on figma - however, 40rem is also media 
 .standaloneForm {
     @include standaloneFormPage;
 }
+
+/* TYPOGRAPHY */
+@mixin mcr-type-style(
+    $font-size,
+    $font-weight,
+    $line-height,
+    $letter-spacing: normal
+) {
+    font-size: $font-size;
+    font-style: normal;
+    font-weight: $font-weight;
+    line-height: $line-height;
+    letter-spacing: $letter-spacing;
+}
+
+h1 {
+    @include mcr-type-style(34px, 700, 100%);
+}
+
+h2 {
+    @include mcr-type-style(32px, 400, 100%, 0.32px);
+}
+
+h3 {
+    @include mcr-type-style(24px, 400, 120%, 0.24px);
+}
+
+h4 {
+    @include mcr-type-style(20px, 400, 140%, 0.2px);
+}
+
+h5 {
+    @include mcr-type-style(17px, 700, 162%, 0.085px);
+}
+
+h6 {
+    @include mcr-type-style(14px, 700, 162%, 0.14px);
+}
+
+.mcr-h1-bold {
+    @include mcr-type-style(38px, 700, 100%);
+}
+
+.mcr-h2-bold {
+    @include mcr-type-style(22px, 700, 28px);
+}
+
+.mcr-h4-bold {
+    @include mcr-type-style(20px, 700, 140%, 0.2px);
+}
+
 /* ACCESSIBILITY */
 // Re-useable classname for hiding UI visually but still having it be read by screenreaders
 .srOnly {

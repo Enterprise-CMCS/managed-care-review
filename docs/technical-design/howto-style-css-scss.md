@@ -18,6 +18,23 @@ Make sure heading levels (`h2`, `h3` etc) are properly used for text content. Th
 
 Note also that there is a specific color to be used for links (`$$mcr-foundation-link`) and hint text (`$mcr-foundation-hint`).
 
+Heading typography is standardized globally in [`services/app-web/src/styles/custom.scss`](/Users/pearlroos/managed-care-review/services/app-web/src/styles/custom.scss). Native `h1` through `h6` tags should be the default path for semantic headings. When a design calls for a visual style that differs from the semantic level, use one of the shared utility classes instead of inline font sizes or a new header component.
+
+- `mcr-h1-bold`
+- `mcr-h2-bold`
+- `mcr-h4-bold`
+- `mcr-body`
+- `mcr-body-bold`
+
+Example:
+
+```tsx
+<h2 className="mcr-h1-bold">Submission details</h2>
+<p className="mcr-body-bold">Updated today</p>
+```
+
+These styles are also exposed in Storybook so typography changes can be visually reviewed before they ship.
+
 ## Technologies related to styles in MC-Review
 
 ### Sass / SCSS stylesheets
