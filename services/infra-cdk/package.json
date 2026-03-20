@@ -20,8 +20,8 @@
         "@luckycatfactory/esbuild-graphql-loader": "^3.8.1",
         "@types/jest": "^30.0.0",
         "@types/node": "25.3.2",
-        "@typescript-eslint/eslint-plugin": "^8.56.1",
-        "@typescript-eslint/parser": "^8.29.1",
+        "@typescript-eslint/eslint-plugin": "^8.57.1",
+        "@typescript-eslint/parser": "^8.57.1",
         "aws-cdk": "2.1107.0",
         "esbuild": "^0.25.5",
         "eslint": "^9.31.0",
@@ -36,7 +36,7 @@
         "tsconfig-paths": "^4.2.0",
         "tsx": "^4.21.0",
         "typescript": "5.9.3",
-        "typescript-eslint": "^8.56.0"
+        "typescript-eslint": "^8.57.1"
     },
     "dependencies": {
         "@aws-sdk/client-secrets-manager": "^3.1012.0",

@@ -84,5 +84,15 @@
         "husky": "^9.1.7",
         "lint-staged": "^16.2.7",
         "prettier": "^3.5.3"
+    },
+    "pnpm": {
+        "overrides": {
+            "flatted": "^3.4.2",
+            "minimatch": "^3.1.4",
+            "undici": "^7.24.0",
+            "axios@<1": "^0.30.3",
+            "fast-xml-parser@<5": "^4.5.4",
+            "fast-xml-parser@>=5": "^5.5.7"
+        }
     }
 }
