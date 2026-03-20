@@ -7,5 +7,9 @@ export async function runStorybookLocally(runner: LabeledProcessRunner) {
 
     await installWebDepsOnce(runner)
 
-    runner.runCommandAndOutput('storybook', ['pnpm', '-r', 'storybook:run'], '')
+    await runner.runCommandAndOutput(
+        'storybook',
+        ['pnpm', 'storybook:serve'],
+        'services/app-web'
+    )
 }

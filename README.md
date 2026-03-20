@@ -134,7 +134,7 @@ Clear and rebuild dependencies
 
 Run storybook
 
-- `./dev storybook`
+- `./dev local storybook`
 
 Run web app locally, but configured to run against a deployed backend
 
