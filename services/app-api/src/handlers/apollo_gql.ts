@@ -136,17 +136,25 @@ function contextForRequestForFetcher(
                 throw new Error(`User not found.`)
             }
 
+            const oauthClient = {
+                clientId: oauthClientId,
+                iss: tokenIssuer,
+                grants: oauthGrants,
+                scopes: clientOauth.scopes.map((scope) => scope),
+                isDelegatedUser: !!delegatedUser,
+            }
+
+            console.info({
+                message: 'OAuth client context',
+                ['x-acting-as-user']: delegatedUser,
+                ...oauthClient,
+            })
+
             return {
                 user: userResult,
                 tracer: tracer,
                 ctx: ctx,
-                oauthClient: {
-                    clientId: oauthClientId,
-                    iss: tokenIssuer,
-                    grants: oauthGrants,
-                    scopes: clientOauth.scopes.map((scope) => scope),
-                    isDelegatedUser: !!delegatedUser,
-                },
+                oauthClient,
             }
         } else {
             const userResult = await userFetcher(authProvider!, store)
