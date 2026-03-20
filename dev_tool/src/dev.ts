@@ -4,7 +4,6 @@ import { parseRunFlags } from './flags.js'
 import { cloneDBLocally, connectToPostgres } from './jumpbox.js'
 import {
     compileGraphQLTypesOnce,
-    compileProto,
     runAPILocally,
     runPostgresLocally,
     runOtelLocally,
@@ -56,11 +55,10 @@ async function runAllFormat() {
     await runner.runCommandAndOutput('format', ['pnpm', 'prettier'], '')
 }
 
-// create generated types for graphql, proto, prisma
+// create generated types for graphql, prisma
 async function runAllGenerate() {
     const runner = new LabeledProcessRunner()
     await compileGraphQLTypesOnce(runner)
-    await compileProto(runner)
     await installPrismaDeps(runner)
 }
 
@@ -630,7 +628,7 @@ async function main() {
         )
         .command(
             'generate',
-            'generate any code required for building. For now thats GraphQL types and the protobuf coder.',
+            'generate any code required for building. For now thats GraphQL types and prisma client.',
             {},
             () => {
                 runAllGenerate()

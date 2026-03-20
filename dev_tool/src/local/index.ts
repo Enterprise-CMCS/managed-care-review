@@ -6,7 +6,6 @@ export {
     compileGraphQLTypesWatchOnce,
 } from './graphql.js'
 export { installPrismaDeps, runPostgresLocally } from './postgres.js'
-export { compileProto, compileProtoWatch } from './proto.js'
 export { runS3Locally } from './s3.js'
 export { runStorybookLocally } from './storybook.js'
 export {
