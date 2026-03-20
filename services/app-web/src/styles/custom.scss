@@ -129,6 +129,9 @@ $mcr-single-page-width: 40rem; // based on figma - however, 40rem is also media 
 }
 
 /* TYPOGRAPHY */
+// Native heading tags are the source of truth for typography. Use the
+// utility classes below only when design calls for a visual variant that
+// differs from the semantic heading level in markup.
 @mixin mcr-type-style(
     $font-size,
     $font-weight,
@@ -140,6 +143,10 @@ $mcr-single-page-width: 40rem; // based on figma - however, 40rem is also media 
     font-weight: $font-weight;
     line-height: $line-height;
     letter-spacing: $letter-spacing;
+}
+
+body {
+    @include mcr-type-style(16px, 400, 162%, 0.16px);
 }
 
 h1 {
@@ -166,16 +173,40 @@ h6 {
     @include mcr-type-style(14px, 700, 162%, 0.14px);
 }
 
-.mcr-h1-bold {
+.mcr-homepage-h1-bold {
     @include mcr-type-style(38px, 700, 100%);
 }
 
-.mcr-h2-bold {
+.mcr-homepage-h2 {
+    font-family: 'Public Sans', sans-serif;
+    @include mcr-type-style(22px, 400, 120%);
+}
+
+.mcr-homepage-h2-bold {
+    font-family: 'Public Sans', sans-serif;
     @include mcr-type-style(22px, 700, 28px);
 }
 
 .mcr-h4-bold {
     @include mcr-type-style(20px, 700, 140%, 0.2px);
+}
+
+.mcr-tag {
+    @include mcr-type-style(14px, 400, 15.87px);
+    text-transform: uppercase;
+}
+
+.mcr-tag-bold {
+    @include mcr-type-style(14px, 700, 15.87px);
+    text-transform: uppercase;
+}
+
+.mcr-body {
+    @include mcr-type-style(16px, 400, 162%, 0.16px);
+}
+
+.mcr-body-bold {
+    @include mcr-type-style(16px, 700, 162%);
 }
 
 /* ACCESSIBILITY */
