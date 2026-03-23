@@ -109,6 +109,9 @@ it('renders EQRO fields', async () => {
     expect(
         screen.queryByText('EQR or EQR-related activities performed on MCOs')
     ).toBeNull()
+
+    // expect review decision to not be on screen
+    expect(screen.queryByLabelText('Review decision')).not.toBeInTheDocument()
 })
 
 it('does not render EQRO fields when conditions are unmet', async () => {

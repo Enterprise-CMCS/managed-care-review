@@ -39,7 +39,11 @@ export const EQROSubmissionTypeSummarySection = ({
     contractRev,
     initiallySubmittedAt,
     isStateUser,
+    editNavigateTo,
+    headerChildComponent,
+    subHeaderComponent,
     explainMissingData,
+    submissionName,
 }: EQROSubmissionTypeSummarySection): React.ReactElement => {
     const contractOrRev = contractRev ? contractRev : contract
     const contractFormData = getVisibleLatestContractFormData(
@@ -49,7 +53,6 @@ export const EQROSubmissionTypeSummarySection = ({
     if (!contractFormData) return <GenericErrorPage />
 
     const programs = contract.state.programs
-
     const programNames = programs
         .filter((p) => contractFormData?.programIDs.includes(p.id))
         .map((p) => p.name)
@@ -66,12 +69,19 @@ export const EQROSubmissionTypeSummarySection = ({
             className={styles.summarySection}
         >
             <SectionHeader
-                header="Submission details"
+                header={submissionName}
+                subHeaderComponent={subHeaderComponent}
                 hideBorderTop
-                fontSize="36px"
-            />
+                editNavigateTo={editNavigateTo}
+                headerId="submissionName"
+                fontSize="32px"
+            >
+                {headerChildComponent && headerChildComponent}
+            </SectionHeader>
             <dl>
-                <ReviewDecision subjectToReview={subjectToReview} />
+                {isSubmitted && (
+                    <ReviewDecision subjectToReview={subjectToReview} />
+                )}
                 {initiallySubmittedAt &&
                     (isSubmitted || (!isStateUser && isUnlocked)) && (
                         <SubmittedAtSummary
