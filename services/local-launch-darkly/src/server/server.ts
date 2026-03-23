@@ -7,16 +7,19 @@ import rateLimit from 'express-rate-limit'
 const sseClients = new Set<Response>()
 const ldStreamClients = new Set<Response>()
 
-function broadcastFlagUpdate(): void {
-    const data = JSON.stringify(flagStore.getAll())
-    for (const res of sseClients) {
-        res.write(`event: update\ndata: ${data}\n\n`)
+function safeSseWrite(clients: Set<Response>, event: string, data: string): void {
+    for (const res of clients) {
+        try {
+            res.write(`event: ${event}\ndata: ${data}\n\n`)
+        } catch {
+            clients.delete(res)
+        }
     }
+}
 
-    const ldFlags = toLDFlagFormat()
-    for (const res of ldStreamClients) {
-        res.write(`event: put\ndata: ${JSON.stringify(ldFlags)}\n\n`)
-    }
+function broadcastFlagUpdate(): void {
+    safeSseWrite(sseClients, 'update', JSON.stringify(flagStore.getAll()))
+    safeSseWrite(ldStreamClients, 'put', JSON.stringify(toLDFlagFormat()))
 }
 
 type LDFlagEntry = {
@@ -157,22 +160,29 @@ const distDir = join(import.meta.dirname, '..', '..', 'dist')
 app.use(express.static(distDir))
 const indexRateLimiter = rateLimit({
     windowMs: 15 * 60 * 1000, // 15 minutes
-    max: 100, // limit each IP to 100 index requests per windowMs
+    limit: 100, // limit each IP to 100 index requests per windowMs
 })
-app.get('*', indexRateLimiter, (_req, res) => {
+
+app.get('*', indexRateLimiter as unknown as express.RequestHandler, (_req, res) => {
     res.sendFile(join(distDir, 'index.html'))
 })
 
-const PORT = parseInt(process.env.PORT || '3031', 10)
-const HOST = process.env.HOST || '127.0.0.1'
+const serviceUrl = new URL(process.env.LOCAL_LD_SERVICE_URL || 'http://127.0.0.1:3031')
+const PORT = parseInt(serviceUrl.port || '3031', 10)
+const HOST = serviceUrl.hostname
 
 // Fetch real LD values on startup, then start the server
-await flagStore.initFromLaunchDarkly()
+try {
+    await flagStore.initFromLaunchDarkly()
+} catch (err) {
+    console.error('Failed to initialize flags from LaunchDarkly:', err)
+    process.exit(1)
+}
 
 const server = app.listen(PORT, HOST, () => {
-    console.info(`Local LaunchDarkly running at http://${HOST}:${PORT}`)
-    console.info(`UI: http://localhost:${PORT}`)
-    console.info(`Flags API: http://localhost:${PORT}/flags`)
+    console.info(`Local LaunchDarkly running at ${serviceUrl}`)
+    console.info(`UI: ${serviceUrl}`)
+    console.info(`Flags API: ${serviceUrl}/flags`)
     console.info(`Loaded ${Object.keys(flagStore.getAll()).length} flags`)
 })
 
