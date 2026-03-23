@@ -18,7 +18,7 @@ Make sure heading levels (`h2`, `h3` etc) are properly used for text content. Th
 
 Note also that there is a specific color to be used for links (`$$mcr-foundation-link`) and hint text (`$mcr-foundation-hint`).
 
-Heading typography is standardized globally in [`services/app-web/src/styles/custom.scss`](/Users/pearlroos/managed-care-review/services/app-web/src/styles/custom.scss). Use one of the shared utility classes below instead of inline font sizes or a new header component.
+Heading typography is standardized globally in [`services/app-web/src/styles/custom.scss`](https://github.com/Enterprise-CMCS/managed-care-review/blob/main/services/app-web/src/styles/custom.scss). Use one of the shared utility classes below instead of inline font sizes or a new header component.
 
 - `mcr-homepage-h1-bold`
 - `mcr-homepage-h2`

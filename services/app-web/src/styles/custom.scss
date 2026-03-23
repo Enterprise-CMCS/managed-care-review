@@ -129,9 +129,8 @@ $mcr-single-page-width: 40rem; // based on figma - however, 40rem is also media 
 }
 
 /* TYPOGRAPHY */
-// Native heading tags are the source of truth for typography. Use the
-// utility classes below only when design calls for a visual variant that
-// differs from the semantic heading level in markup.
+// These heading tags are the source of truth for typography. Use these
+// utility classes to ensure consistent use of font sizes across headers
 @mixin mcr-type-style(
     $font-size,
     $font-weight,
