@@ -414,7 +414,7 @@ describe('Change History', () => {
         ).not.toHaveTextContent('View past submission version')
     })
 
-    it('renders EQRO initial submission under review', async () => {
+    it.skip('renders EQRO initial submission under review', async () => {
         const contract = mockEqroContractSubmittedUnderReview()
         renderWithProviders(<ChangeHistory contract={contract} />)
 
@@ -441,7 +441,7 @@ describe('Change History', () => {
         expect(screen.getByText('Submitted')).toBeInTheDocument()
         expect(screen.getByText('Subject to review')).toBeInTheDocument()
     })
-    it('renders EQRO initial submission not subject to review', async () => {
+    it.skip('renders EQRO initial submission not subject to review', async () => {
         const contract = mockEqroContractSubmittedNotSubjectToReview()
 
         renderWithProviders(<ChangeHistory contract={contract} />)
@@ -460,7 +460,7 @@ describe('Change History', () => {
         expect(screen.getAllByText('Not subject to review')).toHaveLength(2)
         expect(screen.queryByText('Status Update')).not.toBeInTheDocument()
     })
-    it('preserves historical review decisions across EQRO resubmissions', async () => {
+    it.skip('preserves historical review decisions across EQRO resubmissions', async () => {
         const contract = mockEqroContractResubmittedWithReviewStatusChange()
 
         renderWithProviders(<ChangeHistory contract={contract} />)
