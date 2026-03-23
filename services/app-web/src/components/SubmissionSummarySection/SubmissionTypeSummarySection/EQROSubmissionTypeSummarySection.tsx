@@ -29,7 +29,7 @@ export type EQROSubmissionTypeSummarySection = {
     headerChildComponent?: React.ReactElement
     subHeaderComponent?: React.ReactElement
     initiallySubmittedAt?: Date
-    submissionName: string
+    headerText: string
     isStateUser: boolean
     explainMissingData?: boolean
 }
@@ -43,7 +43,7 @@ export const EQROSubmissionTypeSummarySection = ({
     headerChildComponent,
     subHeaderComponent,
     explainMissingData,
-    submissionName,
+    headerText,
 }: EQROSubmissionTypeSummarySection): React.ReactElement => {
     const contractOrRev = contractRev ? contractRev : contract
     const contractFormData = getVisibleLatestContractFormData(
@@ -69,12 +69,12 @@ export const EQROSubmissionTypeSummarySection = ({
             className={styles.summarySection}
         >
             <SectionHeader
-                header={submissionName}
+                header={headerText}
                 subHeaderComponent={subHeaderComponent}
                 hideBorderTop
                 editNavigateTo={editNavigateTo}
-                headerId="submissionName"
-                fontSize="32px"
+                headerId="submissionTypeHeader"
+                fontSize="38px"
             >
                 {headerChildComponent && headerChildComponent}
             </SectionHeader>
