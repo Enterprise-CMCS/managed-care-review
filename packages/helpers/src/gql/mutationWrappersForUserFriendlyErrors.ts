@@ -667,4 +667,5 @@ export const createRateQuestionResponseWrapper = async (
 }
 
 // Legacy alias for backward compatibility
-export const handleApolloErrorsAndAddUserFacingMessages = handleGraphQLErrorsAndAddUserFacingMessages
+export const handleApolloErrorsAndAddUserFacingMessages =
+    handleGraphQLErrorsAndAddUserFacingMessages

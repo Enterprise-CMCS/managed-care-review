@@ -85,11 +85,11 @@ export const MccrsId = (): React.ReactElement => {
     useLayoutEffect(() => {
         updateHeading({ customHeading: stateHeader })
     }, [stateHeader, updateHeading])
- 
-     // Set the active main content to focus when click the Skip to main content button.
-     useEffect(() => {
-         updateActiveMainContent('MCCRSIDForm')
-     }, [updateActiveMainContent])   
+
+    // Set the active main content to focus when click the Skip to main content button.
+    useEffect(() => {
+        updateActiveMainContent('MCCRSIDForm')
+    }, [updateActiveMainContent])
 
     // Handle loading and error states for fetching data while using cached data
     if (!fetchContractData && fetchContractLoading) {

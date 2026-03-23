@@ -1555,8 +1555,7 @@ describe('ContractDetails', () => {
     describe('Contract 438 attestation', () => {
         it('renders 438 attestation question without errors', async () => {
             const draftContract = mockContractPackageUnlockedWithUnlockedType()
-            draftContract.draftRevision.formData.statutoryRegulatoryAttestation =
-                true
+            draftContract.draftRevision.formData.statutoryRegulatoryAttestation = true
 
             renderWithProviders(
                 <Routes>

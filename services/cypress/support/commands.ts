@@ -6,7 +6,7 @@
 import '@testing-library/cypress/add-commands'
 import 'cypress-file-upload'
 import 'cypress-pipe'
-import {aliasMutation, aliasQuery} from '../utils/graphql-test-utils';
+import { aliasMutation, aliasQuery } from '../utils/graphql-test-utils'
 
 const LOCAL_STORAGE_MEMORY = {}
 
@@ -38,7 +38,12 @@ Cypress.Commands.add('restoreLocalStorage', () => {
 
 Cypress.Commands.add('safeClick', { prevSubject: 'element' }, ($element) => {
     const click = ($el: JQuery) => $el.trigger('click')
-    return cy.wrap($element).should('exist').should('be.visible').wait(500).pipe(click)
+    return cy
+        .wrap($element)
+        .should('exist')
+        .should('be.visible')
+        .wait(500)
+        .pipe(click)
 })
 
 Cypress.Commands.add('interceptGraphQL', () => {
@@ -66,4 +71,3 @@ Cypress.Commands.add('interceptGraphQL', () => {
         aliasMutation(req, 'undoWithdrawnRate')
     }).as('GraphQL')
 })
-

@@ -352,8 +352,7 @@ describe('with rates', () => {
 
     test('to addresses list includes DMCP, OACT, and DMCO group emails for contract and rate package', async () => {
         const sub = submission
-        sub.packageSubmissions[0].contractRevision.formData.riskBasedContract =
-            true
+        sub.packageSubmissions[0].contractRevision.formData.riskBasedContract = true
         const template = await resubmitContractCMSEmail(
             sub,
             resubmitData,
@@ -393,8 +392,7 @@ describe('with rates', () => {
 
     it('does not include oactEmails for non risked based contract', async () => {
         const sub = submission
-        sub.packageSubmissions[0].contractRevision.formData.riskBasedContract =
-            false
+        sub.packageSubmissions[0].contractRevision.formData.riskBasedContract = false
         const template = await resubmitContractCMSEmail(
             submission,
             resubmitData,
@@ -450,8 +448,7 @@ describe('with rates', () => {
 
     it('includes state specific analysts emails on contract and rate resubmission email', async () => {
         const sub = submission
-        sub.packageSubmissions[0].contractRevision.formData.riskBasedContract =
-            true
+        sub.packageSubmissions[0].contractRevision.formData.riskBasedContract = true
         const template = await resubmitContractCMSEmail(
             sub,
             resubmitData,

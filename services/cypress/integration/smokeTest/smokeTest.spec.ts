@@ -14,7 +14,10 @@ describe('smoke test', () => {
 
     it('can log in as a CMS user', () => {
         cy.logInAsCMSUser({ initialURL: '/submissions/health-plan/test' })
-        cy.url({ timeout: 10_000 }).should('contain', '/submissions/health-plan/test')
+        cy.url({ timeout: 10_000 }).should(
+            'contain',
+            '/submissions/health-plan/test'
+        )
     })
 
     it('can contact the API and connect to the database', () => {

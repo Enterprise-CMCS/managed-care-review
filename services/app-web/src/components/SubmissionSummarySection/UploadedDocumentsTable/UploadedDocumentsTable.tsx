@@ -92,8 +92,8 @@ export const UploadedDocumentsTable = ({
     // to cms users always when data available, to state users only when linked rates flag is off
     const showLegacySharedRatesAcross = Boolean(
         (hideDynamicFeedback ? !isStateUser : true) &&
-            packagesWithSharedRateCerts &&
-            packagesWithSharedRateCerts.length > 0
+        packagesWithSharedRateCerts &&
+        packagesWithSharedRateCerts.length > 0
     )
 
     const borderTopGradientStyles = `borderTopLinearGradient ${styles.uploadedDocumentsTable}`

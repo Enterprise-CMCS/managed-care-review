@@ -51,14 +51,14 @@ const featureFlags = {
      */
     WITHDRAW_SUBMISSION: {
         flag: 'withdraw-submission',
-        defaultValue: false
+        defaultValue: false,
     },
     /**
      * Enables undo withdraw submission features
      */
     UNDO_WITHDRAW_SUBMISSION: {
         flag: 'undo-withdraw-submission',
-        defaultValue: false
+        defaultValue: false,
     },
     // PERMANENT FLAGS
     /**

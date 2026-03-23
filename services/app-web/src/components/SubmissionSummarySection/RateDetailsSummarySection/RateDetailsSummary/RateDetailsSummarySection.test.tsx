@@ -318,8 +318,7 @@ describe('RateDetailsSummarySection', () => {
     it('can render all rate details fields for new rate certification submission', async () => {
         const statePrograms = mockMNState().programs
         const contract = mockContractPackageSubmitted()
-        contract.packageSubmissions[0].contractRevision.formData.dsnpContract =
-            true
+        contract.packageSubmissions[0].contractRevision.formData.dsnpContract = true
         contract.packageSubmissions[0].rateRevisions[0].formData.rateCertificationName =
             'MCR-MN-0005-SNBC-RATE-20221014-20221014-CERTIFICATION-20221014'
         contract.packageSubmissions[0].rateRevisions[0].formData.rateType =

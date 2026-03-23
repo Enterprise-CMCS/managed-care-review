@@ -43,7 +43,7 @@ describe('CMS user can view submission', () => {
         // store submission name for later
         cy.location().then((loc) => {
             expect(loc.search).to.match(/.*justSubmitted=*/)
-            
+
             const urlParams = new URLSearchParams(loc.search)
             const submissionName = urlParams.get('justSubmitted')
 
@@ -100,21 +100,26 @@ describe('CMS user can view submission', () => {
                 .should('be.visible')
                 .and('have.attr', 'href')
                 .then((href) => {
-                    expect(href).to.match(/\/zips\/contracts\/[^/]+\/[^/]+\.zip(\?|$)/)
+                    expect(href).to.match(
+                        /\/zips\/contracts\/[^/]+\/[^/]+\.zip(\?|$)/
+                    )
                 })
             cy.contains('a', /download rate documents \(2 files\)/i)
                 .should('be.visible')
                 .and('have.attr', 'href')
                 .then((href) => {
-                    expect(href).to.match(/\/zips\/rates\/[^/]+\/[^/]+\.zip(\?|$)/)
+                    expect(href).to.match(
+                        /\/zips\/rates\/[^/]+\/[^/]+\.zip(\?|$)/
+                    )
                 })
 
             // No document dates or other fields are undefined
             cy.findByText('N/A').should('not.exist')
 
             // Double check we do not show any missing field text. This UI is not used for submitted packages
-           cy.findByText(/You must provide this information/).should('not.exist')
-
+            cy.findByText(/You must provide this information/).should(
+                'not.exist'
+            )
         })
     })
 
@@ -123,18 +128,19 @@ describe('CMS user can view submission', () => {
             'eqro-submissions': true,
         })
 
-        cy.apiCreateAndSubmitEQROSubmission(stateUser()).then(contract => {
+        cy.apiCreateAndSubmitEQROSubmission(stateUser()).then((contract) => {
             const latestSubmission = contract.packageSubmissions[0]
             const contractName = latestSubmission.contractRevision.contractName
 
             cy.logInAsCMSUser()
 
-            cy.findByRole('link', { name: contractName}).should('exist').click()
+            cy.findByRole('link', { name: contractName })
+                .should('exist')
+                .click()
 
             cy.wait('@fetchContractWithQuestionsQuery', { timeout: 20_000 })
- 
+
             cy.findByRole('heading', { name: contractName, level: 1 })
-            
 
             //TODO: Add assertions for review determination once that is added.
         })
@@ -144,7 +150,7 @@ describe('CMS user can view submission', () => {
         cy.interceptFeatureFlags({
             '438-attestation': true,
             'hide-supporting-docs-page': true,
-            'dsnp':true
+            dsnp: true,
         })
         // state user adds a new package
         cy.logInAsStateUser()
@@ -182,7 +188,7 @@ describe('CMS user can view submission', () => {
         // store submission name for later
         cy.location().then((loc) => {
             expect(loc.search).to.match(/.*justSubmitted=*/)
-            
+
             const urlParams = new URLSearchParams(loc.search)
             const submissionName = urlParams.get('justSubmitted')
 
@@ -199,16 +205,19 @@ describe('CMS user can view submission', () => {
             cy.findByText(submissionName).should('exist')
             // check the table of submissions
 
-          
             // can navigate to submission summary  by clicking link
             cy.findByText(submissionName).should('exist').click()
             cy.url({ timeout: 10_000 }).should('contain', submissionId)
             cy.wait('@fetchContractQuery', { timeout: 20_000 })
             cy.findByTestId('submission-summary').should('exist')
 
-            cy.findByRole('link', {name: 'Released to state'}).should('exist').click()
+            cy.findByRole('link', { name: 'Released to state' })
+                .should('exist')
+                .click()
             cy.findByTestId('date-picker-external-input').type('11/11/2024')
-            cy.findByRole('button', {name: 'Released to state'}).should('exist').click()
+            cy.findByRole('button', { name: 'Released to state' })
+                .should('exist')
+                .click()
             cy.findByTestId('submissionApprovedBanner').should('exist')
         })
     })

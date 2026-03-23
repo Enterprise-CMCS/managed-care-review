@@ -76,10 +76,10 @@ export const UndoRateWithdraw = () => {
         updateHeading({ customHeading: stateHeader })
     }, [stateHeader, updateHeading])
 
-     // Set the active main content to focus when click the Skip to main content button.
-     useEffect(() => {
-         updateActiveMainContent('UndoRateWithdrawForm')
-     }, [updateActiveMainContent])   
+    // Set the active main content to focus when click the Skip to main content button.
+    useEffect(() => {
+        updateActiveMainContent('UndoRateWithdrawForm')
+    }, [updateActiveMainContent])
 
     if (loading) {
         return <ErrorOrLoadingPage state="LOADING" />

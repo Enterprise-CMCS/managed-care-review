@@ -14,11 +14,11 @@ import { DEFAULT_EXTERNAL_DATE_FORMAT, INTERNAL_DATE_FORMAT } from './constants'
  * @returns {Date} the date, corrected if needed
  */
 export const keepDateWithinMonth = (dateToCheck: Date, month: number): Date => {
-  if (month !== dateToCheck.getMonth()) {
-    dateToCheck.setDate(0)
-  }
+    if (month !== dateToCheck.getMonth()) {
+        dateToCheck.setDate(0)
+    }
 
-  return dateToCheck
+    return dateToCheck
 }
 
 /**
@@ -30,9 +30,9 @@ export const keepDateWithinMonth = (dateToCheck: Date, month: number): Date => {
  * @returns {Date} the set date
  */
 export const setDate = (year: number, month: number, date: number): Date => {
-  const newDate = new Date(0)
-  newDate.setFullYear(year, month, date)
-  return newDate
+    const newDate = new Date(0)
+    newDate.setFullYear(year, month, date)
+    return newDate
 }
 
 /**
@@ -41,11 +41,11 @@ export const setDate = (year: number, month: number, date: number): Date => {
  * @returns {Date} todays date
  */
 export const today = (): Date => {
-  const newDate = new Date()
-  const day = newDate.getDate()
-  const month = newDate.getMonth()
-  const year = newDate.getFullYear()
-  return setDate(year, month, day)
+    const newDate = new Date()
+    const day = newDate.getDate()
+    const month = newDate.getMonth()
+    const year = newDate.getFullYear()
+    return setDate(year, month, day)
 }
 
 /**
@@ -55,9 +55,9 @@ export const today = (): Date => {
  * @returns {Date} the adjusted date
  */
 export const startOfMonth = (date: Date): Date => {
-  const newDate = new Date(0)
-  newDate.setFullYear(date.getFullYear(), date.getMonth(), 1)
-  return newDate
+    const newDate = new Date(0)
+    newDate.setFullYear(date.getFullYear(), date.getMonth(), 1)
+    return newDate
 }
 
 /**
@@ -67,9 +67,9 @@ export const startOfMonth = (date: Date): Date => {
  * @returns {Date} the adjusted date
  */
 export const lastDayOfMonth = (date: Date): Date => {
-  const newDate = new Date(0)
-  newDate.setFullYear(date.getFullYear(), date.getMonth() + 1, 0)
-  return newDate
+    const newDate = new Date(0)
+    newDate.setFullYear(date.getFullYear(), date.getMonth() + 1, 0)
+    return newDate
 }
 
 /**
@@ -80,9 +80,9 @@ export const lastDayOfMonth = (date: Date): Date => {
  * @returns {Date} the adjusted date
  */
 export const addDays = (date: Date, numDays: number): Date => {
-  const newDate = new Date(date.getTime())
-  newDate.setDate(newDate.getDate() + numDays)
-  return newDate
+    const newDate = new Date(date.getTime())
+    newDate.setDate(newDate.getDate() + numDays)
+    return newDate
 }
 
 /**
@@ -93,7 +93,7 @@ export const addDays = (date: Date, numDays: number): Date => {
  * @returns {Date} the adjusted date
  */
 export const subDays = (date: Date, numDays: number): Date =>
-  addDays(date, -numDays)
+    addDays(date, -numDays)
 
 /**
  * Add weeks to date
@@ -103,7 +103,7 @@ export const subDays = (date: Date, numDays: number): Date =>
  * @returns {Date} the adjusted date
  */
 export const addWeeks = (date: Date, numWeeks: number): Date =>
-  addDays(date, numWeeks * 7)
+    addDays(date, numWeeks * 7)
 
 /**
  * Subtract weeks from date
@@ -113,7 +113,7 @@ export const addWeeks = (date: Date, numWeeks: number): Date =>
  * @returns {Date} the adjusted date
  */
 export const subWeeks = (date: Date, numWeeks: number): Date =>
-  addWeeks(date, -numWeeks)
+    addWeeks(date, -numWeeks)
 
 /**
  * Set date to the start of the week (Sunday)
@@ -122,8 +122,8 @@ export const subWeeks = (date: Date, numWeeks: number): Date =>
  * @returns {Date} the adjusted date
  */
 export const startOfWeek = (date: Date): Date => {
-  const dayOfWeek = date.getDay()
-  return subDays(date, dayOfWeek)
+    const dayOfWeek = date.getDay()
+    return subDays(date, dayOfWeek)
 }
 
 /**
@@ -134,8 +134,8 @@ export const startOfWeek = (date: Date): Date => {
  * @returns {Date} the adjusted date
  */
 export const endOfWeek = (date: Date): Date => {
-  const dayOfWeek = date.getDay()
-  return addDays(date, 6 - dayOfWeek)
+    const dayOfWeek = date.getDay()
+    return addDays(date, 6 - dayOfWeek)
 }
 
 /**
@@ -146,11 +146,11 @@ export const endOfWeek = (date: Date): Date => {
  * @returns {Date} the adjusted date
  */
 export const addMonths = (date: Date, numMonths: number): Date => {
-  const newDate = new Date(date.getTime())
-  const dateMonth = (newDate.getMonth() + 12 + numMonths) % 12
-  newDate.setMonth(newDate.getMonth() + numMonths)
-  keepDateWithinMonth(newDate, dateMonth)
-  return newDate
+    const newDate = new Date(date.getTime())
+    const dateMonth = (newDate.getMonth() + 12 + numMonths) % 12
+    newDate.setMonth(newDate.getMonth() + numMonths)
+    keepDateWithinMonth(newDate, dateMonth)
+    return newDate
 }
 
 /**
@@ -161,7 +161,7 @@ export const addMonths = (date: Date, numMonths: number): Date => {
  * @returns {Date} the adjusted date
  */
 export const subMonths = (date: Date, numMonths: number): Date =>
-  addMonths(date, -numMonths)
+    addMonths(date, -numMonths)
 
 /**
  * Add years to date and keep date within month
@@ -171,7 +171,7 @@ export const subMonths = (date: Date, numMonths: number): Date =>
  * @returns {Date} the adjusted date
  */
 export const addYears = (date: Date, numYears: number): Date =>
-  addMonths(date, numYears * 12)
+    addMonths(date, numYears * 12)
 
 /**
  * Subtract years from date
@@ -181,7 +181,7 @@ export const addYears = (date: Date, numYears: number): Date =>
  * @returns {Date} the adjusted date
  */
 export const subYears = (date: Date, numYears: number): Date =>
-  addYears(date, -numYears)
+    addYears(date, -numYears)
 
 /**
  * Set months of date
@@ -191,10 +191,10 @@ export const subYears = (date: Date, numYears: number): Date =>
  * @returns {Date} the adjusted date
  */
 export const setMonth = (date: Date, month: number): Date => {
-  const newDate = new Date(date.getTime())
-  newDate.setMonth(month)
-  keepDateWithinMonth(newDate, month)
-  return newDate
+    const newDate = new Date(date.getTime())
+    newDate.setMonth(month)
+    keepDateWithinMonth(newDate, month)
+    return newDate
 }
 
 /**
@@ -205,11 +205,11 @@ export const setMonth = (date: Date, month: number): Date => {
  * @returns {Date} the adjusted date
  */
 export const setYear = (date: Date, year: number): Date => {
-  const newDate = new Date(date.getTime())
-  const month = newDate.getMonth()
-  newDate.setFullYear(year)
-  keepDateWithinMonth(newDate, month)
-  return newDate
+    const newDate = new Date(date.getTime())
+    const month = newDate.getMonth()
+    newDate.setFullYear(year)
+    keepDateWithinMonth(newDate, month)
+    return newDate
 }
 
 /**
@@ -220,11 +220,11 @@ export const setYear = (date: Date, year: number): Date => {
  * @returns {Date} the earliest date
  */
 export const min = (dateA: Date, dateB: Date): Date => {
-  let newDate = dateA
-  if (dateB < dateA) {
-    newDate = dateB
-  }
-  return new Date(newDate.getTime())
+    let newDate = dateA
+    if (dateB < dateA) {
+        newDate = dateB
+    }
+    return new Date(newDate.getTime())
 }
 
 /**
@@ -235,11 +235,11 @@ export const min = (dateA: Date, dateB: Date): Date => {
  * @returns {Date} the latest date
  */
 export const max = (dateA: Date, dateB: Date): Date => {
-  let newDate = dateA
-  if (dateB > dateA) {
-    newDate = dateB
-  }
-  return new Date(newDate.getTime())
+    let newDate = dateA
+    if (dateB > dateA) {
+        newDate = dateB
+    }
+    return new Date(newDate.getTime())
 }
 
 /**
@@ -250,7 +250,7 @@ export const max = (dateA: Date, dateB: Date): Date => {
  * @returns {boolean} are dates in the same year
  */
 export const isSameYear = (dateA: Date, dateB: Date): boolean => {
-  return dateA && dateB && dateA.getFullYear() === dateB.getFullYear()
+    return dateA && dateB && dateA.getFullYear() === dateB.getFullYear()
 }
 
 /**
@@ -261,7 +261,7 @@ export const isSameYear = (dateA: Date, dateB: Date): boolean => {
  * @returns {boolean} are dates in the same month
  */
 export const isSameMonth = (dateA: Date, dateB: Date): boolean => {
-  return isSameYear(dateA, dateB) && dateA.getMonth() === dateB.getMonth()
+    return isSameYear(dateA, dateB) && dateA.getMonth() === dateB.getMonth()
 }
 
 /**
@@ -272,7 +272,7 @@ export const isSameMonth = (dateA: Date, dateB: Date): boolean => {
  * @returns {boolean} are dates the same date
  */
 export const isSameDay = (dateA: Date, dateB: Date): boolean => {
-  return isSameMonth(dateA, dateB) && dateA.getDate() === dateB.getDate()
+    return isSameMonth(dateA, dateB) && dateA.getDate() === dateB.getDate()
 }
 
 /**
@@ -284,19 +284,19 @@ export const isSameDay = (dateA: Date, dateB: Date): boolean => {
  * @returns {Date} the date between min and max
  */
 export const keepDateBetweenMinAndMax = (
-  date: Date,
-  minDate: Date,
-  maxDate?: Date
+    date: Date,
+    minDate: Date,
+    maxDate?: Date
 ): Date => {
-  let newDate = date
+    let newDate = date
 
-  if (date < minDate) {
-    newDate = minDate
-  } else if (maxDate && date > maxDate) {
-    newDate = maxDate
-  }
+    if (date < minDate) {
+        newDate = minDate
+    } else if (maxDate && date > maxDate) {
+        newDate = maxDate
+    }
 
-  return new Date(newDate.getTime())
+    return new Date(newDate.getTime())
 }
 
 /**
@@ -308,9 +308,9 @@ export const keepDateBetweenMinAndMax = (
  * @return {boolean} is there a day within the month within min and max dates
  */
 export const isDateWithinMinAndMax = (
-  date: Date,
-  minDate: Date,
-  maxDate?: Date
+    date: Date,
+    minDate: Date,
+    maxDate?: Date
 ): boolean => date >= minDate && (!maxDate || date <= maxDate)
 
 /**
@@ -322,14 +322,14 @@ export const isDateWithinMinAndMax = (
  * @return {boolean} is the month outside min or max dates
  */
 export const isDatesMonthOutsideMinOrMax = (
-  date: Date,
-  minDate: Date,
-  maxDate?: Date
+    date: Date,
+    minDate: Date,
+    maxDate?: Date
 ): boolean => {
-  return (
-    lastDayOfMonth(date) < minDate ||
-    (!!maxDate && startOfMonth(date) > maxDate)
-  )
+    return (
+        lastDayOfMonth(date) < minDate ||
+        (!!maxDate && startOfMonth(date) > maxDate)
+    )
 }
 
 /**
@@ -341,14 +341,14 @@ export const isDatesMonthOutsideMinOrMax = (
  * @return {boolean} is the month outside min or max dates
  */
 export const isDatesYearOutsideMinOrMax = (
-  date: Date,
-  minDate: Date,
-  maxDate?: Date
+    date: Date,
+    minDate: Date,
+    maxDate?: Date
 ): boolean => {
-  return (
-    lastDayOfMonth(setMonth(date, 11)) < minDate ||
-    (!!maxDate && startOfMonth(setMonth(date, 0)) > maxDate)
-  )
+    return (
+        lastDayOfMonth(setMonth(date, 11)) < minDate ||
+        (!!maxDate && startOfMonth(setMonth(date, 0)) > maxDate)
+    )
 }
 
 /**
@@ -360,70 +360,70 @@ export const isDatesYearOutsideMinOrMax = (
  * @returns {Date} the parsed date
  */
 export const parseDateString = (
-  dateString: string,
-  dateFormat: string = INTERNAL_DATE_FORMAT,
-  adjustDate = false
+    dateString: string,
+    dateFormat: string = INTERNAL_DATE_FORMAT,
+    adjustDate = false
 ): Date | undefined => {
-  let date
-  let month
-  let day
-  let year
-  let parsed
+    let date
+    let month
+    let day
+    let year
+    let parsed
 
-  if (dateString) {
-    let monthStr, dayStr, yearStr
+    if (dateString) {
+        let monthStr, dayStr, yearStr
 
-    if (dateFormat === DEFAULT_EXTERNAL_DATE_FORMAT) {
-      ;[monthStr, dayStr, yearStr] = dateString.split('/')
-    } else {
-      ;[yearStr, monthStr, dayStr] = dateString.split('-')
-    }
-
-    if (yearStr) {
-      parsed = parseInt(yearStr, 10)
-      if (!Number.isNaN(parsed)) {
-        year = parsed
-        if (adjustDate) {
-          year = Math.max(0, year)
-          if (yearStr.length < 3) {
-            const currentYear = today().getFullYear()
-            const currentYearStub =
-              currentYear - (currentYear % 10 ** yearStr.length)
-            year = currentYearStub + parsed
-          }
+        if (dateFormat === DEFAULT_EXTERNAL_DATE_FORMAT) {
+            ;[monthStr, dayStr, yearStr] = dateString.split('/')
+        } else {
+            ;[yearStr, monthStr, dayStr] = dateString.split('-')
         }
-      }
-    }
 
-    if (monthStr) {
-      parsed = parseInt(monthStr, 10)
-      if (!Number.isNaN(parsed)) {
-        month = parsed
-        if (adjustDate) {
-          month = Math.max(1, month)
-          month = Math.min(12, month)
+        if (yearStr) {
+            parsed = parseInt(yearStr, 10)
+            if (!Number.isNaN(parsed)) {
+                year = parsed
+                if (adjustDate) {
+                    year = Math.max(0, year)
+                    if (yearStr.length < 3) {
+                        const currentYear = today().getFullYear()
+                        const currentYearStub =
+                            currentYear - (currentYear % 10 ** yearStr.length)
+                        year = currentYearStub + parsed
+                    }
+                }
+            }
         }
-      }
-    }
 
-    if (month && dayStr && year != null) {
-      parsed = parseInt(dayStr, 10)
-      if (!Number.isNaN(parsed)) {
-        day = parsed
-        if (adjustDate) {
-          const lastDayOfMonth = setDate(year, month, 0).getDate()
-          day = Math.max(1, day)
-          day = Math.min(lastDayOfMonth, day)
+        if (monthStr) {
+            parsed = parseInt(monthStr, 10)
+            if (!Number.isNaN(parsed)) {
+                month = parsed
+                if (adjustDate) {
+                    month = Math.max(1, month)
+                    month = Math.min(12, month)
+                }
+            }
         }
-      }
+
+        if (month && dayStr && year != null) {
+            parsed = parseInt(dayStr, 10)
+            if (!Number.isNaN(parsed)) {
+                day = parsed
+                if (adjustDate) {
+                    const lastDayOfMonth = setDate(year, month, 0).getDate()
+                    day = Math.max(1, day)
+                    day = Math.min(lastDayOfMonth, day)
+                }
+            }
+        }
+
+        if (month && day && year != null) {
+            date = setDate(year, month - 1, day)
+        }
     }
 
-    if (month && day && year != null) {
-      date = setDate(year, month - 1, day)
-    }
-  }
-
-  return date
+    return date
 }
 
 /**
@@ -434,138 +434,140 @@ export const parseDateString = (
  * @returns {string} the formatted date string
  */
 export const formatDate = (
-  date: Date,
-  dateFormat: string = INTERNAL_DATE_FORMAT
+    date: Date,
+    dateFormat: string = INTERNAL_DATE_FORMAT
 ): string => {
-  const padZeros = (value: number, length: number): string => {
-    return `0000${value}`.slice(-length)
-  }
+    const padZeros = (value: number, length: number): string => {
+        return `0000${value}`.slice(-length)
+    }
 
-  const month = date.getMonth() + 1
-  const day = date.getDate()
-  const year = date.getFullYear()
+    const month = date.getMonth() + 1
+    const day = date.getDate()
+    const year = date.getFullYear()
 
-  if (dateFormat === DEFAULT_EXTERNAL_DATE_FORMAT) {
-    return [padZeros(month, 2), padZeros(day, 2), padZeros(year, 4)].join('/')
-  }
+    if (dateFormat === DEFAULT_EXTERNAL_DATE_FORMAT) {
+        return [padZeros(month, 2), padZeros(day, 2), padZeros(year, 4)].join(
+            '/'
+        )
+    }
 
-  return [padZeros(year, 4), padZeros(month, 2), padZeros(day, 2)].join('-')
+    return [padZeros(year, 4), padZeros(month, 2), padZeros(day, 2)].join('-')
 }
 
 // VALIDATION
 
 export const isDateInvalid = (
-  dateString: string,
-  minDate: Date,
-  maxDate?: Date
+    dateString: string,
+    minDate: Date,
+    maxDate?: Date
 ): boolean => {
-  let isInvalid = false
+    let isInvalid = false
 
-  if (dateString) {
-    isInvalid = true
+    if (dateString) {
+        isInvalid = true
 
-    const dateStringParts = dateString.split('/')
-    const [month, day, year] = dateStringParts.map((str) => {
-      let value
-      const parsed = parseInt(str, 10)
-      if (!Number.isNaN(parsed)) value = parsed
-      return value
-    })
+        const dateStringParts = dateString.split('/')
+        const [month, day, year] = dateStringParts.map((str) => {
+            let value
+            const parsed = parseInt(str, 10)
+            if (!Number.isNaN(parsed)) value = parsed
+            return value
+        })
 
-    if (month && day && year != null) {
-      const checkDate = setDate(year, month - 1, day)
+        if (month && day && year != null) {
+            const checkDate = setDate(year, month - 1, day)
 
-      if (
-        checkDate.getMonth() === month - 1 &&
-        checkDate.getDate() === day &&
-        checkDate.getFullYear() === year &&
-        dateStringParts[2].length === 4 &&
-        isDateWithinMinAndMax(checkDate, minDate, maxDate)
-      ) {
-        isInvalid = false
-      }
+            if (
+                checkDate.getMonth() === month - 1 &&
+                checkDate.getDate() === day &&
+                checkDate.getFullYear() === year &&
+                dateStringParts[2].length === 4 &&
+                isDateWithinMinAndMax(checkDate, minDate, maxDate)
+            ) {
+                isInvalid = false
+            }
+        }
     }
-  }
 
-  return isInvalid
+    return isInvalid
 }
 
 // RENDERING TABLES
 
 export const listToTable = (
-  list: React.ReactNode[],
-  rowSize: number
+    list: React.ReactNode[],
+    rowSize: number
 ): React.ReactElement => {
-  const rows = []
-  let i = 0
+    const rows = []
+    let i = 0
 
-  while (i < list.length) {
-    const row = []
-    while (i < list.length && row.length < rowSize) {
-      row.push(list[parseInt(`${i}`)])
-      i += 1
+    while (i < list.length) {
+        const row = []
+        while (i < list.length && row.length < rowSize) {
+            row.push(list[parseInt(`${i}`)])
+            i += 1
+        }
+        rows.push(row)
     }
-    rows.push(row)
-  }
 
-  return (
-    <>
-      {rows.map((r, rIndex) => (
-        <tr key={`row_${rIndex}`}>
-          {r.map((cell, cIndex) => (
-            <td key={`row_${rIndex}_cell_${cIndex}`}>{cell}</td>
-          ))}
-        </tr>
-      ))}
-    </>
-  )
+    return (
+        <>
+            {rows.map((r, rIndex) => (
+                <tr key={`row_${rIndex}`}>
+                    {r.map((cell, cIndex) => (
+                        <td key={`row_${rIndex}_cell_${cIndex}`}>{cell}</td>
+                    ))}
+                </tr>
+            ))}
+        </>
+    )
 }
 
 export const handleTabKey = (
-  event: KeyboardEvent,
-  focusableEl: Array<HTMLButtonElement | null>
+    event: KeyboardEvent,
+    focusableEl: Array<HTMLButtonElement | null>
 ): void => {
-  if (event.key === 'Tab') {
-    const focusable = focusableEl.filter((el) => el && !el.disabled)
-    const activeElement = document?.activeElement
+    if (event.key === 'Tab') {
+        const focusable = focusableEl.filter((el) => el && !el.disabled)
+        const activeElement = document?.activeElement
 
-    const firstTabIndex = 0
-    const lastTabIndex = focusable.length - 1
-    const firstTabStop = focusable[parseInt(`${firstTabIndex}`)]
-    const lastTabStop = focusable[parseInt(`${lastTabIndex}`)]
-    const focusIndex =
-      activeElement instanceof HTMLButtonElement
-        ? focusable.indexOf(activeElement)
-        : -1
+        const firstTabIndex = 0
+        const lastTabIndex = focusable.length - 1
+        const firstTabStop = focusable[parseInt(`${firstTabIndex}`)]
+        const lastTabStop = focusable[parseInt(`${lastTabIndex}`)]
+        const focusIndex =
+            activeElement instanceof HTMLButtonElement
+                ? focusable.indexOf(activeElement)
+                : -1
 
-    const isLastTab = focusIndex === lastTabIndex
-    const isFirstTab = focusIndex === firstTabIndex
-    const isNotFound = focusIndex === -1
+        const isLastTab = focusIndex === lastTabIndex
+        const isFirstTab = focusIndex === firstTabIndex
+        const isNotFound = focusIndex === -1
 
-    if (event.shiftKey) {
-      // Tab backwards
-      if (isFirstTab || isNotFound) {
-        event.preventDefault()
-        lastTabStop?.focus()
-      }
-    } else {
-      // Tab forwards
-      if (isLastTab || isNotFound) {
-        event.preventDefault()
-        firstTabStop?.focus()
-      }
+        if (event.shiftKey) {
+            // Tab backwards
+            if (isFirstTab || isNotFound) {
+                event.preventDefault()
+                lastTabStop?.focus()
+            }
+        } else {
+            // Tab forwards
+            if (isLastTab || isNotFound) {
+                event.preventDefault()
+                firstTabStop?.focus()
+            }
+        }
     }
-  }
 }
 
 export const isIosDevice = (): boolean =>
     [
-      'iPad Simulator',
-      'iPhone Simulator',
-      'iPod Simulator',
-      'iPad',
-      'iPhone',
-      'iPod'
-    ].includes(navigator.userAgent)
+        'iPad Simulator',
+        'iPhone Simulator',
+        'iPod Simulator',
+        'iPad',
+        'iPhone',
+        'iPod',
+    ].includes(navigator.userAgent) ||
     // iPad on iOS 13 detection
-    || (navigator.userAgent.includes("Mac") && "ontouchend" in document)
+    (navigator.userAgent.includes('Mac') && 'ontouchend' in document)

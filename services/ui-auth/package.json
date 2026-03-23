@@ -8,6 +8,6 @@
     "author": "",
     "license": "CC0-1.0",
     "devDependencies": {
-        "prettier": "^3.5.3"
+        "prettier": "^3.8.1"
     }
 }

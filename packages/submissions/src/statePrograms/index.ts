@@ -3,5 +3,5 @@ export type {
     StateCodeType,
     StatePrograms,
     ProgramArgType,
-    StateType
+    StateType,
 } from './StateCodeType'

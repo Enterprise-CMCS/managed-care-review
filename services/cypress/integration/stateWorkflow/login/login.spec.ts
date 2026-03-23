@@ -6,8 +6,13 @@ describe('login', () => {
     it('can log in and log out as expected without accessibility violations', () => {
         cy.logInAsStateUser()
 
-        cy.url().should('eq', Cypress.config().baseUrl + '/dashboard/submissions')
-        cy.findByRole('button', { name: 'Your account' }).should('exist').click()
+        cy.url().should(
+            'eq',
+            Cypress.config().baseUrl + '/dashboard/submissions'
+        )
+        cy.findByRole('button', { name: 'Your account' })
+            .should('exist')
+            .click()
 
         cy.injectAxe()
         cy.checkA11yWithWcag22aa()
@@ -24,8 +29,8 @@ describe('login', () => {
         cy.logInAsStateUser()
 
         cy.findByText('aang@example.com').should('exist')
-        cy.findByRole('heading', { name: 'Minnesota Submissions dashboard' }).should(
-            'exist'
-        )
+        cy.findByRole('heading', {
+            name: 'Minnesota Submissions dashboard',
+        }).should('exist')
     })
 })

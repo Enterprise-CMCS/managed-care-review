@@ -8,7 +8,7 @@ describe('CMS user can view rate reviews', () => {
 
     it('and withdraw then unwithdraw a rate', () => {
         cy.interceptFeatureFlags({
-            'undo-withdraw-rate': true
+            'undo-withdraw-rate': true,
         })
 
         cy.apiAssignDivisionToCMSUser(cmsUser(), 'DMCO').then(() => {
@@ -52,13 +52,15 @@ describe('CMS user can view rate reviews', () => {
                     cy.findByTestId('rateWithdrawBanner').should('exist')
 
                     cy.findByRole('button', { name: 'Undo withdraw' }).click()
-                    
-                    cy.get('#undoWithdrawReason').type('Undo withdraw for testing')
-                    
+
+                    cy.get('#undoWithdrawReason').type(
+                        'Undo withdraw for testing'
+                    )
+
                     cy.findByRole('button', { name: 'Undo withdraw' }).click()
-                    
+
                     cy.wait(['@undoWithdrawnRateMutation'], { timeout: 50_000 })
-                    
+
                     cy.url().should('contain', `rates/${rate1.rateID}`)
 
                     cy.findByTestId('statusUpdatedBanner').should('exist')

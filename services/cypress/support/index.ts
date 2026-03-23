@@ -28,10 +28,18 @@ import {
 import './apiCommands'
 import './accessibilityCommands'
 import { Contract, Division, OauthClient } from '../gen/gqlClient'
-import { AdminUserType, CMSUserType, StateUserType } from '../utils/apollo-test-utils'
+import {
+    AdminUserType,
+    CMSUserType,
+    StateUserType,
+} from '../utils/apollo-test-utils'
 import { CMSUserLoginNames } from './loginCommands'
 import { FormButtonKey } from './navigateCommands'
-import { ApiCreateOAuthClientResponseType, ThirdPartyApiRequestInput, ThirdPartyApiRequestOutput } from './apiCommands'
+import {
+    ApiCreateOAuthClientResponseType,
+    ThirdPartyApiRequestInput,
+    ThirdPartyApiRequestOutput,
+} from './apiCommands'
 
 declare global {
     namespace Cypress {

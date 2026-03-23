@@ -1,4 +1,3 @@
-
 import type { EmailSettingsType } from '../../domain-models'
 import type { ExtendedPrismaClient } from '../prismaClient'
 

@@ -1,7 +1,7 @@
-import './storybook.scss';
-import '../src/index.scss';
+import './storybook.scss'
+import '../src/index.scss'
 
 export const parameters = {
     layout: 'fullscreen',
-};
-export const tags = ['autodocs', 'autodocs'];
+}
+export const tags = ['autodocs', 'autodocs']

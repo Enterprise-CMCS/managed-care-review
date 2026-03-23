@@ -78,7 +78,7 @@ const SubmissionsDashboard = (): React.ReactElement => {
                 // Errors - data handling
 
                 const draftRevision = sub.draftRevision!
- 
+
                 if (
                     draftRevision?.submitInfo?.updatedAt === undefined &&
                     draftRevision?.unlockInfo?.updatedAt === undefined

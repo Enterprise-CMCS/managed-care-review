@@ -1,1 +1,1 @@
-export {QAUploadFormSummary} from './QAUploadFormSummary'
+export { QAUploadFormSummary } from './QAUploadFormSummary'

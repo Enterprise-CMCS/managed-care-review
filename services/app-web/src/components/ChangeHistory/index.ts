@@ -1,1 +1,1 @@
-export {ChangeHistory} from './ChangeHistory'
+export { ChangeHistory } from './ChangeHistory'

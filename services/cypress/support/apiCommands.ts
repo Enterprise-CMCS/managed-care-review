@@ -26,9 +26,16 @@ import {
     newSubmissionInput,
     rateFormData,
     contractFormData,
-    minnesotaStatePrograms, CMSUserType, eqroFromData, AdminUserType,
+    minnesotaStatePrograms,
+    CMSUserType,
+    eqroFromData,
+    AdminUserType,
 } from '../utils/apollo-test-utils'
-import { ApolloClient, DocumentNode, NormalizedCacheObject } from '@apollo/client'
+import {
+    ApolloClient,
+    DocumentNode,
+    NormalizedCacheObject,
+} from '@apollo/client'
 import { GraphQLError, print } from 'graphql'
 import { CMSUserLoginNames, userLoginData } from './loginCommands'
 import { calculateSHA256 } from '@mc-review/common-code'
@@ -57,7 +64,7 @@ const uploadFile = async (
                 fileType,
                 bucketName,
             },
-        }
+        },
     })
 
     if (
@@ -108,240 +115,243 @@ const createAndSubmitContractOnlyPackage = async (
     apolloClient: ApolloClient<NormalizedCacheObject>,
     documents: FixtureDocuments
 ): Promise<Contract> => {
-  try {
-      // Make sure we can upload file before creating contract, this prevents
-      // a bunch of draft contracts if the file upload failed.
-      const contractDoc = await uploadFile(
-          apolloClient,
-          'trussel-guide.pdf',
-          'PDF',
-          'HEALTH_PLAN_DOCS',
-          documents
-      )
+    try {
+        // Make sure we can upload file before creating contract, this prevents
+        // a bunch of draft contracts if the file upload failed.
+        const contractDoc = await uploadFile(
+            apolloClient,
+            'trussel-guide.pdf',
+            'PDF',
+            'HEALTH_PLAN_DOCS',
+            documents
+        )
 
-      const newContract = await apolloClient.mutate({
-          mutation: CreateContractDocument,
-          variables: {
-              input: newSubmissionInput(),
-          },
-      })
+        const newContract = await apolloClient.mutate({
+            mutation: CreateContractDocument,
+            variables: {
+                input: newSubmissionInput(),
+            },
+        })
 
-      const draftContract = newContract.data.createContract.contract
-      const draftRevision = draftContract.draftRevision
-      const updateFormData = contractFormData({
-          submissionType: 'CONTRACT_ONLY',
-          contractDocuments: [contractDoc],
-      })
+        const draftContract = newContract.data.createContract.contract
+        const draftRevision = draftContract.draftRevision
+        const updateFormData = contractFormData({
+            submissionType: 'CONTRACT_ONLY',
+            contractDocuments: [contractDoc],
+        })
 
-      const updateContractDraftRevisionInput: UpdateContractDraftRevisionInput =
-          {
-              contractID: draftContract.id,
-              lastSeenUpdatedAt: draftRevision.updatedAt,
-              formData: updateFormData,
-          }
+        const updateContractDraftRevisionInput: UpdateContractDraftRevisionInput =
+            {
+                contractID: draftContract.id,
+                lastSeenUpdatedAt: draftRevision.updatedAt,
+                formData: updateFormData,
+            }
 
-      await apolloClient.mutate({
-          mutation: UpdateContractDraftRevisionDocument,
-          variables: {
-              input: updateContractDraftRevisionInput,
-          },
-      })
+        await apolloClient.mutate({
+            mutation: UpdateContractDraftRevisionDocument,
+            variables: {
+                input: updateContractDraftRevisionInput,
+            },
+        })
 
-      const submission = await apolloClient.mutate({
-          mutation: SubmitContractDocument,
-          variables: {
-              input: {
-                  contractID: draftContract.id,
-              },
-          },
-      })
+        const submission = await apolloClient.mutate({
+            mutation: SubmitContractDocument,
+            variables: {
+                input: {
+                    contractID: draftContract.id,
+                },
+            },
+        })
 
-      return submission.data.submitContract.contract
-  } catch (error) {
-    const errorMsg = error instanceof Error ? error.message : String(error)
-    throw new Error(`createAndSubmitContractOnlyPackage failed: ${errorMsg}`)
-  }
+        return submission.data.submitContract.contract
+    } catch (error) {
+        const errorMsg = error instanceof Error ? error.message : String(error)
+        throw new Error(
+            `createAndSubmitContractOnlyPackage failed: ${errorMsg}`
+        )
+    }
 }
 
 const createAndSubmitEQROContract = async (
     apolloClient: ApolloClient<NormalizedCacheObject>,
     documents: FixtureDocuments
 ): Promise<Contract> => {
-  try {
-    // Make sure we can upload file before creating contract, this prevents
-    // a bunch of draft contracts if the file upload failed.
-    const contractDoc = await uploadFile(
-        apolloClient,
-        'trussel-guide.pdf',
-        'PDF',
-        'HEALTH_PLAN_DOCS',
-        documents
-    )
+    try {
+        // Make sure we can upload file before creating contract, this prevents
+        // a bunch of draft contracts if the file upload failed.
+        const contractDoc = await uploadFile(
+            apolloClient,
+            'trussel-guide.pdf',
+            'PDF',
+            'HEALTH_PLAN_DOCS',
+            documents
+        )
 
-    const newContract = await apolloClient.mutate({
-        mutation: CreateContractDocument,
-        variables: {
-            input: newSubmissionInput({
-                populationCovered: 'MEDICAID',
-                programIDs: [minnesotaStatePrograms[0].id],
-                managedCareEntities: ['MCO'],
-                submissionType: 'CONTRACT_ONLY',
-                riskBasedContract: false,
-                submissionDescription: 'Test EQRO submission',
-                contractType: 'BASE',
-                contractSubmissionType: 'EQRO',
-            }),
-        },
-    })
-
-    const draftContract = newContract.data.createContract.contract
-    const draftRevision = draftContract.draftRevision
-    const updateFormData = eqroFromData({
-        contractDocuments: [contractDoc],
-    })
-
-    const updateContractDraftRevisionInput: UpdateContractDraftRevisionInput = {
-        contractID: draftContract.id,
-        lastSeenUpdatedAt: draftRevision.updatedAt,
-        formData: updateFormData,
-    }
-
-    await apolloClient.mutate({
-        mutation: UpdateContractDraftRevisionDocument,
-        variables: {
-            input: updateContractDraftRevisionInput,
-        },
-    })
-
-    const submission = await apolloClient.mutate({
-        mutation: SubmitContractDocument,
-        variables: {
-            input: {
-                contractID: draftContract.id,
+        const newContract = await apolloClient.mutate({
+            mutation: CreateContractDocument,
+            variables: {
+                input: newSubmissionInput({
+                    populationCovered: 'MEDICAID',
+                    programIDs: [minnesotaStatePrograms[0].id],
+                    managedCareEntities: ['MCO'],
+                    submissionType: 'CONTRACT_ONLY',
+                    riskBasedContract: false,
+                    submissionDescription: 'Test EQRO submission',
+                    contractType: 'BASE',
+                    contractSubmissionType: 'EQRO',
+                }),
             },
-        },
-    })
+        })
 
-    return submission.data.submitContract.contract
-  } catch (error) {
-    const errorMsg = error instanceof Error ? error.message : String(error)
-    throw new Error(`createAndSubmitEQROContract failed: ${errorMsg}`)
-  }
+        const draftContract = newContract.data.createContract.contract
+        const draftRevision = draftContract.draftRevision
+        const updateFormData = eqroFromData({
+            contractDocuments: [contractDoc],
+        })
+
+        const updateContractDraftRevisionInput: UpdateContractDraftRevisionInput =
+            {
+                contractID: draftContract.id,
+                lastSeenUpdatedAt: draftRevision.updatedAt,
+                formData: updateFormData,
+            }
+
+        await apolloClient.mutate({
+            mutation: UpdateContractDraftRevisionDocument,
+            variables: {
+                input: updateContractDraftRevisionInput,
+            },
+        })
+
+        const submission = await apolloClient.mutate({
+            mutation: SubmitContractDocument,
+            variables: {
+                input: {
+                    contractID: draftContract.id,
+                },
+            },
+        })
+
+        return submission.data.submitContract.contract
+    } catch (error) {
+        const errorMsg = error instanceof Error ? error.message : String(error)
+        throw new Error(`createAndSubmitEQROContract failed: ${errorMsg}`)
+    }
 }
 
 const createAndSubmitContractWithRates = async (
     apolloClient: ApolloClient<NormalizedCacheObject>,
     documents: FixtureDocuments
 ): Promise<Contract> => {
-  try {
-      // Make sure we can upload file before creating contract, this prevents
-      // a bunch of draft contracts if the file upload failed.
-      const contractDoc = await uploadFile(
-          apolloClient,
-          'trussel-guide.pdf',
-          'PDF',
-          'HEALTH_PLAN_DOCS',
-          documents
-      )
+    try {
+        // Make sure we can upload file before creating contract, this prevents
+        // a bunch of draft contracts if the file upload failed.
+        const contractDoc = await uploadFile(
+            apolloClient,
+            'trussel-guide.pdf',
+            'PDF',
+            'HEALTH_PLAN_DOCS',
+            documents
+        )
 
-      const rate1Doc = await uploadFile(
-          apolloClient,
-          'how-to-open-source.pdf',
-          'PDF',
-          'HEALTH_PLAN_DOCS',
-          documents
-      )
+        const rate1Doc = await uploadFile(
+            apolloClient,
+            'how-to-open-source.pdf',
+            'PDF',
+            'HEALTH_PLAN_DOCS',
+            documents
+        )
 
-      const rate2Doc = await uploadFile(
-          apolloClient,
-          'how-to-open-source.pdf',
-          'PDF',
-          'HEALTH_PLAN_DOCS',
-          documents
-      )
+        const rate2Doc = await uploadFile(
+            apolloClient,
+            'how-to-open-source.pdf',
+            'PDF',
+            'HEALTH_PLAN_DOCS',
+            documents
+        )
 
-      const newContract = await apolloClient.mutate({
-          mutation: CreateContractDocument,
-          variables: {
-              input: newSubmissionInput(),
-          },
-      })
+        const newContract = await apolloClient.mutate({
+            mutation: CreateContractDocument,
+            variables: {
+                input: newSubmissionInput(),
+            },
+        })
 
-      const draftContract = newContract.data.createContract.contract
-      const draftRevision = draftContract.draftRevision
-      const updateFormData = contractFormData({
-          submissionType: 'CONTRACT_AND_RATES',
-          contractDocuments: [contractDoc],
-      })
+        const draftContract = newContract.data.createContract.contract
+        const draftRevision = draftContract.draftRevision
+        const updateFormData = contractFormData({
+            submissionType: 'CONTRACT_AND_RATES',
+            contractDocuments: [contractDoc],
+        })
 
-      const updateContractDraftRevisionInput: UpdateContractDraftRevisionInput =
-          {
-              contractID: draftContract.id,
-              lastSeenUpdatedAt: draftRevision.updatedAt,
-              formData: updateFormData,
-          }
+        const updateContractDraftRevisionInput: UpdateContractDraftRevisionInput =
+            {
+                contractID: draftContract.id,
+                lastSeenUpdatedAt: draftRevision.updatedAt,
+                formData: updateFormData,
+            }
 
-      const updatedContract = await apolloClient.mutate({
-          mutation: UpdateContractDraftRevisionDocument,
-          variables: {
-              input: updateContractDraftRevisionInput,
-          },
-      })
+        const updatedContract = await apolloClient.mutate({
+            mutation: UpdateContractDraftRevisionDocument,
+            variables: {
+                input: updateContractDraftRevisionInput,
+            },
+        })
 
-      const updatedDraftRevision =
-          updatedContract.data.updateContractDraftRevision.contract
-              .draftRevision
+        const updatedDraftRevision =
+            updatedContract.data.updateContractDraftRevision.contract
+                .draftRevision
 
-      const updateDraftContractRatesInput: UpdateDraftContractRatesInput = {
-          contractID: draftContract.id,
-          lastSeenUpdatedAt: updatedDraftRevision.updatedAt,
-          updatedRates: [
-              {
-                  formData: rateFormData({
-                      rateDateStart: '2025-06-01',
-                      rateDateEnd: '2026-05-30',
-                      rateDateCertified: '2025-04-15',
-                      rateProgramIDs: [minnesotaStatePrograms[0].id],
-                      rateDocuments: [rate1Doc],
-                  }),
-                  rateID: undefined,
-                  type: 'CREATE',
-              },
-              {
-                  formData: rateFormData({
-                      rateDateStart: '2024-03-01',
-                      rateDateEnd: '2025-04-30',
-                      rateDateCertified: '2025-03-15',
-                      rateProgramIDs: [minnesotaStatePrograms[1].id],
-                      rateDocuments: [rate2Doc],
-                  }),
-                  rateID: undefined,
-                  type: 'CREATE',
-              },
-          ],
-      }
+        const updateDraftContractRatesInput: UpdateDraftContractRatesInput = {
+            contractID: draftContract.id,
+            lastSeenUpdatedAt: updatedDraftRevision.updatedAt,
+            updatedRates: [
+                {
+                    formData: rateFormData({
+                        rateDateStart: '2025-06-01',
+                        rateDateEnd: '2026-05-30',
+                        rateDateCertified: '2025-04-15',
+                        rateProgramIDs: [minnesotaStatePrograms[0].id],
+                        rateDocuments: [rate1Doc],
+                    }),
+                    rateID: undefined,
+                    type: 'CREATE',
+                },
+                {
+                    formData: rateFormData({
+                        rateDateStart: '2024-03-01',
+                        rateDateEnd: '2025-04-30',
+                        rateDateCertified: '2025-03-15',
+                        rateProgramIDs: [minnesotaStatePrograms[1].id],
+                        rateDocuments: [rate2Doc],
+                    }),
+                    rateID: undefined,
+                    type: 'CREATE',
+                },
+            ],
+        }
 
-      await apolloClient.mutate({
-          mutation: UpdateDraftContractRatesDocument,
-          variables: {
-              input: updateDraftContractRatesInput,
-          },
-      })
+        await apolloClient.mutate({
+            mutation: UpdateDraftContractRatesDocument,
+            variables: {
+                input: updateDraftContractRatesInput,
+            },
+        })
 
-      const submission = await apolloClient.mutate({
-          mutation: SubmitContractDocument,
-          variables: {
-              input: {
-                  contractID: draftContract.id,
-              },
-          },
-      })
+        const submission = await apolloClient.mutate({
+            mutation: SubmitContractDocument,
+            variables: {
+                input: {
+                    contractID: draftContract.id,
+                },
+            },
+        })
 
-      return submission.data.submitContract.contract
-  } catch (error) {
-    const errorMsg = error instanceof Error ? error.message : String(error)
-    throw new Error(`createAndSubmitContractWithRates failed: ${errorMsg}`)
-  }
+        return submission.data.submitContract.contract
+    } catch (error) {
+        const errorMsg = error instanceof Error ? error.message : String(error)
+        throw new Error(`createAndSubmitContractWithRates failed: ${errorMsg}`)
+    }
 }
 
 const assignCmsDivision = async (
@@ -394,7 +404,9 @@ const fetchUser = async (
     }
 
     if (!user.data.fetchCurrentUser) {
-        throw new Error('Error: Seeding user into DB did not return user data in response.')
+        throw new Error(
+            'Error: Seeding user into DB did not return user data in response.'
+        )
     }
 
     return user.data.fetchCurrentUser
@@ -435,9 +447,11 @@ const createOAuthClient = async (
         )
     }
 
-    const apiDelegatedUser = delegatedUser && indexUsers.find(
-        (user) => user?.email === userLoginData[delegatedUser].email
-    )
+    const apiDelegatedUser =
+        delegatedUser &&
+        indexUsers.find(
+            (user) => user?.email === userLoginData[delegatedUser].email
+        )
 
     if (delegatedUser && !apiDelegatedUser) {
         throw new Error(
@@ -483,7 +497,7 @@ const createOAuthClient = async (
     return {
         client: oauthClient,
         clientUser: apiUser as CmsUsersUnion,
-        delegatedUser: apiDelegatedUser as CmsUsersUnion
+        delegatedUser: apiDelegatedUser as CmsUsersUnion,
     }
 }
 
@@ -493,33 +507,37 @@ const requestOAuthToken = (
     const url = Cypress.env('API_URL')
     const tokenUrl = `${url}/oauth/token`
 
-    return cy.request({
-        url: tokenUrl,
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/x-www-form-urlencoded',
-        },
-        body: new URLSearchParams({
-            grant_type: 'client_credentials',
-            client_id: oauthClient.clientId,
-            client_secret: oauthClient.clientSecret,
-        }).toString(),
-        failOnStatusCode: false,
-    }).then((response) => {
-        if (response.status < 200 || response.status >= 300) {
-            throw new Error(
-                `OAuth token request failed with status ${response.status}: ${JSON.stringify(response.body)}`
-            )
-        }
+    return cy
+        .request({
+            url: tokenUrl,
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded',
+            },
+            body: new URLSearchParams({
+                grant_type: 'client_credentials',
+                client_id: oauthClient.clientId,
+                client_secret: oauthClient.clientSecret,
+            }).toString(),
+            failOnStatusCode: false,
+        })
+        .then((response) => {
+            if (response.status < 200 || response.status >= 300) {
+                throw new Error(
+                    `OAuth token request failed with status ${response.status}: ${JSON.stringify(response.body)}`
+                )
+            }
 
-        const token = response.body.access_token
+            const token = response.body.access_token
 
-        if (!token) {
-            throw new Error('OAuth token response did not contain an access_token')
-        }
+            if (!token) {
+                throw new Error(
+                    'OAuth token response did not contain an access_token'
+                )
+            }
 
-        return token
-    })
+            return token
+        })
 }
 
 export type ThirdPartyApiRequestInput = {
@@ -550,38 +568,43 @@ const thirdPartyApiRequest = <TData>(
         headers['x-acting-as-user'] = input.delegatedUserId
     }
 
-    return cy.request({
-        url: apiUrl,
-        method: 'POST',
-        headers,
-        body: {
-            query: print(input.document),
-            variables: input.variables,
-        },
-        failOnStatusCode: false,
-    }).then((response): ThirdPartyApiRequestOutput<TData> => {
-        return { status: response.status, data: response.body.data, errors: response.body.errors }
-    })
+    return cy
+        .request({
+            url: apiUrl,
+            method: 'POST',
+            headers,
+            body: {
+                query: print(input.document),
+                variables: input.variables,
+            },
+            failOnStatusCode: false,
+        })
+        .then((response): ThirdPartyApiRequestOutput<TData> => {
+            return {
+                status: response.status,
+                data: response.body.data,
+                errors: response.body.errors,
+            }
+        })
 }
 
 Cypress.Commands.add(
     'apiCreateAndSubmitContractOnlySubmission',
     (stateUser): Cypress.Chainable<Contract> =>
-        cy.task<DocumentNode>('readGraphQLSchema').then({ timeout: 30000 }, (schema) =>
-            cy
-                .task<Record<string, string>>('readFixtureDocuments')
-                .then({ timeout: 60000 }, (documents) =>
-                    apolloClientWrapper(
-                        schema,
-                        stateUser,
-                        (apolloClient) =>
+        cy
+            .task<DocumentNode>('readGraphQLSchema')
+            .then({ timeout: 30000 }, (schema) =>
+                cy
+                    .task<Record<string, string>>('readFixtureDocuments')
+                    .then({ timeout: 60000 }, (documents) =>
+                        apolloClientWrapper(schema, stateUser, (apolloClient) =>
                             createAndSubmitContractOnlyPackage(
                                 apolloClient,
                                 documents
                             )
+                        )
                     )
-                )
-        )
+            )
 )
 
 Cypress.Commands.add(
@@ -593,14 +616,8 @@ Cypress.Commands.add(
                 cy
                     .task<Record<string, string>>('readFixtureDocuments')
                     .then({ timeout: 60000 }, (documents) =>
-                        apolloClientWrapper(
-                            schema,
-                            stateUser,
-                            (apolloClient) =>
-                                createAndSubmitEQROContract(
-                                    apolloClient,
-                                    documents
-                                )
+                        apolloClientWrapper(schema, stateUser, (apolloClient) =>
+                            createAndSubmitEQROContract(apolloClient, documents)
                         )
                     )
             )
@@ -609,21 +626,20 @@ Cypress.Commands.add(
 Cypress.Commands.add(
     'apiCreateAndSubmitContractWithRates',
     (stateUser): Cypress.Chainable<Contract> =>
-        cy.task<DocumentNode>('readGraphQLSchema').then({ timeout: 30000 }, (schema) =>
-            cy
-                .task<Record<string, string>>('readFixtureDocuments')
-                .then({ timeout: 60000 }, (documents) =>
-                    apolloClientWrapper(
-                        schema,
-                        stateUser,
-                        (apolloClient) =>
+        cy
+            .task<DocumentNode>('readGraphQLSchema')
+            .then({ timeout: 30000 }, (schema) =>
+                cy
+                    .task<Record<string, string>>('readFixtureDocuments')
+                    .then({ timeout: 60000 }, (documents) =>
+                        apolloClientWrapper(schema, stateUser, (apolloClient) =>
                             createAndSubmitContractWithRates(
                                 apolloClient,
                                 documents
                             )
+                        )
                     )
-                )
-        )
+            )
 )
 
 Cypress.Commands.add(

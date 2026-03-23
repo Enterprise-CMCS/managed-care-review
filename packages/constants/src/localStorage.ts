@@ -5,7 +5,7 @@
 
 const LOCAL_STORAGE_KEYS = ['LOGIN_REDIRECT'] as const
 
-export type LocalStorageKeyType = typeof LOCAL_STORAGE_KEYS[number]
+export type LocalStorageKeyType = (typeof LOCAL_STORAGE_KEYS)[number]
 
 export const LocalStorageKeys: Record<LocalStorageKeyType, string> = {
     /**

@@ -74,7 +74,7 @@ export default defineConfig(() => ({
         outDir: './build',
         sourcemap: true,
     },
-resolve: {
+    resolve: {
         alias: {
             '~uswds': path.resolve(__dirname, './node_modules/uswds'),
             '@mc-review/common-code': path.resolve(
@@ -89,7 +89,10 @@ resolve: {
                 __dirname,
                 '../../packages/helpers'
             ),
-            '@mc-review/submissions': path.resolve(__dirname, '../../packages/submissions'),
+            '@mc-review/submissions': path.resolve(
+                __dirname,
+                '../../packages/submissions'
+            ),
             '@mc-review/mocks': path.resolve(__dirname, '../../packages/mocks'),
             '@mc-review/otel': path.resolve(__dirname, '../../packages/otel'),
             '@mc-review/dates': path.resolve(__dirname, '../../packages/dates'),
@@ -100,7 +103,10 @@ resolve: {
             scss: {
                 api: 'legacy',
                 loadPaths: [
-                    path.resolve(__dirname, './node_modules/@uswds/uswds/packages'),
+                    path.resolve(
+                        __dirname,
+                        './node_modules/@uswds/uswds/packages'
+                    ),
                 ],
             },
         },
