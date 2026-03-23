@@ -52,8 +52,6 @@ lambda_response.json
 
 services/app-api/healthPlanFormDataMigrations
 
-services/app-proto/build
-
 services/postgres/dist
 
 services/uploads/src/avLayer/build/lambda_layer
@@ -66,3 +64,5 @@ tests/cypress/fixtures/stores/featureFlagStore.json
 
 packages/*/build
 services/app-api/src/generated/
+
+services/local-launch-darkly/dist

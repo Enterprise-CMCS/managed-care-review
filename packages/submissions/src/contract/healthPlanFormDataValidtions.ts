@@ -1,16 +1,19 @@
 import { Contract, ContractRevision, UnlockedContract } from '../gen/gqlClient'
 import { getLastContractSubmission } from './contractHelpers'
 import {
-    CHIPProvisionType, GeneralizedProvisionType,
-    MedicaidAmendmentProvisionType, MedicaidBaseProvisionType,
-    modifiedProvisionMedicaidAmendmentKeys, provisionCHIPKeys,
-    modifiedProvisionMedicaidBaseKeys
+    CHIPProvisionType,
+    GeneralizedProvisionType,
+    MedicaidAmendmentProvisionType,
+    MedicaidBaseProvisionType,
+    modifiedProvisionMedicaidAmendmentKeys,
+    provisionCHIPKeys,
+    modifiedProvisionMedicaidBaseKeys,
 } from './ModifiedProvisions'
 
 import {
     ModifiedProvisionsCHIPRecord,
     ModifiedProvisionsAmendmentRecord,
-    ModifiedProvisionsBaseContractRecord
+    ModifiedProvisionsBaseContractRecord,
 } from './healthPlanFormDataConstants'
 
 const getContractRev = (
@@ -149,34 +152,34 @@ const sortModifiedProvisions = (
         modifiedBenefitsProvided: contractFormData?.modifiedBenefitsProvided,
         modifiedGeoAreaServed: contractFormData?.modifiedGeoAreaServed,
         modifiedMedicaidBeneficiaries:
-        contractFormData?.modifiedMedicaidBeneficiaries,
+            contractFormData?.modifiedMedicaidBeneficiaries,
         modifiedRiskSharingStrategy:
-        contractFormData?.modifiedRiskSharingStrategy,
+            contractFormData?.modifiedRiskSharingStrategy,
         modifiedIncentiveArrangements:
-        contractFormData?.modifiedIncentiveArrangements,
+            contractFormData?.modifiedIncentiveArrangements,
         modifiedWitholdAgreements: contractFormData?.modifiedWitholdAgreements,
         modifiedStateDirectedPayments:
-        contractFormData?.modifiedStateDirectedPayments,
+            contractFormData?.modifiedStateDirectedPayments,
         modifiedPassThroughPayments:
-        contractFormData?.modifiedPassThroughPayments,
+            contractFormData?.modifiedPassThroughPayments,
         modifiedPaymentsForMentalDiseaseInstitutions:
-        contractFormData?.modifiedPaymentsForMentalDiseaseInstitutions,
+            contractFormData?.modifiedPaymentsForMentalDiseaseInstitutions,
         modifiedMedicalLossRatioStandards:
-        contractFormData?.modifiedMedicalLossRatioStandards,
+            contractFormData?.modifiedMedicalLossRatioStandards,
         modifiedOtherFinancialPaymentIncentive:
-        contractFormData?.modifiedOtherFinancialPaymentIncentive,
+            contractFormData?.modifiedOtherFinancialPaymentIncentive,
         modifiedEnrollmentProcess: contractFormData?.modifiedEnrollmentProcess,
         modifiedGrevienceAndAppeal:
-        contractFormData?.modifiedGrevienceAndAppeal,
+            contractFormData?.modifiedGrevienceAndAppeal,
         modifiedNetworkAdequacyStandards:
-        contractFormData?.modifiedNetworkAdequacyStandards,
+            contractFormData?.modifiedNetworkAdequacyStandards,
         modifiedLengthOfContract: contractFormData?.modifiedLengthOfContract,
         modifiedNonRiskPaymentArrangements:
-        contractFormData?.modifiedNonRiskPaymentArrangements,
+            contractFormData?.modifiedNonRiskPaymentArrangements,
         statutoryRegulatoryAttestation:
-        contractFormData?.statutoryRegulatoryAttestation,
+            contractFormData?.statutoryRegulatoryAttestation,
         statutoryRegulatoryAttestationDescription:
-        contractFormData?.statutoryRegulatoryAttestationDescription,
+            contractFormData?.statutoryRegulatoryAttestationDescription,
     }
     const hasInitialProvisions = Object.values(initialProvisions).some(
         (val) => val !== undefined

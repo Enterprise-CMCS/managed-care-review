@@ -1,6 +1,6 @@
 import fs from 'fs'
 import { createHash } from 'crypto'
-import Papa from 'papaparse';
+import Papa from 'papaparse'
 
 interface DocumentType {
     contractID: string | undefined
@@ -19,81 +19,81 @@ interface ContactPersonType {
 }
 
 interface ContractActionType {
-    externalID: string 
-    externalURL: string 
+    externalID: string
+    externalURL: string
     initiallySubmittedAt: Date
     updatedAt: Date
-    stateCode: string 
-    name: string 
-    mccrsID: string 
-    submissionReason: string 
-    programNicknames: string 
-    populationCovered: "MEDICAID" | "CHIP" | "MEDICAID_AND_CHIP" 
-    submissionType: "CONTRACT_ONLY"| "CONTRACT_AND_RATES"
-    riskBasedContract: Boolean 
-    submissionDescription: string 
-    contractType: "BASE" | "AMENDMENT"
-    contractExecutionStatus: "EXECUTED" | "UNEXECUTED"
-    contractDateStart: string 
-    contractDateEnd: string 
+    stateCode: string
+    name: string
+    mccrsID: string
+    submissionReason: string
+    programNicknames: string
+    populationCovered: 'MEDICAID' | 'CHIP' | 'MEDICAID_AND_CHIP'
+    submissionType: 'CONTRACT_ONLY' | 'CONTRACT_AND_RATES'
+    riskBasedContract: Boolean
+    submissionDescription: string
+    contractType: 'BASE' | 'AMENDMENT'
+    contractExecutionStatus: 'EXECUTED' | 'UNEXECUTED'
+    contractDateStart: string
+    contractDateEnd: string
     managedCareEntities: string
     federalAuthorities: string
-    statutoryRegulatoryAttestation: Boolean 
-    statutoryRegulatoryAttestationDescription: string 
-    inLieuServicesAndSettings: Boolean 
-    modifiedBenefitsProvided: Boolean 
-    modifiedGeoAreaServed: Boolean 
-    modifiedMedicaidBeneficiaries: Boolean 
-    modifiedRiskSharingStrategy: Boolean 
-    modifiedIncentiveArrangements: Boolean 
-    modifiedWitholdAgreements: Boolean 
-    modifiedStateDirectedPayments: Boolean 
-    modifiedPassThroughPayments: Boolean 
-    modifiedPaymentsForMentalDiseaseInstitutions: Boolean 
-    modifiedMedicalLossRatioStandards: Boolean 
-    modifiedOtherFinancialPaymentIncentive: Boolean 
-    modifiedEnrollmentProcess: Boolean 
-    modifiedGrevienceAndAppeal: Boolean 
-    modifiedNetworkAdequacyStandards: Boolean 
-    modifiedLengthOfContract: Boolean 
-    modifiedNonRiskPaymentArrangements: Boolean 
+    statutoryRegulatoryAttestation: Boolean
+    statutoryRegulatoryAttestationDescription: string
+    inLieuServicesAndSettings: Boolean
+    modifiedBenefitsProvided: Boolean
+    modifiedGeoAreaServed: Boolean
+    modifiedMedicaidBeneficiaries: Boolean
+    modifiedRiskSharingStrategy: Boolean
+    modifiedIncentiveArrangements: Boolean
+    modifiedWitholdAgreements: Boolean
+    modifiedStateDirectedPayments: Boolean
+    modifiedPassThroughPayments: Boolean
+    modifiedPaymentsForMentalDiseaseInstitutions: Boolean
+    modifiedMedicalLossRatioStandards: Boolean
+    modifiedOtherFinancialPaymentIncentive: Boolean
+    modifiedEnrollmentProcess: Boolean
+    modifiedGrevienceAndAppeal: Boolean
+    modifiedNetworkAdequacyStandards: Boolean
+    modifiedLengthOfContract: Boolean
+    modifiedNonRiskPaymentArrangements: Boolean
 }
 
 interface RateType {
-    externalID: string 
-    externalURL: string 
-    updatedAt: Date 
-    stateCode: string 
-    name: string 
-    submissionReason: string 
-    rateType: "NEW" | "AMENDMENT"
-    rateCapitationType: "RATE_CELL" | "RATE_RANGE"
+    externalID: string
+    externalURL: string
+    updatedAt: Date
+    stateCode: string
+    name: string
+    submissionReason: string
+    rateType: 'NEW' | 'AMENDMENT'
+    rateCapitationType: 'RATE_CELL' | 'RATE_RANGE'
     programNicknames: string
-    rateDateStart: string 
-    rateDateEnd: string 
-    rateDateCertified: string 
-    amendmentEffectiveDateStart: string 
-    amendmentEffectiveDateEnd: string 
-    actuaryCommunicationPreference: "OACT_TO_ACTUARY" | "OACT_TO_STATE"
+    rateDateStart: string
+    rateDateEnd: string
+    rateDateCertified: string
+    amendmentEffectiveDateStart: string
+    amendmentEffectiveDateEnd: string
+    actuaryCommunicationPreference: 'OACT_TO_ACTUARY' | 'OACT_TO_STATE'
 }
 
 interface ContractRateJoin {
-    contractID: String,
-    rateID: String,
+    contractID: String
+    rateID: String
 }
 
 interface AllTablesType {
-    contracts: ContractActionType[],
-    rates: RateType[],
-    contractRateJoins: ContractRateJoin[],
-    documents: DocumentType[],
-    contacts: ContactPersonType[],
+    contracts: ContractActionType[]
+    rates: RateType[]
+    contractRateJoins: ContractRateJoin[]
+    documents: DocumentType[]
+    contacts: ContactPersonType[]
 }
 
 interface ProgramQueryType {
-    id: string,
-    name: string,
-    fullName: string,
+    id: string
+    name: string
+    fullName: string
 }
 
 interface DocumentQueryType {
@@ -102,14 +102,13 @@ interface DocumentQueryType {
 }
 
 interface ContactQueryType {
-    name: string,
-    titleRole: string,
-    email: string,
+    name: string
+    titleRole: string
+    email: string
 }
 
 function getProgramNames(ids: string[], programs: any) {
-
-    const names = ids.map(id => {
+    const names = ids.map((id) => {
         return programs.find((p: ProgramQueryType) => p.id === id).name
     })
 
@@ -117,10 +116,9 @@ function getProgramNames(ids: string[], programs: any) {
 }
 
 function parseContract(cq: any, allTables: AllTablesType) {
-
     const cqr = cq.packageSubmissions[0].contractRevision
     const cfd = cqr.formData
-    console.log("CFDFORREASL", cfd)
+    console.log('CFDFORREASL', cfd)
 
     const programNames = getProgramNames(cfd.programIDs, cq.state.programs)
 
@@ -145,7 +143,8 @@ function parseContract(cq: any, allTables: AllTablesType) {
         managedCareEntities: JSON.stringify(cfd['managedCareEntities']),
         federalAuthorities: JSON.stringify(cfd['federalAuthorities']),
         statutoryRegulatoryAttestation: cfd['statutoryRegulatoryAttestation'],
-        statutoryRegulatoryAttestationDescription: cfd['statutoryRegulatoryAttestationDescription'],
+        statutoryRegulatoryAttestationDescription:
+            cfd['statutoryRegulatoryAttestationDescription'],
         inLieuServicesAndSettings: cfd['inLieuServicesAndSettings'],
         modifiedBenefitsProvided: cfd['modifiedBenefitsProvided'],
         modifiedGeoAreaServed: cfd['modifiedGeoAreaServed'],
@@ -155,48 +154,58 @@ function parseContract(cq: any, allTables: AllTablesType) {
         modifiedWitholdAgreements: cfd['modifiedWitholdAgreements'],
         modifiedStateDirectedPayments: cfd['modifiedStateDirectedPayments'],
         modifiedPassThroughPayments: cfd['modifiedPassThroughPayments'],
-        modifiedPaymentsForMentalDiseaseInstitutions: cfd['modifiedPaymentsForMentalDiseaseInstitutions'],
-        modifiedMedicalLossRatioStandards: cfd['modifiedMedicalLossRatioStandards'],
-        modifiedOtherFinancialPaymentIncentive: cfd['modifiedOtherFinancialPaymentIncentive'],
+        modifiedPaymentsForMentalDiseaseInstitutions:
+            cfd['modifiedPaymentsForMentalDiseaseInstitutions'],
+        modifiedMedicalLossRatioStandards:
+            cfd['modifiedMedicalLossRatioStandards'],
+        modifiedOtherFinancialPaymentIncentive:
+            cfd['modifiedOtherFinancialPaymentIncentive'],
         modifiedEnrollmentProcess: cfd['modifiedEnrollmentProcess'],
         modifiedGrevienceAndAppeal: cfd['modifiedGrevienceAndAppeal'],
-        modifiedNetworkAdequacyStandards: cfd['modifiedNetworkAdequacyStandards'],
+        modifiedNetworkAdequacyStandards:
+            cfd['modifiedNetworkAdequacyStandards'],
         modifiedLengthOfContract: cfd['modifiedLengthOfContract'],
-        modifiedNonRiskPaymentArrangements: cfd['modifiedNonRiskPaymentArrangements'],
+        modifiedNonRiskPaymentArrangements:
+            cfd['modifiedNonRiskPaymentArrangements'],
     }
 
     allTables.contracts.push(contract)
 
     console.log('CFD', cfd.contractDocuments)
-    const cdocs: DocumentType[] = cfd.contractDocuments.map((d: DocumentQueryType) => ({
-        contractID: cq.id,
-        rateID: undefined,
-        type: 'CONTRACT',
-        title: d.name
-    }))
+    const cdocs: DocumentType[] = cfd.contractDocuments.map(
+        (d: DocumentQueryType) => ({
+            contractID: cq.id,
+            rateID: undefined,
+            type: 'CONTRACT',
+            title: d.name,
+        })
+    )
 
-    const sdocs: DocumentType[] = cfd.supportingDocuments.map((d: DocumentQueryType) => ({
-        contractID: cq.id,
-        rateID: undefined,
-        type: 'CONTRACT_SUPPORTING',
-        title: d.name
-    }))
+    const sdocs: DocumentType[] = cfd.supportingDocuments.map(
+        (d: DocumentQueryType) => ({
+            contractID: cq.id,
+            rateID: undefined,
+            type: 'CONTRACT_SUPPORTING',
+            title: d.name,
+        })
+    )
 
     allTables.documents.push(...cdocs, ...sdocs)
 
-    const contacts: ContactPersonType[] = cfd.stateContacts.map((c: ContactQueryType) => ({
-        contractID: cq.id,
-        rateID: undefined,
-        type: 'CONTRACT',
-        name: createHash('md5').update(c.name).digest('hex'),
-        email: `${createHash('md5').update(c.email).digest('hex')}@example.com`,
-        titleRole: c.titleRole,
-    }))
+    const contacts: ContactPersonType[] = cfd.stateContacts.map(
+        (c: ContactQueryType) => ({
+            contractID: cq.id,
+            rateID: undefined,
+            type: 'CONTRACT',
+            name: createHash('md5').update(c.name).digest('hex'),
+            email: `${createHash('md5').update(c.email).digest('hex')}@example.com`,
+            titleRole: c.titleRole,
+        })
+    )
 
     allTables.contacts.push(...contacts)
 
     // --- rate parsing
-
 
     const rateRevisions = cq.packageSubmissions[0].rateRevisions
 
@@ -213,7 +222,7 @@ function parseContract(cq: any, allTables: AllTablesType) {
             submissionReason: rrev.submitInfo.updatedReason,
             updatedAt: rrev.updatedAt,
             stateCode: rrev.rate.stateCode,
-            name: rfd.rateCertificationName, 
+            name: rfd.rateCertificationName,
             rateType: rfd.rateType,
             rateCapitationType: rfd['rateCapitationType'],
             programNicknames: JSON.stringify(rateNames),
@@ -222,41 +231,49 @@ function parseContract(cq: any, allTables: AllTablesType) {
             rateDateCertified: rfd['rateDateCertified'],
             amendmentEffectiveDateStart: rfd['amendmentEffectiveDateStart'],
             amendmentEffectiveDateEnd: rfd['amendmentEffectiveDateEnd'],
-            actuaryCommunicationPreference: rfd['actuaryCommunicationPreference'],
+            actuaryCommunicationPreference:
+                rfd['actuaryCommunicationPreference'],
         }
 
         allTables.rates.push(rate)
 
-        const rdocs: DocumentType[] = rfd.rateDocuments.map((d: DocumentQueryType) => ({
-            contractID: undefined,
-            rateID: rrev.rateID,
-            type: 'RATE',
-            title: d.name
-        }))
+        const rdocs: DocumentType[] = rfd.rateDocuments.map(
+            (d: DocumentQueryType) => ({
+                contractID: undefined,
+                rateID: rrev.rateID,
+                type: 'RATE',
+                title: d.name,
+            })
+        )
 
-        const rsdocs: DocumentType[] = cfd.supportingDocuments.map((d: DocumentQueryType) => ({
-            rateID: rrev.rateID,
-            type: 'RATE_SUPPORTING',
-            title: d.name
-        }))
+        const rsdocs: DocumentType[] = cfd.supportingDocuments.map(
+            (d: DocumentQueryType) => ({
+                rateID: rrev.rateID,
+                type: 'RATE_SUPPORTING',
+                title: d.name,
+            })
+        )
 
         allTables.documents.push(...rdocs, ...rsdocs)
 
-        const actuary: ContactPersonType[] = rfd.certifyingActuaryContacts.map((c: ContactQueryType) => ({
-            rateID: rrev.rateID,
-            type: 'RATE_ACTUARY',
-            name: createHash('sha256').update(c.name).digest('hex'),
-            email: `${createHash('sha256').update(c.email).digest('hex')}@example.com`,
-            titleRole: c.titleRole,
-        }))
+        const actuary: ContactPersonType[] = rfd.certifyingActuaryContacts.map(
+            (c: ContactQueryType) => ({
+                rateID: rrev.rateID,
+                type: 'RATE_ACTUARY',
+                name: createHash('sha256').update(c.name).digest('hex'),
+                email: `${createHash('sha256').update(c.email).digest('hex')}@example.com`,
+                titleRole: c.titleRole,
+            })
+        )
 
-        const additionalActuaries: ContactPersonType[] = rfd.addtlActuaryContacts.map((c: ContactQueryType) => ({
-            rateID: rrev.rateID,
-            type: 'RATE_ADDITIONAL_ACTUARY',
-            name: createHash('sha256').update(c.name).digest('hex'),
-            email: `${createHash('sha256').update(c.email).digest('hex')}@example.com`,
-            titleRole: c.titleRole,
-        }))
+        const additionalActuaries: ContactPersonType[] =
+            rfd.addtlActuaryContacts.map((c: ContactQueryType) => ({
+                rateID: rrev.rateID,
+                type: 'RATE_ADDITIONAL_ACTUARY',
+                name: createHash('sha256').update(c.name).digest('hex'),
+                email: `${createHash('sha256').update(c.email).digest('hex')}@example.com`,
+                titleRole: c.titleRole,
+            }))
 
         allTables.contacts.push(...actuary, ...additionalActuaries)
 
@@ -264,12 +281,10 @@ function parseContract(cq: any, allTables: AllTablesType) {
             contractID: cq.id,
             rateID: rrev.rateID,
         })
-
     }
 }
 
 function writeTables(allTables: AllTablesType) {
-
     const contractsCSV = Papa.unparse(allTables.contracts)
     const ratesCSV = Papa.unparse(allTables.rates)
     const contractRateJoinCSV = Papa.unparse(allTables.contractRateJoins)
@@ -281,12 +296,9 @@ function writeTables(allTables: AllTablesType) {
     fs.writeFileSync('sampleContractRateJoins.csv', contractRateJoinCSV)
     fs.writeFileSync('sampleDocuments.csv', documentsCSV)
     fs.writeFileSync('sampleContacts.csv', contactsCSV)
-
 }
 
-
 function main() {
-
     const allTables: AllTablesType = {
         contacts: [],
         rates: [],
@@ -302,7 +314,7 @@ function main() {
     for (const sampleContractQueryName of contractQueries) {
         const path = sampleQueriesDir + sampleContractQueryName
 
-        const contractQueryFile = fs.readFileSync(path, 'utf8' )
+        const contractQueryFile = fs.readFileSync(path, 'utf8')
 
         const contract = JSON.parse(contractQueryFile)['contract']
 
@@ -312,7 +324,6 @@ function main() {
     console.log(allTables)
 
     writeTables(allTables)
-
 }
 
 main()

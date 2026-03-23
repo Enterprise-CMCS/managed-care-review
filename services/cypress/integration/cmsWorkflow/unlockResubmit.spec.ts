@@ -1,4 +1,4 @@
-import {stateUser} from '../../utils/apollo-test-utils';
+import { stateUser } from '../../utils/apollo-test-utils'
 
 describe('CMS user', () => {
     beforeEach(() => {
@@ -9,7 +9,7 @@ describe('CMS user', () => {
     it('can unlock and see state resubmit with child rates', () => {
         cy.interceptFeatureFlags({
             '438-attestation': true,
-            'dsnp': true
+            dsnp: true,
         })
         cy.logInAsStateUser()
 
@@ -30,8 +30,8 @@ describe('CMS user', () => {
         cy.findAllByTestId('rate-certification-form').should('have.length', 2)
         cy.findAllByTestId('rate-certification-form').each((form) =>
             cy.wrap(form).within(() => {
-                cy.fillOutNewRateCertification();
-        })
+                cy.fillOutNewRateCertification()
+            })
         )
 
         cy.navigateContractRatesForm('CONTINUE')
@@ -78,7 +78,7 @@ describe('CMS user', () => {
                 .should('exist')
 
             //Find unlocked submission name
-            cy.get('#submissionName', {timeout: 2_000}).then(($h2) => {
+            cy.get('#submissionName', { timeout: 2_000 }).then(($h2) => {
                 //Set name to variable for later use in finding the unlocked submission
                 const submissionName = $h2.text()
 
@@ -122,7 +122,10 @@ describe('CMS user', () => {
                     )
                     .should('exist')
 
-                cy.submitStateSubmissionForm({success: true, resubmission: true})
+                cy.submitStateSubmissionForm({
+                    success: true,
+                    resubmission: true,
+                })
 
                 cy.get('table')
                     .should('exist')
@@ -150,7 +153,9 @@ describe('CMS user', () => {
                 cy.wait('@fetchContractQuery', { timeout: 20_000 })
 
                 //  CMS user sees resubmitted submission and active unlock button
-                cy.findByTestId('submission-summary', {timeout: 4_000}).should('exist')
+                cy.findByTestId('submission-summary', {
+                    timeout: 4_000,
+                }).should('exist')
                 cy.findByRole('button', { name: 'Unlock submission' }).should(
                     'not.be.disabled'
                 )
@@ -196,41 +201,54 @@ describe('CMS user', () => {
                 cy.wait('@fetchContractQuery', { timeout: 20_000 })
                 cy.findByTestId('unlockedBanner').should('exist')
                 cy.submitStateSubmissionForm({
-                        success: true,
-                        resubmission: true,
-                        summary: 'Second resubmit'
-                    }
-                )
+                    success: true,
+                    resubmission: true,
+                    summary: 'Second resubmit',
+                })
 
                 // Visit the submission url and check the history
                 cy.navigateFormByDirectLink(submissionURL)
                 cy.findByTestId('updatedSubmissionBanner').should('exist')
 
-                 // No document dates or other fields are undefined
-                 cy.findByText('N/A').should('not.exist')
+                // No document dates or other fields are undefined
+                cy.findByText('N/A').should('not.exist')
 
                 // Should have change history records
-                cy.findAllByTestId('change-history-record').should('have.length', 5)
+                cy.findAllByTestId('change-history-record').should(
+                    'have.length',
+                    5
+                )
 
-                cy.findAllByTestId('change-history-record').then(records => {
+                cy.findAllByTestId('change-history-record').then((records) => {
                     // We put all the text of each record into an array
-                    const recordText = records.map((_index, record) => Cypress.$(record).text())
+                    const recordText = records.map((_index, record) =>
+                        Cypress.$(record).text()
+                    )
 
                     // Records are in reverse
                     // Second set of unlock and resubmit
-                    expect(recordText[0]).to.contain('Changes made: Second resubmit')
-                    expect(recordText[1]).to.contain('Reason for unlock: Second Unlock')
+                    expect(recordText[0]).to.contain(
+                        'Changes made: Second resubmit'
+                    )
+                    expect(recordText[1]).to.contain(
+                        'Reason for unlock: Second Unlock'
+                    )
 
                     // First set of unlock and resubmit
-                    expect(recordText[2]).to.contain('Changes made: Resubmission summary')
-                    expect(recordText[3]).to.contain('Reason for unlock: Unlock submission reason.')
+                    expect(recordText[2]).to.contain(
+                        'Changes made: Resubmission summary'
+                    )
+                    expect(recordText[3]).to.contain(
+                        'Reason for unlock: Unlock submission reason.'
+                    )
 
                     // Test for initial submission
                     expect(recordText[4]).to.contain('aang@example.com')
-                    expect(recordText[4]).to.contain('View past submission version')
+                    expect(recordText[4]).to.contain(
+                        'View past submission version'
+                    )
                     expect(recordText[4]).to.not.contain('Changes made:')
                     expect(recordText[4]).to.not.contain('Reason for unlock:')
-
                 })
             })
         })
@@ -242,7 +260,7 @@ describe('CMS user', () => {
         cy.interceptFeatureFlags({
             '438-attestation': true,
             'hide-supporting-docs-page': true,
-            'dsnp': true
+            dsnp: true,
         })
 
         // Set up a submission with linked rates
@@ -273,10 +291,9 @@ describe('CMS user', () => {
 
             // Test unlock and resubmit with a linked rate submission
             cy.location().then((fullUrl) => {
-                const submissionURL = fullUrl.toString().replace(
-                    'edit/review-and-submit',
-                    ''
-                )
+                const submissionURL = fullUrl
+                    .toString()
+                    .replace('edit/review-and-submit', '')
 
                 // Submit, sent to dashboard
                 cy.submitStateSubmissionForm()
@@ -299,7 +316,7 @@ describe('CMS user', () => {
                     .should('exist')
 
                 //Find unlocked submission name
-                cy.get('#submissionName', {timeout: 2_000}).then(($h2) => {
+                cy.get('#submissionName', { timeout: 2_000 }).then(($h2) => {
                     //Set name to variable for later use in finding the unlocked submission
                     const submissionName = $h2.text()
 
@@ -343,7 +360,10 @@ describe('CMS user', () => {
                         )
                         .should('exist')
 
-                    cy.submitStateSubmissionForm({success: true, resubmission: true})
+                    cy.submitStateSubmissionForm({
+                        success: true,
+                        resubmission: true,
+                    })
 
                     cy.get('table')
                         .should('exist')
@@ -371,10 +391,12 @@ describe('CMS user', () => {
                     cy.wait('@fetchContractQuery', { timeout: 20_000 })
 
                     //  CMS user sees resubmitted submission and active unlock button
-                    cy.findByTestId('submission-summary', {timeout: 4_000}).should('exist')
-                    cy.findByRole('button', { name: 'Unlock submission' }).should(
-                        'not.be.disabled'
-                    )
+                    cy.findByTestId('submission-summary', {
+                        timeout: 4_000,
+                    }).should('exist')
+                    cy.findByRole('button', {
+                        name: 'Unlock submission',
+                    }).should('not.be.disabled')
 
                     //CMS user should not see unlock banner and should see updated submission banner
                     cy.findByTestId('unlockedBanner').should('not.exist')
@@ -383,10 +405,12 @@ describe('CMS user', () => {
                     //Open all change history accordion items
                     cy.findByTestId('accordion').should('exist')
 
-                    cy.get('[data-testid^="accordionButton_"]').each((button) => {
-                        button.trigger('click')
-                        button.siblings().hasClass('usa-accordion__content') /// make sure accordion is expanded
-                    })
+                    cy.get('[data-testid^="accordionButton_"]').each(
+                        (button) => {
+                            button.trigger('click')
+                            button.siblings().hasClass('usa-accordion__content') /// make sure accordion is expanded
+                        }
+                    )
 
                     //Check for view previous submission link in the initial accordion item to exist
                     cy.findByTestId('revision-link-1').should('be.visible')
@@ -399,9 +423,13 @@ describe('CMS user', () => {
                             /(0?[1-9]|[12][0-9]|3[01])\/[0-9]+\/[0-9]+\s[0-9]+:[0-9]+[a-zA-Z]+ PT version/i
                         )
                     //Previous submission banner should exist and able to click link to go back to current submission
-                    cy.findByTestId('previous-submission-banner').should('exist')
+                    cy.findByTestId('previous-submission-banner').should(
+                        'exist'
+                    )
                     //Navigate back to current submission using link inside banner.
-                    cy.findByTestId('currentSubmissionLink').should('exist').click()
+                    cy.findByTestId('currentSubmissionLink')
+                        .should('exist')
+                        .click()
                     //Make sure banner and revision version text are gone.
                     cy.findByTestId('previous-submission-banner').should(
                         'not.exist'
@@ -418,11 +446,10 @@ describe('CMS user', () => {
                     cy.wait('@fetchContractQuery', { timeout: 20_000 })
                     cy.findByTestId('unlockedBanner').should('exist')
                     cy.submitStateSubmissionForm({
-                            success: true,
-                            resubmission: true,
-                            summary: 'Second resubmit'
-                        }
-                    )
+                        success: true,
+                        resubmission: true,
+                        summary: 'Second resubmit',
+                    })
 
                     // Visit the submission url and check the history
                     cy.visit(submissionURL)
@@ -432,28 +459,48 @@ describe('CMS user', () => {
                     cy.findByText('N/A').should('not.exist')
 
                     // Should have change history records
-                    cy.findAllByTestId('change-history-record').should('have.length', 5)
+                    cy.findAllByTestId('change-history-record').should(
+                        'have.length',
+                        5
+                    )
 
-                    cy.findAllByTestId('change-history-record').then(records => {
-                        // We put all the text of each record into an array
-                        const recordText = records.map((_index, record) => Cypress.$(record).text())
+                    cy.findAllByTestId('change-history-record').then(
+                        (records) => {
+                            // We put all the text of each record into an array
+                            const recordText = records.map((_index, record) =>
+                                Cypress.$(record).text()
+                            )
 
-                        // Records are in reverse
-                        // Second set of unlock and resubmit
-                        expect(recordText[0]).to.contain('Changes made: Second resubmit')
-                        expect(recordText[1]).to.contain('Reason for unlock: Second Unlock')
+                            // Records are in reverse
+                            // Second set of unlock and resubmit
+                            expect(recordText[0]).to.contain(
+                                'Changes made: Second resubmit'
+                            )
+                            expect(recordText[1]).to.contain(
+                                'Reason for unlock: Second Unlock'
+                            )
 
-                        // First set of unlock and resubmit
-                        expect(recordText[2]).to.contain('Changes made: Resubmission summary')
-                        expect(recordText[3]).to.contain('Reason for unlock: Unlock submission reason.')
+                            // First set of unlock and resubmit
+                            expect(recordText[2]).to.contain(
+                                'Changes made: Resubmission summary'
+                            )
+                            expect(recordText[3]).to.contain(
+                                'Reason for unlock: Unlock submission reason.'
+                            )
 
-                        // Test for initial submission
-                        expect(recordText[4]).to.contain('aang@example.com')
-                        expect(recordText[4]).to.contain('View past submission version')
-                        expect(recordText[4]).to.not.contain('Changes made:')
-                        expect(recordText[4]).to.not.contain('Reason for unlock:')
-
-                    })
+                            // Test for initial submission
+                            expect(recordText[4]).to.contain('aang@example.com')
+                            expect(recordText[4]).to.contain(
+                                'View past submission version'
+                            )
+                            expect(recordText[4]).to.not.contain(
+                                'Changes made:'
+                            )
+                            expect(recordText[4]).to.not.contain(
+                                'Reason for unlock:'
+                            )
+                        }
+                    )
                 })
             })
         })

@@ -45,15 +45,16 @@ const ROUTES = [
     'SUBMISSIONS_UPLOAD_RATE_RESPONSE',
     'SUBMISSIONS_RELEASED_TO_STATE',
     'SUBMISSION_WITHDRAW',
-    'UNDO_SUBMISSION_WITHDRAW'
+    'UNDO_SUBMISSION_WITHDRAW',
 ] as const // iterable union type
 type RouteT = (typeof ROUTES)[number]
 type RouteTWithUnknown = RouteT | 'UNKNOWN_ROUTE'
 const ContractSubmissionTypeRecord = {
     HEALTH_PLAN: 'health-plan',
-    EQRO: 'eqro'
+    EQRO: 'eqro',
 } as const
-type ContractSubmissionTypeRecordKeys = keyof typeof ContractSubmissionTypeRecord
+type ContractSubmissionTypeRecordKeys =
+    keyof typeof ContractSubmissionTypeRecord
 type ContractSubmissionTypeParams =
     (typeof ContractSubmissionTypeRecord)[keyof typeof ContractSubmissionTypeRecord]
 /*
@@ -80,7 +81,8 @@ const RoutesRecord: Record<RouteT, string> = {
     AUTOMATED_EMAILS: '/mc-review-settings/automated-emails',
     SUPPORT_EMAILS: '/mc-review-settings/support-emails',
     OAUTH_CLIENTS: '/mc-review-settings/oauth-clients',
-    CREATE_OAUTH_CLIENT: '/mc-review-settings/oauth-clients/create-oauth-client',
+    CREATE_OAUTH_CLIENT:
+        '/mc-review-settings/oauth-clients/create-oauth-client',
     RATES_SUMMARY: '/rates/:id',
     RATES_SUMMARY_QUESTIONS_AND_ANSWERS: '/rates/:id/question-and-answers',
     RATE_EDIT: '/rates/:id/edit',
@@ -91,16 +93,24 @@ const RoutesRecord: Record<RouteT, string> = {
     SUBMISSIONS: '/submissions',
     SUBMISSIONS_NEW: '/submissions/new',
     SUBMISSIONS_NEW_SUBMISSION_FORM: '/submissions/new/:contractSubmissionType',
-    SUBMISSIONS_EDIT_TOP_LEVEL: '/submissions/:contractSubmissionType/:id/edit/*',
+    SUBMISSIONS_EDIT_TOP_LEVEL:
+        '/submissions/:contractSubmissionType/:id/edit/*',
     SUBMISSIONS_TYPE: '/submissions/:contractSubmissionType/:id/edit/type',
-    SUBMISSIONS_CONTRACT_DETAILS: '/submissions/:contractSubmissionType/:id/edit/contract-details',
-    SUBMISSIONS_RATE_DETAILS: '/submissions/:contractSubmissionType/:id/edit/rate-details',
-    SUBMISSIONS_CONTACTS: '/submissions/:contractSubmissionType/:id/edit/contacts',
-    SUBMISSIONS_DOCUMENTS: '/submissions/:contractSubmissionType/:id/edit/documents',
-    SUBMISSIONS_REVIEW_SUBMIT: '/submissions/:contractSubmissionType/:id/edit/review-and-submit',
+    SUBMISSIONS_CONTRACT_DETAILS:
+        '/submissions/:contractSubmissionType/:id/edit/contract-details',
+    SUBMISSIONS_RATE_DETAILS:
+        '/submissions/:contractSubmissionType/:id/edit/rate-details',
+    SUBMISSIONS_CONTACTS:
+        '/submissions/:contractSubmissionType/:id/edit/contacts',
+    SUBMISSIONS_DOCUMENTS:
+        '/submissions/:contractSubmissionType/:id/edit/documents',
+    SUBMISSIONS_REVIEW_SUBMIT:
+        '/submissions/:contractSubmissionType/:id/edit/review-and-submit',
     SUBMISSIONS_SUMMARY: '/submissions/:contractSubmissionType/:id',
-    SUBMISSIONS_MCCRSID: '/submissions/:contractSubmissionType/:id/mccrs-record-number',
-    SUBMISSIONS_REVISION: '/submissions/:contractSubmissionType/:id/revisions/:revisionVersion',
+    SUBMISSIONS_MCCRSID:
+        '/submissions/:contractSubmissionType/:id/mccrs-record-number',
+    SUBMISSIONS_REVISION:
+        '/submissions/:contractSubmissionType/:id/revisions/:revisionVersion',
     SUBMISSIONS_CONTRACT_QUESTIONS_AND_ANSWERS:
         '/submissions/:contractSubmissionType/:id/question-and-answers',
     SUBMISSIONS_RATE_QUESTIONS_AND_ANSWERS:
@@ -111,9 +121,12 @@ const RoutesRecord: Record<RouteT, string> = {
         '/submissions/:contractSubmissionType/:id/question-and-answers/:division/:questionID/upload-response',
     SUBMISSIONS_UPLOAD_RATE_RESPONSE:
         '/submissions/:contractSubmissionType/:id/rates/:rateID/question-and-answers/:division/:questionID/upload-response',
-    SUBMISSIONS_RELEASED_TO_STATE: '/submissions/:contractSubmissionType/:id/released-to-state',
-    SUBMISSION_WITHDRAW: '/submission-reviews/:contractSubmissionType/:id/withdraw-submission',
-    UNDO_SUBMISSION_WITHDRAW: '/submission-reviews/:contractSubmissionType/:id/undo-withdraw-submission',
+    SUBMISSIONS_RELEASED_TO_STATE:
+        '/submissions/:contractSubmissionType/:id/released-to-state',
+    SUBMISSION_WITHDRAW:
+        '/submission-reviews/:contractSubmissionType/:id/withdraw-submission',
+    UNDO_SUBMISSION_WITHDRAW:
+        '/submission-reviews/:contractSubmissionType/:id/undo-withdraw-submission',
 }
 
 // Constants for releated descendant routes
@@ -165,7 +178,7 @@ const QUESTION_RESPONSE_SHOW_SIDEBAR_ROUTES: RouteTWithUnknown[] = [
 ]
 
 // Collect all state or CMS upload form routes
-const QUESTION_RESPONSE_FORM_ROUTES: RouteTWithUnknown[]  = [
+const QUESTION_RESPONSE_FORM_ROUTES: RouteTWithUnknown[] = [
     'SUBMISSIONS_UPLOAD_CONTRACT_QUESTION',
     'RATES_UPLOAD_QUESTION',
     'SUBMISSIONS_UPLOAD_CONTRACT_RESPONSE',
@@ -173,18 +186,18 @@ const QUESTION_RESPONSE_FORM_ROUTES: RouteTWithUnknown[]  = [
 ]
 
 // Collect CMS review or workflow related forms
-const CMS_WORKFLOW_FORM_ROUTES: RouteTWithUnknown[]  = [
+const CMS_WORKFLOW_FORM_ROUTES: RouteTWithUnknown[] = [
     'SUBMISSIONS_MCCRSID',
     'RATE_WITHDRAW',
     'UNDO_RATE_WITHDRAW',
     'SUBMISSIONS_RELEASED_TO_STATE',
     'SUBMISSION_WITHDRAW',
-    'UNDO_SUBMISSION_WITHDRAW'
+    'UNDO_SUBMISSION_WITHDRAW',
 ]
 
 const SETTINGS_HIDE_SIDEBAR_ROUTES: RouteTWithUnknown[] = [
     'EDIT_STATE_ASSIGNMENTS',
-    'CREATE_OAUTH_CLIENT'
+    'CREATE_OAUTH_CLIENT',
 ]
 
 const SUBMISSION_PAGE_HEADING_ROUTES: RouteTWithUnknown[] = [
@@ -266,7 +279,7 @@ const PageTitlesRecord: Record<RouteT | 'UNKNOWN_ROUTE', string> = {
     SUBMISSIONS_RELEASED_TO_STATE: 'Released to state',
     UNKNOWN_ROUTE: 'Not found',
     SUBMISSION_WITHDRAW: 'Withdraw submission',
-    UNDO_SUBMISSION_WITHDRAW: 'Undo submission withdraw'
+    UNDO_SUBMISSION_WITHDRAW: 'Undo submission withdraw',
 }
 
 /*

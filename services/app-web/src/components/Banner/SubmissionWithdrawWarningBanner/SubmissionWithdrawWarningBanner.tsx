@@ -4,8 +4,7 @@ import { RatesToNotBeWithdrawn } from '../../../pages/SubmissionWithdraw/Submiss
 import { NavLinkWithLogging } from '../../TealiumLogging'
 import { AccessibleAlertBanner } from '../AccessibleAlertBanner/AccessibleAlertBanner'
 
-interface SubmissionWithdrawWarningBannerProps
-    extends React.HTMLAttributes<HTMLDivElement> {
+interface SubmissionWithdrawWarningBannerProps extends React.HTMLAttributes<HTMLDivElement> {
     rates: RatesToNotBeWithdrawn[]
 }
 

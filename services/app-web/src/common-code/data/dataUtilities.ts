@@ -2,13 +2,13 @@
  * Recursively remove all keys set to undefined and null from object
  */
 
-function removeNullAndUndefined<T extends object> (data: T){
+function removeNullAndUndefined<T extends object>(data: T) {
     for (const key in data) {
-        if (data[key] === undefined || data[key] === null ) {
-          delete data[key];
+        if (data[key] === undefined || data[key] === null) {
+            delete data[key]
         }
-        if ( typeof data[key] === 'object'){
-          removeNullAndUndefined(data[key] as object)
+        if (typeof data[key] === 'object') {
+            removeNullAndUndefined(data[key] as object)
         }
     }
     return data
@@ -24,28 +24,24 @@ type UnknownObjectWithNestedData<T> = T extends null
       ? T
       : {
             [K in keyof T]: T[K] extends (infer U)[]
-                ?   UnknownObjectWithNestedData<U>[]
-                :   UnknownObjectWithNestedData<T[K]>
+                ? UnknownObjectWithNestedData<U>[]
+                : UnknownObjectWithNestedData<T[K]>
         }
 
 function replaceNullsWithUndefineds<T extends object>(
     obj: T
-):  UnknownObjectWithNestedData<T> {
-     
+): UnknownObjectWithNestedData<T> {
     const newObj: any = obj instanceof Array ? [] : {}
     Object.keys(obj).forEach((k) => {
-         
         const v: any = (obj as any)[k]
         newObj[k as keyof T] =
             v === null
                 ? undefined
-                :  
-                  v &&
-                    typeof v === 'object' && !(v instanceof Date)
+                : v && typeof v === 'object' && !(v instanceof Date)
                   ? replaceNullsWithUndefineds(v)
                   : v
     })
     return newObj
 }
 
-export {removeNullAndUndefined, replaceNullsWithUndefineds }
+export { removeNullAndUndefined, replaceNullsWithUndefineds }

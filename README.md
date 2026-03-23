@@ -31,7 +31,7 @@ For monorepo tooling we just rely on the workspace configuration of `pnpm`. If g
 To get the tools needed for local development, you can run:
 
 ```bash
-brew install pnpm direnv entr shellcheck protolint detect-secrets
+brew install pnpm direnv entr shellcheck detect-secrets
 pnpm install husky
 ```
 
@@ -109,8 +109,8 @@ When run locally (with `VITE_APP_AUTH_MODE=LOCAL`), auth bypasses Cognito. The f
 Run whole app locally
 
 - `./dev local` to run the entire app and storybook
-- Available flags: `--web`, `--api`, `--s3`, '--postgres' for running services individually
-- (you can also exclude services by using the yargs 'no' standard: `./dev local --no-webk`)
+- Available flags: `--web`, `--api`, `--s3`, `--postgres`, `--launch-darkly` for running services individually
+- (you can also exclude services by using the yargs 'no' standard: `./dev local --no-web`)
 
 Run individual services locally
 
@@ -299,6 +299,14 @@ Read more in [monitoring documentation](./docs/technical-design/monitoring.md).
 We currently use the CMS Federal (.us) install of Launch Darkly to manage our feature flags. This can be accessed through [LD Federal](https://app.launchdarkly.us) by providing the email address associated with your EUA account (e.g. `@teamtrussworks.com`), which will redirect you to CMS SSO.
 
 There are technical design docs about [when to add and remove feature flags](docs/technical-design/launch-darkly-feature-flag-lifecycles.md) and [how to test with feature flags](docs/technical-design/launch-darkly-testing-approach.md).
+
+### Local LaunchDarkly Service
+
+When running locally, a local LaunchDarkly service (`services/local-launch-darkly`) replaces the real LD endpoints. It starts automatically with `./dev local` and provides a UI at [http://localhost:3031](http://localhost:3031) for toggling feature flags during development.
+
+On startup, the service can fetch initial flag values from real LaunchDarkly if `LD_SDK_KEY` is set to a valid key in `.envrc.local`. Otherwise it falls back to the defaults defined in `packages/common-code/src/featureFlags/flags.ts`.
+
+Both `app-web` (via Vite proxy) and `app-api` (via `LOCAL_LD_SERVICE_URL`) connect to this local service when `VITE_APP_AUTH_MODE=LOCAL`.
 
 ## Contributing
 

@@ -93,26 +93,21 @@ export class ApiEndpoint extends Construct {
                 {
                     statusCode: '200',
                     responseParameters: {
-                        'method.response.header.Access-Control-Allow-Origin':
-                            true,
-                        'method.response.header.Access-Control-Allow-Headers':
-                            true,
-                        'method.response.header.Access-Control-Allow-Methods':
-                            true,
+                        'method.response.header.Access-Control-Allow-Origin': true,
+                        'method.response.header.Access-Control-Allow-Headers': true,
+                        'method.response.header.Access-Control-Allow-Methods': true,
                     },
                 },
                 {
                     statusCode: '400',
                     responseParameters: {
-                        'method.response.header.Access-Control-Allow-Origin':
-                            true,
+                        'method.response.header.Access-Control-Allow-Origin': true,
                     },
                 },
                 {
                     statusCode: '500',
                     responseParameters: {
-                        'method.response.header.Access-Control-Allow-Origin':
-                            true,
+                        'method.response.header.Access-Control-Allow-Origin': true,
                     },
                 },
             ],

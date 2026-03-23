@@ -12,13 +12,8 @@ import {
     UnlockedContract,
     ActuaryContact,
 } from '../gen/gqlClient'
-import {
-    type ProgramArgType,
-    typedStatePrograms,
-} from '../statePrograms'
-import {
-    ActuaryFirmsRecord
-} from './healthPlanFormDataConstants'
+import { type ProgramArgType, typedStatePrograms } from '../statePrograms'
+import { ActuaryFirmsRecord } from './healthPlanFormDataConstants'
 
 type RateRevisionWithIsLinked = {
     isLinked: boolean
@@ -206,7 +201,6 @@ const findStatePrograms = (stateCode: string): ProgramArgType[] => {
     }
     return programs
 }
-
 
 export {
     getDraftRates,

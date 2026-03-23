@@ -47,7 +47,7 @@ export const UndoSubmissionWithdraw = (): React.ReactElement => {
             'PROGRAMMING ERROR: id param not set in submission withdraw form.'
         )
     }
-    const { updateHeading, updateActiveMainContent } = usePage()    
+    const { updateHeading, updateActiveMainContent } = usePage()
     const { logFormSubmitEvent } = useTealium()
     const navigate = useNavigate()
     const [shouldValidate, setShouldValidate] = useState(false)
@@ -88,7 +88,7 @@ export const UndoSubmissionWithdraw = (): React.ReactElement => {
     // Set the active main content to focus when click the Skip to main content button.
     useEffect(() => {
         updateActiveMainContent('undoSubmissionWithdrawForm')
-    }, [updateActiveMainContent])    
+    }, [updateActiveMainContent])
 
     if (loading) {
         return <ErrorOrLoadingPage state="LOADING" />

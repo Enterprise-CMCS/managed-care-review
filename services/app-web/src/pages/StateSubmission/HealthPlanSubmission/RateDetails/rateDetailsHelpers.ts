@@ -86,14 +86,14 @@ const isRatePartiallyFilled = (rate: RateFormData): boolean => {
 
     return Boolean(
         rate.rateDocuments.length ||
-            rate.supportingDocuments.length ||
-            rate.rateProgramIDs.length ||
-            rate.rateMedicaidPopulations ||
-            rate.rateType ||
-            rate.rateCapitationType ||
-            hasActuaryContacts(rate.certifyingActuaryContacts) ||
-            hasActuaryContacts(rate.addtlActuaryContacts) ||
-            rate.actuaryCommunicationPreference
+        rate.supportingDocuments.length ||
+        rate.rateProgramIDs.length ||
+        rate.rateMedicaidPopulations ||
+        rate.rateType ||
+        rate.rateCapitationType ||
+        hasActuaryContacts(rate.certifyingActuaryContacts) ||
+        hasActuaryContacts(rate.addtlActuaryContacts) ||
+        rate.actuaryCommunicationPreference
     )
 }
 

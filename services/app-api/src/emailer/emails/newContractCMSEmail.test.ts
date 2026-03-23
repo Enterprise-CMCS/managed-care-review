@@ -822,8 +822,7 @@ test('does not include oactEmails on non risked based contract', async () => {
     const sub = mockContract()
     sub.packageSubmissions[0].contractRevision.formData.submissionType =
         'CONTRACT_ONLY'
-    sub.packageSubmissions[0].contractRevision.formData.riskBasedContract =
-        false
+    sub.packageSubmissions[0].contractRevision.formData.riskBasedContract = false
 
     const statePrograms = mockMNState().programs
     const template = await newContractCMSEmail(

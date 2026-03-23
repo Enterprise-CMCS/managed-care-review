@@ -7,4 +7,4 @@ const clientSecret = uuidv4()
 
 console.log('Generated client credentials:')
 console.log('Client ID:     ', clientId)
-console.log('Client Secret: ', clientSecret) 
+console.log('Client Secret: ', clientSecret)

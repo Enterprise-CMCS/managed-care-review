@@ -30,7 +30,7 @@
         "jest": "^30.2.0",
         "jiti": "^2.0.0",
         "lint-staged": "^16.2.7",
-        "prettier": "^3.5.3",
+        "prettier": "^3.8.1",
         "ts-jest": "^29.4.6",
         "ts-node": "^10.9.2",
         "tsconfig-paths": "^4.2.0",
@@ -39,7 +39,7 @@
         "typescript-eslint": "^8.57.1"
     },
     "dependencies": {
-        "@aws-sdk/client-secrets-manager": "^3.1013.0",
+        "@aws-sdk/client-secrets-manager": "^3.1014.0",
         "@aws-solutions-constructs/aws-apigateway-lambda": "2.99.0",
         "@aws-solutions-constructs/aws-cloudfront-s3": "2.94.0",
         "@aws-solutions-constructs/aws-cognito-apigateway-lambda": "2.92.1",

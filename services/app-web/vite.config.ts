@@ -33,34 +33,19 @@ export default defineConfig(() => ({
         },
         proxy: {
             '/ld-clientsdk': {
-                target: 'https://clientsdk.launchdarkly.us',
+                target: 'http://localhost:3031',
                 changeOrigin: true,
                 rewrite: (path) => path.replace(/^\/ld-clientsdk/, ''),
-                configure: (proxy, _options) => {
-                    proxy.on('proxyReq', (proxyReq, req, res) => {
-                        proxyReq.setHeader('Origin', 'http://localhost:3000')
-                    })
-                },
             },
             '/ld-clientstream': {
-                target: 'https://clientstream.launchdarkly.us',
+                target: 'http://localhost:3031',
                 changeOrigin: true,
                 rewrite: (path) => path.replace(/^\/ld-clientstream/, ''),
-                configure: (proxy, _options) => {
-                    proxy.on('proxyReq', (proxyReq, req, res) => {
-                        proxyReq.setHeader('Origin', 'http://localhost:3000')
-                    })
-                },
             },
             '/ld-events': {
-                target: 'https://events.launchdarkly.us',
+                target: 'http://localhost:3031',
                 changeOrigin: true,
                 rewrite: (path) => path.replace(/^\/ld-events/, ''),
-                configure: (proxy, _options) => {
-                    proxy.on('proxyReq', (proxyReq, req, res) => {
-                        proxyReq.setHeader('Origin', 'http://localhost:3000')
-                    })
-                },
             },
         },
     },
@@ -73,9 +58,6 @@ export default defineConfig(() => ({
     build: {
         outDir: './build',
         sourcemap: true,
-    },
-    optimizeDeps: {
-        include: ['protobufjs/minimal', 'buffer'],
     },
     resolve: {
         alias: {
@@ -92,7 +74,10 @@ export default defineConfig(() => ({
                 __dirname,
                 '../../packages/helpers'
             ),
-            '@mc-review/submissions': path.resolve(__dirname, '../../packages/submissions'),
+            '@mc-review/submissions': path.resolve(
+                __dirname,
+                '../../packages/submissions'
+            ),
             '@mc-review/mocks': path.resolve(__dirname, '../../packages/mocks'),
             '@mc-review/otel': path.resolve(__dirname, '../../packages/otel'),
             '@mc-review/dates': path.resolve(__dirname, '../../packages/dates'),
@@ -103,7 +88,10 @@ export default defineConfig(() => ({
             scss: {
                 api: 'legacy',
                 loadPaths: [
-                    path.resolve(__dirname, './node_modules/@uswds/uswds/packages'),
+                    path.resolve(
+                        __dirname,
+                        './node_modules/@uswds/uswds/packages'
+                    ),
                 ],
             },
         },

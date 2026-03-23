@@ -1,1 +1,5 @@
-export {formatEmails, formatUserNamesFromUsers, formatEmailsFromUsers} from './SettingsCells'
+export {
+    formatEmails,
+    formatUserNamesFromUsers,
+    formatEmailsFromUsers,
+} from './SettingsCells'

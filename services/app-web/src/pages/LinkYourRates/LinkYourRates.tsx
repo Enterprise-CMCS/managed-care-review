@@ -60,7 +60,7 @@ export const LinkYourRates = ({
             data-testid="link-your-rates"
             error={Boolean(
                 showFieldErrors('ratePreviouslySubmitted') ||
-                    Boolean(showFieldErrors('linkRateSelect'))
+                Boolean(showFieldErrors('linkRateSelect'))
             )}
         >
             <Fieldset

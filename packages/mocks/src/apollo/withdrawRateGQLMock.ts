@@ -1,9 +1,9 @@
-import {   
+import {
     Rate,
     WithdrawRateDocument,
     UndoWithdrawnRateDocument,
     WithdrawRateMutation,
-    UndoWithdrawnRateMutation
+    UndoWithdrawnRateMutation,
 } from '../gen/gqlClient'
 import { MockedResponse } from '@apollo/client/testing'
 import { GraphQLError } from 'graphql/index'
@@ -135,30 +135,34 @@ const undoWithdrawRateMockSuccess = (
     }
 }
 
-const undoWithdrawRateMockFailure = (): MockedResponse<UndoWithdrawnRateMutation> => {
-    const graphQLError = new GraphQLError('Issue undoing a withdrawn rate', {
-        extensions: {
-            code: 'NOT_FOUND',
-            cause: 'DB_ERROR',
-        },
-    })
+const undoWithdrawRateMockFailure =
+    (): MockedResponse<UndoWithdrawnRateMutation> => {
+        const graphQLError = new GraphQLError(
+            'Issue undoing a withdrawn rate',
+            {
+                extensions: {
+                    code: 'NOT_FOUND',
+                    cause: 'DB_ERROR',
+                },
+            }
+        )
 
-    return {
-        request: {
-            query: UndoWithdrawnRateDocument,
-            variables: {
-                input: {
-                    rateID: 'test-abc-123',
-                    updatedReason: 'Undo withdraw rate'
+        return {
+            request: {
+                query: UndoWithdrawnRateDocument,
+                variables: {
+                    input: {
+                        rateID: 'test-abc-123',
+                        updatedReason: 'Undo withdraw rate',
+                    },
                 },
             },
-        },
-        result: {
-            data: null,
-            errors: [graphQLError],
-        },
+            result: {
+                data: null,
+                errors: [graphQLError],
+            },
+        }
     }
-}
 
 const withdrawRateMockFailure = (): MockedResponse<WithdrawRateMutation> => {
     const graphQLError = new GraphQLError('Issue withdrawing rate', {
@@ -167,14 +171,14 @@ const withdrawRateMockFailure = (): MockedResponse<WithdrawRateMutation> => {
             cause: 'DB_ERROR',
         },
     })
-    
+
     return {
         request: {
             query: WithdrawRateDocument,
             variables: {
                 input: {
                     rateID: 'test-abc-123',
-                    updatedReason: 'withdraw rate'
+                    updatedReason: 'withdraw rate',
                 },
             },
         },
@@ -189,5 +193,5 @@ export {
     withdrawRateMockFailure,
     withdrawRateMockSuccess,
     undoWithdrawRateMockSuccess,
-    undoWithdrawRateMockFailure
+    undoWithdrawRateMockFailure,
 }

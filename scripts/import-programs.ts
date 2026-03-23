@@ -15,9 +15,6 @@ https://github.com/Enterprise-CMCS/managed-care-review/blob/main/docs/technical-
  Additional columns aren't used and should be ignored.
  */
 
-
-
-
 import csv from 'csv-parser'
 import fs from 'fs'
 import { v4 as uuidv4 } from 'uuid'
@@ -123,7 +120,10 @@ fs.createReadStream(file)
             }
 
             if (!data.id) {
-                console.error('No ID set for program, make sure to set an ID in the spreadsheet', data)
+                console.error(
+                    'No ID set for program, make sure to set an ID in the spreadsheet',
+                    data
+                )
                 process.exit(1)
             }
 
@@ -139,7 +139,7 @@ fs.createReadStream(file)
                 id: !data.id ? uuidv4() : data.id,
                 fullName: data.Program,
                 name: data.Nickname,
-                isRateProgram: data.IsRateProgram === 'TRUE'
+                isRateProgram: data.IsRateProgram === 'TRUE',
             })
         }
     )

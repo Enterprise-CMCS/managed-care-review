@@ -51,14 +51,14 @@ const featureFlags = {
      */
     WITHDRAW_SUBMISSION: {
         flag: 'withdraw-submission',
-        defaultValue: false
+        defaultValue: false,
     },
     /**
      * Enables undo withdraw submission features
      */
     UNDO_WITHDRAW_SUBMISSION: {
         flag: 'undo-withdraw-submission',
-        defaultValue: false
+        defaultValue: false,
     },
     // PERMANENT FLAGS
     /**
@@ -88,14 +88,6 @@ const featureFlags = {
     SITE_UNDER_MAINTENANCE_BANNER: {
         flag: 'site-under-maintenance-banner',
         defaultValue: 'OFF',
-    },
-    /**
-     * Used in testing to simulate errors in fetching flag value.
-     * This flag does not exist in LaunchDarkly dashboard so fetching this will return the defaultValue.
-     */
-    TEST_ERROR_FETCHING_FLAG: {
-        flag: 'test-error-fetching-flag',
-        defaultValue: undefined,
     },
 } as const
 

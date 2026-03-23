@@ -2,7 +2,7 @@ export const GRAPHQL_ERROR_CAUSE_MESSAGES = {
     EMAIL_ERROR: 'Error attempting to send emails.',
     INVALID_PACKAGE_STATUS:
         'Attempted to submit or unlock package with wrong status',
-    DB_ERROR: 'database error'
+    DB_ERROR: 'database error',
 }
 
 type GraphQLErrorCodeTypes =

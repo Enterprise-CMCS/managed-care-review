@@ -185,7 +185,7 @@ export const EQROSubmissionSummary = (): React.ReactElement => {
             >
                 <StatusTag
                     status={consolidatedStatus}
-                    notStateUser={isStateUser}
+                    notStateUser={!isStateUser}
                 />
 
                 <h1 className={styles.eqroSummaryNameHeader}>{name}</h1>

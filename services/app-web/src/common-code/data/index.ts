@@ -1,1 +1,4 @@
-export {removeNullAndUndefined, replaceNullsWithUndefineds } from './dataUtilities'
+export {
+    removeNullAndUndefined,
+    replaceNullsWithUndefineds,
+} from './dataUtilities'

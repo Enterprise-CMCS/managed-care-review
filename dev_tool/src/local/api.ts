@@ -2,7 +2,6 @@ import LabeledProcessRunner from '../runner.js'
 import { compileGraphQLTypesWatchOnce } from './graphql.js'
 import { watchPackagesOnce } from './packages.js'
 import { installPrismaDeps } from './postgres.js'
-import { compileProtoWatchOnce } from './proto.js'
 
 export async function installAPIDeps(runner: LabeledProcessRunner) {
     await runner.runCommandAndOutput('api deps', ['pnpm', 'install'], '')
@@ -23,7 +22,6 @@ export async function runAPILocally(
     withProf = false
 ) {
     compileGraphQLTypesWatchOnce(runner)
-    compileProtoWatchOnce(runner)
 
     await installAPIDeps(runner)
 

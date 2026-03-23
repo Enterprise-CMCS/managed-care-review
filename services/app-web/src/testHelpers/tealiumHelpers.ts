@@ -1,5 +1,5 @@
-import { TealiumClientType } from '../tealium';
-import {UseTealiumHookType} from '../hooks/useTealium';
+import { TealiumClientType } from '../tealium'
+import { UseTealiumHookType } from '../hooks/useTealium'
 
 export const tealiumTestClient = (): TealiumClientType => {
     return {

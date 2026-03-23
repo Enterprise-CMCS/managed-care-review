@@ -16,7 +16,7 @@ import {
     IndexContractsForDashboardDocument,
     IndexContractsForDashboardQuery,
     UnlockContractMutation,
-    UnlockContractDocument
+    UnlockContractDocument,
 } from '../gen/gqlClient'
 import { MockedResponse } from '@apollo/client/testing'
 import {
@@ -171,15 +171,15 @@ const createContractMockFail = ({
     return {
         request: {
             query: CreateContractDocument,
-            variables: { 
-                input: { 
+            variables: {
+                input: {
                     populationCovered: 'MEDICAID',
                     programIDs: ['d95394e5-44d1-45df-8151-1cc1ee66f100'],
                     riskBasedContract: false,
                     submissionType: 'CONTRACT_ONLY',
                     submissionDescription: 'A submitted submission',
-                    contractType: 'BASE'
-                } 
+                    contractType: 'BASE',
+                },
             },
         },
         result: {
@@ -313,7 +313,9 @@ const updateContractDraftRevisionMockSuccess = ({
     const contractInput = {
         contractID: contractData.id,
         lastSeenUpdatedAt: contractData.draftRevision?.updatedAt,
-        formData: mockUpdateContractDraftRevisionInput(contractData.draftRevision?.formData),
+        formData: mockUpdateContractDraftRevisionInput(
+            contractData.draftRevision?.formData
+        ),
     }
     return {
         request: {
@@ -459,16 +461,20 @@ type unlockContractMockSuccessProps = {
     reason: string
 }
 
-const transformUnlockedContractToContract = (contract: UnlockedContract): Contract => {
+const transformUnlockedContractToContract = (
+    contract: UnlockedContract
+): Contract => {
     return {
         ...contract,
         __typename: 'Contract',
     }
 }
 const unlockContractMockSuccess = ({
-   contract = transformUnlockedContractToContract(mockContractPackageUnlockedWithUnlockedType()),
-   id,
-   reason,
+    contract = transformUnlockedContractToContract(
+        mockContractPackageUnlockedWithUnlockedType()
+    ),
+    id,
+    reason,
 }: unlockContractMockSuccessProps): MockedResponse<UnlockContractMutation> => {
     // HACK, for some reason tests started failing with getting the types just right
     // As we get those types everywhere we can revisit this.
@@ -484,10 +490,10 @@ const unlockContractMockSuccess = ({
 }
 
 const unlockContractMockError = ({
-     id,
-     reason,
-     error,
- }: {
+    id,
+    reason,
+    error,
+}: {
     id: string
     reason: string
     error?: {
@@ -533,5 +539,5 @@ export {
     createContractMockSuccess,
     indexContractsMockSuccess,
     unlockContractMockError,
-    unlockContractMockSuccess
+    unlockContractMockSuccess,
 }

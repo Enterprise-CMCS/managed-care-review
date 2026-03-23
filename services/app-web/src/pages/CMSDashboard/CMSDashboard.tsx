@@ -10,7 +10,7 @@ import { usePage } from '../../contexts/PageContext'
 
 const CMSDashboard = (): React.ReactElement => {
     const { pathname } = useLocation()
-    const { updateActiveMainContent } = usePage()    
+    const { updateActiveMainContent } = usePage()
     const loadOnRateReviews = pathname === RoutesRecord.DASHBOARD_RATES
     const TAB_NAMES = {
         RATES: 'Rate reviews',
@@ -24,7 +24,11 @@ const CMSDashboard = (): React.ReactElement => {
         updateActiveMainContent(activeMainContentId)
     }, [activeMainContentId, updateActiveMainContent])
     return (
-        <div id={activeMainContentId} data-testid="cms-dashboard-page" className={styles.wrapper}>
+        <div
+            id={activeMainContentId}
+            data-testid="cms-dashboard-page"
+            className={styles.wrapper}
+        >
             <GridContainer className={styles.container}>
                 <section className={styles.panel}>
                     <div className={styles.panelHeader}>

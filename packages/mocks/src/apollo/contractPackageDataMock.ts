@@ -6,8 +6,11 @@ import {
     UnlockedContract,
     CmsUser,
     StateUser,
-    Rate, IndexContractQuestionsPayload, ContractDraftRevisionFormDataInput,
-    GenericDocumentInput, StateContactInput,
+    Rate,
+    IndexContractQuestionsPayload,
+    ContractDraftRevisionFormDataInput,
+    GenericDocumentInput,
+    StateContactInput,
 } from '../gen/gqlClient'
 import { s3DlUrl } from './documentDataMock'
 import { mockMNState } from './stateMock'
@@ -18,16 +21,16 @@ function mockEmptyContractQuestions(): IndexContractQuestionsPayload {
     return {
         DMCOQuestions: {
             totalCount: 0,
-            edges: []
+            edges: [],
         },
         OACTQuestions: {
             totalCount: 0,
-            edges: []
+            edges: [],
         },
         DMCPQuestions: {
             totalCount: 0,
-            edges: []
-        }
+            edges: [],
+        },
     }
 }
 
@@ -70,7 +73,7 @@ function mockContractQuestions(
                                         id: 'response-to-dmco-1-document-1',
                                         s3URL: 's3://bucketname/key/response-to-dmco-1-document-1',
                                         name: 'response-to-dmco-1-document-1',
-                                        downloadURL:s3DlUrl,
+                                        downloadURL: s3DlUrl,
                                     },
                                 ],
                             },
@@ -1215,14 +1218,16 @@ function mockContractPackageSubmitted(partial?: Partial<Contract>): Contract {
                     updatedAt: '2024-12-18T16:54:39.173Z',
                     id: '123',
                     contractID: contractID,
-                    documentZipPackages: [{
-                        id: "zip-package-123",
-                        s3URL: "s3://bucket-name/zips/contracts/key/contract-documents.zip",
-                        sha256: "sha123",
-                        documentType: "CONTRACT_DOCUMENTS",
-                        createdAt: new Date('01/15/2024'),
-                        downloadUrl: s3DlUrl
-                    }],
+                    documentZipPackages: [
+                        {
+                            id: 'zip-package-123',
+                            s3URL: 's3://bucket-name/zips/contracts/key/contract-documents.zip',
+                            sha256: 'sha123',
+                            documentType: 'CONTRACT_DOCUMENTS',
+                            createdAt: new Date('01/15/2024'),
+                            downloadUrl: s3DlUrl,
+                        },
+                    ],
                     submitInfo: {
                         __typename: 'UpdateInformation',
                         updatedAt: new Date(),
@@ -1323,14 +1328,16 @@ function mockContractPackageSubmitted(partial?: Partial<Contract>): Contract {
                         },
                         unlockInfo: null,
                         rate: null,
-                        documentZipPackages: [{
-                            id: "zip-package-321",
-                            s3URL: "s3://bucket-name/zips/rates/key/rate-documents.zip",
-                            sha256: "sha123",
-                            documentType: "RATE_DOCUMENTS",
-                            createdAt: new Date('01/15/2024'),
-                            downloadUrl: s3DlUrl
-                        }],
+                        documentZipPackages: [
+                            {
+                                id: 'zip-package-321',
+                                s3URL: 's3://bucket-name/zips/rates/key/rate-documents.zip',
+                                sha256: 'sha123',
+                                documentType: 'RATE_DOCUMENTS',
+                                createdAt: new Date('01/15/2024'),
+                                downloadUrl: s3DlUrl,
+                            },
+                        ],
                         formData: {
                             __typename: 'RateFormData',
                             rateCertificationName: 'rate cert',
@@ -1386,7 +1393,7 @@ function mockContractPackageSubmitted(partial?: Partial<Contract>): Contract {
                                     name: 'Actuary Contact 1',
                                     titleRole: 'Test Actuary Contact 1',
                                     email: 'actuarycontact1@test.com',
-                                    actuarialFirmOther: null
+                                    actuarialFirmOther: null,
                                 },
                             ],
                             addtlActuaryContacts: [
@@ -1396,7 +1403,7 @@ function mockContractPackageSubmitted(partial?: Partial<Contract>): Contract {
                                     name: 'Actuary Contact 1',
                                     titleRole: 'Test Actuary Contact 1',
                                     email: 'actuarycontact1@test.com',
-                                    actuarialFirmOther: null
+                                    actuarialFirmOther: null,
                                 },
                             ],
                             actuaryCommunicationPreference: 'OACT_TO_ACTUARY',
@@ -2189,7 +2196,7 @@ function mockContractPackageWithDifferentProgramsInRevisions(): Contract {
                 __typename: 'ContractPackageSubmission',
             },
         ],
-        questions: mockEmptyContractQuestions()
+        questions: mockEmptyContractQuestions(),
     }
 }
 
@@ -2543,7 +2550,7 @@ function mockContractPackageUnlockedWithUnlockedType(
                             revisions: [],
                             state: mockMNState(),
                             stateNumber: 5,
-                            parentContractID: contractID
+                            parentContractID: contractID,
                         },
                         createdAt: new Date('01/01/2023'),
                         updatedAt: new Date('01/01/2023'),
@@ -2711,53 +2718,60 @@ function mockUpdateContractDraftRevisionInput(
     const {
         __typename, // strip out __typename. arguments could contain them, but input type errors when present
         ...formData
-    } = partial ?? {} as any
+    } = partial ?? ({} as any)
 
-    const contractDocuments: GenericDocumentInput[] = partial?.contractDocuments ? partial?.contractDocuments.map(doc => ({
-        name: doc.name,
-        s3URL: doc.s3URL,
-        sha256: doc.sha256,
-        downloadURL: doc.downloadURL,
-    })) : [
-        {
-            s3URL: 's3://bucketname/one-two/one-two.png',
-            sha256: 'fakesha',
-            name: 'contract document',
-            downloadURL: s3DlUrl,
-        },
-    ]
+    const contractDocuments: GenericDocumentInput[] = partial?.contractDocuments
+        ? partial?.contractDocuments.map((doc) => ({
+              name: doc.name,
+              s3URL: doc.s3URL,
+              sha256: doc.sha256,
+              downloadURL: doc.downloadURL,
+          }))
+        : [
+              {
+                  s3URL: 's3://bucketname/one-two/one-two.png',
+                  sha256: 'fakesha',
+                  name: 'contract document',
+                  downloadURL: s3DlUrl,
+              },
+          ]
 
-    const supportingDocuments: GenericDocumentInput[]  = partial?.supportingDocuments ? partial?.supportingDocuments.map(doc => ({
-        name: doc.name,
-        s3URL: doc.s3URL,
-        sha256: doc.sha256,
-        downloadURL: doc.downloadURL,
-    })) : [
-        {
-            s3URL: 's3://bucketname/key/contractsupporting1',
-            sha256: 'fakesha',
-            name: 'contractSupporting1',
-            downloadURL: s3DlUrl,
-        },
-        {
-            s3URL: 's3://bucketname/key/contractSupporting2',
-            sha256: 'fakesha',
-            name: 'contractSupporting2',
-            downloadURL: s3DlUrl,
-        },
-    ]
+    const supportingDocuments: GenericDocumentInput[] =
+        partial?.supportingDocuments
+            ? partial?.supportingDocuments.map((doc) => ({
+                  name: doc.name,
+                  s3URL: doc.s3URL,
+                  sha256: doc.sha256,
+                  downloadURL: doc.downloadURL,
+              }))
+            : [
+                  {
+                      s3URL: 's3://bucketname/key/contractsupporting1',
+                      sha256: 'fakesha',
+                      name: 'contractSupporting1',
+                      downloadURL: s3DlUrl,
+                  },
+                  {
+                      s3URL: 's3://bucketname/key/contractSupporting2',
+                      sha256: 'fakesha',
+                      name: 'contractSupporting2',
+                      downloadURL: s3DlUrl,
+                  },
+              ]
 
-    const stateContacts: StateContactInput[]  = partial?.stateContacts ? partial.stateContacts.map(contact => ({
-        name: contact.name,
-        titleRole: contact.titleRole,
-        email: contact.email,
-    })) : [
-        {
-            name: 'State Contact 1',
-            titleRole: 'Test State Contact 1',
-            email: 'actuarycontact1@test.com',
-        }
-    ]
+    const stateContacts: StateContactInput[] = partial?.stateContacts
+        ? partial.stateContacts.map((contact) => ({
+              name: contact.name,
+              titleRole: contact.titleRole,
+              email: contact.email,
+          }))
+        : [
+              {
+                  name: 'State Contact 1',
+                  titleRole: 'Test State Contact 1',
+                  email: 'actuarycontact1@test.com',
+              },
+          ]
 
     return {
         programIDs: ['abbdf9b0-c49e-4c4c-bb6f-040cb7b51cce'],
@@ -2795,7 +2809,7 @@ function mockUpdateContractDraftRevisionInput(
         ...formData,
         contractDocuments,
         supportingDocuments,
-        stateContacts
+        stateContacts,
     }
 }
 
@@ -3006,8 +3020,7 @@ const mockWithdrawnRates = (parentContractID?: string): Rate[] => {
                         updatedAt: new Date('01/01/2021'),
                         formData: {
                             ...mockRateRevision().formData,
-                            rateCertificationName:
-                                'WITHDRAWN-RATE-1-NAME'
+                            rateCertificationName: 'WITHDRAWN-RATE-1-NAME',
                         },
                     },
                     submittedRevisions: [],
@@ -3048,8 +3061,7 @@ const mockWithdrawnRates = (parentContractID?: string): Rate[] => {
                         updatedAt: new Date('01/01/2021'),
                         formData: {
                             ...mockRateRevision().formData,
-                            rateCertificationName:
-                                'WITHDRAWN-RATE-2-NAME'
+                            rateCertificationName: 'WITHDRAWN-RATE-2-NAME',
                         },
                     },
                     submittedRevisions: [],
@@ -3075,5 +3087,5 @@ export {
     mockContractPackageApproved,
     mockContractPackageApprovedWithQuestions,
     mockWithdrawnRates,
-    mockUpdateContractDraftRevisionInput
+    mockUpdateContractDraftRevisionInput,
 }

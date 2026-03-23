@@ -22,9 +22,7 @@ export type {
     MedicaidAmendmentProvisionType,
     CHIPModifiedProvisions,
     GeneralizedProvisionType,
-    GeneralizedModifiedProvisions
+    GeneralizedModifiedProvisions,
 } from './ModifiedProvisions'
 
-export type {
-    RateRevisionWithIsLinked
-} from './contractHelpers'
+export type { RateRevisionWithIsLinked } from './contractHelpers'

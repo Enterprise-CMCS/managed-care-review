@@ -8,10 +8,11 @@ datasource db {
 }
 
 model HealthPlanPackageTable {
-  id        String                    @id
-  stateCode String
-  state     State                     @relation(fields: [stateCode], references: [stateCode])
-  revisions HealthPlanRevisionTable[]
+  id         String                    @id
+  stateCode  String
+  state      State                     @relation(fields: [stateCode], references: [stateCode])
+  revisions  HealthPlanRevisionTable[]
+  deprecated Boolean                   @default(true)
 }
 
 model ProtoMigrationsTable {
@@ -48,8 +49,7 @@ model HealthPlanRevisionTable {
   id              String                 @id
   createdAt       DateTime
   pkgID           String
-  formDataProto   Bytes
-  formData        Json?
+  formData        Json
   submittedAt     DateTime?
   unlockedAt      DateTime?
   unlockedBy      String?
@@ -57,6 +57,7 @@ model HealthPlanRevisionTable {
   submittedBy     String?
   submittedReason String?
   pkg             HealthPlanPackageTable @relation(fields: [pkgID], references: [id])
+  deprecated      Boolean                @default(true)
 }
 
 model ContractTable {

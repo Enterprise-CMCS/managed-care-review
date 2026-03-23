@@ -44,5 +44,6 @@ updates:
       storybook:
         applies-to: version-updates
         patterns:
-          - '@storybook/*'
           - 'storybook'
+          - 'storybook*'
+          - '@storybook/*'

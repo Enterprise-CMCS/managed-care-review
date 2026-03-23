@@ -20,7 +20,7 @@ const defaultFeatureFlags = (): FeatureFlagSettings =>
 type LDServiceArgType = {
     key: string
     flag: FeatureFlagLDConstant
-    kind?: string// usually user specific data form apollo context
+    kind?: string // usually user specific data form apollo context
     span?: Span
     anonymous?: boolean
 }
@@ -35,11 +35,11 @@ type LDService = {
 function ldService(ldClient: LDClient): LDService {
     return {
         getFeatureFlag: async (args) => {
-            const {kind, key, anonymous} = args
+            const { kind, key, anonymous } = args
             const ldContext = {
                 kind: kind ?? 'user',
                 key,
-                anonymous // https://docs.launchdarkly.com/sdk/features/anonymou
+                anonymous, // https://docs.launchdarkly.com/sdk/features/anonymou
             }
             return await ldClient.variation(args.flag, ldContext, false)
         },
@@ -82,5 +82,41 @@ function offlineLDService(): LDService {
     }
 }
 
-export { ldService, offlineLDService, defaultFeatureFlags }
+// Launch Darkly service for local deployments. Visit the UI using http://localhost:3031/
+function localLDService(baseUrl: string): LDService {
+    const flagsUrl = `${baseUrl}/flags`
+    return {
+        getFeatureFlag: async (args) => {
+            try {
+                const response = await fetch(flagsUrl)
+                if (!response.ok) {
+                    throw new Error(`${response.status} ${response.statusText}`)
+                }
+                const flags = (await response.json()) as FeatureFlagSettings
+                return flags[args.flag] ?? defaultFeatureFlags()[args.flag]
+            } catch (err) {
+                console.warn(
+                    `localLDService: failed to fetch flag ${args.flag}, using default`
+                )
+                return defaultFeatureFlags()[args.flag]
+            }
+        },
+        allFlags: async () => {
+            try {
+                const response = await fetch(flagsUrl)
+                if (!response.ok) {
+                    throw new Error(`${response.status} ${response.statusText}`)
+                }
+                return (await response.json()) as FeatureFlagSettings
+            } catch (err) {
+                console.warn(
+                    'localLDService: failed to fetch flags, using defaults'
+                )
+                return defaultFeatureFlags()
+            }
+        },
+    }
+}
+
+export { ldService, offlineLDService, localLDService, defaultFeatureFlags }
 export type { LDService, FeatureFlagSettings }

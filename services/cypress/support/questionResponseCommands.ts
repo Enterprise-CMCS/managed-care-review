@@ -19,12 +19,24 @@ Cypress.Commands.add(
             .should('exist')
             .click()
 
-        cy.url().then(url => {
-           if (url.includes('/rates/')) {
-                cy.wait(['@createRateQuestionMutation', '@fetchRateWithQuestionsQuery'], { timeout: 50_000 })
-           } else {
-                cy.wait(['@createContractQuestionMutation', '@fetchContractWithQuestionsQuery'], { timeout: 50_000 })
-           }
+        cy.url().then((url) => {
+            if (url.includes('/rates/')) {
+                cy.wait(
+                    [
+                        '@createRateQuestionMutation',
+                        '@fetchRateWithQuestionsQuery',
+                    ],
+                    { timeout: 50_000 }
+                )
+            } else {
+                cy.wait(
+                    [
+                        '@createContractQuestionMutation',
+                        '@fetchContractWithQuestionsQuery',
+                    ],
+                    { timeout: 50_000 }
+                )
+            }
         })
     }
 )
@@ -51,11 +63,23 @@ Cypress.Commands.add(
             .should('exist')
             .click()
 
-        cy.url().then(url => {
+        cy.url().then((url) => {
             if (url.includes('/rates/')) {
-                cy.wait(['@createRateQuestionResponseMutation', '@fetchRateWithQuestionsQuery'], { timeout: 50_000 })
+                cy.wait(
+                    [
+                        '@createRateQuestionResponseMutation',
+                        '@fetchRateWithQuestionsQuery',
+                    ],
+                    { timeout: 50_000 }
+                )
             } else {
-                cy.wait(['@createContractQuestionResponseMutation', '@fetchContractWithQuestionsQuery'], { timeout: 50_000 })
+                cy.wait(
+                    [
+                        '@createContractQuestionResponseMutation',
+                        '@fetchContractWithQuestionsQuery',
+                    ],
+                    { timeout: 50_000 }
+                )
             }
         })
     }

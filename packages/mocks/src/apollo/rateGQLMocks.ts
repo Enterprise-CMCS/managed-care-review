@@ -8,16 +8,17 @@ import {
     IndexRatesStrippedQuery,
     IndexRatesQuery,
     Rate,
-    RateRevision, 
+    RateRevision,
     RateStripped,
     IndexRatesStrippedWithRelatedContractsQuery,
-    IndexRatesStrippedWithRelatedContractsDocument
+    IndexRatesStrippedWithRelatedContractsDocument,
 } from '../gen/gqlClient'
 import { MockedResponse } from '@apollo/client/testing'
 import {
     draftRateDataMock,
     rateDataMock,
-    mockRateSubmittedWithQuestions, strippedRateDataMock,
+    mockRateSubmittedWithQuestions,
+    strippedRateDataMock,
 } from './rateDataMock'
 import { GraphQLError } from 'graphql/index'
 
@@ -102,7 +103,7 @@ const indexRatesStrippedMockSuccess = (
 }
 
 const indexRatesStrippedWithRelatedContractsMockSuccess = (
-    stateCode?: string, 
+    stateCode?: string,
     rateIDs?: string[]
 ): MockedResponse<IndexRatesStrippedWithRelatedContractsQuery> => {
     const mockRates = [
@@ -122,18 +123,18 @@ const indexRatesStrippedWithRelatedContractsMockSuccess = (
             variables: {
                 input: {
                     stateCode: stateCode,
-                    rateIDs: rateIDs
+                    rateIDs: rateIDs,
                 },
-            }
+            },
         },
         result: {
             data: {
                 indexRatesStripped: {
                     totalCount: ratesEdge.length,
-                    edges: ratesEdge
-                }
-            }
-        }
+                    edges: ratesEdge,
+                },
+            },
+        },
     }
 }
 
@@ -173,15 +174,12 @@ const indexRatesMockSuccess = (
 
 const indexRatesStrippedMockFailure =
     (): MockedResponse<IndexRatesStrippedQuery> => {
-        const graphQLError = new GraphQLError(
-            'Issue finding rates stripped',
-            {
-                extensions: {
-                    code: 'NOT_FOUND',
-                    cause: 'DB_ERROR',
-                },
-            }
-        )
+        const graphQLError = new GraphQLError('Issue finding rates stripped', {
+            extensions: {
+                code: 'NOT_FOUND',
+                cause: 'DB_ERROR',
+            },
+        })
         return {
             request: {
                 query: IndexRatesStrippedDocument,
