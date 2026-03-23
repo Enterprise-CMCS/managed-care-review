@@ -8,7 +8,7 @@ describe('state user in health plan submission form', () => {
         cy.interceptFeatureFlags({
             '438-attestation': true,
             'hide-supporting-docs-page': true,
-            'dsnp': true
+            dsnp: true,
         })
         cy.logInAsStateUser()
 
@@ -35,13 +35,15 @@ describe('state user in health plan submission form', () => {
 
             // Make sure is contract only
             cy.findByLabelText('Contract action and rate certification').should(
-                    'not.be.checked'
-                )
-            cy.findByTestId('step-indicator').findAllByRole('listitem').should('have.length', 4)
+                'not.be.checked'
+            )
+            cy.findByTestId('step-indicator')
+                .findAllByRole('listitem')
+                .should('have.length', 4)
             cy.findByText('Rate details').should('not.exist')
 
             //Navigate back to previous page
-            cy.findByRole('button', { name: /Cancel/, timeout: 5_000}).click()
+            cy.findByRole('button', { name: /Cancel/, timeout: 5_000 }).click()
             cy.findByRole('heading', { level: 1, name: /Submissions/ })
 
             // Link to type page
@@ -50,17 +52,23 @@ describe('state user in health plan submission form', () => {
             )
 
             // Change to contract and rates and contract amendment
-            cy.findByLabelText('Contract action and rate certification').check({force: true})
+            cy.findByLabelText('Contract action and rate certification').check({
+                force: true,
+            })
             cy.findByLabelText('Contract action and rate certification').should(
                 'be.checked'
             )
 
-            cy.findByLabelText('Amendment to base contract').check({force: true})
-            cy.findByLabelText('Amendment to base contract').should('be.checked')
-            cy.get('label[for="riskBasedContractNo"]').click()
-            cy.findByRole('textbox', { name: 'Submission description' }).clear().type(
-                'description of contract only submission with amendment'
+            cy.findByLabelText('Amendment to base contract').check({
+                force: true,
+            })
+            cy.findByLabelText('Amendment to base contract').should(
+                'be.checked'
             )
+            cy.get('label[for="riskBasedContractNo"]').click()
+            cy.findByRole('textbox', { name: 'Submission description' })
+                .clear()
+                .type('description of contract only submission with amendment')
 
             // Save as draft
             cy.navigateContractForm('SAVE_DRAFT')
@@ -70,7 +78,9 @@ describe('state user in health plan submission form', () => {
             cy.navigateFormByDirectLink(
                 `/submissions/${draftContractSubType}/${draftSubmissionId}/edit/type`
             )
-            cy.findByTestId('step-indicator').findAllByRole('listitem').should('have.length', 5)
+            cy.findByTestId('step-indicator')
+                .findAllByRole('listitem')
+                .should('have.length', 5)
             cy.findByText('Rate details').should('exist')
             cy.navigateContractForm('CONTINUE')
 
@@ -89,7 +99,7 @@ describe('state user in health plan submission form', () => {
             cy.get('[data-testid="saveAsDraftSuccessBanner"]').should('exist')
 
             // Link to contract details page and continue
-               cy.navigateFormByDirectLink(
+            cy.navigateFormByDirectLink(
                 `/submissions/${draftContractSubType}/${draftSubmissionId}/edit/contract-details`
             )
             cy.navigateContractForm('CONTINUE')
@@ -152,7 +162,9 @@ describe('state user in health plan submission form', () => {
             const pathnameArray = pathname.split('/')
             const draftSubmissionId = pathnameArray[3]
             const draftContractSubType = pathnameArray[2]
-            cy.navigateFormByDirectLink(`/submissions/${draftContractSubType}/${draftSubmissionId}/edit/review-and-submit`)
+            cy.navigateFormByDirectLink(
+                `/submissions/${draftContractSubType}/${draftSubmissionId}/edit/review-and-submit`
+            )
 
             // Testing around temporary client-side validation for contract and rates submission.
             // Ensures rate certification is included. Remove after MCR-4871 and use cy.submitStateSubmissionForm below.
@@ -160,13 +172,13 @@ describe('state user in health plan submission form', () => {
             cy.findByRole('button', {
                 name: 'Submit',
             }).safeClick()
-            
+
             cy.findAllByTestId('modalWindow')
-            .eq(1)
-            .should('exist')
-            .within(() => {
-                cy.findByTestId('submit_contract-modal-submit').click()
-            })
+                .eq(1)
+                .should('exist')
+                .within(() => {
+                    cy.findByTestId('submit_contract-modal-submit').click()
+                })
 
             // cy.submitStateSubmissionForm({success: false})
             cy.findByRole('heading', { level: 4, name: /Submission error/ })
@@ -191,10 +203,14 @@ describe('state user in health plan submission form', () => {
             })
                 .should('exist')
                 .within(() => {
-                    cy.findByText('No, this rate certification was not included with any other submissions').click()
+                    cy.findByText(
+                        'No, this rate certification was not included with any other submissions'
+                    ).click()
                 })
 
-            const multiSuppportingDocsField = cy.findAllByTestId('file-input-input').last()
+            const multiSuppportingDocsField = cy
+                .findAllByTestId('file-input-input')
+                .last()
             // MCR-4198 - DOC REPLACED IN PLACE FOR SINGLE ITEM FIELD CURRENTLY BROKEN
             // currently showing duplicate field error when it shouldn't
             // const singleDocRateCertField = cy.findAllByTestId('file-input-input').first()
@@ -210,28 +226,28 @@ describe('state user in health plan submission form', () => {
                 'documents/trussel-guide.pdf',
             ])
             cy.findByText(/0 complete, 0 errors, 1 pending/)
-             multiSuppportingDocsField.attachFile([
+            multiSuppportingDocsField.attachFile([
                 'documents/how-to-open-source.pdf',
             ])
             cy.findByText(/0 complete, 0 errors, 2 pending/)
             cy.waitForDocumentsToLoad()
 
             // Add two more valid documents
-             multiSuppportingDocsField.attachFile([
+            multiSuppportingDocsField.attachFile([
                 'documents/questions_for_submission.pdf',
                 'documents/response_to_questions_for_submission.pdf',
             ])
 
             // Add one more file, a duplicate
-             multiSuppportingDocsField.attachFile(
-                'documents/trussel-guide.pdf'
-            )
+            multiSuppportingDocsField.attachFile('documents/trussel-guide.pdf')
             // Files show correct loading states then complete
             cy.findByText('Duplicate file, please remove').should('exist')
 
-            cy.findAllByTestId('file-input-preview-list').last().within(() => {
-                cy.findAllByRole('listitem').should('have.length', 5)
-            })
+            cy.findAllByTestId('file-input-preview-list')
+                .last()
+                .within(() => {
+                    cy.findAllByRole('listitem').should('have.length', 5)
+                })
 
             cy.findByText(/4 complete, 1 error, 0 pending/)
             cy.findByText(/5 files added/).should('exist')
@@ -249,13 +265,14 @@ describe('state user in health plan submission form', () => {
             // })
             // cy.verifyDocumentsHaveNoErrors()
 
-             // Drop invalid file and invalid type message appears
-             cy.findAllByTestId('file-input-droptarget').last()
-             .should('exist')
-             .attachFile(['images/trussel-guide-screenshot.png'], {
-                 subjectType: 'drag-n-drop',
-                 force: true,
-             })
+            // Drop invalid file and invalid type message appears
+            cy.findAllByTestId('file-input-droptarget')
+                .last()
+                .should('exist')
+                .attachFile(['images/trussel-guide-screenshot.png'], {
+                    subjectType: 'drag-n-drop',
+                    force: true,
+                })
             cy.findByTestId('file-input-error').should(
                 'have.text',
                 'This is not a valid file type.'

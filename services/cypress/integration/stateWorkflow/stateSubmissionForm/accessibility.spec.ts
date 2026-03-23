@@ -1,4 +1,4 @@
-import { stateUser } from '../../../utils/apollo-test-utils';
+import { stateUser } from '../../../utils/apollo-test-utils'
 
 describe('state user in state submission form', () => {
     beforeEach(() => {
@@ -7,7 +7,7 @@ describe('state user in state submission form', () => {
     })
     it.only('has no a11y violations on submission form with form input errors', () => {
         // 438-attestation still needs to go through design, there is an a11y violation for links and spacing
-        cy.interceptFeatureFlags({'438-attestation': false})
+        cy.interceptFeatureFlags({ '438-attestation': false })
         cy.logInAsStateUser()
 
         // Inject the axe run-time
@@ -40,10 +40,9 @@ describe('state user in state submission form', () => {
         cy.checkA11yWithWcag22aa()
 
         cy.location().then((fullUrl) => {
-            const submissionURL = fullUrl.toString().replace(
-                'edit/contract-details',
-                ''
-            )
+            const submissionURL = fullUrl
+                .toString()
+                .replace('edit/contract-details', '')
 
             // Check accessibility on rate details page
             cy.navigateFormByDirectLink(`${submissionURL}edit/rate-details`)
@@ -52,7 +51,9 @@ describe('state user in state submission form', () => {
             })
                 .should('exist')
                 .within(() => {
-                    cy.findByText('No, this rate certification was not included with any other submissions').click()
+                    cy.findByText(
+                        'No, this rate certification was not included with any other submissions'
+                    ).click()
                 })
             cy.injectAxe()
             cy.findByRole('button', {
@@ -76,7 +77,9 @@ describe('state user in state submission form', () => {
             cy.checkA11yWithWcag22aa()
 
             //Check accessibility on review and submit page
-            cy.navigateFormByDirectLink(`${submissionURL}edit/review-and-submit`)
+            cy.navigateFormByDirectLink(
+                `${submissionURL}edit/review-and-submit`
+            )
             cy.findByRole('heading', { level: 2, name: /Review and submit/ })
             cy.injectAxe()
             cy.checkA11yWithWcag22aa()
@@ -96,7 +99,9 @@ describe('state user in state submission form', () => {
             cy.checkA11yWithWcag22aa()
 
             //check rate reviews tab
-            cy.findByRole('tab', { name: 'Rate reviews' }).should('exist').click()
+            cy.findByRole('tab', { name: 'Rate reviews' })
+                .should('exist')
+                .click()
             cy.checkA11yWithWcag22aa()
         })
     })

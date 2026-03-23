@@ -76,7 +76,7 @@ export const CreateOauthClient = (): React.ReactElement => {
     // Set the active main content to focus when click the Skip to main content button.
     useEffect(() => {
         updateActiveMainContent('createOauthForm')
-    }, [updateActiveMainContent])     
+    }, [updateActiveMainContent])
 
     const showFieldErrors = (error?: FormError) =>
         shouldValidate && Boolean(error)

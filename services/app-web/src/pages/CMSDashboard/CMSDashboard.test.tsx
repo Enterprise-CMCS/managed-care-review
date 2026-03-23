@@ -251,20 +251,26 @@ describe('CMSDashboard', () => {
                     unlocked.packageSubmissions[0].contractRevision.formData.submissionType =
                         'CONTRACT_AND_RATES'
 
-                    unlocked.packageSubmissions[0].contractRevision.formData.programIDs = [
-                        mockMN.programs[0].id,
-                        mockMN.programs[1].id,
-                        mockMN.programs[2].id,
-                    ]
-                    unlocked.packageSubmissions[0].contractRevision.updatedAt = new Date('2022-01-15')
+                    unlocked.packageSubmissions[0].contractRevision.formData.programIDs =
+                        [
+                            mockMN.programs[0].id,
+                            mockMN.programs[1].id,
+                            mockMN.programs[2].id,
+                        ]
+                    unlocked.packageSubmissions[0].contractRevision.updatedAt =
+                        new Date('2022-01-15')
                     //copy unlockInfo from draftRevision and populate the date
-                    unlocked.packageSubmissions[0].contractRevision.unlockInfo = {
-                        ...unlocked.draftRevision!.unlockInfo!,
-                        updatedAt: new Date('2100-01-22')
-                    }
-                    //set different data on draft revision to make sure we don't show draft values     
-                    unlocked.draftRevision!.formData.submissionType = 'CONTRACT_ONLY'
-                    unlocked.draftRevision!.formData.programIDs = [mockMN.programs[0].id] 
+                    unlocked.packageSubmissions[0].contractRevision.unlockInfo =
+                        {
+                            ...unlocked.draftRevision!.unlockInfo!,
+                            updatedAt: new Date('2100-01-22'),
+                        }
+                    //set different data on draft revision to make sure we don't show draft values
+                    unlocked.draftRevision!.formData.submissionType =
+                        'CONTRACT_ONLY'
+                    unlocked.draftRevision!.formData.programIDs = [
+                        mockMN.programs[0].id,
+                    ]
 
                     unlocked.id = 'test-state-edit-in-progress-unlocked'
 

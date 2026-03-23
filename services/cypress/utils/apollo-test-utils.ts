@@ -24,7 +24,7 @@ import {
 import { SignatureV4 } from '@aws-sdk/signature-v4'
 import { HttpRequest } from '@aws-sdk/protocol-http'
 import { Sha256 } from '@aws-crypto/sha256-js'
-import { findStatePrograms } from '@mc-review/submissions';
+import { findStatePrograms } from '@mc-review/submissions'
 
 // programs for state used in tests
 const minnesotaStatePrograms = findStatePrograms('MN')
@@ -163,7 +163,7 @@ const newSubmissionInput = (
             riskBasedContract: false,
             submissionDescription: 'Test Q&A',
             contractType: 'BASE',
-            contractSubmissionType: 'HEALTH_PLAN'
+            contractSubmissionType: 'HEALTH_PLAN',
         },
         overrides
     )
@@ -237,8 +237,8 @@ class AuthAPIManager {
             credentials: {
                 accessKeyId: Cypress.env('AWS_ACCESS_KEY_ID'),
                 secretAccessKey: Cypress.env('AWS_SECRET_ACCESS_KEY'),
-                sessionToken: Cypress.env('AWS_SESSION_TOKEN')
-            }
+                sessionToken: Cypress.env('AWS_SESSION_TOKEN'),
+            },
         })
 
         this.cognitoIdentity = new CognitoIdentityClient({
@@ -295,7 +295,7 @@ class AuthAPIManager {
             path: fullPath,
             headers: {
                 'Content-Type': 'application/json',
-                'Host': parsedApiUrl.hostname,
+                Host: parsedApiUrl.hostname,
                 ...options.headers,
             },
             body,
@@ -309,7 +309,8 @@ class AuthAPIManager {
             const getIdCommand = new GetIdCommand({
                 IdentityPoolId: Cypress.env('COGNITO_IDENTITY_POOL_ID'),
                 Logins: {
-                    [`cognito-idp.${Cypress.env('COGNITO_REGION')}.amazonaws.com/${Cypress.env('COGNITO_USER_POOL_ID')}`]: this.tokens.idToken,
+                    [`cognito-idp.${Cypress.env('COGNITO_REGION')}.amazonaws.com/${Cypress.env('COGNITO_USER_POOL_ID')}`]:
+                        this.tokens.idToken,
                 },
             })
 
@@ -318,11 +319,13 @@ class AuthAPIManager {
             const getCredsCommand = new GetCredentialsForIdentityCommand({
                 IdentityId,
                 Logins: {
-                    [`cognito-idp.${Cypress.env('COGNITO_REGION')}.amazonaws.com/${Cypress.env('COGNITO_USER_POOL_ID')}`]: this.tokens.idToken,
+                    [`cognito-idp.${Cypress.env('COGNITO_REGION')}.amazonaws.com/${Cypress.env('COGNITO_USER_POOL_ID')}`]:
+                        this.tokens.idToken,
                 },
             })
 
-            const { Credentials } = await this.cognitoIdentity.send(getCredsCommand)
+            const { Credentials } =
+                await this.cognitoIdentity.send(getCredsCommand)
 
             const signer = new SignatureV4({
                 service: 'execute-api',
@@ -356,7 +359,12 @@ class AuthAPIManager {
             try {
                 responseData = JSON.parse(responseText)
             } catch (jsonError) {
-                console.error('JSON parse error:', jsonError, 'Response:', responseText)
+                console.error(
+                    'JSON parse error:',
+                    jsonError,
+                    'Response:',
+                    responseText
+                )
                 responseData = responseText
             }
         } else {
@@ -554,5 +562,5 @@ export {
     rateFormData,
     contractFormData,
     eqroFromData,
-    minnesotaStatePrograms
+    minnesotaStatePrograms,
 }

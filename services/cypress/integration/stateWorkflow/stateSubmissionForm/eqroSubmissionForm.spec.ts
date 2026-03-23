@@ -63,10 +63,10 @@ describe('state user in eqro submission form', () => {
             success: true,
             resubmission: false,
         })
-         // store submission name for later
-         cy.location().then((loc) => {
+        // store submission name for later
+        cy.location().then((loc) => {
             expect(loc.search).to.match(/.*justSubmitted=*/)
-            
+
             const urlParams = new URLSearchParams(loc.search)
             const submissionName = urlParams.get('justSubmitted')
 
@@ -118,13 +118,15 @@ describe('state user in eqro submission form', () => {
             cy.url({ timeout: 10_000 }).should('contain', submissionId)
             cy.wait('@fetchContractQuery', { timeout: 20_000 })
             cy.findByTestId('submission-summary').should('exist')
-         })
+        })
         // ensure download link text is present
         cy.contains('a', /download contract documents \(2 files\)/i)
-        .should('be.visible')
-        .and('have.attr', 'href')
-        .then((href) => {
-            expect(href).to.match(/\/zips\/contracts\/[^/]+\/[^/]+\.zip(\?|$)/)
-        })
+            .should('be.visible')
+            .and('have.attr', 'href')
+            .then((href) => {
+                expect(href).to.match(
+                    /\/zips\/contracts\/[^/]+\/[^/]+\.zip(\?|$)/
+                )
+            })
     })
 })

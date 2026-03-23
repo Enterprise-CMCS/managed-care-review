@@ -9,54 +9,46 @@ import type {
     TealiumRadioButtonEventObject,
     TealiumCheckboxEventObject,
     TealiumAccordionEventObject,
-    TealiumFormSubmitEventObject
+    TealiumFormSubmitEventObject,
 } from '../tealium'
-import { TealiumContext } from '../contexts/TealiumContext';
-import {getRouteName} from '../routeHelpers';
+import { TealiumContext } from '../contexts/TealiumContext'
+import { getRouteName } from '../routeHelpers'
 
-type AlertImpressionFnArgType = Omit<TealiumAlertImpressionObject, 'event_name' | 'heading'> & { heading?: string }
+type AlertImpressionFnArgType = Omit<
+    TealiumAlertImpressionObject,
+    'event_name' | 'heading'
+> & { heading?: string }
 
 type UseTealiumHookType = {
     logButtonEvent: (
-        tealiumData: Omit<TealiumButtonEventObject, 'event_name'>,
-    ) => void,
-    logInternalLinkEvent: (
-        tealiumData: TealiumLinkEventObject,
-    ) => void,
-    logExternalLinkEvent: (
-        tealiumData: TealiumLinkEventObject,
-    ) => void,
+        tealiumData: Omit<TealiumButtonEventObject, 'event_name'>
+    ) => void
+    logInternalLinkEvent: (tealiumData: TealiumLinkEventObject) => void
+    logExternalLinkEvent: (tealiumData: TealiumLinkEventObject) => void
     logDropdownSelectionEvent: (
         tealiumData: Omit<TealiumDropdownSelectionEventObject, 'event_name'>
     ) => void
-    logFilterEvent: (
-        tealiumData: TealiumFilterEventObject
-    ) => void
+    logFilterEvent: (tealiumData: TealiumFilterEventObject) => void
     logInlineErrorEvent: (
         tealiumData: Omit<TealiumInlineErrorObject, 'event_name'>
     ) => void
-    logAlertImpressionEvent: (
-        tealiumData: AlertImpressionFnArgType
-    ) => void
+    logAlertImpressionEvent: (tealiumData: AlertImpressionFnArgType) => void
     logRadioButtonEvent: (
         tealiumData: Omit<TealiumRadioButtonEventObject, 'event_name'>
     ) => void
-    logCheckboxEvent: (
-        tealiumData: TealiumCheckboxEventObject
-    ) => void
-    logAccordionEvent: (
-        tealiumData: TealiumAccordionEventObject
-    ) => void
-    logFormSubmitEvent: (
-        tealiumData: TealiumFormSubmitEventObject
-    ) => void
+    logCheckboxEvent: (tealiumData: TealiumCheckboxEventObject) => void
+    logAccordionEvent: (tealiumData: TealiumAccordionEventObject) => void
+    logFormSubmitEvent: (tealiumData: TealiumFormSubmitEventObject) => void
 }
 
 const useTealium = (): UseTealiumHookType => {
     const context = React.useContext(TealiumContext)
 
     if (context === undefined) {
-        const warnNoTealium = () => console.warn('cannot log tealium event - Tealium Provider not loaded');
+        const warnNoTealium = () =>
+            console.warn(
+                'cannot log tealium event - Tealium Provider not loaded'
+            )
         return {
             logButtonEvent: warnNoTealium,
             logInternalLinkEvent: warnNoTealium,
@@ -68,41 +60,36 @@ const useTealium = (): UseTealiumHookType => {
             logRadioButtonEvent: warnNoTealium,
             logCheckboxEvent: warnNoTealium,
             logFormSubmitEvent: warnNoTealium,
-            logAccordionEvent: warnNoTealium
-
-        };
+            logAccordionEvent: warnNoTealium,
+        }
     }
 
     const { pathname, loggedInUser, heading, logUserEvent } = context
 
     const logButtonEvent = (
-        tealiumData: Omit<TealiumButtonEventObject, 'event_name'>,
+        tealiumData: Omit<TealiumButtonEventObject, 'event_name'>
     ) => {
         const logData: TealiumButtonEventObject = {
             ...tealiumData,
-            link_type:  'link_other',
+            link_type: 'link_other',
             event_name: 'button_engagement',
         }
         logUserEvent(logData, pathname, loggedInUser, heading)
     }
 
-    const logInternalLinkEvent = (
-        tealiumData: TealiumLinkEventObject
-    ) => {
+    const logInternalLinkEvent = (tealiumData: TealiumLinkEventObject) => {
         const logData: TealiumLinkEventObject = {
             ...tealiumData,
-            link_type:  'link_other',
+            link_type: 'link_other',
             event_name: tealiumData.event_name ?? 'internal_link_clicked',
         }
         logUserEvent(logData, pathname, loggedInUser, heading)
     }
 
-    const logExternalLinkEvent = (
-        tealiumData: TealiumLinkEventObject
-    ) => {
+    const logExternalLinkEvent = (tealiumData: TealiumLinkEventObject) => {
         const logData: TealiumLinkEventObject = {
             ...tealiumData,
-            link_type:  'link_external',
+            link_type: 'link_external',
             event_name: 'external_link_click',
         }
         logUserEvent(logData, pathname, loggedInUser, heading)
@@ -118,9 +105,8 @@ const useTealium = (): UseTealiumHookType => {
         logUserEvent(logData, pathname, loggedInUser, heading)
     }
 
-    const logFilterEvent = (
-        tealiumData: TealiumFilterEventObject
-    ) => logUserEvent(tealiumData, pathname, loggedInUser, heading)
+    const logFilterEvent = (tealiumData: TealiumFilterEventObject) =>
+        logUserEvent(tealiumData, pathname, loggedInUser, heading)
 
     const logInlineErrorEvent = (
         tealiumData: Omit<TealiumInlineErrorObject, 'event_name'>
@@ -128,14 +114,12 @@ const useTealium = (): UseTealiumHookType => {
         const logData: TealiumInlineErrorObject = {
             ...tealiumData,
             event_name: 'inline_error',
-            link_type:  'link_other',
+            link_type: 'link_other',
         }
         logUserEvent(logData, pathname, loggedInUser, heading)
     }
 
-    const logAlertImpressionEvent = (
-        tealiumData: AlertImpressionFnArgType
-    ) => {
+    const logAlertImpressionEvent = (tealiumData: AlertImpressionFnArgType) => {
         const linkData: TealiumAlertImpressionObject = {
             ...tealiumData,
             // Alerts usually are placed at top of pages. The way the app works, the form would be closely tied to the
@@ -159,32 +143,25 @@ const useTealium = (): UseTealiumHookType => {
         logUserEvent(logData, pathname, loggedInUser, heading)
     }
 
-    const logCheckboxEvent = (
-        tealiumData: TealiumCheckboxEventObject
-    ) => logUserEvent(tealiumData, pathname, loggedInUser, heading)
+    const logCheckboxEvent = (tealiumData: TealiumCheckboxEventObject) =>
+        logUserEvent(tealiumData, pathname, loggedInUser, heading)
 
-    const logFormSubmitEvent = (
-        tealiumData: TealiumFormSubmitEventObject
-    ) =>  {
-        const logData: TealiumFormSubmitEventObject= {
+    const logFormSubmitEvent = (tealiumData: TealiumFormSubmitEventObject) => {
+        const logData: TealiumFormSubmitEventObject = {
             ...tealiumData,
             link_type: 'link_other',
-            event_name: 'form_field_submit'
+            event_name: 'form_field_submit',
         }
         logUserEvent(logData, pathname, loggedInUser, heading)
     }
 
-
-    const logAccordionEvent = (
-        tealiumData: TealiumAccordionEventObject
-    ) => {
+    const logAccordionEvent = (tealiumData: TealiumAccordionEventObject) => {
         const logData: TealiumAccordionEventObject = {
             ...tealiumData,
             link_type: 'link_other',
         }
         logUserEvent(logData, pathname, loggedInUser, heading)
     }
-
 
     return {
         logButtonEvent,
@@ -197,7 +174,7 @@ const useTealium = (): UseTealiumHookType => {
         logRadioButtonEvent,
         logCheckboxEvent,
         logFormSubmitEvent,
-        logAccordionEvent
+        logAccordionEvent,
     }
 }
 

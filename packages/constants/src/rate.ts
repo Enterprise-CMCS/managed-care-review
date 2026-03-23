@@ -5,7 +5,7 @@ const ConsolidatedRateStatusRecord: Record<ConsolidatedRateStatus, string> = {
     SUBMITTED: 'Submitted',
     RESUBMITTED: 'Submitted',
     UNLOCKED: 'Unlocked',
-    WITHDRAWN: 'Withdrawn'
+    WITHDRAWN: 'Withdrawn',
 }
 
 export { ConsolidatedRateStatusRecord }

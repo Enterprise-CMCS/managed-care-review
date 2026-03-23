@@ -40,7 +40,7 @@ export const StateDashboard = (): React.ReactElement => {
     // Set the active main content to focus when click the Skip to main content button.
     useEffect(() => {
         updateActiveMainContent(activeMainContentId)
-    }, [activeMainContentId, updateActiveMainContent])    
+    }, [activeMainContentId, updateActiveMainContent])
 
     if (!data && loading) {
         return <Loading />
@@ -134,7 +134,11 @@ export const StateDashboard = (): React.ReactElement => {
 
     return (
         <>
-            <div id={DASHBOARD_ATTRIBUTE} data-testid={DASHBOARD_ATTRIBUTE} className={styles.wrapper}>
+            <div
+                id={DASHBOARD_ATTRIBUTE}
+                data-testid={DASHBOARD_ATTRIBUTE}
+                className={styles.wrapper}
+            >
                 <GridContainer className={styles.container}>
                     {programs.length ? (
                         <section className={styles.panel}>

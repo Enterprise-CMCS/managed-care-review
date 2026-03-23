@@ -67,8 +67,7 @@ describe('rate details', () => {
                     }
                 })
             }
-            )
-        
+        )
 
         // Navigate to contacts page by clicking continue
         cy.navigateContractRatesForm('CONTINUE')

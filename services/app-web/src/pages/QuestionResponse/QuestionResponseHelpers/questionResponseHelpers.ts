@@ -119,10 +119,9 @@ const getDivisionOrder = (division?: Division): Division[] =>
         return 0
     }) as Division[]
 
-
 // This generic type is the minimal subset of Rate and Contract Questions needed to compute round number
 interface GenericQuestionNode {
-    node: {id: string}
+    node: { id: string }
 }
 
 interface GenericQuestionsList {
@@ -130,9 +129,9 @@ interface GenericQuestionsList {
 }
 
 interface GenericQuestionsPayload {
-      DMCOQuestions: GenericQuestionsList
-      DMCPQuestions: GenericQuestionsList;
-      OACTQuestions: GenericQuestionsList
+    DMCOQuestions: GenericQuestionsList
+    DMCPQuestions: GenericQuestionsList
+    OACTQuestions: GenericQuestionsList
 }
 
 // gets question round for a division to display -  default to 0 if API response isn't matching up as expected

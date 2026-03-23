@@ -3,6 +3,4 @@ function jsonStringify(obj: any): string {
     return JSON.stringify(obj, null, '  ')
 }
 
-export {
-    jsonStringify
-}
+export { jsonStringify }

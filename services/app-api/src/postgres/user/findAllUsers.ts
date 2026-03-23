@@ -1,10 +1,9 @@
-
 import type { UserType } from '../../domain-models'
 import type { ExtendedPrismaClient } from '../prismaClient'
 import { parseDomainUsersFromPrismaUsers } from './prismaDomainUser'
 
 export async function findAllUsers(
-    client: ExtendedPrismaClient,
+    client: ExtendedPrismaClient
 ): Promise<UserType[] | Error> {
     try {
         const allUsers = await client.user.findMany({

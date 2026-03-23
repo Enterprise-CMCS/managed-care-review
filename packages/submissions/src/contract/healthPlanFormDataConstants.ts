@@ -1,6 +1,4 @@
-import {
-    FederalAuthority
-} from './FederalAuthorities'
+import { FederalAuthority } from './FederalAuthorities'
 import {
     HealthPlanPackageStatus,
     RateMedicaidPopulations,
@@ -41,9 +39,10 @@ const RateTypeRecord: Record<RateAmendmentType, string> = {
 }
 
 const RateMedicaidPopulationsRecord: Record<RateMedicaidPopulations, string> = {
-    MEDICARE_MEDICAID_WITH_DSNP: 'Medicare-Medicaid dual eligibles enrolled through a D-SNP',
+    MEDICARE_MEDICAID_WITH_DSNP:
+        'Medicare-Medicaid dual eligibles enrolled through a D-SNP',
     MEDICAID_ONLY: 'Medicaid-only',
-    MEDICARE_MEDICAID_WITHOUT_DSNP: `Medicare-Medicaid dual eligibles not enrolled through a D-SNP`
+    MEDICARE_MEDICAID_WITHOUT_DSNP: `Medicare-Medicaid dual eligibles not enrolled through a D-SNP`,
 }
 const ContractExecutionStatusRecord: Record<ContractExecutionStatus, string> = {
     EXECUTED: 'Fully executed',
@@ -165,12 +164,7 @@ const ModifiedProvisionsCHIPRecord: Record<
 
 // The `dsnpContract` field is required when a contract
 // has any of the following Federal Authorities
-const dsnpTriggers = [
-    'STATE_PLAN',
-    'WAIVER_1915B',
-    'WAIVER_1115',
-    'VOLUNTARY',
-]
+const dsnpTriggers = ['STATE_PLAN', 'WAIVER_1915B', 'WAIVER_1115', 'VOLUNTARY']
 
 export {
     RateTypeRecord,
@@ -187,5 +181,5 @@ export {
     ModifiedProvisionsCHIPRecord,
     ModifiedProvisionsBaseContractRecord,
     ModifiedProvisionsAmendmentRecord,
-    dsnpTriggers
+    dsnpTriggers,
 }

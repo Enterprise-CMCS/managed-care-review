@@ -1,5 +1,5 @@
 import { stateUser, cmsUser } from '../../../utils/apollo-test-utils'
-import { ContractSubmissionTypeRecord } from "@mc-review/constants"
+import { ContractSubmissionTypeRecord } from '@mc-review/constants'
 
 describe('Q&A', () => {
     beforeEach(() => {
@@ -33,7 +33,9 @@ describe('Q&A', () => {
                     })
 
                     // Newly uploaded questions document should exist within your section
-                    cy.findByRole('heading', {name: 'Your division\'s questions'})
+                    cy.findByRole('heading', {
+                        name: "Your division's questions",
+                    })
                         .should('exist')
                         .parent()
                         .parent()
@@ -50,7 +52,9 @@ describe('Q&A', () => {
 
                     cy.logInAsStateUser()
 
-                    cy.visit(`/submissions/${ContractSubmissionTypeRecord[contract.contractSubmissionType]}/${contract.id}`)
+                    cy.visit(
+                        `/submissions/${ContractSubmissionTypeRecord[contract.contractSubmissionType]}/${contract.id}`
+                    )
 
                     cy.findByTestId('submission-summary').should('exist')
                     cy.findByRole('link', {
@@ -58,7 +62,9 @@ describe('Q&A', () => {
                     }).should('exist')
 
                     // Find QA Link and click
-                    cy.findByRole('link', { name: /Contract questions/ }).click()
+                    cy.findByRole('link', {
+                        name: /Contract questions/,
+                    }).click()
                     cy.url({ timeout: 10_000 }).should(
                         'contain',
                         `${contract.id}/question-and-answers`
@@ -70,7 +76,7 @@ describe('Q&A', () => {
                     }).should('exist')
 
                     // Newly uploaded questions document should exist within DMCO section
-                    cy.findByRole('heading', {name: 'Outstanding questions'})
+                    cy.findByRole('heading', { name: 'Outstanding questions' })
                         .should('exist')
                         .parent()
                         .parent()
@@ -88,7 +94,7 @@ describe('Q&A', () => {
                     })
 
                     // Newly uploaded response document should exist within DMCO section
-                    cy.findByRole('heading', {name: 'Answered questions'})
+                    cy.findByRole('heading', { name: 'Answered questions' })
                         .should('exist')
                         .parent()
                         .parent()
@@ -101,16 +107,17 @@ describe('Q&A', () => {
                             ).should('exist')
                         })
 
-
                     // No document dates or other fields are undefined
                     cy.findByText('N/A').should('not.exist')
 
                     // Add rate questions
                     // Navigate to rate as state user
-                    cy.findByRole('link', { name: /Rate questions: SNBC/}).should('exist').click()
+                    cy.findByRole('link', { name: /Rate questions: SNBC/ })
+                        .should('exist')
+                        .click()
 
                     // Get the URL to use for CMS user
-                    cy.url().then(rateQAUrl => {
+                    cy.url().then((rateQAUrl) => {
                         cy.url().should('include', '/rates/')
 
                         // Log out as State user
@@ -121,7 +128,9 @@ describe('Q&A', () => {
                             initialURL: rateQAUrl,
                         })
 
-                        cy.findByRole('heading', { name: /Your division's questions/}).should('exist')
+                        cy.findByRole('heading', {
+                            name: /Your division's questions/,
+                        }).should('exist')
 
                         // Add new rate question
                         cy.addQuestion({
