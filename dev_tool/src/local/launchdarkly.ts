@@ -13,7 +13,30 @@ function isChromeWindowOpen(url: string): boolean {
     }
 }
 
+function killProcessOnPort(port: number): void {
+    try {
+        const pids = execSync(`lsof -ti tcp:${port}`, { encoding: 'utf-8' })
+            .trim()
+            .split('\n')
+            .filter(Boolean)
+
+        for (const pid of pids) {
+            console.info(`Killing existing process ${pid} on port ${port}`)
+            process.kill(parseInt(pid, 10), 'SIGTERM')
+        }
+    } catch {
+        // lsof returns non-zero if no process found — port is free
+    }
+}
+
 export async function runLaunchDarklyLocally(runner: LabeledProcessRunner) {
+    // Kill any existing process on the LaunchDarkly port before starting
+    const serviceUrl = new URL(
+        process.env.LOCAL_LD_SERVICE_URL || 'http://127.0.0.1:3031'
+    )
+    const port = parseInt(serviceUrl.port || '3031', 10)
+    killProcessOnPort(port)
+
     // Build the React client
     await runner.runCommandAndOutput(
         'build launch-darkly',
@@ -30,9 +53,10 @@ export async function runLaunchDarklyLocally(runner: LabeledProcessRunner) {
     )
 
     // Only open Chrome if an app window for this URL isn't already open
-    if (!isChromeWindowOpen('http://localhost:3031')) {
+    const url = serviceUrl.href
+    if (!isChromeWindowOpen(url)) {
         exec(
-            'open -na "Google Chrome" --args --app=http://localhost:3031 --window-size=650,750'
+            `open -na "Google Chrome" --args --app=${url} --window-size=650,750`
         )
     }
 }
