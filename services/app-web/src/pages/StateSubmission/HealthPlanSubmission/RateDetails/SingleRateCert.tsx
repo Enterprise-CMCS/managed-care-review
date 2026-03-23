@@ -363,7 +363,7 @@ export const SingleRateCert = ({
                         <FormGroup
                             error={Boolean(
                                 showFieldErrors('rateDateStart') ??
-                                    showFieldErrors('rateDateEnd')
+                                showFieldErrors('rateDateEnd')
                             )}
                         >
                             <Fieldset
@@ -439,7 +439,7 @@ export const SingleRateCert = ({
                                 <FormGroup
                                     error={Boolean(
                                         showFieldErrors('effectiveDateStart') ??
-                                            showFieldErrors('effectiveDateEnd')
+                                        showFieldErrors('effectiveDateEnd')
                                     )}
                                 >
                                     <Fieldset

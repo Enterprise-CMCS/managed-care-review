@@ -6,8 +6,7 @@ import { ExpandableText } from '../../ExpandableText'
 import { UpdatedBy } from '../../../gen/gqlClient'
 import { AccessibleAlertBanner } from '../AccessibleAlertBanner/AccessibleAlertBanner'
 
-interface SubmissionWithdrawnBannerProps
-    extends React.HTMLAttributes<HTMLDivElement> {
+interface SubmissionWithdrawnBannerProps extends React.HTMLAttributes<HTMLDivElement> {
     withdrawInfo: {
         updatedBy: UpdatedBy
         updatedAt: Date

@@ -36,12 +36,9 @@ it('does not include DMCO inbox on EQRO submissions not subject to review', asyn
     const emailConfig = testEmailConfig()
 
     //modify contract to not be subject to review
-    sub.packageSubmissions[0].contractRevision.formData.eqroProvisionMcoEqrOrRelatedActivities =
-        false
-    sub.packageSubmissions[0].contractRevision.formData.eqroProvisionMcoNewOptionalActivity =
-        false
-    sub.packageSubmissions[0].contractRevision.formData.eqroProvisionNewMcoEqrRelatedActivities =
-        false
+    sub.packageSubmissions[0].contractRevision.formData.eqroProvisionMcoEqrOrRelatedActivities = false
+    sub.packageSubmissions[0].contractRevision.formData.eqroProvisionMcoNewOptionalActivity = false
+    sub.packageSubmissions[0].contractRevision.formData.eqroProvisionNewMcoEqrRelatedActivities = false
 
     const result = await newEQROContractCMSEmail(
         sub,

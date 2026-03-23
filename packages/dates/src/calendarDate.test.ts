@@ -15,7 +15,7 @@ describe('isValidDateString', () => {
         it.each([
             [true, '2026-08-09', 'valid internal format'],
             [false, '2026-13-01', 'impossible date - month 13'],
-            [false, '2026-02-29','impossible date - Feb 29 non-leap year'],
+            [false, '2026-02-29', 'impossible date - Feb 29 non-leap year'],
         ])('returns %s for %s: %s', (expected, value, description) => {
             expect(isValidDateString(value as string)).toBe(expected)
         })

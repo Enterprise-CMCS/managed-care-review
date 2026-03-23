@@ -1,4 +1,3 @@
-
 import { User } from '../gen/gqlClient'
 
 type TealiumEvent =
@@ -27,10 +26,7 @@ type TealiumEvent =
     | 'contact_click'
     | 'file_download'
 
-type TealiumEnv =
-    | 'prod'
-    | 'qa'
-    | 'dev'
+type TealiumEnv = 'prod' | 'qa' | 'dev'
 
 type ButtonEventStyle =
     | 'default'
@@ -40,11 +36,7 @@ type ButtonEventStyle =
     | 'outline'
     | 'unstyled'
 
-type ButtonEventType =
-    | 'submit'
-    | 'link'
-    | 'reset'
-    | 'button'
+type ButtonEventType = 'submit' | 'link' | 'reset' | 'button'
 
 type ButtonEventParentComponentType =
     | 'help drawer'
@@ -76,7 +68,7 @@ type TealiumDataObject = {
 }
 
 type TealiumButtonEventObject = {
-    event_name: 'button_engagement' | 'header_click',
+    event_name: 'button_engagement' | 'header_click'
     text: string
     link_type?: 'link_other'
     button_style?: ButtonEventStyle
@@ -95,10 +87,21 @@ type TealiumDropdownSelectionEventObject = {
 }
 
 type TealiumLinkEventObject = {
-    event_name: 'internal_link_clicked' | "navigation_clicked" | "back_button" | "external_link_click" | 'contact_click' | 'file_download',
+    event_name:
+        | 'internal_link_clicked'
+        | 'navigation_clicked'
+        | 'back_button'
+        | 'external_link_click'
+        | 'contact_click'
+        | 'file_download'
     text: string
     link_url: string
-    link_type?: 'link_other' | 'link_external' | 'interaction' | 'download' | 'exit'
+    link_type?:
+        | 'link_other'
+        | 'link_external'
+        | 'interaction'
+        | 'download'
+        | 'exit'
     contact_method?: 'phone' | 'email' // only relevant for contact click
     parent_component_heading?: string
     parent_component_type?: LinkEventParentComponentType | string
@@ -168,15 +171,14 @@ type TealiumAccordionEventObject = {
 
 type TealiumFormSubmitEventObject = {
     event_name: 'form_field_submit'
-    heading: string,
+    heading: string
     form_name: string
     link_type: 'link_other'
 }
 
-
-type TealiumFilterEventObject = (
-    TealiumFilterAppliedType | TealiumFilterRemovedType
-)
+type TealiumFilterEventObject =
+    | TealiumFilterAppliedType
+    | TealiumFilterRemovedType
 
 type TealiumInteractionEventDataObject = {
     tealium_event: TealiumEvent // event is required for user tracking links
@@ -195,7 +197,8 @@ type TealiumEventObjectTypes = (
     | TealiumRadioButtonEventObject
     | TealiumAccordionEventObject
     | TealiumFormSubmitEventObject
-    ) & Partial<TealiumDataObject>
+) &
+    Partial<TealiumDataObject>
 
 type TealiumClientType = {
     initializeTealium: () => void
@@ -229,5 +232,5 @@ export type {
     TealiumRadioButtonEventObject,
     TealiumCheckboxEventObject,
     TealiumAccordionEventObject,
-    TealiumFormSubmitEventObject
+    TealiumFormSubmitEventObject,
 }

@@ -12,9 +12,7 @@
 }
 
 .formContainer {
-
-     @include custom.form-fields;
-
+    @include custom.form-fields;
 
     > div[class^='usa-form-group']:not(:first-of-type) {
         margin-top: 2.5rem;

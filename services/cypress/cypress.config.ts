@@ -49,7 +49,8 @@ module.exports = defineConfig({
             newConfig.env.COGNITO_USER_POOL_WEB_CLIENT_ID =
                 process.env.COGNITO_USER_POOL_WEB_CLIENT_ID
             newConfig.env.AWS_ACCESS_KEY_ID = process.env.AWS_ACCESS_KEY_ID
-            newConfig.env.AWS_SECRET_ACCESS_KEY = process.env.AWS_SECRET_ACCESS_KEY
+            newConfig.env.AWS_SECRET_ACCESS_KEY =
+                process.env.AWS_SECRET_ACCESS_KEY
             newConfig.env.AWS_SESSION_TOKEN = process.env.AWS_SESSION_TOKEN
 
             // Reads graphql schema and converts it to gql for apollo client.
@@ -62,11 +63,16 @@ module.exports = defineConfig({
                     return gql(`${gqlSchema}`)
                 },
                 readFixtureDocuments() {
-                    const docsDir = path.resolve(__dirname, './fixtures/documents')
+                    const docsDir = path.resolve(
+                        __dirname,
+                        './fixtures/documents'
+                    )
                     const files = fs.readdirSync(docsDir)
                     const documents = {}
                     for (const file of files) {
-                        const content = fs.readFileSync(path.join(docsDir, file))
+                        const content = fs.readFileSync(
+                            path.join(docsDir, file)
+                        )
                         documents[file] = content.toString('base64')
                     }
                     return documents

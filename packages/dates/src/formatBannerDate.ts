@@ -1,6 +1,4 @@
-import { formatToPacificTime } from './calendarDate';
+import { formatToPacificTime } from './calendarDate'
 
 export const formatBannerDate = (date?: Date | string) =>
-    date
-        ? `${formatToPacificTime(date)}`
-        : 'Not available'
+    date ? `${formatToPacificTime(date)}` : 'Not available'

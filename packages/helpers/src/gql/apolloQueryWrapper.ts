@@ -26,7 +26,7 @@ interface WrappableApolloResultsType {
 
 type WrappedApolloResultType<
     ResultType extends WrappableApolloResultsType,
-    AdditionalVars = Record<string, unknown>
+    AdditionalVars = Record<string, unknown>,
 > = Omit<ResultType, 'data' | 'loading' | 'error'> & {
     result: ApolloResultType<NonNullable<ResultType['data']>, AdditionalVars>
 }
@@ -69,16 +69,16 @@ function wrapApolloResult<ResultType extends WrappableApolloResultsType>(
     }
     class SkipError extends Error {
         constructor(message: string) {
-          super(message);
-          this.name = "SKIPPED";
+            super(message)
+            this.name = 'SKIPPED'
         }
-      }
+    }
 
     return {
         ...queryResult,
         result: {
             status: 'ERROR',
-            error: new SkipError('Skipped query'),    //this happens when  uery is skipped, not unexpected behavior
+            error: new SkipError('Skipped query'), //this happens when  uery is skipped, not unexpected behavior
         },
     }
 }

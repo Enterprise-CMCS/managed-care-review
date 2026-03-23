@@ -2,7 +2,7 @@
 
 // GraphQL Query function
 export function fetchMcReviewSettings(
-    store: Store,
+    store: Store
 ): QueryResolvers['fetchMcReviewSettings'] {
     return async (_parent, _args, context) => {
         const { user } = context
@@ -21,7 +21,7 @@ export function fetchMcReviewSettings(
                     code: 'INTERNAL_SERVER_ERROR',
                     cause: 'DB_ERROR',
                 },
-        })
+            })
         }
 
         return {
@@ -32,7 +32,7 @@ export function fetchMcReviewSettings(
 
 // Related database function
 export async function findAllSupportedStates(
-   store: Store
+    store: Store
 ): Promise<StateType[] | Error> {
     const pilotStateCodes = typedStatePrograms.states.map((state) => state.code)
 
@@ -78,5 +78,3 @@ export async function findAllSupportedStates(
         return err
     }
 }
-
-

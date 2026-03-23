@@ -99,7 +99,7 @@ export const SubmissionWithdraw = (): React.ReactElement => {
             'PROGRAMMING ERROR: id param not set in submission withdraw form.'
         )
     }
-    const { updateHeading, updateActiveMainContent } = usePage()    
+    const { updateHeading, updateActiveMainContent } = usePage()
     const { logFormSubmitEvent } = useTealium()
     const navigate = useNavigate()
     const [shouldValidate, setShouldValidate] = React.useState(false)

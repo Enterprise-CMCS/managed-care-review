@@ -34,12 +34,9 @@ describe('newEqroContractStateEmail', () => {
         const statePrograms = mockMNState().programs
         const emailConfig = testEmailConfig()
 
-        contract.packageSubmissions[0].contractRevision.formData.eqroProvisionMcoEqrOrRelatedActivities =
-            false
-        contract.packageSubmissions[0].contractRevision.formData.eqroProvisionMcoNewOptionalActivity =
-            false
-        contract.packageSubmissions[0].contractRevision.formData.eqroProvisionNewMcoEqrRelatedActivities =
-            false
+        contract.packageSubmissions[0].contractRevision.formData.eqroProvisionMcoEqrOrRelatedActivities = false
+        contract.packageSubmissions[0].contractRevision.formData.eqroProvisionMcoNewOptionalActivity = false
+        contract.packageSubmissions[0].contractRevision.formData.eqroProvisionNewMcoEqrRelatedActivities = false
 
         const template = await newEqroContractStateEmail(
             contract,
@@ -130,12 +127,9 @@ describe('newEqroContractStateEmail', () => {
             statePrograms
         )
 
-        contract.packageSubmissions[0].contractRevision.formData.eqroProvisionMcoEqrOrRelatedActivities =
-            false
-        contract.packageSubmissions[0].contractRevision.formData.eqroProvisionMcoNewOptionalActivity =
-            false
-        contract.packageSubmissions[0].contractRevision.formData.eqroProvisionNewMcoEqrRelatedActivities =
-            false
+        contract.packageSubmissions[0].contractRevision.formData.eqroProvisionMcoEqrOrRelatedActivities = false
+        contract.packageSubmissions[0].contractRevision.formData.eqroProvisionMcoNewOptionalActivity = false
+        contract.packageSubmissions[0].contractRevision.formData.eqroProvisionNewMcoEqrRelatedActivities = false
 
         const template = await newEqroContractStateEmail(
             contract,

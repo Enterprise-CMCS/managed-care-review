@@ -1032,8 +1032,7 @@ export const ContractDetails = ({
                                                         startDatePickerProps={{
                                                             id: 'contractDateStart',
                                                             name: 'contractDateStart',
-                                                            'aria-required':
-                                                                true,
+                                                            'aria-required': true,
                                                             disabled: false,
                                                             defaultValue:
                                                                 values.contractDateStart,
@@ -1059,8 +1058,7 @@ export const ContractDetails = ({
                                                             disabled: false,
                                                             id: 'contractDateEnd',
                                                             name: 'contractDateEnd',
-                                                            'aria-required':
-                                                                true,
+                                                            'aria-required': true,
                                                             defaultValue:
                                                                 values.contractDateEnd,
                                                             minDate:

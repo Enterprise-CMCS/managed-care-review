@@ -1,71 +1,108 @@
-import { FormikRateForm } from "./index"
-import { convertGQLRateToRateForm, generateUpdatedRates, isRatePartiallyFilled } from "./rateDetailsHelpers"
-import {RateFormData} from '../../../../gen/gqlClient';
+import { FormikRateForm } from './index'
+import {
+    convertGQLRateToRateForm,
+    generateUpdatedRates,
+    isRatePartiallyFilled,
+} from './rateDetailsHelpers'
+import { RateFormData } from '../../../../gen/gqlClient'
 
 describe('generateUpdatedRates', () => {
     const emptyRateForm = () => convertGQLRateToRateForm(vi.fn())
     const testCases = [
-
         {
-            testValue:  [{
-                ...emptyRateForm(),
-                status: 'DRAFT',
-                ratePreviouslySubmitted: 'NO',
-            }] as FormikRateForm[],
+            testValue: [
+                {
+                    ...emptyRateForm(),
+                    status: 'DRAFT',
+                    ratePreviouslySubmitted: 'NO',
+                },
+            ] as FormikRateForm[],
             testName: 'create brand new rate',
-            expectedResult: {type:'CREATE', formData: emptyRateForm(), rateID: undefined}},
+            expectedResult: {
+                type: 'CREATE',
+                formData: emptyRateForm(),
+                rateID: undefined,
+            },
+        },
         {
-            testValue:  [{
-                ...emptyRateForm(),
-                id: 'new-child-rate-being-edited',
-                status: 'DRAFT',
-                ratePreviouslySubmitted: 'NO',
-            }]  as FormikRateForm[],
+            testValue: [
+                {
+                    ...emptyRateForm(),
+                    id: 'new-child-rate-being-edited',
+                    status: 'DRAFT',
+                    ratePreviouslySubmitted: 'NO',
+                },
+            ] as FormikRateForm[],
             testName: 'edit unsubmitted child rate',
-            expectedResult: {type:'UPDATE', formData: emptyRateForm(), rateID: 'new-child-rate-being-edited',} ,
-        } ,
+            expectedResult: {
+                type: 'UPDATE',
+                formData: emptyRateForm(),
+                rateID: 'new-child-rate-being-edited',
+            },
+        },
         {
-            testValue:  [{
-                ...emptyRateForm(),
-                id: 'existing-child-rate',
-                status: 'UNLOCKED',
-                ratePreviouslySubmitted: 'NO',
-            }]  as FormikRateForm[],
+            testValue: [
+                {
+                    ...emptyRateForm(),
+                    id: 'existing-child-rate',
+                    status: 'UNLOCKED',
+                    ratePreviouslySubmitted: 'NO',
+                },
+            ] as FormikRateForm[],
             testName: 'edit unlocked child rate',
-            expectedResult: {type:'UPDATE', formData: emptyRateForm(), rateID: 'existing-child-rate' } ,
+            expectedResult: {
+                type: 'UPDATE',
+                formData: emptyRateForm(),
+                rateID: 'existing-child-rate',
+            },
         },
         {
-            testValue: [{
-                ...emptyRateForm(),
-                id: 'existing-linked-rate1',
-                status: 'SUBMITTED',
-                ratePreviouslySubmitted: 'YES',
-            }]  as FormikRateForm[],
+            testValue: [
+                {
+                    ...emptyRateForm(),
+                    id: 'existing-linked-rate1',
+                    status: 'SUBMITTED',
+                    ratePreviouslySubmitted: 'YES',
+                },
+            ] as FormikRateForm[],
             testName: 'link submitted rate',
-            expectedResult: {type:'LINK', rateID:'existing-linked-rate1', formData: undefined } ,
+            expectedResult: {
+                type: 'LINK',
+                rateID: 'existing-linked-rate1',
+                formData: undefined,
+            },
         },
         {
-            testValue: [{
-                ...emptyRateForm(),
-                id: 'existing-linked-rate2',
-                status: 'RESUBMITTED',
-                ratePreviouslySubmitted: 'YES',
-            }]  as FormikRateForm[],
+            testValue: [
+                {
+                    ...emptyRateForm(),
+                    id: 'existing-linked-rate2',
+                    status: 'RESUBMITTED',
+                    ratePreviouslySubmitted: 'YES',
+                },
+            ] as FormikRateForm[],
             testName: 'link resubmitted rate',
-            expectedResult: {type:'LINK', rateID: 'existing-linked-rate2', formData: undefined} ,
+            expectedResult: {
+                type: 'LINK',
+                rateID: 'existing-linked-rate2',
+                formData: undefined,
+            },
         },
     ]
 
     test.each(testCases)(
         'Returns correct updatedRates: $testName',
         ({ testValue, expectedResult }) => {
-            expect(generateUpdatedRates(testValue)[0]).toEqual(
-              {
+            expect(generateUpdatedRates(testValue)[0]).toEqual({
                 rateID: expectedResult.rateID,
                 type: expectedResult.type,
-                 
-                formData: expectedResult.formData? expect.objectContaining({rateDocuments: expectedResult.formData.rateDocuments}): undefined
-        })
+
+                formData: expectedResult.formData
+                    ? expect.objectContaining({
+                          rateDocuments: expectedResult.formData.rateDocuments,
+                      })
+                    : undefined,
+            })
         }
     )
 })
@@ -78,7 +115,7 @@ describe('isRatePartiallyFilled', () => {
                 supportingDocuments: [],
                 rateProgramIDs: [],
                 certifyingActuaryContacts: [],
-                addtlActuaryContacts: []
+                addtlActuaryContacts: [],
             },
             testName: 'empty rate',
             expectedResult: false,
@@ -95,10 +132,10 @@ describe('isRatePartiallyFilled', () => {
                         email: '',
                         actuarialFirm: undefined,
                         actuarialFirmOther: '',
-                    }
+                    },
                 ],
-                addtlActuaryContacts: []
-            } ,
+                addtlActuaryContacts: [],
+            },
             testName: 'there is a certifying actuary with empty values',
             expectedResult: false,
         },
@@ -109,10 +146,10 @@ describe('isRatePartiallyFilled', () => {
                 rateProgramIDs: [],
                 certifyingActuaryContacts: [
                     {
-                        name: 'Bob'
-                    }
+                        name: 'Bob',
+                    },
                 ],
-                addtlActuaryContacts: []
+                addtlActuaryContacts: [],
             },
             testName: 'there is a certifying actuary',
             expectedResult: true,
@@ -125,9 +162,9 @@ describe('isRatePartiallyFilled', () => {
                 certifyingActuaryContacts: [],
                 addtlActuaryContacts: [
                     {
-                        actuarialFirm: 'OTHER'
-                    }
-                ]
+                        actuarialFirm: 'OTHER',
+                    },
+                ],
             },
             testName: 'there is an additional actuary',
             expectedResult: true,
@@ -139,7 +176,7 @@ describe('isRatePartiallyFilled', () => {
                 rateProgramIDs: [],
                 certifyingActuaryContacts: [],
                 addtlActuaryContacts: [],
-                rateType: 'NEW'
+                rateType: 'NEW',
             },
             testName: 'rate type is filled in',
             expectedResult: true,
@@ -160,7 +197,9 @@ describe('isRatePartiallyFilled', () => {
     test.each(testCases)(
         'Returns correct boolean: $testName',
         ({ testValue, expectedResult }) => {
-            expect(isRatePartiallyFilled(testValue as unknown as RateFormData)).toEqual(expectedResult)
+            expect(
+                isRatePartiallyFilled(testValue as unknown as RateFormData)
+            ).toEqual(expectedResult)
         }
     )
 })

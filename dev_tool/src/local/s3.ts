@@ -28,7 +28,7 @@ export async function runS3Locally(runner: LabeledProcessRunner) {
     const localstackEnv = {
         ...process.env,
         AWS_ACCESS_KEY_ID: 'test',
-        AWS_SECRET_ACCESS_KEY: 'test',
+        AWS_SECRET_ACCESS_KEY: 'test', // pragma: allowlist secret
     }
 
     for (const bucket of buckets) {
@@ -49,7 +49,9 @@ export async function runS3Locally(runner: LabeledProcessRunner) {
             console.info(`Created bucket: ${bucket}`)
         } catch (error) {
             // Failed to create bucket (may already exist, or another error occurred)
-            console.info(`Failed to create bucket "${bucket}" (it may already exist): ${error}`)
+            console.info(
+                `Failed to create bucket "${bucket}" (it may already exist): ${error}`
+            )
         }
     }
 

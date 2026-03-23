@@ -45,12 +45,12 @@ const createContractQuestionSuccess = (
                         createdAt: new Date(),
                         addedBy: mockValidCMSUser(),
                         division: 'DMCO',
-                        documents: testInput.documents.map(doc => ({
+                        documents: testInput.documents.map((doc) => ({
                             ...doc,
                             id: doc.name,
                         })),
                         round: 1,
-                        responses: []
+                        responses: [],
                     },
                 },
             },
@@ -101,11 +101,11 @@ const createRateQuestionSuccess = (
                         addedBy: mockValidCMSUser(),
                         division: 'DMCO',
                         round: 1,
-                        documents: testInput.documents.map(doc => ({
+                        documents: testInput.documents.map((doc) => ({
                             ...doc,
                             id: doc.name,
                         })),
-                        responses: []
+                        responses: [],
                     },
                 },
             },
@@ -142,7 +142,6 @@ const createRateQuestionResponseNetworkFailure = (
         error: new Error('A network error occurred'),
     }
 }
-
 
 export {
     createContractQuestionNetworkFailure,

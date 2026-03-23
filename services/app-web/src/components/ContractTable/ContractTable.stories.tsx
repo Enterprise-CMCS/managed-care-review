@@ -143,7 +143,9 @@ MixedContractTypes.args = {
 export const OnlyEQRO = Template.bind({})
 OnlyEQRO.decorators = [(StoryFn) => ProvidersDecorator(StoryFn, {})]
 OnlyEQRO.args = {
-    tableData: tableData.filter(item => item.contractSubmissionType === 'EQRO'),
+    tableData: tableData.filter(
+        (item) => item.contractSubmissionType === 'EQRO'
+    ),
     user: mockCMSUser,
     showFilters: true,
 }
@@ -152,7 +154,9 @@ OnlyEQRO.args = {
 export const OnlyHealthPlan = Template.bind({})
 OnlyHealthPlan.decorators = [(StoryFn) => ProvidersDecorator(StoryFn, {})]
 OnlyHealthPlan.args = {
-    tableData: tableData.filter(item => item.contractSubmissionType === 'HEALTH_PLAN'),
+    tableData: tableData.filter(
+        (item) => item.contractSubmissionType === 'HEALTH_PLAN'
+    ),
     user: mockCMSUser,
     showFilters: true,
 }

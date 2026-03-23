@@ -34,13 +34,22 @@ async function getCDKUserPoolID(stageName: string): Promise<string> {
     )[0].OutputValue
 
     if (userPoolID === undefined) {
-        throw new Error(`No UserPoolID defined in CDK stack ${cognitoStackName}`)
+        throw new Error(
+            `No UserPoolID defined in CDK stack ${cognitoStackName}`
+        )
     }
 
     return userPoolID
 }
 
-type UserRole = 'CMS_USER' | 'STATE_USER' | 'UNKNOWN_USER' | 'ADMIN_USER' | 'HELPDESK_USER' | 'BUSINESSOWNER_USER' | 'CMS_APPROVER_USER'
+type UserRole =
+    | 'CMS_USER'
+    | 'STATE_USER'
+    | 'UNKNOWN_USER'
+    | 'ADMIN_USER'
+    | 'HELPDESK_USER'
+    | 'BUSINESSOWNER_USER'
+    | 'CMS_APPROVER_USER'
 
 // these are the exact roles as they are set by IDM
 function IDMRole(role: UserRole): string {
@@ -126,7 +135,9 @@ async function createUser({
         if (e instanceof UsernameExistsException) {
             console.info('User already exists in CDK Cognito. Continuing.')
         } else if (e instanceof InvalidParameterException) {
-            throw new Error(`Invalid parameters on CDK Cognito User create: ${e}`)
+            throw new Error(
+                `Invalid parameters on CDK Cognito User create: ${e}`
+            )
         } else {
             console.info(`AWS Error: ${e}`)
         }
@@ -253,9 +264,8 @@ async function main() {
             email: 'azula@example.com',
             role: 'CMS_APPROVER_USER' as const,
             state: undefined,
-        }
+        },
     ]
-
 
     for (const user of testUsers) {
         try {

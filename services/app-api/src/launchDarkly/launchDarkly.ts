@@ -20,7 +20,7 @@ const defaultFeatureFlags = (): FeatureFlagSettings =>
 type LDServiceArgType = {
     key: string
     flag: FeatureFlagLDConstant
-    kind?: string// usually user specific data form apollo context
+    kind?: string // usually user specific data form apollo context
     span?: Span
     anonymous?: boolean
 }
@@ -35,11 +35,11 @@ type LDService = {
 function ldService(ldClient: LDClient): LDService {
     return {
         getFeatureFlag: async (args) => {
-            const {kind, key, anonymous} = args
+            const { kind, key, anonymous } = args
             const ldContext = {
                 kind: kind ?? 'user',
                 key,
-                anonymous // https://docs.launchdarkly.com/sdk/features/anonymou
+                anonymous, // https://docs.launchdarkly.com/sdk/features/anonymou
             }
             return await ldClient.variation(args.flag, ldContext, false)
         },

@@ -98,7 +98,7 @@ Cypress.Commands.add('stubFeatureFlags', () => {
     cy.interceptFeatureFlags({
         '438-attestation': true,
         'hide-supporting-docs-page': true,
-        'dsnp': true
+        dsnp: true,
     })
 })
 
@@ -106,19 +106,21 @@ Cypress.Commands.add('stubFeatureFlags', () => {
 Cypress.Commands.add(
     'getFeatureFlagStore',
     (featureFlags?: FeatureFlagLDConstant[]) => {
-        return cy.readFile('fixtures/stores/featureFlagStore.json').then(
-            (
-                store: Record<FeatureFlagLDConstant, { value: FlagValue }>
-            ): FeatureFlagSettings => {
-                if (featureFlags && featureFlags.length) {
-                    const selectedFlags: FeatureFlagSettings = {}
-                    featureFlags.forEach((flag) => {
-                        selectedFlags[flag] = store[flag].value
-                    })
-                    return selectedFlags
+        return cy
+            .readFile('fixtures/stores/featureFlagStore.json')
+            .then(
+                (
+                    store: Record<FeatureFlagLDConstant, { value: FlagValue }>
+                ): FeatureFlagSettings => {
+                    if (featureFlags && featureFlags.length) {
+                        const selectedFlags: FeatureFlagSettings = {}
+                        featureFlags.forEach((flag) => {
+                            selectedFlags[flag] = store[flag].value
+                        })
+                        return selectedFlags
+                    }
+                    return store
                 }
-                return store
-            }
-        )
+            )
     }
 )

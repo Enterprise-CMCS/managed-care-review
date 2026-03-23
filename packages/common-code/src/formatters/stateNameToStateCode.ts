@@ -3,7 +3,7 @@ import statePrograms from '@mc-review/submissions/src/statePrograms/stateProgram
 // Generate state name to code mapping from statePrograms.json
 // if states are added/updated in the JSON, the mapping automatically updates
 const STATE_NAME_TO_CODE: { [key: string]: string } = Object.fromEntries(
-    statePrograms.states.map(state => [state.name, state.code])
+    statePrograms.states.map((state) => [state.name, state.code])
 )
 
 /**

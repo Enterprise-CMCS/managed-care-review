@@ -16,14 +16,15 @@ const createScript = ({
     src = '',
     inlineScriptAsString,
 }: CustomScriptParams): HTMLScriptElement => {
-
     const script = document.createElement('script')
     script.type = type
     script.id = id
     script.async = async
     if (inlineScriptAsString) script.textContent = inlineScriptAsString
     if (inlineScriptAsString && src !== '') {
-        console.error('programming error: inlineScriptAsString is true but src is still passed in as if this is a third party script. Please correct src (should be empty string)')
+        console.error(
+            'programming error: inlineScriptAsString is true but src is still passed in as if this is a third party script. Please correct src (should be empty string)'
+        )
     } else if (!inlineScriptAsString) {
         script.src = src
     }
@@ -36,16 +37,15 @@ const useScript = ({
     src,
     id,
     showScript,
-    inlineScriptAsString
+    inlineScriptAsString,
 }: {
     src: string
     id: string
     showScript: boolean // useful if feature flagged
     inlineScriptAsString?: string
 }): void => {
-
     useEffect(() => {
-        if (showScript && document.getElementById(id) === null ) {
+        if (showScript && document.getElementById(id) === null) {
             const script = createScript({ src, id, inlineScriptAsString })
             document.head.appendChild(script)
             return () => {

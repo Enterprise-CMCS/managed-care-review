@@ -23,8 +23,10 @@ Cypress.Commands.add(
         }).safeClick()
 
         if (buttonKey === 'SAVE_DRAFT') {
-            if(waitForLoad) {
-                cy.wait('@updateDraftContractRatesMutation', { timeout: 50_000})
+            if (waitForLoad) {
+                cy.wait('@updateDraftContractRatesMutation', {
+                    timeout: 50_000,
+                })
             }
             cy.get('[data-testid="saveAsDraftSuccessBanner"]').should('exist')
         } else if (buttonKey === 'CONTINUE_FROM_START_NEW') {
@@ -35,7 +37,9 @@ Cypress.Commands.add(
         } else if (buttonKey === 'CONTINUE') {
             if (waitForLoad) {
                 cy.findAllByTestId('errorMessage').should('have.length', 0)
-                cy.wait('@updateDraftContractRatesMutation', { timeout: 50_000})
+                cy.wait('@updateDraftContractRatesMutation', {
+                    timeout: 50_000,
+                })
             }
             cy.findByTestId('state-submission-form-page').should('exist')
         } else {
@@ -48,7 +52,6 @@ Cypress.Commands.add(
 Cypress.Commands.add(
     'navigateContractForm',
     (buttonKey: FormButtonKey, waitForLoad: boolean = true) => {
-
         cy.findByRole('button', {
             name: buttonsWithLabels[buttonKey],
         }).should('not.have.attr', 'aria-disabled')
@@ -57,8 +60,10 @@ Cypress.Commands.add(
         }).safeClick()
 
         if (buttonKey === 'SAVE_DRAFT') {
-            if(waitForLoad) {
-                cy.wait('@updateContractDraftRevisionMutation', { timeout: 50_000})
+            if (waitForLoad) {
+                cy.wait('@updateContractDraftRevisionMutation', {
+                    timeout: 50_000,
+                })
             }
             cy.findByTestId('saveAsDraftSuccessBanner').should('exist')
         } else if (buttonKey === 'CONTINUE_FROM_START_NEW') {
@@ -89,11 +94,8 @@ Cypress.Commands.add(
     }
 )
 
-Cypress.Commands.add(
-    'navigateToDashboard',
-    () => {
-        cy.visit('/')
-        cy.wait('@fetchCurrentUserQuery', { timeout: 50_000 })
-        cy.wait('@indexContractsForDashboardQuery', { timeout: 50_000 })
-    }
-)
+Cypress.Commands.add('navigateToDashboard', () => {
+    cy.visit('/')
+    cy.wait('@fetchCurrentUserQuery', { timeout: 50_000 })
+    cy.wait('@indexContractsForDashboardQuery', { timeout: 50_000 })
+})

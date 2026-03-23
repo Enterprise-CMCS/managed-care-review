@@ -15,9 +15,12 @@
     See also provisions.ts
 */
 
-type GeneralizedProvisionType = CHIPProvisionType | MedicaidBaseProvisionType | MedicaidAmendmentProvisionType
+type GeneralizedProvisionType =
+    | CHIPProvisionType
+    | MedicaidBaseProvisionType
+    | MedicaidAmendmentProvisionType
 type GeneralizedModifiedProvisions = {
-    [K in GeneralizedProvisionType ]: boolean
+    [K in GeneralizedProvisionType]: boolean
 }
 
 /*
@@ -104,11 +107,11 @@ export type {
     MedicaidAmendmentProvisionType,
     CHIPModifiedProvisions,
     GeneralizedProvisionType,
-    GeneralizedModifiedProvisions
+    GeneralizedModifiedProvisions,
 }
 
 export {
     modifiedProvisionMedicaidBaseKeys,
     modifiedProvisionMedicaidAmendmentKeys,
-    provisionCHIPKeys
+    provisionCHIPKeys,
 }

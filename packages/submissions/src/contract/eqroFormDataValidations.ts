@@ -42,7 +42,7 @@ export const eqroValidationAndReviewDetermination = (
 
     //Validates at least one of the fields check is yes.
     const validateForYes = (
-        fields: Record<string, boolean | undefined | null>,
+        fields: Record<string, boolean | undefined | null>
     ): boolean => {
         for (const field in fields) {
             if (fields[field] == true) {
