@@ -2,7 +2,6 @@ import opentelemetry, { type Tracer, SpanStatusCode } from '@opentelemetry/api'
 import { trace } from '@opentelemetry/api'
 import { Resource } from '@opentelemetry/resources'
 import { OTLPTraceExporter } from '@opentelemetry/exporter-trace-otlp-http'
-import { SemanticResourceAttributes } from '@opentelemetry/semantic-conventions'
 import {
     SimpleSpanProcessor,
     BatchSpanProcessor,
@@ -12,12 +11,13 @@ import { AWSXRayPropagator } from '@opentelemetry/propagator-aws-xray'
 import { AWSXRayIdGenerator } from '@opentelemetry/id-generator-aws-xray'
 import { PrismaInstrumentation } from '@prisma/instrumentation'
 import { registerInstrumentations } from '@opentelemetry/instrumentation'
+import { ATTR_SERVICE_NAME } from '@opentelemetry/semantic-conventions'
 
 export function initTracer(serviceName: string, otelCollectorURL: string) {
     console.info('-----Setting OTEL instrumentation-----')
 
     const resource = new Resource({
-        [SemanticResourceAttributes.SERVICE_NAME]: serviceName,
+        [ATTR_SERVICE_NAME]: serviceName,
     })
 
     const exporter = new OTLPTraceExporter({
@@ -67,7 +67,7 @@ export function createTracer(serviceName: string): Tracer {
     const provider = new NodeTracerProvider({
         idGenerator: new AWSXRayIdGenerator(),
         resource: new Resource({
-            [SemanticResourceAttributes.SERVICE_NAME]: serviceName,
+            [ATTR_SERVICE_NAME]: serviceName,
         }),
     })
 

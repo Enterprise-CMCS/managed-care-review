@@ -1,8 +1,8 @@
 import { GraphQLError } from 'graphql'
-import { trace, context as otelContext } from '@opentelemetry/api'
 import type { QueryResolvers } from '../../gen/gqlServer'
 import { NotFoundError, type Store } from '../../postgres'
 import {
+    createResolverSpan,
     setErrorAttributesOnActiveSpan,
     setResolverDetailsOnActiveSpan,
     setSuccessAttributesOnActiveSpan,
@@ -19,24 +19,13 @@ export function fetchContractResolver(
     store: Store
 ): QueryResolvers['fetchContract'] {
     return async (_parent, { input }, context) => {
-        const { user, ctx, tracer, span: requestSpan } = context
+        const { user } = context
 
         // Create a resolver span as a child of the GraphQL request span
-        const resolverContext = requestSpan
-            ? trace.setSpan(ctx || otelContext.active(), requestSpan)
-            : ctx || otelContext.active()
-
-        const span = tracer?.startSpan(
-            'resolver.fetchContract',
-            {
-                attributes: {
-                    'graphql.resolver': 'fetchContract',
-                    'graphql.field.name': 'fetchContract',
-                    'contract.id': input.contractID,
-                },
-            },
-            resolverContext
-        )
+        // This ensures proper trace hierarchy: frontend → request → resolver → Prisma → DB
+        const span = createResolverSpan(context, 'fetchContract', {
+            'contract.id': input.contractID,
+        })
         setResolverDetailsOnActiveSpan('fetchContract', user, span)
 
         // Check OAuth client read permissions

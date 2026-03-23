@@ -18,16 +18,21 @@ import { getWebAutoInstrumentations } from '@opentelemetry/auto-instrumentations
 import { AWSXRayPropagator } from '@opentelemetry/propagator-aws-xray'
 import { AWSXRayIdGenerator } from '@opentelemetry/id-generator-aws-xray'
 import { ZoneContextManager } from '@opentelemetry/context-zone'
-import {
-    SemanticResourceAttributes,
-    SemanticAttributes,
-} from '@opentelemetry/semantic-conventions'
 import React, { useMemo } from 'react'
 import {
     useTracing,
     TraceContext,
     setGlobalTracingContext,
 } from '@mc-review/otel'
+import {
+    ATTR_SERVICE_NAME,
+    SEMRESATTRS_DEPLOYMENT_ENVIRONMENT,
+    ATTR_EXCEPTION_TYPE,
+    ATTR_EXCEPTION_MESSAGE,
+    ATTR_EXCEPTION_STACKTRACE,
+    SEMATTRS_CODE_FILEPATH,
+    SEMATTRS_CODE_FUNCTION,
+} from '@opentelemetry/semantic-conventions'
 
 let tracerInstance: Tracer | undefined
 
@@ -39,8 +44,8 @@ function initializeTracer() {
     const provider = new WebTracerProvider({
         idGenerator: new AWSXRayIdGenerator(),
         resource: new Resource({
-            [SemanticResourceAttributes.SERVICE_NAME]: serviceName,
-            [SemanticResourceAttributes.DEPLOYMENT_ENVIRONMENT]: import.meta.env
+            [ATTR_SERVICE_NAME]: serviceName,
+            [SEMRESATTRS_DEPLOYMENT_ENVIRONMENT]: import.meta.env
                 .VITE_APP_STAGE_NAME,
         }),
     })
@@ -200,9 +205,9 @@ export function TraceProvider({ children }: { children: React.ReactNode }) {
 
 function getErrorAttributes(error: Error): Attributes {
     return {
-        [SemanticAttributes.EXCEPTION_TYPE]: error.name,
-        [SemanticAttributes.EXCEPTION_MESSAGE]: error.message,
-        [SemanticAttributes.EXCEPTION_STACKTRACE]: error.stack ?? undefined,
+        [ATTR_EXCEPTION_TYPE]: error.name,
+        [ATTR_EXCEPTION_MESSAGE]: error.message,
+        [ATTR_EXCEPTION_STACKTRACE]: error.stack ?? undefined,
     }
 }
 
@@ -214,10 +219,10 @@ export function useErrorBoundaryTracing() {
             recordError(error, {
                 spanName: 'ErrorBoundary.error',
                 attributes: {
-                    [SemanticAttributes.CODE_FILEPATH]:
+                    [SEMATTRS_CODE_FILEPATH]:
                         errorInfo.componentStack ?? undefined,
-                    [SemanticAttributes.CODE_FUNCTION]: 'ErrorBoundary',
-                    [SemanticAttributes.EXCEPTION_TYPE]: 'boundary',
+                    [SEMATTRS_CODE_FUNCTION]: 'ErrorBoundary',
+                    [ATTR_EXCEPTION_TYPE]: 'boundary',
                     'error.componentStack':
                         errorInfo.componentStack ?? undefined,
                 },
