@@ -58,6 +58,17 @@ function initializeTracer() {
         propagator: new AWSXRayPropagator(),
     })
 
+    // Get API URL to only propagate trace headers to our backend
+    const apiUrl = import.meta.env.VITE_APP_API_URL
+    if (!apiUrl || apiUrl === '') {
+        throw new Error(
+            'VITE_APP_API_URL must be set for OpenTelemetry trace propagation'
+        )
+    }
+    const apiUrlPattern = new RegExp(
+        apiUrl.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
+    )
+
     registerInstrumentations({
         tracerProvider: provider,
         instrumentations: [
@@ -70,7 +81,12 @@ function initializeTracer() {
                         /(.*)\.adoberesources\.net/g,
                         /(.*)\.google-analytics\.com/g,
                     ],
-                    propagateTraceHeaderCorsUrls: [/.+/g],
+                    // Only propagate trace headers to our backend and localhost for development
+                    propagateTraceHeaderCorsUrls: [
+                        apiUrlPattern,
+                        /localhost:\d+/, // Local development
+                        /127\.0\.0\.1:\d+/, // Local development alt
+                    ],
                 },
                 '@opentelemetry/instrumentation-fetch': {
                     ignoreUrls: [
@@ -80,7 +96,12 @@ function initializeTracer() {
                         /(.*)\.adoberesources\.net/g,
                         /(.*)\.google-analytics\.com/g,
                     ],
-                    propagateTraceHeaderCorsUrls: [/.+/g],
+                    // Only propagate trace headers to our backend and localhost for development
+                    propagateTraceHeaderCorsUrls: [
+                        apiUrlPattern,
+                        /localhost:\d+/, // Local development
+                        /127\.0\.0\.1:\d+/, // Local development alt
+                    ],
                 },
             }),
         ],

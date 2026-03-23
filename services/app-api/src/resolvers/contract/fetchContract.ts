@@ -1,4 +1,5 @@
 import { GraphQLError } from 'graphql'
+import { trace, context as otelContext } from '@opentelemetry/api'
 import type { QueryResolvers } from '../../gen/gqlServer'
 import { NotFoundError, type Store } from '../../postgres'
 import {
@@ -18,9 +19,24 @@ export function fetchContractResolver(
     store: Store
 ): QueryResolvers['fetchContract'] {
     return async (_parent, { input }, context) => {
-        const { user, ctx, tracer } = context
-        // add a span to OTEL
-        const span = tracer?.startSpan('fetchContractResolver', {}, ctx)
+        const { user, ctx, tracer, span: requestSpan } = context
+
+        // Create a resolver span as a child of the GraphQL request span
+        const resolverContext = requestSpan
+            ? trace.setSpan(ctx || otelContext.active(), requestSpan)
+            : ctx || otelContext.active()
+
+        const span = tracer?.startSpan(
+            'resolver.fetchContract',
+            {
+                attributes: {
+                    'graphql.resolver': 'fetchContract',
+                    'graphql.field.name': 'fetchContract',
+                    'contract.id': input.contractID,
+                },
+            },
+            resolverContext
+        )
         setResolverDetailsOnActiveSpan('fetchContract', user, span)
 
         // Check OAuth client read permissions

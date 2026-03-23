@@ -10,6 +10,8 @@ import {
 import { NodeTracerProvider } from '@opentelemetry/sdk-trace-node'
 import { AWSXRayPropagator } from '@opentelemetry/propagator-aws-xray'
 import { AWSXRayIdGenerator } from '@opentelemetry/id-generator-aws-xray'
+import { PrismaInstrumentation } from '@prisma/instrumentation'
+import { registerInstrumentations } from '@opentelemetry/instrumentation'
 
 export function initTracer(serviceName: string, otelCollectorURL: string) {
     console.info('-----Setting OTEL instrumentation-----')
@@ -28,7 +30,17 @@ export function initTracer(serviceName: string, otelCollectorURL: string) {
         spanProcessors: [new BatchSpanProcessor(exporter)],
     })
 
-    provider.register()
+    provider.register({
+        propagator: new AWSXRayPropagator(),
+    })
+
+    // Register Prisma instrumentation to capture database operations
+    // Spans will include: prisma:client:*, prisma:engine:*, and prisma:engine:db_query
+    registerInstrumentations({
+        instrumentations: [new PrismaInstrumentation()],
+    })
+
+    console.info('Prisma instrumentation registered')
 }
 
 export function recordException(
