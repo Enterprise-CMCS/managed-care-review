@@ -267,7 +267,7 @@ const StateAssignmentTable = () => {
 
     return (
         <div id={activeMainContentId}>
-            <h2>State assignments</h2>
+            <h1>State assignments</h1>
             <p>
                 Below is a list of the DMCO staff assigned to states. To edit
                 the assigned staff click on the edit link below.
@@ -275,6 +275,7 @@ const StateAssignmentTable = () => {
             <FilterAccordion
                 onClearFilters={clearFilters}
                 filterTitle={'Filters'}
+                headingLevel="h5"
             >
                 <MultiColumnGrid columns={2}>
                     <FilterSelect
