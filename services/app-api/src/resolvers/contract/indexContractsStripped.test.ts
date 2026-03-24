@@ -148,10 +148,10 @@ describe('indexContractsStripped', () => {
                 },
                 formData: {
                     submissionType: 'CONTRACT_AND_RATES',
-                    submissionDescription: 'An updated submission',
                     contractType: 'BASE',
-                    contractExecutionStatus: 'EXECUTED',
                     populationCovered: 'MEDICAID',
+                    contractDateStart: expect.any(String),
+                    contractDateEnd: expect.any(String),
                 },
             },
         })
@@ -193,10 +193,10 @@ describe('indexContractsStripped', () => {
                 },
                 formData: {
                     submissionType: 'CONTRACT_AND_RATES',
-                    submissionDescription: 'An updated submission',
                     contractType: 'BASE',
-                    contractExecutionStatus: 'EXECUTED',
                     populationCovered: 'MEDICAID',
+                    contractDateStart: expect.any(String),
+                    contractDateEnd: expect.any(String),
                 },
             },
         })
@@ -234,10 +234,10 @@ describe('indexContractsStripped', () => {
                 },
                 formData: {
                     submissionType: 'CONTRACT_AND_RATES',
-                    submissionDescription: 'An updated submission',
                     contractType: 'BASE',
-                    contractExecutionStatus: 'EXECUTED',
                     populationCovered: 'MEDICAID',
+                    contractDateStart: expect.any(String),
+                    contractDateEnd: expect.any(String),
                 },
             },
         })
@@ -275,10 +275,10 @@ describe('indexContractsStripped', () => {
                 },
                 formData: {
                     submissionType: 'CONTRACT_ONLY',
-                    submissionDescription: 'A complete EQRO submission',
                     contractType: 'BASE',
-                    contractExecutionStatus: null,
                     populationCovered: 'MEDICAID_AND_CHIP',
+                    contractDateStart: expect.any(String),
+                    contractDateEnd: expect.any(String),
                 },
             },
         })
