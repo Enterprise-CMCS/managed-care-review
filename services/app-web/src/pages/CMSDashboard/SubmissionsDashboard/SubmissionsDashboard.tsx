@@ -55,7 +55,7 @@ const SubmissionsDashboard = (): React.ReactElement => {
 
             if (!currentRevision) {
                 recordJSException(
-                    `Unexpected error: contract with id ${sub.id} did not contain a latestSubmittedRevision`
+                    `Unexpected error: Contract with ID ${sub.id} did not contain a latestSubmittedRevision`
                 )
                 return
             }

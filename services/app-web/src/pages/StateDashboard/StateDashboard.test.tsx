@@ -3,14 +3,11 @@ import { screen, waitFor, within } from '@testing-library/react'
 import { StateDashboard } from './StateDashboard'
 import {
     fetchCurrentUserMock,
-    indexContractsMockSuccess,
-    mockContractPackageUnlockedWithUnlockedType,
-    mockContractPackageDraft,
-    mockContractPackageSubmitted,
-    mockContractPackageApproved,
+    indexContractsStrippedMockSuccess,
+    mockContractStripped,
+    mockUnlockedContractStripped,
 } from '@mc-review/mocks'
 import { renderWithProviders } from '../../testHelpers/jestHelpers'
-import { Contract } from '../../gen/gqlClient'
 
 describe('StateDashboard', () => {
     it('display submission heading', async () => {
@@ -18,7 +15,7 @@ describe('StateDashboard', () => {
             apolloProvider: {
                 mocks: [
                     fetchCurrentUserMock({ statusCode: 200 }),
-                    indexContractsMockSuccess(),
+                    indexContractsStrippedMockSuccess([]),
                 ],
             },
         })
@@ -38,7 +35,7 @@ describe('StateDashboard', () => {
             apolloProvider: {
                 mocks: [
                     fetchCurrentUserMock({ statusCode: 200 }),
-                    indexContractsMockSuccess(),
+                    indexContractsStrippedMockSuccess([]),
                 ],
             },
         })
@@ -57,7 +54,7 @@ describe('StateDashboard', () => {
             apolloProvider: {
                 mocks: [
                     fetchCurrentUserMock({ statusCode: 200 }),
-                    indexContractsMockSuccess(),
+                    indexContractsStrippedMockSuccess([]),
                 ],
             },
             routerProvider: {
@@ -92,7 +89,7 @@ describe('StateDashboard', () => {
             apolloProvider: {
                 mocks: [
                     fetchCurrentUserMock({ statusCode: 200 }),
-                    indexContractsMockSuccess(),
+                    indexContractsStrippedMockSuccess([]),
                 ],
             },
             routerProvider: {
@@ -160,28 +157,46 @@ describe('StateDashboard', () => {
         }
 
         // set draft current revision to a far future updatedAt. Set unlocked to nearer future. This allows us to test sorting.
-        const draft = mockContractPackageDraft()
-
-        draft.draftRevision!.updatedAt = new Date('2100-01-01')
-        const submitted = mockContractPackageSubmitted()
-        submitted.packageSubmissions[0].contractRevision.updatedAt = new Date(
-            '1991-01-01'
-        )
-
-        const unlockedType = mockContractPackageUnlockedWithUnlockedType()
-        const unlocked: Contract = {
-            ...mockContractPackageUnlockedWithUnlockedType({
-                draftRevision: {
-                    ...unlockedType.draftRevision,
-                    updatedAt: new Date('2020-01-01'),
+        const draft = mockContractStripped({
+            id: 'test-abc-draft',
+            status: 'DRAFT',
+            consolidatedStatus: 'DRAFT',
+            lastUpdatedForDisplay: new Date('2100-01-01'),
+            draftRevision: {
+                __typename: 'ContractRevisionStripped',
+                id: 'draft-rev-1',
+                contractID: 'test-abc-draft',
+                createdAt: new Date('2100-01-01'),
+                updatedAt: new Date('2100-01-01'),
+                contractName: 'MCR-MN-0005-SNBC',
+                submitInfo: null,
+                unlockInfo: null,
+                formData: {
+                    __typename: 'ContractFormDataStripped',
+                    programIDs: ['d95394e5-44d1-45df-8151-1cc1ee66f100'],
+                    populationCovered: 'MEDICAID',
+                    submissionType: 'CONTRACT_AND_RATES',
+                    submissionDescription: 'An initial submission',
+                    contractType: 'BASE',
+                    contractExecutionStatus: 'EXECUTED',
+                    contractDateStart: new Date('2024-01-01'),
+                    contractDateEnd: new Date('2025-01-01'),
+                    managedCareEntities: ['MCO'],
+                    federalAuthorities: ['STATE_PLAN'],
                 },
-            }),
-            __typename: 'Contract',
-        }
+            },
+            latestSubmittedRevision: null,
+        })
 
-        draft.id = 'test-abc-draft'
-        submitted.id = 'test-abc-submitted'
-        unlocked.id = 'test-abc-unlocked'
+        const submitted = mockContractStripped({
+            id: 'test-abc-submitted',
+            lastUpdatedForDisplay: new Date('1991-01-01'),
+        })
+
+        const unlocked = mockUnlockedContractStripped({
+            id: 'test-abc-unlocked',
+            lastUpdatedForDisplay: new Date('2020-01-01'),
+        })
 
         const submissions = [draft, submitted, unlocked]
 
@@ -189,7 +204,7 @@ describe('StateDashboard', () => {
             apolloProvider: {
                 mocks: [
                     fetchCurrentUserMock({ statusCode: 200, user: mockUser }),
-                    indexContractsMockSuccess(submissions),
+                    indexContractsStrippedMockSuccess(submissions),
                 ],
             },
         })
@@ -253,26 +268,30 @@ describe('StateDashboard', () => {
             email: 'bob@dmas.mn.gov',
         }
 
-        const approved = mockContractPackageApproved()
-        const submitted = mockContractPackageSubmitted()
-        submitted.packageSubmissions[0].contractRevision.updatedAt = new Date(
-            '1991-01-01'
-        )
-
-        const unlockedType = mockContractPackageUnlockedWithUnlockedType()
-        const unlocked: Contract = {
-            ...mockContractPackageUnlockedWithUnlockedType({
-                draftRevision: {
-                    ...unlockedType.draftRevision,
-                    updatedAt: new Date('2020-01-01'),
+        const approved = mockContractStripped({
+            id: 'test-abc-approved',
+            consolidatedStatus: 'APPROVED',
+            reviewStatus: 'APPROVED',
+            lastUpdatedForDisplay: new Date('2100-01-01'),
+            reviewStatusActions: [
+                {
+                    __typename: 'ContractReviewStatusActions',
+                    contractID: 'test-abc-approved',
+                    updatedAt: new Date('2100-01-01'),
+                    actionType: 'MARK_AS_APPROVED',
                 },
-            }),
-            __typename: 'Contract',
-        }
+            ],
+        })
 
-        approved.id = 'test-abc-approved'
-        submitted.id = 'test-abc-submitted'
-        unlocked.id = 'test-abc-unlocked'
+        const submitted = mockContractStripped({
+            id: 'test-abc-submitted',
+            lastUpdatedForDisplay: new Date('1991-01-01'),
+        })
+
+        const unlocked = mockUnlockedContractStripped({
+            id: 'test-abc-unlocked',
+            lastUpdatedForDisplay: new Date('2020-01-01'),
+        })
 
         const submissions = [approved, submitted, unlocked]
 
@@ -280,7 +299,7 @@ describe('StateDashboard', () => {
             apolloProvider: {
                 mocks: [
                     fetchCurrentUserMock({ statusCode: 200, user: mockUser }),
-                    indexContractsMockSuccess(submissions),
+                    indexContractsStrippedMockSuccess(submissions),
                 ],
             },
         })
@@ -336,28 +355,46 @@ describe('StateDashboard', () => {
         }
 
         // set draft current revision to a far future updatedAt. Set unlocked to nearer future. This allows us to test sorting.
-        const draft = mockContractPackageDraft()
-
-        draft.draftRevision!.updatedAt = new Date('2100-01-01')
-        const submitted = mockContractPackageSubmitted()
-        submitted.packageSubmissions[0].contractRevision.updatedAt = new Date(
-            '1991-01-01'
-        )
-
-        const unlockedType = mockContractPackageUnlockedWithUnlockedType()
-        const unlocked: Contract = {
-            ...mockContractPackageUnlockedWithUnlockedType({
-                draftRevision: {
-                    ...unlockedType.draftRevision,
-                    updatedAt: new Date('2020-01-01'),
+        const draft = mockContractStripped({
+            id: 'test-abc-draft',
+            status: 'DRAFT',
+            consolidatedStatus: 'DRAFT',
+            lastUpdatedForDisplay: new Date('2100-01-01'),
+            draftRevision: {
+                __typename: 'ContractRevisionStripped',
+                id: 'draft-rev-1',
+                contractID: 'test-abc-draft',
+                createdAt: new Date('2100-01-01'),
+                updatedAt: new Date('2100-01-01'),
+                contractName: 'MCR-MN-0005-SNBC',
+                submitInfo: null,
+                unlockInfo: null,
+                formData: {
+                    __typename: 'ContractFormDataStripped',
+                    programIDs: ['d95394e5-44d1-45df-8151-1cc1ee66f100'],
+                    populationCovered: 'MEDICAID',
+                    submissionType: 'CONTRACT_AND_RATES',
+                    submissionDescription: 'An initial submission',
+                    contractType: 'BASE',
+                    contractExecutionStatus: 'EXECUTED',
+                    contractDateStart: new Date('2024-01-01'),
+                    contractDateEnd: new Date('2025-01-01'),
+                    managedCareEntities: ['MCO'],
+                    federalAuthorities: ['STATE_PLAN'],
                 },
-            }),
-            __typename: 'Contract',
-        }
+            },
+            latestSubmittedRevision: null,
+        })
 
-        draft.id = 'test-abc-draft'
-        submitted.id = 'test-abc-submitted'
-        unlocked.id = 'test-abc-unlocked'
+        const submitted = mockContractStripped({
+            id: 'test-abc-submitted',
+            lastUpdatedForDisplay: new Date('1991-01-01'),
+        })
+
+        const unlocked = mockUnlockedContractStripped({
+            id: 'test-abc-unlocked',
+            lastUpdatedForDisplay: new Date('2020-01-01'),
+        })
 
         const submissions = [draft, submitted, unlocked]
 
@@ -365,7 +402,7 @@ describe('StateDashboard', () => {
             apolloProvider: {
                 mocks: [
                     fetchCurrentUserMock({ statusCode: 200, user: mockUser }),
-                    indexContractsMockSuccess(submissions),
+                    indexContractsStrippedMockSuccess(submissions),
                 ],
             },
         })
@@ -380,7 +417,7 @@ describe('StateDashboard', () => {
             apolloProvider: {
                 mocks: [
                     fetchCurrentUserMock({ statusCode: 200 }),
-                    indexContractsMockSuccess(),
+                    indexContractsStrippedMockSuccess([]),
                 ],
             },
         })
