@@ -14,12 +14,9 @@ fragment strippedContractRevisionFragment on ContractRevisionStripped {
         programIDs
         populationCovered
         submissionType
-        submissionDescription
         contractType
-        contractExecutionStatus
         contractDateStart
         contractDateEnd
         managedCareEntities
-        federalAuthorities
     }
 }

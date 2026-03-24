@@ -190,7 +190,7 @@ export function configureResolvers(
         RateFormData: rateFormDataResolver(),
         ContractQuestion: questionResolver(store),
         RateQuestion: questionResolver(store),
-        ContractStripped: contractStrippedResolver(applicationEndpoint),
+        ContractStripped: contractStrippedResolver(),
         Contract: contractResolver(store, applicationEndpoint),
         UnlockedContract: unlockedContractResolver(store, applicationEndpoint),
         ContractRevision: contractRevisionResolver(store),

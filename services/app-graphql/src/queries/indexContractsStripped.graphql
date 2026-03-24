@@ -24,8 +24,6 @@ query indexContractsStripped($input: IndexContractsStrippedInput) {
                 }
                 stateNumber
                 contractSubmissionType
-                mccrsID
-                webURL
 
                 reviewStatusActions {
                     updatedAt

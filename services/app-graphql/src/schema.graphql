@@ -2015,19 +2015,11 @@ type ContractFormDataStripped {
     Options are CONTRACT_ONLY and CONTRACT_AND_RATES
     """
     submissionType: SubmissionType!
-    "State provided summary of the contract being submitted"
-    submissionDescription: String!
     """
     Type of contract the state is submitting
     Options are: BASE, AMENDMENT
     """
     contractType: ContractType
-    """
-    Execution status for a contract.
-    Contracts are fully executed or unexecuted by some or all parties
-    Status can be either EXECUTED or UNEXECUTED
-    """
-    contractExecutionStatus: ContractExecutionStatus
     "Start date of the contract"
     contractDateStart: Date
     "End date of the contract"
@@ -2038,11 +2030,6 @@ type ContractFormDataStripped {
     Options are MCO, PIHP, PAHP, and PCCM
     """
     managedCareEntities: [ManagedCareEntity!]!
-    """
-    The state plan and/or waiver authorities that allow the state
-    to run its managed care programs
-    """
-    federalAuthorities: [FederalAuthority!]!
 }
 
 """
@@ -2110,12 +2097,6 @@ type ContractStripped {
 
     "contractSubmissionType is the type of the submission. It can be HEALTH_PLAN or EQRO"
     contractSubmissionType: ContractSubmissionType!
-
-    "mccrsID is the four digit id in MC-CRS that corresponds to this Contract, if set"
-    mccrsID: String
-
-    "webURL is a url that will open the MC Review web app to this Contract"
-    webURL: String!
 
     "reviewStatusActions are the who/when/why for review status changes on this contract"
     reviewStatusActions: [ContractReviewStatusActions!]

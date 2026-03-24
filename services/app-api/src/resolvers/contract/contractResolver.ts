@@ -215,9 +215,7 @@ function genericContractResolver<
     }
 }
 
-export function contractStrippedResolver(
-    applicationEndpoint: string
-): Resolvers['ContractStripped'] {
+export function contractStrippedResolver(): Resolvers['ContractStripped'] {
     return {
         lastUpdatedForDisplay(parent: StrippedContractType) {
             const contractUpdated = parent.updatedAt
@@ -243,14 +241,6 @@ export function contractStrippedResolver(
         },
         initiallySubmittedAt(parent: StrippedContractType) {
             return parent.initiallySubmittedAt || null
-        },
-        webURL(parent: StrippedContractType) {
-            const urlPath = path.join(
-                '/submissions/',
-                ContractSubmissionTypeRecord[parent.contractSubmissionType],
-                parent.id
-            )
-            return new URL(urlPath, applicationEndpoint).href
         },
         state(parent: StrippedContractType) {
             const packageState = parent.stateCode
