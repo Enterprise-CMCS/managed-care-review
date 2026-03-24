@@ -2,6 +2,7 @@ import {
     Contract,
     ContractFormData,
     ContractRevision,
+    ContractStripped,
     RateRevision,
     UnlockedContract,
     CmsUser,
@@ -4071,6 +4072,150 @@ function mockEqroContractResubmittedWithReviewStatusChange(
     }
 }
 
+const mockContractStripped = (
+    partial?: Partial<ContractStripped>
+): ContractStripped => ({
+    __typename: 'ContractStripped',
+    id: 'test-stripped-contract-123',
+    createdAt: new Date('2024-01-01'),
+    updatedAt: new Date('2024-03-01'),
+    status: 'SUBMITTED',
+    reviewStatus: 'UNDER_REVIEW',
+    consolidatedStatus: 'SUBMITTED',
+    initiallySubmittedAt: new Date('2024-01-15'),
+    lastUpdatedForDisplay: new Date('2024-03-01'),
+    stateCode: 'MN',
+    state: mockMNState(),
+    stateNumber: 5,
+    contractSubmissionType: 'HEALTH_PLAN',
+    mccrsID: null,
+    webURL: 'https://testmcreview.example/submissions/health-plan/test-stripped-contract-123',
+    reviewStatusActions: [],
+    draftRevision: null,
+    latestSubmittedRevision: {
+        __typename: 'ContractRevisionStripped',
+        id: 'test-stripped-revision-123',
+        contractID: 'test-stripped-contract-123',
+        createdAt: new Date('2024-01-15'),
+        updatedAt: new Date('2024-01-15'),
+        contractName: 'MCR-MN-0005-SNBC',
+        submitInfo: {
+            __typename: 'UpdateInformation',
+            updatedAt: '2024-01-15T00:00:00.000Z',
+            updatedBy: {
+                __typename: 'UpdatedBy',
+                email: 'example@state.com',
+                role: 'STATE_USER',
+                givenName: 'John',
+                familyName: 'Vila',
+            },
+            updatedReason: 'Initial submission',
+        },
+        unlockInfo: null,
+        formData: {
+            __typename: 'ContractFormDataStripped',
+            programIDs: ['d95394e5-44d1-45df-8151-1cc1ee66f100'],
+            populationCovered: 'MEDICAID',
+            submissionType: 'CONTRACT_AND_RATES',
+            submissionDescription: 'An initial submission',
+            contractType: 'BASE',
+            contractExecutionStatus: 'EXECUTED',
+            contractDateStart: new Date('2024-01-01'),
+            contractDateEnd: new Date('2025-01-01'),
+            managedCareEntities: ['MCO'],
+            federalAuthorities: ['STATE_PLAN'],
+        },
+    },
+    ...partial,
+})
+
+const mockEQROContractStripped = (
+    partial?: Partial<ContractStripped>
+): ContractStripped => mockContractStripped({
+    id: 'test-stripped-eqro-123',
+    contractSubmissionType: 'EQRO',
+    webURL: 'https://testmcreview.example/submissions/eqro/test-stripped-eqro-123',
+    latestSubmittedRevision: {
+        __typename: 'ContractRevisionStripped',
+        id: 'test-stripped-eqro-revision-123',
+        contractID: 'test-stripped-eqro-123',
+        createdAt: new Date('2024-01-15'),
+        updatedAt: new Date('2024-01-15'),
+        contractName: 'MCR-MN-0005-SNBC',
+        submitInfo: {
+            __typename: 'UpdateInformation',
+            updatedAt: '2024-01-15T00:00:00.000Z',
+            updatedBy: {
+                __typename: 'UpdatedBy',
+                email: 'example@state.com',
+                role: 'STATE_USER',
+                givenName: 'John',
+                familyName: 'Vila',
+            },
+            updatedReason: 'Initial EQRO submission',
+        },
+        unlockInfo: null,
+        formData: {
+            __typename: 'ContractFormDataStripped',
+            programIDs: ['d95394e5-44d1-45df-8151-1cc1ee66f100'],
+            populationCovered: 'MEDICAID_AND_CHIP',
+            submissionType: 'CONTRACT_ONLY',
+            submissionDescription: 'A complete EQRO submission',
+            contractType: 'BASE',
+            contractExecutionStatus: null,
+            contractDateStart: new Date('2024-01-01'),
+            contractDateEnd: new Date('2025-01-01'),
+            managedCareEntities: ['MCO'],
+            federalAuthorities: [],
+        },
+    },
+    ...partial,
+})
+
+const mockUnlockedContractStripped = (
+    partial?: Partial<ContractStripped>
+): ContractStripped => mockContractStripped({
+    id: 'test-stripped-unlocked-123',
+    status: 'UNLOCKED',
+    stateNumber: 1,
+    consolidatedStatus: 'UNLOCKED',
+    draftRevision: {
+        __typename: 'ContractRevisionStripped',
+        id: 'test-stripped-draft-revision-123',
+        contractID: 'test-stripped-unlocked-123',
+        createdAt: new Date('2024-02-01'),
+        updatedAt: new Date('2024-02-01'),
+        contractName: 'MCR-MN-0005-SNBC',
+        submitInfo: null,
+        unlockInfo: {
+            __typename: 'UpdateInformation',
+            updatedAt: '2024-02-01T00:00:00.000Z',
+            updatedBy: {
+                __typename: 'UpdatedBy',
+                email: 'cms@example.com',
+                role: 'CMS_USER',
+                givenName: 'Jane',
+                familyName: 'CMS',
+            },
+            updatedReason: 'Unlocked for corrections',
+        },
+        formData: {
+            __typename: 'ContractFormDataStripped',
+            programIDs: ['d95394e5-44d1-45df-8151-1cc1ee66f100'],
+            populationCovered: 'MEDICAID',
+            submissionType: 'CONTRACT_AND_RATES',
+            submissionDescription: 'An initial submission',
+            contractType: 'BASE',
+            contractExecutionStatus: 'EXECUTED',
+            contractDateStart: new Date('2024-01-01'),
+            contractDateEnd: new Date('2025-01-01'),
+            managedCareEntities: ['MCO'],
+            federalAuthorities: ['STATE_PLAN'],
+        },
+    },
+    ...partial,
+})
+
 export {
     mockContractRevision,
     mockContractPackageDraft,
@@ -4091,4 +4236,7 @@ export {
     mockEqroContractSubmittedUnderReview,
     mockEqroContractSubmittedNotSubjectToReview,
     mockEqroContractResubmittedWithReviewStatusChange,
+    mockContractStripped,
+    mockEQROContractStripped,
+    mockUnlockedContractStripped,
 }
