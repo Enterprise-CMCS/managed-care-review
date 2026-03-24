@@ -18,6 +18,27 @@ Make sure heading levels (`h2`, `h3` etc) are properly used for text content. Th
 
 Note also that there is a specific color to be used for links (`$$mcr-foundation-link`) and hint text (`$mcr-foundation-hint`).
 
+Heading typography is standardized globally in [`services/app-web/src/styles/custom.scss`](https://github.com/Enterprise-CMCS/managed-care-review/blob/main/services/app-web/src/styles/custom.scss). Use one of the shared utility classes below instead of inline font sizes or a new header component.
+
+- `mcr-homepage-h1-bold`
+- `mcr-homepage-h2`
+- `mcr-homepage-h2-bold`
+- `mcr-h4-bold`
+- `mcr-tag`
+- `mcr-tag-bold`
+- `mcr-body`
+- `mcr-body-bold`
+
+Example:
+
+```tsx
+<h2 className="mcr-homepage-h2">Homepage section</h2>
+<span className="mcr-tag-bold">New</span>
+<p className="mcr-body-bold">Updated today</p>
+```
+
+These styles are also exposed in Storybook so typography changes can be visually reviewed before they ship.
+
 ## Technologies related to styles in MC-Review
 
 ### Sass / SCSS stylesheets

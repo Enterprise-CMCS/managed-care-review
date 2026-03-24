@@ -272,7 +272,7 @@ export const EQROSubmissionSummary = (): React.ReactElement => {
                         ) : undefined
                     }
                     contract={contract}
-                    submissionName={name}
+                    headerText="Submission details"
                     initiallySubmittedAt={contract.initiallySubmittedAt}
                     isStateUser={isStateUser}
                     explainMissingData={explainMissingData}
