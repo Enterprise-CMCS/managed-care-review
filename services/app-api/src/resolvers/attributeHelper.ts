@@ -58,7 +58,118 @@ export function createResolverSpan(
     )
 }
 
-/* gather information about what's going on in the request, including user info and the resolver that's being called. */
+/**
+ * Executes a resolver function with proper OTEL context propagation and automatic span lifecycle management.
+ * This ensures that Prisma spans are created as children of the resolver span.
+ * Automatically handles span status (OK/ERROR) and span ending.
+ *
+ * @param context - GraphQL resolver context
+ * @param resolverName - Name of the resolver
+ * @param attributes - Optional span attributes
+ * @param resolver - The resolver function to execute
+ * @returns The result of the resolver function
+ *
+ * @example
+ * ```typescript
+ * return withResolverSpan(context, 'fetchContract', { 'contract.id': input.contractID }, async (span) => {
+ *   setResolverDetails(span, context.user)
+ *   const contract = await store.findContractWithHistory(input.contractID)
+ *   return { contract }
+ * })
+ * ```
+ */
+export async function withResolverSpan<T>(
+    context: Context,
+    resolverName: string,
+    attributes: Attributes | undefined,
+    resolver: (span: Span | undefined) => Promise<T>
+): Promise<T> {
+    const span = createResolverSpan(context, resolverName, attributes)
+
+    if (!span) {
+        // No tracing enabled, just execute the resolver
+        return resolver(span)
+    }
+
+    // Execute the resolver within the span's context so Prisma spans become children
+    const resolverContext = trace.setSpan(otelContext.active(), span)
+
+    try {
+        const result = await otelContext.with(resolverContext, () =>
+            resolver(span)
+        )
+        // Success: set OK status and end span
+        span.setStatus({ code: SpanStatusCode.OK })
+        span.end()
+        return result
+    } catch (error) {
+        // Error: record exception, set error status, end span, then rethrow
+        span.setStatus({
+            code: SpanStatusCode.ERROR,
+            message: error instanceof Error ? error.message : 'Unknown error',
+        })
+        if (error instanceof Error) {
+            span.recordException(error)
+        }
+        span.end()
+        throw error
+    }
+}
+
+/**
+ * Sets user context attributes on the resolver span.
+ * Should be called at the beginning of the resolver to capture user info.
+ *
+ * @param span - The resolver span (can be undefined if tracing is disabled)
+ * @param user - The user from the GraphQL context
+ *
+ * @example
+ * ```typescript
+ * return withResolverSpan(context, 'fetchContract', attributes, async (span) => {
+ *   setResolverDetails(span, context.user)
+ *   // ... resolver logic
+ * })
+ * ```
+ */
+export function setResolverDetails(
+    span: Span | undefined,
+    user: Context['user']
+): void {
+    if (!span) return
+    span.setAttributes({
+        [SEMATTRS_ENDUSER_ID]: user.email,
+        [SEMATTRS_ENDUSER_ROLE]: user.role,
+    })
+}
+
+/**
+ * Records an error on the span and adds it as an attribute.
+ * Use this for errors that don't terminate the resolver (non-fatal errors).
+ * For fatal errors, just throw - withResolverSpan will handle it.
+ *
+ * @param span - The resolver span
+ * @param error - The error to record (Error object or string message)
+ */
+export function recordResolverError(
+    span: Span | undefined,
+    error: Error | string
+): void {
+    if (!span) return
+    if (error instanceof Error) {
+        span.recordException(error)
+    } else {
+        span.recordException(new Error(error))
+    }
+}
+
+// ===== DEPRECATED FUNCTIONS =====
+// The following functions are deprecated and maintained for backwards compatibility.
+// When using withResolverSpan, you don't need to call setSuccessAttributesOnActiveSpan
+// or setErrorAttributesOnActiveSpan - the helper manages span lifecycle automatically.
+
+/**
+ * @deprecated Use setResolverDetails(span, user) instead. This function has a misleading name.
+ */
 export function setResolverDetailsOnActiveSpan(
     name: string,
     user: Context['user'],
@@ -75,6 +186,10 @@ export function setResolverDetailsOnActiveSpan(
     })
 }
 
+/**
+ * @deprecated When using withResolverSpan, just throw the error - it will be recorded automatically.
+ * For non-fatal errors, use recordResolverError(span, error) instead.
+ */
 export function setErrorAttributesOnActiveSpan(
     message: string,
     span: Context['span']
@@ -88,6 +203,9 @@ export function setErrorAttributesOnActiveSpan(
     span.end()
 }
 
+/**
+ * @deprecated When using withResolverSpan, you don't need to call this - the helper ends the span automatically.
+ */
 export function setSuccessAttributesOnActiveSpan(span: Context['span']): void {
     if (!span) return
     span.setAttributes({
