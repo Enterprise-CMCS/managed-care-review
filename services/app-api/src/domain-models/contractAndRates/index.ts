@@ -30,7 +30,11 @@ export {
     hasValidModifiedProvisions,
     getDraftContractRateRevisions,
 } from './helpers'
-export type { ContractType, UnlockedContractType } from './contractTypes'
+export type {
+    ContractType,
+    StrippedContractType,
+    UnlockedContractType,
+} from './contractTypes'
 export type { RateType, StrippedRateType } from './rateTypes'
 export type {
     RateReviewActionType,
@@ -47,12 +51,14 @@ export type {
     StateContactType,
     ActuaryContactType,
     StrippedRateFormDataType,
+    StrippedContractFormDataType,
 } from './formDataTypes'
 
 export type {
     ContractRevisionType,
     RateRevisionType,
     StrippedRateRevisionType,
+    StrippedContractRevisionType,
 } from './revisionTypes'
 
 export type {

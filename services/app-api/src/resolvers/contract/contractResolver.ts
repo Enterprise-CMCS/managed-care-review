@@ -7,6 +7,7 @@ import type {
     RateRevisionType,
     UnlockedContractType,
 } from '../../domain-models'
+import type { StrippedContractType } from '../../domain-models/contractAndRates/contractTypes'
 import path from 'path'
 import type { Store } from '../../postgres'
 import { NotFoundError } from '../../postgres'
@@ -210,6 +211,64 @@ function genericContractResolver<
             }
 
             return convertToIndexQuestionsPayload(questionsForContract)
+        },
+    }
+}
+
+export function contractStrippedResolver(
+    applicationEndpoint: string
+): Resolvers['ContractStripped'] {
+    return {
+        lastUpdatedForDisplay(parent: StrippedContractType) {
+            const contractUpdated = parent.updatedAt
+            const draftUpdated = parent.draftRevision?.updatedAt
+
+            const lastSubmitted =
+                parent.latestSubmittedRevision?.submitInfo?.updatedAt
+            const lastUnlocked = parent.draftRevision?.unlockInfo?.updatedAt
+            const submitStatusDate =
+                lastUnlocked || lastSubmitted || draftUpdated || contractUpdated
+
+            if (
+                parent.reviewStatusActions &&
+                parent.reviewStatusActions.length > 0
+            ) {
+                const latestAction = parent.reviewStatusActions[0].updatedAt
+                if (latestAction && latestAction > submitStatusDate) {
+                    return latestAction
+                }
+            }
+
+            return submitStatusDate
+        },
+        initiallySubmittedAt(parent: StrippedContractType) {
+            return parent.initiallySubmittedAt || null
+        },
+        webURL(parent: StrippedContractType) {
+            const urlPath = path.join(
+                '/submissions/',
+                ContractSubmissionTypeRecord[parent.contractSubmissionType],
+                parent.id
+            )
+            return new URL(urlPath, applicationEndpoint).href
+        },
+        state(parent: StrippedContractType) {
+            const packageState = parent.stateCode
+            const state = typedStatePrograms.states.find(
+                (st) => st.code === packageState
+            )
+
+            if (state === undefined) {
+                const errMessage =
+                    'State not found in database: ' + packageState
+                throw new GraphQLError(errMessage, {
+                    extensions: {
+                        code: 'INTERNAL_SERVER_ERROR',
+                        cause: 'DB_ERROR',
+                    },
+                })
+            }
+            return state
         },
     }
 }
