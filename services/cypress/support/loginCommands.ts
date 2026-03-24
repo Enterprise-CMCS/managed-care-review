@@ -49,7 +49,7 @@ Cypress.Commands.add('logInAsStateUser', () => {
         throw new Error(`Auth mode is not defined or is IDM: ${authMode}`)
     }
     //Wait for both queries to finish.
-    cy.wait(['@fetchCurrentUserQuery', '@indexContractsForDashboardQuery'], {
+    cy.wait(['@fetchCurrentUserQuery', '@indexContractsStrippedQuery'], {
         timeout: 80_000,
     })
     cy.findByTestId('state-dashboard-page', { timeout: 10_000 }).should('exist')
@@ -81,7 +81,7 @@ Cypress.Commands.add('logInAsCMSUser', (args) => {
     }
 
     cy.wait('@fetchCurrentUserQuery', { timeout: 20_000 })
-    cy.wait('@indexContractsForDashboardQuery', { timeout: 80_000 })
+    cy.wait('@indexContractsStrippedQuery', { timeout: 80_000 })
     cy.findByTestId('cms-dashboard-page', { timeout: 10_000 }).should('exist')
 
     // After logging in, we visit the initial URL if it's not the dashboard.
@@ -102,7 +102,7 @@ Cypress.Commands.add('logInAsCMSUser', (args) => {
         } else if (initialURL.match(submissionRateQAPattern)) {
             cy.wait('@fetchRateWithQuestionsQuery', { timeout: 80_000 })
         } else {
-            cy.wait('@indexContractsForDashboardQuery', { timeout: 80_000 })
+            cy.wait('@indexContractsStrippedQuery', { timeout: 80_000 })
             cy.findByTestId('cms-dashboard-page', { timeout: 10_000 }).should(
                 'exist'
             )
@@ -143,7 +143,7 @@ Cypress.Commands.add(
         } else if (initialURL?.includes('submissions')) {
             cy.wait('@fetchContractWithQuestionsQuery', { timeout: 20_000 })
         } else {
-            cy.wait('@indexContractsForDashboardQuery', { timeout: 80_000 })
+            cy.wait('@indexContractsStrippedQuery', { timeout: 80_000 })
             cy.findByTestId('cms-dashboard-page', { timeout: 10_000 }).should(
                 'exist'
             )

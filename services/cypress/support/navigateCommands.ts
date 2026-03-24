@@ -97,5 +97,5 @@ Cypress.Commands.add(
 Cypress.Commands.add('navigateToDashboard', () => {
     cy.visit('/')
     cy.wait('@fetchCurrentUserQuery', { timeout: 50_000 })
-    cy.wait('@indexContractsForDashboardQuery', { timeout: 50_000 })
+    cy.wait('@indexContractsStrippedQuery', { timeout: 50_000 })
 })
