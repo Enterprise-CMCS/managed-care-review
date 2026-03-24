@@ -492,6 +492,7 @@ describe('Change History', () => {
             `accordionItem_${contract.packageSubmissions[0].submitInfo.updatedAt}`
         )
         expect(within(latestSubmissionItem).getByText('Subject to review')).toBeInTheDocument()
+        expect(within(latestSubmissionItem).getByText('Summary of changes:')).toBeInTheDocument()
 
         const unlockItem = screen.getByTestId(
             `accordionItem_${contract.packageSubmissions[0].contractRevision.unlockInfo?.updatedAt}`

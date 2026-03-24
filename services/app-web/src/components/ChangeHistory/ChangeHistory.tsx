@@ -179,7 +179,11 @@ const buildChangeHistoryInfo = (
                 )}
                 <div>
                     <span className={styles.tag}>
-                        {isSubmit ? 'Changes made: ' : 'Reason for unlock: '}
+                        {isSubmit
+                            ? contract.contractSubmissionType === 'EQRO'
+                                ? 'Summary of changes: '
+                                : 'Changes made: '
+                            : 'Reason for unlock: '}
                     </span>
                     <span>{r.updatedReason}</span>
                 </div>
