@@ -10,6 +10,7 @@ query indexContractsStripped($input: IndexContractsStrippedInput) {
                 reviewStatus
                 consolidatedStatus
                 initiallySubmittedAt
+                lastUpdatedForDisplay
                 stateCode
                 state {
                     code

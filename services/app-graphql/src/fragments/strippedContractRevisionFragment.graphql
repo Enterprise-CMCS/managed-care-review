@@ -9,6 +9,7 @@ fragment strippedContractRevisionFragment on ContractRevisionStripped {
     submitInfo {
         ...updateInformationFields
     }
+    contractName
     formData {
         programIDs
         populationCovered

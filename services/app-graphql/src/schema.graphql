@@ -2063,6 +2063,11 @@ type ContractRevisionStripped {
     submitInfo: UpdateInformation
     "The contract related form data that was inputed by the state"
     formData: ContractFormDataStripped!
+    """
+    Represents the name of the contract package.
+    This value is auto generated based on contract state number, contract type, dates, and state program details
+    """
+    contractName: String!
 }
 
 """
@@ -2091,6 +2096,8 @@ type ContractStripped {
     consolidatedStatus: ConsolidatedContractStatus!
     "initiallySubmittedAt is the initial date this contract was submitted at. Is not changed by unlock or resubmission."
     initiallySubmittedAt: DateTime
+    "lastUpdatedForDisplay is the last time this contract was officially updated. When it's a draft it will be the last updatedAt date. Afterwards it will be the most recent submit or unlock or review action date."
+    lastUpdatedForDisplay: DateTime!
     "stateCode is the state code (e.g. CA or TN) for the submitting state"
     stateCode: String!
     "state is fuller state data for the submitting state"
@@ -2117,7 +2124,7 @@ type ContractStripped {
     draftRevision: ContractRevisionStripped
 
     "The latest submitted contract revision"
-    latestSubmittedRevision: ContractRevisionStripped!
+    latestSubmittedRevision: ContractRevisionStripped
 }
 
 """
