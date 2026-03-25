@@ -201,7 +201,7 @@ export class Postgres extends BaseStack {
                 functionName: `postgres-${this.stage}-dbManager-cdk`,
                 description:
                     'Manages logical databases in the CDK PostgreSQL Aurora cluster',
-                runtime: Runtime.NODEJS_20_X,
+                runtime: Runtime.NODEJS_24_X,
                 architecture: Architecture.X86_64,
                 handler: 'handler',
                 entry: join(

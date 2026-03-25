@@ -7,7 +7,7 @@ esbuild
         entryPoints: ['src/local-server.ts'],
         bundle: true,
         platform: 'node',
-        target: 'node20',
+        target: 'node24',
         outfile: '.local-build/local-server.js',
         external: [
             'prisma',
