@@ -4,11 +4,10 @@ import {
     fetchCurrentUserMock,
     iterableCmsUsersMockData,
     mockMNState,
-    indexContractsMockSuccess,
-    mockContractPackageUnlockedWithUnlockedType,
-    mockContractPackageDraft,
-    mockContractPackageSubmitted,
-    mockContractPackageApproved,
+    mockUnlockedContractStripped,
+    mockContractStripped,
+    mockEQROContractStripped,
+    indexContractsStrippedMockSuccess,
 } from '@mc-review/mocks'
 import { renderWithProviders } from '../../testHelpers'
 import { CMSDashboard, RateReviewsDashboard, SubmissionsDashboard } from './'
@@ -17,7 +16,6 @@ import {
     RoutesRecord,
     ContractSubmissionTypeRecord,
 } from '@mc-review/constants'
-import { Contract } from '../../gen/gqlClient'
 
 // copy paste from AppRoutes - this is to allow texting of the react router Outlet
 const CMSDashboardNestedRoutes = () => (
@@ -54,7 +52,7 @@ describe('CMSDashboard', () => {
                                     statusCode: 200,
                                     user: mockUser(),
                                 }),
-                                indexContractsMockSuccess([]),
+                                indexContractsStrippedMockSuccess([]),
                             ],
                         },
                         routerProvider: { route: '/dashboard/rate-reviews' },
@@ -81,7 +79,7 @@ describe('CMSDashboard', () => {
                                         statusCode: 200,
                                         user: mockUser(),
                                     }),
-                                    indexContractsMockSuccess([]),
+                                    indexContractsStrippedMockSuccess([]),
                                 ],
                             },
                             routerProvider: { route: '/dashboard/submissions' },
@@ -93,12 +91,12 @@ describe('CMSDashboard', () => {
                 })
 
                 it('displays submissions table excluding any in progress drafts', async () => {
-                    const draft = mockContractPackageDraft()
-                    const submitted = mockContractPackageSubmitted()
-                    const unlocked: Contract = {
-                        ...mockContractPackageUnlockedWithUnlockedType(),
-                        __typename: 'Contract',
-                    }
+                    const draft = mockUnlockedContractStripped({
+                        consolidatedStatus: 'DRAFT',
+                        latestSubmittedRevision: null,
+                    })
+                    const submitted = mockContractStripped()
+                    const unlocked = mockUnlockedContractStripped()
                     draft.id = 'test-abc-draft'
                     submitted.id = 'test-abc-submitted'
                     unlocked.id = 'test-abc-unlocked'
@@ -112,7 +110,7 @@ describe('CMSDashboard', () => {
                                     statusCode: 200,
                                     user: mockUser(),
                                 }),
-                                indexContractsMockSuccess(submissions),
+                                indexContractsStrippedMockSuccess(submissions),
                             ],
                         },
                         routerProvider: { route: '/dashboard/submissions' },
@@ -135,10 +133,42 @@ describe('CMSDashboard', () => {
                 })
 
                 it('displays submission type as expected for current revision that is submitted/resubmitted', async () => {
-                    const submitted = mockContractPackageSubmitted()
-                    submitted.id = '123-4'
-                    submitted.packageSubmissions[0].contractRevision.formData.submissionType =
-                        'CONTRACT_ONLY'
+                    const submitted = mockContractStripped({
+                        id: '123-4',
+                        latestSubmittedRevision: {
+                            __typename: 'ContractRevisionStripped',
+                            id: 'test-rev-123-4',
+                            contractID: '123-4',
+                            createdAt: new Date(),
+                            updatedAt: new Date(),
+                            contractName: 'MCR-MN-0005-SNBC',
+                            submitInfo: {
+                                __typename: 'UpdateInformation',
+                                updatedAt: '2024-01-15T00:00:00.000Z',
+                                updatedBy: {
+                                    __typename: 'UpdatedBy',
+                                    email: 'example@state.com',
+                                    role: 'STATE_USER',
+                                    givenName: 'John',
+                                    familyName: 'Vila',
+                                },
+                                updatedReason: 'Initial submission',
+                            },
+                            unlockInfo: null,
+                            formData: {
+                                __typename: 'ContractFormDataStripped',
+                                programIDs: [
+                                    'd95394e5-44d1-45df-8151-1cc1ee66f100',
+                                ],
+                                populationCovered: 'MEDICAID',
+                                submissionType: 'CONTRACT_ONLY',
+                                contractType: 'BASE',
+                                contractDateStart: new Date('2024-01-01'),
+                                contractDateEnd: new Date('2025-01-01'),
+                                managedCareEntities: ['MCO'],
+                            },
+                        },
+                    })
                     const submissions = [submitted]
                     renderWithProviders(<CMSDashboardNestedRoutes />, {
                         apolloProvider: {
@@ -147,7 +177,7 @@ describe('CMSDashboard', () => {
                                     statusCode: 200,
                                     user: mockUser(),
                                 }),
-                                indexContractsMockSuccess(submissions),
+                                indexContractsStrippedMockSuccess(submissions),
                             ],
                         },
                         routerProvider: { route: '/dashboard/submissions' },
@@ -162,11 +192,9 @@ describe('CMSDashboard', () => {
                 })
 
                 it('displays contract type as expected for current revision that is submitted/resubmitted', async () => {
-                    const submitted = mockContractPackageSubmitted()
-                    submitted.id = '123-4'
-                    submitted.contractSubmissionType = 'EQRO'
-                    submitted.packageSubmissions[0].contractRevision.formData.submissionType =
-                        'CONTRACT_ONLY'
+                    const submitted = mockEQROContractStripped({
+                        id: '123-4',
+                    })
                     const submissions = [submitted]
                     renderWithProviders(<CMSDashboardNestedRoutes />, {
                         apolloProvider: {
@@ -175,7 +203,7 @@ describe('CMSDashboard', () => {
                                     statusCode: 200,
                                     user: mockUser(),
                                 }),
-                                indexContractsMockSuccess(submissions),
+                                indexContractsStrippedMockSuccess(submissions),
                             ],
                         },
                         routerProvider: { route: '/dashboard/submissions' },
@@ -192,15 +220,17 @@ describe('CMSDashboard', () => {
                 })
 
                 it('displays each contract status tag as expected for current revision that is submitted/resubmitted/approved', async () => {
-                    const unlocked: Contract = {
-                        ...mockContractPackageUnlockedWithUnlockedType(),
-                        __typename: 'Contract',
-                    }
-                    const submitted = mockContractPackageSubmitted()
-                    const approved = mockContractPackageApproved()
-                    approved.id = 'test-abc-approved'
-                    submitted.id = 'test-abc-submitted'
-                    unlocked.id = 'test-abc-unlocked'
+                    const unlocked = mockUnlockedContractStripped({
+                        id: 'test-abc-unlocked',
+                    })
+                    const submitted = mockContractStripped({
+                        id: 'test-abc-submitted',
+                    })
+                    const approved = mockContractStripped({
+                        id: 'test-abc-approved',
+                        consolidatedStatus: 'APPROVED',
+                        reviewStatus: 'APPROVED',
+                    })
                     // post implementation of creating default status filter for CMS users
                     // #filters= is the default hash to use no filters
                     window.location.assign('#filters=')
@@ -213,7 +243,7 @@ describe('CMSDashboard', () => {
                                     statusCode: 200,
                                     user: mockUser(),
                                 }),
-                                indexContractsMockSuccess(submissions),
+                                indexContractsStrippedMockSuccess(submissions),
                             ],
                         },
                         routerProvider: { route: '/dashboard/submissions' },
@@ -243,36 +273,56 @@ describe('CMSDashboard', () => {
 
                 it('displays name, type, programs and last update based on the last submitted revision for UNLOCKED package, not draft changes', async () => {
                     const mockMN = mockMNState() // this is the state used in apolloMocks
-                    const unlocked: Contract = {
-                        ...mockContractPackageUnlockedWithUnlockedType(),
-                        __typename: 'Contract',
-                    }
-                    // Set new data on the latest submitted form. This would be a state users update and the CMS user should not see draft data.
-                    unlocked.packageSubmissions[0].contractRevision.formData.submissionType =
-                        'CONTRACT_AND_RATES'
-
-                    unlocked.packageSubmissions[0].contractRevision.formData.programIDs =
-                        [
-                            mockMN.programs[0].id,
-                            mockMN.programs[1].id,
-                            mockMN.programs[2].id,
-                        ]
-                    unlocked.packageSubmissions[0].contractRevision.updatedAt =
-                        new Date('2022-01-15')
-                    //copy unlockInfo from draftRevision and populate the date
-                    unlocked.packageSubmissions[0].contractRevision.unlockInfo =
-                        {
-                            ...unlocked.draftRevision!.unlockInfo!,
-                            updatedAt: new Date('2100-01-22'),
-                        }
-                    //set different data on draft revision to make sure we don't show draft values
-                    unlocked.draftRevision!.formData.submissionType =
-                        'CONTRACT_ONLY'
-                    unlocked.draftRevision!.formData.programIDs = [
-                        mockMN.programs[0].id,
-                    ]
-
-                    unlocked.id = 'test-state-edit-in-progress-unlocked'
+                    const unlocked = mockUnlockedContractStripped({
+                        id: 'test-state-edit-in-progress-unlocked',
+                        lastUpdatedForDisplay: new Date('2100-01-22'),
+                        latestSubmittedRevision: {
+                            __typename: 'ContractRevisionStripped',
+                            id: 'test-rev-unlocked',
+                            contractID: 'test-state-edit-in-progress-unlocked',
+                            createdAt: new Date('2024-01-15'),
+                            updatedAt: new Date('2022-01-15'),
+                            contractName: 'MCR-MN-0001-MSC+-PMAP-SNBC',
+                            submitInfo: {
+                                __typename: 'UpdateInformation',
+                                updatedAt: '2024-01-15T00:00:00.000Z',
+                                updatedBy: {
+                                    __typename: 'UpdatedBy',
+                                    email: 'example@state.com',
+                                    role: 'STATE_USER',
+                                    givenName: 'John',
+                                    familyName: 'Vila',
+                                },
+                                updatedReason: 'Initial submission',
+                            },
+                            unlockInfo: {
+                                __typename: 'UpdateInformation',
+                                updatedAt: new Date('2100-01-22'),
+                                updatedBy: {
+                                    __typename: 'UpdatedBy',
+                                    email: 'cms@example.com',
+                                    role: 'CMS_USER',
+                                    givenName: 'Jane',
+                                    familyName: 'CMS',
+                                },
+                                updatedReason: 'Unlocked for corrections',
+                            },
+                            formData: {
+                                __typename: 'ContractFormDataStripped',
+                                programIDs: [
+                                    mockMN.programs[0].id,
+                                    mockMN.programs[1].id,
+                                    mockMN.programs[2].id,
+                                ],
+                                populationCovered: 'MEDICAID',
+                                submissionType: 'CONTRACT_AND_RATES',
+                                contractType: 'BASE',
+                                contractDateStart: new Date('2024-01-01'),
+                                contractDateEnd: new Date('2025-01-01'),
+                                managedCareEntities: ['MCO'],
+                            },
+                        },
+                    })
 
                     const submissions = [unlocked]
                     renderWithProviders(<CMSDashboardNestedRoutes />, {
@@ -282,7 +332,7 @@ describe('CMSDashboard', () => {
                                     statusCode: 200,
                                     user: mockUser(),
                                 }),
-                                indexContractsMockSuccess(submissions),
+                                indexContractsStrippedMockSuccess(submissions),
                             ],
                         },
                         routerProvider: { route: '/dashboard/submissions' },
@@ -311,7 +361,7 @@ describe('CMSDashboard', () => {
                     const submissionNameLink =
                         within(unlockedRow).getByTestId('submission-id')
                     expect(submissionNameLink).toHaveTextContent(
-                        'MCR-MN-0005-SNBC'
+                        'MCR-MN-0001-MSC+-PMAP-SNBC'
                     )
 
                     // Confirm we are using updated at from the previous submitted revision unlock info
@@ -323,13 +373,12 @@ describe('CMSDashboard', () => {
                 })
 
                 it('should display filters on cms dashboard', async () => {
-                    const unlocked: Contract = {
-                        ...mockContractPackageUnlockedWithUnlockedType(),
-                        __typename: 'Contract',
-                    }
-                    const submitted = mockContractPackageSubmitted()
-                    submitted.id = 'test-abc-submitted'
-                    unlocked.id = 'test-abc-unlocked'
+                    const unlocked = mockUnlockedContractStripped({
+                        id: 'test-abc-unlocked',
+                    })
+                    const submitted = mockContractStripped({
+                        id: 'test-abc-submitted',
+                    })
                     const screen = renderWithProviders(
                         <CMSDashboardNestedRoutes />,
                         {
@@ -339,7 +388,7 @@ describe('CMSDashboard', () => {
                                         statusCode: 200,
                                         user: mockUser(),
                                     }),
-                                    indexContractsMockSuccess([
+                                    indexContractsStrippedMockSuccess([
                                         submitted,
                                         unlocked,
                                     ]),

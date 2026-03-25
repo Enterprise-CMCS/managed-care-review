@@ -66,3 +66,26 @@ export function contractRevisionResolver(
         },
     }
 }
+
+export function contractRevisionStrippedResolver(
+    store: Store
+): Resolvers['ContractRevisionStripped'] {
+    return {
+        contractID: (parent) => {
+            return parent.contract.id
+        },
+        contractName(parent) {
+            const stateCode = parent.contract.stateCode
+            const programsForContractState = store.findStatePrograms(stateCode)
+            if (programsForContractState instanceof Error) {
+                throw programsForContractState
+            }
+            return packageName(
+                stateCode,
+                parent.contract.stateNumber,
+                parent.formData.programIDs,
+                programsForContractState ?? []
+            )
+        },
+    }
+}

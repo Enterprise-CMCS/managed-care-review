@@ -53,7 +53,7 @@ Cypress.Commands.add('interceptGraphQL', () => {
         aliasQuery(req, 'fetchContractWithQuestions')
         aliasQuery(req, 'indexRates')
         aliasQuery(req, 'indexRatesStripped')
-        aliasQuery(req, 'indexContractsForDashboard')
+        aliasQuery(req, 'indexContractsStripped')
         aliasQuery(req, 'fetchContract')
         aliasQuery(req, 'fetchMcReviewSettings')
         aliasQuery(req, 'fetchRateWithQuestions')

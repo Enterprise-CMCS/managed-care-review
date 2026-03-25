@@ -2,6 +2,7 @@ import type { Prisma } from '../../generated/client'
 import {
     includeContractFormData,
     includeRateFormData,
+    includeStrippedContractFormData,
 } from './prismaSharedContractRateHelpers'
 
 const includeLatestSubmittedRateRev = {
@@ -70,6 +71,42 @@ type ContractTableWithoutDraftRates = Prisma.ContractTableGetPayload<{
     include: typeof includeContractWithoutDraftRates
 }>
 
-export { includeContractWithoutDraftRates, includeLatestSubmittedRateRev }
+// includeStrippedContractWithoutDraftRates is the prisma includes block for a stripped Contract
+const includeStrippedContractWithoutDraftRates = {
+    revisions: {
+        orderBy: {
+            createdAt: 'asc',
+        },
+        include: {
+            ...includeStrippedContractFormData,
+        },
+    },
+    reviewStatusActions: {
+        include: {
+            updatedBy: true,
+        },
+        orderBy: {
+            updatedAt: 'asc',
+        },
+    },
+    contractOverrides: {
+        orderBy: {
+            createdAt: 'desc',
+        },
+        include: {
+            updatedBy: true,
+        },
+    },
+} satisfies Prisma.ContractTableInclude
 
-export type { ContractTableWithoutDraftRates }
+type ContractTableStrippedPayload = Prisma.ContractTableGetPayload<{
+    include: typeof includeStrippedContractWithoutDraftRates
+}>
+
+export {
+    includeContractWithoutDraftRates,
+    includeLatestSubmittedRateRev,
+    includeStrippedContractWithoutDraftRates,
+}
+
+export type { ContractTableWithoutDraftRates, ContractTableStrippedPayload }

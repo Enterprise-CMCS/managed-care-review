@@ -7,6 +7,7 @@ import {
     useSubmitContractMutation,
     useUnlockContractMutation,
     FetchContractWithQuestionsDocument,
+    IndexContractsStrippedDocument,
 } from '../../gen/gqlClient'
 import { useFormik } from 'formik'
 import { usePrevious } from '../../hooks'
@@ -276,6 +277,9 @@ export const UnlockSubmitModal = ({
                 submissionName &&
                 submissionData.__typename === 'Contract'
             ) {
+                await client.refetchQueries({
+                    include: [IndexContractsStrippedDocument],
+                })
                 navigate(
                     `/dashboard/submissions?justSubmitted=${submissionName}&contractType=${submissionData.contractSubmissionType}&id=${submissionData.id}`
                 )

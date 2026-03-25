@@ -1,7 +1,7 @@
 import React from 'react'
 import { SubmissionTypeRecord } from '@mc-review/submissions'
 import { useAuth } from '../../../contexts/AuthContext'
-import { useIndexContractsForDashboardQuery } from '../../../gen/gqlClient'
+import { useIndexContractsStrippedQuery } from '../../../gen/gqlClient'
 import { mostRecentDate } from '@mc-review/dates'
 import styles from '../../StateDashboard/StateDashboard.module.scss'
 import { recordJSException } from '@mc-review/otel'
@@ -15,9 +15,9 @@ import { GenericErrorPage } from '../../Errors/GenericErrorPage'
 
 const SubmissionsDashboard = (): React.ReactElement => {
     const { loggedInUser } = useAuth()
-    const { data, loading, error } = useIndexContractsForDashboardQuery({
+    const { data, loading, error } = useIndexContractsStrippedQuery({
         fetchPolicy: 'cache-and-network',
-        pollInterval: 300000,
+        pollInterval: 120000,
     })
 
     if (!data && loading) {
@@ -34,7 +34,7 @@ const SubmissionsDashboard = (): React.ReactElement => {
     }
 
     const submissionRows: ContractInDashboardType[] = []
-    data.indexContracts.edges
+    data.indexContractsStripped.edges
         .map((edge) => edge.node)
         .forEach((sub) => {
             // When a sub.reviewStatus has been moved out of 'UNDER_REVIEW'
@@ -45,13 +45,20 @@ const SubmissionsDashboard = (): React.ReactElement => {
                     : sub.status
 
             // Errors - data handling
-            if (sub.status === 'DRAFT') {
+            if (sub.consolidatedStatus === 'DRAFT') {
                 recordJSException(
                     `indexContractsQuery: should not return draft submissions for CMS user. ID: ${sub.id}`
                 )
                 return
             }
-            const currentRevision = sub.packageSubmissions[0].contractRevision
+            const currentRevision = sub.latestSubmittedRevision
+
+            if (!currentRevision) {
+                recordJSException(
+                    `Unexpected error: Contract with ID ${sub.id} did not contain a latestSubmittedRevision`
+                )
+                return
+            }
             const currentFormData = currentRevision.formData
 
             if (
@@ -108,7 +115,7 @@ const SubmissionsDashboard = (): React.ReactElement => {
 
             submissionRows.push({
                 id: sub.id,
-                name: sub.packageSubmissions[0].contractRevision.contractName,
+                name: currentRevision.contractName,
                 programs: programs.filter((program) =>
                     displayRateFormData.programIDs.includes(program.id)
                 ),

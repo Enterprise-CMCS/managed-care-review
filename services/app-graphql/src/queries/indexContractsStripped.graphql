@@ -1,0 +1,43 @@
+query indexContractsStripped($input: IndexContractsStrippedInput) {
+    indexContractsStripped(input: $input) {
+        totalCount
+        edges {
+            node {
+                id
+                createdAt
+                updatedAt
+                status
+                reviewStatus
+                consolidatedStatus
+                initiallySubmittedAt
+                lastUpdatedForDisplay
+                stateCode
+                state {
+                    code
+                    name
+                    programs {
+                        id
+                        name
+                        fullName
+                        isRateProgram
+                    }
+                }
+                stateNumber
+                contractSubmissionType
+
+                reviewStatusActions {
+                    updatedAt
+                    actionType
+                }
+
+                draftRevision {
+                    ...strippedContractRevisionFragment
+                }
+
+                latestSubmittedRevision {
+                    ...strippedContractRevisionFragment
+                }
+            }
+        }
+    }
+}

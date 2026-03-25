@@ -402,6 +402,19 @@ const strippedRateFormDataSchema = rateFormDataSchema.omit({
     supportingDocuments: true,
 })
 
+const strippedContractFormDataSchema = contractFormDataSchema.pick({
+    programIDs: true,
+    populationCovered: true,
+    submissionType: true,
+    submissionDescription: true,
+    contractType: true,
+    contractExecutionStatus: true,
+    contractDateStart: true,
+    contractDateEnd: true,
+    managedCareEntities: true,
+    federalAuthorities: true,
+})
+
 const submittableRateFormDataSchema = genericRateFormDataSchema.extend({
     rateDocuments: genericRateFormDataSchema.shape.rateDocuments.nonempty(),
     rateProgramIDs: genericRateFormDataSchema.shape.rateProgramIDs.nonempty(),
@@ -427,6 +440,9 @@ type DocumentType = z.infer<typeof documentSchema>
 type ContractFormDataType = z.infer<typeof contractFormDataSchema>
 type RateFormDataType = z.infer<typeof rateFormDataSchema>
 type StrippedRateFormDataType = z.infer<typeof strippedRateFormDataSchema>
+type StrippedContractFormDataType = z.infer<
+    typeof strippedContractFormDataSchema
+>
 
 type RateFormEditableType = Partial<RateFormDataType>
 type StateContactType = z.infer<typeof stateContactSchema>
@@ -441,6 +457,7 @@ export {
     preprocessNulls,
     documentSchema,
     strippedRateFormDataSchema,
+    strippedContractFormDataSchema,
     contractTypeSchema,
     populationCoveredSchema,
     eqroContractFormDataSchema,
@@ -455,5 +472,6 @@ export type {
     StateContactType,
     ActuaryContactType,
     StrippedRateFormDataType,
+    StrippedContractFormDataType,
     UpdateDraftContractFormDataType,
 }

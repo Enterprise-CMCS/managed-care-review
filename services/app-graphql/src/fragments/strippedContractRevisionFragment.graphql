@@ -1,0 +1,22 @@
+fragment strippedContractRevisionFragment on ContractRevisionStripped {
+    id
+    contractID
+    createdAt
+    updatedAt
+    unlockInfo {
+        ...updateInformationFields
+    }
+    submitInfo {
+        ...updateInformationFields
+    }
+    contractName
+    formData {
+        programIDs
+        populationCovered
+        submissionType
+        contractType
+        contractDateStart
+        contractDateEnd
+        managedCareEntities
+    }
+}

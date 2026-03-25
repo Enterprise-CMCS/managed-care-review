@@ -103,6 +103,11 @@ import type {
 } from './contractAndRates/findAllRatesStripped'
 import { findAllRatesStripped } from './contractAndRates/findAllRatesStripped'
 import type {
+    FindAllContractsStrippedType,
+    StrippedContractOrErrorArrayType,
+} from './contractAndRates/findAllContractsStripped'
+import { findAllContractsStripped } from './contractAndRates/findAllContractsStripped'
+import type {
     WithdrawContractArgsType,
     WithdrawContractReturnType,
 } from './contractAndRates/withdrawContract'
@@ -181,6 +186,9 @@ type Store = {
         useZod?: boolean,
         skipFindingLatest?: boolean
     ) => Promise<ContractOrErrorArrayType | Error>
+    findAllContractsStripped: (
+        args?: FindAllContractsStrippedType
+    ) => Promise<StrippedContractOrErrorArrayType | Error>
     findContractRevision: (
         contractRevID: string
     ) => Promise<ContractRevisionTable | Error>
@@ -355,6 +363,8 @@ function NewPostgresStore(client: ExtendedPrismaClient): Store {
             findAllContractsWithHistoryByState(client, args),
         findAllContractsWithHistoryBySubmitInfo: (args) =>
             findAllContractsWithHistoryBySubmitInfo(client, args),
+        findAllContractsStripped: (args) =>
+            findAllContractsStripped(client, args),
         findContractRevision: (args) => findContractRevision(client, args),
         updateContract: (args) => updateMCCRSID(client, args),
         updateDraftContract: (args) => updateDraftContract(client, args),
