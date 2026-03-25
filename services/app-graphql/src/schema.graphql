@@ -18,6 +18,15 @@ type Query {
     CMSUsers can find all the contracts that do not have the DRAFT status
     """
     indexContracts(input: IndexContractsInput): IndexContractsPayload!
+    """
+    indexContractsStripped returns abbreviated contract data
+    Intended for use with CMS dashboards, initially minimal contract query
+
+      Errors:
+    - ForbiddenError: User must be a CMS, Admin, or State type user
+    - NotFoundError: No submitted contracts found
+    """
+    indexContractsStripped(input: IndexContractsStrippedInput): IndexContractsStrippedPayload!
 
     """
     indexUsers returns all of the Users in the system.
@@ -637,6 +646,20 @@ input IndexContractsInput {
     statusesToExclude: [ConsolidatedContractStatus]
     "In seconds, return submissions that have been updated in this timeframe"
     updatedWithin: Int
+}
+
+input IndexContractsStrippedInput {
+    stateCode: String
+    contractIDs: [String!]
+}
+
+type ContractStrippedEdge {
+    node: ContractStripped!
+}
+
+type IndexContractsStrippedPayload {
+    totalCount: Int
+    edges: [ContractStrippedEdge!]!
 }
 
 type IndexContractQuestionsPayload {
@@ -1972,6 +1995,117 @@ type RatePackageSubmission {
     rateRevision: RateRevision!
     "contractRevision is the contract revision current at the time of this package submission"
     contractRevisions: [ContractRevision!]!
+}
+
+"""
+ContractFormDataStripped represents stripped down form data that excludes relational fields.
+"""
+type ContractFormDataStripped {
+    """
+    An array of IDs representing state programs that the contract covers
+    """
+    programIDs: [String!]!
+    """
+    The large overarching population of people that the program covers.
+    Options are MEDICAID, CHIP, MEDICAID_AND_CHIP
+    """
+    populationCovered: PopulationCovered
+    """
+    The submission type of this package
+    Options are CONTRACT_ONLY and CONTRACT_AND_RATES
+    """
+    submissionType: SubmissionType!
+    """
+    Type of contract the state is submitting
+    Options are: BASE, AMENDMENT
+    """
+    contractType: ContractType
+    "Start date of the contract"
+    contractDateStart: Date
+    "End date of the contract"
+    contractDateEnd: Date
+    """
+    The type of organization the state is contracting with
+    in order to deliver managed care services
+    Options are MCO, PIHP, PAHP, and PCCM
+    """
+    managedCareEntities: [ManagedCareEntity!]!
+}
+
+"""
+A contract revision represents a single submission
+for the contract and contains stripped down data from when the contract was submitted
+"""
+type ContractRevisionStripped {
+    id: ID!
+    contractID: String!
+    createdAt: DateTime!
+    updatedAt: DateTime!
+    """
+    Information about who, when, and why this revision was unlocked.
+    Will be blank on the initial revision.
+    """
+    unlockInfo: UpdateInformation
+    "Information on who, when, and why this revision was submitted."
+    submitInfo: UpdateInformation
+    "The contract related form data that was inputed by the state"
+    formData: ContractFormDataStripped!
+    """
+    Represents the name of the contract package.
+    This value is auto generated based on contract state number, contract type, dates, and state program details
+    """
+    contractName: String!
+}
+
+"""
+ContractStripped is a stripped down version of a Contract, removing many relational fields to provide a faster query.
+"""
+type ContractStripped {
+    id: ID!
+    createdAt: DateTime!
+    updatedAt: DateTime!
+    """
+    Where the contract is in the submission flow.
+    Options are DRAFT, SUBMITTED, RESUBMITTED and UNLOCKED
+    SUBMITTED and RESUBMITTED packages cannot be modified
+    """
+    status: HealthPlanPackageStatus!
+    """
+    Where the contract is in the review submission flow
+    Options are UNDER_REVIEW, APPROVED, WITHDRAWN
+    """
+    reviewStatus: ContractReviewStatus!
+    """
+    Synthesized field that represents if a contract's status or
+    reviewStatus should take precedence
+    Options are DRAFT, SUBMITTED, RESUBMITTED UNLOCKED, UNDER_REVIEW, APPROVED, WITHDRAWN
+    """
+    consolidatedStatus: ConsolidatedContractStatus!
+    "initiallySubmittedAt is the initial date this contract was submitted at. Is not changed by unlock or resubmission."
+    initiallySubmittedAt: DateTime
+    "lastUpdatedForDisplay is the last time this contract was officially updated. When it's a draft it will be the last updatedAt date. Afterwards it will be the most recent submit or unlock or review action date."
+    lastUpdatedForDisplay: DateTime!
+    "stateCode is the state code (e.g. CA or TN) for the submitting state"
+    stateCode: String!
+    "state is fuller state data for the submitting state"
+    state: State!
+    """
+    stateNumber is a unique auto-incrementing number identifying this contract
+    This value is used to generate the contractName
+    """
+    stateNumber: Int!
+
+    "contractSubmissionType is the type of the submission. It can be HEALTH_PLAN or EQRO"
+    contractSubmissionType: ContractSubmissionType!
+
+    "reviewStatusActions are the who/when/why for review status changes on this contract"
+    reviewStatusActions: [ContractReviewStatusActions!]
+
+    "The currently modifiable revision of the contract. Only present when contract has a status of DRAFT or UNLOCKED"
+    draftRevision: ContractRevisionStripped
+
+    "The latest submitted contract revision"
+    latestSubmittedRevision: ContractRevisionStripped
 }
 
 """

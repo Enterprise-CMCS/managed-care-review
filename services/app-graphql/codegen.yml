@@ -25,6 +25,8 @@ generates:
         RateRevision: ../domain-models#RateRevisionWithContractsType
         RateStripped: ../domain-model#StrippedRateType
         Contract: ../domain-models#ContractType as ContractDomainType
+        ContractStripped: ../domain-model#StrippedContractType
+        ContractRevisionStripped: ../domain-model#StrippedContractRevisionType
         UnlockedContract: ../domain-models#UnlockedContractType as UnlockedContractDomainType
         ContractRevision: ../domain-models#ContractRevisionType
         ContractPackageSubmission: ../domain-models#ContractPackageSubmissionWithCauseType

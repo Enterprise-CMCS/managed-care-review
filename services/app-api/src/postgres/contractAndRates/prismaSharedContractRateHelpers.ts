@@ -444,6 +444,12 @@ const includeStrippedRateFormData = {
     unlockInfo: includeUpdateInfo,
 } satisfies Prisma.RateRevisionTableInclude
 
+const includeStrippedContractFormData = {
+    submitInfo: includeUpdateInfo,
+    unlockInfo: includeUpdateInfo,
+    contract: true,
+} satisfies Prisma.ContractRevisionTableInclude
+
 type RateRevisionTableWithFormData = Prisma.RateRevisionTableGetPayload<{
     include: typeof includeRateFormData
 }>
@@ -451,6 +457,11 @@ type RateRevisionTableWithFormData = Prisma.RateRevisionTableGetPayload<{
 type StrippedRateRevisionTableWithFormData =
     Prisma.RateRevisionTableGetPayload<{
         include: typeof includeStrippedRateFormData
+    }>
+
+type StrippedContractRevisionTableWithFormData =
+    Prisma.ContractRevisionTableGetPayload<{
+        include: typeof includeStrippedContractFormData
     }>
 
 // Function to take in original document and look for override dateAdded
@@ -739,6 +750,7 @@ export type {
     RateRevisionTableWithFormData,
     ContractRevisionTableWithFormData,
     StrippedRateRevisionTableWithFormData,
+    StrippedContractRevisionTableWithFormData,
 }
 
 export {
@@ -748,6 +760,7 @@ export {
     includeContractFormData,
     includeRateFormData,
     includeStrippedRateFormData,
+    includeStrippedContractFormData,
     getContractRateStatus,
     getContractReviewStatus,
     convertUpdateInfoToDomainModel,

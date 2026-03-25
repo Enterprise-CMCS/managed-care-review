@@ -15,9 +15,12 @@ import {
     CreateContractDocument,
     IndexContractsForDashboardDocument,
     IndexContractsForDashboardQuery,
+    IndexContractsStrippedDocument,
+    IndexContractsStrippedQuery,
     UnlockContractMutation,
     UnlockContractDocument,
 } from '../gen/gqlClient'
+import type { ContractStripped } from '../gen/gqlClient'
 import { MockedResponse } from '@apollo/client/testing'
 import {
     mockContractPackageDraft,
@@ -25,6 +28,9 @@ import {
     mockContractPackageSubmittedWithRevisions,
     mockContractPackageUnlockedWithUnlockedType,
     mockUpdateContractDraftRevisionInput,
+    mockContractStripped,
+    mockEQROContractStripped,
+    mockUnlockedContractStripped,
 } from './contractPackageDataMock'
 import {
     GRAPHQL_ERROR_CAUSE_MESSAGES,
@@ -455,6 +461,29 @@ const indexContractsMockSuccess = (
     }
 }
 
+const indexContractsStrippedMockSuccess = (
+    contracts: ContractStripped[] = [
+        mockContractStripped({ id: 'test-stripped-id-123' }),
+    ]
+): MockedResponse<IndexContractsStrippedQuery> => {
+    const edges = contracts.map((contract) => ({
+        node: contract,
+    }))
+    return {
+        request: {
+            query: IndexContractsStrippedDocument,
+        },
+        result: {
+            data: {
+                indexContractsStripped: {
+                    totalCount: edges.length,
+                    edges,
+                },
+            },
+        },
+    }
+}
+
 type unlockContractMockSuccessProps = {
     contract?: Contract
     id: string
@@ -538,6 +567,7 @@ export {
     createContractMockFail,
     createContractMockSuccess,
     indexContractsMockSuccess,
+    indexContractsStrippedMockSuccess,
     unlockContractMockError,
     unlockContractMockSuccess,
 }

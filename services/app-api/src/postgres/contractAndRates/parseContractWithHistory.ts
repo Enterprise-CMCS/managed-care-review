@@ -1,9 +1,17 @@
-import type { ContractType, ContractRevisionType } from '../../domain-models'
+import type {
+    ContractType,
+    ContractRevisionType,
+    StrippedContractRevisionType,
+} from '../../domain-models'
+import type { StrippedContractType } from '../../domain-models/contractAndRates/contractTypes'
 import { contractSchema } from '../../domain-models/contractAndRates'
 import type { ContractWithoutDraftRatesType } from '../../domain-models/contractAndRates/baseContractRateTypes'
 import type { ContractPackageSubmissionType } from '../../domain-models'
 import { rateWithoutDraftContractsToDomainModel } from './parseRateWithHistory'
-import type { ContractRevisionTableWithFormData } from './prismaSharedContractRateHelpers'
+import type {
+    ContractRevisionTableWithFormData,
+    StrippedContractRevisionTableWithFormData,
+} from './prismaSharedContractRateHelpers'
 import { getConsolidatedContractStatus } from './prismaSharedContractRateHelpers'
 import {
     rateRevisionToDomainModel,
@@ -16,7 +24,10 @@ import {
     getContractReviewStatus,
     DRAFT_PARENT_PLACEHOLDER,
 } from './prismaSharedContractRateHelpers'
-import type { ContractTableWithoutDraftRates } from './prismaSubmittedContractHelpers'
+import type {
+    ContractTableWithoutDraftRates,
+    ContractTableStrippedPayload,
+} from './prismaSubmittedContractHelpers'
 import type { ContractTableFullPayload } from './prismaFullContractRateHelpers'
 import type { ContractReviewActionType } from '../../domain-models/contractAndRates/contractReviewActionType'
 import type { ContractDataOverrideType } from '../../domain-models/contractAndRates/contractRateOverrideTypes'
@@ -295,8 +306,150 @@ function contractWithHistoryToDomainModel(
     }
 }
 
+function strippedContractFormDataToDomainModel(
+    contractRevision: StrippedContractRevisionTableWithFormData
+) {
+    return {
+        programIDs: contractRevision.programIDs ?? [],
+        populationCovered: contractRevision.populationCovered ?? undefined,
+        submissionType: contractRevision.submissionType,
+        submissionDescription: contractRevision.submissionDescription,
+        contractType: contractRevision.contractType,
+        contractExecutionStatus:
+            contractRevision.contractExecutionStatus ?? undefined,
+        contractDateStart: contractRevision.contractDateStart ?? undefined,
+        contractDateEnd: contractRevision.contractDateEnd ?? undefined,
+        managedCareEntities: contractRevision.managedCareEntities ?? undefined,
+        federalAuthorities: contractRevision.federalAuthorities ?? undefined,
+    }
+}
+
+function strippedContractRevisionToDomainModel(
+    revision: StrippedContractRevisionTableWithFormData
+): StrippedContractRevisionType {
+    return {
+        id: revision.id,
+        contract: revision.contract,
+        createdAt: revision.createdAt,
+        updatedAt: revision.updatedAt,
+        submitInfo: convertUpdateInfoToDomainModel(revision.submitInfo),
+        unlockInfo: convertUpdateInfoToDomainModel(revision.unlockInfo),
+        formData: strippedContractFormDataToDomainModel(revision),
+    }
+}
+
+function strippedContractToDomainModel(
+    contract: ContractTableStrippedPayload
+): StrippedContractType | Error {
+    const contractRevisions = contract.revisions
+    const contractActions = contract.reviewStatusActions
+
+    let draftRevision: StrippedContractRevisionType | undefined = undefined
+    const submittedRevisions: StrippedContractRevisionType[] = []
+    const reviewStatusActions: ContractReviewActionType[] = []
+
+    for (const action of contractActions) {
+        const contractAction = {
+            dateApprovalReleasedToState:
+                action.dateApprovalReleasedToState ?? undefined,
+            actionType: action.actionType,
+            contractID: action.contractID,
+            updatedAt: action.updatedAt,
+            updatedBy: action.updatedBy
+                ? {
+                      email: action.updatedBy.email,
+                      familyName: action.updatedBy.familyName,
+                      givenName: action.updatedBy.givenName,
+                      role: action.updatedBy.role,
+                  }
+                : undefined,
+            updatedReason: action.updatedReason ?? undefined,
+        }
+        reviewStatusActions.push(contractAction)
+    }
+
+    reviewStatusActions.sort(
+        (a, b) => b.updatedAt.getTime() - a.updatedAt.getTime()
+    )
+
+    for (const contractRev of contractRevisions) {
+        if (!contractRev.submitInfo) {
+            if (draftRevision) {
+                return new Error(
+                    'PROGRAMMING ERROR: a contract may not have multiple drafts simultaneously. ID: ' +
+                        contract.id
+                )
+            }
+            draftRevision = strippedContractRevisionToDomainModel(contractRev)
+            continue
+        }
+        submittedRevisions.push(
+            strippedContractRevisionToDomainModel(contractRev)
+        )
+    }
+
+    const status = getContractRateStatus(contractRevisions)
+    const reviewStatus = getContractReviewStatus(contract.reviewStatusActions)
+    const consolidatedStatus = getConsolidatedContractStatus(
+        status,
+        reviewStatus
+    )
+
+    const submittedRevisionsDescending = submittedRevisions.reverse()
+    const latestSubmittedRevision = submittedRevisionsDescending[0]
+
+    if (consolidatedStatus !== 'DRAFT' && !latestSubmittedRevision) {
+        return new Error(
+            `PROGRAMMING ERROR: non-draft contract has no submitted revisions. ID: ${contract.id}, consolidatedStatus: ${consolidatedStatus}`
+        )
+    }
+
+    const latestOverride = contractOverridesToDomainModel(
+        contract.contractOverrides
+    )[0]
+
+    // Use override or calculate initial contract submission.
+    const initiallySubmittedAt =
+        latestOverride?.overrides.initiallySubmittedAt ||
+        submittedRevisionsDescending[submittedRevisionsDescending.length - 1]
+            ?.submitInfo?.updatedAt
+
+    return {
+        id: contract.id,
+        createdAt: contract.createdAt,
+        updatedAt: contract.updatedAt,
+        initiallySubmittedAt,
+        status,
+        reviewStatus,
+        consolidatedStatus,
+        stateCode: contract.stateCode,
+        mccrsID: contract.mccrsID || undefined,
+        stateNumber: contract.stateNumber,
+        contractSubmissionType: contract.contractSubmissionType,
+        draftRevision,
+        latestSubmittedRevision,
+        reviewStatusActions,
+    }
+}
+
+function parseStrippedContractWithHistory(
+    contract: ContractTableStrippedPayload
+): StrippedContractType | Error {
+    const strippedContract = strippedContractToDomainModel(contract)
+
+    if (strippedContract instanceof Error) {
+        console.warn(
+            `ERROR: attempting to parse prisma contract with history failed: ${strippedContract.message}`
+        )
+        return strippedContract
+    }
+
+    return strippedContract
+}
+
 export {
     parseContractWithHistory,
+    parseStrippedContractWithHistory,
     contractRevisionToDomainModel,
     contractWithHistoryToDomainModel,
     contractWithHistoryToDomainModelWithoutRates,

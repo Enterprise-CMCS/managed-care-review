@@ -25,7 +25,7 @@ const SupportEmailsTable = () => {
 
     return (
         <div id={activeMainContentId}>
-            <h2>Support emails</h2>
+            <h1>Support emails</h1>
             <p>
                 States that need support should contact one of these email
                 addresses, depending on the issue.

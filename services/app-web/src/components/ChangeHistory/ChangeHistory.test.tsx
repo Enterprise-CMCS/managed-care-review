@@ -1,4 +1,4 @@
-import { screen } from '@testing-library/react'
+import { screen, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { ChangeHistory } from './ChangeHistory'
 import {
@@ -12,6 +12,9 @@ import {
     mockValidStateUser,
     mockContractPackageApproved,
     mockContractWithLinkedRateSubmitted,
+    mockEqroContractSubmittedUnderReview,
+    mockEqroContractSubmittedNotSubjectToReview,
+    mockEqroContractResubmittedWithReviewStatusChange,
 } from '@mc-review/mocks'
 import { renderWithProviders } from '../../testHelpers'
 import { formatToPacificTime } from '@mc-review/dates'
@@ -409,5 +412,116 @@ describe('Change History', () => {
                 `accordionItem_${submittedContract.packageSubmissions[0].submitInfo.updatedAt}`
             )
         ).not.toHaveTextContent('View past submission version')
+    })
+
+    it('renders EQRO initial submission under review', async () => {
+        const contract = mockEqroContractSubmittedUnderReview()
+        renderWithProviders(<ChangeHistory contract={contract} />)
+
+        expect(
+            screen.getByRole('heading', {
+                level: 2,
+                name: 'Change history',
+            })
+        ).toBeInTheDocument()
+
+        const submissionRow = screen.getByRole('button', {
+            name: `${formatToPacificTime(
+                contract.packageSubmissions[0].submitInfo.updatedAt
+            )} - Submission`,
+        })
+        await userEvent.click(submissionRow)
+
+        const submissionItem = screen.getByTestId(
+            `accordionItem_${contract.packageSubmissions[0].submitInfo.updatedAt}`
+        )
+
+        expect(
+            screen.queryByRole('button', { name: 'Status Update' })
+        ).not.toBeInTheDocument()
+        expect(within(submissionItem).getByText('Status:')).toBeInTheDocument()
+        expect(
+            within(submissionItem).getByText('Submitted')
+        ).toBeInTheDocument()
+        expect(
+            within(submissionItem).getByText('Review Decision:')
+        ).toBeInTheDocument()
+        expect(
+            within(submissionItem).getByText('Subject to review')
+        ).toBeInTheDocument()
+    })
+    it('renders EQRO initial submission not subject to review', async () => {
+        const contract = mockEqroContractSubmittedNotSubjectToReview()
+
+        renderWithProviders(<ChangeHistory contract={contract} />)
+
+        expect(
+            screen.getByRole('heading', {
+                level: 2,
+                name: 'Change history',
+            })
+        ).toBeInTheDocument()
+
+        const submissionRow = screen.getByRole('button', {
+            name: `${formatToPacificTime(
+                contract.packageSubmissions[0].submitInfo.updatedAt
+            )} - Submission`,
+        })
+        await userEvent.click(submissionRow)
+
+        const submissionItem = screen.getByTestId(
+            `accordionItem_${contract.packageSubmissions[0].submitInfo.updatedAt}`
+        )
+
+        expect(
+            screen.queryByRole('button', { name: 'Status Update' })
+        ).not.toBeInTheDocument()
+        expect(within(submissionItem).getByText('Status:')).toBeInTheDocument()
+        expect(
+            within(submissionItem).getAllByText('Not subject to review')
+        ).toHaveLength(2)
+        expect(
+            within(submissionItem).getByText('Review Decision:')
+        ).toBeInTheDocument()
+    })
+    it('preserves historical review decisions across EQRO resubmissions', async () => {
+        const contract = mockEqroContractResubmittedWithReviewStatusChange()
+
+        renderWithProviders(<ChangeHistory contract={contract} />)
+
+        expect(
+            screen.getByRole('heading', {
+                level: 2,
+                name: 'Change history',
+            })
+        ).toBeInTheDocument()
+
+        const accordionRows = screen.getAllByRole('button')
+
+        await userEvent.click(accordionRows[0])
+        await userEvent.click(accordionRows[1])
+        await userEvent.click(accordionRows[2])
+
+        const latestSubmissionItem = screen.getByTestId(
+            `accordionItem_${contract.packageSubmissions[0].submitInfo.updatedAt}`
+        )
+        expect(
+            within(latestSubmissionItem).getByText('Subject to review')
+        ).toBeInTheDocument()
+        expect(
+            within(latestSubmissionItem).getByText('Summary of changes:')
+        ).toBeInTheDocument()
+
+        const unlockItem = screen.getByTestId(
+            `accordionItem_${contract.packageSubmissions[0].contractRevision.unlockInfo?.updatedAt}`
+        )
+        expect(within(unlockItem).getByText('Unlocked by:')).toBeInTheDocument()
+
+        const originalSubmissionItem = screen.getByTestId(
+            `accordionItem_${contract.packageSubmissions[1].submitInfo.updatedAt}`
+        )
+        expect(
+            within(originalSubmissionItem).getAllByText('Not subject to review')
+        ).toHaveLength(2)
     })
 })

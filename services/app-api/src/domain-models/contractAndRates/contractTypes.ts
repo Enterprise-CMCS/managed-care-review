@@ -3,6 +3,7 @@ import {
     contractRevisionSchema,
     rateRevisionSchema,
     eqroContractRevisionSchema,
+    strippedContractRevisionSchema,
 } from './revisionTypes'
 import { unlockedContractStatusSchema } from './statusType'
 import { pruneDuplicateEmails } from '../../emailer/formatters'
@@ -16,6 +17,13 @@ import {
     submittableEQROContractFormDataSchema,
     submittableRateFormDataSchema,
 } from './formDataTypes'
+import {
+    consolidatedContractStatusSchema,
+    contractReviewStatusSchema,
+    statusSchema,
+} from './statusType'
+import { contractReviewActionSchema } from './contractReviewActionType'
+import { contractSubmissionTypeSchema } from './contractSubmissionType'
 
 const contractSchema = contractWithoutDraftRatesSchema.extend({
     withdrawnRates: z.lazy(() =>
@@ -70,6 +78,26 @@ const submittableEQROContractSchema = eqroContractSchema.extend({
     }),
 })
 
+const strippedContractSchema = z.object({
+    id: z.uuid(),
+    createdAt: z.date(),
+    updatedAt: z.date(),
+    initiallySubmittedAt: z.date().optional(),
+    status: statusSchema,
+    reviewStatus: contractReviewStatusSchema,
+    consolidatedStatus: consolidatedContractStatusSchema,
+    stateCode: z.string(),
+    mccrsID: z.string().optional(),
+    stateNumber: z.number().min(1),
+    contractSubmissionType: contractSubmissionTypeSchema,
+    // If this contract is in a DRAFT or UNLOCKED status, there will be a draftRevision
+    draftRevision: strippedContractRevisionSchema.optional(),
+    reviewStatusActions: z.array(contractReviewActionSchema).optional(),
+    latestSubmittedRevision: strippedContractRevisionSchema,
+})
+
+type StrippedContractType = z.infer<typeof strippedContractSchema>
+
 type ContractType = z.infer<typeof contractSchema>
 type UnlockedContractType = z.infer<typeof unlockedContractSchema>
 type DraftContractType = z.infer<typeof draftContractSchema>
@@ -90,8 +118,14 @@ export {
     draftContractSchema,
     submittableContractSchema,
     contractSchema,
+    strippedContractSchema,
     submittableEQROContractSchema,
     contractSubmitters,
 }
 
-export type { ContractType, DraftContractType, UnlockedContractType }
+export type {
+    ContractType,
+    StrippedContractType,
+    DraftContractType,
+    UnlockedContractType,
+}

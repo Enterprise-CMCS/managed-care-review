@@ -4,7 +4,7 @@ import { useLocation } from 'react-router-dom'
 import { useAuth } from '../../contexts/AuthContext'
 import {
     ContractSubmissionType,
-    useIndexContractsForDashboardQuery,
+    useIndexContractsStrippedQuery,
 } from '../../gen/gqlClient'
 import styles from './StateDashboard.module.scss'
 import { SubmissionSuccessMessage } from './SubmissionSuccessMessage'
@@ -19,6 +19,7 @@ import {
 } from '../../components'
 import { GenericErrorPage } from '../Errors/GenericErrorPage'
 import { usePage } from '../../contexts/PageContext'
+import { recordJSException } from '@mc-review/otel'
 
 /**
  * We only pull a subset of data out of the submission and revisions for display in Dashboard
@@ -30,9 +31,9 @@ export const StateDashboard = (): React.ReactElement => {
     const location = useLocation()
     const { updateActiveMainContent } = usePage()
 
-    const { loading, data, error } = useIndexContractsForDashboardQuery({
+    const { loading, data, error } = useIndexContractsStrippedQuery({
         fetchPolicy: 'cache-and-network',
-        pollInterval: 300000,
+        pollInterval: 120000,
     })
 
     const activeMainContentId = DASHBOARD_ATTRIBUTE
@@ -74,7 +75,7 @@ export const StateDashboard = (): React.ReactElement => {
     )
     const submissionRows: ContractInDashboardType[] = []
 
-    data.indexContracts.edges
+    data.indexContractsStripped.edges
         .map((edge) => edge.node)
         .forEach((sub) => {
             // When a sub.reviewStatus has been moved out of 'UNDER_REVIEW'
@@ -87,12 +88,19 @@ export const StateDashboard = (): React.ReactElement => {
                 sub.reviewStatusActions && sub.reviewStatusActions[0]
 
             if (sub.status === 'SUBMITTED' || sub.status === 'RESUBMITTED') {
-                const currentRevision = sub.packageSubmissions[0]
+                const currentRevision = sub.latestSubmittedRevision
+
+                if (!currentRevision) {
+                    recordJSException(
+                        `Unexpected error: Submitted Contract with ID ${sub.id} did not contain a latestSubmittedRevision`
+                    )
+                    return
+                }
                 submissionRows.push({
                     id: sub.id,
-                    name: currentRevision.contractRevision.contractName,
+                    name: currentRevision.contractName,
                     programs: programs.filter((program) => {
-                        return currentRevision.contractRevision.formData.programIDs.includes(
+                        return currentRevision.formData.programIDs.includes(
                             program.id
                         )
                     }),
@@ -100,11 +108,18 @@ export const StateDashboard = (): React.ReactElement => {
                     status: status,
                     updatedAt: subReviewActions
                         ? subReviewActions.updatedAt
-                        : currentRevision.contractRevision.updatedAt,
+                        : currentRevision.updatedAt,
                     contractSubmissionType: sub.contractSubmissionType,
                 })
             } else {
-                const currentRevision = sub.draftRevision!
+                const currentRevision = sub.draftRevision
+
+                if (!currentRevision) {
+                    recordJSException(
+                        `Unexpected error: Contract with ID ${sub.id} did not contain a draftRevision`
+                    )
+                    return
+                }
 
                 submissionRows.push({
                     id: sub.id,

@@ -13,7 +13,6 @@ import {
     UnlockedContract,
     UpdateContractDraftRevisionInput,
     ContractPackageSubmission,
-    IndexContractsForDashboardDocument,
 } from '../gen/gqlClient'
 import { wrapApolloResult, handleApolloError } from '@mc-review/helpers'
 import { recordJSException } from '@mc-review/otel'
@@ -105,27 +104,10 @@ const useContractForm = (contractID?: string): UseContractForm => {
                 return new Error('Failed to create form data')
             }
 
-            // Manually add new contract into cache to prevent pop-in.
-            const indexContracts = client.readQuery({
-                query: IndexContractsForDashboardDocument,
-            })
-            if (indexContracts) {
-                client.writeQuery({
-                    query: IndexContractsForDashboardDocument,
-                    data: {
-                        indexContracts: {
-                            ...indexContracts.indexContracts,
-                            edges: [
-                                {
-                                    __typename: 'ContractEdge',
-                                    node: createdSubmission,
-                                },
-                                ...indexContracts.indexContracts.edges,
-                            ],
-                        },
-                    },
-                })
-            }
+            // Evict the stripped contracts cache so the dashboard
+            // refetches with the new contract included.
+            client.cache.evict({ fieldName: 'indexContractsStripped' })
+            client.cache.gc()
 
             return createdSubmission
         } catch (serverError) {

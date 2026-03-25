@@ -36,13 +36,18 @@ import {
 import { genericDocumentResolver } from './shared/genericDocumentResolver'
 import { updateContract } from './contract/updateContract'
 import { indexContractsResolver } from './contract/indexContracts'
+import { indexContractsStripped } from './contract/indexContractsStripped'
 import { unlockContractResolver } from './contract/unlockContract'
 import { updateDraftContractRates } from './contract/updateDraftContractRates'
 import {
     contractResolver,
+    contractStrippedResolver,
     unlockedContractResolver,
 } from './contract/contractResolver'
-import { contractRevisionResolver } from './contract/contractRevisionResolver'
+import {
+    contractRevisionResolver,
+    contractRevisionStrippedResolver,
+} from './contract/contractRevisionResolver'
 import { fetchContractResolver } from './contract/fetchContract'
 import { submitContract } from './contract/submitContract'
 import type { S3ClientT } from '../s3'
@@ -81,6 +86,7 @@ export function configureResolvers(
             fetchCurrentUser: fetchCurrentUserResolver(),
             fetchDocument: fetchDocumentResolver(store, s3Client),
             indexContracts: indexContractsResolver(store),
+            indexContractsStripped: indexContractsStripped(store),
             indexUsers: indexUsersResolver(store),
             fetchMcReviewSettings: fetchMcReviewSettings(store, emailer),
             // Rates refactor
@@ -184,9 +190,11 @@ export function configureResolvers(
         RateFormData: rateFormDataResolver(),
         ContractQuestion: questionResolver(store),
         RateQuestion: questionResolver(store),
+        ContractStripped: contractStrippedResolver(),
         Contract: contractResolver(store, applicationEndpoint),
         UnlockedContract: unlockedContractResolver(store, applicationEndpoint),
         ContractRevision: contractRevisionResolver(store),
+        ContractRevisionStripped: contractRevisionStrippedResolver(store),
         GenericDocument: genericDocumentResolver(s3Client),
         Document: questionResponseDocumentResolver(s3Client),
         DocumentZipPackage: documentZipPackageResolver(s3Client),
