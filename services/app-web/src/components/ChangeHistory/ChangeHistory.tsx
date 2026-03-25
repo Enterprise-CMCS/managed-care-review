@@ -18,6 +18,7 @@ import { getUpdatedByDisplayName } from '@mc-review/helpers'
 import { useTealium } from '../../hooks'
 import { formatToPacificTime } from '@mc-review/dates'
 import { ContractSubmissionTypeRecord } from '@mc-review/constants'
+import { eqroValidationAndReviewDetermination } from '@mc-review/submissions'
 
 type ChangeHistoryProps = {
     contract: Contract | UnlockedContract
@@ -48,35 +49,6 @@ const getPreviousSubmissionLink = ({
     const contractSubTypeParam =
         ContractSubmissionTypeRecord[contractSubmissionType]
     return `/submissions/${contractSubTypeParam}/${contractID}/revisions/${revisionVersion}`
-}
-
-const getReviewDecisionForDate = (
-    date: string,
-    reviewActions?: ContractReviewStatusActions[]
-) => {
-    if (!reviewActions?.length) return undefined
-
-    const target = new Date(date).getTime()
-    const WINDOW_MS = 5000 // 5 seconds
-
-    const sorted = [...reviewActions].sort(
-        (a, b) =>
-            new Date(a.updatedAt).getTime() - new Date(b.updatedAt).getTime()
-    )
-
-    const match = sorted.find((action) => {
-        const time = new Date(action.updatedAt).getTime()
-        return time >= target && time <= target + WINDOW_MS
-    })
-
-    if (match) return match.actionType
-
-    // fallback: latest status before submission
-    const before = [...sorted]
-        .reverse()
-        .find((action) => new Date(action.updatedAt).getTime() <= target)
-
-    return before?.actionType
 }
 
 const buildChangeHistoryInfo = (
@@ -292,11 +264,21 @@ export const ChangeHistory = ({
                             contract.contractSubmissionType === 'EQRO'
                                 ? 'submit_with_review'
                                 : 'submit'
-                        const reviewDecision = getReviewDecisionForDate(
-                            r.submitInfo.updatedAt,
-                            reviewActions ?? []
-                        )
-                        newSubmit.reviewDecision = reviewDecision
+                        if (contract.contractSubmissionType === 'EQRO') {
+                            const determination =
+                                eqroValidationAndReviewDetermination(
+                                    contract.id,
+                                    r.contractRevision.formData
+                                )
+
+                            if (determination === true) {
+                                newSubmit.reviewDecision = 'UNDER_REVIEW'
+                            } else if (determination === false) {
+                                newSubmit.reviewDecision =
+                                    'NOT_SUBJECT_TO_REVIEW'
+                            }
+                        }
+
                         newSubmit.revisionVersion = revisionVersion
                         result.push(newSubmit)
                         submitsIdx = submitsIdx + 1
@@ -313,7 +295,11 @@ export const ChangeHistory = ({
                     }
                 }
                 if (r?.__typename === 'ContractReviewStatusActions') {
-                    if (contract.contractSubmissionType === 'EQRO') {
+                    if (
+                        contract.contractSubmissionType === 'EQRO' &&
+                        (r.actionType === 'NOT_SUBJECT_TO_REVIEW' ||
+                            r.actionType === 'UNDER_REVIEW')
+                    ) {
                         return
                     }
                     let actionKind: flatRevisions['kind'] =
