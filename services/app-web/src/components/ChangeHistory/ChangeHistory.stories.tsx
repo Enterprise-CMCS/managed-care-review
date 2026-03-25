@@ -1,4 +1,7 @@
-import { mockContractPackageSubmitted } from '@mc-review/mocks'
+import {
+    mockContractPackageSubmitted,
+    mockEqroContractResubmittedWithReviewStatusChange,
+} from '@mc-review/mocks'
 import { ChangeHistory } from './ChangeHistory'
 
 export default {
@@ -10,4 +13,13 @@ const contractData = mockContractPackageSubmitted()
 
 export const DemoListUploadSuccess = (): React.ReactElement => {
     return <ChangeHistory contract={contractData} />
+}
+
+
+export const EqroResubmissionHistory = (): React.ReactElement => {
+    return (
+        <ChangeHistory
+            contract={mockEqroContractResubmittedWithReviewStatusChange()}
+        />
+    )
 }
