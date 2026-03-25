@@ -135,6 +135,8 @@ import {
     findDocumentZipPackagesByRateRevision,
 } from './documents'
 import type { DocumentTypes } from '../domain-models/DocumentType'
+import type { FlattenContractsType } from '../domain-models/flattenContractAndRateTypes/flattenContractTypes'
+import { findLatestFlattenedContracts } from './flattenContractAndRates'
 
 type Store = {
     /** Settings functions **/
@@ -223,6 +225,11 @@ type Store = {
     undoWithdrawContract: (
         args: UndoWithdrawContractArgsType
     ) => Promise<UndoWithdrawContractReturnType | Error>
+
+    /** Flatten contract functions **/
+    findLatestFlattenedContracts: () => Promise<
+        { totalCount: number; contracts: FlattenContractsType } | Error
+    >
 
     /** Rate functions **/
     findRateWithHistory: (rateID: string) => Promise<RateType | Error>
@@ -378,6 +385,10 @@ function NewPostgresStore(client: ExtendedPrismaClient): Store {
         reverseApproveContract: (args) => reverseApproveContract(client, args),
         withdrawContract: (args) => withdrawContract(client, args),
         undoWithdrawContract: (args) => undoWithdrawContract(client, args),
+
+        /** Flatten contract functions **/
+        findLatestFlattenedContracts: () =>
+            findLatestFlattenedContracts(client),
 
         /** Rate functions **/
         findRateWithHistory: (args) => findRateWithHistory(client, args),

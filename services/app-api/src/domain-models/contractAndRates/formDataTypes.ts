@@ -453,6 +453,8 @@ export {
     submittableEQROContractFormDataSchema,
     submittableRateFormDataSchema,
     contractFormDataSchema,
+    genericContractFormDataSchema,
+    genericRateFormDataSchema,
     rateFormDataSchema,
     preprocessNulls,
     documentSchema,

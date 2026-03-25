@@ -210,6 +210,9 @@ function mockStoreThatErrors(): Store {
         findDocumentZipPackagesByRateRevision: async (_userID) => {
             return genericError
         },
+        findLatestFlattenedContracts: async () => {
+            return genericError
+        },
     }
 }
 
