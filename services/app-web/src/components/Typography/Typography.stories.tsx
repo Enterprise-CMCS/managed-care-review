@@ -33,37 +33,43 @@ export const HeadingScale = (): React.ReactElement => (
             <span style={labelStyle}>
                 {'<h1 className="mcr-homepage-h1-bold">'}
             </span>
-            <h1 className="mcr-homepage-h1-bold">
+            <h1 className="typography-v2 mcr-homepage-h1-bold">
                 Homepage heading bold variant
             </h1>
         </div>
         <div style={sampleStyle}>
             <span style={labelStyle}>{'<h2 className="mcr-homepage-h2">'}</span>
-            <h2 className="mcr-homepage-h2">Homepage heading</h2>
+            <h2 className="typography-v2 mcr-homepage-h2">Homepage heading</h2>
         </div>
         <div style={sampleStyle}>
             <span style={labelStyle}>
                 {'<h2 className="mcr-homepage-h2-bold">'}
             </span>
-            <h2 className="mcr-homepage-h2-bold">
+            <h2 className="typography-v2 mcr-homepage-h2-bold">
                 Homepage heading bold variant
             </h2>
         </div>
         <div style={sampleStyle}>
+            <span style={labelStyle}>{'<h1>'}</span>
+            <h1 className="typography-v2">Section 1 heading</h1>
+        </div>
+        <div style={sampleStyle}>
             <span style={labelStyle}>{'<h2>'}</span>
-            <h2>Section heading</h2>
+            <h2 className="typography-v2">Section heading</h2>
         </div>
         <div style={sampleStyle}>
             <span style={labelStyle}>{'<h3>'}</span>
-            <h3>Subsection heading</h3>
+            <h3 className="typography-v2">Subsection heading</h3>
         </div>
         <div style={sampleStyle}>
             <span style={labelStyle}>{'<h4>'}</span>
-            <h4>Detail heading</h4>
+            <h4 className="typography-v2">Detail heading</h4>
         </div>
         <div style={sampleStyle}>
             <span style={labelStyle}>{'<h4 className="mcr-h4-bold">'}</span>
-            <h4 className="mcr-h4-bold">Detail heading bold variant</h4>
+            <h4 className="typography-v2 mcr-h4-bold">
+                Detail heading bold variant
+            </h4>
         </div>
         <div style={sampleStyle}>
             <span style={labelStyle}>{'<h5>'}</span>
@@ -75,11 +81,11 @@ export const HeadingScale = (): React.ReactElement => (
         </div>
         <div style={sampleStyle}>
             <span style={labelStyle}>{'<p className="mcr-body">'}</span>
-            <p className="mcr-body">Body text style</p>
+            <p className="typography-v2 mcr-body">Body text style</p>
         </div>
         <div style={sampleStyle}>
             <span style={labelStyle}>{'<p className="mcr-body-bold">'}</span>
-            <p className="mcr-body-bold">Body bold style</p>
+            <p className="typography-v2 mcr-body-bold">Body bold style</p>
         </div>
         <div style={sampleStyle}>
             <span style={labelStyle}>{'<span className="mcr-tag">'}</span>
