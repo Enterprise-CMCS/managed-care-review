@@ -1,0 +1,154 @@
+query indexSubmissionLatestRevision($pageSize: Int, $afterContractID: ID) {
+    indexSubmissionLatestRevision(input: { pageSize: $pageSize, afterContractID: $afterContractID }) {
+        totalCount
+        pageInfo {
+            hasNextPage
+            hasPreviousPage
+            startContractID
+            endContractID
+        }
+        edges {
+            cursor
+            node {
+                contractId
+                submissionID
+                stateCode
+                stateNumber
+                contractSubmissionType
+                mccrsID
+                status
+                reviewStatus
+                consolidatedStatus
+                contractCreatedAt
+                contractUpdatedAt
+                initiallySubmittedAt
+                lastUpdatedForDisplay
+
+                revisionId
+                revisionCreatedAt
+                revisionUpdatedAt
+
+                submitInfoUpdatedAt
+                submitInfoUpdatedByRole
+                submitInfoUpdatedByEmail
+                submitInfoUpdatedByGivenName
+                submitInfoUpdatedByFamilyName
+                submitInfoUpdatedReason
+
+                unlockInfoUpdatedAt
+                unlockInfoUpdatedByRole
+                unlockInfoUpdatedByEmail
+                unlockInfoUpdatedByGivenName
+                unlockInfoUpdatedByFamilyName
+                unlockInfoUpdatedReason
+
+                programIDs
+                submissionType
+                submissionDescription
+                contractType
+                populationCovered
+                riskBasedContract
+                dsnpContract
+                stateContacts {
+                    email
+                }
+                supportingDocuments {
+                    id
+                    name
+                }
+                contractExecutionStatus
+                contractDocuments {
+                    id
+                    name
+                }
+                contractDateStart
+                contractDateEnd
+                managedCareEntities
+                federalAuthorities
+                inLieuServicesAndSettings
+                modifiedBenefitsProvided
+                modifiedGeoAreaServed
+                modifiedMedicaidBeneficiaries
+                modifiedRiskSharingStrategy
+                modifiedIncentiveArrangements
+                modifiedWitholdAgreements
+                modifiedStateDirectedPayments
+                modifiedPassThroughPayments
+                modifiedPaymentsForMentalDiseaseInstitutions
+                modifiedMedicalLossRatioStandards
+                modifiedOtherFinancialPaymentIncentive
+                modifiedEnrollmentProcess
+                modifiedGrevienceAndAppeal
+                modifiedNetworkAdequacyStandards
+                modifiedLengthOfContract
+                modifiedNonRiskPaymentArrangements
+                statutoryRegulatoryAttestation
+                statutoryRegulatoryAttestationDescription
+                eqroNewContractor
+                eqroProvisionMcoNewOptionalActivity
+                eqroProvisionNewMcoEqrRelatedActivities
+                eqroProvisionChipEqrRelatedActivities
+                eqroProvisionMcoEqrOrRelatedActivities
+
+                rateRevisions {
+                    rateId
+                    rateStateCode
+                    rateStateNumber
+                    parentContractID
+                    rateStatus
+                    rateReviewStatus
+                    rateConsolidatedStatus
+                    rateCreatedAt
+                    rateUpdatedAt
+
+                    rateRevisionId
+                    rateRevisionCreatedAt
+                    rateRevisionUpdatedAt
+
+                    rateSubmitInfoUpdatedAt
+                    rateSubmitInfoUpdatedByRole
+                    rateSubmitInfoUpdatedByEmail
+                    rateSubmitInfoUpdatedByGivenName
+                    rateSubmitInfoUpdatedByFamilyName
+                    rateSubmitInfoUpdatedReason
+
+                    rateUnlockInfoUpdatedAt
+                    rateUnlockInfoUpdatedByRole
+                    rateUnlockInfoUpdatedByEmail
+                    rateUnlockInfoUpdatedByGivenName
+                    rateUnlockInfoUpdatedByFamilyName
+                    rateUnlockInfoUpdatedReason
+
+                    rateType
+                    rateCapitationType
+                    rateDocuments {
+                        id
+                        name
+                    }
+                    supportingDocuments {
+                        id
+                        name
+                    }
+                    rateDateStart
+                    rateDateEnd
+                    rateDateCertified
+                    rateMedicaidPopulations
+                    amendmentEffectiveDateStart
+                    amendmentEffectiveDateEnd
+                    deprecatedRateProgramIDs
+                    rateProgramIDs
+                    rateCertificationName
+                    certifyingActuaryContacts {
+                        id
+                        email
+                    }
+                    addtlActuaryContacts {
+                        id
+                        email
+                    }
+                    actuaryCommunicationPreference
+                }
+            }
+        }
+    }
+}

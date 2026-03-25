@@ -37,6 +37,7 @@ import { genericDocumentResolver } from './shared/genericDocumentResolver'
 import { updateContract } from './contract/updateContract'
 import { indexContractsResolver } from './contract/indexContracts'
 import { indexContractsStripped } from './contract/indexContractsStripped'
+import { indexSubmissionLatestRevisionResolver } from './contract/indexSubmissionLatestRevision'
 import { unlockContractResolver } from './contract/unlockContract'
 import { updateDraftContractRates } from './contract/updateDraftContractRates'
 import {
@@ -95,6 +96,8 @@ export function configureResolvers(
             fetchRate: fetchRateResolver(store),
             fetchContract: fetchContractResolver(store),
             fetchOauthClients: fetchOauthClientsResolver(store),
+            indexSubmissionLatestRevision:
+                indexSubmissionLatestRevisionResolver(store),
         },
         Mutation: {
             submitContract: submitContract(

@@ -31,6 +31,8 @@ generates:
         ContractRevision: ../domain-models#ContractRevisionType
         ContractPackageSubmission: ../domain-models#ContractPackageSubmissionWithCauseType
         RatePackageSubmission: ../domain-models#RatePackageSubmissionWithCauseType
+        FlattenContract: ../domain-models/flattenContractAndRateTypes/flattenContractTypes#FlattenContractType
+        FlattenRate: ../domain-models/flattenContractAndRateTypes/flattenContractTypes#FlattenRateType
   ../app-web/src/gen/gqlClient.tsx:
     documents:
       - src/fragments/*.graphql

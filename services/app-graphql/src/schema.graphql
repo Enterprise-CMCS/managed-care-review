@@ -114,6 +114,17 @@ type Query {
     fetchMcReviewSettings: FetchMcReviewSettingsPayload!
 
     fetchOauthClients(input: FetchOauthClientsInput): FetchOauthClientsPayload!
+
+    """
+    indexSubmissionLatestRevision returns flattened contract and rate data
+    suitable for tabular display. Each contract's latest submitted revision
+    is returned as a single flat row with associated flattened rate revisions.
+
+    Errors:
+    - ForbiddenError: User must be a CMS or Admin type user
+    - NotFoundError: No submitted contracts found
+    """
+    indexSubmissionLatestRevision(input: IndexSubmissionLatestRevisionInput): IndexSubmissionLatestRevisionPayload!
 }
 
 type Mutation {
@@ -2786,4 +2797,198 @@ enum OAuthScope {
 enum UploadBucketName {
     HEALTH_PLAN_DOCS,
     QUESTION_ANSWER_DOCS
+}
+
+"""
+FlattenDocument contains only the id and name of a document,
+stripped down for the flatten export.
+"""
+type FlattenDocument {
+    id: ID
+    name: String!
+}
+
+"""
+FlattenStateContact contains only the email of a state contact,
+stripped down for the flatten export.
+"""
+type FlattenStateContact {
+    email: String
+}
+
+"""
+FlattenActuaryContact contains only the id and email of an actuary contact,
+stripped down for the flatten export.
+"""
+type FlattenActuaryContact {
+    id: ID
+    email: String
+}
+
+"""
+FlattenRate is a flattened rate revision combining rate-level, revision-level,
+and form data fields into a single depth-1 object.
+"""
+type FlattenRate {
+    rateId: ID!
+    rateStateCode: String!
+    rateStateNumber: Int!
+    parentContractID: ID!
+    rateStatus: HealthPlanPackageStatus!
+    rateReviewStatus: RateReviewStatus!
+    rateConsolidatedStatus: ConsolidatedRateStatus!
+    rateCreatedAt: DateTime!
+    rateUpdatedAt: DateTime!
+
+    rateRevisionId: ID!
+    rateRevisionCreatedAt: DateTime!
+    rateRevisionUpdatedAt: DateTime!
+
+    rateSubmitInfoUpdatedAt: DateTime
+    rateSubmitInfoUpdatedByRole: String
+    rateSubmitInfoUpdatedByEmail: String
+    rateSubmitInfoUpdatedByGivenName: String
+    rateSubmitInfoUpdatedByFamilyName: String
+    rateSubmitInfoUpdatedReason: String
+
+    rateUnlockInfoUpdatedAt: DateTime
+    rateUnlockInfoUpdatedByRole: String
+    rateUnlockInfoUpdatedByEmail: String
+    rateUnlockInfoUpdatedByGivenName: String
+    rateUnlockInfoUpdatedByFamilyName: String
+    rateUnlockInfoUpdatedReason: String
+
+    "Rate form data fields"
+    rateType: RateAmendmentType
+    rateCapitationType: RateCapitationType
+    rateDocuments: [FlattenDocument!]
+    supportingDocuments: [FlattenDocument!]
+    rateDateStart: Date
+    rateDateEnd: Date
+    rateDateCertified: Date
+    rateMedicaidPopulations: [RateMedicaidPopulations!]
+    amendmentEffectiveDateStart: Date
+    amendmentEffectiveDateEnd: Date
+    deprecatedRateProgramIDs: [String!]
+    rateProgramIDs: [String!]
+    rateCertificationName: String
+    certifyingActuaryContacts: [FlattenActuaryContact!]
+    addtlActuaryContacts: [FlattenActuaryContact!]
+    actuaryCommunicationPreference: ActuaryCommunication
+}
+
+"""
+FlattenContract is a flattened contract revision combining contract-level,
+revision-level, and form data fields into a single depth-1 object with
+associated flattened rate revisions.
+"""
+type FlattenContract {
+    contractId: ID!
+    submissionID: String!
+    stateCode: String!
+    stateNumber: Int!
+    contractSubmissionType: ContractSubmissionType!
+    mccrsID: String
+    status: HealthPlanPackageStatus!
+    reviewStatus: ContractReviewStatus!
+    consolidatedStatus: ConsolidatedContractStatus!
+    contractCreatedAt: DateTime!
+    contractUpdatedAt: DateTime!
+    initiallySubmittedAt: DateTime!
+    lastUpdatedForDisplay: DateTime!
+
+    revisionId: ID!
+    revisionCreatedAt: DateTime!
+    revisionUpdatedAt: DateTime!
+
+    submitInfoUpdatedAt: DateTime
+    submitInfoUpdatedByRole: String
+    submitInfoUpdatedByEmail: String
+    submitInfoUpdatedByGivenName: String
+    submitInfoUpdatedByFamilyName: String
+    submitInfoUpdatedReason: String
+
+    unlockInfoUpdatedAt: DateTime
+    unlockInfoUpdatedByRole: String
+    unlockInfoUpdatedByEmail: String
+    unlockInfoUpdatedByGivenName: String
+    unlockInfoUpdatedByFamilyName: String
+    unlockInfoUpdatedReason: String
+
+    "Contract form data fields"
+    programIDs: [String!]!
+    submissionType: SubmissionType!
+    submissionDescription: String!
+    contractType: ContractType!
+    populationCovered: PopulationCoveredType
+    riskBasedContract: Boolean
+    dsnpContract: Boolean
+    stateContacts: [FlattenStateContact!]!
+    supportingDocuments: [FlattenDocument!]!
+    contractExecutionStatus: ContractExecutionStatus
+    contractDocuments: [FlattenDocument!]!
+    contractDateStart: Date
+    contractDateEnd: Date
+    managedCareEntities: [ManagedCareEntity!]
+    federalAuthorities: [FederalAuthority!]
+    inLieuServicesAndSettings: Boolean
+    modifiedBenefitsProvided: Boolean
+    modifiedGeoAreaServed: Boolean
+    modifiedMedicaidBeneficiaries: Boolean
+    modifiedRiskSharingStrategy: Boolean
+    modifiedIncentiveArrangements: Boolean
+    modifiedWitholdAgreements: Boolean
+    modifiedStateDirectedPayments: Boolean
+    modifiedPassThroughPayments: Boolean
+    modifiedPaymentsForMentalDiseaseInstitutions: Boolean
+    modifiedMedicalLossRatioStandards: Boolean
+    modifiedOtherFinancialPaymentIncentive: Boolean
+    modifiedEnrollmentProcess: Boolean
+    modifiedGrevienceAndAppeal: Boolean
+    modifiedNetworkAdequacyStandards: Boolean
+    modifiedLengthOfContract: Boolean
+    modifiedNonRiskPaymentArrangements: Boolean
+    statutoryRegulatoryAttestation: Boolean
+    statutoryRegulatoryAttestationDescription: String
+    eqroNewContractor: Boolean
+    eqroProvisionMcoNewOptionalActivity: Boolean
+    eqroProvisionNewMcoEqrRelatedActivities: Boolean
+    eqroProvisionChipEqrRelatedActivities: Boolean
+    eqroProvisionMcoEqrOrRelatedActivities: Boolean
+
+    "Associated flattened rate revisions"
+    rateRevisions: [FlattenRate!]!
+}
+
+input IndexSubmissionLatestRevisionInput {
+    "How many contracts to return per page. Defaults to 1000 if not provided."
+    pageSize: Int
+    "Return contracts after this contract ID. Use the endContractID from the previous page's pageInfo."
+    afterContractID: ID
+}
+
+type FlattenContractEdge {
+    node: FlattenContract!
+    cursor: ID!
+}
+
+"""
+Pagination info for navigating through results.
+https://graphql.org/learn/pagination/
+"""
+type PageInfo {
+    "Are there more results available after this page?"
+    hasNextPage: Boolean!
+    "Are there results before this page? (True when you're not on the first page.)"
+    hasPreviousPage: Boolean!
+    "The contract ID of the first record in this page. Null if the page is empty."
+    startContractID: ID
+    "The contract ID of the last record in this page. Pass this value as the 'after' input to fetch the next page. Null if the page is empty."
+    endContractID: ID
+}
+
+type IndexSubmissionLatestRevisionPayload {
+    totalCount: Int!
+    edges: [FlattenContractEdge!]!
+    pageInfo: PageInfo!
 }
