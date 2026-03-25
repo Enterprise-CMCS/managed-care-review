@@ -1,4 +1,5 @@
 import type { PrismaTransactionType } from '../prismaTypes'
+import type { ExtendedPrismaClient } from '../prismaClient'
 import { NotFoundError } from '../postgresErrors'
 import { parseContractWithHistory } from './parseContractWithHistory'
 import { includeFullContract } from './prismaFullContractRateHelpers'
@@ -20,7 +21,7 @@ type WithLatest = {
  * @param useZod defaults to true (existing behavior)
  * @param skipFindingLatest if true, SKIP computing all the “latest*” helper timestamps
  */
-async function findAllContractsWithHistoryBySubmitInfo(
+async function findAllContractsWithHistoryBySubmitInfoInsideTransaction(
     client: PrismaTransactionType,
     useZod: boolean = true,
     skipFindingLatest: boolean = false
@@ -358,6 +359,29 @@ async function findAllContractsWithHistoryBySubmitInfo(
         }
 
         return parsedWithExtras
+    } catch (err) {
+        console.error('PRISMA ERROR', err)
+        return err
+    }
+}
+
+async function findAllContractsWithHistoryBySubmitInfo(
+    client: ExtendedPrismaClient,
+    useZod: boolean = true,
+    skipFindingLatest: boolean = false
+): Promise<ContractOrErrorArrayType | NotFoundError | Error> {
+    try {
+        return await client.$transaction(
+            async (tx) =>
+                findAllContractsWithHistoryBySubmitInfoInsideTransaction(
+                    tx,
+                    useZod,
+                    skipFindingLatest
+                ),
+            {
+                timeout: 20000,
+            }
+        )
     } catch (err) {
         console.error('PRISMA ERROR', err)
         return err
