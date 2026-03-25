@@ -33,6 +33,7 @@ import {
 } from '../../../components/SubmissionSummarySection'
 import { getSubmissionPath } from '../../../routeHelpers'
 import { StatusTag } from '../../../components/ContractTable/ContractTable'
+import { ChangeHistory } from '../../../components/ChangeHistory'
 
 export const EQROSubmissionSummary = (): React.ReactElement => {
     // Page level state
@@ -289,6 +290,8 @@ export const EQROSubmissionSummary = (): React.ReactElement => {
                     isStateUser={isStateUser}
                     explainMissingData={explainMissingData}
                 />
+
+                <ChangeHistory contract={contract} />
 
                 <UnlockSubmitModal
                     modalRef={modalRef}

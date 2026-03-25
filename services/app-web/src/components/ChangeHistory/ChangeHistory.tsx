@@ -30,8 +30,10 @@ type flatRevisions = Omit<UpdateInformation, 'updatedBy'> & {
         | 'review_update_approve'
         | 'review_update_withdraw'
         | 'review_update_submitted'
+        | 'submit_with_review'
     revisionVersion: string | undefined
     updatedBy?: UpdateInformation['updatedBy']
+    reviewDecision?: string
 }
 
 const getPreviousSubmissionLink = ({
@@ -48,6 +50,35 @@ const getPreviousSubmissionLink = ({
     return `/submissions/${contractSubTypeParam}/${contractID}/revisions/${revisionVersion}`
 }
 
+const getReviewDecisionForDate = (
+    date: string,
+    reviewActions?: ContractReviewStatusActions[]
+) => {
+    if (!reviewActions?.length) return undefined
+
+    const target = new Date(date).getTime()
+    const WINDOW_MS = 5000 // 5 seconds
+
+    const sorted = [...reviewActions].sort(
+        (a, b) =>
+            new Date(a.updatedAt).getTime() - new Date(b.updatedAt).getTime()
+    )
+
+    const match = sorted.find((action) => {
+        const time = new Date(action.updatedAt).getTime()
+        return time >= target && time <= target + WINDOW_MS
+    })
+
+    if (match) return match.actionType
+
+    // fallback: latest status before submission
+    const before = [...sorted]
+        .reverse()
+        .find((action) => new Date(action.updatedAt).getTime() <= target)
+
+    return before?.actionType
+}
+
 const buildChangeHistoryInfo = (
     r: flatRevisions,
     contractSubmissionType: ContractSubmissionType,
@@ -56,7 +87,9 @@ const buildChangeHistoryInfo = (
 ): { content: JSX.Element; title: string } => {
     const isInitialSubmission = r.updatedReason === 'Initial submission'
     const isSubsequentSubmissionOrUnlock =
-        r.kind === 'submit' || r.kind === 'unlock'
+        r.kind === 'submit' ||
+        r.kind === 'unlock' ||
+        r.kind === 'submit_with_review'
     const isReviewUpdate =
         r.kind === 'review_update_submitted' ||
         r.kind === 'review_update_withdraw' ||
@@ -64,6 +97,8 @@ const buildChangeHistoryInfo = (
     // We want to know if this contract has multiple submissions. To have multiple submissions, there must be minimum
     // more than the initial contract revision.
     const hasSubsequentSubmissions = revisionHistory.length > 1
+    const isNotSubjectToReview = r.reviewDecision === 'NOT_SUBJECT_TO_REVIEW'
+
     let content = <></>
     let title = 'Submission'
     if (isInitialSubmission) {
@@ -71,6 +106,28 @@ const buildChangeHistoryInfo = (
             <div data-testid={`change-history-record`}>
                 <span className={styles.tag}>Submitted by:</span>
                 <span>{` ${getUpdatedByDisplayName(r.updatedBy)} `}</span>
+                {r.kind === 'submit_with_review' && (
+                    <>
+                        <div>
+                            <span className={styles.tag}>Status: </span>
+                            <span>
+                                {isNotSubjectToReview
+                                    ? 'Not subject to review'
+                                    : 'Submitted'}
+                            </span>
+                        </div>
+                        <div>
+                            <span className={styles.tag}>
+                                Review Decision:{' '}
+                            </span>
+                            <span>
+                                {isNotSubjectToReview
+                                    ? 'Not subject to review'
+                                    : 'Subject to review'}
+                            </span>
+                        </div>
+                    </>
+                )}
                 <br />
                 {r.revisionVersion && hasSubsequentSubmissions && (
                     <LinkWithLogging
@@ -87,7 +144,8 @@ const buildChangeHistoryInfo = (
             </div>
         )
     } else if (isSubsequentSubmissionOrUnlock) {
-        const isSubmit = r.kind === 'submit'
+        const isSubmit = r.kind === 'submit' || r.kind === 'submit_with_review'
+
         title = isSubmit ? 'Submission' : 'Unlock'
         content = (
             <div data-testid={`change-history-record`}>
@@ -97,14 +155,40 @@ const buildChangeHistoryInfo = (
                     </span>
                     <span>{`${getUpdatedByDisplayName(r.updatedBy)} `}</span>
                 </div>
+                {r.kind === 'submit_with_review' && (
+                    <>
+                        <div>
+                            <span className={styles.tag}>Status: </span>
+                            <span>
+                                {isNotSubjectToReview
+                                    ? 'Not subject to review'
+                                    : 'Submitted'}
+                            </span>
+                        </div>
+                        <div>
+                            <span className={styles.tag}>
+                                Review Decision:{' '}
+                            </span>
+                            <span>
+                                {isNotSubjectToReview
+                                    ? 'Not subject to review'
+                                    : 'Subject to review'}
+                            </span>
+                        </div>
+                    </>
+                )}
                 <div>
                     <span className={styles.tag}>
-                        {isSubmit ? 'Changes made: ' : 'Reason for unlock: '}
+                        {isSubmit
+                            ? contract.contractSubmissionType === 'EQRO'
+                                ? 'Summary of changes: '
+                                : 'Changes made: '
+                            : 'Reason for unlock: '}
                     </span>
                     <span>{r.updatedReason}</span>
                 </div>
                 {isSubsequentSubmissionOrUnlock &&
-                    r.kind === 'submit' &&
+                    (r.kind === 'submit' || r.kind === 'submit_with_review') &&
                     r.revisionVersion && (
                         <LinkWithLogging
                             href={getPreviousSubmissionLink({
@@ -204,7 +288,15 @@ export const ChangeHistory = ({
                         newSubmit.updatedAt = r.submitInfo.updatedAt
                         newSubmit.updatedBy = r.submitInfo.updatedBy
                         newSubmit.updatedReason = r.submitInfo.updatedReason
-                        newSubmit.kind = 'submit'
+                        newSubmit.kind =
+                            contract.contractSubmissionType === 'EQRO'
+                                ? 'submit_with_review'
+                                : 'submit'
+                        const reviewDecision = getReviewDecisionForDate(
+                            r.submitInfo.updatedAt,
+                            reviewActions ?? []
+                        )
+                        newSubmit.reviewDecision = reviewDecision
                         newSubmit.revisionVersion = revisionVersion
                         result.push(newSubmit)
                         submitsIdx = submitsIdx + 1
@@ -221,6 +313,9 @@ export const ChangeHistory = ({
                     }
                 }
                 if (r?.__typename === 'ContractReviewStatusActions') {
+                    if (contract.contractSubmissionType === 'EQRO') {
+                        return
+                    }
                     let actionKind: flatRevisions['kind'] =
                         'review_update_submitted'
 
