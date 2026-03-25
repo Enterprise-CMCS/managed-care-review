@@ -23,7 +23,7 @@ Cypress.Commands.add('startNewEQROSubmission', () => {
 
     cy.fillOutEQROSubmissionDetails()
 
-    cy.navigateContractForm('CONTINUE')
+    cy.navigateContractForm('CONTINUE_FROM_START_NEW')
 
     cy.findByRole('heading', { level: 2, name: /Contract details/ })
 })
