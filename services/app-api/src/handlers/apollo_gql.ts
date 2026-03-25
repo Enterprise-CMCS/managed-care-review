@@ -1,12 +1,17 @@
 import type { Context as OTELContext, Span, Tracer } from '@opentelemetry/api'
-import { propagation, ROOT_CONTEXT } from '@opentelemetry/api'
+import {
+    propagation,
+    ROOT_CONTEXT,
+    trace,
+    SpanStatusCode,
+} from '@opentelemetry/api'
 import { ApolloServer } from '@apollo/server'
 import type { middleware } from '@as-integrations/aws-lambda'
 import {
     startServerAndCreateLambdaHandler,
     handlers,
 } from '@as-integrations/aws-lambda'
-import { initTracer, recordException, createTracer } from '../otel/otel_handler'
+import { initTracer, recordException } from '../otel/otel_handler'
 import type { APIGatewayProxyEvent, Handler } from 'aws-lambda'
 
 import typeDefs from '../../../app-graphql/src/schema.graphql'
@@ -74,10 +79,26 @@ function contextForRequestForFetcher(
     context: any
 }) => Promise<Context> {
     return async ({ event, context }) => {
-        // pull the current span out of the LAMBDA context, to place it in the APOLLO context
+        // Get the already-initialized tracer (initialized during cold start)
         const stageName = process.env.stage
-        const tracer = createTracer('app-api-' + stageName)
-        const ctx = propagation.extract(ROOT_CONTEXT, event.headers)
+        const tracer = trace.getTracer('app-api-' + stageName)
+
+        // Extract trace context from frontend headers for distributed tracing
+        // This allows backend spans to be children of frontend spans
+        const parentContext = propagation.extract(ROOT_CONTEXT, event.headers)
+
+        // Create a span for this GraphQL request as a child of the frontend trace
+        const requestSpan = tracer.startSpan(
+            'graphql.request',
+            {
+                attributes: {
+                    'http.method': event.httpMethod,
+                    'http.url': event.path,
+                    'http.route': event.requestContext.resourcePath,
+                },
+            },
+            parentContext // Use the extracted context as the parent
+        )
 
         const authProvider =
             event.requestContext.identity.cognitoAuthenticationProvider
@@ -159,7 +180,8 @@ function contextForRequestForFetcher(
             return {
                 user: userResult,
                 tracer: tracer,
-                ctx: ctx,
+                ctx: parentContext,
+                span: requestSpan,
                 oauthClient,
             }
         } else {
@@ -176,7 +198,8 @@ function contextForRequestForFetcher(
             const context: Context = {
                 user: userResult,
                 tracer: tracer,
-                ctx: ctx,
+                ctx: parentContext,
+                span: requestSpan,
             }
 
             return context
@@ -288,6 +311,11 @@ async function initializeGQLHandler(): Promise<Handler> {
 
     // END
 
+    // Initialize OpenTelemetry tracing once during cold start
+    // This prevents duplicate provider registrations on every request
+    initTracer('app-api-' + stageName, otelCollectorUrl)
+    console.info('OpenTelemetry tracer initialized for app-api-' + stageName)
+
     const pgResult = await configurePostgres(dbURL, secretsManagerSecret)
     if (pgResult instanceof Error) {
         console.error("Init Error: Postgres couldn't be configured")
@@ -335,6 +363,36 @@ async function initializeGQLHandler(): Promise<Handler> {
         plugins = [ApolloServerPluginLandingPageLocalDefault({ embed: true })]
         introspectionAllowed = true
     }
+
+    // Add OpenTelemetry plugin to manage request span lifecycle
+    const otelPlugin = {
+        async requestDidStart() {
+            return {
+                async willSendResponse(requestContext: any) {
+                    const { span } = requestContext.contextValue
+                    if (span) {
+                        // Set span status based on errors
+                        if (
+                            requestContext.errors &&
+                            requestContext.errors.length > 0
+                        ) {
+                            span.setStatus({
+                                code: SpanStatusCode.ERROR,
+                                message: requestContext.errors[0].message,
+                            })
+                            requestContext.errors.forEach((error: Error) => {
+                                span.recordException(error)
+                            })
+                        } else {
+                            span.setStatus({ code: SpanStatusCode.OK })
+                        }
+                        span.end()
+                    }
+                },
+            }
+        },
+    }
+    plugins.push(otelPlugin)
 
     //Configure email parameter store.
     const emailParameterStore =
@@ -432,16 +490,7 @@ const handlerPromise = initializeGQLHandler()
 const gqlHandler: Handler = async (event, context) => {
     // Once initialized, future awaits will return immediately
     const initializedHandler = await handlerPromise
-    const otelCollectorUrl = process.env.API_APP_OTEL_COLLECTOR_URL
     const serviceName = 'gql-handler'
-
-    if (otelCollectorUrl === undefined || otelCollectorUrl === '') {
-        throw new Error(
-            'Configuration Error: API_APP_OTEL_COLLECTOR_URL is required to run app-api'
-        )
-    }
-
-    initTracer(serviceName, otelCollectorUrl)
 
     // Call handler async-style (Node.js 24 pattern) - callback param unused
     const response = await initializedHandler(event, context, () => {})
