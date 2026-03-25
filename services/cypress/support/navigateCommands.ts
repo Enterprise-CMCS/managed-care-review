@@ -75,7 +75,7 @@ Cypress.Commands.add(
         } else if (buttonKey === 'CONTINUE') {
             if (waitForLoad) {
                 cy.findAllByTestId('errorMessage').should('have.length', 0)
-                // cy.wait('@updateContractDraftRevisionMutation', { timeout: 50_000})
+                cy.wait('@updateContractDraftRevisionMutation', { timeout: 50_000})
             }
             cy.findByTestId(/-submission-form-page/).should('exist')
         } else {
