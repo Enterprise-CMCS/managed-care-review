@@ -49,11 +49,10 @@ describe('SingleRateSummarySection', () => {
 
         const link = await screen.findByTestId('zipDownloadLink')
 
-        const rateName = rateData.revisions[0].formData
-            .rateCertificationName as string
-
         expect(link).toBeInTheDocument()
-        expect(screen.getByText(rateName)).toBeInTheDocument()
+        expect(
+            screen.getByRole('heading', { name: 'Rate details', level: 2 })
+        ).toBeInTheDocument()
         expect(
             screen.getByRole('definition', {
                 name: 'Rates this rate certification covers',
@@ -109,7 +108,7 @@ describe('SingleRateSummarySection', () => {
         ).toBeInTheDocument()
 
         expect(
-            screen.getByRole('heading', { name: 'Rate documents' })
+            screen.getByRole('heading', { name: 'Rate documents', level: 2 })
         ).toBeInTheDocument()
     })
 
@@ -143,7 +142,7 @@ describe('SingleRateSummarySection', () => {
         )
 
         expect(
-            screen.getByRole('heading', { name: 'Rate documents' })
+            screen.getByRole('heading', { name: 'Rate documents', level: 2 })
         ).toBeInTheDocument()
 
         const relatedContractActions = screen.getByRole('definition', {
@@ -220,7 +219,7 @@ describe('SingleRateSummarySection', () => {
         )
 
         expect(
-            screen.getByRole('heading', { name: 'Rate documents' })
+            screen.getByRole('heading', { name: 'Rate documents', level: 2 })
         ).toBeInTheDocument()
 
         const relatedContractActions = screen.getByRole('definition', {

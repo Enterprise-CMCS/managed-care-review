@@ -13,7 +13,7 @@ export type SectionHeaderProps = {
     headerId?: string
     hideBorderBottom?: boolean
     hideBorderTop?: boolean
-    as?: HeadingTag
+    headingLevel?: HeadingTag
     fontSize?: string
 }
 
@@ -26,7 +26,7 @@ export const SectionHeader = ({
     headerId,
     hideBorderBottom,
     hideBorderTop,
-    as,
+    headingLevel = 'h2',
     fontSize,
 }: SectionHeaderProps & JSX.IntrinsicElements['div']): React.ReactElement => {
     const classes = classNames({
@@ -41,12 +41,12 @@ export const SectionHeader = ({
     })
 
     //This lets you customize the header level
-    const Tag = as ?? 'h2'
+    const Heading = headingLevel
 
     return (
         <div className={classes} id={sectionId}>
             <div className={primaryDivClasses}>
-                <Tag
+                <Heading
                     id={headerId}
                     className={styles.headerTag}
                     style={{
@@ -54,7 +54,7 @@ export const SectionHeader = ({
                     }}
                 >
                     {header}
-                </Tag>
+                </Heading>
                 {subHeaderComponent}
             </div>
             <div>

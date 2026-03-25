@@ -352,10 +352,11 @@ export const RateSummary = (): React.ReactElement => {
                         </NavLinkWithLogging>
                     </div>
                 )}
+                <h1 className={styles.eqroSummaryNameHeader}>Rate summary</h1>
 
                 {isCMSUser && (
                     <SectionCard className={styles.actionsSection}>
-                        <h3>Actions</h3>
+                        <h4 className="mcr-h4-bold">Actions</h4>
                         {rateActions.length === 0 ? (
                             <Grid>
                                 No action can be taken on this submission in its
