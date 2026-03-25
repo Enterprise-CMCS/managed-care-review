@@ -71,7 +71,7 @@ Cypress.Commands.add(
                 // cy.wait('@createContractMutation', { timeout: 50_000 })
                 cy.wait('@fetchContractQuery', { timeout: 20_000 })
             }
-            cy.findByTestId('state-submission-form-page').should('exist')
+            cy.findByTestId(/-submission-form-page/).should('exist')
         } else if (buttonKey === 'CONTINUE') {
             if (waitForLoad) {
                 cy.findAllByTestId('errorMessage').should('have.length', 0)
