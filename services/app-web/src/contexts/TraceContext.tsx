@@ -70,8 +70,9 @@ function initializeTracer() {
             'VITE_APP_API_URL must be set for OpenTelemetry trace propagation'
         )
     }
+    // Anchor regex to start of URL to prevent matching substrings in unintended domains
     const apiUrlPattern = new RegExp(
-        apiUrl.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
+        '^' + apiUrl.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
     )
 
     registerInstrumentations({
