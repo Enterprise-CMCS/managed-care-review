@@ -1,8 +1,6 @@
 import {
     mockContractPackageSubmitted,
     mockEqroContractResubmittedWithReviewStatusChange,
-    mockEqroContractSubmittedNotSubjectToReview,
-    mockEqroContractSubmittedUnderReview,
 } from '@mc-review/mocks'
 import { ChangeHistory } from './ChangeHistory'
 
