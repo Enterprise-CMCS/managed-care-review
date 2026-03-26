@@ -63,7 +63,7 @@ export const EQROSubmissionTypeSummarySection = ({
     const isDraft = contract.status === 'DRAFT'
     const subjectToReview =
         contract.consolidatedStatus !== 'NOT_SUBJECT_TO_REVIEW'
-    const showReviewDetermination = !isStateUser && (!isUnlocked || !isDraft)
+    const showReviewDetermination = !(isStateUser && (isUnlocked || isDraft))
 
     return (
         <SectionCard
