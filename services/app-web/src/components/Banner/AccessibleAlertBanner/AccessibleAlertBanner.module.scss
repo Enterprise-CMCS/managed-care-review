@@ -1,0 +1,9 @@
+@use '../../../styles/custom.scss' as custom;
+@use '../../../styles/uswdsImports.scss' as uswds;
+
+.accessibleAlertBanner {
+    h4[class*='usa-alert__heading'] {
+        @include custom.mcr-h4-bold-style;
+        margin: 0;
+    }
+}
