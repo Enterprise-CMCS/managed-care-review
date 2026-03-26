@@ -83,7 +83,7 @@ const CMSReviewBanner = ({
     ) : (
         <p className="usa-alert__text">
             Based on the state's responses, this submission is not subject to
-            formal review and approval.
+            formal review and approval review.
         </p>
     )
 }

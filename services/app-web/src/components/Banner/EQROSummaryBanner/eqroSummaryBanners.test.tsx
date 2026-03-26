@@ -1,4 +1,4 @@
-import { render, screen } from '@testing-library/react'
+import { render, screen, within } from '@testing-library/react'
 import { EqroReviewDeterminationBanners } from './eqroSummaryBanners'
 
 describe('EqroSummaryBanners', () => {
@@ -38,7 +38,7 @@ describe('EqroSummaryBanners', () => {
         ).toBeInTheDocument()
     })
 
-    it('renders subject to review banner for CMS user', () => {
+    it('renders only the one-sentence summary for CMS user subject to review status', () => {
         render(
             <EqroReviewDeterminationBanners
                 subjectToReview={true}
@@ -46,19 +46,28 @@ describe('EqroSummaryBanners', () => {
             />
         )
 
-        expect(screen.getByText('Subject to review')).toBeInTheDocument()
+        const banner = screen.getByTestId('eqroSummaryBanner')
+
+        // CMS-specific sentence is present
         expect(
-            screen.getByText(
-                /this submission is subject to formal review and approval/
+            within(banner).getByText(
+                /based on the state's responses, this submission is subject to formal review and approval/i
             )
         ).toBeInTheDocument()
-        expect(screen.queryByText('What comes next:')).not.toBeInTheDocument()
+
+        // Content for State user is absent
         expect(
-            screen.queryByText(/all contracts with EQROs must/)
+            within(banner).queryByText('What comes next:')
         ).not.toBeInTheDocument()
+        expect(
+            within(banner).queryByText(/all contracts with EQROs must/i)
+        ).not.toBeInTheDocument()
+
+        // No list items for CMS user banner
+        expect(banner.querySelectorAll('li')).toHaveLength(0)
     })
 
-    it('renders not subject to review banner for CMS user', () => {
+    it('renders only the one-sentence summary for CMS user NOT subject to review status', () => {
         render(
             <EqroReviewDeterminationBanners
                 subjectToReview={false}
@@ -66,15 +75,49 @@ describe('EqroSummaryBanners', () => {
             />
         )
 
-        expect(screen.getByText('Not subject to review')).toBeInTheDocument()
+        const banner = screen.getByTestId('eqroSummaryBanner')
+
+        // CMS-specific sentence is present
         expect(
-            screen.getByText(
-                /this submission is not subject to formal review and approval/
+            within(banner).getByText(
+                /based on the state's responses, this submission is not subject to formal review and approval/i
             )
         ).toBeInTheDocument()
-        expect(screen.queryByText('What comes next:')).not.toBeInTheDocument()
+
+        // Content for State user is absent
         expect(
-            screen.queryByText(/all contracts with EQROs must/)
+            within(banner).queryByText('What comes next:')
+        ).not.toBeInTheDocument()
+        expect(
+            within(banner).queryByText(/all contracts with EQROs must/i)
+        ).not.toBeInTheDocument()
+
+        // No list items for CMS user banner
+        expect(banner.querySelectorAll('li')).toHaveLength(0)
+    })
+
+    it('does not show State user step-by-step guidance to CMS user', () => {
+        render(
+            <EqroReviewDeterminationBanners
+                subjectToReview={true}
+                stateUser={false}
+            />
+        )
+
+        const banner = screen.getByTestId('eqroSummaryBanner')
+
+        // None of the detailed State user steps should appear for CMS user
+        expect(
+            within(banner).queryByText(/check for completeness/i)
+        ).not.toBeInTheDocument()
+        expect(
+            within(banner).queryByText(/cms review/i)
+        ).not.toBeInTheDocument()
+        expect(
+            within(banner).queryByText(/you may receive questions via email/i)
+        ).not.toBeInTheDocument()
+        expect(
+            within(banner).queryByText(/determination/i)
         ).not.toBeInTheDocument()
     })
 })
