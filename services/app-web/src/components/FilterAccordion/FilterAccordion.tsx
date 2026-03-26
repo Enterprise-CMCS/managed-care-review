@@ -10,7 +10,6 @@ import { extractText } from '../TealiumLogging/tealiamLoggingHelpers'
 export interface FilterAccordionPropType {
     onClearFilters: () => void
     filterTitle: string | React.ReactNode
-    headingLevel?: 'h1' | 'h2' | 'h3' | 'h4' | 'h5'
     children:
         | React.ReactElement<FilterSelectPropType>
         | Array<React.ReactElement<FilterSelectPropType>>
@@ -19,7 +18,6 @@ export interface FilterAccordionPropType {
 export const FilterAccordion = ({
     onClearFilters,
     filterTitle,
-    headingLevel = 'h4',
     children,
 }: FilterAccordionPropType) => {
     const { logAccordionEvent } = useTealium()
@@ -32,7 +30,7 @@ export const FilterAccordion = ({
     const accordionItems: AccordionItemProps[] = [
         {
             title: filterTitle,
-            headingLevel,
+            headingLevel: 'h4',
             content: (
                 <>
                     <div>{childFilters}</div>
