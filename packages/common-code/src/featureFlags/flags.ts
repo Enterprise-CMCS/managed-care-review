@@ -76,6 +76,13 @@ const featureFlags = {
         defaultValue: false,
     },
     /**
+     * Applies the updated heading SCSS for styling consistency
+     */
+    HEADING_UPDATES: {
+        flag: 'heading-updates',
+        defaultValue: false,
+    },
+    /**
      The number of minutes before the session expires and countdown modal appears
     */
     MINUTES_UNTIL_SESSION_EXPIRES: {

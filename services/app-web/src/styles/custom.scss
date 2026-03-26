@@ -143,69 +143,70 @@ $mcr-single-page-width: 40rem; // based on figma - however, 40rem is also media 
     line-height: $line-height;
     letter-spacing: $letter-spacing;
 }
+.typography-v2 {
+    body {
+        @include mcr-type-style(16px, 400, 162%, 0.16px);
+    }
 
-body.typography-v2 {
-    @include mcr-type-style(16px, 400, 162%, 0.16px);
-}
+    h1 {
+        @include mcr-type-style(34px, 700, 100%);
+    }
 
-h1.typography-v2 {
-    @include mcr-type-style(34px, 700, 100%);
-}
+    h2 {
+        @include mcr-type-style(32px, 400, 100%, 0.32px);
+    }
 
-h2.typography-v2 {
-    @include mcr-type-style(32px, 400, 100%, 0.32px);
-}
+    h3 {
+        @include mcr-type-style(24px, 400, 140%, 0.24px);
+    }
 
-h3.typography-v2 {
-    @include mcr-type-style(24px, 400, 140%, 0.24px);
-}
+    h4 {
+        @include mcr-type-style(20px, 400, 140%, 0.2px);
+    }
 
-h4.typography-v2 {
-    @include mcr-type-style(20px, 400, 140%, 0.2px);
-}
+    h5 {
+        @include mcr-type-style(17px, 700, 162%, 0.085px);
+    }
 
-h5.typography-v2 {
-    @include mcr-type-style(17px, 700, 162%, 0.085px);
-}
+    h6 {
+        @include mcr-type-style(14px, 700, 162%, 0.14px);
+    }
 
-h6.typography-v2 {
-    @include mcr-type-style(14px, 700, 162%, 0.14px);
-}
+    .mcr-homepage-h1-bold {
+        @include mcr-type-style(38px, 700, 100%);
+    }
 
-.mcr-homepage-h1-bold {
-    @include mcr-type-style(38px, 700, 100%);
-}
+    .mcr-homepage-h2 {
+        font-family: 'Public Sans', sans-serif;
+        @include mcr-type-style(22px, 400, 120%);
+    }
 
-.mcr-homepage-h2 {
-    font-family: 'Public Sans', sans-serif;
-    @include mcr-type-style(22px, 400, 120%);
-}
+    .mcr-homepage-h2-bold {
+        font-family: 'Public Sans', sans-serif;
+        @include mcr-type-style(22px, 700, 28px);
+    }
 
-.mcr-homepage-h2-bold {
-    font-family: 'Public Sans', sans-serif;
-    @include mcr-type-style(22px, 700, 28px);
-}
+    .mcr-h4-bold {
+        @include mcr-type-style(20px, 700, 140%, 0.2px);
+    }
 
-.mcr-h4-bold {
-    @include mcr-type-style(20px, 700, 140%, 0.2px);
-}
+    .mcr-tag {
+        @include mcr-type-style(14px, 400, 15.87px);
+        text-transform: uppercase;
+    }
 
-.mcr-tag {
-    @include mcr-type-style(14px, 400, 15.87px);
-    text-transform: uppercase;
-}
+    .mcr-tag-bold {
+        @include mcr-type-style(14px, 700, 15.87px);
+        text-transform: uppercase;
+    }
 
-.mcr-tag-bold {
-    @include mcr-type-style(14px, 700, 15.87px);
-    text-transform: uppercase;
-}
+    .mcr-body {
+        @include mcr-type-style(16px, 400, 162%, 0.16px);
+    }
 
-.mcr-body {
-    @include mcr-type-style(16px, 400, 162%, 0.16px);
-}
-
-.mcr-body-bold {
-    @include mcr-type-style(16px, 700, 162%);
+    .mcr-body-bold {
+        @include mcr-type-style(16px, 700, 162%);
+    }
 }
 
 /* ACCESSIBILITY */

@@ -1,4 +1,5 @@
 import React, { useEffect } from 'react'
+import classNames from 'classnames'
 import { GovBanner } from '@trussworks/react-uswds'
 import styles from './AppBody.module.scss'
 import { AppRoutes } from './AppRoutes'
@@ -35,6 +36,11 @@ export function AppBody({
         featureFlags.SITE_UNDER_MAINTENANCE_BANNER.defaultValue
     )
 
+    const showHeadingUpdates: boolean = ldClient?.variation(
+        featureFlags.HEADING_UPDATES.flag,
+        featureFlags.HEADING_UPDATES.defaultValue
+    )
+
     const siteUnderMaintenance = siteUnderMaintenanceBannerFlag !== 'OFF'
 
     // We want the skip to main content link to be the first item in tab order on each page. Since this Link is persistent
@@ -51,7 +57,12 @@ export function AppBody({
     }, [pathname])
 
     return (
-        <div id="App" className={styles.app}>
+        <div
+            id="App"
+            className={classNames(styles.app, {
+                'typography-v2': showHeadingUpdates,
+            })}
+        >
             <LinkWithLogging
                 className="usa-skipnav"
                 // If an alternate main content is set, we focus that. Usually to skip navigation in main element for
