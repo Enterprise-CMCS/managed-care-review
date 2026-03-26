@@ -75,6 +75,9 @@ describe('EQROSubmissionSummary - Unlock submission button tests', () => {
                     name: 'Unlock submission',
                 })
             ).not.toBeDisabled()
+
+            // Expect Review decision to be visible for CMS users
+            expect(screen.getByText('Review decision')).toBeInTheDocument()
         })
 
         it('renders the unlock button when EQRO submission is Submitted (not subject to review)', async () => {
@@ -196,6 +199,9 @@ describe('EQROSubmissionSummary - Unlock submission button tests', () => {
                     'No action can be taken on this submission in its current status.'
                 )
             ).toBeInTheDocument()
+
+            // Expect Review decision to be visible for CMS users on unlocked submissions
+            expect(screen.getByText('Review decision')).toBeInTheDocument()
         })
 
         it('renders the unlock button when EQRO submission is Resubmitted', async () => {
