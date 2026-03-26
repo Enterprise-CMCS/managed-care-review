@@ -33,21 +33,3 @@
         padding-bottom: uswds.units(2);
     }
 }
-
-.alert {
-    div {
-        margin-top: uswds.units(1);
-    }
-    ol {
-        margin-top: 0;
-    }
-    li {
-        padding: uswds.units(1) 0;
-    }
-}
-
-.alertText {
-    font-size: 16px;
-    margin-top: 8px;
-    margin-bottom: 8px;
-}
