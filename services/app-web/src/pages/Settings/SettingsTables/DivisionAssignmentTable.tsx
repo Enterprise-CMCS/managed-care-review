@@ -275,7 +275,7 @@ export const DivisionAssignmentTable = (): React.ReactElement => {
 
     return (
         <div id={activeMainContentId}>
-            <h2>Division assignments</h2>
+            <h1>Division assignments</h1>
             <p>
                 A list of CMS analysts and their division assignments. If this
                 list is out of date please contact
