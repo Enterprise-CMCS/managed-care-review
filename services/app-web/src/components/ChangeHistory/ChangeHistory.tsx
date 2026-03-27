@@ -345,7 +345,7 @@ export const ChangeHistory = ({
             // Display this code if this is the initial contract. We only want to display the link of the initial contract
             // only if there has been subsequent contracts. We do not want to display a link if the package initial
             // contract was unlocked, but has not been resubmitted yet.
-            headingLevel: 'h4',
+            headingLevel: 'h5',
             content,
             expanded: false,
             handleToggle: () => {
@@ -364,6 +364,7 @@ export const ChangeHistory = ({
                 header="Change history"
                 hideBorderBottom
                 hideBorderTop
+                headingLevel='h2'
             />
             <Accordion items={revisedItems} multiselectable />
         </section>

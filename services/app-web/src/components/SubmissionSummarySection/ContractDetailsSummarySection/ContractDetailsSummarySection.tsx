@@ -134,7 +134,7 @@ export const ContractDetailsSummarySection = ({
                 header="Contract details"
                 editNavigateTo={editNavigateTo}
                 hideBorderTop
-                fontSize="38px"
+                headingLevel='h2'
             />
             <dl>
                 {contract438Attestation && (
@@ -190,6 +190,8 @@ export const ContractDetailsSummarySection = ({
                 documentZipPackages={documentZipPackage}
                 documentCount={contractDocumentCount}
                 onDocumentError={onDocumentError}
+                headingLevel='h3'
+                removeTopBorder
                 renderZipLink={
                     !!(
                         isSubmittedOrCMSUser &&

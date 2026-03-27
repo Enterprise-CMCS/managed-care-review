@@ -36,6 +36,7 @@ import {
     StatutoryRegulatoryAttestation,
     StatutoryRegulatoryAttestationQuestion,
 } from '@mc-review/constants'
+import { SectionHeader } from '../../SectionHeader'
 
 type SummaryDetailProps = {
     contractFormData: ContractFormData
@@ -532,37 +533,44 @@ export const EQROModifiedProvisionSummary = ({
     }
 
     return (
-        <Grid row gap className={styles.singleColumnGrid}>
-            <DataDetail
-                id="includesProvisions"
-                label="This contract action includes new or modified provisions related to the following"
-                explainMissingData={explainMissingData}
-            >
-                {isValidEQROProvisions ? (
-                    <DataDetailCheckboxList
-                        list={includedProvisions}
-                        dict={provisionDictionary}
-                        displayEmptyList
-                    />
-                ) : (
-                    <DataDetailMissingField />
-                )}
-            </DataDetail>
-            <DataDetail
-                id="excludesProvisions"
-                label="This contract action does NOT include new or modified provisions related to the following"
-                explainMissingData={explainMissingData}
-            >
-                {isValidEQROProvisions ? (
-                    <DataDetailCheckboxList
-                        list={excludedProvisions}
-                        dict={provisionDictionary}
-                        displayEmptyList
-                    />
-                ) : (
-                    <DataDetailMissingField />
-                )}
-            </DataDetail>
-        </Grid>
+        <>
+            <SectionHeader
+                header="Provisions" 
+                hideBorderTop
+                headingLevel="h3"
+            />
+            <Grid row gap className={styles.singleColumnGrid}>
+                <DataDetail
+                    id="includesProvisions"
+                    label="This contract action includes new or modified provisions related to the following"
+                    explainMissingData={explainMissingData}
+                >
+                    {isValidEQROProvisions ? (
+                        <DataDetailCheckboxList
+                            list={includedProvisions}
+                            dict={provisionDictionary}
+                            displayEmptyList
+                        />
+                    ) : (
+                        <DataDetailMissingField />
+                    )}
+                </DataDetail>
+                <DataDetail
+                    id="excludesProvisions"
+                    label="This contract action does NOT include new or modified provisions related to the following"
+                    explainMissingData={explainMissingData}
+                >
+                    {isValidEQROProvisions ? (
+                        <DataDetailCheckboxList
+                            list={excludedProvisions}
+                            dict={provisionDictionary}
+                            displayEmptyList
+                        />
+                    ) : (
+                        <DataDetailMissingField />
+                    )}
+                </DataDetail>
+            </Grid>
+        </>
     )
 }

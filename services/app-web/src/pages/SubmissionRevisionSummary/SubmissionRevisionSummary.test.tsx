@@ -161,7 +161,8 @@ describe('SubmissionRevisionSummary', () => {
                 expect(await screen.findByText('rate2 doc')).toBeInTheDocument()
                 expect(
                     await screen.findByRole('heading', {
-                        name: 'MCR-MN-0005-SNBC',
+                        name: 'Submission type',
+                        level: 2,
                     })
                 ).toBeInTheDocument()
                 // API returns UTC timezone, we display timestamped dates in PT timezone so 1 day before on these tests.
@@ -338,7 +339,7 @@ describe('SubmissionRevisionSummary', () => {
                 expect(
                     screen.getByRole('heading', {
                         level: 2,
-                        name: earliestSubmission.contractRevision.contractName,
+                        name: 'Submission type',
                     })
                 ).toBeInTheDocument()
                 expect(

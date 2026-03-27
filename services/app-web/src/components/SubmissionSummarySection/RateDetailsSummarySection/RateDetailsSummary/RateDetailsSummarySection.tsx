@@ -251,7 +251,7 @@ export const RateDetailsSummarySection = ({
                 editNavigateTo={editNavigateTo}
                 hideBorderTop
                 hideBorderBottom
-                fontSize="38px"
+                headingLevel="h2"
             />
             {rateRevs && rateRevs.length > 0
                 ? rateRevs.map((rateRev) => {
@@ -505,6 +505,8 @@ export const RateDetailsSummarySection = ({
                                   documentZipPackages={documentZipPackage}
                                   documentCount={rateDocumentCount}
                                   onDocumentError={onDocumentError}
+                                  headingLevel="h4"
+                                  removeBottomBorder
                                   renderZipLink={
                                       !!(
                                           isSubmittedOrCMSUser &&

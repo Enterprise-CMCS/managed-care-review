@@ -15,6 +15,10 @@
             font-size: size('body', 'lg');
         }
     }
+    h5[class*='usa-accordion__heading'] {
+        @include custom.mcr-h5-style;
+        margin: 0;
+    }
 }
 
 .tag {
