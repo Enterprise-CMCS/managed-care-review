@@ -51,7 +51,8 @@ async function FetchSecrets(
             message: err.message,
         })
         span.end()
-        throw error
+        console.error('Unexpected error fetching secrets:', err)
+        return new Error('Failed to fetch secrets from AWS SecretsManager')
     }
 }
 

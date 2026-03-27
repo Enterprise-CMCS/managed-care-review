@@ -85,11 +85,16 @@ const CACHE_TTL_MS = 12 * 60 * 60 * 1000 // 12 hours
 /**
  * Gets or creates a Prisma client for the given connection URL
  *
- * IMPORTANT: Uses singleton pattern to prevent connection pool leaks in Lambda.
- * Each Lambda warm container reuses the same Prisma client across invocations.
+ * Uses singleton pattern with TTL-based expiration to prevent connection pool leaks
+ * while handling credential rotations gracefully.
+ *
+ * Caching behavior:
+ * - Cached clients expire after 12 hours and are automatically recreated
+ * - Credentials are stable within environments
+ * - TTL provides safety net for unexpected rotations
  *
  * @param connURL - PostgreSQL connection string
- * @param enableCaching - Whether to cache the Prisma client (default: true). Disable for environments with rotating credentials.
+ * @param enableCaching - Whether to cache the Prisma client (default: true)
  * @returns Cached or new ExtendedPrismaClient instance
  */
 async function NewPrismaClient(
@@ -157,18 +162,15 @@ async function NewPrismaClient(
                 span.setAttribute('prisma.cache.hit', false)
             }
         } else {
-            span.setAttribute(
-                'prisma.cache.disabled_reason',
-                'review_environment'
-            )
+            span.setAttribute('prisma.cache.disabled', true)
         }
 
         span.setAttribute('prisma.client.creating', true)
 
         console.info(
             enableCaching
-                ? 'Creating new Prisma client (cold start or new connection URL)'
-                : 'Creating new Prisma client (caching disabled for review environment)'
+                ? 'Creating new Prisma client (cold start, cache miss, or cache expired)'
+                : 'Creating new Prisma client (caching disabled)'
         )
         const pool = new pg.Pool({ connectionString: connURL })
         const adapter = new PrismaPg(pool)

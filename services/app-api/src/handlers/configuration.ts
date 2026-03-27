@@ -18,14 +18,6 @@ import { trace, SpanStatusCode } from '@opentelemetry/api'
  * configuration is captured here.
  */
 
-/**
- * Detect if stage is a review environment
- * Review environments have frequently rotating credentials
- */
-function isReviewEnvironment(stage: string): boolean {
-    return !['dev', 'val', 'prod'].includes(stage)
-}
-
 async function getPostgresURL(
     dbURL: string,
     secretName: string | undefined
@@ -70,7 +62,8 @@ async function configurePostgres(
         attributes: {
             'postgres.stage': stage,
             'postgres.using_secrets_manager': dbURL === 'AWS_SM',
-            'postgres.is_review_env': isReviewEnvironment(stage),
+            'postgres.cache_enabled': true,
+            'postgres.cache_ttl_hours': 12,
         },
     })
 
@@ -88,24 +81,11 @@ async function configurePostgres(
             return dbConnResult
         }
 
-        // Disable caching in review environments where credentials rotate on every deploy
-        // Keep caching in dev/val/prod for performance (credentials rotate infrequently)
-        const enableCaching = !isReviewEnvironment(stage)
-
-        span.setAttributes({
-            'postgres.cache_enabled': enableCaching,
-            'postgres.cache_decision_reason': enableCaching
-                ? 'stable_environment'
-                : 'review_environment_frequent_rotation',
-        })
-
-        if (!enableCaching) {
-            console.info(
-                'Disabling Prisma client caching for review environment'
-            )
-        }
-
-        const prismaResult = await NewPrismaClient(dbConnResult, enableCaching)
+        // Enable caching with 12-hour TTL for all environments
+        // Safe because credentials are now stable for environment lifetime:
+        // - Review envs: Passwords reused (not rotated on deploy)
+        // - Dev/val/prod: 90-day rotation, TTL provides safety net
+        const prismaResult = await NewPrismaClient(dbConnResult, true)
 
         if (prismaResult instanceof Error) {
             console.info(
@@ -133,7 +113,8 @@ async function configurePostgres(
             message: err.message,
         })
         span.end()
-        throw error
+        console.error('Unexpected error configuring postgres:', err)
+        return new Error('Failed to configure Postgres connection')
     }
 }
 
