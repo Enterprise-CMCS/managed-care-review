@@ -67,6 +67,42 @@
     background-color: white;
 }
 
+.subRow {
+    background-color: custom.$mcr-gray-lightest;
+    border-bottom: 1px solid custom.$mcr-gray-lighter;
+}
+
+.subTable {
+    border-collapse: collapse;
+    font-size: 0.8rem;
+    width: max-content;
+
+    th,
+    td {
+        white-space: nowrap;
+        padding: 0.25rem 0.75rem;
+        border: 1px solid custom.$mcr-gray-lighter;
+    }
+
+    th {
+        background-color: white;
+        font-weight: 700;
+    }
+}
+
+.expandButton {
+    cursor: pointer;
+    background: none;
+    border: none;
+    padding: 2px 4px;
+    font-size: 0.7rem;
+    color: custom.$mcr-primary-base;
+
+    &:hover {
+        color: custom.$mcr-primary-dark;
+    }
+}
+
 .columnVisibilityAccordion {
     [class*='usa-accordion__content'] {
         background: custom.$mcr-gray-lightest;

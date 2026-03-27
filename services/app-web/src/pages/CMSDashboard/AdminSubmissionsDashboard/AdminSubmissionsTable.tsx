@@ -1,11 +1,13 @@
 import React, { useRef } from 'react'
 import {
     ColumnFiltersState,
+    ExpandedState,
     PaginationState,
     VisibilityState,
     createColumnHelper,
     flexRender,
     getCoreRowModel,
+    getExpandedRowModel,
     getFilteredRowModel,
     getFacetedUniqueValues,
     getPaginationRowModel,
@@ -18,7 +20,7 @@ import {
 } from '@tanstack/react-table'
 import { Accordion, Button, Table, Tag } from '@trussworks/react-uswds'
 import type { AccordionItemProps } from '@trussworks/react-uswds/lib/components/Accordion/Accordion'
-import { FlattenContract } from '../../../gen/gqlClient'
+import { FlattenContract, FlattenRate } from '../../../gen/gqlClient'
 import { findStatePrograms, ProgramArgType } from '@mc-review/submissions'
 import styles from '../../../components/ContractTable/ContractTable.module.scss'
 import { pluralize } from '@mc-review/common-code'
@@ -38,6 +40,129 @@ import { useVirtualizer } from '@tanstack/react-virtual'
 import virtualStyles from './AdminSubmissionsTable.module.scss'
 
 const ROW_HEIGHT_ESTIMATE = 36
+
+const rateColumns: {
+    header: string
+    accessor: (rate: FlattenRate) => React.ReactNode
+}[] = [
+    { header: 'Rate ID', accessor: (r) => r.rateId },
+    { header: 'Rate State', accessor: (r) => r.rateStateCode },
+    { header: 'Rate State #', accessor: (r) => r.rateStateNumber },
+    { header: 'Parent Contract ID', accessor: (r) => r.parentContractID },
+    { header: 'Rate Status', accessor: (r) => r.rateStatus },
+    { header: 'Rate Review Status', accessor: (r) => r.rateReviewStatus },
+    {
+        header: 'Rate Consolidated Status',
+        accessor: (r) => r.rateConsolidatedStatus,
+    },
+    { header: 'Rate Created', accessor: (r) => formatDate(r.rateCreatedAt) },
+    { header: 'Rate Updated', accessor: (r) => formatDate(r.rateUpdatedAt) },
+    { header: 'Rate Revision ID', accessor: (r) => r.rateRevisionId },
+    {
+        header: 'Rate Revision Created',
+        accessor: (r) => formatDate(r.rateRevisionCreatedAt),
+    },
+    {
+        header: 'Rate Revision Updated',
+        accessor: (r) => formatDate(r.rateRevisionUpdatedAt),
+    },
+    {
+        header: 'Rate Submit At',
+        accessor: (r) => formatDate(r.rateSubmitInfoUpdatedAt),
+    },
+    {
+        header: 'Rate Submit By Role',
+        accessor: (r) => r.rateSubmitInfoUpdatedByRole ?? '-',
+    },
+    {
+        header: 'Rate Submit By Email',
+        accessor: (r) => r.rateSubmitInfoUpdatedByEmail ?? '-',
+    },
+    {
+        header: 'Rate Submit By Given Name',
+        accessor: (r) => r.rateSubmitInfoUpdatedByGivenName ?? '-',
+    },
+    {
+        header: 'Rate Submit By Family Name',
+        accessor: (r) => r.rateSubmitInfoUpdatedByFamilyName ?? '-',
+    },
+    {
+        header: 'Rate Submit Reason',
+        accessor: (r) => r.rateSubmitInfoUpdatedReason ?? '-',
+    },
+    {
+        header: 'Rate Unlock At',
+        accessor: (r) => formatDate(r.rateUnlockInfoUpdatedAt),
+    },
+    {
+        header: 'Rate Unlock By Role',
+        accessor: (r) => r.rateUnlockInfoUpdatedByRole ?? '-',
+    },
+    {
+        header: 'Rate Unlock By Email',
+        accessor: (r) => r.rateUnlockInfoUpdatedByEmail ?? '-',
+    },
+    {
+        header: 'Rate Unlock By Given Name',
+        accessor: (r) => r.rateUnlockInfoUpdatedByGivenName ?? '-',
+    },
+    {
+        header: 'Rate Unlock By Family Name',
+        accessor: (r) => r.rateUnlockInfoUpdatedByFamilyName ?? '-',
+    },
+    {
+        header: 'Rate Unlock Reason',
+        accessor: (r) => r.rateUnlockInfoUpdatedReason ?? '-',
+    },
+    { header: 'Rate Type', accessor: (r) => r.rateType ?? '-' },
+    {
+        header: 'Rate Capitation Type',
+        accessor: (r) => r.rateCapitationType ?? '-',
+    },
+    { header: 'Rate Docs', accessor: (r) => r.rateDocuments?.length ?? 0 },
+    {
+        header: 'Rate Supporting Docs',
+        accessor: (r) => r.supportingDocuments?.length ?? 0,
+    },
+    { header: 'Rate Date Start', accessor: (r) => formatDate(r.rateDateStart) },
+    { header: 'Rate Date End', accessor: (r) => formatDate(r.rateDateEnd) },
+    {
+        header: 'Rate Date Certified',
+        accessor: (r) => formatDate(r.rateDateCertified),
+    },
+    {
+        header: 'Rate Medicaid Populations',
+        accessor: (r) => r.rateMedicaidPopulations?.join(', ') ?? '-',
+    },
+    {
+        header: 'Amendment Start',
+        accessor: (r) => formatDate(r.amendmentEffectiveDateStart),
+    },
+    {
+        header: 'Amendment End',
+        accessor: (r) => formatDate(r.amendmentEffectiveDateEnd),
+    },
+    {
+        header: 'Rate Program IDs',
+        accessor: (r) => r.rateProgramIDs?.join(', ') ?? '-',
+    },
+    {
+        header: 'Rate Certification Name',
+        accessor: (r) => r.rateCertificationName ?? '-',
+    },
+    {
+        header: 'Certifying Actuaries',
+        accessor: (r) => r.certifyingActuaryContacts?.length ?? 0,
+    },
+    {
+        header: 'Addtl Actuaries',
+        accessor: (r) => r.addtlActuaryContacts?.length ?? 0,
+    },
+    {
+        header: 'Actuary Comm Preference',
+        accessor: (r) => r.actuaryCommunicationPreference ?? '-',
+    },
+]
 
 const STORAGE_KEY_FILTERS = 'adminSubmissions_columnFilters'
 const STORAGE_KEY_VISIBILITY = 'adminSubmissions_columnVisibility'
@@ -136,18 +261,41 @@ const columns = [
         id: 'submissionID',
         header: 'Submission ID',
         size: 155,
-        cell: (info) => {
-            const row = info.getValue()
+        cell: ({ row, getValue }) => {
+            const contract = getValue()
             return (
-                <NavLinkWithLogging
-                    to={getSubmissionPath(
-                        'SUBMISSIONS_SUMMARY',
-                        row.contractSubmissionType,
-                        row.contractId
-                    )}
+                <div
+                    style={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '0.25rem',
+                    }}
                 >
-                    {row.submissionID}
-                </NavLinkWithLogging>
+                    {row.original.rateRevisions.length > 0 ? (
+                        <button
+                            type="button"
+                            onClick={row.getToggleExpandedHandler()}
+                            className={virtualStyles.expandButton}
+                            aria-label={
+                                row.getIsExpanded()
+                                    ? 'Collapse rate revisions'
+                                    : 'Expand rate revisions'
+                            }
+                            aria-expanded={row.getIsExpanded()}
+                        >
+                            {row.getIsExpanded() ? '▼' : '▶'}
+                        </button>
+                    ) : null}
+                    <NavLinkWithLogging
+                        to={getSubmissionPath(
+                            'SUBMISSIONS_SUMMARY',
+                            contract.contractSubmissionType,
+                            contract.contractId
+                        )}
+                    >
+                        {contract.submissionID}
+                    </NavLinkWithLogging>
+                </div>
             )
         },
     }),
@@ -553,6 +701,7 @@ export const AdminSubmissionsTable = ({
         React.useState<VisibilityState>(() =>
             loadFromStorage<VisibilityState>(STORAGE_KEY_VISIBILITY, {})
         )
+    const [expanded, setExpanded] = React.useState<ExpandedState>({})
     const [pagination, setPagination] = React.useState<PaginationState>({
         pageIndex: 0,
         pageSize: 150,
@@ -593,16 +742,26 @@ export const AdminSubmissionsTable = ({
             dateRangeFilter: dateRangeFilter,
             analystFilter: () => true,
         },
-        state: { sorting, columnFilters, columnVisibility, pagination },
+        state: {
+            sorting,
+            columnFilters,
+            columnVisibility,
+            expanded,
+            pagination,
+        },
         onSortingChange: setSorting,
         onColumnFiltersChange: setColumnFilters,
         onColumnVisibilityChange: setColumnVisibility,
+        onExpandedChange: setExpanded,
         onPaginationChange: setPagination,
+        getRowCanExpand: (row) => row.original.rateRevisions.length > 0,
         getCoreRowModel: getCoreRowModel(),
         getSortedRowModel: getSortedRowModel(),
         getFilteredRowModel: getFilteredRowModel(),
+        getExpandedRowModel: getExpandedRowModel(),
         getPaginationRowModel: getPaginationRowModel(),
         getFacetedUniqueValues: getFacetedUniqueValues(),
+        paginateExpandedRows: false,
     })
 
     const paginatedRows = table.getRowModel().rows
@@ -1042,38 +1201,112 @@ export const AdminSubmissionsTable = ({
                     >
                         {rowVirtualizer.getVirtualItems().map((virtualRow) => {
                             const row = paginatedRows[virtualRow.index]
+                            const isExpanded = row.getIsExpanded()
+                            const rateRevisions = row.original.rateRevisions
                             return (
-                                <tr
+                                <div
                                     key={row.id}
                                     data-index={virtualRow.index}
                                     ref={(node) =>
                                         rowVirtualizer.measureElement(node)
                                     }
-                                    className={virtualStyles.virtualizedRow}
                                     style={{
+                                        position: 'absolute',
+                                        width: '100%',
                                         transform: `translateY(${virtualRow.start}px)`,
                                     }}
                                 >
-                                    {row
-                                        .getVisibleCells()
-                                        .map((cell, cellIndex) => (
-                                            <td
-                                                key={cell.id}
-                                                className={`${virtualStyles.virtualizedCell}${cellIndex === 0 ? ` ${virtualStyles.stickyColumn}` : ''}`}
-                                                style={{
-                                                    width: cell.column.getSize(),
-                                                    minWidth:
+                                    <tr
+                                        className={virtualStyles.virtualizedRow}
+                                        style={{ position: 'relative' }}
+                                    >
+                                        {row
+                                            .getVisibleCells()
+                                            .map((cell, cellIndex) => (
+                                                <td
+                                                    key={cell.id}
+                                                    className={`${virtualStyles.virtualizedCell}${cellIndex === 0 ? ` ${virtualStyles.stickyColumn}` : ''}`}
+                                                    style={{
+                                                        width: cell.column.getSize(),
+                                                        minWidth:
+                                                            cell.column
+                                                                .columnDef
+                                                                .minSize,
+                                                    }}
+                                                >
+                                                    {flexRender(
                                                         cell.column.columnDef
-                                                            .minSize,
+                                                            .cell,
+                                                        cell.getContext()
+                                                    )}
+                                                </td>
+                                            ))}
+                                    </tr>
+                                    {isExpanded && rateRevisions.length > 0 && (
+                                        <div className={virtualStyles.subRow}>
+                                            <div
+                                                style={{
+                                                    overflowX: 'auto',
+                                                    padding:
+                                                        '0.5rem 0 0.5rem 2rem',
                                                 }}
                                             >
-                                                {flexRender(
-                                                    cell.column.columnDef.cell,
-                                                    cell.getContext()
-                                                )}
-                                            </td>
-                                        ))}
-                                </tr>
+                                                <table
+                                                    className={
+                                                        virtualStyles.subTable
+                                                    }
+                                                >
+                                                    <thead>
+                                                        <tr>
+                                                            {rateColumns.map(
+                                                                (col) => (
+                                                                    <th
+                                                                        key={
+                                                                            col.header
+                                                                        }
+                                                                    >
+                                                                        {
+                                                                            col.header
+                                                                        }
+                                                                    </th>
+                                                                )
+                                                            )}
+                                                        </tr>
+                                                    </thead>
+                                                    <tbody>
+                                                        {rateRevisions.map(
+                                                            (
+                                                                rate: FlattenRate
+                                                            ) => (
+                                                                <tr
+                                                                    key={
+                                                                        rate.rateRevisionId
+                                                                    }
+                                                                >
+                                                                    {rateColumns.map(
+                                                                        (
+                                                                            col
+                                                                        ) => (
+                                                                            <td
+                                                                                key={
+                                                                                    col.header
+                                                                                }
+                                                                            >
+                                                                                {col.accessor(
+                                                                                    rate
+                                                                                )}
+                                                                            </td>
+                                                                        )
+                                                                    )}
+                                                                </tr>
+                                                            )
+                                                        )}
+                                                    </tbody>
+                                                </table>
+                                            </div>
+                                        </div>
+                                    )}
+                                </div>
                             )
                         })}
                     </tbody>
