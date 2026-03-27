@@ -2,6 +2,7 @@ import React, { useRef } from 'react'
 import {
     ColumnFiltersState,
     PaginationState,
+    VisibilityState,
     createColumnHelper,
     flexRender,
     getCoreRowModel,
@@ -34,6 +35,19 @@ import { useVirtualizer } from '@tanstack/react-virtual'
 import virtualStyles from './AdminSubmissionsTable.module.scss'
 
 const ROW_HEIGHT_ESTIMATE = 36
+
+const STORAGE_KEY_FILTERS = 'adminSubmissions_columnFilters'
+const STORAGE_KEY_VISIBILITY = 'adminSubmissions_columnVisibility'
+
+function loadFromStorage<T>(key: string, fallback: T): T {
+    try {
+        const stored = localStorage.getItem(key)
+        if (stored) return JSON.parse(stored) as T
+    } catch {
+        // ignore parse errors
+    }
+    return fallback
+}
 
 const columnHelper = createColumnHelper<FlattenContract>()
 
@@ -489,11 +503,29 @@ export const AdminSubmissionsTable = ({
         { id: 'lastUpdatedForDisplay', desc: true },
     ])
     const [columnFilters, setColumnFilters] =
-        React.useState<ColumnFiltersState>([])
+        React.useState<ColumnFiltersState>(() =>
+            loadFromStorage<ColumnFiltersState>(STORAGE_KEY_FILTERS, [])
+        )
+    const [columnVisibility, setColumnVisibility] =
+        React.useState<VisibilityState>(() =>
+            loadFromStorage<VisibilityState>(STORAGE_KEY_VISIBILITY, {})
+        )
     const [pagination, setPagination] = React.useState<PaginationState>({
         pageIndex: 0,
         pageSize: 150,
     })
+
+    // Persist filters and column visibility to localStorage
+    React.useEffect(() => {
+        localStorage.setItem(STORAGE_KEY_FILTERS, JSON.stringify(columnFilters))
+    }, [columnFilters])
+
+    React.useEffect(() => {
+        localStorage.setItem(
+            STORAGE_KEY_VISIBILITY,
+            JSON.stringify(columnVisibility)
+        )
+    }, [columnVisibility])
 
     const programsByState = React.useMemo(() => {
         const map = new Map<string, ProgramArgType[]>()
@@ -518,9 +550,10 @@ export const AdminSubmissionsTable = ({
             dateRangeFilter: dateRangeFilter,
             analystFilter: () => true,
         },
-        state: { sorting, columnFilters, pagination },
+        state: { sorting, columnFilters, columnVisibility, pagination },
         onSortingChange: setSorting,
         onColumnFiltersChange: setColumnFilters,
+        onColumnVisibilityChange: setColumnVisibility,
         onPaginationChange: setPagination,
         getCoreRowModel: getCoreRowModel(),
         getSortedRowModel: getSortedRowModel(),
@@ -604,6 +637,7 @@ export const AdminSubmissionsTable = ({
         if (filterDateRangeRef.current) {
             filterDateRangeRef.current.clearFilter()
         }
+        localStorage.removeItem(STORAGE_KEY_FILTERS)
     }
 
     if (data.length === 0) {
@@ -796,14 +830,7 @@ export const AdminSubmissionsTable = ({
             </FilterAccordion>
             <ColumnVisibilityAccordion table={table} />
             <div aria-live="polite" aria-atomic>
-                <div
-                    className={styles.filterCount}
-                    style={{
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'space-between',
-                    }}
-                >
+                <div className={virtualStyles.filterCount}>
                     <span>
                         {filterLength} {pluralize('filter', filterLength)}{' '}
                         applied — Displaying {paginatedRows.length} of{' '}

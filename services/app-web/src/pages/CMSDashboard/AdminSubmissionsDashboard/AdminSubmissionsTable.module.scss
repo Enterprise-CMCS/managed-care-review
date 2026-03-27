@@ -1,8 +1,20 @@
-@use '../../../styles/mcrColors.scss' as custom;
+@use '../../../styles/custom.scss' as custom;
+@use '../../../styles/uswdsImports.scss' as uswds;
+
+.filterCount {
+    font-weight: uswds.font-weight('bold');
+    color: custom.$mcr-foundation-ink;
+    padding-top: uswds.units(3);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 1rem;
+}
 
 .virtualizedTable {
     display: grid;
     font-size: 0.85rem;
+    margin: 0;
 }
 
 .stickyThead {
