@@ -3,6 +3,7 @@ import {
     SecretsManagerClient,
 } from '@aws-sdk/client-secrets-manager'
 import type { GetSecretValueResponse } from '@aws-sdk/client-secrets-manager'
+import { trace, SpanStatusCode } from '@opentelemetry/api'
 
 interface APISecrets {
     pgConnectionURL: string
@@ -11,12 +12,47 @@ interface APISecrets {
 async function FetchSecrets(
     secretManagerSecret: string
 ): Promise<Secret | Error> {
-    const secretsResult = await getSecretValue(secretManagerSecret)
-    if (secretsResult instanceof Error) {
-        console.info('Error: Failed to get secrets', secretsResult)
-        return new Error('Failed to talk to AWS SecretsManager')
+    const tracer = trace.getTracer('secrets-manager')
+    const span = tracer.startSpan('secrets.fetch', {
+        attributes: {
+            'secrets.secret_name': secretManagerSecret,
+        },
+    })
+
+    try {
+        const secretsResult = await getSecretValue(secretManagerSecret)
+        if (secretsResult instanceof Error) {
+            console.info('Error: Failed to get secrets', secretsResult)
+            span.recordException(secretsResult)
+            span.setStatus({
+                code: SpanStatusCode.ERROR,
+                message: 'Failed to talk to AWS SecretsManager',
+            })
+            span.end()
+            return new Error('Failed to talk to AWS SecretsManager')
+        }
+
+        // Log username to correlate with credential rotations
+        // (password is never logged)
+        span.setAttributes({
+            'secrets.username': secretsResult.username,
+            'secrets.dbname': secretsResult.dbname,
+            'secrets.host': secretsResult.host,
+        })
+        span.setStatus({ code: SpanStatusCode.OK })
+        span.end()
+
+        return secretsResult
+    } catch (error) {
+        const err = error instanceof Error ? error : new Error(String(error))
+        span.recordException(err)
+        span.setStatus({
+            code: SpanStatusCode.ERROR,
+            message: err.message,
+        })
+        span.end()
+        throw error
     }
-    return secretsResult
 }
 
 interface Secret {

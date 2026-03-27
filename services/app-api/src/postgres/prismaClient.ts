@@ -1,6 +1,7 @@
 import { PrismaClient } from '../generated/client'
 import { PrismaPg } from '@prisma/adapter-pg'
 import pg from 'pg'
+import { trace, SpanStatusCode } from '@opentelemetry/api'
 
 const errorMessages = {
     delete: 'Deletion of records is not allowed',
@@ -95,24 +96,50 @@ async function NewPrismaClient(
     connURL: string,
     enableCaching: boolean = true
 ): Promise<ExtendedPrismaClient | Error> {
+    const tracer = trace.getTracer('prisma-client-cache')
+    const span = tracer.startSpan('prisma.client.get_or_create', {
+        attributes: {
+            'prisma.cache.enabled': enableCaching,
+            'prisma.cache.total_cached': prismaClientCache.size,
+        },
+    })
+
     try {
         // Check if we already have a client for this connection URL (only if caching enabled)
         if (enableCaching) {
             const cached = prismaClientCache.get(connURL)
             if (cached) {
                 const age = Date.now() - cached.createdAt
+                const ageMinutes = Math.round(age / 1000 / 60)
 
                 // Check if cached client is still within TTL
                 if (age < CACHE_TTL_MS) {
+                    span.setAttributes({
+                        'prisma.cache.hit': true,
+                        'prisma.cache.age_minutes': ageMinutes,
+                        'prisma.cache.age_ms': age,
+                        'prisma.cache.ttl_remaining_ms': CACHE_TTL_MS - age,
+                    })
+                    span.setStatus({ code: SpanStatusCode.OK })
+                    span.end()
+
                     console.info(
-                        `Reusing cached Prisma client (age: ${Math.round(age / 1000 / 60)} minutes)`
+                        `Reusing cached Prisma client (age: ${ageMinutes} minutes)`
                     )
                     return cached.client
                 }
 
                 // Cached client expired - disconnect and remove it
+                const ageHours = Math.round(age / 1000 / 60 / 60)
+                span.setAttributes({
+                    'prisma.cache.hit': true,
+                    'prisma.cache.expired': true,
+                    'prisma.cache.age_hours': ageHours,
+                    'prisma.cache.age_ms': age,
+                })
+
                 console.info(
-                    `Cached Prisma client expired (age: ${Math.round(age / 1000 / 60 / 60)} hours), creating new client`
+                    `Cached Prisma client expired (age: ${ageHours} hours), creating new client`
                 )
                 try {
                     await cached.client.$disconnect()
@@ -121,10 +148,22 @@ async function NewPrismaClient(
                         'Error disconnecting expired Prisma client:',
                         err
                     )
+                    span.recordException(
+                        err instanceof Error ? err : new Error(String(err))
+                    )
                 }
                 prismaClientCache.delete(connURL)
+            } else {
+                span.setAttribute('prisma.cache.hit', false)
             }
+        } else {
+            span.setAttribute(
+                'prisma.cache.disabled_reason',
+                'review_environment'
+            )
         }
+
+        span.setAttribute('prisma.client.creating', true)
 
         console.info(
             enableCaching
@@ -144,11 +183,25 @@ async function NewPrismaClient(
                 client: prismaClient,
                 createdAt: Date.now(),
             })
+            span.setAttribute('prisma.cache.stored', true)
         }
+
+        span.setStatus({ code: SpanStatusCode.OK })
+        span.end()
 
         return prismaClient
     } catch (e: unknown) {
+        const error = e instanceof Error ? e : new Error(String(e))
+
+        span.recordException(error)
+        span.setStatus({
+            code: SpanStatusCode.ERROR,
+            message: error.message,
+        })
+        span.end()
+
         if (e instanceof Error) {
+            console.info('Error creating prisma client: ', e)
             return e
         }
         console.info('Unexpected Error creating prisma client: ', e)

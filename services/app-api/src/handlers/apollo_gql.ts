@@ -4,6 +4,7 @@ import {
     ROOT_CONTEXT,
     trace,
     SpanStatusCode,
+    context as otelContext,
 } from '@opentelemetry/api'
 import { ApolloServer } from '@apollo/server'
 import type { middleware } from '@as-integrations/aws-lambda'
@@ -100,114 +101,129 @@ function contextForRequestForFetcher(
             parentContext // Use the extracted context as the parent
         )
 
-        const authProvider =
-            event.requestContext.identity.cognitoAuthenticationProvider
-        // This handler is shared with the third_party_API_authorizer
-        // when called from the 3rd party authorizer the cognito auth provider
-        // is not valid for instead the authorizer returns a user ID
-        // that is used to fetch the user
-        const fromThirdPartyAuthorizer = event.requestContext.path.includes(
-            '/v1/graphql/external'
+        // Make requestSpan the active span for all downstream operations
+        // This ensures all child spans (Prisma, secrets, etc.) are properly linked
+        return otelContext.with(
+            trace.setSpan(parentContext, requestSpan),
+            async () => {
+                const authProvider =
+                    event.requestContext.identity.cognitoAuthenticationProvider
+                // This handler is shared with the third_party_API_authorizer
+                // when called from the 3rd party authorizer the cognito auth provider
+                // is not valid for instead the authorizer returns a user ID
+                // that is used to fetch the user
+                const fromThirdPartyAuthorizer =
+                    event.requestContext.path.includes('/v1/graphql/external')
+
+                if (!authProvider && !fromThirdPartyAuthorizer) {
+                    throw new Error(
+                        'Log: no AuthProvider from an internal API user.'
+                    )
+                }
+
+                const dbURL = process.env.DATABASE_URL ?? ''
+                const secretsManagerSecret =
+                    process.env.SECRETS_MANAGER_SECRET ?? ''
+                const pgResult = await configurePostgres(
+                    dbURL,
+                    secretsManagerSecret,
+                    stageName! // validated during initialization
+                )
+
+                if (pgResult instanceof Error) {
+                    console.error("Init Error: Postgres couldn't be configured")
+                    throw pgResult
+                }
+
+                const store = NewPostgresStore(pgResult)
+
+                if (fromThirdPartyAuthorizer) {
+                    const principalId =
+                        event.requestContext.authorizer?.principalId
+                    const authorizerContext = event.requestContext.authorizer
+                    const delegatedUser: string | null =
+                        event.headers?.['x-acting-as-user'] ??
+                        event.headers?.['X-Acting-As-User'] ??
+                        null
+
+                    // Extract OAuth context if present
+                    const oauthClientId = authorizerContext?.clientId
+                    const tokenIssuer = authorizerContext?.iss
+                    const oauthGrants =
+                        authorizerContext?.grants?.split(',') || []
+
+                    const userResult = await userFromThirdPartyAuthorizer(
+                        store,
+                        principalId,
+                        delegatedUser
+                    )
+
+                    const clientOauth =
+                        await store.getOAuthClientByClientId(oauthClientId)
+
+                    if (clientOauth instanceof Error) {
+                        throw new Error(
+                            `Log: failed to get oauth with client id`
+                        )
+                    }
+
+                    if (!clientOauth) {
+                        throw new Error('Log: OAuth client not found')
+                    }
+
+                    if (userResult instanceof Error) {
+                        throw new Error(userResult.message)
+                    }
+
+                    if (userResult === undefined) {
+                        throw new Error(`User not found.`)
+                    }
+
+                    const oauthClient = {
+                        clientId: oauthClientId,
+                        iss: tokenIssuer,
+                        grants: oauthGrants,
+                        scopes: clientOauth.scopes.map((scope) => scope),
+                        isDelegatedUser: !!delegatedUser,
+                    }
+
+                    console.info({
+                        message: 'OAuth client context',
+                        ['x-acting-as-user']: delegatedUser,
+                        ...oauthClient,
+                    })
+
+                    return {
+                        user: userResult,
+                        tracer: tracer,
+                        ctx: parentContext,
+                        span: requestSpan,
+                        oauthClient,
+                    }
+                } else {
+                    const userResult = await userFetcher(authProvider!, store)
+
+                    if (userResult === undefined) {
+                        throw new Error(`User not found.`)
+                    }
+
+                    if (userResult instanceof Error) {
+                        throw new Error(
+                            `Error fetching user: ${userResult.message}`
+                        )
+                    }
+
+                    const context: Context = {
+                        user: userResult,
+                        tracer: tracer,
+                        ctx: parentContext,
+                        span: requestSpan,
+                    }
+
+                    return context
+                }
+            }
         )
-
-        if (!authProvider && !fromThirdPartyAuthorizer) {
-            throw new Error('Log: no AuthProvider from an internal API user.')
-        }
-
-        const dbURL = process.env.DATABASE_URL ?? ''
-        const secretsManagerSecret = process.env.SECRETS_MANAGER_SECRET ?? ''
-        const pgResult = await configurePostgres(
-            dbURL,
-            secretsManagerSecret,
-            stageName! // validated during initialization
-        )
-
-        if (pgResult instanceof Error) {
-            console.error("Init Error: Postgres couldn't be configured")
-            throw pgResult
-        }
-
-        const store = NewPostgresStore(pgResult)
-
-        if (fromThirdPartyAuthorizer) {
-            const principalId = event.requestContext.authorizer?.principalId
-            const authorizerContext = event.requestContext.authorizer
-            const delegatedUser: string | null =
-                event.headers?.['x-acting-as-user'] ??
-                event.headers?.['X-Acting-As-User'] ??
-                null
-
-            // Extract OAuth context if present
-            const oauthClientId = authorizerContext?.clientId
-            const tokenIssuer = authorizerContext?.iss
-            const oauthGrants = authorizerContext?.grants?.split(',') || []
-
-            const userResult = await userFromThirdPartyAuthorizer(
-                store,
-                principalId,
-                delegatedUser
-            )
-
-            const clientOauth =
-                await store.getOAuthClientByClientId(oauthClientId)
-
-            if (clientOauth instanceof Error) {
-                throw new Error(`Log: failed to get oauth with client id`)
-            }
-
-            if (!clientOauth) {
-                throw new Error('Log: OAuth client not found')
-            }
-
-            if (userResult instanceof Error) {
-                throw new Error(userResult.message)
-            }
-
-            if (userResult === undefined) {
-                throw new Error(`User not found.`)
-            }
-
-            const oauthClient = {
-                clientId: oauthClientId,
-                iss: tokenIssuer,
-                grants: oauthGrants,
-                scopes: clientOauth.scopes.map((scope) => scope),
-                isDelegatedUser: !!delegatedUser,
-            }
-
-            console.info({
-                message: 'OAuth client context',
-                ['x-acting-as-user']: delegatedUser,
-                ...oauthClient,
-            })
-
-            return {
-                user: userResult,
-                tracer: tracer,
-                ctx: parentContext,
-                span: requestSpan,
-                oauthClient,
-            }
-        } else {
-            const userResult = await userFetcher(authProvider!, store)
-
-            if (userResult === undefined) {
-                throw new Error(`User not found.`)
-            }
-
-            if (userResult instanceof Error) {
-                throw new Error(`Error fetching user: ${userResult.message}`)
-            }
-
-            const context: Context = {
-                user: userResult,
-                tracer: tracer,
-                ctx: parentContext,
-                span: requestSpan,
-            }
-
-            return context
-        }
     }
 }
 

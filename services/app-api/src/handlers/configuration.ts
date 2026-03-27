@@ -9,6 +9,7 @@ import {
 } from '../emailer'
 import { type LDService } from '../launchDarkly/launchDarkly'
 import type { ExtendedPrismaClient } from '../postgres/prismaClient'
+import { trace, SpanStatusCode } from '@opentelemetry/api'
 
 /*
  * configuration.ts
@@ -64,32 +65,76 @@ async function configurePostgres(
     secretName: string | undefined,
     stage: string
 ): Promise<ExtendedPrismaClient | Error> {
-    console.info('Getting Postgres Connection')
+    const tracer = trace.getTracer('postgres-configuration')
+    const span = tracer.startSpan('postgres.configure', {
+        attributes: {
+            'postgres.stage': stage,
+            'postgres.using_secrets_manager': dbURL === 'AWS_SM',
+            'postgres.is_review_env': isReviewEnvironment(stage),
+        },
+    })
 
-    const dbConnResult = await getPostgresURL(dbURL, secretName)
-    if (dbConnResult instanceof Error) {
-        return dbConnResult
+    try {
+        console.info('Getting Postgres Connection')
+
+        const dbConnResult = await getPostgresURL(dbURL, secretName)
+        if (dbConnResult instanceof Error) {
+            span.recordException(dbConnResult)
+            span.setStatus({
+                code: SpanStatusCode.ERROR,
+                message: 'Failed to get postgres URL',
+            })
+            span.end()
+            return dbConnResult
+        }
+
+        // Disable caching in review environments where credentials rotate on every deploy
+        // Keep caching in dev/val/prod for performance (credentials rotate infrequently)
+        const enableCaching = !isReviewEnvironment(stage)
+
+        span.setAttributes({
+            'postgres.cache_enabled': enableCaching,
+            'postgres.cache_decision_reason': enableCaching
+                ? 'stable_environment'
+                : 'review_environment_frequent_rotation',
+        })
+
+        if (!enableCaching) {
+            console.info(
+                'Disabling Prisma client caching for review environment'
+            )
+        }
+
+        const prismaResult = await NewPrismaClient(dbConnResult, enableCaching)
+
+        if (prismaResult instanceof Error) {
+            console.info(
+                'Error: attempting to create prisma client: ',
+                prismaResult
+            )
+            span.recordException(prismaResult)
+            span.setStatus({
+                code: SpanStatusCode.ERROR,
+                message: 'Failed to create Prisma Client',
+            })
+            span.end()
+            return new Error('Failed to create Prisma Client')
+        }
+
+        span.setStatus({ code: SpanStatusCode.OK })
+        span.end()
+
+        return prismaResult
+    } catch (error) {
+        const err = error instanceof Error ? error : new Error(String(error))
+        span.recordException(err)
+        span.setStatus({
+            code: SpanStatusCode.ERROR,
+            message: err.message,
+        })
+        span.end()
+        throw error
     }
-
-    // Disable caching in review environments where credentials rotate on every deploy
-    // Keep caching in dev/val/prod for performance (credentials rotate infrequently)
-    const enableCaching = !isReviewEnvironment(stage)
-
-    if (!enableCaching) {
-        console.info('Disabling Prisma client caching for review environment')
-    }
-
-    const prismaResult = await NewPrismaClient(dbConnResult, enableCaching)
-
-    if (prismaResult instanceof Error) {
-        console.info(
-            'Error: attempting to create prisma client: ',
-            prismaResult
-        )
-        return new Error('Failed to create Prisma Client')
-    }
-
-    return prismaResult
 }
 
 async function getDBClusterID(secretName: string): Promise<string | Error> {
