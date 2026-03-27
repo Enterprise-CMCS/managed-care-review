@@ -1,0 +1,99 @@
+@use '../../../styles/mcrColors.scss' as custom;
+
+.virtualizedTable {
+    display: grid;
+    font-size: 0.85rem;
+}
+
+.stickyThead {
+    display: grid;
+    position: sticky;
+    top: 0;
+    z-index: 2;
+    background-color: white;
+}
+
+.theadRow {
+    display: flex;
+    width: 100%;
+}
+
+.theadCell {
+    display: flex;
+    align-items: center;
+    white-space: normal;
+    flex-shrink: 0;
+    border-bottom: 2px solid custom.$mcr-foundation-ink;
+    padding: 0.5rem 1rem;
+    font-weight: 700;
+}
+
+.virtualizedTbody {
+    display: grid;
+    position: relative;
+}
+
+.virtualizedRow {
+    display: flex;
+    position: absolute;
+    width: 100%;
+}
+
+.virtualizedCell {
+    display: flex;
+    align-items: center;
+    white-space: normal;
+    flex-shrink: 0;
+    border-bottom: 1px solid custom.$mcr-gray-lighter;
+    padding: 0.5rem 1rem;
+}
+
+.stickyColumn {
+    position: sticky;
+    left: 0;
+    z-index: 1;
+    background-color: white;
+}
+
+.columnVisibilityAccordion {
+    [class*='usa-accordion__content'] {
+        background: custom.$mcr-gray-lightest;
+        overflow: visible;
+    }
+}
+
+.columnVisibilityActions {
+    display: flex;
+    gap: 1rem;
+    margin-top: 0.75rem;
+}
+
+.columnVisibilityActionButton {
+    background-color: transparent;
+    border: none;
+    cursor: pointer;
+    text-decoration: underline;
+    padding: 0;
+    color: custom.$mcr-primary-base;
+
+    &:hover {
+        color: custom.$mcr-primary-dark;
+    }
+}
+
+.resizeHandle {
+    position: absolute;
+    right: 0;
+    top: 0;
+    height: 100%;
+    width: 4px;
+    cursor: col-resize;
+    user-select: none;
+    touch-action: none;
+    background-color: transparent;
+
+    &:hover,
+    &.isResizing {
+        background-color: custom.$mcr-foundation-ink;
+    }
+}

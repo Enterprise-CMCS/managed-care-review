@@ -8,6 +8,7 @@ const ROUTES = [
     'DASHBOARD',
     'DASHBOARD_SUBMISSIONS',
     'DASHBOARD_RATES',
+    'DASHBOARD_ADMIN_SUBMISSIONS',
     'GRAPHQL_EXPLORER',
     'HELP',
     'SETTINGS',
@@ -70,6 +71,7 @@ const RoutesRecord: Record<RouteT, string> = {
     DASHBOARD: '/dashboard',
     DASHBOARD_SUBMISSIONS: '/dashboard/submissions',
     DASHBOARD_RATES: '/dashboard/rate-reviews',
+    DASHBOARD_ADMIN_SUBMISSIONS: '/dashboard/admin-submissions',
     GRAPHQL_EXPLORER: '/dev/graphql-explorer',
     HELP: '/help',
     SETTINGS: '/settings',
@@ -133,6 +135,7 @@ const RoutesRecord: Record<RouteT, string> = {
 const DASHBOARD_ROUTES: RouteTWithUnknown[] = [
     'DASHBOARD_RATES',
     'DASHBOARD_SUBMISSIONS',
+    'DASHBOARD_ADMIN_SUBMISSIONS',
 ]
 
 const STATE_SUBMISSION_FORM_ROUTES: RouteTWithUnknown[] = [
@@ -252,6 +255,7 @@ const PageTitlesRecord: Record<RouteT | 'UNKNOWN_ROUTE', string> = {
     DASHBOARD: 'Dashboard',
     DASHBOARD_RATES: 'Rate review dashboard',
     DASHBOARD_SUBMISSIONS: 'Dashboard',
+    DASHBOARD_ADMIN_SUBMISSIONS: 'Admin submissions dashboard',
     RATES_SUMMARY: 'Rate summary',
     RATES_SUMMARY_QUESTIONS_AND_ANSWERS: 'Q&A',
     RATE_EDIT: 'Edit rate',
@@ -294,6 +298,7 @@ const PageHeadingsRecord: Partial<Record<RouteTWithUnknown, string>> = {
     ROOT: 'Submissions dashboard',
     DASHBOARD_SUBMISSIONS: 'Submissions dashboard',
     DASHBOARD_RATES: 'Rate reviews dashboard',
+    DASHBOARD_ADMIN_SUBMISSIONS: 'Admin submissions dashboard',
     SUBMISSIONS_NEW: '',
     SUBMISSIONS_NEW_SUBMISSION_FORM: '',
     MCR_SETTINGS: PageTitlesRecord.MCR_SETTINGS,

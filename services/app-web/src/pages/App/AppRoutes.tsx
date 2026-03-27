@@ -11,6 +11,7 @@ import { useTitle } from '../../hooks/useTitle'
 import { LocalLogin } from '../../localAuth'
 import { CognitoLogin } from '../Auth/CognitoLogin'
 import {
+    AdminSubmissionsDashboard,
     CMSDashboard,
     SubmissionsDashboard,
     RateReviewsDashboard,
@@ -264,6 +265,10 @@ const CMSUserRoutes = ({
                     <Route
                         path={'rate-reviews'}
                         element={<RateReviewsDashboard />}
+                    />
+                    <Route
+                        path={'admin-submissions'}
+                        element={<AdminSubmissionsDashboard />}
                     />
                 </Route>
 

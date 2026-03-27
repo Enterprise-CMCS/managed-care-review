@@ -12,9 +12,12 @@ const CMSDashboard = (): React.ReactElement => {
     const { pathname } = useLocation()
     const { updateActiveMainContent } = usePage()
     const loadOnRateReviews = pathname === RoutesRecord.DASHBOARD_RATES
+    const loadOnAdminSubmissions =
+        pathname === RoutesRecord.DASHBOARD_ADMIN_SUBMISSIONS
     const TAB_NAMES = {
         RATES: 'Rate reviews',
         SUBMISSIONS: 'Submissions',
+        ADMIN_SUBMISSIONS: 'Admin submissions',
     }
 
     const activeMainContentId = 'cmsDashboardMainContent'
@@ -38,7 +41,9 @@ const CMSDashboard = (): React.ReactElement => {
                         defaultActiveTab={
                             loadOnRateReviews
                                 ? TAB_NAMES.RATES
-                                : TAB_NAMES.SUBMISSIONS
+                                : loadOnAdminSubmissions
+                                  ? TAB_NAMES.ADMIN_SUBMISSIONS
+                                  : TAB_NAMES.SUBMISSIONS
                         }
                         className={styles.tabs}
                     >
@@ -54,6 +59,16 @@ const CMSDashboard = (): React.ReactElement => {
                             id="rate-reviews"
                             nestedRoute={RoutesRecord.DASHBOARD_RATES}
                             tabName={TAB_NAMES.RATES}
+                        >
+                            <Outlet />
+                        </TabPanel>
+
+                        <TabPanel
+                            id="admin-submissions"
+                            nestedRoute={
+                                RoutesRecord.DASHBOARD_ADMIN_SUBMISSIONS
+                            }
+                            tabName={TAB_NAMES.ADMIN_SUBMISSIONS}
                         >
                             <Outlet />
                         </TabPanel>
