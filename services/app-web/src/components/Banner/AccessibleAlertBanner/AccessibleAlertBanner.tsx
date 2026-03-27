@@ -1,5 +1,6 @@
 import React from 'react'
 import { Alert } from '@trussworks/react-uswds'
+import styles from './AccessibleAlertBanner.module.scss'
 
 type AccessibleAlertProps = React.ComponentProps<typeof Alert>
 
@@ -25,13 +26,15 @@ export const AccessibleAlertBanner = ({
     )
 
     return (
-        <Alert
-            role={role}
-            heading={heading && headingContent}
-            headingLevel={headingLevel}
-            {...rest}
-        >
-            {children}
-        </Alert>
+        <div className={styles.accessibleAlertBanner}>
+            <Alert
+                role={role}
+                heading={heading && headingContent}
+                headingLevel={headingLevel}
+                {...rest}
+            >
+                {children}
+            </Alert>
+        </div>
     )
 }

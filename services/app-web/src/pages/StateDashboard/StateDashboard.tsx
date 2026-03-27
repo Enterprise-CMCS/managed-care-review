@@ -7,7 +7,6 @@ import {
     useIndexContractsStrippedQuery,
 } from '../../gen/gqlClient'
 import styles from './StateDashboard.module.scss'
-import { SubmissionSuccessMessage } from './SubmissionSuccessMessage'
 import { handleApolloError, isLikelyUserAuthError } from '@mc-review/helpers'
 import {
     ErrorAlertSignIn,
@@ -20,6 +19,7 @@ import {
 import { GenericErrorPage } from '../Errors/GenericErrorPage'
 import { usePage } from '../../contexts/PageContext'
 import { recordJSException } from '@mc-review/otel'
+import { SubmissionSuccessBanner } from '../../components/Banner'
 
 /**
  * We only pull a subset of data out of the submission and revisions for display in Dashboard
@@ -158,7 +158,7 @@ export const StateDashboard = (): React.ReactElement => {
                     {programs.length ? (
                         <section className={styles.panel}>
                             {justSubmittedSubmissionName && (
-                                <SubmissionSuccessMessage
+                                <SubmissionSuccessBanner
                                     submissionName={justSubmittedSubmissionName}
                                     submissionId={submissionId || undefined}
                                     contractType={contractType || undefined}

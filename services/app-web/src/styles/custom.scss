@@ -196,40 +196,72 @@ h6 {
     @include mcr-h6-style;
 }
 
-.mcr-homepage-h1-bold {
+@mixin mcr-homepage-h1-bold-style {
     @include mcr-type-style(38px, 700, 100%);
 }
 
-.mcr-homepage-h2 {
+.mcr-homepage-h1-bold {
+    @include mcr-homepage-h1-bold-style;
+}
+
+@mixin mcr-homepage-h2-style {
     font-family: 'Public Sans', sans-serif;
     @include mcr-type-style(22px, 400, 120%);
 }
 
-.mcr-homepage-h2-bold {
+.mcr-homepage-h2 {
+    @include mcr-homepage-h2-style;
+}
+
+@mixin mcr-homepage-h2-bold-style {
     font-family: 'Public Sans', sans-serif;
     @include mcr-type-style(22px, 700, 28px);
 }
 
-.mcr-h4-bold {
+.mcr-homepage-h2-bold {
+    @include mcr-homepage-h2-bold-style;
+}
+
+@mixin mcr-h4-bold-style {
     @include mcr-type-style(20px, 700, 140%, 0.2px);
 }
 
-.mcr-tag {
+.mcr-h4-bold {
+    @include mcr-h4-bold-style;
+}
+
+@mixin mcr-tag-style {
     @include mcr-type-style(14px, 600, 100%);
     text-transform: uppercase;
 }
 
-.mcr-tag-bold {
+.mcr-tag {
+    @include mcr-tag-style;
+}
+
+@mixin mcr-tag-bold-style {
     @include mcr-type-style(14px, 700, 100%);
     text-transform: uppercase;
 }
 
-.mcr-body {
+.mcr-tag-bold {
+    @include mcr-tag-bold-style;
+}
+
+@mixin mcr-body-style {
     @include mcr-type-style(16px, 400, 162%, 0.16px);
 }
 
-.mcr-body-bold {
+.mcr-body {
+    @include mcr-body-style;
+}
+
+@mixin mcr-body-bold-style {
     @include mcr-type-style(16px, 700, 162%);
+}
+
+.mcr-body-bold {
+    @include mcr-body-bold-style;
 }
 
 /* ACCESSIBILITY */
