@@ -69,7 +69,8 @@ interface CachedPrismaClient {
 }
 
 /**
- * Module-level singleton cache for Prisma clients by connection URL
+ * Module-level singleton cache for Prisma clients
+ * Keyed by stable identifier (host/port/dbname/username) to handle credential rotations
  * Prevents connection pool leaks in Lambda warm containers by reusing clients
  *
  * Cached clients expire after 12 hours to handle credential rotations gracefully
@@ -81,6 +82,28 @@ const prismaClientCache = new Map<string, CachedPrismaClient>()
  * This ensures rotated credentials are picked up within a reasonable timeframe
  */
 const CACHE_TTL_MS = 12 * 60 * 60 * 1000 // 12 hours
+
+/**
+ * Derives a stable cache key from connection URL that excludes credentials
+ * This allows the same cache entry to be updated when passwords rotate,
+ * preventing accumulation of orphaned clients
+ *
+ * @param connURL - PostgreSQL connection string
+ * @returns Stable cache key (username@host:port/dbname)
+ */
+function getCacheKey(connURL: string): string {
+    try {
+        const url = new URL(connURL)
+        const username = url.username || 'unknown'
+        const host = url.hostname
+        const port = url.port || '5432'
+        const dbname = url.pathname.slice(1) // Remove leading /
+        return `${username}@${host}:${port}/${dbname}`
+    } catch {
+        // Fallback to full URL if parsing fails
+        return connURL
+    }
+}
 
 /**
  * Gets or creates a Prisma client for the given connection URL
@@ -110,9 +133,12 @@ async function NewPrismaClient(
     })
 
     try {
-        // Check if we already have a client for this connection URL (only if caching enabled)
+        // Use stable cache key that excludes credentials to handle password rotations
+        const cacheKey = getCacheKey(connURL)
+
+        // Check if we already have a client for this connection (only if caching enabled)
         if (enableCaching) {
-            const cached = prismaClientCache.get(connURL)
+            const cached = prismaClientCache.get(cacheKey)
             if (cached) {
                 const age = Date.now() - cached.createdAt
                 const ageMinutes = Math.round(age / 1000 / 60)
@@ -157,7 +183,7 @@ async function NewPrismaClient(
                         err instanceof Error ? err : new Error(String(err))
                     )
                 }
-                prismaClientCache.delete(connURL)
+                prismaClientCache.delete(cacheKey)
             } else {
                 span.setAttribute('prisma.cache.hit', false)
             }
@@ -181,11 +207,12 @@ async function NewPrismaClient(
 
         // Cache for future invocations in this warm container (only if caching enabled)
         if (enableCaching) {
-            prismaClientCache.set(connURL, {
+            prismaClientCache.set(cacheKey, {
                 client: prismaClient,
                 createdAt: Date.now(),
             })
             span.setAttribute('prisma.cache.stored', true)
+            span.setAttribute('prisma.cache.key', cacheKey)
         }
 
         span.setStatus({ code: SpanStatusCode.OK })

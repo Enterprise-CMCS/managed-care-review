@@ -19,6 +19,19 @@ async function main(
         }
     }
 
+    if (!process.env.SECRETS_MANAGER_SECRET) {
+        return {
+            statusCode: 500,
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                error: 'server_error',
+                error_description: 'Secrets manager env var missing',
+            }),
+        }
+    }
+
     if (!process.env.JWT_SECRET) {
         return {
             statusCode: 500,
@@ -47,13 +60,11 @@ async function main(
 
     // stage is either set in lambda env or we can set to local for local dev
     const stage = process.env.stage ?? 'local'
+    const dbURL = process.env.DATABASE_URL
+    const sms = process.env.SECRETS_MANAGER_SECRET
 
     // Configure database
-    const db = await configurePostgres(
-        process.env.DATABASE_URL,
-        process.env.SECRETS_MANAGER_SECRET,
-        stage
-    )
+    const db = await configurePostgres(dbURL, sms, stage)
     if (db instanceof Error) {
         return {
             statusCode: 500,

@@ -401,11 +401,18 @@ class LogicalDatabaseManager {
                     password = existingSecret.password
                     console.info(`Reusing existing password for ${userName}`)
                 } catch (error) {
-                    console.error(`Error on secret: ${error}`)
+                    const errorMessage =
+                        error instanceof Error
+                            ? error.message
+                            : String(error)
+                    console.error(
+                        `Could not retrieve existing secret for ${userName}: ${errorMessage}`,
+                        error instanceof Error ? error.stack : undefined
+                    )
 
                     // Secret doesn't exist or is invalid, generate and set new password
                     console.info(
-                        `Could not retrieve existing password, generating new one for ${userName}`
+                        `Generating new password for ${userName}`
                     )
                     password = await this.secrets.generatePassword()
                     await this.dbClient.updatePassword(client, userName, password)
