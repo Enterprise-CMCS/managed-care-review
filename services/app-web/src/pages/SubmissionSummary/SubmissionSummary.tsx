@@ -339,7 +339,7 @@ export const SubmissionSummary = (): React.ReactElement => {
                     <IncompleteSubmissionBanner message={incompleteMessage} />
                 )}
 
-                {documentError && (
+                {!documentError && (
                     <DocumentWarningBanner className={styles.banner} />
                 )}
 

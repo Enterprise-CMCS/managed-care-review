@@ -4,6 +4,14 @@
 .accessibleAlertBanner {
     h4[class*='usa-alert__heading'] {
         @include custom.mcr-h4-bold-style;
-        margin: 0;
+        margin: 0 0 0.5rem 0;
+    }
+
+    [class*='usa-alert--emergency']:before,
+    [class*='usa-alert--error']:before,
+    [class*='usa-alert--info']:before,
+    [class*='usa-alert--success']:before,
+    [class*='usa-alert--warning']:before {
+        top: 0.25rem;
     }
 }
