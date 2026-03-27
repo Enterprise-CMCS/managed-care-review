@@ -116,7 +116,11 @@ function contextForRequestForFetcher(
 
         const dbURL = process.env.DATABASE_URL ?? ''
         const secretsManagerSecret = process.env.SECRETS_MANAGER_SECRET ?? ''
-        const pgResult = await configurePostgres(dbURL, secretsManagerSecret)
+        const pgResult = await configurePostgres(
+            dbURL,
+            secretsManagerSecret,
+            stageName! // validated during initialization
+        )
 
         if (pgResult instanceof Error) {
             console.error("Init Error: Postgres couldn't be configured")
@@ -316,7 +320,11 @@ async function initializeGQLHandler(): Promise<Handler> {
     initTracer('app-api-' + stageName, otelCollectorUrl)
     console.info('OpenTelemetry tracer initialized for app-api-' + stageName)
 
-    const pgResult = await configurePostgres(dbURL, secretsManagerSecret)
+    const pgResult = await configurePostgres(
+        dbURL,
+        secretsManagerSecret,
+        stageName
+    )
     if (pgResult instanceof Error) {
         console.error("Init Error: Postgres couldn't be configured")
         throw pgResult

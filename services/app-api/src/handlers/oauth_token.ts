@@ -45,10 +45,14 @@ async function main(
         }
     }
 
+    // stage is either set in lambda env or we can set to local for local dev
+    const stage = process.env.stage ?? 'local'
+
     // Configure database
     const db = await configurePostgres(
         process.env.DATABASE_URL,
-        process.env.SECRETS_MANAGER_SECRET
+        process.env.SECRETS_MANAGER_SECRET,
+        stage
     )
     if (db instanceof Error) {
         return {

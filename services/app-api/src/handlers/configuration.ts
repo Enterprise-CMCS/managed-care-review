@@ -17,6 +17,14 @@ import type { ExtendedPrismaClient } from '../postgres/prismaClient'
  * configuration is captured here.
  */
 
+/**
+ * Detect if stage is a review environment
+ * Review environments have frequently rotating credentials
+ */
+function isReviewEnvironment(stage: string): boolean {
+    return !['dev', 'val', 'prod'].includes(stage)
+}
+
 async function getPostgresURL(
     dbURL: string,
     secretName: string | undefined
@@ -53,7 +61,8 @@ async function getPostgresURL(
 // configurePostgres takes our two env vars and attempts to configure postgres correctly
 async function configurePostgres(
     dbURL: string,
-    secretName: string | undefined
+    secretName: string | undefined,
+    stage: string
 ): Promise<ExtendedPrismaClient | Error> {
     console.info('Getting Postgres Connection')
 
@@ -62,7 +71,15 @@ async function configurePostgres(
         return dbConnResult
     }
 
-    const prismaResult = await NewPrismaClient(dbConnResult)
+    // Disable caching in review environments where credentials rotate on every deploy
+    // Keep caching in dev/val/prod for performance (credentials rotate infrequently)
+    const enableCaching = !isReviewEnvironment(stage)
+
+    if (!enableCaching) {
+        console.info('Disabling Prisma client caching for review environment')
+    }
+
+    const prismaResult = await NewPrismaClient(dbConnResult, enableCaching)
 
     if (prismaResult instanceof Error) {
         console.info(

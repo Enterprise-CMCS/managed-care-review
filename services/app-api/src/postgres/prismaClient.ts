@@ -75,23 +75,29 @@ const prismaClientCache = new Map<string, ExtendedPrismaClient>()
  * Each Lambda warm container reuses the same Prisma client across invocations.
  *
  * @param connURL - PostgreSQL connection string
+ * @param enableCaching - Whether to cache the Prisma client (default: true). Disable for environments with rotating credentials.
  * @returns Cached or new ExtendedPrismaClient instance
  */
 async function NewPrismaClient(
-    connURL: string
+    connURL: string,
+    enableCaching: boolean = true
 ): Promise<ExtendedPrismaClient | Error> {
     try {
-        // Check if we already have a client for this connection URL
-        const cached = prismaClientCache.get(connURL)
-        if (cached) {
-            console.info(
-                'Reusing cached Prisma client for warm Lambda container'
-            )
-            return cached
+        // Check if we already have a client for this connection URL (only if caching enabled)
+        if (enableCaching) {
+            const cached = prismaClientCache.get(connURL)
+            if (cached) {
+                console.info(
+                    'Reusing cached Prisma client for warm Lambda container'
+                )
+                return cached
+            }
         }
 
         console.info(
-            'Creating new Prisma client (cold start or new connection URL)'
+            enableCaching
+                ? 'Creating new Prisma client (cold start or new connection URL)'
+                : 'Creating new Prisma client (caching disabled for review environment)'
         )
         const pool = new pg.Pool({ connectionString: connURL })
         const adapter = new PrismaPg(pool)
@@ -100,8 +106,10 @@ async function NewPrismaClient(
             adapter,
         })
 
-        // Cache for future invocations in this warm container
-        prismaClientCache.set(connURL, prismaClient)
+        // Cache for future invocations in this warm container (only if caching enabled)
+        if (enableCaching) {
+            prismaClientCache.set(connURL, prismaClient)
+        }
 
         return prismaClient
     } catch (e: unknown) {
