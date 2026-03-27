@@ -350,11 +350,11 @@ importers:
         specifier: 3.8.8
         version: 3.8.8(graphql-ws@5.16.2(graphql@16.13.1))(graphql@16.13.1)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(subscriptions-transport-ws@0.11.0(graphql@16.13.1))
       '@apollo/server':
-        specifier: ^5.4.0
-        version: 5.4.0(graphql@16.13.1)
+        specifier: ^5.5.0
+        version: 5.5.0(graphql@16.13.1)
       '@as-integrations/aws-lambda':
         specifier: ^3.1.0
-        version: 3.1.0(@apollo/server@5.4.0(graphql@16.13.1))
+        version: 3.1.0(@apollo/server@5.5.0(graphql@16.13.1))
       '@aws-sdk/client-cognito-identity-provider':
         specifier: ^3.1017.0
         version: 3.1017.0
@@ -1279,8 +1279,8 @@ packages:
     peerDependencies:
       graphql: 14.x || 15.x || 16.x
 
-  '@apollo/server@5.4.0':
-    resolution: {integrity: sha512-E0/2C5Rqp7bWCjaDh4NzYuEPDZ+dltTf2c0FI6GCKJA6GBetVferX3h1//1rS4+NxD36wrJsGGJK+xyT/M3ysg==}
+  '@apollo/server@5.5.0':
+    resolution: {integrity: sha512-vWtodBOK/SZwBTJzItECOmLfL8E8pn/IdvP7pnxN5g2tny9iW4+9sxdajE798wV1H2+PYp/rRcl/soSHIBKMPw==}
     engines: {node: '>=20'}
     peerDependencies:
       graphql: ^16.11.0
@@ -8977,6 +8977,10 @@ packages:
     resolution: {integrity: sha512-p571pDVJKxHCjlDJAdlgeqAOMn69ceU4mfuvXs5Gb2I1s114JjeydpDBnkZ7m3zu3CWxQ+WEEhbCm5Oz+tDVxQ==}
     engines: {node: '>=0.4.0'}
 
+  flow-parser@0.307.0:
+    resolution: {integrity: sha512-tgyfAH8UdNCrrNx5H1Qwu6ldFWXqcH7ag6LgN1vCEwK8tamBnJ6ekfJRk32rKM4Jr7V7zhhYwhBDVb+XQtriFQ==}
+    engines: {node: '>=0.4.0'}
+
   follow-redirects@1.15.11:
     resolution: {integrity: sha512-deG2P0JfjrTxl50XGCDyfI97ZGVCxIpfKYmfyrQ54n5FO/0gfIES8C/Psl6kWVDolizcaaxZJnTS0QSMxvnsBQ==}
     engines: {node: '>=4.0'}
@@ -10409,14 +10413,6 @@ packages:
 
   lru-cache@10.4.3:
     resolution: {integrity: sha512-JNAzZcXrCt42VGLuYz0zfAzDfAvJWW6AfYlDBQyDV5DClI2m5sAmK+OIO7s59XfsRsWHp02jAJrRadPRGTt6SQ==}
-
-  lru-cache@11.2.5:
-    resolution: {integrity: sha512-vFrFJkWtJvJnD5hg+hJvVE8Lh/TcMzKnTgCWmtBipwI5yLX/iX+5UB2tfuyODF5E7k9xEzMdYgGqaSb1c0c5Yw==}
-    engines: {node: 20 || >=22}
-
-  lru-cache@11.2.6:
-    resolution: {integrity: sha512-ESL2CrkS/2wTPfuend7Zhkzo2u0daGJ/A2VucJOgQ/C48S/zB8MMeMHSGKYpXhIjbPxfuezITkaBH1wqv00DDQ==}
-    engines: {node: 20 || >=22}
 
   lru-cache@11.2.7:
     resolution: {integrity: sha512-aY/R+aEsRelme17KGQa/1ZSIpLpNYYrhcrepKTZgE+W3WM16YMCaPwOHLHsmopZHELU0Ojin1lPVxKR0MihncA==}
@@ -13410,7 +13406,7 @@ snapshots:
       '@apollo/utils.logger': 3.0.0
       graphql: 16.13.1
 
-  '@apollo/server@5.4.0(graphql@16.13.1)':
+  '@apollo/server@5.5.0(graphql@16.13.1)':
     dependencies:
       '@apollo/cache-control-types': 1.0.3(graphql@16.13.1)
       '@apollo/server-gateway-interface': 2.0.0(graphql@16.13.1)
@@ -13430,7 +13426,7 @@ snapshots:
       finalhandler: 2.1.1
       graphql: 16.13.1
       loglevel: 1.9.2
-      lru-cache: 11.2.5
+      lru-cache: 11.2.7
       negotiator: 1.0.0
       uuid: 11.1.0
       whatwg-mimetype: 4.0.0
@@ -13457,7 +13453,7 @@ snapshots:
   '@apollo/utils.keyvaluecache@4.0.0':
     dependencies:
       '@apollo/utils.logger': 3.0.0
-      lru-cache: 11.2.5
+      lru-cache: 11.2.7
 
   '@apollo/utils.logger@3.0.0': {}
 
@@ -13537,9 +13533,9 @@ snapshots:
       immutable: 5.1.5
       invariant: 2.2.4
 
-  '@as-integrations/aws-lambda@3.1.0(@apollo/server@5.4.0(graphql@16.13.1))':
+  '@as-integrations/aws-lambda@3.1.0(@apollo/server@5.5.0(graphql@16.13.1))':
     dependencies:
-      '@apollo/server': 5.4.0(graphql@16.13.1)
+      '@apollo/server': 5.5.0(graphql@16.13.1)
       '@types/aws-lambda': 8.10.152
 
   '@asamuzakjp/css-color@4.1.2':
@@ -13556,7 +13552,7 @@ snapshots:
       bidi-js: 1.0.3
       css-tree: 3.1.0
       is-potential-custom-element-name: 1.0.1
-      lru-cache: 11.2.6
+      lru-cache: 11.2.7
 
   '@asamuzakjp/nwsapi@2.3.9': {}
 
@@ -23082,7 +23078,7 @@ snapshots:
       '@asamuzakjp/css-color': 4.1.2
       '@csstools/css-syntax-patches-for-csstree': 1.0.27
       css-tree: 3.1.0
-      lru-cache: 11.2.6
+      lru-cache: 11.2.7
 
   csstype@3.1.0: {}
 
@@ -24365,6 +24361,8 @@ snapshots:
   flow-enums-runtime@0.0.6: {}
 
   flow-parser@0.306.1: {}
+
+  flow-parser@0.307.0: {}
 
   follow-redirects@1.15.11: {}
 
@@ -25737,7 +25735,7 @@ snapshots:
       '@babel/register': 7.28.6(@babel/core@7.29.0)
       babel-core: 7.0.0-bridge.0(@babel/core@7.29.0)
       chalk: 4.1.2
-      flow-parser: 0.306.1
+      flow-parser: 0.307.0
       graceful-fs: 4.2.11
       micromatch: 4.0.8
       neo-async: 2.6.2
@@ -26095,10 +26093,6 @@ snapshots:
       tslib: 2.8.1
 
   lru-cache@10.4.3: {}
-
-  lru-cache@11.2.5: {}
-
-  lru-cache@11.2.6: {}
 
   lru-cache@11.2.7: {}
 
