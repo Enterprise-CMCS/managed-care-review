@@ -22,6 +22,9 @@ import { FlattenContract } from '../../../gen/gqlClient'
 import { findStatePrograms, ProgramArgType } from '@mc-review/submissions'
 import styles from '../../../components/ContractTable/ContractTable.module.scss'
 import { pluralize } from '@mc-review/common-code'
+import { getSubmissionPath } from '../../../routeHelpers'
+import { NavLinkWithLogging } from '../../../components'
+import { formatCalendarDate } from '@mc-review/dates'
 import {
     FilterAccordion,
     FilterSelect,
@@ -53,7 +56,7 @@ const columnHelper = createColumnHelper<FlattenContract>()
 
 const formatDate = (value: string | null | undefined): string => {
     if (!value) return '-'
-    return new Date(value).toLocaleDateString()
+    return formatCalendarDate(value, 'UTC')
 }
 
 const formatBool = (value: boolean | null | undefined): string => {
@@ -129,9 +132,24 @@ const dateRangeFilter: FilterFn<DateRangeFilterType> = (
 
 const columns = [
     // Identifiers
-    columnHelper.accessor('submissionID', {
+    columnHelper.accessor((row) => row, {
+        id: 'submissionID',
         header: 'Submission ID',
         size: 155,
+        cell: (info) => {
+            const row = info.getValue()
+            return (
+                <NavLinkWithLogging
+                    to={getSubmissionPath(
+                        'SUBMISSIONS_SUMMARY',
+                        row.contractSubmissionType,
+                        row.contractId
+                    )}
+                >
+                    {row.submissionID}
+                </NavLinkWithLogging>
+            )
+        },
     }),
     columnHelper.accessor('contractId', { header: 'Contract ID' }),
     columnHelper.accessor('stateCode', {
@@ -174,13 +192,11 @@ const columns = [
         cell: (info) => formatDate(info.getValue()),
         filterFn: 'dateRangeFilter',
     }),
-    columnHelper.accessor('contractUpdatedAt', {
-        header: 'Contract Updated',
-        cell: (info) => formatDate(info.getValue()),
-    }),
     columnHelper.accessor('initiallySubmittedAt', {
+        id: 'initiallySubmittedAt',
         header: 'Initially Submitted',
         cell: (info) => formatDate(info.getValue()),
+        filterFn: 'dateRangeFilter',
     }),
     columnHelper.accessor('lastUpdatedForDisplay', {
         header: 'Last Updated',
@@ -240,6 +256,32 @@ const columns = [
     columnHelper.accessor('unlockInfoUpdatedByFamilyName', {
         header: 'Unlock By Family Name',
         cell: (info) => info.getValue() ?? '-',
+    }),
+
+    columnHelper.accessor('stateContacts', {
+        id: 'stateContacts',
+        header: 'State Contacts',
+        cell: (info) => info.getValue().length,
+        filterFn: (row, columnId, filterValue: string) => {
+            if (!filterValue) return true
+            const contacts = row.getValue(columnId) as Array<{
+                email?: string | null
+            }>
+            const joined = contacts
+                .map((c) => c.email ?? '')
+                .join(', ')
+                .toLowerCase()
+            return joined.includes(filterValue.toLowerCase())
+        },
+    }),
+
+    columnHelper.accessor('contractDocuments', {
+        header: 'Contract Docs',
+        cell: (info) => info.getValue().length,
+    }),
+    columnHelper.accessor('supportingDocuments', {
+        header: 'Supporting Docs',
+        cell: (info) => info.getValue().length,
     }),
 
     // Form data
@@ -498,7 +540,8 @@ export const AdminSubmissionsTable = ({
     data,
 }: AdminSubmissionsTableProps): React.ReactElement => {
     const tableContainerRef = useRef<HTMLDivElement>(null)
-    const filterDateRangeRef = useRef<FilterDateRangeRef>(null)
+    const contractCreatedDateRef = useRef<FilterDateRangeRef>(null)
+    const initiallySubmittedDateRef = useRef<FilterDateRangeRef>(null)
     const [sorting, setSorting] = React.useState<SortingState>([
         { id: 'lastUpdatedForDisplay', desc: true },
     ])
@@ -631,11 +674,17 @@ export const AdminSubmissionsTable = ({
     const contractCreatedAtColumn = table.getColumn(
         'contractCreatedAt'
     ) as Column<FlattenContract>
+    const initiallySubmittedAtColumn = table.getColumn(
+        'initiallySubmittedAt'
+    ) as Column<FlattenContract>
 
     const clearFilters = () => {
         setColumnFilters([])
-        if (filterDateRangeRef.current) {
-            filterDateRangeRef.current.clearFilter()
+        if (contractCreatedDateRef.current) {
+            contractCreatedDateRef.current.clearFilter()
+        }
+        if (initiallySubmittedDateRef.current) {
+            initiallySubmittedDateRef.current.clearFilter()
         }
         localStorage.removeItem(STORAGE_KEY_FILTERS)
     }
@@ -801,32 +850,81 @@ export const AdminSubmissionsTable = ({
                         }
                     />
                 </MultiColumnGrid>
-                <FilterDateRange
-                    ref={filterDateRangeRef}
-                    legend="Contract created date"
-                    startDateHint="mm/dd/yyyy"
-                    startDateLabel="From"
-                    startDatePickerProps={{
-                        id: 'contractCreatedFrom',
-                        name: 'contractCreatedFrom',
-                        onChange: (date) =>
-                            updateDateRangeFilter(
-                                [date, undefined],
-                                contractCreatedAtColumn
-                            ),
-                    }}
-                    endDateHint="mm/dd/yyyy"
-                    endDateLabel="To"
-                    endDatePickerProps={{
-                        id: 'contractCreatedTo',
-                        name: 'contractCreatedTo',
-                        onChange: (date) =>
-                            updateDateRangeFilter(
-                                [undefined, date],
-                                contractCreatedAtColumn
-                            ),
-                    }}
-                />
+                <MultiColumnGrid columns={1}>
+                    <FilterDateRange
+                        ref={contractCreatedDateRef}
+                        legend="Contract created date"
+                        startDateHint="mm/dd/yyyy"
+                        startDateLabel="From"
+                        startDatePickerProps={{
+                            id: 'contractCreatedFrom',
+                            name: 'contractCreatedFrom',
+                            onChange: (date) =>
+                                updateDateRangeFilter(
+                                    [date, undefined],
+                                    contractCreatedAtColumn
+                                ),
+                        }}
+                        endDateHint="mm/dd/yyyy"
+                        endDateLabel="To"
+                        endDatePickerProps={{
+                            id: 'contractCreatedTo',
+                            name: 'contractCreatedTo',
+                            onChange: (date) =>
+                                updateDateRangeFilter(
+                                    [undefined, date],
+                                    contractCreatedAtColumn
+                                ),
+                        }}
+                    />
+                    <FilterDateRange
+                        ref={initiallySubmittedDateRef}
+                        legend="Initially submitted date"
+                        startDateHint="mm/dd/yyyy"
+                        startDateLabel="From"
+                        startDatePickerProps={{
+                            id: 'initiallySubmittedFrom',
+                            name: 'initiallySubmittedFrom',
+                            onChange: (date) =>
+                                updateDateRangeFilter(
+                                    [date, undefined],
+                                    initiallySubmittedAtColumn
+                                ),
+                        }}
+                        endDateHint="mm/dd/yyyy"
+                        endDateLabel="To"
+                        endDatePickerProps={{
+                            id: 'initiallySubmittedTo',
+                            name: 'initiallySubmittedTo',
+                            onChange: (date) =>
+                                updateDateRangeFilter(
+                                    [undefined, date],
+                                    initiallySubmittedAtColumn
+                                ),
+                        }}
+                    />
+                </MultiColumnGrid>
+                <div style={{ marginTop: '0.75rem' }}>
+                    <label htmlFor="stateContacts-filter-input">
+                        State Contacts
+                    </label>
+                    <input
+                        id="stateContacts-filter-input"
+                        type="text"
+                        className="usa-input"
+                        placeholder="Search by email..."
+                        value={
+                            (table
+                                .getColumn('stateContacts')
+                                ?.getFilterValue() as string) ?? ''
+                        }
+                        onChange={(e) =>
+                            table
+                                .getColumn('stateContacts')
+                                ?.setFilterValue(e.target.value)
+                        }
+                    />
+                </div>
             </FilterAccordion>
             <ColumnVisibilityAccordion table={table} />
             <div aria-live="polite" aria-atomic>

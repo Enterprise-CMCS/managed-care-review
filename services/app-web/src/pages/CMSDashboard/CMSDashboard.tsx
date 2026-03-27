@@ -7,25 +7,60 @@ import { Tabs, TabPanel } from '../../components'
 import { Outlet, useLocation } from 'react-router-dom'
 import { RoutesRecord } from '@mc-review/constants'
 import { usePage } from '../../contexts/PageContext'
+import { useAuth } from '../../contexts/AuthContext'
 
 const CMSDashboard = (): React.ReactElement => {
     const { pathname } = useLocation()
     const { updateActiveMainContent } = usePage()
+    const { loggedInUser } = useAuth()
+    const isAdminUser = loggedInUser?.role === 'ADMIN_USER'
     const loadOnRateReviews = pathname === RoutesRecord.DASHBOARD_RATES
     const loadOnAdminSubmissions =
         pathname === RoutesRecord.DASHBOARD_ADMIN_SUBMISSIONS
     const TAB_NAMES = {
         RATES: 'Rate reviews',
         SUBMISSIONS: 'Submissions',
-        ADMIN_SUBMISSIONS: 'Admin submissions',
+        ADMIN_SUBMISSIONS: 'Admin',
     }
 
     const activeMainContentId = 'cmsDashboardMainContent'
+
+    const tabPanels = [
+        <TabPanel
+            key="submissions"
+            id="submissions"
+            nestedRoute={RoutesRecord.DASHBOARD_SUBMISSIONS}
+            tabName={TAB_NAMES.SUBMISSIONS}
+        >
+            <Outlet />
+        </TabPanel>,
+        <TabPanel
+            key="rate-reviews"
+            id="rate-reviews"
+            nestedRoute={RoutesRecord.DASHBOARD_RATES}
+            tabName={TAB_NAMES.RATES}
+        >
+            <Outlet />
+        </TabPanel>,
+        ...(isAdminUser
+            ? [
+                  <TabPanel
+                      key="admin-submissions"
+                      id="admin-submissions"
+                      nestedRoute={RoutesRecord.DASHBOARD_ADMIN_SUBMISSIONS}
+                      tabName={TAB_NAMES.ADMIN_SUBMISSIONS}
+                  >
+                      <Outlet />
+                  </TabPanel>,
+              ]
+            : []),
+    ]
 
     // Set the active main content to focus when click the Skip to main content button.
     useEffect(() => {
         updateActiveMainContent(activeMainContentId)
     }, [activeMainContentId, updateActiveMainContent])
+
     return (
         <div
             id={activeMainContentId}
@@ -46,33 +81,8 @@ const CMSDashboard = (): React.ReactElement => {
                                   : TAB_NAMES.SUBMISSIONS
                         }
                         className={styles.tabs}
-                    >
-                        <TabPanel
-                            id="submissions"
-                            nestedRoute={RoutesRecord.DASHBOARD_SUBMISSIONS}
-                            tabName={TAB_NAMES.SUBMISSIONS}
-                        >
-                            <Outlet />
-                        </TabPanel>
-
-                        <TabPanel
-                            id="rate-reviews"
-                            nestedRoute={RoutesRecord.DASHBOARD_RATES}
-                            tabName={TAB_NAMES.RATES}
-                        >
-                            <Outlet />
-                        </TabPanel>
-
-                        <TabPanel
-                            id="admin-submissions"
-                            nestedRoute={
-                                RoutesRecord.DASHBOARD_ADMIN_SUBMISSIONS
-                            }
-                            tabName={TAB_NAMES.ADMIN_SUBMISSIONS}
-                        >
-                            <Outlet />
-                        </TabPanel>
-                    </Tabs>
+                        children={tabPanels}
+                    />
                 </section>
             </GridContainer>
         </div>
