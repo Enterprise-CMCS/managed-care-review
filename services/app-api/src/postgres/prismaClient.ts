@@ -62,11 +62,24 @@ function extendedPrismaClient(optionArgs: { adapter: PrismaPg }) {
 
 type ExtendedPrismaClient = ReturnType<typeof extendedPrismaClient>
 
+interface CachedPrismaClient {
+    client: ExtendedPrismaClient
+    createdAt: number
+}
+
 /**
  * Module-level singleton cache for Prisma clients by connection URL
  * Prevents connection pool leaks in Lambda warm containers by reusing clients
+ *
+ * Cached clients expire after 12 hours to handle credential rotations gracefully
  */
-const prismaClientCache = new Map<string, ExtendedPrismaClient>()
+const prismaClientCache = new Map<string, CachedPrismaClient>()
+
+/**
+ * Time-to-live for cached Prisma clients in milliseconds (12 hours)
+ * This ensures rotated credentials are picked up within a reasonable timeframe
+ */
+const CACHE_TTL_MS = 12 * 60 * 60 * 1000 // 12 hours
 
 /**
  * Gets or creates a Prisma client for the given connection URL
@@ -87,10 +100,29 @@ async function NewPrismaClient(
         if (enableCaching) {
             const cached = prismaClientCache.get(connURL)
             if (cached) {
+                const age = Date.now() - cached.createdAt
+
+                // Check if cached client is still within TTL
+                if (age < CACHE_TTL_MS) {
+                    console.info(
+                        `Reusing cached Prisma client (age: ${Math.round(age / 1000 / 60)} minutes)`
+                    )
+                    return cached.client
+                }
+
+                // Cached client expired - disconnect and remove it
                 console.info(
-                    'Reusing cached Prisma client for warm Lambda container'
+                    `Cached Prisma client expired (age: ${Math.round(age / 1000 / 60 / 60)} hours), creating new client`
                 )
-                return cached
+                try {
+                    await cached.client.$disconnect()
+                } catch (err) {
+                    console.error(
+                        'Error disconnecting expired Prisma client:',
+                        err
+                    )
+                }
+                prismaClientCache.delete(connURL)
             }
         }
 
@@ -108,7 +140,10 @@ async function NewPrismaClient(
 
         // Cache for future invocations in this warm container (only if caching enabled)
         if (enableCaching) {
-            prismaClientCache.set(connURL, prismaClient)
+            prismaClientCache.set(connURL, {
+                client: prismaClient,
+                createdAt: Date.now(),
+            })
         }
 
         return prismaClient
@@ -129,9 +164,9 @@ async function disconnectAllPrismaClients(): Promise<void> {
     console.info(
         `Disconnecting ${prismaClientCache.size} cached Prisma client(s)`
     )
-    for (const client of prismaClientCache.values()) {
+    for (const cached of prismaClientCache.values()) {
         try {
-            await client.$disconnect()
+            await cached.client.$disconnect()
             // Avoid logging connection URL that may contain credentials
             console.info('Disconnected Prisma client')
         } catch (err) {
