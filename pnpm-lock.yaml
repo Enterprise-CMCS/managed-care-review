@@ -464,8 +464,8 @@ importers:
         specifier: ^9.0.3
         version: 9.0.3
       path-to-regexp:
-        specifier: ^8.3.0
-        version: 8.3.0
+        specifier: ^8.4.0
+        version: 8.4.0
       pg:
         specifier: ^8.16.3
         version: 8.19.0
@@ -11063,8 +11063,8 @@ packages:
   path-to-regexp@0.1.12:
     resolution: {integrity: sha512-RA1GjUVMnvYFxuqovrEqZoxxW5NUZqbwKtYz/Tt7nXerk0LbLblQmrsgdeOxV5SFHf0UDggjS/bSeOZwt1pmEQ==}
 
-  path-to-regexp@8.3.0:
-    resolution: {integrity: sha512-7jdwVIRtsP8MYpdXSwOS0YdD0Du+qOoF/AEPIt88PcCFrZCzx41oxku1jD88hZBwbNUIEfpqvuhjFaMAqMTWnA==}
+  path-to-regexp@8.4.0:
+    resolution: {integrity: sha512-PuseHIvAnz3bjrM2rGJtSgo1zjgxapTLZ7x2pjhzWwlp4SJQgK3f3iZIQwkpEnBaKz6seKBADpM4B4ySkuYypg==}
 
   path-type@4.0.0:
     resolution: {integrity: sha512-gDKb8aZMDeD/tZWs9P6+q0J9Mwkdl6xMV8TjnGP3qJVJ06bdMgkbBlLU8IdfOsIsFz2BW1rNVT3XuNEl8zPAvw==}
@@ -26854,7 +26854,7 @@ snapshots:
 
   path-to-regexp@0.1.12: {}
 
-  path-to-regexp@8.3.0: {}
+  path-to-regexp@8.4.0: {}
 
   path-type@4.0.0: {}
 
