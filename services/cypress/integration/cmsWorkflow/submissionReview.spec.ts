@@ -134,10 +134,6 @@ describe('CMS user can view submission', () => {
 
             cy.logInAsCMSUser()
 
-            cy.findByRole('link', { name: contractName })
-                .should('exist')
-                .click()
-
             cy.wait('@fetchContractWithQuestionsQuery', { timeout: 20_000 })
 
             cy.findByRole('heading', {
