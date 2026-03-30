@@ -74,7 +74,7 @@ const undoWithdrawContractInsideTransaction = async (
     const unlockedContract = await unlockContractInsideTransaction(tx, {
         contractID: contract.id,
         unlockedByUserID: updatedByID,
-        unlockReason: `CMS undoing submission submission withdrawal. ${updatedReason}`,
+        unlockReason: `CMS undoing submission withdrawal. ${updatedReason}`,
     })
 
     if (unlockedContract instanceof Error) {
