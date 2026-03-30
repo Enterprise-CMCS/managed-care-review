@@ -6,7 +6,6 @@
     justify-content: space-between;
     height: 2.5rem;
     border-top: 1px solid custom.$mcr-gray-lighter;
-    border-bottom: 1px solid custom.$mcr-gray-lighter;
     margin-top: 0;
     padding-top: 40px;
     padding-bottom: 20px;
@@ -14,10 +13,6 @@
     &.removeTopBorder {
         border-top: none;
         padding-top: 10px;
-    }
-
-    &.removeBottomBorder {
-        border-bottom: none;
     }
 }
 

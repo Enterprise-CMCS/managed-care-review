@@ -17,10 +17,13 @@ export const AccessibleAlertBanner = ({
     children,
     ...rest
 }: AccessibleAlertProps): React.ReactElement => {
+    const headingClassName =
+        headingLevel === 'h4' ? 'mcr-h4-bold' : undefined
+
     const headingContent = (
         <>
             <span className="srOnly">{`${role}, `}</span>
-            {heading}
+            <span className={headingClassName}>{heading}</span>
         </>
     )
 

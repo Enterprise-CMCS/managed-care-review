@@ -100,7 +100,7 @@ export const EqroReviewDeterminationBanners = ({
             heading={
                 subjectToReview ? 'Subject to review' : 'Not subject to review'
             }
-            headingLevel="h3"
+            headingLevel="h4"
             data-testid="eqroSummaryBanner"
             className={className}
         >

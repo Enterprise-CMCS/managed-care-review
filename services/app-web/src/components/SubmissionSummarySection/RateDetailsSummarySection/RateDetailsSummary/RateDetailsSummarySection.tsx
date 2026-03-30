@@ -506,7 +506,6 @@ export const RateDetailsSummarySection = ({
                                   documentCount={rateDocumentCount}
                                   onDocumentError={onDocumentError}
                                   headingLevel="h4"
-                                  removeBottomBorder
                                   renderZipLink={
                                       !!(
                                           isSubmittedOrCMSUser &&

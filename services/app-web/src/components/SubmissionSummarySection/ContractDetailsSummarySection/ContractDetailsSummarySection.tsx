@@ -191,7 +191,6 @@ export const ContractDetailsSummarySection = ({
                 documentCount={contractDocumentCount}
                 onDocumentError={onDocumentError}
                 headingLevel='h3'
-                removeTopBorder
                 renderZipLink={
                     !!(
                         isSubmittedOrCMSUser &&

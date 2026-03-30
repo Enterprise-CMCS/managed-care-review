@@ -1,4 +1,3 @@
-import classNames from 'classnames'
 import {
     ZipDownloadLink,
     ZipDownloadLinkProps,
@@ -15,23 +14,14 @@ interface DocumentHeaderProps extends ZipDownloadLinkProps {
 export const DocumentHeader = ({
     renderZipLink,
     removeTopBorder,
-    removeBottomBorder,
     headingLevel = 'h4',
     ...zipLinkProps
 }: DocumentHeaderProps): React.ReactElement => {
     const Heading = headingLevel
 
-    const containerClasses = classNames(styles.documentHeaderContainer, {
-        [styles.withTopBorder]: !removeTopBorder,
-        [styles.withBottomBorder]: !removeBottomBorder,
-    })
-
     return (
         <div
-            className={`${styles.documentHeaderContainer}
-            ${removeTopBorder ? styles.removeTopBorder : ''}
-            ${removeBottomBorder ? styles.removeBottomBorder : ''}
-        `}
+            className={`${styles.documentHeaderContainer} ${removeTopBorder ? styles.removeTopBorder : ''}`}
         >
             <Heading className={styles.header}>
                 {zipLinkProps.type === 'RATE' ? 'Rate' : 'Contract'} documents
