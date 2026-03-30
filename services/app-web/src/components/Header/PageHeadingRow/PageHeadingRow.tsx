@@ -79,19 +79,15 @@ const LandingRow = ({ isLoading }: { isLoading: boolean }) => {
     return (
         <div className={styles.landingPageHeading}>
             <GridContainer>
-                <h1>
-                    {!isLoading && (
-                        <>
-                            <span className="text-bold">
-                                Managed Care Review&nbsp;
-                            </span>
-                            <span className="font-heading-lg">
-                                Medicaid and CHIP Managed Care Reporting and
-                                Review System
-                            </span>
-                        </>
-                    )}
-                </h1>
+                {!isLoading && (
+                    <>
+                        <h1>Managed Care Review&nbsp;</h1>
+                        <h2 className="mcr-homepage-h2">
+                            Medicaid and CHIP Managed Care Reporting and Review
+                            System
+                        </h2>
+                    </>
+                )}
             </GridContainer>
         </div>
     )

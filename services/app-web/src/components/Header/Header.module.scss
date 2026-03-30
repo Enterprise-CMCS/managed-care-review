@@ -126,12 +126,15 @@
     background-color: custom.$mcr-cmsblue-dark;
     color: custom.$mcr-foundation-white;
     padding: 1rem 0;
-    & h1 {
+    & h1,
+    & h2 {
         display: flex;
         flex-flow: column;
         text-align: center;
-        font-weight: uswds.font-weight('light');
-        line-height: 1.5;
+        margin: 0;
+    }
+    & h1 {
+        margin-bottom: 10px;
     }
 }
 
