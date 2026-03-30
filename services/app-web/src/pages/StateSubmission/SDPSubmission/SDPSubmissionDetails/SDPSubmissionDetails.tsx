@@ -27,6 +27,7 @@ import { RoutesRecord } from '@mc-review/constants'
 import { useNavigate } from 'react-router-dom'
 import styles from '../../StateSubmissionForm.module.scss'
 import { SDPSubmissionDetailsSchema } from './SDPSubmissionDetailsSchema'
+import { PageBannerAlerts } from '../../SharedSubmissionComponents'
 
 export type SDPSubmissionDetailsFormValues = {
     submissionType?:
@@ -114,7 +115,10 @@ const formatCurrencyOnBlur = (value: string): string => {
 
 type SDPSubmissionDetailsProps = {
     initialValues?: SDPSubmissionDetailsFormValues
-    onContinue: (values: SDPSubmissionDetailsFormValues) => void
+    onContinue: (
+        values: SDPSubmissionDetailsFormValues
+    ) => void | Promise<void>
+    pageErrorMessage?: string | boolean
 }
 
 export const sdpSubmissionDetailsInitialValues = initialValues
@@ -122,6 +126,7 @@ export const sdpSubmissionDetailsInitialValues = initialValues
 export const SDPSubmissionDetails = ({
     initialValues = sdpSubmissionDetailsInitialValues,
     onContinue,
+    pageErrorMessage = false,
 }: SDPSubmissionDetailsProps): React.ReactElement => {
     const navigate = useNavigate()
     const { updateActiveMainContent } = usePage()
@@ -144,14 +149,19 @@ export const SDPSubmissionDetails = ({
                 <DynamicStepIndicator
                     formPages={[
                         'SUBMISSIONS_TYPE',
-                        'SUBMISSIONS_CONTRACT_DETAILS',
+                        'SUBMISSIONS_SDP_DETAILS',
+                        'SUBMISSIONS_SDP_CONTACTS',
+                        'SUBMISSIONS_SDP_REVIEW_SUBMIT',
                     ]}
                     currentFormPage="SUBMISSIONS_TYPE"
                     customPageTitles={{
                         SUBMISSIONS_TYPE: 'Submission details',
-                        SUBMISSIONS_CONTRACT_DETAILS: 'SDP details',
+                        SUBMISSIONS_SDP_DETAILS: 'SDP details',
+                        SUBMISSIONS_SDP_CONTACTS: 'Contacts',
+                        SUBMISSIONS_SDP_REVIEW_SUBMIT: 'Review and submit',
                     }}
                 />
+                <PageBannerAlerts showPageErrorMessage={pageErrorMessage} />
             </FormNotificationContainer>
 
             <FormContainer id="SDPSubmissionDetails">
@@ -160,7 +170,7 @@ export const SDPSubmissionDetails = ({
                     validationSchema={SDPSubmissionDetailsSchema}
                     onSubmit={async (values) => {
                         setShouldValidate(true)
-                        onContinue(values)
+                        await onContinue(values)
                     }}
                 >
                     {({ errors, handleSubmit, values, setFieldValue }) => (

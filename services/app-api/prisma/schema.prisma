@@ -279,8 +279,38 @@ model SDPRevisionTable {
   estimatedStateShare    String?
   automaticallyRenewed   Boolean
 
+  sdpDocuments SDPDocument[]
+  stateContacts SDPStateContact[]
+
   createdAt DateTime @default(now())
   updatedAt DateTime @default(now()) @updatedAt
+}
+
+model SDPDocument {
+  id            String           @id @default(uuid())
+  createdAt     DateTime         @default(now())
+  updatedAt     DateTime         @default(now()) @updatedAt
+  position      Int              @default(-1)
+  name          String
+  s3URL         String
+  s3BucketName  String?
+  s3Key         String?
+  sha256        String
+  dateAdded     DateTime?
+  sdpRevisionID String
+  sdpRevision   SDPRevisionTable @relation(fields: [sdpRevisionID], references: [id])
+}
+
+model SDPStateContact {
+  id            String           @id @default(uuid())
+  createdAt     DateTime         @default(now())
+  updatedAt     DateTime         @default(now()) @updatedAt
+  position      Int              @default(-1)
+  name          String?
+  titleRole     String?
+  email         String?
+  sdpRevisionID String
+  sdpRevision   SDPRevisionTable @relation(fields: [sdpRevisionID], references: [id])
 }
 
 model RateRevisionTable {

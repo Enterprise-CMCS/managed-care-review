@@ -3,6 +3,8 @@ export { sdpSchema, strippedSDPSchema } from './sdpTypes'
 export {
     sdpFormDataSchema,
     createSDPSchema,
+    sdpDocumentInputSchema,
+    updateSDPSchema,
     sdpSubmissionTypeSchema,
     sdpChangeTypeSchema,
 } from './sdpFormDataTypes'
@@ -48,6 +50,8 @@ export type { SDPType, StrippedSDPType } from './sdpTypes'
 export type {
     SDPFormDataType,
     CreateSDPInputType,
+    SDPDocumentInputType,
+    UpdateSDPInputType,
     SDPSubmissionType,
     SDPChangeType,
 } from './sdpFormDataTypes'

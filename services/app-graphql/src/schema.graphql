@@ -143,6 +143,13 @@ type Mutation {
     createSDP(input: CreateSDPInput!): CreateSDPPayload!
 
     """
+    updateSDP updates an SDP draft's documents and related contracts.
+
+    This can only be called by StateUsers.
+    """
+    updateSDP(input: UpdateSDPInput!): UpdateSDPPayload!
+
+    """
     updateContract can be used to update fields on the contract
     as opposed to an individual revision
     """
@@ -586,6 +593,18 @@ input CreateSDPInput {
 }
 
 type CreateSDPPayload {
+    sdp: SDP!
+}
+
+input UpdateSDPInput {
+    sdpID: ID!
+    lastSeenUpdatedAt: DateTime!
+    sdpDocuments: [GenericDocumentInput!]
+    relatedContractIDs: [ID!]!
+    stateContacts: [StateContactInput!]
+}
+
+type UpdateSDPPayload {
     sdp: SDP!
 }
 
@@ -1879,7 +1898,13 @@ Only contains the necessary info for displaying the SubmissionWithdrawWarningBan
 """
 type RelatedContractStripped {
     id: ID!
+    stateCode: String!
+    stateNumber: Int!
+    contractSubmissionType: ContractSubmissionType!
+    status: HealthPlanPackageStatus
+    reviewStatus: ContractReviewStatus
     consolidatedStatus: ConsolidatedContractStatus!
+    mccrsID: String
 }
 
 type RelatedSDPStripped {
@@ -2188,6 +2213,7 @@ type SDPFormData {
     estimatedFederalShare: String
     estimatedStateShare: String
     automaticallyRenewed: Boolean!
+    stateContacts: [StateContact!]!
 }
 
 """

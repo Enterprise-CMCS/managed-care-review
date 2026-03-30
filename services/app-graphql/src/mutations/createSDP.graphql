@@ -1,0 +1,54 @@
+mutation createSDP($input: CreateSDPInput!) {
+    createSDP(input: $input) {
+        sdp {
+            id
+            createdAt
+            updatedAt
+            stateCode
+            stateNumber
+            mccrsID
+            relatedContracts {
+                id
+                stateCode
+                stateNumber
+                contractSubmissionType
+                status
+                reviewStatus
+                consolidatedStatus
+                mccrsID
+            }
+            draftRevision {
+                id
+                sdpID
+                createdAt
+                updatedAt
+                formData {
+                    submissionType
+                    programIDs
+                    changesIncluded
+                    ratingPeriodStart
+                    ratingPeriodEnd
+                    estimatedFederalShare
+                    estimatedStateShare
+                    automaticallyRenewed
+                }
+            }
+            revisions {
+                id
+                sdpID
+                createdAt
+                updatedAt
+                formData {
+                    submissionType
+                    programIDs
+                    changesIncluded
+                    ratingPeriodStart
+                    ratingPeriodEnd
+                    estimatedFederalShare
+                    estimatedStateShare
+                    automaticallyRenewed
+                }
+            }
+        }
+    }
+}

@@ -1,0 +1,22 @@
+BEGIN;
+CREATE TABLE "SDPDocument" (
+    "id" TEXT NOT NULL,
+    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updatedAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "position" INTEGER NOT NULL DEFAULT -1,
+    "name" TEXT NOT NULL,
+    "s3URL" TEXT NOT NULL,
+    "s3BucketName" TEXT,
+    "s3Key" TEXT,
+    "sha256" TEXT NOT NULL,
+    "dateAdded" TIMESTAMP(3),
+    "sdpRevisionID" TEXT NOT NULL,
+
+    CONSTRAINT "SDPDocument_pkey" PRIMARY KEY ("id")
+);
+
+ALTER TABLE "SDPDocument"
+ADD CONSTRAINT "SDPDocument_sdpRevisionID_fkey"
+FOREIGN KEY ("sdpRevisionID") REFERENCES "SDPRevisionTable"("id")
+ON DELETE RESTRICT ON UPDATE CASCADE;
+COMMIT;

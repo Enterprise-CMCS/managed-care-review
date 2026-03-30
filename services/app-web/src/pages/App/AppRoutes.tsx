@@ -27,6 +27,7 @@ import {
     StateSubmissionForm,
     NewSubmission,
     NewSubmissionForm,
+    SDPSubmissionForm,
 } from '../StateSubmission'
 import { SubmissionSummaryRoutes } from '../SubmissionSummary'
 import { SubmissionRevisionSummary } from '../SubmissionRevisionSummary'
@@ -147,6 +148,18 @@ const StateUserRoutes = ({
                         element={<NewStateSubmissionForm />}
                     />
                 )}
+                <Route
+                    path={RoutesRecord.SUBMISSIONS_SDP_DETAILS}
+                    element={<SDPSubmissionForm />}
+                />
+                <Route
+                    path={RoutesRecord.SUBMISSIONS_SDP_CONTACTS}
+                    element={<SDPSubmissionForm />}
+                />
+                <Route
+                    path={RoutesRecord.SUBMISSIONS_SDP_REVIEW_SUBMIT}
+                    element={<SDPSubmissionForm />}
+                />
                 {showRatePages && (
                     <>
                         <Route

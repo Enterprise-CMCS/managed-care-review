@@ -1,4 +1,5 @@
 import { z } from 'zod'
+import { stateContactSchema } from './formDataTypes'
 
 const sdpSubmissionTypeSchema = z.union([
     z.literal('NEW_STATE_DIRECTED_PAYMENT_PREPRINT'),
@@ -23,26 +24,51 @@ const sdpFormDataSchema = z.object({
     estimatedFederalShare: z.string().optional(),
     estimatedStateShare: z.string().optional(),
     automaticallyRenewed: z.boolean(),
+    stateContacts: z.array(stateContactSchema).default([]),
 })
 
 const createSDPSchema = sdpFormDataSchema.extend({
     stateCode: z.string(),
 })
 
+const sdpDocumentInputSchema = z.object({
+    name: z.string(),
+    s3URL: z.string(),
+    sha256: z.string(),
+    dateAdded: z.date().optional(),
+    downloadURL: z.string().optional(),
+    s3BucketName: z.string().optional(),
+    s3Key: z.string().optional(),
+})
+
+const updateSDPSchema = z.object({
+    sdpID: z.string().uuid(),
+    lastSeenUpdatedAt: z.date(),
+    sdpDocuments: z.array(sdpDocumentInputSchema),
+    relatedContractIDs: z.array(z.string().uuid()),
+    stateContacts: z.array(stateContactSchema).default([]),
+})
+
 type SDPFormDataType = z.infer<typeof sdpFormDataSchema>
 type CreateSDPInputType = z.infer<typeof createSDPSchema>
+type SDPDocumentInputType = z.infer<typeof sdpDocumentInputSchema>
+type UpdateSDPInputType = z.infer<typeof updateSDPSchema>
 type SDPSubmissionType = z.infer<typeof sdpSubmissionTypeSchema>
 type SDPChangeType = z.infer<typeof sdpChangeTypeSchema>
 
 export {
     sdpFormDataSchema,
     createSDPSchema,
+    sdpDocumentInputSchema,
+    updateSDPSchema,
     sdpSubmissionTypeSchema,
     sdpChangeTypeSchema,
 }
 export type {
     SDPFormDataType,
     CreateSDPInputType,
+    SDPDocumentInputType,
+    UpdateSDPInputType,
     SDPSubmissionType,
     SDPChangeType,
 }

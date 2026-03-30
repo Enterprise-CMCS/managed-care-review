@@ -40,6 +40,8 @@ export type {
     SDPRevisionType,
     SDPFormDataType,
     CreateSDPInputType,
+    SDPDocumentInputType,
+    UpdateSDPInputType,
     SDPSubmissionType,
     SDPChangeType,
     RelatedContractType,

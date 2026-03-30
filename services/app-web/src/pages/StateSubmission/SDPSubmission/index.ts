@@ -1,3 +1,5 @@
 export { SDPSubmissionForm } from './SDPSubmissionForm'
 export { SDPSubmissionDetails } from './SDPSubmissionDetails'
 export { SDPDetails } from './SDPDetails'
+export { SDPContacts } from './SDPContacts'
+export { SDPReviewSubmit } from './SDPReviewSubmit'

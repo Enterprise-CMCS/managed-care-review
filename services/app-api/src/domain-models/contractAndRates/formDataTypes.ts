@@ -454,6 +454,7 @@ export {
     submittableRateFormDataSchema,
     contractFormDataSchema,
     rateFormDataSchema,
+    stateContactSchema,
     preprocessNulls,
     documentSchema,
     strippedRateFormDataSchema,

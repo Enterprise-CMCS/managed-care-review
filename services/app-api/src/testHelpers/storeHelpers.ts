@@ -92,6 +92,9 @@ function mockStoreThatErrors(): Store {
         insertDraftSDP: async (_ID) => {
             return genericError
         },
+        updateDraftSDP: async (_args) => {
+            return genericError
+        },
         findContractWithHistory: async (_ID) => {
             return genericError
         },

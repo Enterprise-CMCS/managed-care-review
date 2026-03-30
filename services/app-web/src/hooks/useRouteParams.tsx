@@ -3,6 +3,7 @@ import { useCurrentRoute } from './useCurrentRoute'
 import {
     ContractSubmissionTypeParams,
     STATE_SUBMISSION_FORM_ROUTES,
+    RouteTWithUnknown,
 } from '@mc-review/constants'
 import { recordJSException } from '@mc-review/otel'
 
@@ -17,6 +18,11 @@ type UseRouteParams = {
 const useRouteParams = (): UseRouteParams => {
     const { id, contractSubmissionType } = useParams<UseRouteParams>()
     const { currentRoute } = useCurrentRoute()
+    const sdpRoutesWithoutContractSubmissionType: RouteTWithUnknown[] = [
+        'SUBMISSIONS_SDP_DETAILS',
+        'SUBMISSIONS_SDP_CONTACTS',
+        'SUBMISSIONS_SDP_REVIEW_SUBMIT',
+    ]
     if (!id) {
         if (STATE_SUBMISSION_FORM_ROUTES.includes(currentRoute)) {
             const errorMessage =
@@ -25,7 +31,10 @@ const useRouteParams = (): UseRouteParams => {
         }
     }
     if (!contractSubmissionType) {
-        if (STATE_SUBMISSION_FORM_ROUTES.includes(currentRoute)) {
+        if (
+            STATE_SUBMISSION_FORM_ROUTES.includes(currentRoute) &&
+            !sdpRoutesWithoutContractSubmissionType.includes(currentRoute)
+        ) {
             const errorMessage =
                 'Unexpected Error: useRouteParams = contractSubmissionType param not set.'
             recordJSException(errorMessage)

@@ -2,6 +2,7 @@ export { StateSubmissionForm } from './StateSubmissionForm'
 export { NewStateSubmissionForm } from './HealthPlanSubmission/New'
 
 export { EQROSubmissionForm } from './EQROSubmission/EQROSubmissionForm'
+export { SDPSubmissionForm } from './SDPSubmission'
 
 export {
     PageBannerAlerts,

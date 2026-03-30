@@ -140,6 +140,7 @@ async function insertDraftSDP(
                             draftRevision.estimatedStateShare ?? undefined,
                         automaticallyRenewed:
                             draftRevision.automaticallyRenewed,
+                        stateContacts: [],
                     },
                 },
                 revisions: [draftRevision].map((revision) => ({
@@ -162,6 +163,7 @@ async function insertDraftSDP(
                         estimatedStateShare:
                             revision.estimatedStateShare ?? undefined,
                         automaticallyRenewed: revision.automaticallyRenewed,
+                        stateContacts: [],
                     },
                 })),
                 questions: undefined,
