@@ -22,7 +22,7 @@
 }
 
 .panel {
-    padding: uswds.units(2);
+    padding: 0 uswds.units(2) uswds.units(2) uswds.units(2);
     width: 100%;
 
     & .panelHeader {
@@ -30,6 +30,6 @@
         align-items: center;
         justify-content: space-between;
         font-weight: 700;
-        padding-bottom: uswds.units(2);
+        padding-bottom: uswds.units(3);
     }
 }
