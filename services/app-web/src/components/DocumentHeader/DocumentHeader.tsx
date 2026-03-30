@@ -7,7 +7,6 @@ import styles from './DocumentHeader.module.scss'
 interface DocumentHeaderProps extends ZipDownloadLinkProps {
     renderZipLink?: boolean
     removeTopBorder?: boolean
-    removeBottomBorder?: boolean
     headingLevel?: 'h1' | 'h2' | 'h3' | 'h4' | 'h5' | 'h6'
 }
 
