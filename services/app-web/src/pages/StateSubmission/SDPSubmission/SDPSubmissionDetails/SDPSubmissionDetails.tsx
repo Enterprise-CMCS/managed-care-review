@@ -130,6 +130,21 @@ const usDateToIsoDate = (value?: string): string => {
     return `${year}-${month.padStart(2, '0')}-${day.padStart(2, '0')}`
 }
 
+const formatCurrencyOnBlur = (value: string): string => {
+    const trimmedValue = value.trim().replace(/,/g, '')
+    const withoutCurrencySymbol = trimmedValue.replace(/^\$/, '')
+
+    if (!withoutCurrencySymbol) {
+        return ''
+    }
+
+    if (!/^\d+(\.\d{1,2})?$/.test(withoutCurrencySymbol)) {
+        return trimmedValue
+    }
+
+    return `$${withoutCurrencySymbol}`
+}
+
 export const SDPSubmissionDetails = (): React.ReactElement => {
     const navigate = useNavigate()
     const { updateActiveMainContent } = usePage()
@@ -458,12 +473,23 @@ export const SDPSubmissionDetails = (): React.ReactElement => {
                                     </Fieldset>
                                 </FormGroup>
 
-                                <Fieldset legend="Estimated dollar amount">
+                                <Fieldset
+                                    style={{ marginTop: '24px' }}
+                                    legend="Estimated dollar amount"
+                                >
                                     <FieldTextInput
                                         id="estimatedFederalShare"
                                         name="estimatedFederalShare"
                                         label="Estimated federal share"
                                         type="text"
+                                        onBlur={(e) =>
+                                            void setFieldValue(
+                                                'estimatedFederalShare',
+                                                formatCurrencyOnBlur(
+                                                    e.currentTarget.value
+                                                )
+                                            )
+                                        }
                                         showError={showFieldErrors(
                                             errors.estimatedFederalShare
                                         )}
@@ -473,6 +499,14 @@ export const SDPSubmissionDetails = (): React.ReactElement => {
                                         name="estimatedStateShare"
                                         label="Estimated state share"
                                         type="text"
+                                        onBlur={(e) =>
+                                            void setFieldValue(
+                                                'estimatedStateShare',
+                                                formatCurrencyOnBlur(
+                                                    e.currentTarget.value
+                                                )
+                                            )
+                                        }
                                         showError={showFieldErrors(
                                             errors.estimatedStateShare
                                         )}

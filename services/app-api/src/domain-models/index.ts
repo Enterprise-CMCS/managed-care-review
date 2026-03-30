@@ -42,6 +42,8 @@ export type {
     CreateSDPInputType,
     SDPSubmissionType,
     SDPChangeType,
+    RelatedContractType,
+    RelatedSDPType,
     StrippedContractType,
     StrippedContractRevisionType,
     StrippedSDPType,

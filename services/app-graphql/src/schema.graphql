@@ -1882,6 +1882,13 @@ type RelatedContractStripped {
     consolidatedStatus: ConsolidatedContractStatus!
 }
 
+type RelatedSDPStripped {
+    id: ID!
+    stateCode: String!
+    stateNumber: Int!
+    mccrsID: String
+}
+
 """
 Rates are rate certifications and their associated actuary contacts and documents
 State users may create, update, and submit several rates at a time
@@ -2232,6 +2239,9 @@ type ContractStripped {
 
     "The latest submitted contract revision"
     latestSubmittedRevision: ContractRevisionStripped
+
+    "SDPs related to this contract"
+    relatedSDPs: [RelatedSDPStripped!]
 }
 
 """
@@ -2247,6 +2257,7 @@ type SDPStripped {
     mccrsID: String
     draftRevision: SDPRevisionStripped
     latestSubmittedRevision: SDPRevisionStripped
+    relatedContracts: [RelatedContractStripped!]
 }
 
 """
@@ -2329,6 +2340,9 @@ type Contract {
     , unlocked, or resubmitted. The array is in descending order by createdAt.
     """
     questions: IndexContractQuestionsPayload
+
+    "SDPs related to this contract"
+    relatedSDPs: [RelatedSDPStripped!]
 }
 
 """
@@ -2345,6 +2359,7 @@ type SDP {
     draftRevision: SDPRevision
     revisions: [SDPRevision!]!
     questions: IndexSDPQuestionsPayload
+    relatedContracts: [RelatedContractStripped!]
 }
 
 """

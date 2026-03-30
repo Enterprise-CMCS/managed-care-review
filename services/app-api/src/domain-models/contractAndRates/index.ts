@@ -94,3 +94,11 @@ export {
     validateContractDraftRevisionInput,
     validateEQROContractDraftRevisionInput,
 } from './dataValidatorHelpers'
+export {
+    relatedContractSchema,
+    relatedSDPSchema,
+} from './relatedSubmissionTypes'
+export type {
+    RelatedContractType,
+    RelatedSDPType,
+} from './relatedSubmissionTypes'

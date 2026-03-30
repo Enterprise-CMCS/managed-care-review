@@ -24,6 +24,7 @@ import {
 } from './statusType'
 import { contractReviewActionSchema } from './contractReviewActionType'
 import { contractSubmissionTypeSchema } from './contractSubmissionType'
+import { relatedSDPSchema } from './relatedSubmissionTypes'
 
 const contractSchema = contractWithoutDraftRatesSchema.extend({
     withdrawnRates: z.lazy(() =>
@@ -32,6 +33,7 @@ const contractSchema = contractWithoutDraftRatesSchema.extend({
     draftRates: z.lazy(() =>
         z.array(rateWithoutDraftContractsSchema).optional()
     ),
+    relatedSDPs: z.array(relatedSDPSchema).optional(),
 })
 
 const eqroContractSchema = eqroContractDraftSchema.extend({
@@ -94,6 +96,7 @@ const strippedContractSchema = z.object({
     draftRevision: strippedContractRevisionSchema.optional(),
     reviewStatusActions: z.array(contractReviewActionSchema).optional(),
     latestSubmittedRevision: strippedContractRevisionSchema,
+    relatedSDPs: z.array(relatedSDPSchema).optional(),
 })
 
 type StrippedContractType = z.infer<typeof strippedContractSchema>

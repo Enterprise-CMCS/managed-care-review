@@ -78,6 +78,7 @@ model ContractTable {
 
   revisions           ContractRevisionTable[]
   sharedRateRevisions RateRevisionTable[]     @relation(name: "SharedRateRevisions")
+  relatedSDPs         ContractSDPJoinTable[]
 
   contractOverrides ContractOverrides[]
 }
@@ -94,6 +95,7 @@ model SDPTable {
 
   questions SDPQuestion[]
   revisions SDPRevisionTable[]
+  relatedContracts ContractSDPJoinTable[]
 }
 
 // Record of contract meta data overrides
@@ -190,6 +192,16 @@ model WithdrawnRatesJoinTable {
   rate       RateTable     @relation(fields: [rateID], references: [id], onDelete: Cascade)
 
   @@id([contractID, rateID])
+}
+
+model ContractSDPJoinTable {
+  createdAt  DateTime      @default(now())
+  contractID String
+  contract   ContractTable @relation(fields: [contractID], references: [id])
+  sdpID      String
+  sdp        SDPTable      @relation(fields: [sdpID], references: [id])
+
+  @@id([contractID, sdpID])
 }
 
 model ContractRevisionTable {

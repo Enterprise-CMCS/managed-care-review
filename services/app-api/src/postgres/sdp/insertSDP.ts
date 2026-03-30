@@ -1,3 +1,4 @@
+import { randomUUID } from 'crypto'
 import { Prisma } from '../../generated/client'
 import type { SDPType, CreateSDPInputType } from '../../domain-models'
 import type { ExtendedPrismaClient } from '../prismaClient'
@@ -32,6 +33,9 @@ async function insertDraftSDP(
 ): Promise<SDPType | Error> {
     try {
         return await client.$transaction(async (tx) => {
+            const sdpID = randomUUID()
+            const sdpRevisionID = randomUUID()
+
             const { latestStateSubmissionNumber } = await tx.state.update({
                 data: {
                     latestStateSubmissionNumber: {
@@ -47,8 +51,8 @@ async function insertDraftSDP(
             // SDP delegates. This keeps createSDP able to persist records now.
             const insertedSDPRows = await tx.$queryRaw<InsertedSDPRow[]>(
                 Prisma.sql`
-                    INSERT INTO "SDPTable" ("stateCode", "stateNumber")
-                    VALUES (${args.stateCode}, ${latestStateSubmissionNumber})
+                    INSERT INTO "SDPTable" ("id", "stateCode", "stateNumber")
+                    VALUES (${sdpID}, ${args.stateCode}, ${latestStateSubmissionNumber})
                     RETURNING "id", "createdAt", "updatedAt", "mccrsID", "stateCode", "stateNumber"
                 `
             )
@@ -63,6 +67,7 @@ async function insertDraftSDP(
             >(
                 Prisma.sql`
                         INSERT INTO "SDPRevisionTable" (
+                            "id",
                             "sdpID",
                             "submissionType",
                             "programIDs",
@@ -74,6 +79,7 @@ async function insertDraftSDP(
                             "automaticallyRenewed"
                         )
                         VALUES (
+                            ${sdpRevisionID},
                             ${sdp.id},
                             ${args.submissionType}::"SDPSubmissionType",
                             ARRAY[${Prisma.join(args.programIDs)}]::text[],

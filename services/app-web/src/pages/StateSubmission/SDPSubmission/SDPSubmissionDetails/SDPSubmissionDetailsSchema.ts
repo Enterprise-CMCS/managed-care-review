@@ -1,5 +1,18 @@
 import * as Yup from 'yup'
 
+const currencyValidationMessage =
+    'Enter a valid number with up to 2 decimal places'
+
+const currencyFieldSchema = Yup.string()
+    .optional()
+    .test(
+        'is-valid-currency',
+        currencyValidationMessage,
+        (value) =>
+            !value ||
+            /^\$?\d+(\.\d{1,2})?$/.test(value.trim().replace(/,/g, ''))
+    )
+
 export const SDPSubmissionDetailsSchema = Yup.object().shape({
     submissionType: Yup.string().required('You must select a submission type'),
     programIDs: Yup.array().min(1, 'You must select at least one program'),
@@ -22,6 +35,6 @@ export const SDPSubmissionDetailsSchema = Yup.object().shape({
     automaticallyRenewed: Yup.string().required(
         'You must select whether this payment arrangement is renewed automatically'
     ),
-    estimatedFederalShare: Yup.string().optional(),
-    estimatedStateShare: Yup.string().optional(),
+    estimatedFederalShare: currencyFieldSchema,
+    estimatedStateShare: currencyFieldSchema,
 })
