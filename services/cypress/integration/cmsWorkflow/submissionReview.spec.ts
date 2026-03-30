@@ -140,7 +140,14 @@ describe('CMS user can view submission', () => {
 
             cy.wait('@fetchContractWithQuestionsQuery', { timeout: 20_000 })
 
-            cy.findByRole('heading', { name: contractName, level: 1 })
+            cy.findByRole('heading', {
+                name: 'Submission summary',
+                level: 1,
+            }).should('exist')
+
+            cy.findByTestId('submission-summary').within(() => {
+                cy.findByText(contractName).should('exist')
+            })
 
             //TODO: Add assertions for review determination once that is added.
         })
