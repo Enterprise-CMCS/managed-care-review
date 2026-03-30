@@ -49,7 +49,7 @@ describe('Header', () => {
             })
 
             await waitFor(() => {
-                expect(screen.getByRole('heading')).toHaveTextContent(
+                expect(screen.getByRole('heading', { level: 2 })).toHaveTextContent(
                     'Medicaid and CHIP Managed Care Reporting and Review System'
                 )
             })

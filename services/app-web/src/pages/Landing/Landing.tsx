@@ -61,7 +61,9 @@ export const Landing = (): React.ReactElement => {
                         <Grid row gap className="margin-top-2">
                             <Grid tablet={{ col: 6 }}>
                                 <div className={styles.detailsSteps}>
-                                    <h2>How it works</h2>
+                                    <h2 className="mcr-homepage-h2-bold">
+                                        How it works
+                                    </h2>
                                     <ul>
                                         <li className={styles.login}>
                                             <span>Sign in with IDM</span>
@@ -95,13 +97,13 @@ export const Landing = (): React.ReactElement => {
                                 </div>
                             </Grid>
                             <Grid tablet={{ col: 6 }}>
-                                <h2 className="margin-top-0">
+                                <h2 className="mcr-homepage-h2-bold">
                                     Submit your managed care contracts to CMS
                                     for review
                                 </h2>
-                                <h4 className="margin-bottom-0">
+                                <h5 className="margin-bottom-0">
                                     MC-Review accepts
-                                </h4>
+                                </h5>
 
                                 <ol className={styles.detailsList}>
                                     <li>
@@ -153,9 +155,10 @@ export const Landing = (): React.ReactElement => {
                                     </li>
                                 </ol>
 
-                                <h4 className="margin-bottom-0">
+                                <h5 className="margin-bottom-0">
                                     Not accepted by MC-Review at this time
-                                </h4>
+                                </h5>
+                                
                                 <ol className={styles.detailsList}>
                                     <li>
                                         Some Medicaid and CHIP managed care
