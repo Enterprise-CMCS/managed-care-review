@@ -77,10 +77,13 @@ describe('CMS user', () => {
                 )
                 .should('exist')
 
-            //Find unlocked submission name
-            cy.get('#submissionName', { timeout: 2_000 }).then(($h2) => {
-                //Set name to variable for later use in finding the unlocked submission
-                const submissionName = $h2.text()
+            // Find unlocked submission name from the page header metadata
+            cy.findByTestId('submission-id', { timeout: 2_000 })
+                .invoke('text')
+                .then((text) => {
+                    const submissionName = text
+                        .replace(/^Submission ID\s*\|\s*/, '')
+                        .trim()
 
                 // Login as state user
                 cy.logOut()
@@ -250,7 +253,7 @@ describe('CMS user', () => {
                     expect(recordText[4]).to.not.contain('Changes made:')
                     expect(recordText[4]).to.not.contain('Reason for unlock:')
                 })
-            })
+                })
         })
     })
 
@@ -315,10 +318,13 @@ describe('CMS user', () => {
                     )
                     .should('exist')
 
-                //Find unlocked submission name
-                cy.get('#submissionName', { timeout: 2_000 }).then(($h2) => {
-                    //Set name to variable for later use in finding the unlocked submission
-                    const submissionName = $h2.text()
+                // Find unlocked submission name from the page header metadata
+                cy.findByTestId('submission-id', { timeout: 2_000 })
+                    .invoke('text')
+                    .then((text) => {
+                        const submissionName = text
+                            .replace(/^Submission ID\s*\|\s*/, '')
+                            .trim()
 
                     // Login as state user
                     cy.logOut()
@@ -501,7 +507,7 @@ describe('CMS user', () => {
                             )
                         }
                     )
-                })
+                    })
             })
         })
     })
