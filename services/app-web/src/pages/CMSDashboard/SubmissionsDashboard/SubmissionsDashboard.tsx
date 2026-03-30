@@ -131,6 +131,14 @@ const SubmissionsDashboard = (): React.ReactElement => {
 
     return (
         <section className={styles.panel}>
+            <div className={styles.panelHeader}>
+                <h2
+                    className="margin-top-0 margin-bottom-0"
+                    data-testid="cms-submissions-heading"
+                >
+                    Submissions
+                </h2>
+            </div>
             <ContractTable
                 tableData={submissionRows}
                 user={loggedInUser}

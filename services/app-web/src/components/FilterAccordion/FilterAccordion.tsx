@@ -19,7 +19,7 @@ export interface FilterAccordionPropType {
 export const FilterAccordion = ({
     onClearFilters,
     filterTitle,
-    headingLevel = 'h4',
+    headingLevel = 'h5',
     children,
 }: FilterAccordionPropType) => {
     const { logAccordionEvent } = useTealium()

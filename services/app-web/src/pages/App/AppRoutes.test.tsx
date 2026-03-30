@@ -64,6 +64,9 @@ describe('AppRoutes and routing configuration', () => {
                     screen.getByTestId('cms-dashboard-page')
                 ).toBeInTheDocument()
                 expect(
+                    screen.queryByTestId('submission-name')
+                ).not.toBeInTheDocument()
+                expect(
                     screen.queryByRole('heading', {
                         level: 2,
                         name: /Submissions/,

@@ -66,6 +66,9 @@ describe('CMSDashboard', () => {
                 expect(
                     screen.getByRole('heading', { name: 'Submissions' })
                 ).toBeInTheDocument()
+                expect(
+                    screen.getByTestId('cms-rate-reviews-heading')
+                ).toHaveTextContent('Rate reviews')
             })
 
             describe(`Tests submissions tab`, () => {
@@ -88,6 +91,9 @@ describe('CMSDashboard', () => {
                     expect(
                         screen.findByTestId('cms-dashboard-page')
                     ).not.toBeNull()
+                    expect(
+                        await screen.findByTestId('cms-submissions-heading')
+                    ).toHaveTextContent('Submissions')
                 })
 
                 it('displays submissions table excluding any in progress drafts', async () => {
