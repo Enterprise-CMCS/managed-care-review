@@ -38,7 +38,7 @@ export const ExpandableText = ({
                 data-testid="clampElement"
                 id="expandable-text"
                 aria-expanded={expanded}
-                className={`usa-alert__text ${
+                className={`usa-alert__text ${styles.expandableContent} ${
                     expanded ? styles.textExpanded : styles.textContracted
                 }`}
             >
