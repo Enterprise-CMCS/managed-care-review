@@ -3,13 +3,13 @@ import { GridContainer } from '@trussworks/react-uswds'
 import {
     ActionButton,
     DynamicStepIndicator,
-    FormContainer,
     FormNotificationContainer,
     PageActionsContainer,
     SectionCard,
     SectionHeader,
     DataDetail,
     DataDetailContactField,
+    UploadedDocumentsTable,
 } from '../../../../components'
 import { usePage } from '../../../../contexts/PageContext'
 import { PageBannerAlerts } from '../../SharedSubmissionComponents'
@@ -18,6 +18,8 @@ import { SDPContactsFormValues } from '../SDPContacts'
 import { SDPSubmissionDetailsFormValues } from '../SDPSubmissionDetails'
 import { generatePath, useNavigate } from 'react-router-dom'
 import { RoutesRecord } from '@mc-review/constants'
+import { useStatePrograms } from '../../../../hooks'
+import { GenericDocument } from '../../../../gen/gqlClient'
 import styles from './SDPReviewSubmit.module.scss'
 
 type SDPReviewSubmitProps = {
@@ -39,9 +41,76 @@ const formatSubmissionType = (
         case 'RENEWAL_FOR_NEW_RATING_PERIOD':
             return 'Renewal for new rating period'
         default:
-            return undefined
+            return 'Not provided'
     }
 }
+
+const formatProgramNames = (
+    programIDs: SDPSubmissionDetailsFormValues['programIDs'],
+    programs: ReturnType<typeof useStatePrograms>
+) => {
+    const selectedProgramNames = programs
+        .filter((program) => programIDs.includes(program.id))
+        .map((program) => program.name)
+
+    return selectedProgramNames.length > 0
+        ? selectedProgramNames.join(', ')
+        : 'None selected'
+}
+
+const formatChangesIncluded = (
+    changesIncluded: SDPSubmissionDetailsFormValues['changesIncluded']
+) => {
+    const changeLabelMap: Record<
+        SDPSubmissionDetailsFormValues['changesIncluded'][number],
+        string
+    > = {
+        RATING_PERIOD: 'Rating period',
+        PAYMENT_TYPE: 'Payment type',
+        PROVIDER_TYPE: 'Provider type',
+        QUALITY_METRICS_OR_BENCHMARKS: 'Quality metrics or benchmarks',
+        OTHER: 'Other',
+    }
+
+    return changesIncluded.length > 0
+        ? changesIncluded.map((change) => changeLabelMap[change]).join(', ')
+        : 'None selected'
+}
+
+const formatDateRange = (startDate: string, endDate: string) => {
+    if (!startDate && !endDate) return 'Not provided'
+    if (!startDate) return `End date: ${endDate}`
+    if (!endDate) return `Start date: ${startDate}`
+    return `${startDate} to ${endDate}`
+}
+
+const formatAutoRenewed = (
+    value?: SDPSubmissionDetailsFormValues['automaticallyRenewed']
+) => {
+    switch (value) {
+        case 'YES':
+            return 'Yes'
+        case 'NO':
+            return 'No'
+        default:
+            return 'Not provided'
+    }
+}
+
+const mapFileItemsToDocuments = (
+    files: SDPDetailsFormValues['sdpDocuments']
+): GenericDocument[] =>
+    files.map((file) => ({
+        __typename: 'GenericDocument',
+        id: file.id,
+        name: file.name,
+        s3URL: file.s3URL ?? '',
+        sha256: file.sha256 ?? '',
+        dateAdded: file.dateAdded?.toISOString() ?? null,
+        downloadURL: file.s3URL ?? null,
+        s3BucketName: null,
+        s3Key: file.key ?? null,
+    }))
 
 export const SDPReviewSubmit = ({
     id,
@@ -52,7 +121,9 @@ export const SDPReviewSubmit = ({
 }: SDPReviewSubmitProps): React.ReactElement => {
     const { updateActiveMainContent } = usePage()
     const navigate = useNavigate()
+    const statePrograms = useStatePrograms()
     const activeMainContentId = 'sdpReviewSubmitMainContent'
+    const sdpDocuments = mapFileItemsToDocuments(sdpDetailsValues.sdpDocuments)
 
     useEffect(() => {
         updateActiveMainContent(activeMainContentId)
@@ -78,123 +149,165 @@ export const SDPReviewSubmit = ({
                 />
                 <PageBannerAlerts showPageErrorMessage={pageErrorMessage} />
             </FormNotificationContainer>
-            <FormContainer id="SDPReviewSubmit">
-                <GridContainer className={styles.reviewSectionWrapper}>
-                    <SectionCard>
-                        <SectionHeader
-                            header="Submission details"
-                            hideBorderTop
-                            fontSize="38px"
-                            editNavigateTo={generatePath(
-                                RoutesRecord.SUBMISSIONS_NEW_SUBMISSION_FORM,
-                                { contractSubmissionType: 'sdp' }
+            <GridContainer className={styles.reviewSectionWrapper}>
+                <SectionCard>
+                    <SectionHeader
+                        header="Submission details"
+                        hideBorderTop
+                        hideBorderBottom
+                        fontSize="38px"
+                        editNavigateTo={generatePath(
+                            RoutesRecord.SUBMISSIONS_NEW_SUBMISSION_FORM,
+                            { contractSubmissionType: 'sdp' }
+                        )}
+                    />
+                    <dl>
+                        <DataDetail
+                            id="sdpSubmissionType"
+                            label="Submission type"
+                        >
+                            {formatSubmissionType(
+                                submissionDetailsValues.submissionType
                             )}
-                        />
-                        <dl>
-                            <DataDetail
-                                id="sdpSubmissionType"
-                                label="Submission type"
-                            >
-                                {formatSubmissionType(
-                                    submissionDetailsValues.submissionType
-                                )}
-                            </DataDetail>
-                            <DataDetail id="sdpPrograms" label="Programs">
-                                {submissionDetailsValues.programIDs.join(', ')}
-                            </DataDetail>
-                        </dl>
-                    </SectionCard>
+                        </DataDetail>
+                        <DataDetail
+                            id="sdpPrograms"
+                            label="Programs this action covers"
+                        >
+                            {formatProgramNames(
+                                submissionDetailsValues.programIDs,
+                                statePrograms
+                            )}
+                        </DataDetail>
+                        <DataDetail
+                            id="sdpChangesIncluded"
+                            label="Changes included in this preprint"
+                        >
+                            {formatChangesIncluded(
+                                submissionDetailsValues.changesIncluded
+                            )}
+                        </DataDetail>
+                        <DataDetail
+                            id="sdpRatingPeriod"
+                            label="Rating period for which this payment arrangement will apply"
+                        >
+                            {formatDateRange(
+                                submissionDetailsValues.ratingPeriodStart,
+                                submissionDetailsValues.ratingPeriodEnd
+                            )}
+                        </DataDetail>
+                        <DataDetail
+                            id="sdpEstimatedFederalShare"
+                            label="Estimated federal share"
+                        >
+                            {submissionDetailsValues.estimatedFederalShare ||
+                                'Not provided'}
+                        </DataDetail>
+                        <DataDetail
+                            id="sdpEstimatedStateShare"
+                            label="Estimated state share"
+                        >
+                            {submissionDetailsValues.estimatedStateShare ||
+                                'Not provided'}
+                        </DataDetail>
+                        <DataDetail
+                            id="sdpAutomaticallyRenewed"
+                            label="Is this payment arrangement renewed automatically?"
+                        >
+                            {formatAutoRenewed(
+                                submissionDetailsValues.automaticallyRenewed
+                            )}
+                        </DataDetail>
+                    </dl>
+                </SectionCard>
 
-                    <SectionCard>
-                        <SectionHeader
-                            header="SDP details"
-                            fontSize="38px"
-                            editNavigateTo={generatePath(
-                                RoutesRecord.SUBMISSIONS_SDP_DETAILS,
-                                {
-                                    id,
-                                }
-                            )}
-                        />
-                        <dl>
-                            <DataDetail
-                                id="sdpDocuments"
-                                label="SDP documents"
-                            >
-                                {sdpDetailsValues.sdpDocuments.length > 0
-                                    ? sdpDetailsValues.sdpDocuments
-                                          .map((doc) => doc.name)
-                                          .join(', ')
-                                    : 'No documents added'}
-                            </DataDetail>
-                            <DataDetail
-                                id="sdpRelatedContracts"
-                                label="Related contracts"
-                            >
-                                {sdpDetailsValues.linkContractSelects.filter(Boolean)
-                                    .length > 0
-                                    ? sdpDetailsValues.linkContractSelects
-                                          .filter(Boolean)
-                                          .join(', ')
-                                    : 'No related contracts added'}
-                            </DataDetail>
-                        </dl>
-                    </SectionCard>
-
-                    <SectionCard>
-                        <SectionHeader
-                            header="State contacts"
-                            fontSize="38px"
-                            editNavigateTo={generatePath(
-                                RoutesRecord.SUBMISSIONS_SDP_CONTACTS,
-                                {
-                                    id,
-                                }
-                            )}
-                        />
-                        <dl>
-                            {sdpContactsValues.stateContacts.map(
-                                (contact, index) => (
-                                    <DataDetail
-                                        key={`sdp-contact-${index}`}
-                                        id={`sdp-contact-${index}`}
-                                        label={`Contact ${index + 1}`}
-                                    >
-                                        <DataDetailContactField
-                                            contact={contact}
-                                        />
-                                    </DataDetail>
-                                )
-                            )}
-                        </dl>
-                    </SectionCard>
-
-                    <PageActionsContainer>
-                        <ActionButton
-                            type="button"
-                            variant="outline"
-                            parent_component_type="page body"
-                            onClick={() =>
-                                navigate(
-                                    generatePath(
-                                        RoutesRecord.SUBMISSIONS_SDP_CONTACTS,
-                                        { id }
-                                    )
-                                )
+                <SectionCard>
+                    <SectionHeader
+                        header="SDP details"
+                        hideBorderTop
+                        hideBorderBottom
+                        fontSize="38px"
+                        editNavigateTo={generatePath(
+                            RoutesRecord.SUBMISSIONS_SDP_DETAILS,
+                            {
+                                id,
                             }
+                        )}
+                    />
+                    <dl>
+                        <DataDetail
+                            id="sdpRelatedContracts"
+                            label="Related contracts"
                         >
-                            Back
-                        </ActionButton>
-                        <ActionButton
-                            type="button"
-                            variant="default"
-                            parent_component_type="page body"
-                        >
-                            Submit
-                        </ActionButton>
-                    </PageActionsContainer>
-                </GridContainer>
-            </FormContainer>
+                            {sdpDetailsValues.linkContractSelects.filter(Boolean)
+                                .length > 0
+                                ? sdpDetailsValues.linkContractSelects
+                                      .filter(Boolean)
+                                      .join(', ')
+                                : 'No related contracts added'}
+                        </DataDetail>
+                    </dl>
+                    <UploadedDocumentsTable
+                        documents={sdpDocuments}
+                        previousSubmissionDate={null}
+                        caption="SDP documents"
+                        documentCategory="SDP"
+                        hideDynamicFeedback
+                    />
+                </SectionCard>
+
+                <SectionCard>
+                    <SectionHeader
+                        header="State contacts"
+                        hideBorderTop
+                        hideBorderBottom
+                        fontSize="38px"
+                        editNavigateTo={generatePath(
+                            RoutesRecord.SUBMISSIONS_SDP_CONTACTS,
+                            {
+                                id,
+                            }
+                        )}
+                    />
+                    <dl>
+                        {sdpContactsValues.stateContacts.map((contact, index) => (
+                            <DataDetail
+                                key={`sdp-contact-${index}`}
+                                id={`sdp-contact-${index}`}
+                                label={`Contact ${index + 1}`}
+                            >
+                                <DataDetailContactField contact={contact} />
+                            </DataDetail>
+                        ))}
+                    </dl>
+                </SectionCard>
+
+                <PageActionsContainer>
+                    <ActionButton
+                        type="button"
+                        variant="outline"
+                        parent_component_type="page body"
+                        onClick={() =>
+                            navigate(
+                                generatePath(
+                                    RoutesRecord.SUBMISSIONS_SDP_CONTACTS,
+                                    { id }
+                                )
+                            )
+                        }
+                    >
+                        Back
+                    </ActionButton>
+                    <ActionButton
+                        type="button"
+                        variant="default"
+                        parent_component_type="page body"
+                        className={styles.submitButton}
+                    >
+                        Submit
+                    </ActionButton>
+                </PageActionsContainer>
+            </GridContainer>
         </div>
     )
 }

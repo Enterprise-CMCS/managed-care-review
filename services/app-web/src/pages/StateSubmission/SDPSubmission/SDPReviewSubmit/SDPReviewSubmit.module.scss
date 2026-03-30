@@ -1,3 +1,13 @@
+@use '../../../../styles/custom.scss' as custom;
+@use '../../../../styles/uswdsImports.scss' as uswds;
+
 .reviewSectionWrapper {
-    padding-bottom: 2rem;
+    max-width: custom.$mcr-container-standard-width-fixed;
+}
+
+.submitButton {
+    background: custom.$mcr-success-base;
+    &:hover {
+        background-color: custom.$mcr-success-hover !important;
+    }
 }
