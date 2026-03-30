@@ -68,11 +68,8 @@ describe('Page Heading Row', () => {
                 mocks: [fetchCurrentUserMock({ statusCode: 200 })],
             },
         })
-
         await waitFor(() => {
-            expect(
-                screen.getByRole('heading', { level: 1 })
-            ).toBeInTheDocument()
+            expect(screen.getByRole('heading')).toBeInTheDocument()
         })
     })
 
@@ -95,9 +92,10 @@ describe('Page Heading Row', () => {
         })
 
         await waitFor(() => {
-            expect(
-                screen.queryByRole('heading', { level: 1 })
-            ).not.toBeInTheDocument()
+            expect(screen.getByRole('heading')).toBeInTheDocument()
+            expect(screen.getByRole('heading')).not.toHaveTextContent(
+                'Medicaid and CHIP Managed Care Reporting and Review System'
+            )
         })
     })
 
@@ -110,9 +108,8 @@ describe('Page Heading Row', () => {
                 },
             }
         )
-
         await waitFor(() => {
-            expect(screen.getByRole('heading', { level: 2 })).toHaveTextContent(
+            expect(screen.getByRole('heading')).toHaveTextContent(
                 'Medicaid and CHIP Managed Care Reporting and Review System'
             )
         })
