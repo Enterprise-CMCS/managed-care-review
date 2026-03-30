@@ -15,4 +15,12 @@
         margin-top: 8px;
         line-height: 24px;
     }
+
+    > :first-child {
+        margin-top: 0;
+    }
+
+    > :last-child {
+        margin-bottom: 0;
+    }
 }

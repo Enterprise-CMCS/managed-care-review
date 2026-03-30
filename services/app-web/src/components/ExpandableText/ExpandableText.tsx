@@ -10,9 +10,9 @@ export const ExpandableText = ({
     clampedLines = 2,
     children,
 }: ExpandableTextProps &
-    React.HTMLAttributes<HTMLParagraphElement>): React.ReactElement => {
+    React.HTMLAttributes<HTMLDivElement>): React.ReactElement => {
     //We are using React.useRef because jest spyOn useRef only works like this.
-    const textRef = React.useRef<HTMLParagraphElement>(null)
+    const textRef = React.useRef<HTMLDivElement>(null)
     const [expanded, setExpanded] = useState<boolean>(false)
     const [showMoreButton, setShowMoreButton] = useState<boolean>(false)
 
@@ -33,17 +33,17 @@ export const ExpandableText = ({
 
     return (
         <div className={styles.expandableBlock} aria-live="off">
-            <p
+            <div
                 ref={textRef}
                 data-testid="clampElement"
                 id="expandable-text"
                 aria-expanded={expanded}
-                className={`usa-alert__text ${
+                className={`usa-alert__text ${styles.expandableContent} ${
                     expanded ? styles.textExpanded : styles.textContracted
                 }`}
             >
                 {children}
-            </p>
+            </div>
             {showMoreButton && (
                 <ButtonWithLogging
                     type="button"
@@ -54,7 +54,7 @@ export const ExpandableText = ({
                     aria-expanded={expanded}
                     aria-controls="expandable-text"
                 >
-                    {expanded ? 'Show Less' : 'Show More'}
+                    {expanded ? 'Show less' : 'Show more'}
                 </ButtonWithLogging>
             )}
         </div>
