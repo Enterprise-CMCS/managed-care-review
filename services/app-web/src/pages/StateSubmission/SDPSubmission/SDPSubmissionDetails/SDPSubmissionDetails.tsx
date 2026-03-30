@@ -1,5 +1,4 @@
 import React, { useEffect, useState } from 'react'
-import { gql, useMutation } from '@apollo/client'
 import { Formik, FormikErrors } from 'formik'
 import {
     Fieldset,
@@ -24,56 +23,24 @@ import { ContactSupportLink } from '../../../../components/ErrorAlert/ContactSup
 import { CustomDateRangePicker } from '../../../../components/Form/CustomDateRangePicker/CustomDateRangePicker'
 import { usePage } from '../../../../contexts/PageContext'
 import { useErrorSummary } from '../../../../hooks/useErrorSummary'
-import { yesNoFormValueAsBoolean } from '../../../../components/Form/FieldYesNo'
 import { RoutesRecord } from '@mc-review/constants'
 import { useNavigate } from 'react-router-dom'
 import styles from '../../StateSubmissionForm.module.scss'
 import { SDPSubmissionDetailsSchema } from './SDPSubmissionDetailsSchema'
 
-const CREATE_SDP_MUTATION = gql`
-    mutation CreateSDP($input: CreateSDPInput!) {
-        createSDP(input: $input) {
-            sdp {
-                id
-            }
-        }
-    }
-`
-
-type CreateSDPMutationData = {
-    createSDP: {
-        sdp: {
-            id: string
-        }
-    }
-}
-
-type CreateSDPMutationVariables = {
-    input: {
-        submissionType:
-            | 'NEW_STATE_DIRECTED_PAYMENT_PREPRINT'
-            | 'AMENDMENT_TO_AN_APPROVED_PREPRINT'
-            | 'RENEWAL_FOR_NEW_RATING_PERIOD'
-        programIDs: string[]
-        changesIncluded: Array<
-            | 'RATING_PERIOD'
-            | 'PAYMENT_TYPE'
-            | 'PROVIDER_TYPE'
-            | 'QUALITY_METRICS_OR_BENCHMARKS'
-            | 'OTHER'
-        >
-        ratingPeriodStart: string
-        ratingPeriodEnd: string
-        estimatedFederalShare?: string
-        estimatedStateShare?: string
-        automaticallyRenewed: boolean
-    }
-}
-
-type SDPSubmissionDetailsFormValues = {
-    submissionType?: CreateSDPMutationVariables['input']['submissionType']
+export type SDPSubmissionDetailsFormValues = {
+    submissionType?:
+        | 'NEW_STATE_DIRECTED_PAYMENT_PREPRINT'
+        | 'AMENDMENT_TO_AN_APPROVED_PREPRINT'
+        | 'RENEWAL_FOR_NEW_RATING_PERIOD'
     programIDs: string[]
-    changesIncluded: CreateSDPMutationVariables['input']['changesIncluded']
+    changesIncluded: Array<
+        | 'RATING_PERIOD'
+        | 'PAYMENT_TYPE'
+        | 'PROVIDER_TYPE'
+        | 'QUALITY_METRICS_OR_BENCHMARKS'
+        | 'OTHER'
+    >
     ratingPeriodStart: string
     ratingPeriodEnd: string
     estimatedFederalShare: string
@@ -145,17 +112,21 @@ const formatCurrencyOnBlur = (value: string): string => {
     return `$${withoutCurrencySymbol}`
 }
 
-export const SDPSubmissionDetails = (): React.ReactElement => {
+type SDPSubmissionDetailsProps = {
+    initialValues?: SDPSubmissionDetailsFormValues
+    onContinue: (values: SDPSubmissionDetailsFormValues) => void
+}
+
+export const sdpSubmissionDetailsInitialValues = initialValues
+
+export const SDPSubmissionDetails = ({
+    initialValues = sdpSubmissionDetailsInitialValues,
+    onContinue,
+}: SDPSubmissionDetailsProps): React.ReactElement => {
     const navigate = useNavigate()
     const { updateActiveMainContent } = usePage()
     const { errorSummaryHeadingRef } = useErrorSummary()
     const [shouldValidate, setShouldValidate] = useState(false)
-    const [createdSDPId, setCreatedSDPId] = useState<string>()
-    const [submissionError, setSubmissionError] = useState<string>()
-    const [createSDP, { loading }] = useMutation<
-        CreateSDPMutationData,
-        CreateSDPMutationVariables
-    >(CREATE_SDP_MUTATION)
 
     const activeMainContentId = 'sdpSubmissionDetailsMainContent'
 
@@ -171,40 +142,16 @@ export const SDPSubmissionDetails = (): React.ReactElement => {
         <div id={activeMainContentId}>
             <FormNotificationContainer>
                 <DynamicStepIndicator
-                    formPages={['SUBMISSIONS_TYPE']}
+                    formPages={[
+                        'SUBMISSIONS_TYPE',
+                        'SUBMISSIONS_CONTRACT_DETAILS',
+                    ]}
                     currentFormPage="SUBMISSIONS_TYPE"
                     customPageTitles={{
                         SUBMISSIONS_TYPE: 'Submission details',
+                        SUBMISSIONS_CONTRACT_DETAILS: 'SDP details',
                     }}
                 />
-                {createdSDPId && (
-                    <div
-                        className="usa-alert usa-alert--success margin-top-3"
-                        role="status"
-                    >
-                        <div className="usa-alert__body">
-                            <h2 className="usa-alert__heading">
-                                Draft SDP created
-                            </h2>
-                            <p className="usa-alert__text">
-                                Draft ID: {createdSDPId}
-                            </p>
-                        </div>
-                    </div>
-                )}
-                {submissionError && (
-                    <div
-                        className="usa-alert usa-alert--error margin-top-3"
-                        role="alert"
-                    >
-                        <div className="usa-alert__body">
-                            <h2 className="usa-alert__heading">
-                                There was a problem creating the SDP draft
-                            </h2>
-                            <p className="usa-alert__text">{submissionError}</p>
-                        </div>
-                    </div>
-                )}
             </FormNotificationContainer>
 
             <FormContainer id="SDPSubmissionDetails">
@@ -213,41 +160,7 @@ export const SDPSubmissionDetails = (): React.ReactElement => {
                     validationSchema={SDPSubmissionDetailsSchema}
                     onSubmit={async (values) => {
                         setShouldValidate(true)
-                        setSubmissionError(undefined)
-                        setCreatedSDPId(undefined)
-
-                        try {
-                            const result = await createSDP({
-                                variables: {
-                                    input: {
-                                        submissionType: values.submissionType!,
-                                        programIDs: values.programIDs,
-                                        changesIncluded: values.changesIncluded,
-                                        ratingPeriodStart:
-                                            values.ratingPeriodStart,
-                                        ratingPeriodEnd: values.ratingPeriodEnd,
-                                        estimatedFederalShare:
-                                            values.estimatedFederalShare ||
-                                            undefined,
-                                        estimatedStateShare:
-                                            values.estimatedStateShare ||
-                                            undefined,
-                                        automaticallyRenewed:
-                                            yesNoFormValueAsBoolean(
-                                                values.automaticallyRenewed
-                                            ) ?? false,
-                                    },
-                                },
-                            })
-
-                            setCreatedSDPId(result.data?.createSDP.sdp.id)
-                        } catch (error) {
-                            setSubmissionError(
-                                error instanceof Error
-                                    ? error.message
-                                    : 'Unknown error'
-                            )
-                        }
+                        onContinue(values)
                     }}
                 >
                     {({ errors, handleSubmit, values, setFieldValue }) => (
@@ -539,7 +452,6 @@ export const SDPSubmissionDetails = (): React.ReactElement => {
                                     RoutesRecord.DASHBOARD_SUBMISSIONS
                                 }
                                 continueOnClick={() => setShouldValidate(true)}
-                                actionInProgress={loading}
                             />
                         </UswdsForm>
                     )}
