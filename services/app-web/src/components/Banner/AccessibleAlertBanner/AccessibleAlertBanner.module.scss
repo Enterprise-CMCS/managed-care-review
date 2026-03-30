@@ -14,4 +14,8 @@
     [class*='usa-alert--warning']:before {
         top: 0.25rem;
     }
+
+    [class*='usa-alert__text'] {
+        font-size: 1rem;
+    }
 }
