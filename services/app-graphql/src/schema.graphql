@@ -198,8 +198,6 @@ type Mutation {
             - Postgres returns error when attempting to update a package
         - INVALID_PACKAGE_STATUS
             - Attempted to unlock a package in the DRAFT or UNLOCKED state
-        - PROTO_DECODE_ERROR
-            - Failed to decode draft proto
         - EMAIL_ERROR
             - Sending state or CMS email failed.
     """
