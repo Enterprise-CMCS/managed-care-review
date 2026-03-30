@@ -1001,8 +1001,8 @@ importers:
         specifier: ^3.1017.0
         version: 3.1017.0
       '@aws-solutions-constructs/aws-apigateway-lambda':
-        specifier: 2.99.0
-        version: 2.99.0(@aws-solutions-constructs/core@2.94.0(aws-cdk-lib@2.243.0(constructs@10.5.1))(constructs@10.5.1))(aws-cdk-lib@2.243.0(constructs@10.5.1))(constructs@10.5.1)
+        specifier: 2.100.1
+        version: 2.100.1(@aws-solutions-constructs/core@2.94.0(aws-cdk-lib@2.243.0(constructs@10.5.1))(constructs@10.5.1))(aws-cdk-lib@2.243.0(constructs@10.5.1))(constructs@10.5.1)
       '@aws-solutions-constructs/aws-cloudfront-s3':
         specifier: 2.94.0
         version: 2.94.0(@aws-solutions-constructs/core@2.94.0(aws-cdk-lib@2.243.0(constructs@10.5.1))(constructs@10.5.1))(@aws-solutions-constructs/resources@2.94.0(@aws-solutions-constructs/core@2.94.0(aws-cdk-lib@2.243.0(constructs@10.5.1))(constructs@10.5.1))(aws-cdk-lib@2.243.0(constructs@10.5.1))(constructs@10.5.1))(aws-cdk-lib@2.243.0(constructs@10.5.1))(constructs@10.5.1)
@@ -2262,11 +2262,11 @@ packages:
     resolution: {integrity: sha512-PxMRlCFNiQnke9YR29vjFQwz4jq+6Q04rOVFeTDR2K7Qpv9h9FOWOxG+zJjageimYbWqE3bTuLjmryWHAWbvaA==}
     engines: {node: '>=20.0.0'}
 
-  '@aws-solutions-constructs/aws-apigateway-lambda@2.99.0':
-    resolution: {integrity: sha512-xe0GEtsbK/J0RcQ+JN8r1XnxwqRR+uU10WhvQVD26igwZBN6TlBOgVfK6hX2srZ7pfn829EJKh350LPM3ofRHA==}
+  '@aws-solutions-constructs/aws-apigateway-lambda@2.100.1':
+    resolution: {integrity: sha512-0ygy5lzsjnvzy8lptFcgjICJsenSy4OjkyG2B0Jfu3JXgI9PYdaoon3CSRGFeMMlyPxL5HYCPvvN5tY16jG4IQ==}
     peerDependencies:
-      '@aws-solutions-constructs/core': 2.99.0
-      aws-cdk-lib: ^2.238.0
+      '@aws-solutions-constructs/core': 2.100.1
+      aws-cdk-lib: ^2.239.0
       constructs: ^10.0.0
 
   '@aws-solutions-constructs/aws-cloudfront-s3@2.94.0':
@@ -16164,7 +16164,7 @@ snapshots:
       fast-xml-parser: 5.5.8
       tslib: 2.8.1
 
-  '@aws-solutions-constructs/aws-apigateway-lambda@2.99.0(@aws-solutions-constructs/core@2.94.0(aws-cdk-lib@2.243.0(constructs@10.5.1))(constructs@10.5.1))(aws-cdk-lib@2.243.0(constructs@10.5.1))(constructs@10.5.1)':
+  '@aws-solutions-constructs/aws-apigateway-lambda@2.100.1(@aws-solutions-constructs/core@2.94.0(aws-cdk-lib@2.243.0(constructs@10.5.1))(constructs@10.5.1))(aws-cdk-lib@2.243.0(constructs@10.5.1))(constructs@10.5.1)':
     dependencies:
       '@aws-solutions-constructs/core': 2.94.0(aws-cdk-lib@2.243.0(constructs@10.5.1))(constructs@10.5.1)
       aws-cdk-lib: 2.243.0(constructs@10.5.1)
