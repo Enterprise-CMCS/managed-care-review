@@ -74,12 +74,36 @@ const strippedContractRevisionSchema = z.object({
     formData: strippedContractFormDataSchema,
 })
 
+const sdpRevisionSchema = z.object({
+    id: z.string().uuid(),
+    sdp: z.object({
+        id: z.string().uuid(),
+        stateCode: z.string(),
+        stateNumber: z.number().min(1),
+    }),
+    createdAt: z.date(),
+    updatedAt: z.date(),
+})
+
+const strippedSDPRevisionSchema = z.object({
+    id: z.uuid(),
+    sdp: z.object({
+        id: z.uuid(),
+        stateCode: z.string(),
+        stateNumber: z.number().min(1),
+    }),
+    createdAt: z.date(),
+    updatedAt: z.date(),
+})
+
 type ContractRevisionType = z.infer<typeof contractRevisionSchema>
 type RateRevisionType = z.infer<typeof rateRevisionSchema>
 type StrippedRateRevisionType = z.infer<typeof strippedRateRevisionSchema>
 type StrippedContractRevisionType = z.infer<
     typeof strippedContractRevisionSchema
 >
+type SDPRevisionType = z.infer<typeof sdpRevisionSchema>
+type StrippedSDPRevisionType = z.infer<typeof strippedSDPRevisionSchema>
 
 export {
     contractRevisionSchema,
@@ -87,6 +111,8 @@ export {
     strippedRateRevisionSchema,
     strippedContractRevisionSchema,
     eqroContractRevisionSchema,
+    sdpRevisionSchema,
+    strippedSDPRevisionSchema,
 }
 
 export type {
@@ -94,4 +120,6 @@ export type {
     RateRevisionType,
     StrippedRateRevisionType,
     StrippedContractRevisionType,
+    SDPRevisionType,
+    StrippedSDPRevisionType,
 }

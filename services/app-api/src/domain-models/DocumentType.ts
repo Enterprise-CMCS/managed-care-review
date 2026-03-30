@@ -56,6 +56,14 @@ const rateQuestionResponseDocumentSchema = baseDocumentSchema.extend({
     responseID: z.string(),
 })
 
+const sdpQuestionDocumentSchema = baseDocumentSchema.extend({
+    questionID: z.string(),
+})
+
+const sdpQuestionResponseDocumentSchema = baseDocumentSchema.extend({
+    responseID: z.string(),
+})
+
 const auditDocumentSchema = z.union([
     contractDocumentSchema.extend({ type: z.literal('CONTRACT_DOC') }),
     rateDocumentSchema.extend({ type: z.literal('RATE_DOC') }),
@@ -79,6 +87,12 @@ const auditDocumentSchema = z.union([
     rateQuestionResponseDocumentSchema.extend({
         type: z.literal('RATE_QUESTION_RESPONSE_DOC'),
     }),
+    sdpQuestionDocumentSchema.extend({
+        type: z.literal('SDP_QUESTION_DOC'),
+    }),
+    sdpQuestionResponseDocumentSchema.extend({
+        type: z.literal('SDP_QUESTION_RESPONSE_DOC'),
+    }),
 ])
 
 const documentTypesSchema = z.union([
@@ -90,6 +104,8 @@ const documentTypesSchema = z.union([
     z.literal('CONTRACT_QUESTION_RESPONSE_DOC'),
     z.literal('RATE_QUESTION_DOC'),
     z.literal('RATE_QUESTION_RESPONSE_DOC'),
+    z.literal('SDP_QUESTION_DOC'),
+    z.literal('SDP_QUESTION_RESPONSE_DOC'),
 ])
 
 export type AuditDocument = z.infer<typeof auditDocumentSchema>

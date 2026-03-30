@@ -39,12 +39,20 @@ const rateQuestion = commonQuestionSchema.extend({
     rateID: z.uuid(),
 })
 
+const sdpQuestion = commonQuestionSchema.extend({
+    sdpID: z.uuid(),
+})
+
 const contractQuestionEdge = z.object({
     node: contractQuestion,
 })
 
 const rateQuestionEdge = z.object({
     node: rateQuestion,
+})
+
+const sdpQuestionEdge = z.object({
+    node: sdpQuestion,
 })
 
 const contractQuestionList = z.object({
@@ -55,6 +63,11 @@ const contractQuestionList = z.object({
 const rateQuestionList = z.object({
     totalCount: z.number(),
     edges: z.array(rateQuestionEdge),
+})
+
+const sdpQuestionList = z.object({
+    totalCount: z.number(),
+    edges: z.array(sdpQuestionEdge),
 })
 
 const indexContractQuestionsPayload = z.object({
@@ -69,8 +82,18 @@ const indexRateQuestionsPayload = z.object({
     OACTQuestions: rateQuestionList,
 })
 
+const indexSDPQuestionsPayload = z.object({
+    DMCOQuestions: sdpQuestionList,
+    DMCPQuestions: sdpQuestionList,
+    OACTQuestions: sdpQuestionList,
+})
+
 const createContractQuestionPayload = z.object({
     question: contractQuestion,
+})
+
+const createSDPQuestionPayload = z.object({
+    question: sdpQuestion,
 })
 
 const createContractQuestionInput = z.object({
@@ -80,6 +103,11 @@ const createContractQuestionInput = z.object({
 
 const createRateQuestionInput = z.object({
     rateID: z.uuid(),
+    documents: z.array(documentInputSchema),
+})
+
+const createSDPQuestionInput = z.object({
+    sdpID: z.uuid(),
     documents: z.array(documentInputSchema),
 })
 
@@ -98,13 +126,23 @@ type IndexContractQuestionsPayload = z.infer<
     typeof indexContractQuestionsPayload
 >
 
+type CreateSDPQuestionPayload = z.infer<typeof createSDPQuestionPayload>
+
+type CreateSDPQuestionInput = z.infer<typeof createSDPQuestionInput>
+
+type IndexSDPQuestionsPayload = z.infer<typeof indexSDPQuestionsPayload>
+
 type ContractQuestionType = z.infer<typeof contractQuestion>
+
+type SDPQuestionType = z.infer<typeof sdpQuestion>
 
 type RateQuestionType = z.infer<typeof rateQuestion>
 
 type CreateRateQuestionInputType = z.infer<typeof createRateQuestionInput>
 
 type ContractQuestionList = z.infer<typeof contractQuestionList>
+
+type SDPQuestionList = z.infer<typeof sdpQuestionList>
 
 type QuestionAndResponseDocument = z.infer<typeof document>
 
@@ -120,13 +158,18 @@ export type {
     IndexContractQuestionsPayload,
     CreateContractQuestionPayload,
     CreateContractQuestionInput,
+    CreateSDPQuestionPayload,
+    CreateSDPQuestionInput,
     ContractQuestionList,
+    SDPQuestionList,
     ContractQuestionType,
+    SDPQuestionType,
     QuestionAndResponseDocument,
     CreateDocument,
     RateQuestionType,
     CreateRateQuestionInputType,
     IndexRateQuestionsPayload,
+    IndexSDPQuestionsPayload,
     QuestionResponseType,
     InsertQuestionResponseArgs,
 }
@@ -137,8 +180,13 @@ export {
     createContractQuestionPayload,
     contractQuestion,
     contractQuestionList,
+    sdpQuestion,
+    sdpQuestionList,
+    createSDPQuestionInput,
+    createSDPQuestionPayload,
     rateQuestion,
     createRateQuestionInput,
     indexRateQuestionsPayload,
+    indexSDPQuestionsPayload,
     insertQuestionResponseArgs,
 }

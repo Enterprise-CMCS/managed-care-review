@@ -1,4 +1,5 @@
 export { rateSchema } from './rateTypes'
+export { sdpSchema, strippedSDPSchema } from './sdpTypes'
 
 export {
     contractSchema,
@@ -10,6 +11,7 @@ export {
 export { contractFormDataSchema, rateFormDataSchema } from './formDataTypes'
 
 export { contractRevisionSchema, rateRevisionSchema } from './revisionTypes'
+export { sdpRevisionSchema, strippedSDPRevisionSchema } from './revisionTypes'
 
 export { statusSchema } from './statusType'
 export type { ConsolidatedContractStatusType } from './statusType'
@@ -36,6 +38,7 @@ export type {
     UnlockedContractType,
 } from './contractTypes'
 export type { RateType, StrippedRateType } from './rateTypes'
+export type { SDPType, StrippedSDPType } from './sdpTypes'
 export type {
     RateReviewActionType,
     RateReviewType,
@@ -59,6 +62,8 @@ export type {
     RateRevisionType,
     StrippedRateRevisionType,
     StrippedContractRevisionType,
+    SDPRevisionType,
+    StrippedSDPRevisionType,
 } from './revisionTypes'
 
 export type {
