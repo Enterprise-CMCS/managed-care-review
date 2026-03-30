@@ -1,6 +1,12 @@
 import { z } from 'zod'
 import { indexSDPQuestionsPayload } from '../QuestionsType'
 import { sdpRevisionSchema, strippedSDPRevisionSchema } from './revisionTypes'
+import {
+    createSDPSchema,
+    sdpChangeTypeSchema,
+    sdpFormDataSchema,
+    sdpSubmissionTypeSchema,
+} from './sdpFormDataTypes'
 
 const sdpSchema = z.object({
     id: z.uuid(),
@@ -27,6 +33,24 @@ const strippedSDPSchema = z.object({
 
 type SDPType = z.infer<typeof sdpSchema>
 type StrippedSDPType = z.infer<typeof strippedSDPSchema>
+type SDPFormDataType = z.infer<typeof sdpFormDataSchema>
+type CreateSDPInputType = z.infer<typeof createSDPSchema>
+type SDPSubmissionType = z.infer<typeof sdpSubmissionTypeSchema>
+type SDPChangeType = z.infer<typeof sdpChangeTypeSchema>
 
-export { sdpSchema, strippedSDPSchema }
-export type { SDPType, StrippedSDPType }
+export {
+    sdpSchema,
+    strippedSDPSchema,
+    sdpFormDataSchema,
+    createSDPSchema,
+    sdpSubmissionTypeSchema,
+    sdpChangeTypeSchema,
+}
+export type {
+    SDPType,
+    StrippedSDPType,
+    SDPFormDataType,
+    CreateSDPInputType,
+    SDPSubmissionType,
+    SDPChangeType,
+}

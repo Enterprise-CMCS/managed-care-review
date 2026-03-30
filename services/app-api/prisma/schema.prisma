@@ -258,6 +258,15 @@ model SDPRevisionTable {
   sdpID String
   sdp   SDPTable @relation(fields: [sdpID], references: [id])
 
+  submissionType         SDPSubmissionType
+  programIDs             String[]
+  changesIncluded        SDPChangeType[]
+  ratingPeriodStart      DateTime          @db.Date
+  ratingPeriodEnd        DateTime          @db.Date
+  estimatedFederalShare  String?
+  estimatedStateShare    String?
+  automaticallyRenewed   Boolean
+
   createdAt DateTime @default(now())
   updatedAt DateTime @default(now()) @updatedAt
 }
@@ -796,6 +805,21 @@ enum DocumentZipType {
 enum ContractSubmissionType {
   HEALTH_PLAN
   EQRO
+  SDP
+}
+
+enum SDPSubmissionType {
+  NEW_STATE_DIRECTED_PAYMENT_PREPRINT
+  AMENDMENT_TO_AN_APPROVED_PREPRINT
+  RENEWAL_FOR_NEW_RATING_PERIOD
+}
+
+enum SDPChangeType {
+  RATING_PERIOD
+  PAYMENT_TYPE
+  PROVIDER_TYPE
+  QUALITY_METRICS_OR_BENCHMARKS
+  OTHER
 }
 
 enum OAuthScope {

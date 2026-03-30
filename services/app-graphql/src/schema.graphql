@@ -136,6 +136,13 @@ type Mutation {
     createContract(input: CreateContractInput!): CreateContractPayload!
 
     """
+    createSDP creates a new State Directed Preprint draft.
+
+    This can only be called by StateUsers.
+    """
+    createSDP(input: CreateSDPInput!): CreateSDPPayload!
+
+    """
     updateContract can be used to update fields on the contract
     as opposed to an individual revision
     """
@@ -565,6 +572,21 @@ input CreateContractInput {
 
 type CreateContractPayload {
     contract: Contract!
+}
+
+input CreateSDPInput {
+    submissionType: SDPSubmissionType!
+    programIDs: [String!]!
+    changesIncluded: [SDPChangeType!]!
+    ratingPeriodStart: Date!
+    ratingPeriodEnd: Date!
+    estimatedFederalShare: String
+    estimatedStateShare: String
+    automaticallyRenewed: Boolean!
+}
+
+type CreateSDPPayload {
+    sdp: SDP!
 }
 
 type ApproveContractPayload {
@@ -1149,6 +1171,20 @@ enum SubmissionType {
 enum ContractType {
     BASE
     AMENDMENT
+}
+
+enum SDPSubmissionType {
+    NEW_STATE_DIRECTED_PAYMENT_PREPRINT
+    AMENDMENT_TO_AN_APPROVED_PREPRINT
+    RENEWAL_FOR_NEW_RATING_PERIOD
+}
+
+enum SDPChangeType {
+    RATING_PERIOD
+    PAYMENT_TYPE
+    PROVIDER_TYPE
+    QUALITY_METRICS_OR_BENCHMARKS
+    OTHER
 }
 
 """
@@ -2122,6 +2158,7 @@ type SDPRevision {
     sdpID: String!
     createdAt: DateTime!
     updatedAt: DateTime!
+    formData: SDPFormData!
 }
 
 """
@@ -2132,6 +2169,18 @@ type SDPRevisionStripped {
     sdpID: String!
     createdAt: DateTime!
     updatedAt: DateTime!
+    formData: SDPFormData!
+}
+
+type SDPFormData {
+    submissionType: SDPSubmissionType!
+    programIDs: [String!]!
+    changesIncluded: [SDPChangeType!]!
+    ratingPeriodStart: Date!
+    ratingPeriodEnd: Date!
+    estimatedFederalShare: String
+    estimatedStateShare: String
+    automaticallyRenewed: Boolean!
 }
 
 """
@@ -2887,6 +2936,7 @@ enum UploadFileType {
 enum ContractSubmissionType {
     HEALTH_PLAN
     EQRO
+    SDP
 }
 
 enum OAuthScope {

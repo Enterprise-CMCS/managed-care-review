@@ -8,6 +8,8 @@ import type {
 import type { StateCodeType } from '@mc-review/submissions'
 import type {
     ProgramType,
+    SDPType,
+    CreateSDPInputType,
     UserType,
     StateUserType,
     ContractQuestionType,
@@ -135,6 +137,7 @@ import {
     findDocumentZipPackagesByRateRevision,
 } from './documents'
 import type { DocumentTypes } from '../domain-models/DocumentType'
+import { insertDraftSDP } from './sdp/insertSDP'
 
 type Store = {
     /** Settings functions **/
@@ -176,6 +179,7 @@ type Store = {
     insertDraftContract: (
         args: InsertContractArgsType
     ) => Promise<ContractType | Error>
+    insertDraftSDP: (args: CreateSDPInputType) => Promise<SDPType | Error>
     findContractWithHistory: (
         contractID: string
     ) => Promise<ContractType | Error>
@@ -357,6 +361,7 @@ function NewPostgresStore(client: ExtendedPrismaClient): Store {
 
         /** Contract functions **/
         insertDraftContract: (args) => insertDraftContract(client, args),
+        insertDraftSDP: (args) => insertDraftSDP(client, args),
         findContractWithHistory: (args) =>
             findContractWithHistory(client, args),
         findAllContractsWithHistoryByState: (args) =>

@@ -98,6 +98,53 @@ it('routes to new EQRO url', async () => {
     })
 })
 
+it('routes to new SDP url', async () => {
+    let testLocation: Location
+    renderWithProviders(
+        <Routes>
+            <Route
+                path={RoutesRecord.SUBMISSIONS_NEW}
+                element={<NewSubmission />}
+            />
+            <Route
+                path={RoutesRecord.SUBMISSIONS_NEW_SUBMISSION_FORM}
+                element={<NewSubmissionForm />}
+            />
+        </Routes>,
+        {
+            routerProvider: {
+                route: `/submissions/new`,
+            },
+            location: (location) => (testLocation = location),
+        }
+    )
+
+    await waitFor(() => {
+        expect(
+            screen.getByRole('heading', { name: 'New submission' })
+        ).toBeInTheDocument()
+    })
+
+    const sdpRadio = screen.getByRole('radio', {
+        name: /State Directed Preprints \(SDP\)/,
+    })
+    const startButton = screen.getByRole('button', { name: /Start/ })
+
+    expect(startButton).toBeInTheDocument()
+    expect(sdpRadio).toBeInTheDocument()
+
+    await userEvent.click(sdpRadio)
+    await userEvent.click(startButton)
+
+    await waitFor(() => {
+        expect(testLocation.pathname).toBe(
+            generatePath(RoutesRecord.SUBMISSIONS_NEW_SUBMISSION_FORM, {
+                contractSubmissionType: 'sdp',
+            })
+        )
+    })
+})
+
 it('renders inline errors', async () => {
     renderWithProviders(
         <Routes>

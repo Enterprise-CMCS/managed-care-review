@@ -19,6 +19,8 @@ const parseContractType = (
     if (contractType === 'EQRO' || contractType === 'eqro') return 'EQRO'
     if (contractType === 'HEALTH_PLAN' || contractType === 'health-plan')
         return 'Health plan'
+    if (contractType === 'SDP' || contractType === 'sdp')
+        return 'State Directed Preprints (SDP)'
 
     return undefined
 }

@@ -70,6 +70,7 @@ import {
 import type { DocumentZipService } from '../zip/generateZip'
 import { fetchDocumentResolver } from './documents/fetchDocument'
 import { generateUploadURLResolver } from './documents/generateUploadURL'
+import { createSDP } from './sdp/createSDP'
 
 export function configureResolvers(
     store: Store,
@@ -105,6 +106,7 @@ export function configureResolvers(
             ),
             unlockContract: unlockContractResolver(store, emailer),
             createContract: createContract(store),
+            createSDP: createSDP(store),
             updateContract: updateContract(store),
             updateContractDraftRevision: updateContractDraftRevision(
                 store,
@@ -142,7 +144,7 @@ export function configureResolvers(
             deleteOauthClient: deleteOauthClientResolver(store),
             updateOauthClient: updateOauthClientResolver(store),
             generateUploadURL: generateUploadURLResolver(store, s3Client),
-        },
+        } as Resolvers['Mutation'],
         User: {
             // resolveType is required to differentiate Unions
             __resolveType(obj) {

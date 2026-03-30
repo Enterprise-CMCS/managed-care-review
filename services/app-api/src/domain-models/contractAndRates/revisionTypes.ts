@@ -8,6 +8,7 @@ import {
     strippedContractFormDataSchema,
 } from './formDataTypes'
 import { contractSubmissionTypeSchema } from './contractSubmissionType'
+import { sdpFormDataSchema } from './sdpFormDataTypes'
 
 const contractRevisionSchema = z.object({
     id: z.string().uuid(),
@@ -83,6 +84,7 @@ const sdpRevisionSchema = z.object({
     }),
     createdAt: z.date(),
     updatedAt: z.date(),
+    formData: sdpFormDataSchema,
 })
 
 const strippedSDPRevisionSchema = z.object({
@@ -94,6 +96,7 @@ const strippedSDPRevisionSchema = z.object({
     }),
     createdAt: z.date(),
     updatedAt: z.date(),
+    formData: sdpFormDataSchema,
 })
 
 type ContractRevisionType = z.infer<typeof contractRevisionSchema>

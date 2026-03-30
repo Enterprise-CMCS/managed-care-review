@@ -9,7 +9,7 @@ import { includeFullContract } from './prismaFullContractRateHelpers'
 
 type InsertContractArgsType = Partial<ContractFormDataType> & {
     // Certain fields are required on insert contract only
-    contractSubmissionType: ContractSubmissionType
+    contractSubmissionType: Exclude<ContractSubmissionType, 'SDP'>
     stateCode: string
     programIDs: ContractFormDataType['programIDs']
     submissionType: ContractFormDataType['submissionType']

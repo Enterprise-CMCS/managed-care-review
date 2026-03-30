@@ -1,5 +1,23 @@
 BEGIN;
 
+-- CreateEnum
+CREATE TYPE "SDPSubmissionType" AS ENUM (
+    'NEW_STATE_DIRECTED_PAYMENT_PREPRINT',
+    'AMENDMENT_TO_AN_APPROVED_PREPRINT',
+    'RENEWAL_FOR_NEW_RATING_PERIOD'
+);
+
+-- CreateEnum
+CREATE TYPE "SDPChangeType" AS ENUM (
+    'RATING_PERIOD',
+    'PAYMENT_TYPE',
+    'PROVIDER_TYPE',
+    'QUALITY_METRICS_OR_BENCHMARKS',
+    'OTHER'
+);
+
+ALTER TYPE "ContractSubmissionType" ADD VALUE IF NOT EXISTS 'SDP';
+
 -- CreateTable
 CREATE TABLE "SDPTable" (
     "id" TEXT NOT NULL,
@@ -16,6 +34,14 @@ CREATE TABLE "SDPTable" (
 CREATE TABLE "SDPRevisionTable" (
     "id" TEXT NOT NULL,
     "sdpID" TEXT NOT NULL,
+    "submissionType" "SDPSubmissionType" NOT NULL,
+    "programIDs" TEXT[] NOT NULL DEFAULT ARRAY[]::TEXT[],
+    "changesIncluded" "SDPChangeType"[] NOT NULL DEFAULT ARRAY[]::"SDPChangeType"[],
+    "ratingPeriodStart" TIMESTAMP(3) NOT NULL,
+    "ratingPeriodEnd" TIMESTAMP(3) NOT NULL,
+    "estimatedFederalShare" TEXT,
+    "estimatedStateShare" TEXT,
+    "automaticallyRenewed" BOOLEAN NOT NULL,
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updatedAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
 

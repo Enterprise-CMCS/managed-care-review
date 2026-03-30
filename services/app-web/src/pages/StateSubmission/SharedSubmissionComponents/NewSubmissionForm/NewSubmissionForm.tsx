@@ -22,6 +22,7 @@ import {
 } from '../../../../components'
 import { NewStateSubmissionForm } from '../../HealthPlanSubmission/New'
 import { EQROSubmissionDetails } from '../../EQROSubmission'
+import { SDPSubmissionForm } from '../../SDPSubmission'
 import { Error404 } from '../../../Errors/Error404Page'
 import styles from './NewSubmissionForm.module.scss'
 
@@ -121,7 +122,7 @@ export const NewSubmission = () => {
                                         data-testid="health-plan"
                                         value="health-plan"
                                         list_position={1}
-                                        list_options={2}
+                                        list_options={3}
                                         parent_component_heading="Contract type"
                                         radio_button_title="Health plan"
                                         labelDescription="Submit your Medicaid and CHIP managed care plans. This includes base contracts, amendments to base contracts, and rate certifications."
@@ -135,10 +136,24 @@ export const NewSubmission = () => {
                                         aria-required
                                         value="eqro"
                                         list_position={2}
-                                        list_options={2}
+                                        list_options={3}
                                         parent_component_heading="Contract type"
                                         radio_button_title="External Quality Review Organization (EQRO)"
                                         labelDescription="Submit base contracts and amendments to base contracts between your state and an EQRO."
+                                        tile
+                                    />
+                                    <FieldRadio
+                                        id="sdp"
+                                        name="contractType"
+                                        label="State Directed Preprints (SDP)"
+                                        data-testid="sdp"
+                                        aria-required
+                                        value="sdp"
+                                        list_position={3}
+                                        list_options={3}
+                                        parent_component_heading="Contract type"
+                                        radio_button_title="State Directed Preprints (SDP)"
+                                        labelDescription="Submit preprints to get prior approval for state directed payments"
                                         tile
                                     />
                                 </Fieldset>
@@ -202,6 +217,10 @@ export const NewSubmissionForm = (): React.ReactElement => {
 
     if (contractSubmissionType === ContractSubmissionTypeRecord['EQRO']) {
         return <EQROSubmissionDetails />
+    }
+
+    if (contractSubmissionType === ContractSubmissionTypeRecord['SDP']) {
+        return <SDPSubmissionForm />
     }
 
     return <Error404 />

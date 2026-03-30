@@ -76,6 +76,17 @@ export function createContract(
             )
         }
 
+        if (input.contractSubmissionType === 'SDP') {
+            const errMessage = 'SDP submissions must be created with createSDP'
+            logError('createContract', errMessage)
+            setErrorAttributesOnActiveSpan(errMessage, span)
+            throw createUserInputError(
+                errMessage,
+                'contractSubmissionType',
+                input.contractSubmissionType
+            )
+        }
+
         const insertArgs: InsertContractArgsType = {
             contractSubmissionType: input.contractSubmissionType,
             stateCode: stateFromCurrentUser,

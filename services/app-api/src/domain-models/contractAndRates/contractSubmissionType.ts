@@ -5,4 +5,5 @@ import { z } from 'zod'
 export const contractSubmissionTypeSchema = z.union([
     z.literal('HEALTH_PLAN'),
     z.literal('EQRO'),
+    z.literal('SDP'),
 ])
