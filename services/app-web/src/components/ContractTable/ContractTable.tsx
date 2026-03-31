@@ -191,6 +191,22 @@ type ReadableFilters = {
     [key: string]: string[]
 }
 
+const getColumnInlineStyle = (
+    columnId: string
+): React.CSSProperties | undefined => {
+    if (columnId === 'ID') {
+        return {
+            minWidth: '90px',
+        }
+    }
+
+    if (columnId === 'programs') {
+        return {
+            maxWidth: '143px',
+        }
+    }
+}
+
 const fromColumnFiltersToReadableUrl = (input: ColumnFiltersState) => {
     const output: ReadableFilters = {}
     input.forEach((element) => {
@@ -390,18 +406,24 @@ export const ContractTable = ({
             }),
             columnHelper.accessor('programs', {
                 header: 'Programs',
-                cell: (info) =>
-                    info.getValue().map((program) => {
-                        return (
-                            <Tag
-                                data-testid="program-tag"
-                                key={program.id}
-                                className={`radius-pill ${styles.programTag}`}
-                            >
-                                {program.name}
-                            </Tag>
-                        )
-                    }),
+                cell: (info) => (
+                    <div
+                        className={styles.programsCellContent}
+                        style={{ maxWidth: '143px' }}
+                    >
+                        {info.getValue().map((program) => {
+                            return (
+                                <Tag
+                                    data-testid="program-tag"
+                                    key={program.id}
+                                    className={`radius-pill ${styles.programTag}`}
+                                >
+                                    {program.name}
+                                </Tag>
+                            )
+                        })}
+                    </div>
+                ),
                 meta: {
                     dataTestID: `${tableConfig.rowIDName}-programs`,
                 },
@@ -719,7 +741,7 @@ export const ContractTable = ({
                             {submissionCount}
                         </div>
                     </div>
-                    <Table fullWidth>
+                    <Table fullWidth className={styles.table}>
                         <thead>
                             {reactTable.getHeaderGroups().map((headerGroup) => (
                                 <tr key={headerGroup.id}>
@@ -728,6 +750,14 @@ export const ContractTable = ({
                                             scope="col"
                                             key={header.id}
                                             id={header.id}
+                                            className={
+                                                styles[
+                                                    `column${header.column.id}`
+                                                ]
+                                            }
+                                            style={getColumnInlineStyle(
+                                                header.column.id
+                                            )}
                                         >
                                             {header.isPlaceholder
                                                 ? null
@@ -754,6 +784,14 @@ export const ContractTable = ({
                                                 cell.column.columnDef.meta
                                                     ?.dataTestID
                                             }
+                                            className={
+                                                styles[
+                                                    `column${cell.column.id}`
+                                                ]
+                                            }
+                                            style={getColumnInlineStyle(
+                                                cell.column.id
+                                            )}
                                             element={
                                                 cell.column.id === 'ID'
                                                     ? 'th'
