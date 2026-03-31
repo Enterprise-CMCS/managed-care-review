@@ -954,6 +954,10 @@ type Program {
     fullName: String!
     "Specifies if a program relates to a rate rather than a contract"
     isRateProgram: Boolean!
+    "Specifies if a program has been deprecated and replaced by another program"
+    isDeprecated: Boolean!
+    "If deprecated this will contain the uuid of the program that replaced it"
+    deprecatedByProgramId: String
 }
 
 """

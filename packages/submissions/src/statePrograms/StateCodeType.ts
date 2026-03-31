@@ -73,6 +73,8 @@ interface ProgramArgType {
     name: string // short name. This is used most often in the application including in submission name
     fullName: string // full name is used in submission summary page
     isRateProgram: boolean // specifies if program relates to rates rather than contract
+    isDeprecated: boolean // Specifies if a program has been deprecated and replaced by another program
+    deprecatedByProgramId?: string | null // If deprecated this will contain the uuid of the program that replaced it
 }
 
 function isValidStateCode(
