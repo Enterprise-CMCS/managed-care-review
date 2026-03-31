@@ -109,7 +109,7 @@ export function newDeployedS3Client(
 
             // Create the presigned URL.
             const signedUrl = await getSignedUrl(s3Client, command, {
-                expiresIn: expiresIn || 3600,
+                expiresIn: expiresIn || 14400,
             })
             return signedUrl
         },
