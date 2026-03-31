@@ -23,6 +23,7 @@ describe('insertSDP', () => {
                 estimatedFederalShare: '$100',
                 estimatedStateShare: '$50',
                 automaticallyRenewed: false,
+                stateContacts: [],
             })
         )
 

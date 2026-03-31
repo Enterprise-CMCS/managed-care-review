@@ -47,6 +47,7 @@ export const SubmissionSideNav = () => {
     const { loggedInUser } = useAuth()
     const { pathname } = useLocation()
     const routeName = getRouteName(pathname)
+    const isSDPSubmission = contractTypeParam === 'sdp'
 
     const isSelectedLink = (route: string | string[]): string => {
         //We pass an array of the form routes in order to display the sideNav on all of the pages
@@ -70,9 +71,62 @@ export const SubmissionSideNav = () => {
             },
         },
         fetchPolicy: 'cache-and-network',
+        skip: isSDPSubmission,
     })
 
     const contract = data?.fetchContract.contract
+
+    if (isSDPSubmission) {
+        if (!loggedInUser) {
+            return <GenericErrorPage />
+        }
+
+        return (
+            <div
+                className={styles.backgroundSidebar}
+                data-testid="submission-side-nav"
+            >
+                <GridContainer className={styles.container}>
+                    <div className={styles.verticalNavContainer}>
+                        <div className={styles.backLinkContainer}>
+                            <NavLinkWithLogging
+                                to={{
+                                    pathname:
+                                        RoutesRecord.DASHBOARD_SUBMISSIONS,
+                                }}
+                                event_name="back_button"
+                            >
+                                <Icon.ArrowBack />
+                                {loggedInUser?.__typename === 'StateUser' ? (
+                                    <span>&nbsp;Go to state dashboard</span>
+                                ) : (
+                                    <span>&nbsp;Go to dashboard</span>
+                                )}
+                            </NavLinkWithLogging>
+                        </div>
+                        <SideNav
+                            items={[
+                                <NavLinkWithLogging
+                                    to={getSubmissionPath(
+                                        'SUBMISSIONS_SUMMARY',
+                                        'SDP',
+                                        id
+                                    )}
+                                    className={isSelectedLink(
+                                        'SUBMISSIONS_SUMMARY'
+                                    )}
+                                    event_name="navigation_clicked"
+                                >
+                                    Submission summary
+                                </NavLinkWithLogging>,
+                            ]}
+                        />
+                    </div>
+                    <Outlet />
+                </GridContainer>
+            </div>
+        )
+    }
 
     if (!data && loading) {
         return (

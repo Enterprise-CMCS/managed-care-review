@@ -96,7 +96,7 @@ export function fetchDocumentResolver(
             id: fetchedDocument.id,
             name: fetchedDocument.name,
             s3URL: fetchedDocument.s3URL,
-            sha256: fetchedDocument.sha256 ?? undefined,
+            sha256: fetchedDocument.sha256 ?? '',
             downloadURL: url,
         }
 

@@ -9,10 +9,7 @@ import type {
 } from '../../domain-models'
 import type { ExtendedPrismaClient } from '../prismaClient'
 import type { PrismaTransactionType } from '../prismaTypes'
-import {
-    NotFoundError,
-    UserInputPostgresError,
-} from '../postgresErrors'
+import { NotFoundError, UserInputPostgresError } from '../postgresErrors'
 
 type UpdateSDPArgsType = UpdateSDPInputType
 
@@ -176,9 +173,10 @@ async function updateDraftSDP(
                 )
             }
 
-            const updatedRevisionRows =
-                await tx.$queryRaw<ExistingSDPRevisionRow[]>(
-                    Prisma.sql`
+            const updatedRevisionRows = await tx.$queryRaw<
+                ExistingSDPRevisionRow[]
+            >(
+                Prisma.sql`
                         UPDATE "SDPRevisionTable"
                         SET "updatedAt" = CURRENT_TIMESTAMP
                         WHERE "id" = ${currentRevision.id}
@@ -195,7 +193,7 @@ async function updateDraftSDP(
                             "estimatedStateShare",
                             "automaticallyRenewed"
                     `
-                )
+            )
             const updatedRevision = updatedRevisionRows[0]
 
             if (!updatedRevision) {
@@ -233,11 +231,7 @@ async function updateDraftSDP(
                     WHERE "sdpRevisionID" = ${currentRevision.id}
                 `
             )
-            await insertSDPDocuments(
-                tx,
-                currentRevision.id,
-                args.sdpDocuments
-            )
+            await insertSDPDocuments(tx, currentRevision.id, args.sdpDocuments)
             await tx.$executeRaw(
                 Prisma.sql`
                     DELETE FROM "SDPStateContact"
@@ -277,6 +271,7 @@ async function updateDraftSDP(
                 stateNumber: updatedSDP.stateNumber,
                 draftRevision: {
                     id: updatedRevision.id,
+                    sdpID: updatedSDP.id,
                     sdp: {
                         id: updatedSDP.id,
                         stateCode: updatedSDP.stateCode,
@@ -298,11 +293,13 @@ async function updateDraftSDP(
                             updatedRevision.automaticallyRenewed,
                         stateContacts: args.stateContacts,
                     },
+                    sdpDocuments: [],
                 },
                 latestSubmittedRevision: undefined,
                 revisions: [
                     {
                         id: updatedRevision.id,
+                        sdpID: updatedSDP.id,
                         sdp: {
                             id: updatedSDP.id,
                             stateCode: updatedSDP.stateCode,
@@ -314,17 +311,20 @@ async function updateDraftSDP(
                             submissionType: updatedRevision.submissionType,
                             programIDs: updatedRevision.programIDs,
                             changesIncluded: updatedRevision.changesIncluded,
-                            ratingPeriodStart: updatedRevision.ratingPeriodStart,
+                            ratingPeriodStart:
+                                updatedRevision.ratingPeriodStart,
                             ratingPeriodEnd: updatedRevision.ratingPeriodEnd,
                             estimatedFederalShare:
                                 updatedRevision.estimatedFederalShare ??
                                 undefined,
                             estimatedStateShare:
-                                updatedRevision.estimatedStateShare ?? undefined,
+                                updatedRevision.estimatedStateShare ??
+                                undefined,
                             automaticallyRenewed:
                                 updatedRevision.automaticallyRenewed,
                             stateContacts: args.stateContacts,
                         },
+                        sdpDocuments: [],
                     },
                 ],
                 questions: undefined,

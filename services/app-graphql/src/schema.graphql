@@ -85,6 +85,17 @@ type Query {
     fetchContract(input: FetchContractInput!): FetchContractPayload!
 
     """
+    fetchSDP returns a single SDP submission with its revisions.
+
+    It can be called by CMS or State users
+
+    Errors:
+    - ForbiddenError: A State user requests an SDP that belongs to another state
+    - NotFoundError: SDP for sdpID not found in database
+    """
+    fetchSDP(input: FetchSDPInput!): FetchSDPPayload!
+
+    """
     fetchDocument returns a single document
     given a documentID
     Optional parameters include:
@@ -2240,6 +2251,7 @@ type SDPRevision {
     createdAt: DateTime!
     updatedAt: DateTime!
     formData: SDPFormData!
+    sdpDocuments: [GenericDocument!]!
 }
 
 """
@@ -2251,6 +2263,7 @@ type SDPRevisionStripped {
     createdAt: DateTime!
     updatedAt: DateTime!
     formData: SDPFormData!
+    sdpDocuments: [GenericDocument!]!
 }
 
 type SDPFormData {
@@ -2434,6 +2447,7 @@ type SDP {
     stateNumber: Int!
     mccrsID: String
     draftRevision: SDPRevision
+    latestSubmittedRevision: SDPRevision
     revisions: [SDPRevision!]!
     questions: IndexSDPQuestionsPayload
     relatedContracts: [RelatedContractStripped!]
@@ -2568,6 +2582,14 @@ type FetchContractPayload {
 
 input FetchContractInput {
     contractID: ID!
+}
+
+type FetchSDPPayload {
+    sdp: SDP!
+}
+
+input FetchSDPInput {
+    sdpID: ID!
 }
 
 type FetchDocumentPayload {

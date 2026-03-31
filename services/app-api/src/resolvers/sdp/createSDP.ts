@@ -66,6 +66,7 @@ export function createSDP(store: Store) {
         const sdpResult = await store.insertDraftSDP({
             ...input,
             stateCode: stateFromCurrentUser,
+            stateContacts: input.stateContacts ?? [],
         })
 
         if (sdpResult instanceof Error) {

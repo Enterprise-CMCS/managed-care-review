@@ -121,6 +121,10 @@ const mapContractToSubmission = (
     stateNameByCode: Record<string, string>,
     store: Store
 ): DashboardSubmission | undefined => {
+    if (contract.contractSubmissionType === 'SDP') {
+        return undefined
+    }
+
     const status =
         contract.reviewStatus !== 'UNDER_REVIEW'
             ? contract.reviewStatus
@@ -147,13 +151,11 @@ const mapContractToSubmission = (
         contract.stateCode,
         currentRevision.formData.programIDs
     )
-    const submissionName =
-        currentRevision.contractName ??
-        fallbackContractSubmissionName(
-            contract.stateCode,
-            contract.stateNumber,
-            contract.contractSubmissionType
-        )
+    const submissionName = fallbackContractSubmissionName(
+        contract.stateCode,
+        contract.stateNumber,
+        contract.contractSubmissionType
+    )
 
     return {
         id: contract.id,
@@ -227,7 +229,7 @@ export function indexSubmissions(
         }
 
         const stateNameByCode = Object.fromEntries(
-            supportedStates.map((state) => [state.code, state.name])
+            supportedStates.map((state) => [state.stateCode, state.name])
         )
 
         const contractsResult = await store.findAllContractsStripped({
@@ -294,9 +296,7 @@ export function indexSubmissions(
         }
 
         if (input?.updatedWithin) {
-            const cutoff = new Date(
-                Date.now() - input.updatedWithin * 1000
-            )
+            const cutoff = new Date(Date.now() - input.updatedWithin * 1000)
             submissions = submissions.filter(
                 (submission) => submission.updatedAt > cutoff
             )

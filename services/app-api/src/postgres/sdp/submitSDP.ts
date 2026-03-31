@@ -2,10 +2,7 @@ import { Prisma } from '../../generated/client'
 import type { SDPType, SubmitSDPInputType } from '../../domain-models'
 import type { ExtendedPrismaClient } from '../prismaClient'
 import type { SDPChangeType, SDPSubmissionType } from '../../domain-models'
-import {
-    NotFoundError,
-    UserInputPostgresError,
-} from '../postgresErrors'
+import { NotFoundError, UserInputPostgresError } from '../postgresErrors'
 
 type SubmitSDPArgsType = SubmitSDPInputType
 
@@ -130,9 +127,10 @@ async function submitSDP(
                 )
             }
 
-            const latestRevisionRows =
-                await tx.$queryRaw<ExistingSDPRevisionRow[]>(
-                    Prisma.sql`
+            const latestRevisionRows = await tx.$queryRaw<
+                ExistingSDPRevisionRow[]
+            >(
+                Prisma.sql`
                         SELECT
                             "id",
                             "createdAt",
@@ -148,7 +146,7 @@ async function submitSDP(
                         FROM "SDPRevisionTable"
                         WHERE "id" = ${currentRevision.id}
                     `
-                )
+            )
             const latestRevision = latestRevisionRows[0]
 
             if (!latestRevision) {
@@ -159,6 +157,7 @@ async function submitSDP(
 
             const submittedRevision = {
                 id: latestRevision.id,
+                sdpID: submittedSDP.id,
                 sdp: {
                     id: submittedSDP.id,
                     stateCode: submittedSDP.stateCode,
@@ -179,6 +178,7 @@ async function submitSDP(
                     automaticallyRenewed: latestRevision.automaticallyRenewed,
                     stateContacts: [],
                 },
+                sdpDocuments: [],
             }
 
             return {

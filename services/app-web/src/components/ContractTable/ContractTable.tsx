@@ -84,7 +84,11 @@ function submissionURL(
             })
         }
 
-        return generatePath(RoutesRecord.SUBMISSIONS_SDP_REVIEW_SUBMIT, { id })
+        return getSubmissionPath(
+            'SUBMISSIONS_SUMMARY',
+            contractSubmissionType,
+            id
+        )
     }
 
     if (isNotStateUser) {

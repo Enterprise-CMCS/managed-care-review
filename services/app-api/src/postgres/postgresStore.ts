@@ -140,6 +140,7 @@ import {
 } from './documents'
 import type { DocumentTypes } from '../domain-models/DocumentType'
 import { insertDraftSDP } from './sdp/insertSDP'
+import { findSDPWithHistory } from './sdp/findSDPWithHistory'
 import { updateDraftSDP } from './sdp/updateSDP'
 import { submitSDP } from './sdp/submitSDP'
 import {
@@ -191,6 +192,7 @@ type Store = {
     insertDraftSDP: (args: CreateSDPInputType) => Promise<SDPType | Error>
     updateDraftSDP: (args: UpdateSDPInputType) => Promise<SDPType | Error>
     submitSDP: (args: SubmitSDPInputType) => Promise<SDPType | Error>
+    findSDPWithHistory: (sdpID: string) => Promise<SDPType | Error>
     findAllSDPsForDashboard: (
         args?: FindAllSDPsForDashboardArgs
     ) => Promise<SDPDashboardRow[] | Error>
@@ -378,6 +380,7 @@ function NewPostgresStore(client: ExtendedPrismaClient): Store {
         insertDraftSDP: (args) => insertDraftSDP(client, args),
         updateDraftSDP: (args) => updateDraftSDP(client, args),
         submitSDP: (args) => submitSDP(client, args),
+        findSDPWithHistory: (args) => findSDPWithHistory(client, args),
         findAllSDPsForDashboard: (args) =>
             findAllSDPsForDashboard(client, args),
         findContractWithHistory: (args) =>

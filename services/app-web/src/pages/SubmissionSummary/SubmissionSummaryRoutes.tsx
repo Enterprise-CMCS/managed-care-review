@@ -1,5 +1,6 @@
 import { useRouteParams } from '../../hooks'
 import { EQROSubmissionSummary } from './EQROSubmissionSummary/EQROSubmissionSummary'
+import { SDPSubmissionSummary } from './SDPSubmissionSummary/SDPSubmissionSummary'
 import { SubmissionSummary } from './SubmissionSummary'
 import { Error404 } from '../Errors/Error404Page'
 import React from 'react'
@@ -13,6 +14,9 @@ const SubmissionSummaryRoutes = ({
 
     if (showEqroSubmissions && contractSubmissionType === 'eqro') {
         return <EQROSubmissionSummary />
+    }
+    if (contractSubmissionType === 'sdp') {
+        return <SDPSubmissionSummary />
     }
     if (contractSubmissionType === 'health-plan') {
         return <SubmissionSummary />

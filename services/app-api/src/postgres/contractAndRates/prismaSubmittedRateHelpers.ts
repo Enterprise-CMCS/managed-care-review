@@ -204,6 +204,9 @@ const includeRateRevisionWithRelatedSubmissionContracts = {
                             contract: {
                                 select: {
                                     id: true,
+                                    stateCode: true,
+                                    stateNumber: true,
+                                    contractSubmissionType: true,
                                     revisions: {
                                         orderBy: {
                                             updatedAt: 'desc',

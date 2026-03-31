@@ -44,7 +44,9 @@ export function updateSDP(store: Store) {
         }
 
         const stateFromCurrentUser = user.stateCode
-        const uniqueRelatedContractIDs = [...new Set(input.relatedContractIDs)]
+        const uniqueRelatedContractIDs: string[] = [
+            ...new Set<string>((input.relatedContractIDs ?? []) as string[]),
+        ]
 
         const relatedContracts = await store.findAllContractsStripped({
             stateCode: stateFromCurrentUser,

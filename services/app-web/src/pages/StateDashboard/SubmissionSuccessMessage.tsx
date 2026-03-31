@@ -20,6 +20,9 @@ export function SubmissionSuccessMessage({
         if (contractType === 'EQRO') {
             return 'You can view your review decision on the submission summary.'
         }
+        if (contractType === 'SDP') {
+            return 'You can view your submitted SDP on the submission summary.'
+        }
         if (contractType === 'HEALTH_PLAN') {
             return 'To make edits, ask your DMCO lead analyst to unlock your submission.'
         }

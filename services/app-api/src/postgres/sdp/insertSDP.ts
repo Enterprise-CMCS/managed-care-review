@@ -123,6 +123,7 @@ async function insertDraftSDP(
                 stateNumber: sdp.stateNumber,
                 draftRevision: {
                     id: draftRevision.id,
+                    sdpID: sdp.id,
                     sdp: {
                         id: sdp.id,
                         stateCode: sdp.stateCode,
@@ -144,10 +145,12 @@ async function insertDraftSDP(
                             draftRevision.automaticallyRenewed,
                         stateContacts: [],
                     },
+                    sdpDocuments: [],
                 },
                 latestSubmittedRevision: undefined,
                 revisions: [draftRevision].map((revision) => ({
                     id: revision.id,
+                    sdpID: sdp.id,
                     sdp: {
                         id: sdp.id,
                         stateCode: sdp.stateCode,
@@ -168,6 +171,7 @@ async function insertDraftSDP(
                         automaticallyRenewed: revision.automaticallyRenewed,
                         stateContacts: [],
                     },
+                    sdpDocuments: [],
                 })),
                 questions: undefined,
             }

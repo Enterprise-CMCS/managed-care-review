@@ -10,6 +10,17 @@ import {
 import { contractSubmissionTypeSchema } from './contractSubmissionType'
 import { sdpFormDataSchema } from './sdpFormDataTypes'
 
+const sdpRevisionDocumentSchema = z.object({
+    id: z.string(),
+    name: z.string(),
+    s3URL: z.string(),
+    sha256: z.string(),
+    downloadURL: z.string().optional(),
+    dateAdded: z.date().nullable().optional(),
+    s3BucketName: z.string().nullable().optional(),
+    s3Key: z.string().nullable().optional(),
+})
+
 const contractRevisionSchema = z.object({
     id: z.string().uuid(),
     contract: z.object({
@@ -77,6 +88,7 @@ const strippedContractRevisionSchema = z.object({
 
 const sdpRevisionSchema = z.object({
     id: z.string().uuid(),
+    sdpID: z.string().uuid(),
     sdp: z.object({
         id: z.string().uuid(),
         stateCode: z.string(),
@@ -85,10 +97,12 @@ const sdpRevisionSchema = z.object({
     createdAt: z.date(),
     updatedAt: z.date(),
     formData: sdpFormDataSchema,
+    sdpDocuments: z.array(sdpRevisionDocumentSchema).default([]),
 })
 
 const strippedSDPRevisionSchema = z.object({
     id: z.uuid(),
+    sdpID: z.uuid(),
     sdp: z.object({
         id: z.uuid(),
         stateCode: z.string(),
@@ -97,6 +111,7 @@ const strippedSDPRevisionSchema = z.object({
     createdAt: z.date(),
     updatedAt: z.date(),
     formData: sdpFormDataSchema,
+    sdpDocuments: z.array(sdpRevisionDocumentSchema).default([]),
 })
 
 type ContractRevisionType = z.infer<typeof contractRevisionSchema>

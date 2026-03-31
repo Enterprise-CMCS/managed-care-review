@@ -377,6 +377,10 @@ const getRelatedContracts = (
                 // Add to our temporary array
                 contracts.push({
                     id: pkg.contractRevision.contract.id,
+                    stateCode: pkg.contractRevision.contract.stateCode,
+                    stateNumber: pkg.contractRevision.contract.stateNumber,
+                    contractSubmissionType:
+                        pkg.contractRevision.contract.contractSubmissionType,
                     consolidatedStatus,
                 })
             }

@@ -71,6 +71,7 @@ import type { DocumentZipService } from '../zip/generateZip'
 import { fetchDocumentResolver } from './documents/fetchDocument'
 import { generateUploadURLResolver } from './documents/generateUploadURL'
 import { createSDP } from './sdp/createSDP'
+import { fetchSDPResolver } from './sdp/fetchSDP'
 import { updateSDP } from './sdp/updateSDP'
 import { submitSDP } from './sdp/submitSDP'
 import { indexSubmissions } from './submission/indexSubmissions'
@@ -99,6 +100,7 @@ export function configureResolvers(
             indexRatesStripped: indexRatesStripped(store),
             fetchRate: fetchRateResolver(store),
             fetchContract: fetchContractResolver(store),
+            fetchSDP: fetchSDPResolver(store),
             fetchOauthClients: fetchOauthClientsResolver(store),
         },
         Mutation: {

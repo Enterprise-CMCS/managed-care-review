@@ -16,6 +16,7 @@ const sharedDocumentSchema = z.object({
     s3URL: z.string(),
     sha256: z.string().optional(),
     downloadURL: z.string().optional(),
+    dateAdded: z.date().nullable().optional(),
     s3BucketName: z.string().nullable().optional(),
     s3Key: z.string().nullable().optional(),
 })
