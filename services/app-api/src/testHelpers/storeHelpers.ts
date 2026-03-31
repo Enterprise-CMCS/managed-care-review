@@ -98,6 +98,9 @@ function mockStoreThatErrors(): Store {
         submitSDP: async (_args) => {
             return genericError
         },
+        findAllSDPsForDashboard: async (_args) => {
+            return genericError
+        },
         findContractWithHistory: async (_ID) => {
             return genericError
         },

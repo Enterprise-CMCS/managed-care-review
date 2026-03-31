@@ -6,5 +6,6 @@ describe('formatContractSubTypeForDisplay', () => {
             'Health plan'
         )
         expect(formatContractSubTypeForDisplay('EQRO')).toBe('EQRO')
+        expect(formatContractSubTypeForDisplay('SDP')).toBe('SDP')
     })
 })

@@ -45,6 +45,8 @@ import { formatCalendarDate } from '@mc-review/dates'
 import { RowCellElement } from '..'
 import { useLDClient } from 'launchdarkly-react-client-sdk'
 import { getSubmissionPath } from '../../routeHelpers'
+import { generatePath } from 'react-router-dom'
+import { RoutesRecord } from '@mc-review/constants'
 
 export type ContractInDashboardType = {
     id: string
@@ -71,6 +73,20 @@ function submissionURL(
     contractSubmissionType: ContractInDashboardType['contractSubmissionType'],
     isNotStateUser: boolean
 ): string {
+    if (contractSubmissionType === 'SDP') {
+        if (status === 'DRAFT') {
+            return generatePath(RoutesRecord.SUBMISSIONS_SDP_DETAILS, { id })
+        }
+
+        if (status === 'UNLOCKED') {
+            return generatePath(RoutesRecord.SUBMISSIONS_SDP_REVIEW_SUBMIT, {
+                id,
+            })
+        }
+
+        return generatePath(RoutesRecord.SUBMISSIONS_SDP_REVIEW_SUBMIT, { id })
+    }
+
     if (isNotStateUser) {
         return getSubmissionPath(
             'SUBMISSIONS_SUMMARY',
@@ -176,6 +192,10 @@ const contractTypeOptions = [
     {
         label: 'EQRO',
         value: 'EQRO',
+    },
+    {
+        label: 'SDP',
+        value: 'SDP',
     },
     {
         label: 'Health plan',

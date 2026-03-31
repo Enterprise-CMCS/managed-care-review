@@ -29,6 +29,11 @@ type Query {
     indexContractsStripped(input: IndexContractsStrippedInput): IndexContractsStrippedPayload!
 
     """
+    indexSubmissions returns a mixed list of contract and SDP dashboard submissions.
+    """
+    indexSubmissions(input: IndexSubmissionsInput): IndexSubmissionsPayload!
+
+    """
     indexUsers returns all of the Users in the system.
 
     It can only be called by an AdminUser
@@ -719,6 +724,34 @@ type ContractStrippedEdge {
 type IndexContractsStrippedPayload {
     totalCount: Int
     edges: [ContractStrippedEdge!]!
+}
+
+input IndexSubmissionsInput {
+    stateCode: String
+    updatedWithin: Int
+    statusesToExclude: [ConsolidatedContractStatus]
+}
+
+type SubmissionDashboard {
+    id: ID!
+    name: String!
+    stateName: String!
+    stateCode: String!
+    programs: [Program!]!
+    submittedAt: DateTime
+    updatedAt: DateTime!
+    status: ConsolidatedContractStatus!
+    contractSubmissionType: ContractSubmissionType!
+    submissionType: String
+}
+
+type SubmissionDashboardEdge {
+    node: SubmissionDashboard!
+}
+
+type IndexSubmissionsPayload {
+    totalCount: Int
+    edges: [SubmissionDashboardEdge!]!
 }
 
 type IndexContractQuestionsPayload {

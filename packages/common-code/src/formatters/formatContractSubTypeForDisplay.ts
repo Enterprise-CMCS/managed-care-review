@@ -4,6 +4,8 @@ export const formatContractSubTypeForDisplay = (subType: string): string => {
             return 'Health plan'
         case 'EQRO':
             return 'EQRO'
+        case 'SDP':
+            return 'SDP'
         default:
             throw new Error(
                 `${subType} is not a recognized contract submission type.`

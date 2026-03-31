@@ -73,6 +73,7 @@ import { generateUploadURLResolver } from './documents/generateUploadURL'
 import { createSDP } from './sdp/createSDP'
 import { updateSDP } from './sdp/updateSDP'
 import { submitSDP } from './sdp/submitSDP'
+import { indexSubmissions } from './submission/indexSubmissions'
 
 export function configureResolvers(
     store: Store,
@@ -90,6 +91,7 @@ export function configureResolvers(
             fetchDocument: fetchDocumentResolver(store, s3Client),
             indexContracts: indexContractsResolver(store),
             indexContractsStripped: indexContractsStripped(store),
+            indexSubmissions: indexSubmissions(store),
             indexUsers: indexUsersResolver(store),
             fetchMcReviewSettings: fetchMcReviewSettings(store, emailer),
             // Rates refactor

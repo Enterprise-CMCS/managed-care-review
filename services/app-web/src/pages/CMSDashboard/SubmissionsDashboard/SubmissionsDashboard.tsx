@@ -1,10 +1,7 @@
+import { gql, useQuery } from '@apollo/client'
 import React from 'react'
-import { SubmissionTypeRecord } from '@mc-review/submissions'
 import { useAuth } from '../../../contexts/AuthContext'
-import { useIndexContractsStrippedQuery } from '../../../gen/gqlClient'
-import { mostRecentDate } from '@mc-review/dates'
 import styles from '../../StateDashboard/StateDashboard.module.scss'
-import { recordJSException } from '@mc-review/otel'
 import {
     Loading,
     ContractTable,
@@ -13,9 +10,36 @@ import {
 import { ErrorFailedRequestPage } from '../../Errors/ErrorFailedRequestPage'
 import { GenericErrorPage } from '../../Errors/GenericErrorPage'
 
+const INDEX_SUBMISSIONS_QUERY = gql`
+    query cmsDashboardIndexSubmissions {
+        indexSubmissions {
+            totalCount
+            edges {
+                node {
+                    id
+                    name
+                    stateName
+                    stateCode
+                    programs {
+                        id
+                        name
+                        fullName
+                        isRateProgram
+                    }
+                    submittedAt
+                    updatedAt
+                    status
+                    contractSubmissionType
+                    submissionType
+                }
+            }
+        }
+    }
+`
+
 const SubmissionsDashboard = (): React.ReactElement => {
     const { loggedInUser } = useAuth()
-    const { data, loading, error } = useIndexContractsStrippedQuery({
+    const { data, loading, error } = useQuery(INDEX_SUBMISSIONS_QUERY, {
         fetchPolicy: 'cache-and-network',
         pollInterval: 120000,
     })
@@ -33,101 +57,18 @@ const SubmissionsDashboard = (): React.ReactElement => {
         return <GenericErrorPage />
     }
 
-    const submissionRows: ContractInDashboardType[] = []
-    data.indexContractsStripped.edges
-        .map((edge) => edge.node)
-        .forEach((sub) => {
-            // When a sub.reviewStatus has been moved out of 'UNDER_REVIEW'
-            // have the reviewStatus supersede the sub.status
-            const status =
-                sub.reviewStatus !== 'UNDER_REVIEW'
-                    ? sub.reviewStatus
-                    : sub.status
-
-            // Errors - data handling
-            if (sub.consolidatedStatus === 'DRAFT') {
-                recordJSException(
-                    `indexContractsQuery: should not return draft submissions for CMS user. ID: ${sub.id}`
-                )
-                return
-            }
-            const currentRevision = sub.latestSubmittedRevision
-
-            if (!currentRevision) {
-                recordJSException(
-                    `Unexpected error: Contract with ID ${sub.id} did not contain a latestSubmittedRevision`
-                )
-                return
-            }
-            const currentFormData = currentRevision.formData
-
-            if (
-                currentRevision?.submitInfo?.updatedAt === undefined &&
-                currentRevision?.unlockInfo?.updatedAt === undefined
-            ) {
-                recordJSException(
-                    `indexContractsQuery: Error finding submit and unlock dates for submissions in CMSDashboard. ID: ${sub.id}`
-                )
-            }
-
-            // Set package display data
-            let displayRateFormData = currentFormData
-            const subReviewActions =
-                sub.reviewStatusActions && sub.reviewStatusActions[0]
-
-            let lastUpdated = mostRecentDate([
-                currentRevision?.submitInfo?.updatedAt,
-                currentRevision?.unlockInfo?.updatedAt,
-                subReviewActions?.updatedAt,
-            ])
-
-            if (sub.status === 'UNLOCKED') {
-                // Errors - data handling
-
-                const draftRevision = sub.draftRevision!
-
-                if (
-                    draftRevision?.submitInfo?.updatedAt === undefined &&
-                    draftRevision?.unlockInfo?.updatedAt === undefined
-                ) {
-                    recordJSException(
-                        `indexContractsQuery: Error finding submit and unlock dates of an unlocked submission. ID: ${sub.id}`
-                    )
-                }
-
-                //last updated date, including the date submission was unlocked
-                lastUpdated = mostRecentDate([
-                    currentRevision?.submitInfo?.updatedAt,
-                    currentRevision?.unlockInfo?.updatedAt,
-                    draftRevision?.submitInfo?.updatedAt,
-                    draftRevision?.unlockInfo?.updatedAt,
-                    subReviewActions?.updatedAt,
-                ])
-            }
-
-            if (!lastUpdated) {
-                recordJSException(
-                    `CMSDashboard: Cannot find valid last updated date from submit and unlock info. Falling back to current revision's last edit timestamp. ID: ${sub.id}`
-                )
-                lastUpdated = new Date(currentRevision.updatedAt)
-            }
-            const programs = sub.state.programs
-
-            submissionRows.push({
-                id: sub.id,
-                name: currentRevision.contractName,
-                programs: programs.filter((program) =>
-                    displayRateFormData.programIDs.includes(program.id)
-                ),
-                submittedAt: sub.initiallySubmittedAt,
-                status: status,
-                updatedAt: lastUpdated,
-                submissionType:
-                    SubmissionTypeRecord[displayRateFormData.submissionType],
-                stateName: sub.state.name,
-                contractSubmissionType: sub.contractSubmissionType,
-            })
-        })
+    const submissionRows: ContractInDashboardType[] =
+        data.indexSubmissions.edges.map((edge: any) => ({
+            id: edge.node.id,
+            name: edge.node.name,
+            programs: edge.node.programs,
+            submittedAt: edge.node.submittedAt ?? undefined,
+            status: edge.node.status,
+            updatedAt: new Date(edge.node.updatedAt),
+            submissionType: edge.node.submissionType ?? undefined,
+            stateName: edge.node.stateName,
+            contractSubmissionType: edge.node.contractSubmissionType,
+        }))
 
     return (
         <section className={styles.panel}>

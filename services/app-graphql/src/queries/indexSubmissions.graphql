@@ -1,0 +1,24 @@
+query indexSubmissions($input: IndexSubmissionsInput) {
+    indexSubmissions(input: $input) {
+        totalCount
+        edges {
+            node {
+                id
+                name
+                stateName
+                stateCode
+                programs {
+                    id
+                    name
+                    fullName
+                    isRateProgram
+                }
+                submittedAt
+                updatedAt
+                status
+                contractSubmissionType
+                submissionType
+            }
+        }
+    }
+}

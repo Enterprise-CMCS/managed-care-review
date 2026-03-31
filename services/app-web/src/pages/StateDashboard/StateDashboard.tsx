@@ -1,11 +1,9 @@
+import { gql, useQuery } from '@apollo/client'
 import { GridContainer } from '@trussworks/react-uswds'
 import React, { useEffect } from 'react'
 import { useLocation } from 'react-router-dom'
 import { useAuth } from '../../contexts/AuthContext'
-import {
-    ContractSubmissionType,
-    useIndexContractsStrippedQuery,
-} from '../../gen/gqlClient'
+import { ContractSubmissionType } from '../../gen/gqlClient'
 import styles from './StateDashboard.module.scss'
 import { SubmissionSuccessMessage } from './SubmissionSuccessMessage'
 import { handleApolloError, isLikelyUserAuthError } from '@mc-review/helpers'
@@ -19,7 +17,33 @@ import {
 } from '../../components'
 import { GenericErrorPage } from '../Errors/GenericErrorPage'
 import { usePage } from '../../contexts/PageContext'
-import { recordJSException } from '@mc-review/otel'
+
+const INDEX_SUBMISSIONS_QUERY = gql`
+    query stateDashboardIndexSubmissions {
+        indexSubmissions {
+            totalCount
+            edges {
+                node {
+                    id
+                    name
+                    stateName
+                    stateCode
+                    programs {
+                        id
+                        name
+                        fullName
+                        isRateProgram
+                    }
+                    submittedAt
+                    updatedAt
+                    status
+                    contractSubmissionType
+                    submissionType
+                }
+            }
+        }
+    }
+`
 
 /**
  * We only pull a subset of data out of the submission and revisions for display in Dashboard
@@ -31,7 +55,7 @@ export const StateDashboard = (): React.ReactElement => {
     const location = useLocation()
     const { updateActiveMainContent } = usePage()
 
-    const { loading, data, error } = useIndexContractsStrippedQuery({
+    const { loading, data, error } = useQuery(INDEX_SUBMISSIONS_QUERY, {
         fetchPolicy: 'cache-and-network',
         pollInterval: 120000,
     })
@@ -73,69 +97,19 @@ export const StateDashboard = (): React.ReactElement => {
     const programs = loggedInUser.state.programs.filter(
         (program) => !program.isRateProgram
     )
-    const submissionRows: ContractInDashboardType[] = []
-
-    data.indexContractsStripped.edges
-        .map((edge) => edge.node)
-        .forEach((sub) => {
-            // When a sub.reviewStatus has been moved out of 'UNDER_REVIEW'
-            // have the reviewStatus supersede the sub.status
-            const status =
-                sub.reviewStatus !== 'UNDER_REVIEW'
-                    ? sub.reviewStatus
-                    : sub.status
-            const subReviewActions =
-                sub.reviewStatusActions && sub.reviewStatusActions[0]
-
-            if (sub.status === 'SUBMITTED' || sub.status === 'RESUBMITTED') {
-                const currentRevision = sub.latestSubmittedRevision
-
-                if (!currentRevision) {
-                    recordJSException(
-                        `Unexpected error: Submitted Contract with ID ${sub.id} did not contain a latestSubmittedRevision`
-                    )
-                    return
-                }
-                submissionRows.push({
-                    id: sub.id,
-                    name: currentRevision.contractName,
-                    programs: programs.filter((program) => {
-                        return currentRevision.formData.programIDs.includes(
-                            program.id
-                        )
-                    }),
-                    submittedAt: sub.initiallySubmittedAt,
-                    status: status,
-                    updatedAt: subReviewActions
-                        ? subReviewActions.updatedAt
-                        : currentRevision.updatedAt,
-                    contractSubmissionType: sub.contractSubmissionType,
-                })
-            } else {
-                const currentRevision = sub.draftRevision
-
-                if (!currentRevision) {
-                    recordJSException(
-                        `Unexpected error: Contract with ID ${sub.id} did not contain a draftRevision`
-                    )
-                    return
-                }
-
-                submissionRows.push({
-                    id: sub.id,
-                    name: currentRevision.contractName,
-                    programs: programs.filter((program) => {
-                        return currentRevision.formData.programIDs.includes(
-                            program.id
-                        )
-                    }),
-                    submittedAt: sub.initiallySubmittedAt,
-                    status: sub.status,
-                    updatedAt: currentRevision.updatedAt,
-                    contractSubmissionType: sub.contractSubmissionType,
-                })
-            }
-        })
+    const submissionRows: ContractInDashboardType[] =
+        data.indexSubmissions.edges.map((edge: any) => ({
+            id: edge.node.id,
+            name: edge.node.name,
+            programs: edge.node.programs.filter((program: any) =>
+                programs.some((stateProgram) => stateProgram.id === program.id)
+            ),
+            submittedAt: edge.node.submittedAt ?? undefined,
+            status: edge.node.status,
+            updatedAt: new Date(edge.node.updatedAt),
+            contractSubmissionType: edge.node.contractSubmissionType,
+            submissionType: edge.node.submissionType ?? undefined,
+        }))
 
     const justSubmittedSubmissionName = new URLSearchParams(
         location.search
