@@ -134,6 +134,10 @@ describe('CMS user can view submission', () => {
 
             cy.logInAsCMSUser()
 
+            cy.findByRole('link', { name: contractName })
+                .should('exist')
+                .click()
+
             cy.wait('@fetchContractWithQuestionsQuery', { timeout: 20_000 })
 
             cy.findByRole('heading', {
@@ -141,9 +145,10 @@ describe('CMS user can view submission', () => {
                 level: 1,
             }).should('exist')
 
-            cy.findByTestId('submission-summary').within(() => {
-                cy.findByText(contractName).should('exist')
-            })
+            cy.findByTestId('submission-id').should(
+                'contain.text',
+                contractName
+            )
 
             //TODO: Add assertions for review determination once that is added.
         })
