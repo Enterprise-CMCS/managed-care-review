@@ -167,7 +167,7 @@ const submissionStatusOptions = [
         value: 'WITHDRAWN',
     },
     {
-        label: 'Not subject to review',
+        label: SubmissionReviewStatusRecord['NOT_SUBJECT_TO_REVIEW'],
         value: 'NOT_SUBJECT_TO_REVIEW',
     },
 ]

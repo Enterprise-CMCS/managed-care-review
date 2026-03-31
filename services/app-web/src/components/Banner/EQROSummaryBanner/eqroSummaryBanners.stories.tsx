@@ -34,3 +34,43 @@ CMSUserNotSubjectToReview.args = {
     subjectToReview: false,
     stateUser: false,
 }
+
+const updateInfo = {
+    updatedAt: new Date('2026-03-15'),
+    updatedReason:
+        'Updated rate certification and contract amendment documents to reflect revised capitation rates for SFY 2026.',
+    updatedBy: {
+        email: 'stateuser@example.com',
+        role: 'STATE_USER',
+        givenName: 'Jane',
+        familyName: 'Smith',
+    },
+}
+
+export const ResubmittedStateUserSubjectToReview = Template.bind({})
+ResubmittedStateUserSubjectToReview.args = {
+    subjectToReview: true,
+    stateUser: true,
+    updateInfo,
+}
+
+export const ResubmittedStateUserNotSubjectToReview = Template.bind({})
+ResubmittedStateUserNotSubjectToReview.args = {
+    subjectToReview: false,
+    stateUser: true,
+    updateInfo,
+}
+
+export const ResubmittedCMSUserSubjectToReview = Template.bind({})
+ResubmittedCMSUserSubjectToReview.args = {
+    subjectToReview: true,
+    stateUser: false,
+    updateInfo,
+}
+
+export const ResubmittedCMSUserNotSubjectToReview = Template.bind({})
+ResubmittedCMSUserNotSubjectToReview.args = {
+    subjectToReview: false,
+    stateUser: false,
+    updateInfo,
+}

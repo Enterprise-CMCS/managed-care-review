@@ -105,7 +105,7 @@ describe('newDeployedS3Client', () => {
             expect(options?.expiresIn).toBe(7200)
         })
 
-        test('defaults to 3600 seconds when expiresIn not provided', async () => {
+        test('defaults to 14400 seconds when expiresIn not provided', async () => {
             const mockSignedUrl =
                 'https://s3.amazonaws.com/presigned-url-default'
             vi.mocked(getSignedUrl).mockResolvedValue(mockSignedUrl)
@@ -116,7 +116,7 @@ describe('newDeployedS3Client', () => {
 
             const options = vi.mocked(getSignedUrl).mock.calls[0][2]
             expect(options).toBeDefined()
-            expect(options?.expiresIn).toBe(3600)
+            expect(options?.expiresIn).toBe(14400)
         })
 
         test('does not prepend allusers/ to zip paths', async () => {

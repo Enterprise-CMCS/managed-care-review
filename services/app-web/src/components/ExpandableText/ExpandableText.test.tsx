@@ -67,7 +67,7 @@ describe('ExpandableText', () => {
         expect(screen.getByTestId('clampElement').className).toContain(
             '_textContracted_'
         )
-        expect(screen.getByText('Show More')).toBeInTheDocument()
+        expect(screen.getByText('Show more')).toBeInTheDocument()
     })
 
     it('can expand and contract clamped text to show more or less text', async () => {
@@ -77,13 +77,13 @@ describe('ExpandableText', () => {
                 <>{longText}</>
             </ExpandableText>
         )
-        expect(screen.getByText('Show More')).toBeInTheDocument()
+        expect(screen.getByText('Show more')).toBeInTheDocument()
         expect(screen.getByTestId('clampElement')).toBeInTheDocument()
         expect(screen.getByTestId('clampElement').className).toContain(
             '_textContracted_'
         )
-        await userEvent.click(screen.getByText('Show More'))
-        expect(screen.getByText('Show Less')).toBeInTheDocument()
+        await userEvent.click(screen.getByText('Show more'))
+        expect(screen.getByText('Show less')).toBeInTheDocument()
         expect(screen.getByTestId('clampElement').className).toContain(
             '_textExpanded_'
         )
@@ -96,7 +96,7 @@ describe('ExpandableText', () => {
                 <>{shortText}</>
             </ExpandableText>
         )
-        expect(screen.queryByText('Show More')).toBeNull()
+        expect(screen.queryByText('Show more')).toBeNull()
         expect(screen.getByTestId('clampElement')).toBeInTheDocument()
         expect(screen.getByTestId('clampElement').className).toContain(
             '_textContracted_'
@@ -117,7 +117,7 @@ describe('ExpandableText', () => {
         expect(screen.getByTestId('clampElement').className).toContain(
             '_textContracted_'
         )
-        expect(screen.getByText('Show More')).toBeInTheDocument()
+        expect(screen.getByText('Show more')).toBeInTheDocument()
     })
 
     it('can expand and contract clamped text inside react element to show more or less text', async () => {
@@ -130,13 +130,13 @@ describe('ExpandableText', () => {
                 </span>
             </ExpandableText>
         )
-        expect(screen.getByText('Show More')).toBeInTheDocument()
+        expect(screen.getByText('Show more')).toBeInTheDocument()
         expect(screen.getByTestId('clampElement')).toBeInTheDocument()
         expect(screen.getByTestId('clampElement').className).toContain(
             '_textContracted_'
         )
-        await userEvent.click(screen.getByText('Show More'))
-        expect(screen.getByText('Show Less')).toBeInTheDocument()
+        await userEvent.click(screen.getByText('Show more'))
+        expect(screen.getByText('Show less')).toBeInTheDocument()
         expect(screen.getByTestId('clampElement').className).toContain(
             '_textExpanded_'
         )

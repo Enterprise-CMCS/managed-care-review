@@ -32,7 +32,7 @@ import {
     EQROSubmissionTypeSummarySection,
 } from '../../../components/SubmissionSummarySection'
 import { getSubmissionPath } from '../../../routeHelpers'
-import { StatusTag } from '../../../components/ContractTable/ContractTable'
+import { StatusTag } from '../../../components/ContractTable'
 import { ChangeHistory } from '../../../components/ChangeHistory'
 
 export const EQROSubmissionSummary = (): React.ReactElement => {
@@ -173,6 +173,29 @@ export const EQROSubmissionSummary = (): React.ReactElement => {
         }
     }
 
+    const renderStatusAlerts = () => {
+        if (isUnlocked && updateInfo) {
+            return (
+                <SubmissionUnlockedBanner
+                    className={styles.banner}
+                    loggedInUser={loggedInUser}
+                    unlockedInfo={updateInfo}
+                />
+            )
+        }
+
+        if (isSubmitted) {
+            return (
+                <EqroReviewDeterminationBanners
+                    className={styles.banner}
+                    subjectToReview={isSubjectToReview}
+                    stateUser={isStateUser}
+                    updateInfo={updateInfo}
+                />
+            )
+        }
+    }
+
     const editOrAddMCCRSID = contract.mccrsID
         ? 'Edit MC-CRS number'
         : 'Add MC-CRS record number'
@@ -197,21 +220,7 @@ export const EQROSubmissionSummary = (): React.ReactElement => {
                     <DocumentWarningBanner className={styles.banner} />
                 )}
 
-                {isUnlocked && updateInfo && (
-                    <SubmissionUnlockedBanner
-                        className={styles.banner}
-                        loggedInUser={loggedInUser}
-                        unlockedInfo={updateInfo}
-                    />
-                )}
-
-                {!isUnlocked && (
-                    <EqroReviewDeterminationBanners
-                        className={styles.banner}
-                        subjectToReview={isSubjectToReview}
-                        stateUser={isStateUser}
-                    />
-                )}
+                {renderStatusAlerts()}
 
                 {hasCMSPermissions && (
                     <SectionCard className={styles.actionsSection}>

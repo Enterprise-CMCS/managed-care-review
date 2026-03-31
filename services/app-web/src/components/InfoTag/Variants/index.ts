@@ -1,0 +1,1 @@
+export { NewTag } from './NewTag'
