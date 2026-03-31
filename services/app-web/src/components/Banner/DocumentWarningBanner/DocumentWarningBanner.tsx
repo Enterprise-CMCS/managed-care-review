@@ -1,5 +1,4 @@
 import React, { useEffect } from 'react'
-import classnames from 'classnames'
 import { useTealium } from '../../../hooks'
 import { ContactSupportLink } from '../../ErrorAlert/ContactSupportLink'
 import styles from '../Banner.module.scss'
@@ -27,7 +26,7 @@ export const DocumentWarningBanner = ({
             heading="Document download unavailable"
             headingLevel="h4"
             data-testid="warning-alert"
-            className={classnames(className, 'usa-alert__text')}
+            className={className}
         >
             <span className={styles.bannerBodyText}>
                 <span>

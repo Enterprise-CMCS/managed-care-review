@@ -60,8 +60,10 @@ export const EQROSubmissionTypeSummarySection = ({
     const isSubmitted =
         contract.status === 'SUBMITTED' || contract.status === 'RESUBMITTED'
     const isUnlocked = contract.status === 'UNLOCKED'
+    const isDraft = contract.status === 'DRAFT'
     const subjectToReview =
         contract.consolidatedStatus !== 'NOT_SUBJECT_TO_REVIEW'
+    const showReviewDetermination = !(isStateUser && (isUnlocked || isDraft))
 
     return (
         <SectionCard
@@ -79,7 +81,7 @@ export const EQROSubmissionTypeSummarySection = ({
                 {headerChildComponent && headerChildComponent}
             </SectionHeader>
             <dl>
-                {isSubmitted && (
+                {showReviewDetermination && (
                     <ReviewDecision subjectToReview={subjectToReview} />
                 )}
                 {initiallySubmittedAt &&

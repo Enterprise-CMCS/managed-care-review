@@ -4,6 +4,7 @@ import {
     fetchCurrentUserMock,
     fetchContractWithQuestionsMockSuccess,
     mockValidCMSUser,
+    mockValidStateUser,
     mockContractPackageSubmitted,
     mockContractPackageUnlockedWithUnlockedType,
 } from '@mc-review/mocks'
@@ -75,6 +76,9 @@ describe('EQROSubmissionSummary - Unlock submission button tests', () => {
                     name: 'Unlock submission',
                 })
             ).not.toBeDisabled()
+
+            // Expect Review decision to be visible for CMS users
+            expect(screen.getByText('Review decision')).toBeInTheDocument()
         })
 
         it('renders the unlock button when EQRO submission is Submitted (not subject to review)', async () => {
@@ -196,6 +200,9 @@ describe('EQROSubmissionSummary - Unlock submission button tests', () => {
                     'No action can be taken on this submission in its current status.'
                 )
             ).toBeInTheDocument()
+
+            // Expect Review decision to be visible for CMS users on unlocked submissions
+            expect(screen.getByText('Review decision')).toBeInTheDocument()
         })
 
         it('renders the unlock button when EQRO submission is Resubmitted', async () => {
@@ -322,6 +329,106 @@ describe('EQROSubmissionSummary - Unlock submission button tests', () => {
                     name: 'Unlock submission',
                 })
             ).not.toBeDisabled()
+        })
+    })
+
+    describe('State User review decision visibility', () => {
+        it('shows Review decision when EQRO submission is Submitted', async () => {
+            const contract = mockContractPackageSubmitted({
+                id: 'test-abc-123',
+                contractSubmissionType: 'EQRO',
+                status: 'SUBMITTED',
+                consolidatedStatus: 'SUBMITTED',
+            })
+
+            renderWithProviders(
+                <Routes>
+                    <Route element={<SubmissionSideNav />}>
+                        <Route
+                            path={RoutesRecord.SUBMISSIONS_SUMMARY}
+                            element={<EQROSubmissionSummary />}
+                        />
+                    </Route>
+                </Routes>,
+                {
+                    apolloProvider: {
+                        mocks: [
+                            fetchCurrentUserMock({
+                                user: mockValidStateUser(),
+                                statusCode: 200,
+                            }),
+                            fetchContractWithQuestionsMockSuccess({
+                                contract,
+                            }),
+                            fetchContractWithQuestionsMockSuccess({
+                                contract,
+                            }),
+                        ],
+                    },
+                    routerProvider: {
+                        route: '/submissions/eqro/test-abc-123',
+                    },
+                    featureFlags: {},
+                }
+            )
+
+            await waitFor(() => {
+                expect(
+                    screen.getByTestId('submission-summary')
+                ).toBeInTheDocument()
+            })
+
+            // Expect Review decision to be visible for state users on submitted submissions
+            expect(screen.getByText('Review decision')).toBeInTheDocument()
+        })
+
+        it('shows Review decision when EQRO submission is Resubmitted', async () => {
+            const contract = mockContractPackageSubmitted({
+                id: 'test-abc-123',
+                contractSubmissionType: 'EQRO',
+                status: 'RESUBMITTED',
+                consolidatedStatus: 'RESUBMITTED',
+            })
+
+            renderWithProviders(
+                <Routes>
+                    <Route element={<SubmissionSideNav />}>
+                        <Route
+                            path={RoutesRecord.SUBMISSIONS_SUMMARY}
+                            element={<EQROSubmissionSummary />}
+                        />
+                    </Route>
+                </Routes>,
+                {
+                    apolloProvider: {
+                        mocks: [
+                            fetchCurrentUserMock({
+                                user: mockValidStateUser(),
+                                statusCode: 200,
+                            }),
+                            fetchContractWithQuestionsMockSuccess({
+                                contract,
+                            }),
+                            fetchContractWithQuestionsMockSuccess({
+                                contract,
+                            }),
+                        ],
+                    },
+                    routerProvider: {
+                        route: '/submissions/eqro/test-abc-123',
+                    },
+                    featureFlags: {},
+                }
+            )
+
+            await waitFor(() => {
+                expect(
+                    screen.getByTestId('submission-summary')
+                ).toBeInTheDocument()
+            })
+
+            // Expect Review decision to be visible for state users on resubmitted submissions
+            expect(screen.getByText('Review decision')).toBeInTheDocument()
         })
     })
 })
