@@ -43,16 +43,24 @@ const sdpDocumentInputSchema = z.object({
 
 const updateSDPSchema = z.object({
     sdpID: z.string().uuid(),
+    stateCode: z.string(),
     lastSeenUpdatedAt: z.date(),
     sdpDocuments: z.array(sdpDocumentInputSchema),
     relatedContractIDs: z.array(z.string().uuid()),
     stateContacts: z.array(stateContactSchema).default([]),
 })
 
+const submitSDPSchema = z.object({
+    sdpID: z.string().uuid(),
+    stateCode: z.string(),
+    lastSeenUpdatedAt: z.date(),
+})
+
 type SDPFormDataType = z.infer<typeof sdpFormDataSchema>
 type CreateSDPInputType = z.infer<typeof createSDPSchema>
 type SDPDocumentInputType = z.infer<typeof sdpDocumentInputSchema>
 type UpdateSDPInputType = z.infer<typeof updateSDPSchema>
+type SubmitSDPInputType = z.infer<typeof submitSDPSchema>
 type SDPSubmissionType = z.infer<typeof sdpSubmissionTypeSchema>
 type SDPChangeType = z.infer<typeof sdpChangeTypeSchema>
 
@@ -61,6 +69,7 @@ export {
     createSDPSchema,
     sdpDocumentInputSchema,
     updateSDPSchema,
+    submitSDPSchema,
     sdpSubmissionTypeSchema,
     sdpChangeTypeSchema,
 }
@@ -69,6 +78,7 @@ export type {
     CreateSDPInputType,
     SDPDocumentInputType,
     UpdateSDPInputType,
+    SubmitSDPInputType,
     SDPSubmissionType,
     SDPChangeType,
 }

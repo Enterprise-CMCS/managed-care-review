@@ -1,0 +1,8 @@
+mutation submitSDP($input: SubmitSDPInput!) {
+    submitSDP(input: $input) {
+        sdp {
+            id
+            status
+        }
+    }
+}

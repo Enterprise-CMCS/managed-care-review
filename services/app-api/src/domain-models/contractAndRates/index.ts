@@ -5,6 +5,7 @@ export {
     createSDPSchema,
     sdpDocumentInputSchema,
     updateSDPSchema,
+    submitSDPSchema,
     sdpSubmissionTypeSchema,
     sdpChangeTypeSchema,
 } from './sdpFormDataTypes'
@@ -52,6 +53,7 @@ export type {
     CreateSDPInputType,
     SDPDocumentInputType,
     UpdateSDPInputType,
+    SubmitSDPInputType,
     SDPSubmissionType,
     SDPChangeType,
 } from './sdpFormDataTypes'

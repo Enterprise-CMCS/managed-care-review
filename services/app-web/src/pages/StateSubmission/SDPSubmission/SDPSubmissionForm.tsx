@@ -54,6 +54,17 @@ const UPDATE_SDP_MUTATION = gql`
     }
 `
 
+const SUBMIT_SDP_MUTATION = gql`
+    mutation submitSDPSubmission($input: SubmitSDPInput!) {
+        submitSDP(input: $input) {
+            sdp {
+                id
+                status
+            }
+        }
+    }
+`
+
 type CreatedSDPState = {
     id: string
     lastSeenUpdatedAt: string
@@ -65,6 +76,11 @@ type UpdateSDPInput = {
     sdpDocuments: GenericDocumentInput[]
     relatedContractIDs: string[]
     stateContacts: SDPContactsFormValues['stateContacts']
+}
+
+type SubmitSDPInput = {
+    sdpID: string
+    lastSeenUpdatedAt: string
 }
 
 type SDPNavigationState = {
@@ -119,6 +135,7 @@ export const SDPSubmissionForm = (): React.ReactElement => {
 
     const [createSDPDraft] = useMutation(CREATE_SDP_MUTATION)
     const [updateSDPDraft] = useMutation(UPDATE_SDP_MUTATION)
+    const [submitSDPDraft] = useMutation(SUBMIT_SDP_MUTATION)
 
     React.useEffect(() => {
         if (location.pathname.endsWith('/edit/review-and-submit')) {
@@ -415,6 +432,48 @@ export const SDPSubmissionForm = (): React.ReactElement => {
                     sdpDetailsValues={sdpDetailsValues}
                     sdpContactsValues={sdpContactsValues}
                     pageErrorMessage={pageErrorMessage}
+                    onSubmit={async () => {
+                        setPageErrorMessage(false)
+
+                        if (!draftSDP?.id || !draftSDP.lastSeenUpdatedAt) {
+                            setPageErrorMessage(
+                                'There was a problem submitting the SDP draft'
+                            )
+                            return false
+                        }
+
+                        try {
+                            const submitInput: SubmitSDPInput = {
+                                sdpID: draftSDP.id,
+                                lastSeenUpdatedAt: draftSDP.lastSeenUpdatedAt,
+                            }
+
+                            const result = await submitSDPDraft({
+                                variables: {
+                                    input: submitInput,
+                                },
+                            })
+                            const submittedSDP = result.data?.submitSDP?.sdp
+
+                            if (
+                                !submittedSDP?.id ||
+                                submittedSDP.status !== 'SUBMITTED'
+                            ) {
+                                setPageErrorMessage(
+                                    'There was a problem submitting the SDP draft'
+                                )
+                                return false
+                            }
+
+                            navigate(RoutesRecord.DASHBOARD_SUBMISSIONS)
+                            return true
+                        } catch (_error) {
+                            setPageErrorMessage(
+                                'There was a problem submitting the SDP draft'
+                            )
+                            return false
+                        }
+                    }}
                 />
             )}
         </div>

@@ -92,6 +92,7 @@ export function updateSDP(store: Store) {
 
         const sdpResult = await store.updateDraftSDP({
             sdpID: input.sdpID,
+            stateCode: stateFromCurrentUser,
             lastSeenUpdatedAt: input.lastSeenUpdatedAt,
             relatedContractIDs: uniqueRelatedContractIDs,
             sdpDocuments: validatedDocuments.map((document, index) => ({

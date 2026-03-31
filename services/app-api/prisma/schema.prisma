@@ -89,6 +89,7 @@ model SDPTable {
   updatedAt DateTime @default(now()) @updatedAt
 
   mccrsID     String?
+  status      String   @default("DRAFT")
   stateCode   String
   state       State  @relation(fields: [stateCode], references: [stateCode])
   stateNumber Int

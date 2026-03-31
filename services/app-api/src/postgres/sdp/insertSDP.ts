@@ -9,6 +9,7 @@ type InsertedSDPRow = {
     createdAt: Date
     updatedAt: Date
     mccrsID: string | null
+    status: string
     stateCode: string
     stateNumber: number
 }
@@ -51,9 +52,9 @@ async function insertDraftSDP(
             // SDP delegates. This keeps createSDP able to persist records now.
             const insertedSDPRows = await tx.$queryRaw<InsertedSDPRow[]>(
                 Prisma.sql`
-                    INSERT INTO "SDPTable" ("id", "stateCode", "stateNumber")
-                    VALUES (${sdpID}, ${args.stateCode}, ${latestStateSubmissionNumber})
-                    RETURNING "id", "createdAt", "updatedAt", "mccrsID", "stateCode", "stateNumber"
+                    INSERT INTO "SDPTable" ("id", "status", "stateCode", "stateNumber")
+                    VALUES (${sdpID}, 'DRAFT', ${args.stateCode}, ${latestStateSubmissionNumber})
+                    RETURNING "id", "createdAt", "updatedAt", "mccrsID", "status", "stateCode", "stateNumber"
                 `
             )
             const sdp = insertedSDPRows[0]
@@ -116,6 +117,7 @@ async function insertDraftSDP(
                 id: sdp.id,
                 createdAt: sdp.createdAt,
                 updatedAt: sdp.updatedAt,
+                status: sdp.status as SDPType['status'],
                 stateCode: sdp.stateCode,
                 mccrsID: sdp.mccrsID ?? undefined,
                 stateNumber: sdp.stateNumber,
@@ -143,6 +145,7 @@ async function insertDraftSDP(
                         stateContacts: [],
                     },
                 },
+                latestSubmittedRevision: undefined,
                 revisions: [draftRevision].map((revision) => ({
                     id: revision.id,
                     sdp: {

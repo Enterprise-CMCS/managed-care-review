@@ -21,6 +21,7 @@ type ExistingSDPRow = {
     createdAt: Date
     updatedAt: Date
     mccrsID: string | null
+    status: string
     stateCode: string
     stateNumber: number
 }
@@ -116,10 +117,12 @@ async function updateDraftSDP(
                         "createdAt",
                         "updatedAt",
                         "mccrsID",
+                        "status",
                         "stateCode",
                         "stateNumber"
                     FROM "SDPTable"
                     WHERE "id" = ${args.sdpID}
+                      AND "stateCode" = ${args.stateCode}
                 `
             )
             const sdp = sdpRows[0]
@@ -127,6 +130,12 @@ async function updateDraftSDP(
             if (!sdp) {
                 return new NotFoundError(
                     `Cannot find SDP to update with id: ${args.sdpID}`
+                )
+            }
+
+            if (sdp.status !== 'DRAFT') {
+                return new UserInputPostgresError(
+                    `SDP is not in editable state. SDP: ${args.sdpID} Status: ${sdp.status}`
                 )
             }
 
@@ -205,6 +214,7 @@ async function updateDraftSDP(
                         "createdAt",
                         "updatedAt",
                         "mccrsID",
+                        "status",
                         "stateCode",
                         "stateNumber"
                 `
@@ -261,6 +271,7 @@ async function updateDraftSDP(
                 id: updatedSDP.id,
                 createdAt: updatedSDP.createdAt,
                 updatedAt: updatedSDP.updatedAt,
+                status: updatedSDP.status as SDPType['status'],
                 stateCode: updatedSDP.stateCode,
                 mccrsID: updatedSDP.mccrsID ?? undefined,
                 stateNumber: updatedSDP.stateNumber,
@@ -288,6 +299,7 @@ async function updateDraftSDP(
                         stateContacts: args.stateContacts,
                     },
                 },
+                latestSubmittedRevision: undefined,
                 revisions: [
                     {
                         id: updatedRevision.id,

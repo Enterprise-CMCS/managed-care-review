@@ -72,6 +72,7 @@ import { fetchDocumentResolver } from './documents/fetchDocument'
 import { generateUploadURLResolver } from './documents/generateUploadURL'
 import { createSDP } from './sdp/createSDP'
 import { updateSDP } from './sdp/updateSDP'
+import { submitSDP } from './sdp/submitSDP'
 
 export function configureResolvers(
     store: Store,
@@ -109,6 +110,7 @@ export function configureResolvers(
             createContract: createContract(store),
             createSDP: createSDP(store),
             updateSDP: updateSDP(store),
+            submitSDP: submitSDP(store),
             updateContract: updateContract(store),
             updateContractDraftRevision: updateContractDraftRevision(
                 store,

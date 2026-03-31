@@ -150,6 +150,13 @@ type Mutation {
     updateSDP(input: UpdateSDPInput!): UpdateSDPPayload!
 
     """
+    submitSDP submits an SDP draft for CMS review.
+
+    This can only be called by StateUsers.
+    """
+    submitSDP(input: SubmitSDPInput!): SubmitSDPPayload!
+
+    """
     updateContract can be used to update fields on the contract
     as opposed to an individual revision
     """
@@ -605,6 +612,15 @@ input UpdateSDPInput {
 }
 
 type UpdateSDPPayload {
+    sdp: SDP!
+}
+
+input SubmitSDPInput {
+    sdpID: ID!
+    lastSeenUpdatedAt: DateTime!
+}
+
+type SubmitSDPPayload {
     sdp: SDP!
 }
 
@@ -2277,6 +2293,7 @@ type SDPStripped {
     id: ID!
     createdAt: DateTime!
     updatedAt: DateTime!
+    status: HealthPlanPackageStatus!
     stateCode: String!
     state: State!
     stateNumber: Int!
@@ -2378,6 +2395,7 @@ type SDP {
     id: ID!
     createdAt: DateTime!
     updatedAt: DateTime!
+    status: HealthPlanPackageStatus!
     stateCode: String!
     state: State!
     stateNumber: Int!

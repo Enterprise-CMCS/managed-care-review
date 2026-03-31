@@ -1,5 +1,5 @@
-import React, { useEffect } from 'react'
-import { GridContainer } from '@trussworks/react-uswds'
+import React, { useEffect, useRef, useState } from 'react'
+import { GridContainer, ModalRef } from '@trussworks/react-uswds'
 import {
     ActionButton,
     DynamicStepIndicator,
@@ -11,6 +11,7 @@ import {
     DataDetailContactField,
     UploadedDocumentsTable,
 } from '../../../../components'
+import { Modal, ModalOpenButton } from '../../../../components/Modal'
 import { usePage } from '../../../../contexts/PageContext'
 import { PageBannerAlerts } from '../../SharedSubmissionComponents'
 import { SDPDetailsFormValues } from '../SDPDetails'
@@ -28,6 +29,7 @@ type SDPReviewSubmitProps = {
     sdpDetailsValues: SDPDetailsFormValues
     sdpContactsValues: SDPContactsFormValues
     pageErrorMessage?: string | boolean
+    onSubmit: () => Promise<boolean>
 }
 
 const formatSubmissionType = (
@@ -118,12 +120,15 @@ export const SDPReviewSubmit = ({
     sdpDetailsValues,
     sdpContactsValues,
     pageErrorMessage = false,
+    onSubmit,
 }: SDPReviewSubmitProps): React.ReactElement => {
     const { updateActiveMainContent } = usePage()
     const navigate = useNavigate()
     const statePrograms = useStatePrograms()
     const activeMainContentId = 'sdpReviewSubmitMainContent'
     const sdpDocuments = mapFileItemsToDocuments(sdpDetailsValues.sdpDocuments)
+    const modalRef = useRef<ModalRef>(null)
+    const [isSubmitting, setIsSubmitting] = useState(false)
 
     useEffect(() => {
         updateActiveMainContent(activeMainContentId)
@@ -298,15 +303,36 @@ export const SDPReviewSubmit = ({
                     >
                         Back
                     </ActionButton>
-                    <ActionButton
-                        type="button"
-                        variant="default"
-                        parent_component_type="page body"
+                    <ModalOpenButton
+                        modalRef={modalRef}
                         className={styles.submitButton}
+                        id="sdp-review-submit-modal-open-button"
                     >
                         Submit
-                    </ActionButton>
+                    </ModalOpenButton>
                 </PageActionsContainer>
+                <Modal
+                    id="sdp-review-submit-modal"
+                    modalRef={modalRef}
+                    modalHeading="Ready to submit?"
+                    onSubmit={() => {
+                        void (async () => {
+                            setIsSubmitting(true)
+                            const didSubmit = await onSubmit()
+                            if (didSubmit) {
+                                modalRef.current?.toggleModal(undefined, false)
+                            }
+                            setIsSubmitting(false)
+                        })()
+                    }}
+                    onSubmitText="Submit"
+                    isSubmitting={isSubmitting}
+                >
+                    <p>
+                        Submitting this SDP will send it to CMS to begin their
+                        review.
+                    </p>
+                </Modal>
             </GridContainer>
         </div>
     )
