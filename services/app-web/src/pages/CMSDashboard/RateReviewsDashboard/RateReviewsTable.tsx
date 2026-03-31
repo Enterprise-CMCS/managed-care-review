@@ -135,6 +135,22 @@ type ReadableFilters = {
     [key: string]: string[]
 }
 
+const getColumnInlineStyle = (
+    columnId: string
+): React.CSSProperties | undefined => {
+    if (columnId === 'Rate review') {
+        return {
+            minWidth: '90px',
+        }
+    }
+
+    if (columnId === 'programs') {
+        return {
+            maxWidth: '143px',
+        }
+    }
+}
+
 const fromColumnFiltersToReadableUrl = (input: ColumnFiltersState) => {
     const output: ReadableFilters = {}
     input.forEach((element) => {
@@ -335,18 +351,24 @@ export const RateReviewsTable = ({
             }),
             columnHelper.accessor('programs', {
                 header: 'Programs',
-                cell: (info) =>
-                    info.getValue().map((program) => {
-                        return (
-                            <Tag
-                                data-testid="program-tag"
-                                key={program.id}
-                                className={`radius-pill ${styles.programTag}`}
-                            >
-                                {program.name}
-                            </Tag>
-                        )
-                    }),
+                cell: (info) => (
+                    <div
+                        className={styles.programsCellContent}
+                        style={{ maxWidth: '143px' }}
+                    >
+                        {info.getValue().map((program) => {
+                            return (
+                                <Tag
+                                    data-testid="program-tag"
+                                    key={program.id}
+                                    className={`radius-pill ${styles.programTag}`}
+                                >
+                                    {program.name}
+                                </Tag>
+                            )
+                        })}
+                    </div>
+                ),
                 meta: {
                     dataTestID: `${tableConfig.rowIDName}-programs`,
                 },
@@ -692,7 +714,7 @@ export const RateReviewsTable = ({
                             {submissionCount}
                         </div>
                     </div>
-                    <Table fullWidth>
+                    <Table fullWidth className={styles.table}>
                         <thead data-testid="rate-reviews-table">
                             {reactTable.getHeaderGroups().map((headerGroup) => (
                                 <tr key={headerGroup.id}>
@@ -701,6 +723,9 @@ export const RateReviewsTable = ({
                                             scope="col"
                                             key={header.id}
                                             id={header.id}
+                                            style={getColumnInlineStyle(
+                                                header.column.id
+                                            )}
                                         >
                                             {header.isPlaceholder
                                                 ? null
@@ -723,6 +748,9 @@ export const RateReviewsTable = ({
                                     {row.getVisibleCells().map((cell) => (
                                         <RowCellElement
                                             key={cell.id}
+                                            style={getColumnInlineStyle(
+                                                cell.column.id
+                                            )}
                                             element={
                                                 cell.column.id === 'Rate review'
                                                     ? 'th'
