@@ -104,7 +104,7 @@ describe('undoWithdrawContract', () => {
         expect(contractHistory).toStrictEqual(
             expect.arrayContaining([
                 'Initial submission',
-                'CMS undoing submission submission withdrawal. Undo submission withdraw done in error.',
+                'CMS undoing submission withdrawal. Undo submission withdraw done in error.',
                 'CMS undid submission withdrawal. Undo submission withdraw done in error.',
             ])
         )
