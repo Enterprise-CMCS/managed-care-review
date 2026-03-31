@@ -75,6 +75,12 @@
         "url": "https://github.com/Enterprise-CMCS/managed-care-review/issues"
     },
     "homepage": "https://github.com/Enterprise-CMCS/managed-care-review#readme",
+    "pnpm": {
+        "overrides": {
+            "axios@^1": "1.13.6",
+            "axios@^0.26": "0.26.0"
+        }
+    },
     "devDependencies": {
         "c8": "^11.0.0",
         "cypress": "^13.13.2",
