@@ -76,7 +76,7 @@ export const EQROSubmissionTypeSummarySection = ({
                 hideBorderTop
                 editNavigateTo={editNavigateTo}
                 headerId="submissionTypeHeader"
-                fontSize="38px"
+                headingLevel='h2'
             >
                 {headerChildComponent && headerChildComponent}
             </SectionHeader>
