@@ -36,6 +36,7 @@ import {
     StatutoryRegulatoryAttestation,
     StatutoryRegulatoryAttestationQuestion,
 } from '@mc-review/constants'
+import { NewTag } from '../../InfoTag'
 
 type SummaryDetailProps = {
     contractFormData: ContractFormData
@@ -151,20 +152,23 @@ export const ContractProgramsSummary = ({
 export const ReviewDecision = ({
     subjectToReview,
     label,
+    newDetermination,
 }: {
     subjectToReview: boolean
     label?: string
+    newDetermination?: boolean
 }) => {
+    const renderReviewDetermination = subjectToReview
+        ? 'Subject to formal review and approval'
+        : 'Not subject to formal review and approval'
+
     return (
-        <DataDetail
-            id="reviewDecision"
-            label={label ?? 'Review decision'}
-            children={
-                subjectToReview
-                    ? 'Subject to formal review and approval'
-                    : 'Not subject to formal review and approval'
-            }
-        />
+        <DataDetail id="reviewDecision" label={label ?? 'Review decision'}>
+            <span>
+                {newDetermination && <NewTag className={styles.tagSpacing} />}
+                {renderReviewDetermination}
+            </span>
+        </DataDetail>
     )
 }
 

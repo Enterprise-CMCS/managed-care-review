@@ -4,13 +4,12 @@ import {
     SectionHeader,
     SectionCard,
 } from '../../../components'
-import { getVisibleLatestContractFormData } from '@mc-review/submissions'
-import { GenericErrorPage } from '../../../pages/Errors/GenericErrorPage'
 import {
-    Contract,
-    UnlockedContract,
-    ContractRevision,
-} from '../../../gen/gqlClient'
+    eqroValidationAndReviewDetermination,
+    getVisibleLatestContractFormData,
+} from '@mc-review/submissions'
+import { GenericErrorPage } from '../../../pages/Errors/GenericErrorPage'
+import { Contract, UnlockedContract } from '../../../gen/gqlClient'
 import styles from '../SubmissionSummarySection.module.scss'
 import {
     ContractProgramsSummary,
@@ -24,7 +23,6 @@ import {
 
 export type EQROSubmissionTypeSummarySection = {
     contract: Contract | UnlockedContract
-    contractRev?: ContractRevision
     editNavigateTo?: string
     headerChildComponent?: React.ReactElement
     subHeaderComponent?: React.ReactElement
@@ -34,9 +32,37 @@ export type EQROSubmissionTypeSummarySection = {
     explainMissingData?: boolean
 }
 
+const calcChangeInReviewDetermination = (
+    contract: Contract | UnlockedContract,
+    currentDetermination: boolean
+): boolean => {
+    if (
+        contract.status === 'DRAFT' ||
+        contract.status === 'UNLOCKED' ||
+        contract.status === 'SUBMITTED'
+    ) {
+        return false
+    }
+
+    if (contract.status === 'RESUBMITTED') {
+        const previousRevision =
+            contract.packageSubmissions?.[1]?.contractRevision
+        if (!previousRevision) return false
+
+        const formData = previousRevision.formData
+        const previousReviewDetermination =
+            eqroValidationAndReviewDetermination(contract.id, formData)
+
+        if (previousReviewDetermination !== currentDetermination) {
+            return true
+        }
+    }
+
+    return false
+}
+
 export const EQROSubmissionTypeSummarySection = ({
     contract,
-    contractRev,
     initiallySubmittedAt,
     isStateUser,
     editNavigateTo,
@@ -45,9 +71,8 @@ export const EQROSubmissionTypeSummarySection = ({
     explainMissingData,
     headerText,
 }: EQROSubmissionTypeSummarySection): React.ReactElement => {
-    const contractOrRev = contractRev ? contractRev : contract
     const contractFormData = getVisibleLatestContractFormData(
-        contractOrRev,
+        contract,
         isStateUser
     )
     if (!contractFormData) return <GenericErrorPage />
@@ -64,6 +89,11 @@ export const EQROSubmissionTypeSummarySection = ({
     const subjectToReview =
         contract.consolidatedStatus !== 'NOT_SUBJECT_TO_REVIEW'
     const showReviewDetermination = !(isStateUser && (isUnlocked || isDraft))
+
+    const hasReviewDeterminationChanged = calcChangeInReviewDetermination(
+        contract,
+        subjectToReview
+    )
 
     return (
         <SectionCard
@@ -82,7 +112,10 @@ export const EQROSubmissionTypeSummarySection = ({
             </SectionHeader>
             <dl>
                 {showReviewDetermination && (
-                    <ReviewDecision subjectToReview={subjectToReview} />
+                    <ReviewDecision
+                        subjectToReview={subjectToReview}
+                        newDetermination={hasReviewDeterminationChanged}
+                    />
                 )}
                 {initiallySubmittedAt &&
                     (isSubmitted || (!isStateUser && isUnlocked)) && (

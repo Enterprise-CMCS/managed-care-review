@@ -152,6 +152,10 @@
     }
 }
 
+.tagSpacing {
+    margin-right: uswds.units(0.5) !important;
+}
+
 .singleColumnGrid {
     @include uswds.at-media(tablet) {
         > * {
