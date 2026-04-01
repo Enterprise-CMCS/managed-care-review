@@ -1793,6 +1793,7 @@ function mockContractPackageWithDifferentProgramsInRevisions(): Contract {
                     name: 'NEMT',
                     fullName: 'Non-Emergency Medical Transportation',
                     isRateProgram: false,
+                    isDeprecated: false,
                     __typename: 'Program',
                 },
                 {
@@ -1800,6 +1801,7 @@ function mockContractPackageWithDifferentProgramsInRevisions(): Contract {
                     name: 'PCCMe',
                     fullName: 'Healthy Start MomCare Network, Inc.',
                     isRateProgram: false,
+                    isDeprecated: false,
                     __typename: 'Program',
                 },
                 {
@@ -1807,6 +1809,7 @@ function mockContractPackageWithDifferentProgramsInRevisions(): Contract {
                     name: 'MMA',
                     fullName: 'Managed Medical Assistance Program',
                     isRateProgram: false,
+                    isDeprecated: false,
                     __typename: 'Program',
                 },
                 {
@@ -1814,6 +1817,7 @@ function mockContractPackageWithDifferentProgramsInRevisions(): Contract {
                     name: 'LTC',
                     fullName: 'Long-term Care Program',
                     isRateProgram: false,
+                    isDeprecated: false,
                     __typename: 'Program',
                 },
                 {
@@ -1821,6 +1825,7 @@ function mockContractPackageWithDifferentProgramsInRevisions(): Contract {
                     name: 'Dental',
                     fullName: 'Prepaid Dental Health Program',
                     isRateProgram: false,
+                    isDeprecated: false,
                     __typename: 'Program',
                 },
             ],
@@ -3173,7 +3178,7 @@ function mockEqroContractSubmittedUnderReview(
                                     id: 'cb794cb3-fc1c-45f8-80e8-da8e4cb7148c',
                                     name: 'contract_document.docx',
                                     s3URL: 's3://local-uploads/TypeError: Failed to fetch/contract_document.docx',
-                                    sha256: 'e6cc7c19ce9ab8f8d705fbe1bbf6978f5edbf5a32e08eeb7c4dd8920af204b3e',
+                                    sha256: 'e6cc7c19ce9ab8f8d705fbe1bbf6978f5edbf5a32e08eeb7c4dd8920af204b3e', // pragma: allowlist secret
                                     dateAdded: '2026-03-23T16:35:27.729Z',
                                     downloadURL:
                                         'http://localhost:4566/fake-download-url',
@@ -3213,7 +3218,7 @@ function mockEqroContractSubmittedUnderReview(
                                 __typename: 'DocumentZipPackage',
                                 id: '0a80bdef-c80a-4e1f-af77-f2cb8afcd3e0',
                                 s3URL: 's3://local-uploads/zips/contracts/0dbdd00b-a196-4ca0-a812-2526bf6a757b/contract-documents.zip',
-                                sha256: '27dec167a1764d7bdcad465f9b04e61c3a7253b879472332d3f92878d57c643b',
+                                sha256: '27dec167a1764d7bdcad465f9b04e61c3a7253b879472332d3f92878d57c643b', // pragma: allowlist secret
                                 documentType: 'CONTRACT_DOCUMENTS',
                                 createdAt: '2026-03-23T16:35:27.853Z',
                                 downloadUrl:
@@ -3267,7 +3272,7 @@ function mockEqroContractSubmittedUnderReview(
                                 id: 'cb794cb3-fc1c-45f8-80e8-da8e4cb7148c',
                                 name: 'contract_document.docx',
                                 s3URL: 's3://local-uploads/TypeError: Failed to fetch/contract_document.docx',
-                                sha256: 'e6cc7c19ce9ab8f8d705fbe1bbf6978f5edbf5a32e08eeb7c4dd8920af204b3e',
+                                sha256: 'e6cc7c19ce9ab8f8d705fbe1bbf6978f5edbf5a32e08eeb7c4dd8920af204b3e', // pragma: allowlist secret
                                 dateAdded: '2026-03-23T16:35:27.729Z',
                                 downloadURL:
                                     'http://localhost:4566/fake-download-url',
@@ -3307,7 +3312,7 @@ function mockEqroContractSubmittedUnderReview(
                             __typename: 'DocumentZipPackage',
                             id: '0a80bdef-c80a-4e1f-af77-f2cb8afcd3e0',
                             s3URL: 's3://local-uploads/zips/contracts/0dbdd00b-a196-4ca0-a812-2526bf6a757b/contract-documents.zip',
-                            sha256: '27dec167a1764d7bdcad465f9b04e61c3a7253b879472332d3f92878d57c643b',
+                            sha256: '27dec167a1764d7bdcad465f9b04e61c3a7253b879472332d3f92878d57c643b', // pragma: allowlist secret
                             documentType: 'CONTRACT_DOCUMENTS',
                             createdAt: '2026-03-23T16:35:27.853Z',
                             downloadUrl:
@@ -3424,7 +3429,7 @@ function mockEqroContractSubmittedNotSubjectToReview(
                                     id: '57f32425-4bfd-4639-a290-e804cd4213fb',
                                     name: 'contract_document.docx',
                                     s3URL: 's3://local-uploads/TypeError: Failed to fetch/contract_document.docx',
-                                    sha256: 'e6cc7c19ce9ab8f8d705fbe1bbf6978f5edbf5a32e08eeb7c4dd8920af204b3e',
+                                    sha256: 'e6cc7c19ce9ab8f8d705fbe1bbf6978f5edbf5a32e08eeb7c4dd8920af204b3e', // pragma: allowlist secret
                                     dateAdded: '2026-03-23T17:01:31.902Z',
                                     downloadURL:
                                         'http://localhost:4566/fake-download-url',
@@ -3464,7 +3469,7 @@ function mockEqroContractSubmittedNotSubjectToReview(
                                 __typename: 'DocumentZipPackage',
                                 id: '67f89e06-0c48-41d0-933f-6568cc5fbdcf',
                                 s3URL: 's3://local-uploads/zips/contracts/ceec98af-7808-4956-9e23-59a76314a308/contract-documents.zip',
-                                sha256: '35cbb48907a7949c17342746913a63290431355b4dde8bd6be3171e8ea2d99be',
+                                sha256: '35cbb48907a7949c17342746913a63290431355b4dde8bd6be3171e8ea2d99be', // pragma: allowlist secret
                                 documentType: 'CONTRACT_DOCUMENTS',
                                 createdAt: '2026-03-23T17:01:32.033Z',
                                 downloadUrl:
@@ -3519,7 +3524,7 @@ function mockEqroContractSubmittedNotSubjectToReview(
                                 id: '57f32425-4bfd-4639-a290-e804cd4213fb',
                                 name: 'contract_document.docx',
                                 s3URL: 's3://local-uploads/TypeError: Failed to fetch/contract_document.docx',
-                                sha256: 'e6cc7c19ce9ab8f8d705fbe1bbf6978f5edbf5a32e08eeb7c4dd8920af204b3e',
+                                sha256: 'e6cc7c19ce9ab8f8d705fbe1bbf6978f5edbf5a32e08eeb7c4dd8920af204b3e', // pragma: allowlist secret
                                 dateAdded: '2026-03-23T17:01:31.902Z',
                                 downloadURL:
                                     'http://localhost:4566/fake-download-url',
@@ -3559,7 +3564,7 @@ function mockEqroContractSubmittedNotSubjectToReview(
                             __typename: 'DocumentZipPackage',
                             id: '67f89e06-0c48-41d0-933f-6568cc5fbdcf',
                             s3URL: 's3://local-uploads/zips/contracts/ceec98af-7808-4956-9e23-59a76314a308/contract-documents.zip',
-                            sha256: '35cbb48907a7949c17342746913a63290431355b4dde8bd6be3171e8ea2d99be',
+                            sha256: '35cbb48907a7949c17342746913a63290431355b4dde8bd6be3171e8ea2d99be', // pragma: allowlist secret
                             documentType: 'CONTRACT_DOCUMENTS',
                             createdAt: '2026-03-23T17:01:32.033Z',
                             downloadUrl:
@@ -3699,7 +3704,7 @@ function mockEqroContractResubmittedWithReviewStatusChange(
                                     id: '8da9610f-d5e7-446c-a8ee-4fe2897783ff',
                                     name: 'contract_document.docx',
                                     s3URL: 's3://local-uploads/TypeError: Failed to fetch/contract_document.docx',
-                                    sha256: 'e6cc7c19ce9ab8f8d705fbe1bbf6978f5edbf5a32e08eeb7c4dd8920af204b3e',
+                                    sha256: 'e6cc7c19ce9ab8f8d705fbe1bbf6978f5edbf5a32e08eeb7c4dd8920af204b3e', // pragma: allowlist secret
                                     dateAdded: '2026-03-23T17:01:31.902Z',
                                     downloadURL:
                                         'http://localhost:4566/fake-download-url',
@@ -3739,7 +3744,7 @@ function mockEqroContractResubmittedWithReviewStatusChange(
                                 __typename: 'DocumentZipPackage',
                                 id: 'afcf886c-260d-42b3-a289-e8086a3d6daf',
                                 s3URL: 's3://local-uploads/zips/contracts/3b09d953-1256-4fb5-8406-20d0e007be17/contract-documents.zip',
-                                sha256: '6210ed5430be21218af24cc2d9b808e2db52c7e65194adab766c44aab6499b53',
+                                sha256: '6210ed5430be21218af24cc2d9b808e2db52c7e65194adab766c44aab6499b53', // pragma: allowlist secret
                                 documentType: 'CONTRACT_DOCUMENTS',
                                 createdAt: '2026-03-23T17:10:31.269Z',
                                 downloadUrl:
@@ -3807,7 +3812,7 @@ function mockEqroContractResubmittedWithReviewStatusChange(
                                 id: '8da9610f-d5e7-446c-a8ee-4fe2897783ff',
                                 name: 'contract_document.docx',
                                 s3URL: 's3://local-uploads/TypeError: Failed to fetch/contract_document.docx',
-                                sha256: 'e6cc7c19ce9ab8f8d705fbe1bbf6978f5edbf5a32e08eeb7c4dd8920af204b3e',
+                                sha256: 'e6cc7c19ce9ab8f8d705fbe1bbf6978f5edbf5a32e08eeb7c4dd8920af204b3e', // pragma: allowlist secret
                                 dateAdded: '2026-03-23T17:01:31.902Z',
                                 downloadURL:
                                     'http://localhost:4566/fake-download-url',
@@ -3847,7 +3852,7 @@ function mockEqroContractResubmittedWithReviewStatusChange(
                             __typename: 'DocumentZipPackage',
                             id: 'afcf886c-260d-42b3-a289-e8086a3d6daf',
                             s3URL: 's3://local-uploads/zips/contracts/3b09d953-1256-4fb5-8406-20d0e007be17/contract-documents.zip',
-                            sha256: '6210ed5430be21218af24cc2d9b808e2db52c7e65194adab766c44aab6499b53',
+                            sha256: '6210ed5430be21218af24cc2d9b808e2db52c7e65194adab766c44aab6499b53', // pragma: allowlist secret
                             documentType: 'CONTRACT_DOCUMENTS',
                             createdAt: '2026-03-23T17:10:31.269Z',
                             downloadUrl:
@@ -3921,7 +3926,7 @@ function mockEqroContractResubmittedWithReviewStatusChange(
                                     id: '57f32425-4bfd-4639-a290-e804cd4213fb',
                                     name: 'contract_document.docx',
                                     s3URL: 's3://local-uploads/TypeError: Failed to fetch/contract_document.docx',
-                                    sha256: 'e6cc7c19ce9ab8f8d705fbe1bbf6978f5edbf5a32e08eeb7c4dd8920af204b3e',
+                                    sha256: 'e6cc7c19ce9ab8f8d705fbe1bbf6978f5edbf5a32e08eeb7c4dd8920af204b3e', // pragma: allowlist secret
                                     dateAdded: '2026-03-23T17:01:31.902Z',
                                     downloadURL:
                                         'http://localhost:4566/fake-download-url',
@@ -3961,7 +3966,7 @@ function mockEqroContractResubmittedWithReviewStatusChange(
                                 __typename: 'DocumentZipPackage',
                                 id: '67f89e06-0c48-41d0-933f-6568cc5fbdcf',
                                 s3URL: 's3://local-uploads/zips/contracts/ceec98af-7808-4956-9e23-59a76314a308/contract-documents.zip',
-                                sha256: '35cbb48907a7949c17342746913a63290431355b4dde8bd6be3171e8ea2d99be',
+                                sha256: '35cbb48907a7949c17342746913a63290431355b4dde8bd6be3171e8ea2d99be', // pragma: allowlist secret
                                 documentType: 'CONTRACT_DOCUMENTS',
                                 createdAt: '2026-03-23T17:01:32.033Z',
                                 downloadUrl:
@@ -4016,7 +4021,7 @@ function mockEqroContractResubmittedWithReviewStatusChange(
                                 id: '57f32425-4bfd-4639-a290-e804cd4213fb',
                                 name: 'contract_document.docx',
                                 s3URL: 's3://local-uploads/TypeError: Failed to fetch/contract_document.docx',
-                                sha256: 'e6cc7c19ce9ab8f8d705fbe1bbf6978f5edbf5a32e08eeb7c4dd8920af204b3e',
+                                sha256: 'e6cc7c19ce9ab8f8d705fbe1bbf6978f5edbf5a32e08eeb7c4dd8920af204b3e', // pragma: allowlist secret
                                 dateAdded: '2026-03-23T17:01:31.902Z',
                                 downloadURL:
                                     'http://localhost:4566/fake-download-url',
@@ -4056,7 +4061,7 @@ function mockEqroContractResubmittedWithReviewStatusChange(
                             __typename: 'DocumentZipPackage',
                             id: '67f89e06-0c48-41d0-933f-6568cc5fbdcf',
                             s3URL: 's3://local-uploads/zips/contracts/ceec98af-7808-4956-9e23-59a76314a308/contract-documents.zip',
-                            sha256: '35cbb48907a7949c17342746913a63290431355b4dde8bd6be3171e8ea2d99be',
+                            sha256: '35cbb48907a7949c17342746913a63290431355b4dde8bd6be3171e8ea2d99be', // pragma: allowlist secret
                             documentType: 'CONTRACT_DOCUMENTS',
                             createdAt: '2026-03-23T17:01:32.033Z',
                             downloadUrl:
