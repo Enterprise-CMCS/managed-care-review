@@ -135,19 +135,9 @@ type ReadableFilters = {
     [key: string]: string[]
 }
 
-const getColumnInlineStyle = (
-    columnId: string
-): React.CSSProperties | undefined => {
+const getColumnClassName = (columnId: string): string | undefined => {
     if (columnId === 'Rate review') {
-        return {
-            minWidth: '90px',
-        }
-    }
-
-    if (columnId === 'programs') {
-        return {
-            maxWidth: '143px',
-        }
+        return styles.columnID
     }
 }
 
@@ -352,10 +342,7 @@ export const RateReviewsTable = ({
             columnHelper.accessor('programs', {
                 header: 'Programs',
                 cell: (info) => (
-                    <div
-                        className={styles.programsCellContent}
-                        style={{ maxWidth: '143px' }}
-                    >
+                    <div className={styles.programsCellContent}>
                         {info.getValue().map((program) => {
                             return (
                                 <Tag
@@ -723,7 +710,7 @@ export const RateReviewsTable = ({
                                             scope="col"
                                             key={header.id}
                                             id={header.id}
-                                            style={getColumnInlineStyle(
+                                            className={getColumnClassName(
                                                 header.column.id
                                             )}
                                         >
@@ -748,7 +735,7 @@ export const RateReviewsTable = ({
                                     {row.getVisibleCells().map((cell) => (
                                         <RowCellElement
                                             key={cell.id}
-                                            style={getColumnInlineStyle(
+                                            className={getColumnClassName(
                                                 cell.column.id
                                             )}
                                             element={
