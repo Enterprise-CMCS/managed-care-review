@@ -956,7 +956,7 @@ type Program {
     isRateProgram: Boolean!
     "Specifies if a program has been deprecated and replaced by another program"
     isDeprecated: Boolean!
-    "If deprecated this will contain the uuid of the program that replaced it"
+    "UUID of the replacement program when one exists"
     deprecatedByProgramId: String
 }
 
