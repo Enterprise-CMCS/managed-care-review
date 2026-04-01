@@ -148,7 +148,7 @@ export const StateDashboard = (): React.ReactElement => {
     ) as ContractSubmissionType | null
 
     return (
-        <>
+        <div className={styles.stateDashboard}>
             <div
                 id={DASHBOARD_ATTRIBUTE}
                 data-testid={DASHBOARD_ATTRIBUTE}
@@ -166,7 +166,7 @@ export const StateDashboard = (): React.ReactElement => {
                             )}
 
                             <div className={styles.panelHeader}>
-                                <h2>Submissions</h2>
+                                <h1>Dashboard</h1>
                                 <div>
                                     <NavLinkWithLogging
                                         className="usa-button"
@@ -182,6 +182,7 @@ export const StateDashboard = (): React.ReactElement => {
                             <ContractTable
                                 tableData={submissionRows}
                                 user={loggedInUser}
+                                filterCountClassName={styles.filterCount}
                             />
                         </section>
                     ) : (
@@ -189,6 +190,6 @@ export const StateDashboard = (): React.ReactElement => {
                     )}
                 </GridContainer>
             </div>
-        </>
+        </div>
     )
 }
