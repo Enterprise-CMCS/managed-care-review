@@ -1,6 +1,22 @@
 # Managed Care Review - API Changelog
 ## This document highlights API changes that have been introduced since May 2025
 
+### April 1, 2026
+#### Added
+- `isDeprecated` and `deprecatedByProgramId` added to the `Program` GraphQL type.
+   - `isDeprecated` indicates whether the program has been retired from new selection.
+   - `deprecatedByProgramId` optionally identifies the replacement program when one exists.
+   - Affected endpoints:
+     - `fetchCurrentUser`
+     - `fetchContract`
+     - `fetchRate`
+     - `fetchMcReviewSettings`
+     - `indexContracts`
+     - `indexContractsStripped`
+     - `indexRates`
+     - `indexRatesStripped`
+     - `indexUsers`
+
 ### March 16, 2026
 #### Added
 - New mutation `reverseApproveContract` added to the API
@@ -132,4 +148,3 @@
 ### May 2, 2025
 #### Deleted
 - `withdrawAndReplaceRedundantRate` endpoint deleted. It was an Admin only action that was used to address bookkeeping errors with rates
-
