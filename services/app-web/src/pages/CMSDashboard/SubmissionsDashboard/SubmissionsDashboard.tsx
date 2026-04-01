@@ -1,6 +1,6 @@
-import { gql, useQuery } from '@apollo/client'
 import React from 'react'
 import { useAuth } from '../../../contexts/AuthContext'
+import { useIndexSubmissionsQuery } from '../../../gen/gqlClient'
 import styles from '../../StateDashboard/StateDashboard.module.scss'
 import {
     Loading,
@@ -10,36 +10,9 @@ import {
 import { ErrorFailedRequestPage } from '../../Errors/ErrorFailedRequestPage'
 import { GenericErrorPage } from '../../Errors/GenericErrorPage'
 
-const INDEX_SUBMISSIONS_QUERY = gql`
-    query cmsDashboardIndexSubmissions {
-        indexSubmissions {
-            totalCount
-            edges {
-                node {
-                    id
-                    name
-                    stateName
-                    stateCode
-                    programs {
-                        id
-                        name
-                        fullName
-                        isRateProgram
-                    }
-                    submittedAt
-                    updatedAt
-                    status
-                    contractSubmissionType
-                    submissionType
-                }
-            }
-        }
-    }
-`
-
 const SubmissionsDashboard = (): React.ReactElement => {
     const { loggedInUser } = useAuth()
-    const { data, loading, error } = useQuery(INDEX_SUBMISSIONS_QUERY, {
+    const { data, loading, error } = useIndexSubmissionsQuery({
         fetchPolicy: 'cache-and-network',
         pollInterval: 120000,
     })

@@ -1,9 +1,11 @@
-import { gql, useQuery } from '@apollo/client'
 import { GridContainer } from '@trussworks/react-uswds'
 import React, { useEffect } from 'react'
 import { useLocation } from 'react-router-dom'
 import { useAuth } from '../../contexts/AuthContext'
-import { ContractSubmissionType } from '../../gen/gqlClient'
+import {
+    ContractSubmissionType,
+    useIndexSubmissionsQuery,
+} from '../../gen/gqlClient'
 import styles from './StateDashboard.module.scss'
 import { SubmissionSuccessMessage } from './SubmissionSuccessMessage'
 import { handleApolloError, isLikelyUserAuthError } from '@mc-review/helpers'
@@ -18,33 +20,6 @@ import {
 import { GenericErrorPage } from '../Errors/GenericErrorPage'
 import { usePage } from '../../contexts/PageContext'
 
-const INDEX_SUBMISSIONS_QUERY = gql`
-    query stateDashboardIndexSubmissions {
-        indexSubmissions {
-            totalCount
-            edges {
-                node {
-                    id
-                    name
-                    stateName
-                    stateCode
-                    programs {
-                        id
-                        name
-                        fullName
-                        isRateProgram
-                    }
-                    submittedAt
-                    updatedAt
-                    status
-                    contractSubmissionType
-                    submissionType
-                }
-            }
-        }
-    }
-`
-
 /**
  * We only pull a subset of data out of the submission and revisions for display in Dashboard
  */
@@ -55,7 +30,7 @@ export const StateDashboard = (): React.ReactElement => {
     const location = useLocation()
     const { updateActiveMainContent } = usePage()
 
-    const { loading, data, error } = useQuery(INDEX_SUBMISSIONS_QUERY, {
+    const { loading, data, error } = useIndexSubmissionsQuery({
         fetchPolicy: 'cache-and-network',
         pollInterval: 120000,
     })

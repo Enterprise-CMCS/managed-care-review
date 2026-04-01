@@ -23,9 +23,11 @@ import { RoutesRecord } from '@mc-review/constants'
 import { useStatePrograms } from '../../../../hooks'
 import {
     GenericDocument,
-    useFetchContractQuery,
+    IndexContractsStrippedInput,
+    useIndexContractsStrippedQuery,
 } from '../../../../gen/gqlClient'
 import styles from './SDPReviewSubmit.module.scss'
+import { useAuth } from '../../../../contexts/AuthContext'
 import { getSubmissionPath } from '../../../../routeHelpers'
 
 type SDPReviewSubmitProps = {
@@ -119,48 +121,13 @@ const mapFileItemsToDocuments = (
         s3Key: file.key ?? null,
     }))
 
-const LinkedContractSummaryLink = ({
-    contractID,
-}: {
-    contractID: string
-}): React.ReactElement | null => {
-    const { data } = useFetchContractQuery({
-        variables: {
-            input: {
-                contractID,
-            },
-        },
-        fetchPolicy: 'cache-first',
-    })
-
-    const contract = data?.fetchContract.contract
-
-    if (!contract || contract.contractSubmissionType === 'SDP') {
-        return null
-    }
-
-    const contractName =
-        contract.draftRevision?.contractName ??
-        contract.packageSubmissions?.[0]?.contractRevision.contractName ??
-        `MCR-${contract.stateCode}-${String(contract.stateNumber).padStart(
-            4,
-            '0'
-        )}`
-
-    return (
-        <div>
-            <NavLinkWithLogging
-                to={getSubmissionPath(
-                    'SUBMISSIONS_SUMMARY',
-                    contract.contractSubmissionType,
-                    contract.id
-                )}
-            >
-                {contractName}
-            </NavLinkWithLogging>
-        </div>
-    )
-}
+const getRelatedContractName = (contract: {
+    contractName?: string | null
+    stateCode: string
+    stateNumber: number
+}) =>
+    contract.contractName ||
+    `MCR-${contract.stateCode}-${String(contract.stateNumber).padStart(4, '0')}`
 
 export const SDPReviewSubmit = ({
     id,
@@ -172,11 +139,28 @@ export const SDPReviewSubmit = ({
 }: SDPReviewSubmitProps): React.ReactElement => {
     const { updateActiveMainContent } = usePage()
     const navigate = useNavigate()
+    const { loggedInUser } = useAuth()
     const statePrograms = useStatePrograms()
     const activeMainContentId = 'sdpReviewSubmitMainContent'
     const sdpDocuments = mapFileItemsToDocuments(sdpDetailsValues.sdpDocuments)
     const modalRef = useRef<ModalRef>(null)
     const [isSubmitting, setIsSubmitting] = useState(false)
+    const stateCode =
+        loggedInUser?.__typename === 'StateUser'
+            ? loggedInUser.state.code
+            : undefined
+    const contractsInput: IndexContractsStrippedInput = { stateCode }
+    const { data: contractsData } = useIndexContractsStrippedQuery({
+        variables: { input: contractsInput },
+        skip: !stateCode,
+    })
+    const relatedContracts = sdpDetailsValues.relatedContracts
+        .map((contractID) =>
+            contractsData?.indexContractsStripped.edges
+                .map((edge) => edge.node)
+                .find((contract) => contract.id === contractID)
+        )
+        .filter((contract) => contract !== undefined)
 
     useEffect(() => {
         updateActiveMainContent(activeMainContentId)
@@ -292,15 +276,31 @@ export const SDPReviewSubmit = ({
                             id="sdpRelatedContracts"
                             label="Related contracts"
                         >
-                            {sdpDetailsValues.relatedContracts.length > 0
-                                ? sdpDetailsValues.relatedContracts.map(
-                                      (contractID) => (
-                                          <LinkedContractSummaryLink
-                                              key={contractID}
-                                              contractID={contractID}
-                                          />
-                                      )
-                                  )
+                            {relatedContracts.length > 0
+                                ? relatedContracts.map((contract) => (
+                                      <div key={contract.id}>
+                                          <NavLinkWithLogging
+                                              to={getSubmissionPath(
+                                                  'SUBMISSIONS_SUMMARY',
+                                                  contract.contractSubmissionType,
+                                                  contract.id
+                                              )}
+                                          >
+                                              {getRelatedContractName({
+                                                  contractName:
+                                                      contract
+                                                          .latestSubmittedRevision
+                                                          ?.contractName ??
+                                                      contract.draftRevision
+                                                          ?.contractName,
+                                                  stateCode:
+                                                      contract.state.code,
+                                                  stateNumber:
+                                                      contract.stateNumber,
+                                              })}
+                                          </NavLinkWithLogging>
+                                      </div>
+                                  ))
                                 : 'No related contracts added'}
                         </DataDetail>
                     </dl>

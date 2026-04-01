@@ -17,11 +17,14 @@ import {
     IndexContractsForDashboardQuery,
     IndexContractsStrippedDocument,
     IndexContractsStrippedQuery,
+    IndexSubmissionsDocument,
+    IndexSubmissionsQuery,
     UnlockContractMutation,
     UnlockContractDocument,
 } from '../gen/gqlClient'
 import type { ContractStripped } from '../gen/gqlClient'
 import { MockedResponse } from '@apollo/client/testing'
+import { SubmissionTypeRecord } from '@mc-review/submissions'
 import {
     mockContractPackageDraft,
     mockContractPackageSubmittedWithQuestions,
@@ -484,6 +487,58 @@ const indexContractsStrippedMockSuccess = (
     }
 }
 
+const indexSubmissionsMockSuccess = (
+    contracts: ContractStripped[] = [
+        mockContractStripped({ id: 'test-stripped-id-123' }),
+    ]
+): MockedResponse<IndexSubmissionsQuery> => {
+    const edges = contracts.map((contract) => {
+        const visibleRevision =
+            contract.draftRevision ?? contract.latestSubmittedRevision
+        const programIDs = visibleRevision?.formData.programIDs ?? []
+
+        return {
+            node: {
+                __typename: 'SubmissionDashboard' as const,
+                id: contract.id,
+                name:
+                    visibleRevision?.contractName ??
+                    `MCR-${contract.stateCode}-${String(
+                        contract.stateNumber
+                    ).padStart(4, '0')}`,
+                stateName: contract.state.name,
+                stateCode: contract.stateCode,
+                programs: contract.state.programs.filter((program) =>
+                    programIDs.includes(program.id)
+                ),
+                submittedAt: contract.initiallySubmittedAt ?? null,
+                updatedAt: contract.lastUpdatedForDisplay,
+                status: contract.consolidatedStatus,
+                contractSubmissionType: contract.contractSubmissionType,
+                submissionType: visibleRevision?.formData.submissionType
+                    ? SubmissionTypeRecord[
+                          visibleRevision.formData.submissionType
+                      ]
+                    : null,
+            },
+        }
+    })
+
+    return {
+        request: {
+            query: IndexSubmissionsDocument,
+        },
+        result: {
+            data: {
+                indexSubmissions: {
+                    totalCount: edges.length,
+                    edges,
+                },
+            },
+        },
+    }
+}
+
 type unlockContractMockSuccessProps = {
     contract?: Contract
     id: string
@@ -568,6 +623,7 @@ export {
     createContractMockSuccess,
     indexContractsMockSuccess,
     indexContractsStrippedMockSuccess,
+    indexSubmissionsMockSuccess,
     unlockContractMockError,
     unlockContractMockSuccess,
 }

@@ -73,14 +73,14 @@ it('returns related contracts with correct status', async () => {
     // expect parent contract B to be resubmitted
     expect(rateARelatedStrippedContracts).toEqual(
         expect.arrayContaining([
-            {
+            expect.objectContaining({
                 id: submittedContractA.id,
                 consolidatedStatus: 'RESUBMITTED',
-            },
-            {
+            }),
+            expect.objectContaining({
                 id: contractB.id,
                 consolidatedStatus: 'SUBMITTED',
-            },
+            }),
         ])
     )
 
@@ -157,18 +157,18 @@ it('returns related contracts with correct status', async () => {
     // expect all contracts to still be related
     expect(rateARelatedStrippedContracts).toEqual(
         expect.arrayContaining([
-            {
+            expect.objectContaining({
                 id: submittedContractA.id,
                 consolidatedStatus: 'UNLOCKED',
-            },
-            {
+            }),
+            expect.objectContaining({
                 id: contractB.id,
                 consolidatedStatus: 'UNLOCKED',
-            },
-            {
+            }),
+            expect.objectContaining({
                 id: contractC.id,
                 consolidatedStatus: 'SUBMITTED',
-            },
+            }),
         ])
     )
 
@@ -189,14 +189,14 @@ it('returns related contracts with correct status', async () => {
     // expect B to be gone and C to be approved
     expect(rateARelatedStrippedContracts).toEqual(
         expect.arrayContaining([
-            {
+            expect.objectContaining({
                 id: submittedContractA.id,
                 consolidatedStatus: 'UNLOCKED',
-            },
-            {
+            }),
+            expect.objectContaining({
                 id: contractC.id,
                 consolidatedStatus: 'APPROVED',
-            },
+            }),
         ])
     )
 })

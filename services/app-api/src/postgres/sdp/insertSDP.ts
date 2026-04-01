@@ -28,6 +28,34 @@ type InsertedSDPRevisionRow = {
     automaticallyRenewed: boolean
 }
 
+const parsePgArray = (
+    value: string[] | string | null | undefined
+): string[] => {
+    if (!value) {
+        return []
+    }
+
+    if (Array.isArray(value)) {
+        return value
+    }
+
+    const trimmed = value.trim()
+
+    if (trimmed === '{}' || trimmed === '') {
+        return []
+    }
+
+    if (trimmed.startsWith('{') && trimmed.endsWith('}')) {
+        return trimmed
+            .slice(1, -1)
+            .split(',')
+            .map((item) => item.replace(/^"(.*)"$/, '$1'))
+            .filter(Boolean)
+    }
+
+    return [trimmed]
+}
+
 async function insertDraftSDP(
     client: ExtendedPrismaClient,
     args: InsertSDPArgsType
@@ -113,6 +141,13 @@ async function insertDraftSDP(
                 )
             }
 
+            const normalizedProgramIDs = parsePgArray(draftRevision.programIDs)
+            const normalizedChangesIncluded = parsePgArray(
+                draftRevision.changesIncluded as
+                    | InsertSDPArgsType['changesIncluded']
+                    | string
+            ) as InsertSDPArgsType['changesIncluded']
+
             return {
                 id: sdp.id,
                 createdAt: sdp.createdAt,
@@ -133,8 +168,8 @@ async function insertDraftSDP(
                     updatedAt: draftRevision.updatedAt,
                     formData: {
                         submissionType: draftRevision.submissionType,
-                        programIDs: draftRevision.programIDs,
-                        changesIncluded: draftRevision.changesIncluded,
+                        programIDs: normalizedProgramIDs,
+                        changesIncluded: normalizedChangesIncluded,
                         ratingPeriodStart: draftRevision.ratingPeriodStart,
                         ratingPeriodEnd: draftRevision.ratingPeriodEnd,
                         estimatedFederalShare:
@@ -160,8 +195,8 @@ async function insertDraftSDP(
                     updatedAt: revision.updatedAt,
                     formData: {
                         submissionType: revision.submissionType,
-                        programIDs: revision.programIDs,
-                        changesIncluded: revision.changesIncluded,
+                        programIDs: normalizedProgramIDs,
+                        changesIncluded: normalizedChangesIncluded,
                         ratingPeriodStart: revision.ratingPeriodStart,
                         ratingPeriodEnd: revision.ratingPeriodEnd,
                         estimatedFederalShare:

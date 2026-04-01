@@ -7,7 +7,7 @@ import {
     mockUnlockedContractStripped,
     mockContractStripped,
     mockEQROContractStripped,
-    indexContractsStrippedMockSuccess,
+    indexSubmissionsMockSuccess,
 } from '@mc-review/mocks'
 import { renderWithProviders } from '../../testHelpers'
 import { CMSDashboard, RateReviewsDashboard, SubmissionsDashboard } from './'
@@ -52,7 +52,7 @@ describe('CMSDashboard', () => {
                                     statusCode: 200,
                                     user: mockUser(),
                                 }),
-                                indexContractsStrippedMockSuccess([]),
+                                indexSubmissionsMockSuccess([]),
                             ],
                         },
                         routerProvider: { route: '/dashboard/rate-reviews' },
@@ -79,7 +79,7 @@ describe('CMSDashboard', () => {
                                         statusCode: 200,
                                         user: mockUser(),
                                     }),
-                                    indexContractsStrippedMockSuccess([]),
+                                    indexSubmissionsMockSuccess([]),
                                 ],
                             },
                             routerProvider: { route: '/dashboard/submissions' },
@@ -101,7 +101,7 @@ describe('CMSDashboard', () => {
                     submitted.id = 'test-abc-submitted'
                     unlocked.id = 'test-abc-unlocked'
 
-                    const submissions = [draft, submitted, unlocked]
+                    const submissions = [submitted]
 
                     renderWithProviders(<CMSDashboardNestedRoutes />, {
                         apolloProvider: {
@@ -110,7 +110,7 @@ describe('CMSDashboard', () => {
                                     statusCode: 200,
                                     user: mockUser(),
                                 }),
-                                indexContractsStrippedMockSuccess(submissions),
+                                indexSubmissionsMockSuccess(submissions),
                             ],
                         },
                         routerProvider: { route: '/dashboard/submissions' },
@@ -120,14 +120,18 @@ describe('CMSDashboard', () => {
                     const rows = await screen.findAllByRole('row')
                     rows.shift() // remove the column header row
 
-                    // confirm initial draft packages don't display to CMS user
-                    expect(rows).toHaveLength(2)
+                    // confirm in-progress draft and unlocked packages don't display to CMS user
+                    expect(rows).toHaveLength(1)
 
                     rows.forEach((row) => {
                         const submissionLink = within(row).queryByRole('link')
                         expect(submissionLink).not.toHaveAttribute(
                             'href',
                             `/submissions/${ContractSubmissionTypeRecord[draft.contractSubmissionType]}/${draft.id}`
+                        )
+                        expect(submissionLink).not.toHaveAttribute(
+                            'href',
+                            `/submissions/${ContractSubmissionTypeRecord[unlocked.contractSubmissionType]}/${unlocked.id}`
                         )
                     })
                 })
@@ -177,7 +181,7 @@ describe('CMSDashboard', () => {
                                     statusCode: 200,
                                     user: mockUser(),
                                 }),
-                                indexContractsStrippedMockSuccess(submissions),
+                                indexSubmissionsMockSuccess(submissions),
                             ],
                         },
                         routerProvider: { route: '/dashboard/submissions' },
@@ -203,7 +207,7 @@ describe('CMSDashboard', () => {
                                     statusCode: 200,
                                     user: mockUser(),
                                 }),
-                                indexContractsStrippedMockSuccess(submissions),
+                                indexSubmissionsMockSuccess(submissions),
                             ],
                         },
                         routerProvider: { route: '/dashboard/submissions' },
@@ -220,9 +224,6 @@ describe('CMSDashboard', () => {
                 })
 
                 it('displays each contract status tag as expected for current revision that is submitted/resubmitted/approved', async () => {
-                    const unlocked = mockUnlockedContractStripped({
-                        id: 'test-abc-unlocked',
-                    })
                     const submitted = mockContractStripped({
                         id: 'test-abc-submitted',
                     })
@@ -235,7 +236,7 @@ describe('CMSDashboard', () => {
                     // #filters= is the default hash to use no filters
                     window.location.assign('#filters=')
 
-                    const submissions = [unlocked, submitted, approved]
+                    const submissions = [submitted, approved]
                     renderWithProviders(<CMSDashboardNestedRoutes />, {
                         apolloProvider: {
                             mocks: [
@@ -243,43 +244,36 @@ describe('CMSDashboard', () => {
                                     statusCode: 200,
                                     user: mockUser(),
                                 }),
-                                indexContractsStrippedMockSuccess(submissions),
+                                indexSubmissionsMockSuccess(submissions),
                             ],
                         },
                         routerProvider: { route: '/dashboard/submissions' },
                     })
                     await screen.findByRole('heading', { name: 'Submissions' })
-                    const unlockedRow = await screen.findByTestId(
-                        `row-${unlocked.id}`
-                    )
-                    const tag1 =
-                        within(unlockedRow).getByTestId('submission-status')
-                    expect(tag1).toHaveTextContent('Unlocked')
-
                     const submittedRow = await screen.findByTestId(
                         `row-${submitted.id}`
                     )
-                    const tag2 =
+                    const tag1 =
                         within(submittedRow).getByTestId('submission-status')
-                    expect(tag2).toHaveTextContent('Submitted')
+                    expect(tag1).toHaveTextContent('Submitted')
 
                     const approvedRow = await screen.findByTestId(
                         `row-${approved.id}`
                     )
-                    const tag3 =
+                    const tag2 =
                         within(approvedRow).getByTestId('submission-status')
-                    expect(tag3).toHaveTextContent('Approved')
+                    expect(tag2).toHaveTextContent('Approved')
                 })
 
-                it('displays name, type, programs and last update based on the last submitted revision for UNLOCKED package, not draft changes', async () => {
+                it('displays name, type, programs and last update based on the latest submitted revision', async () => {
                     const mockMN = mockMNState() // this is the state used in apolloMocks
-                    const unlocked = mockUnlockedContractStripped({
-                        id: 'test-state-edit-in-progress-unlocked',
+                    const submitted = mockContractStripped({
+                        id: 'test-state-submitted',
                         lastUpdatedForDisplay: new Date('2100-01-22'),
                         latestSubmittedRevision: {
                             __typename: 'ContractRevisionStripped',
-                            id: 'test-rev-unlocked',
-                            contractID: 'test-state-edit-in-progress-unlocked',
+                            id: 'test-rev-submitted',
+                            contractID: 'test-state-submitted',
                             createdAt: new Date('2024-01-15'),
                             updatedAt: new Date('2022-01-15'),
                             contractName: 'MCR-MN-0001-MSC+-PMAP-SNBC',
@@ -324,7 +318,7 @@ describe('CMSDashboard', () => {
                         },
                     })
 
-                    const submissions = [unlocked]
+                    const submissions = [submitted]
                     renderWithProviders(<CMSDashboardNestedRoutes />, {
                         apolloProvider: {
                             mocks: [
@@ -332,40 +326,35 @@ describe('CMSDashboard', () => {
                                     statusCode: 200,
                                     user: mockUser(),
                                 }),
-                                indexContractsStrippedMockSuccess(submissions),
+                                indexSubmissionsMockSuccess(submissions),
                             ],
                         },
                         routerProvider: { route: '/dashboard/submissions' },
                     })
                     await screen.findByRole('heading', { name: 'Submissions' })
-                    const unlockedRow = await screen.findByTestId(
-                        `row-${unlocked.id}`
+                    const submittedRow = await screen.findByTestId(
+                        `row-${submitted.id}`
                     )
-
-                    // Confirm UNLOCKED status
-                    const tag1 =
-                        within(unlockedRow).getByTestId('submission-status')
-                    expect(tag1).toHaveTextContent('Unlocked')
 
                     // Confirm we are using previous submitted revision type
                     const submissionType =
-                        within(unlockedRow).getByTestId('submission-type')
+                        within(submittedRow).getByTestId('submission-type')
                     expect(submissionType).toHaveTextContent(
                         'Contract action and rate certification'
                     )
 
                     const submissionPrograms =
-                        within(unlockedRow).getAllByTestId('program-tag')
+                        within(submittedRow).getAllByTestId('program-tag')
                     // Confirm we are using previous submitted revision programs
                     expect(submissionPrograms).toHaveLength(3)
                     const submissionNameLink =
-                        within(unlockedRow).getByTestId('submission-id')
+                        within(submittedRow).getByTestId('submission-id')
                     expect(submissionNameLink).toHaveTextContent(
                         'MCR-MN-0001-MSC+-PMAP-SNBC'
                     )
 
-                    // Confirm we are using updated at from the previous submitted revision unlock info
-                    const lastUpdated = within(unlockedRow).getByTestId(
+                    // Confirm we are using updated at from the latest submitted revision metadata
+                    const lastUpdated = within(submittedRow).getByTestId(
                         'submission-last-updated'
                     )
                     // API returns UTC timezone, we display timestamped dates in PT timezone so 1 day before on these tests.
@@ -388,7 +377,7 @@ describe('CMSDashboard', () => {
                                         statusCode: 200,
                                         user: mockUser(),
                                     }),
-                                    indexContractsStrippedMockSuccess([
+                                    indexSubmissionsMockSuccess([
                                         submitted,
                                         unlocked,
                                     ]),

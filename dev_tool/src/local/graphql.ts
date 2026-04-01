@@ -8,7 +8,8 @@ async function compileGraphQLTypesWatch(runner: LabeledProcessRunner) {
     return await runner.runCommandAndOutput(
         'gqlgen',
         ['pnpm', '-r', 'gqlgen:watch'],
-        ''
+        '',
+        { awaitFor: 'Watching for changes' }
     )
 }
 

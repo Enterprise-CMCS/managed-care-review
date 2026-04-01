@@ -3,7 +3,7 @@ import { screen, waitFor, within } from '@testing-library/react'
 import { StateDashboard } from './StateDashboard'
 import {
     fetchCurrentUserMock,
-    indexContractsStrippedMockSuccess,
+    indexSubmissionsMockSuccess,
     mockContractStripped,
     mockUnlockedContractStripped,
 } from '@mc-review/mocks'
@@ -15,7 +15,7 @@ describe('StateDashboard', () => {
             apolloProvider: {
                 mocks: [
                     fetchCurrentUserMock({ statusCode: 200 }),
-                    indexContractsStrippedMockSuccess([]),
+                    indexSubmissionsMockSuccess([]),
                 ],
             },
         })
@@ -35,7 +35,7 @@ describe('StateDashboard', () => {
             apolloProvider: {
                 mocks: [
                     fetchCurrentUserMock({ statusCode: 200 }),
-                    indexContractsStrippedMockSuccess([]),
+                    indexSubmissionsMockSuccess([]),
                 ],
             },
         })
@@ -54,7 +54,7 @@ describe('StateDashboard', () => {
             apolloProvider: {
                 mocks: [
                     fetchCurrentUserMock({ statusCode: 200 }),
-                    indexContractsStrippedMockSuccess([]),
+                    indexSubmissionsMockSuccess([]),
                 ],
             },
             routerProvider: {
@@ -89,7 +89,7 @@ describe('StateDashboard', () => {
             apolloProvider: {
                 mocks: [
                     fetchCurrentUserMock({ statusCode: 200 }),
-                    indexContractsStrippedMockSuccess([]),
+                    indexSubmissionsMockSuccess([]),
                 ],
             },
             routerProvider: {
@@ -201,7 +201,7 @@ describe('StateDashboard', () => {
             apolloProvider: {
                 mocks: [
                     fetchCurrentUserMock({ statusCode: 200, user: mockUser }),
-                    indexContractsStrippedMockSuccess(submissions),
+                    indexSubmissionsMockSuccess(submissions),
                 ],
             },
         })
@@ -296,7 +296,7 @@ describe('StateDashboard', () => {
             apolloProvider: {
                 mocks: [
                     fetchCurrentUserMock({ statusCode: 200, user: mockUser }),
-                    indexContractsStrippedMockSuccess(submissions),
+                    indexSubmissionsMockSuccess(submissions),
                 ],
             },
         })
@@ -396,7 +396,7 @@ describe('StateDashboard', () => {
             apolloProvider: {
                 mocks: [
                     fetchCurrentUserMock({ statusCode: 200, user: mockUser }),
-                    indexContractsStrippedMockSuccess(submissions),
+                    indexSubmissionsMockSuccess(submissions),
                 ],
             },
         })
@@ -411,7 +411,7 @@ describe('StateDashboard', () => {
             apolloProvider: {
                 mocks: [
                     fetchCurrentUserMock({ statusCode: 200 }),
-                    indexContractsStrippedMockSuccess([]),
+                    indexSubmissionsMockSuccess([]),
                 ],
             },
         })
