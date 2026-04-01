@@ -1,4 +1,4 @@
-// import 'dotenv/config'
+import 'dotenv/config'
 import { env, defineConfig } from 'prisma/config'
 import type { PrismaConfig } from 'prisma'
 
@@ -7,9 +7,9 @@ const config: PrismaConfig = {
     migrations: {
         path: './services/app-api/prisma/migrations',
     },
-    datasource: {
-        url: env('DATABASE_URL'),
-    }
+    // datasource: {
+    //     url: env('DATABASE_URL'),
+    // }
 }
 
 // Only add datasource URL if DATABASE_URL is available (needed for migrations, not generation)
