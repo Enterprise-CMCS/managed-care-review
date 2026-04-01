@@ -32,17 +32,20 @@ describe('AppRoutes and routing configuration', () => {
                 featureFlags: { 'session-expiring-modal': false },
             })
 
-            await waitFor(() => {
-                expect(
-                    screen.getByTestId('state-dashboard-page')
-                ).toBeInTheDocument()
-                expect(
-                    screen.queryByRole('heading', {
-                        level: 2,
-                        name: /Submissions/,
-                    })
-                ).toBeInTheDocument()
-            })
+            expect(
+                await screen.findByTestId('state-dashboard-page')
+            ).toBeInTheDocument()
+            expect(
+                screen.getByRole('heading', {
+                    level: 1,
+                    name: 'Dashboard',
+                })
+            ).toBeInTheDocument()
+            expect(
+                screen.getByRole('link', {
+                    name: 'Start new submission',
+                })
+            ).toBeInTheDocument()
         })
 
         it('cms dashboard when cms user logged in', async () => {
@@ -59,20 +62,20 @@ describe('AppRoutes and routing configuration', () => {
                 featureFlags: { 'session-expiring-modal': false },
             })
 
-            await waitFor(() => {
-                expect(
-                    screen.getByTestId('cms-dashboard-page')
-                ).toBeInTheDocument()
-                expect(
-                    screen.queryByTestId('submission-name')
-                ).not.toBeInTheDocument()
-                expect(
-                    screen.queryByRole('heading', {
-                        level: 2,
-                        name: /Submissions/,
-                    })
-                ).toBeInTheDocument()
-            })
+            expect(
+                await screen.findByTestId('cms-dashboard-page')
+            ).toBeInTheDocument()
+            expect(
+                screen.queryByTestId('submission-name')
+            ).not.toBeInTheDocument()
+            expect(
+                await screen.findByTestId('cms-submissions-heading')
+            ).toHaveTextContent('Submissions')
+            expect(
+                screen.getByRole('tab', {
+                    name: 'Submissions',
+                })
+            ).toBeInTheDocument()
         })
 
         it('landing page when no user', async () => {

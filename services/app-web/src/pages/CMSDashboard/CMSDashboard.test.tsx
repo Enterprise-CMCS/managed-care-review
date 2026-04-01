@@ -61,14 +61,15 @@ describe('CMSDashboard', () => {
 
                 expect(screen.getByTestId('tabs')).toBeInTheDocument()
                 expect(
-                    screen.getByRole('heading', { name: 'Rate reviews' })
+                    screen.getByRole('tab', { name: 'Rate reviews' })
                 ).toBeInTheDocument()
                 expect(
-                    screen.getByRole('heading', { name: 'Submissions' })
+                    screen.getByRole('tab', { name: 'Submissions' })
                 ).toBeInTheDocument()
-                expect(
-                    screen.getByTestId('cms-rate-reviews-heading')
-                ).toHaveTextContent('Rate reviews')
+                expect(screen.getByRole('tabpanel')).toHaveAttribute(
+                    'data-tabname',
+                    'Rate reviews'
+                )
             })
 
             describe(`Tests submissions tab`, () => {
