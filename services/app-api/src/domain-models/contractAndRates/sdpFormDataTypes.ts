@@ -61,6 +61,7 @@ const updateSDPSchema = z.object({
 const submitSDPSchema = z.object({
     sdpID: z.string().uuid(),
     stateCode: z.string(),
+    submittedByUserID: z.string().uuid(),
     lastSeenUpdatedAt: z.date(),
 })
 

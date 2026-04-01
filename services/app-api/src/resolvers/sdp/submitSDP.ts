@@ -45,6 +45,7 @@ export function submitSDP(store: Store) {
         const sdpResult = await store.submitSDP({
             sdpID: input.sdpID,
             stateCode: user.stateCode,
+            submittedByUserID: user.id,
             lastSeenUpdatedAt: input.lastSeenUpdatedAt,
         })
 

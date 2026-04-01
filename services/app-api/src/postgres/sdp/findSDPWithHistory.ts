@@ -62,6 +62,15 @@ type SDPUnlockInfoRow = {
     familyName: string
 }
 
+type SDPSubmitInfoRow = {
+    updatedAt: Date
+    updatedReason: string
+    role: string
+    email: string
+    givenName: string
+    familyName: string
+}
+
 const parsePgArray = (
     value: string[] | string | null | undefined
 ): string[] => {
@@ -137,10 +146,14 @@ async function findSDPWithHistory(
 
         const revisions = await Promise.all(
             revisionRows.map(async (revision) => {
-                const [documents, stateContacts, unlockInfoRows] =
-                    await Promise.all([
-                        client.$queryRaw<SDPDocumentRow[]>(
-                            Prisma.sql`
+                const [
+                    documents,
+                    stateContacts,
+                    unlockInfoRows,
+                    submitInfoRows,
+                ] = await Promise.all([
+                    client.$queryRaw<SDPDocumentRow[]>(
+                        Prisma.sql`
                             SELECT
                                 "id",
                                 "name",
@@ -153,9 +166,9 @@ async function findSDPWithHistory(
                             WHERE "sdpRevisionID" = ${revision.id}
                             ORDER BY "position" ASC, "createdAt" ASC
                         `
-                        ),
-                        client.$queryRaw<SDPStateContactRow[]>(
-                            Prisma.sql`
+                    ),
+                    client.$queryRaw<SDPStateContactRow[]>(
+                        Prisma.sql`
                             SELECT
                                 "name",
                                 "titleRole",
@@ -164,9 +177,9 @@ async function findSDPWithHistory(
                             WHERE "sdpRevisionID" = ${revision.id}
                             ORDER BY "position" ASC, "createdAt" ASC
                         `
-                        ),
-                        client.$queryRaw<SDPUnlockInfoRow[]>(
-                            Prisma.sql`
+                    ),
+                    client.$queryRaw<SDPUnlockInfoRow[]>(
+                        Prisma.sql`
                             SELECT
                                 info."updatedAt",
                                 info."updatedReason",
@@ -181,9 +194,27 @@ async function findSDPWithHistory(
                                 ON userRecord."id" = info."updatedByID"
                             WHERE revisionRecord."id" = ${revision.id}
                         `
-                        ),
-                    ])
+                    ),
+                    client.$queryRaw<SDPSubmitInfoRow[]>(
+                        Prisma.sql`
+                            SELECT
+                                info."updatedAt",
+                                info."updatedReason",
+                                userRecord."role",
+                                userRecord."email",
+                                userRecord."givenName",
+                                userRecord."familyName"
+                            FROM "SDPRevisionTable" revisionRecord
+                            INNER JOIN "UpdateInfoTable" info
+                                ON info."id" = revisionRecord."submitInfoID"
+                            INNER JOIN "User" userRecord
+                                ON userRecord."id" = info."updatedByID"
+                            WHERE revisionRecord."id" = ${revision.id}
+                        `
+                    ),
+                ])
                 const unlockInfo = unlockInfoRows[0]
+                const submitInfo = submitInfoRows[0]
 
                 return {
                     id: revision.id,
@@ -193,6 +224,24 @@ async function findSDPWithHistory(
                         stateCode: sdp.stateCode,
                         stateNumber: sdp.stateNumber,
                     },
+                    submitInfo: submitInfo
+                        ? {
+                              updatedAt: submitInfo.updatedAt,
+                              updatedReason: submitInfo.updatedReason,
+                              updatedBy: {
+                                  role: submitInfo.role as
+                                      | 'STATE_USER'
+                                      | 'CMS_USER'
+                                      | 'CMS_APPROVER_USER'
+                                      | 'ADMIN_USER'
+                                      | 'HELPDESK_USER'
+                                      | 'BUSINESSOWNER_USER',
+                                  email: submitInfo.email,
+                                  givenName: submitInfo.givenName,
+                                  familyName: submitInfo.familyName,
+                              },
+                          }
+                        : undefined,
                     unlockInfo: unlockInfo
                         ? {
                               updatedAt: unlockInfo.updatedAt,

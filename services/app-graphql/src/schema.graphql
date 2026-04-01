@@ -2269,6 +2269,7 @@ type SDPRevision {
     sdpID: String!
     createdAt: DateTime!
     updatedAt: DateTime!
+    submitInfo: UpdateInformation
     unlockInfo: UpdateInformation
     formData: SDPFormData!
     sdpDocuments: [GenericDocument!]!
@@ -2282,6 +2283,7 @@ type SDPRevisionStripped {
     sdpID: String!
     createdAt: DateTime!
     updatedAt: DateTime!
+    submitInfo: UpdateInformation
     unlockInfo: UpdateInformation
     formData: SDPFormData!
     sdpDocuments: [GenericDocument!]!

@@ -22,6 +22,7 @@ import {
     UploadedDocumentsTable,
 } from '../../../components'
 import { SubmissionUnlockedBanner } from '../../../components/Banner'
+import { SDPChangeHistory } from '../../../components/ChangeHistory'
 import { Modal, ModalOpenButton } from '../../../components/Modal'
 import { StatusTag } from '../../../components/ContractTable/ContractTable'
 import { useAuth } from '../../../contexts/AuthContext'
@@ -48,6 +49,16 @@ const FETCH_SDP_QUERY = gql`
                 draftRevision {
                     id
                     updatedAt
+                    submitInfo {
+                        updatedAt
+                        updatedReason
+                        updatedBy {
+                            email
+                            role
+                            familyName
+                            givenName
+                        }
+                    }
                     unlockInfo {
                         updatedAt
                         updatedReason
@@ -87,6 +98,16 @@ const FETCH_SDP_QUERY = gql`
                 latestSubmittedRevision {
                     id
                     updatedAt
+                    submitInfo {
+                        updatedAt
+                        updatedReason
+                        updatedBy {
+                            email
+                            role
+                            familyName
+                            givenName
+                        }
+                    }
                     formData {
                         submissionType
                         programIDs
@@ -111,6 +132,29 @@ const FETCH_SDP_QUERY = gql`
                         downloadURL
                         s3BucketName
                         s3Key
+                    }
+                }
+                revisions {
+                    id
+                    submitInfo {
+                        updatedAt
+                        updatedReason
+                        updatedBy {
+                            email
+                            role
+                            familyName
+                            givenName
+                        }
+                    }
+                    unlockInfo {
+                        updatedAt
+                        updatedReason
+                        updatedBy {
+                            email
+                            role
+                            familyName
+                            givenName
+                        }
                     }
                 }
                 relatedContracts {
@@ -551,6 +595,7 @@ export const SDPSubmissionSummary = (): React.ReactElement => {
                         )}
                     </dl>
                 </SectionCard>
+                <SDPChangeHistory revisions={sdp.revisions} />
             </GridContainer>
             <Modal
                 id="unlockSDPModal"

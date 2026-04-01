@@ -103,6 +103,45 @@ async function submitSDP(
                 )
             }
 
+            const submitInfoRows = await tx.$queryRaw<Array<{ id: string }>>(
+                Prisma.sql`
+                    INSERT INTO "UpdateInfoTable" (
+                        "id",
+                        "updatedAt",
+                        "updatedByID",
+                        "updatedReason"
+                    )
+                    VALUES (
+                        gen_random_uuid(),
+                        CURRENT_TIMESTAMP,
+                        ${args.submittedByUserID},
+                        ${
+                            sdp.status === 'UNLOCKED'
+                                ? 'Resubmitted after unlock'
+                                : 'Initial submission'
+                        }
+                    )
+                    RETURNING "id"
+                `
+            )
+            const submitInfo = submitInfoRows[0]
+
+            if (!submitInfo) {
+                return new Error(
+                    `Unexpected error creating SDP submit info for id: ${args.sdpID}`
+                )
+            }
+
+            await tx.$executeRaw(
+                Prisma.sql`
+                    UPDATE "SDPRevisionTable"
+                    SET
+                        "submitInfoID" = ${submitInfo.id},
+                        "updatedAt" = CURRENT_TIMESTAMP
+                    WHERE "id" = ${currentRevision.id}
+                `
+            )
+
             const submittedSDPRows = await tx.$queryRaw<ExistingSDPRow[]>(
                 Prisma.sql`
                     UPDATE "SDPTable"
