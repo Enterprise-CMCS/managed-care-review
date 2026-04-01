@@ -191,19 +191,9 @@ type ReadableFilters = {
     [key: string]: string[]
 }
 
-const getColumnInlineStyle = (
-    columnId: string
-): React.CSSProperties | undefined => {
+const getColumnClassName = (columnId: string): string | undefined => {
     if (columnId === 'ID') {
-        return {
-            minWidth: '90px',
-        }
-    }
-
-    if (columnId === 'programs') {
-        return {
-            maxWidth: '143px',
-        }
+        return styles.columnID
     }
 }
 
@@ -409,7 +399,6 @@ export const ContractTable = ({
                 cell: (info) => (
                     <div
                         className={styles.programsCellContent}
-                        style={{ maxWidth: '143px' }}
                     >
                         {info.getValue().map((program) => {
                             return (
@@ -750,12 +739,7 @@ export const ContractTable = ({
                                             scope="col"
                                             key={header.id}
                                             id={header.id}
-                                            className={
-                                                styles[
-                                                    `column${header.column.id}`
-                                                ]
-                                            }
-                                            style={getColumnInlineStyle(
+                                            className={getColumnClassName(
                                                 header.column.id
                                             )}
                                         >
@@ -784,12 +768,7 @@ export const ContractTable = ({
                                                 cell.column.columnDef.meta
                                                     ?.dataTestID
                                             }
-                                            className={
-                                                styles[
-                                                    `column${cell.column.id}`
-                                                ]
-                                            }
-                                            style={getColumnInlineStyle(
+                                            className={getColumnClassName(
                                                 cell.column.id
                                             )}
                                             element={
