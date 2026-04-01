@@ -45,6 +45,14 @@ const updateSDPSchema = z.object({
     sdpID: z.string().uuid(),
     stateCode: z.string(),
     lastSeenUpdatedAt: z.date(),
+    submissionType: sdpSubmissionTypeSchema.optional(),
+    programIDs: z.array(z.string()).optional(),
+    changesIncluded: z.array(sdpChangeTypeSchema).optional(),
+    ratingPeriodStart: z.date().optional(),
+    ratingPeriodEnd: z.date().optional(),
+    estimatedFederalShare: z.string().optional(),
+    estimatedStateShare: z.string().optional(),
+    automaticallyRenewed: z.boolean().optional(),
     sdpDocuments: z.array(sdpDocumentInputSchema),
     relatedContractIDs: z.array(z.string().uuid()),
     stateContacts: z.array(stateContactSchema).default([]),
@@ -56,11 +64,18 @@ const submitSDPSchema = z.object({
     lastSeenUpdatedAt: z.date(),
 })
 
+const unlockSDPSchema = z.object({
+    sdpID: z.string().uuid(),
+    unlockedByUserID: z.string().uuid(),
+    unlockReason: z.string(),
+})
+
 type SDPFormDataType = z.infer<typeof sdpFormDataSchema>
 type CreateSDPInputType = z.infer<typeof createSDPSchema>
 type SDPDocumentInputType = z.infer<typeof sdpDocumentInputSchema>
 type UpdateSDPInputType = z.infer<typeof updateSDPSchema>
 type SubmitSDPInputType = z.infer<typeof submitSDPSchema>
+type UnlockSDPInputType = z.infer<typeof unlockSDPSchema>
 type SDPSubmissionType = z.infer<typeof sdpSubmissionTypeSchema>
 type SDPChangeType = z.infer<typeof sdpChangeTypeSchema>
 
@@ -70,6 +85,7 @@ export {
     sdpDocumentInputSchema,
     updateSDPSchema,
     submitSDPSchema,
+    unlockSDPSchema,
     sdpSubmissionTypeSchema,
     sdpChangeTypeSchema,
 }
@@ -79,6 +95,7 @@ export type {
     SDPDocumentInputType,
     UpdateSDPInputType,
     SubmitSDPInputType,
+    UnlockSDPInputType,
     SDPSubmissionType,
     SDPChangeType,
 }

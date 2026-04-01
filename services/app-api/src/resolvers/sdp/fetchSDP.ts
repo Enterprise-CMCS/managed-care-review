@@ -126,6 +126,7 @@ export function fetchSDPResolver(store: Store): QueryResolvers['fetchSDP'] {
                         )
                         .map((contract) => ({
                             id: contract.id,
+                            contractName: null,
                             stateCode: contract.stateCode,
                             stateNumber: contract.stateNumber,
                             contractSubmissionType:
@@ -141,7 +142,7 @@ export function fetchSDPResolver(store: Store): QueryResolvers['fetchSDP'] {
                         ...sdpWithHistory,
                         relatedContracts,
                     },
-                }
+                } as any
             }
         )
     }

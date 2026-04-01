@@ -149,6 +149,10 @@ const StateUserRoutes = ({
                     />
                 )}
                 <Route
+                    path={RoutesRecord.SUBMISSIONS_SDP_TYPE}
+                    element={<SDPSubmissionForm />}
+                />
+                <Route
                     path={RoutesRecord.SUBMISSIONS_SDP_DETAILS}
                     element={<SDPSubmissionForm />}
                 />

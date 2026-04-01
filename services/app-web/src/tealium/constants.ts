@@ -30,6 +30,7 @@ const TEALIUM_CONTENT_TYPE_BY_ROUTE: Record<RouteT | 'UNKNOWN_ROUTE', string> =
         SUBMISSIONS_EDIT_TOP_LEVEL: 'form',
         SUBMISSIONS_TYPE: 'form',
         SUBMISSIONS_SDP_DETAILS: 'form',
+        SUBMISSIONS_SDP_TYPE: 'form',
         SUBMISSIONS_SDP_CONTACTS: 'form',
         SUBMISSIONS_SDP_REVIEW_SUBMIT: 'form',
         SUBMISSIONS_CONTRACT_DETAILS: 'form',

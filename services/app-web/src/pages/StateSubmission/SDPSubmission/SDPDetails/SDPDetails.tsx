@@ -4,6 +4,7 @@ import * as Yup from 'yup'
 import { Form as UswdsForm, FormGroup } from '@trussworks/react-uswds'
 import {
     ButtonWithLogging,
+    DataDetail,
     DynamicStepIndicator,
     ErrorSummary,
     FileItemT,
@@ -11,6 +12,7 @@ import {
     FormContainer,
     FormNotificationContainer,
     PageActions,
+    SectionCard,
 } from '../../../../components'
 import { ACCEPTED_SUBMISSION_FILE_TYPES } from '../../../../components/FileUpload'
 import { usePage } from '../../../../contexts/PageContext'
@@ -19,12 +21,18 @@ import { useErrorSummary } from '../../../../hooks/useErrorSummary'
 import styles from '../../StateSubmissionForm.module.scss'
 import { LinkContractSelect } from '../../../LinkYourRates/LinkContractSelect/LinkContractSelect'
 import { useS3 } from '../../../../contexts/S3Context'
-import { IndexContractsStrippedInput, useIndexContractsStrippedQuery } from '../../../../gen/gqlClient'
+import {
+    IndexContractsStrippedInput,
+    useIndexContractsStrippedQuery,
+} from '../../../../gen/gqlClient'
 import { PageBannerAlerts } from '../../SharedSubmissionComponents'
+import { formatCalendarDate } from '@mc-review/dates'
+import { SubmissionTypeRecord, programNames } from '@mc-review/submissions'
 
 export type SDPDetailsFormValues = {
     sdpDocuments: FileItemT[]
     linkContractSelects: string[]
+    relatedContracts: string[]
 }
 
 type SDPDetailsProps = {
@@ -59,11 +67,13 @@ const generateErrorSummaryErrors = (
 export const sdpDetailsInitialValues: SDPDetailsFormValues = {
     sdpDocuments: [],
     linkContractSelects: [''],
+    relatedContracts: [],
 }
 
 const sdpDetailsSchema = Yup.object().shape({
     sdpDocuments: Yup.array(),
     linkContractSelects: Yup.array().of(Yup.string()),
+    relatedContracts: Yup.array().of(Yup.string()),
 })
 
 export const SDPDetails = ({
@@ -101,6 +111,12 @@ export const SDPDetails = ({
             .map((edge) => edge.node)
             .filter((contract) => contract.consolidatedStatus !== 'WITHDRAWN')
             .length ?? 0
+    const contracts =
+        contractsData?.indexContractsStripped.edges
+            .map((edge) => edge.node)
+            .filter(
+                (contract) => contract.consolidatedStatus !== 'WITHDRAWN'
+            ) ?? []
 
     return (
         <div id={activeMainContentId}>
@@ -129,7 +145,11 @@ export const SDPDetails = ({
                     validationSchema={sdpDetailsSchema}
                     onSubmit={async (values) => {
                         setShouldValidate(true)
-                        await onContinue(values)
+                        await onContinue({
+                            ...values,
+                            relatedContracts:
+                                values.linkContractSelects.filter(Boolean),
+                        })
                     }}
                 >
                     {({ errors, handleSubmit, values, setFieldValue }) => (
@@ -148,10 +168,6 @@ export const SDPDetails = ({
                                     headingRef={errorSummaryHeadingRef}
                                 />
                             )}
-
-                            <h1 className="margin-top-0 margin-bottom-4">
-                                SDP details
-                            </h1>
                             <fieldset className="usa-fieldset">
                                 <legend className="srOnly">SDP details</legend>
 
@@ -199,18 +215,19 @@ export const SDPDetails = ({
                                 </FormGroup>
 
                                 <FieldArray name="linkContractSelects">
-                                    {({ push, remove }: FieldArrayRenderProps) => (
+                                    {({
+                                        push,
+                                        remove,
+                                    }: FieldArrayRenderProps) => (
                                         <FormGroup
                                             error={Boolean(
                                                 Array.isArray(
                                                     errors.linkContractSelects
                                                 ) &&
-                                                    errors.linkContractSelects.some(
-                                                        (error) =>
-                                                            showFieldErrors(
-                                                                error
-                                                            )
-                                                    )
+                                                errors.linkContractSelects.some(
+                                                    (error) =>
+                                                        showFieldErrors(error)
+                                                )
                                             )}
                                         >
                                             <label
@@ -224,56 +241,142 @@ export const SDPDetails = ({
                                                 relate to?
                                             </label>
                                             {values.linkContractSelects.map(
-                                                (linkedContract, index) => (
-                                                    <div
-                                                        key={`linked-contract-${index}`}
-                                                        className={
-                                                            index > 0
-                                                                ? 'margin-top-3'
-                                                                : undefined
-                                                        }
-                                                    >
-                                                        <LinkContractSelect
-                                                            name={`linkContractSelects.${index}`}
-                                                            initialValue={
-                                                                linkedContract ||
-                                                                undefined
+                                                (linkedContract, index) => {
+                                                    const selectedContract =
+                                                        contracts.find(
+                                                            (contract) =>
+                                                                contract.id ===
+                                                                linkedContract
+                                                        )
+                                                    const selectedRevision =
+                                                        selectedContract?.latestSubmittedRevision ??
+                                                        selectedContract?.draftRevision
+
+                                                    return (
+                                                        <div
+                                                            key={`linked-contract-${index}`}
+                                                            className={
+                                                                index > 0
+                                                                    ? 'margin-top-3'
+                                                                    : undefined
                                                             }
-                                                            inputId={`linkContractSelect-${index}`}
-                                                            label="Which contract(s) does this SDP relate to?"
-                                                            alreadySelected={values.linkContractSelects.filter(
-                                                                (value, valueIndex) =>
-                                                                    valueIndex !==
-                                                                    index
-                                                            )}
-                                                        />
-                                                        {index > 0 && (
-                                                            <ButtonWithLogging
-                                                                type="button"
-                                                                unstyled
-                                                                className={
-                                                                    styles.removeContactBtn
+                                                        >
+                                                            <LinkContractSelect
+                                                                name={`linkContractSelects.${index}`}
+                                                                initialValue={
+                                                                    linkedContract ||
+                                                                    undefined
                                                                 }
-                                                                onClick={() =>
-                                                                    remove(
+                                                                inputId={`linkContractSelect-${index}`}
+                                                                label="Which contract(s) does this SDP relate to?"
+                                                                alreadySelected={values.linkContractSelects.filter(
+                                                                    (
+                                                                        value,
+                                                                        valueIndex
+                                                                    ) =>
+                                                                        valueIndex !==
                                                                         index
-                                                                    )
-                                                                }
-                                                            >
-                                                                Remove contract
-                                                            </ButtonWithLogging>
-                                                        )}
-                                                    </div>
-                                                )
+                                                                )}
+                                                            />
+                                                            {selectedContract &&
+                                                                selectedRevision && (
+                                                                    <SectionCard
+                                                                        className="margin-top-2 padding-y-2"
+                                                                        style={{
+                                                                            marginTop:
+                                                                                '12px',
+                                                                        }}
+                                                                    >
+                                                                        <h3 className="margin-top-0 margin-bottom-2 font-body-sm">
+                                                                            {
+                                                                                selectedRevision.contractName
+                                                                            }
+                                                                        </h3>
+                                                                        <dl className="margin-0">
+                                                                            <DataDetail
+                                                                                id={`linked-contract-programs-${index}`}
+                                                                                label="Programs"
+                                                                            >
+                                                                                {programNames(
+                                                                                    selectedContract
+                                                                                        .state
+                                                                                        .programs,
+                                                                                    selectedRevision
+                                                                                        .formData
+                                                                                        .programIDs
+                                                                                ).join(
+                                                                                    ', '
+                                                                                )}
+                                                                            </DataDetail>
+                                                                            <DataDetail
+                                                                                id={`linked-contract-period-${index}`}
+                                                                                label="Contract period"
+                                                                            >
+                                                                                {selectedRevision
+                                                                                    .formData
+                                                                                    .contractDateStart &&
+                                                                                selectedRevision
+                                                                                    .formData
+                                                                                    .contractDateEnd
+                                                                                    ? `${formatCalendarDate(
+                                                                                          selectedRevision
+                                                                                              .formData
+                                                                                              .contractDateStart,
+                                                                                          'UTC'
+                                                                                      )} - ${formatCalendarDate(
+                                                                                          selectedRevision
+                                                                                              .formData
+                                                                                              .contractDateEnd,
+                                                                                          'UTC'
+                                                                                      )}`
+                                                                                    : 'N/A'}
+                                                                            </DataDetail>
+                                                                            <DataDetail
+                                                                                id={`linked-contract-type-${index}`}
+                                                                                label="Submission type"
+                                                                            >
+                                                                                {
+                                                                                    SubmissionTypeRecord[
+                                                                                        selectedRevision
+                                                                                            .formData
+                                                                                            .submissionType
+                                                                                    ]
+                                                                                }
+                                                                            </DataDetail>
+                                                                        </dl>
+                                                                    </SectionCard>
+                                                                )}
+                                                            {index > 0 && (
+                                                                <ButtonWithLogging
+                                                                    type="button"
+                                                                    unstyled
+                                                                    className={
+                                                                        styles.removeContactBtn
+                                                                    }
+                                                                    onClick={() =>
+                                                                        remove(
+                                                                            index
+                                                                        )
+                                                                    }
+                                                                >
+                                                                    Remove
+                                                                    contract
+                                                                </ButtonWithLogging>
+                                                            )}
+                                                        </div>
+                                                    )
+                                                }
                                             )}
 
-                                            {values.linkContractSelects
-                                                .length <
+                                            {values.linkContractSelects.length <
                                                 availableContractsCount && (
                                                 <button
                                                     type="button"
-                                                    className={`usa-button usa-button--outline margin-top-3 ${styles.addRateBtn}`}
+                                                    className={`usa-button usa-button--outline margin-top-3`}
                                                     onClick={() => push('')}
+                                                    style={{
+                                                        marginTop: '12px',
+                                                    }}
                                                 >
                                                     Add additional contract
                                                 </button>

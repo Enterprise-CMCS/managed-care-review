@@ -1,0 +1,15 @@
+mutation unlockSDP($input: UnlockSDPInput!) {
+    unlockSDP(input: $input) {
+        sdp {
+            id
+            status
+            draftRevision {
+                id
+                updatedAt
+            }
+            latestSubmittedRevision {
+                id
+            }
+        }
+    }
+}

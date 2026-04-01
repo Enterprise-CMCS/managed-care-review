@@ -96,6 +96,20 @@ export function updateSDP(store: Store) {
             sdpID: input.sdpID,
             stateCode: stateFromCurrentUser,
             lastSeenUpdatedAt: input.lastSeenUpdatedAt,
+            submissionType: input.submissionType ?? undefined,
+            programIDs: input.programIDs ?? undefined,
+            changesIncluded: input.changesIncluded ?? undefined,
+            ratingPeriodStart: input.ratingPeriodStart ?? undefined,
+            ratingPeriodEnd: input.ratingPeriodEnd ?? undefined,
+            estimatedFederalShare:
+                input.estimatedFederalShare === null
+                    ? undefined
+                    : input.estimatedFederalShare,
+            estimatedStateShare:
+                input.estimatedStateShare === null
+                    ? undefined
+                    : input.estimatedStateShare,
+            automaticallyRenewed: input.automaticallyRenewed ?? undefined,
             relatedContractIDs: uniqueRelatedContractIDs,
             sdpDocuments: validatedDocuments.map((document, index) => ({
                 ...document,

@@ -1,28 +1,40 @@
-import { gql, useQuery } from '@apollo/client'
-import { GridContainer } from '@trussworks/react-uswds'
-import { formatContractSubTypeForDisplay } from '@mc-review/common-code'
+import { gql, useMutation, useQuery } from '@apollo/client'
+import {
+    FormGroup,
+    Grid,
+    GridContainer,
+    ModalRef,
+    Textarea,
+} from '@trussworks/react-uswds'
 import { formatCalendarDate } from '@mc-review/dates'
 import { typedStatePrograms } from '@mc-review/submissions'
-import React, { useEffect, useLayoutEffect } from 'react'
+import React, { useEffect, useLayoutEffect, useRef, useState } from 'react'
 import { Navigate, generatePath } from 'react-router-dom'
 import {
     DataDetail,
     DataDetailContactField,
+    NavLinkWithLogging,
+    MultiColumnGrid,
     Loading,
+    PoliteErrorMessage,
     SectionCard,
     SectionHeader,
     UploadedDocumentsTable,
 } from '../../../components'
+import { SubmissionUnlockedBanner } from '../../../components/Banner'
+import { Modal, ModalOpenButton } from '../../../components/Modal'
 import { StatusTag } from '../../../components/ContractTable/ContractTable'
 import { useAuth } from '../../../contexts/AuthContext'
 import { usePage } from '../../../contexts/PageContext'
-import { GenericDocument } from '../../../gen/gqlClient'
+import { GenericDocument, useFetchContractQuery } from '../../../gen/gqlClient'
 import { useMemoizedStateHeader, useRouteParams } from '../../../hooks'
+import { hasCMSUserPermissions } from '@mc-review/helpers'
 import { Error404 } from '../../Errors/Error404Page'
 import { ErrorForbiddenPage } from '../../Errors/ErrorForbiddenPage'
 import { GenericErrorPage } from '../../Errors/GenericErrorPage'
 import styles from '../SubmissionSummary.module.scss'
 import { RoutesRecord } from '@mc-review/constants'
+import { getSubmissionPath } from '../../../routeHelpers'
 
 const FETCH_SDP_QUERY = gql`
     query fetchSDPSubmissionSummary($input: FetchSDPInput!) {
@@ -33,6 +45,45 @@ const FETCH_SDP_QUERY = gql`
                 stateCode
                 stateNumber
                 mccrsID
+                draftRevision {
+                    id
+                    updatedAt
+                    unlockInfo {
+                        updatedAt
+                        updatedReason
+                        updatedBy {
+                            email
+                            role
+                            familyName
+                            givenName
+                        }
+                    }
+                    formData {
+                        submissionType
+                        programIDs
+                        changesIncluded
+                        ratingPeriodStart
+                        ratingPeriodEnd
+                        estimatedFederalShare
+                        estimatedStateShare
+                        automaticallyRenewed
+                        stateContacts {
+                            name
+                            titleRole
+                            email
+                        }
+                    }
+                    sdpDocuments {
+                        id
+                        name
+                        s3URL
+                        sha256
+                        dateAdded
+                        downloadURL
+                        s3BucketName
+                        s3Key
+                    }
+                }
                 latestSubmittedRevision {
                     id
                     updatedAt
@@ -64,9 +115,21 @@ const FETCH_SDP_QUERY = gql`
                 }
                 relatedContracts {
                     id
-                    stateCode
-                    stateNumber
-                    contractSubmissionType
+                }
+            }
+        }
+    }
+`
+
+const UNLOCK_SDP_MUTATION = gql`
+    mutation unlockSDPSubmission($input: UnlockSDPInput!) {
+        unlockSDP(input: $input) {
+            sdp {
+                id
+                status
+                draftRevision {
+                    id
+                    updatedAt
                 }
             }
         }
@@ -129,15 +192,48 @@ const formatDateRange = (startDate: string, endDate: string) =>
 const formatAutoRenewed = (automaticallyRenewed: boolean) =>
     automaticallyRenewed ? 'Yes' : 'No'
 
-const formatRelatedContractName = (contract: {
-    stateCode: string
-    stateNumber: number
-    contractSubmissionType: 'HEALTH_PLAN' | 'EQRO'
-}) =>
-    `MCR-${contract.stateCode}-${String(contract.stateNumber).padStart(
-        4,
-        '0'
-    )} (${formatContractSubTypeForDisplay(contract.contractSubmissionType)})`
+const LinkedContractSummaryLink = ({
+    contractID,
+}: {
+    contractID: string
+}): React.ReactElement | null => {
+    const { data } = useFetchContractQuery({
+        variables: {
+            input: {
+                contractID,
+            },
+        },
+        fetchPolicy: 'cache-first',
+    })
+
+    const contract = data?.fetchContract.contract
+
+    if (!contract || contract.contractSubmissionType === 'SDP') {
+        return null
+    }
+
+    const contractName =
+        contract.draftRevision?.contractName ??
+        contract.packageSubmissions?.[0]?.contractRevision.contractName ??
+        `MCR-${contract.stateCode}-${String(contract.stateNumber).padStart(
+            4,
+            '0'
+        )}`
+
+    return (
+        <div>
+            <NavLinkWithLogging
+                to={getSubmissionPath(
+                    'SUBMISSIONS_SUMMARY',
+                    contract.contractSubmissionType,
+                    contract.id
+                )}
+            >
+                {contractName}
+            </NavLinkWithLogging>
+        </div>
+    )
+}
 
 export const SDPSubmissionSummary = (): React.ReactElement => {
     const { updateHeading, updateActiveMainContent } = usePage()
@@ -145,8 +241,14 @@ export const SDPSubmissionSummary = (): React.ReactElement => {
     const { id } = useRouteParams()
     const activeMainContentId = 'sdpSubmissionSummaryPageMainContent'
     const isStateUser = loggedInUser?.role === 'STATE_USER'
+    const hasCMSPermissions = hasCMSUserPermissions(loggedInUser)
+    const modalRef = useRef<ModalRef>(null)
+    const [unlockReason, setUnlockReason] = useState('')
+    const [unlockError, setUnlockError] = useState<string>()
+    const [unlockSDP, { loading: unlockLoading }] =
+        useMutation(UNLOCK_SDP_MUTATION)
 
-    const { data, loading, error } = useQuery(FETCH_SDP_QUERY, {
+    const { data, loading, error, refetch } = useQuery(FETCH_SDP_QUERY, {
         variables: {
             input: {
                 sdpID: id ?? 'unknown-sdp',
@@ -156,7 +258,6 @@ export const SDPSubmissionSummary = (): React.ReactElement => {
     })
 
     const sdp = data?.fetchSDP?.sdp
-    const latestSubmittedRevision = sdp?.latestSubmittedRevision
     const stateName = sdp?.stateCode
         ? (typedStatePrograms.states.find(
               (state) => state.code === sdp.stateCode
@@ -202,6 +303,12 @@ export const SDPSubmissionSummary = (): React.ReactElement => {
         return <GenericErrorPage />
     }
 
+    const showUnlockBtn =
+        hasCMSPermissions && ['SUBMITTED', 'RESUBMITTED'].includes(sdp.status)
+    const showNoActionsMsg = !showUnlockBtn
+    const latestVisibleRevision =
+        sdp.latestSubmittedRevision ?? sdp.draftRevision ?? undefined
+
     if (isStateUser && sdp.status === 'DRAFT') {
         return (
             <Navigate
@@ -222,8 +329,41 @@ export const SDPSubmissionSummary = (): React.ReactElement => {
         )
     }
 
-    if (!latestSubmittedRevision) {
+    if (!latestVisibleRevision) {
         return <GenericErrorPage />
+    }
+
+    const handleUnlock = async () => {
+        const trimmedUnlockReason = unlockReason.trim()
+        if (!trimmedUnlockReason) {
+            setUnlockError(
+                'You must provide a reason for unlocking this submission'
+            )
+            return
+        }
+
+        try {
+            const result = await unlockSDP({
+                variables: {
+                    input: {
+                        sdpID: sdp.id,
+                        unlockedReason: trimmedUnlockReason,
+                    },
+                },
+            })
+
+            if (result.data?.unlockSDP?.sdp?.status !== 'UNLOCKED') {
+                setUnlockError('There was a problem unlocking the SDP.')
+                return
+            }
+
+            setUnlockError(undefined)
+            setUnlockReason('')
+            modalRef.current?.toggleModal(undefined, false)
+            await refetch()
+        } catch {
+            setUnlockError('There was a problem unlocking the SDP.')
+        }
     }
 
     return (
@@ -238,6 +378,38 @@ export const SDPSubmissionSummary = (): React.ReactElement => {
                     {submissionName}
                 </h1>
 
+                {sdp.status === 'UNLOCKED' && sdp.draftRevision?.unlockInfo && (
+                    <SubmissionUnlockedBanner
+                        className={styles.banner}
+                        loggedInUser={loggedInUser}
+                        unlockedInfo={sdp.draftRevision.unlockInfo}
+                    />
+                )}
+
+                {hasCMSPermissions && (
+                    <SectionCard className={styles.actionsSection}>
+                        <h3>Actions</h3>
+                        {showNoActionsMsg ? (
+                            <Grid>
+                                No action can be taken on this submission in its
+                                current status.
+                            </Grid>
+                        ) : (
+                            <MultiColumnGrid columns={3}>
+                                {showUnlockBtn && (
+                                    <ModalOpenButton
+                                        modalRef={modalRef}
+                                        className={styles.submitButton}
+                                        id="form-submit"
+                                    >
+                                        Unlock submission
+                                    </ModalOpenButton>
+                                )}
+                            </MultiColumnGrid>
+                        )}
+                    </SectionCard>
+                )}
+
                 <SectionCard>
                     <SectionHeader
                         header="Submission details"
@@ -251,7 +423,7 @@ export const SDPSubmissionSummary = (): React.ReactElement => {
                             label="Submission type"
                         >
                             {formatSubmissionType(
-                                latestSubmittedRevision.formData.submissionType
+                                latestVisibleRevision.formData.submissionType
                             )}
                         </DataDetail>
                         <DataDetail
@@ -260,14 +432,14 @@ export const SDPSubmissionSummary = (): React.ReactElement => {
                         >
                             {formatProgramNames(
                                 sdp.stateCode,
-                                latestSubmittedRevision.formData.programIDs
+                                latestVisibleRevision.formData.programIDs
                             )}
                         </DataDetail>
                         <DataDetail
                             id="sdp-summary-changes"
                             label="Changes included in this preprint"
                         >
-                            {latestSubmittedRevision.formData.changesIncluded
+                            {latestVisibleRevision.formData.changesIncluded
                                 .map(formatChange)
                                 .join(', ')}
                         </DataDetail>
@@ -276,23 +448,23 @@ export const SDPSubmissionSummary = (): React.ReactElement => {
                             label="Rating period for which this payment arrangement will apply"
                         >
                             {formatDateRange(
-                                latestSubmittedRevision.formData
+                                latestVisibleRevision.formData
                                     .ratingPeriodStart,
-                                latestSubmittedRevision.formData.ratingPeriodEnd
+                                latestVisibleRevision.formData.ratingPeriodEnd
                             )}
                         </DataDetail>
                         <DataDetail
                             id="sdp-summary-fed-share"
                             label="Estimated federal share"
                         >
-                            {latestSubmittedRevision.formData
+                            {latestVisibleRevision.formData
                                 .estimatedFederalShare || 'Not provided'}
                         </DataDetail>
                         <DataDetail
                             id="sdp-summary-state-share"
                             label="Estimated state share"
                         >
-                            {latestSubmittedRevision.formData
+                            {latestVisibleRevision.formData
                                 .estimatedStateShare || 'Not provided'}
                         </DataDetail>
                         <DataDetail
@@ -300,7 +472,7 @@ export const SDPSubmissionSummary = (): React.ReactElement => {
                             label="Is this payment arrangement renewed automatically?"
                         >
                             {formatAutoRenewed(
-                                latestSubmittedRevision.formData
+                                latestVisibleRevision.formData
                                     .automaticallyRenewed
                             )}
                         </DataDetail>
@@ -320,15 +492,20 @@ export const SDPSubmissionSummary = (): React.ReactElement => {
                             label="Related contracts"
                         >
                             {sdp.relatedContracts.length > 0
-                                ? sdp.relatedContracts
-                                      .map(formatRelatedContractName)
-                                      .join(', ')
+                                ? sdp.relatedContracts.map(
+                                      (contract: { id: string }) => (
+                                          <LinkedContractSummaryLink
+                                              key={contract.id}
+                                              contractID={contract.id}
+                                          />
+                                      )
+                                  )
                                 : 'No related contracts added'}
                         </DataDetail>
                     </dl>
                     <UploadedDocumentsTable
                         documents={
-                            latestSubmittedRevision.sdpDocuments as GenericDocument[]
+                            latestVisibleRevision.sdpDocuments as GenericDocument[]
                         }
                         previousSubmissionDate={null}
                         caption="SDP documents"
@@ -345,9 +522,9 @@ export const SDPSubmissionSummary = (): React.ReactElement => {
                         hideBorderBottom
                     />
                     <dl>
-                        {latestSubmittedRevision.formData.stateContacts.length >
+                        {latestVisibleRevision.formData.stateContacts.length >
                         0 ? (
-                            latestSubmittedRevision.formData.stateContacts.map(
+                            latestVisibleRevision.formData.stateContacts.map(
                                 (contact: any, index: number) => (
                                     <DataDetail
                                         key={`sdp-summary-contact-${index}`}
@@ -371,6 +548,40 @@ export const SDPSubmissionSummary = (): React.ReactElement => {
                     </dl>
                 </SectionCard>
             </GridContainer>
+            <Modal
+                id="unlockSDPModal"
+                modalRef={modalRef}
+                modalHeading="Reason for unlocking submission"
+                onSubmit={() => void handleUnlock()}
+                onCancel={() => {
+                    setUnlockReason('')
+                    setUnlockError(undefined)
+                }}
+                onSubmitText="Unlock"
+                isSubmitting={unlockLoading}
+            >
+                <FormGroup error={Boolean(unlockError)}>
+                    <label className="usa-label" htmlFor="unlockSDPReason">
+                        Provide reason for unlocking
+                    </label>
+                    {unlockError && (
+                        <PoliteErrorMessage formFieldLabel="Unlock reason">
+                            {unlockError}
+                        </PoliteErrorMessage>
+                    )}
+                    <Textarea
+                        id="unlockSDPReason"
+                        name="unlockSDPReason"
+                        value={unlockReason}
+                        onChange={(event) => {
+                            setUnlockReason(event.target.value)
+                            if (unlockError) {
+                                setUnlockError(undefined)
+                            }
+                        }}
+                    />
+                </FormGroup>
+            </Modal>
         </div>
     )
 }

@@ -11,6 +11,7 @@ import type {
     SDPType,
     CreateSDPInputType,
     SubmitSDPInputType,
+    UnlockSDPInputType,
     UpdateSDPInputType,
     UserType,
     StateUserType,
@@ -143,6 +144,7 @@ import { insertDraftSDP } from './sdp/insertSDP'
 import { findSDPWithHistory } from './sdp/findSDPWithHistory'
 import { updateDraftSDP } from './sdp/updateSDP'
 import { submitSDP } from './sdp/submitSDP'
+import { unlockSDP } from './sdp/unlockSDP'
 import {
     findAllSDPsForDashboard,
     type FindAllSDPsForDashboardArgs,
@@ -192,6 +194,7 @@ type Store = {
     insertDraftSDP: (args: CreateSDPInputType) => Promise<SDPType | Error>
     updateDraftSDP: (args: UpdateSDPInputType) => Promise<SDPType | Error>
     submitSDP: (args: SubmitSDPInputType) => Promise<SDPType | Error>
+    unlockSDP: (args: UnlockSDPInputType) => Promise<SDPType | Error>
     findSDPWithHistory: (sdpID: string) => Promise<SDPType | Error>
     findAllSDPsForDashboard: (
         args?: FindAllSDPsForDashboardArgs
@@ -380,6 +383,7 @@ function NewPostgresStore(client: ExtendedPrismaClient): Store {
         insertDraftSDP: (args) => insertDraftSDP(client, args),
         updateDraftSDP: (args) => updateDraftSDP(client, args),
         submitSDP: (args) => submitSDP(client, args),
+        unlockSDP: (args) => unlockSDP(client, args),
         findSDPWithHistory: (args) => findSDPWithHistory(client, args),
         findAllSDPsForDashboard: (args) =>
             findAllSDPsForDashboard(client, args),

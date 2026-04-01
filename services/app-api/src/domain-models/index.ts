@@ -43,6 +43,7 @@ export type {
     SDPDocumentInputType,
     UpdateSDPInputType,
     SubmitSDPInputType,
+    UnlockSDPInputType,
     SDPSubmissionType,
     SDPChangeType,
     RelatedContractType,

@@ -19,6 +19,7 @@ const useRouteParams = (): UseRouteParams => {
     const { id, contractSubmissionType } = useParams<UseRouteParams>()
     const { currentRoute } = useCurrentRoute()
     const sdpRoutesWithoutContractSubmissionType: RouteTWithUnknown[] = [
+        'SUBMISSIONS_SDP_TYPE',
         'SUBMISSIONS_SDP_DETAILS',
         'SUBMISSIONS_SDP_CONTACTS',
         'SUBMISSIONS_SDP_REVIEW_SUBMIT',

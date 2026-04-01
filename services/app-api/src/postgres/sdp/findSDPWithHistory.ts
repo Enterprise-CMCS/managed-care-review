@@ -53,6 +53,15 @@ type SDPStateContactRow = {
     email: string | null
 }
 
+type SDPUnlockInfoRow = {
+    updatedAt: Date
+    updatedReason: string
+    role: string
+    email: string
+    givenName: string
+    familyName: string
+}
+
 const parsePgArray = (
     value: string[] | string | null | undefined
 ): string[] => {
@@ -128,9 +137,10 @@ async function findSDPWithHistory(
 
         const revisions = await Promise.all(
             revisionRows.map(async (revision) => {
-                const [documents, stateContacts] = await Promise.all([
-                    client.$queryRaw<SDPDocumentRow[]>(
-                        Prisma.sql`
+                const [documents, stateContacts, unlockInfoRows] =
+                    await Promise.all([
+                        client.$queryRaw<SDPDocumentRow[]>(
+                            Prisma.sql`
                             SELECT
                                 "id",
                                 "name",
@@ -143,9 +153,9 @@ async function findSDPWithHistory(
                             WHERE "sdpRevisionID" = ${revision.id}
                             ORDER BY "position" ASC, "createdAt" ASC
                         `
-                    ),
-                    client.$queryRaw<SDPStateContactRow[]>(
-                        Prisma.sql`
+                        ),
+                        client.$queryRaw<SDPStateContactRow[]>(
+                            Prisma.sql`
                             SELECT
                                 "name",
                                 "titleRole",
@@ -154,8 +164,26 @@ async function findSDPWithHistory(
                             WHERE "sdpRevisionID" = ${revision.id}
                             ORDER BY "position" ASC, "createdAt" ASC
                         `
-                    ),
-                ])
+                        ),
+                        client.$queryRaw<SDPUnlockInfoRow[]>(
+                            Prisma.sql`
+                            SELECT
+                                info."updatedAt",
+                                info."updatedReason",
+                                userRecord."role",
+                                userRecord."email",
+                                userRecord."givenName",
+                                userRecord."familyName"
+                            FROM "SDPRevisionTable" revisionRecord
+                            INNER JOIN "UpdateInfoTable" info
+                                ON info."id" = revisionRecord."unlockInfoID"
+                            INNER JOIN "User" userRecord
+                                ON userRecord."id" = info."updatedByID"
+                            WHERE revisionRecord."id" = ${revision.id}
+                        `
+                        ),
+                    ])
+                const unlockInfo = unlockInfoRows[0]
 
                 return {
                     id: revision.id,
@@ -165,6 +193,24 @@ async function findSDPWithHistory(
                         stateCode: sdp.stateCode,
                         stateNumber: sdp.stateNumber,
                     },
+                    unlockInfo: unlockInfo
+                        ? {
+                              updatedAt: unlockInfo.updatedAt,
+                              updatedReason: unlockInfo.updatedReason,
+                              updatedBy: {
+                                  role: unlockInfo.role as
+                                      | 'STATE_USER'
+                                      | 'CMS_USER'
+                                      | 'CMS_APPROVER_USER'
+                                      | 'ADMIN_USER'
+                                      | 'HELPDESK_USER'
+                                      | 'BUSINESSOWNER_USER',
+                                  email: unlockInfo.email,
+                                  givenName: unlockInfo.givenName,
+                                  familyName: unlockInfo.familyName,
+                              },
+                          }
+                        : undefined,
                     createdAt: revision.createdAt,
                     updatedAt: revision.updatedAt,
                     formData: {
@@ -239,13 +285,15 @@ async function findSDPWithHistory(
                 stateCode: contract.stateCode,
                 stateNumber: contract.stateNumber,
                 contractSubmissionType: contract.contractSubmissionType,
-                status: contract.status,
-                reviewStatus: contract.reviewStatus,
-                consolidatedStatus: contract.consolidatedStatus,
+                status: contract.status ?? undefined,
+                reviewStatus: contract.reviewStatus ?? undefined,
+                consolidatedStatus: contract.consolidatedStatus ?? undefined,
                 mccrsID: contract.mccrsID ?? undefined,
             }))
 
         const latestRevision = revisions[0]
+        const latestSubmittedRevision =
+            sdp.status === 'UNLOCKED' ? revisions[1] : latestRevision
 
         return {
             id: sdp.id,
@@ -255,9 +303,16 @@ async function findSDPWithHistory(
             stateCode: sdp.stateCode,
             mccrsID: sdp.mccrsID ?? undefined,
             stateNumber: sdp.stateNumber,
-            draftRevision: sdp.status === 'DRAFT' ? latestRevision : undefined,
+            draftRevision:
+                sdp.status === 'DRAFT' || sdp.status === 'UNLOCKED'
+                    ? latestRevision
+                    : undefined,
             latestSubmittedRevision:
-                sdp.status !== 'DRAFT' ? latestRevision : undefined,
+                sdp.status === 'SUBMITTED' ||
+                sdp.status === 'RESUBMITTED' ||
+                sdp.status === 'UNLOCKED'
+                    ? latestSubmittedRevision
+                    : undefined,
             revisions,
             questions: undefined,
             relatedContracts,

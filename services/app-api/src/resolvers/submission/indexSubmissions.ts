@@ -285,6 +285,14 @@ export function indexSubmissions(
 
         let submissions = [...contractSubmissions, ...sdpSubmissions]
 
+        if (!stateUser) {
+            submissions = submissions.filter(
+                (submission) =>
+                    submission.status !== 'DRAFT' &&
+                    submission.status !== 'UNLOCKED'
+            )
+        }
+
         const statusesToExclude = input?.statusesToExclude?.filter(
             (status): status is DashboardSubmission['status'] => status != null
         )

@@ -10,6 +10,7 @@ import type {
 import type { ExtendedPrismaClient } from '../prismaClient'
 import type { PrismaTransactionType } from '../prismaTypes'
 import { NotFoundError, UserInputPostgresError } from '../postgresErrors'
+import { findSDPWithHistory } from './findSDPWithHistory'
 
 type UpdateSDPArgsType = UpdateSDPInputType
 
@@ -35,6 +36,44 @@ type ExistingSDPRevisionRow = {
     estimatedFederalShare: string | null
     estimatedStateShare: string | null
     automaticallyRenewed: boolean
+}
+
+const parsePgArray = (
+    value: string[] | string | null | undefined
+): string[] => {
+    if (!value) {
+        return []
+    }
+
+    if (Array.isArray(value)) {
+        return value
+    }
+
+    const trimmed = value.trim()
+
+    if (trimmed === '{}' || trimmed === '') {
+        return []
+    }
+
+    if (trimmed.startsWith('{') && trimmed.endsWith('}')) {
+        return trimmed
+            .slice(1, -1)
+            .split(',')
+            .map((item) => item.replace(/^"(.*)"$/, '$1'))
+            .filter(Boolean)
+    }
+
+    return [trimmed]
+}
+
+const normalizeOptionalString = (
+    value: string | null | undefined
+): string | null => {
+    if (value === undefined) {
+        return null
+    }
+
+    return value === '' ? null : value
 }
 
 async function insertSDPDocuments(
@@ -106,7 +145,7 @@ async function updateDraftSDP(
     args: UpdateSDPArgsType
 ): Promise<SDPType | Error> {
     try {
-        return await client.$transaction(async (tx) => {
+        const updateResult = await client.$transaction(async (tx) => {
             const sdpRows = await tx.$queryRaw<ExistingSDPRow[]>(
                 Prisma.sql`
                     SELECT
@@ -130,7 +169,7 @@ async function updateDraftSDP(
                 )
             }
 
-            if (sdp.status !== 'DRAFT') {
+            if (!['DRAFT', 'UNLOCKED'].includes(sdp.status)) {
                 return new UserInputPostgresError(
                     `SDP is not in editable state. SDP: ${args.sdpID} Status: ${sdp.status}`
                 )
@@ -173,12 +212,52 @@ async function updateDraftSDP(
                 )
             }
 
+            const estimatedFederalShare =
+                args.estimatedFederalShare !== undefined
+                    ? normalizeOptionalString(args.estimatedFederalShare)
+                    : currentRevision.estimatedFederalShare
+            const estimatedStateShare =
+                args.estimatedStateShare !== undefined
+                    ? normalizeOptionalString(args.estimatedStateShare)
+                    : currentRevision.estimatedStateShare
+            const programIDs = args.programIDs
+                ? args.programIDs
+                : parsePgArray(currentRevision.programIDs as string[] | string)
+            const changesIncluded = args.changesIncluded
+                ? args.changesIncluded
+                : (parsePgArray(
+                      currentRevision.changesIncluded as
+                          | SDPChangeType[]
+                          | string
+                  ) as SDPChangeType[])
+
             const updatedRevisionRows = await tx.$queryRaw<
                 ExistingSDPRevisionRow[]
             >(
                 Prisma.sql`
                         UPDATE "SDPRevisionTable"
-                        SET "updatedAt" = CURRENT_TIMESTAMP
+                        SET
+                            "updatedAt" = CURRENT_TIMESTAMP,
+                            "submissionType" = ${
+                                args.submissionType ??
+                                currentRevision.submissionType
+                            }::"SDPSubmissionType",
+                            "programIDs" = ARRAY[${Prisma.join(programIDs)}]::text[],
+                            "changesIncluded" = ARRAY[${Prisma.join(changesIncluded)}]::"SDPChangeType"[],
+                            "ratingPeriodStart" = ${
+                                args.ratingPeriodStart ??
+                                currentRevision.ratingPeriodStart
+                            }::date,
+                            "ratingPeriodEnd" = ${
+                                args.ratingPeriodEnd ??
+                                currentRevision.ratingPeriodEnd
+                            }::date,
+                            "estimatedFederalShare" = ${estimatedFederalShare},
+                            "estimatedStateShare" = ${estimatedStateShare},
+                            "automaticallyRenewed" = ${
+                                args.automaticallyRenewed ??
+                                currentRevision.automaticallyRenewed
+                            }
                         WHERE "id" = ${currentRevision.id}
                         RETURNING
                             "id",
@@ -261,75 +340,14 @@ async function updateDraftSDP(
                 )
             }
 
-            return {
-                id: updatedSDP.id,
-                createdAt: updatedSDP.createdAt,
-                updatedAt: updatedSDP.updatedAt,
-                status: updatedSDP.status as SDPType['status'],
-                stateCode: updatedSDP.stateCode,
-                mccrsID: updatedSDP.mccrsID ?? undefined,
-                stateNumber: updatedSDP.stateNumber,
-                draftRevision: {
-                    id: updatedRevision.id,
-                    sdpID: updatedSDP.id,
-                    sdp: {
-                        id: updatedSDP.id,
-                        stateCode: updatedSDP.stateCode,
-                        stateNumber: updatedSDP.stateNumber,
-                    },
-                    createdAt: updatedRevision.createdAt,
-                    updatedAt: updatedRevision.updatedAt,
-                    formData: {
-                        submissionType: updatedRevision.submissionType,
-                        programIDs: updatedRevision.programIDs,
-                        changesIncluded: updatedRevision.changesIncluded,
-                        ratingPeriodStart: updatedRevision.ratingPeriodStart,
-                        ratingPeriodEnd: updatedRevision.ratingPeriodEnd,
-                        estimatedFederalShare:
-                            updatedRevision.estimatedFederalShare ?? undefined,
-                        estimatedStateShare:
-                            updatedRevision.estimatedStateShare ?? undefined,
-                        automaticallyRenewed:
-                            updatedRevision.automaticallyRenewed,
-                        stateContacts: args.stateContacts,
-                    },
-                    sdpDocuments: [],
-                },
-                latestSubmittedRevision: undefined,
-                revisions: [
-                    {
-                        id: updatedRevision.id,
-                        sdpID: updatedSDP.id,
-                        sdp: {
-                            id: updatedSDP.id,
-                            stateCode: updatedSDP.stateCode,
-                            stateNumber: updatedSDP.stateNumber,
-                        },
-                        createdAt: updatedRevision.createdAt,
-                        updatedAt: updatedRevision.updatedAt,
-                        formData: {
-                            submissionType: updatedRevision.submissionType,
-                            programIDs: updatedRevision.programIDs,
-                            changesIncluded: updatedRevision.changesIncluded,
-                            ratingPeriodStart:
-                                updatedRevision.ratingPeriodStart,
-                            ratingPeriodEnd: updatedRevision.ratingPeriodEnd,
-                            estimatedFederalShare:
-                                updatedRevision.estimatedFederalShare ??
-                                undefined,
-                            estimatedStateShare:
-                                updatedRevision.estimatedStateShare ??
-                                undefined,
-                            automaticallyRenewed:
-                                updatedRevision.automaticallyRenewed,
-                            stateContacts: args.stateContacts,
-                        },
-                        sdpDocuments: [],
-                    },
-                ],
-                questions: undefined,
-            }
+            return updatedSDP.id
         })
+
+        if (updateResult instanceof Error) {
+            return updateResult
+        }
+
+        return await findSDPWithHistory(client, updateResult)
     } catch (err) {
         console.error('Prisma error updating SDP', err)
         return err as Error

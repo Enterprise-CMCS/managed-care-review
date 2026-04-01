@@ -1,7 +1,6 @@
 import React from 'react'
 import { useAuth } from '../../../contexts/AuthContext'
 import { useIndexRatesStrippedQuery } from '../../../gen/gqlClient'
-import { mostRecentDate } from '@mc-review/dates'
 import styles from '../../StateDashboard/StateDashboard.module.scss'
 import { recordJSException } from '@mc-review/otel'
 import { Loading } from '../../../components'
@@ -10,6 +9,18 @@ import { RateInDashboardType, RateReviewsTable } from './RateReviewsTable'
 import { ErrorFailedRequestPage } from '../../Errors/ErrorFailedRequestPage'
 import { RateTypeRecord } from '@mc-review/submissions'
 import { GenericErrorPage } from '../../Errors/GenericErrorPage'
+
+const mostRecentDate = (dates: Array<Date | undefined>): Date | undefined => {
+    let maxDate: Date | undefined
+
+    for (const date of dates) {
+        if (date && (!maxDate || date.getTime() > maxDate.getTime())) {
+            maxDate = date
+        }
+    }
+
+    return maxDate
+}
 
 const RateReviewsDashboard = (): React.ReactElement => {
     const { loggedInUser } = useAuth()

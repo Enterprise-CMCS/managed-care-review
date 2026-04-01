@@ -30,6 +30,7 @@ const ROUTES = [
     'SUBMISSIONS_NEW_SUBMISSION_FORM',
     'SUBMISSIONS_TYPE',
     'SUBMISSIONS_EDIT_TOP_LEVEL',
+    'SUBMISSIONS_SDP_TYPE',
     'SUBMISSIONS_SDP_DETAILS',
     'SUBMISSIONS_SDP_CONTACTS',
     'SUBMISSIONS_SDP_REVIEW_SUBMIT',
@@ -99,6 +100,7 @@ const RoutesRecord: Record<RouteT, string> = {
     SUBMISSIONS_NEW_SUBMISSION_FORM: '/submissions/new/:contractSubmissionType',
     SUBMISSIONS_EDIT_TOP_LEVEL:
         '/submissions/:contractSubmissionType/:id/edit/*',
+    SUBMISSIONS_SDP_TYPE: '/submissions/sdp/:id/edit/submission-details',
     SUBMISSIONS_SDP_DETAILS: '/submissions/sdp/:id/edit/sdp-details',
     SUBMISSIONS_SDP_CONTACTS: '/submissions/sdp/:id/edit/contacts',
     SUBMISSIONS_SDP_REVIEW_SUBMIT: '/submissions/sdp/:id/edit/review-and-submit',
@@ -177,6 +179,7 @@ const QUESTION_RESPONSE_SHOW_SIDEBAR_ROUTES: RouteTWithUnknown[] = [
     'SUBMISSIONS_RATE_QUESTIONS_AND_ANSWERS',
     'SUBMISSIONS_SUMMARY',
     'SUBMISSIONS_TYPE',
+    'SUBMISSIONS_SDP_TYPE',
     'SUBMISSIONS_SDP_DETAILS',
     'SUBMISSIONS_SDP_CONTACTS',
     'SUBMISSIONS_SDP_REVIEW_SUBMIT',
@@ -212,6 +215,7 @@ const SETTINGS_HIDE_SIDEBAR_ROUTES: RouteTWithUnknown[] = [
 
 const SUBMISSION_PAGE_HEADING_ROUTES: RouteTWithUnknown[] = [
     'SUBMISSIONS',
+    'SUBMISSIONS_SDP_TYPE',
     'SUBMISSIONS_TYPE',
     'SUBMISSIONS_SDP_DETAILS',
     'SUBMISSIONS_SDP_CONTACTS',
@@ -277,6 +281,7 @@ const PageTitlesRecord: Record<RouteT | 'UNKNOWN_ROUTE', string> = {
     SUBMISSIONS_EDIT_TOP_LEVEL: 'Submissions',
     SUBMISSIONS_TYPE: 'Submission type',
     SUBMISSIONS_SDP_DETAILS: 'SDP details',
+    SUBMISSIONS_SDP_TYPE: 'Submission details',
     SUBMISSIONS_SDP_CONTACTS: 'Contacts',
     SUBMISSIONS_SDP_REVIEW_SUBMIT: 'Review and submit',
     SUBMISSIONS_CONTRACT_DETAILS: 'Contract details',
@@ -312,6 +317,7 @@ const PageHeadingsRecord: Partial<Record<RouteTWithUnknown, string>> = {
     DASHBOARD_RATES: 'Rate reviews dashboard',
     SUBMISSIONS_NEW: '',
     SUBMISSIONS_NEW_SUBMISSION_FORM: '',
+    SUBMISSIONS_SDP_TYPE: '',
     SUBMISSIONS_SDP_DETAILS: '',
     SUBMISSIONS_SDP_CONTACTS: '',
     SUBMISSIONS_SDP_REVIEW_SUBMIT: '',

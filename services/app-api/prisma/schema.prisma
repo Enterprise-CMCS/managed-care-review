@@ -270,6 +270,8 @@ model SDPRevisionTable {
   id    String   @id @default(uuid())
   sdpID String
   sdp   SDPTable @relation(fields: [sdpID], references: [id])
+  unlockInfoID String?
+  unlockInfo   UpdateInfoTable? @relation("unlockSDPInfo", fields: [unlockInfoID], references: [id], onDelete: Cascade)
 
   submissionType         SDPSubmissionType
   programIDs             String[]
@@ -388,6 +390,7 @@ model UpdateInfoTable {
 
   // These relations are inverse 1:1 relations that are not really used.
   unlockedContracts  ContractRevisionTable[]      @relation("unlockContractInfo")
+  unlockedSDPs       SDPRevisionTable[]           @relation("unlockSDPInfo")
   unlockedRates      RateRevisionTable[]          @relation("unlockRateInfo")
   submissionPackages SubmissionPackageJoinTable[] @relation("submission")
 

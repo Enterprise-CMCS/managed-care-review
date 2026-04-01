@@ -2,6 +2,7 @@ import React, { useEffect, useRef, useState } from 'react'
 import { GridContainer, ModalRef } from '@trussworks/react-uswds'
 import {
     ActionButton,
+    NavLinkWithLogging,
     DynamicStepIndicator,
     FormNotificationContainer,
     PageActionsContainer,
@@ -20,8 +21,12 @@ import { SDPSubmissionDetailsFormValues } from '../SDPSubmissionDetails'
 import { generatePath, useNavigate } from 'react-router-dom'
 import { RoutesRecord } from '@mc-review/constants'
 import { useStatePrograms } from '../../../../hooks'
-import { GenericDocument } from '../../../../gen/gqlClient'
+import {
+    GenericDocument,
+    useFetchContractQuery,
+} from '../../../../gen/gqlClient'
 import styles from './SDPReviewSubmit.module.scss'
+import { getSubmissionPath } from '../../../../routeHelpers'
 
 type SDPReviewSubmitProps = {
     id: string
@@ -114,6 +119,49 @@ const mapFileItemsToDocuments = (
         s3Key: file.key ?? null,
     }))
 
+const LinkedContractSummaryLink = ({
+    contractID,
+}: {
+    contractID: string
+}): React.ReactElement | null => {
+    const { data } = useFetchContractQuery({
+        variables: {
+            input: {
+                contractID,
+            },
+        },
+        fetchPolicy: 'cache-first',
+    })
+
+    const contract = data?.fetchContract.contract
+
+    if (!contract || contract.contractSubmissionType === 'SDP') {
+        return null
+    }
+
+    const contractName =
+        contract.draftRevision?.contractName ??
+        contract.packageSubmissions?.[0]?.contractRevision.contractName ??
+        `MCR-${contract.stateCode}-${String(contract.stateNumber).padStart(
+            4,
+            '0'
+        )}`
+
+    return (
+        <div>
+            <NavLinkWithLogging
+                to={getSubmissionPath(
+                    'SUBMISSIONS_SUMMARY',
+                    contract.contractSubmissionType,
+                    contract.id
+                )}
+            >
+                {contractName}
+            </NavLinkWithLogging>
+        </div>
+    )
+}
+
 export const SDPReviewSubmit = ({
     id,
     submissionDetailsValues,
@@ -162,8 +210,8 @@ export const SDPReviewSubmit = ({
                         hideBorderBottom
                         fontSize="38px"
                         editNavigateTo={generatePath(
-                            RoutesRecord.SUBMISSIONS_NEW_SUBMISSION_FORM,
-                            { contractSubmissionType: 'sdp' }
+                            RoutesRecord.SUBMISSIONS_SDP_TYPE,
+                            { id }
                         )}
                     />
                     <dl>
@@ -244,11 +292,15 @@ export const SDPReviewSubmit = ({
                             id="sdpRelatedContracts"
                             label="Related contracts"
                         >
-                            {sdpDetailsValues.linkContractSelects.filter(Boolean)
-                                .length > 0
-                                ? sdpDetailsValues.linkContractSelects
-                                      .filter(Boolean)
-                                      .join(', ')
+                            {sdpDetailsValues.relatedContracts.length > 0
+                                ? sdpDetailsValues.relatedContracts.map(
+                                      (contractID) => (
+                                          <LinkedContractSummaryLink
+                                              key={contractID}
+                                              contractID={contractID}
+                                          />
+                                      )
+                                  )
                                 : 'No related contracts added'}
                         </DataDetail>
                     </dl>
@@ -275,15 +327,17 @@ export const SDPReviewSubmit = ({
                         )}
                     />
                     <dl>
-                        {sdpContactsValues.stateContacts.map((contact, index) => (
-                            <DataDetail
-                                key={`sdp-contact-${index}`}
-                                id={`sdp-contact-${index}`}
-                                label={`Contact ${index + 1}`}
-                            >
-                                <DataDetailContactField contact={contact} />
-                            </DataDetail>
-                        ))}
+                        {sdpContactsValues.stateContacts.map(
+                            (contact, index) => (
+                                <DataDetail
+                                    key={`sdp-contact-${index}`}
+                                    id={`sdp-contact-${index}`}
+                                    label={`Contact ${index + 1}`}
+                                >
+                                    <DataDetailContactField contact={contact} />
+                                </DataDetail>
+                            )
+                        )}
                     </dl>
                 </SectionCard>
 

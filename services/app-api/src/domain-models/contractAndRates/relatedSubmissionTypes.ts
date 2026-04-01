@@ -8,6 +8,7 @@ import { contractSubmissionTypeSchema } from './contractSubmissionType'
 
 const relatedContractSchema = z.object({
     id: z.uuid(),
+    contractName: z.string().optional(),
     stateCode: z.string(),
     stateNumber: z.number().min(1),
     contractSubmissionType: contractSubmissionTypeSchema,

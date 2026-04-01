@@ -74,6 +74,7 @@ import { createSDP } from './sdp/createSDP'
 import { fetchSDPResolver } from './sdp/fetchSDP'
 import { updateSDP } from './sdp/updateSDP'
 import { submitSDP } from './sdp/submitSDP'
+import { unlockSDP } from './sdp/unlockSDP'
 import { indexSubmissions } from './submission/indexSubmissions'
 
 export function configureResolvers(
@@ -115,6 +116,7 @@ export function configureResolvers(
             createSDP: createSDP(store),
             updateSDP: updateSDP(store),
             submitSDP: submitSDP(store),
+            unlockSDP: unlockSDP(store),
             updateContract: updateContract(store),
             updateContractDraftRevision: updateContractDraftRevision(
                 store,

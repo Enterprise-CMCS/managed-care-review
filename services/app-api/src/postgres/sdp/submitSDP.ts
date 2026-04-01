@@ -3,6 +3,7 @@ import type { SDPType, SubmitSDPInputType } from '../../domain-models'
 import type { ExtendedPrismaClient } from '../prismaClient'
 import type { SDPChangeType, SDPSubmissionType } from '../../domain-models'
 import { NotFoundError, UserInputPostgresError } from '../postgresErrors'
+import { findSDPWithHistory } from './findSDPWithHistory'
 
 type SubmitSDPArgsType = SubmitSDPInputType
 
@@ -35,7 +36,7 @@ async function submitSDP(
     args: SubmitSDPArgsType
 ): Promise<SDPType | Error> {
     try {
-        return await client.$transaction(async (tx) => {
+        const submitResult = await client.$transaction(async (tx) => {
             const sdpRows = await tx.$queryRaw<ExistingSDPRow[]>(
                 Prisma.sql`
                     SELECT
@@ -59,7 +60,7 @@ async function submitSDP(
                 )
             }
 
-            if (sdp.status !== 'DRAFT') {
+            if (!['DRAFT', 'UNLOCKED'].includes(sdp.status)) {
                 return new UserInputPostgresError(
                     `Attempted to submit SDP with invalid status: ${sdp.status}`
                 )
@@ -106,7 +107,11 @@ async function submitSDP(
                 Prisma.sql`
                     UPDATE "SDPTable"
                     SET
-                        "status" = 'SUBMITTED',
+                        "status" = ${
+                            sdp.status === 'UNLOCKED'
+                                ? 'RESUBMITTED'
+                                : 'SUBMITTED'
+                        }::text,
                         "updatedAt" = CURRENT_TIMESTAMP
                     WHERE "id" = ${args.sdpID}
                     RETURNING
@@ -127,75 +132,14 @@ async function submitSDP(
                 )
             }
 
-            const latestRevisionRows = await tx.$queryRaw<
-                ExistingSDPRevisionRow[]
-            >(
-                Prisma.sql`
-                        SELECT
-                            "id",
-                            "createdAt",
-                            "updatedAt",
-                            "submissionType",
-                            "programIDs",
-                            "changesIncluded",
-                            "ratingPeriodStart",
-                            "ratingPeriodEnd",
-                            "estimatedFederalShare",
-                            "estimatedStateShare",
-                            "automaticallyRenewed"
-                        FROM "SDPRevisionTable"
-                        WHERE "id" = ${currentRevision.id}
-                    `
-            )
-            const latestRevision = latestRevisionRows[0]
-
-            if (!latestRevision) {
-                return new Error(
-                    `Unexpected error finding submitted SDP revision for SDP id: ${args.sdpID}`
-                )
-            }
-
-            const submittedRevision = {
-                id: latestRevision.id,
-                sdpID: submittedSDP.id,
-                sdp: {
-                    id: submittedSDP.id,
-                    stateCode: submittedSDP.stateCode,
-                    stateNumber: submittedSDP.stateNumber,
-                },
-                createdAt: latestRevision.createdAt,
-                updatedAt: latestRevision.updatedAt,
-                formData: {
-                    submissionType: latestRevision.submissionType,
-                    programIDs: latestRevision.programIDs,
-                    changesIncluded: latestRevision.changesIncluded,
-                    ratingPeriodStart: latestRevision.ratingPeriodStart,
-                    ratingPeriodEnd: latestRevision.ratingPeriodEnd,
-                    estimatedFederalShare:
-                        latestRevision.estimatedFederalShare ?? undefined,
-                    estimatedStateShare:
-                        latestRevision.estimatedStateShare ?? undefined,
-                    automaticallyRenewed: latestRevision.automaticallyRenewed,
-                    stateContacts: [],
-                },
-                sdpDocuments: [],
-            }
-
-            return {
-                id: submittedSDP.id,
-                createdAt: submittedSDP.createdAt,
-                updatedAt: submittedSDP.updatedAt,
-                status: submittedSDP.status as SDPType['status'],
-                stateCode: submittedSDP.stateCode,
-                mccrsID: submittedSDP.mccrsID ?? undefined,
-                stateNumber: submittedSDP.stateNumber,
-                draftRevision: undefined,
-                latestSubmittedRevision: submittedRevision,
-                revisions: [submittedRevision],
-                questions: undefined,
-                relatedContracts: undefined,
-            }
+            return submittedSDP.id
         })
+
+        if (submitResult instanceof Error) {
+            return submitResult
+        }
+
+        return await findSDPWithHistory(client, submitResult)
     } catch (err) {
         console.error('Prisma error submitting SDP', err)
         return err as Error

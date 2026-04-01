@@ -243,6 +243,7 @@ type Mutation {
             - Sending state or CMS email failed.
     """
     unlockContract(input: UnlockContractInput!): UnlockContractPayload!
+    unlockSDP(input: UnlockSDPInput!): UnlockSDPPayload!
 
     """
     updateDivisionAssignment updates CMS user division assignment.
@@ -622,6 +623,14 @@ type CreateSDPPayload {
 input UpdateSDPInput {
     sdpID: ID!
     lastSeenUpdatedAt: DateTime!
+    submissionType: SDPSubmissionType
+    programIDs: [String!]
+    changesIncluded: [SDPChangeType!]
+    ratingPeriodStart: Date
+    ratingPeriodEnd: Date
+    estimatedFederalShare: String
+    estimatedStateShare: String
+    automaticallyRenewed: Boolean
     sdpDocuments: [GenericDocumentInput!]
     relatedContractIDs: [ID!]!
     stateContacts: [StateContactInput!]
@@ -637,6 +646,15 @@ input SubmitSDPInput {
 }
 
 type SubmitSDPPayload {
+    sdp: SDP!
+}
+
+input UnlockSDPInput {
+    sdpID: ID!
+    unlockedReason: String!
+}
+
+type UnlockSDPPayload {
     sdp: SDP!
 }
 
@@ -1958,6 +1976,7 @@ Only contains the necessary info for displaying the SubmissionWithdrawWarningBan
 """
 type RelatedContractStripped {
     id: ID!
+    contractName: String
     stateCode: String!
     stateNumber: Int!
     contractSubmissionType: ContractSubmissionType!
@@ -2250,6 +2269,7 @@ type SDPRevision {
     sdpID: String!
     createdAt: DateTime!
     updatedAt: DateTime!
+    unlockInfo: UpdateInformation
     formData: SDPFormData!
     sdpDocuments: [GenericDocument!]!
 }
@@ -2262,6 +2282,7 @@ type SDPRevisionStripped {
     sdpID: String!
     createdAt: DateTime!
     updatedAt: DateTime!
+    unlockInfo: UpdateInformation
     formData: SDPFormData!
     sdpDocuments: [GenericDocument!]!
 }

@@ -1,5 +1,5 @@
 import React from 'react'
-import { gql, useMutation } from '@apollo/client'
+import { gql, useMutation, useQuery } from '@apollo/client'
 import { generatePath, useLocation, useNavigate } from 'react-router-dom'
 import {
     SDPSubmissionDetails,
@@ -20,11 +20,19 @@ import { SDPReviewSubmit } from './SDPReviewSubmit'
 import formContainerStyles from '../../../components/FormContainer/FormContainer.module.scss'
 import {
     CreateSdpInput,
+    GenericDocument,
     GenericDocumentInput,
 } from '../../../gen/gqlClient'
-import { formatDocumentsForGQL } from '../../../formHelpers/formatters'
+import {
+    formatDocumentsForForm,
+    formatDocumentsForGQL,
+    formatForForm,
+} from '../../../formHelpers/formatters'
 import { RoutesRecord } from '@mc-review/constants'
 import { useRouteParams } from '../../../hooks'
+import { useS3 } from '../../../contexts/S3Context'
+import { Loading } from '../../../components'
+import { GenericErrorPage } from '../../Errors/GenericErrorPage'
 
 const CREATE_SDP_MUTATION = gql`
     mutation createSDPSubmissionDraft($input: CreateSDPInput!) {
@@ -65,6 +73,46 @@ const SUBMIT_SDP_MUTATION = gql`
     }
 `
 
+const FETCH_SDP_EDIT_QUERY = gql`
+    query fetchSDPSubmissionEdit($input: FetchSDPInput!) {
+        fetchSDP(input: $input) {
+            sdp {
+                id
+                status
+                relatedContracts {
+                    id
+                }
+                draftRevision {
+                    id
+                    updatedAt
+                    formData {
+                        submissionType
+                        programIDs
+                        changesIncluded
+                        ratingPeriodStart
+                        ratingPeriodEnd
+                        estimatedFederalShare
+                        estimatedStateShare
+                        automaticallyRenewed
+                        stateContacts {
+                            name
+                            titleRole
+                            email
+                        }
+                    }
+                    sdpDocuments {
+                        id
+                        name
+                        s3URL
+                        sha256
+                        dateAdded
+                    }
+                }
+            }
+        }
+    }
+`
+
 type CreatedSDPState = {
     id: string
     lastSeenUpdatedAt: string
@@ -73,6 +121,14 @@ type CreatedSDPState = {
 type UpdateSDPInput = {
     sdpID: string
     lastSeenUpdatedAt: string
+    submissionType?: SDPSubmissionDetailsFormValues['submissionType']
+    programIDs?: SDPSubmissionDetailsFormValues['programIDs']
+    changesIncluded?: SDPSubmissionDetailsFormValues['changesIncluded']
+    ratingPeriodStart?: string
+    ratingPeriodEnd?: string
+    estimatedFederalShare?: string | null
+    estimatedStateShare?: string | null
+    automaticallyRenewed?: boolean
     sdpDocuments: GenericDocumentInput[]
     relatedContractIDs: string[]
     stateContacts: SDPContactsFormValues['stateContacts']
@@ -94,13 +150,19 @@ export const SDPSubmissionForm = (): React.ReactElement => {
     const navigate = useNavigate()
     const location = useLocation()
     const { id } = useRouteParams()
+    const { getKey } = useS3()
     const navigationState = location.state as SDPNavigationState | null
+    const shouldHydrateFromQuery =
+        Boolean(id) && !navigationState?.draftSDP?.lastSeenUpdatedAt
     const [currentPage, setCurrentPage] = React.useState<
         | 'SUBMISSIONS_TYPE'
         | 'SUBMISSIONS_CONTRACT_DETAILS'
         | 'SUBMISSIONS_SDP_CONTACTS'
         | 'SUBMISSIONS_SDP_REVIEW_SUBMIT'
     >(() => {
+        if (location.pathname.endsWith('/edit/submission-details')) {
+            return 'SUBMISSIONS_TYPE'
+        }
         if (location.pathname.endsWith('/edit/review-and-submit')) {
             return 'SUBMISSIONS_SDP_REVIEW_SUBMIT'
         }
@@ -136,8 +198,22 @@ export const SDPSubmissionForm = (): React.ReactElement => {
     const [createSDPDraft] = useMutation(CREATE_SDP_MUTATION)
     const [updateSDPDraft] = useMutation(UPDATE_SDP_MUTATION)
     const [submitSDPDraft] = useMutation(SUBMIT_SDP_MUTATION)
+    const { data, loading, error } = useQuery(FETCH_SDP_EDIT_QUERY, {
+        variables: {
+            input: {
+                sdpID: id ?? 'unknown-sdp',
+            },
+        },
+        skip: !shouldHydrateFromQuery,
+        fetchPolicy: 'cache-and-network',
+    })
 
     React.useEffect(() => {
+        if (location.pathname.endsWith('/edit/submission-details')) {
+            setCurrentPage('SUBMISSIONS_TYPE')
+            return
+        }
+
         if (location.pathname.endsWith('/edit/review-and-submit')) {
             setCurrentPage('SUBMISSIONS_SDP_REVIEW_SUBMIT')
             return
@@ -156,6 +232,84 @@ export const SDPSubmissionForm = (): React.ReactElement => {
         setCurrentPage('SUBMISSIONS_TYPE')
     }, [location.pathname])
 
+    React.useEffect(() => {
+        if (!shouldHydrateFromQuery) {
+            return
+        }
+
+        const fetchedSDP = data?.fetchSDP?.sdp
+        const draftRevision = fetchedSDP?.draftRevision
+
+        if (!fetchedSDP || !draftRevision) {
+            return
+        }
+
+        setSubmissionDetailsValues({
+            submissionType: draftRevision.formData.submissionType,
+            programIDs: draftRevision.formData.programIDs,
+            changesIncluded: draftRevision.formData.changesIncluded,
+            ratingPeriodStart: formatForForm(
+                draftRevision.formData.ratingPeriodStart
+            ),
+            ratingPeriodEnd: formatForForm(
+                draftRevision.formData.ratingPeriodEnd
+            ),
+            estimatedFederalShare:
+                draftRevision.formData.estimatedFederalShare ?? '',
+            estimatedStateShare:
+                draftRevision.formData.estimatedStateShare ?? '',
+            automaticallyRenewed: formatForForm(
+                draftRevision.formData.automaticallyRenewed
+            ) as 'YES' | 'NO',
+        })
+        setSdpDetailsValues({
+            sdpDocuments: formatDocumentsForForm({
+                documents: draftRevision.sdpDocuments as GenericDocument[],
+                getKey,
+            }),
+            linkContractSelects:
+                fetchedSDP.relatedContracts?.length > 0
+                    ? fetchedSDP.relatedContracts.map(
+                          (contract: { id: string }) => contract.id
+                      )
+                    : [''],
+            relatedContracts:
+                fetchedSDP.relatedContracts?.length > 0
+                    ? fetchedSDP.relatedContracts.map(
+                          (contract: { id: string }) => contract.id
+                      )
+                    : [],
+        })
+        setSdpContactsValues({
+            stateContacts:
+                draftRevision.formData.stateContacts.length > 0
+                    ? draftRevision.formData.stateContacts.map(
+                          (contact: {
+                              name?: string | null
+                              titleRole?: string | null
+                              email?: string | null
+                          }) => ({
+                              name: contact.name ?? '',
+                              titleRole: contact.titleRole ?? '',
+                              email: contact.email ?? '',
+                          })
+                      )
+                    : sdpContactsInitialValues.stateContacts,
+        })
+        setDraftSDP({
+            id: fetchedSDP.id,
+            lastSeenUpdatedAt: draftRevision.updatedAt,
+        })
+    }, [data, getKey, shouldHydrateFromQuery])
+
+    if (shouldHydrateFromQuery && loading && !data) {
+        return <Loading />
+    }
+
+    if (shouldHydrateFromQuery && error && !data) {
+        return <GenericErrorPage />
+    }
+
     return (
         <div
             data-testid="sdp-submission-form-page"
@@ -168,6 +322,80 @@ export const SDPSubmissionForm = (): React.ReactElement => {
                     onContinue={async (values) => {
                         setPageErrorMessage(false)
                         setSubmissionDetailsValues(values)
+                        if (draftSDP?.id && draftSDP.lastSeenUpdatedAt) {
+                            try {
+                                const updateInput: UpdateSDPInput = {
+                                    sdpID: draftSDP.id,
+                                    lastSeenUpdatedAt:
+                                        draftSDP.lastSeenUpdatedAt,
+                                    submissionType: values.submissionType,
+                                    programIDs: values.programIDs,
+                                    changesIncluded: values.changesIncluded,
+                                    ratingPeriodStart: values.ratingPeriodStart,
+                                    ratingPeriodEnd: values.ratingPeriodEnd,
+                                    estimatedFederalShare:
+                                        values.estimatedFederalShare || null,
+                                    estimatedStateShare:
+                                        values.estimatedStateShare || null,
+                                    automaticallyRenewed:
+                                        values.automaticallyRenewed === 'YES',
+                                    sdpDocuments: formatDocumentsForGQL(
+                                        sdpDetailsValues.sdpDocuments
+                                    ),
+                                    relatedContractIDs:
+                                        sdpDetailsValues.relatedContracts,
+                                    stateContacts:
+                                        sdpContactsValues.stateContacts,
+                                }
+
+                                const result = await updateSDPDraft({
+                                    variables: {
+                                        input: updateInput,
+                                    },
+                                })
+                                const updatedSDP = result.data?.updateSDP?.sdp
+
+                                if (
+                                    !updatedSDP?.id ||
+                                    !updatedSDP.draftRevision?.updatedAt
+                                ) {
+                                    setPageErrorMessage(
+                                        'There was a problem updating the SDP draft'
+                                    )
+                                    return
+                                }
+
+                                const updatedDraft = {
+                                    id: updatedSDP.id,
+                                    lastSeenUpdatedAt:
+                                        updatedSDP.draftRevision.updatedAt,
+                                }
+
+                                setDraftSDP(updatedDraft)
+                                navigate(
+                                    generatePath(
+                                        RoutesRecord.SUBMISSIONS_SDP_DETAILS,
+                                        {
+                                            id: updatedSDP.id,
+                                        }
+                                    ),
+                                    {
+                                        state: {
+                                            submissionDetailsValues: values,
+                                            sdpDetailsValues,
+                                            sdpContactsValues,
+                                            draftSDP: updatedDraft,
+                                        },
+                                    }
+                                )
+                            } catch {
+                                setPageErrorMessage(
+                                    'There was a problem updating the SDP draft'
+                                )
+                            }
+                            return
+                        }
+
                         try {
                             const createInput: CreateSdpInput = {
                                 submissionType: values.submissionType!,
@@ -226,7 +454,7 @@ export const SDPSubmissionForm = (): React.ReactElement => {
                                     },
                                 }
                             )
-                        } catch (_error) {
+                        } catch {
                             setPageErrorMessage(
                                 'There was a problem creating the SDP draft'
                             )
@@ -240,12 +468,19 @@ export const SDPSubmissionForm = (): React.ReactElement => {
                     onBack={() => {
                         setCurrentPage('SUBMISSIONS_TYPE')
                         navigate(
-                            generatePath(
-                                RoutesRecord.SUBMISSIONS_NEW_SUBMISSION_FORM,
-                                {
-                                    contractSubmissionType: 'sdp',
-                                }
-                            ),
+                            draftSDP?.id
+                                ? generatePath(
+                                      RoutesRecord.SUBMISSIONS_SDP_TYPE,
+                                      {
+                                          id: draftSDP.id,
+                                      }
+                                  )
+                                : generatePath(
+                                      RoutesRecord.SUBMISSIONS_NEW_SUBMISSION_FORM,
+                                      {
+                                          contractSubmissionType: 'sdp',
+                                      }
+                                  ),
                             {
                                 state: {
                                     submissionDetailsValues,
@@ -271,10 +506,10 @@ export const SDPSubmissionForm = (): React.ReactElement => {
                             const updateInput: UpdateSDPInput = {
                                 sdpID: draftSDP.id,
                                 lastSeenUpdatedAt: draftSDP.lastSeenUpdatedAt,
-                                sdpDocuments:
-                                    formatDocumentsForGQL(values.sdpDocuments),
-                                relatedContractIDs:
-                                    values.linkContractSelects.filter(Boolean),
+                                sdpDocuments: formatDocumentsForGQL(
+                                    values.sdpDocuments
+                                ),
+                                relatedContractIDs: values.relatedContracts,
                                 stateContacts: sdpContactsValues.stateContacts,
                             }
 
@@ -322,7 +557,7 @@ export const SDPSubmissionForm = (): React.ReactElement => {
                                     },
                                 }
                             )
-                        } catch (_error) {
+                        } catch {
                             setPageErrorMessage(
                                 'There was a problem updating the SDP draft'
                             )
@@ -336,12 +571,9 @@ export const SDPSubmissionForm = (): React.ReactElement => {
                     onBack={() => {
                         setCurrentPage('SUBMISSIONS_CONTRACT_DETAILS')
                         navigate(
-                            generatePath(
-                                RoutesRecord.SUBMISSIONS_SDP_DETAILS,
-                                {
-                                    id: draftSDP?.id ?? id ?? 'new-draft',
-                                }
-                            ),
+                            generatePath(RoutesRecord.SUBMISSIONS_SDP_DETAILS, {
+                                id: draftSDP?.id ?? id ?? 'new-draft',
+                            }),
                             {
                                 state: {
                                     submissionDetailsValues,
@@ -371,9 +603,7 @@ export const SDPSubmissionForm = (): React.ReactElement => {
                                     sdpDetailsValues.sdpDocuments
                                 ),
                                 relatedContractIDs:
-                                    sdpDetailsValues.linkContractSelects.filter(
-                                        Boolean
-                                    ),
+                                    sdpDetailsValues.relatedContracts,
                                 stateContacts: values.stateContacts,
                             }
 
@@ -418,7 +648,7 @@ export const SDPSubmissionForm = (): React.ReactElement => {
                                     },
                                 }
                             )
-                        } catch (_error) {
+                        } catch {
                             setPageErrorMessage(
                                 'There was a problem updating the SDP draft'
                             )
@@ -457,7 +687,9 @@ export const SDPSubmissionForm = (): React.ReactElement => {
 
                             if (
                                 !submittedSDP?.id ||
-                                submittedSDP.status !== 'SUBMITTED'
+                                !['SUBMITTED', 'RESUBMITTED'].includes(
+                                    submittedSDP.status
+                                )
                             ) {
                                 setPageErrorMessage(
                                     'There was a problem submitting the SDP draft'
@@ -467,7 +699,7 @@ export const SDPSubmissionForm = (): React.ReactElement => {
 
                             navigate(RoutesRecord.DASHBOARD_SUBMISSIONS)
                             return true
-                        } catch (_error) {
+                        } catch {
                             setPageErrorMessage(
                                 'There was a problem submitting the SDP draft'
                             )
