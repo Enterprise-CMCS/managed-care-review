@@ -1,13 +1,16 @@
 export interface AppConfig {
     stage: string
+    awsRegion: string
 }
 
 export class AppConfigLoader {
     static load(): AppConfig {
         const stage = this.getStage()
+        const awsRegion = this.getRequiredEnv('AWS_REGION')
 
         return {
             stage,
+            awsRegion,
         }
     }
 
@@ -26,5 +29,13 @@ export class AppConfigLoader {
         throw new Error(
             'Stage must be provided via STAGE_NAME environment variable or --context stage=<stage>'
         )
+    }
+
+    private static getRequiredEnv(key: string): string {
+        const value = process.env[key]
+        if (!value) {
+            throw new Error(`${key} environment variable is required`)
+        }
+        return value
     }
 }
