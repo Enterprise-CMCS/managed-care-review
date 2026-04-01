@@ -353,8 +353,8 @@ importers:
         specifier: ^5.5.0
         version: 5.5.0(graphql@16.13.1)
       '@as-integrations/aws-lambda':
-        specifier: ^3.1.0
-        version: 3.1.0(@apollo/server@5.5.0(graphql@16.13.1))
+        specifier: ^4.0.1
+        version: 4.0.1(@apollo/server@5.5.0(graphql@16.13.1))
       '@aws-sdk/client-cognito-identity-provider':
         specifier: ^3.1021.0
         version: 3.1021.0
@@ -1362,11 +1362,11 @@ packages:
     peerDependencies:
       graphql: '*'
 
-  '@as-integrations/aws-lambda@3.1.0':
-    resolution: {integrity: sha512-V7H9ICXgt5KDKfEjYSRB59lEVfQqi7oSIZEeBGzPrmfhSPIHyFCNJyHi1hXdJmRb6GHpCNmtffmqRgsB0i9k3w==}
+  '@as-integrations/aws-lambda@4.0.1':
+    resolution: {integrity: sha512-1vpz2V6MhuPhO0m5vE8NUVR+4RoM5nDO/iH+IVHovE0aOWUIoDbAqQDKCUXTV8/nJO/GBycQt/z/Mp9MX79Hkg==}
     engines: {node: '>=16.0'}
     peerDependencies:
-      '@apollo/server': ^4.0.0
+      '@apollo/server': ^5.0.0
 
   '@asamuzakjp/css-color@4.1.2':
     resolution: {integrity: sha512-NfBUvBaYgKIuq6E/RBLY1m0IohzNHAYyaJGuTK79Z23uNwmz2jl1mPsC5ZxCCxylinKhT1Amn5oNTlx1wN8cQg==}
@@ -6365,8 +6365,8 @@ packages:
   '@types/aws-lambda@8.10.152':
     resolution: {integrity: sha512-soT/c2gYBnT5ygwiHPmd9a1bftj462NWVk2tKCc1PYHSIacB2UwbTS2zYG4jzag1mRDuzg/OjtxQjQ2NKRB6Rw==}
 
-  '@types/aws-lambda@8.10.159':
-    resolution: {integrity: sha512-SAP22WSGNN12OQ8PlCzGzRCZ7QDCwI85dQZbmpz7+mAk+L7j+wI7qnvmdKh+o7A5LaOp6QnOZ2NJphAZQTTHQg==}
+  '@types/aws-lambda@8.10.161':
+    resolution: {integrity: sha512-rUYdp+MQwSFocxIOcSsYSF3YYYC/uUpMbCY/mbO21vGqfrEYvNSoPyKYDj6RhXXpPfS0KstW9RwG3qXh9sL7FQ==}
 
   '@types/babel__core@7.20.5':
     resolution: {integrity: sha512-qoQprZvz5wQFJwMDqeseRXWv3rqMvhgpbXFfVyWhbx9X47POIA6i/+dXefEmZKoAgOaTdaIgNSMqMIU61yRyzA==}
@@ -7707,8 +7707,8 @@ packages:
   caniuse-lite@1.0.30001780:
     resolution: {integrity: sha512-llngX0E7nQci5BPJDqoZSbuZ5Bcs9F5db7EtgfwBerX9XGtkkiO4NwfDDIRzHTTwcYC8vC7bmeUEPGrKlR/TkQ==}
 
-  caniuse-lite@1.0.30001782:
-    resolution: {integrity: sha512-dZcaJLJeDMh4rELYFw1tvSn1bhZWYFOt468FcbHHxx/Z/dFidd1I6ciyFdi3iwfQCyOjqo9upF6lGQYtMiJWxw==}
+  caniuse-lite@1.0.30001784:
+    resolution: {integrity: sha512-WU346nBTklUV9YfUl60fqRbU5ZqyXlqvo1SgigE1OAXK5bFL8LL9q1K7aap3N739l4BvNqnkm3YrGHiY9sfUQw==}
 
   capital-case@1.0.4:
     resolution: {integrity: sha512-ds37W8CytHgwnhGGTi88pcPyR15qoNkOpYwmMMfnWqqWgESapLqvDx6huFjQ5vqWSn2Z06173XNA7LtMOeUh1A==}
@@ -13532,10 +13532,10 @@ snapshots:
       immutable: 5.1.5
       invariant: 2.2.4
 
-  '@as-integrations/aws-lambda@3.1.0(@apollo/server@5.5.0(graphql@16.13.1))':
+  '@as-integrations/aws-lambda@4.0.1(@apollo/server@5.5.0(graphql@16.13.1))':
     dependencies:
       '@apollo/server': 5.5.0(graphql@16.13.1)
-      '@types/aws-lambda': 8.10.152
+      '@types/aws-lambda': 8.10.161
 
   '@asamuzakjp/css-color@4.1.2':
     dependencies:
@@ -19257,7 +19257,7 @@ snapshots:
       '@octokit/core': 7.0.6
       '@octokit/oauth-authorization-url': 8.0.0
       '@octokit/oauth-methods': 6.0.2
-      '@types/aws-lambda': 8.10.159
+      '@types/aws-lambda': 8.10.161
       universal-user-agent: 7.0.3
 
   '@octokit/oauth-authorization-url@8.0.0': {}
@@ -20984,7 +20984,7 @@ snapshots:
 
   '@types/aws-lambda@8.10.152': {}
 
-  '@types/aws-lambda@8.10.159': {}
+  '@types/aws-lambda@8.10.161': {}
 
   '@types/babel__core@7.20.5':
     dependencies:
@@ -22504,7 +22504,7 @@ snapshots:
   browserslist@4.28.2:
     dependencies:
       baseline-browser-mapping: 2.10.13
-      caniuse-lite: 1.0.30001782
+      caniuse-lite: 1.0.30001784
       electron-to-chromium: 1.5.330
       node-releases: 2.0.36
       update-browserslist-db: 1.2.3(browserslist@4.28.2)
@@ -22666,7 +22666,7 @@ snapshots:
 
   caniuse-lite@1.0.30001780: {}
 
-  caniuse-lite@1.0.30001782: {}
+  caniuse-lite@1.0.30001784: {}
 
   capital-case@1.0.4:
     dependencies:
