@@ -1,6 +1,7 @@
 import React from 'react'
 import { gql, useMutation, useQuery } from '@apollo/client'
 import { generatePath, useLocation, useNavigate } from 'react-router-dom'
+import { typedStatePrograms } from '@mc-review/submissions'
 import {
     SDPSubmissionDetails,
     sdpSubmissionDetailsInitialValues,
@@ -29,10 +30,12 @@ import {
     formatForForm,
 } from '../../../formHelpers/formatters'
 import { RoutesRecord } from '@mc-review/constants'
-import { useRouteParams } from '../../../hooks'
+import { useMemoizedStateHeader, useRouteParams } from '../../../hooks'
 import { useS3 } from '../../../contexts/S3Context'
 import { Loading } from '../../../components'
 import { GenericErrorPage } from '../../Errors/GenericErrorPage'
+import { usePage } from '../../../contexts/PageContext'
+import { useAuth } from '../../../contexts/AuthContext'
 
 const CREATE_SDP_MUTATION = gql`
     mutation createSDPSubmissionDraft($input: CreateSDPInput!) {
@@ -79,6 +82,8 @@ const FETCH_SDP_EDIT_QUERY = gql`
             sdp {
                 id
                 status
+                stateCode
+                stateNumber
                 relatedContracts {
                     id
                 }
@@ -149,6 +154,8 @@ type SDPNavigationState = {
 export const SDPSubmissionForm = (): React.ReactElement => {
     const navigate = useNavigate()
     const location = useLocation()
+    const { updateHeading } = usePage()
+    const { loggedInUser } = useAuth()
     const { id } = useRouteParams()
     const { getKey } = useS3()
     const navigationState = location.state as SDPNavigationState | null
@@ -204,9 +211,36 @@ export const SDPSubmissionForm = (): React.ReactElement => {
                 sdpID: id ?? 'unknown-sdp',
             },
         },
-        skip: !shouldHydrateFromQuery,
+        skip: !id,
         fetchPolicy: 'cache-and-network',
     })
+    const fetchedSDP = data?.fetchSDP?.sdp
+    const stateCode =
+        loggedInUser?.__typename === 'StateUser'
+            ? loggedInUser.state.code
+            : fetchedSDP?.stateCode
+    const stateName =
+        loggedInUser?.__typename === 'StateUser'
+            ? loggedInUser.state.name
+            : typedStatePrograms.states.find(
+                  (state) => state.code === stateCode
+              )?.name
+    const submissionName =
+        fetchedSDP && fetchedSDP.stateCode
+            ? `MCR-${fetchedSDP.stateCode}-${String(
+                  fetchedSDP.stateNumber
+              ).padStart(4, '0')}-SDP`
+            : undefined
+    const stateHeader = useMemoizedStateHeader({
+        subHeaderText: submissionName,
+        stateCode,
+        stateName,
+        contractType: 'SDP',
+    })
+
+    React.useLayoutEffect(() => {
+        updateHeading({ customHeading: stateHeader })
+    }, [stateHeader, updateHeading])
 
     React.useEffect(() => {
         if (location.pathname.endsWith('/edit/submission-details')) {
@@ -237,7 +271,6 @@ export const SDPSubmissionForm = (): React.ReactElement => {
             return
         }
 
-        const fetchedSDP = data?.fetchSDP?.sdp
         const draftRevision = fetchedSDP?.draftRevision
 
         if (!fetchedSDP || !draftRevision) {
@@ -300,7 +333,7 @@ export const SDPSubmissionForm = (): React.ReactElement => {
             id: fetchedSDP.id,
             lastSeenUpdatedAt: draftRevision.updatedAt,
         })
-    }, [data, getKey, shouldHydrateFromQuery])
+    }, [fetchedSDP, getKey, shouldHydrateFromQuery])
 
     if (shouldHydrateFromQuery && loading && !data) {
         return <Loading />
