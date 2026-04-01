@@ -45,18 +45,22 @@ const rateColumns: {
     header: string
     accessor: (rate: FlattenRate) => React.ReactNode
 }[] = [
+    {
+        header: 'Rate Certification Name',
+        accessor: (r) => r.rateCertificationName ?? '-',
+    },
     { header: 'Rate ID', accessor: (r) => r.rateId },
-    { header: 'Rate State', accessor: (r) => r.rateStateCode },
-    { header: 'Rate State #', accessor: (r) => r.rateStateNumber },
-    { header: 'Parent Contract ID', accessor: (r) => r.parentContractID },
     { header: 'Rate Status', accessor: (r) => r.rateStatus },
     { header: 'Rate Review Status', accessor: (r) => r.rateReviewStatus },
     {
         header: 'Rate Consolidated Status',
         accessor: (r) => r.rateConsolidatedStatus,
     },
-    { header: 'Rate Created', accessor: (r) => formatDate(r.rateCreatedAt) },
     { header: 'Rate Updated', accessor: (r) => formatDate(r.rateUpdatedAt) },
+    { header: 'Rate Created', accessor: (r) => formatDate(r.rateCreatedAt) },
+    { header: 'Rate State', accessor: (r) => r.rateStateCode },
+    { header: 'Rate State #', accessor: (r) => r.rateStateNumber },
+    { header: 'Parent Contract ID', accessor: (r) => r.parentContractID },
     { header: 'Rate Revision ID', accessor: (r) => r.rateRevisionId },
     {
         header: 'Rate Revision Created',
@@ -145,10 +149,6 @@ const rateColumns: {
     {
         header: 'Rate Program IDs',
         accessor: (r) => r.rateProgramIDs?.join(', ') ?? '-',
-    },
-    {
-        header: 'Rate Certification Name',
-        accessor: (r) => r.rateCertificationName ?? '-',
     },
     {
         header: 'Certifying Actuaries',
@@ -260,7 +260,8 @@ const columns = [
     columnHelper.accessor((row) => row, {
         id: 'submissionID',
         header: 'Submission ID',
-        size: 155,
+        size: 200,
+        maxSize: 200,
         cell: ({ row, getValue }) => {
             const contract = getValue()
             return (
@@ -269,6 +270,9 @@ const columns = [
                         display: 'flex',
                         alignItems: 'center',
                         gap: '0.25rem',
+                        overflowWrap: 'break-word',
+                        wordBreak: 'break-all',
+                        minWidth: 0,
                     }}
                 >
                     {row.original.rateRevisions.length > 0 ? (
@@ -1244,66 +1248,52 @@ export const AdminSubmissionsTable = ({
                                     </tr>
                                     {isExpanded && rateRevisions.length > 0 && (
                                         <div className={virtualStyles.subRow}>
-                                            <div
-                                                style={{
-                                                    overflowX: 'auto',
-                                                    padding:
-                                                        '0.5rem 0 0.5rem 2rem',
-                                                }}
+                                            <table
+                                                className={
+                                                    virtualStyles.subTable
+                                                }
                                             >
-                                                <table
-                                                    className={
-                                                        virtualStyles.subTable
-                                                    }
-                                                >
-                                                    <thead>
-                                                        <tr>
-                                                            {rateColumns.map(
-                                                                (col) => (
-                                                                    <th
-                                                                        key={
-                                                                            col.header
-                                                                        }
-                                                                    >
-                                                                        {
-                                                                            col.header
-                                                                        }
-                                                                    </th>
-                                                                )
-                                                            )}
-                                                        </tr>
-                                                    </thead>
-                                                    <tbody>
-                                                        {rateRevisions.map(
-                                                            (
-                                                                rate: FlattenRate
-                                                            ) => (
-                                                                <tr
+                                                <thead>
+                                                    <tr>
+                                                        {rateColumns.map(
+                                                            (col) => (
+                                                                <th
                                                                     key={
-                                                                        rate.rateRevisionId
+                                                                        col.header
                                                                     }
                                                                 >
-                                                                    {rateColumns.map(
-                                                                        (
-                                                                            col
-                                                                        ) => (
-                                                                            <td
-                                                                                key={
-                                                                                    col.header
-                                                                                }
-                                                                            >
-                                                                                {col.accessor(
-                                                                                    rate
-                                                                                )}
-                                                                            </td>
-                                                                        )
-                                                                    )}
-                                                                </tr>
+                                                                    {col.header}
+                                                                </th>
                                                             )
                                                         )}
-                                                    </tbody>
-                                                </table>
-                                            </div>
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+                                                    {rateRevisions.map(
+                                                        (rate: FlattenRate) => (
+                                                            <tr
+                                                                key={
+                                                                    rate.rateRevisionId
+                                                                }
+                                                            >
+                                                                {rateColumns.map(
+                                                                    (col) => (
+                                                                        <td
+                                                                            key={
+                                                                                col.header
+                                                                            }
+                                                                        >
+                                                                            {col.accessor(
+                                                                                rate
+                                                                            )}
+                                                                        </td>
+                                                                    )
+                                                                )}
+                                                            </tr>
+                                                        )
+                                                    )}
+                                                </tbody>
+                                            </table>
                                         </div>
                                     )}
                                 </div>

@@ -266,11 +266,13 @@ const CMSUserRoutes = ({
                         path={'rate-reviews'}
                         element={<RateReviewsDashboard />}
                     />
+                </Route>
+                {isAdminUser && (
                     <Route
-                        path={'admin-submissions'}
+                        path={RoutesRecord.DASHBOARD_ADMIN_SUBMISSIONS}
                         element={<AdminSubmissionsDashboard />}
                     />
-                </Route>
+                )}
 
                 <Route element={<SubmissionSideNav />}>
                     <Route

@@ -1,6 +1,12 @@
 @use '../../../styles/custom.scss' as custom;
 @use '../../../styles/uswdsImports.scss' as uswds;
 
+.pageContainer {
+    max-width: 100%;
+    background-color: white;
+    padding: 0 32px;
+}
+
 .filterCount {
     font-weight: uswds.font-weight('bold');
     color: custom.$mcr-foundation-ink;
@@ -70,23 +76,25 @@
 .subRow {
     background-color: custom.$mcr-gray-lightest;
     border-bottom: 1px solid custom.$mcr-gray-lighter;
+    padding-left: 16px;
 }
 
 .subTable {
     border-collapse: collapse;
-    font-size: 0.8rem;
+    font-size: 0.85rem;
     width: max-content;
 
     th,
     td {
-        white-space: nowrap;
-        padding: 0.25rem 0.75rem;
-        border: 1px solid custom.$mcr-gray-lighter;
+        white-space: normal;
+        padding: 0.5rem 1rem;
+        border-bottom: 1px solid custom.$mcr-gray-lighter;
     }
 
     th {
         background-color: white;
         font-weight: 700;
+        border-bottom: 2px solid custom.$mcr-foundation-ink;
     }
 }
 

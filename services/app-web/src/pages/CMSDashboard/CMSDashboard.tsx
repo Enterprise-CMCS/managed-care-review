@@ -3,7 +3,7 @@ import React, { useEffect } from 'react'
 
 import styles from '../StateDashboard/StateDashboard.module.scss'
 
-import { Tabs, TabPanel } from '../../components'
+import { Tabs, TabPanel, NavLinkWithLogging } from '../../components'
 import { Outlet, useLocation } from 'react-router-dom'
 import { RoutesRecord } from '@mc-review/constants'
 import { usePage } from '../../contexts/PageContext'
@@ -15,12 +15,9 @@ const CMSDashboard = (): React.ReactElement => {
     const { loggedInUser } = useAuth()
     const isAdminUser = loggedInUser?.role === 'ADMIN_USER'
     const loadOnRateReviews = pathname === RoutesRecord.DASHBOARD_RATES
-    const loadOnAdminSubmissions =
-        pathname === RoutesRecord.DASHBOARD_ADMIN_SUBMISSIONS
     const TAB_NAMES = {
         RATES: 'Rate reviews',
         SUBMISSIONS: 'Submissions',
-        ADMIN_SUBMISSIONS: 'Admin',
     }
 
     const activeMainContentId = 'cmsDashboardMainContent'
@@ -42,18 +39,6 @@ const CMSDashboard = (): React.ReactElement => {
         >
             <Outlet />
         </TabPanel>,
-        ...(isAdminUser
-            ? [
-                  <TabPanel
-                      key="admin-submissions"
-                      id="admin-submissions"
-                      nestedRoute={RoutesRecord.DASHBOARD_ADMIN_SUBMISSIONS}
-                      tabName={TAB_NAMES.ADMIN_SUBMISSIONS}
-                  >
-                      <Outlet />
-                  </TabPanel>,
-              ]
-            : []),
     ]
 
     // Set the active main content to focus when click the Skip to main content button.
@@ -71,14 +56,19 @@ const CMSDashboard = (): React.ReactElement => {
                 <section className={styles.panel}>
                     <div className={styles.panelHeader}>
                         <h2>Submissions and rate reviews</h2>
+                        {isAdminUser && (
+                            <NavLinkWithLogging
+                                to={RoutesRecord.DASHBOARD_ADMIN_SUBMISSIONS}
+                            >
+                                Admin submissions
+                            </NavLinkWithLogging>
+                        )}
                     </div>
                     <Tabs
                         defaultActiveTab={
                             loadOnRateReviews
                                 ? TAB_NAMES.RATES
-                                : loadOnAdminSubmissions
-                                  ? TAB_NAMES.ADMIN_SUBMISSIONS
-                                  : TAB_NAMES.SUBMISSIONS
+                                : TAB_NAMES.SUBMISSIONS
                         }
                         className={styles.tabs}
                         children={tabPanels}

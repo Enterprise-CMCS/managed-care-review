@@ -135,7 +135,6 @@ const RoutesRecord: Record<RouteT, string> = {
 const DASHBOARD_ROUTES: RouteTWithUnknown[] = [
     'DASHBOARD_RATES',
     'DASHBOARD_SUBMISSIONS',
-    'DASHBOARD_ADMIN_SUBMISSIONS',
 ]
 
 const STATE_SUBMISSION_FORM_ROUTES: RouteTWithUnknown[] = [
