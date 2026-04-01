@@ -276,32 +276,36 @@ export const SDPReviewSubmit = ({
                             id="sdpRelatedContracts"
                             label="Related contracts"
                         >
-                            {relatedContracts.length > 0
-                                ? relatedContracts.map((contract) => (
-                                      <div key={contract.id}>
-                                          <NavLinkWithLogging
-                                              to={getSubmissionPath(
-                                                  'SUBMISSIONS_SUMMARY',
-                                                  contract.contractSubmissionType,
-                                                  contract.id
-                                              )}
-                                          >
-                                              {getRelatedContractName({
-                                                  contractName:
-                                                      contract
-                                                          .latestSubmittedRevision
-                                                          ?.contractName ??
-                                                      contract.draftRevision
-                                                          ?.contractName,
-                                                  stateCode:
-                                                      contract.state.code,
-                                                  stateNumber:
-                                                      contract.stateNumber,
-                                              })}
-                                          </NavLinkWithLogging>
-                                      </div>
-                                  ))
-                                : 'No related contracts added'}
+                            {relatedContracts.length > 0 ? (
+                                <div>
+                                    {relatedContracts.map((contract) => (
+                                        <div key={contract.id}>
+                                            <NavLinkWithLogging
+                                                to={getSubmissionPath(
+                                                    'SUBMISSIONS_SUMMARY',
+                                                    contract.contractSubmissionType,
+                                                    contract.id
+                                                )}
+                                            >
+                                                {getRelatedContractName({
+                                                    contractName:
+                                                        contract
+                                                            .latestSubmittedRevision
+                                                            ?.contractName ??
+                                                        contract.draftRevision
+                                                            ?.contractName,
+                                                    stateCode:
+                                                        contract.state.code,
+                                                    stateNumber:
+                                                        contract.stateNumber,
+                                                })}
+                                            </NavLinkWithLogging>
+                                        </div>
+                                    ))}
+                                </div>
+                            ) : (
+                                'No related contracts added'
+                            )}
                         </DataDetail>
                     </dl>
                     <UploadedDocumentsTable

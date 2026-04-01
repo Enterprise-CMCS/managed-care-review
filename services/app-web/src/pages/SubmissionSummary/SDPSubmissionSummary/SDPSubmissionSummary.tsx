@@ -491,16 +491,20 @@ export const SDPSubmissionSummary = (): React.ReactElement => {
                             id="sdp-summary-related-contracts"
                             label="Related contracts"
                         >
-                            {sdp.relatedContracts.length > 0
-                                ? sdp.relatedContracts.map(
-                                      (contract: { id: string }) => (
-                                          <LinkedContractSummaryLink
-                                              key={contract.id}
-                                              contractID={contract.id}
-                                          />
-                                      )
-                                  )
-                                : 'No related contracts added'}
+                            {sdp.relatedContracts.length > 0 ? (
+                                <div>
+                                    {sdp.relatedContracts.map(
+                                        (contract: { id: string }) => (
+                                            <LinkedContractSummaryLink
+                                                key={contract.id}
+                                                contractID={contract.id}
+                                            />
+                                        )
+                                    )}
+                                </div>
+                            ) : (
+                                'No related contracts added'
+                            )}
                         </DataDetail>
                     </dl>
                     <UploadedDocumentsTable
