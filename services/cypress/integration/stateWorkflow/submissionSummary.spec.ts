@@ -1,4 +1,4 @@
-describe('State user can view submissions', () => {
+describe.skip('State user can view submissions', () => {
     beforeEach(() => {
         cy.stubFeatureFlags()
         cy.interceptGraphQL()

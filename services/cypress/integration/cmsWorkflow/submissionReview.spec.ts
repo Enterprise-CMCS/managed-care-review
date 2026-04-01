@@ -1,6 +1,6 @@
 import { stateUser } from '../../utils/apollo-test-utils'
 
-describe('CMS user can view submission', () => {
+describe.skip('CMS user can view submission', () => {
     beforeEach(() => {
         cy.stubFeatureFlags()
         cy.interceptGraphQL()

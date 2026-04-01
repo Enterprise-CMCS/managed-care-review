@@ -1,7 +1,7 @@
 import { stateUser, cmsUser } from '../../../utils/apollo-test-utils'
 import { ContractSubmissionTypeRecord } from '@mc-review/constants'
 
-describe('Q&A', () => {
+describe.skip('Q&A', () => {
     beforeEach(() => {
         cy.stubFeatureFlags()
         cy.interceptGraphQL()

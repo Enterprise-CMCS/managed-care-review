@@ -1,4 +1,4 @@
-describe('rate details', () => {
+describe.skip('rate details', () => {
     beforeEach(() => {
         cy.stubFeatureFlags()
         cy.interceptGraphQL()

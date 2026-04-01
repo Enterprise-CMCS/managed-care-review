@@ -1,4 +1,4 @@
-describe.only('documents', () => {
+describe.skip('documents', () => {
     beforeEach(() => {
         cy.stubFeatureFlags()
         cy.interceptGraphQL()

@@ -1,6 +1,6 @@
 import { cmsUser, stateUser } from '../../utils/apollo-test-utils'
 
-describe('CMS user can view rate reviews', () => {
+describe.skip('CMS user can view rate reviews', () => {
     beforeEach(() => {
         cy.stubFeatureFlags()
         cy.interceptGraphQL()

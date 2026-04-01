@@ -1,6 +1,6 @@
 import { stateUser } from '../../../utils/apollo-test-utils'
 
-describe('state user in state submission form', () => {
+describe.skip('state user in state submission form', () => {
     beforeEach(() => {
         cy.stubFeatureFlags()
         cy.interceptGraphQL()

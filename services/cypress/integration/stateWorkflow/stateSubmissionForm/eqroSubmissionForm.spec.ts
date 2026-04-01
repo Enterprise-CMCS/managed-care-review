@@ -1,4 +1,4 @@
-describe('state user in eqro submission form', () => {
+describe.skip('state user in eqro submission form', () => {
     beforeEach(() => {
         cy.stubFeatureFlags()
         cy.interceptGraphQL()

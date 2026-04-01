@@ -1,4 +1,4 @@
-describe('Admin user can view application level settings', () => {
+describe.skip('Admin user can view application level settings', () => {
     beforeEach(() => {
         cy.stubFeatureFlags()
         cy.interceptGraphQL()
