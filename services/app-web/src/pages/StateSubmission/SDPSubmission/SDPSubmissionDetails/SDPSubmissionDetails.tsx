@@ -115,9 +115,7 @@ const formatCurrencyOnBlur = (value: string): string => {
 
 type SDPSubmissionDetailsProps = {
     initialValues?: SDPSubmissionDetailsFormValues
-    onContinue: (
-        values: SDPSubmissionDetailsFormValues
-    ) => void | Promise<void>
+    onContinue: (values: SDPSubmissionDetailsFormValues) => void | Promise<void>
     pageErrorMessage?: string | boolean
 }
 
@@ -353,6 +351,7 @@ export const SDPSubmissionDetails = ({
                                         </span>
                                         <CustomDateRangePicker
                                             startDateLabel="Start date"
+                                            startDateHint="mm/dd/yyyy"
                                             startDatePickerProps={{
                                                 id: 'ratingPeriodStart',
                                                 name: 'ratingPeriodStart',
@@ -366,6 +365,7 @@ export const SDPSubmissionDetails = ({
                                                     ),
                                             }}
                                             endDateLabel="End date"
+                                            endDateHint="mm/dd/yyyy"
                                             endDatePickerProps={{
                                                 id: 'ratingPeriodEnd',
                                                 name: 'ratingPeriodEnd',
