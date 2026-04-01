@@ -19,7 +19,7 @@
     "devDependencies": {
         "@luckycatfactory/esbuild-graphql-loader": "^3.8.1",
         "@types/jest": "^30.0.0",
-        "@types/node": "25.3.2",
+        "@types/node": "25.5.0",
         "@typescript-eslint/eslint-plugin": "^8.56.1",
         "@typescript-eslint/parser": "^8.29.1",
         "aws-cdk": "2.1107.0",
@@ -39,8 +39,8 @@
         "typescript-eslint": "^8.56.0"
     },
     "dependencies": {
-        "@aws-sdk/client-secrets-manager": "^3.1017.0",
-        "@aws-solutions-constructs/aws-apigateway-lambda": "2.99.0",
+        "@aws-sdk/client-secrets-manager": "^3.1020.0",
+        "@aws-solutions-constructs/aws-apigateway-lambda": "2.100.1",
         "@aws-solutions-constructs/aws-cloudfront-s3": "2.94.0",
         "@aws-solutions-constructs/aws-cognito-apigateway-lambda": "2.92.1",
         "@aws-solutions-constructs/aws-eventbridge-lambda": "2.92.1",

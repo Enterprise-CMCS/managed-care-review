@@ -98,18 +98,20 @@
 
 .rateName {
     display: block;
-    font-weight: 400;
-    font-size: 28px;
     margin: 0;
     border-bottom: 1px solid custom.$mcr-gray-lighter;
     padding-bottom: uswds.units(2);
     line-height: 2rem;
+
+    a {
+        font-size: inherit;
+        font-weight: inherit;
+        line-height: inherit;
+    }
 }
 
 .rateNameWithdrawn {
     display: block;
-    font-weight: 400;
-    font-size: 28px;
     margin: 0;
     padding-top: uswds.units(1);
     padding-bottom: uswds.units(2);
@@ -149,6 +151,10 @@
         margin: 0;
         line-height: 1.5;
     }
+}
+
+.tagSpacing {
+    margin-right: uswds.units(0.5) !important;
 }
 
 .singleColumnGrid {

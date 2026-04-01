@@ -17,7 +17,10 @@ import { LinkWithLogging } from '../TealiumLogging'
 import { getUpdatedByDisplayName } from '@mc-review/helpers'
 import { useTealium } from '../../hooks'
 import { formatToPacificTime } from '@mc-review/dates'
-import { ContractSubmissionTypeRecord } from '@mc-review/constants'
+import {
+    ContractSubmissionTypeRecord,
+    ReviewDecisionRecord,
+} from '@mc-review/constants'
 import { eqroValidationAndReviewDetermination } from '@mc-review/submissions'
 
 type ChangeHistoryProps = {
@@ -84,7 +87,9 @@ const buildChangeHistoryInfo = (
                             <span className={styles.tag}>Status: </span>
                             <span>
                                 {isNotSubjectToReview
-                                    ? 'Not subject to review'
+                                    ? ReviewDecisionRecord[
+                                          'NOT_SUBJECT_TO_REVIEW'
+                                      ]
                                     : 'Submitted'}
                             </span>
                         </div>
@@ -94,8 +99,10 @@ const buildChangeHistoryInfo = (
                             </span>
                             <span>
                                 {isNotSubjectToReview
-                                    ? 'Not subject to review'
-                                    : 'Subject to review'}
+                                    ? ReviewDecisionRecord[
+                                          'NOT_SUBJECT_TO_REVIEW'
+                                      ]
+                                    : ReviewDecisionRecord['UNDER_REVIEW']}
                             </span>
                         </div>
                     </>
@@ -133,7 +140,9 @@ const buildChangeHistoryInfo = (
                             <span className={styles.tag}>Status: </span>
                             <span>
                                 {isNotSubjectToReview
-                                    ? 'Not subject to review'
+                                    ? ReviewDecisionRecord[
+                                          'NOT_SUBJECT_TO_REVIEW'
+                                      ]
                                     : 'Submitted'}
                             </span>
                         </div>
@@ -143,8 +152,10 @@ const buildChangeHistoryInfo = (
                             </span>
                             <span>
                                 {isNotSubjectToReview
-                                    ? 'Not subject to review'
-                                    : 'Subject to review'}
+                                    ? ReviewDecisionRecord[
+                                          'NOT_SUBJECT_TO_REVIEW'
+                                      ]
+                                    : ReviewDecisionRecord['UNDER_REVIEW']}
                             </span>
                         </div>
                     </>
@@ -345,7 +356,7 @@ export const ChangeHistory = ({
             // Display this code if this is the initial contract. We only want to display the link of the initial contract
             // only if there has been subsequent contracts. We do not want to display a link if the package initial
             // contract was unlocked, but has not been resubmitted yet.
-            headingLevel: 'h4',
+            headingLevel: 'h5',
             content,
             expanded: false,
             handleToggle: () => {
@@ -364,6 +375,7 @@ export const ChangeHistory = ({
                 header="Change history"
                 hideBorderBottom
                 hideBorderTop
+                headingLevel="h2"
             />
             <Accordion items={revisedItems} multiselectable />
         </section>

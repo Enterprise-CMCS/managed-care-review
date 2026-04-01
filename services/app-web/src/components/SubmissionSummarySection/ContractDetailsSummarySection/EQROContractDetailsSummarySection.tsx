@@ -97,7 +97,7 @@ export const EQROContractDetailsSummarySection = ({
                 header="Contract details"
                 editNavigateTo={editNavigateTo}
                 hideBorderTop
-                fontSize="38px"
+                headingLevel='h2'
             />
             <dl>
                 <MultiColumnGrid columns={2}>
@@ -120,7 +120,9 @@ export const EQROContractDetailsSummarySection = ({
                 type={'CONTRACT'}
                 documentZipPackages={documentZipPackage}
                 documentCount={contractDocumentCount}
-                onDocumentError={onDocumentError}
+                onDocumentError={onDocumentError}               
+                headingLevel='h3'
+                removeTopBorder
                 renderZipLink={
                     !!(
                         isSubmittedOrCMSUser &&

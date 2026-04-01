@@ -36,6 +36,8 @@ import {
     StatutoryRegulatoryAttestation,
     StatutoryRegulatoryAttestationQuestion,
 } from '@mc-review/constants'
+import { SectionHeader } from '../../SectionHeader'
+import { NewTag } from '../../InfoTag'
 
 type SummaryDetailProps = {
     contractFormData: ContractFormData
@@ -151,20 +153,23 @@ export const ContractProgramsSummary = ({
 export const ReviewDecision = ({
     subjectToReview,
     label,
+    newDetermination,
 }: {
     subjectToReview: boolean
     label?: string
+    newDetermination?: boolean
 }) => {
+    const renderReviewDetermination = subjectToReview
+        ? 'Subject to formal review and approval'
+        : 'Not subject to formal review and approval'
+
     return (
-        <DataDetail
-            id="reviewDecision"
-            label={label ?? 'Review decision'}
-            children={
-                subjectToReview
-                    ? 'Subject to formal review and approval'
-                    : 'Not subject to formal review and approval'
-            }
-        />
+        <DataDetail id="reviewDecision" label={label ?? 'Review decision'}>
+            <span>
+                {newDetermination && <NewTag className={styles.tagSpacing} />}
+                {renderReviewDetermination}
+            </span>
+        </DataDetail>
     )
 }
 
@@ -532,37 +537,44 @@ export const EQROModifiedProvisionSummary = ({
     }
 
     return (
-        <Grid row gap className={styles.singleColumnGrid}>
-            <DataDetail
-                id="includesProvisions"
-                label="This contract action includes new or modified provisions related to the following"
-                explainMissingData={explainMissingData}
-            >
-                {isValidEQROProvisions ? (
-                    <DataDetailCheckboxList
-                        list={includedProvisions}
-                        dict={provisionDictionary}
-                        displayEmptyList
-                    />
-                ) : (
-                    <DataDetailMissingField />
-                )}
-            </DataDetail>
-            <DataDetail
-                id="excludesProvisions"
-                label="This contract action does NOT include new or modified provisions related to the following"
-                explainMissingData={explainMissingData}
-            >
-                {isValidEQROProvisions ? (
-                    <DataDetailCheckboxList
-                        list={excludedProvisions}
-                        dict={provisionDictionary}
-                        displayEmptyList
-                    />
-                ) : (
-                    <DataDetailMissingField />
-                )}
-            </DataDetail>
-        </Grid>
+        <>
+            <SectionHeader
+                header="Provisions"
+                hideBorderTop
+                headingLevel="h3"
+            />
+            <Grid row gap className={styles.singleColumnGrid}>
+                <DataDetail
+                    id="includesProvisions"
+                    label="This contract action includes new or modified provisions related to the following"
+                    explainMissingData={explainMissingData}
+                >
+                    {isValidEQROProvisions ? (
+                        <DataDetailCheckboxList
+                            list={includedProvisions}
+                            dict={provisionDictionary}
+                            displayEmptyList
+                        />
+                    ) : (
+                        <DataDetailMissingField />
+                    )}
+                </DataDetail>
+                <DataDetail
+                    id="excludesProvisions"
+                    label="This contract action does NOT include new or modified provisions related to the following"
+                    explainMissingData={explainMissingData}
+                >
+                    {isValidEQROProvisions ? (
+                        <DataDetailCheckboxList
+                            list={excludedProvisions}
+                            dict={provisionDictionary}
+                            displayEmptyList
+                        />
+                    ) : (
+                        <DataDetailMissingField />
+                    )}
+                </DataDetail>
+            </Grid>
+        </>
     )
 }

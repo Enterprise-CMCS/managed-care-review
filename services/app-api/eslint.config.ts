@@ -12,7 +12,6 @@ export default tseslint.config([
             '**/esbuild.config.js',
             '.esbuild/**',
             '.local-build/**',
-            'protoMigrations/gen/**',
             '.serverless/**',
             'coverage/**',
         ],
