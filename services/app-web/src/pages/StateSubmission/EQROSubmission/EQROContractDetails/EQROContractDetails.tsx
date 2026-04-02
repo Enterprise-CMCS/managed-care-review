@@ -910,12 +910,6 @@ export const EQROContractDetails = ({
                                                 }
                                             )
                                         }}
-                                        continueOnClick={() => {
-                                            // Trigger validation and submit (which saves and navigates)
-                                            setShouldValidate(true)
-                                            setFocusErrorSummaryHeading(true)
-                                            handleSubmit() // ← This triggers Formik's onSubmit, which calls handleFormSubmit with type: 'CONTINUE'
-                                        }}
                                         saveAsDraftOnClick={async () => {
                                             await handleFormSubmit(
                                                 values,
