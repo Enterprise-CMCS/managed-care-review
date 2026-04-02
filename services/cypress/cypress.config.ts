@@ -4,6 +4,8 @@ const fs = require('fs')
 const path = require('path')
 const createBundler = require('@bahmutov/cypress-esbuild-preprocessor')
 
+const isLocal = process.env.VITE_APP_AUTH_MODE
+
 module.exports = defineConfig({
     e2e: {
         baseUrl: 'http://127.0.0.1:3000',
@@ -98,5 +100,6 @@ module.exports = defineConfig({
         openMode: 0,
     },
     experimentalMemoryManagement: true,
-    numTestsKeptInMemory: 20,
+    //Number to test logs to save in Cypress. Locally set to 1 to prevent crashing.
+    numTestsKeptInMemory: isLocal ? 1 : 20,
 })
