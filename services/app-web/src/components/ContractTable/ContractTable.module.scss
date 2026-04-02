@@ -26,8 +26,41 @@
     }
 }
 
+.table {
+    thead th,
+    tbody th,
+    tbody td {
+        padding-top: uswds.units(2);
+        padding-bottom: uswds.units(2);
+        vertical-align: top;
+    }
+
+    tbody th,
+    tbody td {
+        border-bottom-color: custom.$mcr-gray-lighter;
+    }
+
+    thead tr > :first-child,
+    tbody tr > :first-child {
+        padding-left: 0;
+    }
+
+    thead tr > :last-child,
+    tbody tr > :last-child {
+        padding-right: 0;
+    }
+}
+
 .ID {
     word-break: break-all;
+}
+
+.columnID {
+    min-width: 90px;
+}
+
+.programsColumn {
+    max-width: 143px;
 }
 
 .programTag {
