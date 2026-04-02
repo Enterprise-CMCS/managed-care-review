@@ -4,7 +4,7 @@ import {
     SubmissionUnlockedBanner,
     UnlockedProps,
 } from './SubmissionUnlockedBanner'
-import { mockValidStateUser } from '@mc-review/mocks'
+import { mockValidCMSUser, mockValidStateUser } from '@mc-review/mocks'
 
 export default {
     title: 'Components/Banner/SubmissionUnlockedBanner',
@@ -17,7 +17,7 @@ const Template: StoryFn<UnlockedProps> = (args) => (
 
 export const SubmissionUnlockedBannerCMSUser = Template.bind({})
 SubmissionUnlockedBannerCMSUser.args = {
-    loggedInUser: mockValidStateUser(),
+    loggedInUser: mockValidCMSUser(),
     unlockedInfo: {
         updatedAt: new Date(),
         updatedReason:
@@ -41,7 +41,7 @@ SubmissionUnlockedBannerStateUser.args = {
 
         updatedBy: {
             email: 'Loremipsum@email.com',
-            role: 'CMS_USER',
+            role: 'STATE_USER',
             givenName: 'Bob',
             familyName: 'Vila',
         },
