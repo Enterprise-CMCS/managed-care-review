@@ -56,6 +56,7 @@ export class Postgres extends BaseStack {
 
     private readonly vpc: IVpc
     private readonly applicationSecurityGroup: ISecurityGroup
+    private readonly devSecurityGroup?: ISecurityGroup
 
     constructor(scope: Construct, id: string, props: PostgresProps) {
         super(scope, id, {
@@ -69,6 +70,8 @@ export class Postgres extends BaseStack {
             vpcId: process.env.VPC_ID!,
         })
 
+        const isReview = isReviewEnvironment(this.stage)
+
         // Import security group from Network stack CloudFormation exports
         const networkStackName = `network-${this.stage}-cdk`
         this.applicationSecurityGroup = SecurityGroup.fromSecurityGroupId(
@@ -77,7 +80,14 @@ export class Postgres extends BaseStack {
             Fn.importValue(`${networkStackName}-ApplicationSecurityGroupId`)
         )
 
-        const isReview = isReviewEnvironment(this.stage)
+        // Review environments need DEV security group to access shared DEV Aurora database
+        if (isReview) {
+            this.devSecurityGroup = SecurityGroup.fromSecurityGroupId(
+                this,
+                'ImportedDevSG',
+                Fn.importValue('network-dev-cdk-ApplicationSecurityGroupId')
+            )
+        }
 
         // Create VPC endpoint for Secrets Manager (needed by Lambda functions)
         this.vpcEndpoint = this.createSecretsManagerVpcEndpoint()
@@ -125,6 +135,12 @@ export class Postgres extends BaseStack {
      * Create VPC endpoint for Secrets Manager (required by Lambda functions)
      */
     private createSecretsManagerVpcEndpoint(): InterfaceVpcEndpoint {
+        // Use same security groups as Lambda for consistent access
+        const securityGroups = [this.applicationSecurityGroup]
+        if (this.devSecurityGroup) {
+            securityGroups.push(this.devSecurityGroup)
+        }
+
         return new InterfaceVpcEndpoint(this, 'SecretsManagerVPCEndpoint', {
             vpc: this.vpc,
             service: new InterfaceVpcEndpointService(
@@ -133,7 +149,7 @@ export class Postgres extends BaseStack {
             subnets: {
                 subnetType: SubnetType.PRIVATE_WITH_EGRESS,
             },
-            securityGroups: [this.applicationSecurityGroup],
+            securityGroups,
         })
     }
 
@@ -176,7 +192,12 @@ export class Postgres extends BaseStack {
      * Create logical database manager Lambda function
      */
     private createLogicalDbManagerLambda(): NodejsFunction {
+        // Review environments need both their own SG and DEV SG to access shared DEV Aurora
+        // Dev/val/prod only need their own SG to access their dedicated Aurora cluster
         const securityGroups = [this.applicationSecurityGroup]
+        if (this.devSecurityGroup) {
+            securityGroups.push(this.devSecurityGroup)
+        }
 
         // Use NodejsFunction to bundle the TypeScript code from postgres service
         const dbManagerFunction = new NodejsFunction(
