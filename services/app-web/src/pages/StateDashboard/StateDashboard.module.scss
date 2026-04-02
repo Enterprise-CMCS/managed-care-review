@@ -34,8 +34,14 @@
     }
 }
 
-.stateDashboard .panelHeader {
-    padding-bottom: 0;
+.stateDashboard {
+    h1 {
+        margin-top: 32px;
+        margin-bottom: 32px;
+    }
+    .panelHeader {
+        padding-bottom: 0;
+    }
 }
 
 .filterCount {

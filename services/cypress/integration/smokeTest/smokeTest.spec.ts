@@ -9,7 +9,7 @@ describe('smoke test', () => {
             'eq',
             '/dashboard/submissions'
         )
-        cy.findByRole('heading', { level: 1, name: /Submissions dashboard/ })
+        cy.findByRole('heading', { level: 1, name: /Dashboard/ })
     })
 
     it('can log in as a CMS user', () => {
