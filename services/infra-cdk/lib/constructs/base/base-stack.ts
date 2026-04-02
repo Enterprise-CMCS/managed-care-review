@@ -82,29 +82,4 @@ export abstract class BaseStack extends Stack {
     protected exportName(resourceName: string): string {
         return `${this.stackName}-${resourceName}`
     }
-
-    /**
-     * Generate a resource name following naming conventions
-     */
-    protected resourceName(resourceType: string): string {
-        return ResourceNames.resourceName(
-            this.serviceName,
-            resourceType,
-            this.stage
-        )
-    }
-
-    /**
-     * Check if the stack is in production
-     */
-    protected get isProduction(): boolean {
-        return this.stage === 'prod'
-    }
-
-    /**
-     * Check if the stack is in development
-     */
-    protected get isDevelopment(): boolean {
-        return this.stage === 'dev'
-    }
 }

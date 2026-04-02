@@ -13,8 +13,6 @@ import {
     type AddToResourcePolicyResult,
     AnyPrincipal,
     Effect,
-    type Grant,
-    type IGrantable,
     PolicyStatement,
 } from 'aws-cdk-lib/aws-iam'
 import type { IKey } from 'aws-cdk-lib/aws-kms'
@@ -44,11 +42,9 @@ export interface SecureS3BucketProps {
  */
 export class SecureS3Bucket extends Construct {
     public readonly bucket: Bucket
-    private readonly props: SecureS3BucketProps
 
     constructor(scope: Construct, id: string, props: SecureS3BucketProps) {
         super(scope, id)
-        this.props = props
 
         // Create the bucket with security best practices
         this.bucket = new Bucket(this, 'Bucket', {
@@ -133,41 +129,6 @@ export class SecureS3Bucket extends Construct {
     private applyCdkNagSuppressions(): void {
         // CDK Nag suppressions temporarily disabled
         // Will be re-enabled once synthesis is working
-    }
-
-    /**
-     * Grant read access to the bucket
-     */
-    public grantRead(identity: IGrantable): Grant {
-        return this.bucket.grantRead(identity)
-    }
-
-    /**
-     * Grant write access to the bucket
-     */
-    public grantWrite(identity: IGrantable): Grant {
-        return this.bucket.grantWrite(identity)
-    }
-
-    /**
-     * Grant read/write access to the bucket
-     */
-    public grantReadWrite(identity: IGrantable): Grant {
-        return this.bucket.grantReadWrite(identity)
-    }
-
-    /**
-     * Grant put access to the bucket
-     */
-    public grantPut(identity: IGrantable): Grant {
-        return this.bucket.grantPut(identity)
-    }
-
-    /**
-     * Grant delete access to the bucket
-     */
-    public grantDelete(identity: IGrantable): Grant {
-        return this.bucket.grantDelete(identity)
     }
 
     /**
