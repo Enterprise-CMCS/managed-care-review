@@ -12,6 +12,8 @@ fragment cmsUserFragment on CMSUser {
             name
             fullName
             isRateProgram
+            isDeprecated
+            deprecatedByProgramId
         }
     }
     divisionAssignment
@@ -31,6 +33,8 @@ fragment cmsApproverUserFragment on CMSApproverUser {
             name
             fullName
             isRateProgram
+            isDeprecated
+            deprecatedByProgramId
         }
     }
     divisionAssignment
@@ -50,6 +54,8 @@ fragment stateUserFragment on StateUser {
             name
             fullName
             isRateProgram
+            isDeprecated
+            deprecatedByProgramId
         }
     }
 }

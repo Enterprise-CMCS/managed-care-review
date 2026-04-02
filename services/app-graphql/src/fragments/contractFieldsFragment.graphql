@@ -33,6 +33,8 @@ fragment contractFieldsFragment on Contract {
             name
             fullName
             isRateProgram
+            isDeprecated
+            deprecatedByProgramId
         }
     }
 

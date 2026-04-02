@@ -341,6 +341,7 @@ describe('findContractPrograms', () => {
                 name: 'CHIP',
                 fullName: 'MN CHIP',
                 isRateProgram: false,
+                isDeprecated: false,
             },
         ]
 
@@ -357,6 +358,7 @@ describe('findContractPrograms', () => {
                 name: 'CHIP',
                 fullName: 'MN CHIP',
                 isRateProgram: false,
+                isDeprecated: false,
             },
         ]
 
@@ -367,6 +369,24 @@ describe('findContractPrograms', () => {
         expect(result.message).toContain(
             "Can't find programs abbdf9b0-c49e-4c4c-bb6f-040cb7b51cce from state MN"
         )
+    })
+
+    test('returns deprecated programs for historical contract references', async () => {
+        const sub = mockContractRev()
+        const statePrograms: [ProgramType] = [
+            {
+                id: 'abbdf9b0-c49e-4c4c-bb6f-040cb7b51cce',
+                name: 'CHIP',
+                fullName: 'MN CHIP',
+                isRateProgram: false,
+                isDeprecated: true,
+                deprecatedByProgramId: 'replacement-program-id',
+            },
+        ]
+
+        const programs = findContractPrograms(sub, statePrograms)
+
+        expect(programs).toEqual(statePrograms)
     })
 })
 

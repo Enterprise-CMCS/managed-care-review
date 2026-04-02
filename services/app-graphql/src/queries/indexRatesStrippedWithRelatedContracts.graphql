@@ -19,6 +19,8 @@ query indexRatesStrippedWithRelatedContracts($input: IndexRatesInput) {
                         name
                         fullName
                         isRateProgram
+                        isDeprecated
+                        deprecatedByProgramId
                     }
                 }
                 stateNumber
