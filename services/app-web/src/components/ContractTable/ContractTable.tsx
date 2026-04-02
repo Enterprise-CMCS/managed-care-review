@@ -63,6 +63,7 @@ export type ContractTableProps = {
     user: User
     showFilters?: boolean
     caption?: string
+    filterCountClassName?: string
 }
 
 function submissionURL(
@@ -275,6 +276,7 @@ export const ContractTable = ({
     tableData,
     user,
     showFilters = false,
+    filterCountClassName,
 }: ContractTableProps): React.ReactElement => {
     const ldClient = useLDClient()
     const tableConfig = {
@@ -711,11 +713,15 @@ export const ContractTable = ({
                     )}
                     <div aria-live="polite" aria-atomic>
                         {showFilters && (
-                            <div className={styles.filterCount}>
+                            <div
+                                className={`${styles.filterCount}${filterCountClassName ? ` ${filterCountClassName}` : ''}`}
+                            >
                                 {filtersApplied}
                             </div>
                         )}
-                        <div className={styles.filterCount}>
+                        <div
+                            className={`${styles.filterCount}${filterCountClassName ? ` ${filterCountClassName}` : ''}`}
+                        >
                             {submissionCount}
                         </div>
                     </div>

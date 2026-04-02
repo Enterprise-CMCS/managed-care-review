@@ -61,11 +61,15 @@ describe('CMSDashboard', () => {
 
                 expect(screen.getByTestId('tabs')).toBeInTheDocument()
                 expect(
-                    screen.getByRole('heading', { name: 'Rate reviews' })
+                    screen.getByRole('tab', { name: 'Rate reviews' })
                 ).toBeInTheDocument()
                 expect(
-                    screen.getByRole('heading', { name: 'Submissions' })
+                    screen.getByRole('tab', { name: 'Submissions' })
                 ).toBeInTheDocument()
+                expect(screen.getByRole('tabpanel')).toHaveAttribute(
+                    'data-tabname',
+                    'Rate reviews'
+                )
             })
 
             describe(`Tests submissions tab`, () => {
@@ -88,6 +92,9 @@ describe('CMSDashboard', () => {
                     expect(
                         screen.findByTestId('cms-dashboard-page')
                     ).not.toBeNull()
+                    expect(
+                        await screen.findByTestId('cms-submissions-heading')
+                    ).toHaveTextContent('Submissions')
                 })
 
                 it('displays submissions table excluding any in progress drafts', async () => {

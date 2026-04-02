@@ -1,0 +1,5 @@
+@use '../../../styles/uswdsImports.scss' as uswds;
+
+.submissionsHeading {
+    padding-bottom: uswds.units(3);
+}

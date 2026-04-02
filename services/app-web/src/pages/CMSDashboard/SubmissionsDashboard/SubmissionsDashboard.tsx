@@ -4,6 +4,7 @@ import { useAuth } from '../../../contexts/AuthContext'
 import { useIndexContractsStrippedQuery } from '../../../gen/gqlClient'
 import { mostRecentDate } from '@mc-review/dates'
 import styles from '../../StateDashboard/StateDashboard.module.scss'
+import localStyles from './SubmissionsDashboard.module.scss'
 import { recordJSException } from '@mc-review/otel'
 import {
     Loading,
@@ -131,6 +132,16 @@ const SubmissionsDashboard = (): React.ReactElement => {
 
     return (
         <section className={styles.panel}>
+            <div
+                className={`${styles.panelHeader} ${localStyles.submissionsHeading}`}
+            >
+                <h2
+                    className="margin-top-0 margin-bottom-0"
+                    data-testid="cms-submissions-heading"
+                >
+                    Submissions
+                </h2>
+            </div>
             <ContractTable
                 tableData={submissionRows}
                 user={loggedInUser}

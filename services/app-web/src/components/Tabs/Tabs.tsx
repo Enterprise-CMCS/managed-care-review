@@ -12,12 +12,10 @@ type TabsProps = {
 
 export const Tabs = ({
     defaultActiveTab,
-    headingLevel = 'h3',
     children,
     ...tabProps
 }: TabsProps): React.ReactElement => {
     const navigate = useNavigate()
-    const Heading = headingLevel
     const tabs = children.map((child) => ({
         id: child.props.id,
         name: child.props.tabName,
@@ -49,11 +47,11 @@ export const Tabs = ({
                             aria-selected={activeTab === tab.name}
                             id={`tab-id-${index}`}
                         >
-                            <Heading className={styles['easi-tabs__tab-btn']}>
+                            <div className={styles['easi-tabs__tab-btn']}>
                                 <span className={styles['easi-tabs__tab-text']}>
                                     {tab.name}
                                 </span>
-                            </Heading>
+                            </div>
                         </button>
                     ))}
                 </div>

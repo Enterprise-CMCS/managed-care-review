@@ -292,8 +292,8 @@ const PageTitlesRecord: Record<RouteT | 'UNKNOWN_ROUTE', string> = {
 */
 const PageHeadingsRecord: Partial<Record<RouteTWithUnknown, string>> = {
     ROOT: 'Submissions dashboard',
-    DASHBOARD_SUBMISSIONS: 'Submissions dashboard',
-    DASHBOARD_RATES: 'Rate reviews dashboard',
+    DASHBOARD_SUBMISSIONS: '',
+    DASHBOARD_RATES: '',
     SUBMISSIONS_NEW: '',
     SUBMISSIONS_NEW_SUBMISSION_FORM: '',
     MCR_SETTINGS: PageTitlesRecord.MCR_SETTINGS,

@@ -548,6 +548,12 @@
                     "fullName": "KY Managed Care Organization Program",
                     "name": "MCO",
                     "isRateProgram": false
+                },
+                {
+                    "id": "4d0f299a-be95-4142-97d1-09874151a0e6",
+                    "fullName": "KY Human Service Transportation Delivery Program (HSTD)",
+                    "name": "HSTD",
+                    "isRateProgram": false
                 }
             ],
             "code": "KY"

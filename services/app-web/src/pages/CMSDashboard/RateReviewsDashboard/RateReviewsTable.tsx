@@ -591,6 +591,12 @@ export const RateReviewsTable = ({
         <>
             {tableData.length ? (
                 <>
+                    <h2
+                        className="margin-top-0"
+                        data-testid="cms-rate-reviews-heading"
+                    >
+                        Rate reviews
+                    </h2>
                     <FilterAccordion
                         onClearFilters={clearFilters}
                         filterTitle="Filters"

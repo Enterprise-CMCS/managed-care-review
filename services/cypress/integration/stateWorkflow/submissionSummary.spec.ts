@@ -107,7 +107,7 @@ describe('State user can view submissions', () => {
 
             // Link back to dashboard, submission visible in default program
             cy.findByText('Go to state dashboard').should('exist').click()
-            cy.findByText('Submissions dashboard').should('exist')
+            cy.findByText('Dashboard').should('exist')
             // check the table of submissions--find a draft row, then the link in the ID column
             cy.get('table')
                 .contains('span', 'Draft')
