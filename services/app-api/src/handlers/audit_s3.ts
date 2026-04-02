@@ -50,7 +50,7 @@ const main: Handler = async (): Promise<APIGatewayProxyResultV2> => {
 
     const s3Client = new S3Client({ region: 'us-east-1' })
 
-    const pgResult = await configurePostgres(dbURL, secretsManagerSecret)
+    const pgResult = await configurePostgres(dbURL, secretsManagerSecret, stage)
     if (pgResult instanceof Error) {
         console.error("Init Error: Postgres couldn't be configured")
         throw pgResult

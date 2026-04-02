@@ -3,4 +3,6 @@ export type ProgramType = {
     name: string
     fullName: string
     isRateProgram: boolean
+    isDeprecated: boolean
+    deprecatedByProgramId?: string | null
 }

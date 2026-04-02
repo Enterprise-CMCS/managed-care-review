@@ -444,7 +444,7 @@ describe('Change History', () => {
             within(submissionItem).getByText('Submitted')
         ).toBeInTheDocument()
         expect(
-            within(submissionItem).getByText('Review Decision:')
+            within(submissionItem).getByText('Review decision:')
         ).toBeInTheDocument()
         expect(
             within(submissionItem).getByText('Subject to review')
@@ -481,7 +481,7 @@ describe('Change History', () => {
             within(submissionItem).getAllByText('Not subject to review')
         ).toHaveLength(2)
         expect(
-            within(submissionItem).getByText('Review Decision:')
+            within(submissionItem).getByText('Review decision:')
         ).toBeInTheDocument()
     })
     it('preserves historical review decisions across EQRO resubmissions', async () => {

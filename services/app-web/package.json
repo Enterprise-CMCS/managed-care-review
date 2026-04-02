@@ -92,7 +92,7 @@
         "@vitejs/plugin-react": "^5.0.4",
         "amazon-cognito-identity-js": "^6.3.12",
         "aws-amplify": "^5.0.10",
-        "axios": "^1.13.6",
+        "axios": "^1.14.0",
         "dayjs": "^1.11.19",
         "formik": "^2.4.9",
         "graphql": "^16.13.1",
@@ -118,9 +118,9 @@
         "yup": "^0.32.9"
     },
     "devDependencies": {
-        "@aws-sdk/client-amplify": "^3.1020.0",
-        "@aws-sdk/client-s3": "^3.1020.0",
-        "@aws-sdk/s3-request-presigner": "^3.1020.0",
+        "@aws-sdk/client-amplify": "^3.1021.0",
+        "@aws-sdk/client-s3": "^3.1021.0",
+        "@aws-sdk/s3-request-presigner": "^3.1021.0",
         "@chromatic-com/storybook": "^5.0.2",
         "@peculiar/webcrypto": "^1.5.0",
         "@storybook/addon-a11y": "^10.3.3",

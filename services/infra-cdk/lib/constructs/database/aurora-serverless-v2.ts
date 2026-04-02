@@ -5,10 +5,8 @@ import {
     AuroraPostgresEngineVersion,
     Credentials,
     ClusterInstance,
-    type Endpoint,
 } from 'aws-cdk-lib/aws-rds'
 import type { IVpc, SubnetSelection, ISecurityGroup } from 'aws-cdk-lib/aws-ec2'
-import type { IGrantable, Grant } from 'aws-cdk-lib/aws-iam'
 import { Secret, type ISecret } from 'aws-cdk-lib/aws-secretsmanager'
 import { Duration, RemovalPolicy, Stack } from 'aws-cdk-lib'
 import type { DatabaseConfig } from '../../config/environments'
@@ -30,8 +28,6 @@ export interface AuroraServerlessV2Props {
 export class AuroraServerlessV2 extends Construct {
     public readonly cluster: DatabaseCluster
     public readonly secret: ISecret
-    public readonly clusterEndpoint: Endpoint
-    public readonly clusterReadEndpoint: Endpoint
 
     constructor(scope: Construct, id: string, props: AuroraServerlessV2Props) {
         super(scope, id)
@@ -67,7 +63,7 @@ export class AuroraServerlessV2 extends Construct {
         // Create database credentials secret
         // Use CDK-specific naming to avoid conflicts with serverless
         this.secret = new Secret(this, 'Secret', {
-            secretName: `aurora-postgres-${props.stage}-cdk`,
+            secretName: `aurora-postgres-${props.stage}-cdk`, // pragma: allowlist secret
             description: `Database credentials for ${props.databaseName} - ${props.stage}`,
             generateSecretString: {
                 secretStringTemplate: JSON.stringify({
@@ -120,23 +116,5 @@ export class AuroraServerlessV2 extends Construct {
                 publiclyAccessible: false,
             }),
         })
-
-        // Store endpoints
-        this.clusterEndpoint = this.cluster.clusterEndpoint
-        this.clusterReadEndpoint = this.cluster.clusterReadEndpoint
-    }
-
-    /**
-     * Grant access to the database secret
-     */
-    public grantSecretRead(grantee: IGrantable): Grant {
-        return this.secret.grantRead(grantee)
-    }
-
-    /**
-     * Grant data API access (if enabled)
-     */
-    public grantDataApiAccess(grantee: IGrantable): Grant {
-        return this.cluster.grantDataApiAccess(grantee)
     }
 }

@@ -390,13 +390,34 @@ class LogicalDatabaseManager {
             } else {
                 console.info(`User ${userName} already exists`)
 
-                // Reset password for existing user using our DbClient's method
-                password = await this.secrets.generatePassword()
+                // Reuse existing password from Secrets Manager instead of rotating on every deploy
+                // This prevents cached Prisma clients from having stale credentials
+                // Password is stable for the lifetime of the review environment
+                try {
+                    const existingSecret = await this.secrets.getSecretDict(
+                        prSecretName,
+                        'AWSCURRENT'
+                    )
+                    password = existingSecret.password
+                    console.info(`Reusing existing password for ${userName}`)
+                } catch (error) {
+                    const errorMessage =
+                        error instanceof Error
+                            ? error.message
+                            : String(error)
+                    console.error(
+                        `Could not retrieve existing secret for ${userName}: ${errorMessage}`,
+                        error instanceof Error ? error.stack : undefined
+                    )
 
-                console.info(`Updating password for ${userName}`)
-                await this.dbClient.updatePassword(client, userName, password)
-
-                console.info(`Password for user ${userName} reset`)
+                    // Secret doesn't exist or is invalid, generate and set new password
+                    console.info(
+                        `Generating new password for ${userName}`
+                    )
+                    password = await this.secrets.generatePassword()
+                    await this.dbClient.updatePassword(client, userName, password)
+                    console.info(`Password updated for user ${userName}`)
+                }
             }
 
             // Create or update the PR secret with logical database connection info

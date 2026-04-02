@@ -91,6 +91,8 @@ type ProgramDefinition = {
     fullName: string
     name: string
     isRateProgram: boolean
+    isDeprecated: boolean // Specifies if a program has been deprecated and replaced by another program
+    deprecatedByProgramId?: string // If deprecated this will contain the uuid of the program that replaced it
 }
 
 type StateDefinition = {
@@ -111,6 +113,8 @@ fs.createReadStream(file)
             Program: string
             Nickname: string
             IsRateProgram: string
+            isDeprecated: string
+            deprecatedByProgramId: string
         }) => {
             const code = data.State.trim() as keyof typeof stateNames
 
@@ -136,10 +140,12 @@ fs.createReadStream(file)
             }
 
             states[code]!.programs.push({
-                id: !data.id ? uuidv4() : data.id,
-                fullName: data.Program,
-                name: data.Nickname,
+                id: !data.id ? uuidv4() : data.id.trim(),
+                fullName: data.Program.trim(),
+                name: data.Nickname.trim(),
                 isRateProgram: data.IsRateProgram === 'TRUE',
+                isDeprecated: data.isDeprecated === 'TRUE',
+                deprecatedByProgramId: data.deprecatedByProgramId?.trim() || undefined,
             })
         }
     )
