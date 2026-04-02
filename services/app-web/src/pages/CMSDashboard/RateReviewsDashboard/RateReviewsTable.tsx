@@ -139,6 +139,10 @@ const getColumnClassName = (columnId: string): string | undefined => {
     if (columnId === 'Rate review') {
         return styles.columnID
     }
+
+    if (columnId === 'programs') {
+        return styles.programsColumn
+    }
 }
 
 const fromColumnFiltersToReadableUrl = (input: ColumnFiltersState) => {
@@ -341,21 +345,18 @@ export const RateReviewsTable = ({
             }),
             columnHelper.accessor('programs', {
                 header: 'Programs',
-                cell: (info) => (
-                    <div className={styles.programsCellContent}>
-                        {info.getValue().map((program) => {
-                            return (
-                                <Tag
-                                    data-testid="program-tag"
-                                    key={program.id}
-                                    className={`radius-pill ${styles.programTag}`}
-                                >
-                                    {program.name}
-                                </Tag>
-                            )
-                        })}
-                    </div>
-                ),
+                cell: (info) =>
+                    info.getValue().map((program) => {
+                        return (
+                            <Tag
+                                data-testid="program-tag"
+                                key={program.id}
+                                className={`radius-pill ${styles.programTag}`}
+                            >
+                                {program.name}
+                            </Tag>
+                        )
+                    }),
                 meta: {
                     dataTestID: `${tableConfig.rowIDName}-programs`,
                 },
