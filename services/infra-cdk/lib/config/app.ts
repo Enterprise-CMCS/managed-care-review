@@ -1,19 +1,16 @@
 export interface AppConfig {
     stage: string
     awsRegion: string
-    permissionsBoundaryArn?: string
 }
 
 export class AppConfigLoader {
     static load(): AppConfig {
         const stage = this.getStage()
         const awsRegion = this.getRequiredEnv('AWS_REGION')
-        const permissionsBoundaryArn = process.env.PERM_BOUNDARY_ARN
 
         return {
             stage,
             awsRegion,
-            permissionsBoundaryArn,
         }
     }
 

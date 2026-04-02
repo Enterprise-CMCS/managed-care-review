@@ -95,7 +95,7 @@ const buildChangeHistoryInfo = (
                         </div>
                         <div>
                             <span className={styles.tag}>
-                                Review Decision:{' '}
+                                Review decision:{' '}
                             </span>
                             <span>
                                 {isNotSubjectToReview
@@ -107,18 +107,19 @@ const buildChangeHistoryInfo = (
                         </div>
                     </>
                 )}
-                <br />
                 {r.revisionVersion && hasSubsequentSubmissions && (
-                    <LinkWithLogging
-                        href={getPreviousSubmissionLink({
-                            contractSubmissionType,
-                            contractID: contract.id,
-                            revisionVersion: r.revisionVersion,
-                        })}
-                        data-testid={`revision-link-${r.revisionVersion}`}
-                    >
-                        View past submission version
-                    </LinkWithLogging>
+                    <div className={styles.previousSubmissionLink}>
+                        <LinkWithLogging
+                            href={getPreviousSubmissionLink({
+                                contractSubmissionType,
+                                contractID: contract.id,
+                                revisionVersion: r.revisionVersion,
+                            })}
+                            data-testid={`revision-link-${r.revisionVersion}`}
+                        >
+                            View past submission version
+                        </LinkWithLogging>
+                    </div>
                 )}
             </div>
         )
@@ -148,7 +149,7 @@ const buildChangeHistoryInfo = (
                         </div>
                         <div>
                             <span className={styles.tag}>
-                                Review Decision:{' '}
+                                Review decision:{' '}
                             </span>
                             <span>
                                 {isNotSubjectToReview
@@ -173,16 +174,18 @@ const buildChangeHistoryInfo = (
                 {isSubsequentSubmissionOrUnlock &&
                     (r.kind === 'submit' || r.kind === 'submit_with_review') &&
                     r.revisionVersion && (
-                        <LinkWithLogging
-                            href={getPreviousSubmissionLink({
-                                contractSubmissionType,
-                                contractID: contract.id,
-                                revisionVersion: r.revisionVersion,
-                            })}
-                            data-testid={`revision-link-${r.revisionVersion}`}
-                        >
-                            View past submission version
-                        </LinkWithLogging>
+                        <div className={styles.previousSubmissionLink}>
+                            <LinkWithLogging
+                                href={getPreviousSubmissionLink({
+                                    contractSubmissionType,
+                                    contractID: contract.id,
+                                    revisionVersion: r.revisionVersion,
+                                })}
+                                data-testid={`revision-link-${r.revisionVersion}`}
+                            >
+                                View past submission version
+                            </LinkWithLogging>
+                        </div>
                     )}
             </div>
         )
