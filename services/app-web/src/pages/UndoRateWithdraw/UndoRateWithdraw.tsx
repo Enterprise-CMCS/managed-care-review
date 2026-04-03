@@ -8,9 +8,10 @@ import {
     PageActionsContainer,
 } from '../../components'
 import {
-    useFetchRateQuery,
-    useUndoWithdrawnRateMutation,
+    FetchRateDocument,
+    UndoWithdrawnRateDocument,
 } from '../../gen/gqlClient'
+import { useQuery, useMutation } from '@apollo/client'
 import { ErrorOrLoadingPage } from '../StateSubmission'
 import { handleAndReturnErrorState } from '../StateSubmission/SharedSubmissionComponents'
 import { RoutesRecord } from '@mc-review/constants'
@@ -47,13 +48,13 @@ export const UndoRateWithdraw = () => {
     const [
         undoWithdrawRate,
         { error: undoWithdrawError, loading: undoWithdrawLoading },
-    ] = useUndoWithdrawnRateMutation()
+    ] = useMutation(UndoWithdrawnRateDocument)
 
     const formInitialValues: UndoRateWithdrawValues = {
         undoWithdrawReason: '',
     }
 
-    const { data, loading, error } = useFetchRateQuery({
+    const { data, loading, error } = useQuery(FetchRateDocument, {
         variables: {
             input: {
                 rateID: id,

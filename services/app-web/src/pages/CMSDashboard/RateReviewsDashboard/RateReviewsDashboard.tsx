@@ -1,6 +1,7 @@
 import React from 'react'
 import { useAuth } from '../../../contexts/AuthContext'
-import { useIndexRatesStrippedQuery } from '../../../gen/gqlClient'
+import { useQuery } from '@apollo/client'
+import { IndexRatesStrippedDocument } from '../../../gen/gqlClient'
 import { mostRecentDate } from '@mc-review/dates'
 import styles from '../../StateDashboard/StateDashboard.module.scss'
 import { recordJSException } from '@mc-review/otel'
@@ -14,7 +15,7 @@ import { GenericErrorPage } from '../../Errors/GenericErrorPage'
 const RateReviewsDashboard = (): React.ReactElement => {
     const { loggedInUser } = useAuth()
     const isAdminUser = loggedInUser?.role === 'ADMIN_USER'
-    const { data, loading, error } = useIndexRatesStrippedQuery({
+    const { data, loading, error } = useQuery(IndexRatesStrippedDocument, {
         variables: {
             input: {
                 stateCode: undefined,

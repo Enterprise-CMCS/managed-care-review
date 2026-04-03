@@ -19,9 +19,10 @@ import {
     PoliteErrorMessage,
 } from '../../../components'
 import { FormContainer } from '../../../components'
+import { useMutation, useQuery } from '@apollo/client'
 import {
-    useCreateOauthClientMutation,
-    useIndexUsersQuery,
+    CreateOauthClientDocument,
+    IndexUsersDocument,
 } from '../../../gen/gqlClient'
 import { RoutesRecord } from '@mc-review/constants'
 import { FieldSelect } from '../../../components/Select'
@@ -63,7 +64,7 @@ export const CreateOauthClient = (): React.ReactElement => {
     const { updateActiveMainContent } = usePage()
 
     const { result: indexUsersResult } = wrapApolloResult(
-        useIndexUsersQuery({
+        useQuery(IndexUsersDocument, {
             fetchPolicy: 'cache-and-network',
         })
     )
@@ -71,7 +72,7 @@ export const CreateOauthClient = (): React.ReactElement => {
     const [
         createOauthClient,
         { loading: createClientLoading, error: createClientError },
-    ] = useCreateOauthClientMutation()
+    ] = useMutation(CreateOauthClientDocument)
 
     // Set the active main content to focus when click the Skip to main content button.
     useEffect(() => {

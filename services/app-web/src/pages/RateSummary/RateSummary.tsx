@@ -10,10 +10,11 @@ import {
 } from '../../components'
 import { usePage } from '../../contexts/PageContext'
 import {
-    useFetchContractQuery,
-    useUnlockRateMutation,
-    useFetchRateWithQuestionsQuery,
+    FetchContractDocument,
+    UnlockRateDocument,
+    FetchRateWithQuestionsDocument,
 } from '../../gen/gqlClient'
+import { useQuery, useMutation } from '@apollo/client'
 import styles from '../SubmissionSummary/SubmissionSummary.module.scss'
 import { GenericErrorPage } from '../Errors/GenericErrorPage'
 import { ERROR_MESSAGES, RoutesRecord } from '@mc-review/constants'
@@ -70,9 +71,10 @@ export const RateSummary = (): React.ReactElement => {
         featureFlags.UNDO_WITHDRAW_RATE.flag,
         featureFlags.UNDO_WITHDRAW_RATE.defaultValue
     )
-    const [unlockRate, { loading: unlockLoading }] = useUnlockRateMutation()
+    const [unlockRate, { loading: unlockLoading }] =
+        useMutation(UnlockRateDocument)
 
-    const { data, loading, error } = useFetchRateWithQuestionsQuery({
+    const { data, loading, error } = useQuery(FetchRateWithQuestionsDocument, {
         variables: {
             input: {
                 rateID: id,
@@ -86,7 +88,7 @@ export const RateSummary = (): React.ReactElement => {
         data: fetchContractData,
         loading: fetchContractLoading,
         error: fetchContractError,
-    } = useFetchContractQuery({
+    } = useQuery(FetchContractDocument, {
         variables: {
             input: {
                 contractID: rate?.parentContractID ?? 'unknown-contract',

@@ -26,7 +26,8 @@ import {
     ContractDetailsSummarySection,
     SubmissionTypeSummarySection,
 } from '../../../../components/SubmissionSummarySection'
-import { useFetchContractQuery } from '../../../../gen/gqlClient'
+import { useQuery } from '@apollo/client'
+import { FetchContractDocument } from '../../../../gen/gqlClient'
 import { ErrorForbiddenPage } from '../../../Errors/ErrorForbiddenPage'
 import { Error404 } from '../../../Errors/Error404Page'
 import { GenericErrorPage } from '../../../Errors/GenericErrorPage'
@@ -58,7 +59,7 @@ export const ReviewSubmit = (): React.ReactElement => {
         })
     }
 
-    const { data, loading, error } = useFetchContractQuery({
+    const { data, loading, error } = useQuery(FetchContractDocument, {
         variables: {
             input: {
                 contractID: id ?? 'unknown contract',

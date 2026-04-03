@@ -1,11 +1,12 @@
 import { useEffect, useLayoutEffect } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
 import styles from '../QuestionResponse.module.scss'
+import { useMutation, useQuery } from '@apollo/client'
 import {
     ContractSubmissionType,
     CreateContractQuestionInput,
-    useCreateContractQuestionMutation,
-    useFetchContractWithQuestionsQuery,
+    CreateContractQuestionDocument,
+    FetchContractWithQuestionsDocument,
 } from '../../../gen/gqlClient'
 import { usePage } from '../../../contexts/PageContext'
 import { Breadcrumbs } from '../../../components'
@@ -34,7 +35,7 @@ export const UploadContractQuestions = () => {
         data: fetchContractData,
         loading: fetchContractLoading,
         error: fetchContractError,
-    } = useFetchContractWithQuestionsQuery({
+    } = useQuery(FetchContractWithQuestionsDocument, {
         variables: {
             input: {
                 contractID: id || 'not-found',
@@ -43,7 +44,7 @@ export const UploadContractQuestions = () => {
     })
 
     const [createQuestion, { loading: apiLoading, error: apiError }] =
-        useCreateContractQuestionMutation()
+        useMutation(CreateContractQuestionDocument)
 
     const contract = fetchContractData?.fetchContract.contract
     const contractName =
