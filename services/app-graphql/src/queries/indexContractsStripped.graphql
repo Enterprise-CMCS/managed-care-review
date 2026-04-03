@@ -20,6 +20,8 @@ query indexContractsStripped($input: IndexContractsStrippedInput) {
                         name
                         fullName
                         isRateProgram
+                        isDeprecated
+                        deprecatedByProgramId
                     }
                 }
                 stateNumber

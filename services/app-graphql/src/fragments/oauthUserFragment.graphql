@@ -13,6 +13,8 @@ fragment oauthUserFragment on CMSUsersUnion {
                 name
                 fullName
                 isRateProgram
+                isDeprecated
+                deprecatedByProgramId
             }
         }
     }
@@ -30,6 +32,8 @@ fragment oauthUserFragment on CMSUsersUnion {
                 name
                 fullName
                 isRateProgram
+                isDeprecated
+                deprecatedByProgramId
             }
         }
     }

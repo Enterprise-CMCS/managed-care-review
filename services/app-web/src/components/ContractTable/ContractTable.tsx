@@ -191,6 +191,16 @@ type ReadableFilters = {
     [key: string]: string[]
 }
 
+const getColumnClassName = (columnId: string): string | undefined => {
+    if (columnId === 'ID') {
+        return styles.columnID
+    }
+
+    if (columnId === 'programs') {
+        return styles.programsColumn
+    }
+}
+
 const fromColumnFiltersToReadableUrl = (input: ColumnFiltersState) => {
     const output: ReadableFilters = {}
     input.forEach((element) => {
@@ -719,7 +729,7 @@ export const ContractTable = ({
                             {submissionCount}
                         </div>
                     </div>
-                    <Table fullWidth>
+                    <Table fullWidth className={styles.table}>
                         <thead>
                             {reactTable.getHeaderGroups().map((headerGroup) => (
                                 <tr key={headerGroup.id}>
@@ -728,6 +738,9 @@ export const ContractTable = ({
                                             scope="col"
                                             key={header.id}
                                             id={header.id}
+                                            className={getColumnClassName(
+                                                header.column.id
+                                            )}
                                         >
                                             {header.isPlaceholder
                                                 ? null
@@ -754,6 +767,9 @@ export const ContractTable = ({
                                                 cell.column.columnDef.meta
                                                     ?.dataTestID
                                             }
+                                            className={getColumnClassName(
+                                                cell.column.id
+                                            )}
                                             element={
                                                 cell.column.id === 'ID'
                                                     ? 'th'

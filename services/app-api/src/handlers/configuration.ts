@@ -9,6 +9,7 @@ import {
 } from '../emailer'
 import { type LDService } from '../launchDarkly/launchDarkly'
 import type { ExtendedPrismaClient } from '../postgres/prismaClient'
+import { trace, SpanStatusCode } from '@opentelemetry/api'
 
 /*
  * configuration.ts
@@ -53,26 +54,68 @@ async function getPostgresURL(
 // configurePostgres takes our two env vars and attempts to configure postgres correctly
 async function configurePostgres(
     dbURL: string,
-    secretName: string | undefined
+    secretName: string | undefined,
+    stage: string
 ): Promise<ExtendedPrismaClient | Error> {
-    console.info('Getting Postgres Connection')
+    const tracer = trace.getTracer('postgres-configuration')
+    const span = tracer.startSpan('postgres.configure', {
+        attributes: {
+            'postgres.stage': stage,
+            'postgres.using_secrets_manager': dbURL === 'AWS_SM',
+            'postgres.cache_enabled': true,
+            'postgres.cache_ttl_hours': 12,
+        },
+    })
 
-    const dbConnResult = await getPostgresURL(dbURL, secretName)
-    if (dbConnResult instanceof Error) {
-        return dbConnResult
+    try {
+        console.info('Getting Postgres Connection')
+
+        const dbConnResult = await getPostgresURL(dbURL, secretName)
+        if (dbConnResult instanceof Error) {
+            span.recordException(dbConnResult)
+            span.setStatus({
+                code: SpanStatusCode.ERROR,
+                message: 'Failed to get postgres URL',
+            })
+            span.end()
+            return dbConnResult
+        }
+
+        // Enable caching with 12-hour TTL for all environments
+        // Safe because credentials are now stable for environment lifetime:
+        // - Review envs: Passwords reused (not rotated on deploy)
+        // - Dev/val/prod: 90-day rotation, TTL provides safety net
+        const prismaResult = await NewPrismaClient(dbConnResult, true)
+
+        if (prismaResult instanceof Error) {
+            console.info(
+                'Error: attempting to create prisma client: ',
+                prismaResult
+            )
+            span.recordException(prismaResult)
+            span.setStatus({
+                code: SpanStatusCode.ERROR,
+                message: 'Failed to create Prisma Client',
+            })
+            span.end()
+            return new Error('Failed to create Prisma Client')
+        }
+
+        span.setStatus({ code: SpanStatusCode.OK })
+        span.end()
+
+        return prismaResult
+    } catch (error) {
+        const err = error instanceof Error ? error : new Error(String(error))
+        span.recordException(err)
+        span.setStatus({
+            code: SpanStatusCode.ERROR,
+            message: err.message,
+        })
+        span.end()
+        console.error('Unexpected error configuring postgres:', err)
+        return new Error('Failed to configure Postgres connection')
     }
-
-    const prismaResult = await NewPrismaClient(dbConnResult)
-
-    if (prismaResult instanceof Error) {
-        console.info(
-            'Error: attempting to create prisma client: ',
-            prismaResult
-        )
-        return new Error('Failed to create Prisma Client')
-    }
-
-    return prismaResult
 }
 
 async function getDBClusterID(secretName: string): Promise<string | Error> {

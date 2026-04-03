@@ -14,6 +14,8 @@ fragment rateFieldsFragment on Rate {
             name
             fullName
             isRateProgram
+            isDeprecated
+            deprecatedByProgramId
         }
     }
     status

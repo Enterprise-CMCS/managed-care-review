@@ -14,4 +14,29 @@ The source of truth for that file comes from a CSV maintained by product and des
     - The script exits with error message if there's no id set in the spreadsheet.
     - You will have to pause and set missing ids at that time. For any newly created programs, manually populate the `id` field using a UUID generator
 3. Double check the diff. It's important not to delete any programs that have already been used for a submission because although programs are not in the database, we still store references to the program ID in postgres as if they are stable. Also, we want to be sure we are only changing programs expected to change.
-5. Make a PR to update the statePrograms file in the codebase
+4. Make a PR to update the statePrograms file in the codebase
+
+# How to Deprecate state programs
+
+## Background
+
+Each program entry now includes two deprecation-related fields:
+
+- `isDeprecated`: `true` when the program should no longer be available for new selection in the UI
+- `deprecatedByProgramId`: optional UUID of the replacement program when one exists
+
+These fields let us retire old program names without deleting them from the spreadsheet. That matters because submissions store program IDs, not copied program names. If a previously used program were removed outright, historical records could no longer resolve their program name correctly.
+
+## Steps
+
+- Keep the old program entry in the spreadsheet and generated JSON.
+- Set `isDeprecated` to `true` on the old program.
+- If there is a replacement program, set `deprecatedByProgramId` on the old program to the new program's UUID.
+- Add the replacement program as a new row with its own new UUID.
+- Do not reuse the deprecated program's UUID for the replacement.
+- Do not delete the old row just because the name changed. Historical submissions may still depend on that program ID.
+
+For non-deprecated programs:
+
+- Set `isDeprecated` to `false`.
+- Leave `deprecatedByProgramId` blank.

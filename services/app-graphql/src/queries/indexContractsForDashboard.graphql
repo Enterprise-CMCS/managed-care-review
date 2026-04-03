@@ -25,6 +25,8 @@ query indexContractsForDashboard($input: IndexContractsInput) {
                         name
                         fullName
                         isRateProgram
+                        isDeprecated
+                        deprecatedByProgramId
                     }
                 }
                 stateNumber

@@ -19,29 +19,14 @@ export interface LambdaConfig {
     memorySize: number
     timeout: Duration
     architecture: 'x86_64' | 'arm64'
-    reservedConcurrentExecutions?: number
-    provisionedConcurrentExecutions?: number
-}
-
-export interface SecurityConfig {
-    wafEnabled: boolean
-    cognitoMfa: 'OFF' | 'OPTIONAL' | 'REQUIRED'
-    secretRotation: boolean
-    apiThrottleRate: number
-    apiThrottleBurst: number
 }
 
 export interface MonitoringConfig {
     logRetentionDays: RetentionDays
-    tracingEnabled: boolean
-    dashboardEnabled?: boolean
 }
 
 export interface DeploymentFeatures {
     enablePostgresVm: boolean
-    enableCrossAccountRoles: boolean
-    enableDataExportBucket: boolean
-    requireEmailSender: boolean
 }
 
 export interface EnvironmentConfig {
@@ -50,7 +35,6 @@ export interface EnvironmentConfig {
     environment: Environment
     database: DatabaseConfig
     lambda: LambdaConfig
-    security: SecurityConfig
     monitoring: MonitoringConfig
     features: DeploymentFeatures
 }
@@ -74,45 +58,21 @@ const STAGE_OVERRIDES = {
     dev: {
         database: { backupRetentionDays: 1, deletionProtection: false },
         lambda: { memorySize: 1024 },
-        security: {
-            wafEnabled: false,
-            cognitoMfa: 'OFF' as const,
-            secretRotation: false,
-            apiThrottleRate: 100,
-            apiThrottleBurst: 200,
-        },
         monitoring: {
             logRetentionDays: RetentionDays.ONE_WEEK,
-            tracingEnabled: true,
-            dashboardEnabled: false,
         },
         features: {
             enablePostgresVm: true,
-            enableCrossAccountRoles: false,
-            enableDataExportBucket: false,
-            requireEmailSender: false,
         },
     },
     val: {
         database: { backupRetentionDays: 7, deletionProtection: true },
         lambda: { memorySize: 1024 },
-        security: {
-            wafEnabled: true,
-            cognitoMfa: 'OPTIONAL' as const,
-            secretRotation: true,
-            apiThrottleRate: 1000,
-            apiThrottleBurst: 2000,
-        },
         monitoring: {
             logRetentionDays: RetentionDays.ONE_MONTH,
-            tracingEnabled: true,
-            dashboardEnabled: true,
         },
         features: {
             enablePostgresVm: true,
-            enableCrossAccountRoles: true,
-            enableDataExportBucket: true,
-            requireEmailSender: false,
         },
     },
     prod: {
@@ -122,45 +82,21 @@ const STAGE_OVERRIDES = {
             enableDataApi: false,
         },
         lambda: { memorySize: 2048 },
-        security: {
-            wafEnabled: true,
-            cognitoMfa: 'REQUIRED' as const,
-            secretRotation: true,
-            apiThrottleRate: 10000,
-            apiThrottleBurst: 20000,
-        },
         monitoring: {
             logRetentionDays: RetentionDays.THREE_MONTHS,
-            tracingEnabled: true,
-            dashboardEnabled: true,
         },
         features: {
             enablePostgresVm: true,
-            enableCrossAccountRoles: true,
-            enableDataExportBucket: true,
-            requireEmailSender: true,
         },
     },
     review: {
         database: { backupRetentionDays: 1, deletionProtection: false },
         lambda: { memorySize: 512 },
-        security: {
-            wafEnabled: false,
-            cognitoMfa: 'OFF' as const,
-            secretRotation: false,
-            apiThrottleRate: 100,
-            apiThrottleBurst: 200,
-        },
         monitoring: {
             logRetentionDays: RetentionDays.THREE_DAYS,
-            tracingEnabled: false,
-            dashboardEnabled: false,
         },
         features: {
             enablePostgresVm: false,
-            enableCrossAccountRoles: false,
-            enableDataExportBucket: false,
-            requireEmailSender: false,
         },
     },
 } as const
@@ -270,7 +206,6 @@ export function getEnvironment(stage: string): EnvironmentConfig {
         environment: configStage as Environment,
         database: { ...BASE_CONFIG.database, ...overrides.database },
         lambda: { ...BASE_CONFIG.lambda, ...overrides.lambda },
-        security: overrides.security,
         monitoring: overrides.monitoring,
         features: overrides.features,
     }
