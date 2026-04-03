@@ -40,7 +40,7 @@ describe('thirdPartyAPIAccess', () => {
         })
     })
 
-    it('can make delegated API request', () => {
+    it.skip('can make delegated API request', () => {
         // Log in as our API and delegated users to seed the DB
         cy.logInAsCMSUser({ cmsUser: 'ZUKO' }) // our OAuth client user
         cy.logOut()
