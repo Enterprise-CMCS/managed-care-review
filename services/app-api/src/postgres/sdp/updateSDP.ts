@@ -326,16 +326,16 @@ async function updateDraftSDP(
             await tx.$executeRaw(
                 Prisma.sql`
                     DELETE FROM "ContractSDPJoinTable"
-                    WHERE "sdpID" = ${args.sdpID}
+                    WHERE "sdpRevisionID" = ${currentRevision.id}
                 `
             )
 
             for (const contractID of args.relatedContractIDs) {
                 await tx.$executeRaw(
                     Prisma.sql`
-                        INSERT INTO "ContractSDPJoinTable" ("contractID", "sdpID")
-                        VALUES (${contractID}, ${args.sdpID})
-                        ON CONFLICT ("contractID", "sdpID") DO NOTHING
+                        INSERT INTO "ContractSDPJoinTable" ("contractID", "sdpRevisionID")
+                        VALUES (${contractID}, ${currentRevision.id})
+                        ON CONFLICT ("contractID", "sdpRevisionID") DO NOTHING
                     `
                 )
             }

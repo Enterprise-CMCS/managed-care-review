@@ -69,6 +69,9 @@ const FETCH_SDP_QUERY = gql`
                             givenName
                         }
                     }
+                    relatedContracts {
+                        id
+                    }
                     formData {
                         submissionType
                         programIDs
@@ -107,6 +110,9 @@ const FETCH_SDP_QUERY = gql`
                             familyName
                             givenName
                         }
+                    }
+                    relatedContracts {
+                        id
                     }
                     formData {
                         submissionType
@@ -156,9 +162,6 @@ const FETCH_SDP_QUERY = gql`
                             givenName
                         }
                     }
-                }
-                relatedContracts {
-                    id
                 }
             }
         }
@@ -535,9 +538,10 @@ export const SDPSubmissionSummary = (): React.ReactElement => {
                             id="sdp-summary-related-contracts"
                             label="Related contracts"
                         >
-                            {sdp.relatedContracts.length > 0 ? (
+                            {latestVisibleRevision.relatedContracts.length >
+                            0 ? (
                                 <div>
-                                    {sdp.relatedContracts.map(
+                                    {latestVisibleRevision.relatedContracts.map(
                                         (contract: { id: string }) => (
                                             <LinkedContractSummaryLink
                                                 key={contract.id}

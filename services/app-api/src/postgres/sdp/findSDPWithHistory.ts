@@ -53,6 +53,10 @@ type SDPStateContactRow = {
     email: string | null
 }
 
+type RelatedContractIDRow = {
+    id: string
+}
+
 type SDPUnlockInfoRow = {
     updatedAt: Date
     updatedReason: string
@@ -151,6 +155,7 @@ async function findSDPWithHistory(
                     stateContacts,
                     unlockInfoRows,
                     submitInfoRows,
+                    relatedContractRows,
                 ] = await Promise.all([
                     client.$queryRaw<SDPDocumentRow[]>(
                         Prisma.sql`
@@ -212,9 +217,54 @@ async function findSDPWithHistory(
                             WHERE revisionRecord."id" = ${revision.id}
                         `
                     ),
+                    client.$queryRaw<RelatedContractIDRow[]>(
+                        Prisma.sql`
+                            SELECT contract."id"
+                            FROM "ContractSDPJoinTable" link
+                            INNER JOIN "ContractTable" contract
+                                ON contract."id" = link."contractID"
+                            WHERE link."sdpRevisionID" = ${revision.id}
+                            ORDER BY contract."createdAt" DESC
+                        `
+                    ),
                 ])
                 const unlockInfo = unlockInfoRows[0]
                 const submitInfo = submitInfoRows[0]
+                const relatedContractsResult =
+                    relatedContractRows.length > 0
+                        ? await findAllContractsStripped(client, {
+                              contractIDs: relatedContractRows.map(
+                                  (contract) => contract.id
+                              ),
+                              includeDrafts: true,
+                          })
+                        : []
+
+                if (relatedContractsResult instanceof Error) {
+                    throw relatedContractsResult
+                }
+
+                const relatedContracts = Array.isArray(relatedContractsResult)
+                    ? relatedContractsResult
+                          .flatMap(({ contract }) =>
+                              contract instanceof Error ||
+                              contract.contractSubmissionType === 'SDP'
+                                  ? []
+                                  : [contract]
+                          )
+                          .map((contract) => ({
+                              id: contract.id,
+                              stateCode: contract.stateCode,
+                              stateNumber: contract.stateNumber,
+                              contractSubmissionType:
+                                  contract.contractSubmissionType,
+                              status: contract.status ?? undefined,
+                              reviewStatus: contract.reviewStatus ?? undefined,
+                              consolidatedStatus:
+                                  contract.consolidatedStatus ?? undefined,
+                              mccrsID: contract.mccrsID ?? undefined,
+                          }))
+                    : []
 
                 return {
                     id: revision.id,
@@ -296,49 +346,10 @@ async function findSDPWithHistory(
                         s3BucketName: document.s3BucketName ?? undefined,
                         s3Key: document.s3Key ?? undefined,
                     })),
+                    relatedContracts,
                 }
             })
         )
-
-        const relatedContractRows = await client.$queryRaw<
-            Array<{ id: string }>
-        >(
-            Prisma.sql`
-                SELECT
-                    contract."id"
-                FROM "ContractSDPJoinTable" link
-                INNER JOIN "ContractTable" contract
-                    ON contract."id" = link."contractID"
-                WHERE link."sdpID" = ${sdpID}
-                ORDER BY contract."createdAt" DESC
-            `
-        )
-        const relatedContractsResult = await findAllContractsStripped(client, {
-            contractIDs: relatedContractRows.map((contract) => contract.id),
-            includeDrafts: true,
-        })
-
-        if (relatedContractsResult instanceof Error) {
-            return relatedContractsResult
-        }
-
-        const relatedContracts = relatedContractsResult
-            .flatMap(({ contract }) =>
-                contract instanceof Error ||
-                contract.contractSubmissionType === 'SDP'
-                    ? []
-                    : [contract]
-            )
-            .map((contract) => ({
-                id: contract.id,
-                stateCode: contract.stateCode,
-                stateNumber: contract.stateNumber,
-                contractSubmissionType: contract.contractSubmissionType,
-                status: contract.status ?? undefined,
-                reviewStatus: contract.reviewStatus ?? undefined,
-                consolidatedStatus: contract.consolidatedStatus ?? undefined,
-                mccrsID: contract.mccrsID ?? undefined,
-            }))
 
         const latestRevision = revisions[0]
         const latestSubmittedRevision =
@@ -364,7 +375,6 @@ async function findSDPWithHistory(
                     : undefined,
             revisions,
             questions: undefined,
-            relatedContracts,
         }
     } catch (err) {
         console.error('Prisma error finding SDP with history', err)

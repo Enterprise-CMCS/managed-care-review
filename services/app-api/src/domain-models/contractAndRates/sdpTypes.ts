@@ -8,7 +8,6 @@ import {
     sdpSubmissionTypeSchema,
     submitSDPSchema,
 } from './sdpFormDataTypes'
-import { relatedContractSchema } from './relatedSubmissionTypes'
 import { statusSchema } from './statusType'
 
 const sdpSchema = z.object({
@@ -23,7 +22,6 @@ const sdpSchema = z.object({
     latestSubmittedRevision: sdpRevisionSchema.optional(),
     revisions: z.array(sdpRevisionSchema),
     questions: indexSDPQuestionsPayload.optional(),
-    relatedContracts: z.array(relatedContractSchema).optional(),
 })
 
 const strippedSDPSchema = z.object({
@@ -36,7 +34,6 @@ const strippedSDPSchema = z.object({
     stateNumber: z.number().min(1),
     draftRevision: strippedSDPRevisionSchema.optional(),
     latestSubmittedRevision: strippedSDPRevisionSchema.optional(),
-    relatedContracts: z.array(relatedContractSchema).optional(),
 })
 
 type SDPType = z.infer<typeof sdpSchema>

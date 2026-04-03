@@ -84,12 +84,12 @@ const FETCH_SDP_EDIT_QUERY = gql`
                 status
                 stateCode
                 stateNumber
-                relatedContracts {
-                    id
-                }
                 draftRevision {
                     id
                     updatedAt
+                    relatedContracts {
+                        id
+                    }
                     formData {
                         submissionType
                         programIDs
@@ -301,14 +301,14 @@ export const SDPSubmissionForm = (): React.ReactElement => {
                 getKey,
             }),
             linkContractSelects:
-                fetchedSDP.relatedContracts?.length > 0
-                    ? fetchedSDP.relatedContracts.map(
+                fetchedSDP.draftRevision.relatedContracts?.length > 0
+                    ? fetchedSDP.draftRevision.relatedContracts.map(
                           (contract: { id: string }) => contract.id
                       )
                     : [''],
             relatedContracts:
-                fetchedSDP.relatedContracts?.length > 0
-                    ? fetchedSDP.relatedContracts.map(
+                fetchedSDP.draftRevision.relatedContracts?.length > 0
+                    ? fetchedSDP.draftRevision.relatedContracts.map(
                           (contract: { id: string }) => contract.id
                       )
                     : [],

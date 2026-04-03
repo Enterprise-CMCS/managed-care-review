@@ -7,21 +7,21 @@ mutation updateSDP($input: UpdateSDPInput!) {
             stateCode
             stateNumber
             mccrsID
-            relatedContracts {
-                id
-                stateCode
-                stateNumber
-                contractSubmissionType
-                status
-                reviewStatus
-                consolidatedStatus
-                mccrsID
-            }
             draftRevision {
                 id
                 sdpID
                 createdAt
                 updatedAt
+                relatedContracts {
+                    id
+                    stateCode
+                    stateNumber
+                    contractSubmissionType
+                    status
+                    reviewStatus
+                    consolidatedStatus
+                    mccrsID
+                }
                 formData {
                     submissionType
                     programIDs
@@ -38,6 +38,16 @@ mutation updateSDP($input: UpdateSDPInput!) {
                 sdpID
                 createdAt
                 updatedAt
+                relatedContracts {
+                    id
+                    stateCode
+                    stateNumber
+                    contractSubmissionType
+                    status
+                    reviewStatus
+                    consolidatedStatus
+                    mccrsID
+                }
                 formData {
                     submissionType
                     programIDs

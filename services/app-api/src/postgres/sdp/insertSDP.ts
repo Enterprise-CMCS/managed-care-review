@@ -181,6 +181,7 @@ async function insertDraftSDP(
                         stateContacts: [],
                     },
                     sdpDocuments: [],
+                    relatedContracts: [],
                 },
                 latestSubmittedRevision: undefined,
                 revisions: [draftRevision].map((revision) => ({
@@ -207,6 +208,7 @@ async function insertDraftSDP(
                         stateContacts: [],
                     },
                     sdpDocuments: [],
+                    relatedContracts: [],
                 })),
                 questions: undefined,
             }

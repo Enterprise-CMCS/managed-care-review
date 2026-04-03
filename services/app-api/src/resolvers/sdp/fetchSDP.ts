@@ -115,9 +115,11 @@ export function fetchSDPResolver(store: Store): QueryResolvers['fetchSDP'] {
                     context.oauthClient ? 'fetchSDP - oauthClient' : 'fetchSDP'
                 )
 
-                const relatedContracts: RelatedContractStripped[] | undefined =
-                    sdpWithHistory.relatedContracts
-                        ?.filter(
+                const mapRelatedContracts = (
+                    relatedContracts: any[] | undefined
+                ): RelatedContractStripped[] =>
+                    (relatedContracts ?? [])
+                        .filter(
                             (
                                 contract
                             ): contract is GraphQLSafeRelatedContract =>
@@ -140,7 +142,31 @@ export function fetchSDPResolver(store: Store): QueryResolvers['fetchSDP'] {
                 return {
                     sdp: {
                         ...sdpWithHistory,
-                        relatedContracts,
+                        draftRevision: sdpWithHistory.draftRevision
+                            ? {
+                                  ...sdpWithHistory.draftRevision,
+                                  relatedContracts: mapRelatedContracts(
+                                      sdpWithHistory.draftRevision
+                                          .relatedContracts
+                                  ),
+                              }
+                            : undefined,
+                        latestSubmittedRevision:
+                            sdpWithHistory.latestSubmittedRevision
+                                ? {
+                                      ...sdpWithHistory.latestSubmittedRevision,
+                                      relatedContracts: mapRelatedContracts(
+                                          sdpWithHistory.latestSubmittedRevision
+                                              .relatedContracts
+                                      ),
+                                  }
+                                : undefined,
+                        revisions: sdpWithHistory.revisions.map((revision) => ({
+                            ...revision,
+                            relatedContracts: mapRelatedContracts(
+                                revision.relatedContracts
+                            ),
+                        })),
                     },
                 } as any
             }

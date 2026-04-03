@@ -46,6 +46,10 @@ type ExistingSDPStateContactRow = {
     email: string | null
 }
 
+type ExistingRelatedContractRow = {
+    contractID: string
+}
+
 const parsePgArray = (
     value: string[] | string | null | undefined
 ): string[] => {
@@ -129,9 +133,10 @@ async function unlockSDP(
                 )
             }
 
-            const [documents, stateContacts] = await Promise.all([
-                tx.$queryRaw<ExistingSDPDocumentRow[]>(
-                    Prisma.sql`
+            const [documents, stateContacts, relatedContracts] =
+                await Promise.all([
+                    tx.$queryRaw<ExistingSDPDocumentRow[]>(
+                        Prisma.sql`
                         SELECT
                             "position",
                             "name",
@@ -144,9 +149,9 @@ async function unlockSDP(
                         WHERE "sdpRevisionID" = ${latestRevision.id}
                         ORDER BY "position" ASC, "createdAt" ASC
                     `
-                ),
-                tx.$queryRaw<ExistingSDPStateContactRow[]>(
-                    Prisma.sql`
+                    ),
+                    tx.$queryRaw<ExistingSDPStateContactRow[]>(
+                        Prisma.sql`
                         SELECT
                             "position",
                             "name",
@@ -156,8 +161,15 @@ async function unlockSDP(
                         WHERE "sdpRevisionID" = ${latestRevision.id}
                         ORDER BY "position" ASC, "createdAt" ASC
                     `
-                ),
-            ])
+                    ),
+                    tx.$queryRaw<ExistingRelatedContractRow[]>(
+                        Prisma.sql`
+                        SELECT "contractID"
+                        FROM "ContractSDPJoinTable"
+                        WHERE "sdpRevisionID" = ${latestRevision.id}
+                    `
+                    ),
+                ])
 
             const unlockInfo = await tx.updateInfoTable.create({
                 data: {
@@ -254,6 +266,22 @@ async function unlockSDP(
                             ${contact.email},
                             ${unlockedRevisionID}
                         )
+                    `
+                )
+            }
+
+            for (const relatedContract of relatedContracts) {
+                await tx.$executeRaw(
+                    Prisma.sql`
+                        INSERT INTO "ContractSDPJoinTable" (
+                            "contractID",
+                            "sdpRevisionID"
+                        )
+                        VALUES (
+                            ${relatedContract.contractID},
+                            ${unlockedRevisionID}
+                        )
+                        ON CONFLICT ("contractID", "sdpRevisionID") DO NOTHING
                     `
                 )
             }

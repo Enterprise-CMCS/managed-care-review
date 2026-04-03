@@ -96,7 +96,6 @@ model SDPTable {
 
   questions SDPQuestion[]
   revisions SDPRevisionTable[]
-  relatedContracts ContractSDPJoinTable[]
 }
 
 // Record of contract meta data overrides
@@ -196,13 +195,13 @@ model WithdrawnRatesJoinTable {
 }
 
 model ContractSDPJoinTable {
-  createdAt  DateTime      @default(now())
-  contractID String
-  contract   ContractTable @relation(fields: [contractID], references: [id])
-  sdpID      String
-  sdp        SDPTable      @relation(fields: [sdpID], references: [id])
+  createdAt      DateTime         @default(now())
+  contractID     String
+  contract       ContractTable    @relation(fields: [contractID], references: [id])
+  sdpRevisionID  String
+  sdpRevision    SDPRevisionTable @relation(fields: [sdpRevisionID], references: [id])
 
-  @@id([contractID, sdpID])
+  @@id([contractID, sdpRevisionID])
 }
 
 model ContractRevisionTable {
@@ -286,6 +285,7 @@ model SDPRevisionTable {
 
   sdpDocuments SDPDocument[]
   stateContacts SDPStateContact[]
+  relatedContracts ContractSDPJoinTable[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @default(now()) @updatedAt
