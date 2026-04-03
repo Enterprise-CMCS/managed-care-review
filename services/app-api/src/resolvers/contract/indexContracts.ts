@@ -6,7 +6,10 @@ import {
     hasCMSPermissions,
 } from '../../domain-models'
 import type { ContractType } from '../../domain-models'
-import type { QueryResolvers } from '../../gen/gqlServer'
+import type {
+    QueryResolvers,
+    ConsolidatedContractStatus,
+} from '../../gen/gqlServer'
 import { logError, logSuccess } from '../../logger'
 import type { Store } from '../../postgres'
 import { NotFoundError } from '../../postgres'
@@ -19,7 +22,6 @@ import { GraphQLError } from 'graphql/index'
 import type { ContractOrErrorArrayType } from '../../postgres/contractAndRates'
 import { canRead } from '../../authorization/oauthAuthorization'
 import { getLastUpdatedForDisplay } from '../helpers'
-import type { ConsolidatedContractStatus } from '../../gen/gqlClient'
 
 const parseContracts = (
     contractsWithHistory: ContractOrErrorArrayType,

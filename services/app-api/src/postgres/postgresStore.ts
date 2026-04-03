@@ -113,7 +113,7 @@ import type {
 } from './contractAndRates/withdrawContract'
 import { withdrawContract } from './contractAndRates/withdrawContract'
 import { findRateRelatedContracts } from './contractAndRates/findRateRelatedContracts'
-import type { RelatedContractStripped, SharedDocument } from '../gen/gqlClient'
+import type { RelatedContractStripped, SharedDocument } from '../gen/gqlServer'
 import {
     undoWithdrawContract,
     type UndoWithdrawContractArgsType,
