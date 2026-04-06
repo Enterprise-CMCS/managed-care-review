@@ -12,7 +12,7 @@ import { logError, logSuccess } from '../../logger'
 import { createForbiddenError, createUserInputError } from '../errorUtils'
 import { GraphQLError } from 'graphql/index'
 import type { Emailer } from '../../emailer'
-import { canWrite } from '../../authorization/oauthAuthorization'
+import { canOauthWrite } from '../../authorization/oauthAuthorization'
 
 export function withdrawRate(
     store: Store,
@@ -27,7 +27,7 @@ export function withdrawRate(
         span?.setAttribute('mcreview.package_id', rateID)
 
         // Check OAuth client read permissions
-        if (!canWrite(context)) {
+        if (!canOauthWrite(context)) {
             const errMessage = `OAuth client does not have write permissions`
             logError('withdrawRate', errMessage)
             setErrorAttributesOnActiveSpan(errMessage, span)

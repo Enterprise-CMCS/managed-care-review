@@ -205,6 +205,90 @@ describe('withdrawRate', () => {
         )
     })
 
+    it('denies OAuth client without write permissions', async () => {
+        const stateUser = testStateUser()
+        const stateServer = await constructTestPostgresServer({
+            context: {
+                user: stateUser,
+            },
+        })
+
+        const contract = await createAndSubmitTestContractWithRate(stateServer)
+        const rateID = contract.packageSubmissions[0].rateRevisions[0].rateID
+
+        const oauthServer = await constructTestPostgresServer({
+            context: {
+                user: testCMSUser(),
+                oauthClient: {
+                    clientId: 'test-oauth-client',
+                    grants: ['client_credentials'],
+                    iss: 'mcreview-test',
+                    scopes: [],
+                    isDelegatedUser: false,
+                },
+            },
+        })
+
+        const withdrawResult = await executeGraphQLOperation(oauthServer, {
+            query: WithdrawRateDocument,
+            variables: {
+                input: {
+                    rateID,
+                    updatedReason: 'OAuth withdraw attempt',
+                },
+            },
+        })
+
+        expect(withdrawResult.errors).toBeDefined()
+        expect(withdrawResult.errors?.[0].extensions?.code).toBe('FORBIDDEN')
+        expect(withdrawResult.errors?.[0].message).toBe(
+            'OAuth client does not have write permissions'
+        )
+    })
+
+    it('allows delegated OAuth client with submission scope to withdraw a rate', async () => {
+        const stateUser = testStateUser()
+        const stateServer = await constructTestPostgresServer({
+            context: {
+                user: stateUser,
+            },
+        })
+
+        const contract = await createAndSubmitTestContractWithRate(stateServer)
+        const rateID = contract.packageSubmissions[0].rateRevisions[0].rateID
+
+        const oauthServer = await constructTestPostgresServer({
+            context: {
+                user: testCMSUser(),
+                oauthClient: {
+                    clientId: 'test-oauth-client',
+                    grants: ['client_credentials'],
+                    iss: 'mcreview-test',
+                    scopes: ['CMS_SUBMISSION_ACTIONS'],
+                    isDelegatedUser: true,
+                },
+            },
+        })
+
+        const withdrawResult = await executeGraphQLOperation(oauthServer, {
+            query: WithdrawRateDocument,
+            variables: {
+                input: {
+                    rateID,
+                    updatedReason: 'Delegated OAuth withdraw',
+                },
+            },
+        })
+
+        expect(withdrawResult.errors).toBeUndefined()
+        expect(withdrawResult.data?.withdrawRate.rate).toEqual(
+            expect.objectContaining({
+                reviewStatus: 'WITHDRAWN',
+                consolidatedStatus: 'WITHDRAWN',
+            })
+        )
+    })
+
     // No known path exists for a child rate to be submitted while its parent contract is withdrawn.
     // However, we allow rate withdrawal in this edge case so CMS can fix rates without valid parent
     // contracts, which warrants testing.
