@@ -290,7 +290,7 @@ describe('ProgramSelect', () => {
             deprecatedProgram,
         ])
 
-        renderWithProviders(
+        const { rerender } = renderWithProviders(
             <ProgramSelect
                 name="programSelect"
                 programIDs={[deprecatedProgram.id]}
@@ -317,17 +317,29 @@ describe('ProgramSelect', () => {
             ).toBeInTheDocument()
         })
 
-        const removeDeprecated = await screen.findByLabelText(
-            'Remove Deprecated Program (Retired)'
+        // Re-render with empty programIDs to simulate Formik updating
+        // after the deprecated program is removed from the selection
+        rerender(
+            <ProgramSelect
+                name="programSelect"
+                programIDs={[]}
+                onChange={mockOnChange}
+                contractProgramsOnly
+            />
         )
-        await userEvent.click(removeDeprecated)
 
-        await selectEvent.openMenu(combobox)
+        const updatedCombobox = await screen.findByRole('combobox')
+        await selectEvent.openMenu(updatedCombobox)
 
         await waitFor(() => {
+            // Deprecated program is no longer in the dropdown
             expect(
                 screen.queryByText('Deprecated Program (Retired)')
             ).not.toBeInTheDocument()
+            // Active programs are still available
+            expect(screen.getByText('SNBC')).toBeInTheDocument()
+            expect(screen.getByText('PMAP')).toBeInTheDocument()
+            expect(screen.getByText('MSC+')).toBeInTheDocument()
         })
     })
 })
