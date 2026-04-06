@@ -30,6 +30,14 @@ vi.mock('formik', () => {
 
 describe('ProgramSelect', () => {
     let mockOnChange = vi.fn()
+    const deprecatedProgram = {
+        id: 'deprecated-program-id',
+        name: 'Deprecated Program',
+        fullName: 'Deprecated Program Full Name',
+        isRateProgram: false,
+        isDeprecated: true,
+    }
+
     beforeEach(() => {
         //Spy on useStatePrograms hook to get up-to-date state programs
         vi.spyOn(useStatePrograms, 'useStatePrograms').mockReturnValue(
@@ -201,5 +209,125 @@ describe('ProgramSelect', () => {
         // in react-select, only items that are selected have a "remove item" label
         expect(screen.queryByLabelText('Remove SNBC')).toBeNull()
         expect(screen.queryByLabelText('Remove MSHO')).toBeNull()
+    })
+
+    it('does not display deprecated programs for new submissions', async () => {
+        vi.spyOn(useStatePrograms, 'useStatePrograms').mockReturnValue([
+            ...mockMNState().programs,
+            deprecatedProgram,
+        ])
+
+        renderWithProviders(
+            <ProgramSelect
+                name="programSelect"
+                programIDs={[]}
+                onChange={mockOnChange}
+                contractProgramsOnly
+            />,
+            {
+                apolloProvider: {
+                    mocks: [
+                        fetchCurrentUserMock({
+                            statusCode: 200,
+                        }),
+                    ],
+                },
+            }
+        )
+
+        const combobox = await screen.findByRole('combobox')
+
+        await selectEvent.openMenu(combobox)
+
+        await waitFor(() => {
+            expect(
+                screen.queryByText('Deprecated Program (Retired)')
+            ).not.toBeInTheDocument()
+        })
+    })
+
+    it('displays deprecated programs when already selected on an existing submission', async () => {
+        vi.spyOn(useStatePrograms, 'useStatePrograms').mockReturnValue([
+            ...mockMNState().programs,
+            deprecatedProgram,
+        ])
+
+        renderWithProviders(
+            <ProgramSelect
+                name="programSelect"
+                programIDs={[deprecatedProgram.id]}
+                onChange={mockOnChange}
+                contractProgramsOnly
+            />,
+            {
+                apolloProvider: {
+                    mocks: [
+                        fetchCurrentUserMock({
+                            statusCode: 200,
+                        }),
+                    ],
+                },
+            }
+        )
+
+        expect(
+            await screen.findByLabelText('Remove Deprecated Program (Retired)')
+        ).toBeInTheDocument()
+
+        const combobox = await screen.findByRole('combobox')
+        await selectEvent.openMenu(combobox)
+
+        await waitFor(() => {
+            expect(
+                screen.getByText('Deprecated Program (Retired)')
+            ).toBeInTheDocument()
+        })
+    })
+
+    it('removes deprecated programs from the dropdown once they are unselected', async () => {
+        vi.spyOn(useStatePrograms, 'useStatePrograms').mockReturnValue([
+            ...mockMNState().programs,
+            deprecatedProgram,
+        ])
+
+        renderWithProviders(
+            <ProgramSelect
+                name="programSelect"
+                programIDs={[deprecatedProgram.id]}
+                onChange={mockOnChange}
+                contractProgramsOnly
+            />,
+            {
+                apolloProvider: {
+                    mocks: [
+                        fetchCurrentUserMock({
+                            statusCode: 200,
+                        }),
+                    ],
+                },
+            }
+        )
+
+        const combobox = await screen.findByRole('combobox')
+        await selectEvent.openMenu(combobox)
+
+        await waitFor(() => {
+            expect(
+                screen.getByText('Deprecated Program (Retired)')
+            ).toBeInTheDocument()
+        })
+
+        const removeDeprecated = await screen.findByLabelText(
+            'Remove Deprecated Program (Retired)'
+        )
+        await userEvent.click(removeDeprecated)
+
+        await selectEvent.openMenu(combobox)
+
+        await waitFor(() => {
+            expect(
+                screen.queryByText('Deprecated Program (Retired)')
+            ).not.toBeInTheDocument()
+        })
     })
 })

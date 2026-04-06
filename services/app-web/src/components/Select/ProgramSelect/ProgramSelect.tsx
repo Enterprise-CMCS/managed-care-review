@@ -39,9 +39,19 @@ export const ProgramSelect = ({
         ? allPrograms.filter((program) => !program.isRateProgram)
         : allPrograms
 
-    const programOptions: ProgramOptionType[] = statePrograms.map((program) => {
-        return { value: program.id, label: program.name }
-    })
+    const programOptions: ProgramOptionType[] = statePrograms
+        .filter(
+            (program) =>
+                !program.isDeprecated || programIDs.includes(program.id)
+        )
+        .map((program) => {
+            return {
+                value: program.id,
+                label: program.isDeprecated
+                    ? `${program.name} (inactive)`
+                    : program.name,
+            }
+        })
 
     const { logDropdownSelectionEvent } = useTealium()
 
@@ -94,7 +104,9 @@ export const ProgramSelect = ({
                 }
                 return {
                     value: program.id,
-                    label: program.name,
+                    label: program.isDeprecated
+                        ? `${program.name} (Retired)`
+                        : program.name,
                 }
             })}
             className={styles.multiSelect}
