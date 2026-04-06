@@ -91,7 +91,7 @@
         "@trussworks/react-uswds": "^4.0.0",
         "@vitejs/plugin-react": "^5.0.4",
         "amazon-cognito-identity-js": "^6.3.12",
-        "aws-amplify": "^5.0.10",
+        "aws-amplify": "^5.3.33",
         "axios": "^1.14.0",
         "dayjs": "^1.11.19",
         "formik": "^2.4.9",
