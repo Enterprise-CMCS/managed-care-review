@@ -29,6 +29,7 @@ import { StringParameter } from 'aws-cdk-lib/aws-ssm'
 import { Secret } from 'aws-cdk-lib/aws-secretsmanager'
 import { LogGroup } from 'aws-cdk-lib/aws-logs'
 import { ResourceNames } from '../config/shared'
+import { isReviewEnvironment } from '../config/environments'
 import {
     Architecture,
     Runtime,
@@ -99,10 +100,10 @@ export class AppApiStack extends BaseStack {
         // per review environment causes ResourceExistenceCheck failures on first-time stack
         // creation when the new IAM role doesn't exist yet. Dev/val/prod stacks own this
         // setting in their respective accounts and are unaffected.
-        const isReview = this.stageConfig.environment === 'review'
+        const isReview = isReviewEnvironment(this.stage)
 
         // Import security group from Network stack CloudFormation exports
-        const networkStackName = `network-${this.stage}-cdk`
+        const networkStackName = ResourceNames.stackName('network', this.stage)
         this.applicationSecurityGroup = SecurityGroup.fromSecurityGroupId(
             this,
             'ImportedApplicationSG',
@@ -114,7 +115,9 @@ export class AppApiStack extends BaseStack {
             this.devSecurityGroup = SecurityGroup.fromSecurityGroupId(
                 this,
                 'ImportedDevSG',
-                Fn.importValue('network-dev-cdk-ApplicationSecurityGroupId')
+                Fn.importValue(
+                    `${ResourceNames.stackName('network', 'dev')}-ApplicationSecurityGroupId`
+                )
             )
         }
 
@@ -236,12 +239,7 @@ export class AppApiStack extends BaseStack {
         )
 
         // Populate common lambda parameters into variables to be used during function creation
-        // Review environments need both their own SG and DEV SG to access shared DEV Aurora
-        // Dev/val/prod only need their own SG to access their dedicated Aurora cluster
-        const securityGroups = [this.applicationSecurityGroup]
-        if (this.devSecurityGroup) {
-            securityGroups.push(this.devSecurityGroup)
-        }
+        const securityGroups = this.getLambdaSecurityGroups()
         const role = this.createLambdaRole()
         const environment = this.getLambdaEnvironment()
 
@@ -742,6 +740,16 @@ export class AppApiStack extends BaseStack {
             ]),
             ...options,
         })
+    }
+
+    /**
+     * Returns the security groups for VPC-connected Lambda functions.
+     * Review environments include the DEV SG to access the shared DEV Aurora cluster.
+     */
+    private getLambdaSecurityGroups(): ISecurityGroup[] {
+        const sgs: ISecurityGroup[] = [this.applicationSecurityGroup]
+        if (this.devSecurityGroup) sgs.push(this.devSecurityGroup)
+        return sgs
     }
 
     private createLambdaRole(): Role {
