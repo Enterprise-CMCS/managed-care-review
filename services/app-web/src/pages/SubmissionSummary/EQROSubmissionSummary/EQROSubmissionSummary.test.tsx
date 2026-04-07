@@ -1,5 +1,6 @@
 import { screen, waitFor, within } from '@testing-library/react'
 import { RoutesRecord } from '@mc-review/constants'
+import { featureFlags } from '@mc-review/common-code'
 import {
     fetchCurrentUserMock,
     fetchContractWithQuestionsMockSuccess,
@@ -50,7 +51,9 @@ describe('EQROSubmissionSummary - Unlock submission button tests', () => {
                     routerProvider: {
                         route: '/submissions/eqro/test-abc-123',
                     },
-                    featureFlags: {},
+                    featureFlags: {
+                        [featureFlags.EQRO_SUBMISSIONS.flag]: true,
+                    },
                 }
             )
 
@@ -119,7 +122,9 @@ describe('EQROSubmissionSummary - Unlock submission button tests', () => {
                     routerProvider: {
                         route: '/submissions/eqro/test-abc-123',
                     },
-                    featureFlags: {},
+                    featureFlags: {
+                        [featureFlags.EQRO_SUBMISSIONS.flag]: true,
+                    },
                 }
             )
 
@@ -180,7 +185,9 @@ describe('EQROSubmissionSummary - Unlock submission button tests', () => {
                     routerProvider: {
                         route: '/submissions/eqro/test-abc-123',
                     },
-                    featureFlags: {},
+                    featureFlags: {
+                        [featureFlags.EQRO_SUBMISSIONS.flag]: true,
+                    },
                 }
             )
 
@@ -243,7 +250,9 @@ describe('EQROSubmissionSummary - Unlock submission button tests', () => {
                     routerProvider: {
                         route: '/submissions/eqro/test-abc-123',
                     },
-                    featureFlags: {},
+                    featureFlags: {
+                        [featureFlags.EQRO_SUBMISSIONS.flag]: true,
+                    },
                 }
             )
 
@@ -306,7 +315,9 @@ describe('EQROSubmissionSummary - Unlock submission button tests', () => {
                     routerProvider: {
                         route: '/submissions/eqro/test-abc-123',
                     },
-                    featureFlags: {},
+                    featureFlags: {
+                        [featureFlags.EQRO_SUBMISSIONS.flag]: true,
+                    },
                 }
             )
 
@@ -387,7 +398,9 @@ describe('EQROSubmissionSummary - Unlock submission button tests', () => {
                     routerProvider: {
                         route: '/submissions/eqro/test-abc-123',
                     },
-                    featureFlags: {},
+                    featureFlags: {
+                        [featureFlags.EQRO_SUBMISSIONS.flag]: true,
+                    },
                 }
             )
 
@@ -436,7 +449,9 @@ describe('EQROSubmissionSummary - Unlock submission button tests', () => {
                     routerProvider: {
                         route: '/submissions/eqro/test-abc-123',
                     },
-                    featureFlags: {},
+                    featureFlags: {
+                        [featureFlags.EQRO_SUBMISSIONS.flag]: true,
+                    },
                 }
             )
 
@@ -505,7 +520,9 @@ describe('EQROSubmissionSummary - Unlock submission button tests', () => {
                     routerProvider: {
                         route: '/submissions/eqro/test-abc-123',
                     },
-                    featureFlags: {},
+                    featureFlags: {
+                        [featureFlags.EQRO_SUBMISSIONS.flag]: true,
+                    },
                 }
             )
 
@@ -588,7 +605,9 @@ describe('EQROSubmissionSummary - Unlock submission button tests', () => {
                     routerProvider: {
                         route: '/submissions/eqro/test-abc-123',
                     },
-                    featureFlags: {},
+                    featureFlags: {
+                        [featureFlags.EQRO_SUBMISSIONS.flag]: true,
+                    },
                 }
             )
 
@@ -651,7 +670,9 @@ describe('EQROSubmissionSummary - Unlock submission button tests', () => {
                     routerProvider: {
                         route: '/submissions/eqro/test-abc-123',
                     },
-                    featureFlags: {},
+                    featureFlags: {
+                        [featureFlags.EQRO_SUBMISSIONS.flag]: true,
+                    },
                 }
             )
 
@@ -714,7 +735,9 @@ describe('EQROSubmissionSummary - Unlock submission button tests', () => {
                     routerProvider: {
                         route: '/submissions/eqro/test-abc-123',
                     },
-                    featureFlags: {},
+                    featureFlags: {
+                        [featureFlags.EQRO_SUBMISSIONS.flag]: true,
+                    },
                 }
             )
 
