@@ -267,7 +267,19 @@ jobs:
           SUBNET_PRIVATE_C_ID: ${{ secrets.DEV_SUBNET_PRIVATE_C_ID }}
         run: |
           echo "=== Deploying Network stack ==="
-          pnpm cdk deploy network-dev-cdk \
+          export_name="network-dev-cdk-LambdaSecurityGroupId"
+          existing_sg_id=$(aws cloudformation list-exports \
+            --query "Exports[?Name=='${export_name}'].Value" \
+            --output text)
+
+          if [ -n "$existing_sg_id" ] && [ "$existing_sg_id" != "None" ]; then
+            echo "Preserving existing Lambda security group export for ${export_name}"
+            deploy_sg_id="$existing_sg_id"
+          else
+            deploy_sg_id="$SG_ID"
+          fi
+
+          SG_ID="$deploy_sg_id" pnpm cdk deploy network-dev-cdk \
             --app 'pnpm tsx bin/network.ts' \
             --context stage=dev \
             --require-approval never
@@ -614,7 +626,19 @@ jobs:
           SUBNET_PRIVATE_C_ID: ${{ secrets.VAL_SUBNET_PRIVATE_C_ID }}
         run: |
           echo "=== Deploying Network stack ==="
-          pnpm cdk deploy network-val-cdk \
+          export_name="network-val-cdk-LambdaSecurityGroupId"
+          existing_sg_id=$(aws cloudformation list-exports \
+            --query "Exports[?Name=='${export_name}'].Value" \
+            --output text)
+
+          if [ -n "$existing_sg_id" ] && [ "$existing_sg_id" != "None" ]; then
+            echo "Preserving existing Lambda security group export for ${export_name}"
+            deploy_sg_id="$existing_sg_id"
+          else
+            deploy_sg_id="$SG_ID"
+          fi
+
+          SG_ID="$deploy_sg_id" pnpm cdk deploy network-val-cdk \
             --app 'pnpm tsx bin/network.ts' \
             --context stage=val \
             --require-approval never
@@ -953,7 +977,19 @@ jobs:
           SUBNET_PRIVATE_C_ID: ${{ secrets.PROD_SUBNET_PRIVATE_C_ID }}
         run: |
           echo "=== Deploying Network stack ==="
-          pnpm cdk deploy network-prod-cdk \
+          export_name="network-prod-cdk-LambdaSecurityGroupId"
+          existing_sg_id=$(aws cloudformation list-exports \
+            --query "Exports[?Name=='${export_name}'].Value" \
+            --output text)
+
+          if [ -n "$existing_sg_id" ] && [ "$existing_sg_id" != "None" ]; then
+            echo "Preserving existing Lambda security group export for ${export_name}"
+            deploy_sg_id="$existing_sg_id"
+          else
+            deploy_sg_id="$SG_ID"
+          fi
+
+          SG_ID="$deploy_sg_id" pnpm cdk deploy network-prod-cdk \
             --app 'pnpm tsx bin/network.ts' \
             --context stage=prod \
             --require-approval never
