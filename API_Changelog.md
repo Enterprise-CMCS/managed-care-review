@@ -1,5 +1,21 @@
 # Managed Care Review - API Changelog
-## This document highlights API changes that have been introduced since May 2025
+## This document highlights API changes that have been introduced since May 2025. See the full [GraphQL schema](services/app-graphql/src/schema.graphql).
+
+### April 1, 2026
+#### Added
+- `isDeprecated` and `deprecatedByProgramId` added to the `Program` GraphQL type.
+   - `isDeprecated` required `Boolean`, indicates whether the program has been retired from new selection.
+   - `deprecatedByProgramId` nullable `String`, optionally identifies the replacement program when one exists.
+   - Affected endpoints:
+     - `fetchCurrentUser`
+     - `fetchContract`
+     - `fetchRate`
+     - `fetchMcReviewSettings`
+     - `indexContracts`
+     - `indexContractsStripped`
+     - `indexRates`
+     - `indexRatesStripped`
+     - `indexUsers`
 
 ### March 16, 2026
 #### Added

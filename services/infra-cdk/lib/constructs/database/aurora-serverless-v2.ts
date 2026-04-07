@@ -18,7 +18,6 @@ export interface AuroraServerlessV2Props {
     vpc: IVpc
     vpcSubnets: SubnetSelection
     securityGroup: ISecurityGroup
-    additionalSecurityGroups?: ISecurityGroup[]
     databaseConfig: DatabaseConfig
 }
 
@@ -90,10 +89,7 @@ export class AuroraServerlessV2 extends Construct {
             defaultDatabaseName: `aurora_postgres_${props.stage}_${Stack.of(this).account}_cdk`,
             vpc: props.vpc,
             vpcSubnets: props.vpcSubnets,
-            securityGroups: [
-                props.securityGroup,
-                ...(props.additionalSecurityGroups || []),
-            ],
+            securityGroups: [props.securityGroup],
             serverlessV2MinCapacity: props.databaseConfig.minCapacity,
             serverlessV2MaxCapacity: props.databaseConfig.maxCapacity,
             enableDataApi: props.databaseConfig.enableDataApi,
