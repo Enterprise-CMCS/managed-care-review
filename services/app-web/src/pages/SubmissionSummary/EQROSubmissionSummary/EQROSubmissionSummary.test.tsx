@@ -63,6 +63,12 @@ describe('EQROSubmissionSummary - Unlock submission button tests', () => {
                 ).toBeInTheDocument()
             })
 
+            expect(
+                screen.getByRole('link', {
+                    name: 'Contract questions',
+                })
+            ).toBeInTheDocument()
+
             // Expect unlock submission button to be present
             expect(
                 screen.getByRole('button', {
