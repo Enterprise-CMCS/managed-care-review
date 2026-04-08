@@ -14,6 +14,7 @@ import { renderWithProviders } from '../../../testHelpers'
 import { Route, Routes } from 'react-router-dom'
 import { SubmissionSideNav } from '../../SubmissionSideNav'
 import { RoutesRecord } from '@mc-review/constants'
+import { featureFlags } from '@mc-review/common-code'
 import { ContractQuestionResponse } from './ContractQuestionResponse'
 import { SubmissionSummary } from '../../SubmissionSummary'
 import { screen, waitFor, within } from '@testing-library/react'
@@ -218,6 +219,46 @@ describe('ContractQuestionResponse', () => {
                 name: 'Upload response',
             })
             expect(addResponse).not.toBeInTheDocument()
+        })
+
+        it('renders for EQRO submissions when the feature flag is on', async () => {
+            renderWithProviders(
+                <Routes>
+                    <Route
+                        path={
+                            RoutesRecord.SUBMISSIONS_CONTRACT_QUESTIONS_AND_ANSWERS
+                        }
+                        element={<ContractQuestionResponse />}
+                    />
+                </Routes>,
+                {
+                    apolloProvider: {
+                        mocks: [
+                            fetchCurrentUserMock({
+                                user: mockValidStateUser(),
+                                statusCode: 200,
+                            }),
+                            fetchContractWithQuestionsMockSuccess({
+                                contract: {
+                                    ...mockContractPackageSubmittedWithQuestions(),
+                                    id: 'test-contract-id',
+                                    contractSubmissionType: 'EQRO',
+                                },
+                            }),
+                        ],
+                    },
+                    routerProvider: {
+                        route: '/submissions/eqro/test-contract-id/question-and-answers',
+                    },
+                    featureFlags: {
+                        [featureFlags.EQRO_SUBMISSIONS.flag]: true,
+                    },
+                }
+            )
+
+            expect(
+                await screen.findByRole('heading', { name: 'Contract Q&A' })
+            ).toBeInTheDocument()
         })
 
         it('renders error page if contract is in draft', async () => {
@@ -480,6 +521,49 @@ describe('ContractQuestionResponse', () => {
                 name: 'Add questions',
             })
             expect(addQuestion).toBeInTheDocument()
+        })
+
+        it('renders Add questions link for EQRO when the feature flag is on', async () => {
+            renderWithProviders(<CommonCMSRoutes />, {
+                apolloProvider: {
+                    mocks: [
+                        fetchCurrentUserMock({
+                            user: mockValidCMSUser(),
+                            statusCode: 200,
+                        }),
+                        fetchRateMockSuccess({
+                            id: 'test-contract-id',
+                        }),
+                        fetchContractWithQuestionsMockSuccess({
+                            contract: {
+                                ...mockContractPackageSubmittedWithQuestions(),
+                                id: 'test-contract-id',
+                                contractSubmissionType: 'EQRO',
+                            },
+                        }),
+                        fetchContractWithQuestionsMockSuccess({
+                            contract: {
+                                ...mockContractPackageSubmittedWithQuestions(),
+                                id: 'test-contract-id',
+                                contractSubmissionType: 'EQRO',
+                            },
+                        }),
+                    ],
+                },
+                routerProvider: {
+                    route: `/submissions/eqro/test-contract-id/question-and-answers`,
+                },
+                featureFlags: {
+                    [featureFlags.EQRO_SUBMISSIONS.flag]: true,
+                },
+            })
+
+            expect(
+                await screen.findByRole('link', { name: 'Add questions' })
+            ).toHaveAttribute(
+                'href',
+                '/submissions/eqro/test-contract-id/question-and-answers/dmco/upload-questions'
+            )
         })
 
         it('does not render an Add questions button for an approved contract', async () => {

@@ -25,7 +25,7 @@
         "aws-cdk": "2.1107.0",
         "esbuild": "^0.25.5",
         "eslint": "^9.31.0",
-        "eslint-plugin-jest": "^29.2.1",
+        "eslint-plugin-jest": "^29.15.1",
         "fs-extra": "^11.3.3",
         "jest": "^30.2.0",
         "jiti": "^2.0.0",
@@ -39,7 +39,7 @@
         "typescript-eslint": "^8.56.0"
     },
     "dependencies": {
-        "@aws-sdk/client-secrets-manager": "^3.1023.0",
+        "@aws-sdk/client-secrets-manager": "^3.1026.0",
         "@aws-solutions-constructs/aws-apigateway-lambda": "2.100.1",
         "@aws-solutions-constructs/aws-cloudfront-s3": "2.94.0",
         "@aws-solutions-constructs/aws-cognito-apigateway-lambda": "2.92.1",

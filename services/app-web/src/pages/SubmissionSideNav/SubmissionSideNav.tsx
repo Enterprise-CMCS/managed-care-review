@@ -1,4 +1,5 @@
 import { SideNav, GridContainer, Icon } from '@trussworks/react-uswds'
+import { useLDClient } from 'launchdarkly-react-client-sdk'
 import styles from './SubmissionSideNav.module.scss'
 import { useLocation, Outlet, useParams } from 'react-router-dom'
 import { useAuth } from '../../contexts/AuthContext'
@@ -8,6 +9,7 @@ import {
     RoutesRecord,
     STATE_SUBMISSION_FORM_ROUTES,
 } from '@mc-review/constants'
+import { featureFlags } from '@mc-review/common-code'
 import { getRouteName, getSubmissionPath } from '../../routeHelpers'
 import {
     ContractFormData,
@@ -45,8 +47,13 @@ export const SubmissionSideNav = () => {
         )
     }
     const { loggedInUser } = useAuth()
+    const ldClient = useLDClient()
     const { pathname } = useLocation()
     const routeName = getRouteName(pathname)
+    const showEqroSubmissions: boolean = ldClient?.variation(
+        featureFlags.EQRO_SUBMISSIONS.flag,
+        featureFlags.EQRO_SUBMISSIONS.defaultValue
+    )
 
     const isSelectedLink = (route: string | string[]): string => {
         //We pass an array of the form routes in order to display the sideNav on all of the pages
@@ -110,6 +117,10 @@ export const SubmissionSideNav = () => {
         return <Error404 />
     }
 
+    if (contractSubmissionType === 'EQRO' && !showEqroSubmissions) {
+        return <Error404 />
+    }
+
     //The sideNav should not be visible to a state user if the submission is a draft that has never been submitted
     const showSidebar =
         submissionStatus !== 'DRAFT' &&
@@ -157,7 +168,6 @@ export const SubmissionSideNav = () => {
     )
 
     const generateContractQuestion = () => {
-        if (contractSubmissionType === 'EQRO') return null
         return (
             <NavLinkWithLogging
                 to={getSubmissionPath(
