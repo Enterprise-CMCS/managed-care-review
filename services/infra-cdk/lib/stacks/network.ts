@@ -19,11 +19,9 @@ export interface NetworkProps extends BaseStackProps {
  *
  * Environment variables required:
  * - VPC_ID: The existing VPC ID to use
- * - SG_ID: The existing security group ID for Lambda functions
  */
 export class Network extends BaseStack {
     public readonly vpc: IVpc
-    public readonly lambdaSecurityGroup: ISecurityGroup
     public readonly applicationSecurityGroup: ISecurityGroup
 
     constructor(scope: Construct, id: string, props: NetworkProps) {
@@ -37,7 +35,6 @@ export class Network extends BaseStack {
 
         // Initialize resources directly in constructor (standard CDK pattern)
         this.vpc = this.importVpc()
-        this.lambdaSecurityGroup = this.importSecurityGroup()
         this.applicationSecurityGroup = this.createApplicationSecurityGroup()
 
         // Create outputs for other stacks to reference
@@ -50,7 +47,6 @@ export class Network extends BaseStack {
     private validateEnvironment(): void {
         const required = [
             'VPC_ID',
-            'SG_ID',
             'SUBNET_PRIVATE_A_ID',
             'SUBNET_PRIVATE_B_ID',
             'SUBNET_PRIVATE_C_ID',
@@ -72,18 +68,6 @@ export class Network extends BaseStack {
         return Vpc.fromLookup(this, 'ExistingVpc', {
             vpcId: process.env.VPC_ID!,
         })
-    }
-
-    /**
-     * Import existing security group using SG_ID environment variable
-     * Same pattern as serverless: securityGroupIds: - ${self:custom.sgId}
-     */
-    private importSecurityGroup(): ISecurityGroup {
-        return SecurityGroup.fromSecurityGroupId(
-            this,
-            'ExistingLambdaSG',
-            process.env.SG_ID!
-        )
     }
 
     /**
@@ -124,17 +108,6 @@ export class Network extends BaseStack {
     }
 
     /**
-     * Get VPC configuration for Lambda functions
-     * Matches serverless vpc configuration exactly
-     */
-    public getVpcConfig(): { securityGroupIds: string[]; subnetIds: string[] } {
-        return {
-            securityGroupIds: [process.env.SG_ID!],
-            subnetIds: this.getPrivateSubnetIds(),
-        }
-    }
-
-    /**
      * Create stack outputs for other stacks to reference
      */
     private createOutputs(): void {
@@ -142,12 +115,6 @@ export class Network extends BaseStack {
             value: this.vpc.vpcId,
             exportName: this.exportName('VpcId'),
             description: 'VPC ID for Lambda functions',
-        })
-
-        new CfnOutput(this, 'LambdaSecurityGroupId', {
-            value: this.lambdaSecurityGroup.securityGroupId,
-            exportName: this.exportName('LambdaSecurityGroupId'),
-            description: 'Security Group ID for Lambda functions',
         })
 
         new CfnOutput(this, 'ApplicationSecurityGroupId', {

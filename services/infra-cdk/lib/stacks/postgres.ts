@@ -33,6 +33,7 @@ import {
 import { CfnOutput, Duration, Fn, Tags } from 'aws-cdk-lib'
 import { AuroraServerlessV2 } from '../constructs/database'
 import { isReviewEnvironment } from '../config/environments'
+import { ResourceNames } from '../config/shared'
 import { join } from 'path'
 
 export interface PostgresProps extends BaseStackProps {
@@ -55,8 +56,8 @@ export class Postgres extends BaseStack {
     public readonly bastionHost?: Instance
 
     private readonly vpc: IVpc
-    private readonly lambdaSecurityGroup: ISecurityGroup
     private readonly applicationSecurityGroup: ISecurityGroup
+    private readonly devSecurityGroup?: ISecurityGroup
 
     constructor(scope: Construct, id: string, props: PostgresProps) {
         super(scope, id, {
@@ -70,20 +71,26 @@ export class Postgres extends BaseStack {
             vpcId: process.env.VPC_ID!,
         })
 
-        // Import security groups from Network stack CloudFormation exports
-        const networkStackName = `network-${this.stage}-cdk`
-        this.lambdaSecurityGroup = SecurityGroup.fromSecurityGroupId(
-            this,
-            'ImportedLambdaSG',
-            Fn.importValue(`${networkStackName}-LambdaSecurityGroupId`)
-        )
+        const isReview = isReviewEnvironment(this.stage)
+
+        // Import security group from Network stack CloudFormation exports
+        const networkStackName = ResourceNames.stackName('network', this.stage)
         this.applicationSecurityGroup = SecurityGroup.fromSecurityGroupId(
             this,
             'ImportedApplicationSG',
             Fn.importValue(`${networkStackName}-ApplicationSecurityGroupId`)
         )
 
-        const isReview = isReviewEnvironment(this.stage)
+        // Review environments need DEV security group to access shared DEV Aurora database
+        if (isReview) {
+            this.devSecurityGroup = SecurityGroup.fromSecurityGroupId(
+                this,
+                'ImportedDevSG',
+                Fn.importValue(
+                    `${ResourceNames.stackName('network', 'dev')}-ApplicationSecurityGroupId`
+                )
+            )
+        }
 
         // Create VPC endpoint for Secrets Manager (needed by Lambda functions)
         this.vpcEndpoint = this.createSecretsManagerVpcEndpoint()
@@ -103,8 +110,7 @@ export class Postgres extends BaseStack {
                 vpcSubnets: {
                     subnetType: SubnetType.PRIVATE_WITH_EGRESS,
                 },
-                securityGroup: this.lambdaSecurityGroup,
-                additionalSecurityGroups: [this.applicationSecurityGroup],
+                securityGroup: this.applicationSecurityGroup,
                 databaseConfig: this.stageConfig.database,
             })
 
@@ -129,13 +135,20 @@ export class Postgres extends BaseStack {
     }
 
     /**
+     * Returns the security groups for VPC-connected resources.
+     * Review environments include the DEV SG to access the shared DEV Aurora cluster.
+     */
+    private getLambdaSecurityGroups(): ISecurityGroup[] {
+        const sgs: ISecurityGroup[] = [this.applicationSecurityGroup]
+        if (this.devSecurityGroup) sgs.push(this.devSecurityGroup)
+        return sgs
+    }
+
+    /**
      * Create VPC endpoint for Secrets Manager (required by Lambda functions)
      */
     private createSecretsManagerVpcEndpoint(): InterfaceVpcEndpoint {
-        const securityGroups = [
-            this.lambdaSecurityGroup,
-            this.applicationSecurityGroup,
-        ]
+        const securityGroups = this.getLambdaSecurityGroups()
 
         return new InterfaceVpcEndpoint(this, 'SecretsManagerVPCEndpoint', {
             vpc: this.vpc,
@@ -154,7 +167,7 @@ export class Postgres extends BaseStack {
      */
     private createJwtSecret(): ISecret {
         return new Secret(this, 'JwtSecret', {
-            secretName: `api-jwt-secret-${this.stage}-cdk`,
+            secretName: `api-jwt-secret-${this.stage}-cdk`, // pragma: allowlist secret
             description: 'JWT secret for API authentication',
             generateSecretString: {
                 secretStringTemplate: '{}',
@@ -173,7 +186,7 @@ export class Postgres extends BaseStack {
         // Create a placeholder secret with _cdk suffix to avoid serverless conflicts: aurora_postgres_{stage}_cdk
         // The Lambda will update this with the actual logical database connection info
         return new Secret(this, 'ReviewDatabaseSecret', {
-            secretName: `aurora_postgres_${this.stage}_cdk`,
+            secretName: `aurora_postgres_${this.stage}_cdk`, // pragma: allowlist secret
             description: `Logical database credentials for review environment ${this.stage}`,
             generateSecretString: {
                 secretStringTemplate: '{"username": "placeholder"}',
@@ -188,10 +201,7 @@ export class Postgres extends BaseStack {
      * Create logical database manager Lambda function
      */
     private createLogicalDbManagerLambda(): NodejsFunction {
-        const securityGroups = [
-            this.lambdaSecurityGroup,
-            this.applicationSecurityGroup,
-        ]
+        const securityGroups = this.getLambdaSecurityGroups()
 
         // Use NodejsFunction to bundle the TypeScript code from postgres service
         const dbManagerFunction = new NodejsFunction(
@@ -221,7 +231,7 @@ export class Postgres extends BaseStack {
                 },
                 securityGroups,
                 environment: {
-                    SECRETS_MANAGER_ENDPOINT: `https://secretsmanager.${this.region}.amazonaws.com`,
+                    SECRETS_MANAGER_ENDPOINT: `https://secretsmanager.${this.region}.amazonaws.com`, // pragma: allowlist secret
                     DB_SECRET_ARN: this.databaseSecret.secretArn,
                     ...(this.cluster && {
                         DB_CLUSTER_ARN: this.cluster.clusterArn,

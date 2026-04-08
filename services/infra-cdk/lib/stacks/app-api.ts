@@ -29,6 +29,7 @@ import { StringParameter } from 'aws-cdk-lib/aws-ssm'
 import { Secret } from 'aws-cdk-lib/aws-secretsmanager'
 import { LogGroup } from 'aws-cdk-lib/aws-logs'
 import { ResourceNames } from '../config/shared'
+import { isReviewEnvironment } from '../config/environments'
 import {
     Architecture,
     Runtime,
@@ -79,8 +80,8 @@ export class AppApiStack extends BaseStack {
 
     // Network resources from Network stack
     private readonly vpc: IVpc
-    private readonly lambdaSecurityGroup: ISecurityGroup
     private readonly applicationSecurityGroup: ISecurityGroup
+    private readonly devSecurityGroup?: ISecurityGroup
 
     constructor(scope: Construct, id: string, props: AppApiStackProps) {
         super(scope, id, {
@@ -94,25 +95,31 @@ export class AppApiStack extends BaseStack {
             vpcId: process.env.VPC_ID!,
         })
 
-        // Import security groups from Network stack CloudFormation exports
-        const networkStackName = `network-${this.stage}-cdk`
-        this.lambdaSecurityGroup = SecurityGroup.fromSecurityGroupId(
-            this,
-            'ImportedLambdaSG',
-            Fn.importValue(`${networkStackName}-LambdaSecurityGroupId`)
-        )
+        // Review environments skip CfnAccount (AWS::ApiGateway::Account) and CloudWatch
+        // logging entirely. CfnAccount is an account/region-wide singleton — creating it
+        // per review environment causes ResourceExistenceCheck failures on first-time stack
+        // creation when the new IAM role doesn't exist yet. Dev/val/prod stacks own this
+        // setting in their respective accounts and are unaffected.
+        const isReview = isReviewEnvironment(this.stage)
+
+        // Import security group from Network stack CloudFormation exports
+        const networkStackName = ResourceNames.stackName('network', this.stage)
         this.applicationSecurityGroup = SecurityGroup.fromSecurityGroupId(
             this,
             'ImportedApplicationSG',
             Fn.importValue(`${networkStackName}-ApplicationSecurityGroupId`)
         )
 
-        // Review environments skip CfnAccount (AWS::ApiGateway::Account) and CloudWatch
-        // logging entirely. CfnAccount is an account/region-wide singleton — creating it
-        // per review environment causes ResourceExistenceCheck failures on first-time stack
-        // creation when the new IAM role doesn't exist yet. Dev/val/prod stacks own this
-        // setting in their respective accounts and are unaffected.
-        const isReview = this.stageConfig.environment === 'review'
+        // Review environments need DEV security group to access shared DEV Aurora database
+        if (isReview) {
+            this.devSecurityGroup = SecurityGroup.fromSecurityGroupId(
+                this,
+                'ImportedDevSG',
+                Fn.importValue(
+                    `${ResourceNames.stackName('network', 'dev')}-ApplicationSecurityGroupId`
+                )
+            )
+        }
 
         let apiGatewayLogGroup: LogGroup | undefined
         if (!isReview) {
@@ -232,10 +239,7 @@ export class AppApiStack extends BaseStack {
         )
 
         // Populate common lambda parameters into variables to be used during function creation
-        const securityGroups = [
-            this.lambdaSecurityGroup,
-            this.applicationSecurityGroup,
-        ]
+        const securityGroups = this.getLambdaSecurityGroups()
         const role = this.createLambdaRole()
         const environment = this.getLambdaEnvironment()
 
@@ -452,10 +456,7 @@ export class AppApiStack extends BaseStack {
                 vpcSubnets: {
                     subnetType: SubnetType.PRIVATE_WITH_EGRESS,
                 },
-                securityGroups: [
-                    this.lambdaSecurityGroup,
-                    this.applicationSecurityGroup,
-                ],
+                securityGroups,
                 bundling: {
                     format: OutputFormat.ESM,
                     banner: AppApiStack.ESM_BANNER,
@@ -739,6 +740,16 @@ export class AppApiStack extends BaseStack {
             ]),
             ...options,
         })
+    }
+
+    /**
+     * Returns the security groups for VPC-connected Lambda functions.
+     * Review environments include the DEV SG to access the shared DEV Aurora cluster.
+     */
+    private getLambdaSecurityGroups(): ISecurityGroup[] {
+        const sgs: ISecurityGroup[] = [this.applicationSecurityGroup]
+        if (this.devSecurityGroup) sgs.push(this.devSecurityGroup)
+        return sgs
     }
 
     private createLambdaRole(): Role {

@@ -262,7 +262,6 @@ jobs:
         env:
           STAGE_NAME: dev
           VPC_ID: ${{ secrets.DEV_VPC_ID }}
-          SG_ID: ${{ secrets.DEV_SG_ID }}
           SUBNET_PRIVATE_A_ID: ${{ secrets.DEV_SUBNET_PRIVATE_A_ID }}
           SUBNET_PRIVATE_B_ID: ${{ secrets.DEV_SUBNET_PRIVATE_B_ID }}
           SUBNET_PRIVATE_C_ID: ${{ secrets.DEV_SUBNET_PRIVATE_C_ID }}
@@ -289,7 +288,6 @@ jobs:
         env:
           STAGE_NAME: dev
           VPC_ID: ${{ secrets.DEV_VPC_ID }}
-          SG_ID: ${{ secrets.DEV_SG_ID }}
           SUBNET_PRIVATE_A_ID: ${{ secrets.DEV_SUBNET_PRIVATE_A_ID }}
           SUBNET_PRIVATE_B_ID: ${{ secrets.DEV_SUBNET_PRIVATE_B_ID }}
           SUBNET_PRIVATE_C_ID: ${{ secrets.DEV_SUBNET_PRIVATE_C_ID }}
@@ -309,7 +307,6 @@ jobs:
         env:
           STAGE_NAME: dev
           VPC_ID: ${{ secrets.DEV_VPC_ID }}
-          SG_ID: ${{ secrets.DEV_SG_ID }}
           SUBNET_PRIVATE_A_ID: ${{ secrets.DEV_SUBNET_PRIVATE_A_ID }}
           SUBNET_PRIVATE_B_ID: ${{ secrets.DEV_SUBNET_PRIVATE_B_ID }}
           SUBNET_PRIVATE_C_ID: ${{ secrets.DEV_SUBNET_PRIVATE_C_ID }}
@@ -478,7 +475,6 @@ jobs:
         env:
           STAGE_NAME: dev
           VPC_ID: ${{ secrets.DEV_VPC_ID }}
-          SG_ID: ${{ secrets.DEV_SG_ID }}
           INTERNAL_ALLOWED_ORIGINS: ${{ secrets.DEV_INTERNAL_ALLOWED_ORIGINS }}
         run: |
           echo "=== Deploying AppApi stack ==="
@@ -613,7 +609,6 @@ jobs:
         env:
           STAGE_NAME: val
           VPC_ID: ${{ secrets.VAL_VPC_ID }}
-          SG_ID: ${{ secrets.VAL_SG_ID }}
           SUBNET_PRIVATE_A_ID: ${{ secrets.VAL_SUBNET_PRIVATE_A_ID }}
           SUBNET_PRIVATE_B_ID: ${{ secrets.VAL_SUBNET_PRIVATE_B_ID }}
           SUBNET_PRIVATE_C_ID: ${{ secrets.VAL_SUBNET_PRIVATE_C_ID }}
@@ -640,7 +635,6 @@ jobs:
         env:
           STAGE_NAME: val
           VPC_ID: ${{ secrets.VAL_VPC_ID }}
-          SG_ID: ${{ secrets.VAL_SG_ID }}
           SUBNET_PRIVATE_A_ID: ${{ secrets.VAL_SUBNET_PRIVATE_A_ID }}
           SUBNET_PRIVATE_B_ID: ${{ secrets.VAL_SUBNET_PRIVATE_B_ID }}
           SUBNET_PRIVATE_C_ID: ${{ secrets.VAL_SUBNET_PRIVATE_C_ID }}
@@ -660,7 +654,6 @@ jobs:
         env:
           STAGE_NAME: val
           VPC_ID: ${{ secrets.VAL_VPC_ID }}
-          SG_ID: ${{ secrets.VAL_SG_ID }}
           SUBNET_PRIVATE_A_ID: ${{ secrets.VAL_SUBNET_PRIVATE_A_ID }}
           SUBNET_PRIVATE_B_ID: ${{ secrets.VAL_SUBNET_PRIVATE_B_ID }}
           SUBNET_PRIVATE_C_ID: ${{ secrets.VAL_SUBNET_PRIVATE_C_ID }}
@@ -742,7 +735,6 @@ jobs:
         env:
           STAGE_NAME: val
           VPC_ID: ${{ secrets.VAL_VPC_ID }}
-          SG_ID: ${{ secrets.VAL_SG_ID }}
           INTERNAL_ALLOWED_ORIGINS: ${{ secrets.VAL_INTERNAL_ALLOWED_ORIGINS }}
           NR_LICENSE_KEY: ${{ secrets.NR_LICENSE_KEY }}
         run: |
@@ -956,7 +948,6 @@ jobs:
         env:
           STAGE_NAME: prod
           VPC_ID: ${{ secrets.PROD_VPC_ID }}
-          SG_ID: ${{ secrets.PROD_SG_ID }}
           SUBNET_PRIVATE_A_ID: ${{ secrets.PROD_SUBNET_PRIVATE_A_ID }}
           SUBNET_PRIVATE_B_ID: ${{ secrets.PROD_SUBNET_PRIVATE_B_ID }}
           SUBNET_PRIVATE_C_ID: ${{ secrets.PROD_SUBNET_PRIVATE_C_ID }}
@@ -983,7 +974,6 @@ jobs:
         env:
           STAGE_NAME: prod
           VPC_ID: ${{ secrets.PROD_VPC_ID }}
-          SG_ID: ${{ secrets.PROD_SG_ID }}
           SUBNET_PRIVATE_A_ID: ${{ secrets.PROD_SUBNET_PRIVATE_A_ID }}
           SUBNET_PRIVATE_B_ID: ${{ secrets.PROD_SUBNET_PRIVATE_B_ID }}
           SUBNET_PRIVATE_C_ID: ${{ secrets.PROD_SUBNET_PRIVATE_C_ID }}
@@ -1003,7 +993,6 @@ jobs:
         env:
           STAGE_NAME: prod
           VPC_ID: ${{ secrets.PROD_VPC_ID }}
-          SG_ID: ${{ secrets.PROD_SG_ID }}
           SUBNET_PRIVATE_A_ID: ${{ secrets.PROD_SUBNET_PRIVATE_A_ID }}
           SUBNET_PRIVATE_B_ID: ${{ secrets.PROD_SUBNET_PRIVATE_B_ID }}
           SUBNET_PRIVATE_C_ID: ${{ secrets.PROD_SUBNET_PRIVATE_C_ID }}
@@ -1085,7 +1074,6 @@ jobs:
         env:
           STAGE_NAME: prod
           VPC_ID: ${{ secrets.PROD_VPC_ID }}
-          SG_ID: ${{ secrets.PROD_SG_ID }}
           INTERNAL_ALLOWED_ORIGINS: ${{ secrets.PROD_INTERNAL_ALLOWED_ORIGINS }}
           NR_LICENSE_KEY: ${{ secrets.NR_LICENSE_KEY }}
         run: |

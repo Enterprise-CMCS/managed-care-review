@@ -83,7 +83,6 @@ Required for deployment:
 The Network Stack imports an existing VPC using environment variables:
 
 - `VPC_ID` - VPC ID
-- `SG_ID` - Security group ID for Lambda functions
 - `SUBNET_PRIVATE_A_ID` - Private subnet A ID
 - `SUBNET_PRIVATE_B_ID` - Private subnet B ID
 - `SUBNET_PRIVATE_C_ID` - Private subnet C ID

@@ -51,7 +51,7 @@ function main(): void {
         console.error('Network stack initialization failed:', error)
         console.error('\nTroubleshooting:')
         console.error(
-            '- Check required environment variables: VPC_ID, SG_ID, SUBNET_*_ID'
+            '- Check required environment variables: VPC_ID, SUBNET_*_ID'
         )
         console.error('- Check AWS credentials and region configuration')
         process.exit(1)
