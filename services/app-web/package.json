@@ -89,7 +89,7 @@
         "@opentelemetry/semantic-conventions": "^1.30.0",
         "@tanstack/react-table": "^8.21.3",
         "@trussworks/react-uswds": "^4.0.0",
-        "@vitejs/plugin-react": "^5.0.4",
+        "@vitejs/plugin-react": "^5.2.0",
         "amazon-cognito-identity-js": "^6.3.12",
         "aws-amplify": "^5.3.33",
         "axios": "^1.14.0",
@@ -170,8 +170,8 @@
         "stylelint-config-recommended-scss": "^17.0.0",
         "typescript": "5.9.3",
         "typescript-eslint": "^8.56.0",
-        "vite-plugin-graphql-loader": "^4.0.4",
-        "vite-plugin-svgr": "^4.5.0",
+        "vite-plugin-graphql-loader": "^5.0.1",
+        "vite-plugin-svgr": "^5.2.0",
         "vitest": "^3.2.4"
     }
 }
