@@ -434,8 +434,8 @@ importers:
         specifier: ^7.0.0
         version: 7.4.2
       '@prisma/client':
-        specifier: ^7.6.0
-        version: 7.6.0(prisma@7.4.2(@types/react@18.3.3)(magicast@0.3.5)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(typescript@5.9.3))(typescript@5.9.3)
+        specifier: ^7.7.0
+        version: 7.7.0(prisma@7.4.2(@types/react@18.3.3)(magicast@0.3.5)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(typescript@5.9.3))(typescript@5.9.3)
       '@prisma/instrumentation':
         specifier: ^7.5.0
         version: 7.5.0(@opentelemetry/api@1.9.0)
@@ -1147,8 +1147,8 @@ importers:
         specifier: ^3.1026.0
         version: 3.1026.0
       '@prisma/client':
-        specifier: ^7.6.0
-        version: 7.6.0(prisma@7.4.2(@types/react@18.3.3)(magicast@0.3.5)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(typescript@5.9.3))(typescript@5.9.3)
+        specifier: ^7.7.0
+        version: 7.7.0(prisma@7.4.2(@types/react@18.3.3)(magicast@0.3.5)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(typescript@5.9.3))(typescript@5.9.3)
       pg:
         specifier: ^8.19.0
         version: 8.19.0
@@ -5165,11 +5165,11 @@ packages:
   '@prisma/adapter-pg@7.4.2':
     resolution: {integrity: sha512-oUo2Zhe9Tf6YwVL8kLPuOLTK1Z2pwi/Ua77t2PuGyBan2w7shRKqHvYK+3XXmRH9RWhPJ4SMtHZKpNo6Ax/4bQ==}
 
-  '@prisma/client-runtime-utils@7.6.0':
-    resolution: {integrity: sha512-fD7jlqubsZvVODKvsp9lOpXVecx2aWGxC2l35Ioz2t+teUJ5CfR0SAMsi7UkU1VvaZmmm+DS6BdujF622nY7tQ==}
+  '@prisma/client-runtime-utils@7.7.0':
+    resolution: {integrity: sha512-BLyd0UpFYOtyJFTHm7jS9vesHW7P83abibodQMiIofqjBKzDHQ1VAsQkdfvXyYDkPlONPfOTz7/rv3x/+CQqvQ==}
 
-  '@prisma/client@7.6.0':
-    resolution: {integrity: sha512-7Pe/1ayh3GgWPEg4mmT4ax77LJ1wC+XlnIFvQ94bLP2DsUnOpnruQQR3Jw7r+Frthk94QqDNxo3FjSg8h9PXeQ==}
+  '@prisma/client@7.7.0':
+    resolution: {integrity: sha512-5Ar4OsZpJ54s21sy5oDNNW9gQtd4NuxCaiM7+JDTOU07D6VvlpLjYzAVCMB1+JzokN+08dAVomlx+b7bhJd3ww==}
     engines: {node: ^20.19 || ^22.12 || >=24.0}
     peerDependencies:
       prisma: '*'
@@ -7498,8 +7498,8 @@ packages:
   caniuse-lite@1.0.30001780:
     resolution: {integrity: sha512-llngX0E7nQci5BPJDqoZSbuZ5Bcs9F5db7EtgfwBerX9XGtkkiO4NwfDDIRzHTTwcYC8vC7bmeUEPGrKlR/TkQ==}
 
-  caniuse-lite@1.0.30001786:
-    resolution: {integrity: sha512-4oxTZEvqmLLrERwxO76yfKM7acZo310U+v4kqexI2TL1DkkUEMT8UijrxxcnVdxR3qkVf5awGRX+4Z6aPHVKrA==}
+  caniuse-lite@1.0.30001787:
+    resolution: {integrity: sha512-mNcrMN9KeI68u7muanUpEejSLghOKlVhRqS/Za2IeyGllJ9I9otGpR9g3nsw7n4W378TE/LyIteA0+/FOZm4Kg==}
 
   capital-case@1.0.4:
     resolution: {integrity: sha512-ds37W8CytHgwnhGGTi88pcPyR15qoNkOpYwmMMfnWqqWgESapLqvDx6huFjQ5vqWSn2Z06173XNA7LtMOeUh1A==}
@@ -8198,8 +8198,8 @@ packages:
   electron-to-chromium@1.5.321:
     resolution: {integrity: sha512-L2C7Q279W2D/J4PLZLk7sebOILDSWos7bMsMNN06rK482umHUrh/3lM8G7IlHFOYip2oAg5nha1rCMxr/rs6ZQ==}
 
-  electron-to-chromium@1.5.332:
-    resolution: {integrity: sha512-7OOtytmh/rINMLwaFTbcMVvYXO3AUm029X0LcyfYk0B557RlPkdpTpnH9+htMlfu5dKwOmT0+Zs2Aw+lnn6TeQ==}
+  electron-to-chromium@1.5.334:
+    resolution: {integrity: sha512-mgjZAz7Jyx1SRCwEpy9wefDS7GvNPazLthHg8eQMJ76wBdGQQDW33TCrUTvQ4wzpmOrv2zrFoD3oNufMdyMpog==}
 
   element-closest@2.0.2:
     resolution: {integrity: sha512-QCqAWP3kwj8Gz9UXncVXQGdrhnWxD8SQBSeZp5pOsyCcQ6RpL738L1/tfuwBiMi6F1fYkxqPnBrFBR4L+f49Cg==}
@@ -18980,11 +18980,11 @@ snapshots:
     transitivePeerDependencies:
       - pg-native
 
-  '@prisma/client-runtime-utils@7.6.0': {}
+  '@prisma/client-runtime-utils@7.7.0': {}
 
-  '@prisma/client@7.6.0(prisma@7.4.2(@types/react@18.3.3)(magicast@0.3.5)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(typescript@5.9.3))(typescript@5.9.3)':
+  '@prisma/client@7.7.0(prisma@7.4.2(@types/react@18.3.3)(magicast@0.3.5)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(typescript@5.9.3))(typescript@5.9.3)':
     dependencies:
-      '@prisma/client-runtime-utils': 7.6.0
+      '@prisma/client-runtime-utils': 7.7.0
     optionalDependencies:
       prisma: 7.4.2(@types/react@18.3.3)(magicast@0.3.5)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(typescript@5.9.3)
       typescript: 5.9.3
@@ -21786,8 +21786,8 @@ snapshots:
   browserslist@4.28.2:
     dependencies:
       baseline-browser-mapping: 2.10.16
-      caniuse-lite: 1.0.30001786
-      electron-to-chromium: 1.5.332
+      caniuse-lite: 1.0.30001787
+      electron-to-chromium: 1.5.334
       node-releases: 2.0.37
       update-browserslist-db: 1.2.3(browserslist@4.28.2)
 
@@ -21948,7 +21948,7 @@ snapshots:
 
   caniuse-lite@1.0.30001780: {}
 
-  caniuse-lite@1.0.30001786: {}
+  caniuse-lite@1.0.30001787: {}
 
   capital-case@1.0.4:
     dependencies:
@@ -22739,7 +22739,7 @@ snapshots:
 
   electron-to-chromium@1.5.321: {}
 
-  electron-to-chromium@1.5.332: {}
+  electron-to-chromium@1.5.334: {}
 
   element-closest@2.0.2: {}
 
