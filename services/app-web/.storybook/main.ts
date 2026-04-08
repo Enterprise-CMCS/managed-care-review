@@ -33,6 +33,25 @@ const config: StorybookConfig = {
     framework: { name: getAbsolutePath('@storybook/react-vite'), options: {} },
 
     docs: {},
+
+    async viteFinal(config) {
+        // Workaround for Rolldown SIGILL bug (rolldown/rolldown#9028) https://github.com/rolldown/rolldown/issues/9028
+        // Related storybook issue https://github.com/storybookjs/storybook/issues/34159
+        // Storybook sets strictExecutionOrder=true which triggers infinite recursion
+        // with circular deps across chunks. Override it after Storybook's plugin runs.
+        config.plugins = config.plugins || []
+        config.plugins.push({
+            name: 'storybook-rolldown-sigill-workaround',
+            configResolved(resolvedConfig) {
+                if (resolvedConfig.build?.rolldownOptions?.output) {
+                    ;(
+                        resolvedConfig.build.rolldownOptions.output as any
+                    ).strictExecutionOrder = false
+                }
+            },
+        })
+        return config
+    },
 }
 
 export default config
