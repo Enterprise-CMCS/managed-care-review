@@ -27,6 +27,7 @@ import {
     mockValidStateUser,
     fetchRateWithQuestionsMockSuccess,
 } from '@mc-review/mocks'
+import { featureFlags } from '@mc-review/common-code'
 import { RateRevision } from '../../gen/gqlClient'
 import React from 'react'
 
@@ -730,6 +731,80 @@ describe('SubmissionSideNav', () => {
         await waitFor(() => {
             expect(testLocation.pathname).toBe(`/dashboard/submissions`)
         })
+    })
+
+    it('loads contract questions link for EQRO when eqro-submissions flag is on', async () => {
+        const contract = mockContractPackageSubmittedWithQuestions()
+        contract.id = '15'
+        contract.contractSubmissionType = 'EQRO'
+
+        renderWithProviders(<CommonRoutes />, {
+            apolloProvider: {
+                mocks: [
+                    fetchCurrentUserMock({
+                        user: mockValidCMSUser(),
+                        statusCode: 200,
+                    }),
+                    fetchContractWithQuestionsMockSuccess({ contract }),
+                    fetchContractWithQuestionsMockSuccess({ contract }),
+                ],
+            },
+            routerProvider: {
+                route: '/submissions/eqro/15',
+            },
+            featureFlags: {
+                [featureFlags.EQRO_SUBMISSIONS.flag]: true,
+            },
+        })
+
+        await screen.findByTestId('sidenav')
+
+        const withinSideNav = within(screen.getByTestId('sidenav'))
+        expect(
+            withinSideNav.getByRole('link', {
+                name: /Contract questions/,
+            })
+        ).toHaveAttribute('href', '/submissions/eqro/15/question-and-answers')
+    })
+
+    it('renders 404 for EQRO contract routes when eqro-submissions flag is off', async () => {
+        const contract = mockContractPackageSubmittedWithQuestions()
+        contract.id = '15'
+        contract.contractSubmissionType = 'EQRO'
+
+        renderWithProviders(
+            <Routes>
+                <Route element={<SubmissionSideNav />}>
+                    <Route
+                        path={
+                            RoutesRecord.SUBMISSIONS_CONTRACT_QUESTIONS_AND_ANSWERS
+                        }
+                        element={<ContractQuestionResponse />}
+                    />
+                </Route>
+            </Routes>,
+            {
+                apolloProvider: {
+                    mocks: [
+                        fetchCurrentUserMock({
+                            user: mockValidCMSUser(),
+                            statusCode: 200,
+                        }),
+                        fetchContractWithQuestionsMockSuccess({ contract }),
+                    ],
+                },
+                routerProvider: {
+                    route: '/submissions/eqro/15/question-and-answers',
+                },
+                featureFlags: {
+                    [featureFlags.EQRO_SUBMISSIONS.flag]: false,
+                },
+            }
+        )
+
+        expect(
+            await screen.findByText('404 / Page not found')
+        ).toBeInTheDocument()
     })
 
     it('renders back to dashboard link for state users', async () => {
