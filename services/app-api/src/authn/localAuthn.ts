@@ -1,6 +1,6 @@
-import type { UserType } from '../domain-models/index'
-import type { Store, InsertUserArgsType } from '../postgres'
-import { lookupUserAurora } from './cognitoAuthn'
+import type { UserType } from '../domain-models'
+import type { Store } from '../postgres'
+import { syncUserWithAurora } from './cognitoAuthn'
 
 export async function userFromLocalAuthProvider(
     authProvider: string,
@@ -13,51 +13,9 @@ export async function userFromLocalAuthProvider(
             return localUser
         }
 
-        const auroraUser = await insertUserToLocalAurora(store, localUser)
-
-        if (auroraUser instanceof Error) {
-            return auroraUser
-        }
-
-        return auroraUser
+        return syncUserWithAurora(store, localUser)
     } catch (e) {
         console.error('ERROR: failed to parse local user from authProvider')
         return e instanceof Error ? e : new Error(String(e))
     }
-}
-
-export async function insertUserToLocalAurora(
-    store: Store,
-    localUser: UserType
-): Promise<UserType | Error> {
-    const auroraUser = await lookupUserAurora(store, localUser.id)
-
-    if (auroraUser instanceof Error) {
-        return auroraUser
-    }
-
-    if (auroraUser === undefined) {
-        const userToInsert: InsertUserArgsType = {
-            userID: localUser.id,
-            role: localUser.role,
-            givenName: localUser.givenName,
-            familyName: localUser.familyName,
-            email: localUser.email,
-        }
-
-        // if it is a state user, insert the state they are from
-        if (localUser.role === 'STATE_USER') {
-            userToInsert.stateCode = localUser.stateCode
-        }
-
-        const result = await store.insertUser(userToInsert)
-
-        if (result instanceof Error) {
-            console.error(`Could not insert user: ${JSON.stringify(result)}`)
-            return localUser
-        }
-        return result
-    }
-
-    return auroraUser
 }

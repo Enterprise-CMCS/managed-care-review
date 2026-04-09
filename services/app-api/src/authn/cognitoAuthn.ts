@@ -195,6 +195,87 @@ export function userTypeFromAttributes(
     return new Error('Unsupported user role:  ' + roleAttribute)
 }
 
+function hasUserInfoChanged(sourceUser: UserType, dbUser: UserType): boolean {
+    if (
+        sourceUser.email !== dbUser.email ||
+        sourceUser.givenName !== dbUser.givenName ||
+        sourceUser.familyName !== dbUser.familyName ||
+        sourceUser.role !== dbUser.role
+    ) {
+        return true
+    }
+
+    // Check stateCode for state users
+    return (
+        sourceUser.role === 'STATE_USER' &&
+        dbUser.role === 'STATE_USER' &&
+        sourceUser.stateCode !== dbUser.stateCode
+    )
+}
+
+// Syncs a source user (from Cognito or local) with the DB.
+// Inserts the user if not found, updates if info has changed.
+export async function syncUserWithAurora(
+    store: Store,
+    sourceUser: UserType
+): Promise<UserType | Error> {
+    const startRequest = performance.now()
+    const auroraUser = await lookupUserAurora(store, sourceUser.id)
+    if (auroraUser instanceof Error) {
+        return auroraUser
+    }
+    const endRequest = performance.now()
+    console.info('User lookup in postgres takes ms:', endRequest - startRequest)
+
+    // User not in DB yet — insert
+    if (auroraUser === undefined) {
+        const userToInsert: InsertUserArgsType = {
+            userID: sourceUser.id,
+            role: sourceUser.role,
+            givenName: sourceUser.givenName,
+            familyName: sourceUser.familyName,
+            email: sourceUser.email,
+        }
+
+        if (sourceUser.role === 'STATE_USER') {
+            userToInsert.stateCode = sourceUser.stateCode
+        }
+
+        const result = await store.insertUser(userToInsert)
+        if (result instanceof Error) {
+            console.error(`Could not insert user: ${JSON.stringify(result)}`)
+            return sourceUser
+        }
+        return result
+    }
+
+    // User exists — check if info has changed
+    if (hasUserInfoChanged(sourceUser, auroraUser)) {
+        console.info(
+            `User info mismatch for user ${sourceUser.id}. Updating DB.`
+        )
+        const updateResult = await store.updateUserInfo(sourceUser.id, {
+            email: sourceUser.email,
+            givenName: sourceUser.givenName,
+            familyName: sourceUser.familyName,
+            role: sourceUser.role,
+            stateCode:
+                sourceUser.role === 'STATE_USER'
+                    ? sourceUser.stateCode
+                    : undefined,
+        })
+        if (updateResult instanceof Error) {
+            console.error(
+                `Failed to update user info for user ${sourceUser.id}: ${updateResult.message}`
+            )
+            return auroraUser
+        }
+        return updateResult
+    }
+
+    return auroraUser
+}
+
 // userFromCognitoAuthProvider hits the Cognito API to get the information in the authProvider
 export async function userFromCognitoAuthProvider(
     authProvider: string,
@@ -212,57 +293,32 @@ export async function userFromCognitoAuthProvider(
             return lookupUserCognito(userInfo.userId, userInfo.poolId)
         }
 
-        // look up the user in PG. If we don't have it here, then we need to
-        // fetch it from Cognito.
-        const startRequest = performance.now()
-        const auroraUser = await lookupUserAurora(store, userInfo.userId)
-        if (auroraUser instanceof Error) {
-            return auroraUser
-        }
-        const endRequest = performance.now()
-        console.info(
-            'User lookup in postgres takes ms:',
-            endRequest - startRequest
+        const cognitoUserResult = await lookupUserCognito(
+            userInfo.userId,
+            userInfo.poolId
         )
-
-        // if there is no user returned, lookup in cognito and save to postgres
-        if (auroraUser === undefined) {
-            const cognitoUserResult = await lookupUserCognito(
-                userInfo.userId,
-                userInfo.poolId
-            )
-            if (cognitoUserResult instanceof Error) {
-                return cognitoUserResult
-            }
-
-            const cognitoUser = cognitoUserResult
-
-            // create the user and store it in aurora
-            const userToInsert: InsertUserArgsType = {
-                userID: userInfo.userId,
-                role: cognitoUser.role,
-                givenName: cognitoUser.givenName,
-                familyName: cognitoUser.familyName,
-                email: cognitoUser.email,
-            }
-
-            // if it is a state user, insert the state they are from
-            if (cognitoUser.role === 'STATE_USER') {
-                userToInsert.stateCode = cognitoUser.stateCode
-            }
-
-            const result = await store.insertUser(userToInsert)
-            if (result instanceof Error) {
+        if (cognitoUserResult instanceof Error) {
+            // Cognito failed — fall back to DB user if one exists
+            const auroraUser = await lookupUserAurora(store, userInfo.userId)
+            if (auroraUser instanceof Error) {
                 console.error(
-                    `Could not insert user: ${JSON.stringify(result)}`
+                    `Cognito and Aurora lookups both failed for user ${userInfo.userId}. ` +
+                        `Cognito error: ${cognitoUserResult.message}. ` +
+                        `Aurora error: ${auroraUser.message}`
                 )
-                return cognitoUserResult
+                return auroraUser
             }
-            return result
+            if (auroraUser !== undefined) {
+                console.error(
+                    `Cognito lookup failed, using DB user: ${cognitoUserResult.message}`
+                )
+                return auroraUser
+            }
+            // New user with no DB record — Cognito is required
+            return cognitoUserResult
         }
 
-        // we return the user we got from aurora
-        return auroraUser
+        return syncUserWithAurora(store, cognitoUserResult)
     } catch (e) {
         return e instanceof Error
             ? e
