@@ -13,7 +13,7 @@ import { sortRoundsByDate } from './CMSQuestionResponseTable'
 
 type StateQuestionResponseTableProps = {
     indexQuestions: IndexQuestionType
-    header: string
+    header?: string
     contractStatus?: ConsolidatedContractStatus
 }
 
@@ -62,9 +62,6 @@ export const StateQuestionResponseTable = ({
 
     return (
         <>
-            <div className={styles.tableHeader}>
-                <SectionHeader header={header} hideBorderBottom hideBorderTop />
-            </div>
             <section
                 className={styles.questionSection}
                 data-testid={'outstandingQuestions'}
@@ -72,6 +69,7 @@ export const StateQuestionResponseTable = ({
                 <SectionHeader
                     header="Outstanding questions"
                     headerId="outsandingContractQuestions"
+                    headingLevel="h3"
                     hideBorderTop
                 />
                 {sortedUnansweredQuestions.length ? (
@@ -99,6 +97,7 @@ export const StateQuestionResponseTable = ({
                     header="Answered questions"
                     headerId="answeredContractQuestions"
                     hideBorderTop
+                    headingLevel="h3"
                 />
                 {sortedAnsweredQuestions.length ? (
                     sortedAnsweredQuestions.map((questionRound) =>

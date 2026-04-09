@@ -8,7 +8,12 @@
 
 .container {
     max-width: custom.$mcr-container-standard-width-fixed;
-    padding: 2rem 0;
+    padding-bottom: 2rem;
+
+    h1 {
+        margin-top: 34px;
+        margin-bottom: 32px;
+    }
 }
 
 .uploadFormContainer {
@@ -29,7 +34,8 @@
 %questionSection {
     margin: uswds.units(2) auto;
     background: custom.$mcr-foundation-white;
-    padding: uswds.units(4) uswds.units(4);
+    padding-left: uswds.units(4);
+    padding-right: uswds.units(4);
     border: 1px solid custom.$mcr-gray-lighter;
     line-height: uswds.units(3);
     width: 100%;
@@ -51,10 +57,21 @@
 
 .questionSection {
     @extend %questionSection;
+    margin-top: 0px;
+    [class*='summarySectionHeader'] {
+        padding-bottom: 0;
+        margin-bottom: 0;
+    }
+    [class*='tableHeader'] {
+        margin-top: 16px;
+    }
 }
 
 .yourQuestionSection {
     @extend %questionSection;
+    [class*='summarySectionHeader'] {
+        padding-bottom: 0;
+    }
 }
 
 .breadcrumbs {
