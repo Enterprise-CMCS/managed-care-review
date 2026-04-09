@@ -31,7 +31,6 @@ import {
 } from '../parameterStore'
 import { testLDService } from './launchDarklyHelpers'
 import type { LDService } from '../launchDarkly/launchDarkly'
-import { insertUserToLocalAurora } from '../authn'
 import { testStateUser } from './userHelpers'
 import { must } from './assertionHelpers'
 import { testS3Client } from './s3Helpers'
@@ -42,6 +41,7 @@ import {
     localGenerateDocumentZip,
     type DocumentZipService,
 } from '../zip/generateZip'
+import { syncUserWithAurora } from '../authn/cognitoAuthn'
 
 // Since our programs are checked into source code, we have a program we
 // use as our default
@@ -90,7 +90,7 @@ const constructTestPostgresServer = async (opts?: {
         opts?.documentZip ??
         documentZipService(postgresStore, localGenerateDocumentZip)
 
-    await insertUserToLocalAurora(postgresStore, context.user)
+    await syncUserWithAurora(postgresStore, context.user)
     const s3TestClient = testS3Client()
     const s3 = opts?.s3Client || s3TestClient
 
