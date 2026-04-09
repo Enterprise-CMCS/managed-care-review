@@ -54,7 +54,12 @@ describe('currentUser', () => {
         expect(res.data?.fetchCurrentUser.email).toBe('james@example.com')
         expect(res.data?.fetchCurrentUser.state.code).toBe('MI')
         expect(res.data?.fetchCurrentUser.state.name).toBe('Michigan')
-        expect(res.data?.fetchCurrentUser.state.programs).toHaveLength(7)
+        const MIPrograms =
+            typedStatePrograms.states.find((st) => st.code === 'MI')
+                ?.programs ?? []
+        expect(res.data?.fetchCurrentUser.state.programs).toHaveLength(
+            MIPrograms.length
+        )
     })
 
     it('updates DB when user info changes', async () => {
