@@ -1,5 +1,2 @@
-export function start(): void {
-  console.log("ai-form-augmentation workspace ready");
-}
-
-start();
+export type { ArtifactS3Client } from './s3'
+export { newArtifactS3Client } from './s3'

@@ -5,7 +5,10 @@
   "type": "module",
   "scripts": {
     "build": "tsc --noEmit",
-    "dev": "tsx watch src/index.ts"
+    "dev": "tsx watch src/dev.ts"
+  },
+  "dependencies": {
+    "@aws-sdk/client-s3": "^3.1027.0"
   },
   "devDependencies": {
     "@types/node": "^25.5.0",
