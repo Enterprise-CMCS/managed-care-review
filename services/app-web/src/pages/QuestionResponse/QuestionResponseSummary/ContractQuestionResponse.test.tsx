@@ -72,7 +72,7 @@ describe('ContractQuestionResponse', () => {
             await waitFor(() => {
                 expect(
                     screen.getByRole('heading', {
-                        name: `Contract Q&A`,
+                        name: `Contract questions`,
                     })
                 ).toBeInTheDocument()
                 expect(
