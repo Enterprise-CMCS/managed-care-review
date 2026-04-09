@@ -32,6 +32,8 @@
     tbody td {
         padding-top: uswds.units(2);
         padding-bottom: uswds.units(2);
+        padding-left: uswds.units(1);
+        padding-right: uswds.units(1);
         vertical-align: top;
     }
 
@@ -57,6 +59,15 @@
 
 .columnID {
     min-width: 90px;
+    max-width: 224px;
+}
+
+.contractTypeColumn {
+    width: 130px;
+}
+
+.statusColumn {
+    min-width: 181.83px;
 }
 
 .programsColumn {
@@ -94,4 +105,6 @@
 .notSubjectToReviewTag {
     display: inline-block;
     text-align: center;
+    justify-content: center;
+    white-space: nowrap;
 }
