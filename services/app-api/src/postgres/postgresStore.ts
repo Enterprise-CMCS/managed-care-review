@@ -24,11 +24,12 @@ import type {
     EmailSettingsType,
 } from '../domain-models'
 import { findPrograms, findStatePrograms } from './'
-import type { InsertUserArgsType } from './user'
+import type { InsertUserArgsType, UpdateUserInfoArgsType } from './user'
 import {
     findUser,
     insertUser,
     updateCmsUserProperties,
+    updateUserInfo,
     findAllUsers,
     insertManyUsers,
 } from './user'
@@ -164,6 +165,10 @@ type Store = {
         stateCode: StateCodeType,
         assignedUserIDs: string[]
     ) => Promise<UserType[] | Error>
+    updateUserInfo: (
+        userID: string,
+        args: UpdateUserInfoArgsType
+    ) => Promise<UserType | Error>
     updateCmsUserProperties: (
         userID: string,
         idOfUserPerformingUpdate: string,
@@ -326,6 +331,7 @@ function NewPostgresStore(client: ExtendedPrismaClient): Store {
         insertManyUsers: (args) => insertManyUsers(client, args),
         findAllUsers: () => findAllUsers(client),
         findUser: (id) => findUser(client, id),
+        updateUserInfo: (userID, args) => updateUserInfo(client, userID, args),
         findStateAssignedUsers: (stateCode) =>
             findStateAssignedUsers(client, stateCode),
         updateStateAssignedUsers: (
