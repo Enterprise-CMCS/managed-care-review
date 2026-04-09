@@ -62,6 +62,15 @@ export const StateQuestionResponseTable = ({
 
     return (
         <>
+            {header && (
+                <div className={styles.tableHeader}>
+                    <SectionHeader
+                        header={header}
+                        hideBorderBottom
+                        hideBorderTop
+                    />
+                </div>
+            )}
             <section
                 className={styles.questionSection}
                 data-testid={'outstandingQuestions'}
