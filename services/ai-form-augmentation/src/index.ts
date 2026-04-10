@@ -5,3 +5,7 @@ export { newArtifactS3Client } from './s3'
 // PDF parsing
 export type { PdfParseResult } from './parsing'
 export { parsePdf } from './parsing'
+
+// Chunking
+export type { ChunkDocumentOptions, DocumentChunk } from './chunking'
+export { chunkDocument } from './chunking'
