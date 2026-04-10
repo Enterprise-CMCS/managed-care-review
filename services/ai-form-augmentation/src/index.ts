@@ -9,3 +9,7 @@ export { parsePdf } from './parsing'
 // Chunking
 export type { ChunkDocumentOptions, DocumentChunk } from './chunking'
 export { chunkDocument } from './chunking'
+
+// Artifacts
+export type { ChunksArtifact } from './artifacts'
+export { buildChunksArtifact, getChunksArtifactKey } from './artifacts'

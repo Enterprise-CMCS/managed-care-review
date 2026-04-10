@@ -1,7 +1,5 @@
 import { GetObjectCommand, NoSuchKey, PutObjectCommand, S3Client } from "@aws-sdk/client-s3";
 
-type JsonValue = Record<string, unknown> | unknown[] | string | number | boolean | null
-
 type ArtifactS3ClientConfig = {
   region: string
   endpoint?: string
@@ -13,7 +11,7 @@ type ArtifactS3ClientConfig = {
 }
 
 export interface ArtifactS3Client {
-  putJson(bucket: string, key: string, value: JsonValue): Promise<void>
+  putJson(bucket: string, key: string, value: unknown): Promise<void>
   getJson<T>(bucket: string, key: string): Promise<T>
   putText(bucket: string, key: string, value: string): Promise<void>
   getBuffer(bucket: string, key: string): Promise<Buffer>
@@ -30,7 +28,7 @@ export function newArtifactS3Client(
   })
 
   return {
-    async putJson(bucket: string, key: string, value: JsonValue): Promise<void> {
+    async putJson(bucket: string, key: string, value: unknown): Promise<void> {
       await client.send(
         new PutObjectCommand({
           Bucket: bucket,
