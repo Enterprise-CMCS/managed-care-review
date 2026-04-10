@@ -309,7 +309,7 @@ export async function userFromCognitoAuthProvider(
                 return auroraUser
             }
             if (auroraUser !== undefined) {
-                console.error(
+                console.warn(
                     `Cognito lookup failed, using DB user: ${cognitoUserResult.message}`
                 )
                 return auroraUser
