@@ -168,7 +168,7 @@
         "storybook": "^10.3.5",
         "stylelint": "^17.1.1",
         "stylelint-config-recommended-scss": "^17.0.0",
-        "typescript": "5.9.3",
+        "typescript": "6.0.2",
         "typescript-eslint": "^8.56.0",
         "vite-plugin-graphql-loader": "^4.0.4",
         "vite-plugin-svgr": "^4.5.0",
