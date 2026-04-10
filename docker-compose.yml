@@ -18,7 +18,7 @@ services:
       timeout: 5s
       retries: 5
 
-  # LocalStack for S3 emulation (Pinned to 4.4.0 further versions require a license)
+  # LocalStack for S3 emulation (Pinned to 4.4.0 later versions require a license)
   localstack:
     image: localstack/localstack:4.4.0
     container_name: mcr-localstack
