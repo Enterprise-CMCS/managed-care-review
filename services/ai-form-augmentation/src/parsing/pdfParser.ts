@@ -14,6 +14,8 @@ export async function parsePdf (
 
   return {
     fileName,
+    // Trim leading and trailing parser noise so downstream chunking starts from
+    // a stable text shape.
     rawText: result.text.trim(),
     pageCount: result.numpages
   }

@@ -35,6 +35,7 @@ export function newArtifactS3Client(
         new PutObjectCommand({
           Bucket: bucket,
           Key: key,
+          // Store artifacts as plain JSON so they stay easy to inspect in S3.
           Body: JSON.stringify(value),
           ContentType: 'application/json'
         })
@@ -85,6 +86,8 @@ async function getBufferOrThrow (
       throw new Error(`S3 object body was empty for s3://${bucket}/${key}`)
     }
 
+    // The SDK returns a stream-like body; convert it once here so callers can
+    // work with a normal Buffer regardless of the original object type.
     const bytes = await response.Body.transformToByteArray()
     return Buffer.from(bytes)
   } catch (error) {
