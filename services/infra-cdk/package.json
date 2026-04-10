@@ -39,7 +39,7 @@
         "typescript-eslint": "^8.56.0"
     },
     "dependencies": {
-        "@aws-sdk/client-secrets-manager": "^3.1027.0",
+        "@aws-sdk/client-secrets-manager": "^3.1028.0",
         "@aws-solutions-constructs/aws-apigateway-lambda": "2.100.1",
         "@aws-solutions-constructs/aws-cloudfront-s3": "2.94.0",
         "@aws-solutions-constructs/aws-cognito-apigateway-lambda": "2.92.1",
