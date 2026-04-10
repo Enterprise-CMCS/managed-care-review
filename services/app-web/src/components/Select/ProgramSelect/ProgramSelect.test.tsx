@@ -241,7 +241,7 @@ describe('ProgramSelect', () => {
 
         await waitFor(() => {
             expect(
-                screen.queryByText('Deprecated Program (Retired)')
+                screen.queryByText('Deprecated Program (retired)')
             ).not.toBeInTheDocument()
         })
     })
@@ -271,7 +271,7 @@ describe('ProgramSelect', () => {
         )
 
         expect(
-            await screen.findByLabelText('Remove Deprecated Program (Retired)')
+            await screen.findByLabelText('Remove Deprecated Program (retired)')
         ).toBeInTheDocument()
 
         const combobox = await screen.findByRole('combobox')
@@ -279,7 +279,7 @@ describe('ProgramSelect', () => {
 
         await waitFor(() => {
             expect(
-                screen.getByText('Deprecated Program (Retired)')
+                screen.getByText('Deprecated Program (retired)')
             ).toBeInTheDocument()
         })
     })
@@ -313,7 +313,7 @@ describe('ProgramSelect', () => {
 
         await waitFor(() => {
             expect(
-                screen.getByText('Deprecated Program (Retired)')
+                screen.getByText('Deprecated Program (retired)')
             ).toBeInTheDocument()
         })
 
@@ -334,7 +334,7 @@ describe('ProgramSelect', () => {
         await waitFor(() => {
             // Deprecated program is no longer in the dropdown
             expect(
-                screen.queryByText('Deprecated Program (Retired)')
+                screen.queryByText('Deprecated Program (retired)')
             ).not.toBeInTheDocument()
             // Active programs are still available
             expect(screen.getByText('SNBC')).toBeInTheDocument()
