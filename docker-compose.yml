@@ -18,9 +18,9 @@ services:
       timeout: 5s
       retries: 5
 
-  # LocalStack for S3 emulation (Community Edition - Free, no license required)
+  # LocalStack for S3 emulation (Pinned to 4.4.0; later versions require a license)
   localstack:
-    image: localstack/localstack:latest
+    image: localstack/localstack:4.4.0
     container_name: mcr-localstack
     ports:
       - "4566:4566" # LocalStack edge port

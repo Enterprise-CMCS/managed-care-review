@@ -12,6 +12,7 @@ import {
 } from '../../../testHelpers'
 import { RoutesRecord } from '@mc-review/constants'
 import { ACCEPTED_SUBMISSION_FILE_TYPES } from '../../../components/FileUpload'
+import { featureFlags } from '@mc-review/common-code'
 import {
     fetchCurrentUserMock,
     iterableCmsUsersMockData,
@@ -94,6 +95,61 @@ describe('UploadContractQuestions', () => {
                 ).toBeInTheDocument()
                 expect(
                     screen.getByLabelText('Upload questions')
+                ).toBeInTheDocument()
+            })
+
+            it('displays upload questions for EQRO when the feature flag is on', async () => {
+                const division = 'dmco'
+                const contract = mockContractPackageSubmittedWithQuestions()
+
+                renderWithProviders(
+                    <Routes>
+                        <Route element={<SubmissionSideNav />}>
+                            <Route
+                                path={
+                                    RoutesRecord.SUBMISSIONS_UPLOAD_CONTRACT_QUESTION
+                                }
+                                element={<UploadContractQuestions />}
+                            />
+                        </Route>
+                    </Routes>,
+                    {
+                        apolloProvider: {
+                            mocks: [
+                                fetchCurrentUserMock({
+                                    user: mockUser(),
+                                    statusCode: 200,
+                                }),
+                                fetchContractWithQuestionsMockSuccess({
+                                    contract: {
+                                        ...contract,
+                                        id: '15',
+                                        contractSubmissionType: 'EQRO',
+                                    },
+                                }),
+                                fetchContractWithQuestionsMockSuccess({
+                                    contract: {
+                                        ...contract,
+                                        id: '15',
+                                        contractSubmissionType: 'EQRO',
+                                    },
+                                }),
+                            ],
+                        },
+                        routerProvider: {
+                            route: `/submissions/eqro/15/question-and-answers/${division}/upload-questions`,
+                        },
+                        featureFlags: {
+                            [featureFlags.EQRO_SUBMISSIONS.flag]: true,
+                        },
+                    }
+                )
+
+                expect(
+                    await screen.findByRole('heading', {
+                        name: /Add questions/,
+                        level: 2,
+                    })
                 ).toBeInTheDocument()
             })
 
@@ -250,6 +306,88 @@ describe('UploadContractQuestions', () => {
                 await waitFor(() =>
                     expect(testLocation.pathname).toBe(
                         `/submissions/health-plan/15/question-and-answers`
+                    )
+                )
+            })
+
+            it('navigates back to EQRO contract questions after successful submission', async () => {
+                let testLocation: Location
+                const contract = mockContractPackageSubmittedWithQuestions()
+
+                const { user } = renderWithProviders(
+                    <Routes>
+                        <Route element={<SubmissionSideNav />}>
+                            <Route
+                                path={
+                                    RoutesRecord.SUBMISSIONS_UPLOAD_CONTRACT_QUESTION
+                                }
+                                element={<UploadContractQuestions />}
+                            />
+                        </Route>
+                    </Routes>,
+                    {
+                        apolloProvider: {
+                            mocks: [
+                                fetchCurrentUserMock({
+                                    user: mockUser(),
+                                    statusCode: 200,
+                                }),
+                                fetchContractWithQuestionsMockSuccess({
+                                    contract: {
+                                        ...contract,
+                                        id: '15',
+                                        contractSubmissionType: 'EQRO',
+                                    },
+                                }),
+                                fetchContractWithQuestionsMockSuccess({
+                                    contract: {
+                                        ...contract,
+                                        id: '15',
+                                        contractSubmissionType: 'EQRO',
+                                    },
+                                }),
+                                createContractQuestionSuccess({
+                                    contractID: '15',
+                                    documents: [
+                                        {
+                                            name: 'testFile.doc',
+                                            s3URL: 's3://fake-bucket/fakeS3Key0-testFile.doc/testFile.doc',
+                                        },
+                                    ],
+                                }),
+                            ],
+                        },
+                        routerProvider: {
+                            route: `/submissions/eqro/15/question-and-answers/dmco/upload-questions`,
+                        },
+                        location: (location) => (testLocation = location),
+                        featureFlags: {
+                            [featureFlags.EQRO_SUBMISSIONS.flag]: true,
+                        },
+                    }
+                )
+
+                await screen.findByRole('heading', {
+                    name: /Add questions/,
+                    level: 2,
+                })
+                await userEvent.upload(
+                    screen.getByLabelText('Upload questions'),
+                    [TEST_DOC_FILE]
+                )
+                await waitFor(() => {
+                    expect(
+                        screen.getByText(TEST_DOC_FILE.name)
+                    ).toBeInTheDocument()
+                })
+
+                await user.click(
+                    await screen.findByRole('button', { name: /Add questions/ })
+                )
+
+                await waitFor(() =>
+                    expect(testLocation.pathname).toBe(
+                        `/submissions/eqro/15/question-and-answers`
                     )
                 )
             })
