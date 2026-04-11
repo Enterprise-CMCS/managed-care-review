@@ -1,5 +1,11 @@
 packages:
-    - 'services/**'
-    - 'packages/**'
-    - 'dev_tool'
-    - 'scripts'
+  - services/**
+  - packages/**
+  - dev_tool
+  - scripts
+
+ignoredBuiltDependencies:
+  - protobufjs
+
+onlyBuiltDependencies:
+  - sharp

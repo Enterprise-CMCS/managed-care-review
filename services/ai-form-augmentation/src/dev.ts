@@ -1,6 +1,7 @@
 import { readFile } from 'node:fs/promises'
 import { buildChunksArtifact, getChunksArtifactKey } from './artifacts'
 import { chunkDocument } from './chunking'
+import { XenovaEmbeddingProvider } from './embeddings'
 import { parsePdf } from './parsing'
 import { newArtifactS3Client } from './s3'
 
@@ -39,18 +40,26 @@ async function main(): Promise<void> {
   await s3Client.putJson(bucket, key, artifact)
   const storedArtifact = await s3Client.getJson<typeof artifact>(bucket, key)
 
+  const embeddingProvider = new XenovaEmbeddingProvider()
+  const sampleTexts = storedArtifact.chunks.slice(0, 2).map((chunk) => chunk.text)
+  const vectors = await embeddingProvider.embedTexts(sampleTexts)
+
   console.log({
     bucket,
     key,
     artifactVersion: storedArtifact.artifactVersion,
     chunkCount: storedArtifact.chunks.length,
+    embeddingModel: embeddingProvider.getModelInfo?.(),
+    embeddedChunkCount: vectors.length,
+    vectorLength: vectors[0]?.length ?? 0,
     firstChunk: storedArtifact.chunks[0]
       ? {
         chunkId: storedArtifact.chunks[0].chunkId,
         order: storedArtifact.chunks[0].order,
         preview: storedArtifact.chunks[0].text.slice(0,200)
       }
-      : null
+      : null,
+    firstVectorPreview: vectors[0]?.slice(0, 5) ?? []
   })
 }
 

@@ -13,3 +13,7 @@ export { chunkDocument } from './chunking'
 // Artifacts
 export type { ChunksArtifact } from './artifacts'
 export { buildChunksArtifact, getChunksArtifactKey } from './artifacts'
+
+// Embeddings
+export type { EmbeddingProvider } from './embeddings'
+export { XenovaEmbeddingProvider } from './embeddings'
