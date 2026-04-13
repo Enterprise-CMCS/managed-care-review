@@ -1,54 +1,12 @@
 @use '../../styles/custom.scss' as custom;
 @use '../../styles/uswdsImports.scss' as uswds;
 
-.formPage {
-    width: 100%;
-}
-
 .mccrsIDForm {
-    [class^='usa-breadcrumb'] {
-        min-width: 40rem;
-        max-width: 20rem;
-        margin: 0 auto;
-    }
-}
-
-.customHeading {
-    font-weight: 700;
-
-    span {
-        font-weight: normal;
-        margin-left: 16px;
-    }
-}
-
-.formContainer.tableContainer {
-    &[class^='usa-form'] {
-        max-width: 100%;
-        width: 75rem;
-    }
-}
-
-.formHeader {
-    text-align: center;
-    width: 100%;
-    padding: uswds.units(4) 0;
+    @include custom.mini-form-page-container;
 }
 
 .formContainer {
-    > [class^='usa-fieldset'] {
-        padding: uswds.units(4);
-        padding-top: 32px;
-        margin-top: uswds.units(2);
-        background: custom.$mcr-foundation-white;
-        border: 1px solid custom.$mcr-gray-lighter;
-        @include uswds.u-radius('md');
-    }
-
-    h3 {
-        font-size: 22px;
-        margin-top: 0;
-    }
+    @include custom.mini-form-fields;
 
     div[class^='usa-form-group'] {
         margin-top: 24px;
@@ -58,20 +16,6 @@
         }
     }
 
-    > div[class^='usa-form-group']:not(:first-of-type) {
-        margin-top: 2.5rem;
-    }
-
-    &[class^='usa-form'] {
-        min-width: 100%;
-        max-width: 100%;
-
-        @include uswds.at-media(tablet) {
-            min-width: 40rem;
-            max-width: 20rem;
-            margin: 0 auto;
-        }
-    }
     [class^='usa-legend'] {
         margin-top: 0;
     }
@@ -80,18 +24,6 @@
         span {
             display: inline;
             font-weight: bold;
-        }
-    }
-
-    ul[class^='usa-button-group'] {
-        justify-content: end;
-        li[class^='usa-button-group__item'] {
-            margin-top: 0;
-            button {
-                margin-top: 16px;
-                margin-bottom: 44px;
-                margin-right: 0.25rem;
-            }
         }
     }
 }

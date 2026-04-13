@@ -2,21 +2,11 @@
 @use '../../styles/uswdsImports.scss' as uswds;
 
 .uploadFormContainer {
-    max-width: custom.$mcr-container-standard-width-fixed;
-    background-color: none;
-    @include uswds.at-media('tablet') {
-        min-width: 20rem;
-        max-width: 40rem;
-        margin: 0 auto;
-    }
+    @include custom.mini-form-page-container;
 }
 
 .formContainer {
-    @include custom.form-fields;
-
-    > div[class^='usa-form-group']:not(:first-of-type) {
-        margin-top: 2.5rem;
-    }
+    @include custom.mini-form-fields;
 
     [id^='formSummary'] {
         display: flex;

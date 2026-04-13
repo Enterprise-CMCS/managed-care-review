@@ -6,9 +6,14 @@
 }
 
 .crumbContainer {
-    margin-top: 1em;
-    margin-bottom: 1em;
+    margin-top: 2.5rem;
+    margin-bottom: 1rem;
     background: none;
+    padding: 0;
+
+    ul {
+        padding: 0;
+    }
 
     [class^='usa-breadcrumb'] {
         li:last-child a {
