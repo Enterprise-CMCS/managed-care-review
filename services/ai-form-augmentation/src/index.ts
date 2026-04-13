@@ -17,3 +17,11 @@ export { buildChunksArtifact, getChunksArtifactKey } from './artifacts'
 // Embeddings
 export type { EmbeddingProvider } from './embeddings'
 export { XenovaEmbeddingProvider } from './embeddings'
+
+// Vector store
+export type {
+  VectorSearchResult,
+  VectorStore,
+  VectorStoreItem
+} from './vector-store'
+export { BruteForceVectorStore } from './vector-store'

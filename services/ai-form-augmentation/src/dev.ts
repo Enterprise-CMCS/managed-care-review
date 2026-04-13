@@ -4,6 +4,7 @@ import { chunkDocument } from './chunking'
 import { XenovaEmbeddingProvider } from './embeddings'
 import { parsePdf } from './parsing'
 import { newArtifactS3Client } from './s3'
+import { BruteForceVectorStore } from './vector-store'
 
 async function main(): Promise<void> {
   // These values model the runtime context that later pipeline steps will
@@ -41,8 +42,32 @@ async function main(): Promise<void> {
   const storedArtifact = await s3Client.getJson<typeof artifact>(bucket, key)
 
   const embeddingProvider = new XenovaEmbeddingProvider()
-  const sampleTexts = storedArtifact.chunks.slice(0, 2).map((chunk) => chunk.text)
-  const vectors = await embeddingProvider.embedTexts(sampleTexts)
+  const chunkTexts = storedArtifact.chunks.map((chunk) => chunk.text)
+  const chunkVectors = await embeddingProvider.embedTexts(chunkTexts)
+
+  const vectorStore = new BruteForceVectorStore<{
+    chunkId: string
+    documentName: string
+    order: number
+    text: string
+  }>()
+
+  await vectorStore.add(
+    storedArtifact.chunks.map((chunk, index) => ({
+      id: chunk.chunkId,
+      vector: chunkVectors[index],
+      metadata: {
+        chunkId: chunk.chunkId,
+        documentName: chunk.documentName,
+        order: chunk.order,
+        text: chunk.text
+      }
+    }))
+  )
+
+  const queryText = 'contract rate certification submission instructions'
+  const queryVector = await embeddingProvider.embedText(queryText)
+  const results = await vectorStore.search(queryVector, 3)
 
   console.log({
     bucket,
@@ -50,16 +75,15 @@ async function main(): Promise<void> {
     artifactVersion: storedArtifact.artifactVersion,
     chunkCount: storedArtifact.chunks.length,
     embeddingModel: embeddingProvider.getModelInfo?.(),
-    embeddedChunkCount: vectors.length,
-    vectorLength: vectors[0]?.length ?? 0,
-    firstChunk: storedArtifact.chunks[0]
-      ? {
-        chunkId: storedArtifact.chunks[0].chunkId,
-        order: storedArtifact.chunks[0].order,
-        preview: storedArtifact.chunks[0].text.slice(0,200)
-      }
-      : null,
-    firstVectorPreview: vectors[0]?.slice(0, 5) ?? []
+    embeddedChunkCount: chunkVectors.length,
+    vectorLength: chunkVectors[0]?.length ?? 0,
+    queryText,
+    topResults: results.map((result) => ({
+      id: result.id,
+      score: result.score,
+      order: result.metadata.order,
+      preview: result.metadata.text.slice(0, 160)
+    }))
   })
 }
 
