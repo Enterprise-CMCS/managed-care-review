@@ -3,6 +3,7 @@ import { buildChunksArtifact, getChunksArtifactKey } from './artifacts'
 import { chunkDocument } from './chunking'
 import { XenovaEmbeddingProvider } from './embeddings'
 import { parsePdf } from './parsing'
+import { orderRetrievedChunks } from './retrieval'
 import { newArtifactS3Client } from './s3'
 import { BruteForceVectorStore } from './vector-store'
 
@@ -49,6 +50,7 @@ async function main(): Promise<void> {
     chunkId: string
     documentName: string
     order: number
+    page: number | null
     text: string
   }>()
 
@@ -60,6 +62,7 @@ async function main(): Promise<void> {
         chunkId: chunk.chunkId,
         documentName: chunk.documentName,
         order: chunk.order,
+        page: chunk.page,
         text: chunk.text
       }
     }))
@@ -67,7 +70,10 @@ async function main(): Promise<void> {
 
   const queryText = 'contract rate certification submission instructions'
   const queryVector = await embeddingProvider.embedText(queryText)
-  const results = await vectorStore.search(queryVector, 3)
+  const similarityResults = await vectorStore.search(queryVector, 3)
+  // Preserve the same retrieved chunks, but reorder them into source order so
+  // the final prompt context reads more naturally.
+  const orderedResults = orderRetrievedChunks(similarityResults)
 
   console.log({
     bucket,
@@ -78,7 +84,13 @@ async function main(): Promise<void> {
     embeddedChunkCount: chunkVectors.length,
     vectorLength: chunkVectors[0]?.length ?? 0,
     queryText,
-    topResults: results.map((result) => ({
+    topResultsBySimilarity: similarityResults.map((result) => ({
+      id: result.id,
+      score: result.score,
+      order: result.metadata.order,
+      preview: result.metadata.text.slice(0, 160)
+    })),
+    topResultsOrderedForPrompt: orderedResults.map((result) => ({
       id: result.id,
       score: result.score,
       order: result.metadata.order,

@@ -25,3 +25,10 @@ export type {
   VectorStoreItem
 } from './vector-store'
 export { BruteForceVectorStore } from './vector-store'
+
+// Retrieval
+export type {
+  OrderedChunkMetadata,
+  RetrievedChunk
+} from './retrieval'
+export { orderRetrievedChunks } from './retrieval'
