@@ -24,6 +24,7 @@ import {
     userFromLocalAuthProvider,
     userFromThirdPartyAuthorizer,
 } from '../authn'
+import type { Store } from '../postgres'
 import { NewPostgresStore } from '../postgres'
 import { configureResolvers } from '../resolvers'
 import { configurePostgres, configureEmailer } from './configuration'
@@ -72,6 +73,7 @@ export interface Context {
 // This function pulls auth info out of the cognitoAuthenticationProvider in the lambda event
 // and turns that into our GQL resolver context object
 function contextForRequestForFetcher(
+    store: Store,
     userFetcher: userFromAuthProvider
 ): ({
     event,
@@ -120,22 +122,6 @@ function contextForRequestForFetcher(
                         'Log: no AuthProvider from an internal API user.'
                     )
                 }
-
-                const dbURL = process.env.DATABASE_URL ?? ''
-                const secretsManagerSecret =
-                    process.env.SECRETS_MANAGER_SECRET ?? ''
-                const pgResult = await configurePostgres(
-                    dbURL,
-                    secretsManagerSecret,
-                    stageName! // validated during initialization
-                )
-
-                if (pgResult instanceof Error) {
-                    console.error("Init Error: Postgres couldn't be configured")
-                    throw pgResult
-                }
-
-                const store = NewPostgresStore(pgResult)
 
                 if (fromThirdPartyAuthorizer) {
                     const principalId =
@@ -492,7 +478,7 @@ async function initializeGQLHandler(): Promise<Handler> {
             : userFromCognitoAuthProvider
 
     // Our user-context function is parametrized with a local or
-    const contextForRequest = contextForRequestForFetcher(userFetcher)
+    const contextForRequest = contextForRequestForFetcher(store, userFetcher)
 
     const server = new ApolloServer({
         typeDefs,
