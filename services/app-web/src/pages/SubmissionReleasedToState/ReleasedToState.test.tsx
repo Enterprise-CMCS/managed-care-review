@@ -191,7 +191,7 @@ describe('ReleasedToState', () => {
             expect(
                 screen.getByRole('heading', {
                     name: /Are you sure you want to mark this submission as Released to the state/,
-                    level: 2,
+                    level: 3,
                 })
             ).toBeInTheDocument()
         })

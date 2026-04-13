@@ -131,7 +131,7 @@ describe('UndoRateWithdraw', () => {
 
         await waitFor(() => {
             expect(
-                screen.getByRole('heading', { name: 'Undo withdraw' })
+                screen.getByRole('heading', { name: 'Undo rate withdraw' })
             ).toBeInTheDocument()
             expect(
                 screen.getByRole('button', { name: 'Undo withdraw' })
@@ -194,7 +194,7 @@ describe('UndoRateWithdraw', () => {
 
         await waitFor(() => {
             expect(
-                screen.getByRole('heading', { name: 'Undo withdraw' })
+                screen.getByRole('heading', { name: 'Undo rate withdraw' })
             ).toBeInTheDocument()
             expect(
                 screen.getByRole('button', { name: 'Undo withdraw' })
