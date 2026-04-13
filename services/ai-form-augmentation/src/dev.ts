@@ -13,12 +13,12 @@ async function main(): Promise<void> {
   const formId = 'local-dev-form'
   const bucket = 'ai-form-augmentation-artifacts'
   const artifactVersion = 'local-dev-v1'
-  const filePath = '../fixtures/pdf/medicaid-managed-care-contract-and-rate-submission-cover-sheet.pdf'
+  const filePath = '../fixtures/pdf/scan-07-65712-a26-213a-final.pdf'
 
   const buffer = await readFile(new URL(filePath, import.meta.url))
   const parsed = await parsePdf(
     buffer,
-    'medicaid-managed-care-contract-and-rate-submission-cover-sheet.pdf'
+    'scan-07-65712-a26-213a-final.pdf'
   )
 
   // Use the parsed PDF text as-is so chunking can be inspected independently of S3 or embeddings.
@@ -68,7 +68,7 @@ async function main(): Promise<void> {
     }))
   )
 
-  const queryText = 'contract rate certification submission instructions'
+  const queryText = 'contract term start date end date amendment effective date'
   const queryVector = await embeddingProvider.embedText(queryText)
   const similarityResults = await vectorStore.search(queryVector, 3)
   // Preserve the same retrieved chunks, but reorder them into source order so
@@ -76,6 +76,9 @@ async function main(): Promise<void> {
   const orderedResults = orderRetrievedChunks(similarityResults)
 
   console.log({
+    hasStartDateLabel: parsed.rawText.includes('Start Date'),
+    hasJanuary1: parsed.rawText.includes('January 1'),
+    hasFebruary182026: parsed.rawText.includes('February 18, 2026'),
     bucket,
     key,
     artifactVersion: storedArtifact.artifactVersion,
@@ -88,14 +91,17 @@ async function main(): Promise<void> {
       id: result.id,
       score: result.score,
       order: result.metadata.order,
-      preview: result.metadata.text.slice(0, 160)
+      preview: result.metadata.text.slice(0, 2000)
     })),
     topResultsOrderedForPrompt: orderedResults.map((result) => ({
       id: result.id,
       score: result.score,
       order: result.metadata.order,
-      preview: result.metadata.text.slice(0, 160)
-    }))
+      preview: result.metadata.text.slice(0, 2000)
+    })),
+    extractionMethod: parsed.extractionMethod,
+    extractionNotes: parsed.extractionNotes,
+    parsedTextPreview: parsed.rawText.slice(0, 1000)
   })
 }
 

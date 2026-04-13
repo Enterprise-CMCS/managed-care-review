@@ -66,3 +66,6 @@ packages/*/build
 services/app-api/src/generated/
 
 services/local-launch-darkly/dist
+
+# Local OCR language data downloaded by tesseract.js during development.
+services/ai-form-augmentation/*.traineddata

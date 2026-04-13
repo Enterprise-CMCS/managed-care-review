@@ -3,8 +3,16 @@ export type { ArtifactS3Client } from './s3'
 export { newArtifactS3Client } from './s3'
 
 // PDF parsing
-export type { PdfParseResult } from './parsing'
-export { parsePdf } from './parsing'
+export type {
+  PdfExtractionMethod,
+  PdfParseResult,
+  PdfTextExtractor
+} from './parsing'
+export {
+  LocalOcrPdfExtractor,
+  parsePdf,
+  PdfParseTextExtractor
+} from './parsing'
 
 // Chunking
 export type { ChunkDocumentOptions, DocumentChunk } from './chunking'
