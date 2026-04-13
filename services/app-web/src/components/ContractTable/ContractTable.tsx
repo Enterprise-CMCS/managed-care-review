@@ -197,6 +197,22 @@ const getColumnClassName = (columnId: string): string | undefined => {
         return styles.columnID
     }
 
+    if (columnId === 'contractSubmissionType') {
+        return styles.contractTypeColumn
+    }
+
+    if (columnId === 'submittedAt') {
+        return styles.dateColumn
+    }
+
+    if (columnId === 'updatedAt') {
+        return styles.dateColumn
+    }
+
+    if (columnId === 'status') {
+        return styles.statusColumn
+    }
+
     if (columnId === 'programs') {
         return styles.programsColumn
     }
