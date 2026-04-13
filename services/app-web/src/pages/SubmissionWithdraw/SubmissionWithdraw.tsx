@@ -236,7 +236,7 @@ export const SubmissionWithdraw = (): React.ReactElement => {
     return (
         <div className={styles.submissionWithdrawContainer}>
             <Breadcrumbs
-                className="use-breadcrumb--wrap"
+                className="usa-breadcrumb--wrap"
                 items={[
                     {
                         link: RoutesRecord.DASHBOARD_SUBMISSIONS,
@@ -260,12 +260,13 @@ export const SubmissionWithdraw = (): React.ReactElement => {
                     rates={ratesToNotBeWithdrawn}
                 />
             )}
+            <h1>Withdraw submission</h1>
             <Formik
                 initialValues={formInitialValues}
                 onSubmit={(values) => withdrawSubmissionPackage(values)}
                 validationSchema={submissionWithdrawSchema}
             >
-                {({ handleSubmit, handleChange, errors, values }) => (
+                {({ handleSubmit, handleChange, errors }) => (
                     <Form
                         id="SubmissionWithdrawForm"
                         className={styles.formContainer}
@@ -276,7 +277,6 @@ export const SubmissionWithdraw = (): React.ReactElement => {
                     >
                         {withdrawError && <GenericApiErrorBanner />}
                         <fieldset className="usa-fieldset">
-                            <h2>Withdraw submission</h2>
                             <FieldTextarea
                                 label="Reason for withdrawing the submission."
                                 name="submissionWithdrawReason"
