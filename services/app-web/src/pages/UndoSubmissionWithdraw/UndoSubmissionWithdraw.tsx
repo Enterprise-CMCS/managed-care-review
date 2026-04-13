@@ -161,7 +161,7 @@ export const UndoSubmissionWithdraw = (): React.ReactElement => {
                 onSubmit={(values) => undoWithdrawSubmissionAction(values)}
                 validationSchema={UndoSubmissionWithdrawSchema}
             >
-                {({ handleSubmit, handleChange, errors, values }) => (
+                {({ handleSubmit, handleChange, errors }) => (
                     <Form
                         id="undoSubmissionWithdrawForm"
                         className={styles.formContainer}

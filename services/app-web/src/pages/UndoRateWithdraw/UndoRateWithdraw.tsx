@@ -137,7 +137,7 @@ export const UndoRateWithdraw = () => {
                 onSubmit={(values) => undoWithdrawRateAction(values)}
                 validationSchema={UndoRateWithdrawSchema}
             >
-                {({ handleSubmit, handleChange, errors, values }) => (
+                {({ handleSubmit, handleChange, errors }) => (
                     <Form
                         id="UndoRateWithdrawForm"
                         className={styles.formContainer}
