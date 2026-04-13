@@ -288,7 +288,7 @@ describe('userFromCognitoAuthProvider', () => {
         expect(dbUser.email).toBe('newuser@example.com')
     })
 
-    it('updates DB when Cognito user info has changed', async () => {
+    it('updates DB when Cognito user info has changed and updatedAt is stale', async () => {
         const userId = 'update-cognito-user-id'
         const prismaClient = await sharedTestPrismaClient()
         const store = NewPostgresStore(prismaClient)
@@ -304,6 +304,14 @@ describe('userFromCognitoAuthProvider', () => {
             })
         )
         await userFromCognitoAuthProvider(testAuthProvider(userId), store)
+
+        // Set updatedAt to yesterday so the daily sync triggers
+        const yesterday = new Date()
+        yesterday.setDate(yesterday.getDate() - 1)
+        await prismaClient.user.update({
+            where: { id: userId },
+            data: { updatedAt: yesterday },
+        })
 
         // Second call — Cognito returns updated email
         mockSend.mockResolvedValue(
@@ -334,29 +342,68 @@ describe('userFromCognitoAuthProvider', () => {
         expect(dbUser.email).toBe('after@example.com')
     })
 
-    it('updates DB when only role changes', async () => {
-        const userId = 'role-change-cognito-user-id'
+    it('skips Cognito sync when user was already updated today', async () => {
+        const userId = 'skip-sync-cognito-user-id'
         const prismaClient = await sharedTestPrismaClient()
         const store = NewPostgresStore(prismaClient)
 
-        // First call — insert as cms aprrover user
+        // Insert the user
         mockSend.mockResolvedValue(
             mockCognitoUser({
-                role: 'macmcrrs-cms-approver',
-                email: 'rolechange@example.com',
-                givenName: 'Role',
-                familyName: 'Change',
+                role: 'macmcrrs-state-user',
+                email: 'today@example.com',
+                givenName: 'Today',
+                familyName: 'User',
+                stateCode: 'FL',
             })
         )
         await userFromCognitoAuthProvider(testAuthProvider(userId), store)
 
-        // Second call — now a CMS user
+        // Reset mock to track that Cognito is NOT called again
+        mockSend.mockReset()
+
+        const result = await userFromCognitoAuthProvider(
+            testAuthProvider(userId),
+            store
+        )
+
+        expect(mockSend).not.toHaveBeenCalled()
+        expect(result).not.toBeInstanceOf(Error)
+        if (result instanceof Error) return
+        expect(result.email).toBe('today@example.com')
+    })
+
+    it('updates DB when CMS user role changes to CMS approver', async () => {
+        const userId = 'cms-role-change-user-id'
+        const prismaClient = await sharedTestPrismaClient()
+        const store = NewPostgresStore(prismaClient)
+
+        // First call — insert as CMS user
         mockSend.mockResolvedValue(
             mockCognitoUser({
                 role: 'macmcrrs-cms-user',
-                email: 'rolechange@example.com',
-                givenName: 'Role',
-                familyName: 'Change',
+                email: 'cmsuser@example.com',
+                givenName: 'CMS',
+                familyName: 'User',
+            })
+        )
+        await userFromCognitoAuthProvider(testAuthProvider(userId), store)
+
+        // Set updatedAt to yesterday so the daily sync triggers
+        const yesterday = new Date()
+        yesterday.setDate(yesterday.getDate() - 1)
+        await prismaClient.user.update({
+            where: { id: userId },
+            data: { updatedAt: yesterday },
+        })
+
+        // Second call — now a CMS approver with updated email
+        mockSend.mockResolvedValue(
+            mockCognitoUser({
+                role: 'macmcrrs-cms-approver',
+                email: 'cmsapprover@example.com',
+                givenName: 'CMS',
+                familyName: 'User',
             })
         )
         const result = await userFromCognitoAuthProvider(
@@ -367,17 +414,19 @@ describe('userFromCognitoAuthProvider', () => {
         expect(result).not.toBeInstanceOf(Error)
         if (result instanceof Error) return
 
-        expect(result.role).toBe('CMS_USER')
+        expect(result.role).toBe('CMS_APPROVER_USER')
+        expect(result.email).toBe('cmsapprover@example.com')
 
         // Verify DB was updated
         const dbUser = await store.findUser(userId)
         expect(dbUser).toBeDefined()
         expect(dbUser).not.toBeInstanceOf(Error)
         if (!dbUser || dbUser instanceof Error) return
-        expect(dbUser.role).toBe('CMS_USER')
+        expect(dbUser.role).toBe('CMS_APPROVER_USER')
+        expect(dbUser.email).toBe('cmsapprover@example.com')
     })
 
-    it('falls back to DB user when Cognito fails for existing user', async () => {
+    it('Returns db user if Cognito fails during sync', async () => {
         const userId = 'fallback-cognito-user-id'
         const prismaClient = await sharedTestPrismaClient()
         const store = NewPostgresStore(prismaClient)
@@ -385,14 +434,21 @@ describe('userFromCognitoAuthProvider', () => {
         // First call — insert the user successfully
         mockSend.mockResolvedValue(
             mockCognitoUser({
-                role: 'macmcrrs-state-user',
-                email: 'existing@example.com',
-                givenName: 'Existing',
+                role: 'macmcrrs-cms-approver',
+                email: 'cmsapprover@example.com',
+                givenName: 'CMS',
                 familyName: 'User',
-                stateCode: 'FL',
             })
         )
         await userFromCognitoAuthProvider(testAuthProvider(userId), store)
+
+        // Set updatedAt to yesterday so the daily sync triggers
+        const yesterday = new Date()
+        yesterday.setDate(yesterday.getDate() - 1)
+        await prismaClient.user.update({
+            where: { id: userId },
+            data: { updatedAt: yesterday },
+        })
 
         // Second call — Cognito throws
         mockSend.mockRejectedValue(new Error('ThrottlingException'))
@@ -402,10 +458,11 @@ describe('userFromCognitoAuthProvider', () => {
             store
         )
 
-        // Should fall back to the DB user, not return an error
         expect(result).not.toBeInstanceOf(Error)
         if (result instanceof Error) return
-        expect(result.email).toBe('existing@example.com')
+
+        expect(result.role).toBe('CMS_APPROVER_USER')
+        expect(result.email).toBe('cmsapprover@example.com')
     })
 
     it('returns error when Cognito fails and no DB user exists', async () => {

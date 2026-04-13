@@ -9,6 +9,24 @@ import { performance } from 'perf_hooks'
 import type { Store, InsertUserArgsType } from '../postgres'
 import { isValidCmsDivison } from '../domain-models'
 
+/**
+ * Checks whether the given date falls on the current calendar day.
+ * Used to throttle Cognito syncs to once per day — if the user's
+ * record was already updated today, we skip the sync.
+ * @param updatedAt - The user's last updated timestamp. Returns false if undefined.
+ * @returns true if updatedAt is today's date, false otherwise.
+ */
+export function wasUpdatedToday(updatedAt?: Date): boolean {
+    if (!updatedAt) return false
+    const now = new Date()
+    const updated = new Date(updatedAt)
+    return (
+        updated.getFullYear() === now.getFullYear() &&
+        updated.getMonth() === now.getMonth() &&
+        updated.getDate() === now.getDate()
+    )
+}
+
 export function parseAuthProvider(
     authProvider: string
 ): { userId: string; poolId: string } | Error {
@@ -195,40 +213,35 @@ export function userTypeFromAttributes(
     return new Error('Unsupported user role:  ' + roleAttribute)
 }
 
-function hasUserInfoChanged(sourceUser: UserType, dbUser: UserType): boolean {
-    if (
-        sourceUser.email !== dbUser.email ||
-        sourceUser.givenName !== dbUser.givenName ||
-        sourceUser.familyName !== dbUser.familyName ||
-        sourceUser.role !== dbUser.role
-    ) {
-        return true
-    }
-
-    // Check stateCode for state users
-    return (
-        sourceUser.role === 'STATE_USER' &&
-        dbUser.role === 'STATE_USER' &&
-        sourceUser.stateCode !== dbUser.stateCode
-    )
-}
-
-// Syncs a source user (from Cognito or local) with the DB.
-// Inserts the user if not found, updates if info has changed.
+// Syncs cognito user to DB.
 export async function syncUserWithAurora(
     store: Store,
-    sourceUser: UserType
+    sourceUser: UserType,
+    auroraUser?: UserType
 ): Promise<UserType | Error> {
-    const startRequest = performance.now()
-    const auroraUser = await lookupUserAurora(store, sourceUser.id)
-    if (auroraUser instanceof Error) {
-        return auroraUser
-    }
-    const endRequest = performance.now()
-    console.info('User lookup in postgres takes ms:', endRequest - startRequest)
-
-    // User not in DB yet — insert
-    if (auroraUser === undefined) {
+    // User exists update, else insert
+    if (auroraUser) {
+        console.info(
+            `Updating db userId ${auroraUser.id} with Cognito user data.`
+        )
+        const updateResult = await store.updateUserInfo(sourceUser.id, {
+            email: sourceUser.email,
+            givenName: sourceUser.givenName,
+            familyName: sourceUser.familyName,
+            role: sourceUser.role,
+            stateCode:
+                sourceUser.role === 'STATE_USER'
+                    ? sourceUser.stateCode
+                    : undefined,
+        })
+        if (updateResult instanceof Error) {
+            console.error(
+                `Failed to update user info for user ${sourceUser.id}: ${updateResult.message}`
+            )
+            return sourceUser
+        }
+        return updateResult
+    } else {
         const userToInsert: InsertUserArgsType = {
             userID: sourceUser.id,
             role: sourceUser.role,
@@ -248,32 +261,6 @@ export async function syncUserWithAurora(
         }
         return result
     }
-
-    // User exists — check if info has changed
-    if (hasUserInfoChanged(sourceUser, auroraUser)) {
-        console.info(
-            `User info mismatch for user ${sourceUser.id}. Updating DB.`
-        )
-        const updateResult = await store.updateUserInfo(sourceUser.id, {
-            email: sourceUser.email,
-            givenName: sourceUser.givenName,
-            familyName: sourceUser.familyName,
-            role: sourceUser.role,
-            stateCode:
-                sourceUser.role === 'STATE_USER'
-                    ? sourceUser.stateCode
-                    : undefined,
-        })
-        if (updateResult instanceof Error) {
-            console.error(
-                `Failed to update user info for user ${sourceUser.id}: ${updateResult.message}`
-            )
-            return auroraUser
-        }
-        return updateResult
-    }
-
-    return auroraUser
 }
 
 // userFromCognitoAuthProvider hits the Cognito API to get the information in the authProvider
@@ -293,32 +280,36 @@ export async function userFromCognitoAuthProvider(
             return lookupUserCognito(userInfo.userId, userInfo.poolId)
         }
 
-        const cognitoUserResult = await lookupUserCognito(
-            userInfo.userId,
-            userInfo.poolId
-        )
-        if (cognitoUserResult instanceof Error) {
-            // Cognito failed — fall back to DB user if one exists
-            const auroraUser = await lookupUserAurora(store, userInfo.userId)
-            if (auroraUser instanceof Error) {
-                console.error(
-                    `Cognito and Aurora lookups both failed for user ${userInfo.userId}. ` +
-                        `Cognito error: ${cognitoUserResult.message}. ` +
-                        `Aurora error: ${auroraUser.message}`
-                )
-                return auroraUser
-            }
-            if (auroraUser !== undefined) {
-                console.warn(
-                    `Cognito lookup failed, using DB user: ${cognitoUserResult.message}`
-                )
-                return auroraUser
-            }
-            // New user with no DB record — Cognito is required
-            return cognitoUserResult
+        const startRequest = performance.now()
+
+        const auroraUser = await lookupUserAurora(store, userInfo.userId)
+        if (auroraUser instanceof Error) {
+            return lookupUserCognito(userInfo.userId, userInfo.poolId)
         }
 
-        return syncUserWithAurora(store, cognitoUserResult)
+        const endRequest = performance.now()
+        console.info(
+            'User lookup in postgres takes ms:',
+            endRequest - startRequest
+        )
+
+        // If user does not exist, or has not been updated, then sync with DB
+        if (!auroraUser || !wasUpdatedToday(auroraUser.updatedAt)) {
+            const cognitoUser = await lookupUserCognito(
+                userInfo.userId,
+                userInfo.poolId
+            )
+            if (cognitoUser instanceof Error) {
+                console.error(
+                    `Failed to sync Cognito user with aurora: ${cognitoUser.message}`
+                )
+                // Default to DB user or return the cognito error.
+                return auroraUser ?? cognitoUser
+            }
+            return await syncUserWithAurora(store, cognitoUser, auroraUser)
+        }
+
+        return auroraUser
     } catch (e) {
         return e instanceof Error
             ? e
