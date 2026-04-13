@@ -115,7 +115,7 @@ export class AuroraServerlessV2 extends Construct {
 
         // Rotate the admin password every 30 days via the Secrets Manager hosted rotation Lambda
         this.cluster.addRotationSingleUser({
-            automaticallyAfter: Duration.days(30),
+            automaticallyAfter: Duration.days(1),
             vpcSubnets: props.vpcSubnets,
             securityGroup: props.securityGroup,
             excludeCharacters: ' %+~`#$&*()|[]{}:;<>?!\'/@"\\',
