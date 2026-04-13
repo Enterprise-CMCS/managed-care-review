@@ -24,6 +24,7 @@ const deprecatedProgram = {
 }
 
 const mnState = mockMNState()
+const firstProgramId = mnState.programs[0].id
 
 const stateUserWithDeprecatedProgram = mockValidStateUser({
     state: {
@@ -36,10 +37,15 @@ const stateUserWithDeprecatedProgram = mockValidStateUser({
 // ProgramSelect, because react-select captures defaultValue at mount time.
 const ProgramSelectWithReadyState = (args: ProgramSelectPropType) => {
     const programs = useStatePrograms()
-    if (programs.length === 0) {
-        return <div>Loading programs...</div>
-    }
-    return <ProgramSelect {...args} />
+    const isLoading = programs.length === 0
+
+    return (
+        <ProgramSelect
+            key={isLoading ? 'loading' : 'ready'}
+            {...args}
+            isLoading={isLoading}
+        />
+    )
 }
 
 const Template: StoryFn<ProgramSelectPropType> = (args) => (
@@ -58,7 +64,7 @@ const Template: StoryFn<ProgramSelectPropType> = (args) => (
 export const Default = Template.bind({})
 Default.args = {
     name: 'programSelect',
-    programIDs: ['ea16a6c0-5fc6-4df8-adac-c627e76660ab', deprecatedProgram.id],
+    programIDs: [firstProgramId, deprecatedProgram.id],
     contractProgramsOnly: true,
 }
 Default.decorators = [
