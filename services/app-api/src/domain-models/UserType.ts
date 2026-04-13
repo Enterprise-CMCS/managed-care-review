@@ -23,6 +23,8 @@ const baseUserSchema = z.object({
     // Our DB does not generate the user.id, they are not guaranteed to be UUIDs
     // so set this to a string.
     id: z.string(),
+    createdAt: z.date().optional(),
+    updatedAt: z.date().optional(),
     role: userRolesSchema,
     email: z.string(),
     givenName: z.string(),
