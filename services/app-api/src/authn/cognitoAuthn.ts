@@ -91,8 +91,7 @@ async function fetchUserFromCognito(
             return new Error('No user found with this sub')
         }
 
-        const currentUser = listUsersResponse.Users[0]
-        return currentUser
+        return listUsersResponse.Users[0]
     } catch (e) {
         return e instanceof Error
             ? e

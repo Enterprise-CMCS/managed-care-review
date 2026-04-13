@@ -47,7 +47,7 @@ import {
     localGenerateDocumentZip,
     type DocumentZipService,
 } from '../zip/generateZip'
-import { lookupUserAurora } from '../authn/cognitoAuthn'
+import { lookupUserAurora } from '../authn'
 
 // Since our programs are checked into source code, we have a program we
 // use as our default
