@@ -25,7 +25,7 @@ export async function userFromLocalAuthProvider(
 
         // Mimics the logic for syncing cognito user
         if (!dbUser || !wasUpdatedToday(dbUser.updatedAt)) {
-            return syncUserWithAurora(store, localUser)
+            return syncUserWithAurora(store, localUser, dbUser)
         }
 
         return dbUser
