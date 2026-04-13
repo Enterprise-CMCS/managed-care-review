@@ -4,11 +4,12 @@ import { useNavigate } from 'react-router-dom'
 import {
     Rate,
     Contract,
-    useSubmitContractMutation,
-    useUnlockContractMutation,
+    SubmitContractDocument,
+    UnlockContractDocument,
     FetchContractWithQuestionsDocument,
     IndexContractsStrippedDocument,
 } from '../../gen/gqlClient'
+import { useMutation } from '@apollo/client'
 import { useFormik } from 'formik'
 import { usePrevious } from '../../hooks'
 import { Modal } from './Modal'
@@ -147,11 +148,12 @@ export const UnlockSubmitModal = ({
         unlockSubmitModalInput: '',
     }
 
-    const [submitContract, { loading: submitContractLoading }] =
-        useSubmitContractMutation()
+    const [submitContract, { loading: submitContractLoading }] = useMutation(
+        SubmitContractDocument
+    )
 
     const [unlockContract, { loading: unlockContractLoading, client }] =
-        useUnlockContractMutation()
+        useMutation(UnlockContractDocument)
 
     // TODO submitRate and unlockRate should also be set up here - unlock and edit rate epic
     const formik = useFormik({

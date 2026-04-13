@@ -1,32 +1,37 @@
+import type { MutationFunction } from '@apollo/client'
 import {
-    CreateContractQuestionMutationFn,
-    UnlockContractMutationFn,
     FetchContractWithQuestionsQuery,
     FetchContractWithQuestionsDocument,
     IndexContractQuestionsPayload,
     CreateContractQuestionMutation,
-    CreateContractQuestionResponseMutationFn,
+    CreateContractQuestionMutationVariables,
     CreateContractQuestionResponseMutation,
+    CreateContractQuestionResponseMutationVariables,
     ContractQuestion,
     Division,
     CreateContractQuestionInput,
     CreateQuestionResponseInput,
-    SubmitContractMutationFn,
+    SubmitContractMutation,
+    SubmitContractMutationVariables,
     Contract,
     UnlockedContract,
-    UpdateStateAssignmentsByStateMutationFn,
+    UnlockContractMutation,
+    UnlockContractMutationVariables,
+    UpdateStateAssignmentsByStateMutation,
+    UpdateStateAssignmentsByStateMutationVariables,
     FetchMcReviewSettingsDocument,
     FetchMcReviewSettingsQuery,
     CreateRateQuestionMutation,
+    CreateRateQuestionMutationVariables,
     CreateRateQuestionInput,
-    CreateRateQuestionMutationFn,
     RateQuestion,
     FetchRateWithQuestionsDocument,
     IndexRateQuestionsPayload,
     FetchRateWithQuestionsQuery,
-    CreateRateQuestionResponseMutationFn,
     CreateRateQuestionResponseMutation,
-    ApproveContractMutationFn,
+    CreateRateQuestionResponseMutationVariables,
+    ApproveContractMutation,
+    ApproveContractMutationVariables,
 } from '../gen/gqlClient'
 import { GraphQLErrors } from '@apollo/client/errors'
 
@@ -123,7 +128,7 @@ export const handleGraphQLErrorsAndAddUserFacingMessages = (
 }
 
 export const unlockMutationWrapper = async (
-    unlockContract: UnlockContractMutationFn,
+    unlockContract: MutationFunction<UnlockContractMutation, UnlockContractMutationVariables>,
     id: string,
     unlockedReason: string
 ): Promise<Partial<UnlockedContract> | GraphQLErrors | Error> => {
@@ -154,7 +159,7 @@ export const unlockMutationWrapper = async (
 }
 
 export const submitMutationWrapper = async (
-    submitContract: SubmitContractMutationFn,
+    submitContract: MutationFunction<SubmitContractMutation, SubmitContractMutationVariables>,
     id: string,
     submittedReason?: string
 ): Promise<Partial<Contract> | GraphQLErrors | Error> => {
@@ -190,7 +195,7 @@ export const submitMutationWrapper = async (
 }
 
 export const approveMutationWrapper = async (
-    approveContract: ApproveContractMutationFn,
+    approveContract: MutationFunction<ApproveContractMutation, ApproveContractMutationVariables>,
     id: string,
     dateApprovalReleasedToState: string
 ): Promise<Partial<Contract> | GraphQLErrors | Error> => {
@@ -223,7 +228,7 @@ export const approveMutationWrapper = async (
 }
 
 export async function updateStateAssignmentsWrapper(
-    updateStateAssignments: UpdateStateAssignmentsByStateMutationFn,
+    updateStateAssignments: MutationFunction<UpdateStateAssignmentsByStateMutation, UpdateStateAssignmentsByStateMutationVariables>,
     stateCode: string,
     assignedUserIDs: string[]
 ): Promise<undefined | GraphQLErrors | Error> {
@@ -306,7 +311,7 @@ export async function updateStateAssignmentsWrapper(
  * cache.evict() to force a refetch, but would then cause the loading UI to show.
  **/
 export const createContractQuestionWrapper = async (
-    createQuestion: CreateContractQuestionMutationFn,
+    createQuestion: MutationFunction<CreateContractQuestionMutation, CreateContractQuestionMutationVariables>,
     input: CreateContractQuestionInput
 ): Promise<CreateContractQuestionMutation | GraphQLErrors | Error> => {
     try {
@@ -367,7 +372,7 @@ export const createContractQuestionWrapper = async (
                                         },
                                     },
                                 },
-                            },
+                            } as FetchContractWithQuestionsQuery,
                         })
                     }
                 }
@@ -389,7 +394,7 @@ export const createContractQuestionWrapper = async (
 }
 
 export const createRateQuestionWrapper = async (
-    createQuestion: CreateRateQuestionMutationFn,
+    createQuestion: MutationFunction<CreateRateQuestionMutation, CreateRateQuestionMutationVariables>,
     input: CreateRateQuestionInput
 ): Promise<CreateRateQuestionMutation | GraphQLErrors | Error> => {
     try {
@@ -461,7 +466,7 @@ export const createRateQuestionWrapper = async (
                                         },
                                     },
                                 },
-                            },
+                            } as FetchRateWithQuestionsQuery,
                         })
                     }
                 }
@@ -483,7 +488,7 @@ export const createRateQuestionWrapper = async (
 }
 
 export const createContractResponseWrapper = async (
-    createResponse: CreateContractQuestionResponseMutationFn,
+    createResponse: MutationFunction<CreateContractQuestionResponseMutation, CreateContractQuestionResponseMutationVariables>,
     contractID: string,
     input: CreateQuestionResponseInput,
     division: Division
@@ -553,7 +558,7 @@ export const createContractResponseWrapper = async (
                                 fetchContract: {
                                     contract: updatedContract,
                                 },
-                            },
+                            } as FetchContractWithQuestionsQuery,
                         })
                     }
                 }
@@ -575,7 +580,7 @@ export const createContractResponseWrapper = async (
 }
 
 export const createRateQuestionResponseWrapper = async (
-    createResponse: CreateRateQuestionResponseMutationFn,
+    createResponse: MutationFunction<CreateRateQuestionResponseMutation, CreateRateQuestionResponseMutationVariables>,
     rateID: string,
     input: CreateQuestionResponseInput,
     division: Division
@@ -645,7 +650,7 @@ export const createRateQuestionResponseWrapper = async (
                                 fetchRate: {
                                     rate: updatedRate,
                                 },
-                            },
+                            } as FetchRateWithQuestionsQuery,
                         })
                     }
                 }

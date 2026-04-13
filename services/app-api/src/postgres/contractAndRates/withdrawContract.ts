@@ -5,7 +5,7 @@ import { findStatePrograms } from '../state'
 import { findContractWithHistory } from './findContractWithHistory'
 import { NotFoundError } from '../postgresErrors'
 import type { ExtendedPrismaClient } from '../prismaClient'
-import type { ConsolidatedContractStatus } from '../../gen/gqlClient'
+import type { ConsolidatedContractStatus } from '../../gen/gqlServer'
 import { submitContractAndOrRates } from './submitContractAndOrRates'
 import { includeRateRevisionWithRelatedSubmissionContracts } from './prismaSubmittedRateHelpers'
 import {

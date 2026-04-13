@@ -10,8 +10,8 @@ import {
 } from 'react-router-dom'
 import { useAuth } from '../../contexts/AuthContext'
 import { getRouteName } from '../../routeHelpers'
-import { useFetchRateWithQuestionsQuery } from '../../gen/gqlClient'
-import { ApolloError } from '@apollo/client'
+import { FetchRateWithQuestionsDocument } from '../../gen/gqlClient'
+import { ApolloError, useQuery } from '@apollo/client'
 import { handleApolloError } from '@mc-review/helpers'
 import { Error404 } from '../Errors/Error404Page'
 import { recordJSException } from '@mc-review/otel'
@@ -36,7 +36,7 @@ export const RateSummarySideNav = () => {
         pathname
     )
 
-    const { data, loading, error } = useFetchRateWithQuestionsQuery({
+    const { data, loading, error } = useQuery(FetchRateWithQuestionsDocument, {
         variables: {
             input: {
                 rateID: id,

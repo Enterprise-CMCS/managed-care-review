@@ -9,8 +9,8 @@ import {
 import styles from '../../../components/Select/Select.module.scss'
 import {
     IndexRatesInput,
-    useFetchRateQuery,
-    useIndexRatesStrippedQuery,
+    FetchRateDocument,
+    IndexRatesStrippedDocument,
 } from '../../../gen/gqlClient'
 import { programNames } from '@mc-review/submissions'
 import { formatCalendarDate } from '@mc-review/dates'
@@ -24,7 +24,7 @@ import { useField } from 'formik'
 import { convertIndexRatesGQLRateToRateForm } from '../../StateSubmission/HealthPlanSubmission/RateDetails/rateDetailsHelpers'
 import { AccessibleSelect } from '../../../components/Select'
 import { useState, useEffect } from 'react'
-import { ApolloError } from '@apollo/client'
+import { ApolloError, useQuery } from '@apollo/client'
 
 export interface LinkRateOptionType {
     readonly value: string
@@ -63,14 +63,14 @@ export const LinkRateSelect = ({
     const input: IndexRatesInput = { stateCode }
     const [selectedRateId, setSelectedRateID] = useState<string | null>(null)
 
-    const { data, loading, error } = useIndexRatesStrippedQuery({
+    const { data, loading, error } = useQuery(IndexRatesStrippedDocument, {
         variables: { input },
     })
     const {
         data: selectedRateData,
         loading: fetchRateLoading,
         error: fetchRateError,
-    } = useFetchRateQuery({
+    } = useQuery(FetchRateDocument, {
         variables: {
             input: {
                 rateID: selectedRateId ?? '',

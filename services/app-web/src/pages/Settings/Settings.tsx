@@ -7,9 +7,10 @@ import { recordJSException } from '@mc-review/otel'
 import {
     EmailConfiguration,
     StateAssignment,
-    useFetchMcReviewSettingsQuery,
+    FetchMcReviewSettingsDocument,
     OauthClient,
 } from '../../gen/gqlClient'
+import { useQuery } from '@apollo/client'
 import { StateAnalystsInDashboardType } from './SettingsTables'
 import { RoutesRecord } from '@mc-review/constants'
 import { AssignedStaffUpdateBanner } from '../../components/Banner/AssignedStaffUpdateBanner/AssignedStaffUpdateBanner'
@@ -106,7 +107,7 @@ export const Settings = (): React.ReactElement => {
         data,
         error,
         refetch: refetchMcReviewSettings,
-    } = useFetchMcReviewSettingsQuery({
+    } = useQuery(FetchMcReviewSettingsDocument, {
         notifyOnNetworkStatusChange: true,
     })
 

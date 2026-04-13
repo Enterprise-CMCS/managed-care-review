@@ -1,5 +1,5 @@
 import type { PrismaTransactionType } from '../prismaTypes'
-import type { ConsolidatedContractStatus } from '../../gen/gqlClient'
+import type { ConsolidatedContractStatus } from '../../gen/gqlServer'
 import { includeStrippedRateWithoutDraftContracts } from './prismaSubmittedRateHelpers'
 import { getParentContractID } from './prismaSharedContractRateHelpers'
 import { unlockContractInsideTransaction } from './unlockContract'

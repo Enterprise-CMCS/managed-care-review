@@ -39,7 +39,7 @@ generates:
     plugins:
       - 'typescript'
       - 'typescript-operations'
-      - 'typescript-react-apollo'
+      - 'typed-document-node'
     config:
       enumsAsTypes: true
   ../../packages/common-code/src/gen/gqlClient.tsx:
@@ -50,7 +50,7 @@ generates:
     plugins:
       - 'typescript'
       - 'typescript-operations'
-      - 'typescript-react-apollo'
+      - 'typed-document-node'
     config:
       enumsAsTypes: true
   ../../packages/helpers/src/gen/gqlClient.tsx:
@@ -61,7 +61,7 @@ generates:
     plugins:
       - 'typescript'
       - 'typescript-operations'
-      - 'typescript-react-apollo'
+      - 'typed-document-node'
     config:
       enumsAsTypes: true
   ../../packages/constants/src/gen/gqlClient.tsx:
@@ -72,7 +72,7 @@ generates:
     plugins:
       - 'typescript'
       - 'typescript-operations'
-      - 'typescript-react-apollo'
+      - 'typed-document-node'
     config:
       enumsAsTypes: true
   ../../packages/submissions/src/gen/gqlClient.tsx:
@@ -83,7 +83,7 @@ generates:
     plugins:
       - 'typescript'
       - 'typescript-operations'
-      - 'typescript-react-apollo'
+      - 'typed-document-node'
     config:
       enumsAsTypes: true
   ../cypress/gen/gqlClient.ts:
@@ -94,7 +94,7 @@ generates:
     plugins:
       - 'typescript'
       - 'typescript-operations'
-      - 'typescript-react-apollo'
+      - 'typed-document-node'
     config:
       enumsAsTypes: true
   ../../packages/mocks/src/gen/gqlClient.tsx:
@@ -105,7 +105,7 @@ generates:
     plugins:
       - 'typescript'
       - 'typescript-operations'
-      - 'typescript-react-apollo'
+      - 'typed-document-node'
     config:
       enumsAsTypes: true
   # ./src/common-code/graphql/generated/graphql.schema.json:

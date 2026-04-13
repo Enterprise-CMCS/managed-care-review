@@ -1,8 +1,9 @@
 import { useEffect, useLayoutEffect } from 'react'
 import styles from '../QuestionResponse.module.scss'
+import { useQuery } from '@apollo/client'
 import {
     CmsUser,
-    useFetchRateWithQuestionsQuery,
+    FetchRateWithQuestionsDocument,
     Division,
 } from '../../../gen/gqlClient'
 import { useParams, matchPath, useLocation } from 'react-router-dom'
@@ -38,7 +39,7 @@ export const RateQuestionResponse = () => {
         matchPath(RoutesRecord.SUBMISSIONS_RATE_QUESTIONS_AND_ANSWERS, pathname)
             ?.params.rateID ?? id
 
-    const { data, loading, error } = useFetchRateWithQuestionsQuery({
+    const { data, loading, error } = useQuery(FetchRateWithQuestionsDocument, {
         variables: {
             input: {
                 rateID: fetchRateID,

@@ -10,13 +10,13 @@ import { OnChangeValue } from 'react-select'
 import {
     CmsUser,
     Division,
-    useIndexUsersQuery,
-    useUpdateDivisionAssignmentMutation,
+    IndexUsersDocument,
+    UpdateDivisionAssignmentDocument,
 } from '../../../gen/gqlClient'
 
 import styles from '../Settings.module.scss'
 import { handleApolloError, updateDivisionAssignment } from '@mc-review/helpers'
-import { ApolloError } from '@apollo/client'
+import { ApolloError, useMutation, useQuery } from '@apollo/client'
 import { useTealium } from '../../../hooks'
 import { useAuth } from '../../../contexts/AuthContext'
 import { hasAdminUserPermissions } from '@mc-review/helpers'
@@ -218,8 +218,9 @@ export const DivisionAssignmentTable = (): React.ReactElement => {
     const { updateActiveMainContent } = usePage()
     const MAIL_TO_SUPPORT = stringConstants.MAIL_TO_SUPPORT
 
-    const [updateDivisionAssignmentMutation] =
-        useUpdateDivisionAssignmentMutation()
+    const [updateDivisionAssignmentMutation] = useMutation(
+        UpdateDivisionAssignmentDocument
+    )
 
     const setDivisionCallback: SetDivisionCallbackType = useCallback(
         async (userID: string, division: Division) => {
@@ -244,7 +245,7 @@ export const DivisionAssignmentTable = (): React.ReactElement => {
     )
 
     const { result: indexUsersResult } = wrapApolloResult(
-        useIndexUsersQuery({
+        useQuery(IndexUsersDocument, {
             fetchPolicy: 'cache-and-network',
         })
     )

@@ -108,6 +108,9 @@ importers:
       '@apollo/client':
         specifier: 3.8.8
         version: 3.8.8(graphql-ws@5.16.2(graphql@16.13.2))(graphql@16.13.2)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(subscriptions-transport-ws@0.11.0(graphql@16.13.2))
+      '@graphql-typed-document-node/core':
+        specifier: ^3.2.0
+        version: 3.2.0(graphql@16.13.2)
       '@mc-review/constants':
         specifier: workspace:*
         version: link:../constants
@@ -145,6 +148,9 @@ importers:
       '@apollo/client':
         specifier: 3.8.8
         version: 3.8.8(graphql-ws@5.16.2(graphql@16.13.2))(graphql@16.13.2)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(subscriptions-transport-ws@0.11.0(graphql@16.13.2))
+      '@graphql-typed-document-node/core':
+        specifier: ^3.2.0
+        version: 3.2.0(graphql@16.13.2)
       typescript:
         specifier: 5.9.3
         version: 5.9.3
@@ -176,6 +182,9 @@ importers:
       '@apollo/client':
         specifier: 3.8.8
         version: 3.8.8(graphql-ws@5.16.2(graphql@16.13.2))(graphql@16.13.2)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(subscriptions-transport-ws@0.11.0(graphql@16.13.2))
+      '@graphql-typed-document-node/core':
+        specifier: ^3.2.0
+        version: 3.2.0(graphql@16.13.2)
       '@mc-review/constants':
         specifier: workspace:*
         version: link:../constants
@@ -213,6 +222,9 @@ importers:
       '@apollo/client':
         specifier: 3.8.8
         version: 3.8.8(graphql-ws@5.16.2(graphql@16.13.2))(graphql@16.13.2)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(subscriptions-transport-ws@0.11.0(graphql@16.13.2))
+      '@graphql-typed-document-node/core':
+        specifier: ^3.2.0
+        version: 3.2.0(graphql@16.13.2)
       '@mc-review/dates':
         specifier: workspace:*
         version: link:../dates
@@ -269,6 +281,9 @@ importers:
       '@apollo/client':
         specifier: 3.8.8
         version: 3.8.8(graphql-ws@5.16.2(graphql@16.13.2))(graphql@16.13.2)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(subscriptions-transport-ws@0.11.0(graphql@16.13.2))
+      '@graphql-typed-document-node/core':
+        specifier: ^3.2.0
+        version: 3.2.0(graphql@16.13.2)
       '@mc-review/dates':
         specifier: workspace:*
         version: link:../dates
@@ -376,6 +391,9 @@ importers:
       '@aws-sdk/s3-request-presigner':
         specifier: ^3.1029.0
         version: 3.1029.0
+      '@graphql-typed-document-node/core':
+        specifier: ^3.2.0
+        version: 3.2.0(graphql@16.13.2)
       '@launchdarkly/node-server-sdk':
         specifier: 9.10.2
         version: 9.10.2
@@ -576,15 +594,15 @@ importers:
       '@graphql-codegen/introspection':
         specifier: ^5.0.0
         version: 5.0.0(encoding@0.1.13)(graphql@16.13.2)
+      '@graphql-codegen/typed-document-node':
+        specifier: ^5.0.15
+        version: 5.1.2(graphql@16.13.2)
       '@graphql-codegen/typescript':
         specifier: ^5.0.8
         version: 5.0.8(encoding@0.1.13)(graphql@16.13.2)
       '@graphql-codegen/typescript-operations':
         specifier: ^4.2.1
         version: 4.2.1(encoding@0.1.13)(graphql@16.13.2)
-      '@graphql-codegen/typescript-react-apollo':
-        specifier: ^4.4.1
-        version: 4.4.1(graphql@16.13.2)
       '@graphql-codegen/typescript-resolvers':
         specifier: ^5.1.7
         version: 5.1.7(graphql@16.13.2)
@@ -603,6 +621,9 @@ importers:
       '@cypress/code-coverage':
         specifier: ^3.14.7
         version: 3.14.7(@babel/core@7.29.0)(@babel/preset-env@7.24.8(@babel/core@7.29.0))(babel-loader@8.3.0(@babel/core@7.29.0)(webpack@5.93.0(esbuild@0.27.7)))(cypress@15.8.2)(webpack@5.93.0(esbuild@0.27.7))
+      '@graphql-typed-document-node/core':
+        specifier: ^3.2.0
+        version: 3.2.0(graphql@16.13.2)
       '@mc-review/common-code':
         specifier: workspace:*
         version: link:../../packages/common-code
@@ -931,6 +952,9 @@ importers:
       '@aws-sdk/signature-v4':
         specifier: ^3.374.0
         version: 3.374.0
+      '@graphql-typed-document-node/core':
+        specifier: ^3.2.0
+        version: 3.2.0(graphql@16.13.2)
       '@mc-review/common-code':
         specifier: workspace:*
         version: link:../../packages/common-code
@@ -3947,6 +3971,12 @@ packages:
     peerDependencies:
       graphql: ^0.8.0 || ^0.9.0 || ^0.10.0 || ^0.11.0 || ^0.12.0 || ^0.13.0 || ^14.0.0 || ^15.0.0 || ^16.0.0
 
+  '@graphql-codegen/typed-document-node@5.1.2':
+    resolution: {integrity: sha512-jaxfViDqFRbNQmfKwUY8hDyjnLTw2Z7DhGutxoOiiAI0gE/LfPe0LYaVFKVmVOOD7M3bWxoWfu4slrkbWbUbEw==}
+    engines: {node: '>=16'}
+    peerDependencies:
+      graphql: ^0.8.0 || ^0.9.0 || ^0.10.0 || ^0.11.0 || ^0.12.0 || ^0.13.0 || ^14.0.0 || ^15.0.0 || ^16.0.0
+
   '@graphql-codegen/typed-document-node@6.1.7':
     resolution: {integrity: sha512-VLL9hB+YPigc/W2QYCkSNMZrkKv42nTchb9mJ0h5VY98YmW/zWb6NeYM80iHSpk8ZvHsuUT5geA53/s1phO2NQ==}
     engines: {node: '>=16'}
@@ -3967,12 +3997,6 @@ packages:
     peerDependenciesMeta:
       graphql-sock:
         optional: true
-
-  '@graphql-codegen/typescript-react-apollo@4.4.1':
-    resolution: {integrity: sha512-lrjUfDCNlCWQU07jO6EvZE8I2OLfJl9XKKGCcol27OhW6B9xaUEPaId+TvL6o/NfV+T4z4eQ/Y8BuKWyYjD+mQ==}
-    engines: {node: '>= 16.0.0'}
-    peerDependencies:
-      graphql: ^0.8.0 || ^0.9.0 || ^0.10.0 || ^0.11.0 || ^0.12.0 || ^0.13.0 || ^14.0.0 || ^15.0.0 || ^16.0.0
 
   '@graphql-codegen/typescript-resolvers@5.1.7':
     resolution: {integrity: sha512-fhsyG+GWs+MClzQy3KuzUEcztzhPWM7O/66bK5qmL0JfR+XRv5kBIjOGpHJ/A//xF0dPTEctsf+cJm7XfKYMKw==}
@@ -15504,7 +15528,7 @@ snapshots:
       '@babel/types': 7.29.0
       '@jridgewell/remapping': 2.3.5
       convert-source-map: 2.0.0
-      debug: 4.4.3(supports-color@8.1.1)
+      debug: 4.4.3(supports-color@5.5.0)
       gensync: 1.0.0-beta.2
       json5: 2.2.3
       semver: 6.3.1
@@ -15524,7 +15548,7 @@ snapshots:
       '@babel/types': 7.29.0
       '@jridgewell/remapping': 2.3.5
       convert-source-map: 2.0.0
-      debug: 4.4.3(supports-color@8.1.1)
+      debug: 4.4.3(supports-color@5.5.0)
       gensync: 1.0.0-beta.2
       json5: 2.2.3
       semver: 6.3.1
@@ -15584,7 +15608,7 @@ snapshots:
       '@babel/core': 7.29.0
       '@babel/helper-compilation-targets': 7.28.6
       '@babel/helper-plugin-utils': 7.28.6
-      debug: 4.4.3(supports-color@8.1.1)
+      debug: 4.4.3(supports-color@5.5.0)
       lodash.debounce: 4.0.8
       resolve: 1.22.12
     transitivePeerDependencies:
@@ -16438,7 +16462,7 @@ snapshots:
       '@babel/parser': 7.29.2
       '@babel/template': 7.28.6
       '@babel/types': 7.29.0
-      debug: 4.4.3(supports-color@8.1.1)
+      debug: 4.4.3(supports-color@5.5.0)
     transitivePeerDependencies:
       - supports-color
 
@@ -16450,7 +16474,7 @@ snapshots:
       '@babel/parser': 7.29.2
       '@babel/template': 7.28.6
       '@babel/types': 7.29.0
-      debug: 4.4.3(supports-color@8.1.1)
+      debug: 4.4.3(supports-color@5.5.0)
     transitivePeerDependencies:
       - supports-color
 
@@ -16466,7 +16490,7 @@ snapshots:
 
   '@bahmutov/cypress-esbuild-preprocessor@2.2.8(esbuild@0.27.7)':
     dependencies:
-      debug: 4.4.3(supports-color@8.1.1)
+      debug: 4.4.3(supports-color@5.5.0)
       esbuild: 0.27.7
     transitivePeerDependencies:
       - supports-color
@@ -17389,6 +17413,15 @@ snapshots:
       graphql: 16.13.2
       tslib: 2.6.3
 
+  '@graphql-codegen/typed-document-node@5.1.2(graphql@16.13.2)':
+    dependencies:
+      '@graphql-codegen/plugin-helpers': 5.1.1(graphql@16.13.2)
+      '@graphql-codegen/visitor-plugin-common': 5.8.0(graphql@16.13.2)
+      auto-bind: 4.0.0
+      change-case-all: 1.0.15
+      graphql: 16.13.2
+      tslib: 2.6.3
+
   '@graphql-codegen/typed-document-node@6.1.7(graphql@16.13.2)':
     dependencies:
       '@graphql-codegen/plugin-helpers': 6.2.0(graphql@16.13.2)
@@ -17418,15 +17451,6 @@ snapshots:
       auto-bind: 4.0.0
       graphql: 16.13.2
       tslib: 2.6.3
-
-  '@graphql-codegen/typescript-react-apollo@4.4.1(graphql@16.13.2)':
-    dependencies:
-      '@graphql-codegen/plugin-helpers': 6.2.0(graphql@16.13.2)
-      '@graphql-codegen/visitor-plugin-common': 6.2.4(graphql@16.13.2)
-      auto-bind: 4.0.0
-      change-case-all: 1.0.15
-      graphql: 16.13.2
-      tslib: 2.8.1
 
   '@graphql-codegen/typescript-resolvers@5.1.7(graphql@16.13.2)':
     dependencies:
@@ -20598,7 +20622,7 @@ snapshots:
       '@typescript-eslint/types': 8.56.0
       '@typescript-eslint/typescript-estree': 8.56.0(typescript@5.9.3)
       '@typescript-eslint/visitor-keys': 8.56.0
-      debug: 4.4.3(supports-color@8.1.1)
+      debug: 4.4.3(supports-color@5.5.0)
       eslint: 9.34.0(jiti@2.6.1)
       typescript: 5.9.3
     transitivePeerDependencies:
@@ -20608,7 +20632,7 @@ snapshots:
     dependencies:
       '@typescript-eslint/tsconfig-utils': 8.56.0(typescript@5.9.3)
       '@typescript-eslint/types': 8.58.1
-      debug: 4.4.3(supports-color@8.1.1)
+      debug: 4.4.3(supports-color@5.5.0)
       typescript: 5.9.3
     transitivePeerDependencies:
       - supports-color
@@ -20617,7 +20641,7 @@ snapshots:
     dependencies:
       '@typescript-eslint/tsconfig-utils': 8.56.0(typescript@5.9.3)
       '@typescript-eslint/types': 8.56.0
-      debug: 4.4.3(supports-color@8.1.1)
+      debug: 4.4.3(supports-color@5.5.0)
       typescript: 5.9.3
     transitivePeerDependencies:
       - supports-color
@@ -20626,7 +20650,7 @@ snapshots:
     dependencies:
       '@typescript-eslint/tsconfig-utils': 8.58.1(typescript@5.9.3)
       '@typescript-eslint/types': 8.58.1
-      debug: 4.4.3(supports-color@8.1.1)
+      debug: 4.4.3(supports-color@5.5.0)
       typescript: 5.9.3
     transitivePeerDependencies:
       - supports-color
@@ -20635,7 +20659,7 @@ snapshots:
     dependencies:
       '@typescript-eslint/tsconfig-utils': 8.58.1(typescript@5.9.3)
       '@typescript-eslint/types': 8.58.1
-      debug: 4.4.3(supports-color@8.1.1)
+      debug: 4.4.3(supports-color@5.5.0)
       typescript: 5.9.3
     transitivePeerDependencies:
       - supports-color
@@ -20681,7 +20705,7 @@ snapshots:
       '@typescript-eslint/types': 8.56.0
       '@typescript-eslint/typescript-estree': 8.56.0(typescript@5.9.3)
       '@typescript-eslint/utils': 8.56.0(eslint@9.34.0(jiti@2.6.1))(typescript@5.9.3)
-      debug: 4.4.3(supports-color@8.1.1)
+      debug: 4.4.3(supports-color@5.5.0)
       eslint: 9.34.0(jiti@2.6.1)
       ts-api-utils: 2.5.0(typescript@5.9.3)
       typescript: 5.9.3
@@ -20693,7 +20717,7 @@ snapshots:
       '@typescript-eslint/types': 8.58.1
       '@typescript-eslint/typescript-estree': 8.58.1(typescript@5.9.3)
       '@typescript-eslint/utils': 8.58.1(eslint@9.34.0(jiti@2.6.1))(typescript@5.9.3)
-      debug: 4.4.3(supports-color@8.1.1)
+      debug: 4.4.3(supports-color@5.5.0)
       eslint: 9.34.0(jiti@2.6.1)
       ts-api-utils: 2.5.0(typescript@5.9.3)
       typescript: 5.9.3
@@ -20730,7 +20754,7 @@ snapshots:
       '@typescript-eslint/tsconfig-utils': 8.56.0(typescript@5.9.3)
       '@typescript-eslint/types': 8.56.0
       '@typescript-eslint/visitor-keys': 8.56.0
-      debug: 4.4.3(supports-color@8.1.1)
+      debug: 4.4.3(supports-color@5.5.0)
       minimatch: 9.0.5
       semver: 7.7.4
       tinyglobby: 0.2.15
@@ -20745,7 +20769,7 @@ snapshots:
       '@typescript-eslint/tsconfig-utils': 8.58.0(typescript@5.9.3)
       '@typescript-eslint/types': 8.58.0
       '@typescript-eslint/visitor-keys': 8.58.0
-      debug: 4.4.3(supports-color@8.1.1)
+      debug: 4.4.3(supports-color@5.5.0)
       minimatch: 10.2.5
       semver: 7.7.4
       tinyglobby: 0.2.15
@@ -20760,7 +20784,7 @@ snapshots:
       '@typescript-eslint/tsconfig-utils': 8.58.1(typescript@5.9.3)
       '@typescript-eslint/types': 8.58.1
       '@typescript-eslint/visitor-keys': 8.58.1
-      debug: 4.4.3(supports-color@8.1.1)
+      debug: 4.4.3(supports-color@5.5.0)
       minimatch: 10.2.5
       semver: 7.7.4
       tinyglobby: 0.2.16
@@ -21150,7 +21174,7 @@ snapshots:
 
   agent-base@6.0.2:
     dependencies:
-      debug: 4.4.3(supports-color@8.1.1)
+      debug: 4.4.3(supports-color@5.5.0)
     transitivePeerDependencies:
       - supports-color
 
@@ -21735,7 +21759,7 @@ snapshots:
     dependencies:
       bytes: 3.1.2
       content-type: 1.0.5
-      debug: 4.4.3(supports-color@8.1.1)
+      debug: 4.4.3(supports-color@5.5.0)
       http-errors: 2.0.1
       iconv-lite: 0.7.2
       on-finished: 2.4.1
@@ -22491,7 +22515,7 @@ snapshots:
       chalk: 2.4.2
       commander: 2.20.3
       core-js: 3.47.0
-      debug: 4.4.3(supports-color@8.1.1)
+      debug: 4.4.3(supports-color@5.5.0)
       fast-json-patch: 3.1.1
       http-proxy-agent: 5.0.0
       https-proxy-agent: 5.0.1
@@ -23609,7 +23633,7 @@ snapshots:
 
   finalhandler@2.1.1:
     dependencies:
-      debug: 4.4.3(supports-color@8.1.1)
+      debug: 4.4.3(supports-color@5.5.0)
       encodeurl: 2.0.0
       escape-html: 1.0.3
       on-finished: 2.4.1
@@ -24104,14 +24128,14 @@ snapshots:
     dependencies:
       '@tootallnate/once': 2.0.0
       agent-base: 6.0.2
-      debug: 4.4.3(supports-color@8.1.1)
+      debug: 4.4.3(supports-color@5.5.0)
     transitivePeerDependencies:
       - supports-color
 
   http-proxy-agent@7.0.2:
     dependencies:
       agent-base: 7.1.4
-      debug: 4.4.3(supports-color@8.1.1)
+      debug: 4.4.3(supports-color@5.5.0)
     transitivePeerDependencies:
       - supports-color
 
@@ -24126,14 +24150,14 @@ snapshots:
   https-proxy-agent@5.0.1:
     dependencies:
       agent-base: 6.0.2
-      debug: 4.4.3(supports-color@8.1.1)
+      debug: 4.4.3(supports-color@5.5.0)
     transitivePeerDependencies:
       - supports-color
 
   https-proxy-agent@7.0.6:
     dependencies:
       agent-base: 7.1.4
-      debug: 4.4.3(supports-color@8.1.1)
+      debug: 4.4.3(supports-color@5.5.0)
     transitivePeerDependencies:
       - supports-color
 
@@ -24570,7 +24594,7 @@ snapshots:
 
   istanbul-lib-source-maps@4.0.1:
     dependencies:
-      debug: 4.4.3(supports-color@8.1.1)
+      debug: 4.4.3(supports-color@5.5.0)
       istanbul-lib-coverage: 3.2.2
       source-map: 0.6.1
     transitivePeerDependencies:
@@ -26817,7 +26841,7 @@ snapshots:
 
   require-in-the-middle@7.5.2:
     dependencies:
-      debug: 4.4.3(supports-color@8.1.1)
+      debug: 4.4.3(supports-color@5.5.0)
       module-details-from-path: 1.0.4
       resolve: 1.22.11
     transitivePeerDependencies:
@@ -26825,7 +26849,7 @@ snapshots:
 
   require-in-the-middle@8.0.1:
     dependencies:
-      debug: 4.4.3(supports-color@8.1.1)
+      debug: 4.4.3(supports-color@5.5.0)
       module-details-from-path: 1.0.4
     transitivePeerDependencies:
       - supports-color
@@ -27551,7 +27575,7 @@ snapshots:
       cosmiconfig: 9.0.0(typescript@5.9.3)
       css-functions-list: 3.2.3
       css-tree: 3.1.0
-      debug: 4.4.3(supports-color@8.1.1)
+      debug: 4.4.3(supports-color@5.5.0)
       fast-glob: 3.3.3
       fastest-levenshtein: 1.0.16
       file-entry-cache: 11.1.2
@@ -28213,7 +28237,7 @@ snapshots:
   vite-node@3.2.4(@types/node@25.5.0)(jiti@2.6.1)(sass@1.77.2)(terser@5.46.1)(tsx@4.21.0)(yaml@2.8.3):
     dependencies:
       cac: 6.7.14
-      debug: 4.4.3(supports-color@8.1.1)
+      debug: 4.4.3(supports-color@5.5.0)
       es-module-lexer: 1.7.0
       pathe: 2.0.3
       vite: 7.3.2(@types/node@25.5.0)(jiti@2.6.1)(sass@1.77.2)(terser@5.46.1)(tsx@4.21.0)(yaml@2.8.3)
@@ -28250,7 +28274,7 @@ snapshots:
 
   vite-tsconfig-paths@6.1.1(typescript@5.9.3)(vite@7.3.2(@types/node@25.5.0)(jiti@2.6.1)(sass@1.77.2)(terser@5.46.1)(tsx@4.21.0)(yaml@2.8.3)):
     dependencies:
-      debug: 4.4.3(supports-color@8.1.1)
+      debug: 4.4.3(supports-color@5.5.0)
       globrex: 0.1.2
       tsconfck: 3.1.6(typescript@5.9.3)
       vite: 7.3.2(@types/node@25.5.0)(jiti@2.6.1)(sass@1.77.2)(terser@5.46.1)(tsx@4.21.0)(yaml@2.8.3)
@@ -28303,7 +28327,7 @@ snapshots:
       '@vitest/spy': 3.2.4
       '@vitest/utils': 3.2.4
       chai: 5.3.3
-      debug: 4.4.3(supports-color@8.1.1)
+      debug: 4.4.3(supports-color@5.5.0)
       expect-type: 1.3.0
       magic-string: 0.30.21
       pathe: 2.0.3
@@ -28346,7 +28370,7 @@ snapshots:
       '@vitest/spy': 3.2.4
       '@vitest/utils': 3.2.4
       chai: 5.3.3
-      debug: 4.4.3(supports-color@8.1.1)
+      debug: 4.4.3(supports-color@5.5.0)
       expect-type: 1.3.0
       magic-string: 0.30.21
       pathe: 2.0.3

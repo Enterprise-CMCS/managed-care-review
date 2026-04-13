@@ -1,5 +1,6 @@
 import React, { useEffect, useMemo } from 'react'
-import { OauthClient, useFetchOauthClientsQuery } from '../../../gen/gqlClient'
+import { OauthClient, FetchOauthClientsDocument } from '../../../gen/gqlClient'
+import { useQuery } from '@apollo/client'
 import { Loading, NavLinkWithLogging } from '../../../components'
 import { SettingsErrorAlert } from '../SettingsErrorAlert'
 import { GenericErrorPage } from '../../Errors/GenericErrorPage'
@@ -109,7 +110,7 @@ const OauthClientTable = ({
 export const OauthClients = () => {
     const { updateActiveMainContent } = usePage()
     const { result: fetchOauthClientsResult } = wrapApolloResult(
-        useFetchOauthClientsQuery({
+        useQuery(FetchOauthClientsDocument, {
             fetchPolicy: 'cache-and-network',
         })
     )

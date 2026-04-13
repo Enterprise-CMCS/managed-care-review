@@ -12,7 +12,8 @@ import { usePage } from '../../contexts/PageContext'
 import { formatToPacificTime } from '@mc-review/dates'
 import styles from './SubmissionRevisionSummary.module.scss'
 import { PreviousSubmissionBanner } from '../../components'
-import { useFetchContractQuery } from '../../gen/gqlClient'
+import { FetchContractDocument } from '../../gen/gqlClient'
+import { useQuery } from '@apollo/client'
 import {
     ErrorOrLoadingPage,
     handleAndReturnErrorState,
@@ -38,7 +39,7 @@ export const SubmissionRevisionSummary = (): React.ReactElement => {
         data: fetchContractData,
         loading: fetchContractLoading,
         error: fetchContractError,
-    } = useFetchContractQuery({
+    } = useQuery(FetchContractDocument, {
         variables: {
             input: {
                 contractID: id ?? 'unknown-contract',

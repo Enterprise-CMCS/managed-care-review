@@ -25,10 +25,11 @@ import { GenericErrorPage } from '../Errors/GenericErrorPage'
 import { Error404 } from '../Errors/Error404Page'
 import { ErrorForbiddenPage } from '../Errors/ErrorForbiddenPage'
 import {
-    useUpdateContractMutation,
-    useFetchContractQuery,
+    UpdateContractDocument,
+    FetchContractDocument,
     Contract,
 } from '../../gen/gqlClient'
+import { useMutation, useQuery } from '@apollo/client'
 import styles from './MccrsId.module.scss'
 import { useMemoizedStateHeader, useRouteParams } from '../../hooks'
 
@@ -56,12 +57,12 @@ export const MccrsId = (): React.ReactElement => {
     const [showPageErrorMessage, setShowPageErrorMessage] = useState<
         boolean | string
     >(false) // string is a custom error message, defaults to generic of true
-    const [updateContract] = useUpdateContractMutation()
+    const [updateContract] = useMutation(UpdateContractDocument)
     const {
         data: fetchContractData,
         loading: fetchContractLoading,
         error: fetchContractError,
-    } = useFetchContractQuery({
+    } = useQuery(FetchContractDocument, {
         variables: {
             input: {
                 contractID: id,

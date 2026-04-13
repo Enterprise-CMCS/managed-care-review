@@ -1,9 +1,9 @@
 import { useState } from 'react'
 import {
     CreateContractInput,
-    useFetchContractQuery,
-    useCreateContractMutation,
-    useUpdateContractDraftRevisionMutation,
+    FetchContractDocument,
+    CreateContractDocument,
+    UpdateContractDraftRevisionDocument,
     Contract,
     Rate,
     GenericDocument,
@@ -16,7 +16,7 @@ import {
 } from '../gen/gqlClient'
 import { wrapApolloResult, handleApolloError } from '@mc-review/helpers'
 import { recordJSException } from '@mc-review/otel'
-import { ApolloError } from '@apollo/client'
+import { ApolloError, useMutation, useQuery } from '@apollo/client'
 import type { InterimState } from '../pages/StateSubmission/SharedSubmissionComponents'
 
 type UseContractForm = {
@@ -62,7 +62,7 @@ const useContractForm = (contractID?: string): UseContractForm => {
         boolean | string
     >(false) // string is a custom error message, defaults to generic of true
 
-    const [createFormData, { client }] = useCreateContractMutation()
+    const [createFormData, { client }] = useMutation(CreateContractDocument)
 
     const createDraft: UseContractForm['createDraft'] = async (
         input: CreateContractInput
@@ -118,7 +118,7 @@ const useContractForm = (contractID?: string): UseContractForm => {
             return new Error(serverError)
         }
     }
-    const [updateFormData] = useUpdateContractDraftRevisionMutation()
+    const [updateFormData] = useMutation(UpdateContractDraftRevisionDocument)
 
     const updateDraft: UseContractForm['updateDraft'] = async (
         input: UpdateContractDraftRevisionInput
@@ -178,7 +178,7 @@ const useContractForm = (contractID?: string): UseContractForm => {
         }
     }
     const results = wrapApolloResult(
-        useFetchContractQuery({
+        useQuery(FetchContractDocument, {
             variables: {
                 input: {
                     contractID: contractID ?? 'new-draft',
