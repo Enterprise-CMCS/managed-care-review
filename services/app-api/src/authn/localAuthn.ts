@@ -1,6 +1,10 @@
 import type { UserType } from '../domain-models'
 import type { Store } from '../postgres'
-import { syncUserWithAurora } from './cognitoAuthn'
+import {
+    lookupUserAurora,
+    syncUserWithAurora,
+    wasUpdatedToday,
+} from './cognitoAuthn'
 
 export async function userFromLocalAuthProvider(
     authProvider: string,
@@ -13,7 +17,18 @@ export async function userFromLocalAuthProvider(
             return localUser
         }
 
-        return syncUserWithAurora(store, localUser)
+        const dbUser = await lookupUserAurora(store, localUser.id)
+
+        if (dbUser instanceof Error) {
+            return localUser
+        }
+
+        // Mimics the logic for syncing cognito user
+        if (!dbUser || !wasUpdatedToday(dbUser.updatedAt)) {
+            return syncUserWithAurora(store, localUser)
+        }
+
+        return dbUser
     } catch (e) {
         console.error('ERROR: failed to parse local user from authProvider')
         return e instanceof Error ? e : new Error(String(e))

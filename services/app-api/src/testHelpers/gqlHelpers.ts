@@ -18,11 +18,17 @@ import type {
     EmailSettingsType,
     InsertQuestionResponseArgs,
     ProgramType,
+    UserType,
 } from '../domain-models'
 import type { EmailConfiguration, Emailer } from '../emailer'
 import type { UpdateStateAssignmentsByStatePayload } from '../gen/gqlServer'
 import type { Context } from '../handlers/apollo_gql'
-import { findStatePrograms, NewPostgresStore, type Store } from '../postgres'
+import {
+    findStatePrograms,
+    NewPostgresStore,
+    type InsertUserArgsType,
+    type Store,
+} from '../postgres'
 import { configureResolvers } from '../resolvers'
 import { sharedTestPrismaClient } from './storeHelpers'
 import {
@@ -41,7 +47,7 @@ import {
     localGenerateDocumentZip,
     type DocumentZipService,
 } from '../zip/generateZip'
-import { syncUserWithAurora } from '../authn/cognitoAuthn'
+import { lookupUserAurora } from '../authn/cognitoAuthn'
 
 // Since our programs are checked into source code, we have a program we
 // use as our default
@@ -68,6 +74,42 @@ const defaultContext = (): Context => {
     }
 }
 
+export async function insertUserToLocalAurora(
+    store: Store,
+    localUser: UserType
+): Promise<UserType | Error> {
+    const auroraUser = await lookupUserAurora(store, localUser.id)
+
+    if (auroraUser instanceof Error) {
+        return auroraUser
+    }
+
+    if (auroraUser === undefined) {
+        const userToInsert: InsertUserArgsType = {
+            userID: localUser.id,
+            role: localUser.role,
+            givenName: localUser.givenName,
+            familyName: localUser.familyName,
+            email: localUser.email,
+        }
+
+        // if it is a state user, insert the state they are from
+        if (localUser.role === 'STATE_USER') {
+            userToInsert.stateCode = localUser.stateCode
+        }
+
+        const result = await store.insertUser(userToInsert)
+
+        if (result instanceof Error) {
+            console.error(`Could not insert user: ${JSON.stringify(result)}`)
+            return localUser
+        }
+        return result
+    }
+
+    return auroraUser
+}
+
 const constructTestPostgresServer = async (opts?: {
     context?: Context
     emailer?: Emailer
@@ -90,7 +132,7 @@ const constructTestPostgresServer = async (opts?: {
         opts?.documentZip ??
         documentZipService(postgresStore, localGenerateDocumentZip)
 
-    await syncUserWithAurora(postgresStore, context.user)
+    await insertUserToLocalAurora(postgresStore, context.user)
     const s3TestClient = testS3Client()
     const s3 = opts?.s3Client || s3TestClient
 
