@@ -40,3 +40,12 @@ export type {
   RetrievedChunk
 } from './retrieval'
 export { orderRetrievedChunks } from './retrieval'
+
+// Prompts
+export type {
+  BuildDateValidationPromptInput,
+  DateValidationCitationInput,
+  DateValidationFieldInput,
+  DateValidationResult
+} from './prompts'
+export { buildDateValidationPrompt } from './prompts'

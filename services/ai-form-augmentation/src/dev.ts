@@ -6,6 +6,7 @@ import { parsePdf } from './parsing'
 import { orderRetrievedChunks } from './retrieval'
 import { newArtifactS3Client } from './s3'
 import { BruteForceVectorStore } from './vector-store'
+import { buildDateValidationPrompt } from './prompts'
 
 async function main(): Promise<void> {
   // These values model the runtime context that later pipeline steps will
@@ -20,6 +21,7 @@ async function main(): Promise<void> {
     buffer,
     'scan-07-65712-a26-213a-final.pdf'
   )
+  const normalizedParsedText = parsed.rawText.toUpperCase()
 
   // Use the parsed PDF text as-is so chunking can be inspected independently of S3 or embeddings.
   const chunks = chunkDocument(parsed.fileName, parsed.rawText)
@@ -75,8 +77,37 @@ async function main(): Promise<void> {
   // the final prompt context reads more naturally.
   const orderedResults = orderRetrievedChunks(similarityResults)
 
+  const formFields = [
+    {
+      field: 'contractStartDate',
+      label: 'Contract Start Date',
+      value: 'January 1, 2008'
+    },
+    {
+      field: 'contractEndDate',
+      label: 'Contract End Date',
+      value: 'December 31, 2021'
+    },
+    {
+      field: 'amendmentEffectiveDate',
+      label: 'Amendment Effective Date',
+      value: 'January 1, 2021'
+    }
+  ] as const
+
+  const prompt = buildDateValidationPrompt({
+    formFields: [...formFields],
+    retrievedChunks: orderedResults.map((result) => ({
+      chunkId: result.metadata.chunkId,
+      documentName: result.metadata.documentName,
+      page: result.metadata.page,
+      order: result.metadata.order,
+      text: result.metadata.text
+    }))
+  })
+
   console.log({
-    hasStartDateLabel: parsed.rawText.includes('Start Date'),
+    hasStartDateLabel: normalizedParsedText.includes('START DATE'),
     hasJanuary1: parsed.rawText.includes('January 1'),
     hasFebruary182026: parsed.rawText.includes('February 18, 2026'),
     bucket,
@@ -101,7 +132,8 @@ async function main(): Promise<void> {
     })),
     extractionMethod: parsed.extractionMethod,
     extractionNotes: parsed.extractionNotes,
-    parsedTextPreview: parsed.rawText.slice(0, 1000)
+    parsedTextPreview: parsed.rawText.slice(0, 1000),
+    promptPreview: prompt.slice(0, 4000)
   })
 }
 
