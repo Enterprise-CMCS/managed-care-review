@@ -1,13 +1,20 @@
 import { StoryFn } from '@storybook/react'
+import { GridContainer } from '@trussworks/react-uswds'
 import ProvidersDecorator from '../../../../../.storybook/providersDecorator'
 import {
     RateDetailsSummarySectionProps,
     RateDetailsSummarySection,
 } from './RateDetailsSummarySection'
-import { mockContractPackageDraft } from '@mc-review/mocks'
+import {
+    draftRateDataMock,
+    fetchCurrentUserMock,
+    mockContractPackageDraft,
+    mockContractPackageSubmitted,
+    mockValidStateUser,
+} from '@mc-review/mocks'
 
 export default {
-    title: 'Components/SubmissionSummary/RateDetailsSummarySection/V2',
+    title: 'Components/SubmissionSummary/RateDetailsSummarySection',
     component: RateDetailsSummarySection,
     parameters: {
         componentSubtitle:
@@ -15,24 +22,67 @@ export default {
     },
 }
 
+const draft = mockContractPackageDraft({
+    draftRates: [
+        draftRateDataMock({
+            initiallySubmittedAt: null,
+            parentContractID: 'test-abc-123',
+        }),
+    ],
+})
+const submitted = mockContractPackageSubmitted()
+
 const Template: StoryFn<RateDetailsSummarySectionProps> = (args) => (
-    <RateDetailsSummarySection {...args} />
+    <GridContainer className="margin-top-1">
+        <RateDetailsSummarySection {...args} />
+    </GridContainer>
 )
 
 export const WithAction = Template.bind({})
-WithAction.decorators = [(StoryFn) => ProvidersDecorator(StoryFn, {})]
-const contract = mockContractPackageDraft()
+WithAction.decorators = [
+    (StoryFn) =>
+        ProvidersDecorator(StoryFn, {
+            apolloProvider: {
+                mocks: [
+                    fetchCurrentUserMock({
+                        user: mockValidStateUser(),
+                        statusCode: 200,
+                    }),
+                ],
+            },
+        }),
+]
 
 WithAction.args = {
-    contract: contract,
+    contract: draft,
     editNavigateTo: 'contract-details',
     submissionName: 'StoryBook',
-    statePrograms: [],
+    statePrograms: draft.state.programs,
+    isCMSUser: false,
+    onDocumentError: () => {},
+    explainMissingData: false,
 }
 
 export const WithoutAction = Template.bind({})
-WithoutAction.decorators = [(StoryFn) => ProvidersDecorator(StoryFn, {})]
+WithoutAction.decorators = [
+    (StoryFn) =>
+        ProvidersDecorator(StoryFn, {
+            apolloProvider: {
+                mocks: [
+                    fetchCurrentUserMock({
+                        user: mockValidStateUser(),
+                        statusCode: 200,
+                    }),
+                ],
+            },
+        }),
+]
+
 WithoutAction.args = {
-    contract: contract,
+    contract: submitted,
     submissionName: 'StoryBook',
+    statePrograms: submitted.state.programs,
+    isCMSUser: false,
+    onDocumentError: () => {},
+    explainMissingData: false,
 }
