@@ -7,6 +7,7 @@ import { orderRetrievedChunks } from './retrieval'
 import { newArtifactS3Client } from './s3'
 import { BruteForceVectorStore } from './vector-store'
 import { buildDateValidationPrompt } from './prompts'
+import { OllamaValidationClient } from './llm'
 
 async function main(): Promise<void> {
   // These values model the runtime context that later pipeline steps will
@@ -106,6 +107,16 @@ async function main(): Promise<void> {
     }))
   })
 
+  // Keep the first model integration simple: send the prompt and inspect raw
+  // output before adding JSON normalization or schema validation.
+  const llmClient = new OllamaValidationClient({
+    model: 'llama3.1:8b'
+  })
+
+  const validationResponse = await llmClient.generateValidation({
+    prompt
+  })
+
   console.log({
     hasStartDateLabel: normalizedParsedText.includes('START DATE'),
     hasJanuary1: parsed.rawText.includes('January 1'),
@@ -133,7 +144,9 @@ async function main(): Promise<void> {
     extractionMethod: parsed.extractionMethod,
     extractionNotes: parsed.extractionNotes,
     parsedTextPreview: parsed.rawText.slice(0, 1000),
-    promptPreview: prompt.slice(0, 4000)
+    promptPreview: prompt.slice(0, 4000),
+    llmModel: validationResponse.model,
+    llmResponsePreview: validationResponse.rawText.slice(0, 4000)
   })
 }
 

@@ -49,3 +49,11 @@ export type {
   DateValidationResult
 } from './prompts'
 export { buildDateValidationPrompt } from './prompts'
+
+// LLM
+export type {
+  GenerateValidationInput,
+  GenerateValidationResult,
+  ValidationLlmClient
+} from './llm'
+export { OllamaValidationClient } from './llm'
