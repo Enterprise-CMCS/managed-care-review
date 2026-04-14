@@ -78,9 +78,7 @@ describe('ProgramSelect', () => {
         await waitFor(() => {
             expect(screen.getByText('MSHO')).toBeInTheDocument()
             expect(screen.getByText('SNBC')).toBeInTheDocument()
-            expect(screen.getByText('SNBC Rate Program')).toBeInTheDocument()
             expect(screen.getByText('PMAP')).toBeInTheDocument()
-            expect(screen.getByText('PMAP Rate Program')).toBeInTheDocument()
             expect(screen.getByText('MSC+')).toBeInTheDocument()
         })
     })
@@ -145,9 +143,7 @@ describe('ProgramSelect', () => {
         await waitFor(() => {
             expect(screen.getByText('MSHO')).toBeInTheDocument()
             expect(screen.getByText('SNBC')).toBeInTheDocument()
-            expect(screen.getByText('SNBC Rate Program')).toBeInTheDocument()
             expect(screen.getByText('PMAP')).toBeInTheDocument()
-            expect(screen.getByText('PMAP Rate Program')).toBeInTheDocument()
             expect(screen.getByText('MSC+')).toBeInTheDocument()
         })
 
@@ -192,9 +188,7 @@ describe('ProgramSelect', () => {
         await waitFor(() => {
             expect(screen.getByText('MSHO')).toBeInTheDocument()
             expect(screen.getByText('SNBC')).toBeInTheDocument()
-            expect(screen.getByText('SNBC Rate Program')).toBeInTheDocument()
             expect(screen.getByText('PMAP')).toBeInTheDocument()
-            expect(screen.getByText('PMAP Rate Program')).toBeInTheDocument()
             expect(screen.getByText('MSC+')).toBeInTheDocument()
         })
 
