@@ -255,22 +255,20 @@ const parseContract = (
     // to make it part of the core zod parsing.
     const contractWithProgramsParser = contractParser.superRefine(
         (contract, ctx) => {
-            const contractProgramsIDs = new Set(
+            // collect all contract and rate program IDs for validation
+            const allProgramIDs = new Set<string>(
                 contract.draftRevision.formData.programIDs
             )
-            // Collect deprecated programs to validate programs being submitted.
-            const nonDeprecatableIDs = new Set(contractProgramsIDs)
-            const allProgramIDs = contract.draftRates.reduce((acc, rate) => {
-                const rateFormData = rate.draftRevision.formData
-                rateFormData.rateProgramIDs.forEach((id) =>
-                    nonDeprecatableIDs.add(id)
+            for (const rate of contract.draftRates) {
+                if (rate.parentContractID !== contract.id) {
+                    continue
+                }
+                rate.draftRevision.formData.rateProgramIDs.forEach((id) =>
+                    allProgramIDs.add(id)
                 )
-                const rateProgramIDs = rateFormData.rateProgramIDs.concat(
-                    rateFormData.deprecatedRateProgramIDs
-                )
-                return new Set([...acc, ...rateProgramIDs])
-            }, contractProgramsIDs)
+            }
 
+            // find programs full data using collected ids
             const findResult = store.findPrograms(stateCode, [...allProgramIDs])
             if (findResult instanceof Error) {
                 ctx.addIssue({
@@ -280,11 +278,12 @@ const parseContract = (
                 return
             }
 
-            // Reject submission if any current contract/rate program has been deprecated in statePrograms.json
+            // filter out any deprecated programs
             const deprecatedMatches = findResult.filter(
-                (program) =>
-                    program.isDeprecated && nonDeprecatableIDs.has(program.id)
+                (program) => program.isDeprecated
             )
+
+            // add parsing error message for deprecated programs
             if (deprecatedMatches.length > 0) {
                 const names = deprecatedMatches
                     .map((p) => `${p.name} (${p.id})`)
