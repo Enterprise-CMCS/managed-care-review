@@ -12,7 +12,6 @@ import type {
 import { findStatePrograms, type InsertContractArgsType } from '../postgres'
 import { must } from './assertionHelpers'
 import { s3DlUrl } from './documentHelpers'
-import { defaultFloridaProgram, defaultFloridaRateProgram } from './gqlHelpers'
 
 const defaultContractData = () => ({
     id: uuidv4(),
@@ -169,24 +168,32 @@ const mockContractRevision = (
     }
 }
 
-// Minimal-but-fully-submittable FL HEALTH_PLAN draft ContractType for parseContract tests.
+// Minimal-but-fully-submittable KY HEALTH_PLAN draft ContractType for parseContract tests.
 // Uses real UUIDs and sets every submittableContractFormDataSchema-required field.
 const mockSubmittableHealthPlanContract = (opts?: {
     contractID?: string
     stateNumber?: number
     programIDs?: string[]
     rateProgramIDs?: string[]
-    deprecatedRateProgramIDs?: string[]
 }): ContractType => {
-    const floridaProgram = defaultFloridaProgram()
-    const floridaRateProgram = defaultFloridaRateProgram()
+    const activeKYProgram = must(findStatePrograms('KY')).find(
+        (p) => !p.isDeprecated
+    )
+    if (!activeKYProgram) {
+        throw new Error(
+            'Test setup error: expected KY to have at least one active program in statePrograms.json'
+        )
+    }
+    const contractID =
+        opts?.contractID ?? '28b00852-00e3-467c-9311-519e60d43283'
+    const stateNumber = opts?.stateNumber ?? 5
     return {
         status: 'DRAFT',
         createdAt: new Date(),
         updatedAt: new Date(),
-        id: opts?.contractID ?? '28b00852-00e3-467c-9311-519e60d43283',
-        stateCode: 'FL',
-        stateNumber: opts?.stateNumber ?? 5,
+        id: contractID,
+        stateCode: 'KY',
+        stateNumber,
         contractSubmissionType: 'HEALTH_PLAN',
         reviewStatus: 'UNDER_REVIEW',
         consolidatedStatus: 'DRAFT',
@@ -197,15 +204,15 @@ const mockSubmittableHealthPlanContract = (opts?: {
             submitInfo: undefined,
             unlockInfo: undefined,
             contract: {
-                id: '88a54ccd-a36d-494d-a386-8ecf8b7438e6',
-                stateCode: 'FL',
-                stateNumber: 4,
+                id: contractID,
+                stateCode: 'KY',
+                stateNumber,
                 contractSubmissionType: 'HEALTH_PLAN',
             },
             createdAt: new Date('2023-11-27'),
             updatedAt: new Date('2023-11-27'),
             formData: {
-                programIDs: opts?.programIDs ?? [floridaProgram.id],
+                programIDs: opts?.programIDs ?? [activeKYProgram.id],
                 populationCovered: 'MEDICAID',
                 submissionType: 'CONTRACT_AND_RATES',
                 riskBasedContract: true,
@@ -263,9 +270,9 @@ const mockSubmittableHealthPlanContract = (opts?: {
                 status: 'DRAFT',
                 reviewStatus: 'UNDER_REVIEW',
                 consolidatedStatus: 'DRAFT',
-                stateCode: 'FL',
-                stateNumber: opts?.stateNumber ?? 5,
-                parentContractID: 'cb9a1ecb-cdb6-4ef2-956d-3fba8776cd8b',
+                stateCode: 'KY',
+                stateNumber,
+                parentContractID: contractID,
                 packageSubmissions: [],
                 draftRevision: {
                     id: '6c7862a2-f3a1-4171-9fdd-6a8c9c2dd24b',
@@ -295,10 +302,9 @@ const mockSubmittableHealthPlanContract = (opts?: {
                         amendmentEffectiveDateStart: new Date('1/1/2023'),
                         amendmentEffectiveDateEnd: new Date('1/1/2024'),
                         rateProgramIDs: opts?.rateProgramIDs ?? [
-                            floridaRateProgram.id,
+                            activeKYProgram.id,
                         ],
-                        deprecatedRateProgramIDs:
-                            opts?.deprecatedRateProgramIDs ?? [],
+                        deprecatedRateProgramIDs: [],
                         certifyingActuaryContacts: [
                             {
                                 actuarialFirm: 'DELOITTE',

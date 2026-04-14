@@ -22,9 +22,9 @@ import {
     defaultFloridaProgram,
     defaultFloridaRateProgram,
 } from '../../testHelpers/gqlHelpers'
+import { findStatePrograms } from '../../postgres'
 import type { ContractFormDataType } from './formDataTypes'
 import { eqroValidationAndReviewDetermination } from '@mc-review/submissions'
-import { vi } from 'vitest'
 
 describe('Health plan parsing and validation', () => {
     describe('validateContractDraftRevisionInput', () => {
@@ -499,7 +499,7 @@ describe('Health plan parsing and validation', () => {
                                 // amendmentEffectiveDateEnd: new Date('2020-02-04'),
                                 amendmentEffectiveDateStart: undefined,
                                 amendmentEffectiveDateEnd: undefined,
-                                rateProgramIDs: ['fakerateprogramid'],
+                                rateProgramIDs: ['linked-rate-program'],
                                 deprecatedRateProgramIDs: [],
                                 certifyingActuaryContacts: [
                                     {
@@ -558,9 +558,13 @@ describe('Health plan parsing and validation', () => {
             expect(errMessages[4]).toContain(
                 'rateMedicaidPopulations is required when dsnpContract is true'
             )
+            // The rate is linked (parentContractID !== contract.id), so its rateProgramIDs
+            // are excluded from this contract's program validation. Only the contract's own
+            // 'fake-id' should surface in the error.
             expect(errMessages[5]).toContain(
-                'Program(s) in [fake-id,fakerateprogramid] are not valid FL programs'
+                'Program(s) in [fake-id] are not valid FL programs'
             )
+            expect(errMessages[5]).not.toContain('fakerateprogramid')
         })
         it('return error if dnspContract is required but not populated', async () => {
             const prismaClient = await sharedTestPrismaClient()
@@ -752,20 +756,22 @@ describe('Health plan parsing and validation', () => {
         it('return error if a submitted programID is deprecated', async () => {
             const prismaClient = await sharedTestPrismaClient()
             const postgresStore = NewPostgresStore(prismaClient)
-            const floridaProgram = defaultFloridaProgram()
-            const floridaRateProgram = defaultFloridaRateProgram()
+            const deprecatedProgram = must(findStatePrograms('KY')).find(
+                (p) => p.isDeprecated
+            )
+            if (!deprecatedProgram) {
+                throw new Error(
+                    'Test setup error: expected KY to have at least one deprecated program in statePrograms.json'
+                )
+            }
 
-            // Force findPrograms to mark the contract program as deprecated
-            vi.spyOn(postgresStore, 'findPrograms').mockReturnValue([
-                { ...floridaProgram, isDeprecated: true },
-                floridaRateProgram,
-            ])
-
-            const contract = mockSubmittableHealthPlanContract()
+            const contract = mockSubmittableHealthPlanContract({
+                programIDs: [deprecatedProgram.id],
+            })
 
             const parsedContract = parseContract(
                 contract,
-                'FL',
+                'KY',
                 postgresStore,
                 { '438-attestation': true, dsnp: true }
             )
@@ -781,36 +787,66 @@ describe('Health plan parsing and validation', () => {
                 )
             ).toBe(true)
         })
-        it('ignores deprecated programs referenced only by deprecatedRateProgramIDs', async () => {
+        it('return error if a child rate has a deprecated rateProgramID', async () => {
             const prismaClient = await sharedTestPrismaClient()
             const postgresStore = NewPostgresStore(prismaClient)
-            const floridaProgram = defaultFloridaProgram()
-            const floridaRateProgram = defaultFloridaRateProgram()
-            const deprecatedRateProgramID =
-                '00000000-0000-0000-0000-000000000001'
+            const deprecatedProgram = must(findStatePrograms('KY')).find(
+                (p) => p.isDeprecated
+            )
+            if (!deprecatedProgram) {
+                throw new Error(
+                    'Test setup error: expected KY to have at least one deprecated program in statePrograms.json'
+                )
+            }
 
-            // Deprecated program only referenced via deprecatedRateProgramIDs — should not block submission
-            vi.spyOn(postgresStore, 'findPrograms').mockReturnValue([
-                floridaProgram,
-                floridaRateProgram,
-                {
-                    id: deprecatedRateProgramID,
-                    name: 'OLD',
-                    fullName: 'Old Program',
-                    isRateProgram: true,
-                    isDeprecated: true,
-                },
-            ])
-
+            // Default mock rate is a child (parentContractID === contract.id).
             const contract = mockSubmittableHealthPlanContract({
-                contractID: '28b00852-00e3-467c-9311-519e60d43284',
-                stateNumber: 6,
-                deprecatedRateProgramIDs: [deprecatedRateProgramID],
+                rateProgramIDs: [deprecatedProgram.id],
             })
 
             const parsedContract = parseContract(
                 contract,
-                'FL',
+                'KY',
+                postgresStore,
+                { '438-attestation': true, dsnp: true }
+            )
+            if (!(parsedContract instanceof Error)) {
+                throw new Error(
+                    'Expected parseContract to return an error for deprecated rateProgramID on a child rate'
+                )
+            }
+            const errMessages = parsedContract.issues.map((err) => err.message)
+            expect(
+                errMessages.some(
+                    (m) =>
+                        m.includes(
+                            'Submission contains deprecated program(s)'
+                        ) && m.includes(deprecatedProgram.id)
+                )
+            ).toBe(true)
+        })
+        it('ignores deprecated rateProgramIDs on linked rates', async () => {
+            const prismaClient = await sharedTestPrismaClient()
+            const postgresStore = NewPostgresStore(prismaClient)
+            const deprecatedProgram = must(findStatePrograms('KY')).find(
+                (p) => p.isDeprecated
+            )
+            if (!deprecatedProgram) {
+                throw new Error(
+                    'Test setup error: expected KY to have at least one deprecated program in statePrograms.json'
+                )
+            }
+
+            const contract = mockSubmittableHealthPlanContract({
+                rateProgramIDs: [deprecatedProgram.id],
+            })
+            // Make the rate linked by pointing its parentContractID at a different contract.
+            contract.draftRates![0].parentContractID =
+                'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa'
+
+            const parsedContract = parseContract(
+                contract,
+                'KY',
                 postgresStore,
                 { '438-attestation': true, dsnp: true }
             )
@@ -1510,24 +1546,20 @@ describe('EQRO parsing and validation', () => {
         it('should return an error if a submitted programID is deprecated', async () => {
             const prismaClient = await sharedTestPrismaClient()
             const postgresStore = NewPostgresStore(prismaClient)
-            const stateCode = 'FL'
-            const contract = createValidEQROContract()
-
-            // Force findPrograms to return every program as deprecated
-            vi.spyOn(postgresStore, 'findPrograms').mockImplementation(
-                (_stateCode, programIDs) =>
-                    programIDs.map((id) => ({
-                        id,
-                        name: 'DEP',
-                        fullName: 'Deprecated Program',
-                        isRateProgram: false,
-                        isDeprecated: true,
-                    }))
-            )
+            const kyPrograms = must(findStatePrograms('KY'))
+            const deprecatedProgram = kyPrograms.find((p) => p.isDeprecated)
+            if (!deprecatedProgram) {
+                throw new Error(
+                    'Test setup error: expected KY to have at least one deprecated program in statePrograms.json'
+                )
+            }
+            const contract = createValidEQROContract({
+                programIDs: [deprecatedProgram.id],
+            })
 
             const parsedContract = parseEQROContract(
                 contract,
-                stateCode,
+                'KY',
                 postgresStore
             )
 
