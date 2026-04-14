@@ -65,3 +65,10 @@ export {
   normalizeValidationResponse,
   parseValidationResponse
 } from './validation-output'
+
+// Handlers
+export type {
+  ValidationHandlerEvent,
+  ValidationHandlerResult
+} from './handlers'
+export { validationHandler } from './handlers'

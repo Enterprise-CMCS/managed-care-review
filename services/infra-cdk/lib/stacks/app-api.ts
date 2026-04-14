@@ -75,6 +75,8 @@ export class AppApiStack extends BaseStack {
 
     public readonly graphqlFunction: NodejsFunction
 
+    public readonly validationFunction: NodejsFunction
+
     // Shared OTEL layer for all functions
     private readonly otelLayer: ILayerVersion
 
@@ -267,6 +269,35 @@ export class AppApiStack extends BaseStack {
                 environment,
                 role,
                 layers: [this.otelLayer],
+            }
+        )
+
+        this.validationFunction = new NodejsFunction(
+            this,
+            'validationFunction',
+            {
+                functionName: `${ResourceNames.apiName('app-api', this.stage)}-validation`,
+                runtime: Runtime.NODEJS_24_X,
+                architecture: Architecture.X86_64,
+                handler: 'validationHandler',
+                entry: path.join(
+                    __dirname,
+                    '..',
+                    '..',
+                    '..',
+                    'ai-form-augmentation',
+                    'src',
+                    'handlers',
+                    'validationHandler.ts'
+                ),
+                timeout: Duration.seconds(30),
+                memorySize: 1024,
+                environment,
+                role,
+                layers: [this.otelLayer],
+                bundling: this.createBundling('validation', [
+                    this.getOtelBundlingCommands(),
+                ]),
             }
         )
 
@@ -1213,6 +1244,12 @@ export class AppApiStack extends BaseStack {
             value: `https://${this.apiGateway.restApiId}.execute-api.${this.region}.amazonaws.com/${this.stage}`,
             exportName: this.exportName('ApiGatewayUrl'),
             description: 'App API Gateway URL',
+        })
+
+        new CfnOutput(this, 'ValidationFunctionName', {
+            value: this.validationFunction.functionName,
+            exportName: this.exportName('ValidationFunctionName'),
+            description: 'Validation Lambda function name',
         })
     }
 }
