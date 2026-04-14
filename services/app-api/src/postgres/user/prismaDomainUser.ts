@@ -1,11 +1,11 @@
-import type { User, State } from '../../generated/client'
 import type { UserType } from '../../domain-models'
+import type { PrismaUsersWithBaseData } from '../contractAndRates/prismaUserHelpers'
 
 // We are storing all the possible values for any of the user types in the same
 // table in prisma, so we need to parse those into valid UserTypes or error if something
 // got stored wrong.
 function domainUserFromPrismaUser(
-    prismaUser: User & { stateAssignments?: State[] }
+    prismaUser: PrismaUsersWithBaseData
 ): UserType | Error {
     const divisionAssignment = prismaUser.divisionAssignment ?? undefined
     switch (prismaUser.role) {
@@ -18,6 +18,8 @@ function domainUserFromPrismaUser(
 
             return {
                 id: prismaUser.id,
+                createdAt: prismaUser.createdAt,
+                updatedAt: prismaUser.updatedAt,
                 role: 'STATE_USER',
                 givenName: prismaUser.givenName,
                 familyName: prismaUser.familyName,
@@ -33,6 +35,8 @@ function domainUserFromPrismaUser(
 
             return {
                 id: prismaUser.id,
+                createdAt: prismaUser.createdAt,
+                updatedAt: prismaUser.updatedAt,
                 role: 'CMS_USER',
                 givenName: prismaUser.givenName,
                 familyName: prismaUser.familyName,
@@ -49,6 +53,8 @@ function domainUserFromPrismaUser(
 
             return {
                 id: prismaUser.id,
+                createdAt: prismaUser.createdAt,
+                updatedAt: prismaUser.updatedAt,
                 role: 'CMS_APPROVER_USER',
                 givenName: prismaUser.givenName,
                 familyName: prismaUser.familyName,
@@ -59,6 +65,8 @@ function domainUserFromPrismaUser(
         case 'ADMIN_USER':
             return {
                 id: prismaUser.id,
+                createdAt: prismaUser.createdAt,
+                updatedAt: prismaUser.updatedAt,
                 role: 'ADMIN_USER',
                 givenName: prismaUser.givenName,
                 familyName: prismaUser.familyName,
@@ -67,6 +75,8 @@ function domainUserFromPrismaUser(
         case 'HELPDESK_USER':
             return {
                 id: prismaUser.id,
+                createdAt: prismaUser.createdAt,
+                updatedAt: prismaUser.updatedAt,
                 role: 'HELPDESK_USER',
                 givenName: prismaUser.givenName,
                 familyName: prismaUser.familyName,
@@ -75,6 +85,8 @@ function domainUserFromPrismaUser(
         case 'BUSINESSOWNER_USER':
             return {
                 id: prismaUser.id,
+                createdAt: prismaUser.createdAt,
+                updatedAt: prismaUser.updatedAt,
                 role: 'BUSINESSOWNER_USER',
                 givenName: prismaUser.givenName,
                 familyName: prismaUser.familyName,
@@ -84,7 +96,7 @@ function domainUserFromPrismaUser(
 }
 
 function parseDomainUsersFromPrismaUsers(
-    prismaUsers: (User & { stateAssignments?: State[] })[]
+    prismaUsers: PrismaUsersWithBaseData[]
 ): UserType[] | Error {
     const users: UserType[] = []
     const errors: Error[] = []

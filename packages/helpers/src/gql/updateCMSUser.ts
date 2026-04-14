@@ -1,11 +1,13 @@
+import type { MutationFunction } from '@apollo/client'
 import {
     UpdateDivisionAssignmentInput,
-    UpdateDivisionAssignmentMutationFn,
+    UpdateDivisionAssignmentMutation,
+    UpdateDivisionAssignmentMutationVariables,
     UpdateCmsUserPayload,
 } from '../gen/gqlClient'
 
 async function updateDivisionAssignment(
-    updateUserMutation: UpdateDivisionAssignmentMutationFn,
+    updateUserMutation: MutationFunction<UpdateDivisionAssignmentMutation, UpdateDivisionAssignmentMutationVariables>,
     input: UpdateDivisionAssignmentInput
 ): Promise<UpdateCmsUserPayload | Error> {
     try {

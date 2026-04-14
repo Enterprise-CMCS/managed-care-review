@@ -3,7 +3,7 @@ import type { ExtendedPrismaClient } from '../prismaClient'
 import { NotFoundError } from '../postgresErrors'
 import { getRelatedContracts } from './prismaSharedContractRateHelpers'
 import { includeRateRelatedContracts } from './prismaSubmittedRateHelpers'
-import type { RelatedContractStripped } from '../../gen/gqlClient'
+import type { RelatedContractStripped } from '../../gen/gqlServer'
 
 async function findRateRelatedContractsInTransaction(
     tx: PrismaTransactionType,

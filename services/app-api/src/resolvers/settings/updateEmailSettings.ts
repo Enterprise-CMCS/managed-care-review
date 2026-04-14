@@ -3,13 +3,12 @@ import {
     type EmailSettingsType,
     isAdminUser,
 } from '../../domain-models'
-import type { MutationResolvers } from '../../gen/gqlServer'
+import type { MutationResolvers, EmailConfiguration } from '../../gen/gqlServer'
 import { logError } from '../../logger'
 import type { Store } from '../../postgres'
 import { setErrorAttributesOnActiveSpan } from '../attributeHelper'
 import { createForbiddenError, createUserInputError } from '../errorUtils'
 import { GraphQLError } from 'graphql'
-import type { EmailConfiguration } from '../../gen/gqlClient'
 import { canWrite } from '../../authorization/oauthAuthorization'
 
 // Both these functions are temporary until we get around to aligning the types

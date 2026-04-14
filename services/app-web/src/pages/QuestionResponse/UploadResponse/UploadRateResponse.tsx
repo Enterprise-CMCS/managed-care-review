@@ -1,9 +1,10 @@
 import { useEffect, useLayoutEffect } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
+import { useMutation, useQuery } from '@apollo/client'
 import {
     CreateQuestionResponseInput,
-    useCreateRateQuestionResponseMutation,
-    useFetchRateWithQuestionsQuery,
+    CreateRateQuestionResponseDocument,
+    FetchRateWithQuestionsDocument,
 } from '../../../gen/gqlClient'
 import { usePage } from '../../../contexts/PageContext'
 import styles from '../QuestionResponse.module.scss'
@@ -46,7 +47,7 @@ export const UploadRateResponse = () => {
         data: fetchRateData,
         loading: fetchRateLoading,
         error: fetchRateError,
-    } = useFetchRateWithQuestionsQuery({
+    } = useQuery(FetchRateWithQuestionsDocument, {
         variables: {
             input: {
                 rateID: rateID || 'not-found',
@@ -55,7 +56,7 @@ export const UploadRateResponse = () => {
     })
 
     const [createResponse, { loading: apiLoading, error: apiError }] =
-        useCreateRateQuestionResponseMutation()
+        useMutation(CreateRateQuestionResponseDocument)
 
     const rate = fetchRateData?.fetchRate.rate
     const rateName =

@@ -22,10 +22,11 @@ import {
 } from '../../../components'
 import {
     StateAssignment,
-    useFetchMcReviewSettingsQuery,
-    useIndexUsersQuery,
-    useUpdateStateAssignmentsByStateMutation,
+    FetchMcReviewSettingsDocument,
+    IndexUsersDocument,
+    UpdateStateAssignmentsByStateDocument,
 } from '../../../gen/gqlClient'
+import { useMutation, useQuery } from '@apollo/client'
 import { RoutesRecord } from '@mc-review/constants'
 import { isValidStateCode } from '@mc-review/submissions'
 import { Error404 } from '../../Errors/Error404Page'
@@ -77,10 +78,10 @@ export const EditStateAssign = (): React.ReactElement => {
         loading: loadingMcReviewSettings,
         data: mcrSettingsData,
         error: mcReviewError,
-    } = useFetchMcReviewSettingsQuery()
+    } = useQuery(FetchMcReviewSettingsDocument)
 
     const { result: indexUsersResult } = wrapApolloResult(
-        useIndexUsersQuery({
+        useQuery(IndexUsersDocument, {
             fetchPolicy: 'cache-and-network',
         })
     )
@@ -88,7 +89,7 @@ export const EditStateAssign = (): React.ReactElement => {
     const [
         updateAssignmentsMutation,
         { loading: editLoading, error: editError },
-    ] = useUpdateStateAssignmentsByStateMutation()
+    ] = useMutation(UpdateStateAssignmentsByStateDocument)
 
     if (!isValidStateCode(stateCode.toUpperCase())) {
         return <Error404 />

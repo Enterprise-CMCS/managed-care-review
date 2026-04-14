@@ -29,10 +29,10 @@ import {
     HealthPlanPackageStatus,
     Rate,
     RateRevision,
-    useFetchContractQuery,
-    useFetchRateQuery,
-    useSubmitRateMutation,
-    useUpdateDraftContractRatesMutation,
+    FetchContractDocument,
+    FetchRateDocument,
+    SubmitRateDocument,
+    UpdateDraftContractRatesDocument,
 } from '../../../../gen/gqlClient'
 import { SingleRateFormFields } from './SingleRateFormFields'
 import { useFocus, useRouteParams } from '../../../../hooks'
@@ -56,7 +56,7 @@ import { LinkedRateSummary } from './LinkedRateSummary'
 import { usePage } from '../../../../contexts/PageContext'
 import { InfoTag } from '../../../../components/InfoTag/InfoTag'
 import { useFocusOnRender } from '../../../../hooks/useFocusOnRender'
-import { ApolloError } from '@apollo/client'
+import { ApolloError, useMutation, useQuery } from '@apollo/client'
 
 export type FormikRateForm = {
     id?: string // no id if its a new rate
@@ -147,7 +147,7 @@ const RateDetails = ({
         data: fetchContractData,
         loading: fetchContractLoading,
         error: fetchContractError,
-    } = useFetchContractQuery({
+    } = useQuery(FetchContractDocument, {
         variables: {
             input: {
                 contractID: id ?? 'unknown-contract',
@@ -160,7 +160,7 @@ const RateDetails = ({
         data: fetchRateData,
         loading: fetchRateLoading,
         error: fetchRateError,
-    } = useFetchRateQuery({
+    } = useQuery(FetchRateDocument, {
         variables: {
             input: {
                 rateID: id ?? 'unknown-rate',
@@ -198,8 +198,10 @@ const RateDetails = ({
         updateActiveMainContent(activeMainContentId)
     }, [activeMainContentId, updateActiveMainContent])
 
-    const [updateDraftContractRates] = useUpdateDraftContractRatesMutation()
-    const [submitRate] = useSubmitRateMutation()
+    const [updateDraftContractRates] = useMutation(
+        UpdateDraftContractRatesDocument
+    )
+    const [submitRate] = useMutation(SubmitRateDocument)
     const isDSNP = contract?.draftRevision?.formData?.dsnpContract === true
     const rateDetailsFormSchema = RateDetailsFormSchema(
         {

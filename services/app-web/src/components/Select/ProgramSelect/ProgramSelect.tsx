@@ -48,7 +48,7 @@ export const ProgramSelect = ({
             return {
                 value: program.id,
                 label: program.isDeprecated
-                    ? `${program.name} (Retired)`
+                    ? `${program.name} (retired)`
                     : program.name,
             }
         })
@@ -105,7 +105,7 @@ export const ProgramSelect = ({
                 return {
                     value: program.id,
                     label: program.isDeprecated
-                        ? `${program.name} (Retired)`
+                        ? `${program.name} (retired)`
                         : program.name,
                 }
             })}
