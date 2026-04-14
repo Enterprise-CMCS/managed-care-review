@@ -69,6 +69,8 @@ export function buildDateValidationPrompt(
     '- Cite only the chunks that support your conclusion',
     '',
     'Return JSON only.',
+    'Do not wrap the JSON in markdown code fences.',
+    'Do not include any explanation before or after the JSON.',
     'Return an array of objects with this shape:',
     '[',
     '  {',

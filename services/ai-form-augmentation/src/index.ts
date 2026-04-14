@@ -57,3 +57,11 @@ export type {
   ValidationLlmClient
 } from './llm'
 export { OllamaValidationClient } from './llm'
+
+// Validation output
+export type { ParsedValidationOutput } from './validation-output'
+export {
+  extractJsonArray,
+  normalizeValidationResponse,
+  parseValidationResponse
+} from './validation-output'

@@ -8,6 +8,7 @@ import { newArtifactS3Client } from './s3'
 import { BruteForceVectorStore } from './vector-store'
 import { buildDateValidationPrompt } from './prompts'
 import { OllamaValidationClient } from './llm'
+import { parseValidationResponse } from './validation-output'
 
 async function main(): Promise<void> {
   // These values model the runtime context that later pipeline steps will
@@ -117,6 +118,10 @@ async function main(): Promise<void> {
     prompt
   })
 
+  // This is the first end-to-end proof that raw model output can be converted
+  // into typed validation results without manual cleanup in the terminal.
+  const parsedValidation = parseValidationResponse(validationResponse.rawText)
+
   console.log({
     hasStartDateLabel: normalizedParsedText.includes('START DATE'),
     hasJanuary1: parsed.rawText.includes('January 1'),
@@ -146,7 +151,9 @@ async function main(): Promise<void> {
     parsedTextPreview: parsed.rawText.slice(0, 1000),
     promptPreview: prompt.slice(0, 4000),
     llmModel: validationResponse.model,
-    llmResponsePreview: validationResponse.rawText.slice(0, 4000)
+    llmResponsePreview: validationResponse.rawText.slice(0, 4000),
+    parsedValidationCount: parsedValidation.results.length,
+    parsedValidationPreview: parsedValidation.results
   })
 }
 
