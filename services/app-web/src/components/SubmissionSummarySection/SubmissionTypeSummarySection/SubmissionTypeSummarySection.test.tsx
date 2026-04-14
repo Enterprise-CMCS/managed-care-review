@@ -390,6 +390,53 @@ describe('SubmissionTypeSummarySection', () => {
         ).toBeInTheDocument()
     })
 
+    it('renders program name with (retired) suffix for deprecated programs', () => {
+        const draftContract = mockContractPackageDraft()
+        const deprecatedProgramId = 'deprecated-program-id'
+
+        // Add a deprecated program to the state programs list
+        draftContract.state.programs.push({
+            id: deprecatedProgramId,
+            fullName: 'Old Program Full Name',
+            name: 'Old Program',
+            isRateProgram: false,
+            isDeprecated: true,
+        })
+
+        // Set the contract's programIDs to include the deprecated program
+        if (!draftContract.draftRevision)
+            throw Error('Unexpected error: no draftRevision')
+        draftContract.draftRevision.formData.programIDs = [deprecatedProgramId]
+
+        renderWithProviders(
+            <SubmissionTypeSummarySection
+                contract={draftContract}
+                editNavigateTo="submission-type"
+                submissionName="MN-PMAP-0001"
+                isStateUser={true}
+            />
+        )
+
+        expect(screen.getByText(/Old Program \(retired\)/)).toBeInTheDocument()
+    })
+
+    it('does not render (retired) suffix for active programs', () => {
+        const draftContract = mockContractPackageDraft()
+
+        renderWithProviders(
+            <SubmissionTypeSummarySection
+                contract={draftContract}
+                editNavigateTo="submission-type"
+                submissionName="MN-PMAP-0001"
+                isStateUser={true}
+            />
+        )
+
+        // SNBC is the default program in the mock — should not have (retired)
+        expect(screen.getByText('SNBC')).toBeInTheDocument()
+        expect(screen.queryByText(/\(retired\)/)).not.toBeInTheDocument()
+    })
+
     it('does not render fields with missing fields for submitted package on submission summary', () => {
         const stateSubmission = mockContractPackageSubmitted()
         const submittedPackage = stateSubmission.packageSubmissions[0]

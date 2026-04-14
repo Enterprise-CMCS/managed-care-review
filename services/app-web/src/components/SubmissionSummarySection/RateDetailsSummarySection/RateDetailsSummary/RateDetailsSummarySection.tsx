@@ -205,10 +205,7 @@ export const RateDetailsSummarySection = ({
     }
 
     const validateActuary = (actuary: ActuaryContact): boolean => {
-        if (!actuary?.name || !actuary?.email) {
-            return false
-        }
-        return true
+        return !(!actuary?.name || !actuary?.email)
     }
 
     const noRatesMessage = () => {
