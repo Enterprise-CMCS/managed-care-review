@@ -5,9 +5,10 @@ import {
     AuroraPostgresEngineVersion,
     Credentials,
     ClusterInstance,
+    DatabaseSecret,
 } from 'aws-cdk-lib/aws-rds'
 import type { IVpc, SubnetSelection, ISecurityGroup } from 'aws-cdk-lib/aws-ec2'
-import { Secret, type ISecret } from 'aws-cdk-lib/aws-secretsmanager'
+import type { ISecret } from 'aws-cdk-lib/aws-secretsmanager'
 import { Duration, RemovalPolicy, Stack } from 'aws-cdk-lib'
 import type { DatabaseConfig } from '../../config/environments'
 import { ResourceNames } from '../../config/shared'
@@ -59,19 +60,13 @@ export class AuroraServerlessV2 extends Construct {
             )
         }
 
-        // Create database credentials secret
-        // Use CDK-specific naming to avoid conflicts with serverless
-        this.secret = new Secret(this, 'Secret', {
+        // DatabaseSecret creates a secret in the format the rotation Lambda expects:
+        // { engine, host, port, dbname, username, password }
+        // attach() below populates the connection fields after the cluster is created.
+        const dbSecret = new DatabaseSecret(this, 'Secret', {
+            username: 'mcreviewadmin',
             secretName: `aurora-postgres-${props.stage}-cdk`, // pragma: allowlist secret
-            description: `Database credentials for ${props.databaseName} - ${props.stage}`,
-            generateSecretString: {
-                secretStringTemplate: JSON.stringify({
-                    username: 'mcreviewadmin',
-                }),
-                generateStringKey: 'password',
-                excludeCharacters: ' %+~`#$&*()|[]{}:;<>?!\'/@"\\',
-                passwordLength: 30,
-            },
+            excludeCharacters: ' %+~`#$&*()|[]{}:;<>?!\'/@"\\',
         })
 
         // Create the Aurora Serverless v2 cluster
@@ -79,7 +74,7 @@ export class AuroraServerlessV2 extends Construct {
             engine: DatabaseClusterEngine.auroraPostgres({
                 version: AuroraPostgresEngineVersion.VER_16_9,
             }),
-            credentials: Credentials.fromSecret(this.secret),
+            credentials: Credentials.fromSecret(dbSecret),
             clusterIdentifier: ResourceNames.resourceName(
                 'postgres',
                 'cluster',
@@ -112,6 +107,10 @@ export class AuroraServerlessV2 extends Construct {
                 publiclyAccessible: false,
             }),
         })
+
+        // Attach the secret to the cluster so CDK populates host/port/engine/dbname —
+        // these fields are required by the rotation Lambda to connect to Aurora.
+        this.secret = dbSecret.attach(this.cluster)
 
         // Rotate the admin password every 30 days via the Secrets Manager hosted rotation Lambda
         this.cluster.addRotationSingleUser({
