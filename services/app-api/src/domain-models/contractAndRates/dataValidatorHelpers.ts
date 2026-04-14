@@ -258,8 +258,13 @@ const parseContract = (
             const contractProgramsIDs = new Set(
                 contract.draftRevision.formData.programIDs
             )
+            // Collect deprecated programs to validate programs being submitted.
+            const nonDeprecatableIDs = new Set(contractProgramsIDs)
             const allProgramIDs = contract.draftRates.reduce((acc, rate) => {
                 const rateFormData = rate.draftRevision.formData
+                rateFormData.rateProgramIDs.forEach((id) =>
+                    nonDeprecatableIDs.add(id)
+                )
                 const rateProgramIDs = rateFormData.rateProgramIDs.concat(
                     rateFormData.deprecatedRateProgramIDs
                 )
@@ -271,6 +276,22 @@ const parseContract = (
                 ctx.addIssue({
                     code: 'custom',
                     message: findResult.message,
+                })
+                return
+            }
+
+            // Reject submission if any current contract/rate program has been deprecated in statePrograms.json
+            const deprecatedMatches = findResult.filter(
+                (program) =>
+                    program.isDeprecated && nonDeprecatableIDs.has(program.id)
+            )
+            if (deprecatedMatches.length > 0) {
+                const names = deprecatedMatches
+                    .map((p) => `${p.name} (${p.id})`)
+                    .join(', ')
+                ctx.addIssue({
+                    code: 'custom',
+                    message: `Submission contains deprecated program(s): ${names}`,
                 })
             }
         }
@@ -305,6 +326,20 @@ const parseEQROContract = (
                     code: 'custom',
                     message: findResult.message,
                 })
+            } else {
+                // Reject EQRO submission if any selected program has been deprecated in statePrograms.json
+                const deprecatedMatches = findResult.filter(
+                    (program) => program.isDeprecated
+                )
+                if (deprecatedMatches.length > 0) {
+                    const names = deprecatedMatches
+                        .map((p) => `${p.name} (${p.id})`)
+                        .join(', ')
+                    ctx.addIssue({
+                        code: 'custom',
+                        message: `Submission contains deprecated program(s): ${names}`,
+                    })
+                }
             }
 
             const hasRates = contract.draftRates && contract.draftRates.length
