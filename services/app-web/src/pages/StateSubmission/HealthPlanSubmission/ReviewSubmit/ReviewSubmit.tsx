@@ -104,17 +104,13 @@ export const ReviewSubmit = (): React.ReactElement => {
 
     const isContractActionAndRateCertification =
         contractFormData.submissionType === 'CONTRACT_AND_RATES'
-    const programIDs = contractFormData?.programIDs
-    const programs = statePrograms.filter((program) =>
-        programIDs?.includes(program.id)
-    )
 
     const submissionName =
         packageName(
             contract.stateCode,
             contract.stateNumber,
             contractFormData.programIDs,
-            programs
+            statePrograms
         ) || ''
     return (
         <div id={activeMainContentId}>
