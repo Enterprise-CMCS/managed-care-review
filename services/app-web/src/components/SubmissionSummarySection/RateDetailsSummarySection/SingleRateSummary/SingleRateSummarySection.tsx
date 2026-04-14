@@ -25,6 +25,7 @@ import { SectionCard } from '../../../SectionCard'
 import {
     ActuaryCommunicationRecord,
     RateMedicaidPopulationsRecord,
+    programNames,
 } from '@mc-review/submissions'
 import { NavLinkWithLogging } from '../../../TealiumLogging'
 import { hasCMSUserPermissions } from '@mc-review/helpers'
@@ -59,9 +60,7 @@ const ratePrograms = (
         programIDs = formData.rateProgramIDs
     }
     return programIDs
-        ? statePrograms
-              .filter((p) => programIDs.includes(p.id))
-              .map((p) => p.name)
+        ? programNames(statePrograms, programIDs, true)
         : undefined
 }
 

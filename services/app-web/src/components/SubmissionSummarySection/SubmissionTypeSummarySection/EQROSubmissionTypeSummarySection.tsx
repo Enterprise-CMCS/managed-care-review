@@ -7,6 +7,7 @@ import {
 import {
     eqroValidationAndReviewDetermination,
     getVisibleLatestContractFormData,
+    programNames as getProgramNames,
 } from '@mc-review/submissions'
 import { GenericErrorPage } from '../../../pages/Errors/GenericErrorPage'
 import { Contract, UnlockedContract } from '../../../gen/gqlClient'
@@ -78,9 +79,11 @@ export const EQROSubmissionTypeSummarySection = ({
     if (!contractFormData) return <GenericErrorPage />
 
     const programs = contract.state.programs
-    const programNames = programs
-        .filter((p) => contractFormData?.programIDs.includes(p.id))
-        .map((p) => p.name)
+    const programNames = getProgramNames(
+        programs,
+        contractFormData?.programIDs,
+        true
+    )
 
     const isSubmitted =
         contract.status === 'SUBMITTED' || contract.status === 'RESUBMITTED'

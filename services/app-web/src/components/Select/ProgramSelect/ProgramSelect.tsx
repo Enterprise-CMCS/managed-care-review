@@ -4,6 +4,7 @@ import { ActionMeta, AriaOnFocus, OnChangeValue, Props } from 'react-select'
 import { useField } from 'formik'
 import { useStatePrograms, useTealium } from '../../../hooks'
 import { AccessibleSelect } from '../AccessibleSelect/AccessibleSelect'
+import { formatProgramName } from '@mc-review/submissions'
 
 export type ProgramSelectPropType = {
     name: string
@@ -44,14 +45,10 @@ export const ProgramSelect = ({
             (program) =>
                 !program.isDeprecated || programIDs.includes(program.id)
         )
-        .map((program) => {
-            return {
-                value: program.id,
-                label: program.isDeprecated
-                    ? `${program.name} (retired)`
-                    : program.name,
-            }
-        })
+        .map((program) => ({
+            value: program.id,
+            label: formatProgramName(program),
+        }))
 
     const { logDropdownSelectionEvent } = useTealium()
 
@@ -104,9 +101,7 @@ export const ProgramSelect = ({
                 }
                 return {
                     value: program.id,
-                    label: program.isDeprecated
-                        ? `${program.name} (retired)`
-                        : program.name,
+                    label: formatProgramName(program),
                 }
             })}
             className={styles.multiSelect}

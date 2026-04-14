@@ -4,7 +4,10 @@ import {
     SectionHeader,
     SectionCard,
 } from '../../../components'
-import { getVisibleLatestContractFormData } from '@mc-review/submissions'
+import {
+    getVisibleLatestContractFormData,
+    programNames as getProgramNames,
+} from '@mc-review/submissions'
 import { GenericErrorPage } from '../../../pages/Errors/GenericErrorPage'
 import {
     Contract,
@@ -53,9 +56,11 @@ export const SubmissionTypeSummarySection = ({
 
     if (!contractFormData) return <GenericErrorPage />
 
-    const programNames = contract.state.programs
-        .filter((p) => contractFormData?.programIDs.includes(p.id))
-        .map((p) => p.name)
+    const programNames = getProgramNames(
+        contract.state.programs,
+        contractFormData?.programIDs,
+        true
+    )
 
     const isSubmitted =
         contract.status === 'SUBMITTED' || contract.status === 'RESUBMITTED'
