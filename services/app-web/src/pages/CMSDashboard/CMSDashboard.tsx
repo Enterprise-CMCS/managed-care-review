@@ -18,6 +18,7 @@ const CMSDashboard = (): React.ReactElement => {
     const TAB_NAMES = {
         RATES: 'Rate reviews',
         SUBMISSIONS: 'Submissions',
+        ADMIN: 'Admin',
     }
 
     const activeMainContentId = 'cmsDashboardMainContent'
@@ -60,7 +61,7 @@ const CMSDashboard = (): React.ReactElement => {
                             <NavLinkWithLogging
                                 to={RoutesRecord.DASHBOARD_ADMIN_SUBMISSIONS}
                             >
-                                Admin submissions
+                                Admin dashboard
                             </NavLinkWithLogging>
                         )}
                     </div>

@@ -1,18 +1,22 @@
 import React from 'react'
 import { GridContainer, Icon } from '@trussworks/react-uswds'
-import { useIndexSubmissionLatestRevisionQuery } from '../../../gen/gqlClient'
+import { IndexSubmissionLatestRevisionDocument } from '../../../gen/gqlClient'
 import { Loading, NavLinkWithLogging } from '../../../components'
 import { ErrorFailedRequestPage } from '../../Errors/ErrorFailedRequestPage'
 import { GenericErrorPage } from '../../Errors/GenericErrorPage'
 import { AdminSubmissionsTable } from './AdminSubmissionsTable'
 import { RoutesRecord } from '@mc-review/constants'
 import styles from './AdminSubmissionsTable.module.scss'
+import { useQuery } from '@apollo/client'
 
 export const AdminSubmissionsDashboard = (): React.ReactElement => {
-    const { data, loading, error } = useIndexSubmissionLatestRevisionQuery({
-        fetchPolicy: 'cache-and-network',
-        pollInterval: 120000,
-    })
+    const { data, loading, error } = useQuery(
+        IndexSubmissionLatestRevisionDocument,
+        {
+            fetchPolicy: 'cache-and-network',
+            pollInterval: 120000,
+        }
+    )
 
     if (!data && loading) {
         return <Loading />
@@ -40,7 +44,7 @@ export const AdminSubmissionsDashboard = (): React.ReactElement => {
                 <Icon.ArrowBack />
                 <span>&nbsp;Go to dashboard</span>
             </NavLinkWithLogging>
-            <h1>Admin submissions</h1>
+            <h1>Admin dashboard</h1>
             <AdminSubmissionsTable data={nodes} />
         </GridContainer>
     )
