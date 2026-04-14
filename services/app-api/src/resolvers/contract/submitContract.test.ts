@@ -9,8 +9,10 @@ import {
     clearMetadataFromContractFormData,
     createAndUpdateTestEQROContract,
     mockGqlContractDraftRevisionFormDataInput,
+    must,
     testS3Client,
 } from '../../testHelpers'
+import { findStatePrograms } from '../../postgres'
 
 import {
     createDBUsersWithFullData,
@@ -1448,6 +1450,94 @@ describe('submitContract', () => {
                     }),
                 }),
             ])
+        })
+
+        it('returns an error when submitting a contract with a deprecated program', async () => {
+            // Find a real deprecated program from KY's statePrograms entry so the test stays valid if IDs change.
+            const kyPrograms = must(findStatePrograms('KY'))
+            const deprecatedProgram = kyPrograms.find((p) => p.isDeprecated)
+            if (!deprecatedProgram) {
+                throw new Error(
+                    'Test setup error: expected KY to have at least one deprecated program in statePrograms.json'
+                )
+            }
+
+            const stateServer = await constructTestPostgresServer({
+                s3Client: mockS3,
+                context: {
+                    user: testStateUser({ stateCode: 'KY' }),
+                },
+            })
+
+            const draft = await createAndUpdateTestContractWithoutRates(
+                stateServer,
+                'KY',
+                {
+                    submissionType: 'CONTRACT_ONLY',
+                    programIDs: [deprecatedProgram.id],
+                }
+            )
+
+            const response = await executeGraphQLOperation(stateServer, {
+                query: SubmitContractDocument,
+                variables: {
+                    input: {
+                        contractID: draft.id,
+                    },
+                },
+            })
+
+            expect(response.errors).toBeDefined()
+            expect(response.errors?.[0].message).toContain(
+                'Submission contains deprecated program(s)'
+            )
+        })
+
+        it('returns an error when submitting a contract whose child rate has a deprecated rateProgramID', async () => {
+            const kyPrograms = must(findStatePrograms('KY'))
+            const deprecatedProgram = kyPrograms.find((p) => p.isDeprecated)
+            const activeProgram = kyPrograms.find((p) => !p.isDeprecated)
+            if (!deprecatedProgram || !activeProgram) {
+                throw new Error(
+                    'Test setup error: expected KY to have at least one deprecated and one active program in statePrograms.json'
+                )
+            }
+
+            const stateServer = await constructTestPostgresServer({
+                s3Client: mockS3,
+                context: {
+                    user: testStateUser({ stateCode: 'KY' }),
+                },
+            })
+
+            const draft = await createAndUpdateTestContractWithoutRates(
+                stateServer,
+                'KY',
+                {
+                    submissionType: 'CONTRACT_AND_RATES',
+                    programIDs: [activeProgram.id],
+                }
+            )
+
+            await addNewRateToTestContract(stateServer, draft, {
+                rateProgramIDs: [deprecatedProgram.id],
+                deprecatedRateProgramIDs: [],
+            })
+
+            const response = await executeGraphQLOperation(stateServer, {
+                query: SubmitContractDocument,
+                variables: {
+                    input: {
+                        contractID: draft.id,
+                    },
+                },
+            })
+
+            expect(response.errors).toBeDefined()
+            expect(response.errors?.[0].message).toContain(
+                'Submission contains deprecated program(s)'
+            )
+            expect(response.errors?.[0].message).toContain(deprecatedProgram.id)
         })
 
         describe('emails', () => {
