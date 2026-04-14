@@ -154,20 +154,33 @@ const naturalSort = (a: string, b: string): number => {
     return a.localeCompare(b, 'en', { numeric: true })
 }
 
-// Since these functions are in common code, we don't want to rely on the api or gql program types
-// instead we create an interface with what is required for these functions, since both those types
-// implement it, we can use it interchangeably
-// Pull out the programs names for display from the program IDs
+/**
+ * Returns the program name with a "(retired)" suffix for deprecated programs.
+ * @param program - The program object containing program data.
+ */
+const formatProgramName = (program: ProgramArgType ): string => program.isDeprecated
+    ? `${program.name} (retired)`
+    : program.name
+
+/**
+ * Returns an array of program names matching the given program IDs.
+ * If `displayRetired` is true, appends "(retired)" to deprecated program names.
+ * Returns "Unknown Program" for any ID not found in the programs list.
+ * @param programs - The full list of available programs to search.
+ * @param programIDs - The IDs of programs to look up.
+ * @param displayRetired - When true, formats deprecated programs with a "(retired)" suffix.
+ */
 function programNames(
     programs: ProgramArgType[],
-    programIDs: string[]
+    programIDs: string[],
+    displayRetired?: boolean
 ): string[] {
     return programIDs.map((id) => {
         const program = programs.find((p) => p.id === id)
         if (!program) {
             return 'Unknown Program'
         }
-        return program.name
+        return displayRetired ? formatProgramName(program) : program.name
     })
 }
 
@@ -214,5 +227,6 @@ export {
     packageName,
     programNames,
     naturalSort,
+    formatProgramName
 }
 export type { RateRevisionWithIsLinked }

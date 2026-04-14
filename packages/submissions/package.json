@@ -5,7 +5,10 @@
     "types": "build/index.d.ts",
     "scripts": {
         "build": "tsc && pnpm copy-gen-code",
-        "copy-gen-code": "mkdir -p build/gen && cp -r src/gen/* build/gen/ && find build/gen -name '*.ts' -delete"
+        "copy-gen-code": "mkdir -p build/gen && cp -r src/gen/* build/gen/ && find build/gen -name '*.ts' -delete",
+        "test": "vitest --watch",
+        "test:once": "vitest --ci",
+        "test:coverage": "vitest --coverage"
     },
     "dependencies": {
         "@mc-review/dates": "workspace:*",
@@ -16,7 +19,8 @@
         "zod": "^4.3.6"
     },
     "devDependencies": {
-        "@types/jest": "^30.0.0",
-        "@types/node": "^25.5.0"
+        "@types/node": "^25.5.0",
+        "@vitest/coverage-v8": "^3.0.4",
+        "vitest": "^3.0.4"
     }
 }
