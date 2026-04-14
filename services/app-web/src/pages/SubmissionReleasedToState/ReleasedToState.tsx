@@ -6,6 +6,7 @@ import {
     GenericApiErrorBanner,
     PoliteErrorMessage,
     PageActionsContainer,
+    SectionHeader,
 } from '../../components'
 import {
     ContractSubmissionTypeRecord,
@@ -172,6 +173,7 @@ const ReleasedToState = () => {
                     },
                 ]}
             />
+            <h1>Released to state</h1>
             <Formik
                 initialValues={formInitialValues}
                 onSubmit={(values) => approveContractAction(values)}
@@ -188,10 +190,14 @@ const ReleasedToState = () => {
                     >
                         {approveError && <GenericApiErrorBanner />}
                         <fieldset className="usa-fieldset">
-                            <h2>
-                                Are you sure you want to mark this submission as
-                                Released to the state?
-                            </h2>
+                            <SectionHeader
+                                headerId={'releaseToStateHeader'}
+                                headingLevel="h3"
+                                header={
+                                    'Are you sure you want to mark this submission as Released to the state?'
+                                }
+                                hideBorderTop
+                            />
                             <p>
                                 Once you select Released to state, the status
                                 will change from Submitted to Approved on the
@@ -203,7 +209,6 @@ const ReleasedToState = () => {
                                 error={showFieldErrors(
                                     errors.dateApprovalReleasedToState
                                 )}
-                                className="margin-top-0"
                             >
                                 <Label
                                     htmlFor="dateApprovalReleasedToState"

@@ -124,12 +124,13 @@ export const RateWithdraw = () => {
                     },
                 ]}
             />
+            <h1>Withdraw a rate</h1>
             <Formik
                 initialValues={formInitialValues}
                 onSubmit={(values) => withdrawRateAction(values)}
                 validationSchema={RateWithdrawSchema}
             >
-                {({ handleSubmit, handleChange, errors, values }) => (
+                {({ handleSubmit, handleChange, errors }) => (
                     <Form
                         id="RateWithdrawForm"
                         className={styles.formContainer}
@@ -140,7 +141,6 @@ export const RateWithdraw = () => {
                     >
                         {withdrawError && <GenericApiErrorBanner />}
                         <fieldset className="usa-fieldset">
-                            <h2>Withdraw a rate</h2>
                             <FieldTextarea
                                 label="Reason for withdrawing"
                                 id="rateWithdrawReason"

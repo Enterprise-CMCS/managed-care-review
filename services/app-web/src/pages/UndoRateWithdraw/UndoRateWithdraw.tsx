@@ -131,12 +131,13 @@ export const UndoRateWithdraw = () => {
                     },
                 ]}
             />
+            <h1>Undo rate withdraw</h1>
             <Formik
                 initialValues={formInitialValues}
                 onSubmit={(values) => undoWithdrawRateAction(values)}
                 validationSchema={UndoRateWithdrawSchema}
             >
-                {({ handleSubmit, handleChange, errors, values }) => (
+                {({ handleSubmit, handleChange, errors }) => (
                     <Form
                         id="UndoRateWithdrawForm"
                         className={styles.formContainer}
@@ -147,7 +148,6 @@ export const UndoRateWithdraw = () => {
                     >
                         {undoWithdrawError && <GenericApiErrorBanner />}
                         <fieldset className="usa-fieldset">
-                            <h2>Undo withdraw</h2>
                             <FieldTextarea
                                 label="Reason for change"
                                 id="undoWithdrawReason"

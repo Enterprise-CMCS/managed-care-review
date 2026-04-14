@@ -10,7 +10,7 @@ import {
     mockContractPackageSubmitted,
     iterableCmsUsersMockData,
 } from '@mc-review/mocks'
-import { renderWithProviders } from '../../testHelpers/jestHelpers'
+import { renderWithProviders } from '../../testHelpers'
 import { MccrsId } from './MccrsId'
 import { Location, NavigateFunction, Route, Routes } from 'react-router-dom'
 
@@ -21,7 +21,7 @@ describe('MCCRSID', () => {
 
     describe.each(iterableCmsUsersMockData)(
         '$userRole MCCRSID tests',
-        ({ userRole, mockUser }) => {
+        ({ mockUser }) => {
             const contract = mockContractPackageSubmitted()
             contract.id = '15'
             it('renders without errors', async () => {
@@ -97,7 +97,7 @@ describe('MCCRSID', () => {
                     expect(
                         screen.getByRole('heading', {
                             name: /MC-CRS record number/,
-                            level: 3,
+                            level: 1,
                         })
                     ).toBeInTheDocument()
                 })

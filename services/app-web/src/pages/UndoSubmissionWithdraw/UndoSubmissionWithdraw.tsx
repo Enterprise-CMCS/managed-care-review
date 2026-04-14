@@ -155,12 +155,13 @@ export const UndoSubmissionWithdraw = (): React.ReactElement => {
                     },
                 ]}
             />
+            <h1>Undo submission withdraw</h1>
             <Formik
                 initialValues={formInitialValues}
                 onSubmit={(values) => undoWithdrawSubmissionAction(values)}
                 validationSchema={UndoSubmissionWithdrawSchema}
             >
-                {({ handleSubmit, handleChange, errors, values }) => (
+                {({ handleSubmit, handleChange, errors }) => (
                     <Form
                         id="undoSubmissionWithdrawForm"
                         className={styles.formContainer}
@@ -171,7 +172,6 @@ export const UndoSubmissionWithdraw = (): React.ReactElement => {
                     >
                         {undoWithdrawError && <GenericApiErrorBanner />}
                         <fieldset className="usa-fieldset">
-                            <h2>Undo submission withdraw</h2>
                             <FieldTextarea
                                 label="Reason for undoing the submission withdraw."
                                 id="undoSubmissionWithdrawReason"

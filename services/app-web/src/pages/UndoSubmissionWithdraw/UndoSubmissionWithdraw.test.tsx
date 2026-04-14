@@ -61,7 +61,7 @@ describe('UndoSubmissionWithdraw', () => {
             expect(
                 screen.getByRole('heading', {
                     name: 'Undo submission withdraw',
-                    level: 2,
+                    level: 1,
                 })
             ).toBeInTheDocument()
             expect(
@@ -130,7 +130,7 @@ describe('UndoSubmissionWithdraw', () => {
             expect(
                 screen.getByRole('heading', {
                     name: /Undo submission withdraw/,
-                    level: 2,
+                    level: 1,
                 })
             ).toBeInTheDocument()
         })
