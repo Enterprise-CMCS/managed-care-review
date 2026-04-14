@@ -9,6 +9,7 @@ export { must } from './assertionHelpers'
 export {
     mockInsertContractArgs,
     mockContractRevision,
+    mockSubmittableHealthPlanContract,
 } from './contractDataMocks'
 
 export {

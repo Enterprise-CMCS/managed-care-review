@@ -7,6 +7,7 @@ import {
 } from './dataValidatorHelpers'
 import {
     mockGqlContractDraftRevisionFormDataInput,
+    mockSubmittableHealthPlanContract,
     must,
 } from '../../testHelpers'
 import type {
@@ -23,6 +24,7 @@ import {
 } from '../../testHelpers/gqlHelpers'
 import type { ContractFormDataType } from './formDataTypes'
 import { eqroValidationAndReviewDetermination } from '@mc-review/submissions'
+import { vi } from 'vitest'
 
 describe('Health plan parsing and validation', () => {
     describe('validateContractDraftRevisionInput', () => {
@@ -747,6 +749,74 @@ describe('Health plan parsing and validation', () => {
                 'dsnpContract is required when any of the following Federal Authorities are present: STATE_PLAN,WAIVER_1915B,WAIVER_1115,VOLUNTARY'
             )
         })
+        it('return error if a submitted programID is deprecated', async () => {
+            const prismaClient = await sharedTestPrismaClient()
+            const postgresStore = NewPostgresStore(prismaClient)
+            const floridaProgram = defaultFloridaProgram()
+            const floridaRateProgram = defaultFloridaRateProgram()
+
+            // Force findPrograms to mark the contract program as deprecated
+            vi.spyOn(postgresStore, 'findPrograms').mockReturnValue([
+                { ...floridaProgram, isDeprecated: true },
+                floridaRateProgram,
+            ])
+
+            const contract = mockSubmittableHealthPlanContract()
+
+            const parsedContract = parseContract(
+                contract,
+                'FL',
+                postgresStore,
+                { '438-attestation': true, dsnp: true }
+            )
+            if (!(parsedContract instanceof Error)) {
+                throw new Error(
+                    'Expected parseContract to return an error for deprecated programID'
+                )
+            }
+            const errMessages = parsedContract.issues.map((err) => err.message)
+            expect(
+                errMessages.some((m) =>
+                    m.includes('Submission contains deprecated program(s)')
+                )
+            ).toBe(true)
+        })
+        it('ignores deprecated programs referenced only by deprecatedRateProgramIDs', async () => {
+            const prismaClient = await sharedTestPrismaClient()
+            const postgresStore = NewPostgresStore(prismaClient)
+            const floridaProgram = defaultFloridaProgram()
+            const floridaRateProgram = defaultFloridaRateProgram()
+            const deprecatedRateProgramID =
+                '00000000-0000-0000-0000-000000000001'
+
+            // Deprecated program only referenced via deprecatedRateProgramIDs — should not block submission
+            vi.spyOn(postgresStore, 'findPrograms').mockReturnValue([
+                floridaProgram,
+                floridaRateProgram,
+                {
+                    id: deprecatedRateProgramID,
+                    name: 'OLD',
+                    fullName: 'Old Program',
+                    isRateProgram: true,
+                    isDeprecated: true,
+                },
+            ])
+
+            const contract = mockSubmittableHealthPlanContract({
+                contractID: '28b00852-00e3-467c-9311-519e60d43284',
+                stateNumber: 6,
+                deprecatedRateProgramIDs: [deprecatedRateProgramID],
+            })
+
+            const parsedContract = parseContract(
+                contract,
+                'FL',
+                postgresStore,
+                { '438-attestation': true, dsnp: true }
+            )
+
+            expect(parsedContract).toEqual(contract)
+        })
     })
 })
 
@@ -1435,6 +1505,42 @@ describe('EQRO parsing and validation', () => {
             }
 
             expect(parsedContract).toEqual(contract)
+        })
+
+        it('should return an error if a submitted programID is deprecated', async () => {
+            const prismaClient = await sharedTestPrismaClient()
+            const postgresStore = NewPostgresStore(prismaClient)
+            const stateCode = 'FL'
+            const contract = createValidEQROContract()
+
+            // Force findPrograms to return every program as deprecated
+            vi.spyOn(postgresStore, 'findPrograms').mockImplementation(
+                (_stateCode, programIDs) =>
+                    programIDs.map((id) => ({
+                        id,
+                        name: 'DEP',
+                        fullName: 'Deprecated Program',
+                        isRateProgram: false,
+                        isDeprecated: true,
+                    }))
+            )
+
+            const parsedContract = parseEQROContract(
+                contract,
+                stateCode,
+                postgresStore
+            )
+
+            if (!(parsedContract instanceof Error)) {
+                throw new Error('Expected parseEQROContract to return an error')
+            }
+
+            const errMessages = parsedContract.issues.map((err) => err.message)
+            expect(
+                errMessages.some((m) =>
+                    m.includes('Submission contains deprecated program(s)')
+                )
+            ).toBe(true)
         })
     })
 })

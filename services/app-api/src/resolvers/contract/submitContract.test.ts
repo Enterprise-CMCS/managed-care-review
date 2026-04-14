@@ -9,8 +9,10 @@ import {
     clearMetadataFromContractFormData,
     createAndUpdateTestEQROContract,
     mockGqlContractDraftRevisionFormDataInput,
+    must,
     testS3Client,
 } from '../../testHelpers'
+import { findStatePrograms } from '../../postgres'
 
 import {
     createDBUsersWithFullData,
@@ -1448,6 +1450,47 @@ describe('submitContract', () => {
                     }),
                 }),
             ])
+        })
+
+        it('returns an error when submitting a contract with a deprecated program', async () => {
+            // Find a real deprecated program from KY's statePrograms entry so the test stays valid if IDs change.
+            const kyPrograms = must(findStatePrograms('KY'))
+            const deprecatedProgram = kyPrograms.find((p) => p.isDeprecated)
+            if (!deprecatedProgram) {
+                throw new Error(
+                    'Test setup error: expected KY to have at least one deprecated program in statePrograms.json'
+                )
+            }
+
+            const stateServer = await constructTestPostgresServer({
+                s3Client: mockS3,
+                context: {
+                    user: testStateUser({ stateCode: 'KY' }),
+                },
+            })
+
+            const draft = await createAndUpdateTestContractWithoutRates(
+                stateServer,
+                'KY',
+                {
+                    submissionType: 'CONTRACT_ONLY',
+                    programIDs: [deprecatedProgram.id],
+                }
+            )
+
+            const response = await executeGraphQLOperation(stateServer, {
+                query: SubmitContractDocument,
+                variables: {
+                    input: {
+                        contractID: draft.id,
+                    },
+                },
+            })
+
+            expect(response.errors).toBeDefined()
+            expect(response.errors?.[0].message).toContain(
+                'Submission contains deprecated program(s)'
+            )
         })
 
         describe('emails', () => {
