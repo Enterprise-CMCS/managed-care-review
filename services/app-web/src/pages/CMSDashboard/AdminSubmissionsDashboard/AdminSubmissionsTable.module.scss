@@ -2,9 +2,9 @@
 @use '../../../styles/uswdsImports.scss' as uswds;
 
 .pageContainer {
-    max-width: 100%;
+    max-width: 100% !important;
     background-color: white;
-    padding: 0 32px;
+    padding: 2rem 2rem;
 }
 
 .filterCount {
@@ -74,28 +74,50 @@
 }
 
 .subRow {
-    background-color: custom.$mcr-gray-lightest;
-    border-bottom: 1px solid custom.$mcr-gray-lighter;
-    padding-left: 16px;
+    background-color: custom.$mcr-primary-darkest;
+    border-left: 4px solid custom.$mcr-primary-base;
 }
 
 .subTable {
-    border-collapse: collapse;
-    font-size: 0.85rem;
+    border-collapse: separate;
+    border-spacing: 0;
+    font-size: 0.8rem;
     width: max-content;
+
+    tr {
+        display: flex;
+    }
 
     th,
     td {
+        display: flex;
+        align-items: center;
         white-space: normal;
-        padding: 0.5rem 1rem;
-        border-bottom: 1px solid custom.$mcr-gray-lighter;
+        flex-shrink: 0;
+        padding: 0.4rem 0.75rem;
+        background-color: custom.$mcr-primary-darkest;
+        color: white;
+        border-bottom: 1px solid custom.$mcr-primary-dark;
     }
 
     th {
-        background-color: white;
         font-weight: 700;
-        border-bottom: 2px solid custom.$mcr-foundation-ink;
+        border-bottom: 2px solid custom.$mcr-primary-base;
     }
+}
+
+.subTableStickyHeader {
+    position: sticky;
+    left: 0;
+    z-index: 1;
+    background-color: custom.$mcr-primary-darkest;
+}
+
+.subTableStickyData {
+    position: sticky;
+    left: 0;
+    z-index: 1;
+    background-color: custom.$mcr-primary-darkest;
 }
 
 .expandButton {

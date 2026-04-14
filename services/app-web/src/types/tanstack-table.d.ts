@@ -4,7 +4,8 @@ import { ProgramArgType } from '@mc-review/submissions'
 declare module '@tanstack/react-table' {
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     interface ColumnMeta<TData extends RowData, TValue> {
-        dataTestID: string
+        dataTestID?: string
+        isRateFilter?: boolean
     }
     interface FilterFns {
         dateRangeFilter: FilterFn<unknown>
