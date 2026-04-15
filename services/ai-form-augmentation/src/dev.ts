@@ -11,6 +11,10 @@ import { OllamaValidationClient } from './llm'
 import { parseValidationResponse } from './validation-output'
 import { validationHandler } from './handlers'
 import { getValidationStatusKey } from './status'
+import {
+  buildValidationResultArtifact,
+  getValidationResultKey
+} from './results'
 
 async function main(): Promise<void> {
   // These values model the runtime context that later pipeline steps will
@@ -143,6 +147,26 @@ async function main(): Promise<void> {
 
   const statusArtifact = await s3Client.getJson(bucket, getValidationStatusKey(formId))
 
+  // This placeholder hash is good enough for local artifact verification. A
+  // later versioning ticket should replace it with a real form snapshot hash.
+  const formSnapshotHash = 'local-dev-form-snapshot-v1'
+
+  const validationResultArtifact = buildValidationResultArtifact(
+    artifactVersion,
+    formSnapshotHash,
+    parsedValidation.results
+  )
+
+  const validationResultKey = getValidationResultKey(formId)
+
+  await s3Client.putJson(bucket, validationResultKey, validationResultArtifact)
+
+  const storedValidationResult =
+    await s3Client.getJson<typeof validationResultArtifact>(
+      bucket,
+      validationResultKey
+    )
+
   console.log({
     hasStartDateLabel: normalizedParsedText.includes('START DATE'),
     hasJanuary1: parsed.rawText.includes('January 1'),
@@ -175,7 +199,9 @@ async function main(): Promise<void> {
     llmResponsePreview: validationResponse.rawText.slice(0, 4000),
     parsedValidationCount: parsedValidation.results.length,
     parsedValidationPreview: parsedValidation.results,
-    statusArtifact
+    statusArtifact,
+    validationResultKey,
+    storedValidationResult
   })
 }
 

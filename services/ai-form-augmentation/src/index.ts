@@ -84,3 +84,10 @@ export {
   buildValidationStatusArtifact,
   getValidationStatusKey
 } from './status'
+
+// Results
+export type { ValidationResultArtifact } from './results'
+export {
+  buildValidationResultArtifact,
+  getValidationResultKey
+} from './results'
