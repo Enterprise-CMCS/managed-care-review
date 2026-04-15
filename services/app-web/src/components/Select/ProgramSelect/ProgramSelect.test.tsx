@@ -273,7 +273,7 @@ describe('ProgramSelect', () => {
 
         await waitFor(() => {
             expect(
-                screen.getByText('Deprecated Program (retired)')
+                screen.getByTestId(`program-${deprecatedProgram.id}`)
             ).toBeInTheDocument()
         })
     })
@@ -307,7 +307,7 @@ describe('ProgramSelect', () => {
 
         await waitFor(() => {
             expect(
-                screen.getByText('Deprecated Program (retired)')
+                screen.getByTestId(`program-${deprecatedProgram.id}`)
             ).toBeInTheDocument()
         })
 
@@ -328,7 +328,7 @@ describe('ProgramSelect', () => {
         await waitFor(() => {
             // Deprecated program is no longer in the dropdown
             expect(
-                screen.queryByText('Deprecated Program (retired)')
+                screen.queryByText('Deprecated Program')
             ).not.toBeInTheDocument()
             // Active programs are still available
             expect(screen.getByText('SNBC')).toBeInTheDocument()
