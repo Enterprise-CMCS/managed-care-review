@@ -7,7 +7,6 @@ import {
 import {
     eqroValidationAndReviewDetermination,
     getVisibleLatestContractFormData,
-    programNames as getProgramNames,
 } from '@mc-review/submissions'
 import { GenericErrorPage } from '../../../pages/Errors/GenericErrorPage'
 import { Contract, UnlockedContract } from '../../../gen/gqlClient'
@@ -21,6 +20,7 @@ import {
     SubmissionDescriptionSummary,
     SubmittedAtSummary,
 } from '../SummarySectionFields'
+import { formattedProgramNames } from '../../../formHelpers'
 
 export type EQROSubmissionTypeSummarySection = {
     contract: Contract | UnlockedContract
@@ -79,10 +79,9 @@ export const EQROSubmissionTypeSummarySection = ({
     if (!contractFormData) return <GenericErrorPage />
 
     const programs = contract.state.programs
-    const programNames = getProgramNames(
+    const programNames = formattedProgramNames(
         programs,
-        contractFormData?.programIDs,
-        true
+        contractFormData?.programIDs
     )
 
     const isSubmitted =
@@ -134,7 +133,8 @@ export const EQROSubmissionTypeSummarySection = ({
                             label="Populations included in EQRO activities"
                         />
                     )}
-                    {(programNames.length > 0 || !isSubmitted) && (
+                    {(contractFormData.programIDs.length > 0 ||
+                        !isSubmitted) && (
                         <ContractProgramsSummary
                             programNames={programNames}
                             explainMissingData={explainMissingData}

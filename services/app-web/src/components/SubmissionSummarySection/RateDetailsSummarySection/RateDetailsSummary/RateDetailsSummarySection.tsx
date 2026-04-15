@@ -20,7 +20,6 @@ import {
     getLastContractSubmission,
     getPackageSubmissionAtIndex,
     getVisibleLatestRateRevisions,
-    programNames,
 } from '@mc-review/submissions'
 import { hasCMSUserPermissions } from '@mc-review/helpers'
 import { MultiColumnGrid } from '../../../MultiColumnGrid'
@@ -42,6 +41,7 @@ import {
 import { SectionHeader } from '../../../SectionHeader'
 import styles from '../../SubmissionSummarySection.module.scss'
 import { NavLinkWithLogging } from '../../../TealiumLogging'
+import { formattedProgramNames } from '../../../../formHelpers'
 
 export type RateDetailsSummarySectionProps = {
     contract: Contract | UnlockedContract
@@ -165,7 +165,7 @@ export const RateDetailsSummarySection = ({
             programIDs = rateFormData.rateProgramIDs
         }
         return programIDs
-            ? programNames(statePrograms, programIDs, true)
+            ? formattedProgramNames(statePrograms, programIDs)
             : undefined
     }
 

@@ -28,9 +28,9 @@ const formattedProgramName = (program: Program): React.ReactElement => {
 const formattedProgramNames = (
     programs: Program[],
     programIDs: string[]
-): React.ReactElement => {
+): React.ReactElement | null => {
     if (programIDs.length === 0 || programs.length === 0) {
-        return <></>
+        return null
     }
     return (
         <>
@@ -39,9 +39,9 @@ const formattedProgramNames = (
                 const name = program?.name ?? 'Unknown Program'
                 const isDeprecated = program?.isDeprecated ?? false
                 return (
-                    <>
+                    <React.Fragment key={id}>
                         {index > 0 && ', '}
-                        <span key={id} data-testid={`program-${id}`}>
+                        <span data-testid={`program-${id}`}>
                             {name}
                             {isDeprecated && (
                                 <span style={{ fontStyle: 'italic' }}>
@@ -50,7 +50,7 @@ const formattedProgramNames = (
                                 </span>
                             )}
                         </span>
-                    </>
+                    </React.Fragment>
                 )
             })}
         </>

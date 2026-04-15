@@ -1,13 +1,11 @@
+import React from 'react'
 import { Grid } from '@trussworks/react-uswds'
 import {
     MultiColumnGrid,
     SectionHeader,
     SectionCard,
 } from '../../../components'
-import {
-    getVisibleLatestContractFormData,
-    programNames as getProgramNames,
-} from '@mc-review/submissions'
+import { getVisibleLatestContractFormData } from '@mc-review/submissions'
 import { GenericErrorPage } from '../../../pages/Errors/GenericErrorPage'
 import {
     Contract,
@@ -24,6 +22,7 @@ import {
     SubmissionTypeSummary,
     SubmittedAtSummary,
 } from '../SummarySectionFields'
+import { formattedProgramNames } from '../../../formHelpers'
 
 export type SubmissionTypeSummarySectionProps = {
     contract: Contract | UnlockedContract
@@ -56,10 +55,10 @@ export const SubmissionTypeSummarySection = ({
 
     if (!contractFormData) return <GenericErrorPage />
 
-    const programNames = getProgramNames(
+    const programIDs = contractFormData?.programIDs ?? []
+    const programNames = formattedProgramNames(
         contract.state.programs,
-        contractFormData?.programIDs,
-        true
+        programIDs
     )
 
     const isSubmitted =
@@ -89,7 +88,7 @@ export const SubmissionTypeSummarySection = ({
                         />
                     )}
                 <MultiColumnGrid columns={2}>
-                    {(programNames.length > 0 || !isSubmitted) && (
+                    {(programIDs.length > 0 || !isSubmitted) && (
                         <ContractProgramsSummary
                             programNames={programNames}
                             explainMissingData={explainMissingData}

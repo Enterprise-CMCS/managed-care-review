@@ -13,7 +13,7 @@ import {
     handleAndReturnErrorState,
 } from '../../SharedSubmissionComponents'
 import { ApolloError } from '@apollo/client'
-import { programNames } from '@mc-review/submissions'
+import { formattedProgramNames } from '../../../../formHelpers'
 
 export const LinkedRateSummary = ({
     rateForm,
@@ -58,10 +58,9 @@ export const LinkedRateSummary = ({
                     <DataDetail
                         id="ratePrograms"
                         label="Rates this rate certification covers"
-                        children={programNames(
+                        children={formattedProgramNames(
                             statePrograms,
-                            rateForm.rateProgramIDs,
-                            true
+                            rateForm.rateProgramIDs
                         )}
                     />
                     <DataDetail

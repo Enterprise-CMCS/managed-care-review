@@ -25,7 +25,6 @@ import { SectionCard } from '../../../SectionCard'
 import {
     ActuaryCommunicationRecord,
     RateMedicaidPopulationsRecord,
-    programNames,
 } from '@mc-review/submissions'
 import { NavLinkWithLogging } from '../../../TealiumLogging'
 import { hasCMSUserPermissions } from '@mc-review/helpers'
@@ -33,6 +32,7 @@ import { featureFlags } from '@mc-review/common-code'
 import { useLDClient } from 'launchdarkly-react-client-sdk'
 import { DocumentHeader } from '../../../DocumentHeader/DocumentHeader'
 import { ContractSubmissionTypeRecord } from '@mc-review/constants'
+import { formattedProgramNames } from '../../../../formHelpers'
 
 const rateCapitationType = (formData: RateFormData) =>
     formData.rateCapitationType
@@ -60,7 +60,7 @@ const ratePrograms = (
         programIDs = formData.rateProgramIDs
     }
     return programIDs
-        ? programNames(statePrograms, programIDs, true)
+        ? formattedProgramNames(statePrograms, programIDs)
         : undefined
 }
 
