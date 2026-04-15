@@ -15,13 +15,18 @@ import {
   buildValidationResultArtifact,
   getValidationResultKey
 } from './results'
+import {
+  computeArtifactVersion,
+  computeFormSnapshotHash
+} from './versioning'
 
 async function main(): Promise<void> {
   // These values model the runtime context that later pipeline steps will
   // supply when writing artifacts for a real submission.
   const formId = 'local-dev-form'
   const bucket = 'ai-form-augmentation-artifacts'
-  const artifactVersion = 'local-dev-v1'
+  const documentKeys = ['fixtures/pdf/scan-07-65712-a26-213a-final.pdf']
+  const artifactVersion = computeArtifactVersion(documentKeys)
   const filePath = '../fixtures/pdf/scan-07-65712-a26-213a-final.pdf'
 
   const buffer = await readFile(new URL(filePath, import.meta.url))
@@ -147,9 +152,14 @@ async function main(): Promise<void> {
 
   const statusArtifact = await s3Client.getJson(bucket, getValidationStatusKey(formId))
 
-  // This placeholder hash is good enough for local artifact verification. A
-  // later versioning ticket should replace it with a real form snapshot hash.
-  const formSnapshotHash = 'local-dev-form-snapshot-v1'
+  // Hash the normalized form field values so form-only changes can be detected
+  // independently from document-set changes.
+  const formSnapshotHash = computeFormSnapshotHash(
+    formFields.map((field) => ({
+      field: field.field,
+      value: field.value
+    }))
+  )
 
   const validationResultArtifact = buildValidationResultArtifact(
     artifactVersion,

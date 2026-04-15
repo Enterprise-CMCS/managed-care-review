@@ -91,3 +91,10 @@ export {
   buildValidationResultArtifact,
   getValidationResultKey
 } from './results'
+
+// Versioning
+export type { FormSnapshotField } from './versioning'
+export {
+  computeArtifactVersion,
+  computeFormSnapshotHash
+} from './versioning'
