@@ -97,10 +97,13 @@ describe('RateQuestionResponse', () => {
             })
 
             expect(
-                screen.getByRole('heading', {
-                    name: `Rate Q&A`,
+                screen.getByRole('link', {
+                    name: `Rate questions: MSC+`,
                 })
-            ).toBeInTheDocument()
+            ).toHaveAttribute(
+                'href',
+                '/submissions/health-plan/15/rates/second-rate/question-and-answers'
+            )
         })
 
         it('renders questions in correct sections', async () => {
