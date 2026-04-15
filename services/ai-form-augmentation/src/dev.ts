@@ -9,6 +9,8 @@ import { BruteForceVectorStore } from './vector-store'
 import { buildDateValidationPrompt } from './prompts'
 import { OllamaValidationClient } from './llm'
 import { parseValidationResponse } from './validation-output'
+import { validationHandler } from './handlers'
+import { getValidationStatusKey } from './status'
 
 async function main(): Promise<void> {
   // These values model the runtime context that later pipeline steps will
@@ -122,6 +124,25 @@ async function main(): Promise<void> {
   // into typed validation results without manual cleanup in the terminal.
   const parsedValidation = parseValidationResponse(validationResponse.rawText)
 
+  await validationHandler({
+    formId,
+    artifactVersion,
+    bucket,
+    // Keep storage config explicit so the same handler can run against LocalStack
+    // in local development and AWS S3 in deployed environments.
+    s3Config: {
+      region: 'us-east-1',
+      endpoint: 'http://127.0.0.1:4566',
+      forcePathStyle: true,
+      credentials: {
+        accessKeyId: 'test',
+        secretAccessKey: 'test' //pragma: allowlist secret
+      }
+    }
+  })
+
+  const statusArtifact = await s3Client.getJson(bucket, getValidationStatusKey(formId))
+
   console.log({
     hasStartDateLabel: normalizedParsedText.includes('START DATE'),
     hasJanuary1: parsed.rawText.includes('January 1'),
@@ -153,7 +174,8 @@ async function main(): Promise<void> {
     llmModel: validationResponse.model,
     llmResponsePreview: validationResponse.rawText.slice(0, 4000),
     parsedValidationCount: parsedValidation.results.length,
-    parsedValidationPreview: parsedValidation.results
+    parsedValidationPreview: parsedValidation.results,
+    statusArtifact
   })
 }
 

@@ -72,3 +72,15 @@ export type {
   ValidationHandlerResult
 } from './handlers'
 export { validationHandler } from './handlers'
+
+// Status
+export type {
+  ValidationPipelineStage,
+  ValidationStatusArtifact
+} from './status'
+export {
+  buildCompletedValidationStatusArtifact,
+  buildFailedValidationStatusArtifact,
+  buildValidationStatusArtifact,
+  getValidationStatusKey
+} from './status'
