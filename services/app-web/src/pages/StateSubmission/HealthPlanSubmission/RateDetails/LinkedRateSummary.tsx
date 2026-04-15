@@ -11,8 +11,9 @@ import { formatDocumentsForGQL } from '../../../../formHelpers/formatters'
 import {
     ErrorOrLoadingPage,
     handleAndReturnErrorState,
-} from '../../SharedSubmissionComponents/ErrorOrLoadingPage'
+} from '../../SharedSubmissionComponents'
 import { ApolloError } from '@apollo/client'
+import { formattedProgramNames } from '../../../../formHelpers'
 
 export const LinkedRateSummary = ({
     rateForm,
@@ -57,11 +58,10 @@ export const LinkedRateSummary = ({
                     <DataDetail
                         id="ratePrograms"
                         label="Rates this rate certification covers"
-                        children={statePrograms
-                            .filter((p) =>
-                                rateForm.rateProgramIDs.includes(p.id)
-                            )
-                            .map((p) => p.name)}
+                        children={formattedProgramNames(
+                            statePrograms,
+                            rateForm.rateProgramIDs
+                        )}
                     />
                     <DataDetail
                         id="ratingPeriod"

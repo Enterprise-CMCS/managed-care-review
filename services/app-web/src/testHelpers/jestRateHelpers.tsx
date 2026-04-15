@@ -47,11 +47,11 @@ const fillOutIndexRate = async (screen: Screen, index: number) => {
     // add programs
     const combobox = await withinTargetRateCert.findByRole('combobox')
     selectEvent.openMenu(combobox)
-    await selectEvent.select(combobox, 'SNBC Rate Program')
+    await selectEvent.select(combobox, 'SNBC')
     selectEvent.openMenu(combobox)
     await selectEvent.select(combobox, 'PMAP')
     expect(
-        withinTargetRateCert.getByLabelText('Remove SNBC Rate Program')
+        withinTargetRateCert.getByLabelText('Remove SNBC')
     ).toBeInTheDocument()
     expect(
         withinTargetRateCert.getByLabelText('Remove PMAP')

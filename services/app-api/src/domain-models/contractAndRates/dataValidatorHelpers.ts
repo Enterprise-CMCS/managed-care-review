@@ -255,22 +255,42 @@ const parseContract = (
     // to make it part of the core zod parsing.
     const contractWithProgramsParser = contractParser.superRefine(
         (contract, ctx) => {
-            const contractProgramsIDs = new Set(
+            // collect all contract and rate program IDs for validation
+            const allProgramIDs = new Set<string>(
                 contract.draftRevision.formData.programIDs
             )
-            const allProgramIDs = contract.draftRates.reduce((acc, rate) => {
-                const rateFormData = rate.draftRevision.formData
-                const rateProgramIDs = rateFormData.rateProgramIDs.concat(
-                    rateFormData.deprecatedRateProgramIDs
+            for (const rate of contract.draftRates) {
+                if (rate.parentContractID !== contract.id) {
+                    continue
+                }
+                rate.draftRevision.formData.rateProgramIDs.forEach((id) =>
+                    allProgramIDs.add(id)
                 )
-                return new Set([...acc, ...rateProgramIDs])
-            }, contractProgramsIDs)
+            }
 
+            // find programs full data using collected ids
             const findResult = store.findPrograms(stateCode, [...allProgramIDs])
             if (findResult instanceof Error) {
                 ctx.addIssue({
                     code: 'custom',
                     message: findResult.message,
+                })
+                return
+            }
+
+            // filter out any deprecated programs
+            const deprecatedMatches = findResult.filter(
+                (program) => program.isDeprecated
+            )
+
+            // add parsing error message for deprecated programs
+            if (deprecatedMatches.length > 0) {
+                const names = deprecatedMatches
+                    .map((p) => `${p.name} (${p.id})`)
+                    .join(', ')
+                ctx.addIssue({
+                    code: 'custom',
+                    message: `Submission contains deprecated program(s): ${names}`,
                 })
             }
         }
@@ -305,6 +325,20 @@ const parseEQROContract = (
                     code: 'custom',
                     message: findResult.message,
                 })
+            } else {
+                // Reject EQRO submission if any selected program has been deprecated in statePrograms.json
+                const deprecatedMatches = findResult.filter(
+                    (program) => program.isDeprecated
+                )
+                if (deprecatedMatches.length > 0) {
+                    const names = deprecatedMatches
+                        .map((p) => `${p.name} (${p.id})`)
+                        .join(', ')
+                    ctx.addIssue({
+                        code: 'custom',
+                        message: `Submission contains deprecated program(s): ${names}`,
+                    })
+                }
             }
 
             const hasRates = contract.draftRates && contract.draftRates.length
