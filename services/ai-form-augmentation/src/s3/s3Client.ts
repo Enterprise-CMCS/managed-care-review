@@ -1,6 +1,6 @@
 import { GetObjectCommand, NoSuchKey, PutObjectCommand, S3Client } from "@aws-sdk/client-s3";
 
-type ArtifactS3ClientConfig = {
+export type ArtifactS3ClientConfig = {
   region: string
   endpoint?: string
   forcePathStyle?: boolean

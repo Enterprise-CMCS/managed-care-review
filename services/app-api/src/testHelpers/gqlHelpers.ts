@@ -122,7 +122,15 @@ const constructTestPostgresServer = async (opts?: {
         ldService,
         s3,
         'https://localhost:3000',
-        localDocumentZip
+        localDocumentZip,
+        // Tests that build the resolver map do not invoke the validation Lambda,
+        // but configureResolvers now requires the runtime config shape.
+        {
+            validationFunctionName: 'test-validation-function',
+            artifactBucket: 'test-ai-validation-artifacts',
+            region: 'us-east-1',
+            useLocalS3: true,
+        }
     )
 
     const server = new ApolloServer({

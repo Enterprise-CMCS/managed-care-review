@@ -70,6 +70,10 @@ import {
 import type { DocumentZipService } from '../zip/generateZip'
 import { fetchDocumentResolver } from './documents/fetchDocument'
 import { generateUploadURLResolver } from './documents/generateUploadURL'
+import {
+    triggerValidationResolver,
+    type TriggerValidationResolverConfig,
+} from './validation/triggerValidation'
 
 export function configureResolvers(
     store: Store,
@@ -77,7 +81,8 @@ export function configureResolvers(
     launchDarkly: LDService,
     s3Client: S3ClientT,
     applicationEndpoint: string,
-    documentZip: DocumentZipService
+    documentZip: DocumentZipService,
+    validationConfig: TriggerValidationResolverConfig
 ): Resolvers {
     const resolvers: Resolvers = {
         Date: GraphQLDate,
@@ -142,6 +147,10 @@ export function configureResolvers(
             deleteOauthClient: deleteOauthClientResolver(store),
             updateOauthClient: updateOauthClientResolver(store),
             generateUploadURL: generateUploadURLResolver(store, s3Client),
+            triggerValidation: triggerValidationResolver(
+                store,
+                validationConfig
+            ),
         },
         User: {
             // resolveType is required to differentiate Unions

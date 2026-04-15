@@ -284,6 +284,10 @@ async function initializeGQLHandler(): Promise<Handler> {
     const s3DocumentsBucket = process.env.VITE_APP_S3_DOCUMENTS_BUCKET
     const s3QABucket = process.env.VITE_APP_S3_QA_BUCKET
     const region = process.env.REGION
+
+    const validationFunctionName = process.env.VALIDATION_FUNCTION_NAME
+    const aiValidationArtifactBucket = process.env.AI_VALIDATION_ARTIFACT_BUCKET
+
     // START Assert configuration is valid
     if (emailerMode !== 'LOCAL' && emailerMode !== 'SES')
         throw new Error(
@@ -327,6 +331,21 @@ async function initializeGQLHandler(): Promise<Handler> {
 
     if (region === undefined) {
         throw new Error('Configuration error: region is required')
+    }
+
+    // The GraphQL trigger path needs both the target Lambda name and the AI
+    // artifact bucket because this ticket only starts the worker. Status and
+    // result reads are handled separately by later resolver tickets.
+    if (validationFunctionName === undefined) {
+        throw new Error(
+            'Configuration Error: VALIDATION_FUNCTION_NAME is required'
+        )
+    }
+
+    if (aiValidationArtifactBucket === undefined) {
+        throw new Error(
+            'Configuration Error: AI_VALIDATION_ARTIFACT_BUCKET is required'
+        )
     }
 
     // END
@@ -466,6 +485,8 @@ async function initializeGQLHandler(): Promise<Handler> {
         emailerMode,
         otelCollectorUrl,
         parameterStoreMode,
+        validationFunctionName,
+        aiValidationArtifactBucket,
     }
 
     if (authMode === 'LOCAL') {
@@ -476,6 +497,15 @@ async function initializeGQLHandler(): Promise<Handler> {
 
     console.info('Running With Config: ', config)
 
+    // GraphQL owns the orchestration config for the validation worker, while
+    // the worker Lambda remains responsible for executing the actual pipeline.
+    const validationConfig = {
+        validationFunctionName,
+        artifactBucket: aiValidationArtifactBucket,
+        region,
+        useLocalS3: authMode === 'LOCAL',
+    }
+
     // Resolvers are defined and tested in the resolvers package
     const resolvers = configureResolvers(
         store,
@@ -483,7 +513,8 @@ async function initializeGQLHandler(): Promise<Handler> {
         launchDarkly,
         s3Client,
         applicationEndpoint,
-        documentZip
+        documentZip,
+        validationConfig
     )
 
     const userFetcher =

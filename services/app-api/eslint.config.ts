@@ -8,11 +8,13 @@ export default tseslint.config([
         ignores: [
             'gen/*',
             'src/gen/**',
+            'src/generated/**',
             '*.config.js',
             '**/esbuild.config.js',
             '.esbuild/**',
             '.local-build/**',
             '.serverless/**',
+            '.webpack/**',
             'coverage/**',
         ],
     },

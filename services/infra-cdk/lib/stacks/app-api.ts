@@ -301,6 +301,16 @@ export class AppApiStack extends BaseStack {
             }
         )
 
+        // These settings are only needed by the GraphQL entrypoint because it
+        // is responsible for triggering the worker. Keeping them out of the
+        // shared lambda environment avoids implying every function depends on
+        // the AI validation integration.
+        const graphqlEnvironment = {
+            ...environment,
+            VALIDATION_FUNCTION_NAME: this.validationFunction.functionName,
+            AI_VALIDATION_ARTIFACT_BUCKET: 'ai-form-augmentation-artifacts',
+        }
+
         // OTEL function needs the ADOT layer and collector.yml file
 
         this.otelFunction = new NodejsFunction(this, 'otelFunction', {
@@ -574,7 +584,7 @@ export class AppApiStack extends BaseStack {
             {
                 timeout: Duration.seconds(30), // Extended timeout for GraphQL operations
                 memorySize: 1024,
-                environment,
+                environment: graphqlEnvironment,
                 role,
                 layers: [this.otelLayer],
                 vpc: this.vpc,
@@ -604,6 +614,10 @@ export class AppApiStack extends BaseStack {
                 },
             }
         )
+
+        // Make the GraphQL -> validation-worker relationship explicit in CDK
+        // even though the shared role currently allows broad Lambda invocation.
+        this.validationFunction.grantInvoke(this.graphqlFunction)
 
         // Create API Gateway resources and methods first
         this.setupApiGatewayRoutes(this.apiGateway)

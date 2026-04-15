@@ -519,6 +519,17 @@ type Mutation {
     - DB_ERROR
     """
     generateUploadURL(input: GenerateUploadURLInput!): GenerateUploadURLPayload!
+
+    triggerValidation(input: TriggerValidationInput!): TriggerValidationPayload!
+}
+
+input TriggerValidationInput {
+    contractID: ID!
+}
+
+type TriggerValidationPayload {
+    ok: Boolean!
+    artifactVersion: String!
 }
 
 input CreateContractInput {

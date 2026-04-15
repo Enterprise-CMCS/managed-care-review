@@ -389,6 +389,9 @@ importers:
       '@aws-sdk/client-cognito-identity-provider':
         specifier: ^3.1027.0
         version: 3.1027.0
+      '@aws-sdk/client-lambda':
+        specifier: ^3.1027.0
+        version: 3.1027.0
       '@aws-sdk/client-rds':
         specifier: ^3.1027.0
         version: 3.1027.0
@@ -563,7 +566,7 @@ importers:
         version: 10.1.8(eslint@9.34.0(jiti@2.6.1))
       eslint-plugin-jest:
         specifier: ^29.15.1
-        version: 29.15.1(@typescript-eslint/eslint-plugin@8.58.1(@typescript-eslint/parser@8.37.0(eslint@9.34.0(jiti@2.6.1))(typescript@5.9.3))(eslint@9.34.0(jiti@2.6.1))(typescript@5.9.3))(eslint@9.34.0(jiti@2.6.1))(jest@30.2.0(@types/node@25.5.2)(babel-plugin-macros@3.1.0))(typescript@5.9.3)
+        version: 29.15.1(@typescript-eslint/eslint-plugin@8.58.1(@typescript-eslint/parser@8.37.0(eslint@9.34.0(jiti@2.6.1))(typescript@5.9.3))(eslint@9.34.0(jiti@2.6.1))(typescript@5.9.3))(eslint@9.34.0(jiti@2.6.1))(jest@30.2.0(@types/node@25.5.0)(babel-plugin-macros@3.1.0)(ts-node@10.9.2(@types/node@25.5.0)(typescript@5.9.3)))(typescript@5.9.3)
       eslint-plugin-prettier:
         specifier: ^5.5.4
         version: 5.5.4(@types/eslint@9.6.1)(eslint-config-prettier@10.1.8(eslint@9.34.0(jiti@2.6.1)))(eslint@9.34.0(jiti@2.6.1))(prettier@3.8.1)
@@ -572,7 +575,7 @@ importers:
         version: 11.3.3
       jest:
         specifier: ^30.2.0
-        version: 30.2.0(@types/node@25.5.2)(babel-plugin-macros@3.1.0)
+        version: 30.2.0(@types/node@25.5.0)(babel-plugin-macros@3.1.0)(ts-node@10.9.2(@types/node@25.5.0)(typescript@5.9.3))
       jiti:
         specifier: ^2.6.1
         version: 2.6.1
@@ -596,7 +599,7 @@ importers:
         version: 8.56.0(eslint@9.34.0(jiti@2.6.1))(typescript@5.9.3)
       vitest:
         specifier: ^3.2.4
-        version: 3.2.4(@types/node@25.5.2)(@vitest/ui@3.2.4)(jiti@2.6.1)(jsdom@28.0.0)(sass@1.77.2)(terser@5.46.1)(tsx@4.21.0)(yaml@2.8.3)
+        version: 3.2.4(@types/node@25.5.0)(@vitest/ui@3.2.4)(jiti@2.6.1)(jsdom@28.0.0)(sass@1.77.2)(terser@5.46.1)(tsx@4.21.0)(yaml@2.8.3)
 
   services/app-graphql:
     dependencies:
@@ -889,7 +892,7 @@ importers:
         version: 2.32.0(@typescript-eslint/parser@8.37.0(eslint@9.34.0(jiti@2.6.1))(typescript@5.9.3))(eslint@9.34.0(jiti@2.6.1))
       eslint-plugin-jest:
         specifier: ^29.15.1
-        version: 29.15.1(@typescript-eslint/eslint-plugin@8.58.1(@typescript-eslint/parser@8.37.0(eslint@9.34.0(jiti@2.6.1))(typescript@5.9.3))(eslint@9.34.0(jiti@2.6.1))(typescript@5.9.3))(eslint@9.34.0(jiti@2.6.1))(jest@30.2.0(@types/node@25.5.0)(babel-plugin-macros@3.1.0))(typescript@5.9.3)
+        version: 29.15.1(@typescript-eslint/eslint-plugin@8.58.1(@typescript-eslint/parser@8.37.0(eslint@9.34.0(jiti@2.6.1))(typescript@5.9.3))(eslint@9.34.0(jiti@2.6.1))(typescript@5.9.3))(eslint@9.34.0(jiti@2.6.1))(jest@30.2.0(@types/node@25.5.0)(babel-plugin-macros@3.1.0)(ts-node@10.9.2(@types/node@25.5.0)(typescript@5.9.3)))(typescript@5.9.3)
       eslint-plugin-jsx-a11y:
         specifier: ^6.10.2
         version: 6.10.2(eslint@9.34.0(jiti@2.6.1))
@@ -1119,6 +1122,12 @@ importers:
       typescript-eslint:
         specifier: ^8.56.0
         version: 8.56.0(eslint@9.34.0(jiti@2.6.1))(typescript@5.9.3)
+
+  services/infra-cdk/cdk.out/asset.fb0f7b05ed12a45fda15511b0172c721d38e44fc33f13589488c4f86b7827355:
+    dependencies:
+      prisma:
+        specifier: ^7.0.0
+        version: 7.4.2(@types/react@18.3.3)(magicast@0.3.5)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(typescript@5.9.3)
 
   services/local-launch-darkly:
     dependencies:
@@ -21060,14 +21069,6 @@ snapshots:
     optionalDependencies:
       vite: 7.2.7(@types/node@25.5.0)(jiti@2.6.1)(sass@1.77.2)(terser@5.46.1)(tsx@4.21.0)(yaml@2.8.3)
 
-  '@vitest/mocker@3.2.4(vite@7.2.7(@types/node@25.5.2)(jiti@2.6.1)(sass@1.77.2)(terser@5.46.1)(tsx@4.21.0)(yaml@2.8.3))':
-    dependencies:
-      '@vitest/spy': 3.2.4
-      estree-walker: 3.0.3
-      magic-string: 0.30.21
-    optionalDependencies:
-      vite: 7.2.7(@types/node@25.5.2)(jiti@2.6.1)(sass@1.77.2)(terser@5.46.1)(tsx@4.21.0)(yaml@2.8.3)
-
   '@vitest/pretty-format@3.2.4':
     dependencies:
       tinyrainbow: 2.0.0
@@ -23365,28 +23366,6 @@ snapshots:
     transitivePeerDependencies:
       - supports-color
 
-  eslint-plugin-jest@29.15.1(@typescript-eslint/eslint-plugin@8.58.1(@typescript-eslint/parser@8.37.0(eslint@9.34.0(jiti@2.6.1))(typescript@5.9.3))(eslint@9.34.0(jiti@2.6.1))(typescript@5.9.3))(eslint@9.34.0(jiti@2.6.1))(jest@30.2.0(@types/node@25.5.0)(babel-plugin-macros@3.1.0))(typescript@5.9.3):
-    dependencies:
-      '@typescript-eslint/utils': 8.58.0(eslint@9.34.0(jiti@2.6.1))(typescript@5.9.3)
-      eslint: 9.34.0(jiti@2.6.1)
-    optionalDependencies:
-      '@typescript-eslint/eslint-plugin': 8.58.1(@typescript-eslint/parser@8.37.0(eslint@9.34.0(jiti@2.6.1))(typescript@5.9.3))(eslint@9.34.0(jiti@2.6.1))(typescript@5.9.3)
-      jest: 30.2.0(@types/node@25.5.0)(babel-plugin-macros@3.1.0)
-      typescript: 5.9.3
-    transitivePeerDependencies:
-      - supports-color
-
-  eslint-plugin-jest@29.15.1(@typescript-eslint/eslint-plugin@8.58.1(@typescript-eslint/parser@8.37.0(eslint@9.34.0(jiti@2.6.1))(typescript@5.9.3))(eslint@9.34.0(jiti@2.6.1))(typescript@5.9.3))(eslint@9.34.0(jiti@2.6.1))(jest@30.2.0(@types/node@25.5.2)(babel-plugin-macros@3.1.0))(typescript@5.9.3):
-    dependencies:
-      '@typescript-eslint/utils': 8.58.0(eslint@9.34.0(jiti@2.6.1))(typescript@5.9.3)
-      eslint: 9.34.0(jiti@2.6.1)
-    optionalDependencies:
-      '@typescript-eslint/eslint-plugin': 8.58.1(@typescript-eslint/parser@8.37.0(eslint@9.34.0(jiti@2.6.1))(typescript@5.9.3))(eslint@9.34.0(jiti@2.6.1))(typescript@5.9.3)
-      jest: 30.2.0(@types/node@25.5.2)(babel-plugin-macros@3.1.0)
-      typescript: 5.9.3
-    transitivePeerDependencies:
-      - supports-color
-
   eslint-plugin-jsx-a11y@6.10.2(eslint@9.34.0(jiti@2.6.1)):
     dependencies:
       aria-query: 5.3.2
@@ -24847,26 +24826,6 @@ snapshots:
       - babel-plugin-macros
       - supports-color
 
-  jest-cli@30.2.0(@types/node@25.5.0)(babel-plugin-macros@3.1.0):
-    dependencies:
-      '@jest/core': 30.2.0(babel-plugin-macros@3.1.0)(ts-node@10.9.2(@types/node@25.5.0)(typescript@5.9.3))
-      '@jest/test-result': 30.2.0
-      '@jest/types': 30.2.0
-      chalk: 4.1.2
-      exit-x: 0.2.2
-      import-local: 3.2.0
-      jest-config: 30.2.0(@types/node@25.5.0)(babel-plugin-macros@3.1.0)(ts-node@10.9.2(@types/node@25.5.0)(typescript@5.9.3))
-      jest-util: 30.2.0
-      jest-validate: 30.2.0
-      yargs: 17.7.2
-    transitivePeerDependencies:
-      - '@types/node'
-      - babel-plugin-macros
-      - esbuild-register
-      - supports-color
-      - ts-node
-    optional: true
-
   jest-cli@30.2.0(@types/node@25.5.0)(babel-plugin-macros@3.1.0)(ts-node@10.9.2(@types/node@25.5.0)(typescript@5.9.3)):
     dependencies:
       '@jest/core': 30.2.0(babel-plugin-macros@3.1.0)(ts-node@10.9.2(@types/node@25.5.0)(typescript@5.9.3))
@@ -24876,25 +24835,6 @@ snapshots:
       exit-x: 0.2.2
       import-local: 3.2.0
       jest-config: 30.2.0(@types/node@25.5.0)(babel-plugin-macros@3.1.0)(ts-node@10.9.2(@types/node@25.5.0)(typescript@5.9.3))
-      jest-util: 30.2.0
-      jest-validate: 30.2.0
-      yargs: 17.7.2
-    transitivePeerDependencies:
-      - '@types/node'
-      - babel-plugin-macros
-      - esbuild-register
-      - supports-color
-      - ts-node
-
-  jest-cli@30.2.0(@types/node@25.5.2)(babel-plugin-macros@3.1.0):
-    dependencies:
-      '@jest/core': 30.2.0(babel-plugin-macros@3.1.0)(ts-node@10.9.2(@types/node@25.5.0)(typescript@5.9.3))
-      '@jest/test-result': 30.2.0
-      '@jest/types': 30.2.0
-      chalk: 4.1.2
-      exit-x: 0.2.2
-      import-local: 3.2.0
-      jest-config: 30.2.0(@types/node@25.5.2)(babel-plugin-macros@3.1.0)
       jest-util: 30.2.0
       jest-validate: 30.2.0
       yargs: 17.7.2
@@ -24934,38 +24874,6 @@ snapshots:
     optionalDependencies:
       '@types/node': 25.5.0
       ts-node: 10.9.2(@types/node@25.5.0)(typescript@5.9.3)
-    transitivePeerDependencies:
-      - babel-plugin-macros
-      - supports-color
-
-  jest-config@30.2.0(@types/node@25.5.2)(babel-plugin-macros@3.1.0):
-    dependencies:
-      '@babel/core': 7.29.0
-      '@jest/get-type': 30.1.0
-      '@jest/pattern': 30.0.1
-      '@jest/test-sequencer': 30.2.0
-      '@jest/types': 30.2.0
-      babel-jest: 30.2.0(@babel/core@7.29.0)
-      chalk: 4.1.2
-      ci-info: 4.4.0
-      deepmerge: 4.3.1
-      glob: 10.5.0
-      graceful-fs: 4.2.11
-      jest-circus: 30.2.0(babel-plugin-macros@3.1.0)
-      jest-docblock: 30.2.0
-      jest-environment-node: 30.2.0
-      jest-regex-util: 30.0.1
-      jest-resolve: 30.2.0
-      jest-runner: 30.2.0
-      jest-util: 30.2.0
-      jest-validate: 30.2.0
-      micromatch: 4.0.8
-      parse-json: 5.2.0
-      pretty-format: 30.2.0
-      slash: 3.0.0
-      strip-json-comments: 3.1.1
-    optionalDependencies:
-      '@types/node': 25.5.2
     transitivePeerDependencies:
       - babel-plugin-macros
       - supports-color
@@ -25253,39 +25161,12 @@ snapshots:
       merge-stream: 2.0.0
       supports-color: 8.1.1
 
-  jest@30.2.0(@types/node@25.5.0)(babel-plugin-macros@3.1.0):
-    dependencies:
-      '@jest/core': 30.2.0(babel-plugin-macros@3.1.0)(ts-node@10.9.2(@types/node@25.5.0)(typescript@5.9.3))
-      '@jest/types': 30.2.0
-      import-local: 3.2.0
-      jest-cli: 30.2.0(@types/node@25.5.0)(babel-plugin-macros@3.1.0)
-    transitivePeerDependencies:
-      - '@types/node'
-      - babel-plugin-macros
-      - esbuild-register
-      - supports-color
-      - ts-node
-    optional: true
-
   jest@30.2.0(@types/node@25.5.0)(babel-plugin-macros@3.1.0)(ts-node@10.9.2(@types/node@25.5.0)(typescript@5.9.3)):
     dependencies:
       '@jest/core': 30.2.0(babel-plugin-macros@3.1.0)(ts-node@10.9.2(@types/node@25.5.0)(typescript@5.9.3))
       '@jest/types': 30.2.0
       import-local: 3.2.0
       jest-cli: 30.2.0(@types/node@25.5.0)(babel-plugin-macros@3.1.0)(ts-node@10.9.2(@types/node@25.5.0)(typescript@5.9.3))
-    transitivePeerDependencies:
-      - '@types/node'
-      - babel-plugin-macros
-      - esbuild-register
-      - supports-color
-      - ts-node
-
-  jest@30.2.0(@types/node@25.5.2)(babel-plugin-macros@3.1.0):
-    dependencies:
-      '@jest/core': 30.2.0(babel-plugin-macros@3.1.0)(ts-node@10.9.2(@types/node@25.5.0)(typescript@5.9.3))
-      '@jest/types': 30.2.0
-      import-local: 3.2.0
-      jest-cli: 30.2.0(@types/node@25.5.2)(babel-plugin-macros@3.1.0)
     transitivePeerDependencies:
       - '@types/node'
       - babel-plugin-macros
@@ -28704,27 +28585,6 @@ snapshots:
       - tsx
       - yaml
 
-  vite-node@3.2.4(@types/node@25.5.2)(jiti@2.6.1)(sass@1.77.2)(terser@5.46.1)(tsx@4.21.0)(yaml@2.8.3):
-    dependencies:
-      cac: 6.7.14
-      debug: 4.4.3(supports-color@5.5.0)
-      es-module-lexer: 1.7.0
-      pathe: 2.0.3
-      vite: 7.3.2(@types/node@25.5.2)(jiti@2.6.1)(sass@1.77.2)(terser@5.46.1)(tsx@4.21.0)(yaml@2.8.3)
-    transitivePeerDependencies:
-      - '@types/node'
-      - jiti
-      - less
-      - lightningcss
-      - sass
-      - sass-embedded
-      - stylus
-      - sugarss
-      - supports-color
-      - terser
-      - tsx
-      - yaml
-
   vite-plugin-graphql-loader@4.0.4:
     dependencies:
       graphql: 16.13.1
@@ -28769,23 +28629,6 @@ snapshots:
       tsx: 4.21.0
       yaml: 2.8.3
 
-  vite@7.2.7(@types/node@25.5.2)(jiti@2.6.1)(sass@1.77.2)(terser@5.46.1)(tsx@4.21.0)(yaml@2.8.3):
-    dependencies:
-      esbuild: 0.25.12
-      fdir: 6.5.0(picomatch@4.0.3)
-      picomatch: 4.0.3
-      postcss: 8.5.6
-      rollup: 4.53.3
-      tinyglobby: 0.2.15
-    optionalDependencies:
-      '@types/node': 25.5.2
-      fsevents: 2.3.3
-      jiti: 2.6.1
-      sass: 1.77.2
-      terser: 5.46.1
-      tsx: 4.21.0
-      yaml: 2.8.3
-
   vite@7.3.2(@types/node@25.5.0)(jiti@2.6.1)(sass@1.77.2)(terser@5.46.1)(tsx@4.21.0)(yaml@2.8.3):
     dependencies:
       esbuild: 0.27.7
@@ -28796,23 +28639,6 @@ snapshots:
       tinyglobby: 0.2.15
     optionalDependencies:
       '@types/node': 25.5.0
-      fsevents: 2.3.3
-      jiti: 2.6.1
-      sass: 1.77.2
-      terser: 5.46.1
-      tsx: 4.21.0
-      yaml: 2.8.3
-
-  vite@7.3.2(@types/node@25.5.2)(jiti@2.6.1)(sass@1.77.2)(terser@5.46.1)(tsx@4.21.0)(yaml@2.8.3):
-    dependencies:
-      esbuild: 0.27.7
-      fdir: 6.5.0(picomatch@4.0.4)
-      picomatch: 4.0.4
-      postcss: 8.5.8
-      rollup: 4.60.1
-      tinyglobby: 0.2.15
-    optionalDependencies:
-      '@types/node': 25.5.2
       fsevents: 2.3.3
       jiti: 2.6.1
       sass: 1.77.2
@@ -28891,49 +28717,6 @@ snapshots:
     optionalDependencies:
       '@types/node': 25.5.0
       '@vitest/ui': 4.0.18(vitest@3.2.4)
-      jsdom: 28.0.0
-    transitivePeerDependencies:
-      - jiti
-      - less
-      - lightningcss
-      - msw
-      - sass
-      - sass-embedded
-      - stylus
-      - sugarss
-      - supports-color
-      - terser
-      - tsx
-      - yaml
-
-  vitest@3.2.4(@types/node@25.5.2)(@vitest/ui@3.2.4)(jiti@2.6.1)(jsdom@28.0.0)(sass@1.77.2)(terser@5.46.1)(tsx@4.21.0)(yaml@2.8.3):
-    dependencies:
-      '@types/chai': 5.2.3
-      '@vitest/expect': 3.2.4
-      '@vitest/mocker': 3.2.4(vite@7.2.7(@types/node@25.5.2)(jiti@2.6.1)(sass@1.77.2)(terser@5.46.1)(tsx@4.21.0)(yaml@2.8.3))
-      '@vitest/pretty-format': 3.2.4
-      '@vitest/runner': 3.2.4
-      '@vitest/snapshot': 3.2.4
-      '@vitest/spy': 3.2.4
-      '@vitest/utils': 3.2.4
-      chai: 5.3.3
-      debug: 4.4.3(supports-color@5.5.0)
-      expect-type: 1.3.0
-      magic-string: 0.30.21
-      pathe: 2.0.3
-      picomatch: 4.0.3
-      std-env: 3.10.0
-      tinybench: 2.9.0
-      tinyexec: 0.3.2
-      tinyglobby: 0.2.15
-      tinypool: 1.1.1
-      tinyrainbow: 2.0.0
-      vite: 7.2.7(@types/node@25.5.2)(jiti@2.6.1)(sass@1.77.2)(terser@5.46.1)(tsx@4.21.0)(yaml@2.8.3)
-      vite-node: 3.2.4(@types/node@25.5.2)(jiti@2.6.1)(sass@1.77.2)(terser@5.46.1)(tsx@4.21.0)(yaml@2.8.3)
-      why-is-node-running: 2.3.0
-    optionalDependencies:
-      '@types/node': 25.5.2
-      '@vitest/ui': 3.2.4(vitest@3.2.4)
       jsdom: 28.0.0
     transitivePeerDependencies:
       - jiti
