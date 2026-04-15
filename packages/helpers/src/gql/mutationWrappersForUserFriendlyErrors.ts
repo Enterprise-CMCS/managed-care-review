@@ -1,4 +1,4 @@
-import type { MutationFunction } from '@apollo/client'
+import type { useMutation } from '@apollo/client/react'
 import {
     FetchContractWithQuestionsQuery,
     FetchContractWithQuestionsDocument,
@@ -33,12 +33,14 @@ import {
     ApproveContractMutation,
     ApproveContractMutationVariables,
 } from '../gen/gqlClient'
-import { GraphQLErrors } from '@apollo/client/errors'
+import type { GraphQLFormattedError } from 'graphql'
+import { CombinedGraphQLErrors } from '@apollo/client/errors'
 
 import { recordJSException } from '@mc-review/otel'
 import { handleGQLErrors as handleGQLErrorLogging } from './apolloErrors'
-import { ApolloError } from '@apollo/client/errors'
 import { ERROR_MESSAGES } from '@mc-review/constants'
+
+type GraphQLErrors = ReadonlyArray<GraphQLFormattedError>
 
 /*
 Adds user friendly/facing error messages to GraphQL mutations.
@@ -68,7 +70,7 @@ const divisionToIndexQuestionDivision = (
     `${division.toUpperCase()}Questions` as IndexQuestionDivisions
 
 export const handleGraphQLErrorsAndAddUserFacingMessages = (
-    error: ApolloError | Error,
+    error: Error,
     mutation: MutationType
 ) => {
     let message
@@ -88,12 +90,10 @@ export const handleGraphQLErrorsAndAddUserFacingMessages = (
         cause: {},
     }
 
-    // Extract GraphQL errors from ApolloError
-    let graphQLErrors: GraphQLErrors = []
-
-    if (error instanceof ApolloError && error.graphQLErrors) {
-        graphQLErrors = error.graphQLErrors
-    }
+    // Extract GraphQL errors from the v4 CombinedGraphQLErrors class
+    const graphQLErrors: GraphQLErrors = CombinedGraphQLErrors.is(error)
+        ? error.errors
+        : []
 
     if (graphQLErrors.length > 0) {
         handleGQLErrorLogging(graphQLErrors)
@@ -128,7 +128,7 @@ export const handleGraphQLErrorsAndAddUserFacingMessages = (
 }
 
 export const unlockMutationWrapper = async (
-    unlockContract: MutationFunction<UnlockContractMutation, UnlockContractMutationVariables>,
+    unlockContract: useMutation.MutationFunction<UnlockContractMutation, UnlockContractMutationVariables>,
     id: string,
     unlockedReason: string
 ): Promise<Partial<UnlockedContract> | GraphQLErrors | Error> => {
@@ -159,7 +159,7 @@ export const unlockMutationWrapper = async (
 }
 
 export const submitMutationWrapper = async (
-    submitContract: MutationFunction<SubmitContractMutation, SubmitContractMutationVariables>,
+    submitContract: useMutation.MutationFunction<SubmitContractMutation, SubmitContractMutationVariables>,
     id: string,
     submittedReason?: string
 ): Promise<Partial<Contract> | GraphQLErrors | Error> => {
@@ -195,7 +195,7 @@ export const submitMutationWrapper = async (
 }
 
 export const approveMutationWrapper = async (
-    approveContract: MutationFunction<ApproveContractMutation, ApproveContractMutationVariables>,
+    approveContract: useMutation.MutationFunction<ApproveContractMutation, ApproveContractMutationVariables>,
     id: string,
     dateApprovalReleasedToState: string
 ): Promise<Partial<Contract> | GraphQLErrors | Error> => {
@@ -228,7 +228,7 @@ export const approveMutationWrapper = async (
 }
 
 export async function updateStateAssignmentsWrapper(
-    updateStateAssignments: MutationFunction<UpdateStateAssignmentsByStateMutation, UpdateStateAssignmentsByStateMutationVariables>,
+    updateStateAssignments: useMutation.MutationFunction<UpdateStateAssignmentsByStateMutation, UpdateStateAssignmentsByStateMutationVariables>,
     stateCode: string,
     assignedUserIDs: string[]
 ): Promise<undefined | GraphQLErrors | Error> {
@@ -311,7 +311,7 @@ export async function updateStateAssignmentsWrapper(
  * cache.evict() to force a refetch, but would then cause the loading UI to show.
  **/
 export const createContractQuestionWrapper = async (
-    createQuestion: MutationFunction<CreateContractQuestionMutation, CreateContractQuestionMutationVariables>,
+    createQuestion: useMutation.MutationFunction<CreateContractQuestionMutation, CreateContractQuestionMutationVariables>,
     input: CreateContractQuestionInput
 ): Promise<CreateContractQuestionMutation | GraphQLErrors | Error> => {
     try {
@@ -394,7 +394,7 @@ export const createContractQuestionWrapper = async (
 }
 
 export const createRateQuestionWrapper = async (
-    createQuestion: MutationFunction<CreateRateQuestionMutation, CreateRateQuestionMutationVariables>,
+    createQuestion: useMutation.MutationFunction<CreateRateQuestionMutation, CreateRateQuestionMutationVariables>,
     input: CreateRateQuestionInput
 ): Promise<CreateRateQuestionMutation | GraphQLErrors | Error> => {
     try {
@@ -488,7 +488,7 @@ export const createRateQuestionWrapper = async (
 }
 
 export const createContractResponseWrapper = async (
-    createResponse: MutationFunction<CreateContractQuestionResponseMutation, CreateContractQuestionResponseMutationVariables>,
+    createResponse: useMutation.MutationFunction<CreateContractQuestionResponseMutation, CreateContractQuestionResponseMutationVariables>,
     contractID: string,
     input: CreateQuestionResponseInput,
     division: Division
@@ -580,7 +580,7 @@ export const createContractResponseWrapper = async (
 }
 
 export const createRateQuestionResponseWrapper = async (
-    createResponse: MutationFunction<CreateRateQuestionResponseMutation, CreateRateQuestionResponseMutationVariables>,
+    createResponse: useMutation.MutationFunction<CreateRateQuestionResponseMutation, CreateRateQuestionResponseMutationVariables>,
     rateID: string,
     input: CreateQuestionResponseInput,
     division: Division
