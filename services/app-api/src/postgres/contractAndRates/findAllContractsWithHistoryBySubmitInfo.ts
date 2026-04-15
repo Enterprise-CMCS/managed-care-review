@@ -5,6 +5,7 @@ import { parseContractWithHistory } from './parseContractWithHistory'
 import { includeFullContract } from './prismaFullContractRateHelpers'
 import type { ContractOrErrorArrayType } from './findAllContractsWithHistoryByState'
 import type { ContractType } from '../../domain-models/contractAndRates'
+import { parseErrorToError } from '@mc-review/helpers'
 
 type WithLatest = {
     latestQuestionCreatedAt?: Date
@@ -361,7 +362,7 @@ async function findAllContractsWithHistoryBySubmitInfoInsideTransaction(
         return parsedWithExtras
     } catch (err) {
         console.error('PRISMA ERROR', err)
-        return err
+        return parseErrorToError(err)
     }
 }
 
@@ -384,7 +385,7 @@ async function findAllContractsWithHistoryBySubmitInfo(
         )
     } catch (err) {
         console.error('PRISMA ERROR', err)
-        return err
+        return parseErrorToError(err)
     }
 }
 

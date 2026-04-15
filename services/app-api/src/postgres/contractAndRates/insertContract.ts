@@ -6,6 +6,7 @@ import type {
 import type { ExtendedPrismaClient } from '../prismaClient'
 import { parseContractWithHistory } from './parseContractWithHistory'
 import { includeFullContract } from './prismaFullContractRateHelpers'
+import { parseErrorToError } from '@mc-review/helpers'
 
 type InsertContractArgsType = Partial<ContractFormDataType> & {
     // Certain fields are required on insert contract only
@@ -137,7 +138,7 @@ async function insertDraftContract(
         })
     } catch (err) {
         console.error('Prisma error inserting contract', err)
-        return err
+        return parseErrorToError(err)
     }
 }
 

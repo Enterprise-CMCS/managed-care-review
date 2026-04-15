@@ -5,6 +5,7 @@ import {
     UpdateDivisionAssignmentMutationVariables,
     UpdateCmsUserPayload,
 } from '../gen/gqlClient'
+import { parseErrorToError } from '../parseError'
 
 async function updateDivisionAssignment(
     updateUserMutation: MutationFunction<UpdateDivisionAssignmentMutation, UpdateDivisionAssignmentMutationVariables>,
@@ -21,7 +22,7 @@ async function updateDivisionAssignment(
 
         return user
     } catch (err) {
-        return err
+        return parseErrorToError(err)
     }
 }
 

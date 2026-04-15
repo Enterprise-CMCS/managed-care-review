@@ -9,6 +9,7 @@ import {
 } from './questionHelpers'
 import { NotFoundError } from '../postgresErrors'
 import type { ExtendedPrismaClient } from '../prismaClient'
+import { parseErrorToError } from '@mc-review/helpers'
 
 export async function insertRateQuestionResponse(
     client: ExtendedPrismaClient,
@@ -46,12 +47,13 @@ export async function insertRateQuestionResponse(
 
         return rateQuestionPrismaToDomainType(result)
     } catch (e) {
+        const parsedError = parseErrorToError(e)
         // Return a NotFoundError if prisma fails on the primary key constraint
         // An operation failed because it depends on one or more records
         // that were required but not found.
-        if (e.code === 'P2025') {
+        if ((parsedError as unknown as { code?: string }).code === 'P2025') {
             return new NotFoundError('Question was not found to respond to')
         }
-        return e
+        return parsedError
     }
 }

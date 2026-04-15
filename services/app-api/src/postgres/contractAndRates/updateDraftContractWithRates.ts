@@ -6,6 +6,7 @@ import { prismaUpdateContractFormDataFromDomain } from './prismaContractRateAdap
 import { includeFullRate } from './prismaFullContractRateHelpers'
 import type { ExtendedPrismaClient } from '../prismaClient'
 import type { UpdateContractArgsType } from './updateDraftContract'
+import { parseErrorToError } from '@mc-review/helpers'
 
 // Update the given draft
 // * can change the set of draftRates
@@ -63,7 +64,7 @@ async function updateDraftContractFormData(
         })
     } catch (err) {
         console.error('Prisma error updating contract', err)
-        return err
+        return parseErrorToError(err)
     }
 }
 

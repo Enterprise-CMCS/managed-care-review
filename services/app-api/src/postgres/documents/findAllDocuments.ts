@@ -2,6 +2,7 @@ import type { AuditDocument } from '../../domain-models'
 import { auditDocumentSchema } from '../../domain-models'
 import type { z } from 'zod'
 import type { ExtendedPrismaClient } from '../prismaClient'
+import { parseErrorToError } from '@mc-review/helpers'
 
 export async function findAllDocuments(
     client: ExtendedPrismaClient
@@ -97,7 +98,7 @@ export async function findAllDocuments(
         return validDocs
     } catch (err) {
         console.error('Error fetching documents:', err)
-        return err
+        return parseErrorToError(err)
     }
 }
 

@@ -98,8 +98,9 @@ function localLDService(baseUrl: string): LDService {
                 const flags = (await response.json()) as FeatureFlagSettings
                 return flags[args.flag] ?? defaultFeatureFlags()[args.flag]
             } catch (err) {
+                const message = err instanceof Error ? err.message : String(err)
                 console.warn(
-                    `localLDService: failed to fetch flag ${args.flag}, using default: Error:${err.message}`
+                    `localLDService: failed to fetch flag ${args.flag}, using default: Error:${message}`
                 )
                 return defaultFeatureFlags()[args.flag]
             }
@@ -115,8 +116,9 @@ function localLDService(baseUrl: string): LDService {
                 }
                 return (await response.json()) as FeatureFlagSettings
             } catch (err) {
+                const message = err instanceof Error ? err.message : String(err)
                 console.warn(
-                    `localLDService: failed to fetch flags, using defaults: Error:${err.message}`
+                    `localLDService: failed to fetch flags, using defaults: Error:${message}`
                 )
                 return defaultFeatureFlags()
             }

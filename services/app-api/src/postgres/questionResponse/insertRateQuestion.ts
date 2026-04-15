@@ -9,6 +9,7 @@ import {
     questionInclude,
     rateQuestionPrismaToDomainType,
 } from './questionHelpers'
+import { parseErrorToError } from '@mc-review/helpers'
 
 export async function insertRateQuestion(
     client: ExtendedPrismaClient,
@@ -45,6 +46,6 @@ export async function insertRateQuestion(
 
         return rateQuestionPrismaToDomainType(result)
     } catch (e) {
-        return e
+        return parseErrorToError(e)
     }
 }

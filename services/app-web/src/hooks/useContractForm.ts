@@ -14,7 +14,11 @@ import {
     UpdateContractDraftRevisionInput,
     ContractPackageSubmission,
 } from '../gen/gqlClient'
-import { wrapApolloResult, handleApolloError } from '@mc-review/helpers'
+import {
+    wrapApolloResult,
+    handleApolloError,
+    parseErrorToError,
+} from '@mc-review/helpers'
 import { recordJSException } from '@mc-review/otel'
 import { ApolloError, useMutation, useQuery } from '@apollo/client'
 import type { InterimState } from '../pages/StateSubmission/SharedSubmissionComponents'
@@ -111,11 +115,12 @@ const useContractForm = (contractID?: string): UseContractForm => {
 
             return createdSubmission
         } catch (serverError) {
+            const parsedError = parseErrorToError(serverError)
             setShowPageErrorMessage(true)
             recordJSException(
-                `StateSubmissionForm: GraphQL error reported. Error message: ${serverError.message}`
+                `StateSubmissionForm: GraphQL error reported. Error message: ${parsedError.message}`
             )
-            return new Error(serverError)
+            return parsedError
         }
     }
     const [updateFormData] = useMutation(UpdateContractDraftRevisionDocument)
@@ -170,11 +175,12 @@ const useContractForm = (contractID?: string): UseContractForm => {
             }
             return updatedSubmission
         } catch (serverError) {
+            const parsedError = parseErrorToError(serverError)
             setShowPageErrorMessage(true)
             recordJSException(
-                `StateSubmissionForm: GraphQL error reported. Error message: ${serverError.message}`
+                `StateSubmissionForm: GraphQL error reported. Error message: ${parsedError.message}`
             )
-            return new Error(serverError)
+            return parsedError
         }
     }
     const results = wrapApolloResult(

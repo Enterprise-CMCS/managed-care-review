@@ -31,7 +31,10 @@ import { useLDClient } from 'launchdarkly-react-client-sdk'
 import { featureFlags } from '@mc-review/common-code'
 import { UnlockRateButton } from '../../components/SubmissionSummarySection/RateDetailsSummarySection/UnlockRateButton'
 import { recordJSException } from '@mc-review/otel'
-import { handleApolloErrorsAndAddUserFacingMessages } from '@mc-review/helpers'
+import {
+    handleApolloErrorsAndAddUserFacingMessages,
+    parseErrorToError,
+} from '@mc-review/helpers'
 import { StatusUpdatedBanner } from '../../components/Banner'
 import { ChildrenType } from '../../components/MultiColumnGrid/MultiColumnGrid'
 import { getSubmissionPath } from '../../routeHelpers'
@@ -197,7 +200,7 @@ export const RateSummary = (): React.ReactElement => {
             }
         } catch (error) {
             return handleApolloErrorsAndAddUserFacingMessages(
-                error,
+                parseErrorToError(error),
                 'UNLOCK_RATE'
             )
         }

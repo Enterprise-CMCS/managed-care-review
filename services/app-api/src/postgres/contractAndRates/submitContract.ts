@@ -5,6 +5,7 @@ import type { PrismaTransactionType } from '../prismaTypes'
 import { submitContractAndOrRates } from './submitContractAndOrRates'
 import type { ExtendedPrismaClient } from '../prismaClient'
 import { eqroValidationAndReviewDetermination } from '@mc-review/submissions'
+import { parseErrorToError } from '@mc-review/helpers'
 
 async function submitContractInsideTransaction(
     tx: PrismaTransactionType,
@@ -184,7 +185,7 @@ async function submitContract(
         })
     } catch (err) {
         console.error('Submit Prisma Error: ', err)
-        return err
+        return parseErrorToError(err)
     }
 }
 

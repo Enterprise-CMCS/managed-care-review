@@ -3,6 +3,7 @@ import type { StrippedRateType } from '../../domain-models/contractAndRates'
 import { parseStrippedRateWithHistory } from './parseRateWithHistory'
 import { includeStrippedRate } from './prismaFullContractRateHelpers'
 import type { ExtendedPrismaClient } from '../prismaClient'
+import { parseErrorToError } from '@mc-review/helpers'
 
 type StrippedRateOrErrorType = {
     rateID: string
@@ -70,7 +71,7 @@ async function findAllRatesStripped(
             'PRISMA ERROR: Error finding all rates for dashboard',
             err
         )
-        return err
+        return parseErrorToError(err)
     }
 }
 

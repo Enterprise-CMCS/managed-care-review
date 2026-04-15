@@ -3,6 +3,7 @@ import type { ContractType } from '../../domain-models/contractAndRates'
 import { NotFoundError } from '../postgresErrors'
 import { parseContractWithHistory } from './parseContractWithHistory'
 import { includeFullContract } from './prismaFullContractRateHelpers'
+import { parseErrorToError } from '@mc-review/helpers'
 
 type ContractOrErrorType = {
     contractID: string
@@ -41,7 +42,7 @@ async function findAllContractsWithHistoryByState(
         return parsedContractsOrErrors
     } catch (err) {
         console.error('PRISMA ERROR', err)
-        return err
+        return parseErrorToError(err)
     }
 }
 

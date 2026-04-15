@@ -9,6 +9,7 @@ import {
     contractQuestionPrismaToDomainType,
     questionInclude,
 } from './questionHelpers'
+import { parseErrorToError } from '@mc-review/helpers'
 
 export async function insertContractQuestion(
     client: ExtendedPrismaClient,
@@ -46,6 +47,6 @@ export async function insertContractQuestion(
 
         return contractQuestionPrismaToDomainType(result)
     } catch (e) {
-        return e
+        return parseErrorToError(e)
     }
 }

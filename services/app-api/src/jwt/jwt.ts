@@ -1,5 +1,6 @@
 import { curry } from 'purify-ts/Function'
 import { sign, verify } from 'jsonwebtoken'
+import { parseErrorToError } from '@mc-review/helpers'
 
 interface JWTConfig {
     issuer: string
@@ -73,7 +74,7 @@ function userIDFromToken(config: JWTConfig, token: string): string | Error {
         return decoded.sub
     } catch (err) {
         console.info('Error decoding JWT', err)
-        return err
+        return parseErrorToError(err)
     }
 }
 
@@ -106,7 +107,7 @@ function validateOAuthToken(
         }
     } catch (err) {
         console.error('Error decoding OAuth JWT', err)
-        return err
+        return parseErrorToError(err)
     }
 }
 

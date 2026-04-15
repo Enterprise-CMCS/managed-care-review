@@ -10,6 +10,8 @@ import type { BucketShortName, S3BucketConfigType } from './helpers'
 
 import type { S3ClientT } from './s3Client'
 import type { S3Error } from './s3Error'
+import { isS3Error } from './s3Error'
+import { parseErrorToError } from '@mc-review/helpers'
 
 // newDeployedS3Client is used for calling S3 from app-api
 // app-api does not use amplify for interfacing with S3
@@ -43,7 +45,15 @@ export function newDeployedS3Client(
 
                 return filename
             } catch (err) {
-                if (err.code === 'NetworkingError') {
+                if (isS3Error(err)) {
+                    return err
+                }
+                if (
+                    err !== null &&
+                    typeof err === 'object' &&
+                    'code' in err &&
+                    (err as { code: unknown }).code === 'NetworkingError'
+                ) {
                     return {
                         code: 'NETWORK_ERROR',
                         message: 'Error saving file to the cloud.',
@@ -51,7 +61,10 @@ export function newDeployedS3Client(
                 }
 
                 console.info('Log: Unexpected Error putting file to S3', err)
-                return err
+                return {
+                    code: 'NETWORK_ERROR',
+                    message: parseErrorToError(err).message,
+                }
             }
         },
         getUploadURL: async (

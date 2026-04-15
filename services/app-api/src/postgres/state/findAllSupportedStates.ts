@@ -1,6 +1,7 @@
 import type { CMSUsersUnionType, StateType } from '../../domain-models'
 import { typedStatePrograms } from '@mc-review/submissions'
 import type { ExtendedPrismaClient } from '../prismaClient'
+import { parseErrorToError } from '@mc-review/helpers'
 
 // Returns postgres state info for the states that currently supported for pilot.
 // Supported states are state that have had their programs added to the statePrograms json file.
@@ -49,6 +50,6 @@ export async function findAllSupportedStates(
         }))
     } catch (err) {
         console.error(err)
-        return err
+        return parseErrorToError(err)
     }
 }
