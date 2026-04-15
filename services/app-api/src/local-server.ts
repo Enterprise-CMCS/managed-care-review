@@ -17,6 +17,7 @@ import { main as healthCheckHandler } from './handlers/health_check'
 import { main as oauthTokenHandler } from './handlers/oauth_token'
 import { main as otelProxyHandler } from './handlers/otel_proxy'
 import { main as thirdPartyAuthorizer } from './handlers/third_party_API_authorizer'
+import { parseErrorToError } from '@mc-review/helpers'
 
 const app = express()
 const router = express.Router()
@@ -152,7 +153,7 @@ async function handleLambdaResponse(
         console.error('Error handling Lambda response:', error)
         res.status(500).json({
             error: 'Internal server error',
-            message: error instanceof Error ? error.message : String(error),
+            message: parseErrorToError(error).message,
         })
     }
 }

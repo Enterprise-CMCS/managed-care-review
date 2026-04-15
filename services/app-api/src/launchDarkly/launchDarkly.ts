@@ -8,6 +8,7 @@ import type { LDClient } from '@launchdarkly/node-server-sdk'
 import { logError } from '../logger'
 import { setErrorAttributesOnActiveSpan } from '../resolvers/attributeHelper'
 import type { Span } from '@opentelemetry/api'
+import { parseErrorToError } from '@mc-review/helpers'
 
 //Set up default feature flag values used to returned data
 const defaultFeatureFlags = (): FeatureFlagSettings =>
@@ -98,9 +99,8 @@ function localLDService(baseUrl: string): LDService {
                 const flags = (await response.json()) as FeatureFlagSettings
                 return flags[args.flag] ?? defaultFeatureFlags()[args.flag]
             } catch (err) {
-                const message = err instanceof Error ? err.message : String(err)
                 console.warn(
-                    `localLDService: failed to fetch flag ${args.flag}, using default: Error:${message}`
+                    `localLDService: failed to fetch flag ${args.flag}, using default: Error:${parseErrorToError(err).message}`
                 )
                 return defaultFeatureFlags()[args.flag]
             }
@@ -116,9 +116,8 @@ function localLDService(baseUrl: string): LDService {
                 }
                 return (await response.json()) as FeatureFlagSettings
             } catch (err) {
-                const message = err instanceof Error ? err.message : String(err)
                 console.warn(
-                    `localLDService: failed to fetch flags, using defaults: Error:${message}`
+                    `localLDService: failed to fetch flags, using defaults: Error:${parseErrorToError(err).message}`
                 )
                 return defaultFeatureFlags()
             }

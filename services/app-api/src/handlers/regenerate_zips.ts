@@ -30,6 +30,7 @@ import {
     includeContractFormData,
     includeRateFormData,
 } from '../postgres/contractAndRates/prismaSharedContractRateHelpers'
+import { parseErrorToError } from '@mc-review/helpers'
 
 export type RegenerateZipsEvent = {
     contractRevisionID?: string // Optional: regenerate for specific contract revision
@@ -212,8 +213,7 @@ export const main: Handler = async (
         console.info('Zip regeneration complete', response)
         return response
     } catch (error) {
-        const errorMessage =
-            error instanceof Error ? error.message : String(error)
+        const errorMessage = parseErrorToError(error).message
         console.error('Zip regeneration failed:', errorMessage)
         response.success = false
         response.errors.push(errorMessage)
@@ -369,8 +369,7 @@ async function regenerateContractZip(
         )
         return { success: true }
     } catch (error) {
-        const errorMessage =
-            error instanceof Error ? error.message : String(error)
+        const errorMessage = parseErrorToError(error).message
         return {
             success: false,
             error: `Exception regenerating contract zip ${contractRevisionID}: ${errorMessage}`,
@@ -449,8 +448,7 @@ async function regenerateRateZip(
         )
         return { success: true }
     } catch (error) {
-        const errorMessage =
-            error instanceof Error ? error.message : String(error)
+        const errorMessage = parseErrorToError(error).message
         return {
             success: false,
             error: `Exception regenerating rate zip ${rateRevisionID}: ${errorMessage}`,

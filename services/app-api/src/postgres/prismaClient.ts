@@ -2,6 +2,7 @@ import { PrismaClient } from '../generated/client'
 import { PrismaPg } from '@prisma/adapter-pg'
 import pg from 'pg'
 import { trace, SpanStatusCode } from '@opentelemetry/api'
+import { parseErrorToError } from '@mc-review/helpers'
 
 const errorMessages = {
     delete: 'Deletion of records is not allowed',
@@ -179,9 +180,7 @@ async function NewPrismaClient(
                         'Error disconnecting expired Prisma client:',
                         err
                     )
-                    span.recordException(
-                        err instanceof Error ? err : new Error(String(err))
-                    )
+                    span.recordException(parseErrorToError(err))
                 }
                 prismaClientCache.delete(cacheKey)
             } else {
@@ -220,7 +219,7 @@ async function NewPrismaClient(
 
         return prismaClient
     } catch (e: unknown) {
-        const error = e instanceof Error ? e : new Error(String(e))
+        const error = parseErrorToError(e)
 
         span.recordException(error)
         span.setStatus({

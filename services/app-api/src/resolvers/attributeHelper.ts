@@ -10,6 +10,7 @@ import {
     SEMATTRS_ENDUSER_ID,
     SEMATTRS_ENDUSER_ROLE,
 } from '@opentelemetry/semantic-conventions'
+import { parseErrorToError } from '@mc-review/helpers'
 
 /**
  * Creates a resolver span as a child of the GraphQL request span.
@@ -106,7 +107,7 @@ export async function withResolverSpan<T>(
         // Error: record exception, set error status, end span, then rethrow
         span.setStatus({
             code: SpanStatusCode.ERROR,
-            message: error instanceof Error ? error.message : 'Unknown error',
+            message: parseErrorToError(error).message,
         })
         if (error instanceof Error) {
             span.recordException(error)

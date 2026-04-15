@@ -5,6 +5,7 @@ import {
     syncUserWithAurora,
     wasUpdatedToday,
 } from './cognitoAuthn'
+import { parseErrorToError } from '@mc-review/helpers'
 
 export async function userFromLocalAuthProvider(
     authProvider: string,
@@ -31,6 +32,6 @@ export async function userFromLocalAuthProvider(
         return dbUser
     } catch (e) {
         console.error('ERROR: failed to parse local user from authProvider')
-        return e instanceof Error ? e : new Error(String(e))
+        return parseErrorToError(e)
     }
 }

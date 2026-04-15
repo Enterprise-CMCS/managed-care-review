@@ -3,6 +3,7 @@ import { recordJSException } from '@mc-review/otel'
 import { useEffect } from 'react'
 import { EmptyHeader } from '../../components/Header/EmptyHeader'
 import styles from '../App/AppBody.module.scss'
+import { parseErrorToError } from '@mc-review/helpers'
 /* The error boundary is a fallback UI to catch errors
     See React docs: https://reactjs.org/docs/error-boundaries.html
     It is possible to have different error boundary fallback components at different levels of the hierarchy.
@@ -18,8 +19,7 @@ function ErrorBoundaryRoot({
 }): React.ReactElement {
     useEffect(() => {
         const logError = async () => {
-            const errorMessage =
-                error instanceof Error ? error.message : String(error)
+            const errorMessage = parseErrorToError(error).message
             recordJSException(
                 `Crash in ErrorBoundaryRoot. Error message: ${errorMessage}`
             )

@@ -6,6 +6,7 @@ import { setErrorAttributesOnActiveSpan } from '../attributeHelper'
 import { logError } from '../../logger'
 import type { DocumentZipPackageType } from '../../domain-models/ZipType'
 import type { Context } from '../../handlers/apollo_gql'
+import { parseErrorToError } from '@mc-review/helpers'
 
 export function contractRevisionResolver(
     store: Store
@@ -54,8 +55,7 @@ export function contractRevisionResolver(
                 }
                 return documentZipPackages
             } catch (error) {
-                const errorMessage =
-                    error instanceof Error ? error.message : String(error)
+                const errorMessage = parseErrorToError(error).message
                 const errMessage = `Unexpected error fetching document zip packages: ${errorMessage}`
                 logError('contractRevision.documentZipPackages', errMessage)
                 setErrorAttributesOnActiveSpan(errMessage, span)

@@ -1,5 +1,6 @@
 import { parseBucketName, parseKey } from '../s3'
 import { createUserInputError } from './errorUtils'
+import { parseErrorToError } from '@mc-review/helpers'
 
 /**
  * Document input with s3URL from GraphQL
@@ -53,7 +54,7 @@ export function parseAndValidateDocuments(
         try {
             bucket = parseBucketName(doc.s3URL)
         } catch (err) {
-            bucket = err instanceof Error ? err : new Error(String(err))
+            bucket = parseErrorToError(err)
         }
 
         // parseKey returns Error
