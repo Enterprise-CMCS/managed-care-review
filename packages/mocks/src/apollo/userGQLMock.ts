@@ -1,4 +1,4 @@
-import { MockedResponse } from '@apollo/client/testing'
+import { MockLink } from '@apollo/client/testing'
 import { ServerError } from '@apollo/client'
 import {
     CmsUser,
@@ -129,12 +129,12 @@ const fetchCurrentUserMock = ({
     user = mockValidUser(), // defaults to logged in state user, we can override though from test
     statusCode,
 }: // eslint-disable-next-line @typescript-eslint/no-explicit-any
-fetchCurrentUserMockProps): MockedResponse<Record<string, any>> => {
+fetchCurrentUserMockProps): MockLink.MockedResponse<Record<string, any>> => {
     const mockError = (message: string, statusCode?: number) => {
-        const error = new Error(message) as ServerError
-        error.statusCode = statusCode || 400
-        error.name = 'ServerError'
-        return error
+        return new ServerError(message, {
+            response: new Response('', { status: statusCode || 400 }),
+            bodyText: '',
+        })
     }
     switch (statusCode) {
         case 200:
@@ -161,7 +161,7 @@ fetchCurrentUserMockProps): MockedResponse<Record<string, any>> => {
 
 const indexUsersQueryMock = (
     users?: UserType[]
-): MockedResponse<IndexUsersQuery> => {
+): MockLink.MockedResponse<IndexUsersQuery> => {
     const indexUsers: IndexUsersPayload | undefined = users
         ? {
               totalCount: users.length,
@@ -205,7 +205,7 @@ const indexUsersQueryMock = (
     }
 }
 
-const indexUsersQueryFailMock = (): MockedResponse<GraphQLError> => {
+const indexUsersQueryFailMock = (): MockLink.MockedResponse<GraphQLError> => {
     const graphQLError = new GraphQLError(
         'Error fetching email settings data.',
         {
@@ -232,7 +232,7 @@ const indexUsersQueryFailMock = (): MockedResponse<GraphQLError> => {
 function updateStateAssignmentsMutationMockSuccess(
     stateCode: string = 'CA',
     userIDs: string[] = ['1', '2']
-): MockedResponse<
+): MockLink.MockedResponse<
     UpdateStateAssignmentsByStateMutation,
     UpdateStateAssignmentsByStateMutationVariables
 > {
@@ -276,7 +276,7 @@ function updateStateAssignmentsMutationMockSuccess(
 function updateStateAssignmentsMutationMockFailure(
     stateCode: string = 'CA',
     userIDs: string[] = ['1', '2']
-): MockedResponse<GraphQLError> {
+): MockLink.MockedResponse<GraphQLError> {
     const graphQLError = new GraphQLError(
         'Error fetching email settings data.',
         {
