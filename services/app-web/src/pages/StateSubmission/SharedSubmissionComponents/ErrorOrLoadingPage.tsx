@@ -4,9 +4,9 @@ import { GridContainer } from '@trussworks/react-uswds'
 import { Loading } from '../../../components'
 import { ErrorInvalidSubmissionStatus } from '../../Errors/ErrorInvalidSubmissionStatusPage'
 import { Error404 } from '../../Errors/Error404Page'
-import { handleApolloError } from '@mc-review/helpers'
+import { handleApolloError, toGQLError } from '@mc-review/helpers'
 import { ErrorForbiddenPage } from '../../Errors/ErrorForbiddenPage'
-import { ApolloError } from '@apollo/client'
+import type { ErrorLike } from '@apollo/client'
 
 type InterimState =
     | 'LOADING'
@@ -18,16 +18,13 @@ type ErrorOrLoadingPageProps = {
     state?: InterimState
 }
 
-const handleAndReturnErrorState = (error: Error): InterimState => {
-    if (error instanceof ApolloError) {
-        handleApolloError(error, true)
-        if (error.graphQLErrors[0]?.extensions?.code === 'NOT_FOUND') {
-            return 'NOT_FOUND'
-        } else if (
-            error.graphQLErrors[0]?.extensions?.code === 'FORBIDDEN_ERROR'
-        ) {
-            return 'FORBIDDEN'
-        }
+const handleAndReturnErrorState = (error: ErrorLike | Error): InterimState => {
+    handleApolloError(error, true)
+    const gqlError = toGQLError(error)
+    if (gqlError?.extensions.code === 'NOT_FOUND') {
+        return 'NOT_FOUND'
+    } else if (gqlError?.extensions.code === 'FORBIDDEN_ERROR') {
+        return 'FORBIDDEN'
     }
     return 'GENERIC_ERROR'
 }

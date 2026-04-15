@@ -17,7 +17,7 @@ const handleNetworkError = (
     networkError: Error,
     isAuthenticated: boolean
 ) => {
-    if (networkError instanceof ServerError) {
+    if (ServerError.is(networkError)) {
         if (networkError.statusCode === 403 && !isAuthenticated) {
             // Log nothing, this is an expected 403 for a logged out user trying to load a page where we query auth
             return
@@ -33,7 +33,7 @@ const handleNetworkError = (
                 `[Server error]: Code: ${networkError.statusCode} Message: ${networkError.message} ${networkError.stack}`
             )
         }
-    } else if (networkError instanceof ServerParseError) {
+    } else if (ServerParseError.is(networkError)) {
         recordJSException(
             `[Server parse error]: Code: ${networkError.statusCode} Message: ${networkError.message} ${networkError.stack}`
         )
@@ -77,7 +77,7 @@ const isLikelyUserAuthError = (
     error: ErrorLike | Error,
     isAuthenticated: boolean
 ) => {
-    if (error instanceof ServerError) {
+    if (ServerError.is(error)) {
         return error.statusCode === 403 && isAuthenticated
     }
     return false

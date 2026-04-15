@@ -14,7 +14,7 @@ import {
     UnlockRateDocument,
     FetchRateWithQuestionsDocument,
 } from '../../gen/gqlClient'
-import { useQuery, useMutation } from '@apollo/client'
+import { useMutation, useQuery } from '@apollo/client/react'
 import styles from '../SubmissionSummary/SubmissionSummary.module.scss'
 import { GenericErrorPage } from '../Errors/GenericErrorPage'
 import { ERROR_MESSAGES, RoutesRecord } from '@mc-review/constants'
@@ -31,7 +31,10 @@ import { useLDClient } from 'launchdarkly-react-client-sdk'
 import { featureFlags } from '@mc-review/common-code'
 import { UnlockRateButton } from '../../components/SubmissionSummarySection/RateDetailsSummarySection/UnlockRateButton'
 import { recordJSException } from '@mc-review/otel'
-import { handleApolloErrorsAndAddUserFacingMessages } from '@mc-review/helpers'
+import {
+    handleApolloErrorsAndAddUserFacingMessages,
+    toGQLError,
+} from '@mc-review/helpers'
 import { StatusUpdatedBanner } from '../../components/Banner'
 import { ChildrenType } from '../../components/MultiColumnGrid/MultiColumnGrid'
 import { getSubmissionPath } from '../../routeHelpers'
@@ -122,11 +125,10 @@ export const RateSummary = (): React.ReactElement => {
             </GridContainer>
         )
     } else if (!data && error) {
-        if (error?.graphQLErrors[0]?.extensions?.code === 'FORBIDDEN') {
-            return (
-                <ErrorForbiddenPage errorMsg={error.graphQLErrors[0].message} />
-            )
-        } else if (error?.graphQLErrors[0]?.extensions?.code === 'NOT_FOUND') {
+        const gqlError = toGQLError(error)
+        if (gqlError?.extensions.code === 'FORBIDDEN') {
+            return <ErrorForbiddenPage errorMsg={gqlError.message} />
+        } else if (gqlError?.extensions.code === 'NOT_FOUND') {
             return <Error404 />
         } else {
             return <GenericErrorPage />
@@ -155,19 +157,10 @@ export const RateSummary = (): React.ReactElement => {
         )
     } else if (fetchContractError && !fetchContractData) {
         //error handling for a state user that tries to access contracts for a different state
-        if (
-            fetchContractError?.graphQLErrors[0]?.extensions?.code ===
-            'FORBIDDEN'
-        ) {
-            return (
-                <ErrorForbiddenPage
-                    errorMsg={fetchContractError.graphQLErrors[0].message}
-                />
-            )
-        } else if (
-            fetchContractError?.graphQLErrors[0]?.extensions?.code ===
-            'NOT_FOUND'
-        ) {
+        const contractGqlError = toGQLError(fetchContractError)
+        if (contractGqlError?.extensions.code === 'FORBIDDEN') {
+            return <ErrorForbiddenPage errorMsg={contractGqlError.message} />
+        } else if (contractGqlError?.extensions.code === 'NOT_FOUND') {
             return <Error404 />
         } else {
             return <GenericErrorPage />
