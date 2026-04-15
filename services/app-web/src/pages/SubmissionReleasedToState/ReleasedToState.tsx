@@ -14,9 +14,10 @@ import {
 } from '@mc-review/constants'
 import { useNavigate } from 'react-router-dom'
 import {
-    useApproveContractMutation,
-    useFetchContractQuery,
+    ApproveContractDocument,
+    FetchContractDocument,
 } from '../../gen/gqlClient'
+import { useQuery, useMutation } from '@apollo/client'
 import { ErrorOrLoadingPage } from '../StateSubmission'
 import { handleAndReturnErrorState } from '../StateSubmission/SharedSubmissionComponents'
 import { GenericErrorPage } from '../Errors/GenericErrorPage'
@@ -67,12 +68,12 @@ const ReleasedToState = () => {
         shouldValidate && Boolean(error)
 
     const [approveContract, { error: approveError, loading: approveLoading }] =
-        useApproveContractMutation()
+        useMutation(ApproveContractDocument)
     const {
         data: fetchContractData,
         loading: fetchContractLoading,
         error: fetchContractError,
-    } = useFetchContractQuery({
+    } = useQuery(FetchContractDocument, {
         variables: {
             input: {
                 contractID: id || 'not-found',

@@ -16,7 +16,7 @@ import { pruneDuplicateEmails } from './formatters'
 import { findStatePrograms, packageName } from '@mc-review/submissions'
 import { rateSummaryURL, submissionSummaryURL } from './generateURLs'
 import { formatCalendarDate } from '@mc-review/dates'
-import type { SubmissionType } from '../gen/gqlClient'
+import type { SubmissionType } from '../gen/gqlServer'
 
 // ETA SETUP
 Eta.configure({

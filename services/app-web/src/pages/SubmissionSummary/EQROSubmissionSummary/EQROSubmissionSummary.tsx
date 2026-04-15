@@ -6,9 +6,10 @@ import { useAuth } from '../../../contexts/AuthContext'
 import { useMemoizedStateHeader, useRouteParams } from '../../../hooks'
 import { hasCMSUserPermissions } from '@mc-review/helpers'
 import {
-    useFetchContractWithQuestionsQuery,
+    FetchContractWithQuestionsDocument,
     UpdateInformation,
 } from '../../../gen/gqlClient'
+import { useQuery } from '@apollo/client'
 import {
     DocumentWarningBanner,
     LinkWithLogging,
@@ -48,14 +49,17 @@ export const EQROSubmissionSummary = (): React.ReactElement => {
     const modalRef = useRef<ModalRef>(null)
 
     // API requests
-    const { data, loading, error } = useFetchContractWithQuestionsQuery({
-        variables: {
-            input: {
-                contractID: id ?? 'unknown-contract',
+    const { data, loading, error } = useQuery(
+        FetchContractWithQuestionsDocument,
+        {
+            variables: {
+                input: {
+                    contractID: id ?? 'unknown-contract',
+                },
             },
-        },
-        fetchPolicy: 'cache-and-network',
-    })
+            fetchPolicy: 'cache-and-network',
+        }
+    )
 
     const contract = data?.fetchContract.contract
     const name =

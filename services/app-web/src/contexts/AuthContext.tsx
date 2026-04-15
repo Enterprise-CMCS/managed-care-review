@@ -5,14 +5,14 @@ import { AuthModeType } from '@mc-review/common-code'
 import { extendSession } from '../pages/Auth/cognitoAuth'
 import {
     FetchCurrentUserQuery,
-    useFetchCurrentUserQuery,
+    FetchCurrentUserDocument,
     User as UserType,
 } from '../gen/gqlClient'
 import { logoutLocalUser } from '../localAuth'
 import { signOut as cognitoSignOut } from '../pages/Auth/cognitoAuth'
 import { recordJSException } from '@mc-review/otel'
 import { handleApolloError } from '@mc-review/helpers'
-import { ApolloQueryResult } from '@apollo/client'
+import { ApolloQueryResult, useQuery } from '@apollo/client'
 
 // Constants and types
 type LoginStatusType = 'LOADING' | 'LOGGED_OUT' | 'LOGGED_IN'
@@ -62,9 +62,12 @@ function AuthProvider({
     const [loginStatus, setLoginStatus] =
         useState<LoginStatusType>('LOGGED_OUT')
 
-    const { loading, data, error, refetch } = useFetchCurrentUserQuery({
-        notifyOnNetworkStatusChange: true,
-    })
+    const { loading, data, error, refetch } = useQuery(
+        FetchCurrentUserDocument,
+        {
+            notifyOnNetworkStatusChange: true,
+        }
+    )
 
     const isAuthenticated = loggedInUser !== undefined
 

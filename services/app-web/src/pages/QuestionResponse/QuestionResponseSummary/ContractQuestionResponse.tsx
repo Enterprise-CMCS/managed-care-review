@@ -8,10 +8,11 @@ import {
     QuestionResponseSubmitBanner,
     UserAccountWarningBanner,
 } from '../../../components/Banner'
+import { useQuery } from '@apollo/client'
 import {
     CmsUser,
     Division,
-    useFetchContractWithQuestionsQuery,
+    FetchContractWithQuestionsDocument,
 } from '../../../gen/gqlClient'
 import { GenericErrorPage } from '../../Errors/GenericErrorPage'
 import { hasCMSUserPermissions } from '@mc-review/helpers'
@@ -32,14 +33,17 @@ export const ContractQuestionResponse = () => {
     const { loggedInUser } = useAuth()
     const hasCMSPermissions = hasCMSUserPermissions(loggedInUser)
 
-    const { data, loading, error } = useFetchContractWithQuestionsQuery({
-        variables: {
-            input: {
-                contractID: id,
+    const { data, loading, error } = useQuery(
+        FetchContractWithQuestionsDocument,
+        {
+            variables: {
+                input: {
+                    contractID: id,
+                },
             },
-        },
-        fetchPolicy: 'cache-and-network',
-    })
+            fetchPolicy: 'cache-and-network',
+        }
+    )
 
     const contract = data?.fetchContract.contract
     const contractRev = contract?.packageSubmissions?.[0]?.contractRevision

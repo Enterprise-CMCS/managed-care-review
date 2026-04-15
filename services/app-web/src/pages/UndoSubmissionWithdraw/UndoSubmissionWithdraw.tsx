@@ -5,9 +5,10 @@ import { Formik, FormikErrors } from 'formik'
 import { usePage } from '../../contexts/PageContext'
 import { useMemoizedStateHeader, useRouteParams, useTealium } from '../../hooks'
 import {
-    useFetchContractQuery,
-    useUndoWithdrawContractMutation,
+    FetchContractDocument,
+    UndoWithdrawContractDocument,
 } from '../../gen/gqlClient'
+import { useQuery, useMutation } from '@apollo/client'
 import {
     ActionButton,
     Breadcrumbs,
@@ -56,13 +57,13 @@ export const UndoSubmissionWithdraw = (): React.ReactElement => {
     const [
         undoWithdrawSubmission,
         { error: undoWithdrawError, loading: undoWithdrawLoading },
-    ] = useUndoWithdrawContractMutation()
+    ] = useMutation(UndoWithdrawContractDocument)
 
     const formInitialValues: UndoSubmissionWithdrawValues = {
         undoSubmissionWithdrawReason: '',
     }
 
-    const { data, loading, error } = useFetchContractQuery({
+    const { data, loading, error } = useQuery(FetchContractDocument, {
         variables: {
             input: {
                 contractID: id,

@@ -15,10 +15,10 @@ import {
     ContractFormData,
     ContractPackageSubmission,
     ContractRevision,
-    useFetchContractWithQuestionsQuery,
+    FetchContractWithQuestionsDocument,
 } from '../../gen/gqlClient'
 import { Loading, NavLinkWithLogging } from '../../components'
-import { ApolloError } from '@apollo/client'
+import { ApolloError, useQuery } from '@apollo/client'
 import { handleApolloError } from '@mc-review/helpers'
 import { recordJSException } from '@mc-review/otel'
 import { GenericErrorPage } from '../Errors/GenericErrorPage'
@@ -70,14 +70,17 @@ export const SubmissionSideNav = () => {
         }
     }
 
-    const { data, loading, error } = useFetchContractWithQuestionsQuery({
-        variables: {
-            input: {
-                contractID: id,
+    const { data, loading, error } = useQuery(
+        FetchContractWithQuestionsDocument,
+        {
+            variables: {
+                input: {
+                    contractID: id,
+                },
             },
-        },
-        fetchPolicy: 'cache-and-network',
-    })
+            fetchPolicy: 'cache-and-network',
+        }
+    )
 
     const contract = data?.fetchContract.contract
 

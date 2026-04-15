@@ -1,7 +1,8 @@
 import React from 'react'
 import { SubmissionTypeRecord } from '@mc-review/submissions'
 import { useAuth } from '../../../contexts/AuthContext'
-import { useIndexContractsStrippedQuery } from '../../../gen/gqlClient'
+import { useQuery } from '@apollo/client'
+import { IndexContractsStrippedDocument } from '../../../gen/gqlClient'
 import { mostRecentDate } from '@mc-review/dates'
 import styles from '../../StateDashboard/StateDashboard.module.scss'
 import localStyles from './SubmissionsDashboard.module.scss'
@@ -16,7 +17,7 @@ import { GenericErrorPage } from '../../Errors/GenericErrorPage'
 
 const SubmissionsDashboard = (): React.ReactElement => {
     const { loggedInUser } = useAuth()
-    const { data, loading, error } = useIndexContractsStrippedQuery({
+    const { data, loading, error } = useQuery(IndexContractsStrippedDocument, {
         fetchPolicy: 'cache-and-network',
         pollInterval: 120000,
     })

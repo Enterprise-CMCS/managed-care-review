@@ -27,8 +27,9 @@ import {
 import { usePage } from '../../contexts/PageContext'
 import {
     UpdateInformation,
-    useFetchContractWithQuestionsQuery,
+    FetchContractWithQuestionsDocument,
 } from '../../gen/gqlClient'
+import { useQuery } from '@apollo/client'
 import { ErrorForbiddenPage } from '../Errors/ErrorForbiddenPage'
 import { Error404 } from '../Errors/Error404Page'
 import { GenericErrorPage } from '../Errors/GenericErrorPage'
@@ -91,14 +92,17 @@ export const SubmissionSummary = (): React.ReactElement => {
     }, [isStateUser, hasCMSPermissions])
 
     // API requests
-    const { data, loading, error } = useFetchContractWithQuestionsQuery({
-        variables: {
-            input: {
-                contractID: id ?? 'unknown-contract',
+    const { data, loading, error } = useQuery(
+        FetchContractWithQuestionsDocument,
+        {
+            variables: {
+                input: {
+                    contractID: id ?? 'unknown-contract',
+                },
             },
-        },
-        fetchPolicy: 'cache-and-network',
-    })
+            fetchPolicy: 'cache-and-network',
+        }
+    )
 
     const contract = data?.fetchContract.contract
     const name =

@@ -14,10 +14,11 @@ import {
 import { generatePath, useNavigate } from 'react-router-dom'
 import {
     RateStripped,
-    useFetchContractQuery,
-    useIndexRatesStrippedWithRelatedContractsQuery,
-    useWithdrawContractMutation,
+    FetchContractDocument,
+    IndexRatesStrippedWithRelatedContractsDocument,
+    WithdrawContractDocument,
 } from '../../gen/gqlClient'
+import { useQuery, useMutation } from '@apollo/client'
 import { Formik, FormikErrors } from 'formik'
 import { ButtonGroup, Form } from '@trussworks/react-uswds'
 import * as Yup from 'yup'
@@ -106,7 +107,7 @@ export const SubmissionWithdraw = (): React.ReactElement => {
     const [
         withdrawContract,
         { error: withdrawError, loading: withdrawLoading },
-    ] = useWithdrawContractMutation()
+    ] = useMutation(WithdrawContractDocument)
     const showFieldErrors = (error?: FormError): boolean =>
         shouldValidate && Boolean(error)
     const formInitialValues: SubmissionWithdrawValues = {
@@ -118,7 +119,7 @@ export const SubmissionWithdraw = (): React.ReactElement => {
         data: contractData,
         loading: contractLoading,
         error: contractError,
-    } = useFetchContractQuery({
+    } = useQuery(FetchContractDocument, {
         variables: {
             input: {
                 contractID: id,
@@ -155,7 +156,7 @@ export const SubmissionWithdraw = (): React.ReactElement => {
         data: ratesData,
         loading: ratesLoading,
         error: ratesError,
-    } = useIndexRatesStrippedWithRelatedContractsQuery({
+    } = useQuery(IndexRatesStrippedWithRelatedContractsDocument, {
         variables: {
             input: {
                 stateCode: undefined,

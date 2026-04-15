@@ -9,7 +9,8 @@ import {
 } from '../../components'
 import { RoutesRecord } from '@mc-review/constants'
 import { generatePath, useNavigate, useParams } from 'react-router-dom'
-import { useFetchRateQuery, useWithdrawRateMutation } from '../../gen/gqlClient'
+import { FetchRateDocument, WithdrawRateDocument } from '../../gen/gqlClient'
+import { useQuery, useMutation } from '@apollo/client'
 import { ErrorOrLoadingPage } from '../StateSubmission'
 import { handleAndReturnErrorState } from '../StateSubmission/SharedSubmissionComponents'
 import { ButtonGroup, Form } from '@trussworks/react-uswds'
@@ -40,7 +41,7 @@ export const RateWithdraw = () => {
     const { logFormSubmitEvent } = useTealium()
     const [shouldValidate, setShouldValidate] = React.useState(false)
     const [withdrawRate, { error: withdrawError, loading: withdrawLoading }] =
-        useWithdrawRateMutation()
+        useMutation(WithdrawRateDocument)
     const showFieldErrors = (error?: FormError): boolean =>
         shouldValidate && Boolean(error)
 
@@ -48,7 +49,7 @@ export const RateWithdraw = () => {
         rateWithdrawReason: '',
     }
 
-    const { data, loading, error } = useFetchRateQuery({
+    const { data, loading, error } = useQuery(FetchRateDocument, {
         variables: {
             input: {
                 rateID: id,

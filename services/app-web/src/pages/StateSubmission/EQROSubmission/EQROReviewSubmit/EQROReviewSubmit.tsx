@@ -17,7 +17,8 @@ import {
 import styles from './EQROReviewSubmit.module.scss'
 import { usePage } from '../../../../contexts/PageContext'
 import { useAuth } from '../../../../contexts/AuthContext'
-import { useFetchContractQuery } from '../../../../gen/gqlClient'
+import { useQuery } from '@apollo/client'
+import { FetchContractDocument } from '../../../../gen/gqlClient'
 import { ErrorForbiddenPage } from '../../../Errors/ErrorForbiddenPage'
 import { Error404 } from '../../../Errors/Error404Page'
 import { GenericErrorPage } from '../../../Errors/GenericErrorPage'
@@ -50,7 +51,7 @@ export const EQROReviewSubmit = (): React.ReactElement => {
         })
     }
 
-    const { data, loading, error } = useFetchContractQuery({
+    const { data, loading, error } = useQuery(FetchContractDocument, {
         variables: {
             input: {
                 contractID: id ?? 'unknown contract',
@@ -95,16 +96,13 @@ export const EQROReviewSubmit = (): React.ReactElement => {
     )
 
     if (!contractFormData) return <GenericErrorPage />
-    const programIDs = contractFormData?.programIDs
-    const programs = contract.state.programs.filter((program) =>
-        programIDs?.includes(program.id)
-    )
+
     const submissionName =
         packageName(
             contract.stateCode,
             contract.stateNumber,
             contractFormData.programIDs,
-            programs
+            contract.state.programs
         ) || ''
 
     return (

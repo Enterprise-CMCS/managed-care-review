@@ -4,10 +4,16 @@ import {
     ContractDetailsSummarySectionProps,
     ContractDetailsSummarySection,
 } from './ContractDetailsSummarySection'
-import { mockContractPackageDraft } from '@mc-review/mocks'
+import {
+    fetchCurrentUserMock,
+    mockContractPackageDraft,
+    mockContractPackageSubmitted,
+    mockValidStateUser,
+} from '@mc-review/mocks'
+import { GridContainer } from '@trussworks/react-uswds'
 
 export default {
-    title: 'Components/SubmissionSummary/ContractDetailsSummarySection/V2',
+    title: 'Components/SubmissionSummary/ContractDetailsSummarySection',
     component: ContractDetailsSummarySection,
     parameters: {
         componentSubtitle:
@@ -16,20 +22,52 @@ export default {
 }
 
 const Template: StoryFn<ContractDetailsSummarySectionProps> = (args) => (
-    <ContractDetailsSummarySection {...args} />
+    <GridContainer className="margin-top-1">
+        <ContractDetailsSummarySection {...args} />
+    </GridContainer>
 )
 
 export const WithAction = Template.bind({})
-WithAction.decorators = [(StoryFn) => ProvidersDecorator(StoryFn, {})]
+WithAction.decorators = [
+    (StoryFn) =>
+        ProvidersDecorator(StoryFn, {
+            apolloProvider: {
+                mocks: [
+                    fetchCurrentUserMock({
+                        user: mockValidStateUser(),
+                        statusCode: 200,
+                    }),
+                ],
+            },
+        }),
+]
 
 WithAction.args = {
     contract: mockContractPackageDraft(),
     editNavigateTo: 'contract-details',
+    isStateUser: true,
+    onDocumentError: () => {},
+    explainMissingData: false,
 }
 
 export const WithoutAction = Template.bind({})
-WithoutAction.decorators = [(StoryFn) => ProvidersDecorator(StoryFn, {})]
+WithoutAction.decorators = [
+    (StoryFn) =>
+        ProvidersDecorator(StoryFn, {
+            apolloProvider: {
+                mocks: [
+                    fetchCurrentUserMock({
+                        user: mockValidStateUser(),
+                        statusCode: 200,
+                    }),
+                ],
+            },
+        }),
+]
 
 WithoutAction.args = {
-    contract: mockContractPackageDraft(),
+    contract: mockContractPackageSubmitted(),
+    isStateUser: true,
+    onDocumentError: () => {},
+    explainMissingData: false,
 }

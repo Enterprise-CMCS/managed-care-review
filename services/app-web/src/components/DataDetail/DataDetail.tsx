@@ -46,7 +46,7 @@ export const DataDetail = ({
                         requiredText={explainMissingDataMsg}
                     />
                 ) : handleArray ? (
-                    children.join(', ').toUpperCase()
+                    children.join(', ')
                 ) : (
                     children
                 )}

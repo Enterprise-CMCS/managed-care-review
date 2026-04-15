@@ -136,7 +136,7 @@ export const ContractProgramsSummary = ({
     explainMissingData,
     label,
 }: {
-    programNames: string[]
+    programNames?: string[] | React.ReactNode
     explainMissingData?: boolean
     label?: string
 }) => {

@@ -1,3 +1,4 @@
+import React from 'react'
 import { Grid } from '@trussworks/react-uswds'
 import {
     MultiColumnGrid,
@@ -21,6 +22,7 @@ import {
     SubmissionTypeSummary,
     SubmittedAtSummary,
 } from '../SummarySectionFields'
+import { formattedProgramNames } from '../../../formHelpers'
 
 export type SubmissionTypeSummarySectionProps = {
     contract: Contract | UnlockedContract
@@ -53,9 +55,11 @@ export const SubmissionTypeSummarySection = ({
 
     if (!contractFormData) return <GenericErrorPage />
 
-    const programNames = contract.state.programs
-        .filter((p) => contractFormData?.programIDs.includes(p.id))
-        .map((p) => p.name)
+    const programIDs = contractFormData?.programIDs ?? []
+    const programNames = formattedProgramNames(
+        contract.state.programs,
+        programIDs
+    )
 
     const isSubmitted =
         contract.status === 'SUBMITTED' || contract.status === 'RESUBMITTED'
@@ -84,7 +88,7 @@ export const SubmissionTypeSummarySection = ({
                         />
                     )}
                 <MultiColumnGrid columns={2}>
-                    {(programNames.length > 0 || !isSubmitted) && (
+                    {(programIDs.length > 0 || !isSubmitted) && (
                         <ContractProgramsSummary
                             programNames={programNames}
                             explainMissingData={explainMissingData}

@@ -32,6 +32,7 @@ import { featureFlags } from '@mc-review/common-code'
 import { useLDClient } from 'launchdarkly-react-client-sdk'
 import { DocumentHeader } from '../../../DocumentHeader/DocumentHeader'
 import { ContractSubmissionTypeRecord } from '@mc-review/constants'
+import { formattedProgramNames } from '../../../../formHelpers'
 
 const rateCapitationType = (formData: RateFormData) =>
     formData.rateCapitationType
@@ -59,9 +60,7 @@ const ratePrograms = (
         programIDs = formData.rateProgramIDs
     }
     return programIDs
-        ? statePrograms
-              .filter((p) => programIDs.includes(p.id))
-              .map((p) => p.name)
+        ? formattedProgramNames(statePrograms, programIDs)
         : undefined
 }
 

@@ -35,7 +35,7 @@ import type {
     RateRevisionOverridesTablePayload,
 } from './prismaSubmittedRateHelpers'
 import type { ConsolidatedRateStatusType } from '../../domain-models/contractAndRates/statusType'
-import type { RelatedContractStripped } from '../../gen/gqlClient'
+import type { RelatedContractStripped } from '../../gen/gqlServer'
 
 const subincludeUpdateInfo = {
     updatedBy: true,

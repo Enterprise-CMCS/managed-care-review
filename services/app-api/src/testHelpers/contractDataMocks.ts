@@ -7,9 +7,11 @@ import type { StateCodeType } from '@mc-review/submissions'
 import type {
     ContractFormDataType,
     ContractSubmissionType,
+    ContractType,
 } from '../domain-models'
 import { findStatePrograms, type InsertContractArgsType } from '../postgres'
 import { must } from './assertionHelpers'
+import { s3DlUrl } from './documentHelpers'
 
 const defaultContractData = () => ({
     id: uuidv4(),
@@ -166,4 +168,172 @@ const mockContractRevision = (
     }
 }
 
-export { mockInsertContractArgs, mockContractRevision }
+// Minimal-but-fully-submittable KY HEALTH_PLAN draft ContractType for parseContract tests.
+// Uses real UUIDs and sets every submittableContractFormDataSchema-required field.
+const mockSubmittableHealthPlanContract = (opts?: {
+    contractID?: string
+    stateNumber?: number
+    programIDs?: string[]
+    rateProgramIDs?: string[]
+}): ContractType => {
+    const activeKYProgram = must(findStatePrograms('KY')).find(
+        (p) => !p.isDeprecated
+    )
+    if (!activeKYProgram) {
+        throw new Error(
+            'Test setup error: expected KY to have at least one active program in statePrograms.json'
+        )
+    }
+    const contractID =
+        opts?.contractID ?? '28b00852-00e3-467c-9311-519e60d43283'
+    const stateNumber = opts?.stateNumber ?? 5
+    return {
+        status: 'DRAFT',
+        createdAt: new Date(),
+        updatedAt: new Date(),
+        id: contractID,
+        stateCode: 'KY',
+        stateNumber,
+        contractSubmissionType: 'HEALTH_PLAN',
+        reviewStatus: 'UNDER_REVIEW',
+        consolidatedStatus: 'DRAFT',
+        mccrsID: undefined,
+        revisions: [],
+        draftRevision: {
+            id: 'e5bccaa3-d91c-499a-9f2f-c6ce8dbf8a5f',
+            submitInfo: undefined,
+            unlockInfo: undefined,
+            contract: {
+                id: contractID,
+                stateCode: 'KY',
+                stateNumber,
+                contractSubmissionType: 'HEALTH_PLAN',
+            },
+            createdAt: new Date('2023-11-27'),
+            updatedAt: new Date('2023-11-27'),
+            formData: {
+                programIDs: opts?.programIDs ?? [activeKYProgram.id],
+                populationCovered: 'MEDICAID',
+                submissionType: 'CONTRACT_AND_RATES',
+                riskBasedContract: true,
+                dsnpContract: true,
+                submissionDescription: 'A real submission',
+                supportingDocuments: [],
+                stateContacts: [
+                    {
+                        name: 'Someone',
+                        email: 'someone@example.com',
+                        titleRole: 'sometitle',
+                    },
+                ],
+                contractType: 'AMENDMENT',
+                contractExecutionStatus: 'EXECUTED',
+                contractDocuments: [
+                    {
+                        s3URL: 's3://bucketname/key/contract',
+                        sha256: 'fakesha',
+                        name: 'contract',
+                        dateAdded: new Date('01/15/2024'),
+                        downloadURL: s3DlUrl,
+                    },
+                ],
+                contractDateStart: new Date(),
+                contractDateEnd: new Date(),
+                managedCareEntities: ['MCO'],
+                federalAuthorities: ['STATE_PLAN'],
+                inLieuServicesAndSettings: true,
+                modifiedBenefitsProvided: true,
+                modifiedGeoAreaServed: false,
+                modifiedMedicaidBeneficiaries: true,
+                modifiedRiskSharingStrategy: true,
+                modifiedIncentiveArrangements: false,
+                modifiedWitholdAgreements: false,
+                modifiedStateDirectedPayments: true,
+                modifiedPassThroughPayments: true,
+                modifiedPaymentsForMentalDiseaseInstitutions: false,
+                modifiedMedicalLossRatioStandards: true,
+                modifiedOtherFinancialPaymentIncentive: false,
+                modifiedEnrollmentProcess: true,
+                modifiedGrevienceAndAppeal: false,
+                modifiedNetworkAdequacyStandards: true,
+                modifiedLengthOfContract: false,
+                modifiedNonRiskPaymentArrangements: true,
+                statutoryRegulatoryAttestation: true,
+                statutoryRegulatoryAttestationDescription: 'valid description',
+            },
+        },
+        draftRates: [
+            {
+                id: '6ab1b4c0-f9d2-4567-958a-3123e98328eb',
+                createdAt: new Date(),
+                updatedAt: new Date(),
+                status: 'DRAFT',
+                reviewStatus: 'UNDER_REVIEW',
+                consolidatedStatus: 'DRAFT',
+                stateCode: 'KY',
+                stateNumber,
+                parentContractID: contractID,
+                packageSubmissions: [],
+                draftRevision: {
+                    id: '6c7862a2-f3a1-4171-9fdd-6a8c9c2dd24b',
+                    rateID: '6ab1b4c0-f9d2-4567-958a-3123e98328eb',
+                    createdAt: new Date(),
+                    updatedAt: new Date(),
+                    submitInfo: undefined,
+                    unlockInfo: undefined,
+                    formData: {
+                        rateType: 'AMENDMENT',
+                        rateCapitationType: 'RATE_CELL',
+                        rateCertificationName: 'fake-name',
+                        rateMedicaidPopulations: ['MEDICAID_ONLY'],
+                        rateDocuments: [
+                            {
+                                s3URL: 's3://bucketname/key/rate',
+                                sha256: 'fakesha',
+                                name: 'rate',
+                                dateAdded: new Date('01/15/2024'),
+                                downloadURL: s3DlUrl,
+                            },
+                        ],
+                        supportingDocuments: [],
+                        rateDateStart: new Date('2020-02-02'),
+                        rateDateEnd: new Date('2021-02-02'),
+                        rateDateCertified: new Date(),
+                        amendmentEffectiveDateStart: new Date('1/1/2023'),
+                        amendmentEffectiveDateEnd: new Date('1/1/2024'),
+                        rateProgramIDs: opts?.rateProgramIDs ?? [
+                            activeKYProgram.id,
+                        ],
+                        deprecatedRateProgramIDs: [],
+                        certifyingActuaryContacts: [
+                            {
+                                actuarialFirm: 'DELOITTE',
+                                name: 'Actuary Contact 1',
+                                titleRole: 'Test Actuary Contact 1',
+                                email: 'actuarycontact1@test.com',
+                            },
+                        ],
+                        addtlActuaryContacts: [
+                            {
+                                actuarialFirm: 'DELOITTE',
+                                name: 'Actuary Contact 1',
+                                titleRole: 'Test Actuary Contact 1',
+                                email: 'additionalactuarycontact1@test.com',
+                            },
+                        ],
+                        actuaryCommunicationPreference: 'OACT_TO_ACTUARY',
+                        packagesWithSharedRateCerts: [],
+                    },
+                },
+                revisions: [],
+            },
+        ],
+        packageSubmissions: [],
+    }
+}
+
+export {
+    mockInsertContractArgs,
+    mockContractRevision,
+    mockSubmittableHealthPlanContract,
+}

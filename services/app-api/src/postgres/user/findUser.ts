@@ -1,6 +1,7 @@
 import type { UserType } from '../../domain-models'
 import { domainUserFromPrismaUser } from './prismaDomainUser'
 import type { ExtendedPrismaClient } from '../prismaClient'
+import { includeUsersWithBaseData } from '../contractAndRates/prismaUserHelpers'
 
 export async function findUser(
     client: ExtendedPrismaClient,
@@ -11,9 +12,7 @@ export async function findUser(
             where: {
                 id: id,
             },
-            include: {
-                stateAssignments: {},
-            },
+            include: includeUsersWithBaseData,
         })
 
         if (!findResult) {

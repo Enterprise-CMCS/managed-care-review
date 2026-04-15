@@ -4,8 +4,9 @@ import { useLocation } from 'react-router-dom'
 import { useAuth } from '../../contexts/AuthContext'
 import {
     ContractSubmissionType,
-    useIndexContractsStrippedQuery,
+    IndexContractsStrippedDocument,
 } from '../../gen/gqlClient'
+import { useQuery } from '@apollo/client'
 import styles from './StateDashboard.module.scss'
 import { handleApolloError, isLikelyUserAuthError } from '@mc-review/helpers'
 import {
@@ -31,7 +32,7 @@ export const StateDashboard = (): React.ReactElement => {
     const location = useLocation()
     const { updateActiveMainContent } = usePage()
 
-    const { loading, data, error } = useIndexContractsStrippedQuery({
+    const { loading, data, error } = useQuery(IndexContractsStrippedDocument, {
         fetchPolicy: 'cache-and-network',
         pollInterval: 120000,
     })
