@@ -96,16 +96,13 @@ export const EQROReviewSubmit = (): React.ReactElement => {
     )
 
     if (!contractFormData) return <GenericErrorPage />
-    const programIDs = contractFormData?.programIDs
-    const programs = contract.state.programs.filter((program) =>
-        programIDs?.includes(program.id)
-    )
+
     const submissionName =
         packageName(
             contract.stateCode,
             contract.stateNumber,
             contractFormData.programIDs,
-            programs
+            contract.state.programs
         ) || ''
 
     return (
