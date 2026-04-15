@@ -784,8 +784,8 @@ describe('RateDetailsSummarySection', () => {
             name: 'Rates this rate certification covers',
         })
         expect(programElement).toBeInTheDocument()
-        const programList = within(programElement).getByText('SNBC, PMAP')
-        expect(programList).toBeInTheDocument()
+        expect(within(programElement).getByText(/SNBC/)).toBeInTheDocument()
+        expect(within(programElement).getByText(/PMAP/)).toBeInTheDocument()
     })
 
     it('renders multiple rate certifications with program names', async () => {

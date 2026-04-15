@@ -10,7 +10,9 @@ import {
     fetchCurrentUserMock,
     mockContractPackageDraft,
     mockContractPackageSubmitted,
+    mockStateData,
     mockValidStateUser,
+    rateRevisionDataMock,
 } from '@mc-review/mocks'
 
 export default {
@@ -22,11 +24,31 @@ export default {
     },
 }
 
+const kyStateMock = mockStateData('KY')
+
+const fetchKyUserMock = () =>
+    fetchCurrentUserMock({
+        user: mockValidStateUser({ state: kyStateMock }),
+        statusCode: 200,
+    })
+
 const draft = mockContractPackageDraft({
+    stateCode: 'MN',
+    state: kyStateMock,
     draftRates: [
         draftRateDataMock({
             initiallySubmittedAt: null,
+            stateCode: 'KY',
             parentContractID: 'test-abc-123',
+            draftRevision: {
+                ...rateRevisionDataMock({
+                    submitInfo: null,
+                    formData: {
+                        ...rateRevisionDataMock().formData,
+                        rateProgramIDs: kyStateMock.programs.map((p) => p.id),
+                    },
+                }),
+            },
         }),
     ],
 })
@@ -43,12 +65,7 @@ WithAction.decorators = [
     (StoryFn) =>
         ProvidersDecorator(StoryFn, {
             apolloProvider: {
-                mocks: [
-                    fetchCurrentUserMock({
-                        user: mockValidStateUser(),
-                        statusCode: 200,
-                    }),
-                ],
+                mocks: [fetchKyUserMock()],
             },
         }),
 ]
@@ -68,12 +85,7 @@ WithoutAction.decorators = [
     (StoryFn) =>
         ProvidersDecorator(StoryFn, {
             apolloProvider: {
-                mocks: [
-                    fetchCurrentUserMock({
-                        user: mockValidStateUser(),
-                        statusCode: 200,
-                    }),
-                ],
+                mocks: [fetchKyUserMock()],
             },
         }),
 ]

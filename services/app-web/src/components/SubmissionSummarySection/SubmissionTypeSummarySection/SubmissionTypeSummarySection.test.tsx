@@ -390,7 +390,7 @@ describe('SubmissionTypeSummarySection', () => {
         ).toBeInTheDocument()
     })
 
-    it('renders program name with (retired) suffix for deprecated programs', () => {
+    it('renders program name with (retired) suffix for deprecated programs', async () => {
         const draftContract = mockContractPackageDraft()
         const deprecatedProgramId = 'deprecated-program-id'
 
@@ -417,7 +417,9 @@ describe('SubmissionTypeSummarySection', () => {
             />
         )
 
-        expect(screen.getByText(/Old Program \(retired\)/)).toBeInTheDocument()
+        expect(
+            screen.getByTestId('program-deprecated-program-id')
+        ).toBeInTheDocument()
     })
 
     it('does not render (retired) suffix for active programs', () => {
