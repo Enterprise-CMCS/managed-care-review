@@ -8,7 +8,7 @@ import {
     FetchContractDocument,
     UndoWithdrawContractDocument,
 } from '../../gen/gqlClient'
-import { useQuery, useMutation } from '@apollo/client'
+import { useMutation, useQuery } from '@apollo/client/react'
 import {
     ActionButton,
     Breadcrumbs,

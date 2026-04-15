@@ -1,4 +1,4 @@
-import { MockedResponse } from '@apollo/client/testing'
+import { MockLink } from '@apollo/client/testing'
 import {
     Contract,
     UndoWithdrawContractDocument,
@@ -15,7 +15,7 @@ const withdrawContractMockSuccess = (
         contractData?: Partial<Contract>
         updatedReason?: string
     } = {}
-): MockedResponse<WithdrawContractMutation> => {
+): MockLink.MockedResponse<WithdrawContractMutation> => {
     const {
         contractID = 'test-abc-123',
         contractData,
@@ -52,7 +52,7 @@ const withdrawContractMockSuccess = (
 }
 
 const withdrawContractMockFailure =
-    (): MockedResponse<WithdrawContractMutation> => {
+    (): MockLink.MockedResponse<WithdrawContractMutation> => {
         const graphQLError = new GraphQLError('Issue withdrawing submission', {
             extensions: {
                 code: 'NOT_FOUND',
@@ -83,7 +83,7 @@ const undoWithdrawContractMockSuccess = (
         contractData?: Partial<Contract>
         updatedReason?: string
     } = {}
-): MockedResponse<UndoWithdrawContractMutation> => {
+): MockLink.MockedResponse<UndoWithdrawContractMutation> => {
     const {
         contractID = 'test-abc-123',
         contractData,
@@ -121,7 +121,7 @@ const undoWithdrawContractMockSuccess = (
 }
 
 const undoWithdrawContractMockFailure =
-    (): MockedResponse<UndoWithdrawContractMutation> => {
+    (): MockLink.MockedResponse<UndoWithdrawContractMutation> => {
         const graphQLError = new GraphQLError(
             'Issue undoing submission withdraw',
             {

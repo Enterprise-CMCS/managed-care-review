@@ -12,7 +12,7 @@ import {
     ErrorOrLoadingPage,
     handleAndReturnErrorState,
 } from '../../SharedSubmissionComponents'
-import { ApolloError } from '@apollo/client'
+import type { ErrorLike } from '@apollo/client'
 import { formattedProgramNames } from '../../../../formHelpers'
 
 export const LinkedRateSummary = ({
@@ -22,7 +22,7 @@ export const LinkedRateSummary = ({
 }: {
     rateForm: FormikRateForm
     loading: boolean | undefined
-    apiError: ApolloError | undefined
+    apiError: ErrorLike | undefined
 }): React.ReactElement | null => {
     const statePrograms = useStatePrograms()
     // Display any full page interim state resulting from the initial fetch API requests

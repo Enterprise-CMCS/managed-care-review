@@ -1,6 +1,6 @@
 import React, { useEffect, useMemo } from 'react'
 import { OauthClient, FetchOauthClientsDocument } from '../../../gen/gqlClient'
-import { useQuery } from '@apollo/client'
+import { useQuery } from '@apollo/client/react'
 import { Loading, NavLinkWithLogging } from '../../../components'
 import { SettingsErrorAlert } from '../SettingsErrorAlert'
 import { GenericErrorPage } from '../../Errors/GenericErrorPage'

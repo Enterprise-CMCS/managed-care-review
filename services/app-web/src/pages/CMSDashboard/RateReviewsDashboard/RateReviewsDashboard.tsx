@@ -1,6 +1,6 @@
 import React from 'react'
 import { useAuth } from '../../../contexts/AuthContext'
-import { useQuery } from '@apollo/client'
+import { useQuery } from '@apollo/client/react'
 import { IndexRatesStrippedDocument } from '../../../gen/gqlClient'
 import { mostRecentDate } from '@mc-review/dates'
 import styles from '../../StateDashboard/StateDashboard.module.scss'

@@ -1,6 +1,6 @@
 import { useEffect, useLayoutEffect } from 'react'
 import styles from '../QuestionResponse.module.scss'
-import { useQuery } from '@apollo/client'
+import { useQuery } from '@apollo/client/react'
 import {
     CmsUser,
     FetchRateWithQuestionsDocument,

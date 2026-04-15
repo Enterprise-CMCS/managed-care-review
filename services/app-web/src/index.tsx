@@ -1,24 +1,15 @@
 import React from 'react'
 import { createRoot } from 'react-dom/client'
-import {
-    ApolloClient,
-    InMemoryCache,
-    HttpLink,
-    DefaultOptions,
-} from '@apollo/client'
+import { ApolloClient, InMemoryCache, HttpLink } from '@apollo/client'
 import { Amplify } from 'aws-amplify'
-
 import './index.scss'
-
 import App from './pages/App/App'
 import reportWebVitals from './reportWebVitals'
 import { localGQLFetch, fakeAmplifyFetch } from './api'
 import { assertIsAuthMode } from '@mc-review/common-code'
 import { S3ClientT, newAmplifyS3Client, newLocalS3Client } from './s3'
 import { asyncWithLDProvider } from 'launchdarkly-react-client-sdk'
-import type { S3BucketConfigType } from './s3/s3Amplify'
-
-import schema from './gen/schema.graphql'
+import type { S3BucketConfigType } from './s3'
 
 const apiURL = import.meta.env.VITE_APP_API_URL
 if (!apiURL || apiURL === '') {
@@ -83,7 +74,7 @@ const cache = new InMemoryCache({
         },
     },
 })
-const defaultOptions: DefaultOptions = {
+const defaultOptions: ApolloClient.DefaultOptions = {
     watchQuery: {
         fetchPolicy: 'network-only',
     },
@@ -99,7 +90,6 @@ const apolloClient = new ApolloClient({
     }),
     cache,
     defaultOptions,
-    typeDefs: schema,
 })
 
 // S3 Region and LocalUrl are mutually exclusive.
