@@ -14,6 +14,12 @@ export interface ArtifactS3Client {
   putJson(bucket: string, key: string, value: unknown): Promise<void>
   getJson<T>(bucket: string, key: string): Promise<T>
   putText(bucket: string, key: string, value: string): Promise<void>
+  putBuffer(
+    bucket: string,
+    key: string,
+    value: Buffer,
+    contentType?: string
+  ): Promise<void>
   getBuffer(bucket: string, key: string): Promise<Buffer>
 }
 
@@ -57,6 +63,22 @@ export function newArtifactS3Client(
           Key: key,
           Body: value,
           ContentType: 'text/plain; charset=utf-8'
+        })
+      )
+    },
+
+    async putBuffer(
+      bucket: string,
+      key: string,
+      value: Buffer,
+      contentType: string = 'application/octet-stream'
+    ): Promise<void> {
+      await client.send(
+        new PutObjectCommand({
+          Bucket: bucket,
+          Key: key,
+          Body: value,
+          ContentType: contentType
         })
       )
     },

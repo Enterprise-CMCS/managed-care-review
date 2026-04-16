@@ -25,7 +25,8 @@ async function main(): Promise<void> {
   // supply when writing artifacts for a real submission.
   const formId = 'local-dev-form'
   const bucket = 'ai-form-augmentation-artifacts'
-  const documentKeys = ['fixtures/pdf/scan-07-65712-a26-213a-final.pdf']
+  const sourceKey = 'fixtures/pdf/scan-07-65712-a26-213a-final.pdf'
+  const documentKeys = [sourceKey]
   const artifactVersion = computeArtifactVersion(documentKeys)
   const filePath = '../fixtures/pdf/scan-07-65712-a26-213a-final.pdf'
 
@@ -56,6 +57,10 @@ async function main(): Promise<void> {
 
   await s3Client.putJson(bucket, key, artifact)
   const storedArtifact = await s3Client.getJson<typeof artifact>(bucket, key)
+
+  // Store the source PDF in S3 as well so the runtime handler can exercise the
+  // same document-loading path used by the real app trigger flow.
+  await s3Client.putBuffer(bucket, sourceKey, buffer, 'application/pdf')
 
   const embeddingProvider = new XenovaEmbeddingProvider()
   const chunkTexts = storedArtifact.chunks.map((chunk) => chunk.text)
@@ -137,6 +142,14 @@ async function main(): Promise<void> {
     formId,
     artifactVersion,
     bucket,
+    formFields: [...formFields],
+    documents: [
+      {
+        documentName: 'scan-07-65712-a26-213a-final.pdf',
+        sourceBucket: bucket,
+        sourceKey
+      }
+    ],
     // Keep storage config explicit so the same handler can run against LocalStack
     // in local development and AWS S3 in deployed environments.
     s3Config: {

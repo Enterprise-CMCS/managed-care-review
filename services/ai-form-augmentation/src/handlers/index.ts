@@ -1,4 +1,5 @@
 export type {
+  ValidationSourceDocument,
   ValidationHandlerEvent,
   ValidationHandlerResult
 } from './validationHandler'

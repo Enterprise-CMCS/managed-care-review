@@ -68,6 +68,7 @@ export {
 
 // Handlers
 export type {
+  ValidationSourceDocument,
   ValidationHandlerEvent,
   ValidationHandlerResult
 } from './handlers'

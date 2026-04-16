@@ -1,0 +1,243 @@
+import { beforeEach, describe, expect, it, vi } from 'vitest'
+
+const {
+    getBufferMock,
+    putJsonMock,
+    parsePdfMock,
+    chunkDocumentMock,
+    embedTextsMock,
+    embedTextMock,
+    generateValidationMock,
+    parseValidationResponseMock,
+} = vi.hoisted(() => ({
+    getBufferMock: vi.fn(),
+    putJsonMock: vi.fn(),
+    parsePdfMock: vi.fn(),
+    chunkDocumentMock: vi.fn(),
+    embedTextsMock: vi.fn(),
+    embedTextMock: vi.fn(),
+    generateValidationMock: vi.fn(),
+    parseValidationResponseMock: vi.fn(),
+}))
+
+vi.mock('../../../../ai-form-augmentation/src/s3', () => ({
+    newArtifactS3Client: vi.fn(() => ({
+        getBuffer: getBufferMock,
+        putJson: putJsonMock,
+    })),
+}))
+
+vi.mock('../../../../ai-form-augmentation/src/parsing', () => ({
+    parsePdf: parsePdfMock,
+}))
+
+vi.mock('../../../../ai-form-augmentation/src/chunking', () => ({
+    chunkDocument: chunkDocumentMock,
+}))
+
+vi.mock('../../../../ai-form-augmentation/src/embeddings', () => ({
+    XenovaEmbeddingProvider: vi.fn().mockImplementation(() => ({
+        embedTexts: embedTextsMock,
+        embedText: embedTextMock,
+    })),
+}))
+
+vi.mock('../../../../ai-form-augmentation/src/llm', () => ({
+    OllamaValidationClient: vi.fn().mockImplementation(() => ({
+        generateValidation: generateValidationMock,
+    })),
+}))
+
+vi.mock('../../../../ai-form-augmentation/src/prompts', () => ({
+    buildDateValidationPrompt: vi.fn(() => 'test-prompt'),
+}))
+
+vi.mock('../../../../ai-form-augmentation/src/retrieval', () => ({
+    orderRetrievedChunks: vi.fn(
+        (
+            results: Array<{
+                id: string
+                score: number
+                metadata: unknown
+            }>
+        ) => results
+    ),
+}))
+
+vi.mock('../../../../ai-form-augmentation/src/validation-output', () => ({
+    parseValidationResponse: parseValidationResponseMock,
+}))
+
+import { getChunksArtifactKey } from '../../../../ai-form-augmentation/src/artifacts'
+import { getValidationResultKey } from '../../../../ai-form-augmentation/src/results'
+import { getValidationStatusKey } from '../../../../ai-form-augmentation/src/status'
+import { validationHandler } from '../../../../ai-form-augmentation/src/handlers'
+
+const baseEvent = {
+    formId: 'test-form',
+    artifactVersion: 'artifact-v1',
+    bucket: 'ai-form-augmentation-artifacts',
+    s3Config: {
+        region: 'us-east-1',
+    },
+    formFields: [
+        {
+            field: 'contractStartDate' as const,
+            label: 'Contract Start Date',
+            value: 'January 1, 2025',
+        },
+        {
+            field: 'contractEndDate' as const,
+            label: 'Contract End Date',
+            value: 'December 31, 2025',
+        },
+    ],
+    documents: [
+        {
+            documentName: 'contract-a.pdf',
+            sourceBucket: 'local-uploads',
+            sourceKey: 'uploads/contracts/contract-a.pdf',
+        },
+    ],
+}
+
+describe('validationHandler', () => {
+    beforeEach(() => {
+        vi.clearAllMocks()
+
+        getBufferMock.mockResolvedValue(Buffer.from('fake-pdf'))
+        parsePdfMock.mockResolvedValue({
+            fileName: 'contract-a.pdf',
+            rawText: 'START DATE January 1, 2025 END DATE December 31, 2025',
+            extractionMethod: 'pdf-text',
+            extractionNotes: [],
+        })
+        chunkDocumentMock.mockReturnValue([
+            {
+                chunkId: 'contract-a.pdf::chunk-0',
+                documentName: 'contract-a.pdf',
+                order: 0,
+                page: null,
+                text: 'START DATE January 1, 2025 END DATE December 31, 2025',
+                startChar: 0,
+                endChar: 56,
+            },
+        ])
+        embedTextsMock.mockResolvedValue([[0.1, 0.2, 0.3]])
+        embedTextMock.mockResolvedValue([0.1, 0.2, 0.3])
+        generateValidationMock.mockResolvedValue({
+            rawText:
+                '[{"field":"contractStartDate","outcome":"match","confidence":"high","message":"Start date matches.","citations":[{"chunkId":"contract-a.pdf::chunk-0","documentName":"wrong.pdf","page":9,"order":9}]}]',
+            model: 'llama3.1:8b',
+        })
+        parseValidationResponseMock.mockReturnValue({
+            normalizedRawText: '[]',
+            results: [
+                {
+                    field: 'contractStartDate',
+                    outcome: 'match',
+                    confidence: 'high',
+                    message: 'Start date matches.',
+                    citations: [
+                        {
+                            chunkId: 'contract-a.pdf::chunk-0',
+                            documentName: 'wrong.pdf',
+                            page: 9,
+                            order: 9,
+                        },
+                    ],
+                },
+            ],
+        })
+    })
+
+    it('executes the runtime pipeline and persists reconciled results', async () => {
+        const result = await validationHandler(baseEvent)
+
+        expect(result).toEqual({
+            formId: 'test-form',
+            artifactVersion: 'artifact-v1',
+            status: 'completed',
+        })
+
+        expect(getBufferMock).toHaveBeenCalledWith(
+            'local-uploads',
+            'uploads/contracts/contract-a.pdf'
+        )
+
+        expect(putJsonMock).toHaveBeenCalledWith(
+            'ai-form-augmentation-artifacts',
+            getChunksArtifactKey('test-form'),
+            expect.objectContaining({
+                artifactVersion: 'artifact-v1',
+                chunks: expect.arrayContaining([
+                    expect.objectContaining({
+                        chunkId: 'contract-a.pdf::chunk-0',
+                    }),
+                ]),
+            })
+        )
+
+        expect(putJsonMock).toHaveBeenCalledWith(
+            'ai-form-augmentation-artifacts',
+            getValidationResultKey('test-form'),
+            expect.objectContaining({
+                artifactVersion: 'artifact-v1',
+                results: [
+                    {
+                        field: 'contractStartDate',
+                        outcome: 'match',
+                        confidence: 'high',
+                        message: 'Start date matches.',
+                        citations: [
+                            {
+                                chunkId: 'contract-a.pdf::chunk-0',
+                                documentName: 'contract-a.pdf',
+                                page: null,
+                                order: 0,
+                            },
+                        ],
+                    },
+                ],
+            })
+        )
+
+        expect(putJsonMock).toHaveBeenLastCalledWith(
+            'ai-form-augmentation-artifacts',
+            getValidationStatusKey('test-form'),
+            expect.objectContaining({
+                stage: 'complete',
+                artifactVersion: 'artifact-v1',
+                error: null,
+            })
+        )
+    })
+
+    it('writes failed status when the pipeline throws', async () => {
+        parsePdfMock.mockRejectedValueOnce(new Error('parse failure'))
+
+        await expect(validationHandler(baseEvent)).rejects.toThrow(
+            'parse failure'
+        )
+
+        expect(putJsonMock).toHaveBeenNthCalledWith(
+            1,
+            'ai-form-augmentation-artifacts',
+            getValidationStatusKey('test-form'),
+            expect.objectContaining({
+                stage: 'parsing',
+                artifactVersion: 'artifact-v1',
+            })
+        )
+
+        expect(putJsonMock).toHaveBeenLastCalledWith(
+            'ai-form-augmentation-artifacts',
+            getValidationStatusKey('test-form'),
+            expect.objectContaining({
+                stage: 'failed',
+                artifactVersion: 'artifact-v1',
+                error: 'parse failure',
+            })
+        )
+    })
+})
