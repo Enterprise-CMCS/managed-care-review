@@ -48,7 +48,7 @@ async function waitForBastionToReachState(
                 return true
             }
         } catch (err) {
-            return err
+            return err instanceof Error ? err : new Error(String(err))
         }
 
         return false
