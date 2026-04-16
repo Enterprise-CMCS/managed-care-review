@@ -16,7 +16,7 @@ import {
     ApproveContractDocument,
     FetchContractDocument,
 } from '../../gen/gqlClient'
-import { useQuery, useMutation } from '@apollo/client'
+import { useMutation, useQuery } from '@apollo/client/react'
 import { ErrorOrLoadingPage } from '../StateSubmission'
 import { handleAndReturnErrorState } from '../StateSubmission/SharedSubmissionComponents'
 import { GenericErrorPage } from '../Errors/GenericErrorPage'

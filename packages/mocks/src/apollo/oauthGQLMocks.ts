@@ -1,4 +1,4 @@
-import { MockedResponse } from '@apollo/client/testing'
+import { MockLink } from '@apollo/client/testing'
 import {
     FetchOauthClientsDocument,
     FetchOauthClientsQuery,
@@ -7,12 +7,11 @@ import {
     CreateOauthClientInput,
     CreateOauthClientMutation,
 } from '../gen/gqlClient'
-import { ApolloError } from '@apollo/client'
 import { GraphQLError } from 'graphql'
 import { v4 as uuidv4 } from 'uuid'
 
 const fetchOauthClientsMockSuccess =
-    (): MockedResponse<FetchOauthClientsQuery> => {
+    (): MockLink.MockedResponse<FetchOauthClientsQuery> => {
         return {
             request: {
                 query: FetchOauthClientsDocument,
@@ -50,7 +49,8 @@ const fetchOauthClientsMockSuccess =
         }
     }
 
-const fetchOauthClientsMockFail = (): MockedResponse<ApolloError> => {
+const fetchOauthClientsMockFail =
+    (): MockLink.MockedResponse<FetchOauthClientsQuery> => {
     const graphQLError = new GraphQLError('Error fetching Oauth clients.', {
         extensions: {
             code: 'INTERNAL_SERVER_ERROR',
@@ -75,7 +75,7 @@ const createOauthClientMockSuccess = ({
 }: {
     input: CreateOauthClientInput
     user: CmsUsersUnion
-}): MockedResponse<CreateOauthClientMutation> => {
+}): MockLink.MockedResponse<CreateOauthClientMutation> => {
     return {
         request: {
             query: CreateOauthClientDocument,
@@ -106,7 +106,7 @@ const createOauthClientMockSuccess = ({
 }
 
 const createOauthClientMockFailure =
-    (): MockedResponse<CreateOauthClientMutation> => {
+    (): MockLink.MockedResponse<CreateOauthClientMutation> => {
         const graphQLError = new GraphQLError('Issue creating Oauth client', {
             extensions: {
                 code: 'NOT_FOUND',

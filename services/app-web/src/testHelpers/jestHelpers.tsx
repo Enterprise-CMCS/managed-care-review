@@ -1,4 +1,7 @@
-import { MockedProviderProps, MockedProvider } from '@apollo/client/testing'
+import {
+    MockedProvider,
+    MockedProviderProps,
+} from '@apollo/client/testing/react'
 import {
     Location,
     MemoryRouter,

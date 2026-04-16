@@ -12,7 +12,8 @@ import { logoutLocalUser } from '../localAuth'
 import { signOut as cognitoSignOut } from '../pages/Auth/cognitoAuth'
 import { recordJSException } from '@mc-review/otel'
 import { handleApolloError, parseErrorToError } from '@mc-review/helpers'
-import { ApolloQueryResult, useQuery } from '@apollo/client'
+import type { ApolloClient } from '@apollo/client'
+import { useQuery } from '@apollo/client/react'
 
 // Constants and types
 type LoginStatusType = 'LOADING' | 'LOGGED_OUT' | 'LOGGED_IN'
@@ -31,7 +32,7 @@ const LOGOUT_PATHS: Record<LogoutType, string> = {
 type AuthContextType = {
     checkAuth: (
         failureRedirect?: string
-    ) => Promise<ApolloQueryResult<FetchCurrentUserQuery> | Error>
+    ) => Promise<ApolloClient.QueryResult<FetchCurrentUserQuery> | Error>
     refreshAuth: () => Promise<void>
     loggedInUser: UserType | undefined
     loginStatus: LoginStatusType

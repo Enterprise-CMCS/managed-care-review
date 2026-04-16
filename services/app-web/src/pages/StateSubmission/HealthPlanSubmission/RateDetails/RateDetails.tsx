@@ -54,9 +54,10 @@ import {
 import { LinkYourRates } from '../../../LinkYourRates/LinkYourRates'
 import { LinkedRateSummary } from './LinkedRateSummary'
 import { usePage } from '../../../../contexts/PageContext'
-import { InfoTag } from '../../../../components/InfoTag/InfoTag'
+import { InfoTag } from '../../../../components'
 import { useFocusOnRender } from '../../../../hooks/useFocusOnRender'
-import { ApolloError, useMutation, useQuery } from '@apollo/client'
+import type { ErrorLike } from '@apollo/client'
+import { useMutation, useQuery } from '@apollo/client/react'
 
 export type FormikRateForm = {
     id?: string // no id if its a new rate
@@ -135,7 +136,7 @@ const RateDetails = ({
         boolean | undefined
     >(undefined)
     const [rateSummaryError, setRateSummaryError] = useState<
-        ApolloError | undefined
+        ErrorLike | undefined
     >(undefined)
 
     const newRateNameRef = React.useRef<HTMLElement | null>(null)
@@ -576,7 +577,7 @@ const RateDetails = ({
                                                                                 | boolean
                                                                                 | undefined,
                                                                             autoFillError?:
-                                                                                | ApolloError
+                                                                                | ErrorLike
                                                                                 | undefined
                                                                         ) => {
                                                                             if (

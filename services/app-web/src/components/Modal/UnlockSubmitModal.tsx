@@ -9,7 +9,7 @@ import {
     FetchContractWithQuestionsDocument,
     IndexContractsStrippedDocument,
 } from '../../gen/gqlClient'
-import { useMutation } from '@apollo/client'
+import { useMutation } from '@apollo/client/react'
 import { useFormik } from 'formik'
 import { usePrevious } from '../../hooks'
 import { Modal } from './Modal'

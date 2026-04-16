@@ -1,6 +1,12 @@
 import { Crypto } from '@peculiar/webcrypto'
 import { TextEncoder, TextDecoder } from 'util'
 import { cleanup } from '@testing-library/react'
+import { MockLink } from '@apollo/client/testing'
+
+// Apollo Client v4 MockedProvider introduced a 20-50ms default response
+// delay. Override globally to 0 so unit tests stay fast. Individual mocks
+// can still opt in by setting their own `delay`.
+MockLink.defaultOptions = { delay: 0 }
 
 // jest-dom adds custom jest matchers for asserting on DOM nodes.
 // allows you to do things like:

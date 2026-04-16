@@ -26,7 +26,7 @@ import {
     IndexUsersDocument,
     UpdateStateAssignmentsByStateDocument,
 } from '../../../gen/gqlClient'
-import { useMutation, useQuery } from '@apollo/client'
+import { useMutation, useQuery } from '@apollo/client/react'
 import { RoutesRecord } from '@mc-review/constants'
 import { isValidStateCode } from '@mc-review/submissions'
 import { Error404 } from '../../Errors/Error404Page'

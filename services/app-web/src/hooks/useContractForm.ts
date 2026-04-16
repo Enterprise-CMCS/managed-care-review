@@ -17,10 +17,11 @@ import {
 import {
     wrapApolloResult,
     handleApolloError,
+    toGQLError,
     parseErrorToError,
 } from '@mc-review/helpers'
 import { recordJSException } from '@mc-review/otel'
-import { ApolloError, useMutation, useQuery } from '@apollo/client'
+import { useMutation, useQuery } from '@apollo/client/react'
 import type { InterimState } from '../pages/StateSubmission/SharedSubmissionComponents'
 
 type UseContractForm = {
@@ -206,16 +207,14 @@ const useContractForm = (contractID?: string): UseContractForm => {
     // do not trip skipped as an error
     if (result.status === 'ERROR' && result.error.name !== 'SKIPPED') {
         const err = result.error
-        if (err instanceof ApolloError) {
-            handleApolloError(err, true)
-            if (err.graphQLErrors[0]?.extensions?.code === 'NOT_FOUND') {
-                interimState = 'NOT_FOUND'
-                return {
-                    interimState,
-                    createDraft,
-                    updateDraft,
-                    showPageErrorMessage,
-                }
+        handleApolloError(err, true)
+        if (toGQLError(err)?.extensions.code === 'NOT_FOUND') {
+            interimState = 'NOT_FOUND'
+            return {
+                interimState,
+                createDraft,
+                updateDraft,
+                showPageErrorMessage,
             }
         }
         if (err.name !== 'SKIPPED') {

@@ -1,11 +1,8 @@
 import React from 'react'
 import { BrowserRouter } from 'react-router-dom'
 import { ErrorBoundary } from 'react-error-boundary'
-import {
-    ApolloProvider,
-    ApolloClient,
-    NormalizedCacheObject,
-} from '@apollo/client'
+import { ApolloClient } from '@apollo/client'
+import { ApolloProvider } from '@apollo/client/react'
 
 import { AppBody } from './AppBody'
 import { AuthProvider } from '../../contexts/AuthContext'
@@ -39,7 +36,7 @@ export function TracingInitializer({ children }: TracingInitializerProps) {
 
 export type AppProps = {
     authMode: AuthModeType
-    apolloClient: ApolloClient<NormalizedCacheObject>
+    apolloClient: ApolloClient
     s3Client: S3ClientT
 }
 

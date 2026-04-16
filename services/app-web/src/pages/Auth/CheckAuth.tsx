@@ -1,6 +1,6 @@
 import React, { useState } from 'react'
 import { GridContainer } from '@trussworks/react-uswds'
-import { useLazyQuery } from '@apollo/client'
+import { useLazyQuery } from '@apollo/client/react'
 import { FetchCurrentUserDocument } from '../../gen/gqlClient'
 import { ButtonWithLogging } from '../../components'
 import { AccessibleAlertBanner } from '../../components/Banner/AccessibleAlertBanner/AccessibleAlertBanner'

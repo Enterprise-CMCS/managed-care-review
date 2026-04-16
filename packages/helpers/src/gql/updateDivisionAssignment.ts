@@ -1,4 +1,4 @@
-import type { MutationFunction } from '@apollo/client'
+import type { useMutation } from '@apollo/client/react'
 import {
     UpdateDivisionAssignmentInput,
     UpdateDivisionAssignmentMutation,
@@ -8,7 +8,7 @@ import {
 import { parseErrorToError } from '../parseError'
 
 async function updateDivisionAssignment(
-    updateUserMutation: MutationFunction<UpdateDivisionAssignmentMutation, UpdateDivisionAssignmentMutationVariables>,
+    updateUserMutation: useMutation.MutationFunction<UpdateDivisionAssignmentMutation, UpdateDivisionAssignmentMutationVariables>,
     input: UpdateDivisionAssignmentInput
 ): Promise<UpdateCmsUserPayload | Error> {
     try {

@@ -26,7 +26,7 @@ import {
     ContractDetailsSummarySection,
     SubmissionTypeSummarySection,
 } from '../../../../components/SubmissionSummarySection'
-import { useQuery } from '@apollo/client'
+import { useQuery } from '@apollo/client/react'
 import { FetchContractDocument } from '../../../../gen/gqlClient'
 import { ErrorForbiddenPage } from '../../../Errors/ErrorForbiddenPage'
 import { Error404 } from '../../../Errors/Error404Page'
@@ -36,6 +36,7 @@ import { usePage } from '../../../../contexts/PageContext'
 import { activeFormPages } from '../../submissionUtils'
 import { featureFlags } from '@mc-review/common-code'
 import { RoutesRecord, RouteT } from '@mc-review/constants'
+import { toGQLError } from '@mc-review/helpers'
 
 export const ReviewSubmit = (): React.ReactElement => {
     const navigate = useNavigate()
@@ -84,11 +85,10 @@ export const ReviewSubmit = (): React.ReactElement => {
         )
     } else if (error || !contract) {
         //error handling for a state user that tries to access rates for a different state
-        if (error?.graphQLErrors[0]?.extensions?.code === 'FORBIDDEN') {
-            return (
-                <ErrorForbiddenPage errorMsg={error.graphQLErrors[0].message} />
-            )
-        } else if (error?.graphQLErrors[0]?.extensions?.code === 'NOT_FOUND') {
+        const gqlError = toGQLError(error)
+        if (gqlError?.extensions.code === 'FORBIDDEN') {
+            return <ErrorForbiddenPage errorMsg={gqlError.message} />
+        } else if (gqlError?.extensions.code === 'NOT_FOUND') {
             return <Error404 />
         } else {
             return <GenericErrorPage />

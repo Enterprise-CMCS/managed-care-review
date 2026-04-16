@@ -18,10 +18,11 @@
         "start:local": "node .local-build/local-server.js"
     },
     "dependencies": {
-        "@apollo/client": "3.8.8",
+        "@apollo/client": "^4.1.7",
         "@apollo/server": "^5.5.0",
         "@graphql-typed-document-node/core": "^3.2.0",
-        "@as-integrations/aws-lambda": "^3.1.0",
+        "@as-integrations/aws-lambda": "^4.0.1",
+        "rxjs": "^7.8.1",
         "@aws-sdk/client-cognito-identity-provider": "^3.1030.0",
         "@aws-sdk/client-rds": "^3.1030.0",
         "@aws-sdk/client-s3": "^3.1030.0",
@@ -38,7 +39,7 @@
         "@mc-review/helpers": "workspace:*",
         "@mc-review/submissions": "workspace:*",
         "@node-oauth/oauth2-server": "^5.2.1",
-        "@opentelemetry/api": "^1.9.0",
+        "@opentelemetry/api": "^1.9.1",
         "@opentelemetry/core": "^1.30.1",
         "@opentelemetry/exporter-trace-otlp-http": "^0.45.1",
         "@opentelemetry/id-generator-aws-xray": "^2.1.0",

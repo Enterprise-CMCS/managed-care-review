@@ -63,9 +63,10 @@ function fetchResponseFromAxios(axiosResponse: AxiosResponse): Response {
 // Apollo Link uses the ~fetch api for it's client-side middleware.
 // Amplify.API uses axios undeneath and does its own transformation of the body, so we wrap that up here.
 export async function fakeAmplifyFetch(
-    uri: string,
-    options: RequestInit
+    uri: URL | RequestInfo,
+    options?: RequestInit
 ): Promise<Response> {
+    options = options ?? {}
     if (options.method !== 'POST') {
         throw new Error('unexpected GQL request')
     }
@@ -93,8 +94,15 @@ export async function fakeAmplifyFetch(
         headers: headers,
     }
 
+    const uriString =
+        typeof uri === 'string'
+            ? uri
+            : uri instanceof URL
+              ? uri.toString()
+              : uri.url
+
     return new Promise<Response>((resolve, reject) => {
-        API.post('api', uri, apiOptions)
+        API.post('api', uriString, apiOptions)
             .then((apiResponse: AxiosResponse) => {
                 // The Apollo Link wants a fetch.Response shaped response,
                 // not the axios shaped response that Amplify.API returns

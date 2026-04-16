@@ -31,11 +31,7 @@ import {
     eqroFromData,
     AdminUserType,
 } from '../utils/apollo-test-utils'
-import {
-    ApolloClient,
-    DocumentNode,
-    NormalizedCacheObject,
-} from '@apollo/client'
+import { ApolloClient, DocumentNode } from '@apollo/client'
 import { GraphQLError, print } from 'graphql'
 import { CMSUserLoginNames, userLoginData } from './loginCommands'
 import { calculateSHA256 } from '@mc-review/common-code'
@@ -49,7 +45,7 @@ export type ApiCreateOAuthClientResponseType = {
 }
 
 const uploadFile = async (
-    apolloClient: ApolloClient<NormalizedCacheObject>,
+    apolloClient: ApolloClient,
     fileName: string,
     fileType: UploadFileType,
     bucketName: UploadBucketName,
@@ -68,10 +64,10 @@ const uploadFile = async (
     })
 
     if (
-        uploadContractFileUrl.errors ||
+        uploadContractFileUrl.error ||
         !uploadContractFileUrl.data?.generateUploadURL
     ) {
-        const errorMsg = `generating upload url failed: ${JSON.stringify(uploadContractFileUrl.errors)}`
+        const errorMsg = `generating upload url failed: ${JSON.stringify(uploadContractFileUrl.error)}`
         throw new Error(errorMsg)
     }
 
@@ -112,7 +108,7 @@ const uploadFile = async (
 }
 
 const createAndSubmitContractOnlyPackage = async (
-    apolloClient: ApolloClient<NormalizedCacheObject>,
+    apolloClient: ApolloClient,
     documents: FixtureDocuments
 ): Promise<Contract> => {
     try {
@@ -133,12 +129,24 @@ const createAndSubmitContractOnlyPackage = async (
             },
         })
 
+        if (newContract.error || !newContract.data?.createContract.contract) {
+            throw new Error(
+                `Could not create draft contract: ${JSON.stringify(newContract.error)}`
+            )
+        }
+
         const draftContract = newContract.data.createContract.contract
         const draftRevision = draftContract.draftRevision
         const updateFormData = contractFormData({
             submissionType: 'CONTRACT_ONLY',
             contractDocuments: [contractDoc],
         })
+
+        if (!draftRevision) {
+            throw new Error(
+                `Draft contract did not contain draft revision: ${JSON.stringify(draftContract)}`
+            )
+        }
 
         const updateContractDraftRevisionInput: UpdateContractDraftRevisionInput =
             {
@@ -163,6 +171,12 @@ const createAndSubmitContractOnlyPackage = async (
             },
         })
 
+        if (submission.error || !submission.data?.submitContract.contract) {
+            throw new Error(
+                `Could not submit contract: ${JSON.stringify(submission.error)}`
+            )
+        }
+
         return submission.data.submitContract.contract
     } catch (error) {
         const errorMsg = error instanceof Error ? error.message : String(error)
@@ -173,7 +187,7 @@ const createAndSubmitContractOnlyPackage = async (
 }
 
 const createAndSubmitEQROContract = async (
-    apolloClient: ApolloClient<NormalizedCacheObject>,
+    apolloClient: ApolloClient,
     documents: FixtureDocuments
 ): Promise<Contract> => {
     try {
@@ -203,8 +217,21 @@ const createAndSubmitEQROContract = async (
             },
         })
 
+        if (newContract.error || !newContract.data?.createContract.contract) {
+            throw new Error(
+                `Could not create draft EQRO contract: ${JSON.stringify(newContract.error)}`
+            )
+        }
+
         const draftContract = newContract.data.createContract.contract
         const draftRevision = draftContract.draftRevision
+
+        if (!draftRevision) {
+            throw new Error(
+                `Draft contract did not contain draft revision: ${JSON.stringify(draftContract)}`
+            )
+        }
+
         const updateFormData = eqroFromData({
             contractDocuments: [contractDoc],
         })
@@ -232,6 +259,12 @@ const createAndSubmitEQROContract = async (
             },
         })
 
+        if (submission.error || !submission.data?.submitContract.contract) {
+            throw new Error(
+                `Could not submit EQRO contract: ${JSON.stringify(submission.error)}`
+            )
+        }
+
         return submission.data.submitContract.contract
     } catch (error) {
         const errorMsg = error instanceof Error ? error.message : String(error)
@@ -240,7 +273,7 @@ const createAndSubmitEQROContract = async (
 }
 
 const createAndSubmitContractWithRates = async (
-    apolloClient: ApolloClient<NormalizedCacheObject>,
+    apolloClient: ApolloClient,
     documents: FixtureDocuments
 ): Promise<Contract> => {
     try {
@@ -277,8 +310,21 @@ const createAndSubmitContractWithRates = async (
             },
         })
 
+        if (newContract.error || !newContract.data?.createContract.contract) {
+            throw new Error(
+                `Could not create draft contract: ${JSON.stringify(newContract.error)}`
+            )
+        }
+
         const draftContract = newContract.data.createContract.contract
         const draftRevision = draftContract.draftRevision
+
+        if (!draftRevision) {
+            throw new Error(
+                `Draft contract did not contain draft revision: ${JSON.stringify(draftContract)}`
+            )
+        }
+
         const updateFormData = contractFormData({
             submissionType: 'CONTRACT_AND_RATES',
             contractDocuments: [contractDoc],
@@ -297,6 +343,16 @@ const createAndSubmitContractWithRates = async (
                 input: updateContractDraftRevisionInput,
             },
         })
+
+        if (
+            updatedContract.error ||
+            !updatedContract.data?.updateContractDraftRevision.contract
+                .draftRevision
+        ) {
+            throw new Error(
+                `Could not update draft contract: ${JSON.stringify(updatedContract.error)}`
+            )
+        }
 
         const updatedDraftRevision =
             updatedContract.data.updateContractDraftRevision.contract
@@ -347,6 +403,12 @@ const createAndSubmitContractWithRates = async (
             },
         })
 
+        if (submission.error || !submission.data?.submitContract.contract) {
+            throw new Error(
+                `Could not submit contract: ${JSON.stringify(submission.error)}`
+            )
+        }
+
         return submission.data.submitContract.contract
     } catch (error) {
         const errorMsg = error instanceof Error ? error.message : String(error)
@@ -355,7 +417,7 @@ const createAndSubmitContractWithRates = async (
 }
 
 const assignCmsDivision = async (
-    apolloClient: ApolloClient<NormalizedCacheObject>,
+    apolloClient: ApolloClient,
     cmsUser: CmsUsersUnion,
     division: Division
 ): Promise<void> => {
@@ -363,6 +425,12 @@ const assignCmsDivision = async (
     const result = await apolloClient.query({
         query: IndexUsersDocument,
     })
+
+    if (result.error || !result.data?.indexUsers) {
+        throw new Error(
+            `Could not query indexUsers: ${JSON.stringify(result.error)}`
+        )
+    }
 
     const users = result.data.indexUsers.edges.map(
         (edge: UserEdge) => edge.node
@@ -390,16 +458,16 @@ const assignCmsDivision = async (
 }
 
 const fetchUser = async (
-    apolloClient: ApolloClient<NormalizedCacheObject>
+    apolloClient: ApolloClient
 ): Promise<User> => {
     // To seed, we just need to perform a graphql query and the api will add the user to the db
     const user = await apolloClient.query({
         query: FetchCurrentUserDocument,
     })
 
-    if (user.errors) {
+    if (user.error || !user.data?.fetchCurrentUser) {
         throw new Error(
-            `Error: Could not seed user into DB: ${JSON.stringify(user.errors)}`
+            `Error: Could not seed user into DB: ${JSON.stringify(user.error)}`
         )
     }
 
@@ -413,7 +481,7 @@ const fetchUser = async (
 }
 
 const createOAuthClient = async (
-    apolloClient: ApolloClient<NormalizedCacheObject>,
+    apolloClient: ApolloClient,
     oauthClientUser: CMSUserLoginNames,
     delegatedUser?: CMSUserLoginNames
 ): Promise<ApiCreateOAuthClientResponseType> => {
@@ -421,9 +489,9 @@ const createOAuthClient = async (
         query: IndexUsersDocument,
     })
 
-    if (indexUsersRes.errors) {
+    if (indexUsersRes.error || !indexUsersRes.data?.indexUsers) {
         throw new Error(
-            `Error: Could not retrieve index users to for createOAuthClient. ${JSON.stringify(indexUsersRes.errors)}`
+            `Error: Could not retrieve index users to for createOAuthClient. ${JSON.stringify(indexUsersRes.error)}`
         )
     }
 
@@ -480,9 +548,9 @@ const createOAuthClient = async (
         },
     })
 
-    if (oauthClientResponse.errors) {
+    if (oauthClientResponse.error || !oauthClientResponse.data) {
         throw new Error(
-            `Error: Could not create OAuth client for user: ${JSON.stringify(oauthClientResponse.errors)}`
+            `Error: Could not create OAuth client for user: ${JSON.stringify(oauthClientResponse.error)}`
         )
     }
 
