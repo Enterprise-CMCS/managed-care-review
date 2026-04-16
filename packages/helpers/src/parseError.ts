@@ -12,7 +12,7 @@ export function parseErrorToError(err: unknown): Error {
     if (err !== null && typeof err === 'object') {
         const obj = err as Record<string, unknown>
         const message =
-            typeof obj.message === 'string' ? obj.message : String(err)
+            typeof obj.message === 'string' ? obj.message : stringifyError(err)
         const error = new Error(message)
         for (const key of Object.keys(obj)) {
             if (key === 'message' || key === 'stack' || key === 'name') continue
@@ -25,9 +25,13 @@ export function parseErrorToError(err: unknown): Error {
         return error
     }
 
+    return new Error(stringifyError(err))
+}
+
+function stringifyError(err: unknown): string {
     try {
-        return new Error(String(err))
+        return String(err)
     } catch {
-        return new Error('Unknown error')
+        return 'Unknown error'
     }
 }
