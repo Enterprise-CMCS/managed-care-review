@@ -1,7 +1,7 @@
 # AI Validation Session
 
 ## Current Ticket
-AIFA-017 is complete. The GraphQL API can now both trigger validation work and poll the current status/results artifacts for the active draft contract.
+AIFA-018 is complete. The review page now polls and displays non-blocking AI validation status while local development also boots with the validation config introduced by the earlier API tickets.
 
 ## Completed
 - AIFA-001 ✔️ Create AI service workspace
@@ -23,6 +23,7 @@ AIFA-017 is complete. The GraphQL API can now both trigger validation work and p
 - AIFA-014 ✔️ Add deterministic artifactVersion and formSnapshotHash computation
 - AIFA-016 ✔️ Add GraphQL trigger resolver for the validation Lambda
 - AIFA-017 ✔️ Add GraphQL polling resolver for validation status/results
+- AIFA-018 ✔️ Add review-page validation status UI and local-dev bootstrap follow-up
 
 ## Current Progress
 - AI workspace lives in `services/ai-form-augmentation`
@@ -80,6 +81,14 @@ AIFA-017 is complete. The GraphQL API can now both trigger validation work and p
   - `validationStatus` reads `status.json` and `validation-result.json` from the AI artifact bucket
   - both resolvers compute the current `artifactVersion` from the draft revision's persisted contract document keys
   - stale artifact/version mismatches are surfaced explicitly instead of being silently trusted
+- Review page validation visibility is now in place:
+  - `ReviewSubmit` polls `validationStatus` on an interval without blocking the submission review flow
+  - UI state mapping is centralized in a small helper so page logic stays narrow
+  - the review page surfaces pending, in-progress, complete, stale, and unavailable states with calm non-blocking messaging
+  - focused UI tests cover the main polling states
+- Local bootstrap now matches the new validation config requirements:
+  - `./dev local` seeds local defaults for `VALIDATION_FUNCTION_NAME` and `AI_VALIDATION_ARTIFACT_BUCKET` before `apollo_gql` initializes
+  - LocalStack bucket bootstrap now includes `ai-form-augmentation-artifacts` so review-page polling can read validation artifacts locally
 - Local status tracking is now working:
   - `status.json` is written through the existing S3 helper
   - the status artifact includes `stage`, `artifactVersion`, `updatedAt`, and `error`
@@ -154,12 +163,15 @@ AWS_ACCESS_KEY_ID=test AWS_SECRET_ACCESS_KEY=test AWS_DEFAULT_REGION=us-east-1 a
 - The trigger and polling resolvers intentionally key off `draftRevision`.
   - this matches the product workflow where AI validation runs while the user is preparing a submission
   - submitted-history fallbacks can be added later if product flow requires them
+- The review-page UI is intentionally non-blocking.
+  - users can still review and submit even if validation is pending, stale, or temporarily unavailable
+  - this keeps AI validation additive at this stage instead of turning it into a hard product dependency
 - Version/hash placeholders have now been replaced with shared utilities.
   - repeated runs with the same inputs keep stable hash values
   - form-only changes affect `formSnapshotHash` independently from document-set versioning
 
 ## Next Likely Ticket
-- AIFA-018 Review page UI state
+- AIFA-019 Surface validation findings, not just pipeline status
 
 ## Suggested Next Step
 - Keep the same approach:

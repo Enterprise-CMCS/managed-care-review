@@ -11,12 +11,31 @@ import type {
     Context,
 } from 'aws-lambda'
 
-// Import handlers - all ESM now
-import { gqlHandler } from './handlers/apollo_gql'
-import { main as healthCheckHandler } from './handlers/health_check'
-import { main as oauthTokenHandler } from './handlers/oauth_token'
-import { main as otelProxyHandler } from './handlers/otel_proxy'
-import { main as thirdPartyAuthorizer } from './handlers/third_party_API_authorizer'
+function seedLocalValidationDefaults() {
+    // AIFA-016 introduced required validation env vars for the GraphQL handler.
+    // Deployed Lambda gets them from CDK, but `./dev local` boots the handler
+    // directly, so we provide local defaults here before importing apollo_gql.
+    process.env.VALIDATION_FUNCTION_NAME ||= 'local-ai-form-validation'
+    process.env.AI_VALIDATION_ARTIFACT_BUCKET ||=
+        'ai-form-augmentation-artifacts'
+}
+
+seedLocalValidationDefaults()
+
+const gqlHandlerPromise = import('./handlers/apollo_gql').then(
+    ({ gqlHandler }) => gqlHandler
+)
+const healthCheckHandlerPromise = import('./handlers/health_check').then(
+    ({ main }) => main
+)
+const oauthTokenHandlerPromise = import('./handlers/oauth_token').then(
+    ({ main }) => main
+)
+const otelProxyHandlerPromise = import('./handlers/otel_proxy').then(
+    ({ main }) => main
+)
+const thirdPartyAuthorizerPromise =
+    import('./handlers/third_party_API_authorizer').then(({ main }) => main)
 
 const app = express()
 const router = express.Router()
@@ -179,6 +198,7 @@ const createContext = (): Context => ({
 router.get('/health_check', async (req: Request, res: Response) => {
     const event = toLambdaEvent(req)
     const context = createContext()
+    const healthCheckHandler = await healthCheckHandlerPromise
     await handleLambdaResponse(
         res,
         healthCheckHandler(
@@ -192,6 +212,7 @@ router.get('/health_check', async (req: Request, res: Response) => {
 // OAuth token
 router.post('/oauth/token', async (req: Request, res: Response) => {
     const event = toLambdaEvent(req)
+    const oauthTokenHandler = await oauthTokenHandlerPromise
     await handleLambdaResponse(res, oauthTokenHandler(event))
 })
 
@@ -199,6 +220,7 @@ router.post('/oauth/token', async (req: Request, res: Response) => {
 router.post('/otel', async (req: Request, res: Response) => {
     const event = toLambdaEvent(req)
     const context = createContext()
+    const otelProxyHandler = await otelProxyHandlerPromise
     await handleLambdaResponse(
         res,
         otelProxyHandler(
@@ -213,6 +235,7 @@ router.post('/otel', async (req: Request, res: Response) => {
 router.all('/graphql', async (req: Request, res: Response) => {
     const event = toLambdaEvent(req)
     const context = createContext()
+    const gqlHandler = await gqlHandlerPromise
     await handleLambdaResponse(
         res,
         gqlHandler(event, context, () => {}) as Promise<APIGatewayProxyResult>
@@ -224,6 +247,8 @@ router.all('/graphql', async (req: Request, res: Response) => {
 router.all('/v1/graphql/external', async (req: Request, res: Response) => {
     const event = toLambdaEvent(req)
     const context = createContext()
+    const gqlHandler = await gqlHandlerPromise
+    const thirdPartyAuthorizer = await thirdPartyAuthorizerPromise
 
     // API Gateway returns 401 if no Authorization header is present for TOKEN authorizers
     const authHeader = req.headers.authorization

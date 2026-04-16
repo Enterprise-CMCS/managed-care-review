@@ -26,7 +26,10 @@ import {
     ContractDetailsSummarySection,
     SubmissionTypeSummarySection,
 } from '../../../../components/SubmissionSummarySection'
-import { useFetchContractQuery } from '../../../../gen/gqlClient'
+import {
+    useFetchContractQuery,
+    useValidationStatusQuery,
+} from '../../../../gen/gqlClient'
 import { ErrorForbiddenPage } from '../../../Errors/ErrorForbiddenPage'
 import { Error404 } from '../../../Errors/Error404Page'
 import { GenericErrorPage } from '../../../Errors/GenericErrorPage'
@@ -35,6 +38,8 @@ import { usePage } from '../../../../contexts/PageContext'
 import { activeFormPages } from '../../submissionUtils'
 import { featureFlags } from '@mc-review/common-code'
 import { RoutesRecord, RouteT } from '@mc-review/constants'
+import { AIValidationStatusCard } from './AIvalidationStatusCard'
+import { getAIValidationDisplayState } from './aiValidationStatus'
 
 export const ReviewSubmit = (): React.ReactElement => {
     const navigate = useNavigate()
@@ -66,6 +71,32 @@ export const ReviewSubmit = (): React.ReactElement => {
         },
         fetchPolicy: 'network-only',
     })
+
+    // Validation status is informational on this page. It should keep polling in
+    // the background without blocking the user’s review-and-submit flow.
+    const {
+        data: validationData,
+        loading: validationLoading,
+        error: validationError,
+    } = useValidationStatusQuery({
+        variables: {
+            input: {
+                contractID: id ?? 'unknown contract',
+            },
+        },
+        fetchPolicy: 'network-only',
+        pollInterval: 5000,
+        skip: !id,
+    })
+
+    const validationStatus = validationData?.validationStatus
+    const validationDisplayState = getAIValidationDisplayState({
+        stage: validationStatus?.stage,
+        isStale: validationStatus?.isStale,
+        error: validationStatus?.error,
+    })
+    const showInitialValidationLoading =
+        validationLoading && !validationStatus && !validationError
 
     const contract = data?.fetchContract.contract
     const activeMainContentId = 'reviewSubmitMainContent'
@@ -132,6 +163,32 @@ export const ReviewSubmit = (): React.ReactElement => {
                 />
             </FormNotificationContainer>
             <GridContainer className={styles.reviewSectionWrapper}>
+                <section
+                    className={styles.validationStatusSection}
+                    aria-label="Document validation status"
+                >
+                    <AIValidationStatusCard
+                        state={
+                            showInitialValidationLoading
+                                ? {
+                                      title: 'Checking validation status',
+                                      message:
+                                          'We are loading the latest document validation status for this submission.',
+                                      alertType: 'info',
+                                      isPolling: true,
+                                  }
+                                : validationError
+                                  ? {
+                                        title: 'Validation unavailable',
+                                        message:
+                                            'We could not load document validation status right now, but you can still continue reviewing your submission.',
+                                        alertType: 'warning',
+                                        isPolling: false,
+                                    }
+                                  : validationDisplayState
+                        }
+                    />
+                </section>
                 <SubmissionTypeSummarySection
                     contract={contract}
                     submissionName={submissionName}

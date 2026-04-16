@@ -1,0 +1,20 @@
+query ValidationStatus($input: ValidationStatusInput!) {
+    validationStatus(input: $input) {
+        stage
+        artifactVersion
+        isStale
+        error
+        results {
+            field
+            outcome
+            confidence
+            message
+            citations {
+                chunkId
+                documentName
+                page
+                order
+            }
+        }
+    }
+}

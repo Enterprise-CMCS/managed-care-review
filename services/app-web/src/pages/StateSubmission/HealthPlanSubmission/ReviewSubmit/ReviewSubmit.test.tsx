@@ -12,6 +12,34 @@ import {
     mockContractPackageDraft,
     mockContractPackageUnlockedWithUnlockedType,
 } from '@mc-review/mocks'
+import { ValidationStatusDocument } from '../../../../gen/gqlClient'
+
+const validationStatusMock = (overrides?: {
+    stage?: string
+    isStale?: boolean
+    error?: string | null
+}) => ({
+    request: {
+        query: ValidationStatusDocument,
+        variables: {
+            input: {
+                contractID: 'test-abc-123',
+            },
+        },
+    },
+    result: {
+        data: {
+            validationStatus: {
+                __typename: 'ValidationStatusPayload' as const,
+                stage: overrides?.stage ?? 'not-started',
+                artifactVersion: 'test-artifact-version',
+                isStale: overrides?.isStale ?? false,
+                error: overrides?.error ?? null,
+                results: [],
+            },
+        },
+    },
+})
 
 describe('ReviewSubmit', () => {
     it('renders without errors', async () => {
@@ -374,6 +402,167 @@ describe('ReviewSubmit', () => {
                 screen.getByText(
                     'You must add a rate certification before you can resubmit.'
                 )
+            ).toBeInTheDocument()
+        })
+    })
+
+    describe('AI validation status', () => {
+        it('displays a calm validation pending message on the review page', async () => {
+            renderWithProviders(
+                <Routes>
+                    <Route
+                        path={RoutesRecord.SUBMISSIONS_REVIEW_SUBMIT}
+                        element={<ReviewSubmit />}
+                    />
+                </Routes>,
+                {
+                    apolloProvider: {
+                        mocks: [
+                            fetchCurrentUserMock({ statusCode: 200 }),
+                            fetchContractMockSuccess({
+                                contract: {
+                                    ...mockContractPackageDraft(),
+                                    id: 'test-abc-123',
+                                    contractSubmissionType: 'HEALTH_PLAN',
+                                },
+                            }),
+                            validationStatusMock({
+                                stage: 'not-started',
+                            }),
+                        ],
+                    },
+                    routerProvider: {
+                        route: '/submissions/health-plan/test-abc-123/edit/review-and-submit',
+                    },
+                    featureFlags: {},
+                }
+            )
+
+            expect(
+                await screen.findByRole('heading', {
+                    name: 'Validation pending',
+                })
+            ).toBeInTheDocument()
+
+            expect(
+                screen.getByText(
+                    'Document validation has not started yet. It will appear here once available.'
+                )
+            ).toBeInTheDocument()
+        })
+
+        it('shows an in-progress validation message while backend work is running', async () => {
+            renderWithProviders(
+                <Routes>
+                    <Route
+                        path={RoutesRecord.SUBMISSIONS_REVIEW_SUBMIT}
+                        element={<ReviewSubmit />}
+                    />
+                </Routes>,
+                {
+                    apolloProvider: {
+                        mocks: [
+                            fetchCurrentUserMock({ statusCode: 200 }),
+                            fetchContractMockSuccess({
+                                contract: {
+                                    ...mockContractPackageDraft(),
+                                    id: 'test-abc-123',
+                                    contractSubmissionType: 'HEALTH_PLAN',
+                                },
+                            }),
+                            validationStatusMock({
+                                stage: 'validating',
+                            }),
+                        ],
+                    },
+                    routerProvider: {
+                        route: '/submissions/health-plan/test-abc-123/edit/review-and-submit',
+                    },
+                    featureFlags: {},
+                }
+            )
+
+            expect(
+                await screen.findByRole('heading', {
+                    name: 'Reviewing your documents',
+                })
+            ).toBeInTheDocument()
+        })
+
+        it('shows a completed validation message when polling reports complete', async () => {
+            renderWithProviders(
+                <Routes>
+                    <Route
+                        path={RoutesRecord.SUBMISSIONS_REVIEW_SUBMIT}
+                        element={<ReviewSubmit />}
+                    />
+                </Routes>,
+                {
+                    apolloProvider: {
+                        mocks: [
+                            fetchCurrentUserMock({ statusCode: 200 }),
+                            fetchContractMockSuccess({
+                                contract: {
+                                    ...mockContractPackageDraft(),
+                                    id: 'test-abc-123',
+                                    contractSubmissionType: 'HEALTH_PLAN',
+                                },
+                            }),
+                            validationStatusMock({
+                                stage: 'complete',
+                            }),
+                        ],
+                    },
+                    routerProvider: {
+                        route: '/submissions/health-plan/test-abc-123/edit/review-and-submit',
+                    },
+                    featureFlags: {},
+                }
+            )
+
+            expect(
+                await screen.findByRole('heading', {
+                    name: 'Validation complete',
+                })
+            ).toBeInTheDocument()
+        })
+
+        it('shows a non-blocking unavailable message when validation status fails', async () => {
+            renderWithProviders(
+                <Routes>
+                    <Route
+                        path={RoutesRecord.SUBMISSIONS_REVIEW_SUBMIT}
+                        element={<ReviewSubmit />}
+                    />
+                </Routes>,
+                {
+                    apolloProvider: {
+                        mocks: [
+                            fetchCurrentUserMock({ statusCode: 200 }),
+                            fetchContractMockSuccess({
+                                contract: {
+                                    ...mockContractPackageDraft(),
+                                    id: 'test-abc-123',
+                                    contractSubmissionType: 'HEALTH_PLAN',
+                                },
+                            }),
+                            validationStatusMock({
+                                stage: 'failed',
+                                error: 'Validation pipeline failed',
+                            }),
+                        ],
+                    },
+                    routerProvider: {
+                        route: '/submissions/health-plan/test-abc-123/edit/review-and-submit',
+                    },
+                    featureFlags: {},
+                }
+            )
+
+            expect(
+                await screen.findByRole('heading', {
+                    name: 'Validation unavailable',
+                })
             ).toBeInTheDocument()
         })
     })

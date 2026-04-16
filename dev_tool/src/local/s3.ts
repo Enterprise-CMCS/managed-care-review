@@ -18,7 +18,13 @@ export async function runS3Locally(runner: LabeledProcessRunner) {
         'localstack',
     ])
 
-    const buckets = ['local-uploads', 'local-qa']
+    // LocalStack needs the normal document buckets plus the AI validation
+    // artifact bucket so app-api polling can read status/result artifacts.
+    const buckets = [
+        'local-uploads',
+        'local-qa',
+        'ai-form-augmentation-artifacts',
+    ]
     const localstackEndpoint = 'http://localhost:4566'
 
     console.info('Creating S3 buckets in LocalStack...')
