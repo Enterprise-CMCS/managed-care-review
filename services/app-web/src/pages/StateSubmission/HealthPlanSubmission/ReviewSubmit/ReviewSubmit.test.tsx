@@ -18,6 +18,18 @@ const validationStatusMock = (overrides?: {
     stage?: string
     isStale?: boolean
     error?: string | null
+    results?: {
+        field: string
+        outcome: string
+        confidence: string
+        message: string
+        citations?: {
+            chunkId: string
+            documentName: string
+            page: number | null
+            order: number
+        }[]
+    }[]
 }) => ({
     request: {
         query: ValidationStatusDocument,
@@ -35,7 +47,7 @@ const validationStatusMock = (overrides?: {
                 artifactVersion: 'test-artifact-version',
                 isStale: overrides?.isStale ?? false,
                 error: overrides?.error ?? null,
-                results: [],
+                results: overrides?.results ?? [],
             },
         },
     },
@@ -564,6 +576,179 @@ describe('ReviewSubmit', () => {
                     name: 'Validation unavailable',
                 })
             ).toBeInTheDocument()
+        })
+    })
+
+    describe('AI validation findings', () => {
+        it('renders findings when validation completes with results', async () => {
+            renderWithProviders(
+                <Routes>
+                    <Route
+                        path={RoutesRecord.SUBMISSIONS_REVIEW_SUBMIT}
+                        element={<ReviewSubmit />}
+                    />
+                </Routes>,
+                {
+                    apolloProvider: {
+                        mocks: [
+                            fetchCurrentUserMock({ statusCode: 200 }),
+                            fetchContractMockSuccess({
+                                contract: {
+                                    ...mockContractPackageDraft(),
+                                    id: 'test-abc-123',
+                                    contractSubmissionType: 'HEALTH_PLAN',
+                                },
+                            }),
+                            validationStatusMock({
+                                stage: 'complete',
+                                results: [
+                                    {
+                                        field: 'contractStartDate',
+                                        outcome: 'match',
+                                        confidence: 'high',
+                                        message:
+                                            'Start date matches document text.',
+                                        citations: [],
+                                    },
+                                    {
+                                        field: 'amendmentEffectiveDate',
+                                        outcome: 'mismatch',
+                                        confidence: 'medium',
+                                        message:
+                                            'Document text indicates amendment effective date is January 1, 2021.',
+                                        citations: [],
+                                    },
+                                ],
+                            }),
+                        ],
+                    },
+                    routerProvider: {
+                        route: '/submissions/health-plan/test-abc-123/edit/review-and-submit',
+                    },
+                    featureFlags: {},
+                }
+            )
+
+            expect(
+                await screen.findByRole('heading', {
+                    name: 'Validation findings',
+                })
+            ).toBeInTheDocument()
+
+            expect(screen.getByText('Contract start date')).toBeInTheDocument()
+            expect(
+                screen.getByText('Amendment effective date')
+            ).toBeInTheDocument()
+            expect(screen.getByText('Match')).toBeInTheDocument()
+            expect(screen.getByText('Mismatch')).toBeInTheDocument()
+            expect(
+                screen.getByText('Start date matches document text.')
+            ).toBeInTheDocument()
+            expect(
+                screen.getByText(
+                    'Document text indicates amendment effective date is January 1, 2021.'
+                )
+            ).toBeInTheDocument()
+        })
+
+        it('does not render findings when validation is complete but results are empty', async () => {
+            renderWithProviders(
+                <Routes>
+                    <Route
+                        path={RoutesRecord.SUBMISSIONS_REVIEW_SUBMIT}
+                        element={<ReviewSubmit />}
+                    />
+                </Routes>,
+                {
+                    apolloProvider: {
+                        mocks: [
+                            fetchCurrentUserMock({ statusCode: 200 }),
+                            fetchContractMockSuccess({
+                                contract: {
+                                    ...mockContractPackageDraft(),
+                                    id: 'test-abc-123',
+                                    contractSubmissionType: 'HEALTH_PLAN',
+                                },
+                            }),
+                            validationStatusMock({
+                                stage: 'complete',
+                                results: [],
+                            }),
+                        ],
+                    },
+                    routerProvider: {
+                        route: '/submissions/health-plan/test-abc-123/edit/review-and-submit',
+                    },
+                    featureFlags: {},
+                }
+            )
+
+            expect(
+                await screen.findByRole('heading', {
+                    name: 'Validation complete',
+                })
+            ).toBeInTheDocument()
+
+            expect(
+                screen.queryByRole('heading', {
+                    name: 'Validation findings',
+                })
+            ).not.toBeInTheDocument()
+        })
+
+        it('does not render stale findings even if results are present', async () => {
+            renderWithProviders(
+                <Routes>
+                    <Route
+                        path={RoutesRecord.SUBMISSIONS_REVIEW_SUBMIT}
+                        element={<ReviewSubmit />}
+                    />
+                </Routes>,
+                {
+                    apolloProvider: {
+                        mocks: [
+                            fetchCurrentUserMock({ statusCode: 200 }),
+                            fetchContractMockSuccess({
+                                contract: {
+                                    ...mockContractPackageDraft(),
+                                    id: 'test-abc-123',
+                                    contractSubmissionType: 'HEALTH_PLAN',
+                                },
+                            }),
+                            validationStatusMock({
+                                stage: 'complete',
+                                isStale: true,
+                                results: [
+                                    {
+                                        field: 'contractStartDate',
+                                        outcome: 'match',
+                                        confidence: 'high',
+                                        message:
+                                            'Start date matches document text.',
+                                        citations: [],
+                                    },
+                                ],
+                            }),
+                        ],
+                    },
+                    routerProvider: {
+                        route: '/submissions/health-plan/test-abc-123/edit/review-and-submit',
+                    },
+                    featureFlags: {},
+                }
+            )
+
+            expect(
+                await screen.findByRole('heading', {
+                    name: 'Reviewing updated documents',
+                })
+            ).toBeInTheDocument()
+
+            expect(
+                screen.queryByRole('heading', {
+                    name: 'Validation findings',
+                })
+            ).not.toBeInTheDocument()
         })
     })
 })

@@ -40,6 +40,8 @@ import { featureFlags } from '@mc-review/common-code'
 import { RoutesRecord, RouteT } from '@mc-review/constants'
 import { AIValidationStatusCard } from './AIvalidationStatusCard'
 import { getAIValidationDisplayState } from './aiValidationStatus'
+import { AIValidationFindingsCard } from './AIValidationFindingsCard'
+import { mapAIValidationFindings } from './aiValidationFindings'
 
 export const ReviewSubmit = (): React.ReactElement => {
     const navigate = useNavigate()
@@ -97,6 +99,16 @@ export const ReviewSubmit = (): React.ReactElement => {
     })
     const showInitialValidationLoading =
         validationLoading && !validationStatus && !validationError
+    const validationFindings = validationStatus?.results ?? []
+    const validationFindingDisplayItems =
+        mapAIValidationFindings(validationFindings)
+    // Findings should only render for the current completed artifact set. If
+    // the artifact is stale, we keep showing status-only messaging until the
+    // refreshed validation run catches up.
+    const showValidationFindings =
+        validationStatus?.stage === 'complete' &&
+        !validationStatus.isStale &&
+        validationFindingDisplayItems.length > 0
 
     const contract = data?.fetchContract.contract
     const activeMainContentId = 'reviewSubmitMainContent'
@@ -189,6 +201,16 @@ export const ReviewSubmit = (): React.ReactElement => {
                         }
                     />
                 </section>
+                {showValidationFindings && (
+                    <section
+                        className={styles.validationFindingsSection}
+                        aria-label="Document validation findings"
+                    >
+                        <AIValidationFindingsCard
+                            findings={validationFindingDisplayItems}
+                        />
+                    </section>
+                )}
                 <SubmissionTypeSummarySection
                     contract={contract}
                     submissionName={submissionName}
