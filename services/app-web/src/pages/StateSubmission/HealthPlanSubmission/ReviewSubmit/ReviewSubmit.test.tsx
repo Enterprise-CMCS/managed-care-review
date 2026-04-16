@@ -12,7 +12,10 @@ import {
     mockContractPackageDraft,
     mockContractPackageUnlockedWithUnlockedType,
 } from '@mc-review/mocks'
-import { ValidationStatusDocument } from '../../../../gen/gqlClient'
+import {
+    TriggerValidationDocument,
+    ValidationStatusDocument,
+} from '../../../../gen/gqlClient'
 
 const validationStatusMock = (overrides?: {
     stage?: string
@@ -48,6 +51,26 @@ const validationStatusMock = (overrides?: {
                 isStale: overrides?.isStale ?? false,
                 error: overrides?.error ?? null,
                 results: overrides?.results ?? [],
+            },
+        },
+    },
+})
+
+const triggerValidationMock = () => ({
+    request: {
+        query: TriggerValidationDocument,
+        variables: {
+            input: {
+                contractID: 'test-abc-123',
+            },
+        },
+    },
+    result: {
+        data: {
+            triggerValidation: {
+                __typename: 'TriggerValidationPayload' as const,
+                ok: true,
+                artifactVersion: 'test-artifact-version',
             },
         },
     },
@@ -749,6 +772,183 @@ describe('ReviewSubmit', () => {
                     name: 'Validation findings',
                 })
             ).not.toBeInTheDocument()
+        })
+    })
+
+    describe('AI validation trigger flow', () => {
+        it('triggers validation when status is not started', async () => {
+            renderWithProviders(
+                <Routes>
+                    <Route
+                        path={RoutesRecord.SUBMISSIONS_REVIEW_SUBMIT}
+                        element={<ReviewSubmit />}
+                    />
+                </Routes>,
+                {
+                    apolloProvider: {
+                        mocks: [
+                            fetchCurrentUserMock({ statusCode: 200 }),
+                            fetchContractMockSuccess({
+                                contract: {
+                                    ...mockContractPackageDraft(),
+                                    id: 'test-abc-123',
+                                    contractSubmissionType: 'HEALTH_PLAN',
+                                },
+                            }),
+                            validationStatusMock({
+                                stage: 'not-started',
+                            }),
+                            triggerValidationMock(),
+                        ],
+                    },
+                    routerProvider: {
+                        route: '/submissions/health-plan/test-abc-123/edit/review-and-submit',
+                    },
+                    featureFlags: {},
+                }
+            )
+
+            expect(
+                await screen.findByRole('heading', {
+                    name: 'Validation pending',
+                })
+            ).toBeInTheDocument()
+        })
+
+        it('does not trigger validation when work is already in progress', async () => {
+            renderWithProviders(
+                <Routes>
+                    <Route
+                        path={RoutesRecord.SUBMISSIONS_REVIEW_SUBMIT}
+                        element={<ReviewSubmit />}
+                    />
+                </Routes>,
+                {
+                    apolloProvider: {
+                        mocks: [
+                            fetchCurrentUserMock({ statusCode: 200 }),
+                            fetchContractMockSuccess({
+                                contract: {
+                                    ...mockContractPackageDraft(),
+                                    id: 'test-abc-123',
+                                    contractSubmissionType: 'HEALTH_PLAN',
+                                },
+                            }),
+                            validationStatusMock({
+                                stage: 'validating',
+                            }),
+                        ],
+                    },
+                    routerProvider: {
+                        route: '/submissions/health-plan/test-abc-123/edit/review-and-submit',
+                    },
+                    featureFlags: {},
+                }
+            )
+
+            expect(
+                await screen.findByRole('heading', {
+                    name: 'Reviewing your documents',
+                })
+            ).toBeInTheDocument()
+        })
+
+        it('does not trigger validation when current-version results are already complete', async () => {
+            renderWithProviders(
+                <Routes>
+                    <Route
+                        path={RoutesRecord.SUBMISSIONS_REVIEW_SUBMIT}
+                        element={<ReviewSubmit />}
+                    />
+                </Routes>,
+                {
+                    apolloProvider: {
+                        mocks: [
+                            fetchCurrentUserMock({ statusCode: 200 }),
+                            fetchContractMockSuccess({
+                                contract: {
+                                    ...mockContractPackageDraft(),
+                                    id: 'test-abc-123',
+                                    contractSubmissionType: 'HEALTH_PLAN',
+                                },
+                            }),
+                            validationStatusMock({
+                                stage: 'complete',
+                                results: [
+                                    {
+                                        field: 'contractStartDate',
+                                        outcome: 'match',
+                                        confidence: 'high',
+                                        message:
+                                            'Start date matches document text.',
+                                        citations: [],
+                                    },
+                                ],
+                            }),
+                        ],
+                    },
+                    routerProvider: {
+                        route: '/submissions/health-plan/test-abc-123/edit/review-and-submit',
+                    },
+                    featureFlags: {},
+                }
+            )
+
+            expect(
+                await screen.findByRole('heading', {
+                    name: 'Validation complete',
+                })
+            ).toBeInTheDocument()
+        })
+
+        it('triggers validation again when the current status is stale', async () => {
+            renderWithProviders(
+                <Routes>
+                    <Route
+                        path={RoutesRecord.SUBMISSIONS_REVIEW_SUBMIT}
+                        element={<ReviewSubmit />}
+                    />
+                </Routes>,
+                {
+                    apolloProvider: {
+                        mocks: [
+                            fetchCurrentUserMock({ statusCode: 200 }),
+                            fetchContractMockSuccess({
+                                contract: {
+                                    ...mockContractPackageDraft(),
+                                    id: 'test-abc-123',
+                                    contractSubmissionType: 'HEALTH_PLAN',
+                                },
+                            }),
+                            validationStatusMock({
+                                stage: 'complete',
+                                isStale: true,
+                                results: [
+                                    {
+                                        field: 'contractStartDate',
+                                        outcome: 'match',
+                                        confidence: 'high',
+                                        message:
+                                            'Start date matches document text.',
+                                        citations: [],
+                                    },
+                                ],
+                            }),
+                            triggerValidationMock(),
+                        ],
+                    },
+                    routerProvider: {
+                        route: '/submissions/health-plan/test-abc-123/edit/review-and-submit',
+                    },
+                    featureFlags: {},
+                }
+            )
+
+            expect(
+                await screen.findByRole('heading', {
+                    name: 'Reviewing updated documents',
+                })
+            ).toBeInTheDocument()
         })
     })
 })

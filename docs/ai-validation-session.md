@@ -1,7 +1,7 @@
 # AI Validation Session
 
 ## Current Ticket
-AIFA-018 is complete. The review page now polls and displays non-blocking AI validation status while local development also boots with the validation config introduced by the earlier API tickets.
+AIFA-019A is complete. The review page now auto-triggers validation for the current draft when status is not started or stale, while the remaining gap is the fully local execution path.
 
 ## Completed
 - AIFA-001 ✔️ Create AI service workspace
@@ -24,6 +24,8 @@ AIFA-018 is complete. The review page now polls and displays non-blocking AI val
 - AIFA-016 ✔️ Add GraphQL trigger resolver for the validation Lambda
 - AIFA-017 ✔️ Add GraphQL polling resolver for validation status/results
 - AIFA-018 ✔️ Add review-page validation status UI and local-dev bootstrap follow-up
+- AIFA-019 ✔️ Display validation findings on the Review page
+- AIFA-019A ✔️ Wire triggerValidation into Review flow
 
 ## Current Progress
 - AI workspace lives in `services/ai-form-augmentation`
@@ -86,6 +88,16 @@ AIFA-018 is complete. The review page now polls and displays non-blocking AI val
   - UI state mapping is centralized in a small helper so page logic stays narrow
   - the review page surfaces pending, in-progress, complete, stale, and unavailable states with calm non-blocking messaging
   - focused UI tests cover the main polling states
+- Review page findings visibility is now in place:
+  - completed validation findings render in a dedicated card below the status card
+  - raw backend field/outcome/confidence values are mapped into simpler user-facing labels before rendering
+  - stale or empty results do not render the findings card
+  - focused UI tests cover complete, empty, and stale result scenarios
+- Review page trigger orchestration is now in place:
+  - `ReviewSubmit` now starts validation from the product flow instead of only polling passively
+  - the trigger runs only when status is `not-started` or stale for the current draft state
+  - a per-page-session ref prevents duplicate trigger attempts for the same contract/artifact version
+  - focused tests cover trigger, no-trigger, and stale re-trigger scenarios
 - Local bootstrap now matches the new validation config requirements:
   - `./dev local` seeds local defaults for `VALIDATION_FUNCTION_NAME` and `AI_VALIDATION_ARTIFACT_BUCKET` before `apollo_gql` initializes
   - LocalStack bucket bootstrap now includes `ai-form-augmentation-artifacts` so review-page polling can read validation artifacts locally
@@ -166,12 +178,16 @@ AWS_ACCESS_KEY_ID=test AWS_SECRET_ACCESS_KEY=test AWS_DEFAULT_REGION=us-east-1 a
 - The review-page UI is intentionally non-blocking.
   - users can still review and submit even if validation is pending, stale, or temporarily unavailable
   - this keeps AI validation additive at this stage instead of turning it into a hard product dependency
+- The current frontend still only polls.
+  - this statement is no longer true for deployed/product flow
+  - the Review page now attempts to start validation when appropriate
+  - local `./dev local` still needs a real trigger execution path if we want to see the full pipeline cycle from the browser
 - Version/hash placeholders have now been replaced with shared utilities.
   - repeated runs with the same inputs keep stable hash values
   - form-only changes affect `formSnapshotHash` independently from document-set versioning
 
 ## Next Likely Ticket
-- AIFA-019 Surface validation findings, not just pipeline status
+- AIFA-019B Local trigger path for ./dev local
 
 ## Suggested Next Step
 - Keep the same approach:

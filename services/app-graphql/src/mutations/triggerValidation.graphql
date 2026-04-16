@@ -1,0 +1,6 @@
+mutation TriggerValidation($input: TriggerValidationInput!) {
+    triggerValidation(input: $input) {
+        ok
+        artifactVersion
+    }
+}

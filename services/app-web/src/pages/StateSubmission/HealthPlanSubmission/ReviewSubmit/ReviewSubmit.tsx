@@ -28,6 +28,7 @@ import {
 } from '../../../../components/SubmissionSummarySection'
 import {
     useFetchContractQuery,
+    useTriggerValidationMutation,
     useValidationStatusQuery,
 } from '../../../../gen/gqlClient'
 import { ErrorForbiddenPage } from '../../../Errors/ErrorForbiddenPage'
@@ -42,6 +43,7 @@ import { AIValidationStatusCard } from './AIvalidationStatusCard'
 import { getAIValidationDisplayState } from './aiValidationStatus'
 import { AIValidationFindingsCard } from './AIValidationFindingsCard'
 import { mapAIValidationFindings } from './aiValidationFindings'
+import { shouldTriggerAIValidation } from './shouldTriggerAIValidation'
 
 export const ReviewSubmit = (): React.ReactElement => {
     const navigate = useNavigate()
@@ -51,6 +53,8 @@ export const ReviewSubmit = (): React.ReactElement => {
     const { updateActiveMainContent } = usePage()
     const { id } = useRouteParams()
     const [isSubmitting, setIsSubmitting] = useState<boolean>(false)
+    const triggerAttemptedRef = useRef<Set<string>>(new Set())
+    const [triggerValidation] = useTriggerValidationMutation()
     const ldClient = useLDClient()
 
     const hideSupportingDocs = ldClient?.variation(
@@ -110,6 +114,19 @@ export const ReviewSubmit = (): React.ReactElement => {
         !validationStatus.isStale &&
         validationFindingDisplayItems.length > 0
 
+    const contractReady = !loading && !error
+    const validationReady = !validationLoading && !validationError
+    const hasContractId = Boolean(id)
+    const shouldTriggerValidation =
+        hasContractId &&
+        contractReady &&
+        validationReady &&
+        shouldTriggerAIValidation({ validationStatus })
+
+    const validationTriggerKey = `${id ?? 'unknown'}::${
+        validationStatus?.artifactVersion ?? 'no-artifact-version'
+    }`
+
     const contract = data?.fetchContract.contract
     const activeMainContentId = 'reviewSubmitMainContent'
 
@@ -117,6 +134,31 @@ export const ReviewSubmit = (): React.ReactElement => {
     useEffect(() => {
         updateActiveMainContent(activeMainContentId)
     }, [activeMainContentId, updateActiveMainContent])
+
+    useEffect(() => {
+        if (!shouldTriggerValidation || !id) {
+            return
+        }
+
+        if (triggerAttemptedRef.current.has(validationTriggerKey)) {
+            return
+        }
+
+        triggerAttemptedRef.current.add(validationTriggerKey)
+
+        void triggerValidation({
+            variables: {
+                input: {
+                    contractID: id,
+                },
+            },
+        }).catch((triggerError) => {
+            console.error(
+                'Failed to trigger AI validation from ReviewSubmit',
+                triggerError
+            )
+        })
+    }, [id, shouldTriggerValidation, triggerValidation, validationTriggerKey])
 
     if (loading) {
         return (
