@@ -8,6 +8,7 @@ export default tseslint.config([
         ignores: [
             'gen/*',
             'src/gen/**',
+            'src/generated/**',
             '*.config.js',
             '**/esbuild.config.js',
             '.esbuild/**',

@@ -4,6 +4,7 @@ import type {
 } from '../../generated/client'
 import type { ExtendedPrismaClient } from '../prismaClient'
 import { logError } from '../../logger'
+import { parseErrorToError } from '@mc-review/helpers'
 
 // Define types for function arguments
 export type CreateDocumentZipPackageArgsType = {
@@ -41,9 +42,10 @@ export async function createDocumentZipPackage(
             data: args,
         })
     } catch (error) {
-        logError('createDocumentZipPackage', error)
+        const parsedError = parseErrorToError(error)
+        logError('createDocumentZipPackage', parsedError)
         return new Error(
-            `Failed to create document zip package: ${error.message}`
+            `Failed to create document zip package: ${parsedError.message}`
         )
     }
 }
@@ -70,9 +72,10 @@ export async function findDocumentZipPackagesByContractRevision(
 
         return await client.documentZipPackage.findMany({ where })
     } catch (error) {
-        logError('findDocumentZipPackagesByContractRevision', error)
+        const parsedError = parseErrorToError(error)
+        logError('findDocumentZipPackagesByContractRevision', parsedError)
         return new Error(
-            `Failed to find document zip packages: ${error.message}`
+            `Failed to find document zip packages: ${parsedError.message}`
         )
     }
 }
@@ -99,9 +102,10 @@ export async function findDocumentZipPackagesByRateRevision(
 
         return await client.documentZipPackage.findMany({ where })
     } catch (error) {
-        logError('findDocumentZipPackagesByRateRevision', error)
+        const parsedError = parseErrorToError(error)
+        logError('findDocumentZipPackagesByRateRevision', parsedError)
         return new Error(
-            `Failed to find document zip packages: ${error.message}`
+            `Failed to find document zip packages: ${parsedError.message}`
         )
     }
 }

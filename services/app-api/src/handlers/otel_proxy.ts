@@ -1,5 +1,6 @@
 import type { APIGatewayProxyHandler } from 'aws-lambda'
 import axios from 'axios'
+import { parseErrorToError } from '@mc-review/helpers'
 
 const main: APIGatewayProxyHandler = async (event) => {
     const options = {
@@ -12,7 +13,7 @@ const main: APIGatewayProxyHandler = async (event) => {
         console.error(`Could not send OTEL trace: ${JSON.stringify(err)}`)
         return {
             statusCode: 500,
-            body: JSON.stringify(err.message),
+            body: JSON.stringify(parseErrorToError(err).message),
             headers: {
                 'Access-Control-Allow-Origin': '*',
                 'Access-Control-Allow-Credentials': true,

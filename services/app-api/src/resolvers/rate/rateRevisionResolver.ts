@@ -6,6 +6,7 @@ import { GraphQLError } from 'graphql'
 import type { DocumentZipPackageType } from '../../domain-models/ZipType'
 import type { RateRevisionType } from '../../domain-models'
 import type { Context } from '../../handlers/apollo_gql'
+import { parseErrorToError } from '@mc-review/helpers'
 
 export function rateRevisionResolver(store: Store): Resolvers['RateRevision'] {
     return {
@@ -52,8 +53,7 @@ export function rateRevisionResolver(store: Store): Resolvers['RateRevision'] {
 
                 return documentZipPackages
             } catch (error) {
-                const errorMessage =
-                    error instanceof Error ? error.message : String(error)
+                const errorMessage = parseErrorToError(error).message
                 const errMessage = `Unexpected error fetching document zip packages: ${errorMessage}`
                 logError('rateRevision.documentZipPackages', errMessage)
                 setErrorAttributesOnActiveSpan(errMessage, span)

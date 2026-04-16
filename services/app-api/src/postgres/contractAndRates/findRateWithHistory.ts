@@ -3,6 +3,7 @@ import type { RateType } from '../../domain-models'
 import { NotFoundError } from '../postgresErrors'
 import { includeFullRate } from './prismaFullContractRateHelpers'
 import { parseRateWithHistory } from './parseRateWithHistory'
+import { parseErrorToError } from '@mc-review/helpers'
 
 // findRateWithHistory returns a RateType with a full set of
 // RateRevisions in reverse chronological order. Each revision is a change to this
@@ -29,7 +30,7 @@ async function findRateWithHistory(
         return parseRateWithHistory(rate)
     } catch (err) {
         console.error('PRISMA ERROR', err)
-        return err
+        return parseErrorToError(err)
     }
 }
 

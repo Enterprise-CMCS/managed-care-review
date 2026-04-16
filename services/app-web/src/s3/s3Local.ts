@@ -5,10 +5,11 @@ import {
 } from '@aws-sdk/client-s3'
 import { getSignedUrl } from '@aws-sdk/s3-request-presigner'
 
-import { parseKey } from '@mc-review/helpers'
+import { parseKey, parseErrorToError } from '@mc-review/helpers'
 import { BucketShortName, S3BucketConfigType } from './s3Amplify'
 import { S3ClientT } from './s3Client'
 import type { S3Error } from './s3Error'
+import { isS3Error } from './s3Error'
 
 export function newLocalS3Client(
     endpoint: string,
@@ -54,7 +55,15 @@ export function newLocalS3Client(
 
                 return filename
             } catch (err) {
-                if (err.code === 'NetworkingError') {
+                if (isS3Error(err)) {
+                    return err
+                }
+                if (
+                    err !== null &&
+                    typeof err === 'object' &&
+                    'code' in err &&
+                    (err as { code: unknown }).code === 'NetworkingError'
+                ) {
                     return {
                         code: 'NETWORK_ERROR',
                         message: 'Error saving file to the cloud.',
@@ -62,7 +71,10 @@ export function newLocalS3Client(
                 }
 
                 console.info('Log: Unexpected Error putting file to S3', err)
-                return err
+                return {
+                    code: 'NETWORK_ERROR',
+                    message: parseErrorToError(err).message,
+                }
             }
         },
 

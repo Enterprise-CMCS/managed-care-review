@@ -33,6 +33,7 @@ import {
 import { useMutation, useQuery } from '@apollo/client/react'
 import styles from './MccrsId.module.scss'
 import { useMemoizedStateHeader, useRouteParams } from '../../hooks'
+import { parseErrorToError } from '@mc-review/helpers'
 
 export interface MccrsIdFormValues {
     mccrsId: number | undefined
@@ -168,11 +169,12 @@ export const MccrsId = (): React.ReactElement => {
                 `/submissions/${contractSubmissionType}/${updatedSubmission.id}`
             )
         } catch (serverError) {
+            const parsedError = parseErrorToError(serverError)
             setShowPageErrorMessage(true)
             recordJSException(
-                `MCCRSIDForm: Apollo error reported. Error message: ${serverError.message}`
+                `MCCRSIDForm: Apollo error reported. Error message: ${parsedError.message}`
             )
-            return new Error(serverError)
+            return parsedError
         }
     }
 

@@ -39,6 +39,7 @@ import { CombinedGraphQLErrors } from '@apollo/client/errors'
 import { recordJSException } from '@mc-review/otel'
 import { handleGQLErrors as handleGQLErrorLogging } from './apolloErrors'
 import { ERROR_MESSAGES } from '@mc-review/constants'
+import { parseErrorToError } from '../parseError'
 
 type GraphQLErrors = ReadonlyArray<GraphQLFormattedError>
 
@@ -152,7 +153,7 @@ export const unlockMutationWrapper = async (
         }
     } catch (error) {
         return handleGraphQLErrorsAndAddUserFacingMessages(
-            error,
+            parseErrorToError(error),
             'UNLOCK_HEALTH_PLAN_PACKAGE'
         )
     }
@@ -188,7 +189,7 @@ export const submitMutationWrapper = async (
         }
     } catch (error) {
         return handleGraphQLErrorsAndAddUserFacingMessages(
-            error,
+            parseErrorToError(error),
             'SUBMIT_HEALTH_PLAN_PACKAGE'
         )
     }
@@ -221,7 +222,7 @@ export const approveMutationWrapper = async (
         }
     } catch (error) {
         return handleGraphQLErrorsAndAddUserFacingMessages(
-            error,
+            parseErrorToError(error),
             'APPROVE_SUBMISSION'
         )
     }
@@ -299,7 +300,7 @@ export async function updateStateAssignmentsWrapper(
         }
     } catch (error) {
         return handleGraphQLErrorsAndAddUserFacingMessages(
-            error,
+            parseErrorToError(error),
             'UPDATE_STATE_ASSIGNMENTS_BY_STATE'
         )
     }
@@ -389,7 +390,7 @@ export const createContractQuestionWrapper = async (
             return new Error(ERROR_MESSAGES.question_error_generic)
         }
     } catch (error) {
-        return error
+        return parseErrorToError(error)
     }
 }
 
@@ -483,7 +484,7 @@ export const createRateQuestionWrapper = async (
             return new Error(ERROR_MESSAGES.question_error_generic)
         }
     } catch (error) {
-        return error
+        return parseErrorToError(error)
     }
 }
 
@@ -575,7 +576,7 @@ export const createContractResponseWrapper = async (
             return new Error(ERROR_MESSAGES.response_error_generic)
         }
     } catch (error) {
-        return error
+        return parseErrorToError(error)
     }
 }
 
@@ -667,7 +668,7 @@ export const createRateQuestionResponseWrapper = async (
             return new Error(ERROR_MESSAGES.response_error_generic)
         }
     } catch (error) {
-        return error
+        return parseErrorToError(error)
     }
 }
 

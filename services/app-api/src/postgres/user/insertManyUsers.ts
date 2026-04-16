@@ -2,6 +2,7 @@ import type { UserType } from '../../domain-models'
 import { toDomainUser } from '../../domain-models'
 import type { ExtendedPrismaClient } from '../prismaClient'
 import type { InsertUserArgsType } from './insertUser'
+import { parseErrorToError } from '@mc-review/helpers'
 
 export async function insertManyUsers(
     client: ExtendedPrismaClient,
@@ -37,6 +38,6 @@ export async function insertManyUsers(
 
         return usersResult.map((user) => toDomainUser(user))
     } catch (err) {
-        return err
+        return parseErrorToError(err)
     }
 }

@@ -2,6 +2,7 @@ import type { UserType } from '../../domain-models'
 import { domainUserFromPrismaUser } from './prismaDomainUser'
 import type { ExtendedPrismaClient } from '../prismaClient'
 import type { UserRoles } from '../../domain-models/UserType'
+import { parseErrorToError } from '@mc-review/helpers'
 
 export type UpdateUserInfoArgsType = {
     email: string
@@ -39,6 +40,6 @@ export async function updateUserInfo(
 
         return domainUserFromPrismaUser(updateResult)
     } catch (err) {
-        return err
+        return parseErrorToError(err)
     }
 }

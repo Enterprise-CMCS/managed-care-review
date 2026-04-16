@@ -16,6 +16,7 @@ import { submitContractInsideTransaction } from './submitContract'
 import { submitRateInsideTransaction } from './submitRate'
 import { parseContractWithHistory } from './parseContractWithHistory'
 import type { ExtendedPrismaClient } from '../prismaClient'
+import { parseErrorToError } from '@mc-review/helpers'
 
 type WithdrawRateArgsType = {
     rateID: string
@@ -326,7 +327,7 @@ const withdrawRate = async (
         )
     } catch (err) {
         console.error('PRISMA ERROR: Error withdrawing rate', err)
-        return err
+        return parseErrorToError(err)
     }
 }
 

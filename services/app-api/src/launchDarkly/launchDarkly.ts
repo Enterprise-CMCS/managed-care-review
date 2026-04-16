@@ -8,6 +8,7 @@ import type { LDClient } from '@launchdarkly/node-server-sdk'
 import { logError } from '../logger'
 import { setErrorAttributesOnActiveSpan } from '../resolvers/attributeHelper'
 import type { Span } from '@opentelemetry/api'
+import { parseErrorToError } from '@mc-review/helpers'
 
 //Set up default feature flag values used to returned data
 const defaultFeatureFlags = (): FeatureFlagSettings =>
@@ -90,13 +91,16 @@ function localLDService(baseUrl: string): LDService {
             try {
                 const response = await fetch(flagsUrl)
                 if (!response.ok) {
-                    throw new Error(`${response.status} ${response.statusText}`)
+                    console.warn(
+                        `localLDService: failed to fetch flag ${args.flag}, using default: Error:${response.status} ${response.statusText}`
+                    )
+                    return defaultFeatureFlags()[args.flag]
                 }
                 const flags = (await response.json()) as FeatureFlagSettings
                 return flags[args.flag] ?? defaultFeatureFlags()[args.flag]
             } catch (err) {
                 console.warn(
-                    `localLDService: failed to fetch flag ${args.flag}, using default`
+                    `localLDService: failed to fetch flag ${args.flag}, using default: Error:${parseErrorToError(err).message}`
                 )
                 return defaultFeatureFlags()[args.flag]
             }
@@ -105,12 +109,15 @@ function localLDService(baseUrl: string): LDService {
             try {
                 const response = await fetch(flagsUrl)
                 if (!response.ok) {
-                    throw new Error(`${response.status} ${response.statusText}`)
+                    console.warn(
+                        `localLDService: failed to fetch flags, using defaults: Error:${response.status} ${response.statusText}`
+                    )
+                    return defaultFeatureFlags()
                 }
                 return (await response.json()) as FeatureFlagSettings
             } catch (err) {
                 console.warn(
-                    'localLDService: failed to fetch flags, using defaults'
+                    `localLDService: failed to fetch flags, using defaults: Error:${parseErrorToError(err).message}`
                 )
                 return defaultFeatureFlags()
             }

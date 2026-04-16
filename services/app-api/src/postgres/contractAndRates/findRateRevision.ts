@@ -1,6 +1,7 @@
 import type { PrismaTransactionType } from '../prismaTypes'
 import { NotFoundError } from '../postgresErrors'
 import type { RateRevisionTable } from '../../generated/client'
+import { parseErrorToError } from '@mc-review/helpers'
 
 async function findRateRevision(
     client: PrismaTransactionType,
@@ -21,7 +22,7 @@ async function findRateRevision(
         return rateRevision
     } catch (err) {
         console.error('PRISMA ERROR', err)
-        return err
+        return parseErrorToError(err)
     }
 }
 

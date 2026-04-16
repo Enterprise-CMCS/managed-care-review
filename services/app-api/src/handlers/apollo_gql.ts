@@ -26,6 +26,7 @@ import {
 } from '../authn'
 import type { Store } from '../postgres'
 import { NewPostgresStore } from '../postgres'
+import { parseErrorToError } from '@mc-review/helpers'
 import { configureResolvers } from '../resolvers'
 import { configurePostgres, configureEmailer } from './configuration'
 import {
@@ -357,7 +358,7 @@ async function initializeGQLHandler(): Promise<Handler> {
             launchDarkly = ldService(ldClient)
         } catch (err) {
             console.error(
-                `LaunchDarkly Error: ${err.message} Falling back to LaunchDarkly offline service.`
+                `LaunchDarkly Error: ${parseErrorToError(err).message} Falling back to LaunchDarkly offline service.`
             )
             ldClient.close()
             launchDarkly = offlineLDService()

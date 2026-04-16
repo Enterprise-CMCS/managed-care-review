@@ -5,6 +5,7 @@ import type { ExtendedPrismaClient } from '../prismaClient'
 import { unlockContractInsideTransaction } from './unlockContract'
 import { submitContractInsideTransaction } from './submitContract'
 import { findContractWithHistory } from './findContractWithHistory'
+import { parseErrorToError } from '@mc-review/helpers'
 
 export type UndoWithdrawContractArgsType = {
     contract: ContractType
@@ -170,9 +171,10 @@ const undoWithdrawContract = async (
             async (tx) => await undoWithdrawContractInsideTransaction(tx, args)
         )
     } catch (err) {
-        const msg = `PRISMA ERROR: Error undo withdraw contract: ${err.message}`
+        const parsedError = parseErrorToError(err)
+        const msg = `PRISMA ERROR: Error undo withdraw contract: ${parsedError.message}`
         console.error(msg)
-        return err
+        return parsedError
     }
 }
 

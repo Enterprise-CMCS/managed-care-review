@@ -34,6 +34,7 @@ import { recordJSException } from '@mc-review/otel'
 import {
     handleApolloErrorsAndAddUserFacingMessages,
     toGQLError,
+    parseErrorToError,
 } from '@mc-review/helpers'
 import { StatusUpdatedBanner } from '../../components/Banner'
 import { ChildrenType } from '../../components/MultiColumnGrid/MultiColumnGrid'
@@ -190,7 +191,7 @@ export const RateSummary = (): React.ReactElement => {
             }
         } catch (error) {
             return handleApolloErrorsAndAddUserFacingMessages(
-                error,
+                parseErrorToError(error),
                 'UNLOCK_RATE'
             )
         }

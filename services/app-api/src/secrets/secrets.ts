@@ -4,6 +4,7 @@ import {
 } from '@aws-sdk/client-secrets-manager'
 import type { GetSecretValueResponse } from '@aws-sdk/client-secrets-manager'
 import { trace, SpanStatusCode } from '@opentelemetry/api'
+import { parseErrorToError } from '@mc-review/helpers'
 
 interface APISecrets {
     pgConnectionURL: string
@@ -44,7 +45,7 @@ async function FetchSecrets(
 
         return secretsResult
     } catch (error) {
-        const err = error instanceof Error ? error : new Error(String(error))
+        const err = parseErrorToError(error)
         span.recordException(err)
         span.setStatus({
             code: SpanStatusCode.ERROR,

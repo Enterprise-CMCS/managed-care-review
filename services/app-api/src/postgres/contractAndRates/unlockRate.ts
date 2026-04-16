@@ -2,6 +2,7 @@ import type { RateType } from '../../domain-models'
 import type { ExtendedPrismaClient } from '../prismaClient'
 import type { PrismaTransactionType } from '../prismaTypes'
 import { findRateWithHistory } from './findRateWithHistory'
+import { parseErrorToError } from '@mc-review/helpers'
 
 type UnlockRateArgsType = {
     rateID?: string
@@ -238,7 +239,7 @@ async function unlockRate(
         })
     } catch (err) {
         console.error('SUBMIT PRISMA CONTRACT ERR', err)
-        return err
+        return parseErrorToError(err)
     }
 }
 

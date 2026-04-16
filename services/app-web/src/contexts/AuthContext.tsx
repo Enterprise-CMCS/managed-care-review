@@ -11,7 +11,7 @@ import {
 import { logoutLocalUser } from '../localAuth'
 import { signOut as cognitoSignOut } from '../pages/Auth/cognitoAuth'
 import { recordJSException } from '@mc-review/otel'
-import { handleApolloError } from '@mc-review/helpers'
+import { handleApolloError, parseErrorToError } from '@mc-review/helpers'
 import type { ApolloClient } from '@apollo/client'
 import { useQuery } from '@apollo/client/react'
 
@@ -185,7 +185,7 @@ function AuthProvider({
                     type: 'DEFAULT',
                 })
             }
-            return new Error(e)
+            return parseErrorToError(e)
         }
     }
     /*

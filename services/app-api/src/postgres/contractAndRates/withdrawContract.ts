@@ -15,6 +15,7 @@ import {
 import type { RatesToReassign } from './reassignParentContract'
 import { reassignParentContractInTransaction } from './reassignParentContract'
 import type { RateForDisplayType } from '../../emailer/templateHelpers'
+import { parseErrorToError } from '@mc-review/helpers'
 
 export type WithdrawContractArgsType = {
     contract: ContractType
@@ -274,9 +275,10 @@ const withdrawContract = async (
             }
         )
     } catch (err) {
-        const msg = `PRISMA ERROR: Error withdrawing contract: ${err.message}`
+        const parsedError = parseErrorToError(err)
+        const msg = `PRISMA ERROR: Error withdrawing contract: ${parsedError.message}`
         console.error(msg)
-        return err
+        return parsedError
     }
 }
 
