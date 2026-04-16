@@ -52,15 +52,16 @@ async function checkAWSAccess(envName: string): Promise<undefined | Error> {
         }
         return undefined
     } catch (e) {
-        if (e.name === 'CredentialsProviderError') {
+        const errObj = e as { name?: string; Code?: string }
+        if (errObj.name === 'CredentialsProviderError') {
             console.info(
                 'No AWS credentials found. Load current ones into your environment from CloudTamer'
             )
-        } else if (e.Code === 'ExpiredToken') {
+        } else if (errObj.Code === 'ExpiredToken') {
             console.info(
                 'Your AWS credentials have expired. Load current ones into your environment from CloudTamer'
             )
-        } else if (e.Code === 'InvalidClientTokenId') {
+        } else if (errObj.Code === 'InvalidClientTokenId') {
             console.info(
                 'Your AWS credentials are wrong. Load current ones into your environment from CloudTamer'
             )
@@ -68,7 +69,7 @@ async function checkAWSAccess(envName: string): Promise<undefined | Error> {
             console.error('Unknown error returned by AWS call, update ./dev?')
             throw e
         }
-        return e
+        return e instanceof Error ? e : new Error(String(e))
     }
 }
 
@@ -94,7 +95,7 @@ async function describeSecurityGroup(
 
         return securityGroup
     } catch (err) {
-        return err
+        return err instanceof Error ? err : new Error(String(err))
     }
 }
 
@@ -116,7 +117,7 @@ async function addSSHAllowlistRuleToGroup(
         await ec2.send(addAllowlist)
         return undefined
     } catch (err) {
-        return err
+        return err instanceof Error ? err : new Error(String(err))
     }
 }
 
@@ -163,7 +164,7 @@ async function stopInstance(id: string) {
     try {
         await ec2.send(cmd)
     } catch (err) {
-        return err
+        return err instanceof Error ? err : new Error(String(err))
     }
     return undefined
 }
@@ -179,7 +180,7 @@ async function startInstance(id: string) {
         await ec2.send(cmd)
     } catch (err) {
         console.error('Error starting instance', err)
-        return err
+        return err instanceof Error ? err : new Error(String(err))
     }
 }
 
@@ -233,13 +234,12 @@ async function getSecretsForRDS(stage: string): Promise<DBConnection | Error> {
             password: parsedSecrets.password,
         }
     } catch (err) {
-        if (err.__type === 'AccessDeniedException') {
+        if ((err as { __type?: string }).__type === 'AccessDeniedException') {
             console.error(
                 'These creds dont have the ability to get the RDS credentials. Log in with better creds.'
             )
-            return err
         }
-        return err
+        return err instanceof Error ? err : new Error(String(err))
     }
 }
 
