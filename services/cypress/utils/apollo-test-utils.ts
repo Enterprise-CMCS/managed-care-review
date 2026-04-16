@@ -4,7 +4,6 @@ import {
     DocumentNode,
     HttpLink,
     InMemoryCache,
-    NormalizedCacheObject,
 } from '@apollo/client'
 import {
     RateFormDataInput,
@@ -154,7 +153,7 @@ const rateFormData = (
 
 const newSubmissionInput = (
     overrides?: Partial<CreateContractInput>
-): Partial<CreateContractInput> => {
+): CreateContractInput => {
     return Object.assign(
         {
             populationCovered: 'MEDICAID',
@@ -452,9 +451,10 @@ function fetchResponseFromAxios(axiosResponse: AxiosResponse): Response {
 // Apollo Link uses the ~fetch api for it's client-side middleware.
 // Amplify.API uses axios underneath and does its own transformation of the body, so we wrap that up here.
 async function fakeAmplifyFetch(
-    uri: string,
-    options: RequestInit
+    uri: URL | RequestInfo,
+    options?: RequestInit
 ): Promise<Response> {
+    options = options ?? {}
     if (options.method !== 'POST') {
         throw new Error('unexpected GQL request')
     }
@@ -482,8 +482,15 @@ async function fakeAmplifyFetch(
         headers: headers,
     }
 
+    const uriString =
+        typeof uri === 'string'
+            ? uri
+            : uri instanceof URL
+              ? uri.toString()
+              : uri.url
+
     return new Promise<Response>((resolve, reject) => {
-        AuthAPI.post(uri, apiOptions)
+        AuthAPI.post(uriString, apiOptions)
             .then((apiResponse: AxiosResponse) => {
                 // The Apollo Link wants a fetch.Response shaped response,
                 // not the axios shaped response that Amplify.API returns
@@ -509,7 +516,7 @@ async function fakeAmplifyFetch(
 const apolloClientWrapper = async <T>(
     schema: DocumentNode,
     authUser: StateUserType | CMSUserType | AdminUserType,
-    callback: (apolloClient: ApolloClient<NormalizedCacheObject>) => Promise<T>
+    callback: (apolloClient: ApolloClient) => Promise<T>
 ): Promise<T> => {
     const isLocalAuth = Cypress.env('AUTH_MODE') === 'LOCAL'
 
@@ -522,14 +529,13 @@ const apolloClientWrapper = async <T>(
             : undefined,
         fetch: fakeAmplifyFetch,
         fetchOptions: {
-            mode: 'no-cors',
+            mode: 'no-cors' as const,
         },
     }
 
-    const apolloClient: ApolloClient<NormalizedCacheObject> = new ApolloClient({
+    const apolloClient: ApolloClient = new ApolloClient({
         link: new HttpLink(httpLinkConfig),
         cache: new InMemoryCache(),
-        typeDefs: schema,
         defaultOptions: {
             watchQuery: {
                 fetchPolicy: 'no-cache',
@@ -564,3 +570,4 @@ export {
     eqroFromData,
     minnesotaStatePrograms,
 }
+

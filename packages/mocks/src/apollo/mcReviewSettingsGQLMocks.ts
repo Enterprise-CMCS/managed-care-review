@@ -1,4 +1,4 @@
-import { MockedResponse } from '@apollo/client/testing'
+import { MockLink } from '@apollo/client/testing'
 import {
     FetchMcReviewSettingsDocument,
     FetchMcReviewSettingsQuery,
@@ -8,7 +8,7 @@ import { v4 as uuidv4 } from 'uuid'
 import { GraphQLError } from 'graphql/index'
 
 const fetchMcReviewSettingsMock =
-    (): MockedResponse<FetchMcReviewSettingsQuery> => {
+    (): MockLink.MockedResponse<FetchMcReviewSettingsQuery> => {
         return {
             request: {
                 query: FetchMcReviewSettingsDocument,
@@ -121,7 +121,7 @@ const fetchMcReviewSettingsMock =
         }
     }
 
-const fetchMcReviewSettingsFailMock = (): MockedResponse<GraphQLError> => {
+const fetchMcReviewSettingsFailMock = (): MockLink.MockedResponse<GraphQLError> => {
     const graphQLError = new GraphQLError(
         'Error fetching mc-review settings data.',
         {

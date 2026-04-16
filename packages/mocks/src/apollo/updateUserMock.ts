@@ -1,4 +1,4 @@
-import { MockedResponse } from '@apollo/client/testing'
+import { MockLink } from '@apollo/client/testing'
 import { GraphQLError } from 'graphql'
 import {
     UpdateDivisionAssignmentDocument,
@@ -8,7 +8,7 @@ import {
 
 const updateDivisionMockSuccess = (
     updateInput: UpdateDivisionAssignmentInput
-): MockedResponse<UpdateDivisionAssignmentMutation> => {
+): MockLink.MockedResponse<UpdateDivisionAssignmentMutation> => {
     return {
         request: {
             query: UpdateDivisionAssignmentDocument,
@@ -35,7 +35,7 @@ const updateDivisionMockSuccess = (
 
 const updateDivisionMockError = (
     updateInput: UpdateDivisionAssignmentInput
-): MockedResponse<UpdateDivisionAssignmentMutation> => {
+): MockLink.MockedResponse<UpdateDivisionAssignmentMutation> => {
     const graphQLError = new GraphQLError('Error attempting to unlock.', {
         extensions: {
             code: 'NOT_FOUND',

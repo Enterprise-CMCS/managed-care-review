@@ -1,4 +1,4 @@
-import { MockedResponse } from '@apollo/client/testing'
+import { MockLink } from '@apollo/client/testing'
 import {
     ApproveContractDocument,
     ApproveContractMutation,
@@ -19,7 +19,7 @@ const approveContractMockSuccess = (
         contractData?: Partial<Contract>
         dateApprovalReleasedToState?: string
     } = {}
-): MockedResponse<ApproveContractMutation> => {
+): MockLink.MockedResponse<ApproveContractMutation> => {
     const {
         contractID = 'test-abc-123',
         contractData,
@@ -76,7 +76,7 @@ const approveContractMockFailure = ({
         code: GraphQLErrorCodeTypes
         cause: GraphQLErrorCauseTypes
     }
-}): MockedResponse<ApproveContractMutation> => {
+}): MockLink.MockedResponse<ApproveContractMutation> => {
     const graphQLError = new GraphQLError(
         error
             ? GRAPHQL_ERROR_CAUSE_MESSAGES[error.cause]

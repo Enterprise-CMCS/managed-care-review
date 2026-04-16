@@ -13,7 +13,7 @@ import { formatToPacificTime } from '@mc-review/dates'
 import styles from './SubmissionRevisionSummary.module.scss'
 import { PreviousSubmissionBanner } from '../../components'
 import { FetchContractDocument } from '../../gen/gqlClient'
-import { useQuery } from '@apollo/client'
+import { useQuery } from '@apollo/client/react'
 import {
     ErrorOrLoadingPage,
     handleAndReturnErrorState,

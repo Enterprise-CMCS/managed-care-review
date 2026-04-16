@@ -21,7 +21,7 @@ import {
     UnlockContractDocument,
 } from '../gen/gqlClient'
 import type { ContractStripped } from '../gen/gqlClient'
-import { MockedResponse } from '@apollo/client/testing'
+import { MockLink } from '@apollo/client/testing'
 import {
     mockContractPackageDraft,
     mockContractPackageSubmittedWithQuestions,
@@ -43,7 +43,7 @@ const fetchContractMockSuccess = ({
     contract,
 }: {
     contract?: Contract | UnlockedContract
-}): MockedResponse<FetchContractQuery> => {
+}): MockLink.MockedResponse<FetchContractQuery> => {
     let newContract: Contract | undefined
     // contract can be an unlockedContract type
     // however this API returns a contract type
@@ -88,7 +88,7 @@ const fetchContractMockFail = ({
         code: GraphQLErrorCodeTypes
         cause: GraphQLErrorCauseTypes
     }
-}): MockedResponse<FetchContractQuery | GraphQLError> => {
+}): MockLink.MockedResponse<FetchContractQuery | GraphQLError> => {
     const graphQLError = new GraphQLError(
         error
             ? GRAPHQL_ERROR_CAUSE_MESSAGES[error.cause]
@@ -117,7 +117,7 @@ const fetchContractWithQuestionsMockSuccess = ({
     contract,
 }: {
     contract?: Contract | UnlockedContract
-}): MockedResponse<FetchContractWithQuestionsQuery> => {
+}): MockLink.MockedResponse<FetchContractWithQuestionsQuery> => {
     let newContract: Contract | undefined
     // contract can be an unlockedContract type
     // however this API returns a contract type
@@ -161,7 +161,7 @@ const createContractMockFail = ({
         code: GraphQLErrorCodeTypes
         cause: GraphQLErrorCauseTypes
     }
-}): MockedResponse<CreateContractMutation | GraphQLError> => {
+}): MockLink.MockedResponse<CreateContractMutation | GraphQLError> => {
     const graphQLError = new GraphQLError(
         error
             ? GRAPHQL_ERROR_CAUSE_MESSAGES[error.cause]
@@ -204,7 +204,7 @@ const fetchContractWithQuestionsMockFail = ({
         code: GraphQLErrorCodeTypes
         cause: GraphQLErrorCauseTypes
     }
-}): MockedResponse<FetchContractWithQuestionsQuery | GraphQLError> => {
+}): MockLink.MockedResponse<FetchContractWithQuestionsQuery | GraphQLError> => {
     const graphQLError = new GraphQLError(
         error
             ? GRAPHQL_ERROR_CAUSE_MESSAGES[error.cause]
@@ -233,7 +233,7 @@ const createContractMockSuccess = ({
     contract,
 }: {
     contract?: Partial<Contract>
-}): MockedResponse<CreateContractMutation> => {
+}): MockLink.MockedResponse<CreateContractMutation> => {
     const contractData = mockContractPackageDraft(contract)
 
     return {
@@ -257,7 +257,7 @@ const updateDraftContractRatesMockSuccess = ({
     contract,
 }: {
     contract?: Partial<Contract>
-}): MockedResponse<UpdateDraftContractRatesMutation> => {
+}): MockLink.MockedResponse<UpdateDraftContractRatesMutation> => {
     const contractData = mockContractPackageDraft(contract)
     const contractInput = {
         contractID: contractData.id,
@@ -314,7 +314,7 @@ const updateContractDraftRevisionMockSuccess = ({
     contract,
 }: {
     contract?: Partial<Contract>
-}): MockedResponse<UpdateContractDraftRevisionMutation> => {
+}): MockLink.MockedResponse<UpdateContractDraftRevisionMutation> => {
     const contractData = mockContractPackageDraft(contract)
     const contractInput = {
         contractID: contractData.id,
@@ -348,7 +348,7 @@ const updateContractDraftRevisionMockFail = ({
         code: GraphQLErrorCodeTypes
         cause: GraphQLErrorCauseTypes
     }
-}): MockedResponse<UpdateContractDraftRevisionMutation | GraphQLError> => {
+}): MockLink.MockedResponse<UpdateContractDraftRevisionMutation | GraphQLError> => {
     const contractData = mockContractPackageDraft(contract)
     const contractInput = {
         contractID: contractData.id,
@@ -386,7 +386,7 @@ const submitContractMockSuccess = ({
 }: {
     submittedReason?: string
     id: string
-}): MockedResponse<SubmitContractMutation> => {
+}): MockLink.MockedResponse<SubmitContractMutation> => {
     const contractData = mockContractPackageSubmittedWithRevisions({ id })
     return {
         request: {
@@ -406,7 +406,7 @@ const submitContractMockError = ({
         code: GraphQLErrorCodeTypes
         cause: GraphQLErrorCauseTypes
     }
-}): MockedResponse<SubmitContractMutation | GraphQLError> => {
+}): MockLink.MockedResponse<SubmitContractMutation | GraphQLError> => {
     const graphQLError = new GraphQLError(
         error
             ? GRAPHQL_ERROR_CAUSE_MESSAGES[error.cause]
@@ -440,7 +440,7 @@ const indexContractsMockSuccess = (
         },
         { ...mockContractPackageSubmittedWithRevisions(), id: 'test-id-124' },
     ]
-): MockedResponse<IndexContractsForDashboardQuery> => {
+): MockLink.MockedResponse<IndexContractsForDashboardQuery> => {
     const submissionEdges = submissions.map((sub) => {
         return {
             node: sub,
@@ -465,7 +465,7 @@ const indexContractsStrippedMockSuccess = (
     contracts: ContractStripped[] = [
         mockContractStripped({ id: 'test-stripped-id-123' }),
     ]
-): MockedResponse<IndexContractsStrippedQuery> => {
+): MockLink.MockedResponse<IndexContractsStrippedQuery> => {
     const edges = contracts.map((contract) => ({
         node: contract,
     }))
@@ -504,7 +504,7 @@ const unlockContractMockSuccess = ({
     ),
     id,
     reason,
-}: unlockContractMockSuccessProps): MockedResponse<UnlockContractMutation> => {
+}: unlockContractMockSuccessProps): MockLink.MockedResponse<UnlockContractMutation> => {
     // HACK, for some reason tests started failing with getting the types just right
     // As we get those types everywhere we can revisit this.
     const unlockedContract = contract as UnlockedContract
@@ -529,7 +529,7 @@ const unlockContractMockError = ({
         code: GraphQLErrorCodeTypes
         cause: GraphQLErrorCauseTypes
     }
-}): MockedResponse<UnlockContractMutation> => {
+}): MockLink.MockedResponse<UnlockContractMutation> => {
     const graphQLError = new GraphQLError(
         error
             ? GRAPHQL_ERROR_CAUSE_MESSAGES[error.cause]
