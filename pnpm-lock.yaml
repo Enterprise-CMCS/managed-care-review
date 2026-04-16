@@ -1049,8 +1049,8 @@ importers:
         specifier: 2.100.1
         version: 2.100.1(@aws-solutions-constructs/core@2.94.0(aws-cdk-lib@2.243.0(constructs@10.5.1))(constructs@10.5.1))(aws-cdk-lib@2.243.0(constructs@10.5.1))(constructs@10.5.1)
       '@aws-solutions-constructs/aws-cloudfront-s3':
-        specifier: 2.94.0
-        version: 2.94.0(@aws-solutions-constructs/core@2.94.0(aws-cdk-lib@2.243.0(constructs@10.5.1))(constructs@10.5.1))(@aws-solutions-constructs/resources@2.94.0(@aws-solutions-constructs/core@2.94.0(aws-cdk-lib@2.243.0(constructs@10.5.1))(constructs@10.5.1))(aws-cdk-lib@2.243.0(constructs@10.5.1))(constructs@10.5.1))(aws-cdk-lib@2.243.0(constructs@10.5.1))(constructs@10.5.1)
+        specifier: 2.101.0
+        version: 2.101.0(@aws-solutions-constructs/core@2.94.0(aws-cdk-lib@2.243.0(constructs@10.5.1))(constructs@10.5.1))(@aws-solutions-constructs/resources@2.94.0(@aws-solutions-constructs/core@2.94.0(aws-cdk-lib@2.243.0(constructs@10.5.1))(constructs@10.5.1))(aws-cdk-lib@2.243.0(constructs@10.5.1))(constructs@10.5.1))(aws-cdk-lib@2.243.0(constructs@10.5.1))(constructs@10.5.1)
       '@aws-solutions-constructs/aws-cognito-apigateway-lambda':
         specifier: 2.92.1
         version: 2.92.1(@aws-solutions-constructs/core@2.94.0(aws-cdk-lib@2.243.0(constructs@10.5.1))(constructs@10.5.1))(aws-cdk-lib@2.243.0(constructs@10.5.1))(constructs@10.5.1)
@@ -2004,12 +2004,12 @@ packages:
       aws-cdk-lib: ^2.239.0
       constructs: ^10.0.0
 
-  '@aws-solutions-constructs/aws-cloudfront-s3@2.94.0':
-    resolution: {integrity: sha512-UMSY8IXjNwoI0t+dMpQ4KgiLQdSae+eAGFqXQmpoREGJUKaTG9Qvx2xY07LnqNZLWxDdvdSveLfn/Qksx8Y6Wg==}
+  '@aws-solutions-constructs/aws-cloudfront-s3@2.101.0':
+    resolution: {integrity: sha512-/VgQNhGuUxlr3o4J+UBpMs+MWRrBF/N49bJ938QWgfEVyyTyoNfOJGuDpBSCyGz+1TWZHGDD4kOrDhqwMX83nQ==}
     peerDependencies:
-      '@aws-solutions-constructs/core': 2.94.0
-      '@aws-solutions-constructs/resources': 2.94.0
-      aws-cdk-lib: ^2.219.0
+      '@aws-solutions-constructs/core': 2.101.0
+      '@aws-solutions-constructs/resources': 2.101.0
+      aws-cdk-lib: ^2.248.0
       constructs: ^10.0.0
 
   '@aws-solutions-constructs/aws-cognito-apigateway-lambda@2.92.1':
@@ -15470,7 +15470,7 @@ snapshots:
       aws-cdk-lib: 2.243.0(constructs@10.5.1)
       constructs: 10.5.1
 
-  '@aws-solutions-constructs/aws-cloudfront-s3@2.94.0(@aws-solutions-constructs/core@2.94.0(aws-cdk-lib@2.243.0(constructs@10.5.1))(constructs@10.5.1))(@aws-solutions-constructs/resources@2.94.0(@aws-solutions-constructs/core@2.94.0(aws-cdk-lib@2.243.0(constructs@10.5.1))(constructs@10.5.1))(aws-cdk-lib@2.243.0(constructs@10.5.1))(constructs@10.5.1))(aws-cdk-lib@2.243.0(constructs@10.5.1))(constructs@10.5.1)':
+  '@aws-solutions-constructs/aws-cloudfront-s3@2.101.0(@aws-solutions-constructs/core@2.94.0(aws-cdk-lib@2.243.0(constructs@10.5.1))(constructs@10.5.1))(@aws-solutions-constructs/resources@2.94.0(@aws-solutions-constructs/core@2.94.0(aws-cdk-lib@2.243.0(constructs@10.5.1))(constructs@10.5.1))(aws-cdk-lib@2.243.0(constructs@10.5.1))(constructs@10.5.1))(aws-cdk-lib@2.243.0(constructs@10.5.1))(constructs@10.5.1)':
     dependencies:
       '@aws-solutions-constructs/core': 2.94.0(aws-cdk-lib@2.243.0(constructs@10.5.1))(constructs@10.5.1)
       '@aws-solutions-constructs/resources': 2.94.0(@aws-solutions-constructs/core@2.94.0(aws-cdk-lib@2.243.0(constructs@10.5.1))(constructs@10.5.1))(aws-cdk-lib@2.243.0(constructs@10.5.1))(constructs@10.5.1)
