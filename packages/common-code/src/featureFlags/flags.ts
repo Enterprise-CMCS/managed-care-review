@@ -78,6 +78,10 @@ const featureFlags = {
     /**
      The number of minutes before the session expires and countdown modal appears
     */
+    CHIP_SUBMISSION_AUTOMATION: {
+        flag: 'chip-submission-automation',
+        defaultValue: false,
+    },
     MINUTES_UNTIL_SESSION_EXPIRES: {
         flag: 'session-expiration-minutes',
         defaultValue: 30,
