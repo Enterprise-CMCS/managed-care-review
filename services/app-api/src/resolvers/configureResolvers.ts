@@ -72,8 +72,9 @@ import { fetchDocumentResolver } from './documents/fetchDocument'
 import { generateUploadURLResolver } from './documents/generateUploadURL'
 import {
     triggerValidationResolver,
-    type TriggerValidationResolverConfig,
+    type ValidationResolverConfig,
 } from './validation/triggerValidation'
+import { fetchValidationStatusResolver } from './validation/fetchValidationStatus'
 
 export function configureResolvers(
     store: Store,
@@ -82,7 +83,7 @@ export function configureResolvers(
     s3Client: S3ClientT,
     applicationEndpoint: string,
     documentZip: DocumentZipService,
-    validationConfig: TriggerValidationResolverConfig
+    validationConfig: ValidationResolverConfig
 ): Resolvers {
     const resolvers: Resolvers = {
         Date: GraphQLDate,
@@ -90,6 +91,10 @@ export function configureResolvers(
         Query: {
             fetchCurrentUser: fetchCurrentUserResolver(),
             fetchDocument: fetchDocumentResolver(store, s3Client),
+            validationStatus: fetchValidationStatusResolver(
+                store,
+                validationConfig
+            ),
             indexContracts: indexContractsResolver(store),
             indexContractsStripped: indexContractsStripped(store),
             indexUsers: indexUsersResolver(store),

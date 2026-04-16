@@ -6,7 +6,7 @@ import { logError, logSuccess } from '../../logger'
 import { NotFoundError, type Store } from '../../postgres'
 import { computeArtifactVersion } from '../../../../ai-form-augmentation/src/versioning/artifactVersion'
 
-export interface TriggerValidationResolverConfig {
+export interface ValidationResolverConfig {
     validationFunctionName: string
     artifactBucket: string
     region: string
@@ -15,7 +15,7 @@ export interface TriggerValidationResolverConfig {
 
 export function triggerValidationResolver(
     store: Store,
-    config: TriggerValidationResolverConfig
+    config: ValidationResolverConfig
 ): MutationResolvers['triggerValidation'] {
     return async (_parent, { input }, _context: Context) => {
         const contractResult = await store.findContractWithHistory(

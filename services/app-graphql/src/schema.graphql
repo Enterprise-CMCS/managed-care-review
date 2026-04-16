@@ -114,6 +114,8 @@ type Query {
     fetchMcReviewSettings: FetchMcReviewSettingsPayload!
 
     fetchOauthClients(input: FetchOauthClientsInput): FetchOauthClientsPayload!
+
+    validationStatus(input: ValidationStatusInput!): ValidationStatusPayload!
 }
 
 type Mutation {
@@ -530,6 +532,33 @@ input TriggerValidationInput {
 type TriggerValidationPayload {
     ok: Boolean!
     artifactVersion: String!
+}
+
+input ValidationStatusInput {
+    contractID: ID!
+}
+
+type ValidationFinding {
+    field: String!
+    outcome: String!
+    confidence: String!
+    message: String!
+    citations: [ValidationCitation!]!
+}
+
+type ValidationCitation {
+    chunkId: String!
+    documentName: String!
+    page: Int
+    order: Int!
+}
+
+type ValidationStatusPayload {
+    stage: String!
+    artifactVersion: String!
+    isStale: Boolean!
+    error: String
+    results: [ValidationFinding!]!
 }
 
 input CreateContractInput {
