@@ -4,6 +4,7 @@
         "target": "ESNext",
         "module": "ESNext",
         "lib": ["ES2021", "DOM"],
+        "types": ["node"],
         "moduleResolution": "bundler",
 
         "baseUrl": "/",
