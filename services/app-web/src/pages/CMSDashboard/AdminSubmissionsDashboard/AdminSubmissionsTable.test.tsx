@@ -230,6 +230,96 @@ describe('AdminSubmissionsTable', () => {
             })
         })
 
+        it('filters by managed care entities', async () => {
+            renderTable([
+                mockContract({
+                    contractId: 'c-1',
+                    submissionID: 'MCR-MN-0001',
+                    managedCareEntities: ['MCO'],
+                }),
+                mockContract({
+                    contractId: 'c-2',
+                    submissionID: 'MCR-OH-0002',
+                    stateCode: 'OH',
+                    managedCareEntities: ['PIHP'],
+                }),
+                mockContract({
+                    contractId: 'c-3',
+                    submissionID: 'MCR-FL-0003',
+                    stateCode: 'FL',
+                    managedCareEntities: ['PAHP', 'MCO'],
+                }),
+            ])
+            await openContractFilters()
+
+            const managedCareEntitiesFilter = screen.getByTestId(
+                'managedCareEntities-filter'
+            )
+            const managedCareEntitiesCombobox = within(
+                managedCareEntitiesFilter
+            ).getByRole('combobox')
+
+            selectEvent.openMenu(managedCareEntitiesCombobox)
+            const managedCareEntitiesOptions = screen.getByTestId(
+                'managedCareEntities-filter-options'
+            )
+            await selectEvent.select(
+                managedCareEntitiesOptions,
+                'Prepaid Inpatient Health Plan (PIHP)'
+            )
+
+            await waitFor(() => {
+                expect(querySubmissionID('MCR-OH-0002')).toBeInTheDocument()
+                expect(querySubmissionID('MCR-MN-0001')).not.toBeInTheDocument()
+                expect(querySubmissionID('MCR-FL-0003')).not.toBeInTheDocument()
+            })
+        })
+
+        it('filters by federal authorities', async () => {
+            renderTable([
+                mockContract({
+                    contractId: 'c-1',
+                    submissionID: 'MCR-MN-0001',
+                    federalAuthorities: ['STATE_PLAN'],
+                }),
+                mockContract({
+                    contractId: 'c-2',
+                    submissionID: 'MCR-OH-0002',
+                    stateCode: 'OH',
+                    federalAuthorities: ['WAIVER_1115'],
+                }),
+                mockContract({
+                    contractId: 'c-3',
+                    submissionID: 'MCR-FL-0003',
+                    stateCode: 'FL',
+                    federalAuthorities: ['VOLUNTARY', 'BENCHMARK'],
+                }),
+            ])
+            await openContractFilters()
+
+            const federalAuthoritiesFilter = screen.getByTestId(
+                'federalAuthorities-filter'
+            )
+            const federalAuthoritiesCombobox = within(
+                federalAuthoritiesFilter
+            ).getByRole('combobox')
+
+            selectEvent.openMenu(federalAuthoritiesCombobox)
+            const federalAuthoritiesOptions = screen.getByTestId(
+                'federalAuthorities-filter-options'
+            )
+            await selectEvent.select(
+                federalAuthoritiesOptions,
+                '1115 Waiver Authority'
+            )
+
+            await waitFor(() => {
+                expect(querySubmissionID('MCR-OH-0002')).toBeInTheDocument()
+                expect(querySubmissionID('MCR-MN-0001')).not.toBeInTheDocument()
+                expect(querySubmissionID('MCR-FL-0003')).not.toBeInTheDocument()
+            })
+        })
+
         it('clears all filters', async () => {
             renderTable(data)
             await openContractFilters()

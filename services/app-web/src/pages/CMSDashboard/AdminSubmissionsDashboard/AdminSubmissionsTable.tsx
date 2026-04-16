@@ -21,7 +21,12 @@ import {
 import { Accordion, Button, Table, Tag } from '@trussworks/react-uswds'
 import type { AccordionItemProps } from '@trussworks/react-uswds/lib/components/Accordion/Accordion'
 import { FlattenContract, FlattenRate } from '../../../gen/gqlClient'
-import { findStatePrograms, ProgramArgType } from '@mc-review/submissions'
+import {
+    FederalAuthorityRecord,
+    findStatePrograms,
+    ManagedCareEntityRecord,
+    ProgramArgType,
+} from '@mc-review/submissions'
 import styles from '../../../components/ContractTable/ContractTable.module.scss'
 import { pluralize } from '@mc-review/common-code'
 import { getSubmissionPath } from '../../../routeHelpers'
@@ -323,6 +328,22 @@ const contractExecutionStatusOptions: FilterOptionType[] = [
     { label: 'Unexecuted', value: 'UNEXECUTED' },
 ]
 
+const managedCareEntitiesOptions: FilterOptionType[] = [
+    { label: ManagedCareEntityRecord.MCO, value: 'MCO' },
+    { label: ManagedCareEntityRecord.PIHP, value: 'PIHP' },
+    { label: ManagedCareEntityRecord.PAHP, value: 'PAHP' },
+    { label: ManagedCareEntityRecord.PCCM, value: 'PCCM' },
+]
+
+const federalAuthoritiesOptions: FilterOptionType[] = [
+    { label: FederalAuthorityRecord.STATE_PLAN, value: 'STATE_PLAN' },
+    { label: FederalAuthorityRecord.WAIVER_1915B, value: 'WAIVER_1915B' },
+    { label: FederalAuthorityRecord.WAIVER_1115, value: 'WAIVER_1115' },
+    { label: FederalAuthorityRecord.VOLUNTARY, value: 'VOLUNTARY' },
+    { label: FederalAuthorityRecord.BENCHMARK, value: 'BENCHMARK' },
+    { label: FederalAuthorityRecord.TITLE_XXI, value: 'TITLE_XXI' },
+]
+
 type DateRangeFilterType = [string, string] | []
 
 const dateRangeFilter: FilterFn<DateRangeFilterType> = (
@@ -583,12 +604,16 @@ const columns = [
         cell: (info) => formatDate(info.getValue()),
     }),
     columnHelper.accessor('managedCareEntities', {
+        id: 'managedCareEntities',
         header: 'Managed Care Entities',
         cell: (info) => info.getValue()?.join(', ') ?? '-',
+        filterFn: 'arrIncludesSome',
     }),
     columnHelper.accessor('federalAuthorities', {
+        id: 'federalAuthorities',
         header: 'Federal Authorities',
         cell: (info) => info.getValue()?.join(', ') ?? '-',
+        filterFn: 'arrIncludesSome',
     }),
     columnHelper.accessor('inLieuServicesAndSettings', {
         header: 'In Lieu Services',
@@ -1291,6 +1316,40 @@ export const AdminSubmissionsTable = ({
                             updateFilters(
                                 table.getColumn(
                                     'contractExecutionStatus'
+                                ) as Column<FlattenContract>,
+                                selectedOptions
+                            )
+                        }
+                    />
+                    <FilterSelect
+                        value={getSelectedFilters(
+                            'managedCareEntities',
+                            managedCareEntitiesOptions
+                        )}
+                        name="managedCareEntities"
+                        label="Managed Care Entities"
+                        filterOptions={managedCareEntitiesOptions}
+                        onChange={(selectedOptions) =>
+                            updateFilters(
+                                table.getColumn(
+                                    'managedCareEntities'
+                                ) as Column<FlattenContract>,
+                                selectedOptions
+                            )
+                        }
+                    />
+                    <FilterSelect
+                        value={getSelectedFilters(
+                            'federalAuthorities',
+                            federalAuthoritiesOptions
+                        )}
+                        name="federalAuthorities"
+                        label="Federal Authorities"
+                        filterOptions={federalAuthoritiesOptions}
+                        onChange={(selectedOptions) =>
+                            updateFilters(
+                                table.getColumn(
+                                    'federalAuthorities'
                                 ) as Column<FlattenContract>,
                                 selectedOptions
                             )
