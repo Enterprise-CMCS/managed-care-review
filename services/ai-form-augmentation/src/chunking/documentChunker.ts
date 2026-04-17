@@ -3,6 +3,8 @@ export interface DocumentChunk {
   documentName: string
   order: number
   page: number | null
+  startPage: number | null
+  endPage: number | null
   text: string
   startChar: number
   endChar: number
@@ -11,6 +13,7 @@ export interface DocumentChunk {
 export interface ChunkDocumentOptions {
   chunkSize?: number
   chunkOverlap?: number
+  pageTexts?: string[]
 }
 
 const DEFAULT_CHUNK_SIZE = 1000
@@ -23,6 +26,7 @@ export function chunkDocument(
 ): DocumentChunk[] {
   const chunkSize = options.chunkSize ?? DEFAULT_CHUNK_SIZE
   const chunkOverlap = options.chunkOverlap ?? DEFAULT_CHUNK_OVERLAP
+  const pageTexts = options.pageTexts ?? []
 
   if (chunkSize <= 0) {
     throw new Error('chunkSize must be greater than 0')
@@ -43,6 +47,7 @@ export function chunkDocument(
   }
 
   const chunks: DocumentChunk[] = []
+  const pageCharRanges = buildPageCharRanges(pageTexts)
   // Advance by less than chunkSize so adjacent chunks share context.
   const step = chunkSize - chunkOverlap
 
@@ -58,8 +63,9 @@ export function chunkDocument(
         chunkId: `${documentName}::chunk-${order}`,
         documentName,
         order,
-        // Page-level mapping can be added later when the parser returns it.
-        page: null,
+        page: getChunkPage(startChar, pageCharRanges),
+        startPage: getChunkPage(startChar, pageCharRanges),
+        endPage: getChunkPage(endChar - 1, pageCharRanges),
         text,
         startChar,
         endChar
@@ -76,4 +82,47 @@ export function chunkDocument(
   }
 
   return chunks
+}
+
+function buildPageCharRanges(pageTexts: string[]): Array<{
+  page: number
+  startChar: number
+  endChar: number
+}> {
+  if (pageTexts.length === 0) {
+    return []
+  }
+
+  let startChar = 0
+
+  return pageTexts.flatMap((pageText, index) => {
+    const normalizedPageText = pageText.trim()
+
+    if (!normalizedPageText) {
+      return []
+    }
+
+    const endChar = startChar + normalizedPageText.length
+    const range = {
+      page: index + 1,
+      startChar,
+      endChar
+    }
+
+    startChar = endChar + 2
+
+    return [range]
+  })
+}
+
+function getChunkPage(
+  startChar: number,
+  pageCharRanges: Array<{ page: number; startChar: number; endChar: number }>
+): number | null {
+  const matchingPage = pageCharRanges.find(
+    (pageRange) =>
+      startChar >= pageRange.startChar && startChar < pageRange.endChar
+  )
+
+  return matchingPage?.page ?? null
 }

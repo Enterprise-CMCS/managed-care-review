@@ -38,7 +38,9 @@ async function main(): Promise<void> {
   const normalizedParsedText = parsed.rawText.toUpperCase()
 
   // Use the parsed PDF text as-is so chunking can be inspected independently of S3 or embeddings.
-  const chunks = chunkDocument(parsed.fileName, parsed.rawText)
+  const chunks = chunkDocument(parsed.fileName, parsed.rawText, {
+    pageTexts: parsed.pageTexts
+  })
 
   const artifact = buildChunksArtifact(artifactVersion, chunks)
   const key = getChunksArtifactKey(formId)
@@ -71,6 +73,8 @@ async function main(): Promise<void> {
     documentName: string
     order: number
     page: number | null
+    startPage: number | null
+    endPage: number | null
     text: string
   }>()
 
@@ -83,6 +87,8 @@ async function main(): Promise<void> {
         documentName: chunk.documentName,
         order: chunk.order,
         page: chunk.page,
+        startPage: chunk.startPage,
+        endPage: chunk.endPage,
         text: chunk.text
       }
     }))
@@ -119,6 +125,8 @@ async function main(): Promise<void> {
       chunkId: result.metadata.chunkId,
       documentName: result.metadata.documentName,
       page: result.metadata.page,
+      startPage: result.metadata.startPage,
+      endPage: result.metadata.endPage,
       order: result.metadata.order,
       text: result.metadata.text
     }))

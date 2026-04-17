@@ -8,6 +8,11 @@ export interface AIValidationDisplayItem {
     outcomeLabel: string
     confidenceLabel: string
     message: string
+    citations: Array<{
+        documentName: string
+        pageLabel: string
+        orderLabel: string
+    }>
 }
 
 const FIELD_LABELS: Record<string, string> = {
@@ -40,6 +45,30 @@ function getConfidenceLabel(confidence: string): string {
     return CONFIDENCE_LABELS[confidence] ?? confidence
 }
 
+function getPageLabel(args: {
+    page: number | null | undefined
+    startPage?: number | null
+    endPage?: number | null
+}): string {
+    const { page, startPage, endPage } = args
+
+    if (
+        startPage != null &&
+        endPage != null &&
+        startPage !== endPage
+    ) {
+        return `Pages ${startPage}-${endPage}`
+    }
+
+    const singlePage = page ?? startPage ?? endPage
+
+    return singlePage == null ? 'Page unknown' : `Page ${singlePage}`
+}
+
+function getOrderLabel(order: number): string {
+    return `Chunk order ${order}`
+}
+
 export function mapAIValidationFindings(
     findings: ValidationFinding[]
 ): AIValidationDisplayItem[] {
@@ -48,5 +77,14 @@ export function mapAIValidationFindings(
         outcomeLabel: getOutcomeLabel(finding.outcome),
         confidenceLabel: getConfidenceLabel(finding.confidence),
         message: finding.message,
+        citations: finding.citations.map((citation) => ({
+            documentName: citation.documentName,
+            pageLabel: getPageLabel({
+                page: citation.page,
+                startPage: citation.startPage,
+                endPage: citation.endPage,
+            }),
+            orderLabel: getOrderLabel(citation.order),
+        })),
     }))
 }

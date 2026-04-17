@@ -1,54 +1,53 @@
+import { dayjs } from '../../../../packages/dates/src/dayjs'
 import type {
   DateValidationCitationInput,
   DateValidationFieldInput,
   DateValidationResult
 } from '../prompts'
+import { VALIDATION_FIELD_CONFIG } from '../validationFields'
 
 type SupportedField = DateValidationFieldInput['field']
 
-const FIELD_CONFIG: Record<
-  SupportedField,
-  {
-    labelPatterns: RegExp[]
-    messageLabel: string
-  }
-> = {
-  contractStartDate: {
-    labelPatterns: [
-      /\bSTART DATE\b/i,
-      /\bEFFECTIVE DATE\b/i,
-      /\bTERM BEGINS ON\b/i,
-      /\bTERM STARTS ON\b/i
-    ],
-    messageLabel: 'start date'
-  },
-  contractEndDate: {
-    labelPatterns: [
-      /\bTHROUGH END DATE\b/i,
-      /\bEND DATE\b/i,
-      /\bTERM ENDS ON\b/i,
-      /\bTERM EXPIRES ON\b/i
-    ],
-    messageLabel: 'end date'
-  },
-  amendmentEffectiveDate: {
-    labelPatterns: [/Amendment effective date\s*:/i],
-    messageLabel: 'amendment effective date'
-  }
-}
-
 const MONTH_PATTERN =
-  '(January|February|March|April|May|June|July|August|September|October|November|December)'
+  '(January|February|March|April|May|June|July|August|September|October|November|December|Jan(?:uary)?|Feb(?:ruary)?|Mar(?:ch)?|Apr(?:il)?|May|Jun(?:e)?|Jul(?:y)?|Aug(?:ust)?|Sep(?:t(?:ember)?)?|Oct(?:ober)?|Nov(?:ember)?|Dec(?:ember)?)'
+const SLASH_DATE_PATTERN = '\\d{1,2}/\\d{1,2}/\\d{4}'
+const ISO_DATE_PATTERN = '\\d{4}-\\d{2}-\\d{2}'
 const DATE_PATTERN = new RegExp(
-  `${MONTH_PATTERN}\\s+\\d{1,2},?\\s*\\d{4}`,
+  `${MONTH_PATTERN}\\s+\\d{1,2},?\\s*\\d{4}|${SLASH_DATE_PATTERN}|${ISO_DATE_PATTERN}`,
   'i'
 )
+const ACCEPTED_DATE_FORMATS = [
+  'M/D/YYYY',
+  'MM/DD/YYYY',
+  'YYYY-MM-DD',
+  'MMMM D, YYYY',
+  'MMMM D YYYY',
+  'MMM D, YYYY',
+  'MMM D YYYY'
+] as const
 
 function normalizeWhitespace(value: string): string {
   return value.replace(/\s+/g, ' ').trim()
 }
 
+function canonicalizeDateToken(value: string): string | null {
+  const normalizedValue = normalizeWhitespace(value).replace(/\s*,\s*/g, ', ')
+  const parsedDate = dayjs(normalizedValue, [...ACCEPTED_DATE_FORMATS], true)
+
+  if (parsedDate.isValid()) {
+    return parsedDate.format('MM/DD/YYYY')
+  }
+
+  return null
+}
+
 function normalizeDateToken(value: string): string {
+  const canonicalDate = canonicalizeDateToken(value)
+
+  if (canonicalDate) {
+    return canonicalDate.toLowerCase()
+  }
+
   return normalizeWhitespace(value)
     .replace(/\s*,\s*/g, ', ')
     .replace(/,\s*(\d{4})$/, ', $1')
@@ -62,6 +61,8 @@ function buildCitation(
     chunkId: chunk.chunkId,
     documentName: chunk.documentName,
     page: chunk.page,
+    ...(chunk.startPage != null ? { startPage: chunk.startPage } : {}),
+    ...(chunk.endPage != null ? { endPage: chunk.endPage } : {}),
     order: chunk.order
   }
 }
@@ -70,7 +71,7 @@ function extractLabeledDate(
   field: SupportedField,
   chunk: DateValidationCitationInput
 ): string | null {
-  for (const labelPattern of FIELD_CONFIG[field].labelPatterns) {
+  for (const labelPattern of VALIDATION_FIELD_CONFIG[field].labelPatterns) {
     const labelMatch = chunk.text.match(labelPattern)
 
     if (!labelMatch || labelMatch.index == null) {
@@ -145,13 +146,16 @@ export function runDeterministicDateValidation(input: {
 
     const normalizedExpected = normalizeDateToken(field.value)
     const [resolvedCandidate] = uniqueCandidates.values()
+    const displayedLabeledDate =
+      canonicalizeDateToken(resolvedCandidate.labeledDate) ??
+      resolvedCandidate.labeledDate
 
     if (normalizeDateToken(resolvedCandidate.labeledDate) === normalizedExpected) {
       resolvedResults.push({
         field: field.field,
         outcome: 'match',
         confidence: 'high',
-        message: `Document text labels ${FIELD_CONFIG[field.field].messageLabel} as ${field.value}.`,
+        message: `Document text labels ${VALIDATION_FIELD_CONFIG[field.field].messageLabel} as ${field.value}.`,
         decisionSource: 'deterministic',
         citations: resolvedCandidate.chunks.map(buildCitation)
       })
@@ -162,7 +166,7 @@ export function runDeterministicDateValidation(input: {
       field: field.field,
       outcome: 'mismatch',
       confidence: 'high',
-      message: `Document text labels ${FIELD_CONFIG[field.field].messageLabel} as ${resolvedCandidate.labeledDate}, not ${field.value}.`,
+      message: `Document text labels ${VALIDATION_FIELD_CONFIG[field.field].messageLabel} as ${displayedLabeledDate}, not ${field.value}.`,
       decisionSource: 'deterministic',
       citations: resolvedCandidate.chunks.map(buildCitation)
     })

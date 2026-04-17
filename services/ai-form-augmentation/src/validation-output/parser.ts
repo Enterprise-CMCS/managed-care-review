@@ -40,6 +40,12 @@ function isCitation(value: unknown): value is DateValidationResult['citations'][
     typeof candidate.chunkId === 'string' &&
     typeof candidate.documentName === 'string' &&
     (typeof candidate.page === 'number' || candidate.page === null) &&
+    (candidate.startPage === undefined ||
+      typeof candidate.startPage === 'number' ||
+      candidate.startPage === null) &&
+    (candidate.endPage === undefined ||
+      typeof candidate.endPage === 'number' ||
+      candidate.endPage === null) &&
     typeof candidate.order === 'number'
   )
 }

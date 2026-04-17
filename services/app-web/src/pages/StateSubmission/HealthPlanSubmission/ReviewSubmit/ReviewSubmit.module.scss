@@ -16,6 +16,52 @@
     margin-bottom: 2rem;
 }
 
-.validationFindingsSection {
-    margin-bottom: 2rem;
+.validationFindingsToggle {
+    margin-top: 1rem;
+}
+
+.validationFindingsContent {
+    overflow-x: auto;
+}
+
+.findingDetails {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+}
+
+.findingMessage {
+    margin: 0;
+}
+
+.findingEvidence {
+    display: flex;
+    flex-direction: column;
+    gap: 0.375rem;
+}
+
+.findingEvidenceLabel {
+    margin: 0;
+    font-weight: uswds.font-weight('bold');
+}
+
+.findingEvidenceList {
+    margin: 0;
+    padding-left: 1.25rem;
+}
+
+.findingEvidenceItem {
+    color: custom.$mcr-gray-dark;
+    font-size: 0.95rem;
+    margin-bottom: 0.25rem;
+
+    span {
+        display: block;
+    }
+}
+
+.findingEvidenceFallback {
+    color: custom.$mcr-gray-dark;
+    font-size: 0.95rem;
+    margin: 0;
 }

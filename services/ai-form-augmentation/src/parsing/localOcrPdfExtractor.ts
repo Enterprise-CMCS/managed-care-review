@@ -32,6 +32,7 @@ export class LocalOcrPdfExtractor implements PdfTextExtractor {
     return {
       fileName,
       rawText: pageTexts.join('\n\n').trim(),
+      pageTexts,
       pageCount,
       extractionMethod: 'ocr',
       extractionNotes: ['Used local OCR fallback because default PDF text extraction looked weak']

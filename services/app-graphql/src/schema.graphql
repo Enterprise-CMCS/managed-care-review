@@ -550,6 +550,8 @@ type ValidationCitation {
     chunkId: String!
     documentName: String!
     page: Int
+    startPage: Int
+    endPage: Int
     order: Int!
 }
 

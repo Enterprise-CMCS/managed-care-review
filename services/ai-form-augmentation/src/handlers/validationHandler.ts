@@ -28,6 +28,7 @@ import {
   parseValidationResponse,
   runDeterministicDateValidation
 } from '../validation-output'
+import { VALIDATION_FIELD_CONFIG } from '../validationFields'
 import { BruteForceVectorStore } from '../vector-store'
 import { computeFormSnapshotHash } from '../versioning'
 
@@ -88,7 +89,9 @@ export async function validationHandler(
     // Flatten parsed documents into one chunk set for this form so retrieval
     // can search across all currently attached contract PDFs as one evidence pool.
     const chunks = parsedDocuments.flatMap(({ parsed }) =>
-      chunkDocument(parsed.fileName, parsed.rawText)
+      chunkDocument(parsed.fileName, parsed.rawText, {
+        pageTexts: parsed.pageTexts
+      })
     )
 
     if (chunks.length === 0) {
@@ -124,6 +127,8 @@ export async function validationHandler(
       documentName: string
       order: number
       page: number | null
+      startPage: number | null
+      endPage: number | null
       text: string
     }>()
 
@@ -136,6 +141,8 @@ export async function validationHandler(
           documentName: chunk.documentName,
           order: chunk.order,
           page: chunk.page,
+          startPage: chunk.startPage,
+          endPage: chunk.endPage,
           text: chunk.text
         }
       }))
@@ -157,6 +164,8 @@ export async function validationHandler(
               chunkId: result.metadata.chunkId,
               documentName: result.metadata.documentName,
               page: result.metadata.page,
+              startPage: result.metadata.startPage,
+              endPage: result.metadata.endPage,
               order: result.metadata.order,
               text: result.metadata.text
             }))
@@ -181,6 +190,8 @@ export async function validationHandler(
         chunkId: string
         documentName: string
         page: number | null
+        startPage: number | null
+        endPage: number | null
         order: number
         text: string
       }>
@@ -246,6 +257,8 @@ export async function validationHandler(
       reconciledResults.filter((result) => result.field === field.field)
     )
 
+    logMissingCitationPages(event.formId, reconciledResults)
+
     await s3Client.putJson(
       event.bucket,
       getValidationResultKey(event.formId),
@@ -294,6 +307,8 @@ function reconcileValidationResults(
     documentName: string
     order: number
     page: number | null
+    startPage: number | null
+    endPage: number | null
   }>
 ): DateValidationResult[] {
   // Trust the model for semantic judgment, but not for source metadata. We map
@@ -304,7 +319,9 @@ function reconcileValidationResults(
       {
         documentName: chunk.documentName,
         order: chunk.order,
-        page: chunk.page
+        page: chunk.page,
+        startPage: chunk.startPage,
+        endPage: chunk.endPage
       }
     ])
   )
@@ -324,6 +341,12 @@ function reconcileValidationResults(
           chunkId: citation.chunkId,
           documentName: knownChunk.documentName,
           page: knownChunk.page,
+          ...(knownChunk.startPage != null
+            ? { startPage: knownChunk.startPage }
+            : {}),
+          ...(knownChunk.endPage != null
+            ? { endPage: knownChunk.endPage }
+            : {}),
           order: knownChunk.order
         }
       ]
@@ -331,15 +354,27 @@ function reconcileValidationResults(
   }))
 }
 
-function buildFieldRetrievalQuery(field: DateValidationFieldInput['field']): string {
-  switch (field) {
-    case 'contractStartDate':
-      return 'contract start date term begins effective date'
-    case 'contractEndDate':
-      return 'contract end date through end date term ends expiration date'
-    case 'amendmentEffectiveDate':
-      return 'amendment effective date'
+function logMissingCitationPages(
+  formId: string,
+  results: DateValidationResult[]
+): void {
+  const citationsMissingPage = results.flatMap((result) =>
+    result.citations.filter((citation) => citation.page == null)
+  )
+
+  if (citationsMissingPage.length === 0) {
+    return
   }
+
+  console.warn('Validation citations missing page metadata', {
+    formId,
+    count: citationsMissingPage.length,
+    chunkIds: [...new Set(citationsMissingPage.map((citation) => citation.chunkId))]
+  })
+}
+
+function buildFieldRetrievalQuery(field: DateValidationFieldInput['field']): string {
+  return VALIDATION_FIELD_CONFIG[field].retrievalQuery
 }
 
 function parseSingleFieldValidationResponse(
@@ -347,20 +382,37 @@ function parseSingleFieldValidationResponse(
   expectedField: DateValidationFieldInput['field']
 ): DateValidationResult {
   const parsedValidation = parseValidationResponse(rawText)
+  const matchingResults = parsedValidation.results.filter(
+    (result) => result.field === expectedField
+  )
 
-  if (parsedValidation.results.length !== 1) {
-    throw new Error(
-      `Validation model returned ${parsedValidation.results.length} results for ${expectedField}`
-    )
+  if (matchingResults.length !== 1) {
+    return buildLlmFallbackResult(expectedField)
   }
 
-  const [result] = parsedValidation.results
-
-  if (result.field !== expectedField) {
-    throw new Error(
-      `Validation model returned result for ${result.field} while validating ${expectedField}`
-    )
-  }
-
+  const [result] = matchingResults
   return result
+}
+
+function buildLlmFallbackResult(
+  field: DateValidationFieldInput['field']
+): DateValidationResult {
+  return {
+    field,
+    outcome: 'not-enough-evidence',
+    confidence: 'low',
+    message: `Retrieved document evidence was not conclusive enough to verify the ${formatFieldLabel(field)}.`,
+    citations: []
+  }
+}
+
+function formatFieldLabel(field: DateValidationFieldInput['field']): string {
+  switch (field) {
+    case 'contractStartDate':
+      return 'contract start date'
+    case 'contractEndDate':
+      return 'contract end date'
+    case 'amendmentEffectiveDate':
+      return 'amendment effective date'
+  }
 }

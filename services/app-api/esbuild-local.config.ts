@@ -14,6 +14,15 @@ esbuild
             '@prisma/client',
             // Express and its dependencies can be external
             'express',
+            // The AI validation worker pulls in native/local-model dependencies
+            // that should stay runtime-resolved in local mode rather than being
+            // traversed and bundled into the app-api local server build.
+            '@xenova/transformers',
+            'onnxruntime-node',
+            'sharp',
+            'pdf-parse',
+            'pdf-to-img',
+            'tesseract.js',
         ],
         sourcemap: true,
         format: 'esm',

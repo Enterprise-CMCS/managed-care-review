@@ -1,14 +1,15 @@
+import { spawn } from 'node:child_process'
+import { resolve } from 'node:path'
 import { InvokeCommand, LambdaClient } from '@aws-sdk/client-lambda'
-import { formatCalendarDate } from '@mc-review/dates'
 import { GraphQLError } from 'graphql'
 import type { Context } from '../../handlers/apollo_gql'
 import type { MutationResolvers } from '../../gen/gqlServer'
 import { logError, logSuccess } from '../../logger'
 import { NotFoundError, type Store } from '../../postgres'
 import type { ValidationSourceDocument } from '../../../../ai-form-augmentation/src/handlers'
-import type { DateValidationFieldInput } from '../../../../ai-form-augmentation/src/prompts'
 import { computeArtifactVersion } from '../../../../ai-form-augmentation/src/versioning/artifactVersion'
-import { validationHandler } from '../../../../ai-form-augmentation/src/handlers'
+import { getEffectiveValidationDocumentKeys } from './validationDocumentKeys'
+import { buildValidationFormFields } from './validationFormFields'
 
 export interface ValidationResolverConfig {
     validationFunctionName: string
@@ -71,12 +72,20 @@ export function triggerValidationResolver(
                 if (!document.s3Key || !document.s3BucketName) {
                     return []
                 }
+                const [sourceKey] = getEffectiveValidationDocumentKeys(
+                    [document],
+                    config.useLocalS3
+                )
 
                 return [
                     {
                         documentName: document.name,
                         sourceBucket: document.s3BucketName,
-                        sourceKey: document.s3Key,
+                        // Local uploads still persist the historical raw key in
+                        // s3URL while app-api normalizes s3Key to allusers/... .
+                        // The AI worker should follow the actual object location
+                        // in local mode without changing the shared upload stack.
+                        sourceKey,
                     },
                 ]
             })
@@ -149,16 +158,11 @@ export function triggerValidationResolver(
 
         try {
             if (isLocalExecution) {
-                // Local development does not have a real downstream Lambda target, so we
-                // execute the validation worker directly while preserving fire-and-forget behavior.
-                void validationHandler(payload).catch((localError) => {
-                    const message =
-                        localError instanceof Error
-                            ? localError.message
-                            : 'Unknown local validation execution error'
-
-                    logError('triggerValidation.localExecution', message)
-                })
+                // Keep local validation out of the app-api module graph. Spawning
+                // the AI worker in its own workspace process avoids pulling native
+                // OCR/embedding dependencies into local-server startup and keeps
+                // auth/API boot healthy even when validation is idle.
+                startLocalValidationWorker(payload)
 
                 console.info(
                     'triggerValidation started local validation handler',
@@ -216,30 +220,38 @@ export function triggerValidationResolver(
     }
 }
 
-function buildValidationFormFields(formData: {
-    contractDateStart?: Date
-    contractDateEnd?: Date
-}): DateValidationFieldInput[] {
-    const fields: DateValidationFieldInput[] = []
+function startLocalValidationWorker(
+    payload: Parameters<typeof JSON.stringify>[0]
+): void {
+    const repoRoot = resolve(process.cwd(), '../..')
+    const childProcess = spawn(
+        'pnpm',
+        ['--filter', 'ai-form-augmentation', 'exec', 'tsx', 'src/runValidation.ts'],
+        {
+            cwd: repoRoot,
+            stdio: ['pipe', 'ignore', 'pipe'],
+        }
+    )
 
-    if (formData.contractDateStart) {
-        // Serialize dates once at the API boundary so the worker always receives
-        // stable prompt-ready values instead of mixing Date formatting concerns
-        // into the document-processing runtime.
-        fields.push({
-            field: 'contractStartDate',
-            label: 'Contract Start Date',
-            value: formatCalendarDate(formData.contractDateStart, 'UTC'),
-        })
-    }
+    childProcess.stdin?.end(JSON.stringify(payload))
 
-    if (formData.contractDateEnd) {
-        fields.push({
-            field: 'contractEndDate',
-            label: 'Contract End Date',
-            value: formatCalendarDate(formData.contractDateEnd, 'UTC'),
-        })
-    }
+    childProcess.stderr?.on('data', (chunk) => {
+        logError(
+            'triggerValidation.localExecution',
+            Buffer.from(chunk).toString().trim()
+        )
+    })
 
-    return fields
+    childProcess.on('error', (error) => {
+        logError('triggerValidation.localExecution', error.message)
+    })
+
+    childProcess.on('exit', (code) => {
+        if (code && code !== 0) {
+            logError(
+                'triggerValidation.localExecution',
+                `Local validation worker exited with code ${code}`
+            )
+        }
+    })
 }

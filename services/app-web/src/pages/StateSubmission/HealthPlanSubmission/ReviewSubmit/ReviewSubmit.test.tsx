@@ -1,4 +1,5 @@
 import { screen, waitFor, within } from '@testing-library/react'
+import userEvent from '@testing-library/user-event'
 import { renderWithProviders } from '../../../../testHelpers/jestHelpers'
 import { ReviewSubmit } from './index'
 import {
@@ -506,7 +507,7 @@ describe('ReviewSubmit', () => {
                                 },
                             }),
                             validationStatusMock({
-                                stage: 'validating',
+                                stage: 'retrieving',
                             }),
                         ],
                     },
@@ -631,7 +632,15 @@ describe('ReviewSubmit', () => {
                                         confidence: 'high',
                                         message:
                                             'Start date matches document text.',
-                                        citations: [],
+                                        citations: [
+                                            {
+                                                chunkId:
+                                                    'scan-a.pdf::chunk-0',
+                                                documentName: 'scan-a.pdf',
+                                                page: null,
+                                                order: 0,
+                                            },
+                                        ],
                                     },
                                     {
                                         field: 'amendmentEffectiveDate',
@@ -639,6 +648,150 @@ describe('ReviewSubmit', () => {
                                         confidence: 'medium',
                                         message:
                                             'Document text indicates amendment effective date is January 1, 2021.',
+                                        citations: [
+                                            {
+                                                chunkId:
+                                                    'scan-a.pdf::chunk-1',
+                                                documentName: 'scan-a.pdf',
+                                                page: 2,
+                                                order: 1,
+                                            },
+                                            {
+                                                chunkId:
+                                                    'scan-b.pdf::chunk-0',
+                                                documentName: 'scan-b.pdf',
+                                                page: 4,
+                                                order: 0,
+                                            },
+                                        ],
+                                    },
+                                ],
+                            }),
+                        ],
+                    },
+                    routerProvider: {
+                        route: '/submissions/health-plan/test-abc-123/edit/review-and-submit',
+                    },
+                    featureFlags: {},
+                }
+            )
+
+            expect(
+                await screen.findByRole('heading', {
+                    name: 'Validation findings',
+                })
+            ).toBeInTheDocument()
+            expect(screen.getByText('Show less')).toBeInTheDocument()
+
+            expect(screen.getByText('Contract start date')).toBeInTheDocument()
+            expect(
+                screen.getByText('Amendment effective date')
+            ).toBeInTheDocument()
+            expect(screen.getByText('Match')).toBeInTheDocument()
+            expect(screen.getByText('Mismatch')).toBeInTheDocument()
+            expect(
+                screen.getByText('Start date matches document text.')
+            ).toBeInTheDocument()
+            expect(
+                screen.getByText(
+                    'Document text indicates amendment effective date is January 1, 2021.'
+                )
+            ).toBeInTheDocument()
+            expect(screen.getAllByText('Evidence')).toHaveLength(2)
+            expect(screen.getByText('scan-a.pdf')).toBeInTheDocument()
+            expect(screen.getByText('Page unknown')).toBeInTheDocument()
+            expect(screen.getByText('Chunk order 0')).toBeInTheDocument()
+            expect(screen.getByText('Page 2')).toBeInTheDocument()
+            expect(screen.getByText('scan-b.pdf')).toBeInTheDocument()
+            expect(screen.getByText('Page 4')).toBeInTheDocument()
+        })
+
+        it('renders findings expanded first and allows the user to collapse them', async () => {
+            renderWithProviders(
+                <Routes>
+                    <Route
+                        path={RoutesRecord.SUBMISSIONS_REVIEW_SUBMIT}
+                        element={<ReviewSubmit />}
+                    />
+                </Routes>,
+                {
+                    apolloProvider: {
+                        mocks: [
+                            fetchCurrentUserMock({ statusCode: 200 }),
+                            fetchContractMockSuccess({
+                                contract: {
+                                    ...mockContractPackageDraft(),
+                                    id: 'test-abc-123',
+                                    contractSubmissionType: 'HEALTH_PLAN',
+                                },
+                            }),
+                            validationStatusMock({
+                                stage: 'complete',
+                                results: [
+                                    {
+                                        field: 'contractStartDate',
+                                        outcome: 'match',
+                                        confidence: 'high',
+                                        message:
+                                            'Start date matches document text.',
+                                        citations: [],
+                                    },
+                                ],
+                            }),
+                        ],
+                    },
+                    routerProvider: {
+                        route: '/submissions/health-plan/test-abc-123/edit/review-and-submit',
+                    },
+                    featureFlags: {},
+                }
+            )
+
+            expect(
+                await screen.findByRole('heading', {
+                    name: 'Validation findings',
+                })
+            ).toBeInTheDocument()
+            expect(screen.getByRole('table')).toBeInTheDocument()
+
+            await userEvent.click(screen.getByRole('button', { name: 'Show less' }))
+
+            expect(
+                screen.queryByText('Contract start date')
+            ).not.toBeInTheDocument()
+            expect(
+                screen.getByRole('button', { name: 'Show more' })
+            ).toBeInTheDocument()
+        })
+
+        it('renders a neutral fallback when a finding has no citation details', async () => {
+            renderWithProviders(
+                <Routes>
+                    <Route
+                        path={RoutesRecord.SUBMISSIONS_REVIEW_SUBMIT}
+                        element={<ReviewSubmit />}
+                    />
+                </Routes>,
+                {
+                    apolloProvider: {
+                        mocks: [
+                            fetchCurrentUserMock({ statusCode: 200 }),
+                            fetchContractMockSuccess({
+                                contract: {
+                                    ...mockContractPackageDraft(),
+                                    id: 'test-abc-123',
+                                    contractSubmissionType: 'HEALTH_PLAN',
+                                },
+                            }),
+                            validationStatusMock({
+                                stage: 'complete',
+                                results: [
+                                    {
+                                        field: 'contractStartDate',
+                                        outcome: 'not-enough-evidence',
+                                        confidence: 'low',
+                                        message:
+                                            'The document text does not provide enough evidence to verify this field.',
                                         citations: [],
                                     },
                                 ],
@@ -658,19 +811,8 @@ describe('ReviewSubmit', () => {
                 })
             ).toBeInTheDocument()
 
-            expect(screen.getByText('Contract start date')).toBeInTheDocument()
             expect(
-                screen.getByText('Amendment effective date')
-            ).toBeInTheDocument()
-            expect(screen.getByText('Match')).toBeInTheDocument()
-            expect(screen.getByText('Mismatch')).toBeInTheDocument()
-            expect(
-                screen.getByText('Start date matches document text.')
-            ).toBeInTheDocument()
-            expect(
-                screen.getByText(
-                    'Document text indicates amendment effective date is January 1, 2021.'
-                )
+                screen.getByText('No citation details available.')
             ).toBeInTheDocument()
         })
 
@@ -835,7 +977,7 @@ describe('ReviewSubmit', () => {
                                 },
                             }),
                             validationStatusMock({
-                                stage: 'validating',
+                                stage: 'retrieving',
                             }),
                         ],
                     },

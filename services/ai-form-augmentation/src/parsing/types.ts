@@ -3,6 +3,7 @@ export type PdfExtractionMethod = 'pdf-text' | 'ocr'
 export interface PdfParseResult {
   fileName: string
   rawText: string
+  pageTexts: string[]
   pageCount: number
   extractionMethod: PdfExtractionMethod
   extractionNotes: string[]

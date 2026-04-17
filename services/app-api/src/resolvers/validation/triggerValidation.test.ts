@@ -1,3 +1,4 @@
+import type { ChildProcessWithoutNullStreams } from 'node:child_process'
 import { InvokeCommand, LambdaClient } from '@aws-sdk/client-lambda'
 import type { GraphQLError } from 'graphql'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
@@ -8,12 +9,20 @@ import {
 } from './triggerValidation'
 import type { Store } from '../../postgres'
 
-const { validationHandlerMock } = vi.hoisted(() => ({
-    validationHandlerMock: vi.fn(),
+const {
+    spawnMock,
+    childStdinEndMock,
+    childStderrOnMock,
+    childOnMock,
+} = vi.hoisted(() => ({
+    spawnMock: vi.fn(),
+    childStdinEndMock: vi.fn(),
+    childStderrOnMock: vi.fn(),
+    childOnMock: vi.fn(),
 }))
 
-vi.mock('../../../../ai-form-augmentation/src/handlers', () => ({
-    validationHandler: validationHandlerMock,
+vi.mock('node:child_process', () => ({
+    spawn: spawnMock,
 }))
 
 const baseConfig: ValidationResolverConfig = {
@@ -36,6 +45,9 @@ const buildContractWithDraft = (documentKeys: Array<string | undefined>) => ({
             contractDocuments: documentKeys.map((s3Key, index) => ({
                 id: `doc-${index}`,
                 name: `Document ${index}`,
+                s3URL: s3Key
+                    ? `s3://local-uploads/${s3Key.replace(/^allusers\//, '')}/Document ${index}.pdf`
+                    : '',
                 s3BucketName: 'local-uploads',
                 s3Key,
             })),
@@ -63,23 +75,24 @@ describe('triggerValidationResolver', () => {
     beforeEach(() => {
         vi.restoreAllMocks()
         vi.clearAllMocks()
+        spawnMock.mockReturnValue({
+            stdin: {
+                end: childStdinEndMock,
+            },
+            stderr: {
+                on: childStderrOnMock,
+            },
+            on: childOnMock,
+        } as unknown as ChildProcessWithoutNullStreams)
     })
 
-    it('starts local validation handler directly when useLocalS3 is true', async () => {
+    it('starts local validation worker process when useLocalS3 is true', async () => {
         const store = buildStore(
             buildContractWithDraft([
-                'uploads/contracts/doc-a.pdf',
-                'uploads/contracts/doc-b.pdf',
+                'allusers/1776374348125-doc-a.pdf',
+                'allusers/1776374348126-doc-b.pdf',
             ])
         )
-
-        // Local dev does not have a real downstream Lambda, so the resolver
-        // executes the validation worker directly when useLocalS3 is enabled.
-        validationHandlerMock.mockResolvedValue({
-            formId: 'test-abc-123',
-            artifactVersion: 'mock-artifact-version',
-            status: 'completed',
-        })
 
         const sendSpy = vi
             .spyOn(LambdaClient.prototype, 'send')
@@ -95,8 +108,19 @@ describe('triggerValidationResolver', () => {
         expect(result.ok).toBe(true)
         expect(result.artifactVersion).toEqual(expect.any(String))
 
-        expect(validationHandlerMock).toHaveBeenCalledTimes(1)
-        expect(validationHandlerMock).toHaveBeenCalledWith(
+        expect(spawnMock).toHaveBeenCalledTimes(1)
+        expect(spawnMock).toHaveBeenCalledWith(
+            'pnpm',
+            ['--filter', 'ai-form-augmentation', 'exec', 'tsx', 'src/runValidation.ts'],
+            expect.objectContaining({
+                cwd: expect.stringMatching(/managed-care-review$/),
+                stdio: ['pipe', 'ignore', 'pipe'],
+            })
+        )
+        expect(childStdinEndMock).toHaveBeenCalledTimes(1)
+
+        const serializedPayload = childStdinEndMock.mock.calls[0][0]
+        expect(JSON.parse(serializedPayload)).toEqual(
             expect.objectContaining({
                 formId: 'test-abc-123',
                 bucket: 'ai-form-augmentation-artifacts',
@@ -117,12 +141,12 @@ describe('triggerValidationResolver', () => {
                     {
                         documentName: 'Document 0',
                         sourceBucket: 'local-uploads',
-                        sourceKey: 'uploads/contracts/doc-a.pdf',
+                        sourceKey: '1776374348125-doc-a.pdf',
                     },
                     {
                         documentName: 'Document 1',
                         sourceBucket: 'local-uploads',
-                        sourceKey: 'uploads/contracts/doc-b.pdf',
+                        sourceKey: '1776374348126-doc-b.pdf',
                     },
                 ],
                 s3Config: expect.objectContaining({
@@ -148,12 +172,6 @@ describe('triggerValidationResolver', () => {
             ])
         )
 
-        validationHandlerMock.mockResolvedValue({
-            formId: 'test-abc-123',
-            artifactVersion: 'mock-artifact-version',
-            status: 'completed',
-        })
-
         const sendSpy = vi
             .spyOn(LambdaClient.prototype, 'send')
             .mockResolvedValue({} as never)
@@ -169,7 +187,7 @@ describe('triggerValidationResolver', () => {
         expect(result.artifactVersion).toEqual(expect.any(String))
 
         expect(sendSpy).toHaveBeenCalledTimes(1)
-        expect(validationHandlerMock).not.toHaveBeenCalled()
+        expect(spawnMock).not.toHaveBeenCalled()
 
         const sentCommand = sendSpy.mock.calls[0][0]
         expect(sentCommand).toBeInstanceOf(InvokeCommand)

@@ -11,8 +11,11 @@ import {
     getValidationResultKey,
     type ValidationResultArtifact,
 } from '../../../../ai-form-augmentation/src/results'
+import { computeFormSnapshotHash } from '../../../../ai-form-augmentation/src/versioning'
 import { computeArtifactVersion } from '../../../../ai-form-augmentation/src/versioning/artifactVersion'
 import type { ValidationResolverConfig } from './triggerValidation'
+import { getEffectiveValidationDocumentKeys } from './validationDocumentKeys'
+import { buildValidationFormFields } from './validationFormFields'
 
 export function fetchValidationStatusResolver(
     store: Store,
@@ -62,11 +65,10 @@ export function fetchValidationStatusResolver(
         // participate in artifact versioning and artifact lookup. If a
         // document has not been saved to S3 yet, there is nothing stable for
         // the polling resolver to compare against.
-        const documentKeys = revision.formData.contractDocuments
-            .map((document) => document.s3Key)
-            .filter((s3Key: string | undefined): s3Key is string =>
-                Boolean(s3Key)
-            )
+        const documentKeys = getEffectiveValidationDocumentKeys(
+            revision.formData.contractDocuments,
+            config.useLocalS3
+        )
 
         if (documentKeys.length === 0) {
             return {
@@ -82,6 +84,12 @@ export function fetchValidationStatusResolver(
         // This is what lets the resolver treat older status/results artifacts as
         // stale after the user changes the uploaded contract documents.
         const artifactVersion = computeArtifactVersion(documentKeys)
+        const formSnapshotHash = computeFormSnapshotHash(
+            buildValidationFormFields(revision.formData).map((field) => ({
+                field: field.field,
+                value: field.value,
+            }))
+        )
 
         // The polling path reads the same bucket the validation worker writes
         // to, so it uses the artifact-focused S3 client rather than the
@@ -219,6 +227,21 @@ export function fetchValidationStatusResolver(
             }
         }
 
+        if (
+            resultArtifact &&
+            resultArtifact.formSnapshotHash !== formSnapshotHash
+        ) {
+            logSuccess('validationStatus')
+
+            return {
+                stage: statusArtifact?.stage ?? 'complete',
+                artifactVersion,
+                isStale: true,
+                error: null,
+                results: [],
+            }
+        }
+
         if (statusArtifact?.stage === 'failed') {
             logSuccess('validationStatus')
 
@@ -248,7 +271,7 @@ export function fetchValidationStatusResolver(
         logSuccess('validationStatus')
 
         return {
-            stage: statusArtifact?.stage ?? 'validating',
+            stage: statusArtifact?.stage ?? 'retrieving',
             artifactVersion,
             isStale: false,
             error: null,

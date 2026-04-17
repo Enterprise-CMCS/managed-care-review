@@ -41,7 +41,6 @@ import { featureFlags } from '@mc-review/common-code'
 import { RoutesRecord, RouteT } from '@mc-review/constants'
 import { AIValidationStatusCard } from './AIvalidationStatusCard'
 import { getAIValidationDisplayState } from './aiValidationStatus'
-import { AIValidationFindingsCard } from './AIValidationFindingsCard'
 import { mapAIValidationFindings } from './aiValidationFindings'
 import { shouldTriggerAIValidation } from './shouldTriggerAIValidation'
 
@@ -113,6 +112,9 @@ export const ReviewSubmit = (): React.ReactElement => {
         validationStatus?.stage === 'complete' &&
         !validationStatus.isStale &&
         validationFindingDisplayItems.length > 0
+    const validationBannerMode = showValidationFindings
+        ? 'findings'
+        : 'status'
 
     const contractReady = !loading && !error
     const validationReady = !validationLoading && !validationError
@@ -222,6 +224,12 @@ export const ReviewSubmit = (): React.ReactElement => {
                     aria-label="Document validation status"
                 >
                     <AIValidationStatusCard
+                        mode={validationBannerMode}
+                        findings={
+                            showValidationFindings
+                                ? validationFindingDisplayItems
+                                : []
+                        }
                         state={
                             showInitialValidationLoading
                                 ? {
@@ -243,16 +251,6 @@ export const ReviewSubmit = (): React.ReactElement => {
                         }
                     />
                 </section>
-                {showValidationFindings && (
-                    <section
-                        className={styles.validationFindingsSection}
-                        aria-label="Document validation findings"
-                    >
-                        <AIValidationFindingsCard
-                            findings={validationFindingDisplayItems}
-                        />
-                    </section>
-                )}
                 <SubmissionTypeSummarySection
                     contract={contract}
                     submissionName={submissionName}

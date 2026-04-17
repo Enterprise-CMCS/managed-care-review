@@ -8,6 +8,8 @@ export interface DateValidationCitationInput {
   chunkId: string
   documentName: string
   page: number | null
+  startPage?: number | null
+  endPage?: number | null
   order: number
   text: string
 }
@@ -27,6 +29,8 @@ export interface DateValidationResult {
     chunkId: string
     documentName: string
     page: number | null
+    startPage?: number | null
+    endPage?: number | null
     order: number
   }>
 }
@@ -37,6 +41,18 @@ function formatFormFields(fields: DateValidationFieldInput[]): string {
     .join('\n')
 }
 
+function formatPageLabel(chunk: DateValidationCitationInput): string {
+  if (
+    chunk.startPage != null &&
+    chunk.endPage != null &&
+    chunk.startPage !== chunk.endPage
+  ) {
+    return `${chunk.startPage}-${chunk.endPage}`
+  }
+
+  return String(chunk.page ?? chunk.startPage ?? chunk.endPage ?? 'unknown')
+}
+
 function formatRetrievedChunks(chunks: DateValidationCitationInput[]): string {
   return chunks
     .map((chunk, index) => {
@@ -44,7 +60,7 @@ function formatRetrievedChunks(chunks: DateValidationCitationInput[]): string {
         `Chunk ${index + 1}`,
         `chunkId: ${chunk.chunkId}`,
         `documentName: ${chunk.documentName}`,
-        `page: ${chunk.page ?? 'unknown'}`,
+        `page: ${formatPageLabel(chunk)}`,
         `order: ${chunk.order}`,
         'text:',
         chunk.text
@@ -84,6 +100,8 @@ export function buildDateValidationPrompt(
     '        "chunkId": "string",',
     '        "documentName": "string",',
     '        "page": number | null,',
+    '        "startPage": number | null,',
+    '        "endPage": number | null,',
     '        "order": number',
     '      }',
     '    ]',

@@ -12,6 +12,7 @@ const {
     parseValidationResponseMock,
     buildDateValidationPromptMock,
     runDeterministicDateValidationMock,
+    consoleWarnMock,
 } = vi.hoisted(() => ({
     getBufferMock: vi.fn(),
     putJsonMock: vi.fn(),
@@ -22,6 +23,7 @@ const {
     generateValidationMock: vi.fn(),
     parseValidationResponseMock: vi.fn(),
     buildDateValidationPromptMock: vi.fn(() => 'test-prompt'),
+    consoleWarnMock: vi.fn(),
     runDeterministicDateValidationMock: vi.fn(
         (input: { formFields: DateValidationFieldInput[] }) => ({
             resolvedResults: input.formFields.map(
@@ -135,11 +137,16 @@ const baseEvent = {
 describe('validationHandler', () => {
     beforeEach(() => {
         vi.clearAllMocks()
+        vi.spyOn(console, 'warn').mockImplementation(consoleWarnMock)
 
         getBufferMock.mockResolvedValue(Buffer.from('fake-pdf'))
         parsePdfMock.mockResolvedValue({
             fileName: 'contract-a.pdf',
             rawText: 'START DATE January 1, 2025 END DATE December 31, 2025',
+            pageTexts: [
+                'START DATE January 1, 2025 END DATE December 31, 2025',
+            ],
+            pageCount: 1,
             extractionMethod: 'pdf-text',
             extractionNotes: [],
         })
@@ -195,6 +202,23 @@ describe('validationHandler', () => {
         expect(getBufferMock).toHaveBeenCalledWith(
             'local-uploads',
             'uploads/contracts/contract-a.pdf'
+        )
+
+        expect(embedTextMock).toHaveBeenNthCalledWith(
+            1,
+            'START DATE contract term of this agreement effective date begins on'
+        )
+        expect(embedTextMock).toHaveBeenNthCalledWith(
+            2,
+            'contract end date through end date term ends expiration date'
+        )
+        expect(consoleWarnMock).toHaveBeenCalledWith(
+            'Validation citations missing page metadata',
+            {
+                formId: 'test-form',
+                count: 2,
+                chunkIds: ['contract-a.pdf::chunk-0'],
+            }
         )
 
         expect(putJsonMock).toHaveBeenCalledWith(
@@ -398,6 +422,97 @@ describe('validationHandler', () => {
         )
     })
 
+    it('uses the matching llm result when extra results are returned', async () => {
+        runDeterministicDateValidationMock
+            .mockReturnValueOnce({
+                resolvedResults: [],
+                unresolvedFields: [
+                    baseEvent.formFields[0],
+                ] as DateValidationFieldInput[],
+            })
+            .mockReturnValueOnce({
+                resolvedResults: [
+                    {
+                        field: 'contractEndDate',
+                        outcome: 'match',
+                        confidence: 'high',
+                        message:
+                            'Document text includes end date December 31, 2025.',
+                        decisionSource: 'deterministic',
+                        citations: [
+                            {
+                                chunkId: 'contract-a.pdf::chunk-0',
+                                documentName: 'contract-a.pdf',
+                                page: null,
+                                order: 0,
+                            },
+                        ],
+                    },
+                ],
+                unresolvedFields: [],
+            })
+
+        parseValidationResponseMock.mockReturnValueOnce({
+            normalizedRawText: '[]',
+            results: [
+                {
+                    field: 'contractStartDate',
+                    outcome: 'match',
+                    confidence: 'medium',
+                    message: 'Start date matches.',
+                    decisionSource: 'llm',
+                    citations: [
+                        {
+                            chunkId: 'contract-a.pdf::chunk-0',
+                            documentName: 'wrong.pdf',
+                            page: 9,
+                            order: 9,
+                        },
+                    ],
+                },
+                {
+                    field: 'contractEndDate',
+                    outcome: 'mismatch',
+                    confidence: 'low',
+                    message: 'Irrelevant extra result.',
+                    decisionSource: 'llm',
+                    citations: [],
+                },
+            ],
+        })
+
+        await validationHandler(baseEvent)
+
+        expect(putJsonMock).toHaveBeenLastCalledWith(
+            'ai-form-augmentation-artifacts',
+            getValidationStatusKey('test-form'),
+            expect.objectContaining({
+                stage: 'complete',
+                artifactVersion: 'artifact-v1',
+                error: null,
+            })
+        )
+
+        expect(putJsonMock).toHaveBeenCalledWith(
+            'ai-form-augmentation-artifacts',
+            getValidationResultKey('test-form'),
+            expect.objectContaining({
+                results: [
+                    expect.objectContaining({
+                        field: 'contractStartDate',
+                        outcome: 'match',
+                        decisionSource: 'llm',
+                    }),
+                    expect.objectContaining({
+                        field: 'contractEndDate',
+                        outcome: 'match',
+                        decisionSource: 'deterministic',
+                    }),
+                ],
+            })
+        )
+    })
+
     it('uses deterministic validation for obvious labeled date matches without calling the llm', async () => {
         generateValidationMock.mockClear()
         parseValidationResponseMock.mockClear()
@@ -451,7 +566,7 @@ describe('validationHandler', () => {
         )
     })
 
-    it('fails when the llm returns a result for the wrong field', async () => {
+    it('falls back to not-enough-evidence when the llm returns no matching field result', async () => {
         runDeterministicDateValidationMock
             .mockReturnValueOnce({
                 resolvedResults: [],
@@ -495,16 +610,49 @@ describe('validationHandler', () => {
             ],
         })
 
-        await expect(validationHandler(baseEvent)).rejects.toThrow(
-            'Validation model returned result for contractEndDate while validating contractStartDate'
+        await validationHandler(baseEvent)
+
+        expect(putJsonMock).toHaveBeenCalledWith(
+            'ai-form-augmentation-artifacts',
+            getValidationResultKey('test-form'),
+            expect.objectContaining({
+                results: [
+                    {
+                        field: 'contractStartDate',
+                        outcome: 'not-enough-evidence',
+                        confidence: 'low',
+                        message:
+                            'Retrieved document evidence was not conclusive enough to verify the contract start date.',
+                        decisionSource: 'llm',
+                        citations: [],
+                    },
+                    {
+                        field: 'contractEndDate',
+                        outcome: 'match',
+                        confidence: 'high',
+                        message:
+                            'Document text includes end date December 31, 2025.',
+                        decisionSource: 'deterministic',
+                        citations: [
+                            {
+                                chunkId: 'contract-a.pdf::chunk-0',
+                                documentName: 'contract-a.pdf',
+                                page: null,
+                                order: 0,
+                            },
+                        ],
+                    },
+                ],
+            })
         )
 
         expect(putJsonMock).toHaveBeenLastCalledWith(
             'ai-form-augmentation-artifacts',
             getValidationStatusKey('test-form'),
             expect.objectContaining({
-                stage: 'failed',
+                stage: 'complete',
                 artifactVersion: 'artifact-v1',
+                error: null,
             })
         )
     })

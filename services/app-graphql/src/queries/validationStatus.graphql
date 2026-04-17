@@ -13,6 +13,8 @@ query ValidationStatus($input: ValidationStatusInput!) {
                 chunkId
                 documentName
                 page
+                startPage
+                endPage
                 order
             }
         }

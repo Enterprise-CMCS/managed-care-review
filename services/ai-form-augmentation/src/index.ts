@@ -61,6 +61,7 @@ export { OllamaValidationClient } from './llm'
 // Validation output
 export type { ParsedValidationOutput } from './validation-output'
 export {
+  runDeterministicDateValidation,
   extractJsonArray,
   normalizeValidationResponse,
   parseValidationResponse
