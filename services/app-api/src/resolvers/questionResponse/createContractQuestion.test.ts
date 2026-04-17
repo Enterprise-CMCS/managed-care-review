@@ -403,18 +403,18 @@ describe('createQuestion', () => {
             emailer: mockEmailer,
         })
 
+        // Assign state analysts
+        const assignedUserIDs = assignedUsers.map((u) => u.id)
+        const assignedUserEmails = assignedUsers.map((u) => u.email)
+
+        await updateTestStateAssignments(cmsServer, 'FL', assignedUserIDs)
+
         const contract = await createAndSubmitTestContractWithRate(stateServer)
 
         await createTestQuestion(cmsServer, contract.id)
 
         const contractName =
             contract.packageSubmissions[0].contractRevision.contractName
-
-        // Assign state analysts
-        const assignedUserIDs = assignedUsers.map((u) => u.id)
-        const assignedUserEmails = assignedUsers.map((u) => u.email)
-
-        await updateTestStateAssignments(cmsServer, 'FL', assignedUserIDs)
 
         const cmsEmails = [
             ...config.devReviewTeamEmails,
@@ -463,6 +463,13 @@ describe('createQuestion', () => {
             },
             emailer: mockEmailer,
         })
+
+        // Assign state analysts
+        const assignedUserIDs = assignedUsers.map((u) => u.id)
+        const assignedUserEmails = assignedUsers.map((u) => u.email)
+
+        await updateTestStateAssignments(cmsServer, 'FL', assignedUserIDs)
+
         const stateSubmission =
             await createAndSubmitTestContractWithRate(stateServer)
 
@@ -472,12 +479,6 @@ describe('createQuestion', () => {
 
         const contractName =
             stateSubmission.packageSubmissions[0].contractRevision.contractName
-
-        // Assign state analysts
-        const assignedUserIDs = assignedUsers.map((u) => u.id)
-        const assignedUserEmails = assignedUsers.map((u) => u.email)
-
-        await updateTestStateAssignments(cmsServer, 'FL', assignedUserIDs)
 
         const cmsEmails = [
             ...config.devReviewTeamEmails,
