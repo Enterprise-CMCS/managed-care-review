@@ -7,7 +7,7 @@ import { GenericErrorPage } from '../../Errors/GenericErrorPage'
 import { AdminSubmissionsTable } from './AdminSubmissionsTable'
 import { RoutesRecord } from '@mc-review/constants'
 import styles from './AdminSubmissionsTable.module.scss'
-import { useQuery } from '@apollo/client'
+import { useQuery } from '@apollo/client/react'
 
 export const AdminSubmissionsDashboard = (): React.ReactElement => {
     const { data, loading, error } = useQuery(
