@@ -1,4 +1,7 @@
-export type { ValidationResultArtifact } from './validationResultArtifact'
+export type {
+  ValidationLlmDiagnostic,
+  ValidationResultArtifact
+} from './validationResultArtifact'
 export {
   buildValidationResultArtifact,
   getValidationResultKey

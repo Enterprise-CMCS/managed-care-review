@@ -2,7 +2,7 @@
 
 ## Current Ticket
 
-The next implementation ticket is `AIFA-030 LLM output robustness and malformed-response handling`.
+The next implementation ticket is `AIFA-031 Reduce malformed LLM output rate`.
 
 ## Completed
 
@@ -35,6 +35,7 @@ The next implementation ticket is `AIFA-030 LLM output robustness and malformed-
 - AIFA-022 ✔ Minimal test corpus
 - AIFA-023 ✔ Validation evaluation harness
 - AIFA-029 ✔ Field-label and retrieval coverage hardening
+- AIFA-030 ✔ LLM output robustness and malformed-response handling
 
 ## Current State
 
@@ -83,6 +84,12 @@ The local PoC now works end to end from the actual form flow, has a reusable eva
 - competing labeled values now resolve to deterministic `not-enough-evidence` instead of being left entirely to the LLM
 - malformed LLM JSON now degrades to the existing `not-enough-evidence` path instead of breaking the run
 
+### Malformed-output observability
+
+- stored validation artifacts now preserve optional LLM diagnostics for malformed JSON, invalid result shape, and missing or duplicate field results
+- corpus evaluation output now counts malformed LLM responses separately from ordinary validation outcomes
+- runtime behavior remains safely non-blocking: malformed LLM output still degrades to `not-enough-evidence`
+
 ## What Is Working
 
 - local bootstrap with `./dev local`
@@ -105,8 +112,9 @@ The local PoC now works end to end from the actual form flow, has a reusable eva
 - local Ollama quality is still a confound when judging whether a miss is retrieval, prompting, or model reasoning
 - the Review-page wording can still be improved once the measured result quality is stable
 - OCR-heavy fixtures are present, but not yet exercised in a repeatable evaluation loop
-- malformed LLM output is now contained safely, but it is still a distinct reliability risk that should be measured and reduced separately from retrieval quality
+- malformed LLM output is now contained and measurable, but prompt/model quality still needs a separate reduction pass
 - the AHF term-clause fixture still shows a real ambiguity gap around mixed term language and competing end dates
+- evaluation currently reports malformed-output frequency, but does not yet enforce a pass/fail threshold for that rate
 
 ## Current PoC Direction
 
@@ -140,9 +148,9 @@ The main change in direction is that the PoC is no longer framed as "general doc
 
 Use corpus evidence to harden alias coverage, retrieval inputs, and document-family handling for start/end date validation.
 
-### AIFA-030 LLM output robustness and malformed-response handling
+### AIFA-031 Reduce malformed LLM output rate
 
-Separate malformed-output reliability work from retrieval-quality work so evaluation runs stay trustworthy.
+Reduce the actual malformed-output rate now that those failures are visible in artifacts and corpus runs.
 
 ### AIFA-020D Review-page wording refinement
 
@@ -150,9 +158,9 @@ Polish the user-facing wording once the result quality is stable enough to prese
 
 ## Suggested Next Step
 
-- Track malformed-output cases explicitly in corpus runs so they are not confused with retrieval misses.
-- Tighten the prompt/output boundary only where it improves reliability without expanding scope.
-- Keep the next change focused on LLM output robustness, not broader field coverage or UI work.
+- Reduce malformed-output frequency on the same corpus without changing the current safe fallback behavior.
+- Keep prompt and recovery changes narrow to the single-field date-validation path.
+- Leave broader retrieval and UI work out of the next change.
 
 ## Source of Truth Docs
 
@@ -179,4 +187,4 @@ Polish the user-facing wording once the result quality is stable enough to prese
 - The rewritten PoC plan lives in `docs/technical-design/ai-validation-poc-plan.md`.
 - The broader `rag-llm-document-validation.md` document is still useful as long-term architecture context, but it should not be treated as the current PoC scope.
 - Timeout handling remains intentionally deferred while validation quality measurement is still the larger credibility risk.
-- The session file should now be treated as post-`AIFA-029`; the next meaningful implementation checkpoint is separating malformed-output robustness from remaining retrieval-quality gaps.
+- The next meaningful implementation checkpoint is reducing malformed-output frequency now that those failures are visible separately from retrieval gaps.

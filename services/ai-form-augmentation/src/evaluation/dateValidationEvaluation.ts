@@ -5,6 +5,7 @@ import { validationHandler } from '../handlers'
 import type { DateValidationResult } from '../prompts'
 import {
   getValidationResultKey,
+  type ValidationLlmDiagnostic,
   type ValidationResultArtifact
 } from '../results'
 import {
@@ -51,6 +52,7 @@ export interface DateValidationEvaluationFieldReport {
   expectedOutcome: DateValidationCorpusExpectation['expectedOutcome']
   actualOutcome: DateValidationResult['outcome'] | 'missing'
   decisionSource: DateValidationResult['decisionSource'] | 'missing'
+  llmIssue: ValidationLlmDiagnostic['issue'] | null
   passed: boolean
   problems: string[]
   actualMessage: string | null
@@ -73,6 +75,7 @@ export interface DateValidationEvaluationSummary {
   failedScenarios: number
   deterministicResults: number
   llmResults: number
+  malformedLlmResults: number
   reports: DateValidationEvaluationScenarioReport[]
 }
 
@@ -95,6 +98,11 @@ export async function runDateValidationEvaluation(): Promise<DateValidationEvalu
     ).length,
     llmResults: allFieldReports.filter(
       (report) => report.decisionSource === 'llm'
+    ).length,
+    malformedLlmResults: allFieldReports.filter((report) =>
+      report.llmIssue === 'missing-json-array' ||
+      report.llmIssue === 'invalid-json' ||
+      report.llmIssue === 'invalid-result-shape'
     ).length,
     reports
   }
@@ -154,7 +162,11 @@ async function evaluateScenario(
     ])
 
     const fieldReports = scenario.expectations.map((expectation) =>
-      compareExpectation(expectation, resultArtifact.results)
+      compareExpectation(
+        expectation,
+        resultArtifact.results,
+        resultArtifact.llmDiagnostics ?? []
+      )
     )
     // A scenario only counts as passing when the worker completes normally and
     // every expected field-level comparison matches the stored result.
@@ -184,6 +196,7 @@ async function evaluateScenario(
         expectedOutcome: expectation.expectedOutcome,
         actualOutcome: 'missing',
         decisionSource: 'missing',
+        llmIssue: null,
         passed: false,
         problems: ['Scenario evaluation failed before a comparable result was stored.'],
         actualMessage: null,
@@ -195,10 +208,14 @@ async function evaluateScenario(
 
 function compareExpectation(
   expectation: DateValidationCorpusExpectation,
-  actualResults: DateValidationResult[]
+  actualResults: DateValidationResult[],
+  llmDiagnostics: ValidationLlmDiagnostic[]
 ): DateValidationEvaluationFieldReport {
   const matchingResult =
     actualResults.find((result) => result.field === expectation.field) ?? null
+  const matchingDiagnostic =
+    llmDiagnostics.find((diagnostic) => diagnostic.field === expectation.field) ??
+    null
 
   if (!matchingResult) {
     return {
@@ -206,6 +223,7 @@ function compareExpectation(
       expectedOutcome: expectation.expectedOutcome,
       actualOutcome: 'missing',
       decisionSource: 'missing',
+      llmIssue: matchingDiagnostic?.issue ?? null,
       passed: false,
       problems: ['No stored validation result was produced for this field.'],
       actualMessage: null,
@@ -248,6 +266,7 @@ function compareExpectation(
     expectedOutcome: expectation.expectedOutcome,
     actualOutcome: matchingResult.outcome,
     decisionSource: matchingResult.decisionSource ?? 'missing',
+    llmIssue: matchingDiagnostic?.issue ?? null,
     passed: problems.length === 0,
     problems,
     actualMessage: matchingResult.message,

@@ -15,7 +15,8 @@ function formatEvaluationSummary(
   const lines = [
     'Date validation evaluation summary',
     `Scenarios: ${summary.passedScenarios}/${summary.totalScenarios} passed`,
-    `Decision sources: deterministic=${summary.deterministicResults}, llm=${summary.llmResults}`
+    `Decision sources: deterministic=${summary.deterministicResults}, llm=${summary.llmResults}`,
+    `Malformed LLM results: ${summary.malformedLlmResults}`
   ]
 
   for (const report of summary.reports) {
@@ -29,7 +30,7 @@ function formatEvaluationSummary(
 
     for (const fieldReport of report.fieldReports) {
       lines.push(
-        `  - ${fieldReport.field}: expected=${fieldReport.expectedOutcome}, actual=${fieldReport.actualOutcome}, source=${fieldReport.decisionSource}`
+        `  - ${fieldReport.field}: expected=${fieldReport.expectedOutcome}, actual=${fieldReport.actualOutcome}, source=${fieldReport.decisionSource}${fieldReport.llmIssue ? `, llmIssue=${fieldReport.llmIssue}` : ''}`
       )
 
       if (fieldReport.problems.length > 0) {

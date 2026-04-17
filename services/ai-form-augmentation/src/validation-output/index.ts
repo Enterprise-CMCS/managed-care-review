@@ -1,7 +1,11 @@
-export type { ParsedValidationOutput } from './parser'
+export type {
+  ParsedValidationOutput,
+  ValidationResponseIssue
+} from './parser'
 export { runDeterministicDateValidation } from './deterministicDateValidation'
 export {
   extractJsonArray,
   normalizeValidationResponse,
-  parseValidationResponse
+  parseValidationResponse,
+  ValidationResponseParseError
 } from './parser'

@@ -26,7 +26,8 @@ import {
 } from '../status'
 import {
   parseValidationResponse,
-  runDeterministicDateValidation
+  runDeterministicDateValidation,
+  type ValidationResponseIssue
 } from '../validation-output'
 import { VALIDATION_FIELD_CONFIG } from '../validationFields'
 import { BruteForceVectorStore } from '../vector-store'
@@ -216,6 +217,17 @@ export async function validationHandler(
     }
 
     let reconciledResults = deterministicResults
+    // Persist LLM-path diagnostics alongside the artifact so evaluation can
+    // distinguish malformed model output from a legitimate evidence miss
+    // without changing the user-facing finding contract.
+    const llmDiagnostics: Array<{
+      field: string
+      issue:
+        | ValidationResponseIssue
+        | 'missing-field-result'
+        | 'multiple-field-results'
+      message: string
+    }> = []
 
     if (unresolvedFields.length > 0) {
       await s3Client.putJson(
@@ -237,13 +249,17 @@ export async function validationHandler(
           const validationResponse = await validationClient.generateValidation({
             prompt
           })
-          const llmResult = parseSingleFieldValidationResponse(
+          const parsedLlmResponse = parseSingleFieldValidationResponse(
             validationResponse.rawText,
             field.field
           )
 
+          if (parsedLlmResponse.diagnostic != null) {
+            llmDiagnostics.push(parsedLlmResponse.diagnostic)
+          }
+
           return reconcileValidationResults(
-            [{ ...llmResult, decisionSource: 'llm' }],
+            [{ ...parsedLlmResponse.result, decisionSource: 'llm' }],
             retrievedChunks
           )
         })
@@ -272,7 +288,8 @@ export async function validationHandler(
             value: field.value
           }))
         ),
-        reconciledResults
+        reconciledResults,
+        llmDiagnostics
       )
     )
 
@@ -380,24 +397,68 @@ function buildFieldRetrievalQuery(field: DateValidationFieldInput['field']): str
 function parseSingleFieldValidationResponse(
   rawText: string,
   expectedField: DateValidationFieldInput['field']
-): DateValidationResult {
+): {
+  result: DateValidationResult
+  diagnostic?: {
+    field: string
+    issue:
+      | ValidationResponseIssue
+      | 'missing-field-result'
+      | 'multiple-field-results'
+    message: string
+  }
+} {
   let parsedValidation
 
   try {
     parsedValidation = parseValidationResponse(rawText)
-  } catch {
-    return buildLlmFallbackResult(expectedField)
+  } catch (error) {
+    const responseIssue = getValidationResponseIssue(error)
+
+    if (responseIssue != null) {
+      return {
+        result: buildLlmFallbackResult(expectedField),
+        diagnostic: {
+          field: expectedField,
+          issue: responseIssue,
+          message:
+            error instanceof Error
+              ? error.message
+              : `Validation response parse failed for ${expectedField}`
+        }
+      }
+    }
+
+    throw error
   }
   const matchingResults = parsedValidation.results.filter(
     (result) => result.field === expectedField
   )
 
-  if (matchingResults.length !== 1) {
-    return buildLlmFallbackResult(expectedField)
+  if (matchingResults.length === 0) {
+    return {
+      result: buildLlmFallbackResult(expectedField),
+      diagnostic: {
+        field: expectedField,
+        issue: 'missing-field-result',
+        message: `Validation model returned no result for ${expectedField}`
+      }
+    }
+  }
+
+  if (matchingResults.length > 1) {
+    return {
+      result: buildLlmFallbackResult(expectedField),
+      diagnostic: {
+        field: expectedField,
+        issue: 'multiple-field-results',
+        message: `Validation model returned ${matchingResults.length} results for ${expectedField}`
+      }
+    }
   }
 
   const [result] = matchingResults
-  return result
+  return { result }
 }
 
 function buildLlmFallbackResult(
@@ -411,6 +472,26 @@ function buildLlmFallbackResult(
     decisionSource: 'llm',
     citations: []
   }
+}
+
+function getValidationResponseIssue(
+  error: unknown
+): ValidationResponseIssue | null {
+  if (typeof error !== 'object' || error === null || !('issue' in error)) {
+    return null
+  }
+
+  const issue = (error as { issue?: unknown }).issue
+
+  if (
+    issue === 'missing-json-array' ||
+    issue === 'invalid-json' ||
+    issue === 'invalid-result-shape'
+  ) {
+    return issue
+  }
+
+  return null
 }
 
 function formatFieldLabel(field: DateValidationFieldInput['field']): string {

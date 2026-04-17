@@ -531,7 +531,7 @@ Most of the accidental hardcoding has already been removed. The remaining weakne
 - Parsing or chunk metadata preserves enough nearby structure to improve label-to-value matching
 - Retrieval behavior is measurably less dependent on exact wording in one document variant
 - Corpus results or evaluation notes show whether coverage improved and where limitations still remain"
-AIFA-030 LLM output robustness and malformed-response handling,Backlog,5-Testing & Evaluation,Medium,"AIFA-023, AIFA-029","Harden the model-output boundary so malformed or partial LLM responses do not distort evaluation or runtime behavior.
+AIFA-030 LLM output robustness and malformed-response handling,Done,5-Testing & Evaluation,Medium,"AIFA-023, AIFA-029","Harden the model-output boundary so malformed or partial LLM responses do not distort evaluation or runtime behavior.
 - Make malformed-output cases visible in the evaluation harness as a separate class of failure
 - Tighten the single-field prompt/response contract where it improves reliability without broadening scope
 - Keep parser recovery small and explicit if any repair logic is added
@@ -544,6 +544,19 @@ The PoC now has a repeatable corpus and evaluation harness, but malformed LLM ou
 - Any prompt or parser changes stay small, explicit, and testable
 - Corpus runs can report malformed-output frequency concretely
 - Another engineer can tell from the code and notes whether a failure was caused by retrieval quality or output-contract instability"
+AIFA-031 Reduce malformed LLM output rate,Backlog,5-Testing & Evaluation,Medium,AIFA-030,"Reduce how often the local validation model returns malformed or contract-breaking output without changing the current safe fallback behavior.
+- Tighten the date-validation prompt only where it measurably reduces extra prose, wrong shapes, or duplicate field results
+- Add one small recovery step only for clearly recoverable responses if prompt hardening alone is not enough
+- Compare malformed-output frequency before and after the change using the existing corpus and evaluation harness
+- Keep the implementation focused on the single-field validation path rather than broad model experimentation
+- Preserve the current fallback and diagnostics behavior introduced by AIFA-030
+
+Why this matters:
+AIFA-030 makes malformed responses visible and safe, but it does not reduce how often they happen. This ticket improves the actual reliability of the LLM path so evaluation runs and local demos are less affected by output-contract failures.","- Corpus evaluation shows malformed-output frequency before and after the change
+- The malformed-output rate is measurably lower on the same corpus or the limitation is documented clearly
+- Prompt changes remain narrow and specific to the single-field date-validation contract
+- Any recovery logic is small, explicit, and covered by focused tests
+- The runtime path still falls back safely and preserves malformed-response diagnostics when output cannot be trusted"
 AIFA-021 Cache validation results,Backlog,6-Production Prep,Medium,AIFA-015,"Avoid unnecessary re-validation when the documents and form data have not changed.
 - Define the cache key using artifactVersion and formSnapshotHash
 - Check for an existing matching validation result before re-running the full validation step

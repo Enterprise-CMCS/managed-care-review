@@ -1,8 +1,23 @@
 import type { DateValidationResult } from '../prompts'
 
+export type ValidationResponseIssue =
+  | 'missing-json-array'
+  | 'invalid-json'
+  | 'invalid-result-shape'
+
 export interface ParsedValidationOutput {
   results: DateValidationResult[]
   normalizedRawText: string
+}
+
+export class ValidationResponseParseError extends Error {
+  readonly issue: ValidationResponseIssue
+
+  constructor(issue: ValidationResponseIssue, message: string) {
+    super(message)
+    this.name = 'ValidationResponseParseError'
+    this.issue = issue
+  }
 }
 
 export function normalizeValidationResponse(rawText: string): string {
@@ -23,7 +38,10 @@ export function extractJsonArray(rawText: string): string {
   // The current prompt contract asks for an array of validation results, so
   // the parser intentionally looks for the outermost JSON array first.
   if (startIndex === -1 || endIndex === -1 || endIndex < startIndex) {
-    throw new Error('Could not find a JSON array in the LLM response')
+    throw new ValidationResponseParseError(
+      'missing-json-array',
+      'Could not find a JSON array in the LLM response'
+    )
   }
 
   return rawText.slice(startIndex, endIndex + 1)
@@ -82,11 +100,17 @@ export function parseValidationResponse(rawText: string): ParsedValidationOutput
   try {
     parsed = JSON.parse(jsonText)
   } catch (error) {
-    throw new Error(`Failed to parse validation JSON: ${String(error)}`)
+    throw new ValidationResponseParseError(
+      'invalid-json',
+      `Failed to parse validation JSON: ${String(error)}`
+    )
   }
 
   if (!Array.isArray(parsed) || !parsed.every(isDateValidationResult)) {
-    throw new Error('Validation response JSON does not match the expected result shape')
+    throw new ValidationResponseParseError(
+      'invalid-result-shape',
+      'Validation response JSON does not match the expected result shape'
+    )
   }
 
   return {

@@ -88,7 +88,10 @@ export {
 } from './status'
 
 // Results
-export type { ValidationResultArtifact } from './results'
+export type {
+  ValidationLlmDiagnostic,
+  ValidationResultArtifact
+} from './results'
 export {
   buildValidationResultArtifact,
   getValidationResultKey

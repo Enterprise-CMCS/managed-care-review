@@ -616,6 +616,14 @@ describe('validationHandler', () => {
             'ai-form-augmentation-artifacts',
             getValidationResultKey('test-form'),
             expect.objectContaining({
+                llmDiagnostics: [
+                    {
+                        field: 'contractStartDate',
+                        issue: 'missing-field-result',
+                        message:
+                            'Validation model returned no result for contractStartDate',
+                    },
+                ],
                 results: [
                     {
                         field: 'contractStartDate',
@@ -688,7 +696,9 @@ describe('validationHandler', () => {
             })
 
         parseValidationResponseMock.mockImplementationOnce(() => {
-            throw new Error('Failed to parse validation JSON')
+            const error = new Error('Failed to parse validation JSON')
+            ;(error as Error & { issue?: string }).issue = 'invalid-json'
+            throw error
         })
 
         await validationHandler(baseEvent)
@@ -697,6 +707,13 @@ describe('validationHandler', () => {
             'ai-form-augmentation-artifacts',
             getValidationResultKey('test-form'),
             expect.objectContaining({
+                llmDiagnostics: [
+                    {
+                        field: 'contractStartDate',
+                        issue: 'invalid-json',
+                        message: 'Failed to parse validation JSON',
+                    },
+                ],
                 results: [
                     {
                         field: 'contractStartDate',
