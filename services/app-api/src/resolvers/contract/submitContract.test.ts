@@ -2492,7 +2492,7 @@ describe('submitContract', () => {
             )
         })
 
-        it('does not add a review action on non-CHIP HEALTH_PLAN submission', async () => {
+        it('records UNDER_REVIEW action on non-CHIP HEALTH_PLAN submission', async () => {
             const stateServer = await constructTestPostgresServer({
                 s3Client: mockS3,
                 ldService: chipAutomationLD,
@@ -2503,7 +2503,10 @@ describe('submitContract', () => {
 
             expect(contract.contractSubmissionType).toBe('HEALTH_PLAN')
             expect(contract.consolidatedStatus).toBe('SUBMITTED')
-            expect(contract.reviewStatusActions ?? []).toHaveLength(0)
+            expect(contract.reviewStatusActions).toHaveLength(1)
+            expect(contract.reviewStatusActions?.[0].actionType).toBe(
+                'UNDER_REVIEW'
+            )
         })
 
         it('appends a new NOT_SUBJECT_TO_REVIEW row on CHIP resubmit', async () => {
