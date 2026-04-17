@@ -2,7 +2,7 @@
 
 ## Current Ticket
 
-The next implementation ticket is `AIFA-022 Minimal test corpus`.
+The next implementation ticket is `AIFA-023 Validation evaluation harness`.
 
 ## Completed
 
@@ -32,68 +32,62 @@ The next implementation ticket is `AIFA-022 Minimal test corpus`.
 - AIFA-020A ✔ Execute full validation pipeline from `validationHandler`
 - AIFA-020B ✔ Display validation citations and evidence details
 - AIFA-020C ✔ Trustworthy start/end validation flow
+- AIFA-022 ✔ Minimal test corpus
+- AIFA-029 ✔ Field-label and retrieval coverage hardening
 
 ## Current State
 
-The local PoC now works end to end from the actual form flow.
+The local PoC now works end to end from the actual form flow and has a reusable evaluation corpus.
 
 - `ReviewSubmit` triggers validation for the current draft revision instead of only polling passively.
 - `validationStatus` returns staged status plus stored findings/results for the current `artifactVersion`.
-- locally triggered validation now runs through the AI worker from the real app flow.
+- locally triggered validation runs through the AI worker from the real app flow.
 - the worker reads uploaded PDFs, parses text, chunks text, retrieves evidence, validates against form values, and persists `status.json`, `chunks.json`, and `validation-result.json`.
-- the Review page renders findings and citations instead of only showing a status banner.
+- the Review page renders findings and citations in a single expandable validation banner.
+- the repo now includes a fixed corpus of local PDF scenarios for start/end-date evaluation and demo use.
 
 ## Recent Changes
 
-### Local execution boundary
+### Validation flow hardening
 
-- local app-api execution no longer depends on importing the AI worker directly into the running GraphQL process
-- instead, local validation runs through a dedicated `ai-form-augmentation` execution path
-- this kept the deployed Lambda path intact while making `./dev local` actually usable
+- local app-api execution no longer depends on importing the AI worker directly into the GraphQL process
+- local validation runs through a dedicated `ai-form-augmentation` execution path
+- trigger and polling behavior now line up around current document keys plus current form date values
+- stale results are surfaced when dates change, not just when document sets change
 
-### Local server build stability
+### Validation result quality and evidence fidelity
 
-- the local app-api build was updated so native AI dependencies do not break the local server bundle
-- this fixed the `onnxruntime-node` and `sharp` `.node` loader failures that were crashing local API startup
-- result: local login and form navigation can proceed while the AI worker still uses the native dependencies it needs
+- deterministic validation now handles obvious labeled start/end-date extraction and date-format normalization
+- the local LLM remains the fallback path for unresolved cases
+- citation metadata now carries page context through the pipeline so the UI no longer depends on placeholder page text
+- local fallback behavior is more resilient when the LLM returns extra or non-matching results
 
-### Validation document key handling
+### Corpus and planning
 
-- local validation was failing because the worker was trying to read a normalized key that did not match the pre-existing uploaded-object location
-- app-api now derives the effective validation document key from the stored draft document data without changing the existing S3 contract
-- this fixed the local `S3 object not found` failure without rewriting the upload infrastructure
-
-### Artifact version consistency
-
-- trigger and polling behavior now line up more cleanly around the current draft revision state
-- earlier local runs showed stale or confusing transitions because different paths were effectively reasoning about different inputs
-- the current direction keeps `artifactVersion` authoritative and uses it to surface stale results explicitly
-
-### Validation quality path
-
-- a narrow deterministic date-validation step now exists for obvious start/end date extraction cases
-- this is intentionally small and focused on the PoC fields
-- the local LLM is still used for cases that are ambiguous or not captured cleanly by deterministic extraction
+- a reusable local PDF corpus now exists for match, mismatch, not-enough-evidence, and competing-date scenarios
+- the corpus includes a preferred demo subset plus additional document variants
+- the sprint plan now includes a follow-on hardening ticket focused on field-label and retrieval coverage
 
 ## What Is Working
 
 - local bootstrap with `./dev local`
-- local login and form navigation after the app-api build fix
+- local login and form navigation through the real form flow
 - PDF parsing, including the OCR fallback path for weak text extraction
 - chunk artifact persistence in LocalStack
 - local embeddings and brute-force retrieval
 - local validation execution from the product flow
-- findings display on Review & Submit
-- citation display on Review & Submit
-- stale-result handling based on `artifactVersion`
+- deterministic plus LLM fallback validation for start/end dates
+- findings and citation display on Review & Submit
+- stale-result handling based on current artifact inputs and form values
+- reusable corpus fixtures for repeatable manual and harness-driven evaluation
 
 ## What Is Still Weak
 
-- result quality is not yet measured against a fixed corpus
-- retrieval is still not strong enough field-by-field for consistent start/end date trustworthiness
-- local status stages are still broader than they should be for fast debugging
-- local Ollama quality is still a confound when judging whether a failure is retrieval, prompting, or model reasoning
-- Review-page wording can still be clearer for match, mismatch, and not-enough-evidence cases
+- corpus quality is now documented, but not yet measured by an automated harness
+- retrieval is still narrower than it should be across different contract families and label variants
+- local Ollama quality is still a confound when judging whether a miss is retrieval, prompting, or model reasoning
+- the Review-page wording can still be improved once the measured result quality is stable
+- OCR-heavy fixtures are present, but not yet exercised in a repeatable evaluation loop
 
 ## Current PoC Direction
 
@@ -119,16 +113,17 @@ The main change in direction is that the PoC is no longer framed as "general doc
 - Keep the Review-page experience advisory and non-blocking.
 - Do not claim Bedrock readiness or Lambda packaging readiness just because the current seams are in place.
 - Do not treat local-model quality as final quality.
+- Measure behavior against the fixed corpus before broadening coverage changes.
 
 ## Next Tickets
-
-### AIFA-022 Minimal test corpus
-
-Build the fixed set of local PDF fixtures and expected outcomes needed to evaluate quality instead of relying on anecdotal runs.
 
 ### AIFA-023 Validation evaluation harness
 
 Run the corpus repeatedly and record where deterministic logic and local LLM behavior are helping or failing.
+
+### AIFA-029 Field-label and retrieval coverage hardening
+
+Use corpus evidence to harden alias coverage, retrieval inputs, and document-family handling for start/end date validation.
 
 ### AIFA-020D Review-page wording refinement
 
@@ -136,9 +131,9 @@ Polish the user-facing wording once the result quality is stable enough to prese
 
 ## Suggested Next Step
 
-- Implement `AIFA-022` with 5 to 10 fixed PDF fixtures and expected start/end outcomes.
-- Keep the corpus focused on match, mismatch, ambiguous, and not-enough-evidence cases.
-- Use the same corpus as the basis for the later evaluation harness.
+- Implement `AIFA-023` so the corpus can be run repeatably against the real worker path.
+- Record expected versus actual outcomes, plus whether deterministic validation or LLM fallback produced the result.
+- Use that evidence to decide whether `AIFA-029` should focus first on aliases, retrieval terms, or document-family overrides.
 
 ## Source of Truth Docs
 
@@ -154,6 +149,7 @@ Polish the user-facing wording once the result quality is stable enough to prese
 - `services/app-api/esbuild-local.config.ts`
 - `services/ai-form-augmentation/src/handlers/validationHandler.ts`
 - `services/ai-form-augmentation/src/validation-output/deterministicDateValidation.ts`
+- `services/ai-form-augmentation/src/evaluation/dateValidationCorpus.ts`
 - `services/ai-form-augmentation/src/runValidation.ts`
 - `services/app-web/src/pages/StateSubmission/HealthPlanSubmission/ReviewSubmit/ReviewSubmit.tsx`
 
@@ -161,4 +157,5 @@ Polish the user-facing wording once the result quality is stable enough to prese
 
 - The rewritten PoC plan lives in `docs/technical-design/ai-validation-poc-plan.md`.
 - The broader `rag-llm-document-validation.md` document is still useful as long-term architecture context, but it should not be treated as the current PoC scope.
-- Timeout handling remains intentionally deferred while validation quality is still the larger credibility risk.
+- Timeout handling remains intentionally deferred while validation quality measurement is still the larger credibility risk.
+- The session file should now be treated as post-`AIFA-022` and post-`AIFA-029`; the next meaningful implementation checkpoint is the evaluation harness.
