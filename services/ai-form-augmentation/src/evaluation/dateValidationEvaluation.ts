@@ -22,17 +22,11 @@ import {
   type DateValidationCorpusExpectation,
   type DateValidationCorpusScenario
 } from './dateValidationCorpus'
-
-const LOCAL_EVALUATION_BUCKET = 'ai-form-augmentation-artifacts'
-const LOCAL_S3_CONFIG = {
-  region: 'us-east-1',
-  endpoint: 'http://127.0.0.1:4566',
-  forcePathStyle: true,
-  credentials: {
-    accessKeyId: 'test',
-    secretAccessKey: 'test' // pragma: allowlist secret
-  }
-} as const
+import {
+  assertEvaluationStorageReady,
+  getEvaluationStorageConfig,
+  type EvaluationStorageConfig
+} from './evaluationStorage'
 
 const FIELD_LABELS = {
   contractStartDate: 'Contract Start Date',
@@ -80,10 +74,13 @@ export interface DateValidationEvaluationSummary {
 }
 
 export async function runDateValidationEvaluation(): Promise<DateValidationEvaluationSummary> {
-  const s3Client = newArtifactS3Client(LOCAL_S3_CONFIG)
+  const evaluationStorage = getEvaluationStorageConfig()
+  await assertEvaluationStorageReady(evaluationStorage)
+
+  const s3Client = newArtifactS3Client(evaluationStorage.s3Config)
   const reports = await Promise.all(
     DATE_VALIDATION_CORPUS.map(async (scenario) =>
-      evaluateScenario(scenario, s3Client)
+      evaluateScenario(scenario, s3Client, evaluationStorage)
     )
   )
 
@@ -110,7 +107,8 @@ export async function runDateValidationEvaluation(): Promise<DateValidationEvalu
 
 async function evaluateScenario(
   scenario: DateValidationCorpusScenario,
-  s3Client: ArtifactS3Client
+  s3Client: ArtifactS3Client,
+  evaluationStorage: EvaluationStorageConfig
 ): Promise<DateValidationEvaluationScenarioReport> {
   try {
     const fixtureAbsolutePath = path.resolve(
@@ -125,7 +123,7 @@ async function evaluateScenario(
     const artifactVersion = computeArtifactVersion([sourceKey])
 
     await s3Client.putBuffer(
-      LOCAL_EVALUATION_BUCKET,
+      evaluationStorage.bucket,
       sourceKey,
       fixtureBuffer,
       'application/pdf'
@@ -134,8 +132,8 @@ async function evaluateScenario(
     await validationHandler({
       formId,
       artifactVersion,
-      bucket: LOCAL_EVALUATION_BUCKET,
-      s3Config: LOCAL_S3_CONFIG,
+      bucket: evaluationStorage.bucket,
+      s3Config: evaluationStorage.s3Config,
       formFields: scenario.expectations.map((expectation) => ({
         field: expectation.field,
         label: FIELD_LABELS[expectation.field],
@@ -144,7 +142,7 @@ async function evaluateScenario(
       documents: [
         {
           documentName: scenario.documentName,
-          sourceBucket: LOCAL_EVALUATION_BUCKET,
+          sourceBucket: evaluationStorage.bucket,
           sourceKey
         }
       ]
@@ -152,11 +150,11 @@ async function evaluateScenario(
 
     const [statusArtifact, resultArtifact] = await Promise.all([
       s3Client.getJson<ValidationStatusArtifact>(
-        LOCAL_EVALUATION_BUCKET,
+        evaluationStorage.bucket,
         getValidationStatusKey(formId)
       ),
       s3Client.getJson<ValidationResultArtifact>(
-        LOCAL_EVALUATION_BUCKET,
+        evaluationStorage.bucket,
         getValidationResultKey(formId)
       )
     ])

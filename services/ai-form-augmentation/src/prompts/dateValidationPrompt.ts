@@ -69,11 +69,33 @@ function formatRetrievedChunks(chunks: DateValidationCitationInput[]): string {
     .join('\n\n---\n\n')
 }
 
+function formatResponseContract(
+  fields: DateValidationFieldInput[]
+): string[] {
+  if (fields.length === 1) {
+    const [field] = fields
+
+    return [
+      `This request contains exactly one field: ${field.field}.`,
+      'Return a one-element JSON array containing exactly one result object.',
+      `The single result object's "field" value must be "${field.field}".`,
+      'Do not return results for any other field.',
+      'If you would otherwise return a bare JSON object, wrap it in a one-element array.'
+    ]
+  }
+
+  return [
+    'Return one result object for each provided field.',
+    'Do not return duplicate results for the same field.'
+  ]
+}
+
 export function buildDateValidationPrompt(
   input: BuildDateValidationPromptInput
 ): string {
   const formFieldsSection = formatFormFields(input.formFields)
   const retrievedChunksSection = formatRetrievedChunks(input.retrievedChunks)
+  const responseContractSection = formatResponseContract(input.formFields)
 
   return [
     'You are validating form-entered contract dates against retrieved document evidence.',
@@ -84,6 +106,9 @@ export function buildDateValidationPrompt(
     '- Do not guess',
     '- If the evidence is missing, incomplete, or ambiguous, return "not-enough-evidence"',
     '- Cite only the chunks that support your conclusion',
+    '',
+    'Response contract:',
+    ...responseContractSection,
     '',
     'Return JSON only.',
     'Do not wrap the JSON in markdown code fences.',

@@ -544,7 +544,7 @@ The PoC now has a repeatable corpus and evaluation harness, but malformed LLM ou
 - Any prompt or parser changes stay small, explicit, and testable
 - Corpus runs can report malformed-output frequency concretely
 - Another engineer can tell from the code and notes whether a failure was caused by retrieval quality or output-contract instability"
-AIFA-031 Reduce malformed LLM output rate,Backlog,5-Testing & Evaluation,Medium,AIFA-030,"Reduce how often the local validation model returns malformed or contract-breaking output without changing the current safe fallback behavior.
+AIFA-031 Reduce malformed LLM output rate,Done,5-Testing & Evaluation,Medium,AIFA-030,"Reduce how often the local validation model returns malformed or contract-breaking output without changing the current safe fallback behavior.
 - Tighten the date-validation prompt only where it measurably reduces extra prose, wrong shapes, or duplicate field results
 - Add one small recovery step only for clearly recoverable responses if prompt hardening alone is not enough
 - Compare malformed-output frequency before and after the change using the existing corpus and evaluation harness

@@ -2,7 +2,7 @@
 
 ## Current Ticket
 
-The next implementation ticket is `AIFA-031 Reduce malformed LLM output rate`.
+The next implementation ticket is `AIFA-020D Review-page wording refinement`.
 
 ## Completed
 
@@ -36,6 +36,7 @@ The next implementation ticket is `AIFA-031 Reduce malformed LLM output rate`.
 - AIFA-023 ✔ Validation evaluation harness
 - AIFA-029 ✔ Field-label and retrieval coverage hardening
 - AIFA-030 ✔ LLM output robustness and malformed-response handling
+- AIFA-031 ✔ Reduce malformed LLM output rate
 
 ## Current State
 
@@ -90,6 +91,12 @@ The local PoC now works end to end from the actual form flow, has a reusable eva
 - corpus evaluation output now counts malformed LLM responses separately from ordinary validation outcomes
 - runtime behavior remains safely non-blocking: malformed LLM output still degrades to `not-enough-evidence`
 
+### Malformed-output reduction
+
+- the single-field date-validation prompt now explicitly requires exactly one result for the requested field
+- parser recovery now accepts the narrow case where the model returns one valid result object without the surrounding array
+- evaluation bootstrap now checks LocalStack reachability once and prepares the artifact bucket before the corpus run
+
 ## What Is Working
 
 - local bootstrap with `./dev local`
@@ -112,9 +119,9 @@ The local PoC now works end to end from the actual form flow, has a reusable eva
 - local Ollama quality is still a confound when judging whether a miss is retrieval, prompting, or model reasoning
 - the Review-page wording can still be improved once the measured result quality is stable
 - OCR-heavy fixtures are present, but not yet exercised in a repeatable evaluation loop
-- malformed LLM output is now contained and measurable, but prompt/model quality still needs a separate reduction pass
 - the AHF term-clause fixture still shows a real ambiguity gap around mixed term language and competing end dates
 - evaluation currently reports malformed-output frequency, but does not yet enforce a pass/fail threshold for that rate
+- corpus evaluation now depends on reachable LocalStack S3 plus the repo `nvm` runtime, so local environment drift can still block verification before the worker runs
 
 ## Current PoC Direction
 
@@ -148,19 +155,19 @@ The main change in direction is that the PoC is no longer framed as "general doc
 
 Use corpus evidence to harden alias coverage, retrieval inputs, and document-family handling for start/end date validation.
 
-### AIFA-031 Reduce malformed LLM output rate
-
-Reduce the actual malformed-output rate now that those failures are visible in artifacts and corpus runs.
-
 ### AIFA-020D Review-page wording refinement
 
 Polish the user-facing wording once the result quality is stable enough to present.
 
+### AIFA-024 Bedrock follow-up for production-like evaluation
+
+Prepare the path for evaluating the same validation flow against production-like Bedrock models.
+
 ## Suggested Next Step
 
-- Reduce malformed-output frequency on the same corpus without changing the current safe fallback behavior.
-- Keep prompt and recovery changes narrow to the single-field date-validation path.
-- Leave broader retrieval and UI work out of the next change.
+- Refine Review-page wording around match, mismatch, and not-enough-evidence outcomes.
+- Keep the UI advisory and evidence-first; do not change validation backend behavior.
+- Preserve the current citations and staged status flow while tightening the copy.
 
 ## Source of Truth Docs
 
@@ -187,4 +194,4 @@ Polish the user-facing wording once the result quality is stable enough to prese
 - The rewritten PoC plan lives in `docs/technical-design/ai-validation-poc-plan.md`.
 - The broader `rag-llm-document-validation.md` document is still useful as long-term architecture context, but it should not be treated as the current PoC scope.
 - Timeout handling remains intentionally deferred while validation quality measurement is still the larger credibility risk.
-- The next meaningful implementation checkpoint is reducing malformed-output frequency now that those failures are visible separately from retrieval gaps.
+- Local corpus evaluation now has storage bootstrap, but it still requires reachable LocalStack S3 and the repo `nvm` runtime to verify end to end.
