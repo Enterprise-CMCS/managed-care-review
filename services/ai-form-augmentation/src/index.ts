@@ -100,3 +100,13 @@ export {
   computeArtifactVersion,
   computeFormSnapshotHash
 } from './versioning'
+
+// Evaluation
+export type {
+  DateValidationCorpusExpectation,
+  DateValidationCorpusScenario
+} from './evaluation'
+export {
+  DATE_VALIDATION_CORPUS,
+  RECOMMENDED_DATE_VALIDATION_DEMO_SCENARIOS
+} from './evaluation'
