@@ -76,6 +76,13 @@ const featureFlags = {
         defaultValue: false,
     },
     /**
+     * This flag toggles CHIP only health plan submission review automation.
+     */
+    CHIP_SUBMISSION_AUTOMATION: {
+        flag: 'chip-submission-automation',
+        defaultValue: false,
+    },
+    /**
      The number of minutes before the session expires and countdown modal appears
     */
     MINUTES_UNTIL_SESSION_EXPIRES: {
