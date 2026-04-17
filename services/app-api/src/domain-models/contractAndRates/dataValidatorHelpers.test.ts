@@ -32,7 +32,7 @@ describe('Health plan parsing and validation', () => {
         it('Validates input form data and removes statutoryRegulatoryAttestationDescription', async () => {
             const prismaClient = await sharedTestPrismaClient()
             const postgresStore = NewPostgresStore(prismaClient)
-            const stateCode = 'FL'
+            const stateCode = 'KY'
             const formData = {
                 ...mockGqlContractDraftRevisionFormDataInput(stateCode),
                 contractDateStart: new Date(2025, 5, 1),
@@ -71,7 +71,7 @@ describe('Health plan parsing and validation', () => {
         it('converts fields that are null to undefined', async () => {
             const prismaClient = await sharedTestPrismaClient()
             const postgresStore = NewPostgresStore(prismaClient)
-            const stateCode = 'FL'
+            const stateCode = 'KY'
             const formData = {
                 ...mockGqlContractDraftRevisionFormDataInput(stateCode),
                 stateContacts: [
@@ -155,7 +155,7 @@ describe('Health plan parsing and validation', () => {
         it('Returns error for invalid data', async () => {
             const prismaClient = await sharedTestPrismaClient()
             const postgresStore = NewPostgresStore(prismaClient)
-            const stateCode = 'FL'
+            const stateCode = 'KY'
             const formData: ContractDraftRevisionFormDataInput = {
                 ...mockGqlContractDraftRevisionFormDataInput(stateCode),
                 contractDateStart: new Date(2025, 5, 1),
@@ -792,12 +792,13 @@ describe('Health plan parsing and validation', () => {
         it('does not require dsnpContract for CHIP-only submissions when chip automation is enabled', async () => {
             const prismaClient = await sharedTestPrismaClient()
             const postgresStore = NewPostgresStore(prismaClient)
-            const stateCode = 'FL'
+            const stateCode = 'KY'
             const contract = mockSubmittableHealthPlanContract()
             if (!contract.draftRevision) {
                 throw new Error('Unexpected error: no draftRevision')
             }
             contract.draftRevision.formData.populationCovered = 'CHIP'
+            contract.draftRevision.formData.submissionType = 'CONTRACT_ONLY'
             contract.draftRevision.formData.federalAuthorities = ['STATE_PLAN']
             contract.draftRevision.formData.dsnpContract = undefined
 
