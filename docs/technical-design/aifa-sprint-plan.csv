@@ -502,7 +502,7 @@ Quality discussions should not be driven by one favorite PDF. A fixed corpus giv
 - The corpus includes match, mismatch, and not-enough-evidence scenarios
 - At least one fixture exercises ambiguous or competing date mentions
 - A subset of the corpus is marked as the preferred client-demo path"
-AIFA-023 Validation evaluation harness,Backlog,5-Testing & Evaluation,High,"AIFA-020C, AIFA-022","Measure the current behavior of the PoC against the fixed corpus.
+AIFA-023 Validation evaluation harness,Done,5-Testing & Evaluation,High,"AIFA-020C, AIFA-022","Measure the current behavior of the PoC against the fixed corpus.
 - Run the worker against each corpus fixture
 - Compare actual versus expected outcomes
 - Track obvious false positives and false negatives

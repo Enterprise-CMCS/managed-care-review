@@ -402,6 +402,7 @@ function buildLlmFallbackResult(
     outcome: 'not-enough-evidence',
     confidence: 'low',
     message: `Retrieved document evidence was not conclusive enough to verify the ${formatFieldLabel(field)}.`,
+    decisionSource: 'llm',
     citations: []
   }
 }

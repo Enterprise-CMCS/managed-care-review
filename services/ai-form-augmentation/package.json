@@ -5,7 +5,8 @@
   "type": "module",
   "scripts": {
     "build": "tsc --noEmit",
-    "dev": "tsx watch src/dev.ts"
+    "dev": "tsx watch src/dev.ts",
+    "evaluate": "tsx src/evaluation/runDateValidationEvaluation.ts"
   },
   "dependencies": {
     "@aws-sdk/client-s3": "^3.1027.0",

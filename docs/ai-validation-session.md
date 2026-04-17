@@ -2,7 +2,7 @@
 
 ## Current Ticket
 
-The next implementation ticket is `AIFA-023 Validation evaluation harness`.
+The next implementation ticket is `AIFA-029 Field-label and retrieval coverage hardening`.
 
 ## Completed
 
@@ -33,11 +33,12 @@ The next implementation ticket is `AIFA-023 Validation evaluation harness`.
 - AIFA-020B ✔ Display validation citations and evidence details
 - AIFA-020C ✔ Trustworthy start/end validation flow
 - AIFA-022 ✔ Minimal test corpus
+- AIFA-023 ✔ Validation evaluation harness
 - AIFA-029 ✔ Field-label and retrieval coverage hardening
 
 ## Current State
 
-The local PoC now works end to end from the actual form flow and has a reusable evaluation corpus.
+The local PoC now works end to end from the actual form flow, has a reusable evaluation corpus, and can run that corpus through a repeatable evaluation harness.
 
 - `ReviewSubmit` triggers validation for the current draft revision instead of only polling passively.
 - `validationStatus` returns staged status plus stored findings/results for the current `artifactVersion`.
@@ -45,6 +46,7 @@ The local PoC now works end to end from the actual form flow and has a reusable 
 - the worker reads uploaded PDFs, parses text, chunks text, retrieves evidence, validates against form values, and persists `status.json`, `chunks.json`, and `validation-result.json`.
 - the Review page renders findings and citations in a single expandable validation banner.
 - the repo now includes a fixed corpus of local PDF scenarios for start/end-date evaluation and demo use.
+- the AI workspace now includes an evaluation runner that executes corpus scenarios through the real worker path and summarizes expected versus actual outcomes.
 
 ## Recent Changes
 
@@ -68,6 +70,12 @@ The local PoC now works end to end from the actual form flow and has a reusable 
 - the corpus includes a preferred demo subset plus additional document variants
 - the sprint plan now includes a follow-on hardening ticket focused on field-label and retrieval coverage
 
+### Evaluation harness
+
+- the corpus can now be executed through the real validation handler instead of an ad hoc manual walkthrough
+- the harness compares expected outcomes, message fragments, citation orders, and decision source against stored validation results
+- the output is designed to make deterministic wins, LLM fallbacks, and false positives/negatives visible enough to guide the next quality change
+
 ## What Is Working
 
 - local bootstrap with `./dev local`
@@ -80,10 +88,11 @@ The local PoC now works end to end from the actual form flow and has a reusable 
 - findings and citation display on Review & Submit
 - stale-result handling based on current artifact inputs and form values
 - reusable corpus fixtures for repeatable manual and harness-driven evaluation
+- repeatable harness-driven evaluation of corpus scenarios through the worker path
 
 ## What Is Still Weak
 
-- corpus quality is now documented, but not yet measured by an automated harness
+- corpus quality can now be measured repeatedly, but results still need to be run and interpreted in a normal local environment
 - retrieval is still narrower than it should be across different contract families and label variants
 - local Ollama quality is still a confound when judging whether a miss is retrieval, prompting, or model reasoning
 - the Review-page wording can still be improved once the measured result quality is stable
@@ -117,10 +126,6 @@ The main change in direction is that the PoC is no longer framed as "general doc
 
 ## Next Tickets
 
-### AIFA-023 Validation evaluation harness
-
-Run the corpus repeatedly and record where deterministic logic and local LLM behavior are helping or failing.
-
 ### AIFA-029 Field-label and retrieval coverage hardening
 
 Use corpus evidence to harden alias coverage, retrieval inputs, and document-family handling for start/end date validation.
@@ -131,9 +136,9 @@ Polish the user-facing wording once the result quality is stable enough to prese
 
 ## Suggested Next Step
 
-- Implement `AIFA-023` so the corpus can be run repeatably against the real worker path.
-- Record expected versus actual outcomes, plus whether deterministic validation or LLM fallback produced the result.
-- Use that evidence to decide whether `AIFA-029` should focus first on aliases, retrieval terms, or document-family overrides.
+- Run the evaluation harness in a normal local environment and capture the current corpus results.
+- Use those results to identify the highest-value label and retrieval gaps for `AIFA-029`.
+- Keep the next quality change scoped to start/end-date coverage, not broader field expansion.
 
 ## Source of Truth Docs
 
@@ -150,6 +155,7 @@ Polish the user-facing wording once the result quality is stable enough to prese
 - `services/ai-form-augmentation/src/handlers/validationHandler.ts`
 - `services/ai-form-augmentation/src/validation-output/deterministicDateValidation.ts`
 - `services/ai-form-augmentation/src/evaluation/dateValidationCorpus.ts`
+- `services/ai-form-augmentation/src/evaluation/dateValidationEvaluation.ts`
 - `services/ai-form-augmentation/src/runValidation.ts`
 - `services/app-web/src/pages/StateSubmission/HealthPlanSubmission/ReviewSubmit/ReviewSubmit.tsx`
 
@@ -158,4 +164,4 @@ Polish the user-facing wording once the result quality is stable enough to prese
 - The rewritten PoC plan lives in `docs/technical-design/ai-validation-poc-plan.md`.
 - The broader `rag-llm-document-validation.md` document is still useful as long-term architecture context, but it should not be treated as the current PoC scope.
 - Timeout handling remains intentionally deferred while validation quality measurement is still the larger credibility risk.
-- The session file should now be treated as post-`AIFA-022` and post-`AIFA-029`; the next meaningful implementation checkpoint is the evaluation harness.
+- The session file should now be treated as post-`AIFA-023`; the next meaningful implementation checkpoint is coverage hardening driven by corpus evidence.

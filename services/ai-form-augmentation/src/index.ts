@@ -104,9 +104,13 @@ export {
 // Evaluation
 export type {
   DateValidationCorpusExpectation,
-  DateValidationCorpusScenario
+  DateValidationCorpusScenario,
+  DateValidationEvaluationFieldReport,
+  DateValidationEvaluationScenarioReport,
+  DateValidationEvaluationSummary
 } from './evaluation'
 export {
   DATE_VALIDATION_CORPUS,
-  RECOMMENDED_DATE_VALIDATION_DEMO_SCENARIOS
+  RECOMMENDED_DATE_VALIDATION_DEMO_SCENARIOS,
+  runDateValidationEvaluation
 } from './evaluation'
