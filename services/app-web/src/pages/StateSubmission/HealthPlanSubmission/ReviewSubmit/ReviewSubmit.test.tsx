@@ -476,13 +476,13 @@ describe('ReviewSubmit', () => {
 
             expect(
                 await screen.findByRole('heading', {
-                    name: 'Validation pending',
+                    name: 'Document review pending',
                 })
             ).toBeInTheDocument()
 
             expect(
                 screen.getByText(
-                    'Document validation has not started yet. It will appear here once available.'
+                    'We have not started reviewing the uploaded documents yet. Results will appear here when they are ready.'
                 )
             ).toBeInTheDocument()
         })
@@ -520,7 +520,7 @@ describe('ReviewSubmit', () => {
 
             expect(
                 await screen.findByRole('heading', {
-                    name: 'Reviewing your documents',
+                    name: 'Reviewing submission dates',
                 })
             ).toBeInTheDocument()
         })
@@ -558,7 +558,7 @@ describe('ReviewSubmit', () => {
 
             expect(
                 await screen.findByRole('heading', {
-                    name: 'Validation complete',
+                    name: 'Document review complete',
                 })
             ).toBeInTheDocument()
         })
@@ -597,7 +597,7 @@ describe('ReviewSubmit', () => {
 
             expect(
                 await screen.findByRole('heading', {
-                    name: 'Validation unavailable',
+                    name: 'Document review unavailable',
                 })
             ).toBeInTheDocument()
         })
@@ -634,8 +634,7 @@ describe('ReviewSubmit', () => {
                                             'Start date matches document text.',
                                         citations: [
                                             {
-                                                chunkId:
-                                                    'scan-a.pdf::chunk-0',
+                                                chunkId: 'scan-a.pdf::chunk-0',
                                                 documentName: 'scan-a.pdf',
                                                 page: null,
                                                 order: 0,
@@ -650,15 +649,13 @@ describe('ReviewSubmit', () => {
                                             'Document text indicates amendment effective date is January 1, 2021.',
                                         citations: [
                                             {
-                                                chunkId:
-                                                    'scan-a.pdf::chunk-1',
+                                                chunkId: 'scan-a.pdf::chunk-1',
                                                 documentName: 'scan-a.pdf',
                                                 page: 2,
                                                 order: 1,
                                             },
                                             {
-                                                chunkId:
-                                                    'scan-b.pdf::chunk-0',
+                                                chunkId: 'scan-b.pdf::chunk-0',
                                                 documentName: 'scan-b.pdf',
                                                 page: 4,
                                                 order: 0,
@@ -678,8 +675,13 @@ describe('ReviewSubmit', () => {
 
             expect(
                 await screen.findByRole('heading', {
-                    name: 'Validation findings',
+                    name: 'Document review results',
                 })
+            ).toBeInTheDocument()
+            expect(
+                screen.getByText(
+                    'We compared the dates in this submission with the uploaded documents. These results are advisory and do not block submission.'
+                )
             ).toBeInTheDocument()
             expect(screen.getByText('Show less')).toBeInTheDocument()
 
@@ -687,8 +689,8 @@ describe('ReviewSubmit', () => {
             expect(
                 screen.getByText('Amendment effective date')
             ).toBeInTheDocument()
-            expect(screen.getByText('Match')).toBeInTheDocument()
-            expect(screen.getByText('Mismatch')).toBeInTheDocument()
+            expect(screen.getByText('Matches documents')).toBeInTheDocument()
+            expect(screen.getByText('Needs review')).toBeInTheDocument()
             expect(
                 screen.getByText('Start date matches document text.')
             ).toBeInTheDocument()
@@ -697,7 +699,9 @@ describe('ReviewSubmit', () => {
                     'Document text indicates amendment effective date is January 1, 2021.'
                 )
             ).toBeInTheDocument()
-            expect(screen.getAllByText('Evidence')).toHaveLength(2)
+            expect(
+                screen.getAllByText('Supporting document reference')
+            ).toHaveLength(2)
             expect(screen.getByText('scan-a.pdf')).toBeInTheDocument()
             expect(screen.getByText('Page unknown')).toBeInTheDocument()
             expect(screen.getByText('Chunk order 0')).toBeInTheDocument()
@@ -749,12 +753,14 @@ describe('ReviewSubmit', () => {
 
             expect(
                 await screen.findByRole('heading', {
-                    name: 'Validation findings',
+                    name: 'Document review results',
                 })
             ).toBeInTheDocument()
             expect(screen.getByRole('table')).toBeInTheDocument()
 
-            await userEvent.click(screen.getByRole('button', { name: 'Show less' }))
+            await userEvent.click(
+                screen.getByRole('button', { name: 'Show less' })
+            )
 
             expect(
                 screen.queryByText('Contract start date')
@@ -807,12 +813,12 @@ describe('ReviewSubmit', () => {
 
             expect(
                 await screen.findByRole('heading', {
-                    name: 'Validation findings',
+                    name: 'Document review results',
                 })
             ).toBeInTheDocument()
 
             expect(
-                screen.getByText('No citation details available.')
+                screen.getByText('No supporting document reference available.')
             ).toBeInTheDocument()
         })
 
@@ -850,13 +856,13 @@ describe('ReviewSubmit', () => {
 
             expect(
                 await screen.findByRole('heading', {
-                    name: 'Validation complete',
+                    name: 'Document review complete',
                 })
             ).toBeInTheDocument()
 
             expect(
                 screen.queryByRole('heading', {
-                    name: 'Validation findings',
+                    name: 'Document review results',
                 })
             ).not.toBeInTheDocument()
         })
@@ -905,13 +911,13 @@ describe('ReviewSubmit', () => {
 
             expect(
                 await screen.findByRole('heading', {
-                    name: 'Reviewing updated documents',
+                    name: 'Refreshing document review',
                 })
             ).toBeInTheDocument()
 
             expect(
                 screen.queryByRole('heading', {
-                    name: 'Validation findings',
+                    name: 'Document review results',
                 })
             ).not.toBeInTheDocument()
         })
@@ -952,7 +958,7 @@ describe('ReviewSubmit', () => {
 
             expect(
                 await screen.findByRole('heading', {
-                    name: 'Validation pending',
+                    name: 'Document review pending',
                 })
             ).toBeInTheDocument()
         })
@@ -990,7 +996,7 @@ describe('ReviewSubmit', () => {
 
             expect(
                 await screen.findByRole('heading', {
-                    name: 'Reviewing your documents',
+                    name: 'Reviewing submission dates',
                 })
             ).toBeInTheDocument()
         })
@@ -1038,7 +1044,7 @@ describe('ReviewSubmit', () => {
 
             expect(
                 await screen.findByRole('heading', {
-                    name: 'Validation complete',
+                    name: 'Document review complete',
                 })
             ).toBeInTheDocument()
         })
@@ -1088,7 +1094,7 @@ describe('ReviewSubmit', () => {
 
             expect(
                 await screen.findByRole('heading', {
-                    name: 'Reviewing updated documents',
+                    name: 'Refreshing document review',
                 })
             ).toBeInTheDocument()
         })

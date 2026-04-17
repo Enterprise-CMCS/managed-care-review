@@ -14,10 +14,10 @@ export const AIValidationFindingsCard = ({
         <Table fullWidth bordered={false}>
             <thead>
                 <tr>
-                    <th scope="col">Field</th>
-                    <th scope="col">Outcome</th>
+                    <th scope="col">Submission field</th>
+                    <th scope="col">Result</th>
                     <th scope="col">Confidence</th>
-                    <th scope="col">Details</th>
+                    <th scope="col">What we found</th>
                 </tr>
             </thead>
             <tbody>
@@ -40,7 +40,7 @@ export const AIValidationFindingsCard = ({
                                                 styles.findingEvidenceLabel
                                             }
                                         >
-                                            Evidence
+                                            Supporting document reference
                                         </p>
                                         <ul
                                             className={
@@ -79,7 +79,8 @@ export const AIValidationFindingsCard = ({
                                             styles.findingEvidenceFallback
                                         }
                                     >
-                                        No citation details available.
+                                        No supporting document reference
+                                        available.
                                     </p>
                                 )}
                             </div>

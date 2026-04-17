@@ -14,9 +14,9 @@ export function getAIValidationDisplayState(args: {
 
     if (isStale) {
         return {
-            title: 'Reviewing updated documents',
+            title: 'Refreshing document review',
             message:
-                'Your uploaded documents changed, so the validation status is refreshing.',
+                'Your uploaded documents or submission dates changed, so these review results are refreshing.',
             alertType: 'info',
             isPolling: true,
         }
@@ -25,18 +25,18 @@ export function getAIValidationDisplayState(args: {
     switch (stage) {
         case 'failed':
             return {
-                title: 'Validation unavailable',
+                title: 'Document review unavailable',
                 message:
                     error ??
-                    'We could not complete document validation right now, but you can still continue reviewing your submission.',
+                    'We could not load document review results right now, but you can still continue reviewing your submission.',
                 alertType: 'warning',
                 isPolling: false,
             }
         case 'complete':
             return {
-                title: 'Validation complete',
+                title: 'Document review complete',
                 message:
-                    'Your uploaded documents have been reviewed for validation progress.',
+                    'We finished comparing the submission dates with the uploaded documents.',
                 alertType: 'success',
                 isPolling: false,
             }
@@ -45,17 +45,17 @@ export function getAIValidationDisplayState(args: {
         case 'deterministic-validation':
         case 'llm-validation':
             return {
-                title: 'Reviewing your documents',
+                title: 'Reviewing submission dates',
                 message:
-                    'We are checking your uploaded documents against the information in this submission.',
+                    'We are comparing the contract dates in this submission with the uploaded documents.',
                 alertType: 'info',
                 isPolling: true,
             }
         default:
             return {
-                title: 'Validation pending',
+                title: 'Document review pending',
                 message:
-                    'Document validation has not started yet. It will appear here once available.',
+                    'We have not started reviewing the uploaded documents yet. Results will appear here when they are ready.',
                 alertType: 'info',
                 isPolling: false,
             }

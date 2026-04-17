@@ -35,12 +35,12 @@ export const AIValidationStatusCard = ({
         <Alert
             type={showFindings ? 'success' : state.alertType}
             headingLevel="h2"
-            heading={showFindings ? 'Validation findings' : state.title}
+            heading={showFindings ? 'Document review results' : state.title}
             slim={!showFindings}
         >
             <p>
                 {showFindings
-                    ? 'We reviewed the uploaded documents and found the following results.'
+                    ? 'We compared the dates in this submission with the uploaded documents. These results are advisory and do not block submission.'
                     : state.message}
             </p>
             {showFindings && (

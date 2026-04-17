@@ -21,10 +21,12 @@ const FIELD_LABELS: Record<string, string> = {
     amendmentEffectiveDate: 'Amendment effective date',
 }
 
+// Keep the frontend wording advisory even when the stored backend outcome is a
+// harder-edged validation label such as "mismatch".
 const OUTCOME_LABELS: Record<string, string> = {
-    match: 'Match',
-    mismatch: 'Mismatch',
-    'not-enough-evidence': 'Not enough evidence',
+    match: 'Matches documents',
+    mismatch: 'Needs review',
+    'not-enough-evidence': 'Could not verify',
 }
 
 const CONFIDENCE_LABELS: Record<string, string> = {
@@ -52,11 +54,7 @@ function getPageLabel(args: {
 }): string {
     const { page, startPage, endPage } = args
 
-    if (
-        startPage != null &&
-        endPage != null &&
-        startPage !== endPage
-    ) {
+    if (startPage != null && endPage != null && startPage !== endPage) {
         return `Pages ${startPage}-${endPage}`
     }
 

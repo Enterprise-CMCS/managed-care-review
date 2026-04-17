@@ -2,7 +2,7 @@
 
 ## Current Ticket
 
-The next implementation ticket is `AIFA-020D Review-page wording refinement`.
+The next implementation ticket is `AIFA-032 Mismatch message specificity hardening`.
 
 ## Completed
 
@@ -32,6 +32,7 @@ The next implementation ticket is `AIFA-020D Review-page wording refinement`.
 - AIFA-020A ✔ Execute full validation pipeline from `validationHandler`
 - AIFA-020B ✔ Display validation citations and evidence details
 - AIFA-020C ✔ Trustworthy start/end validation flow
+- AIFA-020D ✔ Review-page wording refinement
 - AIFA-022 ✔ Minimal test corpus
 - AIFA-023 ✔ Validation evaluation harness
 - AIFA-029 ✔ Field-label and retrieval coverage hardening
@@ -97,6 +98,12 @@ The local PoC now works end to end from the actual form flow, has a reusable eva
 - parser recovery now accepts the narrow case where the model returns one valid result object without the surrounding array
 - evaluation bootstrap now checks LocalStack reachability once and prepares the artifact bucket before the corpus run
 
+### Review-page wording refinement
+
+- the Review page now uses calmer, more product-facing copy for pending, in-progress, complete, stale, and unavailable validation states
+- finding labels now read as advisory review results instead of backend-oriented validation jargon
+- evidence labels now better describe what the cited document references represent on the page
+
 ## What Is Working
 
 - local bootstrap with `./dev local`
@@ -117,9 +124,9 @@ The local PoC now works end to end from the actual form flow, has a reusable eva
 - corpus quality can now be measured repeatedly, but results still need to be run and interpreted in a normal local environment
 - retrieval is still narrower than it should be across different contract families and label variants
 - local Ollama quality is still a confound when judging whether a miss is retrieval, prompting, or model reasoning
-- the Review-page wording can still be improved once the measured result quality is stable
 - OCR-heavy fixtures are present, but not yet exercised in a repeatable evaluation loop
 - the AHF term-clause fixture still shows a real ambiguity gap around mixed term language and competing end dates
+- mismatch messages can still understate the actual date difference when the model summarizes only the year instead of the full month/day/year
 - evaluation currently reports malformed-output frequency, but does not yet enforce a pass/fail threshold for that rate
 - corpus evaluation now depends on reachable LocalStack S3 plus the repo `nvm` runtime, so local environment drift can still block verification before the worker runs
 
@@ -151,23 +158,23 @@ The main change in direction is that the PoC is no longer framed as "general doc
 
 ## Next Tickets
 
-### AIFA-029 Field-label and retrieval coverage hardening
+### AIFA-032 Mismatch message specificity hardening
 
-Use corpus evidence to harden alias coverage, retrieval inputs, and document-family handling for start/end date validation.
-
-### AIFA-020D Review-page wording refinement
-
-Polish the user-facing wording once the result quality is stable enough to present.
+Tighten mismatch wording so the stored finding and Review-page text reflect full date differences when the cited evidence supports that precision.
 
 ### AIFA-024 Bedrock follow-up for production-like evaluation
 
 Prepare the path for evaluating the same validation flow against production-like Bedrock models.
 
+### AIFA-021 Cache validation results
+
+Avoid unnecessary re-validation when the documents and form data have not changed.
+
 ## Suggested Next Step
 
-- Refine Review-page wording around match, mismatch, and not-enough-evidence outcomes.
-- Keep the UI advisory and evidence-first; do not change validation backend behavior.
-- Preserve the current citations and staged status flow while tightening the copy.
+- Tighten mismatch messages so full-date discrepancies are preserved when the cited evidence supports them.
+- Keep the change narrow to prompt/message shaping or small post-parse normalization instead of broader retrieval or UI work.
+- Add focused corpus coverage for the AHF mismatch scenario so this regression can be measured.
 
 ## Source of Truth Docs
 

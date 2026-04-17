@@ -112,9 +112,7 @@ export const ReviewSubmit = (): React.ReactElement => {
         validationStatus?.stage === 'complete' &&
         !validationStatus.isStale &&
         validationFindingDisplayItems.length > 0
-    const validationBannerMode = showValidationFindings
-        ? 'findings'
-        : 'status'
+    const validationBannerMode = showValidationFindings ? 'findings' : 'status'
 
     const contractReady = !loading && !error
     const validationReady = !validationLoading && !validationError
@@ -221,7 +219,7 @@ export const ReviewSubmit = (): React.ReactElement => {
             <GridContainer className={styles.reviewSectionWrapper}>
                 <section
                     className={styles.validationStatusSection}
-                    aria-label="Document validation status"
+                    aria-label="Document review status"
                 >
                     <AIValidationStatusCard
                         mode={validationBannerMode}
@@ -233,17 +231,17 @@ export const ReviewSubmit = (): React.ReactElement => {
                         state={
                             showInitialValidationLoading
                                 ? {
-                                      title: 'Checking validation status',
+                                      title: 'Loading document review',
                                       message:
-                                          'We are loading the latest document validation status for this submission.',
+                                          'We are loading the latest document review results for this submission.',
                                       alertType: 'info',
                                       isPolling: true,
                                   }
                                 : validationError
                                   ? {
-                                        title: 'Validation unavailable',
+                                        title: 'Document review unavailable',
                                         message:
-                                            'We could not load document validation status right now, but you can still continue reviewing your submission.',
+                                            'We could not load document review results right now, but you can still continue reviewing your submission.',
                                         alertType: 'warning',
                                         isPolling: false,
                                     }

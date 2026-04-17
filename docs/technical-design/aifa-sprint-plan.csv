@@ -450,7 +450,7 @@ The pipeline now runs end to end, but client credibility depends on trustworthy 
 - Ambiguous cases defer to the LLM instead of returning forced deterministic answers
 - Stored findings include `decisionSource`
 - Persisted citations are verified against known retrieved chunks before they reach the UI"
-AIFA-020D Review-page wording refinement,Backlog,4-Frontend Integration,Medium,"AIFA-020B, AIFA-020C","Tighten the Review & Submit wording so the AI results are understandable in a client-facing demo.
+AIFA-020D Review-page wording refinement,Done,4-Frontend Integration,Medium,"AIFA-020B, AIFA-020C","Tighten the Review & Submit wording so the AI results are understandable in a client-facing demo.
 - Refine the status copy for in-progress, unavailable, and completed validation states
 - Refine findings copy for match, mismatch, and not-enough-evidence outcomes
 - Keep the UI advisory and non-blocking
@@ -557,6 +557,19 @@ AIFA-030 makes malformed responses visible and safe, but it does not reduce how 
 - Prompt changes remain narrow and specific to the single-field date-validation contract
 - Any recovery logic is small, explicit, and covered by focused tests
 - The runtime path still falls back safely and preserves malformed-response diagnostics when output cannot be trusted"
+AIFA-032 Mismatch message specificity hardening,Backlog,5-Testing & Evaluation,Medium,"AIFA-023, AIFA-031","Make mismatch findings specific enough that the Review page reflects the actual document-versus-form difference instead of a coarse year-only summary.
+- Tighten the single-field date-validation prompt so mismatch messages include the full submitted date and the full document date when the evidence supports it
+- Add a small normalization step after parsing so recoverable year-only mismatch wording can be upgraded to a full-date message from cited evidence when the cited text is parseable
+- Add or extend corpus coverage for the AHF term-clause mismatch case so month/day loss is measured instead of treated as anecdotal
+- Keep the change narrow to mismatch message wording; do not broaden field scope or rewrite outcome logic
+- Preserve the current advisory UI and citation flow
+
+Why this matters:
+The current PoC can reach the right mismatch outcome while still understating the actual discrepancy in the stored message. If the UI only says the year is wrong when the month and day are also wrong, the result feels less trustworthy during manual review and demo walkthroughs.","- Mismatch findings include the full compared dates when the cited evidence supports full-date comparison
+- Year-only mismatch wording is reduced or explicitly documented when the evidence cannot support more precision
+- The AHF mismatch case is represented in corpus coverage or equivalent focused evaluation notes
+- Any normalization logic stays small, explicit, and limited to recoverable mismatch-message cases
+- Existing outcome classification and citation behavior remain unchanged"
 AIFA-021 Cache validation results,Backlog,6-Production Prep,Medium,AIFA-015,"Avoid unnecessary re-validation when the documents and form data have not changed.
 - Define the cache key using artifactVersion and formSnapshotHash
 - Check for an existing matching validation result before re-running the full validation step
