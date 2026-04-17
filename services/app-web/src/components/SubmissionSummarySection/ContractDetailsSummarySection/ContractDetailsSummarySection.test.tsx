@@ -254,6 +254,44 @@ describe('ContractDetailsSummarySection', () => {
         ).toBeInTheDocument()
     })
 
+    it('hides the DSNP summary for CHIP-only contracts when chip automation is enabled', async () => {
+        const contract = mockContractPackageDraft()
+        if (!contract.draftRevision)
+            throw new Error('Unexpected error: no draftRevision')
+        contract.draftRevision.formData = {
+            ...contract.draftRevision.formData,
+            populationCovered: 'CHIP',
+            federalAuthorities: ['STATE_PLAN'],
+            dsnpContract: true,
+        }
+
+        renderWithProviders(
+            <ContractDetailsSummarySection
+                contract={contract}
+                isStateUser
+                editNavigateTo="contract-details"
+            />,
+            {
+                apolloProvider: defaultApolloMocks,
+                featureFlags: {
+                    dsnp: true,
+                    'chip-submission-automation': true,
+                },
+            }
+        )
+
+        await screen.findByRole('heading', {
+            level: 2,
+            name: 'Contract details',
+        })
+
+        expect(
+            screen.queryByRole('definition', {
+                name: 'Is this contract associated with a Dual-Eligible Special Needs Plan (D-SNP) that covers Medicaid benefits?',
+            })
+        ).not.toBeInTheDocument()
+    })
+
     it('displays correct effective dates text for base contract', async () => {
         const contract = mockContractPackageDraft()
         if (!contract.draftRevision)

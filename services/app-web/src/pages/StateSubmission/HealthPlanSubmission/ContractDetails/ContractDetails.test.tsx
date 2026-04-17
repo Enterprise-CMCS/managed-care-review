@@ -376,6 +376,58 @@ describe('ContractDetails', () => {
                 name: 'D-SNP guidance (opens in new window)',
             })
         })
+
+        it('does not render d-snp field for CHIP-only contracts when chip automation is enabled', async () => {
+            const draftContract = mockContractPackageUnlockedWithUnlockedType()
+            draftContract.draftRevision!.formData.populationCovered = 'CHIP'
+            draftContract.draftRevision!.formData.federalAuthorities = [
+                'STATE_PLAN',
+            ]
+            draftContract.draftRevision!.formData.dsnpContract = true
+
+            renderWithProviders(
+                <Routes>
+                    <Route
+                        path={RoutesRecord.SUBMISSIONS_CONTRACT_DETAILS}
+                        element={<ContractDetails />}
+                    />
+                </Routes>,
+                {
+                    apolloProvider: {
+                        mocks: [
+                            fetchCurrentUserMock({ statusCode: 200 }),
+                            fetchContractMockSuccess({
+                                contract: {
+                                    ...draftContract,
+                                    id: '15',
+                                    contractSubmissionType: 'HEALTH_PLAN',
+                                },
+                            }),
+                        ],
+                    },
+                    routerProvider: {
+                        route: '/submissions/health-plan/15/edit/contract-details',
+                    },
+                    featureFlags: {
+                        dsnp: true,
+                        'chip-submission-automation': true,
+                    },
+                }
+            )
+
+            await screen.findByText('Contract Details')
+
+            expect(
+                screen.queryByRole('group', {
+                    name: 'Is this contract associated with a Dual-Eligible Special Needs Plan (D-SNP) that covers Medicaid benefits?',
+                })
+            ).not.toBeInTheDocument()
+            expect(
+                screen.queryByRole('link', {
+                    name: 'D-SNP guidance (opens in new window)',
+                })
+            ).not.toBeInTheDocument()
+        })
     })
 
     describe('Contract provisions - yes/nos', () => {

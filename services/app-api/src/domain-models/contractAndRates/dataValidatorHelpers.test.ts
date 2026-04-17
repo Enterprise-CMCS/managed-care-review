@@ -3,6 +3,7 @@ import {
     validateEQROContractDraftRevisionInput,
     parseContract,
     parseAndUpdateEqroFields,
+    parseAndUpdateChipOnlyFields,
     parseEQROContract,
 } from './dataValidatorHelpers'
 import {
@@ -787,6 +788,32 @@ describe('Health plan parsing and validation', () => {
                 )
             ).toBe(true)
         })
+
+        it('does not require dsnpContract for CHIP-only submissions when chip automation is enabled', async () => {
+            const prismaClient = await sharedTestPrismaClient()
+            const postgresStore = NewPostgresStore(prismaClient)
+            const stateCode = 'FL'
+            const contract = mockSubmittableHealthPlanContract()
+            if (!contract.draftRevision) {
+                throw new Error('Unexpected error: no draftRevision')
+            }
+            contract.draftRevision.formData.populationCovered = 'CHIP'
+            contract.draftRevision.formData.federalAuthorities = ['STATE_PLAN']
+            contract.draftRevision.formData.dsnpContract = undefined
+
+            const parsedContract = parseContract(
+                contract,
+                stateCode,
+                postgresStore,
+                {
+                    '438-attestation': true,
+                    dsnp: true,
+                    'chip-submission-automation': true,
+                }
+            )
+
+            expect(parsedContract).toEqual(contract)
+        })
         it('return error if a child rate has a deprecated rateProgramID', async () => {
             const prismaClient = await sharedTestPrismaClient()
             const postgresStore = NewPostgresStore(prismaClient)
@@ -1256,6 +1283,36 @@ describe('EQRO parsing and validation', () => {
             ALL_EQRO_FIELDS.forEach((field) => {
                 expect(result[field]).toBeNull()
             })
+        })
+    })
+
+    describe('parseAndUpdateChipOnlyFields', () => {
+        it('clears dsnpContract for CHIP-only submissions when chip automation is enabled', () => {
+            const result = parseAndUpdateChipOnlyFields(
+                {
+                    ...baseCurrentFormData({
+                        populationCovered: 'CHIP',
+                        dsnpContract: true,
+                    }),
+                },
+                { 'chip-submission-automation': true }
+            )
+
+            expect(result.dsnpContract).toBeUndefined()
+        })
+
+        it('preserves dsnpContract when chip automation is disabled', () => {
+            const result = parseAndUpdateChipOnlyFields(
+                {
+                    ...baseCurrentFormData({
+                        populationCovered: 'CHIP',
+                        dsnpContract: true,
+                    }),
+                },
+                { 'chip-submission-automation': false }
+            )
+
+            expect(result.dsnpContract).toBe(true)
         })
     })
 
