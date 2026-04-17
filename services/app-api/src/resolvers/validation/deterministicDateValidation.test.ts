@@ -129,4 +129,88 @@ describe('runDeterministicDateValidation', () => {
             },
         ])
     })
+
+    it('matches contract start date from document-family labels used in amendment forms', () => {
+        const result = runDeterministicDateValidation({
+            formFields: [
+                {
+                    field: 'contractStartDate',
+                    label: 'Contract Start Date',
+                    value: '01/01/2024',
+                },
+            ],
+            retrievedChunks: [
+                {
+                    chunkId: 'amendment.pdf::chunk-0',
+                    documentName: 'amendment.pdf',
+                    page: 1,
+                    order: 0,
+                    text: ['Contract Start Date: 1/1/2024'].join('\n'),
+                },
+            ],
+        })
+
+        expect(result.unresolvedFields).toEqual([])
+        expect(result.resolvedResults).toEqual([
+            {
+                field: 'contractStartDate',
+                outcome: 'match',
+                confidence: 'high',
+                message: 'Document text labels start date as 01/01/2024.',
+                decisionSource: 'deterministic',
+                citations: [
+                    {
+                        chunkId: 'amendment.pdf::chunk-0',
+                        documentName: 'amendment.pdf',
+                        page: 1,
+                        order: 0,
+                    },
+                ],
+            },
+        ])
+    })
+
+    it('returns not-enough-evidence when competing labeled end dates appear in retrieved evidence', () => {
+        const result = runDeterministicDateValidation({
+            formFields: [
+                {
+                    field: 'contractEndDate',
+                    label: 'Contract End Date',
+                    value: '12/31/2025',
+                },
+            ],
+            retrievedChunks: [
+                {
+                    chunkId: 'amendment.pdf::chunk-0',
+                    documentName: 'amendment.pdf',
+                    page: 1,
+                    order: 0,
+                    text: [
+                        'Current Contract Expiration Date: 12/31/2024',
+                        'Requested Contract Expiration Date: 12/31/2025',
+                    ].join('\n'),
+                },
+            ],
+        })
+
+        expect(result.unresolvedFields).toEqual([])
+        expect(result.resolvedResults).toEqual([
+            {
+                field: 'contractEndDate',
+                outcome: 'not-enough-evidence',
+                confidence: 'medium',
+                message:
+                    'Document text contains multiple labeled end date values in the retrieved evidence.',
+                decisionSource: 'deterministic',
+                citations: [
+                    {
+                        chunkId: 'amendment.pdf::chunk-0',
+                        documentName: 'amendment.pdf',
+                        page: 1,
+                        order: 0,
+                    },
+                ],
+            },
+        ])
+    })
 })

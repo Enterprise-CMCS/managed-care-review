@@ -518,7 +518,7 @@ The point of the PoC is not just to run. It is to produce results that are credi
 - False positives and false negatives are visible instead of anecdotal
 - The output notes whether deterministic validation or LLM fallback produced the final result
 - The resulting summary is concrete enough to guide the next quality change"
-AIFA-029 Field-label and retrieval coverage hardening,Backlog,5-Testing & Evaluation,High,"AIFA-022, AIFA-023","Reduce the intentional narrowness in how the PoC recognizes and retrieves start/end date evidence.
+AIFA-029 Field-label and retrieval coverage hardening,Done,5-Testing & Evaluation,High,"AIFA-022, AIFA-023","Reduce the intentional narrowness in how the PoC recognizes and retrieves start/end date evidence.
 - Expand field config from simple regexes into richer alias sets and retrieval terms
 - Allow optional document-family-specific label dictionaries for known contract templates
 - Capture enough parsing structure to preserve label proximity or related context, not just raw chunk text
@@ -531,6 +531,19 @@ Most of the accidental hardcoding has already been removed. The remaining weakne
 - Parsing or chunk metadata preserves enough nearby structure to improve label-to-value matching
 - Retrieval behavior is measurably less dependent on exact wording in one document variant
 - Corpus results or evaluation notes show whether coverage improved and where limitations still remain"
+AIFA-030 LLM output robustness and malformed-response handling,Backlog,5-Testing & Evaluation,Medium,"AIFA-023, AIFA-029","Harden the model-output boundary so malformed or partial LLM responses do not distort evaluation or runtime behavior.
+- Make malformed-output cases visible in the evaluation harness as a separate class of failure
+- Tighten the single-field prompt/response contract where it improves reliability without broadening scope
+- Keep parser recovery small and explicit if any repair logic is added
+- Preserve a safe fallback when the model output cannot be trusted
+- Measure how often malformed output occurs across the corpus
+
+Why this matters:
+The PoC now has a repeatable corpus and evaluation harness, but malformed LLM output is still a separate reliability risk from retrieval quality. This ticket makes that boundary explicit instead of treating formatting failures like ordinary validation misses.","- Evaluation output distinguishes malformed-response failures from normal match/mismatch/not-enough-evidence cases
+- The runtime path degrades safely when the LLM output is unusable
+- Any prompt or parser changes stay small, explicit, and testable
+- Corpus runs can report malformed-output frequency concretely
+- Another engineer can tell from the code and notes whether a failure was caused by retrieval quality or output-contract instability"
 AIFA-021 Cache validation results,Backlog,6-Production Prep,Medium,AIFA-015,"Avoid unnecessary re-validation when the documents and form data have not changed.
 - Define the cache key using artifactVersion and formSnapshotHash
 - Check for an existing matching validation result before re-running the full validation step

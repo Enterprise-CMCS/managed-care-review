@@ -7,14 +7,17 @@ import type {
 import { VALIDATION_FIELD_CONFIG } from '../validationFields'
 
 type SupportedField = DateValidationFieldInput['field']
+const KNOWN_LABEL_PATTERNS = Object.values(VALIDATION_FIELD_CONFIG).flatMap(
+  (config) => config.labelPatterns
+)
 
 const MONTH_PATTERN =
   '(January|February|March|April|May|June|July|August|September|October|November|December|Jan(?:uary)?|Feb(?:ruary)?|Mar(?:ch)?|Apr(?:il)?|May|Jun(?:e)?|Jul(?:y)?|Aug(?:ust)?|Sep(?:t(?:ember)?)?|Oct(?:ober)?|Nov(?:ember)?|Dec(?:ember)?)'
 const SLASH_DATE_PATTERN = '\\d{1,2}/\\d{1,2}/\\d{4}'
 const ISO_DATE_PATTERN = '\\d{4}-\\d{2}-\\d{2}'
-const DATE_PATTERN = new RegExp(
+const DATE_PATTERN_GLOBAL = new RegExp(
   `${MONTH_PATTERN}\\s+\\d{1,2},?\\s*\\d{4}|${SLASH_DATE_PATTERN}|${ISO_DATE_PATTERN}`,
-  'i'
+  'gi'
 )
 const ACCEPTED_DATE_FORMATS = [
   'M/D/YYYY',
@@ -67,30 +70,72 @@ function buildCitation(
   }
 }
 
-function extractLabeledDate(
+function extractLabeledDates(
   field: SupportedField,
   chunk: DateValidationCitationInput
-): string | null {
+): string[] {
+  const labeledDates = new Set<string>()
+  const lines = chunk.text
+    .split('\n')
+    .map((line) => line.trim())
+    .filter(Boolean)
+
   for (const labelPattern of VALIDATION_FIELD_CONFIG[field].labelPatterns) {
-    const labelMatch = chunk.text.match(labelPattern)
+    for (const [index, line] of lines.entries()) {
+      if (!labelPattern.test(line)) {
+        continue
+      }
 
-    if (!labelMatch || labelMatch.index == null) {
-      continue
-    }
+      const labelMatch = line.match(labelPattern)
 
-    const afterLabelText = chunk.text.slice(
-      labelMatch.index + labelMatch[0].length
-    )
-    const dateMatch = afterLabelText
-      .slice(0, 80)
-      .match(DATE_PATTERN)
+      if (!labelMatch || labelMatch.index == null) {
+        continue
+      }
 
-    if (dateMatch?.[0]) {
-      return normalizeWhitespace(dateMatch[0])
+      const afterLabelText = [
+        line.slice(labelMatch.index + labelMatch[0].length),
+        lines[index + 1] ?? ''
+      ].join(' ')
+      const boundedAfterLabelText =
+        truncateAtNextKnownLabel(afterLabelText) ?? afterLabelText
+      const dateMatches = [
+        ...boundedAfterLabelText.matchAll(DATE_PATTERN_GLOBAL)
+      ]
+
+      for (const dateMatch of dateMatches) {
+        if (dateMatch[0]) {
+          labeledDates.add(normalizeWhitespace(dateMatch[0]))
+        }
+      }
     }
   }
 
-  return null
+  return [...labeledDates]
+}
+
+function truncateAtNextKnownLabel(value: string): string | null {
+  let earliestIndex: number | null = null
+
+  for (const pattern of KNOWN_LABEL_PATTERNS) {
+    const match = value.match(pattern)
+
+    if (match?.index == null) {
+      continue
+    }
+
+    earliestIndex =
+      earliestIndex == null ? match.index : Math.min(earliestIndex, match.index)
+  }
+
+  if (earliestIndex == null) {
+    return null
+  }
+
+  // Keep deterministic extraction inside the current label's local context.
+  // This prevents nearby labels like amendment effective date or requested
+  // expiration date from being mistaken as additional values for the field
+  // currently being validated.
+  return value.slice(0, earliestIndex)
 }
 
 export function runDeterministicDateValidation(input: {
@@ -105,13 +150,13 @@ export function runDeterministicDateValidation(input: {
 
   for (const field of input.formFields) {
     const labeledCandidates = input.retrievedChunks.flatMap((chunk) => {
-      const labeledDate = extractLabeledDate(field.field, chunk)
+      const labeledDates = extractLabeledDates(field.field, chunk)
 
-      if (!labeledDate) {
+      if (labeledDates.length === 0) {
         return []
       }
 
-      return [{ chunk, labeledDate }]
+      return labeledDates.map((labeledDate) => ({ chunk, labeledDate }))
     })
 
     if (labeledCandidates.length === 0) {
@@ -140,7 +185,20 @@ export function runDeterministicDateValidation(input: {
     }
 
     if (uniqueCandidates.size > 1) {
-      unresolvedFields.push(field)
+      resolvedResults.push({
+        field: field.field,
+        outcome: 'not-enough-evidence',
+        confidence: 'medium',
+        message: `Document text contains multiple labeled ${VALIDATION_FIELD_CONFIG[field.field].messageLabel} values in the retrieved evidence.`,
+        decisionSource: 'deterministic',
+        citations: [
+          ...new Map(
+            [...uniqueCandidates.values()]
+              .flatMap((candidate) => candidate.chunks)
+              .map((chunk) => [chunk.chunkId, buildCitation(chunk)])
+          ).values()
+        ]
+      })
       continue
     }
 

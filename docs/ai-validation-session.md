@@ -2,7 +2,7 @@
 
 ## Current Ticket
 
-The next implementation ticket is `AIFA-029 Field-label and retrieval coverage hardening`.
+The next implementation ticket is `AIFA-030 LLM output robustness and malformed-response handling`.
 
 ## Completed
 
@@ -76,6 +76,13 @@ The local PoC now works end to end from the actual form flow, has a reusable eva
 - the harness compares expected outcomes, message fragments, citation orders, and decision source against stored validation results
 - the output is designed to make deterministic wins, LLM fallbacks, and false positives/negatives visible enough to guide the next quality change
 
+### Coverage hardening
+
+- field-label coverage now includes real document-family variants such as contract start date and contract expiration labels seen in the corpus
+- deterministic extraction now stops at the next known label boundary instead of bleeding into adjacent fields
+- competing labeled values now resolve to deterministic `not-enough-evidence` instead of being left entirely to the LLM
+- malformed LLM JSON now degrades to the existing `not-enough-evidence` path instead of breaking the run
+
 ## What Is Working
 
 - local bootstrap with `./dev local`
@@ -89,6 +96,7 @@ The local PoC now works end to end from the actual form flow, has a reusable eva
 - stale-result handling based on current artifact inputs and form values
 - reusable corpus fixtures for repeatable manual and harness-driven evaluation
 - repeatable harness-driven evaluation of corpus scenarios through the worker path
+- improved deterministic handling for competing start/end-date labels in real amendment fixtures
 
 ## What Is Still Weak
 
@@ -97,6 +105,8 @@ The local PoC now works end to end from the actual form flow, has a reusable eva
 - local Ollama quality is still a confound when judging whether a miss is retrieval, prompting, or model reasoning
 - the Review-page wording can still be improved once the measured result quality is stable
 - OCR-heavy fixtures are present, but not yet exercised in a repeatable evaluation loop
+- malformed LLM output is now contained safely, but it is still a distinct reliability risk that should be measured and reduced separately from retrieval quality
+- the AHF term-clause fixture still shows a real ambiguity gap around mixed term language and competing end dates
 
 ## Current PoC Direction
 
@@ -130,15 +140,19 @@ The main change in direction is that the PoC is no longer framed as "general doc
 
 Use corpus evidence to harden alias coverage, retrieval inputs, and document-family handling for start/end date validation.
 
+### AIFA-030 LLM output robustness and malformed-response handling
+
+Separate malformed-output reliability work from retrieval-quality work so evaluation runs stay trustworthy.
+
 ### AIFA-020D Review-page wording refinement
 
 Polish the user-facing wording once the result quality is stable enough to present.
 
 ## Suggested Next Step
 
-- Run the evaluation harness in a normal local environment and capture the current corpus results.
-- Use those results to identify the highest-value label and retrieval gaps for `AIFA-029`.
-- Keep the next quality change scoped to start/end-date coverage, not broader field expansion.
+- Track malformed-output cases explicitly in corpus runs so they are not confused with retrieval misses.
+- Tighten the prompt/output boundary only where it improves reliability without expanding scope.
+- Keep the next change focused on LLM output robustness, not broader field coverage or UI work.
 
 ## Source of Truth Docs
 
@@ -156,6 +170,7 @@ Polish the user-facing wording once the result quality is stable enough to prese
 - `services/ai-form-augmentation/src/validation-output/deterministicDateValidation.ts`
 - `services/ai-form-augmentation/src/evaluation/dateValidationCorpus.ts`
 - `services/ai-form-augmentation/src/evaluation/dateValidationEvaluation.ts`
+- `services/ai-form-augmentation/src/validationFields.ts`
 - `services/ai-form-augmentation/src/runValidation.ts`
 - `services/app-web/src/pages/StateSubmission/HealthPlanSubmission/ReviewSubmit/ReviewSubmit.tsx`
 
@@ -164,4 +179,4 @@ Polish the user-facing wording once the result quality is stable enough to prese
 - The rewritten PoC plan lives in `docs/technical-design/ai-validation-poc-plan.md`.
 - The broader `rag-llm-document-validation.md` document is still useful as long-term architecture context, but it should not be treated as the current PoC scope.
 - Timeout handling remains intentionally deferred while validation quality measurement is still the larger credibility risk.
-- The session file should now be treated as post-`AIFA-023`; the next meaningful implementation checkpoint is coverage hardening driven by corpus evidence.
+- The session file should now be treated as post-`AIFA-029`; the next meaningful implementation checkpoint is separating malformed-output robustness from remaining retrieval-quality gaps.

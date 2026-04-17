@@ -381,7 +381,13 @@ function parseSingleFieldValidationResponse(
   rawText: string,
   expectedField: DateValidationFieldInput['field']
 ): DateValidationResult {
-  const parsedValidation = parseValidationResponse(rawText)
+  let parsedValidation
+
+  try {
+    parsedValidation = parseValidationResponse(rawText)
+  } catch {
+    return buildLlmFallbackResult(expectedField)
+  }
   const matchingResults = parsedValidation.results.filter(
     (result) => result.field === expectedField
   )
@@ -401,7 +407,7 @@ function buildLlmFallbackResult(
     field,
     outcome: 'not-enough-evidence',
     confidence: 'low',
-    message: `Retrieved document evidence was not conclusive enough to verify the ${formatFieldLabel(field)}.`,
+    message: `No mention of ${formatFieldLabel(field)} in retrieved document chunks.`,
     decisionSource: 'llm',
     citations: []
   }

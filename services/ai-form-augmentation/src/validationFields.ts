@@ -13,22 +13,29 @@ export const VALIDATION_FIELD_CONFIG: Record<
   contractStartDate: {
     labelPatterns: [
       /\bSTART DATE\b/i,
+      /\bCONTRACT START DATE\b/i,
+      /\bTHE CONTRACT WILL BECOME EFFECTIVE\b/i,
       /\bTERM BEGINS ON\b/i,
       /\bTERM STARTS ON\b/i
     ],
     messageLabel: 'start date',
     retrievalQuery:
-      'START DATE contract term of this agreement effective date begins on'
+      'START DATE CONTRACT START DATE the contract will become effective term begins on'
   },
   contractEndDate: {
     labelPatterns: [
       /\bTHROUGH END DATE\b/i,
       /\bEND DATE\b/i,
+      /\bCURRENT CONTRACT EXPIRATION DATE\b/i,
+      /\bREQUESTED CONTRACT EXPIRATION DATE\b/i,
+      /\bORIGINAL CONTRACT EXPIRATION DATE\b/i,
+      /\bCONTINUE IN FULL FORCE AND EFFECT THROUGH\b/i,
       /\bTERM ENDS ON\b/i,
       /\bTERM EXPIRES ON\b/i
     ],
     messageLabel: 'end date',
-    retrievalQuery: 'contract end date through end date term ends expiration date'
+    retrievalQuery:
+      'contract end date through end date current contract expiration date requested contract expiration date original contract expiration date continue in full force and effect through term ends expiration date'
   },
   amendmentEffectiveDate: {
     labelPatterns: [/Amendment effective date\s*:/i],

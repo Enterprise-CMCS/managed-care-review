@@ -206,11 +206,11 @@ describe('validationHandler', () => {
 
         expect(embedTextMock).toHaveBeenNthCalledWith(
             1,
-            'START DATE contract term of this agreement effective date begins on'
+            'START DATE CONTRACT START DATE the contract will become effective term begins on'
         )
         expect(embedTextMock).toHaveBeenNthCalledWith(
             2,
-            'contract end date through end date term ends expiration date'
+            'contract end date through end date current contract expiration date requested contract expiration date original contract expiration date continue in full force and effect through term ends expiration date'
         )
         expect(consoleWarnMock).toHaveBeenCalledWith(
             'Validation citations missing page metadata',
@@ -622,7 +622,7 @@ describe('validationHandler', () => {
                         outcome: 'not-enough-evidence',
                         confidence: 'low',
                         message:
-                            'Retrieved document evidence was not conclusive enough to verify the contract start date.',
+                            'No mention of contract start date in retrieved document chunks.',
                         decisionSource: 'llm',
                         citations: [],
                     },
@@ -653,6 +653,77 @@ describe('validationHandler', () => {
                 stage: 'complete',
                 artifactVersion: 'artifact-v1',
                 error: null,
+            })
+        )
+    })
+
+    it('falls back to not-enough-evidence when the llm returns malformed JSON', async () => {
+        runDeterministicDateValidationMock
+            .mockReturnValueOnce({
+                resolvedResults: [],
+                unresolvedFields: [
+                    baseEvent.formFields[0],
+                ] as DateValidationFieldInput[],
+            })
+            .mockReturnValueOnce({
+                resolvedResults: [
+                    {
+                        field: 'contractEndDate',
+                        outcome: 'match',
+                        confidence: 'high',
+                        message:
+                            'Document text includes end date December 31, 2025.',
+                        decisionSource: 'deterministic',
+                        citations: [
+                            {
+                                chunkId: 'contract-a.pdf::chunk-0',
+                                documentName: 'contract-a.pdf',
+                                page: null,
+                                order: 0,
+                            },
+                        ],
+                    },
+                ],
+                unresolvedFields: [],
+            })
+
+        parseValidationResponseMock.mockImplementationOnce(() => {
+            throw new Error('Failed to parse validation JSON')
+        })
+
+        await validationHandler(baseEvent)
+
+        expect(putJsonMock).toHaveBeenCalledWith(
+            'ai-form-augmentation-artifacts',
+            getValidationResultKey('test-form'),
+            expect.objectContaining({
+                results: [
+                    {
+                        field: 'contractStartDate',
+                        outcome: 'not-enough-evidence',
+                        confidence: 'low',
+                        message:
+                            'No mention of contract start date in retrieved document chunks.',
+                        decisionSource: 'llm',
+                        citations: [],
+                    },
+                    {
+                        field: 'contractEndDate',
+                        outcome: 'match',
+                        confidence: 'high',
+                        message:
+                            'Document text includes end date December 31, 2025.',
+                        decisionSource: 'deterministic',
+                        citations: [
+                            {
+                                chunkId: 'contract-a.pdf::chunk-0',
+                                documentName: 'contract-a.pdf',
+                                page: null,
+                                order: 0,
+                            },
+                        ],
+                    },
+                ],
             })
         )
     })
