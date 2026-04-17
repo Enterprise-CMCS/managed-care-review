@@ -168,7 +168,7 @@
         "react-select-event": "^5.5.0",
         "react-test-renderer": "^18.2.0",
         "storybook": "^10.3.5",
-        "stylelint": "^17.1.1",
+        "stylelint": "^17.8.0",
         "stylelint-config-recommended-scss": "^17.0.0",
         "typescript": "5.9.3",
         "typescript-eslint": "^8.56.0",
