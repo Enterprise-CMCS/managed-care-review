@@ -22,6 +22,7 @@ export interface DateValidationResult {
   outcome: 'match' | 'mismatch' | 'not-enough-evidence'
   confidence: 'high' | 'medium' | 'low'
   message: string
+  decisionSource?: 'deterministic' | 'llm'
   citations: Array<{
     chunkId: string
     documentName: string

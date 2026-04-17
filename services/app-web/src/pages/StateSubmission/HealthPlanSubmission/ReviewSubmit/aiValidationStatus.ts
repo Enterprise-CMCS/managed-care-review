@@ -41,9 +41,9 @@ export function getAIValidationDisplayState(args: {
                 isPolling: false,
             }
         case 'parsing':
-        case 'embedding':
-        case 'indexing':
-        case 'validating':
+        case 'retrieving':
+        case 'deterministic-validation':
+        case 'llm-validation':
             return {
                 title: 'Reviewing your documents',
                 message:

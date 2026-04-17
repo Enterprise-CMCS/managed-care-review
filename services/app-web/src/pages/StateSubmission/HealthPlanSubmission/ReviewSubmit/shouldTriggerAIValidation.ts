@@ -19,9 +19,9 @@ export function shouldTriggerAIValidation({ validationStatus }: Args): boolean {
         case 'not-started':
             return true
         case 'parsing':
-        case 'embedding':
-        case 'indexing':
-        case 'validating':
+        case 'retrieving':
+        case 'deterministic-validation':
+        case 'llm-validation':
         case 'complete':
         case 'failed':
         default:

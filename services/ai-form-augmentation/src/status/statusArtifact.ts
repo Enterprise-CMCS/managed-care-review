@@ -1,8 +1,8 @@
 export type ValidationPipelineStage =
   | 'parsing'
-  | 'embedding'
-  | 'indexing'
-  | 'validating'
+  | 'retrieving'
+  | 'deterministic-validation'
+  | 'llm-validation'
   | 'complete'
   | 'failed'
 

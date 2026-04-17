@@ -40,12 +40,12 @@ describe('shouldTriggerAIValidation', () => {
         ).toBe(true)
     })
 
-    it('returns false for validating', () => {
+    it('returns false for retrieval in progress', () => {
         expect(
             shouldTriggerAIValidation({
                 validationStatus: {
                     __typename: 'ValidationStatusPayload',
-                    stage: 'validating',
+                    stage: 'retrieving',
                     artifactVersion: 'v1',
                     isStale: false,
                     error: null,

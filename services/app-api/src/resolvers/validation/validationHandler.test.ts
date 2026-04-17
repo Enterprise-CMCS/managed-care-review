@@ -1,4 +1,5 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest'
+import type { DateValidationFieldInput } from '../../../../ai-form-augmentation/src/prompts'
 
 const {
     getBufferMock,
@@ -9,6 +10,8 @@ const {
     embedTextMock,
     generateValidationMock,
     parseValidationResponseMock,
+    buildDateValidationPromptMock,
+    runDeterministicDateValidationMock,
 } = vi.hoisted(() => ({
     getBufferMock: vi.fn(),
     putJsonMock: vi.fn(),
@@ -18,6 +21,33 @@ const {
     embedTextMock: vi.fn(),
     generateValidationMock: vi.fn(),
     parseValidationResponseMock: vi.fn(),
+    buildDateValidationPromptMock: vi.fn(() => 'test-prompt'),
+    runDeterministicDateValidationMock: vi.fn(
+        (input: { formFields: DateValidationFieldInput[] }) => ({
+            resolvedResults: input.formFields.map(
+                (field: DateValidationFieldInput) => ({
+                    field: field.field,
+                    outcome: 'match',
+                    confidence: 'high',
+                    message: `Document text includes ${
+                        field.field === 'contractStartDate'
+                            ? 'start date'
+                            : 'end date'
+                    } ${field.value}.`,
+                    decisionSource: 'deterministic',
+                    citations: [
+                        {
+                            chunkId: 'contract-a.pdf::chunk-0',
+                            documentName: 'contract-a.pdf',
+                            page: null,
+                            order: 0,
+                        },
+                    ],
+                })
+            ),
+            unresolvedFields: [] as DateValidationFieldInput[],
+        })
+    ),
 }))
 
 vi.mock('../../../../ai-form-augmentation/src/s3', () => ({
@@ -49,7 +79,7 @@ vi.mock('../../../../ai-form-augmentation/src/llm', () => ({
 }))
 
 vi.mock('../../../../ai-form-augmentation/src/prompts', () => ({
-    buildDateValidationPrompt: vi.fn(() => 'test-prompt'),
+    buildDateValidationPrompt: buildDateValidationPromptMock,
 }))
 
 vi.mock('../../../../ai-form-augmentation/src/retrieval', () => ({
@@ -65,6 +95,7 @@ vi.mock('../../../../ai-form-augmentation/src/retrieval', () => ({
 }))
 
 vi.mock('../../../../ai-form-augmentation/src/validation-output', () => ({
+    runDeterministicDateValidation: runDeterministicDateValidationMock,
     parseValidationResponse: parseValidationResponseMock,
 }))
 
@@ -138,6 +169,7 @@ describe('validationHandler', () => {
                     outcome: 'match',
                     confidence: 'high',
                     message: 'Start date matches.',
+                    decisionSource: 'llm',
                     citations: [
                         {
                             chunkId: 'contract-a.pdf::chunk-0',
@@ -183,12 +215,31 @@ describe('validationHandler', () => {
             getValidationResultKey('test-form'),
             expect.objectContaining({
                 artifactVersion: 'artifact-v1',
+                formSnapshotHash: expect.any(String),
                 results: [
                     {
                         field: 'contractStartDate',
                         outcome: 'match',
                         confidence: 'high',
-                        message: 'Start date matches.',
+                        message:
+                            'Document text includes start date January 1, 2025.',
+                        decisionSource: 'deterministic',
+                        citations: [
+                            {
+                                chunkId: 'contract-a.pdf::chunk-0',
+                                documentName: 'contract-a.pdf',
+                                page: null,
+                                order: 0,
+                            },
+                        ],
+                    },
+                    {
+                        field: 'contractEndDate',
+                        outcome: 'match',
+                        confidence: 'high',
+                        message:
+                            'Document text includes end date December 31, 2025.',
+                        decisionSource: 'deterministic',
                         citations: [
                             {
                                 chunkId: 'contract-a.pdf::chunk-0',
@@ -237,6 +288,223 @@ describe('validationHandler', () => {
                 stage: 'failed',
                 artifactVersion: 'artifact-v1',
                 error: 'parse failure',
+            })
+        )
+    })
+
+    it('routes unresolved fields to the llm with field-specific retrieval context', async () => {
+        runDeterministicDateValidationMock
+            .mockReturnValueOnce({
+                resolvedResults: [],
+                unresolvedFields: [
+                    baseEvent.formFields[0],
+                ] as DateValidationFieldInput[],
+            })
+            .mockReturnValueOnce({
+                resolvedResults: [
+                    {
+                        field: 'contractEndDate',
+                        outcome: 'match',
+                        confidence: 'high',
+                        message:
+                            'Document text includes end date December 31, 2025.',
+                        decisionSource: 'deterministic',
+                        citations: [
+                            {
+                                chunkId: 'contract-a.pdf::chunk-0',
+                                documentName: 'contract-a.pdf',
+                                page: null,
+                                order: 0,
+                            },
+                        ],
+                    },
+                ],
+                unresolvedFields: [],
+            })
+
+        parseValidationResponseMock.mockReturnValueOnce({
+            normalizedRawText: '[]',
+            results: [
+                {
+                    field: 'contractStartDate',
+                    outcome: 'match',
+                    confidence: 'medium',
+                    message: 'Start date matches.',
+                    decisionSource: 'llm',
+                    citations: [
+                        {
+                            chunkId: 'contract-a.pdf::chunk-0',
+                            documentName: 'wrong.pdf',
+                            page: 9,
+                            order: 9,
+                        },
+                    ],
+                },
+            ],
+        })
+
+        await validationHandler(baseEvent)
+
+        expect(buildDateValidationPromptMock).toHaveBeenCalledTimes(1)
+        expect(buildDateValidationPromptMock).toHaveBeenCalledWith({
+            formFields: [baseEvent.formFields[0]],
+            retrievedChunks: [
+                expect.objectContaining({
+                    chunkId: 'contract-a.pdf::chunk-0',
+                }),
+            ],
+        })
+
+        expect(generateValidationMock).toHaveBeenCalledTimes(1)
+
+        expect(putJsonMock).toHaveBeenCalledWith(
+            'ai-form-augmentation-artifacts',
+            getValidationResultKey('test-form'),
+            expect.objectContaining({
+                results: [
+                    {
+                        field: 'contractStartDate',
+                        outcome: 'match',
+                        confidence: 'medium',
+                        message: 'Start date matches.',
+                        decisionSource: 'llm',
+                        citations: [
+                            {
+                                chunkId: 'contract-a.pdf::chunk-0',
+                                documentName: 'contract-a.pdf',
+                                page: null,
+                                order: 0,
+                            },
+                        ],
+                    },
+                    {
+                        field: 'contractEndDate',
+                        outcome: 'match',
+                        confidence: 'high',
+                        message:
+                            'Document text includes end date December 31, 2025.',
+                        decisionSource: 'deterministic',
+                        citations: [
+                            {
+                                chunkId: 'contract-a.pdf::chunk-0',
+                                documentName: 'contract-a.pdf',
+                                page: null,
+                                order: 0,
+                            },
+                        ],
+                    },
+                ],
+            })
+        )
+    })
+
+    it('uses deterministic validation for obvious labeled date matches without calling the llm', async () => {
+        generateValidationMock.mockClear()
+        parseValidationResponseMock.mockClear()
+        buildDateValidationPromptMock.mockClear()
+
+        await validationHandler(baseEvent)
+
+        expect(generateValidationMock).not.toHaveBeenCalled()
+        expect(parseValidationResponseMock).not.toHaveBeenCalled()
+        expect(buildDateValidationPromptMock).not.toHaveBeenCalled()
+
+        expect(putJsonMock).toHaveBeenCalledWith(
+            'ai-form-augmentation-artifacts',
+            getValidationResultKey('test-form'),
+            expect.objectContaining({
+                results: [
+                    {
+                        field: 'contractStartDate',
+                        outcome: 'match',
+                        confidence: 'high',
+                        message:
+                            'Document text includes start date January 1, 2025.',
+                        decisionSource: 'deterministic',
+                        citations: [
+                            {
+                                chunkId: 'contract-a.pdf::chunk-0',
+                                documentName: 'contract-a.pdf',
+                                page: null,
+                                order: 0,
+                            },
+                        ],
+                    },
+                    {
+                        field: 'contractEndDate',
+                        outcome: 'match',
+                        confidence: 'high',
+                        message:
+                            'Document text includes end date December 31, 2025.',
+                        decisionSource: 'deterministic',
+                        citations: [
+                            {
+                                chunkId: 'contract-a.pdf::chunk-0',
+                                documentName: 'contract-a.pdf',
+                                page: null,
+                                order: 0,
+                            },
+                        ],
+                    },
+                ],
+            })
+        )
+    })
+
+    it('fails when the llm returns a result for the wrong field', async () => {
+        runDeterministicDateValidationMock
+            .mockReturnValueOnce({
+                resolvedResults: [],
+                unresolvedFields: [
+                    baseEvent.formFields[0],
+                ] as DateValidationFieldInput[],
+            })
+            .mockReturnValueOnce({
+                resolvedResults: [
+                    {
+                        field: 'contractEndDate',
+                        outcome: 'match',
+                        confidence: 'high',
+                        message:
+                            'Document text includes end date December 31, 2025.',
+                        decisionSource: 'deterministic',
+                        citations: [
+                            {
+                                chunkId: 'contract-a.pdf::chunk-0',
+                                documentName: 'contract-a.pdf',
+                                page: null,
+                                order: 0,
+                            },
+                        ],
+                    },
+                ],
+                unresolvedFields: [],
+            })
+
+        parseValidationResponseMock.mockReturnValueOnce({
+            normalizedRawText: '[]',
+            results: [
+                {
+                    field: 'contractEndDate',
+                    outcome: 'match',
+                    confidence: 'medium',
+                    message: 'Wrong field.',
+                    decisionSource: 'llm',
+                    citations: [],
+                },
+            ],
+        })
+
+        await expect(validationHandler(baseEvent)).rejects.toThrow(
+            'Validation model returned result for contractEndDate while validating contractStartDate'
+        )
+
+        expect(putJsonMock).toHaveBeenLastCalledWith(
+            'ai-form-augmentation-artifacts',
+            getValidationStatusKey('test-form'),
+            expect.objectContaining({
+                stage: 'failed',
+                artifactVersion: 'artifact-v1',
             })
         )
     })

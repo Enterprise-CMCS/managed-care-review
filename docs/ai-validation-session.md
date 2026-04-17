@@ -1,213 +1,164 @@
 # AI Validation Session
 
 ## Current Ticket
-AIFA-019A is complete. The review page now auto-triggers validation for the current draft when status is not started or stale, while the remaining gap is the fully local execution path.
+
+The next implementation ticket is `AIFA-022 Minimal test corpus`.
 
 ## Completed
-- AIFA-001 ✔️ Create AI service workspace
-- AIFA-002 ✔️ Add watch-based dev script
-- AIFA-003 ✔️ Create local-ready S3 helper
-- AIFA-004 ✔️ Add PDF-only parser using `pdf-parse`
-- AIFA-005 ✔️ Add deterministic chunking utility
-- AIFA-006 ✔️ Persist `chunks.json` to LocalStack S3 and read it back
-- AIFA-007 ✔️ Add `EmbeddingProvider` seam and local Xenova embedding implementation
-- AIFA-008 ✔️ Add `VectorStore` seam and brute-force cosine similarity retrieval
-- AIFA-009 ✔️ Add OP-RAG ordering for retrieved chunks
-- AIFA-009A ✔️ Add production-like PDF extraction fallback with local OCR
-- AIFA-010 ✔️ Add date-focused validation prompt builder
-- AIFA-011 ✔️ Add local Ollama validation client and raw-response capture
-- AIFA-011A ✔️ Normalize and parse validation LLM output
-- AIFA-012 ✔️ Add dedicated validation Lambda handler and CDK wiring
-- AIFA-013 ✔️ Add versioned status artifact writing
-- AIFA-015 ✔️ Persist validation results as a local artifact
-- AIFA-014 ✔️ Add deterministic artifactVersion and formSnapshotHash computation
-- AIFA-016 ✔️ Add GraphQL trigger resolver for the validation Lambda
-- AIFA-017 ✔️ Add GraphQL polling resolver for validation status/results
-- AIFA-018 ✔️ Add review-page validation status UI and local-dev bootstrap follow-up
-- AIFA-019 ✔️ Display validation findings on the Review page
-- AIFA-019A ✔️ Wire triggerValidation into Review flow
 
-## Current Progress
-- AI workspace lives in `services/ai-form-augmentation`
-- Workspace exports are organized by area:
-  - `s3`
-  - `parsing`
-  - `chunking`
-  - `artifacts`
-  - `embeddings`
-  - `vector-store`
-  - `retrieval`
-- Local verification script is currently `services/ai-form-augmentation/src/dev.ts`
-- Representative local PDF fixture is:
-  - `services/ai-form-augmentation/fixtures/pdf/medicaid-managed-care-contract-and-rate-submission-cover-sheet.pdf`
-- Production-like PDF fixture under evaluation:
-  - `services/ai-form-augmentation/fixtures/pdf/scan-07-65712-a26-213a-final.pdf`
-- Local artifact flow is working end to end:
-  - parse PDF
-  - chunk text
-  - build `chunks.json`
-  - write to LocalStack bucket
-  - read back from LocalStack
-- Local embedding flow is working end to end:
-  - read chunk text
-  - embed sample chunks with `Xenova/all-MiniLM-L6-v2`
-  - verify consistent vector length (`384`)
-- Local retrieval flow is working end to end:
-  - add chunk embeddings to an in-memory vector store
-  - embed a query string
-  - search top-k results using brute-force cosine similarity
-  - inspect ranked matches and scores
-- Local OP-RAG flow is working end to end:
-  - take top-k similarity results
-  - reorder them into original source order
-  - inspect the difference between raw similarity ranking and prompt-ready ordering
-- Local prompt-building flow is working end to end:
-  - shape date-focused form fields
-  - shape retrieved chunk context
-  - build a narrow citation-aware validation prompt
-- Local LLM flow is working end to end:
-  - send the real prompt to Ollama
-  - receive a raw response from a local model
-  - inspect real output behavior before adding JSON normalization/parsing
-- Local validation-output flow is working end to end:
-  - normalize raw model output
-  - extract and parse the JSON payload
-  - validate the result shape with runtime guards
-  - produce typed validation results without manual cleanup
-- Validation worker boundary is now in place:
-  - dedicated handler exists in the AI workspace
-  - dedicated Lambda resource exists in CDK
-  - local MVP can keep progressing without waiting on full AWS synth context
-- GraphQL trigger/polling boundary is now in place:
-  - `triggerValidation` invokes the validation Lambda asynchronously from `app-api`
-  - `validationStatus` reads `status.json` and `validation-result.json` from the AI artifact bucket
-  - both resolvers compute the current `artifactVersion` from the draft revision's persisted contract document keys
-  - stale artifact/version mismatches are surfaced explicitly instead of being silently trusted
-- Review page validation visibility is now in place:
-  - `ReviewSubmit` polls `validationStatus` on an interval without blocking the submission review flow
-  - UI state mapping is centralized in a small helper so page logic stays narrow
-  - the review page surfaces pending, in-progress, complete, stale, and unavailable states with calm non-blocking messaging
-  - focused UI tests cover the main polling states
-- Review page findings visibility is now in place:
-  - completed validation findings render in a dedicated card below the status card
-  - raw backend field/outcome/confidence values are mapped into simpler user-facing labels before rendering
-  - stale or empty results do not render the findings card
-  - focused UI tests cover complete, empty, and stale result scenarios
-- Review page trigger orchestration is now in place:
-  - `ReviewSubmit` now starts validation from the product flow instead of only polling passively
-  - the trigger runs only when status is `not-started` or stale for the current draft state
-  - a per-page-session ref prevents duplicate trigger attempts for the same contract/artifact version
-  - focused tests cover trigger, no-trigger, and stale re-trigger scenarios
-- Local bootstrap now matches the new validation config requirements:
-  - `./dev local` seeds local defaults for `VALIDATION_FUNCTION_NAME` and `AI_VALIDATION_ARTIFACT_BUCKET` before `apollo_gql` initializes
-  - LocalStack bucket bootstrap now includes `ai-form-augmentation-artifacts` so review-page polling can read validation artifacts locally
-- Local status tracking is now working:
-  - `status.json` is written through the existing S3 helper
-  - the status artifact includes `stage`, `artifactVersion`, `updatedAt`, and `error`
-  - local verification currently writes `validating` and then `complete`
-- Local validation-result storage is now working:
-  - `validation-result.json` is written through the existing S3 helper
-  - the stored result includes `artifactVersion`, `formSnapshotHash`, and parsed validation results
-  - local verification reads the stored result back successfully
-- Local artifact versioning is now working:
-  - `artifactVersion` is computed from normalized document keys
-  - `formSnapshotHash` is computed from normalized form field/value pairs
-  - form-only changes change `formSnapshotHash` without changing `artifactVersion`
-- Production-like PDF parsing fallback is now working:
-  - `pdf-parse` remains the default path for normal PDFs
-  - weak extraction falls back to a local OCR path
-  - the SCAN fixture now surfaces key date fields such as `START DATE`, `January 1, 2008`, and `Amendment effective date: January 1, 2021`
+- AIFA-001 ✔ Create AI service workspace
+- AIFA-002 ✔ Add watch-based dev script
+- AIFA-003 ✔ Create local-ready S3 helper
+- AIFA-004 ✔ Add PDF-only parser using `pdf-parse`
+- AIFA-005 ✔ Add deterministic chunking utility
+- AIFA-006 ✔ Persist `chunks.json` to LocalStack S3 and read it back
+- AIFA-007 ✔ Add `EmbeddingProvider` seam and local Xenova embedding implementation
+- AIFA-008 ✔ Add `VectorStore` seam and brute-force cosine similarity retrieval
+- AIFA-009 ✔ Add OP-RAG ordering for retrieved chunks
+- AIFA-009A ✔ Add production-like PDF extraction fallback with local OCR
+- AIFA-010 ✔ Add date-focused validation prompt builder
+- AIFA-011 ✔ Add local Ollama validation client and raw-response capture
+- AIFA-011A ✔ Normalize and parse validation LLM output
+- AIFA-012 ✔ Add dedicated validation Lambda handler and CDK wiring
+- AIFA-013 ✔ Add versioned status artifact writing
+- AIFA-014 ✔ Add deterministic artifactVersion and formSnapshotHash computation
+- AIFA-015 ✔ Persist validation results as a local artifact
+- AIFA-016 ✔ Add GraphQL trigger resolver for the validation Lambda
+- AIFA-017 ✔ Add GraphQL polling resolver for validation status/results
+- AIFA-018 ✔ Add review-page validation status UI and local-dev bootstrap follow-up
+- AIFA-019 ✔ Display validation findings on the Review page
+- AIFA-019A ✔ Wire triggerValidation into Review flow
+- AIFA-019B ✔ Add local trigger path for `./dev local`
+- AIFA-020A ✔ Execute full validation pipeline from `validationHandler`
+- AIFA-020B ✔ Display validation citations and evidence details
+- AIFA-020C ✔ Trustworthy start/end validation flow
 
-## Verified Local Setup
-- LocalStack S3 endpoint in use: `http://127.0.0.1:4566`
-- Local bucket used for AIFA-006:
-  - `ai-form-augmentation-artifacts`
-- Verified artifact key:
-  - `rag-indexes/local-dev-form/chunks.json`
-- LocalStack bucket had to be created manually with:
+## Current State
 
-```bash
-AWS_ACCESS_KEY_ID=test AWS_SECRET_ACCESS_KEY=test AWS_DEFAULT_REGION=us-east-1 aws --endpoint-url=http://127.0.0.1:4566 s3 mb s3://ai-form-augmentation-artifacts
-```
+The local PoC now works end to end from the actual form flow.
+
+- `ReviewSubmit` triggers validation for the current draft revision instead of only polling passively.
+- `validationStatus` returns staged status plus stored findings/results for the current `artifactVersion`.
+- locally triggered validation now runs through the AI worker from the real app flow.
+- the worker reads uploaded PDFs, parses text, chunks text, retrieves evidence, validates against form values, and persists `status.json`, `chunks.json`, and `validation-result.json`.
+- the Review page renders findings and citations instead of only showing a status banner.
+
+## Recent Changes
+
+### Local execution boundary
+
+- local app-api execution no longer depends on importing the AI worker directly into the running GraphQL process
+- instead, local validation runs through a dedicated `ai-form-augmentation` execution path
+- this kept the deployed Lambda path intact while making `./dev local` actually usable
+
+### Local server build stability
+
+- the local app-api build was updated so native AI dependencies do not break the local server bundle
+- this fixed the `onnxruntime-node` and `sharp` `.node` loader failures that were crashing local API startup
+- result: local login and form navigation can proceed while the AI worker still uses the native dependencies it needs
+
+### Validation document key handling
+
+- local validation was failing because the worker was trying to read a normalized key that did not match the pre-existing uploaded-object location
+- app-api now derives the effective validation document key from the stored draft document data without changing the existing S3 contract
+- this fixed the local `S3 object not found` failure without rewriting the upload infrastructure
+
+### Artifact version consistency
+
+- trigger and polling behavior now line up more cleanly around the current draft revision state
+- earlier local runs showed stale or confusing transitions because different paths were effectively reasoning about different inputs
+- the current direction keeps `artifactVersion` authoritative and uses it to surface stale results explicitly
+
+### Validation quality path
+
+- a narrow deterministic date-validation step now exists for obvious start/end date extraction cases
+- this is intentionally small and focused on the PoC fields
+- the local LLM is still used for cases that are ambiguous or not captured cleanly by deterministic extraction
+
+## What Is Working
+
+- local bootstrap with `./dev local`
+- local login and form navigation after the app-api build fix
+- PDF parsing, including the OCR fallback path for weak text extraction
+- chunk artifact persistence in LocalStack
+- local embeddings and brute-force retrieval
+- local validation execution from the product flow
+- findings display on Review & Submit
+- citation display on Review & Submit
+- stale-result handling based on `artifactVersion`
+
+## What Is Still Weak
+
+- result quality is not yet measured against a fixed corpus
+- retrieval is still not strong enough field-by-field for consistent start/end date trustworthiness
+- local status stages are still broader than they should be for fast debugging
+- local Ollama quality is still a confound when judging whether a failure is retrieval, prompting, or model reasoning
+- Review-page wording can still be clearer for match, mismatch, and not-enough-evidence cases
+
+## Current PoC Direction
+
+The PoC has been rewritten around the narrower, more realistic goal:
+
+- local-first
+- PDFs only
+- `contractStartDate` and `contractEndDate` only
+- advisory Review-page results
+- trustworthy evidence display
+- small evaluation corpus for repeatable quality checks
+
+The main change in direction is that the PoC is no longer framed as "general document validation infrastructure." It is now framed as a trustworthy start/end date validation slice that can be shown locally and then expanded later.
 
 ## Important Design Decisions
-- Keep the PoC local-first.
-- Keep low-level modules narrow and boring.
-- `formId` stays at the artifact/pipeline layer, not inside the base chunker.
-- LangChain is intentionally deferred.
-  - AIFA-005 uses a simple in-house fixed-size chunker with overlap.
-  - Revisit LangChain later only if chunking/source-position needs become more complex.
-- LocalStack bucket bootstrap is intentionally manual for now.
-  - If the local workflow becomes repetitive, automate it in a later ticket.
-- Local embeddings use `@xenova/transformers`.
-  - This is for functional local development only.
-  - Do not treat local embedding quality as representative of production retrieval quality.
-- Retrieval currently uses brute-force cosine similarity in memory.
-  - This is intentional for the PoC.
-  - FAISS remains deferred until scale or deployment constraints justify the extra complexity.
-- OP-RAG ordering is intentionally a post-retrieval step.
-  - Search decides what is relevant.
-  - Ordering decides how the model should read those relevant chunks.
-- Production-like PDFs may need a stronger extraction path than `pdf-parse` alone.
-  - That fallback now exists locally through OCR behind the parsing seam.
-  - In production, this seam can later point to an AWS-backed extractor without changing downstream pipeline code.
-- `src/dev.ts` is currently a verification/demo script.
-  - If it starts accumulating too many flows, split into dedicated scripts such as `src/dev/pdf.ts`, `src/dev/chunks.ts`, etc.
-- Native local dependencies may need environment help.
-  - `sharp` required explicit install-script approval and a manual install step before AIFA-007 would run locally.
-  - `tesseract.js` may download local OCR assets during setup, so generated files should be reviewed before staging.
-- AIFA-011 intentionally stops at raw model output.
-  - Real Ollama output included markdown fences and extra explanation text around otherwise-correct JSON.
-  - That normalization/parsing concern is now intentionally split into AIFA-011A.
-- Model-returned citation metadata should not be trusted blindly.
-  - The local model can echo the right chunk IDs while drifting on fields such as `order`.
-  - A later result-storage step should reconcile citations against known chunk metadata before persisting or displaying them as authoritative.
-- Full local CDK synth for `app-api` needs real AWS environment inputs.
-  - The validation Lambda bundled successfully during synth attempts.
-  - Remaining synth failures were caused by missing account/VPC context, not by the validation Lambda code itself.
-- The current status flow is intentionally minimal.
-  - The handler quickly advances from `validating` to `complete` because the real long-running work is still being layered in.
-  - Later resolver/UI tickets can treat this as the first stable status artifact contract rather than the final stage-transition behavior.
-- The GraphQL polling resolver is intentionally read-only.
-  - it reads `status.json` and `validation-result.json`
-  - it does not retrigger validation as a side effect
-  - missing artifacts are treated as normal polling states, while real S3/read failures still surface as errors
-- The trigger and polling resolvers intentionally key off `draftRevision`.
-  - this matches the product workflow where AI validation runs while the user is preparing a submission
-  - submitted-history fallbacks can be added later if product flow requires them
-- The review-page UI is intentionally non-blocking.
-  - users can still review and submit even if validation is pending, stale, or temporarily unavailable
-  - this keeps AI validation additive at this stage instead of turning it into a hard product dependency
-- The current frontend still only polls.
-  - this statement is no longer true for deployed/product flow
-  - the Review page now attempts to start validation when appropriate
-  - local `./dev local` still needs a real trigger execution path if we want to see the full pipeline cycle from the browser
-- Version/hash placeholders have now been replaced with shared utilities.
-  - repeated runs with the same inputs keep stable hash values
-  - form-only changes affect `formSnapshotHash` independently from document-set versioning
 
-## Next Likely Ticket
-- AIFA-019B Local trigger path for ./dev local
+- Keep the PoC local-first.
+- Keep the field scope narrow: start date and end date only.
+- Keep brute-force retrieval for the PoC.
+- Keep the `EmbeddingProvider` and `VectorStore` seams so later provider changes remain contained.
+- Do not change pre-existing S3 upload behavior unless there is no other viable option.
+- Treat `artifactVersion` as the source of truth for stale-versus-current results.
+- Keep the Review-page experience advisory and non-blocking.
+- Do not claim Bedrock readiness or Lambda packaging readiness just because the current seams are in place.
+- Do not treat local-model quality as final quality.
+
+## Next Tickets
+
+### AIFA-022 Minimal test corpus
+
+Build the fixed set of local PDF fixtures and expected outcomes needed to evaluate quality instead of relying on anecdotal runs.
+
+### AIFA-023 Validation evaluation harness
+
+Run the corpus repeatedly and record where deterministic logic and local LLM behavior are helping or failing.
+
+### AIFA-020D Review-page wording refinement
+
+Polish the user-facing wording once the result quality is stable enough to present.
 
 ## Suggested Next Step
-- Keep the same approach:
-  - explain first
-  - propose the smallest possible implementation steps
-  - include exact code and clear diff-style changes
-  - wait for approval before making changes
+
+- Implement `AIFA-022` with 5 to 10 fixed PDF fixtures and expected start/end outcomes.
+- Keep the corpus focused on match, mismatch, ambiguous, and not-enough-evidence cases.
+- Use the same corpus as the basis for the later evaluation harness.
+
+## Source of Truth Docs
+
+- `docs/ai-validation-poc-brief.md`
+- `docs/technical-design/ai-validation-poc-plan.md`
+- `docs/technical-design/aifa-sprint-plan.csv`
 
 ## Useful Files
-- `services/ai-form-augmentation/src/s3/s3Client.ts`
-- `services/ai-form-augmentation/src/parsing/pdfParser.ts`
-- `services/ai-form-augmentation/src/chunking/documentChunker.ts`
-- `services/ai-form-augmentation/src/artifacts/chunksArtifact.ts`
-- `services/ai-form-augmentation/src/embeddings/embeddingProvider.ts`
-- `services/ai-form-augmentation/src/embeddings/xenovaEmbeddingProvider.ts`
-- `services/ai-form-augmentation/src/vector-store/vectorStore.ts`
-- `services/ai-form-augmentation/src/vector-store/bruteForceVectorStore.ts`
-- `services/ai-form-augmentation/src/retrieval/opRagOrdering.ts`
-- `services/ai-form-augmentation/src/dev.ts`
+
+- `services/app-api/src/resolvers/validation/triggerValidation.ts`
+- `services/app-api/src/resolvers/validation/fetchValidationStatus.ts`
+- `services/app-api/src/resolvers/validation/validationDocumentKeys.ts`
+- `services/app-api/esbuild-local.config.ts`
+- `services/ai-form-augmentation/src/handlers/validationHandler.ts`
+- `services/ai-form-augmentation/src/validation-output/deterministicDateValidation.ts`
+- `services/ai-form-augmentation/src/runValidation.ts`
+- `services/app-web/src/pages/StateSubmission/HealthPlanSubmission/ReviewSubmit/ReviewSubmit.tsx`
 
 ## Notes
-- Ticket CSV updates were discussed and adjusted during the session, but doc/ticket files should not be staged by default unless explicitly requested.
-- When reviewing code, add balanced comments that help a fresh reader understand intent without over-commenting obvious lines.
+
+- The rewritten PoC plan lives in `docs/technical-design/ai-validation-poc-plan.md`.
+- The broader `rag-llm-document-validation.md` document is still useful as long-term architecture context, but it should not be treated as the current PoC scope.
+- Timeout handling remains intentionally deferred while validation quality is still the larger credibility risk.

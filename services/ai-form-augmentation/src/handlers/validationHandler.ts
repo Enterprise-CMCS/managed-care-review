@@ -24,7 +24,10 @@ import {
   buildValidationStatusArtifact,
   getValidationStatusKey
 } from '../status'
-import { parseValidationResponse } from '../validation-output'
+import {
+  parseValidationResponse,
+  runDeterministicDateValidation
+} from '../validation-output'
 import { BruteForceVectorStore } from '../vector-store'
 import { computeFormSnapshotHash } from '../versioning'
 
@@ -100,12 +103,6 @@ export async function validationHandler(
       buildChunksArtifact(event.artifactVersion, chunks)
     )
 
-    await s3Client.putJson(
-      event.bucket,
-      statusKey,
-      buildValidationStatusArtifact('embedding', event.artifactVersion)
-    )
-
     // Re-embed the stored chunk text inside the worker so the runtime path does
     // not depend on a separate manual precomputation step from src/dev.ts.
     const embeddingProvider = new XenovaEmbeddingProvider()
@@ -116,7 +113,7 @@ export async function validationHandler(
     await s3Client.putJson(
       event.bucket,
       statusKey,
-      buildValidationStatusArtifact('indexing', event.artifactVersion)
+      buildValidationStatusArtifact('retrieving', event.artifactVersion)
     )
 
     // Build the in-memory retrieval index from the current chunk artifact. This
@@ -144,51 +141,109 @@ export async function validationHandler(
       }))
     )
 
-    // The first PoC retrieval query stays intentionally narrow and date-focused.
-    // It is not trying to solve general semantic search yet; it only needs to
-    // bring back the chunks most likely to support date validation.
-    const queryText =
-      'contract term start date end date amendment effective date'
-    const queryVector = await embeddingProvider.embedText(queryText)
-    const orderedResults = orderRetrievedChunks(
-      await vectorStore.search(queryVector, 3)
+    const retrievedChunksByField = new Map(
+      await Promise.all(
+        event.formFields.map(async (field) => {
+          const queryVector = await embeddingProvider.embedText(
+            buildFieldRetrievalQuery(field.field)
+          )
+          const orderedResults = orderRetrievedChunks(
+            await vectorStore.search(queryVector, 3)
+          )
+
+          return [
+            field.field,
+            orderedResults.map((result) => ({
+              chunkId: result.metadata.chunkId,
+              documentName: result.metadata.documentName,
+              page: result.metadata.page,
+              order: result.metadata.order,
+              text: result.metadata.text
+            }))
+          ] as const
+        })
+      )
     )
 
     await s3Client.putJson(
       event.bucket,
       statusKey,
-      buildValidationStatusArtifact('validating', event.artifactVersion)
+      buildValidationStatusArtifact(
+        'deterministic-validation',
+        event.artifactVersion
+      )
     )
 
-    // Convert retrieved evidence plus current form values into the exact prompt
-    // contract the validation model expects. At this point the worker has moved
-    // from document processing into model-facing comparison logic.
-    const prompt = buildDateValidationPrompt({
-      formFields: event.formFields,
-      retrievedChunks: orderedResults.map((result) => ({
-        chunkId: result.metadata.chunkId,
-        documentName: result.metadata.documentName,
-        page: result.metadata.page,
-        order: result.metadata.order,
-        text: result.metadata.text
-      }))
-    })
+    const deterministicResults: DateValidationResult[] = []
+    const unresolvedFields: Array<{
+      field: DateValidationFieldInput
+      retrievedChunks: Array<{
+        chunkId: string
+        documentName: string
+        page: number | null
+        order: number
+        text: string
+      }>
+    }> = []
 
-    const validationClient = new OllamaValidationClient()
-    const validationResponse = await validationClient.generateValidation({
-      prompt
-    })
-    // Parse and validate the raw LLM response immediately so malformed model
-    // output fails the pipeline here instead of leaking partial artifacts to the UI.
-    const parsedValidation = parseValidationResponse(
-      validationResponse.rawText
-    )
+    for (const field of event.formFields) {
+      const retrievedChunksForField =
+        retrievedChunksByField.get(field.field) ?? []
+      const deterministicValidation = runDeterministicDateValidation({
+        formFields: [field],
+        retrievedChunks: retrievedChunksForField
+      })
 
-    // Reconcile LLM-returned citations against known chunks before persisting
-    // them so downstream UI never trusts model-invented page/order metadata.
-    const reconciledResults = reconcileValidationResults(
-      parsedValidation.results,
-      chunks
+      deterministicResults.push(...deterministicValidation.resolvedResults)
+
+      if (deterministicValidation.unresolvedFields.length > 0) {
+        unresolvedFields.push({
+          field,
+          retrievedChunks: retrievedChunksForField
+        })
+      }
+    }
+
+    let reconciledResults = deterministicResults
+
+    if (unresolvedFields.length > 0) {
+      await s3Client.putJson(
+        event.bucket,
+        statusKey,
+        buildValidationStatusArtifact('llm-validation', event.artifactVersion)
+      )
+
+      const validationClient = new OllamaValidationClient()
+      const llmResults = await Promise.all(
+        unresolvedFields.map(async ({ field, retrievedChunks }) => {
+          // Convert only the unresolved field plus its own retrieved evidence
+          // into the prompt so start and end dates do not share mixed context.
+          const prompt = buildDateValidationPrompt({
+            formFields: [field],
+            retrievedChunks
+          })
+
+          const validationResponse = await validationClient.generateValidation({
+            prompt
+          })
+          const llmResult = parseSingleFieldValidationResponse(
+            validationResponse.rawText,
+            field.field
+          )
+
+          return reconcileValidationResults(
+            [{ ...llmResult, decisionSource: 'llm' }],
+            retrievedChunks
+          )
+        })
+      )
+
+      reconciledResults = [...reconciledResults, ...llmResults.flat()]
+    }
+
+    // Preserve input order so the frontend renders findings predictably.
+    reconciledResults = event.formFields.flatMap((field) =>
+      reconciledResults.filter((result) => result.field === field.field)
     )
 
     await s3Client.putJson(
@@ -274,4 +329,38 @@ function reconcileValidationResults(
       ]
     })
   }))
+}
+
+function buildFieldRetrievalQuery(field: DateValidationFieldInput['field']): string {
+  switch (field) {
+    case 'contractStartDate':
+      return 'contract start date term begins effective date'
+    case 'contractEndDate':
+      return 'contract end date through end date term ends expiration date'
+    case 'amendmentEffectiveDate':
+      return 'amendment effective date'
+  }
+}
+
+function parseSingleFieldValidationResponse(
+  rawText: string,
+  expectedField: DateValidationFieldInput['field']
+): DateValidationResult {
+  const parsedValidation = parseValidationResponse(rawText)
+
+  if (parsedValidation.results.length !== 1) {
+    throw new Error(
+      `Validation model returned ${parsedValidation.results.length} results for ${expectedField}`
+    )
+  }
+
+  const [result] = parsedValidation.results
+
+  if (result.field !== expectedField) {
+    throw new Error(
+      `Validation model returned result for ${result.field} while validating ${expectedField}`
+    )
+  }
+
+  return result
 }
