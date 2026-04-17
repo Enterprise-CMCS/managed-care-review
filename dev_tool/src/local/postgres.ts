@@ -1,9 +1,17 @@
+import fs from 'node:fs'
+import path from 'node:path'
 import LabeledProcessRunner from '../runner.js'
 import { checkDockerInstalledAndRunning } from '../deps.js'
 import { commandMustSucceedSync } from '../localProcess.js'
 
 // prisma generate creates the prisma client based on the current prisma schema
+// Prisma 7+ throws an error if the output directory already exists, so we remove it first
 export async function installPrismaDeps(runner: LabeledProcessRunner) {
+    const generatedDir = path.resolve('services/app-api/src/generated')
+    if (fs.existsSync(generatedDir)) {
+        fs.rmSync(generatedDir, { recursive: true, force: true })
+    }
+
     await runner.runCommandAndOutput(
         'api prisma',
         ['pnpm', 'generate'],
