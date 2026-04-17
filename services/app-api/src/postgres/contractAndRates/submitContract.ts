@@ -165,18 +165,13 @@ async function healthPlanContractReviewDeterminationAction(
         )
     }
 
-    // Non-CHIP HEALTH_PLAN submissions are reviewed manually by CMS, so we only
-    // record a determination row for CHIP-only submissions (not subject to review).
-    if (
-        latestSubmission.contractRevision.formData.populationCovered !== 'CHIP'
-    ) {
-        return contract
-    }
+    const isChipOnly =
+        latestSubmission.contractRevision.formData.populationCovered === 'CHIP'
 
     await tx.contractActionTable.create({
         data: {
             updatedByID: undefined,
-            actionType: 'NOT_SUBJECT_TO_REVIEW',
+            actionType: isChipOnly ? 'NOT_SUBJECT_TO_REVIEW' : 'UNDER_REVIEW',
             contractID: contract.id,
         },
     })

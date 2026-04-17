@@ -310,9 +310,8 @@ export const ChangeHistory = ({
                 }
                 if (r?.__typename === 'ContractReviewStatusActions') {
                     if (
-                        contract.contractSubmissionType === 'EQRO' &&
-                        (r.actionType === 'NOT_SUBJECT_TO_REVIEW' ||
-                            r.actionType === 'UNDER_REVIEW')
+                        r.actionType === 'NOT_SUBJECT_TO_REVIEW' ||
+                        r.actionType === 'UNDER_REVIEW'
                     ) {
                         return
                     }
