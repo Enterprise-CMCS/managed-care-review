@@ -1341,7 +1341,7 @@ function mockContractPackageSubmitted(partial?: Partial<Contract>): Contract {
                         ],
                         formData: {
                             __typename: 'RateFormData',
-                            rateCertificationName: 'rate cert',
+                            rateCertificationName: 'MCR-MN-0003-PMAP-RATE-20240301-20250301-AMENDMENT-20240301',
                             rateType: 'AMENDMENT',
                             rateCapitationType: 'RATE_CELL',
                             rateDocuments: [

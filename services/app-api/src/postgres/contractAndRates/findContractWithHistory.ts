@@ -3,6 +3,7 @@ import type { ContractType } from '../../domain-models/contractAndRates'
 import { NotFoundError } from '../postgresErrors'
 import { parseContractWithHistory } from './parseContractWithHistory'
 import { includeFullContract } from './prismaFullContractRateHelpers'
+import { parseErrorToError } from '@mc-review/helpers'
 
 // findContractWithHistory returns a ContractType with a full set of
 // ContractRevisions in reverse chronological order. Each revision is a change to this
@@ -30,7 +31,7 @@ async function findContractWithHistory(
         return parseContractWithHistory(contract)
     } catch (err) {
         console.error('PRISMA ERROR', err)
-        return err
+        return parseErrorToError(err)
     }
 }
 

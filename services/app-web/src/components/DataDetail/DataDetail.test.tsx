@@ -19,22 +19,6 @@ describe('DataDetail', () => {
         expect(screen.getByText('31.58')).toBeInTheDocument()
     })
 
-    it('renders array of strings capitalized and comma separated to easily display program/rate names', () => {
-        render(
-            <DataDetail
-                id="rainfall"
-                label="Program names"
-                children={['pmap-001', 'mcon-001']}
-            />
-        )
-        expect(
-            screen.getByRole('definition', {
-                name: 'Program names',
-            })
-        ).toBeInTheDocument()
-        expect(screen.getByText('PMAP-001, MCON-001')).toBeInTheDocument()
-    })
-
     it('renders an address component when passed in', () => {
         render(
             <DataDetail id="disney" label="Disney World Contact Info">

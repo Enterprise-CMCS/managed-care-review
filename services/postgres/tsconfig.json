@@ -14,7 +14,8 @@
         "skipLibCheck": true,
         "esModuleInterop": true,
         "allowSyntheticDefaultImports": true,
-        "resolveJsonModule": true
+        "resolveJsonModule": true,
+        "useUnknownInCatchVariables": false
     },
     "include": ["scripts/**/*", "src/**/*", "eslint.config.ts"]
 }

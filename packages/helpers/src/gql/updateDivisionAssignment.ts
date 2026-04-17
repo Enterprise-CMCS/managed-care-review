@@ -1,13 +1,14 @@
-import type { MutationFunction } from '@apollo/client'
+import type { useMutation } from '@apollo/client/react'
 import {
     UpdateDivisionAssignmentInput,
     UpdateDivisionAssignmentMutation,
     UpdateDivisionAssignmentMutationVariables,
     UpdateCmsUserPayload,
 } from '../gen/gqlClient'
+import { parseErrorToError } from '../parseError'
 
 async function updateDivisionAssignment(
-    updateUserMutation: MutationFunction<UpdateDivisionAssignmentMutation, UpdateDivisionAssignmentMutationVariables>,
+    updateUserMutation: useMutation.MutationFunction<UpdateDivisionAssignmentMutation, UpdateDivisionAssignmentMutationVariables>,
     input: UpdateDivisionAssignmentInput
 ): Promise<UpdateCmsUserPayload | Error> {
     try {
@@ -21,7 +22,7 @@ async function updateDivisionAssignment(
 
         return user
     } catch (err) {
-        return err
+        return parseErrorToError(err)
     }
 }
 

@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react'
 import { LocalStorageKeyType } from '@mc-review/constants'
 import { recordJSException } from '@mc-review/otel'
+import { parseErrorToError } from '@mc-review/helpers'
 type LocalStorage = {
     key: LocalStorageKeyType
     value: string | string[] | boolean | object | null
@@ -46,7 +47,7 @@ function useLocalStorage(
                 window.localStorage.removeItem(key)
             } catch (error) {
                 recordJSException(
-                    `Unable to remove ${key} local storage. Error message: ${error.message}`
+                    `Unable to remove ${key} local storage. Error message: ${parseErrorToError(error).message}`
                 )
             }
         } else {
@@ -54,7 +55,7 @@ function useLocalStorage(
                 window.localStorage.setItem(key, JSON.stringify(storedValue))
             } catch (error) {
                 recordJSException(
-                    `Unable to set ${key} in local storage. Error message: ${error.message}`
+                    `Unable to set ${key} in local storage. Error message: ${parseErrorToError(error).message}`
                 )
             }
         }

@@ -1,6 +1,7 @@
 import type { UserType } from '../../domain-models'
 import type { ExtendedPrismaClient } from '../prismaClient'
 import { parseDomainUsersFromPrismaUsers } from './prismaDomainUser'
+import { parseErrorToError } from '@mc-review/helpers'
 
 export async function findAllUsers(
     client: ExtendedPrismaClient
@@ -24,6 +25,6 @@ export async function findAllUsers(
         return domainUserResults
     } catch (err) {
         console.error(err)
-        return err
+        return parseErrorToError(err)
     }
 }

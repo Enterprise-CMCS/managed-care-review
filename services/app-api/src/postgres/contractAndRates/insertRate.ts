@@ -6,6 +6,7 @@ import type {
 import { parseRateWithHistory } from './parseRateWithHistory'
 import { includeFullRate } from './prismaFullContractRateHelpers'
 import type { ExtendedPrismaClient } from '../prismaClient'
+import { parseErrorToError } from '@mc-review/helpers'
 
 type InsertRateArgsType = RateFormEditableType & {
     stateCode: StateCodeType
@@ -129,7 +130,7 @@ async function insertDraftRate(
         })
     } catch (err) {
         console.error('Prisma error inserting rate', err)
-        return err
+        return parseErrorToError(err)
     }
 }
 

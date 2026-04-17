@@ -1,4 +1,4 @@
-import { MockedResponse } from '@apollo/client/testing'
+import { MockLink } from '@apollo/client/testing'
 import {
     CreateContractQuestionDocument,
     CreateContractQuestionResponseDocument,
@@ -17,7 +17,7 @@ const createContractQuestionSuccess = (
     question?:
         | CreateContractQuestionInput
         | Partial<CreateContractQuestionInput>
-): MockedResponse<CreateContractQuestionMutation> => {
+): MockLink.MockedResponse<CreateContractQuestionMutation> => {
     const defaultQuestionInput: CreateContractQuestionInput = {
         // dueDate: new Date('11-11-2100'),
         contractID: '123-abc',
@@ -60,7 +60,7 @@ const createContractQuestionSuccess = (
 
 const createContractQuestionNetworkFailure = (
     input: CreateContractQuestionInput
-): MockedResponse<CreateContractQuestionMutation> => {
+): MockLink.MockedResponse<CreateContractQuestionMutation> => {
     return {
         request: {
             query: CreateContractQuestionDocument,
@@ -72,7 +72,7 @@ const createContractQuestionNetworkFailure = (
 
 const createRateQuestionSuccess = (
     question?: CreateRateQuestionInput | Partial<CreateRateQuestionInput>
-): MockedResponse<CreateRateQuestionMutation> => {
+): MockLink.MockedResponse<CreateRateQuestionMutation> => {
     const defaultQuestionInput: CreateRateQuestionInput = {
         // dueDate: new Date('11-11-2100'),
         rateID: '123-abc',
@@ -115,7 +115,7 @@ const createRateQuestionSuccess = (
 
 const createRateQuestionNetworkFailure = (
     input: CreateRateQuestionInput
-): MockedResponse<CreateRateQuestionMutation> => {
+): MockLink.MockedResponse<CreateRateQuestionMutation> => {
     return {
         request: {
             query: CreateRateQuestionDocument,
@@ -127,7 +127,7 @@ const createRateQuestionNetworkFailure = (
 
 const createContractQuestionResponseNetworkFailure = (
     _question?: QuestionResponseType | Partial<QuestionResponseType>
-): MockedResponse<CreateContractQuestionMutation> => {
+): MockLink.MockedResponse<CreateContractQuestionMutation> => {
     return {
         request: { query: CreateContractQuestionResponseDocument },
         error: new Error('A network error occurred'),
@@ -136,7 +136,7 @@ const createContractQuestionResponseNetworkFailure = (
 
 const createRateQuestionResponseNetworkFailure = (
     _question?: QuestionResponseType | Partial<QuestionResponseType>
-): MockedResponse<CreateRateQuestionResponseMutation> => {
+): MockLink.MockedResponse<CreateRateQuestionResponseMutation> => {
     return {
         request: { query: CreateRateQuestionResponseDocument },
         error: new Error('A network error occurred'),

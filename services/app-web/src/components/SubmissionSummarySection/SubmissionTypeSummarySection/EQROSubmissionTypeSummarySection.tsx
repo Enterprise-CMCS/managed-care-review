@@ -20,6 +20,7 @@ import {
     SubmissionDescriptionSummary,
     SubmittedAtSummary,
 } from '../SummarySectionFields'
+import { formattedProgramNames } from '../../../formHelpers'
 
 export type EQROSubmissionTypeSummarySection = {
     contract: Contract | UnlockedContract
@@ -78,9 +79,10 @@ export const EQROSubmissionTypeSummarySection = ({
     if (!contractFormData) return <GenericErrorPage />
 
     const programs = contract.state.programs
-    const programNames = programs
-        .filter((p) => contractFormData?.programIDs.includes(p.id))
-        .map((p) => p.name)
+    const programNames = formattedProgramNames(
+        programs,
+        contractFormData?.programIDs
+    )
 
     const isSubmitted =
         contract.status === 'SUBMITTED' || contract.status === 'RESUBMITTED'
@@ -131,7 +133,8 @@ export const EQROSubmissionTypeSummarySection = ({
                             label="Populations included in EQRO activities"
                         />
                     )}
-                    {(programNames.length > 0 || !isSubmitted) && (
+                    {(contractFormData.programIDs.length > 0 ||
+                        !isSubmitted) && (
                         <ContractProgramsSummary
                             programNames={programNames}
                             explainMissingData={explainMissingData}

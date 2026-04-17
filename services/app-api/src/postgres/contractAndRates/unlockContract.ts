@@ -4,6 +4,7 @@ import { NotFoundError } from '../postgresErrors'
 import { unlockRateInDB } from './unlockRate'
 import type { PrismaTransactionType } from '../prismaTypes'
 import type { ExtendedPrismaClient } from '../prismaClient'
+import { parseErrorToError } from '@mc-review/helpers'
 
 async function unlockContractInsideTransaction(
     tx: PrismaTransactionType,
@@ -328,7 +329,7 @@ async function unlockContract(
         })
     } catch (err) {
         console.error('UNLOCK PRISMA CONTRACT ERR', err)
-        return err
+        return parseErrorToError(err)
     }
 }
 

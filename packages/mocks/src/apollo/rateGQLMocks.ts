@@ -13,7 +13,7 @@ import {
     IndexRatesStrippedWithRelatedContractsQuery,
     IndexRatesStrippedWithRelatedContractsDocument,
 } from '../gen/gqlClient'
-import { MockedResponse } from '@apollo/client/testing'
+import { MockLink } from '@apollo/client/testing'
 import {
     draftRateDataMock,
     rateDataMock,
@@ -25,7 +25,7 @@ import { GraphQLError } from 'graphql/index'
 const fetchRateMockSuccess = (
     rate?: Partial<Rate>,
     revision?: Partial<RateRevision>
-): MockedResponse<FetchRateQuery> => {
+): MockLink.MockedResponse<FetchRateQuery> => {
     const rateData = rateDataMock(revision, rate)
 
     return {
@@ -48,7 +48,7 @@ const fetchRateMockSuccess = (
 const fetchDraftRateMockSuccess = (
     rate?: Partial<Rate>,
     revision?: Partial<RateRevision>
-): MockedResponse<FetchRateQuery> => {
+): MockLink.MockedResponse<FetchRateQuery> => {
     const rateData = draftRateDataMock(rate, revision)
 
     return {
@@ -71,7 +71,7 @@ const fetchDraftRateMockSuccess = (
 const indexRatesStrippedMockSuccess = (
     stateCode?: string,
     rates?: RateStripped[]
-): MockedResponse<IndexRatesStrippedQuery> => {
+): MockLink.MockedResponse<IndexRatesStrippedQuery> => {
     const mockRates = rates ?? [
         { ...strippedRateDataMock(), id: 'test-id-123', stateNumber: 3 },
         { ...strippedRateDataMock(), id: 'test-id-124', stateNumber: 2 },
@@ -105,7 +105,7 @@ const indexRatesStrippedMockSuccess = (
 const indexRatesStrippedWithRelatedContractsMockSuccess = (
     stateCode?: string,
     rateIDs?: string[]
-): MockedResponse<IndexRatesStrippedWithRelatedContractsQuery> => {
+): MockLink.MockedResponse<IndexRatesStrippedWithRelatedContractsQuery> => {
     const mockRates = [
         { ...strippedRateDataMock(), id: 'test-id-123', stateNumber: 3 },
         { ...strippedRateDataMock(), id: 'test-id-124', stateNumber: 2 },
@@ -141,7 +141,7 @@ const indexRatesStrippedWithRelatedContractsMockSuccess = (
 const indexRatesMockSuccess = (
     stateCode?: string,
     rates?: Rate[]
-): MockedResponse<IndexRatesQuery> => {
+): MockLink.MockedResponse<IndexRatesQuery> => {
     const mockRates = rates ?? [
         { ...rateDataMock(), id: 'test-id-123', stateNumber: 3 },
         { ...rateDataMock(), id: 'test-id-124', stateNumber: 2 },
@@ -173,7 +173,7 @@ const indexRatesMockSuccess = (
 }
 
 const indexRatesStrippedMockFailure =
-    (): MockedResponse<IndexRatesStrippedQuery> => {
+    (): MockLink.MockedResponse<IndexRatesStrippedQuery> => {
         const graphQLError = new GraphQLError('Issue finding rates stripped', {
             extensions: {
                 code: 'NOT_FOUND',
@@ -191,7 +191,7 @@ const indexRatesStrippedMockFailure =
         }
     }
 
-const indexRatesMockFailure = (): MockedResponse<IndexRatesQuery> => {
+const indexRatesMockFailure = (): MockLink.MockedResponse<IndexRatesQuery> => {
     const graphQLError = new GraphQLError('Issue finding rates with history', {
         extensions: {
             code: 'NOT_FOUND',
@@ -215,7 +215,7 @@ const fetchRateWithQuestionsMockSuccess = ({
 }: {
     rate?: Partial<Rate>
     rateRev?: Partial<RateRevision>
-}): MockedResponse<FetchRateWithQuestionsQuery> => {
+}): MockLink.MockedResponse<FetchRateWithQuestionsQuery> => {
     const rateID = rate?.id ?? rateRev?.rateID ?? 'rate-123'
     const rateData = mockRateSubmittedWithQuestions(
         { ...rate, id: rateID },

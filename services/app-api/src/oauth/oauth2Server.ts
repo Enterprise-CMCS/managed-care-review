@@ -15,6 +15,7 @@ import {
 } from '../postgres/oauth/oauthClientStore'
 import { newJWTLib } from '../jwt'
 import type { APIGatewayProxyEvent, APIGatewayProxyResult } from 'aws-lambda'
+import { parseErrorToError } from '@mc-review/helpers'
 
 const JWT_EXPIRATION_SECONDS = 60 * 30 // 30 minutes
 
@@ -280,6 +281,7 @@ export class CustomOAuth2Server {
                         }),
                     }
                 }
+                const parsedError = parseErrorToError(error)
                 return {
                     statusCode: 500,
                     headers: {
@@ -288,8 +290,8 @@ export class CustomOAuth2Server {
                     body: JSON.stringify({
                         error: 'server_error',
                         error_description:
-                            error.message || 'Internal server error',
-                        error_type: error.name,
+                            parsedError.message || 'Internal server error',
+                        error_type: parsedError.name,
                     }),
                 }
             }

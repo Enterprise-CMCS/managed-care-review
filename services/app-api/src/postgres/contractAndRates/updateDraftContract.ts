@@ -5,6 +5,7 @@ import { prismaUpdateContractFormDataFromDomain } from './prismaContractRateAdap
 import type { PrismaTransactionType } from '../prismaTypes'
 import type { ExtendedPrismaClient } from '../prismaClient'
 import type { UpdateDraftContractFormDataType } from '../../domain-models/contractAndRates/formDataTypes'
+import { parseErrorToError } from '@mc-review/helpers'
 
 async function updateDraftContractInsideTransaction(
     tx: PrismaTransactionType,
@@ -62,7 +63,7 @@ async function updateDraftContract(
         })
     } catch (err) {
         console.error('Prisma error updating contract', err)
-        return err
+        return parseErrorToError(err)
     }
 }
 

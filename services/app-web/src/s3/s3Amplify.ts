@@ -1,4 +1,4 @@
-import { parseKey } from '@mc-review/helpers'
+import { parseKey, parseErrorToError } from '@mc-review/helpers'
 import { Storage } from 'aws-amplify'
 import { v4 as uuidv4 } from 'uuid'
 import type { S3ClientT } from './s3Client'
@@ -61,7 +61,7 @@ function newAmplifyS3Client(bucketConfig: S3BucketConfigType): S3ClientT {
                 assertIsS3PutResponse(stored)
                 return stored.key
             } catch (err) {
-                recordJSException(err)
+                recordJSException(parseErrorToError(err))
                 assertIsS3PutError(err)
                 if (err.name === 'Error' && err.message === 'Network Error') {
                     console.info('Error uploading file', err)
@@ -97,7 +97,7 @@ function newAmplifyS3Client(bucketConfig: S3BucketConfigType): S3ClientT {
                     })
                 } catch (err) {
                     recordJSExceptionWithContext(
-                        err,
+                        parseErrorToError(err),
                         'scanFile.retryWithBackoff'
                     )
                     throw err
@@ -105,7 +105,7 @@ function newAmplifyS3Client(bucketConfig: S3BucketConfigType): S3ClientT {
                 return
             } catch (err) {
                 assertIsS3PutError(err)
-                recordJSException(err)
+                recordJSException(parseErrorToError(err))
                 if (err.name === 'Error' && err.message === 'Network Error') {
                     return {
                         code: 'NETWORK_ERROR',

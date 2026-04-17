@@ -3,6 +3,7 @@ import { Form, FormGroup, Label, TextInput } from '@trussworks/react-uswds'
 
 import { confirmSignUp, resendSignUp } from './cognitoAuth'
 import { ButtonWithLogging } from '../../components'
+import { parseErrorToError } from '@mc-review/helpers'
 
 export function showError(error: string): void {
     alert(error)
@@ -41,7 +42,10 @@ export function ConfirmSignUp({
             await confirmSignUp(fields.email, fields.confirmationCode)
             displayLogin()
         } catch (error) {
-            if (error.code === 'ExpiredCodeException') {
+            const parsedError = parseErrorToError(error) as Error & {
+                code?: string
+            }
+            if (parsedError.code === 'ExpiredCodeException') {
                 try {
                     await resendSignUp(fields.email)
                     showError(
@@ -51,7 +55,7 @@ export function ConfirmSignUp({
                     console.info('Error in sending confirmation code')
                 }
             } else {
-                console.info('Signup error', error)
+                console.info('Signup error', parsedError)
             }
         }
         setIsLoading(false)

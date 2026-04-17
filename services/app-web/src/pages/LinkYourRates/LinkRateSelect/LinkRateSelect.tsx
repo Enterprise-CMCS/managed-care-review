@@ -24,7 +24,8 @@ import { useField } from 'formik'
 import { convertIndexRatesGQLRateToRateForm } from '../../StateSubmission/HealthPlanSubmission/RateDetails/rateDetailsHelpers'
 import { AccessibleSelect } from '../../../components/Select'
 import { useState, useEffect } from 'react'
-import { ApolloError, useQuery } from '@apollo/client'
+import type { ErrorLike } from '@apollo/client'
+import { useQuery } from '@apollo/client/react'
 
 export interface LinkRateOptionType {
     readonly value: string
@@ -45,7 +46,7 @@ export type LinkRateSelectPropType = {
     autofill?: (
         rateForm: FormikRateForm,
         autofillLoading?: boolean,
-        autofillError?: ApolloError | undefined
+        autofillError?: ErrorLike | undefined
     ) => void // used for multi-rates, when called will FieldArray replace the existing form fields with new data
     label?: string
     stateCode?: string //used to limit rates by state

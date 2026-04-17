@@ -29,7 +29,7 @@ import { GenericErrorPage } from '../../../../pages/Errors/GenericErrorPage'
 import { SectionCard } from '../../../SectionCard'
 import { useAuth } from '../../../../contexts/AuthContext'
 import { useParams } from 'react-router-dom'
-import { InfoTag } from '../../../InfoTag/InfoTag'
+import { InfoTag } from '../../../InfoTag'
 import { useLDClient } from 'launchdarkly-react-client-sdk'
 import { DocumentHeader } from '../../../DocumentHeader/DocumentHeader'
 import {
@@ -40,7 +40,8 @@ import {
 } from '../../../DataDetail'
 import { SectionHeader } from '../../../SectionHeader'
 import styles from '../../SubmissionSummarySection.module.scss'
-import { NavLinkWithLogging } from '../../../../components/TealiumLogging'
+import { NavLinkWithLogging } from '../../../TealiumLogging'
+import { formattedProgramNames } from '../../../../formHelpers'
 
 export type RateDetailsSummarySectionProps = {
     contract: Contract | UnlockedContract
@@ -71,7 +72,6 @@ export const RateDetailsSummarySection = ({
     contractRev,
     rateRevisions,
     editNavigateTo,
-    submissionName,
     statePrograms,
     onDocumentError,
     explainMissingData,
@@ -165,9 +165,7 @@ export const RateDetailsSummarySection = ({
             programIDs = rateFormData.rateProgramIDs
         }
         return programIDs
-            ? statePrograms
-                  .filter((p) => programIDs.includes(p.id))
-                  .map((p) => p.name)
+            ? formattedProgramNames(statePrograms, programIDs)
             : undefined
     }
 
@@ -207,10 +205,7 @@ export const RateDetailsSummarySection = ({
     }
 
     const validateActuary = (actuary: ActuaryContact): boolean => {
-        if (!actuary?.name || !actuary?.email) {
-            return false
-        }
-        return true
+        return !(!actuary?.name || !actuary?.email)
     }
 
     const noRatesMessage = () => {

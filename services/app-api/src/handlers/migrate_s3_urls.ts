@@ -20,6 +20,7 @@
 import type { Handler } from 'aws-lambda'
 import { NewPrismaClient } from '../postgres/prismaClient'
 import { getPostgresURL } from './configuration'
+import { parseErrorToError } from '@mc-review/helpers'
 
 export type MigrateS3UrlsEvent = {
     limit?: number // Optional: limit number of documents to migrate per table (default: all)
@@ -337,8 +338,7 @@ export const main: Handler = async (
         console.info('Migration complete', response)
         return response
     } catch (error) {
-        const errorMessage =
-            error instanceof Error ? error.message : String(error)
+        const errorMessage = parseErrorToError(error).message
         console.error('Migration failed:', errorMessage)
         response.success = false
         response.errors.push(errorMessage)
@@ -436,8 +436,7 @@ async function migrateDocumentTable(
                 )
             }
         } catch (error) {
-            const errorMessage =
-                error instanceof Error ? error.message : String(error)
+            const errorMessage = parseErrorToError(error).message
             console.error(
                 `Failed to migrate ${tableName} ${doc.id}: ${errorMessage}`
             )
@@ -532,8 +531,7 @@ async function migrateZipTable(
                 )
             }
         } catch (error) {
-            const errorMessage =
-                error instanceof Error ? error.message : String(error)
+            const errorMessage = parseErrorToError(error).message
             console.error(
                 `Failed to migrate DocumentZipPackage ${zip.id}: ${errorMessage}`
             )

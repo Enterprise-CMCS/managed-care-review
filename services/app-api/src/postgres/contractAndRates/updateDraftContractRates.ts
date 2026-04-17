@@ -10,6 +10,7 @@ import {
     prismaRateCreateFormDataFromDomain,
     prismaUpdateRateFormDataFromDomain,
 } from './prismaContractRateAdaptors'
+import { parseErrorToError } from '@mc-review/helpers'
 
 interface UpdatedRatesType {
     create: {
@@ -232,7 +233,7 @@ async function updateDraftContractRates(
         })
     } catch (err) {
         console.error('PRISMA ERR', err)
-        return err
+        return parseErrorToError(err)
     }
 }
 

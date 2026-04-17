@@ -1,8 +1,9 @@
 import { findContractWithHistory } from './findContractWithHistory'
 import { NotFoundError } from '../postgresErrors'
-import type { ContractType } from '../../domain-models/contractAndRates'
+import type { ContractType } from '../../domain-models'
 import type { PrismaTransactionType } from '../prismaTypes'
 import type { ExtendedPrismaClient } from '../prismaClient'
+import { parseErrorToError } from '@mc-review/helpers'
 
 async function approveContractInsideTransaction(
     tx: PrismaTransactionType,
@@ -49,7 +50,7 @@ async function approveContractInsideTransaction(
         return findContractWithHistory(tx, contractID)
     } catch (err) {
         console.error('Prisma error finding contract to approve', err)
-        return new Error(err)
+        return parseErrorToError(err)
     }
 }
 
@@ -73,7 +74,7 @@ async function approveContract(
         })
     } catch (err) {
         console.error('Prisma error approving contract', err)
-        return err
+        return parseErrorToError(err)
     }
 }
 

@@ -12,6 +12,7 @@ import type {
     RateType,
 } from '../domain-models'
 import { logError } from '../logger'
+import { parseErrorToError } from '@mc-review/helpers'
 import { pruneDuplicateEmails } from './formatters'
 import { findStatePrograms, packageName } from '@mc-review/submissions'
 import { rateSummaryURL, submissionSummaryURL } from './generateURLs'
@@ -50,7 +51,7 @@ const renderTemplate = async <T extends object>(
         const templateHTML = templateOrVoid as string // we know we have a string we can coerce type here to simply types upstream
         return templateHTML
     } catch (err) {
-        return new Error(err)
+        return parseErrorToError(err)
     }
 }
 

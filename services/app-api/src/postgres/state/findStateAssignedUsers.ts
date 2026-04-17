@@ -3,6 +3,7 @@ import type { PrismaTransactionType } from '../prismaTypes'
 import type { UserType } from '../../domain-models'
 import { NotFoundError } from '../postgresErrors'
 import { parseDomainUsersFromPrismaUsers } from '../user/prismaDomainUser'
+import { parseErrorToError } from '@mc-review/helpers'
 
 async function findStateAssignedUsers(
     client: PrismaTransactionType,
@@ -42,7 +43,7 @@ async function findStateAssignedUsers(
         return users
     } catch (err) {
         console.error(err)
-        return new Error(err)
+        return parseErrorToError(err)
     }
 }
 

@@ -5,9 +5,9 @@ import {
     mockMNState,
     mockValidStateUser,
 } from '@mc-review/mocks'
-import { ProgramSelect, ProgramSelectPropType } from './ProgramSelect'
+import { ProgramSelect, type ProgramSelectPropType } from './ProgramSelect'
 import ProvidersDecorator from '../../../../.storybook/providersDecorator'
-import { useStatePrograms } from '../../../hooks/useStatePrograms'
+import { useStatePrograms } from '../../../hooks'
 
 export default {
     title: 'Components/Select/ProgramSelect',
@@ -64,6 +64,8 @@ const Template: StoryFn<ProgramSelectPropType> = (args) => (
 export const Default = Template.bind({})
 Default.args = {
     name: 'programSelect',
+    inputId: 'programSelect',
+    'aria-label': 'Programs (required)',
     programIDs: [firstProgramId, deprecatedProgram.id],
     contractProgramsOnly: true,
 }

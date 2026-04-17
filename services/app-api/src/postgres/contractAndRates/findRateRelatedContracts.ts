@@ -4,6 +4,7 @@ import { NotFoundError } from '../postgresErrors'
 import { getRelatedContracts } from './prismaSharedContractRateHelpers'
 import { includeRateRelatedContracts } from './prismaSubmittedRateHelpers'
 import type { RelatedContractStripped } from '../../gen/gqlServer'
+import { parseErrorToError } from '@mc-review/helpers'
 
 async function findRateRelatedContractsInTransaction(
     tx: PrismaTransactionType,
@@ -37,7 +38,7 @@ async function findRateRelatedContracts(
             'PRISMA ERROR: Error finding all contracts related to rate',
             err
         )
-        return err
+        return parseErrorToError(err)
     }
 }
 

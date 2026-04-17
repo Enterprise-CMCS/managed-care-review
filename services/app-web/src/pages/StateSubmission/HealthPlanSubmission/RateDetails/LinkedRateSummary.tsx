@@ -11,8 +11,9 @@ import { formatDocumentsForGQL } from '../../../../formHelpers/formatters'
 import {
     ErrorOrLoadingPage,
     handleAndReturnErrorState,
-} from '../../SharedSubmissionComponents/ErrorOrLoadingPage'
-import { ApolloError } from '@apollo/client'
+} from '../../SharedSubmissionComponents'
+import type { ErrorLike } from '@apollo/client'
+import { formattedProgramNames } from '../../../../formHelpers'
 
 export const LinkedRateSummary = ({
     rateForm,
@@ -21,7 +22,7 @@ export const LinkedRateSummary = ({
 }: {
     rateForm: FormikRateForm
     loading: boolean | undefined
-    apiError: ApolloError | undefined
+    apiError: ErrorLike | undefined
 }): React.ReactElement | null => {
     const statePrograms = useStatePrograms()
     // Display any full page interim state resulting from the initial fetch API requests
@@ -57,11 +58,10 @@ export const LinkedRateSummary = ({
                     <DataDetail
                         id="ratePrograms"
                         label="Rates this rate certification covers"
-                        children={statePrograms
-                            .filter((p) =>
-                                rateForm.rateProgramIDs.includes(p.id)
-                            )
-                            .map((p) => p.name)}
+                        children={formattedProgramNames(
+                            statePrograms,
+                            rateForm.rateProgramIDs
+                        )}
                     />
                     <DataDetail
                         id="ratingPeriod"

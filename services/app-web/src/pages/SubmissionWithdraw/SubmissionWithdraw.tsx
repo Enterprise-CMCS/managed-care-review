@@ -18,7 +18,7 @@ import {
     IndexRatesStrippedWithRelatedContractsDocument,
     WithdrawContractDocument,
 } from '../../gen/gqlClient'
-import { useQuery, useMutation } from '@apollo/client'
+import { useMutation, useQuery } from '@apollo/client/react'
 import { Formik, FormikErrors } from 'formik'
 import { ButtonGroup, Form } from '@trussworks/react-uswds'
 import * as Yup from 'yup'

@@ -1,5 +1,6 @@
 import type { EmailSettingsType } from '../../domain-models'
 import type { ExtendedPrismaClient } from '../prismaClient'
+import { parseErrorToError } from '@mc-review/helpers'
 
 export async function updateEmailSettings(
     client: ExtendedPrismaClient,
@@ -38,6 +39,6 @@ export async function updateEmailSettings(
         return result
     } catch (err) {
         console.error('PRISMA ERROR: Error updating email settings', err)
-        return err
+        return parseErrorToError(err)
     }
 }

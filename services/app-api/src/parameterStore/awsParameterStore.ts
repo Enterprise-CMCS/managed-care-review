@@ -3,6 +3,7 @@ import {
     GetParameterCommand,
     GetParametersCommand,
 } from '@aws-sdk/client-ssm'
+import { parseErrorToError } from '@mc-review/helpers'
 
 export type ParameterType = { value: string; type: string } | Error
 export type ParametersType =
@@ -58,10 +59,11 @@ const getParameters = async (names: string[]): Promise<ParametersType> => {
             })
             return parametersList
         } catch (err) {
+            const parsedError = parseErrorToError(err)
             console.error(
-                `GetParameters: Failed to fetch parameters: ${names}. Error: ${err.message}`
+                `GetParameters: Failed to fetch parameters: ${names}. Error: ${parsedError.message}`
             )
-            return new Error(err) // Future refactor: make ParameterStoreError
+            return parsedError // Future refactor: make ParameterStoreError
         }
     }
 
@@ -118,10 +120,11 @@ const getParameter = async (name: string): Promise<ParameterType> => {
             type: parameter.Type,
         }
     } catch (err) {
+        const parsedError = parseErrorToError(err)
         console.error(
-            `GetParameter: Failed to fetch parameter ${name}. Error: ${err.message}`
+            `GetParameter: Failed to fetch parameter ${name}. Error: ${parsedError.message}`
         )
-        return new Error(err) // Future refactor: make ParameterStoreError
+        return parsedError // Future refactor: make ParameterStoreError
     }
 }
 

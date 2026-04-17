@@ -6,7 +6,6 @@ import {
 } from '../../components'
 import { handleApolloError } from '@mc-review/helpers'
 import { recordJSException } from '@mc-review/otel'
-import { ApolloError } from '@apollo/client'
 import styles from './Settings.module.scss'
 
 export const SettingsErrorAlert = ({
@@ -20,9 +19,7 @@ export const SettingsErrorAlert = ({
 }): React.ReactElement | null => {
     if (error) {
         recordJSException(error)
-        if (error instanceof ApolloError) {
-            handleApolloError(error, true)
-        }
+        handleApolloError(error, true)
     }
 
     if (!isAdmin) {

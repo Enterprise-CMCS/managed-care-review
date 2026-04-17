@@ -17,7 +17,7 @@ import {
 import styles from './EQROReviewSubmit.module.scss'
 import { usePage } from '../../../../contexts/PageContext'
 import { useAuth } from '../../../../contexts/AuthContext'
-import { useQuery } from '@apollo/client'
+import { useQuery } from '@apollo/client/react'
 import { FetchContractDocument } from '../../../../gen/gqlClient'
 import { ErrorForbiddenPage } from '../../../Errors/ErrorForbiddenPage'
 import { Error404 } from '../../../Errors/Error404Page'
@@ -34,6 +34,7 @@ import {
     ModalOpenButton,
     UnlockSubmitModal,
 } from '../../../../components/Modal'
+import { toGQLError } from '@mc-review/helpers'
 
 export const EQROReviewSubmit = (): React.ReactElement => {
     const { id } = useRouteParams()
@@ -76,11 +77,10 @@ export const EQROReviewSubmit = (): React.ReactElement => {
         )
     } else if (error || !contract) {
         //error handling for a state user that tries to access rates for a different state
-        if (error?.graphQLErrors[0]?.extensions?.code === 'FORBIDDEN') {
-            return (
-                <ErrorForbiddenPage errorMsg={error.graphQLErrors[0].message} />
-            )
-        } else if (error?.graphQLErrors[0]?.extensions?.code === 'NOT_FOUND') {
+        const gqlError = toGQLError(error)
+        if (gqlError?.extensions.code === 'FORBIDDEN') {
+            return <ErrorForbiddenPage errorMsg={gqlError.message} />
+        } else if (gqlError?.extensions.code === 'NOT_FOUND') {
             return <Error404 />
         } else {
             return <GenericErrorPage />
@@ -96,16 +96,13 @@ export const EQROReviewSubmit = (): React.ReactElement => {
     )
 
     if (!contractFormData) return <GenericErrorPage />
-    const programIDs = contractFormData?.programIDs
-    const programs = contract.state.programs.filter((program) =>
-        programIDs?.includes(program.id)
-    )
+
     const submissionName =
         packageName(
             contract.stateCode,
             contract.stateNumber,
             contractFormData.programIDs,
-            programs
+            contract.state.programs
         ) || ''
 
     return (

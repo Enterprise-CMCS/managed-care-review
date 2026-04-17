@@ -2,6 +2,7 @@ import type { DivisionType, UserType } from '../../domain-models'
 import type { Role } from '../../generated/client'
 import { toDomainUser } from '../../domain-models'
 import type { ExtendedPrismaClient } from '../prismaClient'
+import { parseErrorToError } from '@mc-review/helpers'
 
 export type InsertUserArgsType = {
     userID: string
@@ -31,6 +32,6 @@ export async function insertUser(
         })
         return toDomainUser(val)
     } catch (err) {
-        return err
+        return parseErrorToError(err)
     }
 }
