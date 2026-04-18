@@ -1,5 +1,6 @@
 export type {
   ValidationLlmDiagnostic,
+  ValidationRetrievalDiagnostic,
   ValidationResultArtifact
 } from './validationResultArtifact'
 export {

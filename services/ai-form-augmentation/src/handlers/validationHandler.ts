@@ -12,10 +12,15 @@ import type {
   DateValidationResult
 } from '../prompts'
 import { buildDateValidationPrompt } from '../prompts'
-import { orderRetrievedChunks } from '../retrieval'
+import {
+  buildFieldRetrievalQuery,
+  expandClauseEvidenceForField,
+  orderRetrievedChunks
+} from '../retrieval'
 import {
   buildValidationResultArtifact,
-  getValidationResultKey
+  getValidationResultKey,
+  type ValidationRetrievalDiagnostic
 } from '../results'
 import { newArtifactS3Client } from '../s3'
 import type { ArtifactS3ClientConfig } from '../s3'
@@ -31,7 +36,6 @@ import {
   runDeterministicDateValidation,
   type ValidationResponseIssue
 } from '../validation-output'
-import { VALIDATION_FIELD_CONFIG } from '../validationFields'
 import { BruteForceVectorStore } from '../vector-store'
 import { computeFormSnapshotHash } from '../versioning'
 
@@ -152,26 +156,45 @@ export async function validationHandler(
       }))
     )
 
+    const retrievalDiagnostics = new Map<
+      DateValidationFieldInput['field'],
+      ValidationRetrievalDiagnostic
+    >()
     const retrievedChunksByField = new Map(
       await Promise.all(
         event.formFields.map(async (field) => {
           const queryVector = await embeddingProvider.embedText(
             buildFieldRetrievalQuery(field.field)
           )
-          const orderedResults = orderRetrievedChunks(
+          const initiallyRetrievedChunks = orderRetrievedChunks(
             await vectorStore.search(queryVector, 3)
-          )
+          ).map((result) => ({
+            chunkId: result.metadata.chunkId,
+            documentName: result.metadata.documentName,
+            page: result.metadata.page,
+            startPage: result.metadata.startPage,
+            endPage: result.metadata.endPage,
+            order: result.metadata.order,
+            text: result.metadata.text
+          }))
+          const expandedRetrieval = expandClauseEvidenceForField({
+            field: field.field,
+            retrievedChunks: initiallyRetrievedChunks,
+            allChunks: chunks
+          })
+
+          retrievalDiagnostics.set(field.field, expandedRetrieval.diagnostics)
 
           return [
             field.field,
-            orderedResults.map((result) => ({
-              chunkId: result.metadata.chunkId,
-              documentName: result.metadata.documentName,
-              page: result.metadata.page,
-              startPage: result.metadata.startPage,
-              endPage: result.metadata.endPage,
-              order: result.metadata.order,
-              text: result.metadata.text
+            expandedRetrieval.chunks.map((result) => ({
+              chunkId: result.chunkId,
+              documentName: result.documentName,
+              page: result.page,
+              startPage: result.startPage,
+              endPage: result.endPage,
+              order: result.order,
+              text: result.text
             }))
           ] as const
         })
@@ -302,7 +325,12 @@ export async function validationHandler(
           }))
         ),
         reconciledResults,
-        llmDiagnostics
+        llmDiagnostics,
+        event.formFields.flatMap((field) => {
+          const diagnostic = retrievalDiagnostics.get(field.field)
+
+          return diagnostic ? [diagnostic] : []
+        })
       )
     )
 
@@ -401,10 +429,6 @@ function logMissingCitationPages(
     count: citationsMissingPage.length,
     chunkIds: [...new Set(citationsMissingPage.map((citation) => citation.chunkId))]
   })
-}
-
-function buildFieldRetrievalQuery(field: DateValidationFieldInput['field']): string {
-  return VALIDATION_FIELD_CONFIG[field].retrievalQuery
 }
 
 function parseSingleFieldValidationResponse(

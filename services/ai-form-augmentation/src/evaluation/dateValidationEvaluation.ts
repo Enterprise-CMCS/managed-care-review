@@ -6,6 +6,7 @@ import type { DateValidationResult } from '../prompts'
 import {
   getValidationResultKey,
   type ValidationLlmDiagnostic,
+  type ValidationRetrievalDiagnostic,
   type ValidationResultArtifact
 } from '../results'
 import {
@@ -51,6 +52,9 @@ export interface DateValidationEvaluationFieldReport {
   actualOutcome: DateValidationResult['outcome'] | 'missing'
   decisionSource: DateValidationResult['decisionSource'] | 'missing'
   llmIssue: ValidationLlmDiagnostic['issue'] | null
+  retrievalIssue: 'missing-clause-evidence' | null
+  retrievalClauseEvidencePresent: boolean
+  retrievalClauseEvidenceAdded: boolean
   passed: boolean
   problems: string[]
   actualMessage: string | null
@@ -74,6 +78,7 @@ export interface DateValidationEvaluationSummary {
   deterministicResults: number
   llmResults: number
   malformedLlmResults: number
+  clauseEvidenceMisses: number
   llmProvider: string
   reports: DateValidationEvaluationScenarioReport[]
 }
@@ -111,6 +116,9 @@ export async function runDateValidationEvaluation(): Promise<DateValidationEvalu
       report.llmIssue === 'missing-json-array' ||
       report.llmIssue === 'invalid-json' ||
       report.llmIssue === 'invalid-result-shape'
+    ).length,
+    clauseEvidenceMisses: allFieldReports.filter(
+      (report) => report.retrievalIssue === 'missing-clause-evidence'
     ).length,
     llmProvider: describeEvaluationLlmConfig(evaluationLlmConfig),
     reports
@@ -177,7 +185,8 @@ async function evaluateScenario(
       compareExpectation(
         expectation,
         resultArtifact.results,
-        resultArtifact.llmDiagnostics ?? []
+        resultArtifact.llmDiagnostics ?? [],
+        resultArtifact.retrievalDiagnostics ?? []
       )
     )
     // A scenario only counts as passing when the worker completes normally and
@@ -209,6 +218,9 @@ async function evaluateScenario(
         actualOutcome: 'missing',
         decisionSource: 'missing',
         llmIssue: null,
+        retrievalIssue: null,
+        retrievalClauseEvidencePresent: false,
+        retrievalClauseEvidenceAdded: false,
         passed: false,
         problems: ['Scenario evaluation failed before a comparable result was stored.'],
         actualMessage: null,
@@ -221,13 +233,18 @@ async function evaluateScenario(
 function compareExpectation(
   expectation: DateValidationCorpusExpectation,
   actualResults: DateValidationResult[],
-  llmDiagnostics: ValidationLlmDiagnostic[]
+  llmDiagnostics: ValidationLlmDiagnostic[],
+  retrievalDiagnostics: ValidationRetrievalDiagnostic[]
 ): DateValidationEvaluationFieldReport {
   const matchingResult =
     actualResults.find((result) => result.field === expectation.field) ?? null
   const matchingDiagnostic =
     llmDiagnostics.find((diagnostic) => diagnostic.field === expectation.field) ??
     null
+  const matchingRetrievalDiagnostic =
+    retrievalDiagnostics.find(
+      (diagnostic) => diagnostic.field === expectation.field
+    ) ?? null
 
   if (!matchingResult) {
     return {
@@ -236,6 +253,11 @@ function compareExpectation(
       actualOutcome: 'missing',
       decisionSource: 'missing',
       llmIssue: matchingDiagnostic?.issue ?? null,
+      retrievalIssue: getRetrievalIssue(matchingRetrievalDiagnostic),
+      retrievalClauseEvidencePresent:
+        matchingRetrievalDiagnostic?.clauseEvidencePresentFinally ?? false,
+      retrievalClauseEvidenceAdded:
+        matchingRetrievalDiagnostic?.clauseEvidenceAdded ?? false,
       passed: false,
       problems: ['No stored validation result was produced for this field.'],
       actualMessage: null,
@@ -294,11 +316,33 @@ function compareExpectation(
     actualOutcome: matchingResult.outcome,
     decisionSource: matchingResult.decisionSource ?? 'missing',
     llmIssue: matchingDiagnostic?.issue ?? null,
+    retrievalIssue: getRetrievalIssue(matchingRetrievalDiagnostic),
+    retrievalClauseEvidencePresent:
+      matchingRetrievalDiagnostic?.clauseEvidencePresentFinally ?? false,
+    retrievalClauseEvidenceAdded:
+      matchingRetrievalDiagnostic?.clauseEvidenceAdded ?? false,
     passed: problems.length === 0,
     problems,
     actualMessage: matchingResult.message,
     actualCitationOrders
   }
+}
+
+function getRetrievalIssue(
+  diagnostic: ValidationRetrievalDiagnostic | null
+): 'missing-clause-evidence' | null {
+  if (!diagnostic) {
+    return null
+  }
+
+  if (
+    diagnostic.competingDateCount > 1 &&
+    !diagnostic.clauseEvidencePresentFinally
+  ) {
+    return 'missing-clause-evidence'
+  }
+
+  return null
 }
 
 function sameNumberArray(left: number[], right: number[]): boolean {

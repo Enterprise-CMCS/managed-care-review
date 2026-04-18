@@ -17,7 +17,8 @@ function formatEvaluationSummary(
     `LLM provider: ${summary.llmProvider}`,
     `Scenarios: ${summary.passedScenarios}/${summary.totalScenarios} passed`,
     `Decision sources: deterministic=${summary.deterministicResults}, llm=${summary.llmResults}`,
-    `Malformed LLM results: ${summary.malformedLlmResults}`
+    `Malformed LLM results: ${summary.malformedLlmResults}`,
+    `Clause-evidence retrieval misses: ${summary.clauseEvidenceMisses}`
   ]
 
   for (const report of summary.reports) {
@@ -33,6 +34,11 @@ function formatEvaluationSummary(
       lines.push(
         `  - ${fieldReport.field}: expected=${fieldReport.expectedOutcome}, actual=${fieldReport.actualOutcome}, source=${fieldReport.decisionSource}${fieldReport.llmIssue ? `, llmIssue=${fieldReport.llmIssue}` : ''}`
       )
+      if (fieldReport.retrievalIssue) {
+        lines.push(
+          `    retrieval: issue=${fieldReport.retrievalIssue}, clauseEvidencePresent=${fieldReport.retrievalClauseEvidencePresent}, clauseEvidenceAdded=${fieldReport.retrievalClauseEvidenceAdded}`
+        )
+      }
 
       if (fieldReport.problems.length > 0) {
         for (const problem of fieldReport.problems) {

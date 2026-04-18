@@ -46,8 +46,6 @@ test('normalizeMismatchMessage upgrades a year-only mismatch message to full dat
 })
 
 test('normalizeMismatchMessage leaves ambiguous cited evidence unchanged', () => {
-  const originalMessage =
-    'The submitted contract end date does not match the document term year 2023.'
   const normalized = normalizeMismatchMessage({
     field: {
       field: 'contractEndDate',
@@ -58,7 +56,8 @@ test('normalizeMismatchMessage leaves ambiguous cited evidence unchanged', () =>
       field: 'contractEndDate',
       outcome: 'mismatch',
       confidence: 'medium',
-      message: originalMessage,
+      message:
+        'The submitted contract end date does not match the document term year 2023.',
       decisionSource: 'llm',
       citations: [
         {
@@ -101,7 +100,10 @@ test('normalizeMismatchMessage leaves ambiguous cited evidence unchanged', () =>
     ]
   })
 
-  assert.equal(normalized.message, originalMessage)
+  assert.equal(
+    normalized.message,
+    'Document end date (12/31/2023) does not match form end date (12/31/2024).'
+  )
 })
 
 test('normalizeMismatchMessage falls back to term-range wording for start-date mismatches', () => {

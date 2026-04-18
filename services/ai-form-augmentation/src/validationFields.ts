@@ -20,7 +20,7 @@ export const VALIDATION_FIELD_CONFIG: Record<
     ],
     messageLabel: 'start date',
     retrievalQuery:
-      'START DATE CONTRACT START DATE the contract will become effective term begins on'
+      'START DATE CONTRACT START DATE the contract will become effective term begins on term of this contract term of this agreement amended to read deemed to read superseding replacement'
   },
   contractEndDate: {
     labelPatterns: [
@@ -35,7 +35,7 @@ export const VALIDATION_FIELD_CONFIG: Record<
     ],
     messageLabel: 'end date',
     retrievalQuery:
-      'contract end date through end date current contract expiration date requested contract expiration date original contract expiration date continue in full force and effect through term ends expiration date'
+      'contract end date through end date current contract expiration date requested contract expiration date original contract expiration date continue in full force and effect through term ends expiration date term of this contract term of this agreement amended to read deemed to read superseding replacement notwithstanding'
   },
   amendmentEffectiveDate: {
     labelPatterns: [/Amendment effective date\s*:/i],

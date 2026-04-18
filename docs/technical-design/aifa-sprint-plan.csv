@@ -582,7 +582,7 @@ The current PoC now explains conflicting dates better, but it still relies on na
 - Truly conflicting clauses still return not-enough-evidence with a conflict-style message
 - Corpus scenarios cover both resolvable-precedence and unresolved-conflict cases
 - Existing amendment and AHF competing-date scenarios continue to pass without regression"
-AIFA-034 Clause-evidence retrieval and fallback hardening,Backlog,5-Testing & Evaluation,High,AIFA-033,"Improve clause-evidence recall so precedence logic is more likely to receive the operative amendment or superseding clause text it needs.
+AIFA-034 Clause-evidence retrieval and fallback hardening,Done,5-Testing & Evaluation,High,AIFA-033,"Improve clause-evidence recall so precedence logic is more likely to receive the operative amendment or superseding clause text it needs.
 - Add clause-oriented retrieval cues for competing-date language such as amended to read, replaced as follows, shall be amended, termination date, and continue in full force and effect
 - Improve retrieval inputs so operative clause text is more likely to outrank weaker header or summary date mentions in competing-date fixtures
 - Preserve clause-heavy chunk sets for LLM fallback when deterministic precedence cues do not match a known pattern
@@ -594,6 +594,19 @@ Clause-precedence logic only helps when the worker actually retrieves the operat
 - Existing precedence logic receives the needed chunk set more reliably on amendment and conflict fixtures
 - When deterministic precedence cues still do not match, the LLM fallback receives clause-focused evidence instead of only weaker header or summary dates
 - Evaluation output makes clause-retrieval misses visible enough to distinguish retrieval failure from resolver failure
+- Existing start and end date scenarios continue to pass without regression"
+AIFA-035 Deterministic-to-LLM clause-resolution fallback hardening,Backlog,5-Testing & Evaluation,Medium,AIFA-034,"Reduce over-reliance on deterministic regex-style precedence cues when clause-heavy evidence is already retrieved but phrased outside the currently supported patterns.
+- Route clause-heavy competing-date evidence into a narrower clause-resolution LLM fallback when deterministic precedence does not find a known cue
+- Keep the fallback focused on contractStartDate and contractEndDate only
+- Preserve the current conservative behavior when the retrieved clause evidence still supports more than one plausible reading
+- Add evaluation coverage for scenarios where clause text is retrieved successfully but deterministic cue matching still misses because the wording differs from the supported patterns
+- Keep this as a fallback hardening ticket; do not replace the current deterministic layer or broaden field scope
+
+Why this matters:
+Even after clause retrieval improves, the worker can still miss valid operative language when the phrasing does not match the narrow deterministic cue set. This ticket reduces that regex-over-reliance without abandoning the existing trust model or expanding the PoC into general contract interpretation.","- Clause-heavy evidence that falls outside the supported deterministic cues can still reach a narrow clause-resolution fallback path
+- Unsupported clause phrasing no longer fails only because it misses a regex-style precedence cue
+- Ambiguous competing-clause cases still remain conservative and return not-enough-evidence when the fallback cannot justify one final reading
+- Evaluation output distinguishes unsupported deterministic phrasing from retrieval misses
 - Existing start and end date scenarios continue to pass without regression"
 AIFA-021 Cache validation results,Backlog,6-Production Prep,Medium,AIFA-015,"Avoid unnecessary re-validation when the documents and form data have not changed.
 - Define the cache key using artifactVersion and formSnapshotHash
